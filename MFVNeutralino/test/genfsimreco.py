@@ -86,7 +86,7 @@ scheduler = glite
 
 [CMSSW]
 datasetpath = None
-pset = nino3jet.py
+pset = genfsimreco.py
 get_edm_output = 1
 number_of_jobs = 100
 events_per_job = 1000
