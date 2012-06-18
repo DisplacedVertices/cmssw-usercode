@@ -93,6 +93,7 @@ events_per_job = 1000
 first_lumi = 1
 
 [USER]
+additional_input_files = minSLHA.spc
 ui_working_dir = crab/crab_nino3jet_genfsimreco_test
 copy_data = 1
 storage_element = T3_US_FNALLPC
