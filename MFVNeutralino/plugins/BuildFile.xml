@@ -1,7 +1,7 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
 
-<library file="Nino3jetHistos.cc" name="Nino3jetPlugins">
+<library file="GenHistos.cc" name="MFVNeutralinoPlugins">
   <use name="CommonTools/UtilAlgos"/>
   <use name="DataFormats/PatCandidates"/>
   <use name="SimGeneral/HepPDTRecord"/>
