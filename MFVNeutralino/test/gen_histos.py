@@ -13,7 +13,8 @@ process.printList = cms.EDAnalyzer('ParticleListDrawer',
                                    maxEventsToPrint = cms.untracked.int32(100),
                                    src = cms.InputTag('genParticles'),
                                    printOnlyHardInteraction = cms.untracked.bool(False),
-                                   useMessageLogger = cms.untracked.bool(False)
+                                   useMessageLogger = cms.untracked.bool(False),
+                                   printVertex = cms.untracked.bool(True),
                                    )
 
 process.printTree = cms.EDAnalyzer('ParticleTreeDrawer',
