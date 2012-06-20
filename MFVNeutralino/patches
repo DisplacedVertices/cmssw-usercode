@@ -1,0 +1,86 @@
+Index: GeneratorInterface/Pythia8Interface/src/Pythia8Hadronizer.cc
+===================================================================
+RCS file: /local/reps/CMSSW/CMSSW/GeneratorInterface/Pythia8Interface/src/Pythia8Hadronizer.cc,v
+retrieving revision 1.33
+diff -u -r1.33 Pythia8Hadronizer.cc
+--- GeneratorInterface/Pythia8Interface/src/Pythia8Hadronizer.cc	30 Mar 2012 18:54:20 -0000	1.33
++++ GeneratorInterface/Pythia8Interface/src/Pythia8Hadronizer.cc	20 Jun 2012 20:31:25 -0000
+@@ -105,6 +105,8 @@
+     //
+     EmissionVetoHook* fEmissionVetoHook;
+ 
++    bool offsetNeutralinoDecayProducts;
++    void offset_particle_and_descendants(Pythia8::Event& e, int iparticle, double x, double y, double z, bool at_root);
+ };
+ 
+ 
+@@ -119,7 +121,8 @@
+   fInitialState(PP),
+   fReweightUserHook(0),
+   fJetMatchingHook(0),
+-  fEmissionVetoHook(0)
++  fEmissionVetoHook(0),
++  offsetNeutralinoDecayProducts(params.getUntrackedParameter<bool>("offsetNeutralinoDecayProducts", false))
+ {
+   randomEngine = &getEngineReference();
+ 
+@@ -387,11 +390,58 @@
+   runInfo().setInternalXSec(xsec);
+ }
+ 
+-
++void Pythia8Hadronizer::offset_particle_and_descendants(Pythia8::Event& e, int iparticle, double x, double y, double z, bool at_root) {
++  static bool* offset_already = 0;
++  if (at_root) {
++    delete offset_already;
++    offset_already = new bool[e.size()];
++    memset(offset_already, 0, sizeof(bool)*e.size());
++  }
++  Pythia8::Particle& p = e[iparticle]; 
++  //printf("offset_particle_and_descendants: %i %i %f %f %f\n", iparticle, p.id(), x, y, z);
++  if (offset_already[iparticle])
++    return;
++  offset_already[iparticle] = true;
++  p.xProd(p.xProd() + x);
++  p.yProd(p.yProd() + y);
++  p.zProd(p.zProd() + z);
++  if (p.daughter1() == 0 && p.daughter2() == 0)
++    return;
++  else if (p.daughter1() == 0)
++    offset_particle_and_descendants(e, p.daughter2(), x, y, z, false);
++  else if (p.daughter2() == 0)
++    offset_particle_and_descendants(e, p.daughter1(), x, y, z, false);
++  else
++    for (int i = p.daughter1(), ie = p.daughter2(); i <= ie; ++i)
++      offset_particle_and_descendants(e, i, x, y, z, false);
++}
++  
+ bool Pythia8Hadronizer::generatePartonsAndHadronize()
+ {
+   if (!pythia->next()) return false;
+ 
++  if (offsetNeutralinoDecayProducts) {
++    ostringstream out;
++    //printf("JMT generatePartonsAndHadronize events\n");
++    for (int i = 0; i < pythia->event.size(); ++i) {
++      Pythia8::Particle& p = pythia->event[i];
++      double dist = sqrt(pow(p.xDec() - p.xProd(), 2) + pow(p.yDec() - p.yProd(), 2) + pow(p.zDec() - p.zProd(), 2)); // mm
++      //printf("%10i | %10i %10i | %7i %7i | %7i %7i | %.3f %.3f | %.3f %.3f | %.3f %.3f | %.4f \n", i, p.id(), p.status(), p.mother1(), p.mother2(), p.daughter1(), p.daughter2(), p.eta(), p.phi(), p.xProd(), p.yProd(), p.xDec(), p.yDec(), dist);
++      if (p.daughter1() <= 0 || p.daughter2() <= 0 || p.daughter2() < p.daughter1())
++	continue;
++      int ndau = p.daughter2() - p.daughter1() + 1;
++      double x1 = p.xDec(), y1 = p.yDec(), z1 = p.zDec();
++      if (dist > 1e-3 && ndau > 1 && p.id() == 1000022) {
++	out << "Particle with id 1000022 has flight distance greater than 1 micron (eta = " << p.eta() << ", phi = " << p.phi() << ", decay_vtx = " << x1 << ", " << y1 << ", " << z1 << "), and more than one daughter. going to move all its descendants to that position.\n";
++	for (int j = p.daughter1(), je = p.daughter2(); j <= je; ++j)
++	  offset_particle_and_descendants(pythia->event, j, x1, y1, z1, true);
++      }
++    }
++    //printf("%s\n", out.str().c_str());
++    //printf("done\n");
++    edm::LogWarning("generatePartonsAndHadronize") << "JMT:\n" << out.str();
++  }
++
+   event().reset(new HepMC::GenEvent);
+   toHepMC.fill_next_event(*pythiaEvent, event().get());
+ 
