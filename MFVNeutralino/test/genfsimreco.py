@@ -58,12 +58,16 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 						 'SUSY:qqbar2gluinogluino  = on',
 						 'SUSY:idA        = 1000021 ',
 						 'SUSY:idB        = 1000021 ',
-						 '1000022:tau0 = 1.0',  # in mm/c
 						 'Tune:pp 2',                      
 						 'Tune:ee 3'),
 					 parameterSets = cms.vstring('processParameters')
 					 )
 				 )
+
+def set_neutralino_tau0(tau0):
+    process.generator.PythiaParameters.processParameters.append('1000022:tau0 = %f' % tau0) # tau0 is in mm by pythia convention
+
+set_neutralino_tau0(1) # if this gets called again later (e.g. in the batch scripts) it's fine -- the last instance will be used by pythia
 
 process.ProductionFilterSequence = cms.Sequence(process.generator)
 
@@ -99,23 +103,37 @@ scheduler = glite
 
 [CMSSW]
 datasetpath = None
-pset = genfsimreco.py
+pset = genfsimreco_crab.py
 get_edm_output = 1
-number_of_jobs = 100
-events_per_job = 1000
+number_of_jobs = 50
+events_per_job = 500
 first_lumi = 1
 
 [USER]
 additional_input_files = minSLHA.spc
-ui_working_dir = crab/crab_nino3jet_genfsimreco_test
+ui_working_dir = crab/crab_mfvneutralino_genfsimreco_%(name)s
 copy_data = 1
 storage_element = T3_US_FNALLPC
 check_user_remote_dir = 0
 publish_data = 1
-publish_data_name = nino3jet_genfsimreco_test
+publish_data_name = mfvneutralino_genfsimreco_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 '''
-    
-    open('crab.cfg','wt').write(crab_cfg)
-    os.system('crab -create -submit')
-    os.system('rm -f crab.cfg')
+
+    testing = 'testing' in sys.argv
+
+    jobs = [
+        ('tau1mm', 1.0),
+        ('tau9p9mm', 9.9),
+        ('tau100um', 0.1),
+        ('tau10um', 0.01),
+        ]
+
+    for name, tau0 in jobs:
+        new_py = open('genfsimreco.py').read()
+        new_py += '\nset_neutralino_tau0(%e)\n' % tau0
+        open('genfsimreco_crab.py', 'wt').write(new_py)
+        open('crab.cfg','wt').write(crab_cfg % locals())
+        if not testing:
+            os.system('crab -create -submit')
+            os.system('rm -f crab.cfg')
