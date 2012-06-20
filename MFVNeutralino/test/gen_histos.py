@@ -2,7 +2,7 @@ import os, sys, FWCore.ParameterSet.Config as cms
 
 process = cms.Process('MFVNeutralino')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:input.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:fastsim.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.TFileService = cms.Service('TFileService', fileName = cms.string('gen_histos.root'))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
