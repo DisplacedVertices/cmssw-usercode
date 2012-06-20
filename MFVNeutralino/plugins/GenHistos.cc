@@ -28,6 +28,7 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
   const edm::InputTag gen_met_src;
   
   TH2F* h_vtx_2d;
+  TH1F* h_rho;
 
   edm::ESHandle<ParticleDataTable> pdt;
 };
@@ -40,6 +41,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   h_vtx_2d = fs->make<TH2F>("h_vtx_2d", "", 100, -10, 10, 100, -10, 10);
+  h_rho = fs->make<TH1F>("h_rho", "", 100, 0, 10);
 }
 
 void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -75,6 +77,7 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 	printf("neutralino daughter %i: id %i pt %f eta %f phi %f vertex: %f, %f, %f (rho: %f)\n", i, gen.daughter(i)->pdgId(), gen.daughter(i)->pt(), gen.daughter(i)->eta(), gen.daughter(i)->phi(), dx, dy, dz, sqrt(dx*dx + dy*dy));
       }
       h_vtx_2d->Fill(dx, dy);
+      h_rho->Fill(sqrt(dx*dx + dy*dy));
     }
   }
 }
