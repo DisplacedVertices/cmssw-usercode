@@ -49,6 +49,7 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 				 filterEfficiency = cms.untracked.double(1.0),
 				 pythiaHepMCVerbosity = cms.untracked.bool(False),
 				 comEnergy = cms.double(8000.0),
+				 offsetNeutralinoDecayProducts = cms.untracked.bool(True),
 				 PythiaParameters = cms.PSet(
 					 processParameters = cms.vstring(
 						 'Main:timesAllowErrors    = 10000',
@@ -57,7 +58,7 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 						 'SUSY:qqbar2gluinogluino  = on',
 						 'SUSY:idA        = 1000021 ',
 						 'SUSY:idB        = 1000021 ',
-						 '1000022:tau0 = 0.1 ',  # c*tau = 1/10 mm
+						 '1000022:tau0 = 1.0',  # in mm/c
 						 'Tune:pp 2',                      
 						 'Tune:ee 3'),
 					 parameterSets = cms.vstring('processParameters')
@@ -74,6 +75,18 @@ process.AODSIMoutput_step = cms.EndPath(process.AODSIMoutput)
 process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step)
 process.schedule.extend(process.HLTSchedule)
 process.schedule.extend([process.reconstruction,process.AODSIMoutput_step])
+
+if 0:
+	process.printList = cms.EDAnalyzer('ParticleListDrawer',
+					   maxEventsToPrint = cms.untracked.int32(100),
+					   src = cms.InputTag('genParticles'),
+					   printOnlyHardInteraction = cms.untracked.bool(False),
+					   useMessageLogger = cms.untracked.bool(False),
+					   printVertex = cms.untracked.bool(True),
+					   )
+	
+	process.ppp = cms.Path(process.printList)
+	process.schedule.extend([process.ppp])
 
 for path in process.paths:
 	getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq 
