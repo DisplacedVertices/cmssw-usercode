@@ -136,4 +136,4 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
             os.system('crab -create -submit')
-            os.system('rm -f crab.cfg')
+            os.system('rm -f crab.cfg genfsimreco_crab.py')
