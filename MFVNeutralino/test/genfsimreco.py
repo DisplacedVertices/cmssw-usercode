@@ -127,6 +127,7 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
         ('tau9p9mm', 9.9),
         ('tau100um', 0.1),
         ('tau10um', 0.01),
+        ('tau0', 0.),
         ]
 
     for name, tau0 in jobs:
