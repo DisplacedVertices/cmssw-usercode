@@ -1,7 +1,7 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
 
-<library file="GenHistos.cc" name="MFVNeutralinoPlugins">
+<library file="*.cc" name="MFVNeutralinoPlugins">
   <use name="CommonTools/UtilAlgos"/>
   <use name="DataFormats/PatCandidates"/>
   <use name="SimGeneral/HepPDTRecord"/>
