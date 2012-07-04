@@ -145,6 +145,12 @@ def cumulative_histogram(h, type='ge'):
         hc.SetBinError(i, c**0.5)
     return hc
 
+def cut(*cuts):
+    """Take a sequence of cuts and join them with && (protecting with
+    parentheses), suitable for use by TTree::Draw."""
+    
+    return ' && '.join('(%s)' % c.strip() for c in cuts if c.strip())
+
 def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x)):
     """Dump specified branches from tree into a list of tuples, via an
     ascii file. By default all vars are converted into integers. The
@@ -274,33 +280,39 @@ def get_hist_stats(hist, factor=None, draw=False):
         })
     return results
 
-class hist_register:
+class draw_hist_register:
     """Keep track of the otherwise-anonymous histograms produced by
     TTree::Draw. Can specify binning as well (same syntax as Draw
     expects). Use something like:
 
-    hr = hist_register()
-    tree.Draw(hr('ordinate:abscissa', '100,0,1,100,0,5'))
-    hist = hr.last()
+    hr = hist_register(tree)
+    hist = hr.draw('ordinate:abscissa', '100,0,1,100,0,5')
     hist.SetTitle('ordinate vs. abscissa')
     """
     
-    def __init__(self):
+    def __init__(self, tree):
+        self.tree = tree
         self.n = 0
         self.names = []
         self.hists = []
 
-    def __call__(self, draw, binning=None):
+    def name_for_draw(self, draw_str, binning=''):
         name = 'h' + str(self.n)
         self.names.append(name)
         self.n += 1
-        binning = '' if binning is None else '(%s)' % binning
-        return draw + '>>' + name + binning
+        if binning:
+            binning = '(%s)' % binning
+        return draw_str + '>>' + name + binning
 
-    def last(self):
+    def last_hist(self):
         h = getattr(ROOT, self.names[-1])
         self.hists.append(h)
         return h
+
+    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None):
+        n = (tree if tree else self.tree).Draw(self.name_for_draw(draw_str, binning), cut)
+        h = self.last_hist()
+        return (h,n) if get_n else h
 
 def make_rms_hist(prof, name='', bins=None, cache={}):
     """Takes an input TProfile and produces a histogram whose bin contents are
@@ -644,6 +656,7 @@ __all__ = [
     'clopper_pearson_poisson_means',
     'core_gaussian',
     'cumulative_histogram',
+    'cut',
     'detree',
     'differentiate_stat_box',
     'draw_in_order',
@@ -651,7 +664,7 @@ __all__ = [
     'get_bin_content_error',
     'get_integral',
     'get_hist_stats',
-    'hist_register',
+    'draw_hist_register',
     'make_rms_hist',
     'move_below_into_bin',
     'move_above_into_bin',
