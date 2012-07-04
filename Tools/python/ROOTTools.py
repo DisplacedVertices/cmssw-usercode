@@ -161,6 +161,33 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
         if ' * ' in line and 'Row' not in line:
             yield xform(line.split('*')[2:l])
 
+def differentiate_stat_box(hist, movement=1, new_color=None):
+    """Move hist's stat box and change its line/text color. If
+    movement is just an int, that number specifies how many units to
+    move the box downward. If it is a 2-tuple of ints (m,n), the stat
+    box will be moved to the left m units and down n units. A unit is
+    the width or height of the stat box.
+
+    Call TCanvas::Update first (and use TH1::Draw('sames') if
+    appropriate) or else the stat box will not exist."""
+
+    s = hist.FindObject('stats')
+
+    if new_color is not None:
+        s.SetTextColor(new_color)
+        s.SetLineColor(new_color)
+
+    if type(movement) == int:
+        movement = (0,movement)
+    m,n = movement
+    
+    x1,x2 = s.GetX1NDC(), s.GetX2NDC()
+    y1,y2 = s.GetY1NDC(), s.GetY2NDC()
+    s.SetX1NDC(x1 - (x2-x1)*m)
+    s.SetX2NDC(x2 - (x2-x1)*m)
+    s.SetY1NDC(y1 - (y2-y1)*n)
+    s.SetY2NDC(y2 - (y2-y1)*n)
+
 def draw_in_order(hists, draw_cmds=''):
     hists = [(h, h.GetMaximum()) for h in hists]
     hists.sort(key=lambda x: x[1], reverse=True)
@@ -558,9 +585,10 @@ def set_style(date_pages=False):
     ROOT.gStyle.SetStatW(0.25)
     ROOT.gStyle.SetStatFormat('6.4g')
     ROOT.gStyle.SetPalette(1)
-    #ROOT.gStyle.SetTitleFont(52, 'XY')
-    #ROOT.gStyle.SetLabelFont(52, 'XY')
-    #ROOT.gStyle.SetStatFont(52)
+    ROOT.gStyle.SetTitleFont(42, 'XYZ')
+    ROOT.gStyle.SetLabelFont(42, 'XYZ')
+    ROOT.gStyle.SetStatFont(42)
+    ROOT.gStyle.SetLegendFont(42)
     ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 def sort_histogram_pair(h1, h2, by=real_hist_max):
@@ -589,6 +617,7 @@ __all__ = [
     'core_gaussian',
     'cumulative_histogram',
     'detree',
+    'differentiate_stat_box',
     'draw_in_order',
     'fit_gaussian',
     'get_bin_content_error',
