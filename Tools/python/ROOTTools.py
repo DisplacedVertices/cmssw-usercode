@@ -274,6 +274,34 @@ def get_hist_stats(hist, factor=None, draw=False):
         })
     return results
 
+class hist_register:
+    """Keep track of the otherwise-anonymous histograms produced by
+    TTree::Draw. Can specify binning as well (same syntax as Draw
+    expects). Use something like:
+
+    hr = hist_register()
+    tree.Draw(hr('ordinate:abscissa', '100,0,1,100,0,5'))
+    hist = hr.last()
+    hist.SetTitle('ordinate vs. abscissa')
+    """
+    
+    def __init__(self):
+        self.n = 0
+        self.names = []
+        self.hists = []
+
+    def __call__(self, draw, binning=None):
+        name = 'h' + str(self.n)
+        self.names.append(name)
+        self.n += 1
+        binning = '' if binning is None else '(%s)' % binning
+        return draw + '>>' + name + binning
+
+    def last(self):
+        h = getattr(ROOT, self.names[-1])
+        self.hists.append(h)
+        return h
+
 def make_rms_hist(prof, name='', bins=None, cache={}):
     """Takes an input TProfile and produces a histogram whose bin contents are
     the RMS of the bins of the profile. Caches the histogram so that it doesn't
@@ -623,6 +651,7 @@ __all__ = [
     'get_bin_content_error',
     'get_integral',
     'get_hist_stats',
+    'hist_register',
     'make_rms_hist',
     'move_below_into_bin',
     'move_above_into_bin',
