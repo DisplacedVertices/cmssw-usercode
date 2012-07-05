@@ -2,7 +2,7 @@ import os, sys, FWCore.ParameterSet.Config as cms
 
 process = cms.Process('MFVNeutralino')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/mfvneutralino_genfsimreco_tau0/sstoptuple_mfvN3jtau0//8f6e1718f92d8def674221dd8677caf1/pat_1_1_gKm.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:pat.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.TFileService = cms.Service('TFileService', fileName = cms.string('btag_counting.root'))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
@@ -58,11 +58,11 @@ return_data = 1
     testing = 'testing' in sys.argv
 
     jobs = [
-        ('tau0',     '/mfvneutralino_genfsimreco_tau0/tucker-sstoptuple_mfvN3jtau0-8f6e1718f92d8def674221dd8677caf1/USER'),	  
-        ('tau100um', '/mfvneutralino_genfsimreco_tau100um/tucker-sstoptuple_mfvN3jtau100um-8f6e1718f92d8def674221dd8677caf1/USER'),
-        ('tau10um',  '/mfvneutralino_genfsimreco_tau10um/tucker-sstoptuple_mfvN3jtau10um-8f6e1718f92d8def674221dd8677caf1/USER'),  
-        ('tau1mm',   '/mfvneutralino_genfsimreco_tau1mm/tucker-sstoptuple_mfvN3jtau1mm-8f6e1718f92d8def674221dd8677caf1/USER'),	  
-        ('tau9p9mm', '/mfvneutralino_genfsimreco_tau9p9mm/tucker-sstoptuple_mfvN3jtau9p9mm-8f6e1718f92d8def674221dd8677caf1/USER'),
+        ('tau0',     '/mfvneutralino_genfsimreco_tau0/tucker-sstoptuple_mfvN3jtau0-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),	  
+        ('tau100um', '/mfvneutralino_genfsimreco_tau100um/tucker-sstoptuple_mfvN3jtau100um-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),
+        ('tau10um',  '/mfvneutralino_genfsimreco_tau10um/tucker-sstoptuple_mfvN3jtau10um-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),  
+        ('tau1mm',   '/mfvneutralino_genfsimreco_tau1mm/tucker-sstoptuple_mfvN3jtau1mm-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),	  
+        ('tau9p9mm', '/mfvneutralino_genfsimreco_tau9p9mm/tucker-sstoptuple_mfvN3jtau9p9mm-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),
         ]
 
     for name, dataset in jobs:
