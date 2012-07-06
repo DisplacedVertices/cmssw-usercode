@@ -290,11 +290,12 @@ class draw_hist_register:
     hist.SetTitle('ordinate vs. abscissa')
     """
     
-    def __init__(self, tree):
+    def __init__(self, tree, use_weight=False):
         self.tree = tree
         self.n = 0
         self.names = []
         self.hists = []
+        self.use_weight = True
 
     def name_for_draw(self, draw_str, binning=''):
         name = 'h' + str(self.n)
@@ -310,7 +311,12 @@ class draw_hist_register:
         return h
 
     def draw(self, draw_str, cut='', binning='', get_n=False, tree=None):
-        n = (tree if tree else self.tree).Draw(self.name_for_draw(draw_str, binning), cut)
+        if self.use_weight:
+            if cut:
+                cut = 'weight*(%s)' % cut
+            else:
+                cut = 'weight'
+        n = (tree if tree else self.tree).Draw(self.name_for_draw(draw_str, binning), cut, 'e' if self.use_weight else '')
         h = self.last_hist()
         return (h,n) if get_n else h
 
