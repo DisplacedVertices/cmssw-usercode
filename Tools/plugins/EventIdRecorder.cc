@@ -26,6 +26,9 @@ EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg) {
   tree->Branch("run",   &run,   "run/i");
   tree->Branch("lumi",  &lumi,  "lumi/i");
   tree->Branch("event", &evt,   "event/i");
+
+  if (cfg.existsAs<std::string>("notes"))
+    tree->SetAlias("notes", cfg.getParameter<std::string>("notes").c_str());
 }
 
 void EventIdRecorder::analyze(const edm::Event& event, const edm::EventSetup&) {
