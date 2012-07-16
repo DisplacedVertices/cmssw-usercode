@@ -112,6 +112,9 @@ for sample in _samples:
     exec '%s = sample' % sample.name
     sample.ana_dataset = '/%s/tucker-sstoptuple_%s-136cfdc7b5f14a6e64a64e28492fb90f/USER' % (sample.dataset.split('/')[1], sample.name)
 
+for sample in mfv_signal_samples:
+    sample.ana_dataset = '/%s/tucker-sstoptuple_%s-0c629a8393f3fe6d3c67f49d9ddd1384/USER' % (sample.dataset.split('/')[1], sample.name)
+
 pythiastopm200.dbs_url_ = 1
 pythiastopm200.is_fastsim = True
 for sample in [mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jtau9p9mm]:
