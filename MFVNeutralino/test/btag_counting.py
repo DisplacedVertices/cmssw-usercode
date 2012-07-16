@@ -44,11 +44,11 @@ jobtype = cmssw
 scheduler = condor
 
 [CMSSW]
-dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
-datasetpath = %(dataset)s
+%(ana_dbs_url)s
+datasetpath = %(ana_dataset)s
 pset = btag_counting.py
 total_number_of_events = -1
-events_per_job = 50000
+events_per_job = 100000
 
 [USER]
 ui_working_dir = crab/crab_mfvnu_btag_counting_%(name)s
@@ -57,16 +57,9 @@ return_data = 1
 
     testing = 'testing' in sys.argv
 
-    jobs = [
-        ('tau0',     '/mfvneutralino_genfsimreco_tau0/tucker-sstoptuple_mfvN3jtau0-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),	  
-        ('tau100um', '/mfvneutralino_genfsimreco_tau100um/tucker-sstoptuple_mfvN3jtau100um-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),
-        ('tau10um',  '/mfvneutralino_genfsimreco_tau10um/tucker-sstoptuple_mfvN3jtau10um-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),  
-        ('tau1mm',   '/mfvneutralino_genfsimreco_tau1mm/tucker-sstoptuple_mfvN3jtau1mm-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),	  
-        ('tau9p9mm', '/mfvneutralino_genfsimreco_tau9p9mm/tucker-sstoptuple_mfvN3jtau9p9mm-0c629a8393f3fe6d3c67f49d9ddd1384/USER'),
-        ]
-
-    for name, dataset in jobs:
-        open('crab.cfg', 'wt').write(crab_cfg % locals())
+    from JMTucker.Tools.Samples import background_samples, mfv_signal_samples
+    for sample in background_samples + mfv_signal_samples:
+        open('crab.cfg', 'wt').write(crab_cfg % sample)
         if not testing:
             os.system('crab -create -submit')
             os.system('rm crab.cfg')
