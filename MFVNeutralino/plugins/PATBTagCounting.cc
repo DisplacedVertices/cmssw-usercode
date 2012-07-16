@@ -44,10 +44,15 @@ void MFVNeutralinoPATBTagCounting::analyze(const edm::Event& event, const edm::E
   if (verbose) std::cout << "MFVNeutralinoPATBTagCounting: b_discriminator_name: " << b_discriminator_name << " jet_pt_min: " << jet_pt_min << " bdisc_min: " << bdisc_min << "\n";
   for (int i = 0, ie = jets->size(); i < ie; ++i) {
     const pat::Jet& jet = jets->at(i);
-    //const reco::GenJet* gen_jet = jet.genJet();
+    const reco::GenJet* gen_jet = jet.genJet();
 
     const double bdisc = jet.bDiscriminator(b_discriminator_name);
-    if (verbose) std::cout << "#" << i << ": pt eta phi: " << jet.pt() << ", "<< jet.eta() << ", "<< jet.phi() << " bdisc: " << bdisc << "\n";
+    if (verbose) {
+      std::cout << "#" << i << ": pt eta phi: " << jet.pt() << ", " << jet.eta() << ", "<< jet.phi() << " gen jet (ptr: " << gen_jet;
+      if (gen_jet)
+	std::cout << ") pt eta phi: " << gen_jet->pt() << ", " << gen_jet->eta() << ", " << gen_jet->phi();
+      std::cout << " bdisc: " << bdisc << "\n";
+    }
     if (jet.pt() > jet_pt_min && bdisc > bdisc_min)
       ++ndisc;
   }
