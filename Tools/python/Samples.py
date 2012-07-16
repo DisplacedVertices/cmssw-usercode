@@ -94,8 +94,11 @@ background_samples = [
     MCSample('qcd1800',         'QCD, #hat{p}{T} > 1800 GeV',        '/QCD_Pt-1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',           977586, 815, 0.10, 1.829e-3),
 ]
 
-signal_samples = [
+stop_signal_samples = [
     MCSample('pythiastopm200',  'stop pair prod., Mstop = 200 GeV',  '/none/', 100000,  2, 0.15, 17),
+    ]
+
+mfv_signal_samples = [
     MCSample('mfvN3jtau0',      'MFV N, #tau = 0',                   '/mfvneutralino_genfsimreco_tau0/tucker-mfvneutralino_genfsimreco_tau0-aa8b56a9a9cba6aa847bda9acf329ad0/USER',         24500, -1, 0.2, 9e99),
     MCSample('mfvN3jtau100um',  'MFV N, #tau = 100 #mum',            '/mfvneutralino_genfsimreco_tau100um/tucker-mfvneutralino_genfsimreco_tau100um-465709e5340ac2cc11e2751b48bbef3e/USER', 24000, -1, 0.2, 9e99),
     MCSample('mfvN3jtau10um',   'MFV N, #tau = 10 #mum',             '/mfvneutralino_genfsimreco_tau10um/tucker-mfvneutralino_genfsimreco_tau10um-719b1b049e9de8135afa1f308d0994e6/USER',   24500, -1, 0.2, 9e99),
@@ -103,9 +106,9 @@ signal_samples = [
     MCSample('mfvN3jtau9p9mm',  'MFV N, #tau = 9.9 mm',              '/mfvneutralino_genfsimreco_tau9p9mm/tucker-mfvneutralino_genfsimreco_tau9p9mm-891f0c49f79ad2222cb205736c37de4f/USER', 24000, -1, 0.2, 9e99),
     ]
 
-samples = background_samples + signal_samples
+_samples = background_samples + stop_signal_samples + mfv_signal_samples
 
-for sample in samples:
+for sample in _samples:
     exec '%s = sample' % sample.name
     sample.ana_dataset = '/%s/tucker-sstoptuple_%s-136cfdc7b5f14a6e64a64e28492fb90f/USER' % (sample.dataset.split('/')[1], sample.name)
 
@@ -134,4 +137,4 @@ if temp_neventses:
             sample.nevents = temp_nevents
     big_warn('\n'.join(warning))
 
-__all__ = ['samples'] + [s.name for s in samples]
+__all__ = ['background_samples', 'stop_signal_samples', 'mfv_signal_samples'] + [s.name for s in _samples]
