@@ -2,6 +2,8 @@
 
 pushd $CMSSW_BASE/src
 
+cvs co -d JMTucker/Tools UserCode/JMTucker/Tools
+
 cvs co -r V00-01-32 GeneratorInterface/Pythia8Interface 
 
 patch -p0 < MFVNeutralino/MFVNeutralino/patches
