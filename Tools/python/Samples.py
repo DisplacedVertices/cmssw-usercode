@@ -110,10 +110,7 @@ _samples = background_samples + stop_signal_samples + mfv_signal_samples
 
 for sample in _samples:
     exec '%s = sample' % sample.name
-    sample.ana_dataset = '/%s/tucker-sstoptuple_%s-136cfdc7b5f14a6e64a64e28492fb90f/USER' % (sample.dataset.split('/')[1], sample.name)
-
-for sample in mfv_signal_samples:
-    sample.ana_dataset = '/%s/tucker-sstoptuple_%s-0c629a8393f3fe6d3c67f49d9ddd1384/USER' % (sample.dataset.split('/')[1], sample.name)
+    sample.ana_dataset = '/%s/tucker-sstoptuple_v1_%s-3312fbeda721580c3cdebaec6739016e/USER' % (sample.dataset.split('/')[1], sample.name)
 
 pythiastopm200.dbs_url_ = 1
 pythiastopm200.is_fastsim = True
@@ -126,7 +123,7 @@ from JMTucker.Tools.general import big_warn
 #big_warn('nothing')
 
 temp_neventses = []
-temp_neventses = [(qcd1000, 864088), (qcd120, 2351025), (qcd1400, 25062), (qcd15, 10890480), (qcd170, 412890), (qcd1800, 77586), (qcd30, 1139208), (qcd300, 5927300), (qcd470, 1562224), (qcd5, 50000), (qcd50, 439686), (qcd600, 1607796), (qcd80, 3010832), (qcd800, 1197393), (ttbar, 5546182)]
+temp_neventses = [(ttbar, 6606135), (qcd15, 10801196), (qcd30, 5990000), (qcd80, 5931328), (qcd120, 5935732), (qcd170, 5704398), (qcd470, 3674848), (qcd600, 3712760), (qcd800, 3828563)]
 
 if temp_neventses:
     warning = ['partial datasets published:']
