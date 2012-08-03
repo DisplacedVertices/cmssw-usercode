@@ -77,7 +77,7 @@ class TupleOnlyMCSample(MCSample):
 background_samples = [
     #        name               title                                dataset                                                                              nevents  clr  syst  xsec (pb)
     MCSample('ttbar',           't#bar{t}',                          '/TTJets_TuneZ2star_8TeV-madgraph-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',       6736135,   4, 0.15, 225.2),
-#   MCSample('wjetstolnu',      'W+jets #rightarrow l#nu',           '/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12-PU_S7_START52_V9-v1/AODSIM', 18393090,   8, 0.10, 3.04e4),
+    MCSample('wjetstolnu',      'W+jets #rightarrow l#nu',           '/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12-PU_S7_START52_V9-v1/AODSIM', 18393090,   8, 0.10, 3.04e4),
     MCSample('qcd0',            'QCD, #hat{p}{T} < 5 GeV',           '/QCD_Pt-0to5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',           999788, 801, 0.10, 4.859e10, scheduler='glite'),
     MCSample('qcd5',            'QCD, 5 < #hat{p}{T} < 15 GeV',      '/QCD_Pt-5to15_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',         1489184, 802, 0.10, 4.264e10, scheduler='glite'),
     MCSample('qcd15',           'QCD, 15 < #hat{p}{T} < 30 GeV',     '/QCD_Pt-15to30_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',       10925056, 803, 0.10, 9.883e8,  scheduler='glite'),
@@ -96,7 +96,7 @@ background_samples = [
 ]
 
 stop_signal_samples = [
-    MCSample('pythiastopm200',  'stop pair prod., Mstop = 200 GeV',  '/none/', 100000,  2, 0.15, 17),
+    MCSample('pythiastopm200',  'stop pair prod., Mstop = 200 GeV',  '/sstop_genfsimreco_test/tucker-sstop_genfsimreco_test-15c4250952b10a469cc6da8beaecd65e/USER', 93000,  2, 0.15, 17),
     ]
 
 mfv_signal_samples = [
@@ -113,7 +113,7 @@ for sample in _samples:
     exec '%s = sample' % sample.name
     sample.ana_dataset = '/%s/tucker-sstoptuple_v1_%s-3312fbeda721580c3cdebaec6739016e/USER' % (sample.dataset.split('/')[1], sample.name)
 
-pythiastopm200.dbs_url_ = 1
+pythiastopm200.dbs_url_ = 2
 pythiastopm200.is_fastsim = True
 for sample in [mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jtau9p9mm]:
     sample.ana_dataset = sample.ana_dataset.replace('3312fbeda721580c3cdebaec6739016e', 'd4b76361cb50b072f07d02828189ae78')
