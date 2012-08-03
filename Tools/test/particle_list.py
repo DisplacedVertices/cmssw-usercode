@@ -16,4 +16,4 @@ process.ParticleListDrawer = cms.EDAnalyzer('ParticleListDrawer',
                                             )
 process.p = cms.Path(process.ParticleListDrawer)
 
-process.source.fileNames = [x.strip() for x in open('infiles.txt').split('\n') if x.strip()]
+process.source.fileNames = [x.strip() for x in open('infiles.txt') if x.strip()]
