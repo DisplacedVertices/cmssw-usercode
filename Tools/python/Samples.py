@@ -124,6 +124,9 @@ for sample in [mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jta
 from JMTucker.Tools.general import big_warn
 #big_warn('nothing')
 
+big_warn('subtracting events from qcd15 because of the duplicates that were skipped at pat tupling. analysis still needs to check for other duplicates!')
+qcd15.nevents -= 35720
+
 temp_neventses = []
 temp_neventses = [(ttbar, 6606135), (qcd15, 10801196), (qcd30, 5990000), (qcd80, 5931328), (qcd120, 5935732), (qcd170, 5704398), (qcd470, 3674848), (qcd600, 3712760), (qcd800, 3828563)]
 
