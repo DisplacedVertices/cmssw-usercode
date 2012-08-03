@@ -109,14 +109,18 @@ mfv_signal_samples = [
 
 _samples = background_samples + stop_signal_samples + mfv_signal_samples
 
+ana_hash = '3312fbeda721580c3cdebaec6739016e'
+
 for sample in _samples:
     exec '%s = sample' % sample.name
-    sample.ana_dataset = '/%s/tucker-sstoptuple_v1_%s-3312fbeda721580c3cdebaec6739016e/USER' % (sample.dataset.split('/')[1], sample.name)
+    sample.ana_dataset = '/%s/tucker-sstoptuple_v1_%s-%s/USER' % (sample.dataset.split('/')[1], sample.name, ana_hash)
 
 pythiastopm200.dbs_url_ = 2
 pythiastopm200.is_fastsim = True
+pythiastopm200.ana_dataset = pythiastopm200.ana_dataset.replace(ana_hash, '9d1f47f734d7fa3e7b15bfc3b33b46e5')
+
 for sample in [mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jtau9p9mm]:
-    sample.ana_dataset = sample.ana_dataset.replace('3312fbeda721580c3cdebaec6739016e', 'd4b76361cb50b072f07d02828189ae78')
+    sample.ana_dataset = sample.ana_dataset.replace(ana_hash, 'd4b76361cb50b072f07d02828189ae78')
     sample.is_fastsim = True
     sample.is_pythia8 = True
     sample.dbs_url_ = 2
