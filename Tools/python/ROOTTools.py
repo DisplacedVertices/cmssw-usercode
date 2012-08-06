@@ -293,10 +293,14 @@ class draw_hist_register:
     def __init__(self, tree, use_weight=False):
         self.tree = tree
         self.n = 0
+        self.use_weight = True
+        self.clear()
+
+    def clear(self):
+        # don't reset self.n
         self.names = []
         self.hists = []
-        self.use_weight = True
-
+        
     def name_for_draw(self, draw_str, binning=''):
         name = 'h' + str(self.n)
         self.names.append(name)
