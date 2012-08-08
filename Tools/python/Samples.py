@@ -24,6 +24,9 @@ class MCSample(object):
         self.is_fastsim = is_fastsim
         self.is_pythia8 = is_pythia8
 
+    def replace_ana_hash(self, old, new):
+        self.ana_dataset = self.ana_dataset.replace(old, new)
+
     @property
     def partial_weight(self):
         return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
@@ -75,28 +78,29 @@ class TupleOnlyMCSample(MCSample):
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV or PREP for xsecs
 background_samples = [
-    #        name               title                                dataset                                                                                        nevents  clr  syst  xsec (pb)
-    MCSample('ttbar',           't#bar{t}',                          '/TTJets_TuneZ2star_8TeV-madgraph-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                 6736135,   4, 0.15, 225.2),
-    MCSample('wjetstolnu',      'W+jets #rightarrow l#nu',           '/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12-PU_S7_START52_V9-v1/AODSIM',           18393090,   8, 0.10, 3.04e4),
-    MCSample('qcd0',            'QCD, #hat{p}{T} < 5 GeV',           '/QCD_Pt-0to5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                     999788, 801, 0.10, 4.859e10, scheduler='glite'),
-    MCSample('qcd5',            'QCD, 5 < #hat{p}{T} < 15 GeV',      '/QCD_Pt-5to15_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                   1489184, 802, 0.10, 4.264e10, scheduler='glite'),
-    MCSample('qcd15',           'QCD, 15 < #hat{p}{T} < 30 GeV',     '/QCD_Pt-15to30_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                 10925056, 803, 0.10, 9.883e8,  scheduler='glite'),
-    MCSample('qcd30',           'QCD, 30 < #hat{p}{T} < 50 GeV',     '/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                  6000000, 804, 0.10, 6.629e7,  scheduler='glite'),
-    MCSample('qcd50',           'QCD, 50 < #hat{p}{T} < 80 GeV',     '/QCD_Pt-50to80_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                  5995944, 805, 0.10, 8.149e6,  scheduler='glite'),
-    MCSample('qcd80',           'QCD, 80 < #hat{p}{T} < 120 GeV',    '/QCD_Pt-80to120_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                 5981328, 806, 0.10, 1.034e6,  scheduler='glite'),
-    MCSample('qcd120',          'QCD, 120 < #hat{p}{T} < 170 GeV',   '/QCD_Pt-120to170_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                5985732, 807, 0.10, 1.563e5,  scheduler='glite'),
-    MCSample('qcd170',          'QCD, 170 < #hat{p}{T} < 300 GeV',   '/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                5814398, 808, 0.10, 3.414e4),
-    MCSample('qcd300',          'QCD, 300 < #hat{p}{T} < 470 GeV',   '/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                5927300, 809, 0.10, 1.760e3),
-    MCSample('qcd470',          'QCD, 470 < #hat{p}{T} < 600 GeV',   '/QCD_Pt-470to600_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                3994848, 810, 0.10, 1.139e2),
-    MCSample('qcd600',          'QCD, 600 < #hat{p}{T} < 800 GeV',   '/QCD_Pt-600to800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                3992760, 811, 0.10, 2.699e1),
-    MCSample('qcd800',          'QCD, 800 < #hat{p}{T} < 1000 GeV',  '/QCD_Pt-800to1000_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',               3998563, 812, 0.10, 3.550e0),
-    MCSample('qcd1000',         'QCD, 1000 < #hat{p}{T} < 1400 GeV', '/QCD_Pt-1000to1400_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',              1964088, 813, 0.10, 7.378e-1),
-    MCSample('qcd1400',         'QCD, 1400 < #hat{p}{T} < GeV',      '/QCD_Pt-1400to1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',              2000062, 814, 0.10, 3.352e-2),
-    MCSample('qcd1800',         'QCD, #hat{p}{T} > 1800 GeV',        '/QCD_Pt-1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                     977586, 815, 0.10, 1.829e-3),
+    #        name               title                                   dataset                                                                                        nevents  clr  syst  xsec (pb)
+    MCSample('wjetstolnu',      'W+jets #rightarrow l#nu',              '/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12-PU_S7_START52_V9-v1/AODSIM',           18393090,   9, 0.10, 3.04e4),
+    MCSample('tbarW',           '#bar{t}W',                             '/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',        493460,  42, 0.10, 10.7),
+    MCSample('ttbar',           't#bar{t}',                             '/TTJets_TuneZ2star_8TeV-madgraph-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                 6736135,   4, 0.15, 225.2),
+    MCSample('qcd0',            'QCD, #hat{p}_{T} < 5 GeV',             '/QCD_Pt-0to5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                     999788, 801, 0.10, 4.859e10, scheduler='glite'),
+    MCSample('qcd5',            'QCD, 5 < #hat{p}_{T} < 15 GeV',        '/QCD_Pt-5to15_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                   1489184, 802, 0.10, 4.264e10, scheduler='glite'),
+    MCSample('qcd15',           'QCD, 15 < #hat{p}_{T} < 30 GeV',       '/QCD_Pt-15to30_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                 10925056, 803, 0.10, 9.883e8,  scheduler='glite'),
+    MCSample('qcd30',           'QCD, 30 < #hat{p}_{T} < 50 GeV',       '/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                  6000000, 804, 0.10, 6.629e7,  scheduler='glite'),
+    MCSample('qcd50',           'QCD, 50 < #hat{p}_{T} < 80 GeV',       '/QCD_Pt-50to80_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                  5995944, 805, 0.10, 8.149e6,  scheduler='glite'),
+    MCSample('qcd80',           'QCD, 80 < #hat{p}_{T} < 120 GeV',      '/QCD_Pt-80to120_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                 5981328, 806, 0.10, 1.034e6,  scheduler='glite'),
+    MCSample('qcd120',          'QCD, 120 < #hat{p}_{T} < 170 GeV',     '/QCD_Pt-120to170_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                5985732, 807, 0.10, 1.563e5,  scheduler='glite'),
+    MCSample('qcd170',          'QCD, 170 < #hat{p}_{T} < 300 GeV',     '/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                5814398, 808, 0.10, 3.414e4),
+    MCSample('qcd300',          'QCD, 300 < #hat{p}_{T} < 470 GeV',     '/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                5927300, 809, 0.10, 1.760e3),
+    MCSample('qcd470',          'QCD, 470 < #hat{p}_{T} < 600 GeV',     '/QCD_Pt-470to600_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                3994848, 810, 0.10, 1.139e2),
+    MCSample('qcd600',          'QCD, 600 < #hat{p}_{T} < 800 GeV',     '/QCD_Pt-600to800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                3992760, 811, 0.10, 2.699e1),
+    MCSample('qcd800',          'QCD, 800 < #hat{p}_{T} < 1000 GeV',    '/QCD_Pt-800to1000_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',               3998563, 812, 0.10, 3.550e0),
+    MCSample('qcd1000',         'QCD, 1000 < #hat{p}_{T} < 1400 GeV',   '/QCD_Pt-1000to1400_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',              1964088, 813, 0.10, 7.378e-1),
+    MCSample('qcd1400',         'QCD, 1400 < #hat{p}_{T} < GeV',        '/QCD_Pt-1400to1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',              2000062, 814, 0.10, 3.352e-2),
+    MCSample('qcd1800',         'QCD, #hat{p}_{T} > 1800 GeV',          '/QCD_Pt-1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                     977586, 815, 0.10, 1.829e-3),
 ]
 
 stop_signal_samples = [
-    MCSample('pythiastopm200',  'stop pair prod., Mstop = 200 GeV',  '/sstop_genfsimreco_test/tucker-sstop_genfsimreco_test-15c4250952b10a469cc6da8beaecd65e/USER', 93000,  2, 0.15, 17),
+    MCSample('pythiastopm200',  'stop pair prod., M = 200 GeV',  '/sstop_genfsimreco_test/tucker-sstop_genfsimreco_test-15c4250952b10a469cc6da8beaecd65e/USER', 93000,  2, 0.15, 17),
     ]
 
 mfv_signal_samples = [
@@ -115,12 +119,14 @@ for sample in _samples:
     exec '%s = sample' % sample.name
     sample.ana_dataset = '/%s/tucker-sstoptuple_v1_%s-%s/USER' % (sample.dataset.split('/')[1], sample.name, ana_hash)
 
+tbarW.replace_ana_hash(ana_hash, '77a5e5175da7f67714544eca741c06d6')
+
 pythiastopm200.dbs_url_ = 2
 pythiastopm200.is_fastsim = True
-pythiastopm200.ana_dataset = pythiastopm200.ana_dataset.replace(ana_hash, '9d1f47f734d7fa3e7b15bfc3b33b46e5')
+pythiastopm200.replace_ana_hash(ana_hash, '9d1f47f734d7fa3e7b15bfc3b33b46e5')
 
 for sample in [mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jtau9p9mm]:
-    sample.ana_dataset = sample.ana_dataset.replace(ana_hash, 'd4b76361cb50b072f07d02828189ae78')
+    sample.replace_ana_hash(ana_hash, 'd4b76361cb50b072f07d02828189ae78')
     sample.is_fastsim = True
     sample.is_pythia8 = True
     sample.dbs_url_ = 2
