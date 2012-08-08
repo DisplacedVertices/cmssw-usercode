@@ -289,11 +289,14 @@ class draw_hist_register:
     hist = hr.draw('ordinate:abscissa', '100,0,1,100,0,5')
     hist.SetTitle('ordinate vs. abscissa')
     """
+    uniq = [0]
     
     def __init__(self, tree, use_weight=False):
+        self.id = self.uniq[0]
+        self.uniq[0] += 1
         self.tree = tree
         self.n = 0
-        self.use_weight = True
+        self.use_weight = use_weight
         self.clear()
 
     def clear(self):
@@ -302,7 +305,7 @@ class draw_hist_register:
         self.hists = []
         
     def name_for_draw(self, draw_str, binning=''):
-        name = 'h' + str(self.n)
+        name = 'h_%i_%i' % (self.id, self.n)
         self.names.append(name)
         self.n += 1
         if binning:
