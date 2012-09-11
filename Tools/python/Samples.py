@@ -6,7 +6,7 @@ from JMTucker.Tools.DBS import files_in_dataset
 class MCSample(object):
     DBS_ANA02 = True
     
-    def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1, filenames=None, scheduler='glite', hlt_process_name='HLT', dbs_url=None, ana_dataset=None, ana_dbs_url=2, is_fastsim=False, is_pythia8=False):
+    def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1, filenames=None, scheduler='condor', hlt_process_name='HLT', dbs_url=None, ana_dataset=None, ana_dbs_url=2, is_fastsim=False, is_pythia8=False):
         self.name = name
         self.nice_name = nice_name
         self.dataset = dataset
@@ -133,6 +133,9 @@ for sample in _samples:
     exec '%s = sample' % sample.name
     sample.ana_dataset = '/%s/tucker-sstoptuple_v1_%s-%s/USER' % (sample.dataset.split('/')[1], sample.name, ana_hash)
 
+for sample in (ttgjets, ttzjets, ttwjets, qcd0, qcd5, qcd15, qcd30, qcd50, qcd80, qcd120):
+    sample.scheduler_ = 'glite'
+
 tbarW.replace_ana_hash(ana_hash, '77a5e5175da7f67714544eca741c06d6')
 
 pythiastopm200.dbs_url_ = 2
@@ -167,3 +170,9 @@ if temp_neventses:
     big_warn('\n'.join(warning))
 
 __all__ = ['background_samples', 'stop_signal_samples', 'mfv_signal_samples'] + [s.name for s in _samples]
+
+if __name__ == '__main__':
+    from mydbs import *
+    for sample in _samples:
+        sites = sites_for_dataset(sample.dataset)
+        print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
