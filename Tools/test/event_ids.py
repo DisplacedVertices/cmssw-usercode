@@ -24,7 +24,7 @@ scheduler = condor
 [CMSSW]
 dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 datasetpath = /QCD_Pt-15to30_TuneZ2star_8TeV_pythia6/tucker-sstoptuple_v1_qcd15-3312fbeda721580c3cdebaec6739016e/USER
-pset = particle_list.py
+pset = event_ids.py
 total_number_of_events = -1
 events_per_job = 500
 
