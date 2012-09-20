@@ -2,11 +2,20 @@
 
 import os
 from JMTucker.Tools.DBS import files_in_dataset
+from JMTucker.Tools.general import big_warn
 
 class MCSample(object):
-    DBS_ANA02 = True
+    IS_FASTSIM = False
+    IS_PYTHIA8 = False
+    SCHEDULER_NAME = 'glite'
+    HLT_PROCESS_NAME = 'HLT'
+    DBS_URL_NUM = 0
+    ANA_DBS_URL_NUM = 2
+    ANA_HASH = 'bd9748f60791b31d15ca5bb480d0e762'
+    PUBLISH_USER = 'tucker'
+    ANA_VERSION = 'v2'
     
-    def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1, filenames=None, scheduler='condor', hlt_process_name='HLT', dbs_url=None, ana_dataset=None, ana_dbs_url=2, is_fastsim=False, is_pythia8=False):
+    def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1):
         self.name = name
         self.nice_name = nice_name
         self.dataset = dataset
@@ -15,17 +24,17 @@ class MCSample(object):
         self.syst_frac = float(syst_frac)
         self.cross_section = float(cross_section)
         self.k_factor = float(k_factor)
-        self.filenames_ = filenames
-        self.scheduler_ = scheduler
-        self.hlt_process_name = hlt_process_name
-        self.dbs_url_ = dbs_url
-        self.ana_dataset = ana_dataset
-        self.ana_dbs_url_ = ana_dbs_url
-        self.is_fastsim = is_fastsim
-        self.is_pythia8 = is_pythia8
 
-    def replace_ana_hash(self, old, new):
-        self.ana_dataset = self.ana_dataset.replace(old, new)
+        self.is_fastsim = self.IS_FASTSIM
+        self.is_pythia8 = self.IS_PYTHIA8
+        self.hlt_process_name = self.HLT_PROCESS_NAME
+        self.local_filenames = []
+        self.scheduler_name = self.SCHEDULER_NAME
+        self.dbs_url_num = self.DBS_URL_NUM
+        self.ana_dbs_url_num = self.ANA_DBS_URL_NUM
+        self.ana_hash = self.ANA_HASH
+        self.publish_user = self.PUBLISH_USER
+        self.ana_version = self.ANA_VERSION
 
     @property
     def partial_weight(self):
@@ -36,30 +45,38 @@ class MCSample(object):
         if self.dbs_url_ > 0:
             return 'condor'
         else:
-            return self.scheduler_
+            return self.scheduler_name
 
     def _get_dbs_url(self, num):
         return '' if not num else 'dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_0%i_writer/servlet/DBSServlet' % num
     
     @property
     def dbs_url(self):
-        return self._get_dbs_url(self.dbs_url_)
+        return self._get_dbs_url(self.dbs_url_num)
         
     @property
     def ana_dbs_url(self):
-        return self._get_dbs_url(self.ana_dbs_url_)
+        return self._get_dbs_url(self.ana_dbs_url_num)
+
+    @property
+    def primary_dataset(self):
+        return self.dataset.split('/')[1]
+    
+    @property
+    def ana_dataset(self):
+        return '/%(primary_dataset)s/%(publish_user)s-sstoptuple_%(ana_version)s_%(name)s-%(ana_hash)s/USER' % self
 
     @property
     def use_server(self):
         return 'use_server = 1' if self.scheduler != 'condor' else ''
-        
+
     @property
     def filenames(self):
         # Return a list of filenames for running the histogrammer not
         # using crab.
-        if self.filenames_ is not None:
-            return self.filenames_
-        return files_in_dataset(self.ana_dataset, ana01=self.ana_dbs_url_ == 1, ana02=self.ana_dbs_url_ == 2)
+        if self.local_filenames:
+            return self.local_filenames
+        return files_in_dataset(self.ana_dataset, ana01=self.ana_dbs_url_num == 1, ana02=self.ana_dbs_url_num == 2)
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -95,7 +112,7 @@ background_samples = [
     MCSample('zjetstonunuHT400', 'Z #rightarrow #nu#nu + jets, H_{T} > 400 GeV',            '/ZJetsToNuNu_400_HT_inf_TuneZ2Star_8TeV_madgraph/Summer12-PU_S7_START52_V9-v1/AODSIM',        1006928,  -1, 0.10, 5.27e0),
     MCSample('dyjetstollM10',    'DY + jets #rightarrow ll, 10 < M < 50 GeV',               '/DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12-PU_S7_START52_V9-v1/AODSIM',                7132223,  -1, 0.10, 11050*0.069),
     MCSample('dyjetstollM50',    'DY + jets #rightarrow ll, M > 50 GeV',                    '/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12-PU_S7_START52_V9-v2/AODSIM',      30461028,  -1, 0.10, 2.95e3),
-    MCSample('ttbar',            't#bar{t}',                                                '/TTJets_TuneZ2star_8TeV-madgraph-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                 6736135,   4, 0.15, 225.2, scheduler='condor'),
+    MCSample('ttbar',            't#bar{t}',                                                '/TTJets_TuneZ2star_8TeV-madgraph-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                 6736135,   4, 0.15, 225.2),
     MCSample('qcd0',             'QCD, #hat{p}_{T} < 5 GeV',                                '/QCD_Pt-0to5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                     999788, 801, 0.10, 4.859e10),
     MCSample('qcd5',             'QCD, 5 < #hat{p}_{T} < 15 GeV',                           '/QCD_Pt-5to15_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                   1489184, 802, 0.10, 4.264e10),
     MCSample('qcd15',            'QCD, 15 < #hat{p}_{T} < 30 GeV',                          '/QCD_Pt-15to30_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                 10925056, 803, 0.10, 9.883e8),
@@ -127,35 +144,36 @@ mfv_signal_samples = [
 
 _samples = background_samples + stop_signal_samples + mfv_signal_samples
 
-ana_hash = '3312fbeda721580c3cdebaec6739016e'
-
 for sample in _samples:
     exec '%s = sample' % sample.name
-    sample.ana_dataset = '/%s/tucker-sstoptuple_v1_%s-%s/USER' % (sample.dataset.split('/')[1], sample.name, ana_hash)
 
-for sample in (ttgjets, ttzjets, ttwjets, qcd0, qcd5, qcd15, qcd30, qcd50, qcd80, qcd120):
-    sample.scheduler_ = 'glite'
 
-tbarW.replace_ana_hash(ana_hash, '77a5e5175da7f67714544eca741c06d6')
+# Exceptions to the defaults.
 
-pythiastopm200.dbs_url_ = 2
+pythiastopm200.dbs_url_num = 2
 pythiastopm200.is_fastsim = True
-pythiastopm200.replace_ana_hash(ana_hash, '9d1f47f734d7fa3e7b15bfc3b33b46e5')
+pythiastopm200.ana_hash = 'd1c7726c69d89f45da05a992a40b425c'
 
-for sample in [mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jtau9p9mm]:
-    sample.replace_ana_hash(ana_hash, 'd4b76361cb50b072f07d02828189ae78')
+for sample in (mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jtau9p9mm):
+    sample.ana_hash = 'ffbc82b68f588f5f183a150670744b16'
     sample.is_fastsim = True
     sample.is_pythia8 = True
-    sample.dbs_url_ = 2
+    sample.dbs_url_num = 2
 
-from JMTucker.Tools.general import big_warn
-#big_warn('nothing')
 
-big_warn('subtracting events from qcd15 because of the duplicates that were skipped at pat tupling. analysis still needs to check for other duplicates!')
-qcd15.nevents -= 35720
+# Other exceptions due to jobs being missed, mixing dataset versions
+# (that don't affect actual physics), etc.
+
+warning = ['other datasets v2, these datasets v3:']
+for sample in (qcd170, qcd600, dyjetstollM10, dyjetstollM50, tW, t_s, t_t, tbar_s, tbar_t, ttgjets, ttwjets, ttzjets, wjetstolnu):
+    warning.append(sample.name)
+    sample.ana_version = 'v3'
+    sample.ana_hash = '5e1021f6ad80ccbe13b7c6abc1eb101a'
+big_warn('\n'.join(warning))
+
 
 temp_neventses = []
-temp_neventses = [(ttbar, 6606135), (qcd15, 10801196), (qcd30, 5990000), (qcd80, 5931328), (qcd120, 5935732), (qcd170, 5704398), (qcd470, 3674848), (qcd600, 3712760), (qcd800, 3828563)]
+temp_neventses = [(qcd15, 10918100), (qcd50, 5306688), (qcd120, 5235732), (qcd170, 5764398), (qcd470, 3674848), (qcd600, 3712760), (qcd800, 3828563)]
 
 if temp_neventses:
     warning = ['partial datasets published:']
@@ -169,10 +187,20 @@ if temp_neventses:
             sample.nevents = temp_nevents
     big_warn('\n'.join(warning))
 
+
+big_warn('ttVjets samples not complete')
+for o in (ttgjets, ttwjets, ttzjets):
+    background_samples.remove(o)
+    _samples.remove(o)
+    del o
+
+
 __all__ = ['background_samples', 'stop_signal_samples', 'mfv_signal_samples'] + [s.name for s in _samples]
 
 if __name__ == '__main__':
-    from mydbs import *
-    for sample in _samples:
-        sites = sites_for_dataset(sample.dataset)
-        print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
+    import sys
+    if 'sites' in sys.argv:
+        from mydbs import *
+        for sample in _samples:
+            sites = sites_for_dataset(sample.dataset)
+            print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
