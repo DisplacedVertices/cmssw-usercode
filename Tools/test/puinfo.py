@@ -16,9 +16,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
 [CRAB]
 jobtype = cmssw
-scheduler = glite
+scheduler = %(scheduler)s
 
 [CMSSW]
+%(dbs_url)s
 datasetpath = %(dataset)s
 pset = puinfo_crab.py
 total_number_of_events = -1
@@ -33,7 +34,7 @@ return_data = 1
 
     from JMTucker.Tools.Samples import background_samples, stop_signal_samples
     for sample in background_samples + stop_signal_samples:
-        if sample.name in 'ttzjets ttgjets ttwjets':
+        if sample.name not in 'pythiastopm200':
             continue
         
         open('crab.cfg', 'wt').write(crab_cfg % sample)
