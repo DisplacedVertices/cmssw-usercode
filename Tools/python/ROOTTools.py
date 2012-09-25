@@ -194,14 +194,13 @@ def differentiate_stat_box(hist, movement=1, new_color=None):
     s.SetY1NDC(y1 - (y2-y1)*n)
     s.SetY2NDC(y2 - (y2-y1)*n)
 
-def draw_in_order(hists, draw_cmds=''):
-    hists = [(h, h.GetMaximum()) for h in hists]
+def draw_in_order(hists_and_cmds):
+    hists = [(h, h.GetMaximum(), cmd) for h,cmd in hists_and_cmds]
     hists.sort(key=lambda x: x[1], reverse=True)
-    for h,m in hists:
-        print draw_cmds
-        h.Draw(draw_cmds)
-        if 'same' not in draw_cmds:
-            draw_cmds += ' same'
+    for i, (h, m, cmd) in enumerate(hists):
+        if i > 0 and 'same' not in cmd:
+            cmd += ' same'
+        h.Draw(cmd)
 
 def fit_gaussian(hist, factor=None, draw=False, cache=[]):
     """Fit a Gaussian to the histogram, and return a dict with fitted
