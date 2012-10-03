@@ -10,15 +10,15 @@ struct TriggerHelper {
 
   TriggerHelper(const edm::TriggerResults& trigger_results_, const edm::TriggerNames& trigger_names_) : trigger_results(trigger_results_), trigger_names(trigger_names_) {}
 
-  bool pass(const char* name, bool& found, const bool debug=false) const {
+  bool pass(const std::string& name, bool& found, const bool debug=false) const {
     const unsigned ndx = trigger_names.triggerIndex(name);
     found = ndx < trigger_results.size();
     if (debug) {
-      printf("TriggerHelper debug\nname: %s\n", name);
+      printf("TriggerHelper debug\nname: %s\n", name.c_str());
       printf("names size: %lu\n", trigger_names.size());
       for (size_t i = 0, ie= trigger_names.size(); i < ie; ++i)
 	printf("name %lu: %s\n", i, trigger_names.triggerName(i).c_str());
-      printf("ndx: %u => name %s found? %i\n", ndx, name, found);
+      printf("ndx: %u => name %s found? %i\n", ndx, name.c_str(), found);
       if (found)
 	printf("trigger fired? %i\n", trigger_results.accept(ndx));
       printf("done.\n");
@@ -26,7 +26,7 @@ struct TriggerHelper {
     return found ? trigger_results.accept(ndx) : false;
   }
 
-  bool pass(const char* name) const {
+  bool pass(const std::string& name) const {
     bool found = false;
     bool result = pass(name, found);
     if (!found)
