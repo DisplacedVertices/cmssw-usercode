@@ -173,15 +173,18 @@ for sample in (mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jta
 # Other exceptions due to jobs being missed, mixing dataset versions
 # (that don't affect actual physics), etc.
 
-warning = ['other datasets v2, these datasets v3:']
-for sample in (qcd170, qcd600, dyjetstollM10, dyjetstollM50, tW, t_s, t_t, tbar_s, tbar_t, wjetstolnu):
+warning = []
+for sample in (qcd170, qcd600, dyjetstollM10, dyjetstollM50, tW, t_s, t_t, tbar_s, tbar_t, wjetstolnu, ttbar, ttbarmbd, ww, wz, zz):
     warning.append(sample.name)
     sample.ana_version = 'v3'
     sample.ana_hash = '5e1021f6ad80ccbe13b7c6abc1eb101a'
-big_warn('\n'.join(warning))
+big_warn('other datasets v2, these datasets v3:\n' + ', '.join(warning))
+
+for sample in (ttbarmbd, ww, wz, zz):
+    sample.ana_hash = 'e652915bbe1a42db11af87351dcd4bba'
 
 temp_neventses = []
-temp_neventses = [(qcd15, 10918100), (qcd50, 5306688), (qcd120, 5235732)]
+temp_neventses = [(qcd15, 10918100), (qcd50, 5306688), (qcd120, 5235732), (ttbarmbd, 6917788), (ww, 2391447), (wz, 9896622)]
 if temp_neventses:
     warning = ['partial datasets published:']
     for sample, temp_nevents in temp_neventses:
@@ -194,7 +197,7 @@ if temp_neventses:
             sample.nevents = temp_nevents
     big_warn('\n'.join(warning))
 
-not_ready = (ttgjets, ttwjets, ttzjets, ttbarmbd, smsT2ttFineBin, inclmu15, ww, wz, zz)
+not_ready = (ttgjets, ttwjets, ttzjets, smsT2ttFineBin, inclmu15, zz)
 big_warn('samples not ana_ready: %s' % ' '.join(s.name for s in not_ready))
 for sample in not_ready:
     sample.ana_ready = False
