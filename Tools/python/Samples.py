@@ -4,7 +4,8 @@ import os
 from JMTucker.Tools.DBS import files_in_dataset
 from JMTucker.Tools.general import big_warn
 
-class MCSample(object):
+class Sample(object):
+    IS_MC = True
     IS_FASTSIM = False
     IS_PYTHIA8 = False
     SCHEDULER_NAME = 'glite'
@@ -14,17 +15,13 @@ class MCSample(object):
     ANA_HASH = 'bd9748f60791b31d15ca5bb480d0e762'
     PUBLISH_USER = 'tucker'
     ANA_VERSION = 'v2'
-    
-    def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1):
+
+    def __init__(self, name, nice_name, dataset):
         self.name = name
         self.nice_name = nice_name
         self.dataset = dataset
-        self.nevents = nevents
-        self.color = color
-        self.syst_frac = float(syst_frac)
-        self.cross_section = float(cross_section)
-        self.k_factor = float(k_factor)
 
+        self.is_mc = self.IS_MC
         self.is_fastsim = self.IS_FASTSIM
         self.is_pythia8 = self.IS_PYTHIA8
         self.hlt_process_name = self.HLT_PROCESS_NAME
@@ -36,10 +33,6 @@ class MCSample(object):
         self.publish_user = self.PUBLISH_USER
         self.ana_version = self.ANA_VERSION
         self.ana_ready = True
-
-    @property
-    def partial_weight(self):
-        return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
 
     @property
     def scheduler(self):
@@ -90,9 +83,57 @@ class MCSample(object):
             if redump_existing or not os.path.isfile(os.path.join(dst, os.path.basename(fn))):
                 os.system('dccp ~%s %s/' % (fn,dst))
 
-class TupleOnlyMCSample(MCSample):
-    def __init__(self, name, dataset, scheduler='condor', hlt_process_name='HLT'):
-        super(TupleOnlyMCSample, self).__init__(name, 'dummy', dataset, 1, 1, 1, 1, scheduler=scheduler, hlt_process_name=hlt_process_name)
+    @property
+    def job_control(self):
+        raise NotImplementedError('job_control needs to be implemented')
+    
+class MCSample(Sample):
+    def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1):
+        super(MCSample, self).__init__(name, nice_name, dataset)
+        
+        self.nevents = nevents
+        self.color = color
+        self.syst_frac = float(syst_frac)
+        self.cross_section = float(cross_section)
+        self.k_factor = float(k_factor)
+
+    @property
+    def partial_weight(self):
+        return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
+
+    @property
+    def job_control(self):
+        return '''
+total_number_of_events = -1
+events_per_job = 50000
+'''
+
+class DataSample(Sample):
+    IS_MC = False
+    JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-203002_8TeV_PromptReco_Collisions12_JSON_v2.txt'
+
+    def __init__(self, name, dataset, run_range=None):
+        super(DataSample, self).__init__(name, name, dataset)
+
+        self.run_range = run_range
+        self.json = self.JSON
+
+    @property
+    def lumi_mask(self):
+        # JMTBAD run_range checking
+        if type(self.json) == str:
+            return 'lumi_mask = %s' % self.json
+        elif self.json is None:
+            return ''
+        else: # implement LumiList object -> tmp.json
+            raise NotImplementedError('need to do something more complicated when combining lumimasks')
+
+    @property
+    def job_control(self):
+        return '''
+total_number_of_lumis = -1
+lumis_per_job = 250
+''' + self.lumi_mask
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV or PREP for xsecs
 background_samples = [
@@ -149,7 +190,15 @@ mfv_signal_samples = [
     MCSample('mfvN3jtau9p9mm',  'MFV N, #tau = 9.9 mm',              '/mfvneutralino_genfsimreco_tau9p9mm/tucker-mfvneutralino_genfsimreco_tau9p9mm-891f0c49f79ad2222cb205736c37de4f/USER', 24000, -1, 0.2, 9e99),
     ]
 
-_samples = background_samples + stop_signal_samples + mfv_signal_samples
+data_samples = [
+    DataSample('MultiJetPrompt12A',    '/MultiJet/Run2012A-PromptReco-v1/AOD'),
+    DataSample('MultiJetPrompt12B',    '/MultiJet/Run2012B-PromptReco-v1/AOD'),
+    DataSample('MuHadPrompt12A',       '/MuHad/Run2012A-PromptReco-v1/AOD'),
+    DataSample('MuHadPrompt12B',       '/MuHad/Run2012B-PromptReco-v1/AOD'),
+]    
+
+_mc_samples = background_samples + stop_signal_samples + mfv_signal_samples 
+_samples = _mc_samples + data_samples
 
 for sample in _samples:
     exec '%s = sample' % sample.name
