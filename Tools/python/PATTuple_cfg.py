@@ -1,87 +1,103 @@
-# inspired by TopQuarkAnalysis/Configuration (test/patRefSel_allJets_cfg.py) V07-00-01
+import sys, FWCore.ParameterSet.Config as cms
 
-import sys, os, FWCore.ParameterSet.Config as cms
-
-#inputFiles = ['/store/mc/Summer12/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/AODSIM/PU_S7_START52_V9-v1/0000/FEF1895C-15A4-E111-9EC5-003048D3CDE0.root']
-inputFiles = ['/store/mc/Summer12/TTJets_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V9-v1/0000/FEDDBC6A-9290-E111-B7FD-0018F3D09628.root']
-#inputFiles = ['/store/user/tucker/mfvneutralino_genfsimreco_tau100um/mfvneutralino_genfsimreco_tau100um//465709e5340ac2cc11e2751b48bbef3e/fastsim_9_1_7gz.root']
-outputFile = 'pat.root'
-fwkReportEvery = 100000
-wantSummary = True
-maxEvents = 200
-runOnMC = 'data' not in sys.argv # JMTBAD improve
-globalTag = 'START52_V9C::All' if runOnMC else 'GR_R_52_V7D::All' # incl. Summer12 JEC and new b-tag SF
-
-# Cuts for muons and electrons: including relative isolation with
-# delta beta corrections. First set (no "signal") is for loose cuts
-# for vetos, and "semilep"/"dilep" are the reference cuts for those
-# channels from TWikiTopRefEventSel. In the PAT tuple, we actually
-# only write out the loosest collection of muons/electrons; re-do cuts
-# in ntupler (including impact parameter cuts that aren't included here).
-from selection import muonIso, muonCut, semilepMuonCut, dilepMuonCut, electronIso, electronCut, semilepElectronCut, dilepElectronCut
-
-# PF2PAT
-postfix = 'PF'
-pfVertices = 'goodOfflinePrimaryVertices'
-pfD0Cut = 0.2
-pfDzCut = 0.5
-pfMuonSelectionCut = 'pt > 5.'
-#pfMuonSelectionCut += ' && ' + muonCut # disabled by default, but can use minimal (veto) muon selection cut on top of pfMuonSelectionCut
-pfMuonIsoConeR03 = False
-pfMuonCombIsoCut = 0.2
-pfElectronSelectionCut = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
-#pfElectronSelectionCut += ' && ' + electronCut # disabled by default, but can use minimal (veto) electron selection cut on top of pfElectronSelectionCut
-pfElectronIsoConeR03 = True
-pfElectronCombIsoCut = 0.2
-# subtract charged hadronic pile-up particles (from wrong PVs); effects also JECs
-usePFnoPU       = True # before any top projection
-usePfIsoLessCHS = True # switch to new PF isolation with L1Fastjet CHS
-# PF top projections
-useNoMuon     = True # before electron top projection
-useNoElectron = True # before jet top projection
-useNoJet      = True # before tau top projection
-useNoTau      = True # before MET top projection
-
-# MET/jets
-typeIMetCorrections = True
-jetAlgo = 'AK5'
-jecSet = 'AK5PF'
-if usePFnoPU:
-    jecSet += 'chs'
-jetCut = 'pt > 20. && abs(eta) < 2.5' \
-         ' && numberOfDaughters > 1' \
-         ' && neutralHadronEnergyFraction < 0.99' \
-         ' && neutralEmEnergyFraction < 0.99' \
-         ' && (abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.99 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))'
-jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-#jecLevels.pop(0); jecLevels.insert(0, 'L1Offset')
-if not runOnMC:
-    jecLevels.append('L2L3Residual')
-#jecLevels += ['useL5Flavor', 'useL7Parton']
+version = 'v4'
+runOnMC = True # Submit script expects this line to be unmodified...
 
 ################################################################################
 
 process = cms.Process('PAT')
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxEvents))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(*inputFiles))
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(wantSummary))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V9-v2/0000/E4964FC2-A9B8-E111-A9D0-003048FFCBFC.root'))
+process.source.fileNames = ['/store/mc/Summer12/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/AODSIM/PU_S7_START52_V9-v1/0000/FEF1895C-15A4-E111-9EC5-003048D3CDE0.root']
+#process.source.fileNames = ['/store/user/tucker/mfvneutralino_genfsimreco_tau100um/mfvneutralino_genfsimreco_tau100um//465709e5340ac2cc11e2751b48bbef3e/fastsim_9_1_7gz.root']
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = fwkReportEvery
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.categories.append('PATSummaryTables')
 process.MessageLogger.cerr.PATSummaryTables = cms.untracked.PSet(limit = cms.untracked.int32(-1))
 process.load('Configuration.StandardSequences.Geometry_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = globalTag
+process.GlobalTag.globaltag = 'START52_V9C::All' if runOnMC else 'GR_R_52_V7D::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
-                               fileName = cms.untracked.string(outputFile),
+                               fileName = cms.untracked.string('pat.root'),
                                SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p')),
                                outputCommands = cms.untracked.vstring(*patEventContent),
                                )
 process.outp = cms.EndPath(process.out)
+
+
+# Cuts for muons and electrons, including relative isolation with
+# delta beta corrections. First set (no "signal" or "semilep"/"dilep")
+# is for loose cuts (e.g. for vetos), and "semilep"/"dilep" are the
+# reference cuts for those channels from TWikiTopRefEventSel.
+# Can/should re-do cuts in ntupler starting from loose selection,
+# including impact parameter cuts that aren't included here. We store
+# these strings in a process-level PSet so they can be easily gotten
+# later from provenance (should also be able to get them from the
+# modules' PSets).
+
+muonIso = '(chargedHadronIso + neutralHadronIso + photonIso - 0.5*puChargedHadronIso)/pt'
+electronIso = '(chargedHadronIso + max(0.,neutralHadronIso) + photonIso - 0.5*puChargedHadronIso)/et'
+
+process.jtupleParams = cms.PSet(
+    jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
+                        'numberOfDaughters > 1 && ' \
+                        'neutralHadronEnergyFraction < 0.99 && ' \
+                        'neutralEmEnergyFraction < 0.99 && ' \
+                        '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.99 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))'
+                        ),
+
+    muonCut = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && ' \
+                         'pt > 10. && abs(eta) < 2.5 && ' \
+                         '%s < 0.2' % muonIso
+                         ),
+
+    semilepMuonCut = cms.string('isPFMuon && isGlobalMuon && ' \
+                                'pt > 26. && abs(eta) < 2.1 && ' \
+                                'globalTrack.normalizedChi2 < 10. && ' \
+                                'track.hitPattern.trackerLayersWithMeasurement > 5 && ' \
+                                'globalTrack.hitPattern.numberOfValidMuonHits > 0 && ' \
+                                'innerTrack.hitPattern.numberOfValidPixelHits > 0 && ' \
+                                'numberOfMatchedStations > 1 && ' \
+                                '%s < 0.12' % muonIso
+                                ),
+
+    dilepMuonCut = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && ' \
+                              'pt > 20. && abs(eta) < 2.4 && ' \
+                              '%s < 0.2' % muonIso
+                              ),
+    
+    electronCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
+                             'electronID("mvaTrigV0") > 0. && ' \
+                             '%s < 0.2' % electronIso
+                             ),
+    
+    semilepElectronCut = cms.string('pt > 30. && abs(eta) < 2.5 && ' \
+                                    'abs(superCluster.eta) < 1.4442 && abs(superCluster.eta) > 1.5660 && ' \
+                                    'passConversionVeto && ' \
+                                    '%s < 0.1' % electronIso
+                                    ),
+    
+    dilepElectronCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
+                                  'passConversionVeto && ' \
+                                  '%s < 0.15' % electronIso
+                                  ),
+    
+    eventFilters = cms.vstring('hltPhysicsDeclared',
+                               'FilterOutScraping',
+                               'goodOfflinePrimaryVertices',
+                               'HBHENoiseFilter',
+                               'CSCTightHaloFilter',
+                               'hcalLaserEventFilter',
+                               'EcalDeadCellTriggerPrimitiveFilter',
+                               'trackingFailureFilter',
+                               'eeBadScFilter'),
+    )
+
 
 # Event cleaning, with MET cleaning recommendations from
 # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFilters
@@ -99,7 +115,7 @@ process.hcalLaserEventFilter.vetoByHBHEOccupancy  = True
 process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
 process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag('ecalTPSkimNA')
 process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
-process.trackingFailureFilter.VertexSource = cms.InputTag(pfVertices)
+process.trackingFailureFilter.VertexSource = cms.InputTag('goodOfflinePrimaryVertices')
 process.load('RecoMET.METFilters.eeBadScFilter_cfi')
 
 # Instead of filtering out events at tupling time, schedule separate
@@ -109,8 +125,7 @@ process.load('RecoMET.METFilters.eeBadScFilter_cfi')
 # separately in the TriggerResults object; the "All" path that is the
 # product of all of the filters isn't necessary but it's nice for
 # convenience.
-from selection import event_filters
-filters = [(name, getattr(process, name)) for name in event_filters]
+filters = [(name, getattr(process, name)) for name in process.jtupleParams.eventFilters.value()]
 process.eventCleaningAll = cms.Path()
 for filter, filter_obj in filters:
     setattr(process, 'eventCleaning' + filter, cms.Path(filter_obj))
@@ -118,7 +133,9 @@ for filter, filter_obj in filters:
 
 ################################################################################
 
-# PAT/PF2PAT
+# PAT/PF2PAT configuration inspired by TopQuarkAnalysis/Configuration
+# (test/patRefSel_allJets_cfg.py and included modules) with tag
+# V07-00-01.
 
 # First, turn off stdout so that the spam from PAT/PF2PAT doesn't
 # flood the screen (especially useful in batch job submission).
@@ -129,18 +146,13 @@ if suppress_stdout:
     old_stdout = sys.stdout
     sys.stdout = buf = StringIO()
 
-process.load('PhysicsTools.PatAlgos.patSequences_cff')
-from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
-usePF2PAT(process,
-          runPF2PAT = True,
-          runOnMC = runOnMC,
-          jetAlgo = jetAlgo,
-          postfix = postfix,
-          jetCorrections = (jecSet, jecLevels),
-          typeIMetCorrections = typeIMetCorrections,
-          pvCollection = cms.InputTag(pfVertices),
-          )
+jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
+#jecLevels.pop(0); jecLevels.insert(0, 'L1Offset')
+if not runOnMC:
+    jecLevels.append('L2L3Residual')
+#jecLevels += ['L5Flavor', 'L7Parton']
 
+postfix = 'PF'
 def processpostfix(name):
     return getattr(process, name + postfix)
 def setprocesspostfix(name, obj):
@@ -148,21 +160,35 @@ def setprocesspostfix(name, obj):
 def InputTagPostFix(name):
     return cms.InputTag(name + postfix)
 
-processpostfix('pfNoPileUp')  .enable = usePFnoPU
-processpostfix('pfNoMuon')    .enable = useNoMuon
-processpostfix('pfNoElectron').enable = useNoElectron
-processpostfix('pfNoJet')     .enable = useNoJet
-processpostfix('pfNoTau')     .enable = useNoTau
+process.load('PhysicsTools.PatAlgos.patSequences_cff')
+from PhysicsTools.PatAlgos.tools.pfTools import usePF2PAT
+usePF2PAT(process,
+          runPF2PAT = True,
+          runOnMC = runOnMC,
+          jetAlgo = 'AK5',
+          postfix = postfix,
+          jetCorrections = ('AK5PFchs', jecLevels), # 'chs': using PFnoPU
+          typeIMetCorrections = True,
+          pvCollection = cms.InputTag('goodOfflinePrimaryVertices'),
+          )
+
+processpostfix('pfNoPileUp')  .enable = True  # usePFnoPU
+processpostfix('pfNoMuon')    .enable = True  # useNoMuon
+processpostfix('pfNoElectron').enable = True  # useNoElectron
+processpostfix('pfNoJet')     .enable = True  # useNoJet
+processpostfix('pfNoTau')     .enable = True  # useNoTau
 
 if 'L1FastJet' in jecLevels:
-    processpostfix('pfPileUpIso').checkClosestZVertex = usePfIsoLessCHS
+    processpostfix('pfPileUpIso').checkClosestZVertex = True # usePfIsoLessCHS: switch to new PF isolation with L1Fastjet CHS
 
-processpostfix('pfMuonsFromVertex').d0Cut = pfD0Cut
-processpostfix('pfMuonsFromVertex').dzCut = pfDzCut
-processpostfix('pfSelectedMuons').cut = pfMuonSelectionCut
-processpostfix('pfIsolatedMuons').isolationCut = pfMuonCombIsoCut
+processpostfix('pfMuonsFromVertex').d0Cut = processpostfix('pfElectronsFromVertex').d0Cut = 0.2
+processpostfix('pfMuonsFromVertex').dzCut = processpostfix('pfElectronsFromVertex').dzCut = 0.5
 
-if pfMuonIsoConeR03:
+processpostfix('pfSelectedMuons').cut = 'pt > 5.'
+#processpostfix('pfSelectedMuons').cut += process.jtupleParams.muonCut
+processpostfix('pfIsolatedMuons').isolationCut = 0.2
+
+if False: # pfMuonIsoConeR03
     processpostfix('pfIsolatedMuons').isolationValueMapsCharged  = cms.VInputTag(InputTagPostFix('muPFIsoValueCharged03'))
     processpostfix('pfIsolatedMuons').deltaBetaIsolationValueMap = InputTagPostFix('muPFIsoValuePU03')
     processpostfix('pfIsolatedMuons').isolationValueMapsNeutral  = cms.VInputTag(InputTagPostFix('muPFIsoValueNeutral03'), InputTagPostFix('muPFIsoValueGamma03'))
@@ -175,12 +201,11 @@ if pfMuonIsoConeR03:
     processpostfix('patMuons').isolationValues.pfPhotons          = InputTagPostFix('muPFIsoValueGamma03')
     processpostfix('patMuons').isolationValues.pfChargedHadrons   = InputTagPostFix('muPFIsoValueCharged03')
 
-processpostfix('pfElectronsFromVertex').d0Cut = pfD0Cut
-processpostfix('pfElectronsFromVertex').dzCut = pfDzCut
-processpostfix('pfSelectedElectrons').cut = pfElectronSelectionCut
-processpostfix('pfIsolatedElectrons').isolationCut = pfElectronCombIsoCut
+processpostfix('pfSelectedElectrons').cut = 'pt > 5. && gsfTrackRef.isNonnull && gsfTrackRef.trackerExpectedHitsInner.numberOfLostHits < 2'
+#processpostfix('pfSelectedElectrons').cut += ' && ' + process.jtupleParams.electronCut # disabled by default, but can use minimal (veto) electron selection cut on top of pfElectronSelectionCut
+processpostfix('pfIsolatedElectrons').isolationCut = 0.2
 
-if pfElectronIsoConeR03:
+if True: # pfElectronIsoConeR03
     processpostfix('pfIsolatedElectrons').isolationValueMapsCharged  = cms.VInputTag(InputTagPostFix('elPFIsoValueCharged03PFId'))
     processpostfix('pfIsolatedElectrons').deltaBetaIsolationValueMap = InputTagPostFix('elPFIsoValuePU03PFId')
     processpostfix('pfIsolatedElectrons').isolationValueMapsNeutral  = cms.VInputTag(InputTagPostFix('elPFIsoValueNeutral03PFId'), InputTagPostFix('elPFIsoValueGamma03PFId'))
@@ -198,9 +223,9 @@ process.eidMVASequence = cms.Sequence(process.mvaTrigV0 + process.mvaNonTrigV0)
 processpostfix('patElectrons').electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 processpostfix('patElectrons').electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
 processpostfix('patMuons').embedTrack = True
-processpostfix('selectedPatElectrons').cut = electronCut
-processpostfix('selectedPatMuons').cut = muonCut
-processpostfix('selectedPatJets').cut = jetCut
+processpostfix('selectedPatElectrons').cut = process.jtupleParams.electronCut
+processpostfix('selectedPatMuons').cut = process.jtupleParams.muonCut
+processpostfix('selectedPatJets').cut = process.jtupleParams.jetCut
 processpostfix('patJets').addTagInfos = True
 
 from PhysicsTools.PatAlgos.tools.coreTools import runOnData, removeSpecificPATObjects
@@ -236,11 +261,11 @@ for cut in (1., 1.5, 2., 2.5, 3.):
   
     processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * reduce(lambda x,y: x*y, disc_objs) * processpostfix('patJets'))
 
-setprocesspostfix('semilepMuons',     cms.EDFilter('PATMuonSelector',     src = InputTagPostFix('selectedPatMuons'),     cut = cms.string(semilepMuonCut)))
-setprocesspostfix('dilepMuons',       cms.EDFilter('PATMuonSelector',     src = InputTagPostFix('selectedPatMuons'),     cut = cms.string(dilepMuonCut)))
-setprocesspostfix('semilepElectrons', cms.EDFilter('PATElectronSelector', src = InputTagPostFix('selectedPatElectrons'), cut = cms.string(semilepElectronCut)))
-setprocesspostfix('dilepElectrons',   cms.EDFilter('PATElectronSelector', src = InputTagPostFix('selectedPatElectrons'), cut = cms.string(dilepElectronCut)))
-                                      
+setprocesspostfix('semilepMuons',     cms.EDFilter('PATMuonSelector',     src = InputTagPostFix('selectedPatMuons'),     cut = process.jtupleParams.semilepMuonCut))
+setprocesspostfix('dilepMuons',       cms.EDFilter('PATMuonSelector',     src = InputTagPostFix('selectedPatMuons'),     cut = process.jtupleParams.dilepMuonCut))
+setprocesspostfix('semilepElectrons', cms.EDFilter('PATElectronSelector', src = InputTagPostFix('selectedPatElectrons'), cut = process.jtupleParams.semilepElectronCut))
+setprocesspostfix('dilepElectrons',   cms.EDFilter('PATElectronSelector', src = InputTagPostFix('selectedPatElectrons'), cut = process.jtupleParams.dilepElectronCut))
+
 setprocesspostfix('countPatLeptonsSemileptonic', processpostfix('countPatLeptons').clone(minNumber = 1, muonSource = InputTagPostFix('semilepMuons'), electronSource = InputTagPostFix('semilepElectrons')))
 setprocesspostfix('countPatLeptonsDileptonic',   processpostfix('countPatLeptons').clone(minNumber = 2, muonSource = InputTagPostFix('dilepMuons'),   electronSource = InputTagPostFix('dilepElectrons')))
 
@@ -253,9 +278,9 @@ setprocesspostfix('countPatJetsSemileptonic', processpostfix('countPatJets').clo
 setprocesspostfix('countPatJetsDileptonic',   processpostfix('countPatJets').clone(minNumber = 1))
 
 channels = ('Hadronic', 'Semileptonic', 'Dileptonic')
+obj = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
 for channel in channels:
-    obj = cms.Path(cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence'))
-    setattr(process, 'p' + channel, obj)
+    setattr(process, 'p' + channel, cms.Path(obj))
 
 process.pHadronic     *= processpostfix('countPatJetsHadronic')
 process.pSemileptonic *= processpostfix('countPatJetsSemileptonic') + processpostfix('semilepMuons') + processpostfix('semilepElectrons') + processpostfix('countPatLeptonsSemileptonic')
@@ -266,8 +291,8 @@ process.out.outputCommands = [
     'drop *',
     'keep *_selectedPatElectrons*_*_*',
     'keep *_selectedPatMuons*_*_*',
-    #'keep *_semilep*_*_*',
-    #'keep *_dilep*_*_*',
+    'keep *_semilep*_*_*',
+    'keep *_dilep*_*_*',
     'keep *_selectedPatJets*_*_*',
     'keep *_selectedPatJets*_genJets_*',
     'drop *_selectedPatJets*_pfCandidates_*',
@@ -330,68 +355,5 @@ def keep_general_tracks():
 #input_is_fastsim()
 #input_is_pythia8()
 #keep_general_tracks()
-
-if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    crab_cfg = '''
-[CRAB]
-jobtype = cmssw
-scheduler = %(scheduler)s
-%(use_server)s
-
-[CMSSW]
-%(dbs_url)s
-datasetpath = %(dataset)s
-pset = tuple_crab.py
-get_edm_output = 1
-%(job_control)s
-
-[USER]
-ui_working_dir = CCDIRECTORY/crab_sstoptuple_CCVERSION_%(name)s
-copy_data = 1
-storage_element = T3_US_FNALLPC
-check_user_remote_dir = 0
-publish_data = 1
-publish_data_name = sstoptuple_v4_%(name)s
-dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
-'''
-
-    version = 'v4'
-    directory = 'crab/tuple/' + version
-    crab_cfg = crab_cfg.replace('CCDIRECTORY', directory)
-    crab_cfg = crab_cfg.replace('CCVERSION',   version)
-
-    just_testing = 'testing' in sys.argv or True
-
-    def submit(sample):
-        new_py = open('tuple.py').read()
-        if sample.is_mc:
-            if sample.is_fastsim:
-                new_py += '\ninput_is_fastsim()\n'
-            if sample.is_pythia8:
-                new_py += '\ninput_is_pythia8()\n'
-            if 'mfv' in sample.name:
-                new_py += '\nkeep_general_tracks()\n'
-        else:
-            new_py += '\nrun_on_data()\n'
-
-        open('tuple_crab.py', 'wt').write(new_py)
-        open('crab.cfg', 'wt').write(crab_cfg % sample)
-        if not just_testing:
-            os.system('mkdir -p %s' % directory)
-            os.system('crab -create -submit')
-            os.system('cp tuple_crab.py crab/')
-            os.system('rm crab.cfg tuple_crab.py tuple_crab.pyc')
-        else:
-            print '.py diff:\n---------'
-            os.system('diff -uN tuple.py tuple_crab.py')
-            raw_input('ok?')
-            print '\ncrab.cfg:\n---------'
-            os.system('cat crab.cfg')
-            raw_input('ok?')
-            print
-    
-    from JMTucker.Tools.Samples import background_samples, stop_signal_samples, mfv_signal_samples, data_samples
-    for sample in mfv_signal_samples + stop_signal_samples + background_samples: # + data_samples:
-        submit(sample)
 
 #open('dumptup.py','wt').write(process.dumpPython())
