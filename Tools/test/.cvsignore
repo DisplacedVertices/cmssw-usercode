@@ -1,1 +1,3 @@
 infiles.txt
+*.root
+out.*.gz
