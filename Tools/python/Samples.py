@@ -105,7 +105,7 @@ class MCSample(Sample):
     def job_control(self):
         return '''
 total_number_of_events = -1
-events_per_job = 50000
+events_per_job = 75000
 '''
 
 class DataSample(Sample):
@@ -183,11 +183,11 @@ stop_signal_samples = [
     ]
 
 mfv_signal_samples = [
-    MCSample('mfvN3jtau0',      'MFV N, #tau = 0',                   '/mfvneutralino_genfsimreco_tau0/tucker-mfvneutralino_genfsimreco_tau0-aa8b56a9a9cba6aa847bda9acf329ad0/USER',         24500, -1, 0.2, 9e99),
-    MCSample('mfvN3jtau100um',  'MFV N, #tau = 100 #mum',            '/mfvneutralino_genfsimreco_tau100um/tucker-mfvneutralino_genfsimreco_tau100um-465709e5340ac2cc11e2751b48bbef3e/USER', 24000, -1, 0.2, 9e99),
-    MCSample('mfvN3jtau10um',   'MFV N, #tau = 10 #mum',             '/mfvneutralino_genfsimreco_tau10um/tucker-mfvneutralino_genfsimreco_tau10um-719b1b049e9de8135afa1f308d0994e6/USER',   24500, -1, 0.2, 9e99),
-    MCSample('mfvN3jtau1mm',    'MFV N, #tau = 1 mm',                '/mfvneutralino_genfsimreco_tau1mm/tucker-mfvneutralino_genfsimreco_tau1mm-f0b5b0c98c357fc0015e0194f7aef803/USER',     24500, -1, 0.2, 9e99),
-    MCSample('mfvN3jtau9p9mm',  'MFV N, #tau = 9.9 mm',              '/mfvneutralino_genfsimreco_tau9p9mm/tucker-mfvneutralino_genfsimreco_tau9p9mm-891f0c49f79ad2222cb205736c37de4f/USER', 24000, -1, 0.2, 9e99),
+    MCSample('mfvN3jtau0',      '1 pb signal, #tau = 0',                   '/mfvneutralino_genfsimreco_tau0/tucker-mfvneutralino_genfsimreco_tau0-aa8b56a9a9cba6aa847bda9acf329ad0/USER',         24500, -1, 0.2, 1),
+    MCSample('mfvN3jtau100um',  '1 pb signal, #tau = 100 #mum',            '/mfvneutralino_genfsimreco_tau100um/tucker-mfvneutralino_genfsimreco_tau100um-465709e5340ac2cc11e2751b48bbef3e/USER', 24000, -1, 0.2, 1),
+    MCSample('mfvN3jtau10um',   '1 pb signal, #tau = 10 #mum',             '/mfvneutralino_genfsimreco_tau10um/tucker-mfvneutralino_genfsimreco_tau10um-719b1b049e9de8135afa1f308d0994e6/USER',   24500, -1, 0.2, 1),
+    MCSample('mfvN3jtau1mm',    '1 pb signal, #tau = 1 mm',                '/mfvneutralino_genfsimreco_tau1mm/tucker-mfvneutralino_genfsimreco_tau1mm-f0b5b0c98c357fc0015e0194f7aef803/USER',     24500, -1, 0.2, 1),
+    MCSample('mfvN3jtau9p9mm',  '1 pb signal, #tau = 9.9 mm',              '/mfvneutralino_genfsimreco_tau9p9mm/tucker-mfvneutralino_genfsimreco_tau9p9mm-891f0c49f79ad2222cb205736c37de4f/USER', 24000, -1, 0.2, 1),
     ]
 
 data_samples = [
