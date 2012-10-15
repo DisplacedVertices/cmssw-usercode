@@ -11,7 +11,7 @@ scheduler = %(scheduler)s
 [CMSSW]
 %(dbs_url)s
 datasetpath = %(dataset)s
-pset = tuple_crab.py
+pset = psets/jtuple_CCVERSION_%(name)s.py
 get_edm_output = 1
 %(job_control)s
 
@@ -32,6 +32,8 @@ crab_cfg = crab_cfg.replace('CCVERSION',   version)
 just_testing = 'testing' in sys.argv
 
 def submit(sample):
+    os.system('mkdir -p crab/psets')
+    os.system('ln -sf crab/psets')
     new_py = open(os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/python/PATTuple_cfg.py')).read()
     to_add = []
 
@@ -49,7 +51,7 @@ def submit(sample):
         new_py = new_py.replace(magic, 'runOnMC = False')
 
     new_py += '\n' + '\n'.join(to_add)
-    open('tuple_crab.py', 'wt').write(new_py)
+    open('psets/jtuple_%s_%s.py' % (version, sample.name), 'wt').write(new_py)
     open('crab.cfg', 'wt').write(crab_cfg % sample)
 
     if not just_testing:
