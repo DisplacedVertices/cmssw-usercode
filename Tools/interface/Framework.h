@@ -18,4 +18,14 @@ void dump_ref(std::ostream& out, const edm::Ref<T>& ref, const edm::Event* event
   out << " with index " << ref.index() << "\n";
 }
 
+template <typename T>
+T getProcessModuleParameter(const edm::Event& event, const std::string& process, const std::string& module, const std::string& parameter) {
+  edm::ParameterSet process_ps;
+  bool ok = event.getProcessParameterSet(process, process_ps);
+  if (!ok)
+    throw cms::Exception("getProcessModuleParameter") << "could not get ParameterSet from event provenance for process name '" << process << "'";
+  const edm::ParameterSet& module_ps = process_ps.getParameterSet(module); // may throw if module not found, consider catching exception and rethrowing with "better" reason
+  return module_ps.getParameter<T>(parameter);
+}
+  
 #endif
