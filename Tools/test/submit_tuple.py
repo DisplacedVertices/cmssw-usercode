@@ -25,7 +25,8 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
 '''
 
 from JMTucker.Tools.PATTuple_cfg import version
-directory = 'crab/tuple/CCVERSION/crab_jtuple_CCVERSION_%(name)s'
+base_directory = os.path.join('crab/tuple', version)
+directory = os.path.join(base_directory, 'crab_jtuple_CCVERSION_%(name)s')
 crab_cfg = crab_cfg.replace('CCDIRECTORY', directory)
 crab_cfg = crab_cfg.replace('CCVERSION',   version)
 
@@ -59,7 +60,7 @@ def submit(sample):
     open('crab.cfg', 'wt').write(crab_cfg % sample)
 
     if not just_testing:
-        os.system('mkdir -p %s' % directory)
+        os.system('mkdir -p %s' % base_directory)
         os.system('crab -create -submit')
         os.system('rm crab.cfg')
     else:
