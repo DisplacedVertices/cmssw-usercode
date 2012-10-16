@@ -2,3 +2,4 @@ infiles.txt
 *.root
 out.*.gz
 *dbslog
+crab.cfg
