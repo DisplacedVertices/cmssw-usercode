@@ -14,3 +14,16 @@ def files_in_dataset(dataset, ana01=False, ana02=False):
     if not ret:
         raise RuntimeError('no files for %s (ana01: %s ana02: %s) found. dbs command output:\n' % (dataset, ana01, ana02) + ''.join(cmdout))
     return ret
+
+def numevents_in_dataset(dataset):
+    cmd = 'dbs search --query "find sum(file.numevents) where dataset=%(dataset)s"' % locals()
+    cmdout = os.popen(cmd).readlines()
+    ret = None
+    for line in cmdout:
+        try:
+            ret = int(line)
+        except ValueError:
+            pass
+    if ret is None:
+        raise RuntimeError('not able to get numevents for %s. dbs command output:\n' % (dataset) + ''.join(cmdout))
+    return ret
