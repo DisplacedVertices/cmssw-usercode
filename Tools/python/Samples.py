@@ -141,12 +141,12 @@ background_samples = [
     MCSample('ttzjets',          't#bar{t}+Z',                                              '/TTZJets_8TeV-madgraph_v2/Summer12-PU_S7_START52_V9-v1/AODSIM',                                        209741,  -1, 0.20, 0.172),
     MCSample('ttwjets',          't#bar{t}+W',                                              '/TTWJets_8TeV-madgraph/Summer12-PU_S7_START52_V9-v1/AODSIM',                                           195301,  -1, 0.20, 0.215),
     MCSample('ttgjets',          't#bar{t}+#gamma',                                         '/TTGJets_8TeV-madgraph/Summer12-PU_S7_START52_V9-v1/AODSIM',                                            71598,  -1, 0.20, 1.44),
-    MCSample('singlet_s_t',      'single t (s-channel)',                                    '/T_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                       259961,  -1, 0.20, 3.79),
-    MCSample('singlet_s_tbar',   'single #bar{t} (s-channel)',                              '/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                    139974,  -1, 0.20, 1.76),
-    MCSample('singlet_t_t',      'single t (t-channel)',                                    '/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                        23777,  -1, 0.20, 56.4),
-    MCSample('singlet_t_tbar',   'single #bar{t} (t-channel)',                              '/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                   1935072,  -1, 0.20, 30.7),
-    MCSample('singlet_tW_t',     'single t (tW)',                                           '/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                   497658,  42, 0.20, 11.1),
-    MCSample('singlet_tW_tbar',  'single t (#bar{t}W)',                                     '/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                493460,  42, 0.20, 11.1),
+    MCSample('singletop_s',      'single t (s-channel)',                                    '/T_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                       259961,  -1, 0.20, 3.79),
+    MCSample('singletop_s_tbar', 'single #bar{t} (s-channel)',                              '/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                    139974,  -1, 0.20, 1.76),
+    MCSample('singletop_t',      'single t (t-channel)',                                    '/T_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                        23777,  -1, 0.20, 56.4),
+    MCSample('singletop_t_tbar', 'single #bar{t} (t-channel)',                              '/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                   1935072,  -1, 0.20, 30.7),
+    MCSample('singletop_tW',     'single t (tW)',                                           '/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                   497658,  42, 0.20, 11.1),
+    MCSample('singletop_tW_tbar','single t (#bar{t}W)',                                     '/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                493460,  42, 0.20, 11.1),
     MCSample('wjetstolnu',       'W + jets #rightarrow l#nu',                               '/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12-PU_S7_START52_V9-v1/AODSIM',                   18393090,   9, 0.10, 3.04e4),
     MCSample('ww',               'WW',                                                      '/WW_TuneZ2star_8TeV_pythia6_tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                             10000431,   4, 0.04, 57.1),
     MCSample('wz',               'WZ',                                                      '/WZ_TuneZ2star_8TeV_pythia6_tauola/Summer12-PU_S7_START52_V9-v1/AODSIM',                              9996622,  30, 0.04, 32.3),
@@ -199,10 +199,10 @@ data_samples = [
     DataSample('MuHadPrompt12B',       '/MuHad/Run2012B-PromptReco-v1/AOD'),
 ]    
 
-_mc_samples = background_samples + stop_signal_samples + mfv_signal_samples 
-_samples = _mc_samples + data_samples
+all_mc_samples = background_samples + auxiliary_background_samples + stop_signal_samples + mfv_signal_samples 
+all_samples = all_mc_samples + data_samples
 
-for sample in _samples:
+for sample in all_samples:
     exec '%s = sample' % sample.name
 
 
@@ -225,17 +225,17 @@ for sample in (mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jta
 # (that don't affect actual physics), etc.
 
 warning = []
-for sample in (qcd170, qcd600, dyjetstollM10, dyjetstollM50, tW, t_s, t_t, tbar_s, tbar_t, wjetstolnu, ttbar, ttbarmbd, ww, wz, zz):
+for sample in (qcd0170, qcd0600, dyjetstollM10, dyjetstollM50, singletop_tW, singletop_s, singletop_t, singletop_s_tbar, singletop_t_tbar, wjetstolnu, ttbar, ww, wz, zz):
     warning.append(sample.name)
     sample.ana_version = 'v3'
     sample.ana_hash = '5e1021f6ad80ccbe13b7c6abc1eb101a'
 big_warn('other datasets v2, these datasets v3:\n' + ', '.join(warning))
 
-for sample in (ttbarmbd, ww, wz, zz):
+for sample in (ttbar, ww, wz, zz):
     sample.ana_hash = 'e652915bbe1a42db11af87351dcd4bba'
 
 temp_neventses = []
-temp_neventses = [(qcd15, 10918100), (qcd50, 5306688), (qcd120, 5235732), (ttbarmbd, 6917788), (ww, 2391447), (wz, 9896622)]
+temp_neventses = [(qcd0015, 10918100), (qcd0050, 5306688), (qcd0120, 5235732), (ttbar, 6917788), (ww, 2391447), (wz, 9896622)]
 if temp_neventses:
     warning = ['partial datasets published:']
     for sample, temp_nevents in temp_neventses:
@@ -253,7 +253,8 @@ big_warn('samples not ana_ready: %s' % ' '.join(s.name for s in not_ready))
 for sample in not_ready:
     sample.ana_ready = False
 
-__all__ = ['background_samples', 'stop_signal_samples', 'mfv_signal_samples'] + [s.name for s in _samples]
+__all__ = ['data_samples', 'background_samples', 'auxiliary_background_samples', 'stop_signal_samples', 'mfv_signal_samples']
+__all__ += [s.name for s in all_samples]
 
 if __name__ == '__main__':
     import sys
