@@ -8,8 +8,10 @@ runOnMC = True # Submit script expects this line to be unmodified...
 process = cms.Process('PAT')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V9-v2/0000/E4964FC2-A9B8-E111-A9D0-003048FFCBFC.root'))
-process.source.fileNames = ['/store/mc/Summer12/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/AODSIM/PU_S7_START52_V9-v1/0000/FEF1895C-15A4-E111-9EC5-003048D3CDE0.root']
+#process.source.fileNames = ['/store/mc/Summer12/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/AODSIM/PU_S7_START52_V9-v1/0000/FEF1895C-15A4-E111-9EC5-003048D3CDE0.root']
 #process.source.fileNames = ['/store/user/tucker/mfvneutralino_genfsimreco_tau100um/mfvneutralino_genfsimreco_tau100um//465709e5340ac2cc11e2751b48bbef3e/fastsim_9_1_7gz.root']
+#process.source.fileNames = ['/store/data/Run2012A/MuHad/AOD/PromptReco-v1/000/190/645/9220A9CD-8E82-E111-9938-001D09F24EE3.root']
+#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('190645:10-190645:11')
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
@@ -19,7 +21,7 @@ process.MessageLogger.cerr.PATSummaryTables = cms.untracked.PSet(limit = cms.unt
 process.load('Configuration.StandardSequences.Geometry_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START52_V9C::All' if runOnMC else 'GR_R_52_V7D::All'
+process.GlobalTag.globaltag = 'START52_V9E::All' if runOnMC else 'GR_P_V39_AN2::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
@@ -263,7 +265,7 @@ if suppress_stdout:
     buf.close()
     hsh = hash(pat_output)
     #open('pat_spam.txt', 'wt').write(pat_output)
-    hsh_expected = 4533816878313021228 if runOnMC else 4161958319530755687
+    hsh_expected = 4533816878313021228 if runOnMC else -3882518544097161276
     print 'PAT is done (spam hash %s, expected %s).' % (hsh, hsh_expected)
     if hsh != hsh_expected:
         from JMTucker.Tools.general import big_warn
@@ -289,3 +291,4 @@ def keep_general_tracks():
 #keep_general_tracks()
 
 #open('dumptup.py','wt').write(process.dumpPython())
+
