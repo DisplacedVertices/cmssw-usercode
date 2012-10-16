@@ -34,7 +34,11 @@ just_testing = 'testing' in sys.argv
 def submit(sample):
     os.system('mkdir -p crab/psets')
     os.system('ln -sf crab/psets')
-    new_py = open(os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/python/PATTuple_cfg.py')).read()
+
+    py_fn = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/python/PATTuple_cfg.py')
+    new_py_fn = 'psets/jtuple_%s_%s.py' % (version, sample.name)
+    
+    new_py = open(py_fn).read()
     to_add = []
 
     if sample.is_mc:
@@ -50,24 +54,23 @@ def submit(sample):
             raise ValueError('trying to submit on data, and tuple.py does not contain the magic string "%s"' % magic)
         new_py = new_py.replace(magic, 'runOnMC = False')
 
-    new_py += '\n' + '\n'.join(to_add)
-    open('psets/jtuple_%s_%s.py' % (version, sample.name), 'wt').write(new_py)
+    new_py += '\n' + '\n'.join(to_add) + '\n'
+    open(new_py_fn, 'wt').write(new_py)
     open('crab.cfg', 'wt').write(crab_cfg % sample)
 
     if not just_testing:
         os.system('mkdir -p %s' % directory)
         os.system('crab -create -submit')
-        os.system('cp tuple_crab.py %s' os.path.join()
-        os.system('rm crab.cfg tuple_crab.py tuple_crab.pyc')
+        os.system('rm crab.cfg')
     else:
         print '.py diff:\n---------'
-        os.system('diff -uN tuple.py tuple_crab.py')
+        os.system('diff -uN %s %s' % (py_fn, new_py_fn))
         raw_input('ok?')
         print '\ncrab.cfg:\n---------'
         os.system('cat crab.cfg')
         raw_input('ok?')
         print
 
-from JMTucker.Tools.Samples import background_samples, stop_signal_samples, mfv_signal_samples, data_samples
-for sample in mfv_signal_samples + stop_signal_samples + background_samples + data_samples:
+from JMTucker.Tools.Samples import all_samples
+for sample in all_samples:
     submit(sample)
