@@ -226,6 +226,8 @@ for sample in all_samples:
 
 # Exceptions to the defaults.
 
+singletop_t.scheduler_name = 'condor'
+
 pythiastopm200.dbs_url_num = 2
 pythiastopm200.is_fastsim = True
 pythiastopm200.ana_hash = 'd1c7726c69d89f45da05a992a40b425c'
