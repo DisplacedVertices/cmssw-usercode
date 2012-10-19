@@ -3,13 +3,9 @@
 import gzip, cPickle
 
 def big_warn(s):
-    x = '#' * (len(s) if '\n' not in s else 80)
-    print x
-    print x
+    x = '#' * 80
     print x
     print s
-    print x
-    print x
     print x
 
 def from_pickle(fn, comp=False):
