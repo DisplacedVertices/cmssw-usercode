@@ -21,18 +21,19 @@ process.source = cms.Source("EmptySource")
 process.options = cms.untracked.PSet()
 
 process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
-    eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
-    outputCommands = process.AODSIMEventContent.outputCommands,
-    fileName = cms.untracked.string('fastsim.root'),
-    dataset = cms.untracked.PSet(
-        filterName = cms.untracked.string(''),
-        dataTier = cms.untracked.string('GEN-SIM-DIGI-RECO')
-    ),
-    SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring('generation_step')
-    )
-)
+                                        eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
+                                        outputCommands = process.AODSIMEventContent.outputCommands,
+                                        fileName = cms.untracked.string('fastsim.root'),
+                                        dataset = cms.untracked.PSet(
+                                            filterName = cms.untracked.string(''),
+                                            dataTier = cms.untracked.string('GEN-SIM-DIGI-RECO')
+                                            ),
+                                        SelectEvents = cms.untracked.PSet(
+                                            SelectEvents = cms.vstring('generation_step')
+                                            )
+                                        )
 
+process.genstepfilter.triggerConditions = cms.vstring("generation_step")
 process.famosSimHits.SimulateCalorimetry = True
 process.famosSimHits.SimulateTracking = True
 process.simulation = cms.Sequence(process.simulationWithFamos)
@@ -40,7 +41,8 @@ process.HLTEndSequence = cms.Sequence(process.reconstructionWithFamos)
 process.Realistic8TeVCollisionVtxSmearingParameters.type = cms.string("BetaFunc")
 process.famosSimHits.VertexGenerator = process.Realistic8TeVCollisionVtxSmearingParameters
 process.famosPileUp.VertexGenerator = process.Realistic8TeVCollisionVtxSmearingParameters
-process.GlobalTag.globaltag = 'START52_V9::All'
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:startup_GRun', '')
 
 process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 				 crossSection = cms.untracked.double(1),
@@ -51,17 +53,17 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 				 comEnergy = cms.double(8000.0),
 				 offsetNeutralinoDecayProducts = cms.untracked.bool(True),
 				 PythiaParameters = cms.PSet(
-					 processParameters = cms.vstring(
-						 'Main:timesAllowErrors    = 10000',
-						 'SLHA:file = minSLHA.spc',
-						 'SUSY:gg2gluinogluino  = on',
-						 'SUSY:qqbar2gluinogluino  = on',
-						 'SUSY:idA        = 1000021 ',
-						 'SUSY:idB        = 1000021 ',
-						 'Tune:pp 2',                      
-						 'Tune:ee 3'),
-					 parameterSets = cms.vstring('processParameters')
-					 )
+                                     processParameters = cms.vstring(
+                                         'Main:timesAllowErrors    = 10000',
+                                         'SLHA:file = minSLHA.spc',
+                                         'SUSY:gg2gluinogluino  = on',
+                                         'SUSY:qqbar2gluinogluino  = on',
+                                         'SUSY:idA        = 1000021 ',
+                                         'SUSY:idB        = 1000021 ',
+                                         'Tune:pp 2',                      
+                                         'Tune:ee 3'),
+                                     parameterSets = cms.vstring('processParameters')
+                                     )
 				 )
 
 def set_neutralino_tau0(tau0):
@@ -80,20 +82,22 @@ process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary
 process.schedule.extend(process.HLTSchedule)
 process.schedule.extend([process.reconstruction,process.AODSIMoutput_step])
 
-if 0:
-	process.printList = cms.EDAnalyzer('ParticleListDrawer',
-					   maxEventsToPrint = cms.untracked.int32(100),
-					   src = cms.InputTag('genParticles'),
-					   printOnlyHardInteraction = cms.untracked.bool(False),
-					   useMessageLogger = cms.untracked.bool(False),
-					   printVertex = cms.untracked.bool(True),
-					   )
-	
-	process.ppp = cms.Path(process.printList)
-	process.schedule.extend([process.ppp])
+if 'debug' in sys.argv:
+    process.printList = cms.EDAnalyzer('ParticleListDrawer',
+                                       maxEventsToPrint = cms.untracked.int32(100),
+                                       src = cms.InputTag('genParticles'),
+                                       printOnlyHardInteraction = cms.untracked.bool(False),
+                                       useMessageLogger = cms.untracked.bool(False),
+                                       printVertex = cms.untracked.bool(True),
+                                       )
+    process.ppp = cms.Path(process.printList)
+    process.schedule.extend([process.ppp])
 
 for path in process.paths:
-	getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq 
+    getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq 
+
+from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC 
+customizeHLTforMC(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
