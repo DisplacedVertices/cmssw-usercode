@@ -17,4 +17,5 @@ DECAY   1000021     0.01E+00   # gluino decays
 
 DECAY   1000022     0.01E+00   # neutralino decays
 #           BR         NDA      ID1       ID2       ID3
-     1.0E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
+     0.5E+00          3            3          5           6   # BR(~chi_10 -> s b t)
+     0.5E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
