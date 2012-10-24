@@ -16,7 +16,7 @@ process.load('IOMC.EventVertexGenerators.VtxSmearedParameters_cfi')
 process.load('HLTrigger.Configuration.HLT_GRun_Famos_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(50))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5))
 process.source = cms.Source("EmptySource")
 process.options = cms.untracked.PSet()
 
@@ -85,6 +85,7 @@ process.schedule.extend([process.reconstruction,process.AODSIMoutput_step])
 if 'debug' in sys.argv:
     process.generator.maxEventsToPrint = 1
     process.generator.pythiaPylistVerbosity = 1
+    process.generator.pythiaHepMCVerbosity = True
     process.printList = cms.EDAnalyzer('ParticleListDrawer',
                                        maxEventsToPrint = cms.untracked.int32(100),
                                        src = cms.InputTag('genParticles'),
