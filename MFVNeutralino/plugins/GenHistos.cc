@@ -86,7 +86,7 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 
   int num_ninos = 0;
   const int ndau = 3;
-  const int dau_id_order[ndau] = { -3, -5, -6 };
+  const int dau_id_order[ndau] = { 3, 5, 6 };
 
   BOOST_FOREACH(const reco::GenParticle& gen, *gens) {
     if (!(gen.pdgId() == 1000022 && gen.status() == 52 && gen.numberOfDaughters() == 3))
@@ -105,7 +105,7 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     for (int i = 0; i < ndau; ++i) {
       int id = nino.daughter(i)->pdgId();
       for (int j = 0; j < ndau; ++j) {
-	if (id == dau_id_order[j])
+	if (abs(id) == dau_id_order[j])
 	  daughters[j] = nino.daughter(i);
       }
     }
