@@ -66,11 +66,6 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
                                      )
 				 )
 
-def set_neutralino_tau0(tau0):
-    process.generator.PythiaParameters.processParameters.append('1000022:tau0 = %f' % tau0) # tau0 is in mm by pythia convention
-
-set_neutralino_tau0(1) # if this gets called again later (e.g. in the batch scripts) it's fine -- the last instance will be used by pythia
-
 process.ProductionFilterSequence = cms.Sequence(process.generator)
 
 process.generation_step = cms.Path(process.pgen_genonly)
@@ -102,6 +97,41 @@ for path in process.paths:
 from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC 
 customizeHLTforMC(process)
 
+
+def set_neutralino_tau0(tau0):
+    params = [x for x in process.generator.PythiaParameters.processParameters.value() if '1000022:tau0' not in x]
+    process.generator.PythiaParameters.processParameters = params
+    process.generator.PythiaParameters.processParameters.append('1000022:tau0 = %f' % tau0) # tau0 is in mm by pythia convention
+
+def set_masses(m_gluino, m_neutralino, fn='minSLHA.spc'):
+    slha = '''
+BLOCK SPINFO  # Spectrum calculator information
+     1   Minimal    # spectrum calculator
+     2   1.0.0         # version number
+#
+BLOCK MODSEL  # Model selection
+     1     1   #
+#
+
+BLOCK MASS  # Mass Spectrum
+# PDG code           mass       particle
+  1000021     %(m_gluino)E       # ~g
+  1000022     %(m_neutralino)E   # ~chi_10
+
+DECAY   1000021     0.01E+00   # gluino decays
+#          BR         NDA      ID1       ID2
+    1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
+
+DECAY   1000022     0.01E+00   # neutralino decays
+#           BR         NDA      ID1       ID2       ID3
+     0.5E+00          3            3          5           6   # BR(~chi_10 -> s b t)
+     0.5E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
+'''
+    open(fn, 'wt').write(slha % locals())
+
+set_neutralino_tau0(1)
+set_masses(600, 300)
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
 [CRAB]
@@ -112,36 +142,52 @@ scheduler = glite
 datasetpath = None
 pset = genfsimreco_crab.py
 get_edm_output = 1
-number_of_jobs = 50
+number_of_jobs = 200
 events_per_job = 500
 first_lumi = 1
 
 [USER]
 additional_input_files = minSLHA.spc
-ui_working_dir = crab/crab_mfvneutralino_genfsimreco_%(name)s
+ui_working_dir = crab/genfsimreco/crab_mfvneutralino_genfsimreco_%(name)s
 copy_data = 1
-storage_element = T3_US_FNALLPC
-check_user_remote_dir = 0
+storage_element = T3_US_Cornell
 publish_data = 1
 publish_data_name = mfvneutralino_genfsimreco_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 '''
 
+    os.system('mkdir -p crab/genfsimreco')
     testing = 'testing' in sys.argv
 
-    jobs = [
-        ('tau1mm', 1.0),
-        ('tau9p9mm', 9.9),
-        ('tau100um', 0.1),
-        ('tau10um', 0.01),
-        ('tau0', 0.),
-        ]
-
-    for name, tau0 in jobs:
+    def submit(name, tau0, masses)
+        name += '_M_%i_%i' % masses
         new_py = open('genfsimreco.py').read()
         new_py += '\nset_neutralino_tau0(%e)\n' % tau0
+        new_py += '\nset_masses(%i, %i)\n' % masses
         open('genfsimreco_crab.py', 'wt').write(new_py)
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
             os.system('crab -create -submit')
             os.system('rm -f crab.cfg genfsimreco_crab.py')
+
+    tau0s = [
+        ('tau0', 0.),
+        ('tau100um', 0.1),
+        ('tau10um', 0.01),
+        ('tau1mm', 1.0),
+        ('tau3mm', 3.0),
+        ('tau9p9mm', 9.9),
+        ]
+
+    for name, tau0 in tau0s:
+        submit(name, tau0, (600, 300))
+
+    masseses = [
+        (600, 590),
+        (200, 170),
+        (1000, 200),
+        ]
+
+    for masses in masseses:
+        for name, tau0 in tau0s[:2]: # just do 0 and 100um for now
+            submit(name, tau0, masses)
