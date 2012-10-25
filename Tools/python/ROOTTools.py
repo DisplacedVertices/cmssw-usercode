@@ -79,11 +79,11 @@ def clopper_pearson_poisson_means(x, y, alpha=1-0.6827):
     r, rl, rh = clopper_pearson(x, x+y, alpha)
     return r/(1 - r), rl/(1 - rl), rh/(1 - rh)
 
-def binomial_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
+def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
     nbins = h1.GetNbinsX()
     xax = h1.GetXaxis()
     if h2.GetNbinsX() != nbins: # or xax2.GetBinLowEdge(1) != xax.GetBinLowEdge(1) or xax2.GetBinLowEdge(nbins) != xax.GetBinLowEdge(nbins):
-        raise ValueError, 'incompatible histograms to divide'
+        raise ValueError('incompatible histograms to divide')
     x = []
     y = []
     exl = []
@@ -432,6 +432,9 @@ def move_overflow_into_last_bin(h):
     h.SetBinContent(nb+1, 0)
     h.SetBinError(nb+1, 0)
 
+def poisson_means_divide(h1, h2):
+    return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False)
+
 class plot_saver:
     i = 0
     
@@ -663,7 +666,7 @@ def ttree_iterator(tree, return_tree=False):
             
 __all__ = [
     'apply_hist_commands',
-    'binomial_divide',
+    'histogram_divide',
     'clopper_pearson',
     'clopper_pearson_poisson_means',
     'core_gaussian',
@@ -683,6 +686,7 @@ __all__ = [
     'move_overflow_into_last_bin',
     'plot_saver',
     'poisson_intervalize',
+    'poisson_means_divide',
     'rainbow_palette',
     'real_hist_max',
     'real_hist_min',
