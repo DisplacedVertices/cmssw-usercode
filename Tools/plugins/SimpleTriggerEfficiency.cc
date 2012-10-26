@@ -1,4 +1,6 @@
-#include "TH1F.h"
+#include "TH1I.h"
+#include "TH2I.h"
+#include "CLHEP/Random/RandFlat.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -7,6 +9,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 
 class SimpleTriggerEfficiency : public edm::EDAnalyzer {
 public:
@@ -16,15 +19,46 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   edm::InputTag trigger_results_src;
-  TH1F* triggers_pass_num;
-  TH1F* triggers_pass_den;
+  std::map<std::string, unsigned> prescales;
+  edm::Service<edm::RandomNumberGenerator> rng;
+
+  bool pass_prescale(std::string) const;
+
+  TH1I* triggers_pass_num;
+  TH1I* triggers_pass_den;
+  TH2I* triggers2d_pass_num;
+  TH2I* triggers2d_pass_den;
 };
 
 SimpleTriggerEfficiency::SimpleTriggerEfficiency(const edm::ParameterSet& cfg) 
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
     triggers_pass_num(0),
-    triggers_pass_den(0)
+    triggers_pass_den(0),
+    triggers2d_pass_num(0),
+    triggers2d_pass_den(0)
 {
+  const std::vector<std::string>& prescale_paths = cfg.getParameter<std::vector<std::string> >("prescale_paths");
+  const std::vector<unsigned>& prescale_values = cfg.getParameter<std::vector<unsigned> >("prescale_values");
+  if (prescale_paths.size() != prescale_values.size())
+    throw cms::Exception("SimpleTriggerEfficiency") << "size mismatch: prescale_paths: " << prescale_paths.size() << " prescale_values: " << prescale_values.size();
+  for (size_t i = 0; i < prescale_paths.size(); ++i)
+    prescales[prescale_paths[i]] = prescale_values[i];
+  if (prescale_paths.size() > 0 && !rng.isAvailable())
+    throw cms::Exception("SimpleTriggerEfficiency") << "RandomNumberGeneratorService not available for prescaling!\n";
+}
+
+bool SimpleTriggerEfficiency::pass_prescale(std::string path) const {
+  size_t pos = path.rfind("_v");
+  if (pos != std::string::npos)
+    path.erase(pos);
+  std::map<std::string, unsigned>::const_iterator it = prescales.find(path);
+  if (it == prescales.end())
+    return false;
+  const unsigned prescale = it->second;
+  if (prescale == 0)
+    return false;
+  CLHEP::RandFlat rand(rng->getEngine());
+  return rand.fire() < 1./prescale;
 }
 
 void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -39,17 +73,28 @@ void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventS
     // denominator histogram will just end up being filled nevents
     // times in each bin.
     edm::Service<TFileService> fs;
-    triggers_pass_num = fs->make<TH1F>("triggers_pass_num", "", npaths, 0, npaths);
-    triggers_pass_den = fs->make<TH1F>("triggers_pass_den", "", npaths, 0, npaths);
+
+    triggers_pass_num = fs->make<TH1I>("triggers_pass_num", "", npaths, 0, npaths);
+    triggers_pass_den = fs->make<TH1I>("triggers_pass_den", "", npaths, 0, npaths);
+
+    triggers2d_pass_num = fs->make<TH2I>("triggers2d_pass_num", "", npaths, 0, npaths, npaths, 0, npaths);
+    triggers2d_pass_den = fs->make<TH2I>("triggers2d_pass_den", "", npaths, 0, npaths, npaths, 0, npaths);
     
-    TH1F* hists[2] = { triggers_pass_num, triggers_pass_den };
-    for (size_t ipath = 0; ipath < npaths; ++ipath)
-      for (int ihist = 0; ihist < 2; ++ihist)
-	hists[ihist]->GetXaxis()->SetBinLabel(ipath + 1, trigger_names.triggerName(ipath).c_str());
+    TH1I* hists[2] = { triggers_pass_num, triggers_pass_den };
+    TH2I* hists2d[2] = { triggers2d_pass_num, triggers2d_pass_den };
+    for (size_t ipath = 0; ipath < npaths; ++ipath) {
+      for (int ihist = 0; ihist < 2; ++ihist) {
+	const size_t ibin = ipath + 1;
+	const char* name = trigger_names.triggerName(ipath).c_str();
+	hists  [ihist]->GetXaxis()->SetBinLabel(ibin, name);
+	hists2d[ihist]->GetXaxis()->SetBinLabel(ibin, name);
+	hists2d[ihist]->GetYaxis()->SetBinLabel(ibin, name);
+      }
+    }
   }
   else {
     // Throw an exception if  we're not using the exact same paths.
-    const TH1F* hist = triggers_pass_num;
+    const TH1I* hist = triggers_pass_num;
     for (size_t ipath = 0; ipath < npaths; ++ipath) {
       std::string bin_label(hist->GetXaxis()->GetBinLabel(ipath + 1));
       const std::string& path_name = trigger_names.triggerName(ipath);
@@ -60,8 +105,16 @@ void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventS
 
   for (size_t ipath = 0; ipath < npaths; ++ipath) {
     triggers_pass_den->Fill(ipath);
-    if (trigger_results->accept(ipath))
+    const bool iacc = trigger_results->accept(ipath) && pass_prescale(trigger_names.triggerName(ipath));
+    if (iacc)
       triggers_pass_num->Fill(ipath);
+
+    for (size_t jpath = 0; jpath < ipath; ++jpath) {
+      triggers2d_pass_den->Fill(ipath, jpath);
+      const bool jacc = trigger_results->accept(jpath) && pass_prescale(trigger_names.triggerName(jpath));
+      if (iacc || jacc)
+	triggers2d_pass_num->Fill(ipath, jpath);
+    }
   }
 }
 
