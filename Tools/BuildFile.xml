@@ -1,0 +1,7 @@
+<use name="root"/>
+<use name="DataFormats/HepMCCandidate"/>
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<export>
+  <lib name="1"/>
+</export>
