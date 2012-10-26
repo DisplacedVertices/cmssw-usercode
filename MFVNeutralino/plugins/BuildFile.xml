@@ -5,4 +5,5 @@
   <use name="CommonTools/UtilAlgos"/>
   <use name="DataFormats/PatCandidates"/>
   <use name="SimGeneral/HepPDTRecord"/>
+  <use name="JMTucker/Tools"/>
 </library>
