@@ -3,6 +3,7 @@
 
 #include "TH1F.h"
 #include "TString.h"
+#include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -20,13 +21,20 @@ struct BasicKinematicHists {
   TH1F* Rap;
   TH1F* Eta;
   TH1F* Phi;
+  TH1F* Dxy;
+  TH1F* Dz;
+  TH1F* Q;
 
   BasicKinematicHists()
-    : fs(0), name(""), nice("") {}
+    : fs(0), name(""), nice("") { reset(); }
 
   BasicKinematicHists(edm::Service<TFileService>& fs_, const TString& name_, const TString& nice_)
-    : fs(&fs_), name(name_), nice(nice_) {}
-  
+    : fs(&fs_), name(name_), nice(nice_) { reset(); }
+
+  void reset() {
+    E = P = Pt = Pz = M = Rap = Eta = Phi = Dxy = Dz = Q = 0;
+  }
+
   TH1F* Book(const TString& subname, const TString& subnice, const int nbins, const double min, const double max, const TString& binning) {
     if (fs == 0)
       throw cms::Exception("BasicKinematicHists") << "fs not set before call to Book(...)";
@@ -61,6 +69,10 @@ struct BasicKinematicHists {
     Eta = Book("Eta", "pseudorapidity", nbins, min, max, binning);
   }
 
+  void BookEta(int nbins, const TString& binning) {
+    BookEta(nbins, -10, 10, binning);
+  }
+
   void BookRapEta(int nbins, const TString& binning) {
     BookRap(nbins, -10, 10, binning);
     BookEta(nbins, -10, 10, binning);
@@ -72,6 +84,18 @@ struct BasicKinematicHists {
 
   void BookPhi(int nbins, const TString& binning) {
     BookPhi(nbins, -3.14159, 3.14159, binning);
+  }
+
+  void BookDxy(int nbins, double min, double max, const TString& binning) {
+    Dxy = Book("Dxy", "dxy (cm)", nbins, min, max, binning + " cm");
+  }
+
+  void BookDz(int nbins, double min, double max, const TString& binning) {
+    Dz = Book("Dz", "dz (cm)", nbins, min, max, binning + " cm");
+  }
+
+  void BookQ() {
+    Q = Book("Q", "charge", 3, -1, 2, "1");
   }
 
   // backwards compatibility because I am too lazy to change GenHistos
@@ -148,6 +172,12 @@ struct BasicKinematicHists {
       if (Eta) Eta->Fill(1e9, weight);
     }
     if (Phi) Phi->Fill(v.Phi(), weight);
+  }
+
+  void FillEx(const double dxy, const double dz, const int q, const double weight) {
+    if (Dxy) Dxy->Fill(dxy, weight);
+    if (Dz)  Dz ->Fill(dz,  weight);
+    if (Q)   Q  ->Fill(q,   weight);
   }
 };
 
