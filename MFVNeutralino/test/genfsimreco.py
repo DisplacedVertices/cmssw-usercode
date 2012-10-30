@@ -18,7 +18,6 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5))
 process.source = cms.Source("EmptySource")
-process.options = cms.untracked.PSet()
 
 process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
                                         eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
@@ -159,7 +158,7 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
     os.system('mkdir -p crab/genfsimreco')
     testing = 'testing' in sys.argv
 
-    def submit(name, tau0, masses)
+    def submit(name, tau0, masses):
         name += '_M_%i_%i' % masses
         new_py = open('genfsimreco.py').read()
         new_py += '\nset_neutralino_tau0(%e)\n' % tau0
@@ -168,7 +167,7 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
             os.system('crab -create -submit')
-            os.system('rm -f crab.cfg genfsimreco_crab.py')
+            os.system('rm -f crab.cfg genfsimreco_crab.py genfsimreco_crab.pyc')
 
     tau0s = [
         ('tau0', 0.),
