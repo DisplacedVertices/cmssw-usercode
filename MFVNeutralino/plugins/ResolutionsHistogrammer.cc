@@ -20,7 +20,7 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 
 #define NJETDISTS 20
-#define NBDISC 20
+#define NBDISC 7
 #define NLEPDISTS 5
 
 class MFVNeutralinoResolutionsHistogrammer : public edm::EDAnalyzer {
@@ -177,7 +177,7 @@ void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) 
   NVertices = fs->make<TH1F>("NVertices", ";number of primary vertices;events", 75, 0, 75);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;events", 20, 0, 20);
-  RecoJetHT = fs->make<TH1F>("RecoJetHT", ";reconstructed jet H_{T} (GeV);events/40 GeV", 50, 0, 2000);
+  RecoJetHT = fs->make<TH1F>("RecoJetHT", ";reconstructed jet H_{T} (GeV);events/50 GeV", 100, 0, 5000);
   RecoJetsPVSVCosTheta = fs->make<TH1F>("RecoJetsPVSVCosTheta", ";cos(angle between flight direction and jet);events/0.1", 20, -1, 1);
   
   RecoJets = bkh_factory->make("RecoJets", "all reconstructed jets");
@@ -491,9 +491,8 @@ void MFVNeutralinoResolutionsHistogrammer::analyze(const edm::Event& event, cons
       RecoElectron[i]->FillEx(dxy, dz, electron.charge(), weight);
     }
 
-    const bool AAGGHH = const_cast<pat::Electron*>(electrons.at(i))->passConversionVeto(); // damnit
-    const bool electron_pass_semilep = electron_semilep_selector(electron) && AAGGHH && fabs(dxy) < max_semilep_electron_dxy;
-    const bool electron_pass_dilep   = electron_dilep_selector  (electron) && AAGGHH && fabs(dxy) < max_dilep_electron_dxy;
+    const bool electron_pass_semilep = electron_semilep_selector(electron) && fabs(dxy) < max_semilep_electron_dxy;
+    const bool electron_pass_dilep   = electron_dilep_selector  (electron) && fabs(dxy) < max_dilep_electron_dxy;
 
     if (electron_pass_semilep) {
       RecoSemilepElectrons->Fill(&electron, weight);
