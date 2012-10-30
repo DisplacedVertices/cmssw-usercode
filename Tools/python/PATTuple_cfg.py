@@ -1,27 +1,26 @@
 import sys, FWCore.ParameterSet.Config as cms
 
-version = 'v4'
+version = 'v5'
 runOnMC = True # Submit script expects this line to be unmodified...
+suppress_stdout = True
 
 ################################################################################
 
+assert runOnMC
+
 process = cms.Process('PAT')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S7_START52_V9-v2/0000/E4964FC2-A9B8-E111-A9D0-003048FFCBFC.root'))
-#process.source.fileNames = ['/store/mc/Summer12/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/AODSIM/PU_S7_START52_V9-v1/0000/FEF1895C-15A4-E111-9EC5-003048D3CDE0.root']
-#process.source.fileNames = ['/store/user/tucker/mfvneutralino_genfsimreco_tau100um/mfvneutralino_genfsimreco_tau100um//465709e5340ac2cc11e2751b48bbef3e/fastsim_9_1_7gz.root']
-#process.source.fileNames = ['/store/data/Run2012A/MuHad/AOD/PromptReco-v1/000/190/645/9220A9CD-8E82-E111-9938-001D09F24EE3.root']
-#process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange('190645:10-190645:11')
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.categories.append('PATSummaryTables')
 process.MessageLogger.cerr.PATSummaryTables = cms.untracked.PSet(limit = cms.untracked.int32(-1))
-process.load('Configuration.StandardSequences.Geometry_cff')
+process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START52_V9E::All' if runOnMC else 'GR_P_V39_AN2::All'
+process.GlobalTag.globaltag = 'START53_V13::All' if runOnMC else 'GR_P_V39_AN2::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
@@ -73,7 +72,6 @@ for filter, filter_obj in filters:
 
 # First, turn off stdout so that the spam from PAT/PF2PAT doesn't
 # flood the screen (especially useful in batch job submission).
-suppress_stdout = True
 if suppress_stdout:
     print 'tuple.py: PAT would spam a lot of stuff to stdout... hiding it.'
     from cStringIO import StringIO
@@ -157,10 +155,10 @@ process.eidMVASequence = cms.Sequence(process.mvaTrigV0 + process.mvaNonTrigV0)
 processpostfix('patElectrons').electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 processpostfix('patElectrons').electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
 processpostfix('patMuons').embedTrack = True
+processpostfix('patJets').addTagInfos = True
 processpostfix('selectedPatElectrons').cut = process.jtupleParams.electronCut
 processpostfix('selectedPatMuons').cut = process.jtupleParams.muonCut
 processpostfix('selectedPatJets').cut = process.jtupleParams.jetCut
-processpostfix('patJets').addTagInfos = True
 
 from PhysicsTools.PatAlgos.tools.coreTools import runOnData, removeSpecificPATObjects
 if not runOnMC:
@@ -195,13 +193,8 @@ for cut in (1., 1.5, 2., 2.5, 3.):
   
     processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * reduce(lambda x,y: x*y, disc_objs) * processpostfix('patJets'))
 
-setprocesspostfix('semilepMuons',     cms.EDFilter('PATMuonSelector',     src = InputTagPostFix('selectedPatMuons'),     cut = process.jtupleParams.semilepMuonCut))
-setprocesspostfix('dilepMuons',       cms.EDFilter('PATMuonSelector',     src = InputTagPostFix('selectedPatMuons'),     cut = process.jtupleParams.dilepMuonCut))
-setprocesspostfix('semilepElectrons', cms.EDFilter('PATElectronSelector', src = InputTagPostFix('selectedPatElectrons'), cut = process.jtupleParams.semilepElectronCut))
-setprocesspostfix('dilepElectrons',   cms.EDFilter('PATElectronSelector', src = InputTagPostFix('selectedPatElectrons'), cut = process.jtupleParams.dilepElectronCut))
-
-setprocesspostfix('countPatLeptonsSemileptonic', processpostfix('countPatLeptons').clone(minNumber = 1, muonSource = InputTagPostFix('semilepMuons'), electronSource = InputTagPostFix('semilepElectrons')))
-setprocesspostfix('countPatLeptonsDileptonic',   processpostfix('countPatLeptons').clone(minNumber = 2, muonSource = InputTagPostFix('dilepMuons'),   electronSource = InputTagPostFix('dilepElectrons')))
+from JMTucker.Tools.PATTupleSelection_cfi import makeLeptonProducers
+makeLeptonProducers(process, postfix=postfix, params=process.jtupleParams)
 
 # Require numbers of jets based on the trigger: hadronic channel will
 # have at least a 4-jet trigger (maybe 6!), while semileptonic uses a
@@ -217,16 +210,16 @@ for channel in channels:
     setattr(process, 'p' + channel, cms.Path(obj))
 
 process.pHadronic     *= processpostfix('countPatJetsHadronic')
-process.pSemileptonic *= processpostfix('countPatJetsSemileptonic') + processpostfix('semilepMuons') + processpostfix('semilepElectrons') + processpostfix('countPatLeptonsSemileptonic')
-process.pDileptonic   *= processpostfix('countPatJetsDileptonic')   + processpostfix('dilepMuons')   + processpostfix('dilepElectrons')   + processpostfix('countPatLeptonsDileptonic')
+process.pSemileptonic *= processpostfix('countPatJetsSemileptonic') + process.jtupleSemileptonSequence + process.countSemileptons
+process.pDileptonic   *= processpostfix('countPatJetsDileptonic')   + process.jtupleDileptonSequence   + process.countDileptons
 
 process.out.SelectEvents.SelectEvents = ['p' + channel for channel in channels]
 process.out.outputCommands = [
     'drop *',
     'keep *_selectedPatElectrons*_*_*',
     'keep *_selectedPatMuons*_*_*',
-    'keep *_semilep*_*_*',
-    'keep *_dilep*_*_*',
+    #'keep *_semilep*_*_*',
+    #'keep *_dilep*_*_*',
     'keep *_selectedPatJets*_*_*',
     'keep *_selectedPatJets*_genJets_*',
     'drop *_selectedPatJets*_pfCandidates_*',
@@ -258,6 +251,20 @@ process.ORTrigReport = cms.EDAnalyzer('ORTrigReport',
                                       )
 process.pORTrigReport = cms.EndPath(process.ORTrigReport) # Must be on an EndPath.
 
+# As a simple check of the paths' efficiencies, add some lines to the
+# summary showing stats on events with generator-level muons/electrons
+# in acceptance from W decays.
+for name, cut in [('Muon',     'abs(pdgId) == 13 && abs(eta) < 2.4 && abs(mother.pdgId) == 24 && pt > 20'),
+                  ('Electron', 'abs(pdgId) == 11 && abs(eta) < 2.5 && abs(mother.pdgId) == 24 && pt > 20'),
+                  ('Lepton',   '((abs(pdgId) == 13 && abs(eta) < 2.4) || (abs(pdgId) == 11 && abs(eta) < 2.5)) && abs(mother.pdgId) == 24 && pt > 20'),
+                  ]:
+    name = 'gen' + name + 's'
+    filter = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string(cut))
+    counter = cms.EDFilter('CandViewCountFilter', src = cms.InputTag(name), minNumber = cms.uint32(1))
+    setattr(process, name,           filter)
+    setattr(process, name + 'Count', counter)
+    setattr(process, 'p' + name + 'Count', cms.Path(filter*counter))
+
 # Check that the stdout spam from PAT was what we expect.
 if suppress_stdout:
     pat_output = buf.getvalue()
@@ -265,7 +272,7 @@ if suppress_stdout:
     buf.close()
     hsh = hash(pat_output)
     #open('pat_spam.txt', 'wt').write(pat_output)
-    hsh_expected = 4533816878313021228 if runOnMC else -3882518544097161276
+    hsh_expected = -6137441689280519667 if runOnMC else -3882518544097161276
     print 'PAT is done (spam hash %s, expected %s).' % (hsh, hsh_expected)
     if hsh != hsh_expected:
         from JMTucker.Tools.general import big_warn
