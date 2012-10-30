@@ -71,15 +71,15 @@ jtupleParams = cms.PSet(
     )
 
 def makeLeptonProducers(process, postfix='PF', params=jtupleParams):
-    for name in 'semilepMuons dilepMuons semilepElectrons dilepElectrons jtupleMuonSequence jtupleElectronSequence jtupleSemileptonSequence jtupleDileptonSequence countSemileptonicMuons countDileptonicMuons countSemileptonicElectrons countDileptonicElectrons countSemileptons countDileptons'.split()
+    for name in 'semilepMuons dilepMuons semilepElectrons dilepElectrons jtupleMuonSequence jtupleElectronSequence jtupleSemileptonSequence jtupleDileptonSequence countSemileptonicMuons countDileptonicMuons countSemileptonicElectrons countDileptonicElectrons countSemileptons countDileptons'.split():
         name += postfix
         if hasattr(process, name):
             raise ValueError('refusing to clobber already existing module with label %s' % name)
     
-    semilepMuons     = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons'     + postfix), cut = params.semilepMuonCut))
-    dilepMuons       = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons'     + postfix), cut = params.dilepMuonCut))
-    semilepElectrons = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.semilepElectronCut))
-    dilepElectrons   = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.dilepElectronCut))
+    semilepMuons     = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons'     + postfix), cut = params.semilepMuonCut)
+    dilepMuons       = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons'     + postfix), cut = params.dilepMuonCut)
+    semilepElectrons = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.semilepElectronCut)
+    dilepElectrons   = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.dilepElectronCut)
 
     setattr(process, 'semilepMuons'     + postfix, semilepMuons)    
     setattr(process, 'dilepMuons'       + postfix, dilepMuons)      
