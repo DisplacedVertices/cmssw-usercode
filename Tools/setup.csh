@@ -14,7 +14,28 @@ cd -
 addpkg CommonTools/ParticleFlow
 addpkg PhysicsTools/PatUtils
 addpkg PhysicsTools/SelectorUtils
-addpkg PhysicsTools/TagAndProbe
 
 scram b -j 8
 popd
+
+echo
+echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+echo
+echo checkdeps would also suggest these packages, mostly TQAF:
+echo not getting them, so beware if you use them!
+echo
+echo AnalysisDataFormats/TopObjects
+echo ElectroWeakAnalysis/WENu
+echo ElectroWeakAnalysis/ZEE
+echo PhysicsTools/PatExamples
+echo PhysicsTools/TagAndProbe
+echo TopQuarkAnalysis/Examples
+echo TopQuarkAnalysis/TopEventProducers
+echo TopQuarkAnalysis/TopEventSelection
+echo TopQuarkAnalysis/TopHitFit
+echo TopQuarkAnalysis/TopJetCombination
+echo TopQuarkAnalysis/TopKinFitter
+echo TopQuarkAnalysis/TopObjectResolutions
+echo
+echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+echo
