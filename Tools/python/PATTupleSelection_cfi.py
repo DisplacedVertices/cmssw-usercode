@@ -76,10 +76,10 @@ def makeLeptonProducers(process, postfix='PF', params=jtupleParams):
         if hasattr(process, name):
             raise ValueError('refusing to clobber already existing module with label %s' % name)
     
-    semilepMuons     = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = jtupleParams.semilepMuonCut))
-    dilepMuons       = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = jtupleParams.dilepMuonCut))
-    semilepElectrons = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = jtupleParams.semilepElectronCut))
-    dilepElectrons   = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = jtupleParams.dilepElectronCut))
+    semilepMuons     = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = params.semilepMuonCut))
+    dilepMuons       = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = params.dilepMuonCut))
+    semilepElectrons = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.semilepElectronCut))
+    dilepElectrons   = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.dilepElectronCut))
 
     setattr(process, 'semilepMuons'     + postfix, semilepMuons)    
     setattr(process, 'dilepMuons'       + postfix, dilepMuons)      
