@@ -47,12 +47,14 @@ jtupleParams = cms.PSet(
                              ),
     
     semilepElectronCut = cms.string('pt > 30. && abs(eta) < 2.5 && ' \
-                                    'abs(superCluster.eta) < 1.4442 && abs(superCluster.eta) > 1.5660 && ' \
+                                    'electronID("mvaTrigV0") > 0. && ' \
+                                    '(abs(superCluster.eta) < 1.4442 || abs(superCluster.eta) > 1.5660) && ' \
                                     'passConversionVeto && ' \
                                     '%s < 0.1' % electronIso
                                     ),
     
     dilepElectronCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
+                                  'electronID("mvaTrigV0") > 0. && ' \
                                   'passConversionVeto && ' \
                                   '%s < 0.15' % electronIso
                                   ),
@@ -67,3 +69,33 @@ jtupleParams = cms.PSet(
                                'trackingFailureFilter',
                                'eeBadScFilter'),
     )
+
+def makeLeptonProducers(process, postfix='PF', params=jtupleParams):
+    for name in 'semilepMuons dilepMuons semilepElectrons dilepElectrons jtupleMuonSequence jtupleElectronSequence jtupleSemileptonSequence jtupleDileptonSequence countSemileptonicMuons countDileptonicMuons countSemileptonicElectrons countDileptonicElectrons countSemileptons countDileptons'.split()
+        name += postfix
+        if hasattr(process, name):
+            raise ValueError('refusing to clobber already existing module with label %s' % name)
+    
+    semilepMuons     = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = jtupleParams.semilepMuonCut))
+    dilepMuons       = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = jtupleParams.dilepMuonCut))
+    semilepElectrons = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = jtupleParams.semilepElectronCut))
+    dilepElectrons   = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = jtupleParams.dilepElectronCut))
+
+    setattr(process, 'semilepMuons'     + postfix, semilepMuons)    
+    setattr(process, 'dilepMuons'       + postfix, dilepMuons)      
+    setattr(process, 'semilepElectrons' + postfix, semilepElectrons)
+    setattr(process, 'dilepElectrons'   + postfix, dilepElectrons)
+
+    process.jtupleMuonSequence       = cms.Sequence(semilepMuons + dilepMuons)
+    process.jtupleElectronSequence   = cms.Sequence(semilepElectrons + dilepElectrons)
+    process.jtupleSemileptonSequence = cms.Sequence(semilepMuons + semilepElectrons)
+    process.jtupleDileptonSequence   = cms.Sequence(dilepMuons + dilepElectrons)
+
+    process.countSemileptonicMuons     = cms.EDFilter('PATCandViewCountFilter', src = cms.InputTag('semilepMuons'     + postfix), minNumber = cms.uint32(1), maxNumber = cms.uint32(999999))
+    process.countSemileptonicElectrons = cms.EDFilter('PATCandViewCountFilter', src = cms.InputTag('semilepElectrons' + postfix), minNumber = cms.uint32(1), maxNumber = cms.uint32(999999))
+    process.countDileptonicMuons       = cms.EDFilter('PATCandViewCountFilter', src = cms.InputTag('dilepMuons'       + postfix), minNumber = cms.uint32(2), maxNumber = cms.uint32(999999))
+    process.countDileptonicElectrons   = cms.EDFilter('PATCandViewCountFilter', src = cms.InputTag('dilepElectrons'   + postfix), minNumber = cms.uint32(2), maxNumber = cms.uint32(999999))
+
+    from PhysicsTools.PatAlgos.selectionLayer1.leptonCountFilter_cfi import countPatLeptons
+    process.countSemileptons = countPatLeptons.clone(muonSource = cms.InputTag('semilepMuons' + postfix), electronSource = cms.InputTag('semilepElectrons' + postfix), minNumber = cms.uint32(1))
+    process.countDileptons   = countPatLeptons.clone(muonSource = cms.InputTag('dilepMuons'   + postfix), electronSource = cms.InputTag('dilepElectrons'   + postfix), minNumber = cms.uint32(1))
