@@ -76,8 +76,8 @@ def makeLeptonProducers(process, postfix='PF', params=jtupleParams):
         if hasattr(process, name):
             raise ValueError('refusing to clobber already existing module with label %s' % name)
     
-    semilepMuons     = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = params.semilepMuonCut))
-    dilepMuons       = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons' + postfix),     cut = params.dilepMuonCut))
+    semilepMuons     = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons'     + postfix), cut = params.semilepMuonCut))
+    dilepMuons       = cms.EDFilter('PATMuonSelector',     src = cms.InputTag('selectedPatMuons'     + postfix), cut = params.dilepMuonCut))
     semilepElectrons = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.semilepElectronCut))
     dilepElectrons   = cms.EDFilter('PATElectronSelector', src = cms.InputTag('selectedPatElectrons' + postfix), cut = params.dilepElectronCut))
 
@@ -98,4 +98,4 @@ def makeLeptonProducers(process, postfix='PF', params=jtupleParams):
 
     from PhysicsTools.PatAlgos.selectionLayer1.leptonCountFilter_cfi import countPatLeptons
     process.countSemileptons = countPatLeptons.clone(muonSource = cms.InputTag('semilepMuons' + postfix), electronSource = cms.InputTag('semilepElectrons' + postfix), minNumber = cms.uint32(1))
-    process.countDileptons   = countPatLeptons.clone(muonSource = cms.InputTag('dilepMuons'   + postfix), electronSource = cms.InputTag('dilepElectrons'   + postfix), minNumber = cms.uint32(1))
+    process.countDileptons   = countPatLeptons.clone(muonSource = cms.InputTag('dilepMuons'   + postfix), electronSource = cms.InputTag('dilepElectrons'   + postfix), minNumber = cms.uint32(2))
