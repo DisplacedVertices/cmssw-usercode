@@ -48,6 +48,7 @@ void MCInteractionTop::SetFourVectors() {
 
 void MCInteractionTop::Fill(const reco::GenParticleCollection& gens) {
   Clear();
+  gen_particles = &gens;
 
   // Find the stop and stopbar (but they might not be there for
   // e.g. regular ttbar sample.) Raise an exception if only one of the
@@ -225,4 +226,35 @@ void MCInteractionTop::FindDIFJets(const reco::GenJetCollection& gen_jets) {
       }
     }
   }
+}
+
+void MCInteractionTop::Print(std::ostream& out) {
+  printf("MCInteractionTop:\n");
+  printf("num_leptons: %i\n", num_leptonic);
+  const char* decay_types[4] = {"e", "mu", "tau", "h"};
+  printf("decay type: W+ -> %s,  W- -> %s\n", decay_types[decay_plus], decay_types[decay_minus]);
+  print_gen_and_daus(0,                       "header",                  *gen_particles);
+  print_gen_and_daus(stop,                    "stop",                    *gen_particles);
+  print_gen_and_daus(stopbar,                 "stopbar",                 *gen_particles);
+  print_gen_and_daus(neutralino_from_stop,    "neutralino_from_stop",    *gen_particles);
+  print_gen_and_daus(neutralino_from_stopbar, "neutralino_from_stopbar", *gen_particles);
+  print_gen_and_daus(top,                     "top",                     *gen_particles);
+  print_gen_and_daus(topbar,                  "topbar",                  *gen_particles);
+  print_gen_and_daus(Wplus,                   "Wplus",                   *gen_particles);
+  print_gen_and_daus(Wminus,                  "Wminus",                  *gen_particles);
+  print_gen_and_daus(bottom,                  "bottom",                  *gen_particles);
+  print_gen_and_daus(bottombar,               "bottombar",               *gen_particles);
+  print_gen_and_daus(W_daughters[0][0],       "Wplus daughter 0",        *gen_particles);
+  print_gen_and_daus(W_daughters[0][1],       "Wplus daughter 1",        *gen_particles);
+  print_gen_and_daus(W_daughters[1][0],       "Wminus daughter 0",       *gen_particles);
+  print_gen_and_daus(W_daughters[1][1],       "Wminus daughter 1",       *gen_particles);
+  if (!dif_leptons.empty())
+    printf("charged leptons/neutrinos from decays-in-flight:\n");
+  for (int i = 0, ie = int(dif_leptons.size()); i < ie; ++i) {
+    print_gen_and_daus(dif_leptons[i].charged,     TString::Format("chg #%i", i), *gen_particles);
+    print_gen_and_daus(dif_leptons[i].neutrino,    TString::Format("nu  #%i", i), *gen_particles);
+    print_gen_and_daus(dif_leptons[i].closest_jet, TString::Format("closest jet #%i", i), *gen_particles, false);
+    print_gen_and_daus(dif_leptons[i].mother_jet,  TString::Format("mother  jet #%i", i), *gen_particles, false);
+  }
+  printf("p4_missingsum ex: %.2f  ey: %.2f    et: %.2f  phi: %.3f\n", p4_missingsum.Px(), p4_missingsum.Py(), p4_missingsum.Pt(), p4_missingsum.Phi());
 }

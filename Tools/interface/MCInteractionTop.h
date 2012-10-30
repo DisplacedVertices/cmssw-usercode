@@ -10,6 +10,8 @@ struct MCInteractionTop {
     return tops[0] && tops[1];
   }
 
+  const reco::GenParticleCollection* gen_particles;
+
   const reco::GenParticle* stops[2]; // stop, stopbar
   const reco::GenParticle* tops[2];  //  top,  topbar
   const reco::GenParticle* neutralinos[2]; // from_stop, from_stopbar
@@ -134,6 +136,7 @@ struct MCInteractionTop {
   }
 
   void Clear() {
+    gen_particles = 0;
     for (int i = 0; i < 2; ++i) {
       stops[i] = tops[i] = neutralinos[i] = Ws[i] = bottoms[i] = 0;
       for (int j = 0; j < 2; ++j)
@@ -149,6 +152,7 @@ struct MCInteractionTop {
   void SetFourVectors();
   void Fill(const reco::GenParticleCollection&);
   void FindDIFJets(const reco::GenJetCollection&);
+  void Print(std::ostream&);
 };
 
 #endif
