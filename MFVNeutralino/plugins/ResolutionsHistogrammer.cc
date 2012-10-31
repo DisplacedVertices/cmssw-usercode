@@ -20,6 +20,7 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 
 #define NJETDISTS 20
+#define NBJETDISTS 10
 #define NBDISC 7
 #define NLEPDISTS 5
 
@@ -60,7 +61,7 @@ private:
 
   TH1F* NJets;
   TH1F* NBTags[NBDISC];
-  TH1F* RecoJetHT;
+  TH1F* RecoJetsHT;
   TH1F* RecoJetsPVSVCosTheta;
 
   BasicKinematicHists* RecoJets;
@@ -68,7 +69,7 @@ private:
   TH1F* JetBDiscs[NBDISC];
   TH1F* JetBDisc[NBDISC][NJETDISTS];
   BasicKinematicHists* RecoBJets[NBDISC];
-  BasicKinematicHists* RecoBJet[NBDISC][NJETDISTS];
+  BasicKinematicHists* RecoBJet[NBDISC][NBJETDISTS];
 
   TH1F* JetPtRes;
   TH1F* JetPtResPtGt70;
@@ -97,10 +98,16 @@ private:
   TH1F* NMuons;
   TH1F* NSemilepMuons;
   TH1F* NDilepMuons;
-
   TH1F* NElectrons;
   TH1F* NSemilepElectrons;
   TH1F* NDilepElectrons;
+
+  TH1F* RecoMuonsIso;
+  TH1F* RecoSemilepMuonsIso;
+  TH1F* RecoDilepMuonsIso;
+  TH1F* RecoElectronsIso;
+  TH1F* RecoSemilepElectronsIso;
+  TH1F* RecoDilepElectronsIso;
 
   BasicKinematicHists* RecoMuons;
   BasicKinematicHists* RecoMuon[NLEPDISTS];
@@ -171,55 +178,57 @@ MFVNeutralinoResolutionsHistogrammer::~MFVNeutralinoResolutionsHistogrammer() {
   delete bkh_factory;
 }
 
+TFileDirectory mkdir(edm::Service<TFileService>& fs, const TString& name) {
+  return fs->mkdir(name.Data());
+}
+
 void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
   TH1::SetDefaultSumw2();
 
   NVertices = fs->make<TH1F>("NVertices", ";number of primary vertices;events", 75, 0, 75);
 
-  NJets = fs->make<TH1F>("NJets", ";number of jets;events", 20, 0, 20);
-  RecoJetHT = fs->make<TH1F>("RecoJetHT", ";reconstructed jet H_{T} (GeV);events/50 GeV", 100, 0, 5000);
-  RecoJetsPVSVCosTheta = fs->make<TH1F>("RecoJetsPVSVCosTheta", ";cos(angle between flight direction and jet);events/0.1", 20, -1, 1);
-  
   RecoJets = bkh_factory->make("RecoJets", "all reconstructed jets");
   RecoJets->BookPt(100, 0, 1000, "10");
   RecoJets->BookEta(40, -3, 3, "0.15");
   RecoJets->BookPhi(40, "0.157");
   for (int i = 0; i < NJETDISTS; ++i) {
-    RecoJet[i] = bkh_factory->make(TString::Format("RecoJet%i", i), TString::Format("reconstructed jet #%i", i));
+    RecoJet[i] = bkh_factory->make(TString::Format("RecoJet/pt#%i", i), TString::Format("reconstructed jet #%i", i));
     RecoJet[i]->BookPt(100, 0, 1000, "10");
     RecoJet[i]->BookEta(40, -3, 3, "0.15");
     RecoJet[i]->BookPhi(40, "0.157");
   }
 
+  TFileDirectory RecoJets_dir = fs->mkdir("RecoJets");
+  NJets                = RecoJets->dir.make<TH1F>("NJets", ";number of jets;events", 20, 0, 20);
+  RecoJetsHT           = RecoJets->dir.make<TH1F>("SumHT", ";reconstructed jet H_{T} (GeV);events/50 GeV", 100, 0, 5000);
+  RecoJetsPVSVCosTheta = RecoJets->dir.make<TH1F>("PVSVCosTheta", ";cos(angle between flight direction and jet);events/0.1", 20, -1, 1);
+
+  JetPtRes          = RecoJets->dir.make<TH1F>("PtRes", ";reconstructed jet p_{T} resolution;events/5 GeV", 40, -100, 100);
+  JetPtResPtGt70    = RecoJets->dir.make<TH1F>("PtResPtGt70", "gen p_{T} > 70 GeV;reconstructed jet p_{T} resolution;events/5 GeV", 40, -100, 100);
+  JetPtRelRes       = RecoJets->dir.make<TH1F>("PtRelRes", ";reconstructed jet p_{T} relative resolution;events/0.1", 40, -2, 2);
+  JetPtRelResPtGt70 = RecoJets->dir.make<TH1F>("PtRelResPtGt70", " gen p_{T} > 70 GeV;reconstructed jet p_{T} relative resolution;events/0.1", 40, -2, 2);
+
   for (int j = 0, je = int(b_discriminators.size()); j < je; ++j) {
-    NBTags[j] = fs->make<TH1F>(TString::Format("NBTags%i", j), TString::Format(";number of b-tagged (%s) jets;events", b_discriminators[j].c_str()), 20, 0, 20);
-    JetBDiscs[j] = fs->make<TH1F>(TString::Format("JetBDiscs%i", j), TString::Format(";b-discriminator (%s) value;events/0.05", b_discriminators[j].c_str()), 200, 0, 10);
-    RecoBJets[j] = bkh_factory->make(TString::Format("RecoBJets%i", j), TString::Format("b-tagged (%s) jets", b_discriminators[j].c_str()));
+    const char* bdisc_name = b_discriminators[j].c_str();
+    TFileDirectory bdisc_dir = mkdir(fs, TString::Format("bdisc_%s", bdisc_name));
+    NBTags[j]    = bdisc_dir.make<TH1F>("NBTags", TString::Format(";number of b-tagged (%s) jets;events",    bdisc_name), 20, 0, 20);
+    JetBDiscs[j] = bdisc_dir.make<TH1F>("BDiscs", TString::Format(";b-discriminator (%s) value;events/0.05", bdisc_name), 200, 0, 10);
+    
+    RecoBJets[j] = bkh_factory->make(TString::Format("bdisc_%s/RecoBJets", bdisc_name), TString::Format("b-tagged (%s) jets", bdisc_name));
     RecoBJets[j]->BookPt(100, 0, 1000, "10");
     RecoBJets[j]->BookEta(40, -3, 3, "0.15");
     RecoBJets[j]->BookPhi(40, "0.157");
+  
+    for (int i = 0; i < NJETDISTS; ++i)
+      JetBDisc[j][i] = mkdir(fs, TString::Format("RecoJet/pt#%i/bdisc_%s", i, bdisc_name)).make<TH1F>("BDisc", TString::Format(";jet #%i b-discriminator (%s) value;events/0.05", i, bdisc_name), 200, 0, 10);
 
-    for (int i = 0; i < NJETDISTS; ++i) {
-      JetBDisc[j][i] = fs->make<TH1F>(TString::Format("JetBDisc%i%i", j, i), TString::Format(";jet #%i b-discriminator (%s) value;events/0.05", i, b_discriminators[j].c_str()), 200, 0, 10);
-      RecoBJet[j][i] = bkh_factory->make(TString::Format("RecoBJet%i%i", j, i), TString::Format("b-tagged (%s) jet #%i", b_discriminators[j].c_str(), i));
+    for (int i = 0; i < NBJETDISTS; ++i) {
+      RecoBJet[j][i] = bkh_factory->make(TString::Format("bdisc_%s/RecoBJet/pt#%i", bdisc_name, i), TString::Format("b-tagged (%s) jet #%i", bdisc_name, i));
       RecoBJet[j][i]->BookPt(100, 0, 1000, "10");
       RecoBJet[j][i]->BookEta(40, -3, 3, "0.15");
       RecoBJet[j][i]->BookPhi(40, "0.157");
     }
   }
-
-  JetPtRes = fs->make<TH1F>("JetPtRes", ";reconstructed jet p_{T} resolution;events/5 GeV", 40, -100, 100);
-  JetPtResPtGt70 = fs->make<TH1F>("JetPtResPtGt70", "gen p_{T} > 70 GeV;reconstructed jet p_{T} resolution;events/5 GeV", 40, -100, 100);
-  JetPtRelRes = fs->make<TH1F>("JetPtRelRes", ";reconstructed jet p_{T} relative resolution;events/0.1", 40, -2, 2);
-  JetPtRelResPtGt70 = fs->make<TH1F>("JetPtRelResPtGt70", " gen p_{T} > 70 GeV;reconstructed jet p_{T} relative resolution;events/0.1", 40, -2, 2);
-
-  NMuons        = fs->make<TH1F>("NMuons",        ";number of reconstructed muons;events",         10, 0, 10);
-  NSemilepMuons = fs->make<TH1F>("NSemilepMuons", ";number of reconstructed semilep muons;events", 10, 0, 10);
-  NDilepMuons   = fs->make<TH1F>("NDilepMuons",   ";number of reconstructed dilep muons;events",   10, 0, 10);
-
-  NElectrons        = fs->make<TH1F>("NElectrons",        ";number of reconstructed electrons;events",         10, 0, 10);
-  NSemilepElectrons = fs->make<TH1F>("NSemilepElectrons", ";number of reconstructed semilep electrons;events", 10, 0, 10);
-  NDilepElectrons   = fs->make<TH1F>("NDilepElectrons",   ";number of reconstructed dilep electrons;events",   10, 0, 10);
 
   RecoMuons        = bkh_factory->make("RecoMuons",        "all reconstructed muons");
   RecoSemilepMuons = bkh_factory->make("RecoSemilepMuons", "all reconstructed muons passing semilep cuts");
@@ -229,6 +238,22 @@ void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) 
   RecoSemilepElectrons = bkh_factory->make("RecoSemilepElectrons", "all reconstructed electrons passing semilep cuts");
   RecoDilepElectrons   = bkh_factory->make("RecoDilepElectrons",   "all reconstructed electrons passing dilep cuts");
 
+  NMuons        = RecoMuons       ->dir.make<TH1F>("NMuons",        ";number of reconstructed muons;events",         10, 0, 10);
+  NSemilepMuons = RecoSemilepMuons->dir.make<TH1F>("NSemilepMuons", ";number of reconstructed semilep muons;events", 10, 0, 10);
+  NDilepMuons   = RecoDilepMuons  ->dir.make<TH1F>("NDilepMuons",   ";number of reconstructed dilep muons;events",   10, 0, 10);
+
+  NElectrons        = RecoElectrons       ->dir.make<TH1F>("NElectrons",        ";number of reconstructed electrons;events",         10, 0, 10);
+  NSemilepElectrons = RecoSemilepElectrons->dir.make<TH1F>("NSemilepElectrons", ";number of reconstructed semilep electrons;events", 10, 0, 10);
+  NDilepElectrons   = RecoDilepElectrons  ->dir.make<TH1F>("NDilepElectrons",   ";number of reconstructed dilep electrons;events",   10, 0, 10);
+
+  RecoMuonsIso        = RecoMuons       ->dir.make<TH1F>("Iso", ";muon isolation;events/0.05",         40, 0, 2);
+  RecoSemilepMuonsIso = RecoSemilepMuons->dir.make<TH1F>("Iso", ";semilep muon isolation;events/0.05", 40, 0, 2);
+  RecoDilepMuonsIso   = RecoDilepMuons  ->dir.make<TH1F>("Iso", ";dilep muon isolation;events/0.05",   40, 0, 2);
+
+  RecoElectronsIso        = RecoElectrons       ->dir.make<TH1F>("Iso", ";electron isolation;events/0.05",         40, 0, 2);
+  RecoSemilepElectronsIso = RecoSemilepElectrons->dir.make<TH1F>("Iso", ";semilep electron isolation;events/0.05", 40, 0, 2);
+  RecoDilepElectronsIso   = RecoDilepElectrons  ->dir.make<TH1F>("Iso", ";dilep electron isolation;events/0.05",   40, 0, 2);
+
   BasicKinematicHists* bkhs[6] = { RecoMuons, RecoSemilepMuons, RecoDilepMuons, RecoElectrons, RecoSemilepElectrons, RecoDilepElectrons };
   for (int i = 0; i < 6; ++i) {
     bkhs[i]->BookPt(100, 0, 1000, "10");
@@ -236,45 +261,46 @@ void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) 
     bkhs[i]->BookPhi(40, "0.157");
     bkhs[i]->BookDxy(40, -4, 4, "0.2");
     bkhs[i]->BookDz(40, -20, 20, "1");
+    bkhs[i]->BookQ();
   }
-  
+
   for (int i = 0; i < NLEPDISTS; ++i) {
-    RecoMuon[i] = bkh_factory->make(TString::Format("RecoMuon%i", i), TString::Format("reconstructed muon #%i", i));
+    RecoMuon[i] = bkh_factory->make(TString::Format("RecoMuon/pt#%i", i), TString::Format("reconstructed muon #%i", i));
     RecoMuon[i]->BookPt(100, 0, 1000, "10");
     RecoMuon[i]->BookEta(40, -3, 3, "0.15");
     RecoMuon[i]->BookPhi(40, "0.157");
     RecoMuon[i]->BookDxy(40, -4, 4, "0.2");
     RecoMuon[i]->BookDz(40, -20, 20, "1");
 
-    RecoSemilepMuon[i] = bkh_factory->make(TString::Format("RecoSemilepMuon%i", i), TString::Format("reconstructed semilep muon #%i", i));
+    RecoSemilepMuon[i] = bkh_factory->make(TString::Format("RecoSemilepMuon/pt#%i", i), TString::Format("reconstructed semilep muon #%i", i));
     RecoSemilepMuon[i]->BookPt(100, 0, 1000, "10");
     RecoSemilepMuon[i]->BookEta(40, -3, 3, "0.15");
     RecoSemilepMuon[i]->BookPhi(40, "0.157");
     RecoSemilepMuon[i]->BookDxy(40, -4, 4, "0.2");
     RecoSemilepMuon[i]->BookDz(40, -20, 20, "1");
 
-    RecoDilepMuon[i] = bkh_factory->make(TString::Format("RecoDilepMuon%i", i), TString::Format("reconstructed dilep muon #%i", i));
+    RecoDilepMuon[i] = bkh_factory->make(TString::Format("RecoDilepMuon/pt#%i", i), TString::Format("reconstructed dilep muon #%i", i));
     RecoDilepMuon[i]->BookPt(100, 0, 1000, "10");
     RecoDilepMuon[i]->BookEta(40, -3, 3, "0.15");
     RecoDilepMuon[i]->BookPhi(40, "0.157");
     RecoDilepMuon[i]->BookDxy(40, -4, 4, "0.2");
     RecoDilepMuon[i]->BookDz(40, -20, 20, "1");
 
-    RecoElectron[i] = bkh_factory->make(TString::Format("RecoElectron%i", i), TString::Format("reconstructed electron #%i", i));
+    RecoElectron[i] = bkh_factory->make(TString::Format("RecoElectron/pt#%i", i), TString::Format("reconstructed electron #%i", i));
     RecoElectron[i]->BookPt(100, 0, 1000, "10");
     RecoElectron[i]->BookEta(40, -3, 3, "0.15");
     RecoElectron[i]->BookPhi(40, "0.157");
     RecoElectron[i]->BookDxy(40, -4, 4, "0.2");
     RecoElectron[i]->BookDz(40, -20, 20, "1");
 
-    RecoSemilepElectron[i] = bkh_factory->make(TString::Format("RecoSemilepElectron%i", i), TString::Format("reconstructed semilep electron #%i", i));
+    RecoSemilepElectron[i] = bkh_factory->make(TString::Format("RecoSemilepElectron/pt#%i", i), TString::Format("reconstructed semilep electron #%i", i));
     RecoSemilepElectron[i]->BookPt(100, 0, 1000, "10");
     RecoSemilepElectron[i]->BookEta(40, -3, 3, "0.15");
     RecoSemilepElectron[i]->BookPhi(40, "0.157");
     RecoSemilepElectron[i]->BookDxy(40, -4, 4, "0.2");
     RecoSemilepElectron[i]->BookDz(40, -20, 20, "1");
 
-    RecoDilepElectron[i] = bkh_factory->make(TString::Format("RecoDilepElectron%i", i), TString::Format("reconstructed dilep electron #%i", i));
+    RecoDilepElectron[i] = bkh_factory->make(TString::Format("RecoDilepElectron/pt#%i", i), TString::Format("reconstructed dilep electron #%i", i));
     RecoDilepElectron[i]->BookPt(100, 0, 1000, "10");
     RecoDilepElectron[i]->BookEta(40, -3, 3, "0.15");
     RecoDilepElectron[i]->BookPhi(40, "0.157");
@@ -282,18 +308,19 @@ void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) 
     RecoDilepElectron[i]->BookDz(40, -20, 20, "1");
   }
 
-  RecoMETx = fs->make<TH1F>("RecoMETx", ";reconstructed METx (GeV);events/10 GeV", 40, -200, 200);
-  RecoMETy = fs->make<TH1F>("RecoMETy", ";reconstructed METy (GeV);events/10 GeV", 40, -200, 200);
-  RecoMET = fs->make<TH1F>("RecoMET", ";reconstructed MET (GeV);events/10 GeV", 30, 0, 300);
-  RecoMETSig = fs->make<TH1F>("RecoMETSig", ";MET significance;events/0.2", 100, 0, 20);
-  RecoMETSigProb = fs->make<TH1F>("RecoMETSigProb", ";P(MET significance);events/0.05", 20, 0, 1);
+  TFileDirectory met_dir = fs->mkdir("RecoMET");
+  RecoMETx = met_dir.make<TH1F>("RecoMETx", ";reconstructed METx (GeV);events/10 GeV", 40, -200, 200);
+  RecoMETy = met_dir.make<TH1F>("RecoMETy", ";reconstructed METy (GeV);events/10 GeV", 40, -200, 200);
+  RecoMET = met_dir.make<TH1F>("RecoMET", ";reconstructed MET (GeV);events/10 GeV", 30, 0, 300);
+  RecoMETSig = met_dir.make<TH1F>("RecoMETSig", ";MET significance;events/0.2", 100, 0, 20);
+  RecoMETSigProb = met_dir.make<TH1F>("RecoMETSigProb", ";P(MET significance);events/0.05", 20, 0, 1);
 
-  METxRes = fs->make<TH1F>("METxRes", ";METx resolution (GeV);events/10 GeV", 20, -100, 100);
-  METyRes = fs->make<TH1F>("METyRes", ";METy resolution (GeV);events/10 GeV", 20, -100, 100);
-  METRes = fs->make<TH1F>("METRes", ";MET resolution (GeV);events/10 GeV", 20, 0, 200);
-  METResVsSig = fs->make<TH2F>("METResVsSig", ";MET significance;MET resolution (GeV)", 40, 0, 20, 20, 0, 200);
-  METResVsJetHT = fs->make<TH2F>("METResVsJetHT", ";reconstructed jet H_{T};MET resolution (GeV)", 40, 0, 2000, 20, 0, 200);
-  METResVsNPV = fs->make<TH2F>("METResVsNPV", ";number of primary vertices;MET resolution (GeV)", 25, 0, 75, 20, 0, 200);
+  METxRes = met_dir.make<TH1F>("METxRes", ";METx resolution (GeV);events/10 GeV", 20, -100, 100);
+  METyRes = met_dir.make<TH1F>("METyRes", ";METy resolution (GeV);events/10 GeV", 20, -100, 100);
+  METRes = met_dir.make<TH1F>("METRes", ";MET resolution (GeV);events/10 GeV", 20, 0, 200);
+  METResVsSig = met_dir.make<TH2F>("METResVsSig", ";MET significance;MET resolution (GeV)", 40, 0, 20, 20, 0, 200);
+  METResVsJetHT = met_dir.make<TH2F>("METResVsJetHT", ";reconstructed jet H_{T};MET resolution (GeV)", 40, 0, 2000, 20, 0, 200);
+  METResVsNPV = met_dir.make<TH2F>("METResVsNPV", ";number of primary vertices;MET resolution (GeV)", 25, 0, 75, 20, 0, 200);
 }
 
 float mag(double x, double y) {
@@ -402,7 +429,7 @@ void MFVNeutralinoResolutionsHistogrammer::analyze(const edm::Event& event, cons
     }
   }
 
-  RecoJetHT->Fill(jet_ht);
+  RecoJetsHT->Fill(jet_ht);
 
   for (int j = 0; j < int(b_discriminators.size()); ++j)
     NBTags[j]->Fill(n_btags[j], weight);
