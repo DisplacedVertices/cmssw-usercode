@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 #include "TH1F.h"
 #include "TH2F.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -21,7 +20,7 @@
 
 #define NJETDISTS 20
 #define NBJETDISTS 10
-#define NBDISC 7
+#define NBDISC 13
 #define NLEPDISTS 5
 
 class MFVNeutralinoResolutionsHistogrammer : public edm::EDAnalyzer {
@@ -212,7 +211,7 @@ void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) 
     const char* bdisc_name = b_discriminators[j].c_str();
     TFileDirectory bdisc_dir = mkdir(fs, TString::Format("bdisc_%s", bdisc_name));
     NBTags[j]    = bdisc_dir.make<TH1F>("NBTags", TString::Format(";number of b-tagged (%s) jets;events",    bdisc_name), 20, 0, 20);
-    JetBDiscs[j] = bdisc_dir.make<TH1F>("BDiscs", TString::Format(";b-discriminator (%s) value;events/0.05", bdisc_name), 200, 0, 10);
+    JetBDiscs[j] = bdisc_dir.make<TH1F>("BDiscs", TString::Format(";b-discriminator (%s) value;events/0.1", bdisc_name), 200, -10, 10);
     
     RecoBJets[j] = bkh_factory->make(TString::Format("bdisc_%s/RecoBJets", bdisc_name), TString::Format("b-tagged (%s) jets", bdisc_name));
     RecoBJets[j]->BookPt(100, 0, 1000, "10");
@@ -220,7 +219,7 @@ void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) 
     RecoBJets[j]->BookPhi(40, "0.157");
   
     for (int i = 0; i < NJETDISTS; ++i)
-      JetBDisc[j][i] = mkdir(fs, TString::Format("RecoJet/pt#%i/bdisc_%s", i, bdisc_name)).make<TH1F>("BDisc", TString::Format(";jet #%i b-discriminator (%s) value;events/0.05", i, bdisc_name), 200, 0, 10);
+      JetBDisc[j][i] = mkdir(fs, TString::Format("RecoJet/pt#%i/bdisc_%s", i, bdisc_name)).make<TH1F>("BDisc", TString::Format(";jet #%i b-discriminator (%s) value;events/0.1", i, bdisc_name), 200, -10, 10);
 
     for (int i = 0; i < NBJETDISTS; ++i) {
       RecoBJet[j][i] = bkh_factory->make(TString::Format("bdisc_%s/RecoBJet/pt#%i", bdisc_name, i), TString::Format("b-tagged (%s) jet #%i", bdisc_name, i));
