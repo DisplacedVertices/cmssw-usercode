@@ -11,6 +11,7 @@ assert runOnMC
 process = cms.Process('PAT')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root'))
+#process.source.fileNames = ['/store/user/tucker/mfvneutralino_genfsimreco_tau100um/mfvneutralino_genfsimreco_tau100um/465709e5340ac2cc11e2751b48bbef3e/fastsim_10_3_JMz.root']
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
@@ -272,7 +273,7 @@ if suppress_stdout:
     buf.close()
     hsh = hash(pat_output)
     #open('pat_spam.txt', 'wt').write(pat_output)
-    hsh_expected = -6137441689280519667 if runOnMC else -3882518544097161276
+    hsh_expected = 3033790049475715351 if runOnMC else -3882518544097161276
     print 'PAT is done (spam hash %s, expected %s).' % (hsh, hsh_expected)
     if hsh != hsh_expected:
         from JMTucker.Tools.general import big_warn
@@ -293,9 +294,12 @@ def input_is_pythia8():
 def keep_general_tracks():
     process.out.outputCommands.append('keep *_generalTracks_*_*')
 
-#input_is_fastsim()
-#input_is_pythia8()
-#keep_general_tracks()
+if 'fastsim' in sys.argv:
+    input_is_fastsim()
+if 'pythia8' in sys.argv:
+    input_is_pythia8()
+if 'keep_tracks' in sys.argv:
+    keep_general_tracks()
 
 #open('dumptup.py','wt').write(process.dumpPython())
 
