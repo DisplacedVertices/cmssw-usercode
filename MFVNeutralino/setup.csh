@@ -2,7 +2,7 @@
 
 pushd $CMSSW_BASE/src
 
-cvs co -d JMTucker/Tools UserCode/JMTucker/Tools
+cvs co -r version0 -d JMTucker/Tools UserCode/JMTucker/Tools
 
 source JMTucker/Tools/setup.csh
 
