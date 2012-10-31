@@ -60,15 +60,14 @@ if running_script and 'table' in sys.argv:
         if apply_prescales:
             import prescales
             l1, hlt, overall = prescales.get(path)
+            if overall > 0:
+                eff /= overall
+                lo /= overall
+                hi /= overall
+            elif overall == 0:
+                eff = lo = hi = 0.
         else:
-            l1, hlt, overall = 0, 0, 0
-        
-        if overall > 0:
-            eff /= overall
-            lo /= overall
-            hi /= overall
-        else:
-            eff = lo = hi = 0.
+            l1, hlt, overall = -1, -1, -1
 
         content.append((i-1, path, eff, lo, hi, l1, hlt, overall))
 
