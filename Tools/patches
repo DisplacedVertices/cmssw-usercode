@@ -1,0 +1,103 @@
+Index: PhysicsTools/PatAlgos/python/tools/jetTools.py
+===================================================================
+RCS file: /local/reps/CMSSW/CMSSW/PhysicsTools/PatAlgos/python/tools/jetTools.py,v
+retrieving revision 1.77.2.2.2.3
+diff -u -r1.77.2.2.2.3 jetTools.py
+--- PhysicsTools/PatAlgos/python/tools/jetTools.py	5 Jul 2012 14:55:07 -0000	1.77.2.2.2.3
++++ PhysicsTools/PatAlgos/python/tools/jetTools.py	31 Oct 2012 16:27:40 -0000
+@@ -24,8 +24,8 @@
+         self.addParameter(self._defaultParameters,'jetCollection',self._defaultValue, 'input jet collection',Type=cms.InputTag)
+         self.addParameter(self._defaultParameters,'label',self._defaultValue, 'postfix label to identify new sequence/modules', Type=str)
+         self.addParameter(self._defaultParameters,'postfix',"", "postfix of default sequence (do not confuse with 'label')")
+-        self.addParameter(self._defaultParameters,'btagInfo',['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','softElectronTagInfos'],"input btag info",allowedValues=['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','softElectronTagInfos'],Type=list)
+-        self.addParameter(self._defaultParameters,'btagdiscriminators',['jetBProbabilityBJetTags', 'jetProbabilityBJetTags','trackCountingHighPurBJetTags','trackCountingHighEffBJetTags','simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags'],"input btag discriminators", allowedValues=['jetBProbabilityBJetTags', 'jetProbabilityBJetTags', 'trackCountingHighPurBJetTags', 'trackCountingHighEffBJetTags', 'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags'],Type=list)
++        self.addParameter(self._defaultParameters,'btagInfo',['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','inclusiveSecondaryVertexFinderTagInfosFiltered','softElectronTagInfos'],"input btag info",allowedValues=['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','inclusiveSecondaryVertexFinderTagInfosFiltered','softElectronTagInfos'],Type=list)
++        self.addParameter(self._defaultParameters,'btagdiscriminators',['jetBProbabilityBJetTags', 'jetProbabilityBJetTags','trackCountingHighPurBJetTags','trackCountingHighEffBJetTags','simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','simpleInclusiveSecondaryVertexHighEffBJetTags','simpleInclusiveSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags','doubleSecondaryVertexHighEffBJetTags'],"input btag discriminators", allowedValues=['jetBProbabilityBJetTags', 'jetProbabilityBJetTags', 'trackCountingHighPurBJetTags', 'trackCountingHighEffBJetTags', 'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','simpleInclusiveSecondaryVertexHighEffBJetTags','simpleInclusiveSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags','doubleSecondaryVertexHighEffBJetTags'],Type=list)
+ 
+         self._parameters=copy.deepcopy(self._defaultParameters)
+         self._comment = ""
+@@ -112,6 +112,7 @@
+         ipTILabel = 'impactParameterTagInfos'     + label + postfix
+         svTILabel = 'secondaryVertexTagInfos'     + label + postfix
+         ivfTILabel = 'inclusiveSecondaryVertexFinderTagInfos'     + label + postfix
++        ivfFiltTILabel = 'inclusiveSecondaryVertexFinderTagInfosFiltered'     + label + postfix
+         nvTILabel = 'secondaryVertexNegativeTagInfos'     + label + postfix
+         seTILabel = 'softElectronTagInfos'        + label + postfix
+         smTILabel = 'softMuonTagInfos'            + label + postfix
+@@ -145,6 +146,8 @@
+                         setattr( process, nvTILabel, btag.secondaryVertexNegativeTagInfos.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
+                 if TagInfo=='inclusiveSecondaryVertexFinderTagInfos':
+                         setattr( process, ivfTILabel, btag.inclusiveSecondaryVertexFinderTagInfos.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
++                if TagInfo=='inclusiveSecondaryVertexFinderTagInfosFiltered':
++                        setattr( process, ivfFiltTILabel, btag.inclusiveSecondaryVertexFinderTagInfosFiltered.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
+ 
+         print
+         print "The bdiscriminators below will be written to the jet collection in the PATtuple (default is all, see PatAlgos/PhysicsTools/python/tools/jetTools.py)"
+@@ -159,6 +162,10 @@
+                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(svTILabel))
+                         setattr(process, tag+label+postfix, tagInfo)
+ 
++                if tag == 'simpleInclusiveSecondaryVertexHighEffBJetTags' or tag == 'simpleInclusiveSecondaryVertexHighPurBJetTags':
++                        tagInfo=getattr(btag,tag).clone(tagInfos = vit(ivfFiltTILabel))
++                        setattr(process, tag+label+postfix, tagInfo)
++
+                 if tag == 'combinedSecondaryVertexBJetTags' or tag == 'combinedSecondaryVertexMVABJetTags':
+                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(ipTILabel,svTILabel))
+                         setattr(process, tag+label+postfix, tagInfo)
+@@ -175,6 +182,10 @@
+                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(ipTILabel,ivfTILabel))
+                         setattr(process, tag+label+postfix, tagInfo)
+ 
++                if tag == 'doubleSecondaryVertexHighEffBJetTags' :
++                        tagInfo=getattr(btag,tag).clone(tagInfos = vit(ivfFiltTILabel))
++                        setattr(process, tag+label+postfix, tagInfo)
++
+                 if tag == 'combinedMVABJetTags' :
+                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(ipTILabel, ivfTILabel,smTILabel,seTILabel))
+                         setattr(process, tag+label+postfix, tagInfo)
+@@ -208,6 +219,7 @@
+         ## add a combined sequence to the process
+         seq = mkseq(process, 'btaggingTagInfos'+label+postfix, 'btaggingJetTags' + label + postfix)
+         setattr( process, 'btagging'+label+postfix, seq )
++        ivfSeqDone=False
+         ## return the combined sequence and the labels defined above
+         if seTILabel in seq.moduleNames():
+             setattr( process, 'softElectronCands', btag.softElectronCands )
+@@ -215,7 +227,14 @@
+         if ivfTILabel in seq.moduleNames():
+             process.load( 'RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff' )
+             seq.replace( getattr( process, ivfTILabel ), ( process.inclusiveVertexing * getattr( process, ivfTILabel ) ) )
+-
++            ivfSeqDone=True
++        if ivfFiltTILabel in seq.moduleNames():
++            #check if inclusive vertexing already present
++            if ivfSeqDone:
++                seq.replace( getattr( process, ivfFiltTILabel ), ( process.inclusiveMergedVerticesFiltered * process.bToCharmDecayVertexMerged * getattr( process, ivfFiltTILabel ) ) )
++            else:
++                seq.replace( getattr( process, ivfFiltTILabel ), ( process.inclusiveVertexing * process.inclusiveMergedVerticesFiltered * process.bToCharmDecayVertexMerged * getattr( process, ivfFiltTILabel ) ) )
++                
+         if hasattr(process, "addAction"):
+             process.enableRecording()
+             action=self.__copy__()
+@@ -240,8 +259,8 @@
+         self.addParameter(self._defaultParameters,'jetCollection',self._defaultValue,'Input jet collection', cms.InputTag)
+         self.addParameter(self._defaultParameters,'algoLabel',self._defaultValue, "label to indicate the jet algorithm (e.g.'AK5')",str)
+         self.addParameter(self._defaultParameters,'typeLabel',self._defaultValue, "label to indicate the type of constituents (e.g. 'Calo', 'Pflow', 'Jpt', ...)",str)
+-        self.addParameter(self._defaultParameters,'btagInfo',['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','softElectronTagInfos'],"input btag info",allowedValues=['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','softElectronTagInfos'],Type=list)
+-        self.addParameter(self._defaultParameters,'btagdiscriminators',['jetBProbabilityBJetTags', 'jetProbabilityBJetTags','trackCountingHighPurBJetTags','trackCountingHighEffBJetTags','simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags'],"input btag discriminators", allowedValues=['jetBProbabilityBJetTags', 'jetProbabilityBJetTags', 'trackCountingHighPurBJetTags', 'trackCountingHighEffBJetTags', 'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags'],Type=list)
++        self.addParameter(self._defaultParameters,'btagInfo',['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','inclusiveSecondaryVertexFinderTagInfosFiltered','softElectronTagInfos'],"input btag info",allowedValues=['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','inclusiveSecondaryVertexFinderTagInfosFiltered','softElectronTagInfos'],Type=list)
++        self.addParameter(self._defaultParameters,'btagdiscriminators',['jetBProbabilityBJetTags', 'jetProbabilityBJetTags','trackCountingHighPurBJetTags','trackCountingHighEffBJetTags','simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','simpleInclusiveSecondaryVertexHighEffBJetTags','simpleInclusiveSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags','doubleSecondaryVertexHighEffBJetTags'],"input btag discriminators", allowedValues=['jetBProbabilityBJetTags', 'jetProbabilityBJetTags', 'trackCountingHighPurBJetTags', 'trackCountingHighEffBJetTags', 'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','simpleInclusiveSecondaryVertexHighEffBJetTags','simpleInclusiveSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags','doubleSecondaryVertexHighEffBJetTags'],Type=list)
+         self.addParameter(self._defaultParameters,'doJTA',True, "run b tagging sequence for new jet collection and add it to the new pat jet collection")
+         self.addParameter(self._defaultParameters,'doBTagging',True, 'run JetTracksAssociation and JetCharge and add it to the new pat jet collection (will autom. be true if doBTagging is set to true)')
+         self.addParameter(self._defaultParameters,'jetCorrLabel',None, "payload and list of new jet correction labels, such as (\'AK5Calo\',[\'L2Relative\', \'L3Absolute\'])", tuple,acceptNoneValue=True )
+@@ -630,8 +649,8 @@
+     def __init__(self):
+         ConfigToolBase.__init__(self)
+         self.addParameter(self._defaultParameters,'jetCollection',self._defaultValue,'Input jet collection', cms.InputTag)
+-        self.addParameter(self._defaultParameters,'btagInfo',['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','softElectronTagInfos'],"input btag info",allowedValues=['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','softElectronTagInfos'],Type=list)
+-        self.addParameter(self._defaultParameters,'btagdiscriminators',['jetBProbabilityBJetTags', 'jetProbabilityBJetTags','trackCountingHighPurBJetTags','trackCountingHighEffBJetTags','simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags'],"input btag discriminators", allowedValues=['jetBProbabilityBJetTags', 'jetProbabilityBJetTags', 'trackCountingHighPurBJetTags', 'trackCountingHighEffBJetTags', 'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags'],Type=list)
++        self.addParameter(self._defaultParameters,'btagInfo',['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','inclusiveSecondaryVertexFinderTagInfosFiltered','softElectronTagInfos'],"input btag info",allowedValues=['impactParameterTagInfos','secondaryVertexTagInfos','softMuonTagInfos','secondaryVertexNegativeTagInfos','inclusiveSecondaryVertexFinderTagInfos','inclusiveSecondaryVertexFinderTagInfosFiltered','softElectronTagInfos'],Type=list)
++        self.addParameter(self._defaultParameters,'btagdiscriminators',['jetBProbabilityBJetTags', 'jetProbabilityBJetTags','trackCountingHighPurBJetTags','trackCountingHighEffBJetTags','simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','simpleInclusiveSecondaryVertexHighEffBJetTags','simpleInclusiveSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags','doubleSecondaryVertexHighEffBJetTags'],"input btag discriminators", allowedValues=['jetBProbabilityBJetTags', 'jetProbabilityBJetTags', 'trackCountingHighPurBJetTags', 'trackCountingHighEffBJetTags', 'simpleSecondaryVertexHighEffBJetTags','simpleSecondaryVertexHighPurBJetTags','simpleInclusiveSecondaryVertexHighEffBJetTags','simpleInclusiveSecondaryVertexHighPurBJetTags','combinedSecondaryVertexBJetTags','combinedSecondaryVertexMVABJetTags','softMuonBJetTags','softMuonByPtBJetTags','softMuonByIP3dBJetTags','simpleSecondaryVertexNegativeHighEffBJetTags','simpleSecondaryVertexNegativeHighPurBJetTags','negativeTrackCountingHighEffJetTags','negativeTrackCountingHighPurJetTags','combinedInclusiveSecondaryVertexBJetTags','combinedMVABJetTags','doubleSecondaryVertexHighEffBJetTags'],Type=list)
+ 	self.addParameter(self._defaultParameters,'doJTA',True, "run b tagging sequence for new jet collection and add it to the new pat jet collection")
+         self.addParameter(self._defaultParameters,'doBTagging',True, 'run JetTracksAssociation and JetCharge and add it to the new pat jet collection (will autom. be true if doBTagging is set to true)')
+         self.addParameter(self._defaultParameters,'jetCorrLabel',None, "payload and list of new jet correction labels, such as (\'AK5Calo\',[\'L2Relative\', \'L3Absolute\'])", tuple,acceptNoneValue=True )
