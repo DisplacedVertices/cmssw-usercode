@@ -15,6 +15,11 @@ addpkg CommonTools/ParticleFlow
 addpkg PhysicsTools/PatUtils
 addpkg PhysicsTools/SelectorUtils
 
+cvs co -r V01-10-02 RecoBTag/SecondaryVertex
+addpkg RecoBTag/Configuration
+
+patch -p0 < JMTucker/Tools/patches
+
 scram b -j 8
 popd
 
