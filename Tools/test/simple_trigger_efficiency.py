@@ -44,10 +44,9 @@ if running_script and 'table' in sys.argv:
     hnum, hden = get_hists(f, 'SimpleTriggerEfficiencyMuInAcc')
     print 'number of events:', hden.GetBinContent(1)
 
-    apply_prescales = True
+    apply_prescales = False
     
     from JMTucker.Tools.ROOTTools import clopper_pearson
-    import prescales
     width = 0
     content = []
     for i in xrange(1, hden.GetNbinsX() + 1):
@@ -58,15 +57,18 @@ if running_script and 'table' in sys.argv:
         den = hden.GetBinContent(i)
         eff, lo, hi = clopper_pearson(num, den)
 
-        l1, hlt, overall = prescales.get(path)
-            
         if apply_prescales:
-            if overall > 0:
-                eff /= overall
-                lo /= overall
-                hi /= overall
-            else:
-                eff = lo = hi = 0.
+            import prescales
+            l1, hlt, overall = prescales.get(path)
+        else:
+            l1, hlt, overall = 0, 0, 0
+        
+        if overall > 0:
+            eff /= overall
+            lo /= overall
+            hi /= overall
+        else:
+            eff = lo = hi = 0.
 
         content.append((i-1, path, eff, lo, hi, l1, hlt, overall))
 
