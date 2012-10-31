@@ -104,4 +104,41 @@ if running_script and 'compare' in sys.argv:
 ################################################################################
             
 if running_script and 'submit' in sys.argv:
-    pass
+    crab_cfg = '''
+[CRAB]
+jobtype = cmssw
+scheduler = condor
+
+[CMSSW]
+%(dbs_url)s
+datasetpath = %(dataset)s
+pset = simple_trigger_efficiency.py
+%(job_control)s
+
+[USER]
+ui_working_dir = crab/simple_trigger_efficiency/crab_ste_%(name)s
+return_data = 1
+'''
+
+    os.system('mkdir -p crab/simple_trigger_efficiency')
+    just_testing = 'testing' in sys.argv
+
+    def submit(sample):
+        #new_py = open('simple_trigger_efficiency.py').read()
+        #open('simple_trigger_efficiency_crab.py', 'wt').write(new_py)
+        open('crab.cfg', 'wt').write(crab_cfg % sample)
+        if not just_testing:
+            os.system('crab -create -submit')
+            os.system('rm -f crab.cfg simple_trigger_efficiency_crab.py simple_trigger_efficiency_crab.pyc')
+        else:
+            print '.py diff:\n---------'
+            os.system('diff -uN simple_trigger_efficiency.py simple_trigger_efficiency_crab.py')
+            raw_input('ok?')
+            print '\ncrab.cfg:\n---------'
+            os.system('cat crab.cfg')
+            raw_input('ok?')
+            print
+
+    from JMTucker.Tools.Samples import mfv_signal_samples
+    for sample in mfv_signal_samples:
+        submit(sample)
