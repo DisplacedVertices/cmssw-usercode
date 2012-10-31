@@ -37,17 +37,22 @@ SimpleTriggerEfficiency::SimpleTriggerEfficiency(const edm::ParameterSet& cfg)
     triggers2d_pass_num(0),
     triggers2d_pass_den(0)
 {
-  const std::vector<std::string>& prescale_paths = cfg.getParameter<std::vector<std::string> >("prescale_paths");
-  const std::vector<unsigned>& prescale_values = cfg.getParameter<std::vector<unsigned> >("prescale_values");
-  if (prescale_paths.size() != prescale_values.size())
-    throw cms::Exception("SimpleTriggerEfficiency") << "size mismatch: prescale_paths: " << prescale_paths.size() << " prescale_values: " << prescale_values.size();
-  for (size_t i = 0; i < prescale_paths.size(); ++i)
-    prescales[prescale_paths[i]] = prescale_values[i];
-  if (prescale_paths.size() > 0 && !rng.isAvailable())
-    throw cms::Exception("SimpleTriggerEfficiency") << "RandomNumberGeneratorService not available for prescaling!\n";
+  if (cfg.existsAs<std::vector<std::string> >("prescale_paths")) {
+    const std::vector<std::string>& prescale_paths = cfg.getParameter<std::vector<std::string> >("prescale_paths");
+    const std::vector<unsigned>& prescale_values = cfg.getParameter<std::vector<unsigned> >("prescale_values");
+    if (prescale_paths.size() != prescale_values.size())
+      throw cms::Exception("SimpleTriggerEfficiency") << "size mismatch: prescale_paths: " << prescale_paths.size() << " prescale_values: " << prescale_values.size();
+    for (size_t i = 0; i < prescale_paths.size(); ++i)
+      prescales[prescale_paths[i]] = prescale_values[i];
+    if (prescale_paths.size() > 0 && !rng.isAvailable())
+      throw cms::Exception("SimpleTriggerEfficiency") << "RandomNumberGeneratorService not available for prescaling!\n";
+  }
 }
 
 bool SimpleTriggerEfficiency::pass_prescale(std::string path) const {
+  // prescales map is empty => all paths have prescale 1.
+  if (prescales.size() == 0)
+    return true;
   size_t pos = path.rfind("_v");
   if (pos != std::string::npos)
     path.erase(pos);
