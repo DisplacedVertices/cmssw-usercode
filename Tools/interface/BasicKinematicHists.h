@@ -9,8 +9,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
 struct BasicKinematicHists {
-  edm::Service<TFileService>* fs;
-  TString name;
+  TFileDirectory dir;
   TString nice;
 
   TH1F* E;
@@ -25,20 +24,15 @@ struct BasicKinematicHists {
   TH1F* Dz;
   TH1F* Q;
 
-  BasicKinematicHists()
-    : fs(0), name(""), nice("") { reset(); }
-
-  BasicKinematicHists(edm::Service<TFileService>& fs_, const TString& name_, const TString& nice_)
-    : fs(&fs_), name(name_), nice(nice_) { reset(); }
+  BasicKinematicHists(TFileDirectory dir_, const TString& nice_)
+    : dir(dir_), nice(nice_) { reset(); }
 
   void reset() {
     E = P = Pt = Pz = M = Rap = Eta = Phi = Dxy = Dz = Q = 0;
   }
 
   TH1F* Book(const TString& subname, const TString& subnice, const int nbins, const double min, const double max, const TString& binning) {
-    if (fs == 0)
-      throw cms::Exception("BasicKinematicHists") << "fs not set before call to Book(...)";
-    return (*fs)->make<TH1F>(name + subname, ";" + nice + " " + subnice + ";events/" + binning, nbins, min, max);
+    return dir.make<TH1F>(subname, ";" + nice + " " + subnice + ";events/" + binning, nbins, min, max);
   }
   
   void BookE(int nbins, double min, double max, const TString& binning) {
@@ -96,26 +90,6 @@ struct BasicKinematicHists {
 
   void BookQ() {
     Q = Book("Q", "charge", 3, -1, 2, "1");
-  }
-
-  // backwards compatibility because I am too lazy to change GenHistos
-  // right now...
-  void Book(edm::Service<TFileService>& fs_, const TString& name_, const TString& nice_,
-	    int nbins_E, double min_E, double max_E, const TString& binning_E,
-	    int nbins_Pt, double min_Pt, double max_Pt, const TString& binning_Pt,
-	    int nbins_Pz, double min_Pz, double max_Pz, const TString& binning_Pz,
-	    int nbins_M, double min_M, double max_M, const TString& binning_M) {
-    fs = &fs_;
-    name = name_;
-    nice = nice_;
-    BookE(nbins_E, min_E, max_E, binning_E);
-    BookP(nbins_E, min_E, max_E, binning_E);
-    BookPt(nbins_E, min_E, max_E, binning_E);
-    BookPz(nbins_E, min_E, max_E, binning_E);
-    BookM(nbins_E, min_E, max_E, binning_E);
-    BookRap(120, -6, 6, "0.1");
-    BookEta(120, -6, 6, "0.1");
-    BookPhi(100, -3.1416, 3.1416, "0.063");
   }
 
   void Fill(const reco::Candidate* c) {
@@ -201,12 +175,21 @@ struct BasicKinematicHistsFactory {
     hists.clear();
   }
 
-  BasicKinematicHists* make(const char* name, const char* nice) {
-    return hists[name] = new BasicKinematicHists(fs, name, nice);
+  BasicKinematicHists* make(TFileDirectory& dir, const char* nice) {
+    return hists[dir.fullPath()] = new BasicKinematicHists(dir, nice);
   }
 
-  BasicKinematicHists* make(const TString& name, const TString& nice) {
-    return make(name.Data(), nice.Data());
+  BasicKinematicHists* make(const std::string& dir_path, const char* nice) {
+    TFileDirectory dir = fs->mkdir(dir_path);
+    return make(dir, nice);
+  }
+
+  BasicKinematicHists* make(const TString& dir_path, const char* nice) {
+    return make(std::string(dir_path.Data()), nice);
+  }
+
+  BasicKinematicHists* make(const char* dir_path, const char* nice) {
+    return make(std::string(dir_path), nice);
   }
 
   BasicKinematicHists* operator[](const std::string& name) const {
