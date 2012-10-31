@@ -14,7 +14,7 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
-  bool check_gen_particles;
+  const bool check_gen_particles;
   unsigned run;
   unsigned lumi;
   unsigned evt;
@@ -22,7 +22,9 @@ private:
   TTree* tree;
 };
 
-EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg) {
+EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg) 
+  : check_gen_particles(cfg.existsAs<bool>("check_gen_particles") && cfg.getParameter<bool>("check_gen_particles"))
+{
   edm::Service<TFileService> fs;
 
   tree = fs->make<TTree>("event_ids", "");
@@ -30,7 +32,6 @@ EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg) {
   tree->Branch("lumi",  &lumi,  "lumi/i");
   tree->Branch("event", &evt,   "event/i");
 
-  check_gen_particles = cfg.existsAs<bool>("check_gen_particles") && cfg.getParameter<bool>("check_gen_particles");
   if (check_gen_particles)
     tree->Branch("first_parton_pz", &first_parton_pz, "first_parton_pz/F");
 
