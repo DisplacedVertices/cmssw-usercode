@@ -5,4 +5,5 @@
   <use name="clhep"/>
   <use name="CommonTools/UtilAlgos"/>
   <use name="HLTrigger/HLTcore"/>
+  <use name="JMTucker/Tools"/>
 </library>
