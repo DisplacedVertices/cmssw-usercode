@@ -3,7 +3,7 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 
 void MCInteractionTopsFromStops::Clear() {
-  MCInteraction::Clear();
+  MCInteractionTops::Clear();
   for (int i = 0; i < 2; ++i) {
     stops[i] = neutralinos[i] = 0;
     gluons_from_stops[i].clear();
@@ -36,14 +36,14 @@ void MCInteractionTopsFromStops::Fill() {
 	       "at least one stop doesn't have at least two daughters: stop %i stopbar %i",
 	       stops[0]->numberOfDaughters(), stops[1]->numberOfDaughters());
 
-    neutralinos[0] = dynamic_cast<const reco::GenParticle*>(get_daughter_with_id(stops[0], 1000022));
-    neutralinos[1] = dynamic_cast<const reco::GenParticle*>(get_daughter_with_id(stops[1], 1000022));
+    neutralinos[0] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(stops[0], 1000022));
+    neutralinos[1] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(stops[1], 1000022));
     die_if_not(neutralinos[0] && neutralinos[1],
 	       "at least one neutralino not found: from_stop %p from_stopbar %p",
 	       neutralinos[0], neutralinos[1]);
 
-    get_daughters_with_id(stops[0], 21, gluons_from_stops[0]);
-    get_daughters_with_id(stops[1], 21, gluons_from_stops[1]);
+    daughters_with_id(stops[0], 21, gluons_from_stops[0]);
+    daughters_with_id(stops[1], 21, gluons_from_stops[1]);
   }
 
   MCInteractionTops::Fill();
@@ -70,6 +70,10 @@ void MCInteractionTopsFromStops::SetFourVectors() {
 }
 
 void MCInteractionTopsFromStops::Print(std::ostream& out) {
+  if (!Valid()) {
+    out << "not valid\n";
+    return;
+  }
   print_gen_and_daus(0,                       "header",                  *gen_particles);
   print_gen_and_daus(stop,                    "stop",                    *gen_particles);
   print_gen_and_daus(stopbar,                 "stopbar",                 *gen_particles);
