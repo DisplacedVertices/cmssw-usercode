@@ -29,7 +29,12 @@ struct MCInteraction {
   TLorentzVector p4_neutrinosum;
   TLorentzVector p4_missingsum;
 
-  MCInteraction();
+  enum Generator { pythia6, pythia8 };
+  Generator generator;
+
+  MCInteraction(Generator=pythia6);
+
+  bool FromHardInteraction(const reco::Candidate*) const;
 
   virtual void Init(const reco::GenParticleCollection&, const reco::GenJetCollection&, const reco::GenMET&);
 

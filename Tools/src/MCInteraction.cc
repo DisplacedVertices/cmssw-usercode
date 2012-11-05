@@ -13,8 +13,18 @@ MCInteraction::dif_lepton_pair::dif_lepton_pair(const reco::Candidate* chg, cons
 {
 }
 
-MCInteraction::MCInteraction() {
+MCInteraction::MCInteraction(MCInteraction::Generator g)
+  : generator(g)
+{
   Clear();
+}
+
+bool MCInteraction::FromHardInteraction(const reco::Candidate* p) const {
+  switch (generator) {
+  case pythia6: return p->status() == 3;
+  case pythia8: return p->status() >= 21 && p->status() <= 29;
+  default: return false;
+  }
 }
 
 void MCInteraction::Init(const reco::GenParticleCollection& gen_particles_,
@@ -68,9 +78,9 @@ void MCInteraction::FindDIFLeptons() {
     die_if_not(nu->numberOfMothers() == 1, "neutrino at index %i with # mothers = %i", i, nu->numberOfMothers());
     const reco::Candidate* nu_mom = nu->mother();
     if (nu_mom->pdgId() == nu->pdgId())
-      while (nu_mom->status() != 3)
+      while (!FromHardInteraction(nu_mom))
 	nu_mom = nu_mom->mother();
-
+    
     if (debug) {
       printf("status-3 neutrino mother (& = %p) found with pdgId %i and status %i. number of daughters %i\n", (void*)nu_mom, nu_mom->pdgId(), nu_mom->status(), int(nu_mom->numberOfDaughters()));
       printf("immediate_nus: ");
@@ -144,8 +154,8 @@ void MCInteraction::FindDIFJets() {
 
 void MCInteraction::SetFourVectors() {
   p4_dif_neutrinosum = TLorentzVector();
-  for (int i = 0, ie = int(dif_leptons.size()); i < ie; ++i)
-    p4_dif_neutrinosum += dif_leptons[i].p4_neutrino;
+  for (const auto& dif : dif_leptons)
+    p4_dif_neutrinosum += dif.p4_neutrino;
   
   p4_neutrinosum = p4_dif_neutrinosum;
   p4_missingsum = p4_neutrinosum;
