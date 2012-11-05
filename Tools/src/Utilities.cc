@@ -37,7 +37,7 @@ TLorentzVector make_tlv(const reco::Candidate::LorentzVector& lv) {
 }
 
 TLorentzVector make_tlv(const reco::Candidate* c) {
-  return make_tlv(c->p4());
+  return c == 0 ? TLorentzVector() : make_tlv(c->p4());
 }
 
 TLorentzVector make_tlv(const reco::Candidate& c) {
