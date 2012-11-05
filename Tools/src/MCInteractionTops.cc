@@ -37,14 +37,14 @@ void MCInteractionTops::Fill() {
 	     "at least one top doesn't have at least two daughters: top %i topbar %i",
 	     tops[0]->numberOfDaughters(), tops[1]->numberOfDaughters());
 
-  Ws[0] = dynamic_cast<const reco::GenParticle*>(get_daughter_with_id(top,     24));
-  Ws[1] = dynamic_cast<const reco::GenParticle*>(get_daughter_with_id(topbar, -24));
-  bottoms[0] = dynamic_cast<const reco::GenParticle*>(get_daughter_with_id(top,     5));
-  bottoms[1] = dynamic_cast<const reco::GenParticle*>(get_daughter_with_id(topbar, -5));
+  Ws[0] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(top,     24));
+  Ws[1] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(topbar, -24));
+  bottoms[0] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(top,     5));
+  bottoms[1] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(topbar, -5));
   die_if_not(Ws[0] && Ws[1], "at least one W not found: W+ %p W- %p", Ws[0], Ws[1]);
 
-  get_daughters_with_id(tops[0], 21, gluons_from_tops[0]);
-  get_daughters_with_id(tops[1], 21, gluons_from_tops[1]);
+  daughters_with_id(tops[0], 21, gluons_from_tops[0]);
+  daughters_with_id(tops[1], 21, gluons_from_tops[1]);
 
   // W decays: hadronic, semi-leptonic, or dileptonic?
   assert(Ws[0]->numberOfDaughters() == 3 &&
@@ -87,8 +87,8 @@ void MCInteractionTops::Fill() {
 void MCInteractionTops::SetFourVectors() {
   for (int i = 0; i < 2; ++i) {
     p4_tops[i] = make_tlv(tops[i]);
-    p4_Ws[i] = make_tlv(Ws[i]);
-    p4_bottoms[i] = bottoms[i] ? make_tlv(bottoms[i]) : TLorentzVector();
+    p4_Ws  [i] = make_tlv(Ws[i]);
+    p4_bottoms[i] = make_tlv(bottoms[i]);
     for (int j = 0; j < 2; ++j)
       p4_W_daughters[i][j] = make_tlv(W_daughters[i][j]);
   }
@@ -111,6 +111,10 @@ void MCInteractionTops::SetFourVectors() {
 }
 
 void MCInteractionTops::Print(std::ostream& out) {
+  if (!Valid()) {
+    out << "not valid\n";
+    return;
+  }
   printf("num_leptons: %i\n", num_leptonic);
   const char* decay_types[4] = {"e", "mu", "tau", "h"};
   printf("decay type: W+ -> %s,  W- -> %s\n", decay_types[decay_plus], decay_types[decay_minus]);
