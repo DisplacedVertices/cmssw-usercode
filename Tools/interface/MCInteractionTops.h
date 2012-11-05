@@ -54,8 +54,8 @@ struct MCInteractionTops : public MCInteraction {
   int& decay_plus;
   int& decay_minus;
 
-  MCInteractionTops()
-    : MCInteraction(),
+  MCInteractionTops(MCInteraction::Generator g=MCInteraction::pythia6)
+    : MCInteraction(g),
       top(tops[0]),
       topbar(tops[1]),
       Wplus(Ws[0]),

@@ -24,8 +24,8 @@ struct MCInteractionTopsFromStops : public MCInteractionTops {
   TLorentzVector& p4_neutralino_from_stop;
   TLorentzVector& p4_neutralino_from_stopbar;
 
-  MCInteractionTopsFromStops() :
-    MCInteractionTops(),
+  MCInteractionTopsFromStops(MCInteraction::Generator g=MCInteraction::pythia6) :
+    MCInteractionTops(g),
     stop(stops[0]),
     stopbar(stops[1]),
     neutralino_from_stop(neutralinos[0]),
