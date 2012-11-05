@@ -32,10 +32,13 @@ int original_index(const reco::Candidate* c, const reco::GenParticleCollection& 
   return -1;
 }
 
-const reco::Candidate* get_daughter_with_id(const reco::Candidate* c, int id) {
+const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status) {
   const reco::Candidate* d = 0;
   for (size_t i = 0; i < c->numberOfDaughters(); ++i) {
-    if (c->daughter(i)->pdgId() == id) {
+    if ((id == 0     || c->daughter(i)->pdgId()  == id) && 
+	(status == 0 || c->daughter(i)->status() == status)) {
+      // If we've found a second one, return 0 and let the caller
+      // deal with it.
       if (d != 0)
 	return 0;
       d = c->daughter(i);
@@ -44,7 +47,15 @@ const reco::Candidate* get_daughter_with_id(const reco::Candidate* c, int id) {
   return d;
 }
 
-void get_daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco::Candidate*>& d) {
+const reco::Candidate* daughter_with_id(const reco::Candidate* c, int id) {
+  return daughter_with_id_and_status(c, id, 0);
+}
+
+const reco::Candidate* daughter_with_status(const reco::Candidate* c, int status) {
+  return daughter_with_id_and_status(c, 0, status);
+}
+
+void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco::Candidate*>& d) {
   for (size_t i = 0; i < c->numberOfDaughters(); ++i)
     if (c->daughter(i)->pdgId() == id)
       d.push_back(c->daughter(i));
