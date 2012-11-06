@@ -61,6 +61,13 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
       d.push_back(c->daughter(i));
 }
 
+const reco::Candidate* final_candidate(const reco::Candidate* c) {
+  // Handle PYTHIA8 particle record copying.
+  while (c != 0 && c->numberOfDaughters() == 1 && c->daughter(0)->pdgId() == c->pdgId())
+    c = c->daughter(0);
+  return c;
+}
+
 void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus) {
   if (strcmp(name, "header") == 0) 
     printf("%25s %4s %8s %7s %7s %7s %7s %7s %7s   daughters' index/id\n", "particle", "ndx", "pdgId", "energy", "mass", "pT", "rap", "eta", "phi");
