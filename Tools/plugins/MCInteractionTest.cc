@@ -16,23 +16,26 @@ public:
 
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  bool pythia8;
 };
 
-MCInteractionTest::MCInteractionTest(const edm::ParameterSet& cfg) 
+MCInteractionTest::MCInteractionTest(const edm::ParameterSet& cfg)
+  : pythia8(cfg.existsAs<bool>("pythia8") ? cfg.getParameter<bool>("pythia8") : false)
 {
 }
 
 void MCInteractionTest::analyze(const edm::Event& event, const edm::EventSetup&) {
-  MCInteraction mci;
-  MCInteractionTops mci_top;
-  MCInteractionTopsFromStops mci_tfs;
-
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel("genParticles", gen_particles);
   edm::Handle<reco::GenJetCollection> gen_jets;
   event.getByLabel("ak5GenJets", gen_jets);
   edm::Handle<reco::GenMETCollection> gen_mets;
   event.getByLabel("genMetTrue", gen_mets);
+
+  const MCInteraction::Generator g = pythia8 ? MCInteraction::pythia8 : MCInteraction::pythia6;
+  MCInteraction              mci    (g);
+  MCInteractionTops          mci_top(g);
+  MCInteractionTopsFromStops mci_tfs(g);
 
   printf("inits: mci\n"); fflush(stdout);
   mci.Init    (*gen_particles, *gen_jets, gen_mets->at(0));
