@@ -2,37 +2,26 @@ import os, sys, FWCore.ParameterSet.Config as cms
 
 process = cms.Process('MFVNeutralino')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:pat.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/mfvneutralino_genfsimreco_tau10um/sstoptuple_v3_mfvN3jtau10um/ffbc82b68f588f5f183a150670744b16/pat_1_1_6Sq.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.TFileService = cms.Service('TFileService', fileName = cms.string('btag_counting.root'))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 
-btag_srcs = [
-    ('CSV',   'combinedSecondaryVertexBJetTags',      (0.244, 0.679, 0.898)),
-    ('JP',    'jetProbabilityBJetTags',               (0.275, 0.545, 0.790)),
-    ('JBP',   'jetBProbabilityBJetTags',              (1.33, 2.55, 3.74)),
-    ('SSVHE', 'simpleSecondaryVertexHighEffBJetTags', (1.74, 3.05)),
-    ('SSVHP', 'simpleSecondaryVertexHighPurBJetTags', (2.,)),
-    ('TCHE',  'trackCountingHighEffBJetTags',         (1.7, 3.3, 10.2)),
-    ('TCHP',  'trackCountingHighPurBJetTags',         (1.19, 1.93, 3.41)),
-    ]
-
 debug = 'debug' in sys.argv
 
-process.p = cms.Path()
-for btag_name, src, bdisc_mins in btag_srcs:
-    for bdisc_min in bdisc_mins:
-        obj = cms.EDAnalyzer('MFVNeutralinoPATBTagCounting',
-                             jet_src = cms.InputTag('selectedPatJetsPF'),
-                             b_discriminator_name = cms.string(src),
-                             jet_pt_min = cms.double(50),
-                             bdisc_min = cms.double(bdisc_min),
-                             verbose = cms.bool(debug),
-                             )
-        name = btag_name + 'pt50bd' + str(bdisc_min).replace('.','p')
-        setattr(process, name, obj)
-        process.p *= obj
+process.btagCounting = cms.EDAnalyzer('MFVNeutralinoPATBTagCounting',
+                                      vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                                      jet_src = cms.InputTag('selectedPatJetsPF'),
+                                      b_discriminator_name = cms.string('jetBProbabilityBJetTags'),
+                                      jet_pt_min = cms.double(30),
+                                      bdisc_min = cms.double(2.55),
+                                      muon_src = cms.InputTag('selectedPatMuonsPF'),
+                                      electron_src = cms.InputTag('selectedPatElectronsPF'),
+                                      verbose = cms.bool(debug),
+                                      )
+
+process.p = cms.Path(process.btagCounting)
     
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
