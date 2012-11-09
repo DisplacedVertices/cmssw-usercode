@@ -141,7 +141,7 @@ scheduler = glite
 datasetpath = None
 pset = genfsimreco_crab.py
 get_edm_output = 1
-number_of_jobs = 1000
+number_of_jobs = 500
 events_per_job = 200
 first_lumi = 1
 
@@ -165,15 +165,12 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
         open('genfsimreco_crab.py', 'wt').write(new_py)
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
-            os.system('crab -create')
+            os.system('crab -create -submit')
             os.system('rm -f crab.cfg genfsimreco_crab.py genfsimreco_crab.pyc')
 
     tau0s = [0., 0.01, 0.1, 1.0, 4.0, 9.9]
     masses = [200, 400, 600, 800, 1000]
 
-    tau0s = [0.01]
-    masses = [400]
-    
     for tau0 in tau0s:
         for mass in masses:
             name = 'gluino_tau%04ium_M%i' % (int(tau0*1000), mass)
