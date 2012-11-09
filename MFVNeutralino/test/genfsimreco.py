@@ -50,7 +50,8 @@ process.generator = cms.EDFilter("Pythia8GeneratorFilter",
 				 filterEfficiency = cms.untracked.double(1.0),
 				 pythiaHepMCVerbosity = cms.untracked.bool(False),
 				 comEnergy = cms.double(8000.0),
-				 offsetNeutralinoDecayProducts = cms.untracked.bool(True),
+				 offsetDecayParent = cms.int32(1000021),
+				 offsetDecayProducts = cms.vint32(3,5,6),
 				 PythiaParameters = cms.PSet(
                                      processParameters = cms.vstring(
                                          'Main:timesAllowErrors    = 10000',
@@ -77,7 +78,7 @@ process.schedule.extend(process.HLTSchedule)
 process.schedule.extend([process.reconstruction,process.AODSIMoutput_step])
 
 if 'debug' in sys.argv:
-    process.generator.maxEventsToPrint = 1
+    process.generator.maxEventsToPrint = 5
     process.generator.pythiaPylistVerbosity = 1
     process.generator.pythiaHepMCVerbosity = True
     process.printList = cms.EDAnalyzer('ParticleListDrawer',
@@ -97,12 +98,16 @@ from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC
 customizeHLTforMC(process)
 
 
-def set_neutralino_tau0(tau0):
-    params = [x for x in process.generator.PythiaParameters.processParameters.value() if '1000022:tau0' not in x]
+def set_particle_tau0(id, tau0):
+    line = '%i:tau0' % id
+    params = [x for x in process.generator.PythiaParameters.processParameters.value() if line not in x]
     process.generator.PythiaParameters.processParameters = params
-    process.generator.PythiaParameters.processParameters.append('1000022:tau0 = %f' % tau0) # tau0 is in mm by pythia convention
+    process.generator.PythiaParameters.processParameters.append('%s = %f' % (line, tau0)) # tau0 is in mm by pythia convention
 
-def set_masses(m_gluino, m_neutralino, fn='minSLHA.spc'):
+def set_gluino_tau0(tau0):
+    set_particle_tau0(1000021, tau0)
+
+def set_mass(m_gluino, fn='minSLHA.spc'):
     slha = '''
 BLOCK SPINFO  # Spectrum calculator information
      1   Minimal    # spectrum calculator
@@ -115,21 +120,16 @@ BLOCK MODSEL  # Model selection
 BLOCK MASS  # Mass Spectrum
 # PDG code           mass       particle
   1000021     %(m_gluino)E       # ~g
-  1000022     %(m_neutralino)E   # ~chi_10
 
 DECAY   1000021     0.01E+00   # gluino decays
-#          BR         NDA      ID1       ID2
-    1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
-
-DECAY   1000022     0.01E+00   # neutralino decays
 #           BR         NDA      ID1       ID2       ID3
-     0.5E+00          3            3          5           6   # BR(~chi_10 -> s b t)
-     0.5E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
+     0.5E+00          3            3          5           6   # BR(~g -> s b t)
+     0.5E+00          3           -3         -5          -6   # BR(~g -> sbar bbar tbar)
 '''
     open(fn, 'wt').write(slha % locals())
 
-set_neutralino_tau0(1)
-set_masses(600, 300)
+set_gluino_tau0(1)
+set_mass(300)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
@@ -147,11 +147,11 @@ first_lumi = 1
 
 [USER]
 additional_input_files = minSLHA.spc
-ui_working_dir = crab/genfsimreco/crab_mfvneutralino_genfsimreco_%(name)s
+ui_working_dir = crab/genfsimreco/crab_mfv_genfsimreco_%(name)s
 copy_data = 1
 storage_element = T3_US_Cornell
 publish_data = 1
-publish_data_name = mfvneutralino_genfsimreco_%(name)s
+publish_data_name = mfv_genfsimreco_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 '''
 
