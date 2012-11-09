@@ -141,8 +141,8 @@ scheduler = glite
 datasetpath = None
 pset = genfsimreco_crab.py
 get_edm_output = 1
-number_of_jobs = 200
-events_per_job = 500
+number_of_jobs = 1000
+events_per_job = 200
 first_lumi = 1
 
 [USER]
@@ -158,35 +158,23 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
     os.system('mkdir -p crab/genfsimreco')
     testing = 'testing' in sys.argv
 
-    def submit(name, tau0, masses):
-        name += '_M_%i_%i' % masses
+    def submit(name, tau0, mass):
         new_py = open('genfsimreco.py').read()
-        new_py += '\nset_neutralino_tau0(%e)\n' % tau0
-        new_py += '\nset_masses(%i, %i)\n' % masses
+        new_py += '\nset_gluino_tau0(%e)\n' % tau0
+        new_py += '\nset_mass(%i)\n' % mass
         open('genfsimreco_crab.py', 'wt').write(new_py)
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
-            os.system('crab -create -submit')
+            os.system('crab -create')
             os.system('rm -f crab.cfg genfsimreco_crab.py genfsimreco_crab.pyc')
 
-    tau0s = [
-        ('tau0', 0.),
-        ('tau100um', 0.1),
-        ('tau10um', 0.01),
-        ('tau1mm', 1.0),
-        ('tau3mm', 3.0),
-        ('tau9p9mm', 9.9),
-        ]
+    tau0s = [0., 0.01, 0.1, 1.0, 4.0, 9.9]
+    masses = [200, 400, 600, 800, 1000]
 
-    for name, tau0 in tau0s:
-        submit(name, tau0, (600, 300))
-
-    masseses = [
-        (600, 590),
-        (200, 170),
-        (1000, 200),
-        ]
-
-    for masses in masseses:
-        for name, tau0 in tau0s[:2]: # just do 0 and 100um for now
-            submit(name, tau0, masses)
+    tau0s = [0.01]
+    masses = [400]
+    
+    for tau0 in tau0s:
+        for mass in masses:
+            name = 'gluino_tau%04ium_M%i' % (int(tau0*1000), mass)
+            submit(name, tau0, mass)
