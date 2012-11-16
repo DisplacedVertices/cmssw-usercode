@@ -90,6 +90,12 @@ if 'debug' in sys.argv:
                                        )
     process.ppp = cms.Path(process.printList)
     process.schedule.extend([process.ppp])
+else:
+    process.options.wantSummary = False
+    process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
+    for category in ['TwoTrackMinimumDistance', 'generatePartonsAndHadronize']:
+        process.MessageLogger.categories.append(category)
+        setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
 
 for path in process.paths:
     getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq 
