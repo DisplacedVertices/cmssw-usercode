@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+import os, re
 from JMTucker.Tools.DBS import files_in_dataset
 from JMTucker.Tools.general import big_warn
 
@@ -203,11 +203,36 @@ stop_signal_samples = [
     ]
 
 mfv_signal_samples = [
-    MCSample('mfvN3jtau0',      '1 pb signal, #tau = 0',                   '/mfvneutralino_genfsimreco_tau0/tucker-mfvneutralino_genfsimreco_tau0-aa8b56a9a9cba6aa847bda9acf329ad0/USER',         24500, -1, 0.2, 1),
-    MCSample('mfvN3jtau100um',  '1 pb signal, #tau = 100 #mum',            '/mfvneutralino_genfsimreco_tau100um/tucker-mfvneutralino_genfsimreco_tau100um-465709e5340ac2cc11e2751b48bbef3e/USER', 24000, -1, 0.2, 1),
-    MCSample('mfvN3jtau10um',   '1 pb signal, #tau = 10 #mum',             '/mfvneutralino_genfsimreco_tau10um/tucker-mfvneutralino_genfsimreco_tau10um-719b1b049e9de8135afa1f308d0994e6/USER',   24500, -1, 0.2, 1),
-    MCSample('mfvN3jtau1mm',    '1 pb signal, #tau = 1 mm',                '/mfvneutralino_genfsimreco_tau1mm/tucker-mfvneutralino_genfsimreco_tau1mm-f0b5b0c98c357fc0015e0194f7aef803/USER',     24500, -1, 0.2, 1),
-    MCSample('mfvN3jtau9p9mm',  '1 pb signal, #tau = 9.9 mm',              '/mfvneutralino_genfsimreco_tau9p9mm/tucker-mfvneutralino_genfsimreco_tau9p9mm-891f0c49f79ad2222cb205736c37de4f/USER', 24000, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0000um_M0200', 'MFV signal, M = 200 GeV, #tau = 0',         '/mfv_genfsimreco_gluino_tau0000um_M200/tucker-mfv_genfsimreco_gluino_tau0000um_M200-adc7f942f50ab1cea63def6ed5bff99b/USER',    97998, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0000um_M0400', 'MFV signal, M = 400 GeV, #tau = 0',         '/mfv_genfsimreco_gluino_tau0000um_M400/tucker-mfv_genfsimreco_gluino_tau0000um_M400-adc7f942f50ab1cea63def6ed5bff99b/USER',    98998, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0000um_M0600', 'MFV signal, M = 600 GeV, #tau = 0',         '/mfv_genfsimreco_gluino_tau0000um_M600/tucker-mfv_genfsimreco_gluino_tau0000um_M600-adc7f942f50ab1cea63def6ed5bff99b/USER',    97999, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0000um_M0800', 'MFV signal, M = 800 GeV, #tau = 0',         '/mfv_genfsimreco_gluino_tau0000um_M800/tucker-mfv_genfsimreco_gluino_tau0000um_M800-adc7f942f50ab1cea63def6ed5bff99b/USER',    18400, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 0',        '/mfv_genfsimreco_gluino_tau0000um_M1000/tucker-mfv_genfsimreco_gluino_tau0000um_M1000-adc7f942f50ab1cea63def6ed5bff99b/USER',  85397, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0010um_M0200', 'MFV signal, M = 200 GeV, #tau = 10 #mum',   '/mfv_genfsimreco_gluino_tau0010um_M200/tucker-mfv_genfsimreco_gluino_tau0010um_M200-2a899b36d80e4d3e25d055674a795172/USER',    94597, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0010um_M0400', 'MFV signal, M = 400 GeV, #tau = 10 #mum',   '/mfv_genfsimreco_gluino_tau0010um_M400/tucker-mfv_genfsimreco_gluino_tau0010um_M400-2a899b36d80e4d3e25d055674a795172/USER',    96196, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0010um_M0600', 'MFV signal, M = 600 GeV, #tau = 10 #mum',   '/mfv_genfsimreco_gluino_tau0010um_M600/tucker-mfv_genfsimreco_gluino_tau0010um_M600-2a899b36d80e4d3e25d055674a795172/USER',    81200, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0010um_M0800', 'MFV signal, M = 800 GeV, #tau = 10 #mum',   '/mfv_genfsimreco_gluino_tau0010um_M800/tucker-mfv_genfsimreco_gluino_tau0010um_M800-2a899b36d80e4d3e25d055674a795172/USER',    93796, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0010um_M1000', 'MFV signal, M = 1000 GeV, #tau = 10 #mum',  '/mfv_genfsimreco_gluino_tau0010um_M1000/tucker-mfv_genfsimreco_gluino_tau0010um_M1000-2a899b36d80e4d3e25d055674a795172/USER',  95799, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0100um_M0200', 'MFV signal, M = 200 GeV, #tau = 100 #mum',  '/mfv_genfsimreco_gluino_tau0100um_M200/tucker-mfv_genfsimreco_gluino_tau0100um_M200-6659e500e34fc490bde56b86ad08e337/USER',    94996, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0100um_M0400', 'MFV signal, M = 400 GeV, #tau = 100 #mum',  '/mfv_genfsimreco_gluino_tau0100um_M400/tucker-mfv_genfsimreco_gluino_tau0100um_M400-6659e500e34fc490bde56b86ad08e337/USER',    94997, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0100um_M0600', 'MFV signal, M = 600 GeV, #tau = 100 #mum',  '/mfv_genfsimreco_gluino_tau0100um_M600/tucker-mfv_genfsimreco_gluino_tau0100um_M600-6659e500e34fc490bde56b86ad08e337/USER',    97199, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0100um_M0800', 'MFV signal, M = 800 GeV, #tau = 100 #mum',  '/mfv_genfsimreco_gluino_tau0100um_M800/tucker-mfv_genfsimreco_gluino_tau0100um_M800-6659e500e34fc490bde56b86ad08e337/USER',    80799, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0100um_M1000', 'MFV signal, M = 1000 GeV, #tau = 100 #mum', '/mfv_genfsimreco_gluino_tau0100um_M1000/tucker-mfv_genfsimreco_gluino_tau0100um_M1000-6659e500e34fc490bde56b86ad08e337/USER',  96200, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau1000um_M0200', 'MFV signal, M = 200 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M200/tucker-mfv_genfsimreco_gluino_tau1000um_M200-e47fc4979466aacf88f2c30cc52afb0f/USER',    94996, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M400/tucker-mfv_genfsimreco_gluino_tau1000um_M400-e47fc4979466aacf88f2c30cc52afb0f/USER',    72800, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau1000um_M0600', 'MFV signal, M = 600 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M600/tucker-mfv_genfsimreco_gluino_tau1000um_M600-e47fc4979466aacf88f2c30cc52afb0f/USER',    89399, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau1000um_M0800', 'MFV signal, M = 800 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M800/tucker-mfv_genfsimreco_gluino_tau1000um_M800-e47fc4979466aacf88f2c30cc52afb0f/USER',    94600, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',     '/mfv_genfsimreco_gluino_tau1000um_M1000/tucker-mfv_genfsimreco_gluino_tau1000um_M1000-e47fc4979466aacf88f2c30cc52afb0f/USER',  93798, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau4000um_M0200', 'MFV signal, M = 200 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M200/tucker-mfv_genfsimreco_gluino_tau4000um_M200-088b3b49967ef59b0610526875f2bb9f/USER',    91399, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau4000um_M0400', 'MFV signal, M = 400 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M400/tucker-mfv_genfsimreco_gluino_tau4000um_M400-088b3b49967ef59b0610526875f2bb9f/USER',    85799, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau4000um_M0600', 'MFV signal, M = 600 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M600/tucker-mfv_genfsimreco_gluino_tau4000um_M600-088b3b49967ef59b0610526875f2bb9f/USER',    95199, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau4000um_M0800', 'MFV signal, M = 800 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M800/tucker-mfv_genfsimreco_gluino_tau4000um_M800-088b3b49967ef59b0610526875f2bb9f/USER',    86799, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau4000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 4 mm',     '/mfv_genfsimreco_gluino_tau4000um_M1000/tucker-mfv_genfsimreco_gluino_tau4000um_M1000-088b3b49967ef59b0610526875f2bb9f/USER',  96998, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau9900um_M0200', 'MFV signal, M = 200 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M200/tucker-mfv_genfsimreco_gluino_tau9900um_M200-e8f47d721e19ae8437a32cb76683750e/USER',    93994, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M400/tucker-mfv_genfsimreco_gluino_tau9900um_M400-e8f47d721e19ae8437a32cb76683750e/USER',    96399, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau9900um_M0600', 'MFV signal, M = 600 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M600/tucker-mfv_genfsimreco_gluino_tau9900um_M600-e8f47d721e19ae8437a32cb76683750e/USER',    75599, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau9900um_M0800', 'MFV signal, M = 800 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M800/tucker-mfv_genfsimreco_gluino_tau9900um_M800-e8f47d721e19ae8437a32cb76683750e/USER',    97197, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau9900um_M1000', 'MFV signal, M = 1000 GeV, #tau = 9.9 mm',   '/mfv_genfsimreco_gluino_tau9900um_M1000/tucker-mfv_genfsimreco_gluino_tau9900um_M1000-e8f47d721e19ae8437a32cb76683750e/USER',  96795, -1, 0.2, 1),
     ]
 
 data_samples = [
@@ -234,12 +259,16 @@ pythiastopm200.ana_hash = 'd1c7726c69d89f45da05a992a40b425c'
 
 smsT2ttFineBin.is_fastsim = True
 
-for sample in (mfvN3jtau0, mfvN3jtau100um, mfvN3jtau10um, mfvN3jtau1mm, mfvN3jtau9p9mm):
+for sample in mfv_signal_samples:
+    mo = re.search(r'tau0*(\d+)um_M0*(\d+)', s.name)
+    sample.tau  = int(mo.group(1))
+    sample.mass = int(mo.group(2))
+
     sample.ana_hash = 'ffbc82b68f588f5f183a150670744b16'
     sample.is_fastsim = True
     sample.is_pythia8 = True
     sample.dbs_url_num = 2
-    sample.ana_version = 'v3'
+    sample.ana_version = 'vX'
 
 # Other exceptions due to jobs being missed, mixing dataset versions
 # (that don't affect actual physics), etc.
@@ -268,7 +297,7 @@ if temp_neventses:
             sample.nevents = temp_nevents
     big_warn('\n'.join(warning))
 
-not_ready = [ttgjets, ttwjets, ttzjets, smsT2ttFineBin, zz] + auxiliary_background_samples
+not_ready = [ttgjets, ttwjets, ttzjets, smsT2ttFineBin, zz] + auxiliary_background_samples + mfv_signal_samples
 big_warn('samples not ana_ready: %s' % ' '.join(s.name for s in not_ready))
 for sample in not_ready:
     sample.ana_ready = False
@@ -288,7 +317,29 @@ if __name__ == '__main__':
         print fmt % ('ana_dataset', 'num files')
         for sample in _samples:
             print fmt % (sample.ana_dataset, len(sample.filenames))
-    elif 'numevents':
+    elif 'numevents' in sys.argv:
         from DBS import *
         for name, nn, ds in auxiliary_background_samples:
             print name, numevents_in_dataset(ds)
+    elif 'mfvsignals' in sys.argv:
+        line_re = re.compile(r'total events: (\d+) in dataset: (/.*USER)')
+        dataset_re = re.compile(r'tau0*(\d+)um_M(\d+)-([0-9a-f]*)/USER')
+        nice = {0: '0', 10: '10 #mum', 100: '100 #mum', 1000: '1 mm', 4000: '4 mm', 9900: '9.9 mm'}
+        lines = []
+        for arg in sys.argv:
+            if os.path.isfile(arg) and 'publish' in arg:
+                for line in open(arg):
+                    mo = line_re.search(line)
+                    if mo is not None:
+                        nevents = int(mo.group(1))
+                        dataset = mo.group(2)
+                        tau, mass, hash = dataset_re.search(dataset).groups()
+                        tau = int(tau)
+                        mass = int(mass)
+                        tau_nice = nice[tau]
+                        #print nevents, dataset, tau, mass, hash
+                        lines.append((tau, mass, "MCSample('mfv3j_gluino_tau%(tau)04ium_M%(mass)04i', 'MFV signal, M = %(mass)i GeV, #tau = %(tau_nice)s', '%(dataset)s', %(nevents)6i, -1, 0.2, 1)," % locals()))
+                        break
+        lines.sort()
+        for tau, mass, line in lines:
+            print line
