@@ -12,7 +12,7 @@ const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int
 const reco::Candidate* daughter_with_id(const reco::Candidate* c, int id);
 const reco::Candidate* daughter_with_status(const reco::Candidate* c, int status);
 void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco::Candidate*>& d);
-const reco::Candidate* final_candidate(const reco::Candidate* c);
+const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_other_id);
 void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus=true);
 
 #endif

@@ -61,10 +61,39 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
       d.push_back(c->daughter(i));
 }
 
-const reco::Candidate* final_candidate(const reco::Candidate* c) {
-  // Handle PYTHIA8 particle record copying.
-  while (c != 0 && c->numberOfDaughters() == 1 && c->daughter(0)->pdgId() == c->pdgId())
-    c = c->daughter(0);
+const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_other_id) {
+  // Handle PYTHIA8 particle record copying. allowed_other_id can be
+  // 21 for a gluon (maybe 23 for a photon!), or 0 for no other
+  // allowed ids.
+  while (1) {
+    if (c == 0 || c->numberOfDaughters() == 0)
+      break;
+    if (c->numberOfDaughters() == 1) {
+      if (c->daughter(0)->pdgId() == c->pdgId())
+	c = c->daughter(0);
+      else
+	break;
+    }
+    else if (allowed_other_id != 0) {
+      int the = -1;
+      bool wrong_others = false;
+      for (int i = 0, ie = int(c->numberOfDaughters()); i < ie; ++i) {
+	int id = c->daughter(i)->pdgId();
+	if (id == c->pdgId())
+	  the = i;
+	else if (id != allowed_other_id) {
+	  wrong_others = true;
+	  break;
+	}
+      }
+      if (wrong_others || the < 0)
+	break;
+      else
+	c = c->daughter(the);
+    }
+    else
+      break;
+  }
   return c;
 }
 
