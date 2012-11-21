@@ -260,7 +260,7 @@ pythiastopm200.ana_hash = 'd1c7726c69d89f45da05a992a40b425c'
 smsT2ttFineBin.is_fastsim = True
 
 for sample in mfv_signal_samples:
-    mo = re.search(r'tau0*(\d+)um_M0*(\d+)', s.name)
+    mo = re.search(r'tau0*(\d+)um_M0*(\d+)', sample.name)
     sample.tau  = int(mo.group(1))
     sample.mass = int(mo.group(2))
 
