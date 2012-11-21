@@ -47,3 +47,32 @@ TLorentzVector make_tlv(const reco::Candidate& c) {
 double pt_proj(const TLorentzVector& a, const TLorentzVector& b) {
   return (a.X()*b.X() + a.Y()*b.Y())/b.Pt();
 }
+
+void set_bin_labels(TAxis* xax, const char** labels) {
+  for (int i = 0; i < xax->GetNbins(); ++i)
+    xax->SetBinLabel(i+1, labels[i]);
+}
+
+void fill_by_label(TH1F* h, const std::string& label) {
+  static const bool warn = true;
+  int result = h->Fill(label.c_str(), 1);
+  if (result < 0) {
+    if (warn)
+      printf("fill_by_label: TH1 with name %s has no label %s\n", h->GetName(), label.c_str());
+    result = h->GetNbinsX();
+    h->SetBinContent(result, h->GetBinContent(result) + 1);
+  }
+}
+
+void fill_by_label(TH2F* h, const std::string& label_x, const std::string& label_y) {
+  static const bool warn = true;
+  int result = h->Fill(label_x.c_str(), label_y.c_str(), 1);
+  if (result < 0) {
+    if (warn)
+      printf("fill_by_label: TH2 with name %s has no (label_x, label_y) %s %s\n", h->GetName(), label_x.c_str(), label_y.c_str());
+    int binx = h->GetNbinsX();
+    int biny = h->GetNbinsY();
+    h->SetBinContent(binx, biny, h->GetBinContent(binx, biny) + 1);
+  }
+}
+

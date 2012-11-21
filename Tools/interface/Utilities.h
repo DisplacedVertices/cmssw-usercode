@@ -1,6 +1,9 @@
 #ifndef JMTucker_Tools_Utilities_h
 #define JMTucker_Tools_Utilities_h
 
+#include "TAxis.h"
+#include "TH1F.h"
+#include "TH2F.h"
 #include "TLorentzVector.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 
@@ -13,5 +16,8 @@ TLorentzVector make_tlv(const reco::Candidate::LorentzVector& lv);
 TLorentzVector make_tlv(const reco::Candidate& c);
 TLorentzVector make_tlv(const reco::Candidate* c);
 double pt_proj(const TLorentzVector& a, const TLorentzVector& b);
+void set_bin_labels(TAxis* xax, const char** labels);
+void fill_by_label(TH1F* h, const std::string& label);
+void fill_by_label(TH2F* h, const std::string& label_x, const std::string& label_y);
 
 #endif
