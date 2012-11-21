@@ -148,6 +148,12 @@ struct BasicKinematicHists {
     if (Phi) Phi->Fill(v.Phi(), weight);
   }
 
+  void FillEx(const double dxy, const double dz, const int q) {
+    if (Dxy) Dxy->Fill(dxy);
+    if (Dz)  Dz ->Fill(dz);
+    if (Q)   Q  ->Fill(q);
+  }
+
   void FillEx(const double dxy, const double dz, const int q, const double weight) {
     if (Dxy) Dxy->Fill(dxy, weight);
     if (Dz)  Dz ->Fill(dz,  weight);
