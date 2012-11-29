@@ -6,22 +6,24 @@ suppress_stdout = True
 
 ################################################################################
 
-assert runOnMC
-
 process = cms.Process('PAT')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root'))
 #process.source.fileNames = ['/store/user/tucker/mfvneutralino_genfsimreco_tau100um/mfvneutralino_genfsimreco_tau100um/465709e5340ac2cc11e2751b48bbef3e/fastsim_10_3_JMz.root']
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+#process.source.fileNames = ['/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E8DF1A50-C4D4-E111-B385-002618943944.root']
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.MessageLogger.cerr.threshold = 'INFO'
 process.MessageLogger.categories.append('PATSummaryTables')
 process.MessageLogger.cerr.PATSummaryTables = cms.untracked.PSet(limit = cms.untracked.int32(-1))
+for category in ['TwoTrackMinimumDistance']:
+    process.MessageLogger.categories.append(category)
+    setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
 process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START53_V13::All' if runOnMC else 'GR_P_V39_AN2::All'
+process.GlobalTag.globaltag = 'START53_V13::All' if runOnMC else 'FT_P_V42C_AN2::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
@@ -245,7 +247,7 @@ process.out.outputCommands = [
 # total to the file in case of OutputModule's SelectEvents having
 # multiple paths. Add a summary to stdout that so that it is easy to
 # see what the total number of events should be (for debugging CRAB
-# jobs).
+# jobs). (This means we can kill the normal TrigReport.)
 process.ORTrigReport = cms.EDAnalyzer('ORTrigReport',
                                       results_src = cms.InputTag('TriggerResults', '', process.name_()),
                                       paths = process.out.SelectEvents.SelectEvents
@@ -255,16 +257,17 @@ process.pORTrigReport = cms.EndPath(process.ORTrigReport) # Must be on an EndPat
 # As a simple check of the paths' efficiencies, add some lines to the
 # summary showing stats on events with generator-level muons/electrons
 # in acceptance from W decays.
-for name, cut in [('Muon',     'abs(pdgId) == 13 && abs(eta) < 2.4 && abs(mother.pdgId) == 24 && pt > 20'),
-                  ('Electron', 'abs(pdgId) == 11 && abs(eta) < 2.5 && abs(mother.pdgId) == 24 && pt > 20'),
-                  ('Lepton',   '((abs(pdgId) == 13 && abs(eta) < 2.4) || (abs(pdgId) == 11 && abs(eta) < 2.5)) && abs(mother.pdgId) == 24 && pt > 20'),
-                  ]:
-    name = 'gen' + name + 's'
-    filter = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string(cut))
-    counter = cms.EDFilter('CandViewCountFilter', src = cms.InputTag(name), minNumber = cms.uint32(1))
-    setattr(process, name,           filter)
-    setattr(process, name + 'Count', counter)
-    setattr(process, 'p' + name + 'Count', cms.Path(filter*counter))
+if runOnMC:
+    for name, cut in [('Muon',     'abs(pdgId) == 13 && abs(eta) < 2.4 && abs(mother.pdgId) == 24 && pt > 20'),
+                      ('Electron', 'abs(pdgId) == 11 && abs(eta) < 2.5 && abs(mother.pdgId) == 24 && pt > 20'),
+                      ('Lepton',   '((abs(pdgId) == 13 && abs(eta) < 2.4) || (abs(pdgId) == 11 && abs(eta) < 2.5)) && abs(mother.pdgId) == 24 && pt > 20'),
+                      ]:
+        name = 'gen' + name + 's'
+        filter = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string(cut))
+        counter = cms.EDFilter('CandViewCountFilter', src = cms.InputTag(name), minNumber = cms.uint32(1))
+        setattr(process, name,           filter)
+        setattr(process, name + 'Count', counter)
+        setattr(process, 'p' + name + 'Count', cms.Path(filter*counter))
 
 # Check that the stdout spam from PAT was what we expect.
 if suppress_stdout:
@@ -273,7 +276,7 @@ if suppress_stdout:
     buf.close()
     hsh = hash(pat_output)
     #open('pat_spam.txt', 'wt').write(pat_output)
-    hsh_expected = 3033790049475715351 if runOnMC else -3882518544097161276
+    hsh_expected = 3033790049475715351 if runOnMC else 7363057003043023831
     print 'PAT is done (spam hash %s, expected %s).' % (hsh, hsh_expected)
     if hsh != hsh_expected:
         from JMTucker.Tools.general import big_warn
@@ -302,4 +305,3 @@ if 'keep_tracks' in sys.argv:
     keep_general_tracks()
 
 #open('dumptup.py','wt').write(process.dumpPython())
-
