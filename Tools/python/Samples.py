@@ -237,7 +237,7 @@ data_samples = [
     DataSample('MultiJet12B',  '/MultiJet/Run2012B-13Jul2012-v1/AOD'),
     DataSample('MultiJet12C1', '/MultiJet/Run2012C-PromptReco-v1/AOD'),
     DataSample('MultiJet12C2', '/MultiJet/Run2012C-PromptReco-v2/AOD'),
-    DataSample('MultiJet12D',  '/MultiJet/Run2012D-PromptReco-v2/AOD'),
+    DataSample('MultiJet12D',  '/MultiJet/Run2012D-PromptReco-v1/AOD'),
 ]    
 
 data_samples[0].json = data_samples[1].json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt'
