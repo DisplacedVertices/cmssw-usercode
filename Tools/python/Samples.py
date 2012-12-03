@@ -13,9 +13,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = 'bd9748f60791b31d15ca5bb480d0e762'
+    ANA_HASH = 'ce0f36575948071c2bc4232b86e12d14'
     PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v2'
+    ANA_VERSION = 'v5'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -56,8 +56,7 @@ class Sample(object):
     
     @property
     def ana_dataset(self):
-        raise NotImplementedError('fix this')
-        return '/%(primary_dataset)s/%(publish_user)s-sstoptuple_%(ana_version)s_%(name)s-%(ana_hash)s/USER' % self
+        return '/%(primary_dataset)s/%(publish_user)s-jtuple_%(ana_version)s_%(name)s-%(ana_hash)s/USER' % self
 
     @property
     def use_server(self):
@@ -214,18 +213,18 @@ mfv_signal_samples = [
     MCSample('mfv3j_gluino_tau0100um_M0400', 'MFV signal, M = 400 GeV, #tau = 100 #mum',  '/mfv_genfsimreco_gluino_tau0100um_M400/tucker-mfv_genfsimreco_gluino_tau0100um_M400-6659e500e34fc490bde56b86ad08e337/USER',    95997, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau0100um_M0600', 'MFV signal, M = 600 GeV, #tau = 100 #mum',  '/mfv_genfsimreco_gluino_tau0100um_M600/tucker-mfv_genfsimreco_gluino_tau0100um_M600-6659e500e34fc490bde56b86ad08e337/USER',    97199, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau0100um_M0800', 'MFV signal, M = 800 GeV, #tau = 100 #mum',  '/mfv_genfsimreco_gluino_tau0100um_M800/tucker-mfv_genfsimreco_gluino_tau0100um_M800-6659e500e34fc490bde56b86ad08e337/USER',    98399, -1, 0.2, 1),
-    MCSample('mfv3j_gluino_tau0100um_M1000', 'MFV signal, M = 1000 GeV, #tau = 100 #mum', '/mfv_genfsimreco_gluino_tau0100um_M1000/tucker-mfv_genfsimreco_gluino_tau0100um_M1000-6659e500e34fc490bde56b86ad08e337/USER',  96400, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau0100um_M1000', 'MFV signal, M = 1000 GeV, #tau = 100 #mum', '/mfv_genfsimreco_gluino_tau0100um_M1000/tucker-mfv_genfsimreco_gluino_tau0100um_M1000-6659e500e34fc490bde56b86ad08e337/USER',  96200, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau1000um_M0200', 'MFV signal, M = 200 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M200/tucker-mfv_genfsimreco_gluino_tau1000um_M200-e47fc4979466aacf88f2c30cc52afb0f/USER',    96596, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M400/tucker-mfv_genfsimreco_gluino_tau1000um_M400-e47fc4979466aacf88f2c30cc52afb0f/USER',    91800, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau1000um_M0600', 'MFV signal, M = 600 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M600/tucker-mfv_genfsimreco_gluino_tau1000um_M600-e47fc4979466aacf88f2c30cc52afb0f/USER',    99199, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau1000um_M0800', 'MFV signal, M = 800 GeV, #tau = 1 mm',      '/mfv_genfsimreco_gluino_tau1000um_M800/tucker-mfv_genfsimreco_gluino_tau1000um_M800-e47fc4979466aacf88f2c30cc52afb0f/USER',    94600, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',     '/mfv_genfsimreco_gluino_tau1000um_M1000/tucker-mfv_genfsimreco_gluino_tau1000um_M1000-e47fc4979466aacf88f2c30cc52afb0f/USER',  93998, -1, 0.2, 1),
-    MCSample('mfv3j_gluino_tau4000um_M0200', 'MFV signal, M = 200 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M200/tucker-mfv_genfsimreco_gluino_tau4000um_M200-088b3b49967ef59b0610526875f2bb9f/USER',    94999, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau4000um_M0200', 'MFV signal, M = 200 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M200/tucker-mfv_genfsimreco_gluino_tau4000um_M200-088b3b49967ef59b0610526875f2bb9f/USER',    94799, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau4000um_M0400', 'MFV signal, M = 400 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M400/tucker-mfv_genfsimreco_gluino_tau4000um_M400-088b3b49967ef59b0610526875f2bb9f/USER',    95998, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau4000um_M0600', 'MFV signal, M = 600 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M600/tucker-mfv_genfsimreco_gluino_tau4000um_M600-088b3b49967ef59b0610526875f2bb9f/USER',    95399, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau4000um_M0800', 'MFV signal, M = 800 GeV, #tau = 4 mm',      '/mfv_genfsimreco_gluino_tau4000um_M800/tucker-mfv_genfsimreco_gluino_tau4000um_M800-088b3b49967ef59b0610526875f2bb9f/USER',    97798, -1, 0.2, 1),
-    MCSample('mfv3j_gluino_tau4000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 4 mm',     '/mfv_genfsimreco_gluino_tau4000um_M1000/tucker-mfv_genfsimreco_gluino_tau4000um_M1000-088b3b49967ef59b0610526875f2bb9f/USER',  97398, -1, 0.2, 1),
-    MCSample('mfv3j_gluino_tau9900um_M0200', 'MFV signal, M = 200 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M200/tucker-mfv_genfsimreco_gluino_tau9900um_M200-e8f47d721e19ae8437a32cb76683750e/USER',    96194, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau4000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 4 mm',     '/mfv_genfsimreco_gluino_tau4000um_M1000/tucker-mfv_genfsimreco_gluino_tau4000um_M1000-088b3b49967ef59b0610526875f2bb9f/USER',  96998, -1, 0.2, 1),
+    MCSample('mfv3j_gluino_tau9900um_M0200', 'MFV signal, M = 200 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M200/tucker-mfv_genfsimreco_gluino_tau9900um_M200-e8f47d721e19ae8437a32cb76683750e/USER',    95794, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M400/tucker-mfv_genfsimreco_gluino_tau9900um_M400-e8f47d721e19ae8437a32cb76683750e/USER',    96999, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau9900um_M0600', 'MFV signal, M = 600 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M600/tucker-mfv_genfsimreco_gluino_tau9900um_M600-e8f47d721e19ae8437a32cb76683750e/USER',    98399, -1, 0.2, 1),
     MCSample('mfv3j_gluino_tau9900um_M0800', 'MFV signal, M = 800 GeV, #tau = 9.9 mm',    '/mfv_genfsimreco_gluino_tau9900um_M800/tucker-mfv_genfsimreco_gluino_tau9900um_M800-e8f47d721e19ae8437a32cb76683750e/USER',    97397, -1, 0.2, 1),
@@ -268,15 +267,19 @@ for sample in mfv_signal_samples:
     sample.tau  = int(mo.group(1))
     sample.mass = int(mo.group(2))
 
-    sample.ana_hash = 'ffbc82b68f588f5f183a150670744b16'
     sample.is_fastsim = True
     sample.is_pythia8 = True
     sample.dbs_url_num = 2
-    sample.ana_version = 'vX'
     sample.scheduler_name = 'glite'
 
 # Other exceptions due to jobs being missed, mixing dataset versions
 # (that don't affect actual physics), etc.
+
+big_warn('some mfv3j_gluino samples have missing events during pat tupling')
+mfv3j_gluino_tau0000um_M0600.nevents -= 25000
+mfv3j_gluino_tau0000um_M1000.nevents -= 25000
+mfv3j_gluino_tau0010um_M0800.nevents -= 68796
+mfv3j_gluino_tau1000um_M1000.nevents -= 25000
 
 temp_neventses = []
 if temp_neventses:
@@ -338,6 +341,40 @@ if __name__ == '__main__':
         lines.sort()
         for tau, mass, line in lines:
             print line
+    elif 'mfvsignalsdbs' in sys.argv:
+        for s in mfv_signal_samples:
+            nevents = None
+            for line in os.popen('dbss ana02 nevents %s' % s.ana_dataset):
+                print line
+                try:
+                    nevents = int(line)
+                except ValueError:
+                    pass
+            if nevents is None:
+                print 'could not get nevents from dbs for %s' % s.name
+                continue
+            s.nevents = nevents
+            nice = {0: '0', 10: '10 #mum', 100: '100 #mum', 1000: '1 mm', 4000: '4 mm', 9900: '9.9 mm'}
+            s.tau_nice = nice[s.tau]
+            print "MCSample('mfv3j_gluino_tau%(tau)04ium_M%(mass)04i', 'MFV signal, M = %(mass)i GeV, #tau = %(tau_nice)s', '%(dataset)s', %(nevents)6i, -1, 0.2, 1)," % s
+    elif 'mfvsignalspat' in sys.argv:
+        line_re = re.compile(r'total events: (\d+) in dataset')
+        for s in mfv_signal_samples:
+            fn = 'publish.crab_jtuple_v5_%s' % s.name
+            if not os.path.isfile(fn):
+                print 'no file for %s' % s.name
+                continue
+            nevents = None
+            for line in open(fn):
+                mo = line_re.search(line)
+                if mo is not None:
+                    nevents = int(mo.group(1))
+                    break
+            if nevents is None:
+                print 'no events in %s for %s' % (fn, name)
+                continue
+            if nevents != s.nevents:
+                print '%s.nevents = %i # was %i' % (s.name, nevents, s.nevents)
     elif 'mfvsignalscheck' in sys.argv:
         for sample in mfv_signal_samples:
             print sample.name
