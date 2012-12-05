@@ -16,7 +16,20 @@ process.ParticleListDrawer = cms.EDAnalyzer('ParticleListDrawer',
                                             )
 process.p = cms.Path(process.ParticleListDrawer)
 
-process.source.fileNames = [x.strip() for x in open('infiles.txt') if x.strip()]
+fns = []
+nev = -1
+for x in sys.argv:
+    if x.endswith('.root'):
+        fns.append(x)
+    else:
+        try:
+            x = int(x)
+            nev = x
+        except ValueError:
+            pass
+
+process.maxEvents.input = nev
+process.source.fileNames = fns
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
