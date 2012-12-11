@@ -3,3 +3,4 @@ infiles.txt
 out.*.gz
 *dbslog
 crab.cfg
+prescales_temp
