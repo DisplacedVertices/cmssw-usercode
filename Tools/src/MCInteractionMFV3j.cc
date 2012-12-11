@@ -67,7 +67,7 @@ void MCInteractionMFV3j::Fill() {
     // "final" daughters (PYTHIA8 likes to copy things a lot while it
     // messes with e.g. gluon radiation).
     for (int i = 0; i < ndau; ++i)
-      daughters[i] = final_candidate(daughters[i], 21);
+      daughters[i] = final_candidate(daughters[i], 3); // the 3 means allow gluons or photons
 
     // The asserts protect against dau_id_order changing above.
     assert(abs(daughters[0]->pdgId()) == 3); stranges[which] = dynamic_cast<const reco::GenParticle*>(daughters[0]);
@@ -83,8 +83,8 @@ void MCInteractionMFV3j::Fill() {
     // daughter until we reach the actual W decay (qq' or lnu). The
     // bottom also can have a lot of copies, with the daughter being
     // just a new bottom, or along with some gluons.
-    Ws[which]                = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) * 24),  0));
-    bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  5), 21));
+    Ws[which]                = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) * 24), 2)); // 2 means allow photons only. sheesh.
+    bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  5), 3));
 
     die_if_not(Ws[which],
 	       "at least one W not found: Ws[%i] == %p",
@@ -99,7 +99,7 @@ void MCInteractionMFV3j::Fill() {
     for (int j = 0, je = Ws[which]->numberOfDaughters(); j < je; ++j) {
       const reco::Candidate* d = Ws[which]->daughter(j);
       if (d->pdgId() != Ws[which]->pdgId()) {
-	int allowed_other = is_quark(d) ? 21 : 0; // JMTBAD photons?
+	int allowed_other = is_quark(d) ? 3 : 2;
 	daus.push_back(dynamic_cast<const reco::GenParticle*>(final_candidate(d, allowed_other)));
       }
     }
