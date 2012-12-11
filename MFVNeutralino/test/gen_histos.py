@@ -1,4 +1,5 @@
 import os, sys, FWCore.ParameterSet.Config as cms
+debug = 'debug' in sys.argv
 
 process = cms.Process('MFVNeutralino')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -21,7 +22,13 @@ process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
 
 process.p = cms.Path(process.GenHistos)
 
-if 'debug' in sys.argv:
+if 0:
+    process.source.fileNames = ['file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/fastsim_21_3_oyS.root']
+    from JMTucker.Tools.CMSSWTools import set_events_to_process
+    set_events_to_process(process, [(1,74)])
+    debug = True
+
+if debug:
     process.printList = cms.EDAnalyzer('ParticleListDrawer',
                                        maxEventsToPrint = cms.untracked.int32(100),
                                        src = cms.InputTag('genParticles'),
@@ -30,11 +37,11 @@ if 'debug' in sys.argv:
                                        printVertex = cms.untracked.bool(True),
                                        )
     process.GenHistos.print_info = True
-    process.p *= process.printList
+    process.p.insert(0, process.printList)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    if 'debug' in sys.argv:
+    if debug:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     crab_cfg = '''
