@@ -7,6 +7,8 @@ from FWCore.PythonUtilities.LumiList import LumiList
 from RecoLuminosity.LumiDB import sessionManager, lumiCalcAPI, revisionDML
 from JMTucker.Tools.general import from_pickle, to_pickle
 
+os.system('mkdir -p prescales_temp')
+
 def popen(cmd):
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()[0]
 
@@ -35,7 +37,7 @@ def parse_lumibyls(run):
     return d
 
 def get_lumibylses(runs):
-    fn = 'lumibylses.gzpickle'
+    fn = 'prescales_temp/lumibylses.gzpickle'
     if os.path.isfile(fn):
         return from_pickle(fn)
 
@@ -75,7 +77,7 @@ def lumi_context(action, runs_lumis):
     return result
 
 def get_menus(runs):
-    fn = 'menus.gzpickle'
+    fn = 'prescales_temp/menus.gzpickle'
     if os.path.isfile(fn):
         return from_pickle(fn)
             
@@ -111,7 +113,7 @@ def collapse(l):
     return s
 
 def get_l1_prescales(runs):
-    fn = 'l1prescales.gzpickle'
+    fn = 'prescales_temp/l1prescales.gzpickle'
     if os.path.isfile(fn):
         return from_pickle(fn)
 
@@ -137,7 +139,7 @@ def get_l1_prescales(runs):
     return prescales
 
 def get_hlt_prescales(runs):
-    fn = 'hltprescales.gzpickle'
+    fn = 'prescales_temp/hltprescales.gzpickle'
     if os.path.isfile(fn):
         return from_pickle(fn)
 
@@ -169,8 +171,8 @@ def step_em():
     for i in xrange(0, len(runs), 50):
         print i,i+50
         hlt_prescales = get_hlt_prescales(runs[i:i+50])
-        os.system('mv hltprescales.gzpickle hltprescales.gzpickle.%i' % i)
-        os.system('ls -l hltprescales*')
+        os.system('mv prescales_temp/hltprescales.gzpickle prescales_temp/hltprescales.gzpickle.%i' % i)
+        os.system('ls -l prescales_temp/hltprescales*')
 
 #step_em()
 
@@ -189,8 +191,8 @@ def merge_prescale_dicts(dicts):
     prescales = dict(prescales)
     return prescales
 
-#hlt_prescales = merge_prescale_dicts([from_pickle('hltprescales.gzpickle.%i' % i) for i in [1,2,3,150,200,250,300,350,400,450]])
-#to_pickle(hlt_prescales, 'hltprescales.gzpickle')
+#hlt_prescales = merge_prescale_dicts([from_pickle('prescales_temp/hltprescales.gzpickle.%i' % i) for i in [1,2,3,150,200,250,300,350,400,450]])
+#to_pickle(hlt_prescales, 'prescales_temp/hltprescales.gzpickle')
 
 def version_free_name(path, version_re = re.compile(r'_v(\d+)')):
     if '_' in path:
@@ -214,7 +216,7 @@ def collapse_versions(prescales):
     return prescales
 
 def get_hlt_prescales_collapsed(runs, hlt_prescales=None):
-    fn = 'hltprescales_collapsed.gzpickle'
+    fn = 'prescales_temp/hltprescales_collapsed.gzpickle'
     if os.path.isfile(fn):
         return from_pickle(fn)
 
@@ -381,4 +383,4 @@ total_prescales_collapsed = collapse_versions(total_prescales)
 total_prescales_collapsed_by_intlumi = prescales_by_intlumi(total_prescales_collapsed)
 
 for x in 'total_prescales total_prescales_by_intlumi total_prescales_collapsed total_prescales_collapsed_by_intlumi'.split():
-    to_pickle(eval(x), x + '.gzpickle')
+    to_pickle(eval(x), 'prescales_temp/' + x + '.gzpickle')
