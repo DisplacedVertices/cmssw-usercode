@@ -40,7 +40,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
 [CRAB]
 jobtype = cmssw
-scheduler = condor
+scheduler = glite
 
 [CMSSW]
 dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
@@ -50,21 +50,16 @@ total_number_of_events = -1
 events_per_job = 50000
 
 [USER]
-ui_working_dir = crab/crab_mfvnu_gen_histos_%(name)s
+jmt_skip_input_files = src/EGamma/EGammaAnalysisTools/data/*
+ui_working_dir = crab/gen_histos/crab_mfv_gen_histos_%(name)s
 return_data = 1
 '''
 
     testing = 'testing' in sys.argv
 
-    jobs = [
-        ('tau100um', '/mfvneutralino_genfsimreco_tau100um/tucker-mfvneutralino_genfsimreco_tau100um-465709e5340ac2cc11e2751b48bbef3e/USER'),
-        ('tau10um',  '/mfvneutralino_genfsimreco_tau10um/tucker-mfvneutralino_genfsimreco_tau10um-719b1b049e9de8135afa1f308d0994e6/USER'),
-        ('tau1mm',   '/mfvneutralino_genfsimreco_tau1mm/tucker-mfvneutralino_genfsimreco_tau1mm-f0b5b0c98c357fc0015e0194f7aef803/USER'),
-        ('tau9p9mm', '/mfvneutralino_genfsimreco_tau9p9mm/tucker-mfvneutralino_genfsimreco_tau9p9mm-891f0c49f79ad2222cb205736c37de4f/USER'),
-        ]
-
-    for name, dataset in jobs:
-        open('crab.cfg', 'wt').write(crab_cfg % locals())
+    from JMTucker.Tools.Samples import mfv_signal_samples
+    for sample in mfv_signal_samples:
+        open('crab.cfg', 'wt').write(crab_cfg % sample)
         if not testing:
             os.system('crab -create -submit')
             os.system('rm crab.cfg')
