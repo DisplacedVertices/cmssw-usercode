@@ -61,10 +61,10 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
       d.push_back(c->daughter(i));
 }
 
-const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_other_id) {
-  // Handle PYTHIA8 particle record copying. allowed_other_id can be
-  // 21 for a gluon (maybe 23 for a photon!), or 0 for no other
-  // allowed ids.
+const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others) {
+  // Handle PYTHIA8 particle record copying. allowed_others can be 1
+  // for a gluon, 2 for a photon, 3 for both, or 0 for no other
+  // allowed ids. JMTBAD magic numbers
   while (1) {
     if (c == 0 || c->numberOfDaughters() == 0)
       break;
@@ -74,14 +74,14 @@ const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_oth
       else
 	break;
     }
-    else if (allowed_other_id != 0) {
+    else if (allowed_others != 0) {
       int the = -1;
       bool wrong_others = false;
       for (int i = 0, ie = int(c->numberOfDaughters()); i < ie; ++i) {
 	int id = c->daughter(i)->pdgId();
 	if (id == c->pdgId())
 	  the = i;
-	else if (id != allowed_other_id) {
+	else if ((id != 21 && id != 22) || (id == 21 && !(allowed_others & 1)) || (id == 22 && !(allowed_others & 2))) {
 	  wrong_others = true;
 	  break;
 	}
