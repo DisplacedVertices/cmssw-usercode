@@ -6,4 +6,5 @@
   <use name="DataFormats/PatCandidates"/>
   <use name="SimGeneral/HepPDTRecord"/>
   <use name="JMTucker/Tools"/>
+  <use name="EGamma/EGammaAnalysisTools"/>
 </library>
