@@ -1,4 +1,5 @@
 #include "DataFormats/Math/interface/deltaR.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -47,7 +48,8 @@ void MCInteractionMFV3j::Fill() {
     if (lsps[0] == 0)
       lsps[0] = &lsp;
     else {
-      die_if_not(reco::deltaR(*lsps[0], gen) > 0.01, "found same LSP twice");
+      if (reco::deltaR(*lsps[0], gen) < 0.001)
+	edm::LogWarning("MCInteractionMFV3j") << "warning: may have found same LSP twice based on deltaR < 0.001";
       which = 1;
       lsps[1] = &lsp;
     }
