@@ -101,3 +101,19 @@ diff -u -r1.77.2.2.2.3 jetTools.py
  	self.addParameter(self._defaultParameters,'doJTA',True, "run b tagging sequence for new jet collection and add it to the new pat jet collection")
          self.addParameter(self._defaultParameters,'doBTagging',True, 'run JetTracksAssociation and JetCharge and add it to the new pat jet collection (will autom. be true if doBTagging is set to true)')
          self.addParameter(self._defaultParameters,'jetCorrLabel',None, "payload and list of new jet correction labels, such as (\'AK5Calo\',[\'L2Relative\', \'L3Absolute\'])", tuple,acceptNoneValue=True )
+Index: RecoLuminosity/LumiDB/python/dataDML.py
+===================================================================
+RCS file: /local/reps/CMSSW/CMSSW/RecoLuminosity/LumiDB/python/dataDML.py,v
+retrieving revision 1.59
+diff -u -r1.59 dataDML.py
+--- RecoLuminosity/LumiDB/python/dataDML.py	12 Oct 2012 09:43:40 -0000	1.59
++++ RecoLuminosity/LumiDB/python/dataDML.py	11 Dec 2012 20:59:28 -0000
+@@ -1375,6 +1375,8 @@
+         while cursor.next():
+             runnum=cursor.currentRow()['runnum'].data()
+             cmslsnum=cursor.currentRow()['cmslsnum'].data()
++            if runnum == 199569 and cmslsnum > 371:
++                break
+             prescaleblob=None
+             hltcountblob=None
+             hltacceptblob=None
