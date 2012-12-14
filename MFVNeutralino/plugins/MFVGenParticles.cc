@@ -6,6 +6,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
 
 class MFVGenParticles : public edm::EDProducer {
@@ -27,7 +28,9 @@ MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg)
     gen_met_src(cfg.getParameter<edm::InputTag>("gen_met_src")),
     print_info(cfg.getParameter<bool>("print_info"))
 {
-  produces<reco::GenParticleCollection>();
+  produces<reco::GenParticleCollection>("All");
+  produces<reco::GenParticleCollection>("Visible");
+  produces<reco::GenParticleCollection>("Bottoms");
 }
 
 void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
@@ -42,8 +45,11 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles, *gen_jets, gen_met);
 
-  std::auto_ptr<reco::GenParticleCollection> new_gen_particles(new reco::GenParticleCollection);
-  reco::GenParticleRefProd ref_prod = event.getRefBeforePut<reco::GenParticleCollection>();
+  std::auto_ptr<reco::GenParticleCollection> all(new reco::GenParticleCollection);
+  reco::GenParticleRefProd ref_prod = event.getRefBeforePut<reco::GenParticleCollection>("All");
+
+  std::auto_ptr<reco::GenParticleCollection> visible(new reco::GenParticleCollection);
+  std::auto_ptr<reco::GenParticleCollection> bottoms(new reco::GenParticleCollection);
 
   if (mci.Valid()) {
     if (print_info)
@@ -63,20 +69,30 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
 	*mci.W_daughters      [i][1],
       };
 
+      visible->push_back(reco::GenParticle(*mci.stranges[i]));
+      visible->push_back(reco::GenParticle(*mci.bottoms[i]));
+      visible->push_back(reco::GenParticle(*mci.bottoms_from_tops[i]));
+      for (int k = 0; k < 2; ++k)
+	if (!is_neutrino(mci.W_daughters[i][k]))
+	  visible->push_back(reco::GenParticle(*mci.W_daughters[i][k]));
+
+      bottoms->push_back(reco::GenParticle(*mci.bottoms[i]));
+      bottoms->push_back(reco::GenParticle(*mci.bottoms_from_tops[i]));
+
       for (int j = 0; j < n; ++j) {
-	new_gen_particles->push_back(reco::GenParticle(old_gen[j]));
-	new_gen_particles->back().clearMothers();
-	new_gen_particles->back().clearDaughters();
+	all->push_back(reco::GenParticle(old_gen[j]));
+	all->back().clearMothers();
+	all->back().clearDaughters();
       }
 
-      reco::GenParticle&             lsp(new_gen_particles->at(i*n + 0));
-      reco::GenParticle&         strange(new_gen_particles->at(i*n + 1));
-      reco::GenParticle&          bottom(new_gen_particles->at(i*n + 2));
-      reco::GenParticle&             top(new_gen_particles->at(i*n + 3));
-      reco::GenParticle&               W(new_gen_particles->at(i*n + 4));
-      reco::GenParticle& bottom_from_top(new_gen_particles->at(i*n + 5));
-      reco::GenParticle&    W_daughter_0(new_gen_particles->at(i*n + 6));
-      reco::GenParticle&    W_daughter_1(new_gen_particles->at(i*n + 7));
+      reco::GenParticle&             lsp(all->at(i*n + 0));
+      reco::GenParticle&         strange(all->at(i*n + 1));
+      reco::GenParticle&          bottom(all->at(i*n + 2));
+      reco::GenParticle&             top(all->at(i*n + 3));
+      reco::GenParticle&               W(all->at(i*n + 4));
+      reco::GenParticle& bottom_from_top(all->at(i*n + 5));
+      reco::GenParticle&    W_daughter_0(all->at(i*n + 6));
+      reco::GenParticle&    W_daughter_1(all->at(i*n + 7));
 
       reco::GenParticleRef             lsp_ref(ref_prod, i*n + 0);
       reco::GenParticleRef         strange_ref(ref_prod, i*n + 1);
@@ -109,9 +125,11 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     }
   }
   else
-    edm::LogWarning("MFVGenParticles") << "MCInteractionMFV3j invalid! putting empty collection in event";
+    edm::LogWarning("MFVGenParticles") << "MCInteractionMFV3j invalid! putting empty collections in event";
 
-  event.put(new_gen_particles);
+  event.put(all,     "All");
+  event.put(visible, "Visible");
+  event.put(bottoms, "Bottoms");
 }
 
 DEFINE_FWK_MODULE(MFVGenParticles);

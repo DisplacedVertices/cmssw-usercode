@@ -24,9 +24,10 @@ process.printList = cms.EDAnalyzer('ParticleListDrawer',
                                    printVertex = cms.untracked.bool(True),
                                    )
 
-process.printList2 = process.printList.clone(src = 'mfvGenParticles')
+process.printList2 = process.printList.clone(src = cms.InputTag('mfvGenParticles', 'All'))
+process.printList3 = process.printList.clone(src = cms.InputTag('mfvGenParticles', 'Visible'))
 
-process.p = cms.Path(process.mfvGenParticles * process.printList2)
+process.p = cms.Path(process.mfvGenParticles * process.printList2 * process.printList3)
 
 process.out = cms.OutputModule('PoolOutputModule',
                                fileName = cms.untracked.string('gen_particles.root'),
