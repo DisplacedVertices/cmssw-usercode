@@ -32,6 +32,30 @@ int original_index(const reco::Candidate* c, const reco::GenParticleCollection& 
   return -1;
 }
 
+bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_ancestor) {
+  if (c == 0 || possible_ancestor == 0)
+    return false;
+  if (c == possible_ancestor)
+    return true;
+  for (int i = 0, ie = c->numberOfMothers(); i < ie; ++i) {
+    const reco::Candidate* mom = c->mother(i);
+    if (mom == possible_ancestor || is_ancestor_of(mom, possible_ancestor))
+      return true;
+  }
+  return false;
+}
+
+bool has_any_ancestor_with_id(const reco::Candidate* c, const int id) {
+  if (c == 0)
+    return false;
+  for (int i = 0, ie = c->numberOfMothers(); i < ie; ++i) {
+    const reco::Candidate* mom = c->mother(i);
+    if (mom->pdgId() == id || has_any_ancestor_with_id(mom, id))
+      return true;
+  }
+  return false;
+}
+
 const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status) {
   const reco::Candidate* d = 0;
   for (size_t i = 0; i < c->numberOfDaughters(); ++i) {
@@ -97,13 +121,20 @@ const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_oth
   return c;
 }
 
-void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus) {
-  if (strcmp(name, "header") == 0) 
-    printf("%25s %4s %8s %7s %7s %7s %7s %7s %7s   daughters' index/id\n", "particle", "ndx", "pdgId", "energy", "mass", "pT", "rap", "eta", "phi");
+void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus, const bool print_vtx) {
+  if (strcmp(name, "header") == 0) {
+    if (print_vtx)
+      printf("%25s %4s %8s %7s %7s %7s %7s %7s %7s %7s %7s %7s   daughters' index/id\n", "particle", "ndx", "pdgId", "energy", "mass", "pT", "rap", "eta", "phi", "vx", "vy", "vz");
+    else
+      printf("%25s %4s %8s %7s %7s %7s %7s %7s %7s   daughters' index/id\n", "particle", "ndx", "pdgId", "energy", "mass", "pT", "rap", "eta", "phi");
+  }
   else if (c == 0)
     printf("%25s    not in event\n", name);
   else {
-    printf("%25s %4i %8i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f  ", name, original_index(c, gens), c->pdgId(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
+    if (print_vtx)
+      printf("%25s %4i %8i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f  ", name, original_index(c, gens), c->pdgId(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi(), c->vx(), c->vy(), c->vz());
+    else
+      printf("%25s %4i %8i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f  ", name, original_index(c, gens), c->pdgId(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
     if (print_daus)
       for (int i = 0; i < int(c->numberOfDaughters()); ++i)
 	printf(" %i/%i,", original_index(c->daughter(i), gens), c->daughter(i)->pdgId());
