@@ -87,6 +87,13 @@ void MCInteractionMFV3j::Fill() {
     // just a new bottom, or along with some gluons.
     Ws[which]                = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) * 24), 2)); // 2 means allow photons only. sheesh.
     bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  5), 3));
+    if (bottoms_from_tops[which] == 0) {
+      // JMTBAD ok letting it be strange or down... if it cares, client code now has to check, ugh
+      bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  3), 3));
+      if (bottoms_from_tops[which] == 0) {
+	bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  1), 3));
+      }
+    }
 
     die_if_not(Ws[which],
 	       "at least one W not found: Ws[%i] == %p",
@@ -175,7 +182,11 @@ void MCInteractionMFV3j::Print(std::ostream& out) {
   print_gen_and_daus(Ws[0],                  "Ws[0]",                   *gen_particles);
   print_gen_and_daus(Ws[1],                  "Ws[1]",                   *gen_particles);
   print_gen_and_daus(bottoms_from_tops[0],   "bottoms_from_tops[0]",    *gen_particles);
+  if (abs(bottoms_from_tops[0]->pdgId()) != 5)
+    printf("NB: this was not a bottom quark!\n");
   print_gen_and_daus(bottoms_from_tops[1],   "bottoms_from_tops[1]",    *gen_particles);
+  if (abs(bottoms_from_tops[1]->pdgId()) != 5)
+    printf("NB: this was not a bottom quark!\n");
   print_gen_and_daus(W_daughters[0][0],      "Wplus daughter 0",        *gen_particles);
   print_gen_and_daus(W_daughters[0][1],      "Wplus daughter 1",        *gen_particles);
   print_gen_and_daus(W_daughters[1][0],      "Wminus daughter 0",       *gen_particles);
