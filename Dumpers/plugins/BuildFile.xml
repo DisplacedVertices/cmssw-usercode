@@ -1,0 +1,6 @@
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/PluginManager"/>
+<library file="EventDump.cc" name="JMTuckerDumpersEventDump">
+  <use name="JMTucker/Dumpers"/>
+</library>
