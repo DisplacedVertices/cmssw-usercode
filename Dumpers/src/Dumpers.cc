@@ -305,7 +305,7 @@ std::ostream& operator<<(std::ostream& out, const TrackingRecHit& trh) {
   out << trh.geographicalId();
   if (trh.isValid()) {
     out << " weight: " << trh.weight() << " dim: " << trh.dimension();
-    try {
+    if (false && trh.hasPositionAndError()) {
       out << " localPos: " << trh.localPosition() << " localPosErr: " << trh.localPositionError();
 
       const GeomDet* geom = JMTDumper::geom_det(trh.geographicalId());
@@ -315,8 +315,6 @@ std::ostream& operator<<(std::ostream& out, const TrackingRecHit& trh) {
       }
       else
 	out << " no geometry available in EventSetup";
-    } catch (const cms::Exception& ex) {
-      out << " localPos and localPosErr transient";
     }
   }
 
