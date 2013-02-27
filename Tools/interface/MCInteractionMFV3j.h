@@ -36,6 +36,8 @@ struct MCInteractionMFV3j : public MCInteraction {
   virtual void Fill();
   virtual void SetFourVectors();
   virtual void Print(std::ostream&);
+
+  const reco::Candidate* Ancestor(const reco::Candidate* c, const std::string& type);
 };
 
 #endif
