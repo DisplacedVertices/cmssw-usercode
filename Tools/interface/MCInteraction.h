@@ -10,6 +10,7 @@ struct MCInteraction {
   const reco::GenParticleCollection* gen_particles;
   const reco::GenJetCollection* gen_jets;
   const reco::GenMET* gen_met;
+  bool warned_no_dif_jets;
 
   // Decays-in-flight: neutrinos and their charged lepton partners.
   struct dif_lepton_pair {
@@ -36,6 +37,7 @@ struct MCInteraction {
 
   bool FromHardInteraction(const reco::Candidate*) const;
 
+  virtual void Init(const reco::GenParticleCollection&);
   virtual void Init(const reco::GenParticleCollection&, const reco::GenJetCollection&, const reco::GenMET&);
 
   virtual void Clear();
