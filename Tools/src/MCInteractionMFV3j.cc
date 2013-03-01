@@ -98,7 +98,7 @@ void MCInteractionMFV3j::Fill() {
     Ws_init[which]                = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) * 24));
     Ws[which]                     = dynamic_cast<const reco::GenParticle*>(final_candidate(Ws_init[which], 2)); // 2 means allow photons only. sheesh.
     bottoms_from_tops_init[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  5));
-    bottoms_from_tops[which]      = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops[which], 3));
+    bottoms_from_tops[which]      = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops_init[which], 3));
 
     if (bottoms_from_tops[which] == 0) {
       // JMTBAD ok letting it be strange or down... if it cares, client code now has to check, ugh
