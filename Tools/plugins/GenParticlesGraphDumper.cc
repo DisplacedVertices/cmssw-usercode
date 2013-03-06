@@ -46,9 +46,9 @@ void GenParticlesGraphDumper::analyze(const edm::Event& event, const edm::EventS
     if (include_id_and_stat)
       printf("],%i,%i),\n", gen.pdgId(), gen.status());
     else
-      printf("],\n", gen.pdgId(), gen.status());
+      printf("],\n");
   }
-  printf("}");
+  printf("}\n");
 }
 
 DEFINE_FWK_MODULE(GenParticlesGraphDumper);
@@ -72,6 +72,16 @@ DEFINE_FWK_MODULE(GenParticlesGraphDumper);
 //        if link_node not in tmp_path:
 //            new_path = tmp_path + [link_node]
 //            q.append(new_path)
+
+// To dump to graphviz dot format
+//from gzz import graph
+//print 'digraph G {'
+//for k,(vs,id,stat) in graph.iteritems():
+//    print '%i [label="#%i s%i\n%i"];' % (k, stat, id)
+//for k,(vs,id,stat) in graph.iteritems():
+//    for v in vs:
+//        print '%i->%i;' % (k,v)
+//print '}'
 
 // To dump to BGL code
 //from gzz import graph
