@@ -172,6 +172,25 @@ jmt_externals_hack = pythia8_hack
 jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
 '''
 
+    pythia8_hack = '''config/toolbox/${SCRAM_ARCH}/tools/selected/pythia8.xml
+pythia8
+<tool name="pythia8" version="165-cms">
+  <lib name="pythia8"/>
+  <lib name="hepmcinterface"/>
+  <client>
+    <environment name="PYTHIA8_BASE" default="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms"/>
+    <environment name="LIBDIR" default="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms/lib"/>
+    <environment name="INCLUDE" default="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms/include"/>
+  </client>
+  <runtime name="PYTHIA8DATA" value="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms/xmldoc"/>
+  <use name="cxxcompiler"/>
+  <use name="hepmc"/>
+  <use name="pythia6"/>
+  <use name="clhep"/>
+  <use name="lhapdf"/>
+</tool>
+'''
+    
     if os.environ['USER'] != 'tucker':
         raw_input('do you have the jmt_externals_hack for crab? if not, ^C now.')
 
@@ -183,10 +202,11 @@ jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
         new_py += '\nset_gluino_tau0(%e)\n' % tau0
         new_py += '\nset_mass(%i)\n' % mass
         open('gensimhlt_crab.py', 'wt').write(new_py)
+        open('pythia8_hack', 'wt').write(pythia8_hack)
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
             os.system('crab -create -submit')
-            os.system('rm -f crab.cfg gensimhlt_crab.py gensimhlt_crab.pyc')
+            os.system('rm -f crab.cfg gensimhlt_crab.py gensimhlt_crab.pyc pythia8_hack')
 
     tau0s = [0., 0.01, 0.1, 1.0, 4.0, 9.9]
     masses = [200, 400, 600, 800, 1000]
