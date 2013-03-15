@@ -106,6 +106,19 @@ total_number_of_events = -1
 events_per_job = 25000
 '''
 
+class TupleOnlyMCSample(MCSample):
+    def __init__(self, name, dataset, events_per=25000, max_events=-1):
+        super(TupleOnlyMCSample, self).__init__(name, '', dataset, -1, -1, -1, -1)
+        self.events_per = events_per
+        self.max_events = max_events
+
+    @property
+    def job_control(self):
+        return '''
+total_number_of_events = %(max_events)s
+events_per_job = %(events_per)s
+''' % self
+        
 class DataSample(Sample):
     IS_MC = False
     PROMPT_JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-207469_8TeV_PromptReco_Collisions12_JSON.txt'
