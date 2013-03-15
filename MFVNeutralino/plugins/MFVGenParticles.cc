@@ -1,7 +1,4 @@
-#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -17,33 +14,32 @@ private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
   const edm::InputTag gen_src;
-  const edm::InputTag gen_jet_src;
-  const edm::InputTag gen_met_src;
   const bool print_info;
 };
 
 MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg) 
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
-    gen_met_src(cfg.getParameter<edm::InputTag>("gen_met_src")),
     print_info(cfg.getParameter<bool>("print_info"))
 {
   produces<reco::GenParticleCollection>("All");
   produces<reco::GenParticleCollection>("Visible");
   produces<reco::GenParticleCollection>("Bottoms");
+  produces<reco::GenParticleCollection>("Status1");
+}
+
+namespace {
+  template <typename T>
+  T mag(const T& x, const T& y) {
+    return sqrt(x*x + y*y);
+  }
 }
 
 void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
-  edm::Handle<reco::GenJetCollection> gen_jets;
-  event.getByLabel(gen_jet_src, gen_jets);
-  edm::Handle<reco::GenMETCollection> gen_mets;
-  event.getByLabel(gen_met_src, gen_mets);
-  const reco::GenMET& gen_met = gen_mets->at(0);
 
   MCInteractionMFV3j mci;
-  mci.Init(*gen_particles, *gen_jets, gen_met);
+  mci.Init(*gen_particles);
 
   std::auto_ptr<reco::GenParticleCollection> all(new reco::GenParticleCollection);
   reco::GenParticleRefProd ref_prod = event.getRefBeforePut<reco::GenParticleCollection>("All");
@@ -130,6 +126,19 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   event.put(all,     "All");
   event.put(visible, "Visible");
   event.put(bottoms, "Bottoms");
+
+
+  std::auto_ptr<reco::GenParticleCollection> status1(new reco::GenParticleCollection);
+
+  for (const auto& gen : *gen_particles)
+    if (gen.status() == 1 &&
+	gen.charge() != 0 && 
+	mag(gen.vx(), gen.vy()) < 120 &&
+	abs(gen.vz()) < 300 &&
+	has_any_ancestor_with_id(&gen, 1000021))
+      status1->push_back(gen);
+
+  event.put(status1, "Status1");
 }
 
 DEFINE_FWK_MODULE(MFVGenParticles);
