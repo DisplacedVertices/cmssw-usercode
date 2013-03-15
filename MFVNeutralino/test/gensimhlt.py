@@ -153,9 +153,9 @@ scheduler = glite
 
 [CMSSW]
 datasetpath = None
-pset = genfsimreco_crab.py
+pset = gensimhlt_crab.py
 get_edm_output = 1
-events_per_job = 200
+events_per_job = 100
 total_number_of_events = 10000
 first_lumi = 1
 
@@ -168,7 +168,12 @@ check_user_remote_dir = 0
 publish_data = 1
 publish_data_name = mfv_gensimhlt_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
+jmt_externals_hack = pythia8_hack
+jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
 '''
+
+    if os.environ['USER'] != 'tucker':
+        raw_input('do you have the jmt_externals_hack for crab? if not, ^C now.')
 
     os.system('mkdir -p crab/gensimhlt')
     testing = 'testing' in sys.argv
