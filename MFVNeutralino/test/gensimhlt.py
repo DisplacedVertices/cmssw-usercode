@@ -174,6 +174,7 @@ jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
 
     pythia8_hack = '''config/toolbox/${SCRAM_ARCH}/tools/selected/pythia8.xml
 pythia8
+165-cms
 <tool name="pythia8" version="165-cms">
   <lib name="pythia8"/>
   <lib name="hepmcinterface"/>
