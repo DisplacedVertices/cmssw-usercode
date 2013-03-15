@@ -7,6 +7,7 @@ cvs co -r version3 -d JMTucker/Tools UserCode/JMTucker/Tools
 source JMTucker/Tools/setup.csh
 
 # this only works at cmslpc, obviously
+scram tool remove pythia8
 cat > pythia8.xml <<EOF
 <tool name="pythia8" version="165-cms">
   <lib name="pythia8"/>
@@ -27,8 +28,8 @@ EOF
 mv pythia8.xml $CMSSW_BASE/config/toolbox/slc5_amd64_gcc462/tools/selected/pythia8.xml
 scram setup pythia8
 
-cvs co -r V00-01-32 GeneratorInterface/Pythia8Interface 
-#patch -p0 < JMTucker/MFVNeutralino/patches
+cmsenv # must do again after the setup above, even if user has already cmsenv'ed
 
+cvs co -r V00-01-32 GeneratorInterface/Pythia8Interface 
 scram b -j 8
 popd
