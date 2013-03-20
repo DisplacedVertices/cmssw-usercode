@@ -12,7 +12,7 @@ os.system('mkdir -p prescales_temp')
 def popen(cmd):
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()[0]
 
-ll = LumiList('Cert_190456-206539_8TeV_PromptReco_Collisions12_JSON.txt')
+ll = LumiList('prescales_temp/Cert_190456-208686_8TeV_PromptReco_Collisions12_JSON.txt')
 ll_compact = ll.getCompactList()
 runs = [int(i) for i in ll.getRuns()]
 runs.sort()
@@ -20,12 +20,16 @@ runs.sort()
 def dump_lumibyls(runs):
     l = float(len(runs))
     for i,run in enumerate(runs):
-        print 'run %i (%i/%i)' % (run, i+1, l)
-        popen('lumiCalc2.py lumibyls -r %i -o lumibyls/%i.csv' % (run, run))
+        out_fn = 'prescales_temp/lumibyls/%i.csv' % run
+        already = os.path.isfile(out_fn)
+        print 'run %i (%i/%i)%s' % (run, i+1, l, ' (skipping since already dumped)' if already else '')
+        if already:
+            continue
+        popen('lumiCalc2.py lumibyls -r %i -o %s' % (run, out_fn))
 
 def parse_lumibyls(run):
     d = defaultdict(dict)
-    for line in open('lumibyls/%i.csv' % run):
+    for line in open('prescales_temp/lumibyls/%i.csv' % run):
         if 'Run' in line:
             continue
         x = line.strip().split(',')
@@ -164,9 +168,6 @@ def get_hlt_prescales(runs):
     to_pickle(prescales, fn)
     return prescales
     
-#dump_lumibyls(runs)
-#parse_lumibyls(190645)
-
 def step_em():
     for i in xrange(0, len(runs), 50):
         print i,i+50
@@ -227,7 +228,7 @@ def get_hlt_prescales_collapsed(runs, hlt_prescales=None):
     to_pickle(hlt_prescales_collapsed, fn)
     return hlt_prescales_collapsed
     
-    
+dump_lumibyls(runs)
 lumibylses = get_lumibylses(runs)
 menus = get_menus(runs)
 l1_prescales = get_l1_prescales(runs)
