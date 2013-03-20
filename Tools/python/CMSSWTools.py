@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+#process.source.firstLuminosityBlock = cms.untracked.uint32(2)
+
 def set_events_to_process(process, run_events, run=None):
     '''Set the PoolSource parameter eventsToProcess appropriately,
     given the desired runs/event numbers passed in. If run is None,
@@ -15,3 +17,15 @@ def set_events_to_process(process, run_events, run=None):
     #er = cms.untracked.VEventID(*[cms.untracked.EventID(*x) for x in run_events])
     er = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[-1],x[0],x[-1]) for x in run_events])
     process.source.eventsToProcess = er        
+
+def set_seeds(process, seed=12191982, size=2**24):
+    '''Set all the seeds for the RandomNumberGeneratorService in a
+    deterministic way, starting with the master seed above.
+
+    Warning: modifies python's RNG state.
+    '''
+    import random
+    random.seed(seed)
+    svc = process.RandomNumberGeneratorService
+    for k,v in svc.parameters_().iteritems():
+        getattr(svc, k).initialSeed = random.randint(0, size)
