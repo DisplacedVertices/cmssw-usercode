@@ -13,8 +13,6 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 
 process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
                                    gen_src = cms.InputTag('genParticles'),
-                                   gen_jet_src = cms.InputTag('ak5GenJets'),
-                                   gen_met_src = cms.InputTag('genMetTrue'),
                                    required_num_leptonic = cms.int32(-1),
                                    allowed_decay_types = cms.vint32(),
                                    print_info = cms.bool(False),

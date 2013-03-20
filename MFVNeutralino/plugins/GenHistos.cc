@@ -1,13 +1,8 @@
-#include <boost/foreach.hpp>
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -27,8 +22,6 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag gen_src;
-  const edm::InputTag gen_jet_src;
-  const edm::InputTag gen_met_src;
   const int required_num_leptonic;
   const std::vector<int> allowed_decay_types;
   const bool print_info;
@@ -64,8 +57,6 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
 
 MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
-    gen_met_src(cfg.getParameter<edm::InputTag>("gen_met_src")),
     required_num_leptonic(cfg.getParameter<int>("required_num_leptonic")),
     allowed_decay_types(cfg.getParameter<std::vector<int> >("allowed_decay_types")),
     print_info(cfg.getParameter<bool>("print_info"))
@@ -192,14 +183,9 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
-  edm::Handle<reco::GenJetCollection> gen_jets;
-  event.getByLabel(gen_jet_src, gen_jets);
-  edm::Handle<reco::GenMETCollection> gen_mets;
-  event.getByLabel(gen_met_src, gen_mets);
-  const reco::GenMET& gen_met = gen_mets->at(0);
 
   MCInteractionMFV3j mci;
-  mci.Init(*gen_particles, *gen_jets, gen_met);
+  mci.Init(*gen_particles);
   if (!mci.Valid()) {
     edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid!";
     return;
@@ -218,10 +204,6 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 
   NumLeptons->Fill(mci.num_leptonic);
   DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
-
-  edm::Handle<reco::BeamSpot> bs;
-  event.getByLabel("offlineBeamSpot", bs);
-  if (print_info) printf("beamspot x,y: %f, %f\n", bs->x0(), bs->y0());
 
   // Assume pythia line 2 (probably a gluon) has the "right"
   // production vertex. (The protons are just at 0,0,0.)
