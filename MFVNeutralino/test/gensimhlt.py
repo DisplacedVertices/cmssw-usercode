@@ -25,20 +25,20 @@ process.source = cms.Source('EmptySource')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
+# /RelValProdMinBias/CMSSW_5_3_6-START53_V14-v2/GEN-SIM-RAW
+process.mix.input.fileNames = [
+    '/store/relval/CMSSW_5_3_6-START53_V14/RelValProdMinBias/GEN-SIM-RAW/v2/00000/52000D8A-032A-E211-BC94-00304867BFA8.root',
+    '/store/relval/CMSSW_5_3_6-START53_V14/RelValProdMinBias/GEN-SIM-RAW/v2/00000/4677049F-042A-E211-8525-0026189438E8.root',
+    ]
+
 process.output = cms.OutputModule('PoolOutputModule',
 				  splitLevel = cms.untracked.int32(0),
 				  eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-				  outputCommands = process.RAWSIMEventContent.outputCommands,
+				  outputCommands = process.RAWDEBUGEventContent.outputCommands,
 				  fileName = cms.untracked.string('gensimhlt.root'),
 				  dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('GEN-SIM-RAW')),
 				  SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('generation_step')),
 				  )
-
-process.output.outputCommands += [
-    'keep TrackingParticles_mergedtruth_MergedTrackTruth_*',
-    'keep TrackingVertexs_mergedtruth_MergedTrackTruth_*',
-    'keep edmHepMCProduct_*_*_*',
-    ]
 
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -141,9 +141,37 @@ DECAY   1000021     0.01E+00   # gluino decays
 '''
     open(fn, 'wt').write(slha % locals())
 
+def set_masses(m_gluino, m_neutralino, fn='minSLHA.spc'):
+    slha = '''
+BLOCK SPINFO  # Spectrum calculator information
+     1   Minimal    # spectrum calculator
+     2   1.0.0         # version number
+#
+BLOCK MODSEL  # Model selection
+     1     1   #
+#
+
+BLOCK MASS  # Mass Spectrum
+# PDG code           mass       particle
+  1000021     %(m_gluino)E       # ~g
+  1000022     %(m_neutralino)E   # ~chi_10
+
+DECAY   1000021     0.01E+00   # gluino decays
+#          BR         NDA      ID1       ID2
+    1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
+
+DECAY   1000022     0.01E+00   # neutralino decays
+#           BR         NDA      ID1       ID2       ID3
+     0.5E+00          3            3          5           6   # BR(~chi_10 -> s b t)
+     0.5E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
+'''
+    open(fn, 'wt').write(slha % locals())
+
 set_gluino_tau0(1)
 set_mass(300)
 
+#set_particle_tau0(1000022, 5)
+#set_masses(1000, 400)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
@@ -155,8 +183,8 @@ scheduler = glite
 datasetpath = None
 pset = gensimhlt_crab.py
 get_edm_output = 1
-events_per_job = 100
-total_number_of_events = 10000
+events_per_job = 1
+total_number_of_events = 1
 first_lumi = 1
 
 [USER]
@@ -191,7 +219,7 @@ pythia8
   <use name="lhapdf"/>
 </tool>
 '''
-    
+
     if os.environ['USER'] != 'tucker':
         raw_input('do you have the jmt_externals_hack for crab? if not, ^C now.')
 
@@ -214,5 +242,6 @@ pythia8
 
     for tau0 in tau0s:
         for mass in masses:
-            name = 'gluino_tau%04ium_M%i' % (int(tau0*1000), mass)
+            name = 'testing_gluino_tau%04ium_M%04i' % (int(tau0*1000), mass)
             submit(name, tau0, mass)
+            sys.exit(0)
