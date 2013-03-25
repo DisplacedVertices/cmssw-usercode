@@ -25,12 +25,6 @@ process.source = cms.Source('EmptySource')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
-# /RelValProdMinBias/CMSSW_5_3_6-START53_V14-v2/GEN-SIM-RAW
-process.mix.input.fileNames = [
-    '/store/relval/CMSSW_5_3_6-START53_V14/RelValProdMinBias/GEN-SIM-RAW/v2/00000/52000D8A-032A-E211-BC94-00304867BFA8.root',
-    '/store/relval/CMSSW_5_3_6-START53_V14/RelValProdMinBias/GEN-SIM-RAW/v2/00000/4677049F-042A-E211-8525-0026189438E8.root',
-    ]
-
 process.output = cms.OutputModule('PoolOutputModule',
 				  splitLevel = cms.untracked.int32(0),
 				  eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
@@ -183,8 +177,8 @@ scheduler = glite
 datasetpath = None
 pset = gensimhlt_crab.py
 get_edm_output = 1
-events_per_job = 1
-total_number_of_events = 1
+events_per_job = 40
+total_number_of_events = 10000
 first_lumi = 1
 
 [USER]
@@ -242,6 +236,5 @@ pythia8
 
     for tau0 in tau0s:
         for mass in masses:
-            name = 'testing_gluino_tau%04ium_M%04i' % (int(tau0*1000), mass)
+            name = 'gluino_tau%04ium_M%04i' % (int(tau0*1000), mass)
             submit(name, tau0, mass)
-            sys.exit(0)
