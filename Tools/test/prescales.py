@@ -1,5 +1,31 @@
 #!/usr/bin/env python
 
+import sys
+print '''
+First check that hltLSById in RecoLuminosity/LumiDB/python/dataDML.py
+doesn't hang for run,ls =
+199569,371, and if it does, patch as below (but line numbers will be
+different, as this is for a different tag of RecoLuminosity/LumiDB.
+
+Index: RecoLuminosity/LumiDB/python/dataDML.py
+===================================================================
+RCS file: /local/reps/CMSSW/CMSSW/RecoLuminosity/LumiDB/python/dataDML.py,v
+retrieving revision 1.59
+diff -u -r1.59 dataDML.py
+--- RecoLuminosity/LumiDB/python/dataDML.py	12 Oct 2012 09:43:40 -0000	1.59
++++ RecoLuminosity/LumiDB/python/dataDML.py	11 Dec 2012 20:59:28 -0000
+@@ -1375,6 +1375,8 @@
+         while cursor.next():
+             runnum=cursor.currentRow()['runnum'].data()
+             cmslsnum=cursor.currentRow()['cmslsnum'].data()
++            if runnum == 199569 and cmslsnum > 371:
++                break
+             prescaleblob=None
+             hltcountblob=None
+             hltacceptblob=None
+'''
+sys.exit(1)
+
 import re, os, subprocess
 from pprint import pprint
 from collections import defaultdict
