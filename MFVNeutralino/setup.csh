@@ -14,10 +14,10 @@ cat > pythia8.xml <<EOF
   <lib name="hepmcinterface"/>
   <client>
     <environment name="PYTHIA8_BASE" default="/uscmst1/prod/sw/cms/slc5_amd64_gcc462/external/pythia8/165-cms"/>
-    <environment name="LIBDIR" default="$PYTHIA8_BASE/lib"/>
-    <environment name="INCLUDE" default="$PYTHIA8_BASE/include"/>
+    <environment name="LIBDIR" default="/uscmst1/prod/sw/cms/slc5_amd64_gcc462/external/pythia8/165-cms/lib"/>
+    <environment name="INCLUDE" default="/uscmst1/prod/sw/cms/slc5_amd64_gcc462/external/pythia8/165-cms/include"/>
   </client>
-  <runtime name="PYTHIA8DATA" value="$PYTHIA8_BASE/xmldoc"/>
+  <runtime name="PYTHIA8DATA" value="/uscmst1/prod/sw/cms/slc5_amd64_gcc462/external/pythia8/165-cms/xmldoc"/>
   <use name="cxxcompiler"/>
   <use name="hepmc"/>
   <use name="pythia6"/>
