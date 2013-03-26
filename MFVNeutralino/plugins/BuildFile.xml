@@ -5,6 +5,8 @@
   <use name="CommonTools/UtilAlgos"/>
   <use name="DataFormats/PatCandidates"/>
   <use name="SimGeneral/HepPDTRecord"/>
+  <use name="SimTracker/Records"/>
+  <use name="SimTracker/TrackAssociation"/>
   <use name="JMTucker/Tools"/>
   <use name="EGamma/EGammaAnalysisTools"/>
 </library>
