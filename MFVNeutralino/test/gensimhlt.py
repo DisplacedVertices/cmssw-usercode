@@ -78,6 +78,10 @@ for path in process.paths:
 from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC 
 process = customizeHLTforMC(process)
 
+if 'genonly' in sys.argv:
+    process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step)
+    process.maxEvents.input = 1000
+    
 if 'debug' in sys.argv:
     process.options.wantSummary = True
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -162,7 +166,7 @@ DECAY   1000022     0.01E+00   # neutralino decays
     open(fn, 'wt').write(slha % locals())
 
 set_gluino_tau0(1)
-set_mass(300)
+set_mass(400)
 
 #set_particle_tau0(1000022, 5)
 #set_masses(1000, 400)
