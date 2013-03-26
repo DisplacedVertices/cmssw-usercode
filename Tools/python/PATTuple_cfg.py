@@ -1,6 +1,6 @@
 import sys, FWCore.ParameterSet.Config as cms
 
-version = 'v5'
+version = 'v6'
 runOnMC = True # Submit script expects this line to be unmodified...
 suppress_stdout = True
 
@@ -23,7 +23,7 @@ for category in ['TwoTrackMinimumDistance']:
 process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START53_V13::All' if runOnMC else 'FT_P_V42C_AN2::All'
+process.GlobalTag.globaltag = 'START53_V21::All' if runOnMC else 'FT_P_V42C_AN2::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
@@ -154,7 +154,6 @@ if True: # pfElectronIsoConeR03
     processpostfix('patElectrons').isolationValues.pfChargedHadrons   = InputTagPostFix('elPFIsoValueCharged03PFId')
 
 process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
-process.eidMVASequence = cms.Sequence(process.mvaTrigV0 + process.mvaNonTrigV0)
 processpostfix('patElectrons').electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 processpostfix('patElectrons').electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
 processpostfix('patMuons').embedTrack = True
@@ -231,6 +230,7 @@ process.out.outputCommands = [
     'drop CaloTowers_*_*_*',
     'keep *_patMETs*_*_*',
     'keep recoGenParticles_genParticles_*_*',
+    'keep recoGenJets_ak*GenJets_*_*',
     'keep GenEventInfoProduct_*_*_*',
     'keep GenRunInfoProduct_*_*_*',
     'keep PileupSummaryInfos_addPileupInfo__*',
