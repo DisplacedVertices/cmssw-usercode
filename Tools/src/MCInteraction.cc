@@ -1,5 +1,4 @@
 #include "DataFormats/Math/interface/deltaR.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "JMTucker/Tools/interface/MCInteraction.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -28,17 +27,6 @@ bool MCInteraction::FromHardInteraction(const reco::Candidate* p) const {
   }
 }
 
-void MCInteraction::Init(const reco::GenParticleCollection& gen_particles_) {
-  Clear();
-  
-  gen_particles = &gen_particles_;
-  
-  Fill();
-  FindDIFLeptons();
-  
-  SetFourVectors();
-}
-
 void MCInteraction::Init(const reco::GenParticleCollection& gen_particles_,
 			 const reco::GenJetCollection& gen_jets_,
 			 const reco::GenMET& gen_met_) {
@@ -59,7 +47,6 @@ void MCInteraction::Clear() {
   gen_particles = 0;
   gen_jets = 0;
   gen_met = 0;
-  warned_no_dif_jets = false;
   immediate_nus.clear();
   dif_leptons.clear();
 }
@@ -136,13 +123,6 @@ void MCInteraction::FindDIFLeptons() {
 }
 
 void MCInteraction::FindDIFJets() {
-  if (gen_jets == 0) {
-    if (!warned_no_dif_jets)
-      edm::LogWarning("MCInteraction") << "in, FindDIFJets, gen_jets pointer is null: not setting up closest/mother jets for decay-in-flight leptons.";
-    warned_no_dif_jets = true;
-    return;
-  }
-
   for (int i = 0, ie = int(dif_leptons.size()); i < ie; ++i) {
     MCInteraction::dif_lepton_pair& dif = dif_leptons[i];
     

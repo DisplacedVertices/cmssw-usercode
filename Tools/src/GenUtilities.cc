@@ -45,13 +45,6 @@ bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_an
   return false;
 }
 
-bool is_ancestor_of(const reco::Candidate* c, const std::vector<const reco::Candidate*>& possible_ancestors) {
-  for (const reco::Candidate* possible_ancestor : possible_ancestors)
-    if (is_ancestor_of(c, possible_ancestor))
-      return true;
-  return false;
-}
-
 bool has_any_ancestor_with_id(const reco::Candidate* c, const int id) {
   if (c == 0)
     return false;
@@ -92,19 +85,11 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
       d.push_back(c->daughter(i));
 }
 
-std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::Candidate* c, int allowed_others) {
+const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others) {
   // Handle PYTHIA8 particle record copying. allowed_others can be 1
   // for a gluon, 2 for a photon, 3 for both, or 0 for no other
   // allowed ids. JMTBAD magic numbers
-
-  std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > result;
-  result.first = 0;
-  if (c == 0)
-    return result;
-
   while (1) {
-    result.second.push_back(c);
-
     if (c == 0 || c->numberOfDaughters() == 0)
       break;
     if (c->numberOfDaughters() == 1) {
@@ -133,67 +118,26 @@ std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_ca
     else
       break;
   }
-
-  result.first = c;
-  return result;
-}
-
-const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others) {
-  return final_candidate_with_copies(c, allowed_others).first;
-}
-
-void GenParticlePrinter::PrintHeader() {
-  printf("%25s %4s %8s %4s %7s %7s %7s %7s %7s %7s", "particle", "ndx", "pdgId", "stat", "energy", "mass", "pT", "rap", "eta", "phi");
-  if (print_vertex)
-    printf(" %7s %7s %7s", "vx", "vy", "vz");
-  if (print_mothers)
-    printf(" | %20s |", "moms' ndx/id");
-  if (print_daughters)
-    printf(" | daus' ndx/id");
-  printf("\n");
-}
-
-void GenParticlePrinter::Print(const reco::Candidate* c, const char* name) {
-  if (strcmp(name, "header") == 0)
-    PrintHeader();
-  else if (c == 0)
-    printf("%25s    pointer nil (not in event?)\n", name);
-  else {
-    printf("%25s %4i %8i %4i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f", name, original_index(c, gen_particles), c->pdgId(), c->status(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
-    if (print_vertex)
-      printf(" %7.3f %7.3f %7.3f", c->vx(), c->vy(), c->vz());
-
-    if (print_mothers) {
-      printf(" | ");
-      if (c->numberOfMothers() > 2)
-	printf("%20s", "(more than 2)");
-      else {
-	std::string z;
-	for (int i = 0, ie = int(c->numberOfMothers()); i < ie; ++i) {
-	  char buf[64];
-	  snprintf(buf, 64, "%i/%i", original_index(c->mother(i), gen_particles), c->mother(i)->pdgId());
-	  z += buf;
-	  if (i < ie - 1)
-	    z += ", ";
-	}
-	printf("%20s", z.c_str());
-      }
-    }
-    if (print_daughters) {
-      printf(" | ");
-      for (int i = 0, ie = int(c->numberOfDaughters()); i < ie; ++i) {
-	printf("%i/%i", original_index(c->daughter(i), gen_particles), c->daughter(i)->pdgId());
-	if (i < ie - 1)
-	  printf(" ");
-      }
-    }
-    printf("\n");
-  }
+  return c;
 }
 
 void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus, const bool print_vtx) {
-  GenParticlePrinter p(gens);
-  p.print_daughters = print_daus;
-  p.print_vertex = print_vtx;
-  p.Print(c, name);
+  if (strcmp(name, "header") == 0) {
+    if (print_vtx)
+      printf("%25s %4s %8s %7s %7s %7s %7s %7s %7s %7s %7s %7s   daughters' index/id\n", "particle", "ndx", "pdgId", "energy", "mass", "pT", "rap", "eta", "phi", "vx", "vy", "vz");
+    else
+      printf("%25s %4s %8s %7s %7s %7s %7s %7s %7s   daughters' index/id\n", "particle", "ndx", "pdgId", "energy", "mass", "pT", "rap", "eta", "phi");
+  }
+  else if (c == 0)
+    printf("%25s    not in event\n", name);
+  else {
+    if (print_vtx)
+      printf("%25s %4i %8i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f  ", name, original_index(c, gens), c->pdgId(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi(), c->vx(), c->vy(), c->vz());
+    else
+      printf("%25s %4i %8i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f  ", name, original_index(c, gens), c->pdgId(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
+    if (print_daus)
+      for (int i = 0; i < int(c->numberOfDaughters()); ++i)
+	printf(" %i/%i,", original_index(c->daughter(i), gens), c->daughter(i)->pdgId());
+    printf("\n");
+  }
 }

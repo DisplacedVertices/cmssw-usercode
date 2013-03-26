@@ -8,12 +8,8 @@ void MCInteractionMFV3j::Clear() {
   MCInteraction::Clear();
   for (int i = 0; i < 2; ++i) {
     lsps[i] = stranges[i] = bottoms[i] = tops[i] = Ws[i] = bottoms_from_tops[i] = 0;
-    stranges_init[i] = bottoms_init[i] = tops_init[i] = Ws_init[i] = bottoms_from_tops_init[i] = 0;
     for (int j = 0; j < 2; ++j)
-      {
-	W_daughters[i][j] = 0;
-	W_daughters_init[i][j] = 0;
-      }
+      W_daughters[i][j] = 0;
     decay_type[i] = -1;
   }
   num_leptonic = -1;
@@ -23,9 +19,7 @@ bool MCInteractionMFV3j::Valid() {
   // bottoms_from_tops can be null if Vtb != 1 in gen, but everything else has to be there
   return 
     lsps[0] && stranges[0] && bottoms[0] && tops[0] && Ws[0] && W_daughters[0][0] && W_daughters[0][1] &&
-    lsps[1] && stranges[1] && bottoms[1] && tops[1] && Ws[1] && W_daughters[1][0] && W_daughters[1][1] &&
-    stranges_init[0] && bottoms_init[0] && tops_init[0] && Ws_init[0] && W_daughters_init[0][0] && W_daughters_init[0][1] &&
-    stranges_init[1] && bottoms_init[1] && tops_init[1] && Ws_init[1] && W_daughters_init[1][0] && W_daughters_init[1][1];
+    lsps[1] && stranges[1] && bottoms[1] && tops[1] && Ws[1] && W_daughters[1][0] && W_daughters[1][1];
 }
 
 int sgn(int x) {
@@ -70,11 +64,7 @@ void MCInteractionMFV3j::Fill() {
 	  daughters[j] = lsp.daughter(i);
       }
     }
-
-    stranges_init[which] = dynamic_cast<const reco::GenParticle*>(daughters[0]);
-    bottoms_init [which] = dynamic_cast<const reco::GenParticle*>(daughters[1]);
-    tops_init    [which] = dynamic_cast<const reco::GenParticle*>(daughters[2]);
-
+      
     // Make sure we found all three daughters, and then get the
     // "final" daughters (PYTHIA8 likes to copy things a lot while it
     // messes with e.g. gluon radiation).
@@ -95,18 +85,13 @@ void MCInteractionMFV3j::Fill() {
     // daughter until we reach the actual W decay (qq' or lnu). The
     // bottom also can have a lot of copies, with the daughter being
     // just a new bottom, or along with some gluons.
-    Ws_init[which]                = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) * 24));
-    Ws[which]                     = dynamic_cast<const reco::GenParticle*>(final_candidate(Ws_init[which], 2)); // 2 means allow photons only. sheesh.
-    bottoms_from_tops_init[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  5));
-    bottoms_from_tops[which]      = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops_init[which], 3));
-
+    Ws[which]                = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) * 24), 2)); // 2 means allow photons only. sheesh.
+    bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  5), 3));
     if (bottoms_from_tops[which] == 0) {
       // JMTBAD ok letting it be strange or down... if it cares, client code now has to check, ugh
-      bottoms_from_tops_init[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  3));
-      bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops_init[which], 3));
+      bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  3), 3));
       if (bottoms_from_tops[which] == 0) {
-	bottoms_from_tops_init[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  1));
-	bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops_init[which], 3));
+	bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  1), 3));
       }
     }
 
@@ -129,9 +114,7 @@ void MCInteractionMFV3j::Fill() {
     }
     die_if_not(daus.size() == 2, "a W did not have exactly two non-W daughters: which=%i", which);
     const int order = abs(daus[0]->pdgId()) % 2 == 0;
-    W_daughters_init[which][0] = dynamic_cast<const reco::GenParticle*>(Ws[which]->daughter(order));
     W_daughters[which][0] = daus[ order];
-    W_daughters_init[which][1] = dynamic_cast<const reco::GenParticle*>(Ws[which]->daughter(!order));
     W_daughters[which][1] = daus[!order];
   }
 
@@ -187,75 +170,27 @@ void MCInteractionMFV3j::Print(std::ostream& out) {
   printf("num_leptons: %i\n", num_leptonic);
   const char* decay_types[4] = {"e", "mu", "tau", "h"};
   printf("decay type: Ws[0] -> %s,  Ws[1] -> %s\n", decay_types[decay_type[0]], decay_types[decay_type[1]]);
-  print_gen_and_daus(0,                      "header",                  *gen_particles, true, true);
-  print_gen_and_daus(lsps[0],                "lsps[0]",                 *gen_particles, true, true);
-  print_gen_and_daus(lsps[1],                "lsps[1]",                 *gen_particles, true, true);
-  print_gen_and_daus(stranges[0],            "stranges[0]",             *gen_particles, true, true);
-  print_gen_and_daus(stranges[1],            "stranges[1]",             *gen_particles, true, true);
-  print_gen_and_daus(bottoms[0],             "bottoms[0]",              *gen_particles, true, true);
-  print_gen_and_daus(bottoms[1],             "bottoms[1]",              *gen_particles, true, true);
-  print_gen_and_daus(tops[0],                "tops[0]",                 *gen_particles, true, true);
-  print_gen_and_daus(tops[1],                "tops[1]",                 *gen_particles, true, true);
-  print_gen_and_daus(Ws[0],                  "Ws[0]",                   *gen_particles, true, true);
-  print_gen_and_daus(Ws[1],                  "Ws[1]",                   *gen_particles, true, true);
-  print_gen_and_daus(bottoms_from_tops[0],   "bottoms_from_tops[0]",    *gen_particles, true, true);
+  print_gen_and_daus(0,                      "header",                  *gen_particles);
+  print_gen_and_daus(lsps[0],                "lsps[0]",                 *gen_particles);
+  print_gen_and_daus(lsps[1],                "lsps[1]",                 *gen_particles);
+  print_gen_and_daus(stranges[0],            "stranges[0]",             *gen_particles);
+  print_gen_and_daus(stranges[1],            "stranges[1]",             *gen_particles);
+  print_gen_and_daus(bottoms[0],             "bottoms[0]",              *gen_particles);
+  print_gen_and_daus(bottoms[1],             "bottoms[1]",              *gen_particles);
+  print_gen_and_daus(tops[0],                "tops[0]",                 *gen_particles);
+  print_gen_and_daus(tops[1],                "tops[1]",                 *gen_particles);
+  print_gen_and_daus(Ws[0],                  "Ws[0]",                   *gen_particles);
+  print_gen_and_daus(Ws[1],                  "Ws[1]",                   *gen_particles);
+  print_gen_and_daus(bottoms_from_tops[0],   "bottoms_from_tops[0]",    *gen_particles);
   if (abs(bottoms_from_tops[0]->pdgId()) != 5)
     printf("NB: this was not a bottom quark!\n");
-  print_gen_and_daus(bottoms_from_tops[1],   "bottoms_from_tops[1]",    *gen_particles, true, true);
+  print_gen_and_daus(bottoms_from_tops[1],   "bottoms_from_tops[1]",    *gen_particles);
   if (abs(bottoms_from_tops[1]->pdgId()) != 5)
     printf("NB: this was not a bottom quark!\n");
-  print_gen_and_daus(W_daughters[0][0],      "Wplus daughter 0",        *gen_particles, true, true);
-  print_gen_and_daus(W_daughters[0][1],      "Wplus daughter 1",        *gen_particles, true, true);
-  print_gen_and_daus(W_daughters[1][0],      "Wminus daughter 0",       *gen_particles, true, true);
-  print_gen_and_daus(W_daughters[1][1],      "Wminus daughter 1",       *gen_particles, true, true);
+  print_gen_and_daus(W_daughters[0][0],      "Wplus daughter 0",        *gen_particles);
+  print_gen_and_daus(W_daughters[0][1],      "Wplus daughter 1",        *gen_particles);
+  print_gen_and_daus(W_daughters[1][0],      "Wminus daughter 0",       *gen_particles);
+  print_gen_and_daus(W_daughters[1][1],      "Wminus daughter 1",       *gen_particles);
   MCInteraction::Print(out);
 }
 
-const reco::Candidate* MCInteractionMFV3j::Ancestor(const reco::Candidate* c, const std::string& type) {
-  if (type == "lsp") {
-    if (is_ancestor_of(c, lsps[0]))
-      return lsps[0];
-    else if (is_ancestor_of(c, lsps[1]))
-      return lsps[1];
-  }
-  else if (type == "top") {
-    if (is_ancestor_of(c, tops[0]))
-      return tops[0];
-    else if (is_ancestor_of(c, tops[1]))
-      return tops[1];
-  }
-  else if (type == "strange") {
-    if (is_ancestor_of(c, stranges[0]))
-      return stranges[0];
-    else if (is_ancestor_of(c, stranges[1]))
-      return stranges[1];
-  }
-  else if (type == "bottom") {
-    if (is_ancestor_of(c, bottoms[0]))
-      return bottoms[0];
-    else if (is_ancestor_of(c, bottoms[1]))
-      return bottoms[1];
-  }
-  else if (type == "bottom_from_top") {
-    if (is_ancestor_of(c, bottoms_from_tops[0]))
-      return bottoms_from_tops[0];
-    else if (is_ancestor_of(c, bottoms_from_tops[1]))
-      return bottoms_from_tops[1];
-  }
-  else if (type == "quark") {
-    const reco::Candidate* result = Ancestor(c, "top");
-    if (result == 0) {
-      result = Ancestor(c, "bottom");
-      if (result == 0)
-	result = Ancestor(c, "strange");
-    }
-    return result;
-  }
-  else
-    throw cms::Exception("MCInteractionMFV3j") << "Ancestor: type " << type << " not recognized";
-
-  return 0;
-}
-
-    
-    

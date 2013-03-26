@@ -1,8 +1,8 @@
-#!/bin/tcsh
+#!/dev/null
 
 pushd $CMSSW_BASE/src
 
-cvs co -r version3 -d JMTucker/Tools UserCode/JMTucker/Tools
+cvs co -r version4 -d JMTucker/Tools UserCode/JMTucker/Tools
 
 source JMTucker/Tools/setup.csh
 

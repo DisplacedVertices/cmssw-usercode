@@ -297,17 +297,11 @@ def input_is_pythia8():
 def keep_general_tracks():
     process.out.outputCommands.append('keep *_generalTracks_*_*')
 
-def no_skimming_cuts():
-    global process
-    del process.out.SelectEvents
-
 if 'fastsim' in sys.argv:
     input_is_fastsim()
 if 'pythia8' in sys.argv:
     input_is_pythia8()
 if 'keep_tracks' in sys.argv:
     keep_general_tracks()
-if 'no_cuts' in sys.argv:
-    no_skimming_cuts()
 
 #open('dumptup.py','wt').write(process.dumpPython())
