@@ -196,6 +196,9 @@ publish_data_name = mfv_gensimhlt_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 jmt_externals_hack = pythia8_hack
 jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
+
+[GRID]
+ce_black_list = metu.edu.tr,uoi.gr,troitsk.ru,brunel.ac.uk,bris.ac.uk,kfki.hu,pi.infn.it,ihep.su,ciemat.es,jinr-t1.ru,nectec.or.th,ts.infn.it
 '''
 
     pythia8_hack = '''config/toolbox/${SCRAM_ARCH}/tools/selected/pythia8.xml
