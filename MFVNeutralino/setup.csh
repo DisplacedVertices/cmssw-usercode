@@ -31,5 +31,7 @@ scram setup pythia8
 cmsenv # must do again after the setup above, even if user has already cmsenv'ed
 
 cvs co -r V00-01-32 GeneratorInterface/Pythia8Interface 
-scram b -j 8
+
+scram b -j 24
+
 popd
