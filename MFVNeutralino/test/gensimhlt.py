@@ -52,9 +52,9 @@ process.generator = cms.EDFilter('Pythia8GeneratorFilter',
                                          'SLHA:file = minSLHA.spc',
                                          'SUSY:gg2gluinogluino = on',
                                          'SUSY:qqbar2gluinogluino = on',
-                                         'SUSY:idA = 1000021 ',
-                                         'SUSY:idB = 1000021 ',
-                                         'Tune:pp 5',                      
+                                         'SUSY:idA = 1000021',
+                                         'SUSY:idB = 1000021',
+                                         'Tune:pp 5',
 					 )
                                      ),
 				 )
@@ -80,7 +80,7 @@ process = customizeHLTforMC(process)
 
 if 'genonly' in sys.argv:
     process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step)
-    process.maxEvents.input = 1000
+    process.maxEvents.input = 500
     
 if 'debug' in sys.argv:
     process.options.wantSummary = True
