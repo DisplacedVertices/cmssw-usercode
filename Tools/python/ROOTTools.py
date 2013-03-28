@@ -167,7 +167,7 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
         if ' * ' in line and 'Row' not in line:
             yield xform(line.split('*')[2:l])
 
-def differentiate_stat_box(hist, movement=1, new_color=None):
+def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None):
     """Move hist's stat box and change its line/text color. If
     movement is just an int, that number specifies how many units to
     move the box downward. If it is a 2-tuple of ints (m,n), the stat
@@ -189,6 +189,11 @@ def differentiate_stat_box(hist, movement=1, new_color=None):
     
     x1,x2 = s.GetX1NDC(), s.GetX2NDC()
     y1,y2 = s.GetY1NDC(), s.GetY2NDC()
+
+    if new_size is not None:
+        x1 = x2 - new_size[0]
+        y1 = y2 - new_size[1]
+
     s.SetX1NDC(x1 - (x2-x1)*m)
     s.SetX2NDC(x2 - (x2-x1)*m)
     s.SetY1NDC(y1 - (y2-y1)*n)
