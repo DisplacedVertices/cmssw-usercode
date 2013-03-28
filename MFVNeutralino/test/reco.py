@@ -34,7 +34,7 @@ process.output = cms.OutputModule('PoolOutputModule',
                                   )
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'START53_V7C::All', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'START53_V21::All', '')
 
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
@@ -73,7 +73,7 @@ copy_data = 1
 storage_element = T3_US_FNALLPC
 check_user_remote_dir = 0
 publish_data = 1
-publish_data_name = mfv_reco_%(name)s
+publish_data_name = reco
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 '''
 
@@ -81,41 +81,33 @@ dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02
     testing = 'testing' in sys.argv
 
     datasets = [
+        ('gluino_tau0000um_M0400', '/mfv_gensimhlt_gluino_tau0000um_M0400/tucker-mfv_gensimhlt_gluino_tau0000um_M0400-f418ab66d2aa2ce17edadebd0427e711/USER'),
+        ('gluino_tau0000um_M0600', '/mfv_gensimhlt_gluino_tau0000um_M0600/tucker-mfv_gensimhlt_gluino_tau0000um_M0600-f418ab66d2aa2ce17edadebd0427e711/USER'),
+        ('gluino_tau0000um_M0800', '/mfv_gensimhlt_gluino_tau0000um_M0800/tucker-mfv_gensimhlt_gluino_tau0000um_M0800-f418ab66d2aa2ce17edadebd0427e711/USER'),
         ('gluino_tau0000um_M1000', '/mfv_gensimhlt_gluino_tau0000um_M1000/tucker-mfv_gensimhlt_gluino_tau0000um_M1000-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M200', '/mfv_gensimhlt_gluino_tau0000um_M200/tucker-mfv_gensimhlt_gluino_tau0000um_M200-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M400', '/mfv_gensimhlt_gluino_tau0000um_M400/tucker-mfv_gensimhlt_gluino_tau0000um_M400-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M600', '/mfv_gensimhlt_gluino_tau0000um_M600/tucker-mfv_gensimhlt_gluino_tau0000um_M600-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M800', '/mfv_gensimhlt_gluino_tau0000um_M800/tucker-mfv_gensimhlt_gluino_tau0000um_M800-f418ab66d2aa2ce17edadebd0427e711/USER'),
+        ('gluino_tau0010um_M0400', '/mfv_gensimhlt_gluino_tau0010um_M0400/tucker-mfv_gensimhlt_gluino_tau0010um_M0400-1a774d010111a1aed9668a1957d7b272/USER'),
+        ('gluino_tau0010um_M0600', '/mfv_gensimhlt_gluino_tau0010um_M0600/tucker-mfv_gensimhlt_gluino_tau0010um_M0600-1a774d010111a1aed9668a1957d7b272/USER'),
+        ('gluino_tau0010um_M0800', '/mfv_gensimhlt_gluino_tau0010um_M0800/tucker-mfv_gensimhlt_gluino_tau0010um_M0800-1a774d010111a1aed9668a1957d7b272/USER'),
         ('gluino_tau0010um_M1000', '/mfv_gensimhlt_gluino_tau0010um_M1000/tucker-mfv_gensimhlt_gluino_tau0010um_M1000-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M200', '/mfv_gensimhlt_gluino_tau0010um_M200/tucker-mfv_gensimhlt_gluino_tau0010um_M200-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M400', '/mfv_gensimhlt_gluino_tau0010um_M400/tucker-mfv_gensimhlt_gluino_tau0010um_M400-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M600', '/mfv_gensimhlt_gluino_tau0010um_M600/tucker-mfv_gensimhlt_gluino_tau0010um_M600-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M800', '/mfv_gensimhlt_gluino_tau0010um_M800/tucker-mfv_gensimhlt_gluino_tau0010um_M800-1a774d010111a1aed9668a1957d7b272/USER'),
+        ('gluino_tau0100um_M0200', '/mfv_gensimhlt_gluino_tau0100um_M0200/tucker-mfv_gensimhlt_gluino_tau0100um_M0200-cd908390df85e15f67c1b503d4c4278e/USER'),
+        ('gluino_tau0100um_M0400', '/mfv_gensimhlt_gluino_tau0100um_M0400/tucker-mfv_gensimhlt_gluino_tau0100um_M0400-cd908390df85e15f67c1b503d4c4278e/USER'),
+        ('gluino_tau0100um_M0600', '/mfv_gensimhlt_gluino_tau0100um_M0600/tucker-mfv_gensimhlt_gluino_tau0100um_M0600-cd908390df85e15f67c1b503d4c4278e/USER'),
+        ('gluino_tau0100um_M0800', '/mfv_gensimhlt_gluino_tau0100um_M0800/tucker-mfv_gensimhlt_gluino_tau0100um_M0800-cd908390df85e15f67c1b503d4c4278e/USER'),
         ('gluino_tau0100um_M1000', '/mfv_gensimhlt_gluino_tau0100um_M1000/tucker-mfv_gensimhlt_gluino_tau0100um_M1000-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M200', '/mfv_gensimhlt_gluino_tau0100um_M200/tucker-mfv_gensimhlt_gluino_tau0100um_M200-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M400', '/mfv_gensimhlt_gluino_tau0100um_M400/tucker-mfv_gensimhlt_gluino_tau0100um_M400-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M600', '/mfv_gensimhlt_gluino_tau0100um_M600/tucker-mfv_gensimhlt_gluino_tau0100um_M600-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M800', '/mfv_gensimhlt_gluino_tau0100um_M800/tucker-mfv_gensimhlt_gluino_tau0100um_M800-cd908390df85e15f67c1b503d4c4278e/USER'),
+        ('gluino_tau1000um_M0200', '/mfv_gensimhlt_gluino_tau1000um_M0200/tucker-mfv_gensimhlt_gluino_tau1000um_M0200-11e502b9027fe454bec38485095c4f53/USER'),
+        ('gluino_tau1000um_M0600', '/mfv_gensimhlt_gluino_tau1000um_M0600/tucker-mfv_gensimhlt_gluino_tau1000um_M0600-11e502b9027fe454bec38485095c4f53/USER'),
+        ('gluino_tau1000um_M0800', '/mfv_gensimhlt_gluino_tau1000um_M0800/tucker-mfv_gensimhlt_gluino_tau1000um_M0800-11e502b9027fe454bec38485095c4f53/USER'),
         ('gluino_tau1000um_M1000', '/mfv_gensimhlt_gluino_tau1000um_M1000/tucker-mfv_gensimhlt_gluino_tau1000um_M1000-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M200', '/mfv_gensimhlt_gluino_tau1000um_M200/tucker-mfv_gensimhlt_gluino_tau1000um_M200-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M400', '/mfv_gensimhlt_gluino_tau1000um_M400/tucker-mfv_gensimhlt_gluino_tau1000um_M400-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M600', '/mfv_gensimhlt_gluino_tau1000um_M600/tucker-mfv_gensimhlt_gluino_tau1000um_M600-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M800', '/mfv_gensimhlt_gluino_tau1000um_M800/tucker-mfv_gensimhlt_gluino_tau1000um_M800-11e502b9027fe454bec38485095c4f53/USER'),
+        ('gluino_tau4000um_M0200', '/mfv_gensimhlt_gluino_tau4000um_M0200/tucker-mfv_gensimhlt_gluino_tau4000um_M0200-9dcf202e97da119ad22d8e489ec7b88e/USER'),
+        ('gluino_tau4000um_M0400', '/mfv_gensimhlt_gluino_tau4000um_M0400/tucker-mfv_gensimhlt_gluino_tau4000um_M0400-9dcf202e97da119ad22d8e489ec7b88e/USER'),
+        ('gluino_tau4000um_M0600', '/mfv_gensimhlt_gluino_tau4000um_M0600/tucker-mfv_gensimhlt_gluino_tau4000um_M0600-9dcf202e97da119ad22d8e489ec7b88e/USER'),
         ('gluino_tau4000um_M1000', '/mfv_gensimhlt_gluino_tau4000um_M1000/tucker-mfv_gensimhlt_gluino_tau4000um_M1000-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M200', '/mfv_gensimhlt_gluino_tau4000um_M200/tucker-mfv_gensimhlt_gluino_tau4000um_M200-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M400', '/mfv_gensimhlt_gluino_tau4000um_M400/tucker-mfv_gensimhlt_gluino_tau4000um_M400-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M600', '/mfv_gensimhlt_gluino_tau4000um_M600/tucker-mfv_gensimhlt_gluino_tau4000um_M600-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M800', '/mfv_gensimhlt_gluino_tau4000um_M800/tucker-mfv_gensimhlt_gluino_tau4000um_M800-9dcf202e97da119ad22d8e489ec7b88e/USER'),
+        ('gluino_tau9900um_M0200', '/mfv_gensimhlt_gluino_tau9900um_M0200/tucker-mfv_gensimhlt_gluino_tau9900um_M0200-dd93627319a5f24d5d7ad10ea45db562/USER'),
+        ('gluino_tau9900um_M0400', '/mfv_gensimhlt_gluino_tau9900um_M0400/tucker-mfv_gensimhlt_gluino_tau9900um_M0400-dd93627319a5f24d5d7ad10ea45db562/USER'),
+        ('gluino_tau9900um_M0600', '/mfv_gensimhlt_gluino_tau9900um_M0600/tucker-mfv_gensimhlt_gluino_tau9900um_M0600-dd93627319a5f24d5d7ad10ea45db562/USER'),
         ('gluino_tau9900um_M1000', '/mfv_gensimhlt_gluino_tau9900um_M1000/tucker-mfv_gensimhlt_gluino_tau9900um_M1000-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M200', '/mfv_gensimhlt_gluino_tau9900um_M200/tucker-mfv_gensimhlt_gluino_tau9900um_M200-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M400', '/mfv_gensimhlt_gluino_tau9900um_M400/tucker-mfv_gensimhlt_gluino_tau9900um_M400-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M600', '/mfv_gensimhlt_gluino_tau9900um_M600/tucker-mfv_gensimhlt_gluino_tau9900um_M600-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M800', '/mfv_gensimhlt_gluino_tau9900um_M800/tucker-mfv_gensimhlt_gluino_tau9900um_M800-dd93627319a5f24d5d7ad10ea45db562/USER'),
         ]
 
-    datasets = [
-        ('gluino_tau9900um_M400', '/mfv_gensimhlt_gluino_tau9900um_M400/tucker-mfv_gensimhlt_gluino_tau9900um_M400-dd93627319a5f24d5d7ad10ea45db562/USER'),
-]
     for name, dataset in datasets:
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
