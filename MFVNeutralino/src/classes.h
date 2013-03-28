@@ -1,9 +1,11 @@
 #include <map>
 #include "DataFormats/Common/interface/Wrapper.h"
+#include "JMTucker/MFVNeutralino/interface/LightTrackMatch.h"
 
 namespace {
   namespace {
-    std::map<int, std::pair<double, double> > dummymutddb;
-    edm::Wrapper<std::map<int, std::pair<double, double> > > dummymutddbW;
+    edm::Wrapper<LightTrackMatch> ltm;
+    std::map<int, LightTrackMatch> dummymiltm;
+    edm::Wrapper<std::map<int, LightTrackMatch> > dummymiltmW;
   }
 }

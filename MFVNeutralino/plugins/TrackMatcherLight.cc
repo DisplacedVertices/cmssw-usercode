@@ -11,6 +11,7 @@
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "SimTracker/TrackAssociation/interface/TrackAssociatorBase.h"
+#include "JMTucker/MFVNeutralino/interface/LightTrackMatch.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 
 class MFVTrackMatcherLight : public edm::EDProducer {
@@ -24,8 +25,7 @@ private:
   const edm::InputTag tracking_particles_src;
   const edm::InputTag tracks_src;
 
-  typedef std::map<int, std::pair<double, double> > OutputType;
-  typedef std::set<int> OutputType2;
+  typedef std::map<int, LightTrackMatch> OutputType;
 };
 
 MFVTrackMatcherLight::MFVTrackMatcherLight(const edm::ParameterSet& cfg) 
@@ -34,7 +34,6 @@ MFVTrackMatcherLight::MFVTrackMatcherLight(const edm::ParameterSet& cfg)
     tracks_src(cfg.getParameter<edm::InputTag>("tracks_src"))
 {
   produces<OutputType>();
-  produces<OutputType2>("matchesLSP");
 }
 
 void MFVTrackMatcherLight::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -69,7 +68,6 @@ void MFVTrackMatcherLight::produce(edm::Event& event, const edm::EventSetup& set
   reco::RecoToSimCollection reco_to_sim = associator->associateRecoToSim(tracks, tracking_particles, &event);
 
   std::auto_ptr<OutputType> output(new OutputType);
-  std::auto_ptr<OutputType2> output_matchesLSP(new OutputType2);
     
   for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
     edm::RefToBase<reco::Track> track_ref(tracks, i);
@@ -80,9 +78,15 @@ void MFVTrackMatcherLight::produce(edm::Event& event, const edm::EventSetup& set
     catch (const edm::Exception& e) {
     }
     const size_t nmatch = matches.size();
-    if (nmatch > 1)
-      throw cms::Exception("MFVTrackMatcherLight") << "more than one tracking particle match for track #" << i;
-    else if (nmatch == 1) {
+#if 0
+    if (nmatch > 1) {
+      std::ostringstream out;
+      for (const auto& match : matches)
+	out << "match with quality " << match.second << ": id " << match.first->pdgId() << " q: " << match.first->charge() << " pt: " << match.first->pt() << " eta: " << match.first->eta() << " phi: " << match.first->phi() << " vtx: " << match.first->vx() << "," << match.first->vy() << "," << match.first->vz() << "\n";
+      throw cms::Exception("MFVTrackMatcherLight") << "more than one tracking particle match for track #" << i << ": track pt: " << track_ref->pt() << " eta: " << track_ref->eta() << " phi: " << track_ref->phi() << " dxy: " << track_ref->dxy() << " dz: " << track_ref->dz() << "\n" << out.str();
+    }
+#endif
+    if (nmatch > 0) {
       const auto& match = matches[0];
       const TrackingParticleRef tp = match.first;
       const double quality = match.second;
@@ -93,17 +97,18 @@ void MFVTrackMatcherLight::produce(edm::Event& event, const edm::EventSetup& set
 	const auto& hepmc = tp->genParticle()[0];
 	if (hepmc->barcode() <= 0)
 	  throw cms::Exception("MFVTrackMatcherLight") << "hepmc barcode <= 0 (=" << hepmc->barcode() << ") for track #" << i;
-	const reco::GenParticle& gen = gen_particles->at(hepmc->barcode()-1);
-
-	(*output)[int(i)] = std::make_pair(quality, gen.pt());
-	if (has_any_ancestor_with_id(&gen, 1000021) || has_any_ancestor_with_id(&gen, 1000022))
-	  output_matchesLSP->insert(i);
+	int gen_ndx = hepmc->barcode()-1; // JMTBAD
+	const reco::GenParticle& gen = gen_particles->at(gen_ndx);
+	(*output)[int(i)] = LightTrackMatch(quality,
+					    gen.pt(), gen.eta(), gen.phi(),
+					    gen_ndx,
+					    nmatch > 1,
+					    has_any_ancestor_with_id(&gen, 1000021) || has_any_ancestor_with_id(&gen, 1000022));
       }
     }
   }
     
   event.put(output);
-  event.put(output_matchesLSP, "matchesLSP");
 }
 
 DEFINE_FWK_MODULE(MFVTrackMatcherLight);
