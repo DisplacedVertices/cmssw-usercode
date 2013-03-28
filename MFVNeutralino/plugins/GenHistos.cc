@@ -88,6 +88,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     Lsps[i] = bkh_factory->make(TString::Format("Lsps#%i", i), TString::Format("lsp #%i", i));
     Lsps[i]->BookE (200, 0, 2000, "10");
     Lsps[i]->BookP (200, 0, 2000, "10");
+    Lsps[i]->BookPt(200, 0, 2000, "10");
     Lsps[i]->BookPz(200, 0, 2000, "10");
     Lsps[i]->BookM (200, 0, 2000, "10");
     Lsps[i]->BookRapEta(200, "0.1");
@@ -96,7 +97,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     Stranges[i] = bkh_factory->make(TString::Format("Stranges#%i", i), TString::Format("strange #%i", i));
     Stranges[i]->BookE (200, 0, 2000, "10");
     Stranges[i]->BookP (200, 0, 2000, "10");
-    Stranges[i]->BookPz(200, 0, 2000, "10");
+    Stranges[i]->BookPt(200, 0, 2000, "10");
     Stranges[i]->BookM (200, 0, 2000, "10");
     Stranges[i]->BookRapEta(200, "0.1");
     Stranges[i]->BookPhi(50, "0.125");
@@ -107,6 +108,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     Bottoms[i] = bkh_factory->make(TString::Format("Bottoms#%i", i), TString::Format("bottom #%i", i));
     Bottoms[i]->BookE (200, 0, 2000, "10");
     Bottoms[i]->BookP (200, 0, 2000, "10");
+    Bottoms[i]->BookPt(200, 0, 2000, "10");
     Bottoms[i]->BookPz(200, 0, 2000, "10");
     Bottoms[i]->BookM (200, 0, 2000, "10");
     Bottoms[i]->BookRapEta(200, "0.1");
@@ -118,6 +120,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     Tops[i] = bkh_factory->make(TString::Format("Tops#%i", i), TString::Format("top #%i", i));
     Tops[i]->BookE (200, 0, 2000, "10");
     Tops[i]->BookP (200, 0, 2000, "10");
+    Tops[i]->BookPt(200, 0, 2000, "10");
     Tops[i]->BookPz(200, 0, 2000, "10");
     Tops[i]->BookM (200, 0, 2000, "10");
     Tops[i]->BookRapEta(200, "0.1");
@@ -129,6 +132,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     Ws[i] = bkh_factory->make(TString::Format("Ws#%i", i), TString::Format("w #%i", i));
     Ws[i]->BookE (200, 0, 2000, "10");
     Ws[i]->BookP (200, 0, 2000, "10");
+    Ws[i]->BookPt(200, 0, 2000, "10");
     Ws[i]->BookPz(200, 0, 2000, "10");
     Ws[i]->BookM (200, 0, 2000, "10");
     Ws[i]->BookRapEta(200, "0.1");
@@ -140,6 +144,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     BottomsFromTops[i] = bkh_factory->make(TString::Format("BottomsFromTops#%i", i), TString::Format("bottom from top #%i", i));
     BottomsFromTops[i]->BookE (200, 0, 2000, "10");
     BottomsFromTops[i]->BookP (200, 0, 2000, "10");
+    BottomsFromTops[i]->BookPt(200, 0, 2000, "10");
     BottomsFromTops[i]->BookPz(200, 0, 2000, "10");
     BottomsFromTops[i]->BookM (200, 0, 2000, "10");
     BottomsFromTops[i]->BookRapEta(200, "0.1");
@@ -152,6 +157,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
       WDaughters[i][j] = bkh_factory->make(TString::Format("WDaughters#%i#%i", i,j), TString::Format("W#%i daughter #%i", i, j));
       WDaughters[i][j]->BookE (200, 0, 2000, "10");
       WDaughters[i][j]->BookP (200, 0, 2000, "10");
+      WDaughters[i][j]->BookPt(200, 0, 2000, "10");
       WDaughters[i][j]->BookPz(200, 0, 2000, "10");
       WDaughters[i][j]->BookM (200, 0, 2000, "10");
       WDaughters[i][j]->BookRapEta(200, "0.1");
@@ -218,10 +224,10 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
       fill_by_label(TopDaughterIds[i], pdt->particle(mci.tops[i]->daughter(j)->pdgId())->name());
     fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
 
-    Lsps[i]->Fill(mci.lsps[i]);
+    Lsps    [i]->Fill(mci.lsps[i]);
     Stranges[i]->Fill(mci.stranges[i]);
-    Bottoms[i]->Fill(mci.bottoms[i]);
-    Tops[i]->Fill(mci.tops[i]);
+    Bottoms [i]->Fill(mci.bottoms[i]);
+    Tops    [i]->Fill(mci.tops[i]);
 
     Stranges[i]->FillEx(mag(mci.stranges[i]->vx(), mci.stranges[i]->vy()), mci.stranges[i]->vz(), mci.stranges[i]->charge());
     Bottoms [i]->FillEx(mag(mci.bottoms [i]->vx(), mci.bottoms [i]->vy()), mci.bottoms [i]->vz(), mci.bottoms [i]->charge());
