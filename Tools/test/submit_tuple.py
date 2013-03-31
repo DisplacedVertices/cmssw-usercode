@@ -43,12 +43,11 @@ def submit(sample):
     to_add = []
 
     if sample.is_mc:
+        to_add.append('no_skimming_cuts()')
         if sample.is_fastsim:
             to_add.append('input_is_fastsim()')
         if sample.is_pythia8:
             to_add.append('input_is_pythia8()')
-        if 'mfv' in sample.name:
-            to_add.append('keep_general_tracks()')
     else:
         magic = 'runOnMC = True'
         if magic not in new_py:
@@ -72,48 +71,6 @@ def submit(sample):
         raw_input('ok?')
         print
 
-#from JMTucker.Tools.Samples import all_samples
-#for sample in all_samples:
-    
-from JMTucker.Tools.Samples import TupleOnlyMCSample
-samples = [
-    TupleOnlyMCSample('mfv_temp_gluino_tau0000um_M1000', '/mfv_gensimhlt_gluino_tau0000um_M1000/tucker-mfv_reco_gluino_tau0000um_M1000-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0000um_M200', '/mfv_gensimhlt_gluino_tau0000um_M200/tucker-mfv_reco_gluino_tau0000um_M200-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0000um_M400', '/mfv_gensimhlt_gluino_tau0000um_M400/tucker-mfv_reco_gluino_tau0000um_M400-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0000um_M600', '/mfv_gensimhlt_gluino_tau0000um_M600/tucker-mfv_reco_gluino_tau0000um_M600-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0000um_M800', '/mfv_gensimhlt_gluino_tau0000um_M800/tucker-mfv_reco_gluino_tau0000um_M800-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0010um_M1000', '/mfv_gensimhlt_gluino_tau0010um_M1000/tucker-mfv_reco_gluino_tau0010um_M1000-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0010um_M200', '/mfv_gensimhlt_gluino_tau0010um_M200/tucker-mfv_reco_gluino_tau0010um_M200-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0010um_M400', '/mfv_gensimhlt_gluino_tau0010um_M400/tucker-mfv_reco_gluino_tau0010um_M400-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0010um_M600', '/mfv_gensimhlt_gluino_tau0010um_M600/tucker-mfv_reco_gluino_tau0010um_M600-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0010um_M800', '/mfv_gensimhlt_gluino_tau0010um_M800/tucker-mfv_reco_gluino_tau0010um_M800-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0100um_M1000', '/mfv_gensimhlt_gluino_tau0100um_M1000/tucker-mfv_reco_gluino_tau0100um_M1000-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0100um_M200', '/mfv_gensimhlt_gluino_tau0100um_M200/tucker-mfv_reco_gluino_tau0100um_M200-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0100um_M400', '/mfv_gensimhlt_gluino_tau0100um_M400/tucker-mfv_reco_gluino_tau0100um_M400-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0100um_M600', '/mfv_gensimhlt_gluino_tau0100um_M600/tucker-mfv_reco_gluino_tau0100um_M600-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau0100um_M800', '/mfv_gensimhlt_gluino_tau0100um_M800/tucker-mfv_reco_gluino_tau0100um_M800-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau1000um_M1000', '/mfv_gensimhlt_gluino_tau1000um_M1000/tucker-mfv_reco_gluino_tau1000um_M1000-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau1000um_M200', '/mfv_gensimhlt_gluino_tau1000um_M200/tucker-mfv_reco_gluino_tau1000um_M200-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau1000um_M400', '/mfv_gensimhlt_gluino_tau1000um_M400/tucker-mfv_reco_gluino_tau1000um_M400-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau1000um_M600', '/mfv_gensimhlt_gluino_tau1000um_M600/tucker-mfv_reco_gluino_tau1000um_M600-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau1000um_M800', '/mfv_gensimhlt_gluino_tau1000um_M800/tucker-mfv_reco_gluino_tau1000um_M800-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau4000um_M1000', '/mfv_gensimhlt_gluino_tau4000um_M1000/tucker-mfv_reco_gluino_tau4000um_M1000-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau4000um_M200', '/mfv_gensimhlt_gluino_tau4000um_M200/tucker-mfv_reco_gluino_tau4000um_M200-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau4000um_M400', '/mfv_gensimhlt_gluino_tau4000um_M400/tucker-mfv_reco_gluino_tau4000um_M400-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau4000um_M600', '/mfv_gensimhlt_gluino_tau4000um_M600/tucker-mfv_reco_gluino_tau4000um_M600-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau4000um_M800', '/mfv_gensimhlt_gluino_tau4000um_M800/tucker-mfv_reco_gluino_tau4000um_M800-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau9900um_M1000', '/mfv_gensimhlt_gluino_tau9900um_M1000/tucker-mfv_reco_gluino_tau9900um_M1000-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau9900um_M200', '/mfv_gensimhlt_gluino_tau9900um_M200/tucker-mfv_reco_gluino_tau9900um_M200-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau9900um_M400', '/mfv_gensimhlt_gluino_tau9900um_M400/tucker-mfv_reco_gluino_tau9900um_M400-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau9900um_M600', '/mfv_gensimhlt_gluino_tau9900um_M600/tucker-mfv_reco_gluino_tau9900um_M600-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    TupleOnlyMCSample('mfv_temp_gluino_tau9900um_M800', '/mfv_gensimhlt_gluino_tau9900um_M800/tucker-mfv_reco_gluino_tau9900um_M800-4b815091ea4b0e75a52a1ca758900a17/USER'),
-    ]
-
+from JMTucker.Tools.Samples import mfv_signal_samples as samples
 for sample in samples:
-    mo = re.search(r'tau0*(\d+)um_M0*(\d+)', sample.name)
-    sample.tau  = int(mo.group(1))
-    sample.mass = int(mo.group(2))
-    sample.is_pythia8 = True
-    sample.scheduler_name = 'condor'
-    sample.dbs_url_num = 2
     submit(sample)
