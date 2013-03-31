@@ -7,6 +7,8 @@ cvs co -r V06-05-06-07 DataFormats/PatCandidates
 cvs co -r V08-09-52    PhysicsTools/PatAlgos
 cvs co -r V03-09-28    PhysicsTools/PatUtils
 cvs co -r V00-02-14    DataFormats/StdDictionaries
+cvs co -r V00-00-08    RecoMET/METAnalyzers
+cvs co -r V00-00-13    RecoMET/METFilters
 cvs co -r V03-03-12-02 RecoMET/METProducers
 cvs co -r V15-02-06    RecoParticleFlow/PFProducer 
 cvs co -r V00-00-30-01 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
