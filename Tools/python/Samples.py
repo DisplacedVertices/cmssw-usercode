@@ -215,12 +215,12 @@ auxiliary_background_samples = [
 ]
 
 mfv_signal_samples = [
-   #MCSample('mfv_gluino_tau0000um_M0200', 'MFV signal, M = 200 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',    00, -1, 0.2, 1),
+    MCSample('mfv_gluino_tau0000um_M0200', 'MFV signal, M = 200 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9960, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0000um_M0400', 'MFV signal, M = 400 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0000um_M0600', 'MFV signal, M = 600 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0000um_M0800', 'MFV signal, M = 800 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 0',        '/mfv_gensimhlt_gluino_tau0000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-   #MCSample('mfv_gluino_tau0010um_M0200', 'MFV signal, M = 200 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',    00, -1, 0.2, 1),
+    MCSample('mfv_gluino_tau0010um_M0200', 'MFV signal, M = 200 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9760, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0010um_M0400', 'MFV signal, M = 400 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0010um_M0600', 'MFV signal, M = 600 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0010um_M0800', 'MFV signal, M = 800 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
@@ -231,19 +231,19 @@ mfv_signal_samples = [
     MCSample('mfv_gluino_tau0100um_M0800', 'MFV signal, M = 800 GeV, #tau = 100 #mum',  '/mfv_gensimhlt_gluino_tau0100um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau0100um_M1000', 'MFV signal, M = 1000 GeV, #tau = 100 #mum', '/mfv_gensimhlt_gluino_tau0100um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
     MCSample('mfv_gluino_tau1000um_M0200', 'MFV signal, M = 200 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-   #MCSample('mfv_gluino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',    00, -1, 0.2, 1),
+    MCSample('mfv_gluino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9960, -1, 0.2, 1),
     MCSample('mfv_gluino_tau1000um_M0600', 'MFV signal, M = 600 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
     MCSample('mfv_gluino_tau1000um_M0800', 'MFV signal, M = 800 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',     '/mfv_gensimhlt_gluino_tau1000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau4000um_M0200', 'MFV signal, M = 200 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
     MCSample('mfv_gluino_tau4000um_M0400', 'MFV signal, M = 400 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
     MCSample('mfv_gluino_tau4000um_M0600', 'MFV signal, M = 600 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-   #MCSample('mfv_gluino_tau4000um_M0800', 'MFV signal, M = 800 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',    00, -1, 0.2, 1),
+    MCSample('mfv_gluino_tau4000um_M0800', 'MFV signal, M = 800 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau4000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 4 mm',     '/mfv_gensimhlt_gluino_tau4000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau9900um_M0200', 'MFV signal, M = 200 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
     MCSample('mfv_gluino_tau9900um_M0600', 'MFV signal, M = 600 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9000, -1, 0.2, 1),
-   #MCSample('mfv_gluino_tau9900um_M0800', 'MFV signal, M = 800 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',    00, -1, 0.2, 1),
+    MCSample('mfv_gluino_tau9900um_M0800', 'MFV signal, M = 800 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9960, -1, 0.2, 1),
     MCSample('mfv_gluino_tau9900um_M1000', 'MFV signal, M = 1000 GeV, #tau = 9.9 mm',   '/mfv_gensimhlt_gluino_tau9900um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
     ]
 
@@ -286,8 +286,7 @@ for sample in mfv_signal_samples:
     sample.is_pythia8 = True
     sample.dbs_url_num = 2
     sample.scheduler_name = 'condor'
-
-    sample.ana_ready = False
+    sample.ana_hash = 'bd05e25367130164ec2dd1b6bce4cd3c'
 
 # Other exceptions due to jobs being missed, mixing dataset versions
 # (that don't affect actual physics), etc.
