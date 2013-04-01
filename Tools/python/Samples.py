@@ -15,7 +15,7 @@ class Sample(object):
     ANA_DBS_URL_NUM = 2
     ANA_HASH = 'ce0f36575948071c2bc4232b86e12d14'
     PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v5'
+    ANA_VERSION = 'v6'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -278,6 +278,9 @@ for sample in all_samples:
 
 singletop_t.scheduler_name = 'condor'
 
+for sample in background_samples + auxiliary_background_samples + all_data_samples:
+    sample.ana_ready = False
+    
 for sample in mfv_signal_samples:
     mo = re.search(r'tau0*(\d+)um_M0*(\d+)', sample.name)
     sample.tau  = int(mo.group(1))
