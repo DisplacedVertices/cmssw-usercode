@@ -26,9 +26,10 @@ bool is_neutrino(const reco::Candidate* c) {
 }
 
 int original_index(const reco::Candidate* c, const reco::GenParticleCollection& gens) {
-  for (int i = 0; i < int(gens.size()); ++i)
-    if (&gens[i] == c)
-      return i;
+  if (c != 0)
+    for (int i = 0, ie = int(gens.size()); i < ie; ++i)
+      if (&gens[i] == c)
+	return i;
   return -1;
 }
 
