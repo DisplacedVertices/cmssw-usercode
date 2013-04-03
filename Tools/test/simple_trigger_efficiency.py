@@ -2,22 +2,40 @@ import sys, os
 running_script = __name__ == '__main__' and hasattr(sys, 'argv')
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
-process.source.fileNames = ['/store/user/tucker/mfvneutralino_genfsimreco_tau1mm/mfvneutralino_genfsimreco_tau1mm/f0b5b0c98c357fc0015e0194f7aef803/fastsim_47_1_0c1.root']
+from JMTucker.MFVNeutralino.SimFiles import load as load_files
+load_files(process, 'tau9900um_M0400', 'all', sec_files = False)
 process.TFileService.fileName = 'simple_trigger_efficiency.root'
 
-process.genMuons = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 13 && abs(mother.pdgId) == 24'))
-process.genMuonCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genMuons'), minNumber = cms.uint32(1))
+process.genMus = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 13 && abs(mother.pdgId) == 24'))
+process.genMuCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genMus'), minNumber = cms.uint32(1))
                                 
-process.genMuonsInAcc = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 13 && abs(mother.pdgId) == 24 && pt > 17 && abs(eta) < 2.1'))
-process.genMuonInAccCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genMuonsInAcc'), minNumber = cms.uint32(1))
+process.genMusInAcc = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 13 && abs(mother.pdgId) == 24 && pt > 26 && abs(eta) < 2.1'))
+process.genElsInAcc = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 11 && abs(mother.pdgId) == 24 && pt > 30 && abs(eta) < 2.5'))
+process.genMuInAccCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genMusInAcc'), minNumber = cms.uint32(1))
+process.genElInAccCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genElsInAcc'), minNumber = cms.uint32(1))
 
-process.SimpleTriggerEfficiency = cms.EDAnalyzer('SimpleTriggerEfficiency', trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'))
-process.SimpleTriggerEfficiencyMu = process.SimpleTriggerEfficiency.clone()
+process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
+process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1219))
+process.RandomNumberGeneratorService.SimpleTriggerEfficiencyMu = cms.PSet(initialSeed = cms.untracked.uint32(1220))
+process.RandomNumberGeneratorService.SimpleTriggerEfficiencyMuInAcc = cms.PSet(initialSeed = cms.untracked.uint32(1221))
+
+#import prescales
+process.SimpleTriggerEfficiency = cms.EDAnalyzer('SimpleTriggerEfficiency',
+                                                 trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
+                                                 prescale_paths = cms.vstring(), #*prescales.prescales.keys()),
+                                                 prescale_values = cms.vuint32(), #*[o for l,h,o in prescales.prescales.itervalues()]),
+                                                 )
+
+process.SimpleTriggerEfficiencyMu      = process.SimpleTriggerEfficiency.clone()
 process.SimpleTriggerEfficiencyMuInAcc = process.SimpleTriggerEfficiency.clone()
+process.SimpleTriggerEfficiencyEl      = process.SimpleTriggerEfficiency.clone()
+process.SimpleTriggerEfficiencyElInAcc = process.SimpleTriggerEfficiency.clone()
 
 process.p1 = cms.Path(process.SimpleTriggerEfficiency)
-process.p2 = cms.Path(process.genMuons      * process.genMuonCount      * process.SimpleTriggerEfficiencyMu)
-process.p3 = cms.Path(process.genMuonsInAcc * process.genMuonInAccCount * process.SimpleTriggerEfficiencyMuInAcc)
+process.p2 = cms.Path(process.genMus      * process.genMuCount      * process.SimpleTriggerEfficiencyMu)
+process.p3 = cms.Path(process.genMusInAcc * process.genMuInAccCount * process.SimpleTriggerEfficiencyMuInAcc)
+process.p4 = cms.Path(process.genEls      * process.genElCount      * process.SimpleTriggerEfficiencyEl)
+process.p5 = cms.Path(process.genElsInAcc * process.genElInAccCount * process.SimpleTriggerEfficiencyElInAcc)
 
 ################################################################################
 
@@ -33,20 +51,22 @@ def get_f():
     f = ROOT.TFile(fn)
     return f
 
-def get_hists(f, dn):
-    hnum = f.Get(dn).Get('triggers_pass_num')
-    hden = f.Get(dn).Get('triggers_pass_den')
+def get_hists(f, dn, twod=False):
+    hnum = f.Get(dn).Get('triggers%s_pass_num' % ('2d' if twod else ''))
+    hden = f.Get(dn).Get('triggers%s_pass_den' % ('2d' if twod else ''))
     return hnum, hden
 
+################################################################################
+
 if running_script and 'table' in sys.argv:
-    from JMTucker.Tools.ROOTTools import ROOT
+    from JMTucker.Tools.ROOTTools import ROOT, clopper_pearson
+    apply_prescales = False
+    apply_prescales_in_sort = True
+
     f = get_f()
     hnum, hden = get_hists(f, 'SimpleTriggerEfficiencyMuInAcc')
     print 'number of events:', hden.GetBinContent(1)
-
-    apply_prescales = False
     
-    from JMTucker.Tools.ROOTTools import clopper_pearson
     width = 0
     content = []
     for i in xrange(1, hden.GetNbinsX() + 1):
@@ -69,16 +89,23 @@ if running_script and 'table' in sys.argv:
         else:
             l1, hlt, overall = -1, -1, -1
 
-        content.append((i-1, path, eff, lo, hi, l1, hlt, overall))
+        content.append((i-1, path, eff, lo, hi, l1, hlt, overall, prescaled_eff))
 
-    fmt = '(%3i) %' + str(width + 2) + 's %.4f  68%% CL: [%.4f, %.4f]  (prescales: %10i * %10i = %10i )'
+    fmt = '(%3i) %' + str(width + 2) + 's %.4f  68%% CL: [%.4f, %.4f]   after prescales: (%10i * %10i = %10i):  %.4f'
 
     print 'sorted by trigger bit:'
     for c in content:
         print fmt % c
     print
-    print 'sorted by decreasing eff:'
-    content.sort(key=lambda x: x[2], reverse=True)
+    print 'sorted by decreasing eff',
+    if apply_prescales_in_sort:
+        print '(after applying prescales):'
+        key = lambda x: x[-1]
+    else:
+        print ':'
+        key = lambda x: x[2]
+    print '(applying prescales):' if apply_prescales_in_sort else ':'
+    content.sort(key=key, reverse=True)
     for c in content:
         print fmt % c
 
@@ -101,6 +128,26 @@ if running_script and 'compare' in sys.argv:
     eff_mu.SetLineColor(ROOT.kBlue)
     eff_mu.Draw('P same')
     ps.save('compare')
+
+################################################################################
+            
+if running_script and '2d' in sys.argv:
+    from JMTucker.Tools.ROOTTools import ROOT, set_style, plot_saver, histogram_divide
+    set_style()
+    ps = plot_saver('plots/mfv_simple_eff')
+
+    apply_prescales = False
+    import prescales
+
+    f = get_f()
+    hnum, hden = get_hists(f, 'SimpleTriggerEfficiencyMuInAcc', twod=True)
+    hnum.Divide(hden)
+    xax, yax = hnum.GetXaxis(), hnum.GetYaxis()
+    for x in xrange(1, xax.GetNbins()+1):
+        for y in xrange(1, yax.GetNbins()+1):
+            xpath = xax.GetBinLabel(x)
+            ypath = yax.GetBinLabel(y)
+            
 
 ################################################################################
             
