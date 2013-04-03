@@ -4,11 +4,11 @@ set_style()
 ROOT.gStyle.SetOptStat(100)
 ps = plot_saver('plots/btag_counting', size=(600,600))
 
-btags = 'CSVpt50bd0p244 CSVpt50bd0p679 CSVpt50bd0p898 JPpt50bd0p275 JPpt50bd0p545 JPpt50bd0p79 JBPpt50bd1p33 JBPpt50bd2p55 JBPpt50bd3p74 SSVHEpt50bd1p74 SSVHEpt50bd3p05 SSVHPpt50bd2p0 TCHEpt50bd1p7 TCHEpt50bd3p3 TCHEpt50bd10p2 TCHPpt50bd1p19 TCHPpt50bd1p93 TCHPpt50bd3p41'.split()
-taus = '0 10um 100um 1mm 9p9mm'.split()
-taus = [(tau, ROOT.TFile('mfvnu_btag_counting_tau%s.root' % tau)) for tau in taus]
-tau_nice = {'0': '0', '10um': '10 #mum', '100um': '100 #mum', '1mm': '1 mm', '9p9mm': '9.9 mm'}
-colors = [1,2,3,4,6]
+btags = 'CSVpt30bd0p244 CSVpt30bd0p679 CSVpt30bd0p898 JPpt30bd0p275 JPpt30bd0p545 JPpt30bd0p79 JBPpt30bd1p33 JBPpt30bd2p55 JBPpt30bd3p74 SSVHEpt30bd1p74 SSVHEpt30bd3p05 SSVHPpt30bd2p0 TCHEpt30bd1p7 TCHEpt30bd3p3 TCHEpt30bd10p2 TCHPpt30bd1p19 TCHPpt30bd1p93 TCHPpt30bd3p41'.split()
+taus = '0000 0010 0100 1000 4000 9900'.split()
+taus = [(tau, ROOT.TFile('mfv_reco_counting_gluino_tau%sum_M400.root' % tau)) for tau in taus]
+tau_nice = {'0000': '0', '0010': '10 #mum', '0100': '100 #mum', '1000': '1 mm', '4000': '4 mm', '9900': '9.9 mm'}
+colors = [1,2,3,4,6,46]
 def btag_color(btag):
     if 'CSV' in btag:
         return ROOT.kRed
