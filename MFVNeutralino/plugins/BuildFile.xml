@@ -16,5 +16,6 @@
   <use name="SimTracker/TrackAssociation"/>
   <use name="TrackingTools/Records"/>
   <use name="TrackingTools/TransientTrack"/>
+  <use name="JMTucker/MFVNeutralino"/>
   <use name="JMTucker/Tools"/>
 </library>
