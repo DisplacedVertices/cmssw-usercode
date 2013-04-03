@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+# cd $CMSSW_BASE/src/JMTucker/MFVNeutralino ; grep root test/crab/reco/*/res/*.xml | grep -v dcap | grep -v srm > ! python/SimFiles.py
+
 lines = '''tau0000um_M0200:/store/user/tucker/mfv_gensimhlt_gluino_tau0000um_M0200/reco/a3f0d9ac5e396df027589da2067010b0/reco_1_1_0SJ.root
 /store/user/tucker/mfv_gensimhlt_gluino_tau0000um_M0200/mfv_gensimhlt_gluino_tau0000um_M0200/f418ab66d2aa2ce17edadebd0427e711/gensimhlt_50_2_evg.root
 /store/user/tucker/mfv_gensimhlt_gluino_tau0000um_M0200/mfv_gensimhlt_gluino_tau0000um_M0200/f418ab66d2aa2ce17edadebd0427e711/gensimhlt_34_3_bZs.root
