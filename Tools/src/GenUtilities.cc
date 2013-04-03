@@ -64,11 +64,17 @@ bool has_any_ancestor_with_id(const reco::Candidate* c, const int id) {
   return false;
 }
 
-const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status) {
+const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status, bool take_abs) {
   const reco::Candidate* d = 0;
   for (size_t i = 0; i < c->numberOfDaughters(); ++i) {
-    if ((id == 0     || c->daughter(i)->pdgId()  == id) && 
-	(status == 0 || c->daughter(i)->status() == status)) {
+    int this_id     = c->daughter(i)->pdgId();
+    int this_status = c->daughter(i)->status();
+    if (take_abs) {
+      this_id = abs(this_id);
+      this_status = abs(this_status); // meaningful for pythia8
+    }
+    if ((id == 0     || this_id == id) && 
+	(status == 0 || this_status == status)) {
       // If we've found a second one, return 0 and let the caller
       // deal with it.
       if (d != 0)
@@ -79,12 +85,12 @@ const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int
   return d;
 }
 
-const reco::Candidate* daughter_with_id(const reco::Candidate* c, int id) {
-  return daughter_with_id_and_status(c, id, 0);
+const reco::Candidate* daughter_with_id(const reco::Candidate* c, int id, bool take_abs) {
+  return daughter_with_id_and_status(c, id, 0, take_abs);
 }
 
-const reco::Candidate* daughter_with_status(const reco::Candidate* c, int status) {
-  return daughter_with_id_and_status(c, 0, status);
+const reco::Candidate* daughter_with_status(const reco::Candidate* c, int status, bool take_abs) {
+  return daughter_with_id_and_status(c, 0, status, take_abs);
 }
 
 void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco::Candidate*>& d) {
