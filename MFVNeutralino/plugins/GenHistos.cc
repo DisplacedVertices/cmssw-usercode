@@ -11,8 +11,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/BasicKinematicHists.h"
-#include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVNeutralinoGenHistos : public edm::EDAnalyzer {

@@ -21,9 +21,9 @@
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "SimTracker/TrackAssociation/interface/TrackAssociatorBase.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/Framework.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
-#include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
 
 class MFVTrackAssociator : public edm::EDAnalyzer {
 public:

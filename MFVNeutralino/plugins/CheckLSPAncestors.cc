@@ -4,8 +4,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
-#include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class CheckLSPAncestors : public edm::EDAnalyzer {

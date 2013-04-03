@@ -4,7 +4,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
-#include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 
 class MFVGenParticles : public edm::EDProducer {
 public:

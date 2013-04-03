@@ -3,8 +3,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
-#include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
 
 class MFVGenParticleFilter : public edm::EDFilter {
 public:
