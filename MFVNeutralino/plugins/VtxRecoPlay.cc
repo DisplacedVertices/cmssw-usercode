@@ -33,6 +33,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const edm::InputTag gen_src;
   const edm::InputTag vertex_src;
   const bool print_info;
+  const bool is_mfv;
   const bool reweight_mfv;
   TH1F* h_njets;
   TH2F* h_gen_vtx;
@@ -55,7 +56,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     print_info(cfg.getParameter<bool>("print_info")),
-    reweight_mfv(cfg.getUntrackedParameter<bool>("reweight_mfv", false))
+    is_mfv(cfg.getParameter<bool>("is_mfv")),
+    reweight_mfv(is_mfv && cfg.getParameter<bool>("reweight_mfv"))
 {
   edm::Service<TFileService> fs;
   
@@ -112,49 +114,40 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
   
-  MCInteractionMFV3j mci;
-  mci.Init(*gen_particles);
-
-  if (print_info)
-    mci.Print(std::cout);
-
-  edm::Handle<reco::BeamSpot> bs;
-  event.getByLabel("offlineBeamSpot", bs);
-  if (print_info) printf("beamspot x,y: %f, %f\n", bs->x0(), bs->y0());
-
-  // Assume pythia line 2 (probably a gluon) has the "right"
-  // production vertex. (The protons are just at 0,0,0.)
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  const float gluon_vx = for_vtx.vx();
-  const float gluon_vy = for_vtx.vy();
-  if (print_info) printf("gluon x,y: %f, %f\n", gluon_vx, gluon_vy);
-
   float gen_verts[2][3] = {{0}};
+  bool mci_valid = false;
 
-  if (mci.Valid()) {
-    for (int i = 0; i < 2; ++i) {
-      const reco::GenParticle* daughter = mci.stranges[i];
-      h_gen_vtx->Fill(daughter->vx(), daughter->vy());
-      gen_verts[i][0] = daughter->vx();
-      gen_verts[i][1] = daughter->vy();
-      gen_verts[i][2] = daughter->vz();
-    }
-  }
-  else {
-    MCInteractionTops mcitt;
-    mcitt.Init(*gen_particles);
-    if (mcitt.Valid()) {
+  if (is_mfv) {
+    MCInteractionMFV3j mci;
+    mci.Init(*gen_particles);
+    if ((mci_valid = mci.Valid())) {
+      if (print_info)
+	mci.Print(std::cout);
       for (int i = 0; i < 2; ++i) {
-	const reco::GenParticle* daughter = mcitt.tops[i];
+	const reco::GenParticle* daughter = mci.stranges[i];
 	h_gen_vtx->Fill(daughter->vx(), daughter->vy());
 	gen_verts[i][0] = daughter->vx();
 	gen_verts[i][1] = daughter->vy();
 	gen_verts[i][2] = daughter->vz();
       }
     }
-    else
-      edm::LogWarning("VtxRecoPlay") << "warning neither MCI valid";
   }
+  else {
+    MCInteractionTops mci;
+    mci.Init(*gen_particles);
+    if ((mci_valid = mci.Valid())) {
+      for (int i = 0; i < 2; ++i) {
+	const reco::GenParticle* daughter = mci.tops[i];
+	h_gen_vtx->Fill(daughter->vx(), daughter->vy());
+	gen_verts[i][0] = daughter->vx();
+	gen_verts[i][1] = daughter->vy();
+	gen_verts[i][2] = daughter->vz();
+      }
+    }
+  }
+
+  if (!mci_valid)
+    edm::LogWarning("VtxRecoPlay") << "warning: neither MCI valid";
 
   edm::Handle<reco::VertexCollection> rec_vertices;
   event.getByLabel(vertex_src, rec_vertices);
