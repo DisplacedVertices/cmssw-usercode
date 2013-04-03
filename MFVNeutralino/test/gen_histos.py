@@ -1,21 +1,19 @@
-import os, sys, FWCore.ParameterSet.Config as cms
+import os, sys
+from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 debug = 'debug' in sys.argv
 
-process = cms.Process('MFVNeutralino')
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/mfv_gensimhlt_gluino_tau9900um_M0400/reco/a3f0d9ac5e396df027589da2067010b0/reco_1_1_ohS.root'))
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
-process.TFileService = cms.Service('TFileService', fileName = cms.string('gen_histos.root'))
-process.load('FWCore.MessageLogger.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 100000
-
+process.source.fileNames = ['/store/user/tucker/mfv_gensimhlt_gluino_tau9900um_M0400/reco/a3f0d9ac5e396df027589da2067010b0/reco_1_1_ohS.root']
+process.TFileService.fileName = 'gen_histos.root'
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+
+from JMTucker.MFVNeutralino.SimFiles import load
+load(process, 'tau9900um_M1000', 'all')
 
 process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
                                    gen_src = cms.InputTag('genParticles'),
                                    required_num_leptonic = cms.int32(-1),
                                    allowed_decay_types = cms.vint32(),
-                                   print_info = cms.bool(False),
+                                   print_info = cms.int32(100),
                                    )
 
 process.p = cms.Path(process.GenHistos)
@@ -45,7 +43,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
 [CRAB]
 jobtype = cmssw
-scheduler = glite
+scheduler = %(scheduler)s
 
 [CMSSW]
 dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
@@ -56,7 +54,7 @@ events_per_job = 50000
 
 [USER]
 jmt_skip_input_files = src/EGamma/EGammaAnalysisTools/data/*
-ui_working_dir = crab/gen_histos/crab_mfv_gen_histos_%(name)s
+ui_working_dir = crab/gen_histos/crab_%(name)s
 return_data = 1
 '''
 
