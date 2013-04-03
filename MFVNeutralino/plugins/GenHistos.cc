@@ -24,7 +24,7 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
   const edm::InputTag gen_src;
   const int required_num_leptonic;
   const std::vector<int> allowed_decay_types;
-  const bool print_info;
+  int print_info;
 
   edm::ESHandle<ParticleDataTable> pdt;
 
@@ -59,7 +59,7 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     required_num_leptonic(cfg.getParameter<int>("required_num_leptonic")),
     allowed_decay_types(cfg.getParameter<std::vector<int> >("allowed_decay_types")),
-    print_info(cfg.getParameter<bool>("print_info"))
+    print_info(cfg.getParameter<int>("print_info"))
 {
   edm::Service<TFileService> fs;
 
@@ -180,8 +180,16 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", "", 100, 0, 10, 100, 0, 5);
 }
 
-float mag(float x, float y) {
-  return sqrt(x*x + y*y);
+namespace {
+  float mag(float x, float y) {
+    return sqrt(x*x + y*y);
+  }
+  
+  float signed_mag(float x, float y) {
+    float m = mag(x,y);
+    if (y < 0) return -m;
+    return m;
+  }
 }
 
 void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -189,6 +197,13 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
+
+  // Assume pythia line 2 (probably a gluon) has the "right"
+  // production vertex. (The protons are just at 0,0,0.)
+  const reco::GenParticle& for_vtx = gen_particles->at(2);
+  const float vx = for_vtx.vx();
+  const float vy = for_vtx.vy();
+  if (print_info) printf("gluon x,y: %f, %f\n", vx, vy);
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
@@ -211,17 +226,10 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
   NumLeptons->Fill(mci.num_leptonic);
   DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
 
-  // Assume pythia line 2 (probably a gluon) has the "right"
-  // production vertex. (The protons are just at 0,0,0.)
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  const float vx = for_vtx.vx();
-  const float vy = for_vtx.vy();
-  if (print_info) printf("gluon x,y: %f, %f\n", vx, vy);
-
   for (int i = 0; i < 2; ++i) {
     // For debugging, record all the daughter ids for tops, stops, Ws.
-    for (size_t j = 0; j < mci.tops[i]->numberOfDaughters(); ++j)
-      fill_by_label(TopDaughterIds[i], pdt->particle(mci.tops[i]->daughter(j)->pdgId())->name());
+    for (size_t j = 0, je = mci.last_tops[i]->numberOfDaughters(); j < je; ++j)
+      fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());
     fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
 
     Lsps    [i]->Fill(mci.lsps[i]);
@@ -229,9 +237,9 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     Bottoms [i]->Fill(mci.bottoms[i]);
     Tops    [i]->Fill(mci.tops[i]);
 
-    Stranges[i]->FillEx(mag(mci.stranges[i]->vx(), mci.stranges[i]->vy()), mci.stranges[i]->vz(), mci.stranges[i]->charge());
-    Bottoms [i]->FillEx(mag(mci.bottoms [i]->vx(), mci.bottoms [i]->vy()), mci.bottoms [i]->vz(), mci.bottoms [i]->charge());
-    Tops    [i]->FillEx(mag(mci.tops    [i]->vx(), mci.tops    [i]->vy()), mci.tops    [i]->vz(), mci.tops    [i]->charge());
+    Stranges[i]->FillEx(signed_mag(mci.stranges[i]->vx(), mci.stranges[i]->vy()), mci.stranges[i]->vz(), mci.stranges[i]->charge());
+    Bottoms [i]->FillEx(signed_mag(mci.bottoms [i]->vx(), mci.bottoms [i]->vy()), mci.bottoms [i]->vz(), mci.bottoms [i]->charge());
+    Tops    [i]->FillEx(signed_mag(mci.tops    [i]->vx(), mci.tops    [i]->vy()), mci.tops    [i]->vz(), mci.tops    [i]->charge());
 
     Ws[i]->Fill(mci.Ws[i]);
     if (mci.bottoms_from_tops[i])
@@ -276,6 +284,8 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
     h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
   }
+
+  --print_info;
 }
 
 DEFINE_FWK_MODULE(MFVNeutralinoGenHistos);
