@@ -8345,7 +8345,9 @@ for k in files.keys():
     files[k].sort(key=lambda x: int(x[0].split('_')[-3])) # sort by reco file order
     files[k] = tuple(files[k])
 
-def load(process, sample, file_range):
+def load(process, sample, file_range, sec_files=True):
+    if file_range == 'all':
+        file_range = xrange(len(files[sample]))
     if not hasattr(file_range, '__iter__'):
         file_range = [file_range]
     reco_files = []
@@ -8355,4 +8357,5 @@ def load(process, sample, file_range):
         reco_files.append(rf)
         sim_files.extend(sf)
     process.source.fileNames = cms.untracked.vstring(*reco_files)
-    process.source.secondaryFileNames = cms.untracked.vstring(*sim_files)
+    if sec_files:
+        process.source.secondaryFileNames = cms.untracked.vstring(*sim_files)
