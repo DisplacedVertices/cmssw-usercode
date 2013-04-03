@@ -3,7 +3,7 @@ debug = 'debug' in sys.argv
 
 process = cms.Process('MFVNeutralino')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:/uscms/home/tucker/private/mfv_genfsimreco_535/src/JMTucker/MFVNeutralino/test/fastsim.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/mfv_gensimhlt_gluino_tau9900um_M0400/reco/a3f0d9ac5e396df027589da2067010b0/reco_1_1_ohS.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.TFileService = cms.Service('TFileService', fileName = cms.string('gen_histos.root'))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
