@@ -12,12 +12,8 @@ struct MCInteractionMFV3j : public MCInteraction {
   const reco::GenParticle* bottoms_from_tops[2];
   const reco::GenParticle* W_daughters[2][2]; // first index is same as above, second is W daughters in order (d-type, u-type quark) or (charged lepton, neutrino)
 
-  const reco::GenParticle* stranges_init[2];
-  const reco::GenParticle* bottoms_init[2];
-  const reco::GenParticle* tops_init[2];
-  const reco::GenParticle* Ws_init[2];
-  const reco::GenParticle* bottoms_from_tops_init[2];
-  const reco::GenParticle* W_daughters_init[2][2]; // first index is same as above, second is W daughters in order (d-type, u-type quark) or (charged lepton, neutrino)
+  const reco::GenParticle* last_tops[2];
+  const reco::GenParticle* last_Ws[2];
 
   int num_leptonic;
   int decay_type[2]; // for Wplus and Wminus decays (the array index) into e, mu, tau, hadronic (values 0-3)
@@ -44,6 +40,7 @@ struct MCInteractionMFV3j : public MCInteraction {
   virtual void SetFourVectors();
   virtual void Print(std::ostream&);
 
+  bool is_bottom_from_top(int which);
   const reco::Candidate* Ancestor(const reco::Candidate* c, const std::string& type);
 };
 

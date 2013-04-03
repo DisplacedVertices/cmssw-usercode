@@ -8,28 +8,23 @@ void MCInteractionMFV3j::Clear() {
   MCInteraction::Clear();
   for (int i = 0; i < 2; ++i) {
     lsps[i] = stranges[i] = bottoms[i] = tops[i] = Ws[i] = bottoms_from_tops[i] = 0;
-    stranges_init[i] = bottoms_init[i] = tops_init[i] = Ws_init[i] = bottoms_from_tops_init[i] = 0;
     for (int j = 0; j < 2; ++j)
-      {
-	W_daughters[i][j] = 0;
-	W_daughters_init[i][j] = 0;
-      }
+      W_daughters[i][j] = 0;
     decay_type[i] = -1;
   }
   num_leptonic = -1;
 }
 
 bool MCInteractionMFV3j::Valid() {
-  // bottoms_from_tops can be null if Vtb != 1 in gen, but everything else has to be there
   return 
-    lsps[0] && stranges[0] && bottoms[0] && tops[0] && Ws[0] && W_daughters[0][0] && W_daughters[0][1] &&
-    lsps[1] && stranges[1] && bottoms[1] && tops[1] && Ws[1] && W_daughters[1][0] && W_daughters[1][1] &&
-    stranges_init[0] && bottoms_init[0] && tops_init[0] && Ws_init[0] && W_daughters_init[0][0] && W_daughters_init[0][1] &&
-    stranges_init[1] && bottoms_init[1] && tops_init[1] && Ws_init[1] && W_daughters_init[1][0] && W_daughters_init[1][1];
+    lsps[0] && stranges[0] && bottoms[0] && tops[0] && bottoms_from_tops[0] && Ws[0] && W_daughters[0][0] && W_daughters[0][1] &&
+    lsps[1] && stranges[1] && bottoms[1] && tops[1] && bottoms_from_tops[1] && Ws[1] && W_daughters[1][0] && W_daughters[1][1];
 }
 
-int sgn(int x) {
-  return x >= 0 ? 1 : -1;
+namespace {
+  int sgn(int x) {
+    return x >= 0 ? 1 : -1;
+  }
 }
 
 void MCInteractionMFV3j::Fill() {
@@ -37,8 +32,6 @@ void MCInteractionMFV3j::Fill() {
   // JMTBAD split class into TopsPythia8 and the rest
 
   const int lsp_id = 1000021;
-  const int ndau = 3;
-  const int dau_id_order[ndau] = { 3, 5, 6 };
 
   // Find the LSPs (e.g. gluinos or neutralinos). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
@@ -60,81 +53,66 @@ void MCInteractionMFV3j::Fill() {
       lsps[1] = &lsp;
     }
 
-    // Get the immediate daughters, in order by the ids specified in
-    // dau_id_order.
-    const reco::Candidate* daughters[ndau] = {0};
-    for (int i = 0; i < ndau; ++i) {
-      int id = lsp.daughter(i)->pdgId();
-      for (int j = 0; j < ndau; ++j) {
-	if (abs(id) == dau_id_order[j])
-	  daughters[j] = lsp.daughter(i);
-      }
-    }
-
-    stranges_init[which] = dynamic_cast<const reco::GenParticle*>(daughters[0]);
-    bottoms_init [which] = dynamic_cast<const reco::GenParticle*>(daughters[1]);
-    tops_init    [which] = dynamic_cast<const reco::GenParticle*>(daughters[2]);
+    // Get the immediate daughters. 
+    stranges[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(&lsp, 3, true)); // true means take absolute value, so that e.g. strange or antistrange is OK.
+    bottoms [which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(&lsp, 5, true));
+    tops    [which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(&lsp, 6, true));
 
     // Make sure we found all three daughters, and then get the
-    // "final" daughters (PYTHIA8 likes to copy things a lot while it
-    // messes with e.g. gluon radiation).
-    for (int i = 0; i < ndau; ++i)
-      daughters[i] = final_candidate(daughters[i], 3); // the 3 means allow gluons or photons
+    // "final" top (PYTHIA8 likes to copy things a lot while it messes
+    // with e.g. gluon radiation) to get its decay products.
+    die_if_not(stranges[which] && bottoms[which] && tops[which],
+	       "LSP[%i] did not have strange+bottom+top daughters:  strange: %p bottom: %p top: %p", which, stranges[which], bottoms[which], tops[which]);
 
-    // The asserts protect against dau_id_order changing above.
-    assert(abs(daughters[0]->pdgId()) == 3); stranges[which] = dynamic_cast<const reco::GenParticle*>(daughters[0]);
-    assert(abs(daughters[1]->pdgId()) == 5); bottoms [which] = dynamic_cast<const reco::GenParticle*>(daughters[1]);
-    assert(abs(daughters[2]->pdgId()) == 6); tops    [which] = dynamic_cast<const reco::GenParticle*>(daughters[2]);
+    const reco::Candidate* last_top = final_candidate(tops[which], 3); // the 3 means allow gluons or photons
+    last_tops[which] = dynamic_cast<const reco::GenParticle*>(last_top);
 
-    die_if_not(tops[which]->numberOfDaughters() >= 2,
-	       "at least one top doesn't have at least two daughters: tops[%i] %i", which, tops[which]->numberOfDaughters());
+    die_if_not(last_top, "can't find final candidate for top[%i]", which);
+    die_if_not(last_top->numberOfDaughters() >= 2, "top[%i] doesn't have at least two daughters: %i", which, last_top->numberOfDaughters());
 
-    // Find the Ws and bs from top decay. Bottom or bottombar might
-    // not be there, since |Vtb| isn't exactly 1. The W may have a
-    // lot of copies, but the copies should always have just one
-    // daughter until we reach the actual W decay (qq' or lnu). The
-    // bottom also can have a lot of copies, with the daughter being
-    // just a new bottom, or along with some gluons.
-    Ws_init[which]                = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) * 24));
-    Ws[which]                     = dynamic_cast<const reco::GenParticle*>(final_candidate(Ws_init[which], 2)); // 2 means allow photons only. sheesh.
-    bottoms_from_tops_init[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  5));
-    bottoms_from_tops[which]      = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops_init[which], 3));
+    // Find the Ws and bs from top decay.
+    Ws[which]                = dynamic_cast<const reco::GenParticle*>(daughter_with_id(last_top, sgn(last_top->pdgId()) * 24));
+    bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(last_top, sgn(last_top->pdgId()) *  5));
 
+    // Bottom or bottombar might not be there, since |Vtb| isn't
+    // exactly 1. If the top decayed into some other down-type quark,
+    // grab it, trying strange and down in turn.. Client code has to
+    // check if "bottoms_from_tops[which]" was actually a bottom, if
+    // needed. (See is_bottom_from_top(which) below.)
     if (bottoms_from_tops[which] == 0) {
-      // JMTBAD ok letting it be strange or down... if it cares, client code now has to check, ugh
-      bottoms_from_tops_init[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  3));
-      bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops_init[which], 3));
+      bottoms_from_tops[which]   = dynamic_cast<const reco::GenParticle*>(daughter_with_id(last_top, sgn(last_top->pdgId()) * 3));
       if (bottoms_from_tops[which] == 0) {
-	bottoms_from_tops_init[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(tops[which], sgn(tops[which]->pdgId()) *  1));
-	bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(final_candidate(bottoms_from_tops_init[which], 3));
+	bottoms_from_tops[which] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(last_top, sgn(last_top->pdgId()) * 1));
+	die_if_not(bottoms_from_tops[which] != 0, "could not find down-type quark from top[%i]", which);
       }
     }
 
-    die_if_not(Ws[which],
-	       "at least one W not found: Ws[%i] == %p",
-	       which, Ws[which]);
-    die_if_not(Ws[which]->numberOfDaughters() >= 2,
-	       "one W did not have at least two daughters: Ws[%i] id %i numDau %i",
-	       which, Ws[which]->pdgId(), Ws[which]->numberOfDaughters());
+    // The W may have a lot of copies, but the copies should always
+    // have just one daughter until we reach the actual W decay (qq'
+    // or lnu). Find the last one.
+    const reco::Candidate* last_W = final_candidate(Ws[which], 2); // 2 means allow photons only in the decay chain.
+    last_Ws[which] = dynamic_cast<const reco::GenParticle*>(last_W);
+
+    die_if_not(Ws[which], "W[%i] from top decay not found", which);
+    die_if_not(last_W, "last_W[%i] not found", which);
+    die_if_not(last_W->numberOfDaughters() >= 2, "W[%i] did not have at least two daughters: id %i numDau %i", which, Ws[which]->pdgId(), Ws[which]->numberOfDaughters());
 
     // Find the W daughters, and store them in the order (down-type
     // quark, up-type quark) or (charged lepton, neutrino).
     std::vector<const reco::GenParticle*> daus;
-    for (int j = 0, je = Ws[which]->numberOfDaughters(); j < je; ++j) {
-      const reco::Candidate* d = Ws[which]->daughter(j);
-      if (d->pdgId() != Ws[which]->pdgId()) {
-	int allowed_other = is_quark(d) ? 3 : 2;
-	daus.push_back(dynamic_cast<const reco::GenParticle*>(final_candidate(d, allowed_other)));
-      }
+    for (int j = 0, je = last_W->numberOfDaughters(); j < je; ++j) {
+      const reco::Candidate* d = last_W->daughter(j);
+      if (d->pdgId() != last_W->pdgId()) // The W can have a copy of itself as a daughter, in addition to qqbar' or lnu.
+	daus.push_back(dynamic_cast<const reco::GenParticle*>(d));
     }
-    die_if_not(daus.size() == 2, "a W did not have exactly two non-W daughters: which=%i", which);
+    die_if_not(daus.size() == 2, "W[%i] did not have exactly two non-W daughters", which);
     const int order = abs(daus[0]->pdgId()) % 2 == 0;
-    W_daughters_init[which][0] = dynamic_cast<const reco::GenParticle*>(Ws[which]->daughter(order));
     W_daughters[which][0] = daus[ order];
-    W_daughters_init[which][1] = dynamic_cast<const reco::GenParticle*>(Ws[which]->daughter(!order));
     W_daughters[which][1] = daus[!order];
   }
 
+  // If we didn't find the LSPs or one of the decay products, stop now
+  // before trying to set up the convenience stuff.
   if (!Valid())
     return;
 
@@ -153,7 +131,8 @@ void MCInteractionMFV3j::Fill() {
 
   for (int j = 0; j < 2; ++j)
     for (int k = 0; k < 2; ++k)
-      immediate_nus.push_back(dynamic_cast<const reco::Candidate*>(W_daughters[j][k]));
+      if (is_neutrino(W_daughters[j][k]))
+	immediate_nus.push_back(dynamic_cast<const reco::Candidate*>(W_daughters[j][k]));
 }
 
 void MCInteractionMFV3j::SetFourVectors() {
@@ -211,6 +190,12 @@ void MCInteractionMFV3j::Print(std::ostream& out) {
   MCInteraction::Print(out);
 }
 
+bool MCInteractionMFV3j::is_bottom_from_top(int which) {
+  // Since the top could have decayed into Ws, check if the quark from
+  // top is really a bottom.
+  return abs(bottoms_from_tops[which]->pdgId()) == 5;
+}
+
 const reco::Candidate* MCInteractionMFV3j::Ancestor(const reco::Candidate* c, const std::string& type) {
   if (type == "lsp") {
     if (is_ancestor_of(c, lsps[0]))
@@ -256,6 +241,3 @@ const reco::Candidate* MCInteractionMFV3j::Ancestor(const reco::Candidate* c, co
 
   return 0;
 }
-
-    
-    
