@@ -1,3 +1,5 @@
+#include "TH1F.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -6,6 +8,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
@@ -26,6 +29,8 @@ private:
   const bool produce_nonmatched;
   const double min_match_quality;
   const double min_track_pt;
+
+  TH1F* h_used_quality;
 };
 
 MFVTracksMatchedToSim::MFVTracksMatchedToSim(const edm::ParameterSet& cfg) 
@@ -39,6 +44,9 @@ MFVTracksMatchedToSim::MFVTracksMatchedToSim(const edm::ParameterSet& cfg)
   produces<reco::TrackCollection>();
   if (produce_nonmatched)
     produces<reco::TrackCollection>("nonmatched");
+
+  edm::Service<TFileService> fs;
+  h_used_quality = fs->make<TH1F>("h_used_quality", "", 20, 0, 1);
 }
 
 void MFVTracksMatchedToSim::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -92,6 +100,7 @@ void MFVTracksMatchedToSim::produce(edm::Event& event, const edm::EventSetup& se
 	    throw cms::Exception("MFVTracksMatchedToSim") << "hepmc barcode <= 0 (=" << hepmc->barcode() << ") for track #" << i;
 	  const reco::GenParticle& gen = gen_particles->at(hepmc->barcode()-1);
 	  if (has_any_ancestor_with_id(&gen, 1000021) && track_ref->pt() > min_track_pt) {
+	    h_used_quality->Fill(quality);
 	    put = true;
 	    output->push_back(*track_ref);
 	  }
@@ -104,7 +113,7 @@ void MFVTracksMatchedToSim::produce(edm::Event& event, const edm::EventSetup& se
   }
 
   event.put(output);
-  event.put(output_nonmatched, "nonmatched");
+  if (produce_nonmatched) event.put(output_nonmatched, "nonmatched");
 }
 
 DEFINE_FWK_MODULE(MFVTracksMatchedToSim);
