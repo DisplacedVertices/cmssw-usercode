@@ -45,6 +45,8 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
 
   TH2F* h_vtx_2d;
   TH1F* h_rho;
+  TH1F* h_r;
+  TH1F* h_t;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
   TH1F* h_max_dR;
@@ -168,21 +170,27 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     }
   }
 
-  h_vtx_2d = fs->make<TH2F>("h_vtx_2d", "", 500, -1, 1, 500, -1, 1);
-  h_rho = fs->make<TH1F>("h_rho", "", 100, 0, 2);
-  h_lspbeta = fs->make<TH1F>("h_lspbeta", "", 100, 0, 1);
-  h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", "", 100, 0, 10);
-  h_max_dR = fs->make<TH1F>("h_max_dR", "", 100, 0, 5);
-  h_min_dR = fs->make<TH1F>("h_min_dR", "", 100, 0, 5);
-  h_max_dR_vs_lspbeta = fs->make<TH2F>("h_max_dR_vs_lspbeta", "", 100, 0, 1, 100, 0, 5);
-  h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", "", 100, 0, 1, 100, 0, 5);
-  h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", "", 100, 0, 10, 100, 0, 5);
-  h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", "", 100, 0, 10, 100, 0, 5);
+  h_vtx_2d = fs->make<TH2F>("h_vtx_2d", ";LSP decay vx (cm); LSP decay vy (cm)", 500, -2, 2, 500, -2, 2);
+  h_rho = fs->make<TH1F>("h_rho", ";LSP 2D flight distance (cm);Events/0.1 cm", 100, 0, 10);
+  h_r = fs->make<TH1F>("h_r", ";LSP 3D flight distance (cm);Events/0.1 cm", 100, 0, 10);
+  h_t = fs->make<TH1F>("h_t", ";time to LSP decay (ns);Events/0.1 ns", 100, 0, 10);
+  h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
+  h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
+  h_max_dR = fs->make<TH1F>("h_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
+  h_min_dR = fs->make<TH1F>("h_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
+  h_max_dR_vs_lspbeta = fs->make<TH2F>("h_max_dR_vs_lspbeta", ";LSP #beta;max #DeltaR between partons", 100, 0, 1, 100, 0, 5);
+  h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", ";LSP #beta;min #DeltaR between partons", 100, 0, 1, 100, 0, 5);
+  h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", ";LSP #beta#gamma;max #DeltaR between partons", 100, 0, 10, 100, 0, 5);
+  h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
 }
 
 namespace {
   float mag(float x, float y) {
     return sqrt(x*x + y*y);
+  }
+  
+  float mag(float x, float y, float z) {
+    return sqrt(x*x + y*y + z*z);
   }
   
   float signed_mag(float x, float y) {
@@ -197,13 +205,6 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
-
-  // Assume pythia line 2 (probably a gluon) has the "right"
-  // production vertex. (The protons are just at 0,0,0.)
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  const float vx = for_vtx.vx();
-  const float vy = for_vtx.vy();
-  if (print_info) printf("gluon x,y: %f, %f\n", vx, vy);
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
@@ -260,11 +261,15 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     // Fill some simple histos: 2D vertex location, and distance to
     // origin, and the min/max deltaR of the daughters (also versus
     // lsp boost).
-    float dx = daughters[0]->vx() - vx;
-    float dy = daughters[0]->vy() - vy;
+    float dx = daughters[0]->vx() - lsp.vx();
+    float dy = daughters[0]->vy() - lsp.vy();
+    float dz = daughters[0]->vz() - lsp.vz();
     h_vtx_2d->Fill(dx, dy);
-    h_rho->Fill(sqrt(dx*dx + dy*dy));
-
+    h_rho->Fill(mag(dx, dy));
+    float r = mag(dx, dy, dz);
+    h_r->Fill(r);
+    h_t->Fill(r/lspbeta/30);
+    
     float min_dR =  1e99;
     float max_dR = -1e99;
     for (int i = 0; i < ndau; ++i) {
