@@ -9,6 +9,9 @@ process.TFileService.fileName = 'simple_trigger_efficiency.root'
 process.genMus = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 13 && abs(mother.pdgId) == 24'))
 process.genMuCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genMus'), minNumber = cms.uint32(1))
                                 
+process.genEls = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 11 && abs(mother.pdgId) == 24'))
+process.genElCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genEls'), minNumber = cms.uint32(1))
+                                
 process.genMusInAcc = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 13 && abs(mother.pdgId) == 24 && pt > 26 && abs(eta) < 2.1'))
 process.genElsInAcc = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 11 && abs(mother.pdgId) == 24 && pt > 30 && abs(eta) < 2.5'))
 process.genMuInAccCount = cms.EDFilter('CandViewCountFilter', src = cms.InputTag('genMusInAcc'), minNumber = cms.uint32(1))
@@ -77,6 +80,8 @@ if running_script and 'table' in sys.argv:
         den = hden.GetBinContent(i)
         eff, lo, hi = clopper_pearson(num, den)
 
+        prescaled_eff = 1
+        
         if apply_prescales:
             import prescales
             l1, hlt, overall = prescales.get(path)
