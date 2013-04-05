@@ -58,7 +58,6 @@ class MFVInclusiveVertexFinder : public edm::EDProducer {
 	std::auto_ptr<VertexReconstructor>	vtxReco;
 	std::auto_ptr<MFVTracksClusteringFromDisplacedSeed>	clusterizer;
 
-  const bool reweight_mfv;
   TH1F* h_npv;
   TH1F* h_ntracks;
   TH1F* h_trackhits;
@@ -115,8 +114,7 @@ MFVInclusiveVertexFinder::MFVInclusiveVertexFinder(const edm::ParameterSet &para
         vertexMinDLen2DSig(params.getParameter<double>("vertexMinDLen2DSig")), //2.5
         vertexMinDLenSig(params.getParameter<double>("vertexMinDLenSig")), //0.5
 	vtxReco(new ConfigurableVertexReconstructor(params.getParameter<edm::ParameterSet>("vertexReco"))),
-        clusterizer(new MFVTracksClusteringFromDisplacedSeed(params.getParameter<edm::ParameterSet>("clusterizer"))),
-        reweight_mfv(params.getUntrackedParameter<bool>("reweight_mfv", false))
+        clusterizer(new MFVTracksClusteringFromDisplacedSeed(params.getParameter<edm::ParameterSet>("clusterizer")))
 {
 	produces<reco::VertexCollection>();
 	//produces<reco::VertexCollection>("multi");
@@ -205,12 +203,7 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
 	edm::Handle<VertexCollection> primaryVertices;
 	event.getByLabel(primaryVertexCollection, primaryVertices);
 
-	const double npv_weights[100] = { 0.000000, 0.000000, 0.067249, 0.044833, 0.050810, 0.063293, 0.080533, 0.148446, 0.144329, 0.109138, 0.060456, 0.045131, 0.029133, 0.019916, 0.014338, 0.010808, 0.008680, 0.006432, 0.006350, 0.004934, 0.004402, 0.003949, 0.003134, 0.002880, 0.003237, 0.002499, 0.002638, 0.002997, 0.003357, 0.003736, 0.002880, 0.002368, 0.003047, 0.002099, 0.002397, 0.002625, 0.004110, 0.005604, 0.004483, 0.003321, 0.004483, 0.007472, 0.000000, 0.007472, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000 };
-	const size_t npv = primaryVertices->size();
-	const double npv_weight = reweight_mfv ? (npv < 100 ? npv_weights[npv] : 0) : 1;
-	clusterizer->npv_weight = npv_weight;
-
-	h_npv->Fill(primaryVertices->size(), npv_weight);
+	h_npv->Fill(primaryVertices->size());
 
 	edm::Handle<TrackCollection> tracks;
 	event.getByLabel(trackCollection, tracks);
@@ -227,28 +220,28 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
         
 	std::vector<TransientTrack> tts;
         //Fill transient track vector 
-	h_ntracks->Fill(tracks->size(), npv_weight);
+	h_ntracks->Fill(tracks->size());
 	for(TrackCollection::const_iterator track = tracks->begin();
 	    track != tracks->end(); ++track) {
 		TrackRef ref(tracks, track - tracks->begin());
-		h_trackhits->Fill(track->hitPattern().numberOfValidHits(), npv_weight);
-		h_trackpt->Fill(track->pt(), npv_weight);
-		h_trackdz->Fill(ref->dz(pv.position()), npv_weight);
+		h_trackhits->Fill(track->hitPattern().numberOfValidHits());
+		h_trackpt->Fill(track->pt());
+		h_trackdz->Fill(ref->dz(pv.position()));
 		if (!trackFilter(ref))
 			continue;
                 if( std::abs(ref->dz(pv.position())) > maxLIP)
 			continue;
-		h_trackfilteredhits->Fill(track->hitPattern().numberOfValidHits(), npv_weight);
-		h_trackfilteredpt->Fill(track->pt(), npv_weight);
-		h_trackfiltereddz->Fill(ref->dz(pv.position()), npv_weight);
+		h_trackfilteredhits->Fill(track->hitPattern().numberOfValidHits());
+		h_trackfilteredpt->Fill(track->pt());
+		h_trackfiltereddz->Fill(ref->dz(pv.position()));
 		TransientTrack tt = trackBuilder->build(ref);
 		tt.setBeamSpot(*beamSpot);
 		tts.push_back(tt);
 	}
         std::vector<MFVTracksClusteringFromDisplacedSeed::Cluster> clusters = clusterizer->clusters(pv,tts);
 
-	h_nseltracks->Fill(tts.size(), npv_weight);
-	h_nclusters->Fill(clusters.size(), npv_weight);
+	h_nseltracks->Fill(tts.size());
+	h_nclusters->Fill(clusters.size());
 
         //Create BS object from PV to feed in the AVR
 	BeamSpot::CovarianceMatrix cov;
@@ -272,24 +265,24 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
 	for(std::vector<MFVTracksClusteringFromDisplacedSeed::Cluster>::iterator cluster = clusters.begin();
 	    cluster != clusters.end(); ++cluster,++i)
         {
-	        h_ntrackspercluster->Fill(cluster->tracks.size(), npv_weight);
+	        h_ntrackspercluster->Fill(cluster->tracks.size());
 
                 if(cluster->tracks.size() == 0 || cluster->tracks.size() > maxNTracks ) 
 		     continue;
 
-		h_clusterseedtrackpt->Fill(cluster->seedingTrack.track().pt(), npv_weight);
-		h_clusterseedtrackdxy->Fill(cluster->seedingTrack.stateAtBeamLine().transverseImpactParameter().value(), npv_weight);
-		h_clusterseedpointrho->Fill(cluster->seedPoint.perp(), npv_weight);
+		h_clusterseedtrackpt->Fill(cluster->seedingTrack.track().pt());
+		h_clusterseedtrackdxy->Fill(cluster->seedingTrack.stateAtBeamLine().transverseImpactParameter().value());
+		h_clusterseedpointrho->Fill(cluster->seedPoint.perp());
         
  	        cluster->tracks.push_back(cluster->seedingTrack); //add the seed to the list of tracks to fit
 	 	std::vector<TransientVertex> vertices;
 		vertices = vtxReco->vertices(cluster->tracks, bs);  // attempt with config given reconstructor
-		h_nverticespercluster->Fill(vertices.size(), npv_weight);
+		h_nverticespercluster->Fill(vertices.size());
                 TransientVertex singleFitVertex;
                 singleFitVertex = theAdaptiveFitter.vertex(cluster->tracks,cluster->seedPoint); //attempt with direct fitting
                 if(singleFitVertex.isValid())
                           vertices.push_back(singleFitVertex);
-		h_singlefitspercluster->Fill(singleFitVertex.isValid(), npv_weight);
+		h_singlefitspercluster->Fill(singleFitVertex.isValid());
 		for(std::vector<TransientVertex>::const_iterator v = vertices.begin();
 		    v != vertices.end(); ++v) {
 //			if(v->degreesOfFreedom() > 0.2)
@@ -305,16 +298,16 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
 #endif
                          GlobalVector dir;  
 			 std::vector<reco::TransientTrack> ts = v->originalTracks();
-			 h_vertexdisttopv->Fill(dlen.value(), npv_weight);
-			 h_vertexdist2topv->Fill(dlen2.value(), npv_weight);
-			 h_vertexdisttopverr->Fill(dlen.error(), npv_weight);
-			 h_vertexdist2topverr->Fill(dlen2.error(), npv_weight);
-			 h_vertexdisttopvsig->Fill(dlen.significance(), npv_weight);
-			 h_vertexdist2topvsig->Fill(dlen2.significance(), npv_weight);
-			 h_vertexchi2->Fill(v->normalisedChiSquared(), npv_weight);
-			 h_vertexndof->Fill(v->degreesOfFreedom(), npv_weight);
-			 h_vertexrho->Fill(v->position().perp(), npv_weight);
-			 h_ntrackspervertex->Fill(ts.size(), npv_weight);
+			 h_vertexdisttopv->Fill(dlen.value());
+			 h_vertexdist2topv->Fill(dlen2.value());
+			 h_vertexdisttopverr->Fill(dlen.error());
+			 h_vertexdist2topverr->Fill(dlen2.error());
+			 h_vertexdisttopvsig->Fill(dlen.significance());
+			 h_vertexdist2topvsig->Fill(dlen2.significance());
+			 h_vertexchi2->Fill(v->normalisedChiSquared());
+			 h_vertexndof->Fill(v->degreesOfFreedom());
+			 h_vertexrho->Fill(v->position().perp());
+			 h_ntrackspervertex->Fill(ts.size());
                         for(std::vector<reco::TransientTrack>::const_iterator i = ts.begin();
                             i != ts.end(); ++i) {
                                 reco::TrackRef t = i->trackBaseRef().castTo<reco::TrackRef>();
@@ -326,28 +319,28 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
                                           << (*t).phi() << "], "
                                           << w << std::endl;
 #endif
-				h_vertextrackweight->Fill(w, npv_weight);
+				h_vertextrackweight->Fill(w);
                         }
 		       GlobalPoint ppv(pv.position().x(),pv.position().y(),pv.position().z());
 		       GlobalPoint sv((*v).position().x(),(*v).position().y(),(*v).position().z());
                        float vscal = dir.unit().dot((sv-ppv).unit()) ;
 //                        std::cout << "Vscal: " <<  vscal << std::endl;
-		       h_vertexpvsvcostheta->Fill(vscal, npv_weight);
+		       h_vertexpvsvcostheta->Fill(vscal);
 		       if(dlen.significance() > vertexMinDLenSig  && v->normalisedChiSquared() < 10 && dlen2.significance() > vertexMinDLen2DSig)
-			 h_selectedvertexpvsvcostheta->Fill(vscal, npv_weight);
+			 h_selectedvertexpvsvcostheta->Fill(vscal);
                        if(dlen.significance() > vertexMinDLenSig  && vscal > vertexMinAngleCosine &&  v->normalisedChiSquared() < 10 && dlen2.significance() > vertexMinDLen2DSig)
 	            	  {	 
-			        h_selectedvertexdisttopv->Fill(dlen.value(), npv_weight);
-				h_selectedvertexdist2topv->Fill(dlen2.value(), npv_weight);
-				h_selectedvertexdisttopverr->Fill(dlen.error(), npv_weight);
-				h_selectedvertexdist2topverr->Fill(dlen2.error(), npv_weight);
-				h_selectedvertexdisttopvsig->Fill(dlen.significance(), npv_weight);
-				h_selectedvertexdist2topvsig->Fill(dlen2.significance(), npv_weight);
-				h_selectedvertexchi2->Fill(v->normalisedChiSquared(), npv_weight);
-				h_selectedvertexndof->Fill(v->degreesOfFreedom(), npv_weight);
-				h_selectedvertexrho->Fill(v->position().perp(), npv_weight);
-				h_selectedntrackspervertex->Fill(ts.size(), npv_weight);
-				//h_selectedvertexpvsvcostheta->Fill(vscal, npv_weight);
+			        h_selectedvertexdisttopv->Fill(dlen.value());
+				h_selectedvertexdist2topv->Fill(dlen2.value());
+				h_selectedvertexdisttopverr->Fill(dlen.error());
+				h_selectedvertexdist2topverr->Fill(dlen2.error());
+				h_selectedvertexdisttopvsig->Fill(dlen.significance());
+				h_selectedvertexdist2topvsig->Fill(dlen2.significance());
+				h_selectedvertexchi2->Fill(v->normalisedChiSquared());
+				h_selectedvertexndof->Fill(v->degreesOfFreedom());
+				h_selectedvertexrho->Fill(v->position().perp());
+				h_selectedntrackspervertex->Fill(ts.size());
+				//h_selectedvertexpvsvcostheta->Fill(vscal);
 				recoVertices->push_back(*v);
 #ifdef VTXDEBUG
 

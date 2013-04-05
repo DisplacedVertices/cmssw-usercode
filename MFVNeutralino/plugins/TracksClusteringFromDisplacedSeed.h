@@ -39,8 +39,6 @@ class MFVTracksClusteringFromDisplacedSeed {
 	  const std::vector<reco::TransientTrack> & selectedTracks
 	 );
 	 
-  double npv_weight;
-
     private:
 	bool trackFilter(const reco::TrackRef &track) const;
         std::pair<std::vector<reco::TransientTrack>,GlobalPoint> nearTracks(const reco::TransientTrack &seed, const std::vector<reco::TransientTrack> & tracks, const reco::Vertex & primaryVertex) const;
