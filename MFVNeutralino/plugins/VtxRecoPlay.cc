@@ -34,7 +34,6 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const edm::InputTag vertex_src;
   const bool print_info;
   const bool is_mfv;
-  const bool reweight_mfv;
   TH1F* h_njets;
   TH2F* h_gen_vtx;
   TH1F* h_nrecvtx;
@@ -56,8 +55,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     print_info(cfg.getParameter<bool>("print_info")),
-    is_mfv(cfg.getParameter<bool>("is_mfv")),
-    reweight_mfv(is_mfv && cfg.getParameter<bool>("reweight_mfv"))
+    is_mfv(cfg.getParameter<bool>("is_mfv"))
 {
   edm::Service<TFileService> fs;
   
@@ -90,9 +88,6 @@ namespace {
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByLabel(primary_vertex_src, primary_vertices);
-  const double npv_weights[100] = { 0.000000, 0.000000, 0.067249, 0.044833, 0.050810, 0.063293, 0.080533, 0.148446, 0.144329, 0.109138, 0.060456, 0.045131, 0.029133, 0.019916, 0.014338, 0.010808, 0.008680, 0.006432, 0.006350, 0.004934, 0.004402, 0.003949, 0.003134, 0.002880, 0.003237, 0.002499, 0.002638, 0.002997, 0.003357, 0.003736, 0.002880, 0.002368, 0.003047, 0.002099, 0.002397, 0.002625, 0.004110, 0.005604, 0.004483, 0.003321, 0.004483, 0.007472, 0.000000, 0.007472, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000 };
-  const size_t npv = primary_vertices->size();
-  const double npv_weight = reweight_mfv ? (npv < 100 ? npv_weights[npv] : 0) : 1;
   
   edm::Handle<reco::PFJetCollection> jets;
   event.getByLabel("ak5PFJets", jets);
@@ -107,7 +102,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 	(fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0)))
       njets += 1;
   }
-  h_njets->Fill(njets, npv_weight);
+  h_njets->Fill(njets);
   if (njets < 6)
     return;
 
@@ -153,14 +148,14 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   event.getByLabel(vertex_src, rec_vertices);
 
   const int nvtx = rec_vertices->size();
-  h_nrecvtx->Fill(nvtx, npv_weight);
+  h_nrecvtx->Fill(nvtx);
   for (const reco::Vertex& vtx : *rec_vertices) {
     h_rec_vtx->Fill(vtx.x(), vtx.y());
     h_recvtxchi2->Fill(vtx.normalizedChi2());
     h_recvtxchi2prob->Fill(TMath::Prob(vtx.chi2(), vtx.ndof()));
     for (int i = 0; i < 2; ++i) {
-      h_dist2d->Fill(mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1]), npv_weight);
-      h_dist  ->Fill(mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1], vtx.z() - gen_verts[i][2]), npv_weight);
+      h_dist2d->Fill(mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1]));
+      h_dist  ->Fill(mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1], vtx.z() - gen_verts[i][2]));
     }
   }
 
@@ -189,14 +184,14 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       TransientVertex tv = cv;
       reco::Vertex vtx = tv;
       
-      h_pairvtxsuccess->Fill(tv.isValid(), npv_weight);
+      h_pairvtxsuccess->Fill(tv.isValid());
       if (tv.isValid()) {
-	h_pairvtxchi2->Fill(vtx.normalizedChi2(), npv_weight);
+	h_pairvtxchi2->Fill(vtx.normalizedChi2());
 	h_pairvtxchi2prob->Fill(TMath::Prob(vtx.chi2(), vtx.ndof()));
 	h_pairvtx->Fill(vtx.x(), vtx.y());
 	for (int igen = 0; igen < 2; ++igen) {
-	  h_pairvtxdist2d->Fill(mag(vtx.x() - gen_verts[igen][0], vtx.y() - gen_verts[igen][1]), npv_weight);
-	  h_pairvtxdist  ->Fill(mag(vtx.x() - gen_verts[igen][0], vtx.y() - gen_verts[igen][1], vtx.z() - gen_verts[igen][2]), npv_weight);
+	  h_pairvtxdist2d->Fill(mag(vtx.x() - gen_verts[igen][0], vtx.y() - gen_verts[igen][1]));
+	  h_pairvtxdist  ->Fill(mag(vtx.x() - gen_verts[igen][0], vtx.y() - gen_verts[igen][1], vtx.z() - gen_verts[igen][2]));
 	}
       }
     }
