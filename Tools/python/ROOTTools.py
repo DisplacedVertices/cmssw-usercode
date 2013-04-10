@@ -94,7 +94,6 @@ def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
     for ibin in xrange(1, nbins+1):
         s,t = h1.GetBinContent(ibin), h2.GetBinContent(ibin)
         if t == 0:
-            assert(s == 0)
             continue
 
         p_hat = float(s)/t
