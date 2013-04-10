@@ -6,8 +6,8 @@ process.source.fileNames = ['/store/user/tucker/mfv_gensimhlt_gluino_tau9900um_M
 process.TFileService.fileName = 'gen_histos.root'
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 
-from JMTucker.MFVNeutralino.SimFiles import load
-load(process, 'tau9900um_M1000', 'all')
+#from JMTucker.MFVNeutralino.SimFiles import load
+#load(process, 'tau9900um_M1000', 'all')
 
 process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
                                    gen_src = cms.InputTag('genParticles'),
