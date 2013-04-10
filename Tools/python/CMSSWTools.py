@@ -29,3 +29,12 @@ def set_seeds(process, seed=12191982, size=2**24):
     svc = process.RandomNumberGeneratorService
     for k,v in svc.parameters_().iteritems():
         getattr(svc, k).initialSeed = random.randint(0, size)
+
+def silence_messages(process, categories):
+    '''Make MessageLogger shut up about the categories listed.'''
+
+    if not hasattr(categories, '__iter__'):
+        categories = (categories,)
+    for category in categories:
+        process.MessageLogger.categories.append(category)
+        setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
