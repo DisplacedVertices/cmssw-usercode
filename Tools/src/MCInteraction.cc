@@ -34,6 +34,9 @@ void MCInteraction::Init(const reco::GenParticleCollection& gen_particles_) {
   gen_particles = &gen_particles_;
   
   Fill();
+  if (!Valid())
+    return;
+
   FindDIFLeptons();
   
   SetFourVectors();
@@ -49,6 +52,9 @@ void MCInteraction::Init(const reco::GenParticleCollection& gen_particles_,
   gen_met = &gen_met_;
   
   Fill();
+  if (!Valid())
+    return;
+  
   FindDIFLeptons();
   FindDIFJets();
   
