@@ -14,20 +14,20 @@ private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   const edm::InputTag gen_src;
-  const edm::InputTag gen_jet_src;
-  const edm::InputTag gen_met_src;
   const bool cut_invalid;
-  const double min_rho;
-  const double max_rho;
+  const double min_rho0;
+  const double max_rho0;
+  const double min_rho1;
+  const double max_rho1;
 };
 
 MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg) 
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
-    gen_met_src(cfg.getParameter<edm::InputTag>("gen_met_src")),
-    cut_invalid(cfg.getUntrackedParameter<bool>("cut_invalid", false)),
-    min_rho(cfg.getUntrackedParameter<double>("min_rho", -1)),
-    max_rho(cfg.getUntrackedParameter<double>("max_rho", -1))
+    cut_invalid(cfg.getParameter<bool>("cut_invalid")),
+    min_rho0(cfg.getParameter<double>("min_rho0")),
+    max_rho0(cfg.getParameter<double>("max_rho0")),
+    min_rho1(cfg.getParameter<double>("min_rho1")),
+    max_rho1(cfg.getParameter<double>("max_rho1"))
 {
 }
 
@@ -48,10 +48,16 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   if (cut_invalid && !mci.Valid())
     return false;
 
-  const double rho = mag(mci.stranges[0]->vx(), mci.stranges[0]->vy());
-  if (min_rho > 0 && rho < min_rho)
+  const double rho0 = mag(mci.stranges[0]->vx() - mci.lsps[0]->vx(), mci.stranges[0]->vy() - mci.lsps[0]->vy());
+  const double rho1 = mag(mci.stranges[1]->vx() - mci.lsps[1]->vx(), mci.stranges[1]->vy() - mci.lsps[1]->vy());
+
+  if (min_rho0 > 0 && rho0 < min_rho0)
     return false;
-  if (max_rho > 0 && rho > max_rho)
+  if (max_rho0 > 0 && rho0 > max_rho0)
+    return false;
+  if (min_rho1 > 0 && rho1 < min_rho1)
+    return false;
+  if (max_rho1 > 0 && rho1 > max_rho1)
     return false;
 
   return true;
