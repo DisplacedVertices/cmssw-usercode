@@ -153,10 +153,18 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_rec_vtx->Fill(vtx.x(), vtx.y());
     h_recvtxchi2->Fill(vtx.normalizedChi2());
     h_recvtxchi2prob->Fill(TMath::Prob(vtx.chi2(), vtx.ndof()));
+    float closest2d = 1e99;
+    float closest   = 1e99;
     for (int i = 0; i < 2; ++i) {
-      h_dist2d->Fill(mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1]));
-      h_dist  ->Fill(mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1], vtx.z() - gen_verts[i][2]));
+      float dist2d = mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1]);
+      float dist   = mag(vtx.x() - gen_verts[i][0], vtx.y() - gen_verts[i][1], vtx.z() - gen_verts[i][2]);
+      if (dist2d < closest2d) closest2d = dist2d;
+      if (dist   < closest)   closest   = dist;
     }
+    assert(closest2d < 1e99); // obviously
+    assert(closest   < 1e99);
+    h_dist2d->Fill(closest2d);
+    h_dist  ->Fill(closest);
   }
 
   edm::ESHandle<TransientTrackBuilder> trackBuilder;
