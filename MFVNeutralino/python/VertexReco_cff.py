@@ -93,7 +93,7 @@ def clone_all(process, suffix):
     for i,module in enumerate(modules):
         obj = getattr(process, module).clone()
         if i > 0:
-            obj.secondaryVertices = modules[-1] + suffix
+            obj.secondaryVertices = modules[i-1] + suffix
         objs.append(obj)
         setattr(process, module + suffix, obj)
     seq_obj = cms.Sequence(process.goodOfflinePrimaryVertices * reduce(lambda x,y: x*y, objs))
