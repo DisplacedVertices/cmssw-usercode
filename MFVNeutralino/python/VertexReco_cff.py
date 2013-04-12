@@ -86,3 +86,15 @@ mfvVertexReco = cms.Sequence(goodOfflinePrimaryVertices *
                              mfvInclusiveMergedVertices *
                              mfvInclusiveMergedVerticesFiltered
                              )
+
+def clone_all(process, suffix):
+    modules = 'mfvInclusiveVertexFinder mfvVertexMerger mfvTrackVertexArbitrator mfvInclusiveMergedVertices mfvInclusiveMergedVerticesFiltered'.split()
+    objs = []
+    for module in modules:
+        obj = getattr(process, module).clone()
+        objs.append((module,obj))
+        setattr(process, module + suffix, obj)
+    seq_obj = cms.Sequence(reduce(lambda x,y: x[1]*y[1], objs, process.goodOfflinePrimaryVertices))
+    setattr(process, 'mfvVertexReco' + suffix, seq_obj)
+    objs.append(seq_obj)
+    return objs
