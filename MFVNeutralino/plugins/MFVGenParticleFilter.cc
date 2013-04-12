@@ -45,8 +45,8 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
 
-  if (cut_invalid && !mci.Valid())
-    return false;
+  if (!mci.Valid())
+    return !cut_invalid;
 
   const double rho0 = mag(mci.stranges[0]->vx() - mci.lsps[0]->vx(), mci.stranges[0]->vy() - mci.lsps[0]->vy());
   const double rho1 = mag(mci.stranges[1]->vx() - mci.lsps[1]->vx(), mci.stranges[1]->vy() - mci.lsps[1]->vy());
