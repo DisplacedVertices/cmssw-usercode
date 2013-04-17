@@ -1,4 +1,4 @@
-// $Id: Thrust2D.cc,v 1.15 2011/10/12 15:30:11 gowdy Exp $
+// $Id: Thrust2D.cc,v 1.1 2013/04/17 17:15:39 tucker Exp $
 #include "PhysicsTools/CandUtils/interface/Thrust2D.h"
 #include <cmath>
 using namespace reco;
@@ -163,3 +163,4 @@ double Thrust2D::thrust(const Vector & axis) const {
   if (pSum_ > 0) result = sum / pSum_;
   return result;
 }
+

@@ -28,9 +28,9 @@
  *
  * \author Luca Lista, INFN
  *
- * \version $Revision: 1.11 $
+ * \version $Revision: 1.1 $
  *
- * $Id: Thrust2D.h,v 1.11 2008/03/13 13:28:00 llista Exp $
+ * $Id: Thrust2D.h,v 1.1 2013/04/17 17:15:38 tucker Exp $
  *
  */
 #include "DataFormats/Math/interface/Vector3D.h"
@@ -82,3 +82,4 @@ private:
 };
 
 #endif
+
