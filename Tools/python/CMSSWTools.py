@@ -13,10 +13,16 @@ def set_events_to_process(process, run_events, run=None):
     in each is the lumisection number. This is ignored for now.
     '''
     if run is not None:
+        for event in run_events:
+            if type(event) != int:
+                raise ValueError('with run=%s, expected run_events to be flat list of event numbers, but encountered item %r' % (run, event))
         run_events = [(run, event) for event in run_events]
-    #er = cms.untracked.VEventID(*[cms.untracked.EventID(*x) for x in run_events])
-    er = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[-1],x[0],x[-1]) for x in run_events])
-    process.source.eventsToProcess = er        
+    lengths = list(set(len(x) for x in run_events))
+    if len(lengths) != 1 or lengths[0] not in (2,3):
+        raise ValueError('expected either list of (run,event) or (run,ls,event) in run_events')
+    process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[-1],x[0],x[-1]) for x in run_events])
+    if lengths[0] == 3:
+        process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*[cms.untracked.LuminosityBlockRange(x[0],x[1],x[0],x[1]) for x in run_events])
 
 def set_seeds(process, seed=12191982, size=2**24):
     '''Set all the seeds for the RandomNumberGeneratorService in a
