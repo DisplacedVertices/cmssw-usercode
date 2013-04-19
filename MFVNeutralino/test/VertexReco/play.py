@@ -65,6 +65,11 @@ if 'test_ttbar' in sys.argv:
     process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6577DA8-32E2-E111-AC51-0030487E55BB.root']
     de_mfv()
 
+if 'debug' in sys.argv:
+    process.source.fileNames = ['/store/user/tucker/mfv_gensimhlt_gluino_tau1000um_M0400/reco/a3f0d9ac5e396df027589da2067010b0/reco_28_1_VIC.root']
+    from JMTucker.Tools.CMSSWTools import set_events_to_process
+    set_events_to_process(process, [(1,112,1)])
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     assert anas[0].is_mfv
 
@@ -79,12 +84,12 @@ scheduler = condor
 [CMSSW]
 %(dbs_url)s
 datasetpath = %(dataset)s
-pset = vtxplay_crab.py
+pset = play_crab.py
 total_number_of_events = 10000
 events_per_job = 2000
 
 [USER]
-ui_working_dir = crab/vtxplay/crab_mfv_vtxplay_%(name)s
+ui_working_dir = crab/VertexRecoPlay/crab_mfv_vtxplay_%(name)s
 jmt_skip_input_files = src/EGamma/EGammaAnalysisTools/data/*
 return_data = 1
 '''
@@ -94,10 +99,10 @@ return_data = 1
     samples = [mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut]
     for sample in samples:
         open('crab.cfg', 'wt').write(crab_cfg % sample)
-        new_py = open('vtxplay.py').read()
+        new_py = open('play.py').read()
         if 'ttbar' in sample.name:
             new_py += '\nde_mfv()\n'
-        open('vtxplay_crab.py', 'wt').write(new_py)
+        open('play_crab.py', 'wt').write(new_py)
         if not testing:
             os.system('crab -create -submit')
-            os.system('rm crab.cfg vtxplay_crab.py vtxplay_crab.pyc')
+            os.system('rm crab.cfg play_crab.py play_crab.pyc')
