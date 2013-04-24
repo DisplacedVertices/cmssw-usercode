@@ -20,30 +20,37 @@
 
 class MFVThrustAnalysis : public edm::EDAnalyzer {
 public:
-  explicit MFVThrustAnalysis(const edm::ParameterSet&) {}
+  explicit MFVThrustAnalysis(const edm::ParameterSet&);
 
 private:
   virtual void beginJob();
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   void fillVecs(const reco::Candidate* genp, // initial candidate
-		 TLorentzVector* p4,
-		 TVector3* vtx,
-		 const reco::Candidate* genpFinal = 0); // final candidate (used for b's)
+		TLorentzVector* p4,
+		TVector3* vtx,
+		const reco::Candidate* genpFinal = 0); // final candidate (used for b's)
+  
+  template <typename T>
+  void fillCandVec(std::vector<T>& vec, const T* cand, bool ptNotP=false) {
+    if (!cand) return;
+    T tmp = *cand;
+    if (ptNotP)
+      tmp.setPz(0);
+    vec.push_back(tmp);
+  }
 
-  void fillGenParticleVec(std::vector< reco::GenParticle >& vec,
- 			   const reco::GenParticle* genp,
-			   bool ptNotP = false);
+  const reco::GenJet* matchedGenJet(const reco::GenParticle*, const reco::GenJetCollection&);
 
-  const reco::GenJet* matchedGenJet(const reco::GenParticle* genp,
-				     const reco::GenJetCollection& genJets);
+  const edm::InputTag gen_particles_src;
+  const edm::InputTag gen_jets_src;
+  const edm::InputTag gen_met_src;
+  const double pt_cut;
+  const double eta_cut;
+  const double loose_pt_cut;
+  const double loose_eta_cut;
 
-  void fillGenJetVec(std::vector< reco::GenJet >& vec,
-		      const reco::GenJet* genj,
-		      bool ptNotP = false);
-
-  // ----------member data ---------------------------
-  TTree * m_tree;
+  TTree* m_tree;
 
   TLorentzVector* m_p4GHad;
   TLorentzVector* m_p4BgHad;
@@ -95,10 +102,10 @@ private:
   TVector3* m_vthr2j;
   Double_t m_thr2j;
 
-  std::vector< TLorentzVector >* m_vp4jQOther;
-  std::vector< TLorentzVector >* m_vp4jBOther;
-  std::vector< TVector3 >* m_vvtxQOther;
-  std::vector< TVector3 >* m_vvtxBOther;
+  std::vector<TLorentzVector>* m_vp4jQOther;
+  std::vector<TLorentzVector>* m_vp4jBOther;
+  std::vector<TVector3>* m_vvtxQOther;
+  std::vector<TVector3>* m_vvtxBOther;
 
   TVector3* m_vthr3jAll;
   Double_t m_thr3jAll;
@@ -108,17 +115,18 @@ private:
   TVector3* m_beamspot;
 };
 
-void
-MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
+  : gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
+    gen_jets_src(cfg.getParameter<edm::InputTag>("gen_jets_src")),
+    gen_met_src(cfg.getParameter<edm::InputTag>("gen_met_src")),
+    pt_cut(cfg.getParameter<double>("pt_cut")),
+    eta_cut(cfg.getParameter<double>("eta_cut")),
+    loose_pt_cut(cfg.getParameter<double>("loose_pt_cut")),
+    loose_eta_cut(cfg.getParameter<double>("loose_eta_cut"))
 {
-  using namespace edm;
-  double ptCut = 30.;
-  double etaCut = 3.;
-//   double loosePtCut = 20.;
-//   double looseEtaCut = 3.5;
-  double loosePtCut = 30.;
-  double looseEtaCut = 3.;
+}
 
+void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&) {
   *m_p4GHad = TLorentzVector();
   *m_p4BgHad = TLorentzVector();
   *m_p4SHad = TLorentzVector();
@@ -179,16 +187,16 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   *m_vthr2jAll = TVector3();
   m_thr2jAll = 0.;
 
-  Handle< reco::GenParticleCollection > genpHandle;
-  iEvent.getByLabel("genParticles", genpHandle); 
-  Handle< reco::GenJetCollection > genJetHandle;
-  iEvent.getByLabel("ak5GenJets", genJetHandle);
-  Handle< reco::GenMETCollection > genMetHandle;
-  iEvent.getByLabel("genMetTrue", genMetHandle);
+  edm::Handle<reco::GenParticleCollection> genpHandle;
+  event.getByLabel(gen_particles_src, genpHandle); 
+  edm::Handle<reco::GenJetCollection> genJetHandle;
+  event.getByLabel(gen_jets_src, genJetHandle);
+  edm::Handle<reco::GenMETCollection> genMetHandle;
+  event.getByLabel(gen_met_src, genMetHandle);
   const reco::GenMET& genMet = genMetHandle->at(0);
 
-  std::vector< reco::GenParticle > thr3Cands;
-  std::vector< reco::GenJet > thr3jCands;
+  std::vector<reco::GenParticle> thr3Cands;
+  std::vector<reco::GenJet> thr3jCands;
   const reco::GenJet* jBgHad = 0;
   const reco::GenJet* jSHad = 0;
   const reco::GenJet* jBtHad = 0;
@@ -241,15 +249,15 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
       *m_beamspot = *m_vtxGHad;
 
-      fillGenParticleVec(thr3Cands, mci.bottoms[ ihad ]);
-      fillGenParticleVec(thr3Cands, mci.stranges[ ihad ]);
-      fillGenParticleVec(thr3Cands, mci.bottoms_from_tops[ ihad ]);
-      fillGenParticleVec(thr3Cands, mci.W_daughters[ ihad ][ 0 ]);
-      fillGenParticleVec(thr3Cands, mci.W_daughters[ ihad ][ 1 ]);
-      fillGenParticleVec(thr3Cands, mci.bottoms[ ilep ]);
-      fillGenParticleVec(thr3Cands, mci.stranges[ ilep ]);
-      fillGenParticleVec(thr3Cands, mci.bottoms_from_tops[ ilep ]);
-      fillGenParticleVec(thr3Cands, mci.W_daughters[ ilep ][ 0 ]); // omit neutrino
+      fillCandVec(thr3Cands, mci.bottoms[ ihad ]);
+      fillCandVec(thr3Cands, mci.stranges[ ihad ]);
+      fillCandVec(thr3Cands, mci.bottoms_from_tops[ ihad ]);
+      fillCandVec(thr3Cands, mci.W_daughters[ ihad ][ 0 ]);
+      fillCandVec(thr3Cands, mci.W_daughters[ ihad ][ 1 ]);
+      fillCandVec(thr3Cands, mci.bottoms[ ilep ]);
+      fillCandVec(thr3Cands, mci.stranges[ ilep ]);
+      fillCandVec(thr3Cands, mci.bottoms_from_tops[ ilep ]);
+      fillCandVec(thr3Cands, mci.W_daughters[ ilep ][ 0 ]); // omit neutrino
 
       Thrust thr3Calc(thr3Cands.begin(), thr3Cands.end());
       Thrust::Vector vthr3 = thr3Calc.axis();
@@ -288,14 +296,14 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			0., // the met object has pz = px
 			genMet.energy());
 
-      fillGenJetVec(thr3jCands, jBgHad);
-      fillGenJetVec(thr3jCands, jSHad);
-      fillGenJetVec(thr3jCands, jBtHad);
-      fillGenJetVec(thr3jCands, jQ0);
-      fillGenJetVec(thr3jCands, jQ1);
-      fillGenJetVec(thr3jCands, jBgLep);
-      fillGenJetVec(thr3jCands, jSLep);
-      fillGenJetVec(thr3jCands, jBtLep);
+      fillCandVec(thr3jCands, jBgHad);
+      fillCandVec(thr3jCands, jSHad);
+      fillCandVec(thr3jCands, jBtHad);
+      fillCandVec(thr3jCands, jQ0);
+      fillCandVec(thr3jCands, jQ1);
+      fillCandVec(thr3jCands, jBgLep);
+      fillCandVec(thr3jCands, jSLep);
+      fillCandVec(thr3jCands, jBtLep);
 
       // don't forget the lepton
       if(mci.W_daughters[ ilep ][ 0 ])
@@ -333,8 +341,8 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		   !is_neutrino(genp) &&
 		   genp->mother() &&
 		   fabs(genp->mother()->pdgId()) == 24 && // to get first copy of lepton
-		   genp->pt() > ptCut &&
-		   fabs(genp->eta()) < etaCut)
+		   genp->pt() > pt_cut &&
+		   fabs(genp->eta()) < eta_cut)
 	    {
 	      if(thr3jCands.size())
 		{
@@ -359,8 +367,8 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   // Find GenJets (passing pt and eta cuts) matched to generated
   // b quarks not from gluino decay
-  std::vector< const reco::GenJet* > vbjOther;
-  std::vector< reco::GenJet > thr3jAllCands;
+  std::vector<const reco::GenJet*> vbjOther;
+  std::vector<reco::GenJet> thr3jAllCands;
   const reco::GenParticleCollection& vgenp = *genpHandle;
   for(unsigned int i = 0, n = vgenp.size(); i < n; ++i)
     {
@@ -383,11 +391,11 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	      match != jBgLep &&
 	      match != jSLep &&
 	      match != jBtLep &&
-	      match->pt() > loosePtCut &&
-	      fabs(match->eta()) < looseEtaCut)
+	      match->pt() > loose_pt_cut &&
+	      fabs(match->eta()) < loose_eta_cut)
 	    {	   
 	      vbjOther.push_back(match);
-	      fillGenJetVec(thr3jAllCands, match);
+	      fillCandVec(thr3jAllCands, match);
 
 	      TLorentzVector p4tmp;
 	      TVector3 vtxtmp;
@@ -413,11 +421,11 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	  genJet != jBgLep &&
 	  genJet != jSLep &&
 	  genJet != jBtLep &&
-	  genJet->pt() > loosePtCut &&
-	  fabs(genJet->eta()) < looseEtaCut &&
+	  genJet->pt() > loose_pt_cut &&
+	  fabs(genJet->eta()) < loose_eta_cut &&
 	  find(vbjOther.begin(), vbjOther.end(), genJet) == vbjOther.end())
 	{
-	  fillGenJetVec(thr3jAllCands, genJet);
+	  fillCandVec(thr3jAllCands, genJet);
 
 	  TLorentzVector p4tmp;
 	  TVector3 vtxtmp;
@@ -431,8 +439,8 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   // Calculate thrusts with all jets + lepton with pt and eta cuts
   for(int i = 0, n = thr3jCands.size(); i < n; ++i)
     {
-      if(thr3jCands[ i ].pt() > ptCut &&
-	  fabs(thr3jCands[ i ].eta()) < etaCut)
+      if(thr3jCands[ i ].pt() > pt_cut &&
+	  fabs(thr3jCands[ i ].eta()) < eta_cut)
 	thr3jAllCands.push_back(thr3jCands[ i ]);
     }
 
@@ -455,16 +463,6 @@ MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     m_tree->Fill();
 }
 
-void
-MFVThrustAnalysis::fillGenParticleVec(std::vector< reco::GenParticle >& vec,
-				 const reco::GenParticle* genp,
-				 bool ptNotP)
-{
-  if(!genp) return;
-  reco::GenParticle tmp = *genp;
-  if(ptNotP) tmp.setPz(0.);
-  vec.push_back(tmp);
-}
 
 void
 MFVThrustAnalysis::fillVecs(const reco::Candidate* genp, // initial
@@ -556,25 +554,11 @@ MFVThrustAnalysis::matchedGenJet(const reco::GenParticle* genp,
   return matchedGenJet;
 }
 
-void
-MFVThrustAnalysis::fillGenJetVec(std::vector< reco::GenJet >& vec,
-			    const reco::GenJet* genj,
-			    bool ptNotP)
-{
-  if(!genj) return;
-  reco::GenJet tmp = *genj;
-  if(ptNotP) tmp.setPz(0.);
-  vec.push_back(tmp);
-}
-
-// ------------ method called once each job just before starting event loop  ------------
-void 
-MFVThrustAnalysis::beginJob()
-{
+void MFVThrustAnalysis::beginJob() {
   gSystem->Load("./dict_C.so");
 
-  edm::Service< TFileService > fs;
-  m_tree = fs->make< TTree >("tree", "thetree");
+  edm::Service<TFileService> fs;
+  m_tree = fs->make<TTree>("tree", "");
 
   m_p4GHad = new TLorentzVector;
   m_p4BgHad = new TLorentzVector;
@@ -622,10 +606,10 @@ MFVThrustAnalysis::beginJob()
   m_vthr3j = new TVector3;
   m_vthr2j = new TVector3;
 
-  m_vp4jQOther = new std::vector< TLorentzVector >;
-  m_vp4jBOther = new std::vector< TLorentzVector >;
-  m_vvtxQOther = new std::vector< TVector3 >;
-  m_vvtxBOther = new std::vector< TVector3 >;
+  m_vp4jQOther = new std::vector<TLorentzVector>;
+  m_vp4jBOther = new std::vector<TLorentzVector>;
+  m_vvtxQOther = new std::vector<TVector3>;
+  m_vvtxBOther = new std::vector<TVector3>;
 
   m_vthr3jAll = new TVector3;
   m_vthr2jAll = new TVector3;
