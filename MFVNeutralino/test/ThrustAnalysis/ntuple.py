@@ -5,7 +5,16 @@ process.TFileService.fileName = 'thrust.root'
 from JMTucker.MFVNeutralino.SimFiles import load
 load(process, 'tau1000um_M0400', file_range='all', sec_files=False)
 
-process.thrustNtuple = cms.EDAnalyzer('MFVThrustAnalysis')
+process.thrustNtuple = cms.EDAnalyzer('MFVThrustAnalysis',
+                                      gen_particles_src = cms.InputTag('genParticles'),
+                                      gen_jets_src = cms.InputTag('ak5GenJets'),
+                                      gen_met_src = cms.InputTag('genMetTrue'),
+                                      pt_cut = cms.double(30),
+                                      eta_cut = cms.double(3),
+                                      loose_pt_cut = cms.double(30), # 20
+                                      loose_eta_cut = cms.double(3), # 3.5
+                                      )
+
 process.p = cms.Path(process.thrustNtuple)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
