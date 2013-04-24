@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    MFVGenAnlzr
-// Class:      MFVGenAnlzr
+// Package:    MFVThrustAnalysis
+// Class:      MFVThrustAnalysis
 // 
-/**\class MFVGenAnlzr MFVGenAnlzr.cc MFVAnal/MFVGenAnlzr/src/MFVGenAnlzr.cc
+/**\class MFVThrustAnalysis MFVThrustAnalysis.cc MFVAnal/MFVThrustAnalysis/src/MFVThrustAnalysis.cc
 
 Description: [one line class summary]
 
@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Werner Sun
 //         Created:  Thu Jan 31 12:20:09 CST 2013
-// $Id$
+// $Id: ThrustAnalysis.cc,v 1.1 2013/04/23 23:46:54 tucker Exp $
 //
 //
 
@@ -44,19 +44,19 @@ Implementation:
 #include "DataFormats/METReco/interface/GenMETCollection.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
-#include "JMTucker/Tools/interface/MCInteractionMFV3j.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "PhysicsTools/CandUtils/interface/Thrust.h"
-#include "PhysicsTools/CandUtils/interface/Thrust2D.h"
+#include "JMTucker/Tools/interface/Thrust2D.h"
 
 //
 // class declaration
 //
 
-class MFVGenAnlzr : public edm::EDAnalyzer {
+class MFVThrustAnalysis : public edm::EDAnalyzer {
 public:
-  explicit MFVGenAnlzr(const edm::ParameterSet&);
-  ~MFVGenAnlzr();
+  explicit MFVThrustAnalysis(const edm::ParameterSet&);
+  ~MFVThrustAnalysis();
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -163,7 +163,7 @@ private:
 //
 // constructors and destructor
 //
-MFVGenAnlzr::MFVGenAnlzr(const edm::ParameterSet& iConfig)
+MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& iConfig)
 
 {
   //now do what ever initialization is needed
@@ -171,7 +171,7 @@ MFVGenAnlzr::MFVGenAnlzr(const edm::ParameterSet& iConfig)
 }
 
 
-MFVGenAnlzr::~MFVGenAnlzr()
+MFVThrustAnalysis::~MFVThrustAnalysis()
 {
  
   // do anything here that needs to be done at desctruction time
@@ -186,7 +186,7 @@ MFVGenAnlzr::~MFVGenAnlzr()
 
 // ------------ method called for each event  ------------
 void
-MFVGenAnlzr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
   double ptCut = 30. ;
@@ -287,48 +287,46 @@ MFVGenAnlzr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       int ilep = 1 - ihad ;
 
       fillVecs( mci.lsps[ ihad ], m_p4GHad, m_vtxGHad ) ;
-      fillVecs( mci.bottoms_init[ ihad ], m_p4BgHad, m_vtxBgHad, mci.bottoms[ ihad ] ) ;
-      fillVecs( mci.stranges_init[ ihad ], m_p4SHad, m_vtxSHad ) ;
-      fillVecs( mci.tops_init[ ihad ], m_p4THad, m_vtxTHad ) ;
-      fillVecs( mci.bottoms_from_tops_init[ ihad ], m_p4BtHad, m_vtxBtHad,
-		mci.bottoms_from_tops[ ihad ] ) ;
-      fillVecs( mci.W_daughters_init[ ihad ][ 0 ], m_p4Q0, m_vtxQ0 ) ;
-      fillVecs( mci.W_daughters_init[ ihad ][ 1 ], m_p4Q1, m_vtxQ1 ) ;
+      fillVecs( mci.bottoms[ ihad ], m_p4BgHad, m_vtxBgHad, final_candidate(mci.bottoms[ ihad ], 3) ) ;
+      fillVecs( mci.stranges[ ihad ], m_p4SHad, m_vtxSHad ) ;
+      fillVecs( mci.tops[ ihad ], m_p4THad, m_vtxTHad ) ;
+      fillVecs( mci.bottoms_from_tops[ ihad ], m_p4BtHad, m_vtxBtHad, final_candidate(mci.bottoms_from_tops[ ihad ], 3) ) ;
+      fillVecs( mci.W_daughters[ ihad ][ 0 ], m_p4Q0, m_vtxQ0 ) ;
+      fillVecs( mci.W_daughters[ ihad ][ 1 ], m_p4Q1, m_vtxQ1 ) ;
       fillVecs( mci.lsps[ ilep ], m_p4GLep, m_vtxGLep ) ;
-      fillVecs( mci.bottoms_init[ ilep ], m_p4BgLep, m_vtxBgLep, mci.bottoms[ ilep ] ) ;
-      fillVecs( mci.stranges_init[ ilep ], m_p4SLep, m_vtxSLep ) ;
-      fillVecs( mci.tops_init[ ilep ], m_p4TLep, m_vtxTLep ) ;
-      fillVecs( mci.bottoms_from_tops_init[ ilep ], m_p4BtLep, m_vtxBtLep,
-		mci.bottoms_from_tops[ ilep ] ) ;
-      fillVecs( mci.W_daughters_init[ ilep ][ 0 ], m_p4Lep, m_vtxLep ) ;
-      fillVecs( mci.W_daughters_init[ ilep ][ 1 ], m_p4Nu, m_vtxNu ) ;
+      fillVecs( mci.bottoms[ ilep ], m_p4BgLep, m_vtxBgLep, final_candidate(mci.bottoms[ ilep ], 3) ) ;
+      fillVecs( mci.stranges[ ilep ], m_p4SLep, m_vtxSLep ) ;
+      fillVecs( mci.tops[ ilep ], m_p4TLep, m_vtxTLep ) ;
+      fillVecs( mci.bottoms_from_tops[ ilep ], m_p4BtLep, m_vtxBtLep, final_candidate(mci.bottoms_from_tops[ ilep ], 3) ) ;
+      fillVecs( mci.W_daughters[ ilep ][ 0 ], m_p4Lep, m_vtxLep ) ;
+      fillVecs( mci.W_daughters[ ilep ][ 1 ], m_p4Nu, m_vtxNu ) ;
 
 //       std::cout << "GHad " << mci.lsps[ ihad ]->vertex() << std::endl
-// 		<< "BgHad " << mci.bottoms_init[ ihad ]->vertex() << std::endl
-//  		<< "SHad " << mci.stranges_init[ ihad ]->vertex() << std::endl
-// 		<< "THad " << mci.tops_init[ ihad ]->vertex() << std::endl
+// 		<< "BgHad " << mci.bottoms[ ihad ]->vertex() << std::endl
+//  		<< "SHad " << mci.stranges[ ihad ]->vertex() << std::endl
+// 		<< "THad " << mci.tops[ ihad ]->vertex() << std::endl
 // 		<< "BtHad " << mci.bottoms_from_tops[ ihad ]->vertex() << std::endl
-// 		<< "Q0 " << mci.W_daughters_init[ ihad ][ 0 ]->vertex() << std::endl
-// 		<< "Q1 " << mci.W_daughters_init[ ihad ][ 1 ]->vertex() << std::endl
+// 		<< "Q0 " << mci.W_daughters[ ihad ][ 0 ]->vertex() << std::endl
+// 		<< "Q1 " << mci.W_daughters[ ihad ][ 1 ]->vertex() << std::endl
 // 		<< "GLep " << mci.lsps[ ilep ]->vertex() << std::endl
-// 		<< "BgLep " << mci.bottoms_init[ ilep ]->vertex() << std::endl
-// 		<< "SLep " << mci.stranges_init[ ilep ]->vertex() << std::endl
-// 		<< "TLep " << mci.tops_init[ ilep ]->vertex() << std::endl
+// 		<< "BgLep " << mci.bottoms[ ilep ]->vertex() << std::endl
+// 		<< "SLep " << mci.stranges[ ilep ]->vertex() << std::endl
+// 		<< "TLep " << mci.tops[ ilep ]->vertex() << std::endl
 // 		<< "BtLep " << mci.bottoms_from_tops[ ilep ]->vertex() << std::endl
-// 		<< "Lep " << mci.W_daughters_init[ ilep ][ 0 ]->vertex() << std::endl
-// 		<< "Nu " << mci.W_daughters_init[ ilep ][ 1 ]->vertex() << std::endl ;
+// 		<< "Lep " << mci.W_daughters[ ilep ][ 0 ]->vertex() << std::endl
+// 		<< "Nu " << mci.W_daughters[ ilep ][ 1 ]->vertex() << std::endl ;
 
       *m_beamspot = *m_vtxGHad ;
 
-      fillGenParticleVec( thr3Cands, mci.bottoms_init[ ihad ] ) ;
-      fillGenParticleVec( thr3Cands, mci.stranges_init[ ihad ] ) ;
-      fillGenParticleVec( thr3Cands, mci.bottoms_from_tops_init[ ihad ] ) ;
-      fillGenParticleVec( thr3Cands, mci.W_daughters_init[ ihad ][ 0 ] ) ;
-      fillGenParticleVec( thr3Cands, mci.W_daughters_init[ ihad ][ 1 ] ) ;
-      fillGenParticleVec( thr3Cands, mci.bottoms_init[ ilep ] ) ;
-      fillGenParticleVec( thr3Cands, mci.stranges_init[ ilep ] ) ;
-      fillGenParticleVec( thr3Cands, mci.bottoms_from_tops_init[ ilep ] ) ;
-      fillGenParticleVec( thr3Cands, mci.W_daughters_init[ ilep ][ 0 ] ) ; // omit neutrino
+      fillGenParticleVec( thr3Cands, mci.bottoms[ ihad ] ) ;
+      fillGenParticleVec( thr3Cands, mci.stranges[ ihad ] ) ;
+      fillGenParticleVec( thr3Cands, mci.bottoms_from_tops[ ihad ] ) ;
+      fillGenParticleVec( thr3Cands, mci.W_daughters[ ihad ][ 0 ] ) ;
+      fillGenParticleVec( thr3Cands, mci.W_daughters[ ihad ][ 1 ] ) ;
+      fillGenParticleVec( thr3Cands, mci.bottoms[ ilep ] ) ;
+      fillGenParticleVec( thr3Cands, mci.stranges[ ilep ] ) ;
+      fillGenParticleVec( thr3Cands, mci.bottoms_from_tops[ ilep ] ) ;
+      fillGenParticleVec( thr3Cands, mci.W_daughters[ ilep ][ 0 ] ) ; // omit neutrino
 
       Thrust thr3Calc( thr3Cands.begin(), thr3Cands.end() ) ;
       Thrust::Vector vthr3 = thr3Calc.axis() ;
@@ -343,14 +341,14 @@ MFVGenAnlzr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       // ~~~~~~~~~~ Matched GenJets ~~~~~~~~~~
 
       // Find matching GenJets
-      jBgHad = matchedGenJet( mci.bottoms_init[ ihad ], *genJetHandle ) ;
-      jSHad = matchedGenJet( mci.stranges_init[ ihad ], *genJetHandle ) ;
-      jBtHad = matchedGenJet( mci.bottoms_from_tops_init[ ihad ], *genJetHandle ) ;
-      jQ0 = matchedGenJet( mci.W_daughters_init[ ihad ][ 0 ], *genJetHandle ) ;
-      jQ1 = matchedGenJet( mci.W_daughters_init[ ihad ][ 1 ], *genJetHandle ) ;
-      jBgLep = matchedGenJet( mci.bottoms_init[ ilep ], *genJetHandle ) ;
-      jSLep = matchedGenJet( mci.stranges_init[ ilep ], *genJetHandle ) ;
-      jBtLep = matchedGenJet( mci.bottoms_from_tops_init[ ilep ], *genJetHandle ) ;
+      jBgHad = matchedGenJet( mci.bottoms[ ihad ], *genJetHandle ) ;
+      jSHad = matchedGenJet( mci.stranges[ ihad ], *genJetHandle ) ;
+      jBtHad = matchedGenJet( mci.bottoms_from_tops[ ihad ], *genJetHandle ) ;
+      jQ0 = matchedGenJet( mci.W_daughters[ ihad ][ 0 ], *genJetHandle ) ;
+      jQ1 = matchedGenJet( mci.W_daughters[ ihad ][ 1 ], *genJetHandle ) ;
+      jBgLep = matchedGenJet( mci.bottoms[ ilep ], *genJetHandle ) ;
+      jSLep = matchedGenJet( mci.stranges[ ilep ], *genJetHandle ) ;
+      jBtLep = matchedGenJet( mci.bottoms_from_tops[ ilep ], *genJetHandle ) ;
 
       TVector3 vtxTmp ;
       fillVecs( jBgHad, m_p4jBgHad, &vtxTmp ) ;
@@ -377,10 +375,10 @@ MFVGenAnlzr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       fillGenJetVec( thr3jCands, jBtLep ) ;
 
       // don't forget the lepton
-      if( mci.W_daughters_init[ ilep ][ 0 ] )
+      if( mci.W_daughters[ ilep ][ 0 ] )
 	{
-	  thr3jCands.push_back( reco::GenJet( mci.W_daughters_init[ ilep ][ 0 ]->p4(),
-					      mci.W_daughters_init[ ilep ][ 0 ]->vertex(),
+	  thr3jCands.push_back( reco::GenJet( mci.W_daughters[ ilep ][ 0 ]->p4(),
+					      mci.W_daughters[ ilep ][ 0 ]->vertex(),
 					      reco::GenJet::Specific(),
 					      reco::Jet::Constituents() ) ) ;
 	}
@@ -446,10 +444,10 @@ MFVGenAnlzr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if( fabs( vgenp[ i ].pdgId() ) == 5 &&
 	  vgenp[ i ].mother() &&
 	  fabs( vgenp[ i ].mother()->pdgId() ) != 5 &&
-	  &( vgenp[ i ] ) != mci.bottoms_init[ 0 ] &&
-	  &( vgenp[ i ] ) != mci.bottoms_init[ 1 ] &&
-	  &( vgenp[ i ] ) != mci.bottoms_from_tops_init[ 0 ] &&
-	  &( vgenp[ i ] ) != mci.bottoms_from_tops_init[ 1 ] )
+	  &( vgenp[ i ] ) != mci.bottoms[ 0 ] &&
+	  &( vgenp[ i ] ) != mci.bottoms[ 1 ] &&
+	  &( vgenp[ i ] ) != mci.bottoms_from_tops[ 0 ] &&
+	  &( vgenp[ i ] ) != mci.bottoms_from_tops[ 1 ] )
 	{
 	  const reco::GenJet* match = matchedGenJet( &( vgenp[ i ] ),
 						     *genJetHandle ) ;
@@ -535,7 +533,7 @@ MFVGenAnlzr::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 }
 
 void
-MFVGenAnlzr::fillGenParticleVec( std::vector< reco::GenParticle >& vec,
+MFVThrustAnalysis::fillGenParticleVec( std::vector< reco::GenParticle >& vec,
 				 const reco::GenParticle* genp,
 				 bool ptNotP )
 {
@@ -546,7 +544,7 @@ MFVGenAnlzr::fillGenParticleVec( std::vector< reco::GenParticle >& vec,
 }
 
 void
-MFVGenAnlzr::fillVecs( const reco::Candidate* genp, // initial
+MFVThrustAnalysis::fillVecs( const reco::Candidate* genp, // initial
 		       TLorentzVector* p4,
 		       TVector3* vtx,
 		       const reco::Candidate* genpFinal ) // for b's
@@ -612,7 +610,7 @@ MFVGenAnlzr::fillVecs( const reco::Candidate* genp, // initial
 
 // Find closest GenJet
 const reco::GenJet*
-MFVGenAnlzr::matchedGenJet( const reco::GenParticle* genp,
+MFVThrustAnalysis::matchedGenJet( const reco::GenParticle* genp,
 			    const reco::GenJetCollection& genJets )
 {
   const reco::GenJet* matchedGenJet = 0 ;
@@ -636,7 +634,7 @@ MFVGenAnlzr::matchedGenJet( const reco::GenParticle* genp,
 }
 
 void
-MFVGenAnlzr::fillGenJetVec( std::vector< reco::GenJet >& vec,
+MFVThrustAnalysis::fillGenJetVec( std::vector< reco::GenJet >& vec,
 			    const reco::GenJet* genj,
 			    bool ptNotP )
 {
@@ -648,7 +646,7 @@ MFVGenAnlzr::fillGenJetVec( std::vector< reco::GenJet >& vec,
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-MFVGenAnlzr::beginJob()
+MFVThrustAnalysis::beginJob()
 {
   gSystem->Load( "./dict_C.so" ) ;
 
@@ -776,37 +774,37 @@ MFVGenAnlzr::beginJob()
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-MFVGenAnlzr::endJob() 
+MFVThrustAnalysis::endJob() 
 {
 }
 
 // ------------ method called when starting to processes a run  ------------
 void 
-MFVGenAnlzr::beginRun(edm::Run const&, edm::EventSetup const&)
+MFVThrustAnalysis::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a run  ------------
 void 
-MFVGenAnlzr::endRun(edm::Run const&, edm::EventSetup const&)
+MFVThrustAnalysis::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when starting to processes a luminosity block  ------------
 void 
-MFVGenAnlzr::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+MFVThrustAnalysis::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method called when ending the processing of a luminosity block  ------------
 void 
-MFVGenAnlzr::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+MFVThrustAnalysis::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-MFVGenAnlzr::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+MFVThrustAnalysis::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -815,4 +813,4 @@ MFVGenAnlzr::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(MFVGenAnlzr);
+DEFINE_FWK_MODULE(MFVThrustAnalysis);
