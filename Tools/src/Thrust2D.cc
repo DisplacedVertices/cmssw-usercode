@@ -1,5 +1,5 @@
-// $Id: Thrust2D.cc,v 1.1 2013/04/17 17:15:39 tucker Exp $
-#include "PhysicsTools/CandUtils/interface/Thrust2D.h"
+// $Id: Thrust2D.cc,v 1.2 2013/04/17 17:20:30 tucker Exp $
+#include "JMTucker/Tools/interface/Thrust2D.h"
 #include <cmath>
 using namespace reco;
 const double pi = M_PI, pi2 = 2 * pi, pi_2 = pi / 2, pi_4 = pi / 4;
