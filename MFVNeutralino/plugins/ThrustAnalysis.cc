@@ -49,6 +49,7 @@ private:
   const double eta_cut;
   const double loose_pt_cut;
   const double loose_eta_cut;
+  const bool prints;
 
   TTree* m_tree;
 
@@ -122,7 +123,8 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
     pt_cut(cfg.getParameter<double>("pt_cut")),
     eta_cut(cfg.getParameter<double>("eta_cut")),
     loose_pt_cut(cfg.getParameter<double>("loose_pt_cut")),
-    loose_eta_cut(cfg.getParameter<double>("loose_eta_cut"))
+    loose_eta_cut(cfg.getParameter<double>("loose_eta_cut")),
+    prints(cfg.getUntrackedParameter<bool>("prints", false))
 {
 }
 
@@ -198,12 +200,12 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   std::vector<reco::GenParticle> thr3Cands;
   std::vector<reco::GenJet> thr3jCands;
   const reco::GenJet* jBgHad = 0;
-  const reco::GenJet* jSHad = 0;
+  const reco::GenJet* jSHad  = 0;
   const reco::GenJet* jBtHad = 0;
-  const reco::GenJet* jQ0 = 0;
-  const reco::GenJet* jQ1 = 0;
+  const reco::GenJet* jQ0    = 0;
+  const reco::GenJet* jQ1    = 0;
   const reco::GenJet* jBgLep = 0;
-  const reco::GenJet* jSLep = 0;
+  const reco::GenJet* jSLep  = 0;
   const reco::GenJet* jBtLep = 0;
 
   *m_beamspot = TVector3();
@@ -212,52 +214,52 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
 
   MCInteractionMFV3j mci;
   mci.Init(*genpHandle, *genJetHandle, genMet);
-  if(mci.Valid())
+  if (mci.Valid()) 
     {
-      int ihad = (mci.decay_type[ 0 ] == 3) ? 0 : 1;
+      int ihad = (mci.decay_type[0] == 3) ? 0 : 1;
       int ilep = 1 - ihad;
 
-      fillVecs(mci.lsps[ ihad ], m_p4GHad, m_vtxGHad);
-      fillVecs(mci.bottoms[ ihad ], m_p4BgHad, m_vtxBgHad, final_candidate(mci.bottoms[ ihad ], 3));
-      fillVecs(mci.stranges[ ihad ], m_p4SHad, m_vtxSHad);
-      fillVecs(mci.tops[ ihad ], m_p4THad, m_vtxTHad);
-      fillVecs(mci.bottoms_from_tops[ ihad ], m_p4BtHad, m_vtxBtHad, final_candidate(mci.bottoms_from_tops[ ihad ], 3));
-      fillVecs(mci.W_daughters[ ihad ][ 0 ], m_p4Q0, m_vtxQ0);
-      fillVecs(mci.W_daughters[ ihad ][ 1 ], m_p4Q1, m_vtxQ1);
-      fillVecs(mci.lsps[ ilep ], m_p4GLep, m_vtxGLep);
-      fillVecs(mci.bottoms[ ilep ], m_p4BgLep, m_vtxBgLep, final_candidate(mci.bottoms[ ilep ], 3));
-      fillVecs(mci.stranges[ ilep ], m_p4SLep, m_vtxSLep);
-      fillVecs(mci.tops[ ilep ], m_p4TLep, m_vtxTLep);
-      fillVecs(mci.bottoms_from_tops[ ilep ], m_p4BtLep, m_vtxBtLep, final_candidate(mci.bottoms_from_tops[ ilep ], 3));
-      fillVecs(mci.W_daughters[ ilep ][ 0 ], m_p4Lep, m_vtxLep);
-      fillVecs(mci.W_daughters[ ilep ][ 1 ], m_p4Nu, m_vtxNu);
+      fillVecs(mci.lsps[ihad], m_p4GHad, m_vtxGHad);
+      fillVecs(mci.bottoms[ihad], m_p4BgHad, m_vtxBgHad, final_candidate(mci.bottoms[ihad], 3));
+      fillVecs(mci.stranges[ihad], m_p4SHad, m_vtxSHad);
+      fillVecs(mci.tops[ihad], m_p4THad, m_vtxTHad);
+      fillVecs(mci.bottoms_from_tops[ihad], m_p4BtHad, m_vtxBtHad, final_candidate(mci.bottoms_from_tops[ihad], 3));
+      fillVecs(mci.W_daughters[ihad][0], m_p4Q0, m_vtxQ0);
+      fillVecs(mci.W_daughters[ihad][1], m_p4Q1, m_vtxQ1);
+      fillVecs(mci.lsps[ilep], m_p4GLep, m_vtxGLep);
+      fillVecs(mci.bottoms[ilep], m_p4BgLep, m_vtxBgLep, final_candidate(mci.bottoms[ilep], 3));
+      fillVecs(mci.stranges[ilep], m_p4SLep, m_vtxSLep);
+      fillVecs(mci.tops[ilep], m_p4TLep, m_vtxTLep);
+      fillVecs(mci.bottoms_from_tops[ilep], m_p4BtLep, m_vtxBtLep, final_candidate(mci.bottoms_from_tops[ilep], 3));
+      fillVecs(mci.W_daughters[ilep][0], m_p4Lep, m_vtxLep);
+      fillVecs(mci.W_daughters[ilep][1], m_p4Nu, m_vtxNu);
 
-//       std::cout << "GHad " << mci.lsps[ ihad ]->vertex() << std::endl
-// 		<< "BgHad " << mci.bottoms[ ihad ]->vertex() << std::endl
-//  		<< "SHad " << mci.stranges[ ihad ]->vertex() << std::endl
-// 		<< "THad " << mci.tops[ ihad ]->vertex() << std::endl
-// 		<< "BtHad " << mci.bottoms_from_tops[ ihad ]->vertex() << std::endl
-// 		<< "Q0 " << mci.W_daughters[ ihad ][ 0 ]->vertex() << std::endl
-// 		<< "Q1 " << mci.W_daughters[ ihad ][ 1 ]->vertex() << std::endl
-// 		<< "GLep " << mci.lsps[ ilep ]->vertex() << std::endl
-// 		<< "BgLep " << mci.bottoms[ ilep ]->vertex() << std::endl
-// 		<< "SLep " << mci.stranges[ ilep ]->vertex() << std::endl
-// 		<< "TLep " << mci.tops[ ilep ]->vertex() << std::endl
-// 		<< "BtLep " << mci.bottoms_from_tops[ ilep ]->vertex() << std::endl
-// 		<< "Lep " << mci.W_daughters[ ilep ][ 0 ]->vertex() << std::endl
-// 		<< "Nu " << mci.W_daughters[ ilep ][ 1 ]->vertex() << std::endl;
+      if (prints) std::cout << "GHad " << mci.lsps[ihad]->vertex() << "\n"
+ 		<< "BgHad " << mci.bottoms[ihad]->vertex() << "\n"
+  		<< "SHad " << mci.stranges[ihad]->vertex() << "\n"
+ 		<< "THad " << mci.tops[ihad]->vertex() << "\n"
+ 		<< "BtHad " << mci.bottoms_from_tops[ihad]->vertex() << "\n"
+ 		<< "Q0 " << mci.W_daughters[ihad][0]->vertex() << "\n"
+ 		<< "Q1 " << mci.W_daughters[ihad][1]->vertex() << "\n"
+ 		<< "GLep " << mci.lsps[ilep]->vertex() << "\n"
+ 		<< "BgLep " << mci.bottoms[ilep]->vertex() << "\n"
+ 		<< "SLep " << mci.stranges[ilep]->vertex() << "\n"
+ 		<< "TLep " << mci.tops[ilep]->vertex() << "\n"
+ 		<< "BtLep " << mci.bottoms_from_tops[ilep]->vertex() << "\n"
+ 		<< "Lep " << mci.W_daughters[ilep][0]->vertex() << "\n"
+ 		<< "Nu " << mci.W_daughters[ilep][1]->vertex() << "\n";
 
       *m_beamspot = *m_vtxGHad;
 
-      fillCandVec(thr3Cands, mci.bottoms[ ihad ]);
-      fillCandVec(thr3Cands, mci.stranges[ ihad ]);
-      fillCandVec(thr3Cands, mci.bottoms_from_tops[ ihad ]);
-      fillCandVec(thr3Cands, mci.W_daughters[ ihad ][ 0 ]);
-      fillCandVec(thr3Cands, mci.W_daughters[ ihad ][ 1 ]);
-      fillCandVec(thr3Cands, mci.bottoms[ ilep ]);
-      fillCandVec(thr3Cands, mci.stranges[ ilep ]);
-      fillCandVec(thr3Cands, mci.bottoms_from_tops[ ilep ]);
-      fillCandVec(thr3Cands, mci.W_daughters[ ilep ][ 0 ]); // omit neutrino
+      fillCandVec(thr3Cands, mci.bottoms[ihad]);
+      fillCandVec(thr3Cands, mci.stranges[ihad]);
+      fillCandVec(thr3Cands, mci.bottoms_from_tops[ihad]);
+      fillCandVec(thr3Cands, mci.W_daughters[ihad][0]);
+      fillCandVec(thr3Cands, mci.W_daughters[ihad][1]);
+      fillCandVec(thr3Cands, mci.bottoms[ilep]);
+      fillCandVec(thr3Cands, mci.stranges[ilep]);
+      fillCandVec(thr3Cands, mci.bottoms_from_tops[ilep]);
+      fillCandVec(thr3Cands, mci.W_daughters[ilep][0]); // omit neutrino
 
       Thrust thr3Calc(thr3Cands.begin(), thr3Cands.end());
       Thrust::Vector vthr3 = thr3Calc.axis();
@@ -272,14 +274,14 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
       // ~~~~~~~~~~ Matched GenJets ~~~~~~~~~~
 
       // Find matching GenJets
-      jBgHad = matchedGenJet(mci.bottoms[ ihad ], *genJetHandle);
-      jSHad = matchedGenJet(mci.stranges[ ihad ], *genJetHandle);
-      jBtHad = matchedGenJet(mci.bottoms_from_tops[ ihad ], *genJetHandle);
-      jQ0 = matchedGenJet(mci.W_daughters[ ihad ][ 0 ], *genJetHandle);
-      jQ1 = matchedGenJet(mci.W_daughters[ ihad ][ 1 ], *genJetHandle);
-      jBgLep = matchedGenJet(mci.bottoms[ ilep ], *genJetHandle);
-      jSLep = matchedGenJet(mci.stranges[ ilep ], *genJetHandle);
-      jBtLep = matchedGenJet(mci.bottoms_from_tops[ ilep ], *genJetHandle);
+      jBgHad = matchedGenJet(mci.bottoms[ihad], *genJetHandle);
+      jSHad = matchedGenJet(mci.stranges[ihad], *genJetHandle);
+      jBtHad = matchedGenJet(mci.bottoms_from_tops[ihad], *genJetHandle);
+      jQ0 = matchedGenJet(mci.W_daughters[ihad][0], *genJetHandle);
+      jQ1 = matchedGenJet(mci.W_daughters[ihad][1], *genJetHandle);
+      jBgLep = matchedGenJet(mci.bottoms[ilep], *genJetHandle);
+      jSLep = matchedGenJet(mci.stranges[ilep], *genJetHandle);
+      jBtLep = matchedGenJet(mci.bottoms_from_tops[ilep], *genJetHandle);
 
       TVector3 vtxTmp;
       fillVecs(jBgHad, m_p4jBgHad, &vtxTmp);
@@ -306,10 +308,10 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
       fillCandVec(thr3jCands, jBtLep);
 
       // don't forget the lepton
-      if(mci.W_daughters[ ilep ][ 0 ])
+      if(mci.W_daughters[ilep][0])
 	{
-	  thr3jCands.push_back(reco::GenJet(mci.W_daughters[ ilep ][ 0 ]->p4(),
-					      mci.W_daughters[ ilep ][ 0 ]->vertex(),
+	  thr3jCands.push_back(reco::GenJet(mci.W_daughters[ilep][0]->p4(),
+					      mci.W_daughters[ilep][0]->vertex(),
 					      reco::GenJet::Specific(),
 					      reco::Jet::Constituents()));
 	}
@@ -372,15 +374,15 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   const reco::GenParticleCollection& vgenp = *genpHandle;
   for(unsigned int i = 0, n = vgenp.size(); i < n; ++i)
     {
-      if(fabs(vgenp[ i ].pdgId()) == 5 &&
-	  vgenp[ i ].mother() &&
-	  fabs(vgenp[ i ].mother()->pdgId()) != 5 &&
-	  &(vgenp[ i ]) != mci.bottoms[ 0 ] &&
-	  &(vgenp[ i ]) != mci.bottoms[ 1 ] &&
-	  &(vgenp[ i ]) != mci.bottoms_from_tops[ 0 ] &&
-	  &(vgenp[ i ]) != mci.bottoms_from_tops[ 1 ])
+      if(fabs(vgenp[i].pdgId()) == 5 &&
+	  vgenp[i].mother() &&
+	  fabs(vgenp[i].mother()->pdgId()) != 5 &&
+	  &(vgenp[i]) != mci.bottoms[0] &&
+	  &(vgenp[i]) != mci.bottoms[1] &&
+	  &(vgenp[i]) != mci.bottoms_from_tops[0] &&
+	  &(vgenp[i]) != mci.bottoms_from_tops[1])
 	{
-	  const reco::GenJet* match = matchedGenJet(&(vgenp[ i ]),
+	  const reco::GenJet* match = matchedGenJet(&(vgenp[i]),
 						     *genJetHandle);
 	  if(match &&
 	      match != jBgHad &&
@@ -411,7 +413,7 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   const reco::GenJetCollection& genJets = *genJetHandle;
   for(unsigned int i = 0, n = genJets.size(); i < n; ++i)
     {
-      const reco::GenJet* genJet = &(genJets[ i ]);
+      const reco::GenJet* genJet = &(genJets[i]);
 
       if(genJet != jBgHad &&
 	  genJet != jSHad &&
@@ -439,9 +441,9 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   // Calculate thrusts with all jets + lepton with pt and eta cuts
   for(int i = 0, n = thr3jCands.size(); i < n; ++i)
     {
-      if(thr3jCands[ i ].pt() > pt_cut &&
-	  fabs(thr3jCands[ i ].eta()) < eta_cut)
-	thr3jAllCands.push_back(thr3jCands[ i ]);
+      if(thr3jCands[i].pt() > pt_cut &&
+	  fabs(thr3jCands[i].eta()) < eta_cut)
+	thr3jAllCands.push_back(thr3jCands[i]);
     }
 
   // Add other jets to thrust calculations
@@ -542,10 +544,10 @@ MFVThrustAnalysis::matchedGenJet(const reco::GenParticle* genp,
       double bestDR = 999.;
       for(unsigned int i = 0; i < genJets.size(); ++i)
 	{
-	  double dR = deltaR(genp->p4(), genJets[ i ].p4());
+	  double dR = deltaR(genp->p4(), genJets[i].p4());
 	  if(dR < 0.4 && dR < bestDR)
 	    {
-	      matchedGenJet = &(genJets[ i ]);
+	      matchedGenJet = &(genJets[i]);
 	      bestDR = dR;
 	    }
 	}
