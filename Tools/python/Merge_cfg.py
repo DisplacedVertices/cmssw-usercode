@@ -22,7 +22,8 @@ process.out.outputCommands = cms.untracked.vstring('keep *', 'drop LumiDetails_l
 
 def get_input_from_argv(process):
     # Look for just a list of files in argv first.
-    files = ['file:%s' % x for x in sys.argv if os.path.isfile(x) and '.root' in x]
+    files = [x for x in sys.argv if x.startswith('/store') and x.endswith('.root')]
+    files += ['file:%s' % x for x in sys.argv if os.path.isfile(x) and x.endswith('.root')]
     name = 'merged.root'
     if not files:
         # Else, files from crab dir mode.
@@ -40,3 +41,7 @@ def get_input_from_argv(process):
     print 'Merging to', name
 
 __all__ = ['cms', 'process', 'get_input_from_argv']
+
+if 'argv' in sys.argv:
+    get_input_from_argv(process)
+
