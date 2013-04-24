@@ -1,42 +1,6 @@
-// -*- C++ -*-
-//
-// Package:    MFVThrustAnalysis
-// Class:      MFVThrustAnalysis
-// 
-/**\class MFVThrustAnalysis MFVThrustAnalysis.cc MFVAnal/MFVThrustAnalysis/src/MFVThrustAnalysis.cc
-
-Description: [one line class summary]
-
-Implementation:
-[Notes on implementation]
-*/
-//
-// Original Author:  Werner Sun
-//         Created:  Thu Jan 31 12:20:09 CST 2013
-// $Id: ThrustAnalysis.cc,v 1.1 2013/04/23 23:46:54 tucker Exp $
-//
-//
-
-
-// system include files
-#include <memory>
-
-// root
 #include "TTree.h"
 #include "TSystem.h"
-
-// user include files
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
@@ -44,31 +8,24 @@ Implementation:
 #include "DataFormats/METReco/interface/GenMETCollection.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
+//#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "PhysicsTools/CandUtils/interface/Thrust.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
-#include "PhysicsTools/CandUtils/interface/Thrust.h"
 #include "JMTucker/Tools/interface/Thrust2D.h"
-
-//
-// class declaration
-//
 
 class MFVThrustAnalysis : public edm::EDAnalyzer {
 public:
-  explicit MFVThrustAnalysis(const edm::ParameterSet&);
-  ~MFVThrustAnalysis();
-
-  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  explicit MFVThrustAnalysis(const edm::ParameterSet&) {}
 
 private:
   virtual void beginJob() ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
-  virtual void endJob() ;
-
-  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-  virtual void endRun(edm::Run const&, edm::EventSetup const&);
-  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
   void fillVecs( const reco::Candidate* genp, // initial candidate
 		 TLorentzVector* p4,
@@ -152,39 +109,6 @@ private:
   TVector3* m_beamspot ;
 };
 
-//
-// constants, enums and typedefs
-//
-
-//
-// static data member definitions
-//
-
-//
-// constructors and destructor
-//
-MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& iConfig)
-
-{
-  //now do what ever initialization is needed
-
-}
-
-
-MFVThrustAnalysis::~MFVThrustAnalysis()
-{
- 
-  // do anything here that needs to be done at desctruction time
-  // (e.g. close files, deallocate resources etc.)
-
-}
-
-
-//
-// member functions
-//
-
-// ------------ method called for each event  ------------
 void
 MFVThrustAnalysis::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
@@ -772,45 +696,4 @@ MFVThrustAnalysis::beginJob()
   m_tree->Branch( "beamspot", &m_beamspot ) ;
 }
 
-// ------------ method called once each job just after ending the event loop  ------------
-void 
-MFVThrustAnalysis::endJob() 
-{
-}
-
-// ------------ method called when starting to processes a run  ------------
-void 
-MFVThrustAnalysis::beginRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a run  ------------
-void 
-MFVThrustAnalysis::endRun(edm::Run const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when starting to processes a luminosity block  ------------
-void 
-MFVThrustAnalysis::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method called when ending the processing of a luminosity block  ------------
-void 
-MFVThrustAnalysis::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
-{
-}
-
-// ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
-void
-MFVThrustAnalysis::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
-  //The following says we do not know what parameters are allowed so do no validation
-  // Please change this to state exactly what you do use, even if it is no parameters
-  edm::ParameterSetDescription desc;
-  desc.setUnknown();
-  descriptions.addDefault(desc);
-}
-
-//define this as a plug-in
 DEFINE_FWK_MODULE(MFVThrustAnalysis);
