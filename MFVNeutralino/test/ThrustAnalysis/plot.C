@@ -1,3 +1,5 @@
+// root -b plot.C+
+
 #include "TSystem.h"
 #include "TStyle.h"
 #include "TLorentzVector.h"
@@ -54,15 +56,17 @@ void drawPair( TH1F* h0, TH1F* h1,
 void drawTriplet( TH1F* h0, TH1F* h1, TH1F* h2,
 		  TCanvas* canvas, const char* filename ) ;
 
-void plot2( const char* inputFile )
+void plot()
 {
-  gSystem->Load( "./libexec/dict_C.so" ) ;
+  const char* inputFile = "thrust.root";
+
+  gSystem->Load( "./dict_C.so" ) ;
 
   // Initialize random engine
   TRandom3 rndeng( 0 ) ;
 
   TFile* f = TFile::Open( inputFile ) ;
-  TTree* tree = ( TTree* ) f->Get( "MFVGenAnlzr/tree" ) ;
+  TTree* tree = ( TTree* ) f->Get( "thrustNtuple/tree" ) ;
   cout << tree->GetEntries() << endl ;
 
   // ~~~~~~~~~~ Set branches ~~~~~~~~~~
