@@ -260,6 +260,7 @@ void MFVThrustAnalysis::fillVecs(const reco::Candidate* genp, TLorentzVector* p4
   if (!genp) {
     *p4 = TLorentzVector();
     *vtx = TVector3();
+    return;
   }
 
   p4->SetXYZT(genp->px(), genp->py(), genp->pz(), genp->energy());
@@ -614,8 +615,7 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
     m_vtxSHad->Print();
   }
 
-  if (mci.Valid() ||
-      (m_vp4jQOther->size() > 2 && m_vp4jBOther->size() > 2))
+  if (mci.Valid() || (m_vp4jQOther->size() > 2 && m_vp4jBOther->size() > 2))
     m_tree->Fill();
 }
 
