@@ -1,1 +1,3 @@
 *.root
+out.*.gz
+a.out
