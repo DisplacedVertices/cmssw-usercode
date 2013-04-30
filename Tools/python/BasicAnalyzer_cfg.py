@@ -7,3 +7,8 @@ process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('fil
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.TFileService = cms.Service('TFileService', fileName = cms.string('tfileservice.root'))
+
+def add_analyzer(name, **kwargs):
+    obj = cms.EDAnalyzer(name, **kwargs)
+    setattr(process, name, obj)
+    setattr(process, 'p' + name, cms.Path(obj))
