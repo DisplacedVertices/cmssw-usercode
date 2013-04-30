@@ -123,6 +123,52 @@ def core_gaussian(hist, factor, i=[0]):
     i[0] += 1
     return f
 
+def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats):
+    names = [k.GetName() for k in dir1.GetListOfKeys()]
+    #names.sort()
+
+    for name in names:
+        h1 = dir1.Get(name)
+        h2 = dir2.Get(name)
+
+        is2d = issubclass(type(h1), ROOT.TH2)
+        if not issubclass(type(h1), ROOT.TH1):
+            continue
+        
+        if not is2d:
+            i1 = get_integral(h1, 0, integral_only=True)
+            i2 = get_integral(h2, 0, integral_only=True)
+        else:
+            i1, i2 = 0, 0
+
+        rescale = i1 > 0 and i2 > 0 and not is2d
+        for i, (h, integ, color) in enumerate(((h1,i1,color1),(h2,i2, color2))):
+            h.SetLineWidth(2)
+
+            if rescale:
+                h.Scale(1./integ)
+            if nostats(name):
+                h.SetStats(0)
+            h.SetLineColor(color)
+            h.SetMarkerColor(color)
+
+        h1.SetName(name1)
+        h2.SetName(name2)
+
+        if is2d or h1.GetMaximum() > h2.GetMaximum():
+            h1.Draw()
+            h2.Draw('sames')
+        else:
+            h2.Draw()
+            h1.Draw('sames')
+
+        ps.c.Update()
+        if not nostats(name):
+            differentiate_stat_box(h1, 0, color1)
+            differentiate_stat_box(h2, 1, color2)
+
+        ps.save(name.replace('/','_'), log=not is2d)
+
 def cumulative_histogram(h, type='ge'):
     """Construct the cumulative histogram in which the value of each
     bin is the tail integral of the given histogram.
@@ -317,19 +363,21 @@ class draw_hist_register:
             binning = '(%s)' % binning
         return draw_str + '>>' + name + binning
 
-    def last_hist(self):
-        h = getattr(ROOT, self.names[-1])
-        self.hists.append(h)
-        return h
-
-    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None):
+    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None, nice_name=None):
         if self.use_weight:
             if cut:
                 cut = 'weight*(%s)' % cut
             else:
                 cut = 'weight'
-        n = (tree if tree else self.tree).Draw(self.name_for_draw(draw_str, binning), cut, 'e' if self.use_weight else '')
-        h = self.last_hist()
+        varexp = self.name_for_draw(draw_str, binning)
+        option = 'e' if self.use_weight else ''
+        n = (tree if tree else self.tree).Draw(varexp, cut, option)
+        h = getattr(ROOT, self.names[-1])
+        self.hists.append(h)
+        h.is2d = ':' in draw_str
+        if nice_name is None:
+            nice_name = draw_str.replace(':', '_vs_')
+        h.nice_name = nice_name
         return (h,n) if get_n else h
 
 def make_rms_hist(prof, name='', bins=None, cache={}):
@@ -675,6 +723,7 @@ __all__ = [
     'histogram_divide',
     'clopper_pearson',
     'clopper_pearson_poisson_means',
+    'compare_all_hists',
     'core_gaussian',
     'cumulative_histogram',
     'cut',
