@@ -123,11 +123,15 @@ def core_gaussian(hist, factor, i=[0]):
     i[0] += 1
     return f
 
-def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats):
+def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, stat_size=None, show_progress=False):
     names = [k.GetName() for k in dir1.GetListOfKeys()]
     #names.sort()
 
-    for name in names:
+    nnames = len(names)
+    for iname, name in enumerate(names):
+        if show_progress and iname % (nnames/20) == 0:
+            print '%5i/%5i' % (iname, nnames), name
+
         h1 = dir1.Get(name)
         h2 = dir2.Get(name)
 
@@ -164,8 +168,8 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats):
 
         ps.c.Update()
         if not nostats(name):
-            differentiate_stat_box(h1, 0, color1)
-            differentiate_stat_box(h2, 1, color2)
+            differentiate_stat_box(h1, 0, color1, stat_size)
+            differentiate_stat_box(h2, 1, color2, stat_size)
 
         ps.save(name.replace('/','_'), log=not is2d)
 
