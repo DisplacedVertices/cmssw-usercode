@@ -18,6 +18,7 @@
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -49,18 +50,18 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   VertexDistance3D distcalc_3d;
 
   std::pair<bool, float> compatibility(const reco::Vertex& x, const reco::Vertex& y, bool use3d=false) {
-    bool success = true;
+    bool success = false;
     float compat = 0;
     try {
       if (use3d)
 	compat = distcalc_3d.compatibility(x, y);
       else
 	compat = distcalc_2d.compatibility(x, y);
+      success = true;
     }
     catch (cms::Exception& e) {
       if (e.category().find("matrix inversion problem") == std::string::npos)
 	throw;
-      success = false;
     }
     return std::make_pair(success, compat);
   }
@@ -68,6 +69,9 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   bool use_vertex(const reco::Vertex& vtx) {
     return int(vtx.tracksSize()) >= min_sv_ntracks && vtx.normalizedChi2() <= max_sv_chi2dof;
   }
+
+  TH1F* h_sim_pileup_num_int[3];
+  TH1F* h_sim_pileup_true_num_int[3];
 
   TH1F* h_gen_valid;
   TH1F* h_gen_pos_1d[2][3];
@@ -129,11 +133,17 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 {
   edm::Service<TFileService> fs;
 
+  for (int i = 0; i < 3; ++i) {
+    const char* ex = (i == 0 ? "m1" : (i == 1 ? "0" : "p1"));
+    h_sim_pileup_num_int[i]      = fs->make<TH1F>(TString::Format("h_sim_pileup_num_int_bx%s",      ex), "", 65, 0, 65);
+    h_sim_pileup_true_num_int[i] = fs->make<TH1F>(TString::Format("h_sim_pileup_true_num_int_bx%s", ex), "", 65, 0, 65);
+  }
+
   h_gen_valid = fs->make<TH1F>("h_gen_valid", ";gen valid?;frac. events", 2, 0, 2);
   
   for (int j = 0; j < 2; ++j) {
     for (int i = 0; i < 3; ++i) {
-      float l = i == 2 ? 10 : 1;
+      float l = i == 2 ? 25 : 1;
       h_gen_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_gen_pos_1d_%i%i", j, i), TString::Format(";gen #%i vtx pos[%i] (cm);arb. units", j, i), 100, -l, l);
     }
     h_gen_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixy", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx y (cm)", j, j), 100, -1, 1, 100, -1, 1);
@@ -145,13 +155,13 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   h_ntracks = fs->make<TH1F>("h_ntracks", ";# of general tracks;arb. units", 20, 0, 2000);
   h_ntracksptpass = fs->make<TH1F>("h_ntracksptpass", ";# of selected tracks;arb. units", 20, 0, 60);
 
-  h_npv = fs->make<TH1F>("h_npv", ";# of primary vertices;arb. units", 13, 0, 65);
+  h_npv = fs->make<TH1F>("h_npv", ";# of primary vertices;arb. units", 65, 0, 65);
 
   for (int j = 0; j < 2; ++j) {
     const char* ex = j == 0 ? "the" : "other";
 
     for (int i = 0; i < 3; ++i) {
-      float l = i == 2 ? 10 : 1;
+      float l = i == 2 ? 25 : 1;
       h_pv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_pv_pos_1d_%i%i", j, i), TString::Format(";%s PV pos[%i] (cm);arb. units", ex, i), 100, -l, l);
     }
     h_pv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixy", j), TString::Format(";%s PV x (cm);%s PV y (cm)", ex, ex), 100, -1, 1, 100, -1, 1);
@@ -166,8 +176,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     h_pv_pt[j] = fs->make<TH1F>(TString::Format("h_pv_pt_%i", j), TString::Format(";%s PV p_{T} (GeV);arb.units", ex), 25, 0, 500);
     h_pv_eta[j] = fs->make<TH1F>(TString::Format("h_pv_eta_%i", j), TString::Format(";%s PV #eta;arb.units", ex), 30, -5, 5);
     h_pv_phi[j] = fs->make<TH1F>(TString::Format("h_pv_phi_%i", j), TString::Format(";%s PV #phi;arb.units", ex), 30, -3.15, 3.15);
-    h_pv_mass[j] = fs->make<TH1F>(TString::Format("h_pv_mass_%i", j), TString::Format(";%s PV mass (GeV);arb.units", ex), 25, 0, 500);
-    h_pv_sumpt2[j] = fs->make<TH1F>(TString::Format("h_pv_sumpt2_%i", j), TString::Format(";%s PV #Sigma p_{T}^{2} (GeV);arb.units", ex), 25, 0, 10000);
+    h_pv_mass[j] = fs->make<TH1F>(TString::Format("h_pv_mass_%i", j), TString::Format(";%s PV mass (GeV);arb.units", ex), 50, 0, 1000);
+    h_pv_sumpt2[j] = fs->make<TH1F>(TString::Format("h_pv_sumpt2_%i", j), TString::Format(";%s PV #Sigma p_{T}^{2} (GeV);arb.units", ex), 30, 0, 15000);
   }
 
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 100, 0, 100);
@@ -195,38 +205,39 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     PairwiseHistos::HistoDefs hs;
     hs.add("ntracks",        "# of tracks/SV",                              40,    0,      40);
     hs.add("ntracksptpass",  "# of selected tracks/SV",                     40,    0,      40);
+    hs.add("trackminnhits",  "min number of hits on track per SV",          40,    0,      40);
     hs.add("chi2dof",        "SV #chi^2/dof",                               50,    0,      20);
     hs.add("chi2dofprob",    "SV p(#chi^2, dof)",                           50,    0,       1);
-    hs.add("pt",             "SV p_{T} (GeV)",                             100,    0,     250);
-    hs.add("eta",            "SV #eta",                                    100,   -3,       3);
-    hs.add("phi",            "SV #phi",                                    100,   -3.15,    3.15);
+    hs.add("pt",             "SV p_{T} (GeV)",                             100,    0,     300);
+    hs.add("eta",            "SV #eta",                                     50,   -4,       4);
+    hs.add("phi",            "SV #phi",                                     50,   -3.15,    3.15);
     hs.add("mass",           "SV mass (GeV)",                              100,    0,     250);
-    hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                100,    0,    5000);
-    hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     100);
-    hs.add("drmax",          "SV max{#Delta R(i,j)}",                      100,    0,       6);
-    hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      100,    0,       3);
-    hs.add("drrms",          "SV rms{#Delta R(i,j)}",                      100,    0,       3);
+    hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                100,    0,   10000);
+    hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
+    hs.add("drmax",          "SV max{#Delta R(i,j)}",                      100,    0,       4);
+    hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      100,    0,       2.5);
+    hs.add("drrms",          "SV rms{#Delta R(i,j)}",                      100,    0,       2);
     hs.add("dravgw",         "SV wavg{#Delta R(i,j)}",                     100,    0,       3);
-    hs.add("drrmsw",         "SV wrms{#Delta R(i,j)}",                     100,    0,       3);
+    hs.add("drrmsw",         "SV wrms{#Delta R(i,j)}",                     100,    0,       2);
     hs.add("gen2ddist",      "dist2d(SV, closest gen vtx) (cm)",           100,    0,       0.5);
     hs.add("gen2derr",       "#sigma(dist2d(SV, closest gen vtx)) (cm)",   100,    0,       0.5);
     hs.add("gen3ddist",      "dist3d(SV, closest gen vtx) (cm)",           100,    0,       0.5);
     hs.add("gen3derr",       "#sigma(dist3d(SV, closest gen vtx)) (cm)",   100,    0,       0.5);
     hs.add("bs2dcompatscss", "compat2d(SV, beamspot) success",               2,    0,       2);
-    hs.add("bs2dcompat",     "compat2d(SV, beamspot)",                     100,    0,     100);
+    hs.add("bs2dcompat",     "compat2d(SV, beamspot)",                     100,    0,     500);
     hs.add("bs2ddist",       "dist2d(SV, beamspot) (cm)",                  100,    0,       0.5);
     hs.add("bs2derr",        "#sigma(dist2d(SV, beamspot)) (cm)",          100,    0,       0.1);
-    hs.add("bs2dsig",        "N#sigma(dist2d(SV, beamspot))",              100,    0,      50);
+    hs.add("bs2dsig",        "N#sigma(dist2d(SV, beamspot))",              100,    0,     100);
     hs.add("pv2dcompatscss", "compat2d(SV, PV) success",                     2,    0,       2);
-    hs.add("pv2dcompat",     "compat2d(SV, PV)",                           100,    0,     100);
+    hs.add("pv2dcompat",     "compat2d(SV, PV)",                           100,    0,     500);
     hs.add("pv2ddist",       "dist2d(SV, PV) (cm)",                        100,    0,       0.5);
     hs.add("pv2derr",        "#sigma(dist2d(SV, PV)) (cm)",                100,    0,       0.1);
-    hs.add("pv2dsig",        "N#sigma(dist2d(SV, PV))",                    100,    0,      50);
+    hs.add("pv2dsig",        "N#sigma(dist2d(SV, PV))",                    100,    0,     100);
     hs.add("pv3dcompatscss", "compat3d(SV, PV) success",                     2,    0,       2);
-    hs.add("pv3dcompat",     "compat3d(SV, PV)",                           100,    0,     100);
+    hs.add("pv3dcompat",     "compat3d(SV, PV)",                           100,    0,     500);
     hs.add("pv3ddist",       "dist3d(SV, PV) (cm)",                        100,    0,       0.5);
     hs.add("pv3derr",        "#sigma(dist3d(SV, PV)) (cm)",                100,    0,       0.1);
-    hs.add("pv3dsig",        "N#sigma(dist3d(SV, PV))",                    100,    0,      50);
+    hs.add("pv3dsig",        "N#sigma(dist3d(SV, PV))",                    100,    0,     100);
     h_sv[j].Init("h_sv_" + ex, hs, true);
   }
 
@@ -242,7 +253,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   h_pair3dsig        = fs->make<TH1F>("h_pair3dsig",        ";pair N#sigma(dist3d);arb. units",      100,    0,    50);
 
   h_pairnsharedtracks = fs->make<TH1F>("h_pairnsharedtracks", "", 50, 0, 50);
-  h_pairfsharedtracks = fs->make<TH2F>("h_pairfsharedtracks", "", 50, 0,  1, 50, 0,  1);
+  h_pairfsharedtracks = fs->make<TH2F>("h_pairfsharedtracks", "", 51, 0,  1.02, 51, 0,  1.02);
 }
 
 namespace {
@@ -267,6 +278,16 @@ namespace {
 }
 
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  edm::Handle<std::vector<PileupSummaryInfo> > pileup;
+  event.getByLabel("addPileupInfo", pileup);
+  for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi) {
+    const int bx = psi->getBunchCrossing();
+    if (bx < -1 || bx > 1)
+      throw cms::Exception("SimPUInfo") << "pileup BX not -1, 0, or 1: " << bx << "\n";
+    h_sim_pileup_num_int     [bx+1]->Fill(psi->getPU_NumInteractions());
+    h_sim_pileup_true_num_int[bx+1]->Fill(psi->getTrueNumInteractions());
+  }
+
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByLabel("offlineBeamSpot", beamspot);
   const float bsx = beamspot->x0(); 
@@ -415,6 +436,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     std::map<int,int>& trackicity_m = trackicities[isv];
     int ntracks = trke - trkb;
     int ntracksptpass = 0;
+    int trackminnhits = 1000;
     double sumpt2 = 0;
     double maxtrackpt = 0;
     std::vector<double> drs;
@@ -431,7 +453,11 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 	trackicity_m[key] = 1;
       else
 	icity->second += 1;
-	
+
+      int nhits = (*trki)->numberOfValidHits();
+      if (nhits < trackminnhits)
+	trackminnhits = nhits;
+
       double pti = (*trki)->pt();
       if (pti > track_pt_min)
 	++ntracksptpass;
@@ -457,7 +483,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     std::vector<int> trackicity;
     for (auto i : trackicity_m) 
       trackicity.push_back(i.second);
-    h_sv_max_trackicity->Fill(ntracks, *std::max(trackicity.begin(), trackicity.end()));
+    int max_trackicity = *std::max_element(trackicity.begin(), trackicity.end());
+    h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
     dravg  /= drs.size();
     dravgw /= sumweight;
@@ -506,6 +533,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     PairwiseHistos::ValueMap v = {
         {"ntracks",         ntracks},        
         {"ntracksptpass",   ntracksptpass},   
+        {"trackminnhits",   trackminnhits},
         {"chi2dof",         sv.normalizedChi2()},        
         {"chi2dofprob",     TMath::Prob(sv.chi2(), sv.ndof())},
         {"pt",              sv.p4().pt()},
