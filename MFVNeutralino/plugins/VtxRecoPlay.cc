@@ -45,11 +45,27 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 
   const int min_sv_ntracks;
   const double max_sv_chi2dof;
+  const double max_sv_err2d;
 
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
 
-  std::pair<bool, float> compatibility(const reco::Vertex& x, const reco::Vertex& y, bool use3d=false) {
+  float abs_error(const reco::Vertex& sv, bool use3d) {
+    float err2 = 
+      4*sv.x()*sv.x()*sv.covariance(0,0) +
+      4*sv.y()*sv.y()*sv.covariance(1,1) +
+      8*sv.x()*sv.y()*sv.covariance(0,1);
+      
+    if (use3d)
+      err2 += 
+	4*sv.z()*sv.z()*sv.covariance(2,2) +
+	8*sv.x()*sv.z()*sv.covariance(0,2) +
+	8*sv.y()*sv.z()*sv.covariance(1,2);
+
+    return sqrt(err2);
+  }
+
+  std::pair<bool, float> compatibility(const reco::Vertex& x, const reco::Vertex& y, bool use3d) {
     bool success = false;
     float compat = 0;
     try {
@@ -67,7 +83,10 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   }
 
   bool use_vertex(const reco::Vertex& vtx) {
-    return int(vtx.tracksSize()) >= min_sv_ntracks && vtx.normalizedChi2() <= max_sv_chi2dof;
+    return 
+      int(vtx.tracksSize()) >= min_sv_ntracks &&
+      vtx.normalizedChi2() <= max_sv_chi2dof  &&
+      abs_error(vtx, false) < max_sv_err2d;
   }
 
   TH1F* h_sim_pileup_num_int[3];
@@ -129,7 +148,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     track_pt_min(cfg.getParameter<double>("track_pt_min")),
     min_sv_ntracks(cfg.getParameter<int>("min_sv_ntracks")),
-    max_sv_chi2dof(cfg.getParameter<double>("max_sv_chi2dof"))
+    max_sv_chi2dof(cfg.getParameter<double>("max_sv_chi2dof")),
+    max_sv_err2d(cfg.getParameter<double>("max_sv_err2d"))
 {
   edm::Service<TFileService> fs;
 
@@ -506,25 +526,13 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       if (gen3ddist_ < gen3ddist) gen3ddist = gen3ddist_;
     }
     
-    float gen2derr = sqrt(
-      4*sv.x()*sv.x()*sv.covariance(0,0) +
-      4*sv.y()*sv.y()*sv.covariance(1,1) +
-      8*sv.x()*sv.y()*sv.covariance(0,1)
-      );
+    float gen2derr = abs_error(sv, false);
+    float gen3derr = abs_error(sv, true);
 
-    float gen3derr = sqrt(
-      4*sv.x()*sv.x()*sv.covariance(0,0) +
-      4*sv.y()*sv.y()*sv.covariance(1,1) +
-      4*sv.z()*sv.z()*sv.covariance(2,2) +
-      8*sv.x()*sv.y()*sv.covariance(0,1) +
-      8*sv.x()*sv.z()*sv.covariance(0,2) +
-      8*sv.y()*sv.z()*sv.covariance(1,2)
-      );
-
-    std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx);
+    std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
     Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
     
-    std::pair<bool,float> pv2dcompat = compatibility(sv, primary_vertex);
+    std::pair<bool,float> pv2dcompat = compatibility(sv, primary_vertex, false);
     Measurement1D pv2ddist = distcalc_2d.distance(sv, primary_vertex);
 
     std::pair<bool,float> pv3dcompat = compatibility(sv, primary_vertex, true);
@@ -590,7 +598,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       Measurement1D pair2ddist = distcalc_2d.distance(vtxi, vtxj);
       Measurement1D pair3ddist = distcalc_3d.distance(vtxi, vtxj);
 
-      std::pair<bool, float> pair2dcompat = compatibility(vtxi, vtxj);
+      std::pair<bool, float> pair2dcompat = compatibility(vtxi, vtxj, false);
       std::pair<bool, float> pair3dcompat = compatibility(vtxi, vtxj, true);
 
       h_pair2dcompatscss->Fill(pair2dcompat.first);
