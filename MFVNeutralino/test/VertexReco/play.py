@@ -24,7 +24,7 @@ process.load('JMTucker.MFVNeutralino.VertexReco_cff')
 #process.p = cms.Path(process.mfvGenParticleFilter * process.mfvVertexReco)
 process.p = cms.Path(process.mfvVertexReco)
 
-anas = []
+all_anas = []
 
 for suffix in ('', 'Cos75'):
     vertex_srcs = [
@@ -56,22 +56,22 @@ for suffix in ('', 'Cos75'):
                          max_sv_err2d   = cms.double(1e6),
                          )
 
-    anas = [
-        ('Qno',            ana),
+    ana_qcuts = [
+        ('Qno',             ana),
         ('Qntk5',           ana.clone(min_sv_ntracks = 5)),
         ('Qntk5err2d0p015', ana.clone(min_sv_ntracks = 5, max_sv_err2d = 0.015)),
         ]
     
     for name, src in vertex_srcs:
-        for ana_name, ana in anas:
+        for ana_name, ana in ana_qcuts:
             obj = ana.clone(vertex_src = src + suffix)
             setattr(process, 'play' + name + suffix + ana_name, obj)
-            anas.append(obj)
+            all_anas.append(obj)
             process.p *= obj
 
 def de_mfv():
     process.mfvGenParticleFilter.cut_invalid = False
-    for ana in anas:
+    for ana in all_anas:
         ana.is_mfv = False
 
 if 'test_ttbar' in sys.argv:
@@ -84,7 +84,7 @@ if 'debug' in sys.argv:
     set_events_to_process(process, [(1,112,1)])
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    assert anas[0].is_mfv
+    assert all_anas[0].is_mfv # de_mfv will be called for non-signal samples below
 
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
