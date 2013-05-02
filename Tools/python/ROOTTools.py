@@ -492,7 +492,7 @@ def poisson_means_divide(h1, h2):
 class plot_saver:
     i = 0
     
-    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630)):
+    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1):
         self.c = ROOT.TCanvas('c%i' % plot_saver.i, '', *size)
         plot_saver.i += 1
         self.saved = []
@@ -504,20 +504,46 @@ class plot_saver:
         self.pdf_log = pdf_log
         self.C = C
         self.C_log = C_log
+        self.per_page = per_page
 
     def __del__(self):
         self.write_index()
 
     def anchor_name(self, fn):
-        return fn.replace('.', '_').replace('/', '_')
+        return os.path.splitext(os.path.basename(fn))[0].replace('.', '_').replace('/', '_')
     
     def write_index(self):
         if not self.saved or not self.html:
             return
         html = open(os.path.join(self.plot_dir, 'index.html'), 'wt')
+        if self.per_page > 0:
+            nsaved = len(self.saved)
+            ndxs = range(0, nsaved, self.per_page)
+            npages = len(ndxs)
+            for page, ndx in enumerate(ndxs):
+                self.write_index_page(self.saved[ndx:ndx+self.per_page], page, npages)
+        else:
+            self.write_index_page(self.saved, 0, 1)
+            
+    def write_index_page(self, saved, page, num_pages):
+        def html_fn(page):
+            if page == 0:
+                return 'index.html'
+            else:
+                return 'index_%i.html' % page
+            return 
+        html = open(os.path.join(self.plot_dir, html_fn(page)), 'wt')
         html.write('<html><body><pre>\n')
+        if num_pages > 1:
+            html.write('pages: ')
+            for i in xrange(num_pages):
+                if i == page:
+                    html.write('<b>%i</b>  ' % i)
+                else:
+                    html.write('<a href="%s">%i</a>  ' % (html_fn(i), i))
+            html.write('\n')
         html.write('<a href="..">.. (parent directory)</a>\n')
-        for i, save in enumerate(self.saved):
+        for i, save in enumerate(saved):
             if type(save) == str:
                 # this is just a directory link
                 html.write('<a href="%s">%10i%32s%s</a>\n' % (save, i, 'change directory: ', save))
@@ -554,7 +580,7 @@ class plot_saver:
             html.write('  <a href="%s">%s</a>' % (bn, bn))
             html.write('\n')
         html.write('<br><br>')
-        for i, save in enumerate(self.saved):
+        for i, save in enumerate(saved):
             if type(save) == str:
                 continue # skip dir entries
             fn, log, root, pdf, pdf_log, C, C_log = save
