@@ -534,7 +534,7 @@ class plot_saver:
             return 
         html = open(os.path.join(self.plot_dir, html_fn(page)), 'wt')
         html.write('<html><body><pre>\n')
-        if num_pages > 1:
+        def write_pages_line():
             html.write('pages: ')
             for i in xrange(num_pages):
                 if i == page:
@@ -542,6 +542,8 @@ class plot_saver:
                 else:
                     html.write('<a href="%s">%i</a>  ' % (html_fn(i), i))
             html.write('\n')
+        if num_pages > 1:
+            write_pages_line()
         html.write('<a href="..">.. (parent directory)</a>\n')
         for i, save in enumerate(saved):
             if type(save) == str:
@@ -590,6 +592,8 @@ class plot_saver:
                 html.write('<img src="%s"><img src="%s"><br><br>\n' % (bn, os.path.basename(log)))
             else:
                 html.write('<img src="%s"><br><br>\n' % bn)
+        if num_pages > 1:
+            write_pages_line()
         html.write('</pre></body></html>\n')
         
     def set_plot_dir(self, plot_dir):
