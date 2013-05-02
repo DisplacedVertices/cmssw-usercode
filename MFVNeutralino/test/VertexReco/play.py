@@ -51,15 +51,23 @@ for suffix in ('', 'Cos75'):
                          is_mfv = cms.bool(True),
                          jet_pt_min = cms.double(30),
                          track_pt_min = cms.double(10),
-                         min_sv_ntracks = cms.int32(5),
-                         max_sv_chi2dof = cms.double(100),
+                         min_sv_ntracks = cms.int32(0),
+                         max_sv_chi2dof = cms.double(1e6),
+                         max_sv_err2d   = cms.double(1e6),
                          )
 
+    anas = [
+        ('Qno',            ana),
+        ('Qntk5',           ana.clone(min_sv_ntracks = 5)),
+        ('Qntk5err2d0p015', ana.clone(min_sv_ntracks = 5, max_sv_err2d = 0.015)),
+        ]
+    
     for name, src in vertex_srcs:
-        obj =  ana.clone(vertex_src = src + suffix)
-        setattr(process, 'play' + name + suffix, obj)
-        anas.append(obj)
-        process.p *= obj
+        for ana_name, ana in anas:
+            obj = ana.clone(vertex_src = src + suffix)
+            setattr(process, 'play' + name + suffix + ana_name, obj)
+            anas.append(obj)
+            process.p *= obj
 
 def de_mfv():
     process.mfvGenParticleFilter.cut_invalid = False
