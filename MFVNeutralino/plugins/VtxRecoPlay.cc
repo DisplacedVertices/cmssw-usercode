@@ -132,43 +132,47 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   h_gen_valid = fs->make<TH1F>("h_gen_valid", ";gen valid?;frac. events", 2, 0, 2);
   
   for (int j = 0; j < 2; ++j) {
-    for (int i = 0; i < 3; ++i)
-      h_gen_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_gen_pos_1d_%i%i", j, i), TString::Format(";gen #%i vtx pos[%i] (cm);arb. units", j, i), 100, -1, 1);
+    for (int i = 0; i < 3; ++i) {
+      float l = i == 2 ? 10 : 1;
+      h_gen_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_gen_pos_1d_%i%i", j, i), TString::Format(";gen #%i vtx pos[%i] (cm);arb. units", j, i), 100, -l, l);
+    }
     h_gen_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixy", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx y (cm)", j, j), 100, -1, 1, 100, -1, 1);
-    h_gen_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixz", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100, -1, 1);
-    h_gen_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%iyz", j), TString::Format(";gen #%i vtx y (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100, -1, 1);
+    h_gen_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixz", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-10,10);
+    h_gen_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%iyz", j), TString::Format(";gen #%i vtx y (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-10,10);
   }
 
-  h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 10, 0, 30);
+  h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 15, 0, 30);
   h_ntracks = fs->make<TH1F>("h_ntracks", ";# of general tracks;arb. units", 20, 0, 2000);
-  h_ntracksptpass = fs->make<TH1F>("h_ntracksptpass", ";# of selected tracks;arb. units", 10, 0, 50);
+  h_ntracksptpass = fs->make<TH1F>("h_ntracksptpass", ";# of selected tracks;arb. units", 20, 0, 60);
 
-  h_npv = fs->make<TH1F>("h_npv", ";# of primary vertices;arb. units", 10, 0, 70);
+  h_npv = fs->make<TH1F>("h_npv", ";# of primary vertices;arb. units", 13, 0, 65);
 
   for (int j = 0; j < 2; ++j) {
-    const char* ex = j == 0 ? "the" : "all";
+    const char* ex = j == 0 ? "the" : "other";
 
-    for (int i = 0; i < 3; ++i)
-      h_pv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_pv_pos_1d_%i%i", j, i), TString::Format(";%s PV pos[%i] (cm);arb. units", ex, i), 100, -1, 1);
+    for (int i = 0; i < 3; ++i) {
+      float l = i == 2 ? 10 : 1;
+      h_pv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_pv_pos_1d_%i%i", j, i), TString::Format(";%s PV pos[%i] (cm);arb. units", ex, i), 100, -l, l);
+    }
     h_pv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixy", j), TString::Format(";%s PV x (cm);%s PV y (cm)", ex, ex), 100, -1, 1, 100, -1, 1);
-    h_pv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixz", j), TString::Format(";%s PV x (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100, -1, 1);
-    h_pv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%iyz", j), TString::Format(";%s PV y (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100, -1, 1);
+    h_pv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixz", j), TString::Format(";%s PV x (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100,-10,10);
+    h_pv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%iyz", j), TString::Format(";%s PV y (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100,-10,10);
     
-    h_pv_ntracks[j] = fs->make<TH1F>(TString::Format("h_pv_ntracks_%i", j), TString::Format(";# tracks for %s PV;arb.units", ex), 50, 0, 50);
+    h_pv_ntracks[j] = fs->make<TH1F>(TString::Format("h_pv_ntracks_%i", j), TString::Format(";# tracks for %s PV;arb.units", ex), 50, 0, 200);
     h_pv_ntracksptpass[j] = fs->make<TH1F>(TString::Format("h_pv_ntracksptpass_%i", j), TString::Format(";# selected tracks for %s PV;arb.units", ex), 50, 0, 50);
     h_pv_chi2dof[j] = fs->make<TH1F>(TString::Format("h_pv_chi2dof_%i", j), TString::Format(";#chi^{2}/dof for %s PV;arb.units", ex), 20, 0, 10);
-    h_pv_chi2dofprob[j] = fs->make<TH1F>(TString::Format("h_pv_chi2dof_%i", j), TString::Format(";p(#chi^{2}/dof) for %s PV;arb.units", ex), 20, 0, 1);
+    h_pv_chi2dofprob[j] = fs->make<TH1F>(TString::Format("h_pv_chi2dofprob_%i", j), TString::Format(";p(#chi^{2}/dof) for %s PV;arb.units", ex), 20, 0, 1);
 
-    h_pv_pt[j] = fs->make<TH1F>(TString::Format("h_pv_pt_%i", j), TString::Format(";%s PV p_{T} (GeV);arb.units", ex), 25, 0, 250);
-    h_pv_eta[j] = fs->make<TH1F>(TString::Format("h_pv_eta_%i", j), TString::Format(";%s PV #eta;arb.units", ex), 30, -3, 3);
+    h_pv_pt[j] = fs->make<TH1F>(TString::Format("h_pv_pt_%i", j), TString::Format(";%s PV p_{T} (GeV);arb.units", ex), 25, 0, 500);
+    h_pv_eta[j] = fs->make<TH1F>(TString::Format("h_pv_eta_%i", j), TString::Format(";%s PV #eta;arb.units", ex), 30, -5, 5);
     h_pv_phi[j] = fs->make<TH1F>(TString::Format("h_pv_phi_%i", j), TString::Format(";%s PV #phi;arb.units", ex), 30, -3.15, 3.15);
-    h_pv_mass[j] = fs->make<TH1F>(TString::Format("h_pv_mass_%i", j), TString::Format(";%s PV mass (GeV);arb.units", ex), 25, 0, 250);
-    h_pv_sumpt2[j] = fs->make<TH1F>(TString::Format("h_pv_sumpt2_%i", j), TString::Format(";%s PV #sigma p_{T}^{2} (GeV);arb.units", ex), 25, 0, 5000);
+    h_pv_mass[j] = fs->make<TH1F>(TString::Format("h_pv_mass_%i", j), TString::Format(";%s PV mass (GeV);arb.units", ex), 25, 0, 500);
+    h_pv_sumpt2[j] = fs->make<TH1F>(TString::Format("h_pv_sumpt2_%i", j), TString::Format(";%s PV #Sigma p_{T}^{2} (GeV);arb.units", ex), 25, 0, 10000);
   }
 
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 100, 0, 100);
   h_nsvpass = fs->make<TH1F>("h_nsvpass", ";# of selected secondary vertices;arb. units", 100, 0, 100);
-  h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 5, 0, 5);
+  h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
   for (int j = 0; j < 3; ++j) {
     std::string ex;
@@ -180,11 +184,13 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
       ex = "rest";
     const char* exc = ex.c_str();
 
-    for (int i = 0; i < 3; ++i)
-      h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -1, 1);
+    for (int i = 0; i < 3; ++i) {
+      float l = i == 2 ? 10 : 1;
+      h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
+    }
     h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -1, 1, 100, -1, 1);
-    h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100, -1, 1);
-    h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100, -1, 1);
+    h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-10,10);
+    h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-10,10);
 
     PairwiseHistos::HistoDefs hs;
     hs.add("ntracks",        "# of tracks/SV",                              40,    0,      40);
@@ -364,7 +370,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     for (auto trki = trkb; trki != trke; ++trki) {
       double trkpt = (*trki)->pt();
       if (trkpt > track_pt_min)
-	++ntracksptpass;
+	++pv_ntracksptpass;
       pv_sumpt2 += trkpt * trkpt;
     }
 
