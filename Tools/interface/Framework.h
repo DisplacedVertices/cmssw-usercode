@@ -19,6 +19,20 @@ void dump_ref(std::ostream& out, const edm::Ref<T>& ref, const edm::Event* event
 }
 
 template <typename T>
+void dump_ref2base(std::ostream& out, const edm::RefToBase<T>& ref, const edm::Event* event=0) {
+  out << "ref2base with product id " << ref.id().id();
+  if (ref.id().id() == 0) {
+    out << "\n";
+    return;
+  }
+  if (event) {
+    edm::Provenance prov = event->getProvenance(ref.id());
+    out << ", branch " << prov.branchName() << " (id " << prov.branchID().id() << "),";
+  }
+  out << " with key " << ref.key() << "\n";
+}
+
+template <typename T>
 T getProcessModuleParameter(const edm::Event& event, const std::string& process, const std::string& module, const std::string& parameter) {
   edm::ParameterSet process_ps;
   bool ok = event.getProcessParameterSet(process, process_ps);
