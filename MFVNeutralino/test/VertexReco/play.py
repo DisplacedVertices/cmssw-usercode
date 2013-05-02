@@ -2,7 +2,8 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools.CMSSWTools import silence_messages
 
-process.maxEvents.input = 20
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.maxEvents.input = 100
 process.options.wantSummary = True
 process.source.fileNames = ['/store/user/tucker/mfv_gensimhlt_gluino_tau9900um_M0400/reco/a3f0d9ac5e396df027589da2067010b0/reco_1_1_ohS.root']
 process.TFileService.fileName = 'play.root'
@@ -29,9 +30,9 @@ for suffix in ('', 'Cos75'):
     vertex_srcs = [
         ('IVF', 'mfvInclusiveVertexFinder'),
         ('IVFMrgd', 'mfvVertexMerger'),
-        ('IVFMrgdArbd', 'mfvTrackVertexArbitrator'),
-        ('IVFMrgdArbdMrgd', 'mfvInclusiveMergedVertices'),
-        ('IVFMrgdArbdMrgdFltd', 'mfvInclusiveMergedVerticesFiltered'),
+#        ('IVFMrgdArbd', 'mfvTrackVertexArbitrator'),
+#        ('IVFMrgdArbdMrgd', 'mfvInclusiveMergedVertices'),
+#        ('IVFMrgdArbdMrgdFltd', 'mfvInclusiveMergedVerticesFiltered'),
         ]
 
     if suffix:
@@ -42,12 +43,16 @@ for suffix in ('', 'Cos75'):
         process.p *= objs[-1] # this vtx reco sequence
         
     ana = cms.EDAnalyzer('VtxRecoPlay',
+                         tracks_src = cms.InputTag('generalTracks'),
                          primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                          gen_src = cms.InputTag('genParticles'),
                          vertex_src = cms.InputTag('dummy'),
-                         is_mfv = cms.bool(True),
-                         min_njets = cms.int32(6),
                          print_info = cms.bool(False),
+                         is_mfv = cms.bool(True),
+                         jet_pt_min = cms.double(30),
+                         track_pt_min = cms.double(10),
+                         min_sv_ntracks = cms.int32(5),
+                         max_sv_chi2dof = cms.double(100),
                          )
 
     for name, src in vertex_srcs:
@@ -97,6 +102,7 @@ return_data = 1
     testing = 'testing' in sys.argv
     from JMTucker.Tools.Samples import mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut
     samples = [mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut]
+    samples = [mfv_gluino_tau1000um_M0400, ttbarnocut]
     for sample in samples:
         open('crab.cfg', 'wt').write(crab_cfg % sample)
         new_py = open('play.py').read()
