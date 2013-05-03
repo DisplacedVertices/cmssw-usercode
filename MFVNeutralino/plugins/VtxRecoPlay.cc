@@ -28,6 +28,32 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 //#include "JMTucker/Tools/interface/Framework.h"
 
+namespace {
+  template <typename T>
+  T mag(T x, T y) {
+    return sqrt(x*x + y*y);
+  }
+  
+  template <typename T>
+  T mag(T x, T y, T z) {
+    return sqrt(x*x + y*y + z*z);
+  }
+
+  template <typename T>
+  double mag(const T& v) {
+    return mag(v.x(), v.y(), v.z());
+  }
+
+  template <typename V>
+  float coord(const V& v, const int i) {
+    if      (i == 0) return v.x();
+    else if (i == 1) return v.y();
+    else if (i == 2) return v.z();
+    else
+      throw cms::Exception("coord") << "no such coordinate " << i;
+  }
+}
+
 class VtxRecoPlay : public edm::EDAnalyzer {
  public:
   explicit VtxRecoPlay(const edm::ParameterSet&);
@@ -51,18 +77,14 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   VertexDistance3D distcalc_3d;
 
   float abs_error(const reco::Vertex& sv, bool use3d) {
-    float err2 = 
-      4*sv.x()*sv.x()*sv.covariance(0,0) +
-      4*sv.y()*sv.y()*sv.covariance(1,1) +
-      8*sv.x()*sv.y()*sv.covariance(0,1);
-      
-    if (use3d)
-      err2 += 
-	4*sv.z()*sv.z()*sv.covariance(2,2) +
-	8*sv.x()*sv.z()*sv.covariance(0,2) +
-	8*sv.y()*sv.z()*sv.covariance(1,2);
-
-    return sqrt(err2);
+    const double x = sv.x();
+    const double y = sv.y();
+    const double z = use3d ? sv.z() : 0;
+    AlgebraicVector3 v(x,y,z);
+    AlgebraicSymMatrix33 cov = sv.covariance();
+    double dist = mag(x,y,z);
+    double err2 = ROOT::Math::Similarity(v, cov);
+    return dist != 0 ? sqrt(err2)/dist : 0;
   }
 
   std::pair<bool, float> compatibility(const reco::Vertex& x, const reco::Vertex& y, bool use3d) {
@@ -167,8 +189,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
       h_gen_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_gen_pos_1d_%i%i", j, i), TString::Format(";gen #%i vtx pos[%i] (cm);arb. units", j, i), 100, -l, l);
     }
     h_gen_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixy", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx y (cm)", j, j), 100, -1, 1, 100, -1, 1);
-    h_gen_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixz", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-10,10);
-    h_gen_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%iyz", j), TString::Format(";gen #%i vtx y (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-10,10);
+    h_gen_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixz", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-25,25);
+    h_gen_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%iyz", j), TString::Format(";gen #%i vtx y (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-25,25);
   }
 
   h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 15, 0, 30);
@@ -185,8 +207,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
       h_pv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_pv_pos_1d_%i%i", j, i), TString::Format(";%s PV pos[%i] (cm);arb. units", ex, i), 100, -l, l);
     }
     h_pv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixy", j), TString::Format(";%s PV x (cm);%s PV y (cm)", ex, ex), 100, -1, 1, 100, -1, 1);
-    h_pv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixz", j), TString::Format(";%s PV x (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100,-10,10);
-    h_pv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%iyz", j), TString::Format(";%s PV y (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100,-10,10);
+    h_pv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixz", j), TString::Format(";%s PV x (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100,-25,25);
+    h_pv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%iyz", j), TString::Format(";%s PV y (cm);%s PV z (cm)", ex, ex), 100, -1, 1, 100,-25,25);
     
     h_pv_ntracks[j] = fs->make<TH1F>(TString::Format("h_pv_ntracks_%i", j), TString::Format(";# tracks for %s PV;arb.units", ex), 50, 0, 200);
     h_pv_ntracksptpass[j] = fs->make<TH1F>(TString::Format("h_pv_ntracksptpass_%i", j), TString::Format(";# selected tracks for %s PV;arb.units", ex), 50, 0, 50);
@@ -219,8 +241,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
       h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
     }
     h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -1, 1, 100, -1, 1);
-    h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-10,10);
-    h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-10,10);
+    h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
+    h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
 
     PairwiseHistos::HistoDefs hs;
     hs.add("ntracks",        "# of tracks/SV",                              40,    0,      40);
@@ -274,27 +296,6 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 
   h_pairnsharedtracks = fs->make<TH1F>("h_pairnsharedtracks", "", 50, 0, 50);
   h_pairfsharedtracks = fs->make<TH2F>("h_pairfsharedtracks", "", 51, 0,  1.02, 51, 0,  1.02);
-}
-
-namespace {
-  template <typename T>
-  T mag(T x, T y) {
-    return sqrt(x*x + y*y);
-  }
-  
-  template <typename T>
-  T mag(T x, T y, T z) {
-    return sqrt(x*x + y*y + z*z);
-  }
-
-  template <typename V>
-  float coord(const V& v, const int i) {
-    if      (i == 0) return v.x();
-    else if (i == 1) return v.y();
-    else if (i == 2) return v.z();
-    else
-      throw cms::Exception("coord") << "no such coordinate " << i;
-  }
 }
 
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
