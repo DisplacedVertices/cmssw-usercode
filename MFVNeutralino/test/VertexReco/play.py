@@ -108,9 +108,8 @@ return_data = 1
 '''
 
     testing = 'testing' in sys.argv
-    from JMTucker.Tools.Samples import mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut
-    samples = [mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut]
-    samples = [mfv_gluino_tau1000um_M0400, ttbarnocut]
+    from JMTucker.Tools.Samples import mfv_gluino_tau0000um_M0400, mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut
+    samples = [mfv_gluino_tau0000um_M0400, mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut]
     for sample in samples:
         open('crab.cfg', 'wt').write(crab_cfg % sample)
         new_py = open('play.py').read()
