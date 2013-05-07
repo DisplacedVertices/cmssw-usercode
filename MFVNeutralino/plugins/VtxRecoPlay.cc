@@ -255,7 +255,9 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("phi",            "SV #phi",                                     50,   -3.15,    3.15);
     hs.add("mass",           "SV mass (GeV)",                              100,    0,     250);
     hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                100,    0,   10000);
+    hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      50);
     hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
+    hs.add("drmin",          "SV min{#Delta R(i,j)}",                      100,    0,       1);
     hs.add("drmax",          "SV max{#Delta R(i,j)}",                      100,    0,       4);
     hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      100,    0,       2.5);
     hs.add("drrms",          "SV rms{#Delta R(i,j)}",                      100,    0,       2);
@@ -459,10 +461,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     int ntracksptpass = 0;
     int trackminnhits = 1000;
     double sumpt2 = 0;
+    double mintrackpt = 1e99;
     double maxtrackpt = 0;
     std::vector<double> drs;
     std::vector<double> weights;
     double sumweight = 0;
+    double drmin = 1e99;
     double drmax = 0;
     double dravg = 0, dravgw = 0;
     double drrms = 0, drrmsw = 0;
@@ -484,6 +488,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 	++ntracksptpass;
       if (pti > maxtrackpt)
 	maxtrackpt = pti;
+      if (pti < mintrackpt)
+	mintrackpt = pti;
       sumpt2 += pti*pti;
 
       for (auto trkj = trki + 1; trkj != trke; ++trkj) {
@@ -496,6 +502,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 	
 	dravg  += dr;
 	dravgw += dr * weight;
+	if (dr < drmin)
+	  drmin = dr;
 	if (dr > drmax)
 	  drmax = dr;
       }
@@ -550,7 +558,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"phi",             sv.p4().phi()},
         {"mass",            sv.p4().mass()},
         {"sumpt2",          sumpt2},
+        {"mintrackpt",      mintrackpt},
         {"maxtrackpt",      maxtrackpt},
+        {"drmin",           drmin},
         {"drmax",           drmax},
         {"dravg",           dravg},
         {"drrms",           drrms},
