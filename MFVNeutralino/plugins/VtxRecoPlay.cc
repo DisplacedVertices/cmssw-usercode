@@ -92,14 +92,14 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float compat = 0;
     try {
       if (use3d)
-	compat = distcalc_3d.compatibility(x, y);
+        compat = distcalc_3d.compatibility(x, y);
       else
-	compat = distcalc_2d.compatibility(x, y);
+        compat = distcalc_2d.compatibility(x, y);
       success = true;
     }
     catch (cms::Exception& e) {
       if (e.category().find("matrix inversion problem") == std::string::npos)
-	throw;
+        throw;
     }
     return std::make_pair(success, compat);
   }
@@ -139,9 +139,9 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_nsvpass;
   TH2F* h_sv_max_trackicity;
   TH1F* h_sv_pos_1d[3][3]; // index 0: 0 = the highest mass SV (all),
-			   // 1 = highest mass SV passing cuts, 
+                           // 1 = highest mass SV passing cuts, 
                            // 2 = second highest mass SV passing cuts,
-			   // 2 = rest
+                           // 2 = rest
   TH2F* h_sv_pos_2d[3][3];
   PairwiseHistos h_sv[3];
 
@@ -329,12 +329,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     mci.Init(*gen_particles);
     if ((gen_valid = mci.Valid())) {
       if (print_info)
-	mci.Print(std::cout);
+        mci.Print(std::cout);
       for (int i = 0; i < 2; ++i) {
-	const reco::GenParticle* daughter = mci.stranges[i];
-	gen_verts[i][0] = daughter->vx();
-	gen_verts[i][1] = daughter->vy();
-	gen_verts[i][2] = daughter->vz();
+        const reco::GenParticle* daughter = mci.stranges[i];
+        gen_verts[i][0] = daughter->vx();
+        gen_verts[i][1] = daughter->vy();
+        gen_verts[i][2] = daughter->vz();
       }
     }
   }
@@ -343,10 +343,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     mci.Init(*gen_particles);
     if ((gen_valid = mci.Valid())) {
       for (int i = 0; i < 2; ++i) {
-	const reco::GenParticle* daughter = mci.tops[i];
-	gen_verts[i][0] = daughter->vx();
-	gen_verts[i][1] = daughter->vy();
-	gen_verts[i][2] = daughter->vz();
+        const reco::GenParticle* daughter = mci.tops[i];
+        gen_verts[i][0] = daughter->vx();
+        gen_verts[i][1] = daughter->vy();
+        gen_verts[i][2] = daughter->vz();
       }
     }
   }
@@ -369,11 +369,11 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   int njets = 0;
   for (const reco::PFJet& jet : *jets) {
     if (jet.pt() > jet_pt_min && 
-	fabs(jet.eta()) < 2.5 && 
-	jet.numberOfDaughters() > 1 &&
-	jet.neutralHadronEnergyFraction() < 0.99 && 
-	jet.neutralEmEnergyFraction() < 0.99 && 
-	(fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0)))
+        fabs(jet.eta()) < 2.5 && 
+        jet.numberOfDaughters() > 1 &&
+        jet.neutralHadronEnergyFraction() < 0.99 && 
+        jet.neutralEmEnergyFraction() < 0.99 && 
+        (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0)))
       njets += 1;
   }
 
@@ -414,7 +414,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     for (auto trki = trkb; trki != trke; ++trki) {
       double trkpt = (*trki)->pt();
       if (trkpt > track_pt_min)
-	++pv_ntracksptpass;
+        ++pv_ntracksptpass;
       pv_sumpt2 += trkpt * trkpt;
     }
 
@@ -434,7 +434,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
   reco::VertexCollection secondary_vertices(*original_secondary_vertices);
   std::sort(secondary_vertices.begin(), secondary_vertices.end(),
-	    [](const reco::Vertex& a, const reco::Vertex& b) { return a.p4().mass() > b.p4().mass(); });
+            [](const reco::Vertex& a, const reco::Vertex& b) { return a.p4().mass() > b.p4().mass(); });
   
   const int nsv = int(secondary_vertices.size());
   h_nsv->Fill(nsv);
@@ -475,37 +475,37 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       int key = trki->key();
       std::map<int,int>::iterator icity = trackicity_m.find(key);
       if (icity == trackicity_m.end())
-	trackicity_m[key] = 1;
+        trackicity_m[key] = 1;
       else
-	icity->second += 1;
+        icity->second += 1;
 
       int nhits = (*trki)->numberOfValidHits();
       if (nhits < trackminnhits)
-	trackminnhits = nhits;
+        trackminnhits = nhits;
 
       double pti = (*trki)->pt();
       if (pti > track_pt_min)
-	++ntracksptpass;
+        ++ntracksptpass;
       if (pti > maxtrackpt)
-	maxtrackpt = pti;
+        maxtrackpt = pti;
       if (pti < mintrackpt)
-	mintrackpt = pti;
+        mintrackpt = pti;
       sumpt2 += pti*pti;
 
       for (auto trkj = trki + 1; trkj != trke; ++trkj) {
-	double dr = reco::deltaR(**trki, **trkj);
-	drs.push_back(dr);
-	
-	double weight = 0.5*((*trki)->pt() + (*trkj)->pt());
-	sumweight += weight;
-	weights.push_back(weight);
-	
-	dravg  += dr;
-	dravgw += dr * weight;
-	if (dr < drmin)
-	  drmin = dr;
-	if (dr > drmax)
-	  drmax = dr;
+        double dr = reco::deltaR(**trki, **trkj);
+        drs.push_back(dr);
+        
+        double weight = 0.5*((*trki)->pt() + (*trkj)->pt());
+        sumweight += weight;
+        weights.push_back(weight);
+        
+        dravg  += dr;
+        dravgw += dr * weight;
+        if (dr < drmin)
+          drmin = dr;
+        if (dr > drmax)
+          drmax = dr;
       }
     }
 
@@ -602,7 +602,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     for (int jvtx = ivtx + 1; jvtx < nvtx; ++jvtx) {
       const reco::Vertex& vtxj = secondary_vertices[jvtx];
       if (!use_vertex(vtxj))
-	continue;
+        continue;
 
       const std::map<int,int>& icityj = trackicities[jvtx];
 
@@ -625,8 +625,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
       int nsharedtracks = 0;
       for (auto it : icityi)
-	if (icityj.find(it.first) != icityj.end())
-	  ++nsharedtracks;
+        if (icityj.find(it.first) != icityj.end())
+          ++nsharedtracks;
 
       h_pairnsharedtracks->Fill(nsharedtracks);
       h_pairfsharedtracks->Fill(float(nsharedtracks)/icityi.size(), float(nsharedtracks)/icityj.size());
