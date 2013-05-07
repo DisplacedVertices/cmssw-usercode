@@ -45,7 +45,7 @@ namespace {
   }
 
   template <typename V>
-  float coord(const V& v, const int i) {
+  double coord(const V& v, const int i) {
     if      (i == 0) return v.x();
     else if (i == 1) return v.y();
     else if (i == 2) return v.z();
