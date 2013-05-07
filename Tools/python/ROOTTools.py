@@ -591,7 +591,7 @@ class plot_saver:
                 continue # skip dir entries
             fn, log, root, pdf, pdf_log, C, C_log = save
             bn = os.path.basename(fn)
-            html.write('<h4 id="%s">%s</h4><br>\n' % (self.anchor_name(fn), bn.replace('.png', '')))
+            html.write('<a href="#%s"><h4 id="%s">%s</h4></a><br>\n' % (self.anchor_name(fn), self.anchor_name(fn), bn.replace('.png', '')))
             if log:
                 html.write('<img src="%s"><img src="%s"><br><br>\n' % (bn, os.path.basename(log)))
             else:
