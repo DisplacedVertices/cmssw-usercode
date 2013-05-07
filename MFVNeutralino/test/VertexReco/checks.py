@@ -1,11 +1,8 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
-process.source.fileNames = ['/store/user/tucker/mfv_gensimhlt_gluino_tau9900um_M400/mfv_gensimhlt_gluino_tau9900um_M400/dd93627319a5f24d5d7ad10ea45db562/gensimhlt_1_1_liZ.root']
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.TFileService.fileName = 'checks.root'
-
-from files import files
-process.source.fileNames = files
+from JMTucker.MFVNeutralino.SimFiles import load as load_files
+load_files(process, 'tau9900um_M0400', 0)
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.TFileService.fileName = 'checks.root'
 
 #process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 #process.load('SimTracker.TrackAssociation.TrackAssociatorByHits_cfi')
