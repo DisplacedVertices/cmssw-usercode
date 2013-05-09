@@ -13,6 +13,7 @@
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/BasicKinematicHists.h"
+#include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
@@ -43,9 +44,9 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
   BasicKinematicHists* BottomsFromTops[2];
   BasicKinematicHists* WDaughters[2][2];
 
-  TH2F* h_vtx_2d;
-  TH1F* h_rho;
-  TH1F* h_r;
+  TH2F* h_vtx[4];
+  TH1F* h_r2d[4];
+  TH1F* h_r3d[4];
   TH1F* h_t;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
@@ -170,12 +171,17 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     }
   }
 
-  h_vtx_2d = fs->make<TH2F>("h_vtx_2d", ";LSP decay vx (cm); LSP decay vy (cm)", 500, -2, 2, 500, -2, 2);
-  h_rho = fs->make<TH1F>("h_rho", ";LSP 2D flight distance (cm);Events/0.1 cm", 100, 0, 10);
-  h_r = fs->make<TH1F>("h_r", ";LSP 3D flight distance (cm);Events/0.1 cm", 100, 0, 10);
+  const char* names[4] = {"lsp", "strange", "bottom", "bhadron"};
+  for (int i = 0; i < 4; ++i) {
+    h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 201, -1, 1, 201, -1, 1);
+    h_r2d[i] = fs->make<TH1F>(TString::Format("h_r2d_%s", names[i]), TString::Format(";%s 2D distance (cm);Events/0.05 cm", names[i]), 100, 0, 5);
+    h_r3d[i] = fs->make<TH1F>(TString::Format("h_r3d_%s", names[i]), TString::Format(";%s 3D distance (cm);Events/0.05 cm", names[i]), 100, 0, 5);
+  }
+
   h_t = fs->make<TH1F>("h_t", ";time to LSP decay (ns);Events/0.1 ns", 100, 0, 10);
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
   h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
+
   h_max_dR = fs->make<TH1F>("h_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_min_dR = fs->make<TH1F>("h_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_max_dR_vs_lspbeta = fs->make<TH2F>("h_max_dR_vs_lspbeta", ";LSP #beta;max #DeltaR between partons", 100, 0, 1, 100, 0, 5);
@@ -205,6 +211,13 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
+
+  const reco::GenParticle& for_vtx = gen_particles->at(2);
+  const int for_vtx_id = abs(for_vtx.pdgId());
+  die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 4), "gen_particles[2] is not a gluon or light quark: id=%i", for_vtx_id);
+  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+  if (print_info)
+    printf("origin x,y,z: %f, %f, %f\n", x0, y0, z0);
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
@@ -261,14 +274,31 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     // Fill some simple histos: 2D vertex location, and distance to
     // origin, and the min/max deltaR of the daughters (also versus
     // lsp boost).
-    float dx = daughters[0]->vx() - lsp.vx();
-    float dy = daughters[0]->vy() - lsp.vy();
-    float dz = daughters[0]->vz() - lsp.vz();
-    h_vtx_2d->Fill(dx, dy);
-    h_rho->Fill(mag(dx, dy));
-    float r = mag(dx, dy, dz);
-    h_r->Fill(r);
-    h_t->Fill(r/lspbeta/30);
+
+    const reco::Candidate* particles[4] = { &lsp, mci.stranges[i], mci.bottoms[i], 0};
+    // For that last one, find the b hadron for the primary b quark.
+    std::vector<const reco::Candidate*> b_quark_descendants;
+    flatten_descendants(final_candidate(mci.bottoms[i], 3), b_quark_descendants);
+    for (const reco::Candidate* bdesc : b_quark_descendants) {
+      int zid = abs(bdesc->pdgId()) % 10000;
+      if (zid / 100 == 5 || zid / 1000 == 5) {
+        particles[3] = bdesc;
+        break;
+      }
+    }
+    die_if_not(particles[3] != 0, "did not find b hadron");
+
+    for (int i = 0; i < 4; ++i) {
+      float dx = particles[i]->vx() - x0;
+      float dy = particles[i]->vy() - y0;
+      float dz = particles[i]->vz() - z0;
+      h_vtx[i]->Fill(dx, dy);
+      h_r2d[i]->Fill(mag(dx, dy));
+      float r = mag(dx, dy, dz);
+      h_r3d[i]->Fill(r);
+      if (i == 0)
+        h_t->Fill(r/lspbeta/30);
+    }
     
     float min_dR =  1e99;
     float max_dR = -1e99;
@@ -290,7 +320,8 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
   }
 
-  --print_info;
+  if (print_info)
+    --print_info;
 }
 
 DEFINE_FWK_MODULE(MFVNeutralinoGenHistos);
