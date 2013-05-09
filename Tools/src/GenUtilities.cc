@@ -64,6 +64,15 @@ bool has_any_ancestor_with_id(const reco::Candidate* c, const int id) {
   return false;
 }
 
+void flatten_descendants(const reco::Candidate* c, std::vector<const reco::Candidate*>& descendants) {
+  if (c == 0)
+    return;
+  for (size_t i = 0, ie = c->numberOfDaughters(); i < ie; ++i) {
+    descendants.push_back(c->daughter(i));
+    flatten_descendants(c->daughter(i), descendants);
+  }
+}
+
 const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status, bool take_abs) {
   const reco::Candidate* d = 0;
   for (size_t i = 0; i < c->numberOfDaughters(); ++i) {

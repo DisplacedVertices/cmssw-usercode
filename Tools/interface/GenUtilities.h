@@ -12,6 +12,7 @@ int original_index(const reco::Candidate* c, const reco::GenParticleCollection& 
 bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_ancestor);
 bool is_ancestor_of(const reco::Candidate* c, const std::vector<const reco::Candidate*>& possible_ancestors);
 bool has_any_ancestor_with_id(const reco::Candidate* c, const int id);
+void flatten_descendants(const reco::Candidate* c, std::vector<const reco::Candidate*>& descendants);
 const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status, bool take_abs=false);
 const reco::Candidate* daughter_with_id(const reco::Candidate* c, int id, bool take_abs=false);
 const reco::Candidate* daughter_with_status(const reco::Candidate* c, int status, bool take_abs=false);
