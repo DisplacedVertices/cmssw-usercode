@@ -1,29 +1,16 @@
 import os, sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, add_analyzer
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 del process.TFileService
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 
+process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 add_analyzer('JMTParticleListDrawer',
              src = cms.InputTag('genParticles'),
              printVertex = cms.untracked.bool(True),
              )
 
-fns = []
-nev = -1
-for x in sys.argv:
-    if x.endswith('.root'):
-        fns.append(x)
-    else:
-        try:
-            x = int(x)
-            nev = x
-        except ValueError:
-            pass
-
-process.maxEvents.input = nev
-process.source.fileNames = fns
+input_from_argv()
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
