@@ -2,18 +2,18 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 debug = 'debug' in sys.argv
 
-process.source.fileNames = ['/store/user/tucker/mfv_gensimhlt_gluino_tau9900um_M0400/reco/a3f0d9ac5e396df027589da2067010b0/reco_1_1_ohS.root']
+process.source.fileNames = ['file:gensimhlt.root']
 process.TFileService.fileName = 'gen_histos.root'
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 
 #from JMTucker.MFVNeutralino.SimFiles import load
-#load(process, 'tau9900um_M1000', 'all')
+#load(process, 'tau1000um_M0400', [0,1])
 
 process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
                                    gen_src = cms.InputTag('genParticles'),
                                    required_num_leptonic = cms.int32(-1),
                                    allowed_decay_types = cms.vint32(),
-                                   print_info = cms.int32(100),
+                                   print_info = cms.int32(0),
                                    )
 
 process.p = cms.Path(process.GenHistos)
@@ -32,7 +32,7 @@ if debug:
                                        useMessageLogger = cms.untracked.bool(False),
                                        printVertex = cms.untracked.bool(True),
                                        )
-    process.GenHistos.print_info = True
+    process.GenHistos.print_info = 100
     process.p.insert(0, process.printList)
 
 
