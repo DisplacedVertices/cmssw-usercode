@@ -200,7 +200,7 @@ jmt_externals_hack = pythia8_hack
 jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
 
 [GRID]
-ce_black_list = metu.edu.tr,uoi.gr,troitsk.ru,brunel.ac.uk,bris.ac.uk,kfki.hu,pi.infn.it,ihep.su,ciemat.es,jinr-t1.ru,nectec.or.th,ts.infn.it
+ce_black_list = metu.edu.tr,uoi.gr,troitsk.ru,brunel.ac.uk,bris.ac.uk,kfki.hu,pi.infn.it,ihep.su,ciemat.es,jinr-t1.ru,nectec.or.th,ts.infn.it,hep.by
 '''
 
     pythia8_hack = '''config/toolbox/${SCRAM_ARCH}/tools/selected/pythia8.xml
