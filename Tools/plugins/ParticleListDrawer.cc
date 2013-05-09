@@ -46,7 +46,7 @@ void JMTParticleListDrawer::analyze(const edm::Event& event, const edm::EventSet
   out << "\n[JMTParticleListDrawer] particle collection " << src.label() << "\n";
   out << "Run: " << event.id().run() << " LS: " << event.luminosityBlock() << " Event: " << event.id().event() << "\n";
   snprintf(buf, 512, 
-           " %5s | %7s - %10s | %4s | %4s %4s %4s %4s | %4s %4s | %10s %10s %10s | %10s %10s %10s %10s %10s",
+           " %5s | %7s - %12s | %4s | %4s %4s %4s %4s | %4s %4s | %10s %10s %10s | %10s %10s %10s %10s %10s",
            "index", "pdgId", "name", "stat", "mom1", "mom2", "dau1", "dau2", "nmom", "ndau", "pt", "eta", "phi", "px", "py", "pz", "energy", "mass");
   out << buf;
   if (printVertex) {
@@ -73,7 +73,7 @@ void JMTParticleListDrawer::analyze(const edm::Event& event, const edm::EventSet
     const int nMo = p->numberOfMothers();
     const int nDa = p->numberOfDaughters();
     snprintf(buf, 512,
-	     " %5d | %7d - %10s | %4d | %4d %4d %4d %4d | %4d %4d | %10.3f %10.3f %10.3f | %10.3f %10.3f %10.3f %10.3f %10.3f",
+	     " %5d | %7d - %12s | %4d | %4d %4d %4d %4d | %4d %4d | %10.3f %10.3f %10.3f | %10.3f %10.3f %10.3f %10.3f %10.3f",
              idx,
              p->pdgId(),
              particleName.c_str(),
