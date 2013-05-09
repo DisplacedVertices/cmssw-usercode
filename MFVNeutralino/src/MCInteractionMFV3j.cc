@@ -28,11 +28,22 @@ namespace {
 }
 
 void MCInteractionMFV3j::Fill() {
-
   // JMTBAD split class into TopsPythia8 and the rest
 
-  const int lsp_id = 1000021;
-
+  static int lsp_id = -1;
+  if (lsp_id == -1) {
+    // If there is a neutralino in the first event (lsp_id is
+    // static, so what we set here will stay for future events),
+    // assume that's the LSP id wanted. Otherwise, default to looking
+    // for gluino.
+    lsp_id = 1000021;
+    for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i)
+      if (gen_particles->at(i).pdgId() == 1000022) {
+        lsp_id = 1000022;
+        break;
+      }
+  }
+  
   // Find the LSPs (e.g. gluinos or neutralinos). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
   // decay to the three quarks.
