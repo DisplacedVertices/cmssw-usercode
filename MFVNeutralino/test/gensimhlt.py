@@ -79,9 +79,9 @@ from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC
 process = customizeHLTforMC(process)
 
 if 'genonly' in sys.argv:
-    process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step)
-    process.maxEvents.input = 500
-    
+    process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.output_step)
+    process.maxEvents.input = 1000
+
 if 'debug' in sys.argv:
     process.options.wantSummary = True
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -110,13 +110,15 @@ else:
         setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
 
 def set_particle_tau0(id, tau0):
-    line = '%i:tau0' % id
-    params = [x for x in process.generator.PythiaParameters.processParameters.value() if line not in x]
+    params = [x for x in process.generator.PythiaParameters.processParameters.value() if ':tau0' not in x]
     process.generator.PythiaParameters.processParameters = params
-    process.generator.PythiaParameters.processParameters.append('%s = %f' % (line, tau0)) # tau0 is in mm by pythia convention
+    process.generator.PythiaParameters.processParameters.append('%i:tau0 = %f' % (id, tau0)) # tau0 is in mm by pythia convention
 
 def set_gluino_tau0(tau0):
     set_particle_tau0(1000021, tau0)
+
+def set_neutralino_tau0(tau0):
+    set_particle_tau0(1000022, tau0)
 
 def set_mass(m_gluino, fn='minSLHA.spc'):
     slha = '''
@@ -165,11 +167,11 @@ DECAY   1000022     0.01E+00   # neutralino decays
 '''
     open(fn, 'wt').write(slha % locals())
 
-set_gluino_tau0(1)
-set_mass(400)
+#set_gluino_tau0(1)
+#set_mass(400)
 
-#set_particle_tau0(1000022, 5)
-#set_masses(1000, 400)
+set_neutralino_tau0(1)
+set_masses(405, 400)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
@@ -229,14 +231,23 @@ pythia8
 
     def submit(name, tau0, mass):
         new_py = open('gensimhlt.py').read()
-        new_py += '\nset_gluino_tau0(%e)\n' % tau0
-        new_py += '\nset_mass(%i)\n' % mass
+        if 'gluino' in name:
+            new_py += '\nset_gluino_tau0(%e)\n' % tau0
+            new_py += '\nset_mass(%i)\n' % mass
+        elif 'neutralino' in name:
+            new_py += '\nset_neutralino_tau0(%e)\n' % tau0
+            new_py += '\nset_masses(%i,%i)\n' % (mass+5, mass)
+        else:
+            raise 'buh?'
         open('gensimhlt_crab.py', 'wt').write(new_py)
         open('pythia8_hack', 'wt').write(pythia8_hack)
         open('crab.cfg','wt').write(crab_cfg % locals())
         if not testing:
             os.system('crab -create -submit')
             os.system('rm -f crab.cfg gensimhlt_crab.py gensimhlt_crab.pyc pythia8_hack')
+
+    submit('neutralino_tau1000um_M0400', 1.0, 400)
+    sys.exit(0)
 
     tau0s = [0., 0.01, 0.1, 1.0, 4.0, 9.9]
     masses = [200, 400, 600, 800, 1000]
