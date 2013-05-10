@@ -3,8 +3,10 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
 from JMTucker.MFVNeutralino.SimFiles import load as load_files
 load_files(process, 'tau9900um_M0400', 0)
+process.source.fileNames = ['file:reco.root']
+process.source.secondaryFileNames = ['/store/user/tucker/mfv_gensimhlt_neutralino_tau1000um_M0400/mfv_gensimhlt_neutralino_tau1000um_M0400/c9c4c27381f6625ed3d8394ffaf0b9cd/gensimhlt_16_1_FFD.root']
 process.TFileService.fileName = 'prepare_vis.root'
-process.maxEvents.input = 10
+process.maxEvents.input = 20
 
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -26,11 +28,8 @@ process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
                                          print_info = cms.bool(True),
                                          )
 
-process.printList = cms.EDAnalyzer('ParticleListDrawer',
-                                   maxEventsToPrint = cms.untracked.int32(100),
+process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
                                    src = cms.InputTag('genParticles'),
-                                   printOnlyHardInteraction = cms.untracked.bool(False),
-                                   useMessageLogger = cms.untracked.bool(False),
                                    printVertex = cms.untracked.bool(True),
                                    )
 
