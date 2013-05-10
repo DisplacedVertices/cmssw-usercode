@@ -66,6 +66,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const edm::InputTag vertex_src;
   const bool print_info;
   const bool is_mfv;
+  const bool do_scatterplots;
   const double jet_pt_min;
   const double track_pt_min;
 
@@ -167,6 +168,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     print_info(cfg.getParameter<bool>("print_info")),
     is_mfv(cfg.getParameter<bool>("is_mfv")),
+    do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     track_pt_min(cfg.getParameter<double>("track_pt_min")),
     min_sv_ntracks(cfg.getParameter<int>("min_sv_ntracks")),
@@ -282,7 +284,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("pv3ddist",       "dist3d(SV, PV) (cm)",                        100,    0,       0.5);
     hs.add("pv3derr",        "#sigma(dist3d(SV, PV)) (cm)",                100,    0,       0.1);
     hs.add("pv3dsig",        "N#sigma(dist3d(SV, PV))",                    100,    0,     100);
-    h_sv[j].Init("h_sv_" + ex, hs, true);
+    h_sv[j].Init("h_sv_" + ex, hs, true, do_scatterplots);
   }
 
   h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
