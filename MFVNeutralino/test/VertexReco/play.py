@@ -49,6 +49,7 @@ for suffix in ('', 'Cos75'):
                          vertex_src = cms.InputTag('dummy'),
                          print_info = cms.bool(False),
                          is_mfv = cms.bool(True),
+                         do_scatterplots = cms.bool(True),
                          jet_pt_min = cms.double(30),
                          track_pt_min = cms.double(10),
                          min_sv_ntracks = cms.int32(0),
@@ -98,8 +99,8 @@ scheduler = condor
 %(dbs_url)s
 datasetpath = %(dataset)s
 pset = play_crab.py
-total_number_of_events = 10000
-events_per_job = 2000
+total_number_of_events = 6000
+events_per_job = 1000
 
 [USER]
 ui_working_dir = crab/VertexRecoPlay/crab_mfv_vtxplay_%(name)s
@@ -108,8 +109,13 @@ return_data = 1
 '''
 
     testing = 'testing' in sys.argv
-    from JMTucker.Tools.Samples import mfv_gluino_tau0000um_M0400, mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut
+    from JMTucker.Tools.Samples import mfv_gluino_tau0000um_M0400, mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut, TupleOnlyMCSample
     samples = [mfv_gluino_tau0000um_M0400, mfv_gluino_tau1000um_M0400, mfv_gluino_tau9900um_M0400, ttbarnocut]
+
+    nu = TupleOnlyMCSample('mfv_neutralino_tau1000um_M0400_test', '/mfv_gensimhlt_neutralino_tau1000um_M0400/tucker-recotest-a3f0d9ac5e396df027589da2067010b0/USER')
+    nu.dbs_url_num = 2
+    samples.append(nu)
+
     for sample in samples:
         open('crab.cfg', 'wt').write(crab_cfg % sample)
         new_py = open('play.py').read()
