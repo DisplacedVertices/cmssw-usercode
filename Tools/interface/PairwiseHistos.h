@@ -42,8 +42,9 @@ struct PairwiseHistos {
 
   PairwiseHistos() : n(-1) {}
 
-  void Init(const std::string& name, const HistoDefs& histos, const bool combs_only) {
+  void Init(const std::string& name, const HistoDefs& histos, const bool combs_only, const bool do2d) {
     n = int(histos.size());
+    do_2d = do2d;
     combinations_only = combs_only;
 
     edm::Service<TFileService> fs;
@@ -58,6 +59,9 @@ struct PairwiseHistos {
                                    i->nbins, i->min, i->max)
                     });
     }
+
+    if (!do_2d)
+      return;
 
     for (auto i = b; i != e; ++i)
       for (auto j = combinations_only ? i+1 : b; j != e; ++j) {
@@ -87,6 +91,9 @@ struct PairwiseHistos {
     for (auto i = b; i != e; ++i) {
       const float vi = get(values, *i, allow_default, default_);
       h1[*i]->Fill(vi);
+      
+      if (!do_2d)
+        continue;
 
       auto j = combinations_only ? i+1 : b;
       for (; j != e; ++j) {
@@ -100,6 +107,7 @@ struct PairwiseHistos {
   }
 
   int n;
+  bool do_2d;
   bool combinations_only;
   std::vector<std::string> names;
   std::map<std::string, TH1F*> h1;
