@@ -2,6 +2,19 @@ import FWCore.ParameterSet.Config as cms
 
 #process.source.firstLuminosityBlock = cms.untracked.uint32(2)
 
+def replay_event(process, filename, rle, new_process_name='REPLAY'):
+    '''Set the process up to replay the given event (rle is a 2- or
+    3-tuple specifying it) using the random engine state saved in the
+    file.'''
+    
+    if process.source.type_() == 'EmptySource':
+        process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(filename))        
+    else:
+        process.source.fileNames = cms.untracked.vstring(filename)
+    set_events_to_process(process, [rle])
+    process.RandomNumberGeneratorService.restoreStateLabel = cms.untracked.string('randomEngineStateProducer')
+    process.setName_(new_process_name)
+
 def set_events_to_process(process, run_events, run=None):
     '''Set the PoolSource parameter eventsToProcess appropriately,
     given the desired runs/event numbers passed in. If run is None,
