@@ -82,6 +82,10 @@ if 'genonly' in sys.argv:
     process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.output_step)
     process.maxEvents.input = 1000
 
+if 'replay' in sys.argv:
+    from JMTucker.Tools.CMSSWTools import replay_event
+    replay_event(process, '/store/user/tucker/mfv_gensimhlt_gluino_tau1000um_M0400/mfv_gensimhlt_gluino_tau1000um_M0400/11e502b9027fe454bec38485095c4f53/gensimhlt_7_1_mcS.root', (1,7,35))
+
 if 'debug' in sys.argv:
     process.options.wantSummary = True
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
