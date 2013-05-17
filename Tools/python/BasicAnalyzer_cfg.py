@@ -9,9 +9,14 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.TFileService = cms.Service('TFileService', fileName = cms.string('tfileservice.root'))
 
 def add_analyzer(name, **kwargs):
+    if kwargs.has_key('_path'):
+        path_name = kwargs['_path']
+        del kwargs['_path']
+    else:
+        path_name = 'p' + name
     obj = cms.EDAnalyzer(name, **kwargs)
     setattr(process, name, obj)
-    setattr(process, 'p' + name, cms.Path(obj))
+    setattr(process, path_name, cms.Path(obj))
 
 def input_from_argv():
     fns = []
