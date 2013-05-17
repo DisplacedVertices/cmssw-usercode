@@ -123,7 +123,7 @@ def core_gaussian(hist, factor, i=[0]):
     i[0] += 1
     return f
 
-def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, stat_size=None, show_progress=False):
+def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, stat_size=None, show_progress=False, skip=None, apply_commands=None, legend=None):
     names = [k.GetName() for k in dir1.GetListOfKeys()]
     #names.sort()
 
@@ -134,6 +134,9 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, sta
 
         h1 = dir1.Get(name)
         h2 = dir2.Get(name)
+
+        if skip is not None and skip(name, h1, h2):
+            continue
 
         is2d = issubclass(type(h1), ROOT.TH2)
         if not issubclass(type(h1), ROOT.TH1):
@@ -156,6 +159,9 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, sta
             h.SetLineColor(color)
             h.SetMarkerColor(color)
 
+            if apply_commands is not None:
+                apply_commands(name, h)
+
         h1.SetName(name1)
         h2.SetName(name2)
 
@@ -171,6 +177,10 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, sta
             differentiate_stat_box(h1, 0, color1, stat_size)
             differentiate_stat_box(h2, 1, color2, stat_size)
 
+        if legend is not None:
+            leg = legend(name, h1, h2)
+            leg.Draw()
+            
         ps.save(name.replace('/','_'), log=not is2d)
 
 def cumulative_histogram(h, type='ge'):
