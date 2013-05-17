@@ -14,6 +14,9 @@ for x in ['pythia8', 'pld']:
         if format is None:
             format = eval(x + '_re')
         sys.argv.remove(x)
+if format is None:
+    print 'usage: genparticles2html.py pythia8|pld listing.txt'
+    sys.exit(1)
 
 fn = sys.argv[1]
 
