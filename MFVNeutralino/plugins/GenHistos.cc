@@ -44,9 +44,9 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
   BasicKinematicHists* BottomsFromTops[2];
   BasicKinematicHists* WDaughters[2][2];
 
-  TH2F* h_vtx[4];
-  TH1F* h_r2d[4];
-  TH1F* h_r3d[4];
+  TH2F* h_vtx[9];
+  TH1F* h_r2d[9];
+  TH1F* h_r3d[9];
   TH1F* h_t;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
@@ -56,6 +56,8 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
   TH2F* h_min_dR_vs_lspbeta;
   TH2F* h_max_dR_vs_lspbetagamma;
   TH2F* h_min_dR_vs_lspbetagamma;
+
+  TH1F* h_status1origins;
 };
 
 MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
@@ -171,8 +173,8 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
     }
   }
 
-  const char* names[4] = {"lsp", "strange", "bottom", "bhadron"};
-  for (int i = 0; i < 4; ++i) {
+  const char* names[9] = {"lsp", "strange", "bottom", "bhadron", "from21", "from22", "fromq", "from21only", "from22only"};
+  for (int i = 0; i < 9; ++i) {
     h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 201, -1, 1, 201, -1, 1);
     h_r2d[i] = fs->make<TH1F>(TString::Format("h_r2d_%s", names[i]), TString::Format(";%s 2D distance (cm);Events/0.05 cm", names[i]), 100, 0, 5);
     h_r3d[i] = fs->make<TH1F>(TString::Format("h_r3d_%s", names[i]), TString::Format(";%s 3D distance (cm);Events/0.05 cm", names[i]), 100, 0, 5);
@@ -188,6 +190,17 @@ MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
   h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", ";LSP #beta;min #DeltaR between partons", 100, 0, 1, 100, 0, 5);
   h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", ";LSP #beta#gamma;max #DeltaR between partons", 100, 0, 10, 100, 0, 5);
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
+
+  h_status1origins = fs->make<TH1F>("status1origins", "", 8, 0, 8);
+  TAxis* xax = h_status1origins->GetXaxis();
+  xax->SetBinLabel(1, "nowhere");
+  xax->SetBinLabel(2, "q only");
+  xax->SetBinLabel(3, "22 only");
+  xax->SetBinLabel(4, "q & 22");
+  xax->SetBinLabel(5, "21 only");
+  xax->SetBinLabel(6, "21 & q");
+  xax->SetBinLabel(7, "21 & 22");
+  xax->SetBinLabel(8, "21 & 22 & q");
 }
 
 namespace {
@@ -278,7 +291,8 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     const reco::Candidate* particles[4] = { &lsp, mci.stranges[i], mci.bottoms[i], 0};
     // For that last one, find the b hadron for the primary b quark.
     std::vector<const reco::Candidate*> b_quark_descendants;
-    flatten_descendants(final_candidate(mci.bottoms[i], 3), b_quark_descendants);
+    const reco::Candidate* last_b_quark = final_candidate(mci.bottoms[i], 3);
+    flatten_descendants(last_b_quark, b_quark_descendants);
     for (const reco::Candidate* bdesc : b_quark_descendants) {
       int zid = abs(bdesc->pdgId()) % 10000;
       if (zid / 100 == 5 || zid / 1000 == 5) {
@@ -289,15 +303,41 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     die_if_not(particles[3] != 0, "did not find b hadron");
 
     for (int i = 0; i < 4; ++i) {
-      float dx = particles[i]->vx() - x0;
-      float dy = particles[i]->vy() - y0;
-      float dz = particles[i]->vz() - z0;
+      const float dx = particles[i]->vx() - x0;
+      const float dy = particles[i]->vy() - y0;
+      const float dz = particles[i]->vz() - z0;
+      const float r2d = mag(dx, dy);
+      const float r3d = mag(dx, dy, dz);
       h_vtx[i]->Fill(dx, dy);
-      h_r2d[i]->Fill(mag(dx, dy));
-      float r = mag(dx, dy, dz);
-      h_r3d[i]->Fill(r);
+      h_r2d[i]->Fill(r2d);
+      h_r3d[i]->Fill(r3d);
       if (i == 0)
-        h_t->Fill(r/lspbeta/30);
+        h_t->Fill(r3d/lspbeta/30);
+    }
+
+    for (const auto& gen : *gen_particles) {
+      if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
+        const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
+        const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
+        const bool fromq = mci.Ancestor(&gen, "quark");
+        const float dx = gen.vx() - x0;
+        const float dy = gen.vy() - y0;
+        const float dz = gen.vz() - z0;
+        const float r2d = mag(dx, dy);
+        const float r3d = mag(dx, dy, dz);
+        std::vector<int> tofill;
+        h_status1origins->Fill((from21*4) | (from22*2) | (fromq*1));
+        if (from21) tofill.push_back(4);
+        if (from22) tofill.push_back(5);
+        if (fromq)  tofill.push_back(6);
+        if (from21 && !from22 && !fromq) tofill.push_back(7);
+        if (from22 && !from21 && !fromq) tofill.push_back(8);
+        for (int i : tofill) {
+          h_vtx[i]->Fill(dx, dy);
+          h_r2d[i]->Fill(r2d);
+          h_r3d[i]->Fill(r3d);
+        }
+      }
     }
     
     float min_dR =  1e99;
