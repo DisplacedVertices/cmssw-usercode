@@ -25,7 +25,6 @@ MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg)
   produces<reco::GenParticleCollection>("Visible");
   produces<reco::GenParticleCollection>("Bottoms");
   produces<reco::GenParticleCollection>("Status1");
-  produces<reco::GenParticleCollection>("Status1FromTBS");
 }
 
 namespace {
@@ -129,20 +128,17 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   event.put(bottoms, "Bottoms");
 
 
-  std::auto_ptr<reco::GenParticleCollection> status1   (new reco::GenParticleCollection);
-  std::auto_ptr<reco::GenParticleCollection> status1tbs(new reco::GenParticleCollection);
+  std::auto_ptr<reco::GenParticleCollection> status1(new reco::GenParticleCollection);
 
-  for (const auto& gen : *gen_particles) {
-    if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
-      if (has_any_ancestor_with_id(&gen, 1000021))
-        status1->push_back(gen);
-      if (mci.Ancestor(&gen, "quark"))
-        status1tbs->push_back(gen);
-    }
-  }
+  for (const auto& gen : *gen_particles)
+    if (gen.status() == 1 &&
+	gen.charge() != 0 && 
+	mag(gen.vx(), gen.vy()) < 120 &&
+	abs(gen.vz()) < 300 &&
+	has_any_ancestor_with_id(&gen, 1000021))
+      status1->push_back(gen);
 
-  event.put(status1,    "Status1");
-  event.put(status1tbs, "Status1FromTBS");
+  event.put(status1, "Status1");
 }
 
 DEFINE_FWK_MODULE(MFVGenParticles);

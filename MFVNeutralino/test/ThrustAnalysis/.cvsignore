@@ -1,5 +1,3 @@
-*.root*
+*.root
 out.*.gz
 a.out
-*.d
-*.pdf
