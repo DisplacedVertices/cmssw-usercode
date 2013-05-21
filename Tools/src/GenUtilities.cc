@@ -40,6 +40,8 @@ bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_an
     return true;
   for (int i = 0, ie = c->numberOfMothers(); i < ie; ++i) {
     const reco::Candidate* mom = c->mother(i);
+    if (mom == c)
+      continue;
     if (mom == possible_ancestor || is_ancestor_of(mom, possible_ancestor))
       return true;
   }
