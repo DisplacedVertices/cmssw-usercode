@@ -123,9 +123,21 @@ def core_gaussian(hist, factor, i=[0]):
     i[0] += 1
     return f
 
-def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, stat_size=None, show_progress=False, skip=None, apply_commands=None, legend=None):
+def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
+    def _get(arg, default):
+        return kwargs.get(arg, lambda name, hist1, hist2: default)
+    
+    no_stats       = _get('no_stats',       False)
+    stat_size      = _get('stat_size',      (0.2, 0.2))
+    show_progress  = _get('show_progress',  True)
+    skip           = _get('skip',           False)
+    apply_commands = _get('apply_commands', None)
+    legend         = _get('legend',         None)
+    sort_names     = _get('sort_names',     False)
+
     names = [k.GetName() for k in dir1.GetListOfKeys()]
-    #names.sort()
+    if sort_names:
+        names.sort()
 
     nnames = len(names)
     for iname, name in enumerate(names):
@@ -135,7 +147,7 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, sta
         h1 = dir1.Get(name)
         h2 = dir2.Get(name)
 
-        if skip is not None and skip(name, h1, h2):
+        if skip(name, h1, h2):
             continue
 
         is2d = issubclass(type(h1), ROOT.TH2)
@@ -154,13 +166,12 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, sta
 
             if rescale:
                 h.Scale(1./integ)
-            if nostats(name):
+            if no_stats(name, h1, h2):
                 h.SetStats(0)
             h.SetLineColor(color)
             h.SetMarkerColor(color)
 
-            if apply_commands is not None:
-                apply_commands(name, h)
+        apply_commands(name, h1, h2)
 
         h1.SetName(name1)
         h2.SetName(name2)
@@ -173,12 +184,13 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, nostats, sta
             h1.Draw('sames')
 
         ps.c.Update()
-        if not nostats(name):
-            differentiate_stat_box(h1, 0, color1, stat_size)
-            differentiate_stat_box(h2, 1, color2, stat_size)
+        if not no_stats(name, h1, h2):
+            ss = stat_size(name, h1, h2)
+            differentiate_stat_box(h1, 0, color1, ss)
+            differentiate_stat_box(h2, 1, color2, ss)
 
-        if legend is not None:
-            leg = legend(name, h1, h2)
+        leg = legend(name, h1, h2)
+        if leg is not None:
             leg.Draw()
             
         ps.save(name.replace('/','_'), log=not is2d)
