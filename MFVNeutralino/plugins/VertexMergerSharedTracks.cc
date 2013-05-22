@@ -48,11 +48,12 @@ std::pair<double,double> MFVVertexMergerSharedTracks::computeSharedTracks(const 
   int totals[2] = {0};
   for (int i = 0; i < 2; ++i) {
     const reco::Vertex& sv = i == 0 ? sv0 : sv1;
-    for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it)
+    for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
       if (sv.trackWeight(*it) >= min_track_weight) {
         ++totals[i];
         tracks.insert(it->castTo<reco::TrackRef>());
       }
+    }
   }
   
   double shared = totals[0] + totals[1] - tracks.size();
@@ -60,8 +61,6 @@ std::pair<double,double> MFVVertexMergerSharedTracks::computeSharedTracks(const 
 }
 
 void MFVVertexMergerSharedTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
-  static const bool debug = true;
-
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
@@ -76,12 +75,10 @@ void MFVVertexMergerSharedTracks::produce(edm::Event& event, const edm::EventSet
     bool shared = false;
     std::vector<reco::Vertex>::iterator other_sv;
 
-    for (std::vector<reco::Vertex>::iterator sv2 = new_vertices->begin(), sv2e = new_vertices->end(); sv2 != sv2e; ++sv2) {
-      if (sv == sv2)
-        continue;
-
+    for (std::vector<reco::Vertex>::iterator sv2 = sv+1, sv2e = new_vertices->end(); sv2 != sv2e; ++sv2) {
       std::pair<double,double> shared_fracs = computeSharedTracks(*sv2, *sv);
       double sig = vertex_dist.distance(*sv, *sv2).significance();
+
       if (debug) printf("sv %i sv2 %i fr %f fr2 %f sig %f\n", int(sv-new_vertices->begin()), int(sv2-new_vertices->begin()), shared_fracs.first, shared_fracs.second, sig);
 
       if (shared_fracs.first > max_frac && sig < min_sig && shared_fracs.first >= shared_fracs.second) {
@@ -115,13 +112,16 @@ void MFVVertexMergerSharedTracks::produce(edm::Event& event, const edm::EventSet
       std::vector<TransientVertex> vertices = vertex_reco->vertices(ttks);
       if (debug) printf("in shared: num verts found: %i\n", int(vertices.size()));
 
-      new_vertices->erase(other_sv);
+      new_vertices->erase(other_sv); // erase other_sv first since it comes after sv
       new_vertices->erase(sv);
-      sv = new_vertices->begin(); // start over completely
 
       for (std::vector<TransientVertex>::const_iterator v = vertices.begin(), ve = vertices.end(); v != ve; ++v)
         if (v->normalisedChiSquared() < max_new_chi2dof)
           new_vertices->push_back(reco::Vertex(*v));
+
+      // start over completely
+      sv  = new_vertices->begin();
+      sve = new_vertices->end();
     }
   }
 
