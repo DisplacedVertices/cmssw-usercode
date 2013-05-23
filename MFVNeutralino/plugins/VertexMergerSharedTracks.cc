@@ -18,7 +18,34 @@ public:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
 private:
-  std::pair<double,double> computeSharedTracks(const reco::Vertex&, const reco::Vertex&) const;
+  typedef std::set<reco::TrackRef> track_set;
+  struct share_info {
+    void set(int s, int t0, int t1) {
+      shared = s;
+      totals[0] = t0;
+      totals[1] = t1;
+      total = t0+t1;
+      fracs[0] = t0 > 0 ? double(s)/t0 : -1;
+      fracs[1] = t1 > 0 ? double(s)/t1 : -1;
+    }
+
+    void set(int s) {
+      set(s, totals[0], totals[1]);
+    }
+
+    share_info() {
+      set(0,0,0);
+    }
+
+    int shared;
+    int totals[2];
+    int total;
+    double fracs[2];
+    track_set tracks;
+  };
+
+  track_set vertexTrackSet(const reco::Vertex&, double min_weight=0, bool extra_debug=false) const;
+  share_info computeSharedTracks(const reco::Vertex&, const reco::Vertex&) const;
 
   VertexDistance3D vertex_dist;
   std::auto_ptr<VertexReconstructor> vertex_reco;
@@ -43,21 +70,40 @@ MFVVertexMergerSharedTracks::MFVVertexMergerSharedTracks(const edm::ParameterSet
   produces<reco::VertexCollection>();
 }
 
-std::pair<double,double> MFVVertexMergerSharedTracks::computeSharedTracks(const reco::Vertex& sv0, const reco::Vertex& sv1) const {
-  std::set<reco::TrackRef> tracks;
-  int totals[2] = {0};
+MFVVertexMergerSharedTracks::track_set MFVVertexMergerSharedTracks::vertexTrackSet(const reco::Vertex& v, double min_weight, bool extra_debug) const {
+  std::set<reco::TrackRef> result;
+  for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+    double w = v.trackWeight(*it);
+    bool use = w >= min_weight;
+    if (debug && extra_debug) printf("trk #%2i pt %6.3f eta %6.3f phi %6.3f dxy %6.3f dz %6.3f w %5.3f  use? %i\n", int(it-v.tracks_begin()), (*it)->pt(), (*it)->eta(), (*it)->phi(), (*it)->dxy(), (*it)->dz(), w, use);
+    if (use)
+      result.insert(it->castTo<reco::TrackRef>());
+  }
+
+  if (debug) {
+    printf("track set: ");
+    for (auto r : result)
+      printf("(%i,%u) ", r.id().id(), r.key());
+    printf("\n");
+  }
+
+  return result;
+}
+
+MFVVertexMergerSharedTracks::share_info MFVVertexMergerSharedTracks::computeSharedTracks(const reco::Vertex& sv0, const reco::Vertex& sv1) const {
+  share_info result;
+
   for (int i = 0; i < 2; ++i) {
     const reco::Vertex& sv = i == 0 ? sv0 : sv1;
-    for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
-      if (sv.trackWeight(*it) >= min_track_weight) {
-        ++totals[i];
-        tracks.insert(it->castTo<reco::TrackRef>());
-      }
-    }
+    if (debug) printf("computeSharedtracks sv #%i\n", i);
+    track_set tracks = vertexTrackSet(sv, min_track_weight, true);
+    result.totals[i] += tracks.size();
+    result.tracks.insert(tracks.begin(), tracks.end());
   }
   
-  double shared = totals[0] + totals[1] - tracks.size();
-  return std::make_pair(shared/totals[0], shared/totals[1]);
+  int shared = result.totals[0] + result.totals[1] - result.tracks.size();
+  result.set(shared);
+  return result;
 }
 
 void MFVVertexMergerSharedTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -71,17 +117,48 @@ void MFVVertexMergerSharedTracks::produce(edm::Event& event, const edm::EventSet
   for (const reco::Vertex& sv : *vertices)
     new_vertices->push_back(sv);
 
+  if (debug) printf("run: %u lumi: %u event: %u  # input vertices: %i\n", event.id().run(), event.luminosityBlock(), event.id().event(), int(vertices->size()));
+
+  int num_duplicate = 0;
+  int num_shared = 0;
+
+  // First, look for duplicates and remove them.
+  if (debug) printf("looking for duplicates:\n");
+  for (std::vector<reco::Vertex>::iterator sv0 = new_vertices->begin(); sv0 != new_vertices->end(); ++sv0) {
+    if (debug) printf("sv0 #%i ", int(sv0-new_vertices->begin()));
+    track_set tks0 = vertexTrackSet(*sv0);
+
+    for (std::vector<reco::Vertex>::iterator sv1 = sv0+1; sv1 != new_vertices->end(); ++sv1) {
+      if (debug) printf("sv1 #%i ", int(sv1-new_vertices->begin()));
+      track_set tks1 = vertexTrackSet(*sv1);
+
+      if (tks1 == tks0) {
+        ++num_duplicate;
+        sv1 = new_vertices->erase(sv1)-1;
+        if (debug) printf("duplicate!\n");
+      }
+    }
+  }
+
+  if (debug) printf("# duplicates removed: %i  # vertices left: %i\n", num_duplicate, int(new_vertices->size()));
+
   for (std::vector<reco::Vertex>::iterator sv = new_vertices->begin(), sve = new_vertices->end(); sv != sve; ++sv) {
     bool shared = false;
+    share_info sharing;
     std::vector<reco::Vertex>::iterator other_sv;
 
     for (std::vector<reco::Vertex>::iterator sv2 = sv+1, sv2e = new_vertices->end(); sv2 != sv2e; ++sv2) {
-      std::pair<double,double> shared_fracs = computeSharedTracks(*sv2, *sv);
-      double sig = vertex_dist.distance(*sv, *sv2).significance();
+      Measurement1D dist = vertex_dist.distance(*sv, *sv2);
+      double sig = dist.significance();
+      if (sig > min_sig)
+        continue;
 
-      if (debug) printf("sv %i sv2 %i fr %f fr2 %f sig %f\n", int(sv-new_vertices->begin()), int(sv2-new_vertices->begin()), shared_fracs.first, shared_fracs.second, sig);
+      if (debug) printf("computeShared for sv %i and %i, with dist %6.3f +/- %6.3f: sig %6.3f\n", int(sv-new_vertices->begin()), int(sv2-new_vertices->begin()), dist.value(), dist.error(), sig);
+      sharing = computeSharedTracks(*sv2, *sv);
 
-      if (shared_fracs.first > max_frac && sig < min_sig && shared_fracs.first >= shared_fracs.second) {
+      if (debug) printf("sv0 #%i sv1 #%i: total0 %i total1 %i total %i shared %i frac0 %f frac1 %f \n", int(sv-new_vertices->begin()), int(sv2-new_vertices->begin()), sharing.totals[0], sharing.totals[1], sharing.total, sharing.shared, sharing.fracs[0], sharing.fracs[1]);
+
+      if (sharing.fracs[0] > max_frac && sharing.fracs[0] >= sharing.fracs[1]) {
         if (debug) printf("SHARED!\n");
         other_sv = sv2;
         shared = true;
@@ -90,24 +167,13 @@ void MFVVertexMergerSharedTracks::produce(edm::Event& event, const edm::EventSet
     }
 
     if (shared) {
-      std::set<reco::TrackRef> tracks_seen;
-      std::vector<reco::TransientTrack> ttks;
-      int totals[2] = {0};
-      for (int i = 0; i < 2; ++i) {
-        const reco::Vertex& v = i == 0 ? *sv : *other_sv;
-        for (std::vector<reco::TrackBaseRef>::const_iterator it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
-          if (v.trackWeight(*it) >= min_track_weight) {
-            ++totals[i];
-            reco::TrackRef tk = it->castTo<reco::TrackRef>();
-            if (tracks_seen.count(tk) < 1) {
-              tracks_seen.insert(tk);
-              ttks.push_back(tt_builder->build(tk));
-            }
-          }
-        }
-      }
+      ++num_shared;
 
-      if (debug) printf("in shared merge: tracks in sv: %i/%i tracks in sv2: %i/%i; num total with weight > min and remove shared %i\n", totals[0], int(sv->tracks_end() - sv->tracks_begin()), totals[1], int(other_sv->tracks_end() - other_sv->tracks_begin()), int(ttks.size()));
+      std::vector<reco::TransientTrack> ttks;
+      for (const reco::TrackRef& tk : sharing.tracks)
+        ttks.push_back(tt_builder->build(tk));
+      
+      if (debug) printf("in shared merge: tracks in sv: %i/%i tracks in sv2: %i/%i; num total with weight > min and remove shared: %i\n", sharing.totals[0], int(sv->tracks_end() - sv->tracks_begin()), sharing.totals[1], int(other_sv->tracks_end() - other_sv->tracks_begin()), int(ttks.size()));
 
       std::vector<TransientVertex> vertices = vertex_reco->vertices(ttks);
       if (debug) printf("in shared: num verts found: %i\n", int(vertices.size()));
@@ -120,7 +186,7 @@ void MFVVertexMergerSharedTracks::produce(edm::Event& event, const edm::EventSet
           new_vertices->push_back(reco::Vertex(*v));
 
       // start over completely
-      sv  = new_vertices->begin();
+      sv  = new_vertices->begin()-1; // -1 because about to ++sv
       sve = new_vertices->end();
     }
   }
