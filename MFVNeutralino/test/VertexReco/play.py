@@ -15,13 +15,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = 'START53_V21::All'
 process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
 
-process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
-process.mfvGenParticleFilter.min_rho0 = 0.02 # 200 um
-process.mfvGenParticleFilter.min_rho1 = 0.02
-
 process.load('JMTucker.MFVNeutralino.VertexReco_cff')
-
-#process.p = cms.Path(process.mfvGenParticleFilter * process.mfvVertexReco)
 process.p = cms.Path(process.mfvVertexReco)
 
 all_anas = []
@@ -60,7 +54,6 @@ for suffix in ('', 'Cos75'):
     ana_qcuts = [
         ('Qno',             ana),
         ('Qntk5',           ana.clone(min_sv_ntracks = 5)),
-        ('Qntk5err2d0p015', ana.clone(min_sv_ntracks = 5, max_sv_err2d = 0.015)),
         ]
     
     for name, src in vertex_srcs:
@@ -70,19 +63,28 @@ for suffix in ('', 'Cos75'):
             all_anas.append(obj)
             process.p *= obj
 
+def gen_length_filter(dist):
+    process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
+    process.mfvGenParticleFilter.min_rho0 = dist
+    process.mfvGenParticleFilter.min_rho1 = dist
+    process.p.insert(0, process.mfvGenParticleFilter)
+    
 def de_mfv():
-    process.mfvGenParticleFilter.cut_invalid = False
+    if hasattr(process, 'mfvGenParticleFilter'):
+        process.mfvGenParticleFilter.cut_invalid = False
     for ana in all_anas:
         ana.is_mfv = False
 
-if 'test_ttbar' in sys.argv:
-    process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/C6577DA8-32E2-E111-AC51-0030487E55BB.root']
-    de_mfv()
+def no_scatterplots():
+    for ana in all_anas:
+        ana.do_scatterplots = False
 
 if 'debug' in sys.argv:
-    process.source.fileNames = ['/store/user/tucker/mfv_gensimhlt_gluino_tau1000um_M0400/reco/a3f0d9ac5e396df027589da2067010b0/reco_28_1_VIC.root']
-    from JMTucker.Tools.CMSSWTools import set_events_to_process
-    set_events_to_process(process, [(1,112,1)])
+    if 'ttbar' in sys.argv:
+        de_mfv()
+
+    from JMTucker.Tools.CMSSWTools import file_event_from_argv
+    file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     assert all_anas[0].is_mfv # de_mfv will be called for non-signal samples below
@@ -116,10 +118,12 @@ return_data = 1
     nu.dbs_url_num = 2
     samples.append(nu)
 
+    samples = [mfv_gluino_tau1000um_M0400, nu, ttbarnocut]
+
     for sample in samples:
         open('crab.cfg', 'wt').write(crab_cfg % sample)
         new_py = open('play.py').read()
-        if 'ttbar' in sample.name:
+        if 'mfv' not in sample.name:
             new_py += '\nde_mfv()\n'
         open('play_crab.py', 'wt').write(new_py)
         if not testing:
