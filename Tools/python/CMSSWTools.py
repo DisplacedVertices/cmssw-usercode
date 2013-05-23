@@ -1,6 +1,28 @@
-import FWCore.ParameterSet.Config as cms
+import sys, FWCore.ParameterSet.Config as cms
 
 #process.source.firstLuminosityBlock = cms.untracked.uint32(2)
+
+def file_event_from_argv(process):
+    '''Set the filename and event to run on from argv.'''
+    file = None
+    nums = []
+    for arg in sys.argv[1:]:
+        if arg.endswith('.root'):
+            file = arg
+        else:
+            try:
+                nums.append(int(arg))
+            except ValueError:
+                pass
+    if file is not None:
+        process.source.fileNames = [file]
+    else:
+        print 'file_event_from_argv warning: no filename found'
+    l = len(nums)
+    if l == 2 or l == 3:
+        set_events_to_process(process, [tuple(nums)])
+    else:
+        print 'file_event_from_argv warning: did not understand event number'
 
 def replay_event(process, filename, rle, new_process_name='REPLAY'):
     '''Set the process up to replay the given event (rle is a 2- or
