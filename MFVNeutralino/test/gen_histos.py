@@ -1,5 +1,5 @@
-import os, sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+import os, sys, glob
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 debug = 'debug' in sys.argv
 
 process.source.fileNames = ['file:gensimhlt.root']
@@ -8,7 +8,7 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 
 #from JMTucker.MFVNeutralino.SimFiles import load
 #load(process, 'tau1000um_M0400', [0,1])
-
+    
 process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
                                    gen_src = cms.InputTag('genParticles'),
                                    required_num_leptonic = cms.int32(-1),
@@ -18,23 +18,13 @@ process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
 
 process.p = cms.Path(process.GenHistos)
 
-if 0:
-    process.source.fileNames = ['file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/fastsim_21_3_oyS.root']
-    from JMTucker.Tools.CMSSWTools import set_events_to_process
-    set_events_to_process(process, [(1,74)])
-    debug = True
-
 if debug:
-    process.printList = cms.EDAnalyzer('ParticleListDrawer',
-                                       maxEventsToPrint = cms.untracked.int32(100),
+    process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
                                        src = cms.InputTag('genParticles'),
-                                       printOnlyHardInteraction = cms.untracked.bool(False),
-                                       useMessageLogger = cms.untracked.bool(False),
                                        printVertex = cms.untracked.bool(True),
                                        )
-    process.GenHistos.print_info = 100
+    process.GenHistos.print_info = -1
     process.p.insert(0, process.printList)
-
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if debug:
