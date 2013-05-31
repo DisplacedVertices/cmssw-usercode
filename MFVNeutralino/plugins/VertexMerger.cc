@@ -1,3 +1,7 @@
+#include "TH1F.h"
+#include "TH2F.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -21,6 +25,9 @@ private:
   const double min_sig;
 
   VertexDistance3D dist;
+
+  TH2F* h_nvtx;
+  TH2F* h_frac_v_sig;
 };
 
 MFVVertexMerger::MFVVertexMerger(const edm::ParameterSet& params)
@@ -29,6 +36,10 @@ MFVVertexMerger::MFVVertexMerger(const edm::ParameterSet& params)
     min_sig(params.getParameter<double>("min_sig"))
 {
   produces<reco::VertexCollection>();
+
+  edm::Service<TFileService> fs;
+  h_nvtx = fs->make<TH2F>("h_nvtx", ";# input vertices;# output vertices", 100, 0, 100, 50, 0, 50);
+  h_frac_v_sig = fs->make<TH2F>("h_frac_v_sig", ";pairwise significance;fraction shared", 50, 0, 100, 26, 0, 1.04);
 }
 
 double MFVVertexMerger::computeSharedTracks(const reco::Vertex& sv, const reco::Vertex& sv2) const {
@@ -60,20 +71,22 @@ void MFVVertexMerger::produce(edm::Event& event, const edm::EventSetup& setup) {
   for (std::vector<reco::Vertex>::iterator sv = new_vertices->begin(); sv != new_vertices->end(); ++sv) {
     bool shared = false;
     for (std::vector<reco::Vertex>::iterator sv2 = new_vertices->begin(); sv2 != new_vertices->end(); ++sv2) {
-      if (sv == sv2 || dist.distance(*sv, *sv2).significance() > min_sig)
-        continue;
+      if (sv == sv2)
+        continue; 
 
-      double fr = computeSharedTracks(*sv2, *sv);
-      if (fr > max_frac && fr >= computeSharedTracks(*sv, *sv2)) {
+      const double sig = dist.distance(*sv, *sv2).significance();
+      const double fr = computeSharedTracks(*sv2, *sv);
+      h_frac_v_sig->Fill(sig, fr);
+
+      if (sig < min_sig && fr > max_frac && fr >= computeSharedTracks(*sv, *sv2))
         shared = true;
-        break;
-      }
     }
 
     if (shared)
       sv = new_vertices->erase(sv) - 1;
   }
 
+  h_nvtx->Fill(vertices->size(), new_vertices->size());
   event.put(new_vertices);
 }
 
