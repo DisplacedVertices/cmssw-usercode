@@ -57,10 +57,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
 [CRAB]
 jobtype = cmssw
-scheduler = condor
+scheduler = remoteGlidein
 
 [CMSSW]
-datasetpath = %(dataset)s
+datasetpath = %(parent_dataset)s
 dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 pset = reco.py
 get_edm_output = 1
@@ -68,53 +68,28 @@ events_per_job = 200
 total_number_of_events = -1
 
 [USER]
-ui_working_dir = crab/reco/crab_mfv_reco_%(name)s
+ui_working_dir = crab/reco/crab_reco_%(name)s
 copy_data = 1
-storage_element = T3_US_FNALLPC
-check_user_remote_dir = 0
+storage_element = T3_US_Cornell
 publish_data = 1
 publish_data_name = reco
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
+jmt_skip_input_files = src/EGamma/EGammaAnalysisTools/data/*
 '''
 
     os.system('mkdir -p crab/reco')
     testing = 'testing' in sys.argv
 
     datasets = [
-        ('gluino_tau0000um_M0200', '/mfv_gensimhlt_gluino_tau0000um_M0200/tucker-mfv_gensimhlt_gluino_tau0000um_M0200-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M0400', '/mfv_gensimhlt_gluino_tau0000um_M0400/tucker-mfv_gensimhlt_gluino_tau0000um_M0400-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M0600', '/mfv_gensimhlt_gluino_tau0000um_M0600/tucker-mfv_gensimhlt_gluino_tau0000um_M0600-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M0800', '/mfv_gensimhlt_gluino_tau0000um_M0800/tucker-mfv_gensimhlt_gluino_tau0000um_M0800-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0000um_M1000', '/mfv_gensimhlt_gluino_tau0000um_M1000/tucker-mfv_gensimhlt_gluino_tau0000um_M1000-f418ab66d2aa2ce17edadebd0427e711/USER'),
-        ('gluino_tau0010um_M0200', '/mfv_gensimhlt_gluino_tau0010um_M0200/tucker-mfv_gensimhlt_gluino_tau0010um_M0200-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M0400', '/mfv_gensimhlt_gluino_tau0010um_M0400/tucker-mfv_gensimhlt_gluino_tau0010um_M0400-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M0600', '/mfv_gensimhlt_gluino_tau0010um_M0600/tucker-mfv_gensimhlt_gluino_tau0010um_M0600-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M0800', '/mfv_gensimhlt_gluino_tau0010um_M0800/tucker-mfv_gensimhlt_gluino_tau0010um_M0800-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0010um_M1000', '/mfv_gensimhlt_gluino_tau0010um_M1000/tucker-mfv_gensimhlt_gluino_tau0010um_M1000-1a774d010111a1aed9668a1957d7b272/USER'),
-        ('gluino_tau0100um_M0200', '/mfv_gensimhlt_gluino_tau0100um_M0200/tucker-mfv_gensimhlt_gluino_tau0100um_M0200-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M0400', '/mfv_gensimhlt_gluino_tau0100um_M0400/tucker-mfv_gensimhlt_gluino_tau0100um_M0400-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M0600', '/mfv_gensimhlt_gluino_tau0100um_M0600/tucker-mfv_gensimhlt_gluino_tau0100um_M0600-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M0800', '/mfv_gensimhlt_gluino_tau0100um_M0800/tucker-mfv_gensimhlt_gluino_tau0100um_M0800-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau0100um_M1000', '/mfv_gensimhlt_gluino_tau0100um_M1000/tucker-mfv_gensimhlt_gluino_tau0100um_M1000-cd908390df85e15f67c1b503d4c4278e/USER'),
-        ('gluino_tau1000um_M0200', '/mfv_gensimhlt_gluino_tau1000um_M0200/tucker-mfv_gensimhlt_gluino_tau1000um_M0200-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M0400', '/mfv_gensimhlt_gluino_tau1000um_M0400/tucker-mfv_gensimhlt_gluino_tau1000um_M0400-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M0600', '/mfv_gensimhlt_gluino_tau1000um_M0600/tucker-mfv_gensimhlt_gluino_tau1000um_M0600-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M0800', '/mfv_gensimhlt_gluino_tau1000um_M0800/tucker-mfv_gensimhlt_gluino_tau1000um_M0800-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau1000um_M1000', '/mfv_gensimhlt_gluino_tau1000um_M1000/tucker-mfv_gensimhlt_gluino_tau1000um_M1000-11e502b9027fe454bec38485095c4f53/USER'),
-        ('gluino_tau4000um_M0200', '/mfv_gensimhlt_gluino_tau4000um_M0200/tucker-mfv_gensimhlt_gluino_tau4000um_M0200-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M0400', '/mfv_gensimhlt_gluino_tau4000um_M0400/tucker-mfv_gensimhlt_gluino_tau4000um_M0400-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M0600', '/mfv_gensimhlt_gluino_tau4000um_M0600/tucker-mfv_gensimhlt_gluino_tau4000um_M0600-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M0800', '/mfv_gensimhlt_gluino_tau4000um_M0800/tucker-mfv_gensimhlt_gluino_tau4000um_M0800-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau4000um_M1000', '/mfv_gensimhlt_gluino_tau4000um_M1000/tucker-mfv_gensimhlt_gluino_tau4000um_M1000-9dcf202e97da119ad22d8e489ec7b88e/USER'),
-        ('gluino_tau9900um_M0200', '/mfv_gensimhlt_gluino_tau9900um_M0200/tucker-mfv_gensimhlt_gluino_tau9900um_M0200-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M0400', '/mfv_gensimhlt_gluino_tau9900um_M0400/tucker-mfv_gensimhlt_gluino_tau9900um_M0400-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M0600', '/mfv_gensimhlt_gluino_tau9900um_M0600/tucker-mfv_gensimhlt_gluino_tau9900um_M0600-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M0800', '/mfv_gensimhlt_gluino_tau9900um_M0800/tucker-mfv_gensimhlt_gluino_tau9900um_M0800-dd93627319a5f24d5d7ad10ea45db562/USER'),
-        ('gluino_tau9900um_M1000', '/mfv_gensimhlt_gluino_tau9900um_M1000/tucker-mfv_gensimhlt_gluino_tau9900um_M1000-dd93627319a5f24d5d7ad10ea45db562/USER'),
+        ('neutralino_tau1000um_M0400', '/mfv_neutralino_tau1000um_M0400/tucker-mfv_neutralino_tau1000um_M0400-c9c4c27381f6625ed3d8394ffaf0b9cd/USER'),
+        ('neutralino_tau0000um_M0400', '/mfv_neutralino_tau0000um_M0400/tucker-mfv_neutralino_tau0000um_M0400-3e730b2f07d27fadb85eb50c5002cc81/USER'),
+        ('neutralino_tau9900um_M0400', '/mfv_neutralino_tau9900um_M0400/tucker-mfv_neutralino_tau9900um_M0400-c91fb7b9ece3e3abc0445dc6699e16d6/USER'),
+        ('neutralino_tau1000um_M1000', '/mfv_neutralino_tau1000um_M1000/tucker-mfv_neutralino_tau1000um_M1000-c9c4c27381f6625ed3d8394ffaf0b9cd/USER'),
         ]
 
-    for name, dataset in datasets:
-        open('crab.cfg','wt').write(crab_cfg % locals())
+    from JMTucker.Tools.Samples import mfv_signal_samples as samples
+    for sample in samples:
+        open('crab.cfg','wt').write(crab_cfg % sample)
         if not testing:
             os.system('crab -create -submit')
             os.system('rm -f crab.cfg')
