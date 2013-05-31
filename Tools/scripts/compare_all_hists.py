@@ -6,20 +6,20 @@ from JMTucker.Tools.ROOTTools import *
 parser = optparse.OptionParser(usage='%prog [options] file1.root file2.root dir_path plot_path')
 parser.add_option('--per-page', type=int, default=-1,
                   help='Put PER_PAGE plots per html page (default all on one page).')
-parser.add_option('--size', nargs=2, type=int, default=(600,600), metavar=('SIZEX','SIZEY'),
-                  help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
+parser.add_option('--size', nargs=2, type=int, default=(600,600), metavar='SIZEX,SIZEY',
+                  help='Set the plot size to SIZEX x SIZEY (default %default.')
 parser.add_option('--nice1', default='file1',
-                  help='Nice name for file #1 (default is %(default)s).')
+                  help='Nice name for file #1 (default is %default).')
 parser.add_option('--nice2', default='file2',
-                  help='Nice name for file #2 (default is %(default)s).')
+                  help='Nice name for file #2 (default is %default).')
 parser.add_option('--color1', default='ROOT.kRed',
-                  help='Color #1: may be a python snippet, e.g. ROOT.kRed (which is the default).')
+                  help='Color #1: may be a python snippet, e.g. the default %default.')
 parser.add_option('--color2', default='ROOT.kBlue',
-                  help='Color #1: may be a python snippet, e.g. ROOT.kBlue (which is the default).')
+                  help='Color #1: may be a python snippet, e.g. the default %default.')
 parser.add_option('--no-stats', default='False',
-                  help='Snippet for no_stats lambda, which takes name, hist1, hist2 as args (default is %(default)s).')
+                  help='Snippet for no_stats lambda, which takes name, hist1, hist2 as args (default is %default).')
 parser.add_option('--apply-commands', default='None',
-                  help='Snippet for apply_commands lambda, which takes name, hist1, hist2 as args (default is %(default)s).')
+                  help='Snippet for apply_commands lambda, which takes name, hist1, hist2 as args (default is %default).')
 options, args = parser.parse_args()
 
 if len(args) < 4:
