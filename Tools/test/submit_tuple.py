@@ -17,10 +17,9 @@ get_edm_output = 1
 [USER]
 ui_working_dir = CCDIRECTORY
 copy_data = 1
-storage_element = T3_US_FNALLPC
-check_user_remote_dir = 0
+storage_element = T3_US_Cornell
 publish_data = 1
-publish_data_name = jtuple_CCVERSION_%(name)s
+publish_data_name = jtuple_CCVERSION
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 '''
 
@@ -43,7 +42,10 @@ def submit(sample):
     to_add = []
 
     if sample.is_mc:
-        to_add.append('no_skimming_cuts()')
+        if sample.no_skimming_cuts:
+            to_add.append('no_skimming_cuts()')
+        if sample.aod_plus_pat:
+            to_add.append('aod_plus_pat()')
         if sample.is_fastsim:
             to_add.append('input_is_fastsim()')
         if sample.is_pythia8:
