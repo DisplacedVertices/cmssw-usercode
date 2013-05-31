@@ -17,7 +17,9 @@ parser.add_option('--color1', default='ROOT.kRed',
 parser.add_option('--color2', default='ROOT.kBlue',
                   help='Color #1: may be a python snippet, e.g. ROOT.kBlue (which is the default).')
 parser.add_option('--no-stats', default='False',
-                  help='Snippet for no_stats lambda, which takes name, hist1, hist2 as args (default is False).')
+                  help='Snippet for no_stats lambda, which takes name, hist1, hist2 as args (default is %(default)s).')
+parser.add_option('--apply-commands', default='None',
+                  help='Snippet for apply_commands lambda, which takes name, hist1, hist2 as args (default is %(default)s).')
 options, args = parser.parse_args()
 
 if len(args) < 4:
@@ -28,7 +30,9 @@ if len(args) < 4:
 options.file1, options.file2, options.dir_path, options.plot_path = args
 options.color1 = eval(options.color1)
 options.color2 = eval(options.color2)
-options.no_stats = eval('lambda name, hist1, hist2: ' + options.no_stats)
+_lambda = 'lambda name, hist1, hist2: '
+options.no_stats       = eval(_lambda + options.no_stats)
+options.apply_commands = eval(_lambda + options.apply_commands)
 
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -43,5 +47,6 @@ f_2 = ROOT.TFile(options.file2)
 compare_all_hists(ps,
                   options.nice1, f_1.Get(options.dir_path), options.color1,
                   options.nice2, f_2.Get(options.dir_path), options.color2,
-                  no_stats = options.no_stats
+                  no_stats = options.no_stats,
+                  apply_commands = options.apply_commands
                   )
