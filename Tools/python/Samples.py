@@ -9,6 +9,8 @@ from JMTucker.Tools.general import big_warn
 
 class Sample(object):
     PARENT_DATASET = None
+    NO_SKIMMING_CUTS = False
+    AOD_PLUS_PAT = False
     IS_MC = True
     IS_FASTSIM = False
     IS_PYTHIA8 = False
@@ -26,6 +28,8 @@ class Sample(object):
         self.dataset = dataset
 
         self.parent_dataset = self.PARENT_DATASET
+        self.no_skimming_cuts = self.NO_SKIMMING_CUTS
+        self.aod_plus_pat = self.AOD_PLUS_PAT
         self.is_mc = self.IS_MC
         self.is_fastsim = self.IS_FASTSIM
         self.is_pythia8 = self.IS_PYTHIA8
@@ -254,6 +258,8 @@ for tau, mass, gensimhlt_hash in mfv_signal_samples_ex:
     s.parent_dataset = '/mfv_%(name_frag)s/tucker-mfv_%(name_frag)s-%(gensimhlt_hash)s/USER' % locals()
     s.tau  = tau
     s.mass = mass
+    s.no_skimming_cuts = True
+    s.aod_plus_pat = True
     s.is_pythia8 = True
     s.dbs_url_num = 2
     mfv_signal_samples.append(s)
@@ -274,8 +280,10 @@ for sample in all_samples:
 
 ########################################################################
 
-# Exceptions to the defaults.
+# Exceptions to the defaults (except for the MFV signal samples, which
+# are already applied above).
 
+ttbarincl.no_skimming_cuts = True
 singletop_t.scheduler_name = 'condor'
 
 for sample in background_samples + auxiliary_background_samples + all_data_samples:
