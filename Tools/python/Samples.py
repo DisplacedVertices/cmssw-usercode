@@ -104,6 +104,9 @@ class Sample(object):
 ########################################################################
 
 class MCSample(Sample):
+    EVENTS_PER = 25000
+    TOTAL_EVENTS = -1
+    
     def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1):
         super(MCSample, self).__init__(name, nice_name, dataset)
         
@@ -113,43 +116,47 @@ class MCSample(Sample):
         self.cross_section = float(cross_section)
         self.k_factor = float(k_factor)
 
+        self.events_per = self.EVENTS_PER
+        self.total_events = self.TOTAL_EVENTS
+
     @property
     def partial_weight(self):
-        return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
+        nevents = self.nevents
+        if self.total_events > 0 and self.total_events < self.nevents:
+            nevents = self.total_events
+        return self.cross_section / float(nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
 
     @property
     def job_control(self):
         return '''
-total_number_of_events = -1
-events_per_job = 25000
-'''
+total_number_of_events = %(total_events)s
+events_per_job = %(events_per)s
+''' % self
 
 ########################################################################
 
 class TupleOnlyMCSample(MCSample):
-    def __init__(self, name, dataset, events_per=25000, max_events=-1):
+    def __init__(self, name, dataset, events_per=25000, total_events=-1):
         super(TupleOnlyMCSample, self).__init__(name, '', dataset, -1, -1, -1, -1)
         self.events_per = events_per
-        self.max_events = max_events
-
-    @property
-    def job_control(self):
-        return '''
-total_number_of_events = %(max_events)s
-events_per_job = %(events_per)s
-''' % self
+        self.total_events = total_events
 
 ########################################################################
 
 class DataSample(Sample):
     IS_MC = False
     PROMPT_JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-207469_8TeV_PromptReco_Collisions12_JSON.txt'
+    LUMIS_PER = 250
+    TOTAL_LUMIS = -1
 
     def __init__(self, name, dataset, run_range=None):
         super(DataSample, self).__init__(name, name, dataset)
 
         self.run_range = run_range
         self.json = self.PROMPT_JSON
+
+        self.lumis_per = self.LUMIS_PER
+        self.total_lumis = self.TOTAL_LUMIS
 
     @property
     def lumi_mask(self):
@@ -163,10 +170,10 @@ class DataSample(Sample):
 
     @property
     def job_control(self):
-        return '''
-total_number_of_lumis = -1
-lumis_per_job = 250
-''' + self.lumi_mask
+        return self.lumi_mask + '''
+total_number_of_lumis = %(total_lumis)s
+lumis_per_job = %(lumis_per)s
+''' % self
 
 ########################################################################
 
@@ -258,6 +265,7 @@ for tau, mass, gensimhlt_hash in mfv_signal_samples_ex:
     s.parent_dataset = '/mfv_%(name_frag)s/tucker-mfv_%(name_frag)s-%(gensimhlt_hash)s/USER' % locals()
     s.tau  = tau
     s.mass = mass
+    s.events_per = 2000
     s.no_skimming_cuts = True
     s.aod_plus_pat = True
     s.is_pythia8 = True
