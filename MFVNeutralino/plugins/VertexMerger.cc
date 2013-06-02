@@ -31,9 +31,9 @@ private:
 };
 
 MFVVertexMerger::MFVVertexMerger(const edm::ParameterSet& params)
-  : vertex_src(params.getParameter<edm::InputTag>("vertex_src")),
-    max_frac(params.getParameter<double>("max_frac")),
-    min_sig(params.getParameter<double>("min_sig"))
+  : vertex_src(params.getParameter<edm::InputTag>("secondaryVertices")),
+    max_frac(params.getParameter<double>("maxFraction")),
+    min_sig(params.getParameter<double>("minSignificance"))
 {
   produces<reco::VertexCollection>();
 
