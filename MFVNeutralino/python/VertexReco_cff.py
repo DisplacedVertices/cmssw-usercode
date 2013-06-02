@@ -1,7 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
 from CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi import *
-goodOfflinePrimaryVertices.filter = cms.bool(True)
+goodOfflinePrimaryVertices.filter = cms.bool(False)
+
+########################################################################
 
 mfvInclusiveVertexFinder = cms.EDProducer('MFVInclusiveVertexFinder',
                                           beamSpot = cms.InputTag('offlineBeamSpot'),
@@ -30,13 +32,15 @@ mfvInclusiveVertexFinder = cms.EDProducer('MFVInclusiveVertexFinder',
                                           minPt = cms.double(0.8)
                                           )
 
-mfvVertexMerger = cms.EDProducer('VertexMerger',
-                                 minSignificance = cms.double(2),
-                                 secondaryVertices = cms.InputTag('mfvInclusiveVertexFinder'),
-                                 maxFraction = cms.double(0.7)
-                                 )
+########################################################################
 
-mfvTrackVertexArbitrator = cms.EDProducer('TrackVertexArbitrator',
+mfvVertexMerger =  cms.EDProducer('MFVVertexMerger',
+                                  minSignificance = cms.double(2),
+                                  secondaryVertices = cms.InputTag('mfvInclusiveVertexFinder'),
+                                  maxFraction = cms.double(0.7)
+                                  )
+
+mfvTrackVertexArbitrator = cms.EDProducer('MFVTrackVertexArbitrator',
                                           dLenFraction = cms.double(0.333),
                                           beamSpot = cms.InputTag('offlineBeamSpot'),
                                           distCut = cms.double(0.04),
@@ -47,53 +51,44 @@ mfvTrackVertexArbitrator = cms.EDProducer('TrackVertexArbitrator',
                                           sigCut = cms.double(5)
                                           )
 
-mfvInclusiveMergedVertices =  cms.EDProducer('VertexMerger',
+mfvInclusiveMergedVertices =  cms.EDProducer('MFVVertexMerger',
                                              minSignificance = cms.double(10.0),
                                              secondaryVertices = cms.InputTag('mfvTrackVertexArbitrator'),
                                              maxFraction = cms.double(0.2)
                                              )
 
-mfvInclusiveMergedVerticesFiltered = cms.EDFilter('BVertexFilter',
-                                                  primaryVertices = cms.InputTag('goodOfflinePrimaryVertices'),
-                                                  minVertices = cms.int32(0),
-                                                  useVertexKinematicAsJetAxis = cms.bool(True),
-                                                  vertexFilter = cms.PSet(
-                                                      distSig3dMax = cms.double(99999.9),
-                                                      fracPV = cms.double(0.65),
-                                                      distVal2dMax = cms.double(2.5),
-                                                      useTrackWeights = cms.bool(True),
-                                                      maxDeltaRToJetAxis = cms.double(0.1),
-                                                      v0Filter = cms.PSet(
-                                                          k0sMassWindow = cms.double(0.05)
-                                                          ),
-                                                      distSig2dMin = cms.double(3.0),
-                                                      multiplicityMin = cms.uint32(2),
-                                                      massMax = cms.double(6.5),
-                                                      distSig2dMax = cms.double(99999.9),
-                                                      distVal3dMax = cms.double(99999.9),
-                                                      minimumTrackWeight = cms.double(0.5),
-                                                      distVal3dMin = cms.double(-99999.9),
-                                                      distVal2dMin = cms.double(0.01),
-                                                      distSig3dMin = cms.double(-99999.9)
-                                                      ),
-                                                  secondaryVertices = cms.InputTag('mfvInclusiveMergedVertices')
-                                                  )
+########################################################################
+
+mfvVertexMergerShared = cms.EDProducer('MFVVertexMergerSharedTracks',
+                                       vertex_reco = mfvInclusiveVertexFinder.vertexReco,
+                                       secondaryVertices = cms.InputTag('mfvInclusiveVertexFinder'),
+                                       min_track_weight = cms.double(0.5),
+                                       max_frac = cms.double(0.7),
+                                       min_sig = cms.double(2),
+                                       max_new_chi2dof = cms.double(10),
+                                       debug = cms.untracked.bool(False),
+                                       )
+
+mfvTrackVertexArbitratorShared   = mfvTrackVertexArbitrator  .clone(secondaryVertices = 'mfvVertexMergerShared')
+mfvInclusiveMergedVerticesShared = mfvInclusiveMergedVertices.clone(secondaryVertices = 'mfvTrackVertexArbitratorShared')
 
 mfvVertexReco = cms.Sequence(goodOfflinePrimaryVertices *
                              mfvInclusiveVertexFinder *
                              mfvVertexMerger *
                              mfvTrackVertexArbitrator *
                              mfvInclusiveMergedVertices *
-                             mfvInclusiveMergedVerticesFiltered
+                             mfvVertexMergerShared *
+                             mfvTrackVertexArbitratorShared *
+                             mfvInclusiveMergedVerticesShared
                              )
 
 def clone_all(process, suffix):
-    modules = 'mfvInclusiveVertexFinder mfvVertexMerger mfvTrackVertexArbitrator mfvInclusiveMergedVertices mfvInclusiveMergedVerticesFiltered'.split()
+    modules = 'mfvInclusiveVertexFinder mfvVertexMerger mfvTrackVertexArbitrator mfvInclusiveMergedVertices mfvVertexMergerShared mfvTrackVertexArbitratorShared mfvInclusiveMergedVerticesShared'.split()
     objs = []
     for i,module in enumerate(modules):
         obj = getattr(process, module).clone()
         if i > 0:
-            obj.secondaryVertices = modules[i-1] + suffix
+            obj.secondaryVertices = obj.secondaryVertices.value() + suffix
         objs.append(obj)
         setattr(process, module + suffix, obj)
     seq_obj = cms.Sequence(process.goodOfflinePrimaryVertices * reduce(lambda x,y: x*y, objs))
