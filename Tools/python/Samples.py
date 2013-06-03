@@ -18,7 +18,7 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = 'ce0f36575948071c2bc4232b86e12d14'
+    ANA_HASH = '547d3313903142038335071634b26604'
     PUBLISH_USER = 'tucker'
     ANA_VERSION = 'v6'
 
