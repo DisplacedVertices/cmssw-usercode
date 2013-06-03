@@ -9,8 +9,6 @@ suppress_stdout = True
 process = cms.Process('PAT')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root'))
-#process.source.fileNames = ['/store/user/tucker/mfvneutralino_genfsimreco_tau100um/mfvneutralino_genfsimreco_tau100um/465709e5340ac2cc11e2751b48bbef3e/fastsim_10_3_JMz.root']
-#process.source.fileNames = ['/store/data/Run2012A/MultiJet/AOD/13Jul2012-v1/0000/E8DF1A50-C4D4-E111-B385-002618943944.root']
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
@@ -301,6 +299,18 @@ def no_skimming_cuts():
     global process
     del process.out.SelectEvents
 
+def drop_gen_particles():
+    process.out.outputCommands.append('drop *_genParticles_*_*')
+
+def aod_plus_pat():
+    if runOnMC:
+        from Configuration.EventContent.EventContent_cff import AODSIMEventContent as aod
+        aod.outputCommands += ['keep *_mfvTrackMatches_*_*']
+    else:
+        from Configuration.EventContent.EventContent_cff import AODEventContent as aod
+    old_cmds = [x for x in process.out.outputCommands.value() if x.strip() != 'drop *']
+    process.out.outputCommands = aod.outputCommands + old_cmds
+
 if 'fastsim' in sys.argv:
     input_is_fastsim()
 if 'pythia8' in sys.argv:
@@ -309,5 +319,9 @@ if 'keep_tracks' in sys.argv:
     keep_general_tracks()
 if 'no_cuts' in sys.argv:
     no_skimming_cuts()
+if 'drop_gen' in sys.argv:
+    drop_gen_particles()
+if 'aod_plus_pat' in sys.argv:
+    aod_plus_pat()
 
 #open('dumptup.py','wt').write(process.dumpPython())

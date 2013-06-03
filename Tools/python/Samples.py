@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 
-import os, re
+import os, re, sys
 from copy import copy
 from JMTucker.Tools.DBS import files_in_dataset
 from JMTucker.Tools.general import big_warn
 
+########################################################################
+
 class Sample(object):
+    PARENT_DATASET = None
+    NO_SKIMMING_CUTS = False
+    AOD_PLUS_PAT = False
     IS_MC = True
     IS_FASTSIM = False
     IS_PYTHIA8 = False
-    SCHEDULER_NAME = 'glite'
+    SCHEDULER_NAME = 'remoteGlidein'
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = 'ce0f36575948071c2bc4232b86e12d14'
+    ANA_HASH = '547d3313903142038335071634b26604'
     PUBLISH_USER = 'tucker'
     ANA_VERSION = 'v6'
 
@@ -22,6 +27,9 @@ class Sample(object):
         self.nice_name = nice_name
         self.dataset = dataset
 
+        self.parent_dataset = self.PARENT_DATASET
+        self.no_skimming_cuts = self.NO_SKIMMING_CUTS
+        self.aod_plus_pat = self.AOD_PLUS_PAT
         self.is_mc = self.IS_MC
         self.is_fastsim = self.IS_FASTSIM
         self.is_pythia8 = self.IS_PYTHIA8
@@ -34,6 +42,14 @@ class Sample(object):
         self.publish_user = self.PUBLISH_USER
         self.ana_version = self.ANA_VERSION
         self.ana_ready = False
+
+    def dump(self):
+        xx = 'name nice_name dataset parent_dataset is_mc is_fastsim is_pythia8 scheduler_name dbs_url_num ana_ready ana_dbs_url_num ana_hash publish_user ana_version'
+        for x in xx.split():
+            a = getattr(self, x)
+            if hasattr(self, x.upper()) and a == getattr(self, x.upper()):
+                continue
+            print x, ':', a
 
     @property
     def scheduler(self):
@@ -56,11 +72,11 @@ class Sample(object):
     
     @property
     def ana_dataset(self):
-        return '/%(primary_dataset)s/%(publish_user)s-jtuple_%(ana_version)s_%(name)s-%(ana_hash)s/USER' % self
+        return '/%(primary_dataset)s/%(publish_user)s-jtuple_%(ana_version)s-%(ana_hash)s/USER' % self
 
     @property
     def use_server(self):
-        return 'use_server = 1' if self.scheduler != 'condor' else ''
+        return ''
 
     @property
     def filenames(self):
@@ -84,8 +100,13 @@ class Sample(object):
     @property
     def job_control(self):
         raise NotImplementedError('job_control needs to be implemented')
-    
+
+########################################################################
+
 class MCSample(Sample):
+    EVENTS_PER = 25000
+    TOTAL_EVENTS = -1
+    
     def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1):
         super(MCSample, self).__init__(name, nice_name, dataset)
         
@@ -95,39 +116,47 @@ class MCSample(Sample):
         self.cross_section = float(cross_section)
         self.k_factor = float(k_factor)
 
+        self.events_per = self.EVENTS_PER
+        self.total_events = self.TOTAL_EVENTS
+
     @property
     def partial_weight(self):
-        return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
+        nevents = self.nevents
+        if self.total_events > 0 and self.total_events < self.nevents:
+            nevents = self.total_events
+        return self.cross_section / float(nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
 
     @property
     def job_control(self):
         return '''
-total_number_of_events = -1
-events_per_job = 25000
-'''
-
-class TupleOnlyMCSample(MCSample):
-    def __init__(self, name, dataset, events_per=25000, max_events=-1):
-        super(TupleOnlyMCSample, self).__init__(name, '', dataset, -1, -1, -1, -1)
-        self.events_per = events_per
-        self.max_events = max_events
-
-    @property
-    def job_control(self):
-        return '''
-total_number_of_events = %(max_events)s
+total_number_of_events = %(total_events)s
 events_per_job = %(events_per)s
 ''' % self
-        
+
+########################################################################
+
+class TupleOnlyMCSample(MCSample):
+    def __init__(self, name, dataset, events_per=25000, total_events=-1):
+        super(TupleOnlyMCSample, self).__init__(name, '', dataset, -1, -1, -1, -1)
+        self.events_per = events_per
+        self.total_events = total_events
+
+########################################################################
+
 class DataSample(Sample):
     IS_MC = False
     PROMPT_JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-207469_8TeV_PromptReco_Collisions12_JSON.txt'
+    LUMIS_PER = 250
+    TOTAL_LUMIS = -1
 
     def __init__(self, name, dataset, run_range=None):
         super(DataSample, self).__init__(name, name, dataset)
 
         self.run_range = run_range
         self.json = self.PROMPT_JSON
+
+        self.lumis_per = self.LUMIS_PER
+        self.total_lumis = self.TOTAL_LUMIS
 
     @property
     def lumi_mask(self):
@@ -141,10 +170,12 @@ class DataSample(Sample):
 
     @property
     def job_control(self):
-        return '''
-total_number_of_lumis = -1
-lumis_per_job = 250
-''' + self.lumi_mask
+        return self.lumi_mask + '''
+total_number_of_lumis = %(total_lumis)s
+lumis_per_job = %(lumis_per)s
+''' % self
+
+########################################################################
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV or PREP for xsecs
 background_samples = [
@@ -159,10 +190,8 @@ background_samples = [
     MCSample('qcdht1000',        'QCD, H_{T} > 1000 GeV',                                   '/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',     13843863, 801, 0.10, 2.04e2),
     ]
 
-ttbarnocut = MCSample('ttbarnocut', '', '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', -1, -1, -1, -1)
-ttbarnocut.ana_hash = '2d2960c14b31abaf9411557f09aded05'
-
 auxiliary_background_samples = [
+    MCSample('ttbarincl',        't#bar{t}',                                                '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 6923750,   4, 0.15, 225.2),
     MCSample('ttzjets',          't#bar{t}+Z',                                              '/TTZJets_8TeV-madgraph_v2/Summer12-PU_S7_START52_V9-v1/AODSIM',                                        209741,  -1, 0.20, 0.172),
     MCSample('ttwjets',          't#bar{t}+W',                                              '/TTWJets_8TeV-madgraph/Summer12-PU_S7_START52_V9-v1/AODSIM',                                           195301,  -1, 0.20, 0.215),
     MCSample('ttgjets',          't#bar{t}+#gamma',                                         '/TTGJets_8TeV-madgraph/Summer12-PU_S7_START52_V9-v1/AODSIM',                                            71598,  -1, 0.20, 1.44),
@@ -182,21 +211,21 @@ auxiliary_background_samples = [
     MCSample('dyjetstollM10',    'DY + jets #rightarrow ll, 10 < M < 50 GeV',               '/DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12-PU_S7_START52_V9-v1/AODSIM',                        7132223,  -1, 0.10, 11050*0.069),
     MCSample('dyjetstollM50',    'DY + jets #rightarrow ll, M > 50 GeV',                    '/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12-PU_S7_START52_V9-v2/AODSIM',              30461028,  -1, 0.10, 2.95e3),
 
-    MCSample('qcd0000',          'QCD, #hat{p}_{T} < 5 GeV',                                '/QCD_Pt-0to5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                             999788, 801, 0.10, 4.859e10),
-    MCSample('qcd0005',          'QCD, 5 < #hat{p}_{T} < 15 GeV',                           '/QCD_Pt-5to15_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                           1489184, 802, 0.10, 4.264e10),
-    MCSample('qcd0015',          'QCD, 15 < #hat{p}_{T} < 30 GeV',                          '/QCD_Pt-15to30_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                         10925056, 803, 0.10, 9.883e8),
-    MCSample('qcd0030',          'QCD, 30 < #hat{p}_{T} < 50 GeV',                          '/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                          6000000, 804, 0.10, 6.629e7),
-    MCSample('qcd0050',          'QCD, 50 < #hat{p}_{T} < 80 GeV',                          '/QCD_Pt-50to80_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                          5995944, 805, 0.10, 8.149e6),
-    MCSample('qcd0080',          'QCD, 80 < #hat{p}_{T} < 120 GeV',                         '/QCD_Pt-80to120_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                         5981328, 806, 0.10, 1.034e6),
-    MCSample('qcd0120',          'QCD, 120 < #hat{p}_{T} < 170 GeV',                        '/QCD_Pt-120to170_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                        5985732, 807, 0.10, 1.563e5),
-    MCSample('qcd0170',          'QCD, 170 < #hat{p}_{T} < 300 GeV',                        '/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                        5814398, 808, 0.10, 3.414e4),
-    MCSample('qcd0300',          'QCD, 300 < #hat{p}_{T} < 470 GeV',                        '/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                        5927300, 809, 0.10, 1.760e3),
-    MCSample('qcd0470',          'QCD, 470 < #hat{p}_{T} < 600 GeV',                        '/QCD_Pt-470to600_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                        3994848, 810, 0.10, 1.139e2),
-    MCSample('qcd0600',          'QCD, 600 < #hat{p}_{T} < 800 GeV',                        '/QCD_Pt-600to800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                        3992760, 811, 0.10, 2.699e1),
-    MCSample('qcd0800',          'QCD, 800 < #hat{p}_{T} < 1000 GeV',                       '/QCD_Pt-800to1000_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                       3998563, 812, 0.10, 3.550e0),
-    MCSample('qcd1000',          'QCD, 1000 < #hat{p}_{T} < 1400 GeV',                      '/QCD_Pt-1000to1400_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                      1964088, 813, 0.10, 7.378e-1),
-    MCSample('qcd1400',          'QCD, 1400 < #hat{p}_{T} < 1800 GeV',                      '/QCD_Pt-1400to1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                      2000062, 814, 0.10, 3.352e-2),
-    MCSample('qcd1800',          'QCD, #hat{p}_{T} > 1800 GeV',                             '/QCD_Pt-1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',                             977586, 815, 0.10, 1.829e-3),
+    MCSample('qcd0000', 'QCD, #hat{p}_{T} < 5 GeV',           '/QCD_Pt-0to5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',         999788, 801, 0.10, 4.859e10),
+    MCSample('qcd0005', 'QCD, 5 < #hat{p}_{T} < 15 GeV',      '/QCD_Pt-5to15_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',       1489184, 802, 0.10, 4.264e10),
+    MCSample('qcd0015', 'QCD, 15 < #hat{p}_{T} < 30 GeV',     '/QCD_Pt-15to30_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',     10925056, 803, 0.10, 9.883e08),
+    MCSample('qcd0030', 'QCD, 30 < #hat{p}_{T} < 50 GeV',     '/QCD_Pt-30to50_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',      6000000, 804, 0.10, 6.629e07),
+    MCSample('qcd0050', 'QCD, 50 < #hat{p}_{T} < 80 GeV',     '/QCD_Pt-50to80_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',      5995944, 805, 0.10, 8.149e06),
+    MCSample('qcd0080', 'QCD, 80 < #hat{p}_{T} < 120 GeV',    '/QCD_Pt-80to120_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',     5981328, 806, 0.10, 1.034e06),
+    MCSample('qcd0120', 'QCD, 120 < #hat{p}_{T} < 170 GeV',   '/QCD_Pt-120to170_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',    5985732, 807, 0.10, 1.563e05),
+    MCSample('qcd0170', 'QCD, 170 < #hat{p}_{T} < 300 GeV',   '/QCD_Pt-170to300_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',    5814398, 808, 0.10, 3.414e04),
+    MCSample('qcd0300', 'QCD, 300 < #hat{p}_{T} < 470 GeV',   '/QCD_Pt-300to470_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',    5927300, 809, 0.10, 1.760e03),
+    MCSample('qcd0470', 'QCD, 470 < #hat{p}_{T} < 600 GeV',   '/QCD_Pt-470to600_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',    3994848, 810, 0.10, 1.139e02),
+    MCSample('qcd0600', 'QCD, 600 < #hat{p}_{T} < 800 GeV',   '/QCD_Pt-600to800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',    3992760, 811, 0.10, 2.699e01),
+    MCSample('qcd0800', 'QCD, 800 < #hat{p}_{T} < 1000 GeV',  '/QCD_Pt-800to1000_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',   3998563, 812, 0.10, 3.550e00),
+    MCSample('qcd1000', 'QCD, 1000 < #hat{p}_{T} < 1400 GeV', '/QCD_Pt-1000to1400_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',  1964088, 813, 0.10, 7.378e-1),
+    MCSample('qcd1400', 'QCD, 1400 < #hat{p}_{T} < 1800 GeV', '/QCD_Pt-1400to1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',  2000062, 814, 0.10, 3.352e-2),
+    MCSample('qcd1800', 'QCD, #hat{p}_{T} > 1800 GeV',        '/QCD_Pt-1800_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',         977586, 815, 0.10, 1.829e-3),
     
     MCSample('qcdmu0015', 'QCDmu5, 15 < #hat{p}_{T} < 20 GeV',    '/QCD_Pt-15to20_MuEnrichedPt5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v2/AODSIM',     1722681, 801, 0.10, 0.0039*7.02e8),
     MCSample('qcdmu0020', 'QCDmu5, 20 < #hat{p}_{T} < 30 GeV',    '/QCD_Pt-20to30_MuEnrichedPt5_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM',     8486904, 801, 0.10, 0.0065*2.87e8),
@@ -214,57 +243,41 @@ auxiliary_background_samples = [
     MCSample('qcdmupt15', 'QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', '/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM', 7529312, 801, 0.10, 3.64e8*3.7e-4),
 ]
 
-mfv_signal_samples = [
-    MCSample('mfv_gluino_tau0000um_M0200', 'MFV signal, M = 200 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9960, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0000um_M0400', 'MFV signal, M = 400 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0000um_M0600', 'MFV signal, M = 600 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0000um_M0800', 'MFV signal, M = 800 GeV, #tau = 0',         '/mfv_gensimhlt_gluino_tau0000um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 0',        '/mfv_gensimhlt_gluino_tau0000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0010um_M0200', 'MFV signal, M = 200 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9760, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0010um_M0400', 'MFV signal, M = 400 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0010um_M0600', 'MFV signal, M = 600 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0010um_M0800', 'MFV signal, M = 800 GeV, #tau = 10 #mum',   '/mfv_gensimhlt_gluino_tau0010um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0010um_M1000', 'MFV signal, M = 1000 GeV, #tau = 10 #mum',  '/mfv_gensimhlt_gluino_tau0010um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0100um_M0200', 'MFV signal, M = 200 GeV, #tau = 100 #mum',  '/mfv_gensimhlt_gluino_tau0100um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0100um_M0400', 'MFV signal, M = 400 GeV, #tau = 100 #mum',  '/mfv_gensimhlt_gluino_tau0100um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0100um_M0600', 'MFV signal, M = 600 GeV, #tau = 100 #mum',  '/mfv_gensimhlt_gluino_tau0100um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0100um_M0800', 'MFV signal, M = 800 GeV, #tau = 100 #mum',  '/mfv_gensimhlt_gluino_tau0100um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau0100um_M1000', 'MFV signal, M = 1000 GeV, #tau = 100 #mum', '/mfv_gensimhlt_gluino_tau0100um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau1000um_M0200', 'MFV signal, M = 200 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9960, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau1000um_M0600', 'MFV signal, M = 600 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau1000um_M0800', 'MFV signal, M = 800 GeV, #tau = 1 mm',      '/mfv_gensimhlt_gluino_tau1000um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',     '/mfv_gensimhlt_gluino_tau1000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau4000um_M0200', 'MFV signal, M = 200 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau4000um_M0400', 'MFV signal, M = 400 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau4000um_M0600', 'MFV signal, M = 600 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau4000um_M0800', 'MFV signal, M = 800 GeV, #tau = 4 mm',      '/mfv_gensimhlt_gluino_tau4000um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau4000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 4 mm',     '/mfv_gensimhlt_gluino_tau4000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau9900um_M0200', 'MFV signal, M = 200 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0200/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0400/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER', 10000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau9900um_M0600', 'MFV signal, M = 600 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0600/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9000, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau9900um_M0800', 'MFV signal, M = 800 GeV, #tau = 9.9 mm',    '/mfv_gensimhlt_gluino_tau9900um_M0800/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9960, -1, 0.2, 1),
-    MCSample('mfv_gluino_tau9900um_M1000', 'MFV signal, M = 1000 GeV, #tau = 9.9 mm',   '/mfv_gensimhlt_gluino_tau9900um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',  9500, -1, 0.2, 1),
+########################################################################
+
+mfv_signal_samples_ex = [
+    (1000,  400, 'c9c4c27381f6625ed3d8394ffaf0b9cd'),
+    (   0,  400, '3e730b2f07d27fadb85eb50c5002cc81'),
+    (9900,  400, 'c91fb7b9ece3e3abc0445dc6699e16d6'),
+    (1000, 1000, 'c9c4c27381f6625ed3d8394ffaf0b9cd'),
     ]
 
-data_samples = [
-    DataSample('MultiJet12A',  '/MultiJet/Run2012A-13Jul2012-v1/AOD'),
-    DataSample('MultiJet12B',  '/MultiJet/Run2012B-13Jul2012-v1/AOD'),
-    DataSample('MultiJet12C1', '/MultiJet/Run2012C-PromptReco-v1/AOD'),
-    DataSample('MultiJet12C2', '/MultiJet/Run2012C-PromptReco-v2/AOD'),
-    DataSample('MultiJet12D',  '/MultiJet/Run2012D-PromptReco-v1/AOD'),
-]    
+mfv_signal_samples_nice = {0: '0', 10: '10 #mum', 100: '100 #mum', 1000: '1 mm', 4000: '4 mm', 9900: '9.9 mm'}
 
-data_samples[0].json = data_samples[1].json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-196531_8TeV_13Jul2012ReReco_Collisions12_JSON_v2.txt'
+mfv_signal_samples = []
+for tau, mass, gensimhlt_hash in mfv_signal_samples_ex:
+    name_frag = 'neutralino_tau%04ium_M%04i' % (tau, mass)
+    s = MCSample('mfv_' + name_frag,
+                 'MFV signal, M = %i GeV, #tau = %s' % (mass, mfv_signal_samples_nice[tau]),
+                 '/mfv_%s/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER' % name_frag,
+                 10000, -1, 0.2, 1)
+    s.ana_hash = '547d3313903142038335071634b26604'
+    s.parent_dataset = '/mfv_%(name_frag)s/tucker-mfv_%(name_frag)s-%(gensimhlt_hash)s/USER' % locals()
+    s.tau  = tau
+    s.mass = mass
+    s.events_per = 2000
+    s.no_skimming_cuts = True
+    s.aod_plus_pat = True
+    s.is_pythia8 = True
+    s.dbs_url_num = 2
+    mfv_signal_samples.append(s)
 
+########################################################################
+
+data_samples = []    
 auxiliary_data_samples = []
-for pd in ['MuHad', 'ElectronHad']:
-    for s in data_samples:
-        ns = copy(s)
-        switch = lambda x: x.replace('MultiJet', pd)
-        ns.name    = switch(ns.name)
-        ns.dataset = switch(ns.dataset)
-        auxiliary_data_samples.append(ns)
+
+########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
 all_mc_samples = background_samples + auxiliary_background_samples + mfv_signal_samples 
@@ -273,28 +286,23 @@ all_samples = all_data_samples + all_mc_samples
 for sample in all_samples:
     exec '%s = sample' % sample.name
 
+########################################################################
 
-# Exceptions to the defaults.
+# Exceptions to the defaults (except for the MFV signal samples, which
+# are already applied above).
 
+ttbarincl.no_skimming_cuts = True
 singletop_t.scheduler_name = 'condor'
 
 for sample in background_samples + auxiliary_background_samples + all_data_samples:
     sample.ana_ready = False
     
-for sample in mfv_signal_samples:
-    mo = re.search(r'tau0*(\d+)um_M0*(\d+)', sample.name)
-    sample.tau  = int(mo.group(1))
-    sample.mass = int(mo.group(2))
-
-    sample.is_pythia8 = True
-    sample.dbs_url_num = 2
-    sample.scheduler_name = 'condor'
-    sample.ana_hash = 'bd05e25367130164ec2dd1b6bce4cd3c'
-
 # Other exceptions due to jobs being missed, mixing dataset versions
 # (that don't affect actual physics), etc.
 
 temp_neventses = []
+not_ready = []
+
 if temp_neventses:
     warning = ['partial datasets published:']
     for sample, temp_nevents in temp_neventses:
@@ -307,90 +315,23 @@ if temp_neventses:
             sample.nevents = temp_nevents
     big_warn('\n'.join(warning))
 
-not_ready = []
 if not_ready:
     big_warn('samples not ana_ready: %s' % ' '.join(s.name for s in not_ready))
 for sample in not_ready:
     sample.ana_ready = False
 
+########################################################################
+
 __all__ = ['data_samples', 'auxiliary_data_samples', 'background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
 __all__ += [s.name for s in all_samples]
 
 if __name__ == '__main__':
-    import sys
-    if 'sites' in sys.argv:
+    if 'dump' in sys.argv:
+        for sample in all_samples:
+            sample.dump()
+            print
+    elif 'sites' in sys.argv:
         from mydbs import *
-        for sample in _samples:
+        for sample in all_samples:
             sites = sites_for_dataset(sample.dataset)
             print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
-    elif 'checkpubnumfiles' in sys.argv:
-        fmt = '%160s%15s'
-        print fmt % ('ana_dataset', 'num files')
-        for sample in _samples:
-            print fmt % (sample.ana_dataset, len(sample.filenames))
-    elif 'numevents' in sys.argv:
-        from DBS import *
-        for name, nn, ds in auxiliary_background_samples:
-            print name, numevents_in_dataset(ds)
-    elif 'mfvsignals' in sys.argv:
-        line_re = re.compile(r'total events: (\d+) in dataset: (/.*USER)')
-        dataset_re = re.compile(r'tau0*(\d+)um_M(\d+)-([0-9a-f]*)/USER')
-        nice = {0: '0', 10: '10 #mum', 100: '100 #mum', 1000: '1 mm', 4000: '4 mm', 9900: '9.9 mm'}
-        lines = []
-        for arg in sys.argv:
-            if os.path.isfile(arg) and 'publish' in arg:
-                for line in open(arg):
-                    mo = line_re.search(line)
-                    if mo is not None:
-                        nevents = int(mo.group(1))
-                        dataset = mo.group(2)
-                        tau, mass, hash = dataset_re.search(dataset).groups()
-                        tau = int(tau)
-                        mass = int(mass)
-                        tau_nice = nice[tau]
-                        #print nevents, dataset, tau, mass, hash
-                        lines.append((tau, mass, "MCSample('mfv3j_gluino_tau%(tau)04ium_M%(mass)04i', 'MFV signal, M = %(mass)i GeV, #tau = %(tau_nice)s', '%(dataset)s', %(nevents)6i, -1, 0.2, 1)," % locals()))
-                        break
-        lines.sort()
-        for tau, mass, line in lines:
-            print line
-    elif 'mfvsignalsdbs' in sys.argv:
-        for s in mfv_signal_samples:
-            nevents = None
-            for line in os.popen('dbss ana02 nevents %s' % s.ana_dataset):
-                print line
-                try:
-                    nevents = int(line)
-                except ValueError:
-                    pass
-            if nevents is None:
-                print 'could not get nevents from dbs for %s' % s.name
-                continue
-            s.nevents = nevents
-            nice = {0: '0', 10: '10 #mum', 100: '100 #mum', 1000: '1 mm', 4000: '4 mm', 9900: '9.9 mm'}
-            s.tau_nice = nice[s.tau]
-            print "MCSample('mfv3j_gluino_tau%(tau)04ium_M%(mass)04i', 'MFV signal, M = %(mass)i GeV, #tau = %(tau_nice)s', '%(dataset)s', %(nevents)6i, -1, 0.2, 1)," % s
-    elif 'mfvsignalspat' in sys.argv:
-        line_re = re.compile(r'total events: (\d+) in dataset')
-        for s in mfv_signal_samples:
-            fn = 'publish.crab_jtuple_v5_%s' % s.name
-            if not os.path.isfile(fn):
-                print 'no file for %s' % s.name
-                continue
-            nevents = None
-            for line in open(fn):
-                mo = line_re.search(line)
-                if mo is not None:
-                    nevents = int(mo.group(1))
-                    break
-            if nevents is None:
-                print 'no events in %s for %s' % (fn, name)
-                continue
-            if nevents != s.nevents:
-                print '%s.nevents = %i # was %i' % (s.name, nevents, s.nevents)
-    elif 'mfvsignalscheck' in sys.argv:
-        for sample in mfv_signal_samples:
-            print sample.name
-            x = files_in_dataset(sample.dataset, ana02=True)
-            x.sort()
-            assert x == sorted(set(x))
