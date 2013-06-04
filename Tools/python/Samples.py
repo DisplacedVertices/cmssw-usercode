@@ -44,7 +44,7 @@ class Sample(object):
         self.ana_ready = False
 
     def dump(self):
-        xx = 'name nice_name dataset parent_dataset is_mc is_fastsim is_pythia8 scheduler_name dbs_url_num ana_ready ana_dbs_url_num ana_hash publish_user ana_version'
+        xx = 'name nice_name dataset parent_dataset is_mc is_fastsim is_pythia8 scheduler_name dbs_url_num ana_ready ana_dbs_url_num ana_hash publish_user ana_version ana_dataset'
         for x in xx.split():
             a = getattr(self, x)
             if hasattr(self, x.upper()) and a == getattr(self, x.upper()):
