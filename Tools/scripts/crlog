@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+import sys, os
+from JMTucker.Tools.CRABTools import CrabError, crab_dir_from_argv, crab_jobs_from_argv, print_run_cmd
+
+try:
+    d = crab_dir_from_argv()
+except CrabError:
+    print 'usage: crlog <crab directory> [list of jobs]\n   if no list of jobs is supplied, will show the crab.log.'
+    sys.exit(1)
+
+jobs = crab_jobs_from_argv()
+
+print d
+if len(jobs) == 0 or (len(jobs) == 1 and jobs[0] == 0):
+    print_run_cmd('less %s/log/crab.log' % d)
+else:
+    for job in jobs:
+        if len(jobs) != 1:
+            raw_input('\nlogs for job %i <hit enter to show>' % job)
+
+        stdout = '%s/res/CMSSW_%i.stdout' % (d, job)
+        if os.path.isfile(stdout):
+            print
+            print_run_cmd('less %s' % stdout)
+        else:
+            print '\nno stdout!'
+            
+        condor_log = '%s/share/.condor_temp/CMSSW_%i.log' % (d, job)
+        if os.path.isfile(condor_log):
+            print
+            print_run_cmd('less %s' % condor_log)
+        else:
+            print '\nno condor log!'
+
+        print '\noutput files:'
+        print_run_cmd('ls -l %s/res/*_%i.*' % (d, job))
