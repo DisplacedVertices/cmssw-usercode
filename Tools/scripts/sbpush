@@ -1,0 +1,12 @@
+#!/bin/tcsh
+
+if ! $?NUM_SCRAM_JOBS then
+    set NUM_SCRAM_JOBS=4
+endif
+
+pushd $1
+echo scramv1 b -j $NUM_SCRAM_JOBS $2 $3 $4 $5 $6
+scramv1 b -j $NUM_SCRAM_JOBS $2 $3 $4 $5 $6
+set ECODE=$?
+popd
+exit $ECODE
