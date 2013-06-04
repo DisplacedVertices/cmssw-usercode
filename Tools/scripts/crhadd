@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+import os, glob, sys
+from JMTucker.Tools.CRABTools import is_crab_working_dir, crab_hadd
+
+for x in sys.argv:
+    if is_crab_working_dir(x):
+        crab_hadd(x)
+    elif os.path.isdir(x):
+        # if we have a dir of crab dirs, make a new dir of the same
+        # name and haddcrab all their files into it.
+        sub_dirs = [d for d in glob.glob(os.path.join(x, '*')) if os.path.isdir(d)]
+        new_dir = os.path.basename(x)
+        os.system('mkdir -p %s' % new_dir)
+        for y in sub_dirs:
+            crab_hadd(y, new_dir=new_dir)
