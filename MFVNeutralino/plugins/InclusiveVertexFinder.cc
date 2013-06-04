@@ -58,6 +58,7 @@ class MFVInclusiveVertexFinder : public edm::EDProducer {
 	std::auto_ptr<VertexReconstructor>	vtxReco;
 	std::auto_ptr<MFVTracksClusteringFromDisplacedSeed>	clusterizer;
 
+  const bool do_histos;
   TH1F* h_npv;
   TH1F* h_ntracks;
   TH1F* h_trackhits;
@@ -114,58 +115,61 @@ MFVInclusiveVertexFinder::MFVInclusiveVertexFinder(const edm::ParameterSet &para
         vertexMinDLen2DSig(params.getParameter<double>("vertexMinDLen2DSig")), //2.5
         vertexMinDLenSig(params.getParameter<double>("vertexMinDLenSig")), //0.5
 	vtxReco(new ConfigurableVertexReconstructor(params.getParameter<edm::ParameterSet>("vertexReco"))),
-        clusterizer(new MFVTracksClusteringFromDisplacedSeed(params.getParameter<edm::ParameterSet>("clusterizer")))
+        clusterizer(new MFVTracksClusteringFromDisplacedSeed(params.getParameter<edm::ParameterSet>("clusterizer"))),
+        do_histos(params.getParameter<bool>("do_histos"))
 {
 	produces<reco::VertexCollection>();
 	//produces<reco::VertexCollection>("multi");
 
-  edm::Service<TFileService> fs;
-  TH1::SetDefaultSumw2();
-  h_npv = fs->make<TH1F>("h_npv", ";npv;events", 100, 0, 100);
-  h_ntracks = fs->make<TH1F>("h_ntracks", ";ntracks;events/30", 50, 0, 1500);
-  h_trackhits = fs->make<TH1F>("h_trackhits", ";nhits/track;tracks", 50, 0, 50);
-  h_trackpt = fs->make<TH1F>("h_trackpt", ";track pt;tracks/5 GeV", 100, 0, 500);
-  h_trackdz = fs->make<TH1F>("h_trackdz", ";track dz(pv);tracks/2 cm", 150, -150, 150);
-  h_trackfilteredhits = fs->make<TH1F>("h_trackfilteredhits", "selected tracks;nhits/track;tracks", 50, 0, 50);
-  h_trackfilteredpt   = fs->make<TH1F>("h_trackfilteredpt", "selected tracks;nhits;tracks/5 GeV", 100, 0, 500);
-  h_trackfiltereddz   = fs->make<TH1F>("h_trackfiltereddz", "selcted tracks;track dz(pv)", 50, -0.5, 0.5);
+  if (do_histos) {
+    edm::Service<TFileService> fs;
+    TH1::SetDefaultSumw2();
+    h_npv = fs->make<TH1F>("h_npv", ";npv;events", 100, 0, 100);
+    h_ntracks = fs->make<TH1F>("h_ntracks", ";ntracks;events/30", 50, 0, 1500);
+    h_trackhits = fs->make<TH1F>("h_trackhits", ";nhits/track;tracks", 50, 0, 50);
+    h_trackpt = fs->make<TH1F>("h_trackpt", ";track pt;tracks/5 GeV", 100, 0, 500);
+    h_trackdz = fs->make<TH1F>("h_trackdz", ";track dz(pv);tracks/2 cm", 150, -150, 150);
+    h_trackfilteredhits = fs->make<TH1F>("h_trackfilteredhits", "selected tracks;nhits/track;tracks", 50, 0, 50);
+    h_trackfilteredpt   = fs->make<TH1F>("h_trackfilteredpt", "selected tracks;nhits;tracks/5 GeV", 100, 0, 500);
+    h_trackfiltereddz   = fs->make<TH1F>("h_trackfiltereddz", "selcted tracks;track dz(pv)", 50, -0.5, 0.5);
 
-  h_nseltracks = fs->make<TH1F>("h_nseltracks", "", 500, 0, 500);
-  h_nclusters = fs->make<TH1F>("h_nclusters", "", 500, 0, 500);
-  h_ntrackspercluster = fs->make<TH1F>("h_ntrackspercluster", "", 100, 0, 100);
-  h_clusterseedtrackpt = fs->make<TH1F>("h_clusterseedtrackpt", "", 100, 0, 500);
-  h_clusterseedtrackdxy = fs->make<TH1F>("h_clusterseedtrackdxy", "", 200, 0, 100);
-  h_clusterseedpointrho = fs->make<TH1F>("h_clusterseedpointrho", "", 200, 0, 100);
-  h_nverticespercluster = fs->make<TH1F>("h_nverticespercluster", "", 20, 0, 20);
-  h_singlefitspercluster = fs->make<TH1F>("h_singlefitspercluster", "", 2, 0, 2);
+    h_nseltracks = fs->make<TH1F>("h_nseltracks", "", 500, 0, 500);
+    h_nclusters = fs->make<TH1F>("h_nclusters", "", 500, 0, 500);
+    h_ntrackspercluster = fs->make<TH1F>("h_ntrackspercluster", "", 100, 0, 100);
+    h_clusterseedtrackpt = fs->make<TH1F>("h_clusterseedtrackpt", "", 100, 0, 500);
+    h_clusterseedtrackdxy = fs->make<TH1F>("h_clusterseedtrackdxy", "", 200, 0, 100);
+    h_clusterseedpointrho = fs->make<TH1F>("h_clusterseedpointrho", "", 200, 0, 100);
+    h_nverticespercluster = fs->make<TH1F>("h_nverticespercluster", "", 20, 0, 20);
+    h_singlefitspercluster = fs->make<TH1F>("h_singlefitspercluster", "", 2, 0, 2);
 
-  h_nvertex = fs->make<TH1F>("h_nvertex", "", 100, 0, 100);
-  h_vertexdisttopv = fs->make<TH1F>("h_vertexdisttopv", "", 200, 0, 200);
-  h_vertexdist2topv = fs->make<TH1F>("h_vertexdist2topv", "", 200, 0, 200);
-  h_vertexdisttopverr = fs->make<TH1F>("h_vertexdisttopverr", "", 200, 0, 200);
-  h_vertexdist2topverr = fs->make<TH1F>("h_vertexdist2topverr", "", 200, 0, 200);
-  h_vertexdisttopvsig = fs->make<TH1F>("h_vertexdisttopvsig", "", 200, 0, 200);
-  h_vertexdist2topvsig = fs->make<TH1F>("h_vertexdist2topvsig", "", 200, 0, 200);
-  h_vertexchi2 = fs->make<TH1F>("h_vertexchi2", "", 100, 0, 20);
-  h_vertexndof = fs->make<TH1F>("h_vertexndof", "", 80, 0, 80);
-  h_vertexrho = fs->make<TH1F>("h_vertexrho", "", 200, 0, 200);
-  h_ntrackspervertex = fs->make<TH1F>("h_ntrackspervertex", "", 50, 0, 50);
-  h_vertextrackweight = fs->make<TH1F>("h_vertextrackweight", "", 50, 0, 1);
-  h_vertexpvsvcostheta = fs->make<TH1F>("h_vertexpvsvcostheta", "", 200, -1, 1);
+    h_nvertex = fs->make<TH1F>("h_nvertex", "", 100, 0, 100);
+    h_vertexdisttopv = fs->make<TH1F>("h_vertexdisttopv", "", 200, 0, 200);
+    h_vertexdist2topv = fs->make<TH1F>("h_vertexdist2topv", "", 200, 0, 200);
+    h_vertexdisttopverr = fs->make<TH1F>("h_vertexdisttopverr", "", 200, 0, 200);
+    h_vertexdist2topverr = fs->make<TH1F>("h_vertexdist2topverr", "", 200, 0, 200);
+    h_vertexdisttopvsig = fs->make<TH1F>("h_vertexdisttopvsig", "", 200, 0, 200);
+    h_vertexdist2topvsig = fs->make<TH1F>("h_vertexdist2topvsig", "", 200, 0, 200);
+    h_vertexchi2 = fs->make<TH1F>("h_vertexchi2", "", 100, 0, 20);
+    h_vertexndof = fs->make<TH1F>("h_vertexndof", "", 80, 0, 80);
+    h_vertexrho = fs->make<TH1F>("h_vertexrho", "", 200, 0, 200);
+    h_ntrackspervertex = fs->make<TH1F>("h_ntrackspervertex", "", 50, 0, 50);
+    h_vertextrackweight = fs->make<TH1F>("h_vertextrackweight", "", 50, 0, 1);
+    h_vertexpvsvcostheta = fs->make<TH1F>("h_vertexpvsvcostheta", "", 200, -1, 1);
 
-  h_nselectedvertex = fs->make<TH1F>("h_nselectedvertex", "", 100, 0, 100);
-  h_selectedvertexdisttopv = fs->make<TH1F>("h_selectedvertexdisttopv", "", 200, 0, 200);
-  h_selectedvertexdist2topv = fs->make<TH1F>("h_selectedvertexdist2topv", "", 200, 0, 200);
-  h_selectedvertexdisttopverr = fs->make<TH1F>("h_selectedvertexdisttopverr", "", 200, 0, 200);
-  h_selectedvertexdist2topverr = fs->make<TH1F>("h_selectedvertexdist2topverr", "", 200, 0, 200);
-  h_selectedvertexdisttopvsig = fs->make<TH1F>("h_selectedvertexdisttopvsig", "", 200, 0, 200);
-  h_selectedvertexdist2topvsig = fs->make<TH1F>("h_selectedvertexdist2topvsig", "", 200, 0, 200);
-  h_selectedvertexchi2 = fs->make<TH1F>("h_selectedvertexchi2", "", 100, 0, 20);
-  h_selectedvertexndof = fs->make<TH1F>("h_selectedvertexndof", "", 80, 0, 80);
-  h_selectedvertexrho = fs->make<TH1F>("h_selectedvertexrho", "", 200, 0, 200);
-  h_selectedntrackspervertex = fs->make<TH1F>("h_selectedntrackspervertex", "", 50, 0, 50);
-  h_selectedvertextrackweight = fs->make<TH1F>("h_selectedvertextrackweight", "", 50, 0, 1);
-  h_selectedvertexpvsvcostheta = fs->make<TH1F>("h_selectedvertexpvsvcostheta", "", 200, -1, 1);
+    h_nselectedvertex = fs->make<TH1F>("h_nselectedvertex", "", 100, 0, 100);
+    h_selectedvertexdisttopv = fs->make<TH1F>("h_selectedvertexdisttopv", "", 200, 0, 200);
+    h_selectedvertexdist2topv = fs->make<TH1F>("h_selectedvertexdist2topv", "", 200, 0, 200);
+    h_selectedvertexdisttopverr = fs->make<TH1F>("h_selectedvertexdisttopverr", "", 200, 0, 200);
+    h_selectedvertexdist2topverr = fs->make<TH1F>("h_selectedvertexdist2topverr", "", 200, 0, 200);
+    h_selectedvertexdisttopvsig = fs->make<TH1F>("h_selectedvertexdisttopvsig", "", 200, 0, 200);
+    h_selectedvertexdist2topvsig = fs->make<TH1F>("h_selectedvertexdist2topvsig", "", 200, 0, 200);
+    h_selectedvertexchi2 = fs->make<TH1F>("h_selectedvertexchi2", "", 100, 0, 20);
+    h_selectedvertexndof = fs->make<TH1F>("h_selectedvertexndof", "", 80, 0, 80);
+    h_selectedvertexrho = fs->make<TH1F>("h_selectedvertexrho", "", 200, 0, 200);
+    h_selectedntrackspervertex = fs->make<TH1F>("h_selectedntrackspervertex", "", 50, 0, 50);
+    h_selectedvertextrackweight = fs->make<TH1F>("h_selectedvertextrackweight", "", 50, 0, 1);
+    h_selectedvertexpvsvcostheta = fs->make<TH1F>("h_selectedvertexpvsvcostheta", "", 200, -1, 1);
+  }
 }
 
 bool MFVInclusiveVertexFinder::trackFilter(const reco::TrackRef &track) const
@@ -203,7 +207,7 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
 	edm::Handle<VertexCollection> primaryVertices;
 	event.getByLabel(primaryVertexCollection, primaryVertices);
 
-	h_npv->Fill(primaryVertices->size());
+	if (do_histos) h_npv->Fill(primaryVertices->size());
 
 	edm::Handle<TrackCollection> tracks;
 	event.getByLabel(trackCollection, tracks);
@@ -220,28 +224,28 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
         
 	std::vector<TransientTrack> tts;
         //Fill transient track vector 
-	h_ntracks->Fill(tracks->size());
+	if (do_histos) h_ntracks->Fill(tracks->size());
 	for(TrackCollection::const_iterator track = tracks->begin();
 	    track != tracks->end(); ++track) {
 		TrackRef ref(tracks, track - tracks->begin());
-		h_trackhits->Fill(track->hitPattern().numberOfValidHits());
-		h_trackpt->Fill(track->pt());
-		h_trackdz->Fill(ref->dz(pv.position()));
+		if (do_histos) h_trackhits->Fill(track->hitPattern().numberOfValidHits());
+		if (do_histos) h_trackpt->Fill(track->pt());
+		if (do_histos) h_trackdz->Fill(ref->dz(pv.position()));
 		if (!trackFilter(ref))
 			continue;
                 if( std::abs(ref->dz(pv.position())) > maxLIP)
 			continue;
-		h_trackfilteredhits->Fill(track->hitPattern().numberOfValidHits());
-		h_trackfilteredpt->Fill(track->pt());
-		h_trackfiltereddz->Fill(ref->dz(pv.position()));
+		if (do_histos) h_trackfilteredhits->Fill(track->hitPattern().numberOfValidHits());
+		if (do_histos) h_trackfilteredpt->Fill(track->pt());
+		if (do_histos) h_trackfiltereddz->Fill(ref->dz(pv.position()));
 		TransientTrack tt = trackBuilder->build(ref);
 		tt.setBeamSpot(*beamSpot);
 		tts.push_back(tt);
 	}
         std::vector<MFVTracksClusteringFromDisplacedSeed::Cluster> clusters = clusterizer->clusters(pv,tts);
 
-	h_nseltracks->Fill(tts.size());
-	h_nclusters->Fill(clusters.size());
+	if (do_histos) h_nseltracks->Fill(tts.size());
+	if (do_histos) h_nclusters->Fill(clusters.size());
 
         //Create BS object from PV to feed in the AVR
 	BeamSpot::CovarianceMatrix cov;
@@ -265,24 +269,24 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
 	for(std::vector<MFVTracksClusteringFromDisplacedSeed::Cluster>::iterator cluster = clusters.begin();
 	    cluster != clusters.end(); ++cluster,++i)
         {
-	        h_ntrackspercluster->Fill(cluster->tracks.size());
+	        if (do_histos) h_ntrackspercluster->Fill(cluster->tracks.size());
 
                 if(cluster->tracks.size() == 0 || cluster->tracks.size() > maxNTracks ) 
 		     continue;
 
-		h_clusterseedtrackpt->Fill(cluster->seedingTrack.track().pt());
-		h_clusterseedtrackdxy->Fill(cluster->seedingTrack.stateAtBeamLine().transverseImpactParameter().value());
-		h_clusterseedpointrho->Fill(cluster->seedPoint.perp());
+		if (do_histos) h_clusterseedtrackpt->Fill(cluster->seedingTrack.track().pt());
+		if (do_histos) h_clusterseedtrackdxy->Fill(cluster->seedingTrack.stateAtBeamLine().transverseImpactParameter().value());
+		if (do_histos) h_clusterseedpointrho->Fill(cluster->seedPoint.perp());
         
  	        cluster->tracks.push_back(cluster->seedingTrack); //add the seed to the list of tracks to fit
 	 	std::vector<TransientVertex> vertices;
 		vertices = vtxReco->vertices(cluster->tracks, bs);  // attempt with config given reconstructor
-		h_nverticespercluster->Fill(vertices.size());
+		if (do_histos) h_nverticespercluster->Fill(vertices.size());
                 TransientVertex singleFitVertex;
                 singleFitVertex = theAdaptiveFitter.vertex(cluster->tracks,cluster->seedPoint); //attempt with direct fitting
                 if(singleFitVertex.isValid())
                           vertices.push_back(singleFitVertex);
-		h_singlefitspercluster->Fill(singleFitVertex.isValid());
+		if (do_histos) h_singlefitspercluster->Fill(singleFitVertex.isValid());
 		for(std::vector<TransientVertex>::const_iterator v = vertices.begin();
 		    v != vertices.end(); ++v) {
 //			if(v->degreesOfFreedom() > 0.2)
@@ -298,16 +302,16 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
 #endif
                          GlobalVector dir;  
 			 std::vector<reco::TransientTrack> ts = v->originalTracks();
-			 h_vertexdisttopv->Fill(dlen.value());
-			 h_vertexdist2topv->Fill(dlen2.value());
-			 h_vertexdisttopverr->Fill(dlen.error());
-			 h_vertexdist2topverr->Fill(dlen2.error());
-			 h_vertexdisttopvsig->Fill(dlen.significance());
-			 h_vertexdist2topvsig->Fill(dlen2.significance());
-			 h_vertexchi2->Fill(v->normalisedChiSquared());
-			 h_vertexndof->Fill(v->degreesOfFreedom());
-			 h_vertexrho->Fill(v->position().perp());
-			 h_ntrackspervertex->Fill(ts.size());
+			 if (do_histos) h_vertexdisttopv->Fill(dlen.value());
+			 if (do_histos) h_vertexdist2topv->Fill(dlen2.value());
+			 if (do_histos) h_vertexdisttopverr->Fill(dlen.error());
+			 if (do_histos) h_vertexdist2topverr->Fill(dlen2.error());
+			 if (do_histos) h_vertexdisttopvsig->Fill(dlen.significance());
+			 if (do_histos) h_vertexdist2topvsig->Fill(dlen2.significance());
+			 if (do_histos) h_vertexchi2->Fill(v->normalisedChiSquared());
+			 if (do_histos) h_vertexndof->Fill(v->degreesOfFreedom());
+			 if (do_histos) h_vertexrho->Fill(v->position().perp());
+			 if (do_histos) h_ntrackspervertex->Fill(ts.size());
                         for(std::vector<reco::TransientTrack>::const_iterator i = ts.begin();
                             i != ts.end(); ++i) {
                                 reco::TrackRef t = i->trackBaseRef().castTo<reco::TrackRef>();
@@ -319,28 +323,28 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
                                           << (*t).phi() << "], "
                                           << w << std::endl;
 #endif
-				h_vertextrackweight->Fill(w);
+				if (do_histos) h_vertextrackweight->Fill(w);
                         }
 		       GlobalPoint ppv(pv.position().x(),pv.position().y(),pv.position().z());
 		       GlobalPoint sv((*v).position().x(),(*v).position().y(),(*v).position().z());
                        float vscal = dir.unit().dot((sv-ppv).unit()) ;
 //                        std::cout << "Vscal: " <<  vscal << std::endl;
-		       h_vertexpvsvcostheta->Fill(vscal);
+		       if (do_histos) h_vertexpvsvcostheta->Fill(vscal);
 		       if(dlen.significance() > vertexMinDLenSig  && v->normalisedChiSquared() < 10 && dlen2.significance() > vertexMinDLen2DSig)
-			 h_selectedvertexpvsvcostheta->Fill(vscal);
+			 if (do_histos) h_selectedvertexpvsvcostheta->Fill(vscal);
                        if(dlen.significance() > vertexMinDLenSig  && vscal > vertexMinAngleCosine &&  v->normalisedChiSquared() < 10 && dlen2.significance() > vertexMinDLen2DSig)
 	            	  {	 
-			        h_selectedvertexdisttopv->Fill(dlen.value());
-				h_selectedvertexdist2topv->Fill(dlen2.value());
-				h_selectedvertexdisttopverr->Fill(dlen.error());
-				h_selectedvertexdist2topverr->Fill(dlen2.error());
-				h_selectedvertexdisttopvsig->Fill(dlen.significance());
-				h_selectedvertexdist2topvsig->Fill(dlen2.significance());
-				h_selectedvertexchi2->Fill(v->normalisedChiSquared());
-				h_selectedvertexndof->Fill(v->degreesOfFreedom());
-				h_selectedvertexrho->Fill(v->position().perp());
-				h_selectedntrackspervertex->Fill(ts.size());
-				//h_selectedvertexpvsvcostheta->Fill(vscal);
+			        if (do_histos) h_selectedvertexdisttopv->Fill(dlen.value());
+				if (do_histos) h_selectedvertexdist2topv->Fill(dlen2.value());
+				if (do_histos) h_selectedvertexdisttopverr->Fill(dlen.error());
+				if (do_histos) h_selectedvertexdist2topverr->Fill(dlen2.error());
+				if (do_histos) h_selectedvertexdisttopvsig->Fill(dlen.significance());
+				if (do_histos) h_selectedvertexdist2topvsig->Fill(dlen2.significance());
+				if (do_histos) h_selectedvertexchi2->Fill(v->normalisedChiSquared());
+				if (do_histos) h_selectedvertexndof->Fill(v->degreesOfFreedom());
+				if (do_histos) h_selectedvertexrho->Fill(v->position().perp());
+				if (do_histos) h_selectedntrackspervertex->Fill(ts.size());
+				//if (do_histos) h_selectedvertexpvsvcostheta->Fill(vscal);
 				recoVertices->push_back(*v);
 #ifdef VTXDEBUG
 
@@ -348,7 +352,7 @@ void MFVInclusiveVertexFinder::produce(edm::Event &event, const edm::EventSetup 
 #endif
 
                          }
-		       h_nselectedvertex->Fill(recoVertices->size());
+		       if (do_histos) h_nselectedvertex->Fill(recoVertices->size());
                       }
                    }
         }

@@ -51,6 +51,7 @@ class MFVTracksClusteringFromDisplacedSeed {
         double 					clusterScale;
         double 					clusterMinAngleCosine;
 
+  const bool do_histos;
   TH1F* h_tcfds_trackip3dsuccess;
   TH1F* h_tcfds_trackip3d;
   TH1F* h_tcfds_trackip3dsig;

@@ -42,6 +42,7 @@ private:
 
   VertexDistance3D vdist;
 
+  const bool do_histos;
   TH1F* h_ntracks;
   TH1F* h_dist;
   TH1F* h_sig;
@@ -70,29 +71,32 @@ MFVTrackVertexArbitrator::MFVTrackVertexArbitrator(const edm::ParameterSet& cfg)
     dRCut       (cfg.getParameter<double>("dRCut")),
     distCut     (cfg.getParameter<double>("distCut")),
     sigCut      (cfg.getParameter<double>("sigCut")),
-    dLenFraction(cfg.getParameter<double>("dLenFraction"))
+    dLenFraction(cfg.getParameter<double>("dLenFraction")),
+    do_histos(cfg.getParameter<bool>("do_histos"))
 {
   produces<reco::VertexCollection>();
 
-  edm::Service<TFileService> fs;
-  h_ntracks = fs->make<TH1F>("h_ntracks", "", 50, 0, 1000);
-  h_dist = fs->make<TH1F>("h_dist", "", 100, 0, 1);
-  h_sig = fs->make<TH1F>("h_sig", "", 100, 0, 100);
-  h_w = fs->make<TH1F>("h_w", "", 51, 0, 1.02);
-  h_tkdpvsuccess = fs->make<TH1F>("h_tkdpvsuccess", "", 2, 0, 2);
-  h_tkdpv = fs->make<TH1F>("h_tkdpv", "", 100, 0, 1);
-  h_tkdpvsig = fs->make<TH1F>("h_tkdpvsig", "", 100, 0, 100);
-  h_tkdsvsuccess = fs->make<TH1F>("h_tkdsvsuccess", "", 2, 0, 2);
-  h_tkdsv = fs->make<TH1F>("h_tkdsv", "", 100, 0, 1);
-  h_tkdsvsig = fs->make<TH1F>("h_tkdsvsig", "", 100, 0, 100);
-  h_tkdsv_v_dpv = fs->make<TH2F>("h_tkdsv_v_dpv", "", 50, 0, 1, 50, 0, 1);
-  h_tkdsvsig_v_dpvsig = fs->make<TH2F>("h_tkdsvsig_v_dpvsig", "", 50, 0, 100, 50, 0, 100);
-  h_dr = fs->make<TH1F>("h_dr", "", 100, 0, 7);
-  h_tkdsv_v_dR = fs->make<TH2F>("h_tkdsv_v_dR", "", 50, 0, 7, 50, 0, 1);
-  h_tkdsvsig_v_dR = fs->make<TH2F>("h_tkdsvsig_v_dR", "", 50, 0, 7, 50, 0, 100);
-  h_nselforsv = fs->make<TH1F>("h_nselforsv", "", 25, 0, 25);
-  h_nselforsv_v_svalready = fs->make<TH2F>("h_nselforsv_v_svalready", "", 50, 0, 50, 25, 0, 25);
-  h_nnewvtx = fs->make<TH1F>("h_nnewvtx", "", 50, 0, 50);
+  if (do_histos) {
+    edm::Service<TFileService> fs;
+    h_ntracks = fs->make<TH1F>("h_ntracks", "", 50, 0, 1000);
+    h_dist = fs->make<TH1F>("h_dist", "", 100, 0, 1);
+    h_sig = fs->make<TH1F>("h_sig", "", 100, 0, 100);
+    h_w = fs->make<TH1F>("h_w", "", 51, 0, 1.02);
+    h_tkdpvsuccess = fs->make<TH1F>("h_tkdpvsuccess", "", 2, 0, 2);
+    h_tkdpv = fs->make<TH1F>("h_tkdpv", "", 100, 0, 1);
+    h_tkdpvsig = fs->make<TH1F>("h_tkdpvsig", "", 100, 0, 100);
+    h_tkdsvsuccess = fs->make<TH1F>("h_tkdsvsuccess", "", 2, 0, 2);
+    h_tkdsv = fs->make<TH1F>("h_tkdsv", "", 100, 0, 1);
+    h_tkdsvsig = fs->make<TH1F>("h_tkdsvsig", "", 100, 0, 100);
+    h_tkdsv_v_dpv = fs->make<TH2F>("h_tkdsv_v_dpv", "", 50, 0, 1, 50, 0, 1);
+    h_tkdsvsig_v_dpvsig = fs->make<TH2F>("h_tkdsvsig_v_dpvsig", "", 50, 0, 100, 50, 0, 100);
+    h_dr = fs->make<TH1F>("h_dr", "", 100, 0, 7);
+    h_tkdsv_v_dR = fs->make<TH2F>("h_tkdsv_v_dR", "", 50, 0, 7, 50, 0, 1);
+    h_tkdsvsig_v_dR = fs->make<TH2F>("h_tkdsvsig_v_dR", "", 50, 0, 7, 50, 0, 100);
+    h_nselforsv = fs->make<TH1F>("h_nselforsv", "", 25, 0, 25);
+    h_nselforsv_v_svalready = fs->make<TH2F>("h_nselforsv_v_svalready", "", 50, 0, 50, 25, 0, 25);
+    h_nnewvtx = fs->make<TH1F>("h_nnewvtx", "", 50, 0, 50);
+  }
 }
 
 bool MFVTrackVertexArbitrator::trackFilter(const reco::TrackRef& track) const {
@@ -139,7 +143,7 @@ void MFVTrackVertexArbitrator::produce(edm::Event& event, const edm::EventSetup&
         selectedTracks.push_back(tk);
     }
 
-    h_ntracks->Fill(selectedTracks.size());
+    if (do_histos) h_ntracks->Fill(selectedTracks.size());
     
     for (std::vector<reco::Vertex>::const_iterator sv = secondaryVertices->begin(); sv != secondaryVertices->end(); ++sv) {
       GlobalPoint ppv(pv .position().x(), pv .position().y(), pv .position().z());
@@ -147,8 +151,8 @@ void MFVTrackVertexArbitrator::produce(edm::Event& event, const edm::EventSetup&
       GlobalVector flightDir = ssv - ppv;
 
       Measurement1D dlen = vdist.distance(pv, *sv);
-      h_dist->Fill(dlen.value());
-      h_sig->Fill(dlen.significance());
+      if (do_histos) h_dist->Fill(dlen.value());
+      if (do_histos) h_sig->Fill(dlen.significance());
       std::vector<reco::TransientTrack> selTracks;
 
       for (unsigned int itrack = 0; itrack < selectedTracks.size(); itrack++) {
@@ -157,26 +161,26 @@ void MFVTrackVertexArbitrator::produce(edm::Event& event, const edm::EventSetup&
         reco::TransientTrack tt = trackBuilder->build(tkref);
         tt.setBeamSpot(*beamSpot);
         float w = sv->trackWeight(tkref);
-        h_w->Fill(w);
+        if (do_histos) h_w->Fill(w);
         std::pair<bool,Measurement1D> ipv  = IPTools::absoluteImpactParameter3D(tt, pv);
         std::pair<bool,Measurement1D> isv  = IPTools::absoluteImpactParameter3D(tt, *sv);
         //        std::pair<bool,Measurement1D> itpv = IPTools::absoluteTransverseImpactParameter(tt, pv);
         float dR = reco::deltaR(flightDir, tt.track());
 
-        h_tkdpvsuccess->Fill(ipv.first);
-        h_tkdpv->Fill(ipv.second.value());
-        h_tkdpvsig->Fill(ipv.second.significance());
+        if (do_histos) h_tkdpvsuccess->Fill(ipv.first);
+        if (do_histos) h_tkdpv->Fill(ipv.second.value());
+        if (do_histos) h_tkdpvsig->Fill(ipv.second.significance());
 
-        h_tkdsvsuccess->Fill(isv.first);
-        h_tkdsv->Fill(isv.second.value());
-        h_tkdsvsig->Fill(isv.second.significance());
+        if (do_histos) h_tkdsvsuccess->Fill(isv.first);
+        if (do_histos) h_tkdsv->Fill(isv.second.value());
+        if (do_histos) h_tkdsvsig->Fill(isv.second.significance());
 
-        h_tkdsv_v_dpv->Fill(ipv.second.value(), isv.second.value());
-        h_tkdsvsig_v_dpvsig->Fill(ipv.second.significance(), isv.second.significance());
+        if (do_histos) h_tkdsv_v_dpv->Fill(ipv.second.value(), isv.second.value());
+        if (do_histos) h_tkdsvsig_v_dpvsig->Fill(ipv.second.significance(), isv.second.significance());
 
-        h_dr->Fill(dR);
-        h_tkdsv_v_dR->Fill(dR, isv.second.value());
-        h_tkdsvsig_v_dR->Fill(dR, isv.second.significance());
+        if (do_histos) h_dr->Fill(dR);
+        if (do_histos) h_tkdsv_v_dR->Fill(dR, isv.second.value());
+        if (do_histos) h_tkdsvsig_v_dR->Fill(dR, isv.second.significance());
 
         if (w > 0 || (isv.second.significance() < sigCut && isv.second.value() < distCut && isv.second.value() < dlen.value() * dLenFraction)) {
           if (isv.second.value() < ipv.second.value() && isv.second.value() < distCut && isv.second.value() < dlen.value()*dLenFraction && dR < dRCut)
@@ -187,8 +191,8 @@ void MFVTrackVertexArbitrator::produce(edm::Event& event, const edm::EventSetup&
         }
       }
 
-      h_nselforsv->Fill(selTracks.size());
-      h_nselforsv_v_svalready->Fill(sv->nTracks(), selTracks.size());
+      if (do_histos) h_nselforsv->Fill(selTracks.size());
+      if (do_histos) h_nselforsv_v_svalready->Fill(sv->nTracks(), selTracks.size());
       if (selTracks.size() >= 2) { 
         TransientVertex singleFitVertex = theAdaptiveFitter.vertex(selTracks,ssv);
         if (singleFitVertex.isValid())
@@ -197,7 +201,7 @@ void MFVTrackVertexArbitrator::produce(edm::Event& event, const edm::EventSetup&
     }
   }	
 
-  h_nnewvtx->Fill(recoVertices->size());
+  if (do_histos) h_nnewvtx->Fill(recoVertices->size());
   event.put(recoVertices);
 }
 
