@@ -20,7 +20,8 @@ mfvInclusiveVertexFinder = cms.EDProducer('MFVInclusiveVertexFinder',
                                               seedMin3DIPSignificance = cms.double(1.2),
                                               clusterScale = cms.double(1),
                                               clusterMaxSignificance = cms.double(4.5),
-                                              clusterMinAngleCosine = cms.double(0.5)
+                                              clusterMinAngleCosine = cms.double(0.5),
+                                              do_histos = cms.bool(True),
                                               ),
                                           vertexReco = cms.PSet(
                                               seccut = cms.double(3),
@@ -29,7 +30,8 @@ mfvInclusiveVertexFinder = cms.EDProducer('MFVInclusiveVertexFinder',
                                               smoothing = cms.bool(True)
                                               ),
                                           vertexMinDLenSig = cms.double(0.5),
-                                          minPt = cms.double(0.8)
+                                          minPt = cms.double(0.8),
+                                          do_histos = cms.bool(True),
                                           )
 
 ########################################################################
@@ -37,7 +39,8 @@ mfvInclusiveVertexFinder = cms.EDProducer('MFVInclusiveVertexFinder',
 mfvVertexMerger =  cms.EDProducer('MFVVertexMerger',
                                   minSignificance = cms.double(2),
                                   secondaryVertices = cms.InputTag('mfvInclusiveVertexFinder'),
-                                  maxFraction = cms.double(0.7)
+                                  maxFraction = cms.double(0.7),
+                                  do_histos = cms.bool(True),
                                   )
 
 mfvTrackVertexArbitrator = cms.EDProducer('MFVTrackVertexArbitrator',
@@ -48,13 +51,15 @@ mfvTrackVertexArbitrator = cms.EDProducer('MFVTrackVertexArbitrator',
                                           dRCut = cms.double(0.4),
                                           primaryVertices = cms.InputTag('goodOfflinePrimaryVertices'),
                                           tracks = cms.InputTag('generalTracks'),
-                                          sigCut = cms.double(5)
+                                          sigCut = cms.double(5),
+                                          do_histos = cms.bool(True),
                                           )
 
 mfvInclusiveMergedVertices =  cms.EDProducer('MFVVertexMerger',
                                              minSignificance = cms.double(10.0),
                                              secondaryVertices = cms.InputTag('mfvTrackVertexArbitrator'),
-                                             maxFraction = cms.double(0.2)
+                                             maxFraction = cms.double(0.2),
+                                             do_histos = cms.bool(True),
                                              )
 
 ########################################################################
@@ -82,11 +87,14 @@ mfvVertexReco = cms.Sequence(goodOfflinePrimaryVertices *
                              mfvInclusiveMergedVerticesShared
                              )
 
-def clone_all(process, suffix):
+def get_all(process, suffix):
     modules = 'mfvInclusiveVertexFinder mfvVertexMerger mfvTrackVertexArbitrator mfvInclusiveMergedVertices mfvVertexMergerShared mfvTrackVertexArbitratorShared mfvInclusiveMergedVerticesShared'.split()
+    return [(name + suffix, getattr(process, name)) for name in modules]
+
+def clone_all(process, suffix):
     objs = []
-    for i,module in enumerate(modules):
-        obj = getattr(process, module).clone()
+    for i, (module, orig_obj) in enumerate(get_all(process, '')):
+        obj = orig_obj.clone()
         if i > 0:
             obj.secondaryVertices = obj.secondaryVertices.value() + suffix
         objs.append(obj)
