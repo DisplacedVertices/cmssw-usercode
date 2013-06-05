@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import os, sys
+from JMTucker.Tools.CRABTools import crab_dirs_from_argv
+
+NoInp = 'NoInp'
+if NoInp in sys.argv:
+    sys.argv.remove(NoInp)
+else:
+    NoInp = ''
+
+if not os.path.isdir('publish_logs'):
+    print 'Refusing to work: no publish_logs directory!'
+    sys.exit(1)
+
+dirs = []
+for d in crab_dirs_from_argv():
+    d = os.path.normpath(d)
+    bd = os.path.basename(d)
+    if bd == d:
+        p = 'publish_logs/publish.%s' % d
+    else:
+        dd = os.path.dirname(d)
+        os.system('mkdir -p publish_logs/%s' % dd)
+        p = 'publish_logs/%s/publish.%s' % (dd, bd)
+    if os.path.isfile(p):
+        print 'Refusing to launch for %s: %s already exists!' % (d,p)
+    else:
+        dirs.append((d, p))
+
+for d, p in dirs:
+    cmd = 'crab -c %s -publish%s >& %s &' % (d, NoInp, p)
+    print cmd
+    os.system(cmd)
