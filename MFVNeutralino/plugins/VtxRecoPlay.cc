@@ -66,6 +66,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const edm::InputTag vertex_src;
   const bool print_info;
   const bool is_mfv;
+  const bool is_ttbar;
   const bool do_scatterplots;
   const double jet_pt_min;
   const double track_pt_min;
@@ -73,6 +74,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const int min_sv_ntracks;
   const double max_sv_chi2dof;
   const double max_sv_err2d;
+  const double min_sv_mass;
+  const double min_sv_drmax;
 
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
@@ -87,6 +90,62 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     double err2 = ROOT::Math::Similarity(v, cov);
     return dist != 0 ? sqrt(err2)/dist : 0;
   }
+
+  struct vertex_tracks_distance {
+    double drmin, drmax;
+    double dravg, dravgw, dravgvw;
+    double drrms, drrmsw, drrmsvw;
+
+    vertex_tracks_distance(const reco::Vertex& sv) {
+      drmin = 1e99;
+      drmax = dravg = dravgw = drrms = drrmsw = 0;
+      std::vector<double> drs;
+      std::vector<double> ws;
+      std::vector<double> vws;
+      double sumw = 0, sumvw = 0;
+
+      auto trkb = sv.tracks_begin();
+      auto trke = sv.tracks_end();
+      for (auto trki = trkb; trki != trke; ++trki) {
+        for (auto trkj = trki + 1; trkj != trke; ++trkj) {
+          double dr = reco::deltaR(**trki, **trkj);
+          drs.push_back(dr);
+          
+          double w  = 0.5*((*trki)->pt() + (*trkj)->pt());
+          double vw = 0.5*(sv.trackWeight(*trki) + sv.trackWeight(*trkj));
+
+          sumw  += w;
+          sumvw += vw;
+          ws .push_back(w);
+          vws.push_back(vw);
+          
+          dravg   += dr;
+          dravgw  += dr * w;
+          dravgvw += dr * vw;
+
+          if (dr < drmin)
+            drmin = dr;
+          if (dr > drmax)
+            drmax = dr;
+        }
+      }
+
+      dravg   /= drs.size();
+      dravgw  /= sumw;
+      dravgvw /= sumvw;
+
+      for (int i = 0, ie = int(drs.size()); i < ie; ++i) {
+        double dr = drs[i];
+        drrms   += pow(dr - dravg,   2);
+        drrmsw  += pow(dr - dravgw,  2) * ws [i];
+        drrmsvw += pow(dr - dravgvw, 2) * vws[i];
+      }
+
+      drrms   = sqrt(drrms  /drs.size());
+      drrmsw  = sqrt(drrmsw /sumw);
+      drrmsvw = sqrt(drrmsvw/sumvw);
+    }
+  };
 
   std::pair<bool, float> compatibility(const reco::Vertex& x, const reco::Vertex& y, bool use3d) {
     bool success = false;
@@ -108,8 +167,10 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   bool use_vertex(const reco::Vertex& vtx) {
     return 
       int(vtx.tracksSize()) >= min_sv_ntracks &&
-      vtx.normalizedChi2() <= max_sv_chi2dof  &&
-      abs_error(vtx, false) < max_sv_err2d;
+      vtx.normalizedChi2() < max_sv_chi2dof   &&
+      abs_error(vtx, false) < max_sv_err2d    &&
+      vtx.p4().mass() >= min_sv_mass          &&
+      (min_sv_drmax == 0 || vertex_tracks_distance(vtx).drmax >= min_sv_drmax);
   }
 
   TH1F* h_sim_pileup_num_int[3];
@@ -168,12 +229,15 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     print_info(cfg.getParameter<bool>("print_info")),
     is_mfv(cfg.getParameter<bool>("is_mfv")),
+    is_ttbar(cfg.getParameter<bool>("is_ttbar")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     track_pt_min(cfg.getParameter<double>("track_pt_min")),
     min_sv_ntracks(cfg.getParameter<int>("min_sv_ntracks")),
     max_sv_chi2dof(cfg.getParameter<double>("max_sv_chi2dof")),
-    max_sv_err2d(cfg.getParameter<double>("max_sv_err2d"))
+    max_sv_err2d(cfg.getParameter<double>("max_sv_err2d")),
+    min_sv_mass(cfg.getParameter<double>("min_sv_mass")),
+    min_sv_drmax(cfg.getParameter<double>("min_sv_drmax"))
 {
   edm::Service<TFileService> fs;
 
@@ -340,7 +404,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       }
     }
   }
-  else {
+  else if (is_ttbar) {
     MCInteractionTops mci;
     mci.Init(*gen_particles);
     if ((gen_valid = mci.Valid())) {
@@ -352,9 +416,16 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       }
     }
   }
+  else {
+    for (int i = 0; i < 2; ++i) {
+      gen_verts[i][0] = beamspot->x0();
+      gen_verts[i][1] = beamspot->y0();
+      gen_verts[i][2] = beamspot->z0();
+    }
+  }
 
-  if (!gen_valid)
-    edm::LogWarning("VtxRecoPlay") << "warning: neither MCI valid";
+  if (!gen_valid && (is_mfv || is_ttbar))
+    edm::LogWarning("VtxRecoPlay") << "warning: is_mfv=" << is_mfv << ", is_ttbar=" << is_ttbar << " and neither MCI valid";
 
   h_gen_valid->Fill(gen_valid);
   for (int j = 0; j < 2; ++j) {
@@ -465,13 +536,6 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     double sumpt2 = 0;
     double mintrackpt = 1e99;
     double maxtrackpt = 0;
-    std::vector<double> drs;
-    std::vector<double> weights;
-    double sumweight = 0;
-    double drmin = 1e99;
-    double drmax = 0;
-    double dravg = 0, dravgw = 0;
-    double drrms = 0, drrmsw = 0;
 
     for (auto trki = trkb; trki != trke; ++trki) {
       int key = trki->key();
@@ -493,22 +557,6 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       if (pti < mintrackpt)
         mintrackpt = pti;
       sumpt2 += pti*pti;
-
-      for (auto trkj = trki + 1; trkj != trke; ++trkj) {
-        double dr = reco::deltaR(**trki, **trkj);
-        drs.push_back(dr);
-        
-        double weight = 0.5*((*trki)->pt() + (*trkj)->pt());
-        sumweight += weight;
-        weights.push_back(weight);
-        
-        dravg  += dr;
-        dravgw += dr * weight;
-        if (dr < drmin)
-          drmin = dr;
-        if (dr > drmax)
-          drmax = dr;
-      }
     }
 
     std::vector<int> trackicity;
@@ -517,16 +565,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     int max_trackicity = *std::max_element(trackicity.begin(), trackicity.end());
     h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
-    dravg  /= drs.size();
-    dravgw /= sumweight;
-    
-    int idr = 0;
-    for (double dr : drs) {
-      drrms  += pow(dr - dravg,  2);
-      drrmsw += pow(dr - dravgw, 2) * weights[idr++];
-    }
-    drrms  = sqrt(drrms/drs.size());
-    drrmsw = sqrt(drrmsw/sumweight);
+    vertex_tracks_distance vtx_tks_dist(sv);
 
     float gen2ddist = 1e99;
     float gen3ddist = 1e99;
@@ -562,12 +601,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"sumpt2",          sumpt2},
         {"mintrackpt",      mintrackpt},
         {"maxtrackpt",      maxtrackpt},
-        {"drmin",           drmin},
-        {"drmax",           drmax},
-        {"dravg",           dravg},
-        {"drrms",           drrms},
-        {"dravgw",          dravgw},
-        {"drrmsw",          drrmsw},
+        {"drmin",           vtx_tks_dist.drmin},
+        {"drmax",           vtx_tks_dist.drmax},
+        {"dravg",           vtx_tks_dist.dravg},
+        {"drrms",           vtx_tks_dist.drrms},
+        {"dravgw",          vtx_tks_dist.dravgw},
+        {"drrmsw",          vtx_tks_dist.drrmsw},
         {"gen2ddist",       gen2ddist},
         {"gen2derr",        gen2derr},
         {"gen3ddist",       gen3ddist},
