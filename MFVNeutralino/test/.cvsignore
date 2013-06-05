@@ -1,8 +1,0 @@
-NuclearInteractionOutputFile.txt
-PileUpOutputFile.txt
-*.root
-out.*
-crab
-minSLHA.spc
-crab.cfg
-genfsimreco_crab.py

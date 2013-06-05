@@ -1,5 +1,0 @@
-<use name="DataFormats/Common"/>
-<use name="JMTucker/Tools"/>
-<export>
-  <lib name="1"/>
-</export>

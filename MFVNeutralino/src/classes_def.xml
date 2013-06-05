@@ -1,6 +1,0 @@
-<lcgdict>
-  <class name="LightTrackMatch"/>
-  <class name="edm::Wrapper<LightTrackMatch>"/>
-  <class name="std::map<int, LightTrackMatch>"/>
-  <class name="edm::Wrapper<std::map<int, LightTrackMatch> >"/>
-</lcgdict>
