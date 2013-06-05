@@ -9,8 +9,8 @@ from ConfigParser import ConfigParser, NoOptionError
 from JMTucker.Tools.hadd import hadd
 
 username = getpass.getuser()
-tmp_dir = '/tmp/%s/mycrab' % username
-os.system('mkdir -p %s' % tmp_dir)
+mycrab_tmp_dir = '/tmp/%s/mycrab' % username
+os.system('mkdir -p %s' % mycrab_tmp_dir)
 
 if os.path.exists('/uscms_data'):
     crab_working_dir_default_root = '/uscms_data/d2/%s/crab_dirs' % username
