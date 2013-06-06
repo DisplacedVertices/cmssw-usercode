@@ -23,7 +23,7 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag gen_src;
-  int print_info;
+  const bool check_all_gen_particles;
 
   edm::ESHandle<ParticleDataTable> pdt;
 
@@ -60,7 +60,7 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    print_info(cfg.getUntrackedParameter<int>("print_info", 0))
+    check_all_gen_particles(cfg.getParameter<bool>("check_all_gen_particles"))
 {
   edm::Service<TFileService> fs;
 
@@ -225,8 +225,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   const int for_vtx_id = abs(for_vtx.pdgId());
   die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 4), "gen_particles[2] is not a gluon or light quark: id=%i", for_vtx_id);
   float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
-  if (print_info)
-    printf("origin x,y,z: %f, %f, %f\n", x0, y0, z0);
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
@@ -234,9 +232,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid!";
     return;
   }
-
-  if (print_info)
-    mci.Print(std::cout);
 
   NumLeptons->Fill(mci.num_leptonic);
   DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
@@ -271,7 +266,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
     h_lspbeta->Fill(lspbeta);
     h_lspbetagamma->Fill(lspbetagamma);
-    
+
     // Fill some simple histos: 2D vertex location, and distance to
     // origin, and the min/max deltaR of the daughters (also versus
     // lsp boost).
@@ -303,31 +298,32 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         h_t->Fill(r3d/lspbeta/30);
     }
 
-    for (const auto& gen : *gen_particles) {
-      if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
-        const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
-        const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
-        const bool fromq = mci.Ancestor(&gen, "quark");
-        const float dx = gen.vx() - x0;
-        const float dy = gen.vy() - y0;
-        const float dz = gen.vz() - z0;
-        const float r2d = mag(dx, dy);
-        const float r3d = mag(dx, dy, dz);
-        std::vector<int> tofill;
-        h_status1origins->Fill((from21*4) | (from22*2) | (fromq*1));
-        if (from21) tofill.push_back(4);
-        if (from22) tofill.push_back(5);
-        if (fromq)  tofill.push_back(6);
-        if (from21 && !from22 && !fromq) tofill.push_back(7);
-        if (from22 && !from21 && !fromq) tofill.push_back(8);
-        for (int i : tofill) {
-          h_vtx[i]->Fill(dx, dy);
-          h_r2d[i]->Fill(r2d);
-          h_r3d[i]->Fill(r3d);
+    if (check_all_gen_particles)
+      for (const auto& gen : *gen_particles) {
+        if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
+          const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
+          const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
+          const bool fromq = mci.Ancestor(&gen, "quark");
+          const float dx = gen.vx() - x0;
+          const float dy = gen.vy() - y0;
+          const float dz = gen.vz() - z0;
+          const float r2d = mag(dx, dy);
+          const float r3d = mag(dx, dy, dz);
+          std::vector<int> tofill;
+          h_status1origins->Fill((from21*4) | (from22*2) | (fromq*1));
+          if (from21) tofill.push_back(4);
+          if (from22) tofill.push_back(5);
+          if (fromq)  tofill.push_back(6);
+          if (from21 && !from22 && !fromq) tofill.push_back(7);
+          if (from22 && !from21 && !fromq) tofill.push_back(8);
+          for (int i : tofill) {
+            h_vtx[i]->Fill(dx, dy);
+            h_r2d[i]->Fill(r2d);
+            h_r3d[i]->Fill(r3d);
+          }
         }
       }
-    }
-    
+
     float min_dR =  1e99;
     float max_dR = -1e99;
     for (int i = 0; i < ndau; ++i) {
@@ -347,9 +343,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
     h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
   }
-
-  if (print_info)
-    --print_info;
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);
