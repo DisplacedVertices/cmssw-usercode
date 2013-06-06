@@ -41,6 +41,11 @@ class MFVGenHistos : public edm::EDAnalyzer {
   BasicKinematicHists* Ws[2];
   BasicKinematicHists* BottomsFromTops[2];
   BasicKinematicHists* WDaughters[2][2];
+  BasicKinematicHists* Muons;
+  BasicKinematicHists* Electrons;
+  BasicKinematicHists* Taus;
+  BasicKinematicHists* LightLeptons;
+  BasicKinematicHists* Leptons;
 
   TH2F* h_vtx[9];
   TH1F* h_r2d[9];
@@ -169,6 +174,66 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     }
   }
 
+  Electrons = bkh_factory->make("Electrons", "electrons");
+  Electrons->BookE (200, 0, 2000, "10");
+  Electrons->BookP (200, 0, 2000, "10");
+  Electrons->BookPt(200, 0, 2000, "10");
+  Electrons->BookPz(200, 0, 2000, "10");
+  Electrons->BookM (200, 0, 2000, "10");
+  Electrons->BookRapEta(200, "0.1");
+  Electrons->BookPhi(50, "0.125");
+  Electrons->BookDxy(200, -2, 2, "0.02");
+  Electrons->BookDz (200, -20, 20, "0.2");
+  Electrons->BookQ();
+
+  Muons = bkh_factory->make("Muons", "muons");
+  Muons->BookE (200, 0, 2000, "10");
+  Muons->BookP (200, 0, 2000, "10");
+  Muons->BookPt(200, 0, 2000, "10");
+  Muons->BookPz(200, 0, 2000, "10");
+  Muons->BookM (200, 0, 2000, "10");
+  Muons->BookRapEta(200, "0.1");
+  Muons->BookPhi(50, "0.125");
+  Muons->BookDxy(200, -2, 2, "0.02");
+  Muons->BookDz (200, -20, 20, "0.2");
+  Muons->BookQ();
+
+  Taus = bkh_factory->make("Taus", "taus");
+  Taus->BookE (200, 0, 2000, "10");
+  Taus->BookP (200, 0, 2000, "10");
+  Taus->BookPt(200, 0, 2000, "10");
+  Taus->BookPz(200, 0, 2000, "10");
+  Taus->BookM (200, 0, 2000, "10");
+  Taus->BookRapEta(200, "0.1");
+  Taus->BookPhi(50, "0.125");
+  Taus->BookDxy(200, -2, 2, "0.02");
+  Taus->BookDz (200, -20, 20, "0.2");
+  Taus->BookQ();
+
+  LightLeptons= bkh_factory->make("LightLeptons", "light leptons");
+  LightLeptons->BookE (200, 0, 2000, "10");
+  LightLeptons->BookP (200, 0, 2000, "10");
+  LightLeptons->BookPt(200, 0, 2000, "10");
+  LightLeptons->BookPz(200, 0, 2000, "10");
+  LightLeptons->BookM (200, 0, 2000, "10");
+  LightLeptons->BookRapEta(200, "0.1");
+  LightLeptons->BookPhi(50, "0.125");
+  LightLeptons->BookDxy(200, -2, 2, "0.02");
+  LightLeptons->BookDz (200, -20, 20, "0.2");
+  LightLeptons->BookQ();
+
+  Leptons = bkh_factory->make("Leptons", "leptons");
+  Leptons->BookE (200, 0, 2000, "10");
+  Leptons->BookP (200, 0, 2000, "10");
+  Leptons->BookPt(200, 0, 2000, "10");
+  Leptons->BookPz(200, 0, 2000, "10");
+  Leptons->BookM (200, 0, 2000, "10");
+  Leptons->BookRapEta(200, "0.1");
+  Leptons->BookPhi(50, "0.125");
+  Leptons->BookDxy(200, -2, 2, "0.02");
+  Leptons->BookDz (200, -20, 20, "0.2");
+  Leptons->BookQ();
+
   const char* names[9] = {"lsp", "strange", "bottom", "bhadron", "from21", "from22", "fromq", "from21only", "from22only"};
   for (int i = 0; i < 9; ++i) {
     h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 201, -1, 1, 201, -1, 1);
@@ -213,11 +278,6 @@ namespace {
     if (y < 0) return -m;
     return m;
   }
-
-  void fill(BasicKinematicHists* bkh, const reco::Candidate* c, float x0, float y0, float z0) {
-    bkh->Fill(c);
-    bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());
-  }
 }
 
 void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -230,6 +290,10 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   const int for_vtx_id = abs(for_vtx.pdgId());
   die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 4), "gen_particles[2] is not a gluon or light quark: id=%i", for_vtx_id);
   float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+  auto fill = [x0,y0,z0](BasicKinematicHists* bkh, const reco::Candidate* c) {
+    bkh->Fill(c);
+    bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());
+  };
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
@@ -247,15 +311,21 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());
     fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
 
-    fill(Lsps           [i], mci.lsps             [i], x0, y0, z0);
-    fill(Stranges       [i], mci.stranges         [i], x0, y0, z0);
-    fill(Bottoms        [i], mci.bottoms          [i], x0, y0, z0);
-    fill(Tops           [i], mci.tops             [i], x0, y0, z0);
-    fill(Ws             [i], mci.Ws               [i], x0, y0, z0);
-    fill(BottomsFromTops[i], mci.bottoms_from_tops[i], x0, y0, z0);
-    for (int j = 0; j < 2; ++j)
-      fill(WDaughters[i][j], mci.W_daughters[i][j], x0, y0, z0);
+    fill(Lsps           [i], mci.lsps             [i]);
+    fill(Stranges       [i], mci.stranges         [i]);
+    fill(Bottoms        [i], mci.bottoms          [i]);
+    fill(Tops           [i], mci.tops             [i]);
+    fill(Ws             [i], mci.Ws               [i]);
+    fill(BottomsFromTops[i], mci.bottoms_from_tops[i]);
 
+    for (int j = 0; j < 2; ++j) {
+      const reco::Candidate* c = mci.W_daughters[i][j];
+      fill(WDaughters[i][j], c);
+      const int id = abs(c->pdgId());
+      if      (id == 11) { fill(Leptons, c); fill(LightLeptons, c); fill(Electrons, c); }
+      else if (id == 13) { fill(Leptons, c); fill(LightLeptons, c); fill(Muons,     c); }
+      else if (id == 15) { fill(Leptons, c);                        fill(Taus,      c); }
+    }
 
     const reco::GenParticle& lsp = *mci.lsps[i];
     const int ndau = 3;
