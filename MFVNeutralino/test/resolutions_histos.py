@@ -1,6 +1,7 @@
 import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, add_analyzer
 
+#process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.source.fileNames = ['file:/uscms/home/jchaves/nobackup/pat_2_1_Nnk.root']
 process.TFileService.fileName = 'resolutions_histos.root'
 
