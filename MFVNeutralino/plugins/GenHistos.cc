@@ -102,8 +102,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Stranges[i]->BookM (200, 0, 2000, "10");
     Stranges[i]->BookRapEta(200, "0.1");
     Stranges[i]->BookPhi(50, "0.125");
-    Stranges[i]->BookDxy(200, -50, 50, "0.5");
-    Stranges[i]->BookDz (200, -50, 50, "0.5");
+    Stranges[i]->BookDxy(200, -2, 2, "0.02");
+    Stranges[i]->BookDz (200, -20, 20, "0.2");
     Stranges[i]->BookQ();
 
     Bottoms[i] = bkh_factory->make(TString::Format("Bottoms#%i", i), TString::Format("bottom #%i", i));
@@ -114,8 +114,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Bottoms[i]->BookM (200, 0, 2000, "10");
     Bottoms[i]->BookRapEta(200, "0.1");
     Bottoms[i]->BookPhi(50, "0.125");
-    Bottoms[i]->BookDxy(200, -50, 50, "0.5");
-    Bottoms[i]->BookDz (200, -50, 50, "0.5");
+    Bottoms[i]->BookDxy(200, -2, 20, "0.02");
+    Bottoms[i]->BookDz (200, -20, 20, "0.2");
     Bottoms[i]->BookQ();
     
     Tops[i] = bkh_factory->make(TString::Format("Tops#%i", i), TString::Format("top #%i", i));
@@ -126,8 +126,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Tops[i]->BookM (200, 0, 2000, "10");
     Tops[i]->BookRapEta(200, "0.1");
     Tops[i]->BookPhi(50, "0.125");
-    Tops[i]->BookDxy(200, -50, 50, "0.5");
-    Tops[i]->BookDz (200, -50, 50, "0.5");
+    Tops[i]->BookDxy(200, -2, 2, "0.02");
+    Tops[i]->BookDz (200, -20, 20, "0.2");
     Tops[i]->BookQ();
     
     Ws[i] = bkh_factory->make(TString::Format("Ws#%i", i), TString::Format("w #%i", i));
@@ -138,8 +138,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Ws[i]->BookM (200, 0, 2000, "10");
     Ws[i]->BookRapEta(200, "0.1");
     Ws[i]->BookPhi(50, "0.125");
-    Ws[i]->BookDxy(200, -50, 50, "0.5");
-    Ws[i]->BookDz (200, -50, 50, "0.5");
+    Ws[i]->BookDxy(200, -2, 2, "0.02");
+    Ws[i]->BookDz (200, -20, 20, "0.2");
     Ws[i]->BookQ();
 
     BottomsFromTops[i] = bkh_factory->make(TString::Format("BottomsFromTops#%i", i), TString::Format("bottom from top #%i", i));
@@ -150,8 +150,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     BottomsFromTops[i]->BookM (200, 0, 2000, "10");
     BottomsFromTops[i]->BookRapEta(200, "0.1");
     BottomsFromTops[i]->BookPhi(50, "0.125");
-    BottomsFromTops[i]->BookDxy(200, -50, 50, "0.5");
-    BottomsFromTops[i]->BookDz (200, -50, 50, "0.5");
+    BottomsFromTops[i]->BookDxy(200, -2, 2, "0.02");
+    BottomsFromTops[i]->BookDz (200, -20, 20, "0.2");
     BottomsFromTops[i]->BookQ();
 
     for (int j = 0; j < 2; ++j) {
@@ -163,8 +163,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
       WDaughters[i][j]->BookM (200, 0, 2000, "10");
       WDaughters[i][j]->BookRapEta(200, "0.1");
       WDaughters[i][j]->BookPhi(50, "0.125");
-      WDaughters[i][j]->BookDxy(200, -50, 50, "0.5");
-      WDaughters[i][j]->BookDz (200, -50, 50, "0.5");
+      WDaughters[i][j]->BookDxy(200, -2, 2, "0.02");
+      WDaughters[i][j]->BookDz (200, -20, 20, "0.2");
       WDaughters[i][j]->BookQ();
     }
   }
@@ -213,6 +213,11 @@ namespace {
     if (y < 0) return -m;
     return m;
   }
+
+  void fill(BasicKinematicHists* bkh, const reco::Candidate* c, float x0, float y0, float z0) {
+    bkh->Fill(c);
+    bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());
+  }
 }
 
 void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -242,20 +247,14 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());
     fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
 
-    Lsps    [i]->Fill(mci.lsps[i]);
-    Stranges[i]->Fill(mci.stranges[i]);
-    Bottoms [i]->Fill(mci.bottoms[i]);
-    Tops    [i]->Fill(mci.tops[i]);
-
-    Stranges[i]->FillEx(signed_mag(mci.stranges[i]->vx(), mci.stranges[i]->vy()), mci.stranges[i]->vz(), mci.stranges[i]->charge());
-    Bottoms [i]->FillEx(signed_mag(mci.bottoms [i]->vx(), mci.bottoms [i]->vy()), mci.bottoms [i]->vz(), mci.bottoms [i]->charge());
-    Tops    [i]->FillEx(signed_mag(mci.tops    [i]->vx(), mci.tops    [i]->vy()), mci.tops    [i]->vz(), mci.tops    [i]->charge());
-
-    Ws[i]->Fill(mci.Ws[i]);
-    if (mci.bottoms_from_tops[i])
-      BottomsFromTops[i]->Fill(mci.bottoms_from_tops[i]);
+    fill(Lsps           [i], mci.lsps             [i], x0, y0, z0);
+    fill(Stranges       [i], mci.stranges         [i], x0, y0, z0);
+    fill(Bottoms        [i], mci.bottoms          [i], x0, y0, z0);
+    fill(Tops           [i], mci.tops             [i], x0, y0, z0);
+    fill(Ws             [i], mci.Ws               [i], x0, y0, z0);
+    fill(BottomsFromTops[i], mci.bottoms_from_tops[i], x0, y0, z0);
     for (int j = 0; j < 2; ++j)
-      WDaughters[i][j]->Fill(mci.W_daughters[i][j]);
+      fill(WDaughters[i][j], mci.W_daughters[i][j], x0, y0, z0);
 
 
     const reco::GenParticle& lsp = *mci.lsps[i];
