@@ -15,8 +15,9 @@ struct MCInteractionMFV3j : public MCInteraction {
   const reco::GenParticle* last_tops[2];
   const reco::GenParticle* last_Ws[2];
 
-  int num_leptonic;
+  int num_leptonic; // 0, 1, or 2 for hadronic, semileptonic, dileptonic ttbar decay
   int decay_type[2]; // for Wplus and Wminus decays (the array index) into e, mu, tau, hadronic (values 0-3)
+  int which_is_lepton; // which W daughter is the leptonic decay; only has meaning for num_leptonic = 1
 
   // "Plain" momentum four-vectors.
   TLorentzVector p4_lsps[2];

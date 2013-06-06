@@ -13,6 +13,7 @@ void MCInteractionMFV3j::Clear() {
     decay_type[i] = -1;
   }
   num_leptonic = -1;
+  which_is_lepton = -1;
 }
 
 bool MCInteractionMFV3j::Valid() {
@@ -134,6 +135,7 @@ void MCInteractionMFV3j::Fill() {
       die_if_not(is_quark(W_daughters[i][1]), "one W daughter is quark but other is not");
     else {
       die_if_not(is_lepton(W_daughters[i][0]) && is_lepton(W_daughters[i][1]), "one W daughter is lepton and other is not");
+      which_is_lepton = i;
       ++num_leptonic;
     }
 
