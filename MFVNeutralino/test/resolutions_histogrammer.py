@@ -1,8 +1,8 @@
 import os, sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms
+from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, add_analyzer
 
 process.source.fileNames = ['file:/uscms/home/jchaves/nobackup/pat_2_1_Nnk.root']
-process.TFileService.fileName = 'resolutions.root'
+process.TFileService.fileName = 'resolutions_histos.root'
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.goodDataFilter = hltHighLevel.clone()
@@ -11,7 +11,7 @@ process.goodDataFilter.HLTPaths = ['eventCleaningAll'] # can set to just 'goodOf
 process.goodDataFilter.andOr = False # = AND
 
 process.triggerFilter = hltHighLevel.clone()
-process.triggerFilter.HLTPaths = ['HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_v*', 'HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralPFNoPUJet30_v*']
+process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*', 'HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet50_40_30_v*', 'HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*', 'HLT_Ele25_CaloIdVT_CaloIsoVL_TrkIdVL_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*']
 process.triggerFilter.andOr = True # = OR
 
 import JMTucker.Tools.PATTupleSelection_cfi
@@ -60,12 +60,10 @@ process.histosNoClean       = histogrammer()
 process.histosNoTrig        = histogrammer()
 process.histosNoCleanNoTrig = histogrammer()
 
-process.eventIds = cms.EDAnalyzer('EventIdRecorder')
-
-process.p0 = cms.Path(process.goodDataFilter * process.triggerFilter * process.eventIds * process.histos)
-process.p1 = cms.Path(                         process.triggerFilter * process.eventIds * process.histosNoClean)
-process.p2 = cms.Path(process.goodDataFilter *                         process.eventIds * process.histosNoTrig)
-process.p3 = cms.Path(                                                 process.eventIds * process.histosNoCleanNoTrig)
+process.p0 = cms.Path(process.goodDataFilter * process.triggerFilter * process.histos)
+process.p1 = cms.Path(                         process.triggerFilter * process.histosNoClean)
+process.p2 = cms.Path(process.goodDataFilter *                         process.histosNoTrig)
+process.p3 = cms.Path(                                                 process.histosNoCleanNoTrig)
 
 if 'debug' in sys.argv:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -82,6 +80,8 @@ if 'debug' in sys.argv:
 def run_on_data(dataset=None, datasets=None):
     if 'debug' in sys.argv:
         process.p.remove(process.printList)
+
+    add_analyzer('EventIdRecorder')
 
     if dataset and datasets:
         veto_filter = cms.EDFilter('VetoOtherDatasets', datasets_to_veto = cms.vstring(*[d for d in datasets if d != dataset]))
