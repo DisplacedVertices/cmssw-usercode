@@ -13,7 +13,7 @@ process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
 process.GenHistos = cms.EDAnalyzer('MFVGenHistos',
                                    gen_src = cms.InputTag('genParticles'),
-                                   print_info = cms.int32(0),
+                                   print_info = cms.untracked.int32(0),
                                    )
 
 process.p = cms.Path(process.mfvGenParticleFilter * process.GenHistos)

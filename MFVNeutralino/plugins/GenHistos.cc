@@ -60,7 +60,7 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    print_info(cfg.getParameter<int>("print_info"))
+    print_info(cfg.getUntrackedParameter<int>("print_info", 0))
 {
   edm::Service<TFileService> fs;
 
