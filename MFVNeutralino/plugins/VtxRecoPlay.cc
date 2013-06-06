@@ -465,7 +465,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByLabel(primary_vertex_src, primary_vertices);
-  const reco::Vertex& primary_vertex = primary_vertices->at(0);
+  const reco::Vertex* primary_vertex = 0;
+  if (primary_vertices->size())
+    primary_vertex = &primary_vertices->at(0);
 
   const int npv = primary_vertices->size();
   h_npv->Fill(npv);
@@ -581,12 +583,27 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
     std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
     Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
-    
-    std::pair<bool,float> pv2dcompat = compatibility(sv, primary_vertex, false);
-    Measurement1D pv2ddist = distcalc_2d.distance(sv, primary_vertex);
 
-    std::pair<bool,float> pv3dcompat = compatibility(sv, primary_vertex, true);
-    Measurement1D pv3ddist = distcalc_3d.distance(sv, primary_vertex);
+    std::pair<bool,float> pv2dcompat, pv3dcompat;
+    float pv2ddist_val, pv3ddist_val;
+    float pv2ddist_err, pv3ddist_err;
+    float pv2ddist_sig, pv3ddist_sig;
+    pv2dcompat = pv3dcompat = std::make_pair(false, -1.f);
+    pv2ddist_val = pv3ddist_val = pv2ddist_err = pv3ddist_err = pv2ddist_sig = pv3ddist_sig = -1;
+
+    if (primary_vertex != 0) {
+      pv2dcompat = compatibility(sv, *primary_vertex, false);
+      Measurement1D pv2ddist = distcalc_2d.distance(sv, *primary_vertex);
+      pv2ddist_val = pv2ddist.value();
+      pv2ddist_err = pv2ddist.error();
+      pv2ddist_sig = pv2ddist.significance();
+      
+      pv3dcompat = compatibility(sv, *primary_vertex, true);
+      Measurement1D pv3ddist = distcalc_3d.distance(sv, *primary_vertex);
+      pv3ddist_val = pv3ddist.value();
+      pv3ddist_err = pv3ddist.error();
+      pv3ddist_sig = pv3ddist.significance();
+    }
 
     PairwiseHistos::ValueMap v = {
         {"ntracks",         ntracks},        
@@ -618,14 +635,14 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"bs2dsig",         bs2ddist.significance()},
         {"pv2dcompatscss",  pv2dcompat.first},
         {"pv2dcompat",      pv2dcompat.second},
-        {"pv2ddist",        pv2ddist.value()},
-        {"pv2derr",         pv2ddist.error()},
-        {"pv2dsig",         pv2ddist.significance()},
+        {"pv2ddist",        pv2ddist_val},
+        {"pv2derr",         pv2ddist_err},
+        {"pv2dsig",         pv2ddist_sig},
         {"pv3dcompatscss",  pv3dcompat.first},
         {"pv3dcompat",      pv3dcompat.second},
-        {"pv3ddist",        pv3ddist.value()},
-        {"pv3derr",         pv3ddist.error()},
-        {"pv3dsig",         pv3ddist.significance()},
+        {"pv3ddist",        pv3ddist_val},
+        {"pv3derr",         pv3ddist_err},
+        {"pv3dsig",         pv3ddist_sig},
     };
     h_sv[svndx].Fill(v);
   }
