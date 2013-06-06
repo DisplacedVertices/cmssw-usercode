@@ -4,6 +4,11 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, add_analyzer
 process.source.fileNames = ['file:/uscms/home/jchaves/nobackup/pat_2_1_Nnk.root']
 process.TFileService.fileName = 'resolutions_histos.root'
 
+process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
+process.mfvGenParticleFilter.required_num_leptonic = 1
+process.mfvGenParticleFilter.min_lepton_pt = 30
+process.mfvGenParticleFilter.max_lepton_eta = 2.1
+
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.goodDataFilter = hltHighLevel.clone()
 process.goodDataFilter.TriggerResultsTag = cms.InputTag('TriggerResults', '', 'PAT')
@@ -55,15 +60,23 @@ def histogrammer():
                           print_info = cms.bool(False),
                           )
 
-process.histos              = histogrammer()
-process.histosNoClean       = histogrammer()
-process.histosNoTrig        = histogrammer()
-process.histosNoCleanNoTrig = histogrammer()
+process.histos                   = histogrammer()
+process.histosNoClean            = histogrammer()
+process.histosNoTrig             = histogrammer()
+process.histosNoCleanNoTrig      = histogrammer()
+process.histosInAcc              = histogrammer()
+process.histosInAccNoClean       = histogrammer()
+process.histosInAccNoTrig        = histogrammer()
+process.histosInAccNoCleanNoTrig = histogrammer()
 
-process.p0 = cms.Path(process.goodDataFilter * process.triggerFilter * process.histos)
-process.p1 = cms.Path(                         process.triggerFilter * process.histosNoClean)
-process.p2 = cms.Path(process.goodDataFilter *                         process.histosNoTrig)
-process.p3 = cms.Path(                                                 process.histosNoCleanNoTrig)
+process.p0 = cms.Path(                               process.goodDataFilter * process.triggerFilter * process.histos)
+process.p1 = cms.Path(                                                        process.triggerFilter * process.histosNoClean)
+process.p2 = cms.Path(                               process.goodDataFilter *                         process.histosNoTrig)
+process.p3 = cms.Path(                                                                                process.histosNoCleanNoTrig)
+process.p4 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter * process.triggerFilter * process.histosInAcc)
+process.p5 = cms.Path(process.mfvGenParticleFilter *                          process.triggerFilter * process.histosInAccNoClean)
+process.p6 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter *                         process.histosInAccNoTrig)
+process.p7 = cms.Path(process.mfvGenParticleFilter *                                                  process.histosInAccNoCleanNoTrig)
 
 if 'debug' in sys.argv:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -76,7 +89,7 @@ if 'debug' in sys.argv:
                                        useMessageLogger = cms.untracked.bool(False)
                                        )
     process.p *= process.printList
-
+                                     
 def run_on_data(dataset=None, datasets=None):
     if 'debug' in sys.argv:
         process.p.remove(process.printList)
