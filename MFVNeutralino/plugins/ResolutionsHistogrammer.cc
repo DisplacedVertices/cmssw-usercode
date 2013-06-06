@@ -23,10 +23,10 @@
 #define NBDISC 13
 #define NLEPDISTS 5
 
-class MFVNeutralinoResolutionsHistogrammer : public edm::EDAnalyzer {
+class MFVResolutionsHistogrammer : public edm::EDAnalyzer {
 public:
-  explicit MFVNeutralinoResolutionsHistogrammer(const edm::ParameterSet&);
-  ~MFVNeutralinoResolutionsHistogrammer();
+  explicit MFVResolutionsHistogrammer(const edm::ParameterSet&);
+  ~MFVResolutionsHistogrammer();
 
 private:
   const bool reweight_pileup;
@@ -122,30 +122,32 @@ private:
   BasicKinematicHists* RecoDilepElectron[NLEPDISTS];
 };
 
-template <typename T>
-std::vector<T> copy_N_elements(const std::vector<T>& src, const size_t N) {
-  std::vector<T> res;
-  const size_t ie = N < src.size() ? N : src.size();
-  for (size_t i = 0; i < ie; ++i)
-    res.push_back(src[i]);
-  return res;
+namespace {
+  template <typename T>
+  std::vector<T> copy_N_elements(const std::vector<T>& src, const size_t N) {
+    std::vector<T> res;
+    const size_t ie = N < src.size() ? N : src.size();
+    for (size_t i = 0; i < ie; ++i)
+      res.push_back(src[i]);
+    return res;
+  }
+
+  template <typename T>
+  bool greater_by_pt(const T* l, const T* r) {
+    return l->pt() > r->pt();
+  }
+
+  template <typename T>
+  std::vector<const T*> sort_pointers(const std::vector<T>& src) {
+    std::vector<const T*> res;
+    for (size_t i = 0; i < src.size(); ++i)
+      res.push_back(&src[i]);
+    std::sort(res.begin(), res.end(), greater_by_pt<T>);
+    return res;
+  }
 }
 
-template <typename T>
-bool greater_by_pt(const T* l, const T* r) {
-  return l->pt() > r->pt();
-}
-
-template <typename T>
-std::vector<const T*> sort_pointers(const std::vector<T>& src) {
-  std::vector<const T*> res;
-  for (size_t i = 0; i < src.size(); ++i)
-    res.push_back(&src[i]);
-  std::sort(res.begin(), res.end(), greater_by_pt<T>);
-  return res;
-}
-
-MFVNeutralinoResolutionsHistogrammer::MFVNeutralinoResolutionsHistogrammer(const edm::ParameterSet& cfg)
+MFVResolutionsHistogrammer::MFVResolutionsHistogrammer(const edm::ParameterSet& cfg)
   : reweight_pileup(cfg.getParameter<bool>("reweight_pileup")),
     force_weight(cfg.existsAs<double>("force_weight") ? cfg.getParameter<double>("force_weight") : -1),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
@@ -167,21 +169,23 @@ MFVNeutralinoResolutionsHistogrammer::MFVNeutralinoResolutionsHistogrammer(const
 {
   die_if_not(b_discriminators.size() == b_discriminator_mins.size(), "b_discriminators size %i != b_discriminator_mins size %i", int(b_discriminators.size()), int(b_discriminator_mins.size()));
   if (cfg.getParameter<std::vector<std::string> >("b_discriminators").size() > NBDISC)
-    edm::LogWarning("MFVNeutralinoResolutionsHistogrammer") << "only first " << NBDISC << " b_discriminators will be used";
+    edm::LogWarning("MFVResolutionsHistogrammer") << "only first " << NBDISC << " b_discriminators will be used";
   edm::Service<TFileService> fs;
   bkh_factory = new BasicKinematicHistsFactory(fs);
   Book(fs);
 }
 
-MFVNeutralinoResolutionsHistogrammer::~MFVNeutralinoResolutionsHistogrammer() {
+MFVResolutionsHistogrammer::~MFVResolutionsHistogrammer() {
   delete bkh_factory;
 }
 
-TFileDirectory mkdir(edm::Service<TFileService>& fs, const TString& name) {
-  return fs->mkdir(name.Data());
+namespace {
+  TFileDirectory mkdir(edm::Service<TFileService>& fs, const TString& name) {
+    return fs->mkdir(name.Data());
+  }
 }
 
-void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
+void MFVResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
   TH1::SetDefaultSumw2();
 
   NVertices = fs->make<TH1F>("NVertices", ";number of primary vertices;events", 75, 0, 75);
@@ -322,11 +326,13 @@ void MFVNeutralinoResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) 
   METResVsNPV = met_dir.make<TH2F>("METResVsNPV", ";number of primary vertices;MET resolution (GeV)", 25, 0, 75, 20, 0, 200);
 }
 
-float mag(double x, double y) {
-  return sqrt(x*x + y*y);
+namespace {
+  float mag(double x, double y) {
+    return sqrt(x*x + y*y);
+  }
 }
 
-double MFVNeutralinoResolutionsHistogrammer::GetWeight(const edm::Event& event) const {
+double MFVResolutionsHistogrammer::GetWeight(const edm::Event& event) const {
   double weight = 1.;
   if (force_weight > 0)
     weight *= force_weight;
@@ -342,7 +348,7 @@ double MFVNeutralinoResolutionsHistogrammer::GetWeight(const edm::Event& event) 
   return weight;
 }
 
-void MFVNeutralinoResolutionsHistogrammer::analyze(const edm::Event& event, const edm::EventSetup&) {
+void MFVResolutionsHistogrammer::analyze(const edm::Event& event, const edm::EventSetup&) {
   const bool is_mc = !event.isRealData();
   const double weight = is_mc ? GetWeight(event) : 1.;
 
@@ -580,4 +586,4 @@ void MFVNeutralinoResolutionsHistogrammer::analyze(const edm::Event& event, cons
   }
 }
 
-DEFINE_FWK_MODULE(MFVNeutralinoResolutionsHistogrammer);
+DEFINE_FWK_MODULE(MFVResolutionsHistogrammer);
