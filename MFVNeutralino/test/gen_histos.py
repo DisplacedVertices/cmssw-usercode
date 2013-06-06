@@ -4,26 +4,21 @@ debug = 'debug' in sys.argv
 
 process.source.fileNames = ['file:gensimhlt.root']
 process.TFileService.fileName = 'gen_histos.root'
-process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 
 #from JMTucker.MFVNeutralino.SimFiles import load
 #load(process, 'tau1000um_M0400', [0,1])
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
+process.load('JMTucker.MFVNeutralino.GenHistos_cff')
 
-process.GenHistos = cms.EDAnalyzer('MFVGenHistos',
-                                   gen_src = cms.InputTag('genParticles'),
-                                   print_info = cms.untracked.int32(0),
-                                   )
-
-process.p = cms.Path(process.mfvGenParticleFilter * process.GenHistos)
+process.p = cms.Path(process.mfvGenParticleFilter * process.mfvGenHistos)
 
 if debug:
     process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
                                        src = cms.InputTag('genParticles'),
                                        printVertex = cms.untracked.bool(True),
                                        )
-    process.GenHistos.print_info = -1
+    process.mfvGenHistos.print_info = -1
     process.p.insert(0, process.printList)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

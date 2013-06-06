@@ -60,11 +60,10 @@ def histogrammer():
                           print_info = cms.bool(False),
                           )
 
-def gen_histogrammer():
-    return cms.EDAnalyzer('MFVGenHistos', gen_src = cms.InputTag('genParticles'))
+process.load('JMTucker.MFVNeutralino.GenHistos_cff')
 
 for x in [''] + 'NoClean NoTrig NoCleanNoTrig InAcc InAccNoClean InAccNoTrig InAccNoCleanNoTrig'.split():
-    setattr(process, 'genHistos' + x, gen_histogrammer())
+    setattr(process, 'genHistos' + x, process.mfvGenHistos.clone())
     setattr(process, 'histos'    + x, histogrammer())
 
 process.p0 = cms.Path(                               process.goodDataFilter * process.triggerFilter * process.genHistos                   * process.histos)
