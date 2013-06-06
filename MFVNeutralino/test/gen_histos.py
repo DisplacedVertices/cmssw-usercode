@@ -8,15 +8,15 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 
 #from JMTucker.MFVNeutralino.SimFiles import load
 #load(process, 'tau1000um_M0400', [0,1])
-    
-process.GenHistos = cms.EDAnalyzer('MFVNeutralinoGenHistos',
+
+process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
+
+process.GenHistos = cms.EDAnalyzer('MFVGenHistos',
                                    gen_src = cms.InputTag('genParticles'),
-                                   required_num_leptonic = cms.int32(-1),
-                                   allowed_decay_types = cms.vint32(),
                                    print_info = cms.int32(0),
                                    )
 
-process.p = cms.Path(process.GenHistos)
+process.p = cms.Path(process.mfvGenParticleFilter * process.GenHistos)
 
 if debug:
     process.printList = cms.EDAnalyzer('JMTParticleListDrawer',

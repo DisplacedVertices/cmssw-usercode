@@ -16,15 +16,13 @@
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
-class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
+class MFVGenHistos : public edm::EDAnalyzer {
  public:
-  explicit MFVNeutralinoGenHistos(const edm::ParameterSet&);
+  explicit MFVGenHistos(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
   const edm::InputTag gen_src;
-  const int required_num_leptonic;
-  const std::vector<int> allowed_decay_types;
   int print_info;
 
   edm::ESHandle<ParticleDataTable> pdt;
@@ -60,10 +58,8 @@ class MFVNeutralinoGenHistos : public edm::EDAnalyzer {
   TH1F* h_status1origins;
 };
 
-MFVNeutralinoGenHistos::MFVNeutralinoGenHistos(const edm::ParameterSet& cfg)
+MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    required_num_leptonic(cfg.getParameter<int>("required_num_leptonic")),
-    allowed_decay_types(cfg.getParameter<std::vector<int> >("allowed_decay_types")),
     print_info(cfg.getParameter<int>("print_info"))
 {
   edm::Service<TFileService> fs;
@@ -219,7 +215,7 @@ namespace {
   }
 }
 
-void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   setup.getData(pdt);
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
@@ -241,14 +237,6 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
 
   if (print_info)
     mci.Print(std::cout);
-
-  if (required_num_leptonic >= 0 && mci.num_leptonic != required_num_leptonic) 
-    return;
-
-  if (allowed_decay_types.size())
-    for (int i = 0; i < 2; ++i)
-      if (std::find(allowed_decay_types.begin(), allowed_decay_types.end(), mci.decay_type[i]) == allowed_decay_types.end())
-	return;
 
   NumLeptons->Fill(mci.num_leptonic);
   DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
@@ -364,4 +352,4 @@ void MFVNeutralinoGenHistos::analyze(const edm::Event& event, const edm::EventSe
     --print_info;
 }
 
-DEFINE_FWK_MODULE(MFVNeutralinoGenHistos);
+DEFINE_FWK_MODULE(MFVGenHistos);
