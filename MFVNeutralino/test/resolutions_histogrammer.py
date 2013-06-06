@@ -1,12 +1,8 @@
-import os, sys, FWCore.ParameterSet.Config as cms
+import os, sys
+from JMTucker.Tools.BasicAnalyzer_cfg import cms
 
-process = cms.Process('ResolutionsHistogrammer')
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/mfvneutralino_genfsimreco_tau10um/sstoptuple_v3_mfvN3jtau10um/ffbc82b68f588f5f183a150670744b16/pat_1_1_6Sq.root'))
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
-process.TFileService = cms.Service('TFileService', fileName = cms.string('mfv_resolutions_histos.root'))
-process.load('FWCore.MessageLogger.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 100000
+process.source.fileNames = ['file:/uscms/home/jchaves/nobackup/pat_2_1_Nnk.root']
+process.TFileService.fileName = 'resolutions.root'
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.goodDataFilter = hltHighLevel.clone()
@@ -38,7 +34,7 @@ bdiscs = [
     ]
 
 def histogrammer():
-    return cms.EDAnalyzer('MFVNeutralinoResolutionsHistogrammer',
+    return cms.EDAnalyzer('MFVResolutionsHistogrammer',
                           reweight_pileup = cms.bool(True),
                           force_weight = cms.double(-1),
                           vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
@@ -47,13 +43,13 @@ def histogrammer():
                           b_discriminators = cms.vstring(*[name for name, discs in bdiscs]),
                           b_discriminator_mins = cms.vdouble(*[discs[1] for name, discs in bdiscs]),
                           muon_src = cms.InputTag('selectedPatMuonsPF'),
-                          max_muon_dxy = cms.double(0.2),
-                          max_muon_dz = cms.double(0.5),
+                          max_muon_dxy = cms.double(1e99),
+                          max_muon_dz = cms.double(1e99),
                           muon_semilep_cut = selection.semilepMuonCut,
                           muon_dilep_cut = selection.dilepMuonCut,
                           electron_src = cms.InputTag('selectedPatElectronsPF'),
-                          max_semilep_electron_dxy = cms.double(0.02),
-                          max_dilep_electron_dxy = cms.double(0.04),
+                          max_semilep_electron_dxy = cms.double(1e99),
+                          max_dilep_electron_dxy = cms.double(1e99),
                           electron_semilep_cut = selection.semilepElectronCut,
                           electron_dilep_cut = selection.dilepElectronCut,
                           print_info = cms.bool(False),
