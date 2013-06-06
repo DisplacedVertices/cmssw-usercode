@@ -262,8 +262,8 @@ void MFVResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
     bkhs[i]->BookPt(100, 0, 1000, "10");
     bkhs[i]->BookEta(40, -3, 3, "0.15");
     bkhs[i]->BookPhi(40, "0.157");
-    bkhs[i]->BookDxy(40, -4, 4, "0.2");
-    bkhs[i]->BookDz(40, -20, 20, "1");
+    bkhs[i]->BookDxy(100, -2, 2, "0.04");
+    bkhs[i]->BookDz(100, -20, 20, "0.4");
     bkhs[i]->BookQ();
   }
 
@@ -272,43 +272,43 @@ void MFVResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
     RecoMuon[i]->BookPt(100, 0, 1000, "10");
     RecoMuon[i]->BookEta(40, -3, 3, "0.15");
     RecoMuon[i]->BookPhi(40, "0.157");
-    RecoMuon[i]->BookDxy(40, -4, 4, "0.2");
-    RecoMuon[i]->BookDz(40, -20, 20, "1");
+    RecoMuon[i]->BookDxy(100, -2, 2, "0.04");
+    RecoMuon[i]->BookDz(100, -20, 20, "0.4");
 
     RecoSemilepMuon[i] = bkh_factory->make(TString::Format("RecoSemilepMuon/pt#%i", i), TString::Format("reconstructed semilep muon #%i", i));
     RecoSemilepMuon[i]->BookPt(100, 0, 1000, "10");
     RecoSemilepMuon[i]->BookEta(40, -3, 3, "0.15");
     RecoSemilepMuon[i]->BookPhi(40, "0.157");
-    RecoSemilepMuon[i]->BookDxy(40, -4, 4, "0.2");
-    RecoSemilepMuon[i]->BookDz(40, -20, 20, "1");
+    RecoSemilepMuon[i]->BookDxy(100, -2, 2, "0.04");
+    RecoSemilepMuon[i]->BookDz(100, -20, 20, "0.4");
 
     RecoDilepMuon[i] = bkh_factory->make(TString::Format("RecoDilepMuon/pt#%i", i), TString::Format("reconstructed dilep muon #%i", i));
     RecoDilepMuon[i]->BookPt(100, 0, 1000, "10");
     RecoDilepMuon[i]->BookEta(40, -3, 3, "0.15");
     RecoDilepMuon[i]->BookPhi(40, "0.157");
-    RecoDilepMuon[i]->BookDxy(40, -4, 4, "0.2");
-    RecoDilepMuon[i]->BookDz(40, -20, 20, "1");
+    RecoDilepMuon[i]->BookDxy(100, -2, 2, "0.04");
+    RecoDilepMuon[i]->BookDz(100, -20, 20, "0.4");
 
     RecoElectron[i] = bkh_factory->make(TString::Format("RecoElectron/pt#%i", i), TString::Format("reconstructed electron #%i", i));
     RecoElectron[i]->BookPt(100, 0, 1000, "10");
     RecoElectron[i]->BookEta(40, -3, 3, "0.15");
     RecoElectron[i]->BookPhi(40, "0.157");
-    RecoElectron[i]->BookDxy(40, -4, 4, "0.2");
-    RecoElectron[i]->BookDz(40, -20, 20, "1");
+    RecoElectron[i]->BookDxy(100, -2, 2, "0.04");
+    RecoElectron[i]->BookDz(100, -20, 20, "0.4");
 
     RecoSemilepElectron[i] = bkh_factory->make(TString::Format("RecoSemilepElectron/pt#%i", i), TString::Format("reconstructed semilep electron #%i", i));
     RecoSemilepElectron[i]->BookPt(100, 0, 1000, "10");
     RecoSemilepElectron[i]->BookEta(40, -3, 3, "0.15");
     RecoSemilepElectron[i]->BookPhi(40, "0.157");
-    RecoSemilepElectron[i]->BookDxy(40, -4, 4, "0.2");
-    RecoSemilepElectron[i]->BookDz(40, -20, 20, "1");
+    RecoSemilepElectron[i]->BookDxy(100, -2, 2, "0.04");
+    RecoSemilepElectron[i]->BookDz(100, -20, 20, "0.4");
 
     RecoDilepElectron[i] = bkh_factory->make(TString::Format("RecoDilepElectron/pt#%i", i), TString::Format("reconstructed dilep electron #%i", i));
     RecoDilepElectron[i]->BookPt(100, 0, 1000, "10");
     RecoDilepElectron[i]->BookEta(40, -3, 3, "0.15");
     RecoDilepElectron[i]->BookPhi(40, "0.157");
-    RecoDilepElectron[i]->BookDxy(40, -4, 4, "0.2");
-    RecoDilepElectron[i]->BookDz(40, -20, 20, "1");
+    RecoDilepElectron[i]->BookDxy(100, -2, 2, "0.04");
+    RecoDilepElectron[i]->BookDz(100, -20, 20, "0.4");
   }
 
   TFileDirectory met_dir = fs->mkdir("RecoMET");
