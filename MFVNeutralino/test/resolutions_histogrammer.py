@@ -60,23 +60,21 @@ def histogrammer():
                           print_info = cms.bool(False),
                           )
 
-process.histos                   = histogrammer()
-process.histosNoClean            = histogrammer()
-process.histosNoTrig             = histogrammer()
-process.histosNoCleanNoTrig      = histogrammer()
-process.histosInAcc              = histogrammer()
-process.histosInAccNoClean       = histogrammer()
-process.histosInAccNoTrig        = histogrammer()
-process.histosInAccNoCleanNoTrig = histogrammer()
+def gen_histogrammer():
+    return cms.EDAnalyzer('MFVGenHistos', gen_src = cms.InputTag('genParticles'))
 
-process.p0 = cms.Path(                               process.goodDataFilter * process.triggerFilter * process.histos)
-process.p1 = cms.Path(                                                        process.triggerFilter * process.histosNoClean)
-process.p2 = cms.Path(                               process.goodDataFilter *                         process.histosNoTrig)
-process.p3 = cms.Path(                                                                                process.histosNoCleanNoTrig)
-process.p4 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter * process.triggerFilter * process.histosInAcc)
-process.p5 = cms.Path(process.mfvGenParticleFilter *                          process.triggerFilter * process.histosInAccNoClean)
-process.p6 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter *                         process.histosInAccNoTrig)
-process.p7 = cms.Path(process.mfvGenParticleFilter *                                                  process.histosInAccNoCleanNoTrig)
+for x in [''] + 'NoClean NoTrig NoCleanNoTrig InAcc InAccNoClean InAccNoTrig InAccNoCleanNoTrig'.split():
+    setattr(process, 'genHistos' + x, gen_histogrammer())
+    setattr(process, 'histos'    + x, histogrammer())
+
+process.p0 = cms.Path(                               process.goodDataFilter * process.triggerFilter * process.genHistos                   * process.histos)
+process.p1 = cms.Path(                                                        process.triggerFilter * process.genHistosNoClean            * process.histosNoClean)
+process.p2 = cms.Path(                               process.goodDataFilter *                         process.genHistosNoTrig             * process.histosNoTrig)
+process.p3 = cms.Path(                                                                                process.genHistosNoCleanNoTrig      * process.histosNoCleanNoTrig)
+process.p4 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter * process.triggerFilter * process.genHistosInAcc              * process.histosInAcc)
+process.p5 = cms.Path(process.mfvGenParticleFilter *                          process.triggerFilter * process.genHistosInAccNoClean       * process.histosInAccNoClean)
+process.p6 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter *                         process.genHistosInAccNoTrig        * process.histosInAccNoTrig)
+process.p7 = cms.Path(process.mfvGenParticleFilter *                                                  process.genHistosInAccNoCleanNoTrig * process.histosInAccNoCleanNoTrig)
 
 if 'debug' in sys.argv:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
