@@ -134,6 +134,7 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
     apply_commands = _get('apply_commands', None)
     legend         = _get('legend',         None)
     sort_names     = _get('sort_names',     False)
+    separate_plots = _get('separate_plots', False)
 
     names = [k.GetName() for k in dir1.GetListOfKeys()]
     if sort_names:
@@ -141,9 +142,11 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
 
     nnames = len(names)
     for iname, name in enumerate(names):
-        if show_progress and iname % (nnames/20) == 0:
+        if show_progress and (nnames < 10 or iname % (nnames/10) == 0):
             print '%5i/%5i' % (iname, nnames), name
 
+        name_clean = name.replace('/','_')
+        
         h1 = dir1.Get(name)
         h2 = dir2.Get(name)
 
@@ -176,6 +179,13 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
         h1.SetName(name1)
         h2.SetName(name2)
 
+        if separate_plots(name, h1, h2):
+            draw_cmd = 'colz' if is2d else 'hist'
+            h1.Draw(draw_cmd)
+            ps.save(name_clean + '_' + name1, log=not is2d)
+            h2.Draw(draw_cmd)
+            ps.save(name_clean + '_' + name2, log=not is2d)
+            
         if is2d or h1.GetMaximum() > h2.GetMaximum():
             h1.Draw()
             h2.Draw('sames')
@@ -193,7 +203,7 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
         if leg is not None:
             leg.Draw()
             
-        ps.save(name.replace('/','_'), log=not is2d)
+        ps.save(name_clean, log=not is2d)
 
 def cumulative_histogram(h, type='ge'):
     """Construct the cumulative histogram in which the value of each
