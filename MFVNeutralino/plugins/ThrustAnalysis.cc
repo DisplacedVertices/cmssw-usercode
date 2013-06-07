@@ -9,6 +9,7 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -53,6 +54,7 @@ private:
   const edm::InputTag gen_jets_src;
   const edm::InputTag gen_met_src;
   const edm::InputTag met_src;
+  const edm::InputTag muon_src;
   const double pt_cut;
   const double eta_cut;
   const double loose_pt_cut;
@@ -128,6 +130,8 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   : gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
     gen_jets_src(cfg.getParameter<edm::InputTag>("gen_jets_src")),
     gen_met_src(cfg.getParameter<edm::InputTag>("gen_met_src")),
+    met_src(cfg.getParameter<edm::InputTag>("met_src")),
+    muon_src(cfg.getParameter<edm::InputTag>("muon_src")),
     pt_cut(cfg.getParameter<double>("pt_cut")),
     eta_cut(cfg.getParameter<double>("eta_cut")),
     loose_pt_cut(cfg.getParameter<double>("loose_pt_cut")),
@@ -392,6 +396,9 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   edm::Handle<reco::GenMETCollection> gen_mets;
   const reco::GenMET* gen_met = 0;
 
+  edm::Handle<pat::MuonCollection> muons;
+  event.getByLabel(muon_src, muons);
+
   edm::Handle<pat::METCollection> mets;
   event.getByLabel(met_src, mets);
   const pat::MET& met = mets->at(0);
@@ -421,6 +428,9 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
+  if (!mci.Valid() || mci.num_leptonic != 1 || abs(mci.W_daughters[mci.which_is_lepton][0]->pdgId()) == 15)
+    return;
+
   if (mci.Valid()) {
     int ihad = mci.decay_type[0] == 3 ? 0 : 1;
     int ilep = 1 - ihad;
