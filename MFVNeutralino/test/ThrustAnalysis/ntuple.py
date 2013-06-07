@@ -2,13 +2,17 @@ import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 process.TFileService.fileName = 'thrust.root'
 
-from JMTucker.MFVNeutralino.SimFiles import load
-load(process, 'tau1000um_M0400', file_range='all', sec_files=False)
+#from JMTucker.MFVNeutralino.SimFiles import load
+#load(process, 'tau1000um_M0400', file_range='all', sec_files=False)
+
+process.source.fileNames = ['file:/uscms/home/jchaves/nobackup/pat_2_1_Nnk.root']
 
 process.thrustNtuple = cms.EDAnalyzer('MFVThrustAnalysis',
                                       gen_particles_src = cms.InputTag('genParticles'),
                                       gen_jets_src = cms.InputTag('ak5GenJets'),
                                       gen_met_src = cms.InputTag('genMetTrue'),
+                                      met_src = cms.InputTag('patMETsPF'),
+                                      muon_src = cms.InputTag('semilepMuonsPF'),
                                       pt_cut = cms.double(30),
                                       eta_cut = cms.double(3),
                                       loose_pt_cut = cms.double(30), # 20
