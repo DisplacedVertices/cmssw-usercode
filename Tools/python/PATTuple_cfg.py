@@ -21,7 +21,7 @@ for category in ['TwoTrackMinimumDistance']:
 process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START53_V21::All' if runOnMC else 'FT_P_V42C_AN2::All'
+process.GlobalTag.globaltag = 'START53_V23::All' if runOnMC else 'FT_53_V21_AN4::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
@@ -274,7 +274,7 @@ if suppress_stdout:
     buf.close()
     hsh = hash(pat_output)
     #open('pat_spam.txt', 'wt').write(pat_output)
-    hsh_expected = 3033790049475715351 if runOnMC else 7363057003043023831
+    hsh_expected = -8177973912149098964 if runOnMC else -7150895072730005484
     print 'PAT is done (spam hash %s, expected %s).' % (hsh, hsh_expected)
     if hsh != hsh_expected:
         from JMTucker.Tools.general import big_warn
