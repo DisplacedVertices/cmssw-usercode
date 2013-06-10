@@ -2,7 +2,7 @@
 
 pushd $CMSSW_BASE/src
 
-cvs co -r version11 -d JMTucker/Tools UserCode/JMTucker/Tools
+cvs co -r version14 -d JMTucker/Tools UserCode/JMTucker/Tools
 
 source JMTucker/Tools/setup.csh
 
@@ -32,6 +32,6 @@ cmsenv # must do again after the setup above, even if user has already cmsenv'ed
 
 cvs co -r V00-01-32 GeneratorInterface/Pythia8Interface 
 
-scram b -j 24
+scram b -j 8
 
 popd
