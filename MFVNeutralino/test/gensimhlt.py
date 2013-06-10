@@ -193,12 +193,11 @@ first_lumi = 1
 
 [USER]
 additional_input_files = minSLHA.spc
-ui_working_dir = crab/gensimhlt/crab_mfv_gensimhlt_%(name)s
+ui_working_dir = crab/gensimhlt/crab_mfv_%(name)s
 copy_data = 1
-storage_element = T3_US_FNALLPC
-check_user_remote_dir = 0
+storage_element = T3_US_Cornell
 publish_data = 1
-publish_data_name = mfv_gensimhlt_%(name)s
+publish_data_name = mfv_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 jmt_externals_hack = pythia8_hack
 jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
@@ -250,13 +249,12 @@ pythia8
             os.system('crab -create -submit')
             os.system('rm -f crab.cfg gensimhlt_crab.py gensimhlt_crab.pyc pythia8_hack')
 
-    submit('neutralino_tau1000um_M0400', 1.0, 400)
-    sys.exit(0)
-
-    tau0s = [0., 0.01, 0.1, 1.0, 4.0, 9.9]
-    masses = [200, 400, 600, 800, 1000]
+    tau0s = [0., 1.0, 9.9]
+    masses = [400, 1000]
 
     for tau0 in tau0s:
         for mass in masses:
-            name = 'gluino_tau%04ium_M%04i' % (int(tau0*1000), mass)
+            if mass == 1000 and tau0 != 1.0:
+                continue
+            name = 'neutralino_tau%04ium_M%04i' % (int(tau0*1000), mass)
             submit(name, tau0, mass)
