@@ -1,10 +1,10 @@
 Index: PhysicsTools/PatAlgos/python/tools/jetTools.py
 ===================================================================
 RCS file: /local/reps/CMSSW/CMSSW/PhysicsTools/PatAlgos/python/tools/jetTools.py,v
-retrieving revision 1.77.2.2.2.3
-diff -u -r1.77.2.2.2.3 jetTools.py
---- PhysicsTools/PatAlgos/python/tools/jetTools.py	5 Jul 2012 14:55:07 -0000	1.77.2.2.2.3
-+++ PhysicsTools/PatAlgos/python/tools/jetTools.py	31 Oct 2012 16:27:40 -0000
+retrieving revision 1.77.2.2.2.4
+diff -u -r1.77.2.2.2.4 jetTools.py
+--- PhysicsTools/PatAlgos/python/tools/jetTools.py	21 May 2013 20:06:58 -0000	1.77.2.2.2.4
++++ PhysicsTools/PatAlgos/python/tools/jetTools.py	10 Jun 2013 18:27:00 -0000
 @@ -24,8 +24,8 @@
          self.addParameter(self._defaultParameters,'jetCollection',self._defaultValue, 'input jet collection',Type=cms.InputTag)
          self.addParameter(self._defaultParameters,'label',self._defaultValue, 'postfix label to identify new sequence/modules', Type=str)
@@ -24,62 +24,66 @@ diff -u -r1.77.2.2.2.3 jetTools.py
          nvTILabel = 'secondaryVertexNegativeTagInfos'     + label + postfix
          seTILabel = 'softElectronTagInfos'        + label + postfix
          smTILabel = 'softMuonTagInfos'            + label + postfix
-@@ -145,6 +146,8 @@
-                         setattr( process, nvTILabel, btag.secondaryVertexNegativeTagInfos.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
-                 if TagInfo=='inclusiveSecondaryVertexFinderTagInfos':
-                         setattr( process, ivfTILabel, btag.inclusiveSecondaryVertexFinderTagInfos.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
-+                if TagInfo=='inclusiveSecondaryVertexFinderTagInfosFiltered':
-+                        setattr( process, ivfFiltTILabel, btag.inclusiveSecondaryVertexFinderTagInfosFiltered.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
+@@ -160,6 +161,12 @@
+                         setattr( process, ivfTILabel, tagInfoMod )
+                     else:
+                         getattr( process, ivfTILabel ).trackIPTagInfos = cms.InputTag(ipTILabel)
++                if tagInfo=='inclusiveSecondaryVertexFinderTagInfosFiltered':
++                    if not hasattr( process, ivfFiltTILabel ):
++                        tagInfoMod=getattr(btag,tagInfo).clone(trackIPTagInfos = cms.InputTag(ipTILabel))
++                        setattr( process, ivfFiltTILabel, tagInfoMod )
++                    else:
++                        getattr( process, ivfFiltTILabel ).trackIPTagInfos = cms.InputTag(ipTILabel)
  
          print
          print "The bdiscriminators below will be written to the jet collection in the PATtuple (default is all, see PatAlgos/PhysicsTools/python/tools/jetTools.py)"
-@@ -159,6 +162,10 @@
-                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(svTILabel))
-                         setattr(process, tag+label+postfix, tagInfo)
+@@ -181,6 +188,10 @@
+                         #getattr(process, tag+label+postfix).tagInfos = vit(ipTILabel,svTILabel)
+                         getattr(process, tag+label+postfix).tagInfos = vit(svTILabel)
  
 +                if tag == 'simpleInclusiveSecondaryVertexHighEffBJetTags' or tag == 'simpleInclusiveSecondaryVertexHighPurBJetTags':
 +                        tagInfo=getattr(btag,tag).clone(tagInfos = vit(ivfFiltTILabel))
 +                        setattr(process, tag+label+postfix, tagInfo)
 +
                  if tag == 'combinedSecondaryVertexBJetTags' or tag == 'combinedSecondaryVertexMVABJetTags':
-                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(ipTILabel,svTILabel))
-                         setattr(process, tag+label+postfix, tagInfo)
-@@ -175,6 +182,10 @@
-                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(ipTILabel,ivfTILabel))
-                         setattr(process, tag+label+postfix, tagInfo)
+                     if not hasattr(process, tag+label+postfix):
+                         tagMod=getattr(btag,tag).clone(tagInfos = vit(ipTILabel,svTILabel))
+@@ -209,6 +220,10 @@
+                     else:
+                         getattr(process, tag+label+postfix).tagInfos = vit(ipTILabel,ivfTILabel)
  
 +                if tag == 'doubleSecondaryVertexHighEffBJetTags' :
 +                        tagInfo=getattr(btag,tag).clone(tagInfos = vit(ivfFiltTILabel))
 +                        setattr(process, tag+label+postfix, tagInfo)
 +
                  if tag == 'combinedMVABJetTags' :
-                         tagInfo=getattr(btag,tag).clone(tagInfos = vit(ipTILabel, ivfTILabel,smTILabel,seTILabel))
-                         setattr(process, tag+label+postfix, tagInfo)
-@@ -208,6 +219,7 @@
-         ## add a combined sequence to the process
-         seq = mkseq(process, 'btaggingTagInfos'+label+postfix, 'btaggingJetTags' + label + postfix)
-         setattr( process, 'btagging'+label+postfix, seq )
+                     if not hasattr(process, tag+label+postfix):
+                         tagMod=getattr(btag,tag).clone(tagInfos = vit(ipTILabel, ivfTILabel,smTILabel,seTILabel))
+@@ -243,6 +258,7 @@
+                 oldSeq += obj
+             seq = None
+ 
 +        ivfSeqDone=False
          ## return the combined sequence and the labels defined above
-         if seTILabel in seq.moduleNames():
-             setattr( process, 'softElectronCands', btag.softElectronCands )
-@@ -215,7 +227,14 @@
-         if ivfTILabel in seq.moduleNames():
-             process.load( 'RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff' )
-             seq.replace( getattr( process, ivfTILabel ), ( process.inclusiveVertexing * getattr( process, ivfTILabel ) ) )
--
-+            ivfSeqDone=True
-+        if ivfFiltTILabel in seq.moduleNames():
-+            #check if inclusive vertexing already present
+         if seTILabel in getattr( process, 'btagging'+label+postfix ).moduleNames():
+             if not hasattr( process, 'softElectronCands' ):
+@@ -252,6 +268,15 @@
+             if not hasattr( process, 'inclusiveVertexing' ):
+                 process.load( 'RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff' )
+             getattr( process, 'btagging'+label+postfix ).replace( getattr( process, ivfTILabel ), ( process.inclusiveVertexing * getattr( process, ivfTILabel ) ) )
++            ivfSeqDone = True
++        if ivfFiltTILabel in getattr( process, 'btagging'+label+postfix ).moduleNames():
++            if not hasattr( process, 'inclusiveVertexing' ):
++                process.load( 'RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff' )
 +            if ivfSeqDone:
-+                seq.replace( getattr( process, ivfFiltTILabel ), ( process.inclusiveMergedVerticesFiltered * process.bToCharmDecayVertexMerged * getattr( process, ivfFiltTILabel ) ) )
++                getattr( process, 'btagging'+label+postfix ).replace( getattr( process, ivfFiltTILabel ), ( process.inclusiveMergedVerticesFiltered * process.bToCharmDecayVertexMerged * getattr( process, ivfFiltTILabel ) ) )
 +            else:
-+                seq.replace( getattr( process, ivfFiltTILabel ), ( process.inclusiveVertexing * process.inclusiveMergedVerticesFiltered * process.bToCharmDecayVertexMerged * getattr( process, ivfFiltTILabel ) ) )
-+                
++                getattr( process, 'btagging'+label+postfix ).replace( getattr( process, ivfFiltTILabel ), ( process.inclusiveVertexing * process.inclusiveMergedVerticesFiltered * process.bToCharmDecayVertexMerged * getattr( process, ivfFiltTILabel ) ) )
++        
+ 
          if hasattr(process, "addAction"):
              process.enableRecording()
-             action=self.__copy__()
-@@ -240,8 +259,8 @@
+@@ -277,8 +302,8 @@
          self.addParameter(self._defaultParameters,'jetCollection',self._defaultValue,'Input jet collection', cms.InputTag)
          self.addParameter(self._defaultParameters,'algoLabel',self._defaultValue, "label to indicate the jet algorithm (e.g.'AK5')",str)
          self.addParameter(self._defaultParameters,'typeLabel',self._defaultValue, "label to indicate the type of constituents (e.g. 'Calo', 'Pflow', 'Jpt', ...)",str)
@@ -90,7 +94,7 @@ diff -u -r1.77.2.2.2.3 jetTools.py
          self.addParameter(self._defaultParameters,'doJTA',True, "run b tagging sequence for new jet collection and add it to the new pat jet collection")
          self.addParameter(self._defaultParameters,'doBTagging',True, 'run JetTracksAssociation and JetCharge and add it to the new pat jet collection (will autom. be true if doBTagging is set to true)')
          self.addParameter(self._defaultParameters,'jetCorrLabel',None, "payload and list of new jet correction labels, such as (\'AK5Calo\',[\'L2Relative\', \'L3Absolute\'])", tuple,acceptNoneValue=True )
-@@ -630,8 +649,8 @@
+@@ -669,8 +694,8 @@
      def __init__(self):
          ConfigToolBase.__init__(self)
          self.addParameter(self._defaultParameters,'jetCollection',self._defaultValue,'Input jet collection', cms.InputTag)
