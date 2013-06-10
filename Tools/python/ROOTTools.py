@@ -124,16 +124,17 @@ def core_gaussian(hist, factor, i=[0]):
     return f
 
 def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
+    sort_names     = kwargs.get('sort_names',     False)
+    show_progress  = kwargs.get('show_progress',  True)
+
     def _get(arg, default):
         return kwargs.get(arg, lambda name, hist1, hist2: default)
     
     no_stats       = _get('no_stats',       False)
     stat_size      = _get('stat_size',      (0.2, 0.2))
-    show_progress  = _get('show_progress',  True)
     skip           = _get('skip',           False)
     apply_commands = _get('apply_commands', None)
     legend         = _get('legend',         None)
-    sort_names     = _get('sort_names',     False)
     separate_plots = _get('separate_plots', False)
 
     names = [k.GetName() for k in dir1.GetListOfKeys()]
@@ -173,17 +174,16 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
                 h.SetStats(0)
             h.SetLineColor(color)
             h.SetMarkerColor(color)
-
+            
         apply_commands(name, h1, h2)
 
         h1.SetName(name1)
         h2.SetName(name2)
 
-        if separate_plots(name, h1, h2):
-            draw_cmd = 'colz' if is2d else 'hist'
-            h1.Draw(draw_cmd)
+        if is2d and separate_plots(name, h1, h2):
+            h1.Draw('colz')
             ps.save(name_clean + '_' + name1, log=not is2d)
-            h2.Draw(draw_cmd)
+            h2.Draw('colz')
             ps.save(name_clean + '_' + name2, log=not is2d)
             
         if is2d or h1.GetMaximum() > h2.GetMaximum():
