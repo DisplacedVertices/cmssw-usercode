@@ -134,11 +134,11 @@ MFVInclusiveVertexFinder::MFVInclusiveVertexFinder(const edm::ParameterSet &para
     h_trackfiltereddz   = fs->make<TH1F>("h_trackfiltereddz", "selcted tracks;track dz(pv)", 50, -0.5, 0.5);
 
     h_nseltracks = fs->make<TH1F>("h_nseltracks", "", 500, 0, 500);
-    h_nclusters = fs->make<TH1F>("h_nclusters", "", 500, 0, 500);
+    h_nclusters = fs->make<TH1F>("h_nclusters", "", 200, 0, 200);
     h_ntrackspercluster = fs->make<TH1F>("h_ntrackspercluster", "", 100, 0, 100);
-    h_clusterseedtrackpt = fs->make<TH1F>("h_clusterseedtrackpt", "", 100, 0, 500);
-    h_clusterseedtrackdxy = fs->make<TH1F>("h_clusterseedtrackdxy", "", 200, 0, 100);
-    h_clusterseedpointrho = fs->make<TH1F>("h_clusterseedpointrho", "", 200, 0, 100);
+    h_clusterseedtrackpt = fs->make<TH1F>("h_clusterseedtrackpt", "", 100, 0, 200);
+    h_clusterseedtrackdxy = fs->make<TH1F>("h_clusterseedtrackdxy", "", 200, 0, 10);
+    h_clusterseedpointrho = fs->make<TH1F>("h_clusterseedpointrho", "", 200, 0, 10);
     h_nverticespercluster = fs->make<TH1F>("h_nverticespercluster", "", 20, 0, 20);
     h_singlefitspercluster = fs->make<TH1F>("h_singlefitspercluster", "", 2, 0, 2);
 
