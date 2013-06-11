@@ -103,3 +103,15 @@ def clone_all(process, suffix):
     setattr(process, 'mfvVertexReco' + suffix, seq_obj)
     objs.append(seq_obj)
     return objs
+
+def cut_all(process, suffix, cut_name, cut):
+    filters = []
+    for module_name, module in get_all(process, suffix):
+        filt = cms.EDFilter('VertexSelector',
+                            filter = cms.bool(False),
+                            src = cms.InputTag(module_name),
+                            cut = cms.string(cut),
+                            )
+        setattr(process, module_name + cut_name, filt)
+        filters.append(filt)
+    return cms.Sequence(reduce(lambda x,y: x*y, filters))
