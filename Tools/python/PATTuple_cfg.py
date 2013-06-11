@@ -41,16 +41,7 @@ from DPGAnalysis.Skims.goodvertexSkim_cff import noscraping as FilterOutScraping
 process.FilterOutScraping = FilterOutScraping
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.goodOfflinePrimaryVertices.filter = cms.bool(True)
-process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
-process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
-process.load('RecoMET.METFilters.hcalLaserEventFilter_cfi')
-process.hcalLaserEventFilter.vetoByRunEventNumber = False
-process.hcalLaserEventFilter.vetoByHBHEOccupancy  = True
-process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
-process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag('ecalTPSkimNA')
-process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
-process.trackingFailureFilter.VertexSource = cms.InputTag('goodOfflinePrimaryVertices')
-process.load('RecoMET.METFilters.eeBadScFilter_cfi')
+process.load('RecoMET.METFilters.metFilters_cff')
 
 # Instead of filtering out events at tupling time, schedule separate
 # paths for all the "good data" filters so that the results of them
@@ -59,10 +50,14 @@ process.load('RecoMET.METFilters.eeBadScFilter_cfi')
 # separately in the TriggerResults object; the "All" path that is the
 # product of all of the filters isn't necessary but it's nice for
 # convenience.
-filters = [(name, getattr(process, name)) for name in process.jtupleParams.eventFilters.value()]
 process.eventCleaningAll = cms.Path()
-for filter, filter_obj in filters:
-    setattr(process, 'eventCleaning' + filter, cms.Path(filter_obj))
+for name in process.jtupleParams.eventFilters.value():
+    negate = name.startswith('~')
+    name = name.replace('~', '')
+    filter_obj = getattr(process, name)
+    if negate:
+        filter_obj = ~filter_obj
+    setattr(process, 'eventCleaning' + name, cms.Path(filter_obj))
     process.eventCleaningAll *= filter_obj
 
 ################################################################################

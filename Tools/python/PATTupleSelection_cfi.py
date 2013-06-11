@@ -67,7 +67,18 @@ jtupleParams = cms.PSet(
                                'hcalLaserEventFilter',
                                'EcalDeadCellTriggerPrimitiveFilter',
                                'trackingFailureFilter',
-                               'eeBadScFilter'),
+                               'eeBadScFilter',
+                               'ecalLaserCorrFilter',
+                               'tobtecfakesfilter',
+                               '~logErrorTooManyClusters',
+                               '~logErrorTooManySeeds',
+                               '~logErrorTooManySeedsDefault',
+                               '~logErrorTooManySeedsMainIterations',
+                               '~logErrorTooManyTripletsPairs',
+                               '~logErrorTooManyTripletsPairsMainIterations',
+                               '~manystripclus53X',
+                               '~toomanystripclus53X',
+                               ),
     )
 
 def makeLeptonProducers(process, postfix='PF', params=jtupleParams):
