@@ -1,12 +1,13 @@
 import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from JMTucker.Tools.CMSSWTools import silence_messages
 
 from JMTucker.MFVNeutralino.SimFiles import load as load_files
-load_files(process, 'tau9900um_M0400', 0)
-process.source.fileNames = ['file:reco.root']
-process.source.secondaryFileNames = ['/store/user/tucker/mfv_gensimhlt_neutralino_tau1000um_M0400/mfv_gensimhlt_neutralino_tau1000um_M0400/c9c4c27381f6625ed3d8394ffaf0b9cd/gensimhlt_16_1_FFD.root']
+load_files(process, 'tau1000um_M0400', 0)
+
 process.TFileService.fileName = 'prepare_vis.root'
 process.maxEvents.input = 20
+silence_messages(process, 'TwoTrackMinimumDistance')
 
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -35,9 +36,18 @@ process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
 
 process.load('JMTucker.MFVNeutralino.MatchedTracks_cff')
 process.load('JMTucker.MFVNeutralino.VertexReco_cff')
+from JMTucker.MFVNeutralino.VertexReco_cff import cut_all, clone_all
 
 process.pp = cms.Path(process.mfvGenParticles *
                       process.printList *
                       process.mfvTrackMatching *
                       process.mfvVertexReco
                       )
+
+objs = clone_all(process, 'Cos75')
+objs[0].vertexMinAngleCosine = 0.75
+process.pp *= objs[-1] # the sequence
+
+cut_name, cut = 'Qntk6M20', 'tracksSize >= 6 && p4.mass >= 20'
+process.pp *= cut_all(process, '',      cut_name, cut)
+process.pp *= cut_all(process, 'Cos75', cut_name, cut)
