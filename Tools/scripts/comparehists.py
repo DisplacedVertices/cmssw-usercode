@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import optparse, sys
+from pprint import pprint
 
 parser = optparse.OptionParser(usage='%prog [options] file1.root file2.root dir_path plot_path')
 parser.add_option('--per-page', type=int, default=-1,
@@ -11,9 +12,9 @@ parser.add_option('--nice1', default='file1',
                   help='Nice name for file #1 (default is %default).')
 parser.add_option('--nice2', default='file2',
                   help='Nice name for file #2 (default is %default).')
-parser.add_option('--color1', default='632',
+parser.add_option('--color1', default='ROOT.kRed',
                   help='Color #1: may be a python snippet, e.g. the default %default.')
-parser.add_option('--color2', default='600',
+parser.add_option('--color2', default='ROOT.kBlue',
                   help='Color #1: may be a python snippet, e.g. the default %default.')
 parser.add_option('--no-stats', default='False',
                   help='Snippet for no_stats lambda, which takes name, hist1, hist2 as args (default is %default).')
@@ -30,7 +31,8 @@ if len(args) < 4:
     parser.print_help()
     sys.exit(1)
 
-print options
+from JMTucker.Tools.ROOTTools import *
+
 options.file1, options.file2, options.dir_path, options.plot_path = args
 options.color1 = eval(options.color1)
 options.color2 = eval(options.color2)
@@ -40,11 +42,9 @@ options.apply_commands = eval(_lambda + options.apply_commands)
 options.separate_plots = eval(_lambda + options.separate_plots)
 options.skip           = eval(_lambda + options.skip)
 
-#print options ; print args ; import sys ; print sys.argv ; raise 1
+#print args ; import sys ; print sys.argv ; raise 1
 
 ########################################################################
-
-from JMTucker.Tools.ROOTTools import *
 
 set_style()
 ps = plot_saver(options.plot_path, size=options.size, per_page=options.per_page)
