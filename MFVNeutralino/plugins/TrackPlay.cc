@@ -43,6 +43,9 @@ MFVTrackPlay::MFVTrackPlay(const edm::ParameterSet& cfg)
 
   PairwiseHistos::HistoDefs hs;
   hs.add("algo", "", reco::TrackBase::algoSize, 0, reco::TrackBase::algoSize);
+  hs.add("tight", "", 2, 0, 2);
+  hs.add("highpur", "", 2, 0, 2);
+  hs.add("gooditer", "", 2, 0, 2);
   hs.add("q", "", 2, -2, 2);
   hs.add("pt", "", 100, 0, 500);
   hs.add("eta", "", 60, -3, 3);
@@ -81,6 +84,9 @@ void MFVTrackPlay::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     PairwiseHistos::ValueMap v = {
       {"algo",           t.algo()},
+      {"tight",          t.quality(reco::TrackBase::qualityByName("tight"))},
+      {"highpur",        t.quality(reco::TrackBase::qualityByName("highPurity"))},
+      {"gooditer",       t.quality(reco::TrackBase::qualityByName("goodIterative"))},
       {"q",              t.charge()},
       {"pt",             t.pt()},
       {"eta",            t.eta()},

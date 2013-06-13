@@ -20,6 +20,7 @@ process.p = cms.Path(process.mfvTrackingPlay)
 
 cuts = [
     ('Qpt10eta2p4',        'pt > 10 && abs(eta) < 2.4'),
+    ('Qpt10eta2p410hits',  'pt > 10 && abs(eta) < 2.4 && hitPattern.numberOfValidHits > 9'),
     ('Qpt50eta2p4',        'pt > 50 && abs(eta) < 2.4'),
     ('Qpt10eta2p4dxy0p1',  'pt > 10 && abs(eta) < 2.4'),
     ('Qpt10eta2p4dxy0p5',  'pt > 10 && abs(eta) < 2.4'),
