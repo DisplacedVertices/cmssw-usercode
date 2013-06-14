@@ -291,6 +291,19 @@ for sample in all_samples:
 # Exceptions to the defaults (except for the MFV signal samples, which
 # are already applied above).
 
+for sample in background_samples:
+    sample.publish_user = 'jchu'
+    sample.scheduler_name = 'condor'
+    sample.total_events = {'wjetstolnu': 38444,
+         'ttbarhadronic': 102305,
+         'ttbarsemilep': 100973,
+         'ttbardilep': 98219,
+         'qcdht0100': 114289,
+         'qcdht0250': 108026,
+         'qcdht0500': 106835,
+         'qcdht1000': 100989,
+         }[sample.name]
+    
 ttbarincl.no_skimming_cuts = True
 singletop_t.scheduler_name = 'condor'
 
