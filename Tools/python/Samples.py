@@ -115,6 +115,7 @@ class MCSample(Sample):
         self.syst_frac = float(syst_frac)
         self.cross_section = float(cross_section)
         self.k_factor = float(k_factor)
+        self.join_info = (False, self.nice_name, self.color)
 
         self.events_per = self.EVENTS_PER
         self.total_events = self.TOTAL_EVENTS
@@ -274,7 +275,7 @@ for tau, mass, gensimhlt_hash in mfv_signal_samples_ex:
 
 ########################################################################
 
-data_samples = []    
+data_samples = []
 auxiliary_data_samples = []
 
 ########################################################################
