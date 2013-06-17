@@ -109,35 +109,35 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
 [CRAB]
 jobtype = cmssw
-scheduler = condor
+scheduler = %(scheduler)s
 
 [CMSSW]
 dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 datasetpath = %(ana_dataset)s
-pset = resolutions_crab.py
+pset = resolutions_histos_crab.py
 %(job_control)s
 
 [USER]
-ui_working_dir = crab/resolutions/crab_sstopresolutions_%(name)s_xxx
+ui_working_dir = crab/resolutions/crab_resolutions_%(name)s
 return_data = 1
 '''
     
     just_testing = 'testing' in sys.argv
 
     def submit(sample):
-        new_py = open('resolutions.py').read()
+        new_py = open('resolutions_histos.py').read()
 
         if not sample.is_mc:
             new_py += '\nrun_on_data()\n'
         
-        open('resolutions_crab.py', 'wt').write(new_py)
+        open('resolutions_histos_crab.py', 'wt').write(new_py)
         open('crab.cfg', 'wt').write(crab_cfg % sample)
         if not just_testing:
             os.system('crab -create -submit')
-            os.system('rm crab.cfg resolutions_crab.py resolutions_crab.pyc')
+            os.system('rm crab.cfg resolutions_histos_crab.py resolutions_histos_crab.pyc')
         else:
             print '.py diff:\n---------'
-            os.system('diff -uN resolutions.py resolutions_crab.py')
+            os.system('diff -uN resolutions_histos.py resolutions_histos_crab.py')
             raw_input('ok?')
             print '\ncrab.cfg:\n---------'
             os.system('cat crab.cfg')
@@ -145,6 +145,6 @@ return_data = 1
             print
 
     from JMTucker.Tools.Samples import background_samples, mfv_signal_samples, data_samples
-    for sample in mfv_signal_samples + background_samples: # + data_samples:
-        if sample.ana_ready:
+    for sample in mfv_signal_samples: # + background_samples: # + data_samples:
+#        if sample.ana_ready:
             submit(sample)
