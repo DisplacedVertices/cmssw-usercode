@@ -182,9 +182,9 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
 
         if is2d and separate_plots(name, h1, h2):
             h1.Draw('colz')
-            ps.save(name_clean + '_' + name1, log=not is2d)
+            ps.save(name_clean + '_' + name1, logz=True)
             h2.Draw('colz')
-            ps.save(name_clean + '_' + name2, log=not is2d)
+            ps.save(name_clean + '_' + name2, logz=True)
             
         if is2d or h1.GetMaximum() > h2.GetMaximum():
             h1.Draw()
@@ -203,7 +203,7 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
         if leg is not None:
             leg.Draw()
             
-        ps.save(name_clean, log=not is2d)
+        ps.save(name_clean, logz=is2d)
 
 def cumulative_histogram(h, type='ge'):
     """Construct the cumulative histogram in which the value of each
@@ -231,6 +231,127 @@ def cut(*cuts):
     parentheses), suitable for use by TTree::Draw."""
     
     return ' && '.join('(%s)' % c.strip() for c in cuts if c.strip())
+
+def data_mc_comparison(name,
+                       background_samples,
+                       signal_samples,
+                       data_sample,
+                       output_fn = None,
+                       plot_saver = None,
+                       canvas_title = '',
+                       canvas_size = (700, 840),
+                       canvas_top_margin = 0.01,
+                       canvas_bottom_margin = 0.3,
+                       canvas_left_margin = 0.1,
+                       canvas_right_margin = 0.1,
+                       join_info_override = None,
+                       x_title = '',
+                       y_title = 'arb. units',
+                       y_title_offset = 1.3,
+                       y_label_size = 0.035,
+                       x_range = (None, None),
+                       y_range = (None, None),
+                       signal_color_override = None,
+                       signal_line_width = 3,
+                       signal_draw_cmd = 'hist',
+                       data_marker_style = 20,
+                       data_marker_size = 1.3,
+                       data_draw_cmd = 'pe',
+                       res_line_width = 2,
+                       res_line_color = ROOT.kBlue+3,
+                       res_y_title = 'data/MC',
+                       res_y_title_offset = None,
+                       res_y_label_size = 0.03,
+                       res_draw_cmd = 'apez',
+                       legend_pos = None,
+                       ):
+
+    if output_fn is None and plot_saver is None:
+        raise ValueError('at least one of output_fn, plot_saver must be supplied')
+    
+    canvas = ROOT.TCanvas('c_datamc_' + name, canvas_title, *canvas_size)
+    canvas.SetTopMargin(canvas_top_margin)
+    canvas.SetBottomMargin(canvas_bottom_margin)
+    canvas.SetLeftMargin(canvas_left_margin)
+    canvas.SetRightMargin(canvas_right_margin)
+
+    if plot_saver is not None:
+        plot_saver.old_c = plot_saver.c
+        plot_saver.c = canvas
+
+    legend_entries = []
+    stack = ROOT.THStack('s_datamc_' + name, '')
+    sum_background = None
+    for sample in background_samples:
+        join, nice_name, color = sample.join_info if join_info_override is None else join_info_override(sample)
+        sample.hist.SetLineColor(color)
+        sample.hist.SetFillColor(color)
+        if nice_name not in [l[1] for l in legend_entries] or not join:
+            legend_entries.append((sample.hist, nice_name, 'F'))
+        stack.Add(sample.hist)
+        if sum_background is None:
+            sum_background = sample.hist.Clone('sum_background_' + name)
+        else:
+            sum_background.Add(sample.hist)
+
+    stack.Draw()
+    stack.SetTitle(';%s;%s' % (x_title, y_title))
+
+    stack.GetXaxis().SetLabelSize(0) # the data/MC ratio part will show the labels
+    stack.GetYaxis().SetTitleOffset(y_title_offset)
+    stack.GetYaxis().SetLabelSize(y_label_size)
+
+    y_range_min, y_range_max = y_range
+    if y_range_min is not None:
+        stack.SetMinimum(y_range_min)
+    if y_range_max is not None:
+        stack.SetMaximum(y_range_max)
+
+    for sample in signal_samples:
+        sample.hist.SetLineColor(sample.color if signal_color_override is None else signal_color_override(sample))
+        sample.hist.SetLineWidth(signal_line_width)
+        sample.hist.Draw('same ' + signal_draw_cmd)
+
+    data_sample.hist.SetMarkerStyle(data_marker_style)
+    data_sample.hist.SetMarkerSize(data_marker_size)
+    data_sample.hist.Draw('same ' + data_draw_cmd)
+
+    if legend_pos is not None:
+        legend_entries.reverse()
+        legend = ROOT.TLegend(*legend_pos)
+        legend.SetBorderSize(0)
+        for l in legend_entries:
+            legend.AddEntry(*l)
+        for sample in signal_samples:
+            legend.AddEntry(sample.hist, sample.nice_name, 'L')
+        legend.AddEntry(data_sample.hist, 'data', 'LPE')
+        legend.Draw()
+
+    ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
+    ratio_pad.SetTopMargin(0.71)
+    ratio_pad.SetLeftMargin(canvas_left_margin)
+    ratio_pad.SetRightMargin(canvas_right_margin)
+    ratio_pad.SetFillColor(0)
+    ratio_pad.SetFillStyle(0)
+    ratio_pad.Draw()
+    ratio_pad.cd(0)
+    
+    res_g = poisson_means_divide(data_sample.hist, sum_background)
+    res_g.SetLineWidth(res_line_width)
+    res_g.SetLineColor(res_line_color)
+    res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
+    res_g.GetYaxis().SetLabelSize(res_y_label_size)
+    res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
+    res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
+    res_g.Draw(res_draw_cmd)
+
+    if plot_saver is not None:
+        plot_saver.save(name)
+        plot_saver.c = plot_saver.old_c
+    elif output_fn is not None:
+        canvas.SaveAs(output_fn)
+
+    return canvas, stack, legend, ratio_pad
 
 def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x)):
     """Dump specified branches from tree into a list of tuples, via an
@@ -646,7 +767,12 @@ class plot_saver:
             raise ValueError('save_dir called before plot_dir set!')
         self.saved.append(n)
 
-    def save(self, n, log=None, root=None, pdf=None, pdf_log=None, C=None, C_log=None):
+    def save(self, n, log=None, root=None, pdf=None, pdf_log=None, C=None, C_log=None, logz=None):
+        if logz:
+            logfcn = self.c.SetLogz
+        else:
+            logfcn = self.c.SetLogy
+
         log = self.log if log is None else log
         root = self.root if root is None else root
         pdf = self.pdf if pdf is None else pdf
@@ -663,26 +789,26 @@ class plot_saver:
             root = os.path.join(self.plot_dir, n + '.root')
             self.c.SaveAs(root)
         if log:
-            self.c.SetLogy(1)
+            logfcn(1)
             log = os.path.join(self.plot_dir, n + '_log.png')
             self.c.SaveAs(log)
-            self.c.SetLogy(0)
+            logfcn(0)
         if pdf:
             pdf = os.path.join(self.plot_dir, n + '.pdf')
             self.c.SaveAs(pdf)
         if pdf_log:
-            self.c.SetLogy(1)
+            logfcn(1)
             pdf_log = os.path.join(self.plot_dir, n + '_log.pdf')
             self.c.SaveAs(pdf_log)
-            self.c.SetLogy(0)
+            logfcn(0)
         if C:
             C = os.path.join(self.plot_dir, n + '.C')
             self.c.SaveAs(C_fn)
         if C_log:
-            self.c.SetLogy(1)
+            logfcn(1)
             C_log = os.path.join(self.plot_dir, n + '_log.C')
             self.c.SaveAs(C_log)
-            self.c.SetLogy(0)
+            logfcn(0)
         self.saved.append((fn, log, root, pdf, pdf_log, C, C_log))
 
 def rainbow_palette(num_colors=500):
@@ -793,6 +919,7 @@ __all__ = [
     'core_gaussian',
     'cumulative_histogram',
     'cut',
+    'data_mc_comparison',
     'detree',
     'differentiate_stat_box',
     'draw_in_order',
