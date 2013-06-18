@@ -300,8 +300,8 @@ def data_mc_comparison(name,
         raise ValueError('must supply all of file_path, histogram_path, int_lumi or none of them')
 
     if file_path is None:
-        for s in all_samples:
-            if not hasattr(s, 'hist'):
+        for sample in all_samples:
+            if not hasattr(sample, 'hist') or not issubclass(type(sample.hist), ROOT.TH1):
                 raise ValueError('all sample objects must have hist preloaded if file_path is not supplied')
     else:
         previous_file_paths = list(set(vars(sample).get('file_path', None) for sample in all_samples))
@@ -309,8 +309,11 @@ def data_mc_comparison(name,
         for sample in all_samples:
             if not previous_file_paths_ok:
                 sample._datamccomp_file_path = file_path
-                sample._datamccomp_file = ROOT.TFile(file_path % sample)
+                sample._datamccomp_filename = file_path % sample
+                sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
             sample.hist = sample._datamccomp_file.Get(histogram_path)
+            if not issubclass(type(sample.hist), ROOT.TH1):
+                raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
             sample.hist.Scale(sample.partial_weight * int_lumi)
            
     #####################
