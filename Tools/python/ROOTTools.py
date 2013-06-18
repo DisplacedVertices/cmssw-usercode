@@ -387,16 +387,25 @@ def data_mc_comparison(name,
             legend.AddEntry(data_sample.hist, 'data', 'LPE')
         legend.Draw()
 
-    ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
-    ratio_pad.SetTopMargin(0.71)
-    ratio_pad.SetLeftMargin(canvas_left_margin)
-    ratio_pad.SetRightMargin(canvas_right_margin)
-    ratio_pad.SetFillColor(0)
-    ratio_pad.SetFillStyle(0)
-    ratio_pad.Draw()
-    ratio_pad.cd(0)
-
+    if int_lumi_nice is not None:
+        t = ROOT.TPaveLabel(0.293, 0.875, 0.953, 0.975, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
+        t.SetTextSize(0.25)
+        t.SetBorderSize(0)
+        t.SetFillColor(0)
+        t.SetFillStyle(0)
+        t.Draw()
+    
+    ratio_pad, res_g = None, None
     if data_sample is not None:
+        ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
+        ratio_pad.SetTopMargin(0.71)
+        ratio_pad.SetLeftMargin(canvas_left_margin)
+        ratio_pad.SetRightMargin(canvas_right_margin)
+        ratio_pad.SetFillColor(0)
+        ratio_pad.SetFillStyle(0)
+        ratio_pad.Draw()
+        ratio_pad.cd(0)
+
         res_g = poisson_means_divide(data_sample.hist, sum_background)
         res_g.SetLineWidth(res_line_width)
         res_g.SetLineColor(res_line_color)
@@ -412,7 +421,7 @@ def data_mc_comparison(name,
     elif output_fn is not None:
         canvas.SaveAs(output_fn)
 
-    return canvas, stack, legend, ratio_pad
+    return canvas, stack, legend, ratio_pad, res_g
 
 def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x)):
     """Dump specified branches from tree into a list of tuples, via an
