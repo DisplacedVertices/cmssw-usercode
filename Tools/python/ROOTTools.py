@@ -235,9 +235,13 @@ def cut(*cuts):
 def data_mc_comparison(name,
                        background_samples,
                        signal_samples,
-                       data_sample,
+                       data_sample=None,
                        output_fn = None,
                        plot_saver = None,
+                       histogram_path = None,
+                       file_path = None,
+                       int_lumi = None,
+                       int_lumi_nice = None,
                        canvas_title = '',
                        canvas_size = (700, 840),
                        canvas_top_margin = 0.01,
@@ -245,6 +249,7 @@ def data_mc_comparison(name,
                        canvas_left_margin = 0.1,
                        canvas_right_margin = 0.1,
                        join_info_override = None,
+                       stack_draw_cmd = 'hist',
                        x_title = '',
                        y_title = 'arb. units',
                        y_title_offset = 1.3,
@@ -264,16 +269,62 @@ def data_mc_comparison(name,
                        res_y_label_size = 0.03,
                        res_draw_cmd = 'apez',
                        legend_pos = None,
+                       verbose = False,
                        ):
+    """JMTBAD.
 
+    If histogram_path and file_path are not supplied, all of the
+    sample objects must have a member object named 'hist' that has the
+    histogram preloaded.
+
+    file_path is of the format
+    'path/to/root/files/filename_%(sample_name)s.root'.
+
+    histogram_path is the path to the histogram inside the ROOT
+    files, e.g. 'histos/RecoJets/njets'.
+
+    int_lumi is the integrated luminosity to scale the MC to, in
+    pb^-1.
+    
+    """
+
+    all_samples = background_samples + signal_samples
+    if data_sample is not None:
+         all_samples.append(data_sample)
+    
     if output_fn is None and plot_saver is None:
         raise ValueError('at least one of output_fn, plot_saver must be supplied')
-    
+
+    check_params = (file_path is None, histogram_path is None, int_lumi is None)
+    if any(check_params) and not all(check_params):
+        raise ValueError('must supply all of file_path, histogram_path, int_lumi or none of them')
+
+    if file_path is None:
+        for s in all_samples:
+            if not hasattr(s, 'hist'):
+                raise ValueError('all sample objects must have hist preloaded if file_path is not supplied')
+    else:
+        previous_file_paths = list(set(vars(sample).get('file_path', None) for sample in all_samples))
+        previous_file_paths_ok = len(previous_file_paths) == 1 and previous_file_paths[0] is not None
+        for sample in all_samples:
+            if not previous_file_paths_ok:
+                sample._datamccomp_file_path = file_path
+                sample._datamccomp_file = ROOT.TFile(file_path % sample)
+            sample.hist = sample._datamccomp_file.Get(histogram_path)
+            sample.hist.Scale(sample.partial_weight * int_lumi)
+           
+    #####################
+
+    no_data_no_adjust_margins = data_sample is None and canvas_size == (700,840) and canvas_bottom_margin == 0.3
+    if no_data_no_adjust_margins:
+        canvas_size = (700, 700)
+
     canvas = ROOT.TCanvas('c_datamc_' + name, canvas_title, *canvas_size)
-    canvas.SetTopMargin(canvas_top_margin)
-    canvas.SetBottomMargin(canvas_bottom_margin)
-    canvas.SetLeftMargin(canvas_left_margin)
-    canvas.SetRightMargin(canvas_right_margin)
+    if not no_data_no_adjust_margins:
+        canvas.SetTopMargin(canvas_top_margin)
+        canvas.SetBottomMargin(canvas_bottom_margin)
+        canvas.SetLeftMargin(canvas_left_margin)
+        canvas.SetRightMargin(canvas_right_margin)
 
     if plot_saver is not None:
         plot_saver.old_c = plot_saver.c
@@ -294,10 +345,14 @@ def data_mc_comparison(name,
         else:
             sum_background.Add(sample.hist)
 
-    stack.Draw()
+        if verbose:
+            print sample.name, get_integral(sample.hist, 0)
+
+    stack.Draw(stack_draw_cmd)
     stack.SetTitle(';%s;%s' % (x_title, y_title))
 
-    stack.GetXaxis().SetLabelSize(0) # the data/MC ratio part will show the labels
+    if data_sample is not None:
+        stack.GetXaxis().SetLabelSize(0) # the data/MC ratio part will show the labels
     stack.GetYaxis().SetTitleOffset(y_title_offset)
     stack.GetYaxis().SetLabelSize(y_label_size)
 
@@ -312,9 +367,10 @@ def data_mc_comparison(name,
         sample.hist.SetLineWidth(signal_line_width)
         sample.hist.Draw('same ' + signal_draw_cmd)
 
-    data_sample.hist.SetMarkerStyle(data_marker_style)
-    data_sample.hist.SetMarkerSize(data_marker_size)
-    data_sample.hist.Draw('same ' + data_draw_cmd)
+    if data_sample is not None:
+        data_sample.hist.SetMarkerStyle(data_marker_style)
+        data_sample.hist.SetMarkerSize(data_marker_size)
+        data_sample.hist.Draw('same ' + data_draw_cmd)
 
     if legend_pos is not None:
         legend_entries.reverse()
@@ -324,7 +380,8 @@ def data_mc_comparison(name,
             legend.AddEntry(*l)
         for sample in signal_samples:
             legend.AddEntry(sample.hist, sample.nice_name, 'L')
-        legend.AddEntry(data_sample.hist, 'data', 'LPE')
+        if data_sample is not None:
+            legend.AddEntry(data_sample.hist, 'data', 'LPE')
         legend.Draw()
 
     ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
@@ -335,15 +392,16 @@ def data_mc_comparison(name,
     ratio_pad.SetFillStyle(0)
     ratio_pad.Draw()
     ratio_pad.cd(0)
-    
-    res_g = poisson_means_divide(data_sample.hist, sum_background)
-    res_g.SetLineWidth(res_line_width)
-    res_g.SetLineColor(res_line_color)
-    res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
-    res_g.GetYaxis().SetLabelSize(res_y_label_size)
-    res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
-    res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
-    res_g.Draw(res_draw_cmd)
+
+    if data_sample is not None:
+        res_g = poisson_means_divide(data_sample.hist, sum_background)
+        res_g.SetLineWidth(res_line_width)
+        res_g.SetLineColor(res_line_color)
+        res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
+        res_g.GetYaxis().SetLabelSize(res_y_label_size)
+        res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
+        res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
+        res_g.Draw(res_draw_cmd)
 
     if plot_saver is not None:
         plot_saver.save(name)
