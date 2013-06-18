@@ -19,12 +19,10 @@ ana = process.mfvTrackingPlay = cms.EDAnalyzer('MFVTrackPlay',
 process.p = cms.Path(process.mfvTrackingPlay)
 
 cuts = [
-    ('Qpt10eta2p4',        'pt > 10 && abs(eta) < 2.4'),
-    ('Qpt10eta2p410hits',  'pt > 10 && abs(eta) < 2.4 && hitPattern.numberOfValidHits > 9'),
-    ('Qpt50eta2p4',        'pt > 50 && abs(eta) < 2.4'),
-    ('Qpt10eta2p4dxy0p1',  'pt > 10 && abs(eta) < 2.4'),
-    ('Qpt10eta2p4dxy0p5',  'pt > 10 && abs(eta) < 2.4'),
-    ('Qpt10eta2p4highPur', 'pt > 10 && abs(eta) < 2.4'),
+    ('Qpt5eta2p4',               'pt > 5  && abs(eta) < 2.4'),
+    ('Qpt5eta2p48hits',          'pt > 5  && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
+    ('Qpt5eta2p48hitsdxy0p1',    'pt > 5  && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
+    ('Qpt20eta2p48hitsdxy0p1',   'pt > 20 && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
     ]
 
 for cut_name, cut in cuts:
