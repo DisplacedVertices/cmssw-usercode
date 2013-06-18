@@ -2,6 +2,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 
 class MFVAnalysisCuts : public edm::EDFilter {
 public:
