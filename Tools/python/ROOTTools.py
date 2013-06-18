@@ -234,8 +234,8 @@ def cut(*cuts):
 
 def data_mc_comparison(name,
                        background_samples,
-                       signal_samples,
-                       data_sample=None,
+                       signal_samples = [],
+                       data_sample = None,
                        output_fn = None,
                        plot_saver = None,
                        histogram_path = None,
