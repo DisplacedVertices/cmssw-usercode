@@ -288,7 +288,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   const reco::GenParticle& for_vtx = gen_particles->at(2);
   const int for_vtx_id = abs(for_vtx.pdgId());
-  die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 4), "gen_particles[2] is not a gluon or light quark: id=%i", for_vtx_id);
+  die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
   float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
   auto fill = [x0,y0,z0](BasicKinematicHists* bkh, const reco::Candidate* c) {
     bkh->Fill(c);
