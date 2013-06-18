@@ -52,6 +52,9 @@ MFVTrackPlay::MFVTrackPlay(const edm::ParameterSet& cfg)
   hs.add("phi", "", 63, -3.15, 3.15);
   hs.add("dxy", "", 100, -1, 1);
   hs.add("dz", "", 100, -25, 25);
+  hs.add("fracsigpt", "", 100, 0, 3);
+  hs.add("sigdxy", "", 100, 0, 2);
+  hs.add("sigdz", "", 100, 0, 5);
   hs.add("nhits", "", 33, 0, 33);
   hs.add("npxhits", "", 9, 0, 9);
   hs.add("nsthits", "", 28, 0, 28);
@@ -93,6 +96,9 @@ void MFVTrackPlay::analyze(const edm::Event& event, const edm::EventSetup&) {
       {"phi",            t.phi()},
       {"dxy",            dxy},
       {"dz",             t.dz(beamspot->position())},
+      {"fracsigpt",      t.ptError()/t.pt()},
+      {"sigdxy",         t.dxyError()},
+      {"sigdz",          t.dzError()},
       {"nhits",          hp.numberOfValidHits()},
       {"npxhits",        hp.numberOfValidPixelHits()},
       {"nsthits",        hp.numberOfValidStripHits()},
