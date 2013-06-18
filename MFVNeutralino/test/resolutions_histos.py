@@ -77,6 +77,8 @@ process.p6 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter *   
 process.p7 = cms.Path(process.mfvGenParticleFilter *                                                  process.genHistosInAccNoCleanNoTrig * process.histosInAccNoCleanNoTrig)
 
 if 'debug' in sys.argv:
+    from JMTucker.Tools.CMSSWTools import file_event_from_argv
+    file_event_from_argv(process)
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
     process.histos.print_info = True
     process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -86,7 +88,7 @@ if 'debug' in sys.argv:
                                        printOnlyHardInteraction = cms.untracked.bool(False),
                                        useMessageLogger = cms.untracked.bool(False)
                                        )
-    process.p *= process.printList
+    process.p0.insert(0, process.printList)
                                      
 def run_on_data(dataset=None, datasets=None):
     if 'debug' in sys.argv:
