@@ -15,6 +15,8 @@ def file_event_from_argv(process):
             except ValueError:
                 pass
     if file is not None:
+        if not file.startswith('/store'):
+            file = 'file:' + file
         process.source.fileNames = [file]
     else:
         print 'file_event_from_argv warning: no filename found'
