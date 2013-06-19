@@ -7,7 +7,7 @@ suppress_stdout = True
 ################################################################################
 
 process = cms.Process('PAT')
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
@@ -42,6 +42,7 @@ process.FilterOutScraping = FilterOutScraping
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.goodOfflinePrimaryVertices.filter = cms.bool(True)
 process.load('RecoMET.METFilters.metFilters_cff')
+process.trackingFailureFilter.VertexSource = 'goodOfflinePrimaryVertices'
 
 # Instead of filtering out events at tupling time, schedule separate
 # paths for all the "good data" filters so that the results of them
@@ -290,6 +291,16 @@ def input_is_pythia8():
 def keep_general_tracks():
     process.out.outputCommands.append('keep *_generalTracks_*_*')
 
+def keep_selected_tracks():
+    process.selectTracks = cms.EDFilter('TrackSelector',
+                                        src = cms.InputTag('generalTracks'),
+                                        filter = cms.bool(False),
+                                        cut = cms.string('pt > 0.8 && abs(eta) < 2.5 && hitPattern.numberOfValidHits > 7'),
+                                        )
+    for p in (process.pHadronic, process.pSemileptonic, process.pDileptonic):
+        p.insert(0, process.selectTracks)
+    process.out.outputCommands.append('keep *_selectTracks_*_*')
+
 def no_skimming_cuts():
     global process
     del process.out.SelectEvents
@@ -310,8 +321,10 @@ if 'fastsim' in sys.argv:
     input_is_fastsim()
 if 'pythia8' in sys.argv:
     input_is_pythia8()
-if 'keep_tracks' in sys.argv:
+if 'keep_general_tracks' in sys.argv:
     keep_general_tracks()
+if 'keep_selected_tracks' in sys.argv:
+    keep_selected_tracks()
 if 'no_cuts' in sys.argv:
     no_skimming_cuts()
 if 'drop_gen' in sys.argv:
