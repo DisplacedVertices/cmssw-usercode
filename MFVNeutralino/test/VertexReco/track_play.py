@@ -54,42 +54,18 @@ for cut_name, cut in cuts:
 #process.add_(cms.Service('SimpleMemoryCheck'))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    if 'debug' in sys.argv:
-        raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
-
-    crab_cfg = '''
-[CRAB]
-jobtype = cmssw
-scheduler = %(scheduler)s 
-
-[CMSSW]
-%(ana_dbs_url)s
-datasetpath = %(ana_dataset)s
-pset = track_play_crab.py
-total_number_of_events = 100000
-events_per_job = 20000
-
-[USER]
-ui_working_dir = crab/TrackPlay/crab_mfv_trackplay_%(name)s
-jmt_skip_input_files = src/EGamma/EGammaAnalysisTools/data/*
-return_data = 1
-'''
-
-    os.system('mkdir -p crab/TrackPlay')
-    
-    testing = 'testing' in sys.argv
     from JMTucker.Tools.Samples import mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400, ttbarincl, TupleOnlyMCSample
     samples = [mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400, ttbarincl]
 
     mfv_neutralino_tau9900um_M0400.dataset = '/crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER'
     mfv_neutralino_tau1000um_M0400.dataset = '/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER'
     mfv_neutralino_tau0000um_M0400.dataset = '/crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER'
-    
     for sample in samples:
         sample.scheduler_name = 'condor'
-        open('crab.cfg', 'wt').write(crab_cfg % sample)
-        new_py = open('track_play.py').read()
-        open('track_play_crab.py', 'wt').write(new_py)
-        if not testing:
-            os.system('crab -create -submit')
-            os.system('rm crab.cfg track_play_crab.py track_play_crab.pyc')
+
+    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    cs = CRABSubmitter('TrackPlay',
+                       job_splitting = ('total_number_of_events', 100000, 'events_per_job', 20000),
+                       other_cfg_lines = ('USER', 'jmt_skip_input_files', 'src/EGamma/EGammaAnalysisTools/data/*'),
+                       )
+    cs.submit_all(samples)
