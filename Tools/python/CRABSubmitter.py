@@ -21,6 +21,8 @@ def mkdirs_if_needed(path):
         os.system('mkdir -p %s' % dn)
 
 class CRABSubmitter:
+    get_proxy = True
+    
     def __init__(self,
                  batch_name,
                  pset_template_fn = sys.argv[0],
@@ -38,6 +40,10 @@ class CRABSubmitter:
                  crab_cfg_fn = 'crab.cfg',
                  max_threads = 5,
                  ):
+
+        if CRABSubmitter.get_proxy:
+            os.system('voms-proxy-init -voms cms')
+            CRABSubmitter.get_proxy = False
 
         self.batch_name = batch_name
         self.testing = 'testing' in argv
