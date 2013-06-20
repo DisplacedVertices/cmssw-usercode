@@ -65,7 +65,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('TrackPlay',
-                       job_splitting = ('total_number_of_events', 100000, 'events_per_job', 20000),
-                       other_cfg_lines = ('USER', 'jmt_skip_input_files', 'src/EGamma/EGammaAnalysisTools/data/*'),
+                       total_number_of_events = 100000,
+                       events_per_job = 20000,
+                       USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        )
     cs.submit_all(samples)
