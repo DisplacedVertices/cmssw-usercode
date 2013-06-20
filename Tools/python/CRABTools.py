@@ -44,8 +44,13 @@ def print_run_cmd(cmd, _print=True):
         print cmd
     os.system(cmd)
 
-def crab_popen(cmd):
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True).communicate()[0]
+def crab_popen(cmd, return_exit_code=False):
+    child = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    output = child.communicate()[0]
+    if return_exit_code:
+        return output, child.returncode
+    else:
+        return output
 
 def crabify_list(l, simple=True):
     if simple:
