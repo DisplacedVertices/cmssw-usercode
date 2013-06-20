@@ -29,16 +29,16 @@ class CRABSubmitter:
                  pset_adder = None,
                  working_dir_pattern = '%BATCH/crab_%(name)s',
                  pset_fn_pattern = '%BATCH/%(name)s',
-                 job_splitting = ('total_number_of_events', -1, 'events_per_job', 1000),
+                 job_splitting = (),
                  data_retrieval = 'return',
                  publish_data_name = '',
                  use_ana_dataset = False,
                  get_edm_output = False,
                  use_parent = False,
-                 other_cfg_lines = [],
+                 other_cfg_lines = (),
                  testing = 'testing' in sys.argv,
                  max_threads = 5,
-                 ):
+                 **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
             print 'CRABSubmitter init: mandatory proxy get.'
@@ -70,10 +70,33 @@ class CRABSubmitter:
         cfg.set('CMSSW', 'pset', pset_fn_pattern)
         mkdirs_if_needed(pset_fn_pattern)
 
-        if len(job_splitting) % 2 != 0:
-            raise ValueError('job_splitting must be flat sequence of (name, value, ...) pairs')
-        for i in xrange(0, len(job_splitting), 2):
-            cfg.set('CMSSW', *job_splitting[i:i+2])
+        def get_two_max(s):
+            l = []
+            for opt in s.split():
+                val = kwargs.get(opt, None)
+                if val is not None:
+                    l.append((opt, val))
+            if len(l) > 2:
+                raise ValueError('can only set two of %s' % s)
+            return l
+
+        if len(job_splitting) < 2:
+            job_splitting = get_two_max('total_number_of_events events_per_job number_of_jobs')
+        if len(job_splitting) < 2:
+            job_splitting = get_two_max('total_number_of_lumis lumis_per_job number_of_jobs')
+        if len(job_splitting) < 2:
+            raise ValueError('must provide job splitting')
+
+        if type(job_splitting[0]) == str:
+            if len(job_splitting) % 2 != 0:
+                raise ValueError('job_splitting must be flat sequence of (name, value, ...) pairs')
+            for i in xrange(0, len(job_splitting), 2):
+                cfg.set('CMSSW', *job_splitting[i:i+2])
+        else:
+            for opt, val in job_splitting:
+                if kwargs.has_key(opt):
+                    del kwargs[opt]
+                cfg.set('CMSSW', opt, val)
 
         data_retrieval = data_retrieval.lower()
         if data_retrieval == 'return':
@@ -100,6 +123,11 @@ class CRABSubmitter:
             raise ValueError('other_cfg_lines must be flat sequence of (section, option, value, ...) triplets')
         for i in xrange(0, len(other_cfg_lines), 3):
             cfg.set(*other_cfg_lines[i:i+3])
+        for opt, val in kwargs.iteritems():
+            for section in cfg.sections():
+                shib = section + '_'
+                if opt.startswith(shib):
+                    cfg.set(section, opt.replace(shib, ''), val)
 
         self.crab_cfg_template = StringIO()
         cfg.write(self.crab_cfg_template)
@@ -157,7 +185,7 @@ class CRABSubmitter:
                 raw_input('continue?')
                 print
             print 'crab.cfg:\n---------'
-            os.system('cat crab.cfg')
+            print crab_cfg
             raw_input('continue?')
             print '\n'
 
