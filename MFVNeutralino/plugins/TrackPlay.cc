@@ -1,6 +1,8 @@
 #include "TH1F.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -17,9 +19,12 @@ class MFVTrackPlay : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
-  const edm::InputTag tracks_src;
+  const edm::InputTag track_src;
   const double dxy_cut;
   const int quality_cut;
+  const edm::InputTag jet_src;
+  const double jet_pt_cut;
+  const double delta_r_jet_cut;
   const bool verbose;
 
   TH1F* h_ntracks;
@@ -28,9 +33,12 @@ class MFVTrackPlay : public edm::EDAnalyzer {
 };
 
 MFVTrackPlay::MFVTrackPlay(const edm::ParameterSet& cfg)
-  : tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
+  : track_src(cfg.getParameter<edm::InputTag>("track_src")),
     dxy_cut(cfg.getParameter<double>("dxy_cut")),
     quality_cut(reco::TrackBase::qualityByName(cfg.getParameter<std::string>("quality_cut"))),
+    jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
+    jet_pt_cut(cfg.getParameter<double>("jet_pt_cut")),
+    delta_r_jet_cut(cfg.getParameter<double>("delta_r_jet_cut")),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
   edm::Service<TFileService> fs;
@@ -62,7 +70,9 @@ MFVTrackPlay::MFVTrackPlay(const edm::ParameterSet& cfg)
   hs.add("nstlayers", "", 15, 0, 15);
   hs.add("nhitsmissinner", "", 15, 0, 15);
   hs.add("nhitsmissouter", "", 15, 0, 15);
-  h_tracks.Init("h_tracks", hs, true, true);
+  hs.add("min_dr_jet", "", 40, 0, delta_r_jet_cut);
+  hs.add("min_dr_jet_pt", "", 100, 0, 500);
+  h_tracks.Init("h", hs, true, true);
 }
 
 void MFVTrackPlay::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -70,42 +80,61 @@ void MFVTrackPlay::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByLabel("offlineBeamSpot", beamspot);
 
   edm::Handle<reco::TrackCollection> tracks;
-  event.getByLabel(tracks_src, tracks);
+  event.getByLabel(track_src, tracks);
+
+  edm::Handle<pat::JetCollection> jets;
+  event.getByLabel(jet_src, jets);
 
   int ntracks = 0;
-  for (const reco::Track& t : *tracks) {
-    double dxy = t.dxy(beamspot->position());
+  for (const reco::Track& track : *tracks) {
+    double dxy = track.dxy(beamspot->position());
 
-    if (fabs(dxy) < dxy_cut || (quality_cut != -1 && !t.quality(reco::TrackBase::TrackQuality(quality_cut))))
+    if (fabs(dxy) < dxy_cut || (quality_cut != -1 && !track.quality(reco::TrackBase::TrackQuality(quality_cut))))
+      continue;
+
+    double min_dr_jet = 1e99;
+    double min_dr_jet_pt = -1;
+    for (const pat::Jet& jet : *jets) {
+      if (jet.pt() > jet_pt_cut) {
+        double dr = reco::deltaR(jet, track);
+        if (dr < delta_r_jet_cut && dr < min_dr_jet) {
+          min_dr_jet = dr;
+          min_dr_jet_pt = jet.pt();
+        }
+      }
+    }
+    if (min_dr_jet > delta_r_jet_cut)
       continue;
 
     ++ntracks;
 
-    h_algo->Fill(t.algo());
+    h_algo->Fill(track.algo());
 
-    const reco::HitPattern& hp = t.hitPattern();
+    const reco::HitPattern& hp = track.hitPattern();
 
     PairwiseHistos::ValueMap v = {
-      {"algo",           t.algo()},
-      {"tight",          t.quality(reco::TrackBase::qualityByName("tight"))},
-      {"highpur",        t.quality(reco::TrackBase::qualityByName("highPurity"))},
-      {"gooditer",       t.quality(reco::TrackBase::qualityByName("goodIterative"))},
-      {"q",              t.charge()},
-      {"pt",             t.pt()},
-      {"eta",            t.eta()},
-      {"phi",            t.phi()},
+      {"algo",           track.algo()},
+      {"tight",          track.quality(reco::TrackBase::qualityByName("tight"))},
+      {"highpur",        track.quality(reco::TrackBase::qualityByName("highPurity"))},
+      {"gooditer",       track.quality(reco::TrackBase::qualityByName("goodIterative"))},
+      {"q",              track.charge()},
+      {"pt",             track.pt()},
+      {"eta",            track.eta()},
+      {"phi",            track.phi()},
       {"dxy",            dxy},
-      {"dz",             t.dz(beamspot->position())},
-      {"fracsigpt",      t.ptError()/t.pt()},
-      {"sigdxy",         t.dxyError()},
-      {"sigdz",          t.dzError()},
+      {"dz",             track.dz(beamspot->position())},
+      {"fracsigpt",      track.ptError()/track.pt()},
+      {"sigdxy",         track.dxyError()},
+      {"sigdz",          track.dzError()},
       {"nhits",          hp.numberOfValidHits()},
       {"npxhits",        hp.numberOfValidPixelHits()},
       {"nsthits",        hp.numberOfValidStripHits()},
       {"npxlayers",      hp.pixelLayersWithMeasurement()},
       {"nstlayers",      hp.stripLayersWithMeasurement()},
-      {"nhitsmissinner", t.trackerExpectedHitsInner().numberOfHits()},
-      {"nhitsmissouter", t.trackerExpectedHitsOuter().numberOfHits()},
+      {"nhitsmissinner", track.trackerExpectedHitsInner().numberOfHits()},
+      {"nhitsmissouter", track.trackerExpectedHitsOuter().numberOfHits()},
+      {"min_dr_jet",     min_dr_jet},
+      {"min_dr_jet_pt",  min_dr_jet_pt}
     };
 
     h_tracks.Fill(v);
