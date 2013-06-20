@@ -36,17 +36,17 @@ class CRABSubmitter:
                  get_edm_output = False,
                  use_parent = False,
                  other_cfg_lines = [],
-                 argv = sys.argv,
-                 crab_cfg_fn = 'crab.cfg',
+                 testing = 'testing' in sys.argv,
                  max_threads = 5,
                  ):
 
-        if CRABSubmitter.get_proxy:
-            os.system('voms-proxy-init -voms cms')
+        if not testing and CRABSubmitter.get_proxy:
+            print 'CRABSubmitter init: mandatory proxy get.'
+            os.system('voms-proxy-init -voms cms -valid 192:00')
             CRABSubmitter.get_proxy = False
 
         self.batch_name = batch_name
-        self.testing = 'testing' in argv
+        self.testing = testing
         self.max_threads = max_threads
 
         self.pset_template_fn = pset_template_fn
@@ -55,7 +55,6 @@ class CRABSubmitter:
         cfg = ConfigParserEx()
         cfg.set('CRAB', 'jobtype', 'cmssw')
         cfg.set('CRAB', 'scheduler', '%(scheduler)s')
-        self.crab_cfg_fn = crab_cfg_fn
 
         if working_dir_pattern.startswith('%BATCH/'):
             working_dir_pattern = working_dir_pattern.replace('%BATCH', 'crab/%s' % batch_name)
@@ -113,8 +112,9 @@ class CRABSubmitter:
         dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url
         if dbs_url:
             cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
-        cfg.write(open(self.crab_cfg_fn, 'wt'))
-        return self.crab_cfg_fn, open(self.crab_cfg_fn, 'rt').read()
+        crab_cfg_fn = 'crab.%s.%s.cfg' % (self.batch_name, sample.name)
+        cfg.write(open(crab_cfg_fn, 'wt'))
+        return crab_cfg_fn, open(crab_cfg_fn, 'rt').read()
 
     def pset(self, sample):
         pset = open(self.pset_template_fn).read()
@@ -125,7 +125,7 @@ class CRABSubmitter:
         open(pset_fn, 'wt').write(pset)
         return pset_fn, pset
 
-    def submit(self, sample, cleanup_crab_cfg=True, cleanup_pset=False, cleanup_pset_pyc=True):
+    def submit(self, sample, cleanup_crab_cfg=True, cleanup_pset=False, cleanup_pset_pyc=True, create_only=False):
         print 'batch %s, submit sample %s' % (self.batch_name, sample.name)
 
         cleanup = []
@@ -143,31 +143,42 @@ class CRABSubmitter:
 
         crab_output = None
         if not self.testing:
-            crab_output = crab_popen('crab -cfg %s -create -submit' % crab_cfg_fn)
+            cmd = 'crab -cfg %s -create' % crab_cfg_fn
+            if not create_only:
+                cmd += ' -submit'
+            crab_output = crab_popen(cmd)
             os.system('rm -f %s' % ' '.join(cleanup))
         else:
             print 'in testing mode, not submitting anything.'
-            print '.py diff:\n---------'
-            os.system('diff -uN %s %s' % (self.pset_template_fn, pset_fn))
-            raw_input('continue?')
-            print '\ncrab.cfg:\n---------'
+            diff_out, diff_ret = crab_popen('diff -uN %s %s' % (self.pset_template_fn, pset_fn), return_exit_code=True)
+            if diff_ret != 0:
+                print '.py diff:\n---------'
+                print diff_out
+                raw_input('continue?')
+                print
+            print 'crab.cfg:\n---------'
             os.system('cat crab.cfg')
             raw_input('continue?')
             print '\n'
 
         return crab_output
 
-    def submit_all(self, samples):
+    def submit_all(self, samples, **kwargs):
+        if self.testing:
+            print 'in testing mode, so only doing one sample at a time.'
+            for sample in samples:
+                self.submit(sample, **kwargs)
+            return
+            
         results = {}
         threads = []
-        print 'launching threads...'
-        def threadable_fcn(s):
-            print 'submitting', s.name
-            results[s.name] = self.submit(s)
+        print 'launching threads (max %s)...' % self.max_threads
+        def threadable_fcn(sample):
+            results[sample.name] = self.submit(sample, **kwargs)
         for sample in samples:
             while threading.active_count() - 1 >= self.max_threads:
                 time.sleep(0.1)
-            thread = threading.Thread(target=threadable_fcn, args=(s,))
+            thread = threading.Thread(target=threadable_fcn, args=(sample,))
             threads.append((sample,thread))
             thread.start()
         sleep_count = 0
@@ -177,7 +188,15 @@ class CRABSubmitter:
             sleep_count += 1
             time.sleep(0.1)
         print 'done waiting for threads!'
-        
+
+        os.system('mkdir -p /tmp/%s' % os.environ['USER'])
+        log = open('/tmp/%s/CRABSubmitter_%s.log' % (os.environ['USER'], self.batch_name), 'wt')
+        for name in sorted(results.keys()):
+            log.write('*' * 250)
+            log.write('\n\n%s\n' % name)
+            log.write(results[name])
+            log.write('\n\n')
+
 if __name__ == '__main__':
     cs = CRABSubmitter('abalone')
     from JMTucker.Tools.Samples import ttbarincl, mfv_neutralino_tau1000um_M0400
