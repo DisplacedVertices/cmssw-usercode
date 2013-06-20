@@ -16,8 +16,8 @@ private:
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
   const double min_6th_jet_pt;
-  const double min_njets;
-  const double min_nbtags;
+  const int min_njets;
+  const int min_nbtags;
   const double min_sum_ht;
 
   const std::string b_discriminator_name;
@@ -32,8 +32,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
     min_6th_jet_pt(cfg.getParameter<double>("min_6th_jet_pt")),
-    min_njets(cfg.getParameter<double>("min_njets")),
-    min_nbtags(cfg.getParameter<double>("min_nbtags")),
+    min_njets(cfg.getParameter<int>("min_njets")),
+    min_nbtags(cfg.getParameter<int>("min_nbtags")),
     min_sum_ht(cfg.getParameter<double>("min_sum_ht")),
 
     b_discriminator_name(cfg.getParameter<std::string>("b_discriminator_name")),
