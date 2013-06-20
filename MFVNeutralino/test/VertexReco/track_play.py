@@ -12,33 +12,42 @@ process.TFileService.fileName = 'track_play.root'
 #process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
 
 ana = process.mfvTrackingPlay = cms.EDAnalyzer('MFVTrackPlay',
-                                               tracks_src = cms.InputTag('generalTracks'),
+                                               track_src = cms.InputTag('generalTracks'),
                                                dxy_cut = cms.double(0),
                                                quality_cut = cms.string(''),
+                                               jet_src = cms.InputTag('selectedPatJetsPF'),
+                                               jet_pt_cut = cms.double(20),
+                                               delta_r_jet_cut = cms.double(1e10),
                                                )
 process.p = cms.Path(process.mfvTrackingPlay)
 
 cuts = [
-    ('Qpt5eta2p4',               'pt > 5  && abs(eta) < 2.4'),
-    ('Qpt5eta2p48hits',          'pt > 5  && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
-    ('Qpt5eta2p48hitsdxy0p1',    'pt > 5  && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
-    ('Qpt20eta2p48hitsdxy0p1',   'pt > 20 && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
+    ('Qpt0p5eta2p4DRJet0p4',        'pt > 0.5 && abs(eta) < 2.4'),
+    ('Qpt0p5eta2p4DRJet0p4JetPt80', 'pt > 0.5 && abs(eta) < 2.4'),
+    ('Qpt5eta2p4',                  'pt > 5   && abs(eta) < 2.4'),
+    ('Qpt5eta2p48hits',             'pt > 5   && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
+    ('Qpt5eta2p48hitsdxy0p1',       'pt > 5   && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
+    ('Qpt20eta2p48hitsdxy0p1',      'pt > 20  && abs(eta) < 2.4 && hitPattern.numberOfValidHits >= 8'),
     ]
 
 for cut_name, cut in cuts:
     filt = cms.EDFilter('TrackSelector',
-                        src = ana.tracks_src,
+                        src = ana.track_src,
                         filter = cms.bool(False),
                         cut = cms.string(cut),
                         )
     setattr(process, cut_name, filt)
-    cut_ana = ana.clone(tracks_src = cut_name)
+    cut_ana = ana.clone(track_src = cut_name)
     if 'dxy0p1' in cut_name:
         cut_ana.dxy_cut = 0.1
     if 'dxy0p5' in cut_name:
         cut_ana.dxy_cut = 0.5
     if 'highPur' in cut_name:
         cut_ana.quality_cut = 'highPurity'
+    if 'JetDR0p4' in cut_name:
+        cut_ana.delta_r_jet_cut = 0.4
+    if 'JetPt80' in cut_name:
+        cut_ana.jet_pt_cut = 80
     setattr(process, 'mfvTrackingPlay' + cut_name, cut_ana)
     process.p *= filt * cut_ana
 
@@ -54,8 +63,8 @@ jobtype = cmssw
 scheduler = %(scheduler)s 
 
 [CMSSW]
-%(dbs_url)s
-datasetpath = %(dataset)s
+%(ana_dbs_url)s
+datasetpath = %(ana_dataset)s
 pset = track_play_crab.py
 total_number_of_events = 100000
 events_per_job = 20000
