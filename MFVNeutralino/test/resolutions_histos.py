@@ -17,7 +17,7 @@ process.goodDataFilter.HLTPaths = ['eventCleaningAll'] # can set to just 'goodOf
 process.goodDataFilter.andOr = False # = AND
 
 process.triggerFilter = hltHighLevel.clone()
-process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*', 'HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet50_40_30_v*', 'HLT_Ele25_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*', 'HLT_Ele25_CaloIdVT_CaloIsoVL_TrkIdVL_TrkIsoT_TriCentralPFNoPUJet50_40_30_v*']
+process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
 process.triggerFilter.andOr = True # = OR
 
 import JMTucker.Tools.PATTupleSelection_cfi
@@ -63,18 +63,27 @@ def histogrammer():
 
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')
 
-for x in [''] + 'NoClean NoTrig NoCleanNoTrig InAcc InAccNoClean InAccNoTrig InAccNoCleanNoTrig'.split():
+for x in ['', 'WithCuts', 'WithTriggerWithCuts']:
     setattr(process, 'genHistos' + x, process.mfvGenHistos.clone())
     setattr(process, 'histos'    + x, histogrammer())
 
-process.p0 = cms.Path(                               process.goodDataFilter * process.triggerFilter * process.genHistos                   * process.histos)
-process.p1 = cms.Path(                                                        process.triggerFilter * process.genHistosNoClean            * process.histosNoClean)
-process.p2 = cms.Path(                               process.goodDataFilter *                         process.genHistosNoTrig             * process.histosNoTrig)
-process.p3 = cms.Path(                                                                                process.genHistosNoCleanNoTrig      * process.histosNoCleanNoTrig)
-process.p4 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter * process.triggerFilter * process.genHistosInAcc              * process.histosInAcc)
-process.p5 = cms.Path(process.mfvGenParticleFilter *                          process.triggerFilter * process.genHistosInAccNoClean       * process.histosInAccNoClean)
-process.p6 = cms.Path(process.mfvGenParticleFilter * process.goodDataFilter *                         process.genHistosInAccNoTrig        * process.histosInAccNoTrig)
-process.p7 = cms.Path(process.mfvGenParticleFilter *                                                  process.genHistosInAccNoCleanNoTrig * process.histosInAccNoCleanNoTrig)
+process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
+                                    jet_src = cms.InputTag('selectedPatJetsPF'),
+                                    min_jet_pt = cms.double(0),
+                                    min_4th_jet_pt = cms.double(0),
+                                    min_5th_jet_pt = cms.double(0),
+                                    min_6th_jet_pt = cms.double(0),
+                                    min_njets = cms.int32(5),
+                                    min_nbtags = cms.int32(3),
+                                    min_sum_ht = cms.double(400),
+                                    b_discriminator_name = cms.string('jetProbabilityBJetTags'),
+                                    bdisc_min = cms.double(0),
+                                    muon_src = cms.InputTag('selectedPatMuonsPF'), 
+                                    electron_src = cms.InputTag('selectedPatElectronsPF'),
+                                    )
+process.p0 = cms.Path(process.genHistos * process.histos)
+process.p1 = cms.Path(process.analysisCuts * process.genHistosWithCuts * process.histosWithCuts)
+process.p2 = cms.Path(process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
 
 if 'debug' in sys.argv:
     from JMTucker.Tools.CMSSWTools import file_event_from_argv
@@ -147,6 +156,6 @@ return_data = 1
             print
 
     from JMTucker.Tools.Samples import background_samples, mfv_signal_samples, data_samples
-    for sample in mfv_signal_samples: # + background_samples: # + data_samples:
-#        if sample.ana_ready:
+    for sample in background_samples + mfv_signal_samples: #+ data_samples:
+        #if sample.ana_ready:
             submit(sample)
