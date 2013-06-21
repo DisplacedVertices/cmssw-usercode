@@ -2,7 +2,7 @@
 
 # author: J. Tucker
 
-import os, sys, time, datetime, optparse, pprint, threading
+import os, sys, time, datetime, optparse, pprint, threading, pdb
 from JMTucker.Tools.CRABTools import *
 
 parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
@@ -40,6 +40,8 @@ parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_z
                   help='Do not suppress zeroes in the status table.')
 parser.add_option('--use-debugger', action='store_true', default=False,
                   help='Enter the debugger upon thrown exception.')
+parser.add_option('--run-in-debugger', action='store_true', default=False,
+                  help='Run the whole threadloop in the debugger.')
 parser.add_option('--post-process', type='str', metavar='FILE.PY',
                   help='After each check_fcn call, call the function "post_process_fcn" defined in FILE.PY, which takes the directory name and results dict as its arguments.')
 options, args = parser.parse_args()
@@ -133,6 +135,10 @@ if options.delay:
 
 to_resub_done = {}
 
+if options.run_in_debugger:
+    print 'running in debugger'
+    pdb.set_trace()
+
 while 1:
     if options.tee:
         tee = Tee(options.tee)
@@ -151,6 +157,9 @@ while 1:
         threads = []
         print 'launching threads...'
         def threadable_check_fcn(d):
+            if options.run_in_debugger:
+                print 'running thread for %s in debugger' % d
+                pdb.set_trace()
             print 'checking', d
             try:
                 results[d] = dict(check_fcn(d, verbose=False))
@@ -166,7 +175,7 @@ while 1:
             thread.start()
         sleep_count = 0
         while threading.active_count() > 1:
-            if sleep_count % 150 == 3:
+            if sleep_count % 150 == 3 and not options.run_in_debugger:
                 print 'waiting for these threads:', ' '.join(d for d,t in threads if t.is_alive())
             sleep_count += 1
             time.sleep(0.1)
