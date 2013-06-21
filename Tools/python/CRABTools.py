@@ -44,9 +44,14 @@ def print_run_cmd(cmd, _print=True):
         print cmd
     os.system(cmd)
 
-def crab_popen(cmd, return_exit_code=False):
+def crab_popen(cmd, return_exit_code=False, print_output=False):
     child = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    output = child.communicate()[0]
+    output = []
+    for line in child.stdout:
+        if print_output:
+            print line,
+        output.append(line)
+    output = ''.join(output)
     if return_exit_code:
         return output, child.returncode
     else:
@@ -208,7 +213,7 @@ def crab_status(working_dir, verbose=True, debug=False):
             else:
                 print '(via grid so this may take some time)'
 
-    s = crab_popen(cmd) if True else open('crab_status_test').read()
+    s = crab_popen(cmd, print_output=debug) if True else open('crab_status_test').read()
     #open('crab_status_test','wt').write(s); sys.exit(1)
     
     if 'Total Jobs' not in s:
@@ -266,9 +271,6 @@ def crab_status(working_dir, verbose=True, debug=False):
                 key = status
             d[key].append(id)
 
-    if debug:
-        print s
-
     if verbose:
         for k in sorted(d.keys()):
             print '%s: %s' % (k.ljust(25), crabify_list(d[k], simple=False))
@@ -286,9 +288,7 @@ def crab_get_output(working_dir, l=None, n=500, verbose=True, debug=False):
             cmd = 'crab -c %s -getoutput %s' % (working_dir, crabify_list(ll))
             if verbose:
                 print cmd
-            s = crab_popen(cmd)
-            if debug:
-                print s  # JMTBAD need a logging framework
+            s = crab_popen(cmd, print_output=debug)
             ll_success = set()
             for line in s.split('\n'):
                 mo = job_re.search(line)
@@ -440,7 +440,7 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
             to_resub.extend(d[key])
 
     if d.has_key('Done'):
-        missing = crab_get_output(working_dir, d['Done'])
+        missing = crab_get_output(working_dir, d['Done'], debug=debug)
         if missing:
             for m in missing:
                 d['Done'].remove(m)
