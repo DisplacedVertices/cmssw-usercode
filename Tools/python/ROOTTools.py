@@ -418,10 +418,11 @@ def data_mc_comparison(name,
     if plot_saver is not None:
         plot_saver.save(name)
         plot_saver.c = plot_saver.old_c
+        plot_saver.c.cd()
     elif output_fn is not None:
         canvas.SaveAs(output_fn)
 
-    return canvas, stack, legend, ratio_pad, res_g
+    return canvas, stack, sum_background, legend, ratio_pad, res_g
 
 def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x)):
     """Dump specified branches from tree into a list of tuples, via an
