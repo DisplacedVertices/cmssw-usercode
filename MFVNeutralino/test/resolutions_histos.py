@@ -63,27 +63,28 @@ def histogrammer():
 
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')
 
-for x in ['', 'WithCuts', 'WithTriggerWithCuts']:
+for x in ['', 'WithTrigger', 'WithCuts', 'WithTriggerWithCuts']:
     setattr(process, 'genHistos' + x, process.mfvGenHistos.clone())
     setattr(process, 'histos'    + x, histogrammer())
 
 process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                     jet_src = cms.InputTag('selectedPatJetsPF'),
-                                    min_jet_pt = cms.double(0),
-                                    min_4th_jet_pt = cms.double(0),
+                                    min_jet_pt = cms.double(30),
+                                    min_4th_jet_pt = cms.double(60),
                                     min_5th_jet_pt = cms.double(0),
                                     min_6th_jet_pt = cms.double(0),
                                     min_njets = cms.int32(5),
                                     min_nbtags = cms.int32(3),
                                     min_sum_ht = cms.double(400),
                                     b_discriminator_name = cms.string('jetProbabilityBJetTags'),
-                                    bdisc_min = cms.double(0),
+                                    bdisc_min = cms.double(0.545),
                                     muon_src = cms.InputTag('selectedPatMuonsPF'), 
                                     electron_src = cms.InputTag('selectedPatElectronsPF'),
                                     )
 process.p0 = cms.Path(process.genHistos * process.histos)
-process.p1 = cms.Path(process.analysisCuts * process.genHistosWithCuts * process.histosWithCuts)
-process.p2 = cms.Path(process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
+process.p1 = cms.Path(process.triggerFilter * process.genHistosWithTrigger * process.histosWithTrigger)
+process.p2 = cms.Path(process.analysisCuts * process.genHistosWithCuts * process.histosWithCuts)
+process.p3 = cms.Path(process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
 
 if 'debug' in sys.argv:
     from JMTucker.Tools.CMSSWTools import file_event_from_argv
