@@ -317,17 +317,17 @@ def aod_plus_pat():
     old_cmds = [x for x in process.out.outputCommands.value() if x.strip() != 'drop *']
     process.out.outputCommands = aod.outputCommands + old_cmds
 
-if 'fastsim' in sys.argv:
+if 'input_is_fastsim' in sys.argv:
     input_is_fastsim()
-if 'pythia8' in sys.argv:
+if 'input_is_pythia8' in sys.argv:
     input_is_pythia8()
 if 'keep_general_tracks' in sys.argv:
     keep_general_tracks()
 if 'keep_selected_tracks' in sys.argv:
     keep_selected_tracks()
-if 'no_cuts' in sys.argv:
+if 'no_skimming_cuts' in sys.argv:
     no_skimming_cuts()
-if 'drop_gen' in sys.argv:
+if 'drop_gen_particles' in sys.argv:
     drop_gen_particles()
 if 'aod_plus_pat' in sys.argv:
     aod_plus_pat()
