@@ -11,6 +11,7 @@ class Sample(object):
     PARENT_DATASET = None
     NO_SKIMMING_CUTS = False
     AOD_PLUS_PAT = False
+    DROP_GEN_PARTICLES = False
     IS_MC = True
     IS_FASTSIM = False
     IS_PYTHIA8 = False
@@ -30,6 +31,7 @@ class Sample(object):
         self.parent_dataset = self.PARENT_DATASET
         self.no_skimming_cuts = self.NO_SKIMMING_CUTS
         self.aod_plus_pat = self.AOD_PLUS_PAT
+        self.drop_gen_particles = self.DROP_GEN_PARTICLES
         self.is_mc = self.IS_MC
         self.is_fastsim = self.IS_FASTSIM
         self.is_pythia8 = self.IS_PYTHIA8
@@ -43,11 +45,11 @@ class Sample(object):
         self.ana_version = self.ANA_VERSION
         self.ana_ready = False
 
-    def dump(self):
+    def dump(self, dump_all=False):
         xx = 'name nice_name dataset parent_dataset is_mc is_fastsim is_pythia8 scheduler_name dbs_url_num ana_ready ana_dbs_url_num ana_hash publish_user ana_version ana_dataset'
         for x in xx.split():
             a = getattr(self, x)
-            if hasattr(self, x.upper()) and a == getattr(self, x.upper()):
+            if not dump_all and hasattr(self, x.upper()) and a == getattr(self, x.upper()):
                 continue
             print x, ':', a
 
@@ -78,13 +80,15 @@ class Sample(object):
     def use_server(self):
         return ''
 
-    @property
-    def filenames(self):
+    def filenames(self, ana=True):
         # Return a list of filenames for running the histogrammer not
         # using crab.
         if self.local_filenames:
             return self.local_filenames
-        return files_in_dataset(self.ana_dataset, ana01=self.ana_dbs_url_num == 1, ana02=self.ana_dbs_url_num == 2)
+        if ana:
+            return files_in_dataset(self.ana_dataset, ana01=self.ana_dbs_url_num == 1, ana02=self.ana_dbs_url_num == 2)
+        else:
+            return files_in_dataset(self.dataset, ana01=self.dbs_url_num == 1, ana02=self.dbs_url_num == 2)
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -293,17 +297,19 @@ for sample in all_samples:
 # are already applied above).
 
 for sample in background_samples:
+    sample.drop_gen_particles = True
     sample.publish_user = 'jchu'
-    sample.scheduler_name = 'condor'
-    sample.total_events = {'wjetstolnu': 7142857,
-                           'ttbarhadronic': 112360,
-                           'ttbarsemilep': 136240,
-                           'ttbardilep': 185185,
-                           'qcdht0100': 2941176,
-                           'qcdht0250': 335570,
-                           'qcdht0500': 204918,
-                           'qcdht1000': 162338}[sample.name]
-    
+    if sample.name != 'ttbarhadronic':
+        sample.scheduler_name = 'condor'
+    sample.total_events = {'wjetstolnu':     57709905,
+                           'ttbarhadronic':  10291640,
+                           'ttbarsemilep':    9863760,
+                           'ttbardilep':      2364600,
+                           'qcdht0100':      50129518,
+                           'qcdht0250':      27062078,
+                           'qcdht0500':       8430000,
+                           'qcdht1000':      10200000}[sample.name]
+                           
 ttbarincl.no_skimming_cuts = True
 singletop_t.scheduler_name = 'condor'
 
