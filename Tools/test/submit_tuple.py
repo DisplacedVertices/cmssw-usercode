@@ -17,7 +17,8 @@ get_edm_output = 1
 [USER]
 ui_working_dir = CCDIRECTORY
 copy_data = 1
-storage_element = T3_US_Cornell
+storage_element = T3_US_FNALLPC
+check_user_remote_dir = 0
 publish_data = 1
 publish_data_name = jtuple_CCVERSION
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
@@ -75,6 +76,6 @@ def submit(sample):
         raw_input('ok?')
         print
 
-from JMTucker.Tools.Samples import mfv_signal_samples as samples
+from JMTucker.Tools.Samples import background_samples as samples
 for sample in samples:
     submit(sample)
