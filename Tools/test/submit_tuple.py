@@ -46,6 +46,8 @@ def submit(sample):
             to_add.append('no_skimming_cuts()')
         if sample.aod_plus_pat:
             to_add.append('aod_plus_pat()')
+        if sample.drop_gen_particles:
+            to_add.append('drop_gen_particles()')
         if sample.is_fastsim:
             to_add.append('input_is_fastsim()')
         if sample.is_pythia8:
