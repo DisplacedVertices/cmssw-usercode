@@ -1,14 +1,20 @@
 import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, add_analyzer
+from JMTucker.Tools.CMSSWTools import silence_messages
 
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.source.fileNames = ['file:/uscms/home/jchaves/nobackup/pat_2_1_Nnk.root']
 process.TFileService.fileName = 'resolutions_histos.root'
+silence_messages(process, 'TwoTrackMinimumDistance')
+
+########################################################################
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.mfvGenParticleFilter.required_num_leptonic = 1
 process.mfvGenParticleFilter.min_lepton_pt = 30
 process.mfvGenParticleFilter.max_lepton_eta = 2.1
+
+########################################################################
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.goodDataFilter = hltHighLevel.clone()
@@ -19,6 +25,25 @@ process.goodDataFilter.andOr = False # = AND
 process.triggerFilter = hltHighLevel.clone()
 process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
 process.triggerFilter.andOr = True # = OR
+
+########################################################################
+
+process.load('Configuration.Geometry.GeometryIdeal_cff')
+process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.GlobalTag.globaltag = 'START53_V21::All'
+process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
+
+process.load('JMTucker.MFVNeutralino.VertexReco_cff')
+process.mfvInclusiveVertexFinder.vertexMinAngleCosine = 0.75
+process.mfvSelectedVertices = cms.EDFilter('VertexSelector',
+                                           src = cms.InputTag('mfvVertexMergerShared'),
+                                           cut = cms.string('nTracks >= 6 && p4.mass > 20'),
+                                           filter = cms.bool(False),
+                                           )
+process.mfvVertexSequence = cms.Sequence(process.mfvVertexReco * process.mfvSelectedVertices)
+
+########################################################################
 
 import JMTucker.Tools.PATTupleSelection_cfi
 selection = JMTucker.Tools.PATTupleSelection_cfi.jtupleParams
@@ -46,6 +71,7 @@ def histogrammer():
                           vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                           met_src = cms.InputTag('patMETsPF'),
                           jet_src = cms.InputTag('selectedPatJetsPF'),
+                          secondary_vertex_src = cms.InputTag('mfvSelectedVertices'),
                           b_discriminators = cms.vstring(*[name for name, discs in bdiscs]),
                           b_discriminator_mins = cms.vdouble(*[discs[1] for name, discs in bdiscs]),
                           muon_src = cms.InputTag('selectedPatMuonsPF'),
@@ -67,6 +93,8 @@ for x in ['', 'WithTrigger', 'WithCuts', 'WithTriggerWithCuts']:
     setattr(process, 'genHistos' + x, process.mfvGenHistos.clone())
     setattr(process, 'histos'    + x, histogrammer())
 
+########################################################################
+
 process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                     jet_src = cms.InputTag('selectedPatJetsPF'),
                                     min_jet_pt = cms.double(30),
@@ -81,10 +109,11 @@ process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                     muon_src = cms.InputTag('selectedPatMuonsPF'), 
                                     electron_src = cms.InputTag('selectedPatElectronsPF'),
                                     )
-process.p0 = cms.Path(process.genHistos * process.histos)
-process.p1 = cms.Path(process.triggerFilter * process.genHistosWithTrigger * process.histosWithTrigger)
-process.p2 = cms.Path(process.analysisCuts * process.genHistosWithCuts * process.histosWithCuts)
-process.p3 = cms.Path(process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
+
+process.p0 = cms.Path(process.mfvVertexSequence *                                                process.genHistos                    * process.histos)
+process.p1 = cms.Path(process.mfvVertexSequence * process.triggerFilter *                        process.genHistosWithTrigger         * process.histosWithTrigger)
+process.p2 = cms.Path(process.mfvVertexSequence *                         process.analysisCuts * process.genHistosWithCuts            * process.histosWithCuts)
+process.p3 = cms.Path(process.mfvVertexSequence * process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
 
 if 'debug' in sys.argv:
     from JMTucker.Tools.CMSSWTools import file_event_from_argv
