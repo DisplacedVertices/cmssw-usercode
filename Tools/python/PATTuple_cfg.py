@@ -276,7 +276,7 @@ if suppress_stdout:
         from JMTucker.Tools.general import big_warn
         big_warn('Unexpected spam hash! Did you change an option?')
 
-def input_is_fastsim():
+def input_is_fastsim(process):
     for name in 'HBHENoiseFilter CSCTightHaloFilter'.split():
         delattr(process, 'eventCleaning' + name)
         process.eventCleaningAll.remove(getattr(process, name))
@@ -284,14 +284,14 @@ def input_is_fastsim():
     process.pfPileUp.PFCandidates = 'FSparticleFlow'
     process.pfCandsNotInJetPF.bottomCollection = 'FSparticleFlow'
 
-def input_is_pythia8():
+def input_is_pythia8(process):
     process.patJetPartonMatch.mcStatus = cms.vint32(21,22,23,24,25,26,27,28,29)
     process.patJetPartonMatchPF.mcStatus = cms.vint32(21,22,23,24,25,26,27,28,29)
 
-def keep_general_tracks():
+def keep_general_tracks(process):
     process.out.outputCommands.append('keep *_generalTracks_*_*')
 
-def keep_selected_tracks():
+def keep_selected_tracks(process):
     process.selectTracks = cms.EDFilter('TrackSelector',
                                         src = cms.InputTag('generalTracks'),
                                         filter = cms.bool(False),
@@ -301,14 +301,13 @@ def keep_selected_tracks():
         p.insert(0, process.selectTracks)
     process.out.outputCommands.append('keep *_selectTracks_*_*')
 
-def no_skimming_cuts():
-    global process
+def no_skimming_cuts(process):
     del process.out.SelectEvents
 
-def drop_gen_particles():
+def drop_gen_particles(process):
     process.out.outputCommands.append('drop *_genParticles_*_*')
 
-def aod_plus_pat():
+def aod_plus_pat(process):
     if runOnMC:
         from Configuration.EventContent.EventContent_cff import AODSIMEventContent as aod
         aod.outputCommands += ['keep *_mfvTrackMatches_*_*']
@@ -317,19 +316,11 @@ def aod_plus_pat():
     old_cmds = [x for x in process.out.outputCommands.value() if x.strip() != 'drop *']
     process.out.outputCommands = aod.outputCommands + old_cmds
 
-if 'input_is_fastsim' in sys.argv:
-    input_is_fastsim()
-if 'input_is_pythia8' in sys.argv:
-    input_is_pythia8()
-if 'keep_general_tracks' in sys.argv:
-    keep_general_tracks()
-if 'keep_selected_tracks' in sys.argv:
-    keep_selected_tracks()
-if 'no_skimming_cuts' in sys.argv:
-    no_skimming_cuts()
-if 'drop_gen_particles' in sys.argv:
-    drop_gen_particles()
-if 'aod_plus_pat' in sys.argv:
-    aod_plus_pat()
+def keep_random_state(process):
+    process.out.outputCommands.append('keep *_randomEngineStateProducer_*_*')
+
+for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state'.split():
+    if arg in sys.argv:
+        exec '%s(process)' % arg
 
 #open('dumptup.py','wt').write(process.dumpPython())
