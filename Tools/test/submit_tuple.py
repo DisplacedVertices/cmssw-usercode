@@ -44,15 +44,15 @@ def submit(sample):
 
     if sample.is_mc:
         if sample.no_skimming_cuts:
-            to_add.append('no_skimming_cuts()')
+            to_add.append('no_skimming_cuts(process)')
         if sample.aod_plus_pat:
-            to_add.append('aod_plus_pat()')
+            to_add.append('aod_plus_pat(process)')
         if sample.drop_gen_particles:
-            to_add.append('drop_gen_particles()')
+            to_add.append('drop_gen_particles(process)')
         if sample.is_fastsim:
-            to_add.append('input_is_fastsim()')
+            to_add.append('input_is_fastsim(process)')
         if sample.is_pythia8:
-            to_add.append('input_is_pythia8()')
+            to_add.append('input_is_pythia8(process)')
     else:
         magic = 'runOnMC = True'
         if magic not in new_py:
