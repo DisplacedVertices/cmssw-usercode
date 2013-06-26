@@ -128,7 +128,14 @@ if 'debug' in sys.argv:
                                        useMessageLogger = cms.untracked.bool(False)
                                        )
     process.p0.insert(0, process.printList)
-                                     
+
+def remove_genhistos():
+    for path_name in process.paths:
+        path = getattr(process, path_name)
+        for mod_name in path.moduleNames():
+            if mod_name.startswith('genHistos'):
+                path.remove(getattr(process, mod_name))
+
 def run_on_data(dataset=None, datasets=None):
     if 'debug' in sys.argv:
         process.p.remove(process.printList)
@@ -146,46 +153,23 @@ def run_on_data(dataset=None, datasets=None):
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
-    
-    crab_cfg = '''
-[CRAB]
-jobtype = cmssw
-scheduler = %(scheduler)s
-
-[CMSSW]
-dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
-datasetpath = %(ana_dataset)s
-pset = resolutions_histos_crab.py
-%(job_control)s
-
-[USER]
-ui_working_dir = crab/resolutions/crab_resolutions_%(name)s
-return_data = 1
-'''
-    
-    just_testing = 'testing' in sys.argv
-
-    def submit(sample):
-        new_py = open('resolutions_histos.py').read()
-
-        if not sample.is_mc:
-            new_py += '\nrun_on_data()\n'
-        
-        open('resolutions_histos_crab.py', 'wt').write(new_py)
-        open('crab.cfg', 'wt').write(crab_cfg % sample)
-        if not just_testing:
-            os.system('crab -create -submit')
-            os.system('rm crab.cfg resolutions_histos_crab.py resolutions_histos_crab.pyc')
-        else:
-            print '.py diff:\n---------'
-            os.system('diff -uN resolutions_histos.py resolutions_histos_crab.py')
-            raw_input('ok?')
-            print '\ncrab.cfg:\n---------'
-            os.system('cat crab.cfg')
-            raw_input('ok?')
-            print
 
     from JMTucker.Tools.Samples import background_samples, mfv_signal_samples, data_samples
-    for sample in background_samples + mfv_signal_samples: #+ data_samples:
-        #if sample.ana_ready:
-            submit(sample)
+    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+
+    def pset_adder(sample):
+        to_add = []
+        if not sample.is_mc:
+            to_add.append('run_on_data()')
+        if 'mfv' not in sample.name:
+            to_add.append('remove_genhistos()')
+        return to_add
+
+    cs = CRABSubmitter('ResolutionsHistos',
+                       total_number_of_events = -1,
+                       events_per_job = 10000,
+                       use_ana_dataset = True,
+                       CMSSW_use_parent = 1,
+                       pset_adder = pset_adder
+                       )
+    cs.submit_all(samples)
