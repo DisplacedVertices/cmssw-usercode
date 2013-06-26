@@ -39,12 +39,8 @@ class CRABSubmitter:
                  other_cfg_lines = (),
                  testing = 'testing' in sys.argv,
                  max_threads = 5,
+                 ssh_control_persist = False,
                  **kwargs):
-
-        if not testing and CRABSubmitter.get_proxy:
-            print 'CRABSubmitter init: mandatory proxy get.'
-            os.system('voms-proxy-init -voms cms -valid 192:00')
-            CRABSubmitter.get_proxy = False
 
         self.batch_name = batch_name
         self.testing = testing
@@ -56,6 +52,8 @@ class CRABSubmitter:
         cfg = ConfigParserEx()
         cfg.set('CRAB', 'jobtype', 'cmssw')
         cfg.set('CRAB', 'scheduler', '%(scheduler)s')
+        if not ssh_control_persist:
+            cfg.set('USER', 'ssh_control_persist', 'no')
 
         if working_dir_pattern.startswith('%BATCH/'):
             working_dir_pattern = working_dir_pattern.replace('%BATCH', 'crab/%s' % batch_name)
@@ -208,6 +206,11 @@ class CRABSubmitter:
         return crab_output
 
     def submit_all(self, samples, **kwargs):
+        if not self.testing and CRABSubmitter.get_proxy:
+            print 'CRABSubmitter init: mandatory proxy get.'
+            os.system('voms-proxy-init -voms cms -valid 192:00')
+            CRABSubmitter.get_proxy = False
+
         if self.testing:
             print 'in testing mode, so only doing one sample at a time.'
             for sample in samples:
