@@ -1,0 +1,18 @@
+config/toolbox/${SCRAM_ARCH}/tools/selected/pythia8.xml
+pythia8
+165-cms
+<tool name="pythia8" version="165-cms">
+  <lib name="pythia8"/>
+  <lib name="hepmcinterface"/>
+  <client>
+    <environment name="PYTHIA8_BASE" default="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms"/>
+    <environment name="LIBDIR" default="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms/lib"/>
+    <environment name="INCLUDE" default="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms/include"/>
+  </client>
+  <runtime name="PYTHIA8DATA" value="${CMSSW_RELEASE_BASE}/../../../external/pythia8/165-cms/xmldoc"/>
+  <use name="cxxcompiler"/>
+  <use name="hepmc"/>
+  <use name="pythia6"/>
+  <use name="clhep"/>
+  <use name="lhapdf"/>
+</tool>
