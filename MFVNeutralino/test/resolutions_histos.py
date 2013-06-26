@@ -170,6 +170,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        events_per_job = 10000,
                        use_ana_dataset = True,
                        CMSSW_use_parent = 1,
-                       pset_adder = pset_adder
+                       pset_modifier = pset_adder
                        )
     cs.submit_all(samples)
