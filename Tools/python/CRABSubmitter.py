@@ -26,9 +26,10 @@ class CRABSubmitter:
     def __init__(self,
                  batch_name,
                  pset_template_fn = sys.argv[0],
-                 pset_adder = None,
+                 pset_modifier = None,
                  working_dir_pattern = '%BATCH/crab_%(name)s',
                  pset_fn_pattern = '%BATCH/%(name)s',
+                 job_control_from_sample = False,
                  job_splitting = (),
                  data_retrieval = 'return',
                  publish_data_name = '',
@@ -50,7 +51,7 @@ class CRABSubmitter:
         self.max_threads = max_threads
 
         self.pset_template_fn = pset_template_fn
-        self.pset_adder = pset_adder
+        self.pset_modifier = pset_modifier
 
         cfg = ConfigParserEx()
         cfg.set('CRAB', 'jobtype', 'cmssw')
@@ -80,23 +81,26 @@ class CRABSubmitter:
                 raise ValueError('can only set two of %s' % s)
             return l
 
-        if len(job_splitting) < 2:
-            job_splitting = get_two_max('total_number_of_events events_per_job number_of_jobs')
-        if len(job_splitting) < 2:
-            job_splitting = get_two_max('total_number_of_lumis lumis_per_job number_of_jobs')
-        if len(job_splitting) < 2:
-            raise ValueError('must provide job splitting')
+        self.job_control_from_sample = job_control_from_sample
+        if not job_control_from_sample:
+            self.job_control_from_sample = False
+            if len(job_splitting) < 2:
+                job_splitting = get_two_max('total_number_of_events events_per_job number_of_jobs')
+            if len(job_splitting) < 2:
+                job_splitting = get_two_max('total_number_of_lumis lumis_per_job number_of_jobs')
+            if len(job_splitting) < 2:
+                raise ValueError('must provide job splitting')
 
-        if type(job_splitting[0]) == str:
-            if len(job_splitting) % 2 != 0:
-                raise ValueError('job_splitting must be flat sequence of (name, value, ...) pairs')
-            for i in xrange(0, len(job_splitting), 2):
-                cfg.set('CMSSW', *job_splitting[i:i+2])
-        else:
-            for opt, val in job_splitting:
-                if kwargs.has_key(opt):
-                    del kwargs[opt]
-                cfg.set('CMSSW', opt, val)
+            if type(job_splitting[0]) == str:
+                if len(job_splitting) % 2 != 0:
+                    raise ValueError('job_splitting must be flat sequence of (name, value, ...) pairs')
+                for i in xrange(0, len(job_splitting), 2):
+                    cfg.set('CMSSW', *job_splitting[i:i+2])
+            else:
+                for opt, val in job_splitting:
+                    if kwargs.has_key(opt):
+                        del kwargs[opt]
+                    cfg.set('CMSSW', opt, val)
 
         data_retrieval = data_retrieval.lower()
         if data_retrieval == 'return':
@@ -140,14 +144,26 @@ class CRABSubmitter:
         dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url
         if dbs_url:
             cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
+        if self.job_control_from_sample:
+            for cmd in sample.job_control_commands:
+                cfg.set('CMSSW', *cmd)
         crab_cfg_fn = 'crab.%s.%s.cfg' % (self.batch_name, sample.name)
         cfg.write(open(crab_cfg_fn, 'wt'))
         return crab_cfg_fn, open(crab_cfg_fn, 'rt').read()
 
     def pset(self, sample):
         pset = open(self.pset_template_fn).read()
-        if self.pset_adder is not None:
-            to_add = self.pset_adder(sample) 
+        if self.pset_modifier is not None:
+            ret = self.pset_modifier(sample)
+            if type(ret) != tuple:
+                to_add = ret
+                to_replace = []
+            else:
+                to_add, to_replace = ret
+            for a,b,err in to_replace:
+                if pset.find(a) < 0:
+                    raise ValueError(err)
+                pset = pset.replace(a,b)
             pset += '\n' + '\n'.join(to_add) + '\n'
         pset_fn = self.pset_fn_pattern % sample
         open(pset_fn, 'wt').write(pset)
