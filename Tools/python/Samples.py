@@ -102,8 +102,12 @@ class Sample(object):
                 os.system('dccp ~%s %s/' % (fn,dst))
 
     @property
+    def job_control_commands(self):
+        raise NotImplementedError('job_control_commands needs to be implemented')
+
+    @property
     def job_control(self):
-        raise NotImplementedError('job_control needs to be implemented')
+        return '\n'.join('%s = %s' % cmd for cmd in self.job_control_commands)
 
 ########################################################################
 
@@ -132,11 +136,9 @@ class MCSample(Sample):
         return self.cross_section / float(nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
 
     @property
-    def job_control(self):
-        return '''
-total_number_of_events = %(total_events)s
-events_per_job = %(events_per)s
-''' % self
+    def job_control_commands(self):
+        return (('total_number_of_events', self.total_events),
+                ('events_per_job',         self.events_per))
 
 ########################################################################
 
@@ -174,11 +176,10 @@ class DataSample(Sample):
             raise NotImplementedError('need to do something more complicated when combining lumimasks')
 
     @property
-    def job_control(self):
-        return self.lumi_mask + '''
-total_number_of_lumis = %(total_lumis)s
-lumis_per_job = %(lumis_per)s
-''' % self
+    def job_control_commands(self):
+        return (self.lumi_mask,
+                ('total_number_of_lumis', self.total_lumis),
+                ('lumis_per_job',         self.lumis_per))
 
 ########################################################################
 
