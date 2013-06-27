@@ -44,7 +44,10 @@ def print_run_cmd(cmd, _print=True):
         print cmd
     os.system(cmd)
 
-def crab_popen(cmd, return_exit_code=False, print_output=False):
+def crab_popen(cmd, return_exit_code=False, print_output=False, no_ssh_control_persist=True):
+    if no_ssh_control_persist:
+        assert 'crab ' in cmd
+        cmd = cmd.replace('crab ', 'crab -USER.ssh_control_persist=no ')
     child = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     output = []
     for line in child.stdout:
