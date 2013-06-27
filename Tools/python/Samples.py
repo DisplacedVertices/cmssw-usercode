@@ -27,7 +27,8 @@ class Sample(object):
         self.name = name
         self.nice_name = nice_name
         self.dataset = dataset
-
+        self.ana_dataset_override = None
+        
         self.parent_dataset = self.PARENT_DATASET
         self.no_skimming_cuts = self.NO_SKIMMING_CUTS
         self.aod_plus_pat = self.AOD_PLUS_PAT
@@ -74,6 +75,8 @@ class Sample(object):
     
     @property
     def ana_dataset(self):
+        if self.ana_dataset_override is not None:
+            return self.ana_dataset_override
         return '/%(primary_dataset)s/%(publish_user)s-jtuple_%(ana_version)s-%(ana_hash)s/USER' % self
 
     @property
