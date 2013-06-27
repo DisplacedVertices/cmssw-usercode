@@ -3,17 +3,12 @@
 import os, sys
 from JMTucker.Tools.CRABTools import *
 
-tmp_file = 'crsuball.tmp'
-
 for d in crab_dirs_from_argv():
-    cmd = 'crab -c %s -submit 500 | tee %s' % (d, tmp_file)
+    cmd = 'crab -c %s -submit 500' % d
     print cmd
     while True:
-        os.system(cmd)
-        x = open(tmp_file).read()
+        x = crab_popen(cmd, print_output=True)
         if 'asking to submit 500 jobs, but only' in x:
             break
         elif 'crab:  Total of 500 jobs submitted.' not in x:
             raise ValueError('problem with crab output: did not submit 500 jobs?')
-
-os.remove(tmp_file)
