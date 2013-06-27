@@ -6,7 +6,10 @@ from JMTucker.Tools.CRABTools import *
 for d in crab_dirs_from_argv():
     cmd = 'crab -c %s -submit 500' % d
     print cmd
+    i = 0
     while True:
+        print 'running iteration #%i, be patient...' % i
+        i += 1
         x = crab_popen(cmd, print_output=True)
         if 'asking to submit 500 jobs, but only' in x:
             break
