@@ -42,6 +42,11 @@ class CRABSubmitter:
                  ssh_control_persist = False,
                  **kwargs):
 
+        if not testing and CRABSubmitter.get_proxy:
+            print 'CRABSubmitter init: mandatory proxy get.'
+            os.system('voms-proxy-init -voms cms -valid 192:00')
+            CRABSubmitter.get_proxy = False
+
         self.batch_name = batch_name
         self.testing = testing
         self.max_threads = max_threads
@@ -206,11 +211,6 @@ class CRABSubmitter:
         return crab_output
 
     def submit_all(self, samples, **kwargs):
-        if not self.testing and CRABSubmitter.get_proxy:
-            print 'CRABSubmitter init: mandatory proxy get.'
-            os.system('voms-proxy-init -voms cms -valid 192:00')
-            CRABSubmitter.get_proxy = False
-
         if self.testing:
             print 'in testing mode, so only doing one sample at a time.'
             for sample in samples:
