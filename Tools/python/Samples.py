@@ -305,6 +305,7 @@ for sample in background_samples:
                            'qcdht1000':      10200000}[sample.name]
                            
 ttbarincl.no_skimming_cuts = True
+ttbarincl.scheduler_name = 'condor'
 singletop_t.scheduler_name = 'condor'
 
 for sample in background_samples + auxiliary_background_samples + all_data_samples:
