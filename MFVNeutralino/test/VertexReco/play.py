@@ -51,12 +51,15 @@ ana_qcuts = [
     ('Qntk6',           ana.clone(min_sv_ntracks = 6)),
     ('Qntk6M20',        ana.clone(min_sv_ntracks = 6, min_sv_mass = 20)),
     ]
-    
-for ana_name, ana in ana_qcuts:
-    obj = ana.clone(vertex_src = src)
-    setattr(process, 'play' + name + ana_name, obj)
-    all_anas.append(obj)
-    process.p *= obj
+
+for vertex_name, vertex_src in vertex_srcs:
+    for ana_name, ana in ana_qcuts:
+        obj = ana.clone(vertex_src = vertex_src)
+        if 'IVF' in vertex_src:
+            obj.do_scatterplots = False
+        setattr(process, 'play' + vertex_name + ana_name, obj)
+        all_anas.append(obj)
+        process.p *= obj
 
 def gen_length_filter(dist):
     process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
@@ -111,8 +114,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('VertexRecoPlay',
-                       total_number_of_events = 100000,
-                       events_per_job = 2000,
+                       total_number_of_events = 10000,
+                       events_per_job = 1000,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
                        )
