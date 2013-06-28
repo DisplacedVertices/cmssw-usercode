@@ -123,13 +123,52 @@ def core_gaussian(hist, factor, i=[0]):
     i[0] += 1
     return f
 
-def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
-    sort_names     = kwargs.get('sort_names',     False)
+class _hist_list:
+    def __init__(self, hists):
+        self.hists = dict(hists)
+        if self.hists.has_key('all'):
+            raise NameError("name 'all' is reserved")
+
+    def __getattr__(self, name):
+        if name == 'all':
+            return self.hists.values()
+        elif self.hists.has_key(name):
+            return self.hists[name]
+        else:
+            raise AttributeError("no histogram '%s' found" % name)
+
+def compare_all_hists(ps, samples, **kwargs):
+    """For the common subset of histograms found in dir1..N, draw them
+    superimposed, normalized to unit area, with different
+    colors. samples is a list of [(sample_name, dir_name, color), ...].
+
+    Options (see the list below) are specified as keyword arguments in
+    kwargs, and so far include
+    - sort_names: True: process the histograms in alphabetical
+    order. False (default): in the order found in the ROOT directory.
+    - show_progress: if True (default), print how far along we are
+    processing the histograms.
+    
+    Various callbacks (see the other list below) can be specified as
+    keyword arguments to modify the drawing depending on the
+    histogram. The callback receives the arguments (histogram_name,
+    hist_list), where hist_list is an instance of _hist_list
+    above. This object serves as proxy for any of the histograms by
+    name, or to return the whole list. Some examples:
+
+    draw_commands = lambda name, hists: [hist.GetXaxis().SetRangeUser(0,1) for hist in hists.all]
+    apply_commands = lambda name, hists: (hists.ttbar.SetFillStyle(3004), hists.signal.SetFillStyle(3005))
+    no_stats = lambda name, hists: name == 'h_costheta'
+    """
+
+    # options
+    sort_names = kwargs.get('sort_names',     False)
     show_progress  = kwargs.get('show_progress',  True)
 
     def _get(arg, default):
-        return kwargs.get(arg, lambda name, hist1, hist2: default)
-    
+        return kwargs.get(arg, lambda name, hists: default)
+
+    # callbacks
     no_stats       = _get('no_stats',       False)
     stat_size      = _get('stat_size',      (0.2, 0.2))
     skip           = _get('skip',           False)
@@ -137,9 +176,16 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
     legend         = _get('legend',         None)
     separate_plots = _get('separate_plots', False)
 
+    ###
+    
     names = [k.GetName() for k in dir1.GetListOfKeys()]
     if sort_names:
         names.sort()
+
+    def all_same(l, msg):
+        if len(set(l)) != 1:
+            raise ValueError(msg)
+        return l[0]
 
     nnames = len(names)
     for iname, name in enumerate(names):
@@ -147,59 +193,67 @@ def compare_all_hists(ps, name1, dir1, color1, name2, dir2, color2, **kwargs):
             print '%5i/%5i' % (iname, nnames), name
 
         name_clean = name.replace('/','_')
-        
-        h1 = dir1.Get(name)
-        h2 = dir2.Get(name)
 
-        if skip(name, h1, h2):
+        hists = []
+        for sample_name, dir_name, color in samples:
+            hist = dir.Get(name)
+            # Store these data in the histogram object so we don't
+            # have to cross-reference later. If we give them unique
+            # names (prefix 'cah_') ROOT probably won't mind...
+            hist.cah_sample_name = sample_name
+            hist.cah_color = color
+            hists.append(hist)
+        hist_list = _hist_list((hist.cah_sample_name, hist) for hist in hists)
+
+        if skip(name, hist_list):
             continue
 
-        is2d = issubclass(type(h1), ROOT.TH2)
-        if not issubclass(type(h1), ROOT.TH1):
-            continue
+        is2d = all_same([issubclass(type(hist), ROOT.TH2) for hist in hists],
+                        "for name %s, some samples' histograms are TH2, and some are not" % name)
         
-        if not is2d:
-            i1 = get_integral(h1, 0, integral_only=True)
-            i2 = get_integral(h2, 0, integral_only=True)
-        else:
-            i1, i2 = 0, 0
+        if not all_same([issubclass(type(hist), ROOT.TH1) for hist in hists],
+                        "for name %s, some samples' histograms are TH1, and some are not" % name)
+            continue
 
-        rescale = i1 > 0 and i2 > 0 and not is2d
-        for i, (h, integ, color) in enumerate(((h1,i1,color1),(h2,i2, color2))):
-            h.SetLineWidth(2)
+        for hist in hists:
+            hist.cah_integral = get_integral(hist, 0, integral_only=True) if not is2d else 0.
+
+        rescale = not is2d and all(hist.cah_integral > 0 for hist in hists)
+        for hist in hists:
+            hist.SetLineWidth(2)
 
             if rescale:
-                h.Scale(1./integ)
-            if no_stats(name, h1, h2):
+                hist.Scale(1./hist.cah_integral)
+            if no_stats(name, hist_list):
                 h.SetStats(0)
-            h.SetLineColor(color)
-            h.SetMarkerColor(color)
-            
-        apply_commands(name, h1, h2)
+            h.SetLineColor(hist.cah_color)
+            h.SetMarkerColor(hist.cah_color)
 
-        h1.SetName(name1)
-        h2.SetName(name2)
-
-        if is2d and separate_plots(name, h1, h2):
-            h1.Draw('colz')
-            ps.save(name_clean + '_' + name1, logz=True)
-            h2.Draw('colz')
-            ps.save(name_clean + '_' + name2, logz=True)
+            h.SetName(hist.cah_sample_name)
             
-        if is2d or h1.GetMaximum() > h2.GetMaximum():
-            h1.Draw()
-            h2.Draw('sames')
-        else:
-            h2.Draw()
-            h1.Draw('sames')
+        apply_commands(name, hists)
+
+        if is2d and separate_plots(name, hist_list):
+            for hist in hists:
+                hist.Draw('colz')
+                ps.save(name_clean + '_' + hist.cah_sample_name, logz=True)
+
+        hists_sorted = hists[:]
+        if not is2d:
+            hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
+        for i,hist in enumerate(hists_sorted):
+            if i == 0:
+                hist.Draw()
+            else:
+                hist.Draw('sames')
 
         ps.c.Update()
-        if not no_stats(name, h1, h2):
-            ss = stat_size(name, h1, h2)
-            differentiate_stat_box(h1, 0, color1, ss)
-            differentiate_stat_box(h2, 1, color2, ss)
+        if not no_stats(name, hist_list):
+            ss = stat_size(name, hist_list)
+            for i, hist in enumerate(hists):
+                differentiate_stat_box(hist, i, hist.cah_color, ss)
 
-        leg = legend(name, h1, h2)
+        leg = legend(name, hist_list)
         if leg is not None:
             leg.Draw()
             
