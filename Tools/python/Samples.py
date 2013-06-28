@@ -79,10 +79,6 @@ class Sample(object):
             return self.ana_dataset_override
         return '/%(primary_dataset)s/%(publish_user)s-jtuple_%(ana_version)s-%(ana_hash)s/USER' % self
 
-    @property
-    def use_server(self):
-        return ''
-
     def filenames(self, ana=True):
         # Return a list of filenames for running the histogrammer not
         # using crab.
@@ -254,32 +250,27 @@ auxiliary_background_samples = [
 
 ########################################################################
 
+# xsecs from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections8TeVgluglu (M_glu = M_neu + 5 GeV...)
 mfv_signal_samples_ex = [
-    (1000,  400, 'c9c4c27381f6625ed3d8394ffaf0b9cd'),
-    (   0,  400, '3e730b2f07d27fadb85eb50c5002cc81'),
-    (9900,  400, 'c91fb7b9ece3e3abc0445dc6699e16d6'),
-    (1000, 1000, 'c9c4c27381f6625ed3d8394ffaf0b9cd'),
+    (0,     400, MCSample('mfv_neutralino_tau0000um_M0400', 'MFV signal, M = 400 GeV, prompt',         '/crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER', 10000, 2, 0.15, 1.74e01),),
+    (1000,  400, MCSample('mfv_neutralino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',    '/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER', 10000, 2, 0.15, 1.74e01),),
+    (9900,  400, MCSample('mfv_neutralino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',  '/crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER', 10000, 2, 0.15, 1.74e01),),
+    (1000, 1000, MCSample('mfv_neutralino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',   '/mfv_neutralino_tau1000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',                                                                                                                                   10000, 6, 0.26, 2.33e-2),),
     ]
 
-mfv_signal_samples_nice = {0: '0', 10: '10 #mum', 100: '100 #mum', 1000: '1 mm', 4000: '4 mm', 9900: '9.9 mm'}
-
 mfv_signal_samples = []
-for tau, mass, gensimhlt_hash in mfv_signal_samples_ex:
-    name_frag = 'neutralino_tau%04ium_M%04i' % (tau, mass)
-    s = MCSample('mfv_' + name_frag,
-                 'MFV signal, M = %i GeV, #tau = %s' % (mass, mfv_signal_samples_nice[tau]),
-                 '/mfv_%s/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER' % name_frag,
-                 10000, -1, 0.2, 1)
-    s.ana_hash = '547d3313903142038335071634b26604'
-    s.parent_dataset = '/mfv_%(name_frag)s/tucker-mfv_%(name_frag)s-%(gensimhlt_hash)s/USER' % locals()
-    s.tau  = tau
-    s.mass = mass
-    s.events_per = 2000
-    s.no_skimming_cuts = True
-    s.aod_plus_pat = True
-    s.is_pythia8 = True
-    s.dbs_url_num = 2
-    mfv_signal_samples.append(s)
+for tau, mass, sample in mfv_signal_samples_ex:
+    mfv_signal_samples.append(sample)
+    sample.tau = tau
+    sample.mass = mass
+    sample.events_per = 2000
+    sample.no_skimming_cuts = True
+    sample.aod_plus_pat = True
+    sample.is_pythia8 = True
+    sample.dbs_url_num = 2
+    if 'crabfake' in sample.dataset:
+        sample.ana_dataset_override = sample.dataset
+        sample.scheduler_name = 'condor'
 
 ########################################################################
 
