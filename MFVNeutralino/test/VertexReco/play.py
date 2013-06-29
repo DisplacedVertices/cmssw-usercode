@@ -36,7 +36,8 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      print_info = cms.bool(False),
                      is_mfv = cms.bool(True),
                      is_ttbar = cms.bool(False),
-                     do_scatterplots = cms.bool(True),
+                     do_scatterplots = cms.bool(False),
+                     do_ntuple = cms.bool(True),
                      jet_pt_min = cms.double(30),
                      track_pt_min = cms.double(10),
                      min_sv_ntracks = cms.int32(0),
@@ -78,9 +79,9 @@ def sample_ttbar():
     for ana in all_anas:
         ana.is_ttbar = True
     
-def no_scatterplots():
+def scatterplots(do):
     for ana in all_anas:
-        ana.do_scatterplots = False
+        ana.do_scatterplots = do
 
 if 'debug' in sys.argv:
     if 'ttbar' in sys.argv:
@@ -92,7 +93,7 @@ if 'debug' in sys.argv:
 
     process.mfvVertices.verbose = True
 
-#no_scatterplots()
+#scatterplots(True)
 #process.add_(cms.Service('SimpleMemoryCheck'))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -101,8 +102,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
-    from JMTucker.Tools.Samples import mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400, ttbarincl, qcdht0100, qcdht0250, qcdht0500, qcdht1000
-    samples = [mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400, ttbarincl] #, qcdht0100, qcdht0250, qcdht0500, qcdht1000]
+    from JMTucker.Tools.Samples import background_samples, mfv_signal_samples
+    samples = background_samples + mfv_signal_samples
 
     def pset_modifier(sample):
         to_add = []
