@@ -162,8 +162,9 @@ def compare_all_hists(ps, samples, **kwargs):
     """
 
     # options
-    sort_names = kwargs.get('sort_names',     False)
+    sort_names     = kwargs.get('sort_names',     False)
     show_progress  = kwargs.get('show_progress',  True)
+    only_n_first   = kwargs.get('only_n_first',   -1)
 
     def _get(arg, default):
         return kwargs.get(arg, lambda name, hists: default)
@@ -182,6 +183,8 @@ def compare_all_hists(ps, samples, **kwargs):
     names = [k.GetName() for k in samples[0][1].GetListOfKeys()]
     if sort_names:
         names.sort()
+    if only_n_first > 0:
+        names = names[:only_n_first]
 
     def all_same(l, msg):
         if len(set(l)) != 1:
