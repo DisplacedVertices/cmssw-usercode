@@ -15,18 +15,20 @@ parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZ
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
 parser.add_argument('--nice', nargs='+', default=[],
                     help='Nice names for the files (default is file1, file2, ...).')
-parser.add_argument('--colors', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kOrange+7'],
+parser.add_argument('--colors', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta'],
                     help='Colors for the files: may be a python snippet, e.g. the default %(default)s.')
 
 group = parser.add_argument_group('Callback function snippets: will be of the form lambda name, hists: <snippet here>')
 group.add_argument('--no-stats', default='False',
-                    help='Snippet for no_stats lambda (default is %(default)s).')
+                    help='Snippet for no_stats lambda (default: %(default)s).')
 group.add_argument('--apply-commands', default='None',
-                  help='Snippet for apply_commands lambda, which takes name, hist1, hist2 as args (default is %(default)s).')
+                  help='Snippet for apply_commands (default: %(default)s).')
 group.add_argument('--separate-plots', default='None',
-                  help='Snippet for separate_plots lambda, which takes name, hist1, hist2 as args (default is %(default)s).')
+                  help='Snippet for separate_plots (default: %(default)s).')
 group.add_argument('--skip', default='None',
-                  help='Snippet for skip lambda, which takes name, hist1, hist2 as args (default is %(default)s).')
+                  help='Snippet for skip lambda (default: %(default)s).')
+group.add_argument('--draw-command', default='""',
+                   help='Snippet for draw_command lambda (default: %(default)s).')
 
 options = parser.parse_args()
 
@@ -49,22 +51,24 @@ options.colors = options.colors[:nfiles]
 options.colors = [eval(c) for c in options.colors]
 ncolors = len(options.colors)
 while len(options.colors) < nfiles:
-    options.colors.append(ROOT.kMagenta + len(options.colors) - ncolors)
+    options.colors.append(ROOT.kMagenta + 1 + len(options.colors) - ncolors)
 
 _lambda = 'lambda name, hists: '
 options.no_stats       = _lambda + options.no_stats
 options.apply_commands = _lambda + options.apply_commands
 options.separate_plots = _lambda + options.separate_plots
 options.skip           = _lambda + options.skip
+options.draw_command   = _lambda + options.draw_command
 options.lambda_no_stats       = eval(options.no_stats)
 options.lambda_apply_commands = eval(options.apply_commands)
 options.lambda_separate_plots = eval(options.separate_plots)
 options.lambda_skip           = eval(options.skip)
+options.lambda_draw_command   = eval(options.draw_command)
 
 print 'comparehists running with these options:'
 pprint(vars(options))
 
-#import sys ; print 'argv:', sys.argv ;  sys.exit(1)
+#import sys ; print 'argv:', sys.argv ; raise 1 ; sys.exit(1)
 
 ########################################################################
 
@@ -80,4 +84,5 @@ compare_all_hists(ps,
                   apply_commands = options.lambda_apply_commands,
                   separate_plots = options.lambda_separate_plots,
                   skip = options.lambda_skip,
+                  draw_command = options.lambda_draw_command,
                   )
