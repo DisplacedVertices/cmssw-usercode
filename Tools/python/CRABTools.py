@@ -414,13 +414,25 @@ def crab_get_output_files(working_dir, _re=re.compile(r'\$SOFTWARE_DIR/(.*?)[,"]
         
     return list(sorted(files))
     
-def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_stuck_done=False, resub_none=False, site_control=''):
-    d = crab_status(working_dir, verbose, debug)
+def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_stuck_done=False, resub_none=False, site_control='', status_until_none_done=True):
     use_server = crab_is_using_server(working_dir)
-
     to_kill = []
     to_resub = []
-    
+
+    d = {'Done': None} # dummy to start the while loop
+    while d.has_key('Done'):
+        d = crab_status(working_dir, verbose, debug)
+        if d.has_key('Done'):
+            missing = crab_get_output(working_dir, d['Done'], debug=debug)
+            if missing:
+                for m in missing:
+                    d['Done'].remove(m)
+                d['DoneStuck'] = missing
+                if resub_stuck_done:
+                    to_resub.extend(missing)
+        if not status_until_none_done:
+            break
+
     if d.has_key('Aborted'): # If use_server mode, and the jobs are in end status, this is OK -- else the key will be AbortedNotEnd and we shouldn't touch them.
         to_resub.extend(d['Aborted'])
 
@@ -440,15 +452,6 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
         key = 'Retrieved_%s' % '_'.join(code)
         if d.has_key(key):
             to_resub.extend(d[key])
-
-    if d.has_key('Done'):
-        missing = crab_get_output(working_dir, d['Done'], debug=debug)
-        if missing:
-            for m in missing:
-                d['Done'].remove(m)
-            d['DoneStuck'] = missing
-            if resub_stuck_done:
-                to_resub.extend(missing)
 
     if to_kill:
         crab_kill(working_dir, to_kill)
