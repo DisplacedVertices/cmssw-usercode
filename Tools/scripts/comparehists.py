@@ -10,7 +10,9 @@ parser = argparse.ArgumentParser(description = 'comparehists: compare all histog
 parser.add_argument('positional', nargs='*', help='The .root files.')
 
 parser.add_argument('--per-page', type=int, default=-1,
-                    help='Put PER_PAGE plots per html page (default all on one page).')
+                    help='Put PER_PAGE histograms per html page (default: all on one page).')
+parser.add_argument('--only-n-first', type=int, default=-1,
+                    help='Only do the first ONLY_N_FIRST histograms (default: do all).')
 parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZE',
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
 parser.add_argument('--nice', nargs='+', default=[],
@@ -80,6 +82,7 @@ dirs = [file.Get(options.dir_path) for file in files]
 
 compare_all_hists(ps,
                   samples = zip(options.nice, dirs, options.colors),
+                  only_n_first = options.only_n_first,
                   no_stats = options.lambda_no_stats,
                   apply_commands = options.lambda_apply_commands,
                   separate_plots = options.lambda_separate_plots,
