@@ -1,5 +1,6 @@
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -68,6 +69,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const bool is_mfv;
   const bool is_ttbar;
   const bool do_scatterplots;
+  const bool do_ntuple;
   const double jet_pt_min;
   const double track_pt_min;
 
@@ -220,6 +222,85 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 
   TH1F* h_pairnsharedtracks;
   TH2F* h_pairfsharedtracks;
+
+  struct ntuple_t {
+    float mass0_ntracks;           
+    float mass0_ntracksptpass;     
+    float mass0_trackminnhits;     
+    float mass0_chi2dof;           
+    float mass0_chi2dofprob;       
+    float mass0_pt;                
+    float mass0_eta;               
+    float mass0_phi;               
+    float mass0_mass;              
+    float mass0_sumpt2;            
+    float mass0_mintrackpt;        
+    float mass0_maxtrackpt;        
+    float mass0_drmin;             
+    float mass0_drmax;             
+    float mass0_dravg;             
+    float mass0_drrms;             
+    float mass0_dravgw;            
+    float mass0_drrmsw;            
+    float mass0_gen2ddist;         
+    float mass0_gen2derr;          
+    float mass0_gen3ddist;         
+    float mass0_gen3derr;          
+    float mass0_bs2dcompatscss;    
+    float mass0_bs2dcompat;        
+    float mass0_bs2ddist;          
+    float mass0_bs2derr;           
+    float mass0_bs2dsig;           
+    float mass0_pv2dcompatscss;    
+    float mass0_pv2dcompat;        
+    float mass0_pv2ddist;          
+    float mass0_pv2derr;           
+    float mass0_pv2dsig;           
+    float mass0_pv3dcompatscss;    
+    float mass0_pv3dcompat;        
+    float mass0_pv3ddist;          
+    float mass0_pv3derr;           
+    float mass0_pv3dsig;           
+    float mass1_ntracks;           
+    float mass1_ntracksptpass;     
+    float mass1_trackminnhits;     
+    float mass1_chi2dof;           
+    float mass1_chi2dofprob;       
+    float mass1_pt;                
+    float mass1_eta;               
+    float mass1_phi;               
+    float mass1_mass;              
+    float mass1_sumpt2;            
+    float mass1_mintrackpt;        
+    float mass1_maxtrackpt;        
+    float mass1_drmin;             
+    float mass1_drmax;             
+    float mass1_dravg;             
+    float mass1_drrms;             
+    float mass1_dravgw;            
+    float mass1_drrmsw;            
+    float mass1_gen2ddist;         
+    float mass1_gen2derr;          
+    float mass1_gen3ddist;         
+    float mass1_gen3derr;          
+    float mass1_bs2dcompatscss;    
+    float mass1_bs2dcompat;        
+    float mass1_bs2ddist;          
+    float mass1_bs2derr;           
+    float mass1_bs2dsig;           
+    float mass1_pv2dcompatscss;    
+    float mass1_pv2dcompat;        
+    float mass1_pv2ddist;          
+    float mass1_pv2derr;           
+    float mass1_pv2dsig;           
+    float mass1_pv3dcompatscss;    
+    float mass1_pv3dcompat;        
+    float mass1_pv3ddist;          
+    float mass1_pv3derr;           
+    float mass1_pv3dsig;           
+  };
+  TTree* tree;
+  ntuple_t nt;
 };
 
 VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
@@ -231,6 +312,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     is_mfv(cfg.getParameter<bool>("is_mfv")),
     is_ttbar(cfg.getParameter<bool>("is_ttbar")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
+    do_ntuple(cfg.getParameter<bool>("do_ntuple")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     track_pt_min(cfg.getParameter<double>("track_pt_min")),
     min_sv_ntracks(cfg.getParameter<int>("min_sv_ntracks")),
@@ -240,6 +322,86 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     min_sv_drmax(cfg.getParameter<double>("min_sv_drmax"))
 {
   edm::Service<TFileService> fs;
+
+  if (!do_ntuple)
+    tree = 0;
+  else {
+    tree = fs->make<TTree>("tree", "");
+    tree->Branch("mass0_ntracks", &nt.mass0_ntracks, "mass0_ntracks/F");
+    tree->Branch("mass0_ntracksptpass", &nt.mass0_ntracksptpass, "mass0_ntracksptpass/F");
+    tree->Branch("mass0_trackminnhits", &nt.mass0_trackminnhits, "mass0_trackminnhits/F");
+    tree->Branch("mass0_chi2dof", &nt.mass0_chi2dof, "mass0_chi2dof/F");
+    tree->Branch("mass0_chi2dofprob", &nt.mass0_chi2dofprob, "mass0_chi2dofprob/F");
+    tree->Branch("mass0_pt", &nt.mass0_pt, "mass0_pt/F");
+    tree->Branch("mass0_eta", &nt.mass0_eta, "mass0_eta/F");
+    tree->Branch("mass0_phi", &nt.mass0_phi, "mass0_phi/F");
+    tree->Branch("mass0_mass", &nt.mass0_mass, "mass0_mass/F");
+    tree->Branch("mass0_sumpt2", &nt.mass0_sumpt2, "mass0_sumpt2/F");
+    tree->Branch("mass0_mintrackpt", &nt.mass0_mintrackpt, "mass0_mintrackpt/F");
+    tree->Branch("mass0_maxtrackpt", &nt.mass0_maxtrackpt, "mass0_maxtrackpt/F");
+    tree->Branch("mass0_drmin", &nt.mass0_drmin, "mass0_drmin/F");
+    tree->Branch("mass0_drmax", &nt.mass0_drmax, "mass0_drmax/F");
+    tree->Branch("mass0_dravg", &nt.mass0_dravg, "mass0_dravg/F");
+    tree->Branch("mass0_drrms", &nt.mass0_drrms, "mass0_drrms/F");
+    tree->Branch("mass0_dravgw", &nt.mass0_dravgw, "mass0_dravgw/F");
+    tree->Branch("mass0_drrmsw", &nt.mass0_drrmsw, "mass0_drrmsw/F");
+    tree->Branch("mass0_gen2ddist", &nt.mass0_gen2ddist, "mass0_gen2ddist/F");
+    tree->Branch("mass0_gen2derr", &nt.mass0_gen2derr, "mass0_gen2derr/F");
+    tree->Branch("mass0_gen3ddist", &nt.mass0_gen3ddist, "mass0_gen3ddist/F");
+    tree->Branch("mass0_gen3derr", &nt.mass0_gen3derr, "mass0_gen3derr/F");
+    tree->Branch("mass0_bs2dcompatscss", &nt.mass0_bs2dcompatscss, "mass0_bs2dcompatscss/F");
+    tree->Branch("mass0_bs2dcompat", &nt.mass0_bs2dcompat, "mass0_bs2dcompat/F");
+    tree->Branch("mass0_bs2ddist", &nt.mass0_bs2ddist, "mass0_bs2ddist/F");
+    tree->Branch("mass0_bs2derr", &nt.mass0_bs2derr, "mass0_bs2derr/F");
+    tree->Branch("mass0_bs2dsig", &nt.mass0_bs2dsig, "mass0_bs2dsig/F");
+    tree->Branch("mass0_pv2dcompatscss", &nt.mass0_pv2dcompatscss, "mass0_pv2dcompatscss/F");
+    tree->Branch("mass0_pv2dcompat", &nt.mass0_pv2dcompat, "mass0_pv2dcompat/F");
+    tree->Branch("mass0_pv2ddist", &nt.mass0_pv2ddist, "mass0_pv2ddist/F");
+    tree->Branch("mass0_pv2derr", &nt.mass0_pv2derr, "mass0_pv2derr/F");
+    tree->Branch("mass0_pv2dsig", &nt.mass0_pv2dsig, "mass0_pv2dsig/F");
+    tree->Branch("mass0_pv3dcompatscss", &nt.mass0_pv3dcompatscss, "mass0_pv3dcompatscss/F");
+    tree->Branch("mass0_pv3dcompat", &nt.mass0_pv3dcompat, "mass0_pv3dcompat/F");
+    tree->Branch("mass0_pv3ddist", &nt.mass0_pv3ddist, "mass0_pv3ddist/F");
+    tree->Branch("mass0_pv3derr", &nt.mass0_pv3derr, "mass0_pv3derr/F");
+    tree->Branch("mass0_pv3dsig", &nt.mass0_pv3dsig, "mass0_pv3dsig/F");
+    tree->Branch("mass1_ntracks", &nt.mass1_ntracks, "mass1_ntracks/F");
+    tree->Branch("mass1_ntracksptpass", &nt.mass1_ntracksptpass, "mass1_ntracksptpass/F");
+    tree->Branch("mass1_trackminnhits", &nt.mass1_trackminnhits, "mass1_trackminnhits/F");
+    tree->Branch("mass1_chi2dof", &nt.mass1_chi2dof, "mass1_chi2dof/F");
+    tree->Branch("mass1_chi2dofprob", &nt.mass1_chi2dofprob, "mass1_chi2dofprob/F");
+    tree->Branch("mass1_pt", &nt.mass1_pt, "mass1_pt/F");
+    tree->Branch("mass1_eta", &nt.mass1_eta, "mass1_eta/F");
+    tree->Branch("mass1_phi", &nt.mass1_phi, "mass1_phi/F");
+    tree->Branch("mass1_mass", &nt.mass1_mass, "mass1_mass/F");
+    tree->Branch("mass1_sumpt2", &nt.mass1_sumpt2, "mass1_sumpt2/F");
+    tree->Branch("mass1_mintrackpt", &nt.mass1_mintrackpt, "mass1_mintrackpt/F");
+    tree->Branch("mass1_maxtrackpt", &nt.mass1_maxtrackpt, "mass1_maxtrackpt/F");
+    tree->Branch("mass1_drmin", &nt.mass1_drmin, "mass1_drmin/F");
+    tree->Branch("mass1_drmax", &nt.mass1_drmax, "mass1_drmax/F");
+    tree->Branch("mass1_dravg", &nt.mass1_dravg, "mass1_dravg/F");
+    tree->Branch("mass1_drrms", &nt.mass1_drrms, "mass1_drrms/F");
+    tree->Branch("mass1_dravgw", &nt.mass1_dravgw, "mass1_dravgw/F");
+    tree->Branch("mass1_drrmsw", &nt.mass1_drrmsw, "mass1_drrmsw/F");
+    tree->Branch("mass1_gen2ddist", &nt.mass1_gen2ddist, "mass1_gen2ddist/F");
+    tree->Branch("mass1_gen2derr", &nt.mass1_gen2derr, "mass1_gen2derr/F");
+    tree->Branch("mass1_gen3ddist", &nt.mass1_gen3ddist, "mass1_gen3ddist/F");
+    tree->Branch("mass1_gen3derr", &nt.mass1_gen3derr, "mass1_gen3derr/F");
+    tree->Branch("mass1_bs2dcompatscss", &nt.mass1_bs2dcompatscss, "mass1_bs2dcompatscss/F");
+    tree->Branch("mass1_bs2dcompat", &nt.mass1_bs2dcompat, "mass1_bs2dcompat/F");
+    tree->Branch("mass1_bs2ddist", &nt.mass1_bs2ddist, "mass1_bs2ddist/F");
+    tree->Branch("mass1_bs2derr", &nt.mass1_bs2derr, "mass1_bs2derr/F");
+    tree->Branch("mass1_bs2dsig", &nt.mass1_bs2dsig, "mass1_bs2dsig/F");
+    tree->Branch("mass1_pv2dcompatscss", &nt.mass1_pv2dcompatscss, "mass1_pv2dcompatscss/F");
+    tree->Branch("mass1_pv2dcompat", &nt.mass1_pv2dcompat, "mass1_pv2dcompat/F");
+    tree->Branch("mass1_pv2ddist", &nt.mass1_pv2ddist, "mass1_pv2ddist/F");
+    tree->Branch("mass1_pv2derr", &nt.mass1_pv2derr, "mass1_pv2derr/F");
+    tree->Branch("mass1_pv2dsig", &nt.mass1_pv2dsig, "mass1_pv2dsig/F");
+    tree->Branch("mass1_pv3dcompatscss", &nt.mass1_pv3dcompatscss, "mass1_pv3dcompatscss/F");
+    tree->Branch("mass1_pv3dcompat", &nt.mass1_pv3dcompat, "mass1_pv3dcompat/F");
+    tree->Branch("mass1_pv3ddist", &nt.mass1_pv3ddist, "mass1_pv3ddist/F");
+    tree->Branch("mass1_pv3derr", &nt.mass1_pv3derr, "mass1_pv3derr/F");
+    tree->Branch("mass1_pv3dsig", &nt.mass1_pv3dsig, "mass1_pv3dsig/F");
+  }
 
   for (int i = 0; i < 3; ++i) {
     const char* ex = (i == 0 ? "m1" : (i == 1 ? "0" : "p1"));
@@ -367,6 +529,12 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 }
 
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  // memset(&nt, 0, sizeof(ntuple_t));
+  // roll that beautiful bean footage
+  float* haha = (float*)&nt;
+  for (int i = 0, ie = sizeof(ntuple_t)/sizeof(float); i < ie; ++i)
+    *haha++ = -1;
+
   edm::Handle<std::vector<PileupSummaryInfo> > pileup;
   event.getByLabel("addPileupInfo", pileup);
   for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi) {
@@ -605,6 +773,87 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       pv3ddist_sig = pv3ddist.significance();
     }
 
+    if (do_ntuple) {
+      if (isv == 0) {
+        nt.mass0_ntracks         = ntracks;        
+        nt.mass0_ntracksptpass   = ntracksptpass;   
+        nt.mass0_trackminnhits   = trackminnhits;
+        nt.mass0_chi2dof         = sv.normalizedChi2();        
+        nt.mass0_chi2dofprob     = TMath::Prob(sv.chi2(), sv.ndof());
+        nt.mass0_pt              = sv.p4().pt();
+        nt.mass0_eta             = sv.p4().eta();
+        nt.mass0_phi             = sv.p4().phi();
+        nt.mass0_mass            = sv.p4().mass();
+        nt.mass0_sumpt2          = sumpt2;
+        nt.mass0_mintrackpt      = mintrackpt;
+        nt.mass0_maxtrackpt      = maxtrackpt;
+        nt.mass0_drmin           = vtx_tks_dist.drmin;
+        nt.mass0_drmax           = vtx_tks_dist.drmax;
+        nt.mass0_dravg           = vtx_tks_dist.dravg;
+        nt.mass0_drrms           = vtx_tks_dist.drrms;
+        nt.mass0_dravgw          = vtx_tks_dist.dravgw;
+        nt.mass0_drrmsw          = vtx_tks_dist.drrmsw;
+        nt.mass0_gen2ddist       = gen2ddist;
+        nt.mass0_gen2derr        = gen2derr;
+        nt.mass0_gen3ddist       = gen3ddist;
+        nt.mass0_gen3derr        = gen3derr;
+        nt.mass0_bs2dcompatscss  = bs2dcompat.first;
+        nt.mass0_bs2dcompat      = bs2dcompat.second;
+        nt.mass0_bs2ddist        = bs2ddist.value();
+        nt.mass0_bs2derr         = bs2ddist.error();
+        nt.mass0_bs2dsig         = bs2ddist.significance();
+        nt.mass0_pv2dcompatscss  = pv2dcompat.first;
+        nt.mass0_pv2dcompat      = pv2dcompat.second;
+        nt.mass0_pv2ddist        = pv2ddist_val;
+        nt.mass0_pv2derr         = pv2ddist_err;
+        nt.mass0_pv2dsig         = pv2ddist_sig;
+        nt.mass0_pv3dcompatscss  = pv3dcompat.first;
+        nt.mass0_pv3dcompat      = pv3dcompat.second;
+        nt.mass0_pv3ddist        = pv3ddist_val;
+        nt.mass0_pv3derr         = pv3ddist_err;
+        nt.mass0_pv3dsig         = pv3ddist_sig;
+      }
+      else if (isv == 1) {
+        nt.mass1_ntracks         = ntracks;        
+        nt.mass1_ntracksptpass   = ntracksptpass;   
+        nt.mass1_trackminnhits   = trackminnhits;
+        nt.mass1_chi2dof         = sv.normalizedChi2();        
+        nt.mass1_chi2dofprob     = TMath::Prob(sv.chi2(), sv.ndof());
+        nt.mass1_pt              = sv.p4().pt();
+        nt.mass1_eta             = sv.p4().eta();
+        nt.mass1_phi             = sv.p4().phi();
+        nt.mass1_mass            = sv.p4().mass();
+        nt.mass1_sumpt2          = sumpt2;
+        nt.mass1_mintrackpt      = mintrackpt;
+        nt.mass1_maxtrackpt      = maxtrackpt;
+        nt.mass1_drmin           = vtx_tks_dist.drmin;
+        nt.mass1_drmax           = vtx_tks_dist.drmax;
+        nt.mass1_dravg           = vtx_tks_dist.dravg;
+        nt.mass1_drrms           = vtx_tks_dist.drrms;
+        nt.mass1_dravgw          = vtx_tks_dist.dravgw;
+        nt.mass1_drrmsw          = vtx_tks_dist.drrmsw;
+        nt.mass1_gen2ddist       = gen2ddist;
+        nt.mass1_gen2derr        = gen2derr;
+        nt.mass1_gen3ddist       = gen3ddist;
+        nt.mass1_gen3derr        = gen3derr;
+        nt.mass1_bs2dcompatscss  = bs2dcompat.first;
+        nt.mass1_bs2dcompat      = bs2dcompat.second;
+        nt.mass1_bs2ddist        = bs2ddist.value();
+        nt.mass1_bs2derr         = bs2ddist.error();
+        nt.mass1_bs2dsig         = bs2ddist.significance();
+        nt.mass1_pv2dcompatscss  = pv2dcompat.first;
+        nt.mass1_pv2dcompat      = pv2dcompat.second;
+        nt.mass1_pv2ddist        = pv2ddist_val;
+        nt.mass1_pv2derr         = pv2ddist_err;
+        nt.mass1_pv2dsig         = pv2ddist_sig;
+        nt.mass1_pv3dcompatscss  = pv3dcompat.first;
+        nt.mass1_pv3dcompat      = pv3dcompat.second;
+        nt.mass1_pv3ddist        = pv3ddist_val;
+        nt.mass1_pv3derr         = pv3ddist_err;
+        nt.mass1_pv3dsig         = pv3ddist_sig;
+      }
+    }
+      
     PairwiseHistos::ValueMap v = {
         {"ntracks",         ntracks},        
         {"ntracksptpass",   ntracksptpass},   
@@ -646,6 +895,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     };
     h_sv[svndx].Fill(v);
   }
+
+  tree->Fill();
 
   h_nsvpass->Fill(nsvpass);
 
