@@ -178,7 +178,7 @@ def compare_all_hists(ps, samples, **kwargs):
 
     ###
     
-    names = [k.GetName() for k in dir1.GetListOfKeys()]
+    names = [k.GetName() for k in samples[0][1].GetListOfKeys()]
     if sort_names:
         names.sort()
 
@@ -195,7 +195,7 @@ def compare_all_hists(ps, samples, **kwargs):
         name_clean = name.replace('/','_')
 
         hists = []
-        for sample_name, dir_name, color in samples:
+        for sample_name, dir, color in samples:
             hist = dir.Get(name)
             # Store these data in the histogram object so we don't
             # have to cross-reference later. If we give them unique
@@ -212,7 +212,7 @@ def compare_all_hists(ps, samples, **kwargs):
                         "for name %s, some samples' histograms are TH2, and some are not" % name)
         
         if not all_same([issubclass(type(hist), ROOT.TH1) for hist in hists],
-                        "for name %s, some samples' histograms are TH1, and some are not" % name)
+                        "for name %s, some samples' histograms are TH1, and some are not" % name):
             continue
 
         for hist in hists:
@@ -226,12 +226,12 @@ def compare_all_hists(ps, samples, **kwargs):
                 hist.Scale(1./hist.cah_integral)
             if no_stats(name, hist_list):
                 h.SetStats(0)
-            h.SetLineColor(hist.cah_color)
-            h.SetMarkerColor(hist.cah_color)
+            hist.SetLineColor(hist.cah_color)
+            hist.SetMarkerColor(hist.cah_color)
 
-            h.SetName(hist.cah_sample_name)
+            hist.SetName(hist.cah_sample_name)
             
-        apply_commands(name, hists)
+        apply_commands(name, hist_list)
 
         if is2d and separate_plots(name, hist_list):
             for hist in hists:
