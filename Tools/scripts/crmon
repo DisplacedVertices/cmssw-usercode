@@ -16,6 +16,8 @@ parser.add_option('-d', '--delay', action='store_true', default=False,
                   help='Wait once before starting passes.')
 parser.add_option('--max-threads', type='int', default=10,
                   help='Max number of status-checking threads to run at once.')
+parser.add_option('--no-status-until-none-done', action='store_false', dest='status_until_none_done', default=True,
+                  help='In each iteration, by default we loop over status->getoutput->status->... until none are in Done. I.e. we resolve all Done jobs to their Retrieved_X_Y status codes before trying to resubmit/displaying the status code table/etc. Supplying this option will return us to the previous behavior of only doing status->getoutput per iteration.')
 parser.add_option('--resub-any', action='store_true', default=False,
                   help='Resubmit any job that has status Retrieved but with exit code non-zero.')
 parser.add_option('--resub-stuck-done', action='store_true', default=False,
@@ -103,7 +105,7 @@ def check_fcn(crab_dir, verbose):
     if options.status_only:
         return crab_status(crab_dir, verbose=verbose, debug=options.debug_output)
     else:
-        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_stuck_done=options.resub_stuck_done, resub_none=options.resub_none, site_control=options.resub_site_control)
+        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_stuck_done=options.resub_stuck_done, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done)
 
 dirs = crab_dirs_from_argv()
 if not dirs:
