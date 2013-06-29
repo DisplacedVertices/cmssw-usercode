@@ -175,6 +175,7 @@ def compare_all_hists(ps, samples, **kwargs):
     apply_commands = _get('apply_commands', None)
     legend         = _get('legend',         None)
     separate_plots = _get('separate_plots', False)
+    draw_command   = _get('draw_command',   '')
 
     ###
     
@@ -241,11 +242,12 @@ def compare_all_hists(ps, samples, **kwargs):
         hists_sorted = hists[:]
         if not is2d:
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
+        draw_cmd = draw_command(name, hist_list)
         for i,hist in enumerate(hists_sorted):
             if i == 0:
-                hist.Draw()
+                hist.Draw(draw_cmd)
             else:
-                hist.Draw('sames')
+                hist.Draw(draw_cmd + ' sames')
 
         ps.c.Update()
         if not no_stats(name, hist_list):
