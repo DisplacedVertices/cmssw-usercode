@@ -43,7 +43,7 @@ class CRABSubmitter:
                  **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
-            print 'CRABSubmitter init: mandatory proxy get.'
+            print 'CRABSubmitter init: mandatory proxy get (but you can skip it with ^C if you know what you are doing).'
             os.system('voms-proxy-init -voms cms -valid 192:00')
             CRABSubmitter.get_proxy = False
 
@@ -194,6 +194,12 @@ class CRABSubmitter:
             if not create_only:
                 cmd += ' -submit'
             crab_output = crab_popen(cmd)
+            ok = False
+            for line in crab_output.split('\n'):
+                if 'Total of' in line and 'jobs submitted' in line:
+                    ok = True
+            if not ok:
+                print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
             os.system('rm -f %s' % ' '.join(cleanup))
         else:
             print 'in testing mode, not submitting anything.'
