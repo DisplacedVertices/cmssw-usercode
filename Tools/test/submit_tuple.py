@@ -31,6 +31,7 @@ cs = CRABSubmitter('Tuple' + tuple_version.upper(),
                    pset_template_fn = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/python/PATTuple_cfg.py'),
                    pset_modifier = modify,
                    job_control_from_sample = True,
+                   get_edm_output = True,
                    data_retrieval = 'fnal',
                    publish_data_name = 'jtuple_' + tuple_version
                    )
