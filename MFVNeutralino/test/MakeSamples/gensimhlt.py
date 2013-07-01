@@ -89,4 +89,4 @@ for category in ['TwoTrackMinimumDistance','hello']:
 if 'modify' in sys.argv:
     from modify import set_neutralino_tau0, set_masses
     set_neutralino_tau0(process, 1)
-    set_masses(process, 405, 400)
+    set_masses(405, 400)
