@@ -130,6 +130,9 @@ class CRABSubmitter:
             datasetpath = '%(parent_dataset)s'
         cfg.set('CMSSW', 'datasetpath', datasetpath)
 
+        if use_parent:
+            cfg.set('CMSSW', 'use_parent', 1)
+
         if get_edm_output:
             cfg.set('CMSSW', 'get_edm_output', 1)
 
