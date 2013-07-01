@@ -34,6 +34,7 @@ class CRABSubmitter:
                  data_retrieval = 'return',
                  publish_data_name = '',
                  use_ana_dataset = False,
+                 use_parent_dataset = False,
                  get_edm_output = False,
                  use_parent = False,
                  other_cfg_lines = (),
@@ -121,7 +122,13 @@ class CRABSubmitter:
                 cfg.set('USER', 'dbs_url_for_publication', 'https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet')
 
         self.use_ana_dataset = use_ana_dataset
-        cfg.set('CMSSW', 'datasetpath', '%(ana_dataset)s' if use_ana_dataset else '%(dataset)s')
+        self.use_parent_dataset = use_parent_dataset
+        datasetpath = '%(dataset)s'
+        if use_ana_dataset:
+            datasetpath = '%(ana_dataset)s'
+        elif use_parent_dataset:
+            datasetpath = '%(parent_dataset)s'
+        cfg.set('CMSSW', 'datasetpath', datasetpath)
 
         if get_edm_output:
             cfg.set('CMSSW', 'get_edm_output', 1)
@@ -144,7 +151,7 @@ class CRABSubmitter:
         cfg = ConfigParserEx()
         cfg.readfp(StringIO(self.crab_cfg_template))
         cfg.interpolate(sample)
-        dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url
+        dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url # assume if use_parent_dataset the dbs_url is the same
         if dbs_url:
             cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
         if self.job_control_from_sample:
