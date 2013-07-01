@@ -82,7 +82,7 @@ from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC
 process = customizeHLTforMC(process)
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
-for category in ['TwoTrackMinimumDistance','hello']:
+for category in ['TwoTrackMinimumDistance']:
     process.MessageLogger.categories.append(category)
     setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
 
@@ -90,3 +90,5 @@ if 'modify' in sys.argv:
     from modify import set_neutralino_tau0, set_masses
     set_neutralino_tau0(process, 1)
     set_masses(405, 400)
+
+#process.maxEvents.input = 1 ; open('pset.py','wt').write(process.dumpPython())
