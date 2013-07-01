@@ -218,7 +218,6 @@ process.out.outputCommands = [
     #'keep *_dilep*_*_*',
     'keep *_selectedPatJets*_*_*',
     'keep *_selectedPatJets*_genJets_*',
-    'drop *_selectedPatJets*_pfCandidates_*',
     'drop *_selectedPatJetsForMETtype1p2CorrPF_*_*',
     'drop *_selectedPatJetsForMETtype2CorrPF_*_*',
     'drop CaloTowers_*_*_*',
