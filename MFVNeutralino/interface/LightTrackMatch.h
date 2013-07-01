@@ -2,7 +2,7 @@
 #define JMTucker_MFVNeutralino_LightTrackMatch_h
 
 struct LightTrackMatch {
-  LightTrackMatch(double qual, double pt, double eta, double phi, int ndx, bool other, bool lsp) : quality(qual), gen_pt(pt), gen_eta(eta), gen_phi(phi), gen_ndx(ndx), other_matches(other), matches_lsp(lsp) {}
+  LightTrackMatch(double qual, double pt, double eta, double phi, int ndx, bool other, bool d_1000021, bool d_1000022) : quality(qual), gen_pt(pt), gen_eta(eta), gen_phi(phi), gen_ndx(ndx), other_matches(other), descent_1000021(d_1000021), descent_1000022(d_1000022) {}
   LightTrackMatch() {}
 
   double quality;
@@ -11,7 +11,8 @@ struct LightTrackMatch {
   double gen_phi;
   int gen_ndx;
   bool other_matches;
-  bool matches_lsp;
+  bool descent_1000021;
+  bool descent_1000022;
 };
 
 #endif

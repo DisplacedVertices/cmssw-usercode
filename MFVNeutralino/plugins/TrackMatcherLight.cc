@@ -103,7 +103,8 @@ void MFVTrackMatcherLight::produce(edm::Event& event, const edm::EventSetup& set
 					    gen.pt(), gen.eta(), gen.phi(),
 					    gen_ndx,
 					    nmatch > 1,
-					    has_any_ancestor_with_id(&gen, 1000021) || has_any_ancestor_with_id(&gen, 1000022));
+					    has_any_ancestor_with_id(&gen, 1000021),
+                                            has_any_ancestor_with_id(&gen, 1000022));
       }
     }
   }
