@@ -47,6 +47,9 @@ class MFVGenHistos : public edm::EDAnalyzer {
   BasicKinematicHists* LightLeptons;
   BasicKinematicHists* Leptons;
 
+  TH1F* h_lsp_dist2d;
+  TH1F* h_lsp_dist3d;
+
   TH2F* h_vtx[9];
   TH1F* h_r2d[9];
   TH1F* h_r3d[9];
@@ -61,6 +64,8 @@ class MFVGenHistos : public edm::EDAnalyzer {
   TH2F* h_min_dR_vs_lspbetagamma;
 
   TH1F* h_status1origins;
+
+  TH2F* h_nbhadronsvsbquarks;
 };
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
@@ -234,6 +239,9 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Leptons->BookDz (200, -20, 20, "0.2");
   Leptons->BookQ();
 
+  h_lsp_dist2d = fs->make<TH1F>("h_lsp_dist2d", ";2D distance between LSP decay positions (cm);Events/0.0025 cm", 400, 0, 1);
+  h_lsp_dist3d = fs->make<TH1F>("h_lsp_dist3d", ";3D distance between LSP decay positions (cm);Events/0.0025 cm", 400, 0, 1);
+
   const char* names[9] = {"lsp", "strange", "bottom", "bhadron", "from21", "from22", "fromq", "from21only", "from22only"};
   for (int i = 0; i < 9; ++i) {
     h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 201, -1, 1, 201, -1, 1);
@@ -262,6 +270,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   xax->SetBinLabel(6, "21 & q");
   xax->SetBinLabel(7, "21 & 22");
   xax->SetBinLabel(8, "21 & 22 & q");
+
+  h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", "", 20, 0, 20, 20, 0, 20);
 }
 
 namespace {
@@ -346,8 +356,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     const reco::Candidate* last_b_quark = final_candidate(mci.bottoms[i], 3);
     flatten_descendants(last_b_quark, b_quark_descendants);
     for (const reco::Candidate* bdesc : b_quark_descendants) {
-      int zid = abs(bdesc->pdgId()) % 10000;
-      if (zid / 100 == 5 || zid / 1000 == 5) {
+      if (is_bhadron(bdesc)) {
         particles[3] = bdesc;
         break;
       }
@@ -412,6 +421,41 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
     h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
   }
+
+  h_lsp_dist2d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
+                         mci.stranges[0]->vy() - mci.stranges[1]->vy()));
+  h_lsp_dist3d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
+                         mci.stranges[0]->vy() - mci.stranges[1]->vy(),
+                         mci.stranges[0]->vz() - mci.stranges[1]->vz()));
+
+  // Now look at b quarks separately. Count the number of status-3 b
+  // quarks, those with Zs, Ws, or LSPs as mothers so that we only get
+  // each one once. Also as cross check count the number of b hadrons
+  // (should be status 2), those with b quarks as mothers.
+  const double min_b_pt = 5;
+  int nbquarks = 0;
+  int nbhadrons = 0;
+  for (const reco::GenParticle& gen : *gen_particles) {
+    if (gen.pt() < min_b_pt)
+      continue;
+
+    if (gen.status() == 3 && abs(gen.pdgId()) == 5)
+      for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
+        int mid = abs(gen.mother(i)->pdgId());
+        if (mid == 24 || mid == 1000021 || mid == 1000022 || mid == 23)
+          ++nbquarks;
+          break;
+        }
+
+    if (gen.status() == 2 && is_bhadron(&gen))
+      for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i)
+        if (abs(gen.mother(i)->pdgId()) == 5) {
+          ++nbhadrons;
+          break;
+        }
+  }
+
+  h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);
