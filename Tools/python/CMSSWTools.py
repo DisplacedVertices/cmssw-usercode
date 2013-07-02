@@ -2,6 +2,18 @@ import sys, FWCore.ParameterSet.Config as cms
 
 #process.source.firstLuminosityBlock = cms.untracked.uint32(2)
 
+def add_analyzer(process, name, **kwargs):
+    '''Add a simple EDAnalyzer with its own separate path.'''
+    
+    if kwargs.has_key('_path'):
+        path_name = kwargs['_path']
+        del kwargs['_path']
+    else:
+        path_name = 'p' + name
+    obj = cms.EDAnalyzer(name, **kwargs)
+    setattr(process, name, obj)
+    setattr(process, path_name, cms.Path(obj))
+
 def file_event_from_argv(process):
     '''Set the filename and event to run on from argv.'''
     file = None
@@ -17,12 +29,18 @@ def file_event_from_argv(process):
     if file is not None:
         if not file.startswith('/store'):
             file = 'file:' + file
+        print 'filename from argv:', file
         process.source.fileNames = [file]
     else:
         print 'file_event_from_argv warning: no filename found'
     l = len(nums)
-    if l == 2 or l == 3:
-        set_events_to_process(process, [tuple(nums)])
+    if l == 1:
+        print 'maxEvents from argv:', nums[0]
+        process.maxEvents.input = nums[0]
+    elif l == 2 or l == 3:
+        nums = tuple(nums)
+        print 'set_events_to_process from argv:', nums
+        set_events_to_process(process, [nums])
     else:
         print 'file_event_from_argv warning: did not understand event number'
 
@@ -30,12 +48,14 @@ def replay_event(process, filename, rle, new_process_name='REPLAY'):
     '''Set the process up to replay the given event (rle is a 2- or
     3-tuple specifying it) using the random engine state saved in the
     file.'''
-    
+
     if process.source.type_() == 'EmptySource':
-        process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(filename))        
+        process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring())
+    if filename is None and rle is None:
+        file_event_from_argv(process)
     else:
         process.source.fileNames = cms.untracked.vstring(filename)
-    set_events_to_process(process, [rle])
+        set_events_to_process(process, [rle])
     process.RandomNumberGeneratorService.restoreStateLabel = cms.untracked.string('randomEngineStateProducer')
     process.setName_(new_process_name)
 
