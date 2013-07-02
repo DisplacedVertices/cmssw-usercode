@@ -72,6 +72,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const bool do_ntuple;
   const double jet_pt_min;
   const double track_pt_min;
+  const double track_vertex_weight_min;
 
   const int min_sv_ntracks;
   const double max_sv_chi2dof;
@@ -98,7 +99,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     double dravg, dravgw, dravgvw;
     double drrms, drrmsw, drrmsvw;
 
-    vertex_tracks_distance(const reco::Vertex& sv) {
+    vertex_tracks_distance(const reco::Vertex& sv, const double track_vertex_weight_min) {
       drmin = 1e99;
       drmax = dravg = dravgw = drrms = drrmsw = 0;
       std::vector<double> drs;
@@ -109,7 +110,13 @@ class VtxRecoPlay : public edm::EDAnalyzer {
       auto trkb = sv.tracks_begin();
       auto trke = sv.tracks_end();
       for (auto trki = trkb; trki != trke; ++trki) {
+        if (sv.trackWeight(*trki) < track_vertex_weight_min)
+          continue;
+
         for (auto trkj = trki + 1; trkj != trke; ++trkj) {
+          if (sv.trackWeight(*trkj) < track_vertex_weight_min)
+            continue;
+
           double dr = reco::deltaR(**trki, **trkj);
           drs.push_back(dr);
           
@@ -172,7 +179,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
       vtx.normalizedChi2() < max_sv_chi2dof   &&
       abs_error(vtx, false) < max_sv_err2d    &&
       vtx.p4().mass() >= min_sv_mass          &&
-      (min_sv_drmax == 0 || vertex_tracks_distance(vtx).drmax >= min_sv_drmax);
+      (min_sv_drmax == 0 || vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_sv_drmax);
   }
 
   TH1F* h_sim_pileup_num_int[3];
@@ -201,13 +208,23 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   
   TH1F* h_nsv;
   TH1F* h_nsvpass;
+  TH2F* h_isvmnsvpass_v_svndx;
   TH2F* h_sv_max_trackicity;
-  TH1F* h_sv_pos_1d[3][3]; // index 0: 0 = the highest mass SV (all),
-                           // 1 = highest mass SV passing cuts, 
-                           // 2 = second highest mass SV passing cuts,
-                           // 2 = rest
-  TH2F* h_sv_pos_2d[3][3];
-  PairwiseHistos h_sv[3];
+  TH1F* h_sv_pos_1d[4][3]; // index 0: 0 = the highest mass SV, 1 = second highest, 2 = third highest, 3 = rest
+  TH2F* h_sv_pos_2d[4][3];
+
+  TH1F* h_sv_trackpt[4];
+  TH1F* h_sv_tracketa[4];
+  TH1F* h_sv_trackphi[4];
+  TH1F* h_sv_trackdxy[4];
+  TH1F* h_sv_trackdz[4];
+
+  TH1F* h_sv_trackpaircosth[4];
+  TH1F* h_sv_trackpairdr[4];
+  TH1F* h_sv_trackpairmass[4];
+  TH1F* h_sv_tracktriplemass[4];
+
+  PairwiseHistos h_sv[4];
 
   TH1F* h_pair2dcompatscss;
   TH1F* h_pair2dcompat;
@@ -315,6 +332,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     do_ntuple(cfg.getParameter<bool>("do_ntuple")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     track_pt_min(cfg.getParameter<double>("track_pt_min")),
+    track_vertex_weight_min(cfg.getParameter<double>("track_vertex_weight_min")),
     min_sv_ntracks(cfg.getParameter<int>("min_sv_ntracks")),
     max_sv_chi2dof(cfg.getParameter<double>("max_sv_chi2dof")),
     max_sv_err2d(cfg.getParameter<double>("max_sv_err2d")),
@@ -413,7 +431,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   
   for (int j = 0; j < 2; ++j) {
     for (int i = 0; i < 3; ++i) {
-      float l = i == 2 ? 25 : 1;
+      float l = i == 2 ? 25 : 0.8;
       h_gen_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_gen_pos_1d_%i%i", j, i), TString::Format(";gen #%i vtx pos[%i] (cm);arb. units", j, i), 100, -l, l);
     }
     h_gen_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%ixy", j), TString::Format(";gen #%i vtx x (cm);gen #%i vtx y (cm)", j, j), 100, -1, 1, 100, -1, 1);
@@ -421,7 +439,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     h_gen_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%iyz", j), TString::Format(";gen #%i vtx y (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-25,25);
   }
 
-  h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 15, 0, 30);
+  h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 30, 0, 30);
   h_ntracks = fs->make<TH1F>("h_ntracks", ";# of general tracks;arb. units", 20, 0, 2000);
   h_ntracksptpass = fs->make<TH1F>("h_ntracksptpass", ";# of selected tracks;arb. units", 20, 0, 60);
 
@@ -431,7 +449,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     const char* ex = j == 0 ? "the" : "other";
 
     for (int i = 0; i < 3; ++i) {
-      float l = i == 2 ? 25 : 1;
+      float l = i == 2 ? 25 : 0.8;
       h_pv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_pv_pos_1d_%i%i", j, i), TString::Format(";%s PV pos[%i] (cm);arb. units", ex, i), 100, -l, l);
     }
     h_pv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_pv_pos_2d_%ixy", j), TString::Format(";%s PV x (cm);%s PV y (cm)", ex, ex), 100, -1, 1, 100, -1, 1);
@@ -440,73 +458,87 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     
     h_pv_ntracks[j] = fs->make<TH1F>(TString::Format("h_pv_ntracks_%i", j), TString::Format(";# tracks for %s PV;arb.units", ex), 50, 0, 200);
     h_pv_ntracksptpass[j] = fs->make<TH1F>(TString::Format("h_pv_ntracksptpass_%i", j), TString::Format(";# selected tracks for %s PV;arb.units", ex), 50, 0, 50);
-    h_pv_chi2dof[j] = fs->make<TH1F>(TString::Format("h_pv_chi2dof_%i", j), TString::Format(";#chi^{2}/dof for %s PV;arb.units", ex), 20, 0, 10);
-    h_pv_chi2dofprob[j] = fs->make<TH1F>(TString::Format("h_pv_chi2dofprob_%i", j), TString::Format(";p(#chi^{2}/dof) for %s PV;arb.units", ex), 20, 0, 1);
+    h_pv_chi2dof[j] = fs->make<TH1F>(TString::Format("h_pv_chi2dof_%i", j), TString::Format(";#chi^{2}/dof for %s PV;arb.units", ex), 20, 0, 5);
+    h_pv_chi2dofprob[j] = fs->make<TH1F>(TString::Format("h_pv_chi2dofprob_%i", j), TString::Format(";p(#chi^{2}/dof) for %s PV;arb.units", ex), 24, 0, 1.2);
 
     h_pv_pt[j] = fs->make<TH1F>(TString::Format("h_pv_pt_%i", j), TString::Format(";%s PV p_{T} (GeV);arb.units", ex), 25, 0, 500);
     h_pv_eta[j] = fs->make<TH1F>(TString::Format("h_pv_eta_%i", j), TString::Format(";%s PV #eta;arb.units", ex), 30, -5, 5);
     h_pv_phi[j] = fs->make<TH1F>(TString::Format("h_pv_phi_%i", j), TString::Format(";%s PV #phi;arb.units", ex), 30, -3.15, 3.15);
     h_pv_mass[j] = fs->make<TH1F>(TString::Format("h_pv_mass_%i", j), TString::Format(";%s PV mass (GeV);arb.units", ex), 50, 0, 1000);
-    h_pv_sumpt2[j] = fs->make<TH1F>(TString::Format("h_pv_sumpt2_%i", j), TString::Format(";%s PV #Sigma p_{T}^{2} (GeV);arb.units", ex), 30, 0, 15000);
+    h_pv_sumpt2[j] = fs->make<TH1F>(TString::Format("h_pv_sumpt2_%i", j), TString::Format(";%s PV #Sigma p_{T}^{2} (GeV);arb.units", ex), 50, 0, 20000);
   }
 
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 100, 0, 100);
   h_nsvpass = fs->make<TH1F>("h_nsvpass", ";# of selected secondary vertices;arb. units", 100, 0, 100);
+  h_isvmnsvpass_v_svndx = fs->make<TH2F>("h_isvmnsvpass_v_svndx", ";svndx;isv - nsvpass", 10, 0, 10, 10, -10, 10);
   h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
-  for (int j = 0; j < 3; ++j) {
+  for (int j = 0; j < 4; ++j) {
     std::string ex;
     if (j == 0)
       ex = "mass0";
     else if (j == 1)
       ex = "mass1";
+    else if (j == 2)
+      ex = "mass2";
     else
       ex = "rest";
     const char* exc = ex.c_str();
 
     for (int i = 0; i < 3; ++i) {
-      float l = i == 2 ? 10 : 1;
+      float l = i == 2 ? 25 : 0.8;
       h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
     }
     h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -1, 1, 100, -1, 1);
     h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
     h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
 
+    h_sv_trackpt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpt", exc), TString::Format(";SV %s track p_{T} (GeV);arb. units", exc), 100, 0, 200);
+    h_sv_tracketa[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracketa", exc), TString::Format(";SV %s track #eta;arb. units", exc), 50, -2.7, 2.7);
+    h_sv_trackphi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackphi", exc), TString::Format(";SV %s track #phi;arb. units", exc), 50, -3.15, 3.15);
+    h_sv_trackdxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackdxy", exc), TString::Format(";SV %s track dxy wrt bs (cm);arb. units", exc), 200, -1, 1);
+    h_sv_trackdz[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackdz", exc), TString::Format(";SV %s track dz wrt bs (cm);arb. units", exc), 200, -20, 20);
+    
+    h_sv_trackpaircosth[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpaircosth", exc), TString::Format(";SV %s track pair cos(#theta);arb. units", exc), 100, -1, 1);
+    h_sv_trackpairdr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpairdr", exc), TString::Format(";SV %s track pair #Delta R;arb. units", exc), 100, 0, 7);
+    h_sv_trackpairmass[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpairmass", exc), TString::Format(";SV %s track pair mass (GeV);arb. units", exc), 200, 0, 20);
+    h_sv_tracktriplemass[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracktriplemass", exc), TString::Format(";SV %s track triple mass (GeV);arb. units", exc), 200, 0, 20);
+
     PairwiseHistos::HistoDefs hs;
     hs.add("ntracks",        "# of tracks/SV",                              40,    0,      40);
     hs.add("ntracksptpass",  "# of selected tracks/SV",                     40,    0,      40);
     hs.add("trackminnhits",  "min number of hits on track per SV",          40,    0,      40);
-    hs.add("chi2dof",        "SV #chi^2/dof",                               50,    0,      20);
-    hs.add("chi2dofprob",    "SV p(#chi^2, dof)",                           50,    0,       1);
+    hs.add("chi2dof",        "SV #chi^2/dof",                               50,    0,       7);
+    hs.add("chi2dofprob",    "SV p(#chi^2, dof)",                           50,    0,       1.2);
     hs.add("pt",             "SV p_{T} (GeV)",                             100,    0,     300);
     hs.add("eta",            "SV #eta",                                     50,   -4,       4);
     hs.add("phi",            "SV #phi",                                     50,   -3.15,    3.15);
     hs.add("mass",           "SV mass (GeV)",                              100,    0,     250);
-    hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                100,    0,   10000);
-    hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      50);
+    hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                100,    0,    6000);
+    hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      10);
     hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
-    hs.add("drmin",          "SV min{#Delta R(i,j)}",                      100,    0,       1);
-    hs.add("drmax",          "SV max{#Delta R(i,j)}",                      100,    0,       4);
-    hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      100,    0,       2.5);
-    hs.add("drrms",          "SV rms{#Delta R(i,j)}",                      100,    0,       2);
-    hs.add("dravgw",         "SV wavg{#Delta R(i,j)}",                     100,    0,       3);
-    hs.add("drrmsw",         "SV wrms{#Delta R(i,j)}",                     100,    0,       2);
-    hs.add("gen2ddist",      "dist2d(SV, closest gen vtx) (cm)",           100,    0,       0.5);
-    hs.add("gen2derr",       "#sigma(dist2d(SV, closest gen vtx)) (cm)",   100,    0,       0.5);
-    hs.add("gen3ddist",      "dist3d(SV, closest gen vtx) (cm)",           100,    0,       0.5);
-    hs.add("gen3derr",       "#sigma(dist3d(SV, closest gen vtx)) (cm)",   100,    0,       0.5);
+    hs.add("drmin",          "SV min{#Delta R(i,j)}",                      150,    0,       1.5);
+    hs.add("drmax",          "SV max{#Delta R(i,j)}",                      150,    0,       7);
+    hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      150,    0,       5);
+    hs.add("drrms",          "SV rms{#Delta R(i,j)}",                      150,    0,       3);
+    hs.add("dravgw",         "SV wavg{#Delta R(i,j)}",                     150,    0,       5);
+    hs.add("drrmsw",         "SV wrms{#Delta R(i,j)}",                     150,    0,       3);
+    hs.add("gen2ddist",      "dist2d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
+    hs.add("gen2derr",       "#sigma(dist2d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
+    hs.add("gen3ddist",      "dist3d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
+    hs.add("gen3derr",       "#sigma(dist3d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
     hs.add("bs2dcompatscss", "compat2d(SV, beamspot) success",               2,    0,       2);
-    hs.add("bs2dcompat",     "compat2d(SV, beamspot)",                     100,    0,     500);
+    hs.add("bs2dcompat",     "compat2d(SV, beamspot)",                     100,    0,    1000);
     hs.add("bs2ddist",       "dist2d(SV, beamspot) (cm)",                  100,    0,       0.5);
-    hs.add("bs2derr",        "#sigma(dist2d(SV, beamspot)) (cm)",          100,    0,       0.1);
+    hs.add("bs2derr",        "#sigma(dist2d(SV, beamspot)) (cm)",          100,    0,       0.05);
     hs.add("bs2dsig",        "N#sigma(dist2d(SV, beamspot))",              100,    0,     100);
     hs.add("pv2dcompatscss", "compat2d(SV, PV) success",                     2,    0,       2);
-    hs.add("pv2dcompat",     "compat2d(SV, PV)",                           100,    0,     500);
+    hs.add("pv2dcompat",     "compat2d(SV, PV)",                           100,    0,    1000);
     hs.add("pv2ddist",       "dist2d(SV, PV) (cm)",                        100,    0,       0.5);
-    hs.add("pv2derr",        "#sigma(dist2d(SV, PV)) (cm)",                100,    0,       0.1);
+    hs.add("pv2derr",        "#sigma(dist2d(SV, PV)) (cm)",                100,    0,       0.05);
     hs.add("pv2dsig",        "N#sigma(dist2d(SV, PV))",                    100,    0,     100);
     hs.add("pv3dcompatscss", "compat3d(SV, PV) success",                     2,    0,       2);
-    hs.add("pv3dcompat",     "compat3d(SV, PV)",                           100,    0,     500);
+    hs.add("pv3dcompat",     "compat3d(SV, PV)",                           100,    0,    1000);
     hs.add("pv3ddist",       "dist3d(SV, PV) (cm)",                        100,    0,       0.5);
     hs.add("pv3derr",        "#sigma(dist3d(SV, PV)) (cm)",                100,    0,       0.1);
     hs.add("pv3dsig",        "N#sigma(dist3d(SV, PV))",                    100,    0,     100);
@@ -514,15 +546,15 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   }
 
   h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
-  h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,   100);
-  h_pair2ddist       = fs->make<TH1F>("h_pair2ddist",       ";pair dist2d (cm);arb. units",          100,    0,     0.5);
-  h_pair2derr        = fs->make<TH1F>("h_pair2derr",        ";pair #sigma(dist2d) (cm);arb. units",  100,    0,     0.1);
-  h_pair2dsig        = fs->make<TH1F>("h_pair2dsig",        ";pair N#sigma(dist2d);arb. units",      100,    0,    50);
+  h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
+  h_pair2ddist       = fs->make<TH1F>("h_pair2ddist",       ";pair dist2d (cm);arb. units",          150,    0,     0.3);
+  h_pair2derr        = fs->make<TH1F>("h_pair2derr",        ";pair #sigma(dist2d) (cm);arb. units",  100,    0,     0.05);
+  h_pair2dsig        = fs->make<TH1F>("h_pair2dsig",        ";pair N#sigma(dist2d);arb. units",      100,    0,   100);
   h_pair3dcompatscss = fs->make<TH1F>("h_pair3dcompatscss", ";pair compat3d success;arb. units",       2,    0,     2);
-  h_pair3dcompat     = fs->make<TH1F>("h_pair3dcompat",     ";pair compat3d;arb. units",             100,    0,   100);
+  h_pair3dcompat     = fs->make<TH1F>("h_pair3dcompat",     ";pair compat3d;arb. units",             100,    0,  1000);
   h_pair3ddist       = fs->make<TH1F>("h_pair3ddist",       ";pair dist3d (cm);arb. units",          100,    0,     0.5);
-  h_pair3derr        = fs->make<TH1F>("h_pair3derr",        ";pair #sigma(dist3d) (cm);arb. units",  100,    0,     0.1);
-  h_pair3dsig        = fs->make<TH1F>("h_pair3dsig",        ";pair N#sigma(dist3d);arb. units",      100,    0,    50);
+  h_pair3derr        = fs->make<TH1F>("h_pair3derr",        ";pair #sigma(dist3d) (cm);arb. units",  100,    0,     0.07);
+  h_pair3dsig        = fs->make<TH1F>("h_pair3dsig",        ";pair N#sigma(dist3d);arb. units",      100,    0,   100);
 
   h_pairnsharedtracks = fs->make<TH1F>("h_pairnsharedtracks", "", 50, 0, 50);
   h_pairfsharedtracks = fs->make<TH2F>("h_pairfsharedtracks", "", 51, 0,  1.02, 51, 0,  1.02);
@@ -687,9 +719,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     const reco::Vertex& sv = secondary_vertices[isv];
     if (!use_vertex(sv))
       continue;
-    ++nsvpass;
 
-    const int svndx = isv >= 2 ? 2 : isv;
+    const int svndx = nsvpass >= 3 ? 3 : nsvpass;
+    h_isvmnsvpass_v_svndx->Fill(svndx, isv - nsvpass);
 
     for (int i = 0; i < 3; ++i)
       h_sv_pos_1d[svndx][i]->Fill(coord(sv.position(), i) - coord(beamspot->position(), i));
@@ -708,18 +740,24 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     double maxtrackpt = 0;
 
     for (auto trki = trkb; trki != trke; ++trki) {
-      int key = trki->key();
+      float track_vertex_weight = sv.trackWeight(*trki);
+      if (track_vertex_weight < track_vertex_weight_min)
+        continue;
+
+      const reco::TrackBaseRef& tri = *trki;
+
+      int key = tri.key();
       std::map<int,int>::iterator icity = trackicity_m.find(key);
       if (icity == trackicity_m.end())
         trackicity_m[key] = 1;
       else
         icity->second += 1;
 
-      int nhits = (*trki)->numberOfValidHits();
+      int nhits = tri->numberOfValidHits();
       if (nhits < trackminnhits)
         trackminnhits = nhits;
 
-      double pti = (*trki)->pt();
+      double pti = tri->pt();
       if (pti > track_pt_min)
         ++ntracksptpass;
       if (pti > maxtrackpt)
@@ -727,6 +765,31 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       if (pti < mintrackpt)
         mintrackpt = pti;
       sumpt2 += pti*pti;
+
+      h_sv_trackpt[svndx]->Fill(pti);
+      h_sv_tracketa[svndx]->Fill(tri->eta());
+      h_sv_trackphi[svndx]->Fill(tri->phi());
+      h_sv_trackdxy[svndx]->Fill(tri->dxy(beamspot->position()));
+      h_sv_trackdz[svndx]->Fill(tri->dz(beamspot->position()));
+
+      TLorentzVector p4_i, p4_j, p4_k;
+      const double m = 0.135;
+      p4_i.SetPtEtaPhiM(pti, tri->eta(), tri->phi(), m);
+      for (auto trkj = trki + 1; trkj != trke; ++trkj) {
+        const reco::TrackBaseRef& trj = *trkj;
+        p4_j.SetPtEtaPhiM(trj->pt(), trj->eta(), trj->phi(), m);
+
+        h_sv_trackpaircosth[svndx]->Fill(tri->momentum().Dot(trj->momentum()) / tri->p() / trj->p());
+        h_sv_trackpairdr[svndx]->Fill(reco::deltaR(*tri, *trj));
+        TLorentzVector p4_ij = p4_i + p4_j;
+        h_sv_trackpairmass[svndx]->Fill(p4_ij.M());
+
+        for (auto trkk = trkj + 1; trkk != trke; ++trkk) {
+          const reco::TrackBaseRef& trk = *trkk;
+          p4_k.SetPtEtaPhiM(trk->pt(), trk->eta(), trk->phi(), m);
+          h_sv_tracktriplemass[svndx]->Fill((p4_ij + p4_k).M());
+        }
+      }
     }
 
     std::vector<int> trackicity;
@@ -735,7 +798,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     int max_trackicity = *std::max_element(trackicity.begin(), trackicity.end());
     h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
-    vertex_tracks_distance vtx_tks_dist(sv);
+    vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
 
     float gen2ddist = 1e99;
     float gen3ddist = 1e99;
@@ -894,6 +957,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"pv3dsig",         pv3ddist_sig},
     };
     h_sv[svndx].Fill(v);
+
+    ++nsvpass;
   }
 
   tree->Fill();
