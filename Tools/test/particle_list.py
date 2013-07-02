@@ -10,7 +10,7 @@ add_analyzer('JMTParticleListDrawer',
              printVertex = cms.untracked.bool(True),
              )
 
-input_from_argv()
+file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import background_samples
