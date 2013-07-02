@@ -25,7 +25,8 @@ bool is_neutrino(const reco::Candidate* c) {
   return apid == 12 || apid == 14 || apid == 16;
 }
 
-bool is_bhadron(const int id) {
+bool is_bhadron(int id) {
+  id = abs(id);
   return id % 1000 / 500 == 1 || id % 10000 / 5000 == 1;
 }
 
