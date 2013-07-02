@@ -1,4 +1,5 @@
 import sys, FWCore.ParameterSet.Config as cms
+from JMTucker.Tools.CMSSWTools import file_event_from_argv, add_analyzer as _add_analyzer
 
 process = cms.Process('BasicAnalyzer')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -9,27 +10,4 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.TFileService = cms.Service('TFileService', fileName = cms.string('tfileservice.root'))
 
 def add_analyzer(name, **kwargs):
-    if kwargs.has_key('_path'):
-        path_name = kwargs['_path']
-        del kwargs['_path']
-    else:
-        path_name = 'p' + name
-    obj = cms.EDAnalyzer(name, **kwargs)
-    setattr(process, name, obj)
-    setattr(process, path_name, cms.Path(obj))
-
-def input_from_argv():
-    fns = []
-    nev = -1
-    for x in sys.argv:
-        if x.endswith('.root'):
-            fns.append(x)
-        else:
-            try:
-                x = int(x)
-                nev = x
-            except ValueError:
-                pass
-
-    process.maxEvents.input = nev
-    process.source.fileNames = fns
+    return _add_analyzer(process, name, **kwargs)
