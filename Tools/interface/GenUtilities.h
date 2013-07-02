@@ -8,6 +8,8 @@ bool is_quark(const reco::Candidate* c);
 bool is_lepton(const reco::Candidate* c);
 int lepton_code(const reco::Candidate* c);
 bool is_neutrino(const reco::Candidate* c);
+bool is_bhadron(const int id);
+bool is_bhadron(const reco::Candidate* c);
 int original_index(const reco::Candidate* c, const reco::GenParticleCollection& gens);
 bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_ancestor);
 bool is_ancestor_of(const reco::Candidate* c, const std::vector<const reco::Candidate*>& possible_ancestors);
