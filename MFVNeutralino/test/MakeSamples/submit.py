@@ -10,13 +10,13 @@ datasetpath = None
 pset = %(pset_fn)s
 get_edm_output = 0
 ignore_edm_output = 1
-output_file = reco.root
+output_file = pat.root
 events_per_job = 5
 total_number_of_events = 10
 first_lumi = 1
 
 [USER]
-script_exe = twostep.csh
+script_exe = twostep.sh
 additional_input_files = minSLHA.spc, reco.py, pat.py
 ui_working_dir = crab/gensimhltrecopat/crab_mfv_%(name)s
 copy_data = 1
@@ -26,22 +26,24 @@ publish_data = 1
 publish_data_name = testtwostep_mfv_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 jmt_externals_hack = pythia8_hack
-jmt_externals_hack_dirs = GeneratorInterface/Pythia8Interface
+ssh_control_persist = no
 
 [GRID]
-se_black_list = metu.edu.tr,uoi.gr,troitsk.ru,brunel.ac.uk,bris.ac.uk,kfki.hu,pi.infn.it,ihep.su,ciemat.es,jinr-t1.ru,nectec.or.th,ts.infn.it,hep.by,cinvestav.mx
+se_black_list = metu.edu.tr,uoi.gr,troitsk.ru,brunel.ac.uk,bris.ac.uk,kfki.hu,pi.infn.it,ihep.su,ciemat.es,jinr-t1.ru,nectec.or.th,ts.infn.it,hep.by,cinvestav.mx,baylor.edu
 '''
 
 if os.environ['USER'] != 'tucker':
     raw_input('do you have the jmt_externals_hack for crab? if not, ^C now.')
 
-print 'testing gensimhlt.py'
-if os.system('python gensimhlt.py') != 0: # cannot just import or else this screws up singleton services like MessageLogger when we expand pat.py below
-    raise RuntimeError('gensimhlt.py does not work')
+skip_tests = False
+if not skip_tests:
+    print 'testing gensimhlt.py'
+    if os.system('python gensimhlt.py') != 0: # cannot just import or else this screws up singleton services like MessageLogger when we expand pat.py below
+        raise RuntimeError('gensimhlt.py does not work')
 
-print 'testing reco.py (may need to expand if you have modified the base reconstruction)'
-if os.system('python reco.py') != 0:
-    raise RuntimeError('reco.py does not work')
+    print 'testing reco.py (may need to expand if you have modified the base reconstruction)'
+    if os.system('python reco.py') != 0:
+        raise RuntimeError('reco.py does not work')
 
 print 'expanding pat.py'
 import JMTucker.Tools.PATTuple_cfg as _pat
