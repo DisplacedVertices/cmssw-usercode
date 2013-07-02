@@ -2,7 +2,7 @@ import os, sys, glob
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 debug = 'debug' in sys.argv
 
-process.source.fileNames = ['file:gensimhlt.root']
+process.source.fileNames = ['file:/uscms/home/tucker/nobackup/fromt3/mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604_pat_1_1_Dpa.root']
 process.TFileService.fileName = 'gen_histos.root'
 
 #from JMTucker.MFVNeutralino.SimFiles import load
@@ -10,7 +10,7 @@ process.TFileService.fileName = 'gen_histos.root'
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')
-process.mfvGenHistos.check_all_gen_particles = True
+process.mfvGenHistos.check_all_gen_particles = False
 
 process.p = cms.Path(process.mfvGenParticleFilter * process.mfvGenHistos)
 
