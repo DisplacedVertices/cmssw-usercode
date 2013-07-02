@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, JMTucker.Tools.argparse as argparse
+import os, sys, JMTucker.Tools.argparse as argparse
 
 parser = argparse.ArgumentParser(description = 'comparebranches: compare the branches present in two files',
                                  usage = '%(prog)s [options] file1.root file2.root')
@@ -9,7 +9,7 @@ parser.add_argument('positional', nargs='*', help='The .root files.')
 
 parser.add_argument('--show-common', default=False,
                     help='Write the list of branches the two have in common.')
-parser.add_argument('--ignore-process-names', default=False,
+parser.add_argument('--ignore-process-names', action='store_true',
                     help='Ignore the process names (e.g. HLT, HLT2) when comparing the branch lists.')
 
 options = parser.parse_args()
