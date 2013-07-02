@@ -11,8 +11,8 @@ pset = %(pset_fn)s
 get_edm_output = 0
 ignore_edm_output = 1
 output_file = pat.root
-events_per_job = 5
-total_number_of_events = 10
+events_per_job = 500
+total_number_of_events = 100000
 first_lumi = 1
 
 [USER]
@@ -23,7 +23,7 @@ copy_data = 1
 storage_element = T3_US_FNALLPC
 check_user_remote_dir = 0
 publish_data = 1
-publish_data_name = testtwostep_mfv_%(name)s
+publish_data_name = mfv_%(name)s
 dbs_url_for_publication = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet
 jmt_externals_hack = pythia8_hack
 ssh_control_persist = no
