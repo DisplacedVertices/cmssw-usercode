@@ -795,7 +795,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     std::vector<int> trackicity;
     for (auto i : trackicity_m) 
       trackicity.push_back(i.second);
-    int max_trackicity = *std::max_element(trackicity.begin(), trackicity.end());
+    auto max_tcity = std::max_element(trackicity.begin(), trackicity.end());
+    int max_trackicity = max_tcity != trackicity.end() ? *max_tcity : 0;
     h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
     vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
