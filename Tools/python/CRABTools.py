@@ -625,6 +625,9 @@ if __name__ == '__main__':
         print 'executing crab_cleanup()'
         crab_cleanup()
 
+    elif bool_from_argv('-countJobs'):
+        print len(crab_jobs_from_argv())
+        
     elif bool_from_argv('-expectedLumis'):
         print 'writing out JSONs for expected lumis:'
         for d in crab_dirs_from_argv():
