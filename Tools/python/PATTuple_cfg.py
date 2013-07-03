@@ -314,6 +314,7 @@ def aod_plus_pat(process):
         from Configuration.EventContent.EventContent_cff import AODEventContent as aod
     old_cmds = [x for x in process.out.outputCommands.value() if x.strip() != 'drop *']
     process.out.outputCommands = aod.outputCommands + old_cmds
+    process.out.fileName = 'aodpat.root'
 
 def keep_random_state(process):
     process.out.outputCommands.append('keep *_randomEngineStateProducer_*_*')
