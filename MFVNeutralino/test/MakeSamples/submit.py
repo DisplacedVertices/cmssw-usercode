@@ -10,8 +10,8 @@ datasetpath = None
 pset = %(pset_fn)s
 get_edm_output = 0
 ignore_edm_output = 1
-output_file = pat.root
-events_per_job = 500
+output_file = aodpat.root
+events_per_job = 50
 total_number_of_events = 100000
 first_lumi = 1
 
@@ -29,7 +29,7 @@ jmt_externals_hack = pythia8_hack
 ssh_control_persist = no
 
 [GRID]
-se_black_list = metu.edu.tr,uoi.gr,troitsk.ru,brunel.ac.uk,bris.ac.uk,kfki.hu,pi.infn.it,ihep.su,ciemat.es,jinr-t1.ru,nectec.or.th,ts.infn.it,hep.by,cinvestav.mx,baylor.edu
+se_black_list = ttu.edu,kharkov.ua,sprace.org.br,sbgce2.in2p3.fr,icm.edu.pl,top.ucr.edu,ohio-state.edu,pnpi.nw.ru
 '''
 
 if os.environ['USER'] != 'tucker':
