@@ -29,7 +29,7 @@ jmt_externals_hack = pythia8_hack
 ssh_control_persist = no
 
 [GRID]
-se_black_list = T2_RU_ITEP,T2_FI_HIP,T3_UK_SGrid_Oxford,T3_FR_IPNL,T3_US_FIU,T2_FR_CCIN2P3,T2_GR_Ioannina,T2_AT_Vienna,T3_US_Omaha,T3_US_UCR,T2_TW_Taiwan,T2_PL_Warsaw,T3_US_Baylor,T2_FR_IPHC,T3_MX_Cinvestav,T2_TH_CUNSTDA,T2_UK_London_IC,T3_US_TTU,T2_UA_KIPT,T2_BR_SPRACE,T3_US_OSU,T2_RU_PNPI
+se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_Warsaw,T3_US_Baylor,T2_FR_IPHC,T3_MX_Cinvestav,T2_TH_CUNSTDA,T3_US_TTU,T2_UA_KIPT,T2_BR_SPRACE,T3_US_OSU,T2_RU_PNPI
 '''
 
 if os.environ['USER'] != 'tucker':
@@ -84,9 +84,6 @@ def submit(name, tau0, mass):
 
 tau0s = [0., 0.01, 0.1, 1.0, 9.9]
 masses = [200, 400, 600, 800, 1000]
-
-tau0s = [1.0]
-masses = [400]
 
 for tau0 in tau0s:
     for mass in masses:
