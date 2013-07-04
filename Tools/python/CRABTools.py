@@ -96,9 +96,9 @@ def decrabify_list(s):
             l.append(int(x))
     return l
 
-def crab_jobs_from_argv():
+def crab_jobs_from_list(from_list):
     jobs = []
-    for x in sys.argv:
+    for x in from_list:
         was_list = False
         try:
             l = decrabify_list(x)
@@ -115,6 +115,9 @@ def crab_jobs_from_argv():
                 pass
     jobs.sort()
     return jobs
+
+def crab_jobs_from_argv():
+    return crab_jobs_from_list(sys.argv)
 
 def is_crab_working_dir(path):
     return os.path.isdir(path) and os.path.isdir(os.path.join(path, 'job'))
@@ -190,16 +193,22 @@ def crab_cleanup(extra=[]):
 def crab_report(working_dir):
     print_run_cmd('crab -c %s -report' % working_dir)
 
-def crab_is_using_server(working_dir=None, cfg=None):
+def crab_get_cfg_param(section, param, working_dir=None, cfg=None):
     if working_dir is None and cfg is None:
         raise ValueError('need one of working_dir or cfg to be provided')
     if working_dir is not None:
         cfg = crab_cfg_parser(working_dir)
     try:
-        return cfg.get('CRAB', 'use_server') == '1'
+        return cfg.get(section, param)
     except NoOptionError:
-        return False
+        return None
 
+def crab_is_using_server(working_dir=None, cfg=None):
+    return crab_get_cfg_param('CRAB', 'use_server', working_dir, cfg) == '1'
+
+def crab_get_scheduler(working_dir=None, cfg=None):
+    return crab_get_cfg_param('CRAB', 'scheduler', working_dir, cfg)
+    
 def crab_status(working_dir, verbose=True, debug=False):
     d = defaultdict(list)
     
@@ -307,6 +316,29 @@ def crab_get_output(working_dir, l=None, n=500, verbose=True, debug=False):
             print '\033[36;7m warning: \033[m crab_get_output for %s could not get output for %i/%i jobs: %s' % (working_dir, len(missing), len(l), crabify_list(sorted(missing)))
     return sorted(missing)
 
+def crab_get_output_progress(working_dir):
+    scheduler = crab_get_scheduler(working_dir)
+    if scheduler != 'remoteGlidein':
+        raise NotImplementedError('scheduler %s not supported' % scheduler)
+    
+    last_get = None
+    last_retrieve = None
+    for line in open(os.path.join(working_dir, 'log/crab.log')):
+        #2013-07-04 06:05:24,987 [DEBUG]         /uscms/home/tucker/nobackup/crabs/CRAB_2_8_7_patch2/python/crab.py -USER.ssh_control_persist=no -c crab_mfv_neutralino_tau1000um_M0800 -getoutput 1915,1916,1917,1919,1920,1922,1923,1924,1926,1927,1928,1929,1930,1932,1933,1934,1935,1936,1937,1938,1939,1940,1941,1942,1943,1944,1945,1946,1947,1948,1949,1950,1951,1952,1953,1954,1955,1957,1959,1962,1964,1966,1967,1973,1974,1976,1979,1982,1983,1984,1985,1986,1989,1991,1992,1993,1998,2000
+        if 'crab.py' in line and '-get' in line:
+            last_get = line
+        elif 'RETRIEVE FILE' in line:
+            last_retrieve = line
+
+    if last_get is not None and last_retrieve is not None:
+        get = crab_jobs_from_list(last_get.split())
+        try:
+            retrieve = int(last_retrieve.split('for job #')[1])
+            i = get.index(retrieve)
+            return (i+1, len(get))
+        except ValueError, IndexError:
+            pass
+    
 def crab_create_submit(cfg, jobs):
     print_run_cmd('crab -cfg %s -create -submit %s' % (cfg, jobs))
 
@@ -316,37 +348,42 @@ def crab_kill(working_dir, jobs):
     output = crab_popen(cmd)
     open(os.path.join(mycrab_tmp_dir, 'debug_crab_kill_%s' % os.path.basename(working_dir)), 'wt').write(output)
     
-def crab_resubmit(working_dir, jobs, site_control=''):
+def crab_resubmit(working_dir, jobs, site_control='', command='resubmit', n=500):
     jobs_re = re.compile(r'crab:  Jobs (\[.*\]) will be resubmitted')
     total_re = re.compile(r'crab:  Total of (\d+) jobs submitted.')
 
     if site_control and not site_control.startswith('-GRID.'):
         site_control = '-GRID.' + site_control
 
-    cmd = 'crab -c %s %s -resubmit %s' % (working_dir, site_control, crabify_list(jobs))
-    print cmd
-    output = crab_popen(cmd)
-    open(os.path.join(mycrab_tmp_dir, 'debug_crab_resubmit_%s' % os.path.basename(working_dir)), 'wt').write(output)
+    for i in xrange(0, len(jobs), n):
+        these_jobs = jobs[i:i+n]
+        cmd = 'crab -c %s %s -%s %s' % (working_dir, site_control, command, crabify_list(these_jobs))
+        print cmd
+        output = crab_popen(cmd)
+        open(os.path.join(mycrab_tmp_dir, 'debug_crab_resubmit_%s' % os.path.basename(working_dir)), 'wt').write(output)
 
-    success = []
-    for line in output.split('\n'):
-        mo = jobs_re.search(line)
-        if mo is not None:
-            l = eval(mo.group(1))
-            overlap = sorted(set(success) & set(l))
-            if overlap:
-                print '\033[36;7m warning: \033[m crab_resubmit for %s encountered success jobs twice: %s' % (working_dir, crabify_list(overlap))
-            success.extend(l)
+        success = []
+        for line in output.split('\n'):
+            mo = jobs_re.search(line)
+            if mo is not None:
+                l = eval(mo.group(1))
+                overlap = sorted(set(success) & set(l))
+                if overlap:
+                    print '\033[36;7m warning: \033[m crab_resubmit for %s encountered success jobs twice: %s' % (working_dir, crabify_list(overlap))
+                success.extend(l)
 
-    for line in output.split('\n'):
-        mo = total_re.search(line)
-        if mo is not None:
-            n = int(mo.group(1))
-            if n != len(jobs):
-                print '\033[36;7m warning: \033[m crab_resubmit for %s wanted to resubmit %i jobs, but crab reports only %i jobs resubmitted' % (working_dir, len(jobs), n)
-            if n != len(success):
-                print '\033[36;7m warning: \033[m crab_resubmit for %s claimed to resubmit %i jobs but we only found %i in the lists it printed' % (n, len(success))
-            break
+        if not success:
+            print '\033[36;7m warning: \033[m crab_resubmit for %s wanted to resubmit %i jobs, but nothing resubmitted?' % (working_dir, len(these_jobs))
+
+        for line in output.split('\n'):
+            mo = total_re.search(line)
+            if mo is not None:
+                n = int(mo.group(1))
+                if n != len(these_jobs):
+                    print '\033[36;7m warning: \033[m crab_resubmit for %s wanted to resubmit %i jobs, but crab reports only %i jobs resubmitted' % (working_dir, len(these_jobs), n)
+                if n != len(success):
+                    print '\033[36;7m warning: \033[m crab_resubmit for %s claimed to resubmit %i jobs but we only found %i in the lists it printed' % (n, len(success))
+                break
 
 def crab_cfg_parser(working_dir):
     c = ConfigParser()
@@ -414,10 +451,12 @@ def crab_get_output_files(working_dir, _re=re.compile(r'\$SOFTWARE_DIR/(.*?)[,"]
         
     return list(sorted(files))
     
-def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_stuck_done=False, resub_none=False, site_control='', status_until_none_done=True):
+def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_stuck_done=False, resub_none=False, site_control='', status_until_none_done=True, resub_created=False):
     use_server = crab_is_using_server(working_dir)
     to_kill = []
     to_resub = []
+    to_sub = []
+    to_force = []
 
     d = {'Done': None} # dummy to start the while loop
     while d.has_key('Done'):
@@ -429,7 +468,7 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
                     d['Done'].remove(m)
                 d['DoneStuck'] = missing
                 if resub_stuck_done:
-                    to_resub.extend(missing)
+                    to_force.extend(missing)
         if not status_until_none_done:
             break
 
@@ -439,6 +478,9 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
     if d.has_key('Cancelled'):
         to_kill.extend(d['Cancelled'])
         to_resub.extend(d['Cancelled'])
+
+    if resub_created and d.has_key('Created'):
+        to_sub.extend(d['Created'])
         
     if resub_any:
         for k in d.keys():
@@ -456,11 +498,15 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
     if to_kill:
         crab_kill(working_dir, to_kill)
 
-    if not resub_none and to_resub:
-        uniq = 'crabcheckoutputat%i' % time.time()
-        for job in to_resub:
-            crab_cleanup_aborted_job(working_dir, job, uniq)
-        crab_resubmit(working_dir, to_resub, site_control)
+    if not resub_none:
+        to_re = to_resub + to_sub + to_force
+        if to_re:
+            uniq = 'crabcheckoutputat%i' % time.time()
+            for job in to_re:
+                crab_cleanup_aborted_job(working_dir, job, uniq)
+        for to_re, cmd in ((to_resub, 'resubmit'), (to_sub, 'submit'), (to_force, 'forceResubmit')):
+            if to_re:
+                crab_resubmit(working_dir, to_re, site_control, cmd)
 
     return d
 
