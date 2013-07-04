@@ -176,9 +176,18 @@ while 1:
             threads.append((d,thread))
             thread.start()
         sleep_count = 0
+        msg_interval = 600
         while threading.active_count() > 1:
-            if sleep_count % 150 == 3 and not options.run_in_debugger:
-                print 'waiting for these threads:', ' '.join(d for d,t in threads if t.is_alive())
+            if sleep_count / msg_interval > 0 and sleep_count % msg_interval == 0 and not options.run_in_debugger:
+                msgs = []
+                for d,t in threads:
+                    if t.is_alive():
+                        prog = crab_get_output_progress(d)
+                        if prog is None:
+                            msgs.append(d)
+                        else:
+                            msgs.append('%s(%i/%i)' % (d, prog[0], prog[1])
+                print 'waiting for these threads:', ' '.join(msgs
             sleep_count += 1
             time.sleep(0.1)
         print 'done waiting for threads!'
