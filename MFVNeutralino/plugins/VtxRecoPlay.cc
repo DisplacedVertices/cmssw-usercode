@@ -208,7 +208,6 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   
   TH1F* h_nsv;
   TH1F* h_nsvpass;
-  TH2F* h_isvmnsvpass_v_svndx;
   TH2F* h_sv_max_trackicity;
   TH1F* h_sv_pos_1d[4][3]; // index 0: 0 = the highest mass SV, 1 = second highest, 2 = third highest, 3 = rest
   TH2F* h_sv_pos_2d[4][3];
@@ -470,7 +469,6 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 100, 0, 100);
   h_nsvpass = fs->make<TH1F>("h_nsvpass", ";# of selected secondary vertices;arb. units", 100, 0, 100);
-  h_isvmnsvpass_v_svndx = fs->make<TH2F>("h_isvmnsvpass_v_svndx", ";svndx;isv - nsvpass", 10, 0, 10, 10, -10, 10);
   h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
   for (int j = 0; j < 4; ++j) {
@@ -721,7 +719,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       continue;
 
     const int svndx = nsvpass >= 3 ? 3 : nsvpass;
-    h_isvmnsvpass_v_svndx->Fill(svndx, isv - nsvpass);
+
+    ++nsvpass;
 
     for (int i = 0; i < 3; ++i)
       h_sv_pos_1d[svndx][i]->Fill(coord(sv.position(), i) - coord(beamspot->position(), i));
@@ -958,8 +957,6 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"pv3dsig",         pv3ddist_sig},
     };
     h_sv[svndx].Fill(v);
-
-    ++nsvpass;
   }
 
   tree->Fill();
