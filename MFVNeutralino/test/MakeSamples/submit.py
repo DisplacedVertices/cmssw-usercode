@@ -53,6 +53,7 @@ _pat.no_skimming_cuts(_pat.process)
 _pat.aod_plus_pat(_pat.process)
 _pat.input_is_pythia8(_pat.process)
 _pat.keep_random_state(_pat.process)
+_pat.keep_mixing_info(_pat.process)
 open('pat.py', 'wt').write(_pat.process.dumpPython())
 
 os.system('mkdir -p crab/gensimhltrecopat')
@@ -88,4 +89,6 @@ masses = [200, 400, 600, 800, 1000]
 for tau0 in tau0s:
     for mass in masses:
         name = 'neutralino_tau%04ium_M%04i' % (int(tau0*1000), mass)
+        if 'tau1000um_M0400' in name:
+            continue
         submit(name, tau0, mass)

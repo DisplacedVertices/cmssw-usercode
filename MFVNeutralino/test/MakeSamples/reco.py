@@ -51,7 +51,8 @@ process.mfvTrackMatches = cms.EDProducer('MFVTrackMatcherLight',
                                          )
 process.reconstruction_step *= process.mfvTrackMatches
 process.output.outputCommands += ['keep *_mfvTrackMatches_*_*',
-                                  'keep *_randomEngineStateProducer_*_*']
+                                  'keep *_randomEngineStateProducer_*_*',
+                                  'keep CrossingFramePlaybackInfoExtended_*_*_*']
 
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.output_step)
 
