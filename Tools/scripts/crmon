@@ -188,8 +188,8 @@ while 1:
                         if prog is None:
                             msgs.append(d)
                         else:
-                            msgs.append('%s(%i/%i)' % (d, prog[0], prog[1])
-                print 'waiting for these threads:', ' '.join(msgs
+                            msgs.append('%s(%i/%i)' % (d, prog[0], prog[1]))
+                print 'waiting for these threads:', ' '.join(msgs)
             sleep_count += 1
             time.sleep(0.1)
         print 'done waiting for threads!'
