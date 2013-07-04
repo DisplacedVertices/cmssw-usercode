@@ -319,7 +319,10 @@ def aod_plus_pat(process):
 def keep_random_state(process):
     process.out.outputCommands.append('keep *_randomEngineStateProducer_*_*')
 
-for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state'.split():
+def keep_mixing_info(process):
+    process.out.outputCommands.append('keep CrossingFramePlaybackInfoExtended_*_*_*')
+
+for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info'.split():
     if arg in sys.argv:
         exec '%s(process)' % arg
 
