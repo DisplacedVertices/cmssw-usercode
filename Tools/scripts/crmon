@@ -22,6 +22,8 @@ parser.add_option('--resub-any', action='store_true', default=False,
                   help='Resubmit any job that has status Retrieved but with exit code non-zero.')
 parser.add_option('--resub-stuck-done', action='store_true', default=False,
                   help='Resubmit any job that has status DoneStuck: Done, but whose output cannot be retrieved.')
+parser.add_option('--resub-created', action='store_true', default=False,
+                  help='(Re)submit any job that has status Created.')
 parser.add_option('--resub-none', action='store_true', default=False,
                   help='Do not resubmit any jobs (i.e. allow getting output, but do not do anything with e.g. those that are Aborted).')
 parser.add_option('--resub-site-control', default='',
@@ -105,7 +107,7 @@ def check_fcn(crab_dir, verbose):
     if options.status_only:
         return crab_status(crab_dir, verbose=verbose, debug=options.debug_output)
     else:
-        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_stuck_done=options.resub_stuck_done, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done)
+        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_stuck_done=options.resub_stuck_done, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created)
 
 dirs = crab_dirs_from_argv()
 if not dirs:
