@@ -382,7 +382,9 @@ def crab_resubmit(working_dir, jobs, site_control='', command='resubmit', n=500)
                 if n != len(these_jobs):
                     print '\033[36;7m warning: \033[m crab_resubmit for %s wanted to resubmit %i jobs, but crab reports only %i jobs resubmitted' % (working_dir, len(these_jobs), n)
                 if n != len(success):
-                    print '\033[36;7m warning: \033[m crab_resubmit for %s claimed to resubmit %i jobs but we only found %i in the lists it printed' % (n, len(success))
+                    scheduler = crab_get_scheduler(working_dir)
+                    if scheduler != 'remoteGlidein':
+                        print '\033[36;7m warning: \033[m crab_resubmit for %s claimed to resubmit %i jobs but we only found %i in the lists it printed' % (working_dir, n, len(success))
                 break
 
 def crab_cfg_parser(working_dir):
