@@ -238,15 +238,18 @@ def compare_all_hists(ps, samples, **kwargs):
             
         apply_commands(name, hist_list)
 
-        if is2d and separate_plots(name, hist_list):
+        draw_cmd = draw_command(name, hist_list)
+        
+        sep = separate_plots(name, hist_list)
+        if sep == 'all' or (is2d and sep):
             for hist in hists:
-                hist.Draw('colz')
-                ps.save(name_clean + '_' + hist.cah_sample_name, logz=True)
+                hist.Draw('colz' if is2d else draw_cmd)
+                ps.save(name_clean + '_' + hist.cah_sample_name, log=not is2d, logz=is2d)
 
         hists_sorted = hists[:]
         if not is2d:
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
-        draw_cmd = draw_command(name, hist_list)
+
         for i,hist in enumerate(hists_sorted):
             if i == 0:
                 hist.Draw(draw_cmd)
