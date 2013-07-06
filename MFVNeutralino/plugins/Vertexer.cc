@@ -148,6 +148,8 @@ private:
   TH1F* h_seed_track_multiplicity;
   TH1F* h_max_seed_track_multiplicity;
   TH1F* h_n_noshare_vertices;
+  TH1F* h_n_resets;
+  TH1F* h_n_onetracks;
   TH1F* h_noshare_vertex_ntracks;
   TH1F* h_noshare_vertex_track_weights;
   TH1F* h_noshare_vertex_chi2;
@@ -379,7 +381,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     printf("fun time!\n");
 
   track_set discarded_tracks;
-  int nresets = 0;
+  int n_resets = 0;
+  int n_onetracks = 0;
   std::vector<reco::Vertex>::iterator v[2];
   size_t ivtx[2];
   for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
@@ -391,6 +394,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       if (verbose)
         printf("track-sharing: vertex-0 #%lu is down to one track, junking it\n", ivtx[0]);
       v[0] = vertices->erase(v[0]) - 1;
+      ++n_onetracks;
       continue;
     }
 
@@ -407,6 +411,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose)
           printf("track-sharing: vertex-1 #%lu is down to one track, junking it\n", ivtx[1]);
         v[1] = vertices->erase(v[1]) - 1;
+        ++n_onetracks;
         continue;
       }
 
@@ -612,18 +617,21 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     // If we changed the vertices at all, start loop over completely.
     if (duplicate || merge || refit) {
       v[0] = vertices->begin() - 1;  // -1 because about to ++sv
-      ++nresets;
-      if (verbose) printf("   resetting from vertices %lu and %lu. # of resets: %i\n", ivtx[0], ivtx[1], nresets);
+      ++n_resets;
+      if (verbose) printf("   resetting from vertices %lu and %lu. # of resets: %i\n", ivtx[0], ivtx[1], n_resets);
       
-      //if (nresets == 3000)
+      //if (n_resets == 3000)
       //  throw "I'm dumb";
     }
   }
 
   if (verbose)
     printf("n_noshare_vertices: %lu\n", vertices->size());
-  if (histos)
+  if (histos) {
     h_n_noshare_vertices->Fill(vertices->size());
+    h_n_resets->Fill(n_resets);
+    h_n_onetracks->Fill(n_onetracks);
+  }
 
   if (histos || verbose) {
     std::map<reco::TrackRef, int> track_use;
