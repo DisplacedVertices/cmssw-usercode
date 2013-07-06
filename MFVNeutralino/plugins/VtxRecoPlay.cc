@@ -45,6 +45,26 @@ namespace {
     return mag(v.x(), v.y(), v.z());
   }
 
+  template <typename T, typename T2>
+  double dot2(const T& a, const T2& b) {
+    return a.x() * b.x() + a.y() * b.y();
+  }
+
+  template <typename T, typename T2>
+  double dot3(const T& a, const T2& b) {
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
+  }
+
+  template <typename T, typename T2>
+  double costh2(const T& a, const T2& b) {
+    return dot2(a,b) / mag(a.x(), a.y()) / mag(b.x(), b.y());
+  }
+
+  template <typename T, typename T2>
+  double costh3(const T& a, const T2& b) {
+    return dot3(a,b) / mag(a.x(), a.y(), a.z()) / mag(b.x(), b.y(), b.z());
+  }
+
   template <typename V>
   double coord(const V& v, const int i) {
     if      (i == 0) return v.x();
@@ -249,6 +269,9 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float mass0_eta;               
     float mass0_phi;               
     float mass0_mass;              
+    float mass0_costhmombs;              
+    float mass0_costhmompv2d;              
+    float mass0_costhmompv3d;              
     float mass0_sumpt2;            
     float mass0_mintrackpt;        
     float mass0_maxtrackpt;        
@@ -286,6 +309,9 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float mass1_eta;               
     float mass1_phi;               
     float mass1_mass;              
+    float mass1_costhmombs;              
+    float mass1_costhmompv2d;              
+    float mass1_costhmompv3d;              
     float mass1_sumpt2;            
     float mass1_mintrackpt;        
     float mass1_maxtrackpt;        
@@ -353,6 +379,9 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("mass0_eta", &nt.mass0_eta, "mass0_eta/F");
     tree->Branch("mass0_phi", &nt.mass0_phi, "mass0_phi/F");
     tree->Branch("mass0_mass", &nt.mass0_mass, "mass0_mass/F");
+    tree->Branch("mass0_costhmombs", &nt.mass0_costhmombs, "mass0_costhmombs/F");
+    tree->Branch("mass0_costhmompv2d", &nt.mass0_costhmompv2d, "mass0_costhmompv2d/F");
+    tree->Branch("mass0_costhmompv3d", &nt.mass0_costhmompv3d, "mass0_costhmompv3d/F");
     tree->Branch("mass0_sumpt2", &nt.mass0_sumpt2, "mass0_sumpt2/F");
     tree->Branch("mass0_mintrackpt", &nt.mass0_mintrackpt, "mass0_mintrackpt/F");
     tree->Branch("mass0_maxtrackpt", &nt.mass0_maxtrackpt, "mass0_maxtrackpt/F");
@@ -390,6 +419,9 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("mass1_eta", &nt.mass1_eta, "mass1_eta/F");
     tree->Branch("mass1_phi", &nt.mass1_phi, "mass1_phi/F");
     tree->Branch("mass1_mass", &nt.mass1_mass, "mass1_mass/F");
+    tree->Branch("mass1_costhmombs", &nt.mass1_costhmombs, "mass1_costhmombs/F");
+    tree->Branch("mass1_costhmompv2d", &nt.mass1_costhmompv2d, "mass1_costhmompv2d/F");
+    tree->Branch("mass1_costhmompv3d", &nt.mass1_costhmompv3d, "mass1_costhmompv3d/F");
     tree->Branch("mass1_sumpt2", &nt.mass1_sumpt2, "mass1_sumpt2/F");
     tree->Branch("mass1_mintrackpt", &nt.mass1_mintrackpt, "mass1_mintrackpt/F");
     tree->Branch("mass1_maxtrackpt", &nt.mass1_maxtrackpt, "mass1_maxtrackpt/F");
@@ -512,6 +544,9 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("eta",            "SV #eta",                                     50,   -4,       4);
     hs.add("phi",            "SV #phi",                                     50,   -3.15,    3.15);
     hs.add("mass",           "SV mass (GeV)",                              100,    0,     250);
+    hs.add("costhmombs",     "cos(angle(2-momentum, 2-dist to BS))",       100,   -1,       1);
+    hs.add("costhmompv2d",   "cos(angle(2-momentum, 2-dist to PV))",       100,   -1,       1);
+    hs.add("costhmompv3d",   "cos(angle(3-momentum, 3-dist to PV))",       100,   -1,       1);
     hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                100,    0,    6000);
     hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      10);
     hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
@@ -836,8 +871,16 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       pv3ddist_sig = pv3ddist.significance();
     }
 
+    float costhmombs = costh2(sv.p4(), sv.position() - beamspot->position());
+    float costhmompv2d = -2, costhmompv3d = -2;
+    if (primary_vertex != 0) {
+      auto disp = sv.position() - primary_vertex->position();
+      costhmompv2d = costh2(sv.p4(), disp);
+      costhmompv3d = costh3(sv.p4(), disp);
+    }
+
     if (do_ntuple) {
-      if (isv == 0) {
+      if (svndx == 0) {
         nt.mass0_ntracks         = ntracks;        
         nt.mass0_ntracksptpass   = ntracksptpass;   
         nt.mass0_trackminnhits   = trackminnhits;
@@ -847,6 +890,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         nt.mass0_eta             = sv.p4().eta();
         nt.mass0_phi             = sv.p4().phi();
         nt.mass0_mass            = sv.p4().mass();
+        nt.mass0_costhmombs      = costhmombs;
+        nt.mass0_costhmompv2d    = costhmompv2d;
+        nt.mass0_costhmompv3d    = costhmompv3d;
         nt.mass0_sumpt2          = sumpt2;
         nt.mass0_mintrackpt      = mintrackpt;
         nt.mass0_maxtrackpt      = maxtrackpt;
@@ -876,7 +922,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         nt.mass0_pv3derr         = pv3ddist_err;
         nt.mass0_pv3dsig         = pv3ddist_sig;
       }
-      else if (isv == 1) {
+      else if (svndx == 1) {
         nt.mass1_ntracks         = ntracks;        
         nt.mass1_ntracksptpass   = ntracksptpass;   
         nt.mass1_trackminnhits   = trackminnhits;
@@ -886,6 +932,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         nt.mass1_eta             = sv.p4().eta();
         nt.mass1_phi             = sv.p4().phi();
         nt.mass1_mass            = sv.p4().mass();
+        nt.mass1_costhmombs      = costhmombs;
+        nt.mass1_costhmompv2d    = costhmompv2d;
+        nt.mass1_costhmompv3d    = costhmompv3d;
         nt.mass1_sumpt2          = sumpt2;
         nt.mass1_mintrackpt      = mintrackpt;
         nt.mass1_maxtrackpt      = maxtrackpt;
@@ -927,6 +976,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"eta",             sv.p4().eta()},
         {"phi",             sv.p4().phi()},
         {"mass",            sv.p4().mass()},
+        {"costhmombs",      costhmombs},
+        {"costhmompv2d",    costhmompv2d},
+        {"costhmompv3d",    costhmompv3d},
         {"sumpt2",          sumpt2},
         {"mintrackpt",      mintrackpt},
         {"maxtrackpt",      maxtrackpt},
