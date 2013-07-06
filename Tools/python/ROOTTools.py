@@ -223,13 +223,14 @@ def compare_all_hists(ps, samples, **kwargs):
             hist.cah_integral = get_integral(hist, 0, integral_only=True) if not is2d else 0.
 
         rescale = not is2d and all(hist.cah_integral > 0 for hist in hists)
+        nostat = no_stats(name, hist_list)
         for hist in hists:
             hist.SetLineWidth(2)
 
             if rescale:
                 hist.Scale(1./hist.cah_integral)
-            if no_stats(name, hist_list):
-                h.SetStats(0)
+            if nostat:
+                hist.SetStats(0)
             hist.SetLineColor(hist.cah_color)
             hist.SetMarkerColor(hist.cah_color)
 
