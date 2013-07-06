@@ -51,6 +51,7 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
 ana_qcuts = [
     ('Qno',             ana),
     ('Qntk6',           ana.clone(min_sv_ntracks = 6)),
+    ('QM20',            ana.clone(min_sv_mass = 20)),
     ('Qntk6M20',        ana.clone(min_sv_ntracks = 6, min_sv_mass = 20)),
     ]
 
@@ -104,7 +105,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     from JMTucker.Tools.Samples import background_samples, mfv_signal_samples
-    samples = background_samples + mfv_signal_samples
+    samples = background_samples + mfv_signal_samples[:-1]
 
     def pset_modifier(sample):
         to_add = []
@@ -122,3 +123,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = pset_modifier,
                        )
     cs.submit_all(samples)
+
+'''
+mergeTFileServiceHistograms -w 0.457,0.438,0.105 -i ttbarhadronic.root ttbarsemilep.root ttbardilep.root -o ttbar_merge.root
+mergeTFileServiceHistograms -w 0.97336,0.025831,0.00078898,1.9093e-5 -i qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root -o qcd_merge.root
+'''
+
