@@ -184,7 +184,7 @@ while 1:
                 msgs = []
                 for d,t in threads:
                     if t.is_alive():
-                        prog = crab_get_output_progress(d)
+                        prog = None # crab_get_output_progress(d)
                         if prog is None:
                             msgs.append(d)
                         else:
