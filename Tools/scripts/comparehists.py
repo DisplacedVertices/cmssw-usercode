@@ -17,7 +17,7 @@ parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZ
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
 parser.add_argument('--nice', nargs='+', default=[],
                     help='Nice names for the files (default is file1, file2, ...).')
-parser.add_argument('--colors', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta'],
+parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta'],
                     help='Colors for the files: may be a python snippet, e.g. the default %(default)s.')
 
 group = parser.add_argument_group('Callback function snippets: will be of the form lambda name, hists: <snippet here>')
@@ -78,7 +78,14 @@ set_style()
 ps = plot_saver(options.plot_path, size=options.size, per_page=options.per_page)
 
 files = [ROOT.TFile(file) for file in options.files]
+for i,f in enumerate(files):
+    if not f.IsOpen():
+        raise ValueError('file %s not readable' % options.files[i])
+
 dirs = [file.Get(options.dir_path) for file in files]
+for i,d in enumerate(dirs):
+    if not issubclass(type(d), ROOT.TDirectory):
+        raise ValueError('dir %s not found in file %s' % (options.dir_path, options.files[i]))
 
 compare_all_hists(ps,
                   samples = zip(options.nice, dirs, options.colors),
