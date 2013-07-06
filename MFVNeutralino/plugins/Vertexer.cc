@@ -1,4 +1,6 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -110,7 +112,13 @@ private:
   }
 
   const edm::InputTag beamspot_src;
+  const bool use_tracks;
   const edm::InputTag track_src;
+  const bool use_pf_jets;
+  const edm::InputTag pf_jet_src;
+  const bool use_pat_jets;
+  const edm::InputTag pat_jet_src;
+  const double min_seed_jet_pt;
   const double min_seed_track_pt;
   const double min_seed_track_dxy;
   const int min_seed_track_nhits;
@@ -168,7 +176,13 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     av_reco(new ConfigurableVertexReconstructor(cfg.getParameter<edm::ParameterSet>("avr_params"))),
     beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
+    use_tracks(cfg.getParameter<bool>("use_tracks")),
     track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    use_pf_jets(cfg.getParameter<bool>("use_pf_jets")),
+    pf_jet_src(cfg.getParameter<edm::InputTag>("pf_jet_src")),
+    use_pat_jets(cfg.getParameter<bool>("use_pat_jets")),
+    pat_jet_src(cfg.getParameter<edm::InputTag>("pat_jet_src")),
+    min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
     min_seed_track_pt(cfg.getParameter<double>("min_seed_track_pt")),
     min_seed_track_dxy(cfg.getParameter<double>("min_seed_track_dxy")),
     min_seed_track_nhits(cfg.getParameter<int>("min_seed_track_nhits")),
@@ -186,6 +200,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
+  if (use_tracks + use_pf_jets + use_pat_jets != 1)
+    throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/pf_jets/pat_jets";
+
   produces<reco::VertexCollection>();
 
   if (histos) {
@@ -239,58 +256,90 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const double bs_y = beamspot->position().y();
   const double bs_z = beamspot->position().z();
 
-  edm::Handle<reco::TrackCollection> tracks;
-  event.getByLabel(track_src, tracks);
+  //////////////////////////////////////////////////////////////////////
+  // The tracks to be used. Will be filled from a track collection or
+  // from raw-PF/PF2PAT jet constituents with cuts on pt/nhits/dxy.
+  //////////////////////////////////////////////////////////////////////
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
-  //////////////////////////////////////////////////////////////////////
-  // Select tracks for seeding passing pt, dxy, nhits cuts.
-  //////////////////////////////////////////////////////////////////////
-
+  reco::TrackRefVector all_tracks;
   std::vector<reco::TransientTrack> seed_tracks;
   std::map<reco::TrackRef, size_t> seed_track_ref_map;
-  for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
-    reco::TrackRef tk(tracks, i);
+
+  if (use_tracks) {
+    edm::Handle<reco::TrackCollection> tracks;
+    event.getByLabel(track_src, tracks);
+    for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
+      all_tracks.push_back(reco::TrackRef(tracks, i));
+  }
+  else if (use_pf_jets) {
+    edm::Handle<reco::PFJetCollection> jets;
+    event.getByLabel(pf_jet_src, jets);
+    for (const reco::PFJet& jet : *jets) {
+      if (jet.pt() > min_seed_jet_pt &&
+          fabs(jet.eta()) < 2.5 &&
+          jet.numberOfDaughters() > 1 &&
+          jet.neutralHadronEnergyFraction() < 0.99 &&
+          jet.neutralEmEnergyFraction() < 0.99 &&
+          (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
+        for (const reco::TrackRef& tk : jet.getTrackRefs())
+          all_tracks.push_back(tk);
+      }
+    }
+  }
+  else if (use_pat_jets) {
+    edm::Handle<pat::JetCollection> jets;
+    event.getByLabel(pat_jet_src, jets);
+    for (const pat::Jet& jet : *jets) {
+      if (jet.pt() > min_seed_jet_pt) { // assume rest of id above already applied at tuple time
+        for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
+          const reco::TrackRef& tk = pfcand->trackRef();
+          if (tk.isNonnull())
+            all_tracks.push_back(tk);
+        }
+      }
+    }
+  }
+
+  for (size_t i = 0, ie = all_tracks.size(); i < ie; ++i) {
+    const reco::TrackRef& tk = all_tracks[i];
     const double pt = tk->pt();
     const double dxy = tk->dxy(beamspot->position());
     const int nhits = tk->hitPattern().numberOfValidHits();
+    const bool use = pt > min_seed_track_pt && fabs(dxy) > min_seed_track_dxy && nhits >= min_seed_track_nhits;
 
-    if (verbose)
+    if (use) {
+      seed_tracks.push_back(tt_builder->build(tk));
+      seed_track_ref_map[tk] = seed_tracks.size() - 1;
+    }
+
+    if (verbose) {
       printf("track %5lu: pt: %7.3f dxy: %7.3f nhits %3i ", i, pt, dxy, nhits);
+      if (use)
+        printf(" selected for seed! (#%lu)", seed_tracks.size()-1);
+      printf("\n");
+    }        
 
     if (histos) {
       h_all_track_pt->Fill(pt);
       h_all_track_dxy->Fill(dxy);
       h_all_track_nhits->Fill(nhits);
-    }
-
-    if (pt > min_seed_track_pt && fabs(dxy) > min_seed_track_dxy && nhits >= min_seed_track_nhits) {
-      seed_tracks.push_back(tt_builder->build(tk));
-      seed_track_ref_map[tk] = seed_tracks.size() - 1;
-
-      if (histos) {
+      if (use) {
         h_seed_track_pt->Fill(pt);
         h_seed_track_dxy->Fill(dxy);
         h_seed_track_nhits->Fill(nhits);
       }
-
-      if (verbose)
-        printf(" selected for seed! (#%lu)", seed_tracks.size()-1);
     }
-
-    if (verbose)
-      printf("\n");
   }
-  
+
   const size_t ntk = seed_tracks.size();
 
   if (verbose)
-    printf("n_all_tracks: %5lu   n_seed_tracks: %5lu\n", tracks->size(), ntk);
-
+    printf("n_all_tracks: %5lu   n_seed_tracks: %5lu\n", all_tracks.size(), ntk);
   if (histos) {
-    h_n_all_tracks->Fill(tracks->size());
+    h_n_all_tracks->Fill(all_tracks.size());
     h_n_seed_tracks->Fill(ntk);
   }
 
