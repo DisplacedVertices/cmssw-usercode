@@ -208,6 +208,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_gen_valid;
   TH1F* h_gen_pos_1d[2][3];
   TH2F* h_gen_pos_2d[2][3];
+  TH1F* h_lspdist2d;
+  TH1F* h_lspdist3d;
 
   TH1F* h_njets;
   TH1F* h_ntracks;
@@ -228,6 +230,9 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   
   TH1F* h_nsv;
   TH1F* h_nsvpass;
+  TH2F* h_nsvpass_v_lspdist2d;
+  TH2F* h_nsvpass_v_lspdist3d;
+
   TH2F* h_sv_max_trackicity;
   TH1F* h_sv_pos_1d[4][3]; // index 0: 0 = the highest mass SV, 1 = second highest, 2 = third highest, 3 = rest
   TH2F* h_sv_pos_2d[4][3];
@@ -470,6 +475,9 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     h_gen_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%iyz", j), TString::Format(";gen #%i vtx y (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-25,25);
   }
 
+  h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);arb. units", 400, 0, 2);
+  h_lspdist3d = fs->make<TH1F>("h_lspdist2d", ";dist3d(gen vtx #0, #1) (cm);arb. units", 400, 0, 2);
+
   h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 30, 0, 30);
   h_ntracks = fs->make<TH1F>("h_ntracks", ";# of general tracks;arb. units", 20, 0, 2000);
   h_ntracksptpass = fs->make<TH1F>("h_ntracksptpass", ";# of selected tracks;arb. units", 20, 0, 60);
@@ -500,7 +508,9 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   }
 
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 100, 0, 100);
-  h_nsvpass = fs->make<TH1F>("h_nsvpass", ";# of selected secondary vertices;arb. units", 100, 0, 100);
+  h_nsvpass = fs->make<TH1F>("h_nsvpass", ";# of selected secondary vertices;arb. units", 15, 0, 15);
+  h_nsvpass_v_lspdist2d = fs->make<TH2F>("h_nsvpass_v_lspdist2d", ";# of selected secondary vertices", 200, 0, 1, 5, 0, 5);
+  h_nsvpass_v_lspdist3d = fs->make<TH2F>("h_nsvpass_v_lspdist3d", ";# of selected secondary vertices", 200, 0, 1, 5, 0, 5);
   h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
   for (int j = 0; j < 4; ++j) {
@@ -668,6 +678,15 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_gen_pos_2d[j][1]->Fill(gen_verts[j][0] - bsx, gen_verts[j][2] - bsz);
     h_gen_pos_2d[j][2]->Fill(gen_verts[j][1] - bsy, gen_verts[j][2] - bsz);
   }
+
+  const double lspdist2d = mag(gen_verts[0][0] - gen_verts[1][0],
+                               gen_verts[0][1] - gen_verts[1][1]);
+  const double lspdist3d = mag(gen_verts[0][0] - gen_verts[1][0],
+                               gen_verts[0][1] - gen_verts[1][1],
+                               gen_verts[0][2] - gen_verts[1][2]);
+
+  h_lspdist2d->Fill(lspdist2d);
+  h_lspdist3d->Fill(lspdist3d);
 
   edm::Handle<reco::PFJetCollection> jets;
   event.getByLabel("ak5PFJets", jets);
@@ -1014,6 +1033,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   tree->Fill();
 
   h_nsvpass->Fill(nsvpass);
+  h_nsvpass_v_lspdist2d->Fill(lspdist2d, nsvpass);
+  h_nsvpass_v_lspdist3d->Fill(lspdist3d, nsvpass);
 
   const int nvtx = secondary_vertices.size();
   for (int ivtx = 0; ivtx < nvtx; ++ivtx) {
