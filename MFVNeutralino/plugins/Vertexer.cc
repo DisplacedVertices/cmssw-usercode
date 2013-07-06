@@ -406,7 +406,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       if (tracks[1].size() < 2) {
         if (verbose)
           printf("track-sharing: vertex-1 #%lu is down to one track, junking it\n", ivtx[1]);
-        v[1] = vertices->erase(v[1]);
+        v[1] = vertices->erase(v[1]) - 1;
         continue;
       }
 
@@ -611,7 +611,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     // If we changed the vertices at all, start loop over completely.
     if (duplicate || merge || refit) {
-      v[0] = vertices->begin()-1;  // -1 because about to ++sv
+      v[0] = vertices->begin() - 1;  // -1 because about to ++sv
       ++nresets;
       if (verbose) printf("   resetting from vertices %lu and %lu. # of resets: %i\n", ivtx[0], ivtx[1], nresets);
       
