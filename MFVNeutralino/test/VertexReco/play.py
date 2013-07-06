@@ -3,9 +3,9 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools.CMSSWTools import silence_messages
 
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.maxEvents.input = 100
+process.maxEvents.input = 10
 process.options.wantSummary = True
-process.source.fileNames = ['file:/uscms/home/tucker/nobackup/fromt3/mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604_pat_1_1_Dpa.root']
+process.source.fileNames = ['/store/user/tucker/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/5bdce5833f35b995ab0c308220e77250/pat_1_1_ABC.root']
 process.TFileService.fileName = 'play.root'
 silence_messages(process, 'TwoTrackMinimumDistance')
 
@@ -21,10 +21,20 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.p = cms.Path(process.mfvVertexReco * process.mfvVertices)
 #process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertices)
 
+process.mfvVerticesDxy50 = process.mfvVertices.clone(min_seed_track_dxy = cms.double(0.005))
+process.mfvVerticesDxy10 = process.mfvVertices.clone(min_seed_track_dxy = cms.double(0.001))
+process.mfvVerticesPt075 = process.mfvVertices.clone(min_seed_track_pt = cms.double(0.75))
+process.mfvVerticesNh6 = process.mfvVertices.clone(min_seed_track_nhits = cms.int32(6))
+process.p *= process.mfvVerticesDxy50 * process.mfvVerticesDxy10 * process.mfvVerticesPt075 * process.mfvVerticesNh6
+
 all_anas = []
 
 vertex_srcs = [
     ('MY', 'mfvVertices'),
+    ('MYDXY5', 'mfvVerticesDxy50'),
+    ('MYDXY1', 'mfvVerticesDxy10'),
+    ('MYPT', 'mfvVerticesPt075'),
+    ('MYNH', 'mfvVerticesNh6'),
     ('IVFC75MrgdS', 'mfvVertexMergerShared'),
     ]
 
@@ -37,7 +47,7 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      is_mfv = cms.bool(True),
                      is_ttbar = cms.bool(False),
                      do_scatterplots = cms.bool(False),
-                     do_ntuple = cms.bool(True),
+                     do_ntuple = cms.bool(False),
                      jet_pt_min = cms.double(30),
                      track_pt_min = cms.double(10),
                      track_vertex_weight_min = cms.double(0.5),
@@ -104,8 +114,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
-    from JMTucker.Tools.Samples import background_samples, mfv_signal_samples
-    samples = background_samples + mfv_signal_samples[:-1]
+    import JMTucker.Tools.Samples as s
+    samples = s.background_samples[1:] + s.mfv_signal_samples[:-1]
 
     def pset_modifier(sample):
         to_add = []
@@ -122,6 +132,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
                        )
+    #cs.submit_all([s.mfv_neutralino_tau1000um_M0400, s.ttbarhadronic, s.qcdht1000])
     cs.submit_all(samples)
 
 '''
