@@ -1047,7 +1047,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_sv[svndx].Fill(v);
   }
 
-  tree->Fill();
+  if (do_ntuple)
+    tree->Fill();
 
   h_nsvpass->Fill(nsvpass);
   h_nsvpass_v_lspdist2d->Fill(lspdist2d, nsvpass);
