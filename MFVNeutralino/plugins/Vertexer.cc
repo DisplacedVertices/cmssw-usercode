@@ -147,9 +147,9 @@ private:
   TH1F* h_seed_vertex_r;
   TH1F* h_seed_track_multiplicity;
   TH1F* h_max_seed_track_multiplicity;
-  TH1F* h_n_noshare_vertices;
   TH1F* h_n_resets;
   TH1F* h_n_onetracks;
+  TH1F* h_n_noshare_vertices;
   TH1F* h_noshare_vertex_ntracks;
   TH1F* h_noshare_vertex_track_weights;
   TH1F* h_noshare_vertex_chi2;
@@ -190,27 +190,29 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
   if (histos) {
     edm::Service<TFileService> fs;
-    h_n_all_tracks                = fs->make<TH1F>("h_n_all_tracks",                "", 200,   0,   2000);
-    h_all_track_pt                = fs->make<TH1F>("h_all_track_pt",                "", 250,   0,    500);
-    h_all_track_dxy               = fs->make<TH1F>("h_all_track_dxy",               "", 200,  -1,      1);
-    h_all_track_nhits             = fs->make<TH1F>("h_all_track_nhits",             "",  40,   0,     40);
-    h_n_seed_tracks               = fs->make<TH1F>("h_n_seed_tracks",               "", 200,   0,    600);
-    h_seed_track_pt               = fs->make<TH1F>("h_seed_track_pt",               "", 250,   0,    500);
-    h_seed_track_dxy              = fs->make<TH1F>("h_seed_track_dxy",              "", 200,  -1,      1);
-    h_seed_track_nhits            = fs->make<TH1F>("h_seed_track_nhits",            "",  40,   0,     40);
-    h_n_seed_vertices             = fs->make<TH1F>("h_n_seed_vertices",             "", 200,   0,    200);
-    h_seed_vertex_track_weights   = fs->make<TH1F>("h_seed_vertex_track_weights",   "",  64,   0,      1);
-    h_seed_vertex_chi2            = fs->make<TH1F>("h_seed_vertex_chi2",            "", 100,   0,     20);
-    h_seed_vertex_ndof            = fs->make<TH1F>("h_seed_vertex_ndof",            "", 100,   0,     20);
-    h_seed_vertex_x               = fs->make<TH1F>("h_seed_vertex_x",               "", 200,  -1,      1);
-    h_seed_vertex_y               = fs->make<TH1F>("h_seed_vertex_y",               "", 200,  -1,      1);
-    h_seed_vertex_rho             = fs->make<TH1F>("h_seed_vertex_rho",             "", 200,   0,      2);
-    h_seed_vertex_z               = fs->make<TH1F>("h_seed_vertex_z",               "", 200, -20,     20);
-    h_seed_vertex_r               = fs->make<TH1F>("h_seed_vertex_r",               "", 200,   0,      2);
-    h_seed_track_multiplicity     = fs->make<TH1F>("h_seed_track_multiplicity",     "",  40,   0,     40);
-    h_max_seed_track_multiplicity = fs->make<TH1F>("h_max_seed_track_multiplicity", "",  40,   0,     40);
+    h_n_all_tracks                   = fs->make<TH1F>("h_n_all_tracks",                   "", 200,   0,   2000);
+    h_all_track_pt                   = fs->make<TH1F>("h_all_track_pt",                   "", 250,   0,    500);
+    h_all_track_dxy                  = fs->make<TH1F>("h_all_track_dxy",                  "", 200,  -1,      1);
+    h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
+    h_n_seed_tracks                  = fs->make<TH1F>("h_n_seed_tracks",                  "", 200,   0,    600);
+    h_seed_track_pt                  = fs->make<TH1F>("h_seed_track_pt",                  "", 250,   0,    500);
+    h_seed_track_dxy                 = fs->make<TH1F>("h_seed_track_dxy",                 "", 200,  -1,      1);
+    h_seed_track_nhits               = fs->make<TH1F>("h_seed_track_nhits",               "",  40,   0,     40);
+    h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "", 200,   0,    200);
+    h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  64,   0,      1);
+    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               "", 100,   0,     20);
+    h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               "", 100,   0,     20);
+    h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  "", 200,  -1,      1);
+    h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  "", 200,  -1,      1);
+    h_seed_vertex_rho                = fs->make<TH1F>("h_seed_vertex_rho",                "", 200,   0,      2);
+    h_seed_vertex_z                  = fs->make<TH1F>("h_seed_vertex_z",                  "", 200, -20,     20);
+    h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  "", 200,   0,      2);
+    h_seed_track_multiplicity        = fs->make<TH1F>("h_seed_track_multiplicity",        "",  40,   0,     40);
+    h_max_seed_track_multiplicity    = fs->make<TH1F>("h_max_seed_track_multiplicity",    "",  40,   0,     40);
+    h_n_resets                       = fs->make<TH1F>("h_n_resets",                       "", 500,   0,  10000);
+    h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "", 500,   0,  10000);
     h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             "", 200,   0,    200);
-    h_noshare_vertex_ntracks    = fs->make<TH1F>("h_noshare_vertex_ntracks",   "",  50, 0, 50);
+    h_noshare_vertex_ntracks         = fs->make<TH1F>("h_noshare_vertex_ntracks",         "",  50, 0, 50);
     h_noshare_vertex_track_weights   = fs->make<TH1F>("h_noshare_vertex_track_weights",   "",  64,   0,      1);
     h_noshare_vertex_chi2            = fs->make<TH1F>("h_noshare_vertex_chi2",            "", 100,   0,     20);
     h_noshare_vertex_ndof            = fs->make<TH1F>("h_noshare_vertex_ndof",            "", 100,   0,     20);
@@ -626,11 +628,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   if (verbose)
-    printf("n_noshare_vertices: %lu\n", vertices->size());
+    printf("n_resets: %i  n_onetracks: %i  n_noshare_vertices: %lu\n", n_resets, n_onetracks, vertices->size());
   if (histos) {
-    h_n_noshare_vertices->Fill(vertices->size());
     h_n_resets->Fill(n_resets);
     h_n_onetracks->Fill(n_onetracks);
+    h_n_noshare_vertices->Fill(vertices->size());
   }
 
   if (histos || verbose) {
