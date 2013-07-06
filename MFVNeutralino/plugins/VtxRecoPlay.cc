@@ -250,6 +250,11 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 
   PairwiseHistos h_sv[4];
 
+  TH1F* h_svdist2d;
+  TH1F* h_svdist3d;
+  TH2F* h_svdist2d_v_lspdist2d;
+  TH2F* h_svdist3d_v_lspdist3d;
+
   TH1F* h_pair2dcompatscss;
   TH1F* h_pair2dcompat;
   TH1F* h_pair2ddist;
@@ -475,8 +480,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     h_gen_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_gen_pos_2d_%iyz", j), TString::Format(";gen #%i vtx y (cm);gen #%i vtx z (cm)", j, j), 100, -1, 1, 100,-25,25);
   }
 
-  h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);arb. units", 400, 0, 2);
-  h_lspdist3d = fs->make<TH1F>("h_lspdist2d", ";dist3d(gen vtx #0, #1) (cm);arb. units", 400, 0, 2);
+  h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);arb. units", 200, 0, 1);
+  h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);arb. units", 200, 0, 1);
 
   h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 30, 0, 30);
   h_ntracks = fs->make<TH1F>("h_ntracks", ";# of general tracks;arb. units", 20, 0, 2000);
@@ -509,8 +514,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 100, 0, 100);
   h_nsvpass = fs->make<TH1F>("h_nsvpass", ";# of selected secondary vertices;arb. units", 15, 0, 15);
-  h_nsvpass_v_lspdist2d = fs->make<TH2F>("h_nsvpass_v_lspdist2d", ";# of selected secondary vertices", 200, 0, 1, 5, 0, 5);
-  h_nsvpass_v_lspdist3d = fs->make<TH2F>("h_nsvpass_v_lspdist3d", ";# of selected secondary vertices", 200, 0, 1, 5, 0, 5);
+  h_nsvpass_v_lspdist2d = fs->make<TH2F>("h_nsvpass_v_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);# of selected secondary vertices", 200, 0, 1, 5, 0, 5);
+  h_nsvpass_v_lspdist3d = fs->make<TH2F>("h_nsvpass_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of selected secondary vertices", 200, 0, 1, 5, 0, 5);
   h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
   for (int j = 0; j < 4; ++j) {
@@ -587,6 +592,11 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("pv3dsig",        "N#sigma(dist3d(SV, PV))",                    100,    0,     100);
     h_sv[j].Init("h_sv_" + ex, hs, true, do_scatterplots);
   }
+
+  h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 200, 0, 1);
+  h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 200, 0, 1);
+  h_svdist2d_v_lspdist2d = fs->make<TH2F>("h_svdist2d_v_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);dist2d(sv #0, #1) (cm)", 200, 0, 1, 200, 0, 1);
+  h_svdist3d_v_lspdist3d = fs->make<TH2F>("h_svdist3d_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);dist3d(sv #0, #1) (cm)", 200, 0, 1, 200, 0, 1);
 
   h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
   h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
@@ -766,11 +776,18 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   const int nsv = int(secondary_vertices.size());
   h_nsv->Fill(nsv);
   int nsvpass = 0;
+  const reco::Vertex* sv0 = 0;
+  const reco::Vertex* sv1 = 0;
   std::vector<std::map<int,int> > trackicities(nsv);
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices[isv];
     if (!use_vertex(sv))
       continue;
+
+    if (sv0 == 0)
+      sv0 = &sv;
+    else if (sv1 == 0)
+      sv1 = &sv;
 
     const int svndx = nsvpass >= 3 ? 3 : nsvpass;
 
@@ -1035,6 +1052,18 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   h_nsvpass->Fill(nsvpass);
   h_nsvpass_v_lspdist2d->Fill(lspdist2d, nsvpass);
   h_nsvpass_v_lspdist3d->Fill(lspdist3d, nsvpass);
+
+  if (sv0 && sv1) {
+    double svdist2d = mag(sv0->position().x() - sv1->position().x(),
+                          sv0->position().y() - sv1->position().y());
+    double svdist3d = mag(sv0->position().x() - sv1->position().x(),
+                          sv0->position().y() - sv1->position().y(),
+                          sv0->position().z() - sv1->position().z());
+    h_svdist2d->Fill(svdist2d);
+    h_svdist3d->Fill(svdist3d);
+    h_svdist2d_v_lspdist2d->Fill(lspdist2d, svdist2d);
+    h_svdist3d_v_lspdist3d->Fill(lspdist3d, svdist3d);
+  }
 
   const int nvtx = secondary_vertices.size();
   for (int ivtx = 0; ivtx < nvtx; ++ivtx) {
