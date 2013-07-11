@@ -441,6 +441,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int nbhadrons = 0;
   int nbquarks_wcuts = 0;
   int nbhadrons_wcuts = 0;
+  std::set<const reco::Candidate*> bquarks_used;
   for (const reco::GenParticle& gen : *gen_particles) {
     if ((gen.status() == 3 || (gen.status() >= 21 && gen.status() <= 29)) && abs(gen.pdgId()) == 5) {
       bool has_b_mom = false;
@@ -464,9 +465,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       }
     }
 
-    if (gen.status() == 2 && is_bhadron(&gen)) {
+    if ((gen.status() == 2 || gen.status() == 74) && is_bhadron(&gen)) {
       for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
-        if (abs(gen.mother(i)->pdgId()) == 5) {
+        const reco::Candidate* mom = gen.mother(i);
+        if (abs(mom->pdgId()) == 5 && bquarks_used.count(mom) == 0) {
+          bquarks_used.insert(mom);
           ++nbhadrons;
           if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta)
             ++nbhadrons_wcuts;
