@@ -10,6 +10,7 @@ process.TFileService.fileName = 'gen_histos.root'
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')
+process.mfvGenParticleFilter.cut_invalid = False
 process.mfvGenHistos.check_all_gen_particles = False
 
 process.p = cms.Path(process.mfvGenParticleFilter * process.mfvGenHistos)
