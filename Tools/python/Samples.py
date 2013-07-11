@@ -9,12 +9,16 @@ from JMTucker.Tools.general import big_warn
 
 class Sample(object):
     PARENT_DATASET = None
-    NO_SKIMMING_CUTS = False
-    AOD_PLUS_PAT = False
-    DROP_GEN_PARTICLES = False
     IS_MC = True
     IS_FASTSIM = False
     IS_PYTHIA8 = False
+    KEEP_GENERAL_TRACKS = False
+    KEEP_SELECTED_TRACKS = False
+    NO_SKIMMING_CUTS = False
+    DROP_GEN_PARTICLES = False
+    AOD_PLUS_PAT = False
+    KEEP_RANDOM_STATE = False
+    KEEP_MIXING_INFO = False
     SCHEDULER_NAME = 'remoteGlidein'
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
@@ -30,12 +34,16 @@ class Sample(object):
         self.ana_dataset_override = None
         
         self.parent_dataset = self.PARENT_DATASET
-        self.no_skimming_cuts = self.NO_SKIMMING_CUTS
-        self.aod_plus_pat = self.AOD_PLUS_PAT
-        self.drop_gen_particles = self.DROP_GEN_PARTICLES
         self.is_mc = self.IS_MC
         self.is_fastsim = self.IS_FASTSIM
         self.is_pythia8 = self.IS_PYTHIA8
+        self.keep_general_tracks = self.KEEP_GENERAL_TRACKS
+        self.keep_selected_tracks = self.KEEP_SELECTED_TRACKS
+        self.no_skimming_cuts = self.NO_SKIMMING_CUTS
+        self.drop_gen_particles = self.DROP_GEN_PARTICLES
+        self.aod_plus_pat = self.AOD_PLUS_PAT
+        self.keep_random_state = self.KEEP_RANDOM_STATE
+        self.keep_mixing_info = self.KEEP_MIXING_INFO
         self.hlt_process_name = self.HLT_PROCESS_NAME
         self.local_filenames = []
         self.scheduler_name = self.SCHEDULER_NAME
@@ -251,11 +259,40 @@ auxiliary_background_samples = [
 ########################################################################
 
 # xsecs from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections8TeVgluglu (M_glu = M_neu + 5 GeV...)
+mfv_xsec = {
+     200: (0.153, 8.88e2),
+     400: (0.151, 1.74e1),
+     600: (0.173, 1.24e0),
+     800: (0.202, 1.50e-1),
+    1000: (0.257, 2.33e-2),
+    }
+
 mfv_signal_samples_ex = [
-    (0,     400, MCSample('mfv_neutralino_tau0000um_M0400', 'MFV signal, M = 400 GeV, prompt',         '/crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER', 10000, 2, 0.15, 1.74e01),),
-    (1000,  400, MCSample('mfv_neutralino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',    '/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER', 10000, 2, 0.15, 1.74e01),),
-    (9900,  400, MCSample('mfv_neutralino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',  '/crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER', 10000, 2, 0.15, 1.74e01),),
-    (1000, 1000, MCSample('mfv_neutralino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',   '/mfv_neutralino_tau1000um_M1000/tucker-reco-a3f0d9ac5e396df027589da2067010b0/USER',                                                                                                                                   10000, 6, 0.26, 2.33e-2),),
+    (   0,  200, MCSample('mfv_neutralino_tau0000um_M0200', 'MFV signal, M = 200 GeV, prompt',           '/mfv_neutralino_tau0000um_M0200/tucker-mfv_neutralino_tau0000um_M0200-4c5a3e1bd487f486a1b444615e104727/USER',  99850, 2, *mfv_xsec[ 200]),),
+    (   0,  400, MCSample('mfv_neutralino_tau0000um_M0400', 'MFV signal, M = 400 GeV, prompt',           '/mfv_neutralino_tau0000um_M0400/tucker-mfv_neutralino_tau0000um_M0400-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 400]),),
+    (   0,  600, MCSample('mfv_neutralino_tau0000um_M0600', 'MFV signal, M = 600 GeV, prompt',           '/mfv_neutralino_tau0000um_M0600/tucker-mfv_neutralino_tau0000um_M0600-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 600]),),
+    (   0,  800, MCSample('mfv_neutralino_tau0000um_M0800', 'MFV signal, M = 800 GeV, prompt',           '/mfv_neutralino_tau0000um_M0800/tucker-mfv_neutralino_tau0000um_M0800-4c5a3e1bd487f486a1b444615e104727/USER',  99900, 2, *mfv_xsec[ 800]),),
+    (   0, 1000, MCSample('mfv_neutralino_tau0000um_M1000', 'MFV signal, M = 1000 GeV, prompt',          '/mfv_neutralino_tau0000um_M1000/tucker-mfv_neutralino_tau0000um_M1000-4c5a3e1bd487f486a1b444615e104727/USER',  99996, 2, *mfv_xsec[1000]),),
+    (  10,  200, MCSample('mfv_neutralino_tau0010um_M0200', 'MFV signal, M = 200 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0200/tucker-mfv_neutralino_tau0010um_M0200-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 200]),),
+    (  10,  400, MCSample('mfv_neutralino_tau0010um_M0400', 'MFV signal, M = 400 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0400/tucker-mfv_neutralino_tau0010um_M0400-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 400]),),
+    (  10,  600, MCSample('mfv_neutralino_tau0010um_M0600', 'MFV signal, M = 600 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0600/tucker-mfv_neutralino_tau0010um_M0600-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99700, 2, *mfv_xsec[ 600]),),
+    (  10,  800, MCSample('mfv_neutralino_tau0010um_M0800', 'MFV signal, M = 800 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0800/tucker-mfv_neutralino_tau0010um_M0800-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99950, 2, *mfv_xsec[ 800]),),
+    (  10, 1000, MCSample('mfv_neutralino_tau0010um_M1000', 'MFV signal, M = 1000 GeV, #tau = 10 #mum',  '/mfv_neutralino_tau0010um_M1000/tucker-mfv_neutralino_tau0010um_M1000-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99899, 2, *mfv_xsec[1000]),),
+    ( 100,  200, MCSample('mfv_neutralino_tau0100um_M0200', 'MFV signal, M = 200 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0200/tucker-mfv_neutralino_tau0100um_M0200-86ebc7c9963ad7f892ad94c512f4c308/USER',  99700, 2, *mfv_xsec[ 200]),),
+    ( 100,  400, MCSample('mfv_neutralino_tau0100um_M0400', 'MFV signal, M = 400 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0400/tucker-mfv_neutralino_tau0100um_M0400-86ebc7c9963ad7f892ad94c512f4c308/USER',  99250, 2, *mfv_xsec[ 400]),),
+    ( 100,  600, MCSample('mfv_neutralino_tau0100um_M0600', 'MFV signal, M = 600 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0600/tucker-mfv_neutralino_tau0100um_M0600-86ebc7c9963ad7f892ad94c512f4c308/USER',  99650, 2, *mfv_xsec[ 600]),),
+    ( 100,  800, MCSample('mfv_neutralino_tau0100um_M0800', 'MFV signal, M = 800 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0800/tucker-mfv_neutralino_tau0100um_M0800-86ebc7c9963ad7f892ad94c512f4c308/USER',  92100, 2, *mfv_xsec[ 800]),),
+    ( 100, 1000, MCSample('mfv_neutralino_tau0100um_M1000', 'MFV signal, M = 1000 GeV, #tau = 100 #mum', '/mfv_neutralino_tau0100um_M1000/tucker-mfv_neutralino_tau0100um_M1000-86ebc7c9963ad7f892ad94c512f4c308/USER',  99749, 2, *mfv_xsec[1000]),),
+    (1000,  200, MCSample('mfv_neutralino_tau1000um_M0200', 'MFV signal, M = 200 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0200/tucker-mfv_neutralino_tau1000um_M0200-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99752, 2, *mfv_xsec[ 200]),),
+    (1000,  400, MCSample('mfv_neutralino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0400/tucker-mfv_neutralino_tau1000um_M0400-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99850, 2, *mfv_xsec[ 400]),),
+    (1000,  600, MCSample('mfv_neutralino_tau1000um_M0600', 'MFV signal, M = 600 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0600/tucker-mfv_neutralino_tau1000um_M0600-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99851, 2, *mfv_xsec[ 600]),),
+    (1000,  800, MCSample('mfv_neutralino_tau1000um_M0800', 'MFV signal, M = 800 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0800/tucker-mfv_neutralino_tau1000um_M0800-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99949, 2, *mfv_xsec[ 800]),),
+    (1000, 1000, MCSample('mfv_neutralino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',     '/mfv_neutralino_tau1000um_M1000/tucker-mfv_neutralino_tau1000um_M1000-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[1000]),),
+    (9900,  200, MCSample('mfv_neutralino_tau9900um_M0200', 'MFV signal, M = 200 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0200/tucker-mfv_neutralino_tau9900um_M0200-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 200]),),
+    (9900,  400, MCSample('mfv_neutralino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0400/tucker-mfv_neutralino_tau9900um_M0400-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 400]),),
+    (9900,  600, MCSample('mfv_neutralino_tau9900um_M0600', 'MFV signal, M = 600 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0600/tucker-mfv_neutralino_tau9900um_M0600-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 600]),),
+    (9900,  800, MCSample('mfv_neutralino_tau9900um_M0800', 'MFV signal, M = 800 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0800/tucker-mfv_neutralino_tau9900um_M0800-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99900, 2, *mfv_xsec[ 800]),),
+    (9900, 1000, MCSample('mfv_neutralino_tau9900um_M1000', 'MFV signal, M = 1000 GeV, #tau = 9.9 mm',   '/mfv_neutralino_tau9900um_M1000/tucker-mfv_neutralino_tau9900um_M1000-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99899, 2, *mfv_xsec[1000]),), 
     ]
 
 mfv_signal_samples = []
@@ -267,10 +304,11 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.no_skimming_cuts = True
     sample.aod_plus_pat = True
     sample.is_pythia8 = True
+    sample.keep_random_state = True
+    sample.keep_mixing_info = True
     sample.dbs_url_num = 2
-    if 'crabfake' in sample.dataset:
-        sample.ana_dataset_override = sample.dataset
-        sample.scheduler_name = 'condor'
+    sample.ana_dataset_override = sample.dataset
+    sample.scheduler_name = 'condor'
 
 ########################################################################
 
@@ -295,7 +333,7 @@ for sample in background_samples:
     sample.drop_gen_particles = True
     sample.publish_user = 'jchu'
     sample.scheduler_name = 'condor'
-    sample.total_events = {'wjetstolnu':     57709905,
+    sample.total_events = {'wjetstolnu':     57685961,
                            'ttbarhadronic':  10291640,
                            'ttbarsemilep':    9863760,
                            'ttbardilep':      2364600,
