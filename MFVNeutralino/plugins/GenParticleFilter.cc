@@ -24,6 +24,7 @@ private:
   const double max_rho0;
   const double min_rho1;
   const double max_rho1;
+  bool mci_warned;
 
   bool cut_lepton(const reco::Candidate* lep) const {
     return lep->pt() < min_lepton_pt || fabs(lep->eta()) > max_lepton_eta;
@@ -41,7 +42,8 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_rho0(cfg.getParameter<double>("min_rho0")),
     max_rho0(cfg.getParameter<double>("max_rho0")),
     min_rho1(cfg.getParameter<double>("min_rho1")),
-    max_rho1(cfg.getParameter<double>("max_rho1"))
+    max_rho1(cfg.getParameter<double>("max_rho1")),
+    mci_warned(false)
 {
 }
 
@@ -63,7 +65,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     mci.Print(std::cout);
 
   if (!mci.Valid()) {
-    edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid!";
+    if (!mci_warned)
+      edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
+    mci_warned = true;
     return !cut_invalid;
   }
 
