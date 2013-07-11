@@ -311,124 +311,124 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   mci.Init(*gen_particles);
   if (!mci.Valid()) {
     edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid!";
-    return;
   }
+  else {
+    NumLeptons->Fill(mci.num_leptonic);
+    DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
 
-  NumLeptons->Fill(mci.num_leptonic);
-  DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
+    for (int i = 0; i < 2; ++i) {
+      // For debugging, record all the daughter ids for tops, stops, Ws.
+      for (size_t j = 0, je = mci.last_tops[i]->numberOfDaughters(); j < je; ++j)
+        fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());
+      fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
 
-  for (int i = 0; i < 2; ++i) {
-    // For debugging, record all the daughter ids for tops, stops, Ws.
-    for (size_t j = 0, je = mci.last_tops[i]->numberOfDaughters(); j < je; ++j)
-      fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());
-    fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
+      fill(Lsps           [i], mci.lsps             [i]);
+      fill(Stranges       [i], mci.stranges         [i]);
+      fill(Bottoms        [i], mci.bottoms          [i]);
+      fill(Tops           [i], mci.tops             [i]);
+      fill(Ws             [i], mci.Ws               [i]);
+      fill(BottomsFromTops[i], mci.bottoms_from_tops[i]);
 
-    fill(Lsps           [i], mci.lsps             [i]);
-    fill(Stranges       [i], mci.stranges         [i]);
-    fill(Bottoms        [i], mci.bottoms          [i]);
-    fill(Tops           [i], mci.tops             [i]);
-    fill(Ws             [i], mci.Ws               [i]);
-    fill(BottomsFromTops[i], mci.bottoms_from_tops[i]);
-
-    for (int j = 0; j < 2; ++j) {
-      const reco::Candidate* c = mci.W_daughters[i][j];
-      fill(WDaughters[i][j], c);
-      const int id = abs(c->pdgId());
-      if      (id == 11) { fill(Leptons, c); fill(LightLeptons, c); fill(Electrons, c); }
-      else if (id == 13) { fill(Leptons, c); fill(LightLeptons, c); fill(Muons,     c); }
-      else if (id == 15) { fill(Leptons, c);                        fill(Taus,      c); }
-    }
-
-    const reco::GenParticle& lsp = *mci.lsps[i];
-    const int ndau = 3;
-    const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.tops[i] };
-
-    const double lspbeta  = lsp.p()/lsp.energy();
-    const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
-    h_lspbeta->Fill(lspbeta);
-    h_lspbetagamma->Fill(lspbetagamma);
-
-    // Fill some simple histos: 2D vertex location, and distance to
-    // origin, and the min/max deltaR of the daughters (also versus
-    // lsp boost).
-
-    const reco::Candidate* particles[4] = { &lsp, mci.stranges[i], mci.bottoms[i], 0};
-    // For that last one, find the b hadron for the primary b quark.
-    std::vector<const reco::Candidate*> b_quark_descendants;
-    const reco::Candidate* last_b_quark = final_candidate(mci.bottoms[i], 3);
-    flatten_descendants(last_b_quark, b_quark_descendants);
-    for (const reco::Candidate* bdesc : b_quark_descendants) {
-      if (is_bhadron(bdesc)) {
-        particles[3] = bdesc;
-        break;
+      for (int j = 0; j < 2; ++j) {
+        const reco::Candidate* c = mci.W_daughters[i][j];
+        fill(WDaughters[i][j], c);
+        const int id = abs(c->pdgId());
+        if      (id == 11) { fill(Leptons, c); fill(LightLeptons, c); fill(Electrons, c); }
+        else if (id == 13) { fill(Leptons, c); fill(LightLeptons, c); fill(Muons,     c); }
+        else if (id == 15) { fill(Leptons, c);                        fill(Taus,      c); }
       }
-    }
-    die_if_not(particles[3] != 0, "did not find b hadron");
 
-    for (int i = 0; i < 4; ++i) {
-      const float dx = particles[i]->vx() - x0;
-      const float dy = particles[i]->vy() - y0;
-      const float dz = particles[i]->vz() - z0;
-      const float r2d = mag(dx, dy);
-      const float r3d = mag(dx, dy, dz);
-      h_vtx[i]->Fill(dx, dy);
-      h_r2d[i]->Fill(r2d);
-      h_r3d[i]->Fill(r3d);
-      if (i == 0)
-        h_t->Fill(r3d/lspbeta/30);
-    }
+      const reco::GenParticle& lsp = *mci.lsps[i];
+      const int ndau = 3;
+      const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.tops[i] };
 
-    if (check_all_gen_particles)
-      for (const auto& gen : *gen_particles) {
-        if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
-          const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
-          const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
-          const bool fromq = mci.Ancestor(&gen, "quark");
-          const float dx = gen.vx() - x0;
-          const float dy = gen.vy() - y0;
-          const float dz = gen.vz() - z0;
-          const float r2d = mag(dx, dy);
-          const float r3d = mag(dx, dy, dz);
-          std::vector<int> tofill;
-          h_status1origins->Fill((from21*4) | (from22*2) | (fromq*1));
-          if (from21) tofill.push_back(4);
-          if (from22) tofill.push_back(5);
-          if (fromq)  tofill.push_back(6);
-          if (from21 && !from22 && !fromq) tofill.push_back(7);
-          if (from22 && !from21 && !fromq) tofill.push_back(8);
-          for (int i : tofill) {
-            h_vtx[i]->Fill(dx, dy);
-            h_r2d[i]->Fill(r2d);
-            h_r3d[i]->Fill(r3d);
+      const double lspbeta  = lsp.p()/lsp.energy();
+      const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
+      h_lspbeta->Fill(lspbeta);
+      h_lspbetagamma->Fill(lspbetagamma);
+
+      // Fill some simple histos: 2D vertex location, and distance to
+      // origin, and the min/max deltaR of the daughters (also versus
+      // lsp boost).
+
+      const reco::Candidate* particles[4] = { &lsp, mci.stranges[i], mci.bottoms[i], 0};
+      // For that last one, find the b hadron for the primary b quark.
+      std::vector<const reco::Candidate*> b_quark_descendants;
+      const reco::Candidate* last_b_quark = final_candidate(mci.bottoms[i], 3);
+      flatten_descendants(last_b_quark, b_quark_descendants);
+      for (const reco::Candidate* bdesc : b_quark_descendants) {
+        if (is_bhadron(bdesc)) {
+          particles[3] = bdesc;
+          break;
+        }
+      }
+      die_if_not(particles[3] != 0, "did not find b hadron");
+
+      for (int i = 0; i < 4; ++i) {
+        const float dx = particles[i]->vx() - x0;
+        const float dy = particles[i]->vy() - y0;
+        const float dz = particles[i]->vz() - z0;
+        const float r2d = mag(dx, dy);
+        const float r3d = mag(dx, dy, dz);
+        h_vtx[i]->Fill(dx, dy);
+        h_r2d[i]->Fill(r2d);
+        h_r3d[i]->Fill(r3d);
+        if (i == 0)
+          h_t->Fill(r3d/lspbeta/30);
+      }
+
+      if (check_all_gen_particles)
+        for (const auto& gen : *gen_particles) {
+          if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
+            const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
+            const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
+            const bool fromq = mci.Ancestor(&gen, "quark");
+            const float dx = gen.vx() - x0;
+            const float dy = gen.vy() - y0;
+            const float dz = gen.vz() - z0;
+            const float r2d = mag(dx, dy);
+            const float r3d = mag(dx, dy, dz);
+            std::vector<int> tofill;
+            h_status1origins->Fill((from21*4) | (from22*2) | (fromq*1));
+            if (from21) tofill.push_back(4);
+            if (from22) tofill.push_back(5);
+            if (fromq)  tofill.push_back(6);
+            if (from21 && !from22 && !fromq) tofill.push_back(7);
+            if (from22 && !from21 && !fromq) tofill.push_back(8);
+            for (int i : tofill) {
+              h_vtx[i]->Fill(dx, dy);
+              h_r2d[i]->Fill(r2d);
+              h_r3d[i]->Fill(r3d);
+            }
           }
+        }
+
+      float min_dR =  1e99;
+      float max_dR = -1e99;
+      for (int i = 0; i < ndau; ++i) {
+        for (int j = i+1; j < ndau; ++j) {
+          float dR = reco::deltaR(*daughters[i], *daughters[j]);
+          if (dR < min_dR)
+            min_dR = dR;
+          if (dR > max_dR)
+            max_dR = dR;
         }
       }
 
-    float min_dR =  1e99;
-    float max_dR = -1e99;
-    for (int i = 0; i < ndau; ++i) {
-      for (int j = i+1; j < ndau; ++j) {
-	float dR = reco::deltaR(*daughters[i], *daughters[j]);
-	if (dR < min_dR)
-	  min_dR = dR;
-	if (dR > max_dR)
-	  max_dR = dR;
-      }
+      h_min_dR->Fill(min_dR);
+      h_max_dR->Fill(max_dR);
+      h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR);
+      h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR);
+      h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
+      h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
     }
 
-    h_min_dR->Fill(min_dR);
-    h_max_dR->Fill(max_dR);
-    h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR);
-    h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR);
-    h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
-    h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
+    h_lsp_dist2d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
+                           mci.stranges[0]->vy() - mci.stranges[1]->vy()));
+    h_lsp_dist3d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
+                           mci.stranges[0]->vy() - mci.stranges[1]->vy(),
+                           mci.stranges[0]->vz() - mci.stranges[1]->vz()));
   }
-
-  h_lsp_dist2d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
-                         mci.stranges[0]->vy() - mci.stranges[1]->vy()));
-  h_lsp_dist3d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
-                         mci.stranges[0]->vy() - mci.stranges[1]->vy(),
-                         mci.stranges[0]->vz() - mci.stranges[1]->vz()));
 
   // Now look at b quarks separately. Count the number of status-3 b
   // quarks, those with tops, vector bosons, or LSPs as mothers so
