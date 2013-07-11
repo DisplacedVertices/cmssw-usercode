@@ -442,10 +442,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     if (gen.status() == 3 && abs(gen.pdgId()) == 5)
       for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
         int mid = abs(gen.mother(i)->pdgId());
-        if (mid == 24 || mid == 1000021 || mid == 1000022 || mid == 23)
+        if (mid == 24 || mid == 1000021 || mid == 1000022 || mid == 23) {
           ++nbquarks;
           break;
         }
+      }
 
     if (gen.status() == 2 && is_bhadron(&gen))
       for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i)
