@@ -73,8 +73,9 @@ void MFVGenNtupleDumper::analyze(const edm::Event& event, const edm::EventSetup&
     nt.lsp_decay_vx[i] = mci.stranges[i]->vx();
     nt.lsp_decay_vy[i] = mci.stranges[i]->vy();
     nt.lsp_decay_vz[i] = mci.stranges[i]->vz();
-    tree->Fill();
   }
+
+  tree->Fill();
 }
 
 DEFINE_FWK_MODULE(MFVGenNtupleDumper);
