@@ -24,6 +24,7 @@ class MFVGenHistos : public edm::EDAnalyzer {
  private:
   const edm::InputTag gen_src;
   const bool check_all_gen_particles;
+  bool mci_warned;
 
   edm::ESHandle<ParticleDataTable> pdt;
 
@@ -71,7 +72,8 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    check_all_gen_particles(cfg.getParameter<bool>("check_all_gen_particles"))
+    check_all_gen_particles(cfg.getParameter<bool>("check_all_gen_particles")),
+    mci_warned(false)
 {
   edm::Service<TFileService> fs;
 
@@ -310,7 +312,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
   if (!mci.Valid()) {
-    edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid!";
+    if (!mci_warned)
+      edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
+    mci_warned = false;
   }
   else {
     NumLeptons->Fill(mci.num_leptonic);
