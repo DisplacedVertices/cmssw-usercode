@@ -314,7 +314,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   if (!mci.Valid()) {
     if (!mci_warned)
       edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
-    mci_warned = false;
+    mci_warned = true;
   }
   else {
     NumLeptons->Fill(mci.num_leptonic);
