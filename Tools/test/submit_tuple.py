@@ -10,16 +10,20 @@ def modify(sample):
     to_replace = []
 
     if sample.is_mc:
-        if sample.no_skimming_cuts:
-            to_add.append('no_skimming_cuts(process)')
-        if sample.aod_plus_pat:
-            to_add.append('aod_plus_pat(process)')
-        if sample.drop_gen_particles:
-            to_add.append('drop_gen_particles(process)')
         if sample.is_fastsim:
             to_add.append('input_is_fastsim(process)')
         if sample.is_pythia8:
             to_add.append('input_is_pythia8(process)')
+        if sample.no_skimming_cuts:
+            to_add.append('no_skimming_cuts(process)')
+        if sample.drop_gen_particles:
+            to_add.append('drop_gen_particles(process)')
+        if sample.aod_plus_pat:
+            to_add.append('aod_plus_pat(process)')
+        if sample.keep_random_state:
+            to_add.append('keep_random_state(process)')
+        if sample.keep_mixing_info:
+            to_add.append('keep_mixing_info(process)')
     else:
         magic = 'runOnMC = True'
         err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
