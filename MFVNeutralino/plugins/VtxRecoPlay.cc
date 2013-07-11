@@ -99,6 +99,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const double max_sv_err2d;
   const double min_sv_mass;
   const double min_sv_drmax;
+  const double max_sv_gen3dsig;
 
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
@@ -372,7 +373,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     max_sv_chi2dof(cfg.getParameter<double>("max_sv_chi2dof")),
     max_sv_err2d(cfg.getParameter<double>("max_sv_err2d")),
     min_sv_mass(cfg.getParameter<double>("min_sv_mass")),
-    min_sv_drmax(cfg.getParameter<double>("min_sv_drmax"))
+    min_sv_drmax(cfg.getParameter<double>("min_sv_drmax")),
+    max_sv_gen3dsig(cfg.getParameter<double>("max_sv_gen3dsig"))
 {
   edm::Service<TFileService> fs;
 
@@ -573,8 +575,10 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("drrmsw",         "SV wrms{#Delta R(i,j)}",                     150,    0,       3);
     hs.add("gen2ddist",      "dist2d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
     hs.add("gen2derr",       "#sigma(dist2d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
+    hs.add("gen2dsig",       "N#sigma(dist2d(SV, closest gen vtx)) (cm)",  200,    0,     100);
     hs.add("gen3ddist",      "dist3d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
     hs.add("gen3derr",       "#sigma(dist3d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
+    hs.add("gen3dsig",       "N#sigma(dist3d(SV, closest gen vtx)) (cm)",  200,    0,     100);
     hs.add("bs2dcompatscss", "compat2d(SV, beamspot) success",               2,    0,       2);
     hs.add("bs2dcompat",     "compat2d(SV, beamspot)",                     100,    0,    1000);
     hs.add("bs2ddist",       "dist2d(SV, beamspot) (cm)",                  100,    0,       0.5);
@@ -883,6 +887,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     float gen2derr = abs_error(sv, false);
     float gen3derr = abs_error(sv, true);
 
+    float gen2dsig = gen2derr > 0 ? gen2ddist / gen2derr : -1;
+    float gen3dsig = gen3derr > 0 ? gen3ddist / gen3derr : -1;
+
     std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
     Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
 
@@ -1026,8 +1033,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"drrmsw",          vtx_tks_dist.drrmsw},
         {"gen2ddist",       gen2ddist},
         {"gen2derr",        gen2derr},
+        {"gen2dsig",        gen2dsig},
         {"gen3ddist",       gen3ddist},
         {"gen3derr",        gen3derr},
+        {"gen3dsig",        gen3dsig},
         {"bs2dcompatscss",  bs2dcompat.first},
         {"bs2dcompat",      bs2dcompat.second},
         {"bs2ddist",        bs2ddist.value()},
