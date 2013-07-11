@@ -349,3 +349,8 @@ if __name__ == '__main__':
         for sample in all_samples:
             sites = sites_for_dataset(sample.dataset)
             print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
+    elif 'checknumevents' in sys.argv:
+        from JMTucker.Tools.DBS import *
+        for sample in background_samples + auxiliary_background_samples:
+            x,y = sample.nevents, numevents_in_dataset(sample.dataset)
+            print '%30s %14i %14i %s' % (sample.name, x, y, x == y)
