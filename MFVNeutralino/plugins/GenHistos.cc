@@ -66,6 +66,7 @@ class MFVGenHistos : public edm::EDAnalyzer {
   TH1F* h_status1origins;
 
   TH2F* h_nbhadronsvsbquarks;
+  TH2F* h_nbhadronsvsbquarks_wcuts;
 };
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
@@ -272,6 +273,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   xax->SetBinLabel(8, "21 & 22 & q");
 
   h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", "", 20, 0, 20, 20, 0, 20);
+  h_nbhadronsvsbquarks_wcuts = fs->make<TH2F>("h_nbhadronsvsbquarks_wcuts", "", 20, 0, 20, 20, 0, 20);
 }
 
 namespace {
@@ -429,16 +431,17 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
                          mci.stranges[0]->vz() - mci.stranges[1]->vz()));
 
   // Now look at b quarks separately. Count the number of status-3 b
-  // quarks, those with Zs, Ws, or LSPs as mothers so that we only get
-  // each one once. Also as cross check count the number of b hadrons
-  // (should be status 2), those with b quarks as mothers.
+  // quarks, those with tops, vector bosons, or LSPs as mothers so
+  // that we only get each one once. Also as cross check count the
+  // number of b hadrons (should be status 2), those with b quarks as
+  // mothers.
   const double min_b_pt = 20;
+  const double max_b_eta = 2.5;
   int nbquarks = 0;
   int nbhadrons = 0;
+  int nbquarks_wcuts = 0;
+  int nbhadrons_wcuts = 0;
   for (const reco::GenParticle& gen : *gen_particles) {
-    if (gen.pt() < min_b_pt)
-      continue;
-
     if ((gen.status() == 3 || (gen.status() >= 21 && gen.status() <= 29)) && abs(gen.pdgId()) == 5) {
       bool has_b_mom = false;
       for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
@@ -451,9 +454,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       if (!has_b_mom) {
         for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
           int mid = abs(gen.mother(i)->pdgId());
-          if (mid == 6 || mid == 21 ||  mid == 22 || mid == 23 ||  mid == 24 || mid == 1000021 || mid == 1000022) {
+          if (mid == 6 || mid == 1000021 || mid == 1000022 || (mid >= 21 && mid <= 24)) {
             ++nbquarks;
-            break;
+            if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta)
+              ++nbquarks_wcuts;
+           break;
           }
         }
       }
@@ -463,6 +468,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
         if (abs(gen.mother(i)->pdgId()) == 5) {
           ++nbhadrons;
+          if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta)
+            ++nbhadrons_wcuts;
           break;
         }
       }
@@ -470,6 +477,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   }
 
   h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
+  h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);
