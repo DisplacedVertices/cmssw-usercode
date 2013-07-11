@@ -21,20 +21,10 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.p = cms.Path(process.mfvVertexReco * process.mfvVertices)
 #process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertices)
 
-process.mfvVerticesDxy50 = process.mfvVertices.clone(min_seed_track_dxy = cms.double(0.005))
-process.mfvVerticesDxy10 = process.mfvVertices.clone(min_seed_track_dxy = cms.double(0.001))
-process.mfvVerticesPt075 = process.mfvVertices.clone(min_seed_track_pt = cms.double(0.75))
-process.mfvVerticesNh6 = process.mfvVertices.clone(min_seed_track_nhits = cms.int32(6))
-process.p *= process.mfvVerticesDxy50 * process.mfvVerticesDxy10 * process.mfvVerticesPt075 * process.mfvVerticesNh6
-
 all_anas = []
 
 vertex_srcs = [
     ('MY', 'mfvVertices'),
-    ('MYDXY5', 'mfvVerticesDxy50'),
-    ('MYDXY1', 'mfvVerticesDxy10'),
-    ('MYPT', 'mfvVerticesPt075'),
-    ('MYNH', 'mfvVerticesNh6'),
     ('IVFC75MrgdS', 'mfvVertexMergerShared'),
     ]
 
@@ -56,10 +46,12 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      max_sv_err2d   = cms.double(1e6),
                      min_sv_mass    = cms.double(0),
                      min_sv_drmax   = cms.double(0),
+                     max_sv_gen3dsig = cms.duble(1e6),
                      )
 
 ana_qcuts = [
     ('Qno',             ana),
+    ('Qg3dsig',         ana.clone(max_sv_gen3dsig = 5),
     ('Qntk6',           ana.clone(min_sv_ntracks = 6)),
     ('QM20',            ana.clone(min_sv_mass = 20)),
     ('Qntk6M20',        ana.clone(min_sv_ntracks = 6, min_sv_mass = 20)),
