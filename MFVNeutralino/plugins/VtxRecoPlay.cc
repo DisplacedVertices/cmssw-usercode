@@ -104,7 +104,10 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
 
-  float abs_error(const reco::Vertex& sv, bool use3d) {
+  float gen_verts[2][3];
+  bool gen_valid;
+
+  float abs_error(const reco::Vertex& sv, bool use3d) const {
     const double x = sv.x();
     const double y = sv.y();
     const double z = use3d ? sv.z() : 0;
@@ -113,6 +116,20 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     double dist = mag(x,y,z);
     double err2 = ROOT::Math::Similarity(v, cov);
     return dist != 0 ? sqrt(err2)/dist : 0;
+  }
+
+  Measurement1D gen_dist(const reco::Vertex& sv, const bool use3d) const {
+    float dist = 1e99;
+    for (int i = 0; i < 2; ++i) {
+      float dist_;
+      if (use3d)
+        dist_ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1], sv.z() - gen_verts[i][2]);
+      else
+        dist_ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1]);
+      if (dist_ < dist) dist = dist_;
+    }
+    
+    return Measurement1D(dist, abs_error(sv, use3d));
   }
 
   struct vertex_tracks_distance {
@@ -194,14 +211,14 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     return std::make_pair(success, compat);
   }
 
-  bool use_vertex(const reco::Vertex& vtx, const double gen3dsig) {
+  bool use_vertex(const reco::Vertex& vtx) {
     return 
       int(vtx.tracksSize()) >= min_sv_ntracks &&
       vtx.normalizedChi2() < max_sv_chi2dof   &&
       abs_error(vtx, false) < max_sv_err2d    &&
       vtx.p4().mass() >= min_sv_mass          &&
       (min_sv_drmax == 0 || vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_sv_drmax) &&
-      gen3dsig < max_sv_gen3dsig;
+      (!gen_valid || gen_dist(vtx, true).significance() < max_sv_gen3dsig);
   }
 
   TH1F* h_sim_pileup_num_int[3];
@@ -645,8 +662,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
 
-  float gen_verts[2][3] = {{0}};
-  bool gen_valid = false;
+  gen_valid = false;
 
   if (is_mfv) {
     MCInteractionMFV3j mci;
@@ -786,26 +802,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   std::vector<std::map<int,int> > trackicities(nsv);
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices[isv];
-
-    float gen2ddist_ = 1e99;
-    float gen3ddist_ = 1e99;
-    for (int i = 0; i < 2; ++i) {
-      float gen2ddist__ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1]);
-      float gen3ddist__ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1], sv.z() - gen_verts[i][2]);
-      if (gen2ddist__ < gen2ddist_) gen2ddist_ = gen2ddist__;
-      if (gen3ddist__ < gen3ddist_) gen3ddist_ = gen3ddist__;
-    }
-    
-    const float gen2ddist = gen2ddist_;
-    const float gen3ddist = gen3ddist_;
-
-    const float gen2derr = abs_error(sv, false);
-    const float gen3derr = abs_error(sv, true);
-
-    const float gen2dsig = gen2derr > 0 ? gen2ddist / gen2derr : -1;
-    const float gen3dsig = gen3derr > 0 ? gen3ddist / gen3derr : -1;
-
-    if (!use_vertex(sv, gen3dsig))
+    if (!use_vertex(sv))
       continue;
 
     if (sv0 == 0)
@@ -895,6 +892,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
     vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
 
+    Measurement1D gen2ddist = gen_dist(sv, false);
+    Measurement1D gen3ddist = gen_dist(sv, true);
+
     std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
     Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
 
@@ -950,10 +950,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         nt.mass0_drrms           = vtx_tks_dist.drrms;
         nt.mass0_dravgw          = vtx_tks_dist.dravgw;
         nt.mass0_drrmsw          = vtx_tks_dist.drrmsw;
-        nt.mass0_gen2ddist       = gen2ddist;
-        nt.mass0_gen2derr        = gen2derr;
-        nt.mass0_gen3ddist       = gen3ddist;
-        nt.mass0_gen3derr        = gen3derr;
+        nt.mass0_gen2ddist       = gen2ddist.value();
+        nt.mass0_gen2derr        = gen2ddist.error();
+        nt.mass0_gen3ddist       = gen3ddist.value();
+        nt.mass0_gen3derr        = gen3ddist.error();
         nt.mass0_bs2dcompatscss  = bs2dcompat.first;
         nt.mass0_bs2dcompat      = bs2dcompat.second;
         nt.mass0_bs2ddist        = bs2ddist.value();
@@ -992,10 +992,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         nt.mass1_drrms           = vtx_tks_dist.drrms;
         nt.mass1_dravgw          = vtx_tks_dist.dravgw;
         nt.mass1_drrmsw          = vtx_tks_dist.drrmsw;
-        nt.mass1_gen2ddist       = gen2ddist;
-        nt.mass1_gen2derr        = gen2derr;
-        nt.mass1_gen3ddist       = gen3ddist;
-        nt.mass1_gen3derr        = gen3derr;
+        nt.mass1_gen2ddist       = gen2ddist.value();
+        nt.mass1_gen2derr        = gen2ddist.error();
+        nt.mass1_gen3ddist       = gen3ddist.value();
+        nt.mass1_gen3derr        = gen3ddist.error();
         nt.mass1_bs2dcompatscss  = bs2dcompat.first;
         nt.mass1_bs2dcompat      = bs2dcompat.second;
         nt.mass1_bs2ddist        = bs2ddist.value();
@@ -1036,12 +1036,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"drrms",           vtx_tks_dist.drrms},
         {"dravgw",          vtx_tks_dist.dravgw},
         {"drrmsw",          vtx_tks_dist.drrmsw},
-        {"gen2ddist",       gen2ddist},
-        {"gen2derr",        gen2derr},
-        {"gen2dsig",        gen2dsig},
-        {"gen3ddist",       gen3ddist},
-        {"gen3derr",        gen3derr},
-        {"gen3dsig",        gen3dsig},
+        {"gen2ddist",       gen2ddist.value()},
+        {"gen2derr",        gen2ddist.error()},
+        {"gen2dsig",        gen2ddist.significance()},
+        {"gen3ddist",       gen3ddist.value()},
+        {"gen3derr",        gen3ddist.error()},
+        {"gen3dsig",        gen3ddist.significance()},
         {"bs2dcompatscss",  bs2dcompat.first},
         {"bs2dcompat",      bs2dcompat.second},
         {"bs2ddist",        bs2ddist.value()},
