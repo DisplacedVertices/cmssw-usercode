@@ -194,13 +194,14 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     return std::make_pair(success, compat);
   }
 
-  bool use_vertex(const reco::Vertex& vtx) {
+  bool use_vertex(const reco::Vertex& vtx, const double gen3dsig) {
     return 
       int(vtx.tracksSize()) >= min_sv_ntracks &&
       vtx.normalizedChi2() < max_sv_chi2dof   &&
       abs_error(vtx, false) < max_sv_err2d    &&
       vtx.p4().mass() >= min_sv_mass          &&
-      (min_sv_drmax == 0 || vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_sv_drmax);
+      (min_sv_drmax == 0 || vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_sv_drmax) &&
+      gen3dsig < max_sv_gen3dsig;
   }
 
   TH1F* h_sim_pileup_num_int[3];
@@ -785,7 +786,26 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   std::vector<std::map<int,int> > trackicities(nsv);
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices[isv];
-    if (!use_vertex(sv))
+
+    float gen2ddist_ = 1e99;
+    float gen3ddist_ = 1e99;
+    for (int i = 0; i < 2; ++i) {
+      float gen2ddist__ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1]);
+      float gen3ddist__ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1], sv.z() - gen_verts[i][2]);
+      if (gen2ddist__ < gen2ddist_) gen2ddist_ = gen2ddist__;
+      if (gen3ddist__ < gen3ddist_) gen3ddist_ = gen3ddist__;
+    }
+    
+    const float gen2ddist = gen2ddist_;
+    const float gen3ddist = gen3ddist_;
+
+    const float gen2derr = abs_error(sv, false);
+    const float gen3derr = abs_error(sv, true);
+
+    const float gen2dsig = gen2derr > 0 ? gen2ddist / gen2derr : -1;
+    const float gen3dsig = gen3derr > 0 ? gen3ddist / gen3derr : -1;
+
+    if (!use_vertex(sv, gen3dsig))
       continue;
 
     if (sv0 == 0)
@@ -874,21 +894,6 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
     vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
-
-    float gen2ddist = 1e99;
-    float gen3ddist = 1e99;
-    for (int i = 0; i < 2; ++i) {
-      float gen2ddist_ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1]);
-      float gen3ddist_ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1], sv.z() - gen_verts[i][2]);
-      if (gen2ddist_ < gen2ddist) gen2ddist = gen2ddist_;
-      if (gen3ddist_ < gen3ddist) gen3ddist = gen3ddist_;
-    }
-    
-    float gen2derr = abs_error(sv, false);
-    float gen3derr = abs_error(sv, true);
-
-    float gen2dsig = gen2derr > 0 ? gen2ddist / gen2derr : -1;
-    float gen3dsig = gen3derr > 0 ? gen3ddist / gen3derr : -1;
 
     std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
     Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
