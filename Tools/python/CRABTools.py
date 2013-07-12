@@ -629,9 +629,12 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True):
         new_name += '.root'
     if new_dir is not None:
         new_name = os.path.join(new_dir, new_name)
-    print '%s: expecting %i files if all jobs succeeded' % (working_dir, crab_get_njobs(working_dir))
+    expected = crab_get_njobs(working_dir)
+    print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
     files = glob.glob(os.path.join(working_dir, 'res/*root'))
     l = len(files)
+    if l != expected:
+        print '\033[36;7m num files %i != expected %i \033[m' % (l, expected)
     if l == 0:
         msg = 'crab_hadd: no files found in %s' % working_dir
         if raise_on_empty:
