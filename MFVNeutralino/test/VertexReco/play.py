@@ -29,6 +29,8 @@ vertex_srcs = [
     ]
 
 ana = cms.EDAnalyzer('VtxRecoPlay',
+                     trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
+                     jets_src = cms.InputTag('ak5PFJets'),
                      tracks_src = cms.InputTag('generalTracks'),
                      primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                      gen_src = cms.InputTag('genParticles'),
@@ -60,8 +62,9 @@ ana_qcuts = [
 for vertex_name, vertex_src in vertex_srcs:
     for ana_name, ana in ana_qcuts:
         obj = ana.clone(vertex_src = vertex_src)
-        if 'IVF' in vertex_src:
-            obj.do_scatterplots = False
+        if ana_name == 'Qno' and vertex_Name == 'MY'
+            obj.do_ntuple = True
+        
         setattr(process, 'play' + vertex_name + ana_name, obj)
         all_anas.append(obj)
         process.p *= obj
