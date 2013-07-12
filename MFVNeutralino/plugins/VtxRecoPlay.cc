@@ -2,12 +2,14 @@
 #include "TH2F.h"
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -81,6 +83,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
+  const edm::InputTag trigger_results_src;
+  const edm::InputTag jets_src;
   const edm::InputTag tracks_src;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_src;
@@ -230,7 +234,13 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
 
+  TH1F* h_pass_trigger;
   TH1F* h_njets;
+  TH1F* h_ntightjets;
+  TH1F* h_jetpt4;
+  TH1F* h_tightjetpt4;
+  TH1F* h_jetpt5;
+  TH1F* h_tightjetpt5;
   TH1F* h_ntracks;
   TH1F* h_ntracksptpass;
   
@@ -291,6 +301,13 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   struct ntuple_t {
     float lspdist2d;
     float lspdist3d;
+    int pass_trigger;
+    float njets;
+    float ntightjets;
+    float jetpt4;
+    float jetpt5;
+    float tightjetpt4;
+    float tightjetpt5;
     float mass0_ntracks;           
     float mass0_ntracksptpass;     
     float mass0_trackminnhits;     
@@ -377,7 +394,9 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 };
 
 VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
-  : tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
+  : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
+    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
+    tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
@@ -404,6 +423,13 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree = fs->make<TTree>("tree", "");
     tree->Branch("lspdist2d", &nt.lspdist2d, "lspdist2d/F");
     tree->Branch("lspdist3d", &nt.lspdist3d, "lspdist3d/F");
+    tree->Branch("pass_trigger", &nt.pass_trigger, "pass_trigger/I");
+    tree->Branch("njets", &nt.njets, "njets/F");
+    tree->Branch("ntightjets", &nt.ntightjets, "ntightjets/F");
+    tree->Branch("jetpt4", &nt.jetpt4, "jetpt4/F");
+    tree->Branch("jetpt5", &nt.jetpt5, "jetpt5/F");
+    tree->Branch("tightjetpt4", &nt.tightjetpt4, "tightjetpt4/F");
+    tree->Branch("tightjetpt5", &nt.tightjetpt5, "tightjetpt5/F");
     tree->Branch("mass0_ntracks", &nt.mass0_ntracks, "mass0_ntracks/F");
     tree->Branch("mass0_ntracksptpass", &nt.mass0_ntracksptpass, "mass0_ntracksptpass/F");
     tree->Branch("mass0_trackminnhits", &nt.mass0_trackminnhits, "mass0_trackminnhits/F");
@@ -507,7 +533,13 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);arb. units", 200, 0, 1);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);arb. units", 200, 0, 1);
 
-  h_njets = fs->make<TH1F>("h_njets", ";# of unclean PF jets;arb. units", 30, 0, 30);
+  h_pass_trigger = fs->make<TH1F>("h_pass_trigger", ";pass-trigger code;arb. units", 3, -1, 2);
+  h_njets = fs->make<TH1F>("h_njets", ";# of loose PF jets;arb. units", 30, 0, 30);
+  h_ntightjets = fs->make<TH1F>("h_ntightjets", ";# of tight PF jets;arb. units", 30, 0, 30);
+  h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th loose PF jet (GeV);arb. units", 100, 0, 500);
+  h_tightjetpt4 = fs->make<TH1F>("h_tightjetpt4", ";p_{T} of 4th tight PF jet (GeV);arb. units", 100, 0, 500);
+  h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th loose PF jet (GeV);arb. units", 100, 0, 500);
+  h_tightjetpt5 = fs->make<TH1F>("h_tightjetpt5", ";p_{T} of 5th tight PF jet (GeV);arb. units", 100, 0, 500);
   h_ntracks = fs->make<TH1F>("h_ntracks", ";# of general tracks;arb. units", 20, 0, 2000);
   h_ntracksptpass = fs->make<TH1F>("h_ntracksptpass", ";# of selected tracks;arb. units", 20, 0, 60);
 
@@ -723,18 +755,46 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   h_lspdist2d->Fill(lspdist2d);
   h_lspdist3d->Fill(lspdist3d);
 
+  edm::Handle<edm::TriggerResults> trigger_results;
+  event.getByLabel(trigger_results_src, trigger_results);
+  const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
+  const size_t npaths = trigger_names.size();
+  const std::string trigger = "HLT_QuadJet50_v";
+  int pass_trigger = -1;
+  for (size_t ipath = 0; ipath < npaths; ++ipath) {
+    const std::string path = trigger_names.triggerName(ipath);
+    if (path.substr(0, trigger.size()) == trigger) {
+      pass_trigger = trigger_results->accept(ipath);
+      break;
+    }
+  }
+
   edm::Handle<reco::PFJetCollection> jets;
-  event.getByLabel("ak5PFJets", jets);
+  event.getByLabel(jets_src, jets);
   
   int njets = 0;
+  int ntightjets = 0;
   for (const reco::PFJet& jet : *jets) {
     if (jet.pt() > jet_pt_min && 
         fabs(jet.eta()) < 2.5 && 
         jet.numberOfDaughters() > 1 &&
-        jet.neutralHadronEnergyFraction() < 0.99 && 
-        jet.neutralEmEnergyFraction() < 0.99 && 
-        (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0)))
-      njets += 1;
+        (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
+
+      if (jet.neutralHadronEnergyFraction() < 0.99 && jet.neutralEmEnergyFraction() < 0.99)
+        ++njets;
+      if (jet.neutralHadronEnergyFraction() < 0.90 && jet.neutralEmEnergyFraction() < 0.90)
+        ++ntightjets;
+
+      if (njets == 4)
+        nt.jetpt4 = jet.pt();
+      else if (njets == 5)
+        nt.jetpt5 = jet.pt();
+
+      if (ntightjets == 4)
+        nt.tightjetpt4 = jet.pt();
+      else if (ntightjets == 5)
+        nt.tightjetpt5 = jet.pt();
+    }
   }
 
   edm::Handle<reco::TrackCollection> tracks;
@@ -746,7 +806,13 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     if (tk.pt() > track_pt_min)
       ++ntracksptpass;
 
+  h_pass_trigger->Fill(pass_trigger);
   h_njets->Fill(njets);
+  h_ntightjets->Fill(ntightjets);
+  h_jetpt4->Fill(nt.jetpt4);
+  h_tightjetpt4->Fill(nt.tightjetpt4);
+  h_jetpt5->Fill(nt.jetpt5);
+  h_tightjetpt5->Fill(nt.tightjetpt5);
   h_ntracks->Fill(ntracks);
   h_ntracksptpass->Fill(ntracksptpass);
   
@@ -1068,6 +1134,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   if (do_ntuple) {
     nt.lspdist2d = lspdist2d;
     nt.lspdist3d = lspdist3d;
+    nt.njets = njets;
+    nt.ntightjets = ntightjets;
     tree->Fill();
   }
 
