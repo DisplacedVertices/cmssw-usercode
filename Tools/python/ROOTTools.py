@@ -220,7 +220,7 @@ def compare_all_hists(ps, samples, **kwargs):
             continue
 
         for hist in hists:
-            hist.cah_integral = get_integral(hist, 0, integral_only=True) if not is2d else 0.
+            hist.cah_integral = hist.Integral(0, hist.GetNbinsX()+1) if not is2d else 0.
 
         rescale = not is2d and all(hist.cah_integral > 0 for hist in hists)
         nostat = no_stats(name, hist_list)
@@ -582,12 +582,16 @@ def get_bin_content_error(hist, value):
     bin = hist.FindBin(*value)
     return (hist.GetBinContent(bin), hist.GetBinError(bin))
 
-def get_integral(hist, xlo, xhi=None, integral_only=False, include_last_bin=True):
+def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin=True):
     """For the given histogram, return the integral of the bins
     corresponding to the values xlo to xhi along with its error.
     """
-    
-    binlo = hist.FindBin(xlo)
+
+    if xlo is None:
+        binlo = 0
+    else:
+        binlo = hist.FindBin(xlo)
+
     if xhi is None:
         binhi = hist.GetNbinsX()+1
     else:
