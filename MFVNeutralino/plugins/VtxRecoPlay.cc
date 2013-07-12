@@ -289,6 +289,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH2F* h_pairfsharedtracks;
 
   struct ntuple_t {
+    float lspdist2d;
+    float lspdist3d;
     float mass0_ntracks;           
     float mass0_ntracksptpass;     
     float mass0_trackminnhits;     
@@ -400,6 +402,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree = 0;
   else {
     tree = fs->make<TTree>("tree", "");
+    tree->Branch("lspdist2d", &nt.lspdist2d, "lspdist2d/F");
+    tree->Branch("lspdist3d", &nt.lspdist3d, "lspdist3d/F");
     tree->Branch("mass0_ntracks", &nt.mass0_ntracks, "mass0_ntracks/F");
     tree->Branch("mass0_ntracksptpass", &nt.mass0_ntracksptpass, "mass0_ntracksptpass/F");
     tree->Branch("mass0_trackminnhits", &nt.mass0_trackminnhits, "mass0_trackminnhits/F");
@@ -1061,8 +1065,11 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_sv[svndx].Fill(v);
   }
 
-  if (do_ntuple)
+  if (do_ntuple) {
+    nt.lspdist2d = lspdist2d;
+    nt.lspdist3d = lspdist3d;
     tree->Fill();
+  }
 
   h_nsvpass->Fill(nsvpass);
   h_nsvpass_v_lspdist2d->Fill(lspdist2d, nsvpass);
