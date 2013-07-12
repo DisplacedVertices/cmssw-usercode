@@ -301,7 +301,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   struct ntuple_t {
     float lspdist2d;
     float lspdist3d;
-    int pass_trigger;
+    float pass_trigger;
     float njets;
     float ntightjets;
     float jetpt4;
@@ -423,7 +423,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree = fs->make<TTree>("tree", "");
     tree->Branch("lspdist2d", &nt.lspdist2d, "lspdist2d/F");
     tree->Branch("lspdist3d", &nt.lspdist3d, "lspdist3d/F");
-    tree->Branch("pass_trigger", &nt.pass_trigger, "pass_trigger/I");
+    tree->Branch("pass_trigger", &nt.pass_trigger, "pass_trigger/F");
     tree->Branch("njets", &nt.njets, "njets/F");
     tree->Branch("ntightjets", &nt.ntightjets, "ntightjets/F");
     tree->Branch("jetpt4", &nt.jetpt4, "jetpt4/F");
@@ -760,11 +760,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
   const size_t npaths = trigger_names.size();
   const std::string trigger = "HLT_QuadJet50_v";
-  int pass_trigger = -1;
   for (size_t ipath = 0; ipath < npaths; ++ipath) {
     const std::string path = trigger_names.triggerName(ipath);
     if (path.substr(0, trigger.size()) == trigger) {
-      pass_trigger = trigger_results->accept(ipath);
+      nt.pass_trigger = trigger_results->accept(ipath);
       break;
     }
   }
@@ -806,7 +805,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     if (tk.pt() > track_pt_min)
       ++ntracksptpass;
 
-  h_pass_trigger->Fill(pass_trigger);
+  h_pass_trigger->Fill(nt.pass_trigger);
   h_njets->Fill(njets);
   h_ntightjets->Fill(ntightjets);
   h_jetpt4->Fill(nt.jetpt4);
