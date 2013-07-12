@@ -274,7 +274,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   xax->SetBinLabel(7, "21 & 22");
   xax->SetBinLabel(8, "21 & 22 & q");
 
-  h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", "", 20, 0, 20, 20, 0, 20);
+  h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", ";number of b quarks;number of b hadrons", 20, 0, 20, 20, 0, 20);
   h_nbhadronsvsbquarks_wcuts = fs->make<TH2F>("h_nbhadronsvsbquarks_wcuts", "", 20, 0, 20, 20, 0, 20);
 }
 
@@ -447,7 +447,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int nbhadrons_wcuts = 0;
   std::set<const reco::Candidate*> bquarks_used;
   for (const reco::GenParticle& gen : *gen_particles) {
-    if ((gen.status() == 3 || (gen.status() >= 21 && gen.status() <= 29)) && abs(gen.pdgId()) == 5) {
+    if (abs(gen.pdgId()) == 5) {
       bool has_b_mom = false;
       for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
         if (abs(gen.mother(i)->pdgId()) == 5) {
@@ -455,29 +455,26 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           break;
         }
       }
-
       if (!has_b_mom) {
-        for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
-          int mid = abs(gen.mother(i)->pdgId());
-          if (mid == 6 || mid == 1000021 || mid == 1000022 || (mid >= 21 && mid <= 24)) {
-            ++nbquarks;
-            if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta)
-              ++nbquarks_wcuts;
-           break;
-          }
+        ++nbquarks;
+        if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta) {
+          ++nbquarks_wcuts;
         }
       }
     }
 
-    if ((gen.status() == 2 || gen.status() == 74) && is_bhadron(&gen)) {
+    if (is_bhadron(&gen)) {
+      bool has_b_mom = false;
       for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
-        const reco::Candidate* mom = gen.mother(i);
-        if (abs(mom->pdgId()) == 5 && bquarks_used.count(mom) == 0) {
-          bquarks_used.insert(mom);
-          ++nbhadrons;
-          if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta)
-            ++nbhadrons_wcuts;
+        if (is_bhadron(gen.mother(i))) {
+          has_b_mom = true;
           break;
+        }
+      }
+      if (!has_b_mom) {
+        ++nbhadrons;
+        if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta) {
+          ++nbhadrons_wcuts;
         }
       }
     }
