@@ -33,7 +33,7 @@ def hadd_ex(new_name, files):
             max_file_num = max(max_file_num, int(line.split(':')[0].split(' ')[-1]))
     print max_file_num, 'files merged to', new_name
     if max_file_num != l:
-        print '\033[36;7m PROBLEM hadding', new_name
+        print '\033[36;7m PROBLEM hadding \033[m', new_name
         return False
 
     return True
