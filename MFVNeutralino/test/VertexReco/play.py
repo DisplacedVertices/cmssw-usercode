@@ -110,7 +110,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as s
-    samples = s.background_samples[1:] + s.mfv_signal_samples[:-1]
+    samples = s.background_samples[1:] + s.mfv_signal_samples
 
     def pset_modifier(sample):
         to_add = []
@@ -122,8 +122,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('VertexRecoPlay',
-                       total_number_of_events = 10000,
-                       events_per_job = 1000,
+                       total_number_of_events = 99250,
+                       events_per_job = 4000,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
                        )
@@ -134,4 +134,3 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 mergeTFileServiceHistograms -w 0.457,0.438,0.105 -i ttbarhadronic.root ttbarsemilep.root ttbardilep.root -o ttbar_merge.root
 mergeTFileServiceHistograms -w 0.97336,0.025831,0.00078898,1.9093e-5 -i qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root -o qcd_merge.root
 '''
-
