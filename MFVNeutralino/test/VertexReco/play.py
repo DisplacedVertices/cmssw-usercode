@@ -3,9 +3,9 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools.CMSSWTools import silence_messages
 
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.maxEvents.input = 10
+process.maxEvents.input = 100
 process.options.wantSummary = True
-process.source.fileNames = ['/store/user/tucker/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/5bdce5833f35b995ab0c308220e77250/pat_1_1_ABC.root']
+process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root']
 process.TFileService.fileName = 'play.root'
 silence_messages(process, 'TwoTrackMinimumDistance')
 
@@ -48,12 +48,12 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      max_sv_err2d   = cms.double(1e6),
                      min_sv_mass    = cms.double(0),
                      min_sv_drmax   = cms.double(0),
-                     max_sv_gen3dsig = cms.duble(1e6),
+                     max_sv_gen3dsig = cms.double(1e6),
                      )
 
 ana_qcuts = [
     ('Qno',             ana),
-    ('Qg3dsig',         ana.clone(max_sv_gen3dsig = 5),
+    ('Qg3dsig',         ana.clone(max_sv_gen3dsig = 5)),
     ('Qntk6',           ana.clone(min_sv_ntracks = 6)),
     ('QM20',            ana.clone(min_sv_mass = 20)),
     ('Qntk6M20',        ana.clone(min_sv_ntracks = 6, min_sv_mass = 20)),
@@ -62,7 +62,7 @@ ana_qcuts = [
 for vertex_name, vertex_src in vertex_srcs:
     for ana_name, ana in ana_qcuts:
         obj = ana.clone(vertex_src = vertex_src)
-        if ana_name == 'Qno' and vertex_Name == 'MY'
+        if ana_name == 'Qno' and vertex_name == 'MY':
             obj.do_ntuple = True
         
         setattr(process, 'play' + vertex_name + ana_name, obj)
