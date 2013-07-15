@@ -167,6 +167,7 @@ def compare_all_hists(ps, samples, **kwargs):
     """
 
     # options
+    recurse        = kwargs.get('recurse',        False)
     sort_names     = kwargs.get('sort_names',     False)
     show_progress  = kwargs.get('show_progress',  True)
     only_n_first   = kwargs.get('only_n_first',   -1)
@@ -185,8 +186,16 @@ def compare_all_hists(ps, samples, **kwargs):
     scaling        = _get('scaling',        1.)
 
     ###
-    
-    names = [k.GetName() for k in samples[0][1].GetListOfKeys()]
+
+    proto_dir = samples[0][1]
+    if recurse:
+        names = flatten_directory(proto_dir)
+    else:
+        names = [k.GetName() for k in proto_dir.GetListOfKeys()]
+    names = [name for name in names if issubclass(type(proto_dir.Get(name)), ROOT.TH1)]
+    if not names:
+        raise ValueError('no TH1-descended objects found')
+
     if sort_names:
         names.sort()
     if only_n_first > 0:
@@ -551,6 +560,35 @@ def draw_in_order(hists_and_cmds, sames=False):
             if sames:
                 cmd += 's'
         h.Draw(cmd)
+
+def flatten_directory(dir, prefix=''):
+    """Take an input TDirectory object (a TFile is a TDirectory) and
+    flatten its structure. E.g. for an input File with structure
+
+    File
+    \A
+     \a1
+     \a2
+     \B
+      \b1
+    \c
+    \d
+
+    where uppercase names are directories and lowercase names are
+    objects e.g. histos, we return
+    ['A/a1', 'A/a2', 'A/B/b1', 'c', 'd'].
+    """
+    
+    result = []
+    for key in dir.GetListOfKeys():
+        name = key.GetName()
+        obj = dir.Get(name)
+        if issubclass(type(obj), ROOT.TDirectory):
+            for sub_name in flatten_directory(obj, name):
+                result.append(name + '/' + sub_name)
+        else:
+            result.append(name)
+    return result
 
 def fit_gaussian(hist, factor=None, draw=False, cache=[]):
     """Fit a Gaussian to the histogram, and return a dict with fitted
@@ -1070,6 +1108,7 @@ __all__ = [
     'detree',
     'differentiate_stat_box',
     'draw_in_order',
+    'flatten_directory',
     'fit_gaussian',
     'get_bin_content_error',
     'get_integral',
