@@ -12,7 +12,11 @@ def add_analyzer(process, name, **kwargs):
         path_name = 'p' + name
     obj = cms.EDAnalyzer(name, **kwargs)
     setattr(process, name, obj)
-    setattr(process, path_name, cms.Path(obj))
+    if hasattr(process, path_name):
+        pobj = getattr(process, path_name)
+        pobj *= obj # ugh
+    else:
+        setattr(process, path_name, cms.Path(obj))
 
 def file_event_from_argv(process):
     '''Set the filename and event to run on from argv.'''
