@@ -5,9 +5,9 @@ from pprint import pprint
 import JMTucker.Tools.argparse as argparse
 
 parser = argparse.ArgumentParser(description = 'comparehists: compare all histograms in multiple files',
-                                 usage = '%(prog)s [options] file1.root file2.root [... fileN.root] dir_path plot_path')
+                                 usage = '%(prog)s [options] file1.root [file2.root ... fileN.root] dir_path plot_path')
 
-parser.add_argument('positional', nargs='*', help='The .root files.')
+parser.add_argument('positional', nargs='*')
 
 parser.add_argument('--per-page', type=int, default=-1,
                     help='Put PER_PAGE histograms per html page (default: all on one page).')
@@ -20,7 +20,7 @@ parser.add_argument('--nice', nargs='+', default=[],
 parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta'],
                     help='Colors for the files: may be a python snippet, e.g. the default %(default)s.')
 
-group = parser.add_argument_group('Callback function snippets: will be of the form lambda name, hists: <snippet here>')
+group = parser.add_argument_group('Callback function snippets: will be of the form lambda name, hists, curr: <snippet here>')
 group.add_argument('--no-stats', default='False',
                     help='Snippet for no_stats lambda (default: %(default)s).')
 group.add_argument('--apply-commands', default='None',
@@ -31,11 +31,13 @@ group.add_argument('--skip', default='None',
                   help='Snippet for skip lambda (default: %(default)s).')
 group.add_argument('--draw-command', default='""',
                    help='Snippet for draw_command lambda (default: %(default)s).')
+group.add_argument('--scaling', default='""',
+                   help='Snippet for scaling lambda (default: %(default)s).')
 
 options = parser.parse_args()
 
-if len(options.positional) < 4:
-    print 'Required args missing, including at least two filenames\n'
+if len(options.positional) < 3:
+    print 'Required args missing, including at least one filename\n'
     parser.print_help()
     sys.exit(1)
 
@@ -55,17 +57,19 @@ ncolors = len(options.colors)
 while len(options.colors) < nfiles:
     options.colors.append(ROOT.kMagenta + 1 + len(options.colors) - ncolors)
 
-_lambda = 'lambda name, hists: '
+_lambda = 'lambda name, hists, curr: '
 options.no_stats       = _lambda + options.no_stats
 options.apply_commands = _lambda + options.apply_commands
 options.separate_plots = _lambda + options.separate_plots
 options.skip           = _lambda + options.skip
 options.draw_command   = _lambda + options.draw_command
+options.scaling        = _lambda + options.scaling
 options.lambda_no_stats       = eval(options.no_stats)
 options.lambda_apply_commands = eval(options.apply_commands)
 options.lambda_separate_plots = eval(options.separate_plots)
 options.lambda_skip           = eval(options.skip)
 options.lambda_draw_command   = eval(options.draw_command)
+options.lambda_scaling        = eval(options.scaling)
 
 print 'comparehists running with these options:'
 pprint(vars(options))
@@ -95,4 +99,5 @@ compare_all_hists(ps,
                   separate_plots = options.lambda_separate_plots,
                   skip = options.lambda_skip,
                   draw_command = options.lambda_draw_command,
+                  scaling = options.lambda_scaling,
                   )
