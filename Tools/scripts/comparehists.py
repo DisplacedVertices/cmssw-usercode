@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser(description = 'comparehists: compare all histog
 
 parser.add_argument('positional', nargs='*')
 
+parser.add_argument('--recurse', action='store_true',
+                    help='Recurse down the directory structure, i.e. use all histograms in the given directory and all subdirectories.')
 parser.add_argument('--per-page', type=int, default=-1,
                     help='Put PER_PAGE histograms per html page (default: all on one page).')
 parser.add_argument('--only-n-first', type=int, default=-1,
@@ -31,7 +33,7 @@ group.add_argument('--skip', default='None',
                   help='Snippet for skip lambda (default: %(default)s).')
 group.add_argument('--draw-command', default='""',
                    help='Snippet for draw_command lambda (default: %(default)s).')
-group.add_argument('--scaling', default='""',
+group.add_argument('--scaling', default='1.',
                    help='Snippet for scaling lambda (default: %(default)s).')
 
 options = parser.parse_args()
@@ -93,6 +95,7 @@ for i,d in enumerate(dirs):
 
 compare_all_hists(ps,
                   samples = zip(options.nice, dirs, options.colors),
+                  recurse = options.recurse,
                   only_n_first = options.only_n_first,
                   no_stats = options.lambda_no_stats,
                   apply_commands = options.lambda_apply_commands,
