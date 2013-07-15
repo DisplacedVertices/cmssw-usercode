@@ -148,17 +148,22 @@ def compare_all_hists(ps, samples, **kwargs):
     order. False (default): in the order found in the ROOT directory.
     - show_progress: if True (default), print how far along we are
     processing the histograms.
+    - only_n_first: if supplied, only do that that many histograms. If
+    -1 (default), do all.
     
     Various callbacks (see the other list below) can be specified as
     keyword arguments to modify the drawing depending on the
     histogram. The callback receives the arguments (histogram_name,
-    hist_list), where hist_list is an instance of _hist_list
-    above. This object serves as proxy for any of the histograms by
-    name, or to return the whole list. Some examples:
+    hist_list, current_sample_name), where hist_list is an instance of
+    _hist_list above, and current_sample_name is the particular sample
+    in question, if applicable. The hist_list object serves as proxy
+    for any of the histograms by name, or to return the whole
+    list. Some examples:
 
-    draw_commands = lambda name, hists: [hist.GetXaxis().SetRangeUser(0,1) for hist in hists.all]
-    apply_commands = lambda name, hists: (hists.ttbar.SetFillStyle(3004), hists.signal.SetFillStyle(3005))
-    no_stats = lambda name, hists: name == 'h_costheta'
+    draw_commands = lambda name, hists, curr: [hist.GetXaxis().SetRangeUser(0,1) for hist in hists.all]
+    apply_commands = lambda name, hists, curr: (hists.ttbar.SetFillStyle(3004), hists.signal.SetFillStyle(3005))
+    no_stats = lambda name, hists, curr: name == 'h_costheta'
+    scaling = lambda name, hists, curr: {'ttbar': 1, 'signal': 0.01}[curr]
     """
 
     # options
@@ -167,7 +172,7 @@ def compare_all_hists(ps, samples, **kwargs):
     only_n_first   = kwargs.get('only_n_first',   -1)
 
     def _get(arg, default):
-        return kwargs.get(arg, lambda name, hists: default)
+        return kwargs.get(arg, lambda name, hists, curr: default)
 
     # callbacks
     no_stats       = _get('no_stats',       False)
@@ -177,6 +182,7 @@ def compare_all_hists(ps, samples, **kwargs):
     legend         = _get('legend',         None)
     separate_plots = _get('separate_plots', False)
     draw_command   = _get('draw_command',   '')
+    scaling        = _get('scaling',        1.)
 
     ###
     
@@ -209,7 +215,7 @@ def compare_all_hists(ps, samples, **kwargs):
             hists.append(hist)
         hist_list = _hist_list((hist.cah_sample_name, hist) for hist in hists)
 
-        if skip(name, hist_list):
+        if skip(name, hist_list, None):
             continue
 
         is2d = all_same([issubclass(type(hist), ROOT.TH2) for hist in hists],
@@ -221,14 +227,15 @@ def compare_all_hists(ps, samples, **kwargs):
 
         for hist in hists:
             hist.cah_integral = hist.Integral(0, hist.GetNbinsX()+1) if not is2d else 0.
+            hist.cah_scaling = scaling(name, hist_list, hist.cah_sample_name)
 
         rescale = not is2d and all(hist.cah_integral > 0 for hist in hists)
-        nostat = no_stats(name, hist_list)
+        nostat = no_stats(name, hist_list, None)
         for hist in hists:
             hist.SetLineWidth(2)
 
             if rescale:
-                hist.Scale(1./hist.cah_integral)
+                hist.Scale(hist.cah_scaling/hist.cah_integral)
             if nostat:
                 hist.SetStats(0)
             hist.SetLineColor(hist.cah_color)
@@ -236,11 +243,11 @@ def compare_all_hists(ps, samples, **kwargs):
 
             hist.SetName(hist.cah_sample_name)
             
-        apply_commands(name, hist_list)
+        apply_commands(name, hist_list, None)
 
-        draw_cmd = draw_command(name, hist_list)
+        draw_cmd = draw_command(name, hist_list, None)
         
-        sep = separate_plots(name, hist_list)
+        sep = separate_plots(name, hist_list, None)
         if sep == 'all' or (is2d and sep):
             for hist in hists:
                 hist.Draw('colz' if is2d else draw_cmd)
@@ -258,11 +265,11 @@ def compare_all_hists(ps, samples, **kwargs):
 
         ps.c.Update()
         if not no_stats(name, hist_list):
-            ss = stat_size(name, hist_list)
+            ss = stat_size(name, hist_list, None)
             for i, hist in enumerate(hists):
                 differentiate_stat_box(hist, i, hist.cah_color, ss)
 
-        leg = legend(name, hist_list)
+        leg = legend(name, hist_list, None)
         if leg is not None:
             leg.Draw()
             
