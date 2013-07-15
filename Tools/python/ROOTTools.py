@@ -211,7 +211,7 @@ def compare_all_hists(ps, samples, **kwargs):
         if show_progress and (nnames < 10 or iname % (nnames/10) == 0):
             print '%5i/%5i' % (iname, nnames), name
 
-        name_clean = name.replace('/','_')
+        name_clean = name.replace('/','_').replace('#','n')
 
         hists = []
         for sample_name, dir, color in samples:
@@ -273,7 +273,7 @@ def compare_all_hists(ps, samples, **kwargs):
                 hist.Draw(draw_cmd + ' sames')
 
         ps.c.Update()
-        if not no_stats(name, hist_list):
+        if not no_stats(name, hist_list, None):
             ss = stat_size(name, hist_list, None)
             for i, hist in enumerate(hists):
                 differentiate_stat_box(hist, i, hist.cah_color, ss)
