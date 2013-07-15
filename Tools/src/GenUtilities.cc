@@ -1,5 +1,30 @@
 #include "JMTucker/Tools/interface/GenUtilities.h"
 
+double track_qoverp(const reco::Candidate* c) {
+  return c->p() > 0 ? c->charge()/c->p() : 1e99;
+}
+
+double track_lambda(const reco::Candidate* c) {
+  return M_PI_2 - c->theta();
+}
+
+double track_phi(const reco::Candidate* c) {
+  return c->phi();
+}
+
+double track_dxy(const reco::Candidate* c) {
+  return -c->vx()*sin(c->phi()) + c->vy()*cos(c->phi());
+}
+
+double track_dsz(const reco::Candidate* c) {
+  double lambda = track_lambda(c);
+  return c->vz()*cos(lambda) - (c->vx()*cos(c->phi())+c->vy()*sin(c->phi()))*sin(lambda);
+}
+
+double track_dz(const reco::Candidate* c) {
+  return track_dsz(c)/cos(track_lambda(c));
+}
+
 bool is_quark(const reco::Candidate* c) {
   int apid = abs(c->pdgId());
   return apid >= 1 && apid <= 6;
@@ -64,17 +89,21 @@ bool is_ancestor_of(const reco::Candidate* c, const std::vector<const reco::Cand
   return false;
 }
 
-bool has_any_ancestor_with_id(const reco::Candidate* c, const int id) {
+bool has_any_ancestor_such_that(const reco::Candidate* c, std::function<bool(const reco::Candidate*)> such_that) {
   if (c == 0)
     return false;
   for (int i = 0, ie = c->numberOfMothers(); i < ie; ++i) {
     const reco::Candidate* mom = c->mother(i);
     if (mom == c)
       continue;
-    if (mom->pdgId() == id || has_any_ancestor_with_id(mom, id))
+    if (such_that(mom) || has_any_ancestor_such_that(mom, such_that))
       return true;
   }
   return false;
+}
+
+bool has_any_ancestor_with_id(const reco::Candidate* c, const int id) {
+  return has_any_ancestor_such_that(c, [id](const reco::Candidate* c) { return c->pdgId() == id; });
 }
 
 void flatten_descendants(const reco::Candidate* c, std::vector<const reco::Candidate*>& descendants) {

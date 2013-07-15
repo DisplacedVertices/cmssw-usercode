@@ -4,6 +4,13 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
+double track_qoverp(const reco::Candidate* c);
+double track_lambda(const reco::Candidate* c);
+double track_phi(const reco::Candidate* c);
+double track_dxy(const reco::Candidate* c);
+double track_dsz(const reco::Candidate* c);
+double track_dz(const reco::Candidate* c);
+
 bool is_quark(const reco::Candidate* c);
 bool is_lepton(const reco::Candidate* c);
 int lepton_code(const reco::Candidate* c);
@@ -13,6 +20,7 @@ bool is_bhadron(const reco::Candidate* c);
 int original_index(const reco::Candidate* c, const reco::GenParticleCollection& gens);
 bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_ancestor);
 bool is_ancestor_of(const reco::Candidate* c, const std::vector<const reco::Candidate*>& possible_ancestors);
+bool has_any_ancestor_such_that(const reco::Candidate* c, std::function<bool(const reco::Candidate*)> such_that);
 bool has_any_ancestor_with_id(const reco::Candidate* c, const int id);
 void flatten_descendants(const reco::Candidate* c, std::vector<const reco::Candidate*>& descendants);
 const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status, bool take_abs=false);
