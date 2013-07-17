@@ -445,7 +445,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int nbhadrons = 0;
   int nbquarks_wcuts = 0;
   int nbhadrons_wcuts = 0;
-  std::set<const reco::Candidate*> bquarks_used;
   for (const reco::GenParticle& gen : *gen_particles) {
     if (abs(gen.pdgId()) == 5) {
       bool has_b_mom = false;
