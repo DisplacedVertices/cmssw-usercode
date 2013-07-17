@@ -260,7 +260,7 @@ def compare_all_hists(ps, samples, **kwargs):
         if sep == 'all' or (is2d and sep):
             for hist in hists:
                 hist.Draw('colz' if is2d else draw_cmd)
-                ps.save(name_clean + '_' + hist.cah_sample_name, log=not is2d, logz=is2d)
+                ps.save(name_clean + '_' + hist.cah_sample_name, logz=is2d)
 
         hists_sorted = hists[:]
         if not is2d:
