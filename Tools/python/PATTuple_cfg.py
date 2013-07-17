@@ -7,7 +7,7 @@ suppress_stdout = True
 ################################################################################
 
 process = cms.Process('PAT')
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
@@ -281,6 +281,9 @@ def input_is_fastsim(process):
         process.eventCleaningAll.remove(getattr(process, name))
     process.pfNoPileUp.bottomCollection = 'FSparticleFlow'
     process.pfPileUp.PFCandidates = 'FSparticleFlow'
+    process.pfNoPileUpPF.bottomCollection = 'FSparticleFlow'
+    process.pfPileUpPF.PFCandidates = 'FSparticleFlow'
+    process.pfCandsNotInJet.bottomCollection = 'FSparticleFlow'
     process.pfCandsNotInJetPF.bottomCollection = 'FSparticleFlow'
 
 def input_is_pythia8(process):
@@ -322,7 +325,10 @@ def keep_random_state(process):
 def keep_mixing_info(process):
     process.out.outputCommands.append('keep CrossingFramePlaybackInfoExtended_*_*_*')
 
-for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info'.split():
+def disable_nopileup(process):
+    processpostfix('pfNoPileUp').enable = False
+
+for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup'.split():
     if arg in sys.argv:
         exec '%s(process)' % arg
 
