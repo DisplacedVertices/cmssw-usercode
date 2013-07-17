@@ -55,6 +55,7 @@ class MFVGenHistos : public edm::EDAnalyzer {
   TH1F* h_r2d[9];
   TH1F* h_r3d[9];
   TH1F* h_t;
+  TH2F* h_r3d_bhadron_v_bquark;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
   TH1F* h_max_dR;
@@ -253,6 +254,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   }
 
   h_t = fs->make<TH1F>("h_t", ";time to LSP decay (ns);Events/0.1 ns", 100, 0, 10);
+  h_r3d_bhadron_v_bquark = fs->make<TH2F>("h_r3d_bhadron_v_bquark", ";b quark 3D distance (cm);b hadron 3D distance (cm)", 100, 0, 2, 100, 0, 2);
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
   h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
 
@@ -367,20 +369,28 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         }
       }
       die_if_not(particles[3] != 0, "did not find b hadron");
-
+      
+      float dx [4] = {0}; 
+      float dy [4] = {0}; 
+      float dz [4] = {0}; 
+      float r2d[4] = {0};
+      float r3d[4] = {0};
       for (int i = 0; i < 4; ++i) {
-        const float dx = particles[i]->vx() - x0;
-        const float dy = particles[i]->vy() - y0;
-        const float dz = particles[i]->vz() - z0;
-        const float r2d = mag(dx, dy);
-        const float r3d = mag(dx, dy, dz);
-        h_vtx[i]->Fill(dx, dy);
-        h_r2d[i]->Fill(r2d);
-        h_r3d[i]->Fill(r3d);
-        if (i == 0)
-          h_t->Fill(r3d/lspbeta/30);
+        dx [i] = particles[i]->vx() - x0;
+        dy [i] = particles[i]->vy() - y0;
+        dz [i] = particles[i]->vz() - z0;
+        r2d[i] = mag(dx[i], dy[i]);
+        r3d[i] = mag(dx[i], dy[i], dz[i]);
+        h_vtx[i]->Fill(dx[i], dy[i]);
+        h_r2d[i]->Fill(r2d[i]);
+        h_r3d[i]->Fill(r3d[i]);
       }
-
+      
+      h_t->Fill(r3d[0]/lspbeta/30);
+      h_r3d_bhadron_v_bquark->Fill(r3d[2], r3d[3]);
+      if (fabs(r3d[2] - r3d[3]) > 0.001) // 10 micron
+        printf("difference between bquark and bhadron r3ds is %f for run,lumi,event %u, %u, %u\n", fabs(r3d[2] - r3d[3]), event.id().run(), event.luminosityBlock(), event.id().event());
+        
       if (check_all_gen_particles)
         for (const auto& gen : *gen_particles) {
           if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
