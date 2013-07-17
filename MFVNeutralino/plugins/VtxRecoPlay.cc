@@ -313,11 +313,15 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float jetpt5;
     float tightjetpt4;
     float tightjetpt5;
+    ushort nsv;
+    ushort nsvpass;
 
     short isv;
     ushort ntracks;
-    ushort ntracksptpass;
+    ushort ntracksptgt10;
+    ushort ntracksptgt20;
     ushort trackminnhits;
+    ushort trackmaxnhits;
     float chi2dof;
     float chi2dofprob;
     float pt;
@@ -330,6 +334,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float sumpt2;
     float mintrackpt;
     float maxtrackpt;
+    float maxm1trackpt;
+    float maxm2trackpt;
     float drmin;
     float drmax;
     float dravg;
@@ -338,8 +344,10 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float drrmsw;
     float gen2ddist;
     float gen2derr;
+    float gen2dsig;
     float gen3ddist;
     float gen3derr;
+    float gen3dsig;
     ushort bs2dcompatscss;
     float bs2dcompat;
     float bs2ddist;
@@ -356,11 +364,11 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float pv3derr;
     float pv3dsig;
 
-    void clear(bool all = true) {
-      run = -1; lumi = -1; event = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; njets = -1; ntightjets = -1; jetpt4 = -1; jetpt5 = -1; tightjetpt4 = -1; tightjetpt5 = -1;
+    void clear(bool all) {
       if (all) {
-        isv = -1; ntracks = -1; ntracksptpass = -1; trackminnhits = -1; chi2dof = -1; chi2dofprob = -1; pt = -1; eta = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; mintrackpt = -1; maxtrackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen3ddist = -1; gen3derr = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
+        run = -1; lumi = -1; event = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; njets = -1; ntightjets = -1; jetpt4 = -1; jetpt5 = -1; tightjetpt4 = -1; tightjetpt5 = -1; nsv = -1; nsvpass = -1;
       }
+      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; pt = -1; eta = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
     }
   };
 
@@ -408,10 +416,14 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("jetpt5", &nt.jetpt5, "jetpt5/F");
     tree->Branch("tightjetpt4", &nt.tightjetpt4, "tightjetpt4/F");
     tree->Branch("tightjetpt5", &nt.tightjetpt5, "tightjetpt5/F");
+    tree->Branch("nsv", &nt.nsv, "nsv/s");
+    tree->Branch("nsvpass", &nt.nsvpass, "nsvpass/s");
     tree->Branch("isv", &nt.isv, "isv/S");
     tree->Branch("ntracks", &nt.ntracks, "ntracks/s");
-    tree->Branch("ntracksptpass", &nt.ntracksptpass, "ntracksptpass/s");
+    tree->Branch("ntracksptgt10", &nt.ntracksptgt10, "ntracksptgt10/s");
+    tree->Branch("ntracksptgt20", &nt.ntracksptgt20, "ntracksptgt20/s");
     tree->Branch("trackminnhits", &nt.trackminnhits, "trackminnhits/s");
+    tree->Branch("trackmaxnhits", &nt.trackmaxnhits, "trackmaxnhits/s");
     tree->Branch("chi2dof", &nt.chi2dof, "chi2dof/F");
     tree->Branch("chi2dofprob", &nt.chi2dofprob, "chi2dofprob/F");
     tree->Branch("pt", &nt.pt, "pt/F");
@@ -424,6 +436,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("sumpt2", &nt.sumpt2, "sumpt2/F");
     tree->Branch("mintrackpt", &nt.mintrackpt, "mintrackpt/F");
     tree->Branch("maxtrackpt", &nt.maxtrackpt, "maxtrackpt/F");
+    tree->Branch("maxm1trackpt", &nt.maxm1trackpt, "maxm1trackpt/F");
+    tree->Branch("maxm2trackpt", &nt.maxm2trackpt, "maxm2trackpt/F");
     tree->Branch("drmin", &nt.drmin, "drmin/F");
     tree->Branch("drmax", &nt.drmax, "drmax/F");
     tree->Branch("dravg", &nt.dravg, "dravg/F");
@@ -432,8 +446,10 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("drrmsw", &nt.drrmsw, "drrmsw/F");
     tree->Branch("gen2ddist", &nt.gen2ddist, "gen2ddist/F");
     tree->Branch("gen2derr", &nt.gen2derr, "gen2derr/F");
+    tree->Branch("gen2dsig", &nt.gen2dsig, "gen2dsig/F");
     tree->Branch("gen3ddist", &nt.gen3ddist, "gen3ddist/F");
     tree->Branch("gen3derr", &nt.gen3derr, "gen3derr/F");
+    tree->Branch("gen3dsig", &nt.gen3dsig, "gen3dsig/F");
     tree->Branch("bs2dcompatscss", &nt.bs2dcompatscss, "bs2dcompatscss/s");
     tree->Branch("bs2dcompat", &nt.bs2dcompat, "bs2dcompat/F");
     tree->Branch("bs2ddist", &nt.bs2ddist, "bs2ddist/F");
@@ -546,8 +562,10 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 
     PairwiseHistos::HistoDefs hs;
     hs.add("ntracks",        "# of tracks/SV",                              40,    0,      40);
-    hs.add("ntracksptpass",  "# of selected tracks/SV",                     40,    0,      40);
+    hs.add("ntracksptgt10",  "# of tracks/SV w/ p_{T} > 10 GeV",            40,    0,      40);
+    hs.add("ntracksptgt20",  "# of tracks/SV w/ p_{T} > 20 GeV",            40,    0,      40);
     hs.add("trackminnhits",  "min number of hits on track per SV",          40,    0,      40);
+    hs.add("trackmaxnhits",  "max number of hits on track per SV",          40,    0,      40);
     hs.add("chi2dof",        "SV #chi^2/dof",                               50,    0,       7);
     hs.add("chi2dofprob",    "SV p(#chi^2, dof)",                           50,    0,       1.2);
     hs.add("pt",             "SV p_{T} (GeV)",                             100,    0,     300);
@@ -560,6 +578,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                100,    0,    6000);
     hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      10);
     hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
+    hs.add("maxm1trackpt",   "SV max-1{trk_{i} p_{T}} (GeV)",              100,    0,     150);
+    hs.add("maxm2trackpt",   "SV max-2{trk_{i} p_{T}} (GeV)",              100,    0,     150);
     hs.add("drmin",          "SV min{#Delta R(i,j)}",                      150,    0,       1.5);
     hs.add("drmax",          "SV max{#Delta R(i,j)}",                      150,    0,       7);
     hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      150,    0,       5);
@@ -611,7 +631,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 }
 
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  nt.clear();
+  nt.clear(true);
   nt.run = event.id().run();
   nt.lumi = event.luminosityBlock();
   nt.event = event.id().event();
@@ -846,11 +866,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     auto trke = sv.tracks_end();
     std::map<int,int>& trackicity_m = trackicities[isv];
     int ntracks = trke - trkb;
-    int ntracksptpass = 0;
+    int ntracksptgt10 = 0;
+    int ntracksptgt20 = 0;
     int trackminnhits = 1000;
+    int trackmaxnhits = 0;
     double sumpt2 = 0;
-    double mintrackpt = 1e99;
-    double maxtrackpt = 0;
+    std::vector<double> trackpts;
 
     for (auto trki = trkb; trki != trke; ++trki) {
       float track_vertex_weight = sv.trackWeight(*trki);
@@ -869,14 +890,15 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       int nhits = tri->numberOfValidHits();
       if (nhits < trackminnhits)
         trackminnhits = nhits;
+      if (nhits < trackmaxnhits)
+        trackmaxnhits = nhits;
 
       double pti = tri->pt();
-      if (pti > track_pt_min)
-        ++ntracksptpass;
-      if (pti > maxtrackpt)
-        maxtrackpt = pti;
-      if (pti < mintrackpt)
-        mintrackpt = pti;
+      trackpts.push_back(pti);
+      if (pti > 10)
+        ++ntracksptgt10;
+      if (pti > 20)
+        ++ntracksptgt20;
       sumpt2 += pti*pti;
 
       h_sv_trackpt[svndx]->Fill(pti);
@@ -904,6 +926,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         }
       }
     }
+
+    std::sort(trackpts.begin(), trackpts.end());
+    const double mintrackpt = trackpts[0];
+    const double maxtrackpt = trackpts[trackpts.size()-1];
+    const double maxm1trackpt = trackpts[trackpts.size()-2];
+    const double maxm2trackpt = trackpts[trackpts.size()-3];
 
     std::vector<int> trackicity;
     for (auto i : trackicity_m)
@@ -951,8 +979,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
     if (do_ntuple) {
       nt.ntracks         = ntracks;
-      nt.ntracksptpass   = ntracksptpass;
+      nt.ntracksptgt10   = ntracksptgt10;
+      nt.ntracksptgt20   = ntracksptgt20;
       nt.trackminnhits   = trackminnhits;
+      nt.trackmaxnhits   = trackmaxnhits;
       nt.chi2dof         = sv.normalizedChi2();
       nt.chi2dofprob     = TMath::Prob(sv.chi2(), sv.ndof());
       nt.pt              = sv.p4().pt();
@@ -965,6 +995,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.sumpt2          = sumpt2;
       nt.mintrackpt      = mintrackpt;
       nt.maxtrackpt      = maxtrackpt;
+      nt.maxm1trackpt    = maxm1trackpt;
+      nt.maxm2trackpt    = maxm2trackpt;
       nt.drmin           = vtx_tks_dist.drmin;
       nt.drmax           = vtx_tks_dist.drmax;
       nt.dravg           = vtx_tks_dist.dravg;
@@ -973,8 +1005,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.drrmsw          = vtx_tks_dist.drrmsw;
       nt.gen2ddist       = gen2ddist.value();
       nt.gen2derr        = gen2ddist.error();
+      nt.gen2dsig        = gen2ddist.significance();
       nt.gen3ddist       = gen3ddist.value();
       nt.gen3derr        = gen3ddist.error();
+      nt.gen3dsig        = gen3ddist.significance();
       nt.bs2dcompatscss  = bs2dcompat.first;
       nt.bs2dcompat      = bs2dcompat.second;
       nt.bs2ddist        = bs2ddist.value();
@@ -996,8 +1030,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
     PairwiseHistos::ValueMap v = {
         {"ntracks",         ntracks},
-        {"ntracksptpass",   ntracksptpass},
+        {"ntracksptgt10",   ntracksptgt10},
+        {"ntracksptgt20",   ntracksptgt20},
         {"trackminnhits",   trackminnhits},
+        {"trackmaxnhits",   trackmaxnhits},
         {"chi2dof",         sv.normalizedChi2()},
         {"chi2dofprob",     TMath::Prob(sv.chi2(), sv.ndof())},
         {"pt",              sv.p4().pt()},
@@ -1010,6 +1046,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"sumpt2",          sumpt2},
         {"mintrackpt",      mintrackpt},
         {"maxtrackpt",      maxtrackpt},
+        {"maxm1trackpt",    maxm1trackpt},
+        {"maxm2trackpt",    maxm2trackpt},
         {"drmin",           vtx_tks_dist.drmin},
         {"drmax",           vtx_tks_dist.drmax},
         {"dravg",           vtx_tks_dist.dravg},
@@ -1041,8 +1079,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_sv[svndx].Fill(v);
   }
 
-  if (do_ntuple && nsvpass == 0) {
-    nt.isv = -1;
+  //////////////////////////////////////////////////////////////////////
+
+  if (do_ntuple) {
+    nt.clear(false);
+    nt.nsv = nsv;
+    nt.nsvpass = nsvpass;
     tree->Fill();
   }
 
