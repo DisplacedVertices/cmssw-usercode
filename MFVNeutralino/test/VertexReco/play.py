@@ -14,18 +14,16 @@ process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cf
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.GlobalTag.globaltag = 'START53_V21::All'
 process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
+process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+process.goodOfflinePrimaryVertices.filter = cms.bool(False)
 
-process.load('JMTucker.MFVNeutralino.VertexReco_cff')
-process.mfvInclusiveVertexFinder.vertexMinAngleCosine = 0.75
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-process.p = cms.Path(process.mfvVertexReco * process.mfvVertices)
-#process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertices)
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertices)
 
 all_anas = []
 
 vertex_srcs = [
     ('MY', 'mfvVertices'),
-    ('IVFC75MrgdS', 'mfvVertexMergerShared'),
     ]
 
 ana = cms.EDAnalyzer('VtxRecoPlay',
