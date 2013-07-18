@@ -109,8 +109,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
-    import JMTucker.Tools.Samples as s
-    samples = s.background_samples[1:] + s.mfv_signal_samples
+    import JMTucker.Tools.Samples as Samples
+    for sample in Samples.background_samples + Samples.auxiliary_background_samples:
+        sample.scheduler_name = 'remoteGlidein'
+    samples = Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples
+    #samples += [s for s in Samples.auxiliary_background_samples if not s.name.endswith('_tbar')]
 
     def pset_modifier(sample):
         to_add = []
