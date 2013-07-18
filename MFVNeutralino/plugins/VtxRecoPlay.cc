@@ -371,6 +371,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float bs2ddist;
     float bs2derr;
     float bs2dsig;
+    float bs3ddist;
     ushort pv2dcompatscss;
     float pv2dcompat;
     float pv2ddist;
@@ -386,7 +387,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
       if (all) {
         run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; njets = -1; ntightjets = -1; jetpt4 = -1; jetpt5 = -1; tightjetpt4 = -1; tightjetpt5 = -1; nsv = -1; nsvpass = -1;
       }
-      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
+      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
     }
   };
 
@@ -477,6 +478,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("bs2ddist", &nt.bs2ddist, "bs2ddist/F");
     tree->Branch("bs2derr", &nt.bs2derr, "bs2derr/F");
     tree->Branch("bs2dsig", &nt.bs2dsig, "bs2dsig/F");
+    tree->Branch("bs3ddist", &nt.bs3ddist, "bs3ddist/F");
     tree->Branch("pv2dcompatscss", &nt.pv2dcompatscss, "pv2dcompatscss/s");
     tree->Branch("pv2dcompat", &nt.pv2dcompat, "pv2dcompat/F");
     tree->Branch("pv2ddist", &nt.pv2ddist, "pv2ddist/F");
@@ -623,6 +625,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("bs2ddist",       "dist2d(SV, beamspot) (cm)",                  100,    0,       0.5);
     hs.add("bs2derr",        "#sigma(dist2d(SV, beamspot)) (cm)",          100,    0,       0.05);
     hs.add("bs2dsig",        "N#sigma(dist2d(SV, beamspot))",              100,    0,     100);
+    hs.add("bs3ddist",       "dist2d(SV, beamspot) * sin(SV theta) (cm)",  100,    0,       0.5);
     hs.add("pv2dcompatscss", "compat2d(SV, PV) success",                     2,    0,       2);
     hs.add("pv2dcompat",     "compat2d(SV, PV)",                           100,    0,    1000);
     hs.add("pv2ddist",       "dist2d(SV, PV) (cm)",                        100,    0,       0.5);
@@ -975,13 +978,13 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     int max_trackicity = max_tcity != trackicity.end() ? *max_tcity : 0;
     h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
-    vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
+    const vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
 
-    Measurement1D gen2ddist = gen_dist(sv, false);
-    Measurement1D gen3ddist = gen_dist(sv, true);
+    const Measurement1D gen2ddist = gen_dist(sv, false);
+    const Measurement1D gen3ddist = gen_dist(sv, true);
 
-    std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
-    Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
+    const std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
+    const Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
 
     std::pair<bool,float> pv2dcompat, pv3dcompat;
     float pv2ddist_val, pv3ddist_val;
@@ -1004,10 +1007,13 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       pv3ddist_sig = pv3ddist.significance();
     }
 
-    float costhmombs = costh2(sv.p4(), sv.position() - beamspot->position());
+    const auto bs2sv = sv.position() - beamspot->position();
+    const Measurement1D bs3ddist(mag(bs2sv.x(), bs2sv.y()) * sin(sv.p4().theta()));
+
+    const float costhmombs = costh2(sv.p4(), bs2sv);
     float costhmompv2d = -2, costhmompv3d = -2;
     if (primary_vertex != 0) {
-      auto disp = sv.position() - primary_vertex->position();
+      const auto disp = sv.position() - primary_vertex->position();
       costhmompv2d = costh2(sv.p4(), disp);
       costhmompv3d = costh3(sv.p4(), disp);
     }
@@ -1051,6 +1057,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.bs2ddist        = bs2ddist.value();
       nt.bs2derr         = bs2ddist.error();
       nt.bs2dsig         = bs2ddist.significance();
+      nt.bs3ddist        = bs3ddist.value();
       nt.pv2dcompatscss  = pv2dcompat.first;
       nt.pv2dcompat      = pv2dcompat.second;
       nt.pv2ddist        = pv2ddist_val;
@@ -1104,6 +1111,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"bs2ddist",        bs2ddist.value()},
         {"bs2derr",         bs2ddist.error()},
         {"bs2dsig",         bs2ddist.significance()},
+        {"bs3ddist",        bs3ddist.value()},
         {"pv2dcompatscss",  pv2dcompat.first},
         {"pv2dcompat",      pv2dcompat.second},
         {"pv2ddist",        pv2ddist_val},
