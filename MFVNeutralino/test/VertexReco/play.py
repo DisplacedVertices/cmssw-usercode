@@ -114,10 +114,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     def pset_modifier(sample):
         to_add = []
-        if 'mfv' not in sample.name:
-            to_add.append('de_mfv()')
-        elif 'ttbar' in sample.name:
+        if 'ttbar' in sample.name:
             to_add.append('sample_ttbar()')
+        elif 'mfv' not in sample.name:
+            to_add.append('de_mfv()')
         return to_add
         
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
