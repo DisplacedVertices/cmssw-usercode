@@ -46,12 +46,14 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      max_sv_err2d   = cms.double(1e6),
                      min_sv_mass    = cms.double(0),
                      min_sv_drmax   = cms.double(0),
+                     min_sv_gen3dsig = cms.double(0),
                      max_sv_gen3dsig = cms.double(1e6),
                      )
 
 ana_qcuts = [
     ('Qno',             ana),
-    ('Qg3dsig',         ana.clone(max_sv_gen3dsig = 5)),
+    ('Q3dsiglt4',       ana.clone(max_sv_gen3dsig = 4)),
+    ('Q3dsigge6',       ana.clone(min_sv_gen3dsig = 6)),
     ('Qntk6',           ana.clone(min_sv_ntracks = 6)),
     ('QM20',            ana.clone(min_sv_mass = 20)),
     ('Qntk6M20',        ana.clone(min_sv_ntracks = 6, min_sv_mass = 20)),
