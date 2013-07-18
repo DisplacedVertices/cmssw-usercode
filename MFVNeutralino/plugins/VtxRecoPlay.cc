@@ -905,8 +905,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     std::vector<double> trackpts;
 
     for (auto trki = trkb; trki != trke; ++trki) {
-      float track_vertex_weight = sv.trackWeight(*trki);
-      if (track_vertex_weight < track_vertex_weight_min)
+      if (sv.trackWeight(*trki) < track_vertex_weight_min)
         continue;
 
       const reco::TrackBaseRef& tri = *trki;
@@ -942,6 +941,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       const double m = 0.135;
       p4_i.SetPtEtaPhiM(pti, tri->eta(), tri->phi(), m);
       for (auto trkj = trki + 1; trkj != trke; ++trkj) {
+        if (sv.trackWeight(*trkj) < track_vertex_weight_min)
+          continue;
         const reco::TrackBaseRef& trj = *trkj;
         p4_j.SetPtEtaPhiM(trj->pt(), trj->eta(), trj->phi(), m);
 
@@ -951,6 +952,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         h_sv_trackpairmass[svndx]->Fill(p4_ij.M());
 
         for (auto trkk = trkj + 1; trkk != trke; ++trkk) {
+          if (sv.trackWeight(*trkk) < track_vertex_weight_min)
+            continue;
+
           const reco::TrackBaseRef& trk = *trkk;
           p4_k.SetPtEtaPhiM(trk->pt(), trk->eta(), trk->phi(), m);
           h_sv_tracktriplemass[svndx]->Fill((p4_ij + p4_k).M());
