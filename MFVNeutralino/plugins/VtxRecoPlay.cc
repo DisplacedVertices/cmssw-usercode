@@ -108,6 +108,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const double max_sv_err2d;
   const double min_sv_mass;
   const double min_sv_drmax;
+  const double min_sv_gen3dsig;
   const double max_sv_gen3dsig;
 
   VertexDistanceXY distcalc_2d;
@@ -221,13 +222,18 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   }
 
   bool use_vertex(const reco::Vertex& vtx) {
-    return
+    const bool use =
       int(vtx.tracksSize()) >= min_sv_ntracks &&
       vtx.normalizedChi2() < max_sv_chi2dof   &&
       abs_error(vtx, false) < max_sv_err2d    &&
       vtx.p4().mass() >= min_sv_mass          &&
-      (min_sv_drmax == 0 || vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_sv_drmax) &&
-      (!gen_valid || gen_dist(vtx, true).significance() < max_sv_gen3dsig);
+      (min_sv_drmax == 0 || vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_sv_drmax);
+
+    if (!use)
+      return false;
+
+    const float gd3sg = gen_dist(vtx, true).significance();
+    return use && (!gen_valid || (gd3sg >= min_sv_gen3dsig && gd3sg < max_sv_gen3dsig));
   }
 
   TH1F* h_sim_pileup_num_int[3];
@@ -408,6 +414,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     max_sv_err2d(cfg.getParameter<double>("max_sv_err2d")),
     min_sv_mass(cfg.getParameter<double>("min_sv_mass")),
     min_sv_drmax(cfg.getParameter<double>("min_sv_drmax")),
+    min_sv_gen3dsig(cfg.getParameter<double>("min_sv_gen3dsig")),
     max_sv_gen3dsig(cfg.getParameter<double>("max_sv_gen3dsig"))
 {
   edm::Service<TFileService> fs;
