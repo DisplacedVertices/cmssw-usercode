@@ -328,7 +328,13 @@ def keep_mixing_info(process):
 def disable_nopileup(process):
     processpostfix('pfNoPileUp').enable = False
 
-for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup'.split():
+def re_pat(process, name='PAT2', old_name='PAT'):
+    process.source.inputCommands = cms.untracked.vstring('keep *', 'drop *_*_*_%s' % old_name)
+    process.setName_(name)
+    process.ORTrigReport.results_src.setProcessName(name)
+    process.out.outputCommands.append('keep edmTriggerResults_TriggerResults__%s' % name)
+
+for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup re_pat'.split():
     if arg in sys.argv:
         exec '%s(process)' % arg
 
