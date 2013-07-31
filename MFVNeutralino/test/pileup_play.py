@@ -12,19 +12,12 @@ add_analyzer('PileupRemovalPlay',
              )
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400, ttbarincl, TupleOnlyMCSample
-    samples = [mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400, ttbarincl]
-
-    mfv_neutralino_tau9900um_M0400.dataset = '/crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau9900um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER'
-    mfv_neutralino_tau1000um_M0400.dataset = '/crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau1000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER'
-    mfv_neutralino_tau0000um_M0400.dataset = '/crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604/tucker-crabfake_mfv_neutralino_tau0000um_M0400_jtuple_v6_547d3313903142038335071634b26604-5bdce5833f35b995ab0c308220e77250/USER'
-    for sample in samples:
-        sample.scheduler_name = 'condor'
+    from JMTucker.Tools.Samples import *
+    samples = [mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau0010um_M0400, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('TrackPlay',
-                       total_number_of_events = 100000,
+    cs = CRABSubmitter('PileupPlay',
+                       total_number_of_events = 99250,
                        events_per_job = 20000,
-                       USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        )
     cs.submit_all(samples)
