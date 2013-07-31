@@ -7,6 +7,7 @@ process.TFileService.fileName = 'pileup_play.root'
 
 add_analyzer('PileupRemovalPlay',
              pucands_src = cms.InputTag('pfPileUpPF'),
+             pv_src = cms.InputTag('goodOfflinePrimaryVertices'),
              ltmm_src = cms.InputTag('mfvTrackMatches'),
              )
 
