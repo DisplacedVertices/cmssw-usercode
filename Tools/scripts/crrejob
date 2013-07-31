@@ -50,5 +50,5 @@ if to_force:
 if to_resub:
     confirm_cmd('crab -c %s %s -resubmit %s'      % (dir, options.extra, crabify_list(to_resub)), options.doit)
 
-if not options.doit:
+if not options.doit and not 'doit' in sys.argv:
     print '\nre-run with --doit if this is right.'
