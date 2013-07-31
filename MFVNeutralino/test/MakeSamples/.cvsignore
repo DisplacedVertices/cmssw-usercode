@@ -3,3 +3,4 @@ minbias_files.py
 pat.py
 *.root
 out.*.gz
+test
