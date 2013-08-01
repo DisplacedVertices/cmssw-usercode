@@ -90,6 +90,17 @@ def scatterplots(do):
     for ana in all_anas:
         ana.do_scatterplots = do
 
+def use_jets(kind):
+    process.mfvVertices.use_tracks = False
+    if kind == 'pat':
+        process.mfvVertices.use_pf_jets = False
+        process.mfvVertices.use_pat_jets = True
+    elif kind == 'pf':
+        process.mfvVertices.use_pf_jets = True
+        process.mfvVertices.use_pat_jets = False
+    else:
+        raise ValueError("don't know anything about kind = %r" % kind)
+
 if 'debug' in sys.argv:
     if 'ttbar' in sys.argv:
         de_mfv()
@@ -101,6 +112,7 @@ if 'debug' in sys.argv:
     process.mfvVertices.verbose = True
 
 #scatterplots(True)
+use_jets('pat')
 #process.add_(cms.Service('SimpleMemoryCheck'))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
