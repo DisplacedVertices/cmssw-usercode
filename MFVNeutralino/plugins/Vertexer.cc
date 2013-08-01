@@ -32,10 +32,11 @@ namespace {
 class MFVVertexer : public edm::EDProducer {
 public:
   MFVVertexer(const edm::ParameterSet&);
-
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
 private:
+  void finish(edm::Event&, std::auto_ptr<reco::VertexCollection>);
+
   typedef std::set<reco::TrackRef> track_set;
 
   template <typename T>
@@ -244,6 +245,15 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   }
 }
 
+void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection> vertices) {
+  if (verbose)
+    printf("n_output_vertices: %lu\n", vertices->size());
+  if (histos)
+    h_n_output_vertices->Fill(vertices->size());
+
+  event.put(vertices);
+}
+
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) {
     printf("------------------------------------------------------------------------\n");
@@ -350,6 +360,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   std::auto_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
   std::vector<std::vector<std::pair<int, int> > > track_use(ntk);
+
+  if (ntk == 0) {
+    if (verbose)
+      printf("no seed tracks -> putting empty vertex collection into event\n");
+    finish(event, vertices);
+    return;
+  }
 
   for (size_t itk = 0; itk < ntk-1; ++itk) {
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
@@ -792,12 +809,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // Put the output.
   //////////////////////////////////////////////////////////////////////
 
-  if (verbose)
-    printf("n_output_vertices: %lu\n", vertices->size());
-  if (histos)
-    h_n_output_vertices->Fill(vertices->size());
-
-  event.put(vertices);
+  finish(event, vertices);
 }
 
 DEFINE_FWK_MODULE(MFVVertexer);
