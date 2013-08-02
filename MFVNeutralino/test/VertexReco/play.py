@@ -112,7 +112,7 @@ if 'debug' in sys.argv:
     process.mfvVertices.verbose = True
 
 #scatterplots(True)
-use_jets('pat')
+#use_jets('pat')
 #process.add_(cms.Service('SimpleMemoryCheck'))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -122,10 +122,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as Samples
-    for sample in Samples.background_samples + Samples.auxiliary_background_samples:
-        sample.scheduler_name = 'remoteGlidein'
     samples = Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples
-    #samples += [s for s in Samples.auxiliary_background_samples if not s.name.endswith('_tbar')]
 
     def pset_modifier(sample):
         to_add = []
@@ -134,7 +131,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         elif 'mfv' not in sample.name:
             to_add.append('de_mfv()')
         return to_add
-        
+    
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('VertexRecoPlay',
                        total_number_of_events = 99250,
@@ -142,7 +139,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
                        )
-    #cs.submit_all([s.mfv_neutralino_tau1000um_M0400, s.ttbarhadronic, s.qcdht1000])
+    Samples.ttbarincl.ana_dataset_override = '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/jchu-jtuplev6-57bdb3121379054e9430a70b722159ce/USER'
+    cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400, Samples.ttbarincl])
     cs.submit_all(samples)
 
 '''
