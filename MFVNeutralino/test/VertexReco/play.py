@@ -140,7 +140,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = pset_modifier,
                        )
     Samples.ttbarincl.ana_dataset_override = '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/jchu-jtuplev6-57bdb3121379054e9430a70b722159ce/USER'
-    cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400, Samples.ttbarincl])
+    #cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400, Samples.ttbarincl])
     cs.submit_all(samples)
 
 '''
