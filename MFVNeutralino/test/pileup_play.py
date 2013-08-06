@@ -14,6 +14,7 @@ add_analyzer('PileupRemovalPlay',
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *
+    mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/jchu-jtuple_pileupremovalstudiesv6-66e8ed2d65a6b86d5a5bb40c50df93ea/USER'
     #samples = [mfv_neutralino_tau0000um_M0400, mfv_neutralino_tau0010um_M0400, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400]
     samples = [mfv_neutralino_tau9900um_M0400]
 
