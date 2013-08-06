@@ -41,6 +41,7 @@ class PileupRemovalPlay : public edm::EDAnalyzer {
   TH1F* h_ltm_vz;
   TH1F* h_ltm_rho;
   TH1F* h_ltm_r;
+  TH2F* h_ltm_rho_vz;
   TH1F* h_ltm_gen_pt;
   TH1F* h_ltm_gen_eta;
   TH1F* h_ltm_gen_phi;
@@ -92,11 +93,12 @@ PileupRemovalPlay::PileupRemovalPlay(const edm::ParameterSet& cfg)
   h_ltm_pt = fs->make<TH1F>("h_ltm_pt", ";pt for pucands with lighttrackmatch;number of pucands", 100, 0, 100);
   h_ltm_eta = fs->make<TH1F>("h_ltm_eta", ";eta for pucands with lighttrackmatch;number of pucands", 60, -3, 3);
   h_ltm_phi = fs->make<TH1F>("h_ltm_phi", ";phi for pucands with lighttrackmatch;number of pucands", 63, -3.15, 3.15);
-  h_ltm_vx = fs->make<TH1F>("h_ltm_vx", ";vx for pucands with lighttrackmatch;number of pucands", 100, 0, 10);
-  h_ltm_vy = fs->make<TH1F>("h_ltm_vy", ";vy for pucands with lighttrackmatch;number of pucands", 100, 0, 10);
-  h_ltm_vz = fs->make<TH1F>("h_ltm_vz", ";vz for pucands with lighttrackmatch;number of pucands", 100, 0, 100);
+  h_ltm_vx = fs->make<TH1F>("h_ltm_vx", ";vx for pucands with lighttrackmatch;number of pucands", 100, -1, 1);
+  h_ltm_vy = fs->make<TH1F>("h_ltm_vy", ";vy for pucands with lighttrackmatch;number of pucands", 100, -1, 1);
+  h_ltm_vz = fs->make<TH1F>("h_ltm_vz", ";vz for pucands with lighttrackmatch;number of pucands", 100, -100, 100);
   h_ltm_rho = fs->make<TH1F>("h_ltm_rho", ";rho for pucands with lighttrackmatch;number of pucands", 100, 0, 10);
   h_ltm_r = fs->make<TH1F>("h_ltm_r", ";r for pucands with lighttrackmatch;number of pucands", 100, 0, 100);
+  h_ltm_rho_vz = fs->make<TH2F>("h_ltm_rho_vz", ";vz for pucands with lighttrackmatch;rho for pucands with lighttrackmatch", 100, -100, 100, 100, 0, 10);
   h_ltm_gen_pt = fs->make<TH1F>("h_ltm_gen_pt", ";gen_pt;number of pucands", 100, 0, 100);
   h_ltm_gen_eta = fs->make<TH1F>("h_ltm_gen_eta", ";gen_eta;number of pucands", 60, -3, 3);
   h_ltm_gen_phi = fs->make<TH1F>("h_ltm_gen_phi", ";gen_phi;number of pucands", 63, -3.15, 3.15);
@@ -108,12 +110,12 @@ PileupRemovalPlay::PileupRemovalPlay(const edm::ParameterSet& cfg)
   h_noltm_pt = fs->make<TH1F>("h_noltm_pt", ";pt for pucands without lighttrackmatch;number of pucands", 100, 0, 100);
   h_noltm_eta = fs->make<TH1F>("h_noltm_eta", ";eta for pucands without lighttrackmatch;number of pucands", 60, -3, 3);
   h_noltm_phi = fs->make<TH1F>("h_noltm_phi", ";phi for pucands without lighttrackmatch;number of pucands", 63, -3.15, 3.15);
-  h_noltm_vx = fs->make<TH1F>("h_noltm_vx", ";vx for pucands without lighttrackmatch;number of pucands", 100, 0, 10);
-  h_noltm_vy = fs->make<TH1F>("h_noltm_vy", ";vy for pucands without lighttrackmatch;number of pucands", 100, 0, 10);
-  h_noltm_vz = fs->make<TH1F>("h_noltm_vz", ";vz for pucands without lighttrackmatch;number of pucands", 100, 0, 100);
+  h_noltm_vx = fs->make<TH1F>("h_noltm_vx", ";vx for pucands without lighttrackmatch;number of pucands", 100, -1, 1);
+  h_noltm_vy = fs->make<TH1F>("h_noltm_vy", ";vy for pucands without lighttrackmatch;number of pucands", 100, -1, 1);
+  h_noltm_vz = fs->make<TH1F>("h_noltm_vz", ";vz for pucands without lighttrackmatch;number of pucands", 100, -100, 100);
   h_noltm_rho = fs->make<TH1F>("h_noltm_rho", ";rho for pucands without lighttrackmatch;number of pucands", 100, 0, 10);
   h_noltm_r = fs->make<TH1F>("h_noltm_r", ";r for pucands without lighttrackmatch;number of pucands", 100, 0, 100);
-  h_noltm_rho_vz = fs->make<TH2F>("h_noltm_rho_vz", ";vz for pucands without lighttrackmatch;rho for pucands without lighttrackmatch", 100, 0, 100, 100, 0, 10);
+  h_noltm_rho_vz = fs->make<TH2F>("h_noltm_rho_vz", ";vz for pucands without lighttrackmatch;rho for pucands without lighttrackmatch", 100, -100, 100, 100, 0, 10);
   h_num_PVsumpt2 = fs->make<TH2F>("h_num_PVsumpt2", ";sumpt2 of the primary vertex;number of pucands", 100, 0, 2000, 100, 0, 2000);
   h_num_withoutLightTrackMatch_PVsumpt2 = fs->make<TH2F>("h_num_withoutLightTrackMatch_PVsumpt2", ";sumpt2 of the primary vertex;number of pucands without lighttrackmatch", 100, 0, 2000, 100, 0, 2000);
   h_num_withLightTrackMatch_PVsumpt2 = fs->make<TH2F>("h_num_withLightTrackMatch_PVsumpt2", ";sumpt2 of the primary vertex;number of pucands with lighttrackmatch", 100, 0, 2000, 100, 0, 2000);
@@ -146,7 +148,13 @@ void PileupRemovalPlay::analyze(const edm::Event& event, const edm::EventSetup&)
 
   edm::Handle<reco::PFCandidateCollection> nonpucands;
   event.getByLabel(nonpucands_src, nonpucands);
-  const size_t num_nonpucands = nonpucands->size();
+
+  int num_nonpucands = 0;
+  for (const reco::PFCandidate& nonpucand : *nonpucands) {
+    if (nonpucand.particleId() == reco::PFCandidate::h) {
+      ++num_nonpucands;
+    }
+  }
 
   edm::Handle<reco::VertexCollection> pvs;
   event.getByLabel(pv_src, pvs);
@@ -248,6 +256,7 @@ void PileupRemovalPlay::analyze(const edm::Event& event, const edm::EventSetup&)
     h_ltm_vz->Fill(pucand.vz() - bsz);
     h_ltm_rho->Fill(mag(pucand.vx() - bsx, pucand.vy() - bsy));
     h_ltm_r->Fill(mag(pucand.vx() - bsx, pucand.vy() - bsy, pucand.vz() - bsz));
+    h_ltm_rho_vz->Fill(pucand.vz() - bsz, mag(pucand.vx() - bsx, pucand.vy() - bsy));
     h_ltm_gen_pt->Fill(ltm.gen_pt);
     h_ltm_gen_eta->Fill(ltm.gen_eta);
     h_ltm_gen_phi->Fill(ltm.gen_phi);
