@@ -23,13 +23,14 @@ private:
   const edm::InputTag vertex_src;
   const double min_jet_track_frac;
   const double min_vertex_track_weight;
-  const bool verbose;
   const bool histos;
+  const bool verbose;
 
   TH2F* h_n_jets_v_vertices;
   TH1F* h_n_jet_tracks;
   TH1F* h_frac;
   TH2F* h_n_fracs;
+  TH2F* h_best_fracs;
 };
 
 MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
@@ -37,8 +38,8 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_jet_track_frac(cfg.getParameter<double>("min_jet_track_frac")),
     min_vertex_track_weight(cfg.getParameter<double>("min_vertex_track_weight")),
-    verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
-    histos(cfg.getUntrackedParameter<bool>("histos", false))
+    histos(cfg.getUntrackedParameter<bool>("histos", false)),
+    verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
   produces<JetVertexAssociation>();
 
@@ -49,6 +50,7 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     h_n_jet_tracks = fs->make<TH1F>("h_n_jet_tracks", ";# tracks per jet;arb. units", 50, 0, 50);
     h_frac = fs->make<TH1F>("h_frac", ";fraction of jet's tracks in a vertex;arb. units", 51, 0, 1.02);
     h_n_fracs = fs->make<TH2F>("h_n_fracs", ";# non zero fractions;# non zero good fractions", 30, 0, 30, 30, 0, 30);
+    h_best_fracs = fs->make<TH2F>("h_best_fracs", ";second-best fraction;best fraction", 26, 0, 1.04, 26, 0, 1.04);
   }
 }
 
@@ -85,8 +87,10 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
 
     if (n_jet_tracks > 0) {
       double best_frac = 0;
+      double second_best_frac = 0;
       int n_non_zero_fracs = 0;
       int n_non_zero_good_fracs = 0;
+      
 
       for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
         const reco::Vertex& vtx = vertices->at(ivtx);
@@ -112,14 +116,17 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
             ++n_non_zero_good_fracs;
 
           if (frac > best_frac) {
+            second_best_frac = best_frac;
             best_frac = frac;
             assoc_ivtx = ivtx;
           }
         }
       }
 
-      if (histos)
+      if (histos) {
         h_n_fracs->Fill(n_non_zero_fracs, n_non_zero_good_fracs);
+        h_best_fracs->Fill(second_best_frac, best_frac);
+      }
     }
 
     indices[ijet] = assoc_ivtx;
