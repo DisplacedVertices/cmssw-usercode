@@ -18,7 +18,7 @@ process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.goodOfflinePrimaryVertices.filter = cms.bool(False)
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertices)
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSequence)
 
 all_anas = []
 
@@ -138,8 +138,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        events_per_job = 4000,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
+                       use_ana_dataset = True,
+                       use_parent = True,
                        )
-    Samples.ttbarincl.ana_dataset_override = '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/jchu-jtuplev6-57bdb3121379054e9430a70b722159ce/USER'
+
     #cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400, Samples.ttbarincl])
     cs.submit_all(samples)
 
