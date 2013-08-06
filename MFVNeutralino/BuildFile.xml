@@ -1,4 +1,6 @@
+<use name="clhep"/>
 <use name="DataFormats/Common"/>
+<use name="DataFormats/VertexReco"/>
 <use name="JMTucker/Tools"/>
 <export>
   <lib name="1"/>
