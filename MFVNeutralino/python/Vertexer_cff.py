@@ -38,13 +38,19 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              verbose = cms.untracked.bool(False),
                              )
 
+mfvSelectedVertices = cms.EDFilter('VertexSelector',
+                                   filter = cms.bool(False),
+                                   src = cms.InputTag('mfvVertices'),
+                                   cut = cms.string('nTracks >= 6'),
+                                   )
+
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
                                    jet_src = cms.InputTag('selectedPatJetsPF'),
-                                   vertex_src = cms.InputTag('mfvVertices'),
-                                   min_jet_track_frac = cms.double(0.75),
+                                   vertex_src = cms.InputTag('mfvSelectedVertices'),
+                                   min_jet_track_frac = cms.double(0.),
                                    min_vertex_track_weight = cms.double(0.5),
                                    histos = cms.untracked.bool(True),
                                    verbose = cms.untracked.bool(False),
                                    )
 
-mfvVertexSequence = cms.Sequence(mfvVertices * mfvVerticesToJets)
+mfvVertexSequence = cms.Sequence(mfvVertices * mfvSelectedVertices * mfvVerticesToJets)
