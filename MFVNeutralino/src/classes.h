@@ -11,7 +11,6 @@ namespace {
     std::map<int, LightTrackMatch> dummymiltm;
     edm::Wrapper<std::map<int, LightTrackMatch> > dummyWmiltm;
 
-    std::vector<reco::Vertex> vrv;
     edm::Association<std::vector<reco::Vertex> > dummyAvV;
     edm::Wrapper<edm::Association<std::vector<reco::Vertex> > > dummyWAvV;
   }

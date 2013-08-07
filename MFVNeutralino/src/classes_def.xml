@@ -3,8 +3,6 @@
   <class name="edm::Wrapper<LightTrackMatch>"/>
   <class name="std::map<int, LightTrackMatch>"/>
   <class name="edm::Wrapper<std::map<int, LightTrackMatch> >"/>
-  <class name="reco::Vertex"/>
-  <class name="std::vector<reco::Vertex>"/>
   <class name="edm::Association<std::vector<reco::Vertex> >"/>
   <class name="edm::Wrapper<edm::Association<std::vector<reco::Vertex> > >"/>
 </lcgdict>
