@@ -205,8 +205,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
-  if (use_tracks + use_pf_jets + use_pat_jets != 1)
-    throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/pf_jets/pat_jets";
+  if (use_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
+    throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/pf_candidates/pf_jets/pat_jets";
 
   produces<reco::VertexCollection>();
 
