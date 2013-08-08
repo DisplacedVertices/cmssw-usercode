@@ -90,16 +90,41 @@ def scatterplots(do):
     for ana in all_anas:
         ana.do_scatterplots = do
 
-def use_jets(kind):
-    process.mfvVertices.use_tracks = False
+def use_pf_candidates(src, vertex_producer=process.mfvVertices):
+    vertex_producer.use_tracks = False
+    vertex_producer.use_pf_jets = False
+    vertex_producer.use_pat_jets = False
+    vertex_producer.use_pf_candidates = True
+    vertex_producer.pf_candidate_src = src
+
+def use_jets(kind, vertex_producer=process.mfvVertices):
+    vertex_producer.use_tracks = False
+    vertex_producer.use_pf_candidates = False
     if kind == 'pat':
-        process.mfvVertices.use_pf_jets = False
-        process.mfvVertices.use_pat_jets = True
+        vertex_producer.use_pf_jets = False
+        vertex_producer.use_pat_jets = True
     elif kind == 'pf':
-        process.mfvVertices.use_pf_jets = True
-        process.mfvVertices.use_pat_jets = False
+        vertex_producer.use_pf_jets = True
+        vertex_producer.use_pat_jets = False
     else:
         raise ValueError("don't know anything about kind = %r" % kind)
+
+process.mfvVerticesFromCands = process.mfvVertices.clone()
+use_pf_candidates('particleFlow', process.mfvVerticesFromCands)
+
+process.mfvVerticesFromJets = process.mfvVertices.clone()
+use_jets('pat', process.mfvVerticesFromJets)
+
+process.playMYPFQno   = ana.clone(vertex_src = 'mfvVerticesFromCands')
+process.playMYPFQntk6 = ana.clone(vertex_src = 'mfvVerticesFromCands', min_sv_ntracks = 6)
+all_anas.extend((process.playMYPFQno, process.playMYPFQntk6))
+
+process.playMYJPTQno   = ana.clone(vertex_src = 'mfvVerticesFromJets')
+process.playMYJPTQntk6 = ana.clone(vertex_src = 'mfvVerticesFromJets', min_sv_ntracks = 6)
+all_anas.extend((process.playMYJPTQno, process.playMYJPTQntk6))
+
+process.p *= process.mfvVerticesFromCands * process.playMYPFQno  * process.playMYPFQntk6
+process.p *= process.mfvVerticesFromJets  * process.playMYJPTQno * process.playMYJPTQntk6
 
 if 'debug' in sys.argv:
     if 'ttbar' in sys.argv:
@@ -112,7 +137,6 @@ if 'debug' in sys.argv:
     process.mfvVertices.verbose = True
 
 #scatterplots(True)
-#use_jets('pat')
 #process.add_(cms.Service('SimpleMemoryCheck'))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -141,8 +165,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        use_ana_dataset = True,
                        use_parent = True,
                        )
-
-    #cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400, Samples.ttbarincl])
+    
+    #cs.submit_all([Samples.mfv_neutralino_tau9900um_M0400, Samples.ttbarincl])
     cs.submit_all(samples)
 
 '''
