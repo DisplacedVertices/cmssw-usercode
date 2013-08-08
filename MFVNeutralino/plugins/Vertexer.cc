@@ -115,6 +115,8 @@ private:
   const edm::InputTag beamspot_src;
   const bool use_tracks;
   const edm::InputTag track_src;
+  const bool use_pf_candidates;
+  const edm::InputTag pf_candidate_src;
   const bool use_pf_jets;
   const edm::InputTag pf_jet_src;
   const bool use_pat_jets;
@@ -179,6 +181,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    use_pf_candidates(cfg.getParameter<bool>("use_pf_candidates")),
+    pf_candidate_src(cfg.getParameter<edm::InputTag>("pf_candidate_src")),
     use_pf_jets(cfg.getParameter<bool>("use_pf_jets")),
     pf_jet_src(cfg.getParameter<edm::InputTag>("pf_jet_src")),
     use_pat_jets(cfg.getParameter<bool>("use_pat_jets")),
@@ -283,6 +287,16 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     event.getByLabel(track_src, tracks);
     for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
       all_tracks.push_back(reco::TrackRef(tracks, i));
+  }
+  else if (use_pf_candidates) {
+    edm::Handle<reco::PFCandidateCollection> pf_candidates;
+    event.getByLabel(pf_candidate_src, pf_candidates);
+
+    for (const reco::PFCandidate& cand : *pf_candidates) {
+      reco::TrackRef tkref = cand.trackRef();
+      if (tkref.isNonnull())
+        all_tracks.push_back(tkref);
+    }
   }
   else if (use_pf_jets) {
     edm::Handle<reco::PFJetCollection> jets;
