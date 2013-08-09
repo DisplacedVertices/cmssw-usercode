@@ -22,5 +22,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('PileupPlay',
                        total_number_of_events = 99250,
                        events_per_job = 20000,
+                       use_ana_dataset = True,
+                       use_parent = True,
                        )
     cs.submit_all(samples)
