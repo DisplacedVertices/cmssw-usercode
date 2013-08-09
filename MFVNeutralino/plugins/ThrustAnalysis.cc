@@ -8,8 +8,11 @@
 #include "DataFormats/METReco/interface/GenMETCollection.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -53,12 +56,16 @@ private:
   const edm::InputTag gen_particles_src;
   const edm::InputTag gen_jets_src;
   const edm::InputTag gen_met_src;
+  const edm::InputTag jets_src;
   const edm::InputTag met_src;
   const edm::InputTag muon_src;
+  const edm::InputTag map_src;
   const double pt_cut;
   const double eta_cut;
   const double loose_pt_cut;
   const double loose_eta_cut;
+  const double lepton_pt_cut;
+  const double lepton_eta_cut;
   const bool prints;
 
   TTree* m_tree;
@@ -76,6 +83,7 @@ private:
   TLorentzVector* m_p4TLep;
   TLorentzVector* m_p4BtLep;
   TLorentzVector* m_p4Lep;
+  TLorentzVector* m_p4LepPF;
   TLorentzVector* m_p4Nu;
 
   TVector3* m_vtxGHad;
@@ -91,6 +99,7 @@ private:
   TVector3* m_vtxTLep;
   TVector3* m_vtxBtLep;
   TVector3* m_vtxLep;
+  TVector3* m_vtxLepPF;
   TVector3* m_vtxNu;
 
   TVector3* m_vthr3;
@@ -108,6 +117,8 @@ private:
   TLorentzVector* m_p4jBtLep;
   TLorentzVector* m_p4MET;
 
+  TLorentzVector* m_p4jBPF;
+
   TVector3* m_vthr3j;
   Double_t m_thr3j;
   TVector3* m_vthr2j;
@@ -117,25 +128,50 @@ private:
   std::vector<TLorentzVector>* m_vp4jBOther;
   std::vector<TVector3>* m_vvtxQOther;
   std::vector<TVector3>* m_vvtxBOther;
-
   TVector3* m_vthr3jAll;
   Double_t m_thr3jAll;
   TVector3* m_vthr2jAll;
   Double_t m_thr2jAll;
 
+  std::vector<TLorentzVector>* m_vp4jQOtherPF;
+  std::vector<TLorentzVector>* m_vp4jBOtherPF;
+  std::vector<TVector3>* m_vvtxQOtherPF;
+  std::vector<TVector3>* m_vvtxBOtherPF;
+  TVector3* m_vthr3jAllPF;
+  Double_t m_thr3jAllPF;
+  TVector3* m_vthr2jAllPF;
+  Double_t m_thr2jAllPF;
+
+  Double_t m_ele_pt;
+  Double_t m_ele_eta;
+  Double_t m_ele_phi;
+
+  Double_t m_mu_pt;
+  Double_t m_mu_eta;
+  Double_t m_mu_phi;
+
+  Double_t m_ele_num;
+  Double_t m_mu_num;
+
+
   TVector3* m_beamspot;
+  TVector3* m_reco_beamspot;
 };
 
 MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   : gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
     gen_jets_src(cfg.getParameter<edm::InputTag>("gen_jets_src")),
     gen_met_src(cfg.getParameter<edm::InputTag>("gen_met_src")),
+    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     met_src(cfg.getParameter<edm::InputTag>("met_src")),
     muon_src(cfg.getParameter<edm::InputTag>("muon_src")),
+    map_src(cfg.getParameter<edm::InputTag>("map_src")),
     pt_cut(cfg.getParameter<double>("pt_cut")),
     eta_cut(cfg.getParameter<double>("eta_cut")),
     loose_pt_cut(cfg.getParameter<double>("loose_pt_cut")),
     loose_eta_cut(cfg.getParameter<double>("loose_eta_cut")),
+    lepton_pt_cut(cfg.getParameter<double>("lepton_pt_cut")),
+    lepton_eta_cut(cfg.getParameter<double>("lepton_eta_cut")),
     prints(cfg.getUntrackedParameter<bool>("prints", false))
 {
   gSystem->Load("./dict_C.so");
@@ -156,6 +192,7 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_p4TLep = new TLorentzVector;
   m_p4BtLep = new TLorentzVector;
   m_p4Lep = new TLorentzVector;
+  m_p4LepPF = new TLorentzVector;
   m_p4Nu = new TLorentzVector;
 
   m_vtxGHad = new TVector3;
@@ -171,6 +208,7 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_vtxTLep = new TVector3;
   m_vtxBtLep = new TVector3;
   m_vtxLep = new TVector3;
+  m_vtxLepPF = new TVector3;
   m_vtxNu = new TVector3;
 
   m_vthr3 = new TVector3;
@@ -186,6 +224,8 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_p4jBtLep = new TLorentzVector;
   m_p4MET = new TLorentzVector;
 
+  m_p4jBPF = new TLorentzVector;
+
   m_vthr3j = new TVector3;
   m_vthr2j = new TVector3;
 
@@ -197,7 +237,16 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_vthr3jAll = new TVector3;
   m_vthr2jAll = new TVector3;
 
+  m_vp4jQOtherPF = new std::vector<TLorentzVector>;
+  m_vp4jBOtherPF = new std::vector<TLorentzVector>;
+  m_vvtxQOtherPF = new std::vector<TVector3>;
+  m_vvtxBOtherPF = new std::vector<TVector3>;
+
+  m_vthr3jAllPF = new TVector3;
+  m_vthr2jAllPF = new TVector3;
+
   m_beamspot = new TVector3;
+  m_reco_beamspot = new TVector3;
 
   m_tree->Branch("p4GHad", &m_p4GHad);
   m_tree->Branch("p4BgHad", &m_p4BgHad);
@@ -212,6 +261,7 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_tree->Branch("p4TLep", &m_p4TLep);
   m_tree->Branch("p4BtLep", &m_p4BtLep);
   m_tree->Branch("p4Lep", &m_p4Lep);
+  m_tree->Branch("p4LepPF", &m_p4LepPF);
   m_tree->Branch("p4Nu", &m_p4Nu);
 
   m_tree->Branch("vtxGHad", &m_vtxGHad);
@@ -227,6 +277,7 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_tree->Branch("vtxTLep", &m_vtxTLep);
   m_tree->Branch("vtxBtLep", &m_vtxBtLep);
   m_tree->Branch("vtxLep", &m_vtxLep);
+  m_tree->Branch("vtxLepPF", &m_vtxLepPF);
   m_tree->Branch("vtxNu", &m_vtxNu);
 
   m_tree->Branch("vthr3", &m_vthr3);
@@ -244,6 +295,8 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_tree->Branch("p4jBtLep", &m_p4jBtLep);
   m_tree->Branch("p4MET", &m_p4MET);
 
+  m_tree->Branch("p4jBPF", &m_p4jBPF);
+
   m_tree->Branch("vthr3j", &m_vthr3j);
   m_tree->Branch("thr3j", &m_thr3j, "thr3j/D");
   m_tree->Branch("vthr2j", &m_vthr2j);
@@ -259,7 +312,29 @@ MFVThrustAnalysis::MFVThrustAnalysis(const edm::ParameterSet& cfg)
   m_tree->Branch("vthr2jAll", &m_vthr2jAll);
   m_tree->Branch("thr2jAll", &m_thr2jAll, "thr2jAll/D");
 
+  m_tree->Branch("vp4jQOtherPF", &m_vp4jQOtherPF, 32000, 0);
+  m_tree->Branch("vp4jBOtherPF", &m_vp4jBOtherPF, 32000, 0);
+  m_tree->Branch("vvtxQOtherPF", &m_vvtxQOtherPF, 32000, 0);
+  m_tree->Branch("vvtxBOtherPF", &m_vvtxBOtherPF, 32000, 0);
+
+  m_tree->Branch("vthr3jAllPF", &m_vthr3jAllPF);
+  m_tree->Branch("thr3jAllPF", &m_thr3jAllPF, "thr3jAllPF/D");
+  m_tree->Branch("vthr2jAllPF", &m_vthr2jAllPF);
+  m_tree->Branch("thr2jAllPF", &m_thr2jAllPF, "thr2jAllPF/D");
+
+  m_tree->Branch("ele_pt", &m_ele_pt, "ele_pt/D");
+  m_tree->Branch("ele_eta", &m_ele_eta, "ele_eta/D");
+  m_tree->Branch("ele_phi", &m_ele_phi, "ele_phi/D");
+
+  m_tree->Branch("mu_pt", &m_mu_pt, "mu_pt/D");
+  m_tree->Branch("mu_eta", &m_mu_eta, "mu_eta/D");
+  m_tree->Branch("mu_phi", &m_mu_phi, "mu_phi/D");
+
+  m_tree->Branch("ele_num", &m_ele_num, "ele_num/D");
+  m_tree->Branch("mu_num", &m_mu_num, "mu_num/D");
+
   m_tree->Branch("beamspot", &m_beamspot);
+  m_tree->Branch("reco_beamspot", &m_reco_beamspot);
 }
 
 void MFVThrustAnalysis::fillVecs(const reco::Candidate* genp, TLorentzVector* p4, TVector3* vtx, const reco::Candidate* genpFinal) {
@@ -268,9 +343,9 @@ void MFVThrustAnalysis::fillVecs(const reco::Candidate* genp, TLorentzVector* p4
     *vtx = TVector3();
     return;
   }
-
+  //std::cout<<"fill vecs genp pt "<<genp->pt()<<std::endl;
   p4->SetXYZT(genp->px(), genp->py(), genp->pz(), genp->energy());
-
+  //std::cout<<"fill vecs p4 pt "<<p4->Pt()<<std::endl;
   const reco::Candidate* for_vtx = genp;
   if (genpFinal) {
     // get position of first non-b daughter
@@ -342,6 +417,7 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   *m_p4TLep = TLorentzVector();
   *m_p4BtLep = TLorentzVector();
   *m_p4Lep = TLorentzVector();
+  *m_p4LepPF = TLorentzVector();
   *m_p4Nu = TLorentzVector();
 
   *m_vtxGHad = TVector3();
@@ -357,6 +433,7 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   *m_vtxTLep = TVector3();
   *m_vtxBtLep = TVector3();
   *m_vtxLep = TVector3();
+  *m_vtxLepPF = TVector3();
   *m_vtxNu = TVector3();
 
   *m_vthr3 = TVector3();
@@ -374,6 +451,8 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   *m_p4jBtLep = TLorentzVector();
   *m_p4MET = TLorentzVector();
 
+  *m_p4jBPF = TLorentzVector();
+
   *m_vthr3j = TVector3();
   m_thr3j = 0.;
   *m_vthr2j = TVector3();
@@ -389,6 +468,27 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   *m_vthr2jAll = TVector3();
   m_thr2jAll = 0.;
 
+  m_vp4jQOtherPF->clear();
+  m_vp4jBOtherPF->clear();
+  m_vvtxQOtherPF->clear();
+  m_vvtxBOtherPF->clear();
+
+  *m_vthr3jAllPF = TVector3();
+  m_thr3jAllPF = 0.;
+  *m_vthr2jAllPF = TVector3();
+  m_thr2jAllPF = 0.;
+
+  m_ele_pt = 0.;
+  m_ele_eta = 0.;
+  m_ele_phi = 0.;
+
+  m_mu_pt = 0.;
+  m_mu_eta = 0.;
+  m_mu_phi = 0.;
+
+  m_ele_num = 0.;
+  m_mu_num = 0.;
+
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_particles_src, gen_particles); 
   edm::Handle<reco::GenJetCollection> gen_jets;
@@ -396,12 +496,15 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   edm::Handle<reco::GenMETCollection> gen_mets;
   const reco::GenMET* gen_met = 0;
 
-  edm::Handle<pat::MuonCollection> muons;
-  event.getByLabel(muon_src, muons);
 
   edm::Handle<pat::METCollection> mets;
   event.getByLabel(met_src, mets);
   const pat::MET& met = mets->at(0);
+
+  edm::Handle<pat::ElectronCollection> electrons;
+  event.getByLabel("selectedPatElectronsPF", electrons); 
+  edm::Handle<pat::MuonCollection> muons;
+  event.getByLabel("selectedPatMuonsPF", muons); 
   
   if (event.getByLabel(gen_met_src, gen_mets))
     gen_met = &gen_mets->at(0);
@@ -410,6 +513,12 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
 
   if (gen_met == 0)
     throw cms::Exception("ThrustAnalysis") << "gen met not found in event";
+
+  edm::Handle<pat::JetCollection> jets;
+  event.getByLabel(jets_src, jets);
+
+  edm::Handle<reco::VertexCollection> vertices;
+  event.getByLabel("goodOfflinePrimaryVertices", vertices); 
 
   std::vector<reco::GenParticle> thr3Cands;
   std::vector<reco::GenJet> thr3jCands;
@@ -422,13 +531,28 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   const reco::GenJet* jSLep  = 0;
   const reco::GenJet* jBtLep = 0;
 
+  const pat::Jet* jBgHadPF = 0;
+  const pat::Jet* jSHadPF  = 0;
+  const pat::Jet* jBtHadPF = 0;
+  const pat::Jet* jQ0PF    = 0;
+  const pat::Jet* jQ1PF    = 0;
+  const pat::Jet* jBgLepPF = 0;
+  const pat::Jet* jSLepPF  = 0;
+  const pat::Jet* jBtLepPF = 0;
+
   *m_beamspot = TVector3();
+  *m_reco_beamspot = TVector3();
 
   // ~~~~~~~~~~ GenParticle ~~~~~~~~~~
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
-  if (!mci.Valid() || mci.num_leptonic != 1 || abs(mci.W_daughters[mci.which_is_lepton][0]->pdgId()) == 15)
+
+  if (mci.num_leptonic != 1) 
+    return;
+  const int which_lepton = mci.decay_type[0] == 3 ? 1 : 0;
+  const reco::Candidate* gen_lepton = mci.W_daughters[which_lepton][0];
+  if (gen_lepton->pdgId() == 15 || gen_lepton->pt() < lepton_pt_cut || fabs(gen_lepton->eta()) > lepton_eta_cut)
     return;
 
   if (mci.Valid()) {
@@ -492,6 +616,19 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
     jBgLep = matchedGenJet(mci.bottoms          [ilep],    *gen_jets);
     jSLep  = matchedGenJet(mci.stranges         [ilep],    *gen_jets);
     jBtLep = matchedGenJet(mci.bottoms_from_tops[ilep],    *gen_jets);
+
+    // ~~~~~~~~~~ Matched RecoJets ~~~~~~~~~~
+    /*
+    // Find matching RecoJets
+    jBgHadPF = matchedRecoJet(jBgHad,    *pf_jets);
+    jSHadPF  = matchedRecoJet(jSHad,     *pf_jets);
+    jBtHadPF = matchedRecoJet(jBtHad,    *pf_jets);
+    jQ0PF    = matchedRecoJet(jQ0,       *pf_jets);
+    jQ1PF    = matchedRecoJet(jQ1,       *pf_jets);
+    jBgLepPF = matchedRecoJet(jBgLep,    *pf_jets);
+    jSLepPF  = matchedRecoJet(jSLep,     *pf_jets);
+    jBtLepPF = matchedRecoJet(jBtLep,    *pf_jets);
+    */
 
     TVector3 vtxTmp;
     fillVecs(jBgHad, m_p4jBgHad, &vtxTmp);
@@ -626,19 +763,117 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   }
 
   // Calculate thrusts with all jets + lepton with pt and eta cuts
-  for (int i = 0, n = thr3jCands.size(); i < n; ++i)
+  for (int i = 0, n = thr3jCands.size(); i < n; ++i) {
     if (thr3jCands[i].pt() > pt_cut && fabs(thr3jCands[i].eta()) < eta_cut)
-      thr3jAllCands.push_back(thr3jCands[i]);
+      thr3jAllCands.push_back(thr3jCands[i]);    
+  }
 
   calcThrust<Thrust>  (thr3jAllCands, *m_vthr3jAll, m_thr3jAll);
   calcThrust<Thrust2D>(thr3jAllCands, *m_vthr2jAll, m_thr2jAll);
+
+  std::vector<pat::Jet> thr3jAllCandsPF;
+
+  edm::Handle< edm::Association<reco::VertexCollection> > map;
+  event.getByLabel (map_src,map);
+  if (!map->empty())
+    std::cout<<"test "<<map->size()<<std::endl;
+  *m_reco_beamspot = *m_beamspot;
+
+  for (unsigned i = 0, n = jets->size(); i < n; ++i) {
+    const pat::Jet* jet = &jets->at(i);
+
+    edm::Ref<pat::JetCollection> jetref (jets, i);
+    reco::VertexRef ass_vtx;
+    bool map_flag=false;
+
+    //if ((*map)[jetref].isNull())
+      {
+      ass_vtx = (*map)[jetref];          
+      map_flag=true;
+      }
+    std::cout<<"test "<<i<<std::endl;
+    if (jet->pt() > loose_pt_cut && fabs(jet->eta()) < loose_eta_cut) {
+      fillCandVec(thr3jAllCandsPF, jet);     
+      TLorentzVector p4tmp;
+      TVector3 vtxtmp;
+      fillVecs(jet, &p4tmp, &vtxtmp);      
+      const reco::SecondaryVertexTagInfo* svtag = jet->tagInfoSecondaryVertex("secondaryVertex");
+      if (vertices->size() > 0 && svtag && svtag->nVertices() > 0) {
+	const reco::Vertex& sv = svtag->secondaryVertex(0);
+	{
+	  //std::cout<<"test"<<std::endl;
+	  vtxtmp.SetXYZ(m_reco_beamspot->x(),m_reco_beamspot->y(),m_reco_beamspot->z());
+	}
+	//else vtxtmp.SetXYZ(ass_vtx->x(),ass_vtx->y(),ass_vtx->z());
+	const GlobalVector& flight_dir = svtag->flightDirection(0);
+      }
+      
+
+      if (jet->bDiscriminator("combinedSecondaryVertexBJetTags") > 0.679 ) {
+	//std::cout<<"btag "<<jet->bDiscriminator("combinedSecondaryVertexBJetTags")<<std::endl;
+	m_vp4jBOtherPF->push_back(p4tmp);
+	m_vvtxBOtherPF->push_back(vtxtmp);
+      }
+      else {
+	m_vp4jQOtherPF->push_back(p4tmp);
+	m_vvtxQOtherPF->push_back(vtxtmp);
+      }
+    }
+  }
+
+  if (electrons->size() > 0) {
+    const pat::Electron* electron = &electrons->at(0);
+    std::cout<<"electron"<<std::endl;
+    std::cout<<electron->pt()<<std::endl;   
+    if (electron->pt() > lepton_pt_cut &&
+	fabs(electron->eta()) < lepton_eta_cut) {
+      fillVecs(electron, m_p4LepPF, m_vtxLepPF);
+      m_ele_pt = electron->pt();
+      m_ele_eta = electron->eta();
+      m_ele_phi = electron->phi();
+      m_ele_num = electrons->size();
+
+    }
+  }
+  if (muons->size() > 0) {
+    int hardest_mu = 0;
+    for (unsigned int i=0;i<muons->size();i++) {
+      if (muons->at(i).pt() >	muons->at(hardest_mu).pt())
+	hardest_mu = i;
+    }
+    const pat::Muon* muon = &muons->at(hardest_mu);  
+    std::cout<<"muon"<<std::endl;   
+    std::cout<<muon->pt()<<std::endl;
+    if (muon->pt() > lepton_pt_cut &&
+	fabs(muon->eta()) < lepton_eta_cut) {
+      fillVecs(muon, m_p4LepPF, m_vtxLepPF);
+      m_mu_pt = muon->pt();
+      m_mu_eta = muon->eta();
+      m_mu_phi = muon->phi();
+      m_mu_num = muons->size();
+    }
+  }
+
+  if (mci.num_leptonic==1)
+    std::cout<<"event"<<std::endl;
+  if(m_p4LepPF->Pt() < 4) {
+    std::cout<<"bazinga"<<std::endl;
+    std::cout<<electrons->size()<<" "<<muons->size()<<std::endl;
+  }
+    
+
+
+  calcThrust<Thrust>  (thr3jAllCandsPF, *m_vthr3jAllPF, m_thr3jAllPF);
+  calcThrust<Thrust2D>(thr3jAllCandsPF, *m_vthr2jAllPF, m_thr2jAllPF);
 
   if (prints) {
     m_beamspot->Print();
     m_vtxSHad->Print();
   }
 
-  if (mci.Valid() || (m_vp4jQOther->size() > 2 && m_vp4jBOther->size() > 2))
+  if (mci.Valid() 
+      && electrons->size()+muons->size() > 0
+      )
     m_tree->Fill();
 }
 
