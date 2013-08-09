@@ -1,25 +1,46 @@
 import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
-process.TFileService.fileName = 'thrust.root'
+process.load('Configuration.Geometry.GeometryIdeal_cff')
+process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.GlobalTag.globaltag = 'START53_V21::All'
+process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
+process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+process.goodOfflinePrimaryVertices.filter = cms.bool(False)
 
-#from JMTucker.MFVNeutralino.SimFiles import load
-#load(process, 'tau1000um_M0400', file_range='all', sec_files=False)
+process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
-process.source.fileNames = ['file:/uscms/home/jchaves/nobackup/pat_2_1_Nnk.root']
+process.TFileService.fileName = 'ass_thrust.root'
+process.maxEvents.input = 100
+process.options.SkipEvent = cms.untracked.vstring('ProductNotFound')
+
+file = open('files.txt', 'r')
+myfilelist = cms.untracked.vstring()
+for line in file:
+	string = "/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/"+line
+    # add as many files as you wish this way
+	myfilelist.extend( [string] )
+
+process.source = cms.Source('PoolSource', fileNames = myfilelist)
 
 process.thrustNtuple = cms.EDAnalyzer('MFVThrustAnalysis',
                                       gen_particles_src = cms.InputTag('genParticles'),
                                       gen_jets_src = cms.InputTag('ak5GenJets'),
                                       gen_met_src = cms.InputTag('genMetTrue'),
                                       met_src = cms.InputTag('patMETsPF'),
-                                      muon_src = cms.InputTag('semilepMuonsPF'),
+                                      jets_src = cms.InputTag('selectedPatJetsPF'),
+                                      muon_src = cms.InputTag('selectedPatMuonsPF'),
+                                      map_src = cms.InputTag('mfvVerticesToJets'),
                                       pt_cut = cms.double(30),
                                       eta_cut = cms.double(3),
                                       loose_pt_cut = cms.double(30), # 20
                                       loose_eta_cut = cms.double(3), # 3.5
+                                      lepton_pt_cut = cms.double(30), # 20
+                                      lepton_eta_cut = cms.double(2.1), # 3.5
                                       )
 
-process.p = cms.Path(process.thrustNtuple)
+process.p = cms.Path(process.mfvVertexSequence*process.thrustNtuple)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     crab_cfg = '''
