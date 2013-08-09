@@ -335,15 +335,17 @@ def re_pat(process, name='PAT2', old_name='PAT'):
     process.out.outputCommands.append('keep edmTriggerResults_TriggerResults__%s' % name)
 
 def pileup_removal_studies(process, keep_nopileup=True, no_closest_z_vtx=True):
-    process.out.outputCommands.append('keep *_pfPileUpPF_*_*')
+    process.out.outputCommands.append('keep *_pfPileUp%s_*_*' % postfix)
     if keep_nopileup:
-        process.out.outputCommands.append('keep *_pfNoPileUpPF_*_*')
+        process.out.outputCommands.append('keep *_pfNoPileUp%s_*_*' % postfix)
     if no_closest_z_vtx:
-        process.pfPileUpPFNoClosestZVertex = process.pfPileUpPF.clone(checkClosestZVertex = False)
-        process.pfNoPileUpPFNoClosestZVertex = process.pfNoPileUpPF.clone(topCollection = 'pfPileUpPFNoClosestZVertex')
-        process.out.outputCommands.append('keep *_pfPileUpPFNoClosestZVertex_*_*')
+        setprocesspostfix('pfPileUpNoClosestZVertex',   processpostfix('pfPileUp').clone(checkClosestZVertex = False))
+        setprocesspostfix('pfNoPileUpNoClosestZVertex', processpostfix('pfNoPileUp').clone(topCollection = 'pfPileUpPFNoClosestZVertex'))
+        processpostfix('patPF2PATSequence').replace(processpostfix('pfPileUp'),   processpostfix('pfPileUp')   + processpostfix('pfPileUpNoClosestZVertex'))
+        processpostfix('patPF2PATSequence').replace(processpostfix('pfNoPileUp'), processpostfix('pfNoPileUp') + processpostfix('pfNoPileUpNoClosestZVertex'))
+        process.out.outputCommands.append('keep *_pfPileUpNoClosestZVertex%s_*_*' % postfix)
         if keep_nopileup:
-            process.out.outputCommands.append('keep *_pfNoPileUpPFNoClosestZVertex_*_*')
+            process.out.outputCommands.append('keep *_pfNoPileUpNoClosestZVertex%s_*_*' % postfix)
 
 for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup re_pat pileup_removal_studies'.split():
     if arg in sys.argv:
