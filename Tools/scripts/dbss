@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+
+import os, sys
+
+cmd = 'dbs search --query="%s"'
+
+if 'ex' in sys.argv:
+    raise RuntimeError('you troglodyte')
+
+if 'ana01' in sys.argv:
+    sys.argv.remove('ana01')
+    cmd += ' --url https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_01_writer/servlet/DBSServlet'
+elif 'ana02' in sys.argv:
+    sys.argv.remove('ana02')
+    cmd += ' --url https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet'
+
+if 'find' not in sys.argv:
+    if 'size' in sys.argv:
+        sys.argv.remove('size')
+        c = 'find sum(file.size) where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'file' in sys.argv:
+        sys.argv.remove('file')
+        c = 'find file where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'filenev' in sys.argv:
+        sys.argv.remove('filenev')
+        c = 'find file,file.numevents where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'filenevsz' in sys.argv:
+        sys.argv.remove('filenevsz')
+        c = 'find file,file.numevents,file.size where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'site' in sys.argv:
+        sys.argv.remove('site')
+        c = 'find site where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'nevents' in sys.argv:
+        sys.argv.remove('nevents')
+        c = 'find sum(file.numevents) where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'nevent' in sys.argv:
+        sys.argv.remove('nevent')
+        c = 'find file.numevents where file=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'ds' in sys.argv:
+        sys.argv.remove('ds')
+        c = 'find dataset where dataset like "*%s*"' % sys.argv[1]
+        cmd = cmd % c
+    elif 'dss' in sys.argv:
+        sys.argv.remove('dss')
+        c = 'find dataset where dataset like "%s"' % sys.argv[1]
+        cmd = cmd % c
+    elif 'dsfile' in sys.argv:
+        sys.argv.remove('dsfile')
+        c = 'find dataset where file="%s"' % sys.argv[1]
+        cmd = cmd % c
+    elif 'dsrun' in sys.argv:
+        sys.argv.remove('dsrun')
+        c = 'find dataset where run=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'filerun' in sys.argv:
+        sys.argv.remove('filerun')
+        c = 'find file where dataset="%s" and run=%s' % (sys.argv[1], sys.argv[2])
+        cmd = cmd % c
+    elif 'filerunls' in sys.argv:
+        sys.argv.remove('filerunls')
+        c = 'find file where dataset="%s" and run=%s and lumi=%s' % (sys.argv[1], sys.argv[2], sys.argv[3])
+        cmd = cmd % c
+    elif 'runrange' in sys.argv:
+        sys.argv.remove('runrange')
+        c = 'find min(run),max(run) where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'rel' in sys.argv:
+        sys.argv.remove('rel')
+        c = 'find release where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'run' in sys.argv:
+        sys.argv.remove('run')
+        c = 'find run where dataset=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'runfile' in sys.argv:
+        sys.argv.remove('runfile')
+        c = 'find run where file=%s' % sys.argv[1]
+        cmd = cmd % c
+    elif 'pick' in sys.argv:
+        n = sys.argv.index('pick')
+        r,l = sys.argv[n+1:n+3]
+        r,l = int(r), int(l)
+        del sys.argv[n:n+3]
+        c = 'find file where dataset=%s and run=%i and lumi=%i' % (sys.argv[1], r, l)
+        cmd = cmd % c
+else:
+    cmd = cmd % ' '.join(sys.argv[1:])
+
+print cmd
+
+os.system(cmd)
