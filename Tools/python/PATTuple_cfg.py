@@ -347,7 +347,11 @@ def pileup_removal_studies(process, keep_nopileup=True, no_closest_z_vtx=True):
         if keep_nopileup:
             process.out.outputCommands.append('keep *_pfNoPileUpNoClosestZVertex%s_*_*' % postfix)
 
-for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup re_pat pileup_removal_studies'.split():
+def no_closest_z_in_pu(process):
+    processpostfix('pfPileUp').checkClosestZVertex = False
+    processpostfix('pfPileUpIso').checkClosestZVertex = False
+    
+for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup re_pat pileup_removal_studies no_closest_z_in_pu'.split():
     if arg in sys.argv:
         exec '%s(process)' % arg
 
