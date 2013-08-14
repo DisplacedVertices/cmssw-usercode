@@ -2,9 +2,8 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools.CMSSWTools import silence_messages
 
-from JMTucker.MFVNeutralino.SimFiles import load as load_files
-load_files(process, 'tau1000um_M0400', 0)
-
+process.source.fileNames = ['/store/user/jchu/mfv_neutralino_tau9900um_M0400/jtuple_pileupremovalstudies_v6/5c257295836d18fbf020b73449ad9b5f/pat_1_1_luH.root']
+process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_254_2_JTs.root','/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_255_1_nvB.root')
 process.TFileService.fileName = 'prepare_vis.root'
 process.maxEvents.input = 20
 silence_messages(process, 'TwoTrackMinimumDistance')
@@ -20,8 +19,8 @@ process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
 process.load('SimTracker.TrackAssociation.TrackAssociatorByHits_cfi')
 
 from Configuration.EventContent.EventContent_cff import AODSIMEventContent
-process.out = cms.OutputModule('PoolOutputModule', fileName = cms.untracked.string('/uscms/home/tucker/scratch/mfv_vis.root'), outputCommands = AODSIMEventContent.outputCommands)
-process.out.outputCommands += ['keep *_*_*_BasicAnalyzer']
+process.out = cms.OutputModule('PoolOutputModule', fileName = cms.untracked.string('/uscms/home/tucker/scratch/mfv_vis.root')) #, outputCommands = AODSIMEventContent.outputCommands)
+#process.out.outputCommands += ['keep *_*_*_BasicAnalyzer']
 process.outp = cms.EndPath(process.out)
 
 process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
@@ -35,19 +34,10 @@ process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
                                    )
 
 process.load('JMTucker.MFVNeutralino.MatchedTracks_cff')
-process.load('JMTucker.MFVNeutralino.VertexReco_cff')
-from JMTucker.MFVNeutralino.VertexReco_cff import cut_all, clone_all
+process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 
 process.pp = cms.Path(process.mfvGenParticles *
                       process.printList *
-                      process.mfvTrackMatching *
-                      process.mfvVertexReco
+#                      process.mfvTrackMatching *
+                      process.mfvVertexSequence
                       )
-
-objs = clone_all(process, 'Cos75')
-objs[0].vertexMinAngleCosine = 0.75
-process.pp *= objs[-1] # the sequence
-
-cut_name, cut = 'Qntk6M20', 'tracksSize >= 6 && p4.mass >= 20'
-process.pp *= cut_all(process, '',      cut_name, cut)
-process.pp *= cut_all(process, 'Cos75', cut_name, cut)
