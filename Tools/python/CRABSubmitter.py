@@ -163,7 +163,7 @@ class CRABSubmitter:
         if self.job_control_from_sample:
             for cmd in sample.job_control_commands:
                 cfg.set('CMSSW', *cmd)
-        if self.crab_cfg_modifier is not none:
+        if self.crab_cfg_modifier is not None:
             ret = self.crab_cfg_modifier(sample)
             for entry in ret:
                 cfg.set(*entry)
