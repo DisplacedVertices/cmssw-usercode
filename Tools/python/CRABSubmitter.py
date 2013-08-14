@@ -41,6 +41,7 @@ class CRABSubmitter:
                  testing = 'testing' in sys.argv,
                  max_threads = 5,
                  ssh_control_persist = False,
+                 crab_cfg_modifier = None,
                  **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
@@ -51,6 +52,8 @@ class CRABSubmitter:
         self.batch_name = batch_name
         self.testing = testing
         self.max_threads = max_threads
+
+        self.crab_cfg_modifier = crab_cfg_modifier
 
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
@@ -160,6 +163,10 @@ class CRABSubmitter:
         if self.job_control_from_sample:
             for cmd in sample.job_control_commands:
                 cfg.set('CMSSW', *cmd)
+        if self.crab_cfg_modifier is not none:
+            ret = self.crab_cfg_modifier(sample)
+            for entry in ret:
+                cfg.set(*entry)
         crab_cfg_fn = 'crab.%s.%s.cfg' % (self.batch_name, sample.name)
         cfg.write(open(crab_cfg_fn, 'wt'))
         return crab_cfg_fn, open(crab_cfg_fn, 'rt').read()
