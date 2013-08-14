@@ -92,7 +92,7 @@ def sample_ttbar():
     de_mfv()
     for ana in all_anas:
         ana.is_ttbar = True
-    
+
 def scatterplots(do):
     for ana in all_anas:
         ana.do_scatterplots = do
@@ -117,7 +117,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples
+    samples = Samples.mfv_signal_samples + Samples.background_samples # + Samples.auxiliary_background_samples
+
+    for sample in Samples.background_samples:
+        sample.ana_hash = '547d3313903142038335071634b26604'
 
     def pset_modifier(sample):
         to_add = []
@@ -126,7 +129,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         elif 'mfv' not in sample.name:
             to_add.append('de_mfv()')
         return to_add
-    
+
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('VertexRecoPlay',
                        total_number_of_events = 99250,
