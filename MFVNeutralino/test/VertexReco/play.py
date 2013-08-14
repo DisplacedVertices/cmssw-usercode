@@ -17,13 +17,20 @@ process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.goodOfflinePrimaryVertices.filter = cms.bool(False)
 
+process.load('JMTucker.MFVNeutralino.RedoPURemoval_cff')
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSequence)
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSequence *
+                     process.mfvRedoPURemoval * process.mfvExtraVertexSequence)
 
 all_anas = []
 
 vertex_srcs = [
-    ('MY', 'mfvVertices'),
+    ('MY',     'mfvVertices'),
+    ('PF',     'mfvVerticesFromCands'),
+    ('PFNPU',  'mfvVerticesFromNoPUCands'),
+    ('PFNZPU', 'mfvVerticesFromNoPUNoZCands'),
+    ('JPT',    'mfvVerticesFromJets'),
+    ('JPF',    'mfvVerticesFromPFJets'),
     ]
 
 ana = cms.EDAnalyzer('VtxRecoPlay',
@@ -89,42 +96,6 @@ def sample_ttbar():
 def scatterplots(do):
     for ana in all_anas:
         ana.do_scatterplots = do
-
-def use_pf_candidates(src, vertex_producer=process.mfvVertices):
-    vertex_producer.use_tracks = False
-    vertex_producer.use_pf_jets = False
-    vertex_producer.use_pat_jets = False
-    vertex_producer.use_pf_candidates = True
-    vertex_producer.pf_candidate_src = src
-
-def use_jets(kind, vertex_producer=process.mfvVertices):
-    vertex_producer.use_tracks = False
-    vertex_producer.use_pf_candidates = False
-    if kind == 'pat':
-        vertex_producer.use_pf_jets = False
-        vertex_producer.use_pat_jets = True
-    elif kind == 'pf':
-        vertex_producer.use_pf_jets = True
-        vertex_producer.use_pat_jets = False
-    else:
-        raise ValueError("don't know anything about kind = %r" % kind)
-
-process.mfvVerticesFromCands = process.mfvVertices.clone()
-use_pf_candidates('particleFlow', process.mfvVerticesFromCands)
-
-process.mfvVerticesFromJets = process.mfvVertices.clone()
-use_jets('pat', process.mfvVerticesFromJets)
-
-process.playMYPFQno   = ana.clone(vertex_src = 'mfvVerticesFromCands')
-process.playMYPFQntk6 = ana.clone(vertex_src = 'mfvVerticesFromCands', min_sv_ntracks = 6)
-all_anas.extend((process.playMYPFQno, process.playMYPFQntk6))
-
-process.playMYJPTQno   = ana.clone(vertex_src = 'mfvVerticesFromJets')
-process.playMYJPTQntk6 = ana.clone(vertex_src = 'mfvVerticesFromJets', min_sv_ntracks = 6)
-all_anas.extend((process.playMYJPTQno, process.playMYJPTQntk6))
-
-process.p *= process.mfvVerticesFromCands * process.playMYPFQno  * process.playMYPFQntk6
-process.p *= process.mfvVerticesFromJets  * process.playMYJPTQno * process.playMYJPTQntk6
 
 if 'debug' in sys.argv:
     if 'ttbar' in sys.argv:
