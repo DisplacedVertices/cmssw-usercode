@@ -270,7 +270,7 @@ def compare_all_hists(ps, samples, **kwargs):
             if i == 0:
                 hist.Draw(draw_cmd)
             else:
-                hist.Draw(draw_cmd + ' sames')
+                hist.Draw((draw_cmd + ' sames').strip())
 
         ps.c.Update()
         if not no_stats(name, hist_list, None):
