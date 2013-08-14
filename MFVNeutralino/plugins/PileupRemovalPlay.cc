@@ -26,6 +26,7 @@ class PileupRemovalPlay : public edm::EDAnalyzer {
   const edm::InputTag nonpucands_src;
   const edm::InputTag pv_src;
   const edm::InputTag ltmm_src;
+  const double pt_cut;
 
   TH1F* h_num;
   TH1F* h_num_null;
@@ -116,14 +117,15 @@ PileupRemovalPlay::PileupRemovalPlay(const edm::ParameterSet& cfg)
   : pucands_src(cfg.getParameter<edm::InputTag>("pucands_src")),
     nonpucands_src(cfg.getParameter<edm::InputTag>("nonpucands_src")),
     pv_src(cfg.getParameter<edm::InputTag>("pv_src")),
-    ltmm_src(cfg.getParameter<edm::InputTag>("ltmm_src"))
+    ltmm_src(cfg.getParameter<edm::InputTag>("ltmm_src")),
+    pt_cut(cfg.getParameter<double>("pt_cut"))
 {
   edm::Service<TFileService> fs;
-  h_num = fs->make<TH1F>("h_num", ";number of pucands;events", 100, 0, 2000);
+  h_num = fs->make<TH1F>("h_num", ";number of pucands;events", 2000, 0, 2000);
   h_num_null = fs->make<TH1F>("h_num_null", ";number of pucands with null track ref;events", 10, 0, 10);
   h_num_notGeneralTracks = fs->make<TH1F>("h_num_notGeneralTracks", ";number of pucands with module not generalTracks;events", 10, 0, 10);
-  h_num_withoutLightTrackMatch = fs->make<TH1F>("h_num_withoutLightTrackMatch", ";number of pucands without lighttrackmatch;events", 100, 0, 2000);
-  h_num_withLightTrackMatch = fs->make<TH1F>("h_num_withLightTrackMatch", ";number of pucands with lighttrackmatch;events", 100, 0, 300);
+  h_num_withoutLightTrackMatch = fs->make<TH1F>("h_num_withoutLightTrackMatch", ";number of pucands without lighttrackmatch;events", 2000, 0, 2000);
+  h_num_withLightTrackMatch = fs->make<TH1F>("h_num_withLightTrackMatch", ";number of pucands with lighttrackmatch;events", 300, 0, 300);
   h_ltm_quality = fs->make<TH1F>("h_ltm_quality", ";lighttrackmatch quality;number of pucands", 101, 0, 1.01);
   h_ltm_min_quality = fs->make<TH1F>("h_ltm_min_quality", ";min quality;events", 101, 0, 1.01);
   h_ltm_pt = fs->make<TH1F>("h_ltm_pt", ";pt for pucands with lighttrackmatch;number of pucands", 100, 0, 100);
@@ -287,6 +289,10 @@ void PileupRemovalPlay::analyze(const edm::Event& event, const edm::EventSetup&)
   int ltm_num_only_descent_1000022 = 0;
   int num_withLightTrackMatch_without_ltm_descent_1000021 = 0;
   for (const reco::PFCandidate& pucand : *pucands) {
+    if (pucand.pt() < pt_cut) {
+      continue;
+    }
+
     ++num;
 
     reco::TrackRef tkref = pucand.trackRef();
