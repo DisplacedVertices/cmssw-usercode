@@ -14,11 +14,14 @@ add_analyzer('PileupRemovalPlay',
              nonpucands_src = cms.InputTag('pfNoPileUpPF'),
              pv_src = cms.InputTag('goodOfflinePrimaryVertices'),
              ltmm_src = cms.InputTag('mfvTrackMatches'),
+             pt_cut = cms.double(0),
              )
 
 process.PileupRemovalPlayNoZCheck = process.PileupRemovalPlay.clone(pucands_src = 'pfPileUpNoClosestZVertexPF',
                                                                     nonpucands_src = 'pfNoPileUpNoClosestZVertexPF')
-process.pPileupRemovalPlay *= process.PileupRemovalPlayNoZCheck
+process.PileupRemovalPlayPt5 = process.PileupRemovalPlay.clone(pt_cut = 5)
+process.PileupRemovalPlayNoZCheckPt5 = process.PileupRemovalPlayNoZCheck.clone(pt_cut = 5)
+process.pPileupRemovalPlay *= process.PileupRemovalPlayNoZCheck * process.PileupRemovalPlayPt5 * process.PileupRemovalPlayNoZCheckPt5
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *
