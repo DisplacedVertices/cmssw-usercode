@@ -119,8 +119,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     samples = Samples.mfv_signal_samples + Samples.background_samples # + Samples.auxiliary_background_samples
 
-    for sample in Samples.background_samples:
-        sample.ana_hash = '547d3313903142038335071634b26604'
+    samples = [Samples.mfv_neutralino_tau0000um_M0400, Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau1000um_M1000, Samples.mfv_neutralino_tau9900um_M0400, Samples.qcdht1000, Samples.ttbarsemilep]
+    Samples.mfv_neutralino_tau0000um_M0400.ana_dataset_override = '/mfv_neutralino_tau0000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    Samples.mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    Samples.mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    Samples.mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    Samples.qcdht1000                     .ana_dataset_override = '/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    Samples.ttbarsemilep                  .ana_dataset_override = '/TTJets_SemiLeptMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
 
     def pset_modifier(sample):
         to_add = []
@@ -131,7 +137,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('VertexRecoPlay',
+    cs = CRABSubmitter('VertexRecoPlayNoZPU',
                        total_number_of_events = 99250,
                        events_per_job = 4000,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
@@ -139,8 +145,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        use_ana_dataset = True,
                        use_parent = True,
                        )
-    
-    #cs.submit_all([Samples.mfv_neutralino_tau9900um_M0400, Samples.ttbarincl])
     cs.submit_all(samples)
 
 '''
