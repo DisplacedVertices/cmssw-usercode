@@ -333,14 +333,14 @@ for sample in background_samples:
     sample.drop_gen_particles = True
     sample.publish_user = 'jchu'
     sample.scheduler_name = 'condor'
-    sample.total_events = {'wjetstolnu':     57685961,
-                           'ttbarhadronic':  10291640,
-                           'ttbarsemilep':    9863760,
-                           'ttbardilep':      2364600,
-                           'qcdht0100':      50129518,
-                           'qcdht0250':      27062078,
-                           'qcdht0500':       8430000,
-                           'qcdht1000':      10200000}[sample.name]
+    sample.total_events = {'wjetstolnu':    645677,
+                           'ttbarhadronic': 18776224,
+                           'ttbarsemilep':  14691718,
+                           'ttbardilep':    2525457,
+                           'qcdht0100':     4024204,
+                           'qcdht0250':     17614616,
+                           'qcdht0500':     8835416,
+                           'qcdht1000':     12773699}[sample.name]
                            
 ttbarincl.no_skimming_cuts = True
 ttbarincl.scheduler_name = 'condor'
