@@ -19,8 +19,8 @@ process.goodOfflinePrimaryVertices.filter = cms.bool(False)
 
 process.load('JMTucker.MFVNeutralino.RedoPURemoval_cff')
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSequence *
-                     process.mfvRedoPURemoval * process.mfvExtraVertexSequence)
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertices *
+                     process.mfvRedoPURemoval * process.mfvNonPATExtraVertexSequence)
 
 all_anas = []
 
@@ -29,7 +29,7 @@ vertex_srcs = [
     ('PF',     'mfvVerticesFromCands'),
     ('PFNPU',  'mfvVerticesFromNoPUCands'),
     ('PFNZPU', 'mfvVerticesFromNoPUNoZCands'),
-    ('JPT',    'mfvVerticesFromJets'),
+#    ('JPT',    'mfvVerticesFromJets'),
     ('JPF',    'mfvVerticesFromPFJets'),
     ]
 
@@ -98,14 +98,14 @@ def scatterplots(do):
         ana.do_scatterplots = do
 
 if 'debug' in sys.argv:
-    if 'ttbar' in sys.argv:
-        de_mfv()
-
-    if 'argv' in sys.argv:
-        from JMTucker.Tools.CMSSWTools import file_event_from_argv
-        file_event_from_argv(process)
-
     process.mfvVertices.verbose = True
+
+if 'ttbar' in sys.argv:
+    de_mfv()
+
+if 'argv' in sys.argv:
+    from JMTucker.Tools.CMSSWTools import file_event_from_argv
+    file_event_from_argv(process)
 
 #scatterplots(True)
 #process.add_(cms.Service('SimpleMemoryCheck'))
@@ -119,15 +119,23 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     samples = Samples.mfv_signal_samples + Samples.background_samples # + Samples.auxiliary_background_samples
 
-    samples = [Samples.mfv_neutralino_tau0000um_M0400, Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau1000um_M1000, Samples.mfv_neutralino_tau9900um_M0400, Samples.qcdht1000, Samples.ttbarsemilep]
-    Samples.mfv_neutralino_tau0000um_M0400.ana_dataset_override = '/mfv_neutralino_tau0000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    Samples.mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    Samples.mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    Samples.mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    Samples.qcdht1000                     .ana_dataset_override = '/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
-    Samples.ttbarsemilep                  .ana_dataset_override = '/TTJets_SemiLeptMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    #Samples.mfv_neutralino_tau0000um_M0400.ana_dataset_override = '/mfv_neutralino_tau0000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    #Samples.mfv_neutralino_tau0010um_M0400.ana_dataset_override = '/mfv_neutralino_tau0010um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    #Samples.mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    #Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    #Samples.mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    #Samples.mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
+    #Samples.qcdht0100                     .ana_dataset_override = '/QCD_HT-100To250_TuneZ2star_8TeV-madgraph-pythia/tucker-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    #Samples.qcdht0250                     .ana_dataset_override = '/QCD_HT-250To500_TuneZ2star_8TeV-madgraph-pythia6/tucker-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    #Samples.qcdht0500                     .ana_dataset_override = '/QCD_HT-500To1000_TuneZ2star_8TeV-madgraph-pythia6/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    #Samples.qcdht1000                     .ana_dataset_override = '/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    #Samples.ttbarhadronic                 .ana_dataset_override = '/TTJets_HadronicMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    #Samples.ttbarsemilep                  .ana_dataset_override = '/TTJets_SemiLeptMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    #Samples.ttbardilep                    .ana_dataset_override = '/TTJets_FullLeptMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
 
+    samples = [Samples.mfv_neutralino_tau0000um_M0400, Samples.mfv_neutralino_tau0010um_M0400, Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400,
+               Samples.qcdht0100, Samples.qcdht0250, Samples.qcdht0500, Samples.qcdht1000, Samples.ttbarhadronic, Samples.ttbarsemilep, Samples.ttbardilep]
+    
     def pset_modifier(sample):
         to_add = []
         if 'ttbar' in sample.name:
@@ -137,13 +145,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('VertexRecoPlayNoZPU',
+    cs = CRABSubmitter('VertexRecoPlay',
                        total_number_of_events = 99250,
                        events_per_job = 4000,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
-                       use_ana_dataset = True,
-                       use_parent = True,
+                       #use_ana_dataset = True,
+                       #use_parent = True,
                        )
     cs.submit_all(samples)
 
