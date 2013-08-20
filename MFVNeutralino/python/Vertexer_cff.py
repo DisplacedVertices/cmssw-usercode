@@ -95,4 +95,5 @@ mfvPFCandVertexSequence = cms.Sequence(mfvVerticesFromCands + mfvVerticesFromNoP
 mfvJetVertexSequence = cms.Sequence(mfvVerticesFromJets + mfvVerticesFromPFJets)
 mfvExtraVertexSequence = cms.Sequence(mfvPFCandVertexSequence + mfvJetVertexSequence)
 
-
+mfvNonPATJetVertexSequence = cms.Sequence(mfvVerticesFromPFJets)
+mfvNonPATExtraVertexSequence = cms.Sequence(mfvPFCandVertexSequence + mfvNonPATJetVertexSequence)
