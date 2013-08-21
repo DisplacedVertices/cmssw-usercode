@@ -117,25 +117,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.mfv_signal_samples + Samples.background_samples # + Samples.auxiliary_background_samples
+    samples = Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples
 
-    #Samples.mfv_neutralino_tau0000um_M0400.ana_dataset_override = '/mfv_neutralino_tau0000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    #Samples.mfv_neutralino_tau0010um_M0400.ana_dataset_override = '/mfv_neutralino_tau0010um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    #Samples.mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    #Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    #Samples.mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    #Samples.mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/jchu-jtuple_noclosestzinpu_v6-ff1e996c570958e7ce2da7f6770f8077/USER'
-    #Samples.qcdht0100                     .ana_dataset_override = '/QCD_HT-100To250_TuneZ2star_8TeV-madgraph-pythia/tucker-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
-    #Samples.qcdht0250                     .ana_dataset_override = '/QCD_HT-250To500_TuneZ2star_8TeV-madgraph-pythia6/tucker-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
-    #Samples.qcdht0500                     .ana_dataset_override = '/QCD_HT-500To1000_TuneZ2star_8TeV-madgraph-pythia6/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
-    #Samples.qcdht1000                     .ana_dataset_override = '/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
-    #Samples.ttbarhadronic                 .ana_dataset_override = '/TTJets_HadronicMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
-    #Samples.ttbarsemilep                  .ana_dataset_override = '/TTJets_SemiLeptMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
-    #Samples.ttbardilep                    .ana_dataset_override = '/TTJets_FullLeptMGDecays_8TeV-madgraph/jchu-jtuple_noclosestzinpu_v6-18644a3db1aeb7c32497dd7b35b54016/USER'
+    no = 'mfv_neutralino_tau0000um_M0400 mfv_neutralino_tau0010um_M0400 mfv_neutralino_tau0100um_M0400 mfv_neutralino_tau1000um_M0400 mfv_neutralino_tau9900um_M0400 qcdht0100 qcdht0250 qcdht0500 qcdht1000 ttbardilep ttbarhadronic ttbarsemilep zjetstonunuHT050 zjetstonunuHT100 zjetstonunuHT200 zjetstonunuHT400 dyjetstollM10 dyjetstollM50 qcdmu0015 qcdmu0020 qcdmu0030 qcdmu0050 qcdmu0080 qcdmu0120 qcdmu0170 qcdmu0300 qcdmu0470 qcdmu0600 qcdmu0800 qcdmu1000 qcdmupt15'.split()
+    samples = [sample for sample in samples if sample.name not in no]
+    for sample in samples:
+        if 'mfv' not in sample.name:
+            sample.scheduler_name = 'remoteGlidein'
 
-    samples = [Samples.mfv_neutralino_tau0000um_M0400, Samples.mfv_neutralino_tau0010um_M0400, Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400,
-               Samples.qcdht0100, Samples.qcdht0250, Samples.qcdht0500, Samples.qcdht1000, Samples.ttbarhadronic, Samples.ttbarsemilep, Samples.ttbardilep]
-    
     def pset_modifier(sample):
         to_add = []
         if 'ttbar' in sample.name:
@@ -147,11 +136,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('VertexRecoPlay',
                        total_number_of_events = 99250,
-                       events_per_job = 4000,
+                       events_per_job = 2500,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
-                       #use_ana_dataset = True,
-                       #use_parent = True,
                        )
     cs.submit_all(samples)
 
