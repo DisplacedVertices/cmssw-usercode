@@ -923,7 +923,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       int nhits = tri->numberOfValidHits();
       if (nhits < trackminnhits)
         trackminnhits = nhits;
-      if (nhits < trackmaxnhits)
+      if (nhits > trackmaxnhits)
         trackmaxnhits = nhits;
 
       double pti = tri->pt();
@@ -969,7 +969,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     const double mintrackpt = trackpts[0];
     const double maxtrackpt = trackpts[trackpts.size()-1];
     const double maxm1trackpt = trackpts[trackpts.size()-2];
-    const double maxm2trackpt = trackpts[trackpts.size()-3];
+    const double maxm2trackpt = trackpts.size() > 2 ? trackpts[trackpts.size()-3] : -1;
 
     std::vector<int> trackicity;
     for (auto i : trackicity_m)
