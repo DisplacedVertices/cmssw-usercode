@@ -12,20 +12,16 @@ class Sample(object):
     IS_MC = True
     IS_FASTSIM = False
     IS_PYTHIA8 = False
-    KEEP_GENERAL_TRACKS = False
-    KEEP_SELECTED_TRACKS = False
     NO_SKIMMING_CUTS = False
-    DROP_GEN_PARTICLES = False
-    AOD_PLUS_PAT = False
-    KEEP_RANDOM_STATE = False
-    KEEP_MIXING_INFO = False
-    SCHEDULER_NAME = 'remoteGlidein'
+    RE_PAT = False
+    SCHEDULER = 'remoteGlidein'
+    ANA_SCHEDULER = 'condor'
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = '57bdb3121379054e9430a70b722159ce'
+    ANA_HASH = 'none'
     PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v6'
+    ANA_VERSION = 'v7'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -37,16 +33,12 @@ class Sample(object):
         self.is_mc = self.IS_MC
         self.is_fastsim = self.IS_FASTSIM
         self.is_pythia8 = self.IS_PYTHIA8
-        self.keep_general_tracks = self.KEEP_GENERAL_TRACKS
-        self.keep_selected_tracks = self.KEEP_SELECTED_TRACKS
         self.no_skimming_cuts = self.NO_SKIMMING_CUTS
-        self.drop_gen_particles = self.DROP_GEN_PARTICLES
-        self.aod_plus_pat = self.AOD_PLUS_PAT
-        self.keep_random_state = self.KEEP_RANDOM_STATE
-        self.keep_mixing_info = self.KEEP_MIXING_INFO
+        self.re_pat = self.RE_PAT
         self.hlt_process_name = self.HLT_PROCESS_NAME
         self.local_filenames = []
-        self.scheduler_name = self.SCHEDULER_NAME
+        self.scheduler = self.SCHEDULER
+        self.ana_scheduler = self.ANA_SCHEDULER
         self.dbs_url_num = self.DBS_URL_NUM
         self.ana_dbs_url_num = self.ANA_DBS_URL_NUM
         self.ana_hash = self.ANA_HASH
@@ -61,10 +53,6 @@ class Sample(object):
             if not dump_all and hasattr(self, x.upper()) and a == getattr(self, x.upper()):
                 continue
             print x, ':', a
-
-    @property
-    def scheduler(self):
-        return self.scheduler_name
 
     def _get_dbs_url(self, num):
         return '' if not num else 'dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_0%i_writer/servlet/DBSServlet' % num
@@ -309,10 +297,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.mass = mass
     sample.events_per = 2000
     sample.no_skimming_cuts = True
-    sample.aod_plus_pat = True
     sample.is_pythia8 = True
-    sample.keep_random_state = True
-    sample.keep_mixing_info = True
     sample.dbs_url_num = 2
     sample.ana_dataset_override = sample.dataset
     sample.scheduler_name = 'condor'
@@ -337,7 +322,6 @@ for sample in all_samples:
 # are already applied above).
 
 for sample in background_samples:
-    sample.drop_gen_particles = True
     sample.publish_user = 'jchu'
     sample.scheduler_name = 'condor'
     sample.total_events = {'wjetstolnu':    57685961,
