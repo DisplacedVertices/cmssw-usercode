@@ -21,7 +21,7 @@ for category in ['TwoTrackMinimumDistance']:
 process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START53_V23::All' if runOnMC else 'FT_53_V21_AN4::All'
+process.GlobalTag.globaltag = 'START53_V27::All' if runOnMC else 'FT_53_V21A_AN6::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
@@ -76,7 +76,6 @@ if suppress_stdout:
     sys.stdout = buf = StringIO()
 
 jecLevels = ['L1FastJet', 'L2Relative', 'L3Absolute']
-#jecLevels.pop(0); jecLevels.insert(0, 'L1Offset')
 if not runOnMC:
     jecLevels.append('L2L3Residual')
 #jecLevels += ['L5Flavor', 'L7Parton']
@@ -107,8 +106,8 @@ processpostfix('pfNoElectron').enable = True  # useNoElectron
 processpostfix('pfNoJet')     .enable = True  # useNoJet
 processpostfix('pfNoTau')     .enable = True  # useNoTau
 
-if 'L1FastJet' in jecLevels:
-    processpostfix('pfPileUpIso').checkClosestZVertex = True # usePfIsoLessCHS: switch to new PF isolation with L1Fastjet CHS
+processpostfix('pfPileUp').checkClosestZVertex = False
+processpostfix('pfPileUpIso').checkClosestZVertex = False
 
 processpostfix('pfMuonsFromVertex').d0Cut = processpostfix('pfElectronsFromVertex').d0Cut = 0.2
 processpostfix('pfMuonsFromVertex').dzCut = processpostfix('pfElectronsFromVertex').dzCut = 0.5
@@ -347,11 +346,11 @@ def pileup_removal_studies(process, keep_nopileup=True, no_closest_z_vtx=True):
         if keep_nopileup:
             process.out.outputCommands.append('keep *_pfNoPileUpNoClosestZVertex%s_*_*' % postfix)
 
-def no_closest_z_in_pu(process):
-    processpostfix('pfPileUp').checkClosestZVertex = False
-    processpostfix('pfPileUpIso').checkClosestZVertex = False
+def closest_z_in_pu(process):
+    processpostfix('pfPileUp').checkClosestZVertex = True
+    processpostfix('pfPileUpIso').checkClosestZVertex = True
     
-for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup re_pat pileup_removal_studies no_closest_z_in_pu'.split():
+for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup re_pat pileup_removal_studies closest_z_in_pu'.split():
     if arg in sys.argv:
         exec '%s(process)' % arg
 
