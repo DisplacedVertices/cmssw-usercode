@@ -28,11 +28,14 @@ vertex_srcs = [
     ('MY',     'mfvVertices'),
     ('PF',     'mfvVerticesFromCands'),
     ('PFNPU',  'mfvVerticesFromNoPUCands'),
-    ('PFNZPU', 'mfvVerticesFromNoPUNoZCands'),
+    ('PFNPUZ', 'mfvVerticesFromNoPUZCands'),
 #    ('JPT',    'mfvVerticesFromJets'),
     ('JPF',    'mfvVerticesFromPFJets'),
     ]
 
+for name, src in vertex_srcs:
+    getattr(process, src).histos = True
+    
 ana = cms.EDAnalyzer('VtxRecoPlay',
                      trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
                      jets_src = cms.InputTag('ak5PFJets'),
