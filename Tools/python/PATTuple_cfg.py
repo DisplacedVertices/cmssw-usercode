@@ -191,6 +191,11 @@ for cut in (1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.):
 from JMTucker.Tools.PATTupleSelection_cfi import makeLeptonProducers
 makeLeptonProducers(process, postfix=postfix, params=process.jtupleParams)
 
+common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
+
+process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+common_seq *= process.mfvVertices
+
 # Require numbers of jets based on the trigger: hadronic channel will
 # have at least a 4-jet trigger (maybe 6!), while semileptonic uses a
 # 3-jet trigger. Dileptonic has no jets in trigger, but we'll require
@@ -200,9 +205,8 @@ setprocesspostfix('countPatJetsSemileptonic', processpostfix('countPatJets').clo
 setprocesspostfix('countPatJetsDileptonic',   processpostfix('countPatJets').clone(minNumber = 1))
 
 channels = ('Hadronic', 'Semileptonic', 'Dileptonic')
-obj = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
 for channel in channels:
-    setattr(process, 'p' + channel, cms.Path(obj))
+    setattr(process, 'p' + channel, cms.Path(common_seq))
 
 process.pHadronic     *= processpostfix('countPatJetsHadronic')
 process.pSemileptonic *= processpostfix('countPatJetsSemileptonic') + process.jtupleSemileptonSequence + process.countSemileptons
@@ -217,6 +221,7 @@ process.out.outputCommands = [
     'drop *_selectedPatJetsForMETtype1p2CorrPF_*_*',
     'drop *_selectedPatJetsForMETtype2CorrPF_*_*',
     'drop CaloTowers_*_*_*',
+    'keep *_mfvVertices*_*_*',
     'keep *_patMETs*_*_*',
     'keep *_goodOfflinePrimaryVertices_*_*',
     'keep edmTriggerResults_TriggerResults__PAT', # for post-tuple filtering on the goodData paths
