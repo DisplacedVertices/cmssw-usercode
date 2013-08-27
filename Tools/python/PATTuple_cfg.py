@@ -1,6 +1,6 @@
 import sys, FWCore.ParameterSet.Config as cms
 
-version = 'v6'
+version = 'v7'
 runOnMC = True # Submit script expects this line to be unmodified...
 suppress_stdout = True
 
@@ -161,7 +161,7 @@ if not runOnMC:
 removeSpecificPATObjects(process, names = ['Photons'], postfix = postfix) # will also remove cleaning
 
 # Make some extra SV producers for MFV studies. JMTBAD postfix junk
-for cut in (1., 1.5, 2., 2.5, 3.):
+for cut in (1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.):
     cut_name = ('%.1f' % cut).replace('.', 'p')
                  
     tag_info_name = 'secondaryVertexMaxDR%sTagInfosAODPF' % cut_name
@@ -213,26 +213,13 @@ process.out.outputCommands = [
     'drop *',
     'keep *_selectedPatElectrons*_*_*',
     'keep *_selectedPatMuons*_*_*',
-    #'keep *_semilep*_*_*',
-    #'keep *_dilep*_*_*',
     'keep *_selectedPatJets*_*_*',
-    'keep *_selectedPatJets*_genJets_*',
     'drop *_selectedPatJetsForMETtype1p2CorrPF_*_*',
     'drop *_selectedPatJetsForMETtype2CorrPF_*_*',
     'drop CaloTowers_*_*_*',
     'keep *_patMETs*_*_*',
-    'keep recoGenParticles_genParticles_*_*',
-    'keep recoGenJets_ak*GenJets_*_*',
-    'keep GenEventInfoProduct_*_*_*',
-    'keep GenRunInfoProduct_*_*_*',
-    'keep PileupSummaryInfos_addPileupInfo__*',
-    'keep *_offlineBeamSpot_*_*',
     'keep *_goodOfflinePrimaryVertices_*_*',
-    'keep edmTriggerResults_TriggerResults__HLT*',
-    'keep edmTriggerResults_TriggerResults__REDIGI*',
     'keep edmTriggerResults_TriggerResults__PAT', # for post-tuple filtering on the goodData paths
-    'keep *_hltTriggerSummaryAOD__HLT*',
-    'keep *_hltTriggerSummaryAOD__REDIGI*',
     ]
 
 # The normal TrigReport doesn't state how many events are written
