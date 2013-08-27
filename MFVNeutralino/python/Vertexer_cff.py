@@ -36,7 +36,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              max_track_vertex_sig = cms.double(5),
                              min_track_vertex_sig_to_remove = cms.double(1.5),
                              remove_one_track_at_a_time = cms.bool(True),
-                             histos = cms.untracked.bool(True),
+                             histos = cms.untracked.bool(False),
                              verbose = cms.untracked.bool(False),
                              )
 
@@ -82,8 +82,8 @@ use_pf_candidates(mfvVerticesFromCands, 'particleFlow')
 mfvVerticesFromNoPUCands = mfvVertices.clone()
 use_pf_candidates(mfvVerticesFromNoPUCands, 'pfNoPileUpPF')
 
-mfvVerticesFromNoPUNoZCands = mfvVertices.clone()
-use_pf_candidates(mfvVerticesFromNoPUNoZCands, 'pfNoPileUpPFNoClosestZVertex')
+mfvVerticesFromNoPUZCands = mfvVertices.clone()
+use_pf_candidates(mfvVerticesFromNoPUZCands, 'pfNoPileUpPFClosestZVertex')
 
 mfvVerticesFromJets = mfvVertices.clone()
 use_jets(mfvVerticesFromJets, 'pat')
@@ -91,7 +91,7 @@ use_jets(mfvVerticesFromJets, 'pat')
 mfvVerticesFromPFJets = mfvVertices.clone()
 use_jets(mfvVerticesFromPFJets, 'pf')
 
-mfvPFCandVertexSequence = cms.Sequence(mfvVerticesFromCands + mfvVerticesFromNoPUCands + mfvVerticesFromNoPUNoZCands)
+mfvPFCandVertexSequence = cms.Sequence(mfvVerticesFromCands + mfvVerticesFromNoPUCands + mfvVerticesFromNoPUZCands)
 mfvJetVertexSequence = cms.Sequence(mfvVerticesFromJets + mfvVerticesFromPFJets)
 mfvExtraVertexSequence = cms.Sequence(mfvPFCandVertexSequence + mfvJetVertexSequence)
 
