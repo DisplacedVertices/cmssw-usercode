@@ -65,6 +65,9 @@ private:
 
   BasicKinematicHists* RecoJets;
   BasicKinematicHists* RecoJet[NJETDISTS];
+  TH1F* JetNConstituents;
+  TH1F* JetConstituentMaxPt;
+  TH1F* JetNConstituent[NJETDISTS];
   TH1F* JetBDiscs[NBDISC];
   TH1F* JetBDisc[NBDISC][NJETDISTS];
   BasicKinematicHists* RecoBJets[NBDISC];
@@ -205,6 +208,11 @@ void MFVResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
   NJets                = RecoJets->dir.make<TH1F>("NJets", ";number of jets;events", 20, 0, 20);
   RecoJetsHT           = RecoJets->dir.make<TH1F>("SumHT", ";reconstructed jet H_{T} (GeV);events/50 GeV", 100, 0, 5000);
   RecoJetsPVSVCosTheta = RecoJets->dir.make<TH1F>("PVSVCosTheta", ";cos(angle between flight direction and jet);events/0.1", 20, -1, 1);
+
+  JetNConstituents = RecoJets->dir.make<TH1F>("NConstituents", ";number of constituents/jet;events", 60, 0, 60);
+  JetConstituentMaxPt = RecoJets->dir.make<TH1F>("ConstituentMaxPt", ";max(constituents' p_{T})/jet;events/4 GeV", 50, 0, 200);
+  for (int i = 0; i < NJETDISTS; ++i)
+    JetNConstituent[i] = RecoJet[i]->dir.make<TH1F>("NConstituents", TString::Format(";number of constituents for jet #%i;events", i), 60, 0, 60);
 
   JetPtRes          = RecoJets->dir.make<TH1F>("PtRes", ";reconstructed jet p_{T} resolution;events/5 GeV", 40, -100, 100);
   JetPtResPtGt70    = RecoJets->dir.make<TH1F>("PtResPtGt70", "gen p_{T} > 70 GeV;reconstructed jet p_{T} resolution;events/5 GeV", 40, -100, 100);
@@ -378,11 +386,18 @@ void MFVResolutionsHistogrammer::analyze(const edm::Event& event, const edm::Eve
     RecoJets->Pt ->Fill(jet.pt(),  weight);
     RecoJets->Eta->Fill(jet.eta(), weight);
     RecoJets->Phi->Fill(jet.phi(), weight);
+    JetNConstituents->Fill(jet.nConstituents(), weight);
+    double max_jet_const_pt = 0;
+    for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
+      if (pfcand->pt() > max_jet_const_pt)
+        max_jet_const_pt = pfcand->pt();
+    JetConstituentMaxPt->Fill(max_jet_const_pt);
 
     if (i < NJETDISTS) {
       RecoJet[i]->Pt ->Fill(jet.pt(), weight);
       RecoJet[i]->Eta->Fill(jet.eta(), weight);
       RecoJet[i]->Phi->Fill(jet.phi(), weight);
+      JetNConstituent[i]->Fill(jet.nConstituents(), weight);
     }
 
     for (int j = 0; j < int(b_discriminators.size()); ++j) {
