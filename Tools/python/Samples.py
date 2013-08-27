@@ -300,6 +300,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.is_pythia8 = True
     sample.dbs_url_num = 2
     sample.ana_dataset_override = sample.dataset
+    sample.re_pat = True
     sample.scheduler_name = 'condor'
 
 ########################################################################
