@@ -301,7 +301,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.dbs_url_num = 2
     sample.ana_dataset_override = sample.dataset
     sample.re_pat = True
-    sample.scheduler_name = 'condor'
+    sample.scheduler = 'condor'
 
 ########################################################################
 
@@ -324,7 +324,6 @@ for sample in all_samples:
 
 for sample in background_samples:
     sample.publish_user = 'jchu'
-    sample.scheduler_name = 'condor'
     sample.total_events = {'wjetstolnu':    57685961,
                            'ttbarhadronic': 10291640,
                            'ttbarsemilep':  9863760,
@@ -335,8 +334,8 @@ for sample in background_samples:
                            'qcdht1000':     10200000}[sample.name]
                            
 ttbarincl.no_skimming_cuts = True
-ttbarincl.scheduler_name = 'condor'
-singletop_t.scheduler_name = 'condor'
+ttbarincl.scheduler = 'condor'
+singletop_t.scheduler = 'condor'
 
 for sample in background_samples + auxiliary_background_samples + all_data_samples:
     sample.ana_ready = False
