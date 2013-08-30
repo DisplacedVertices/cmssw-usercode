@@ -35,8 +35,6 @@ std::ostream& operator<<(std::ostream&, const DTRecHit1DPair&);
 std::ostream& operator<<(std::ostream&, const DTRecSegment4D&);
 std::ostream& operator<<(std::ostream&, const CSCSegment&);
 std::ostream& operator<<(std::ostream&, const RPCRecHit&);
-std::ostream& operator<<(std::ostream&, const LocalPoint&);
-std::ostream& operator<<(std::ostream&, const LocalError&);
 std::ostream& operator<<(std::ostream&, const reco::HitPattern&);
 std::ostream& operator<<(std::ostream&, const reco::Track&);
 std::ostream& operator<<(std::ostream&, const reco::Muon&);
