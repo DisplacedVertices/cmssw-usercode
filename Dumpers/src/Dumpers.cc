@@ -182,16 +182,6 @@ std::ostream& operator<<(std::ostream& out, const CSCSegment& seg) {
   return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const LocalPoint& p) {
-  out << p << std::endl;
-  return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const LocalError& e) {
-  out << e << std::endl;
-  return out;
-}
-
 std::ostream& operator<<(std::ostream& out, const reco::HitPattern& hp) {
   out << "# hits: " << hp.numberOfHits() << std::endl
       << "# valid: tot: " << hp.numberOfValidHits() << " tk: " << hp.numberOfValidTrackerHits() << " pxb: " << hp.numberOfValidPixelBarrelHits() << " pxe: " << hp.numberOfValidPixelEndcapHits() << " tib: " << hp.numberOfValidStripTIBHits() << " tob: " << hp.numberOfValidStripTOBHits() << " tid: " << hp.numberOfValidStripTIDHits() << " tec: " << hp.numberOfValidStripTECHits() << " mu: " << hp.numberOfValidMuonHits() << " csc: " << hp.numberOfValidMuonCSCHits() << " dt: " << hp.numberOfValidMuonDTHits() << " rpc: " << hp.numberOfValidMuonRPCHits() << std::endl
@@ -200,6 +190,20 @@ std::ostream& operator<<(std::ostream& out, const reco::HitPattern& hp) {
       << "# tk layers: with meas: " << hp.trackerLayersWithMeasurement() << " without: " << hp.trackerLayersWithoutMeasurement() << " totallyofforbad: " << hp.trackerLayersTotallyOffOrBad() << " null: " << hp.trackerLayersNull() << std::endl
       << "# px layers: with meas: " << hp.pixelLayersWithMeasurement() << " without: " << hp.pixelLayersWithoutMeasurement() << " totallyofforbad: " << hp.pixelLayersTotallyOffOrBad() << " null: " << hp.pixelLayersNull() << std::endl
       << "# si layers: with meas: " << hp.stripLayersWithMeasurement() << " without: " << hp.stripLayersWithoutMeasurement() << " totallyofforbad: " << hp.stripLayersTotallyOffOrBad() << " null: " << hp.stripLayersNull() << std::endl;
+
+  for (int i = 0, ie = hp.numberOfHits(); i < ie; ++i) {
+    uint32_t hit = hp.getHitPattern(i);
+
+    out << "hit #" << i << " in binary format = "; 
+    for (int j = 10; j >= 0; --j) {
+      int bit = (hit >> j) & 0x1;
+      if (j == 10 || j == 7 || j == 3 || j == 2)
+        out << " ";
+      out << bit;
+    }
+    out << std::endl;
+  }
+  
   return out;
 }
 
@@ -305,7 +309,7 @@ std::ostream& operator<<(std::ostream& out, const TrackingRecHit& trh) {
   out << trh.geographicalId();
   if (trh.isValid()) {
     out << " weight: " << trh.weight() << " dim: " << trh.dimension();
-    if (false && trh.hasPositionAndError()) {
+    if (trh.hasPositionAndError()) {
       out << " localPos: " << trh.localPosition() << " localPosErr: " << trh.localPositionError();
 
       const GeomDet* geom = JMTDumper::geom_det(trh.geographicalId());
