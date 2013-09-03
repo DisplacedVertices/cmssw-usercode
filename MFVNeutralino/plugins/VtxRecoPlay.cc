@@ -6,6 +6,13 @@
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/TrackReco/interface/HitPattern.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -16,6 +23,10 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
+#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexPrimitives/interface/CachingVertex.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
@@ -79,6 +90,55 @@ namespace {
     else if (i == 2) return v.z();
     else
       throw cms::Exception("coord") << "no such coordinate " << i;
+  }
+}
+
+struct tracker_space_extent {
+  double min_r;
+  double max_r;
+  double avg_r;
+  int nr;
+  double min_z;
+  double max_z;
+  double avg_z;
+  int nz;
+  tracker_space_extent() : min_r(1e99), max_r(0), avg_r(0), nr(0), min_z(1e99), max_z(0), avg_z(0), nz(0) {}
+
+  void add(double r, double z) {
+    if (r < min_r)
+      min_r = r;
+    if (r > max_r)
+      max_r = r;
+    avg_r = (nr*avg_r + r)/(nr+1);
+    ++nr;
+
+    if (z < min_z)
+      min_z = z;
+    if (z > max_z)
+      max_z = z;
+    avg_z = (nz*avg_z + z)/(nz+1);
+    ++nz;
+  }
+
+  void print() {
+    printf("r stats: %7.3f-%7.3f (avg %7.3f)   z stats: %7.3f-%7.3f (avg %7.3f)", min_r, max_r, avg_r, min_z, max_z, avg_z);
+  }
+};
+
+typedef std::map<std::pair<int, int>, tracker_space_extent> tracker_space_extent_map;
+
+template <typename Id, typename SubFunc>
+void fill_tracker_rzs(tracker_space_extent_map& extents, const TrackingGeometry::DetContainer& dets, SubFunc substructure, GlobalPoint origin) {
+  for (const GeomDet* geom : dets) {
+    const GlobalPoint pos = geom->toGlobal(LocalPoint());
+    const double r = mag(pos.x() - origin.x(), pos.y() - origin.y());
+    const double z = pos.z() - origin.z();
+
+    Id id(geom->geographicalId());
+    std::pair<int, int> which_element = std::make_pair(id.subdetId(), substructure(id));
+    if (extents.find(which_element) == extents.end())
+      extents[which_element] = tracker_space_extent();
+    extents[which_element].add(r, fabs(z));
   }
 }
 
@@ -284,6 +344,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_sv_trackphi[4];
   TH1F* h_sv_trackdxy[4];
   TH1F* h_sv_trackdz[4];
+  TH1F* h_sv_tracknhits[4];
+  TH1F* h_sv_tracknhitsbehind[4];
 
   TH1F* h_sv_trackpaircosth[4];
   TH1F* h_sv_trackpairdr[4];
@@ -350,6 +412,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float costhmompv2d;
     float costhmompv3d;
     float sumpt2;
+    ushort sumnhitsbehind;
+    ushort maxnhitsbehind;
     float mintrackpt;
     float maxtrackpt;
     float maxm1trackpt;
@@ -387,7 +451,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
       if (all) {
         run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; njets = -1; ntightjets = -1; jetpt4 = -1; jetpt5 = -1; tightjetpt4 = -1; tightjetpt5 = -1; nsv = -1; nsvpass = -1;
       }
-      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
+      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
     }
   };
 
@@ -457,6 +521,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("costhmompv2d", &nt.costhmompv2d, "costhmompv2d/F");
     tree->Branch("costhmompv3d", &nt.costhmompv3d, "costhmompv3d/F");
     tree->Branch("sumpt2", &nt.sumpt2, "sumpt2/F");
+    tree->Branch("sumnhitsbehind", &nt.sumnhitsbehind, "sumnhitsbehind/s");
+    tree->Branch("maxnhitsbehind", &nt.maxnhitsbehind, "maxnhitsbehind/s");
     tree->Branch("mintrackpt", &nt.mintrackpt, "mintrackpt/F");
     tree->Branch("maxtrackpt", &nt.maxtrackpt, "maxtrackpt/F");
     tree->Branch("maxm1trackpt", &nt.maxm1trackpt, "maxm1trackpt/F");
@@ -580,6 +646,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     h_sv_trackphi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackphi", exc), TString::Format(";SV %s track #phi;arb. units", exc), 50, -3.15, 3.15);
     h_sv_trackdxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackdxy", exc), TString::Format(";SV %s track dxy wrt bs (cm);arb. units", exc), 200, -1, 1);
     h_sv_trackdz[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackdz", exc), TString::Format(";SV %s track dz wrt bs (cm);arb. units", exc), 200, -20, 20);
+    h_sv_tracknhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracknhits", exc), TString::Format(";SV %s track nhits;arb. units", exc), 60, 0, 60);
+    h_sv_tracknhitsbehind[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracknhitsbehind", exc), TString::Format(";SV %s track nhits behind SV;arb. units", exc), 20, 0, 20);
 
     h_sv_trackpaircosth[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpaircosth", exc), TString::Format(";SV %s track pair cos(#theta);arb. units", exc), 100, -1, 1);
     h_sv_trackpairdr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpairdr", exc), TString::Format(";SV %s track pair #Delta R;arb. units", exc), 100, 0, 7);
@@ -604,6 +672,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("costhmompv2d",   "cos(angle(2-momentum, 2-dist to PV))",       100,   -1,       1);
     hs.add("costhmompv3d",   "cos(angle(3-momentum, 3-dist to PV))",       100,   -1,       1);
     hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                300,    0,    6000);
+    hs.add("maxnhitsbehind", "max number of hits behind SV",                15,    0,      15);
+    hs.add("sumnhitsbehind", "sum number of hits behind SV",               100,    0,     100);
     hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      10);
     hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
     hs.add("maxm1trackpt",   "SV max-1{trk_{i} p_{T}} (GeV)",              100,    0,     150);
@@ -677,12 +747,39 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_sim_pileup_true_num_int[bx+1]->Fill(psi->getTrueNumInteractions());
   }
 
+  //////////////////////////////////////////////////////////////////////
+
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByLabel("offlineBeamSpot", beamspot);
   const float bsx = beamspot->x0();
   const float bsy = beamspot->y0();
   const float bsz = beamspot->z0();
+  const GlobalPoint origin(bsx, bsy, bsz);
   const reco::Vertex fake_bs_vtx(beamspot->position(), beamspot->covariance3D());
+
+  //////////////////////////////////////////////////////////////////////
+
+  edm::ESHandle<GlobalTrackingGeometry> geometry;
+  setup.get<GlobalTrackingGeometryRecord>().get(geometry);
+  const TrackingGeometry* tg = geometry->slaveGeometry(PXBDetId(1, 1, 1));
+  die_if_not(tg != 0, "null slave geometry");
+  const TrackerGeometry* tktg = dynamic_cast<const TrackerGeometry*>(tg);
+  die_if_not(tktg != 0, "couldn't cast tg to tktg");
+
+  tracker_space_extent_map tracker_extents;
+  fill_tracker_rzs<PXBDetId>(tracker_extents, tktg->detsPXB(), [](const PXBDetId& id) { return id.layer(); }, origin);
+  fill_tracker_rzs<PXFDetId>(tracker_extents, tktg->detsPXF(), [](const PXFDetId& id) { return id.disk (); }, origin); 
+  fill_tracker_rzs<TIBDetId>(tracker_extents, tktg->detsTIB(), [](const TIBDetId& id) { return id.layer(); }, origin); 
+  fill_tracker_rzs<TIDDetId>(tracker_extents, tktg->detsTID(), [](const TIDDetId& id) { return id.wheel(); }, origin); 
+  fill_tracker_rzs<TOBDetId>(tracker_extents, tktg->detsTOB(), [](const TOBDetId& id) { return id.layer(); }, origin); 
+  fill_tracker_rzs<TECDetId>(tracker_extents, tktg->detsTEC(), [](const TECDetId& id) { return id.wheel(); }, origin); 
+  //for (auto extent : tracker_extents) {
+  //  printf("sub %i  subsub: %i ", extent.first.first, extent.first.second);
+  //  extent.second.print();
+  //  printf("\n");
+  //}
+  
+  //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
@@ -898,6 +995,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
     auto trkb = sv.tracks_begin();
     auto trke = sv.tracks_end();
+    const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
+    const double sv_z = fabs(sv.position().z() - bsz);
     std::map<int,int>& trackicity_m = trackicities[isv];
     int ntracks = trke - trkb;
     int ntracksptgt10 = 0;
@@ -906,6 +1005,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     int trackmaxnhits = 0;
     double sumpt2 = 0;
     std::vector<double> trackpts;
+    std::vector<int> tracknhitsbehind;
 
     for (auto trki = trkb; trki != trke; ++trki) {
       if (sv.trackWeight(*trki) < track_vertex_weight_min)
@@ -926,6 +1026,34 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       if (nhits > trackmaxnhits)
         trackmaxnhits = nhits;
 
+      const reco::HitPattern& hp = tri->hitPattern();
+      int nhitsbehind = 0;
+      for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
+        uint32_t hit = hp.getHitPattern(ihit);
+        
+        bool is_valid = hp.getHitType(hit) == 0;
+        if (!is_valid)
+          continue;
+
+        bool is_tk = (hit >> 10) & 0x1;
+        if (!is_tk)
+          continue;
+
+        uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
+        uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
+        
+        const tracker_space_extent& extent = tracker_extents[std::make_pair(int(sub), int(subsub))];
+        if (sub == PixelSubdetector::PixelBarrel || sub == StripSubdetector::TIB || sub == StripSubdetector::TOB) {
+          if (extent.max_r < sv_r)
+            ++nhitsbehind;
+        }
+        else if (sub == PixelSubdetector::PixelEndcap || sub == StripSubdetector::TID || sub == StripSubdetector::TEC) {
+          if (extent.max_z < sv_z)
+            ++nhitsbehind;
+        }
+      }
+      tracknhitsbehind.push_back(nhitsbehind);
+
       double pti = tri->pt();
       trackpts.push_back(pti);
       if (pti > 10)
@@ -939,6 +1067,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       h_sv_trackphi[svndx]->Fill(tri->phi());
       h_sv_trackdxy[svndx]->Fill(tri->dxy(beamspot->position()));
       h_sv_trackdz[svndx]->Fill(tri->dz(beamspot->position()));
+      h_sv_tracknhits[svndx]->Fill(nhits);
+      h_sv_tracknhitsbehind[svndx]->Fill(nhitsbehind);
 
       TLorentzVector p4_i, p4_j, p4_k;
       const double m = 0.135;
@@ -964,6 +1094,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         }
       }
     }
+
+    std::sort(tracknhitsbehind.begin(), tracknhitsbehind.end());
+    const int sumnhitsbehind = std::accumulate(tracknhitsbehind.begin(), tracknhitsbehind.end(), 0);
+    const int maxnhitsbehind = tracknhitsbehind[tracknhitsbehind.size()-1];
 
     std::sort(trackpts.begin(), trackpts.end());
     const double mintrackpt = trackpts[0];
@@ -1036,6 +1170,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.costhmompv2d    = costhmompv2d;
       nt.costhmompv3d    = costhmompv3d;
       nt.sumpt2          = sumpt2;
+      nt.sumnhitsbehind  = sumnhitsbehind;
+      nt.maxnhitsbehind  = maxnhitsbehind;
       nt.mintrackpt      = mintrackpt;
       nt.maxtrackpt      = maxtrackpt;
       nt.maxm1trackpt    = maxm1trackpt;
@@ -1090,6 +1226,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"costhmompv2d",    costhmompv2d},
         {"costhmompv3d",    costhmompv3d},
         {"sumpt2",          sumpt2},
+        {"sumnhitsbehind",  sumnhitsbehind},
+        {"maxnhitsbehind",  maxnhitsbehind},
         {"mintrackpt",      mintrackpt},
         {"maxtrackpt",      maxtrackpt},
         {"maxm1trackpt",    maxm1trackpt},
