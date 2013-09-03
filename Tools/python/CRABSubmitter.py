@@ -144,7 +144,7 @@ class CRABSubmitter:
         for i in xrange(0, len(other_cfg_lines), 3):
             cfg.set(*other_cfg_lines[i:i+3])
         for opt, val in kwargs.iteritems():
-            for section in cfg.sections():
+            for section in ('CMSSW', 'USER', 'CRAB', 'GRID'):
                 shib = section + '_'
                 if opt.startswith(shib):
                     cfg.set(section, opt.replace(shib, ''), val)
@@ -169,7 +169,7 @@ class CRABSubmitter:
                 cfg.set(*entry)
         crab_cfg_fn = 'crab.%s.%s.cfg' % (self.batch_name, sample.name)
         cfg.write(open(crab_cfg_fn, 'wt'))
-        return crab_cfg_fn, open(crab_cfg_fn, 'rt').read()
+        return crab_cfg_fn, open(crab_cfg_fn, 'rt').read(), cfg
 
     def pset(self, sample):
         pset = open(self.pset_template_fn).read()
@@ -194,7 +194,7 @@ class CRABSubmitter:
 
         cleanup = []
 
-        crab_cfg_fn, crab_cfg = self.crab_cfg(sample)
+        crab_cfg_fn, crab_cfg, crab_cfg_obj = self.crab_cfg(sample)
         if cleanup_crab_cfg:
             cleanup.append(crab_cfg_fn)
 
@@ -205,18 +205,21 @@ class CRABSubmitter:
             assert pset_fn.endswith('.py')
             cleanup.append(pset_fn + 'c')
 
-        crab_output = None
+        crab_output = 'Not run'
         if not self.testing:
-            cmd = 'crab -cfg %s -create' % crab_cfg_fn
-            if not create_only:
-                cmd += ' -submit'
-            crab_output = crab_popen(cmd)
-            ok = False
-            for line in crab_output.split('\n'):
-                if 'Total of' in line and 'jobs submitted' in line:
-                    ok = True
-            if not ok:
-                print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
+            if not os.path.isdir(crab_cfg_obj.get('USER', 'ui_working_dir')):
+                cmd = 'crab -cfg %s -create' % crab_cfg_fn
+                if not create_only:
+                    cmd += ' -submit'
+                crab_output = crab_popen(cmd)
+                ok = False
+                for line in crab_output.split('\n'):
+                    if 'Total of' in line and 'jobs submitted' in line:
+                        ok = True
+                if not ok:
+                    print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
+            else:
+                print '\033[36;7m warning: \033[m sample %s not submitted, directory %s already exists' % (sample.name, crab_cfg_obj.get('USER', 'ui_working_dir'))
             os.system('rm -f %s' % ' '.join(cleanup))
         else:
             print 'in testing mode, not submitting anything.'
