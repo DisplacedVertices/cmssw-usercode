@@ -67,6 +67,10 @@ if 'find' not in sys.argv:
         sys.argv.remove('filerunls')
         c = 'find file where dataset="%s" and run=%s and lumi=%s' % (sys.argv[1], sys.argv[2], sys.argv[3])
         cmd = cmd % c
+    elif 'fileparent' in sys.argv:
+        sys.argv.remove('fileparent')
+        c = 'find file.parent where file="%s"' % sys.argv[1]
+        cmd = cmd % c
     elif 'runrange' in sys.argv:
         sys.argv.remove('runrange')
         c = 'find min(run),max(run) where dataset=%s' % sys.argv[1]
