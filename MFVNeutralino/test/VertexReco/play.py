@@ -5,7 +5,8 @@ from JMTucker.Tools.CMSSWTools import silence_messages
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents.input = 100
 process.options.wantSummary = True
-process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root']
+process.source.fileNames = ['/store/user/jchu/mfv_neutralino_tau1000um_M0400/jtuple_v7/5d4c2a74c85834550d3f9609274e8548/pat_1_1_hdB.root']
+process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_891_1_sZ9.root','/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_948_2_lgB.root')
 process.TFileService.fileName = 'play.root'
 silence_messages(process, 'TwoTrackMinimumDistance')
 
@@ -17,20 +18,21 @@ process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.goodOfflinePrimaryVertices.filter = cms.bool(False)
 
-process.load('JMTucker.MFVNeutralino.RedoPURemoval_cff')
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertices *
-                     process.mfvRedoPURemoval * process.mfvNonPATExtraVertexSequence)
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSequence)
+
+#process.load('JMTucker.MFVNeutralino.RedoPURemoval_cff')
+#process.p *= process.mfvRedoPURemoval * process.mfvExtraVertexSequence
 
 all_anas = []
 
 vertex_srcs = [
     ('MY',     'mfvVertices'),
-    ('PF',     'mfvVerticesFromCands'),
-    ('PFNPU',  'mfvVerticesFromNoPUCands'),
-    ('PFNPUZ', 'mfvVerticesFromNoPUZCands'),
+#    ('PF',     'mfvVerticesFromCands'),
+#    ('PFNPU',  'mfvVerticesFromNoPUCands'),
+#    ('PFNPUZ', 'mfvVerticesFromNoPUZCands'),
 #    ('JPT',    'mfvVerticesFromJets'),
-    ('JPF',    'mfvVerticesFromPFJets'),
+#    ('JPF',    'mfvVerticesFromPFJets'),
     ]
 
 for name, src in vertex_srcs:
@@ -38,7 +40,8 @@ for name, src in vertex_srcs:
     
 ana = cms.EDAnalyzer('VtxRecoPlay',
                      trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
-                     jets_src = cms.InputTag('ak5PFJets'),
+                     pfjets_src = cms.InputTag('ak5PFJets'),
+                     jets_src = cms.InputTag('selectedPatJetsPF'),
                      tracks_src = cms.InputTag('generalTracks'),
                      primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                      gen_src = cms.InputTag('genParticles'),
@@ -112,6 +115,7 @@ if 'argv' in sys.argv:
 
 #scatterplots(True)
 #process.add_(cms.Service('SimpleMemoryCheck'))
+#process.playMYQno.do_scatterplots = True
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     assert all_anas[0].is_mfv # de_mfv will be called for non-signal samples below
@@ -120,14 +124,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples
+    samples = Samples.mfv_signal_samples + Samples.background_samples #+ Samples.auxiliary_background_samples
 
-    no = 'mfv_neutralino_tau0000um_M0400 mfv_neutralino_tau0010um_M0400 mfv_neutralino_tau0100um_M0400 mfv_neutralino_tau1000um_M0400 mfv_neutralino_tau9900um_M0400 qcdht0100 qcdht0250 qcdht0500 qcdht1000 ttbardilep ttbarhadronic ttbarsemilep zjetstonunuHT050 zjetstonunuHT100 zjetstonunuHT200 zjetstonunuHT400 dyjetstollM10 dyjetstollM50 qcdmu0015 qcdmu0020 qcdmu0030 qcdmu0050 qcdmu0080 qcdmu0120 qcdmu0170 qcdmu0300 qcdmu0470 qcdmu0600 qcdmu0800 qcdmu1000 qcdmupt15'.split()
-    samples = [sample for sample in samples if sample.name not in no]
     for sample in samples:
-        if 'mfv' not in sample.name:
-            sample.scheduler_name = 'remoteGlidein'
-
+        sample.scheduler = 'remoteGlidein'
+        sample.ana_scheduler = 'remoteGlidein'
+        
     def pset_modifier(sample):
         to_add = []
         if 'ttbar' in sample.name:
@@ -136,14 +138,22 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_add.append('de_mfv()')
         return to_add
 
+    Samples.ttbarhadronic.ana_dataset_override = '/TTJets_HadronicMGDecays_8TeV-madgraph/jchu-jtuple_v7-fe6d9f80f9c0fe06cc80b089617fa99d/USER'
+    Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/jchu-jtuple_v7-5d4c2a74c85834550d3f9609274e8548/USER'
+    
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('VertexRecoPlay',
+    cs = CRABSubmitter('VertexRecoPlayTest',
                        total_number_of_events = 99250,
                        events_per_job = 2500,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
+                       use_ana_dataset = True,
+                       use_parent = True,
+                       USER_skip_servers = 'unl_hcc-crabserver',
+                       #GRID_data_location_override = 'T1_US_FNAL,T2_US_Caltech,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin',
+                       #GRID_remove_default_blacklist = 1,
                        )
-    cs.submit_all(samples)
+    cs.submit_all([Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400])
 
 '''
 mergeTFileServiceHistograms -w 0.457,0.438,0.105 -i ttbarhadronic.root ttbarsemilep.root ttbardilep.root -o ttbar_merge.root
