@@ -6,6 +6,7 @@
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
 #include "DataFormats/SiStripDetId/interface/TIBDetId.h"
@@ -150,6 +151,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
  private:
   const edm::InputTag trigger_results_src;
   const edm::InputTag pfjets_src;
+  const edm::InputTag jets_src;
   const edm::InputTag tracks_src;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_src;
@@ -462,6 +464,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
     pfjets_src(cfg.getParameter<edm::InputTag>("pfjets_src")),
+    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
@@ -899,6 +902,11 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
   //////////////////////////////////////////////////////////////////////
 
+  edm::Handle<pat::JetCollection> jets;
+  event.getByLabel(jets_src, jets);
+
+  //////////////////////////////////////////////////////////////////////
+
   edm::Handle<reco::TrackCollection> tracks;
   event.getByLabel(tracks_src, tracks);
 
@@ -970,6 +978,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   const reco::Vertex* sv0 = 0;
   const reco::Vertex* sv1 = 0;
   std::vector<std::map<int,int> > trackicities(nsv);
+
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices[isv];
     if (!use_vertex(sv))
