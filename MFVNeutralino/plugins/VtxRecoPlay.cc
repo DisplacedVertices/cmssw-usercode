@@ -149,7 +149,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag trigger_results_src;
-  const edm::InputTag jets_src;
+  const edm::InputTag pfjets_src;
   const edm::InputTag tracks_src;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_src;
@@ -306,12 +306,12 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_lspdist3d;
 
   TH1F* h_pass_trigger;
-  TH1F* h_njets;
-  TH1F* h_ntightjets;
-  TH1F* h_jetpt4;
-  TH1F* h_tightjetpt4;
-  TH1F* h_jetpt5;
-  TH1F* h_tightjetpt5;
+  TH1F* h_npfjets;
+  TH1F* h_ntightpfjets;
+  TH1F* h_pfjetpt4;
+  TH1F* h_tightpfjetpt4;
+  TH1F* h_pfjetpt5;
+  TH1F* h_tightpfjetpt5;
   TH1F* h_ntracks;
   TH1F* h_ntracksptpass;
 
@@ -385,12 +385,12 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float lspdist2d;
     float lspdist3d;
     short pass_trigger;
-    ushort njets;
-    ushort ntightjets;
-    float jetpt4;
-    float jetpt5;
-    float tightjetpt4;
-    float tightjetpt5;
+    ushort npfjets;
+    ushort ntightpfjets;
+    float pfjetpt4;
+    float pfjetpt5;
+    float tightpfjetpt4;
+    float tightpfjetpt5;
     ushort nsv;
     ushort nsvpass;
 
@@ -449,7 +449,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 
     void clear(bool all) {
       if (all) {
-        run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; njets = -1; ntightjets = -1; jetpt4 = -1; jetpt5 = -1; tightjetpt4 = -1; tightjetpt5 = -1; nsv = -1; nsvpass = -1;
+        run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; npfjets = -1; ntightpfjets = -1; pfjetpt4 = -1; pfjetpt5 = -1; tightpfjetpt4 = -1; tightpfjetpt5 = -1; nsv = -1; nsvpass = -1;
       }
       isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
     }
@@ -461,7 +461,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 
 VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
-    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
+    pfjets_src(cfg.getParameter<edm::InputTag>("pfjets_src")),
     tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
@@ -495,12 +495,12 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("lspdist2d", &nt.lspdist2d, "lspdist2d/F");
     tree->Branch("lspdist3d", &nt.lspdist3d, "lspdist3d/F");
     tree->Branch("pass_trigger", &nt.pass_trigger, "pass_trigger/S");
-    tree->Branch("njets", &nt.njets, "njets/s");
-    tree->Branch("ntightjets", &nt.ntightjets, "ntightjets/s");
-    tree->Branch("jetpt4", &nt.jetpt4, "jetpt4/F");
-    tree->Branch("jetpt5", &nt.jetpt5, "jetpt5/F");
-    tree->Branch("tightjetpt4", &nt.tightjetpt4, "tightjetpt4/F");
-    tree->Branch("tightjetpt5", &nt.tightjetpt5, "tightjetpt5/F");
+    tree->Branch("npfjets", &nt.npfjets, "npfjets/s");
+    tree->Branch("ntightpfjets", &nt.ntightpfjets, "ntightpfjets/s");
+    tree->Branch("pfjetpt4", &nt.pfjetpt4, "pfjetpt4/F");
+    tree->Branch("pfjetpt5", &nt.pfjetpt5, "pfjetpt5/F");
+    tree->Branch("tightpfjetpt4", &nt.tightpfjetpt4, "tightpfjetpt4/F");
+    tree->Branch("tightpfjetpt5", &nt.tightpfjetpt5, "tightpfjetpt5/F");
     tree->Branch("nsv", &nt.nsv, "nsv/s");
     tree->Branch("nsvpass", &nt.nsvpass, "nsvpass/s");
     tree->Branch("isv", &nt.isv, "isv/S");
@@ -579,12 +579,12 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);arb. units", 600, 0, 3);
 
   h_pass_trigger = fs->make<TH1F>("h_pass_trigger", ";pass-trigger code;arb. units", 3, -1, 2);
-  h_njets = fs->make<TH1F>("h_njets", ";# of loose PF jets;arb. units", 30, 0, 30);
-  h_ntightjets = fs->make<TH1F>("h_ntightjets", ";# of tight PF jets;arb. units", 30, 0, 30);
-  h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th loose PF jet (GeV);arb. units", 100, 0, 500);
-  h_tightjetpt4 = fs->make<TH1F>("h_tightjetpt4", ";p_{T} of 4th tight PF jet (GeV);arb. units", 100, 0, 500);
-  h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th loose PF jet (GeV);arb. units", 100, 0, 500);
-  h_tightjetpt5 = fs->make<TH1F>("h_tightjetpt5", ";p_{T} of 5th tight PF jet (GeV);arb. units", 100, 0, 500);
+  h_npfjets = fs->make<TH1F>("h_npfjets", ";# of loose PF jets;arb. units", 30, 0, 30);
+  h_ntightpfjets = fs->make<TH1F>("h_ntightpfjets", ";# of tight PF jets;arb. units", 30, 0, 30);
+  h_pfjetpt4 = fs->make<TH1F>("h_pfjetpt4", ";p_{T} of 4th loose PF jet (GeV);arb. units", 100, 0, 500);
+  h_tightpfjetpt4 = fs->make<TH1F>("h_tightpfjetpt4", ";p_{T} of 4th tight PF jet (GeV);arb. units", 100, 0, 500);
+  h_pfjetpt5 = fs->make<TH1F>("h_pfjetpt5", ";p_{T} of 5th loose PF jet (GeV);arb. units", 100, 0, 500);
+  h_tightpfjetpt5 = fs->make<TH1F>("h_tightpfjetpt5", ";p_{T} of 5th tight PF jet (GeV);arb. units", 100, 0, 500);
   h_ntracks = fs->make<TH1F>("h_ntracks", ";# of general tracks;arb. units", 20, 0, 2000);
   h_ntracksptpass = fs->make<TH1F>("h_ntracksptpass", ";# of selected tracks;arb. units", 20, 0, 60);
 
@@ -862,40 +862,40 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<reco::PFJetCollection> jets;
-  event.getByLabel(jets_src, jets);
+  edm::Handle<reco::PFJetCollection> pfjets;
+  event.getByLabel(pfjets_src, pfjets);
 
-  nt.njets = 0;
-  nt.ntightjets = 0;
-  for (const reco::PFJet& jet : *jets) {
+  nt.npfjets = 0;
+  nt.ntightpfjets = 0;
+  for (const reco::PFJet& jet : *pfjets) {
     if (jet.pt() > jet_pt_min &&
         fabs(jet.eta()) < 2.5 &&
         jet.numberOfDaughters() > 1 &&
         (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
 
       if (jet.neutralHadronEnergyFraction() < 0.99 && jet.neutralEmEnergyFraction() < 0.99)
-        ++nt.njets;
+        ++nt.npfjets;
       if (jet.neutralHadronEnergyFraction() < 0.90 && jet.neutralEmEnergyFraction() < 0.90)
-        ++nt.ntightjets;
+        ++nt.ntightpfjets;
 
-      if (nt.njets == 4)
-        nt.jetpt4 = jet.pt();
-      else if (nt.njets == 5)
-        nt.jetpt5 = jet.pt();
+      if (nt.npfjets == 4)
+        nt.pfjetpt4 = jet.pt();
+      else if (nt.npfjets == 5)
+        nt.pfjetpt5 = jet.pt();
 
-      if (nt.ntightjets == 4)
-        nt.tightjetpt4 = jet.pt();
-      else if (nt.ntightjets == 5)
-        nt.tightjetpt5 = jet.pt();
+      if (nt.ntightpfjets == 4)
+        nt.tightpfjetpt4 = jet.pt();
+      else if (nt.ntightpfjets == 5)
+        nt.tightpfjetpt5 = jet.pt();
     }
   }
 
-  h_njets->Fill(nt.njets);
-  h_ntightjets->Fill(nt.ntightjets);
-  h_jetpt4->Fill(nt.jetpt4);
-  h_tightjetpt4->Fill(nt.tightjetpt4);
-  h_jetpt5->Fill(nt.jetpt5);
-  h_tightjetpt5->Fill(nt.tightjetpt5);
+  h_npfjets->Fill(nt.npfjets);
+  h_ntightpfjets->Fill(nt.ntightpfjets);
+  h_pfjetpt4->Fill(nt.pfjetpt4);
+  h_tightpfjetpt4->Fill(nt.tightpfjetpt4);
+  h_pfjetpt5->Fill(nt.pfjetpt5);
+  h_tightpfjetpt5->Fill(nt.tightpfjetpt5);
 
   //////////////////////////////////////////////////////////////////////
 
