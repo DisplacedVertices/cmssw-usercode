@@ -40,14 +40,20 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              verbose = cms.untracked.bool(False),
                              )
 
-mfvSelectedVertices = cms.EDFilter('VertexSelector',
-                                   filter = cms.bool(False),
-                                   src = cms.InputTag('mfvVertices'),
-                                   cut = cms.string('nTracks >= 6'),
-                                   )
+import JMTucker.MFVNeutralino.GenParticles_cff
+mfvGenVertices = JMTucker.MFVNeutralino.GenParticles_cff.mfvGenVertices.clone()
+
+import JMTucker.MFVNeutralino.VertexSelector_cfi
+mfvSelectedVertices = JMTucker.MFVNeutralino.VertexSelector_cfi.mfvSelectedVertices.clone()
+mfvSelectedVertices.min_ntracks = 6
+
+mfvSelectedJets = cms.EDFilter('PATJetSelector',
+                               src = cms.InputTag('selectedPatJetsPF'),
+                               cut = cms.string('pt > 20')  # JMTBAD PUT BACK TO 30
+                               )
 
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
-                                   jet_src = cms.InputTag('selectedPatJetsPF'),
+                                   jet_src = cms.InputTag('mfvSelectedJets'),
                                    vertex_src = cms.InputTag('mfvSelectedVertices'),
                                    min_jet_track_frac = cms.double(0.),
                                    min_vertex_track_weight = cms.double(0.5),
@@ -74,7 +80,7 @@ def use_jets(vertex_producer, kind):
     else:
         raise ValueError("don't know anything about kind = %r" % kind)
 
-mfvVertexSequence = cms.Sequence(mfvVertices * mfvSelectedVertices * mfvVerticesToJets)
+mfvVertexSequence = cms.Sequence(mfvVertices * mfvGenVertices * mfvSelectedVertices * mfvSelectedJets * mfvVerticesToJets)
 
 mfvVerticesFromCands = mfvVertices.clone()
 use_pf_candidates(mfvVerticesFromCands, 'particleFlow')
