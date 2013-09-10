@@ -24,6 +24,7 @@ process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSeque
 #process.load('JMTucker.MFVNeutralino.RedoPURemoval_cff')
 #process.p *= process.mfvRedoPURemoval * process.mfvExtraVertexSequence
 
+all_sels = []
 all_anas = []
 
 vertex_srcs = [
@@ -37,50 +38,47 @@ vertex_srcs = [
 
 for name, src in vertex_srcs:
     getattr(process, src).histos = True
-    
+
 ana = cms.EDAnalyzer('VtxRecoPlay',
                      trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
                      pfjets_src = cms.InputTag('ak5PFJets'),
                      jets_src = cms.InputTag('selectedPatJetsPF'),
                      tracks_src = cms.InputTag('generalTracks'),
                      primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
-                     gen_src = cms.InputTag('genParticles'),
+                     gen_vertices_src = cms.InputTag('mfvGenVertices'),
                      vertex_src = cms.InputTag('dummy'),
-                     print_info = cms.bool(False),
-                     is_mfv = cms.bool(True),
-                     is_ttbar = cms.bool(False),
                      do_scatterplots = cms.bool(False),
                      do_ntuple = cms.bool(False),
-                     jet_pt_min = cms.double(30),
+                     jet_pt_min = cms.double(30), # JMTBAD keep synchronized with Vertexer_cff
                      track_pt_min = cms.double(10),
                      track_vertex_weight_min = cms.double(0.5),
-                     min_sv_ntracks = cms.int32(0),
-                     max_sv_chi2dof = cms.double(1e6),
-                     max_sv_err2d   = cms.double(1e6),
-                     min_sv_mass    = cms.double(0),
-                     min_sv_drmax   = cms.double(0),
-                     min_sv_gen3dsig = cms.double(0),
-                     max_sv_gen3dsig = cms.double(1e6),
                      )
 
-ana_qcuts = [
-    ('Qno',             ana),
-    ('Q3dsiglt4',       ana.clone(max_sv_gen3dsig = 4)),
-    ('Q3dsigge6',       ana.clone(min_sv_gen3dsig = 6)),
-    ('Qntk6',           ana.clone(min_sv_ntracks = 6)),
-    ('QM20',            ana.clone(min_sv_mass = 20)),
-    ('Qntk6M20',        ana.clone(min_sv_ntracks = 6, min_sv_mass = 20)),
+sel = process.mfvSelectedVertices.clone(min_ntracks = 0) # JMTBAD keep synchronized with Vertexer_cff
+
+sel_qcuts = [
+    ('Qno',             sel.clone(min_ntracks = 0)),
+    ('Q3dsiglt4',       sel.clone(max_gen3dsig = 4)),
+    ('Q3dsigge6',       sel.clone(min_gen3dsig = 6)),
+    ('Qntk6',           sel.clone(min_ntracks = 6)),  
+    ('QM20',            sel.clone(min_mass = 20)),
+    ('Qntk6M20',        sel.clone(min_ntracks = 6, min_mass = 20)),
     ]
 
 for vertex_name, vertex_src in vertex_srcs:
-    for ana_name, ana in ana_qcuts:
-        obj = ana.clone(vertex_src = vertex_src)
-        if ana_name == 'Qno' and vertex_name == 'MY':
-            obj.do_ntuple = True
+    for sel_name, sel in sel_qcuts:
+        sel_obj = sel.clone(vertex_src = vertex_src)
+        all_sels.append(sel_obj)
+        vertex_sel_name = 'sel' + vertex_name + sel_name
+        setattr(process, vertex_sel_name, sel_obj)
         
-        setattr(process, 'play' + vertex_name + ana_name, obj)
-        all_anas.append(obj)
-        process.p *= obj
+        ana_obj = ana.clone(vertex_src = vertex_sel_name)
+        all_anas.append(ana_obj)
+        if sel_name == 'Qno' and vertex_name == 'MY':
+            ana_obj.do_ntuple = True
+        setattr(process, 'play' + vertex_name + sel_name, ana_obj)
+        
+        process.p *= sel_obj * ana_obj
 
 def gen_length_filter(dist):
     process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
@@ -91,13 +89,13 @@ def gen_length_filter(dist):
 def de_mfv():
     if hasattr(process, 'mfvGenParticleFilter'):
         process.mfvGenParticleFilter.cut_invalid = False
-    for ana in all_anas:
-        ana.is_mfv = False
+    if hasattr(process, 'mfvGenVertices'):
+        process.mfvGenVertices.is_mfv = False
 
 def sample_ttbar():
     de_mfv()
-    for ana in all_anas:
-        ana.is_ttbar = True
+    if hasattr(process, 'mfvGenVertices'):
+        process.mfvGenVertices.is_ttbar = True
 
 def scatterplots(do):
     for ana in all_anas:

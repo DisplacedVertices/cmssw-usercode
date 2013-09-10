@@ -37,10 +37,9 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
-#include "JMTucker/Tools/interface/MCInteractionTops.h"
 #include "JMTucker/Tools/interface/PairwiseHistos.h"
 #include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 //#include "JMTucker/Tools/interface/Framework.h"
 
 namespace {
@@ -154,149 +153,16 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const edm::InputTag jets_src;
   const edm::InputTag tracks_src;
   const edm::InputTag primary_vertex_src;
-  const edm::InputTag gen_src;
+  const edm::InputTag gen_vertices_src;
   const edm::InputTag vertex_src;
-  const bool print_info;
-  const bool is_mfv;
-  const bool is_ttbar;
   const bool do_scatterplots;
   const bool do_ntuple;
   const double jet_pt_min;
   const double track_pt_min;
   const double track_vertex_weight_min;
 
-  const int min_sv_ntracks;
-  const double max_sv_chi2dof;
-  const double max_sv_err2d;
-  const double min_sv_mass;
-  const double min_sv_drmax;
-  const double min_sv_gen3dsig;
-  const double max_sv_gen3dsig;
-
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
-
-  float gen_verts[2][3];
-  bool gen_valid;
-
-  float abs_error(const reco::Vertex& sv, bool use3d) const {
-    const double x = sv.x();
-    const double y = sv.y();
-    const double z = use3d ? sv.z() : 0;
-    AlgebraicVector3 v(x,y,z);
-    AlgebraicSymMatrix33 cov = sv.covariance();
-    double dist = mag(x,y,z);
-    double err2 = ROOT::Math::Similarity(v, cov);
-    return dist != 0 ? sqrt(err2)/dist : 0;
-  }
-
-  Measurement1D gen_dist(const reco::Vertex& sv, const bool use3d) const {
-    float dist = 1e99;
-    for (int i = 0; i < 2; ++i) {
-      float dist_;
-      if (use3d)
-        dist_ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1], sv.z() - gen_verts[i][2]);
-      else
-        dist_ = mag(sv.x() - gen_verts[i][0], sv.y() - gen_verts[i][1]);
-      if (dist_ < dist) dist = dist_;
-    }
-
-    return Measurement1D(dist, abs_error(sv, use3d));
-  }
-
-  struct vertex_tracks_distance {
-    double drmin, drmax;
-    double dravg, dravgw, dravgvw;
-    double drrms, drrmsw, drrmsvw;
-
-    vertex_tracks_distance(const reco::Vertex& sv, const double track_vertex_weight_min) {
-      drmin = 1e99;
-      drmax = dravg = dravgw = drrms = drrmsw = 0;
-      std::vector<double> drs;
-      std::vector<double> ws;
-      std::vector<double> vws;
-      double sumw = 0, sumvw = 0;
-
-      auto trkb = sv.tracks_begin();
-      auto trke = sv.tracks_end();
-      for (auto trki = trkb; trki != trke; ++trki) {
-        if (sv.trackWeight(*trki) < track_vertex_weight_min)
-          continue;
-
-        for (auto trkj = trki + 1; trkj != trke; ++trkj) {
-          if (sv.trackWeight(*trkj) < track_vertex_weight_min)
-            continue;
-
-          double dr = reco::deltaR(**trki, **trkj);
-          drs.push_back(dr);
-
-          double w  = 0.5*((*trki)->pt() + (*trkj)->pt());
-          double vw = 0.5*(sv.trackWeight(*trki) + sv.trackWeight(*trkj));
-
-          sumw  += w;
-          sumvw += vw;
-          ws .push_back(w);
-          vws.push_back(vw);
-
-          dravg   += dr;
-          dravgw  += dr * w;
-          dravgvw += dr * vw;
-
-          if (dr < drmin)
-            drmin = dr;
-          if (dr > drmax)
-            drmax = dr;
-        }
-      }
-
-      dravg   /= drs.size();
-      dravgw  /= sumw;
-      dravgvw /= sumvw;
-
-      for (int i = 0, ie = int(drs.size()); i < ie; ++i) {
-        double dr = drs[i];
-        drrms   += pow(dr - dravg,   2);
-        drrmsw  += pow(dr - dravgw,  2) * ws [i];
-        drrmsvw += pow(dr - dravgvw, 2) * vws[i];
-      }
-
-      drrms   = sqrt(drrms  /drs.size());
-      drrmsw  = sqrt(drrmsw /sumw);
-      drrmsvw = sqrt(drrmsvw/sumvw);
-    }
-  };
-
-  std::pair<bool, float> compatibility(const reco::Vertex& x, const reco::Vertex& y, bool use3d) {
-    bool success = false;
-    float compat = 0;
-    try {
-      if (use3d)
-        compat = distcalc_3d.compatibility(x, y);
-      else
-        compat = distcalc_2d.compatibility(x, y);
-      success = true;
-    }
-    catch (cms::Exception& e) {
-      if (e.category().find("matrix inversion problem") == std::string::npos)
-        throw;
-    }
-    return std::make_pair(success, compat);
-  }
-
-  bool use_vertex(const reco::Vertex& vtx) {
-    const bool use =
-      int(vtx.tracksSize()) >= min_sv_ntracks &&
-      vtx.normalizedChi2() < max_sv_chi2dof   &&
-      abs_error(vtx, false) < max_sv_err2d    &&
-      vtx.p4().mass() >= min_sv_mass          &&
-      (min_sv_drmax == 0 || vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_sv_drmax);
-
-    if (!use)
-      return false;
-
-    const float gd3sg = gen_dist(vtx, true).significance();
-    return use && (!gen_valid || (gd3sg >= min_sv_gen3dsig && gd3sg < max_sv_gen3dsig));
-  }
 
   TH1F* h_sim_pileup_num_int[3];
   TH1F* h_sim_pileup_true_num_int[3];
@@ -332,10 +198,9 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_pv_sumpt2[2];
 
   TH1F* h_nsv;
-  TH1F* h_nsvpass;
-  TH2F* h_nsvpass_v_minlspdist2d;
-  TH2F* h_nsvpass_v_lspdist2d;
-  TH2F* h_nsvpass_v_lspdist3d;
+  TH2F* h_nsv_v_minlspdist2d;
+  TH2F* h_nsv_v_lspdist2d;
+  TH2F* h_nsv_v_lspdist3d;
 
   TH2F* h_sv_max_trackicity;
   TH1F* h_sv_pos_1d[4][3]; // index 0: 0 = the highest mass SV, 1 = second highest, 2 = third highest, 3 = rest
@@ -394,7 +259,6 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     float tightpfjetpt4;
     float tightpfjetpt5;
     ushort nsv;
-    ushort nsvpass;
 
     short isv;
     ushort ntracks;
@@ -451,7 +315,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
 
     void clear(bool all) {
       if (all) {
-        run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; npfjets = -1; ntightpfjets = -1; pfjetpt4 = -1; pfjetpt5 = -1; tightpfjetpt4 = -1; tightpfjetpt5 = -1; nsv = -1; nsvpass = -1;
+        run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; npfjets = -1; ntightpfjets = -1; pfjetpt4 = -1; pfjetpt5 = -1; tightpfjetpt4 = -1; tightpfjetpt5 = -1; nsv = -1;
       }
       isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
     }
@@ -467,23 +331,13 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
+    gen_vertices_src(cfg.getParameter<edm::InputTag>("gen_vertices_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    print_info(cfg.getParameter<bool>("print_info")),
-    is_mfv(cfg.getParameter<bool>("is_mfv")),
-    is_ttbar(cfg.getParameter<bool>("is_ttbar")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     do_ntuple(cfg.getParameter<bool>("do_ntuple")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     track_pt_min(cfg.getParameter<double>("track_pt_min")),
-    track_vertex_weight_min(cfg.getParameter<double>("track_vertex_weight_min")),
-    min_sv_ntracks(cfg.getParameter<int>("min_sv_ntracks")),
-    max_sv_chi2dof(cfg.getParameter<double>("max_sv_chi2dof")),
-    max_sv_err2d(cfg.getParameter<double>("max_sv_err2d")),
-    min_sv_mass(cfg.getParameter<double>("min_sv_mass")),
-    min_sv_drmax(cfg.getParameter<double>("min_sv_drmax")),
-    min_sv_gen3dsig(cfg.getParameter<double>("min_sv_gen3dsig")),
-    max_sv_gen3dsig(cfg.getParameter<double>("max_sv_gen3dsig"))
+    track_vertex_weight_min(cfg.getParameter<double>("track_vertex_weight_min"))
 {
   edm::Service<TFileService> fs;
 
@@ -505,7 +359,6 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("tightpfjetpt4", &nt.tightpfjetpt4, "tightpfjetpt4/F");
     tree->Branch("tightpfjetpt5", &nt.tightpfjetpt5, "tightpfjetpt5/F");
     tree->Branch("nsv", &nt.nsv, "nsv/s");
-    tree->Branch("nsvpass", &nt.nsvpass, "nsvpass/s");
     tree->Branch("isv", &nt.isv, "isv/S");
     tree->Branch("ntracks", &nt.ntracks, "ntracks/s");
     tree->Branch("ntracksptgt10", &nt.ntracksptgt10, "ntracksptgt10/s");
@@ -617,11 +470,10 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     h_pv_sumpt2[j] = fs->make<TH1F>(TString::Format("h_pv_sumpt2_%i", j), TString::Format(";%s PV #Sigma p_{T}^{2} (GeV);arb.units", ex), 200, 0, 20000);
   }
 
-  h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 100, 0, 100);
-  h_nsvpass = fs->make<TH1F>("h_nsvpass", ";# of selected secondary vertices;arb. units", 15, 0, 15);
-  h_nsvpass_v_minlspdist2d = fs->make<TH2F>("h_nsvpass_v_lspdist2d", ";min dist2d(gen vtx #0, #1) (cm);# of selected secondary vertices", 600, 0, 3, 5, 0, 5);
-  h_nsvpass_v_lspdist2d = fs->make<TH2F>("h_nsvpass_v_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);# of selected secondary vertices", 600, 0, 3, 5, 0, 5);
-  h_nsvpass_v_lspdist3d = fs->make<TH2F>("h_nsvpass_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of selected secondary vertices", 600, 0, 3, 5, 0, 5);
+  h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 15, 0, 15);
+  h_nsv_v_minlspdist2d = fs->make<TH2F>("h_nsv_v_minlspdist2d", ";min dist2d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
+  h_nsv_v_lspdist2d = fs->make<TH2F>("h_nsv_v_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
+  h_nsv_v_lspdist3d = fs->make<TH2F>("h_nsv_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
   h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
   for (int j = 0; j < 4; ++j) {
@@ -784,47 +636,13 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
+  edm::Handle<std::vector<double> > gen_vertices;
+  event.getByLabel(gen_vertices_src, gen_vertices);
 
-  gen_valid = false;
-
-  if (is_mfv) {
-    MCInteractionMFV3j mci;
-    mci.Init(*gen_particles);
-    if ((gen_valid = mci.Valid())) {
-      if (print_info)
-        mci.Print(std::cout);
-      for (int i = 0; i < 2; ++i) {
-        const reco::GenParticle* daughter = mci.stranges[i];
-        gen_verts[i][0] = daughter->vx();
-        gen_verts[i][1] = daughter->vy();
-        gen_verts[i][2] = daughter->vz();
-      }
-    }
-  }
-  else if (is_ttbar) {
-    MCInteractionTops mci;
-    mci.Init(*gen_particles);
-    if ((gen_valid = mci.Valid())) {
-      for (int i = 0; i < 2; ++i) {
-        const reco::GenParticle* daughter = mci.tops[i];
-        gen_verts[i][0] = daughter->vx();
-        gen_verts[i][1] = daughter->vy();
-        gen_verts[i][2] = daughter->vz();
-      }
-    }
-  }
-  else {
-    for (int i = 0; i < 2; ++i) {
-      gen_verts[i][0] = beamspot->x0();
-      gen_verts[i][1] = beamspot->y0();
-      gen_verts[i][2] = beamspot->z0();
-    }
-  }
-
-  if (!gen_valid && (is_mfv || is_ttbar))
-    edm::LogWarning("VtxRecoPlay") << "warning: is_mfv=" << is_mfv << ", is_ttbar=" << is_ttbar << " and neither MCI valid";
+  const bool gen_valid = gen_vertices->size() == 6;
+  float gen_verts[2][3] = {{0}};
+  for (int i = 0; i < 6; ++i)
+    gen_verts[i/3][i%3] = gen_vertices->at(i);
 
   h_gen_valid->Fill(gen_valid);
   for (int j = 0; j < 2; ++j) {
@@ -965,36 +783,19 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<reco::VertexCollection> original_secondary_vertices;
-  event.getByLabel(vertex_src, original_secondary_vertices);
+  edm::Handle<reco::VertexCollection> secondary_vertices;
+  event.getByLabel(vertex_src, secondary_vertices);
 
-  reco::VertexCollection secondary_vertices(*original_secondary_vertices);
-  std::sort(secondary_vertices.begin(), secondary_vertices.end(),
-            [](const reco::Vertex& a, const reco::Vertex& b) { return a.p4().mass() > b.p4().mass(); });
-
-  const int nsv = int(secondary_vertices.size());
+  const int nsv = int(secondary_vertices->size());
   h_nsv->Fill(nsv);
-  int nsvpass = 0;
-  const reco::Vertex* sv0 = 0;
-  const reco::Vertex* sv1 = 0;
   std::vector<std::map<int,int> > trackicities(nsv);
 
   for (int isv = 0; isv < nsv; ++isv) {
-    const reco::Vertex& sv = secondary_vertices[isv];
-    if (!use_vertex(sv))
-      continue;
-
-    if (sv0 == 0)
-      sv0 = &sv;
-    else if (sv1 == 0)
-      sv1 = &sv;
-
-    const int svndx = nsvpass >= 3 ? 3 : nsvpass;
+    const reco::Vertex& sv = secondary_vertices->at(isv);
+    const int svndx = isv >= 3 ? 3 : isv;
 
     nt.clear(false);
-    nt.isv = nsvpass;
-
-    ++nsvpass;
+    nt.isv = isv;
 
     for (int i = 0; i < 3; ++i)
       h_sv_pos_1d[svndx][i]->Fill(coord(sv.position(), i) - coord(beamspot->position(), i));
@@ -1121,12 +922,12 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     int max_trackicity = max_tcity != trackicity.end() ? *max_tcity : 0;
     h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
-    const vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
+    const mfv::vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
 
-    const Measurement1D gen2ddist = gen_dist(sv, false);
-    const Measurement1D gen3ddist = gen_dist(sv, true);
+    const Measurement1D gen2ddist = mfv::gen_dist(sv, *gen_vertices, false);
+    const Measurement1D gen3ddist = mfv::gen_dist(sv, *gen_vertices, true);
 
-    const std::pair<bool,float> bs2dcompat = compatibility(sv, fake_bs_vtx, false);
+    const std::pair<bool,float> bs2dcompat = mfv::compatibility(sv, fake_bs_vtx, false);
     const Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
 
     std::pair<bool,float> pv2dcompat, pv3dcompat;
@@ -1137,13 +938,13 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     pv2ddist_val = pv3ddist_val = pv2ddist_err = pv3ddist_err = pv2ddist_sig = pv3ddist_sig = -1;
 
     if (primary_vertex != 0) {
-      pv2dcompat = compatibility(sv, *primary_vertex, false);
+      pv2dcompat = mfv::compatibility(sv, *primary_vertex, false);
       Measurement1D pv2ddist = distcalc_2d.distance(sv, *primary_vertex);
       pv2ddist_val = pv2ddist.value();
       pv2ddist_err = pv2ddist.error();
       pv2ddist_sig = pv2ddist.significance();
 
-      pv3dcompat = compatibility(sv, *primary_vertex, true);
+      pv3dcompat = mfv::compatibility(sv, *primary_vertex, true);
       Measurement1D pv3ddist = distcalc_3d.distance(sv, *primary_vertex);
       pv3ddist_val = pv3ddist.value();
       pv3ddist_err = pv3ddist.error();
@@ -1278,21 +1079,22 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   if (do_ntuple) {
     nt.clear(false);
     nt.nsv = nsv;
-    nt.nsvpass = nsvpass;
     tree->Fill();
   }
 
-  h_nsvpass->Fill(nsvpass);
-  h_nsvpass_v_minlspdist2d->Fill(nt.minlspdist2d, nsvpass);
-  h_nsvpass_v_lspdist2d->Fill(nt.lspdist2d, nsvpass);
-  h_nsvpass_v_lspdist3d->Fill(nt.lspdist3d, nsvpass);
+  h_nsv->Fill(nsv);
+  h_nsv_v_minlspdist2d->Fill(nt.minlspdist2d, nsv);
+  h_nsv_v_lspdist2d->Fill(nt.lspdist2d, nsv);
+  h_nsv_v_lspdist3d->Fill(nt.lspdist3d, nsv);
 
-  if (sv0 && sv1) {
-    double svdist2d = mag(sv0->position().x() - sv1->position().x(),
-                          sv0->position().y() - sv1->position().y());
-    double svdist3d = mag(sv0->position().x() - sv1->position().x(),
-                          sv0->position().y() - sv1->position().y(),
-                          sv0->position().z() - sv1->position().z());
+  if (nsv >= 2) {
+    const reco::Vertex& sv0 = secondary_vertices->at(0);
+    const reco::Vertex& sv1 = secondary_vertices->at(1);
+    double svdist2d = mag(sv0.position().x() - sv1.position().x(),
+                          sv0.position().y() - sv1.position().y());
+    double svdist3d = mag(sv0.position().x() - sv1.position().x(),
+                          sv0.position().y() - sv1.position().y(),
+                          sv0.position().z() - sv1.position().z());
     h_svdist2d->Fill(svdist2d);
     h_svdist3d->Fill(svdist3d);
     h_svdist2d_v_lspdist2d->Fill(nt.lspdist2d, svdist2d);
@@ -1300,26 +1102,19 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_svdist2d_v_minlspdist2d->Fill(nt.minlspdist2d, svdist2d);
   }
 
-  const int nvtx = secondary_vertices.size();
-  for (int ivtx = 0; ivtx < nvtx; ++ivtx) {
-    const reco::Vertex& vtxi = secondary_vertices[ivtx];
-    if (!use_vertex(vtxi))
-      continue;
-
+  for (int ivtx = 0; ivtx < nsv; ++ivtx) {
+    const reco::Vertex& vtxi = secondary_vertices->at(ivtx);
     const std::map<int,int>& icityi = trackicities[ivtx];
 
-    for (int jvtx = ivtx + 1; jvtx < nvtx; ++jvtx) {
-      const reco::Vertex& vtxj = secondary_vertices[jvtx];
-      if (!use_vertex(vtxj))
-        continue;
-
+    for (int jvtx = ivtx + 1; jvtx < nsv; ++jvtx) {
+      const reco::Vertex& vtxj = secondary_vertices->at(jvtx);
       const std::map<int,int>& icityj = trackicities[jvtx];
 
       Measurement1D pair2ddist = distcalc_2d.distance(vtxi, vtxj);
       Measurement1D pair3ddist = distcalc_3d.distance(vtxi, vtxj);
 
-      std::pair<bool, float> pair2dcompat = compatibility(vtxi, vtxj, false);
-      std::pair<bool, float> pair3dcompat = compatibility(vtxi, vtxj, true);
+      std::pair<bool, float> pair2dcompat = mfv::compatibility(vtxi, vtxj, false);
+      std::pair<bool, float> pair3dcompat = mfv::compatibility(vtxi, vtxj, true);
 
       h_pair2dcompatscss->Fill(pair2dcompat.first);
       h_pair2dcompat->Fill(pair2dcompat.second);
