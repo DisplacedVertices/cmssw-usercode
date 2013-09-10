@@ -31,6 +31,33 @@ def apply_hist_commands(hist, hist_cmds=None):
             args = (args,)
         getattr(hist, fn)(*args)
 
+def check_consistency(h1, h2, log=True):
+    def p(s):
+        if not (log or log == ''):
+            return
+        if type(log) == str:
+            print log, s
+        else:
+            print s
+    t1 = type(h1)
+    t2 = type(h2)
+    assert issubclass(t1, ROOT.TH1) and issubclass(t2, ROOT.TH1)
+    if t1 != t2:
+        p('histograms have different types')
+        return False
+
+    for ax in 'XYZ':
+        n = getattr(h1, 'GetNbins' + ax)()
+        if n != getattr(h2, 'GetNbins' + ax)():
+            p('histograms have different number of bins along %s' % ax)
+            return False
+        for i in xrange(0, n+2):
+            if getattr(h1, 'Get%saxis' % ax)().GetBinLowEdge(i) != getattr(h2, 'Get%saxis' % ax)().GetBinLowEdge(i):
+                p('histograms have different %s binning' % ax)
+                return False
+
+    return True
+
 def poisson_interval(nobs, alpha=(1-0.6827)/2, beta=(1-0.6827)/2):
     lower = 0
     if nobs > 0:
@@ -1097,6 +1124,7 @@ def ttree_iterator(tree, return_tree=False):
             
 __all__ = [
     'apply_hist_commands',
+    'check_consistency',
     'histogram_divide',
     'clopper_pearson',
     'clopper_pearson_poisson_means',
