@@ -44,6 +44,8 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
   produces<JetVertexAssociation>();
+  //produces<edm::ValueMap<int> >("ntracks");
+  //produces<edm::ValueMap<double> >("angle");
 
   if (histos) {
     edm::Service<TFileService> fs;
@@ -65,7 +67,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   edm::Handle<reco::VertexCollection> vertices;
   event.getByLabel(vertex_src, vertices);
 
-  std::auto_ptr<JetVertexAssociation> assoc(new JetVertexAssociation);
+  std::auto_ptr<JetVertexAssociation> assoc(new JetVertexAssociation(vertices));
   JetVertexAssociation::Filler filler(*assoc);
   
   const size_t n_jets = jets->size();
@@ -74,7 +76,22 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   if (histos)
     h_n_jets_v_vertices->Fill(n_vertices, n_jets);
 
+  if (verbose) {
+    for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
+      const reco::Vertex& vtx = vertices->at(ivtx);
+      printf("ivtx %lu ntracks %i mass %f\n", ivtx, vtx.nTracks(), vtx.p4().mass());
+    }
+  }
+
   size_t n_matchedjets = 0;
+
+  // Associate jets to vertices. For each jet, pick the vertex that
+  // shares the most tracks. Use the absolute number of tracks and not
+  // fractions so that low-ntrack vertices are not preferentially
+  // picked.  If a jet does not share tracks with any vertex, try to
+  // find a vertex that it points back to (in a straight line), taking
+  // the one closest in impact parameter still within 3 sigma of the
+  // vertex position uncertainty.
 
   std::vector<int> indices(n_jets);
   for (size_t ijet = 0; ijet < n_jets; ++ijet) {
@@ -138,6 +155,9 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       ++n_matchedjets;
 
     indices[ijet] = assoc_ivtx;
+
+    if (verbose)
+      printf("ijet %lu pt %f eta %f phi %f  assoc ivtx %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), indices[ijet]);
   }
 
   if (histos) {
