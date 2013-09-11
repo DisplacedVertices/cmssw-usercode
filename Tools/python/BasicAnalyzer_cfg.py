@@ -9,5 +9,12 @@ process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.TFileService = cms.Service('TFileService', fileName = cms.string('tfileservice.root'))
 
+def geometry_etc(process, tag):
+    process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
+    process.load('Configuration.Geometry.GeometryIdeal_cff')
+    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+    process.GlobalTag.globaltag = tag
+    process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
+    
 def add_analyzer(name, **kwargs):
     return _add_analyzer(process, name, **kwargs)
