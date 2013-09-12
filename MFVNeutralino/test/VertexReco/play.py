@@ -58,7 +58,7 @@ v2j = process.mfvVerticesToJets.clone()
 
 sel_qcuts = [
     ('Qno',             sel),
-    ('Q3derrlt0p01',    sel.clone(max_gen3derr = 0.01)),
+    ('Q3derrlt0p01',    sel.clone(max_err3d = 0.01)),
     ('Q3dsiglt4',       sel.clone(max_gen3dsig = 4)),
     ('Q3dsigge6',       sel.clone(min_gen3dsig = 6)),
     ('Qntk6',           sel.clone(min_ntracks = 6)),  
