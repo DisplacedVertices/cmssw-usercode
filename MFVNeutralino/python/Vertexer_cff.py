@@ -45,18 +45,18 @@ mfvGenVertices = JMTucker.MFVNeutralino.GenParticles_cff.mfvGenVertices.clone()
 
 import JMTucker.MFVNeutralino.VertexSelector_cfi
 mfvSelectedVertices = JMTucker.MFVNeutralino.VertexSelector_cfi.mfvSelectedVertices.clone()
-mfvSelectedVertices.min_ntracks = 6
 
 mfvSelectedJets = cms.EDFilter('PATJetSelector',
                                src = cms.InputTag('selectedPatJetsPF'),
-                               cut = cms.string('pt > 20')  # JMTBAD PUT BACK TO 30
+                               cut = cms.string('pt > 20')
                                )
 
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
                                    jet_src = cms.InputTag('mfvSelectedJets'),
                                    vertex_src = cms.InputTag('mfvSelectedVertices'),
-                                   min_jet_track_frac = cms.double(0.),
                                    min_vertex_track_weight = cms.double(0.5),
+                                   min_tracks_shared = cms.int32(1),
+                                   min_track_pt = cms.double(5),
                                    histos = cms.untracked.bool(True),
                                    verbose = cms.untracked.bool(False),
                                    )
