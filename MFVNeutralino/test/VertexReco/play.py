@@ -24,7 +24,6 @@ process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSeque
 #process.load('JMTucker.MFVNeutralino.RedoPURemoval_cff')
 #process.p *= process.mfvRedoPURemoval * process.mfvExtraVertexSequence
 
-all_sels = []
 all_anas = []
 
 vertex_srcs = [
@@ -55,6 +54,7 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      )
 
 sel = process.mfvSelectedVertices.clone(min_ntracks = 0) # JMTBAD keep synchronized with Vertexer_cff
+v2j = process.mfvVerticesToJets.clone()
 
 sel_qcuts = [
     ('Qno',             sel.clone(min_ntracks = 0)),
@@ -68,9 +68,12 @@ sel_qcuts = [
 for vertex_name, vertex_src in vertex_srcs:
     for sel_name, sel in sel_qcuts:
         sel_obj = sel.clone(vertex_src = vertex_src)
-        all_sels.append(sel_obj)
         vertex_sel_name = 'sel' + vertex_name + sel_name
         setattr(process, vertex_sel_name, sel_obj)
+
+        v2j_obj = v2j.clone(vertex_src = vertex_src)
+        v2j_name = 'v2j' + vertex_name + sel_name
+        setattr(process, v2j_name, v2j_obj)
         
         ana_obj = ana.clone(vertex_src = vertex_sel_name)
         all_anas.append(ana_obj)
@@ -78,7 +81,7 @@ for vertex_name, vertex_src in vertex_srcs:
             ana_obj.do_ntuple = True
         setattr(process, 'play' + vertex_name + sel_name, ana_obj)
         
-        process.p *= sel_obj * ana_obj
+        process.p *= sel_obj * v2j_obj * ana_obj
 
 def gen_length_filter(dist):
     process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
@@ -115,19 +118,17 @@ if 'argv' in sys.argv:
 #process.add_(cms.Service('SimpleMemoryCheck'))
 #process.playMYQno.do_scatterplots = True
 
-if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    assert all_anas[0].is_mfv # de_mfv will be called for non-signal samples below
+#process.source.fileNames = ['/store/user/jchu/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jtuple_v7/fe6d9f80f9c0fe06cc80b089617fa99d/pat_1_1_NOT.root']
+#process.source.secondaryFileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/0038E6D2-860D-E211-9211-00266CFACC38.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/D4C0816B-870D-E211-B094-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/A2CEDDF1-870D-E211-A98D-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/9E8E388F-970D-E211-8D78-848F69FD298E.root']
+#de_mfv()
 
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as Samples
     samples = Samples.mfv_signal_samples + Samples.background_samples #+ Samples.auxiliary_background_samples
 
-    for sample in samples:
-        sample.scheduler = 'remoteGlidein'
-        sample.ana_scheduler = 'remoteGlidein'
-        
     def pset_modifier(sample):
         to_add = []
         if 'ttbar' in sample.name:
