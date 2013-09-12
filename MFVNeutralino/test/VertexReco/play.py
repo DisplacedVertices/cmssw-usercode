@@ -53,11 +53,12 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      track_vertex_weight_min = cms.double(0.5),
                      )
 
-sel = process.mfvSelectedVertices.clone(min_ntracks = 0) # JMTBAD keep synchronized with Vertexer_cff
+sel = process.mfvSelectedVertices.clone() # JMTBAD keep synchronized with Vertexer_cff
 v2j = process.mfvVerticesToJets.clone()
 
 sel_qcuts = [
-    ('Qno',             sel.clone(min_ntracks = 0)),
+    ('Qno',             sel),
+    ('Q3derrlt0p01',    sel.clone(max_gen3derr = 0.01)),
     ('Q3dsiglt4',       sel.clone(max_gen3dsig = 4)),
     ('Q3dsigge6',       sel.clone(min_gen3dsig = 6)),
     ('Qntk6',           sel.clone(min_ntracks = 6)),  
