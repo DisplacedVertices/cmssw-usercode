@@ -21,6 +21,7 @@ private:
   const int min_ntracks;
   const double max_chi2dof;
   const double max_err2d;
+  const double max_err3d;
   const double min_mass;
   const double min_drmax;
   const double min_gen3dsig;
@@ -37,6 +38,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     max_err2d(cfg.getParameter<double>("max_err2d")),
+    max_err3d(cfg.getParameter<double>("max_err3d")),
     min_mass(cfg.getParameter<double>("min_mass")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
     min_gen3dsig(cfg.getParameter<double>("min_gen3dsig")),
@@ -49,8 +51,9 @@ bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx) const {
   const bool use =
     int(vtx.tracksSize()) >= min_ntracks && // JMTBAD use nTracks(0.5)
     vtx.normalizedChi2() < max_chi2dof   &&
-    mfv::abs_error(vtx, false) < max_err2d    &&
     vtx.p4().mass() >= min_mass          &&
+    mfv::abs_error(vtx, false) < max_err2d    &&
+    mfv::abs_error(vtx, true ) < max_err3d    &&
     (min_drmax == 0 || mfv::vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_drmax);
 
   if (!use)
