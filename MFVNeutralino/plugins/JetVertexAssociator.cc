@@ -39,21 +39,30 @@ private:
   TH1F* h_n_jet_tracks;
 
   TH1F* h_ntracks;
-  TH2F* h_best_ntracks;
   TH1F* h_ntracks_ptmin;
-  TH2F* h_best_ntracks_ptmin;
   TH1F* h_sum_nhits;
-  TH2F* h_best_sum_nhits;
   TH1F* h_cos_angle;
-  TH2F* h_best_cos_angle;
   TH1F* h_miss_dist;
-  TH2F* h_best_miss_dist;
   TH1F* h_miss_dist_err;
-  TH2F* h_best_miss_dist_err;
   TH1F* h_miss_dist_sig;
-  TH2F* h_best_miss_dist_sig;
   TH2F* h_miss_dist_err_v;
+
+  TH1F* h_best_ntracks;
+  TH1F* h_best_ntracks_ptmin;
+  TH1F* h_best_sum_nhits;
+  TH1F* h_best_cos_angle;
+  TH1F* h_best_miss_dist;
+  TH1F* h_best_miss_dist_err;
+  TH1F* h_best_miss_dist_sig;
   TH2F* h_best_miss_dist_err_v;
+
+  TH2F* h_best_ntracks_v_second;
+  TH2F* h_best_ntracks_ptmin_v_second;
+  TH2F* h_best_sum_nhits_v_second;
+  TH2F* h_best_cos_angle_v_second;
+  TH2F* h_best_miss_dist_v_second;
+  TH2F* h_best_miss_dist_err_v_second;
+  TH2F* h_best_miss_dist_sig_v_second;
 
   TH2F* h_n_matchedjets_v_jets;
   TH2F* h_n_matchedjets_v_vertices;
@@ -85,21 +94,30 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     h_n_jet_tracks = fs->make<TH1F>("h_n_jet_tracks", ";# tracks per jet;arb. units", 50, 0, 50);
 
     h_ntracks = fs->make<TH1F>("h_ntracks", ";# tracks shared w. a vertex;arb. units", 20, 0, 20);
-    h_best_ntracks = fs->make<TH2F>("h_best_ntracks", ";# tracks shared w. 2nd-best vertex;# tracks shared w. best vertex", 20, 0, 20, 20, 0, 20);
     h_ntracks_ptmin = fs->make<TH1F>("h_ntracks_ptmin", ";# tracks (p_{T} cut) shared w. a vertex;arb. units", 20, 0, 20);
-    h_best_ntracks_ptmin = fs->make<TH2F>("h_best_ntracks_ptmin", ";# tracks (p_{T} cut) shared w. 2nd-best vertex;# tracks (p_{T} cut) shared w. best vertex", 20, 0, 20, 20, 0, 20);
     h_sum_nhits = fs->make<TH1F>("h_sum_nhits", ";# tracks' hits shared w. a vertex;arb. units", 100, 0, 100);
-    h_best_sum_nhits = fs->make<TH2F>("h_best_sum_nhits", ";# tracks' hits shared w. 2nd-best vertex;# tracks' hits shared w. best vertex", 100, 0, 100, 100, 0, 100);
     h_cos_angle = fs->make<TH1F>("h_cos_angle", ";cos(angle between jet mom. and TV-SV);arb. units", 101, -1, 1.02);
-    h_best_cos_angle = fs->make<TH2F>("h_best_cos_angle", ";cos(angle between jet mom. and TV-SV) for 2nd-best vertex;cos(angle between jet mom. and TV-SV) for best vertex", 101, -1, 1.02, 101, -1, 1.02);
     h_miss_dist = fs->make<TH1F>("h_miss_dist", ";jet miss distance (cm);arb. units", 100, 0, 0.5);
-    h_best_miss_dist = fs->make<TH2F>("h_best_miss_dist", ";jet miss distance to 2nd-best vertex (cm);jet miss distance to best vertex", 100, 0, 0.5, 100, 0, 0.5);
     h_miss_dist_err = fs->make<TH1F>("h_miss_dist_err", ";#sigma(jet miss distance) (cm);arb. units", 100, 0, 0.5);
-    h_best_miss_dist_err = fs->make<TH2F>("h_best_miss_dist_err", ";#sigma(jet miss distance to 2nd-best vertex) (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 0.5, 100, 0, 0.5);
     h_miss_dist_sig = fs->make<TH1F>("h_miss_dist_sig", ";N#sigma(jet miss distance);arb. units", 100, 0, 50);
-    h_best_miss_dist_sig = fs->make<TH2F>("h_best_miss_dist_sig", ";N#sigma(jet miss distance to 2nd-best vertex);N#sigma(jet miss distance to best vertex)", 100, 0, 50, 100, 0, 50);
     h_miss_dist_err_v = fs->make<TH2F>("h_miss_dist_err_v", ";jet miss distance to a vertex (cm);#sigma(jet miss distance to a vertex) (cm)", 100, 0, 0.5, 100, 0, 0.5);
+
+    h_best_ntracks = fs->make<TH1F>("h_best_ntracks", ";# tracks shared w. best vertex;arb. units", 20, 0, 20);
+    h_best_ntracks_ptmin = fs->make<TH1F>("h_best_ntracks_ptmin", ";# tracks (p_{T} cut) shared w. best vertex;arb. units", 20, 0, 20);
+    h_best_sum_nhits = fs->make<TH1F>("h_best_sum_nhits", ";# tracks' hits shared w. best vertex;arb. units", 100, 0, 100);
+    h_best_cos_angle = fs->make<TH1F>("h_best_cos_angle", ";cos(angle between jet mom. and TV-best SV);arb. units", 101, -1, 1.02);
+    h_best_miss_dist = fs->make<TH1F>("h_best_miss_dist", ";jet miss distance to best SV (cm);arb. units", 100, 0, 0.5);
+    h_best_miss_dist_err = fs->make<TH1F>("h_best_miss_dist_err", ";#sigma(jet miss distance to best SV) (cm);arb. units", 100, 0, 0.5);
+    h_best_miss_dist_sig = fs->make<TH1F>("h_best_miss_dist_sig", ";N#sigma(jet miss distance to best SV);arb. units", 100, 0, 50);
     h_best_miss_dist_err_v = fs->make<TH2F>("h_best_miss_dist_err_v", ";jet miss distance to best vertex (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 0.5, 100, 0, 0.5);
+
+    h_best_ntracks_v_second = fs->make<TH2F>("h_best_ntracks_v_second", ";# tracks shared w. 2nd-best vertex;# tracks shared w. best vertex", 20, 0, 20, 20, 0, 20);
+    h_best_ntracks_ptmin_v_second = fs->make<TH2F>("h_best_ntracks_ptmin_v_second", ";# tracks (p_{T} cut) shared w. 2nd-best vertex;# tracks (p_{T} cut) shared w. best vertex", 20, 0, 20, 20, 0, 20);
+    h_best_sum_nhits_v_second = fs->make<TH2F>("h_best_sum_nhits_v_second", ";# tracks' hits shared w. 2nd-best vertex;# tracks' hits shared w. best vertex", 100, 0, 100, 100, 0, 100);
+    h_best_cos_angle_v_second = fs->make<TH2F>("h_best_cos_angle_v_second", ";cos(angle between jet mom. and TV-SV) for 2nd-best vertex;cos(angle between jet mom. and TV-SV) for best vertex", 101, -1, 1.02, 101, -1, 1.02);
+    h_best_miss_dist_v_second = fs->make<TH2F>("h_best_miss_dist_v_second", ";jet miss distance to 2nd-best vertex (cm);jet miss distance to best vertex", 100, 0, 0.5, 100, 0, 0.5);
+    h_best_miss_dist_err_v_second = fs->make<TH2F>("h_best_miss_dist_err_v_second", ";#sigma(jet miss distance to 2nd-best vertex) (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 0.5, 100, 0, 0.5);
+    h_best_miss_dist_sig_v_second = fs->make<TH2F>("h_best_miss_dist_sig_v_second", ";N#sigma(jet miss distance to 2nd-best vertex);N#sigma(jet miss distance to best vertex)", 100, 0, 50, 100, 0, 50);
 
     h_n_matchedjets_v_jets = fs->make<TH2F>("h_n_matchedjets_v_jets", ";# of jets;# of matched jets", 20, 0, 20, 20, 0, 20);
     h_n_matchedjets_v_vertices = fs->make<TH2F>("h_n_matchedjets_v_vertices", ";# of vertices;# of matched jets", 20, 0, 20, 20, 0, 20);
@@ -282,14 +300,22 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
     }        
 
     if (histos) {
-      h_best_ntracks->Fill(second_best_ntracks[ijet], best_ntracks[ijet]);
-      h_best_ntracks_ptmin->Fill(second_best_ntracks_ptmin[ijet], best_ntracks_ptmin[ijet]);
-      h_best_sum_nhits->Fill(second_best_sum_nhits[ijet], best_sum_nhits[ijet]);
-      h_best_cos_angle->Fill(second_best_cos_angle[ijet], best_cos_angle[ijet]);
-      h_best_miss_dist->Fill(second_best_miss_dist[ijet].value(), best_miss_dist[ijet].value());
-      h_best_miss_dist_err->Fill(second_best_miss_dist[ijet].error(), best_miss_dist[ijet].error());
-      h_best_miss_dist_sig->Fill(second_best_miss_dist[ijet].significance(), best_miss_dist[ijet].significance());
+      h_best_ntracks->Fill(best_ntracks[ijet]);
+      h_best_ntracks_ptmin->Fill(best_ntracks_ptmin[ijet]);
+      h_best_sum_nhits->Fill(best_sum_nhits[ijet]);
+      h_best_cos_angle->Fill(best_cos_angle[ijet]);
+      h_best_miss_dist->Fill(best_miss_dist[ijet].value());
+      h_best_miss_dist_err->Fill(best_miss_dist[ijet].error());
+      h_best_miss_dist_sig->Fill(best_miss_dist[ijet].significance());
       h_best_miss_dist_err_v->Fill(best_miss_dist[ijet].value(), best_miss_dist[ijet].error());
+
+      h_best_ntracks_v_second->Fill(second_best_ntracks[ijet], best_ntracks[ijet]);
+      h_best_ntracks_ptmin_v_second->Fill(second_best_ntracks_ptmin[ijet], best_ntracks_ptmin[ijet]);
+      h_best_sum_nhits_v_second->Fill(second_best_sum_nhits[ijet], best_sum_nhits[ijet]);
+      h_best_cos_angle_v_second->Fill(second_best_cos_angle[ijet], best_cos_angle[ijet]);
+      h_best_miss_dist_v_second->Fill(second_best_miss_dist[ijet].value(), best_miss_dist[ijet].value());
+      h_best_miss_dist_err_v_second->Fill(second_best_miss_dist[ijet].error(), best_miss_dist[ijet].error());
+      h_best_miss_dist_sig_v_second->Fill(second_best_miss_dist[ijet].significance(), best_miss_dist[ijet].significance());
     }        
 
     //if (verbose)
