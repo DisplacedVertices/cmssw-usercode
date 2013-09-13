@@ -46,6 +46,7 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                      gen_vertices_src = cms.InputTag('mfvGenVertices'),
                      vertex_src = cms.InputTag('dummy'),
+                     sv_to_jets_src = cms.InputTag('dummy'),
                      do_scatterplots = cms.bool(False),
                      do_ntuple = cms.bool(False),
                      jet_pt_min = cms.double(30), # JMTBAD keep synchronized with Vertexer_cff
@@ -76,7 +77,8 @@ for vertex_name, vertex_src in vertex_srcs:
         v2j_name = 'v2j' + vertex_name + sel_name
         setattr(process, v2j_name, v2j_obj)
         
-        ana_obj = ana.clone(vertex_src = vertex_sel_name)
+        ana_obj = ana.clone(vertex_src = vertex_sel_name,
+                            sv_to_jets_src = v2j_name)
         all_anas.append(ana_obj)
         if sel_name == 'Qno' and vertex_name == 'MY':
             ana_obj.do_ntuple = True
@@ -119,17 +121,28 @@ if 'argv' in sys.argv:
 #process.add_(cms.Service('SimpleMemoryCheck'))
 #process.playMYQno.do_scatterplots = True
 
-#process.source.fileNames = ['/store/user/jchu/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jtuple_v7/fe6d9f80f9c0fe06cc80b089617fa99d/pat_1_1_NOT.root']
-#process.source.secondaryFileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/0038E6D2-860D-E211-9211-00266CFACC38.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/D4C0816B-870D-E211-B094-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/A2CEDDF1-870D-E211-A98D-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/9E8E388F-970D-E211-8D78-848F69FD298E.root']
-#de_mfv()
+if 'testttbar' in sys.argv:
+    process.source.fileNames = ['']
+    process.source.secondaryFileNames = ['']
+    sample_ttbar()
+
+if 'testqcd' in sys.argv:
+    process.source.fileNames = ['/store/user/jchu/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jtuple_v7/fe6d9f80f9c0fe06cc80b089617fa99d/pat_1_1_NOT.root']
+    process.source.secondaryFileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/0038E6D2-860D-E211-9211-00266CFACC38.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/D4C0816B-870D-E211-B094-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/A2CEDDF1-870D-E211-A98D-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/9E8E388F-970D-E211-8D78-848F69FD298E.root']
+    de_mfv()
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.mfv_signal_samples + Samples.background_samples #+ Samples.auxiliary_background_samples
-
+    ss = set(Samples.mfv_signal_samples)
+    first = [Samples.mfv_neutralino_tau0000um_M0400, Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
+    for f in first:
+        ss.remove(f)
+    rest = sorted(ss, key=lambda s: s.name)
+    samples = first + Samples.background_samples + rest
+    
     def pset_modifier(sample):
         to_add = []
         if 'ttbar' in sample.name:
@@ -138,11 +151,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_add.append('de_mfv()')
         return to_add
 
-    Samples.ttbarhadronic.ana_dataset_override = '/TTJets_HadronicMGDecays_8TeV-madgraph/jchu-jtuple_v7-fe6d9f80f9c0fe06cc80b089617fa99d/USER'
-    Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/jchu-jtuple_v7-5d4c2a74c85834550d3f9609274e8548/USER'
-    
+    import pdb
+    pdb.set_trace()
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('VertexRecoPlayTest',
+    cs = CRABSubmitter('VertexRecoPlay',
                        total_number_of_events = 99250,
                        events_per_job = 2500,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
@@ -153,7 +165,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        #GRID_data_location_override = 'T1_US_FNAL,T2_US_Caltech,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin',
                        #GRID_remove_default_blacklist = 1,
                        )
-    cs.submit_all([Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400])
+    cs.submit_all(samples)
 
 '''
 mergeTFileServiceHistograms -w 0.457,0.438,0.105 -i ttbarhadronic.root ttbarsemilep.root ttbardilep.root -o ttbar_merge.root
