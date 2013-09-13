@@ -268,8 +268,8 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       }
     }
 
-    these_n_matchedjets += these_n_matchedjets;
-    if (n_matchedjets > 0)
+    n_matchedjets += these_n_matchedjets;
+    if (these_n_matchedjets > 0)
       ++n_matchedvertices;
   }
 
