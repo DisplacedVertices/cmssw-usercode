@@ -2,6 +2,7 @@
 #include "TH2F.h"
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -155,6 +156,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_vertices_src;
   const edm::InputTag vertex_src;
+  const edm::InputTag sv_to_jets_src;
   const bool do_scatterplots;
   const bool do_ntuple;
   const double jet_pt_min;
@@ -266,6 +268,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
     ushort ntracksptgt20;
     ushort trackminnhits;
     ushort trackmaxnhits;
+    ushort njetssharetks;
+    float jetsmass;
     float chi2dof;
     float chi2dofprob;
     float p;
@@ -317,7 +321,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
       if (all) {
         run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; npfjets = -1; ntightpfjets = -1; pfjetpt4 = -1; pfjetpt5 = -1; tightpfjetpt4 = -1; tightpfjetpt5 = -1; nsv = -1;
       }
-      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
+      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; njetssharetks = -1; jetsmass = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
     }
   };
 
@@ -333,6 +337,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_vertices_src(cfg.getParameter<edm::InputTag>("gen_vertices_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    sv_to_jets_src(cfg.getParameter<edm::InputTag>("sv_to_jets_src")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     do_ntuple(cfg.getParameter<bool>("do_ntuple")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
@@ -365,6 +370,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree->Branch("ntracksptgt20", &nt.ntracksptgt20, "ntracksptgt20/s");
     tree->Branch("trackminnhits", &nt.trackminnhits, "trackminnhits/s");
     tree->Branch("trackmaxnhits", &nt.trackmaxnhits, "trackmaxnhits/s");
+    tree->Branch("njetssharetks", &nt.njetssharetks, "njetssharetks/s");
+    tree->Branch("jetsmass", &nt.jetsmass, "jetsmass/s");
     tree->Branch("chi2dof", &nt.chi2dof, "chi2dof/F");
     tree->Branch("chi2dofprob", &nt.chi2dofprob, "chi2dofprob/F");
     tree->Branch("p", &nt.pt, "p/F");
@@ -515,6 +522,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     hs.add("ntracksptgt20",  "# of tracks/SV w/ p_{T} > 20 GeV",            40,    0,      40);
     hs.add("trackminnhits",  "min number of hits on track per SV",          40,    0,      40);
     hs.add("trackmaxnhits",  "max number of hits on track per SV",          40,    0,      40);
+    hs.add("njetssharetks",  "# of jets assoc. by tracks to SV",            10,    0,      10);
+    hs.add("jetsmass",       "inv. mass of jets assoc. by tracks to SV",   200,    0,    2000);
     hs.add("chi2dof",        "SV #chi^2/dof",                               50,    0,       7);
     hs.add("chi2dofprob",    "SV p(#chi^2, dof)",                           50,    0,       1.2);
     hs.add("p",              "SV p (GeV)",                                 100,    0,     300);
@@ -786,11 +795,16 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   edm::Handle<reco::VertexCollection> secondary_vertices;
   event.getByLabel(vertex_src, secondary_vertices);
 
+  typedef edm::AssociationMap<edm::OneToMany<reco::VertexCollection, pat::JetCollection> > JetVertexAssociation;
+  edm::Handle<JetVertexAssociation> sv_to_jets;
+  event.getByLabel(sv_to_jets_src, sv_to_jets);
+
   const int nsv = int(secondary_vertices->size());
   std::vector<std::map<int,int> > trackicities(nsv);
 
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices->at(isv);
+    const reco::VertexRef svref(secondary_vertices, isv);
     const int svndx = isv >= 3 ? 3 : isv;
 
     nt.clear(false);
@@ -801,6 +815,17 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_sv_pos_2d[svndx][0]->Fill(sv.position().x() - bsx, sv.position().y() - bsy);
     h_sv_pos_2d[svndx][1]->Fill(sv.position().x() - bsx, sv.position().z() - bsz);
     h_sv_pos_2d[svndx][2]->Fill(sv.position().y() - bsy, sv.position().z() - bsz);
+
+    const int njetssharetks = sv_to_jets->numberOfAssociations(svref);
+    double jetsmass = 0;
+    if (njetssharetks > 0) {
+      const edm::RefVector<pat::JetCollection>& jets_sharing_tracks = (*sv_to_jets)[svref];
+      auto jetsp4 = jets_sharing_tracks[0]->p4();
+      for (int ijet = 1; ijet < njetssharetks; ++ijet) {
+        jetsp4 += jets_sharing_tracks[ijet]->p4();
+      }
+      jetsmass = jetsp4.mass();
+    }
 
     auto trkb = sv.tracks_begin();
     auto trke = sv.tracks_end();
@@ -967,6 +992,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.ntracksptgt20   = ntracksptgt20;
       nt.trackminnhits   = trackminnhits;
       nt.trackmaxnhits   = trackmaxnhits;
+      nt.njetssharetks   = njetssharetks;
+      nt.jetsmass        = jetsmass;
       nt.chi2dof         = sv.normalizedChi2();
       nt.chi2dofprob     = TMath::Prob(sv.chi2(), sv.ndof());
       nt.p               = sv.p4().P();
@@ -1023,6 +1050,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"ntracksptgt20",   ntracksptgt20},
         {"trackminnhits",   trackminnhits},
         {"trackmaxnhits",   trackmaxnhits},
+        {"njetssharetks",   njetssharetks},
+        {"jetsmass",        jetsmass},
         {"chi2dof",         sv.normalizedChi2()},
         {"chi2dofprob",     TMath::Prob(sv.chi2(), sv.ndof())},
         {"p",               sv.p4().P()},
