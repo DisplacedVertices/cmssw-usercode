@@ -19,8 +19,8 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = 'none'
-    PUBLISH_USER = 'tucker'
+    ANA_HASH = 'fe6d9f80f9c0fe06cc80b089617fa99d'
+    PUBLISH_USER = 'jchu'
     ANA_VERSION = 'v7'
 
     def __init__(self, name, nice_name, dataset):
@@ -299,9 +299,9 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.no_skimming_cuts = True
     sample.is_pythia8 = True
     sample.dbs_url_num = 2
-    sample.ana_dataset_override = sample.dataset
     sample.re_pat = True
     sample.scheduler = 'condor'
+    sample.ana_hash = '5d4c2a74c85834550d3f9609274e8548'
 
 ########################################################################
 
@@ -323,7 +323,6 @@ for sample in all_samples:
 # are already applied above).
 
 for sample in background_samples:
-    sample.publish_user = 'jchu'
     sample.total_events = {'wjetstolnu':    57685961,
                            'ttbarhadronic': 10291640,
                            'ttbarsemilep':  9863760,
@@ -337,7 +336,7 @@ ttbarincl.no_skimming_cuts = True
 ttbarincl.scheduler = 'condor'
 singletop_t.scheduler = 'condor'
 
-for sample in background_samples + auxiliary_background_samples + all_data_samples:
+for sample in auxiliary_background_samples + all_data_samples:
     sample.ana_ready = False
     
 # Other exceptions due to jobs being missed, mixing dataset versions
