@@ -141,7 +141,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for f in first:
         ss.remove(f)
     rest = sorted(ss, key=lambda s: s.name)
-    samples = first + Samples.background_samples + rest
+    samples = first + Samples.background_samples # + rest
     
     def pset_modifier(sample):
         to_add = []
@@ -151,8 +151,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_add.append('de_mfv()')
         return to_add
 
-    import pdb
-    pdb.set_trace()
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('VertexRecoPlay',
                        total_number_of_events = 99250,
