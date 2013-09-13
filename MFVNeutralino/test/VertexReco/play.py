@@ -72,7 +72,7 @@ for vertex_name, vertex_src in vertex_srcs:
         vertex_sel_name = 'sel' + vertex_name + sel_name
         setattr(process, vertex_sel_name, sel_obj)
 
-        v2j_obj = v2j.clone(vertex_src = vertex_src)
+        v2j_obj = v2j.clone(vertex_src = vertex_sel_name)
         v2j_name = 'v2j' + vertex_name + sel_name
         setattr(process, v2j_name, v2j_obj)
         
