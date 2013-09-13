@@ -787,7 +787,6 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   event.getByLabel(vertex_src, secondary_vertices);
 
   const int nsv = int(secondary_vertices->size());
-  h_nsv->Fill(nsv);
   std::vector<std::map<int,int> > trackicities(nsv);
 
   for (int isv = 0; isv < nsv; ++isv) {
