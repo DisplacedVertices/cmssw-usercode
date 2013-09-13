@@ -41,6 +41,7 @@
 #include "JMTucker/Tools/interface/PairwiseHistos.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/MFVNeutralino/plugins/VertexNtuple.h"
 //#include "JMTucker/Tools/interface/Framework.h"
 
 namespace {
@@ -244,89 +245,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_pairnsharedtracks;
   TH2F* h_pairfsharedtracks;
 
-  struct ntuple_t {
-    typedef unsigned short ushort;
-    typedef unsigned int uint;
-    uint run;
-    uint lumi;
-    uint event;
-    float minlspdist2d;
-    float lspdist2d;
-    float lspdist3d;
-    short pass_trigger;
-    ushort npfjets;
-    ushort ntightpfjets;
-    float pfjetpt4;
-    float pfjetpt5;
-    float tightpfjetpt4;
-    float tightpfjetpt5;
-    ushort nsv;
-
-    short isv;
-    ushort ntracks;
-    ushort ntracksptgt10;
-    ushort ntracksptgt20;
-    ushort trackminnhits;
-    ushort trackmaxnhits;
-    ushort njetssharetks;
-    float jetsmass;
-    float chi2dof;
-    float chi2dofprob;
-    float p;
-    float pt;
-    float eta;
-    float rapidity;
-    float phi;
-    float mass;
-    float costhmombs;
-    float costhmompv2d;
-    float costhmompv3d;
-    float sumpt2;
-    ushort sumnhitsbehind;
-    ushort maxnhitsbehind;
-    float mintrackpt;
-    float maxtrackpt;
-    float maxm1trackpt;
-    float maxm2trackpt;
-    float drmin;
-    float drmax;
-    float dravg;
-    float drrms;
-    float dravgw;
-    float drrmsw;
-    float gen2ddist;
-    float gen2derr;
-    float gen2dsig;
-    float gen3ddist;
-    float gen3derr;
-    float gen3dsig;
-    ushort bs2dcompatscss;
-    float bs2dcompat;
-    float bs2ddist;
-    float bs2derr;
-    float bs2dsig;
-    float bs3ddist;
-    ushort pv2dcompatscss;
-    float pv2dcompat;
-    float pv2ddist;
-    float pv2derr;
-    float pv2dsig;
-    ushort pv3dcompatscss;
-    float pv3dcompat;
-    float pv3ddist;
-    float pv3derr;
-    float pv3dsig;
-
-    void clear(bool all) {
-      if (all) {
-        run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; npfjets = -1; ntightpfjets = -1; pfjetpt4 = -1; pfjetpt5 = -1; tightpfjetpt4 = -1; tightpfjetpt5 = -1; nsv = -1;
-      }
-      isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; njetssharetks = -1; jetsmass = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
-    }
-  };
-
   TTree* tree;
-  ntuple_t nt;
+  VertexNtuple nt;
 };
 
 VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
@@ -350,74 +270,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree = 0;
   else {
     tree = fs->make<TTree>("tree", "");
-    tree->Branch("run", &nt.run, "run/i");
-    tree->Branch("lumi", &nt.lumi, "lumi/i");
-    tree->Branch("event", &nt.event, "event/i");
-    tree->Branch("minlspdist2d", &nt.minlspdist2d, "minlspdist2d/F");
-    tree->Branch("lspdist2d", &nt.lspdist2d, "lspdist2d/F");
-    tree->Branch("lspdist3d", &nt.lspdist3d, "lspdist3d/F");
-    tree->Branch("pass_trigger", &nt.pass_trigger, "pass_trigger/S");
-    tree->Branch("npfjets", &nt.npfjets, "npfjets/s");
-    tree->Branch("ntightpfjets", &nt.ntightpfjets, "ntightpfjets/s");
-    tree->Branch("pfjetpt4", &nt.pfjetpt4, "pfjetpt4/F");
-    tree->Branch("pfjetpt5", &nt.pfjetpt5, "pfjetpt5/F");
-    tree->Branch("tightpfjetpt4", &nt.tightpfjetpt4, "tightpfjetpt4/F");
-    tree->Branch("tightpfjetpt5", &nt.tightpfjetpt5, "tightpfjetpt5/F");
-    tree->Branch("nsv", &nt.nsv, "nsv/s");
-    tree->Branch("isv", &nt.isv, "isv/S");
-    tree->Branch("ntracks", &nt.ntracks, "ntracks/s");
-    tree->Branch("ntracksptgt10", &nt.ntracksptgt10, "ntracksptgt10/s");
-    tree->Branch("ntracksptgt20", &nt.ntracksptgt20, "ntracksptgt20/s");
-    tree->Branch("trackminnhits", &nt.trackminnhits, "trackminnhits/s");
-    tree->Branch("trackmaxnhits", &nt.trackmaxnhits, "trackmaxnhits/s");
-    tree->Branch("njetssharetks", &nt.njetssharetks, "njetssharetks/s");
-    tree->Branch("jetsmass", &nt.jetsmass, "jetsmass/s");
-    tree->Branch("chi2dof", &nt.chi2dof, "chi2dof/F");
-    tree->Branch("chi2dofprob", &nt.chi2dofprob, "chi2dofprob/F");
-    tree->Branch("p", &nt.pt, "p/F");
-    tree->Branch("pt", &nt.pt, "pt/F");
-    tree->Branch("eta", &nt.eta, "eta/F");
-    tree->Branch("rapidity", &nt.rapidity, "rapidity/F");
-    tree->Branch("phi", &nt.phi, "phi/F");
-    tree->Branch("mass", &nt.mass, "mass/F");
-    tree->Branch("costhmombs", &nt.costhmombs, "costhmombs/F");
-    tree->Branch("costhmompv2d", &nt.costhmompv2d, "costhmompv2d/F");
-    tree->Branch("costhmompv3d", &nt.costhmompv3d, "costhmompv3d/F");
-    tree->Branch("sumpt2", &nt.sumpt2, "sumpt2/F");
-    tree->Branch("sumnhitsbehind", &nt.sumnhitsbehind, "sumnhitsbehind/s");
-    tree->Branch("maxnhitsbehind", &nt.maxnhitsbehind, "maxnhitsbehind/s");
-    tree->Branch("mintrackpt", &nt.mintrackpt, "mintrackpt/F");
-    tree->Branch("maxtrackpt", &nt.maxtrackpt, "maxtrackpt/F");
-    tree->Branch("maxm1trackpt", &nt.maxm1trackpt, "maxm1trackpt/F");
-    tree->Branch("maxm2trackpt", &nt.maxm2trackpt, "maxm2trackpt/F");
-    tree->Branch("drmin", &nt.drmin, "drmin/F");
-    tree->Branch("drmax", &nt.drmax, "drmax/F");
-    tree->Branch("dravg", &nt.dravg, "dravg/F");
-    tree->Branch("drrms", &nt.drrms, "drrms/F");
-    tree->Branch("dravgw", &nt.dravgw, "dravgw/F");
-    tree->Branch("drrmsw", &nt.drrmsw, "drrmsw/F");
-    tree->Branch("gen2ddist", &nt.gen2ddist, "gen2ddist/F");
-    tree->Branch("gen2derr", &nt.gen2derr, "gen2derr/F");
-    tree->Branch("gen2dsig", &nt.gen2dsig, "gen2dsig/F");
-    tree->Branch("gen3ddist", &nt.gen3ddist, "gen3ddist/F");
-    tree->Branch("gen3derr", &nt.gen3derr, "gen3derr/F");
-    tree->Branch("gen3dsig", &nt.gen3dsig, "gen3dsig/F");
-    tree->Branch("bs2dcompatscss", &nt.bs2dcompatscss, "bs2dcompatscss/s");
-    tree->Branch("bs2dcompat", &nt.bs2dcompat, "bs2dcompat/F");
-    tree->Branch("bs2ddist", &nt.bs2ddist, "bs2ddist/F");
-    tree->Branch("bs2derr", &nt.bs2derr, "bs2derr/F");
-    tree->Branch("bs2dsig", &nt.bs2dsig, "bs2dsig/F");
-    tree->Branch("bs3ddist", &nt.bs3ddist, "bs3ddist/F");
-    tree->Branch("pv2dcompatscss", &nt.pv2dcompatscss, "pv2dcompatscss/s");
-    tree->Branch("pv2dcompat", &nt.pv2dcompat, "pv2dcompat/F");
-    tree->Branch("pv2ddist", &nt.pv2ddist, "pv2ddist/F");
-    tree->Branch("pv2derr", &nt.pv2derr, "pv2derr/F");
-    tree->Branch("pv2dsig", &nt.pv2dsig, "pv2dsig/F");
-    tree->Branch("pv3dcompatscss", &nt.pv3dcompatscss, "pv3dcompatscss/s");
-    tree->Branch("pv3dcompat", &nt.pv3dcompat, "pv3dcompat/F");
-    tree->Branch("pv3ddist", &nt.pv3ddist, "pv3ddist/F");
-    tree->Branch("pv3derr", &nt.pv3derr, "pv3derr/F");
-    tree->Branch("pv3dsig", &nt.pv3dsig, "pv3dsig/F");
+    nt.branch(tree);
   }
 
   for (int i = 0; i < 3; ++i) {
