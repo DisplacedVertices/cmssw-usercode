@@ -1,4 +1,5 @@
 #include "TH2F.h"
+#include "TVector3.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -89,16 +90,16 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     h_best_ntracks_ptmin = fs->make<TH2F>("h_best_ntracks_ptmin", ";# tracks (p_{T} cut) shared w. 2nd-best vertex;# tracks (p_{T} cut) shared w. best vertex", 20, 0, 20, 20, 0, 20);
     h_sum_nhits = fs->make<TH1F>("h_sum_nhits", ";# tracks' hits shared w. a vertex;arb. units", 100, 0, 100);
     h_best_sum_nhits = fs->make<TH2F>("h_best_sum_nhits", ";# tracks' hits shared w. 2nd-best vertex;# tracks' hits shared w. best vertex", 100, 0, 100, 100, 0, 100);
-    h_cos_angle = fs->make<TH1F>("h_cos_angle", ";cos(angle between jet mom. and TV-SV);arb. units", 100, -1, 1);
-    h_best_cos_angle = fs->make<TH2F>("h_best_cos_angle", ";cos(angle between jet mom. and TV-SV) for 2nd-best vertex;cos(angle between jet mom. and TV-SV) for best vertex", 100, 0, 100, 100, 0, 100);
-    h_miss_dist = fs->make<TH1F>("h_miss_dist", ";jet miss distance (cm);arb. units", 100, 0, 2);
-    h_best_miss_dist = fs->make<TH2F>("h_best_miss_dist", ";jet miss distance to 2nd-best vertex (cm);jet miss distance to best vertex", 100, 0, 2, 100, 0, 2);
-    h_miss_dist_err = fs->make<TH1F>("h_miss_dist_err", ";#sigma(jet miss distance) (cm);arb. units", 100, 0, 2);
-    h_best_miss_dist_err = fs->make<TH2F>("h_best_miss_dist_err", ";#sigma(jet miss distance to 2nd-best vertex) (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 2, 100, 0, 2);
-    h_miss_dist_sig = fs->make<TH1F>("h_miss_dist_sig", ";N#sigma(jet miss distance);arb. units", 100, 0, 20);
-    h_best_miss_dist_sig = fs->make<TH2F>("h_best_miss_dist_sig", ";N#sigma(jet miss distance to 2nd-best vertex);N#sigma(jet miss distance to best vertex)", 100, 0, 20, 100, 0, 20);
-    h_miss_dist_err_v = fs->make<TH2F>("h_miss_dist_err_v", ";jet miss distance to a vertex (cm);#sigma(jet miss distance to a vertex) (cm)", 100, 0, 2, 100, 0, 2);
-    h_best_miss_dist_err_v = fs->make<TH2F>("h_best_miss_dist_err_v", ";jet miss distance to best vertex (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 2, 100, 0, 2);
+    h_cos_angle = fs->make<TH1F>("h_cos_angle", ";cos(angle between jet mom. and TV-SV);arb. units", 101, -1, 1.02);
+    h_best_cos_angle = fs->make<TH2F>("h_best_cos_angle", ";cos(angle between jet mom. and TV-SV) for 2nd-best vertex;cos(angle between jet mom. and TV-SV) for best vertex", 101, -1, 1.02, 101, -1, 1.02);
+    h_miss_dist = fs->make<TH1F>("h_miss_dist", ";jet miss distance (cm);arb. units", 100, 0, 0.5);
+    h_best_miss_dist = fs->make<TH2F>("h_best_miss_dist", ";jet miss distance to 2nd-best vertex (cm);jet miss distance to best vertex", 100, 0, 0.5, 100, 0, 0.5);
+    h_miss_dist_err = fs->make<TH1F>("h_miss_dist_err", ";#sigma(jet miss distance) (cm);arb. units", 100, 0, 0.5);
+    h_best_miss_dist_err = fs->make<TH2F>("h_best_miss_dist_err", ";#sigma(jet miss distance to 2nd-best vertex) (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 0.5, 100, 0, 0.5);
+    h_miss_dist_sig = fs->make<TH1F>("h_miss_dist_sig", ";N#sigma(jet miss distance);arb. units", 100, 0, 50);
+    h_best_miss_dist_sig = fs->make<TH2F>("h_best_miss_dist_sig", ";N#sigma(jet miss distance to 2nd-best vertex);N#sigma(jet miss distance to best vertex)", 100, 0, 50, 100, 0, 50);
+    h_miss_dist_err_v = fs->make<TH2F>("h_miss_dist_err_v", ";jet miss distance to a vertex (cm);#sigma(jet miss distance to a vertex) (cm)", 100, 0, 0.5, 100, 0, 0.5);
+    h_best_miss_dist_err_v = fs->make<TH2F>("h_best_miss_dist_err_v", ";jet miss distance to best vertex (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 0.5, 100, 0, 0.5);
 
     h_n_matchedjets_v_jets = fs->make<TH2F>("h_n_matchedjets_v_jets", ";# of jets;# of matched jets", 20, 0, 20, 20, 0, 20);
     h_n_matchedjets_v_vertices = fs->make<TH2F>("h_n_matchedjets_v_vertices", ";# of vertices;# of matched jets", 20, 0, 20, 20, 0, 20);
@@ -166,8 +167,8 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   std::vector<double> second_best_cos_angle(n_jets, 1e9);
 
   std::vector<int> index_by_miss_dist(n_jets);
-  std::vector<Measurement1D> best_miss_dist(n_jets, Measurement1D(1e9, 1e9));
-  std::vector<Measurement1D> second_best_miss_dist(n_jets, Measurement1D(1e9, 1e9));
+  std::vector<Measurement1D> best_miss_dist(n_jets, Measurement1D(1e9, 1));
+  std::vector<Measurement1D> second_best_miss_dist(n_jets, Measurement1D(1e9, 1));
 
   for (size_t ijet = 0; ijet < n_jets; ++ijet) {
     const pat::Jet& jet = jets->at(ijet);
@@ -182,8 +183,14 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
     if (histos)
       h_n_jet_tracks->Fill(n_jet_tracks);
 
-    if (n_jet_tracks == 0)
-      continue;
+    const reco::SecondaryVertexTagInfo* jet_tag = jet.tagInfoSecondaryVertex(tag_info_name);
+    const reco::Vertex* jet_tag_vtx = 0;
+    TVector3 jet_tag_vtx_pos;
+    if (jet_tag && jet_tag->nVertices() > 0) {
+      jet_tag_vtx = &jet_tag->secondaryVertex(0);
+      jet_tag_vtx_pos.SetXYZ(jet_tag_vtx->x(), jet_tag_vtx->y(), jet_tag_vtx->z());
+    }
+    const TVector3 jet_mom_dir = TVector3(jet.px(), jet.py(), jet.pz()).Unit();
 
     for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
       const reco::Vertex& vtx = vertices->at(ivtx);
@@ -191,7 +198,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       int ntracks_ptmin = 0;
       int sum_nhits = 0;
       double cos_angle = 1e9;
-      Measurement1D miss_dist(1e9, 1e9);
+      Measurement1D miss_dist(1e9, 1);
 
       for (auto itk = vtx.tracks_begin(), itke = vtx.tracks_end(); itk != itke; ++itk) {
         if (vtx.trackWeight(*itk) >= min_vertex_track_weight) {
@@ -203,6 +210,28 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
             sum_nhits += tk->hitPattern().numberOfValidHits();
           }
         }
+      }
+
+      if (jet_tag_vtx) {
+        const TVector3 sv_to_tv = jet_tag_vtx_pos - TVector3(vtx.x(), vtx.y(), vtx.z());
+        cos_angle = sv_to_tv.Dot(jet_mom_dir) / sv_to_tv.Mag();
+
+        // miss distance is magnitude of (jet direction cross (tv - sv))
+        // to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2
+        const TVector3& n = jet_mom_dir;
+        const TVector3& d = sv_to_tv;
+        const double n_dot_d = n.Dot(d);
+        const TVector3 n_cross_d = n.Cross(d);
+        typedef math::VectorD<3>::type vec_t;
+        typedef math::ErrorD<3>::type mat_t;
+        vec_t jacobian(2*d.x() - 2*n_dot_d*n.x(),
+                       2*d.y() - 2*n_dot_d*n.y(),
+                       2*d.z() - 2*n_dot_d*n.z());
+        mat_t sv_to_tv_cov_matrix = vtx.covariance() + jet_tag_vtx->covariance();
+        double sigma_f2 = sqrt(ROOT::Math::Similarity(jacobian, sv_to_tv_cov_matrix));
+        double miss_dist_value = n_cross_d.Mag();
+        double miss_dist_err = sigma_f2 / 2 / miss_dist_value;
+        miss_dist = Measurement1D(miss_dist_value, miss_dist_err);
       }
 
       if (ntracks > best_ntracks[ijet]) {
@@ -258,6 +287,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       h_best_sum_nhits->Fill(second_best_sum_nhits[ijet], best_sum_nhits[ijet]);
       h_best_cos_angle->Fill(second_best_cos_angle[ijet], best_cos_angle[ijet]);
       h_best_miss_dist->Fill(second_best_miss_dist[ijet].value(), best_miss_dist[ijet].value());
+      h_best_miss_dist_err->Fill(second_best_miss_dist[ijet].error(), best_miss_dist[ijet].error());
       h_best_miss_dist_sig->Fill(second_best_miss_dist[ijet].significance(), best_miss_dist[ijet].significance());
       h_best_miss_dist_err_v->Fill(best_miss_dist[ijet].value(), best_miss_dist[ijet].error());
     }        
