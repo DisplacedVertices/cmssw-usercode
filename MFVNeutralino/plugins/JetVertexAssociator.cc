@@ -22,9 +22,14 @@ private:
 
   const edm::InputTag jet_src;
   const edm::InputTag vertex_src;
+  const std::string tag_info_name;
   const double min_vertex_track_weight;
   const int min_tracks_shared;
   const double min_track_pt;
+  const int min_hits_shared;
+  const double max_cos_angle_diff;
+  const double max_miss_dist;
+  const double max_miss_sig;
   const bool histos;
   const bool verbose;
 
@@ -44,6 +49,8 @@ private:
   TH2F* h_best_miss_dist;
   TH1F* h_miss_dist_err;
   TH2F* h_best_miss_dist_err;
+  TH1F* h_miss_dist_sig;
+  TH2F* h_best_miss_dist_sig;
   TH2F* h_miss_dist_err_v;
   TH2F* h_best_miss_dist_err_v;
 
@@ -56,9 +63,14 @@ private:
 MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
   : jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    tag_info_name(cfg.getParameter<std::string>("tag_info_name")),
     min_vertex_track_weight(cfg.getParameter<double>("min_vertex_track_weight")),
     min_tracks_shared(cfg.getParameter<int>("min_tracks_shared")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
+    min_hits_shared(cfg.getParameter<int>("min_hits_shared")),
+    max_cos_angle_diff(cfg.getParameter<double>("max_cos_angle_diff")),
+    max_miss_dist(cfg.getParameter<double>("max_miss_dist")),
+    max_miss_sig(cfg.getParameter<double>("max_miss_sig")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
@@ -83,6 +95,8 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     h_best_miss_dist = fs->make<TH2F>("h_best_miss_dist", ";jet miss distance to 2nd-best vertex (cm);jet miss distance to best vertex", 100, 0, 2, 100, 0, 2);
     h_miss_dist_err = fs->make<TH1F>("h_miss_dist_err", ";#sigma(jet miss distance) (cm);arb. units", 100, 0, 2);
     h_best_miss_dist_err = fs->make<TH2F>("h_best_miss_dist_err", ";#sigma(jet miss distance to 2nd-best vertex) (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 2, 100, 0, 2);
+    h_miss_dist_sig = fs->make<TH1F>("h_miss_dist_sig", ";N#sigma(jet miss distance);arb. units", 100, 0, 20);
+    h_best_miss_dist_sig = fs->make<TH2F>("h_best_miss_dist_sig", ";N#sigma(jet miss distance to 2nd-best vertex);N#sigma(jet miss distance to best vertex)", 100, 0, 20, 100, 0, 20);
     h_miss_dist_err_v = fs->make<TH2F>("h_miss_dist_err_v", ";jet miss distance to a vertex (cm);#sigma(jet miss distance to a vertex) (cm)", 100, 0, 2, 100, 0, 2);
     h_best_miss_dist_err_v = fs->make<TH2F>("h_best_miss_dist_err_v", ";jet miss distance to best vertex (cm);#sigma(jet miss distance to best vertex) (cm)", 100, 0, 2, 100, 0, 2);
 
@@ -152,10 +166,8 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   std::vector<double> second_best_cos_angle(n_jets, 1e9);
 
   std::vector<int> index_by_miss_dist(n_jets);
-  std::vector<double> best_miss_dist(n_jets, 1e9);
-  std::vector<double> best_miss_dist_err(n_jets, 1e9);
-  std::vector<double> second_best_miss_dist(n_jets, 1e9);
-  std::vector<double> second_best_miss_dist_err(n_jets, 1e9);
+  std::vector<Measurement1D> best_miss_dist(n_jets, Measurement1D(1e9, 1e9));
+  std::vector<Measurement1D> second_best_miss_dist(n_jets, Measurement1D(1e9, 1e9));
 
   for (size_t ijet = 0; ijet < n_jets; ++ijet) {
     const pat::Jet& jet = jets->at(ijet);
@@ -179,8 +191,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       int ntracks_ptmin = 0;
       int sum_nhits = 0;
       double cos_angle = 1e9;
-      double miss_dist = 1e9;
-      double miss_dist_err = 1e9;
+      Measurement1D miss_dist(1e9, 1e9);
 
       for (auto itk = vtx.tracks_begin(), itke = vtx.tracks_end(); itk != itke; ++itk) {
         if (vtx.trackWeight(*itk) >= min_vertex_track_weight) {
@@ -197,33 +208,36 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       if (ntracks > best_ntracks[ijet]) {
         second_best_ntracks[ijet] = best_ntracks[ijet];
         best_ntracks[ijet] = ntracks;
-        index_by_ntracks[ijet] = ivtx;
+        if (ntracks >= min_tracks_shared)
+          index_by_ntracks[ijet] = ivtx;
       }
 
       if (ntracks_ptmin > best_ntracks_ptmin[ijet]) {
         second_best_ntracks_ptmin[ijet] = best_ntracks_ptmin[ijet];
         best_ntracks_ptmin[ijet] = ntracks_ptmin;
-        index_by_ntracks_ptmin[ijet] = ivtx;
+        if (ntracks_ptmin >= min_tracks_shared)
+          index_by_ntracks_ptmin[ijet] = ivtx;
       }
 
       if (sum_nhits > best_sum_nhits[ijet]) {
         second_best_sum_nhits[ijet] = best_sum_nhits[ijet];
         best_sum_nhits[ijet] = sum_nhits;
-        index_by_sum_nhits[ijet] = ivtx;
+        if (sum_nhits >= min_hits_shared)
+          index_by_sum_nhits[ijet] = ivtx;
       }
         
       if (fabs(cos_angle - 1) < fabs(best_cos_angle[ijet] - 1)) {
         second_best_cos_angle[ijet] = best_cos_angle[ijet];
         best_cos_angle[ijet] = cos_angle;
-        index_by_cos_angle[ijet] = ivtx;
+        if (fabs(cos_angle - 1) <= max_cos_angle_diff)
+          index_by_cos_angle[ijet] = ivtx;
       }
 
-      if (miss_dist > best_miss_dist[ijet]) {
+      if (miss_dist.value() < best_miss_dist[ijet].value()) {
         second_best_miss_dist[ijet] = best_miss_dist[ijet];
-        second_best_miss_dist_err[ijet] = best_miss_dist_err[ijet];
         best_miss_dist[ijet] = miss_dist;
-        best_miss_dist_err[ijet] = miss_dist_err;
-        index_by_miss_dist[ijet] = ivtx;
+        if (miss_dist.value() <= max_miss_dist && miss_dist.significance() <= max_miss_sig)
+          index_by_miss_dist[ijet] = ivtx;
       }
 
       if (histos) {
@@ -231,9 +245,10 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
         h_ntracks_ptmin->Fill(ntracks_ptmin);
         h_sum_nhits->Fill(sum_nhits);
         h_cos_angle->Fill(cos_angle);
-        h_miss_dist->Fill(miss_dist);
-        h_miss_dist_err->Fill(miss_dist_err);
-        h_miss_dist_err_v->Fill(miss_dist, miss_dist_err);
+        h_miss_dist->Fill(miss_dist.value());
+        h_miss_dist_err->Fill(miss_dist.error());
+        h_miss_dist_sig->Fill(miss_dist.significance());
+        h_miss_dist_err_v->Fill(miss_dist.value(), miss_dist.error());
       }        
     }        
 
@@ -242,9 +257,9 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       h_best_ntracks_ptmin->Fill(second_best_ntracks_ptmin[ijet], best_ntracks_ptmin[ijet]);
       h_best_sum_nhits->Fill(second_best_sum_nhits[ijet], best_sum_nhits[ijet]);
       h_best_cos_angle->Fill(second_best_cos_angle[ijet], best_cos_angle[ijet]);
-      h_best_miss_dist->Fill(second_best_miss_dist[ijet], best_miss_dist[ijet]);
-      h_best_miss_dist_err->Fill(second_best_miss_dist_err[ijet], best_miss_dist_err[ijet]);
-      h_best_miss_dist_err_v->Fill(best_miss_dist[ijet], best_miss_dist_err[ijet]);
+      h_best_miss_dist->Fill(second_best_miss_dist[ijet].value(), best_miss_dist[ijet].value());
+      h_best_miss_dist_sig->Fill(second_best_miss_dist[ijet].significance(), best_miss_dist[ijet].significance());
+      h_best_miss_dist_err_v->Fill(best_miss_dist[ijet].value(), best_miss_dist[ijet].error());
     }        
 
     //if (verbose)
