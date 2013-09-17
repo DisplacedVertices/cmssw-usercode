@@ -270,7 +270,7 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     tree = 0;
   else {
     tree = fs->make<TTree>("tree", "");
-    nt.branch(tree);
+    nt.write(tree);
   }
 
   for (int i = 0; i < 3; ++i) {
