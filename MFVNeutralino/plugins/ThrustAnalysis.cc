@@ -531,14 +531,14 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
   const reco::GenJet* jSLep  = 0;
   const reco::GenJet* jBtLep = 0;
 
-  const pat::Jet* jBgHadPF = 0;
-  const pat::Jet* jSHadPF  = 0;
-  const pat::Jet* jBtHadPF = 0;
-  const pat::Jet* jQ0PF    = 0;
-  const pat::Jet* jQ1PF    = 0;
-  const pat::Jet* jBgLepPF = 0;
-  const pat::Jet* jSLepPF  = 0;
-  const pat::Jet* jBtLepPF = 0;
+  //const pat::Jet* jBgHadPF = 0;
+  //const pat::Jet* jSHadPF  = 0;
+  //const pat::Jet* jBtHadPF = 0;
+  //const pat::Jet* jQ0PF    = 0;
+  //const pat::Jet* jQ1PF    = 0;
+  //const pat::Jet* jBgLepPF = 0;
+  //const pat::Jet* jSLepPF  = 0;
+  //const pat::Jet* jBtLepPF = 0;
 
   *m_beamspot = TVector3();
   *m_reco_beamspot = TVector3();
@@ -784,12 +784,12 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
 
     edm::Ref<pat::JetCollection> jetref (jets, i);
     reco::VertexRef ass_vtx;
-    bool map_flag=false;
+    //bool map_flag=false;
 
     //if ((*map)[jetref].isNull())
       {
       ass_vtx = (*map)[jetref];          
-      map_flag=true;
+      //map_flag=true;
       }
     std::cout<<"test "<<i<<std::endl;
     if (jet->pt() > loose_pt_cut && fabs(jet->eta()) < loose_eta_cut) {
@@ -799,13 +799,13 @@ void MFVThrustAnalysis::analyze(const edm::Event& event, const edm::EventSetup&)
       fillVecs(jet, &p4tmp, &vtxtmp);      
       const reco::SecondaryVertexTagInfo* svtag = jet->tagInfoSecondaryVertex("secondaryVertex");
       if (vertices->size() > 0 && svtag && svtag->nVertices() > 0) {
-	const reco::Vertex& sv = svtag->secondaryVertex(0);
+	//const reco::Vertex& sv = svtag->secondaryVertex(0);
 	{
 	  //std::cout<<"test"<<std::endl;
 	  vtxtmp.SetXYZ(m_reco_beamspot->x(),m_reco_beamspot->y(),m_reco_beamspot->z());
 	}
 	//else vtxtmp.SetXYZ(ass_vtx->x(),ass_vtx->y(),ass_vtx->z());
-	const GlobalVector& flight_dir = svtag->flightDirection(0);
+	//const GlobalVector& flight_dir = svtag->flightDirection(0);
       }
       
 
