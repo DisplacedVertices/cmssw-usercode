@@ -257,7 +257,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   VertexNtuple nt;
 };
 
-const char* VtxRecoPlay::sv_index_names[VtxRecoPlay::sv_num_indices] = { "mass0", "mass1", "mass2", "rest", "top2", "all" };
+const char* VtxRecoPlay::sv_index_names[VtxRecoPlay::sv_num_indices] = { "best0", "best1", "best2", "rest", "top2", "all" };
 
 VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
