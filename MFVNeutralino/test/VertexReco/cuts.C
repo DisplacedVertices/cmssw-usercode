@@ -1,0 +1,263 @@
+// alias rootg++ 'g++ `root-config --cflags --libs --glibs`'
+// rootg++ -I../../plugins -std=c++0x cuts.C && ./a.out
+
+#include <assert.h>
+#include <TROOT.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <TH2.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <Math/QuantFunc.h>
+#include "VertexNtuple.h"
+
+struct Sample {
+  static const char* prefix;
+  const char* fn;
+  int nevents;
+  double xsec;
+};
+
+//const char* Sample::prefix = "";
+const char* Sample::prefix = "crab/VertexRecoPlay/";
+
+class Analyzer {
+public:
+  Sample sample;
+  TFile* file;
+  TTree* tree;
+  VertexNtuple nt;
+
+  Analyzer(const Sample&);
+  ~Analyzer();
+  void Loop();
+};
+
+Analyzer::~Analyzer() {
+  file->Close();
+  delete file;
+}
+
+Analyzer::Analyzer(const char* dir_name, const Sample& s)
+  : sample(s)
+{
+  file = new TFile(TString(s.prefix) + s.fn);
+  if (!file || !file->IsOpen()) {
+    fprintf(stderr, "couldn't open file %s\n", s.fn);
+    assert(0);
+  }
+
+  TDirectory* dir = (TDirectory*)file->Get(dir_name);
+  if (!dir) {
+    fprintf(stderr, "couldn't get dir %s from %s\n", dir_name, s.fn);
+    assert(0);
+  }
+  
+  dir->GetObject("tree", tree);
+  if (!tree) {
+    fprintf(stderr, "couldn't get tree \"tree\" from %s/%s\n", s.fn, dir_name);
+    assert(0);
+  }
+
+  tree->SetMakeClass(1);
+  nt.read(tree);
+}
+
+struct confint {
+  double lower;
+  double upper;
+  confint() : lower(0), upper(1) {}
+};
+
+confint clopper_pearson(const double n_on, const double n_tot, const double alpha=1-0.6827, const bool equal_tailed=true) {
+  const double alpha_min = equal_tailed ? alpha/2 : alpha;
+  confint res;
+  if (n_on > 0)
+    res.lower = ROOT::Math::beta_quantile(alpha_min, n_on, n_tot - n_on + 1);
+  if (n_tot - n_on > 0)
+    res.upper = ROOT::Math::beta_quantile_c(alpha_min, n_on + 1, n_tot - n_on);
+  return res;
+}
+
+void Analyzer::Loop() {
+  if (tree == 0)
+    return;
+
+  int nevents = 0;
+  std::map<std::string, int> nvtxpass;
+  std::map<std::string, int> nevtpass;
+
+  for (Long64_t jentry = 0, nentries = tree->GetEntriesFast(); jentry < nentries; ++jentry) {
+    if (tree->LoadTree(jentry) < 0) break;
+    tree->GetEntry(jentry);
+
+    //printf("%u %i/%i\n", nt.event, nt.isv, nt.nsv);
+
+    if (nt.isv == -1) {
+      ++nevents;
+
+      for (auto n : nvtxpass)
+        if (n.second >= 2)
+          ++nevtpass[n.first];
+
+      nvtxpass.clear();
+      
+      continue;
+    }
+
+    if (!nt.pass_trigger || nt.pfjetpt4 < 60)
+      continue;
+
+    std::map<std::string, bool> cuts;
+    cuts["all"] = true;
+    cuts["ntracks >= 7"] =
+       nt.ntracks >= 7;
+    //    cuts["ntracksptgt10 > 0"] =
+    //          ntracksptgt10 > 0;
+    //cuts["sumpt2 > 200"] =
+    //      sumpt2 > 200;
+    //    cuts["p > 15"] =
+    //          p > 15;
+    cuts["mass > 25"] =
+       nt.mass > 25;
+    cuts["maxtrackpt > 15"] =
+       nt.maxtrackpt > 15;
+    //cuts["maxm1trackpt > 5"] =
+    //      maxm1trackpt > 5; 
+    //cuts["maxm2trackpt > 3"] =
+    //      maxm2trackpt > 3;
+    cuts["drmin < 0.4"] =
+       nt.drmin < 0.4;
+    cuts["drmax < 4"] =
+       nt.drmax < 4;
+    //    cuts["dravg < 2.5"] =
+    //          dravg < 2.5;
+    //cuts["bs2dcompat > 200"] =
+    //      bs2dcompat > 200;
+    //    cuts["bs2dsig > 5"] =
+    //          bs2dsig > 5;
+    cuts["bs2derr < 0.005"] =
+       nt.bs2derr < 0.005;
+    cuts["njetssharetks > 1"] = 
+       nt.njetssharetks > 1;
+
+    for (auto icut : cuts) {
+      bool anded = true;
+      for (auto jcut : cuts) {
+        if (icut.first == jcut.first)
+          continue;
+        anded = anded && jcut.second;
+      }
+
+      if (anded)
+        ++nvtxpass[icut.first];
+    }
+  }
+
+  if (nevents != sample.nevents)
+    printf("nevents %i not right\n", nevents);
+  assert(nevents == sample.nevents);
+  const double intlumi = 20000;
+  printf("%s n>=2\n", sample.fn);
+  const double all = nevtpass["all"];
+  for (auto cut : nevtpass) {
+    double eff;
+    bool is_all = cut.first == "all";
+    
+    if (is_all)
+      eff = float(cut.second)/nevents;
+    else {
+      if (cut.second == 0)
+        eff = -1;
+      else
+        eff = all/cut.second;
+    }
+    const double N = eff * sample.xsec * intlumi;
+    confint ci = clopper_pearson(cut.second, nevents);
+    ci.lower *= sample.xsec * intlumi;
+    ci.upper *= sample.xsec * intlumi;
+    if (is_all)
+      printf("%24s: nevtpass: %10i nevents: %10i  eff: %10.6f  N: %10.1f [%10.1f, %10.1f]\n", "eff with all cuts", cut.second, nevents, eff, N, ci.lower, ci.upper);
+    else
+      printf("w/o %20s: nevtpass: %10i          %7s n-1 eff: %10.6f\n", cut.first.c_str(), cut.second, "", eff);
+      
+  }
+}
+
+int main() {
+  
+  Sample samples[] = {
+    //    {"mfv_neutralino_tau0000um_M0200.root", 99250, 888.0 },
+    {"mfv_neutralino_tau0000um_M0400.root", 99250, 1  },
+    //    {"mfv_neutralino_tau0000um_M0600.root", 99250, 1.24  },
+    //    {"mfv_neutralino_tau0000um_M0800.root", 99250, 0.15  },
+    //    {"mfv_neutralino_tau0000um_M1000.root", 99250, 0.0233},
+    //    {"mfv_neutralino_tau0010um_M0200.root", 99250, 888.0 },
+    //{"mfv_neutralino_tau0010um_M0400.root", 99250, 1  },
+    //    {"mfv_neutralino_tau0010um_M0600.root", 99250, 1.24  },
+    //    {"mfv_neutralino_tau0010um_M0800.root", 99250, 0.15  },
+    //    {"mfv_neutralino_tau0010um_M1000.root", 99250, 0.0233},
+    //    {"mfv_neutralino_tau0100um_M0200.root", 99250, 888.0 },
+    {"mfv_neutralino_tau0100um_M0400.root", 99250, 1  },
+    //    {"mfv_neutralino_tau0100um_M0600.root", 99250, 1.24  },
+    //    {"mfv_neutralino_tau0100um_M0800.root", 99250, 0.15  },
+    //    {"mfv_neutralino_tau0100um_M1000.root", 99250, 0.0233},
+    //    {"mfv_neutralino_tau1000um_M0200.root", 99250, 888.0 },
+    {"mfv_neutralino_tau1000um_M0400.root", 99250, 1  },
+    //    {"mfv_neutralino_tau1000um_M0600.root", 99250, 1.24  },
+    //    {"mfv_neutralino_tau1000um_M0800.root", 99250, 0.15  },
+    //    {"mfv_neutralino_tau1000um_M1000.root", 99250, 0.0233},
+    //    {"mfv_neutralino_tau9900um_M0200.root", 99250, 888.0 },
+    {"mfv_neutralino_tau9900um_M0400.root", 99250, 1  },
+    //    {"mfv_neutralino_tau9900um_M0600.root", 99250, 1.24  },
+    //    {"mfv_neutralino_tau9900um_M0800.root", 99250, 0.15  },
+    //                                                   0.0233
+    //    {"bjetsht0100.root",       99250, 1.34e5  },
+    //    {"bjetsht0250.root",       99250, 5.83e3  },
+    //    {"bjetsht0500.root",       99250, 2.18e2  },
+    //    {"bjetsht1000.root",       99250, 4.71e0  },
+    {"qcdht0100.root",         99250, 1.04e7  },
+    {"qcdht0250.root",         99250, 2.76e5  },
+    {"qcdht0500.root",         99250, 8.43e3  },
+    {"qcdht1000.root",         99250, 2.04e2  },
+    //    {"qcdpt0000.root",         99250, 4.859e10},
+    //    {"qcdpt0005.root",         99250, 4.264e10},
+    //    {"qcdpt0015.root",         99250, 9.883e08},
+    //    {"qcdpt0030.root",         99250, 6.629e07},
+    //    {"qcdpt0050.root",         99250, 8.149e06},
+    //    {"qcdpt0080.root",         99250, 1.034e06},
+    //    {"qcdpt0120.root",         99250, 1.563e05},
+    //    {"qcdpt0170.root",         99250, 3.414e04},
+    //    {"qcdpt0300.root",         99250, 1.760e03},
+    //    {"qcdpt0470.root",         99250, 1.139e02},
+    //    {"qcdpt0600.root",         99250, 2.699e01},
+    //    {"qcdpt0800.root",         99250, 3.550e00},
+    //    {"qcdpt1000.root",         99250, 7.378e-1},
+    //    {"qcdpt1400.root",         99250, 3.352e-2},
+    //    {"qcdpt1800.root",         99250, 1.829e-3},
+    //    {"singletop_s.root",       99250, 3.79},
+    //    {"singletop_s_tbar.root",  99250, 1.76},
+    //    {"singletop_t.root",       99250, 56.4},
+    //    {"singletop_t_tbar.root",  99250, 30.7},
+    //    {"singletop_tW.root",      99250, 11.1},
+    //    {"singletop_tW_tbar.root", 99250, 11.1},
+    {"ttbarhadronic.root",     99250, 225.2 * 0.457},
+    {"ttbarsemilep.root",      99250, 225.2 * 0.438},
+    {"ttbardilep.root",        99250, 225.2 * 0.105},
+    //    {"ttbarincl.root",         99250, 225.2},
+    //    {"ttzjets.root",           99250, 0.172},
+    //    {"ttwjets.root",           99250, 0.215},
+    //    {"ttgjets.root",           99250, 1.44},
+    //    {"tttt.root",              99250, 7.16E-4},
+    //    {"tthbb.root",             99250, 0.1293 * 0.577},
+    //    {"wjetstolnu.root",        99250, 3.04e4},
+    //    {"ww.root",                99250, 57.1},
+    //    {"wz.root",                99250, 32.3},
+    //    {"zz.root",                99250, 8.3},
+  };
+
+  for (const Sample& s : samples) {
+    Analyzer a("playMYQno", s);
+    a.Loop();
+  }
+}
