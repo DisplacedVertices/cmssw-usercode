@@ -82,7 +82,7 @@ struct VertexNtuple {
     isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; njetssharetks = -1; jetsmass = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
   }
 
-  void branch(TTree* tree) {
+  void write(TTree* tree) {
     tree->Branch("run", &run, "run/i");
     tree->Branch("lumi", &lumi, "lumi/i");
     tree->Branch("event", &event, "event/i");
@@ -151,6 +151,77 @@ struct VertexNtuple {
     tree->Branch("pv3ddist", &pv3ddist, "pv3ddist/F");
     tree->Branch("pv3derr", &pv3derr, "pv3derr/F");
     tree->Branch("pv3dsig", &pv3dsig, "pv3dsig/F");
+  }
+
+  void read(TTree* tree) {
+    tree->SetBranchAddress("run", &run);
+    tree->SetBranchAddress("lumi", &lumi);
+    tree->SetBranchAddress("event", &event);
+    tree->SetBranchAddress("minlspdist2d", &minlspdist2d);
+    tree->SetBranchAddress("lspdist2d", &lspdist2d);
+    tree->SetBranchAddress("lspdist3d", &lspdist3d);
+    tree->SetBranchAddress("pass_trigger", &pass_trigger);
+    tree->SetBranchAddress("npfjets", &npfjets);
+    tree->SetBranchAddress("ntightpfjets", &ntightpfjets);
+    tree->SetBranchAddress("pfjetpt4", &pfjetpt4);
+    tree->SetBranchAddress("pfjetpt5", &pfjetpt5);
+    tree->SetBranchAddress("tightpfjetpt4", &tightpfjetpt4);
+    tree->SetBranchAddress("tightpfjetpt5", &tightpfjetpt5);
+    tree->SetBranchAddress("nsv", &nsv);
+    tree->SetBranchAddress("isv", &isv);
+    tree->SetBranchAddress("ntracks", &ntracks);
+    tree->SetBranchAddress("ntracksptgt10", &ntracksptgt10);
+    tree->SetBranchAddress("ntracksptgt20", &ntracksptgt20);
+    tree->SetBranchAddress("trackminnhits", &trackminnhits);
+    tree->SetBranchAddress("trackmaxnhits", &trackmaxnhits);
+    tree->SetBranchAddress("njetssharetks", &njetssharetks);
+    tree->SetBranchAddress("jetsmass", &jetsmass);
+    tree->SetBranchAddress("chi2dof", &chi2dof);
+    tree->SetBranchAddress("chi2dofprob", &chi2dofprob);
+    tree->SetBranchAddress("p", &pt);
+    tree->SetBranchAddress("pt", &pt);
+    tree->SetBranchAddress("eta", &eta);
+    tree->SetBranchAddress("rapidity", &rapidity);
+    tree->SetBranchAddress("phi", &phi);
+    tree->SetBranchAddress("mass", &mass);
+    tree->SetBranchAddress("costhmombs", &costhmombs);
+    tree->SetBranchAddress("costhmompv2d", &costhmompv2d);
+    tree->SetBranchAddress("costhmompv3d", &costhmompv3d);
+    tree->SetBranchAddress("sumpt2", &sumpt2);
+    tree->SetBranchAddress("sumnhitsbehind", &sumnhitsbehind);
+    tree->SetBranchAddress("maxnhitsbehind", &maxnhitsbehind);
+    tree->SetBranchAddress("mintrackpt", &mintrackpt);
+    tree->SetBranchAddress("maxtrackpt", &maxtrackpt);
+    tree->SetBranchAddress("maxm1trackpt", &maxm1trackpt);
+    tree->SetBranchAddress("maxm2trackpt", &maxm2trackpt);
+    tree->SetBranchAddress("drmin", &drmin);
+    tree->SetBranchAddress("drmax", &drmax);
+    tree->SetBranchAddress("dravg", &dravg);
+    tree->SetBranchAddress("drrms", &drrms);
+    tree->SetBranchAddress("dravgw", &dravgw);
+    tree->SetBranchAddress("drrmsw", &drrmsw);
+    tree->SetBranchAddress("gen2ddist", &gen2ddist);
+    tree->SetBranchAddress("gen2derr", &gen2derr);
+    tree->SetBranchAddress("gen2dsig", &gen2dsig);
+    tree->SetBranchAddress("gen3ddist", &gen3ddist);
+    tree->SetBranchAddress("gen3derr", &gen3derr);
+    tree->SetBranchAddress("gen3dsig", &gen3dsig);
+    tree->SetBranchAddress("bs2dcompatscss", &bs2dcompatscss);
+    tree->SetBranchAddress("bs2dcompat", &bs2dcompat);
+    tree->SetBranchAddress("bs2ddist", &bs2ddist);
+    tree->SetBranchAddress("bs2derr", &bs2derr);
+    tree->SetBranchAddress("bs2dsig", &bs2dsig);
+    tree->SetBranchAddress("bs3ddist", &bs3ddist);
+    tree->SetBranchAddress("pv2dcompatscss", &pv2dcompatscss);
+    tree->SetBranchAddress("pv2dcompat", &pv2dcompat);
+    tree->SetBranchAddress("pv2ddist", &pv2ddist);
+    tree->SetBranchAddress("pv2derr", &pv2derr);
+    tree->SetBranchAddress("pv2dsig", &pv2dsig);
+    tree->SetBranchAddress("pv3dcompatscss", &pv3dcompatscss);
+    tree->SetBranchAddress("pv3dcompat", &pv3dcompat);
+    tree->SetBranchAddress("pv3ddist", &pv3ddist);
+    tree->SetBranchAddress("pv3derr", &pv3derr);
+    tree->SetBranchAddress("pv3dsig", &pv3dsig);
   }
 };
 
