@@ -21,6 +21,10 @@ process.goodOfflinePrimaryVertices.filter = cms.bool(False)
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvVertexSequence)
 
+from JMTucker.Tools.general import big_warn
+big_warn("\nusing vertices stored in PAT tuple, hope you didn't mean to change their reco\n")
+process.p.remove(process.mfvVertices)
+
 #process.load('JMTucker.MFVNeutralino.RedoPURemoval_cff')
 #process.p *= process.mfvRedoPURemoval * process.mfvExtraVertexSequence
 
