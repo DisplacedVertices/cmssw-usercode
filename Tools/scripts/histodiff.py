@@ -16,20 +16,32 @@ d2 = set(flatten_directory(f2))
 d = sorted(d1 & d2)
 in1not2 = sorted(d1 - d2)
 in2not1 = sorted(d2 - d1)
-print 'warning: not comparing these:'
-print 'in f1 not f2:'
-pprint(in1not2)
-print 'in f2 not f1:'
-pprint(in2not1)
-print
+if 'small' in sys.argv:
+    print 'comparing %i hists (and not %i+%i of them)' % (len(d), len(in1not2), len(in2not1))
+else:
+    print 'warning: not comparing these:'
+    print 'in f1 not f2:'
+    pprint(in1not2)
+    print 'in f2 not f1:'
+    pprint(in2not1)
+    print
+
+problem_seen = False
 
 for n in d:
     #print n
     h1 = f1.Get(n)
     h2 = f2.Get(n)
-    if not issubclass(type(h1), ROOT.TH1) or not check_consistency(h1, h2, log='problem with %s:' % n):
+    if not issubclass(type(h1), ROOT.TH1):
+        continue
+    if not check_consistency(h1, h2, log='problem with %s:' % n):
+        problem_seen = True
         continue
     h = h1.Clone(n + '_subtract')
     h.Add(h2, -1)
     if h.GetEntries() != 0:
         print 'problem with %s: entries differ' % n
+        problem_seen = True
+
+sys.exit(1 if problem_seen else 0)
+
