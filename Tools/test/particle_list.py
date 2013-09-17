@@ -3,14 +3,10 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 del process.TFileService
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
-
-process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
-add_analyzer('JMTParticleListDrawer',
-             src = cms.InputTag('genParticles'),
-             printVertex = cms.untracked.bool(True),
-             )
-
 file_event_from_argv(process)
+
+process.load('JMTucker.Tools.ParticleListDrawer_cff')
+process.p = cms.Path(process.ParticleListDrawer)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import background_samples
