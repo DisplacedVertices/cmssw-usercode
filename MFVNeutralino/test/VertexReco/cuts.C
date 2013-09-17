@@ -1,68 +1,5 @@
-// alias rootg++ 'g++ `root-config --cflags --libs --glibs`'
-// rootg++ -I../../plugins -std=c++0x cuts.C && ./a.out
-
-#include <assert.h>
-#include <TROOT.h>
-#include <TTree.h>
-#include <TFile.h>
-#include <TH2.h>
-#include <TStyle.h>
-#include <TCanvas.h>
 #include <Math/QuantFunc.h>
-#include "VertexNtuple.h"
-
-void die_if_not(bool condition, const char* msg, ...) {
-  if (condition)
-    return;
-  va_list args;
-  va_start(args, msg);
-  vfprintf(stderr, msg, args);
-  va_end(args);
-  assert(0);
-}
-
-struct Sample {
-  static const char* prefix;
-  const char* fn;
-  int nevents;
-  double xsec;
-};
-
-//const char* Sample::prefix = "";
-const char* Sample::prefix = "crab/VertexRecoPlay/";
-
-class Analyzer {
-public:
-  Sample sample;
-  TFile* file;
-  TTree* tree;
-  VertexNtuple nt;
-
-  Analyzer(const char*, const Sample&);
-  ~Analyzer();
-  void Loop();
-};
-
-Analyzer::~Analyzer() {
-  file->Close();
-  delete file;
-}
-
-Analyzer::Analyzer(const char* dir_name, const Sample& s)
-  : sample(s)
-{
-  file = new TFile(TString(s.prefix) + s.fn);
-  die_if_not(file && file->IsOpen(), "couldn't open file %s\n", s.fn);
-
-  TDirectory* dir = (TDirectory*)file->Get(dir_name);
-  die_if_not(dir, "couldn't get dir %s from %s\n", dir_name, s.fn);
-  
-  dir->GetObject("tree", tree);
-  die_if_not(tree, "couldn't get tree \"tree\" from %s/%s\n", s.fn, dir_name);
-
-  tree->SetMakeClass(1);
-  nt.read(tree);
-}
+#include "ntuplereader.h"
 
 struct confint {
   double lower;
@@ -80,21 +17,21 @@ confint clopper_pearson(const double n_on, const double n_tot, const double alph
   return res;
 }
 
-void Analyzer::Loop() {
-  if (tree == 0)
+void Run(NtupleReader& nr) {
+  if (nr.tree == 0)
     return;
-
+  
   int nevents = 0;
   std::map<std::string, int> nvtxpass;
   std::map<std::string, int> nevtpass;
+  
+  for (Long64_t jentry = 0, nentries = nr.tree->GetEntriesFast(); jentry < nentries; ++jentry) {
+    if (nr.tree->LoadTree(jentry) < 0) break;
+    nr.tree->GetEntry(jentry);
 
-  for (Long64_t jentry = 0, nentries = tree->GetEntriesFast(); jentry < nentries; ++jentry) {
-    if (tree->LoadTree(jentry) < 0) break;
-    tree->GetEntry(jentry);
+    //printf("%u %i/%i\n", nr.nt.event, nr.nt.isv, nr.nt.nsv);
 
-    //printf("%u %i/%i\n", nt.event, nt.isv, nt.nsv);
-
-    if (nt.isv == -1) {
+    if (nr.nt.isv == -1) {
       ++nevents;
 
       for (auto n : nvtxpass)
@@ -106,30 +43,30 @@ void Analyzer::Loop() {
       continue;
     }
 
-    if (!nt.pass_trigger || nt.pfjetpt4 < 60)
+    if (!nr.nt.pass_trigger || nr.nt.pfjetpt4 < 60)
       continue;
 
     std::map<std::string, bool> cuts;
 
-// heh
-#define EVAL_CUT(x) { std::string _x(#x); _x.replace(_x.find("nt."), 3, ""); cuts[_x] = x; }
+    // heh
+#define EVAL_CUT(x) { std::string _x(#x); _x.replace(_x.find("nr.nt."), 6, ""); cuts[_x] = x; }
 
     cuts["all"] = true;
-    EVAL_CUT(nt.ntracks       >= 7);
-  //EVAL_CUT(nt.ntracksptgt10 > 0);
-  //EVAL_CUT(nt.sumpt2        > 200);
-  //EVAL_CUT(nt.p             > 15);
-  //EVAL_CUT(nt.mass          > 25);
-    EVAL_CUT(nt.maxtrackpt    > 15);
-  //EVAL_CUT(nt.maxm1trackpt  > 5);
-  //EVAL_CUT(nt.maxm2trackpt  > 3);
-    EVAL_CUT(nt.drmin         < 0.4);
-    EVAL_CUT(nt.drmax         < 4);
-  //EVAL_CUT(nt.dravg         < 2.5);
-  //EVAL_CUT(nt.bs2dcompat    > 200);
-  //EVAL_CUT(nt.bs2dsig       > 5);
-    EVAL_CUT(nt.bs2derr       < 0.005);
-    EVAL_CUT(nt.njetssharetks > 1);
+    EVAL_CUT(nr.nt.ntracks       >= 7);
+  //EVAL_CUT(nr.nt.ntracksptgt10 > 0);
+  //EVAL_CUT(nr.nt.sumpt2        > 200);
+  //EVAL_CUT(nr.nt.p             > 15);
+  //EVAL_CUT(nr.nt.mass          > 25);
+    EVAL_CUT(nr.nt.maxtrackpt    > 15);
+  //EVAL_CUT(nr.nt.maxm1trackpt  > 5);
+  //EVAL_CUT(nr.nt.maxm2trackpt  > 3);
+    EVAL_CUT(nr.nt.drmin         < 0.4);
+    EVAL_CUT(nr.nt.drmax         < 4);
+  //EVAL_CUT(nr.nt.dravg         < 2.5);
+  //EVAL_CUT(nr.nt.bs2dcompat    > 200);
+  //EVAL_CUT(nr.nt.bs2dsig       > 5);
+    EVAL_CUT(nr.nt.bs2derr       < 0.005);
+    EVAL_CUT(nr.nt.njetssharetks > 1);
 
     for (auto icut : cuts) {
       bool anded = true;
@@ -144,11 +81,11 @@ void Analyzer::Loop() {
     }
   }
 
-  if (nevents != sample.nevents)
+  if (nevents != nr.sample.nevents)
     printf("nevents %i not right\n", nevents);
-  assert(nevents == sample.nevents);
+  assert(nevents == nr.sample.nevents);
   const double intlumi = 20000;
-  printf("%s n>=2\n", sample.fn);
+  printf("%s n>=2\n", nr.sample.fn);
   const double all = nevtpass["all"];
   for (auto cut : nevtpass) {
     double eff;
@@ -162,17 +99,21 @@ void Analyzer::Loop() {
       else
         eff = all/cut.second;
     }
-    const double N = eff * sample.xsec * intlumi;
+
+    const double sigL = nr.sample.xsec * intlumi;
+    const double N = eff * sigL;
     confint ci = clopper_pearson(cut.second, nevents);
-    ci.lower *= sample.xsec * intlumi;
-    ci.upper *= sample.xsec * intlumi;
+    ci.lower *= sigL;
+    ci.upper *= sigL;
     if (is_all)
       printf("%24s: nevtpass: %10i nevents: %10i  eff: %10.6f  N: %10.1f [%10.1f, %10.1f]\n", "eff with all cuts", cut.second, nevents, eff, N, ci.lower, ci.upper);
     else
       printf("w/o %20s: nevtpass: %10i          %7s n-1 eff: %10.6f\n", cut.first.c_str(), cut.second, "", eff);
-      
   }
 }
+
+const char* Sample::file_dir = "crab/VertexRecoPlay/";
+const char* Sample::root_dir = "playMYQno";
 
 int main() {
   
@@ -247,7 +188,7 @@ int main() {
   };
 
   for (const Sample& s : samples) {
-    Analyzer a("playMYQno", s);
-    a.Loop();
+    NtupleReader nr(s);
+    Run(nr);
   }
 }
