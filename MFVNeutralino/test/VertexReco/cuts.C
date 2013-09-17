@@ -84,64 +84,69 @@ void Analyzer::Loop() {
   if (tree == 0)
     return;
 
-  int nevents = tree->GetEntries();
-  die_if_not(nevents == sample.nevents, "nevents %i not right\n", nevents);
-
+  int nevents = 0;
+  std::map<std::string, int> nvtxpass;
   std::map<std::string, int> nevtpass;
 
-  for (int ievent = 0; ievent < nevents; ++ievent) {
-    die_if_not(tree->LoadTree(ievent) >= 0, "problem with tree for %s\n", sample.fn);
-    tree->GetEntry(ievent);
+  for (Long64_t jentry = 0, nentries = tree->GetEntriesFast(); jentry < nentries; ++jentry) {
+    if (tree->LoadTree(jentry) < 0) break;
+    tree->GetEntry(jentry);
 
     //printf("%u %i/%i\n", nt.event, nt.isv, nt.nsv);
+
+    if (nt.isv == -1) {
+      ++nevents;
+
+      for (auto n : nvtxpass)
+        if (n.second >= 2)
+          ++nevtpass[n.first];
+
+      nvtxpass.clear();
+      
+      continue;
+    }
 
     if (!nt.pass_trigger || nt.pfjetpt4 < 60)
       continue;
 
-    std::map<std::string, int> nvtxpass;
-    const int nsv = int(nt.ntracks.size());
+    std::map<std::string, bool> cuts;
 
 // heh
-#define EVAL_CUT(x) { std::string _x(#x); _x.replace(_x.find("nt."), 3, ""); _x.replace(_x.find("[isv]"), 5, ""); cuts[_x] = x; }
+#define EVAL_CUT(x) { std::string _x(#x); _x.replace(_x.find("nt."), 3, ""); cuts[_x] = x; }
 
-    for (int isv = 0; isv < nsv; ++isv) {
-      std::map<std::string, bool> cuts;
-      cuts["all"] = true;
-      EVAL_CUT(nt.ntracks      [isv] >= 7);
-    //EVAL_CUT(nt.ntracksptgt10[isv] > 0);
-    //EVAL_CUT(nt.sumpt2       [isv] > 200);
-    //EVAL_CUT(nt.p            [isv] > 15);
-    //EVAL_CUT(nt.mass         [isv] > 25);
-      EVAL_CUT(nt.maxtrackpt   [isv] > 15);
-    //EVAL_CUT(nt.maxm1trackpt [isv] > 5);
-    //EVAL_CUT(nt.maxm2trackpt [isv] > 3);
-      EVAL_CUT(nt.drmin        [isv] < 0.4);
-      EVAL_CUT(nt.drmax        [isv] < 4);
-    //EVAL_CUT(nt.dravg        [isv] < 2.5);
-    //EVAL_CUT(nt.bs2dcompat   [isv] > 200);
-    //EVAL_CUT(nt.bs2dsig      [isv] > 5);
-      EVAL_CUT(nt.bs2derr      [isv] < 0.005);
-      EVAL_CUT(nt.njetssharetks[isv] > 1);
+    cuts["all"] = true;
+    EVAL_CUT(nt.ntracks       >= 7);
+  //EVAL_CUT(nt.ntracksptgt10 > 0);
+  //EVAL_CUT(nt.sumpt2        > 200);
+  //EVAL_CUT(nt.p             > 15);
+  //EVAL_CUT(nt.mass          > 25);
+    EVAL_CUT(nt.maxtrackpt    > 15);
+  //EVAL_CUT(nt.maxm1trackpt  > 5);
+  //EVAL_CUT(nt.maxm2trackpt  > 3);
+    EVAL_CUT(nt.drmin         < 0.4);
+    EVAL_CUT(nt.drmax         < 4);
+  //EVAL_CUT(nt.dravg         < 2.5);
+  //EVAL_CUT(nt.bs2dcompat    > 200);
+  //EVAL_CUT(nt.bs2dsig       > 5);
+    EVAL_CUT(nt.bs2derr       < 0.005);
+    EVAL_CUT(nt.njetssharetks > 1);
 
-      for (auto icut : cuts) {
-        bool anded = true;
-        for (auto jcut : cuts) {
-          if (icut.first == jcut.first)
-            continue;
-          anded = anded && jcut.second;
-        }
-
-        if (anded)
-          ++nvtxpass[icut.first];
+    for (auto icut : cuts) {
+      bool anded = true;
+      for (auto jcut : cuts) {
+        if (icut.first == jcut.first)
+          continue;
+        anded = anded && jcut.second;
       }
+
+      if (anded)
+        ++nvtxpass[icut.first];
     }
-
-
-    for (auto n : nvtxpass)
-      if (n.second >= 2)
-        ++nevtpass[n.first];
   }
 
+  if (nevents != sample.nevents)
+    printf("nevents %i not right\n", nevents);
+  assert(nevents == sample.nevents);
   const double intlumi = 20000;
   printf("%s n>=2\n", sample.fn);
   const double all = nevtpass["all"];
@@ -165,6 +170,7 @@ void Analyzer::Loop() {
       printf("%24s: nevtpass: %10i nevents: %10i  eff: %10.6f  N: %10.1f [%10.1f, %10.1f]\n", "eff with all cuts", cut.second, nevents, eff, N, ci.lower, ci.upper);
     else
       printf("w/o %20s: nevtpass: %10i          %7s n-1 eff: %10.6f\n", cut.first.c_str(), cut.second, "", eff);
+      
   }
 }
 
