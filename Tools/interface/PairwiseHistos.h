@@ -6,8 +6,9 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 
 struct PairwiseHistos {
-  typedef std::map<std::string, float> ValueMap;
-  float get(const ValueMap& m, const std::string& s, bool allow_default, float default_) {
+  typedef float Value;
+  typedef std::map<std::string, Value> ValueMap;
+  Value get(const ValueMap& m, const std::string& s, bool allow_default, Value default_) {
     auto it = m.find(s);
     if (it == m.end()) {
       if (!allow_default)
@@ -42,10 +43,15 @@ struct PairwiseHistos {
 
   PairwiseHistos() : n(-1) {}
 
-  void Init(const std::string& name, const HistoDefs& histos, const bool combs_only, const bool do2d) {
+  void Init(const std::string& name, const HistoDefs& histos, const bool combs_only, const bool do2d, const int sumto=-1) {
     n = int(histos.size());
     do_2d = do2d;
     combinations_only = combs_only;
+
+    sums_mode = sumto > 0;
+    sum_to = sumto;
+    sums.clear();
+    sum_at = 0;
 
     edm::Service<TFileService> fs;
 
@@ -88,8 +94,21 @@ struct PairwiseHistos {
       for (auto i = b; i != e; ++i)
 	die_if_not(values.find(*b) != values.end(), "var %s not found in value map and allow_default=false", b->c_str());
 
+    if (sums_mode) {
+      if (sum_at < sum_to) {
+        for (auto i = b; i != e; ++i)
+          sums[*i] = get(values, *i, allow_default, default_) + get(sums, *i, true, 0);
+        ++sum_at;
+      }
+
+      if (sum_at != sum_to)
+        return;
+    }
+      
+    const ValueMap& to_fill = sums_mode ? sums : values;
+
     for (auto i = b; i != e; ++i) {
-      const float vi = get(values, *i, allow_default, default_);
+      const float vi = get(to_fill, *i, allow_default, default_);
       h1[*i]->Fill(vi);
       
       if (!do_2d)
@@ -100,10 +119,15 @@ struct PairwiseHistos {
 	if (i == j)
 	  continue;
 
-	const float vj = get(values, *j, allow_default, default_);
+	const float vj = get(to_fill, *j, allow_default, default_);
 	h2[std::make_pair(*i, *j)]->Fill(vi, vj);
       }
-    }    
+    }
+
+    if (sums_mode) {
+      sums.clear();
+      sum_at = 0;
+    }
   }
 
   int n;
@@ -112,4 +136,9 @@ struct PairwiseHistos {
   std::vector<std::string> names;
   std::map<std::string, TH1F*> h1;
   std::map<std::pair<std::string, std::string>, TH2F*> h2;
+
+  bool sums_mode;
+  int sum_to;
+  ValueMap sums;
+  int sum_at;
 };
