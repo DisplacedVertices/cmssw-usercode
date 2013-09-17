@@ -475,7 +475,7 @@ void VtxRecoPlay::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHi
 }
 
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  nt.clear(true);
+  nt.clear();
   nt.run = event.id().run();
   nt.lumi = event.luminosityBlock();
   nt.event = event.id().event();
@@ -685,9 +685,6 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     const reco::Vertex& sv = secondary_vertices->at(isv);
     const reco::VertexRef svref(secondary_vertices, isv);
 
-    nt.clear(false);
-    nt.isv = isv;
-
     const int svndx = isv >= 3 ? 3 : isv; // don't use fill_multi for the position plots
     for (int i = 0; i < 3; ++i)
       h_sv_pos_1d[svndx][i]->Fill(coord(sv.position(), i) - coord(beamspot->position(), i));
@@ -866,61 +863,59 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     }
 
     if (do_ntuple) {
-      nt.ntracks         = ntracks;
-      nt.ntracksptgt10   = ntracksptgt10;
-      nt.ntracksptgt20   = ntracksptgt20;
-      nt.trackminnhits   = trackminnhits;
-      nt.trackmaxnhits   = trackmaxnhits;
-      nt.njetssharetks   = njetssharetks;
-      nt.jetsmass        = jetsmass;
-      nt.chi2dof         = sv.normalizedChi2();
-      nt.chi2dofprob     = TMath::Prob(sv.chi2(), sv.ndof());
-      nt.p               = sv.p4().P();
-      nt.pt              = sv.p4().pt();
-      nt.eta             = sv.p4().eta();
-      nt.rapidity        = sv.p4().Rapidity();
-      nt.phi             = sv.p4().phi();
-      nt.mass            = sv.p4().mass();
-      nt.costhmombs      = costhmombs;
-      nt.costhmompv2d    = costhmompv2d;
-      nt.costhmompv3d    = costhmompv3d;
-      nt.sumpt2          = sumpt2;
-      nt.sumnhitsbehind  = sumnhitsbehind;
-      nt.maxnhitsbehind  = maxnhitsbehind;
-      nt.mintrackpt      = mintrackpt;
-      nt.maxtrackpt      = maxtrackpt;
-      nt.maxm1trackpt    = maxm1trackpt;
-      nt.maxm2trackpt    = maxm2trackpt;
-      nt.drmin           = vtx_tks_dist.drmin;
-      nt.drmax           = vtx_tks_dist.drmax;
-      nt.dravg           = vtx_tks_dist.dravg;
-      nt.drrms           = vtx_tks_dist.drrms;
-      nt.dravgw          = vtx_tks_dist.dravgw;
-      nt.drrmsw          = vtx_tks_dist.drrmsw;
-      nt.gen2ddist       = gen2ddist.value();
-      nt.gen2derr        = gen2ddist.error();
-      nt.gen2dsig        = gen2ddist.significance();
-      nt.gen3ddist       = gen3ddist.value();
-      nt.gen3derr        = gen3ddist.error();
-      nt.gen3dsig        = gen3ddist.significance();
-      nt.bs2dcompatscss  = bs2dcompat.first;
-      nt.bs2dcompat      = bs2dcompat.second;
-      nt.bs2ddist        = bs2ddist.value();
-      nt.bs2derr         = bs2ddist.error();
-      nt.bs2dsig         = bs2ddist.significance();
-      nt.bs3ddist        = bs3ddist.value();
-      nt.pv2dcompatscss  = pv2dcompat.first;
-      nt.pv2dcompat      = pv2dcompat.second;
-      nt.pv2ddist        = pv2ddist_val;
-      nt.pv2derr         = pv2ddist_err;
-      nt.pv2dsig         = pv2ddist_sig;
-      nt.pv3dcompatscss  = pv3dcompat.first;
-      nt.pv3dcompat      = pv3dcompat.second;
-      nt.pv3ddist        = pv3ddist_val;
-      nt.pv3derr         = pv3ddist_err;
-      nt.pv3dsig         = pv3ddist_sig;
-
-      tree->Fill();
+      nt.ntracks         .push_back(ntracks);
+      nt.ntracksptgt10   .push_back(ntracksptgt10);
+      nt.ntracksptgt20   .push_back(ntracksptgt20);
+      nt.trackminnhits   .push_back(trackminnhits);
+      nt.trackmaxnhits   .push_back(trackmaxnhits);
+      nt.njetssharetks   .push_back(njetssharetks);
+      nt.jetsmass        .push_back(jetsmass);
+      nt.chi2dof         .push_back(sv.normalizedChi2());
+      nt.chi2dofprob     .push_back(TMath::Prob(sv.chi2(), sv.ndof()));
+      nt.p               .push_back(sv.p4().P());
+      nt.pt              .push_back(sv.p4().pt());
+      nt.eta             .push_back(sv.p4().eta());
+      nt.rapidity        .push_back(sv.p4().Rapidity());
+      nt.phi             .push_back(sv.p4().phi());
+      nt.mass            .push_back(sv.p4().mass());
+      nt.costhmombs      .push_back(costhmombs);
+      nt.costhmompv2d    .push_back(costhmompv2d);
+      nt.costhmompv3d    .push_back(costhmompv3d);
+      nt.sumpt2          .push_back(sumpt2);
+      nt.sumnhitsbehind  .push_back(sumnhitsbehind);
+      nt.maxnhitsbehind  .push_back(maxnhitsbehind);
+      nt.mintrackpt      .push_back(mintrackpt);
+      nt.maxtrackpt      .push_back(maxtrackpt);
+      nt.maxm1trackpt    .push_back(maxm1trackpt);
+      nt.maxm2trackpt    .push_back(maxm2trackpt);
+      nt.drmin           .push_back(vtx_tks_dist.drmin);
+      nt.drmax           .push_back(vtx_tks_dist.drmax);
+      nt.dravg           .push_back(vtx_tks_dist.dravg);
+      nt.drrms           .push_back(vtx_tks_dist.drrms);
+      nt.dravgw          .push_back(vtx_tks_dist.dravgw);
+      nt.drrmsw          .push_back(vtx_tks_dist.drrmsw);
+      nt.gen2ddist       .push_back(gen2ddist.value());
+      nt.gen2derr        .push_back(gen2ddist.error());
+      nt.gen2dsig        .push_back(gen2ddist.significance());
+      nt.gen3ddist       .push_back(gen3ddist.value());
+      nt.gen3derr        .push_back(gen3ddist.error());
+      nt.gen3dsig        .push_back(gen3ddist.significance());
+      nt.bs2dcompatscss  .push_back(bs2dcompat.first);
+      nt.bs2dcompat      .push_back(bs2dcompat.second);
+      nt.bs2ddist        .push_back(bs2ddist.value());
+      nt.bs2derr         .push_back(bs2ddist.error());
+      nt.bs2dsig         .push_back(bs2ddist.significance());
+      nt.bs3ddist        .push_back(bs3ddist.value());
+      nt.pv2dcompatscss  .push_back(pv2dcompat.first);
+      nt.pv2dcompat      .push_back(pv2dcompat.second);
+      nt.pv2ddist        .push_back(pv2ddist_val);
+      nt.pv2derr         .push_back(pv2ddist_err);
+      nt.pv2dsig         .push_back(pv2ddist_sig);
+      nt.pv3dcompatscss  .push_back(pv3dcompat.first);
+      nt.pv3dcompat      .push_back(pv3dcompat.second);
+      nt.pv3ddist        .push_back(pv3ddist_val);
+      nt.pv3derr         .push_back(pv3ddist_err);
+      nt.pv3dsig         .push_back(pv3ddist_sig);
     }
 
     PairwiseHistos::ValueMap v = {
@@ -983,11 +978,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
   //////////////////////////////////////////////////////////////////////
 
-  if (do_ntuple) {
-    nt.clear(false);
-    nt.nsv = nsv;
+  if (do_ntuple)
     tree->Fill();
-  }
 
   h_nsv->Fill(nsv);
   h_nsv_v_minlspdist2d->Fill(nt.minlspdist2d, nsv);

@@ -11,6 +11,16 @@
 #include <Math/QuantFunc.h>
 #include "VertexNtuple.h"
 
+void die_if_not(bool condition, const char* msg, ...) {
+  if (condition)
+    return;
+  va_list args;
+  va_start(args, msg);
+  vfprintf(stderr, msg, args);
+  va_end(args);
+  assert(0);
+}
+
 struct Sample {
   static const char* prefix;
   const char* fn;
@@ -28,7 +38,7 @@ public:
   TTree* tree;
   VertexNtuple nt;
 
-  Analyzer(const Sample&);
+  Analyzer(const char*, const Sample&);
   ~Analyzer();
   void Loop();
 };
@@ -42,22 +52,13 @@ Analyzer::Analyzer(const char* dir_name, const Sample& s)
   : sample(s)
 {
   file = new TFile(TString(s.prefix) + s.fn);
-  if (!file || !file->IsOpen()) {
-    fprintf(stderr, "couldn't open file %s\n", s.fn);
-    assert(0);
-  }
+  die_if_not(file && file->IsOpen(), "couldn't open file %s\n", s.fn);
 
   TDirectory* dir = (TDirectory*)file->Get(dir_name);
-  if (!dir) {
-    fprintf(stderr, "couldn't get dir %s from %s\n", dir_name, s.fn);
-    assert(0);
-  }
+  die_if_not(dir, "couldn't get dir %s from %s\n", dir_name, s.fn);
   
   dir->GetObject("tree", tree);
-  if (!tree) {
-    fprintf(stderr, "couldn't get tree \"tree\" from %s/%s\n", s.fn, dir_name);
-    assert(0);
-  }
+  die_if_not(tree, "couldn't get tree \"tree\" from %s/%s\n", s.fn, dir_name);
 
   tree->SetMakeClass(1);
   nt.read(tree);
@@ -83,80 +84,64 @@ void Analyzer::Loop() {
   if (tree == 0)
     return;
 
-  int nevents = 0;
-  std::map<std::string, int> nvtxpass;
+  int nevents = tree->GetEntries();
+  die_if_not(nevents == sample.nevents, "nevents %i not right\n", nevents);
+
   std::map<std::string, int> nevtpass;
 
-  for (Long64_t jentry = 0, nentries = tree->GetEntriesFast(); jentry < nentries; ++jentry) {
-    if (tree->LoadTree(jentry) < 0) break;
-    tree->GetEntry(jentry);
+  for (int ievent = 0; ievent < nevents; ++ievent) {
+    die_if_not(tree->LoadTree(ievent) >= 0, "problem with tree for %s\n", sample.fn);
+    tree->GetEntry(ievent);
 
     //printf("%u %i/%i\n", nt.event, nt.isv, nt.nsv);
-
-    if (nt.isv == -1) {
-      ++nevents;
-
-      for (auto n : nvtxpass)
-        if (n.second >= 2)
-          ++nevtpass[n.first];
-
-      nvtxpass.clear();
-      
-      continue;
-    }
 
     if (!nt.pass_trigger || nt.pfjetpt4 < 60)
       continue;
 
-    std::map<std::string, bool> cuts;
-    cuts["all"] = true;
-    cuts["ntracks >= 7"] =
-       nt.ntracks >= 7;
-    //    cuts["ntracksptgt10 > 0"] =
-    //          ntracksptgt10 > 0;
-    //cuts["sumpt2 > 200"] =
-    //      sumpt2 > 200;
-    //    cuts["p > 15"] =
-    //          p > 15;
-    cuts["mass > 25"] =
-       nt.mass > 25;
-    cuts["maxtrackpt > 15"] =
-       nt.maxtrackpt > 15;
-    //cuts["maxm1trackpt > 5"] =
-    //      maxm1trackpt > 5; 
-    //cuts["maxm2trackpt > 3"] =
-    //      maxm2trackpt > 3;
-    cuts["drmin < 0.4"] =
-       nt.drmin < 0.4;
-    cuts["drmax < 4"] =
-       nt.drmax < 4;
-    //    cuts["dravg < 2.5"] =
-    //          dravg < 2.5;
-    //cuts["bs2dcompat > 200"] =
-    //      bs2dcompat > 200;
-    //    cuts["bs2dsig > 5"] =
-    //          bs2dsig > 5;
-    cuts["bs2derr < 0.005"] =
-       nt.bs2derr < 0.005;
-    cuts["njetssharetks > 1"] = 
-       nt.njetssharetks > 1;
+    std::map<std::string, int> nvtxpass;
+    const int nsv = int(nt.ntracks.size());
 
-    for (auto icut : cuts) {
-      bool anded = true;
-      for (auto jcut : cuts) {
-        if (icut.first == jcut.first)
-          continue;
-        anded = anded && jcut.second;
+// heh
+#define EVAL_CUT(x) { std::string _x(#x); _x.replace(_x.find("nt."), 3, ""); _x.replace(_x.find("[isv]"), 5, ""); cuts[_x] = x; }
+
+    for (int isv = 0; isv < nsv; ++isv) {
+      std::map<std::string, bool> cuts;
+      cuts["all"] = true;
+      EVAL_CUT(nt.ntracks      [isv] >= 7);
+    //EVAL_CUT(nt.ntracksptgt10[isv] > 0);
+    //EVAL_CUT(nt.sumpt2       [isv] > 200);
+    //EVAL_CUT(nt.p            [isv] > 15);
+    //EVAL_CUT(nt.mass         [isv] > 25);
+      EVAL_CUT(nt.maxtrackpt   [isv] > 15);
+    //EVAL_CUT(nt.maxm1trackpt [isv] > 5);
+    //EVAL_CUT(nt.maxm2trackpt [isv] > 3);
+      EVAL_CUT(nt.drmin        [isv] < 0.4);
+      EVAL_CUT(nt.drmax        [isv] < 4);
+    //EVAL_CUT(nt.dravg        [isv] < 2.5);
+    //EVAL_CUT(nt.bs2dcompat   [isv] > 200);
+    //EVAL_CUT(nt.bs2dsig      [isv] > 5);
+      EVAL_CUT(nt.bs2derr      [isv] < 0.005);
+      EVAL_CUT(nt.njetssharetks[isv] > 1);
+
+      for (auto icut : cuts) {
+        bool anded = true;
+        for (auto jcut : cuts) {
+          if (icut.first == jcut.first)
+            continue;
+          anded = anded && jcut.second;
+        }
+
+        if (anded)
+          ++nvtxpass[icut.first];
       }
-
-      if (anded)
-        ++nvtxpass[icut.first];
     }
+
+
+    for (auto n : nvtxpass)
+      if (n.second >= 2)
+        ++nevtpass[n.first];
   }
 
-  if (nevents != sample.nevents)
-    printf("nevents %i not right\n", nevents);
-  assert(nevents == sample.nevents);
   const double intlumi = 20000;
   printf("%s n>=2\n", sample.fn);
   const double all = nevtpass["all"];
@@ -180,7 +165,6 @@ void Analyzer::Loop() {
       printf("%24s: nevtpass: %10i nevents: %10i  eff: %10.6f  N: %10.1f [%10.1f, %10.1f]\n", "eff with all cuts", cut.second, nevents, eff, N, ci.lower, ci.upper);
     else
       printf("w/o %20s: nevtpass: %10i          %7s n-1 eff: %10.6f\n", cut.first.c_str(), cut.second, "", eff);
-      
   }
 }
 
