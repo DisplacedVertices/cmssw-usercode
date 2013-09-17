@@ -205,24 +205,32 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH2F* h_nsv_v_lspdist2d;
   TH2F* h_nsv_v_lspdist3d;
 
+  // indices for h_sv below:
+  enum sv_index { sv_best0, sv_best1, sv_best2, sv_rest, sv_top2, sv_all, sv_num_indices };
+  static const char* sv_index_names[sv_num_indices];
+
+  void fill_multi(TH1F** hs, const int isv, const double val) const;
+  void fill_multi(TH2F** hs, const int isv, const double val, const double val2) const;
+  void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val) const;
+
   TH2F* h_sv_max_trackicity;
-  TH1F* h_sv_pos_1d[4][3]; // index 0: 0 = the highest mass SV, 1 = second highest, 2 = third highest, 3 = rest
+  TH1F* h_sv_pos_1d[4][3];
   TH2F* h_sv_pos_2d[4][3];
 
-  TH1F* h_sv_trackpt[4];
-  TH1F* h_sv_tracketa[4];
-  TH1F* h_sv_trackphi[4];
-  TH1F* h_sv_trackdxy[4];
-  TH1F* h_sv_trackdz[4];
-  TH1F* h_sv_tracknhits[4];
-  TH1F* h_sv_tracknhitsbehind[4];
+  TH1F* h_sv_trackpt[sv_num_indices];
+  TH1F* h_sv_tracketa[sv_num_indices];
+  TH1F* h_sv_trackphi[sv_num_indices];
+  TH1F* h_sv_trackdxy[sv_num_indices];
+  TH1F* h_sv_trackdz[sv_num_indices];
+  TH1F* h_sv_tracknhits[sv_num_indices];
+  TH1F* h_sv_tracknhitsbehind[sv_num_indices];
 
-  TH1F* h_sv_trackpaircosth[4];
-  TH1F* h_sv_trackpairdr[4];
-  TH1F* h_sv_trackpairmass[4];
-  TH1F* h_sv_tracktriplemass[4];
+  TH1F* h_sv_trackpaircosth[sv_num_indices];
+  TH1F* h_sv_trackpairdr[sv_num_indices];
+  TH1F* h_sv_trackpairmass[sv_num_indices];
+  TH1F* h_sv_tracktriplemass[sv_num_indices];
 
-  PairwiseHistos h_sv[4];
+  PairwiseHistos h_sv[sv_num_indices];
 
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
@@ -248,6 +256,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TTree* tree;
   VertexNtuple nt;
 };
+
+const char* VtxRecoPlay::sv_index_names[VtxRecoPlay::sv_num_indices] = { "mass0", "mass1", "mass2", "rest", "top2", "all" };
 
 VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
@@ -336,25 +346,19 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   h_nsv_v_lspdist3d = fs->make<TH2F>("h_nsv_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
   h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
-  for (int j = 0; j < 4; ++j) {
-    std::string ex;
-    if (j == 0)
-      ex = "mass0";
-    else if (j == 1)
-      ex = "mass1";
-    else if (j == 2)
-      ex = "mass2";
-    else
-      ex = "rest";
+  for (int j = 0; j < sv_num_indices; ++j) {
+    const std::string ex = sv_index_names[j];
     const char* exc = ex.c_str();
 
-    for (int i = 0; i < 3; ++i) {
-      float l = i == 2 ? 25 : 0.8;
-      h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
+    if (j < 4) {
+      for (int i = 0; i < 3; ++i) {
+        float l = i == 2 ? 25 : 0.8;
+        h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
+      }
+      h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -1, 1, 100, -1, 1);
+      h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
+      h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
     }
-    h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -1, 1, 100, -1, 1);
-    h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
-    h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
 
     h_sv_trackpt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpt", exc), TString::Format(";SV %s track p_{T} (GeV);arb. units", exc), 100, 0, 200);
     h_sv_tracketa[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracketa", exc), TString::Format(";SV %s track #eta;arb. units", exc), 50, -2.7, 2.7);
@@ -446,6 +450,28 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
 
   h_pairnsharedtracks = fs->make<TH1F>("h_pairnsharedtracks", "", 50, 0, 50);
   h_pairfsharedtracks = fs->make<TH2F>("h_pairfsharedtracks", "", 51, 0,  1.02, 51, 0,  1.02);
+}
+
+// JMTBAD ugh
+void VtxRecoPlay::fill_multi(TH1F** hs, const int isv, const double val) const {
+  hs[isv < 3 ? isv : sv_rest]->Fill(val);
+  if (isv < 2)
+    hs[sv_top2]->Fill(val);
+  hs[sv_all]->Fill(val);
+}
+
+void VtxRecoPlay::fill_multi(TH2F** hs, const int isv, const double val, const double val2) const {
+  hs[isv < 3 ? isv : sv_rest]->Fill(val, val2);
+  if (isv < 2)
+    hs[sv_top2]->Fill(val, val2);
+  hs[sv_all]->Fill(val, val2);
+}
+
+void VtxRecoPlay::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val) const {
+  hs[isv < 3 ? isv : sv_rest].Fill(val);
+  if (isv < 2)
+    hs[sv_top2].Fill(val);
+  hs[sv_all].Fill(val);
 }
 
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -658,11 +684,11 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices->at(isv);
     const reco::VertexRef svref(secondary_vertices, isv);
-    const int svndx = isv >= 3 ? 3 : isv;
 
     nt.clear(false);
     nt.isv = isv;
 
+    const int svndx = isv >= 3 ? 3 : isv; // don't use fill_multi for the position plots
     for (int i = 0; i < 3; ++i)
       h_sv_pos_1d[svndx][i]->Fill(coord(sv.position(), i) - coord(beamspot->position(), i));
     h_sv_pos_2d[svndx][0]->Fill(sv.position().x() - bsx, sv.position().y() - bsy);
@@ -749,13 +775,13 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         ++ntracksptgt20;
       sumpt2 += pti*pti;
 
-      h_sv_trackpt[svndx]->Fill(pti);
-      h_sv_tracketa[svndx]->Fill(tri->eta());
-      h_sv_trackphi[svndx]->Fill(tri->phi());
-      h_sv_trackdxy[svndx]->Fill(tri->dxy(beamspot->position()));
-      h_sv_trackdz[svndx]->Fill(tri->dz(beamspot->position()));
-      h_sv_tracknhits[svndx]->Fill(nhits);
-      h_sv_tracknhitsbehind[svndx]->Fill(nhitsbehind);
+      fill_multi(h_sv_trackpt,          isv, pti);
+      fill_multi(h_sv_tracketa,         isv, tri->eta());
+      fill_multi(h_sv_trackphi,         isv, tri->phi());
+      fill_multi(h_sv_trackdxy,         isv, tri->dxy(beamspot->position()));
+      fill_multi(h_sv_trackdz,          isv, tri->dz (beamspot->position()));
+      fill_multi(h_sv_tracknhits,       isv, nhits);
+      fill_multi(h_sv_tracknhitsbehind, isv, nhitsbehind);
 
       TLorentzVector p4_i, p4_j, p4_k;
       const double m = 0.135;
@@ -766,10 +792,10 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         const reco::TrackBaseRef& trj = *trkj;
         p4_j.SetPtEtaPhiM(trj->pt(), trj->eta(), trj->phi(), m);
 
-        h_sv_trackpaircosth[svndx]->Fill(tri->momentum().Dot(trj->momentum()) / tri->p() / trj->p());
-        h_sv_trackpairdr[svndx]->Fill(reco::deltaR(*tri, *trj));
-        TLorentzVector p4_ij = p4_i + p4_j;
-        h_sv_trackpairmass[svndx]->Fill(p4_ij.M());
+        const TLorentzVector p4_ij = p4_i + p4_j;
+        fill_multi(h_sv_trackpaircosth, isv, tri->momentum().Dot(trj->momentum()) / tri->p() / trj->p());
+        fill_multi(h_sv_trackpairdr,    isv, reco::deltaR(*tri, *trj));
+        fill_multi(h_sv_trackpairmass,  isv, p4_ij.M());
 
         for (auto trkk = trkj + 1; trkk != trke; ++trkk) {
           if (sv.trackWeight(*trkk) < track_vertex_weight_min)
@@ -777,7 +803,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
           const reco::TrackBaseRef& trk = *trkk;
           p4_k.SetPtEtaPhiM(trk->pt(), trk->eta(), trk->phi(), m);
-          h_sv_tracktriplemass[svndx]->Fill((p4_ij + p4_k).M());
+          fill_multi(h_sv_tracktriplemass, isv, (p4_ij + p4_k).M());
         }
       }
     }
@@ -952,7 +978,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"pv3derr",         pv3ddist_err},
         {"pv3dsig",         pv3ddist_sig},
     };
-    h_sv[svndx].Fill(v);
+    fill_multi(h_sv, isv, v);
   }
 
   //////////////////////////////////////////////////////////////////////
