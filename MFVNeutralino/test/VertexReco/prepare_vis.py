@@ -2,10 +2,10 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools.CMSSWTools import silence_messages
 
-process.source.fileNames = ['/store/user/jchu/mfv_neutralino_tau9900um_M0400/jtuple_pileupremovalstudies_v6/5c257295836d18fbf020b73449ad9b5f/pat_1_1_luH.root']
-process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_254_2_JTs.root','/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_255_1_nvB.root')
+process.source.fileNames = ['/store/user/jchu/mfv_neutralino_tau1000um_M0400/jtuple_v7/5d4c2a74c85834550d3f9609274e8548/pat_1_1_hdB.root']
+process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_891_1_sZ9.root','/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_948_2_lgB.root')
 process.TFileService.fileName = 'prepare_vis.root'
-process.maxEvents.input = 20
+process.maxEvents.input = 25
 silence_messages(process, 'TwoTrackMinimumDistance')
 
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
@@ -35,6 +35,8 @@ process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
 
 process.load('JMTucker.MFVNeutralino.MatchedTracks_cff')
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+
+#process.mfvVertices.verbose = True
 
 process.pp = cms.Path(process.mfvGenParticles *
                       process.printList *
