@@ -78,17 +78,17 @@ bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx) const {
 
   if (!use) return false;
 
-  if (max_err2d < 1e9)
+  if (max_err2d < 1e6)
     use = use && mfv::abs_error(vtx, false) < max_err2d;
 
   if (!use) return false;
 
-  if (max_err3d < 1e9)
+  if (max_err3d < 1e6)
     use = use && mfv::abs_error(vtx, true) < max_err3d;
 
   if (!use) return false;
 
-  if (min_drmin > 0 || min_drmax > 0 || max_drmin < 1e9 || max_drmax < 1e9) {
+  if (min_drmin > 0 || min_drmax > 0 || max_drmin < 1e6 || max_drmax < 1e6) {
     mfv::vertex_tracks_distance tks(vtx, track_vertex_weight_min);
     use = use && tks.drmin >= min_drmin && tks.drmin < max_drmin
               && tks.drmax >= min_drmax && tks.drmax < max_drmax
