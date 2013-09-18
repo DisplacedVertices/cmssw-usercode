@@ -91,7 +91,7 @@ bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx) const {
   if (min_drmin > 0 || min_drmax > 0 || max_drmin < 1e6 || max_drmax < 1e6) {
     mfv::vertex_tracks_distance tks(vtx, track_vertex_weight_min);
     use = use && tks.drmin >= min_drmin && tks.drmin < max_drmin
-              && tks.drmax >= min_drmax && tks.drmax < max_drmax
+              && tks.drmax >= min_drmax && tks.drmax < max_drmax;
   }
 
   if (!use) return false;
