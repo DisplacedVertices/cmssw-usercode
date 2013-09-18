@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      vertex_src = cms.InputTag('mfvVertices'),
+                                     primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                                      gen_vertices_src = cms.InputTag('mfvGenVertices'),
                                      track_vertex_weight_min = cms.double(0.5),
                                      min_ntracks = cms.int32(0),
