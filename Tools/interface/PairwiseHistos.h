@@ -8,7 +8,7 @@
 struct PairwiseHistos {
   typedef float Value;
   typedef std::map<std::string, Value> ValueMap;
-  Value get(const ValueMap& m, const std::string& s, bool allow_default, Value default_) {
+  Value get(const ValueMap& m, const std::string& s, bool allow_default=false, Value default_=0) {
     auto it = m.find(s);
     if (it == m.end()) {
       if (!allow_default)
@@ -51,7 +51,6 @@ struct PairwiseHistos {
     sums_mode = sumto > 0;
     sum_to = sumto;
     sums.clear();
-    sum_at = 0;
 
     edm::Service<TFileService> fs;
 
@@ -83,32 +82,29 @@ struct PairwiseHistos {
       }
   }
 
-  void Fill(const ValueMap& values, bool allow_default=false, float default_=0) {
+  void Fill(const ValueMap& values, const int fill_num=-1) {
     die_if_not(n > 0, "PairwiseHistos not properly initialized");
     die_if_not(int(values.size()) == n, "wrong size for values: %i != %i expected", values.size(), h1.size());
 
     const auto b = names.begin();
     const auto e = names.end();
 
-    if (!allow_default)
-      for (auto i = b; i != e; ++i)
-	die_if_not(values.find(*b) != values.end(), "var %s not found in value map and allow_default=false", b->c_str());
+    for (auto i = b; i != e; ++i)
+      die_if_not(values.find(*b) != values.end(), "var %s not found in value map and allow_default=false", b->c_str());
 
     if (sums_mode) {
-      if (sum_at < sum_to) {
+      if (fill_num < sum_to)
         for (auto i = b; i != e; ++i)
-          sums[*i] = get(values, *i, allow_default, default_) + get(sums, *i, true, 0);
-        ++sum_at;
-      }
+          sums[*i] = get(values, *i) + get(sums, *i, true, 0);
 
-      if (sum_at != sum_to)
+      if (fill_num != sum_to - 1)
         return;
     }
       
     const ValueMap& to_fill = sums_mode ? sums : values;
 
     for (auto i = b; i != e; ++i) {
-      const float vi = get(to_fill, *i, allow_default, default_);
+      const float vi = get(to_fill, *i);
       h1[*i]->Fill(vi);
       
       if (!do_2d)
@@ -119,15 +115,13 @@ struct PairwiseHistos {
 	if (i == j)
 	  continue;
 
-	const float vj = get(to_fill, *j, allow_default, default_);
+	const float vj = get(to_fill, *j);
 	h2[std::make_pair(*i, *j)]->Fill(vi, vj);
       }
     }
 
-    if (sums_mode) {
+    if (sums_mode)
       sums.clear();
-      sum_at = 0;
-    }
   }
 
   int n;
@@ -140,5 +134,4 @@ struct PairwiseHistos {
   bool sums_mode;
   int sum_to;
   ValueMap sums;
-  int sum_at;
 };
