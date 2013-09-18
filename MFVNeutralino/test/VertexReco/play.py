@@ -53,6 +53,7 @@ ana = cms.EDAnalyzer('VtxRecoPlay',
                      sv_to_jets_src = cms.InputTag('dummy'),
                      do_scatterplots = cms.bool(False),
                      do_ntuple = cms.bool(False),
+                     ntuple_event_mod = cms.int32(1),
                      jet_pt_min = cms.double(30), # JMTBAD keep synchronized with Vertexer_cff
                      track_pt_min = cms.double(10),
                      track_vertex_weight_min = cms.double(0.5),
@@ -170,7 +171,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        #GRID_data_location_override = 'T1_US_FNAL,T2_US_Caltech,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin',
                        #GRID_remove_default_blacklist = 1,
                        )
-    cs.submit_all(samples)
+    cs.submit_all([s for s in samples if s.name == 'qcdht0100'])
 
 '''
 mergeTFileServiceHistograms -w 0.457,0.438,0.105 -i ttbarhadronic.root ttbarsemilep.root ttbardilep.root -o ttbar_merge.root

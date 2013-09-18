@@ -140,6 +140,8 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   const edm::InputTag sv_to_jets_src;
   const bool do_scatterplots;
   const bool do_ntuple;
+  const int ntuple_event_mod;
+  int ntuple_event_count;
   const double jet_pt_min;
   const double track_pt_min;
   const double track_vertex_weight_min;
@@ -251,6 +253,8 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     sv_to_jets_src(cfg.getParameter<edm::InputTag>("sv_to_jets_src")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     do_ntuple(cfg.getParameter<bool>("do_ntuple")),
+    ntuple_event_mod(cfg.getParameter<int>("ntuple_event_mod")),
+    ntuple_event_count(-1),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     track_pt_min(cfg.getParameter<double>("track_pt_min")),
     track_vertex_weight_min(cfg.getParameter<double>("track_vertex_weight_min"))
@@ -469,6 +473,7 @@ void VtxRecoPlay::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHi
 }
 
 void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  ++ntuple_event_count;
   nt.clear(true);
   nt.run = event.id().run();
   nt.lumi = event.luminosityBlock();
@@ -878,7 +883,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.pv3derr         = vtx_distances.pv3ddist_err;
       nt.pv3dsig         = vtx_distances.pv3ddist_sig;
 
-      tree->Fill();
+      if (ntuple_event_count % ntuple_event_mod == 0)
+        tree->Fill();
     }
 
     PairwiseHistos::ValueMap v = {
@@ -948,7 +954,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
   if (do_ntuple) {
     nt.clear(false);
     nt.nsv = nsv;
-    tree->Fill();
+    if (ntuple_event_count % ntuple_event_mod == 0)
+      tree->Fill();
   }
 
   h_nsv->Fill(nsv);
