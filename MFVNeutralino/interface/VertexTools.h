@@ -13,8 +13,21 @@ namespace mfv {
     double drmin, drmax;
     double dravg, dravgw, dravgvw;
     double drrms, drrmsw, drrmsvw;
+    double maxtrackpt; // JMTBAD
 
     vertex_tracks_distance(const reco::Vertex& sv, const double track_vertex_weight_min);
+  };
+
+  struct vertex_distances {
+    std::pair<bool,float> bs2dcompat, pv2dcompat, pv3dcompat;
+    Measurement1D gen2ddist, gen3ddist, bs2ddist;
+    float bs3ddist;
+    float pv2ddist_val, pv3ddist_val;
+    float pv2ddist_err, pv3ddist_err;
+    float pv2ddist_sig, pv3ddist_sig;
+    float costhmombs, costhmompv2d, costhmompv3d;
+
+    vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex);
   };
 }
 

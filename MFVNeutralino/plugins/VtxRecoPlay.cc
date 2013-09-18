@@ -65,26 +65,6 @@ namespace {
     return mag(v.x(), v.y(), v.z());
   }
 
-  template <typename T, typename T2>
-  double dot2(const T& a, const T2& b) {
-    return a.x() * b.x() + a.y() * b.y();
-  }
-
-  template <typename T, typename T2>
-  double dot3(const T& a, const T2& b) {
-    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
-  }
-
-  template <typename T, typename T2>
-  double costh2(const T& a, const T2& b) {
-    return dot2(a,b) / mag(a.x(), a.y()) / mag(b.x(), b.y());
-  }
-
-  template <typename T, typename T2>
-  double costh3(const T& a, const T2& b) {
-    return dot3(a,b) / mag(a.x(), a.y(), a.z()) / mag(b.x(), b.y(), b.z());
-  }
-
   template <typename V>
   double coord(const V& v, const int i) {
     if      (i == 0) return v.x();
@@ -841,43 +821,7 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
     const mfv::vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
 
-    const Measurement1D gen2ddist = mfv::gen_dist(sv, *gen_vertices, false);
-    const Measurement1D gen3ddist = mfv::gen_dist(sv, *gen_vertices, true);
-
-    const std::pair<bool,float> bs2dcompat = mfv::compatibility(sv, fake_bs_vtx, false);
-    const Measurement1D bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
-
-    std::pair<bool,float> pv2dcompat, pv3dcompat;
-    float pv2ddist_val, pv3ddist_val;
-    float pv2ddist_err, pv3ddist_err;
-    float pv2ddist_sig, pv3ddist_sig;
-    pv2dcompat = pv3dcompat = std::make_pair(false, -1.f);
-    pv2ddist_val = pv3ddist_val = pv2ddist_err = pv3ddist_err = pv2ddist_sig = pv3ddist_sig = -1;
-
-    if (primary_vertex != 0) {
-      pv2dcompat = mfv::compatibility(sv, *primary_vertex, false);
-      Measurement1D pv2ddist = distcalc_2d.distance(sv, *primary_vertex);
-      pv2ddist_val = pv2ddist.value();
-      pv2ddist_err = pv2ddist.error();
-      pv2ddist_sig = pv2ddist.significance();
-
-      pv3dcompat = mfv::compatibility(sv, *primary_vertex, true);
-      Measurement1D pv3ddist = distcalc_3d.distance(sv, *primary_vertex);
-      pv3ddist_val = pv3ddist.value();
-      pv3ddist_err = pv3ddist.error();
-      pv3ddist_sig = pv3ddist.significance();
-    }
-
-    const auto bs2sv = sv.position() - beamspot->position();
-    const Measurement1D bs3ddist(mag(bs2sv.x(), bs2sv.y()) * sin(sv.p4().theta()));
-
-    const float costhmombs = costh2(sv.p4(), bs2sv);
-    float costhmompv2d = -2, costhmompv3d = -2;
-    if (primary_vertex != 0) {
-      const auto disp = sv.position() - primary_vertex->position();
-      costhmompv2d = costh2(sv.p4(), disp);
-      costhmompv3d = costh3(sv.p4(), disp);
-    }
+    const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex);
 
     if (do_ntuple) {
       nt.ntracks         = ntracks;
@@ -895,9 +839,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.rapidity        = sv.p4().Rapidity();
       nt.phi             = sv.p4().phi();
       nt.mass            = sv.p4().mass();
-      nt.costhmombs      = costhmombs;
-      nt.costhmompv2d    = costhmompv2d;
-      nt.costhmompv3d    = costhmompv3d;
+      nt.costhmombs      = vtx_distances.costhmombs;
+      nt.costhmompv2d    = vtx_distances.costhmompv2d;
+      nt.costhmompv3d    = vtx_distances.costhmompv3d;
       nt.sumpt2          = sumpt2;
       nt.sumnhitsbehind  = sumnhitsbehind;
       nt.maxnhitsbehind  = maxnhitsbehind;
@@ -911,28 +855,28 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
       nt.drrms           = vtx_tks_dist.drrms;
       nt.dravgw          = vtx_tks_dist.dravgw;
       nt.drrmsw          = vtx_tks_dist.drrmsw;
-      nt.gen2ddist       = gen2ddist.value();
-      nt.gen2derr        = gen2ddist.error();
-      nt.gen2dsig        = gen2ddist.significance();
-      nt.gen3ddist       = gen3ddist.value();
-      nt.gen3derr        = gen3ddist.error();
-      nt.gen3dsig        = gen3ddist.significance();
-      nt.bs2dcompatscss  = bs2dcompat.first;
-      nt.bs2dcompat      = bs2dcompat.second;
-      nt.bs2ddist        = bs2ddist.value();
-      nt.bs2derr         = bs2ddist.error();
-      nt.bs2dsig         = bs2ddist.significance();
-      nt.bs3ddist        = bs3ddist.value();
-      nt.pv2dcompatscss  = pv2dcompat.first;
-      nt.pv2dcompat      = pv2dcompat.second;
-      nt.pv2ddist        = pv2ddist_val;
-      nt.pv2derr         = pv2ddist_err;
-      nt.pv2dsig         = pv2ddist_sig;
-      nt.pv3dcompatscss  = pv3dcompat.first;
-      nt.pv3dcompat      = pv3dcompat.second;
-      nt.pv3ddist        = pv3ddist_val;
-      nt.pv3derr         = pv3ddist_err;
-      nt.pv3dsig         = pv3ddist_sig;
+      nt.gen2ddist       = vtx_distances.gen2ddist.value();
+      nt.gen2derr        = vtx_distances.gen2ddist.error();
+      nt.gen2dsig        = vtx_distances.gen2ddist.significance();
+      nt.gen3ddist       = vtx_distances.gen3ddist.value();
+      nt.gen3derr        = vtx_distances.gen3ddist.error();
+      nt.gen3dsig        = vtx_distances.gen3ddist.significance();
+      nt.bs2dcompatscss  = vtx_distances.bs2dcompat.first;
+      nt.bs2dcompat      = vtx_distances.bs2dcompat.second;
+      nt.bs2ddist        = vtx_distances.bs2ddist.value();
+      nt.bs2derr         = vtx_distances.bs2ddist.error();
+      nt.bs2dsig         = vtx_distances.bs2ddist.significance();
+      nt.bs3ddist        = vtx_distances.bs3ddist;
+      nt.pv2dcompatscss  = vtx_distances.pv2dcompat.first;
+      nt.pv2dcompat      = vtx_distances.pv2dcompat.second;
+      nt.pv2ddist        = vtx_distances.pv2ddist_val;
+      nt.pv2derr         = vtx_distances.pv2ddist_err;
+      nt.pv2dsig         = vtx_distances.pv2ddist_sig;
+      nt.pv3dcompatscss  = vtx_distances.pv3dcompat.first;
+      nt.pv3dcompat      = vtx_distances.pv3dcompat.second;
+      nt.pv3ddist        = vtx_distances.pv3ddist_val;
+      nt.pv3derr         = vtx_distances.pv3ddist_err;
+      nt.pv3dsig         = vtx_distances.pv3ddist_sig;
 
       tree->Fill();
     }
@@ -953,9 +897,9 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"rapidity",        sv.p4().Rapidity()},
         {"phi",             sv.p4().phi()},
         {"mass",            sv.p4().mass()},
-        {"costhmombs",      costhmombs},
-        {"costhmompv2d",    costhmompv2d},
-        {"costhmompv3d",    costhmompv3d},
+        {"costhmombs",      vtx_distances.costhmombs},
+        {"costhmompv2d",    vtx_distances.costhmompv2d},
+        {"costhmompv3d",    vtx_distances.costhmompv3d},
         {"sumpt2",          sumpt2},
         {"sumnhitsbehind",  sumnhitsbehind},
         {"maxnhitsbehind",  maxnhitsbehind},
@@ -969,28 +913,28 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"drrms",           vtx_tks_dist.drrms},
         {"dravgw",          vtx_tks_dist.dravgw},
         {"drrmsw",          vtx_tks_dist.drrmsw},
-        {"gen2ddist",       gen2ddist.value()},
-        {"gen2derr",        gen2ddist.error()},
-        {"gen2dsig",        gen2ddist.significance()},
-        {"gen3ddist",       gen3ddist.value()},
-        {"gen3derr",        gen3ddist.error()},
-        {"gen3dsig",        gen3ddist.significance()},
-        {"bs2dcompatscss",  bs2dcompat.first},
-        {"bs2dcompat",      bs2dcompat.second},
-        {"bs2ddist",        bs2ddist.value()},
-        {"bs2derr",         bs2ddist.error()},
-        {"bs2dsig",         bs2ddist.significance()},
-        {"bs3ddist",        bs3ddist.value()},
-        {"pv2dcompatscss",  pv2dcompat.first},
-        {"pv2dcompat",      pv2dcompat.second},
-        {"pv2ddist",        pv2ddist_val},
-        {"pv2derr",         pv2ddist_err},
-        {"pv2dsig",         pv2ddist_sig},
-        {"pv3dcompatscss",  pv3dcompat.first},
-        {"pv3dcompat",      pv3dcompat.second},
-        {"pv3ddist",        pv3ddist_val},
-        {"pv3derr",         pv3ddist_err},
-        {"pv3dsig",         pv3ddist_sig},
+        {"gen2ddist",       vtx_distances.gen2ddist.value()},
+        {"gen2derr",        vtx_distances.gen2ddist.error()},
+        {"gen2dsig",        vtx_distances.gen2ddist.significance()},
+        {"gen3ddist",       vtx_distances.gen3ddist.value()},
+        {"gen3derr",        vtx_distances.gen3ddist.error()},
+        {"gen3dsig",        vtx_distances.gen3ddist.significance()},
+        {"bs2dcompatscss",  vtx_distances.bs2dcompat.first},
+        {"bs2dcompat",      vtx_distances.bs2dcompat.second},
+        {"bs2ddist",        vtx_distances.bs2ddist.value()},
+        {"bs2derr",         vtx_distances.bs2ddist.error()},
+        {"bs2dsig",         vtx_distances.bs2ddist.significance()},
+        {"bs3ddist",        vtx_distances.bs3ddist},
+        {"pv2dcompatscss",  vtx_distances.pv2dcompat.first},
+        {"pv2dcompat",      vtx_distances.pv2dcompat.second},
+        {"pv2ddist",        vtx_distances.pv2ddist_val},
+        {"pv2derr",         vtx_distances.pv2ddist_err},
+        {"pv2dsig",         vtx_distances.pv2ddist_sig},
+        {"pv3dcompatscss",  vtx_distances.pv3dcompat.first},
+        {"pv3dcompat",      vtx_distances.pv3dcompat.second},
+        {"pv3ddist",        vtx_distances.pv3ddist_val},
+        {"pv3derr",         vtx_distances.pv3ddist_err},
+        {"pv3dsig",         vtx_distances.pv3ddist_sig},
     };
 
     fill_multi(h_sv, isv, v);
