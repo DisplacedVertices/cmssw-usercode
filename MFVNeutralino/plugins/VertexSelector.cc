@@ -23,9 +23,18 @@ private:
   const double max_err2d;
   const double max_err3d;
   const double min_mass;
+  const double min_drmin;
+  const double max_drmin;
   const double min_drmax;
+  const double max_drmax;
   const double min_gen3dsig;
   const double max_gen3dsig;
+  const double min_maxtrackpt;
+  const double max_bs2derr;
+  const int min_njetssharetks;
+
+  enum sort_by_this { sort_by_mass, sort_by_ntracks };
+  sort_by_this sort_by;
 
   bool gen_valid;
   std::vector<double> gen_verts;
@@ -40,27 +49,59 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_err2d(cfg.getParameter<double>("max_err2d")),
     max_err3d(cfg.getParameter<double>("max_err3d")),
     min_mass(cfg.getParameter<double>("min_mass")),
+    min_drmin(cfg.getParameter<double>("min_drmin")),
+    max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
+    max_drmax(cfg.getParameter<double>("max_drmax")),
     min_gen3dsig(cfg.getParameter<double>("min_gen3dsig")),
-    max_gen3dsig(cfg.getParameter<double>("max_gen3dsig"))
+    max_gen3dsig(cfg.getParameter<double>("max_gen3dsig")),
+    min_maxtrackpt(cfg.getParameter<double>("min_maxtrackpt")),
+    max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
+    min_njetssharetks(cfg.getParameter<int>("min_njetssharetks"))
 {
   produces<reco::VertexCollection>();
+
+  std::string x = cfg.getParameter<std::string>("sort_by");
+  if (x == "mass")
+    sort_by = sort_by_mass;
+  else if (x == "ntracks")
+    sort_by = sort_by_ntracks;
+  else
+    throw cms::Exception("MFVVertexSelector") << "invalid sort_by";
 }
 
 bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx) const {
-  const bool use =
+  bool use =
     int(vtx.tracksSize()) >= min_ntracks && // JMTBAD use nTracks(0.5)
     vtx.normalizedChi2() < max_chi2dof   &&
-    vtx.p4().mass() >= min_mass          &&
-    mfv::abs_error(vtx, false) < max_err2d    &&
-    mfv::abs_error(vtx, true ) < max_err3d    &&
-    (min_drmax == 0 || mfv::vertex_tracks_distance(vtx, track_vertex_weight_min).drmax >= min_drmax);
+    vtx.p4().mass() >= min_mass;
 
-  if (!use)
-    return false;
+  if (!use) return false;
 
-  const float gd3sg = mfv::gen_dist(vtx, gen_verts, true).significance();
-  return use && (!gen_valid || (gd3sg >= min_gen3dsig && gd3sg < max_gen3dsig));
+  if (max_err2d < 1e9)
+    use = use && mfv::abs_error(vtx, false) < max_err2d;
+
+  if (!use) return false;
+
+  if (max_err3d < 1e9)
+    use = use && mfv::abs_error(vtx, true) < max_err3d;
+
+  if (!use) return false;
+
+  if (min_drmin > 0 || min_drmax > 0 || max_drmin < 1e9 || max_drmax < 1e9) {
+    mfv::vertex_tracks_distance tks(vtx, track_vertex_weight_min);
+    use = use && tks.drmin >= min_drmin && tks.drmin < max_drmin
+              && tks.drmax >= min_drmax && tks.drmax < max_drmax
+  }
+
+  if (!use) return false;
+  
+  if (gen_valid) {
+    const float gd3sg = mfv::gen_dist(vtx, gen_verts, true).significance();
+    use = use && gd3sg >= min_gen3dsig && gd3sg < max_gen3dsig;
+  }
+
+  return use;
 }
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
@@ -79,8 +120,10 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
     if (use_vertex(v))
       selected_vertices->push_back(v);
 
-  std::sort(selected_vertices->begin(), selected_vertices->end(),
-            [](const reco::Vertex& a, const reco::Vertex& b) { return a.p4().mass() > b.p4().mass(); });
+  if (sort_by == sort_by_mass)
+    std::sort(selected_vertices->begin(), selected_vertices->end(), [](const reco::Vertex& a, const reco::Vertex& b) { return a.p4().mass() > b.p4().mass(); });
+  else if (sort_by == sort_by_ntracks)
+    std::sort(selected_vertices->begin(), selected_vertices->end(), [](const reco::Vertex& a, const reco::Vertex& b) { return a.nTracks() > b.nTracks(); });
 
   event.put(selected_vertices);
 }
