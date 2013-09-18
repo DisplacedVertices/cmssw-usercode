@@ -70,6 +70,7 @@ sel_qcuts = [
     ('Qntk6Bntk',       sel.clone(min_ntracks = 6, sort_by = 'ntracks')),
     ('QM20',            sel.clone(min_mass = 20)),
     ('Qntk6M20',        sel.clone(min_ntracks = 6, min_mass = 20)),
+    ('Qwow',            sel.clone(min_ntracks = 7, min_maxtrackpt = 15, max_drmin = 0.4, max_drmax = 4, max_bs2derr = 0.005)),
     ]
 
 for vertex_name, vertex_src in vertex_srcs:
