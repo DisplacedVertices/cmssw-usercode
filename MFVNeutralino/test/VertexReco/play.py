@@ -67,6 +67,7 @@ sel_qcuts = [
     ('Q3dsiglt4',       sel.clone(max_gen3dsig = 4)),
     ('Q3dsigge6',       sel.clone(min_gen3dsig = 6)),
     ('Qntk6',           sel.clone(min_ntracks = 6)),  
+    ('Qntk6Bntk',       sel.clone(min_ntracks = 6, sort_by = 'ntracks')),
     ('QM20',            sel.clone(min_mass = 20)),
     ('Qntk6M20',        sel.clone(min_ntracks = 6, min_mass = 20)),
     ]
