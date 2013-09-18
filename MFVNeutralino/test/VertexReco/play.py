@@ -105,6 +105,11 @@ def de_mfv():
     if hasattr(process, 'mfvGenVertices'):
         process.mfvGenVertices.is_mfv = False
 
+def reduce_trees(factor):
+    for ana in all_anas:
+        if ana.do_ntuple.value():
+            ana.ntuple_event_mod = factor
+
 def sample_ttbar():
     de_mfv()
     if hasattr(process, 'mfvGenVertices'):
@@ -156,6 +161,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_add.append('sample_ttbar()')
         elif 'mfv' not in sample.name:
             to_add.append('de_mfv()')
+            factor = 1
+            counts = {            
+                'wjetstolnu': 656405,
+                'ttbarhadronic': 9738903,
+                'ttbarsemilep': 7987193,
+                'ttbardilep': 1389075,
+                'qcdht0100': 4455967,
+                'qcdht0250': 11137722,
+                'qcdht0500': 4991784,
+                'qcdht1000': 6968522,
+                }
+            if counts.has_key(sample.name):
+                factor = round(counts[sample.name]/100000.)
+            to_add.append('reduce_trees(%i)' % factor)
         return to_add
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
