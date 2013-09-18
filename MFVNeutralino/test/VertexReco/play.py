@@ -147,8 +147,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for f in first:
         ss.remove(f)
     rest = sorted(ss, key=lambda s: s.name)
-    samples = first + Samples.background_samples # + rest
-    
+    samples = first + Samples.background_samples + rest
+
     def pset_modifier(sample):
         to_add = []
         if 'ttbar' in sample.name:
@@ -159,13 +159,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('VertexRecoPlay',
-                       total_number_of_events = 99250,
-                       events_per_job = 2500,
+                       #total_number_of_events = 99250,
+                       #events_per_job = 2500,
+                       job_control_from_sample = True,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        pset_modifier = pset_modifier,
                        use_ana_dataset = True,
                        use_parent = True,
-                       USER_skip_servers = 'unl_hcc-crabserver',
+                       #USER_skip_servers = 'unl_hcc-crabserver',
                        #GRID_data_location_override = 'T1_US_FNAL,T2_US_Caltech,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin',
                        #GRID_remove_default_blacklist = 1,
                        )
