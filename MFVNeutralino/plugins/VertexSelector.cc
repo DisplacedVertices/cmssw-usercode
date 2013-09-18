@@ -13,9 +13,10 @@ public:
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
-  bool use_vertex(const reco::Vertex&) const;
+  bool use_vertex(const reco::Vertex& vtx, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex) const;
 
   const edm::InputTag vertex_src;
+  const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_vertices_src;
   const double track_vertex_weight_min;
   const int min_ntracks;
@@ -42,6 +43,7 @@ private:
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
   : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_vertices_src(cfg.getParameter<edm::InputTag>("gen_vertices_src")),
     track_vertex_weight_min(cfg.getParameter<double>("track_vertex_weight_min")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
@@ -70,7 +72,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVVertexSelector") << "invalid sort_by";
 }
 
-bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx) const {
+bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex) const {
   bool use =
     int(vtx.tracksSize()) >= min_ntracks && // JMTBAD use nTracks(0.5)
     vtx.normalizedChi2() < max_chi2dof   &&
@@ -88,10 +90,11 @@ bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx) const {
 
   if (!use) return false;
 
-  if (min_drmin > 0 || min_drmax > 0 || max_drmin < 1e6 || max_drmax < 1e6) {
+  if (min_drmin > 0 || min_drmax > 0 || max_drmin < 1e6 || max_drmax < 1e6 || min_maxtrackpt > 0) {
     mfv::vertex_tracks_distance tks(vtx, track_vertex_weight_min);
     use = use && tks.drmin >= min_drmin && tks.drmin < max_drmin
-              && tks.drmax >= min_drmax && tks.drmax < max_drmax;
+              && tks.drmax >= min_drmax && tks.drmax < max_drmax
+              && tks.maxtrackpt >= min_maxtrackpt;
   }
 
   if (!use) return false;
@@ -99,6 +102,13 @@ bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx) const {
   if (gen_valid) {
     const float gd3sg = mfv::gen_dist(vtx, gen_verts, true).significance();
     use = use && gd3sg >= min_gen3dsig && gd3sg < max_gen3dsig;
+  }
+
+  if (!use) return false;
+
+  if (max_bs2derr < 1e6) {
+    mfv::vertex_distances dst(vtx, gen_verts, beamspot, primary_vertex);
+    use = use && dst.bs2ddist.error() < max_bs2derr;
   }
 
   return use;
@@ -111,13 +121,22 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   if (gen_valid)
     gen_verts = *gen_vertices;
 
+  edm::Handle<reco::BeamSpot> beamspot;
+  event.getByLabel("offlineBeamSpot", beamspot);
+
+  edm::Handle<reco::VertexCollection> primary_vertices;
+  event.getByLabel(primary_vertex_src, primary_vertices);
+  const reco::Vertex* primary_vertex = 0;
+  if (primary_vertices->size())
+    primary_vertex = &primary_vertices->at(0);
+
   edm::Handle<reco::VertexCollection> vertices;
   event.getByLabel(vertex_src, vertices);
 
   std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
 
   for (const reco::Vertex& v : *vertices)
-    if (use_vertex(v))
+    if (use_vertex(v, *beamspot, primary_vertex))
       selected_vertices->push_back(v);
 
   if (sort_by == sort_by_mass)
