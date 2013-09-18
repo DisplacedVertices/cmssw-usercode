@@ -88,7 +88,7 @@ void Run(NtupleReader& nr) {
   printf("%s n>=2\n", nr.sample.fn);
   const double all = nevtpass["all"];
   for (auto cut : nevtpass) {
-    double eff;
+    double eff, eff2;
     bool is_all = cut.first == "all";
     
     if (is_all)
@@ -98,6 +98,7 @@ void Run(NtupleReader& nr) {
         eff = -1;
       else
         eff = all/cut.second;
+      eff2 = float(cut.second)/nevents;
     }
 
     const double sigL = nr.sample.xsec * intlumi;
@@ -108,7 +109,7 @@ void Run(NtupleReader& nr) {
     if (is_all)
       printf("%24s: nevtpass: %10i nevents: %10i  eff: %10.6f  N: %10.1f [%10.1f, %10.1f]\n", "eff with all cuts", cut.second, nevents, eff, N, ci.lower, ci.upper);
     else
-      printf("w/o %20s: nevtpass: %10i          %7s n-1 eff: %10.6f\n", cut.first.c_str(), cut.second, "", eff);
+      printf("w/o %20s: nevtpass: %10i          %7s n-1 eff: %10.6f  eff %10.6f\n", cut.first.c_str(), cut.second, "", eff, eff2);
   }
 }
 
