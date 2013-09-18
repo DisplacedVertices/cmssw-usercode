@@ -231,6 +231,7 @@ class VtxRecoPlay : public edm::EDAnalyzer {
   TH1F* h_sv_tracktriplemass[sv_num_indices];
 
   PairwiseHistos h_sv[sv_num_indices];
+  PairwiseHistos h_sv_sums[3]; // top2, top3, all
 
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
@@ -346,6 +347,61 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
   h_nsv_v_lspdist3d = fs->make<TH2F>("h_nsv_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
   h_sv_max_trackicity = fs->make<TH2F>("h_sv_max_trackicity", ";# of tracks in SV;highest trackicity", 40, 0, 40, 40, 0, 40);
 
+  PairwiseHistos::HistoDefs hs;
+  hs.add("ntracks",        "# of tracks/SV",                              40,    0,      40);
+  hs.add("ntracksptgt10",  "# of tracks/SV w/ p_{T} > 10 GeV",            40,    0,      40);
+  hs.add("ntracksptgt20",  "# of tracks/SV w/ p_{T} > 20 GeV",            40,    0,      40);
+  hs.add("trackminnhits",  "min number of hits on track per SV",          40,    0,      40);
+  hs.add("trackmaxnhits",  "max number of hits on track per SV",          40,    0,      40);
+  hs.add("njetssharetks",  "# of jets assoc. by tracks to SV",            10,    0,      10);
+  hs.add("jetsmass",       "inv. mass of jets assoc. by tracks to SV",   200,    0,    2000);
+  hs.add("chi2dof",        "SV #chi^2/dof",                               50,    0,       7);
+  hs.add("chi2dofprob",    "SV p(#chi^2, dof)",                           50,    0,       1.2);
+  hs.add("p",              "SV p (GeV)",                                 100,    0,     300);
+  hs.add("pt",             "SV p_{T} (GeV)",                             100,    0,     300);
+  hs.add("eta",            "SV #eta",                                     50,   -4,       4);
+  hs.add("rapidity",       "SV rapidity",                                 50,   -4,       4);
+  hs.add("phi",            "SV #phi",                                     50,   -3.15,    3.15);
+  hs.add("mass",           "SV mass (GeV)",                              100,    0,     250);
+  hs.add("costhmombs",     "cos(angle(2-momentum, 2-dist to BS))",       100,   -1,       1);
+  hs.add("costhmompv2d",   "cos(angle(2-momentum, 2-dist to PV))",       100,   -1,       1);
+  hs.add("costhmompv3d",   "cos(angle(3-momentum, 3-dist to PV))",       100,   -1,       1);
+  hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                300,    0,    6000);
+  hs.add("maxnhitsbehind", "max number of hits behind SV",                15,    0,      15);
+  hs.add("sumnhitsbehind", "sum number of hits behind SV",               100,    0,     100);
+  hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      10);
+  hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
+  hs.add("maxm1trackpt",   "SV max-1{trk_{i} p_{T}} (GeV)",              100,    0,     150);
+  hs.add("maxm2trackpt",   "SV max-2{trk_{i} p_{T}} (GeV)",              100,    0,     150);
+  hs.add("drmin",          "SV min{#Delta R(i,j)}",                      150,    0,       1.5);
+  hs.add("drmax",          "SV max{#Delta R(i,j)}",                      150,    0,       7);
+  hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      150,    0,       5);
+  hs.add("drrms",          "SV rms{#Delta R(i,j)}",                      150,    0,       3);
+  hs.add("dravgw",         "SV wavg{#Delta R(i,j)}",                     150,    0,       5);
+  hs.add("drrmsw",         "SV wrms{#Delta R(i,j)}",                     150,    0,       3);
+  hs.add("gen2ddist",      "dist2d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
+  hs.add("gen2derr",       "#sigma(dist2d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
+  hs.add("gen2dsig",       "N#sigma(dist2d(SV, closest gen vtx)) (cm)",  200,    0,     100);
+  hs.add("gen3ddist",      "dist3d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
+  hs.add("gen3derr",       "#sigma(dist3d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
+  hs.add("gen3dsig",       "N#sigma(dist3d(SV, closest gen vtx)) (cm)",  200,    0,     100);
+  hs.add("bs2dcompatscss", "compat2d(SV, beamspot) success",               2,    0,       2);
+  hs.add("bs2dcompat",     "compat2d(SV, beamspot)",                     100,    0,    1000);
+  hs.add("bs2ddist",       "dist2d(SV, beamspot) (cm)",                  100,    0,       0.5);
+  hs.add("bs2derr",        "#sigma(dist2d(SV, beamspot)) (cm)",          100,    0,       0.05);
+  hs.add("bs2dsig",        "N#sigma(dist2d(SV, beamspot))",              100,    0,     100);
+  hs.add("bs3ddist",       "dist2d(SV, beamspot) * sin(SV theta) (cm)",  100,    0,       0.5);
+  hs.add("pv2dcompatscss", "compat2d(SV, PV) success",                     2,    0,       2);
+  hs.add("pv2dcompat",     "compat2d(SV, PV)",                           100,    0,    1000);
+  hs.add("pv2ddist",       "dist2d(SV, PV) (cm)",                        100,    0,       0.5);
+  hs.add("pv2derr",        "#sigma(dist2d(SV, PV)) (cm)",                100,    0,       0.05);
+  hs.add("pv2dsig",        "N#sigma(dist2d(SV, PV))",                    100,    0,     100);
+  hs.add("pv3dcompatscss", "compat3d(SV, PV) success",                     2,    0,       2);
+  hs.add("pv3dcompat",     "compat3d(SV, PV)",                           100,    0,    1000);
+  hs.add("pv3ddist",       "dist3d(SV, PV) (cm)",                        100,    0,       0.5);
+  hs.add("pv3derr",        "#sigma(dist3d(SV, PV)) (cm)",                100,    0,       0.1);
+  hs.add("pv3dsig",        "N#sigma(dist3d(SV, PV))",                    100,    0,     100);
+
   for (int j = 0; j < sv_num_indices; ++j) {
     const std::string ex = sv_index_names[j];
     const char* exc = ex.c_str();
@@ -373,62 +429,20 @@ VtxRecoPlay::VtxRecoPlay(const edm::ParameterSet& cfg)
     h_sv_trackpairmass[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpairmass", exc), TString::Format(";SV %s track pair mass (GeV);arb. units", exc), 200, 0, 20);
     h_sv_tracktriplemass[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracktriplemass", exc), TString::Format(";SV %s track triple mass (GeV);arb. units", exc), 200, 0, 20);
 
-    PairwiseHistos::HistoDefs hs;
-    hs.add("ntracks",        "# of tracks/SV",                              40,    0,      40);
-    hs.add("ntracksptgt10",  "# of tracks/SV w/ p_{T} > 10 GeV",            40,    0,      40);
-    hs.add("ntracksptgt20",  "# of tracks/SV w/ p_{T} > 20 GeV",            40,    0,      40);
-    hs.add("trackminnhits",  "min number of hits on track per SV",          40,    0,      40);
-    hs.add("trackmaxnhits",  "max number of hits on track per SV",          40,    0,      40);
-    hs.add("njetssharetks",  "# of jets assoc. by tracks to SV",            10,    0,      10);
-    hs.add("jetsmass",       "inv. mass of jets assoc. by tracks to SV",   200,    0,    2000);
-    hs.add("chi2dof",        "SV #chi^2/dof",                               50,    0,       7);
-    hs.add("chi2dofprob",    "SV p(#chi^2, dof)",                           50,    0,       1.2);
-    hs.add("p",              "SV p (GeV)",                                 100,    0,     300);
-    hs.add("pt",             "SV p_{T} (GeV)",                             100,    0,     300);
-    hs.add("eta",            "SV #eta",                                     50,   -4,       4);
-    hs.add("rapidity",       "SV rapidity",                                 50,   -4,       4);
-    hs.add("phi",            "SV #phi",                                     50,   -3.15,    3.15);
-    hs.add("mass",           "SV mass (GeV)",                              100,    0,     250);
-    hs.add("costhmombs",     "cos(angle(2-momentum, 2-dist to BS))",       100,   -1,       1);
-    hs.add("costhmompv2d",   "cos(angle(2-momentum, 2-dist to PV))",       100,   -1,       1);
-    hs.add("costhmompv3d",   "cos(angle(3-momentum, 3-dist to PV))",       100,   -1,       1);
-    hs.add("sumpt2",         "SV #Sigma p_{T}^{2} (GeV^2)",                300,    0,    6000);
-    hs.add("maxnhitsbehind", "max number of hits behind SV",                15,    0,      15);
-    hs.add("sumnhitsbehind", "sum number of hits behind SV",               100,    0,     100);
-    hs.add("mintrackpt",     "SV min{trk_{i} p_{T}} (GeV)",                 50,    0,      10);
-    hs.add("maxtrackpt",     "SV max{trk_{i} p_{T}} (GeV)",                100,    0,     150);
-    hs.add("maxm1trackpt",   "SV max-1{trk_{i} p_{T}} (GeV)",              100,    0,     150);
-    hs.add("maxm2trackpt",   "SV max-2{trk_{i} p_{T}} (GeV)",              100,    0,     150);
-    hs.add("drmin",          "SV min{#Delta R(i,j)}",                      150,    0,       1.5);
-    hs.add("drmax",          "SV max{#Delta R(i,j)}",                      150,    0,       7);
-    hs.add("dravg",          "SV avg{#Delta R(i,j)}",                      150,    0,       5);
-    hs.add("drrms",          "SV rms{#Delta R(i,j)}",                      150,    0,       3);
-    hs.add("dravgw",         "SV wavg{#Delta R(i,j)}",                     150,    0,       5);
-    hs.add("drrmsw",         "SV wrms{#Delta R(i,j)}",                     150,    0,       3);
-    hs.add("gen2ddist",      "dist2d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
-    hs.add("gen2derr",       "#sigma(dist2d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
-    hs.add("gen2dsig",       "N#sigma(dist2d(SV, closest gen vtx)) (cm)",  200,    0,     100);
-    hs.add("gen3ddist",      "dist3d(SV, closest gen vtx) (cm)",           200,    0,       0.2);
-    hs.add("gen3derr",       "#sigma(dist3d(SV, closest gen vtx)) (cm)",   200,    0,       0.2);
-    hs.add("gen3dsig",       "N#sigma(dist3d(SV, closest gen vtx)) (cm)",  200,    0,     100);
-    hs.add("bs2dcompatscss", "compat2d(SV, beamspot) success",               2,    0,       2);
-    hs.add("bs2dcompat",     "compat2d(SV, beamspot)",                     100,    0,    1000);
-    hs.add("bs2ddist",       "dist2d(SV, beamspot) (cm)",                  100,    0,       0.5);
-    hs.add("bs2derr",        "#sigma(dist2d(SV, beamspot)) (cm)",          100,    0,       0.05);
-    hs.add("bs2dsig",        "N#sigma(dist2d(SV, beamspot))",              100,    0,     100);
-    hs.add("bs3ddist",       "dist2d(SV, beamspot) * sin(SV theta) (cm)",  100,    0,       0.5);
-    hs.add("pv2dcompatscss", "compat2d(SV, PV) success",                     2,    0,       2);
-    hs.add("pv2dcompat",     "compat2d(SV, PV)",                           100,    0,    1000);
-    hs.add("pv2ddist",       "dist2d(SV, PV) (cm)",                        100,    0,       0.5);
-    hs.add("pv2derr",        "#sigma(dist2d(SV, PV)) (cm)",                100,    0,       0.05);
-    hs.add("pv2dsig",        "N#sigma(dist2d(SV, PV))",                    100,    0,     100);
-    hs.add("pv3dcompatscss", "compat3d(SV, PV) success",                     2,    0,       2);
-    hs.add("pv3dcompat",     "compat3d(SV, PV)",                           100,    0,    1000);
-    hs.add("pv3ddist",       "dist3d(SV, PV) (cm)",                        100,    0,       0.5);
-    hs.add("pv3derr",        "#sigma(dist3d(SV, PV)) (cm)",                100,    0,       0.1);
-    hs.add("pv3dsig",        "N#sigma(dist3d(SV, PV))",                    100,    0,     100);
     h_sv[j].Init("h_sv_" + ex, hs, true, do_scatterplots);
   }
+
+  for (int j = 0; j < 3; ++j) {
+    std::string ex;
+    if (j == 0)
+      ex = "sumtop2";
+    else if (j == 1)
+      ex = "sumtop3";
+    else if (j == 2)
+      ex = "sumtop4";
+
+    h_sv_sums[j].Init("h_sv_" + ex, hs, true, do_scatterplots, j+2);
+  }    
 
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 1);
@@ -978,7 +992,11 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
         {"pv3derr",         pv3ddist_err},
         {"pv3dsig",         pv3ddist_sig},
     };
+
     fill_multi(h_sv, isv, v);
+
+    for (PairwiseHistos& h : h_sv_sums)
+      h.Fill(v, isv);
   }
 
   //////////////////////////////////////////////////////////////////////
