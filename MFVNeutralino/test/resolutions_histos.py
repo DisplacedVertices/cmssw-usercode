@@ -102,6 +102,7 @@ process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                     )
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+process.mfvVertexSequence.remove(process.mfvVertices)
 
 process.p0 = cms.Path(process.mfvVertexSequence *                                                process.genHistos                    * process.histos)
 process.p1 = cms.Path(process.mfvVertexSequence * process.triggerFilter *                        process.genHistosWithTrigger         * process.histosWithTrigger)
@@ -128,6 +129,22 @@ def remove_genhistos():
         for mod_name in path.moduleNames():
             if mod_name.startswith('genHistos'):
                 path.remove(getattr(process, mod_name))
+
+def de_mfv():
+    if hasattr(process, 'mfvGenParticleFilter'):
+        process.mfvGenParticleFilter.cut_invalid = False
+    if hasattr(process, 'mfvGenVertices'):
+        process.mfvGenVertices.is_mfv = False
+
+def sample_ttbar():
+    de_mfv()
+    if hasattr(process, 'mfvGenVertices'):
+        process.mfvGenVertices.is_ttbar = True
+
+if 'ttbar' in sys.argv:
+    sample_ttbar()
+elif 'de_mfv' in sys.argv:
+    de_mfv()
 
 def run_on_data(dataset=None, datasets=None):
     if 'debug' in sys.argv:
@@ -156,6 +173,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_add.append('run_on_data()')
         if 'mfv' not in sample.name:
             to_add.append('remove_genhistos()')
+
+        if 'ttbar' in sample.name:
+            to_add.append('sample_ttbar()')
+        elif 'mfv' not in sample.name:
+            to_add.append('de_mfv()')
+
         return to_add
 
     cs = CRABSubmitter('ResolutionsHistos',
@@ -165,4 +188,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        CMSSW_use_parent = 1,
                        pset_modifier = pset_adder
                        )
-    cs.submit_all(samples)
+    cs.submit_all(background_samples + [mfv_signal_samples[0]])
