@@ -45,6 +45,7 @@ mfvGenVertices = JMTucker.MFVNeutralino.GenParticles_cff.mfvGenVertices.clone()
 
 import JMTucker.MFVNeutralino.VertexSelector_cfi
 mfvSelectedVertices = JMTucker.MFVNeutralino.VertexSelector_cfi.mfvSelectedVertices.clone()
+mfvSelectedVerticesTight = JMTucker.MFVNeutralino.VertexSelector_cfi.mfvSelectedVerticesTight.clone()
 
 mfvSelectedJets = cms.EDFilter('PATJetSelector',
                                src = cms.InputTag('selectedPatJetsPF'),
@@ -85,7 +86,7 @@ def use_jets(vertex_producer, kind):
     else:
         raise ValueError("don't know anything about kind = %r" % kind)
 
-mfvVertexSequence = cms.Sequence(mfvVertices * mfvGenVertices * mfvSelectedVertices * mfvSelectedJets * mfvVerticesToJets)
+mfvVertexSequence = cms.Sequence(mfvVertices * mfvGenVertices * mfvSelectedVertices * mfvSelectedVerticesTight * mfvSelectedJets * mfvVerticesToJets)
 
 mfvVerticesFromCands = mfvVertices.clone()
 use_pf_candidates(mfvVerticesFromCands, 'particleFlow')
