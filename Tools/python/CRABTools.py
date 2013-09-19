@@ -520,6 +520,16 @@ def crab_status_dict(dirs=None):
         results[d] = crab_status(d)
     return results
 
+def crab_fjr_xml(path, job=None):
+    if os.path.isdir(path):
+        filename = os.path.join(path, 'res/crab_fjr_%i.xml' % job)
+    else:
+        filename = path
+    return xml.etree.cElementTree.parse(filename)
+
+def crab_analysis_file_pfn(path, job=None):
+    return crab_fjr_xml(path, job).find('AnalysisFile').find('PFN').get('Value')
+
 def crab_arguments_xml(path, jobs_into_dicts=True):
     if os.path.isdir(path):
         filename = os.path.join(path, 'share/arguments.xml')
@@ -629,9 +639,26 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True):
         new_name += '.root'
     if new_dir is not None:
         new_name = os.path.join(new_dir, new_name)
+
     expected = crab_get_njobs(working_dir)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
-    files = glob.glob(os.path.join(working_dir, 'res/*root'))
+
+    on_resilient = False
+    cfg = crab_cfg_parser(working_dir)
+    try:
+        storage_path = cfg.get('USER', 'storage_path')
+        on_resilient = 'resilient' in storage_path
+    except NoOptionError:
+        pass
+
+    files = []
+    
+    if on_resilient:
+        pfns = [crab_analysis_file_pfn(path) for path in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml'))]
+        files = ['dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/resilient/' + pfn.split('/resilient/')[1] for pfn in pfns] # JMTBAD
+    else:    
+        files = glob.glob(os.path.join(working_dir, 'res/*root'))
+        
     l = len(files)
     if l != expected:
         print '\033[36;7m num files %i != expected %i \033[m' % (l, expected)
@@ -643,7 +670,8 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True):
             print msg
     elif l == 1:
         print working_dir, ': just one file found, copying'
-        os.system('cp %s %s' % (files[0], new_name))
+        cmd = '%scp %s %s' % ('dc' if 'dcap' in files[0] else '', files[0], new_name)
+        os.system(cmd)
     else:
         hadd(new_name, files)
         
