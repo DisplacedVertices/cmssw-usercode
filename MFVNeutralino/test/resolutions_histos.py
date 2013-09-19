@@ -101,10 +101,12 @@ process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                     electron_src = cms.InputTag('selectedPatElectronsPF'),
                                     )
 
-process.p0 = cms.Path(                                               process.genHistos                    * process.histos)
-process.p1 = cms.Path(process.triggerFilter *                        process.genHistosWithTrigger         * process.histosWithTrigger)
-process.p2 = cms.Path(                        process.analysisCuts * process.genHistosWithCuts            * process.histosWithCuts)
-process.p3 = cms.Path(process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
+process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+
+process.p0 = cms.Path(process.mfvVertexSequence *                                                process.genHistos                    * process.histos)
+process.p1 = cms.Path(process.mfvVertexSequence * process.triggerFilter *                        process.genHistosWithTrigger         * process.histosWithTrigger)
+process.p2 = cms.Path(process.mfvVertexSequence *                         process.analysisCuts * process.genHistosWithCuts            * process.histosWithCuts)
+process.p3 = cms.Path(process.mfvVertexSequence * process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
 
 if 'debug' in sys.argv:
     from JMTucker.Tools.CMSSWTools import file_event_from_argv
