@@ -117,6 +117,11 @@ class CRABSubmitter:
             if data_retrieval == 'fnal':
                 cfg.set('USER', 'storage_element', 'T3_US_FNALLPC')
                 cfg.set('USER', 'check_user_remote_dir', 0)
+            elif data_retrieval == 'fnal_resilient':
+                cfg.set('USER', 'storage_element', 'cmssrm.fnal.gov')
+                cfg.set('USER', 'storage_path', '/srm/managerv2?SFN=/resilient/tucker/crabdump/')
+                cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
+                cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'cornell':
                 cfg.set('USER', 'storage_element', 'T3_US_Cornell')
             if publish_data_name:
