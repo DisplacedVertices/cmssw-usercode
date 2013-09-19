@@ -31,6 +31,25 @@ def apply_hist_commands(hist, hist_cmds=None):
             args = (args,)
         getattr(hist, fn)(*args)
 
+def bin_iterator(hist):
+    """Loop over all bins of hist (which has whatever dimension) and
+    yield the bin coordinates and the bin contents."""
+
+    if issubclass(type(hist), ROOT.TH3):
+        for ibin in xrange(0, hist.GetNbinsX()+2):
+            for jbin in xrange(0, hist.GetNbinsY()+2):
+                for kbin in xrange(0, hist.GetNbinsZ()+2):
+                    yield (ibin, jbin, kbin), hist.GetBinContent(ibin, jbin, kbin)
+    elif issubclass(type(hist), ROOT.TH2):
+        for ibin in xrange(0, hist.GetNbinsX()+2):
+            for jbin in xrange(0, hist.GetNbinsY()+2):
+                yield (ibin, jbin), hist.GetBinContent(ibin, jbin)
+    elif issubclass(type(hist), ROOT.TH1):
+        for ibin in xrange(0, hist.GetNbinsX()+2):
+            yield (ibin,), hist.GetBinContent(ibin)
+    else:
+        raise TypeError('input is not a histogram')
+
 def check_consistency(h1, h2, log=True):
     def p(s):
         if not (log or log == ''):
@@ -1124,6 +1143,7 @@ def ttree_iterator(tree, return_tree=False):
             
 __all__ = [
     'apply_hist_commands',
+    'bin_iterator',
     'check_consistency',
     'histogram_divide',
     'clopper_pearson',
