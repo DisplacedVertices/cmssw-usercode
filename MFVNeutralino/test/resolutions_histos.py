@@ -3,8 +3,13 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, add_analyzer
 from JMTucker.Tools.CMSSWTools import silence_messages
 
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.source.fileNames = ['file:pat.root']
-process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root')
+process.maxEvents.input = 100
+#process.source.fileNames = ['file:pat.root']
+#process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root')
+process.source.fileNames = ['/store/user/jchu/mfv_neutralino_tau1000um_M0400/jtuple_v7/5d4c2a74c85834550d3f9609274e8548/pat_1_1_hdB.root']
+process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_891_1_sZ9.root','/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_948_2_lgB.root')
+#process.source.fileNames = ['/store/user/jchu/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jtuple_v7/fe6d9f80f9c0fe06cc80b089617fa99d/pat_1_1_NOT.root']
+#process.source.secondaryFileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/0038E6D2-860D-E211-9211-00266CFACC38.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/D4C0816B-870D-E211-B094-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/A2CEDDF1-870D-E211-A98D-00266CF258D8.root','/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/9E8E388F-970D-E211-8D78-848F69FD298E.root')
 process.TFileService.fileName = 'resolutions_histos.root'
 silence_messages(process, 'TwoTrackMinimumDistance')
 
@@ -87,18 +92,22 @@ for x in ['', 'WithTrigger', 'WithCuts', 'WithTriggerWithCuts']:
 ########################################################################
 
 process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
-                                    jet_src = cms.InputTag('selectedPatJetsPF'),
-                                    min_jet_pt = cms.double(30),
+                                    jet_src = cms.InputTag('mfvSelectedJets'),
+                                    min_jet_pt = cms.double(20),
                                     min_4th_jet_pt = cms.double(60),
                                     min_5th_jet_pt = cms.double(0),
                                     min_6th_jet_pt = cms.double(0),
-                                    min_njets = cms.int32(5),
-                                    min_nbtags = cms.int32(3),
-                                    min_sum_ht = cms.double(400),
+                                    min_njets = cms.int32(4),
+                                    min_nbtags = cms.int32(0),
+                                    min_sum_ht = cms.double(0),
                                     b_discriminator_name = cms.string('jetProbabilityBJetTags'),
                                     bdisc_min = cms.double(0.545),
                                     muon_src = cms.InputTag('selectedPatMuonsPF'), 
                                     electron_src = cms.InputTag('selectedPatElectronsPF'),
+                                    vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
+                                    min_nvertex = cms.int32(2),
+                                    min_ntracks01 = cms.int32(15),
+                                    min_maxtrackpt01 = cms.int32(15),
                                     )
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
@@ -188,4 +197,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        CMSSW_use_parent = 1,
                        pset_modifier = pset_adder
                        )
-    cs.submit_all(background_samples + [mfv_signal_samples[0]])
+    cs.submit_all(background_samples + mfv_signal_samples)
