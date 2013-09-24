@@ -47,7 +47,7 @@ def hadd(new_name, files, chunk_size=900):
     if len(files) <= chunk_size:
         return hadd_ex(new_name, files)
 
-    if len(files)/chunk_size < 999:
+    if len(files)/chunk_size >= 998:
         raise ValueError('number of chunks greater than hadd can handle')
 
     files = files[:]
