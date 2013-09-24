@@ -17,6 +17,7 @@ private:
   const double min_5th_jet_pt;
   const double min_6th_jet_pt;
   const int min_njets;
+  const int max_njets;
   const int min_nbtags;
   const double min_sum_ht;
 
@@ -38,6 +39,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
     min_6th_jet_pt(cfg.getParameter<double>("min_6th_jet_pt")),
     min_njets(cfg.getParameter<int>("min_njets")),
+    max_njets(cfg.getParameter<int>("max_njets")),
     min_nbtags(cfg.getParameter<int>("min_nbtags")),
     min_sum_ht(cfg.getParameter<double>("min_sum_ht")),
 
@@ -77,7 +79,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (i+1==6 && jet.pt() < min_6th_jet_pt) return false; //cut on the pt of the 6th jet
   }
 
-  if (njets < min_njets) return false; //cut on the number of jets
+  //if (njets == 0) printf("njets = %d, run = %u, luminosity block = %u, event = %u\n", njets, event.id().run(), event.luminosityBlock(), event.id().event());
+  if (njets < min_njets) return false; //cut on the minimum number of jets
+  if (njets > max_njets) return false; //cut on the maximum number of jets
   if (nbtags < min_nbtags) return false; //cut on the number of btags
   if (sum_ht < min_sum_ht) return false; //cut on the sum of the pt's of all the jets
 
