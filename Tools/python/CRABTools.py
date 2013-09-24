@@ -630,7 +630,7 @@ def crab_output_files_from_fjr(working_dir):
 
     return files
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True):
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True, chunk_size=900):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
@@ -673,7 +673,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True):
         cmd = '%scp %s %s' % ('dc' if 'dcap' in files[0] else '', files[0], new_name)
         os.system(cmd)
     else:
-        hadd(new_name, files)
+        hadd(new_name, files, chunk_size)
         
     return new_name
 
