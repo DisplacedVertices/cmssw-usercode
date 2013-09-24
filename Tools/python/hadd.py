@@ -46,7 +46,10 @@ def hadd(new_name, files, chunk_size=900):
     
     if len(files) <= chunk_size:
         return hadd_ex(new_name, files)
-    
+
+    if len(files)/chunk_size < 999:
+        raise ValueError('number of chunks greater than hadd can handle')
+
     files = files[:]
     new_files = []
     while files:
@@ -59,8 +62,6 @@ def hadd(new_name, files, chunk_size=900):
         if not hadd_ex(this_fn, these):
             print '\033[36;7m PROBLEM hadding \033[m', new_name, 'in chunks of', chunk_size, 'on', this_fn
             return False
-
-    assert len(new_files) < chunk_size
 
     ok = hadd_ex(new_name, new_files)
     if not ok:
