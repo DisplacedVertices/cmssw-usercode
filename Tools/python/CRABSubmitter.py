@@ -118,6 +118,7 @@ class CRABSubmitter:
                 cfg.set('USER', 'storage_element', 'T3_US_FNALLPC')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'fnal_resilient':
+                assert os.environ['USER'] == 'tucker'
                 cfg.set('USER', 'storage_element', 'cmssrm.fnal.gov')
                 cfg.set('USER', 'storage_path', '/srm/managerv2?SFN=/resilient/tucker/crabdump/')
                 cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
