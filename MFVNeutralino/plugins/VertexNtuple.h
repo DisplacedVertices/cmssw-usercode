@@ -26,8 +26,16 @@ struct VertexNtuple {
   ushort ntracksptgt20;
   ushort trackminnhits;
   ushort trackmaxnhits;
-  ushort njetssharetks;
-  float jetsmass;
+  ushort njetsntks;
+  ushort njetsntksptmin;
+  ushort njetsmissdist;
+  ushort njetscomb;
+  ushort njetscombptmin;
+  float jetsmassntks;
+  float jetsmassntksptmin;
+  float jetsmassmissdist;
+  float jetsmasscomb;
+  float jetsmasscombptmin;
   float chi2dof;
   float chi2dofprob;
   float p;
@@ -79,7 +87,7 @@ struct VertexNtuple {
     if (all) {
       run = -1; lumi = -1; event = -1; minlspdist2d = -1; lspdist2d = -1; lspdist3d = -1; pass_trigger = -1; npfjets = -1; ntightpfjets = -1; pfjetpt4 = -1; pfjetpt5 = -1; tightpfjetpt4 = -1; tightpfjetpt5 = -1; nsv = -1;
     }
-    isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; njetssharetks = -1; jetsmass = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
+    isv = -1; ntracks = -1; ntracksptgt10 = -1; ntracksptgt20 = -1; trackminnhits = -1; trackmaxnhits = -1; njetsntks = -1; njetsntksptmin = -1; njetsmissdist = -1; njetscomb = -1; njetscombptmin = -1; jetsmassntks = -1; jetsmassntksptmin = -1; jetsmassmissdist = -1; jetsmasscomb = -1; jetsmasscombptmin = -1; chi2dof = -1; chi2dofprob = -1; p = -1; pt = -1; eta = -1; rapidity = -1; phi = -1; mass = -1; costhmombs = -1; costhmompv2d = -1; costhmompv3d = -1; sumpt2 = -1; sumnhitsbehind = -1; maxnhitsbehind = -1; mintrackpt = -1; maxtrackpt = -1; maxm1trackpt = -1; maxm2trackpt = -1; drmin = -1; drmax = -1; dravg = -1; drrms = -1; dravgw = -1; drrmsw = -1; gen2ddist = -1; gen2derr = -1; gen2dsig = -1; gen3ddist = -1; gen3derr = -1; gen3dsig = -1; bs2dcompatscss = -1; bs2dcompat = -1; bs2ddist = -1; bs2derr = -1; bs2dsig = -1; bs3ddist = -1; pv2dcompatscss = -1; pv2dcompat = -1; pv2ddist = -1; pv2derr = -1; pv2dsig = -1; pv3dcompatscss = -1; pv3dcompat = -1; pv3ddist = -1; pv3derr = -1; pv3dsig = -1;
   }
 
   void write(TTree* tree) {
@@ -103,8 +111,14 @@ struct VertexNtuple {
     tree->Branch("ntracksptgt20", &ntracksptgt20, "ntracksptgt20/s");
     tree->Branch("trackminnhits", &trackminnhits, "trackminnhits/s");
     tree->Branch("trackmaxnhits", &trackmaxnhits, "trackmaxnhits/s");
-    tree->Branch("njetssharetks", &njetssharetks, "njetssharetks/s");
-    tree->Branch("jetsmass", &jetsmass, "jetsmass/s");
+    tree->Branch("njetsntks", &njetsntks, "njetsntks/s");
+    tree->Branch("njetsntksptmin", &njetsntksptmin, "njetsntksptmin/s");
+    tree->Branch("njetsmissdist", &njetsmissdist, "njetsmissdist/s");
+    tree->Branch("jetsmassntks", &jetsmassntks, "jetsmassntks/s");
+    tree->Branch("jetsmassntksptmin", &jetsmassntksptmin, "jetsmassntksptmin/s");
+    tree->Branch("jetsmassmissdist", &jetsmassmissdist, "jetsmassmissdist/s");
+    tree->Branch("jetsmasscomb", &jetsmasscomb, "jetsmasscomb/s");
+    tree->Branch("jetsmasscombptmin", &jetsmasscombptmin, "jetsmasscombptmin/s");
     tree->Branch("chi2dof", &chi2dof, "chi2dof/F");
     tree->Branch("chi2dofprob", &chi2dofprob, "chi2dofprob/F");
     tree->Branch("p", &pt, "p/F");
@@ -174,8 +188,16 @@ struct VertexNtuple {
     tree->SetBranchAddress("ntracksptgt20", &ntracksptgt20);
     tree->SetBranchAddress("trackminnhits", &trackminnhits);
     tree->SetBranchAddress("trackmaxnhits", &trackmaxnhits);
-    tree->SetBranchAddress("njetssharetks", &njetssharetks);
-    tree->SetBranchAddress("jetsmass", &jetsmass);
+    tree->SetBranchAddress("njetsntks", &njetsntks);
+    tree->SetBranchAddress("njetsntksptmin", &njetsntksptmin);
+    tree->SetBranchAddress("njetsmissdist", &njetsmissdist);
+    tree->SetBranchAddress("njetscomb", &njetscomb);
+    tree->SetBranchAddress("njetscombptmin", &njetscombptmin);
+    tree->SetBranchAddress("jetsmassntks", &jetsmassntks);
+    tree->SetBranchAddress("jetsmassntksptmin", &jetsmassntksptmin);
+    tree->SetBranchAddress("jetsmassmissdist", &jetsmassmissdist);
+    tree->SetBranchAddress("jetsmasscomb", &jetsmasscomb);
+    tree->SetBranchAddress("jetsmasscombptmin", &jetsmasscombptmin);
     tree->SetBranchAddress("chi2dof", &chi2dof);
     tree->SetBranchAddress("chi2dofprob", &chi2dofprob);
     tree->SetBranchAddress("p", &pt);
