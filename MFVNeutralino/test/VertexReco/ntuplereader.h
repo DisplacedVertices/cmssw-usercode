@@ -37,7 +37,7 @@ struct NtupleReader {
   NtupleReader(const Sample& s)
     : sample(s)
   {
-    file = new TFile(TString(s.file_dir) + s.fn);
+    file = TFile::Open(TString(s.file_dir) + s.fn);
     die_if_not(file && file->IsOpen(), "couldn't open file %s\n", s.fn);
     
     TDirectory* dir = (TDirectory*)file->Get(s.root_dir);
