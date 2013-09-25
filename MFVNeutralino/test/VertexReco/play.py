@@ -123,6 +123,8 @@ if 'debug' in sys.argv:
     process.mfvVertices.verbose = True
 
 if 'ttbar' in sys.argv:
+    sample_ttbar()
+elif 'de_mfv' in sys.argv:
     de_mfv()
 
 if 'argv' in sys.argv:
@@ -161,20 +163,21 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_add.append('sample_ttbar()')
         elif 'mfv' not in sample.name:
             to_add.append('de_mfv()')
-            factor = 1
-            counts = {            
-                'wjetstolnu': 656405,
-                'ttbarhadronic': 9738903,
-                'ttbarsemilep': 7987193,
-                'ttbardilep': 1389075,
-                'qcdht0100': 4455967,
-                'qcdht0250': 11137722,
-                'qcdht0500': 4991784,
-                'qcdht1000': 6968522,
-                }
-            if counts.has_key(sample.name):
-                factor = round(counts[sample.name]/100000.)
-            to_add.append('reduce_trees(%i)' % factor)
+            if False:
+                factor = 1
+                counts = {            
+                    'wjetstolnu': 656405,
+                    'ttbarhadronic': 9738903,
+                    'ttbarsemilep': 7987193,
+                    'ttbardilep': 1389075,
+                    'qcdht0100': 4455967,
+                    'qcdht0250': 11137722,
+                    'qcdht0500': 4991784,
+                    'qcdht1000': 6968522,
+                    }
+                if counts.has_key(sample.name):
+                    factor = round(counts[sample.name]/100000.)
+                to_add.append('reduce_trees(%i)' % factor)
         return to_add
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
@@ -186,13 +189,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = pset_modifier,
                        use_ana_dataset = True,
                        use_parent = True,
+                       #data_retrieval = 'fnal_resilient',
                        #USER_skip_servers = 'unl_hcc-crabserver',
                        #GRID_data_location_override = 'T1_US_FNAL,T2_US_Caltech,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin',
                        #GRID_remove_default_blacklist = 1,
                        )
-    cs.submit_all([s for s in samples if s.name == 'qcdht0100'])
+    cs.submit_all(samples)
 
 '''
+# for running 100kevent of AOD
 mergeTFileServiceHistograms -w 0.457,0.438,0.105 -i ttbarhadronic.root ttbarsemilep.root ttbardilep.root -o ttbar_merge.root
 mergeTFileServiceHistograms -w 0.97336,0.025831,0.00078898,1.9093e-5 -i qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root -o qcd_merge.root
+
+# for running full PAT tuples as in Samples.py
+mergeTFileServiceHistograms -w 0.94870,0.046638,0.0045729,9.1457e-05 -i qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root -o qcd_merge.root
+mergeTFileServiceHistograms -w 0.33333,0.333333,0.33333 -i ttbarhadronic.root ttbarsemilep.root ttbardilep.root -o ttbar_merge.root
+
 '''
