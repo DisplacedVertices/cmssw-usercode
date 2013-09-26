@@ -284,12 +284,11 @@ def compare_all_hists(ps, samples, **kwargs):
             hist.cah_integral = hist.Integral(0, hist.GetNbinsX()+1) if not is2d else 0.
             hist.cah_scaling = scaling(name, hist_list, hist.cah_sample_name)
 
-        rescale = not is2d and all(hist.cah_integral > 0 for hist in hists)
         nostat = no_stats(name, hist_list, None)
         for hist in hists:
             hist.SetLineWidth(2)
 
-            if rescale:
+            if not is2d and hist.cah_integral > 0:
                 hist.Scale(hist.cah_scaling/hist.cah_integral)
             if nostat:
                 hist.SetStats(0)
