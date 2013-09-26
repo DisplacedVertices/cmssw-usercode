@@ -190,11 +190,23 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add
 
-    cs = CRABSubmitter('ResolutionsHistos_max_njets_3',
+    cs = CRABSubmitter('ResolutionsHistos',
                        total_number_of_events = -1,
                        events_per_job = 10000,
                        use_ana_dataset = True,
                        CMSSW_use_parent = 1,
                        pset_modifier = pset_adder
                        )
-    cs.submit_all(background_samples + mfv_signal_samples)
+    from JMTucker.Tools.Samples import singletop_s, singletop_s_tbar, singletop_t, singletop_t_tbar, singletop_tW, singletop_tW_tbar, ww, wz, zz
+    singletop_s.ana_dataset_override = '/T_s-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    singletop_s_tbar.ana_dataset_override = '/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    singletop_t.ana_dataset_override = '/T_t-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    singletop_t_tbar.ana_dataset_override = '/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    singletop_tW.ana_dataset_override = '/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    singletop_tW_tbar.ana_dataset_override = '/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    ww.ana_dataset_override = '/WW_TuneZ2star_8TeV_pythia6_tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    wz.ana_dataset_override = '/WZ_TuneZ2star_8TeV_pythia6_tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+    zz.ana_dataset_override = '/ZZ_TuneZ2star_8TeV_pythia6_tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
+
+    samples = mfv_signal_samples + background_samples + [singletop_s, singletop_s_tbar, singletop_t, singletop_t_tbar, singletop_tW, singletop_tW_tbar, ww, wz, zz]
+    cs.submit_all(samples)
