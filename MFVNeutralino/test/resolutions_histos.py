@@ -46,19 +46,9 @@ import JMTucker.Tools.PATTupleSelection_cfi
 selection = JMTucker.Tools.PATTupleSelection_cfi.jtupleParams
 
 bdiscs = [
-    ('combinedSecondaryVertexBJetTags',               (0.244, 0.679, 0.898)),
+    #('combinedSecondaryVertexBJetTags',               (0.244, 0.679, 0.898)),
     ('jetProbabilityBJetTags',                        (0.275, 0.545, 0.790)),
-    ('jetBProbabilityBJetTags',                       (1.33, 2.55, 3.74)),
-    ('simpleSecondaryVertexHighEffBJetTags',          (1.74, 3.05)),
-    ('simpleSecondaryVertexHighPurBJetTags',          (2., 2.)),
-    ('trackCountingHighEffBJetTags',                  (1.7, 3.3, 10.2)),
-    ('trackCountingHighPurBJetTags',                  (1.19, 1.93, 3.41)),
-    ('combinedMVABJetTags',                           (0.5, 0.5)),
-    ('combinedSecondaryVertexMVABJetTags',            (0.5, 0.5)),
-    ('simpleInclusiveSecondaryVertexHighEffBJetTags', (0.5, 0.5)),
-    ('simpleInclusiveSecondaryVertexHighPurBJetTags', (0.5, 0.5)),
-    ('combinedInclusiveSecondaryVertexBJetTags',      (0.5, 0.5)),
-    ('doubleSecondaryVertexHighEffBJetTags',          (0.5, 0.5)),
+    #('jetBProbabilityBJetTags',                       (1.33, 2.55, 3.74)),
     ]
 
 def histogrammer():
@@ -85,7 +75,7 @@ def histogrammer():
 
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')
 
-for x in ['', 'WithTrigger', 'WithCuts', 'WithTriggerWithCuts']:
+for x in ['', 'WithTrigger', 'WithCuts', 'WithTriggerWithCuts', 'WTWCNB', 'WTWCNL', 'WTWCNBNL']:
     setattr(process, 'genHistos' + x, process.mfvGenHistos.clone())
     setattr(process, 'histos'    + x, histogrammer())
 
@@ -98,13 +88,14 @@ process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                     min_5th_jet_pt = cms.double(0),
                                     min_6th_jet_pt = cms.double(0),
                                     min_njets = cms.int32(4),
-                                    max_njets = cms.int32(1e99),
+                                    max_njets = cms.int32(100000),
                                     min_nbtags = cms.int32(0),
                                     min_sum_ht = cms.double(0),
                                     b_discriminator_name = cms.string('jetProbabilityBJetTags'),
                                     bdisc_min = cms.double(0.545),
                                     muon_src = cms.InputTag('selectedPatMuonsPF'), 
                                     electron_src = cms.InputTag('selectedPatElectronsPF'),
+                                    min_nleptons = cms.int32(0),
                                     vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                     min_nvertex = cms.int32(2),
                                     min_ntracks01 = cms.int32(15),
@@ -118,6 +109,14 @@ process.p0 = cms.Path(process.mfvVertexSequence *                               
 process.p1 = cms.Path(process.mfvVertexSequence * process.triggerFilter *                        process.genHistosWithTrigger         * process.histosWithTrigger)
 process.p2 = cms.Path(process.mfvVertexSequence *                         process.analysisCuts * process.genHistosWithCuts            * process.histosWithCuts)
 process.p3 = cms.Path(process.mfvVertexSequence * process.triggerFilter * process.analysisCuts * process.genHistosWithTriggerWithCuts * process.histosWithTriggerWithCuts)
+
+process.cutsnb = process.analysisCuts.clone(min_nbtags = 3)
+process.cutsnl = process.analysisCuts.clone(min_nleptons = 1)
+process.cutsnbnl = process.analysisCuts.clone(min_nbtags = 3, min_nleptons = 1)
+
+process.p4 = cms.Path(process.mfvVertexSequence * process.triggerFilter * process.cutsnb   * process.histosWTWCNB)
+process.p5 = cms.Path(process.mfvVertexSequence * process.triggerFilter * process.cutsnl   * process.histosWTWCNL)
+process.p6 = cms.Path(process.mfvVertexSequence * process.triggerFilter * process.cutsnbnl * process.histosWTWCNBNL)
 
 if 'debug' in sys.argv:
     from JMTucker.Tools.CMSSWTools import file_event_from_argv
