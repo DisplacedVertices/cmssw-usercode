@@ -3,6 +3,8 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 
 class MFVAnalysisCuts : public edm::EDFilter {
 public:
@@ -25,6 +27,7 @@ private:
   const double bdisc_min;
   const edm::InputTag muon_src;
   const edm::InputTag electron_src;
+  const int min_nleptons;
 
   const edm::InputTag vertex_src;
   const int min_nvertex;
@@ -47,6 +50,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     bdisc_min(cfg.getParameter<double>("bdisc_min")),
     muon_src(cfg.getParameter<edm::InputTag>("muon_src")),
     electron_src(cfg.getParameter<edm::InputTag>("electron_src")),
+    min_nleptons(cfg.getParameter<int>("min_nleptons")),
 
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
@@ -56,6 +60,14 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
 }
 
 bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
+  edm::Handle<pat::MuonCollection> muons;
+  event.getByLabel(muon_src, muons);
+  edm::Handle<pat::ElectronCollection> electrons;
+  event.getByLabel(electron_src, electrons);
+  
+  if (int(muons->size() + electrons->size()) < min_nleptons)
+    return false;
+
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jet_src, jets);
 
