@@ -18,10 +18,10 @@
 #include "JMTucker/Tools/interface/BasicKinematicHists.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
-#define NJETDISTS 20
-#define NBJETDISTS 10
-#define NBDISC 13
-#define NLEPDISTS 5
+#define NJETDISTS 4
+#define NBJETDISTS 2
+#define NBDISC 1
+#define NLEPDISTS 2
 
 class MFVResolutionsHistogrammer : public edm::EDAnalyzer {
 public:
@@ -413,7 +413,7 @@ void MFVResolutionsHistogrammer::analyze(const edm::Event& event, const edm::Eve
 	RecoBJets[j]->Eta->Fill(jet.eta(), weight);
 	RecoBJets[j]->Phi->Fill(jet.phi(), weight);
 	
-	if (n_btags[j] < NJETDISTS) {
+	if (n_btags[j] < NBJETDISTS) {
 	  RecoBJet[j][n_btags[j]]->Pt ->Fill(jet.pt(), weight);
 	  RecoBJet[j][n_btags[j]]->Eta->Fill(jet.eta(), weight);
 	  RecoBJet[j][n_btags[j]]->Phi->Fill(jet.phi(), weight);
