@@ -98,6 +98,7 @@ process.analysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                     min_5th_jet_pt = cms.double(0),
                                     min_6th_jet_pt = cms.double(0),
                                     min_njets = cms.int32(4),
+                                    max_njets = cms.int32(1e99),
                                     min_nbtags = cms.int32(0),
                                     min_sum_ht = cms.double(0),
                                     b_discriminator_name = cms.string('jetProbabilityBJetTags'),
@@ -190,7 +191,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add
 
-    cs = CRABSubmitter('ResolutionsHistos',
+    cs = CRABSubmitter('ResolutionsHistos_max_njets_3',
                        total_number_of_events = -1,
                        events_per_job = 10000,
                        use_ana_dataset = True,
