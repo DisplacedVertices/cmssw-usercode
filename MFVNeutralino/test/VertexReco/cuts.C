@@ -20,6 +20,8 @@ confint clopper_pearson(const double n_on, const double n_tot, const double alph
 void Run(NtupleReader& nr) {
   if (nr.tree == 0)
     return;
+
+  printf("%s n>=2\n", nr.sample.fn);
   
   int nevents = 0;
   std::map<std::string, int> nvtxpass;
@@ -28,6 +30,11 @@ void Run(NtupleReader& nr) {
   for (Long64_t jentry = 0, nentries = nr.tree->GetEntriesFast(); jentry < nentries; ++jentry) {
     if (nr.tree->LoadTree(jentry) < 0) break;
     nr.tree->GetEntry(jentry);
+
+    if (jentry % 25000 == 0) {
+      printf("\r%12li/%12li entries processed", jentry, nentries);
+      fflush(stdout);
+    }
 
     //printf("%u %i/%i\n", nr.nt.event, nr.nt.isv, nr.nt.nsv);
 
@@ -66,7 +73,7 @@ void Run(NtupleReader& nr) {
   //EVAL_CUT(nr.nt.bs2dcompat    > 200);
   //EVAL_CUT(nr.nt.bs2dsig       > 5);
     EVAL_CUT(nr.nt.bs2derr       < 0.005);
-    EVAL_CUT(nr.nt.njetssharetks > 1);
+  //EVAL_CUT(nr.nt.njetsntks     > 1);
 
     for (auto icut : cuts) {
       bool anded = true;
@@ -81,11 +88,13 @@ void Run(NtupleReader& nr) {
     }
   }
 
+  printf("\r                                                                                \r");
+  fflush(stdout);
+
   if (nevents != nr.sample.nevents)
     printf("nevents %i not right\n", nevents);
   assert(nevents == nr.sample.nevents);
   const double intlumi = 20000;
-  printf("%s n>=2\n", nr.sample.fn);
   const double all = nevtpass["all"];
   for (auto cut : nevtpass) {
     double eff, eff2;
@@ -113,79 +122,46 @@ void Run(NtupleReader& nr) {
   }
 }
 
-const char* Sample::file_dir = "crab/VertexRecoPlay/";
+//const char* Sample::file_dir = "crab/VertexRecoPlay/roots/";
+const char* Sample::file_dir = "dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/resilient/tucker/crabdump/VertexRecoPlay/";
 const char* Sample::root_dir = "playMYQno";
 
 int main() {
-  
+  printf("opening files from %s\n", Sample::file_dir);
+
   Sample samples[] = {
-    //    {"mfv_neutralino_tau0000um_M0200.root", 99250, 888.0 },
-    {"mfv_neutralino_tau0000um_M0400.root", 99250, 1  },
-    //    {"mfv_neutralino_tau0000um_M0600.root", 99250, 1.24  },
-    //    {"mfv_neutralino_tau0000um_M0800.root", 99250, 0.15  },
-    //    {"mfv_neutralino_tau0000um_M1000.root", 99250, 0.0233},
-    //    {"mfv_neutralino_tau0010um_M0200.root", 99250, 888.0 },
-    //{"mfv_neutralino_tau0010um_M0400.root", 99250, 1  },
-    //    {"mfv_neutralino_tau0010um_M0600.root", 99250, 1.24  },
-    //    {"mfv_neutralino_tau0010um_M0800.root", 99250, 0.15  },
-    //    {"mfv_neutralino_tau0010um_M1000.root", 99250, 0.0233},
-    //    {"mfv_neutralino_tau0100um_M0200.root", 99250, 888.0 },
-    {"mfv_neutralino_tau0100um_M0400.root", 99250, 1  },
-    //    {"mfv_neutralino_tau0100um_M0600.root", 99250, 1.24  },
-    //    {"mfv_neutralino_tau0100um_M0800.root", 99250, 0.15  },
-    //    {"mfv_neutralino_tau0100um_M1000.root", 99250, 0.0233},
-    //    {"mfv_neutralino_tau1000um_M0200.root", 99250, 888.0 },
-    {"mfv_neutralino_tau1000um_M0400.root", 99250, 1  },
-    //    {"mfv_neutralino_tau1000um_M0600.root", 99250, 1.24  },
-    //    {"mfv_neutralino_tau1000um_M0800.root", 99250, 0.15  },
-    //    {"mfv_neutralino_tau1000um_M1000.root", 99250, 0.0233},
-    //    {"mfv_neutralino_tau9900um_M0200.root", 99250, 888.0 },
-    {"mfv_neutralino_tau9900um_M0400.root", 99250, 1  },
-    //    {"mfv_neutralino_tau9900um_M0600.root", 99250, 1.24  },
-    //    {"mfv_neutralino_tau9900um_M0800.root", 99250, 0.15  },
-    //                                                   0.0233
-    //    {"bjetsht0100.root",       99250, 1.34e5  },
-    //    {"bjetsht0250.root",       99250, 5.83e3  },
-    //    {"bjetsht0500.root",       99250, 2.18e2  },
-    //    {"bjetsht1000.root",       99250, 4.71e0  },
-    {"qcdht0100.root",         99250, 1.04e7  },
-    {"qcdht0250.root",         99250, 2.76e5  },
-    {"qcdht0500.root",         99250, 8.43e3  },
-    {"qcdht1000.root",         99250, 2.04e2  },
-    //    {"qcdpt0000.root",         99250, 4.859e10},
-    //    {"qcdpt0005.root",         99250, 4.264e10},
-    //    {"qcdpt0015.root",         99250, 9.883e08},
-    //    {"qcdpt0030.root",         99250, 6.629e07},
-    //    {"qcdpt0050.root",         99250, 8.149e06},
-    //    {"qcdpt0080.root",         99250, 1.034e06},
-    //    {"qcdpt0120.root",         99250, 1.563e05},
-    //    {"qcdpt0170.root",         99250, 3.414e04},
-    //    {"qcdpt0300.root",         99250, 1.760e03},
-    //    {"qcdpt0470.root",         99250, 1.139e02},
-    //    {"qcdpt0600.root",         99250, 2.699e01},
-    //    {"qcdpt0800.root",         99250, 3.550e00},
-    //    {"qcdpt1000.root",         99250, 7.378e-1},
-    //    {"qcdpt1400.root",         99250, 3.352e-2},
-    //    {"qcdpt1800.root",         99250, 1.829e-3},
-    //    {"singletop_s.root",       99250, 3.79},
-    //    {"singletop_s_tbar.root",  99250, 1.76},
-    //    {"singletop_t.root",       99250, 56.4},
-    //    {"singletop_t_tbar.root",  99250, 30.7},
-    //    {"singletop_tW.root",      99250, 11.1},
-    //    {"singletop_tW_tbar.root", 99250, 11.1},
-    {"ttbarhadronic.root",     99250, 225.2 * 0.457},
-    {"ttbarsemilep.root",      99250, 225.2 * 0.438},
-    {"ttbardilep.root",        99250, 225.2 * 0.105},
-    //    {"ttbarincl.root",         99250, 225.2},
-    //    {"ttzjets.root",           99250, 0.172},
-    //    {"ttwjets.root",           99250, 0.215},
-    //    {"ttgjets.root",           99250, 1.44},
-    //    {"tttt.root",              99250, 7.16E-4},
-    //    {"tthbb.root",             99250, 0.1293 * 0.577},
-    //    {"wjetstolnu.root",        99250, 3.04e4},
-    //    {"ww.root",                99250, 57.1},
-    //    {"wz.root",                99250, 32.3},
-    //    {"zz.root",                99250, 8.3},
+//    {"mfv_neutralino_tau0000um_M0200.root", 99850 , 1 },   // 888.0 },
+//    {"mfv_neutralino_tau0000um_M0400.root", 100000, 1 },   // 17.4  },
+//    {"mfv_neutralino_tau0000um_M0600.root", 100000, 1 },   // 1.24  },
+//    {"mfv_neutralino_tau0000um_M0800.root", 99900 , 1 },   // 0.15  },
+//    {"mfv_neutralino_tau0000um_M1000.root", 99996 , 1 },   // 0.0233},
+//    {"mfv_neutralino_tau0010um_M0200.root", 100000, 1 },   // 888.0 },
+//    {"mfv_neutralino_tau0010um_M0400.root", 100000, 1 },   // 17.4  },
+//    {"mfv_neutralino_tau0010um_M0600.root", 99700 , 1 },   // 1.24  },
+//    {"mfv_neutralino_tau0010um_M0800.root", 99950 , 1 },   // 0.15  },
+//    {"mfv_neutralino_tau0010um_M1000.root", 99899 , 1 },   // 0.0233},
+//    {"mfv_neutralino_tau0100um_M0200.root", 99700 , 1 },   // 888.0 },
+//    {"mfv_neutralino_tau0100um_M0400.root", 99250 , 1 },   // 17.4  },
+//    {"mfv_neutralino_tau0100um_M0600.root", 99650 , 1 },   // 1.24  },
+//    {"mfv_neutralino_tau0100um_M0800.root", 100000, 1 },   // 0.15  },
+//    {"mfv_neutralino_tau0100um_M1000.root", 99749 , 1 },   // 0.0233},
+//    {"mfv_neutralino_tau1000um_M0200.root", 99752 , 1 },   // 888.0 },
+//    {"mfv_neutralino_tau1000um_M0400.root", 99850 , 1 },   // 17.4  },
+//    {"mfv_neutralino_tau1000um_M0600.root", 99851 , 1 },   // 1.24  },
+//    {"mfv_neutralino_tau1000um_M0800.root", 99949 , 1 },   // 0.15  },
+//    {"mfv_neutralino_tau1000um_M1000.root", 100000, 1 },   // 0.0233},
+//    {"mfv_neutralino_tau9900um_M0200.root", 99950 , 1 },   // 888.0 },
+//    {"mfv_neutralino_tau9900um_M0400.root", 100000, 1 },   // 17.4  },
+//    {"mfv_neutralino_tau9900um_M0600.root", 99950 , 1 },   // 1.24  },
+//    {"mfv_neutralino_tau9900um_M0800.root", 99900 , 1 },   // 0.15  },
+//    {"mfv_neutralino_tau9900um_M1000.root", 99899 , 1 },   // 0.0233},
+//    {"qcdht0100.root",         4455967, 1.04e7  },
+//    {"qcdht0250.root",        11137722, 2.76e5  },
+//    {"qcdht0500.root",         4991784, 8.43e3  },
+//    {"qcdht1000.root",         6968522, 2.04e2  },
+    {"ttbarhadronic.root",     9738903, 225.2 * 0.457},
+    {"ttbarsemilep.root",      7987193, 225.2 * 0.438},
+    {"ttbardilep.root",        1389075, 225.2 * 0.105},
   };
 
   for (const Sample& s : samples) {
