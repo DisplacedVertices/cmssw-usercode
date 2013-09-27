@@ -173,7 +173,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
-    from JMTucker.Tools.Samples import background_samples, mfv_signal_samples, data_samples
+    from JMTucker.Tools.Samples import background_samples, smaller_background_samples, mfv_signal_samples, data_samples
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
 
     def pset_adder(sample):
@@ -197,16 +197,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        CMSSW_use_parent = 1,
                        pset_modifier = pset_adder
                        )
-    from JMTucker.Tools.Samples import singletop_s, singletop_s_tbar, singletop_t, singletop_t_tbar, singletop_tW, singletop_tW_tbar, ww, wz, zz
-    singletop_s.ana_dataset_override = '/T_s-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    singletop_s_tbar.ana_dataset_override = '/Tbar_s-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    singletop_t.ana_dataset_override = '/T_t-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    singletop_t_tbar.ana_dataset_override = '/Tbar_t-channel_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    singletop_tW.ana_dataset_override = '/T_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    singletop_tW_tbar.ana_dataset_override = '/Tbar_tW-channel-DR_TuneZ2star_8TeV-powheg-tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    ww.ana_dataset_override = '/WW_TuneZ2star_8TeV_pythia6_tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    wz.ana_dataset_override = '/WZ_TuneZ2star_8TeV_pythia6_tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
-    zz.ana_dataset_override = '/ZZ_TuneZ2star_8TeV_pythia6_tauola/jchu-jtuple_v7-e4d108e5d014df5f9335feb5272936d6/USER'
 
-    samples = mfv_signal_samples + background_samples + [singletop_s, singletop_s_tbar, singletop_t, singletop_t_tbar, singletop_tW, singletop_tW_tbar, ww, wz, zz]
+    samples = mfv_signal_samples + background_samples + [s for s in smaller_background_samples if name not in 'ttgjets ttwjets ttzjets']
     cs.submit_all(samples)
