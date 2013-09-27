@@ -191,7 +191,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   std::vector<double> best_cos_angle(n_jets, 1e9);
   std::vector<double> second_best_cos_angle(n_jets, 1e9);
 
-  std::vector<int> index_by_miss_dist(n_jets);
+  std::vector<int> index_by_miss_dist(n_jets, -1);
   std::vector<Measurement1D> best_miss_dist(n_jets, Measurement1D(1e9, 1));
   std::vector<Measurement1D> second_best_miss_dist(n_jets, Measurement1D(1e9, 1));
 
@@ -259,39 +259,35 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
         miss_dist = Measurement1D(miss_dist_value, miss_dist_err);
       }
 
-      if (ntracks > best_ntracks[ijet]) {
+      if (ntracks_ptmin >= min_tracks_shared && ntracks > best_ntracks[ijet]) {
         second_best_ntracks[ijet] = best_ntracks[ijet];
         best_ntracks[ijet] = ntracks;
-        if (ntracks >= min_tracks_shared)
-          index_by_ntracks[ijet] = ivtx;
+        index_by_ntracks[ijet] = ivtx;
       }
 
-      if (ntracks_ptmin > best_ntracks_ptmin[ijet]) {
+      if (ntracks_ptmin >= min_tracks_shared && ntracks_ptmin > best_ntracks_ptmin[ijet]) {
         second_best_ntracks_ptmin[ijet] = best_ntracks_ptmin[ijet];
         best_ntracks_ptmin[ijet] = ntracks_ptmin;
-        if (ntracks_ptmin >= min_tracks_shared)
-          index_by_ntracks_ptmin[ijet] = ivtx;
+        index_by_ntracks_ptmin[ijet] = ivtx;
       }
 
-      if (sum_nhits > best_sum_nhits[ijet]) {
+      if (sum_nhits >= min_hits_shared && sum_nhits > best_sum_nhits[ijet]) {
         second_best_sum_nhits[ijet] = best_sum_nhits[ijet];
         best_sum_nhits[ijet] = sum_nhits;
-        if (sum_nhits >= min_hits_shared)
-          index_by_sum_nhits[ijet] = ivtx;
+        index_by_sum_nhits[ijet] = ivtx;
       }
-        
-      if (fabs(cos_angle - 1) < fabs(best_cos_angle[ijet] - 1)) {
+      
+      
+      if (fabs(cos_angle - 1) <= max_cos_angle_diff && fabs(cos_angle - 1) < fabs(best_cos_angle[ijet] - 1)) {
         second_best_cos_angle[ijet] = best_cos_angle[ijet];
         best_cos_angle[ijet] = cos_angle;
-        if (fabs(cos_angle - 1) <= max_cos_angle_diff)
-          index_by_cos_angle[ijet] = ivtx;
+        index_by_cos_angle[ijet] = ivtx;
       }
 
-      if (miss_dist.value() < best_miss_dist[ijet].value()) {
+      if (miss_dist.value() <= max_miss_dist && miss_dist.significance() <= max_miss_sig && miss_dist.value() < best_miss_dist[ijet].value()) {
         second_best_miss_dist[ijet] = best_miss_dist[ijet];
         best_miss_dist[ijet] = miss_dist;
-        if (miss_dist.value() <= max_miss_dist && miss_dist.significance() <= max_miss_sig)
-          index_by_miss_dist[ijet] = ivtx;
+        index_by_miss_dist[ijet] = ivtx;
       }
 
       if (histos) {
