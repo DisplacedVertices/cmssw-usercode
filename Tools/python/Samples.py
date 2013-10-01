@@ -314,7 +314,7 @@ auxiliary_data_samples = []
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = background_samples + auxiliary_background_samples + mfv_signal_samples 
+all_mc_samples = background_samples + smaller_background_samples + auxiliary_background_samples + mfv_signal_samples 
 all_samples = all_data_samples + all_mc_samples
 
 for sample in all_samples:
