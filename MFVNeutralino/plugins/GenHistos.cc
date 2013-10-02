@@ -69,6 +69,8 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
   TH2F* h_nbhadronsvsbquarks;
   TH2F* h_nbhadronsvsbquarks_wcuts;
+
+  TH1F* h_npartons_in_acc;
 };
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
@@ -278,6 +280,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", ";number of b quarks;number of b hadrons", 20, 0, 20, 20, 0, 20);
   h_nbhadronsvsbquarks_wcuts = fs->make<TH2F>("h_nbhadronsvsbquarks_wcuts", "", 20, 0, 20, 20, 0, 20);
+
+  h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
 }
 
 namespace {
@@ -442,6 +446,23 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_lsp_dist3d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
                            mci.stranges[0]->vy() - mci.stranges[1]->vy(),
                            mci.stranges[0]->vz() - mci.stranges[1]->vz()));
+
+    std::vector<const reco::GenParticle*> lsp_partons;
+    for (int i = 0; i < 2; ++i) {
+      lsp_partons.push_back(mci.stranges[i]);
+      lsp_partons.push_back(mci.bottoms[i]);
+      lsp_partons.push_back(mci.bottoms_from_tops[i]);
+      if (mci.decay_type[i] == 3) {
+        lsp_partons.push_back(mci.W_daughters[i][0]);
+        lsp_partons.push_back(mci.W_daughters[i][1]);
+      }
+    } 
+
+    int npartons_in_acc = 0;
+    for (const reco::GenParticle* p : lsp_partons) 
+      if (p->pt() > 20 && fabs(p->eta()) < 2.5)
+        ++npartons_in_acc;
+    h_npartons_in_acc->Fill(npartons_in_acc);
   }
 
   // Now look at b quarks separately. Count the number of status-3 b
