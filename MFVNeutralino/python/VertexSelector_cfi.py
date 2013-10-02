@@ -1,10 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
-                                     vertex_src = cms.InputTag('mfvVertices'),
-                                     primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
-                                     gen_vertices_src = cms.InputTag('mfvGenVertices'),
-                                     track_vertex_weight_min = cms.double(0.5),
+                                     vertex_aux_src = cms.InputTag('mfvVerticesAuxTmp'),
+                                     produce_refs = cms.bool(True),
                                      min_ntracks = cms.int32(0),
                                      max_chi2dof = cms.double(1e9),
                                      max_err2d   = cms.double(1e9),
@@ -19,7 +17,7 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      min_maxtrackpt = cms.double(0),
                                      max_bs2derr = cms.double(1e9),
                                      min_njetssharetks = cms.int32(0),
-                                     sort_by = cms.string('mass'),
+                                     sort_by = cms.string('ntracks'),
                                      )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(

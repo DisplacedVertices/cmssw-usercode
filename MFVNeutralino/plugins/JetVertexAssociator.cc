@@ -11,6 +11,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JMTucker/MFVNeutralino/interface/JetVertexAssociation.h"
 
 class MFVJetVertexAssociator : public edm::EDProducer {
 public:
@@ -19,12 +20,12 @@ public:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
 private:
-  typedef edm::AssociationMap<edm::OneToMany<reco::VertexCollection, pat::JetCollection> > JetVertexAssociation;
-  enum { by_ntracks, by_ntracks_ptmin, by_miss_dist, by_combination, by_combination_ptmin, nassoc };
-  static const char* assoc_names[nassoc];
+  typedef MFVJetVertexAssociation Assoc;
+  typedef Assoc::type Association;
 
   const edm::InputTag jet_src;
   const edm::InputTag vertex_src;
+  const bool input_is_refs;
   const std::string tag_info_name;
   const double min_vertex_track_weight;
   const int min_tracks_shared;
@@ -66,17 +67,16 @@ private:
   TH2F* h_best_miss_dist_err_v_second;
   TH2F* h_best_miss_dist_sig_v_second;
 
-  TH2F* h_n_matchedjets_v_jets[nassoc];
-  TH2F* h_n_matchedjets_v_vertices[nassoc];
-  TH2F* h_n_matchedvertices_v_jets[nassoc];
-  TH2F* h_n_matchedvertices_v_vertices[nassoc];
+  TH2F* h_n_matchedjets_v_jets[Assoc::NBy];
+  TH2F* h_n_matchedjets_v_vertices[Assoc::NBy];
+  TH2F* h_n_matchedvertices_v_jets[Assoc::NBy];
+  TH2F* h_n_matchedvertices_v_vertices[Assoc::NBy];
 };
-
-const char* MFVJetVertexAssociator::assoc_names[MFVJetVertexAssociator::nassoc] = { "byNtracks", "byNtracksPtmin", "byMissDist", "byCombination", "byCombinationPtmin" };
 
 MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
   : jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    input_is_refs(cfg.getParameter<bool>("input_is_refs")),
     tag_info_name(cfg.getParameter<std::string>("tag_info_name")),
     min_vertex_track_weight(cfg.getParameter<double>("min_vertex_track_weight")),
     min_tracks_shared(cfg.getParameter<int>("min_tracks_shared")),
@@ -88,8 +88,8 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
-  for (int i = 0; i < nassoc; ++i)
-    produces<JetVertexAssociation>(assoc_names[i]);
+  for (int i = 0; i < Assoc::NBy; ++i)
+    produces<Association>(Assoc::names[i]);
 
   if (histos) {
     edm::Service<TFileService> fs;
@@ -125,10 +125,10 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     h_best_miss_dist_sig_v_second = fs->make<TH2F>("h_best_miss_dist_sig_v_second", ";N#sigma(jet miss distance to 2nd-best vertex);N#sigma(jet miss distance to best vertex)", 100, 0, 50, 100, 0, 50);
 
     for (int i = 0; i < 5; ++i) {
-      h_n_matchedjets_v_jets        [i] = fs->make<TH2F>(TString::Format("h_n_matched%sjets_v_jets",         assoc_names[i]), TString::Format(";# of jets;# of matched jets (%s)",         assoc_names[i]), 20, 0, 20, 20, 0, 20);
-      h_n_matchedjets_v_vertices    [i] = fs->make<TH2F>(TString::Format("h_n_matched%sjets_v_vertices",     assoc_names[i]), TString::Format(";# of vertices;# of matched jets (%s)",     assoc_names[i]), 20, 0, 20, 20, 0, 20);
-      h_n_matchedvertices_v_jets    [i] = fs->make<TH2F>(TString::Format("h_n_matched%svertices_v_jets",     assoc_names[i]), TString::Format(";# of jets;# of matched vertices (%s)",     assoc_names[i]), 20, 0, 20, 20, 0, 20);
-      h_n_matchedvertices_v_vertices[i] = fs->make<TH2F>(TString::Format("h_n_matched%svertices_v_vertices", assoc_names[i]), TString::Format(";# of vertices;# of matched vertices (%s)", assoc_names[i]), 20, 0, 20, 20, 0, 20);
+      h_n_matchedjets_v_jets        [i] = fs->make<TH2F>(TString::Format("h_n_matched%sjets_v_jets",         Assoc::names[i]), TString::Format(";# of jets;# of matched jets (%s)",         Assoc::names[i]), 20, 0, 20, 20, 0, 20);
+      h_n_matchedjets_v_vertices    [i] = fs->make<TH2F>(TString::Format("h_n_matched%sjets_v_vertices",     Assoc::names[i]), TString::Format(";# of vertices;# of matched jets (%s)",     Assoc::names[i]), 20, 0, 20, 20, 0, 20);
+      h_n_matchedvertices_v_jets    [i] = fs->make<TH2F>(TString::Format("h_n_matched%svertices_v_jets",     Assoc::names[i]), TString::Format(";# of jets;# of matched vertices (%s)",     Assoc::names[i]), 20, 0, 20, 20, 0, 20);
+      h_n_matchedvertices_v_vertices[i] = fs->make<TH2F>(TString::Format("h_n_matched%svertices_v_vertices", Assoc::names[i]), TString::Format(";# of vertices;# of matched vertices (%s)", Assoc::names[i]), 20, 0, 20, 20, 0, 20);
     }
   }
 }
@@ -137,21 +137,33 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jet_src, jets);
 
-  edm::Handle<reco::VertexCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
+  std::vector<reco::VertexRef> vertices;
+
+  if (input_is_refs) {
+    edm::Handle<reco::VertexRefVector> h;
+    event.getByLabel(vertex_src, h);
+    for (const reco::VertexRef& ref : *h)
+      vertices.push_back(ref);
+  }
+  else {
+    edm::Handle<reco::VertexCollection> h;
+    event.getByLabel(vertex_src, h);
+    for (size_t i = 0; i < h->size(); ++i)
+      vertices.push_back(reco::VertexRef(h, i));
+  }
 
   const size_t n_jets = jets->size();
-  const size_t n_vertices = vertices->size();
+  const size_t n_vertices = vertices.size();
 
   if (histos) {
     h_n_jets_v_vertices->Fill(n_vertices, n_jets);
-    for (const reco::Vertex& vtx : *vertices)
-      h_n_vertex_tracks->Fill(vtx.nTracks(min_vertex_track_weight));
+    for (const reco::VertexRef& vtx : vertices)
+      h_n_vertex_tracks->Fill(vtx->nTracks(min_vertex_track_weight));
   }
 
   if (verbose) {
     for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
-      const reco::Vertex& vtx = vertices->at(ivtx);
+      const reco::Vertex& vtx = *vertices.at(ivtx);
       printf("ivtx %lu ntracks %i mass %f\n", ivtx, vtx.nTracks(min_vertex_track_weight), vtx.p4().mass());
     }
   }
@@ -218,7 +230,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
     const TVector3 jet_mom_dir = TVector3(jet.px(), jet.py(), jet.pz()).Unit();
 
     for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
-      const reco::Vertex& vtx = vertices->at(ivtx);
+      const reco::Vertex& vtx = *vertices.at(ivtx);
       int ntracks = 0;
       int ntracks_ptmin = 0;
       int sum_nhits = 0;
@@ -326,47 +338,47 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   }
 
 
-  std::auto_ptr<JetVertexAssociation> assoc[5];
-  for (int i = 0; i < nassoc; ++i)
-    assoc[i].reset(new JetVertexAssociation);
+  std::auto_ptr<Association> assoc[Assoc::NBy];
+  for (int i = 0; i < Assoc::NBy; ++i)
+    assoc[i].reset(new Association);
 
-  int n_matchedvertices[nassoc] = {0};
-  int n_matchedjets[nassoc] = {0};
+  int n_matchedvertices[Assoc::NBy] = {0};
+  int n_matchedjets[Assoc::NBy] = {0};
 
   for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
-    reco::VertexRef vtxref(vertices, ivtx);
-    int these_n_matchedjets[nassoc] = {0};
+    reco::VertexRef vtxref = vertices.at(ivtx);
+    int these_n_matchedjets[Assoc::NBy] = {0};
 
     for (size_t ijet = 0; ijet < n_jets; ++ijet) {
       pat::JetRef jetref(jets, ijet);
       
       if (index_by_ntracks[ijet] == int(ivtx)) {
-        assoc[by_ntracks]->insert(vtxref, jetref);
-        ++these_n_matchedjets[by_ntracks];
+        assoc[Assoc::ByNtracks]->insert(vtxref, jetref);
+        ++these_n_matchedjets[Assoc::ByNtracks];
       }
 
       if (index_by_ntracks_ptmin[ijet] == int(ivtx)) {
-        assoc[by_ntracks_ptmin]->insert(vtxref, jetref);
-        ++these_n_matchedjets[by_ntracks_ptmin];
+        assoc[Assoc::ByNtracksPtmin]->insert(vtxref, jetref);
+        ++these_n_matchedjets[Assoc::ByNtracksPtmin];
       }
 
       if (index_by_miss_dist[ijet] == int(ivtx)) {
-        assoc[by_miss_dist]->insert(vtxref, jetref);
-        ++these_n_matchedjets[by_miss_dist];
+        assoc[Assoc::ByMissDist]->insert(vtxref, jetref);
+        ++these_n_matchedjets[Assoc::ByMissDist];
       }
 
       if (index_by_ntracks[ijet] == int(ivtx) || index_by_miss_dist[ijet] == int(ivtx)) {
-        assoc[by_combination]->insert(vtxref, jetref);
-        ++these_n_matchedjets[by_combination];
+        assoc[Assoc::ByCombination]->insert(vtxref, jetref);
+        ++these_n_matchedjets[Assoc::ByCombination];
       }
 
       if (index_by_ntracks_ptmin[ijet] == int(ivtx) || index_by_miss_dist[ijet] == int(ivtx)) {
-        assoc[by_combination_ptmin]->insert(vtxref, jetref);
-        ++these_n_matchedjets[by_combination_ptmin];
+        assoc[Assoc::ByCombinationPtmin]->insert(vtxref, jetref);
+        ++these_n_matchedjets[Assoc::ByCombinationPtmin];
       }
     }
 
-    for (int i = 0; i < nassoc; ++i) {
+    for (int i = 0; i < Assoc::NBy; ++i) {
       n_matchedjets[i] += these_n_matchedjets[i];
       if (these_n_matchedjets[i] > 0)
         ++n_matchedvertices[i];
@@ -374,7 +386,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   }
 
   if (histos) {
-    for (int i = 0; i < nassoc; ++i) {
+    for (int i = 0; i < Assoc::NBy; ++i) {
       h_n_matchedjets_v_jets        [i]->Fill(n_jets,     n_matchedjets[i]);
       h_n_matchedjets_v_vertices    [i]->Fill(n_vertices, n_matchedjets[i]);
       h_n_matchedvertices_v_jets    [i]->Fill(n_jets,     n_matchedvertices[i]);
@@ -382,8 +394,8 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
     }
   }
 
-  for (int i = 0; i < nassoc; ++i)
-    event.put(assoc[i], assoc_names[i]);
+  for (int i = 0; i < Assoc::NBy; ++i)
+    event.put(assoc[i], Assoc::names[i]);
 }
 
 DEFINE_FWK_MODULE(MFVJetVertexAssociator);

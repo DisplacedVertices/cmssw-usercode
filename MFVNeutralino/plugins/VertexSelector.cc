@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/MFVNeutralino/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 
 class MFVVertexSelector : public edm::EDProducer {
@@ -13,12 +14,11 @@ public:
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
-  bool use_vertex(const reco::Vertex& vtx, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex) const;
+  bool use_vertex(const MFVVertexAux& vtx) const;
 
-  const edm::InputTag vertex_src;
-  const edm::InputTag primary_vertex_src;
-  const edm::InputTag gen_vertices_src;
-  const double track_vertex_weight_min;
+  const edm::InputTag vertex_aux_src;
+  const bool produce_refs;
+
   const int min_ntracks;
   const double max_chi2dof;
   const double max_err2d;
@@ -36,16 +36,11 @@ private:
 
   enum sort_by_this { sort_by_mass, sort_by_ntracks };
   sort_by_this sort_by;
-
-  bool gen_valid;
-  std::vector<double> gen_verts;
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
-  : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    gen_vertices_src(cfg.getParameter<edm::InputTag>("gen_vertices_src")),
-    track_vertex_weight_min(cfg.getParameter<double>("track_vertex_weight_min")),
+  : vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
+    produce_refs(cfg.getParameter<bool>("produce_refs")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     max_err2d(cfg.getParameter<double>("max_err2d")),
@@ -61,7 +56,11 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
     min_njetssharetks(cfg.getParameter<int>("min_njetssharetks"))
 {
-  produces<reco::VertexCollection>();
+  if (produce_refs)
+    produces<reco::VertexRefVector>();
+  else
+    produces<reco::VertexCollection>();
+  produces<MFVVertexAuxCollection>();
 
   std::string x = cfg.getParameter<std::string>("sort_by");
   if (x == "mass")
@@ -72,79 +71,55 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVVertexSelector") << "invalid sort_by";
 }
 
-bool MFVVertexSelector::use_vertex(const reco::Vertex& vtx, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex) const {
-  bool use =
-    int(vtx.tracksSize()) >= min_ntracks && // JMTBAD use nTracks(0.5)
-    vtx.normalizedChi2() < max_chi2dof   &&
-    vtx.p4().mass() >= min_mass;
-
-  if (!use) return false;
-
-  if (max_err2d < 1e6)
-    use = use && mfv::abs_error(vtx, false) < max_err2d;
-
-  if (!use) return false;
-
-  if (max_err3d < 1e6)
-    use = use && mfv::abs_error(vtx, true) < max_err3d;
-
-  if (!use) return false;
-
-  if (min_drmin > 0 || min_drmax > 0 || max_drmin < 1e6 || max_drmax < 1e6 || min_maxtrackpt > 0) {
-    mfv::vertex_tracks_distance tks(vtx, track_vertex_weight_min);
-    use = use && tks.drmin >= min_drmin && tks.drmin < max_drmin
-              && tks.drmax >= min_drmax && tks.drmax < max_drmax
-              && tks.maxtrackpt >= min_maxtrackpt;
-  }
-
-  if (!use) return false;
-  
-  if (gen_valid) {
-    const float gd3sg = mfv::gen_dist(vtx, gen_verts, true).significance();
-    use = use && gd3sg >= min_gen3dsig && gd3sg < max_gen3dsig;
-  }
-
-  if (!use) return false;
-
-  if (max_bs2derr < 1e6) {
-    mfv::vertex_distances dst(vtx, gen_verts, beamspot, primary_vertex);
-    use = use && dst.bs2ddist.error() < max_bs2derr;
-  }
-
-  return use;
+bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
+  return 
+    vtx.ntracks >= min_ntracks &&
+    vtx.chi2/vtx.ndof < max_chi2dof &&
+    vtx.gen2derr < max_err2d &&
+    vtx.gen3derr < max_err3d &&
+    vtx.mass >= min_mass && 
+    vtx.drmin >= min_drmin &&
+    vtx.drmin <  max_drmin &&
+    vtx.drmax >= min_drmax &&
+    vtx.drmax <  max_drmax &&
+    vtx.gen3dsig() >= min_gen3dsig &&
+    vtx.gen3dsig() <  max_gen3dsig &&
+    vtx.maxtrackpt >= min_maxtrackpt &&
+    vtx.bs2derr < max_bs2derr &&
+    vtx.njets[0] >= min_njetssharetks;
 }
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
-  edm::Handle<std::vector<double> > gen_vertices;
-  event.getByLabel(gen_vertices_src, gen_vertices);
-  gen_valid = gen_vertices->size() == 6;
-  if (gen_valid)
-    gen_verts = *gen_vertices;
+  edm::Handle<MFVVertexAuxCollection> auxes;
+  event.getByLabel(vertex_aux_src, auxes);
 
-  edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel("offlineBeamSpot", beamspot);
+  std::auto_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
+  std::auto_ptr<reco::VertexRefVector>  selected_vertex_refs(new reco::VertexRefVector);
 
-  edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByLabel(primary_vertex_src, primary_vertices);
-  const reco::Vertex* primary_vertex = 0;
-  if (primary_vertices->size())
-    primary_vertex = &primary_vertices->at(0);
-
-  edm::Handle<reco::VertexCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
-
-  std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
-
-  for (const reco::Vertex& v : *vertices)
-    if (use_vertex(v, *beamspot, primary_vertex))
-      selected_vertices->push_back(v);
+  for (const MFVVertexAux& aux : *auxes) {
+    if (use_vertex(aux)) {
+      MFVVertexAux sel(aux);
+      sel.selected = true;
+      selected->push_back(sel);
+      selected_vertex_refs->push_back(aux.ref);
+    }
+  }
 
   if (sort_by == sort_by_mass)
-    std::sort(selected_vertices->begin(), selected_vertices->end(), [](const reco::Vertex& a, const reco::Vertex& b) { return a.p4().mass() > b.p4().mass(); });
+    std::sort(selected->begin(), selected->end(), [](const MFVVertexAux& a, const MFVVertexAux& b) { return a.mass > b.mass; });
   else if (sort_by == sort_by_ntracks)
-    std::sort(selected_vertices->begin(), selected_vertices->end(), [](const reco::Vertex& a, const reco::Vertex& b) { return a.nTracks() > b.nTracks(); });
+    std::sort(selected->begin(), selected->end(), [](const MFVVertexAux& a, const MFVVertexAux& b) { return a.ntracks > b.ntracks; });
 
-  event.put(selected_vertices);
+  if (!produce_refs) {
+    std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
+    for (const reco::VertexRef& v : *selected_vertex_refs)
+      selected_vertices->push_back(*v);
+    event.put(selected_vertices);
+  }
+  else
+    event.put(selected_vertex_refs);
+
+  event.put(selected);
 }
 
 DEFINE_FWK_MODULE(MFVVertexSelector);

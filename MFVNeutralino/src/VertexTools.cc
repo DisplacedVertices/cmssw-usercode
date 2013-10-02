@@ -79,10 +79,9 @@ namespace mfv {
     return std::make_pair(success, compat);
   }
 
-  vertex_tracks_distance::vertex_tracks_distance(const reco::Vertex& sv, const double track_vertex_weight_min) {
+  vertex_tracks_distance::vertex_tracks_distance(const reco::Vertex& sv) {
     drmin = 1e99;
     drmax = dravg = dravgw = drrms = drrmsw = 0;
-    maxtrackpt = 0;
 
     std::vector<double> drs;
     std::vector<double> ws;
@@ -94,10 +93,6 @@ namespace mfv {
     for (auto trki = trkb; trki != trke; ++trki) {
       if (sv.trackWeight(*trki) < track_vertex_weight_min)
         continue;
-
-      double pt = (*trki)->pt();
-      if (pt > maxtrackpt)
-        maxtrackpt = pt;
 
       for (auto trkj = trki + 1; trkj != trke; ++trkj) {
         if (sv.trackWeight(*trkj) < track_vertex_weight_min)

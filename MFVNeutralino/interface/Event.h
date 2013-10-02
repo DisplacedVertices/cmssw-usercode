@@ -1,0 +1,96 @@
+#ifndef JMTucker_MFVNeutralino_interface_Event_h
+#define JMTucker_MFVNeutralino_interface_Event_h
+
+#include "TLorentzVector.h"
+
+struct MFVEvent {
+  typedef unsigned char uchar;
+  typedef unsigned short ushort;
+  typedef unsigned int uint;
+
+  static TLorentzVector p4(float pt, float eta, float phi, float mass) {
+    TLorentzVector v;
+    v.SetPtEtaPhiM(pt, eta, phi, mass);
+    return v;
+  }
+
+  template <typename T>
+  static T min(T x, T y) {
+    return x < y ? x : y;
+  }
+
+  template <typename T>
+  static T mag(T x, T y) {
+    return sqrt(x*x + y*y);
+  }
+
+  template <typename T>
+  static T mag(T x, T y, T z) {
+    return sqrt(x*x + y*y + z*z);
+  }
+
+  bool gen_valid;
+  float gen_lsp_pt[2];
+  float gen_lsp_eta[2];
+  float gen_lsp_phi[2];
+  float gen_lsp_mass[2];
+  float gen_lsp_decay[2][3];
+  uchar gen_decay_type[2];
+  uchar gen_partons_in_acc;
+
+  TLorentzVector gen_lsp_p4(int w) const {
+    return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
+  }
+
+  float minlspdist2d() const {
+    return min(mag(gen_lsp_decay[0][0] - bsx, gen_lsp_decay[0][1] - bsy),
+               mag(gen_lsp_decay[1][0] - bsx, gen_lsp_decay[1][1] - bsy));
+  }
+
+  float lspdist2d() const {
+    return mag(gen_lsp_decay[0][0] - gen_lsp_decay[1][0],
+               gen_lsp_decay[0][1] - gen_lsp_decay[1][1]);
+  }
+
+  float lspdist3d() const {
+    return mag(gen_lsp_decay[0][0] - gen_lsp_decay[1][0],
+               gen_lsp_decay[0][1] - gen_lsp_decay[1][1],
+               gen_lsp_decay[0][2] - gen_lsp_decay[1][2]);
+  }
+
+  enum { n_trigger_paths = 1 };
+  bool pass_trigger[n_trigger_paths];
+
+  uchar npfjets;
+  float pfjetpt4;
+  float pfjetpt5;
+
+  float npu;
+
+  float bsx;
+  float bsy;
+  float bsz;
+
+  uchar npv;
+  float pvx;
+  float pvy;
+  float pvz;
+  uchar pv_ntracks;
+  float pv_sumpt2;
+
+  float pv_rho() const {
+    return mag(pvx - bsx, pvy - bsy);
+  }
+
+  uchar njets;
+  float jet_ht;
+  uchar nbtags;
+  uchar nmu[3];
+  uchar nel[3];
+
+  int nlep(int w) const {
+    return int(nmu[w]) + int(nel[w]);
+  }
+};
+
+#endif

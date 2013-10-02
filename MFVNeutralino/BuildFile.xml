@@ -1,6 +1,7 @@
 <use name="clhep"/>
 <use name="DataFormats/Common"/>
 <use name="DataFormats/VertexReco"/>
+<use name="Geometry/TrackerGeometryBuilder"/>
 <use name="JMTucker/Tools"/>
 <use name="RecoVertex/VertexTools"/>
 <export>

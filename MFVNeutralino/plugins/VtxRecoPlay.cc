@@ -44,37 +44,6 @@
 #include "JMTucker/MFVNeutralino/plugins/VertexNtuple.h"
 //#include "JMTucker/Tools/interface/Framework.h"
 
-namespace {
-  template <typename T>
-  T min(T x, T y) {
-    return x < y ? x : y;
-  }
-
-  template <typename T>
-  T mag(T x, T y) {
-    return sqrt(x*x + y*y);
-  }
-
-  template <typename T>
-  T mag(T x, T y, T z) {
-    return sqrt(x*x + y*y + z*z);
-  }
-
-  template <typename T>
-  double mag(const T& v) {
-    return mag(v.x(), v.y(), v.z());
-  }
-
-  template <typename V>
-  double coord(const V& v, const int i) {
-    if      (i == 0) return v.x();
-    else if (i == 1) return v.y();
-    else if (i == 2) return v.z();
-    else
-      throw cms::Exception("coord") << "no such coordinate " << i;
-  }
-}
-
 struct tracker_space_extent {
   double min_r;
   double max_r;
@@ -840,7 +809,8 @@ void VtxRecoPlay::analyze(const edm::Event& event, const edm::EventSetup& setup)
     int max_trackicity = max_tcity != trackicity.end() ? *max_tcity : 0;
     h_sv_max_trackicity->Fill(ntracks, max_trackicity);
 
-    const mfv::vertex_tracks_distance vtx_tks_dist(sv, track_vertex_weight_min);
+    assert(mfv::track_vertex_weight_min == track_vertex_weight_min);
+    const mfv::vertex_tracks_distance vtx_tks_dist(sv);
 
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex);
 

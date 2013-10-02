@@ -5,6 +5,8 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 namespace mfv {
+  static const double track_vertex_weight_min = 0.5;
+
   float abs_error(const reco::Vertex& sv, bool use3d);
   Measurement1D gen_dist(const reco::Vertex& sv, const std::vector<double>& gen_verts, const bool use3d);
   std::pair<bool, float> compatibility(const reco::Vertex& x, const reco::Vertex& y, bool use3d);
@@ -13,9 +15,8 @@ namespace mfv {
     double drmin, drmax;
     double dravg, dravgw, dravgvw;
     double drrms, drrmsw, drrmsvw;
-    double maxtrackpt; // JMTBAD
 
-    vertex_tracks_distance(const reco::Vertex& sv, const double track_vertex_weight_min);
+    vertex_tracks_distance(const reco::Vertex& sv);
   };
 
   struct vertex_distances {
