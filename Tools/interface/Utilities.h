@@ -20,4 +20,37 @@ void set_bin_labels(TAxis* xax, const char** labels);
 void fill_by_label(TH1F* h, const std::string& label);
 void fill_by_label(TH2F* h, const std::string& label_x, const std::string& label_y);
 
+template <typename T>
+T min(T x, T y) {
+  return x < y ? x : y;
+}
+
+template <typename T>
+T mag(T x, T y) {
+  return sqrt(x*x + y*y);
+}
+
+template <typename T>
+T mag(T x, T y, T z) {
+  return sqrt(x*x + y*y + z*z);
+}
+
+template <typename T, typename T2>
+T2 mag(const T& v) {
+  return mag<T2>(v.x(), v.y(), v.z());
+}
+
+template <typename V>
+double coord(const V& v, const int i) {
+  if      (i == 0) return v.x();
+  else if (i == 1) return v.y();
+  else if (i == 2) return v.z();
+  else
+    throw cms::Exception("coord") << "no such coordinate " << i;
+}
+
+typedef unsigned char uchar;
+uchar int2uchar(int x);
+void inc_uchar(uchar& x);
+
 #endif

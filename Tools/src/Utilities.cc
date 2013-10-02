@@ -76,3 +76,12 @@ void fill_by_label(TH2F* h, const std::string& label_x, const std::string& label
   }
 }
 
+uchar int2uchar(int x) {
+  assert(x >= 0 && x <= 255);
+  return (uchar)x;
+}
+
+void inc_uchar(uchar& x) {
+  assert(x < 255);
+  ++x;
+}
