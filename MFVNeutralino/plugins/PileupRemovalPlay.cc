@@ -1,7 +1,9 @@
 #include "TH2F.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -24,9 +26,12 @@ class PileupRemovalPlay : public edm::EDAnalyzer {
   typedef std::map<int, LightTrackMatch> LightTrackMatchMap;
   const edm::InputTag pucands_src;
   const edm::InputTag nonpucands_src;
+  const edm::InputTag pf_jets_src;
+  const edm::InputTag pat_jets_src;
   const edm::InputTag pv_src;
   const edm::InputTag ltmm_src;
   const double pt_cut;
+  const bool verbose;
 
   TH1F* h_num;
   TH1F* h_num_null;
@@ -116,9 +121,12 @@ class PileupRemovalPlay : public edm::EDAnalyzer {
 PileupRemovalPlay::PileupRemovalPlay(const edm::ParameterSet& cfg)
   : pucands_src(cfg.getParameter<edm::InputTag>("pucands_src")),
     nonpucands_src(cfg.getParameter<edm::InputTag>("nonpucands_src")),
+    pf_jets_src(cfg.getParameter<edm::InputTag>("pf_jets_src")),
+    pat_jets_src(cfg.getParameter<edm::InputTag>("pat_jets_src")),
     pv_src(cfg.getParameter<edm::InputTag>("pv_src")),
     ltmm_src(cfg.getParameter<edm::InputTag>("ltmm_src")),
-    pt_cut(cfg.getParameter<double>("pt_cut"))
+    pt_cut(cfg.getParameter<double>("pt_cut")),
+    verbose(cfg.getParameter<bool>("verbose"))
 {
   edm::Service<TFileService> fs;
   h_num = fs->make<TH1F>("h_num", ";number of pucands;events", 2000, 0, 2000);
@@ -226,6 +234,70 @@ void PileupRemovalPlay::analyze(const edm::Event& event, const edm::EventSetup&)
   for (const reco::PFCandidate& nonpucand : *nonpucands) {
     if (nonpucand.particleId() == reco::PFCandidate::h) {
       ++num_nonpucands;
+    }
+  }
+
+  if (verbose) {
+    printf("PU candidates\n");
+    int itrk = 0;
+    for (const reco::PFCandidate& pfcand : *pucands) {
+      reco::TrackRef tk = pfcand.trackRef();
+      if (tk.isNull())
+        continue;
+      printf("  track #%i: q: %i pt %6.4f eta %6.4f phi %6.4f\n", itrk++, tk->charge(), tk->pt(), tk->eta(), tk->phi());
+    }
+    
+    printf("\n\nnon-PU candidates\n");
+    itrk = 0;
+    for (const reco::PFCandidate& pfcand : *nonpucands) {
+      reco::TrackRef tk = pfcand.trackRef();
+      if (tk.isNull())
+        continue;
+      printf("  track #%i: q: %i pt %6.4f eta %6.4f phi %6.4f\n", itrk++, tk->charge(), tk->pt(), tk->eta(), tk->phi());
+    }
+
+    edm::Handle<reco::PFJetCollection> pfjets;
+    event.getByLabel("ak5PFJets", pfjets);
+  
+    printf("\n\nak5PFJets\n");
+    int ijet = 0;
+    for (const reco::PFJet& jet : *pfjets) {
+      if (jet.pt() > 20 &&
+          fabs(jet.eta()) < 2.5 &&
+          jet.numberOfDaughters() > 1 &&
+          jet.neutralHadronEnergyFraction() < 0.99 &&
+          jet.neutralEmEnergyFraction() < 0.99 &&
+          (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
+        printf("ak5PF jet #%i: pt %6.4f eta %6.4f phi %6.4f nconst %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), jet.nConstituents());
+        itrk = 0;
+        for (const reco::TrackRef& tk : jet.getTrackRefs())
+          printf("  track #%i: q: %i pt %6.4f eta %6.4f phi %6.4f\n", itrk++, tk->charge(), tk->pt(), tk->eta(), tk->phi());
+      }
+      ++ijet;
+    }
+
+    edm::Handle<pat::JetCollection> patjets;
+    event.getByLabel("selectedPatJetsPF", patjets);
+  
+    printf("\n\nselectedPatJetsPF\n");
+    ijet = 0;
+    for (const pat::Jet& jet : *patjets) {
+      if (jet.pt() > 20 &&
+          fabs(jet.eta()) < 2.5 &&
+          jet.numberOfDaughters() > 1 &&
+          jet.neutralHadronEnergyFraction() < 0.99 &&
+          jet.neutralEmEnergyFraction() < 0.99 &&
+          (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
+        printf("patJet #%i:\n", ijet);
+        itrk = 0;
+        for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
+          reco::TrackRef tk = pfcand->trackRef();
+          if (tk.isNull())
+            continue;
+          printf("  track #%i: q: %i pt %6.4f eta %6.4f phi %6.4f\n", itrk++, tk->charge(), tk->pt(), tk->eta(), tk->phi());
+        }
+      }
+      ++ijet;
     }
   }
 
