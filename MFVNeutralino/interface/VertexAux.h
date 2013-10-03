@@ -1,6 +1,7 @@
 #ifndef JMTucker_MFVNeutralino_interface_VertexAux_h
 #define JMTucker_MFVNeutralino_interface_VertexAux_h
 
+#include <algorithm>
 #include "TLorentzVector.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JMTucker/MFVNeutralino/interface/JetVertexAssociation.h"
@@ -110,5 +111,34 @@ struct MFVVertexAux {
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;
+
+struct MFVVertexAuxSorter {
+  enum sort_by_this { sort_by_mass, sort_by_ntracks };
+  sort_by_this sort_by;
+
+  MFVVertexAuxSorter(const std::string& x) {
+    if (x == "mass")
+      sort_by = sort_by_mass;
+    else if (x == "ntracks")
+      sort_by = sort_by_ntracks;
+    else
+      throw cms::Exception("MFVVertexTools") << "invalid sort_by";
+  }
+
+  static bool by_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
+    return a.mass > b.mass;
+  }
+
+  static bool by_ntracks(const MFVVertexAux& a, const MFVVertexAux& b) {
+    return a.ntracks > b.ntracks;
+  }
+
+  void sort(MFVVertexAuxCollection& v) const {
+    if (sort_by == sort_by_mass)
+      std::sort(v.begin(), v.end(), by_mass);
+    else if (sort_by == sort_by_ntracks)
+      std::sort(v.begin(), v.end(), by_ntracks);
+  }
+};    
 
 #endif
