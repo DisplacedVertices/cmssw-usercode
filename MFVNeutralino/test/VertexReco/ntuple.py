@@ -35,6 +35,8 @@ process.p *= process.mfvEvent
 
 process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
 process.p *= process.mfvVertexHistos
+process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_aux_src = 'mfvVerticesAux')
+process.p *= process.mfvVertexHistosNoCuts
 
 def de_mfv():
     if hasattr(process, 'mfvGenVertices'):
