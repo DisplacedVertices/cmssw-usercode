@@ -18,6 +18,7 @@ private:
 
   const edm::InputTag vertex_aux_src;
   const bool produce_refs;
+  const MFVVertexAuxSorter sorter;
 
   const int min_ntracks;
   const double max_chi2dof;
@@ -33,14 +34,12 @@ private:
   const double min_maxtrackpt;
   const double max_bs2derr;
   const int min_njetssharetks;
-
-  enum sort_by_this { sort_by_mass, sort_by_ntracks };
-  sort_by_this sort_by;
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
   : vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
     produce_refs(cfg.getParameter<bool>("produce_refs")),
+    sorter(cfg.getParameter<std::string>("sort_by")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     max_err2d(cfg.getParameter<double>("max_err2d")),
@@ -61,14 +60,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
   else
     produces<reco::VertexCollection>();
   produces<MFVVertexAuxCollection>();
-
-  std::string x = cfg.getParameter<std::string>("sort_by");
-  if (x == "mass")
-    sort_by = sort_by_mass;
-  else if (x == "ntracks")
-    sort_by = sort_by_ntracks;
-  else
-    throw cms::Exception("MFVVertexSelector") << "invalid sort_by";
 }
 
 bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
@@ -105,10 +96,7 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  if (sort_by == sort_by_mass)
-    std::sort(selected->begin(), selected->end(), [](const MFVVertexAux& a, const MFVVertexAux& b) { return a.mass > b.mass; });
-  else if (sort_by == sort_by_ntracks)
-    std::sort(selected->begin(), selected->end(), [](const MFVVertexAux& a, const MFVVertexAux& b) { return a.ntracks > b.ntracks; });
+  sorter.sort(*selected);
 
   if (!produce_refs) {
     std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
