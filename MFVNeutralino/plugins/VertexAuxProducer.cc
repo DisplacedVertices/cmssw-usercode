@@ -27,13 +27,15 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const edm::InputTag gen_vertices_src;
   const edm::InputTag vertex_src;
   const std::string sv_to_jets_src;
+  const MFVVertexAuxSorter sorter;
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
   : primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_vertices_src(cfg.getParameter<edm::InputTag>("gen_vertices_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src"))
+    sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
+    sorter(cfg.getParameter<std::string>("sort_by"))
 {
   produces<MFVEvent>();
   produces<std::vector<MFVVertexAux> >();
@@ -99,7 +101,12 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     aux.chi2 = sv.chi2();
     aux.ndof = sv.ndof();
-    
+
+    aux.pt   = sv.p4().pt();
+    aux.eta  = sv.p4().eta();
+    aux.phi  = sv.p4().phi();
+    aux.mass = sv.p4().mass();
+
     if (use_sv_to_jets) {
       reco::Candidate::LorentzVector jets_p4[MFVJetVertexAssociation::NByUse];
 
@@ -222,6 +229,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     // JMTBAD miss distances
   }
+
+  sorter.sort(*auxes);
 
   event.put(auxes);
 }
