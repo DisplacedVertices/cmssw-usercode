@@ -56,3 +56,38 @@ if 'testttbar' in sys.argv:
     process.source.fileNames = ['']
     process.source.secondaryFileNames = ['']
     sample_ttbar()
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    if 'debug' in sys.argv:
+        raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
+
+    import JMTucker.Tools.Samples as Samples
+    ss = set(Samples.mfv_signal_samples)
+    first = [Samples.mfv_neutralino_tau0000um_M0400, Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
+    for f in first:
+        ss.remove(f)
+    rest = sorted(ss, key=lambda s: s.name)
+    samples = first + Samples.background_samples + rest
+
+    def pset_modifier(sample):
+        to_add = []
+        if 'ttbar' in sample.name:
+            to_add.append('sample_ttbar()')
+        elif 'mfv' not in sample.name:
+            to_add.append('de_mfv()')
+        return to_add
+
+    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    cs = CRABSubmitter('MFVNtuple',
+                       total_number_of_events = 99250,
+                       events_per_job = 10000,
+                       #job_control_from_sample = True,
+                       USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
+                       pset_modifier = pset_modifier,
+                       use_ana_dataset = True,
+                       use_parent = True,
+                       get_edm_output = True,
+                       data_retrieval = 'fnal',
+                       publish_data_name = 'mfvntupletest',
+                       )
+    cs.submit_all(samples)
