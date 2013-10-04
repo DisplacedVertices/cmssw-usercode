@@ -11,7 +11,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/MFVNeutralino/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/TrackerSpaceExtent.h"
 #include "JMTucker/MFVNeutralino/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
@@ -37,7 +36,6 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
     sorter(cfg.getParameter<std::string>("sort_by"))
 {
-  produces<MFVEvent>();
   produces<std::vector<MFVVertexAux> >();
 }
 
