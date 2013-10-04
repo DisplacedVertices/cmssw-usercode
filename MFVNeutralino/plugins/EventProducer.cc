@@ -94,9 +94,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_lsp_phi [i] = mci.lsps[i]->phi();
         mevent->gen_lsp_mass[i] = mci.lsps[i]->mass();
 
-        mevent->gen_lsp_decay[i][0] = mci.stranges[i]->vx();
-        mevent->gen_lsp_decay[i][1] = mci.stranges[i]->vy();
-        mevent->gen_lsp_decay[i][2] = mci.stranges[i]->vz();
+        mevent->gen_lsp_decay[i*3+0] = mci.stranges[i]->vx();
+        mevent->gen_lsp_decay[i*3+1] = mci.stranges[i]->vy();
+        mevent->gen_lsp_decay[i*3+2] = mci.stranges[i]->vz();
 
         lsp_partons.push_back(mci.stranges[i]);
         lsp_partons.push_back(mci.bottoms[i]);
@@ -125,7 +125,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   const bool simple_trigger[MFVEvent::n_trigger_paths] = { true };
   const std::string try_trigger[MFVEvent::n_trigger_paths] = {
-    "HLT_QuadJet50_v"
+    "HLT_QuadJet50_v", "HLT_IsoMu24_v", "HLT_HT750_v"
   };
 
   for (int itry = 0; itry < MFVEvent::n_trigger_paths; ++itry) {

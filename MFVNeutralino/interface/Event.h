@@ -34,7 +34,7 @@ struct MFVEvent {
   float gen_lsp_eta[2];
   float gen_lsp_phi[2];
   float gen_lsp_mass[2];
-  float gen_lsp_decay[2][3];
+  float gen_lsp_decay[2*3];
   uchar gen_decay_type[2];
   uchar gen_partons_in_acc;
 
@@ -43,22 +43,22 @@ struct MFVEvent {
   }
 
   float minlspdist2d() const {
-    return min(mag(gen_lsp_decay[0][0] - bsx, gen_lsp_decay[0][1] - bsy),
-               mag(gen_lsp_decay[1][0] - bsx, gen_lsp_decay[1][1] - bsy));
+    return min(mag(gen_lsp_decay[0*3+0] - bsx, gen_lsp_decay[0*3+1] - bsy),
+               mag(gen_lsp_decay[1*3+0] - bsx, gen_lsp_decay[1*3+1] - bsy));
   }
 
   float lspdist2d() const {
-    return mag(gen_lsp_decay[0][0] - gen_lsp_decay[1][0],
-               gen_lsp_decay[0][1] - gen_lsp_decay[1][1]);
+    return mag(gen_lsp_decay[0*3+0] - gen_lsp_decay[1*3+0],
+               gen_lsp_decay[0*3+1] - gen_lsp_decay[1*3+1]);
   }
 
   float lspdist3d() const {
-    return mag(gen_lsp_decay[0][0] - gen_lsp_decay[1][0],
-               gen_lsp_decay[0][1] - gen_lsp_decay[1][1],
-               gen_lsp_decay[0][2] - gen_lsp_decay[1][2]);
+    return mag(gen_lsp_decay[0*3+0] - gen_lsp_decay[1*3+0],
+               gen_lsp_decay[0*3+1] - gen_lsp_decay[1*3+1],
+               gen_lsp_decay[0*3+2] - gen_lsp_decay[1*3+2]);
   }
 
-  enum { n_trigger_paths = 1 };
+  enum { n_trigger_paths = 3 };
   bool pass_trigger[n_trigger_paths];
 
   uchar npfjets;
