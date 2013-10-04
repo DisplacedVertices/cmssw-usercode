@@ -21,9 +21,10 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
-    min_ntracks = cms.int32(4),
-    max_drmin   = cms.double(0.4),
-    max_drmax   = cms.double(4),
-    max_bs2derr = cms.double(0.005),
-    sort_by = cms.string('ntracks'),
+    min_ntracks = 7,
+    min_maxtrackpt = 15,
+    max_drmin = 0.4,
+    max_drmax = 4,
+    max_bs2derr = 0.005,
+    sort_by = 'ntracks'
     )
