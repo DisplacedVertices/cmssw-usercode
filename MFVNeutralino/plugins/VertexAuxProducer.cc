@@ -163,12 +163,12 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
 
+      inc_uchar(aux.ntracks);
+
       if (tri->ptError() / tri->pt() > 0.5) {
         inc_uchar(aux.nbadtracks);
         continue;
       }
-
-      inc_uchar(aux.ntracks);
 
       const double pti = tri->pt();
       trackpts.push_back(pti);
@@ -193,13 +193,17 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       else
         aux.sumnhitsbehind += nhitsbehind;
     }
-    
-    std::sort(trackpts.begin(), trackpts.end());
-    aux.mintrackpt = trackpts[0];
-    aux.maxtrackpt = trackpts[trackpts.size()-1];
-    aux.maxm1trackpt = trackpts[trackpts.size()-2];
-    aux.maxm2trackpt = trackpts.size() > 2 ? trackpts[trackpts.size()-3] : -1;
 
+    if (trackpts.size()) {
+      std::sort(trackpts.begin(), trackpts.end());
+      aux.mintrackpt = trackpts[0];
+      aux.maxtrackpt = trackpts[trackpts.size()-1];
+      aux.maxm1trackpt = trackpts[trackpts.size()-2];
+      aux.maxm2trackpt = trackpts.size() > 2 ? trackpts[trackpts.size()-3] : -1;
+    }
+    else
+      aux.mintrackpt = aux.maxtrackpt = aux.maxm1trackpt = aux.maxm2trackpt = -1;
+      
     const mfv::vertex_tracks_distance vtx_tks_dist(sv);
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, jets_p4);
 
