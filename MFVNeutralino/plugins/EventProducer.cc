@@ -123,7 +123,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
   const size_t npaths = trigger_names.size();
 
-  const bool simple_trigger[MFVEvent::n_trigger_paths] = { true };
+  const bool simple_trigger[MFVEvent::n_trigger_paths] = { true, true, true };
   const std::string try_trigger[MFVEvent::n_trigger_paths] = {
     "HLT_QuadJet50_v", "HLT_IsoMu24_v", "HLT_HT750_v"
   };
