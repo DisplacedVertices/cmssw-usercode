@@ -41,6 +41,7 @@ process.p *= process.mfvVertexHistosNoCuts
 def de_mfv():
     if hasattr(process, 'mfvGenVertices'):
         process.mfvGenVertices.is_mfv = False
+    process.mfvEvent.is_mfv = False
 
 def sample_ttbar():
     de_mfv()
@@ -53,8 +54,8 @@ if 'testqcd' in sys.argv:
     de_mfv()
 
 if 'testttbar' in sys.argv:
-    process.source.fileNames = ['']
-    process.source.secondaryFileNames = ['']
+    process.source.fileNames = ['/store/user/jchu/TTJets_HadronicMGDecays_8TeV-madgraph/jtuple_v7/fe6d9f80f9c0fe06cc80b089617fa99d/pat_1_1_HLq.root']
+    process.source.secondaryFileNames = ['/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/BCE41FBC-BE17-E211-9679-00259073E3FC.root','/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/562EF878-5017-E211-976D-E0CB4E5536A7.root']
     sample_ttbar()
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
