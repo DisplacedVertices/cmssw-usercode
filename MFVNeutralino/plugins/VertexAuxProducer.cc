@@ -105,9 +105,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.phi  = sv.p4().phi();
     aux.mass = sv.p4().mass();
 
-    if (use_sv_to_jets) {
-      reco::Candidate::LorentzVector jets_p4[MFVJetVertexAssociation::NByUse];
+    std::vector<math::XYZTLorentzVector> jets_p4(MFVJetVertexAssociation::NByUse);
 
+    if (use_sv_to_jets) {
       for (int i = 0; i < MFVJetVertexAssociation::NByUse; ++i) {
         int njets = sv_to_jets[i]->numberOfAssociations(svref);
         aux.njets[i] = int2uchar(njets);
@@ -139,8 +139,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     auto trkb = sv.tracks_begin();
     auto trke = sv.tracks_end();
-    aux.ntracks = int2uchar(trke - trkb); // JMTBAD use ++ntracks in loop
 
+    aux.ntracks = 0;
+    aux.nbadtracks = 0;
     aux.ntracksptgt3 = 0;
     aux.ntracksptgt5 = 0;
     aux.ntracksptgt10 = 0;
@@ -153,24 +154,30 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     for (auto trki = trkb; trki != trke; ++trki) {
       const reco::TrackBaseRef& tri = *trki;
+
+      if (trackicity.count(tri.key()) > 0)
+        throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
+      else
+        trackicity.insert(tri.key());
+
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
 
+      if (tri->ptError() / tri->pt() > 0.5) {
+        inc_uchar(aux.nbadtracks);
+        continue;
+      }
+
+      inc_uchar(aux.ntracks);
+
       const double pti = tri->pt();
       trackpts.push_back(pti);
-
-      // inc_uchar(aux.ntracks); // JMTBAD
 
       if (pti > 3)  inc_uchar(aux.ntracksptgt3);
       if (pti > 5)  inc_uchar(aux.ntracksptgt5);
       if (pti > 10) inc_uchar(aux.ntracksptgt10);
 
       aux.sumpt2 += pti*pti;
-
-      if (trackicity.count(tri.key()) > 0)
-        throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
-      else
-        trackicity.insert(tri.key());
 
       const uchar nhits = int2uchar(tri->numberOfValidHits());
       if (nhits < aux.trackminnhits)
@@ -194,7 +201,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.maxm2trackpt = trackpts.size() > 2 ? trackpts[trackpts.size()-3] : -1;
 
     const mfv::vertex_tracks_distance vtx_tks_dist(sv);
-    const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex);
+    const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, jets_p4);
 
     aux.drmin  = vtx_tks_dist.drmin;
     aux.drmax  = vtx_tks_dist.drmax;
@@ -221,11 +228,15 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.pv3ddist        = vtx_distances.pv3ddist_val;
     aux.pv3derr         = vtx_distances.pv3ddist_err;
 
-    aux.costhmombs  [0] = vtx_distances.costhmombs; // JMTBAD other costhmoms
-    aux.costhmompv2d[0] = vtx_distances.costhmompv2d;
-    aux.costhmompv3d[0] = vtx_distances.costhmompv3d;
+    for (size_t iuse = 0, iusee = use_sv_to_jets ? MFVJetVertexAssociation::NByUse+1 : 1; iuse < iusee; ++iuse) {
+      aux.costhmombs  [iuse] = vtx_distances.costhmombs[iuse];
+      aux.costhmompv2d[iuse] = vtx_distances.costhmompv2d[iuse];
+      aux.costhmompv3d[iuse] = vtx_distances.costhmompv3d[iuse];
 
-    // JMTBAD miss distances
+      aux.missdistpv   [iuse] = vtx_distances.missdistpv[iuse].value();
+      aux.missdistpverr[iuse] = vtx_distances.missdistpv[iuse].error();
+    }
+
   }
 
   sorter.sort(*auxes);
