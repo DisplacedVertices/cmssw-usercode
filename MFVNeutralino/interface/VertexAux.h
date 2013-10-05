@@ -34,6 +34,8 @@ struct MFVVertexAux {
   }
 
   uchar ntracks;
+  uchar nbadtracks;
+
   uchar ntracksptgt3;
   uchar ntracksptgt5;
   uchar ntracksptgt10;
@@ -105,9 +107,9 @@ struct MFVVertexAux {
   float costhmompv2d[MFVJetVertexAssociation::NByUse+1];
   float costhmompv3d[MFVJetVertexAssociation::NByUse+1];
 
-  float missdistbs  [MFVJetVertexAssociation::NByUse+1];
-  float missdistpv2d[MFVJetVertexAssociation::NByUse+1];
-  float missdistpv3d[MFVJetVertexAssociation::NByUse+1];
+  float missdistpv   [MFVJetVertexAssociation::NByUse+1];
+  float missdistpverr[MFVJetVertexAssociation::NByUse+1];
+  float missdistpvsig(int w) const { return sig(missdistpv[w], missdistpverr[w]); }
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;
