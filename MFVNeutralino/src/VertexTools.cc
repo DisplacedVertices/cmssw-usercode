@@ -1,3 +1,4 @@
+#include "TVector3.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
@@ -79,6 +80,30 @@ namespace mfv {
     return std::make_pair(success, compat);
   }
 
+  Measurement1D miss_dist(const reco::Vertex& v0, const reco::Vertex& v1, const math::XYZTLorentzVector& mom) {
+    // miss distance is magnitude of (jet direction (= n) cross (tv - sv) ( = d))
+    // to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2
+    // JMTBAD vector/matrix types
+    const TVector3 n = TVector3(mom.x(), mom.y(), mom.z()).Unit();
+    const TVector3 d(v1.x() - v0.x(),
+                     v1.y() - v0.y(),
+                     v1.z() - v0.z());
+    const double n_dot_d = n.Dot(d);
+    const TVector3 n_cross_d = n.Cross(d);
+    const double miss_dist_value = n_cross_d.Mag();
+
+    typedef math::VectorD<3>::type vec_t;
+    typedef math::ErrorD<3>::type mat_t;
+    const vec_t jacobian(2*d.x() - 2*n_dot_d*n.x(),
+                         2*d.y() - 2*n_dot_d*n.y(),
+                         2*d.z() - 2*n_dot_d*n.z());
+    const mat_t v0_to_v1_cov_matrix = v0.covariance() + v1.covariance();
+    const double sigma_f2 = sqrt(ROOT::Math::Similarity(jacobian, v0_to_v1_cov_matrix));
+
+    const double miss_dist_err = sigma_f2 / 2 / miss_dist_value;
+    return Measurement1D(miss_dist_value, miss_dist_err);
+  }
+
   vertex_tracks_distance::vertex_tracks_distance(const reco::Vertex& sv) {
     drmin = 1e99;
     drmax = dravg = dravgw = drrms = drrmsw = 0;
@@ -136,7 +161,7 @@ namespace mfv {
     drrmsvw = sqrt(drrmsvw/sumvw);
   }
 
-  vertex_distances::vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex) {
+  vertex_distances::vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& other_mom) {
     VertexDistanceXY distcalc_2d;
     VertexDistance3D distcalc_3d;
 
@@ -146,7 +171,7 @@ namespace mfv {
     const reco::Vertex fake_bs_vtx(beamspot.position(), beamspot.covariance3D());
     bs2dcompat = compatibility(sv, fake_bs_vtx, false);
     bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
-    const auto bs2sv = sv.position() - beamspot.position();
+    const math::XYZVector bs2sv = sv.position() - beamspot.position();
     bs3ddist = mag(bs2sv.x(), bs2sv.y()) * sin(sv.p4().theta());
 
     pv2dcompat = pv3dcompat = std::make_pair(false, -1.f);
@@ -166,12 +191,23 @@ namespace mfv {
       pv3ddist_sig = pv3ddist.significance();
     }
 
-    costhmombs = costh2(sv.p4(), bs2sv);
-    costhmompv2d = -2, costhmompv3d = -2;
-    if (primary_vertex != 0) {
-      const auto disp = sv.position() - primary_vertex->position();
-      costhmompv2d = costh2(sv.p4(), disp);
-      costhmompv3d = costh3(sv.p4(), disp);
+    math::XYZVector pv2sv;
+    if (primary_vertex != 0)
+      pv2sv = sv.position() - primary_vertex->position();
+
+    for (size_t i = 0, ie = other_mom.size()+1; i < ie; ++i) {
+      const math::XYZTLorentzVector& mom = i == 0 ? sv.p4() : other_mom[i-1];
+      costhmombs.push_back(costh2(mom, bs2sv));
+      if (primary_vertex != 0) {
+        costhmompv2d.push_back(costh2(mom, pv2sv));
+        costhmompv3d.push_back(costh3(mom, pv2sv));
+        missdistpv.push_back(miss_dist(*primary_vertex, sv, mom));
+      }
+      else {
+        costhmompv2d.push_back(-2);
+        costhmompv3d.push_back(-2);
+        missdistpv.push_back(Measurement1D(1e9,-1));
+      }
     }
   }
 }
