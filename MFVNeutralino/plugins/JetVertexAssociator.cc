@@ -253,6 +253,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
         const TVector3 sv_to_tv = jet_tag_vtx_pos - TVector3(vtx.x(), vtx.y(), vtx.z());
         cos_angle = sv_to_tv.Dot(jet_mom_dir) / sv_to_tv.Mag();
 
+        // JMTBAD use mfv::miss_dist()
         // miss distance is magnitude of (jet direction cross (tv - sv))
         // to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2
         const TVector3& n = jet_mom_dir;
