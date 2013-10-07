@@ -188,7 +188,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pvx = primary_vertex->x();
     mevent->pvy = primary_vertex->y();
     mevent->pvz = primary_vertex->z();
-    mevent->pv_ntracks = int2uchar(primary_vertex->nTracks());
+    mevent->pv_ntracks = int2uchar_clamp(primary_vertex->nTracks());
     mevent->pv_sumpt2 = 0;
     for (auto trki = primary_vertex->tracks_begin(), trke = primary_vertex->tracks_end(); trki != trke; ++trki) {
       double trkpt = (*trki)->pt();
@@ -199,7 +199,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 
   mevent->njets = mevent->nbtags = 0;
-  mevent->jet_ht = 0;
+  mevent->jetpt4 = mevent->jetpt5 = mevent->jetpt6 = 0;
+  mevent->jet_sum_ht = 0;
 
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jets_src, jets);
@@ -209,7 +210,15 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       continue;
 
     inc_uchar(mevent->njets);
-    mevent->jet_ht += jet.pt();
+
+    if (mevent->njets == 4)
+      mevent->jetpt4 = jet.pt();
+    else if (mevent->njets == 5)
+      mevent->jetpt5 = jet.pt();
+    else if (mevent->njets == 6)
+      mevent->jetpt6 = jet.pt();
+
+    mevent->jet_sum_ht += jet.pt();
 
     if (jet.bDiscriminator(b_discriminator) > b_discriminator_min)
       inc_uchar(mevent->nbtags);
