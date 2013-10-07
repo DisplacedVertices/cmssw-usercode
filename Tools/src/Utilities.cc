@@ -85,3 +85,11 @@ void inc_uchar(uchar& x) {
   assert(x < 255);
   ++x;
 }
+
+uchar int2uchar_clamp(int x) {
+  if (x < 0)
+    return 0;
+  else if (x > 255)
+    return 255;
+  else return (uchar)x;
+}
