@@ -166,6 +166,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->pfjetpt4 = jet.pt();
       else if (mevent->npfjets == 5)
         mevent->pfjetpt5 = jet.pt();
+      else if (mevent->npfjets == 6)
+        mevent->pfjetpt6 = jet.pt();
     }
   }
 
