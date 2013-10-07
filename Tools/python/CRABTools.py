@@ -644,10 +644,16 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True, chu
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     on_resilient = False
+    on_store = False
     cfg = crab_cfg_parser(working_dir)
     try:
         storage_path = cfg.get('USER', 'storage_path')
         on_resilient = 'resilient' in storage_path
+    except NoOptionError:
+        pass
+    try:
+        storage_element = cfg.get('USER', 'storage_element')
+        on_store = storage_element == 'T3_US_FNALLPC'
     except NoOptionError:
         pass
 
@@ -656,6 +662,9 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True, chu
     if on_resilient:
         pfns = [crab_analysis_file_pfn(path) for path in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml'))]
         files = ['dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/resilient/' + pfn.split('/resilient/')[1] for pfn in pfns] # JMTBAD
+    elif on_store:
+        pfns = [crab_analysis_file_pfn(path) for path in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml'))]
+        files = ['dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/11/' + pfn.split('/11/')[1] for pfn in pfns] # JMTBAD
     else:    
         files = glob.glob(os.path.join(working_dir, 'res/*root'))
         
