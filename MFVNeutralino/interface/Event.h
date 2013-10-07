@@ -64,6 +64,7 @@ struct MFVEvent {
   uchar npfjets;
   float pfjetpt4;
   float pfjetpt5;
+  float pfjetpt6;
 
   float npu;
 
@@ -83,7 +84,10 @@ struct MFVEvent {
   }
 
   uchar njets;
-  float jet_ht;
+  float jetpt4;
+  float jetpt5;
+  float jetpt6;
+  float jet_sum_ht;
   uchar nbtags;
   uchar nmu[3];
   uchar nel[3];
