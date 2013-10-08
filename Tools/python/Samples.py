@@ -155,7 +155,7 @@ class DataSample(Sample):
         super(DataSample, self).__init__(name, name, dataset)
 
         self.run_range = run_range
-        self.json = self.PROMPT_JSON
+        self.json = None
 
         self.lumis_per = self.LUMIS_PER
         self.total_lumis = self.TOTAL_LUMIS
@@ -308,7 +308,10 @@ for tau, mass, sample in mfv_signal_samples_ex:
 
 ########################################################################
 
-data_samples = []
+data_samples = [
+    DataSample('MultiJetPk2012B', '/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD')
+    ]
+
 auxiliary_data_samples = []
 
 ########################################################################
