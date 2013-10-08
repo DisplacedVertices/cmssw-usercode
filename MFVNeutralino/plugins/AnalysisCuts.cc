@@ -51,7 +51,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
-  if (!mevent->pass_trigger[trigger_bit])
+  if (trigger_bit >= 0 && !mevent->pass_trigger[trigger_bit])
     return false;
 
   if (mevent->nlep(0) < min_nleptons)
