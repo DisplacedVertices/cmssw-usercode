@@ -23,10 +23,10 @@
 #define NBDISC 1
 #define NLEPDISTS 2
 
-class MFVResolutionsHistogrammer : public edm::EDAnalyzer {
+class ResolutionsHistogrammer : public edm::EDAnalyzer {
 public:
-  explicit MFVResolutionsHistogrammer(const edm::ParameterSet&);
-  ~MFVResolutionsHistogrammer();
+  explicit ResolutionsHistogrammer(const edm::ParameterSet&);
+  ~ResolutionsHistogrammer();
 
 private:
   const bool reweight_pileup;
@@ -150,7 +150,7 @@ namespace {
   }
 }
 
-MFVResolutionsHistogrammer::MFVResolutionsHistogrammer(const edm::ParameterSet& cfg)
+ResolutionsHistogrammer::ResolutionsHistogrammer(const edm::ParameterSet& cfg)
   : reweight_pileup(cfg.getParameter<bool>("reweight_pileup")),
     force_weight(cfg.existsAs<double>("force_weight") ? cfg.getParameter<double>("force_weight") : -1),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
@@ -172,13 +172,13 @@ MFVResolutionsHistogrammer::MFVResolutionsHistogrammer(const edm::ParameterSet& 
 {
   die_if_not(b_discriminators.size() == b_discriminator_mins.size(), "b_discriminators size %i != b_discriminator_mins size %i", int(b_discriminators.size()), int(b_discriminator_mins.size()));
   if (cfg.getParameter<std::vector<std::string> >("b_discriminators").size() > NBDISC)
-    edm::LogWarning("MFVResolutionsHistogrammer") << "only first " << NBDISC << " b_discriminators will be used";
+    edm::LogWarning("ResolutionsHistogrammer") << "only first " << NBDISC << " b_discriminators will be used";
   edm::Service<TFileService> fs;
   bkh_factory = new BasicKinematicHistsFactory(fs);
   Book(fs);
 }
 
-MFVResolutionsHistogrammer::~MFVResolutionsHistogrammer() {
+ResolutionsHistogrammer::~ResolutionsHistogrammer() {
   delete bkh_factory;
 }
 
@@ -188,7 +188,7 @@ namespace {
   }
 }
 
-void MFVResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
+void ResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
   TH1::SetDefaultSumw2();
 
   NVertices = fs->make<TH1F>("NVertices", ";number of primary vertices;events", 75, 0, 75);
@@ -340,7 +340,7 @@ namespace {
   }
 }
 
-double MFVResolutionsHistogrammer::GetWeight(const edm::Event& event) const {
+double ResolutionsHistogrammer::GetWeight(const edm::Event& event) const {
   double weight = 1.;
   if (force_weight > 0)
     weight *= force_weight;
@@ -356,7 +356,7 @@ double MFVResolutionsHistogrammer::GetWeight(const edm::Event& event) const {
   return weight;
 }
 
-void MFVResolutionsHistogrammer::analyze(const edm::Event& event, const edm::EventSetup&) {
+void ResolutionsHistogrammer::analyze(const edm::Event& event, const edm::EventSetup&) {
   const bool is_mc = !event.isRealData();
   const double weight = is_mc ? GetWeight(event) : 1.;
 
@@ -601,4 +601,4 @@ void MFVResolutionsHistogrammer::analyze(const edm::Event& event, const edm::Eve
   }
 }
 
-DEFINE_FWK_MODULE(MFVResolutionsHistogrammer);
+DEFINE_FWK_MODULE(ResolutionsHistogrammer);
