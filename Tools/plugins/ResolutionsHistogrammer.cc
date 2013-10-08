@@ -424,7 +424,7 @@ void MFVResolutionsHistogrammer::analyze(const edm::Event& event, const edm::Eve
     }
 
     double jet_pvsv_costheta = -999;
-    const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertexMaxDR2p5");
+    const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
     if (vertices->size() > 0 && svtag && svtag->nVertices() > 0) {
       const GlobalVector& flight_dir = svtag->flightDirection(0);
       const GlobalVector jet_mom(jet.momentum().x(), jet.momentum().y(), jet.momentum().z());
