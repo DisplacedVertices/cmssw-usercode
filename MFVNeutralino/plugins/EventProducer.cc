@@ -26,6 +26,7 @@ private:
   const edm::InputTag pfjets_src;
   const double jet_pt_min;
   const edm::InputTag primary_vertex_src;
+  const bool is_mc;
   const bool is_mfv;
   const edm::InputTag gen_particles_src;
   const edm::InputTag jets_src;
@@ -44,6 +45,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     pfjets_src(cfg.getParameter<edm::InputTag>("pfjets_src")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
+    is_mc(cfg.getParameter<bool>("is_mc")),
     is_mfv(cfg.getParameter<bool>("is_mfv")),
     gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
@@ -78,7 +80,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   mevent->gen_valid = false;
 
-  if (is_mfv) {
+  if (is_mc && is_mfv) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByLabel(gen_particles_src, gen_particles);
 
@@ -174,14 +176,16 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<std::vector<PileupSummaryInfo> > pileup;
-  event.getByLabel("addPileupInfo", pileup);
+  if (is_mc) {
+    edm::Handle<std::vector<PileupSummaryInfo> > pileup;
+    event.getByLabel("addPileupInfo", pileup);
 
-  mevent->npu = -1;
+    mevent->npu = -1;
 
-  for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
-    if (psi->getBunchCrossing() == 0)
-      mevent->npu = psi->getTrueNumInteractions();
+    for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
+      if (psi->getBunchCrossing() == 0)
+        mevent->npu = psi->getTrueNumInteractions();
+  }
 
   //////////////////////////////////////////////////////////////////////
   
