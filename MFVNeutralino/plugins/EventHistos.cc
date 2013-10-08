@@ -60,7 +60,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   h_gen_decay = fs->make<TH2F>("h_gen_decay", "0-2=e,mu,tau, 3=h;decay code #0;decay code #1", 4, 0, 4, 4, 0, 4);
-  h_gen_partons_in_acc = fs->make<TH1F>("h_gen_partons_in_acc", ";# partons from LSP in acceptance;events", 10, 0, 10);
+  h_gen_partons_in_acc = fs->make<TH1F>("h_gen_partons_in_acc", ";# partons from LSP in acceptance;events", 11, 0, 11);
 
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
@@ -129,9 +129,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_bsz->Fill(mevent->bsz);
 
   h_npv->Fill(mevent->npv);
-  h_pvx->Fill(mevent->pvx);
-  h_pvy->Fill(mevent->pvy);
-  h_pvz->Fill(mevent->pvz);
+  h_pvx->Fill(mevent->pvx - mevent->bsx);
+  h_pvy->Fill(mevent->pvy - mevent->bsy);
+  h_pvz->Fill(mevent->pvz - mevent->bsz);
   h_pv_ntracks->Fill(mevent->pv_ntracks);
   h_pv_sumpt2->Fill(mevent->pv_sumpt2);
   h_pv_rho->Fill(mevent->pv_rho());
