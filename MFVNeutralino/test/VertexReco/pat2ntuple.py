@@ -28,14 +28,20 @@ process.out.fileName = 'ntuple.root'
 process.out.outputCommands = [
     'drop *',
     'keep MFVEvent_mfvEvent__*',
-    'keep MFVVertexAuxs_mfvVerticesAux__*'
-    'keep edmTriggerResults_TriggerResults__%s' % process.name_()
+    'keep MFVVertexAuxs_mfvVerticesAux__*',
+    'keep edmTriggerResults_TriggerResults__%s' % process.name_(),
     ]
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+process.mfvVertices.histos = False
+process.mfvVerticesToJets.histos = False
 process.p = cms.Path(common_seq * process.mfvVertexSequence * process.mfvEvent)
 ''')
+
+    if not sample.is_mc or 'mfv' not in sample.name:
+        to_add.append('process.mfvGenVertices.is_mfv = False')
+        to_add.append('process.mfvEvent.is_mfv = False')
 
     return to_add, to_replace
 
@@ -48,4 +54,7 @@ cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
                    publish_data_name = 'mfvntuple_' + tuple_version
                    )
 
-cs.submit_all([Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400])
+samples = [Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400]
+for sample in samples:
+    sample.total_events = -1
+cs.submit_all(samples)
