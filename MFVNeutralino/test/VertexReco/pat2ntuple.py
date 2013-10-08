@@ -42,6 +42,8 @@ process.p = cms.Path(common_seq * process.mfvVertexSequence * process.mfvEvent)
     if not sample.is_mc or 'mfv' not in sample.name:
         to_add.append('process.mfvGenVertices.is_mfv = False')
         to_add.append('process.mfvEvent.is_mfv = False')
+    if not sample.is_mc:
+        to_add.append('process.mfvEvent.is_mc = False')
 
     return to_add, to_replace
 
@@ -54,7 +56,7 @@ cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
                    publish_data_name = 'mfvntuple_' + tuple_version
                    )
 
-samples = [Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400]
-for sample in samples:
+samples = [Samples.MultiJetPk2012B, Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400]
+for sample in Samples.background_samples:
     sample.total_events = -1
 cs.submit_all(samples)
