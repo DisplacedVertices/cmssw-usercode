@@ -17,13 +17,11 @@ private:
 
   const edm::InputTag gen_src;
   const bool is_mfv;
-  const bool is_ttbar;
 };
 
 MFVGenVertices::MFVGenVertices(const edm::ParameterSet& cfg) 
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    is_mfv(cfg.getParameter<bool>("is_mfv")),
-    is_ttbar(cfg.getParameter<bool>("is_ttbar"))
+    is_mfv(cfg.getParameter<bool>("is_mfv"))
 {
   produces<std::vector<double> >();
 }
@@ -32,7 +30,7 @@ void MFVGenVertices::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
 
-  edm::Handle<reco::BeamSpot> beamspot; // JMTBAD switch to gen_partciles[2] vertex
+  edm::Handle<reco::BeamSpot> beamspot;
   event.getByLabel("offlineBeamSpot", beamspot);
 
   bool gen_valid = false;
@@ -51,18 +49,6 @@ void MFVGenVertices::produce(edm::Event& event, const edm::EventSetup&) {
       }
     }
   }
-  else if (is_ttbar) {
-    MCInteractionTops mci;
-    mci.Init(*gen_particles);
-    if ((gen_valid = mci.Valid())) {
-      for (int i = 0; i < 2; ++i) {
-        const reco::GenParticle* daughter = mci.tops[i];
-        decay_vertices->push_back(daughter->vx());
-        decay_vertices->push_back(daughter->vy());
-        decay_vertices->push_back(daughter->vz());
-      }
-    }
-  }
   else {
     for (int i = 0; i < 2; ++i) {
       decay_vertices->push_back(beamspot->x0());
@@ -71,8 +57,8 @@ void MFVGenVertices::produce(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  if (!gen_valid && (is_mfv || is_ttbar))
-    edm::LogWarning("MFVGenVertices") << "warning: is_mfv=" << is_mfv << ", is_ttbar=" << is_ttbar << " and neither MCI valid";
+  if (!gen_valid && is_mfv)
+    edm::LogWarning("MFVGenVertices") << "MCI not valid and is_mfv";
 
   event.put(decay_vertices);
 }
