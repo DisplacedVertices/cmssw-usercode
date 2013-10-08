@@ -87,6 +87,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (!mci.Valid())
       edm::LogWarning("MCInteractionMFV3j") << "invalid!";
     else {
+      mevent->gen_valid = true;
       std::vector<const reco::GenParticle*> lsp_partons;
       for (int i = 0; i < 2; ++i) {
         mevent->gen_lsp_pt  [i] = mci.lsps[i]->pt();
