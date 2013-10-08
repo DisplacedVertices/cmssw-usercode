@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),
+                               trigger_bit = cms.int32(0),
                                min_4th_jet_pt = cms.double(60),
                                min_5th_jet_pt = cms.double(0),
                                min_6th_jet_pt = cms.double(0),
