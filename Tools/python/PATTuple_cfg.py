@@ -8,7 +8,7 @@ suppress_stdout = True
 
 process = cms.Process('PAT')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root' if runOnMC else '/store/data/Run2012B/MultiJet1Parked/AOD/05Nov2012-v2/10000/0003D331-5C49-E211-8210-00259020081C.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
@@ -21,7 +21,7 @@ for category in ['TwoTrackMinimumDistance']:
 process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.GlobalTag.globaltag = 'START53_V27::All' if runOnMC else 'FT_53_V21A_AN6::All'
+process.GlobalTag.globaltag = 'START53_V27::All' if runOnMC else 'FT53_V21A_AN6::All'
 
 from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.out = cms.OutputModule('PoolOutputModule',
