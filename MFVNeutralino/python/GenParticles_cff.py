@@ -9,5 +9,4 @@ mfvGenVertices = cms.EDProducer('MFVGenVertices',
                                 gen_src = cms.InputTag('genParticles'),
                                 print_info = cms.bool(False),
                                 is_mfv = cms.bool(True),
-                                is_ttbar = cms.bool(False)
                                 )
