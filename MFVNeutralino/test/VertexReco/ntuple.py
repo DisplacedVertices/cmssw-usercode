@@ -2,6 +2,7 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools.CMSSWTools import silence_messages
 
+process.setName_('MFVNtuple')
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.maxEvents.input = 2000
 process.options.wantSummary = True
@@ -33,10 +34,8 @@ process.p.remove(process.mfvVertices)
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p *= process.mfvEvent
 
-process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
-process.p *= process.mfvVertexHistos
-process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_aux_src = 'mfvVerticesAux')
-process.p *= process.mfvVertexHistosNoCuts
+process.load('JMTucker.MFVNeutralino.Histos_cff')
+process.p *= process.mfvHistos
 
 def de_mfv():
     if hasattr(process, 'mfvGenVertices'):
