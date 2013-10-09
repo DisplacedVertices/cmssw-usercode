@@ -39,9 +39,6 @@ process.mfvVerticesToJets.histos = False
 process.p = cms.Path(common_seq * process.mfvVertexSequence * process.mfvEvent)
 ''')
 
-    if not sample.is_mc or 'mfv' not in sample.name:
-        to_add.append('process.mfvGenVertices.is_mfv = False')
-        to_add.append('process.mfvEvent.is_mfv = False')
     if not sample.is_mc:
         to_add.append('process.mfvEvent.is_mc = False')
 
