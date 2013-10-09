@@ -1,4 +1,4 @@
-import sys, FWCore.ParameterSet.Config as cms
+import sys, glob, FWCore.ParameterSet.Config as cms
 
 #process.source.firstLuminosityBlock = cms.untracked.uint32(2)
 
@@ -48,6 +48,12 @@ def file_event_from_argv(process):
     else:
         print 'file_event_from_argv warning: did not understand event number'
 
+def glob_store(pattern):
+    if not pattern.startswith('/store'):
+        raise ValueError('pattern must start with /store')
+    magic = '/pnfs/cms/WAX/11/store'
+    return [x.replace(magic, '/store') for x in glob.glob(pattern.replace('/store', magic))]
+    
 def replay_event(process, filename, rle, new_process_name='REPLAY'):
     '''Set the process up to replay the given event (rle is a 2- or
     3-tuple specifying it) using the random engine state saved in the
