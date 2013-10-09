@@ -1,4 +1,4 @@
-import FWCore.ParameterSet.Config as cms
+import sys, FWCore.ParameterSet.Config as cms
 
 tau1000M0400 = ['/store/user/jchu/mfv_neutralino_tau1000um_M0400/jtuple_v7/5d4c2a74c85834550d3f9609274e8548/pat_1_1_hdB.root']
 tau1000M0400_sec = cms.untracked.vstring(
@@ -57,3 +57,14 @@ ttbarhadronic_sec = cms.untracked.vstring(
     '/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/BCE41FBC-BE17-E211-9679-00259073E3FC.root',
     '/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/562EF878-5017-E211-976D-E0CB4E5536A7.root'
     )
+
+def set_test_files(process):
+    if 'testqcd' in sys.argv:
+        process.source.fileNames = qcdht1000
+        process.source.secondaryFileNames = qcdht1000_sec
+    elif 'testttbar' in sys.argv:
+        process.source.fileNames = ttbarhadronic
+        process.source.secondaryFileNames = ttbarhadronic_sec
+    else:
+        process.source.fileNames = tau1000M0400
+        process.source.secondaryFileNames = tau1000M0400_sec
