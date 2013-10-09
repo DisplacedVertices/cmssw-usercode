@@ -1,13 +1,12 @@
 import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools.CMSSWTools import silence_messages
-import JMTucker.MFVNeutralino.TestFiles as TestFiles
+from JMTucker.MFVNeutralino.TestFiles import set_test_files
 
 process.setName_('MFVNtuple')
 #process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.source.fileNames = TestFiles.tau1000M0400
-process.source.secondaryFileNames = TestFiles.tau1000M0400_sec
 process.maxEvents.input = 2000
+set_test_files(process)
 process.options.wantSummary = True
 process.TFileService.fileName = 'ntuple_histos.root'
 silence_messages(process, 'TwoTrackMinimumDistance')
@@ -37,13 +36,7 @@ if not 'debug' in sys.argv:
 else:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1
     process.mfvVertices.verbose = True
-
-if 'testqcd' in sys.argv:
-    process.source.fileNames = TestFiles.qcdht1000
-    process.source.secondaryFileNames = TestFiles.qcdht1000_sec
-elif 'testttbar' in sys.argv:
-    process.source.fileNames = TestFiles.ttbarhadronic
-    process.source.secondaryFileNames = TestFiles.ttbarhadronic_sec
+    from JMTucker.Tools.CMSSWTools import set_events_to_process
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if 'debug' in sys.argv:
