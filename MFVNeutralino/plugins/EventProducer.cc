@@ -27,7 +27,7 @@ private:
   const double jet_pt_min;
   const edm::InputTag primary_vertex_src;
   const bool is_mc;
-  const bool is_mfv;
+  bool warned_non_mfv;
   const edm::InputTag gen_particles_src;
   const edm::InputTag jets_src;
   const std::string b_discriminator;
@@ -46,7 +46,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     is_mc(cfg.getParameter<bool>("is_mc")),
-    is_mfv(cfg.getParameter<bool>("is_mfv")),
+    warned_non_mfv(false),
     gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
@@ -80,14 +80,18 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   mevent->gen_valid = false;
 
-  if (is_mc && is_mfv) {
+  if (is_mc) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByLabel(gen_particles_src, gen_particles);
 
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
-    if (!mci.Valid())
-      edm::LogWarning("MCInteractionMFV3j") << "invalid!";
+    if (!mci.Valid()) {
+      if (!warned_non_mfv) {
+        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file";
+        warned_non_mfv = true;
+      }
+    }
     else {
       mevent->gen_valid = true;
       std::vector<const reco::GenParticle*> lsp_partons;

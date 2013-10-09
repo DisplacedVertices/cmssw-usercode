@@ -7,6 +7,5 @@ mfvGenParticles = cms.EDProducer('MFVGenParticles',
 
 mfvGenVertices = cms.EDProducer('MFVGenVertices',
                                 gen_src = cms.InputTag('genParticles'),
-                                print_info = cms.bool(False),
-                                is_mfv = cms.bool(True),
+                                debug = cms.untracked.bool(False),
                                 )
