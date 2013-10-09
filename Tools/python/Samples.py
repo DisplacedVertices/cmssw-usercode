@@ -147,15 +147,15 @@ class TupleOnlyMCSample(MCSample):
 
 class DataSample(Sample):
     IS_MC = False
-    PROMPT_JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-207469_8TeV_PromptReco_Collisions12_JSON.txt'
-    LUMIS_PER = 250
+    JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt'
+    LUMIS_PER = 75
     TOTAL_LUMIS = -1
 
     def __init__(self, name, dataset, run_range=None):
         super(DataSample, self).__init__(name, name, dataset)
 
         self.run_range = run_range
-        self.json = None
+        self.json = self.JSON
 
         self.lumis_per = self.LUMIS_PER
         self.total_lumis = self.TOTAL_LUMIS
