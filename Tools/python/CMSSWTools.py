@@ -52,6 +52,8 @@ def glob_store(pattern):
     if not pattern.startswith('/store'):
         raise ValueError('pattern must start with /store')
     magic = '/pnfs/cms/WAX/11/store'
+    if not os.path.isdir(magic):
+        raise ValueError('not at fermilab?')
     return [x.replace(magic, '/store') for x in glob.glob(pattern.replace('/store', magic))]
     
 def replay_event(process, filename, rle, new_process_name='REPLAY'):
