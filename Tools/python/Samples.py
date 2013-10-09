@@ -164,7 +164,7 @@ class DataSample(Sample):
     def lumi_mask(self):
         # JMTBAD run_range checking
         if type(self.json) == str:
-            return 'lumi_mask = %s' % self.json
+            return 'lumi_mask', self.json
         elif self.json is None:
             return ''
         else: # implement LumiList object -> tmp.json
