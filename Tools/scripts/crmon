@@ -103,6 +103,19 @@ class Tee(object):
         self.file.flush()
         self.stdout.flush()
 
+def backdoor_file(filename):
+    return open('/tmp/%s/crmon_%s' % (os.environ['USER'], filename), 'wt')
+
+def backdoor_print(filename, l):
+    ll = []
+    for a in l:
+        if a.endswith('\\'):
+            a = a.rsplit('\\')[0]
+        ll.append(a)
+    s = '\n'.join(ll) + '\n'
+    backdoor_file(filename).write(s)
+    print s
+
 def check_fcn(crab_dir, verbose):
     if options.status_only:
         return crab_status(crab_dir, verbose=verbose, debug=options.debug_output)
@@ -246,17 +259,22 @@ while 1:
     print
 
     if not options.resub_any:
-        print_header('To view logs for resubmits:')
+        resub_crlogs = []
+        resub_crrejobs = []
+        resub_crjobprobs = ['cat << EOF | crjobprobs']
         for d,jobs in to_resub.iteritems():
             jobs = crabify_list(jobs)
-            print 'crlog %s %s ; \\' % (d, jobs)
-        print
+            resub_crlogs.append('crlog %s %s ; \\' % (d, jobs))
+            resub_crrejobs.append('crrejob %s %s doit ; \\' % (d, jobs))
+            resub_crjobprobs.append('%s %s' % (d, jobs))
+        resub_crjobprobs.append('EOF')
 
+        print_header('To view logs for resubmits:')
+        backdoor_print('resub_crlogs', resub_crlogs)
         print_header('To resubmit:')
-        for d,jobs in to_resub.iteritems():
-            jobs = crabify_list(jobs)
-            print 'crrejob %s %s doit ; \\' % (d, jobs)
-        print
+        backdoor_print('resub_crrejobs', resub_crrejobs)
+        print_header('To diagnose by site:')
+        backdoor_print('resub_crjobprobs', resub_crjobprobs)
 
     # Now print a big summary table where the rows are directories and
     # the columns are the statuses, with the entries being the number
@@ -384,7 +402,8 @@ while 1:
     if notdone:
         print
         print_header('To resume with just the not-done dirs, do:')
-        print 'crmon ' + ' '.join(notdone)
+        s = 'crmon ' + ' '.join(notdone)
+        backdoor_print('resume_notdone', [s])
 
     if not dirs:
         print
