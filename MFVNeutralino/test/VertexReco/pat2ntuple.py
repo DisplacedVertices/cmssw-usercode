@@ -53,10 +53,13 @@ cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
                    job_control_from_sample = True,
                    get_edm_output = True,
                    data_retrieval = 'fnal',
-                   publish_data_name = 'mfvntuple_' + tuple_version
+                   publish_data_name = 'mfvntuple_' + tuple_version,
+                   max_threads = 3,
                    )
 
-samples = [Samples.MultiJetPk2012B, Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400]
+samples = Samples.data_samples + Samples.mfv_signal_samples + Samples.background_samples + Samples.smaller_background_samples
+
 for sample in Samples.background_samples:
     sample.total_events = -1
+
 cs.submit_all(samples)
