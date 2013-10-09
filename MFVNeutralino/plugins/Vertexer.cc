@@ -1,3 +1,4 @@
+#include "TMath.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -498,9 +499,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
 
       if (verbose) {
-        printf("track-sharing: # vertices = %lu. considering vertices #%lu (track set", vertices->size(), ivtx[0]);
+        printf("track-sharing: # vertices = %lu. considering vertices #%lu (chi2/dof %.3f prob %.2e, track set", vertices->size(), ivtx[0], v[0]->chi2()/v[0]->ndof(), TMath::Prob(v[0]->chi2(), int(v[0]->ndof())));
         print_track_set(tracks[0], *v[0]);
-        printf(") and #%lu (track set", ivtx[1]);
+        printf(") and #%lu (chi2/dof %.3f prob %.2e, track set", ivtx[1], v[1]->chi2()/v[1]->ndof(), TMath::Prob(v[1]->chi2(), int(v[1]->ndof())));
         print_track_set(tracks[1], *v[1]);
         printf("):\n");
       }
@@ -617,9 +618,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       
       if (verbose) {
         printf("      got %lu new vertices out of the av fit\n", new_vertices.size());
-        printf("      these track sets:");
+        printf("      these (chi2/dof : prob | track sets):");
         for (const auto& nv : new_vertices) {
-          printf(" (");
+          printf(" (%.3f : %.2e | ", nv.chi2()/nv.ndof(), TMath::Prob(nv.chi2(), int(nv.ndof())));
           print_track_set(nv);
           printf(" ),");
         }
