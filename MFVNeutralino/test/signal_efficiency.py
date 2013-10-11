@@ -61,12 +61,15 @@ process.p = cms.EDAnalyzer('SignalEfficiency',
                            primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                            muon_src = cms.InputTag('selectedPatMuonsPF'),
                            min_nmuons = cms.int32(1),
+                           muon_dxymax = cms.bool(True),
                            b_discriminator_name = cms.string('combinedSecondaryVertexBJetTags'),
                            bdisc_min = cms.double(0.679),
                            min_nbtags = cms.int32(1),
                            )
+process.nodxymax = process.p.clone(muon_dxymax = False)
 
 process.p0 = cms.Path(process.goodOfflinePrimaryVertices * process.p)
+process.p1 = cms.Path(process.goodOfflinePrimaryVertices * process.nodxymax)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import mfv_signal_samples
