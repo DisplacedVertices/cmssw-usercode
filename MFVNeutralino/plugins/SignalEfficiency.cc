@@ -25,6 +25,7 @@ class SignalEfficiency : public edm::EDAnalyzer {
   const edm::InputTag primary_vertex_src;
   const edm::InputTag muon_src;
   const int min_nmuons;
+  const bool muon_dxymax;
   const std::string b_discriminator_name;
   const double bdisc_min;
   const int min_nbtags;
@@ -43,6 +44,7 @@ SignalEfficiency::SignalEfficiency(const edm::ParameterSet& cfg)
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     muon_src(cfg.getParameter<edm::InputTag>("muon_src")),
     min_nmuons(cfg.getParameter<int>("min_nmuons")),
+    muon_dxymax(cfg.getParameter<bool>("muon_dxymax")),
     b_discriminator_name(cfg.getParameter<std::string>("b_discriminator_name")),
     bdisc_min(cfg.getParameter<double>("bdisc_min")),
     min_nbtags(cfg.getParameter<int>("min_nbtags"))
@@ -107,8 +109,10 @@ void SignalEfficiency::analyze(const edm::Event& event, const edm::EventSetup& s
       muon.combinedQuality().trkKink < 20 &&
       (muon.chargedHadronIso() + muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt() < 0.1;
 
-    const double dxymax = muon.pt() > 20 ? 0.02 : 0.01;
-    good = good && fabs(tk.dxy(pv.position())) < dxymax && fabs(tk.dz(pv.position())) < 0.1;
+    if (muon_dxymax) {
+      const double dxymax = muon.pt() > 20 ? 0.02 : 0.01;
+      good = good && fabs(tk.dxy(pv.position())) < dxymax && fabs(tk.dz(pv.position())) < 0.1;
+    }
 
     if (good) {
       ++nmuons;
