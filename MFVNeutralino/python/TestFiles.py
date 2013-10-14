@@ -58,6 +58,9 @@ ttbarhadronic_sec = cms.untracked.vstring(
     '/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/562EF878-5017-E211-976D-E0CB4E5536A7.root'
     )
 
+multijet = ['file:/uscms_data/d1/tucker/multijetb.root']
+multijet_sec = cms.untracked.vstring('/store/data/Run2012B/MultiJet1Parked/AOD/05Nov2012-v2/10002/84082899-BB49-E211-9227-001E67398052.root')
+
 def set_test_files(process):
     if 'testqcd' in sys.argv:
         process.source.fileNames = qcdht1000
@@ -65,6 +68,9 @@ def set_test_files(process):
     elif 'testttbar' in sys.argv:
         process.source.fileNames = ttbarhadronic
         process.source.secondaryFileNames = ttbarhadronic_sec
+    elif 'testdata' in sys.argv:
+        process.source.fileNames = multijet
+        process.source.secondaryFileNames = multijet_sec
     else:
         process.source.fileNames = tau1000M0400
         process.source.secondaryFileNames = tau1000M0400_sec
