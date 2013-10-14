@@ -270,11 +270,11 @@ while 1:
         resub_crjobprobs.append('EOF')
 
         print_header('To view logs for resubmits:')
-        backdoor_print('resub_crlogs', resub_crlogs)
+        backdoor_print('crlogs', resub_crlogs)
         print_header('To resubmit:')
-        backdoor_print('resub_crrejobs', resub_crrejobs)
+        backdoor_print('crrejobs', resub_crrejobs)
         print_header('To diagnose by site:')
-        backdoor_print('resub_crjobprobs', resub_crjobprobs)
+        backdoor_print('crjobprobs', resub_crjobprobs)
 
     # Now print a big summary table where the rows are directories and
     # the columns are the statuses, with the entries being the number
@@ -403,7 +403,7 @@ while 1:
         print
         print_header('To resume with just the not-done dirs, do:')
         s = 'crmon ' + ' '.join(notdone)
-        backdoor_print('resume_notdone', [s])
+        backdoor_print('resume', [s])
 
     if not dirs:
         print
