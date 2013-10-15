@@ -155,6 +155,18 @@ processpostfix('selectedPatElectrons').cut = process.jtupleParams.electronCut
 processpostfix('selectedPatMuons').cut = process.jtupleParams.muonCut
 processpostfix('selectedPatJets').cut = process.jtupleParams.jetCut
 
+process.load('CMGTools.External.pujetidsequence_cff')
+for x in (process.puJetId, process.puJetMva, process.puJetIdChs, process.puJetMvaChs):
+    x.jets = InputTagPostFix('selectedPatJets')
+    # fix bug in V00-03-04 of CMGTools/External
+    if hasattr(x, 'algos'):
+        bad, good = 'RecoJets/JetProducers', 'CMGTools/External'
+        for ps in x.algos:
+            if hasattr(ps, 'tmvaWeights'):
+                s = ps.tmvaWeights.value()
+                if s.startswith(bad):
+                    ps.tmvaWeights = s.replace(bad, good)
+
 from PhysicsTools.PatAlgos.tools.coreTools import runOnData, removeSpecificPATObjects
 if not runOnMC:
     runOnData(process, names = ['All'], postfix = postfix)
@@ -191,7 +203,7 @@ for cut in (1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.):
 from JMTucker.Tools.PATTupleSelection_cfi import makeLeptonProducers
 makeLeptonProducers(process, postfix=postfix, params=process.jtupleParams)
 
-common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
+common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
 
 # Require numbers of jets based on the trigger: hadronic channel will
 # have at least a 4-jet trigger (maybe 6!), while semileptonic uses a
@@ -221,6 +233,7 @@ process.out.outputCommands = [
     'keep *_patMETs*_*_*',
     'keep *_goodOfflinePrimaryVertices_*_*',
     'keep edmTriggerResults_TriggerResults__PAT', # for post-tuple filtering on the goodData paths
+    'keep *_puJet*_*_*',
     ]
 
 # The normal TrigReport doesn't state how many events are written

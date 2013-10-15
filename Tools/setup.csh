@@ -6,6 +6,7 @@ cvs co -r V04-02-07 RecoLuminosity/LumiDB
 cvs co -r V00-00-08 RecoMET/METAnalyzers
 cvs co -r V15-02-06 RecoParticleFlow/PFProducer 
 cvs co -r V00-00-30-01 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs co -r V00-03-04 -d CMGTools/External UserCode/CMG/CMGTools/External
 cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 cd -
