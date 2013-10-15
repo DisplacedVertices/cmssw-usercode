@@ -35,18 +35,24 @@ void MFVGenVertices::produce(edm::Event& event, const edm::EventSetup&) {
 
   std::auto_ptr<std::vector<double> > decay_vertices(new std::vector<double>);
 
-  MCInteractionMFV3j mci;
-  mci.Init(*gen_particles);
-  if (mci.Valid()) {
-    for (int i = 0; i < 2; ++i) {
-      const reco::GenParticle* daughter = mci.stranges[i];
-      decay_vertices->push_back(daughter->vx());
-      decay_vertices->push_back(daughter->vy());
-      decay_vertices->push_back(daughter->vz());
+  bool ok = false;
+
+  if (!event.isRealData()) {
+    MCInteractionMFV3j mci;
+    mci.Init(*gen_particles);
+    if (mci.Valid()) {
+      for (int i = 0; i < 2; ++i) {
+        const reco::GenParticle* daughter = mci.stranges[i];
+        decay_vertices->push_back(daughter->vx());
+        decay_vertices->push_back(daughter->vy());
+        decay_vertices->push_back(daughter->vz());
+      }
+      ok = true;
+      if (debug) printf("mci valid: ");
     }
-    if (debug) printf("mci valid: ");
   }
-  else {
+
+  if (!ok) {
     for (int i = 0; i < 2; ++i) {
       decay_vertices->push_back(beamspot->x0());
       decay_vertices->push_back(beamspot->y0());
