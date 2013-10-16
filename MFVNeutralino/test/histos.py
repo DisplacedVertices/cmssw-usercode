@@ -9,6 +9,7 @@ process.load('JMTucker.MFVNeutralino.Histos_cff')
 process.mfvVertexHistos        .use_ref = False
 process.mfvVertexHistosNoCuts  .use_ref = False
 process.mfvVertexHistosWAnaCuts.use_ref = False
+process.mfvVertexHistosNoCutsWAnaCuts.use_ref = False
 
 process.mfvAnalysisCuts.min_nvertex = 0
 process.mfvAnalysisCuts.min_ntracks01 = 0
@@ -30,4 +31,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        use_ana_dataset = True,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        )
-    cs.submit_all(samples[:1])
+    cs.submit_all(samples)
