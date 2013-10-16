@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+import os, sys
+from JMTucker.Tools.CRABTools import crab_dirs_from_argv
+
+remove = 'remove' in sys.argv
+if remove:
+    sys.argv.remove('remove')
+
+for d in crab_dirs_from_argv():
+    os.system('crab -c %s -kill all' % d)
+    if remove:
+        os.system('rm -r %s' % d)
