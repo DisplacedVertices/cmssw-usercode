@@ -15,5 +15,5 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                min_nvertex = cms.int32(2),
                                min_ntracks01 = cms.int32(15),
-                               min_maxtrackpt01 = cms.int32(15),
+                               min_maxtrackpt01 = cms.double(15),
                                )
