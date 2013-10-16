@@ -10,6 +10,14 @@ process.mfvVertexHistos        .use_ref = False
 process.mfvVertexHistosNoCuts  .use_ref = False
 process.mfvVertexHistosWAnaCuts.use_ref = False
 
+process.mfvAnalysisCuts.min_nvertex = 0
+process.mfvAnalysisCuts.min_ntracks01 = 0
+process.mfvAnalysisCuts.min_maxtrackpt01 = 0
+
+process.mfvAnalysisCuts.min_4th_jet_pt = 0
+process.mfvAnalysisCuts.min_njets = 0
+process.mfvAnalysisCuts.max_njets = 3
+
 process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvHistos)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -18,9 +26,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('MFVHistos',
-                       #job_control_from_sample = True,
-                       total_number_of_events = -1,
-                       events_per_job = 1000000,
+                       job_control_from_sample = True,
                        use_ana_dataset = True,
                        USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
                        )
