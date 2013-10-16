@@ -166,7 +166,6 @@ class DataSample(Sample):
         self.ana_lumis_per = self.ANA_LUMIS_PER
         self.total_lumis = self.TOTAL_LUMIS
 
-    @property
     def lumi_mask(self, ana=False):
         # JMTBAD run_range checking
         # JMTBAD ana/not difference
@@ -179,11 +178,11 @@ class DataSample(Sample):
 
     def job_control_commands(self, ana=False):
         if ana:
-            return (self.ana_lumi_mask,
+            return (self.lumi_mask(ana),
                     ('total_number_of_lumis', self.total_lumis),
                     ('lumis_per_job',         self.ana_lumis_per))
         else:
-            return (self.lumi_mask,
+            return (self.lumi_mask(ana),
                     ('total_number_of_lumis', self.total_lumis),
                     ('lumis_per_job',         self.lumis_per))
 
