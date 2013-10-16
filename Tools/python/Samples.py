@@ -19,9 +19,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = 'fe6d9f80f9c0fe06cc80b089617fa99d'
-    PUBLISH_USER = 'jchu'
-    ANA_VERSION = 'v7'
+    ANA_HASH = '944db31db2a0af057913c3b3bd5ae1df'
+    PUBLISH_USER = 'tucker'
+    ANA_VERSION = 'v8'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -73,7 +73,7 @@ class Sample(object):
     def ana_dataset(self):
         if self.ana_dataset_override is not None:
             return self.ana_dataset_override
-        return '/%(primary_dataset)s/%(publish_user)s-jtuple_%(ana_version)s-%(ana_hash)s/USER' % self
+        return '/%(primary_dataset)s/%(publish_user)s-mfvntuple_%(ana_version)s-%(ana_hash)s/USER' % self
 
     def filenames(self, ana=True):
         # Return a list of filenames for running the histogrammer not
@@ -304,7 +304,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.dbs_url_num = 2
     sample.re_pat = True
     sample.scheduler = 'condor'
-    sample.ana_hash = '5d4c2a74c85834550d3f9609274e8548'
+    sample.ana_hash = '99d7a676d206adfebd5d154091ebe5a6'
 
 ########################################################################
 
@@ -328,52 +328,15 @@ for sample in all_samples:
 # Exceptions to the defaults (except for the MFV signal samples, which
 # are already applied above).
 
-for sample in background_samples:
-    sample.total_events = {'wjetstolnu':    57685961,
-                           'ttbarhadronic': 10291640,
-                           'ttbarsemilep':  9863760,
-                           'ttbardilep':    2364600,
-                           'qcdht0100':     50129518,
-                           'qcdht0250':     27062078,
-                           'qcdht0500':     8430000,
-                           'qcdht1000':     10200000}[sample.name]
-
-for sample in smaller_background_samples:
-    sample.ana_hash = 'e4d108e5d014df5f9335feb5272936d6'
-    
-ttbarincl.no_skimming_cuts = True
-ttbarincl.scheduler = 'condor'
-singletop_t.scheduler = 'condor'
-
-for sample in auxiliary_background_samples + all_data_samples:
-    sample.ana_ready = False
-    
-# Other exceptions due to jobs being missed, mixing dataset versions
-# (that don't affect actual physics), etc.
-
-temp_neventses = []
-not_ready = []
-
-if temp_neventses:
-    warning = ['partial datasets published:']
-    for sample, temp_nevents in temp_neventses:
-        if temp_nevents > sample.nevents:
-            raise ValueError('for sample %s, will not set temp nevents to %i, greater than original %i' % (sample.name, temp_nevents, sample.nevents))
-        elif temp_nevents == sample.nevents:
-            warning.append('sample %s: temp nevents %i is equal to original' % (sample.name, temp_nevents))
-        else:
-            warning.append('sample %s: new temp nevents %i (original %i, weight increased by %.1f%%)' % (sample.name, temp_nevents, sample.nevents, 100.*sample.nevents/temp_nevents))
-            sample.nevents = temp_nevents
-    big_warn('\n'.join(warning))
-
-if not_ready:
-    big_warn('samples not ana_ready: %s' % ' '.join(s.name for s in not_ready))
-for sample in not_ready:
-    sample.ana_ready = False
+# JMTBAD need to distinguish between total_events and ana_total_events
+# (and need a better name for total_events)
+ttbarsemilep.total_events = 25349818
+qcdht0500   .total_events = 30549292
+qcdht1000   .total_events = 12068863
 
 ########################################################################
 
-__all__ = ['data_samples', 'auxiliary_data_samples', 'background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
+__all__ = ['data_samples', 'auxiliary_data_samples', 'background_samples', 'smaller_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
 __all__ += [s.name for s in all_samples]
 
 if __name__ == '__main__':
