@@ -96,7 +96,6 @@ class Sample(object):
             if redump_existing or not os.path.isfile(os.path.join(dst, os.path.basename(fn))):
                 os.system('dccp ~%s %s/' % (fn,dst))
 
-    @property
     def job_control_commands(self):
         raise NotImplementedError('job_control_commands needs to be implemented')
 
@@ -108,6 +107,7 @@ class Sample(object):
 
 class MCSample(Sample):
     EVENTS_PER = 25000
+    ANA_EVENTS_PER = 1000000
     TOTAL_EVENTS = -1
     
     def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1):
@@ -121,6 +121,7 @@ class MCSample(Sample):
         self.join_info = (False, self.nice_name, self.color)
 
         self.events_per = self.EVENTS_PER
+        self.ana_events_per = self.ANA_EVENTS_PER
         self.total_events = self.TOTAL_EVENTS
 
     @property
@@ -130,10 +131,13 @@ class MCSample(Sample):
             nevents = self.total_events
         return self.cross_section / float(nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
 
-    @property
-    def job_control_commands(self):
-        return (('total_number_of_events', self.total_events),
-                ('events_per_job',         self.events_per))
+    def job_control_commands(self, ana=False):
+        if ana:
+            return (('total_number_of_events', self.total_events),
+                    ('events_per_job',         self.ana_events_per))
+        else:
+            return (('total_number_of_events', self.total_events),
+                    ('events_per_job',         self.events_per))
 
 ########################################################################
 
@@ -149,6 +153,7 @@ class DataSample(Sample):
     IS_MC = False
     JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt'
     LUMIS_PER = 75
+    ANA_LUMIS_PER = 500
     TOTAL_LUMIS = -1
 
     def __init__(self, name, dataset, run_range=None):
@@ -158,11 +163,13 @@ class DataSample(Sample):
         self.json = self.JSON
 
         self.lumis_per = self.LUMIS_PER
+        self.ana_lumis_per = self.ANA_LUMIS_PER
         self.total_lumis = self.TOTAL_LUMIS
 
     @property
-    def lumi_mask(self):
+    def lumi_mask(self, ana=False):
         # JMTBAD run_range checking
+        # JMTBAD ana/not difference
         if type(self.json) == str:
             return 'lumi_mask', self.json
         elif self.json is None:
@@ -170,11 +177,15 @@ class DataSample(Sample):
         else: # implement LumiList object -> tmp.json
             raise NotImplementedError('need to do something more complicated when combining lumimasks')
 
-    @property
-    def job_control_commands(self):
-        return (self.lumi_mask,
-                ('total_number_of_lumis', self.total_lumis),
-                ('lumis_per_job',         self.lumis_per))
+    def job_control_commands(self, ana=False):
+        if ana:
+            return (self.ana_lumi_mask,
+                    ('total_number_of_lumis', self.total_lumis),
+                    ('lumis_per_job',         self.ana_lumis_per))
+        else:
+            return (self.lumi_mask,
+                    ('total_number_of_lumis', self.total_lumis),
+                    ('lumis_per_job',         self.lumis_per))
 
 ########################################################################
 
@@ -313,6 +324,9 @@ data_samples = [
     ]
 
 auxiliary_data_samples = []
+
+for sample in data_samples:
+    sample.ana_hash = '00b5523718eb71b4bef18c6d45967745'
 
 ########################################################################
 
