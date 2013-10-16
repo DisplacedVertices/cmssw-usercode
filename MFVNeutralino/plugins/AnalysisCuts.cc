@@ -20,6 +20,7 @@ private:
   const int min_njets;
   const int max_njets;
   const int min_nbtags;
+  const int max_nbtags;
   const double min_sum_ht;
   const int min_nleptons;
 
@@ -38,6 +39,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_njets(cfg.getParameter<int>("min_njets")),
     max_njets(cfg.getParameter<int>("max_njets")),
     min_nbtags(cfg.getParameter<int>("min_nbtags")),
+    max_nbtags(cfg.getParameter<int>("max_nbtags")),
     min_sum_ht(cfg.getParameter<double>("min_sum_ht")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
@@ -65,7 +67,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       mevent->jetpt6 < min_6th_jet_pt)
     return false;
 
-  if (mevent->nbtags < min_nbtags)
+  if (mevent->nbtags < min_nbtags || mevent->nbtags > max_nbtags)
     return false;
 
   if (mevent->jet_sum_ht < min_sum_ht)
