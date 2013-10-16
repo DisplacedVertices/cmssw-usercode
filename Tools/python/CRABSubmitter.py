@@ -167,7 +167,7 @@ class CRABSubmitter:
         if dbs_url:
             cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
         if self.job_control_from_sample:
-            for cmd in sample.job_control_commands:
+            for cmd in sample.job_control_commands(ana=self.use_ana_dataset):
                 if cmd:
                     cfg.set('CMSSW', *cmd)
         if self.crab_cfg_modifier is not None:
