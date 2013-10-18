@@ -205,6 +205,9 @@ makeLeptonProducers(process, postfix=postfix, params=process.jtupleParams)
 
 common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
 
+process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+common_seq *= process.mfvVertices
+
 # Require numbers of jets based on the trigger: hadronic channel will
 # have at least a 4-jet trigger (maybe 6!), while semileptonic uses a
 # 3-jet trigger. Dileptonic has no jets in trigger, but we'll require
@@ -229,6 +232,7 @@ process.out.outputCommands = [
     'keep *_selectedPatJets*_*_*',
     'drop *_selectedPatJetsForMETtype1p2CorrPF_*_*',
     'drop *_selectedPatJetsForMETtype2CorrPF_*_*',
+    'keep *_mfvVertices*_*_*',
     'drop CaloTowers_*_*_*',
     'keep *_patMETs*_*_*',
     'keep *_goodOfflinePrimaryVertices_*_*',
