@@ -36,11 +36,9 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.mfvVertices.histos = False
 process.mfvVerticesToJets.histos = False
+process.p.remove(process.mfvVertices)
 process.p = cms.Path(common_seq * process.mfvVertexSequence * process.mfvEvent)
 ''')
-
-    if not sample.is_mc:
-        to_add.append('process.mfvEvent.is_mc = False')
 
     return to_add, to_replace
 
@@ -54,7 +52,7 @@ cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
                    max_threads = 3,
                    )
 
-samples = Samples.data_samples + Samples.mfv_signal_samples + Samples.background_samples + Samples.smaller_background_samples
+samples = Samples.data_samples + Samples.mfv_signal_samples + Samples.background_samples + Samples.smaller_background_samples + Samples.leptonic_background_samples
 
 for sample in Samples.background_samples:
     sample.total_events = -1
