@@ -26,8 +26,6 @@ private:
   const edm::InputTag pfjets_src;
   const double jet_pt_min;
   const edm::InputTag primary_vertex_src;
-  const bool is_mc;
-  bool warned_non_mfv;
   const edm::InputTag gen_particles_src;
   const edm::InputTag jets_src;
   const std::string b_discriminator;
@@ -38,6 +36,7 @@ private:
   const edm::InputTag electrons_src;
   const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
+  bool warned_non_mfv;
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
@@ -45,8 +44,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     pfjets_src(cfg.getParameter<edm::InputTag>("pfjets_src")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    is_mc(cfg.getParameter<bool>("is_mc")),
-    warned_non_mfv(false),
     gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
@@ -56,7 +53,8 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     muon_dilep_selector(cfg.getParameter<std::string>("muon_dilep_cut")),
     electrons_src(cfg.getParameter<edm::InputTag>("electrons_src")),
     electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
-    electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut"))
+    electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
+    warned_non_mfv(false)
 {
   produces<MFVEvent>();
 }
@@ -80,7 +78,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   mevent->gen_valid = false;
 
-  if (is_mc) {
+  if (!event.isRealData()) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByLabel(gen_particles_src, gen_particles);
 
@@ -180,11 +178,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  if (is_mc) {
+  mevent->npu = -1;
+
+  if (!event.isRealData()) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup;
     event.getByLabel("addPileupInfo", pileup);
-
-    mevent->npu = -1;
 
     for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
       if (psi->getBunchCrossing() == 0)
