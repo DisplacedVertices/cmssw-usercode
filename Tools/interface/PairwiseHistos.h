@@ -82,7 +82,7 @@ struct PairwiseHistos {
       }
   }
 
-  void Fill(const ValueMap& values, const int fill_num=-1) {
+  void Fill(const ValueMap& values, const int fill_num=-1, const double weight=1.) {
     die_if_not(n > 0, "PairwiseHistos not properly initialized");
     die_if_not(int(values.size()) == n, "wrong size for values: %i != %i expected", values.size(), h1.size());
 
@@ -105,7 +105,7 @@ struct PairwiseHistos {
 
     for (auto i = b; i != e; ++i) {
       const float vi = get(to_fill, *i);
-      h1[*i]->Fill(vi);
+      h1[*i]->Fill(vi, weight);
       
       if (!do_2d)
         continue;
@@ -116,7 +116,7 @@ struct PairwiseHistos {
 	  continue;
 
 	const float vj = get(to_fill, *j);
-	h2[std::make_pair(*i, *j)]->Fill(vi, vj);
+	h2[std::make_pair(*i, *j)]->Fill(vi, vj, weight);
       }
     }
 
