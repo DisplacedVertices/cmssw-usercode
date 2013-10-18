@@ -54,4 +54,15 @@ uchar int2uchar(int x);
 uchar int2uchar_clamp(int x);
 void inc_uchar(uchar& x);
 
+struct weight_fill {
+  double weight;
+  weight_fill(double w) : weight(w) {}
+  void operator()(TH1F* h, double x) const {
+    h->Fill(x, weight);
+  }
+  void operator()(TH2F* h, double x, double y) const {
+    h->Fill(x, y, weight);
+  }
+};
+
 #endif
