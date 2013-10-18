@@ -23,6 +23,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
  private:
   const edm::InputTag mfv_event_src;
   const edm::InputTag vertex_aux_src;
+  const edm::InputTag weight_src;
   const bool use_ref;
   const bool do_scatterplots;
 
@@ -38,9 +39,9 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   enum sv_index { sv_best0, sv_best1, sv_best2, sv_rest, sv_top2, sv_all, sv_num_indices };
   static const char* sv_index_names[sv_num_indices];
 
-  void fill_multi(TH1F** hs, const int isv, const double val) const;
-  void fill_multi(TH2F** hs, const int isv, const double val, const double val2) const;
-  void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val) const;
+  void fill_multi(TH1F** hs, const int isv, const double val, const double weight) const;
+  void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
+  void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const;
 
   TH1F* h_sv_pos_1d[4][3];
   TH2F* h_sv_pos_2d[4][3];
@@ -88,6 +89,7 @@ const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = {
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
     vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
+    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     use_ref(cfg.getParameter<bool>("use_ref")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
@@ -238,30 +240,33 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 }
 
 // JMTBAD ugh
-void MFVVertexHistos::fill_multi(TH1F** hs, const int isv, const double val) const {
-  hs[isv < 3 ? isv : sv_rest]->Fill(val);
+void MFVVertexHistos::fill_multi(TH1F** hs, const int isv, const double val, const double weight) const {
+  hs[isv < 3 ? isv : sv_rest]->Fill(val, weight);
   if (isv < 2)
-    hs[sv_top2]->Fill(val);
-  hs[sv_all]->Fill(val);
+    hs[sv_top2]->Fill(val, weight);
+  hs[sv_all]->Fill(val, weight);
 }
 
-void MFVVertexHistos::fill_multi(TH2F** hs, const int isv, const double val, const double val2) const {
-  hs[isv < 3 ? isv : sv_rest]->Fill(val, val2);
+void MFVVertexHistos::fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const {
+  hs[isv < 3 ? isv : sv_rest]->Fill(val, val2, weight);
   if (isv < 2)
-    hs[sv_top2]->Fill(val, val2);
-  hs[sv_all]->Fill(val, val2);
+    hs[sv_top2]->Fill(val, val2, weight);
+  hs[sv_all]->Fill(val, val2, weight);
 }
 
-void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val) const {
-  hs[isv < 3 ? isv : sv_rest].Fill(val);
+void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const {
+  hs[isv < 3 ? isv : sv_rest].Fill(val, -1, weight);
   if (isv < 2)
-    hs[sv_top2].Fill(val);
-  hs[sv_all].Fill(val);
+    hs[sv_top2].Fill(val, -1, weight);
+  hs[sv_all].Fill(val, -1, weight);
 }
 
 void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mfv_event_src, mevent);
+
+  edm::Handle<double> weight;
+  event.getByLabel(weight_src, weight);
 
   const float bsx = mevent->bsx;
   const float bsy = mevent->bsy;
@@ -277,12 +282,12 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     const MFVVertexAux& aux = auxes->at(isv);
 
     const int svndx = isv >= 3 ? 3 : isv; // don't use fill_multi for the position plots
-    h_sv_pos_1d[svndx][0]->Fill(aux.x - bsx);
-    h_sv_pos_1d[svndx][1]->Fill(aux.y - bsy);
-    h_sv_pos_1d[svndx][2]->Fill(aux.z - bsz);
-    h_sv_pos_2d[svndx][0]->Fill(aux.x - bsx, aux.y - bsy);
-    h_sv_pos_2d[svndx][1]->Fill(aux.x - bsx, aux.z - bsz);
-    h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz);
+    h_sv_pos_1d[svndx][0]->Fill(aux.x - bsx, *weight);
+    h_sv_pos_1d[svndx][1]->Fill(aux.y - bsy, *weight);
+    h_sv_pos_1d[svndx][2]->Fill(aux.z - bsz, *weight);
+    h_sv_pos_2d[svndx][0]->Fill(aux.x - bsx, aux.y - bsy, *weight);
+    h_sv_pos_2d[svndx][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
+    h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
 
     if (use_ref) {
       for (auto trki = aux.ref->tracks_begin(), trke = aux.ref->tracks_end(); trki != trke; ++trki) {
@@ -291,13 +296,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
         const reco::TrackBaseRef& tri = *trki;
 
-        fill_multi(h_sv_trackpt,          isv, tri->pt());
-        fill_multi(h_sv_trackfracpterr,   isv, tri->ptError()/tri->pt());
-        fill_multi(h_sv_tracketa,         isv, tri->eta());
-        fill_multi(h_sv_trackphi,         isv, tri->phi());
-        fill_multi(h_sv_trackdxy,         isv, tri->dxy(bs));
-        fill_multi(h_sv_trackdz,          isv, tri->dz (bs));
-        fill_multi(h_sv_tracknhits,       isv, tri->numberOfValidHits());
+        fill_multi(h_sv_trackpt,          isv, tri->pt(), *weight);
+        fill_multi(h_sv_trackfracpterr,   isv, tri->ptError()/tri->pt(), *weight);
+        fill_multi(h_sv_tracketa,         isv, tri->eta(), *weight);
+        fill_multi(h_sv_trackphi,         isv, tri->phi(), *weight);
+        fill_multi(h_sv_trackdxy,         isv, tri->dxy(bs), *weight);
+        fill_multi(h_sv_trackdz,          isv, tri->dz (bs), *weight);
+        fill_multi(h_sv_tracknhits,       isv, tri->numberOfValidHits(), *weight);
 
         TLorentzVector p4_i, p4_j, p4_k;
         const double m = 0.135;
@@ -309,9 +314,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
           p4_j.SetPtEtaPhiM(trj->pt(), trj->eta(), trj->phi(), m);
 
           const TLorentzVector p4_ij = p4_i + p4_j;
-          fill_multi(h_sv_trackpaircosth, isv, tri->momentum().Dot(trj->momentum()) / tri->p() / trj->p());
-          fill_multi(h_sv_trackpairdr,    isv, reco::deltaR(*tri, *trj));
-          fill_multi(h_sv_trackpairmass,  isv, p4_ij.M());
+          fill_multi(h_sv_trackpaircosth, isv, tri->momentum().Dot(trj->momentum()) / tri->p() / trj->p(), *weight);
+          fill_multi(h_sv_trackpairdr,    isv, reco::deltaR(*tri, *trj), *weight);
+          fill_multi(h_sv_trackpairmass,  isv, p4_ij.M(), *weight);
 
           for (auto trkk = trkj + 1; trkk != trke; ++trkk) {
             if (aux.ref->trackWeight(*trkk) < mfv::track_vertex_weight_min)
@@ -319,7 +324,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
             const reco::TrackBaseRef& trk = *trkk;
             p4_k.SetPtEtaPhiM(trk->pt(), trk->eta(), trk->phi(), m);
-            fill_multi(h_sv_tracktriplemass, isv, (p4_ij + p4_k).M());
+            fill_multi(h_sv_tracktriplemass, isv, (p4_ij + p4_k).M(), *weight);
           }
         }
       }
@@ -400,29 +405,29 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"pv3dsig",                 aux.pv3dsig()},
     };
 
-    fill_multi(h_sv, isv, v);
+    fill_multi(h_sv, isv, v, *weight);
 
     for (PairwiseHistos& h : h_sv_sums)
-      h.Fill(v, isv);
+      h.Fill(v, isv, *weight);
   }
 
   //////////////////////////////////////////////////////////////////////
 
-  h_nsv->Fill(nsv);
-  h_nsv_v_minlspdist2d->Fill(mevent->minlspdist2d(), nsv);
-  h_nsv_v_lspdist2d->Fill(mevent->lspdist2d(), nsv);
-  h_nsv_v_lspdist3d->Fill(mevent->lspdist3d(), nsv);
+  h_nsv->Fill(nsv, *weight);
+  h_nsv_v_minlspdist2d->Fill(mevent->minlspdist2d(), nsv, *weight);
+  h_nsv_v_lspdist2d->Fill(mevent->lspdist2d(), nsv, *weight);
+  h_nsv_v_lspdist3d->Fill(mevent->lspdist3d(), nsv, *weight);
 
   if (nsv >= 2) {
     const MFVVertexAux& sv0 = auxes->at(0);
     const MFVVertexAux& sv1 = auxes->at(1);
     double svdist2d = mag(sv0.x - sv1.x, sv0.y - sv1.y);
     double svdist3d = mag(sv0.x - sv1.x, sv0.y - sv1.y, sv0.z - sv1.z);
-    h_svdist2d->Fill(svdist2d);
-    h_svdist3d->Fill(svdist3d);
-    h_svdist2d_v_lspdist2d->Fill(mevent->lspdist2d(), svdist2d);
-    h_svdist3d_v_lspdist3d->Fill(mevent->lspdist3d(), svdist3d);
-    h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d);
+    h_svdist2d->Fill(svdist2d, *weight);
+    h_svdist3d->Fill(svdist3d, *weight);
+    h_svdist2d_v_lspdist2d->Fill(mevent->lspdist2d(), svdist2d, *weight);
+    h_svdist3d_v_lspdist3d->Fill(mevent->lspdist3d(), svdist3d, *weight);
+    h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, *weight);
   }
 
   if (use_ref) {
@@ -438,16 +443,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         std::pair<bool, float> pair2dcompat = mfv::compatibility(vtxi, vtxj, false);
         std::pair<bool, float> pair3dcompat = mfv::compatibility(vtxi, vtxj, true);
 
-        h_pair2dcompatscss->Fill(pair2dcompat.first);
-        h_pair2dcompat->Fill(pair2dcompat.second);
-        h_pair2ddist->Fill(pair2ddist.value());
-        h_pair2derr->Fill(pair2ddist.error());
-        h_pair2dsig->Fill(pair2ddist.significance());
-        h_pair3dcompatscss->Fill(pair3dcompat.first);
-        h_pair3dcompat->Fill(pair3dcompat.second);
-        h_pair3ddist->Fill(pair3ddist.value());
-        h_pair3derr->Fill(pair3ddist.error());
-        h_pair3dsig->Fill(pair3ddist.significance());
+        h_pair2dcompatscss->Fill(pair2dcompat.first, *weight);
+        h_pair2dcompat->Fill(pair2dcompat.second, *weight);
+        h_pair2ddist->Fill(pair2ddist.value(), *weight);
+        h_pair2derr->Fill(pair2ddist.error(), *weight);
+        h_pair2dsig->Fill(pair2ddist.significance(), *weight);
+        h_pair3dcompatscss->Fill(pair3dcompat.first, *weight);
+        h_pair3dcompat->Fill(pair3dcompat.second, *weight);
+        h_pair3ddist->Fill(pair3ddist.value(), *weight);
+        h_pair3derr->Fill(pair3ddist.error(), *weight);
+        h_pair3dsig->Fill(pair3ddist.significance(), *weight);
       }
     }
   }

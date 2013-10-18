@@ -14,6 +14,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag mfv_event_src;
+  const edm::InputTag weight_src;
 
   TH2F* h_gen_decay;
   TH1F* h_gen_partons_in_acc;
@@ -55,7 +56,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
 };
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
-  : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src"))
+  : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+    weight_src(cfg.getParameter<edm::InputTag>("weight_src"))
 {
   edm::Service<TFileService> fs;
 
@@ -107,46 +109,50 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mfv_event_src, mevent);
 
-  h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1]);
-  h_gen_partons_in_acc->Fill(mevent->gen_partons_in_acc);
+  edm::Handle<double> weight;
+  event.getByLabel(weight_src, weight);
+  const double w = *weight;
 
-  h_minlspdist2d->Fill(mevent->minlspdist2d());
-  h_lspdist2d->Fill(mevent->lspdist2d());
-  h_lspdist3d->Fill(mevent->lspdist3d());
+  h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
+  h_gen_partons_in_acc->Fill(mevent->gen_partons_in_acc, w);
+
+  h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
+  h_lspdist2d->Fill(mevent->lspdist2d(), w);
+  h_lspdist3d->Fill(mevent->lspdist3d(), w);
 
   for (int i = 0; i < MFVEvent::n_trigger_paths; ++i)
-    h_pass_trigger[i]->Fill(mevent->pass_trigger[i]);
+    h_pass_trigger[i]->Fill(mevent->pass_trigger[i], w);
 
-  h_npfjets->Fill(mevent->npfjets);
-  h_pfjetpt4->Fill(mevent->pfjetpt4);
-  h_pfjetpt5->Fill(mevent->pfjetpt5);
-  h_pfjetpt6->Fill(mevent->pfjetpt6);
+  h_npfjets->Fill(mevent->npfjets, w);
+  h_pfjetpt4->Fill(mevent->pfjetpt4, w);
+  h_pfjetpt5->Fill(mevent->pfjetpt5, w);
+  h_pfjetpt6->Fill(mevent->pfjetpt6, w);
 
-  h_npu->Fill(mevent->npu);
+  h_npu->Fill(mevent->npu, w);
 
-  h_bsx->Fill(mevent->bsx);
-  h_bsy->Fill(mevent->bsy);
-  h_bsz->Fill(mevent->bsz);
+  h_bsx->Fill(mevent->bsx, w);
+  h_bsy->Fill(mevent->bsy, w);
+  h_bsz->Fill(mevent->bsz, w);
 
-  h_npv->Fill(mevent->npv);
-  h_pvx->Fill(mevent->pvx - mevent->bsx);
-  h_pvy->Fill(mevent->pvy - mevent->bsy);
-  h_pvz->Fill(mevent->pvz - mevent->bsz);
-  h_pv_ntracks->Fill(mevent->pv_ntracks);
-  h_pv_sumpt2->Fill(mevent->pv_sumpt2);
-  h_pv_rho->Fill(mevent->pv_rho());
+  h_npv->Fill(mevent->npv, w);
+  h_pvx->Fill(mevent->pvx - mevent->bsx, w);
+  h_pvy->Fill(mevent->pvy - mevent->bsy, w);
+  h_pvz->Fill(mevent->pvz - mevent->bsz, w);
+  h_pv_ntracks->Fill(mevent->pv_ntracks, w);
+  h_pv_sumpt2->Fill(mevent->pv_sumpt2, w);
+  h_pv_rho->Fill(mevent->pv_rho(), w);
 
-  h_njets->Fill(mevent->njets);
-  h_jetpt4->Fill(mevent->jetpt4);
-  h_jetpt5->Fill(mevent->jetpt5);
-  h_jetpt6->Fill(mevent->jetpt6);
-  h_jet_sum_ht->Fill(mevent->jet_sum_ht);
-  h_nbtags->Fill(mevent->nbtags);
+  h_njets->Fill(mevent->njets, w);
+  h_jetpt4->Fill(mevent->jetpt4, w);
+  h_jetpt5->Fill(mevent->jetpt5, w);
+  h_jetpt6->Fill(mevent->jetpt6, w);
+  h_jet_sum_ht->Fill(mevent->jet_sum_ht, w);
+  h_nbtags->Fill(mevent->nbtags, w);
 
   for (int i = 0; i < 3; ++i) {
-    h_nmuons[i]->Fill(mevent->nmu[i]);
-    h_nelectrons[i]->Fill(mevent->nel[i]);
-    h_nleptons[i]->Fill(mevent->nlep(i));
+    h_nmuons[i]->Fill(mevent->nmu[i], w);
+    h_nelectrons[i]->Fill(mevent->nel[i], w);
+    h_nleptons[i]->Fill(mevent->nlep(i), w);
   }
 }
 
