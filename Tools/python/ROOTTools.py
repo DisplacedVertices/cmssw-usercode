@@ -438,7 +438,8 @@ def data_mc_comparison(name,
             sample.hist = sample._datamccomp_file.Get(histogram_path)
             if not issubclass(type(sample.hist), ROOT.TH1):
                 raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
-            sample.hist.Scale(sample.partial_weight * int_lumi)
+            if sample != data_sample:
+                sample.hist.Scale(sample.partial_weight * int_lumi)
            
     #####################
 
@@ -518,6 +519,11 @@ def data_mc_comparison(name,
         t.SetFillColor(0)
         t.SetFillStyle(0)
         t.Draw()
+
+    if verbose:
+        print name
+        print 'data integral:', data_sample.hist.Integral(0, data_sample.hist.GetNbinsX()+1)
+        print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
     
     ratio_pad, res_g = None, None
     if data_sample is not None:
@@ -536,8 +542,13 @@ def data_mc_comparison(name,
         res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
+        res_g.GetYaxis().SetRangeUser(-1,3)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)
+        ln = ROOT.TLine(0,1, sum_background.GetBinLowEdge(sum_background.GetNbinsX()+1), 1)
+        ln.SetLineStyle(4)
+        ln.SetLineColor(ROOT.kBlue+3)
+        ln.Draw()
 
     if plot_saver is not None:
         plot_saver.save(name)
