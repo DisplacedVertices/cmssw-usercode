@@ -38,10 +38,10 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 }
 
 double MFVWeightProducer::pileup_weight(int mc_npu) const {
-  if (mc_npu < 1 || mc_npu > int(pileup_weights.size()))
+  if (mc_npu < 0 || mc_npu > int(pileup_weights.size()))
     return 0;
   else
-    return pileup_weights[mc_npu - 1];
+    return pileup_weights[mc_npu];
 }
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
