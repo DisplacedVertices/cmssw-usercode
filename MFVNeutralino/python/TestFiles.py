@@ -44,6 +44,7 @@ tau1000M0400_sec = cms.untracked.vstring(
     '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_179_2_WvC.root'
     )
 
+qcdht1000_nt = ['/store/user/tucker/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/mfvntuple_v8/944db31db2a0af057913c3b3bd5ae1df/ntuple_1_1_3QM.root']
 qcdht1000 = ['/store/user/jchu/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jtuple_v7/fe6d9f80f9c0fe06cc80b089617fa99d/pat_1_1_NOT.root']
 qcdht1000_sec = cms.untracked.vstring(
     '/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/0038E6D2-860D-E211-9211-00266CFACC38.root',
@@ -58,6 +59,7 @@ ttbarhadronic_sec = cms.untracked.vstring(
     '/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/562EF878-5017-E211-976D-E0CB4E5536A7.root'
     )
 
+multijet_nt = ['/store/user/tucker/MultiJet1Parked/mfvntuple_v8/00b5523718eb71b4bef18c6d45967745/ntuple_100_1_M3M.root']
 multijet = ['file:/uscms_data/d1/tucker/multijetb.root']
 multijet_sec = cms.untracked.vstring('/store/data/Run2012B/MultiJet1Parked/AOD/05Nov2012-v2/10002/84082899-BB49-E211-9227-001E67398052.root')
 
