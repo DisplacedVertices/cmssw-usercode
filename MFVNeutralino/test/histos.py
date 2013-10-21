@@ -1,7 +1,8 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+import JMTucker.MFVNeutralino.TestFiles as TestFiles
 
-process.source.fileNames = ['/store/user/tucker/MultiJet1Parked/mfvntuple_v8/00b5523718eb71b4bef18c6d45967745/ntuple_100_1_M3M.root']
+process.source.fileNames = TestFiles.qcdht1000_nt
 process.TFileService.fileName = 'histos.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
