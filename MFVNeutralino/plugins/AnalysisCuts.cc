@@ -2,7 +2,9 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/MFVNeutralino/interface/Event.h"
+#include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/VertexAux.h"
 
 class MFVAnalysisCuts : public edm::EDFilter {
@@ -14,6 +16,7 @@ private:
 
   const edm::InputTag mevent_src;
   const int trigger_bit;
+  const bool re_trigger;
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
   const double min_6th_jet_pt;
@@ -33,6 +36,7 @@ private:
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
+    re_trigger(cfg.getParameter<bool>("re_trigger")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
     min_6th_jet_pt(cfg.getParameter<double>("min_6th_jet_pt")),
@@ -53,8 +57,17 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
-  if (trigger_bit >= 0 && !mevent->pass_trigger[trigger_bit])
-    return false;
+  if (trigger_bit >= 0) {
+    if (re_trigger) {
+      bool pass_trigger[mfv::n_trigger_paths] = { 0 };
+      TriggerHelper trig_helper(event, edm::InputTag("TriggerResults", "", "HLT"));
+      mfv::trigger_decision(trig_helper, pass_trigger);
+      if (!pass_trigger[trigger_bit])
+        return false;
+    }
+    else if (!mevent->pass_trigger[trigger_bit])
+      return false;
+  }
 
   if (mevent->nlep(0) < min_nleptons)
     return false;

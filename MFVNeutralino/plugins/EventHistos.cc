@@ -4,8 +4,10 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralino/interface/Event.h"
+#include "JMTucker/MFVNeutralino/interface/EventTools.h"
 
 class MFVEventHistos : public edm::EDAnalyzer {
  public:
@@ -15,6 +17,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
  private:
   const edm::InputTag mfv_event_src;
   const edm::InputTag weight_src;
+  const bool re_trigger;
 
   TH2F* h_gen_decay;
   TH1F* h_gen_partons_in_acc;
@@ -23,7 +26,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
 
-  TH1F* h_pass_trigger[MFVEvent::n_trigger_paths];
+  TH1F* h_pass_trigger[mfv::n_trigger_paths];
 
   TH1F* h_npfjets;
   TH1F* h_pfjetpt4;
@@ -57,7 +60,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src"))
+    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
+    re_trigger(cfg.getParameter<bool>("re_trigger"))
 {
   edm::Service<TFileService> fs;
 
@@ -68,7 +72,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
 
-  for (int i = 0; i < MFVEvent::n_trigger_paths; ++i)
+  for (int i = 0; i < mfv::n_trigger_paths; ++i)
     h_pass_trigger[i] = fs->make<TH1F>(TString::Format("h_pass_trigger_%i", i), TString::Format(";pass_trigger[%i];events", i), 2, 0, 2);
 
   h_npfjets = fs->make<TH1F>("h_npfjets", ";# of PF jets;events", 30, 0, 30);
@@ -113,6 +117,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(weight_src, weight);
   const double w = *weight;
 
+  //////////////////////////////////////////////////////////////////////////////
+
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
   h_gen_partons_in_acc->Fill(mevent->gen_partons_in_acc, w);
 
@@ -120,8 +126,19 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
   h_lspdist3d->Fill(mevent->lspdist3d(), w);
 
-  for (int i = 0; i < MFVEvent::n_trigger_paths; ++i)
-    h_pass_trigger[i]->Fill(mevent->pass_trigger[i], w);
+  //////////////////////////////////////////////////////////////////////////////
+
+  bool pass_trigger[mfv::n_trigger_paths] = { 0 };
+
+  if (re_trigger) {
+    TriggerHelper trig_helper(event, edm::InputTag("TriggerResults", "", "HLT"));
+    mfv::trigger_decision(trig_helper, pass_trigger);
+  }
+
+  for (int i = 0; i < mfv::n_trigger_paths; ++i)
+    h_pass_trigger[i]->Fill((re_trigger ? pass_trigger : mevent->pass_trigger)[i], w);
+
+  //////////////////////////////////////////////////////////////////////////////
 
   h_npfjets->Fill(mevent->npfjets, w);
   h_pfjetpt4->Fill(mevent->pfjetpt4, w);
