@@ -123,7 +123,10 @@ def clopper_pearson(n_on, n_tot, alpha=1-0.6827, equal_tailed=True):
 
 def clopper_pearson_poisson_means(x, y, alpha=1-0.6827):
     r, rl, rh = clopper_pearson(x, x+y, alpha)
-    return r/(1 - r), rl/(1 - rl), rh/(1 - rh)
+    pl = rl/(1-rl)
+    if y == 0 or abs(rh - 1) < 1e-9:
+        return None, pl, None
+    return r/(1-r), pl, rh/(1 - rh)
 
 def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
     nbins = h1.GetNbinsX()
@@ -148,6 +151,10 @@ def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
             s = t
         rat, a,b = confint(s,t)
         #print ibin, s, t, a, b
+
+        if b is None: # JMTBAD
+            assert confint is not clopper_pearson
+            b = 1e99
 
         _x  = xax.GetBinCenter(ibin)
         _xw = xax.GetBinWidth(ibin)/2
@@ -542,7 +549,7 @@ def data_mc_comparison(name,
         res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
-        res_g.GetYaxis().SetRangeUser(-1,3)
+        res_g.GetYaxis().SetRangeUser(0,3)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)
         ln = ROOT.TLine(0,1, sum_background.GetBinLowEdge(sum_background.GetNbinsX()+1), 1)
