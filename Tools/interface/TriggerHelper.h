@@ -3,6 +3,7 @@
 
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+#include "FWCore/Framework/interface/Event.h"
 
 struct TriggerHelper {
   const edm::TriggerResults& trigger_results;
@@ -10,7 +11,15 @@ struct TriggerHelper {
 
   bool debug;
 
+  static const edm::TriggerResults& _get(const edm::Event& event, const edm::InputTag& src) {
+    edm::Handle<edm::TriggerResults> h;
+    event.getByLabel(src, h);
+    return *h;
+  }
+
   TriggerHelper(const edm::TriggerResults& trigger_results_, const edm::TriggerNames& trigger_names_) : trigger_results(trigger_results_), trigger_names(trigger_names_), debug(false) {}
+  TriggerHelper(const edm::Event& event, const edm::InputTag& src)
+    : trigger_results(_get(event, src)), trigger_names(event.triggerNames(trigger_results)), debug(false) {}
 
   bool pass(const std::string& name, bool& found) const {
     const unsigned ndx = trigger_names.triggerIndex(name);
