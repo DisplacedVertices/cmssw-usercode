@@ -8,9 +8,11 @@ struct TriggerHelper {
   const edm::TriggerResults& trigger_results;
   const edm::TriggerNames& trigger_names;
 
-  TriggerHelper(const edm::TriggerResults& trigger_results_, const edm::TriggerNames& trigger_names_) : trigger_results(trigger_results_), trigger_names(trigger_names_) {}
+  bool debug;
 
-  bool pass(const std::string& name, bool& found, const bool debug=false) const {
+  TriggerHelper(const edm::TriggerResults& trigger_results_, const edm::TriggerNames& trigger_names_) : trigger_results(trigger_results_), trigger_names(trigger_names_), debug(false) {}
+
+  bool pass(const std::string& name, bool& found) const {
     const unsigned ndx = trigger_names.triggerIndex(name);
     found = ndx < trigger_results.size();
     if (debug) {
@@ -34,7 +36,7 @@ struct TriggerHelper {
     return result;
   }
    
-  bool pass(const char* fmt, int range_lo, int range_hi) const {
+  bool pass(const char* fmt, int range_lo, int range_hi, bool throw_not_found=true) const {
     char name[512];
     for (int i = range_lo; i <= range_hi; ++i) {
       snprintf(name, 512, fmt, i);
@@ -43,7 +45,21 @@ struct TriggerHelper {
       if (found)
 	return result;
     }
-    throw cms::Exception("TriggerHelper") << "no trigger for fmt " << fmt << " range " << range_lo << "-" << range_hi << " found";
+    if (throw_not_found)
+      throw cms::Exception("TriggerHelper") << "no trigger for fmt " << fmt << " range " << range_lo << "-" << range_hi << " found";
+    return false;
+  }
+
+  bool pass_any_version(const std::string& trigger, bool throw_not_found=true) const {
+    for (size_t ipath = 0, ipathe = trigger_names.size(); ipath < ipathe; ++ipath) {
+      const std::string path = trigger_names.triggerName(ipath);
+      if (path.substr(0, trigger.size()) == trigger)
+        return trigger_results.accept(ipath);
+    }
+    
+    if (throw_not_found)
+      throw cms::Exception("TriggerHelper") << "no trigger for " << trigger << " found";
+    return false;
   }
 };
 
