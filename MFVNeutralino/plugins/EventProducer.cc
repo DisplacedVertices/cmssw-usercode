@@ -13,7 +13,9 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralino/interface/Event.h"
+#include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
+#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVEventProducer : public edm::EDProducer {
@@ -123,32 +125,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<edm::TriggerResults> trigger_results;
-  event.getByLabel(trigger_results_src, trigger_results);
-  const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
-  const size_t npaths = trigger_names.size();
-
-  const bool simple_trigger[MFVEvent::n_trigger_paths] = { true, true, true };
-  const std::string try_trigger[MFVEvent::n_trigger_paths] = {
-    "HLT_QuadJet50_v", "HLT_IsoMu24_v", "HLT_HT750_v"
-  };
-
-  for (int itry = 0; itry < MFVEvent::n_trigger_paths; ++itry) {
-    if (simple_trigger[itry]) {
-      const std::string& trigger = try_trigger[itry];
-    
-      for (size_t ipath = 0; ipath < npaths; ++ipath) {
-        const std::string path = trigger_names.triggerName(ipath);
-        if (path.substr(0, trigger.size()) == trigger) {
-          mevent->pass_trigger[itry] = trigger_results->accept(ipath);
-          break;
-        }
-      }
-    }
-    else {
-      assert(0);
-    }
-  }
+  TriggerHelper trig_helper(event, trigger_results_src);
+  mfv::trigger_decision(trig_helper, mevent->pass_trigger);
 
   //////////////////////////////////////////////////////////////////////
 
