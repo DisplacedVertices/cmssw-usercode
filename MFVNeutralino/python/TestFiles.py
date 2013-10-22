@@ -133,10 +133,16 @@ def set_test_files(process):
     if 'testfileshelp' in sys.argv:
         print 'set_test_files sample keywords available: testdata (multijet), testqcd, testttbar. default is tau1000M0400.'
         print 'words set_test_files recognizes in argv:'
+        print '  temp    : use ntuple.root in current directory.'
         print '  usesec  : use secondary files.'
         print '  frompat : use PAT tuples as input instead, and implies usesec. default is to run on MFV ntuples.'
         sys.exit(1)
-        
+
+    if 'temp' in sys.argv:
+        process.source.fileNames = ['file:ntuple.root']
+        process.source.secondaryFileNames = cms.untracked.vstring('/store/data/Run2012B/SingleMu/AOD/22Jan2013-v1/110000/0C57EA77-AEE3-E211-8DCA-00259073E4D4.root')
+        return
+
     nt = 'frompat' not in sys.argv
     sec = not nt or 'usesec' in sys.argv
 
