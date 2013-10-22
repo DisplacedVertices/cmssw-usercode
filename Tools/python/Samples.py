@@ -324,7 +324,9 @@ data_samples = [
     DataSample('MultiJetPk2012B', '/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD')
     ]
 
-auxiliary_data_samples = []
+auxiliary_data_samples = [
+    DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD')
+    ]
 
 for sample in data_samples:
     sample.ana_hash = '00b5523718eb71b4bef18c6d45967745'
@@ -332,7 +334,7 @@ for sample in data_samples:
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = background_samples + smaller_background_samples + auxiliary_background_samples + mfv_signal_samples 
+all_mc_samples = background_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples 
 all_samples = all_data_samples + all_mc_samples
 
 for sample in all_samples:
