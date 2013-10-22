@@ -49,43 +49,48 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
 {
 }
 
-//#define CUT(x,r) if ((x)) { std::cout << r << std::endl; return false; }
-#define CUT(x,r) if ((x)) return false;
-
 bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
-  CUT(trigger_bit >= 0 && !mevent->pass_trigger[trigger_bit],
-      "trigger " << trigger_bit << mevent->pass_trigger[trigger_bit]);
+  if (trigger_bit >= 0 && !mevent->pass_trigger[trigger_bit])
+    return false;
 
-  CUT(mevent->nlep(0) < min_nleptons, "nlep");
+  if (mevent->nlep(0) < min_nleptons)
+    return false;
 
-  CUT(mevent->njets < min_njets || mevent->njets > max_njets,
-      "njets " << int(mevent->njets) << " " << min_njets << " " << max_njets);
+  if (mevent->njets < min_njets || mevent->njets > max_njets)
+    return false;
 
-  CUT((min_4th_jet_pt > 0 && mevent->jetpt4 < min_4th_jet_pt) ||
-      (min_5th_jet_pt > 0 && mevent->jetpt5 < min_5th_jet_pt) ||
-      (min_6th_jet_pt > 0 && mevent->jetpt6 < min_6th_jet_pt),
-      "minjetpt");
+  if((min_4th_jet_pt > 0 && mevent->jetpt4 < min_4th_jet_pt) ||
+     (min_5th_jet_pt > 0 && mevent->jetpt5 < min_5th_jet_pt) ||
+     (min_6th_jet_pt > 0 && mevent->jetpt6 < min_6th_jet_pt))
+    return false;
 
-  CUT(mevent->nbtags < min_nbtags || mevent->nbtags > max_nbtags, "nbtags");
-  CUT(mevent->jet_sum_ht < min_sum_ht, "sumht");
+  if (mevent->nbtags < min_nbtags || mevent->nbtags > max_nbtags)
+    return false;
+
+  if (mevent->jet_sum_ht < min_sum_ht)
+    return false;
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByLabel(vertex_src, vertices);
 
   const int nsv = int(vertices->size());
-  CUT(nsv < min_nvertex, "nvertex");
+  if (nsv < min_nvertex)
+    return false;
 
   if (min_ntracks01 > 0 || min_maxtrackpt01 > 0) {
-    CUT(nsv < 2, "nsvlt2");
+    if (nsv < 2)
+      return false;
 
     const MFVVertexAux& v0 = vertices->at(0);
     const MFVVertexAux& v1 = vertices->at(1);
 
-    CUT(v0.ntracks + v1.ntracks < min_ntracks01, "ntracks01");
-    CUT(v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01, "maxtrackpt01")
+    if (v0.ntracks + v1.ntracks < min_ntracks01)
+      return false;
+    if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
+      return false;
   }
 
   return true;
