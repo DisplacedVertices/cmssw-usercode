@@ -2,6 +2,7 @@
 #define JMTucker_MFVNeutralino_interface_Event_h
 
 #include "TLorentzVector.h"
+#include "JMTucker/MFVNeutralino/interface/EventTools.h"
 
 struct MFVEvent {
   typedef unsigned char uchar;
@@ -58,8 +59,7 @@ struct MFVEvent {
                gen_lsp_decay[0*3+2] - gen_lsp_decay[1*3+2]);
   }
 
-  enum { n_trigger_paths = 3 };
-  bool pass_trigger[n_trigger_paths];
+  bool pass_trigger[mfv::n_trigger_paths];
 
   uchar npfjets;
   float pfjetpt4;
