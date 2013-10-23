@@ -18,3 +18,8 @@ mfvHistos = cms.Sequence(mfvWeight *
                          mfvEventHistos *
                          mfvVertexHistosNoCutsWAnaCuts *
                          mfvVertexHistosWAnaCuts)
+
+def re_trigger(process):
+    process.mfvAnalysisCuts     .re_trigger = True # JMTBAD make an "EventRedoer"
+    process.mfvEventHistosNoCuts.re_trigger = True
+    process.mfvEventHistos      .re_trigger = True
