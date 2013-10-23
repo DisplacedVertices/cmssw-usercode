@@ -25,7 +25,7 @@ private:
   const int min_nbtags;
   const int max_nbtags;
   const double min_sum_ht;
-  const int min_nmuons;
+  const int min_nsemilepmuons;
   const int min_nleptons;
 
   const edm::InputTag vertex_src;
@@ -46,7 +46,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_nbtags(cfg.getParameter<int>("min_nbtags")),
     max_nbtags(cfg.getParameter<int>("max_nbtags")),
     min_sum_ht(cfg.getParameter<double>("min_sum_ht")),
-    min_nmuons(cfg.getParameter<int>("min_nmuons")),
+    min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
@@ -71,7 +71,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
   }
 
-  if (mevent->nmu[0] < min_nmuons)
+  if (mevent->nmu[1] < min_nsemilepmuons)
     return false;
 
   if (mevent->nlep(0) < min_nleptons)

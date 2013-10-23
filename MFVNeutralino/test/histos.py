@@ -27,7 +27,7 @@ if control_region:
     process.mfvEventHistosNoCuts.re_trigger = True
     process.mfvEventHistos      .re_trigger = True
     process.mfvAnalysisCuts.trigger_bit = 4
-    process.mfvAnalysisCuts.min_nmuons = 1
+    process.mfvAnalysisCuts.min_nsemilepmuons = 1
 
 process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvHistos)
 
