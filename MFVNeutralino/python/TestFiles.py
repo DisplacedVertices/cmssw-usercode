@@ -90,6 +90,52 @@ tau1000M0400_nt_sec = cms.untracked.vstring(
     
 ##########
 
+tau9900M0400_nt = ['/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfvntuple_v8/99d7a676d206adfebd5d154091ebe5a6/ntuple_1_1_wm7.root']
+tau9900M0400_nt_sec = cms.untracked.vstring(
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_680_1_n16.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_679_2_G1R.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_678_1_7Cc.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_608_1_TQw.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_606_2_mE6.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_605_1_dIp.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_544_4_lLD.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_543_2_xpc.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_542_2_mhX.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_541_2_Tia.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_540_2_IRN.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_483_3_Ng2.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_482_2_pEi.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_481_2_YIx.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_480_2_3GJ.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_443_2_Utv.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_442_3_4YW.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_441_1_YCs.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_440_1_Vau.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_378_1_BCE.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_377_2_1y1.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_376_1_55z.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_375_1_xRB.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_374_1_7vn.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_343_1_rvT.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_342_1_H3w.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_341_1_ej2.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_339_2_vKg.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_318_2_ucT.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_317_2_Vm8.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_316_1_Enr.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_315_2_AHh.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_313_1_JGt.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_289_1_vob.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_285_1_3dZ.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_284_1_cwR.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_258_2_A5T.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_257_4_83M.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_255_1_nvB.root',
+    '/store/user/tucker/mfv_neutralino_tau9900um_M0400/mfv_neutralino_tau9900um_M0400/3c4ccd1d95a3d8658f6b5a18424712b3/aodpat_254_2_JTs.root',
+    )
+
+##########
+
 qcdht1000 = ['/store/user/jchu/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/jtuple_v7/fe6d9f80f9c0fe06cc80b089617fa99d/pat_1_1_NOT.root']
 qcdht1000_sec = cms.untracked.vstring(
     '/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/0038E6D2-860D-E211-9211-00266CFACC38.root',
@@ -173,6 +219,13 @@ def set_test_files(process):
             process.source.fileNames = multijet
             if sec:
                 process.source.secondaryFileNames = multijet_sec
+    elif 'test9900' in sys.argv:
+        if nt:
+            process.source.fileNames = tau9900M0400_nt
+            if sec:
+                process.source.secondaryFileNames = tau9900M0400_nt_sec
+        else:
+            assert 0
     else:
         if nt:
             process.source.fileNames = tau1000M0400_nt
