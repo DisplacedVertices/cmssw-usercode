@@ -331,9 +331,6 @@ auxiliary_data_samples = [
     DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD')
     ]
 
-for sample in data_samples:
-    sample.ana_hash = '00b5523718eb71b4bef18c6d45967745'
-
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
@@ -347,6 +344,9 @@ for sample in all_samples:
 
 # Exceptions to the defaults (except for the MFV signal samples, which
 # are already applied above).
+
+MultiJetPk2012B.ana_hash = '00b5523718eb71b4bef18c6d45967745'
+SingleMu2012B.ana_hash = '6383d09e70ccb0537c8eaa970a34d494
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
