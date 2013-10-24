@@ -468,6 +468,8 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
             if missing:
                 for m in missing:
                     d['Done'].remove(m)
+                    if not d['Done']:
+                        del d['Done']
                 d['DoneStuck'] = missing
                 if resub_stuck_done:
                     to_force.extend(missing)
