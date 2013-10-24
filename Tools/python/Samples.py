@@ -347,12 +347,16 @@ for sample in all_samples:
 
 MultiJetPk2012B.ana_hash = '00b5523718eb71b4bef18c6d45967745'
 SingleMu2012B.ana_hash = '6383d09e70ccb0537c8eaa970a34d494'
+for sample in (qcdmupt15, dyjetstollM10, dyjetstollM50):
+    sample.ana_hash = '08fd6086d1722befde87a416353544a2'
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
 ttbarsemilep.total_events = 25349818
-qcdht0500   .total_events = 30549292
-qcdht1000   .total_events = 12068863
+qcdht0500.total_events = 30549292
+qcdht1000.total_events = 12068863
+qcdmupt15.total_events = 7479312
+dyjetsotllM50.total_events = 29834503
 
 ########################################################################
 
