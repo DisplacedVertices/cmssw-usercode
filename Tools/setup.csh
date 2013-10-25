@@ -3,6 +3,7 @@
 pushd $CMSSW_BASE/src
 
 # sigh
+mkdir RecoLuminosity
 curl https://codeload.github.com/cms-sw/RecoLuminosity-LumiDB/tar.gz/V04-02-10  | tar xzv -C RecoLuminosity
 mv RecoLuminosity/RecoLuminosity-LumiDB-* RecoLuminosity/LumiDB
 
