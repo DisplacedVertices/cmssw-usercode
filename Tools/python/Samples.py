@@ -3,6 +3,7 @@
 import os, re, sys
 from copy import copy
 from JMTucker.Tools.DBS import files_in_dataset
+from JMTucker.Tools.ROOTTools import ROOT
 from JMTucker.Tools.general import big_warn
 
 ########################################################################
@@ -107,13 +108,13 @@ class Sample(object):
 
 class MCSample(Sample):
     EVENTS_PER = 25000
-    ANA_EVENTS_PER = 1000000
+    ANA_EVENTS_PER = 100000
     TOTAL_EVENTS = -1
     
     def __init__(self, name, nice_name, dataset, nevents, color, syst_frac, cross_section, k_factor=1):
         super(MCSample, self).__init__(name, nice_name, dataset)
         
-        self.nevents = nevents
+        self.nevents_orig = nevents
         self.color = color
         self.syst_frac = float(syst_frac)
         self.cross_section = float(cross_section)
@@ -124,12 +125,24 @@ class MCSample(Sample):
         self.ana_events_per = self.ANA_EVENTS_PER
         self.total_events = self.TOTAL_EVENTS
 
+    def nevents_from_file(self, hist_path, fn_pattern='%(name)s.root', f=None):
+        if f is None:
+            fn = fn_pattern % self
+            if not os.path.isfile(fn):
+                return -999
+            f = ROOT.TFile(fn)
+        return f.Get(hist_path).GetEntries()
+
+    @property
+    def nevents(self):
+        if self.total_events >= 0 and self.total_events < self.nevents_orig:
+            return self.total_events
+        else:
+            return self.nevents_orig
+        
     @property
     def partial_weight(self):
-        nevents = self.nevents
-        if self.total_events > 0 and self.total_events < self.nevents:
-            nevents = self.total_events
-        return self.cross_section / float(nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
+        return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
 
     def job_control_commands(self, ana=False):
         if ana:
@@ -220,8 +233,8 @@ smaller_background_samples =[
 
 leptonic_background_samples = [
     MCSample('wjetstolnu',       'W + jets #rightarrow l#nu',                               '/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',           57709905,   9, 0.10, 3.04e4),
-    MCSample('dyjetstollM10',    'DY + jets #rightarrow ll, 10 < M < 50 GeV',               '/DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                7132223,  -1, 0.10, 11050*0.069),
-    MCSample('dyjetstollM50',    'DY + jets #rightarrow ll, M > 50 GeV',                    '/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      30459503,  -1, 0.10, 2.95e3),
+    MCSample('dyjetstollM10',    'DY + jets #rightarrow ll, 10 < M < 50 GeV',               '/DYJetsToLL_M-10To50filter_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                7132223,  29, 0.10, 11050*0.069),
+    MCSample('dyjetstollM50',    'DY + jets #rightarrow ll, M > 50 GeV',                    '/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      30459503,  32, 0.10, 2.95e3),
     MCSample('qcdmupt15',        'QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV',           '/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      7529312, 801, 0.10, 3.64e8*3.7e-4),
 ]
 
@@ -356,7 +369,24 @@ ttbarsemilep.total_events = 25349818
 qcdht0500.total_events = 30549292
 qcdht1000.total_events = 12068863
 qcdmupt15.total_events = 7479312
-dyjetsotllM50.total_events = 29834503
+dyjetstollM50.total_events = 29834503
+
+########################################################################
+
+def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
+    disagreements = []
+    nofiles = []
+    for sample in samples:
+        n = sample.nevents_from_file(hist_path, fn_pattern)
+        if n == -999:
+            nofiles.append(sample.name)
+            continue
+        if n != sample.nevents:
+            disagreements.append('%s.total_events = %i' % (sample.name, n))
+    if disagreements:
+        print '\n'.join(disagreements)
+        print '(no files found for %s)' % ' '.join(nofiles)
+        raise ValueError('different numbers of events')
 
 ########################################################################
 
@@ -378,3 +408,10 @@ if __name__ == '__main__':
         for sample in background_samples + auxiliary_background_samples:
             x,y = sample.nevents, numevents_in_dataset(sample.dataset)
             print '%30s %14i %14i %s' % (sample.name, x, y, x == y)
+    elif 'getnewevents' in sys.argv:
+        path = sys.argv[sys.argv.index('getnewevents')+1]
+        check_nevents(all_mc_samples, path)
+        print 'no files found for', ' '.join(nofiles)
+            
+
+            
