@@ -371,6 +371,7 @@ def data_mc_comparison(name,
                        plot_saver = None,
                        histogram_path = None,
                        file_path = None,
+                       hist_path_for_nevents_check = None,
                        int_lumi = None,
                        int_lumi_nice = None,
                        canvas_title = '',
@@ -381,11 +382,12 @@ def data_mc_comparison(name,
                        canvas_right_margin = 0.1,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
+                       rebin = None,
                        x_title = '',
                        y_title = 'arb. units',
                        y_title_offset = 1.3,
                        y_label_size = 0.035,
-                       x_range = (None, None),
+                       x_range = None,
                        y_range = (None, None),
                        signal_color_override = None,
                        signal_line_width = 3,
@@ -442,12 +444,17 @@ def data_mc_comparison(name,
                 sample._datamccomp_file_path = file_path
                 sample._datamccomp_filename = file_path % sample
                 sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
+                if sample != data_sample and hist_path_for_nevents_check is not None:
+                    if sample.nevents_from_file(hist_path_for_nevents_check, f=sample._datamccomp_file) != sample.nevents:
+                        raise ValueError('wrong number of events for %s' % sample.name)
             sample.hist = sample._datamccomp_file.Get(histogram_path)
             if not issubclass(type(sample.hist), ROOT.TH1):
                 raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
             if sample != data_sample:
                 sample.hist.Scale(sample.partial_weight * int_lumi)
-           
+            if rebin is not None:
+                sample.hist.Rebin(rebin)
+
     #####################
 
     no_data_no_adjust_margins = data_sample is None and canvas_size == (700,840) and canvas_bottom_margin == 0.3
@@ -491,6 +498,8 @@ def data_mc_comparison(name,
     stack.GetYaxis().SetTitleOffset(y_title_offset)
     stack.GetYaxis().SetLabelSize(y_label_size)
 
+    if x_range is not None:
+        stack.GetXaxis().SetRangeUser(*x_range)
     y_range_min, y_range_max = y_range
     if y_range_min is not None:
         stack.SetMinimum(y_range_min)
@@ -520,7 +529,7 @@ def data_mc_comparison(name,
         legend.Draw()
 
     if int_lumi_nice is not None:
-        t = ROOT.TPaveLabel(0.293, 0.875, 0.953, 0.975, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
+        t = ROOT.TPaveLabel(0.214, 0.898, 0.875, 0.998, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
         t.SetTextSize(0.25)
         t.SetBorderSize(0)
         t.SetFillColor(0)
@@ -546,7 +555,10 @@ def data_mc_comparison(name,
         res_g = poisson_means_divide(data_sample.hist, sum_background)
         res_g.SetLineWidth(res_line_width)
         res_g.SetLineColor(res_line_color)
-        res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
+        if x_range is not None:
+            res_g.GetXaxis().SetLimits(*x_range)
+        else:
+            res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
         res_g.GetYaxis().SetRangeUser(0,3)
