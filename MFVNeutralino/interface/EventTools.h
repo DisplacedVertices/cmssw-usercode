@@ -5,6 +5,7 @@ class TriggerHelper;
 
 namespace mfv {
   static const int n_trigger_paths = 5;
+  static const int n_clean_paths = 19+1;
 
   void trigger_decision(const TriggerHelper& trig, bool* pass_trigger);
 }
