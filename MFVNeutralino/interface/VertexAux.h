@@ -115,7 +115,7 @@ struct MFVVertexAux {
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;
 
 struct MFVVertexAuxSorter {
-  enum sort_by_this { sort_by_mass, sort_by_ntracks };
+  enum sort_by_this { sort_by_mass, sort_by_ntracks, sort_by_ntracks_then_mass };
   sort_by_this sort_by;
 
   MFVVertexAuxSorter(const std::string& x) {
@@ -123,6 +123,8 @@ struct MFVVertexAuxSorter {
       sort_by = sort_by_mass;
     else if (x == "ntracks")
       sort_by = sort_by_ntracks;
+    else if (x == "ntracks_then_mass")
+      sort_by = sort_by_ntracks_then_mass;
     else
       throw cms::Exception("MFVVertexTools") << "invalid sort_by";
   }
@@ -135,11 +137,19 @@ struct MFVVertexAuxSorter {
     return a.ntracks > b.ntracks;
   }
 
+  static bool by_ntracks_then_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
+    if (a.ntracks == b.ntracks)
+      return a.mass > b.mass;
+    return a.ntracks > b.ntracks;
+  }
+
   void sort(MFVVertexAuxCollection& v) const {
     if (sort_by == sort_by_mass)
       std::sort(v.begin(), v.end(), by_mass);
     else if (sort_by == sort_by_ntracks)
       std::sort(v.begin(), v.end(), by_ntracks);
+    else if (sort_by == sort_by_ntracks_then_mass)
+      std::sort(v.begin(), v.end(), by_ntracks_then_mass);
   }
 };    
 
