@@ -27,6 +27,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_lspdist3d;
 
   TH1F* h_pass_trigger[mfv::n_trigger_paths];
+  TH1F* h_pass_clean[mfv::n_clean_paths];
+  TH1F* h_passoldskim;
 
   TH1F* h_npfjets;
   TH1F* h_pfjetpt4;
@@ -48,11 +50,19 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pv_rho;
 
   TH1F* h_njets;
+  TH1F* h_njetsnopu[3];
   TH1F* h_jetpt4;
   TH1F* h_jetpt5;
   TH1F* h_jetpt6;
   TH1F* h_jet_sum_ht;
-  TH1F* h_nbtags;
+  TH1F* h_metx;
+  TH1F* h_mety;
+  TH1F* h_metsig;
+  TH1F* h_met;
+  TH1F* h_metphi;
+  TH1F* h_metdphimin;
+
+  TH1F* h_nbtags[3];
   TH1F* h_nmuons[3];
   TH1F* h_nelectrons[3];
   TH1F* h_nleptons[3];
@@ -74,6 +84,9 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   for (int i = 0; i < mfv::n_trigger_paths; ++i)
     h_pass_trigger[i] = fs->make<TH1F>(TString::Format("h_pass_trigger_%i", i), TString::Format(";pass_trigger[%i];events", i), 2, 0, 2);
+  for (int i = 0; i < mfv::n_clean_paths; ++i)
+    h_pass_clean[i] = fs->make<TH1F>(TString::Format("h_pass_clean_%i", i), TString::Format(";pass_clean[%i];events", i), 2, 0, 2);
+  h_passoldskim = fs->make<TH1F>("h_passoldskim", ";pass old skim?;events", 2, 0, 2);
 
   h_npfjets = fs->make<TH1F>("h_npfjets", ";# of PF jets;events", 30, 0, 30);
   h_pfjetpt4 = fs->make<TH1F>("h_pfjetpt4", ";p_{T} of 4th PF jet (GeV);events/5 GeV", 100, 0, 500);
@@ -94,15 +107,26 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pv_sumpt2 = fs->make<TH1F>("h_pv_sumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
   h_pv_rho = fs->make<TH1F>("h_pv_rho", ";PV rho (cm);events/0.1 mm", 200, 0, 2);
 
+  const char* lmt_ex[3] = {"loose", "medium", "tight"};
+
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
+  for (int i = 0; i < 3; ++i)
+    h_njetsnopu[i] = fs->make<TH1F>(TString::Format("h_njetsnopu_%s", lmt_ex[i]), TString::Format(";# of jets (%s PU id);events", lmt_ex[i]), 20, 0, 20);
   h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt6 = fs->make<TH1F>("h_jetpt6", ";p_{T} of 6th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jet_sum_ht = fs->make<TH1F>("h_jet_sum_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_nbtags = fs->make<TH1F>("h_nbtags", ";# of b-tags;events", 20, 0, 20);
+
+  h_metx = fs->make<TH1F>("h_metx", ";MET x (GeV);events/5 GeV", 100, -250, 250);
+  h_mety = fs->make<TH1F>("h_mety", ";MET y (GeV);events/5 GeV", 100, -250, 250);
+  h_metsig = fs->make<TH1F>("h_metsig", ";MET significance;events/0.5", 100, 0, 50);
+  h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
+  h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  h_metdphimin = fs->make<TH1F>("h_metdphimin", ";#Delta #hat{#phi}_{min} (rad);events/0.1", 100, 0, 10);
 
   const char* lep_ex[3] = {"veto", "semilep", "dilep"};
   for (int i = 0; i < 3; ++i) {
+    h_nbtags[i] = fs->make<TH1F>(TString::Format("h_nbtags_%s", lmt_ex[i]), TString::Format(";# of %s b-tags;events", lmt_ex[i]), 20, 0, 20);
     h_nmuons[i] = fs->make<TH1F>(TString::Format("h_nmuons_%s", lep_ex[i]), TString::Format(";# of %s muons;events", lep_ex[i]), 5, 0, 5);
     h_nelectrons[i] = fs->make<TH1F>(TString::Format("h_nelectrons_%s", lep_ex[i]), TString::Format(";# of %s electrons;events", lep_ex[i]), 5, 0, 5);
     h_nleptons[i] = fs->make<TH1F>(TString::Format("h_nleptons_%s", lep_ex[i]), TString::Format(";# of %s leptons;events", lep_ex[i]), 5, 0, 5);
@@ -138,6 +162,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < mfv::n_trigger_paths; ++i)
     h_pass_trigger[i]->Fill((re_trigger ? pass_trigger : mevent->pass_trigger)[i], w);
 
+  for (int i = 0; i < mfv::n_trigger_paths; ++i)
+    h_pass_clean[i]->Fill(mevent->pass_clean[i], w);
+
   //////////////////////////////////////////////////////////////////////////////
 
   h_npfjets->Fill(mevent->npfjets, w);
@@ -160,13 +187,21 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pv_rho->Fill(mevent->pv_rho(), w);
 
   h_njets->Fill(mevent->njets, w);
+  for (int i = 0; i < 3; ++i)
+    h_njetsnopu[i]->Fill(mevent->njetsnopu[i], w);
   h_jetpt4->Fill(mevent->jetpt4, w);
   h_jetpt5->Fill(mevent->jetpt5, w);
   h_jetpt6->Fill(mevent->jetpt6, w);
   h_jet_sum_ht->Fill(mevent->jet_sum_ht, w);
-  h_nbtags->Fill(mevent->nbtags, w);
+  h_metx->Fill(mevent->metx);
+  h_mety->Fill(mevent->mety);
+  h_metsig->Fill(mevent->metsig);
+  h_met->Fill(mevent->met());
+  h_metphi->Fill(mevent->metphi());
+  h_metdphimin->Fill(mevent->metdphimin);
 
   for (int i = 0; i < 3; ++i) {
+    h_nbtags[i]->Fill(mevent->nbtags[i], w);
     h_nmuons[i]->Fill(mevent->nmu[i], w);
     h_nelectrons[i]->Fill(mevent->nel[i], w);
     h_nleptons[i]->Fill(mevent->nlep(i), w);

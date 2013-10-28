@@ -1,9 +1,11 @@
+#include "CMGTools/External/interface/PileupJetIdentifier.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -25,13 +27,15 @@ public:
   
 private:
   const edm::InputTag trigger_results_src;
+  const edm::InputTag cleaning_results_src;
   const edm::InputTag pfjets_src;
   const double jet_pt_min;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_particles_src;
   const edm::InputTag jets_src;
+  const edm::InputTag met_src;
   const std::string b_discriminator;
-  const double b_discriminator_min;
+  const std::vector<double> b_discriminator_mins;
   const edm::InputTag muons_src;
   const StringCutObjectSelector<pat::Muon> muon_semilep_selector;
   const StringCutObjectSelector<pat::Muon> muon_dilep_selector;
@@ -43,13 +47,15 @@ private:
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
+    cleaning_results_src(cfg.getParameter<edm::InputTag>("cleaning_results_src")),
     pfjets_src(cfg.getParameter<edm::InputTag>("pfjets_src")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
+    met_src(cfg.getParameter<edm::InputTag>("met_src")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
-    b_discriminator_min(cfg.getParameter<double>("b_discriminator_min")),
+    b_discriminator_mins(cfg.getParameter<std::vector<double> >("b_discriminator_mins")),
     muons_src(cfg.getParameter<edm::InputTag>("muons_src")),
     muon_semilep_selector(cfg.getParameter<std::string>("muon_semilep_cut")),
     muon_dilep_selector(cfg.getParameter<std::string>("muon_dilep_cut")),
@@ -128,6 +134,37 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   TriggerHelper trig_helper(event, trigger_results_src);
   mfv::trigger_decision(trig_helper, mevent->pass_trigger);
 
+  TriggerHelper trig_helper_cleaning(event, cleaning_results_src);
+  const std::string cleaning_paths[mfv::n_clean_paths] = { // JMTBAD take from PATTupleSelection_cfg
+    "All",
+    "hltPhysicsDeclared",
+    "FilterOutScraping",
+    "goodOfflinePrimaryVertices",
+    "HBHENoiseFilter",
+    "CSCTightHaloFilter",
+    "hcalLaserEventFilter",
+    "EcalDeadCellTriggerPrimitiveFilter",
+    "trackingFailureFilter",
+    "eeBadScFilter",
+    "ecalLaserCorrFilter",
+    "tobtecfakesfilter",
+    "logErrorTooManyClusters",
+    "logErrorTooManySeeds",
+    "logErrorTooManySeedsDefault",
+    "logErrorTooManySeedsMainIterations",
+    "logErrorTooManyTripletsPairs",
+    "logErrorTooManyTripletsPairsMainIterations",
+    "manystripclus53X",
+    "toomanystripclus53X"
+  };
+  for (int i = 0; i < mfv::n_clean_paths; ++i)
+    mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
+
+  mevent->passoldskim = 
+    trig_helper_cleaning.pass("pHadronic") ||
+    trig_helper_cleaning.pass("pSemileptonic") ||
+    trig_helper_cleaning.pass("pDileptonic");
+  
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::PFJetCollection> pfjets;
@@ -185,18 +222,45 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  mevent->njets = mevent->nbtags = 0;
+  mevent->njets = 0;
   mevent->jetpt4 = mevent->jetpt5 = mevent->jetpt6 = 0;
   mevent->jet_sum_ht = 0;
+  for (int i = 0; i < 3; ++i) {
+    mevent->njetsnopu[i] = 0;
+    mevent->nbtags[i] = 0;
+  }
 
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jets_src, jets);
 
-  for (const pat::Jet& jet : *jets) {
+  edm::Handle<pat::METCollection> mets;
+  event.getByLabel(met_src, mets);
+  const pat::MET& met = mets->at(0);
+
+  edm::Handle<edm::ValueMap<int> > puids;
+  event.getByLabel("puJetMvaChs", "fullId", puids);
+
+  mevent->metx = met.px();
+  mevent->mety = met.py();
+  if (met.getSignificanceMatrix()(0,0) < 1e10 && met.getSignificanceMatrix()(1,1) < 1e10)
+    mevent->metsig = met.significance();
+  else
+    mevent->metsig = -999;
+  mevent->metdphimin = 1e99;
+
+  const PileupJetIdentifier::Id puidlevel[3] = {PileupJetIdentifier::kLoose, PileupJetIdentifier::kMedium, PileupJetIdentifier::kTight};
+
+  for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
+    const pat::Jet& jet = jets->at(jjet);
     if (jet.pt() < jet_pt_min)
       continue;
 
     inc_uchar(mevent->njets);
+
+    int puid = (*puids)[pat::JetRef(jets, jjet)];
+    for (int i = 0; i < 3; ++i)
+      if (PileupJetIdentifier::passJetId(puid, puidlevel[i]))
+        inc_uchar(mevent->njetsnopu[i]);
 
     if (mevent->njets == 4)
       mevent->jetpt4 = jet.pt();
@@ -207,8 +271,21 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     mevent->jet_sum_ht += jet.pt();
 
-    if (jet.bDiscriminator(b_discriminator) > b_discriminator_min)
-      inc_uchar(mevent->nbtags);
+    double deltatsum = 0;
+    for (int ijet = 0, ijete = int(jets->size()); ijet < ijete; ++ijet) {
+      if (ijet == jjet)
+        continue;
+      const pat::Jet& jeti = jets->at(ijet);
+      deltatsum += pow(jet.px() * jeti.py() - jet.py() * jeti.px(), 2);
+    }
+    const double deltat = 0.1 * sqrt(deltatsum) / jet.pt();
+    const double deltaphi = reco::deltaPhi(jet, met)/asin(deltat/met.pt());
+    if (deltaphi < mevent->metdphimin)
+      mevent->metdphimin = deltaphi;
+      
+    for (int i = 0; i < 3; ++i)
+      if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
+        inc_uchar(mevent->nbtags[i]);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -239,7 +316,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
   
   //////////////////////////////////////////////////////////////////////
-  
+
   event.put(mevent);
 }
 

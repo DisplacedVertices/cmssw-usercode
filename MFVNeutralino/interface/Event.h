@@ -60,6 +60,8 @@ struct MFVEvent {
   }
 
   bool pass_trigger[mfv::n_trigger_paths];
+  bool pass_clean[mfv::n_clean_paths]; // JMTBAD
+  bool passoldskim;
 
   uchar npfjets;
   float pfjetpt4;
@@ -78,23 +80,25 @@ struct MFVEvent {
   float pvz;
   uchar pv_ntracks;
   float pv_sumpt2;
-
-  float pv_rho() const {
-    return mag(pvx - bsx, pvy - bsy);
-  }
+  float pv_rho() const { return mag(pvx - bsx, pvy - bsy); }
 
   uchar njets;
+  uchar njetsnopu[3]; // loose, medium, tight
   float jetpt4;
   float jetpt5;
   float jetpt6;
   float jet_sum_ht;
-  uchar nbtags;
-  uchar nmu[3];
-  uchar nel[3];
+  float metx;
+  float mety;
+  float metsig;
+  float met() const { return mag(metx, mety); }
+  float metphi() const { return atan2(mety, metx); }
+  float metdphimin;
 
-  int nlep(int w) const {
-    return int(nmu[w]) + int(nel[w]);
-  }
+  uchar nbtags[3]; // loose, medium, tight
+  uchar nmu[3]; // top pag "veto", "semilep", "dilep" 
+  uchar nel[3]; // ditto
+  int nlep(int w) const { return int(nmu[w]) + int(nel[w]); }
 };
 
 #endif
