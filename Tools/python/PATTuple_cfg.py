@@ -273,7 +273,7 @@ if suppress_stdout:
     buf.close()
     hsh = hash(pat_output)
     #open('pat_spam.txt', 'wt').write(pat_output)
-    hsh_expected = -8177973912149098964 if runOnMC else -7150895072730005484
+    hsh_expected = 3487836507076371322 if runOnMC else 2143796091641756714
     print 'PAT is done (spam hash %s, expected %s).' % (hsh, hsh_expected)
     if hsh != hsh_expected:
         from JMTucker.Tools.general import big_warn
