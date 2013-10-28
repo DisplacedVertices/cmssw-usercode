@@ -6,10 +6,13 @@ pushd $CMSSW_BASE/src
 mkdir RecoLuminosity
 curl https://codeload.github.com/cms-sw/RecoLuminosity-LumiDB/tar.gz/V04-02-10  | tar xzv -C RecoLuminosity
 mv RecoLuminosity/RecoLuminosity-LumiDB-* RecoLuminosity/LumiDB
+rm -r RecoLuminosity/LumiDB/{plotdata,doc,test}
 
-mkdir -p EgammaAnalysis/ElectronTools/data
-cd EgammaAnalysis/ElectronTools/data
-cp $CMSSW_RELEASE_BASE/src/EgammaAnalysis/ElectronTools/data/download.url .
+cvs co -r V00-00-08 RecoMET/METAnalyzers
+cvs co -r V15-02-06 RecoParticleFlow/PFProducer 
+addpkg CommonTools/ParticleFlow # satisfy checkdeps
+cvs co -r V00-00-30-01 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cd EGamma/EGammaAnalysisTools/data
 cat download.url | xargs wget
 cd -
 
@@ -30,6 +33,8 @@ rm TMVAClassification_PuJetIdOptMVA.weights.xml
 rm mva_JetID.weights.xml
 rm mva_JetID_v1.weights.xml
 cd -
+
+#patch -p0 < JMTucker/Tools/patches
 
 scram b -j 8
 
