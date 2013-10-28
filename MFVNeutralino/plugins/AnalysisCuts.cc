@@ -22,8 +22,8 @@ private:
   const double min_6th_jet_pt;
   const int min_njets;
   const int max_njets;
-  const int min_nbtags;
-  const int max_nbtags;
+  const std::vector<int> min_nbtags;
+  const std::vector<int> max_nbtags;
   const double min_sum_ht;
   const int min_nsemilepmuons;
   const int min_nleptons;
@@ -43,8 +43,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_6th_jet_pt(cfg.getParameter<double>("min_6th_jet_pt")),
     min_njets(cfg.getParameter<int>("min_njets")),
     max_njets(cfg.getParameter<int>("max_njets")),
-    min_nbtags(cfg.getParameter<int>("min_nbtags")),
-    max_nbtags(cfg.getParameter<int>("max_nbtags")),
+    min_nbtags(cfg.getParameter<std::vector<int> >("min_nbtags")),
+    max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
     min_sum_ht(cfg.getParameter<double>("min_sum_ht")),
     min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
@@ -85,8 +85,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
      (min_6th_jet_pt > 0 && mevent->jetpt6 < min_6th_jet_pt))
     return false;
 
-  if (mevent->nbtags < min_nbtags || mevent->nbtags > max_nbtags)
-    return false;
+  for (int i = 0; i < 3; ++i)
+    if (mevent->nbtags[i] < min_nbtags[i] || mevent->nbtags[i] > max_nbtags[i])
+      return false;
 
   if (mevent->jet_sum_ht < min_sum_ht)
     return false;
