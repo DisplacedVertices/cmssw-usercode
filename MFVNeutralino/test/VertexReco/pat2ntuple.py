@@ -39,6 +39,9 @@ process.mfvVerticesToJets.histos = False
 process.p = cms.Path(common_seq * process.mfvVertexSequence * process.mfvEvent)
 ''')
 
+    if sample.is_mc and sample.re_pat:
+        process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2') # JMTBAD rework re_pat
+
     return to_add, to_replace
 
 cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
