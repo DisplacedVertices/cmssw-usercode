@@ -29,7 +29,6 @@ process.out.outputCommands = [
     'drop *',
     'keep MFVEvent_mfvEvent__*',
     'keep MFVVertexAuxs_mfvVerticesAux__*',
-    'keep edmTriggerResults_TriggerResults__%s' % process.name_(),
     ]
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
