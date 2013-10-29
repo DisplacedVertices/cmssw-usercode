@@ -35,11 +35,14 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.mfvVertices.histos = False
 process.mfvVerticesToJets.histos = False
-process.p = cms.Path(common_seq * process.mfvVertexSequence * process.mfvEvent)
+process.p = cms.Path(common_seq * process.mfvVertexSequence)
+
+del process.outp
+process.outp = cms.EndPath(process.mfvEvent * process.out)
 ''')
 
     if sample.is_mc and sample.re_pat:
-        process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2') # JMTBAD rework re_pat
+        to_add.append("process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')") # JMTBAD rework re_pat
 
     return to_add, to_replace
 
@@ -53,10 +56,9 @@ cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
                    max_threads = 3,
                    )
 
-samples = Samples.data_samples + Samples.mfv_signal_samples + Samples.background_samples + Samples.smaller_background_samples + Samples.leptonic_background_samples
-samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples
-samples.remove(Samples.wjetstolnu)
-for sample in Samples.background_samples:
-    sample.total_events = -1
+samples = Samples.data_samples + Samples.auxiliary_data_samples + Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.smaller_background_samples + Samples.leptonic_background_samples
+for sample in samples:
+    if sample.is_mc:
+        sample.total_events = -1
 
 cs.submit_all(samples)
