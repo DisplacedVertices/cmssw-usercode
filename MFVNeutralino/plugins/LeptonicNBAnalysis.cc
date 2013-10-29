@@ -11,10 +11,11 @@
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "CMGTools/External/interface/PileupJetIdentifier.h"
 
-class SignalEfficiency : public edm::EDAnalyzer {
+class LeptonicNBAnalysis : public edm::EDAnalyzer {
  public:
-  explicit SignalEfficiency(const edm::ParameterSet&);
+  explicit LeptonicNBAnalysis(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
  
  private:
@@ -50,6 +51,7 @@ class SignalEfficiency : public edm::EDAnalyzer {
   TH1F* h_jet_pt;
   TH1F* h_jet_eta;
   TH1F* h_jet_deltaR;
+  TH1F* h_njets_puJetId;
   TH1F* h_njets_cut;
   TH1F* h_nbtags;
   TH1F* h_nbtags_cut;
@@ -60,7 +62,7 @@ class SignalEfficiency : public edm::EDAnalyzer {
   TH1F* h_8jets;
 };
 
-SignalEfficiency::SignalEfficiency(const edm::ParameterSet& cfg)
+LeptonicNBAnalysis::LeptonicNBAnalysis(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     secondary_vertex_src(cfg.getParameter<edm::InputTag>("secondary_vertex_src")),
@@ -94,6 +96,7 @@ SignalEfficiency::SignalEfficiency(const edm::ParameterSet& cfg)
   h_jet_pt = fs->make<TH1F>("h_jet_pt", ";jet pt;number of jets", 100, 0, 1000);
   h_jet_eta = fs->make<TH1F>("h_jet_eta", ";jet eta;number of jets", 40, -3, 3);
   h_jet_deltaR = fs->make<TH1F>("h_jet_deltaR", ";pass_jet_deltaR;number of jets", 2, 0, 2);
+  h_njets_puJetId = fs->make<TH1F>("h_njets_puJetId", ";number of jets that pass loose puJetId cut;events", 20, 0, 20);
   h_njets_cut = fs->make<TH1F>("h_njets_cut", ";number of jets after cuts;events", 20, 0, 20);
   h_nbtags = fs->make<TH1F>("h_nbtags", ";number of btags before cuts;events", 20, 0, 20);
   h_nbtags_cut = fs->make<TH1F>("h_nbtags_cut", ";number of btags after cuts;events", 20, 0, 20);
@@ -104,7 +107,7 @@ SignalEfficiency::SignalEfficiency(const edm::ParameterSet& cfg)
   h_8jets = fs->make<TH1F>("h_8jets", ";number of btags;events with >=8 jets", 4, 1, 5);
 }
 
-void SignalEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void LeptonicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup& setup) {
 
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByLabel(trigger_results_src, trigger_results);
@@ -173,11 +176,41 @@ void SignalEfficiency::analyze(const edm::Event& event, const edm::EventSetup& s
 
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jet_src, jets);
+
+  edm::Handle<edm::ValueMap<float> > puJetIdMva;
+  event.getByLabel("puJetMvaChs", "fullDiscriminant", puJetIdMva);
+
+  edm::Handle<edm::ValueMap<int> > puJetIdFlag;
+  event.getByLabel("puJetMvaChs", "fullId", puJetIdFlag);
+
   h_njets->Fill(int(jets->size()));
   int njets = 0;
+  int njets_puJetId = 0;
   int nbtags = 0;
   int nbtags_nocuts = 0;
   for (int i = 0; i < int(jets->size()); ++i) {
+    pat::JetRef jetref(jets, i);
+    float mva   = (*puJetIdMva)[jetref];
+    int idflag = (*puJetIdFlag)[jetref];
+
+/*
+    std::cout << "jet " << i << " pt " << jetref->pt() << " eta " << jetref->eta() << " PU JetID MVA " << mva;
+    if (PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kLoose)) {
+      std::cout << " pass loose wp";
+    }
+    if (PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kMedium)) {
+      std::cout << " pass medium wp";
+    }
+    if (PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kTight)) {
+      std::cout << " pass tight wp";
+    }
+    std::cout << "\n";
+*/
+
+    if (PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kLoose)) {
+      ++njets_puJetId;
+    }
+
     const pat::Jet& jet = jets->at(i);
     h_jet_pt->Fill(jet.pt());
     h_jet_eta->Fill(jet.eta());
@@ -193,13 +226,14 @@ void SignalEfficiency::analyze(const edm::Event& event, const edm::EventSetup& s
       }
     }
     h_jet_deltaR->Fill(jet_deltaR);
-    if (jet.pt() > min_jet_pt && fabs(jet.eta()) < max_jet_eta && jet_deltaR) {
+    if (jet.pt() > min_jet_pt && fabs(jet.eta()) < max_jet_eta && jet_deltaR && PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kLoose)) {
       ++njets;
       if (bdisc > bdisc_min) {
         ++nbtags;
       }
     }
   }
+  h_njets_puJetId->Fill(njets_puJetId);
   h_nbtags->Fill(nbtags_nocuts);
   bool pass_njets = njets >= min_njets;
   bool pass_nbtags = nbtags >= min_nbtags;
@@ -245,8 +279,9 @@ void SignalEfficiency::analyze(const edm::Event& event, const edm::EventSetup& s
     if (njets == 6) h_6jets->Fill(nbtags);
     if (njets == 7) h_7jets->Fill(nbtags);
     if (njets >= 8) h_8jets->Fill(nbtags);
+
   }
 
 }
 
-DEFINE_FWK_MODULE(SignalEfficiency);
+DEFINE_FWK_MODULE(LeptonicNBAnalysis);
