@@ -18,7 +18,7 @@ first_lumi = 1
 [USER]
 script_exe = twostep.sh
 additional_input_files = minSLHA.spc, reco.py, pat.py
-ui_working_dir = crab/gensimhltrecopat/crab_mfv_%(name)s
+ui_working_dir = %(ui_working_dir)s
 copy_data = 1
 storage_element = T3_US_FNALLPC
 check_user_remote_dir = 0
@@ -76,11 +76,12 @@ def submit(name, tau0, mass):
     else:
         raise RuntimeError("don't know what LSP to use")
     open(pset_fn, 'wt').write(new_py)
+    ui_working_dir = 'crab/gensimhltrecopat/crab_mfv_%s' % name
     open('crab.cfg','wt').write(crab_cfg % locals())
     if not testing:
         os.system('crab -create')
         for i in xrange(4):
-            os.system('crab -submit 500')
+            os.system('crab -c %s -submit 500' % ui_working_dir)
         os.system('rm -f crab.cfg reco.pyc')
 
 tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
