@@ -57,11 +57,11 @@ _pat.keep_mixing_info(_pat.process)
 open('pat.py', 'wt').write(_pat.process.dumpPython())
 
 os.system('mkdir -p crab/gensimhltrecopat')
-os.system('mkdir -p psets/gensimhltrecopat')
+os.system('mkdir -p crab/psets/gensimhltrecopat')
 testing = 'testing' in sys.argv
 
 def submit(name, tau0, mass):
-    pset_fn = 'psets/gensimhltrecopat/%(name)s.py' % locals()
+    pset_fn = 'crab/psets/gensimhltrecopat/%(name)s.py' % locals()
     new_py = open('gensimhlt.py').read()
     if 'gluino' in name:
         new_py += '\nfrom modify import set_gluino_tau0\n'
@@ -83,12 +83,11 @@ def submit(name, tau0, mass):
             os.system('crab -submit 500')
         os.system('rm -f crab.cfg reco.pyc')
 
-tau0s = [0., 0.01, 0.1, 1.0, 9.9]
-masses = [200, 400, 600, 800, 1000]
+tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
+masses = [200, 300, 400, 600, 800, 1000]
 
-for tau0 in tau0s:
-    for mass in masses:
-        name = 'neutralino_tau%04ium_M%04i' % (int(tau0*1000), mass)
-        if 'tau1000um_M0400' in name:
-            continue
-        submit(name, tau0, mass)
+to_do = [(0.3, m) for m in masses] + [(t, 300) for t in tau0s]
+
+for tau0, mass in to_do:
+    name = 'neutralino_tau%04ium_M%04i' % (int(tau0*1000), mass)
+    submit(name, tau0, mass)
