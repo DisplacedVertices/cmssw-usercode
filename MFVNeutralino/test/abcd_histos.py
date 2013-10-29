@@ -6,8 +6,7 @@ process.source.fileNames = TestFiles.qcdht1000_nt
 process.TFileService.fileName = 'abcd_histos.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.mfvSelectedVerticesTight.min_ntracks = 5
-process.mfvSelectedVerticesTight.min_maxtrackpt = 0
+process.mfvSelectedVerticesTight.min_njetssharetks = 2
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvAnalysisCuts.min_ntracks01 = 0
@@ -20,9 +19,8 @@ process.abcdHistos = cms.EDAnalyzer('ABCDHistos',
 process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.abcdHistos)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import ttbar_samples, qcd_samples
-    samples = ttbar_samples + qcd_samples
-    for sample in samples:
+    from JMTucker.Tools.Samples import mfv_signal_samples, ttbar_samples, qcd_samples
+    for sample in ttbar_samples + qcd_samples:
         sample.total_events = {'ttbarhadronic': 5268722,
                                'ttbarsemilep':  12674909,
                                'ttbardilep':    6059506,
@@ -32,9 +30,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                'qcdht1000':     6034431}[sample.name]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('ABCDHistosHalf',
+    cs = CRABSubmitter('ABCDHistosHalfTight',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        )
+    samples = mfv_signal_samples + ttbar_samples + qcd_samples
     cs.submit_all(samples)
 
