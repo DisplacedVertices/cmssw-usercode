@@ -162,8 +162,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < mfv::n_trigger_paths; ++i)
     h_pass_trigger[i]->Fill((re_trigger ? pass_trigger : mevent->pass_trigger)[i], w);
 
-  for (int i = 0; i < mfv::n_trigger_paths; ++i)
+  for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i]->Fill(mevent->pass_clean[i], w);
+
+  h_passoldskim->Fill(mevent->passoldskim);
 
   //////////////////////////////////////////////////////////////////////////////
 
