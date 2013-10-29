@@ -271,17 +271,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     mevent->jet_sum_ht += jet.pt();
 
-    double deltatsum = 0;
-    for (int ijet = 0, ijete = int(jets->size()); ijet < ijete; ++ijet) {
-      if (ijet == jjet)
-        continue;
-      const pat::Jet& jeti = jets->at(ijet);
-      deltatsum += pow(jet.px() * jeti.py() - jet.py() * jeti.px(), 2);
+    if (jjet < 4) {
+      double deltatsum = 0;
+      for (int ijet = 0, ijete = int(jets->size()); ijet < ijete; ++ijet) {
+        if (ijet == jjet)
+          continue;
+        const pat::Jet& jeti = jets->at(ijet);
+        deltatsum += pow(jet.px() * jeti.py() - jet.py() * jeti.px(), 2);
+      }
+      const double deltat = 0.1 * sqrt(deltatsum) / jet.pt();
+      const double dphi = fabs(reco::deltaPhi(jet, met)/asin(deltat/met.pt()));
+      if (dphi < mevent->metdphimin)
+        mevent->metdphimin = dphi;
     }
-    const double deltat = 0.1 * sqrt(deltatsum) / jet.pt();
-    const double deltaphi = reco::deltaPhi(jet, met)/asin(deltat/met.pt());
-    if (deltaphi < mevent->metdphimin)
-      mevent->metdphimin = deltaphi;
       
     for (int i = 0; i < 3; ++i)
       if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
