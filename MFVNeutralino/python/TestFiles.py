@@ -186,7 +186,6 @@ def set_test_files(process):
 
     if 'temp' in sys.argv:
         process.source.fileNames = ['file:ntuple.root']
-        process.source.secondaryFileNames = cms.untracked.vstring('/store/data/Run2012B/SingleMu/AOD/22Jan2013-v1/110000/0C57EA77-AEE3-E211-8DCA-00259073E4D4.root')
         return
 
     nt = 'frompat' not in sys.argv
