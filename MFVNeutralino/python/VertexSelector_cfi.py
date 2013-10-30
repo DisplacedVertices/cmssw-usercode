@@ -20,6 +20,10 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      sort_by = cms.string('ntracks_then_mass'),
                                      )
 
+mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
+    min_ntracks = 5
+    )
+
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_ntracks = 7,
     min_maxtrackpt = 15,
@@ -27,3 +31,5 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_drmax = 4,
     max_bs2derr = 0.005,
     )
+
+mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose + mfvSelectedVerticesTight)
