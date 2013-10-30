@@ -350,8 +350,10 @@ all_data_samples = data_samples + auxiliary_data_samples
 all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples 
 all_samples = all_data_samples + all_mc_samples
 
+samples_by_name = {}
 for sample in all_samples:
     exec '%s = sample' % sample.name
+    samples_by_name[sample.name] = sample
 
 ########################################################################
 
@@ -376,16 +378,21 @@ dyjetstollM50.total_events = 29834503
 def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
     disagreements = []
     nofiles = []
+    ok = []
     for sample in samples:
         n = sample.nevents_from_file(hist_path, fn_pattern)
+        #print sample.name, n
         if n == -999:
             nofiles.append(sample.name)
             continue
         if n != sample.nevents:
             disagreements.append('%s.total_events = %i' % (sample.name, n))
+        else:
+            ok.append(sample.name)
+    print 'these are OK: %s' % ' '.join(ok)
+    print '(no files found for %s)' % ' '.join(nofiles)
     if disagreements:
         print '\n'.join(disagreements)
-        print '(no files found for %s)' % ' '.join(nofiles)
         raise ValueError('different numbers of events')
 
 ########################################################################
@@ -411,7 +418,44 @@ if __name__ == '__main__':
     elif 'getnewevents' in sys.argv:
         path = sys.argv[sys.argv.index('getnewevents')+1]
         check_nevents(all_mc_samples, path)
-        print 'no files found for', ' '.join(nofiles)
-            
+    elif 'merge' in sys.argv:
+        files = []
+        output = []
+        norm_to = 1
+        path_for_nevents = ''
+        for x in sys.argv:
+            if x.endswith('.root'):
+                if os.path.isfile(x):
+                    files.append(x)
+                else:
+                    output = x
+            elif x.startswith('path_for_nevents='):
+                path_for_nevents = x.replace('path_for_nevents=', '')
+            else:
+                try:
+                    norm_to = float(x)
+                except ValueError:
+                    pass
 
-            
+        print 'norm sum of weights to', norm_to
+        if not path_for_nevents:
+            print 'taking nevents from samples'
+        else:
+            print 'taking nevents from file with path', path_for_nevents
+
+        weights = []
+        for fn in files:
+            sname = os.path.splitext(os.path.basename(fn))[0]
+            sample = samples_by_name[sname]
+            if path_for_nevents:
+                sample.total_events = sample.nevents_from_file(path_for_nevents, fn)
+            weights.append(sample.partial_weight)
+
+        sw = sum(weights)
+        weights = [w/sw*norm_to for w in weights]
+        
+        weights = ','.join('%f' % w for w in weights)
+        cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
+        print cmd
+        os.system(cmd)
+
