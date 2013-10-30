@@ -22,6 +22,7 @@ def mkdirs_if_needed(path):
 
 class CRABSubmitter:
     get_proxy = True
+    aaa_locations = 'T1_US_FNAL,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin,T2_US_Vanderbilt,T3_US_Brown,T3_US_Colorado,T3_US_NotreDame,T3_US_UMiss'
     
     def __init__(self,
                  batch_name,
@@ -42,6 +43,7 @@ class CRABSubmitter:
                  max_threads = 5,
                  ssh_control_persist = False,
                  crab_cfg_modifier = None,
+                 aaa = False,
                  **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
@@ -145,6 +147,11 @@ class CRABSubmitter:
         if get_edm_output:
             cfg.set('CMSSW', 'get_edm_output', 1)
 
+        if aaa:
+            cfg.set('CRAB', 'scheduler', 'remoteGlidein')
+            cfg.set('GRID', 'data_location_override', self.aaa_locations)
+            cfg.set('GRID', 'remove_default_blacklist', 1)
+            
         if len(other_cfg_lines) % 3 != 0:
             raise ValueError('other_cfg_lines must be flat sequence of (section, option, value, ...) triplets')
         for i in xrange(0, len(other_cfg_lines), 3):
