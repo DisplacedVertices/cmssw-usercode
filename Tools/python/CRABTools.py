@@ -476,6 +476,10 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
         if not d['Done'] or not status_until_none_done:
             break
 
+    for key in d.keys():
+        if not d[key]:
+            del d[key]
+
     if d.has_key('Aborted'): # If use_server mode, and the jobs are in end status, this is OK -- else the key will be AbortedNotEnd and we shouldn't touch them.
         to_resub.extend(d['Aborted'])
 
