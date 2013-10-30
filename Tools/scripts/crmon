@@ -103,8 +103,11 @@ class Tee(object):
         self.file.flush()
         self.stdout.flush()
 
+backdoor_time = str(int(time.time()*1e6))
+
 def backdoor_file(filename):
-    return open('/tmp/%s/crmon_%s' % (os.environ['USER'], filename), 'wt')
+    fn = '/tmp/%s/crmon_%s_%s' % (os.environ['USER'], backdoor_time, filename)
+    return fn, open(fn, 'wt')
 
 def backdoor_print(filename, l):
     ll = []
@@ -113,7 +116,9 @@ def backdoor_print(filename, l):
             a = a.rsplit('\\')[0]
         ll.append(a)
     s = '\n'.join(ll) + '\n'
-    backdoor_file(filename).write(s)
+    fn, f = backdoor_file(filename)
+    f.write(s)
+    print filename, 'is', fn
     print s
 
 def check_fcn(crab_dir, verbose):
