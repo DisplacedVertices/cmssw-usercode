@@ -79,7 +79,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.gen3dsig() <  max_gen3dsig &&
     vtx.maxtrackpt >= min_maxtrackpt &&
     vtx.bs2derr < max_bs2derr &&
-    vtx.njets[0] >= min_njetssharetks;
+    vtx.njets[0] >= min_njetssharetks &&
     vtx.njets[0] <= max_njetssharetks;
 }
 
