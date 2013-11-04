@@ -20,9 +20,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = '944db31db2a0af057913c3b3bd5ae1df'
+    ANA_HASH = '803a9991f628859a3f121bab38a51732'
     PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v8'
+    ANA_VERSION = 'v9'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -332,7 +332,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.dbs_url_num = 2
     sample.re_pat = True
     sample.scheduler = 'condor'
-    sample.ana_hash = '99d7a676d206adfebd5d154091ebe5a6'
+    sample.ana_hash = 'cff4f01a00e7796ff96ffdf9fefed1c3'
 
 ########################################################################
 
@@ -360,18 +360,11 @@ for sample in all_samples:
 # Exceptions to the defaults (except for the MFV signal samples, which
 # are already applied above).
 
-MultiJetPk2012B.ana_hash = '00b5523718eb71b4bef18c6d45967745'
-SingleMu2012B.ana_hash = '6383d09e70ccb0537c8eaa970a34d494'
-for sample in (qcdmupt15, dyjetstollM10, dyjetstollM50):
-    sample.ana_hash = '08fd6086d1722befde87a416353544a2'
+MultiJetPk2012B.ana_hash = '036a5bc53cc53c9868db88b68a1c6eeb'
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
-ttbarsemilep.total_events = 25349818
-qcdht0500.total_events = 30549292
-qcdht1000.total_events = 12068863
-qcdmupt15.total_events = 7479312
-dyjetstollM50.total_events = 29834503
+mfv_neutralino_tau1000um_M0200.total_events = 97752
 
 ########################################################################
 
