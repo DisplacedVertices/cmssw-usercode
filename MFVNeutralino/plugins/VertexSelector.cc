@@ -34,6 +34,7 @@ private:
   const double min_maxtrackpt;
   const double max_bs2derr;
   const int min_njetssharetks;
+  const int max_njetssharetks;
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
@@ -53,7 +54,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_gen3dsig(cfg.getParameter<double>("max_gen3dsig")),
     min_maxtrackpt(cfg.getParameter<double>("min_maxtrackpt")),
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
-    min_njetssharetks(cfg.getParameter<int>("min_njetssharetks"))
+    min_njetssharetks(cfg.getParameter<int>("min_njetssharetks")),
+    max_njetssharetks(cfg.getParameter<int>("max_njetssharetks"))
 {
   if (produce_refs)
     produces<reco::VertexRefVector>();
@@ -78,6 +80,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.maxtrackpt >= min_maxtrackpt &&
     vtx.bs2derr < max_bs2derr &&
     vtx.njets[0] >= min_njetssharetks;
+    vtx.njets[0] <= max_njetssharetks;
 }
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
