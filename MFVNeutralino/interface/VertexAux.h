@@ -5,6 +5,7 @@
 #include "TLorentzVector.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JMTucker/MFVNeutralino/interface/JetVertexAssociation.h"
+#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 
 struct MFVVertexAux {
   typedef unsigned char uchar;
@@ -21,15 +22,16 @@ struct MFVVertexAux {
   float chi2;
   float ndof;
 
-  uchar njets   [MFVJetVertexAssociation::NByUse];
-  float jetspt  [MFVJetVertexAssociation::NByUse];
-  float jetseta [MFVJetVertexAssociation::NByUse];
-  float jetsphi [MFVJetVertexAssociation::NByUse];
-  float jetsmass[MFVJetVertexAssociation::NByUse];
+  uchar njets[MFVJetVertexAssociation::NByUse];
 
-  TLorentzVector jetsp4(int w) const {
+  float pt  [mfv::NMomenta];
+  float eta [mfv::NMomenta];
+  float phi [mfv::NMomenta];
+  float mass[mfv::NMomenta];
+
+  TLorentzVector p4(int w=0) const {
     TLorentzVector v;
-    v.SetPtEtaPhiM(jetspt[w], jetseta[w], jetsphi[w], jetsmass[w]);
+    v.SetPtEtaPhiM(pt[w], eta[w], phi[w], mass[w]);
     return v;
   }
 
@@ -47,17 +49,6 @@ struct MFVVertexAux {
 
   uchar sumnhitsbehind;
   uchar maxnhitsbehind;
-
-  float pt; // tracks' sum
-  float eta;
-  float phi;
-  float mass; // assuming pion mass for tracks
-
-  TLorentzVector p4() const {
-    TLorentzVector v;
-    v.SetPtEtaPhiM(pt, eta, phi, mass);
-    return v;
-  }
 
   float mintrackpt;
   float maxtrackpt;
@@ -103,12 +94,12 @@ struct MFVVertexAux {
   float pv3derr;
   float pv3dsig() const { return sig(pv3ddist, pv3derr); }
 
-  float costhmombs  [MFVJetVertexAssociation::NByUse+1]; // first is for just track-only p4
-  float costhmompv2d[MFVJetVertexAssociation::NByUse+1];
-  float costhmompv3d[MFVJetVertexAssociation::NByUse+1];
+  float costhmombs  [mfv::NMomenta];
+  float costhmompv2d[mfv::NMomenta];
+  float costhmompv3d[mfv::NMomenta];
 
-  float missdistpv   [MFVJetVertexAssociation::NByUse+1];
-  float missdistpverr[MFVJetVertexAssociation::NByUse+1];
+  float missdistpv   [mfv::NMomenta];
+  float missdistpverr[mfv::NMomenta];
   float missdistpvsig(int w) const { return sig(missdistpv[w], missdistpverr[w]); }
 };
 

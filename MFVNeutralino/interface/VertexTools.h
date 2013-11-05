@@ -3,9 +3,11 @@
 
 #include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "JMTucker/MFVNeutralino/interface/JetVertexAssociation.h"
 
 namespace mfv {
-  static const double track_vertex_weight_min = 0.5;
+  static const double track_vertex_weight_min = 0.5; // JMTBAD unify
+  enum Momenta { PTracksOnly, PJetsByNtracks, PJetsByCombination, PTracksPlusJetsByNtracks, PTracksPlusJetsByCombination, NMomenta }; // JMTBAD keep in sync
 
   float abs_error(const reco::Vertex& sv, bool use3d);
   Measurement1D gen_dist(const reco::Vertex& sv, const std::vector<double>& gen_verts, const bool use3d);
@@ -31,7 +33,7 @@ namespace mfv {
     std::vector<float> costhmombs, costhmompv2d, costhmompv3d;
     std::vector<Measurement1D> missdistpv;
 
-    vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& other_mom);
+    vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& momenta);
   };
 }
 

@@ -100,12 +100,12 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.chi2 = sv.chi2();
     aux.ndof = sv.ndof();
 
-    aux.pt   = sv.p4().pt();
-    aux.eta  = sv.p4().eta();
-    aux.phi  = sv.p4().phi();
-    aux.mass = sv.p4().mass();
 
-    std::vector<math::XYZTLorentzVector> jets_p4(MFVJetVertexAssociation::NByUse);
+    std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
+    p4s[mfv::PTracksOnly] = sv.p4();
+
+    for (int i = 0; i < MFVJetVertexAssociation::NByUse; ++i)
+      aux.njets[i] = 0;
 
     if (use_sv_to_jets) {
       for (int i = 0; i < MFVJetVertexAssociation::NByUse; ++i) {
@@ -114,25 +114,40 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       
         if (njets > 0) {
           const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i])[svref];
-          for (int ijet = 0; ijet < njets; ++ijet)
-            jets_p4[i] += jets[ijet]->p4();
+          std::set<reco::TrackRef> jets_tracks;
+
+          for (int ijet = 0; ijet < njets; ++ijet) {
+            p4s[1+i] += jets[ijet]->p4();
+
+            for (const reco::PFCandidatePtr& pfcand : jets[ijet]->getPFConstituents()) {
+              const reco::TrackRef& tk = pfcand->trackRef();
+              if (tk.isNonnull())
+                jets_tracks.insert(tk);
+            }
+          }
         
-          aux.jetspt  [i] = jets_p4[i].pt();
-          aux.jetseta [i] = jets_p4[i].eta();
-          aux.jetsphi [i] = jets_p4[i].phi();
-          aux.jetsmass[i] = jets_p4[i].mass();
+          math::XYZTLorentzVector jpt_p4 = p4s[1+i];
+
+          for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
+            if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
+              reco::TrackRef tk = it->castTo<reco::TrackRef>();
+              if (!jets_tracks.count(tk))
+                jpt_p4 += math::XYZTLorentzVector(tk->px(), tk->py(), tk->pz(), tk->p());
+            }
+          }
+
+          p4s[1 + i + MFVJetVertexAssociation::NByUse] = jpt_p4;
         }
       }
     }
-    else {
-      for (int i = 0; i < MFVJetVertexAssociation::NByUse; ++i) {
-        aux.njets[i] = 0;
-        aux.jetspt[i] = 0;
-        aux.jetseta[i] = 0;
-        aux.jetsphi[i] = 0;
-        aux.jetsmass[i] = 0;
-      }
+
+    for (int i = 0; i < mfv::NMomenta; ++i) {
+      aux.pt[i]   = p4s[i].pt();
+      aux.eta[i]  = p4s[i].eta();
+      aux.phi[i]  = p4s[i].phi();
+      aux.mass[i] = p4s[i].mass();
     }
+
       
     const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
     const double sv_z = fabs(sv.position().z() - bsz);
@@ -205,7 +220,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.mintrackpt = aux.maxtrackpt = aux.maxm1trackpt = aux.maxm2trackpt = -1;
       
     const mfv::vertex_tracks_distance vtx_tks_dist(sv);
-    const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, jets_p4);
+    const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
 
     aux.drmin  = vtx_tks_dist.drmin;
     aux.drmax  = vtx_tks_dist.drmax;
@@ -232,13 +247,13 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.pv3ddist        = vtx_distances.pv3ddist_val;
     aux.pv3derr         = vtx_distances.pv3ddist_err;
 
-    for (size_t iuse = 0, iusee = use_sv_to_jets ? MFVJetVertexAssociation::NByUse+1 : 1; iuse < iusee; ++iuse) {
-      aux.costhmombs  [iuse] = vtx_distances.costhmombs[iuse];
-      aux.costhmompv2d[iuse] = vtx_distances.costhmompv2d[iuse];
-      aux.costhmompv3d[iuse] = vtx_distances.costhmompv3d[iuse];
+    for (int i = 0; i < mfv::NMomenta; ++i) {
+      aux.costhmombs  [i] = vtx_distances.costhmombs[i];
+      aux.costhmompv2d[i] = vtx_distances.costhmompv2d[i];
+      aux.costhmompv3d[i] = vtx_distances.costhmompv3d[i];
 
-      aux.missdistpv   [iuse] = vtx_distances.missdistpv[iuse].value();
-      aux.missdistpverr[iuse] = vtx_distances.missdistpv[iuse].error();
+      aux.missdistpv   [i] = vtx_distances.missdistpv[i].value();
+      aux.missdistpverr[i] = vtx_distances.missdistpv[i].error();
     }
 
   }

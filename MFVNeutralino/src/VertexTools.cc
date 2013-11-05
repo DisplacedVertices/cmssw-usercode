@@ -161,7 +161,7 @@ namespace mfv {
     drrmsvw = sqrt(drrmsvw/sumvw);
   }
 
-  vertex_distances::vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& other_mom) {
+  vertex_distances::vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& momenta) {
     VertexDistanceXY distcalc_2d;
     VertexDistance3D distcalc_3d;
 
@@ -195,8 +195,7 @@ namespace mfv {
     if (primary_vertex != 0)
       pv2sv = sv.position() - primary_vertex->position();
 
-    for (size_t i = 0, ie = other_mom.size()+1; i < ie; ++i) {
-      const math::XYZTLorentzVector& mom = i == 0 ? sv.p4() : other_mom[i-1];
+    for (const math::XYZTLorentzVector& mom : momenta) {
       costhmombs.push_back(costh2(mom, bs2sv));
       if (primary_vertex != 0) {
         costhmompv2d.push_back(costh2(mom, pv2sv));

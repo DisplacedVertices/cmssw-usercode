@@ -70,7 +70,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.chi2/vtx.ndof < max_chi2dof &&
     vtx.gen2derr < max_err2d &&
     vtx.gen3derr < max_err3d &&
-    vtx.mass >= min_mass && 
+    vtx.mass[0] >= min_mass && 
     vtx.drmin >= min_drmin &&
     vtx.drmin <  max_drmin &&
     vtx.drmax >= min_drmax &&

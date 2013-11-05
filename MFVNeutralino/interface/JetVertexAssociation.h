@@ -8,7 +8,7 @@
 struct MFVJetVertexAssociation {
   typedef edm::AssociationMap<edm::OneToMany<reco::VertexCollection, pat::JetCollection> > type;
 
-  enum { ByNtracks, ByCombination, NByUse, ByNtracksPtmin=NByUse, ByMissDist, ByCombinationPtmin, NBy };
+  enum { ByNtracks, ByCombination, NByUse, ByNtracksPtmin=NByUse, ByMissDist, ByCombinationPtmin, NBy }; // JMTBAD keep in sync with mfv::Momenta
   static const char* names[NBy];
 };
 
