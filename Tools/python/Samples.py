@@ -165,7 +165,7 @@ class TupleOnlyMCSample(MCSample):
 class DataSample(Sample):
     IS_MC = False
     JSON = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt'
-    LUMIS_PER = 75
+    LUMIS_PER = 30
     ANA_LUMIS_PER = 500
     TOTAL_LUMIS = -1
 
