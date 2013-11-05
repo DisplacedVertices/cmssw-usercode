@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+import os, sys
 from JMTucker.Tools.CRABSubmitter import CRABSubmitter
 from JMTucker.Tools.PATTuple_cfg import version as tuple_version
 import JMTucker.Tools.Samples as Samples
@@ -55,6 +55,12 @@ cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
                    publish_data_name = 'mfvntuple_' + tuple_version,
                    max_threads = 3,
                    )
+
+if 'testsingle' in sys.argv:
+    fn,pset = cs.pset(Samples.mfv_neutralino_tau0100um_M0400, '/dev/null')
+    pset += 'process.options.wantSummary = True\nprocess.source.fileNames = %r' % Samples.mfv_neutralino_tau0100um_M0400.filenames(False)[:5]
+    open('runme.py','wt').write(pset)
+    sys.exit(os.system('logcms.py runme.py'))
 
 samples = Samples.data_samples + Samples.auxiliary_data_samples + Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.smaller_background_samples + Samples.leptonic_background_samples
 for sample in samples:
