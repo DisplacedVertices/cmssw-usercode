@@ -125,28 +125,28 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("jetsntketa",                    "SV jets-by-ntracks -only #eta",                                                50,   -4,       4);
   hs.add("jetsntkrapidity",               "SV jets-by-ntracks -only rapidity",                                            50,   -4,       4);
   hs.add("jetsntkphi",                    "SV jets-by-ntracks -only #phi",                                                50,   -3.15,    3.15);
-  hs.add("jetsntkmass",                   "SV jets-by-ntracks -only mass (GeV)",                                         100,    0,     250);
+  hs.add("jetsntkmass",                   "SV jets-by-ntracks -only mass (GeV)",                                         100,    0,    1500);
 
   hs.add("jetscmbp",                      "SV jets-by-combination -only p (GeV)",                                        100,    0,     300);
   hs.add("jetscmbpt",                     "SV jets-by-combination -only p_{T} (GeV)",                                    100,    0,     300);
   hs.add("jetscmbeta",                    "SV jets-by-combination -only #eta",                                            50,   -4,       4);
   hs.add("jetscmbrapidity",               "SV jets-by-combination -only rapidity",                                        50,   -4,       4);
   hs.add("jetscmbphi",                    "SV jets-by-combination -only #phi",                                            50,   -3.15,    3.15);
-  hs.add("jetscmbmass",                   "SV jets-by-combination -only mass (GeV)",                                     100,    0,     250);
+  hs.add("jetscmbmass",                   "SV jets-by-combination -only mass (GeV)",                                     100,    0,    1500);
 				     
   hs.add("tksjetsntkp",                   "SV tracks-plus-jets-by-ntracks p (GeV)",                                      100,    0,     300);
   hs.add("tksjetsntkpt",                  "SV tracks-plus-jets-by-ntracks p_{T} (GeV)",                                  100,    0,     300);
   hs.add("tksjetsntketa",                 "SV tracks-plus-jets-by-ntracks #eta",                                          50,   -4,       4);
   hs.add("tksjetsntkrapidity",            "SV tracks-plus-jets-by-ntracks rapidity",                                      50,   -4,       4);
   hs.add("tksjetsntkphi",                 "SV tracks-plus-jets-by-ntracks #phi",                                          50,   -3.15,    3.15);
-  hs.add("tksjetsntkmass",                "SV tracks-plus-jets-by-ntracks mass (GeV)",                                   100,    0,     250);
+  hs.add("tksjetsntkmass",                "SV tracks-plus-jets-by-ntracks mass (GeV)",                                   100,    0,    1500);
 				        
-  hs.add("tksjetscombp",                  "SV tracks-plus-jets-by-combination p (GeV)",                                  100,    0,     300);
-  hs.add("tksjetscombpt",                 "SV tracks-plus-jets-by-combination p_{T} (GeV)",                              100,    0,     300);
-  hs.add("tksjetscombeta",                "SV tracks-plus-jets-by-combination #eta",                                      50,   -4,       4);
-  hs.add("tksjetscombrapidity",           "SV tracks-plus-jets-by-combination rapidity",                                  50,   -4,       4);
-  hs.add("tksjetscombphi",                "SV tracks-plus-jets-by-combination #phi",                                      50,   -3.15,    3.15);
-  hs.add("tksjetscombmass",               "SV tracks-plus-jets-by-combination mass (GeV)",                               100,    0,     250);
+  hs.add("tksjetscmbp",                  "SV tracks-plus-jets-by-combination p (GeV)",                                  100,    0,     300);
+  hs.add("tksjetscmbpt",                 "SV tracks-plus-jets-by-combination p_{T} (GeV)",                              100,    0,     300);
+  hs.add("tksjetscmbeta",                "SV tracks-plus-jets-by-combination #eta",                                      50,   -4,       4);
+  hs.add("tksjetscmbrapidity",           "SV tracks-plus-jets-by-combination rapidity",                                  50,   -4,       4);
+  hs.add("tksjetscmbphi",                "SV tracks-plus-jets-by-combination #phi",                                      50,   -3.15,    3.15);
+  hs.add("tksjetscmbmass",               "SV tracks-plus-jets-by-combination mass (GeV)",                               100,    0,    1500);
 
   hs.add("costhtkonlymombs",              "cos(angle(2-momentum (tracks-only), 2-dist to BS))",                          101,   -1,       1.02);
   hs.add("costhtkonlymompv2d",            "cos(angle(2-momentum (tracks-only), 2-dist to PV))",                          101,   -1,       1.02);
