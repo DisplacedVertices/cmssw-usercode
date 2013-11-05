@@ -185,7 +185,7 @@ class CRABSubmitter:
         cfg.write(open(crab_cfg_fn, 'wt'))
         return crab_cfg_fn, open(crab_cfg_fn, 'rt').read(), cfg
 
-    def pset(self, sample):
+    def pset(self, sample, tmp_fn=None):
         pset = open(self.pset_template_fn).read()
         if self.pset_modifier is not None:
             ret = self.pset_modifier(sample)
@@ -199,7 +199,7 @@ class CRABSubmitter:
                     raise ValueError(err)
                 pset = pset.replace(a,b)
             pset += '\n' + '\n'.join(to_add) + '\n'
-        pset_fn = self.pset_fn_pattern % sample
+        pset_fn = self.pset_fn_pattern % sample if tmp_fn is None else tmp_fn
         open(pset_fn, 'wt').write(pset)
         return pset_fn, pset
 
