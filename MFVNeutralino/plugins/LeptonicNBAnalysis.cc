@@ -177,8 +177,8 @@ void LeptonicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jet_src, jets);
 
-  edm::Handle<edm::ValueMap<float> > puJetIdMva;
-  event.getByLabel("puJetMvaChs", "fullDiscriminant", puJetIdMva);
+  //edm::Handle<edm::ValueMap<float> > puJetIdMva;
+  //event.getByLabel("puJetMvaChs", "fullDiscriminant", puJetIdMva);
 
   edm::Handle<edm::ValueMap<int> > puJetIdFlag;
   event.getByLabel("puJetMvaChs", "fullId", puJetIdFlag);
@@ -190,7 +190,7 @@ void LeptonicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
   int nbtags_nocuts = 0;
   for (int i = 0; i < int(jets->size()); ++i) {
     pat::JetRef jetref(jets, i);
-    float mva   = (*puJetIdMva)[jetref];
+    //float mva   = (*puJetIdMva)[jetref];
     int idflag = (*puJetIdFlag)[jetref];
 
 /*
