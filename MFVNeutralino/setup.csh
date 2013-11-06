@@ -2,8 +2,6 @@
 
 pushd $CMSSW_BASE/src
 
-cvs co -r version19 -d JMTucker/Tools UserCode/JMTucker/Tools
-
 source JMTucker/Tools/setup.csh
 
 # this only works at cmslpc, obviously
