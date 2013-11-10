@@ -3,7 +3,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralino/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 class MFVWeightProducer : public edm::EDProducer {
 public:

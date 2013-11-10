@@ -1,11 +1,10 @@
-#ifndef JMTucker_MFVNeutralino_interface_VertexAux_h
-#define JMTucker_MFVNeutralino_interface_VertexAux_h
+#ifndef JMTucker_MFVNeutralinoFormats_interface_VertexAux_h
+#define JMTucker_MFVNeutralinoFormats_interface_VertexAux_h
 
 #include <algorithm>
 #include "TLorentzVector.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "JMTucker/MFVNeutralino/interface/JetVertexAssociation.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
 
 struct MFVVertexAux {
   typedef unsigned char uchar;
@@ -22,7 +21,9 @@ struct MFVVertexAux {
   float chi2;
   float ndof;
 
-  uchar njets[MFVJetVertexAssociation::NByUse];
+  uchar njets[mfv::NJetsByUse];
+
+  float dummy; // JMTBAD wtf?
 
   float pt  [mfv::NMomenta];
   float eta [mfv::NMomenta];

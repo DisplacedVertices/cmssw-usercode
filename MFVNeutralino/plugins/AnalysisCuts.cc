@@ -3,9 +3,9 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
-#include "JMTucker/MFVNeutralino/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
-#include "JMTucker/MFVNeutralino/interface/VertexAux.h"
 
 class MFVAnalysisCuts : public edm::EDFilter {
 public:

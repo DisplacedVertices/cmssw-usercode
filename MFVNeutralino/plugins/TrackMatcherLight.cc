@@ -11,7 +11,7 @@
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "SimTracker/TrackAssociation/interface/TrackAssociatorBase.h"
-#include "JMTucker/MFVNeutralino/interface/LightTrackMatch.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/LightTrackMatch.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 
 class MFVTrackMatcherLight : public edm::EDProducer {

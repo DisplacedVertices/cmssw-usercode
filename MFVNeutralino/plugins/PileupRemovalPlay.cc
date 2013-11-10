@@ -14,7 +14,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralino/interface/LightTrackMatch.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/LightTrackMatch.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 
 class PileupRemovalPlay : public edm::EDAnalyzer {

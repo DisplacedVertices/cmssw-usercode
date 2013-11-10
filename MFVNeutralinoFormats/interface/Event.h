@@ -1,8 +1,13 @@
-#ifndef JMTucker_MFVNeutralino_interface_Event_h
-#define JMTucker_MFVNeutralino_interface_Event_h
+#ifndef JMTucker_MFVNeutralinoFormats_interface_Event_h
+#define JMTucker_MFVNeutralinoFormats_interface_Event_h
 
 #include "TLorentzVector.h"
-#include "JMTucker/MFVNeutralino/interface/EventTools.h"
+//#include "JMTucker/MFVNeutralino/interface/EventTools.h"
+
+namespace mfv {
+  static const int n_trigger_paths = 5;
+  static const int n_clean_paths = 19+1;
+}
 
 struct MFVEvent {
   typedef unsigned char uchar;

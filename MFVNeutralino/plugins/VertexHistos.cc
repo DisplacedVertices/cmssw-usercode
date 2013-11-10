@@ -11,8 +11,8 @@
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 #include "JMTucker/Tools/interface/PairwiseHistos.h"
 #include "JMTucker/Tools/interface/Utilities.h"
-#include "JMTucker/MFVNeutralino/interface/Event.h"
-#include "JMTucker/MFVNeutralino/interface/VertexAux.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 
 class MFVVertexHistos : public edm::EDAnalyzer {
@@ -388,8 +388,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"ntracksptgt10",           aux.ntracksptgt10},
         {"trackminnhits",           aux.trackminnhits},
         {"trackmaxnhits",           aux.trackmaxnhits},
-        {"njetsntks",               aux.njets[MFVJetVertexAssociation::ByNtracks]},
-        {"njetscomb",               aux.njets[MFVJetVertexAssociation::ByCombination]},
+        {"njetsntks",               aux.njets[mfv::JByNtracks]},
+        {"njetscomb",               aux.njets[mfv::JByCombination]},
         {"chi2dof",                 aux.chi2/aux.ndof},
         {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof)},
 

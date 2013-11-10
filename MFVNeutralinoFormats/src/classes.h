@@ -6,9 +6,9 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "JMTucker/MFVNeutralino/interface/LightTrackMatch.h"
-#include "JMTucker/MFVNeutralino/interface/Event.h"
-#include "JMTucker/MFVNeutralino/interface/VertexAux.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/LightTrackMatch.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 namespace {
   namespace {

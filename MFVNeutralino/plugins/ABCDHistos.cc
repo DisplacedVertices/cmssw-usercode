@@ -4,7 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralino/interface/VertexAux.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 class ABCDHistos : public edm::EDAnalyzer {
  public:

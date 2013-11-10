@@ -11,8 +11,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/TrackerSpaceExtent.h"
-#include "JMTucker/MFVNeutralino/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -76,10 +76,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   const int nsv = int(secondary_vertices->size());
 
   const bool use_sv_to_jets = sv_to_jets_src != "dummy";
-  edm::Handle<MFVJetVertexAssociation::type> sv_to_jets[MFVJetVertexAssociation::NByUse];
+  edm::Handle<mfv::JetVertexAssociation> sv_to_jets[mfv::NJetsByUse];
   if (use_sv_to_jets)
-    for (int i = 0; i < MFVJetVertexAssociation::NByUse; ++i)
-      event.getByLabel(edm::InputTag(sv_to_jets_src, MFVJetVertexAssociation::names[i]), sv_to_jets[i]);
+    for (int i = 0; i < mfv::NJetsByUse; ++i)
+      event.getByLabel(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i]), sv_to_jets[i]);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -104,11 +104,11 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
     p4s[mfv::PTracksOnly] = sv.p4();
 
-    for (int i = 0; i < MFVJetVertexAssociation::NByUse; ++i)
+    for (int i = 0; i < mfv::NJetsByUse; ++i)
       aux.njets[i] = 0;
 
     if (use_sv_to_jets) {
-      for (int i = 0; i < MFVJetVertexAssociation::NByUse; ++i) {
+      for (int i = 0; i < mfv::NJetsByUse; ++i) {
         int njets = sv_to_jets[i]->numberOfAssociations(svref);
         aux.njets[i] = int2uchar(njets);
       
@@ -136,7 +136,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             }
           }
 
-          p4s[1 + i + MFVJetVertexAssociation::NByUse] = jpt_p4;
+          p4s[1 + i + mfv::NJetsByUse] = jpt_p4;
         }
       }
     }

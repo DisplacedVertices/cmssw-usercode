@@ -3,11 +3,9 @@
 
 #include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "JMTucker/MFVNeutralino/interface/JetVertexAssociation.h"
 
 namespace mfv {
   static const double track_vertex_weight_min = 0.5; // JMTBAD unify
-  enum Momenta { PTracksOnly, PJetsByNtracks, PJetsByCombination, PTracksPlusJetsByNtracks, PTracksPlusJetsByCombination, NMomenta }; // JMTBAD keep in sync
 
   float abs_error(const reco::Vertex& sv, bool use3d);
   Measurement1D gen_dist(const reco::Vertex& sv, const std::vector<double>& gen_verts, const bool use3d);

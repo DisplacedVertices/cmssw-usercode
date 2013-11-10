@@ -14,7 +14,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-#include "JMTucker/MFVNeutralino/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"

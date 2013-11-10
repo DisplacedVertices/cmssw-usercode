@@ -106,7 +106,7 @@ namespace mfv {
 
   vertex_tracks_distance::vertex_tracks_distance(const reco::Vertex& sv) {
     drmin = 1e99;
-    drmax = dravg = dravgw = drrms = drrmsw = 0;
+    drmax = dravg = dravgw = dravgvw = drrms = drrmsw = drrmsvw = 0;
 
     std::vector<double> drs;
     std::vector<double> ws;

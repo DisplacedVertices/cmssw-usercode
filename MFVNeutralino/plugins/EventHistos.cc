@@ -6,7 +6,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
-#include "JMTucker/MFVNeutralino/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 
 class MFVEventHistos : public edm::EDAnalyzer {
