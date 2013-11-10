@@ -4,7 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/MFVNeutralino/interface/VertexAux.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 
 class MFVVertexSelector : public edm::EDProducer {
@@ -95,11 +95,13 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
       MFVVertexAux sel(aux);
       sel.selected = true;
       selected->push_back(sel);
-      selected_vertex_refs->push_back(aux.ref);
     }
   }
 
   sorter.sort(*selected);
+
+  for (const MFVVertexAux& aux : *selected)
+    selected_vertex_refs->push_back(aux.ref);
 
   if (!produce_refs) {
     std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
