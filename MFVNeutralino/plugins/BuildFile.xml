@@ -7,7 +7,6 @@
   <use name="DataFormats/PatCandidates"/>
   <use name="DataFormats/TrackReco"/>
   <use name="DataFormats/VertexReco"/>
-  <use name="EGamma/EGammaAnalysisTools"/>
   <use name="PhysicsTools/CandUtils"/>
   <use name="RecoBTag/SecondaryVertex"/>
   <use name="RecoVertex/ConfigurableVertexReco"/>
