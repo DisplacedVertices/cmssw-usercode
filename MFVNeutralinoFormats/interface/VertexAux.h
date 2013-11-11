@@ -11,19 +11,23 @@ struct MFVVertexAux {
   typedef unsigned short ushort;
   typedef unsigned int uint;
 
-  reco::VertexRef ref;
-  bool selected;
+  uchar which;
 
   float x;
   float y;
   float z;
 
+  float cxx;
+  float cxy;
+  float cxz;
+  float cyy;
+  float cyz;
+  float czz;
+
   float chi2;
   float ndof;
 
   uchar njets[mfv::NJetsByUse];
-
-  float dummy; // JMTBAD wtf?
 
   float pt  [mfv::NMomenta];
   float eta [mfv::NMomenta];

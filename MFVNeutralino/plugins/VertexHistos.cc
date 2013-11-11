@@ -339,6 +339,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_sv_pos_2d[svndx][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
     h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
 
+#if 0
     if (use_ref) {
       for (auto trki = aux.ref->tracks_begin(), trke = aux.ref->tracks_end(); trki != trke; ++trki) {
         if (aux.ref->trackWeight(*trki) < mfv::track_vertex_weight_min)
@@ -379,6 +380,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         }
       }
     }
+#endif
 
     PairwiseHistos::ValueMap v = {
         {"ntracks",                 aux.ntracks},
@@ -530,6 +532,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, *weight);
   }
 
+#if 0
   if (use_ref) {
     for (int ivtx = 0; ivtx < nsv; ++ivtx) {
       const reco::Vertex& vtxi = *auxes->at(ivtx).ref;
@@ -556,6 +559,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       }
     }
   }
+#endif
 }
 
 DEFINE_FWK_MODULE(MFVVertexHistos);

@@ -90,12 +90,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     const reco::Vertex& sv = secondary_vertices->at(isv);
     const reco::VertexRef svref(secondary_vertices, isv);
     MFVVertexAux& aux = auxes->at(isv);
-    aux.ref = svref;
-    aux.selected = false; // to be finalized in VertexSelector
+    aux.which = int2uchar(isv);
 
     aux.x = sv.x();
     aux.y = sv.y();
     aux.z = sv.z();
+
+    aux.cxx = sv.covariance(0,0);
+    aux.cxy = sv.covariance(0,1);
+    aux.cxz = sv.covariance(0,2);
+    aux.cyy = sv.covariance(1,1);
+    aux.cyz = sv.covariance(1,2);
+    aux.czz = sv.covariance(2,2);
 
     aux.chi2 = sv.chi2();
     aux.ndof = sv.ndof();

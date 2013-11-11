@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
+                                     vertex_src = cms.InputTag('mfvVertices'),
                                      vertex_aux_src = cms.InputTag('mfvVerticesAux'),
                                      produce_refs = cms.bool(True),
                                      min_ntracks = cms.int32(0),

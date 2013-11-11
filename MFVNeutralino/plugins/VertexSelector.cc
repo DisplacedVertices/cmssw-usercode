@@ -16,6 +16,7 @@ private:
 
   bool use_vertex(const MFVVertexAux& vtx) const;
 
+  const edm::InputTag vertex_src;
   const edm::InputTag vertex_aux_src;
   const bool produce_refs;
   const MFVVertexAuxSorter sorter;
@@ -38,7 +39,8 @@ private:
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
-  : vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
+  : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
     produce_refs(cfg.getParameter<bool>("produce_refs")),
     sorter(cfg.getParameter<std::string>("sort_by")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
@@ -84,24 +86,23 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
 }
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
+  edm::Handle<reco::VertexCollection> vertices;
+  event.getByLabel(vertex_src, vertices);
+
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByLabel(vertex_aux_src, auxes);
 
   std::auto_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
   std::auto_ptr<reco::VertexRefVector>  selected_vertex_refs(new reco::VertexRefVector);
 
-  for (const MFVVertexAux& aux : *auxes) {
-    if (use_vertex(aux)) {
-      MFVVertexAux sel(aux);
-      sel.selected = true;
-      selected->push_back(sel);
-    }
-  }
+  for (const MFVVertexAux& aux : *auxes)
+    if (use_vertex(aux))
+      selected->push_back(aux);
 
   sorter.sort(*selected);
 
   for (const MFVVertexAux& aux : *selected)
-    selected_vertex_refs->push_back(aux.ref);
+    selected_vertex_refs->push_back(reco::VertexRef(vertices, aux.which));
 
   if (!produce_refs) {
     std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
