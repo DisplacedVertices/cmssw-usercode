@@ -39,6 +39,8 @@ process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
+
+disable_pujetid(process)
 ''')
 
     if sample.is_mc and sample.re_pat:
