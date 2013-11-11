@@ -146,7 +146,7 @@ if True: # pfElectronIsoConeR03
     processpostfix('patElectrons').isolationValues.pfPhotons          = InputTagPostFix('elPFIsoValueGamma03PFId')
     processpostfix('patElectrons').isolationValues.pfChargedHadrons   = InputTagPostFix('elPFIsoValueCharged03PFId')
 
-process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
+process.load('EgammaAnalysis.ElectronTools.electronIdMVAProducer_cfi')
 processpostfix('patElectrons').electronIDSources.mvaTrigV0    = cms.InputTag("mvaTrigV0")
 processpostfix('patElectrons').electronIDSources.mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0")
 processpostfix('patMuons').embedTrack = True
@@ -181,24 +181,8 @@ for cut in (1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.):
     tag_info_obj.vertexCuts.maxDeltaRToJetAxis = cut
     setattr(process, tag_info_name, tag_info_obj)
     process.patJetsPF.tagInfoSources.append(cms.InputTag(tag_info_name))
-  
-    disc_names = ('simpleSecondaryVertexHighEffBJetTagsAODPF',
-                  'simpleSecondaryVertexHighPurBJetTagsAODPF',
-                  'combinedSecondaryVertexBJetTagsAODPF',
-                  'combinedSecondaryVertexMVABJetTagsAODPF')
-    disc_objs = []
-    for disc_name in disc_names:
-        new_disc_name = disc_name.replace('JetTagsAODPF', 'MaxDR%sJetTagsAODPF' % cut_name)
-        if 'simple' in disc_name:
-            tags = cms.VInputTag(cms.InputTag(tag_info_name))
-        else:
-            tags = cms.VInputTag(cms.InputTag("impactParameterTagInfosAODPF"), cms.InputTag(tag_info_name))
-        o = getattr(process, disc_name).clone(tagInfos = tags)
-        disc_objs.append(o)
-        setattr(process, new_disc_name, o)
-        process.patJetsPF.discriminatorSources.append(cms.InputTag(new_disc_name))
-  
-    processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * reduce(lambda x,y: x*y, disc_objs) * processpostfix('patJets'))
+
+    processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * processpostfix('patJets'))
 
 from JMTucker.Tools.PATTupleSelection_cfi import makeLeptonProducers
 makeLeptonProducers(process, postfix=postfix, params=process.jtupleParams)
@@ -354,7 +338,12 @@ def pileup_removal_studies(process, keep_nopileup=True, no_closest_z_vtx=True):
 def closest_z_in_pu(process):
     processpostfix('pfPileUp').checkClosestZVertex = True
     processpostfix('pfPileUpIso').checkClosestZVertex = True
-    
+
+def disable_pujetid(process):
+    for p in process.paths_():
+        getattr(process, p).remove(process.puJetIdChs)
+        getattr(process, p).remove(process.puJetMvaChs)
+
 for arg in 'input_is_fastsim input_is_pythia8 keep_general_tracks keep_selected_tracks no_skimming_cuts drop_gen_particles aod_plus_pat keep_random_state keep_mixing_info disable_nopileup re_pat pileup_removal_studies closest_z_in_pu'.split():
     if arg in sys.argv:
         exec '%s(process)' % arg
