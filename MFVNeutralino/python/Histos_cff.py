@@ -5,7 +5,6 @@ from JMTucker.MFVNeutralino.VertexHistos_cfi import *
 from JMTucker.MFVNeutralino.EventHistos_cfi import *
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 
-mfvVertexHistosLoose = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesLoose')
 mfvVertexHistosNoCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvVerticesAux')
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvEventHistosNoCuts = mfvEventHistos.clone()
@@ -13,7 +12,6 @@ mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 
 mfvHistos = cms.Sequence(mfvWeight *
                          mfvVertexHistos *
-                         mfvVertexHistosLoose *
                          mfvVertexHistosNoCuts *
                          mfvEventHistosNoCuts *
                          mfvAnalysisCuts *
@@ -27,5 +25,5 @@ def re_trigger(process):
     process.mfvEventHistos      .re_trigger = True
 
 def no_use_ref(process):
-    for name in 'mfvVertexHistos mfvVertexHistosLoose mfvVertexHistosNoCuts mfvVertexHistosNoCutsWAnaCuts mfvVertexHistosWAnaCuts'.split():
+    for name in 'mfvVertexHistos mfvVertexHistosNoCuts mfvVertexHistosNoCutsWAnaCuts mfvVertexHistosWAnaCuts'.split():
         getattr(process, name).use_ref = False
