@@ -237,6 +237,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByLabel(met_src, mets);
   const pat::MET& met = mets->at(0);
 
+  edm::Handle<edm::ValueMap<int> > puids;
+  event.getByLabel("puJetMvaChs", "fullId", puids);
+
   mevent->metx = met.px();
   mevent->mety = met.py();
   if (met.getSignificanceMatrix()(0,0) < 1e10 && met.getSignificanceMatrix()(1,1) < 1e10)
@@ -245,12 +248,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->metsig = -999;
   mevent->metdphimin = 1e99;
 
+  const PileupJetIdentifier::Id puidlevel[3] = {PileupJetIdentifier::kLoose, PileupJetIdentifier::kMedium, PileupJetIdentifier::kTight};
+
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
     if (jet.pt() < jet_pt_min)
       continue;
 
     inc_uchar(mevent->njets);
+
+    int puid = (*puids)[pat::JetRef(jets, jjet)];
+    for (int i = 0; i < 3; ++i)
+      if (PileupJetIdentifier::passJetId(puid, puidlevel[i]))
+        inc_uchar(mevent->njetsnopu[i]);
 
     if (mevent->njets == 4)
       mevent->jetpt4 = jet.pt();
