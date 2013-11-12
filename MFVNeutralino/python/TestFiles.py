@@ -184,12 +184,17 @@ def set_test_files(process):
         print '  frompat : use PAT tuples as input instead, and implies usesec. default is to run on MFV ntuples.'
         sys.exit(1)
 
-    if 'temp' in sys.argv:
-        process.source.fileNames = ['file:ntuple.root']
-        return
-
     nt = 'frompat' not in sys.argv
     sec = not nt or 'usesec' in sys.argv
+
+    if 'temp' in sys.argv:
+        if nt:
+            process.source.fileNames = ['file:ntuple.root']
+        else:
+            process.source.fileNames = ['file:pat.root']
+        if sec:
+            process.source.secondaryFileNames = cms.untracked.vstring('file:parent.root')
+        return
 
     if 'testqcd' in sys.argv:
         if nt:
