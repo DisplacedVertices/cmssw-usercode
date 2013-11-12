@@ -1,8 +1,7 @@
-<use name="root"/>
+<use name="clhep"/>
 <use name="rootrflx"/>
+<use name="rootphysics"/>
 <use name="DataFormats/Common"/>
-<use name="DataFormats/VertexReco"/>
-<use name="RecoVertex/VertexTools"/>
 <export>
   <lib name="1"/>
 </export>
