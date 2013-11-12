@@ -1,15 +1,22 @@
 #ifndef JMTucker_MFVNeutralinoFormats_interface_VertexAux_h
 #define JMTucker_MFVNeutralinoFormats_interface_VertexAux_h
 
-#include <algorithm>
 #include "TLorentzVector.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
 
 struct MFVVertexAux {
   typedef unsigned char uchar;
   typedef unsigned short ushort;
   typedef unsigned int uint;
+
+  MFVVertexAux() {
+    which = ntracks = nbadtracks = ntracksptgt3 = ntracksptgt5 = ntracksptgt10 = trackminnhits = trackmaxnhits = sumnhitsbehind = maxnhitsbehind = bs2dcompatscss = pv2dcompatscss = pv3dcompatscss = 0;
+    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = sumpt2 = mintrackpt = maxtrackpt = maxm1trackpt = maxm2trackpt = drmin = drmax = dravg = drrms = dravgw = drrmsw = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2dcompat = bs2ddist = bs2derr = bs3ddist = pv2dcompat = pv2ddist = pv2derr = pv3dcompat = pv3ddist = pv3derr = 0;
+    for (int i = 0; i < mfv::NJetsByUse; ++i)
+      njets[i] = 0;
+    for (int i = 0; i < mfv::NMomenta; ++i)
+      pt[i] = eta[i] = phi[i] = mass[i] = costhmombs[i] = costhmompv2d[i] = costhmompv3d[i] = missdistpv[i] = missdistpverr[i] = 0;
+  }
 
   uchar which;
 
@@ -109,44 +116,5 @@ struct MFVVertexAux {
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;
-
-struct MFVVertexAuxSorter {
-  enum sort_by_this { sort_by_mass, sort_by_ntracks, sort_by_ntracks_then_mass };
-  sort_by_this sort_by;
-
-  MFVVertexAuxSorter(const std::string& x) {
-    if (x == "mass")
-      sort_by = sort_by_mass;
-    else if (x == "ntracks")
-      sort_by = sort_by_ntracks;
-    else if (x == "ntracks_then_mass")
-      sort_by = sort_by_ntracks_then_mass;
-    else
-      throw cms::Exception("MFVVertexTools") << "invalid sort_by";
-  }
-
-  static bool by_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
-    return a.mass > b.mass;
-  }
-
-  static bool by_ntracks(const MFVVertexAux& a, const MFVVertexAux& b) {
-    return a.ntracks > b.ntracks;
-  }
-
-  static bool by_ntracks_then_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
-    if (a.ntracks == b.ntracks)
-      return a.mass > b.mass;
-    return a.ntracks > b.ntracks;
-  }
-
-  void sort(MFVVertexAuxCollection& v) const {
-    if (sort_by == sort_by_mass)
-      std::sort(v.begin(), v.end(), by_mass);
-    else if (sort_by == sort_by_ntracks)
-      std::sort(v.begin(), v.end(), by_ntracks);
-    else if (sort_by == sort_by_ntracks_then_mass)
-      std::sort(v.begin(), v.end(), by_ntracks_then_mass);
-  }
-};    
 
 #endif

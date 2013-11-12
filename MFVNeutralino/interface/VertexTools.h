@@ -3,6 +3,7 @@
 
 #include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 namespace mfv {
   static const double track_vertex_weight_min = 0.5; // JMTBAD unify
@@ -34,5 +35,46 @@ namespace mfv {
     vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& momenta);
   };
 }
+
+// JMTBAD mfv::
+struct MFVVertexAuxSorter {
+  enum sort_by_this { sort_by_mass, sort_by_ntracks, sort_by_ntracks_then_mass };
+  sort_by_this sort_by;
+
+  MFVVertexAuxSorter(const std::string& x) {
+    if (x == "mass")
+      sort_by = sort_by_mass;
+    else if (x == "ntracks")
+      sort_by = sort_by_ntracks;
+    else if (x == "ntracks_then_mass")
+      sort_by = sort_by_ntracks_then_mass;
+    else
+      throw cms::Exception("MFVVertexTools") << "invalid sort_by";
+  }
+
+  static bool by_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
+    return a.mass > b.mass;
+  }
+
+  static bool by_ntracks(const MFVVertexAux& a, const MFVVertexAux& b) {
+    return a.ntracks > b.ntracks;
+  }
+
+  static bool by_ntracks_then_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
+    if (a.ntracks == b.ntracks)
+      return a.mass[0] > b.mass[0];
+    return a.ntracks > b.ntracks;
+  }
+
+  void sort(MFVVertexAuxCollection& v) const {
+    if (sort_by == sort_by_mass)
+      std::sort(v.begin(), v.end(), by_mass);
+    else if (sort_by == sort_by_ntracks)
+      std::sort(v.begin(), v.end(), by_ntracks);
+    else if (sort_by == sort_by_ntracks_then_mass)
+      std::sort(v.begin(), v.end(), by_ntracks_then_mass);
+  }
+};    
+
 
 #endif
