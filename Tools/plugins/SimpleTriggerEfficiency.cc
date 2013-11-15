@@ -1,5 +1,5 @@
-#include "TH1I.h"
-#include "TH2I.h"
+#include "TH1F.h"
+#include "TH2F.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -24,10 +24,10 @@ private:
 
   bool pass_prescale(std::string) const;
 
-  TH1I* triggers_pass_num;
-  TH1I* triggers_pass_den;
-  TH2I* triggers2d_pass_num;
-  TH2I* triggers2d_pass_den;
+  TH1F* triggers_pass_num;
+  TH1F* triggers_pass_den;
+  TH2F* triggers2d_pass_num;
+  TH2F* triggers2d_pass_den;
 };
 
 SimpleTriggerEfficiency::SimpleTriggerEfficiency(const edm::ParameterSet& cfg) 
@@ -79,14 +79,14 @@ void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventS
     // times in each bin.
     edm::Service<TFileService> fs;
 
-    triggers_pass_num = fs->make<TH1I>("triggers_pass_num", "", npaths, 0, npaths);
-    triggers_pass_den = fs->make<TH1I>("triggers_pass_den", "", npaths, 0, npaths);
+    triggers_pass_num = fs->make<TH1F>("triggers_pass_num", "", npaths, 0, npaths);
+    triggers_pass_den = fs->make<TH1F>("triggers_pass_den", "", npaths, 0, npaths);
 
-    triggers2d_pass_num = fs->make<TH2I>("triggers2d_pass_num", "", npaths, 0, npaths, npaths, 0, npaths);
-    triggers2d_pass_den = fs->make<TH2I>("triggers2d_pass_den", "", npaths, 0, npaths, npaths, 0, npaths);
+    triggers2d_pass_num = fs->make<TH2F>("triggers2d_pass_num", "", npaths, 0, npaths, npaths, 0, npaths);
+    triggers2d_pass_den = fs->make<TH2F>("triggers2d_pass_den", "", npaths, 0, npaths, npaths, 0, npaths);
     
-    TH1I* hists[2] = { triggers_pass_num, triggers_pass_den };
-    TH2I* hists2d[2] = { triggers2d_pass_num, triggers2d_pass_den };
+    TH1F* hists[2] = { triggers_pass_num, triggers_pass_den };
+    TH2F* hists2d[2] = { triggers2d_pass_num, triggers2d_pass_den };
     for (size_t ipath = 0; ipath < npaths; ++ipath) {
       for (int ihist = 0; ihist < 2; ++ihist) {
 	const size_t ibin = ipath + 1;
@@ -99,7 +99,7 @@ void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventS
   }
   else {
     // Throw an exception if  we're not using the exact same paths.
-    const TH1I* hist = triggers_pass_num;
+    const TH1F* hist = triggers_pass_num;
     for (size_t ipath = 0; ipath < npaths; ++ipath) {
       std::string bin_label(hist->GetXaxis()->GetBinLabel(ipath + 1));
       const std::string& path_name = trigger_names.triggerName(ipath);
