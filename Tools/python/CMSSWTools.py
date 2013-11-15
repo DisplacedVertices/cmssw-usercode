@@ -1,4 +1,4 @@
-import sys, glob, FWCore.ParameterSet.Config as cms
+import os, sys, glob, FWCore.ParameterSet.Config as cms
 
 #process.source.firstLuminosityBlock = cms.untracked.uint32(2)
 
