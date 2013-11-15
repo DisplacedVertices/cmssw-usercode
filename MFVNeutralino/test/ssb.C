@@ -52,15 +52,15 @@ struct sigproflik {
   int nfiles;
   std::vector<std::map<std::string, TH1F*> > hists;
 
-  sigproflik(const char** vars, const int nvars) {
-    filenames.push_back("mfv_neutralino_tau0100um_M0400_mangled.root");
-    filenames.push_back("ttbarhadronic_mangled.root");
-    filenames.push_back("ttbarsemilep_mangled.root");
-    filenames.push_back("ttbardilep_mangled.root");
-    //filenames.push_back("qcdht0100_mangled.root");
-    //filenames.push_back("qcdht0250_mangled.root");
-    filenames.push_back("qcdht0500_mangled.root");
-    filenames.push_back("qcdht1000_mangled.root");
+  sigproflik(const char** vars, const int nvars, const std::string dir) {
+    filenames.push_back(dir + "mfv_neutralino_tau0100um_M0400_mangled.root");
+    filenames.push_back(dir + "ttbarhadronic_mangled.root");
+    filenames.push_back(dir + "ttbarsemilep_mangled.root");
+    filenames.push_back(dir + "ttbardilep_mangled.root");
+    //filenames.push_back(dir + "qcdht0100_mangled.root");
+    //filenames.push_back(dir + "qcdht0250_mangled.root");
+    filenames.push_back(dir + "qcdht0500_mangled.root");
+    filenames.push_back(dir + "qcdht1000_mangled.root");
 
     lumis.push_back(nsig_total/1000/0.199379);
     lumis.push_back(nsig_total/1000/0.386535);
@@ -189,6 +189,7 @@ int main() {
 
   for (int i = 0; i <= niter; i++) {
     printf("iteration %d\n", i);
+    slik = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", i).Data());
     TFile* sigFile = TFile::Open(TString::Format("crab/CutPlay%d/mfv_neutralino_tau0100um_M0400_1pb.root", i));
     TFile* bkgFile = TFile::Open(TString::Format("crab/CutPlay%d/background.root", i));
 
@@ -199,5 +200,6 @@ int main() {
       maxSSB(sigHist, bkgHist, hnames[j]);
     }
     printf("\n");
+    delete slik;
   }
 }
