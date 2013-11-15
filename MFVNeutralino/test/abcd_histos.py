@@ -6,7 +6,8 @@ process.source.fileNames = TestFiles.qcdht1000_nt
 process.TFileService.fileName = 'abcd_histos.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.mfvSelectedVerticesTight.min_njetssharetks = 2
+process.mfvSelectedVerticesTight.min_ntracks = 5
+process.mfvSelectedVerticesTight.min_maxtrackpt = 0
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvAnalysisCuts.min_ntracks01 = 0
@@ -30,7 +31,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                'qcdht1000':     6034431}[sample.name]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('ABCDHistosHalfTight',
+    cs = CRABSubmitter('ABCDHistos',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        )
