@@ -10,6 +10,7 @@
 #include "TFile.h"
 #include "TLegend.h"
 #include "getSignificance.h"
+#include "TError.h"
 
 const int niter = 1;
 bool printall = 0;
@@ -170,7 +171,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       h_sigfrac->SetLineColor(kRed);
       h_bkgfrac->SetLineColor(kBlue);
       draw_in_order(h_sigfrac, h_bkgfrac);
-      c1->SaveAs(TString::Format("plots/SSB/iter%d/%s.pdf", niter, sigHist->GetName()));
+      c1->SaveAs(TString::Format("plots/SSB/iter%d/%s%s.pdf", niter, sigHist->GetName(), (logy ? "_log" : "")));
       delete c1;
     }
   }
@@ -184,6 +185,8 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
 }
 
 int main() {
+  gErrorIgnoreLevel = 1001;
+
   const int nvars = 9;
   const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01"};
 
