@@ -54,3 +54,5 @@ if line_count > 1 or totals_only:
     total_ce_counts = total_ce_counts.items()
     total_ce_counts.sort(key=lambda x: -x[1])
     pprint(total_ce_counts)
+
+    print '-GRID.se_black_list=' + ','.join(a.replace('SyncSite=','') for a,b in total_ce_counts)
