@@ -30,7 +30,7 @@ void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
     if (i == 0)
       v[i]->Draw(cmd);
     else
-      v[i]->Draw(cmd + TString(" same"));
+      v[i]->Draw(TString::Format("%s same", cmd));
   }
 }
 
@@ -134,6 +134,8 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       h_ssb->SetBinContent(i, s/sqrt(b));
     if (b+sigb > 0)
       h_ssbsb->SetBinContent(i, s/sqrt(b+sigb));
+    if (!TMath::IsNaN(zpl))
+      h_proflik->SetBinContent(i, zpl);
 
     if (s/sqrt(b) > ssb) {
       value = sigHist->GetBinLowEdge(i);
