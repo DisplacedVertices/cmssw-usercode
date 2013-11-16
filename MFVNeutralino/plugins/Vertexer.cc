@@ -123,6 +123,9 @@ private:
   const bool use_pat_jets;
   const edm::InputTag pat_jet_src;
   const double min_seed_jet_pt;
+  const double min_all_track_pt;
+  const double min_all_track_dxy;
+  const int min_all_track_nhits;
   const double min_seed_track_pt;
   const double min_seed_track_dxy;
   const int min_seed_track_nhits;
@@ -189,6 +192,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     use_pat_jets(cfg.getParameter<bool>("use_pat_jets")),
     pat_jet_src(cfg.getParameter<edm::InputTag>("pat_jet_src")),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
+    min_all_track_pt(cfg.getParameter<double>("min_all_track_pt")),
+    min_all_track_dxy(cfg.getParameter<double>("min_all_track_dxy")),
+    min_all_track_nhits(cfg.getParameter<int>("min_all_track_nhits")),
     min_seed_track_pt(cfg.getParameter<double>("min_seed_track_pt")),
     min_seed_track_dxy(cfg.getParameter<double>("min_seed_track_dxy")),
     min_seed_track_nhits(cfg.getParameter<int>("min_seed_track_nhits")),
@@ -333,7 +339,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const double pt = tk->pt();
     const double dxy = tk->dxy(beamspot->position());
     const int nhits = tk->hitPattern().numberOfValidHits();
-    const bool use = pt > min_seed_track_pt && fabs(dxy) > min_seed_track_dxy && nhits >= min_seed_track_nhits;
+    const bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits;
 
     if (use) {
       seed_tracks.push_back(tt_builder->build(tk));
@@ -384,7 +390,17 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   for (size_t itk = 0; itk < ntk-1; ++itk) {
+    bool use_i =
+      seed_tracks[itk].track().pt() > min_seed_track_pt &&
+      seed_tracks[itk].track().dxy(beamspot->position()) > min_seed_track_dxy &&
+      seed_tracks[itk].track().hitPattern().numberOfValidHits() >= min_seed_track_nhits;
+
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
+      if (!use_i && (seed_tracks[jtk].track().pt() < min_seed_track_pt ||
+                     seed_tracks[jtk].track().dxy(beamspot->position()) < min_seed_track_dxy ||
+                     seed_tracks[jtk].track().hitPattern().numberOfValidHits() < min_seed_track_nhits))
+        continue; // one or the other has to pass the seed cuts, not necessarily both.
+
       std::vector<reco::TransientTrack> ttks;
       ttks.push_back(seed_tracks[itk]);
       ttks.push_back(seed_tracks[jtk]);
