@@ -11,8 +11,8 @@ parser.add_argument('positional', nargs='*')
 
 parser.add_argument('--recurse', action='store_true',
                     help='Recurse down the directory structure, i.e. use all histograms in the given directory and all subdirectories.')
-parser.add_argument('--per-page', type=int, default=-1,
-                    help='Put PER_PAGE histograms per html page (default: all on one page).')
+parser.add_argument('--per-page', type=int, default=100,
+                    help='Put PER_PAGE histograms per html page (default: 100 per page).')
 parser.add_argument('--only-n-first', type=int, default=-1,
                     help='Only do the first ONLY_N_FIRST histograms (default: do all).')
 parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZE',
