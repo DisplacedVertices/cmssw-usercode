@@ -79,9 +79,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_pair3ddist;
   TH1F* h_pair3derr;
   TH1F* h_pair3dsig;
-
-  TH1F* h_pairnsharedtracks;
-  TH2F* h_pairfsharedtracks;
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "best2", "rest", "top2", "all" };
@@ -275,18 +272,16 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_svdist2d_v_minlspdist2d = fs->make<TH2F>("h_svdist2d_v_minlspdist2d", ";min dist2d(gen vtx #0, #1) (cm);dist2d(sv #0, #1) (cm)", 600, 0, 3, 600, 0, 3);
   h_svdist2d_v_minbsdist2d = fs->make<TH2F>("h_svdist2d_v_mindist2d", ";min dist2d(sv, bs) (cm);dist2d(sv #0, #1) (cm)", 600, 0, 3, 600, 0, 3);
 
-  if (use_ref) {
-    h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
-    h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
-    h_pair2ddist       = fs->make<TH1F>("h_pair2ddist",       ";pair dist2d (cm);arb. units",          150,    0,     0.3);
-    h_pair2derr        = fs->make<TH1F>("h_pair2derr",        ";pair #sigma(dist2d) (cm);arb. units",  100,    0,     0.05);
-    h_pair2dsig        = fs->make<TH1F>("h_pair2dsig",        ";pair N#sigma(dist2d);arb. units",      100,    0,   100);
-    h_pair3dcompatscss = fs->make<TH1F>("h_pair3dcompatscss", ";pair compat3d success;arb. units",       2,    0,     2);
-    h_pair3dcompat     = fs->make<TH1F>("h_pair3dcompat",     ";pair compat3d;arb. units",             100,    0,  1000);
-    h_pair3ddist       = fs->make<TH1F>("h_pair3ddist",       ";pair dist3d (cm);arb. units",          100,    0,     0.5);
-    h_pair3derr        = fs->make<TH1F>("h_pair3derr",        ";pair #sigma(dist3d) (cm);arb. units",  100,    0,     0.07);
-    h_pair3dsig        = fs->make<TH1F>("h_pair3dsig",        ";pair N#sigma(dist3d);arb. units",      100,    0,   100);
-  }
+  h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
+  h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
+  h_pair2ddist       = fs->make<TH1F>("h_pair2ddist",       ";pair dist2d (cm);arb. units",          150,    0,     0.3);
+  h_pair2derr        = fs->make<TH1F>("h_pair2derr",        ";pair #sigma(dist2d) (cm);arb. units",  100,    0,     0.05);
+  h_pair2dsig        = fs->make<TH1F>("h_pair2dsig",        ";pair N#sigma(dist2d);arb. units",      100,    0,   100);
+  h_pair3dcompatscss = fs->make<TH1F>("h_pair3dcompatscss", ";pair compat3d success;arb. units",       2,    0,     2);
+  h_pair3dcompat     = fs->make<TH1F>("h_pair3dcompat",     ";pair compat3d;arb. units",             100,    0,  1000);
+  h_pair3ddist       = fs->make<TH1F>("h_pair3ddist",       ";pair dist3d (cm);arb. units",          100,    0,     0.5);
+  h_pair3derr        = fs->make<TH1F>("h_pair3derr",        ";pair #sigma(dist3d) (cm);arb. units",  100,    0,     0.07);
+  h_pair3dsig        = fs->make<TH1F>("h_pair3dsig",        ";pair N#sigma(dist3d);arb. units",      100,    0,   100);
 }
 
 // JMTBAD ugh
@@ -532,34 +527,30 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, *weight);
   }
 
-#if 0
-  if (use_ref) {
-    for (int ivtx = 0; ivtx < nsv; ++ivtx) {
-      const reco::Vertex& vtxi = *auxes->at(ivtx).ref;
+  for (int ivtx = 0; ivtx < nsv; ++ivtx) {
+    const reco::Vertex vtxi = mfv::aux_to_reco(auxes->at(ivtx));
 
-      for (int jvtx = ivtx + 1; jvtx < nsv; ++jvtx) {
-        const reco::Vertex& vtxj = *auxes->at(jvtx).ref;
+    for (int jvtx = ivtx + 1; jvtx < nsv; ++jvtx) {
+      const reco::Vertex vtxj = mfv::aux_to_reco(auxes->at(jvtx));
 
-        Measurement1D pair2ddist = distcalc_2d.distance(vtxi, vtxj);
-        Measurement1D pair3ddist = distcalc_3d.distance(vtxi, vtxj);
+      Measurement1D pair2ddist = distcalc_2d.distance(vtxi, vtxj);
+      Measurement1D pair3ddist = distcalc_3d.distance(vtxi, vtxj);
 
-        std::pair<bool, float> pair2dcompat = mfv::compatibility(vtxi, vtxj, false);
-        std::pair<bool, float> pair3dcompat = mfv::compatibility(vtxi, vtxj, true);
+      std::pair<bool, float> pair2dcompat = mfv::compatibility(vtxi, vtxj, false);
+      std::pair<bool, float> pair3dcompat = mfv::compatibility(vtxi, vtxj, true);
 
-        h_pair2dcompatscss->Fill(pair2dcompat.first, *weight);
-        h_pair2dcompat->Fill(pair2dcompat.second, *weight);
-        h_pair2ddist->Fill(pair2ddist.value(), *weight);
-        h_pair2derr->Fill(pair2ddist.error(), *weight);
-        h_pair2dsig->Fill(pair2ddist.significance(), *weight);
-        h_pair3dcompatscss->Fill(pair3dcompat.first, *weight);
-        h_pair3dcompat->Fill(pair3dcompat.second, *weight);
-        h_pair3ddist->Fill(pair3ddist.value(), *weight);
-        h_pair3derr->Fill(pair3ddist.error(), *weight);
-        h_pair3dsig->Fill(pair3ddist.significance(), *weight);
-      }
+      h_pair2dcompatscss->Fill(pair2dcompat.first, *weight);
+      h_pair2dcompat->Fill(pair2dcompat.second, *weight);
+      h_pair2ddist->Fill(pair2ddist.value(), *weight);
+      h_pair2derr->Fill(pair2ddist.error(), *weight);
+      h_pair2dsig->Fill(pair2ddist.significance(), *weight);
+      h_pair3dcompatscss->Fill(pair3dcompat.first, *weight);
+      h_pair3dcompat->Fill(pair3dcompat.second, *weight);
+      h_pair3ddist->Fill(pair3ddist.value(), *weight);
+      h_pair3derr->Fill(pair3ddist.error(), *weight);
+      h_pair3dsig->Fill(pair3ddist.significance(), *weight);
     }
   }
-#endif
 }
 
 DEFINE_FWK_MODULE(MFVVertexHistos);
