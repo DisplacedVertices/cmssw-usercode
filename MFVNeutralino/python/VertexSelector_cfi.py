@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      vertex_src = cms.InputTag('mfvVertices'),
                                      vertex_aux_src = cms.InputTag('mfvVerticesAux'),
+                                     produce_vertices = cms.bool(False),
                                      produce_refs = cms.bool(True),
                                      min_ntracks = cms.int32(0),
                                      max_chi2dof = cms.double(1e9),
@@ -42,3 +43,7 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     )
 
 mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose + mfvSelectedVerticesTight)
+
+def no_produce_refs(process):
+    for name in 'mfvSelectedVertices mfvSelectedVerticesLoose mfvSelectedVerticesMedium mfvSelectedVerticesTight'.split():
+        getattr(process, name).produce_refs = False

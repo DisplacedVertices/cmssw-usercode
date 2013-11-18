@@ -18,6 +18,7 @@ private:
 
   const edm::InputTag vertex_src;
   const edm::InputTag vertex_aux_src;
+  const bool produce_vertices;
   const bool produce_refs;
   const MFVVertexAuxSorter sorter;
 
@@ -41,6 +42,7 @@ private:
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
   : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
+    produce_vertices(cfg.getParameter<bool>("produce_vertices")),
     produce_refs(cfg.getParameter<bool>("produce_refs")),
     sorter(cfg.getParameter<std::string>("sort_by")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
@@ -93,7 +95,6 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(vertex_aux_src, auxes);
 
   std::auto_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
-  std::auto_ptr<reco::VertexRefVector>  selected_vertex_refs(new reco::VertexRefVector);
 
   for (const MFVVertexAux& aux : *auxes)
     if (use_vertex(aux))
@@ -101,17 +102,21 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
   sorter.sort(*selected);
 
-  for (const MFVVertexAux& aux : *selected)
-    selected_vertex_refs->push_back(reco::VertexRef(vertices, aux.which));
 
-  if (!produce_refs) {
-    std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
-    for (const reco::VertexRef& v : *selected_vertex_refs)
-      selected_vertices->push_back(*v);
-    event.put(selected_vertices);
+  if (produce_vertices || produce_refs) {
+    std::auto_ptr<reco::VertexRefVector> selected_vertex_refs(new reco::VertexRefVector);
+    for (const MFVVertexAux& aux : *selected)
+      selected_vertex_refs->push_back(reco::VertexRef(vertices, aux.which));
+
+    if (produce_vertices) {
+      std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
+      for (const reco::VertexRef& v : *selected_vertex_refs)
+        selected_vertices->push_back(*v);
+      event.put(selected_vertices);
+    }
+    else
+      event.put(selected_vertex_refs);
   }
-  else
-    event.put(selected_vertex_refs);
 
   event.put(selected);
 }
