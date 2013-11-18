@@ -12,15 +12,17 @@
 #include "getSignificance.h"
 #include "TError.h"
 
-const int niter = 1;
+const int niter = 0;
 bool printall = 0;
 bool plot = 0;
 
 double nsig_total = 19788.362;
-double nsig = 1023.41;
+//double nsig = 1023.41;
+double nsig = 794.72;
 
 double nbkg_total = 211435861768.63;
-double nbkg = 174811.73;
+//double nbkg = 174811.73;
+double nbkg = 28368.50;
 
 void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
@@ -58,8 +60,8 @@ struct sigproflik {
     filenames.push_back(dir + "ttbarhadronic_mangled.root");
     filenames.push_back(dir + "ttbarsemilep_mangled.root");
     filenames.push_back(dir + "ttbardilep_mangled.root");
-    //filenames.push_back(dir + "qcdht0100_mangled.root");
-    //filenames.push_back(dir + "qcdht0250_mangled.root");
+    filenames.push_back(dir + "qcdht0100_mangled.root");
+    filenames.push_back(dir + "qcdht0250_mangled.root");
     filenames.push_back(dir + "qcdht0500_mangled.root");
     filenames.push_back(dir + "qcdht1000_mangled.root");
 
@@ -67,8 +69,8 @@ struct sigproflik {
     lumis.push_back(nsig_total/1000/0.386535);
     lumis.push_back(nsig_total/1000/0.153995);
     lumis.push_back(nsig_total/1000/0.077220);
-    //lumis.push_back(nsig_total/1000/8210.69);
-    //lumis.push_back(nsig_total/1000/403.634);
+    lumis.push_back(nsig_total/1000/8210.69);
+    lumis.push_back(nsig_total/1000/403.634);
     lumis.push_back(nsig_total/1000/10.9211);
     lumis.push_back(nsig_total/1000/0.668965);
 
@@ -137,17 +139,17 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     if (!TMath::IsNaN(zpl))
       h_proflik->SetBinContent(i, zpl);
 
-    if (s/sqrt(b) > ssb) {
+    if (zpl > ssb) {
       value = sigHist->GetBinLowEdge(i);
       smax = s;
       bmax = b;
-      ssb = s/sqrt(b);
+      ssb = zpl;
     }
   }
   if (printall) {
-    printf("\n%16s\t%5.1f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n\n\n", "max ssb", value, smax, bmax, ssb, smax/nsig, smax/nsig_total, bmax/nbkg, bmax/nbkg_total);
+    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n\n\n", "max ssb", value, smax, bmax, ssb, smax/nsig, smax/nsig_total, bmax/nbkg, bmax/nbkg_total);
   } else {
-    printf("%16s\t%5.1f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(), value, smax, bmax, ssb, smax/nsig, smax/nsig_total, bmax/nbkg, bmax/nbkg_total);
+    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(), value, smax, bmax, ssb, smax/nsig, smax/nsig_total, bmax/nbkg, bmax/nbkg_total);
   }
 
   h_ssbsb->SetLineColor(kRed);
@@ -167,12 +169,22 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       c1->cd(3)->SetLogy(logy);
       bkgHist->Draw();
       c1->cd(2)->SetLogy(logy);
-      draw_in_order(h_ssb, h_ssbsb, h_proflik);
+      //draw_in_order(h_ssb, h_ssbsb, h_proflik);
+      h_proflik->Draw();
+      h_ssb->Draw("same");
+      h_ssbsb->Draw("same");
       leg->Draw();
       c1->cd(4)->SetLogy(logy);
       h_sigfrac->SetLineColor(kRed);
       h_bkgfrac->SetLineColor(kBlue);
-      draw_in_order(h_sigfrac, h_bkgfrac);
+//      draw_in_order(h_sigfrac, h_bkgfrac);
+      if (h_sigfrac->GetMaximum() >= h_bkgfrac->GetMaximum()) {
+        h_sigfrac->Draw();
+        h_bkgfrac->Draw("same");
+      } else {
+        h_bkgfrac->Draw();
+        h_sigfrac->Draw("same");
+      }
       c1->SaveAs(TString::Format("plots/SSB/iter%d/%s%s.pdf", niter, sigHist->GetName(), (logy ? "_log" : "")));
       delete c1;
     }
@@ -189,8 +201,8 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
 int main() {
   gErrorIgnoreLevel = 1001;
 
-  const int nvars = 9;
-  const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01"};
+  const int nvars = 18;
+  const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01", "costhmombs", "costhjetntkmombs", "mass", "jetsmassntks", "mass01", "jetsmassntks01", "pt", "ntracksptgt3", "sumpt2"};
 
   for (int i = 0; i <= niter; i++) {
     printf("iteration %d\n", i);
