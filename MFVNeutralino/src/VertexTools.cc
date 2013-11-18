@@ -38,6 +38,17 @@ namespace {
 }
 
 namespace mfv {
+  reco::Vertex aux_to_reco(const MFVVertexAux& aux) {
+    reco::Vertex::Error e;
+    e(0,0) = aux.cxx;
+    e(0,1) = aux.cxy;
+    e(0,2) = aux.cxz;
+    e(1,1) = aux.cyy;
+    e(1,2) = aux.cyz;
+    e(2,2) = aux.czz;
+    return reco::Vertex(reco::Vertex::Point(aux.x, aux.y, aux.z), e, aux.chi2, aux.ndof, aux.ntracks);
+  }
+
   float abs_error(const reco::Vertex& sv, bool use3d) {
     const double x = sv.x();
     const double y = sv.y();
