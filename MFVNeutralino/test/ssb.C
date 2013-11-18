@@ -55,13 +55,15 @@ struct sigproflik {
   int nfiles;
   std::vector<std::map<std::string, TH1F*> > hists;
 
-  sigproflik(const char** vars, const int nvars, const std::string dir) {
+  sigproflik(const char** vars, const int nvars, const std::string dir, const bool bigw) {
     filenames.push_back(dir + "mfv_neutralino_tau0100um_M0400_mangled.root");
     filenames.push_back(dir + "ttbarhadronic_mangled.root");
     filenames.push_back(dir + "ttbarsemilep_mangled.root");
     filenames.push_back(dir + "ttbardilep_mangled.root");
-    filenames.push_back(dir + "qcdht0100_mangled.root");
-    filenames.push_back(dir + "qcdht0250_mangled.root");
+    if (bigw) {
+      filenames.push_back(dir + "qcdht0100_mangled.root");
+      filenames.push_back(dir + "qcdht0250_mangled.root");
+    }
     filenames.push_back(dir + "qcdht0500_mangled.root");
     filenames.push_back(dir + "qcdht1000_mangled.root");
 
@@ -69,8 +71,10 @@ struct sigproflik {
     lumis.push_back(nsig_total/1000/0.386535);
     lumis.push_back(nsig_total/1000/0.153995);
     lumis.push_back(nsig_total/1000/0.077220);
-    lumis.push_back(nsig_total/1000/8210.69);
-    lumis.push_back(nsig_total/1000/403.634);
+    if (bigw) {
+      lumis.push_back(nsig_total/1000/8210.69);
+      lumis.push_back(nsig_total/1000/403.634);
+    }
     lumis.push_back(nsig_total/1000/10.9211);
     lumis.push_back(nsig_total/1000/0.668965);
 
@@ -107,6 +111,7 @@ struct sigproflik {
   }
 };
 
+sigproflik* slik_nobigw = 0;
 sigproflik* slik = 0;
 
 void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
@@ -119,6 +124,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
   TH1F* h_ssbsb = new TH1F("h_ssbsb", ";cut;ssbsb", nbins, xlow, xup);
   TH1F* h_proflik = new TH1F("h_proflik", ";cut;asimov Z", nbins, xlow, xup);
+  TH1F* h_proflik_nobigw = new TH1F("h_proflik_nobigw", ";cut;asimov Z", nbins, xlow, xup);
 
   double value = 0;
   double smax = 0;
@@ -129,6 +135,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     double b = bkgHist->GetBinContent(i);
     double sigb = bkgHist->GetBinError(i);
     double zpl = slik->sig(var, i);
+    double zpl_nobigw = slik_nobigw->sig(var, i);
     if (printall) printf("%16s\t%5.1f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", "", sigHist->GetBinLowEdge(i), s, b, s/sqrt(b), s/sqrt(b+sigb), zpl, s/nsig, s/nsig_total, b/nbkg, b/nbkg_total);
     h_sigfrac->SetBinContent(i, s/nsig);
     h_bkgfrac->SetBinContent(i, b/nbkg);
@@ -138,12 +145,14 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       h_ssbsb->SetBinContent(i, s/sqrt(b+sigb));
     if (!TMath::IsNaN(zpl))
       h_proflik->SetBinContent(i, zpl);
+    if (!TMath::IsNaN(zpl_nobigw))
+      h_proflik_nobigw->SetBinContent(i, zpl_nobigw);
 
-    if (zpl > ssb) {
+    if (zpl_nobigw > ssb) {
       value = sigHist->GetBinLowEdge(i);
       smax = s;
       bmax = b;
-      ssb = zpl;
+      ssb = zpl_nobigw;
     }
   }
   if (printall) {
@@ -153,11 +162,13 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   }
 
   h_ssbsb->SetLineColor(kRed);
-  h_proflik->SetLineColor(kBlue);
-  TLegend* leg = new TLegend(0.9,0.9,1,1);
+  h_proflik_nobigw->SetLineColor(kBlue);
+  h_proflik->SetLineColor(kOrange+2);
+  TLegend* leg = new TLegend(0.8,0.8,1,1);
   leg->AddEntry(h_ssb, "s/#sqrt{b}", "L");
   leg->AddEntry(h_ssbsb, "s/#sqrt{b+#sigma_{b}}", "L");
   leg->AddEntry(h_proflik, "Z_{PL}", "L");
+  leg->AddEntry(h_proflik_nobigw, "Z_{PL} (no big weights)", "L");
 
   if (plot) {
     for (int logy = 0; logy < 2; ++logy) {
@@ -171,6 +182,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       c1->cd(2)->SetLogy(logy);
       //draw_in_order(h_ssb, h_ssbsb, h_proflik);
       h_proflik->Draw();
+      h_proflik_nobigw->Draw("same");
       h_ssb->Draw("same");
       h_ssbsb->Draw("same");
       leg->Draw();
@@ -193,6 +205,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   delete h_ssb;
   delete h_ssbsb;
   delete h_proflik;
+  delete h_proflik_nobigw;
   delete h_sigfrac;
   delete h_bkgfrac;
   delete leg;
@@ -206,7 +219,8 @@ int main() {
 
   for (int i = 0; i <= niter; i++) {
     printf("iteration %d\n", i);
-    slik = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", i).Data());
+    slik = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", i).Data(), true);
+    slik_nobigw = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", i).Data(), false);
     TFile* sigFile = TFile::Open(TString::Format("crab/CutPlay%d/mfv_neutralino_tau0100um_M0400_1pb.root", i));
     TFile* bkgFile = TFile::Open(TString::Format("crab/CutPlay%d/background.root", i));
 
@@ -218,5 +232,6 @@ int main() {
     }
     printf("\n");
     delete slik;
+    delete slik_nobigw;
   }
 }
