@@ -8,7 +8,7 @@ process.source.fileNames = glob_store('/store/user/tucker/mfv_neutralino_tau0100
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
-                                                 min_maxtrackpt = 0)
+                                                 min_maxtrackpt = 5)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
@@ -46,10 +46,10 @@ for i in xrange(0,20):
 for i in xrange(0,60):
     changes.append(('maxtrackpt01X%i'%i, '', 'min_maxtrackpt01 = %i'%i))
 
-for i in xrange(-50,50): #costhmombs has 100 bins from -1 to 1
+for i in xrange(0,50): #costhmombs has 100 bins from -1 to 1
     changes.append(('costhmombsX%s'%pize(0.02*i,2), 'min_costhmombs = %f'%(0.02*i), ''))
 
-for i in xrange(-50,50):
+for i in xrange(0,50):
     changes.append(('costhjetntkmombsX%s'%pize(0.02*i,2), 'min_costhjetntkmombs = %f'%(0.02*i), ''))
 
 for i in xrange(0,250,5): #mass has 100 bins from 0 to 250
@@ -63,6 +63,15 @@ for i in xrange(0,500,10):
 
 for i in xrange(0,4000,20):
     changes.append(('jetsmassntks01X%i'%i, '', 'min_jetsmassntks01 = %i'%i))
+
+for i in xrange(0,100,2):
+    changes.append(('ptX%i'%i, 'min_pt = %i'%i, ''))
+
+for i in xrange(0,20):
+    changes.append(('ntracksptgt3X%i'%i, 'min_ntracksptgt3 = %i'%i, ''))
+
+for i in xrange(0,1500,30):
+    changes.append(('sumpt2X%i'%i, 'min_sumpt2 = %i'%i, ''))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
@@ -88,7 +97,7 @@ process.p = cms.EndPath(process.effs)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import mfv_neutralino_tau0100um_M0400, ttbar_samples, qcd_samples
+    from JMTucker.Tools.Samples import mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, ttbar_samples, qcd_samples
     for sample in ttbar_samples + qcd_samples:
         sample.total_events = {'ttbarhadronic': 5268722,
                                'ttbarsemilep':  12674909,
@@ -99,10 +108,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                'qcdht1000':     6034431}[sample.name]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('CutPlay2',
+    cs = CRABSubmitter('CutPlay1',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        )
-    samples = [mfv_neutralino_tau0100um_M0400] + ttbar_samples + qcd_samples
+    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400] + ttbar_samples + qcd_samples
     cs.submit_all(samples)
 
