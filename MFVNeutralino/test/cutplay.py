@@ -2,7 +2,6 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools.CMSSWTools import glob_store
 
-process.maxEvents.input = 100
 process.TFileService.fileName = 'cutplay.root'
 process.source.fileNames = glob_store('/store/user/tucker/mfv_neutralino_tau0100um_M0400/mfvntuple_v8/99d7a676d206adfebd5d154091ebe5a6/*')
 
@@ -19,7 +18,7 @@ def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
     return (fmt % f).replace('.','p').replace('-','n')
 
-for i in xrange(5,40):
+for i in xrange(0,40):
     changes.append(('ntracksX%i'%i, 'min_ntracks = %i'%i, ''))
 
 for i in xrange(0,10):
@@ -37,7 +36,7 @@ for i in xrange(0,50): #bs2dsig has 100 bins from 0 to 100
 for i in xrange(0,30): #maxtrackpt has 100 bins from 0 to 150
     changes.append(('maxtrackptX%i'%i, 'min_maxtrackpt = %i'%i, ''))
 
-for i in xrange(10,80):
+for i in xrange(0,80):
     changes.append(('ntracks01X%i'%i, '', 'min_ntracks01 = %i'%i))
 
 for i in xrange(0,20):
@@ -48,9 +47,6 @@ for i in xrange(0,60):
 
 for i in xrange(0,50): #costhmombs has 100 bins from -1 to 1
     changes.append(('costhmombsX%s'%pize(0.02*i,2), 'min_costhmombs = %f'%(0.02*i), ''))
-
-for i in xrange(0,50):
-    changes.append(('costhjetntkmombsX%s'%pize(0.02*i,2), 'min_costhjetntkmombs = %f'%(0.02*i), ''))
 
 for i in xrange(0,250,5): #mass has 100 bins from 0 to 250
     changes.append(('massX%i'%i, 'min_mass = %i'%i, ''))

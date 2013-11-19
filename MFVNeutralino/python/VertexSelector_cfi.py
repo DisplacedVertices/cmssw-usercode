@@ -16,7 +16,6 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_abs_rapidity     = cms.double(1e9),
                                      min_mass             = cms.double(0),
                                      min_costhmombs       = cms.double(-1),
-                                     min_costhjetntkmombs = cms.double(-1),
                                      min_sumpt2           = cms.double(0),
                                      min_maxtrackpt       = cms.double(0),
                                      min_maxm1trackpt     = cms.double(0),
@@ -33,7 +32,7 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_bs2derr          = cms.double(1e9),
                                      min_bs2dsig          = cms.double(0),
                                      min_bs3ddist         = cms.double(0),
-                                     sort_by = cms.string('ntracks'),
+                                     sort_by = cms.string('ntracks_then_mass'),
                                      )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
@@ -42,5 +41,4 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_drmin = 0.4,
     max_drmax = 4,
     max_bs2derr = 0.005,
-    sort_by = 'ntracks'
     )

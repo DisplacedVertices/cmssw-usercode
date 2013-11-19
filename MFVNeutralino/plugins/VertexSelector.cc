@@ -33,7 +33,6 @@ private:
   const double max_abs_rapidity;
   const double min_mass;
   const double min_costhmombs;
-  const double min_costhjetntkmombs;
   const double min_sumpt2;
   const double min_maxtrackpt;
   const double min_maxm1trackpt;
@@ -69,7 +68,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_abs_rapidity(cfg.getParameter<double>("max_abs_rapidity")),
     min_mass(cfg.getParameter<double>("min_mass")),
     min_costhmombs(cfg.getParameter<double>("min_costhmombs")),
-    min_costhjetntkmombs(cfg.getParameter<double>("min_costhjetntkmombs")),
     min_sumpt2(cfg.getParameter<double>("min_sumpt2")),
     min_maxtrackpt(cfg.getParameter<double>("min_maxtrackpt")),
     min_maxm1trackpt(cfg.getParameter<double>("min_maxm1trackpt")),
@@ -107,9 +105,8 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.pt >= min_pt &&
     fabs(vtx.eta) < max_abs_eta &&
     fabs(vtx.p4().Rapidity()) < max_abs_rapidity &&
-    vtx.mass >= min_mass && 
+    vtx.mass >= min_mass &&
     vtx.costhmombs[0] >= min_costhmombs &&
-    vtx.costhmombs[1] >= min_costhjetntkmombs;
     vtx.sumpt2 >= min_sumpt2 &&
     vtx.maxtrackpt >= min_maxtrackpt &&
     vtx.maxm1trackpt >= min_maxm1trackpt &&
