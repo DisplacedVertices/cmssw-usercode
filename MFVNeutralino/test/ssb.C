@@ -15,9 +15,11 @@
 
 const int niter = 1;
 bool printall = 0;
+bool moreprints = printall && 0;
 bool plot = 0;
 
-double nsig_total = 19788.362;
+double int_lumi = 19788.362;
+double nsig_total = int_lumi;
 double nsig[niter+1] = {1023.41, 794.72};
 //double nsig[niter+1] = {1023.41, 7342.61};
 
@@ -56,6 +58,7 @@ void draw_in_order(TH1F* a, TH1F* b, TH1F* c, TH1F* d, const char* cmd="") {
 
 struct sigproflik {
   std::vector<std::string> filenames;
+  std::vector<int> nevents;
   std::vector<double> lumis;
   std::vector<double> taus;
   std::vector<TFile*> files;
@@ -74,16 +77,25 @@ struct sigproflik {
     filenames.push_back(dir + "qcdht0500_mangled.root");
     filenames.push_back(dir + "qcdht1000_mangled.root");
 
-    lumis.push_back(nsig_total/1000/0.199379);
-    lumis.push_back(nsig_total/1000/0.386535);
-    lumis.push_back(nsig_total/1000/0.153995);
-    lumis.push_back(nsig_total/1000/0.077220);
+    nevents.push_back(100000);
+    nevents.push_back(5268722); 
+    nevents.push_back(12674909);
+    nevents.push_back(6059506); 
+    nevents.push_back(25064759);
+    nevents.push_back(13531039);
+    nevents.push_back(15274646);
+    nevents.push_back(6034431);
+
+    lumis.push_back(int_lumi/1000/0.199379);
+    lumis.push_back(int_lumi/1000/0.386535);
+    lumis.push_back(int_lumi/1000/0.153995);
+    lumis.push_back(int_lumi/1000/0.077220);
     if (bigw) {
-      lumis.push_back(nsig_total/1000/8210.69);
-      lumis.push_back(nsig_total/1000/403.634);
+      lumis.push_back(int_lumi/1000/8210.69);
+      lumis.push_back(int_lumi/1000/403.634);
     }
-    lumis.push_back(nsig_total/1000/10.9211);
-    lumis.push_back(nsig_total/1000/0.668965);
+    lumis.push_back(int_lumi/1000/10.9211);
+    lumis.push_back(int_lumi/1000/0.668965);
 
     nfiles = int(filenames.size());
     assert(nfiles == lumis.size());
@@ -109,6 +121,8 @@ struct sigproflik {
     //printf("   proflik: b/m:");
     for (int i = 1; i < nfiles; ++i) {
       double b = hists[i][var]->GetBinContent(ibin);
+      if (moreprints)
+        printf("    %s %i/%i\n", filenames[i].c_str(), int(b), nevents[i]);
       n += b;
       m.push_back(b * taus[i-1]);
       //printf("%f/%f ", b, b*taus[i-1]);
