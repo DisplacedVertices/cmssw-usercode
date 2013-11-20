@@ -32,6 +32,9 @@ private:
   const int min_nvertex;
   const int min_ntracks01;
   const double min_maxtrackpt01;
+  const int min_njetssharetks01;
+  const double min_mass01;
+  const double min_jetsmassntks01;
 };
 
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
@@ -51,7 +54,10 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
     min_ntracks01(cfg.getParameter<int>("min_ntracks01")),
-    min_maxtrackpt01(cfg.getParameter<double>("min_maxtrackpt01"))
+    min_maxtrackpt01(cfg.getParameter<double>("min_maxtrackpt01")),
+    min_njetssharetks01(cfg.getParameter<int>("min_njetssharetks01")),
+    min_mass01(cfg.getParameter<double>("min_mass01")),
+    min_jetsmassntks01(cfg.getParameter<double>("min_jetsmassntks01"))
 {
 }
 
@@ -99,7 +105,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (nsv < min_nvertex)
     return false;
 
-  if (min_ntracks01 > 0 || min_maxtrackpt01 > 0) {
+  if (min_ntracks01 > 0 || min_maxtrackpt01 > 0 || min_njetssharetks01 > 0 || min_mass01 > 0 || min_jetsmassntks01 > 0) {
     if (nsv < 2)
       return false;
 
@@ -109,6 +115,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (v0.ntracks + v1.ntracks < min_ntracks01)
       return false;
     if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
+      return false;
+    if (v0.njets[0] + v1.njets[0] < min_njetssharetks01)
+      return false;
+    if (v0.mass + v1.mass < min_mass01)
+      return false;
+    if (v0.jetsmass[0] + v1.jetsmass[0] < min_jetsmassntks01)
       return false;
   }
 

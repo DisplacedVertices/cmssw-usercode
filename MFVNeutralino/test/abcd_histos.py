@@ -30,7 +30,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                'qcdht1000':     6034431}[sample.name]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('ABCDHistosHalfTight',
+    cs = CRABSubmitter('ABCDHistos',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        )

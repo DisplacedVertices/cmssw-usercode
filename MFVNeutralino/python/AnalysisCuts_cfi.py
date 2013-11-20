@@ -18,4 +18,7 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                min_nvertex = cms.int32(2),
                                min_ntracks01 = cms.int32(15),
                                min_maxtrackpt01 = cms.double(15),
+                               min_njetssharetks01 = cms.int32(0),
+                               min_mass01 = cms.double(0),
+                               min_jetsmassntks01 = cms.double(0),
                                )
