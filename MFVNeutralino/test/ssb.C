@@ -11,28 +11,31 @@
 #include "TLegend.h"
 #include "getSignificance.h"
 #include "TError.h"
+#include "TStyle.h"
 
-const int niter = 0;
+const int niter = 1;
 bool printall = 0;
 bool plot = 0;
 
 double nsig_total = 19788.362;
-//double nsig = 1023.41;
-double nsig = 794.72;
+double nsig[niter+1] = {1023.41, 794.72};
+//double nsig[niter+1] = {1023.41, 7342.61};
 
 double nbkg_total = 211435861768.63;
-//double nbkg = 174811.73;
-double nbkg = 28368.50;
+double nbkg[niter+1] = {174811.73, 28369.66};
 
 void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
   std::sort(v.begin(), v.end(), f);
   std::string ex = cmd;
   for (int i = 0; i < v.size(); ++i) {
-    if (i == 0)
+    if (i == 0) {
+      v[i]->SetMinimum(0.01);
       v[i]->Draw(cmd);
-    else
-      v[i]->Draw(TString::Format("%s same", cmd));
+    } else {
+      //v[i]->Draw(TString::Format("%s same", cmd));
+      v[i]->Draw("same");
+    }
   }
 }
 
@@ -46,6 +49,10 @@ void draw_in_order(TH1F* a, TH1F* b, TH1F* c, const char* cmd="") {
   draw_in_order(v, cmd);
 }
 
+void draw_in_order(TH1F* a, TH1F* b, TH1F* c, TH1F* d, const char* cmd="") {
+  std::vector<TH1F*> v = {a,b,c,d};
+  draw_in_order(v, cmd);
+}
 
 struct sigproflik {
   std::vector<std::string> filenames;
@@ -115,7 +122,7 @@ sigproflik* slik_nobigw = 0;
 sigproflik* slik = 0;
 
 void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
-  if (printall) printf("%16s\tcut\t\ts\t\tb\tssb\tssbsb\tproflik\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n", sigHist->GetName());
+  if (printall) printf("%16s\tcut\t\ts\t\tb\tsigb\t\tssb\tssbsb\tproflik\tnobigw\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n", sigHist->GetName());
   int nbins = sigHist->GetNbinsX();
   double xlow = sigHist->GetXaxis()->GetXmin();
   double xup = sigHist->GetXaxis()->GetXmax();
@@ -136,9 +143,9 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     double sigb = bkgHist->GetBinError(i);
     double zpl = slik->sig(var, i);
     double zpl_nobigw = slik_nobigw->sig(var, i);
-    if (printall) printf("%16s\t%5.1f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", "", sigHist->GetBinLowEdge(i), s, b, s/sqrt(b), s/sqrt(b+sigb), zpl, s/nsig, s/nsig_total, b/nbkg, b/nbkg_total);
-    h_sigfrac->SetBinContent(i, s/nsig);
-    h_bkgfrac->SetBinContent(i, b/nbkg);
+    if (printall) printf("%16s\t%5.1f\t%9.2f\t%9.2f\t%9.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%f\t%f\t%f\t%e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, s/sqrt(b), s/sqrt(b+sigb), zpl, zpl_nobigw, s/nsig[niter], s/nsig_total, b/nbkg[niter], b/nbkg_total);
+    h_sigfrac->SetBinContent(i, s/nsig[niter]);
+    h_bkgfrac->SetBinContent(i, b/nbkg[niter]);
     if (b != 0)
       h_ssb->SetBinContent(i, s/sqrt(b));
     if (b+sigb > 0)
@@ -156,9 +163,9 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     }
   }
   if (printall) {
-    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n\n\n", "max ssb", value, smax, bmax, ssb, smax/nsig, smax/nsig_total, bmax/nbkg, bmax/nbkg_total);
+    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", value, smax, bmax, ssb, smax/nsig[niter], smax/nsig_total, bmax/nbkg[niter], bmax/nbkg_total);
   } else {
-    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(), value, smax, bmax, ssb, smax/nsig, smax/nsig_total, bmax/nbkg, bmax/nbkg_total);
+    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(), value, smax, bmax, ssb, smax/nsig[niter], smax/nsig_total, bmax/nbkg[niter], bmax/nbkg_total);
   }
 
   h_ssbsb->SetLineColor(kRed);
@@ -180,24 +187,13 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       c1->cd(3)->SetLogy(logy);
       bkgHist->Draw();
       c1->cd(2)->SetLogy(logy);
-      //draw_in_order(h_ssb, h_ssbsb, h_proflik);
-      h_proflik->Draw();
-      h_proflik_nobigw->Draw("same");
-      h_ssb->Draw("same");
-      h_ssbsb->Draw("same");
+      draw_in_order(h_ssb, h_ssbsb, h_proflik, h_proflik_nobigw);
       leg->Draw();
       c1->cd(4)->SetLogy(logy);
       h_sigfrac->SetLineColor(kRed);
       h_bkgfrac->SetLineColor(kBlue);
-//      draw_in_order(h_sigfrac, h_bkgfrac);
-      if (h_sigfrac->GetMaximum() >= h_bkgfrac->GetMaximum()) {
-        h_sigfrac->Draw();
-        h_bkgfrac->Draw("same");
-      } else {
-        h_bkgfrac->Draw();
-        h_sigfrac->Draw("same");
-      }
-      c1->SaveAs(TString::Format("plots/SSB/iter%d/%s%s.pdf", niter, sigHist->GetName(), (logy ? "_log" : "")));
+      draw_in_order(h_sigfrac, h_bkgfrac);
+      c1->SaveAs(TString::Format("plots/SSB/iter%d_tau0100um/%s%s.pdf", niter, sigHist->GetName(), (logy ? "_log" : "")));
       delete c1;
     }
   }
@@ -213,25 +209,24 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
 
 int main() {
   gErrorIgnoreLevel = 1001;
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
 
-  const int nvars = 18;
-  const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01", "costhmombs", "costhjetntkmombs", "mass", "jetsmassntks", "mass01", "jetsmassntks01", "pt", "ntracksptgt3", "sumpt2"};
+  const int nvars = 17;
+  const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01", "costhmombs", "mass", "jetsmassntks", "mass01", "jetsmassntks01", "pt", "ntracksptgt3", "sumpt2"};
 
-  for (int i = 0; i <= niter; i++) {
-    printf("iteration %d\n", i);
-    slik = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", i).Data(), true);
-    slik_nobigw = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", i).Data(), false);
-    TFile* sigFile = TFile::Open(TString::Format("crab/CutPlay%d/mfv_neutralino_tau0100um_M0400_1pb.root", i));
-    TFile* bkgFile = TFile::Open(TString::Format("crab/CutPlay%d/background.root", i));
+  printf("iteration %d\n", niter);
+  slik = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", niter).Data(), true);
+  slik_nobigw = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", niter).Data(), false);
+  TFile* sigFile = TFile::Open(TString::Format("crab/CutPlay%d/mfv_neutralino_tau0100um_M0400_1pb.root", niter));
+  TFile* bkgFile = TFile::Open(TString::Format("crab/CutPlay%d/background.root", niter));
 
-    if (!printall) printf("variable\t\tcut\t\ts\t\tb\tmax ssb\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n");
-    for (int j = 0; j < nvars; j++) {
-      TH1F* sigHist = (TH1F*)sigFile->Get(hnames[j]);
-      TH1F* bkgHist = (TH1F*)bkgFile->Get(hnames[j]);
-      maxSSB(sigHist, bkgHist, hnames[j]);
-    }
-    printf("\n");
-    delete slik;
-    delete slik_nobigw;
+  if (!printall) printf("variable\t\tcut\t\ts\t\tb\tmax ssb\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n");
+  for (int i = 0; i < nvars; i++) {
+    TH1F* sigHist = (TH1F*)sigFile->Get(hnames[i]);
+    TH1F* bkgHist = (TH1F*)bkgFile->Get(hnames[i]);
+    maxSSB(sigHist, bkgHist, hnames[i]);
   }
+  delete slik;
+  delete slik_nobigw;
 }
