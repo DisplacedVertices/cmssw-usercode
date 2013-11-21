@@ -27,6 +27,7 @@ private:
   const int min_ntracksptgt5;
   const int min_ntracksptgt10;
   const int min_njetssharetks;
+  const int max_njetssharetks;
   const double min_jetsmassntks;
   const double max_chi2dof;
   const double min_p;
@@ -49,8 +50,6 @@ private:
   const double max_gen3dsig;
   const double min_bs2ddist;
   const double max_bs2derr;
-  const int min_njetssharetks;
-  const int max_njetssharetks;
   const double min_bs2dsig;
   const double min_bs3ddist;
 };
@@ -66,6 +65,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_ntracksptgt5(cfg.getParameter<int>("min_ntracksptgt5")),
     min_ntracksptgt10(cfg.getParameter<int>("min_ntracksptgt10")),
     min_njetssharetks(cfg.getParameter<int>("min_njetssharetks")),
+    max_njetssharetks(cfg.getParameter<int>("max_njetssharetks")),
     min_jetsmassntks(cfg.getParameter<double>("min_jetsmassntks")),
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     min_p(cfg.getParameter<double>("min_p")),
@@ -88,8 +88,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_gen3dsig(cfg.getParameter<double>("max_gen3dsig")),
     min_bs2ddist(cfg.getParameter<double>("min_bs2ddist")),
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
-    min_njetssharetks(cfg.getParameter<int>("min_njetssharetks")),
-    max_njetssharetks(cfg.getParameter<int>("max_njetssharetks"))
     min_bs2dsig(cfg.getParameter<double>("min_bs2dsig")),
     min_bs3ddist(cfg.getParameter<double>("min_bs3ddist"))
 {
@@ -106,17 +104,18 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.ntracksptgt3 >= min_ntracksptgt3 &&
     vtx.ntracksptgt5 >= min_ntracksptgt5 &&
     vtx.ntracksptgt10 >= min_ntracksptgt10 &&
-    vtx.njets[0] >= min_njetssharetks &&
-    vtx.jetsmass[0] >= min_jetsmassntks &&
+    vtx.njets[mfv::JByNtracks] >= min_njetssharetks &&
+    vtx.njets[mfv::JByNtracks] <= max_njetssharetks &&
+    vtx.mass[mfv::PJetsByNtracks] >= min_jetsmassntks &&
     vtx.chi2/vtx.ndof < max_chi2dof &&
     vtx.gen2derr < max_err2d &&
     vtx.gen3derr < max_err3d &&
-    vtx.mass[0] >= min_mass && 
-    vtx.p4().P() >= min_p &&
-    vtx.pt >= min_pt &&
-    fabs(vtx.eta) < max_abs_eta &&
-    fabs(vtx.p4().Rapidity()) < max_abs_rapidity &&
-    vtx.costhmombs[0] >= min_costhmombs &&
+    vtx.mass[mfv::PTracksOnly] >= min_mass && 
+    vtx.p4(mfv::PTracksOnly).P() >= min_p &&
+    vtx.pt[mfv::PTracksOnly] >= min_pt &&
+    fabs(vtx.eta[mfv::PTracksOnly]) < max_abs_eta &&
+    fabs(vtx.p4(mfv::PTracksOnly).Rapidity()) < max_abs_rapidity &&
+    vtx.costhmombs[mfv::PTracksOnly] >= min_costhmombs &&
     vtx.sumpt2 >= min_sumpt2 &&
     vtx.maxtrackpt >= min_maxtrackpt &&
     vtx.maxm1trackpt >= min_maxm1trackpt &&
@@ -131,8 +130,6 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.gen3dsig() <  max_gen3dsig &&
     vtx.bs2ddist >= min_bs2ddist &&
     vtx.bs2derr < max_bs2derr &&
-    vtx.njets[0] >= min_njetssharetks &&
-    vtx.njets[0] <= max_njetssharetks &&
     vtx.bs2dsig() >= min_bs2dsig &&
     vtx.bs3ddist >= min_bs3ddist;
 }

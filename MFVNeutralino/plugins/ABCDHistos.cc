@@ -55,14 +55,14 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const MFVVertexAux& v0 = vertices->at(0);
     const MFVVertexAux& v1 = vertices->at(1);
     h_ntracks01_maxtrackpt01->Fill(v0.maxtrackpt + v1.maxtrackpt, v0.ntracks + v1.ntracks);
-    h_tracks_mass1_mass0->Fill(v0.mass, v1.mass);
-    h_tracks_mass01->Fill(v0.mass + v1.mass);
-    h_tracks_costhmombs1_costhmombs0->Fill(v0.costhmombs[0], v1.costhmombs[0]);
-    h_njets1_njets0->Fill(v0.njets[0], v1.njets[0]);
-    h_njets01->Fill(v0.njets[0] + v1.njets[0]);
-    h_jets_mass1_mass0->Fill(v0.jetsmass[0], v1.jetsmass[0]);
-    h_jets_mass01->Fill(v0.jetsmass[0] + v1.jetsmass[0]);
-    h_jets_costhmombs1_costhmombs0->Fill(v0.costhmombs[1], v1.costhmombs[1]);
+    h_tracks_mass1_mass0->Fill(v0.mass[mfv::PTracksOnly], v1.mass[mfv::PTracksOnly]);
+    h_tracks_mass01->Fill(v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly]);
+    h_tracks_costhmombs1_costhmombs0->Fill(v0.costhmombs[mfv::PTracksOnly], v1.costhmombs[mfv::PTracksOnly]);
+    h_njets1_njets0->Fill(v0.njets[mfv::JByNtracks], v1.njets[mfv::JByNtracks]);
+    h_njets01->Fill(v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks]);
+    h_jets_mass1_mass0->Fill(v0.mass[mfv::PJetsByNtracks], v1.mass[mfv::PJetsByNtracks]);
+    h_jets_mass01->Fill(v0.mass[mfv::PJetsByNtracks] + v1.mass[mfv::PJetsByNtracks]);
+    h_jets_costhmombs1_costhmombs0->Fill(v0.costhmombs[mfv::PJetsByNtracks], v1.costhmombs[mfv::PJetsByNtracks]);
   }
 
 }

@@ -116,11 +116,11 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
     if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
       return false;
-    if (v0.njets[0] + v1.njets[0] < min_njetssharetks01)
+    if (v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks] < min_njetssharetks01)
       return false;
-    if (v0.mass + v1.mass < min_mass01)
+    if (v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly] < min_mass01)
       return false;
-    if (v0.jetsmass[0] + v1.jetsmass[0] < min_jetsmassntks01)
+    if (v0.mass[mfv::PJetsByNtracks] + v1.mass[mfv::PJetsByNtracks] < min_jetsmassntks01)
       return false;
   }
 
