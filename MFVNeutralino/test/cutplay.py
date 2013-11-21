@@ -6,7 +6,7 @@ process.TFileService.fileName = 'cutplay.root'
 process.source.fileNames = glob_store('/store/user/tucker/mfv_neutralino_tau0100um_M0400/mfvntuple_v8/99d7a676d206adfebd5d154091ebe5a6/*')
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
+vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 7,
                                                  min_maxtrackpt = 5)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
@@ -24,16 +24,16 @@ for i in xrange(0,40):
 for i in xrange(0,10):
     changes.append(('njetssharetksX%i'%i, 'min_njetssharetks = %i'%i, ''))
 
-for i in xrange(0,60): #drmin has 150 bins from 0 to 1.5
+for i in xrange(0,100):
     changes.append(('drminX%s'%pize(0.01*i,2), 'max_drmin = %f'%(0.01*i), ''))
 
-for i in xrange(0,28): #drmax has 150 bins from 0 to 7
+for i in xrange(0,28):
     changes.append(('drmaxX%s'%pize(0.25*i,2), 'max_drmax = %f'%(0.25*i), ''))
 
-for i in xrange(0,50): #bs2dsig has 100 bins from 0 to 100
+for i in xrange(0,50):
     changes.append(('bs2dsigX%i'%i, 'min_bs2dsig = %i'%i, ''))
 
-for i in xrange(0,30): #maxtrackpt has 100 bins from 0 to 150
+for i in xrange(0,30):
     changes.append(('maxtrackptX%i'%i, 'min_maxtrackpt = %i'%i, ''))
 
 for i in xrange(0,80):
@@ -45,19 +45,19 @@ for i in xrange(0,20):
 for i in xrange(0,60):
     changes.append(('maxtrackpt01X%i'%i, '', 'min_maxtrackpt01 = %i'%i))
 
-for i in xrange(0,50): #costhmombs has 100 bins from -1 to 1
+for i in xrange(-50,50):
     changes.append(('costhmombsX%s'%pize(0.02*i,2), 'min_costhmombs = %f'%(0.02*i), ''))
 
-for i in xrange(0,250,5): #mass has 100 bins from 0 to 250
+for i in xrange(0,100,2):
     changes.append(('massX%i'%i, 'min_mass = %i'%i, ''))
 
-for i in xrange(0,2000,10): #jetsmassntks has 200 bins from 0 to 2000
+for i in xrange(0,100,5):
     changes.append(('jetsmassntksX%i'%i, 'min_jetsmassntks = %i'%i, ''))
 
-for i in xrange(0,500,10):
+for i in xrange(0,200,4):
     changes.append(('mass01X%i'%i, '', 'min_mass01 = %i'%i))
 
-for i in xrange(0,4000,20):
+for i in xrange(0,200,10):
     changes.append(('jetsmassntks01X%i'%i, '', 'min_jetsmassntks01 = %i'%i))
 
 for i in xrange(0,100,2):
@@ -66,7 +66,7 @@ for i in xrange(0,100,2):
 for i in xrange(0,20):
     changes.append(('ntracksptgt3X%i'%i, 'min_ntracksptgt3 = %i'%i, ''))
 
-for i in xrange(0,1500,30):
+for i in xrange(0,200,5):
     changes.append(('sumpt2X%i'%i, 'min_sumpt2 = %i'%i, ''))
 
 for name, vtx_change, ana_change in changes:
@@ -104,7 +104,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                'qcdht1000':     6034431}[sample.name]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('CutPlay1',
+    cs = CRABSubmitter('CutPlay2',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        )

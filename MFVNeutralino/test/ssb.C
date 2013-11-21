@@ -13,18 +13,17 @@
 #include "TError.h"
 #include "TStyle.h"
 
-const int niter = 1;
+const int niter = 2;
 bool printall = 0;
 bool moreprints = printall && 0;
 bool plot = 0;
 
 double int_lumi = 19788.362;
 double nsig_total = int_lumi;
-double nsig[niter+1] = {1023.41, 794.72};
-//double nsig[niter+1] = {1023.41, 7342.61};
+double nsig[niter+1] = {1023.41, 794.72, 254.21};
 
 double nbkg_total = 211435861768.63;
-double nbkg[niter+1] = {174811.73, 28369.66};
+double nbkg[niter+1] = {174811.73, 28369.66, 2866.69};
 
 void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
@@ -207,7 +206,8 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       h_sigfrac->SetLineColor(kRed);
       h_bkgfrac->SetLineColor(kBlue);
       draw_in_order(h_sigfrac, h_bkgfrac);
-      c1->SaveAs(TString::Format("plots/SSB/iter%d_tau0100um/%s%s.pdf", niter, sigHist->GetName(), (logy ? "_log" : "")));
+      c1->SaveAs(TString::Format("plots/SSB/iter%d/tau0100um/%s%s.pdf", niter, sigHist->GetName(), (logy ? "_log" : "")));
+      c1->SaveAs(TString::Format("plots/SSB/iter%d/tau0100um/%s%s.root", niter, sigHist->GetName(), (logy ? "_log" : "")));
       delete c1;
     }
   }
