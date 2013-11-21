@@ -23,7 +23,3 @@ def re_trigger(process):
     process.mfvAnalysisCuts     .re_trigger = True # JMTBAD make an "EventRedoer"
     process.mfvEventHistosNoCuts.re_trigger = True
     process.mfvEventHistos      .re_trigger = True
-
-def no_use_ref(process):
-    for name in 'mfvVertexHistos mfvVertexHistosNoCuts mfvVertexHistosNoCutsWAnaCuts mfvVertexHistosWAnaCuts'.split():
-        getattr(process, name).use_ref = False

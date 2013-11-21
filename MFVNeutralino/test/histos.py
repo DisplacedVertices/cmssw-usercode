@@ -9,11 +9,6 @@ process.TFileService.fileName = 'histos.root'
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.Histos_cff')
 
-from JMTucker.MFVNeutralino.VertexSelector_cfi import no_produce_refs 
-from JMTucker.MFVNeutralino.Histos_cff import no_use_ref
-no_produce_refs(process)
-no_use_ref(process)
-
 process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvHistos)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
