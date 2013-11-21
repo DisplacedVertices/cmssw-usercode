@@ -20,9 +20,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = '803a9991f628859a3f121bab38a51732'
+    ANA_HASH = '1ed9d997e29199117961ba7531f8a4c8'
     PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v9'
+    ANA_VERSION = 'v10'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -332,7 +332,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.dbs_url_num = 2
     sample.re_pat = True
     sample.scheduler = 'condor'
-    sample.ana_hash = 'cff4f01a00e7796ff96ffdf9fefed1c3'
+    sample.ana_hash = '5c05eb42bbf1b04cf0f00b96bae48439'
 
 ########################################################################
 
@@ -355,16 +355,23 @@ for sample in all_samples:
     exec '%s = sample' % sample.name
     samples_by_name[sample.name] = sample
 
+for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
+    sample.ana_ready = True
+
 ########################################################################
 
 # Exceptions to the defaults (except for the MFV signal samples, which
 # are already applied above).
 
-MultiJetPk2012B.ana_hash = '036a5bc53cc53c9868db88b68a1c6eeb'
+MultiJetPk2012B.ana_hash = '5f39779c81ab17a4a334adf2625b21f7'
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
-mfv_neutralino_tau1000um_M0200.total_events = 97752
+ttbarhadronic.total_events = 10512444
+qcdht0100.total_events = 50104518
+qcdht0250.total_events = 26837078
+qcdht0500.total_events = 30449292
+qcdht1000.total_events = 13418863
 
 ########################################################################
 
@@ -405,9 +412,17 @@ if __name__ == '__main__':
             print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
     elif 'checknumevents' in sys.argv:
         from JMTucker.Tools.DBS import *
-        for sample in background_samples + auxiliary_background_samples:
-            x,y = sample.nevents, numevents_in_dataset(sample.dataset)
+        diffs = []
+        for sample in all_mc_samples:
+            if not sample.ana_ready:
+                continue
+            x,y = sample.nevents, numevents_in_dataset(sample.ana_dataset, ana01=sample.ana_dbs_url_num == 1, ana02=sample.ana_dbs_url_num == 2)
             print '%30s %14i %14i %s' % (sample.name, x, y, x == y)
+            if x != y:
+                diffs.append((sample.name, y))
+        print '\nsuggested change:'
+        for diff in diffs:
+            print '%s.total_events = %i' % diff
     elif 'getnewevents' in sys.argv:
         path = sys.argv[sys.argv.index('getnewevents')+1]
         check_nevents(all_mc_samples, path)
