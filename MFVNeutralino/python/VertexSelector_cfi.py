@@ -4,7 +4,7 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      vertex_src = cms.InputTag('mfvVertices'),
                                      vertex_aux_src = cms.InputTag('mfvVerticesAux'),
                                      produce_vertices = cms.bool(False),
-                                     produce_refs = cms.bool(True),
+                                     produce_refs = cms.bool(False),
                                      min_ntracks          = cms.int32(0),
                                      min_ntracksptgt3     = cms.int32(0),
                                      min_ntracksptgt5     = cms.int32(0),
@@ -58,7 +58,3 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     )
 
 mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose + mfvSelectedVerticesTight)
-
-def no_produce_refs(process):
-    for name in 'mfvSelectedVertices mfvSelectedVerticesLoose mfvSelectedVerticesMedium mfvSelectedVerticesTight'.split():
-        getattr(process, name).produce_refs = False

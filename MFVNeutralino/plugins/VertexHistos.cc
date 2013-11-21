@@ -24,7 +24,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   const edm::InputTag mfv_event_src;
   const edm::InputTag vertex_aux_src;
   const edm::InputTag weight_src;
-  const bool use_ref;
   const bool do_scatterplots;
 
   VertexDistanceXY distcalc_2d;
@@ -87,7 +86,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
     vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
-    use_ref(cfg.getParameter<bool>("use_ref")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
   edm::Service<TFileService> fs;
@@ -235,21 +233,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -1, 1, 100,-25,25);
     }
 
-    if (use_ref) {
-      h_sv_trackpt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpt", exc), TString::Format(";SV %s track p_{T} (GeV);arb. units", exc), 100, 0, 200);
-      h_sv_trackfracpterr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackfracpterr", exc), TString::Format(";SV %s fractional track p_{T} uncertainty (GeV);arb. units", exc), 100, 0, 20);
-      h_sv_tracketa[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracketa", exc), TString::Format(";SV %s track #eta;arb. units", exc), 50, -2.7, 2.7);
-      h_sv_trackphi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackphi", exc), TString::Format(";SV %s track #phi;arb. units", exc), 50, -3.15, 3.15);
-      h_sv_trackdxy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackdxy", exc), TString::Format(";SV %s track dxy wrt bs (cm);arb. units", exc), 200, -1, 1);
-      h_sv_trackdz[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackdz", exc), TString::Format(";SV %s track dz wrt bs (cm);arb. units", exc), 200, -20, 20);
-      h_sv_tracknhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracknhits", exc), TString::Format(";SV %s track nhits;arb. units", exc), 60, 0, 60);
-
-      h_sv_trackpaircosth[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpaircosth", exc), TString::Format(";SV %s track pair cos(#theta);arb. units", exc), 100, -1, 1);
-      h_sv_trackpairdr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpairdr", exc), TString::Format(";SV %s track pair #Delta R;arb. units", exc), 100, 0, 7);
-      h_sv_trackpairmass[j] = fs->make<TH1F>(TString::Format("h_sv_%s_trackpairmass", exc), TString::Format(";SV %s track pair mass (GeV);arb. units", exc), 200, 0, 20);
-      h_sv_tracktriplemass[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracktriplemass", exc), TString::Format(";SV %s track triple mass (GeV);arb. units", exc), 200, 0, 20);
-    }
-
     h_sv[j].Init("h_sv_" + ex, hs, true, do_scatterplots);
   }
 
@@ -333,49 +316,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_sv_pos_2d[svndx][0]->Fill(aux.x - bsx, aux.y - bsy, *weight);
     h_sv_pos_2d[svndx][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
     h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
-
-#if 0
-    if (use_ref) {
-      for (auto trki = aux.ref->tracks_begin(), trke = aux.ref->tracks_end(); trki != trke; ++trki) {
-        if (aux.ref->trackWeight(*trki) < mfv::track_vertex_weight_min)
-          continue;
-
-        const reco::TrackBaseRef& tri = *trki;
-
-        fill_multi(h_sv_trackpt,          isv, tri->pt(), *weight);
-        fill_multi(h_sv_trackfracpterr,   isv, tri->ptError()/tri->pt(), *weight);
-        fill_multi(h_sv_tracketa,         isv, tri->eta(), *weight);
-        fill_multi(h_sv_trackphi,         isv, tri->phi(), *weight);
-        fill_multi(h_sv_trackdxy,         isv, tri->dxy(bs), *weight);
-        fill_multi(h_sv_trackdz,          isv, tri->dz (bs), *weight);
-        fill_multi(h_sv_tracknhits,       isv, tri->numberOfValidHits(), *weight);
-
-        TLorentzVector p4_i, p4_j, p4_k;
-        const double m = 0.135;
-        p4_i.SetPtEtaPhiM(tri->pt(), tri->eta(), tri->phi(), m);
-        for (auto trkj = trki + 1; trkj != trke; ++trkj) {
-          if (aux.ref->trackWeight(*trkj) < mfv::track_vertex_weight_min)
-            continue;
-          const reco::TrackBaseRef& trj = *trkj;
-          p4_j.SetPtEtaPhiM(trj->pt(), trj->eta(), trj->phi(), m);
-
-          const TLorentzVector p4_ij = p4_i + p4_j;
-          fill_multi(h_sv_trackpaircosth, isv, tri->momentum().Dot(trj->momentum()) / tri->p() / trj->p(), *weight);
-          fill_multi(h_sv_trackpairdr,    isv, reco::deltaR(*tri, *trj), *weight);
-          fill_multi(h_sv_trackpairmass,  isv, p4_ij.M(), *weight);
-
-          for (auto trkk = trkj + 1; trkk != trke; ++trkk) {
-            if (aux.ref->trackWeight(*trkk) < mfv::track_vertex_weight_min)
-              continue;
-
-            const reco::TrackBaseRef& trk = *trkk;
-            p4_k.SetPtEtaPhiM(trk->pt(), trk->eta(), trk->phi(), m);
-            fill_multi(h_sv_tracktriplemass, isv, (p4_ij + p4_k).M(), *weight);
-          }
-        }
-      }
-    }
-#endif
 
     PairwiseHistos::ValueMap v = {
         {"ntracks",                 aux.ntracks},
