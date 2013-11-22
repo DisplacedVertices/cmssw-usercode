@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools.CMSSWTools import glob_store
 
 process.TFileService.fileName = 'cutplay.root'
-process.source.fileNames = glob_store('/store/user/tucker/mfv_neutralino_tau0100um_M0400/mfvntuple_v8/99d7a676d206adfebd5d154091ebe5a6/*')
+process.source.fileNames = glob_store('/store/user/tucker/mfv_neutralino_tau0100um_M0400/mfvntuple_v10/5c05eb42bbf1b04cf0f00b96bae48439/*')
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 7,
@@ -13,10 +13,12 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
                                         min_maxtrackpt01 = 0)
 
-changes = []
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
     return (fmt % f).replace('.','p').replace('-','n')
+
+changes = []
+changes.append(('nm1', '', ''))
 
 for i in xrange(0,40):
     changes.append(('ntracksX%i'%i, 'min_ntracks = %i'%i, ''))
@@ -30,8 +32,8 @@ for i in xrange(0,100):
 for i in xrange(0,28):
     changes.append(('drmaxX%s'%pize(0.25*i,2), 'max_drmax = %f'%(0.25*i), ''))
 
-for i in xrange(0,50):
-    changes.append(('bs2dsigX%i'%i, 'min_bs2dsig = %i'%i, ''))
+for i in xrange(0,30):
+    changes.append(('bs2dsigX%s'%pize(0.5*i,1), 'min_bs2dsig = %f'%(0.5*i), ''))
 
 for i in xrange(0,30):
     changes.append(('maxtrackptX%i'%i, 'min_maxtrackpt = %i'%i, ''))
