@@ -20,10 +20,10 @@ bool plot = 0;
 
 double int_lumi = 19788.362;
 double nsig_total = int_lumi;
-double nsig[niter+1] = {1023.41, 794.72, 254.21};
+double nsig[] = {1023.41, 794.72, 254.21};
 
 double nbkg_total = 211435861768.63;
-double nbkg[niter+1] = {174811.73, 28369.66, 2866.69};
+double nbkg[] = {174811.73, 28369.66, 2866.69};
 
 void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
@@ -116,18 +116,18 @@ struct sigproflik {
   double sig(const char* var, const int ibin) {
     double s = hists[0][var]->GetBinContent(ibin);
     double n = s;
-    std::vector<double> m;
+    std::vector<double> ms;
     //printf("   proflik: b/m:");
     for (int i = 1; i < nfiles; ++i) {
-      double b = hists[i][var]->GetBinContent(ibin);
+      double m = hists[i][var]->GetBinContent(ibin);
       if (moreprints)
-        printf("    %s %i/%i\n", filenames[i].c_str(), int(b), nevents[i]);
-      n += b;
-      m.push_back(b * taus[i-1]);
+        printf("    %s %i/%i\n", filenames[i].c_str(), int(m), nevents[i]);
+      n += m/taus[i-1];
+      ms.push_back(m);
       //printf("%f/%f ", b, b*taus[i-1]);
     }
     //printf("   s: %f  n: %f\n", s, n);
-    return getSignificance(0, n, s, m, taus);
+    return getSignificance(0, n, s, ms, taus);
   }
 };
 
