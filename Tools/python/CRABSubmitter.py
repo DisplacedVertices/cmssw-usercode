@@ -54,7 +54,12 @@ class CRABSubmitter:
 
         self.username = os.environ['USER']
         
+        if '/' in batch_name:
+            raise ValueError('/ not allowed in batch name')
         self.batch_name = batch_name
+        self.batch_dir = 'crab/%s' % batch_name
+        mkdirs_if_needed(self.batch_dir + '/publish_logs/')
+        
         self.testing = testing
         self.max_threads = max_threads
 
@@ -70,7 +75,7 @@ class CRABSubmitter:
             cfg.set('USER', 'ssh_control_persist', 'no')
 
         if working_dir_pattern.startswith('%BATCH/'):
-            working_dir_pattern = working_dir_pattern.replace('%BATCH', 'crab/%s' % batch_name)
+            working_dir_pattern = working_dir_pattern.replace('%BATCH', self.batch_dir)
         self.working_dir_pattern = working_dir_pattern
         cfg.set('USER', 'ui_working_dir', working_dir_pattern)
         mkdirs_if_needed(working_dir_pattern)
@@ -78,7 +83,7 @@ class CRABSubmitter:
         if not pset_fn_pattern.endswith('.py'):
             pset_fn_pattern = pset_fn_pattern + '.py'
         if pset_fn_pattern.startswith('%BATCH/'):
-            pset_fn_pattern = pset_fn_pattern.replace('%BATCH', 'crab/psets/%s' % batch_name)
+            pset_fn_pattern = pset_fn_pattern.replace('%BATCH', self.batch_dir + '/psets')
         self.pset_fn_pattern = pset_fn_pattern
         cfg.set('CMSSW', 'pset', pset_fn_pattern)
         mkdirs_if_needed(pset_fn_pattern)
