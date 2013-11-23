@@ -58,14 +58,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    cs = CRABSubmitter('zzzeosMFVNtuple' + tuple_version.upper(),
+    cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
                        pset_modifier = modify,
-                       #job_control_from_sample = True,
-                       total_number_of_events = 100,
-                       number_of_jobs = 1,
+                       job_control_from_sample = True,
                        get_edm_output = True,
                        data_retrieval = 'fnal_eos',
-                       publish_data_name = 'zzzeos_mfvntuple_' + tuple_version,
+                       #publish_data_name = 'mfvntuple_' + tuple_version,
                        max_threads = 3,
                        )
 
@@ -78,11 +76,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     else:
         samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
 
-    samples = [Samples.ttbarhadronic]
-    
     for sample in samples:
         if sample.is_mc:
             sample.total_events = -1
-            sample.scheduler = 'condor'
 
     cs.submit_all(samples)
