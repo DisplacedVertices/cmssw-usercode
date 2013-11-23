@@ -134,7 +134,7 @@ class CRABSubmitter:
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'fnal_eos':
                 cfg.set('USER', 'storage_element', 'cmseos.fnal.gov')
-                cfg.set('USER', 'storage_path', '/srm/v2?SFN=/eos/uscms/store/user/%s/' % self.username)
+                cfg.set('USER', 'storage_path', '/srm/v2/server?SFN=/eos/uscms/store/user/%s/' % self.username)
                 cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'cornell':
