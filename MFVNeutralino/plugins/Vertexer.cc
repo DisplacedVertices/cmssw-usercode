@@ -1,3 +1,4 @@
+#include "TH2.h"
 #include "TMath.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
@@ -129,6 +130,11 @@ private:
   const double min_seed_track_pt;
   const double min_seed_track_dxy;
   const int min_seed_track_nhits;
+  const bool seed_by_sums;
+  const double min_seed_sum_pt;
+  const double min_seed_sum_dxy;
+  const double min_seed_sum_adxy;
+  const int min_seed_sum_nhits;
   const double max_seed_vertex_chi2;
   const bool use_2d_vertex_dist;
   const bool use_2d_track_dist;
@@ -151,6 +157,9 @@ private:
   TH1F* h_seed_track_pt;
   TH1F* h_seed_track_dxy;
   TH1F* h_seed_track_nhits;
+  TH2F* h_seed_pair_pt;
+  TH2F* h_seed_pair_dxy;
+  TH2F* h_seed_pair_nhits;
   TH1F* h_n_seed_vertices;
   TH1F* h_seed_vertex_track_weights;
   TH1F* h_seed_vertex_chi2;
@@ -198,6 +207,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_seed_track_pt(cfg.getParameter<double>("min_seed_track_pt")),
     min_seed_track_dxy(cfg.getParameter<double>("min_seed_track_dxy")),
     min_seed_track_nhits(cfg.getParameter<int>("min_seed_track_nhits")),
+    seed_by_sums(cfg.getParameter<bool>("seed_by_sums")),
+    min_seed_sum_pt(cfg.getParameter<double>("min_seed_sum_pt")),
+    min_seed_sum_dxy(cfg.getParameter<double>("min_seed_sum_dxy")),
+    min_seed_sum_adxy(cfg.getParameter<double>("min_seed_sum_adxy")),
+    min_seed_sum_nhits(cfg.getParameter<int>("min_seed_sum_nhits")),
     max_seed_vertex_chi2(cfg.getParameter<double>("max_seed_vertex_chi2")),
     use_2d_vertex_dist(cfg.getParameter<bool>("use_2d_vertex_dist")),
     use_2d_track_dist(cfg.getParameter<bool>("use_2d_track_dist")),
@@ -221,12 +235,15 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     edm::Service<TFileService> fs;
     h_n_all_tracks                   = fs->make<TH1F>("h_n_all_tracks",                   "", 200,   0,   2000);
     h_all_track_pt                   = fs->make<TH1F>("h_all_track_pt",                   "", 250,   0,    500);
-    h_all_track_dxy                  = fs->make<TH1F>("h_all_track_dxy",                  "", 200,  -1,      1);
+    h_all_track_dxy                  = fs->make<TH1F>("h_all_track_dxy",                  "", 200,  -0.1,    0.1);
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
     h_n_seed_tracks                  = fs->make<TH1F>("h_n_seed_tracks",                  "", 200,   0,    600);
     h_seed_track_pt                  = fs->make<TH1F>("h_seed_track_pt",                  "", 250,   0,    500);
-    h_seed_track_dxy                 = fs->make<TH1F>("h_seed_track_dxy",                 "", 200,  -1,      1);
+    h_seed_track_dxy                 = fs->make<TH1F>("h_seed_track_dxy",                 "", 200,  -0.1,    0.1);
     h_seed_track_nhits               = fs->make<TH1F>("h_seed_track_nhits",               "",  40,   0,     40);
+    h_seed_pair_pt                   = fs->make<TH2F>("h_seed_pair_pt",                   "",  50,   0,    500,    50,   0,    500);
+    h_seed_pair_dxy                  = fs->make<TH2F>("h_seed_pair_dxy",                  "",  40,  -0.1,    0.1,  40,  -0.1,    0.1);
+    h_seed_pair_nhits                = fs->make<TH2F>("h_seed_pair_nhits",                "",  15,   0,     45,    15,   0,     45);
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "", 200,   0,    400);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  64,   0,      1);
     h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               "", 100,   0, max_seed_vertex_chi2);
@@ -390,16 +407,35 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   for (size_t itk = 0; itk < ntk-1; ++itk) {
-    bool use_i =
-      seed_tracks[itk].track().pt() > min_seed_track_pt &&
-      seed_tracks[itk].track().dxy(beamspot->position()) > min_seed_track_dxy &&
-      seed_tracks[itk].track().hitPattern().numberOfValidHits() >= min_seed_track_nhits;
+    double itk_pt    = seed_tracks[itk].track().pt();
+    double itk_dxy   = seed_tracks[itk].track().dxy(beamspot->position());
+    double itk_nhits = seed_tracks[itk].track().hitPattern().numberOfValidHits();
+    bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && itk_nhits >= min_seed_track_nhits;
 
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
-      if (!use_i && (seed_tracks[jtk].track().pt() < min_seed_track_pt ||
-                     seed_tracks[jtk].track().dxy(beamspot->position()) < min_seed_track_dxy ||
-                     seed_tracks[jtk].track().hitPattern().numberOfValidHits() < min_seed_track_nhits))
-        continue; // one or the other has to pass the seed cuts, not necessarily both.
+      double jtk_pt    = seed_tracks[jtk].track().pt();
+      double jtk_dxy   = seed_tracks[jtk].track().dxy(beamspot->position());
+      double jtk_nhits = seed_tracks[jtk].track().hitPattern().numberOfValidHits();
+      bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && jtk_nhits >= min_seed_track_nhits;
+
+      if (histos) {
+        h_seed_pair_pt->Fill(itk_pt, jtk_pt);
+        h_seed_pair_dxy->Fill(itk_dxy, jtk_dxy);
+        h_seed_pair_nhits->Fill(itk_nhits, jtk_nhits);
+      }
+
+      if (!itk_use && !jtk_use) {
+        if (!seed_by_sums)
+          continue;
+
+        double ij_sum_pt = itk_pt + jtk_pt;
+        double ij_sum_dxy = fabs(itk_dxy + jtk_dxy);
+        double ij_sum_adxy = fabs(itk_dxy) + fabs(jtk_dxy);
+        int ij_sum_nhits = itk_nhits + jtk_nhits;
+        bool ij_sum_use = ij_sum_pt > min_seed_sum_pt && ij_sum_dxy > min_seed_sum_dxy && ij_sum_adxy > min_seed_sum_adxy && ij_sum_nhits >= min_seed_sum_nhits;
+        if (!ij_sum_use)
+          continue;
+      }
 
       std::vector<reco::TransientTrack> ttks;
       ttks.push_back(seed_tracks[itk]);
