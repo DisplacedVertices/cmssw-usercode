@@ -124,22 +124,28 @@ class CRABSubmitter:
             cfg.set('USER', 'return_data', 1)
         else:
             cfg.set('USER', 'copy_data', 1)
+            publish_ok = True
             if data_retrieval == 'fnal':
                 cfg.set('USER', 'storage_element', 'T3_US_FNALLPC')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'fnal_resilient':
+                publish_ok = False
                 cfg.set('USER', 'storage_element', 'cmssrm.fnal.gov')
                 cfg.set('USER', 'storage_path', '/srm/managerv2?SFN=/resilient/%s/crabdump/' % self.username)
                 cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'fnal_eos':
+                publish_ok = False
                 cfg.set('USER', 'storage_element', 'cmseos.fnal.gov')
                 cfg.set('USER', 'storage_path', '/srm/v2/server?SFN=/eos/uscms/store/user/%s/' % self.username)
                 cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'cornell':
                 cfg.set('USER', 'storage_element', 'T3_US_Cornell')
+
             if publish_data_name:
+                if not publish_ok:
+                    raise ValueError('refusing to set up publishing when writing to EOS/resilient')
                 cfg.set('USER', 'publish_data', 1)
                 cfg.set('USER', 'publish_data_name', publish_data_name)
                 cfg.set('USER', 'dbs_url_for_publication', 'https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet')
