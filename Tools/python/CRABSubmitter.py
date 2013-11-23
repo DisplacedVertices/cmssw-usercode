@@ -47,10 +47,13 @@ class CRABSubmitter:
                  **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
-            print 'CRABSubmitter init: mandatory proxy get (but you can skip it with ^C if you know what you are doing).'
+            print 'CRABSubmitter init: mandatory proxy get, will ask for password twice (but you can skip it with ^C if you know what you are doing).'
             os.system('voms-proxy-init -voms cms -valid 192:00')
+            os.system('myproxy-init -d -n -s myproxy.cern.ch')
             CRABSubmitter.get_proxy = False
 
+        self.username = os.environ['USER']
+        
         self.batch_name = batch_name
         self.testing = testing
         self.max_threads = max_threads
@@ -120,9 +123,13 @@ class CRABSubmitter:
                 cfg.set('USER', 'storage_element', 'T3_US_FNALLPC')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'fnal_resilient':
-                assert os.environ['USER'] == 'tucker'
                 cfg.set('USER', 'storage_element', 'cmssrm.fnal.gov')
-                cfg.set('USER', 'storage_path', '/srm/managerv2?SFN=/resilient/tucker/crabdump/')
+                cfg.set('USER', 'storage_path', '/srm/managerv2?SFN=/resilient/%s/crabdump/' % self.username)
+                cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
+                cfg.set('USER', 'check_user_remote_dir', 0)
+            elif data_retrieval == 'fnal_eos':
+                cfg.set('USER', 'storage_element', 'cmseos.fnal.gov')
+                cfg.set('USER', 'storage_path', '/srm/v2?SFN=/eos/uscms/store/user/%s/' % self.username)
                 cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'cornell':
@@ -276,8 +283,8 @@ class CRABSubmitter:
             time.sleep(0.1)
         print 'done waiting for threads!'
 
-        os.system('mkdir -p /tmp/%s' % os.environ['USER'])
-        log = open('/tmp/%s/CRABSubmitter_%s.log' % (os.environ['USER'], self.batch_name), 'wt')
+        os.system('mkdir -p /tmp/%s' % self.username)
+        log = open('/tmp/%s/CRABSubmitter_%s.log' % (self.username, self.batch_name), 'wt')
         for name in sorted(results.keys()):
             log.write('*' * 250)
             log.write('\n\n%s\n' % name)
