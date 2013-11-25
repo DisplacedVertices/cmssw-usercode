@@ -2,7 +2,7 @@
 
 import sys, os, threading, time, ConfigParser, StringIO
 from StringIO import StringIO
-from CRABTools import crab_popen
+from CRABTools import crab_popen, crab_submit_in_batches
     
 class ConfigParserEx(ConfigParser.ConfigParser):
     def set(self, section, option, value):
@@ -239,19 +239,26 @@ class CRABSubmitter:
 
         crab_output = 'Not run'
         if not self.testing:
-            if not os.path.isdir(crab_cfg_obj.get('USER', 'ui_working_dir')):
+            working_dir = crab_cfg_obj.get('USER', 'ui_working_dir')
+            if not os.path.isdir(working_dir):
                 cmd = 'crab -cfg %s -create' % crab_cfg_fn
                 if not create_only:
                     cmd += ' -submit'
                 crab_output = crab_popen(cmd)
                 ok = False
+                suball = False
                 for line in crab_output.split('\n'):
                     if 'Total of' in line and 'jobs submitted' in line:
                         ok = True
+                    if not create_only and 'The CRAB client will not submit task with more than 500 jobs.' in line:
+                        suball = True
                 if not ok:
+                    if suball:
+                        print '%s needs to sub in groups of 500, doing now' % sample.name
+                        crab_submit_in_batch(working_dir)
                     print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
             else:
-                print '\033[36;7m warning: \033[m sample %s not submitted, directory %s already exists' % (sample.name, crab_cfg_obj.get('USER', 'ui_working_dir'))
+                print '\033[36;7m warning: \033[m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
             os.system('rm -f %s' % ' '.join(cleanup))
         else:
             print 'in testing mode, not submitting anything.'
