@@ -427,6 +427,19 @@ def crab_get_condor_clusters(working_dir, cluster_re=re.compile(r'\((\d+)\.')):
                 clusters.add(int(mo.group(1)))
     return sorted(clusters)
 
+def crab_submit_in_batches(working_dir, nper=500, print_output=False):
+    cmd = 'crab -c %s -submit %i' % (working_dir, nper)
+    print cmd
+    i = 0
+    while True:
+        print 'running %s submit batch iteration #%i, be patient...' % (working_dir, i)
+        i += 1
+        x = crab_popen(cmd, print_output=print_output)
+        if 'asking to submit 500 jobs, but only' in x:
+            break
+        elif 'crab:  Total of 500 jobs submitted.' not in x:
+            raise ValueError('problem with crab output: did not submit 500 jobs?')
+
 def crab_get_output_files(working_dir, _re=re.compile(r'\$SOFTWARE_DIR/(.*?)[,"]')):
     c = crab_cfg_parser(working_dir)
 
@@ -452,7 +465,7 @@ def crab_get_output_files(working_dir, _re=re.compile(r'\$SOFTWARE_DIR/(.*?)[,"]
         files.add(x.replace('$NJob', '%i'))
         
     return list(sorted(files))
-    
+
 def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_stuck_done=False, resub_none=False, site_control='', status_until_none_done=True, resub_created=False):
     use_server = crab_is_using_server(working_dir)
     to_kill = []

@@ -12,6 +12,6 @@ mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
                                    max_cos_angle_diff = cms.double(2),
                                    max_miss_dist = cms.double(1e6),
                                    max_miss_sig = cms.double(2),
-                                   histos = cms.untracked.bool(True),
+                                   histos = cms.untracked.bool(False),
                                    verbose = cms.untracked.bool(False),
                                    )
