@@ -1,6 +1,5 @@
-PROGNAME      = runSigCalc
-SOURCES       = runSigCalc.cc getSignificance.cc SigCalc.cc fitPar.cc
-INCLUDES      = getSignificance.h SigCalc.h fitPar.h
+SOURCES       = SigCalc.cc fitPar.cc
+INCLUDES      = SigCalc.h fitPar.h
 OBJECTS       = $(patsubst %.cc, %.o, $(SOURCES))
 ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --libs)
@@ -8,19 +7,16 @@ ROOTGLIBS    := $(shell root-config --glibs)
 ROOTLIBS     := $(shell root-config --nonew --libs)
 CFLAGS       += $(ROOTCFLAGS)
 LIBS         += $(ROOTLIBS)
-#  Not sure why Minuit isn't being included -- put in by hand
-#
 LIBS         += -lMinuit
 LDFLAGS       = -O
 
-$(PROGNAME):    $(OBJECTS)
-		g++ -o $@ $(OBJECTS) $(LDFLAGS) $(LIBS)
+all: $(OBJECTS)
 
 %.o : %.cc $(INCLUDES)
-	g++ ${CFLAGS} -c  -g -o $@ $<
+	g++ $(CFLAGS) -c -o $@ $<
 
 test:
-	@echo $(ROOTCFLAGS)
+	@echo $(CFLAGS)
 
 clean:	
-	-rm -f ${PROGNAME} ${OBJECTS}
+	-rm -f $(OBJECTS)

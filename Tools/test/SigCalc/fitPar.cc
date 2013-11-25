@@ -1,6 +1,4 @@
-// File:  fitPar.cc
-// Glen Cowan
-// RHUL Physics
+// Modified version of SigCalc from Glen Cowan, RHUL Physics
 
 // Uses TMinuit to fit the MLEs muHat, bHat and conditional MLEs bHatHat
 // used in profile likelihood ratio.
@@ -12,21 +10,15 @@
 // tau   defined by m_i ~ Poisson(tau_i*b_i), e.g., ratio of MC lumonisity
 //       to that of data sample.
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <cstdlib>
 #include <cmath>
-
-#include "SigCalc.h"
+#include <string>
+#include "TMinuit.h"
 #include "fitPar.h"
-#include <TMinuit.h>
 
 SigCalc* scGlobal;   // needs to be global to communicate with fcn (below)
 bool debug;
 
-int fitPar (SigCalc* sc, vector<bool> freePar, vector<double>& parVec){
+int fitPar(SigCalc* sc, std::vector<bool> freePar, std::vector<double>& parVec) {
   
 // set up start values, step sizes, etc. for fit
 
@@ -35,33 +27,31 @@ int fitPar (SigCalc* sc, vector<bool> freePar, vector<double>& parVec){
 
   const int maxpar = 100;
   double par[maxpar];
-  string parName[maxpar];
+  std::string parName[maxpar];
   double stepSize[maxpar];
   double minVal[maxpar];
   double maxVal[maxpar];
 
-  for (int i=0; i<npar; i++){
+  for (int i=0; i<npar; i++) {
     par[i] = parVec[i];
   }
 
-  for (int i=0; i<npar; i++){    // some of these overridden below
+  for (int i=0; i<npar; i++) {    // some of these overridden below
     stepSize[i] = 0.1;
     minVal[i] = 0.;
     maxVal[i] = 1000000.;
   }  
 
   parName[0] = "mu";
-  for (int i=1; i<npar; i++){
-    stringstream ss;
-    string bckNumber;
-    ss << i;
-    ss >> bckNumber;
-    parName[i] = "b" +  bckNumber;
+  for (int i=1; i<npar; i++) {
+    char buf[128];
+    snprintf(buf, 128, "b%i", i);
+    parName[i] = buf;
   }
 
-  for (int i=0; i<npar; i++){
+  for (int i=0; i<npar; i++) {
     if ( par[i] != 0 ) {
-      stepSize[i] = abs( par[i] ) * 0.1;
+      stepSize[i] = std::abs( par[i] ) * 0.1;
     }
     else {
       stepSize[i] = 0.1;
@@ -77,13 +67,13 @@ int fitPar (SigCalc* sc, vector<bool> freePar, vector<double>& parVec){
   minuit->mnexcm("SET NOWarnings",0,0,ierr);
 
   minuit->SetFCN(fcn);
-  for (int i=0; i<npar; i++){
+  for (int i=0; i<npar; i++) {
     minuit->DefineParameter(i, parName[i].c_str(), 
     par[i], stepSize[i], minVal[i], maxVal[i]);
   }
 
-  for (int i=0; i<npar; i++){
-    if ( !freePar[i] ){
+  for (int i=0; i<npar; i++) {
+    if ( !freePar[i] ) {
       minuit->FixParameter(i);
     }
   }
@@ -101,7 +91,7 @@ int fitPar (SigCalc* sc, vector<bool> freePar, vector<double>& parVec){
   parVec.clear();
   int nFreePar = minuit->GetNumFreePars();
   double fitpar[nFreePar], err[nFreePar];
-  for (int i=0; i<npar; i++){
+  for (int i=0; i<npar; i++) {
     minuit->GetParameter(i, fitpar[i], err[i]);
     parVec.push_back(fitpar[i]);
   }
@@ -111,22 +101,20 @@ int fitPar (SigCalc* sc, vector<bool> freePar, vector<double>& parVec){
 
 }
 
-//-------------------------------------------------------------------------
-
 // fcn must be non-member function, uses global SigCalc object scGlobal
 
-void fcn(int& npar, double* deriv, double& f, double par[], int flag){
+void fcn(int& npar, double* deriv, double& f, double par[], int flag) {
 
   int numBck = scGlobal->numBck();
   double mu = par[0];
-  vector<double> bVec;
-  for (int i=0; i<numBck; i++){
+  std::vector<double> bVec;
+  for (int i=0; i<numBck; i++) {
     bVec.push_back(par[i+1]);
   }
   f = -2.*scGlobal->lnL(mu, bVec);
 
   //  if ( debug ) {
-  //    for (int i=0; i<npar; i++){
+  //    for (int i=0; i<npar; i++) {
   //      cout << "i, par = " << i << "  " << par[i] << endl;
   //    }
   //    cout << "f = " << f << endl;
@@ -135,14 +123,12 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag){
 
 }
 
-//-------------------------------------------------------------------------
-
 // The function psi returns log of Poisson probability nu^n exp(-nu)
 // (the n! term is dropped).  For nu -> 0 and n = 0 the probability is 1,
 // i.e., psi returns zero.  The function avoids evaluating log(nu) for 
 // nu <= epsilon.
 
-double psi(double n, double nu){
+double psi(double n, double nu) {
   const double epsilon = 1.e-6;
   const double logOfSmallValue = -100.;
   double val;
