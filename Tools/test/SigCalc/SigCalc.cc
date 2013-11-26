@@ -114,8 +114,9 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
 // tau   defined by m_i ~ Poisson(tau_i*b_i), e.g., ratio of MC lumonisity
 //        to that of data sample.
 
-double getSignificance(double mu, double n, double s, std::vector<double> m, std::vector<double> tau) {
+double getSignificance(double mu, double n, double s, std::vector<double> m, std::vector<double> tau, double systFrac) {
   SigCalc* sc = new SigCalc (n, s, m, tau);
+  sc->setSystFrac(systFrac);
   double qmu = sc->qmu(mu);
   double Z = sqrt(qmu);
 
