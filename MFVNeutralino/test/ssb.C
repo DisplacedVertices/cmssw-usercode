@@ -13,17 +13,15 @@
 #include "TError.h"
 #include "TStyle.h"
 
-const int niter = 2;
+const int niter = 3;
 bool printall = 0;
 bool moreprints = printall && 0;
 bool plot = 0;
+const char* signal = "mfv_neutralino_tau0100um_M0400";
 
 double int_lumi = 19788.362;
 double nsig_total = int_lumi;
-double nsig[] = {1023.41, 794.72, 254.21};
-
 double nbkg_total = 211435861768.63;
-double nbkg[] = {174811.73, 28369.66, 2866.69};
 
 void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
@@ -65,7 +63,7 @@ struct sigproflik {
   std::vector<std::map<std::string, TH1F*> > hists;
 
   sigproflik(const char** vars, const int nvars, const std::string dir, const bool bigw) {
-    filenames.push_back(dir + "mfv_neutralino_tau0100um_M0400_mangled.root");
+    filenames.push_back(dir + TString::Format("%s_mangled.root", signal).Data());
     filenames.push_back(dir + "ttbarhadronic_mangled.root");
     filenames.push_back(dir + "ttbarsemilep_mangled.root");
     filenames.push_back(dir + "ttbardilep_mangled.root");
@@ -134,7 +132,7 @@ struct sigproflik {
 sigproflik* slik_nobigw = 0;
 sigproflik* slik = 0;
 
-void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
+void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, const char* var) {
   if (printall) printf("%16s\tcut\t\ts\t\tb\tsigb\t\tssb\tssbsb\tproflik\tnobigw\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n", sigHist->GetName());
   int nbins = sigHist->GetNbinsX();
   double xlow = sigHist->GetXaxis()->GetXmin();
@@ -156,9 +154,9 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     double sigb = bkgHist->GetBinError(i);
     double zpl = slik->sig(var, i);
     double zpl_nobigw = slik_nobigw->sig(var, i);
-    if (printall) printf("%16s\t%5.1f\t%9.2f\t%9.2f\t%9.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%f\t%f\t%f\t%e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, s/sqrt(b), s/sqrt(b+sigb), zpl, zpl_nobigw, s/nsig[niter], s/nsig_total, b/nbkg[niter], b/nbkg_total);
-    h_sigfrac->SetBinContent(i, s/nsig[niter]);
-    h_bkgfrac->SetBinContent(i, b/nbkg[niter]);
+    if (printall) printf("%16s\t%5.1f\t%9.2f\t%9.2f\t%9.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%f\t%f\t%f\t%e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, s/sqrt(b), s/sqrt(b+sigb), zpl, zpl_nobigw, s/nsig_nm1, s/nsig_total, b/nbkg_nm1, b/nbkg_total);
+    h_sigfrac->SetBinContent(i, s/nsig_nm1);
+    h_bkgfrac->SetBinContent(i, b/nbkg_nm1);
     if (b != 0)
       h_ssb->SetBinContent(i, s/sqrt(b));
     if (b+sigb > 0)
@@ -168,17 +166,17 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     if (!TMath::IsNaN(zpl_nobigw))
       h_proflik_nobigw->SetBinContent(i, zpl_nobigw);
 
-    if (zpl_nobigw > ssb) {
+    if (zpl > ssb) {
       value = sigHist->GetBinLowEdge(i);
       smax = s;
       bmax = b;
-      ssb = zpl_nobigw;
+      ssb = zpl;
     }
   }
   if (printall) {
-    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", value, smax, bmax, ssb, smax/nsig[niter], smax/nsig_total, bmax/nbkg[niter], bmax/nbkg_total);
+    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", value, smax, bmax, ssb, smax/nsig_nm1, smax/nsig_total, bmax/nbkg_nm1, bmax/nbkg_total);
   } else {
-    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(), value, smax, bmax, ssb, smax/nsig[niter], smax/nsig_total, bmax/nbkg[niter], bmax/nbkg_total);
+    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(), value, smax, bmax, ssb, smax/nsig_nm1, smax/nsig_total, bmax/nbkg_nm1, bmax/nbkg_total);
   }
 
   h_ssbsb->SetLineColor(kRed);
@@ -206,8 +204,8 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
       h_sigfrac->SetLineColor(kRed);
       h_bkgfrac->SetLineColor(kBlue);
       draw_in_order(h_sigfrac, h_bkgfrac);
-      c1->SaveAs(TString::Format("plots/SSB/iter%d/tau0100um/%s%s.pdf", niter, sigHist->GetName(), (logy ? "_log" : "")));
-      c1->SaveAs(TString::Format("plots/SSB/iter%d/tau0100um/%s%s.root", niter, sigHist->GetName(), (logy ? "_log" : "")));
+      c1->SaveAs(TString::Format("plots/SSB/iter%d/%s/%s%s.pdf", niter, signal, sigHist->GetName(), (logy ? "_log" : "")));
+      if (logy == 0) c1->SaveAs(TString::Format("plots/SSB/iter%d/%s/%s.root", niter, signal, sigHist->GetName()));
       delete c1;
     }
   }
@@ -232,14 +230,17 @@ int main() {
   printf("iteration %d\n", niter);
   slik = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", niter).Data(), true);
   slik_nobigw = new sigproflik(hnames, nvars, TString::Format("crab/CutPlay%d/", niter).Data(), false);
-  TFile* sigFile = TFile::Open(TString::Format("crab/CutPlay%d/mfv_neutralino_tau0100um_M0400_1pb.root", niter));
+  TFile* sigFile = TFile::Open(TString::Format("crab/CutPlay%d/%s_1pb.root", niter, signal));
   TFile* bkgFile = TFile::Open(TString::Format("crab/CutPlay%d/background.root", niter));
 
+  double nsig_nm1 = ((TH1F*)sigFile->Get("nm1"))->GetBinContent(1);
+  double nbkg_nm1 = ((TH1F*)bkgFile->Get("nm1"))->GetBinContent(1);
+  printf("nsig_nm1 = %f, nbkg_nm1 = %f\n", nsig_nm1, nbkg_nm1);
   if (!printall) printf("variable\t\tcut\t\ts\t\tb\tmax ssb\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n");
   for (int i = 0; i < nvars; i++) {
     TH1F* sigHist = (TH1F*)sigFile->Get(hnames[i]);
     TH1F* bkgHist = (TH1F*)bkgFile->Get(hnames[i]);
-    maxSSB(sigHist, bkgHist, hnames[i]);
+    maxSSB(sigHist, nsig_nm1, bkgHist, nbkg_nm1, hnames[i]);
   }
   delete slik;
   delete slik_nobigw;
