@@ -1,4 +1,4 @@
-SIGCALC_PATH  = ../../Tools/test/SigCalc
+SIGCALC_PATH  = ../../../Tools/test/SigCalc
 SIGCALC_OBJS  = $(SIGCALC_PATH)/*.o
 PROGNAME      = ssb
 SOURCES       = ssb.cc
