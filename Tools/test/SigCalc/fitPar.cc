@@ -16,9 +16,8 @@
 #include "fitPar.h"
 
 SigCalc* scGlobal;   // needs to be global to communicate with fcn (below)
-bool debug_fcn = false;
 
-int fitPar(SigCalc* sc, std::vector<bool> freePar, std::vector<double>& parVec, bool debug) {
+int fitPar(SigCalc* sc, std::vector<bool> freePar, std::vector<double>& parVec) {
   
 // set up start values, step sizes, etc. for fit
 
@@ -82,10 +81,8 @@ int fitPar(SigCalc* sc, std::vector<bool> freePar, std::vector<double>& parVec, 
 
   int status = minuit->Command("MIGRAD");
   if ( status != 0 ) {
-    debug_fcn = true;
     status = minuit->Command("SIMPLEX");
     status = minuit->Command("MIGRAD");
-    debug_fcn = false;
   }
 
   parVec.clear();
@@ -113,7 +110,7 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag) {
   }
   f = -2.*scGlobal->lnL(mu, bVec);
 
-  //  if ( debug_fcn ) {
+  //  if ( SigCalc::debugLevel >= 3 ) {
   //    for (int i=0; i<npar; i++) {
   //      cout << "i, par = " << i << "  " << par[i] << endl;
   //    }

@@ -21,6 +21,8 @@ public:
   double qmu(double mu, double& muHat, std::vector<double>& bHat, std::vector<double>& bHatHat);
   double qmu(double mu);
 
+  static int debugLevel;
+
 private:
   int m_numBck;
   double m_n;

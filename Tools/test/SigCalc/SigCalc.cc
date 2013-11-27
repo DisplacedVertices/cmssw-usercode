@@ -4,6 +4,8 @@
 #include "SigCalc.h"
 #include "fitPar.h"
 
+int SigCalc::debugLevel = 0;
+
 SigCalc::SigCalc(double n, double s, std::vector<double> mVec, std::vector<double> tauVec) {
   m_n = n;
   m_s = s;
