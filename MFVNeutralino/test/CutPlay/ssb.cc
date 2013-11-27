@@ -271,76 +271,87 @@ sigproflik* slik_nobigw = 0;
 sigproflik* slik_syst20 = 0;
 
 void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, const char* var) {
-  if (options.printall) printf("%16s\tcut\t\ts\t\tb\tsigb\t\tssb\tssbsb\tproflik\tnobigw\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n", sigHist->GetName());
-  int nbins = sigHist->GetNbinsX();
-  double xlow = sigHist->GetXaxis()->GetXmin();
-  double xup = sigHist->GetXaxis()->GetXmax();
-  TH1F* h_ssb = new TH1F("h_ssb", ";cut;ssb", nbins, xlow, xup);
+  if (options.printall)
+    printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", sigHist->GetName(), "cut", "s", "b", "sigb", "ssb", "ssbsb", "ssbsb20", "zplnobigw", "zpl", "zplsyst20", "sig frac", "sig eff", "bkg frac", "bkg eff");
+  const int nbins = sigHist->GetNbinsX();
+  const double xlow = sigHist->GetXaxis()->GetXmin();
+  const double xup = sigHist->GetXaxis()->GetXmax();
   TH1F* h_sigfrac = new TH1F("h_sigfrac", ";cut;sig frac", nbins, xlow, xup);
   TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
-  TH1F* h_ssbsb = new TH1F("h_ssbsb", ";cut;ssbsb", nbins, xlow, xup);
-  TH1F* h_ssbsb20 = new TH1F("h_ssbsb20", ";cut;ssbsb20", nbins, xlow, xup);
-  TH1F* h_proflik_syst20 = new TH1F("h_proflik_syst20", ";cut;asimov Z", nbins, xlow, xup);
-  TH1F* h_proflik = new TH1F("h_proflik", ";cut;asimov Z", nbins, xlow, xup);
-  TH1F* h_proflik_nobigw = new TH1F("h_proflik_nobigw", ";cut;asimov Z", nbins, xlow, xup);
+  TH1F* h_zssb = new TH1F("h_zssb", ";cut;ssb", nbins, xlow, xup);
+  TH1F* h_zssbsb = new TH1F("h_zssbsb", ";cut;ssbsb", nbins, xlow, xup);
+  TH1F* h_zssbsb20 = new TH1F("h_zssbsb20", ";cut;ssbsb20", nbins, xlow, xup);
+  TH1F* h_zpl_nobigw = new TH1F("h_zpl_nobigw", ";cut;asimov Z", nbins, xlow, xup);
+  TH1F* h_zpl = new TH1F("h_zpl", ";cut;asimov Z", nbins, xlow, xup);
+  TH1F* h_zpl_syst20 = new TH1F("h_zpl_syst20", ";cut;asimov Z", nbins, xlow, xup);
 
-  double value = 0;
+  double cut = 0;
   double smax = 0;
   double bmax = 0;
-  double ssb = 0;
+  double zmax = 0;
+
   for (int i = 1; i <= nbins; i++) {
-    double s = sigHist->GetBinContent(i);
-    double b = bkgHist->GetBinContent(i);
-    double sigb = bkgHist->GetBinError(i);
-    double zpl = slik->sig(var, i);
-    double zpl_nobigw = slik_nobigw->sig(var, i);
-    double zssbsb20 = s/sqrt(b+sigb*sigb + 0.04*b*b);
-    double zpl_syst20 = slik_syst20->sig(var, i);
-    if (options.printall) printf("%16s\t%5.1f\t%9.2f\t%9.2f\t%9.2f\t%9.2f\t%9.2f\t%6.2f\t%6.2f\t%6.2f\t%6.2f\t%f\t%f\t%f\t%e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, s/sqrt(b), s/sqrt(b+sigb*sigb), zssbsb20, zpl_nobigw, zpl, zpl_syst20, s/nsig_nm1, s/options.nsig_total(), b/nbkg_nm1, b/options.nbkg_total);
+    const double s = sigHist->GetBinContent(i);
+    const double b = bkgHist->GetBinContent(i);
+    const double sigb = bkgHist->GetBinError(i);
+
+    const double zssb = s/sqrt(b);
+    const double zssbsb = s/sqrt(b + sigb*sigb);
+    const double zssbsb20 = s/sqrt(b + sigb*sigb + 0.04*b*b);
+    const double zpl_nobigw = -1; //slik_nobigw->sig(var, i);
+    const double zpl = slik->sig(var, i);
+    const double zpl_syst20 = -1; //slik_syst20->sig(var, i);
+
+    if (options.printall)
+      printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssbsb, zssbsb20, zpl_nobigw, zpl, zpl_syst20, s/nsig_nm1, s/options.nsig_total(), b/nbkg_nm1, b/options.nbkg_total);
+
     h_sigfrac->SetBinContent(i, s/nsig_nm1);
     h_bkgfrac->SetBinContent(i, b/nbkg_nm1);
-    if (b != 0)
-      h_ssb->SetBinContent(i, s/sqrt(b));
-    if (b+sigb*sigb > 0)
-      h_ssbsb->SetBinContent(i, s/sqrt(b+sigb*sigb));
-    if (b > 0)
-      h_ssbsb20->SetBinContent(i, zssbsb20);                               
-    if (!TMath::IsNaN(zpl))
-      h_proflik->SetBinContent(i, zpl);
-    if (!TMath::IsNaN(zpl_nobigw))
-      h_proflik_nobigw->SetBinContent(i, zpl_nobigw);
-    if (!TMath::IsNaN(zpl_syst20))
-      h_proflik_syst20->SetBinContent(i, zpl_syst20);
 
-    if (zpl > ssb) {
-      value = sigHist->GetBinLowEdge(i);
+    if (b != 0)
+      h_zssb->SetBinContent(i, zssb);
+    if (b + sigb*sigb > 0)
+      h_zssbsb->SetBinContent(i, zssbsb);
+    if (b > 0)
+      h_zssbsb20->SetBinContent(i, zssbsb20);
+    if (!TMath::IsNaN(zpl_nobigw))
+      h_zpl_nobigw->SetBinContent(i, zpl_nobigw);
+    if (!TMath::IsNaN(zpl))
+      h_zpl->SetBinContent(i, zpl);
+    if (!TMath::IsNaN(zpl_syst20))
+      h_zpl_syst20->SetBinContent(i, zpl_syst20);
+
+    if (zpl > zmax) {
+      cut = sigHist->GetBinLowEdge(i);
       smax = s;
       bmax = b;
-      ssb = zpl;
+      zmax = zpl;
     }
   }
-  if (options.printall) {
-    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", value, smax, bmax, ssb, smax/nsig_nm1, smax/options.nsig_total(), bmax/nbkg_nm1, bmax/options.nbkg_total);
-  } else {
-    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(), value, smax, bmax, ssb, smax/nsig_nm1, smax/options.nsig_total(), bmax/nbkg_nm1, bmax/options.nbkg_total);
-  }
 
-  h_ssb->SetLineWidth(2);
-  h_ssbsb->SetLineWidth(2);
-  h_ssbsb20->SetLineWidth(2);
-  h_proflik->SetLineWidth(2);
-  h_proflik_nobigw->SetLineWidth(2);
-  h_ssbsb->SetLineColor(kRed);
-  h_ssbsb20->SetLineColor(6);
-  h_proflik_nobigw->SetLineColor(kBlue);
-  h_proflik->SetLineColor(kOrange+2);
-  h_proflik_syst20->SetLineColor(kGreen+2);
+  if (options.printall)
+    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", cut, smax, bmax, zmax, smax/nsig_nm1, smax/options.nsig_total(), bmax/nbkg_nm1, bmax/options.nbkg_total);
+  else
+    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(),  cut, smax, bmax, zmax, smax/nsig_nm1, smax/options.nsig_total(), bmax/nbkg_nm1, bmax/options.nbkg_total);
+
+  std::vector<TH1F*> zs = {h_zssb, h_zssbsb, h_zssbsb20, h_zpl_nobigw, h_zpl, h_zpl_syst20};
+  for (TH1F* h : zs)
+    h->SetLineWidth(2);
+  h_zssbsb->SetLineColor(kRed);
+  h_zssbsb20->SetLineColor(6);
+  h_zpl_nobigw->SetLineColor(kBlue);
+  h_zpl->SetLineColor(kOrange+2);
+  h_zpl_syst20->SetLineColor(kGreen+2);
+  h_sigfrac->SetLineColor(kRed);
+  h_bkgfrac->SetLineColor(kBlue);
+
   TLegend* leg = new TLegend(0.8,0.8,1,1);
-  leg->AddEntry(h_ssb, "s/#sqrt{b}", "L");
-  leg->AddEntry(h_ssbsb, "s/#sqrt{b+#sigma_{b}}", "L");
-  leg->AddEntry(h_ssbsb20, "s/#sqrt{b+#sigma_{b}+20%}", "L");
-  leg->AddEntry(h_proflik, "Z_{PL}", "L");
-  leg->AddEntry(h_proflik_nobigw, "Z_{PL} (no big weights)", "L");
+  leg->AddEntry(h_zssb, "s/#sqrt{b}", "L");
+  leg->AddEntry(h_zssbsb, "s/#sqrt{b+#sigma_{b}^{2}}", "L");
+  leg->AddEntry(h_zssbsb20, "s/#sqrt{b+#sigma_{b}^{2}+(0.2b)^{2}}", "L");
+  leg->AddEntry(h_zpl_nobigw, "Z_{PL} (no big weights)", "L");
+  leg->AddEntry(h_zpl, "Z_{PL}", "L");
+  leg->AddEntry(h_zpl_syst20, "Z_{PL} inc. 20% syst. unc.", "L");
 
   if (options.saveplots) {
     for (int logy = 0; logy < 2; ++logy) {
@@ -352,12 +363,9 @@ void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, cons
       c1->cd(3)->SetLogy(logy);
       bkgHist->Draw();
       c1->cd(2)->SetLogy(logy);
-      std::vector<TH1F*> v = {h_ssb, h_ssbsb, h_ssbsb20, h_proflik, h_proflik_nobigw, h_proflik_syst20};
-      draw_in_order(v);
+      draw_in_order(zs);
       leg->Draw();
       c1->cd(4)->SetLogy(logy);
-      h_sigfrac->SetLineColor(kRed);
-      h_bkgfrac->SetLineColor(kBlue);
       draw_in_order(std::vector<TH1F*>({h_sigfrac, h_bkgfrac}));
       std::string p = options.plot_path + "/" + options.signal_name + "/";
       p += var;
@@ -370,12 +378,12 @@ void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, cons
     }
   }
 
-  delete h_ssb;
-  delete h_ssbsb;
-  delete h_ssbsb20;
-  delete h_proflik;
-  delete h_proflik_nobigw;
-  delete h_proflik_syst20;
+  delete h_zssb;
+  delete h_zssbsb;
+  delete h_zssbsb20;
+  delete h_zpl;
+  delete h_zpl_nobigw;
+  delete h_zpl_syst20;
   delete h_sigfrac;
   delete h_bkgfrac;
   delete leg;
@@ -396,8 +404,8 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  const int nvars = 17;
-  const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01", "costhmombs", "mass", "jetsmassntks", "mass01", "jetsmassntks01", "pt", "ntracksptgt3", "sumpt2"};
+  const int nvars = 1;
+  const char* hnames[nvars] = {"bs2dsig"};
 
   slik = new sigproflik(hnames, nvars, true, -1);
   slik_nobigw = new sigproflik(hnames, nvars, false, -1);
