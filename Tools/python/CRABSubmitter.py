@@ -2,7 +2,7 @@
 
 import sys, os, threading, time, ConfigParser, StringIO
 from StringIO import StringIO
-from CRABTools import crab_popen
+from CRABTools import crab_popen, crab_submit_in_batches
     
 class ConfigParserEx(ConfigParser.ConfigParser):
     def set(self, section, option, value):
@@ -47,11 +47,19 @@ class CRABSubmitter:
                  **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
-            print 'CRABSubmitter init: mandatory proxy get (but you can skip it with ^C if you know what you are doing).'
+            print 'CRABSubmitter init: mandatory proxy get, will ask for password twice (but you can skip it with ^C if you know what you are doing).'
             os.system('voms-proxy-init -voms cms -valid 192:00')
+            os.system('myproxy-init -d -n -s myproxy.cern.ch')
             CRABSubmitter.get_proxy = False
 
+        self.username = os.environ['USER']
+        
+        if '/' in batch_name:
+            raise ValueError('/ not allowed in batch name')
         self.batch_name = batch_name
+        self.batch_dir = 'crab/%s' % batch_name
+        mkdirs_if_needed(self.batch_dir + '/publish_logs/')
+        
         self.testing = testing
         self.max_threads = max_threads
 
@@ -67,7 +75,7 @@ class CRABSubmitter:
             cfg.set('USER', 'ssh_control_persist', 'no')
 
         if working_dir_pattern.startswith('%BATCH/'):
-            working_dir_pattern = working_dir_pattern.replace('%BATCH', 'crab/%s' % batch_name)
+            working_dir_pattern = working_dir_pattern.replace('%BATCH', self.batch_dir)
         self.working_dir_pattern = working_dir_pattern
         cfg.set('USER', 'ui_working_dir', working_dir_pattern)
         mkdirs_if_needed(working_dir_pattern)
@@ -75,7 +83,7 @@ class CRABSubmitter:
         if not pset_fn_pattern.endswith('.py'):
             pset_fn_pattern = pset_fn_pattern + '.py'
         if pset_fn_pattern.startswith('%BATCH/'):
-            pset_fn_pattern = pset_fn_pattern.replace('%BATCH', 'crab/psets/%s' % batch_name)
+            pset_fn_pattern = pset_fn_pattern.replace('%BATCH', self.batch_dir + '/psets')
         self.pset_fn_pattern = pset_fn_pattern
         cfg.set('CMSSW', 'pset', pset_fn_pattern)
         mkdirs_if_needed(pset_fn_pattern)
@@ -116,18 +124,28 @@ class CRABSubmitter:
             cfg.set('USER', 'return_data', 1)
         else:
             cfg.set('USER', 'copy_data', 1)
+            publish_ok = True
             if data_retrieval == 'fnal':
                 cfg.set('USER', 'storage_element', 'T3_US_FNALLPC')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'fnal_resilient':
-                assert os.environ['USER'] == 'tucker'
+                publish_ok = False
                 cfg.set('USER', 'storage_element', 'cmssrm.fnal.gov')
-                cfg.set('USER', 'storage_path', '/srm/managerv2?SFN=/resilient/tucker/crabdump/')
+                cfg.set('USER', 'storage_path', '/srm/managerv2?SFN=/resilient/%s/crabdump/' % self.username)
+                cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
+                cfg.set('USER', 'check_user_remote_dir', 0)
+            elif data_retrieval == 'fnal_eos':
+                publish_ok = False
+                cfg.set('USER', 'storage_element', 'cmseos.fnal.gov')
+                cfg.set('USER', 'storage_path', '/srm/v2/server?SFN=/eos/uscms/store/user/%s/' % self.username)
                 cfg.set('USER', 'user_remote_dir', batch_name + '_' + '%(name)s')
                 cfg.set('USER', 'check_user_remote_dir', 0)
             elif data_retrieval == 'cornell':
                 cfg.set('USER', 'storage_element', 'T3_US_Cornell')
+
             if publish_data_name:
+                if not publish_ok:
+                    raise ValueError('refusing to set up publishing when writing to EOS/resilient')
                 cfg.set('USER', 'publish_data', 1)
                 cfg.set('USER', 'publish_data_name', publish_data_name)
                 cfg.set('USER', 'dbs_url_for_publication', 'https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet')
@@ -221,19 +239,26 @@ class CRABSubmitter:
 
         crab_output = 'Not run'
         if not self.testing:
-            if not os.path.isdir(crab_cfg_obj.get('USER', 'ui_working_dir')):
+            working_dir = crab_cfg_obj.get('USER', 'ui_working_dir')
+            if not os.path.isdir(working_dir):
                 cmd = 'crab -cfg %s -create' % crab_cfg_fn
                 if not create_only:
                     cmd += ' -submit'
                 crab_output = crab_popen(cmd)
                 ok = False
+                suball = False
                 for line in crab_output.split('\n'):
                     if 'Total of' in line and 'jobs submitted' in line:
                         ok = True
+                    if not create_only and 'The CRAB client will not submit task with more than 500 jobs.' in line:
+                        suball = True
                 if not ok:
+                    if suball:
+                        print '%s needs to sub in groups of 500, doing now' % sample.name
+                        crab_submit_in_batch(working_dir)
                     print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
             else:
-                print '\033[36;7m warning: \033[m sample %s not submitted, directory %s already exists' % (sample.name, crab_cfg_obj.get('USER', 'ui_working_dir'))
+                print '\033[36;7m warning: \033[m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
             os.system('rm -f %s' % ' '.join(cleanup))
         else:
             print 'in testing mode, not submitting anything.'
@@ -276,8 +301,8 @@ class CRABSubmitter:
             time.sleep(0.1)
         print 'done waiting for threads!'
 
-        os.system('mkdir -p /tmp/%s' % os.environ['USER'])
-        log = open('/tmp/%s/CRABSubmitter_%s.log' % (os.environ['USER'], self.batch_name), 'wt')
+        os.system('mkdir -p /tmp/%s' % self.username)
+        log = open('/tmp/%s/CRABSubmitter_%s.log' % (self.username, self.batch_name), 'wt')
         for name in sorted(results.keys()):
             log.write('*' * 250)
             log.write('\n\n%s\n' % name)

@@ -2,7 +2,6 @@ import sys, os
 from JMTucker.Tools.ROOTTools import ROOT
 
 def depize(s):
-  print repr(s)
   return float(s.replace('p','.').replace('n','-'))
 
 def cutplayMangle(filename):
@@ -14,16 +13,18 @@ def cutplayMangle(filename):
     
   x = file.Get('effs/triggers_pass_num')
 
-#  typedef std::vector<std::pair<std::string, float> > cutscan_t;
-#  std::map<std::string, cutscan_t> cutscans;
-
-
   cutscans = {}
-
+  nm1 = None
+  
   # Extract from the big list of bins the numbers separately for each
   # cut.
   for i in xrange(1, x.GetNbinsX()+1):
     label = x.GetXaxis().GetBinLabel(i)
+
+    if label == 'nm1':
+      nm1 = x.GetBinContent(i), x.GetBinError(i)
+      continue
+
     cut, cut_val = label.split('X')
 
     if not cutscans.has_key(cut):
@@ -34,9 +35,16 @@ def cutplayMangle(filename):
 
   output_fn = os.path.basename(filename).replace('.root', '_mangled.root')
   output_file = ROOT.TFile(output_fn, 'RECREATE')
-  
-  output_hists = []
 
+  if nm1 is not None:
+    h_nm1 = ROOT.TH1F('nm1', '', 1, 0, 1)
+    h_nm1.SetBinContent(1, nm1[0])
+    h_nm1.SetBinError(1, nm1[0])
+  else:
+    raise ValueError('did not find nm1 value in input')
+
+  output_hists = []
+  
   for cut_name, scan in cutscans.iteritems():
     if debug:
       print 'cut: %s' % cut_name

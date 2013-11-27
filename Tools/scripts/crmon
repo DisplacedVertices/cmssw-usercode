@@ -147,6 +147,8 @@ else:
 
 if options.renew_proxies:
     print 'renewing proxies'
+    os.system('voms-proxy-init -voms cms -valid 192:00')
+    os.system('myproxy-init -d -n -s myproxy.cern.ch')
     for d in dirs:
         if crab_is_using_server(d):
             print_run_cmd('crab -c %s -renewCredential' % d)
