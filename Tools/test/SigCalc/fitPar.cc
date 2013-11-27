@@ -1,114 +1,84 @@
 // Modified version of SigCalc from Glen Cowan, RHUL Physics
 
-// Uses TMinuit to fit the MLEs muHat, bHat and conditional MLEs bHatHat
+// Uses Minuit to fit the MLEs muHat, bHat and conditional MLEs bHatHat
 // used in profile likelihood ratio.
-// Inputs:     
-// mu    signal strength parameter (0 = background only, 1 = nominal).
-// n     number of events seen in data, e.g. generate from Poisson(mu*s+b)
-// s     expected number of signal events
-// m     vector of numbers of events seen in subsidiary measurements.
-// tau   defined by m_i ~ Poisson(tau_i*b_i), e.g., ratio of MC lumonisity
-//       to that of data sample.
 
 #include <cmath>
 #include <string>
 #include "TMinuit.h"
 #include "fitPar.h"
 
-SigCalc* scGlobal;   // needs to be global to communicate with fcn (below)
+const SigCalc* scGlobal; // needs to be global to communicate with fcn (below)
 
-int fitPar(SigCalc* sc, std::vector<bool> freePar, std::vector<double>& parVec) {
-  
-// set up start values, step sizes, etc. for fit
+int fitPar(const SigCalc* sc, const std::vector<bool>& freePar, std::vector<double>& pars) {
+  // Set up start values, step sizes, etc. for fit.
 
-  scGlobal = sc;                  // communicate to fcn via global
-  int npar = parVec.size();
+  scGlobal = sc; // communicate to fcn via global
+  const int npar = pars.size();
 
-  const int maxpar = 100;
-  double par[maxpar];
-  std::string parName[maxpar];
-  double stepSize[maxpar];
-  double minVal[maxpar];
-  double maxVal[maxpar];
-
-  for (int i=0; i<npar; i++) {
-    par[i] = parVec[i];
-  }
-
-  for (int i=0; i<npar; i++) {    // some of these overridden below
-    stepSize[i] = 0.1;
-    minVal[i] = 0.;
-    maxVal[i] = 1000000.;
-  }  
+  double par[npar];
+  std::string parName[npar];
+  double stepSize[npar];
+  double minVal[npar];
+  double maxVal[npar];
 
   parName[0] = "mu";
-  for (int i=1; i<npar; i++) {
-    char buf[128];
-    snprintf(buf, 128, "b%i", i);
-    parName[i] = buf;
+
+  for (int i = 0; i < npar; i++) {
+    par[i] = pars[i];
+    stepSize[i] = par[i] != 0 ? std::abs(par[i])*0.1 : 0.1;
+    minVal[i] = 0.;
+    maxVal[i] = 1000000.;
+
+    if (i > 0) {
+      char buf[128];
+      snprintf(buf, 128, "b%i", i-1);
+      parName[i] = buf;
+    }
   }
 
-  for (int i=0; i<npar; i++) {
-    if ( par[i] != 0 ) {
-      stepSize[i] = std::abs( par[i] ) * 0.1;
-    }
-    else {
-      stepSize[i] = 0.1;
-    }
-  }
-
-// Create the TMinuit object and define parameters
-
+  // Create the TMinuit object and define parameters.
   TMinuit* minuit = new TMinuit(npar);
-
-  minuit->SetPrintLevel(-1);
   int ierr = 0;
-  minuit->mnexcm("SET NOWarnings",0,0,ierr);
+  minuit->SetPrintLevel(SigCalc::debugLevel >= 2 ? 1 : -1);
+  if (SigCalc::debugLevel < 1)
+    minuit->mnexcm("SET NOWarnings", 0, 0, ierr);
 
   minuit->SetFCN(fcn);
-  for (int i=0; i<npar; i++) {
-    minuit->DefineParameter(i, parName[i].c_str(), 
-    par[i], stepSize[i], minVal[i], maxVal[i]);
-  }
-
-  for (int i=0; i<npar; i++) {
-    if ( !freePar[i] ) {
+  for (int i = 0; i < npar; i++) {
+    minuit->DefineParameter(i, parName[i].c_str(), par[i], stepSize[i], minVal[i], maxVal[i]);
+    if (!freePar[i])
       minuit->FixParameter(i);
-    }
   }
 
-// do the fit and extract results
-
+  // Do the fit and extract results.
   int status = minuit->Command("MIGRAD");
-  if ( status != 0 ) {
+  if (status != 0) {
     status = minuit->Command("SIMPLEX");
     status = minuit->Command("MIGRAD");
   }
 
-  parVec.clear();
-  int nFreePar = minuit->GetNumFreePars();
+  pars.clear();
+  const int nFreePar = minuit->GetNumFreePars();
   double fitpar[nFreePar], err[nFreePar];
-  for (int i=0; i<npar; i++) {
+  for (int i = 0; i < npar; ++i) {
     minuit->GetParameter(i, fitpar[i], err[i]);
-    parVec.push_back(fitpar[i]);
+    pars.push_back(fitpar[i]);
   }
 
   delete minuit;
-  return status;     // 0 = normal completion, 4 = MIGRAD not converged
-
+  return status; // 0 = normal completion, 4 = MIGRAD not converged
 }
 
-// fcn must be non-member function, uses global SigCalc object scGlobal
-
+// fcn must be non-member function, uses global SigCalc object scGlobal.
 void fcn(int& npar, double* deriv, double& f, double par[], int flag) {
-
-  int numBck = scGlobal->numBck();
+  const int numBck = scGlobal->numBck();
   double mu = par[0];
-  std::vector<double> bVec;
-  for (int i=0; i<numBck; i++) {
-    bVec.push_back(par[i+1]);
-  }
-  f = -2.*scGlobal->lnL(mu, bVec);
+  std::vector<double> b;
+  for (int i = 0; i < numBck; ++i)
+    b.push_back(par[i+1]);
+
+  f = -2.*scGlobal->lnL(mu, b);
 
   //  if ( SigCalc::debugLevel >= 3 ) {
   //    for (int i=0; i<npar; i++) {
@@ -117,26 +87,20 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag) {
   //    cout << "f = " << f << endl;
   //    cout << endl;
   //  }
-
 }
 
-// The function psi returns log of Poisson probability nu^n exp(-nu)
-// (the n! term is dropped).  For nu -> 0 and n = 0 the probability is 1,
-// i.e., psi returns zero.  The function avoids evaluating log(nu) for 
-// nu <= epsilon.
-
+// psi returns log of Poisson probability nu^n exp(-nu) (the n! term
+// is dropped). For nu -> 0 and n = 0 the probability is 1, i.e., psi
+// returns zero. The function avoids evaluating log(nu) for nu <=
+// epsilon.
 double psi(double n, double nu) {
-  const double epsilon = 1.e-6;
-  const double logOfSmallValue = -100.;
+  static const double epsilon = 1e-6;
+  static const double logOfSmallValue = -100; // JMTBAD should correspond to epsilon...
   double val;
-  if ( n <= epsilon && nu <= epsilon ) {
-    val = 0.;
-  }
-  else if ( n > epsilon && nu <= epsilon ) {
-    val = - n * logOfSmallValue; 
-  }
-  else {
-    val = n*log(nu) - nu;
-  }
-  return val;
+  if (n <= epsilon && nu <= epsilon)
+    return 0;
+  else if (n > epsilon && nu <= epsilon)
+    return -n * logOfSmallValue;  // JMTBAD two negatives here? 
+  else
+    return n*log(nu) - nu;
 }

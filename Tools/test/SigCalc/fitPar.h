@@ -6,8 +6,8 @@
 #include <vector>
 #include "SigCalc.h"
 
+int fitPar(const SigCalc* sc, const std::vector<bool>& freePar, std::vector<double>& parVec);
 void fcn(int& n, double* d, double& f, double par[], int flag);
-int fitPar(SigCalc* sc, std::vector<bool> freePar, std::vector<double>& parVec);
 double psi(double n, double nu);
 
 #endif
