@@ -63,7 +63,7 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
     printf("qmu, fitting nuisance parameters only for mu=%.4f: status=%i\n", mu, status);
     printf("  bHatHat: ");
     for (int i = 1; i < nbkg; ++i)
-      printf("%e ", bHat[i-1]);
+      printf("%e ", bHatHat[i-1]);
     printf("\n");
   }
 
