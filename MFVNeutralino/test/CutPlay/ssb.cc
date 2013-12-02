@@ -35,8 +35,8 @@ struct option_driver {
       moreprints(0),
       saveplots(0),
       plot_path("plots/SSB"),
-      signal_name("mfv_neutralino_tau0100um_M0400"),
       int_lumi(20000.),
+      signal_name("mfv_neutralino_tau0100um_M0400"),
       signal_xsec(1.),
       nbkg_total(211435861768.63),
       background_file_name("background.root")
@@ -63,7 +63,7 @@ struct option_driver {
   int parse_args(int argc, char** argv) {
     bool help = false;
 
-    int c, n;
+    int c;
     while (!help && (c = getopt(argc, argv, "hwpmsz:l:n:x:b:u:k:")) != -1) {
       switch (c) {
       case 'h':
@@ -154,7 +154,7 @@ void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
   std::sort(v.begin(), v.end(), f);
   std::string ex = cmd;
-  for (int i = 0; i < v.size(); ++i) {
+  for (size_t i = 0; i < v.size(); ++i) {
     if (i == 0) {
       v[i]->SetMinimum(0.01);
       v[i]->Draw(cmd);
@@ -229,12 +229,12 @@ struct sigproflik {
       lumis.push_back(1e-3/s.partial_weight()); // 1e-3 is go to fb^-1 from the xsecs in pb
     }
 
-    for (int i = 1; i < filenames.size(); ++i)
+    for (size_t i = 1; i < filenames.size(); ++i)
       taus.push_back(lumis[i] / lumis[0]);
         
     hists.resize(filenames.size());
 
-    for (int i = 0; i < filenames.size(); ++i) {
+    for (size_t i = 0; i < filenames.size(); ++i) {
       files.push_back(new TFile(filenames[i].c_str()));
       for (int j = 0; j < nvars; ++j)
         hists[i][vars[j]] = (TH1F*)files.back()->Get(vars[j]);
@@ -243,7 +243,7 @@ struct sigproflik {
     if (!bannered) {
       bannered = true;
       printf("sigproflik setup:\nint lumi 'data': %f/fb\n", lumis[0]);
-      for (int i = 1; i < filenames.size(); ++i)
+      for (size_t i = 1; i < filenames.size(); ++i)
         printf("bkg: %s   int lumi: %f/fb    tau: %f\n", filenames[i].c_str(), lumis[i], taus[i-1]);
     }
   }
@@ -253,10 +253,10 @@ struct sigproflik {
     double n = s;
     std::vector<double> ms;
     if (options.moreprints) printf("   proflik: b/m:");
-    for (int i = 1; i < filenames.size(); ++i) {
+    for (size_t i = 1; i < filenames.size(); ++i) {
       double m = hists[i][var]->GetBinContent(ibin);
       if (options.moreprints)
-        printf("    %s %i/%i\n", filenames[i].c_str(), int(m), samples[i].nevents);
+        printf("    %s %i/%i\n", filenames[i].c_str(), int(m), int(samples[i].nevents));
       n += m/taus[i-1];
       ms.push_back(m);
     }
@@ -272,7 +272,7 @@ sigproflik* slik_syst20 = 0;
 
 void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, const char* var) {
   if (options.printall)
-    printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", sigHist->GetName(), "cut", "s", "b", "sigb", "ssb", "ssbsb", "ssbsb20", "zplnobigw", "zpl", "zplsyst20", "sig frac", "sig eff", "bkg frac", "bkg eff");
+    printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", sigHist->GetName(), "cut", "s", "b", "sigb", "ssb", "ssbsb", "ssbsb20", "zplsmw", "zpl", "zpls20", "sig frac", "sig eff", "bkg frac", "bkg eff");
   const int nbins = sigHist->GetNbinsX();
   const double xlow = sigHist->GetXaxis()->GetXmin();
   const double xup = sigHist->GetXaxis()->GetXmax();
