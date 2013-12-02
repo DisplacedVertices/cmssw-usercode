@@ -13,8 +13,7 @@ SigCalc::SigCalc(double n, double s, const std::vector<double>& m, const std::ve
   m_m = m;
   m_tau = tau;
   m_numBck = m.size();
-  m_systFrac = 0;
-  m_numa = 0;
+  m_useSystFrac = false;
 }
 
 // The log-likelihood function.
@@ -26,7 +25,7 @@ SigCalc::SigCalc(double n, double s, const std::vector<double>& m, const std::ve
 double SigCalc::lnL(double mu, const std::vector<double>& b, const std::vector<double>& a) const {
   double btot = 0;
   for (int i = 0; i < numBck(); ++i) {
-    if (systFrac() > 0)
+    if (useSystFrac())
       btot += b[i] * a[bitoaj(i)];
     else
       btot += b[i];
@@ -35,9 +34,10 @@ double SigCalc::lnL(double mu, const std::vector<double>& b, const std::vector<d
   double logL = psi(n(), mu * s() + btot);
 
   for (int i = 0; i < numBck(); ++i) {
-    if (systFrac() > 0) {
-      double loga = log(a[bitoaj(i)]);
-      logL += psi(m(i), tau(i) * b[i] * a[bitoaj(i)]) - loga - loga*loga/2/systFrac()/systFrac();
+    if (useSystFrac()) {
+      int j = bitoaj(i);
+      double loga = log(a[j]);
+      logL += psi(m(i), tau(i) * b[i] * a[j]) - loga - loga*loga/2/systFrac(j)/systFrac(j);
     }
     else
       logL += psi(m(i), tau(i) * b[i]);
@@ -61,7 +61,7 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
     freePar.push_back(true);
   }
   
-  if (systFrac() > 0) {
+  if (useSystFrac()) {
     for (int j = 0; j < numa(); ++j) {
       parVec.push_back(1);
       freePar.push_back(true);
@@ -103,7 +103,7 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
     freePar.push_back(true);
   }
 
-  if (systFrac() > 0) {
+  if (useSystFrac()) {
     for (int j = 0; j < numa(); ++j) {
       parVec.push_back(1);
       freePar.push_back(true);
@@ -158,9 +158,10 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
 
 double getSignificance(double mu, double n, double s, const std::vector<double>& m, const std::vector<double>& tau, double systFrac) {
   SigCalc* sc = new SigCalc (n, s, m, tau);
-  sc->systFrac(systFrac);
-  sc->numa(1);
-  sc->bitoaj(std::vector<int>(m.size(), 0));
+  if (systFrac > 0) {
+    sc->systFrac(std::vector<double>({systFrac}));
+    sc->bitoaj(std::vector<int>(m.size(), 0));
+  }
   double qmu = sc->qmu(mu);
   double Z = sqrt(qmu);
 

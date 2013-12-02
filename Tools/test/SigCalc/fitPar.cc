@@ -76,7 +76,7 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag) {
   std::vector<double> b, a;
   for (int i = 0; i < scGlobal->numBck(); ++i)
     b.push_back(par[i+1]);
-  if (scGlobal->systFrac() > 0)
+  if (scGlobal->useSystFrac())
     for (int j = 0; j < scGlobal->numa(); ++j)
       a.push_back(par[scGlobal->numBck()+1+j]);
 
