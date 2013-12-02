@@ -2,7 +2,6 @@
 #define JMTucker_MFVNeutralinoFormats_interface_Event_h
 
 #include "TLorentzVector.h"
-//#include "JMTucker/MFVNeutralino/interface/EventTools.h"
 
 namespace mfv {
   static const int n_trigger_paths = 5;
@@ -13,6 +12,24 @@ struct MFVEvent {
   typedef unsigned char uchar;
   typedef unsigned short ushort;
   typedef unsigned int uint;
+
+  MFVEvent() {
+    gen_valid = passoldskim = 0;
+    gen_partons_in_acc = npfjets = npv = pv_ntracks = njets = 0;
+    pfjetpt4 = pfjetpt5 = pfjetpt6 = npu = bsx = bsy = bsz = pvx = pvy = pvz = pv_sumpt2 = jetpt4 = jetpt5 = jetpt6 = jet_sum_ht = metx = mety = metsig = metdphimin = 0;
+    for (int i = 0; i < 3; ++i)
+      njetsnopu[i] = nbtags[i] = nmu[i] = nel[i] = 0;
+    for (int i = 0; i < 2; ++i) {
+      gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
+      gen_decay_type[i] = 0;
+      for (int j = 0; j < 3; ++j)
+        gen_lsp_decay[i*3+j] = 0;
+    }
+    for (int i = 0; i < mfv::n_trigger_paths; ++i)
+      pass_trigger[i] = 0;
+    for (int i = 0; i < mfv::n_clean_paths; ++i)
+      pass_clean[i] = 0;
+  }
 
   static TLorentzVector p4(float pt, float eta, float phi, float mass) {
     TLorentzVector v;

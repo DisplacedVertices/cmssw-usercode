@@ -218,6 +218,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("pv3ddist",                      "dist3d(SV, PV) (cm)",                                                         100,    0,       0.5);
   hs.add("pv3derr",                       "#sigma(dist3d(SV, PV)) (cm)",                                                 100,    0,       0.1);
   hs.add("pv3dsig",                       "N#sigma(dist3d(SV, PV))",                                                     100,    0,     100);
+  hs.add("pvdz",                          "dz(SV, PV) (cm)",                                                             100,    0,       0.5);
+  hs.add("pvdzerr",                       "#sigma(dz(SV, PV)) (cm)",                                                     100,    0,       0.1);
+  hs.add("pvdzsig",                       "N#sigma(dz(SV, PV))",                                                         100,    0,     100);
 
   for (int j = 0; j < sv_num_indices; ++j) {
     const std::string ex = sv_index_names[j];
@@ -440,6 +443,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"pv3ddist",                aux.pv3ddist},
         {"pv3derr",                 aux.pv3derr},
         {"pv3dsig",                 aux.pv3dsig()},
+        {"pvdz",                    aux.pvdz()},
+        {"pvdzerr",                 aux.pvdzerr()},
+        {"pvdzsig",                 aux.pvdzsig()}
     };
 
     fill_multi(h_sv, isv, v, *weight);
