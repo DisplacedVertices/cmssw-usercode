@@ -404,8 +404,8 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  const int nvars = 1;
-  const char* hnames[nvars] = {"bs2dsig"};
+  const int nvars = 17;
+  const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01", "costhmombs", "mass", "jetsmassntks", "mass01", "jetsmassntks01", "pt", "ntracksptgt3", "sumpt2"};
 
   slik = new sigproflik(hnames, nvars, true, -1);
   slik_nobigw = new sigproflik(hnames, nvars, false, -1);
