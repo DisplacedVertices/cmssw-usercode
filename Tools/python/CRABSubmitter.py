@@ -102,6 +102,7 @@ class CRABSubmitter:
                 del kwargs[opt]
 
             cfg.set('CMSSW', 'datasetpath', 'None')
+            cfg.set('CRAB', 'scheduler', 'condor')
             # crab_cfg below has to set out CMSSW.number_of_jobs
 
         def get_two_max(s):
