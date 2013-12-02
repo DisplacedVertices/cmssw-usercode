@@ -159,6 +159,7 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
 double getSignificance(double mu, double n, double s, const std::vector<double>& m, const std::vector<double>& tau, double systFrac) {
   SigCalc* sc = new SigCalc (n, s, m, tau);
   sc->systFrac(systFrac);
+  sc->numa(1);
   sc->bitoaj(std::vector<int>(m.size(), 0));
   double qmu = sc->qmu(mu);
   double Z = sqrt(qmu);

@@ -15,11 +15,12 @@ public:
   double tau(int i) const { return m_tau[i]; }
   int numBck() const { return m_numBck; }
   double systFrac() const { return m_systFrac; }
-  int bitoaj(const int i) const { return m_bitoaj[i]; }
   int numa() const { return m_numa; }
+  int bitoaj(const int i) const { return m_bitoaj[i]; }
 
-  void systFrac(double x) { m_systFrac = x > 0 ? x : 0; }
-  void bitoaj(const std::vector<int>& x) { m_bitoaj = x; m_numa = int(x.size()); }
+  void systFrac(const double x) { m_systFrac = x > 0 ? x : 0; }
+  void numa(int na) { m_numa = na; }
+  void bitoaj(const std::vector<int>& x) { m_bitoaj = x; }
 
   double lnL(double mu, const std::vector<double>& b, const std::vector<double>& a) const;
   double qmu(double mu, double& muHat, std::vector<double>& bHat, std::vector<double>& bHatHat) const;
