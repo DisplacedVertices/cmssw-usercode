@@ -7,7 +7,7 @@ ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 ROOTLIBS     := $(shell root-config --nonew --libs)
-CFLAGS       += $(ROOTCFLAGS) -I$(SIGCALC_PATH) -std=c++0x
+CFLAGS       += $(ROOTCFLAGS) -I$(SIGCALC_PATH) -std=c++0x -Wall
 LIBS         += $(ROOTLIBS)
 LIBS         += -lMinuit
 LDFLAGS       = -O
@@ -28,3 +28,4 @@ SigCalc:
 
 clean:	
 	-rm -f ${PROGNAME} ${OBJECTS}
+	$(MAKE) -C $(SIGCALC_PATH) clean
