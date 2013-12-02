@@ -44,6 +44,7 @@ class CRABSubmitter:
                  ssh_control_persist = False,
                  crab_cfg_modifier = None,
                  aaa = False,
+                 manual_datasets = None,
                  **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
@@ -88,6 +89,22 @@ class CRABSubmitter:
         cfg.set('CMSSW', 'pset', pset_fn_pattern)
         mkdirs_if_needed(pset_fn_pattern)
 
+        if manual_datasets is not None:
+            if job_control_from_sample:
+                raise ValueError('unable to do job_control_from_sample when doing manual_datasets')
+
+            self.manual_datasets = manual_datasets
+
+            for opt in 'total_number_of_events events_per_job'.split():
+                if not kwargs.has_key(opt):
+                    raise ValueError('must specify %s in manual_datasets mode' % opt)
+                setattr(self, 'manual_%s' % opt, kwargs[opt])
+                del kwargs[opt]
+
+            cfg.set('CMSSW', 'datasetpath', 'None')
+            cfg.set('CRAB', 'scheduler', 'condor')
+            # crab_cfg below has to set out CMSSW.number_of_jobs
+
         def get_two_max(s):
             l = []
             for opt in s.split():
@@ -99,8 +116,7 @@ class CRABSubmitter:
             return l
 
         self.job_control_from_sample = job_control_from_sample
-        if not job_control_from_sample:
-            self.job_control_from_sample = False
+        if not job_control_from_sample and manual_datasets is None:
             if len(job_splitting) < 2:
                 job_splitting = get_two_max('total_number_of_events events_per_job number_of_jobs')
             if len(job_splitting) < 2:
@@ -150,17 +166,18 @@ class CRABSubmitter:
                 cfg.set('USER', 'publish_data_name', publish_data_name)
                 cfg.set('USER', 'dbs_url_for_publication', 'https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet')
 
-        self.use_ana_dataset = use_ana_dataset
-        self.use_parent_dataset = use_parent_dataset
-        datasetpath = '%(dataset)s'
-        if use_ana_dataset:
-            datasetpath = '%(ana_dataset)s'
-        elif use_parent_dataset:
-            datasetpath = '%(parent_dataset)s'
-        cfg.set('CMSSW', 'datasetpath', datasetpath)
+        if not self.manual_datasets:
+            self.use_ana_dataset = use_ana_dataset
+            self.use_parent_dataset = use_parent_dataset
+            datasetpath = '%(dataset)s'
+            if use_ana_dataset:
+                datasetpath = '%(ana_dataset)s'
+            elif use_parent_dataset:
+                datasetpath = '%(parent_dataset)s'
+            cfg.set('CMSSW', 'datasetpath', datasetpath)
 
-        if use_parent:
-            cfg.set('CMSSW', 'use_parent', 1)
+            if use_parent:
+                cfg.set('CMSSW', 'use_parent', 1)
 
         if get_edm_output:
             cfg.set('CMSSW', 'get_edm_output', 1)
@@ -169,7 +186,7 @@ class CRABSubmitter:
             cfg.set('CRAB', 'scheduler', 'remoteGlidein')
             cfg.set('GRID', 'data_location_override', self.aaa_locations)
             cfg.set('GRID', 'remove_default_blacklist', 1)
-            
+
         if len(other_cfg_lines) % 3 != 0:
             raise ValueError('other_cfg_lines must be flat sequence of (section, option, value, ...) triplets')
         for i in xrange(0, len(other_cfg_lines), 3):
@@ -188,9 +205,16 @@ class CRABSubmitter:
         cfg = ConfigParserEx()
         cfg.readfp(StringIO(self.crab_cfg_template))
         cfg.interpolate(sample)
-        dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url # assume if use_parent_dataset the dbs_url is the same
-        if dbs_url:
-            cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
+
+        if not self.manual_datasets:
+            dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url # assume if use_parent_dataset the dbs_url is the same
+            if dbs_url:
+                cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
+        else:
+            cfg.set('USER', 'script_exe', sample.manual_script_fn)
+            cfg.set('CMSSW', 'number_of_jobs', sample.manual_script_njobs)
+            cfg.set('CMSSW', 'events_per_job', '-1') # totally fake, will be re-written at batch job run time
+
         if self.job_control_from_sample:
             for cmd in sample.job_control_commands(ana=self.use_ana_dataset):
                 if cmd:
@@ -221,11 +245,108 @@ class CRABSubmitter:
         open(pset_fn, 'wt').write(pset)
         return pset_fn, pset
 
-    def submit(self, sample, cleanup_crab_cfg=True, cleanup_pset=False, cleanup_pset_pyc=True, create_only=False):
+    def manual_splits(self, filenevs):
+        splits = []
+        files = []
+        skipsum = 0
+        totevsum = 0
+        evsum = 0
+        curr = 0
+
+        while curr < len(filenevs):
+            if len(filenevs[curr]) < 3:
+                fn, nevents = filenevs[curr]
+                skip = 0
+            else:
+                fn, nevents, skip = filenevs[curr]
+
+            files.append(fn)
+            skipsum += skip
+            evsum += nevents - skip
+
+            advance = True
+
+            if evsum >= self.manual_events_per_job:
+                breakmax = False
+
+                nevinjob = self.manual_events_per_job
+                if self.manual_total_number_of_events >= 0 and totevsum + nevinjob >= self.manual_total_number_of_events:
+                    breakmax = True
+                    nevinjob = self.manual_total_number_of_events - totevsum
+
+                splits += [(files, nevinjob, skipsum)]
+                totevsum += nevinjob
+
+                if breakmax:
+                    break
+
+                if evsum > self.manual_events_per_job:
+                    filenevs[curr] = (fn, nevents, nevents - (evsum - self.manual_events_per_job))
+                    advance = False
+
+                files, skipsum, evsum = [], 0, 0
+
+            if advance:
+                curr += 1
+
+        if files and self.manual_total_number_of_events < 0:
+            splits += [(files, self.manual_events_per_job, skipsum)]
+
+        return splits
+    
+    def manual_script(self, sample, splits):
+        script = '''#!/bin/sh
+
+NJob=$1
+
+SPLITTING_DETAILS
+
+echo Messing with pset.py
+cat >> pset.py <<EOF
+process.source.fileNames = "${FileNames[$NJob]}".split(',')
+process.maxEvents.input = ${NEvents[$NJob]}
+process.source.skipEvents = ${SkipEvents[$NJob]}
+EOF
+
+cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml -p pset.py
+ECODE=$?
+echo manual exit code was $ECODE, done!
+exit $ECODE
+'''
+
+        splitting_details = []
+        for i, (files, maxev, skipev) in enumerate(splits):
+            njob = i+1
+            mangled_files = []
+            for file in files:
+                if file.startswith('/store') or file.startswith('file:'):
+                    mangled_files.append(file)
+                else:
+                    mangled_files.append('file:' + file)
+            splitting_details.append('FileNames[%i]=%s' % (njob, ','.join(mangled_files)))
+            splitting_details.append('NEvents[%i]=%i' % (njob, maxev))
+            splitting_details.append('SkipEvents[%i]=%i' % (njob, skipev))
+        splitting_details.sort()
+
+        script_fn = 'crabsubmitter.%s.%s.sh' % (self.batch_name, sample.name)
+        script = script.replace('SPLITTING_DETAILS', '\n'.join(splitting_details))
+        open(script_fn, 'wt').write(script)
+        return script_fn, script
+
+    def submit(self, sample, cleanup_crab_cfg=True, cleanup_pset=False, cleanup_pset_pyc=True, cleanup_manual_script=True, create_only=False):
         print 'batch %s, submit sample %s' % (self.batch_name, sample.name)
 
         cleanup = []
 
+        if self.manual_datasets:
+            filenevs = self.manual_datasets[sample.name]
+            splits = self.manual_splits(filenevs)
+            manual_script_fn, manual_script = self.manual_script(sample, splits)
+            sample.manual_script_njobs = len(splits)  # to communicate with crab_cfg
+            sample.manual_script_fn = manual_script_fn # ditto
+            if cleanup_manual_script:
+                cleanup.append(manual_script_fn)
+                    
         crab_cfg_fn, crab_cfg, crab_cfg_obj = self.crab_cfg(sample)
         if cleanup_crab_cfg:
             cleanup.append(crab_cfg_fn)
@@ -271,6 +392,10 @@ class CRABSubmitter:
             print 'crab.cfg:\n---------'
             print crab_cfg
             raw_input('continue?')
+            if self.manual_datasets:
+                print 'manual script:\n---------'
+                print manual_script
+                raw_input('continue?')
             print '\n'
 
         return crab_output
