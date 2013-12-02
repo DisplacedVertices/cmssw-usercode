@@ -32,6 +32,8 @@ private:
   const double max_chi2dof;
   const double min_p;
   const double min_pt;
+  const double min_tksjetsntkpt;
+  const double min_missdisttksjetsntkpvsig;
   const double max_abs_eta;
   const double max_abs_rapidity;
   const double min_mass;
@@ -70,6 +72,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     min_p(cfg.getParameter<double>("min_p")),
     min_pt(cfg.getParameter<double>("min_pt")),
+    min_tksjetsntkpt(cfg.getParameter<double>("min_tksjetsntkpt")),
+    min_missdisttksjetsntkpvsig(cfg.getParameter<double>("min_missdisttksjetsntkpvsig")),
     max_abs_eta(cfg.getParameter<double>("max_abs_eta")),
     max_abs_rapidity(cfg.getParameter<double>("max_abs_rapidity")),
     min_mass(cfg.getParameter<double>("min_mass")),
@@ -113,6 +117,8 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.mass[mfv::PTracksOnly] >= min_mass && 
     vtx.p4(mfv::PTracksOnly).P() >= min_p &&
     vtx.pt[mfv::PTracksOnly] >= min_pt &&
+    vtx.pt[mfv::PTracksPlusJetsByNtracks] >= min_tksjetsntkpt &&
+    vtx.missdistpvsig(mfv::PTracksPlusJetsByNtracks) >= min_missdisttksjetsntkpvsig &&
     fabs(vtx.eta[mfv::PTracksOnly]) < max_abs_eta &&
     fabs(vtx.p4(mfv::PTracksOnly).Rapidity()) < max_abs_rapidity &&
     vtx.costhmombs[mfv::PTracksOnly] >= min_costhmombs &&
