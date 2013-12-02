@@ -13,6 +13,8 @@ SigCalc::SigCalc(double n, double s, const std::vector<double>& m, const std::ve
   m_m = m;
   m_tau = tau;
   m_numBck = m.size();
+  m_systFrac = 0;
+  m_numa = 0;
 }
 
 // The log-likelihood function.
@@ -21,17 +23,25 @@ SigCalc::SigCalc(double n, double s, const std::vector<double>& m, const std::ve
 // confused with the m values in the SigCalc object, which are
 // estimates based on MC or sidebands.
 
-double SigCalc::lnL(double mu, const std::vector<double>& b) const {
-  const int nbkg = int(b.size());
-
+double SigCalc::lnL(double mu, const std::vector<double>& b, const std::vector<double>& a) const {
   double btot = 0;
-  for (int i = 0; i < nbkg; ++i)
-    btot += b[i];
+  for (int i = 0; i < numBck(); ++i) {
+    if (systFrac() > 0)
+      btot += b[i] * a[bitoaj(i)];
+    else
+      btot += b[i];
+  }
 
   double logL = psi(n(), mu * s() + btot);
 
-  for (int i = 0; i < nbkg; ++i)
-    logL += psi(m(i), tau(i) * b[i]);
+  for (int i = 0; i < numBck(); ++i) {
+    if (systFrac() > 0) {
+      double loga = log(a[bitoaj(i)]);
+      logL += psi(m(i), tau(i) * b[i] * a[bitoaj(i)]) - loga - loga*loga/2/systFrac()/systFrac();
+    }
+    else
+      logL += psi(m(i), tau(i) * b[i]);
+  }
 
   return logL;
 }
@@ -39,8 +49,6 @@ double SigCalc::lnL(double mu, const std::vector<double>& b) const {
 // Returns qmu = - 2 ln lambda(mu), where lambda = profile likelihood
 // ratio.
 double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::vector<double>& bHatHat) const {
-  const int nbkg = numBck();
-
   // Fix mu to input value and fit for (HatHat) nuisance parameters.
 
   std::vector<double> parVec; // mu is first, then the b, then the a
@@ -48,23 +56,39 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
   parVec.push_back(mu);
   freePar.push_back(false);
 
-  for (int i = 0; i < nbkg; ++i) {
+  for (int i = 0; i < numBck(); ++i) {
     parVec.push_back(m(i)/tau(i));   // m/tau as starting values
     freePar.push_back(true);
+  }
+  
+  if (systFrac() > 0) {
+    for (int j = 0; j < numa(); ++j) {
+      parVec.push_back(1);
+      freePar.push_back(true);
+    }
   }
 
   int status = fitPar(this, freePar, parVec);
 
+  std::vector<double> aHatHat, aHat;
+
   bHatHat.clear();
-  for (int i = 0; i < nbkg; ++i)
+  for (int i = 0; i < numBck(); ++i)
     bHatHat.push_back(parVec[i+1]);
+  aHatHat.clear();
+  for (int j = 0; j < numa(); ++j)
+    aHatHat.push_back(parVec[numBck()+1+j]);
 
   if (status != 0 || debugLevel >= 2) {
+    printf("\n");
     printf("qmu, fitting nuisance parameters only for mu=%.4f: status=%i\n", mu, status);
     printf("  bHatHat: ");
-    for (int i = 1; i < nbkg; ++i)
-      printf("%e ", bHatHat[i-1]);
-    printf("\n");
+    for (int i = 0; i < numBck(); ++i)
+      printf("%e ", bHatHat[i]);
+    printf("\n  aHatHat: ");
+    for (int j = 0; j < numa(); ++j)
+      printf("%e ", aHatHat[j]);
+    printf("\n\n");
   }
 
   // Fit all parameters.
@@ -74,31 +98,45 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
   parVec.push_back(0.5);
   freePar.push_back(true);
 
-  for (int i = 0; i < nbkg; ++i) {
+  for (int i = 0; i < numBck(); ++i) {
     parVec.push_back(m(i)/tau(i));
     freePar.push_back(true);
+  }
+
+  if (systFrac() > 0) {
+    for (int j = 0; j < numa(); ++j) {
+      parVec.push_back(1);
+      freePar.push_back(true);
+    }
   }
 
   status = fitPar(this, freePar, parVec);
   
   muHat = parVec[0];
   bHat.clear();
-  for (int i=0; i < nbkg; ++i)
+  for (int i = 0; i < numBck(); ++i)
     bHat.push_back(parVec[i+1]);
+  aHat.clear();
+  for (int j = 0; j < numa(); ++j)
+    aHatHat.push_back(parVec[numBck()+1+j]);
 
   if (status != 0 || debugLevel >= 2) {
+    printf("\n");
     printf("qmu, fitting all parameters: status=%i, muHat = %.4f\n", status, muHat);
     printf("  bHat: ");
-    for (int i = 1; i < nbkg; ++i)
-      printf("%e ", bHat[i-1]);
-    printf("\n");
+    for (int i = 0; i < numBck(); ++i)
+      printf("%e ", bHat[i]);
+    printf("\n  aHat: ");
+    for (int j = 0; j < numa(); ++j)
+      printf("%e ", aHat[j]);
+    printf("\n\n");
   }
 
-  const double lnLmu_bHatHat = lnL(mu, bHatHat);
-  const double lnLmuHat_bHat = lnL(muHat, bHat);
-  const double q = 2.*(lnLmuHat_bHat - lnLmu_bHatHat);
+  const double lnLmu_xHatHat = lnL(mu, bHatHat, aHatHat);
+  const double lnLmuHat_xHat = lnL(muHat, bHat, aHat);
+  const double q = 2.*(lnLmuHat_xHat - lnLmu_xHatHat);
   if (q < 0 || debugLevel >= 2)
-    printf("lnLmuHat_bHat: %e  lnLmu_bHatHat: %e  q: %e\n", lnLmuHat_bHat, lnLmu_bHatHat, q);
+    printf("lnLmuHat_xHat: %e  lnLmu_xHatHat: %e  q: %e\n", lnLmuHat_xHat, lnLmu_xHatHat, q);
   return q;
 }
 
@@ -120,7 +158,8 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
 
 double getSignificance(double mu, double n, double s, const std::vector<double>& m, const std::vector<double>& tau, double systFrac) {
   SigCalc* sc = new SigCalc (n, s, m, tau);
-  sc->setSystFrac(systFrac);
+  sc->systFrac(systFrac);
+  sc->bitoaj(std::vector<int>(m.size(), 0));
   double qmu = sc->qmu(mu);
   double Z = sqrt(qmu);
 

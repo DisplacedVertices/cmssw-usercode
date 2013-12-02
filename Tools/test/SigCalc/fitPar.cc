@@ -32,7 +32,8 @@ int fitPar(const SigCalc* sc, const std::vector<bool>& freePar, std::vector<doub
 
     if (i > 0) {
       char buf[128];
-      snprintf(buf, 128, "b%i", i-1);
+      bool isa = i - sc->numBck() > 0;
+      snprintf(buf, 128, "%s%i", (isa ? "a" : "b"), i-1 - isa*sc->numBck());
       parName[i] = buf;
     }
   }
@@ -59,11 +60,10 @@ int fitPar(const SigCalc* sc, const std::vector<bool>& freePar, std::vector<doub
   }
 
   pars.clear();
-  const int nFreePar = minuit->GetNumFreePars();
-  double fitpar[nFreePar], err[nFreePar];
   for (int i = 0; i < npar; ++i) {
-    minuit->GetParameter(i, fitpar[i], err[i]);
-    pars.push_back(fitpar[i]);
+    double fitpar, err;
+    minuit->GetParameter(i, fitpar, err);
+    pars.push_back(fitpar);
   }
 
   delete minuit;
@@ -72,13 +72,15 @@ int fitPar(const SigCalc* sc, const std::vector<bool>& freePar, std::vector<doub
 
 // fcn must be non-member function, uses global SigCalc object scGlobal.
 void fcn(int& npar, double* deriv, double& f, double par[], int flag) {
-  const int numBck = scGlobal->numBck();
   double mu = par[0];
-  std::vector<double> b;
-  for (int i = 0; i < numBck; ++i)
+  std::vector<double> b, a;
+  for (int i = 0; i < scGlobal->numBck(); ++i)
     b.push_back(par[i+1]);
+  if (scGlobal->systFrac() > 0)
+    for (int j = 0; j < scGlobal->numa(); ++j)
+      a.push_back(par[scGlobal->numBck()+1+j]);
 
-  f = -2.*scGlobal->lnL(mu, b);
+  f = -2.*scGlobal->lnL(mu, b, a);
 
   //  if ( SigCalc::debugLevel >= 3 ) {
   //    for (int i=0; i<npar; i++) {
@@ -95,12 +97,11 @@ void fcn(int& npar, double* deriv, double& f, double par[], int flag) {
 // epsilon.
 double psi(double n, double nu) {
   static const double epsilon = 1e-6;
-  static const double logOfSmallValue = -100; // JMTBAD should correspond to epsilon...
-  double val;
+  static const double logeps = log(epsilon);
   if (n <= epsilon && nu <= epsilon)
     return 0;
   else if (n > epsilon && nu <= epsilon)
-    return -n * logOfSmallValue;  // JMTBAD two negatives here? 
+    return n * logeps;
   else
     return n*log(nu) - nu;
 }

@@ -15,10 +15,13 @@ public:
   double tau(int i) const { return m_tau[i]; }
   int numBck() const { return m_numBck; }
   double systFrac() const { return m_systFrac; }
+  int bitoaj(const int i) const { return m_bitoaj[i]; }
+  int numa() const { return m_numa; }
 
-  void setSystFrac(double x) { m_systFrac = x; }
+  void systFrac(double x) { m_systFrac = x > 0 ? x : 0; }
+  void bitoaj(const std::vector<int>& x) { m_bitoaj = x; m_numa = int(x.size()); }
 
-  double lnL(double mu, const std::vector<double>& b) const;
+  double lnL(double mu, const std::vector<double>& b, const std::vector<double>& a) const;
   double qmu(double mu, double& muHat, std::vector<double>& bHat, std::vector<double>& bHatHat) const;
   double qmu(double mu) const {
     double muHat;
@@ -35,6 +38,8 @@ private:
   std::vector<double> m_m;
   std::vector<double> m_tau;
   double m_systFrac;
+  int m_numa;
+  std::vector<int> m_bitoaj;
 };
 
 double getSignificance(double mu, double n, double s, const std::vector<double>& m, const std::vector<double>& tau, double systFrac);
