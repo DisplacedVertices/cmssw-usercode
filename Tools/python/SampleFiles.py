@@ -11,7 +11,7 @@ def set(process, batch, sample, nevents):
     for fn, n in SampleFiles[batch][sample]:
         files.append('file:' + fn)
         ntot += n
-        if ntot > nevents:
+        if nevents > 0 and ntot > nevents:
             break
     process.source.fileNames = files
     process.maxEvents.input = nevents
