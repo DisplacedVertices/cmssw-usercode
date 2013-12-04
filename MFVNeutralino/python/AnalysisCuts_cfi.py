@@ -21,4 +21,5 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                min_njetssharetks01 = cms.int32(0),
                                min_mass01 = cms.double(0),
                                min_jetsmassntks01 = cms.double(0),
+                               min_tksjetsntkmass01 = cms.double(0),
                                )
