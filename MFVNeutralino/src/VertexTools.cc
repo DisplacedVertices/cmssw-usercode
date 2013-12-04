@@ -207,13 +207,21 @@ namespace mfv {
       pv2sv = sv.position() - primary_vertex->position();
 
     for (const math::XYZTLorentzVector& mom : momenta) {
-      costhmombs.push_back(costh2(mom, bs2sv));
-      if (primary_vertex != 0) {
-        costhmompv2d.push_back(costh2(mom, pv2sv));
-        costhmompv3d.push_back(costh3(mom, pv2sv));
-        missdistpv.push_back(miss_dist(*primary_vertex, sv, mom));
+      if (mom.pt() > 0) {
+        costhmombs.push_back(costh2(mom, bs2sv));
+        if (primary_vertex != 0) {
+          costhmompv2d.push_back(costh2(mom, pv2sv));
+          costhmompv3d.push_back(costh3(mom, pv2sv));
+          missdistpv.push_back(miss_dist(*primary_vertex, sv, mom));
+        }
+        else {
+          costhmompv2d.push_back(-2);
+          costhmompv3d.push_back(-2);
+          missdistpv.push_back(Measurement1D(1e9,-1));
+        }
       }
       else {
+        costhmombs.push_back(-2);
         costhmompv2d.push_back(-2);
         costhmompv3d.push_back(-2);
         missdistpv.push_back(Measurement1D(1e9,-1));

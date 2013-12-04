@@ -28,6 +28,7 @@ private:
   const int min_nsemilepmuons;
   const int min_nleptons;
 
+  const bool apply_vertex_cuts;
   const edm::InputTag vertex_src;
   const int min_nvertex;
   const int min_ntracks01;
@@ -52,6 +53,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_sum_ht(cfg.getParameter<double>("min_sum_ht")),
     min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
+    apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
     min_ntracks01(cfg.getParameter<int>("min_ntracks01")),
@@ -100,32 +102,34 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (mevent->jet_sum_ht < min_sum_ht)
     return false;
 
-  edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
+  if (apply_vertex_cuts) {
+    edm::Handle<MFVVertexAuxCollection> vertices;
+    event.getByLabel(vertex_src, vertices);
 
-  const int nsv = int(vertices->size());
-  if (nsv < min_nvertex)
-    return false;
-
-  if (min_ntracks01 > 0 || min_maxtrackpt01 > 0 || min_njetssharetks01 > 0 || min_mass01 > 0 || min_jetsmassntks01 > 0 || min_tksjetsntkmass01 > 0) {
-    if (nsv < 2)
+    const int nsv = int(vertices->size());
+    if (nsv < min_nvertex)
       return false;
 
-    const MFVVertexAux& v0 = vertices->at(0);
-    const MFVVertexAux& v1 = vertices->at(1);
+    if (min_ntracks01 > 0 || min_maxtrackpt01 > 0 || min_njetssharetks01 > 0 || min_mass01 > 0 || min_jetsmassntks01 > 0 || min_tksjetsntkmass01 > 0) {
+      if (nsv < 2)
+        return false;
 
-    if (v0.ntracks + v1.ntracks < min_ntracks01)
-      return false;
-    if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
-      return false;
-    if (v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks] < min_njetssharetks01)
-      return false;
-    if (v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly] < min_mass01)
-      return false;
-    if (v0.mass[mfv::PJetsByNtracks] + v1.mass[mfv::PJetsByNtracks] < min_jetsmassntks01)
-      return false;
-    if (v0.mass[mfv::PTracksPlusJetsByNtracks] + v1.mass[mfv::PTracksPlusJetsByNtracks] < min_tksjetsntkmass01)
-      return false;
+      const MFVVertexAux& v0 = vertices->at(0);
+      const MFVVertexAux& v1 = vertices->at(1);
+
+      if (v0.ntracks + v1.ntracks < min_ntracks01)
+        return false;
+      if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
+        return false;
+      if (v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks] < min_njetssharetks01)
+        return false;
+      if (v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly] < min_mass01)
+        return false;
+      if (v0.mass[mfv::PJetsByNtracks] + v1.mass[mfv::PJetsByNtracks] < min_jetsmassntks01)
+        return false;
+      if (v0.mass[mfv::PTracksPlusJetsByNtracks] + v1.mass[mfv::PTracksPlusJetsByNtracks] < min_tksjetsntkmass01)
+        return false;
+    }
   }
 
   return true;

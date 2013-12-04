@@ -700,6 +700,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True, chu
         print working_dir, ': just one file found, copying'
         cmd = '%scp %s %s' % ('dc' if 'dcap' in files[0] else '', files[0], new_name)
         os.system(cmd)
+        os.chmod(new_name, 0644)
     else:
         hadd(new_name, files, chunk_size)
         

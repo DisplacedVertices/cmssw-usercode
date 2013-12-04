@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
                                    jet_src = cms.InputTag('selectedPatJetsPF'),
-                                   vertex_src = cms.InputTag('mfvSelectedVerticesTightTmp'),
+                                   vertex_src = cms.InputTag('mfvSelectedVerticesTmp'),
                                    input_is_refs = cms.bool(True),
                                    tag_info_name = cms.string('secondaryVertexMaxDR6p0'),
                                    min_vertex_track_weight = cms.double(0.5),

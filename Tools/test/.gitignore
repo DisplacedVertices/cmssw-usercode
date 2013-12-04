@@ -4,3 +4,4 @@ out.*.gz
 *dbslog
 crab.cfg
 prescales_temp
+crab

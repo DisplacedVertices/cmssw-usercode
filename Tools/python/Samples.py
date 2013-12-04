@@ -20,9 +20,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 2
-    ANA_HASH = '1ed9d997e29199117961ba7531f8a4c8'
-    PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v10'
+    ANA_HASH = ''
+    PUBLISH_USER = ''
+    ANA_VERSION = 'v11'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -355,24 +355,20 @@ for sample in all_samples:
     exec '%s = sample' % sample.name
     samples_by_name[sample.name] = sample
 
-for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
-    sample.ana_ready = True
+#for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
+#    sample.ana_ready = True
 
 ########################################################################
 
-# Exceptions to the defaults (except for the MFV signal samples, which
-# are already applied above).
-
-MultiJetPk2012B.ana_hash = '5f39779c81ab17a4a334adf2625b21f7'
-
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
-ttbarhadronic.total_events = 10512444
-qcdht0100.total_events = 50104518
-qcdht0250.total_events = 26837078
-qcdht0500.total_events = 30449292
-qcdht1000.total_events = 13418863
-
+qcdht0100.total_events     = 50354518  # 50129518
+qcdht0500.total_events     = 30474292  # 30599292
+qcdht1000.total_events     = 13768863  # 13843863
+ttbardilep.total_events    = 12144013  # 12119013
+ttbarhadronic.total_events = 10412444  # 10537444
+ttbarsemilep.total_events  = 25374818  # 25424818
+                            
 ########################################################################
 
 def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
@@ -397,7 +393,7 @@ def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
 
 ########################################################################
 
-__all__ = ['data_samples', 'auxiliary_data_samples', 'background_samples', 'smaller_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
+__all__ = ['data_samples', 'auxiliary_data_samples', 'ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
 __all__ += [s.name for s in all_samples]
 
 if __name__ == '__main__':
@@ -428,7 +424,7 @@ if __name__ == '__main__':
         check_nevents(all_mc_samples, path)
     elif 'merge' in sys.argv:
         files = []
-        output = []
+        output = 'merge.root'
         norm_to = 1
         path_for_nevents = ''
         for x in sys.argv:

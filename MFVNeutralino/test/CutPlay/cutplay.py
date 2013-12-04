@@ -119,21 +119,18 @@ process.p = cms.EndPath(process.effs)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, ttbar_samples, qcd_samples
+    from JMTucker.Tools.Samples import *
+    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400] + ttbar_samples + qcd_samples
     for sample in ttbar_samples + qcd_samples:
-        sample.total_events = {'ttbarhadronic': 5268722,
-                               'ttbarsemilep':  12674909,
-                               'ttbardilep':    6059506,
-                               'qcdht0100':     25064759,
-                               'qcdht0250':     13531039,
-                               'qcdht0500':     15274646,
-                               'qcdht1000':     6034431}[sample.name]
+        sample.total_events = sample.nevents_orig/2
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('CutPlay3',
-                       job_control_from_sample = True,
-                       use_ana_dataset = True,
+    from JMTucker.Tools.SampleFiles import SampleFiles
+    
+    cs = CRABSubmitter('CutPlayV11',
+                       total_number_of_events = -1,
+                       events_per_job = 25000,
+                       manual_datasets = SampleFiles['MFVNtupleV11'],
                        )
-    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400] + ttbar_samples + qcd_samples
     cs.submit_all(samples)
 

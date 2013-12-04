@@ -106,6 +106,16 @@ struct MFVVertexAux {
   float pv3derr;
   float pv3dsig() const { return sig(pv3ddist, pv3derr); }
 
+  float pvdz() const { return sqrt(pv3ddist*pv3ddist - pv2ddist*pv2ddist); }
+  float pvdzerr() const {
+    // JMTBAD
+    float z = pvdz();
+    if (z == 0)
+      return -1;
+    return sqrt(pv3ddist*pv3ddist*pv3derr*pv3derr + pv2ddist*pv2ddist*pv2derr*pv2derr)/z;
+  }
+  float pvdzsig() const { return sig(pvdz(), pvdzerr()); }
+
   float costhmombs  [mfv::NMomenta];
   float costhmompv2d[mfv::NMomenta];
   float costhmompv3d[mfv::NMomenta];
