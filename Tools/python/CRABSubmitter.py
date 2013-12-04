@@ -91,15 +91,12 @@ class CRABSubmitter:
 
         self.manual_datasets = manual_datasets
         if manual_datasets is not None:
-            if job_control_from_sample:
-                raise ValueError('unable to do job_control_from_sample when doing manual_datasets')
-
-
-            for opt in 'total_number_of_events events_per_job'.split():
-                if not kwargs.has_key(opt):
-                    raise ValueError('must specify %s in manual_datasets mode' % opt)
-                setattr(self, 'manual_%s' % opt, kwargs[opt])
-                del kwargs[opt]
+            if not job_control_from_sample:
+                for opt in 'total_number_of_events events_per_job'.split():
+                    if not kwargs.has_key(opt):
+                        raise ValueError('must specify %s in manual_datasets mode' % opt)
+                    setattr(self, 'manual_%s' % opt, kwargs[opt])
+                    del kwargs[opt]
 
             cfg.set('CMSSW', 'datasetpath', 'None')
             cfg.set('CRAB', 'scheduler', 'condor')
@@ -166,8 +163,8 @@ class CRABSubmitter:
                 cfg.set('USER', 'publish_data_name', publish_data_name)
                 cfg.set('USER', 'dbs_url_for_publication', 'https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet')
 
+        self.use_ana_dataset = use_ana_dataset
         if not self.manual_datasets:
-            self.use_ana_dataset = use_ana_dataset
             self.use_parent_dataset = use_parent_dataset
             datasetpath = '%(dataset)s'
             if use_ana_dataset:
@@ -210,15 +207,15 @@ class CRABSubmitter:
             dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url # assume if use_parent_dataset the dbs_url is the same
             if dbs_url:
                 cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
+            if self.job_control_from_sample:
+                for cmd in sample.job_control_commands(ana=self.use_ana_dataset):
+                    if cmd:
+                        cfg.set('CMSSW', *cmd)
         else:
             cfg.set('USER', 'script_exe', sample.manual_script_fn)
             cfg.set('CMSSW', 'number_of_jobs', sample.manual_script_njobs)
             cfg.set('CMSSW', 'events_per_job', '-1') # totally fake, will be re-written at batch job run time
 
-        if self.job_control_from_sample:
-            for cmd in sample.job_control_commands(ana=self.use_ana_dataset):
-                if cmd:
-                    cfg.set('CMSSW', *cmd)
         if self.crab_cfg_modifier is not None:
             ret = self.crab_cfg_modifier(sample)
             for entry in ret:
@@ -245,13 +242,21 @@ class CRABSubmitter:
         open(pset_fn, 'wt').write(pset)
         return pset_fn, pset
 
-    def manual_splits(self, filenevs):
+    def manual_splits(self, sample, filenevs):
         splits = []
         files = []
         skipsum = 0
         totevsum = 0
         evsum = 0
         curr = 0
+
+        if self.job_control_from_sample:
+            jcc = dict(sample.job_control_commands(ana=self.use_ana_dataset))
+            total_number_of_events = jcc['total_number_of_events']
+            events_per_job = jcc['events_per_job']
+        else:
+            total_number_of_events = self.manual_total_number_of_events
+            events_per_job = self.manual_events_per_job
 
         while curr < len(filenevs):
             if len(filenevs[curr]) < 3:
@@ -266,13 +271,13 @@ class CRABSubmitter:
 
             advance = True
 
-            if evsum >= self.manual_events_per_job:
+            if evsum >= events_per_job:
                 breakmax = False
 
-                nevinjob = self.manual_events_per_job
-                if self.manual_total_number_of_events >= 0 and totevsum + nevinjob >= self.manual_total_number_of_events:
+                nevinjob = events_per_job
+                if total_number_of_events >= 0 and totevsum + nevinjob >= total_number_of_events:
                     breakmax = True
-                    nevinjob = self.manual_total_number_of_events - totevsum
+                    nevinjob = total_number_of_events - totevsum
 
                 splits += [(files, nevinjob, skipsum)]
                 totevsum += nevinjob
@@ -280,8 +285,8 @@ class CRABSubmitter:
                 if breakmax:
                     break
 
-                if evsum > self.manual_events_per_job:
-                    filenevs[curr] = (fn, nevents, nevents - (evsum - self.manual_events_per_job))
+                if evsum > events_per_job:
+                    filenevs[curr] = (fn, nevents, nevents - (evsum - events_per_job))
                     advance = False
 
                 files, skipsum, evsum = [], 0, 0
@@ -289,8 +294,8 @@ class CRABSubmitter:
             if advance:
                 curr += 1
 
-        if files and self.manual_total_number_of_events < 0:
-            splits += [(files, self.manual_events_per_job, skipsum)]
+        if files and total_number_of_events < 0:
+            splits += [(files, events_per_job, skipsum)]
 
         return splits
     
@@ -335,7 +340,7 @@ exit $ECODE
 
         if self.manual_datasets:
             filenevs = self.manual_datasets[sample.name]
-            splits = self.manual_splits(filenevs)
+            splits = self.manual_splits(sample, filenevs)
             manual_script_fn, manual_script = self.manual_script(sample, splits)
             sample.manual_script_njobs = len(splits)  # to communicate with crab_cfg
             sample.manual_script_fn = manual_script_fn # ditto
