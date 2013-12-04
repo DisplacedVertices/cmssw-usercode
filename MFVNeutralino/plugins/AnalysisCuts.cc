@@ -24,7 +24,7 @@ private:
   const int max_njets;
   const std::vector<int> min_nbtags;
   const std::vector<int> max_nbtags;
-  const double min_sum_ht;
+  const double min_sumht;
   const int min_nsemilepmuons;
   const int min_nleptons;
 
@@ -33,9 +33,9 @@ private:
   const int min_nvertex;
   const int min_ntracks01;
   const double min_maxtrackpt01;
-  const int min_njetssharetks01;
-  const double min_mass01;
-  const double min_jetsmassntks01;
+  const int min_njetsntks01;
+  const double min_tkonlymass01;
+  const double min_jetsntkmass01;
   const double min_tksjetsntkmass01;
 };
 
@@ -50,7 +50,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     max_njets(cfg.getParameter<int>("max_njets")),
     min_nbtags(cfg.getParameter<std::vector<int> >("min_nbtags")),
     max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
-    min_sum_ht(cfg.getParameter<double>("min_sum_ht")),
+    min_sumht(cfg.getParameter<double>("min_sumht")),
     min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
@@ -58,9 +58,9 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
     min_ntracks01(cfg.getParameter<int>("min_ntracks01")),
     min_maxtrackpt01(cfg.getParameter<double>("min_maxtrackpt01")),
-    min_njetssharetks01(cfg.getParameter<int>("min_njetssharetks01")),
-    min_mass01(cfg.getParameter<double>("min_mass01")),
-    min_jetsmassntks01(cfg.getParameter<double>("min_jetsmassntks01")),
+    min_njetsntks01(cfg.getParameter<int>("min_njetsntks01")),
+    min_tkonlymass01(cfg.getParameter<double>("min_tkonlymass01")),
+    min_jetsntkmass01(cfg.getParameter<double>("min_jetsntkmass01")),
     min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01"))
 {
 }
@@ -99,7 +99,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->nbtags[i] < min_nbtags[i] || mevent->nbtags[i] > max_nbtags[i])
       return false;
 
-  if (mevent->jet_sum_ht < min_sum_ht)
+  if (mevent->jet_sum_ht < min_sumht)
     return false;
 
   if (apply_vertex_cuts) {
@@ -110,7 +110,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex)
       return false;
 
-    if (min_ntracks01 > 0 || min_maxtrackpt01 > 0 || min_njetssharetks01 > 0 || min_mass01 > 0 || min_jetsmassntks01 > 0 || min_tksjetsntkmass01 > 0) {
+    if (min_ntracks01 > 0 || min_maxtrackpt01 > 0 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0) {
       if (nsv < 2)
         return false;
 
@@ -121,11 +121,11 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
       if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
         return false;
-      if (v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks] < min_njetssharetks01)
+      if (v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks] < min_njetsntks01)
         return false;
-      if (v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly] < min_mass01)
+      if (v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly] < min_tkonlymass01)
         return false;
-      if (v0.mass[mfv::PJetsByNtracks] + v1.mass[mfv::PJetsByNtracks] < min_jetsmassntks01)
+      if (v0.mass[mfv::PJetsByNtracks] + v1.mass[mfv::PJetsByNtracks] < min_jetsntkmass01)
         return false;
       if (v0.mass[mfv::PTracksPlusJetsByNtracks] + v1.mass[mfv::PTracksPlusJetsByNtracks] < min_tksjetsntkmass01)
         return false;
