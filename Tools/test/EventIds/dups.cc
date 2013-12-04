@@ -1,18 +1,28 @@
-// rootg++ -std=c++0x dups.cc -o dups
+// rootg++ -std=c++0x -Wall -Werror dups.cc -o dups
 
+#include <set>
+#include <map>
 #include <tuple>
 #include "TFile.h"
 #include "TTree.h"
 
-int main(int argc, char** argv) {
-  if (argc < 3) {
-    fprintf(stderr, "usage: eiddups input.root path_to_tree\n");
-    return 1;
-  }
+const char* path = 0;
 
-  printf("reading %s:%s\n", argv[1], argv[2]);
-  TFile* f = TFile::Open(argv[1]);
-  TTree* t = (TTree*)f->Get(argv[2]);
+typedef std::tuple<unsigned, unsigned, unsigned> RLE;
+std::map<RLE, std::set<int> > m;
+
+void process_file(const char* fn, int fileno) {
+  printf("reading %s:%s (fileno %i)\n", fn, path, fileno);
+  TFile* f = TFile::Open(fn);
+  if (!f->IsOpen()) {
+    fprintf(stderr, "could not open file!\n");
+    exit(1);
+  }
+  TTree* t = (TTree*)f->Get(path);
+  if (!t) {
+    fprintf(stderr, "could not read tree!\n");
+    exit(1);
+  }
 
   unsigned run;
   unsigned lumi;
@@ -21,42 +31,59 @@ int main(int argc, char** argv) {
   t->SetBranchAddress("lumi", &lumi);
   t->SetBranchAddress("event", &event);
 
-  typedef std::tuple<unsigned, unsigned, unsigned> RLE;
-  std::map<RLE, int> m;
-
   for (long i = 0, ie = t->GetEntries(); i < ie; ++i) {
     if (t->LoadTree(i) < 0) break;
     if (t->GetEntry(i) <= 0) continue;
     if (i % 500000 == 0) {
-      printf("\r%li/%li", i, ie);
-      fflush(stdout);
+      fprintf(stderr, "\r%li/%li", i, ie);
+      fflush(stderr);
     }
     
     RLE rle(run, lumi, event);
-
     if (m.find(rle) == m.end())
-      m[rle] = 1;
+      m[rle] = std::set<int>({fileno});
     else
-      ++m[rle];
+      m[rle].insert(fileno);
   }
-  printf("\r                        \r");
-  fflush(stdout);
+  fprintf(stderr, "\r                                     \r");
+  fflush(stderr);
+
+  delete f;
+}
+
+int main(int argc, char** argv) {
+  if (argc < 4) {
+    fprintf(stderr, "usage: eiddups path_to_tree scan_format input_1.root [input_2.root ...] \n");
+    return 1;
+  }
+
+  path = argv[1];
+  const char* fmt = argv[2];
+  printf("scanning with fmt %s\n", fmt);
+
+  for (int i = 3; i < argc; ++i) {
+    int fileno;
+    int c = sscanf(argv[i], fmt, &fileno); // JMTBAD I hope you don't care about your system
+    if (c != 1) {
+      fprintf(stderr, "could not scan %s for file number\n", argv[i]);
+      return 1;
+    }
+
+    process_file(argv[i], fileno);
+  }
 
   int dup_count = 0;
-  std::vector<RLE> dups;
   for (auto p : m) {
-    if (p.second > 1) {
-      dups.push_back(p.first);
+    if (p.second.size() > 1) {
+      if (dup_count == 0)
+        printf("duplicates:\n");
+      printf("%u,%u,%u : ", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      for (int fileno : p.second)
+        printf("%i ", fileno);
+      printf("\n");
       ++dup_count;
     }
   }
 
-  delete f;
-
-  if (dup_count) {
-    printf("duplicates:\n");
-    for (const RLE& r : dups)
-      printf("%u,%u,%u\n", std::get<0>(r), std::get<1>(r), std::get<2>(r));
-    return 1;
-  }
+  return dup_count > 0;
 }
