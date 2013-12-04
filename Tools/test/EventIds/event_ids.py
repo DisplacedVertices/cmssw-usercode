@@ -1,10 +1,13 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
-process.options.wantSummary = True
-process.TFileService.fileName = cms.string('eid.root')
+from JMTucker.Tools import SampleFiles
+SampleFiles.set(process, 'MFVNtupleV11', 'mfv_neutralino_tau1000um_M0400', 500)
 
-process.evids = cms.EDAnalyzer('EventIdRecorder', check_gen_particles = cms.bool(True))
+process.options.wantSummary = True
+process.TFileService.fileName = cms.string('evids.root')
+
+process.evids = cms.EDAnalyzer('EventIdRecorder')
 process.p = cms.Path(process.evids)
 
 process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
