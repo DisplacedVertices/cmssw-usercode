@@ -10,9 +10,6 @@ process.load('JMTucker.MFVNeutralino.Histos_cff')
 
 process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvHistos)
 
-process.eid = cms.EDAnalyzer('EventIdRecorder')
-process.peid = cms.Path(process.eid)
-
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     samples = Samples.ttbar_samples + Samples.qcd_samples
