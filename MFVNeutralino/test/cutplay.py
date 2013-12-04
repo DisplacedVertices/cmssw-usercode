@@ -6,8 +6,11 @@ process.TFileService.fileName = 'cutplay.root'
 process.source.fileNames = glob_store('/store/user/tucker/mfv_neutralino_tau0100um_M0400/mfvntuple_v10/5c05eb42bbf1b04cf0f00b96bae48439/*')
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 7,
-                                                 min_maxtrackpt = 5)
+vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
+                                                 min_maxtrackpt = 0)
+#vtx_sel = process.mfvSelectedVerticesTight.clone(min_njetssharetks = 1,
+#                                                 min_bs2dsig = 5,
+#                                                 min_ntracksptgt3 = 2)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
@@ -23,8 +26,26 @@ changes.append(('nm1', '', ''))
 for i in xrange(0,40):
     changes.append(('ntracksX%i'%i, 'min_ntracks = %i'%i, ''))
 
+for i in xrange(0,20):
+    changes.append(('ntracksptgt3X%i'%i, 'min_ntracksptgt3 = %i'%i, ''))
+
 for i in xrange(0,10):
     changes.append(('njetssharetksX%i'%i, 'min_njetssharetks = %i'%i, ''))
+
+for i in xrange(0,100,2):
+    changes.append(('tksjetsntkptX%i'%i, 'min_tksjetsntkpt = %i'%i, ''))
+
+for i in xrange(0,100):
+    changes.append(('tksjetsntkmassX%i'%i, 'min_tksjetsntkmass = %i'%i, ''))
+
+#for i in xrange(-50,50):
+#    changes.append(('costhtksjetsntkmombsX%s'%pize(0.02*i,2), 'min_costhtksjetsntkmombs = %f'%(0.02*i), ''))
+
+for i in xrange(0,200,5):
+    changes.append(('sumpt2X%i'%i, 'min_sumpt2 = %i'%i, ''))
+
+for i in xrange(0,30):
+    changes.append(('maxtrackptX%i'%i, 'min_maxtrackpt = %i'%i, ''))
 
 for i in xrange(0,100):
     changes.append(('drminX%s'%pize(0.01*i,2), 'max_drmin = %f'%(0.01*i), ''))
@@ -35,41 +56,44 @@ for i in xrange(0,28):
 for i in xrange(0,30):
     changes.append(('bs2dsigX%s'%pize(0.5*i,1), 'min_bs2dsig = %f'%(0.5*i), ''))
 
-for i in xrange(0,30):
-    changes.append(('maxtrackptX%i'%i, 'min_maxtrackpt = %i'%i, ''))
+for i in xrange(0,5000):
+    changes.append(('sum_htX%i'%i, '', 'min_sum_ht = %i'%i))
+
+for i in xrange(0,10):
+    changes.append(('nsemilepmuonsX%i'%i, '', 'min_nsemilepmuons = %i'%i))
+
+for i in xrange(0,10):
+    changes.append(('nleptonsX%i'%i, '', 'min_nleptons = %i'%i))
 
 for i in xrange(0,80):
     changes.append(('ntracks01X%i'%i, '', 'min_ntracks01 = %i'%i))
 
-for i in xrange(0,20):
-    changes.append(('njetssharetks01X%i'%i, '', 'min_njetssharetks01 = %i'%i))
-
 for i in xrange(0,60):
     changes.append(('maxtrackpt01X%i'%i, '', 'min_maxtrackpt01 = %i'%i))
 
-for i in xrange(-50,50):
-    changes.append(('costhmombsX%s'%pize(0.02*i,2), 'min_costhmombs = %f'%(0.02*i), ''))
-
-for i in xrange(0,100,2):
-    changes.append(('massX%i'%i, 'min_mass = %i'%i, ''))
-
-for i in xrange(0,100,5):
-    changes.append(('jetsmassntksX%i'%i, 'min_jetsmassntks = %i'%i, ''))
-
-for i in xrange(0,200,4):
-    changes.append(('mass01X%i'%i, '', 'min_mass01 = %i'%i))
-
-for i in xrange(0,200,10):
-    changes.append(('jetsmassntks01X%i'%i, '', 'min_jetsmassntks01 = %i'%i))
-
-for i in xrange(0,100,2):
-    changes.append(('ptX%i'%i, 'min_pt = %i'%i, ''))
-
 for i in xrange(0,20):
-    changes.append(('ntracksptgt3X%i'%i, 'min_ntracksptgt3 = %i'%i, ''))
+    changes.append(('njetssharetks01X%i'%i, '', 'min_njetssharetks01 = %i'%i))
 
-for i in xrange(0,200,5):
-    changes.append(('sumpt2X%i'%i, 'min_sumpt2 = %i'%i, ''))
+for i in xrange(0,200):
+    changes.append(('tksjetsntkmass01X%i'%i, '', 'min_tksjetsntkmass01X%i'%i))
+
+#for i in xrange(-50,50):
+#    changes.append(('costhmombsX%s'%pize(0.02*i,2), 'min_costhmombs = %f'%(0.02*i), ''))
+
+#for i in xrange(0,100,2):
+#    changes.append(('massX%i'%i, 'min_mass = %i'%i, ''))
+
+#for i in xrange(0,100,5):
+#    changes.append(('jetsmassntksX%i'%i, 'min_jetsmassntks = %i'%i, ''))
+
+#for i in xrange(0,200,4):
+#    changes.append(('mass01X%i'%i, '', 'min_mass01 = %i'%i))
+
+#for i in xrange(0,200,10):
+#    changes.append(('jetsmassntks01X%i'%i, '', 'min_jetsmassntks01 = %i'%i))
+
+#for i in xrange(0,100,2):
+#    changes.append(('ptX%i'%i, 'min_pt = %i'%i, ''))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
@@ -106,7 +130,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                'qcdht1000':     6034431}[sample.name]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('CutPlay2',
+    cs = CRABSubmitter('CutPlay3',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        )
