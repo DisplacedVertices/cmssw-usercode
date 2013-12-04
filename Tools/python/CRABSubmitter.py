@@ -306,6 +306,7 @@ cat >> pset.py <<EOF
 process.source.fileNames = "${FileNames[$NJob]}".split(',')
 process.maxEvents.input = ${NEvents[$NJob]}
 process.source.skipEvents = ${SkipEvents[$NJob]}
+del process.source.firstLuminosityBlock
 EOF
 
 cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml -p pset.py
@@ -369,7 +370,7 @@ exit $ECODE
                 ok = False
                 suball = False
                 for line in crab_output.split('\n'):
-                    if 'Total of' in line and 'jobs submitted' in line:
+                    if 'Total of' in line and ('jobs created' if create_only else 'jobs submitted') in line:
                         ok = True
                     if not create_only and 'The CRAB client will not submit task with more than 500 jobs.' in line:
                         suball = True
