@@ -67,6 +67,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_svdist3d_v_lspdist3d;
   TH2F* h_svdist2d_v_minlspdist2d;
   TH2F* h_svdist2d_v_minbsdist2d;
+  TH2F* h_sv0pvdz_v_sv1pvdz;
+  TH2F* h_sv0pvdzsig_v_sv1pvdzsig;
 
   TH1F* h_pair2dcompatscss;
   TH1F* h_pair2dcompat;
@@ -257,6 +259,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_svdist3d_v_lspdist3d = fs->make<TH2F>("h_svdist3d_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);dist3d(sv #0, #1) (cm)", 600, 0, 3, 600, 0, 3);
   h_svdist2d_v_minlspdist2d = fs->make<TH2F>("h_svdist2d_v_minlspdist2d", ";min dist2d(gen vtx #0, #1) (cm);dist2d(sv #0, #1) (cm)", 600, 0, 3, 600, 0, 3);
   h_svdist2d_v_minbsdist2d = fs->make<TH2F>("h_svdist2d_v_mindist2d", ";min dist2d(sv, bs) (cm);dist2d(sv #0, #1) (cm)", 600, 0, 3, 600, 0, 3);
+  h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
+  h_sv0pvdzsig_v_sv1pvdzsig = fs->make<TH2F>("h_sv0pvdzsig_v_sv1pvdzsig", ";N#sigma(sv #1 dz to PV);sv N#sigma(#0 dz to PV)", 100, 0, 50, 100, 0, 50);
 
   h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
   h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
@@ -471,13 +475,17 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_svdist2d_v_lspdist2d->Fill(mevent->lspdist2d(), svdist2d, *weight);
     h_svdist3d_v_lspdist3d->Fill(mevent->lspdist3d(), svdist3d, *weight);
     h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, *weight);
+    h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz());
+    h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig());
   }
 
   for (int ivtx = 0; ivtx < nsv; ++ivtx) {
-    const reco::Vertex vtxi = mfv::aux_to_reco(auxes->at(ivtx));
+    const MFVVertexAux& auxi = auxes->at(ivtx);
+    const reco::Vertex vtxi = mfv::aux_to_reco(auxi);
 
     for (int jvtx = ivtx + 1; jvtx < nsv; ++jvtx) {
-      const reco::Vertex vtxj = mfv::aux_to_reco(auxes->at(jvtx));
+      const MFVVertexAux& auxj = auxes->at(jvtx);
+      const reco::Vertex vtxj = mfv::aux_to_reco(auxj);
 
       Measurement1D pair2ddist = distcalc_2d.distance(vtxi, vtxj);
       Measurement1D pair3ddist = distcalc_3d.distance(vtxi, vtxj);
