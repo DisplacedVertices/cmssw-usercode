@@ -3,9 +3,11 @@
 #include <map>
 #include <vector>
 #include <getopt.h>
+#include "Math/QuantFuncMathCore.h"
 #include "TCanvas.h"
 #include "TError.h"
 #include "TFile.h"
+#include "TGraphAsymmErrors.h"
 #include "TH1.h"
 #include "TLegend.h"
 #include "TMath.h"
@@ -23,6 +25,8 @@ struct option_driver {
   double signal_xsec;
   double nsig_total() { return int_lumi * signal_xsec; }
   double nbkg_total;
+  double nsig_nm1;
+  double nbkg_nm1;
   std::string file_path;
   std::string signal_file_suffix() { return TString::Format("%ipb", int(signal_xsec)).Data(); }
   std::string background_file_name;
@@ -39,6 +43,8 @@ struct option_driver {
       signal_name("mfv_neutralino_tau0100um_M0400"),
       signal_xsec(1.),
       nbkg_total(211435861768.63),
+      nsig_nm1(1.),
+      nbkg_nm1(1.),
       background_file_name("background.root")
   {}
 
@@ -209,12 +215,57 @@ bool weight_files() {
   return true;
 }
 
+double get_nm1(TFile* f) {
+  TH1F* h = (TH1F*)f->Get("nm1");
+  return h == 0 ? 1 : h->GetBinContent(1);
+}
+
+struct intvl {
+  double lower;
+  double upper;
+  double hat;
+
+  intvl() : lower(0), upper(1) {}
+};
+
+intvl clopper_pearson(double n_on, double n_tot, const double alpha=1-0.6827, const bool equal_tailed=true) {
+  const double alpha_min = equal_tailed ? alpha/2 : alpha;
+    
+  intvl v;
+
+  if (n_on > 0)
+    v.lower = ROOT::Math::beta_quantile(alpha_min, n_on, n_tot - n_on + 1);
+  if (n_tot - n_on > 0)
+    v.upper = ROOT::Math::beta_quantile_c(alpha_min, n_on + 1, n_tot - n_on);
+  
+  if (n_on == 0 && n_tot == 0)
+    v.hat = 0;
+  else
+    v.hat = n_on/n_tot;
+
+  return v;
+}
+
+intvl clopper_pearson_poisson(double x, double y) {
+  intvl vbi = clopper_pearson(x, x+y);
+  intvl v;
+  v.lower = vbi.lower/(1 - vbi.lower);
+  if (y == 0 || fabs(vbi.upper - 1) < 1e-9) {
+    v.hat = v.upper = -1;
+    return v;
+  }
+  v.hat = vbi.hat/(1-vbi.hat);
+  v.upper = vbi.upper/(1-vbi.upper);
+  return v;
+}
+
 struct sigproflik {
   static bool bannered;
   std::vector<std::string> filenames;
   std::vector<TFile*> files;
   std::vector<double> taus;
   std::vector<std::map<std::string, TH1F*> > hists;
+  std::vector<double> nm1s;
   double syst_frac;
 
   sigproflik(const char** vars, const int nvars, const bool bigw, const double syst) {
@@ -236,6 +287,7 @@ struct sigproflik {
 
     for (size_t i = 0; i < filenames.size(); ++i) {
       files.push_back(new TFile(filenames[i].c_str()));
+      nm1s.push_back(get_nm1(files.back()));
       for (int j = 0; j < nvars; ++j)
         hists[i][vars[j]] = (TH1F*)files.back()->Get(vars[j]);
     }
@@ -263,6 +315,20 @@ struct sigproflik {
     if (options.moreprints) printf("   s: %f  n: %f\n", s, n);
     return getSignificance(0, n, s, ms, taus, syst_frac);
   }
+
+  intvl bkgfrac(const char* var, const int ibin) {
+    if (options.moreprints) printf("bkgfrac  var %s  ibin %i\n", var, ibin);
+    double num = 0, den = 0;
+    for (size_t i = 1; i < filenames.size(); ++i) {
+      double num_b = hists[i][var]->GetBinContent(ibin);
+      double den_b = nm1s[i];
+      if (options.moreprints) printf("num_b[%i] = %f\n", int(i), num_b);
+      num += num_b/taus[i-1];
+      den += den_b/taus[i-1];
+    }
+    if (options.moreprints) printf("\n");
+    return clopper_pearson_poisson(num, den); // JMTBAD
+  }
 };
 
 bool sigproflik::bannered = false;
@@ -270,7 +336,7 @@ sigproflik* slik = 0;
 sigproflik* slik_nobigw = 0;
 sigproflik* slik_syst20 = 0;
 
-void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, const char* var) {
+void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   if (options.printall)
     printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", sigHist->GetName(), "cut", "s", "b", "sigb", "ssb", "ssbsb", "ssbsb20", "zplsmw", "zpl", "zpls20", "sig frac", "sig eff", "bkg frac", "bkg eff");
   const int nbins = sigHist->GetNbinsX();
@@ -278,6 +344,7 @@ void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, cons
   const double xup = sigHist->GetXaxis()->GetXmax();
   TH1F* h_sigfrac = new TH1F("h_sigfrac", ";cut;sig frac", nbins, xlow, xup);
   TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
+  double bkgpl_x[nbins], bkgpl_y[nbins], bkgpl_exl[nbins], bkgpl_exh[nbins], bkgpl_eyl[nbins], bkgpl_eyh[nbins];
   TH1F* h_zssb = new TH1F("h_zssb", ";cut;ssb", nbins, xlow, xup);
   TH1F* h_zssbsb = new TH1F("h_zssbsb", ";cut;ssbsb", nbins, xlow, xup);
   TH1F* h_zssbsb20 = new TH1F("h_zssbsb20", ";cut;ssbsb20", nbins, xlow, xup);
@@ -302,11 +369,18 @@ void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, cons
     const double zpl = slik->sig(var, i);
     const double zpl_syst20 = -1; //slik_syst20->sig(var, i);
 
-    if (options.printall)
-      printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssbsb, zssbsb20, zpl_nobigw, zpl, zpl_syst20, s/nsig_nm1, s/options.nsig_total(), b/nbkg_nm1, b/options.nbkg_total);
+    bkgpl_x[i-1] = sigHist->GetXaxis()->GetBinCenter(i);
+    bkgpl_exl[i-1] = bkgpl_exh[i-1] = sigHist->GetXaxis()->GetBinWidth(i)/2;
+    intvl bkgpl_v = slik_syst20->bkgfrac(var, i);
+    bkgpl_y[i-1] = bkgpl_v.hat;
+    bkgpl_eyl[i-1] = bkgpl_v.hat - bkgpl_v.lower;
+    bkgpl_eyh[i-1] = bkgpl_v.upper - bkgpl_v.hat;
 
-    h_sigfrac->SetBinContent(i, s/nsig_nm1);
-    h_bkgfrac->SetBinContent(i, b/nbkg_nm1);
+    if (options.printall)
+      printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssbsb, zssbsb20, zpl_nobigw, zpl, zpl_syst20, s/options.nsig_nm1, s/options.nsig_total(), b/options.nbkg_nm1, b/options.nbkg_total);
+
+    h_sigfrac->SetBinContent(i, s/options.nsig_nm1);
+    h_bkgfrac->SetBinContent(i, b/options.nbkg_nm1);
 
     if (b != 0)
       h_zssb->SetBinContent(i, zssb);
@@ -330,9 +404,9 @@ void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, cons
   }
 
   if (options.printall)
-    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", cut, smax, bmax, zmax, smax/nsig_nm1, smax/options.nsig_total(), bmax/nbkg_nm1, bmax/options.nbkg_total);
+    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", cut, smax, bmax, zmax, smax/options.nsig_nm1, smax/options.nsig_total(), bmax/options.nbkg_nm1, bmax/options.nbkg_total);
   else
-    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(),  cut, smax, bmax, zmax, smax/nsig_nm1, smax/options.nsig_total(), bmax/nbkg_nm1, bmax/options.nbkg_total);
+    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(),  cut, smax, bmax, zmax, smax/options.nsig_nm1, smax/options.nsig_total(), bmax/options.nbkg_nm1, bmax/options.nbkg_total);
 
   std::vector<TH1F*> zs = {h_zssb, h_zssbsb, h_zssbsb20, h_zpl_nobigw, h_zpl, h_zpl_syst20};
   for (TH1F* h : zs)
@@ -344,6 +418,12 @@ void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, cons
   h_zpl_syst20->SetLineColor(kGreen+2);
   h_sigfrac->SetLineColor(kRed);
   h_bkgfrac->SetLineColor(kBlue);
+
+  TGraphAsymmErrors* g_bkgpl = new TGraphAsymmErrors(nbins, bkgpl_x, bkgpl_y, bkgpl_exl, bkgpl_exh, bkgpl_eyl, bkgpl_eyh);
+  g_bkgpl->SetLineColor(kCyan);
+  g_bkgpl->SetMarkerColor(kCyan);
+  g_bkgpl->SetMarkerStyle(20);
+  g_bkgpl->SetMarkerSize(1);
 
   TLegend* leg = new TLegend(0.8,0.8,1,1);
   leg->AddEntry(h_zssb, "s/#sqrt{b}", "L");
@@ -367,6 +447,7 @@ void maxSSB(TH1F* sigHist, double nsig_nm1, TH1F* bkgHist, double nbkg_nm1, cons
       leg->Draw();
       c1->cd(4)->SetLogy(logy);
       draw_in_order(std::vector<TH1F*>({h_sigfrac, h_bkgfrac}));
+      g_bkgpl->Draw("ZP");
       std::string p = options.plot_path + "/" + options.signal_name + "/";
       p += var;
       if (logy)
@@ -414,16 +495,16 @@ int main(int argc, char** argv) {
   TFile* sigFile = TFile::Open(options.signal_path().c_str());
   TFile* bkgFile = TFile::Open(options.background_path().c_str());
 
-  double nsig_nm1 = ((TH1F*)sigFile->Get("nm1"))->GetBinContent(1);
-  double nbkg_nm1 = ((TH1F*)bkgFile->Get("nm1"))->GetBinContent(1);
-  printf("nsig_nm1 = %f, nbkg_nm1 = %f\n", nsig_nm1, nbkg_nm1);
+  options.nsig_nm1 = get_nm1(sigFile);
+  options.nbkg_nm1 = get_nm1(sigFile);
+  printf("nsig_nm1 = %f, nbkg_nm1 = %f\n", options.nsig_nm1, options.nbkg_nm1);
 
   if (!options.printall) printf("variable\t\tcut\t\ts\t\tb\tmax ssb\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n");
 
   for (int i = 0; i < nvars; i++) {
     TH1F* sigHist = (TH1F*)sigFile->Get(hnames[i]);
     TH1F* bkgHist = (TH1F*)bkgFile->Get(hnames[i]);
-    maxSSB(sigHist, nsig_nm1, bkgHist, nbkg_nm1, hnames[i]);
+    maxSSB(sigHist, bkgHist, hnames[i]);
   }
 
   delete slik;
