@@ -11,6 +11,8 @@ parser.add_option('--dir2',
                   help='The second directory name (if applicable, e.g. in --compare).')
 parser.add_option('--table', action='store_true', default=False,
                   help='Print a table of the paths and efficiencies.')
+parser.add_option('--table-conf-level', type=float, default=0.6827,
+                  help='Confidence level for the intervals displayed (default is %default).')
 parser.add_option('--table-apply-prescales', action='store_true', default=False,
                   help='Use prescales from prescales.py in current directory.')
 parser.add_option('--table-apply-prescales-in-sort', action='store_true', default=False,
@@ -74,7 +76,7 @@ if options.table:
 
         num = hnum.GetBinContent(i)
         den = hden.GetBinContent(i)
-        eff, lo, hi = clopper_pearson(num, den)
+        eff, lo, hi = clopper_pearson(num, den, alpha=1-options.table_conf_level)
 
         prescaled_eff = 1
         
@@ -112,7 +114,6 @@ if options.table:
         else:
             print ':'
             key = lambda x: x[2]
-        print '(applying prescales):' if options.table_apply_prescales_in_sort else ':'
         content.sort(key=key, reverse=True)
         for c in content:
             print fmt % c
