@@ -75,9 +75,11 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
   bHatHat.clear();
   for (int i = 0; i < numBck(); ++i)
     bHatHat.push_back(parVec[i+1]);
-  aHatHat.clear();
-  for (int j = 0; j < numa(); ++j)
-    aHatHat.push_back(parVec[numBck()+1+j]);
+  if (useSystFrac()) {
+    aHatHat.clear();
+    for (int j = 0; j < numa(); ++j)
+      aHatHat.push_back(parVec[numBck()+1+j]);
+  }
 
   if (status != 0 || debugLevel >= 2) {
     printf("\n");
@@ -85,9 +87,11 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
     printf("  bHatHat: ");
     for (int i = 0; i < numBck(); ++i)
       printf("%e ", bHatHat[i]);
-    printf("\n  aHatHat: ");
-    for (int j = 0; j < numa(); ++j)
-      printf("%e ", aHatHat[j]);
+    if (useSystFrac()) {
+      printf("\n  aHatHat: ");
+      for (int j = 0; j < numa(); ++j)
+        printf("%e ", aHatHat[j]);
+    }
     printf("\n\n");
   }
 
@@ -116,9 +120,11 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
   bHat.clear();
   for (int i = 0; i < numBck(); ++i)
     bHat.push_back(parVec[i+1]);
-  aHat.clear();
-  for (int j = 0; j < numa(); ++j)
-    aHatHat.push_back(parVec[numBck()+1+j]);
+  if (useSystFrac()) {
+    aHat.clear();
+    for (int j = 0; j < numa(); ++j)
+      aHat.push_back(parVec[numBck()+1+j]);
+  }
 
   if (status != 0 || debugLevel >= 2) {
     printf("\n");
@@ -126,9 +132,11 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
     printf("  bHat: ");
     for (int i = 0; i < numBck(); ++i)
       printf("%e ", bHat[i]);
-    printf("\n  aHat: ");
-    for (int j = 0; j < numa(); ++j)
-      printf("%e ", aHat[j]);
+    if (useSystFrac()) {
+      printf("\n  aHat: ");
+      for (int j = 0; j < numa(); ++j)
+        printf("%e ", aHat[j]);
+    }
     printf("\n\n");
   }
 
