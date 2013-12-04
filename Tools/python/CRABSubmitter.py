@@ -89,11 +89,11 @@ class CRABSubmitter:
         cfg.set('CMSSW', 'pset', pset_fn_pattern)
         mkdirs_if_needed(pset_fn_pattern)
 
+        self.manual_datasets = manual_datasets
         if manual_datasets is not None:
             if job_control_from_sample:
                 raise ValueError('unable to do job_control_from_sample when doing manual_datasets')
 
-            self.manual_datasets = manual_datasets
 
             for opt in 'total_number_of_events events_per_job'.split():
                 if not kwargs.has_key(opt):
