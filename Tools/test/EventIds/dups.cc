@@ -53,20 +53,28 @@ void process_file(const char* fn, int fileno) {
 
 int main(int argc, char** argv) {
   if (argc < 4) {
-    fprintf(stderr, "usage: eiddups path_to_tree scan_format input_1.root [input_2.root ...] \n");
+    fprintf(stderr, "usage: eiddups path_to_tree [scan_format] input_1.root [input_2.root ...] \n");
     return 1;
   }
 
   path = argv[1];
   const char* fmt = argv[2];
-  fprintf(stderr, "scanning with fmt %s\n", fmt);
+  int startat = 3;
+  int fileno = -1;
+  if (strchr(fmt, '%') == 0) {
+    fprintf(stderr, "not using a fileno\n");
+    startat = 2;
+  }
+  else
+    fprintf(stderr, "scanning with fmt %s\n", fmt);
 
-  for (int i = 3; i < argc; ++i) {
-    int fileno;
-    int c = sscanf(argv[i], fmt, &fileno); // JMTBAD I hope you don't care about your system
-    if (c != 1) {
-      fprintf(stderr, "could not scan %s for file number\n", argv[i]);
-      return 1;
+  for (int i = startat; i < argc; ++i) {
+    if (startat == 3) {
+      int c = sscanf(argv[i], fmt, &fileno); // JMTBAD I hope you don't care about your system
+      if (c != 1) {
+        fprintf(stderr, "could not scan %s for file number\n", argv[i]);
+        return 1;
+      }
     }
 
     process_file(argv[i], fileno);
