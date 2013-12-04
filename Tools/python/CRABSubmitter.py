@@ -318,13 +318,7 @@ exit $ECODE
         splitting_details = []
         for i, (files, maxev, skipev) in enumerate(splits):
             njob = i+1
-            mangled_files = []
-            for file in files:
-                if file.startswith('/store') or file.startswith('file:'):
-                    mangled_files.append(file)
-                else:
-                    mangled_files.append('file:' + file)
-            splitting_details.append('FileNames[%i]=%s' % (njob, ','.join(mangled_files)))
+            splitting_details.append('FileNames[%i]=%s' % (njob, ','.join(files)))
             splitting_details.append('NEvents[%i]=%i' % (njob, maxev))
             splitting_details.append('SkipEvents[%i]=%i' % (njob, skipev))
         splitting_details.sort()
