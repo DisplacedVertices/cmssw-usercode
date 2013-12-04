@@ -5,7 +5,7 @@ ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 ROOTLIBS     := $(shell root-config --nonew --libs)
-CFLAGS       += $(ROOTCFLAGS) -std=c++0x -Wall
+CFLAGS       += $(ROOTCFLAGS) -std=c++0x -Wall -Werror
 LIBS         += $(ROOTLIBS)
 LIBS         += -lMinuit
 LDFLAGS       = -O
