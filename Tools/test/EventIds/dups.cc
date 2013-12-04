@@ -12,7 +12,7 @@ typedef std::tuple<unsigned, unsigned, unsigned> RLE;
 std::map<RLE, std::set<int> > m;
 
 void process_file(const char* fn, int fileno) {
-  printf("reading %s:%s (fileno %i)\n", fn, path, fileno);
+  fprintf(stderr, "reading %s:%s (fileno %i)\n", fn, path, fileno);
   TFile* f = TFile::Open(fn);
   if (!f->IsOpen()) {
     fprintf(stderr, "could not open file!\n");
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 
   path = argv[1];
   const char* fmt = argv[2];
-  printf("scanning with fmt %s\n", fmt);
+  fprintf(stderr, "scanning with fmt %s\n", fmt);
 
   for (int i = 3; i < argc; ++i) {
     int fileno;
