@@ -16,14 +16,6 @@ namespace mfv {
 
   Measurement1D miss_dist(const reco::Vertex& v0, const reco::Vertex& v1, const math::XYZTLorentzVector& mom);
 
-  struct vertex_tracks_distance {
-    double drmin, drmax;
-    double dravg, dravgw, dravgvw;
-    double drrms, drrmsw, drrmsvw;
-
-    vertex_tracks_distance(const reco::Vertex& sv);
-  };
-
   struct vertex_distances {
     std::pair<bool,float> bs2dcompat, pv2dcompat, pv3dcompat;
     Measurement1D gen2ddist, gen3ddist, bs2ddist;

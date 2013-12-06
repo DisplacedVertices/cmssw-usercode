@@ -115,63 +115,6 @@ namespace mfv {
     return Measurement1D(miss_dist_value, miss_dist_err);
   }
 
-  vertex_tracks_distance::vertex_tracks_distance(const reco::Vertex& sv) {
-    drmin = 1e99;
-    drmax = dravg = dravgw = dravgvw = drrms = drrmsw = drrmsvw = 0;
-
-    std::vector<double> drs;
-    std::vector<double> ws;
-    std::vector<double> vws;
-    double sumw = 0, sumvw = 0;
-    
-    auto trkb = sv.tracks_begin();
-    auto trke = sv.tracks_end();
-    for (auto trki = trkb; trki != trke; ++trki) {
-      if (sv.trackWeight(*trki) < track_vertex_weight_min)
-        continue;
-
-      for (auto trkj = trki + 1; trkj != trke; ++trkj) {
-        if (sv.trackWeight(*trkj) < track_vertex_weight_min)
-          continue;
-
-        double dr = reco::deltaR(**trki, **trkj);
-        drs.push_back(dr);
-
-        double w  = 0.5*((*trki)->pt() + (*trkj)->pt());
-        double vw = 0.5*(sv.trackWeight(*trki) + sv.trackWeight(*trkj));
-
-        sumw  += w;
-        sumvw += vw;
-        ws .push_back(w);
-        vws.push_back(vw);
-
-        dravg   += dr;
-        dravgw  += dr * w;
-        dravgvw += dr * vw;
-
-        if (dr < drmin)
-          drmin = dr;
-        if (dr > drmax)
-          drmax = dr;
-      }
-    }
-
-    dravg   /= drs.size();
-    dravgw  /= sumw;
-    dravgvw /= sumvw;
-
-    for (int i = 0, ie = int(drs.size()); i < ie; ++i) {
-      double dr = drs[i];
-      drrms   += pow(dr - dravg,   2);
-      drrmsw  += pow(dr - dravgw,  2) * ws [i];
-      drrmsvw += pow(dr - dravgvw, 2) * vws[i];
-    }
-
-    drrms   = sqrt(drrms  /drs.size());
-    drrmsw  = sqrt(drrmsw /sumw);
-    drrmsvw = sqrt(drrmsvw/sumvw);
-  }
-
   vertex_distances::vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& momenta) {
     VertexDistanceXY distcalc_2d;
     VertexDistance3D distcalc_3d;
