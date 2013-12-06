@@ -20,15 +20,15 @@ struct option_driver {
   bool moreprints;
   bool saveplots;
   std::string plot_path;
-  double int_lumi;
+  double int_lumi; // in /fb
   std::string signal_name;
-  double signal_xsec;
+  double signal_xsec; // in fb
   double nsig_total() { return int_lumi * signal_xsec; }
   double nbkg_total;
   double nsig_nm1;
   double nbkg_nm1;
   std::string file_path;
-  std::string signal_file_suffix() { return TString::Format("%ipb", int(signal_xsec)).Data(); }
+  std::string signal_file_suffix() { return TString::Format("%ifb", int(signal_xsec)).Data(); }
   std::string background_file_name;
   std::string signal_path() { return file_path + "/" + signal_name + "_" + signal_file_suffix() + ".root"; }
   std::string background_path() { return file_path + "/background.root"; }
@@ -39,9 +39,9 @@ struct option_driver {
       moreprints(0),
       saveplots(0),
       plot_path("plots/SSB"),
-      int_lumi(20000.),
+      int_lumi(20.),
       signal_name("mfv_neutralino_tau0100um_M0400"),
-      signal_xsec(1.),
+      signal_xsec(1000.),
       nbkg_total(211435861768.63),
       nsig_nm1(1.),
       nbkg_nm1(1.),
@@ -136,9 +136,9 @@ struct option_driver {
       fprintf(stderr, "  -m                      turn on (all) prints (default: off)\n");
       fprintf(stderr, "  -s                      turn on saving of plots (default: off\n");
       fprintf(stderr, "  -z plot_path            path to save plots to (implies -s, default: plots/SSB/signal_name/)\n");
-      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in pb^-1 (default: 20000)\n");
+      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20000)\n");
       fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau0100um_M0400)\n");
-      fprintf(stderr, "  -x signal_xsec          signal cross section, in pb (default: 1)\n");
+      fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 1)\n");
       fprintf(stderr, "  -b nbkg_total           number to scale background efficiency by (default: something big)\n");
       fprintf(stderr, "  -k bkg_file_name        filename for weighted, added backgrounds (default: background.root)\n");
       return 1;
@@ -156,16 +156,14 @@ struct option_driver {
 
 option_driver options;
 
-void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
+void draw_in_order(std::vector<TH1F*> v) {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
   std::sort(v.begin(), v.end(), f);
-  std::string ex = cmd;
   for (size_t i = 0; i < v.size(); ++i) {
     if (i == 0) {
       v[i]->SetMinimum(0.01);
-      v[i]->Draw(cmd);
+      v[i]->Draw();
     } else {
-      //v[i]->Draw(TString::Format("%s same", cmd));
       v[i]->Draw("same");
     }
   }
@@ -173,7 +171,7 @@ void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
 
 struct sample {
   std::string name;
-  double xsec; // in pb
+  double xsec; // in fb
   double nevents;
 
   double partial_weight() const { assert(nevents > 0); return xsec / nevents; }
@@ -183,13 +181,13 @@ struct sample {
 const int nsamples = 8;
 sample samples[nsamples] = {
   {options.signal_name, options.signal_xsec, 0 },
-  {"ttbarhadronic",     225.2 * 0.457,       0 },
-  {"ttbarsemilep",      225.2 * 0.438,       0 },
-  {"ttbardilep",        225.2 * 0.105,       0 },
-  {"qcdht0100",         1.04e7,              0 },
-  {"qcdht0250",         2.76e5,              0 },
-  {"qcdht0500",         8.43e3,              0 },
-  {"qcdht1000",         2.04e2,              0 }
+  {"ttbarhadronic",     225.2e3 * 0.457,     0 },
+  {"ttbarsemilep",      225.2e3 * 0.438,     0 },
+  {"ttbardilep",        225.2e3 * 0.105,     0 },
+  {"qcdht0100",         1.04e10,             0 },
+  {"qcdht0250",         2.76e8,              0 },
+  {"qcdht0500",         8.43e6,              0 },
+  {"qcdht1000",         2.04e5,              0 }
 };
 
 void read_nevents() {
@@ -282,12 +280,12 @@ struct sigproflik {
     syst_frac = syst;
 
     std::vector<double> lumis;
-  
+
     for (const sample& s : samples) {
-      if (s.name != options.signal_name && !bigw && s.partial_weight() > 1e-3)
+      if (s.name != options.signal_name && !bigw && s.partial_weight() > 5e-2)
         continue;
       filenames.push_back(options.file_path + "/" + s.name + "_mangled.root");
-      lumis.push_back(1e-3/s.partial_weight()); // 1e-3 is go to fb^-1 from the xsecs in pb
+      lumis.push_back(1./s.partial_weight());
     }
 
     for (size_t i = 1; i < filenames.size(); ++i)
