@@ -176,21 +176,31 @@ struct sample {
   double xsec; // in pb
   double nevents;
 
-  double partial_weight() const { return xsec / nevents; }
-  double weight() const { return xsec * options.int_lumi / nevents; }
+  double partial_weight() const { assert(nevents > 0); return xsec / nevents; }
+  double weight() const { assert(nevents > 0); return xsec * options.int_lumi / nevents; }
 };
 
 const int nsamples = 8;
 sample samples[nsamples] = {
-  {options.signal_name, options.signal_xsec,    100000 },
-  {"ttbarhadronic",     225.2 * 0.457,         5268722 },
-  {"ttbarsemilep",      225.2 * 0.438,        12674909 },
-  {"ttbardilep",        225.2 * 0.105,         6059506 },
-  {"qcdht0100",         1.04e7,               25064759 },           
-  {"qcdht0250",         2.76e5,               13531039 },           
-  {"qcdht0500",         8.43e3,               15274646 },           
-  {"qcdht1000",         2.04e2,                6034431 }
+  {options.signal_name, options.signal_xsec, 0 },
+  {"ttbarhadronic",     225.2 * 0.457,       0 },
+  {"ttbarsemilep",      225.2 * 0.438,       0 },
+  {"ttbardilep",        225.2 * 0.105,       0 },
+  {"qcdht0100",         1.04e7,              0 },
+  {"qcdht0250",         2.76e5,              0 },
+  {"qcdht0500",         8.43e3,              0 },
+  {"qcdht1000",         2.04e2,              0 }
 };
+
+void read_nevents() {
+  for (sample& s: samples) {
+    std::string filename = options.file_path + "/" + s.name + "_mangled.root";
+    TFile* f = TFile::Open(filename.c_str());
+    TH1F* h = (TH1F*)f->Get("ntot");
+    s.nevents = h->GetBinContent(1);
+    delete f;
+  }
+}
 
 bool weight_files() {
   std::string cmd = "mergeTFileServiceHistograms -w ";
@@ -475,6 +485,8 @@ int main(int argc, char** argv) {
   int r;
   if ((r = options.parse_args(argc, argv)))
     return r;
+
+  read_nevents();
 
   if (options.weightfiles) {
     weight_files();
