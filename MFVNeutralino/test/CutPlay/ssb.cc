@@ -20,18 +20,18 @@ struct option_driver {
   bool moreprints;
   bool saveplots;
   std::string plot_path;
-  double int_lumi;
+  double int_lumi; // in /fb
   std::string signal_name;
-  double signal_xsec;
+  double signal_xsec; // in fb
   double nsig_total() { return int_lumi * signal_xsec; }
   double nbkg_total;
   double nsig_nm1;
   double nbkg_nm1;
   std::string file_path;
-  std::string signal_file_suffix() { return TString::Format("%ipb", int(signal_xsec)).Data(); }
+  std::string signal_file_suffix() { return TString::Format("%ifb", int(signal_xsec)).Data(); }
   std::string background_file_name;
   std::string signal_path() { return file_path + "/" + signal_name + "_" + signal_file_suffix() + ".root"; }
-  std::string background_path() { return file_path + "/background.root"; }
+  std::string background_path() { return file_path + "/" + background_file_name; }
   
   option_driver()
     : weightfiles(0),
@@ -39,9 +39,9 @@ struct option_driver {
       moreprints(0),
       saveplots(0),
       plot_path("plots/SSB"),
-      int_lumi(20000.),
+      int_lumi(20.),
       signal_name("mfv_neutralino_tau0100um_M0400"),
-      signal_xsec(1.),
+      signal_xsec(1000.),
       nbkg_total(211435861768.63),
       nsig_nm1(1.),
       nbkg_nm1(1.),
@@ -134,11 +134,11 @@ struct option_driver {
       fprintf(stderr, "  -w                      produce weighted files and quit\n");
       fprintf(stderr, "  -p                      turn on (some) prints (default: off)\n");
       fprintf(stderr, "  -m                      turn on (all) prints (default: off)\n");
-      fprintf(stderr, "  -s                      turn on saving of plots (default: off\n");
+      fprintf(stderr, "  -s                      turn on saving of plots (default: off)\n");
       fprintf(stderr, "  -z plot_path            path to save plots to (implies -s, default: plots/SSB/signal_name/)\n");
-      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in pb^-1 (default: 20000)\n");
+      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20000)\n");
       fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau0100um_M0400)\n");
-      fprintf(stderr, "  -x signal_xsec          signal cross section, in pb (default: 1)\n");
+      fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 1)\n");
       fprintf(stderr, "  -b nbkg_total           number to scale background efficiency by (default: something big)\n");
       fprintf(stderr, "  -k bkg_file_name        filename for weighted, added backgrounds (default: background.root)\n");
       return 1;
@@ -156,16 +156,14 @@ struct option_driver {
 
 option_driver options;
 
-void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
+void draw_in_order(std::vector<TH1F*> v) {
   auto f = [](TH1F* h, TH1F* h2) { return h->GetMaximum() > h2->GetMaximum(); };
   std::sort(v.begin(), v.end(), f);
-  std::string ex = cmd;
   for (size_t i = 0; i < v.size(); ++i) {
     if (i == 0) {
       v[i]->SetMinimum(0.01);
-      v[i]->Draw(cmd);
+      v[i]->Draw();
     } else {
-      //v[i]->Draw(TString::Format("%s same", cmd));
       v[i]->Draw("same");
     }
   }
@@ -173,24 +171,34 @@ void draw_in_order(std::vector<TH1F*> v, const char* cmd="") {
 
 struct sample {
   std::string name;
-  double xsec; // in pb
+  double xsec; // in fb
   double nevents;
 
-  double partial_weight() const { return xsec / nevents; }
-  double weight() const { return xsec * options.int_lumi / nevents; }
+  double partial_weight() const { assert(nevents > 0); return xsec / nevents; }
+  double weight() const { assert(nevents > 0); return xsec * options.int_lumi / nevents; }
 };
 
 const int nsamples = 8;
 sample samples[nsamples] = {
-  {options.signal_name, options.signal_xsec,    100000 },
-  {"ttbarhadronic",     225.2 * 0.457,         5268722 },
-  {"ttbarsemilep",      225.2 * 0.438,        12674909 },
-  {"ttbardilep",        225.2 * 0.105,         6059506 },
-  {"qcdht0100",         1.04e7,               25064759 },           
-  {"qcdht0250",         2.76e5,               13531039 },           
-  {"qcdht0500",         8.43e3,               15274646 },           
-  {"qcdht1000",         2.04e2,                6034431 }
+  {options.signal_name, options.signal_xsec, 0 },
+  {"ttbarhadronic",     225.2e3 * 0.457,     0 },
+  {"ttbarsemilep",      225.2e3 * 0.438,     0 },
+  {"ttbardilep",        225.2e3 * 0.105,     0 },
+  {"qcdht0100",         1.04e10,             0 },
+  {"qcdht0250",         2.76e8,              0 },
+  {"qcdht0500",         8.43e6,              0 },
+  {"qcdht1000",         2.04e5,              0 }
 };
+
+void read_nevents() {
+  for (sample& s: samples) {
+    std::string filename = options.file_path + "/" + s.name + "_mangled.root";
+    TFile* f = TFile::Open(filename.c_str());
+    TH1F* h = (TH1F*)f->Get("ntot");
+    s.nevents = h->GetBinContent(1);
+    delete f;
+  }
+}
 
 bool weight_files() {
   std::string cmd = "mergeTFileServiceHistograms -w ";
@@ -272,12 +280,12 @@ struct sigproflik {
     syst_frac = syst;
 
     std::vector<double> lumis;
-  
+
     for (const sample& s : samples) {
-      if (s.name != options.signal_name && !bigw && s.partial_weight() > 1e-3)
+      if (s.name != options.signal_name && !bigw && s.partial_weight() > 5e-2)
         continue;
       filenames.push_back(options.file_path + "/" + s.name + "_mangled.root");
-      lumis.push_back(1e-3/s.partial_weight()); // 1e-3 is go to fb^-1 from the xsecs in pb
+      lumis.push_back(1./s.partial_weight());
     }
 
     for (size_t i = 1; i < filenames.size(); ++i)
@@ -338,7 +346,7 @@ sigproflik* slik_syst20 = 0;
 
 void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   if (options.printall)
-    printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", sigHist->GetName(), "cut", "s", "b", "sigb", "ssb", "ssbsb", "ssbsb20", "zplsmw", "zpl", "zpls20", "sig frac", "sig eff", "bkg frac", "bkg eff");
+    printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", sigHist->GetName(), "cut", "s", "b", "sigb", "ssb", "ssb20", "ssbsb", "ssbsb20", "zplsmw", "zpl", "zpls20", "sig frac", "sig eff", "bkg frac", "bkg eff");
   const int nbins = sigHist->GetNbinsX();
   const double xlow = sigHist->GetXaxis()->GetXmin();
   const double xup = sigHist->GetXaxis()->GetXmax();
@@ -346,6 +354,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
   double bkgpl_x[nbins], bkgpl_y[nbins], bkgpl_exl[nbins], bkgpl_exh[nbins], bkgpl_eyl[nbins], bkgpl_eyh[nbins];
   TH1F* h_zssb = new TH1F("h_zssb", ";cut;ssb", nbins, xlow, xup);
+  TH1F* h_zssb20 = new TH1F("h_zssb20", ";cut;ssb20", nbins, xlow, xup);
   TH1F* h_zssbsb = new TH1F("h_zssbsb", ";cut;ssbsb", nbins, xlow, xup);
   TH1F* h_zssbsb20 = new TH1F("h_zssbsb20", ";cut;ssbsb20", nbins, xlow, xup);
   TH1F* h_zpl_nobigw = new TH1F("h_zpl_nobigw", ";cut;asimov Z", nbins, xlow, xup);
@@ -363,6 +372,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     const double sigb = bkgHist->GetBinError(i);
 
     const double zssb = s/sqrt(b);
+    const double zssb20 = s/sqrt(b + 0.04*b*b);
     const double zssbsb = s/sqrt(b + sigb*sigb);
     const double zssbsb20 = s/sqrt(b + sigb*sigb + 0.04*b*b);
     const double zpl_nobigw = -1; //slik_nobigw->sig(var, i);
@@ -377,13 +387,15 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
     bkgpl_eyh[i-1] = bkgpl_v.upper - bkgpl_v.hat;
 
     if (options.printall)
-      printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssbsb, zssbsb20, zpl_nobigw, zpl, zpl_syst20, s/options.nsig_nm1, s/options.nsig_total(), b/options.nbkg_nm1, b/options.nbkg_total);
+      printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl_nobigw, zpl, zpl_syst20, s/options.nsig_nm1, s/options.nsig_total(), b/options.nbkg_nm1, b/options.nbkg_total);
 
     h_sigfrac->SetBinContent(i, s/options.nsig_nm1);
     h_bkgfrac->SetBinContent(i, b/options.nbkg_nm1);
 
     if (b != 0)
       h_zssb->SetBinContent(i, zssb);
+    if (b > 0)
+      h_zssb20->SetBinContent(i, zssb20);
     if (b + sigb*sigb > 0)
       h_zssbsb->SetBinContent(i, zssbsb);
     if (b > 0)
@@ -408,9 +420,10 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   else
     printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(),  cut, smax, bmax, zmax, smax/options.nsig_nm1, smax/options.nsig_total(), bmax/options.nbkg_nm1, bmax/options.nbkg_total);
 
-  std::vector<TH1F*> zs = {h_zssb, h_zssbsb, h_zssbsb20, h_zpl_nobigw, h_zpl, h_zpl_syst20};
+  std::vector<TH1F*> zs = {h_zssb, h_zssb20, h_zssbsb, h_zssbsb20, h_zpl_nobigw, h_zpl, h_zpl_syst20};
   for (TH1F* h : zs)
     h->SetLineWidth(2);
+  h_zssb20->SetLineColor(kCyan);
   h_zssbsb->SetLineColor(kRed);
   h_zssbsb20->SetLineColor(6);
   h_zpl_nobigw->SetLineColor(kBlue);
@@ -427,6 +440,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
 
   TLegend* leg = new TLegend(0.8,0.8,1,1);
   leg->AddEntry(h_zssb, "s/#sqrt{b}", "L");
+  leg->AddEntry(h_zssb20, "s/#sqrt{b+(0.2b)^{2}}", "L");
   leg->AddEntry(h_zssbsb, "s/#sqrt{b+#sigma_{b}^{2}}", "L");
   leg->AddEntry(h_zssbsb20, "s/#sqrt{b+#sigma_{b}^{2}+(0.2b)^{2}}", "L");
   leg->AddEntry(h_zpl_nobigw, "Z_{PL} (no big weights)", "L");
@@ -460,6 +474,7 @@ void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
   }
 
   delete h_zssb;
+  delete h_zssb20;
   delete h_zssbsb;
   delete h_zssbsb20;
   delete h_zpl;
@@ -476,6 +491,8 @@ int main(int argc, char** argv) {
   if ((r = options.parse_args(argc, argv)))
     return r;
 
+  read_nevents();
+
   if (options.weightfiles) {
     weight_files();
     return 0;
@@ -485,8 +502,8 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  const int nvars = 17;
-  const char* hnames[nvars] = {"ntracks", "njetssharetks", "maxtrackpt", "drmin", "drmax", "bs2dsig", "ntracks01", "njetssharetks01", "maxtrackpt01", "costhmombs", "mass", "jetsmassntks", "mass01", "jetsmassntks01", "pt", "ntracksptgt3", "sumpt2"};
+  const int nvars = 26;
+  const char* hnames[nvars] = {"ntracks", "ntracksptgt3", "njetsntks", "tkonlypt", "tkonlymass", "jetsntkpt", "jetsntkmass", "tksjetsntkpt", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "sumpt2", "maxtrackpt", "drmin", "drmax", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "tkonlymass01", "tksjetsntkmass01"};
 
   slik = new sigproflik(hnames, nvars, true, -1);
   slik_nobigw = new sigproflik(hnames, nvars, false, -1);
@@ -496,7 +513,7 @@ int main(int argc, char** argv) {
   TFile* bkgFile = TFile::Open(options.background_path().c_str());
 
   options.nsig_nm1 = get_nm1(sigFile);
-  options.nbkg_nm1 = get_nm1(sigFile);
+  options.nbkg_nm1 = get_nm1(bkgFile);
   printf("nsig_nm1 = %f, nbkg_nm1 = %f\n", options.nsig_nm1, options.nbkg_nm1);
 
   if (!options.printall) printf("variable\t\tcut\t\ts\t\tb\tmax ssb\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n");

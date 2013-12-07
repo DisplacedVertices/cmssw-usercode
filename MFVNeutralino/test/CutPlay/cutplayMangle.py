@@ -25,21 +25,32 @@ def cutplayMangle(filename):
       nm1 = x.GetBinContent(i), x.GetBinError(i)
       continue
 
-    cut, cut_val = label.split('X')
+    try:
+      cut, cut_val = label.split('X')
+    except ValueError:
+      print 'warning: could not parse label %s' % label
+      continue
 
     if not cutscans.has_key(cut):
       cutscans[cut] = []
     cutscans[cut].append((cut_val, x.GetBinContent(i)))
+
+  h_intot = file.Get('effs/triggers_pass_den')
+  ntot = h_intot.GetBinContent(1), h_intot.GetBinError(1)
 
   file.Close()
 
   output_fn = os.path.basename(filename).replace('.root', '_mangled.root')
   output_file = ROOT.TFile(output_fn, 'RECREATE')
 
+  h_ntot = ROOT.TH1F('ntot', '', 1, 0, 1)
+  h_ntot.SetBinContent(1, ntot[0])
+  h_ntot.SetBinError(1, ntot[1])
+
   if nm1 is not None:
     h_nm1 = ROOT.TH1F('nm1', '', 1, 0, 1)
     h_nm1.SetBinContent(1, nm1[0])
-    h_nm1.SetBinError(1, nm1[0])
+    h_nm1.SetBinError(1, nm1[1])
   else:
     raise ValueError('did not find nm1 value in input')
 
