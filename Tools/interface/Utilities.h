@@ -76,8 +76,8 @@ struct distrib_calculator {
       return;
 
     bool usew = w.size() > 0;
-    if (usew)
-      assert(int(w.size()) == n);
+    if (usew && int(w.size()) != n)
+      throw cms::Exception("distrib_calculator") << "v.size = " << n << " != w.size = " << w.size();
 
     for (int i = 0; i < n; ++i) {
       if (v[i] < min) min = v[i];
