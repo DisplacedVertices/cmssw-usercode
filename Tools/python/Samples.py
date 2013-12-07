@@ -287,6 +287,7 @@ auxiliary_background_samples = [
 # xsecs from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections8TeVgluglu (M_glu = M_neu + 5 GeV...)
 mfv_xsec = {
      200: (0.153, 8.88e2),
+     300: (0.149, 9.64e1),
      400: (0.151, 1.74e1),
      600: (0.173, 1.24e0),
      800: (0.202, 1.50e-1),
