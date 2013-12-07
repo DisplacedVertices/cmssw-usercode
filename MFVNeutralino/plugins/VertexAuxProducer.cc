@@ -242,8 +242,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
 
-      trackws.push_back(tri->pt());
-
       inc_uchar(aux.ntracks);
 
       if (tri->ptError() / tri->pt() > 0.5) {
@@ -251,11 +249,13 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         continue;
       }
 
+      trackws.push_back(tri->pt());
+
       const double pti = tri->pt();
       trackpts.push_back(pti);
-      trackdxys.push_back(tri->dxy(beamspot->position()));
+      trackdxys.push_back(fabs(tri->dxy(beamspot->position())));
       if (primary_vertex)
-        trackdzs.push_back(tri->dz(primary_vertex->position()));
+        trackdzs.push_back(fabs(tri->dz(primary_vertex->position())));
 
       trackpterrs.push_back(tri->ptError());
       trackdxyerrs.push_back(tri->dxyError());
