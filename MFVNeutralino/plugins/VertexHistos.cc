@@ -45,19 +45,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_pos_1d[4][3];
   TH2F* h_sv_pos_2d[4][3];
 
-  TH1F* h_sv_trackpt[sv_num_indices];
-  TH1F* h_sv_trackfracpterr[sv_num_indices];
-  TH1F* h_sv_tracketa[sv_num_indices];
-  TH1F* h_sv_trackphi[sv_num_indices];
-  TH1F* h_sv_trackdxy[sv_num_indices];
-  TH1F* h_sv_trackdz[sv_num_indices];
-  TH1F* h_sv_tracknhits[sv_num_indices];
-
-  TH1F* h_sv_trackpaircosth[sv_num_indices];
-  TH1F* h_sv_trackpairdr[sv_num_indices];
-  TH1F* h_sv_trackpairmass[sv_num_indices];
-  TH1F* h_sv_tracktriplemass[sv_num_indices];
-
   PairwiseHistos h_sv[sv_num_indices];
   PairwiseHistos h_sv_sums[3]; // top2, top3, all
 
@@ -188,16 +175,76 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("sumpt2",                        "SV #Sigma p_{T}^{2} (GeV^2)",                                                 300,    0,    6000);
   hs.add("maxnhitsbehind",                "max number of hits behind SV",                                                 15,    0,      15);
   hs.add("sumnhitsbehind",                "sum number of hits behind SV",                                                100,    0,     100);
+
   hs.add("mintrackpt",                    "SV min{trk_{i} p_{T}} (GeV)",                                                  50,    0,      10);
   hs.add("maxtrackpt",                    "SV max{trk_{i} p_{T}} (GeV)",                                                 100,    0,     150);
   hs.add("maxm1trackpt",                  "SV max-1{trk_{i} p_{T}} (GeV)",                                               100,    0,     150);
   hs.add("maxm2trackpt",                  "SV max-2{trk_{i} p_{T}} (GeV)",                                               100,    0,     150);
+  hs.add("trackptavg",                    "SV avg{trk_{i} p_{T}} (GeV)",                                                  50,    0,      50);
+  hs.add("trackptrms",                    "SV rms{trk_{i} p_{T}} (GeV)",                                                  50,    0,      10);
+
+  hs.add("trackdxymin", "SV min{trk_{i} dxy(BS)} (cm)", 50, 0, 0.2);
+  hs.add("trackdxymax", "SV max{trk_{i} dxy(BS)} (cm)", 50, 0, 1);
+  hs.add("trackdxyavg", "SV avg{trk_{i} dxy(BS)} (cm)", 50, 0, 1);
+  hs.add("trackdxyrms", "SV rms{trk_{i} dxy(BS)} (cm)", 50, 0, 0.2);
+
+  hs.add("trackdzmin", "SV min{trk_{i} dz(PV)} (cm)", 50, 0, 0.2);
+  hs.add("trackdzmax", "SV max{trk_{i} dz(PV)} (cm)", 50, 0, 1);
+  hs.add("trackdzavg", "SV avg{trk_{i} dz(PV)} (cm)", 50, 0, 1);
+  hs.add("trackdzrms", "SV rms{trk_{i} dz(PV)} (cm)", 50, 0, 0.2);
+
+  hs.add("trackpterrmin", "SV min{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 0.2);
+  hs.add("trackpterrmax", "SV max{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 1);
+  hs.add("trackpterravg", "SV avg{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 1);
+  hs.add("trackpterrrms", "SV rms{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 0.2);
+
+  hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.2);
+  hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 1);
+  hs.add("trackdxyerravg", "SV avg{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 1);
+  hs.add("trackdxyerrrms", "SV rms{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.2);
+
+  hs.add("trackdzerrmin", "SV min{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 0.2);
+  hs.add("trackdzerrmax", "SV max{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 1);
+  hs.add("trackdzerravg", "SV avg{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 1);
+  hs.add("trackdzerrrms", "SV rms{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 0.2);
+
+  hs.add("trackpairmassmin", "SV min{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 20);
+  hs.add("trackpairmassmax", "SV max{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 20);
+  hs.add("trackpairmassavg", "SV avg{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 20);
+  hs.add("trackpairmassrms", "SV rms{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 20);
+
+  hs.add("tracktripmassmin", "SV min{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 20);
+  hs.add("tracktripmassmax", "SV max{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 20);
+  hs.add("tracktripmassavg", "SV avg{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 20);
+  hs.add("tracktripmassrms", "SV rms{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 20);
+
+  hs.add("trackquadmassmin", "SV min{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 20);
+  hs.add("trackquadmassmax", "SV max{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 20);
+  hs.add("trackquadmassavg", "SV avg{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 20);
+  hs.add("trackquadmassrms", "SV rms{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 20);
+
   hs.add("drmin",                         "SV min{#Delta R(i,j)}",                                                       150,    0,       1.5);
   hs.add("drmax",                         "SV max{#Delta R(i,j)}",                                                       150,    0,       7);
   hs.add("dravg",                         "SV avg{#Delta R(i,j)}",                                                       150,    0,       5);
   hs.add("drrms",                         "SV rms{#Delta R(i,j)}",                                                       150,    0,       3);
   hs.add("dravgw",                        "SV wavg{#Delta R(i,j)}",                                                      150,    0,       5);
   hs.add("drrmsw",                        "SV wrms{#Delta R(i,j)}",                                                      150,    0,       3);
+
+  hs.add("jetpairdrmin", "SV min{#Delta R(jet_{i}, jet_{j})}", 50, 0, 1.5);
+  hs.add("jetpairdrmax", "SV max{#Delta R(jet_{i}, jet_{j})}", 50, 0, 1.5);
+  hs.add("jetpairdravg", "SV avg{#Delta R(jet_{i}, jet_{j})}", 50, 0, 1.5);
+  hs.add("jetpairdrrms", "SV rms{#Delta R(jet_{i}, jet_{j})}", 50, 0, 1.5);
+
+  hs.add("costhtkmomvtxdispmin", "SV min{cos(angle(trk_{i}, SV-PV))}", 50, -1, 1);
+  hs.add("costhtkmomvtxdispmax", "SV max{cos(angle(trk_{i}, SV-PV))}", 50, -1, 1);
+  hs.add("costhtkmomvtxdispavg", "SV avg{cos(angle(trk_{i}, SV-PV))}", 50, -1, 1);
+  hs.add("costhtkmomvtxdisprms", "SV rms{cos(angle(trk_{i}, SV-PV))}", 50, -1, 1);
+
+  hs.add("costhjetmomvtxdispmin", "SV min{cos(angle(jet_{i}, SV-PV))}", 50, -1, 1);
+  hs.add("costhjetmomvtxdispmax", "SV max{cos(angle(jet_{i}, SV-PV))}", 50, -1, 1);
+  hs.add("costhjetmomvtxdispavg", "SV avg{cos(angle(jet_{i}, SV-PV))}", 50, -1, 1);
+  hs.add("costhjetmomvtxdisprms", "SV rms{cos(angle(jet_{i}, SV-PV))}", 50, -1, 1);
+
   hs.add("gen2ddist",                     "dist2d(SV, closest gen vtx) (cm)",                                            200,    0,       0.2);
   hs.add("gen2derr",                      "#sigma(dist2d(SV, closest gen vtx)) (cm)",                                    200,    0,       0.2);
   hs.add("gen2dsig",                      "N#sigma(dist2d(SV, closest gen vtx)) (cm)",                                   200,    0,     100);
@@ -419,12 +466,72 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"maxtrackpt",              aux.maxtrackpt},
         {"maxm1trackpt",            aux.maxm1trackpt},
         {"maxm2trackpt",            aux.maxm2trackpt},
+
+        {"trackptavg", aux.trackptavg},
+        {"trackptrms", aux.trackptrms},
+
+        {"trackdxymin", aux.trackdxymin},
+        {"trackdxymax", aux.trackdxymax},
+        {"trackdxyavg", aux.trackdxyavg},
+        {"trackdxyrms", aux.trackdxyrms},
+
+        {"trackdzmin", aux.trackdzmin},
+        {"trackdzmax", aux.trackdzmax},
+        {"trackdzavg", aux.trackdzavg},
+        {"trackdzrms", aux.trackdzrms},
+
+        {"trackpterrmin", aux.trackpterrmin},
+        {"trackpterrmax", aux.trackpterrmax},
+        {"trackpterravg", aux.trackpterravg},
+        {"trackpterrrms", aux.trackpterrrms},
+
+        {"trackdxyerrmin", aux.trackdxyerrmin},
+        {"trackdxyerrmax", aux.trackdxyerrmax},
+        {"trackdxyerravg", aux.trackdxyerravg},
+        {"trackdxyerrrms", aux.trackdxyerrrms},
+
+        {"trackdzerrmin", aux.trackdzerrmin},
+        {"trackdzerrmax", aux.trackdzerrmax},
+        {"trackdzerravg", aux.trackdzerravg},
+        {"trackdzerrrms", aux.trackdzerrrms},
+
+        {"trackpairmassmin", aux.trackpairmassmin},
+        {"trackpairmassmax", aux.trackpairmassmax},
+        {"trackpairmassavg", aux.trackpairmassavg},
+        {"trackpairmassrms", aux.trackpairmassrms},
+
+        {"tracktripmassmin", aux.tracktripmassmin},
+        {"tracktripmassmax", aux.tracktripmassmax},
+        {"tracktripmassavg", aux.tracktripmassavg},
+        {"tracktripmassrms", aux.tracktripmassrms},
+
+        {"trackquadmassmin", aux.trackquadmassmin},
+        {"trackquadmassmax", aux.trackquadmassmax},
+        {"trackquadmassavg", aux.trackquadmassavg},
+        {"trackquadmassrms", aux.trackquadmassrms},
+
         {"drmin",                   aux.drmin},
         {"drmax",                   aux.drmax},
         {"dravg",                   aux.dravg},
         {"drrms",                   aux.drrms},
         {"dravgw",                  aux.dravgw},
         {"drrmsw",                  aux.drrmsw},
+
+        {"jetpairdrmin", aux.jetpairdrmin},
+        {"jetpairdrmax", aux.jetpairdrmax},
+        {"jetpairdravg", aux.jetpairdravg},
+        {"jetpairdrrms", aux.jetpairdrrms},
+
+        {"costhtkmomvtxdispmin", aux.costhtkmomvtxdispmin},
+        {"costhtkmomvtxdispmax", aux.costhtkmomvtxdispmax},
+        {"costhtkmomvtxdispavg", aux.costhtkmomvtxdispavg},
+        {"costhtkmomvtxdisprms", aux.costhtkmomvtxdisprms},
+
+        {"costhjetmomvtxdispmin", aux.costhjetmomvtxdispmin},
+        {"costhjetmomvtxdispmax", aux.costhjetmomvtxdispmax},
+        {"costhjetmomvtxdispavg", aux.costhjetmomvtxdispavg},
+        {"costhjetmomvtxdisprms", aux.costhjetmomvtxdisprms},
+
         {"gen2ddist",               aux.gen2ddist},
         {"gen2derr",                aux.gen2derr},
         {"gen2dsig",                aux.gen2dsig()},
