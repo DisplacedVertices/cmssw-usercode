@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os, sys
 from collections import defaultdict
 
 # Data structure is {batch_name : {sample_name : [(file1, nevents1), ...]}}
@@ -8610,32 +8611,51 @@ def pprint(d):
     print '}'
 
 if __name__ == '__main__' and 'read' in sys.argv:
-    import os, sys
     from JMTucker.Tools.Samples import all_samples
     from collections import defaultdict
     sys.argv.append('-b')
     import ROOT
+    if os.environ['CMSSW_BASE']:
+        ROOT.gSystem.Load('libFWCoreFWLite')
+        ROOT.AutoLibraryLoader.enable()
+        ROOT.gSystem.Load('libDataFormatsFWLite.so')
+        ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
 
     # Make dict with format as above from list of filenames in argv.
     d = defaultdict(lambda: defaultdict(list))
-    for x in sys.argv[1:]:
-        if os.path.isfile(x):
-            fn = os.path.realpath(os.path.expanduser(x)) # shell should expanduser ~ already but why not
-            path, base_fn = os.path.split(fn)
-            x, dirname = os.path.split(path)
 
-            batch, sample = None, None
-            for s in all_samples:
-                if dirname.endswith('_' + s.name):
-                    batch = dirname.replace('_' + sample.name, '')
-                    sample = s.name
-            if batch is None:
-                batch, sample = dirname.rsplit('_', 1)
+    def fill_fn_nevents(fn, batch, sample):
+        f = ROOT.TFile.Open(fn)
+        nevents = f.Get('Events').GetEntriesFast()
+        print fn, nevents
+        d[batch][sample].append((fn, nevents))
+        
+    if 'store' in sys.argv:
+        for x in sys.argv[1:]:
+            if '/store/' in x:
+                x = x.split('/store/')[1]
+                fn = 'dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/11/store/' + x
+                x = x.split('/')
+                user = x[1]
+                batch = user + '-' + x[3] + '-' + x[4]
+                sample = x[2]
+                fill_fn_nevents(fn, batch, sample)
+    else:
+        for x in sys.argv[1:]:
+            if os.path.isfile(x):
+                fn = os.path.realpath(os.path.expanduser(x)) # shell should expanduser ~ already but why not
+                path, base_fn = os.path.split(fn)
+                x, dirname = os.path.split(path)
 
-            f = ROOT.TFile(fn)
-            nevents = f.Get('Events').GetEntriesFast()
-            print fn, nevents
-            d[batch][sample].append((fn, nevents))
+                batch, sample = None, None
+                for s in all_samples:
+                    if dirname.endswith('_' + s.name):
+                        batch = dirname.replace('_' + sample.name, '')
+                        sample = s.name
+                if batch is None:
+                    batch, sample = dirname.rsplit('_', 1)
+
+                fill_fn_nevents(fn, batch, sample)
 
     print repr(d)
 
