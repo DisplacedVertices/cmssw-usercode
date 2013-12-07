@@ -77,14 +77,27 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        max_threads = 3,
                        )
 
+    x = Samples.mfv_signal_samples
+    Samples.mfv_signal_samples = []
+    Samples.mfv300 = []
+    for y in x:
+        if '300' in y.name:
+            Samples.mfv300.append(y)
+        else:
+            Samples.mfv_signal_samples.append(y)
+    
     if 'smaller' in sys.argv:
         samples = Samples.smaller_background_samples
     elif 'leptonic' in sys.argv:
-        samples = Samples.auxiliary_data_samples +  + Samples.leptonic_background_samples
+        samples = Samples.leptonic_background_samples
     elif 'data' in sys.argv:
         samples = Samples.data_samples
+    elif 'auxdata' in sys.argv:
+        samples = Samples.auxiliary_data_samples
     elif '100k' in sys.argv:
         samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples
+    elif 'mfv300' in sys.argv:
+        samples = Samples.mfv300
     else:
         samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
 
