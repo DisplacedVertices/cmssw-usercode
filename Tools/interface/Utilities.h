@@ -69,7 +69,7 @@ struct distrib_calculator {
   double min, max, sum, wsum, avg, rms, sumw, avgw, rmsw;
 
   distrib_calculator(const std::vector<double>& v, const std::vector<double>& w)
-    : min(-1e99), max(1e99), sum(0), wsum(0), avg(0), rms(0), sumw(0), avgw(0), rmsw(0)
+    : min(1e99), max(-1e99), sum(0), wsum(0), avg(0), rms(0), sumw(0), avgw(0), rmsw(0)
   {
     int n;
     if ((n = int(v.size())) == 0)
