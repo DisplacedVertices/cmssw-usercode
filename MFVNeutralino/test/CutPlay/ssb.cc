@@ -29,9 +29,7 @@ struct option_driver {
   double syst_frac;
   std::string file_path;
   std::string signal_file_suffix() const { return TString::Format("%ifb", int(signal_xsec)).Data(); }
-  std::string background_file_name;
   std::string signal_path() const { return file_path + "/" + signal_name + "_" + signal_file_suffix() + ".root"; }
-  std::string background_path() const { return file_path + "/" + background_file_name; }
   
   option_driver()
     : weightfiles(0),
@@ -43,8 +41,7 @@ struct option_driver {
       signal_name("mfv_neutralino_tau0100um_M0400"),
       signal_xsec(20.),
       bigw(false),
-      syst_frac(-1),
-      background_file_name("background.root")
+      syst_frac(-1)
   {}
 
   bool one_double(char sw, double* d) {
@@ -69,7 +66,7 @@ struct option_driver {
     bool help = false;
 
     int c;
-    while (!help && (c = getopt(argc, argv, "hpmsz:l:n:x:bf:k:")) != -1) {
+    while (!help && (c = getopt(argc, argv, "hpmsz:l:n:x:bf:")) != -1) {
       switch (c) {
       case 'h':
         help = true;
@@ -107,10 +104,6 @@ struct option_driver {
         if (!one_double('f', &syst_frac))
           return 1;
 	break;
-      case 'k':
-        if (!one_string('k', &background_file_name))
-          return 1;
-        break;
         
       case '?':
         if (strchr("", optopt))
@@ -134,12 +127,11 @@ struct option_driver {
       fprintf(stderr, "  -m                      turn on (all) prints (default: off)\n");
       fprintf(stderr, "  -s                      turn on saving of plots (default: off)\n");
       fprintf(stderr, "  -z plot_path            path to save plots to (implies -s, default: plots/SSB/signal_name/)\n");
-      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20000)\n");
+      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20)\n");
       fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau0100um_M0400)\n");
       fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 20)\n");
       fprintf(stderr, "  -b                      use big-weights samples (default: off)\n");
       fprintf(stderr, "  -f syst_frac            fraction systematic uncertainty to use in PL calculation (default: -1)\n");
-      fprintf(stderr, "  -k bkg_file_name        filename for weighted, added backgrounds (default: background.root)\n");
       return 1;
     }
 
