@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cassert>
 #include <map>
+#include <memory>
 #include <vector>
 #include <getopt.h>
 #include "Math/QuantFuncMathCore.h"
@@ -23,15 +24,13 @@ struct option_driver {
   double int_lumi; // in /fb
   std::string signal_name;
   double signal_xsec; // in fb
-  double nsig_total() { return int_lumi * signal_xsec; }
-  double nbkg_total;
-  double nsig_nm1;
-  double nbkg_nm1;
+  bool bigw;
+  double syst_frac;
   std::string file_path;
-  std::string signal_file_suffix() { return TString::Format("%ifb", int(signal_xsec)).Data(); }
+  std::string signal_file_suffix() const { return TString::Format("%ifb", int(signal_xsec)).Data(); }
   std::string background_file_name;
-  std::string signal_path() { return file_path + "/" + signal_name + "_" + signal_file_suffix() + ".root"; }
-  std::string background_path() { return file_path + "/" + background_file_name; }
+  std::string signal_path() const { return file_path + "/" + signal_name + "_" + signal_file_suffix() + ".root"; }
+  std::string background_path() const { return file_path + "/" + background_file_name; }
   
   option_driver()
     : weightfiles(0),
@@ -41,10 +40,9 @@ struct option_driver {
       plot_path("plots/SSB"),
       int_lumi(20.),
       signal_name("mfv_neutralino_tau0100um_M0400"),
-      signal_xsec(1000.),
-      nbkg_total(211435861768.63),
-      nsig_nm1(1.),
-      nbkg_nm1(1.),
+      signal_xsec(20.),
+      bigw(false),
+      syst_frac(-1),
       background_file_name("background.root")
   {}
 
@@ -65,7 +63,7 @@ struct option_driver {
     *s = optarg;
     return true;
   }
-    
+
   int parse_args(int argc, char** argv) {
     bool help = false;
 
@@ -74,9 +72,6 @@ struct option_driver {
       switch (c) {
       case 'h':
         help = true;
-        break;
-      case 'w':
-        weightfiles = true;
         break;
       case 'p':
         printall = true;
@@ -105,7 +100,10 @@ struct option_driver {
           return 1;
 	break;
       case 'b':
-        if (!one_double('b', &nbkg_total))
+        bigw = true;
+	break;
+      case 'f':
+        if (!one_double('f', &syst_frac))
           return 1;
 	break;
       case 'k':
@@ -131,15 +129,15 @@ struct option_driver {
       fprintf(stderr, "  path             path containing input root files\n");
       fprintf(stderr, "available switch options:\n");
       fprintf(stderr, "  -h                      produce this help message and quit\n");
-      fprintf(stderr, "  -w                      produce weighted files and quit\n");
       fprintf(stderr, "  -p                      turn on (some) prints (default: off)\n");
       fprintf(stderr, "  -m                      turn on (all) prints (default: off)\n");
       fprintf(stderr, "  -s                      turn on saving of plots (default: off)\n");
       fprintf(stderr, "  -z plot_path            path to save plots to (implies -s, default: plots/SSB/signal_name/)\n");
       fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20000)\n");
       fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau0100um_M0400)\n");
-      fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 1)\n");
-      fprintf(stderr, "  -b nbkg_total           number to scale background efficiency by (default: something big)\n");
+      fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 20)\n");
+      fprintf(stderr, "  -b                      use big-weights samples (default: off)\n");
+      fprintf(stderr, "  -f syst_frac            fraction systematic uncertainty to use in PL calculation (default: -1)\n");
       fprintf(stderr, "  -k bkg_file_name        filename for weighted, added backgrounds (default: background.root)\n");
       return 1;
     }
@@ -169,64 +167,7 @@ void draw_in_order(std::vector<TH1F*> v) {
   }
 }
 
-struct sample {
-  std::string name;
-  double xsec; // in fb
-  double nevents;
 
-  double partial_weight() const { assert(nevents > 0); return xsec / nevents; }
-  double weight() const { assert(nevents > 0); return xsec * options.int_lumi / nevents; }
-};
-
-const int nsamples = 8;
-sample samples[nsamples] = {
-  {options.signal_name, options.signal_xsec, 0 },
-  {"ttbarhadronic",     225.2e3 * 0.457,     0 },
-  {"ttbarsemilep",      225.2e3 * 0.438,     0 },
-  {"ttbardilep",        225.2e3 * 0.105,     0 },
-  {"qcdht0100",         1.04e10,             0 },
-  {"qcdht0250",         2.76e8,              0 },
-  {"qcdht0500",         8.43e6,              0 },
-  {"qcdht1000",         2.04e5,              0 }
-};
-
-void read_nevents() {
-  for (sample& s: samples) {
-    std::string filename = options.file_path + "/" + s.name + "_mangled.root";
-    TFile* f = TFile::Open(filename.c_str());
-    TH1F* h = (TH1F*)f->Get("ntot");
-    s.nevents = h->GetBinContent(1);
-    delete f;
-  }
-}
-
-bool weight_files() {
-  std::string cmd = "mergeTFileServiceHistograms -w ";
-  cmd += TString::Format("%e", samples[0].weight()).Data();
-  cmd += " -i " + options.file_path + "/" + samples[0].name + "_mangled.root -o " + options.file_path + "/" + samples[0].name + "_" + options.signal_file_suffix() + ".root";
-  printf("%s\n", cmd.c_str());
-  if (system(cmd.c_str()))
-    return false;
-
-  cmd = "mergeTFileServiceHistograms -w ";
-  
-  for (int i = 1; i < nsamples; ++i)
-    cmd += TString::Format("%e%s", samples[i].weight(), (i < nsamples-1 ? "," : ""));
-  cmd += " -i ";
-  for (int i = 1; i < nsamples; ++i)
-    cmd += options.file_path + "/" + samples[i].name + "_mangled.root ";
-  cmd += " -o " + options.file_path + "/" + options.background_file_name;
-  printf("%s\n", cmd.c_str());
-  if (system(cmd.c_str()))
-    return false;
-
-  return true;
-}
-
-double get_nm1(TFile* f) {
-  TH1F* h = (TH1F*)f->Get("nm1");
-  return h == 0 ? 1 : h->GetBinContent(1);
-}
 
 struct intvl {
   double lower;
@@ -267,264 +208,335 @@ intvl clopper_pearson_poisson(double x, double y) {
   return v;
 }
 
-struct sigproflik {
+struct z_calculator {
+  struct sample {
+    std::string name;
+    std::string filename;
+    bool is_signal;
+    double xsec; // in fb
+    std::unique_ptr<TFile> file;
+    double nevents;
+    double nm1;
+
+    double partial_weight() const { assert(nevents > 0); return xsec / nevents; }
+    double lumi() const { assert(xsec > 0); return nevents / xsec; };
+    double weight() const { assert(nevents > 0); return xsec * options.int_lumi / nevents; }
+    bool use() const { return is_signal || options.bigw || partial_weight() < 5e-2; }
+    double tau() const { return lumi() / options.int_lumi; }
+
+    std::map<std::string, TH1F*> hists;
+
+    const TH1F* hist(const std::string& var) const {
+      auto it = hists.find(var);
+      assert(it != hists.end());
+      return it->second;
+    }
+
+    sample(const std::string& name_, const double xsec_, const std::vector<std::string>& vars)
+      : name(name_),
+        filename(options.file_path + "/" + name_ + "_mangled.root"),
+        is_signal(name == options.signal_name),
+        xsec(xsec_),
+        file(TFile::Open(filename.c_str()))
+    {
+      assert(file->IsOpen());
+
+      TH1F* hnevents = (TH1F*)file->Get("ntot");
+      nevents = hnevents->GetBinContent(1);
+
+      TH1F* hnm1 = (TH1F*)file->Get("nm1");
+      nm1 = hnm1->GetBinContent(1);
+
+      for (const std::string& var : vars)
+        hists[var] = (TH1F*)file->Get(var.c_str());
+    }
+  };
+
   static bool bannered;
-  std::vector<std::string> filenames;
-  std::vector<TFile*> files;
-  std::vector<double> taus;
-  std::vector<std::map<std::string, TH1F*> > hists;
-  std::vector<double> nm1s;
-  double syst_frac;
+  std::vector<sample> samples;
+  double nsig_nm1;
+  double nbkg_nm1;
+  double nsig_tot;
+  double nbkg_tot;
 
-  sigproflik(const char** vars, const int nvars, const bool bigw, const double syst) {
-    syst_frac = syst;
+  z_calculator(const std::vector<std::string>& vars)
+    : nsig_nm1(0),
+      nbkg_nm1(0),
+      nsig_tot(0),
+      nbkg_tot(0)
+  {
+    samples.push_back(sample(options.signal_name, options.signal_xsec, vars));
+    samples.push_back(sample("ttbarhadronic",     225.2e3 * 0.457,     vars));
+    samples.push_back(sample("ttbarsemilep",      225.2e3 * 0.438,     vars));
+    samples.push_back(sample("ttbardilep",        225.2e3 * 0.105,     vars));
+    samples.push_back(sample("qcdht0100",         1.04e10,             vars));
+    samples.push_back(sample("qcdht0250",         2.76e8,              vars));
+    samples.push_back(sample("qcdht0500",         8.43e6,              vars));
+    samples.push_back(sample("qcdht1000",         2.04e5,              vars));
 
-    std::vector<double> lumis;
+    for (std::vector<sample>::iterator s = samples.begin(); s != samples.end(); ) {
+      if (!s->use())
+        s = samples.erase(s);
+      else
+        ++s;
+    }
 
+    int n_sig_samples = 0;
     for (const sample& s : samples) {
-      if (s.name != options.signal_name && !bigw && s.partial_weight() > 5e-2)
-        continue;
-      filenames.push_back(options.file_path + "/" + s.name + "_mangled.root");
-      lumis.push_back(1./s.partial_weight());
+      if (s.is_signal) {
+        ++n_sig_samples;
+        nsig_nm1 = s.weight() * s.nm1;
+        nsig_tot = s.weight() * s.nevents;
+      }
+      else {
+        nbkg_nm1 += s.weight() * s.nm1;
+        nbkg_tot += s.weight() * s.nevents;
+      }
     }
 
-    for (size_t i = 1; i < filenames.size(); ++i)
-      taus.push_back(lumis[i] / lumis[0]);
-        
-    hists.resize(filenames.size());
-
-    for (size_t i = 0; i < filenames.size(); ++i) {
-      files.push_back(new TFile(filenames[i].c_str()));
-      nm1s.push_back(get_nm1(files.back()));
-      for (int j = 0; j < nvars; ++j)
-        hists[i][vars[j]] = (TH1F*)files.back()->Get(vars[j]);
-    }
+    assert(n_sig_samples == 1);
 
     if (!bannered) {
       bannered = true;
-      printf("sigproflik setup:\nint lumi 'data': %f/fb\n", lumis[0]);
-      for (size_t i = 1; i < filenames.size(); ++i)
-        printf("bkg: %s   int lumi: %f/fb    tau: %f\n", filenames[i].c_str(), lumis[i], taus[i-1]);
+      printf("nsig_nm1 = %f, nbkg_nm1 = %f\n", nsig_nm1, nbkg_nm1);
+      printf("z_calculator setup:\nint lumi 'data': %f/fb\n", options.int_lumi);
+      for (const sample& s : samples)
+        if (!s.is_signal)
+          printf("bkg: %20s   int lumi: %.3e/fb    tau: %.3e\n", s.name.c_str(), s.lumi(), s.tau());
     }
   }
 
-  double sig(const char* var, const int ibin) {
-    double s = hists[0][var]->GetBinContent(ibin);
+  typedef std::pair<double, double> val_w_err;
+
+  val_w_err raw_count(const sample& s, const std::string& var, const int ibin) const {
+    const TH1F* h = s.hist(var);
+    return std::make_pair(h->GetBinContent(ibin), h->GetBinError(ibin));
+  }
+
+  val_w_err weighted_count(const sample& s, const std::string& var, const int ibin) const {
+    val_w_err r = raw_count(s, var, ibin);
+    double w = s.weight();
+    return std::make_pair(w * r.first, w * r.second);
+  }
+
+  val_w_err total_count(const std::string& var, const int ibin, const bool signal, const bool weighted) const {
+    double totb = 0, totvarb = 0;
+    for (const sample& s : samples) {
+      if (s.is_signal == signal) {
+        val_w_err b;
+        if (weighted)
+          b = weighted_count(s, var, ibin);
+        else
+          b = raw_count(s, var, ibin);
+
+        totb += b.first;
+        totvarb += b.second*b.second;
+      }
+    }
+
+    return std::make_pair(totb, sqrt(totvarb));
+  }
+
+  TH1F* total_hist(const std::string& var, const bool signal, const bool weighted) const {
+    TH1F* h = 0;
+
+    for (const sample& s : samples) {
+      if (s.is_signal == signal) {
+        double w = s.weight();
+
+        if (h == 0) {
+          h = (TH1F*)s.hist(var)->Clone(TString::Format("total_%s", var.c_str()));
+          h->Sumw2();
+          if (weighted) {
+            for (int i = 0; i < h->GetNbinsX()+2; ++i) {
+              h->SetBinContent(i, h->GetBinContent(i) * w);
+              h->SetBinError(i, h->GetBinError(i) * w);
+            }
+          }
+        }
+        else
+          h->Add(s.hist(var), weighted ? w : 1);
+      }
+    }
+
+    return h;
+  }
+
+  double get_zpl(const std::string& var, const int ibin) const {
+    double s = total_count(var, ibin, true, true).first;
     double n = s;
-    std::vector<double> ms;
-    if (options.moreprints) printf("   proflik: b/m:");
-    for (size_t i = 1; i < filenames.size(); ++i) {
-      double m = hists[i][var]->GetBinContent(ibin);
-      if (options.moreprints)
-        printf("    %s %i/%i\n", filenames[i].c_str(), int(m), int(samples[i].nevents));
-      n += m/taus[i-1];
+    std::vector<double> ms, taus;
+    if (options.moreprints) printf("   PL: b/m:");
+    for (const sample& s : samples) {
+      if (s.is_signal)
+        continue;
+
+      double m = raw_count(s, var, ibin).first;
+      double tau = s.tau();
+      n += m/tau;
+
       ms.push_back(m);
+      taus.push_back(tau);
+
+      if (options.moreprints)
+        printf("    %s %i/%i\n", s.name.c_str(), int(m), int(s.nevents));
     }
+
     if (options.moreprints) printf("   s: %f  n: %f\n", s, n);
-    return getSignificance(0, n, s, ms, taus, syst_frac);
+    return getSignificance(0, n, s, ms, taus, options.syst_frac);
   }
 
-  intvl bkgfrac(const char* var, const int ibin) {
-    if (options.moreprints) printf("bkgfrac  var %s  ibin %i\n", var, ibin);
-    double num = 0, den = 0;
-    for (size_t i = 1; i < filenames.size(); ++i) {
-      double num_b = hists[i][var]->GetBinContent(ibin);
-      double den_b = nm1s[i];
-      if (options.moreprints) printf("num_b[%i] = %f\n", int(i), num_b);
-      num += num_b/taus[i-1];
-      den += den_b/taus[i-1];
+  void max_z(const std::string& var) const {
+    TH1F* sigHist = total_hist(var, true, true);
+    TH1F* bkgHist = total_hist(var, false, true);
+
+    if (options.printall)
+      printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", var.c_str(), "cut", "s", "b", "sigb", "ssb", "ssb20", "ssbsb", "ssbsb20", "zpl", "sig frac", "sig eff", "bkg frac", "bkg eff");
+
+    const int nbins = sigHist->GetNbinsX();
+    const double xlow = sigHist->GetXaxis()->GetXmin();
+    const double xup = sigHist->GetXaxis()->GetXmax();
+    TH1F* h_sigfrac = new TH1F("h_sigfrac", ";cut;sig frac", nbins, xlow, xup);
+    TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
+    double bkgpl_x[nbins], bkgpl_y[nbins], bkgpl_exl[nbins], bkgpl_exh[nbins], bkgpl_eyl[nbins], bkgpl_eyh[nbins];
+    TH1F* h_zssb = new TH1F("h_zssb", ";cut;ssb", nbins, xlow, xup);
+    TH1F* h_zssb20 = new TH1F("h_zssb20", ";cut;ssb20", nbins, xlow, xup);
+    TH1F* h_zssbsb = new TH1F("h_zssbsb", ";cut;ssbsb", nbins, xlow, xup);
+    TH1F* h_zssbsb20 = new TH1F("h_zssbsb20", ";cut;ssbsb20", nbins, xlow, xup);
+    TH1F* h_zpl = new TH1F("h_zpl", ";cut;asimov Z", nbins, xlow, xup);
+
+    double cut = 0;
+    double smax = 0;
+    double bmax = 0;
+    double zmax = 0;
+
+    for (int i = 1; i <= nbins; i++) {
+      const double s = total_count(var, i, true, true).first;
+      const val_w_err bve = total_count(var, i, false, true);
+      const double b = bve.first;
+      const double sigb = bve.second;
+
+      const double zssb = s/sqrt(b);
+      const double zssb20 = s/sqrt(b + 0.04*b*b);
+      const double zssbsb = s/sqrt(b + sigb*sigb);
+      const double zssbsb20 = s/sqrt(b + sigb*sigb + 0.04*b*b);
+      const double zpl = get_zpl(var, i);
+
+      bkgpl_x[i-1] = sigHist->GetXaxis()->GetBinCenter(i);
+      bkgpl_exl[i-1] = bkgpl_exh[i-1] = sigHist->GetXaxis()->GetBinWidth(i)/2;
+      //intvl bkgpl_v = slik_syst20->bkgfrac(var, i);
+      bkgpl_y[i-1] = 0; //bkgpl_v.hat;
+      bkgpl_eyl[i-1] = 0; //bkgpl_v.hat - bkgpl_v.lower;
+      bkgpl_eyh[i-1] = 0; //bkgpl_v.upper - bkgpl_v.hat;
+
+      if (options.printall)
+        printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl, s/nsig_nm1, s/nsig_tot, b/nbkg_nm1, b/nbkg_tot);
+
+      h_sigfrac->SetBinContent(i, s/nsig_nm1);
+      h_bkgfrac->SetBinContent(i, b/nbkg_nm1);
+
+      if (b > 0) {
+        h_zssb->SetBinContent(i, zssb);
+        h_zssb20->SetBinContent(i, zssb20);
+      }
+      if (b + sigb*sigb > 0) {
+        h_zssbsb->SetBinContent(i, zssbsb);
+        h_zssbsb20->SetBinContent(i, zssbsb20);
+      }
+      if (!TMath::IsNaN(zpl))
+        h_zpl->SetBinContent(i, zpl);
+
+      if (zpl > zmax) {
+        cut = sigHist->GetBinLowEdge(i);
+        smax = s;
+        bmax = b;
+        zmax = zpl;
+      }
     }
-    if (options.moreprints) printf("\n");
-    return clopper_pearson_poisson(num, den); // JMTBAD
+
+    if (options.printall)
+      printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", cut, smax, bmax, zmax, smax/nsig_nm1, smax/nsig_tot, bmax/nbkg_nm1, bmax/nbkg_tot);
+    else
+      printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", var.c_str(),  cut, smax, bmax, zmax, smax/nsig_nm1, smax/nsig_tot, bmax/nbkg_nm1, bmax/nbkg_tot);
+
+    std::vector<TH1F*> zs = {h_zssb, h_zssb20, h_zssbsb, h_zssbsb20, h_zpl};
+    for (TH1F* h : zs)
+      h->SetLineWidth(2);
+    h_zssb20->SetLineColor(kCyan);
+    h_zssbsb->SetLineColor(kRed);
+    h_zssbsb20->SetLineColor(6);
+    h_zpl->SetLineColor(kOrange+2);
+    h_sigfrac->SetLineColor(kRed);
+    h_bkgfrac->SetLineColor(kBlue);
+
+    TGraphAsymmErrors* g_bkgpl = new TGraphAsymmErrors(nbins, bkgpl_x, bkgpl_y, bkgpl_exl, bkgpl_exh, bkgpl_eyl, bkgpl_eyh);
+    g_bkgpl->SetLineColor(kCyan);
+    g_bkgpl->SetMarkerColor(kCyan);
+    g_bkgpl->SetMarkerStyle(20);
+    g_bkgpl->SetMarkerSize(1);
+
+    TLegend* leg = new TLegend(0.8,0.8,1,1);
+    leg->AddEntry(h_zssb, "s/#sqrt{b}", "L");
+    leg->AddEntry(h_zssb20, "s/#sqrt{b+(0.2b)^{2}}", "L");
+    leg->AddEntry(h_zssbsb, "s/#sqrt{b+#sigma_{b}^{2}}", "L");
+    leg->AddEntry(h_zssbsb20, "s/#sqrt{b+#sigma_{b}^{2}+(0.2b)^{2}}", "L");
+    leg->AddEntry(h_zpl, TString::Format("Z_{PL} w/ %i syst", int(options.syst_frac * 100)), "L");
+
+    if (options.saveplots) {
+      for (int logy = 0; logy < 2; ++logy) {
+        TCanvas* c1 = new TCanvas("c1", "", 1200, 675);
+        c1->Divide(2,2);
+        c1->cd(1)->SetLogy(logy);
+        TH1F* sh = (TH1F*)sigHist->Clone();
+        sh->SetLineColor(kRed);
+        sh->Draw();
+        c1->cd(3)->SetLogy(logy);
+        bkgHist->Draw();
+        c1->cd(2)->SetLogy(logy);
+        draw_in_order(zs);
+        leg->Draw();
+        c1->cd(4)->SetLogy(logy);
+        draw_in_order(std::vector<TH1F*>({h_sigfrac, h_bkgfrac}));
+        g_bkgpl->Draw("ZP");
+        std::string p = options.plot_path + "/" + options.signal_name + "/";
+        p += var;
+        if (logy)
+          p += "_log";
+        c1->SaveAs((p + ".pdf").c_str());
+        c1->SaveAs((p + ".png").c_str());
+        if (!logy) c1->SaveAs((p + ".root").c_str());
+        delete c1;
+      }
+    }
+
+    delete h_zssb;
+    delete h_zssb20;
+    delete h_zssbsb;
+    delete h_zssbsb20;
+    delete h_zpl;
+    delete h_sigfrac;
+    delete h_bkgfrac;
+    delete leg;
   }
 };
 
-bool sigproflik::bannered = false;
-sigproflik* slik = 0;
-sigproflik* slik_nobigw = 0;
-sigproflik* slik_syst20 = 0;
-
-void maxSSB(TH1F* sigHist, TH1F* bkgHist, const char* var) {
-  if (options.printall)
-    printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", sigHist->GetName(), "cut", "s", "b", "sigb", "ssb", "ssb20", "ssbsb", "ssbsb20", "zplsmw", "zpl", "zpls20", "sig frac", "sig eff", "bkg frac", "bkg eff");
-  const int nbins = sigHist->GetNbinsX();
-  const double xlow = sigHist->GetXaxis()->GetXmin();
-  const double xup = sigHist->GetXaxis()->GetXmax();
-  TH1F* h_sigfrac = new TH1F("h_sigfrac", ";cut;sig frac", nbins, xlow, xup);
-  TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
-  double bkgpl_x[nbins], bkgpl_y[nbins], bkgpl_exl[nbins], bkgpl_exh[nbins], bkgpl_eyl[nbins], bkgpl_eyh[nbins];
-  TH1F* h_zssb = new TH1F("h_zssb", ";cut;ssb", nbins, xlow, xup);
-  TH1F* h_zssb20 = new TH1F("h_zssb20", ";cut;ssb20", nbins, xlow, xup);
-  TH1F* h_zssbsb = new TH1F("h_zssbsb", ";cut;ssbsb", nbins, xlow, xup);
-  TH1F* h_zssbsb20 = new TH1F("h_zssbsb20", ";cut;ssbsb20", nbins, xlow, xup);
-  TH1F* h_zpl_nobigw = new TH1F("h_zpl_nobigw", ";cut;asimov Z", nbins, xlow, xup);
-  TH1F* h_zpl = new TH1F("h_zpl", ";cut;asimov Z", nbins, xlow, xup);
-  TH1F* h_zpl_syst20 = new TH1F("h_zpl_syst20", ";cut;asimov Z", nbins, xlow, xup);
-
-  double cut = 0;
-  double smax = 0;
-  double bmax = 0;
-  double zmax = 0;
-
-  for (int i = 1; i <= nbins; i++) {
-    const double s = sigHist->GetBinContent(i);
-    const double b = bkgHist->GetBinContent(i);
-    const double sigb = bkgHist->GetBinError(i);
-
-    const double zssb = s/sqrt(b);
-    const double zssb20 = s/sqrt(b + 0.04*b*b);
-    const double zssbsb = s/sqrt(b + sigb*sigb);
-    const double zssbsb20 = s/sqrt(b + sigb*sigb + 0.04*b*b);
-    const double zpl_nobigw = -1; //slik_nobigw->sig(var, i);
-    const double zpl = slik->sig(var, i);
-    const double zpl_syst20 = -1; //slik_syst20->sig(var, i);
-
-    bkgpl_x[i-1] = sigHist->GetXaxis()->GetBinCenter(i);
-    bkgpl_exl[i-1] = bkgpl_exh[i-1] = sigHist->GetXaxis()->GetBinWidth(i)/2;
-    intvl bkgpl_v = slik_syst20->bkgfrac(var, i);
-    bkgpl_y[i-1] = bkgpl_v.hat;
-    bkgpl_eyl[i-1] = bkgpl_v.hat - bkgpl_v.lower;
-    bkgpl_eyh[i-1] = bkgpl_v.upper - bkgpl_v.hat;
-
-    if (options.printall)
-      printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl_nobigw, zpl, zpl_syst20, s/options.nsig_nm1, s/options.nsig_total(), b/options.nbkg_nm1, b/options.nbkg_total);
-
-    h_sigfrac->SetBinContent(i, s/options.nsig_nm1);
-    h_bkgfrac->SetBinContent(i, b/options.nbkg_nm1);
-
-    if (b != 0)
-      h_zssb->SetBinContent(i, zssb);
-    if (b > 0)
-      h_zssb20->SetBinContent(i, zssb20);
-    if (b + sigb*sigb > 0)
-      h_zssbsb->SetBinContent(i, zssbsb);
-    if (b > 0)
-      h_zssbsb20->SetBinContent(i, zssbsb20);
-    if (!TMath::IsNaN(zpl_nobigw))
-      h_zpl_nobigw->SetBinContent(i, zpl_nobigw);
-    if (!TMath::IsNaN(zpl))
-      h_zpl->SetBinContent(i, zpl);
-    if (!TMath::IsNaN(zpl_syst20))
-      h_zpl_syst20->SetBinContent(i, zpl_syst20);
-
-    if (zpl > zmax) {
-      cut = sigHist->GetBinLowEdge(i);
-      smax = s;
-      bmax = b;
-      zmax = zpl;
-    }
-  }
-
-  if (options.printall)
-    printf("\n%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t\t\t%f\t%f\t%f\t%e\n\n\n", "max ssb", cut, smax, bmax, zmax, smax/options.nsig_nm1, smax/options.nsig_total(), bmax/options.nbkg_nm1, bmax/options.nbkg_total);
-  else
-    printf("%16s\t%6.2f\t%9.2f\t%9.2f\t%6.2f\t%f\t%f\t%f\t%e\n", sigHist->GetName(),  cut, smax, bmax, zmax, smax/options.nsig_nm1, smax/options.nsig_total(), bmax/options.nbkg_nm1, bmax/options.nbkg_total);
-
-  std::vector<TH1F*> zs = {h_zssb, h_zssb20, h_zssbsb, h_zssbsb20, h_zpl_nobigw, h_zpl, h_zpl_syst20};
-  for (TH1F* h : zs)
-    h->SetLineWidth(2);
-  h_zssb20->SetLineColor(kCyan);
-  h_zssbsb->SetLineColor(kRed);
-  h_zssbsb20->SetLineColor(6);
-  h_zpl_nobigw->SetLineColor(kBlue);
-  h_zpl->SetLineColor(kOrange+2);
-  h_zpl_syst20->SetLineColor(kGreen+2);
-  h_sigfrac->SetLineColor(kRed);
-  h_bkgfrac->SetLineColor(kBlue);
-
-  TGraphAsymmErrors* g_bkgpl = new TGraphAsymmErrors(nbins, bkgpl_x, bkgpl_y, bkgpl_exl, bkgpl_exh, bkgpl_eyl, bkgpl_eyh);
-  g_bkgpl->SetLineColor(kCyan);
-  g_bkgpl->SetMarkerColor(kCyan);
-  g_bkgpl->SetMarkerStyle(20);
-  g_bkgpl->SetMarkerSize(1);
-
-  TLegend* leg = new TLegend(0.8,0.8,1,1);
-  leg->AddEntry(h_zssb, "s/#sqrt{b}", "L");
-  leg->AddEntry(h_zssb20, "s/#sqrt{b+(0.2b)^{2}}", "L");
-  leg->AddEntry(h_zssbsb, "s/#sqrt{b+#sigma_{b}^{2}}", "L");
-  leg->AddEntry(h_zssbsb20, "s/#sqrt{b+#sigma_{b}^{2}+(0.2b)^{2}}", "L");
-  leg->AddEntry(h_zpl_nobigw, "Z_{PL} (no big weights)", "L");
-  leg->AddEntry(h_zpl, "Z_{PL}", "L");
-  leg->AddEntry(h_zpl_syst20, "Z_{PL} inc. 20% syst. unc.", "L");
-
-  if (options.saveplots) {
-    for (int logy = 0; logy < 2; ++logy) {
-      TCanvas* c1 = new TCanvas("c1", "", 1200, 675);
-      c1->Divide(2,2);
-      c1->cd(1)->SetLogy(logy);
-      sigHist->SetLineColor(kRed);
-      sigHist->Draw();
-      c1->cd(3)->SetLogy(logy);
-      bkgHist->Draw();
-      c1->cd(2)->SetLogy(logy);
-      draw_in_order(zs);
-      leg->Draw();
-      c1->cd(4)->SetLogy(logy);
-      draw_in_order(std::vector<TH1F*>({h_sigfrac, h_bkgfrac}));
-      g_bkgpl->Draw("ZP");
-      std::string p = options.plot_path + "/" + options.signal_name + "/";
-      p += var;
-      if (logy)
-        p += "_log";
-      c1->SaveAs((p + ".pdf").c_str());
-      c1->SaveAs((p + ".png").c_str());
-      if (!logy) c1->SaveAs((p + ".root").c_str());
-      delete c1;
-    }
-  }
-
-  delete h_zssb;
-  delete h_zssb20;
-  delete h_zssbsb;
-  delete h_zssbsb20;
-  delete h_zpl;
-  delete h_zpl_nobigw;
-  delete h_zpl_syst20;
-  delete h_sigfrac;
-  delete h_bkgfrac;
-  delete leg;
-}
-
+bool z_calculator::bannered = false;
 
 int main(int argc, char** argv) {
   int r;
   if ((r = options.parse_args(argc, argv)))
     return r;
 
-  read_nevents();
-
-  if (options.weightfiles) {
-    weight_files();
-    return 0;
-  }
-
   gErrorIgnoreLevel = 1001;
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  const int nvars = 26;
-  const char* hnames[nvars] = {"ntracks", "ntracksptgt3", "njetsntks", "tkonlypt", "tkonlymass", "jetsntkpt", "jetsntkmass", "tksjetsntkpt", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "sumpt2", "maxtrackpt", "drmin", "drmax", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "tkonlymass01", "tksjetsntkmass01"};
+  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "njetsntks", "tkonlypt", "tkonlymass", "jetsntkpt", "jetsntkmass", "tksjetsntkpt", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "sumpt2", "maxtrackpt", "drmin", "drmax", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "tkonlymass01", "tksjetsntkmass01"};
 
-  slik = new sigproflik(hnames, nvars, true, -1);
-  slik_nobigw = new sigproflik(hnames, nvars, false, -1);
-  slik_syst20 = new sigproflik(hnames, nvars, true, 0.2);
-
-  TFile* sigFile = TFile::Open(options.signal_path().c_str());
-  TFile* bkgFile = TFile::Open(options.background_path().c_str());
-
-  options.nsig_nm1 = get_nm1(sigFile);
-  options.nbkg_nm1 = get_nm1(bkgFile);
-  printf("nsig_nm1 = %f, nbkg_nm1 = %f\n", options.nsig_nm1, options.nbkg_nm1);
+  z_calculator z_calc(vars);
 
   if (!options.printall) printf("variable\t\tcut\t\ts\t\tb\tmax ssb\tsig frac\tsig eff\t\tbkg frac\tbkg eff\n");
 
-  for (int i = 0; i < nvars; i++) {
-    TH1F* sigHist = (TH1F*)sigFile->Get(hnames[i]);
-    TH1F* bkgHist = (TH1F*)bkgFile->Get(hnames[i]);
-    maxSSB(sigHist, bkgHist, hnames[i]);
-  }
-
-  delete slik;
-  delete slik_nobigw;
-  delete slik_syst20;
+  for (const std::string& var : vars)
+    z_calc.max_z(var);
 }
