@@ -344,7 +344,7 @@ struct z_calculator {
   }
 
   THStack* total_hist(const std::string& var, const bool signal, const bool weighted) const {
-    THStack* hs = new THStack(TString::Format("stack_%s", var.c_str()), TString::Format(";%s > X;events passing", var.c_str()));
+    THStack* hs = new THStack(TString::Format("stack_%s", var.c_str()), TString::Format(";%s cut value;events passing", var.c_str()));
 
     for (const sample& s : samples) {
       if (s.is_signal == signal) {
@@ -430,6 +430,8 @@ struct z_calculator {
       const double zssbsb20 = s/sqrt(b + sigb*sigb + 0.04*b*b);
       const double zpl = get_zpl(var, i);
 
+      const double z = zssb20;
+
       bkgpl_x[i-1] = xax->GetBinCenter(i);
       bkgpl_exl[i-1] = bkgpl_exh[i-1] = xax->GetBinWidth(i)/2;
       //intvl bkgpl_v = slik_syst20->bkgfrac(var, i);
@@ -454,11 +456,11 @@ struct z_calculator {
       if (!TMath::IsNaN(zpl))
         h_zpl->SetBinContent(i, zpl);
 
-      if (zpl > zmax) {
+      if (z > zmax) {
         cut = xax->GetBinLowEdge(i);
         smax = s;
         bmax = b;
-        zmax = zpl;
+        zmax = z;
       }
     }
 
