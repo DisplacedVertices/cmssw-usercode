@@ -214,6 +214,7 @@ struct z_calculator {
     std::string filename;
     bool is_signal;
     double xsec; // in fb
+    int color;
     std::unique_ptr<TFile> file;
     double nevents;
     double nm1;
@@ -232,11 +233,12 @@ struct z_calculator {
       return it->second;
     }
 
-    sample(const std::string& name_, const double xsec_, const std::vector<std::string>& vars)
+    sample(const std::string& name_, const double xsec_, const int color_, const std::vector<std::string>& vars)
       : name(name_),
         filename(options.file_path + "/" + name_ + "_mangled.root"),
         is_signal(name == options.signal_name),
         xsec(xsec_),
+        color(color_),
         file(TFile::Open(filename.c_str()))
     {
       assert(file->IsOpen());
@@ -254,6 +256,7 @@ struct z_calculator {
 
   static bool bannered;
   std::vector<sample> samples;
+  std::map<std::string, const sample*> samples_by_name;
   double nsig_nm1;
   double nbkg_nm1;
   double nsig_tot;
@@ -265,14 +268,14 @@ struct z_calculator {
       nsig_tot(0),
       nbkg_tot(0)
   {
-    samples.push_back(sample(options.signal_name, options.signal_xsec, vars));
-    samples.push_back(sample("ttbarhadronic",     225.2e3 * 0.457,     vars));
-    samples.push_back(sample("ttbarsemilep",      225.2e3 * 0.438,     vars));
-    samples.push_back(sample("ttbardilep",        225.2e3 * 0.105,     vars));
-    samples.push_back(sample("qcdht0100",         1.04e10,             vars));
-    samples.push_back(sample("qcdht0250",         2.76e8,              vars));
-    samples.push_back(sample("qcdht0500",         8.43e6,              vars));
-    samples.push_back(sample("qcdht1000",         2.04e5,              vars));
+    samples.push_back(sample(options.signal_name, options.signal_xsec, kRed,       vars));
+    samples.push_back(sample("ttbarhadronic",     225.2e3 * 0.457,     kBlue,      vars));
+    samples.push_back(sample("ttbarsemilep",      225.2e3 * 0.438,     kBlue + 1,  vars));
+    samples.push_back(sample("ttbardilep",        225.2e3 * 0.105,     kBlue + 2,  vars));
+    samples.push_back(sample("qcdht0100",         1.04e10,             kGreen,     vars));
+    samples.push_back(sample("qcdht0250",         2.76e8,              kGreen + 1, vars));
+    samples.push_back(sample("qcdht0500",         8.43e6,              kGreen + 2, vars));
+    samples.push_back(sample("qcdht1000",         2.04e5,              kGreen + 3, vars));
 
     for (std::vector<sample>::iterator s = samples.begin(); s != samples.end(); ) {
       if (!s->use())
@@ -283,6 +286,8 @@ struct z_calculator {
 
     int n_sig_samples = 0;
     for (const sample& s : samples) {
+      samples_by_name[s.name] = &s;
+
       if (s.is_signal) {
         ++n_sig_samples;
         nsig_nm1 = s.weight() * s.nm1;
