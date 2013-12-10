@@ -10,6 +10,7 @@
 #include "TFile.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1.h"
+#include "THStack.h"
 #include "TLegend.h"
 #include "TMath.h"
 #include "TStyle.h"
@@ -68,7 +69,7 @@ struct option_driver {
     bool help = false;
 
     int c;
-    while (!help && (c = getopt(argc, argv, "hwpmsz:l:n:x:b:u:k:")) != -1) {
+    while (!help && (c = getopt(argc, argv, "hpmsz:l:n:x:bf:k:")) != -1) {
       switch (c) {
       case 'h':
         help = true;
@@ -342,29 +343,30 @@ struct z_calculator {
     return std::make_pair(totb, sqrt(totvarb));
   }
 
-  TH1F* total_hist(const std::string& var, const bool signal, const bool weighted) const {
-    TH1F* h = 0;
+  THStack* total_hist(const std::string& var, const bool signal, const bool weighted) const {
+    THStack* hs = new THStack(TString::Format("stack_%s", var.c_str()), TString::Format(";%s > X;events passing", var.c_str()));
 
     for (const sample& s : samples) {
       if (s.is_signal == signal) {
         double w = s.weight();
 
-        if (h == 0) {
-          h = (TH1F*)s.hist(var)->Clone(TString::Format("total_%s", var.c_str()));
-          h->Sumw2();
-          if (weighted) {
-            for (int i = 0; i < h->GetNbinsX()+2; ++i) {
-              h->SetBinContent(i, h->GetBinContent(i) * w);
-              h->SetBinError(i, h->GetBinError(i) * w);
-            }
+        TH1F* h = (TH1F*)s.hist(var)->Clone(TString::Format("total_%s", var.c_str()));
+        h->Sumw2();
+        h->SetFillColor(s.color);
+        h->SetLineColor(s.color);
+
+        if (weighted) {
+          for (int i = 0; i < h->GetNbinsX()+2; ++i) {
+            h->SetBinContent(i, w * h->GetBinContent(i));
+            h->SetBinError  (i, w * h->GetBinError  (i));
           }
         }
-        else
-          h->Add(s.hist(var), weighted ? w : 1);
+
+        hs->Add(h);
       }
     }
 
-    return h;
+    return hs;
   }
 
   double get_zpl(const std::string& var, const int ibin) const {
@@ -392,15 +394,16 @@ struct z_calculator {
   }
 
   void max_z(const std::string& var) const {
-    TH1F* sigHist = total_hist(var, true, true);
-    TH1F* bkgHist = total_hist(var, false, true);
+    THStack* sigHist = total_hist(var, true, true);
+    THStack* bkgHist = total_hist(var, false, true);
+    TAxis* xax = ((TH1F*)sigHist->GetHists()->First())->GetXaxis();
 
     if (options.printall)
       printf("%16s%6s%9s%9s%9s%9s%9s%9s%9s%9s %9s %9s %9s %9s\n", var.c_str(), "cut", "s", "b", "sigb", "ssb", "ssb20", "ssbsb", "ssbsb20", "zpl", "sig frac", "sig eff", "bkg frac", "bkg eff");
 
-    const int nbins = sigHist->GetNbinsX();
-    const double xlow = sigHist->GetXaxis()->GetXmin();
-    const double xup = sigHist->GetXaxis()->GetXmax();
+    const int nbins = xax->GetNbins();
+    const double xlow = xax->GetXmin();
+    const double xup = xax->GetXmax();
     TH1F* h_sigfrac = new TH1F("h_sigfrac", ";cut;sig frac", nbins, xlow, xup);
     TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
     double bkgpl_x[nbins], bkgpl_y[nbins], bkgpl_exl[nbins], bkgpl_exh[nbins], bkgpl_eyl[nbins], bkgpl_eyh[nbins];
@@ -427,15 +430,15 @@ struct z_calculator {
       const double zssbsb20 = s/sqrt(b + sigb*sigb + 0.04*b*b);
       const double zpl = get_zpl(var, i);
 
-      bkgpl_x[i-1] = sigHist->GetXaxis()->GetBinCenter(i);
-      bkgpl_exl[i-1] = bkgpl_exh[i-1] = sigHist->GetXaxis()->GetBinWidth(i)/2;
+      bkgpl_x[i-1] = xax->GetBinCenter(i);
+      bkgpl_exl[i-1] = bkgpl_exh[i-1] = xax->GetBinWidth(i)/2;
       //intvl bkgpl_v = slik_syst20->bkgfrac(var, i);
       bkgpl_y[i-1] = 0; //bkgpl_v.hat;
       bkgpl_eyl[i-1] = 0; //bkgpl_v.hat - bkgpl_v.lower;
       bkgpl_eyh[i-1] = 0; //bkgpl_v.upper - bkgpl_v.hat;
 
       if (options.printall)
-        printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", sigHist->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl, s/nsig_nm1, s/nsig_tot, b/nbkg_nm1, b/nbkg_tot);
+        printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", xax->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl, s/nsig_nm1, s/nsig_tot, b/nbkg_nm1, b/nbkg_tot);
 
       h_sigfrac->SetBinContent(i, s/nsig_nm1);
       h_bkgfrac->SetBinContent(i, b/nbkg_nm1);
@@ -452,7 +455,7 @@ struct z_calculator {
         h_zpl->SetBinContent(i, zpl);
 
       if (zpl > zmax) {
-        cut = sigHist->GetBinLowEdge(i);
+        cut = xax->GetBinLowEdge(i);
         smax = s;
         bmax = b;
         zmax = zpl;
@@ -489,12 +492,10 @@ struct z_calculator {
 
     if (options.saveplots) {
       for (int logy = 0; logy < 2; ++logy) {
-        TCanvas* c1 = new TCanvas("c1", "", 1200, 675);
+        TCanvas* c1 = new TCanvas("c1", "", 1110, 1020);
         c1->Divide(2,2);
         c1->cd(1)->SetLogy(logy);
-        TH1F* sh = (TH1F*)sigHist->Clone();
-        sh->SetLineColor(kRed);
-        sh->Draw();
+        sigHist->Draw();
         c1->cd(3)->SetLogy(logy);
         bkgHist->Draw();
         c1->cd(2)->SetLogy(logy);
@@ -522,6 +523,8 @@ struct z_calculator {
     delete h_sigfrac;
     delete h_bkgfrac;
     delete leg;
+    delete sigHist;
+    delete bkgHist;
   }
 };
 
