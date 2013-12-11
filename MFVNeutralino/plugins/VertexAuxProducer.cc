@@ -257,7 +257,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (primary_vertex)
         trackdzs.push_back(fabs(tri->dz(primary_vertex->position())));
 
-      trackpterrs.push_back(tri->ptError());
+      trackpterrs.push_back(tri->ptError()/tri->pt());
       trackdxyerrs.push_back(tri->dxyError());
       trackdzerrs.push_back(tri->dzError());
       costhtkmomvtxdisps.push_back(costh3(tri->momentum(), pv2sv));
