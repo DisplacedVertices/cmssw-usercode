@@ -12,6 +12,7 @@ process.out.outputCommands = [
     'keep MFVEvent_mfvEvent__*',
     'keep MFVVertexAuxs_mfvVerticesAux__*',
     ]
+process.out.dropMetaData = cms.untracked.string('ALL')
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
@@ -19,6 +20,7 @@ process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
+
 
 if 'histos' in sys.argv:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
@@ -39,6 +41,7 @@ if 'test' in sys.argv:
         '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_8_1_3WZ.root',
         '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_9_1_ANl.root',
     ]
+    process.maxEvents.input = 100
     input_is_pythia8(process)
     re_pat(process)
     process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')
