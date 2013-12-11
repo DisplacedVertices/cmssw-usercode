@@ -723,6 +723,40 @@ def crab_event_summary_from_stdout(working_dir, path=None):
         if not res.has_key(job):
             raise ValueError('totals not found in file %s' % fn)
     return res
+
+def crab_ownpublish(batch_name, working_dirs, sample_name=lambda wd: wd.replace('crab_','')):
+    from collections import defaultdict
+    d = defaultdict(lambda: defaultdict(list))
+
+    for working_dir in working_dirs:
+        sample = sample_name(working_dir)
+
+        for fjr_fn in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml')):
+            fjr = crab_fjr_xml(fjr_fn)
+            if fjr.getroot().get('Status') != 'Success':
+                continue
+
+            x = fjr.find('File')
+
+            # can't just grab LFN because for /eos-outputted files it
+            # isn't any sort of decent absolute path
+            pfn = x.find('PFN').text.strip()
+            if '/eos' in pfn: # needs to go before /store because it's /eos/uscms/store/...
+                fn = 'root://cmseos.fnal.gov//eos' + pfn.split('/eos')[1]
+            elif '/store' in pfn:
+                fn = '/store' + pfn.split('/store')[1]
+            else:
+                raise ValueError("don't know how to deal with pfn %s" % pfn)
+
+            nevents = int(x.find('TotalEvents').text.strip())
+
+            d[batch_name][sample].append((fn, nevents))
+
+        print 'got %i files for %s' % (len(d[batch_name][sample]), working_dir)
+
+    from JMTucker.Tools.SampleFiles import pprint
+    print '\n --- cut here ---\n'
+    pprint(d)
     
 if __name__ == '__main__':
     from pprint import pprint
@@ -810,3 +844,6 @@ if __name__ == '__main__':
     elif bool_from_argv('-reportDirs'):
         for dir in crab_dirs_from_argv():
             crab_report(dir)
+
+    elif bool_from_argv('-ownPublish'):
+        crab_ownpublish('changeme', crab_dirs_from_argv())
