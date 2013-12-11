@@ -8,11 +8,11 @@
 namespace mfv {
   typedef edm::AssociationMap<edm::OneToMany<reco::VertexCollection, pat::JetCollection> > JetVertexAssociation;
 
-  enum { JByNtracks, JByCombination, NJetsByUse, JByNtracksPtmin=NJetsByUse, JByMissDist, JByCombinationPtmin, NJetsBy };
+  enum { JByNtracks, NJetsByUse, JByNtracksPtmin=NJetsByUse, JByMissDist, JByCombination, JByCombinationPtmin, NJetsBy };
   static const char* jetsby_names[NJetsBy] __attribute__((used)) =
-    { "ByNtracks", "ByCombination", "ByNtracksPtmin", "ByMissDist", "ByCombinationPtmin" };
+    { "ByNtracks", "ByNtracksPtmin", "ByMissDist", "ByCombination", "ByCombinationPtmin" };
 
-  enum { PTracksOnly, PJetsByNtracks, PJetsByCombination, PTracksPlusJetsByNtracks, PTracksPlusJetsByCombination, NMomenta }; // JMTBAD keep in sync
+  enum { PTracksOnly, PJetsByNtracks, PTracksPlusJetsByNtracks, NMomenta }; // JMTBAD keep in sync
 }
 
 #endif
