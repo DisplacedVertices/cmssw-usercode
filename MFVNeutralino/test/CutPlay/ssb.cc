@@ -448,7 +448,7 @@ struct z_calculator {
       if (!TMath::IsNaN(zpl))
         h_zpl->SetBinContent(i, zpl);
 
-      if (z > zmax) {
+      if (z > zmax && s >= 5) {
         cut = xax->GetBinLowEdge(i);
         smax = s;
         bmax = b;
