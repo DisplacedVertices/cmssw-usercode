@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 # Cuts for muons and electrons, including relative isolation with
 # delta beta corrections. First set (no "signal" or "semilep"/"dilep")
 # is for loose cuts (e.g. for vetos), and "semilep"/"dilep" are the
-# reference cuts for those channels from TWikiTopRefEventSel.
+# reference cuts for those channels from TWikiTopRefEventSel. // JMTBAD were those cuts
 # Can/should re-do cuts in ntupler starting from loose selection,
 # including impact parameter cuts that aren't included here. We store
 # these strings in a process-level PSet so they can be easily gotten
@@ -12,6 +12,22 @@ import FWCore.ParameterSet.Config as cms
 
 muonIso = '(chargedHadronIso + neutralHadronIso + photonIso - 0.5*puChargedHadronIso)/pt'
 electronIso = '(chargedHadronIso + max(0.,neutralHadronIso) + photonIso - 0.5*puChargedHadronIso)/et'
+
+# https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification#Non_triggering_MVA
+electronMVA = ' '.join('''
+(
+ (pt > 7 && pt < 10 &&
+  ((                                  abs(superCluster.eta) < 0.8   && electronID("mvaNonTrigV0") > 0.47 ) ||
+   (abs(superCluster.eta) >= 0.8   && abs(superCluster.eta) < 1.479 && electronID("mvaNonTrigV0") > 0.004) ||
+   (abs(superCluster.eta) >= 1.479 && abs(superCluster.eta) < 2.5   && electronID("mvaNonTrigV0") > 0.295))
+ ) ||
+ (pt >= 10 &&
+  ((                                  abs(superCluster.eta) < 0.8   && electronID("mvaNonTrigV0") > -0.34) ||
+   (abs(superCluster.eta) >= 0.8   && abs(superCluster.eta) < 1.479 && electronID("mvaNonTrigV0") > -0.65) ||
+   (abs(superCluster.eta) >= 1.479 && abs(superCluster.eta) < 2.5   && electronID("mvaNonTrigV0") >  0.6 ))
+ )
+)
+'''.replace('\n','').split()) # ignore the weirdo behind the curtain
 
 jtupleParams = cms.PSet(
     jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
@@ -22,12 +38,12 @@ jtupleParams = cms.PSet(
                         ),
 
     muonCut = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && ' \
-                         'pt > 10. && abs(eta) < 2.5 && ' \
+                         'pt > 7. && abs(eta) < 2.4 && ' \
                          '%s < 0.2' % muonIso
                          ),
 
     semilepMuonCut = cms.string('isPFMuon && isGlobalMuon && ' \
-                                'pt > 26. && abs(eta) < 2.1 && ' \
+                                'pt > 7. && abs(eta) < 2.4 && ' \
                                 'globalTrack.normalizedChi2 < 10. && ' \
                                 'track.hitPattern.trackerLayersWithMeasurement > 5 && ' \
                                 'globalTrack.hitPattern.numberOfValidMuonHits > 0 && ' \
@@ -37,26 +53,24 @@ jtupleParams = cms.PSet(
                                 ),
 
     dilepMuonCut = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && ' \
-                              'pt > 20. && abs(eta) < 2.4 && ' \
+                              'pt > 7. && abs(eta) < 2.4 && ' \
                               '%s < 0.2' % muonIso
                               ),
-    
-    electronCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
-                             'electronID("mvaTrigV0") > 0. && ' \
-                             '%s < 0.2' % electronIso
+
+    electronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
+                             '%s && ' \
+                             '%s < 0.2' % (electronMVA, electronIso)
                              ),
     
-    semilepElectronCut = cms.string('pt > 30. && abs(eta) < 2.5 && ' \
-                                    'electronID("mvaTrigV0") > 0. && ' \
+    semilepElectronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
+                                    '%s && ' \
                                     '(abs(superCluster.eta) < 1.4442 || abs(superCluster.eta) > 1.5660) && ' \
-                                    'passConversionVeto && ' \
-                                    '%s < 0.1' % electronIso
+                                    '%s < 0.1' % (electronMVA, electronIso)
                                     ),
     
-    dilepElectronCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
-                                  'electronID("mvaTrigV0") > 0. && ' \
-                                  'passConversionVeto && ' \
-                                  '%s < 0.15' % electronIso
+    dilepElectronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
+                                  '%s && ' \
+                                  '%s < 0.15' % (electronMVA, electronIso)
                                   ),
     
     eventFilters = cms.vstring('hltPhysicsDeclared',
