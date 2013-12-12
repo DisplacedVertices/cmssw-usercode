@@ -52,8 +52,8 @@ void process_file(const char* fn, int fileno) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 4) {
-    fprintf(stderr, "usage: eiddups path_to_tree [scan_format] input_1.root [input_2.root ...] \n");
+  if (argc < 3) {
+    fprintf(stderr, "usage: dups path_to_tree [scan_format] input_1.root [input_2.root ...] \n");
     return 1;
   }
 
@@ -92,6 +92,9 @@ int main(int argc, char** argv) {
       ++dup_count;
     }
   }
+
+  if (dup_count == 0)
+    printf("OK!\n");
 
   return dup_count > 0;
 }
