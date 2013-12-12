@@ -25,6 +25,7 @@ private:
   const std::vector<int> min_nbtags;
   const std::vector<int> max_nbtags;
   const double min_sumht;
+  const int min_nmuons;
   const int min_nsemilepmuons;
   const int min_nleptons;
 
@@ -51,6 +52,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_nbtags(cfg.getParameter<std::vector<int> >("min_nbtags")),
     max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
     min_sumht(cfg.getParameter<double>("min_sumht")),
+    min_nmuons(cfg.getParameter<int>("min_nmuons")),
     min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
@@ -80,6 +82,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     else if (!mevent->pass_trigger[trigger_bit])
       return false;
   }
+
+  if (mevent->nmu[0] < min_nmuons)
+    return false;
 
   if (mevent->nmu[1] < min_nsemilepmuons)
     return false;

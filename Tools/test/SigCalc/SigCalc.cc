@@ -5,7 +5,7 @@
 #include "SigCalc.h"
 #include "fitPar.h"
 
-int SigCalc::debugLevel = 0;
+int SigCalc::debugLevel = -1;
 
 SigCalc::SigCalc(double n, double s, const std::vector<double>& m, const std::vector<double>& tau) {
   m_n = n;
@@ -81,7 +81,7 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
       aHatHat.push_back(parVec[numBck()+1+j]);
   }
 
-  if (status != 0 || debugLevel >= 2) {
+  if ((status != 0 && debugLevel >= 0) || debugLevel >= 2) {
     printf("\n");
     printf("qmu, fitting nuisance parameters only for mu=%.4f: status=%i\n", mu, status);
     printf("  bHatHat: ");
@@ -126,7 +126,7 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
       aHat.push_back(parVec[numBck()+1+j]);
   }
 
-  if (status != 0 || debugLevel >= 2) {
+  if ((status != 0 && debugLevel >= 0) || debugLevel >= 2) {
     printf("\n");
     printf("qmu, fitting all parameters: status=%i, muHat = %.4f\n", status, muHat);
     printf("  bHat: ");
@@ -143,7 +143,7 @@ double SigCalc::qmu(double mu, double& muHat, std::vector<double>& bHat, std::ve
   const double lnLmu_xHatHat = lnL(mu, bHatHat, aHatHat);
   const double lnLmuHat_xHat = lnL(muHat, bHat, aHat);
   const double q = 2.*(lnLmuHat_xHat - lnLmu_xHatHat);
-  if (q < 0 || debugLevel >= 2)
+  if ((q < 0 && debugLevel >= 0) || debugLevel >= 2)
     printf("lnLmuHat_xHat: %e  lnLmu_xHatHat: %e  q: %e\n", lnLmuHat_xHat, lnLmu_xHatHat, q);
   return q;
 }

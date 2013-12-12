@@ -20,11 +20,15 @@ process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAnd
 process.source.inputCommands = cms.untracked.vstring('keep *', 'drop *_MEtoEDMConverter_*_*')
 process.out.outputCommands = cms.untracked.vstring('keep *', 'drop LumiDetails_lumiProducer_*_*', 'drop LumiSummary_lumiProducer_*_*', 'drop RunSummary_lumiProducer_*_*')
 
+# Also don't need per-event metadata.
+process.out.dropMetaData = cms.untracked.string('ALL')
+
 def get_input_from_argv(process):
     # Look for just a list of files in argv first.
     files = [x for x in sys.argv if x.startswith('/store') and x.endswith('.root')]
     files += ['file:%s' % x for x in sys.argv if os.path.isfile(x) and x.endswith('.root')]
-    name = 'merged.root'
+    name = [x for x in sys.argv if not os.path.isfile(x) and x.endswith('.root')]
+    name = name[0] if name else 'merged.root'
     if not files:
         # Else, files from crab dir mode.
         from JMTucker.Tools.CRABTools import files_from_crab_dir
@@ -39,6 +43,7 @@ def get_input_from_argv(process):
     pprint(files)
     process.source.fileNames = files
     print 'Merging to', name
+    process.out.fileName = name
 
 __all__ = ['cms', 'process', 'get_input_from_argv']
 
