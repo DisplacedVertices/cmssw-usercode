@@ -427,12 +427,14 @@ exit $ECODE
         print 'done waiting for threads!'
 
         os.system('mkdir -p /tmp/%s' % self.username)
-        log = open('/tmp/%s/CRABSubmitter_%s.log' % (self.username, self.batch_name), 'wt')
+        log_fn = '/tmp/%s/CRABSubmitter_%s.log' % (self.username, self.batch_name)
+        log = open(log_fn, 'wt')
         for name in sorted(results.keys()):
             log.write('*' * 250)
             log.write('\n\n%s\n' % name)
             log.write(results[name])
             log.write('\n\n')
+        print 'log fn is', log_fn
 
 if __name__ == '__main__':
     cs = CRABSubmitter('abalone')
