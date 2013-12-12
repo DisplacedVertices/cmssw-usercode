@@ -105,7 +105,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif '100k' in sys.argv:
         samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples
     elif 'few' in sys.argv:
-        samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400, Samples.ttbarhadronic + Samples.qcdht1000]
+        samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400, Samples.ttbarhadronic, Samples.qcdht1000]
     elif 'mfv300' in sys.argv:
         samples = Samples.mfv300
     else:
