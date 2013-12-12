@@ -1,6 +1,6 @@
 import sys, FWCore.ParameterSet.Config as cms
 
-version = 'v12'
+version = 'v13'
 runOnMC = True # Submit script expects this line to be unmodified...
 suppress_stdout = True
 
