@@ -107,7 +107,7 @@ class Sample(object):
 ########################################################################
 
 class MCSample(Sample):
-    EVENTS_PER = 25000
+    EVENTS_PER = 5000
     ANA_EVENTS_PER = 100000
     TOTAL_EVENTS = -1
     
@@ -338,7 +338,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     mfv_signal_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
-    sample.events_per = 2000
+    sample.events_per = 1500
     sample.no_skimming_cuts = True
     sample.is_pythia8 = True
     sample.dbs_url_num = 2
