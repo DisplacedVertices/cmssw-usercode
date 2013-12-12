@@ -21,6 +21,11 @@ process.p = cms.Path(common_seq * process.mfvVertexSequence)
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
 
+process.p *= process.mfvVertexAsymSeedSequence * process.mfvVertexSumSeedSequence
+process.out.outputCommands += [
+    'keep MFVVertexAuxs_mfvVerticesAsymSeedAux__*',
+    'keep MFVVertexAuxs_mfvVerticesSumSeedAux__*',
+    ]
 
 if 'histos' in sys.argv:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
