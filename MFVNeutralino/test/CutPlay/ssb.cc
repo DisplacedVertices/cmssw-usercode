@@ -533,7 +533,7 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "njetsntks", "tkonlypt", "tkonlymass", "jetsntkpt", "jetsntkmass", "tksjetsntkpt", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "sumpt2", "maxtrackpt", "drmin", "drmax", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "tkonlymass01", "tksjetsntkmass01"};
+  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "njetsntks", "tkonlypt", "tkonlymass", "jetsntkpt", "jetsntkmass", "tksjetsntkpt", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "drmin", "drmax", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01"};
 
   z_calculator z_calc(vars);
 
