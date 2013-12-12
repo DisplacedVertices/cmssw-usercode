@@ -162,10 +162,10 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackdzavg", "SV avg{trk_{i} dz(PV)} (cm)", 50, 0, 1);
   hs.add("trackdzrms", "SV rms{trk_{i} dz(PV)} (cm)", 50, 0, 0.5);
 
-  hs.add("trackpterrmin", "SV min{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 0.1);
-  hs.add("trackpterrmax", "SV max{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 2);
-  hs.add("trackpterravg", "SV avg{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 1);
-  hs.add("trackpterrrms", "SV rms{#sigma trk_{i} p_{T}} (GeV)", 50, 0, 2);
+  hs.add("trackpterrmin", "SV min{frac. #sigma trk_{i} p_{T}}", 50, 0, 0.1);
+  hs.add("trackpterrmax", "SV max{frac. #sigma trk_{i} p_{T}}", 50, 0, 2);
+  hs.add("trackpterravg", "SV avg{frac. #sigma trk_{i} p_{T}}", 50, 0, 1);
+  hs.add("trackpterrrms", "SV rms{frac. #sigma trk_{i} p_{T}}", 50, 0, 2);
 
   hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.01);
   hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.5);
@@ -177,17 +177,17 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackdzerravg", "SV avg{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 1);
   hs.add("trackdzerrrms", "SV rms{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 0.4);
 
-  hs.add("trackpairmassmin", "SV min{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 0.5);
-  hs.add("trackpairmassmax", "SV max{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 50);
+  hs.add("trackpairmassmin", "SV min{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 2);
+  hs.add("trackpairmassmax", "SV max{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 100);
   hs.add("trackpairmassavg", "SV avg{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 20);
   hs.add("trackpairmassrms", "SV rms{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 20);
 
-  hs.add("tracktripmassmin", "SV min{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 4);
-  hs.add("tracktripmassmax", "SV max{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 100);
+  hs.add("tracktripmassmin", "SV min{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 6);
+  hs.add("tracktripmassmax", "SV max{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 150);
   hs.add("tracktripmassavg", "SV avg{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 50);
   hs.add("tracktripmassrms", "SV rms{mass(trk_{i}, trk_{j}, trk_{k})} (GeV)", 50, 0, 40);
 
-  hs.add("trackquadmassmin", "SV min{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 10);
+  hs.add("trackquadmassmin", "SV min{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 15);
   hs.add("trackquadmassmax", "SV max{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 200);
   hs.add("trackquadmassavg", "SV avg{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 50);
   hs.add("trackquadmassrms", "SV rms{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 30);
