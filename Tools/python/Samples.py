@@ -372,15 +372,15 @@ for sample in all_samples:
 
 ########################################################################
 
+# need fewer than 5000 jobs/batch
+qcdht0100.events_per = 11000
+qcdht0250.events_per = 6000
+qcdht0500.events_per = 7000
+ttbarsemilep.events_per = 5500
+
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
-qcdht0100.total_events     = 50354518  # 50129518
-qcdht0500.total_events     = 30474292  # 30599292
-qcdht1000.total_events     = 13768863  # 13843863
-ttbardilep.total_events    = 12144013  # 12119013
-ttbarhadronic.total_events = 10412444  # 10537444
-ttbarsemilep.total_events  = 25374818  # 25424818
-                            
+
 ########################################################################
 
 def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
