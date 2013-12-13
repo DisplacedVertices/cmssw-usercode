@@ -7,12 +7,19 @@ process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
-                                                 min_maxtrackpt = 0)
-#process.trigtopmunmu = cuts.clone(trigger_bit = 4, min_4th_jet_pt = 20, min_nsemilepmuons = 1)
+                                                 min_maxtrackpt = 4,
+                                                 max_drmin = 0.5,
+                                                 max_drmax = 4.5,
+                                                 min_bs2dsig = 4.5,
+                                                 min_njetsntks = 1,
+                                                 min_sumpt2 = 40)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
-                                        min_maxtrackpt01 = 0)
+                                        min_maxtrackpt01 = 0,
+                                        min_jetsntkmass01 = 60,
+                                        min_njetsntks01 = 3,
+                                        min_sumht = 600)
 
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
@@ -58,7 +65,7 @@ for i in xrange(-50,50):
     changes.append(('costhtksjetsntkmombsX%s'%pize(0.02*i,2), 'min_costhtksjetsntkmombs = %f'%(0.02*i), ''))
 
 for i in xrange(0,30):
-    changes.append(('missdisttksjetsntkpvsig%i'%i, 'min_missdisttksjetsntkpvsig = %i'%i, ''))
+    changes.append(('missdisttksjetsntkpvsigX%i'%i, 'min_missdisttksjetsntkpvsig = %i'%i, ''))
 
 for i in xrange(0,200,5):
     changes.append(('sumpt2X%i'%i, 'min_sumpt2 = %i'%i, ''))
@@ -127,16 +134,16 @@ process.p = cms.EndPath(process.effs)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *
-    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400] + ttbar_samples + qcd_samples
+    samples = [mfv_neutralino_tau0100um_M0200, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0100um_M1000, mfv_neutralino_tau1000um_M0400] + ttbar_samples + qcd_samples
     for sample in ttbar_samples + qcd_samples:
         sample.total_events = sample.nevents_orig/2
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
     
-    cs = CRABSubmitter('CutPlayV11',
-                       total_number_of_events = -1,
-                       events_per_job = 25000,
+    cs = CRABSubmitter('CutPlayV11_4',
+                       job_control_from_sample = True,
+                       use_ana_dataset = True,
                        manual_datasets = SampleFiles['MFVNtupleV11'],
                        )
     cs.submit_all(samples)
