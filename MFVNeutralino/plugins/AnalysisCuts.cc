@@ -38,6 +38,9 @@ private:
   const double min_tkonlymass01;
   const double min_jetsntkmass01;
   const double min_tksjetsntkmass01;
+
+  const int min_npv;
+  const int max_npv;
 };
 
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
@@ -63,7 +66,9 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_njetsntks01(cfg.getParameter<int>("min_njetsntks01")),
     min_tkonlymass01(cfg.getParameter<double>("min_tkonlymass01")),
     min_jetsntkmass01(cfg.getParameter<double>("min_jetsntkmass01")),
-    min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01"))
+    min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01")),
+    min_npv(cfg.getParameter<int>("min_npv")),
+    max_npv(cfg.getParameter<int>("max_npv"))
 {
 }
 
@@ -136,6 +141,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
     }
   }
+
+  if (mevent->npv < min_npv || mevent->npv > max_npv)
+    return false;
 
   return true;
 }
