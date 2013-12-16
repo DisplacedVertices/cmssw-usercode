@@ -23,7 +23,7 @@ class dbs_query:
                 if x is not None:
                     ret.append(x)
         if not ret:
-            raise RuntimeError('query %r (ana01: %s ana02: %s) did not succeed. dbs command output:\n' % (query, ana01, ana02) + ''.join(cmdout))
+            raise RuntimeError('query %r (ana01: %s ana02: %s) did not succeed. dbs command output:\n' % (query, self.ana01, self.ana02) + ''.join(cmdout))
         return ret
 
 def files_in_dataset(dataset, ana01=False, ana02=False):
