@@ -14,6 +14,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
 class MFVVertexHistos : public edm::EDAnalyzer {
  public:
@@ -25,6 +26,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   const edm::InputTag vertex_aux_src;
   const edm::InputTag weight_src;
   const bool do_scatterplots;
+
+  MFVVertexMVAWrap mva;
 
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
@@ -85,6 +88,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_nsv_v_lspdist3d = fs->make<TH2F>("h_nsv_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
 
   PairwiseHistos::HistoDefs hs;
+  hs.add("mva", "MVA output", 100, -2, 3);
+
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
   hs.add("nbadtracks",                    "# of 'bad' tracks/SV",                                                         40,    0,      40);
   hs.add("ntracksptgt3",                  "# of tracks/SV w/ p_{T} > 3 GeV",                                              40,    0,      40);
@@ -341,6 +346,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
 
     PairwiseHistos::ValueMap v = {
+        {"mva",                     mva.value(aux)},
         {"ntracks",                 aux.ntracks},
         {"nbadtracks",              aux.nbadtracks},
         {"ntracksptgt3",            aux.ntracksptgt3},

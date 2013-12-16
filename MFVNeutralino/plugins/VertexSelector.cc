@@ -6,10 +6,12 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
 class MFVVertexSelector : public edm::EDProducer {
 public:
   explicit MFVVertexSelector(const edm::ParameterSet&);
+  ~MFVVertexSelector() { delete mva; }
 
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
@@ -21,6 +23,10 @@ private:
   const bool produce_vertices;
   const bool produce_refs;
   const MFVVertexAuxSorter sorter;
+
+  const bool use_mva;
+  const MFVVertexMVAWrap* mva;
+  const double mva_cut;
 
   const int min_ntracks;
   const int min_ntracksptgt3;
@@ -65,6 +71,9 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     produce_vertices(cfg.getParameter<bool>("produce_vertices")),
     produce_refs(cfg.getParameter<bool>("produce_refs")),
     sorter(cfg.getParameter<std::string>("sort_by")),
+    use_mva(cfg.getParameter<bool>("use_mva")),
+    mva(use_mva ? new MFVVertexMVAWrap : 0),
+    mva_cut(cfg.getParameter<double>("mva_cut")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     min_ntracksptgt3(cfg.getParameter<int>("min_ntracksptgt3")),
     min_ntracksptgt5(cfg.getParameter<int>("min_ntracksptgt5")),
@@ -109,6 +118,13 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
 }
 
 bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
+  if (use_mva) {
+    if (vtx.ntracks < 5)
+      return false;
+
+    return mva->value(vtx) > mva_cut;
+  }
+
   return 
     vtx.ntracks >= min_ntracks &&
     vtx.ntracksptgt3 >= min_ntracksptgt3 &&
