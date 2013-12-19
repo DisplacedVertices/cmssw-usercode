@@ -284,6 +284,20 @@ auxiliary_background_samples = [
     MCSample('qcdmu0600', 'QCDmu5, 600 < #hat{p}_{T} < 800 GeV',  '/QCD_Pt-600to800_MuEnrichedPt5_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',   4119000, 801, 0.10, 0.0996*2.70e1),
     MCSample('qcdmu0800', 'QCDmu5, 800 < #hat{p}_{T} < 1000 GeV', '/QCD_Pt-800to1000_MuEnrichedPt5_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',  4107853, 801, 0.10, 0.1033*3.57e0),
     MCSample('qcdmu1000', 'QCDmu5, #hat{p}_{T} > 1000 GeV',       '/QCD_Pt-1000_MuEnrichedPt5_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',       3873970, 801, 0.10, 0.1097*7.74e-1),
+
+    MCSample('qcdem020', 'QCDem, < #hat{p}_{T} < GeV', '/QCD_Pt_20_30_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',   35040695, 801, 0.10, 0.010*2.89e8),
+    MCSample('qcdem030', 'QCDem, < #hat{p}_{T} < GeV', '/QCD_Pt_30_80_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',   33088888, 801, 0.10, 0.062*7.43e7),
+    MCSample('qcdem080', 'QCDem, < #hat{p}_{T} < GeV', '/QCD_Pt_80_170_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',  34542763, 801, 0.10, 0.154*1.19e6),
+    MCSample('qcdem170', 'QCDem, < #hat{p}_{T} < GeV', '/QCD_Pt_170_250_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 31697066, 801, 0.10, 0.148*3.10e4),
+    MCSample('qcdem250', 'QCDem, < #hat{p}_{T} < GeV', '/QCD_Pt_250_350_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 34611322, 801, 0.10, 0.131*4.25e3),
+    MCSample('qcdem350', 'QCDem, < #hat{p}_{T} < GeV', '/QCD_Pt_350_EMEnriched_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',     34080562, 801, 0.10, 0.110*8.10e2),
+
+    MCSample('qcdbce020', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_20_30_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',   1740229, 801, 0.10, 5.80e-4*2.89e8),
+    MCSample('qcdbce030', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_30_80_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',   2048152, 801, 0.10, 2.25e-3*7.43e7),
+    MCSample('qcdbce080', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_80_170_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',  1945525, 801, 0.10, 1.09e-2*1.19e6),
+    MCSample('qcdbce170', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_170_250_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1948112, 801, 0.10, 2.04e-2*3.10e4),
+    MCSample('qcdbce250', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_250_350_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 2026521, 801, 0.10, 2.43e-2*4.25e3),
+    MCSample('qcdbce350', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_350_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',     1948532, 801, 0.10, 2.95e-2*8.10e2),
 ]
 
 ########################################################################
