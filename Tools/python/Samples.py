@@ -144,6 +144,10 @@ class MCSample(Sample):
     def partial_weight(self):
         return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
 
+    @property
+    def int_lumi(self):
+        return 1./self.partial_weight
+
     def job_control_commands(self, ana=False):
         if ana:
             return (('total_number_of_events', self.total_events),
