@@ -394,6 +394,7 @@ for sample in all_samples:
 qcdht0100.events_per = 11000
 qcdht0250.events_per = 6000
 qcdht0500.events_per = 7000
+qcdht1000.events_per = 3000
 ttbarsemilep.events_per = 5500
 
 # JMTBAD need to distinguish between total_events and ana_total_events
