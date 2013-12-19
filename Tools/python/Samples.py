@@ -390,12 +390,13 @@ for sample in all_samples:
 
 ########################################################################
 
-# need fewer than 5000 jobs/batch
+# need fewer than 5000 jobs/batch, but need to beat the wallclock
 qcdht0100.events_per = 11000
 qcdht0250.events_per = 6000
 qcdht0500.events_per = 7000
 qcdht1000.events_per = 3000
 ttbarsemilep.events_per = 5500
+mfv_neutralino_tau9900um_M1000.events_per = 500
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
