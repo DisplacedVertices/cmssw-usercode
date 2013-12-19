@@ -474,8 +474,10 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
     to_force = []
 
     d = {'Done': None} # dummy to start the while loop
+    iterations = 0
     while d.has_key('Done'):
         d = crab_status(working_dir, verbose, debug)
+        iterations += 1
         if d.has_key('Done'):
             missing = crab_get_output(working_dir, d['Done'], debug=debug)
             if missing:
@@ -486,7 +488,7 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
                 d['DoneStuck'] = missing
                 if resub_stuck_done:
                     to_force.extend(missing)
-        if not d['Done'] or not status_until_none_done:
+        if not d['Done'] or not status_until_none_done or iterations > 2:
             break
 
     for key in d.keys():
