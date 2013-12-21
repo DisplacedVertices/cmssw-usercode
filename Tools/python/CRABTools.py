@@ -849,3 +849,23 @@ if __name__ == '__main__':
 
     elif bool_from_argv('-ownPublish'):
         crab_ownpublish('changeme', crab_dirs_from_argv())
+
+    elif bool_from_argv('-manualSplit', remove=False):
+        dummy, per = bool_from_argv('-manualSplit', return_pos=True)
+        per = int(sys.argv.pop(per))
+        dir = crab_dir_from_argv()
+        args = crab_arguments_xml(dir)
+        jobs = crab_jobs_from_argv()
+        jc = 1
+        for job in jobs:
+            arg = args[job]
+            maxev = int(arg['MaxEvents'])
+            assert maxev % per == 0
+            n = maxev / per
+            assert n > 0
+            skip = int(arg['SkipEvents'])
+            for i in xrange(n):
+                print 'FileNames[%i]=%s' % (jc + i, arg['InputFiles'])
+                print 'SkipEvents[%i]=%i' % (jc + i, skip + i*per)
+                print 'MaxEvents[%i]=%i' % (jc + i, per)
+            jc += n
