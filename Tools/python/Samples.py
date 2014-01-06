@@ -427,7 +427,7 @@ def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
 
 ########################################################################
 
-__all__ = ['data_samples', 'auxiliary_data_samples', 'ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
+__all__ = ['data_samples', 'auxiliary_data_samples', 'ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'leptonic_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
 __all__ += [s.name for s in all_samples]
 
 if __name__ == '__main__':
