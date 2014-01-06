@@ -28,6 +28,7 @@ private:
   const int min_nmuons;
   const int min_nsemilepmuons;
   const int min_nleptons;
+  const int min_nsemileptons;
 
   const bool apply_vertex_cuts;
   const edm::InputTag vertex_src;
@@ -58,6 +59,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_nmuons(cfg.getParameter<int>("min_nmuons")),
     min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
+    min_nsemileptons(cfg.getParameter<int>("min_nsemileptons")),
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
@@ -95,6 +97,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     return false;
 
   if (mevent->nlep(0) < min_nleptons)
+    return false;
+
+  if (mevent->nlep(1) < min_nsemileptons)
     return false;
 
   if (mevent->njets < min_njets || mevent->njets > max_njets)
