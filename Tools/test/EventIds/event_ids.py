@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
 from JMTucker.Tools import SampleFiles
-SampleFiles.set(process, 'MFVNtupleV12a', 'mfv_neutralino_tau1000um_M0400', 500)
+SampleFiles.set(process, 'MFVNtupleV13', 'mfv_neutralino_tau1000um_M0400', 500)
 
 process.TFileService.fileName = cms.string('evids.root')
 
@@ -28,9 +28,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
 
-    cs = CRABSubmitter('EventIdsV12a',
+    cs = CRABSubmitter('EventIdsV13',
                        total_number_of_events = -1,
                        events_per_job = 234567,
-                       manual_datasets = SampleFiles['MFVNtupleV12a'],
+                       manual_datasets = SampleFiles['MFVNtupleV13'],
                        )
     cs.submit_all(samples)
