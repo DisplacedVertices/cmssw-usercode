@@ -2,7 +2,7 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.set(process, 'MFVNtupleV11', 'mfv_neutralino_tau1000um_M0400', 500)
+SampleFiles.setup(process, 'MFVNtupleV11', 'mfv_neutralino_tau1000um_M0400', 500)
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')

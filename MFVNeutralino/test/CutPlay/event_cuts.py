@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
 process.options.wantSummary = True
-SampleFiles.set(process, 'MFVNtupleV11', 'qcdht0250', 10000)
+SampleFiles.setup(process, 'MFVNtupleV11', 'qcdht0250', 10000)
 process.TFileService.fileName = 'events_cutplay.root'
 
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import mfvAnalysisCuts as cuts
