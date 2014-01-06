@@ -1,11 +1,13 @@
+int iteration = 6;
+double xcut = 40;
+double ycut = 20;
+
 void compareShapes(char* sampleName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosHalf/%s_scaled.root", sampleName));
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV11_%d/%s_scaled.root", iteration, sampleName));
   TH2F* hist = (TH2F*)abcdHistos->Get("h_ntracks01_maxtrackpt01");
   char* xname = "maxtrackpt01";
-  double xcut = 15;
   char* yname = "ntracks01";
-  double ycut = 15;
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
@@ -58,11 +60,13 @@ void compareShapes(char* sampleName) {
     h_high->Draw("same");
   }
 
-  c1->SaveAs(TString::Format("plots/ABCD/ntracks01_maxtrackpt01_scaled/%s.pdf", sampleName));
+//  c1->SaveAs(TString::Format("plots/ABCD/CutPlayV11_%d/%d_%d/%s.pdf", iteration, int(xcut), int(ycut), sampleName));
 
 }
 
 void abcd() {
+  compareShapes("mfv_neutralino_tau0100um_M0400");
+  compareShapes("mfv_neutralino_tau1000um_M0400");
   compareShapes("ttbarhadronic");
   compareShapes("ttbarsemilep");
   compareShapes("ttbardilep");
