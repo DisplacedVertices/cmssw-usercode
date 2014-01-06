@@ -16,6 +16,18 @@
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
+namespace {
+  template <typename T, typename T2>
+  double dot3(const T& a, const T2& b) {
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
+  }
+
+  template <typename T, typename T2>
+  double costh3(const T& a, const T2& b) {
+    return dot3(a,b) / mag(a.x(), a.y(), a.z()) / mag(b.x(), b.y(), b.z());
+  }
+}
+
 class MFVVertexAuxProducer : public edm::EDProducer {
  public:
   explicit MFVVertexAuxProducer(const edm::ParameterSet&);
@@ -106,12 +118,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.chi2 = sv.chi2();
     aux.ndof = sv.ndof();
 
+    math::XYZVector pv2sv;
+    if (primary_vertex != 0)
+      pv2sv = sv.position() - primary_vertex->position();
 
     std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
     p4s[mfv::PTracksOnly] = sv.p4();
 
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       aux.njets[i] = 0;
+
+    std::vector<double> jetpairdrs[mfv::NJetsByUse];
+    std::vector<double> costhjetmomvtxdisps[mfv::NJetsByUse];
 
     if (use_sv_to_jets) {
       for (int i = 0; i < mfv::NJetsByUse; ++i) {
@@ -130,6 +148,14 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
               if (tk.isNonnull())
                 jets_tracks.insert(tk);
             }
+
+            if (primary_vertex)
+              costhjetmomvtxdisps[i].push_back(costh3(jets[ijet]->p4(), pv2sv));
+            else
+              costhjetmomvtxdisps[i].push_back(-2);
+
+            for (int jjet = ijet+1; jjet < njets; ++jjet)
+              jetpairdrs[i].push_back(reco::deltaR(*jets[ijet], *jets[jjet]));
           }
         
           math::XYZTLorentzVector jpt_p4 = p4s[1+i];
@@ -145,6 +171,22 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           p4s[1 + i + mfv::NJetsByUse] = jpt_p4;
         }
       }
+
+      distrib_calculator jetpairdr(jetpairdrs[mfv::JByNtracks], std::vector<double>());
+      aux.jetpairdrmin = jetpairdr.min;
+      aux.jetpairdrmax = jetpairdr.max;
+      aux.jetpairdravg = jetpairdr.avg;
+      aux.jetpairdrrms = jetpairdr.rms;
+
+      if (aux.njets[mfv::JByNtracks] > 0) {
+        distrib_calculator costhjetmomvtxdisp(costhjetmomvtxdisps[mfv::JByNtracks], std::vector<double>());
+        aux.costhjetmomvtxdispmin = costhjetmomvtxdisp.min;
+        aux.costhjetmomvtxdispmax = costhjetmomvtxdisp.max;
+        aux.costhjetmomvtxdispavg = costhjetmomvtxdisp.avg;
+        aux.costhjetmomvtxdisprms = costhjetmomvtxdisp.rms;
+      }
+      else
+        aux.costhjetmomvtxdispmin = aux.costhjetmomvtxdispmax = aux.costhjetmomvtxdispavg = aux.costhjetmomvtxdisprms = -2;
     }
 
     for (int i = 0; i < mfv::NMomenta; ++i) {
@@ -169,12 +211,28 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.trackminnhits = 255;
     aux.trackmaxnhits = 0;
     aux.sumpt2 = 0;
-    std::vector<double> trackpts;
     aux.maxnhitsbehind = 0;
     aux.sumnhitsbehind = 0;
 
+    std::vector<double> trackws;
+    std::vector<double> trackpts;
+    std::vector<double> trackdxys;
+    std::vector<double> trackdzs;
+    std::vector<double> trackpterrs;
+    std::vector<double> trackdxyerrs;
+    std::vector<double> trackdzerrs;
+    std::vector<double> costhtkmomvtxdisps;
+
+    std::vector<double> trackpairws;
+    std::vector<double> trackpairdrs;
+    std::vector<double> trackpairmasses;
+
+    std::vector<double> tracktripmasses;
+    std::vector<double> trackquadmasses;
+
     for (auto trki = trkb; trki != trke; ++trki) {
       const reco::TrackBaseRef& tri = *trki;
+      const math::XYZTLorentzVector tri_p4(tri->px(), tri->py(), tri->pz(), tri->p());
 
       if (trackicity.count(tri.key()) > 0)
         throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
@@ -191,8 +249,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         continue;
       }
 
+      trackws.push_back(tri->pt());
+
       const double pti = tri->pt();
       trackpts.push_back(pti);
+      trackdxys.push_back(fabs(tri->dxy(beamspot->position())));
+      if (primary_vertex)
+        trackdzs.push_back(fabs(tri->dz(primary_vertex->position())));
+
+      trackpterrs.push_back(tri->ptError()/tri->pt());
+      trackdxyerrs.push_back(tri->dxyError());
+      trackdzerrs.push_back(tri->dzError());
+      costhtkmomvtxdisps.push_back(costh3(tri->momentum(), pv2sv));
 
       if (pti > 3)  inc_uchar(aux.ntracksptgt3);
       if (pti > 5)  inc_uchar(aux.ntracksptgt5);
@@ -213,6 +281,36 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         aux.sumnhitsbehind = 255;
       else
         aux.sumnhitsbehind += nhitsbehind;
+
+      for (auto trkj = trki + 1; trkj != trke; ++trkj) {
+        const reco::TrackBaseRef& trj = *trkj;
+        const math::XYZTLorentzVector trj_p4(trj->px(), trj->py(), trj->pz(), trj->p());
+        if (sv.trackWeight(trj) < mfv::track_vertex_weight_min)
+          continue;
+
+        trackpairws.push_back(0.5*(tri->pt() + trj->pt()));
+
+        trackpairdrs.push_back(reco::deltaR(*tri, *trj));
+        trackpairmasses.push_back((tri_p4 + trj_p4).M());
+
+        for (auto trkk = trkj + 1; trkk != trke; ++trkk) {
+          const reco::TrackBaseRef& trk = *trkk;
+          const math::XYZTLorentzVector trk_p4(trk->px(), trk->py(), trk->pz(), trk->p());
+          if (sv.trackWeight(trk) < mfv::track_vertex_weight_min)
+            continue;
+
+          tracktripmasses.push_back((tri_p4 + trj_p4 + trk_p4).M());
+
+          for (auto trkl = trkk + 1; trkl != trke; ++trkl) {
+            const reco::TrackBaseRef& trl = *trkl;
+            const math::XYZTLorentzVector trl_p4(trl->px(), trl->py(), trl->pz(), trl->p());
+            if (sv.trackWeight(trk) < mfv::track_vertex_weight_min)
+              continue;
+
+            trackquadmasses.push_back((tri_p4 + trj_p4 + trk_p4 + trl_p4).M());
+          }
+        }
+      }
     }
 
     if (trackpts.size()) {
@@ -225,16 +323,74 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     else
       aux.mintrackpt = aux.maxtrackpt = aux.maxm1trackpt = aux.maxm2trackpt = -1;
       
-    const mfv::vertex_tracks_distance vtx_tks_dist(sv);
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
 
-    aux.drmin  = vtx_tks_dist.drmin;
-    aux.drmax  = vtx_tks_dist.drmax;
-    aux.dravg  = vtx_tks_dist.dravg;
-    aux.drrms  = vtx_tks_dist.drrms;
-    aux.dravgw = vtx_tks_dist.dravgw;
-    aux.drrmsw = vtx_tks_dist.drrmsw;
-    
+    distrib_calculator trackpt(trackpts, trackws);
+    aux.trackptavg = trackpt.avg;
+    aux.trackptrms = trackpt.rms;
+
+    distrib_calculator trackdxy(trackdxys, trackws);
+    aux.trackdxymin = trackdxy.min;
+    aux.trackdxymax = trackdxy.max;
+    aux.trackdxyavg = trackdxy.avg;
+    aux.trackdxyrms = trackdxy.rms;
+
+    distrib_calculator trackdz(trackdzs, trackws);
+    aux.trackdzmin = trackdz.min;
+    aux.trackdzmax = trackdz.max;
+    aux.trackdzavg = trackdz.avg;
+    aux.trackdzrms = trackdz.rms;
+
+    distrib_calculator trackpterr(trackpterrs, trackws);
+    aux.trackpterrmin = trackpterr.min;
+    aux.trackpterrmax = trackpterr.max;
+    aux.trackpterravg = trackpterr.avg;
+    aux.trackpterrrms = trackpterr.rms;
+
+    distrib_calculator trackdxyerr(trackdxyerrs, trackws);
+    aux.trackdxyerrmin = trackdxyerr.min;
+    aux.trackdxyerrmax = trackdxyerr.max;
+    aux.trackdxyerravg = trackdxyerr.avg;
+    aux.trackdxyerrrms = trackdxyerr.rms;
+
+    distrib_calculator trackdzerr(trackdzerrs, trackws);
+    aux.trackdzerrmin = trackdzerr.min;
+    aux.trackdzerrmax = trackdzerr.max;
+    aux.trackdzerravg = trackdzerr.avg;
+    aux.trackdzerrrms = trackdzerr.rms;
+
+    distrib_calculator costhtkmomvtxdisp(costhtkmomvtxdisps, trackws);
+    aux.costhtkmomvtxdispmin = costhtkmomvtxdisp.min;
+    aux.costhtkmomvtxdispmax = costhtkmomvtxdisp.max;
+    aux.costhtkmomvtxdispavg = costhtkmomvtxdisp.avg;
+    aux.costhtkmomvtxdisprms = costhtkmomvtxdisp.rms;
+
+    distrib_calculator trackpairdr(trackpairdrs, trackpairws);
+    aux.drmin = trackpairdr.min;
+    aux.drmax = trackpairdr.max;
+    aux.dravg = trackpairdr.avg;
+    aux.drrms = trackpairdr.rms;
+    aux.dravgw = trackpairdr.avgw;
+    aux.drrmsw = trackpairdr.rmsw;
+
+    distrib_calculator trackpairmass(trackpairmasses, trackpairws);
+    aux.trackpairmassmin = trackpairmass.min;
+    aux.trackpairmassmax = trackpairmass.max;
+    aux.trackpairmassavg = trackpairmass.avg;
+    aux.trackpairmassrms = trackpairmass.rms;
+
+    distrib_calculator tracktripmass(tracktripmasses, std::vector<double>());
+    aux.tracktripmassmin = tracktripmass.min;
+    aux.tracktripmassmax = tracktripmass.max;
+    aux.tracktripmassavg = tracktripmass.avg;
+    aux.tracktripmassrms = tracktripmass.rms;
+
+    distrib_calculator trackquadmass(trackquadmasses, std::vector<double>());
+    aux.trackquadmassmin = trackquadmass.min;
+    aux.trackquadmassmax = trackquadmass.max;
+    aux.trackquadmassavg = trackquadmass.avg;
+    aux.trackquadmassrms = trackquadmass.rms;
+
     aux.gen2ddist       = vtx_distances.gen2ddist.value();
     aux.gen2derr        = vtx_distances.gen2ddist.error();
     aux.gen3ddist       = vtx_distances.gen3ddist.value();

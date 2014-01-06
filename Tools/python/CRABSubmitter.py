@@ -375,9 +375,10 @@ exit $ECODE
                         suball = True
                 if not ok:
                     if suball:
-                        print '%s needs to sub in groups of 500, doing now' % sample.name
+                        print '%s needs to sub in groups of 500, doing now (and not checking for errors!)' % sample.name
                         crab_submit_in_batches(working_dir)
-                    print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
+                    else:
+                        print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
             else:
                 print '\033[36;7m warning: \033[m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
             os.system('rm -f %s' % ' '.join(cleanup))

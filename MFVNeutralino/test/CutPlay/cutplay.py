@@ -2,7 +2,7 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.set(process, 'MFVNtupleV11', 'mfv_neutralino_tau1000um_M0400', 500)
+SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau1000um_M0400', 500)
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -130,17 +130,18 @@ process.p = cms.EndPath(process.effs)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *
-    samples = [mfv_neutralino_tau0100um_M0200, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0100um_M1000, mfv_neutralino_tau1000um_M0400] + ttbar_samples + qcd_samples
-    for sample in ttbar_samples + qcd_samples:
+    bkg_samples = ttbar_samples + qcd_samples + leptonic_background_samples
+    samples = [mfv_neutralino_tau0100um_M0200, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400] + bkg_samples
+    for sample in bkg_samples:
         sample.total_events = sample.nevents_orig/2
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
     
-    cs = CRABSubmitter('CutPlayV11_6',
+    cs = CRABSubmitter('CutPlayV13',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV11'],
+                       manual_datasets = SampleFiles['MFVNtupleV13'],
                        )
     cs.submit_all(samples)
 

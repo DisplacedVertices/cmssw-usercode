@@ -65,4 +65,44 @@ struct weight_fill {
   }
 };
 
+struct distrib_calculator {
+  double min, max, sum, wsum, avg, rms, sumw, avgw, rmsw;
+
+  distrib_calculator(const std::vector<double>& v, const std::vector<double>& w)
+    : min(1e99), max(-1e99), sum(0), wsum(0), avg(0), rms(0), sumw(0), avgw(0), rmsw(0)
+  {
+    int n;
+    if ((n = int(v.size())) == 0)
+      return;
+
+    bool usew = w.size() > 0;
+    if (usew && int(w.size()) != n)
+      throw cms::Exception("distrib_calculator") << "v.size = " << n << " != w.size = " << w.size();
+
+    for (int i = 0; i < n; ++i) {
+      if (v[i] < min) min = v[i];
+      if (v[i] > max) max = v[i];
+      sum += v[i];
+      if (usew) {
+        sumw += w[i];
+        wsum += v[i] * w[i];
+      }
+    }
+
+    avg = sum / n;
+    if (usew)
+      avgw = wsum / sumw;
+
+    for (int i = 0; i < n; ++i) {
+      rms += pow(v[i] - avg, 2);
+      if (usew)
+        rmsw += pow(v[i] - avg, 2) * w[i];
+    }
+
+    rms = sqrt(rms/n);
+    if (usew)
+      rmsw = sqrt(rmsw/sumw);
+  }
+};
+
 #endif

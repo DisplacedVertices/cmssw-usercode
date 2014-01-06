@@ -1,6 +1,6 @@
 import sys, FWCore.ParameterSet.Config as cms
 
-version = 'v11'
+version = 'v13'
 runOnMC = True # Submit script expects this line to be unmodified...
 suppress_stdout = True
 
@@ -109,8 +109,8 @@ processpostfix('pfNoTau')     .enable = True  # useNoTau
 processpostfix('pfPileUp').checkClosestZVertex = False
 processpostfix('pfPileUpIso').checkClosestZVertex = False
 
-processpostfix('pfMuonsFromVertex').d0Cut = processpostfix('pfElectronsFromVertex').d0Cut = 0.2
-processpostfix('pfMuonsFromVertex').dzCut = processpostfix('pfElectronsFromVertex').dzCut = 0.5
+processpostfix('pfMuonsFromVertex').d0Cut = processpostfix('pfElectronsFromVertex').d0Cut = 2
+processpostfix('pfMuonsFromVertex').dzCut = processpostfix('pfElectronsFromVertex').dzCut = 2
 
 processpostfix('pfSelectedMuons').cut = 'pt > 5.'
 #processpostfix('pfSelectedMuons').cut += process.jtupleParams.muonCut
