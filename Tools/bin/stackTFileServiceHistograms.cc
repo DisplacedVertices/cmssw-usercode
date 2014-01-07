@@ -143,12 +143,21 @@ int main(int argc, char** argv) {
   out.Close();
 }
 
+template <typename T>
+bool make_hist(TDirectory& out, TObject* o) {
+  T* h = dynamic_cast<T*>(o);
+  if (!h)
+    return false;
+  T* h2 = (T*)h->Clone();
+  h2->Reset();
+  if (!h2->GetSumw2N())
+    h2->Sumw2();
+  h2->SetDirectory(&out);
+  return true;
+}
+
 void make(TDirectory& out, TObject* o) {
   TDirectory* dir;
-  TH1F* th1f;
-  TH1D* th1d;
-  TH2F* th2f;
-  TH2D* th2d;
 
   out.cd();
 
@@ -169,38 +178,28 @@ void make(TDirectory& out, TObject* o) {
       make(*outDir, obj);
     }
   }
-  else if ((th1f = dynamic_cast<TH1F*>(o)) != 0) {
-    TH1F *h = (TH1F*) th1f->Clone();
-    h->Reset();
-    h->Sumw2();
-    h->SetDirectory(&out);
+  else if (make_hist<TH1F>(out, o)) {}
+  else if (make_hist<TH1D>(out, o)) {}
+  else if (make_hist<TH2F>(out, o)) {}
+  else if (make_hist<TH2D>(out, o)) {}
+}
+
+template <typename T>
+bool fill_hist(TDirectory& out, TObject* o, double w) {
+  T* h = dynamic_cast<T*>(o);
+  if (!h)
+    return false;
+  T* h2 = dynamic_cast<T*>(out.Get(o->GetName()));
+  if (!h2) {
+    std::cerr << "error: histogram " << typeid(*o).name() << " not fuond in directory " << out.GetName() << "\n";
+    exit(-1);
   }
-  else if ((th1d = dynamic_cast<TH1D*>(o)) != 0) {
-    TH1D *h = (TH1D*) th1d->Clone();
-    h->Reset();
-    h->Sumw2();
-    h->SetDirectory(&out);
-  }
-  else if ((th2f = dynamic_cast<TH2F*>(o)) != 0) {
-    TH2F *h = (TH2F*) th2f->Clone();
-    h->Reset();   
-    h->Sumw2();
-    h->SetDirectory(&out);
-  }
-  else if ((th2d = dynamic_cast<TH2D*>(o)) != 0) {
-    TH2D *h = (TH2D*) th2d->Clone();
-    h->Reset();   
-    h->Sumw2();
-    h->SetDirectory(&out);
-  }
+  h2->Add(h, w);
+  return true;
 }
 
 void fill(TDirectory& out, TObject* o, double w) {
   TDirectory* dir;
-  TH1F* th1f;
-  TH1D* th1d;
-  TH2F* th2f;
-  TH2D* th2d;
 
   if ((dir = dynamic_cast<TDirectory*>(o)) != 0) {
     const char* name = dir->GetName();
@@ -226,40 +225,8 @@ void fill(TDirectory& out, TObject* o, double w) {
       fill(*outDir, obj, w);
     }
   }
-  else if ((th1f = dynamic_cast<TH1F*>(o)) != 0) {
-    const char* name = th1f->GetName();
-    TH1F* outTh1f = dynamic_cast<TH1F*>(out.Get(name));
-    if (outTh1f == 0) {
-      std::cerr << "error: histogram TH1F" << name << " not found in directory " << out.GetName() << "\n";
-      exit(-1);	
-    }
-    outTh1f->Add(th1f, w);
-  }
-  else if ((th1d = dynamic_cast<TH1D*>(o)) != 0) {
-    const char* name = th1d->GetName();
-    TH1D* outTh1d = dynamic_cast<TH1D*>(out.Get(name));
-    if (outTh1d == 0) {
-      std::cerr << "error: histogram TH1D" << name << " not found in directory " << out.GetName() << "\n";
-      exit(-1);	
-    } 
-    outTh1d->Add(th1d, w);
-  }
-  else if ((th2f = dynamic_cast<TH2F*>(o)) != 0) {
-    const char* name = th2f->GetName();
-    TH2F* outTh2f = dynamic_cast<TH2F*>(out.Get(name));
-    if (outTh2f == 0) {
-      std::cerr << "error: histogram TH2F" << name << " not found in directory " << out.GetName() << "\n";
-      exit(-1);	
-    }
-    outTh2f->Add(th2f, w);
-  }
-  else if ((th2d = dynamic_cast<TH2D*>(o)) != 0) {
-    const char* name = th2d->GetName();
-    TH2D* outTh2d = dynamic_cast<TH2D*>(out.Get(name));
-    if (outTh2d == 0) {
-      std::cerr << "error: histogram TH2D" << name << " not found in directory " << out.GetName() << "\n";
-      exit(-1);	
-    }
-    outTh2d->Add(th2d, w);
-  }
+  else if (fill_hist<TH1F>(out, o, w)) {}
+  else if (fill_hist<TH1D>(out, o, w)) {}
+  else if (fill_hist<TH2F>(out, o, w)) {}
+  else if (fill_hist<TH2D>(out, o, w)) {}
 }
