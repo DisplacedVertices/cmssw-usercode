@@ -7,11 +7,7 @@ process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
-                                                 min_maxtrackpt = 0,
-                                                 min_bs2dsig = 5,
-                                                 min_njetsntks = 1,
-                                                 min_ntracksptgt3 = 2,
-                                                 min_sumpt2 = 40)
+                                                 min_maxtrackpt = 0)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
@@ -75,6 +71,9 @@ for i in xrange(0,100):
 for i in xrange(0,28):
     changes.append(('drmaxX%s'%pize(0.25*i,2), 'max_drmax = %f'%(0.25*i), ''))
 
+for i in xrange(0,50):
+    changes.append(('bs2derrX%s'%pize(0.0005*i,4), 'max_bs2derr = %f'%(0.0005*i), ''))
+
 for i in xrange(0,30):
     changes.append(('bs2dsigX%s'%pize(0.5*i,1), 'min_bs2dsig = %f'%(0.5*i), ''))
 
@@ -86,6 +85,9 @@ for i in xrange(0,3):
 
 for i in xrange(0,3):
     changes.append(('nleptonsX%i'%i, '', 'min_nleptons = %i'%i))
+
+for i in xrange(0,3):
+    changes.append(('nsemileptonsX%i'%i, '', 'min_nsemileptons = %i'%i))
 
 for i in xrange(0,80):
     changes.append(('ntracks01X%i'%i, '', 'min_ntracks01 = %i'%i))
