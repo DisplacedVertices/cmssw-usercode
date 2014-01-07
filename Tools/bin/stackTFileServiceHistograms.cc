@@ -9,10 +9,11 @@
 #include <boost/tokenizer.hpp>
 #include <TFile.h>
 #include <TH2.h>
+#include <THStack.h>
 #include <TKey.h>
 #include <TROOT.h>
 
-void make(TDirectory& out, TObject* o);
+void make(TDirectory& out, TObject* o, bool stacking);
 void fill(TDirectory& out, TObject* o, double weight);
 
 static const char* const kHelpOpt = "help";
@@ -169,7 +170,7 @@ int main(int argc, char** argv) {
       }
 
       if (empty)
-        make(out, obj);
+        make(out, obj, stacking);
 
       fill(out, obj, weights[i]);
     }
@@ -183,19 +184,27 @@ int main(int argc, char** argv) {
 }
 
 template <typename T>
-bool make_hist(TDirectory& out, TObject* o) {
+bool make_hist(TDirectory& out, TObject* o, bool stacking) {
   T* h = dynamic_cast<T*>(o);
   if (!h)
     return false;
-  T* h2 = (T*)h->Clone();
-  h2->Reset();
-  if (!h2->GetSumw2N())
-    h2->Sumw2();
-  h2->SetDirectory(&out);
+
+  if (!stacking) {
+    T* h2 = (T*)h->Clone();
+    h2->Reset();
+    if (!h2->GetSumw2N())
+      h2->Sumw2();
+    h2->SetDirectory(&out);
+  }
+  else {
+    THStack* hs = new THStack(h->GetName(), h->GetTitle());
+    hs->Write();
+  }
+    
   return true;
 }
 
-void make(TDirectory& out, TObject* o) {
+void make(TDirectory& out, TObject* o, bool stacking) {
   TDirectory* dir;
 
   out.cd();
@@ -214,17 +223,17 @@ void make(TDirectory& out, TObject* o) {
 	exit(-1);
       }
 
-      make(*outDir, obj);
+      make(*outDir, obj, stacking);
     }
   }
-  else if (make_hist<TH1F>(out, o)) {}
-  else if (make_hist<TH1D>(out, o)) {}
-  else if (make_hist<TH2F>(out, o)) {}
-  else if (make_hist<TH2D>(out, o)) {}
+  else if (make_hist<TH1F>(out, o, stacking)) {}
+  else if (make_hist<TH1D>(out, o, stacking)) {}
+  else if (make_hist<TH2F>(out, o, false)) {}
+  else if (make_hist<TH2D>(out, o, false)) {}
 }
 
 template <typename T>
-bool fill_hist(TDirectory& out, TObject* o, double w) {
+bool fill_hist(TDirectory& out, TObject* o, double w, int s) {
   T* h = dynamic_cast<T*>(o);
   if (!h)
     return false;
@@ -237,7 +246,7 @@ bool fill_hist(TDirectory& out, TObject* o, double w) {
   return true;
 }
 
-void fill(TDirectory& out, TObject* o, double w) {
+void fill(TDirectory& out, TObject* o, double w, int s) {
   TDirectory* dir;
 
   if ((dir = dynamic_cast<TDirectory*>(o)) != 0) {
