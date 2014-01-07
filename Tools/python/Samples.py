@@ -402,6 +402,9 @@ mfv_neutralino_tau9900um_M1000.events_per = 500
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
+qcdht0500.total_events = 30592292
+qcdht1000.total_events = 13834863
+wjetstolnu.total_events = 57673905
 
 ########################################################################
 
