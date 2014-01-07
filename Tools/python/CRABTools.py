@@ -759,7 +759,23 @@ def crab_ownpublish(batch_name, working_dirs, sample_name=lambda wd: wd.replace(
     from JMTucker.Tools.SampleFiles import pprint
     print '\n --- cut here ---\n'
     pprint(d)
-    
+
+def crab_need_renew_proxy(min_hours=120):
+    # JMTBAD should use the CRAB function (an api! an api! my kingdom for an api!)
+    if os.system('voms-proxy-info -exists -valid %i:0' % min_hours) != 0:
+        return True
+    out = crab_popen('myproxy-info -d -s myproxy.cern.ch')
+    for line in out.split('\n'):
+        if 'timeleft' in line:
+            return int(line.split(':')[1]) < min_hours
+    print '\033[36;7m warning: \033[m crab_need_renew_proxy could not parse output of myproxy-info'
+    return True
+
+def crab_renew_proxy_if_needed(min_hours=120):
+    if crab_need_renew_proxy(min_hours):
+        os.system('voms-proxy-init -voms cms -valid 192:00')
+        os.system('myproxy-init -d -n -s myproxy.cern.ch')
+
 if __name__ == '__main__':
     from pprint import pprint
     from mymisc import bool_from_argv

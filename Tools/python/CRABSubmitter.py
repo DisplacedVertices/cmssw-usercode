@@ -2,7 +2,7 @@
 
 import sys, os, threading, time, ConfigParser, StringIO
 from StringIO import StringIO
-from CRABTools import crab_popen, crab_submit_in_batches
+from CRABTools import crab_popen, crab_submit_in_batches, crab_renew_proxy_if_needed
     
 class ConfigParserEx(ConfigParser.ConfigParser):
     def set(self, section, option, value):
@@ -48,9 +48,8 @@ class CRABSubmitter:
                  **kwargs):
 
         if not testing and CRABSubmitter.get_proxy:
-            print 'CRABSubmitter init: mandatory proxy get, will ask for password twice (but you can skip it with ^C if you know what you are doing).'
-            os.system('voms-proxy-init -voms cms -valid 192:00')
-            os.system('myproxy-init -d -n -s myproxy.cern.ch')
+            print 'CRABSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
+            crab_renew_proxy_if_needed()
             CRABSubmitter.get_proxy = False
 
         self.username = os.environ['USER']
