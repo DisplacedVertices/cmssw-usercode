@@ -5,6 +5,7 @@ from pprint import pprint
 from JMTucker.Tools.ROOTTools import ROOT, flatten_directory, check_consistency
 
 fn1, fn2 = fns = [x for x in sys.argv[1:] if '.root' in x]
+print 'comparing', fn1, fn2
 f1, f2 = fs = [ROOT.TFile(fn) for fn in fns]
 
 d1 = set(flatten_directory(f1))
@@ -18,7 +19,7 @@ in1not2 = sorted(d1 - d2)
 in2not1 = sorted(d2 - d1)
 if 'small' in sys.argv:
     print 'comparing %i hists (and not %i+%i of them)' % (len(d), len(in1not2), len(in2not1))
-else:
+elif in1not2 or in2not1:
     print 'warning: not comparing these:'
     print 'in f1 not f2:'
     pprint(in1not2)
