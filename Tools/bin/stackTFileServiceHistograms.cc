@@ -23,6 +23,31 @@ static const char* const kInputFilesOpt = "input-files";
 static const char* const kInputFilesCommandOpt = "input-files,i";
 static const char* const kWeightsOpt = "weights";
 static const char* const kWeightsCommandOpt = "weights,w";
+static const char* const kStackOpt = "stack";
+static const char* const kStackCommandOpt = "stack,s";
+
+template <typename T>
+std::vector<T> parse_comma_sep(const std::string& w) {
+  std::vector<T> res;
+
+  typedef boost::char_separator<char> sep_t;
+  sep_t sep(",");
+  boost::tokenizer<sep_t> tokens(w, sep);
+  for (boost::tokenizer<sep_t>::iterator t = tokens.begin(); t != tokens.end(); ++t) {
+    const char* begin = t->c_str();
+    char* end;
+    T w = strtod(begin, &end);
+
+    if (size_t(end - begin) < t->size()) {
+      std::cerr << "invalid token: " << begin << "\n";
+      exit(-1);
+    }
+
+    res.push_back(w);
+  }
+
+  return res;
+}
 
 int main(int argc, char** argv) {
   std::string programName(argv[0]);
@@ -32,10 +57,11 @@ int main(int argc, char** argv) {
   boost::program_options::options_description desc(descString);
 
   desc.add_options()
+    (kHelpCommandOpt,                                                                                 "produce help message")
+    (kInputFilesCommandOpt, boost::program_options::value<std::vector<std::string> >()->multitoken(), "input root files")
     (kOutputFileCommandOpt, boost::program_options::value<std::string>()->default_value("out.root"),  "output root file (default out.root)")
     (kWeightsCommandOpt,    boost::program_options::value<std::string>(),                             "comma-separated list of weights (default all 1)")
-    (kHelpCommandOpt,                                                                                 "produce help message")
-    (kInputFilesCommandOpt, boost::program_options::value<std::vector<std::string> >()->multitoken(), "input root files");
+    (kStackCommandOpt,      boost::program_options::value<std::string>(),                             "comma-separated list of stack colors (default no stack)");
 
   boost::program_options::positional_options_description p;
 
@@ -57,6 +83,8 @@ int main(int argc, char** argv) {
   std::vector<std::string> fileNames;
   std::string outputFile;
   std::vector<double> weights;
+  std::vector<int> stack;
+  bool stacking;
 
   if (vm.count(kInputFilesOpt))
     fileNames = vm[kInputFilesOpt].as<std::vector<std::string> >();
@@ -73,24 +101,8 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  if (vm.count(kWeightsOpt)) {
-    std::string w = vm[kWeightsOpt].as<std::string>();
-    typedef boost::char_separator<char> sep_t;
-    sep_t sep(",");
-    boost::tokenizer<sep_t> tokens(w, sep);
-    for (boost::tokenizer<sep_t>::iterator t = tokens.begin(); t != tokens.end(); ++t) {
-      const char* begin = t->c_str();
-      char* end;
-      double w = strtod(begin, &end);
-
-      if (size_t(end - begin) < t->size()) {
-	std::cerr << "invalid weight: " << begin << "\n";
-        return -1;
-      }
-
-      weights.push_back(w);
-    }
-  }
+  if (vm.count(kWeightsOpt))
+    weights = parse_comma_sep<double>(vm[kWeightsOpt].as<std::string>());
   else
     weights = std::vector<double>(fileNames.size(), 1.0);
 
@@ -98,6 +110,33 @@ int main(int argc, char** argv) {
     std::cerr << "the number of weights and the number of files must be the same\n";
     return -1;
   }
+
+  if (vm.count(kStackOpt))
+    stack = parse_comma_sep<int>(vm[kStackOpt].as<std::string>());
+
+  stacking = stack.size();
+
+  if (stacking && stack.size() != fileNames.size()) {
+    std::cerr << "the number of stack colors and the number of files must be the same\n";
+    return -1;
+  }
+
+  std::cout << "merging";
+  if (stacking) std::cout << "/stacking";
+  std::cout << " these files:\n";
+  for (const std::string& f : fileNames)
+    std::cout << "  " << f << "\n";
+  std::cout << "with weights";
+  if (stacking) std::cout << "/stack colors";
+  std::cout << ":\n";
+  for (size_t i = 0; i < fileNames.size(); ++i) {
+    std::cout << "  " << weights[i];
+    if (stacking) std::cout << "/" << stack[i];
+    std::cout << "\n";
+  }
+  std::cout << "to output file " << outputFile << "\n";
+
+  //////////////////////////////////////////////////////////////////////////////
 
   gROOT->SetBatch();
 
