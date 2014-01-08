@@ -18,6 +18,7 @@ process.trigtopmu = cuts.clone(trigger_bit = 4, min_4th_jet_pt = 20)
 process.trigtopmunmu = cuts.clone(trigger_bit = 4, min_4th_jet_pt = 20, min_nsemilepmuons = 1)
 process.trigtopmunmuht500 = cuts.clone(trigger_bit = 4, min_4th_jet_pt = 20, min_nsemilepmuons = 1, min_sumht = 500)
 process.trignjetsslep = cuts.clone(min_nsemileptons = 1)
+process.trigonly = cuts.clone(min_njets = 0, min_4th_jet_pt = 0)
 
 for name in process.filters.keys():
     setattr(process, 'p' + name, cms.Path(getattr(process,name)))
@@ -33,8 +34,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.SampleFiles import SampleFiles
 
     cs = CRABSubmitter('EventsCutplay',
-                       total_number_of_events = -1,
-                       events_per_job = 1000000,
+                       total_number_of_events = 1000000,
+                       events_per_job = 500000,
                        manual_datasets = SampleFiles['MFVNtupleV13'],
                        )
     cs.submit_all(samples)
