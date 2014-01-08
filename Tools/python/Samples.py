@@ -353,6 +353,8 @@ mfv_signal_samples_ex = [
 
 mfv_signal_samples = []
 for tau, mass, sample in mfv_signal_samples_ex:
+    if mass == 300 or tau == 300:
+        continue
     mfv_signal_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
