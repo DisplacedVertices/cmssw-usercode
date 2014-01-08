@@ -2,6 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
                                    primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                                   muons_src = cms.InputTag('selectedPatMuonsPF'),
+                                   electrons_src = cms.InputTag('selectedPatElectronsPF'),
                                    gen_vertices_src = cms.InputTag('mfvGenVertices'),
                                    vertex_src = cms.InputTag('mfvVertices'),
                                    sv_to_jets_src = cms.string('dummy'),

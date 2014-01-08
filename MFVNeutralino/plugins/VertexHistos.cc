@@ -90,6 +90,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   PairwiseHistos::HistoDefs hs;
   hs.add("mva", "MVA output", 100, -2, 3);
 
+  hs.add("nlep", "# leptons", 10, 0, 10);
+
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
   hs.add("nbadtracks",                    "# of 'bad' tracks/SV",                                                         40,    0,      40);
   hs.add("ntracksptgt3",                  "# of tracks/SV w/ p_{T} > 3 GeV",                                              40,    0,      40);
@@ -357,6 +359,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
     PairwiseHistos::ValueMap v = {
         {"mva",                     mva.value(aux)},
+        {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 aux.ntracks},
         {"nbadtracks",              aux.nbadtracks},
         {"ntracksptgt3",            aux.ntracksptgt3},

@@ -1,6 +1,7 @@
 #ifndef JMTucker_MFVNeutralinoFormats_interface_VertexAux_h
 #define JMTucker_MFVNeutralinoFormats_interface_VertexAux_h
 
+#include <vector>
 #include "TLorentzVector.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
 
@@ -19,6 +20,7 @@ struct MFVVertexAux {
   }
 
   uchar which;
+  std::vector<uchar> which_lep; // electrons have 7th bit set
 
   float x;
   float y;
