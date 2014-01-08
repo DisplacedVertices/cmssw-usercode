@@ -292,29 +292,53 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  for (int i = 0; i < 3; ++i)
-    mevent->nmu[i] = mevent->nel[i] = 0;
+  mevent->lep_id.clear();
+  mevent->lep_pt.clear();
+  mevent->lep_eta.clear();
+  mevent->lep_phi.clear();
+  mevent->lep_iso.clear();
+  mevent->lep_mva.clear();
 
   edm::Handle<pat::MuonCollection> muons;
   event.getByLabel(muons_src, muons);
 
-  mevent->nmu[0] = int2uchar(muons->size());
   for (const pat::Muon& muon : *muons) {
-    if (muon_semilep_selector(muon))
-      inc_uchar(mevent->nmu[1]);
-    if (muon_dilep_selector(muon))
-      inc_uchar(mevent->nmu[2]);
+    uchar id =
+      0
+      | 1 << 1  // if it's in the collection it passes veto selection
+      | muon_semilep_selector(muon) << 2
+      | muon_dilep_selector(muon) << 3;
+
+    float iso = (muon.chargedHadronIso() + muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
+    float mva = 1e99;
+
+    mevent->lep_id.push_back(id);
+    mevent->lep_pt.push_back(muon.pt());
+    mevent->lep_eta.push_back(muon.eta());
+    mevent->lep_phi.push_back(muon.phi());
+    mevent->lep_iso.push_back(iso);
+    mevent->lep_mva.push_back(mva);
   }
   
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByLabel(electrons_src, electrons);
   
-  mevent->nel[0] = int2uchar(electrons->size());
   for (const pat::Electron& electron : *electrons) {
-    if (electron_semilep_selector(electron))
-      inc_uchar(mevent->nel[1]);
-    if (electron_dilep_selector(electron))
-      inc_uchar(mevent->nel[2]);
+    uchar id =
+      1
+      | 1 << 1  // if it's in the collection it passes veto selection
+      | electron_semilep_selector(electron) << 2
+      | electron_dilep_selector(electron) << 3;
+
+    float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
+    float mva = electron.electronID("mvaNonTrigV0");
+
+    mevent->lep_id.push_back(id);
+    mevent->lep_pt.push_back(electron.pt());
+    mevent->lep_eta.push_back(electron.eta());
+    mevent->lep_phi.push_back(electron.phi());
+    mevent->lep_iso.push_back(iso);
+    mevent->lep_mva.push_back(mva);
   }
   
   //////////////////////////////////////////////////////////////////////

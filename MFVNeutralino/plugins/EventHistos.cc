@@ -204,8 +204,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags[i], w);
-    h_nmuons[i]->Fill(mevent->nmu[i], w);
-    h_nelectrons[i]->Fill(mevent->nel[i], w);
+    h_nmuons[i]->Fill(mevent->nmu(i), w);
+    h_nelectrons[i]->Fill(mevent->nel(i), w);
     h_nleptons[i]->Fill(mevent->nlep(i), w);
   }
 }
