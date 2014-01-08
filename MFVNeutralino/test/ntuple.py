@@ -14,6 +14,13 @@ process.out.outputCommands = [
     ]
 process.out.dropMetaData = cms.untracked.string('ALL')
 
+from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
+process.triggerFilter = hltHighLevel.clone()
+process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
+process.triggerFilter.andOr = True # = OR
+process.ptrig = cms.Path(process.triggerFilter)
+process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
+
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
