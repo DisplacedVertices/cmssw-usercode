@@ -293,7 +293,7 @@ class CRABSubmitter:
             if advance:
                 curr += 1
 
-        if files and total_number_of_events < 0:
+        if files and (total_number_of_events < 0 or evsum < events_per_job):
             splits += [(files, events_per_job, skipsum)]
 
         return splits
