@@ -1,10 +1,10 @@
-int iteration = 6;
-double xcut = 40;
-double ycut = 20;
+int iteration = 0;
+double xcut = 15;
+double ycut = 15;
 
 void compareShapes(char* sampleName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV11_%d/%s_scaled.root", iteration, sampleName));
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV13_%d/%s_scaled.root", iteration, sampleName));
   TH2F* hist = (TH2F*)abcdHistos->Get("h_ntracks01_maxtrackpt01");
   char* xname = "maxtrackpt01";
   char* yname = "ntracks01";
@@ -76,5 +76,7 @@ void abcd() {
   compareShapes("qcdht0500");
   compareShapes("qcdht1000");
   compareShapes("qcd");
+  compareShapes("wjetstolnu");
+  compareShapes("dyjetstollM50");
   compareShapes("background");
 }
