@@ -128,6 +128,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       aux.njets[i] = 0;
 
+    std::vector<double> jetpairdetas[mfv::NJetsByUse];
     std::vector<double> jetpairdrs[mfv::NJetsByUse];
     std::vector<double> costhjetmomvtxdisps[mfv::NJetsByUse];
 
@@ -154,8 +155,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             else
               costhjetmomvtxdisps[i].push_back(-2);
 
-            for (int jjet = ijet+1; jjet < njets; ++jjet)
+            for (int jjet = ijet+1; jjet < njets; ++jjet) {
+              jetpairdetas[i].push_back(fabs(jets[ijet]->eta() - jets[jjet]->eta()));
               jetpairdrs[i].push_back(reco::deltaR(*jets[ijet], *jets[jjet]));
+            }
           }
         
           math::XYZTLorentzVector jpt_p4 = p4s[1+i];
@@ -171,6 +174,12 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           p4s[1 + i + mfv::NJetsByUse] = jpt_p4;
         }
       }
+
+      distrib_calculator jetpairdeta(jetpairdetas[mfv::JByNtracks], std::vector<double>());
+      aux.jetpairdetamin = jetpairdeta.min;
+      aux.jetpairdetamax = jetpairdeta.max;
+      aux.jetpairdetaavg = jetpairdeta.avg;
+      aux.jetpairdetarms = jetpairdeta.rms;
 
       distrib_calculator jetpairdr(jetpairdrs[mfv::JByNtracks], std::vector<double>());
       aux.jetpairdrmin = jetpairdr.min;
@@ -224,6 +233,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     std::vector<double> costhtkmomvtxdisps;
 
     std::vector<double> trackpairws;
+    std::vector<double> trackpairdetas;
     std::vector<double> trackpairdrs;
     std::vector<double> trackpairmasses;
 
@@ -290,6 +300,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
         trackpairws.push_back(0.5*(tri->pt() + trj->pt()));
 
+        trackpairdetas.push_back(fabs(tri->eta() - trj->eta()));
         trackpairdrs.push_back(reco::deltaR(*tri, *trj));
         trackpairmasses.push_back((tri_p4 + trj_p4).M());
 
@@ -364,6 +375,12 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.costhtkmomvtxdispmax = costhtkmomvtxdisp.max;
     aux.costhtkmomvtxdispavg = costhtkmomvtxdisp.avg;
     aux.costhtkmomvtxdisprms = costhtkmomvtxdisp.rms;
+
+    distrib_calculator trackpairdeta(trackpairdetas, trackpairws);
+    aux.trackpairdetamin = trackpairdeta.min;
+    aux.trackpairdetamax = trackpairdeta.max;
+    aux.trackpairdetaavg = trackpairdeta.avg;
+    aux.trackpairdetarms = trackpairdeta.rms;
 
     distrib_calculator trackpairdr(trackpairdrs, trackpairws);
     aux.drmin = trackpairdr.min;

@@ -95,6 +95,11 @@ struct MFVVertexAux {
   float trackdzerravg;
   float trackdzerrrms;
 
+  float trackpairdetamin;
+  float trackpairdetamax;
+  float trackpairdetaavg;
+  float trackpairdetarms;
+
   float drmin; // JMTBAD trackpairdrmin
   float drmax;
   float dravg;
@@ -116,6 +121,11 @@ struct MFVVertexAux {
   float trackquadmassmax;
   float trackquadmassavg;
   float trackquadmassrms;
+
+  float jetpairdetamin;
+  float jetpairdetamax;
+  float jetpairdetaavg;
+  float jetpairdetarms;
 
   float jetpairdrmin;
   float jetpairdrmax;
