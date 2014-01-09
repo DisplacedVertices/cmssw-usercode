@@ -121,6 +121,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.smaller_background_samples
     elif 'leptonic' in sys.argv:
         samples = Samples.leptonic_background_samples
+    elif 'qcdlep' in sys.argv:
+        samples = []
+        for s in Samples.auxiliary_background_samples:
+            if (s.name != 'qcdmupt15' and 'qcdmu' in s.name) or 'qcdem' in s.name or 'qcdbce' in s.name:
+                samples.append(s)
     elif 'data' in sys.argv:
         samples = Samples.data_samples
     elif 'auxdata' in sys.argv:
