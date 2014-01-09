@@ -105,13 +105,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     Samples.ttbarsemilep.events_per = 5500
     Samples.wjetstolnu.events_per = 12000
     Samples.dyjetstollM50.events_per = 6500
+    for s in Samples.auxiliary_background_samples:
+        if 'qcdem' in s.name:
+            s.events_per = 7000
+    for s in Samples.mfv_signal_samples:
+        s.events_per = 500
 
     x = Samples.mfv_signal_samples
     Samples.mfv_signal_samples = []
     Samples.mfv300 = []
     for y in x:
-        y.events_per = 500
-
         if '300' in y.name:
             Samples.mfv300.append(y)
         else:
