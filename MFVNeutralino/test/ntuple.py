@@ -108,6 +108,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for s in Samples.auxiliary_background_samples:
         if 'qcdem' in s.name:
             s.events_per = 7000
+    Samples.qcdem020.events_per = 7500
     for s in Samples.mfv_signal_samples:
         s.events_per = 500
 
