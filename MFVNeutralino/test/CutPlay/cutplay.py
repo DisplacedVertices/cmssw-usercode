@@ -10,7 +10,8 @@ vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
                                                  min_maxtrackpt = 0)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
+ana_sel = process.mfvAnalysisCuts.clone(min_sumht = 500,
+                                        min_ntracks01 = 0,
                                         min_maxtrackpt01 = 0)
 
 def pize(f,sz):
@@ -26,11 +27,20 @@ for i in xrange(0,40):
 for i in xrange(0,20):
     changes.append(('ntracksptgt3X%i'%i, 'min_ntracksptgt3 = %i'%i, ''))
 
+for i in xrange(0,20):
+    changes.append(('ntracksptgt5X%i'%i, 'min_ntracksptgt5 = %i'%i, ''))
+
+for i in xrange(0,20):
+    changes.append(('ntracksptgt10X%i'%i, 'min_ntracksptgt10 = %i'%i, ''))
+
 for i in xrange(0,10):
     changes.append(('njetsntksX%i'%i, 'min_njetsntks = %i'%i, ''))
 
 for i in xrange(0,100,2):
     changes.append(('tkonlyptX%i'%i, 'min_tkonlypt = %i'%i, ''))
+
+for i in xrange(0,25):
+    changes.append(('abstkonlyetaX%s'%pize(0.16*i,2), 'max_abstkonlyeta = %f'%(0.16*i), ''))
 
 for i in xrange(0,100,2):
     changes.append(('tkonlymassX%i'%i, 'min_tkonlymass = %i'%i, ''))
@@ -38,11 +48,17 @@ for i in xrange(0,100,2):
 for i in xrange(0,100,5):
     changes.append(('jetsntkptX%i'%i, 'min_jetsntkpt = %i'%i, ''))
 
+for i in xrange(0,25):
+    changes.append(('absjetsntketaX%s'%pize(0.16*i,2), 'max_absjetsntketa = %f'%(0.16*i), ''))
+
 for i in xrange(0,100,5):
     changes.append(('jetsntkmassX%i'%i, 'min_jetsntkmass = %i'%i, ''))
 
 for i in xrange(0,100,5):
     changes.append(('tksjetsntkptX%i'%i, 'min_tksjetsntkpt = %i'%i, ''))
+
+for i in xrange(0,25):
+    changes.append(('abstksjetsntketaX%s'%pize(0.16*i,2), 'max_abstksjetsntketa = %f'%(0.16*i), ''))
 
 for i in xrange(0,100,5):
     changes.append(('tksjetsntkmassX%i'%i, 'min_tksjetsntkmass = %i'%i, ''))
@@ -65,11 +81,23 @@ for i in xrange(0,200,5):
 for i in xrange(0,30):
     changes.append(('maxtrackptX%i'%i, 'min_maxtrackpt = %i'%i, ''))
 
+for i in xrange(0,50):
+    changes.append(('trackdxyerrminX%s'%pize(0.0002*i,4), 'max_trackdxyerrmin = %f'%(0.0002*i), ''))
+
+for i in xrange(0,50):
+    changes.append(('trackdzerrminX%s'%pize(0.0002*i,4), 'max_trackdzerrmin = %f'%(0.0002*i), ''))
+
 for i in xrange(0,100):
     changes.append(('drminX%s'%pize(0.01*i,2), 'max_drmin = %f'%(0.01*i), ''))
 
 for i in xrange(0,28):
     changes.append(('drmaxX%s'%pize(0.25*i,2), 'max_drmax = %f'%(0.25*i), ''))
+
+for i in xrange(0,50):
+    changes.append(('jetpairdrminX%s'%pize(0.1*i,1), 'max_jetpairdrmin = %f'%(0.1*i), ''))
+
+for i in xrange(0,70):
+    changes.append(('jetpairdrmaxX%s'%pize(0.1*i,1), 'max_jetpairdrmax = %f'%(0.1*i), ''))
 
 for i in xrange(0,50):
     changes.append(('bs2derrX%s'%pize(0.0005*i,4), 'max_bs2derr = %f'%(0.0005*i), ''))
