@@ -316,6 +316,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_pt.push_back(muon.pt());
     mevent->lep_eta.push_back(muon.eta());
     mevent->lep_phi.push_back(muon.phi());
+    mevent->lep_dxy.push_back(muon.track()->dxy(beamspot->position()));
+    mevent->lep_dz.push_back(muon.track()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }
@@ -328,7 +330,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       1
       | 1 << 1  // if it's in the collection it passes veto selection
       | electron_semilep_selector(electron) << 2
-      | electron_dilep_selector(electron) << 3;
+      | electron_dilep_selector(electron) << 3
+      | electron.closestCtfTrackRef().isNonnull() << 4;
 
     float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
     float mva = electron.electronID("mvaNonTrigV0");
@@ -337,6 +340,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_pt.push_back(electron.pt());
     mevent->lep_eta.push_back(electron.eta());
     mevent->lep_phi.push_back(electron.phi());
+    mevent->lep_dxy.push_back(electron.gsfTrack()->dxy(beamspot->position()));
+    mevent->lep_dz.push_back(electron.gsfTrack()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }

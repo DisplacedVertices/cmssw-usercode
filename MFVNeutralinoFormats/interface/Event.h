@@ -119,10 +119,12 @@ struct MFVEvent {
 
   uchar nbtags[3]; // loose, medium, tight
 
-  std::vector<uchar> lep_id; // bit field: bit 0 (lsb) = mu, 1 = el, bit 1 = loosest (veto) id (always 1 for now), bit 2 = semilep id, bit 3 = dilep id
+  std::vector<uchar> lep_id; // bit field: bit 0 (lsb) = mu, 1 = el, bit 1 = loosest (veto) id (always 1 for now), bit 2 = semilep id, bit 3 = dilep id, bit4 = 1 if electron and closestCtfTrack is not null
   std::vector<float> lep_pt;
   std::vector<float> lep_eta;
   std::vector<float> lep_phi;
+  std::vector<float> lep_dxy;
+  std::vector<float> lep_dz;
   std::vector<float> lep_iso;
   std::vector<float> lep_mva; // only filled for electrons
 
