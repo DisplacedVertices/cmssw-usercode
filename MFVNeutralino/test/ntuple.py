@@ -97,10 +97,21 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        max_threads = 3,
                        )
 
+    # need fewer than 5000 jobs/batch, but need to beat the wallclock
+    Samples.qcdht0100.events_per = 11000
+    Samples.qcdht0250.events_per = 6000
+    Samples.qcdht0500.events_per = 7000
+    Samples.qcdht1000.events_per = 3000
+    Samples.ttbarsemilep.events_per = 5500
+    Samples.wjetstolnu.events_per = 12000
+    Samples.dyjetstollM50.events_per = 6500
+
     x = Samples.mfv_signal_samples
     Samples.mfv_signal_samples = []
     Samples.mfv300 = []
     for y in x:
+        y.events_per = 500
+
         if '300' in y.name:
             Samples.mfv300.append(y)
         else:
