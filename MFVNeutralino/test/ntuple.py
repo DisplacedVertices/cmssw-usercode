@@ -34,6 +34,11 @@ process.out.outputCommands += [
     'keep MFVVertexAuxs_mfvVerticesSumSeedAux__*',
     ]
 
+# We're not saving the PAT branches, but if the embedding is on then
+# we can't match leptons by track to vertices.
+process.patMuonsPF.embedTrack = False
+process.patElectronsPF.embedTrack = False
+
 if 'histos' in sys.argv:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
     process.mfvVertices.histos = True
