@@ -24,6 +24,8 @@ parser.add_option('--resub-stuck-done', action='store_true', default=False,
                   help='Resubmit any job that has status DoneStuck: Done, but whose output cannot be retrieved.')
 parser.add_option('--resub-created', action='store_true', default=False,
                   help='(Re)submit any job that has status Created.')
+parser.add_option('--resub-all', action='store_true', default=False,
+                  help='Resubmit all jobs that need it (equivalent to --resub-any --resub-stuck-done --resub-created).')
 parser.add_option('--resub-none', action='store_true', default=False,
                   help='Do not resubmit any jobs (i.e. allow getting output, but do not do anything with e.g. those that are Aborted).')
 parser.add_option('--resub-site-control', default='',
@@ -57,7 +59,10 @@ def print_header(s):
     print '\033[1m%s\033[0m' % s
 def print_subheader(s):
     print '\033[32m%s\033[0m' % s
-    
+
+if options.resub_all:
+    options.resub_any = options.resub_stuck_done = options.resub_created = True
+
 if options.status_only and not options.once:
     print '--status-only implies --once, setting it.'
     options.once = True
