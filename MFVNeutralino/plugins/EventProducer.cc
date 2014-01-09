@@ -296,6 +296,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->lep_pt.clear();
   mevent->lep_eta.clear();
   mevent->lep_phi.clear();
+  mevent->lep_dxy.clear();
+  mevent->lep_dz.clear();
   mevent->lep_iso.clear();
   mevent->lep_mva.clear();
 
