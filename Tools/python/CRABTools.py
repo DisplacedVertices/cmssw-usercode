@@ -247,7 +247,13 @@ def crab_status(working_dir, verbose=True, debug=False):
             if end == 'N' and use_server:
                 status += 'NotEnd'
 
-            if len(x) == 7:
+            if len(x) >= 7:
+                if len(x) > 7:
+                    if len(x) == 8 and x[6] == x[7]: # kludge against hostname being duplicated e.g. 'red.unl.edu red.unl.edu' 1/9/14
+                        x = x[:7]
+                    else:
+                        raise ValueError('unexpected length of job line: %r' % x)
+
                 #print 'len(x) == 7'
                 exe_exit_code = int(x[4])
                 job_exit_code = int(x[5])
@@ -263,7 +269,7 @@ def crab_status(working_dir, verbose=True, debug=False):
             elif len(x) == 4:
                 exe_exit_code = job_exit_code = -1
             else:
-                raise ValueError('trouble parsing job line: repr(x) = %s' % repr(x))
+                raise ValueError('trouble parsing job line: %r' % x)
 
             # I guess "Cleared" means Retrieved and no longer available to get the output? jesus who cares
             if status == 'Cleared':
