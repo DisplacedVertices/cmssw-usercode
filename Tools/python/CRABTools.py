@@ -230,9 +230,13 @@ def crab_status(working_dir, verbose=True, debug=False):
     if 'Total Jobs' not in s:
         raise CrabError, 'unable to get status for working_dir=' + working_dir
 
+    #import pdb; pdb.set_trace()
+
     for x in s.split('\n'):
         # hurr should redo this with regexps, then not have to use these hacks
         x = x.replace('Cancelled by user', 'CancelledByUser')
+        x = x.replace('red.unl.edu red.unl.edu', 'red.unl.edu') # remote screwup 1/9/14
+        x = x.replace('tusker-gw1.unl.edu tusker-gw1.unl.edu', 'tusker-gw1.unl.edu')
         x = [y.strip() for y in x.split() if y.strip()]
         #print len(x), x
         if len(x) < 4: continue
@@ -248,12 +252,6 @@ def crab_status(working_dir, verbose=True, debug=False):
                 status += 'NotEnd'
 
             if len(x) >= 7:
-                if len(x) > 7:
-                    if len(x) == 8 and x[6] == x[7]: # kludge against hostname being duplicated e.g. 'red.unl.edu red.unl.edu' 1/9/14
-                        x = x[:7]
-                    else:
-                        raise ValueError('unexpected length of job line: %r' % x)
-
                 #print 'len(x) == 7'
                 exe_exit_code = int(x[4])
                 job_exit_code = int(x[5])
