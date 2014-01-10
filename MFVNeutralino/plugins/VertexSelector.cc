@@ -172,7 +172,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.drmin <  max_drmin &&
     vtx.drmax >= min_drmax &&
     vtx.drmax <  max_drmax &&
-    vtx.jetpairdrmin < max_jetpairdrmin &&
+    (max_jetpairdrmin > 1e6 || vtx.jetpairdrmin < max_jetpairdrmin) &&
     vtx.jetpairdrmax < max_jetpairdrmax &&
     vtx.gen2derr < max_err2d &&
     vtx.gen3derr < max_err3d &&
