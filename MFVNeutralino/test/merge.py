@@ -6,6 +6,7 @@ from JMTucker.Tools.Merge_cfg import cms, process
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
+    from JMTucker.Tools.SampleFiles import SampleFiles
 
     cs = CRABSubmitter('MergeNtuple',
                        total_number_of_events = -1,
