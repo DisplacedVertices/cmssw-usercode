@@ -9,5 +9,8 @@ except CrabError:
     sys.stderr.write('Usage: crlogs <crab directory> <list of jobs>\n    Only one crab directory is allowed at a time.\n')
     sys.exit(1)
 
-for job in crab_jobs_from_argv():
+jobs = crab_jobs_from_argv()
+if not jobs:
+    print '%s/log/crab.log' % d
+for job in jobs:
     print '%s/res/CMSSW_%i.stdout' % (d, job),
