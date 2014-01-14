@@ -7,8 +7,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
     from JMTucker.Tools.SampleFiles import SampleFiles
+    from JMTucker.Tools.PATTuple_cfg import version as tuple_version
 
-    cs = CRABSubmitter('MergeNtuple',
+    cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + 'Merged',
                        total_number_of_events = -1,
                        events_per_job = 50000,
                        get_edm_output = True,
