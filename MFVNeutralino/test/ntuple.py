@@ -28,12 +28,6 @@ process.p = cms.Path(common_seq * process.mfvVertexSequence)
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
 
-process.p *= process.mfvVertexAsymSeedSequence * process.mfvVertexSumSeedSequence
-process.out.outputCommands += [
-    'keep MFVVertexAuxs_mfvVerticesAsymSeedAux__*',
-    'keep MFVVertexAuxs_mfvVerticesSumSeedAux__*',
-    ]
-
 # We're not saving the PAT branches, but if the embedding is on then
 # we can't match leptons by track to vertices.
 process.patMuonsPF.embedTrack = False
