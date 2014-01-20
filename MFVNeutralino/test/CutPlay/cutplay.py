@@ -7,12 +7,13 @@ process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
-                                                 min_maxtrackpt = 0)
+                                                 min_maxtrackpt = 0,
+                                                 min_njetsntks = 1)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-ana_sel = process.mfvAnalysisCuts.clone(min_sumht = 500,
-                                        min_ntracks01 = 0,
-                                        min_maxtrackpt01 = 0)
+ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
+                                        min_maxtrackpt01 = 0,
+                                        min_sumht = 500)
 
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
@@ -99,6 +100,9 @@ for i in xrange(0,50):
 for i in xrange(0,70):
     changes.append(('jetpairdrmaxX%s'%pize(0.1*i,1), 'max_jetpairdrmax = %f'%(0.1*i), ''))
 
+for i in xrange(0,30):
+    changes.append(('bs2ddistX%s'%pize(0.001*i,3), 'min_bs2ddist = %f'%(0.001*i), ''))
+
 for i in xrange(0,50):
     changes.append(('bs2derrX%s'%pize(0.0005*i,4), 'max_bs2derr = %f'%(0.0005*i), ''))
 
@@ -160,7 +164,7 @@ process.p = cms.EndPath(process.effs)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *
-    bkg_samples = ttbar_samples + qcd_samples + leptonic_background_samples
+    bkg_samples = ttbar_samples + qcd_samples
     samples = [mfv_neutralino_tau0100um_M0200, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400] + bkg_samples
     for sample in bkg_samples:
         sample.total_events = sample.nevents_orig/2
