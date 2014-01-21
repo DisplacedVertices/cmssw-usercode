@@ -269,8 +269,6 @@ struct z_calculator {
     samples.push_back(sample("qcdht0250",         2.76e8,              kGreen + 1, vars));
     samples.push_back(sample("qcdht0500",         8.43e6,              kGreen + 2, vars));
     samples.push_back(sample("qcdht1000",         2.04e5,              kGreen + 3, vars));
-    samples.push_back(sample("wjetstolnu",        3.04e4,              kPink,      vars));
-    samples.push_back(sample("dyjetstollM50",     2.95e3,              kPink + 1,  vars));
 
     for (std::vector<sample>::iterator s = samples.begin(); s != samples.end(); ) {
       if (!s->use())
@@ -535,7 +533,7 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "njetsntks", "tkonlypt", "tkonlymass", "jetsntkpt", "jetsntkmass", "tksjetsntkpt", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "drmin", "drmax", "bs2derr", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "nsemileptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01"};
+  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "ntracksptgt5", "ntracksptgt10", "njetsntks", "tkonlypt", "abstkonlyeta", "tkonlymass", "jetsntkpt", "absjetsntketa", "jetsntkmass", "tksjetsntkpt", "abstksjetsntketa", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "trackdxyerrmin", "trackdzerrmin", "drmin", "drmax", "jetpairdrmin", "jetpairdrmax", "bs2ddist", "bs2derr", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "nsemileptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01"};
 
   z_calculator z_calc(vars);
 
