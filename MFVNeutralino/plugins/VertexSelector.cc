@@ -36,10 +36,13 @@ private:
   const int max_njetsntks;
   const double max_chi2dof;
   const double min_tkonlypt;
+  const double max_abstkonlyeta;
   const double min_tkonlymass;
   const double min_jetsntkpt;
+  const double max_absjetsntketa;
   const double min_jetsntkmass;
   const double min_tksjetsntkpt;
+  const double max_abstksjetsntketa;
   const double min_tksjetsntkmass;
   const double min_costhtkonlymombs;
   const double min_costhjetsntkmombs;
@@ -51,10 +54,14 @@ private:
   const double min_maxtrackpt;
   const double min_maxm1trackpt;
   const double min_maxm2trackpt;
+  const double max_trackdxyerrmin;
+  const double max_trackdzerrmin;
   const double min_drmin;
   const double max_drmin;
   const double min_drmax;
   const double max_drmax;
+  const double max_jetpairdrmin;
+  const double max_jetpairdrmax;
   const double max_err2d;
   const double max_err3d;
   const double min_gen3dsig;
@@ -82,10 +89,13 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_njetsntks(cfg.getParameter<int>("max_njetsntks")),
     max_chi2dof(cfg.getParameter<double>("max_chi2dof")),
     min_tkonlypt(cfg.getParameter<double>("min_tkonlypt")),
+    max_abstkonlyeta(cfg.getParameter<double>("max_abstkonlyeta")),
     min_tkonlymass(cfg.getParameter<double>("min_tkonlymass")),
     min_jetsntkpt(cfg.getParameter<double>("min_jetsntkpt")),
+    max_absjetsntketa(cfg.getParameter<double>("max_absjetsntketa")),
     min_jetsntkmass(cfg.getParameter<double>("min_jetsntkmass")),
     min_tksjetsntkpt(cfg.getParameter<double>("min_tksjetsntkpt")),
+    max_abstksjetsntketa(cfg.getParameter<double>("max_abstksjetsntketa")),
     min_tksjetsntkmass(cfg.getParameter<double>("min_tksjetsntkmass")),
     min_costhtkonlymombs(cfg.getParameter<double>("min_costhtkonlymombs")),
     min_costhjetsntkmombs(cfg.getParameter<double>("min_costhjetsntkmombs")),
@@ -97,10 +107,14 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_maxtrackpt(cfg.getParameter<double>("min_maxtrackpt")),
     min_maxm1trackpt(cfg.getParameter<double>("min_maxm1trackpt")),
     min_maxm2trackpt(cfg.getParameter<double>("min_maxm2trackpt")),
+    max_trackdxyerrmin(cfg.getParameter<double>("max_trackdxyerrmin")),
+    max_trackdzerrmin(cfg.getParameter<double>("max_trackdzerrmin")),
     min_drmin(cfg.getParameter<double>("min_drmin")),
     max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax")),
+    max_jetpairdrmin(cfg.getParameter<double>("max_jetpairdrmin")),
+    max_jetpairdrmax(cfg.getParameter<double>("max_jetpairdrmax")),
     max_err2d(cfg.getParameter<double>("max_err2d")),
     max_err3d(cfg.getParameter<double>("max_err3d")),
     min_gen3dsig(cfg.getParameter<double>("min_gen3dsig")),
@@ -134,10 +148,13 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.njets[mfv::JByNtracks] <= max_njetsntks &&
     vtx.chi2/vtx.ndof < max_chi2dof &&
     vtx.pt[mfv::PTracksOnly] >= min_tkonlypt &&
+    fabs(vtx.eta[mfv::PTracksOnly]) < max_abstkonlyeta &&
     vtx.mass[mfv::PTracksOnly] >= min_tkonlymass &&
     vtx.pt[mfv::PJetsByNtracks] >= min_jetsntkpt &&
+    fabs(vtx.eta[mfv::PJetsByNtracks]) < max_absjetsntketa &&
     vtx.mass[mfv::PJetsByNtracks] >= min_jetsntkmass &&
     vtx.pt[mfv::PTracksPlusJetsByNtracks] >= min_tksjetsntkpt &&
+    fabs(vtx.eta[mfv::PTracksPlusJetsByNtracks]) < max_abstksjetsntketa &&
     vtx.mass[mfv::PTracksPlusJetsByNtracks] >= min_tksjetsntkmass &&
     vtx.costhmombs[mfv::PTracksOnly] >= min_costhtkonlymombs &&
     vtx.costhmombs[mfv::PJetsByNtracks] >= min_costhjetsntkmombs &&
@@ -149,10 +166,14 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.maxtrackpt >= min_maxtrackpt &&
     vtx.maxm1trackpt >= min_maxm1trackpt &&
     vtx.maxm2trackpt >= min_maxm2trackpt &&
+    vtx.trackdxyerrmin < max_trackdxyerrmin &&
+    vtx.trackdzerrmin < max_trackdzerrmin &&
     vtx.drmin >= min_drmin &&
     vtx.drmin <  max_drmin &&
     vtx.drmax >= min_drmax &&
     vtx.drmax <  max_drmax &&
+    (max_jetpairdrmin > 1e6 || vtx.jetpairdrmin < max_jetpairdrmin) &&
+    vtx.jetpairdrmax < max_jetpairdrmax &&
     vtx.gen2derr < max_err2d &&
     vtx.gen3derr < max_err3d &&
     vtx.gen3dsig() >= min_gen3dsig &&

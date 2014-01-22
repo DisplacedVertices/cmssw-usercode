@@ -738,7 +738,12 @@ def crab_ownpublish(batch_name, working_dirs, sample_name=lambda wd: wd.replace(
         sample = sample_name(working_dir)
 
         for fjr_fn in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml')):
-            fjr = crab_fjr_xml(fjr_fn)
+            try:
+                fjr = crab_fjr_xml(fjr_fn)
+            except SyntaxError:
+                print 'problem with parsing xml in', fjr_fn, ', skipping'
+                continue
+
             if fjr.getroot().get('Status') != 'Success':
                 continue
 
@@ -764,7 +769,7 @@ def crab_ownpublish(batch_name, working_dirs, sample_name=lambda wd: wd.replace(
     print '\n --- cut here ---\n'
     pprint(d)
 
-def crab_need_renew_proxy(min_hours=132):
+def crab_need_renew_proxy(min_hours=144):
     # JMTBAD should use the CRAB function (an api! an api! my kingdom for an api!)
     if os.system('voms-proxy-info -exists -valid %i:0' % min_hours) != 0:
         return True
