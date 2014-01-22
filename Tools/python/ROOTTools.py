@@ -128,6 +128,12 @@ def clopper_pearson_poisson_means(x, y, alpha=1-0.6827):
         return None, pl, None
     return r/(1-r), pl, rh/(1 - rh)
 
+def cmssw_setup():
+    ROOT.gSystem.Load('libFWCoreFWLite')
+    ROOT.AutoLibraryLoader.enable()
+    ROOT.gSystem.Load('libDataFormatsFWLite.so')
+    ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
+    
 def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
     nbins = h1.GetNbinsX()
     xax = h1.GetXaxis()
@@ -589,10 +595,10 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
     t.GetPlayer().SetScanFileName(tmp_fn)
     t.Scan(branches, cut, 'colsize=50')
     t.GetPlayer().SetScanRedirect(False)
-    l = len(branches.split(':')) + 2
+    nvp2 = branches.replace('::','').count(':') + 1 + 2
     for line in open(tmp_fn):
         if ' * ' in line and 'Row' not in line:
-            yield xform(line.split('*')[2:l])
+            yield xform(line.split('*')[2:nvp2])
 
 def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None):
     """Move hist's stat box and change its line/text color. If
@@ -1177,6 +1183,7 @@ __all__ = [
     'histogram_divide',
     'clopper_pearson',
     'clopper_pearson_poisson_means',
+    'cmssw_setup',
     'compare_all_hists',
     'core_gaussian',
     'cumulative_histogram',
