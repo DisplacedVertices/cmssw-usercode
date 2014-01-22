@@ -769,7 +769,7 @@ def crab_ownpublish(batch_name, working_dirs, sample_name=lambda wd: wd.replace(
     print '\n --- cut here ---\n'
     pprint(d)
 
-def crab_need_renew_proxy(min_hours=132):
+def crab_need_renew_proxy(min_hours=144):
     # JMTBAD should use the CRAB function (an api! an api! my kingdom for an api!)
     if os.system('voms-proxy-info -exists -valid %i:0' % min_hours) != 0:
         return True
