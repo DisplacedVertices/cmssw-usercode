@@ -48,6 +48,7 @@ if 'test' in sys.argv:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
+    from JMTucker.Tools.SampleFiles import SampleFiles
 
     def modify(sample):
         to_add = []
@@ -76,6 +77,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        get_edm_output = True,
                        data_retrieval = 'fnal_eos',
                        #publish_data_name = 'mfvntuple_' + tuple_version,
+                       #manual_datasets = SampleFiles['mfv300s'],
                        max_threads = 3,
                        )
 
