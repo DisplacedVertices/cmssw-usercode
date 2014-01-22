@@ -336,7 +336,7 @@ mfv_signal_samples_ex = [
     ( 300,  400, MCSample('mfv_neutralino_tau0300um_M0400', 'MFV signal, M = 400 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0400/tucker-mfv_neutralino_tau0300um_M0400-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 400]),),
     ( 300,  600, MCSample('mfv_neutralino_tau0300um_M0600', 'MFV signal, M = 600 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0600/tucker-mfv_neutralino_tau0300um_M0600-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 600]),),
     ( 300,  800, MCSample('mfv_neutralino_tau0300um_M0800', 'MFV signal, M = 800 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0800/tucker-mfv_neutralino_tau0300um_M0800-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 800]),),
-    ( 300, 3000, MCSample('mfv_neutralino_tau0300um_M3000', 'MFV signal, M = 3000 GeV, #tau = 300 #mum', '/mfv_neutralino_tau0300um_M3000/tucker-mfv_neutralino_tau0300um_M3000-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[1000]),),
+    ( 300, 1000, MCSample('mfv_neutralino_tau0300um_M1000', 'MFV signal, M = 1000 GeV, #tau = 300 #mum', '/mfv_neutralino_tau0300um_M3000/tucker-mfv_neutralino_tau0300um_M1000-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[1000]),),
     (1000,  200, MCSample('mfv_neutralino_tau1000um_M0200', 'MFV signal, M = 200 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0200/tucker-mfv_neutralino_tau1000um_M0200-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99752, 2, *mfv_xsec[ 200]),),
     (1000,  300, MCSample('mfv_neutralino_tau1000um_M0300', 'MFV signal, M = 300 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0300/tucker-mfv_neutralino_tau1000um_M0300-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[ 300]),),
     (1000,  400, MCSample('mfv_neutralino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0400/tucker-mfv_neutralino_tau1000um_M0400-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99850, 2, *mfv_xsec[ 400]),),
@@ -353,8 +353,6 @@ mfv_signal_samples_ex = [
 
 mfv_signal_samples = []
 for tau, mass, sample in mfv_signal_samples_ex:
-    if mass == 300 or tau == 300:
-        continue
     mfv_signal_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
