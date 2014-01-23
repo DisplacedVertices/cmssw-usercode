@@ -103,9 +103,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     for sample in Samples.all_mc_samples:
         if timing.has_key(sample.name):
-            sample.events_per = 3.5*3600/timing[sample.name]
+            sample.events_per = int(3.5*3600/timing[sample.name])
             sample.timed = True
-            nj = sample.nevents_orig / float(sample.events_per)
+            nj = int(sample.nevents_orig / float(sample.events_per)) + 1
             assert nj < 5000
 
     for s in Samples.mfv_signal_samples:
