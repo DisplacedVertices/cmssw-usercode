@@ -5,7 +5,7 @@ from JMTucker.Tools.PATTuple_cfg import *
 tuple_version = version
 
 runOnMC = True # magic line, don't touch
-process = pat_tuple_process(runOnMC)
+process, common_seq = pat_tuple_process(runOnMC)
 
 no_skimming_cuts(process)
 
@@ -131,7 +131,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             if (s.name != 'qcdmupt15' and 'qcdmu' in s.name) or 'qcdem' in s.name or 'qcdbce' in s.name:
                 samples.append(s)
     elif 'data' in sys.argv:
-        samples = Samples.data_samples
+        samples = Samples.data_samples[:1]
     elif 'auxdata' in sys.argv:
         samples = Samples.auxiliary_data_samples
     elif '100k' in sys.argv:
@@ -146,6 +146,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in samples:
         if sample.is_mc:
             sample.total_events = -1
-        assert hasattr(sample, 'timed')
+            assert hasattr(sample, 'timed')
 
     cs.submit_all(samples)
