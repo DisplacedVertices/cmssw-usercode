@@ -262,7 +262,7 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
             from JMTucker.Tools.general import big_warn
             big_warn('Unexpected spam hash! Did you change an option?')
 
-    return process
+    return process, common_seq
 
 ################################################################################
 
