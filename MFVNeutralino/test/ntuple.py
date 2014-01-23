@@ -4,6 +4,9 @@ import sys
 from JMTucker.Tools.PATTuple_cfg import *
 tuple_version = version
 
+runOnMC = True # magic line, don't touch
+process = pat_tuple_process(runOnMC)
+
 no_skimming_cuts(process)
 
 process.out.fileName = 'ntuple.root'
@@ -96,20 +99,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        max_threads = 3,
                        )
 
-    # need fewer than 5000 jobs/batch, but need to beat the wallclock
-    Samples.qcdht0100.events_per = 11000
-    Samples.qcdht0250.events_per = 6000
-    Samples.qcdht0500.events_per = 7000
-    Samples.qcdht1000.events_per = 3000
-    Samples.ttbarsemilep.events_per = 5500
-    Samples.wjetstolnu.events_per = 12000
-    Samples.dyjetstollM50.events_per = 6500
-    for s in Samples.auxiliary_background_samples:
-        if 'qcdem' in s.name:
-            s.events_per = 7000
-    Samples.qcdem020.events_per = 7500
+    timing = { 'dyjetstollM10': 0.011203, 'dyjetstollM50': 0.019867, 'qcdbce020': 0.008660, 'qcdbce030': 0.007796, 'qcdbce080': 0.061260, 'qcdbce170': 0.328891, 'qcdbce250': 0.481813, 'qcdbce350': 0.519482, 'qcdem020': 0.010137, 'qcdem030': 0.01, 'qcdem080': 0.037925, 'qcdem170': 0.286123, 'qcdem250': 0.471398, 'qcdem350': 0.686303, 'qcdht0100': 0.008273, 'qcdht0250': 0.116181, 'qcdht0500': 0.738374, 'qcdht1000': 1.002745, 'qcdmu0020': 0.012301, 'qcdmu0030': 0.015762, 'qcdmu0050': 0.018178, 'qcdmu0080': 0.119300, 'qcdmu0120': 0.245562, 'qcdmu0170': 0.32, 'qcdmu0300': 0.419818, 'qcdmu0470': 0.584266, 'qcdmu0600': 0.455305, 'qcdmu0800': 0.879171, 'qcdmu1000': 1.075712, 'singletop_s': 0.093429, 'singletop_s_tbar': 0.146642, 'singletop_tW': 0.327386, 'singletop_tW_tbar': 0.184349, 'singletop_t': 0.092783, 'singletop_t_tbar': 0.060983, 'ttbarhadronic': 0.752852, 'ttbarsemilep': 0.419073, 'ttbardilep': 0.295437, 'ttgjets': 0.861987, 'ttwjets': 0.714156, 'ttzjets': 0.827464, 'wjetstolnu': 0.010842, 'ww': 0.046754, 'wz': 0.049839, 'zz': 0.059791, }
+
+    for sample in Samples.all_mc_samples:
+        if timing.has_key(sample.name):
+            sample.events_per = 3.5*3600/timing[sample.name]
+            sample.timed = True
+            nj = sample.nevents_orig / float(sample.events_per)
+            assert nj < 5000
+
     for s in Samples.mfv_signal_samples:
         s.events_per = 500
+        s.timed = True
 
     x = Samples.mfv_signal_samples
     Samples.mfv_signal_samples = []
@@ -145,5 +146,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in samples:
         if sample.is_mc:
             sample.total_events = -1
+        assert hasattr(sample, 'timed')
 
     cs.submit_all(samples)
