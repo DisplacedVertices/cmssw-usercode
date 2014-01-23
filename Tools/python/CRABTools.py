@@ -780,7 +780,7 @@ def crab_need_renew_proxy(min_hours=144):
     print '\033[36;7m warning: \033[m crab_need_renew_proxy could not parse output of myproxy-info'
     return True
 
-def crab_renew_proxy_if_needed(min_hours=132):
+def crab_renew_proxy_if_needed(min_hours=144):
     if crab_need_renew_proxy(min_hours):
         os.system('voms-proxy-init -voms cms -valid 192:00')
         os.system('myproxy-init -d -n -s myproxy.cern.ch')
