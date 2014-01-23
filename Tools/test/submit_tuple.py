@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+raise NotImplementedError('dunno if this works with the new pat_tuple_process() thingy')
+
 import os
 from JMTucker.Tools.CRABSubmitter import CRABSubmitter
 from JMTucker.Tools.PATTuple_cfg import version as tuple_version
