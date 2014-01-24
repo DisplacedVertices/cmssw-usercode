@@ -2,7 +2,7 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau0100um_M0400', -1)
+SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau0100um_M0400', 500)
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -23,31 +23,65 @@ def pize(f,sz):
 changes = []
 changes.append(('nm1', '', ''))
 
-for i in xrange(5,11):
-    for j in xrange(0,9):
-        changes.append(('0ntracks%ibs2ddistX%s'%(i,pize(0.005*j,3)), 'min_ntracks = %i, min_bs2ddist = %f'%(i,(0.005*j)), ''))
+#A region: max_ntracks01 = 12, max_maxtrackpt01 = 30
+for i in xrange(0,2):
+    for j in xrange(5,11):
+        for k in xrange(0,9):
+            changes.append(('A%intracks%ibs2ddistX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, min_bs2ddist = %f'%(j,(0.005*k)), 'max_ntracks01 = 12, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
 
-for i in xrange(5,11):
-    for j in xrange(0,10):
-        changes.append(('0ntracks%ibs2derrX%s'%(i,pize(0.005*j,3)), 'min_ntracks = %i, max_bs2derr = %f'%(i,(0.005*j)), ''))
-    changes.append(('0ntracksX%i'%i, 'min_ntracks = %i'%i, ''))
+    for j in xrange(5,11):
+        for k in xrange(0,10):
+            changes.append(('A%intracks%ibs2derrX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, max_bs2derr = %f'%(j,(0.005*k)), 'max_ntracks01 = 12, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+        changes.append(('A%intracksX%i'%(i,j), 'min_ntracks = %i'%j, 'max_ntracks01 = 12, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
 
-for i in xrange(5,11):
-    for j in xrange(0,11):
-        changes.append(('0ntracks%ibs2dsigX%i'%(i,j), 'min_ntracks = %i, min_bs2dsig = %f'%(i,j), ''))
+    for j in xrange(5,11):
+        for k in xrange(0,11):
+            changes.append(('A%intracks%ibs2dsigX%i'%(i,j,k), 'min_ntracks = %i, min_bs2dsig = %f'%(j,k), 'max_ntracks01 = 12, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
 
-for i in xrange(5,11):
-    for j in xrange(0,9):
-        changes.append(('1ntracks%ibs2ddistX%s'%(i,pize(0.005*j,3)), 'min_ntracks = %i, min_bs2ddist = %f'%(i,(0.005*j)), 'min_nsemileptons = 1'))
+#B region: min_ntracks01 = 13, max_maxtrackpt01 = 30
+for i in xrange(0,2):
+    for j in xrange(5,11):
+        for k in xrange(0,9):
+            changes.append(('B%intracks%ibs2ddistX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, min_bs2ddist = %f'%(j,(0.005*k)), 'min_ntracks01 = 13, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
 
-for i in xrange(5,11):
-    for j in xrange(0,10):
-        changes.append(('1ntracks%ibs2derrX%s'%(i,pize(0.005*j,3)), 'min_ntracks = %i, max_bs2derr = %f'%(i,(0.005*j)), 'min_nsemileptons = 1'))
-    changes.append(('1ntracksX%i'%i, 'min_ntracks = %i'%i, 'min_nsemileptons = 1'))
+    for j in xrange(5,11):
+        for k in xrange(0,10):
+            changes.append(('B%intracks%ibs2derrX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, max_bs2derr = %f'%(j,(0.005*k)), 'min_ntracks01 = 13, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+        changes.append(('B%intracksX%i'%(i,j), 'min_ntracks = %i'%j, 'min_ntracks01 = 13, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
 
-for i in xrange(5,11):
-    for j in xrange(0,11):
-        changes.append(('1ntracks%ibs2dsigX%i'%(i,j), 'min_ntracks = %i, min_bs2dsig = %f'%(i,j), 'min_nsemileptons = 1'))
+    for j in xrange(5,11):
+        for k in xrange(0,11):
+            changes.append(('B%intracks%ibs2dsigX%i'%(i,j,k), 'min_ntracks = %i, min_bs2dsig = %f'%(j,k), 'min_ntracks01 = 13, max_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+
+#C region: max_ntracks01 = 12, min_maxtrackpt01 = 30
+for i in xrange(0,2):
+    for j in xrange(5,11):
+        for k in xrange(0,9):
+            changes.append(('C%intracks%ibs2ddistX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, min_bs2ddist = %f'%(j,(0.005*k)), 'max_ntracks01 = 12, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+
+    for j in xrange(5,11):
+        for k in xrange(0,10):
+            changes.append(('C%intracks%ibs2derrX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, max_bs2derr = %f'%(j,(0.005*k)), 'max_ntracks01 = 12, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+        changes.append(('C%intracksX%i'%(i,j), 'min_ntracks = %i'%j, 'max_ntracks01 = 12, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+
+    for j in xrange(5,11):
+        for k in xrange(0,11):
+            changes.append(('C%intracks%ibs2dsigX%i'%(i,j,k), 'min_ntracks = %i, min_bs2dsig = %f'%(j,k), 'max_ntracks01 = 12, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+
+#D region: min_ntracks01 = 13, min_maxtrackpt01 = 30
+for i in xrange(0,2):
+    for j in xrange(5,11):
+        for k in xrange(0,9):
+            changes.append(('D%intracks%ibs2ddistX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, min_bs2ddist = %f'%(j,(0.005*k)), 'min_ntracks01 = 13, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+
+    for j in xrange(5,11):
+        for k in xrange(0,10):
+            changes.append(('D%intracks%ibs2derrX%s'%(i,j,pize(0.005*k,3)), 'min_ntracks = %i, max_bs2derr = %f'%(j,(0.005*k)), 'min_ntracks01 = 13, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+        changes.append(('D%intracksX%i'%(i,j), 'min_ntracks = %i'%j, 'min_ntracks01 = 13, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
+
+    for j in xrange(5,11):
+        for k in xrange(0,11):
+            changes.append(('D%intracks%ibs2dsigX%i'%(i,j,k), 'min_ntracks = %i, min_bs2dsig = %f'%(j,k), 'min_ntracks01 = 13, min_maxtrackpt01 = 30, min_nsemileptons = %i'%i))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
