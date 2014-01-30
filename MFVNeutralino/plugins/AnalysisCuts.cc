@@ -1,3 +1,4 @@
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -41,6 +42,7 @@ private:
   const double min_tkonlymass01;
   const double min_jetsntkmass01;
   const double min_tksjetsntkmass01;
+  const double min_absdeltaphi01;
 
   const int min_npv;
   const int max_npv;
@@ -73,6 +75,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_tkonlymass01(cfg.getParameter<double>("min_tkonlymass01")),
     min_jetsntkmass01(cfg.getParameter<double>("min_jetsntkmass01")),
     min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01")),
+    min_absdeltaphi01(cfg.getParameter<double>("min_absdeltaphi01")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv"))
 {
@@ -129,7 +132,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex)
       return false;
 
-    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0) {
+    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0) {
       if (nsv < 2)
         return false;
 
@@ -152,6 +155,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
       if (v0.mass[mfv::PTracksPlusJetsByNtracks] + v1.mass[mfv::PTracksPlusJetsByNtracks] < min_tksjetsntkmass01)
         return false;
+
+      double phi0 = atan2(v0.y - mevent->bsy, v0.x - mevent->bsx);
+      double phi1 = atan2(v1.y - mevent->bsy, v1.x - mevent->bsx);
+      if (fabs(reco::deltaPhi(phi0, phi1)) < min_absdeltaphi01)
+        return false;
+
     }
   }
 

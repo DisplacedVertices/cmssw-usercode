@@ -59,6 +59,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_svdist2d_v_minbsdist2d;
   TH2F* h_sv0pvdz_v_sv1pvdz;
   TH2F* h_sv0pvdzsig_v_sv1pvdzsig;
+  TH1F* h_absdeltaphi01;
 
   TH1F* h_pair2dcompatscss;
   TH1F* h_pair2dcompat;
@@ -282,6 +283,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_svdist2d_v_minbsdist2d = fs->make<TH2F>("h_svdist2d_v_mindist2d", ";min dist2d(sv, bs) (cm);dist2d(sv #0, #1) (cm)", 600, 0, 3, 600, 0, 3);
   h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
   h_sv0pvdzsig_v_sv1pvdzsig = fs->make<TH2F>("h_sv0pvdzsig_v_sv1pvdzsig", ";N#sigma(sv #1 dz to PV);sv N#sigma(#0 dz to PV)", 100, 0, 50, 100, 0, 50);
+  h_absdeltaphi01 = fs->make<TH1F>("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 315, 0, 3.15);
 
   h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
   h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
@@ -528,6 +530,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, *weight);
     h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz());
     h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig());
+    double phi0 = atan2(sv0.y - mevent->bsy, sv0.x - mevent->bsx);
+    double phi1 = atan2(sv1.y - mevent->bsy, sv1.x - mevent->bsx);
+    h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)));
   }
 
   for (int ivtx = 0; ivtx < nsv; ++ivtx) {
