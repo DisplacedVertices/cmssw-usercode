@@ -8,10 +8,12 @@ process.TFileService.fileName = 'abcd_histos.root'
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.mfvSelectedVerticesTight.min_ntracks = 5
 process.mfvSelectedVerticesTight.min_maxtrackpt = 0
+process.mfvSelectedVerticesTight.min_njetsntks = 1
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvAnalysisCuts.min_ntracks01 = 0
 process.mfvAnalysisCuts.min_maxtrackpt01 = 0
+process.mfvAnalysisCuts.min_sumht = 500
 
 process.abcdHistos = cms.EDAnalyzer('ABCDHistos',
                                     vertex_src = cms.InputTag('mfvSelectedVerticesTight')
@@ -21,7 +23,7 @@ process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *
-    bkg_samples = ttbar_samples + qcd_samples + leptonic_background_samples
+    bkg_samples = ttbar_samples + qcd_samples
     samples = [mfv_neutralino_tau0100um_M0200, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400] + bkg_samples
     for sample in bkg_samples:
         sample.total_events = sample.nevents_orig/2
