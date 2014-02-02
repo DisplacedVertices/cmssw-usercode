@@ -82,6 +82,9 @@ for i in xrange(0,200,5):
 for i in xrange(0,30):
     changes.append(('maxtrackptX%i'%i, 'min_maxtrackpt = %i'%i, ''))
 
+for i in xrange(0,30):
+    changes.append(('maxm1trackptX%i'%i, 'min_maxm1trackpt = %i'%i, ''))
+
 for i in xrange(0,50):
     changes.append(('trackdxyerrminX%s'%pize(0.0002*i,4), 'max_trackdxyerrmin = %f'%(0.0002*i), ''))
 
@@ -106,7 +109,7 @@ for i in xrange(0,30):
 for i in xrange(0,50):
     changes.append(('bs2derrX%s'%pize(0.0005*i,4), 'max_bs2derr = %f'%(0.0005*i), ''))
 
-for i in xrange(0,30):
+for i in xrange(0,200):
     changes.append(('bs2dsigX%s'%pize(0.5*i,1), 'min_bs2dsig = %f'%(0.5*i), ''))
 
 for i in xrange(0,1000,50):
@@ -136,8 +139,11 @@ for i in xrange(0,200,4):
 for i in xrange(0,200,10):
     changes.append(('jetsntkmass01X%i'%i, '', 'min_jetsntkmass01 = %i'%i))
 
-for i in xrange(0,200,10):
+for i in xrange(0,500,10):
     changes.append(('tksjetsntkmass01X%i'%i, '', 'min_tksjetsntkmass01 = %i'%i))
+
+for i in xrange(0,32):
+    changes.append(('absdeltaphi01X%s'%pize(0.1*i,1), '', 'min_absdeltaphi01 = %f'%(0.1*i)))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name

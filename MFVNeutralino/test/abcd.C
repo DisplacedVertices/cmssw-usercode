@@ -33,7 +33,7 @@ void compareShapes(char* sampleName) {
   c1->cd(3);
   h_high->Draw();
   c1->cd(2);
-  hist->Draw();
+  hist->Draw("colz");
 
   double errA, errB, errC, errD;
   double A = hist->IntegralAndError(0, xbin-1, 0, ybin-1, errA);
@@ -60,7 +60,7 @@ void compareShapes(char* sampleName) {
     h_high->Draw("same");
   }
 
-//  c1->SaveAs(TString::Format("plots/ABCD/CutPlayV11_%d/%d_%d/%s.pdf", iteration, int(xcut), int(ycut), sampleName));
+//  c1->SaveAs(TString::Format("plots/ABCD/CutPlayV13/iter%d/%d_%d/%s.pdf", iteration, int(xcut), int(ycut), sampleName));
 
 }
 
@@ -76,7 +76,5 @@ void abcd() {
   compareShapes("qcdht0500");
   compareShapes("qcdht1000");
   compareShapes("qcd");
-  compareShapes("wjetstolnu");
-  compareShapes("dyjetstollM50");
   compareShapes("background");
 }
