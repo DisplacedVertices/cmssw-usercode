@@ -10,6 +10,26 @@ process.load('JMTucker.MFVNeutralino.Histos_cff')
 
 process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvHistos)
 
+nm1s = [
+    ('Ntracks', 'min_ntracks = 0'),
+    ('Drmin',   'max_drmin = 1e9'),
+    ('Drmax',   'max_drmax = 1e9'),
+    ('Bs2derr', 'max_bs2derr = 1e9'),
+    ('Njets',   'min_njetsntks = 0'),
+    ('Bs2dsig', 'min_bs2dsig = 0'),
+    ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
+    ]
+
+for name, cut in nm1s:
+    vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
+    vtx_name = 'vtxNo' + name
+    hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
+    hst_name = 'hstNo' + name
+    setattr(process, vtx_name, vtx)
+    setattr(process, hst_name, hst)
+    process.p *= vtx * hst
+
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples
