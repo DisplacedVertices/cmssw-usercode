@@ -120,6 +120,7 @@ class MCSample(Sample):
         self.cross_section = float(cross_section)
         self.k_factor = float(k_factor)
         self.join_info = (False, self.nice_name, self.color)
+        self.ana_filter_eff = -1.
 
         self.events_per = self.EVENTS_PER
         self.ana_events_per = self.ANA_EVENTS_PER
@@ -396,6 +397,57 @@ for sample in all_samples:
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
+
+ttbardilep.total_events = ttbardilep.nevents_orig - 3*42648
+ttbarhadronic.total_events = ttbarhadronic.nevents_orig - 23*16736
+
+mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
+mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
+mfv_neutralino_tau0000um_M0600.ana_filter_eff = 9.9495e-01  #    99495 /   100000
+mfv_neutralino_tau0000um_M0800.ana_filter_eff = 9.9796e-01  #    99696 /    99900
+mfv_neutralino_tau0000um_M1000.ana_filter_eff = 9.9866e-01  #    99862 /    99996
+mfv_neutralino_tau0010um_M0200.ana_filter_eff = 4.7647e-01  #    47647 /   100000
+mfv_neutralino_tau0010um_M0400.ana_filter_eff = 9.6750e-01  #    96750 /   100000
+mfv_neutralino_tau0010um_M0600.ana_filter_eff = 9.9530e-01  #    99231 /    99700
+mfv_neutralino_tau0010um_M0800.ana_filter_eff = 9.9795e-01  #    99745 /    99950
+mfv_neutralino_tau0010um_M1000.ana_filter_eff = 9.9892e-01  #    99791 /    99899
+mfv_neutralino_tau0100um_M0200.ana_filter_eff = 4.7951e-01  #    47807 /    99700
+mfv_neutralino_tau0100um_M0400.ana_filter_eff = 9.6769e-01  #    96043 /    99250
+mfv_neutralino_tau0100um_M0600.ana_filter_eff = 9.9554e-01  #    99206 /    99650
+mfv_neutralino_tau0100um_M0800.ana_filter_eff = 9.9795e-01  #    99795 /   100000
+mfv_neutralino_tau0100um_M1000.ana_filter_eff = 9.9890e-01  #    99639 /    99749
+mfv_neutralino_tau1000um_M0200.ana_filter_eff = 4.7873e-01  #    47754 /    99752
+mfv_neutralino_tau1000um_M0400.ana_filter_eff = 9.6798e-01  #    96653 /    99850
+mfv_neutralino_tau1000um_M0600.ana_filter_eff = 9.9508e-01  #    99360 /    99851
+mfv_neutralino_tau1000um_M0800.ana_filter_eff = 9.9825e-01  #    99774 /    99949
+mfv_neutralino_tau1000um_M1000.ana_filter_eff = 9.9866e-01  #    99866 /   100000
+mfv_neutralino_tau9900um_M0200.ana_filter_eff = 4.7714e-01  #    47690 /    99950
+mfv_neutralino_tau9900um_M0400.ana_filter_eff = 9.6734e-01  #    96734 /   100000
+mfv_neutralino_tau9900um_M0600.ana_filter_eff = 9.9511e-01  #    99461 /    99950
+mfv_neutralino_tau9900um_M0800.ana_filter_eff = 9.9818e-01  #    99718 /    99900
+mfv_neutralino_tau9900um_M1000.ana_filter_eff = 9.9904e-01  #    99803 /    99899
+dyjetstollM10.ana_filter_eff        = 4.3913e-04  #     3132 /  7132223
+dyjetstollM50.ana_filter_eff        = 2.8337e-03  #    86313 / 30459503
+qcdht0100.ana_filter_eff            = 7.4784e-04  #    37489 / 50129518
+qcdht0250.ana_filter_eff            = 6.0783e-02  #  1644907 / 27062078
+qcdht0500.ana_filter_eff            = 3.1108e-01  #  9518716 / 30599292
+qcdht1000.ana_filter_eff            = 4.4614e-01  #  6176270 / 13843863
+singletop_s.ana_filter_eff          = 7.3030e-02  #    18985 /   259961
+singletop_s_tbar.ana_filter_eff     = 6.7548e-02  #     9455 /   139974
+singletop_t.ana_filter_eff          = 5.4126e-02  #   203416 /  3758227
+singletop_tW.ana_filter_eff         = 1.8520e-01  #    92167 /   497658
+singletop_tW_tbar.ana_filter_eff    = 1.8475e-01  #    91167 /   493460
+singletop_t_tbar.ana_filter_eff     = 5.3102e-02  #   102756 /  1935072
+ttbardilep.ana_filter_eff           = 1.3153e-01  #  1577210 / 11991069
+ttbarhadronic.ana_filter_eff        = 4.7515e-01  #  4823997 / 10152516
+ttbarsemilep.ana_filter_eff         = 2.7453e-01  #  6979960 / 25424818
+ttgjets.ana_filter_eff              = 5.0128e-01  #   862177 /  1719954
+ttwjets.ana_filter_eff              = 6.0494e-01  #   118596 /   196046
+ttzjets.ana_filter_eff              = 6.3787e-01  #   134054 /   210160
+wjetstolnu.ana_filter_eff           = 6.6758e-04  #    38526 / 57709905
+ww.ana_filter_eff                   = 2.2439e-02  #   224401 / 10000431
+wz.ana_filter_eff                   = 2.8131e-02  #   281321 / 10000283
+zz.ana_filter_eff                   = 2.9762e-02  #   291664 /  9799908
 
 ########################################################################
 
