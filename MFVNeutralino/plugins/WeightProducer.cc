@@ -30,11 +30,9 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 {
   produces<double>();
 
-  if (enable) {
-    edm::Service<TFileService> fs;
-    TH1::SetDefaultSumw2();
-    h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
-  }
+  edm::Service<TFileService> fs;
+  TH1::SetDefaultSumw2();
+  h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
 }
 
 double MFVWeightProducer::pileup_weight(int mc_npu) const {
@@ -61,9 +59,9 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         *weight *= pu_w;
       }
     }
-
-    h_sums->Fill(sum_weight, *weight);
   }
+
+  h_sums->Fill(sum_weight, *weight);
 
   event.put(weight);
 }
