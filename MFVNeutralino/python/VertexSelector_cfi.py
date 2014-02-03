@@ -73,4 +73,4 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_ntracksptgt3 = 3,
     )
 
-mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose + mfvSelectedVerticesTight)
+mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesTight)
