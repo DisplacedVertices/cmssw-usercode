@@ -32,4 +32,4 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                max_npv = cms.int32(100000),
                                )
 
-mfvAnalysisCutsTrigOnly = mfVAnalysisCuts.clone(apply_vertex_cuts = False)
+mfvAnalysisCutsTrigOnly = mfvAnalysisCuts.clone(apply_vertex_cuts = False)
