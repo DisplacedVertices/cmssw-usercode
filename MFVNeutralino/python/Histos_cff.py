@@ -6,14 +6,19 @@ from JMTucker.MFVNeutralino.EventHistos_cfi import *
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 
 mfvVertexHistosNoCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvVerticesAux')
+mfvVertexHistosTrigCut = mfvVertexHistos.clone()
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvEventHistosNoCuts = mfvEventHistos.clone()
+mfvEventHistosTrigCut = mfvEventHistos.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 
 mfvHistos = cms.Sequence(mfvWeight *
                          mfvVertexHistos *
                          mfvVertexHistosNoCuts *
                          mfvEventHistosNoCuts *
+                         mfvAnalysisCutsTrigOnly *
+                         mfvVertexHistosTrigCut *
+                         mfvEventHistosTrigCut *
                          mfvAnalysisCuts *
                          mfvEventHistos *
                          mfvVertexHistosNoCutsWAnaCuts *
