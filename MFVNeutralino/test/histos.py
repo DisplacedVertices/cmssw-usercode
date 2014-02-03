@@ -29,10 +29,16 @@ for name, cut in nm1s:
     setattr(process, hst_name, hst)
     process.p *= vtx * hst
 
-nosigorptgt3 = False
-if nosigorptgt3:
+cuts = ''
+#cuts = 'looser'
+#cuts = 'tightest'
+
+if cuts == 'looser':
     process.mfvSelectedVerticesTight.min_bs2dsig = 0
     process.mfvSelectedVerticesTight.min_ntracksptgt3 = 0
+elif cuts == 'tightest':
+    process.mfvAnalysisCuts.min_ntracks01 = 17
+    process.mfvAnalysisCuts.min_maxtrackpt01 = 30
 
 hackrundata = False # JMTBAD
 if hackrundata:
@@ -51,8 +57,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
 
-    subname = '_nosigorptgt3' if nosigorptgt3 else ''
-    cs = CRABSubmitter('MFVHistosV15' + subname,
+    if cuts != '':
+        cuts = '_' + cuts
+    cs = CRABSubmitter('MFVHistosV15' + cuts,
                        total_number_of_events = -1,
                        events_per_job = 200000,
                        manual_datasets = SampleFiles['MFVNtupleV15'],
