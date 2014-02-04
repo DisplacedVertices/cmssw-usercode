@@ -61,6 +61,7 @@ mfvSelectedVerticesMedium = mfvSelectedVertices.clone(
     max_drmin = 0.4,
     max_drmax = 4,
     max_bs2derr = 0.008,
+    min_njetsntks = 1,
 )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
