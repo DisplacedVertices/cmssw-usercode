@@ -20,15 +20,6 @@ nm1s = [
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
     ]
 
-for name, cut in nm1s:
-    vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
-    vtx_name = 'vtxNo' + name
-    hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
-    hst_name = 'hstNo' + name
-    setattr(process, vtx_name, vtx)
-    setattr(process, hst_name, hst)
-    process.p *= vtx * hst
-
 cuts = ''
 #cuts = 'looser'
 #cuts = 'tightest'
@@ -40,6 +31,18 @@ if cuts == 'looser':
 elif cuts == 'tightest':
     process.mfvAnalysisCuts.min_ntracks01 = 17
     process.mfvAnalysisCuts.min_maxtrackpt01 = 30
+
+for name, cut in nm1s:
+    vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
+    vtx_name = 'vtxNo' + name
+    ana = process.mfvAnalysisCuts.clone(vertex_src = vtx_name)
+    ana_name = 'anaNo' + name
+    hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
+    hst_name = 'hstNo' + name
+    setattr(process, vtx_name, vtx)
+    setattr(process, ana_name, ana)
+    setattr(process, hst_name, hst)
+    setattr(process, 'p' + name, cms.Path(vtx * ana * hst)
 
 hackrundata = False # JMTBAD
 if hackrundata:
