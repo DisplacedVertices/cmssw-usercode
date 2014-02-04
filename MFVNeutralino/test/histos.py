@@ -34,8 +34,9 @@ cuts = ''
 #cuts = 'tightest'
 
 if cuts == 'looser':
-    process.mfvSelectedVerticesTight.min_bs2dsig = 0
-    process.mfvSelectedVerticesTight.min_ntracksptgt3 = 0
+    process.mfvAnalysisCuts.min_sumht = 500
+    process.mfvSelectedVerticesTight.min_bs2dsig = 5
+    process.mfvSelectedVerticesTight.min_ntracksptgt3 = 1
 elif cuts == 'tightest':
     process.mfvAnalysisCuts.min_ntracks01 = 17
     process.mfvAnalysisCuts.min_maxtrackpt01 = 30
@@ -53,6 +54,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + \
               [sample for sample in Samples.mfv_signal_samples if '0300' not in sample.name]
+
+    #samples = [sample for sample in Samples.mfv_signal_samples if '0300' in sample.name]
     
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
