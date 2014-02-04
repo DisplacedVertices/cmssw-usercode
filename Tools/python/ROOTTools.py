@@ -134,7 +134,7 @@ def cmssw_setup():
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
     
-def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
+def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes=False):
     nbins = h1.GetNbinsX()
     xax = h1.GetXaxis()
     if h2.GetNbinsX() != nbins: # or xax2.GetBinLowEdge(1) != xax.GetBinLowEdge(1) or xax2.GetBinLowEdge(nbins) != xax.GetBinLowEdge(nbins):
@@ -149,6 +149,8 @@ def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
     for ibin in xrange(1, nbins+1):
         s,t = h1.GetBinContent(ibin), h2.GetBinContent(ibin)
         if t == 0:
+            continue
+        if s == 0 and no_zeroes:
             continue
 
         p_hat = float(s)/t
@@ -562,19 +564,20 @@ def data_mc_comparison(name,
         ratio_pad.Draw()
         ratio_pad.cd(0)
 
-        res_g = poisson_means_divide(data_sample.hist, sum_background)
+        res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True)
         res_g.SetLineWidth(res_line_width)
         res_g.SetLineColor(res_line_color)
-        if x_range is not None:
-            res_g.GetXaxis().SetLimits(*x_range)
+        if x_range is None:
+            x_range_dmc = sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax()
         else:
-            res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
+            x_range_dmc = x_range[0], x_range[1]+1
+        res_g.GetXaxis().SetLimits(*x_range_dmc)
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
         res_g.GetYaxis().SetRangeUser(0,3)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)
-        ln = ROOT.TLine(0,1, sum_background.GetBinLowEdge(sum_background.GetNbinsX()+1), 1)
+        ln = ROOT.TLine(x_range_dmc[0], 1, x_range_dmc[1], 1)
         ln.SetLineStyle(4)
         ln.SetLineColor(ROOT.kBlue+3)
         ln.Draw()
@@ -911,8 +914,8 @@ def move_overflow_into_last_bin(h):
     h.SetBinContent(nb+1, 0)
     h.SetBinError(nb+1, 0)
 
-def poisson_means_divide(h1, h2):
-    return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False)
+def poisson_means_divide(h1, h2, no_zeroes=False):
+    return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
 
 class plot_saver:
     i = 0
