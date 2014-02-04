@@ -87,19 +87,32 @@ def poisson_interval(nobs, alpha=(1-0.6827)/2, beta=(1-0.6827)/2):
     return lower, upper
 
 def poisson_intervalize(h, zero_x=False, include_zero_bins=False):
-    h2 = ROOT.TGraphAsymmErrors(h)
+    bins = []
     for i in xrange(1, h.GetNbinsX()+1):
-        c = h.GetBinContent(i)
-        if c == 0 and not include_zero_bins:
-            continue
-        l,u = poisson_interval(c)
-        # i-1 in the following because ROOT TGraphs count from 0 but
-        # TH1s count from 1
+        y = h.GetBinContent(i)
+        if y > 0 or include_zero_bins:
+            bins.append(i)
+
+    h2 = ROOT.TGraphAsymmErrors(len(bins))
+    np = 0 # TGraphs count from 0
+    for ibin in bins:
+        xl = h.GetBinLowEdge(ibin)
+        xh = h.GetBinLowEdge(ibin+1)
+        x = (xl + xh)/2
+        y = h.GetBinContent(ibin)
+        yl, yh = poisson_interval(y)
+        h2.SetPoint(np, x, y)
+
         if zero_x:
-            h2.SetPointEXlow(i-1, 0)
-            h2.SetPointEXhigh(i-1, 0)
-        h2.SetPointEYlow(i-1, c-l)
-        h2.SetPointEYhigh(i-1, u-c)
+            h2.SetPointEXlow (np, 0)
+            h2.SetPointEXhigh(np, 0)
+        else:
+            h2.SetPointEXlow (np, x - xl)
+            h2.SetPointEXhigh(np, xh - x)
+        h2.SetPointEYlow (np, y - yl)
+        h2.SetPointEYhigh(np, yh - y)
+
+        np += 1
     return h2
 
 def clopper_pearson(n_on, n_tot, alpha=1-0.6827, equal_tailed=True):
@@ -392,6 +405,7 @@ def data_mc_comparison(name,
                        stack_draw_cmd = 'hist',
                        overflow_in_last = False,
                        rebin = None,
+                       poisson_intervals = False,
                        x_title = '',
                        y_title = 'arb. units',
                        y_title_offset = 1.3,
@@ -483,6 +497,9 @@ def data_mc_comparison(name,
         plot_saver.old_c = plot_saver.c
         plot_saver.c = canvas
 
+    if verbose:
+        print name
+
     legend_entries = []
     stack = ROOT.THStack('s_datamc_' + name, '')
     sum_background = None
@@ -529,7 +546,13 @@ def data_mc_comparison(name,
     if data_sample is not None:
         data_sample.hist.SetMarkerStyle(data_marker_style)
         data_sample.hist.SetMarkerSize(data_marker_size)
-        data_sample.hist.Draw('same ' + data_draw_cmd)
+        if poisson_intervals:
+            data_sample.hist_poissoned = poisson_intervalize(data_sample.hist)
+            data_sample.hist_poissoned.SetMarkerStyle(data_marker_style)
+            data_sample.hist_poissoned.SetMarkerSize(data_marker_size)
+            data_sample.hist_poissoned.Draw(data_draw_cmd)
+        else:
+            data_sample.hist.Draw('same ' + data_draw_cmd)
 
     if legend_pos is not None:
         legend_entries.reverse()
@@ -552,9 +575,9 @@ def data_mc_comparison(name,
         t.Draw()
 
     if verbose:
-        print name
         print 'data integral:', data_sample.hist.Integral(0, data_sample.hist.GetNbinsX()+1)
         print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
+        print
     
     ratio_pad, res_g = None, None
     if data_sample is not None:
