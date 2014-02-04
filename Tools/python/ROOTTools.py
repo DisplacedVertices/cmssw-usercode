@@ -478,7 +478,10 @@ def data_mc_comparison(name,
             if rebin is not None:
                 sample.hist.Rebin(rebin)
             if overflow_in_last:
-                move_overflow_into_last_bin(sample.hist)
+                if x_range is not None:
+                    move_above_into_bin(sample.hist, x_range[1])
+                else:
+                    move_overflow_into_last_bin(sample.hist)
 
     #####################
 
@@ -531,7 +534,7 @@ def data_mc_comparison(name,
     stack.GetYaxis().SetLabelSize(y_label_size)
 
     if x_range is not None:
-        stack.GetXaxis().SetRangeUser(*x_range)
+        stack.GetXaxis().SetLimits(*x_range)
     y_range_min, y_range_max = y_range
     if y_range_min is not None:
         stack.SetMinimum(y_range_min)
@@ -596,7 +599,7 @@ def data_mc_comparison(name,
         if x_range is None:
             x_range_dmc = sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax()
         else:
-            x_range_dmc = x_range[0], x_range[1]+1
+            x_range_dmc = x_range[0], x_range[1]
         res_g.GetXaxis().SetLimits(*x_range_dmc)
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
@@ -915,11 +918,13 @@ def move_below_into_bin(h,a):
     h.SetBinContent(b, bc)
     h.SetBinError(b, bcv**0.5)
 
-def move_above_into_bin(h,a):
+def move_above_into_bin(h,a,minus_one=False):
     """Given the TH1 h, add the contents of the bins above the one
     corresponding to a into that bin, and zero the bins above."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
     b = h.FindBin(a)
+    if minus_one:
+        b -= 1
     bc = h.GetBinContent(b)
     bcv = h.GetBinError(b)**2
     for nb in xrange(b+1, h.GetNbinsX()+2):
