@@ -390,6 +390,7 @@ def data_mc_comparison(name,
                        canvas_right_margin = 0.1,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
+                       overflow_in_last = False,
                        rebin = None,
                        x_title = '',
                        y_title = 'arb. units',
@@ -462,6 +463,8 @@ def data_mc_comparison(name,
                 sample.hist.Scale(sample.partial_weight * int_lumi)
             if rebin is not None:
                 sample.hist.Rebin(rebin)
+            if overflow_in_last:
+                move_overflow_into_last_bin(sample.hist)
 
     #####################
 
