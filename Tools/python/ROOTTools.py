@@ -494,7 +494,11 @@ def data_mc_comparison(name,
             sum_background.Add(sample.hist)
 
         if verbose:
-            print sample.name, get_integral(sample.hist, 0)
+            integ = get_integral(sample.hist, 0)
+            if integ[0] == 0:
+                print sample.name, '<', 3 * sample.partial_weight * int_lumi, '@95%CL'
+            else:
+                print sample.name, integ
 
     stack.Draw(stack_draw_cmd)
     stack.SetTitle(';%s;%s' % (x_title, y_title))
