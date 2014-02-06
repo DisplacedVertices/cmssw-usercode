@@ -568,6 +568,8 @@ def data_mc_comparison(name,
         if data_sample is not None:
             legend.AddEntry(data_sample.hist, 'data', 'LPE')
         legend.Draw()
+    else:
+        legend = None
 
     if int_lumi_nice is not None:
         t = ROOT.TPaveLabel(0.214, 0.898, 0.875, 0.998, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
@@ -669,6 +671,9 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None):
     s.SetY2NDC(y2 - (y2-y1)*n)
 
 def draw_in_order(hists_and_cmds, sames=False):
+    if type(hists_and_cmds[1]) == str:
+        cmd = hists_and_cmds[1]
+        hists_and_cmds = [(h,cmd) for h in hists_and_cmds[0]]
     hists = [(h, h.GetMaximum(), cmd) for h,cmd in hists_and_cmds]
     hists.sort(key=lambda x: x[1], reverse=True)
     for i, (h, m, cmd) in enumerate(hists):
