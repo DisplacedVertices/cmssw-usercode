@@ -71,7 +71,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   TriggerHelper trig_helper_cleaning(event, cleaning_results_src);
-  if (!trig_helper_cleaning.pass(skip_event_filter))
+  if (skip_event_filter != "" && !trig_helper_cleaning.pass(skip_event_filter))
     return;
 
   std::auto_ptr<MFVEvent> mevent(new MFVEvent);
