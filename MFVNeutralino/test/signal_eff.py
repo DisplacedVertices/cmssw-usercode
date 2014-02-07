@@ -5,12 +5,12 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
 set_style()
-ps = plot_saver('plots/mfvsigeff', size=(600,400))
+ps = plot_saver('plots/mfvsigeff', size=(600,600))
 
 samples = mfv_signal_samples
-samples = [sample for sample in mfv_signal_samples if '0300' not in sample.name]
+samples = [sample for sample in mfv_signal_samples if '0000um' not in sample.name]
 
-per_div = 5
+per_div = 6
 y_range = 0.8
 
 def curve(name, root_file_dir, num_path, den_path, color):
@@ -75,7 +75,7 @@ leg = ROOT.TLegend(0.151,0.635,0.602,0.858)
 leg.AddEntry(looser, 'Preselection', 'L')
 leg.AddEntry(abcd, 'Sideband+signal', 'L')
 leg.AddEntry(dreg, 'Signal region', 'L')
-#leg.Draw()
+leg.Draw()
 
 
 ps.save('sigeff')
