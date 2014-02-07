@@ -42,7 +42,7 @@ for name, cut in nm1s:
     setattr(process, vtx_name, vtx)
     setattr(process, ana_name, ana)
     setattr(process, hst_name, hst)
-    setattr(process, 'p' + name, cms.Path(vtx * ana * hst)
+    setattr(process, 'p' + name, cms.Path(vtx * ana * hst))
 
 hackrundata = False # JMTBAD
 if hackrundata:
@@ -55,10 +55,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples
     samples += [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + \
-              [sample for sample in Samples.mfv_signal_samples if '0300' not in sample.name]
-
-    #samples = [sample for sample in Samples.mfv_signal_samples if '0300' in sample.name]
+    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
     
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
