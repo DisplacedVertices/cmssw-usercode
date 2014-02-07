@@ -8,7 +8,10 @@ process.TFileService.fileName = 'cutplay.root'
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
                                                  min_maxtrackpt = 0,
-                                                 min_njetsntks = 1)
+                                                 min_njetsntks = 1,
+                                                 max_bs2derr = 0.008,
+                                                 min_bs2dsig = 10,
+                                                 min_ntracksptgt3 = 3)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
@@ -178,7 +181,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
     
-    cs = CRABSubmitter('CutPlayV13',
+    cs = CRABSubmitter('CutPlayV13_30',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        manual_datasets = SampleFiles['MFVNtupleV13'],

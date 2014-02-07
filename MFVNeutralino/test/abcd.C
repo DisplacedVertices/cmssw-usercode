@@ -1,6 +1,6 @@
-int iteration = 0;
-double xcut = 15;
-double ycut = 15;
+int iteration = 30;
+double xcut = 30;
+double ycut = 17;
 
 void compareShapes(char* sampleName) {
   TH1::SetDefaultSumw2();
