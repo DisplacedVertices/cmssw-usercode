@@ -2,19 +2,14 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau0100um_M0400', 500)
+SampleFiles.setup(process, 'MFVNtupleV15', 'mfv_neutralino_tau0100um_M0400', 500)
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-vtx_sel = process.mfvSelectedVerticesTight.clone(min_ntracks = 5,
-                                                 min_maxtrackpt = 0,
-                                                 min_njetsntks = 1,
-                                                 max_bs2derr = 1e9)
+vtx_sel = process.mfvSelectedVerticesTight.clone(max_bs2derr = 1e9)
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-ana_sel = process.mfvAnalysisCuts.clone(min_ntracks01 = 0,
-                                        min_maxtrackpt01 = 0,
-                                        min_sumht = 500)
+ana_sel = process.mfvAnalysisCuts
 
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
@@ -116,10 +111,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
     
-    cs = CRABSubmitter('CutPlay2dV13',
+    cs = CRABSubmitter('CutPlay2dV15',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV13'],
+                       manual_datasets = SampleFiles['MFVNtupleV15'],
                        )
     cs.submit_all(samples)
 

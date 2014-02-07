@@ -2,8 +2,10 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
+raise NotImplementedError('V15 samples have trigger selection already')
+
 process.options.wantSummary = True
-SampleFiles.setup(process, 'MFVNtupleV13', 'qcdht0250', 10000)
+SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht0250', 10000)
 process.TFileService.fileName = 'events_cutplay.root'
 
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import mfvAnalysisCuts as cuts
@@ -36,6 +38,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('EventsCutplay',
                        total_number_of_events = 1000000,
                        events_per_job = 500000,
-                       manual_datasets = SampleFiles['MFVNtupleV13'],
+                       manual_datasets = SampleFiles['MFVNtupleV15'],
                        )
     cs.submit_all(samples)
