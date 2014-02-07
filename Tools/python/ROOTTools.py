@@ -87,19 +87,32 @@ def poisson_interval(nobs, alpha=(1-0.6827)/2, beta=(1-0.6827)/2):
     return lower, upper
 
 def poisson_intervalize(h, zero_x=False, include_zero_bins=False):
-    h2 = ROOT.TGraphAsymmErrors(h)
+    bins = []
     for i in xrange(1, h.GetNbinsX()+1):
-        c = h.GetBinContent(i)
-        if c == 0 and not include_zero_bins:
-            continue
-        l,u = poisson_interval(c)
-        # i-1 in the following because ROOT TGraphs count from 0 but
-        # TH1s count from 1
+        y = h.GetBinContent(i)
+        if y > 0 or include_zero_bins:
+            bins.append(i)
+
+    h2 = ROOT.TGraphAsymmErrors(len(bins))
+    np = 0 # TGraphs count from 0
+    for ibin in bins:
+        xl = h.GetBinLowEdge(ibin)
+        xh = h.GetBinLowEdge(ibin+1)
+        x = (xl + xh)/2
+        y = h.GetBinContent(ibin)
+        yl, yh = poisson_interval(y)
+        h2.SetPoint(np, x, y)
+
         if zero_x:
-            h2.SetPointEXlow(i-1, 0)
-            h2.SetPointEXhigh(i-1, 0)
-        h2.SetPointEYlow(i-1, c-l)
-        h2.SetPointEYhigh(i-1, u-c)
+            h2.SetPointEXlow (np, 0)
+            h2.SetPointEXhigh(np, 0)
+        else:
+            h2.SetPointEXlow (np, x - xl)
+            h2.SetPointEXhigh(np, xh - x)
+        h2.SetPointEYlow (np, y - yl)
+        h2.SetPointEYhigh(np, yh - y)
+
+        np += 1
     return h2
 
 def clopper_pearson(n_on, n_tot, alpha=1-0.6827, equal_tailed=True):
@@ -134,7 +147,7 @@ def cmssw_setup():
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
     
-def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
+def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes=False):
     nbins = h1.GetNbinsX()
     xax = h1.GetXaxis()
     if h2.GetNbinsX() != nbins: # or xax2.GetBinLowEdge(1) != xax.GetBinLowEdge(1) or xax2.GetBinLowEdge(nbins) != xax.GetBinLowEdge(nbins):
@@ -149,6 +162,8 @@ def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True):
     for ibin in xrange(1, nbins+1):
         s,t = h1.GetBinContent(ibin), h2.GetBinContent(ibin)
         if t == 0:
+            continue
+        if s == 0 and no_zeroes:
             continue
 
         p_hat = float(s)/t
@@ -388,7 +403,9 @@ def data_mc_comparison(name,
                        canvas_right_margin = 0.1,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
+                       overflow_in_last = False,
                        rebin = None,
+                       poisson_intervals = False,
                        x_title = '',
                        y_title = 'arb. units',
                        y_title_offset = 1.3,
@@ -460,6 +477,11 @@ def data_mc_comparison(name,
                 sample.hist.Scale(sample.partial_weight * int_lumi)
             if rebin is not None:
                 sample.hist.Rebin(rebin)
+            if overflow_in_last:
+                if x_range is not None:
+                    move_above_into_bin(sample.hist, x_range[1])
+                else:
+                    move_overflow_into_last_bin(sample.hist)
 
     #####################
 
@@ -478,6 +500,9 @@ def data_mc_comparison(name,
         plot_saver.old_c = plot_saver.c
         plot_saver.c = canvas
 
+    if verbose:
+        print name
+
     legend_entries = []
     stack = ROOT.THStack('s_datamc_' + name, '')
     sum_background = None
@@ -494,7 +519,11 @@ def data_mc_comparison(name,
             sum_background.Add(sample.hist)
 
         if verbose:
-            print sample.name, get_integral(sample.hist, 0)
+            integ = get_integral(sample.hist, 0)
+            if integ[0] == 0:
+                print sample.name, '<', 3 * sample.partial_weight * int_lumi, '@95%CL'
+            else:
+                print sample.name, integ
 
     stack.Draw(stack_draw_cmd)
     stack.SetTitle(';%s;%s' % (x_title, y_title))
@@ -505,7 +534,7 @@ def data_mc_comparison(name,
     stack.GetYaxis().SetLabelSize(y_label_size)
 
     if x_range is not None:
-        stack.GetXaxis().SetRangeUser(*x_range)
+        stack.GetXaxis().SetLimits(*x_range)
     y_range_min, y_range_max = y_range
     if y_range_min is not None:
         stack.SetMinimum(y_range_min)
@@ -520,7 +549,13 @@ def data_mc_comparison(name,
     if data_sample is not None:
         data_sample.hist.SetMarkerStyle(data_marker_style)
         data_sample.hist.SetMarkerSize(data_marker_size)
-        data_sample.hist.Draw('same ' + data_draw_cmd)
+        if poisson_intervals:
+            data_sample.hist_poissoned = poisson_intervalize(data_sample.hist)
+            data_sample.hist_poissoned.SetMarkerStyle(data_marker_style)
+            data_sample.hist_poissoned.SetMarkerSize(data_marker_size)
+            data_sample.hist_poissoned.Draw(data_draw_cmd)
+        else:
+            data_sample.hist.Draw('same ' + data_draw_cmd)
 
     if legend_pos is not None:
         legend_entries.reverse()
@@ -533,6 +568,8 @@ def data_mc_comparison(name,
         if data_sample is not None:
             legend.AddEntry(data_sample.hist, 'data', 'LPE')
         legend.Draw()
+    else:
+        legend = None
 
     if int_lumi_nice is not None:
         t = ROOT.TPaveLabel(0.214, 0.898, 0.875, 0.998, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
@@ -543,9 +580,9 @@ def data_mc_comparison(name,
         t.Draw()
 
     if verbose:
-        print name
         print 'data integral:', data_sample.hist.Integral(0, data_sample.hist.GetNbinsX()+1)
         print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
+        print
     
     ratio_pad, res_g = None, None
     if data_sample is not None:
@@ -558,19 +595,20 @@ def data_mc_comparison(name,
         ratio_pad.Draw()
         ratio_pad.cd(0)
 
-        res_g = poisson_means_divide(data_sample.hist, sum_background)
+        res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True)
         res_g.SetLineWidth(res_line_width)
         res_g.SetLineColor(res_line_color)
-        if x_range is not None:
-            res_g.GetXaxis().SetLimits(*x_range)
+        if x_range is None:
+            x_range_dmc = sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax()
         else:
-            res_g.GetXaxis().SetLimits(sum_background.GetXaxis().GetXmin(), sum_background.GetXaxis().GetXmax())
+            x_range_dmc = x_range[0], x_range[1]
+        res_g.GetXaxis().SetLimits(*x_range_dmc)
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
         res_g.GetYaxis().SetRangeUser(0,3)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)
-        ln = ROOT.TLine(0,1, sum_background.GetBinLowEdge(sum_background.GetNbinsX()+1), 1)
+        ln = ROOT.TLine(x_range_dmc[0], 1, x_range_dmc[1], 1)
         ln.SetLineStyle(4)
         ln.SetLineColor(ROOT.kBlue+3)
         ln.Draw()
@@ -633,6 +671,9 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None):
     s.SetY2NDC(y2 - (y2-y1)*n)
 
 def draw_in_order(hists_and_cmds, sames=False):
+    if type(hists_and_cmds[1]) == str:
+        cmd = hists_and_cmds[1]
+        hists_and_cmds = [(h,cmd) for h in hists_and_cmds[0]]
     hists = [(h, h.GetMaximum(), cmd) for h,cmd in hists_and_cmds]
     hists.sort(key=lambda x: x[1], reverse=True)
     for i, (h, m, cmd) in enumerate(hists):
@@ -882,11 +923,13 @@ def move_below_into_bin(h,a):
     h.SetBinContent(b, bc)
     h.SetBinError(b, bcv**0.5)
 
-def move_above_into_bin(h,a):
+def move_above_into_bin(h,a,minus_one=False):
     """Given the TH1 h, add the contents of the bins above the one
     corresponding to a into that bin, and zero the bins above."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
     b = h.FindBin(a)
+    if minus_one:
+        b -= 1
     bc = h.GetBinContent(b)
     bcv = h.GetBinError(b)**2
     for nb in xrange(b+1, h.GetNbinsX()+2):
@@ -907,8 +950,8 @@ def move_overflow_into_last_bin(h):
     h.SetBinContent(nb+1, 0)
     h.SetBinError(nb+1, 0)
 
-def poisson_means_divide(h1, h2):
-    return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False)
+def poisson_means_divide(h1, h2, no_zeroes=False):
+    return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
 
 class plot_saver:
     i = 0

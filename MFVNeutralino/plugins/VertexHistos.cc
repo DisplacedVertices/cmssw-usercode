@@ -91,6 +91,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   PairwiseHistos::HistoDefs hs;
   hs.add("mva", "MVA output", 100, -2, 3);
 
+  hs.add("nlep", "# leptons", 10, 0, 10);
+
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
   hs.add("nbadtracks",                    "# of 'bad' tracks/SV",                                                         40,    0,      40);
   hs.add("ntracksptgt3",                  "# of tracks/SV w/ p_{T} > 3 GeV",                                              40,    0,      40);
@@ -198,12 +200,22 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackquadmassavg", "SV avg{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 50);
   hs.add("trackquadmassrms", "SV rms{mass(trk_{i}, trk_{j}, trk_{k}, trk_{l})} (GeV)", 50, 0, 30);
 
+  hs.add("trackpairdetamin", "SV min{#Delta #eta(i,j)}", 150,    0,       1.5);
+  hs.add("trackpairdetamax", "SV max{#Delta #eta(i,j)}", 150,    0,       7);
+  hs.add("trackpairdetaavg", "SV avg{#Delta #eta(i,j)}", 150,    0,       5);
+  hs.add("trackpairdetarms", "SV rms{#Delta #eta(i,j)}", 150,    0,       3);
+
   hs.add("drmin",                         "SV min{#Delta R(i,j)}",                                                       150,    0,       1.5);
   hs.add("drmax",                         "SV max{#Delta R(i,j)}",                                                       150,    0,       7);
   hs.add("dravg",                         "SV avg{#Delta R(i,j)}",                                                       150,    0,       5);
   hs.add("drrms",                         "SV rms{#Delta R(i,j)}",                                                       150,    0,       3);
   hs.add("dravgw",                        "SV wavg{#Delta R(i,j)}",                                                      150,    0,       5);
   hs.add("drrmsw",                        "SV wrms{#Delta R(i,j)}",                                                      150,    0,       3);
+
+  hs.add("jetpairdetamin", "SV min{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 5);
+  hs.add("jetpairdetamax", "SV max{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 7);
+  hs.add("jetpairdetaavg", "SV avg{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 5);
+  hs.add("jetpairdetarms", "SV rms{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 1.5);
 
   hs.add("jetpairdrmin", "SV min{#Delta R(jet_{i}, jet_{j})}", 50, 0, 5);
   hs.add("jetpairdrmax", "SV max{#Delta R(jet_{i}, jet_{j})}", 50, 0, 7);
@@ -349,6 +361,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
     PairwiseHistos::ValueMap v = {
         {"mva",                     mva.value(aux)},
+        {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 aux.ntracks},
         {"nbadtracks",              aux.nbadtracks},
         {"ntracksptgt3",            aux.ntracksptgt3},
@@ -456,12 +469,22 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"trackquadmassavg", aux.trackquadmassavg},
         {"trackquadmassrms", aux.trackquadmassrms},
 
-        {"drmin",                   aux.drmin},
-        {"drmax",                   aux.drmax},
-        {"dravg",                   aux.dravg},
-        {"drrms",                   aux.drrms},
-        {"dravgw",                  aux.dravgw},
-        {"drrmsw",                  aux.drrmsw},
+        {"trackpairdetamin", aux.trackpairdetamin},
+        {"trackpairdetamax", aux.trackpairdetamax},
+        {"trackpairdetaavg", aux.trackpairdetaavg},
+        {"trackpairdetarms", aux.trackpairdetarms},
+
+        {"drmin",  aux.drmin},
+        {"drmax",  aux.drmax},
+        {"dravg",  aux.dravg},
+        {"drrms",  aux.drrms},
+        {"dravgw", aux.dravgw},
+        {"drrmsw", aux.drrmsw},
+
+        {"jetpairdetamin", aux.jetpairdetamin},
+        {"jetpairdetamax", aux.jetpairdetamax},
+        {"jetpairdetaavg", aux.jetpairdetaavg},
+        {"jetpairdetarms", aux.jetpairdetarms},
 
         {"jetpairdrmin", aux.jetpairdrmin},
         {"jetpairdrmax", aux.jetpairdrmax},

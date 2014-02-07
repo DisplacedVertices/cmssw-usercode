@@ -18,7 +18,7 @@ struct MFVEvent {
     gen_partons_in_acc = npfjets = npv = pv_ntracks = njets = 0;
     pfjetpt4 = pfjetpt5 = pfjetpt6 = npu = bsx = bsy = bsz = pvx = pvy = pvz = pv_sumpt2 = jetpt4 = jetpt5 = jetpt6 = jet_sum_ht = metx = mety = metsig = metdphimin = 0;
     for (int i = 0; i < 3; ++i)
-      njetsnopu[i] = nbtags[i] = nmu[i] = nel[i] = 0;
+      njetsnopu[i] = nbtags[i];
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -118,9 +118,33 @@ struct MFVEvent {
   float metdphimin;
 
   uchar nbtags[3]; // loose, medium, tight
-  uchar nmu[3]; // top pag "veto", "semilep", "dilep" 
-  uchar nel[3]; // ditto
-  int nlep(int w) const { return int(nmu[w]) + int(nel[w]); }
+
+  std::vector<uchar> lep_id; // bit field: bit 0 (lsb) = mu, 1 = el, bit 1 = loosest (veto) id (always 1 for now), bit 2 = semilep id, bit 3 = dilep id, bit4 = 1 if electron and closestCtfTrack is not null
+  std::vector<float> lep_pt;
+  std::vector<float> lep_eta;
+  std::vector<float> lep_phi;
+  std::vector<float> lep_dxy;
+  std::vector<float> lep_dz;
+  std::vector<float> lep_iso;
+  std::vector<float> lep_mva; // only filled for electrons
+
+  TLorentzVector lep_p4(int w) const {
+    float mass = (lep_id[w] & 1) ? 0.000511 : 0.106;
+    return p4(lep_pt[w], lep_eta[w], lep_phi[w], mass);
+  }
+
+  int nlep(int type, int id) const {
+    int n = 0;
+    for (size_t i = 0, ie = lep_id.size(); i < ie; ++i)
+      if ((lep_id[i] & 1) == type &&
+          (lep_id[i] & (1 << (id+1))))
+        ++n;
+    return n;
+  }
+
+  int nmu(int which) const { return nlep(0, which); }
+  int nel(int which) const { return nlep(1, which); }
+  int nlep(int which) const { return nmu(which) + nel(which); }
 };
 
 #endif

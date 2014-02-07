@@ -97,10 +97,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
   }
 
-  if (mevent->nmu[0] < min_nmuons)
+  if (mevent->nmu(0) < min_nmuons)
     return false;
 
-  if (mevent->nmu[1] < min_nsemilepmuons)
+  if (mevent->nmu(1) < min_nsemilepmuons)
     return false;
 
   if (mevent->nlep(0) < min_nleptons)

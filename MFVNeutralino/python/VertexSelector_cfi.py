@@ -60,15 +60,18 @@ mfvSelectedVerticesMedium = mfvSelectedVertices.clone(
     min_ntracks = 5,
     max_drmin = 0.4,
     max_drmax = 4,
-    max_bs2derr = 0.005,
+    max_bs2derr = 0.008,
+    min_njetsntks = 1,
 )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
-    min_ntracks = 7,
-    min_maxtrackpt = 15,
+    min_ntracks = 5,
     max_drmin = 0.4,
     max_drmax = 4,
-    max_bs2derr = 0.005,
+    max_bs2derr = 0.008,
+    min_njetsntks = 1,
+    min_bs2dsig = 10,
+    min_ntracksptgt3 = 3,
     )
 
-mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose + mfvSelectedVerticesTight)
+mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesTight)

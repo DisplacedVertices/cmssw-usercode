@@ -120,6 +120,7 @@ class MCSample(Sample):
         self.cross_section = float(cross_section)
         self.k_factor = float(k_factor)
         self.join_info = (False, self.nice_name, self.color)
+        self.ana_filter_eff = -1.
 
         self.events_per = self.EVENTS_PER
         self.ana_events_per = self.ANA_EVENTS_PER
@@ -215,9 +216,9 @@ ttbar_samples = [
 
 qcd_samples = [
     MCSample('qcdht0100',        'QCD, 100 < H_{T} < 250 GeV',                              '/QCD_HT-100To250_TuneZ2star_8TeV-madgraph-pythia/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',       50129518, 801, 0.10, 1.04e7),
-    MCSample('qcdht0250',        'QCD, 250 < H_{T} < 500 GeV',                              '/QCD_HT-250To500_TuneZ2star_8TeV-madgraph-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      27062078, 801, 0.10, 2.76e5),
-    MCSample('qcdht0500',        'QCD, 500 < H_{T} < 1000 GeV',                             '/QCD_HT-500To1000_TuneZ2star_8TeV-madgraph-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',     30599292, 801, 0.10, 8.43e3),
-    MCSample('qcdht1000',        'QCD, H_{T} > 1000 GeV',                                   '/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',     13843863, 801, 0.10, 2.04e2),
+    MCSample('qcdht0250',        'QCD, 250 < H_{T} < 500 GeV',                              '/QCD_HT-250To500_TuneZ2star_8TeV-madgraph-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      27062078, 802, 0.10, 2.76e5),
+    MCSample('qcdht0500',        'QCD, 500 < H_{T} < 1000 GeV',                             '/QCD_HT-500To1000_TuneZ2star_8TeV-madgraph-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',     30599292, 803, 0.10, 8.43e3),
+    MCSample('qcdht1000',        'QCD, H_{T} > 1000 GeV',                                   '/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',     13843863, 804, 0.10, 2.04e2),
     ]
 
 smaller_background_samples =[
@@ -313,42 +314,42 @@ mfv_xsec = {
     }
 
 mfv_signal_samples_ex = [
-    (   0,  200, MCSample('mfv_neutralino_tau0000um_M0200', 'MFV signal, M = 200 GeV, prompt',           '/mfv_neutralino_tau0000um_M0200/tucker-mfv_neutralino_tau0000um_M0200-4c5a3e1bd487f486a1b444615e104727/USER',  99850, 2, *mfv_xsec[ 200]),),
-    (   0,  300, MCSample('mfv_neutralino_tau0000um_M0300', 'MFV signal, M = 300 GeV, prompt',           '/mfv_neutralino_tau0000um_M0300/tucker-mfv_neutralino_tau0000um_M0300-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 300]),),
-    (   0,  400, MCSample('mfv_neutralino_tau0000um_M0400', 'MFV signal, M = 400 GeV, prompt',           '/mfv_neutralino_tau0000um_M0400/tucker-mfv_neutralino_tau0000um_M0400-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 400]),),
-    (   0,  600, MCSample('mfv_neutralino_tau0000um_M0600', 'MFV signal, M = 600 GeV, prompt',           '/mfv_neutralino_tau0000um_M0600/tucker-mfv_neutralino_tau0000um_M0600-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 600]),),
-    (   0,  800, MCSample('mfv_neutralino_tau0000um_M0800', 'MFV signal, M = 800 GeV, prompt',           '/mfv_neutralino_tau0000um_M0800/tucker-mfv_neutralino_tau0000um_M0800-4c5a3e1bd487f486a1b444615e104727/USER',  99900, 2, *mfv_xsec[ 800]),),
-    (   0, 1000, MCSample('mfv_neutralino_tau0000um_M1000', 'MFV signal, M = 1000 GeV, prompt',          '/mfv_neutralino_tau0000um_M1000/tucker-mfv_neutralino_tau0000um_M1000-4c5a3e1bd487f486a1b444615e104727/USER',  99996, 2, *mfv_xsec[1000]),),
-    (  10,  200, MCSample('mfv_neutralino_tau0010um_M0200', 'MFV signal, M = 200 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0200/tucker-mfv_neutralino_tau0010um_M0200-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 200]),),
-    (  10,  300, MCSample('mfv_neutralino_tau0010um_M0300', 'MFV signal, M = 300 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0300/tucker-mfv_neutralino_tau0010um_M0300-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 300]),),
-    (  10,  400, MCSample('mfv_neutralino_tau0010um_M0400', 'MFV signal, M = 400 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0400/tucker-mfv_neutralino_tau0010um_M0400-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 400]),),
-    (  10,  600, MCSample('mfv_neutralino_tau0010um_M0600', 'MFV signal, M = 600 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0600/tucker-mfv_neutralino_tau0010um_M0600-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99700, 2, *mfv_xsec[ 600]),),
-    (  10,  800, MCSample('mfv_neutralino_tau0010um_M0800', 'MFV signal, M = 800 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0800/tucker-mfv_neutralino_tau0010um_M0800-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99950, 2, *mfv_xsec[ 800]),),
-    (  10, 1000, MCSample('mfv_neutralino_tau0010um_M1000', 'MFV signal, M = 1000 GeV, #tau = 10 #mum',  '/mfv_neutralino_tau0010um_M1000/tucker-mfv_neutralino_tau0010um_M1000-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99899, 2, *mfv_xsec[1000]),),
-    ( 100,  200, MCSample('mfv_neutralino_tau0100um_M0200', 'MFV signal, M = 200 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0200/tucker-mfv_neutralino_tau0100um_M0200-86ebc7c9963ad7f892ad94c512f4c308/USER',  99700, 2, *mfv_xsec[ 200]),),
-    ( 100,  300, MCSample('mfv_neutralino_tau0100um_M0300', 'MFV signal, M = 300 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0300/tucker-mfv_neutralino_tau0100um_M0300-86ebc7c9963ad7f892ad94c512f4c308/USER', 100000, 2, *mfv_xsec[ 300]),),
-    ( 100,  400, MCSample('mfv_neutralino_tau0100um_M0400', 'MFV signal, M = 400 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0400/tucker-mfv_neutralino_tau0100um_M0400-86ebc7c9963ad7f892ad94c512f4c308/USER',  99250, 2, *mfv_xsec[ 400]),),
-    ( 100,  600, MCSample('mfv_neutralino_tau0100um_M0600', 'MFV signal, M = 600 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0600/tucker-mfv_neutralino_tau0100um_M0600-86ebc7c9963ad7f892ad94c512f4c308/USER',  99650, 2, *mfv_xsec[ 600]),),
-    ( 100,  800, MCSample('mfv_neutralino_tau0100um_M0800', 'MFV signal, M = 800 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0800/tucker-mfv_neutralino_tau0100um_M0800-86ebc7c9963ad7f892ad94c512f4c308/USER', 100000, 2, *mfv_xsec[ 800]),),
-    ( 100, 1000, MCSample('mfv_neutralino_tau0100um_M1000', 'MFV signal, M = 1000 GeV, #tau = 100 #mum', '/mfv_neutralino_tau0100um_M1000/tucker-mfv_neutralino_tau0100um_M1000-86ebc7c9963ad7f892ad94c512f4c308/USER',  99749, 2, *mfv_xsec[1000]),),
-    ( 300,  200, MCSample('mfv_neutralino_tau0300um_M0200', 'MFV signal, M = 200 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0200/tucker-mfv_neutralino_tau0300um_M0200-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 200]),),
-    ( 300,  300, MCSample('mfv_neutralino_tau0300um_M0300', 'MFV signal, M = 300 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0300/tucker-mfv_neutralino_tau0300um_M0300-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 300]),),
-    ( 300,  400, MCSample('mfv_neutralino_tau0300um_M0400', 'MFV signal, M = 400 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0400/tucker-mfv_neutralino_tau0300um_M0400-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 400]),),
-    ( 300,  600, MCSample('mfv_neutralino_tau0300um_M0600', 'MFV signal, M = 600 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0600/tucker-mfv_neutralino_tau0300um_M0600-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 600]),),
-    ( 300,  800, MCSample('mfv_neutralino_tau0300um_M0800', 'MFV signal, M = 800 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0800/tucker-mfv_neutralino_tau0300um_M0800-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 800]),),
-    ( 300, 1000, MCSample('mfv_neutralino_tau0300um_M1000', 'MFV signal, M = 1000 GeV, #tau = 300 #mum', '/mfv_neutralino_tau0300um_M3000/tucker-mfv_neutralino_tau0300um_M1000-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[1000]),),
-    (1000,  200, MCSample('mfv_neutralino_tau1000um_M0200', 'MFV signal, M = 200 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0200/tucker-mfv_neutralino_tau1000um_M0200-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99752, 2, *mfv_xsec[ 200]),),
-    (1000,  300, MCSample('mfv_neutralino_tau1000um_M0300', 'MFV signal, M = 300 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0300/tucker-mfv_neutralino_tau1000um_M0300-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[ 300]),),
-    (1000,  400, MCSample('mfv_neutralino_tau1000um_M0400', 'MFV signal, M = 400 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0400/tucker-mfv_neutralino_tau1000um_M0400-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99850, 2, *mfv_xsec[ 400]),),
-    (1000,  600, MCSample('mfv_neutralino_tau1000um_M0600', 'MFV signal, M = 600 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0600/tucker-mfv_neutralino_tau1000um_M0600-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99851, 2, *mfv_xsec[ 600]),),
-    (1000,  800, MCSample('mfv_neutralino_tau1000um_M0800', 'MFV signal, M = 800 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0800/tucker-mfv_neutralino_tau1000um_M0800-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99949, 2, *mfv_xsec[ 800]),),
-    (1000, 1000, MCSample('mfv_neutralino_tau1000um_M1000', 'MFV signal, M = 1000 GeV, #tau = 1 mm',     '/mfv_neutralino_tau1000um_M1000/tucker-mfv_neutralino_tau1000um_M1000-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[1000]),),
-    (9900,  200, MCSample('mfv_neutralino_tau9900um_M0200', 'MFV signal, M = 200 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0200/tucker-mfv_neutralino_tau9900um_M0200-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 200]),),
-    (9900,  300, MCSample('mfv_neutralino_tau9900um_M0300', 'MFV signal, M = 300 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0300/tucker-mfv_neutralino_tau9900um_M0300-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 300]),),
-    (9900,  400, MCSample('mfv_neutralino_tau9900um_M0400', 'MFV signal, M = 400 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0400/tucker-mfv_neutralino_tau9900um_M0400-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 400]),),
-    (9900,  600, MCSample('mfv_neutralino_tau9900um_M0600', 'MFV signal, M = 600 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0600/tucker-mfv_neutralino_tau9900um_M0600-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 600]),),
-    (9900,  800, MCSample('mfv_neutralino_tau9900um_M0800', 'MFV signal, M = 800 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0800/tucker-mfv_neutralino_tau9900um_M0800-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99900, 2, *mfv_xsec[ 800]),),
-    (9900, 1000, MCSample('mfv_neutralino_tau9900um_M1000', 'MFV signal, M = 1000 GeV, #tau = 9.9 mm',   '/mfv_neutralino_tau9900um_M1000/tucker-mfv_neutralino_tau9900um_M1000-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99899, 2, *mfv_xsec[1000]),), 
+    (   0,  200, MCSample('mfv_neutralino_tau0000um_M0200', 'M_{tbs} = 200 GeV, prompt',           '/mfv_neutralino_tau0000um_M0200/tucker-mfv_neutralino_tau0000um_M0200-4c5a3e1bd487f486a1b444615e104727/USER',  99850, 2, *mfv_xsec[ 200]),),
+    (   0,  300, MCSample('mfv_neutralino_tau0000um_M0300', 'M_{tbs} = 300 GeV, prompt',           '/mfv_neutralino_tau0000um_M0300/tucker-mfv_neutralino_tau0000um_M0300-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 300]),),
+    (   0,  400, MCSample('mfv_neutralino_tau0000um_M0400', 'M_{tbs} = 400 GeV, prompt',           '/mfv_neutralino_tau0000um_M0400/tucker-mfv_neutralino_tau0000um_M0400-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 400]),),
+    (   0,  600, MCSample('mfv_neutralino_tau0000um_M0600', 'M_{tbs} = 600 GeV, prompt',           '/mfv_neutralino_tau0000um_M0600/tucker-mfv_neutralino_tau0000um_M0600-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 600]),),
+    (   0,  800, MCSample('mfv_neutralino_tau0000um_M0800', 'M_{tbs} = 800 GeV, prompt',           '/mfv_neutralino_tau0000um_M0800/tucker-mfv_neutralino_tau0000um_M0800-4c5a3e1bd487f486a1b444615e104727/USER',  99900, 2, *mfv_xsec[ 800]),),
+    (   0, 1000, MCSample('mfv_neutralino_tau0000um_M1000', 'M_{tbs} = 1000 GeV, prompt',          '/mfv_neutralino_tau0000um_M1000/tucker-mfv_neutralino_tau0000um_M1000-4c5a3e1bd487f486a1b444615e104727/USER',  99996, 2, *mfv_xsec[1000]),),
+    (  10,  200, MCSample('mfv_neutralino_tau0010um_M0200', 'M_{tbs} = 200 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0200/tucker-mfv_neutralino_tau0010um_M0200-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 200]),),
+    (  10,  300, MCSample('mfv_neutralino_tau0010um_M0300', 'M_{tbs} = 300 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0300/tucker-mfv_neutralino_tau0010um_M0300-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 300]),),
+    (  10,  400, MCSample('mfv_neutralino_tau0010um_M0400', 'M_{tbs} = 400 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0400/tucker-mfv_neutralino_tau0010um_M0400-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 400]),),
+    (  10,  600, MCSample('mfv_neutralino_tau0010um_M0600', 'M_{tbs} = 600 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0600/tucker-mfv_neutralino_tau0010um_M0600-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99700, 2, *mfv_xsec[ 600]),),
+    (  10,  800, MCSample('mfv_neutralino_tau0010um_M0800', 'M_{tbs} = 800 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0800/tucker-mfv_neutralino_tau0010um_M0800-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99950, 2, *mfv_xsec[ 800]),),
+    (  10, 1000, MCSample('mfv_neutralino_tau0010um_M1000', 'M_{tbs} = 1000 GeV, #tau = 10 #mum',  '/mfv_neutralino_tau0010um_M1000/tucker-mfv_neutralino_tau0010um_M1000-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99899, 2, *mfv_xsec[1000]),),
+    ( 100,  200, MCSample('mfv_neutralino_tau0100um_M0200', 'M_{tbs} = 200 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0200/tucker-mfv_neutralino_tau0100um_M0200-86ebc7c9963ad7f892ad94c512f4c308/USER',  99700, 2, *mfv_xsec[ 200]),),
+    ( 100,  300, MCSample('mfv_neutralino_tau0100um_M0300', 'M_{tbs} = 300 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0300/tucker-mfv_neutralino_tau0100um_M0300-86ebc7c9963ad7f892ad94c512f4c308/USER', 100000, 2, *mfv_xsec[ 300]),),
+    ( 100,  400, MCSample('mfv_neutralino_tau0100um_M0400', 'M_{tbs} = 400 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0400/tucker-mfv_neutralino_tau0100um_M0400-86ebc7c9963ad7f892ad94c512f4c308/USER',  99250, 2, *mfv_xsec[ 400]),),
+    ( 100,  600, MCSample('mfv_neutralino_tau0100um_M0600', 'M_{tbs} = 600 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0600/tucker-mfv_neutralino_tau0100um_M0600-86ebc7c9963ad7f892ad94c512f4c308/USER',  99650, 2, *mfv_xsec[ 600]),),
+    ( 100,  800, MCSample('mfv_neutralino_tau0100um_M0800', 'M_{tbs} = 800 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0800/tucker-mfv_neutralino_tau0100um_M0800-86ebc7c9963ad7f892ad94c512f4c308/USER', 100000, 2, *mfv_xsec[ 800]),),
+    ( 100, 1000, MCSample('mfv_neutralino_tau0100um_M1000', 'M_{tbs} = 1000 GeV, #tau = 100 #mum', '/mfv_neutralino_tau0100um_M1000/tucker-mfv_neutralino_tau0100um_M1000-86ebc7c9963ad7f892ad94c512f4c308/USER',  99749, 2, *mfv_xsec[1000]),),
+    ( 300,  200, MCSample('mfv_neutralino_tau0300um_M0200', 'M_{tbs} = 200 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0200/tucker-mfv_neutralino_tau0300um_M0200-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 200]),),
+    ( 300,  300, MCSample('mfv_neutralino_tau0300um_M0300', 'M_{tbs} = 300 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0300/tucker-mfv_neutralino_tau0300um_M0300-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 300]),),
+    ( 300,  400, MCSample('mfv_neutralino_tau0300um_M0400', 'M_{tbs} = 400 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0400/tucker-mfv_neutralino_tau0300um_M0400-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 400]),),
+    ( 300,  600, MCSample('mfv_neutralino_tau0300um_M0600', 'M_{tbs} = 600 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0600/tucker-mfv_neutralino_tau0300um_M0600-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 600]),),
+    ( 300,  800, MCSample('mfv_neutralino_tau0300um_M0800', 'M_{tbs} = 800 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0800/tucker-mfv_neutralino_tau0300um_M0800-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 800]),),
+    ( 300, 1000, MCSample('mfv_neutralino_tau0300um_M1000', 'M_{tbs} = 1000 GeV, #tau = 300 #mum', '/mfv_neutralino_tau0300um_M3000/tucker-mfv_neutralino_tau0300um_M1000-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[1000]),),
+    (1000,  200, MCSample('mfv_neutralino_tau1000um_M0200', 'M_{tbs} = 200 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0200/tucker-mfv_neutralino_tau1000um_M0200-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99752, 2, *mfv_xsec[ 200]),),
+    (1000,  300, MCSample('mfv_neutralino_tau1000um_M0300', 'M_{tbs} = 300 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0300/tucker-mfv_neutralino_tau1000um_M0300-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[ 300]),),
+    (1000,  400, MCSample('mfv_neutralino_tau1000um_M0400', 'M_{tbs} = 400 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0400/tucker-mfv_neutralino_tau1000um_M0400-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99850, 2, *mfv_xsec[ 400]),),
+    (1000,  600, MCSample('mfv_neutralino_tau1000um_M0600', 'M_{tbs} = 600 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0600/tucker-mfv_neutralino_tau1000um_M0600-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99851, 2, *mfv_xsec[ 600]),),
+    (1000,  800, MCSample('mfv_neutralino_tau1000um_M0800', 'M_{tbs} = 800 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0800/tucker-mfv_neutralino_tau1000um_M0800-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99949, 2, *mfv_xsec[ 800]),),
+    (1000, 1000, MCSample('mfv_neutralino_tau1000um_M1000', 'M_{tbs} = 1000 GeV, #tau = 1 mm',     '/mfv_neutralino_tau1000um_M1000/tucker-mfv_neutralino_tau1000um_M1000-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[1000]),),
+    (9900,  200, MCSample('mfv_neutralino_tau9900um_M0200', 'M_{tbs} = 200 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0200/tucker-mfv_neutralino_tau9900um_M0200-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 200]),),
+    (9900,  300, MCSample('mfv_neutralino_tau9900um_M0300', 'M_{tbs} = 300 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0300/tucker-mfv_neutralino_tau9900um_M0300-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 300]),),
+    (9900,  400, MCSample('mfv_neutralino_tau9900um_M0400', 'M_{tbs} = 400 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0400/tucker-mfv_neutralino_tau9900um_M0400-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 400]),),
+    (9900,  600, MCSample('mfv_neutralino_tau9900um_M0600', 'M_{tbs} = 600 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0600/tucker-mfv_neutralino_tau9900um_M0600-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 600]),),
+    (9900,  800, MCSample('mfv_neutralino_tau9900um_M0800', 'M_{tbs} = 800 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0800/tucker-mfv_neutralino_tau9900um_M0800-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99900, 2, *mfv_xsec[ 800]),),
+    (9900, 1000, MCSample('mfv_neutralino_tau9900um_M1000', 'M_{tbs} = 1000 GeV, #tau = 9.9 mm',   '/mfv_neutralino_tau9900um_M1000/tucker-mfv_neutralino_tau9900um_M1000-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99899, 2, *mfv_xsec[1000]),), 
     ]
 
 mfv_signal_samples = []
@@ -363,6 +364,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.re_pat = True
     sample.scheduler = 'condor'
     sample.ana_hash = '5c05eb42bbf1b04cf0f00b96bae48439'
+    sample.cross_section = 0.020
 
 ########################################################################
 
@@ -394,21 +396,59 @@ for sample in all_samples:
 
 ########################################################################
 
-# need fewer than 5000 jobs/batch, but need to beat the wallclock
-qcdht0100.events_per = 11000
-qcdht0250.events_per = 6000
-qcdht0500.events_per = 7000
-qcdht1000.events_per = 3000
-ttbarsemilep.events_per = 5500
-wjetstolnu.events_per = 12000
-dyjetstollM50.events_per = 6500
-mfv_neutralino_tau9900um_M1000.events_per = 500
-
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
-qcdht0500.total_events = 30592292
-qcdht1000.total_events = 13834863
-wjetstolnu.total_events = 57673905
+
+ttbardilep.total_events = ttbardilep.nevents_orig - 3*42648
+ttbarhadronic.total_events = ttbarhadronic.nevents_orig - 23*16736
+
+mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
+mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
+mfv_neutralino_tau0000um_M0600.ana_filter_eff = 9.9495e-01  #    99495 /   100000
+mfv_neutralino_tau0000um_M0800.ana_filter_eff = 9.9796e-01  #    99696 /    99900
+mfv_neutralino_tau0000um_M1000.ana_filter_eff = 9.9866e-01  #    99862 /    99996
+mfv_neutralino_tau0010um_M0200.ana_filter_eff = 4.7647e-01  #    47647 /   100000
+mfv_neutralino_tau0010um_M0400.ana_filter_eff = 9.6750e-01  #    96750 /   100000
+mfv_neutralino_tau0010um_M0600.ana_filter_eff = 9.9530e-01  #    99231 /    99700
+mfv_neutralino_tau0010um_M0800.ana_filter_eff = 9.9795e-01  #    99745 /    99950
+mfv_neutralino_tau0010um_M1000.ana_filter_eff = 9.9892e-01  #    99791 /    99899
+mfv_neutralino_tau0100um_M0200.ana_filter_eff = 4.7951e-01  #    47807 /    99700
+mfv_neutralino_tau0100um_M0400.ana_filter_eff = 9.6769e-01  #    96043 /    99250
+mfv_neutralino_tau0100um_M0600.ana_filter_eff = 9.9554e-01  #    99206 /    99650
+mfv_neutralino_tau0100um_M0800.ana_filter_eff = 9.9795e-01  #    99795 /   100000
+mfv_neutralino_tau0100um_M1000.ana_filter_eff = 9.9890e-01  #    99639 /    99749
+mfv_neutralino_tau1000um_M0200.ana_filter_eff = 4.7873e-01  #    47754 /    99752
+mfv_neutralino_tau1000um_M0400.ana_filter_eff = 9.6798e-01  #    96653 /    99850
+mfv_neutralino_tau1000um_M0600.ana_filter_eff = 9.9508e-01  #    99360 /    99851
+mfv_neutralino_tau1000um_M0800.ana_filter_eff = 9.9825e-01  #    99774 /    99949
+mfv_neutralino_tau1000um_M1000.ana_filter_eff = 9.9866e-01  #    99866 /   100000
+mfv_neutralino_tau9900um_M0200.ana_filter_eff = 4.7714e-01  #    47690 /    99950
+mfv_neutralino_tau9900um_M0400.ana_filter_eff = 9.6734e-01  #    96734 /   100000
+mfv_neutralino_tau9900um_M0600.ana_filter_eff = 9.9511e-01  #    99461 /    99950
+mfv_neutralino_tau9900um_M0800.ana_filter_eff = 9.9818e-01  #    99718 /    99900
+mfv_neutralino_tau9900um_M1000.ana_filter_eff = 9.9904e-01  #    99803 /    99899
+dyjetstollM10.ana_filter_eff        = 4.3913e-04  #     3132 /  7132223
+dyjetstollM50.ana_filter_eff        = 2.8337e-03  #    86313 / 30459503
+qcdht0100.ana_filter_eff            = 7.4784e-04  #    37489 / 50129518
+qcdht0250.ana_filter_eff            = 6.0783e-02  #  1644907 / 27062078
+qcdht0500.ana_filter_eff            = 3.1108e-01  #  9518716 / 30599292
+qcdht1000.ana_filter_eff            = 4.4614e-01  #  6176270 / 13843863
+singletop_s.ana_filter_eff          = 7.3030e-02  #    18985 /   259961
+singletop_s_tbar.ana_filter_eff     = 6.7548e-02  #     9455 /   139974
+singletop_t.ana_filter_eff          = 5.4126e-02  #   203416 /  3758227
+singletop_tW.ana_filter_eff         = 1.8520e-01  #    92167 /   497658
+singletop_tW_tbar.ana_filter_eff    = 1.8475e-01  #    91167 /   493460
+singletop_t_tbar.ana_filter_eff     = 5.3102e-02  #   102756 /  1935072
+ttbardilep.ana_filter_eff           = 1.3153e-01  #  1577210 / 11991069
+ttbarhadronic.ana_filter_eff        = 4.7515e-01  #  4823997 / 10152516
+ttbarsemilep.ana_filter_eff         = 2.7453e-01  #  6979960 / 25424818
+ttgjets.ana_filter_eff              = 5.0128e-01  #   862177 /  1719954
+ttwjets.ana_filter_eff              = 6.0494e-01  #   118596 /   196046
+ttzjets.ana_filter_eff              = 6.3787e-01  #   134054 /   210160
+wjetstolnu.ana_filter_eff           = 6.6758e-04  #    38526 / 57709905
+ww.ana_filter_eff                   = 2.2439e-02  #   224401 / 10000431
+wz.ana_filter_eff                   = 2.8131e-02  #   281321 / 10000283
+zz.ana_filter_eff                   = 2.9762e-02  #   291664 /  9799908
 
 ########################################################################
 

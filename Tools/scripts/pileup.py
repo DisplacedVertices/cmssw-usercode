@@ -64,7 +64,7 @@ for i in xrange(1, ndata+1):
     m = mc_h.GetBinContent(i)
     w = -1
     if m == 0:
-        if d > 1e-12:
+        if d > 1e-9:
             raise ValueError('m == 0 and d = %e != 0 for i = %i' % (d, i))
         w = 0
     else:
