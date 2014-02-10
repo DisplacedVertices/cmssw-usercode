@@ -226,6 +226,58 @@ struct z_calculator {
       return it->second;
     }
 
+    static double ana_filter_eff(const std::string& name) {
+      // JMTBAD keep in sync with Samples.py
+      if (name == "mfv_neutralino_tau0000um_M0200") return 4.7518e-01;  //    47447 /    99850
+      else if (name == "mfv_neutralino_tau0000um_M0400") return 9.6890e-01;  //    96890 /   100000
+      else if (name == "mfv_neutralino_tau0000um_M0600") return 9.9495e-01;  //    99495 /   100000
+      else if (name == "mfv_neutralino_tau0000um_M0800") return 9.9796e-01;  //    99696 /    99900
+      else if (name == "mfv_neutralino_tau0000um_M1000") return 9.9866e-01;  //    99862 /    99996
+      else if (name == "mfv_neutralino_tau0010um_M0200") return 4.7647e-01;  //    47647 /   100000
+      else if (name == "mfv_neutralino_tau0010um_M0400") return 9.6750e-01;  //    96750 /   100000
+      else if (name == "mfv_neutralino_tau0010um_M0600") return 9.9530e-01;  //    99231 /    99700
+      else if (name == "mfv_neutralino_tau0010um_M0800") return 9.9795e-01;  //    99745 /    99950
+      else if (name == "mfv_neutralino_tau0010um_M1000") return 9.9892e-01;  //    99791 /    99899
+      else if (name == "mfv_neutralino_tau0100um_M0200") return 4.7951e-01;  //    47807 /    99700
+      else if (name == "mfv_neutralino_tau0100um_M0400") return 9.6769e-01;  //    96043 /    99250
+      else if (name == "mfv_neutralino_tau0100um_M0600") return 9.9554e-01;  //    99206 /    99650
+      else if (name == "mfv_neutralino_tau0100um_M0800") return 9.9795e-01;  //    99795 /   100000
+      else if (name == "mfv_neutralino_tau0100um_M1000") return 9.9890e-01;  //    99639 /    99749
+      else if (name == "mfv_neutralino_tau1000um_M0200") return 4.7873e-01;  //    47754 /    99752
+      else if (name == "mfv_neutralino_tau1000um_M0400") return 9.6798e-01;  //    96653 /    99850
+      else if (name == "mfv_neutralino_tau1000um_M0600") return 9.9508e-01;  //    99360 /    99851
+      else if (name == "mfv_neutralino_tau1000um_M0800") return 9.9825e-01;  //    99774 /    99949
+      else if (name == "mfv_neutralino_tau1000um_M1000") return 9.9866e-01;  //    99866 /   100000
+      else if (name == "mfv_neutralino_tau9900um_M0200") return 4.7714e-01;  //    47690 /    99950
+      else if (name == "mfv_neutralino_tau9900um_M0400") return 9.6734e-01;  //    96734 /   100000
+      else if (name == "mfv_neutralino_tau9900um_M0600") return 9.9511e-01;  //    99461 /    99950
+      else if (name == "mfv_neutralino_tau9900um_M0800") return 9.9818e-01;  //    99718 /    99900
+      else if (name == "mfv_neutralino_tau9900um_M1000") return 9.9904e-01;  //    99803 /    99899
+      else if (name == "dyjetstollM10") return 4.3913e-04;  //     3132 /  7132223
+      else if (name == "dyjetstollM50") return 2.8337e-03;  //    86313 / 30459503
+      else if (name == "qcdht0100") return 7.4784e-04;  //    37489 / 50129518
+      else if (name == "qcdht0250") return 6.0783e-02;  //  1644907 / 27062078
+      else if (name == "qcdht0500") return 3.1108e-01;  //  9518716 / 30599292
+      else if (name == "qcdht1000") return 4.4614e-01;  //  6176270 / 13843863
+      else if (name == "singletop_s") return 7.3030e-02;  //    18985 /   259961
+      else if (name == "singletop_s_tbar") return 6.7548e-02;  //     9455 /   139974
+      else if (name == "singletop_t") return 5.4126e-02;  //   203416 /  3758227
+      else if (name == "singletop_tW") return 1.8520e-01;  //    92167 /   497658
+      else if (name == "singletop_tW_tbar") return 1.8475e-01;  //    91167 /   493460
+      else if (name == "singletop_t_tbar") return 5.3102e-02;  //   102756 /  1935072
+      else if (name == "ttbardilep") return 1.3153e-01;  //  1577210 / 11991069
+      else if (name == "ttbarhadronic") return 4.7515e-01;  //  4823997 / 10152516
+      else if (name == "ttbarsemilep") return 2.7453e-01;  //  6979960 / 25424818
+      else if (name == "ttgjets") return 5.0128e-01;  //   862177 /  1719954
+      else if (name == "ttwjets") return 6.0494e-01;  //   118596 /   196046
+      else if (name == "ttzjets") return 6.3787e-01;  //   134054 /   210160
+      else if (name == "wjetstolnu") return 6.6758e-04;  //    38526 / 57709905
+      else if (name == "ww") return 2.2439e-02;  //   224401 / 10000431
+      else if (name == "wz") return 2.8131e-02;  //   281321 / 10000283
+      else if (name == "zz") return 2.9762e-02;  //   291664 /  9799908
+      else return 0;
+    }
+
     sample(const std::string& name_, const double xsec_, const int color_, const std::vector<std::string>& vars)
       : name(name_),
         filename(options.file_path + "/" + name_ + "_mangled.root"),
@@ -236,11 +288,13 @@ struct z_calculator {
     {
       assert(file->IsOpen());
 
+      double filter_eff = ana_filter_eff(name);
+
       TH1F* hnevents = (TH1F*)file->Get("ntot");
-      nevents = hnevents->GetBinContent(1);
+      nevents = hnevents->GetBinContent(1) / filter_eff;
 
       TH1F* hnm1 = (TH1F*)file->Get("nm1");
-      nm1 = hnm1->GetBinContent(1);
+      nm1 = hnm1->GetBinContent(1) / filter_eff;
 
       for (const std::string& var : vars)
         hists[var] = (TH1F*)file->Get(var.c_str());
