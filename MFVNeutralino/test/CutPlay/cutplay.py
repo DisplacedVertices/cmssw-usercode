@@ -169,7 +169,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     bkg_samples = ttbar_samples + qcd_samples
     samples = [mfv_neutralino_tau0100um_M0200, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400] + bkg_samples
     for sample in bkg_samples:
-        sample.total_events = sample.nevents_orig/2
+        sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
