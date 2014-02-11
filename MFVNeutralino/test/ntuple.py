@@ -21,18 +21,42 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
-from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-process.triggerFilter = hltHighLevel.clone()
-process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
-process.triggerFilter.andOr = True # = OR
-for name, path in process.paths.items():
-    if not name.startswith('eventCleaning'):
-        path.insert(0, process.triggerFilter)
-process.ptrig = cms.Path(process.triggerFilter)
-process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
+#from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
+#process.triggerFilter = hltHighLevel.clone()
+#process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
+#process.triggerFilter.andOr = True # = OR
+#for name, path in process.paths.items():
+#    if not name.startswith('eventCleaning'):
+#        path.insert(0, process.triggerFilter)
+#process.ptrig = cms.Path(process.triggerFilter)
+#process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
+
+process.mfvEvent.skip_event_filter = ''
+
+process.filt1 = cms.EDFilter('MFVDispJetsFilter', a = cms.int32(1), b = cms.int32(0))
+process.filt2 = cms.EDFilter('MFVDispJetsFilter', a = cms.int32(2), b = cms.int32(0))
+process.filt3 = cms.EDFilter('MFVDispJetsFilter', a = cms.int32(3), b = cms.int32(0))
+
+process.pfilt1 = cms.Path(process.filt1)
+process.pfilt2 = cms.Path(process.filt2)
+process.pfilt3 = cms.Path(process.filt3)
+
+process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('pfilt1'))
+process.out.fileName = 'ntuplef1.root'
+process.out2 = process.out.clone()
+process.out2.fileName = 'ntuplef2.root'
+process.out2.SelectEvents.SelectEvents = ['pfilt2']
+process.outp *= process.out2
+process.out3 = process.out.clone()
+process.out3.fileName = 'ntuplef3.root'
+process.out3.SelectEvents.SelectEvents = ['pfilt3']
+process.outp *= process.out3
+
+process.source.fileNames = ['/store/mc/Summer12_DR53X/HTo2LongLivedTo4F_MH-1000_MFF-20_CTau1p5To150_8TeV-pythia6/AODSIM/DEBUG_PU_S10_START53_V7A-v2/0000/E80ADAD3-EEF0-E111-B106-003048F0E55A.root']
+process.maxEvents.input = 10
 
 # We're not saving the PAT branches, but if the embedding is on then
 # we can't match leptons by track to vertices.
@@ -98,6 +122,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        #manual_datasets = SampleFiles['mfv300s'],
                        max_threads = 3,
                        )
+
+    samples = [
+        Samples.TupleOnlyMCSample('dp_200_50_tau20to2000', '/HTo2LongLivedTo4F_MH-200_MFF-50_CTau20To2000_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_50_tau8to800', '/HTo2LongLivedTo4F_MH-400_MFF-50_CTau8To800_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_150_tau40to4000', '/HTo2LongLivedTo4F_MH-400_MFF-150_CTau40To4000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_150_tau10to1000', '/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_350_tau35to3500', '/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        ]
+
+    cs.submit_all(samples[1:])
+    raise 'done'
+
 
     timing = { 'dyjetstollM10': 0.011203, 'dyjetstollM50': 0.019867, 'qcdbce020': 0.008660, 'qcdbce030': 0.007796, 'qcdbce080': 0.061260, 'qcdbce170': 0.328891, 'qcdbce250': 0.481813, 'qcdbce350': 0.519482, 'qcdem020': 0.010137, 'qcdem030': 0.01, 'qcdem080': 0.037925, 'qcdem170': 0.286123, 'qcdem250': 0.471398, 'qcdem350': 0.686303, 'qcdht0100': 0.008273, 'qcdht0250': 0.116181, 'qcdht0500': 0.738374, 'qcdht1000': 1.002745, 'qcdmu0020': 0.012301, 'qcdmu0030': 0.015762, 'qcdmu0050': 0.018178, 'qcdmu0080': 0.119300, 'qcdmu0120': 0.245562, 'qcdmu0170': 0.32, 'qcdmu0300': 0.419818, 'qcdmu0470': 0.584266, 'qcdmu0600': 0.455305, 'qcdmu0800': 0.879171, 'qcdmu1000': 1.075712, 'singletop_s': 0.093429, 'singletop_s_tbar': 0.146642, 'singletop_tW': 0.327386, 'singletop_tW_tbar': 0.184349, 'singletop_t': 0.092783, 'singletop_t_tbar': 0.060983, 'ttbarhadronic': 0.752852, 'ttbarsemilep': 0.419073, 'ttbardilep': 0.295437, 'ttgjets': 0.861987, 'ttwjets': 0.714156, 'ttzjets': 0.827464, 'wjetstolnu': 0.010842, 'ww': 0.046754, 'wz': 0.049839, 'zz': 0.059791, }
 

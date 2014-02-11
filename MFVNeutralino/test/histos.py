@@ -56,6 +56,24 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples += [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 
     samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
+
+    samples = [
+        Samples.TupleOnlyMCSample('dp_200_50_tau20to2000_1', '/HTo2LongLivedTo4F_MH-200_MFF-50_CTau20To2000_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_50_tau8to800_1', '/HTo2LongLivedTo4F_MH-400_MFF-50_CTau8To800_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_150_tau40to4000_1', '/HTo2LongLivedTo4F_MH-400_MFF-150_CTau40To4000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_150_tau10to1000_1', '/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_350_tau35to3500_1', '/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_200_50_tau20to2000_2', '/HTo2LongLivedTo4F_MH-200_MFF-50_CTau20To2000_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_50_tau8to800_2', '/HTo2LongLivedTo4F_MH-400_MFF-50_CTau8To800_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_150_tau40to4000_2', '/HTo2LongLivedTo4F_MH-400_MFF-150_CTau40To4000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_150_tau10to1000_2', '/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_350_tau35to3500_2', '/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_200_50_tau20to2000_3', '/HTo2LongLivedTo4F_MH-200_MFF-50_CTau20To2000_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_50_tau8to800_3', '/HTo2LongLivedTo4F_MH-400_MFF-50_CTau8To800_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_400_150_tau40to4000_3', '/HTo2LongLivedTo4F_MH-400_MFF-150_CTau40To4000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_150_tau10to1000_3', '/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 500),
+        Samples.TupleOnlyMCSample('dp_1000_350_tau35to3500_3', '/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 500),
+        ]
     
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
