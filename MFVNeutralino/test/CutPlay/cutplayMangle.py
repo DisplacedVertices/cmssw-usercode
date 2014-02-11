@@ -1,5 +1,6 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import ROOT
+import JMTucker.Tools.Samples as Samples
 
 def depize(s):
     return float(s.replace('p','.').replace('n','-'))
@@ -43,9 +44,12 @@ def cutplayMangle(filename):
     output_fn = os.path.basename(filename).replace('.root', '_mangled.root')
     output_file = ROOT.TFile(output_fn, 'RECREATE')
 
+    sample_name = os.path.basename(filename).replace('.root', '')
+    sample = getattr(Samples, sample_name)
+
     h_ntot = ROOT.TH1F('ntot', '', 1, 0, 1)
-    h_ntot.SetBinContent(1, ntot[0])
-    h_ntot.SetBinError(1, ntot[1])
+    h_ntot.SetBinContent(1, ntot[0] / sample.ana_filter_eff)
+    h_ntot.SetBinError(1, ntot[1] / sample.ana_filter_eff)
 
     if nm1 is not None:
         h_nm1 = ROOT.TH1F('nm1', '', 1, 0, 1)
