@@ -294,7 +294,7 @@ struct z_calculator {
       nevents = hnevents->GetBinContent(1) / filter_eff;
 
       TH1F* hnm1 = (TH1F*)file->Get("nm1");
-      nm1 = hnm1->GetBinContent(1) / filter_eff;
+      nm1 = hnm1->GetBinContent(1);
 
       for (const std::string& var : vars)
         hists[var] = (TH1F*)file->Get(var.c_str());
