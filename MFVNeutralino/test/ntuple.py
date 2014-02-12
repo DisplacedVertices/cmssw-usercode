@@ -1,35 +1,42 @@
 #!/usr/bin/env python
 
 import sys
+from JMTucker.Tools.CMSSWTools import set_events_to_process
 from JMTucker.Tools.PATTuple_cfg import *
 tuple_version = version
 
 runOnMC = True # magic line, don't touch
+keep_everything = False
+#set_events_to_process(process, [])
 process, common_seq = pat_tuple_process(runOnMC)
 
 no_skimming_cuts(process)
 
 process.out.fileName = 'ntuple.root'
-process.out.outputCommands = [
-    'drop *',
-    'keep MFVEvent_mfvEvent__*',
-    'keep MFVVertexAuxs_mfvVerticesAux__*',
-    ]
-process.out.dropMetaData = cms.untracked.string('ALL')
+if keep_everything:
+    process.out.outputCommands = ['keep *']
+else:
+    process.out.outputCommands = [
+        'drop *',
+        'keep MFVEvent_mfvEvent__*',
+        'keep MFVVertexAuxs_mfvVerticesAux__*',
+        ]
+    process.out.dropMetaData = cms.untracked.string('ALL')
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
-from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-process.triggerFilter = hltHighLevel.clone()
-process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
-process.triggerFilter.andOr = True # = OR
-for name, path in process.paths.items():
-    if not name.startswith('eventCleaning'):
-        path.insert(0, process.triggerFilter)
-process.ptrig = cms.Path(process.triggerFilter)
-process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
+if not keep_everything:
+    from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
+    process.triggerFilter = hltHighLevel.clone()
+    process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
+    process.triggerFilter.andOr = True # = OR
+    for name, path in process.paths.items():
+        if not name.startswith('eventCleaning'):
+            path.insert(0, process.triggerFilter)
+    process.ptrig = cms.Path(process.triggerFilter)
+    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
