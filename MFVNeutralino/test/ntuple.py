@@ -6,7 +6,8 @@ from JMTucker.Tools.PATTuple_cfg import *
 tuple_version = version
 
 runOnMC = True # magic line, don't touch
-keep_everything = False
+prepare_vis = False
+keep_everything = prepare_vis
 #set_events_to_process(process, [])
 process, common_seq = pat_tuple_process(runOnMC)
 
@@ -45,6 +46,22 @@ process.outp = cms.EndPath(process.mfvEvent * process.out)
 # we can't match leptons by track to vertices.
 process.patMuonsPF.embedTrack = False
 process.patElectronsPF.embedTrack = False
+
+if prepare_vis:
+    process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
+                                             gen_src = cms.InputTag('genParticles'),
+                                             print_info = cms.bool(True),
+                                             )
+
+    process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
+                                       src = cms.InputTag('genParticles'),
+                                       printVertex = cms.untracked.bool(True),
+                                       )
+
+    process.load('JMTucker.MFVNeutralino.MatchedTracks_cff')
+
+    process.pp = cms.Path(process.mfvGenParticles * process.printList * process.mfvTrackMatching)
+
 
 if 'histos' in sys.argv:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
