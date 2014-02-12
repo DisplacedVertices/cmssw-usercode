@@ -8,8 +8,9 @@ tuple_version = version
 runOnMC = True # magic line, don't touch
 prepare_vis = False
 keep_everything = prepare_vis
-#set_events_to_process(process, [])
 process, common_seq = pat_tuple_process(runOnMC)
+#set_events_to_process(process, [])
+#process.source.fileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/ACE17BB6-A20E-E211-819A-00266CF9B630.root']
 
 no_skimming_cuts(process)
 
@@ -28,7 +29,10 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
-if not keep_everything:
+if keep_everything:
+    process.mfvEvent.skip_event_filter = ''
+    process.mfvSelectedVerticesTight.produce_vertices = True
+else:
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
     process.triggerFilter = hltHighLevel.clone()
     process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
@@ -53,14 +57,8 @@ if prepare_vis:
                                              print_info = cms.bool(True),
                                              )
 
-    process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
-                                       src = cms.InputTag('genParticles'),
-                                       printVertex = cms.untracked.bool(True),
-                                       )
-
-    process.load('JMTucker.MFVNeutralino.MatchedTracks_cff')
-
-    process.pp = cms.Path(process.mfvGenParticles * process.printList * process.mfvTrackMatching)
+    process.load('JMTucker.Tools.ParticleListDrawer_cff')
+    process.pp = cms.Path(process.mfvGenParticles * process.ParticleListDrawer)
 
 
 if 'histos' in sys.argv:
