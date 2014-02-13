@@ -50,6 +50,7 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_bs2derr          = cms.double(1e9),
                                      min_bs2dsig          = cms.double(0),
                                      min_bs3ddist         = cms.double(0),
+                                     max_sumnhitsbehind   = cms.int32(1000000),
                                      sort_by = cms.string('ntracks_then_mass'),
                                      )
 
