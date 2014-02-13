@@ -67,6 +67,7 @@ private:
   const double min_gen3dsig;
   const double max_gen3dsig;
   const double min_bs2ddist;
+  const double max_bs2ddist;
   const double max_bs2derr;
   const double min_bs2dsig;
   const double min_bs3ddist;
@@ -120,6 +121,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_gen3dsig(cfg.getParameter<double>("min_gen3dsig")),
     max_gen3dsig(cfg.getParameter<double>("max_gen3dsig")),
     min_bs2ddist(cfg.getParameter<double>("min_bs2ddist")),
+    max_bs2ddist(cfg.getParameter<double>("max_bs2ddist")),
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
     min_bs2dsig(cfg.getParameter<double>("min_bs2dsig")),
     min_bs3ddist(cfg.getParameter<double>("min_bs3ddist"))
@@ -179,6 +181,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.gen3dsig() >= min_gen3dsig &&
     vtx.gen3dsig() <  max_gen3dsig &&
     vtx.bs2ddist >= min_bs2ddist &&
+    vtx.bs2ddist < max_bs2ddist &&
     vtx.bs2derr < max_bs2derr &&
     vtx.bs2dsig() >= min_bs2dsig &&
     vtx.bs3ddist >= min_bs3ddist;
