@@ -20,18 +20,6 @@ nm1s = [
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
     ]
 
-cuts = ''
-#cuts = 'looser'
-#cuts = 'tightest'
-
-if cuts == 'looser':
-    process.mfvAnalysisCuts.min_sumht = 500
-    process.mfvSelectedVerticesTight.min_bs2dsig = 5
-    process.mfvSelectedVerticesTight.min_ntracksptgt3 = 1
-elif cuts == 'tightest':
-    process.mfvAnalysisCuts.min_ntracks01 = 17
-    process.mfvAnalysisCuts.min_maxtrackpt01 = 30
-
 for name, cut in nm1s:
     vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
     vtx_name = 'vtxNo' + name
@@ -52,17 +40,15 @@ if hackrundata:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples
+    samples = Samples.ttbar_samples + Samples.qcd_samples
     samples += [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
-    
+    #samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
+
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
 
-    if cuts != '':
-        cuts = '_' + cuts
-    cs = CRABSubmitter('MFVHistosV15' + cuts,
+    cs = CRABSubmitter('MFVHistosV15',
                        total_number_of_events = -1,
                        events_per_job = 200000,
                        manual_datasets = SampleFiles['MFVNtupleV15'],
