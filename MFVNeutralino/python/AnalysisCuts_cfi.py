@@ -33,3 +33,4 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                )
 
 mfvAnalysisCutsTrigOnly = mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+mfvAnalysisCutsOneVtx = mfvAnalysisCuts.clone(min_nvertex = 1)
