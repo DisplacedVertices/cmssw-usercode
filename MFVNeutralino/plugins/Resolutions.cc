@@ -63,6 +63,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(vertex_src, vertices);
 
   TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
+  int lsp_nmatch[2] = {0,0};
 
   for (const MFVVertexAux& vtx : *vertices) {
     double dr = 1e99, dist = 1e99;
@@ -74,11 +75,15 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
         reco::deltaR(lsp_p4s[1].Eta(), lsp_p4s[1].Phi(), vtx.eta[which_mom], vtx.phi[which_mom])
       };
       
-      for (int i = 0; i < 2; ++i)
-        if (drs[i] < max_dr && drs[i] < dr) {
-          dr = drs[i];
-          ilsp = i;
+      for (int i = 0; i < 2; ++i) {
+        if (drs[i] < max_dr) {
+          ++lsp_nmatch[i];
+          if (drs[i] < dr) {
+            dr = drs[i];
+            ilsp = i;
+          }
         }
+      }
     }
     else if (max_dist > 0) {
       double dists[2] = {
@@ -90,11 +95,15 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
             mevent->gen_lsp_decay[1*3+2] - vtx.z),
       };
 
-      for (int i = 0; i < 2; ++i)
-        if (dists[i] < max_dist && dists[i] < dist) {
-          dist = dists[i];
-          ilsp = i;
+      for (int i = 0; i < 2; ++i) {
+        if (dists[i] < max_dist) {
+          ++lsp_nmatch[i];
+          if (dists[i] < dist) {
+            dist = dists[i];
+            ilsp = i;
+          }
         }
+      }
     }
 
     if (ilsp < 0)
@@ -104,7 +113,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     const TLorentzVector& lsp_p4 = lsp_p4s[ilsp];
     const TLorentzVector& vtx_p4 = vtx.p4(which_mom);
 
-    // histogram dr, dist
+    // histogram dr, dist, lsp_nmatch[i]
     // histogram space resolutions: x, y, z, dist2d, dist3d
     // histogram momentum: p, pt, eta, phi, mass, px, py, pz
   }
