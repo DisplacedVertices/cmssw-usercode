@@ -43,6 +43,7 @@ private:
   const double min_jetsntkmass01;
   const double min_tksjetsntkmass01;
   const double min_absdeltaphi01;
+  const double min_bs2ddist01;
 
   const int min_npv;
   const int max_npv;
@@ -76,6 +77,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_jetsntkmass01(cfg.getParameter<double>("min_jetsntkmass01")),
     min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01")),
     min_absdeltaphi01(cfg.getParameter<double>("min_absdeltaphi01")),
+    min_bs2ddist01(cfg.getParameter<double>("min_bs2ddist01")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv"))
 {
@@ -132,7 +134,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex)
       return false;
 
-    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0) {
+    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0) {
       if (nsv < 2)
         return false;
 
@@ -161,6 +163,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (fabs(reco::deltaPhi(phi0, phi1)) < min_absdeltaphi01)
         return false;
 
+      if (v0.bs2ddist + v1.bs2ddist < min_bs2ddist01)
+        return false;
     }
   }
 
