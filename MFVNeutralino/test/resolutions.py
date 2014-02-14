@@ -20,19 +20,19 @@ process.p = cms.Path(process.mfvSelectedVerticesSeq)
 process.mfvResolutionsByDistAllTrks = mfvResolutions.clone()
 process.p *= process.mfvResolutionsByDistAllTrks
 
-process.mfvResolutionsByDistCutTrks = mfvResolutions.clone(max_dist = 0.008)
+process.mfvResolutionsByDistCutTrks = mfvResolutions.clone(max_dist = 0.02)
 process.p *= process.mfvResolutionsByDistCutTrks
 
 process.mfvResolutionsByDistAllJets = mfvResolutions.clone(which_mom = 1)
 process.p *= process.mfvResolutionsByDistAllJets
 
-process.mfvResolutionsByDistCutJets = mfvResolutions.clone(which_mom = 1, max_dist = 0.008)
+process.mfvResolutionsByDistCutJets = mfvResolutions.clone(which_mom = 1, max_dist = 0.02)
 process.p *= process.mfvResolutionsByDistCutJets
 
 process.mfvResolutionsByDistAllTrksJets = mfvResolutions.clone(which_mom = 2)
 process.p *= process.mfvResolutionsByDistAllTrksJets
 
-process.mfvResolutionsByDistCutTrksJets = mfvResolutions.clone(which_mom = 2, max_dist = 0.008)
+process.mfvResolutionsByDistCutTrksJets = mfvResolutions.clone(which_mom = 2, max_dist = 0.02)
 process.p *= process.mfvResolutionsByDistCutTrksJets
 
 process.mfvResolutionsByDRAllTrks = mfvResolutions.clone(max_dr = 1e99, max_dist = -1)
