@@ -15,8 +15,11 @@ def effs(fn):
     h = f.Get('mfvVertexHistos/h_nsv')
     numvtx = h.Integral(h.FindBin(2), 1000000)
     sname = os.path.basename(fn).replace('.root','')
-    s = getattr(Samples, sname)
-    weight = s.cross_section*int_lumi/(den/s.ana_filter_eff)
+    try:
+        s = getattr(Samples, sname)
+        weight = s.cross_section*int_lumi/(den/s.ana_filter_eff)
+    except AttributeError:
+        weight = 1.
     sum += numall * weight
     var += numall * weight**2
     print '%s (w = %.3e): # ev: %5i  pass evt+vtx: %5i -> %5.3e  pass vtx only: %5i -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numvtx, float(numvtx)/den)
