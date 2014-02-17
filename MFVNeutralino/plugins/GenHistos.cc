@@ -50,6 +50,8 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
   TH1F* h_lsp_dist2d;
   TH1F* h_lsp_dist3d;
+  TH1F* h_lsp_angle2;
+  TH1F* h_lsp_angle3;
 
   TH2F* h_vtx[9];
   TH1F* h_r2d[9];
@@ -247,6 +249,9 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   h_lsp_dist2d = fs->make<TH1F>("h_lsp_dist2d", ";2D distance between LSP decay positions (cm);Events/0.0025 cm", 400, 0, 1);
   h_lsp_dist3d = fs->make<TH1F>("h_lsp_dist3d", ";3D distance between LSP decay positions (cm);Events/0.0025 cm", 400, 0, 1);
+
+  h_lsp_angle2 = fs->make<TH1F>("h_lsp_angle2", ";cos(angle in r-#phi plane) between LSP momenta;Events/0.01", 202, -1.01, 1.01);
+  h_lsp_angle3 = fs->make<TH1F>("h_lsp_angle3", ";cos(3D angle) between LSP momenta;Events/0.01", 202, -1.01, 1.01);
 
   const char* names[9] = {"lsp", "strange", "bottom", "bhadron", "from21", "from22", "fromq", "from21only", "from22only"};
   for (int i = 0; i < (check_all_gen_particles ? 9 : 4); ++i) {
@@ -446,6 +451,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_lsp_dist3d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
                            mci.stranges[0]->vy() - mci.stranges[1]->vy(),
                            mci.stranges[0]->vz() - mci.stranges[1]->vz()));
+
+    {
+      TVector3 lsp_mom_0 = mci.p4_lsps[0].Vect();
+      TVector3 lsp_mom_1 = mci.p4_lsps[1].Vect();
+      h_lsp_angle3->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
+      lsp_mom_0.SetZ(0);
+      lsp_mom_1.SetZ(0);
+      h_lsp_angle2->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
+    }
 
     std::vector<const reco::GenParticle*> lsp_partons;
     for (int i = 0; i < 2; ++i) {
