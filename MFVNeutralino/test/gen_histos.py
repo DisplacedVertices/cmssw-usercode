@@ -25,7 +25,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
 
     import JMTucker.Tools.Samples as Samples
-    samples = [s for s in Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples if 'qcdmu' not in s.name]
+    #samples = [s for s in Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples if 'qcdmu' not in s.name]
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('GenHistos',
