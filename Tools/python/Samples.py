@@ -449,6 +449,21 @@ wjetstolnu.ana_filter_eff           = 6.6758e-04  #    38526 / 57709905
 ww.ana_filter_eff                   = 2.2439e-02  #   224401 / 10000431
 wz.ana_filter_eff                   = 2.8131e-02  #   281321 / 10000283
 zz.ana_filter_eff                   = 2.9762e-02  #   291664 /  9799908
+qcdpt0000.ana_filter_eff =  7.001e-06
+qcdpt0005.ana_filter_eff =  1.410e-05
+qcdpt0015.ana_filter_eff =  1.332e-05
+qcdpt0030.ana_filter_eff =  5.733e-05
+qcdpt0050.ana_filter_eff =  1.313e-03
+qcdpt0080.ana_filter_eff =  1.476e-02
+qcdpt0120.ana_filter_eff =  5.763e-02
+qcdpt0170.ana_filter_eff =  1.235e-01
+qcdpt0300.ana_filter_eff =  2.067e-01
+qcdpt0470.ana_filter_eff =  2.439e-01
+qcdpt0600.ana_filter_eff =  2.534e-01
+qcdpt0800.ana_filter_eff =  2.505e-01
+qcdpt1000.ana_filter_eff =  2.341e-01
+qcdpt1400.ana_filter_eff =  1.969e-01
+qcdpt1800.ana_filter_eff =  1.546e-01
 
 ########################################################################
 
