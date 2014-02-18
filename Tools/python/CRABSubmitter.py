@@ -59,6 +59,18 @@ class CRABSubmitter:
         self.batch_name = batch_name
         self.batch_dir = 'crab/%s' % batch_name
         mkdirs_if_needed(self.batch_dir + '/publish_logs/')
+
+        self.git_status_dir = self.batch_dir + '/gitstatus/'
+        mkdirs_if_needed(self.git_status_dir)
+        os.system("git log --pretty=format:'%%H' -n 1 > %shash" % self.git_status_dir)
+        os.system("git status --untracked-files=all --ignored > %sstatus" % self.git_status_dir)
+        self.git_untracked_tmp_fn = '/tmp/%s/untracked.tgz' % self.username
+        os.system("tar czf %s -C `git rev-parse --show-toplevel` `git status --porcelain | grep '^??' | sed 's/??//'`" % self.git_untracked_tmp_fn)
+        if os.stat(self.git_untracked_tmp_fn).st_size > 100*1024**2:
+            print '\033[36;7m warning: \033[m git-untracked tarball is bigger than 100M, leaving in %s' % self.git_untracked_tmp_fn
+        else:
+            os.system('mv %s %s' % (self.git_untracked_tmp_fn, self.git_status_dir))
+        os.system('git diff > %sdiff' % self.git_status_dir)
         
         self.testing = testing
         self.max_threads = max_threads
