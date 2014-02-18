@@ -622,7 +622,7 @@ def data_mc_comparison(name,
 
     return canvas, stack, sum_background, legend, ratio_pad, res_g
 
-def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x)):
+def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x), delete_tmp=True):
     """Dump specified branches from tree into a list of tuples, via an
     ascii file. By default all vars are converted into integers. The
     xform parameter specifies the function transforming the tuple of
@@ -637,6 +637,8 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
     for line in open(tmp_fn):
         if ' * ' in line and 'Row' not in line:
             yield xform(line.split('*')[2:nvp2])
+    if delete_tmp:
+        os.remove(tmp_fn)
 
 def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None):
     """Move hist's stat box and change its line/text color. If
