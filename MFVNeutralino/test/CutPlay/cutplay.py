@@ -18,6 +18,9 @@ def pize(f,sz):
 changes = []
 changes.append(('nm1', '', ''))
 
+for i in xrange(0,20):
+    changes.append(('mindrmaxX%s'%pize(0.1*i,1), 'min_drmax = %f'%(0.1*i),''))
+
 for i in xrange(0,40):
     changes.append(('ntracksX%i'%i, 'min_ntracks = %i'%i, ''))
 
