@@ -114,12 +114,12 @@ from out2 import *
 
 no_run = True
 
-def foo(l):
+def foo(s):
     if no_run:
-        for r,l,e in l:
+        for r,l,e in s:
             print 'else if (l == %i && e == %i) return false;' % (l, e)
     else:
-        for rle in l:
+        for rle in s:
             print 'else if (r == %i && l == %i && e == %i) return false;' % rle
 
 foo(only1)
