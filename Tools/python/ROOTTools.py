@@ -640,7 +640,7 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
     if delete_tmp:
         os.remove(tmp_fn)
 
-def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None):
+def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, color_from_hist=True):
     """Move hist's stat box and change its line/text color. If
     movement is just an int, that number specifies how many units to
     move the box downward. If it is a 2-tuple of ints (m,n), the stat
@@ -651,6 +651,9 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None):
     appropriate) or else the stat box will not exist."""
 
     s = hist.FindObject('stats')
+
+    if color_from_hist:
+        new_color = hist.GetLineColor()
 
     if new_color is not None:
         s.SetTextColor(new_color)
@@ -974,6 +977,9 @@ class plot_saver:
 
     def __del__(self):
         self.write_index()
+
+    def update_canvas(self):
+        self.c.Update()
 
     def anchor_name(self, fn):
         return os.path.splitext(os.path.basename(fn))[0].replace('.', '_').replace('/', '_')
