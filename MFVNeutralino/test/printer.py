@@ -1,7 +1,10 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV15', 'mfv_neutralino_tau1000um_M0400', 10)
+#SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau1000um_M0400', 10)
+process.source.fileNames = ['file:selected_v13.root']
+process.source.noEventSort = cms.untracked.bool(False)
+
 del process.TFileService
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
