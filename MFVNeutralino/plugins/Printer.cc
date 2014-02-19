@@ -73,11 +73,11 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup&) {
     printf("  nlep (l,m,t): ");
     for (int i = 0; i < 3; ++i)
       printf("%i ", mevent->nlep(i));
-    size_t nl = mevent->lep_id.size();
-    die_if_not(nl == mevent->lep_pt.size() && nl == mevent->lep_eta.size() && nl == mevent->lep_phi.size() && nl == mevent->lep_dxy.size() && nl == mevent->lep_dz.size() && nl == mevent->lep_iso.size() && nl == mevent->lep_mva.size(), "lep vectors not same size");
-    printf("raw lep info (nl: %lu):\n", nl);
-    for (size_t i = 0; i < nl; ++i)
-      printf("id: %u   pt: %11.4e   eta: %11.4e   phi: %11.4e   dxy: %11.4e   dz: %11.4e   iso: %11.4e   mva: %11.4e\n", mevent->lep_id[i], mevent->lep_pt[i], mevent->lep_eta[i], mevent->lep_phi[i], mevent->lep_dxy[i], mevent->lep_dz[i], mevent->lep_iso[i], mevent->lep_mva[i]);
+//  size_t nl = mevent->lep_id.size();
+//  die_if_not(nl == mevent->lep_pt.size() && nl == mevent->lep_eta.size() && nl == mevent->lep_phi.size() && nl == mevent->lep_dxy.size() && nl == mevent->lep_dz.size() && nl == mevent->lep_iso.size() && nl == mevent->lep_mva.size(), "lep vectors not same size");
+//  printf("raw lep info (nl: %lu):\n", nl);
+//  for (size_t i = 0; i < nl; ++i)
+//    printf("id: %u   pt: %11.4e   eta: %11.4e   phi: %11.4e   dxy: %11.4e   dz: %11.4e   iso: %11.4e   mva: %11.4e\n", mevent->lep_id[i], mevent->lep_pt[i], mevent->lep_eta[i], mevent->lep_phi[i], mevent->lep_dxy[i], mevent->lep_dz[i], mevent->lep_iso[i], mevent->lep_mva[i]);
 
     printf("------- MFVEvent done -------\n\n");
   }
@@ -102,13 +102,13 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup&) {
       printf("                   %11s %11.4e %11.4e\n", "", v.cyy, v.cyz);
       printf("                   %11s %11s %11.4e\n", "", "", v.czz);
       printf("chi2/ndf: %11.4e / %11.4e\n", v.chi2, v.ndof);
-      printf("nlep associated: %lu", v.which_lep.size());
-      if (v.which_lep.size()) {
-        printf("which:\n");
-        for (uchar i : v.which_lep)
-          printf("%u ", i);
-        printf("\n");
-      }
+//    printf("nlep associated: %lu", v.which_lep.size());
+//    if (v.which_lep.size()) {
+//      printf("which:\n");
+//      for (uchar i : v.which_lep)
+//        printf("%u ", i);
+//      printf("\n");
+//    }
       printf("njets (%i types): ", mfv::NJetsByUse);
       for (uchar i : v.njets)
         printf("%u ", i);
@@ -127,7 +127,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup&) {
       printf("trackpterr         min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.trackpterrmin, v.trackpterrmax, v.trackpterravg, v.trackpterrrms);
       printf("trackdxyerr        min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.trackdxyerrmin, v.trackdxyerrmax, v.trackdxyerravg, v.trackdxyerrrms);
       printf("trackdzerr         min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.trackdzerrmin, v.trackdzerrmax, v.trackdzerravg, v.trackdzerrrms);
-      printf("trackpairdeta      min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.trackpairdetamin, v.trackpairdetamax, v.trackpairdetaavg, v.trackpairdetarms);
+//    printf("trackpairdeta      min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.trackpairdetamin, v.trackpairdetamax, v.trackpairdetaavg, v.trackpairdetarms);
       printf("dr                 min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.drmin, v.drmax, v.dravg, v.drrms);
       printf("trackpairmass      min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.trackpairmassmin, v.trackpairmassmax, v.trackpairmassavg, v.trackpairmassrms);
       printf("tracktripmass      min: %11.4e   max: %11.4e   avg: %11.4e   rms: %11.4e\n", v.tracktripmassmin, v.tracktripmassmax, v.tracktripmassavg, v.tracktripmassrms);
