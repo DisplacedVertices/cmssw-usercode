@@ -44,13 +44,13 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_r_pz;
   TH1F* h_r_rapidity;
   TH1F* h_r_theta;
+  TH1F* h_r_betagamma;
+  TH1F* h_r_avgbetagammalab;
+  TH1F* h_r_avgbetagammacmz;
 
   TH1F* h_f_p;
   TH1F* h_f_pt;
   TH1F* h_f_mass;
-  TH1F* h_f_px;
-  TH1F* h_f_py;
-  TH1F* h_f_pz;
 
   TH2F* h_s_p;
   TH2F* h_s_pt;
@@ -62,6 +62,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_pz;
   TH2F* h_s_rapidity;
   TH2F* h_s_theta;
+  TH2F* h_s_betagamma;
+  TH2F* h_s_avgbetagammalab;
+  TH2F* h_s_avgbetagammacmz;
 
 };
 
@@ -98,13 +101,13 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_r_pz = fs->make<TH1F>("h_r_pz", ";pz resolution (GeV);number of vertices", 300, -1500, 1500);
   h_r_rapidity = fs->make<TH1F>("h_r_rapidity", ";rapidity resolution;number of vertices", 50, -4, 4);
   h_r_theta = fs->make<TH1F>("h_r_theta", ";theta resolution;number of vertices", 50, -3.15, 3.15);
+  h_r_betagamma = fs->make<TH1F>("h_r_betagamma", ";betagamma resolution;number of vertices", 200, -10, 10);
+  h_r_avgbetagammalab = fs->make<TH1F>("h_r_avgbetagammalab", ";avgbetagammalab resolution;events", 200, -10, 10);
+  h_r_avgbetagammacmz = fs->make<TH1F>("h_r_avgbetagammacmz", ";avgbetagammacmz resolution;events", 200, -10, 10);
 
   h_f_p = fs->make<TH1F>("h_f_p", ";fractional p resolution;number of vertices", 100, -5, 5);
   h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional pt resolution;number of vertices", 100, -5, 5);
   h_f_mass = fs->make<TH1F>("h_f_mass", ";fractional mass resolution;number of vertices", 100, -5, 5);
-  h_f_px = fs->make<TH1F>("h_f_px", ";fractional px resolution;number of vertices", 100, -5, 5);
-  h_f_py = fs->make<TH1F>("h_f_py", ";fractional py resolution;number of vertices", 100, -5, 5);
-  h_f_pz = fs->make<TH1F>("h_f_pz", ";fractional pz resolution;number of vertices", 100, -5, 5);
 
   h_s_p = fs->make<TH2F>("h_s_p", ";generated p;reconstructed p", 150, 0, 1500, 150, 0, 1500);
   h_s_pt = fs->make<TH2F>("h_s_pt", ";generated pt;reconstructed pt", 150, 0, 1500, 150, 0, 1500);
@@ -116,6 +119,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_pz = fs->make<TH2F>("h_s_pz", ";generated pz;reconstructed pz", 150, 0, 1500, 150, 0, 1500);
   h_s_rapidity = fs->make<TH2F>("h_s_rapidity", ";generated rapidity;reconstructed rapidity", 50, -4, 4, 50, -4, 4);
   h_s_theta = fs->make<TH2F>("h_s_theta", ";generated theta;reconstructed theta", 50, 0, 3.15, 50, 0, 3.15);
+  h_s_betagamma = fs->make<TH2F>("h_s_betagamma", ";generated betagamma;reconstructed betagamma", 100, 0, 10, 100, 0, 10);
+  h_s_avgbetagammalab = fs->make<TH2F>("h_s_avgbetagammalab", ";generated avgbetagammalab;reconstructed avgbetagammalab", 100, 0, 10, 100, 0, 10);
+  h_s_avgbetagammacmz = fs->make<TH2F>("h_s_avgbetagammacmz", ";generated avgbetagammacmz;reconstructed avgbetagammacmz", 100, 0, 10, 100, 0, 10);
 }
 
 namespace {
@@ -208,7 +214,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
 
-    // histogram momentum resolutions: p, pt, eta, phi, mass, px, py, pz, rapidity, theta
+    // histogram momentum resolutions: p, pt, eta, phi, mass, px, py, pz, rapidity, theta, betagamma
     h_r_p->Fill(vtx_p4.P() - lsp_p4.P());
     h_r_pt->Fill(vtx_p4.Pt() - lsp_p4.Pt());
     h_r_eta->Fill(vtx_p4.Eta() - lsp_p4.Eta());
@@ -219,13 +225,11 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_r_pz->Fill(vtx_p4.Pz() - lsp_p4.Pz());
     h_r_rapidity->Fill(vtx_p4.Rapidity() - lsp_p4.Rapidity());
     h_r_theta->Fill(vtx_p4.Theta() - lsp_p4.Theta());
+    h_r_betagamma->Fill(vtx_p4.Beta()*vtx_p4.Gamma() - lsp_p4.Beta()*lsp_p4.Gamma());
 
     h_f_p->Fill((vtx_p4.P() - lsp_p4.P()) / lsp_p4.P());
     h_f_pt->Fill((vtx_p4.Pt() - lsp_p4.Pt()) / lsp_p4.Pt());
     h_f_mass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M());
-    h_f_px->Fill((vtx_p4.Px() - lsp_p4.Px()) / lsp_p4.Px());
-    h_f_py->Fill((vtx_p4.Py() - lsp_p4.Py()) / lsp_p4.Py());
-    h_f_pz->Fill((vtx_p4.Pz() - lsp_p4.Pz()) / lsp_p4.Pz());
 
     h_s_p->Fill(lsp_p4.P(), vtx_p4.P());
     h_s_pt->Fill(lsp_p4.Pt(), vtx_p4.Pt());
@@ -237,11 +241,41 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_pz->Fill(lsp_p4.Pz(), vtx_p4.Pz());
     h_s_rapidity->Fill(lsp_p4.Rapidity(), vtx_p4.Rapidity());
     h_s_theta->Fill(lsp_p4.Theta(), vtx_p4.Theta());
+    h_s_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx_p4.Beta()*vtx_p4.Gamma());
   }
 
   // histogram lsp_nmatch[i]
   for (int i = 0; i < 2; ++i) {
     h_lsp_nmatch[i]->Fill(lsp_nmatch[i]);
+  }
+
+  // histogram average betagamma resolutions
+  const int nsv = int(vertices->size());
+  if (nsv >= 2) {
+    const MFVVertexAux& v0 = vertices->at(0);
+    const MFVVertexAux& v1 = vertices->at(1);
+
+    TLorentzVector lsp0_p4 = lsp_p4s[0];
+    TLorentzVector lsp1_p4 = lsp_p4s[1];
+    double lsp_avgbetagammalab = (lsp0_p4.Beta()*lsp1_p4.Gamma() + lsp0_p4.Beta()*lsp1_p4.Gamma()) / 2;
+    TVector3 lsp_betacmz = TVector3(0, 0, -(lsp0_p4.Pz() + lsp1_p4.Pz()) / (lsp0_p4.E() + lsp1_p4.E()));
+    lsp0_p4.Boost(lsp_betacmz);
+    lsp1_p4.Boost(lsp_betacmz);
+    double lsp_avgbetagammacmz = (lsp0_p4.Beta()*lsp1_p4.Gamma() + lsp0_p4.Beta()*lsp1_p4.Gamma()) / 2;
+
+    TLorentzVector vtx0_p4 = v0.p4(which_mom);
+    TLorentzVector vtx1_p4 = v1.p4(which_mom);
+    double vtx_avgbetagammalab = (vtx0_p4.Beta()*vtx0_p4.Gamma() + vtx1_p4.Beta()*vtx1_p4.Gamma()) / 2;
+    TVector3 vtx_betacmz = TVector3(0, 0, -(vtx0_p4.Pz() + vtx1_p4.Pz()) / (vtx0_p4.E() + vtx1_p4.E()));
+    vtx0_p4.Boost(vtx_betacmz);
+    vtx1_p4.Boost(vtx_betacmz);
+    double vtx_avgbetagammacmz = (vtx0_p4.Beta()*vtx1_p4.Gamma() + vtx0_p4.Beta()*vtx1_p4.Gamma()) / 2;
+
+    h_r_avgbetagammalab->Fill(vtx_avgbetagammalab - lsp_avgbetagammalab);
+    h_r_avgbetagammacmz->Fill(vtx_avgbetagammacmz - lsp_avgbetagammacmz);
+    h_s_avgbetagammalab->Fill(lsp_avgbetagammalab, vtx_avgbetagammalab);
+    h_s_avgbetagammacmz->Fill(lsp_avgbetagammacmz, vtx_avgbetagammacmz);
+
   }
 }
 
