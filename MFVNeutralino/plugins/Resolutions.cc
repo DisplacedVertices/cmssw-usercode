@@ -55,6 +55,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_f_pt;
   TH1F* h_f_mass;
 
+  TH2F* h_rp_rmass;
+  TH2F* h_fp_fmass;
+
   TH2F* h_s_p;
   TH2F* h_s_pt;
   TH2F* h_s_eta;
@@ -68,7 +71,6 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_betagamma;
   TH2F* h_s_avgbetagammalab;
   TH2F* h_s_avgbetagammacmz;
-
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -112,17 +114,20 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_r_avgbetagammacmz = fs->make<TH1F>("h_r_avgbetagammacmz", ";avgbetagammacmz resolution;events", 200, -10, 10);
 
   h_f_p = fs->make<TH1F>("h_f_p", ";fractional p resolution;number of vertices", 100, -5, 5);
-  h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional pt resolution;number of vertices", 100, -5, 5);
+  h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional p_{T} resolution;number of vertices", 100, -5, 5);
   h_f_mass = fs->make<TH1F>("h_f_mass", ";fractional mass resolution;number of vertices", 100, -5, 5);
+
+  h_rp_rmass = fs->make<TH2F>("h_rp_rmass", ";mass resolution;p resolution", 300, -1500, 1500, 300, -1500, 1500);
+  h_fp_fmass = fs->make<TH2F>("h_fp_fmass", ";fractional mass resolution;fractional p resolution", 100, -5, 5, 100, -5, 5);
 
   h_s_p = fs->make<TH2F>("h_s_p", ";generated p;reconstructed p", 150, 0, 1500, 150, 0, 1500);
   h_s_pt = fs->make<TH2F>("h_s_pt", ";generated pt;reconstructed pt", 150, 0, 1500, 150, 0, 1500);
   h_s_eta = fs->make<TH2F>("h_s_eta", ";generated eta;reconstructed eta", 50, -4, 4, 50, -4, 4);
   h_s_phi = fs->make<TH2F>("h_s_phi", ";generated phi;reconstructed phi", 50, -3.15, 3.15, 50, -3.15, 3.15);
   h_s_mass = fs->make<TH2F>("h_s_mass", ";generated mass;reconstructed mass", 150, 0, 1500, 150, 0, 1500);
-  h_s_px = fs->make<TH2F>("h_s_px", ";generated px;reconstructed px", 150, 0, 1500, 150, 0, 1500);
-  h_s_py = fs->make<TH2F>("h_s_py", ";generated py;reconstructed py", 150, 0, 1500, 150, 0, 1500);
-  h_s_pz = fs->make<TH2F>("h_s_pz", ";generated pz;reconstructed pz", 150, 0, 1500, 150, 0, 1500);
+  h_s_px = fs->make<TH2F>("h_s_px", ";generated px;reconstructed px", 300, -1500, 1500, 300, -1500, 1500);
+  h_s_py = fs->make<TH2F>("h_s_py", ";generated py;reconstructed py", 300, -1500, 1500, 300, -1500, 1500);
+  h_s_pz = fs->make<TH2F>("h_s_pz", ";generated pz;reconstructed pz", 300, -1500, 1500, 300, -1500, 1500);
   h_s_rapidity = fs->make<TH2F>("h_s_rapidity", ";generated rapidity;reconstructed rapidity", 50, -4, 4, 50, -4, 4);
   h_s_theta = fs->make<TH2F>("h_s_theta", ";generated theta;reconstructed theta", 50, 0, 3.15, 50, 0, 3.15);
   h_s_betagamma = fs->make<TH2F>("h_s_betagamma", ";generated betagamma;reconstructed betagamma", 100, 0, 10, 100, 0, 10);
@@ -237,6 +242,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_f_p->Fill((vtx_p4.P() - lsp_p4.P()) / lsp_p4.P());
     h_f_pt->Fill((vtx_p4.Pt() - lsp_p4.Pt()) / lsp_p4.Pt());
     h_f_mass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M());
+
+    h_rp_rmass->Fill(vtx_p4.M() - lsp_p4.M(), vtx_p4.P() - lsp_p4.P());
+    h_fp_fmass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M(), (vtx_p4.P() - lsp_p4.P()) / lsp_p4.P());
 
     h_s_p->Fill(lsp_p4.P(), vtx_p4.P());
     h_s_pt->Fill(lsp_p4.Pt(), vtx_p4.Pt());
