@@ -27,6 +27,7 @@ struct option_driver {
   double signal_xsec; // in fb
   bool bigw;
   double syst_frac;
+  double min_scan_events;
   std::string file_path;
   std::string signal_file_suffix() const { return TString::Format("%ifb", int(signal_xsec)).Data(); }
   std::string signal_path() const { return file_path + "/" + signal_name + "_" + signal_file_suffix() + ".root"; }
@@ -38,10 +39,11 @@ struct option_driver {
       saveplots(0),
       plot_path("plots/SSB"),
       int_lumi(20.),
-      signal_name("mfv_neutralino_tau0100um_M0400"),
+      signal_name("mfv_neutralino_tau1000um_M0400"),
       signal_xsec(20.),
-      bigw(false),
-      syst_frac(-1)
+      bigw(true),
+      syst_frac(-1),
+      min_scan_events(5),
   {}
 
   bool one_double(char sw, double* d) {
@@ -98,10 +100,14 @@ struct option_driver {
           return 1;
 	break;
       case 'b':
-        bigw = true;
+        bigw = false;
 	break;
       case 'f':
         if (!one_double('f', &syst_frac))
+          return 1;
+	break;
+      case 'e':
+        if (!one_double('e', &min_scan_events))
           return 1;
 	break;
         
@@ -130,8 +136,9 @@ struct option_driver {
       fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20)\n");
       fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau0100um_M0400)\n");
       fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 20)\n");
-      fprintf(stderr, "  -b                      use big-weights samples (default: off)\n");
+      fprintf(stderr, "  -b                      do not use big-weights samples (default: on)\n");
       fprintf(stderr, "  -f syst_frac            fraction systematic uncertainty to use in PL calculation (default: -1)\n");
+      fprintf(stderr, "  -e min_scan_events      minimum number of events to allow in scan (default: 5)\n");
       return 1;
     }
 
@@ -448,7 +455,7 @@ struct z_calculator {
       if (!TMath::IsNaN(zpl))
         h_zpl->SetBinContent(i, zpl);
 
-      if (z > zmax && s >= 5) {
+      if (b > 0 && z > zmax && s >= options.min_scan_events) {
         cut = xax->GetBinLowEdge(i);
         smax = s;
         bmax = b;
@@ -533,7 +540,7 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "ntracksptgt5", "ntracksptgt10", "njetsntks", "tkonlypt", "abstkonlyeta", "tkonlymass", "jetsntkpt", "absjetsntketa", "jetsntkmass", "tksjetsntkpt", "abstksjetsntketa", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "maxm1trackpt", "trackdxyerrmin", "trackdzerrmin", "drmin", "drmax", "jetpairdrmin", "jetpairdrmax", "bs2ddist", "bs2derr", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "nsemileptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01", "absdeltaphi01"};
+  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "ntracksptgt5", "ntracksptgt10", "njetsntks", "tkonlypt", "abstkonlyeta", "tkonlymass", "jetsntkpt", "absjetsntketa", "jetsntkmass", "tksjetsntkpt", "abstksjetsntketa", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "maxm1trackpt", "trackdxyerrmin", "trackdzerrmin", "drmin", "drmax", "mindrmax", "jetpairdrmin", "jetpairdrmax", "bs2ddist", "bs2derr", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "nsemileptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01", "absdeltaphi01"};
 
   z_calculator z_calc(vars);
 
