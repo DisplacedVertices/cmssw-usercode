@@ -1,13 +1,18 @@
-double xcut = 90;
-double ycut = 0.1;
+#include "TH2.h"
+#include "TFile.h"
+#include "TString.h"
+#include "TCanvas.h"
+#include "TF1.h"
 
-TH1D* compareShapes(char* sampleName, char* histName, char* yname) {
+TH1D* compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_3/%s_scaled.root", sampleName));
-  TH2F* hist = (TH2F*)abcdHistos->Get(histName);
-  char* xname = "tkonlymass01";
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_4/%s_scaled.root", sampleName));
+  TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistos/%s", histName));
 
   hist->Rebin2D(10,5);
+
+  double xcut = 90;
+  double ycut = 0.1;
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
@@ -15,8 +20,8 @@ TH1D* compareShapes(char* sampleName, char* histName, char* yname) {
   int nbinsx = hist->GetNbinsX();
   int nbinsy = hist->GetNbinsY();
 
-  TH1D* h_low = hist->ProjectionY(TString::Format("h_%s_low_%s", yname, xname), 0, xbin-1);
-  TH1D* h_high = hist->ProjectionY(TString::Format("h_%s_high_%s", yname, xname), xbin, nbinsx+1);
+  TH1D* h_low = hist->ProjectionY(TString::Format("%s_low_%s", histName, sampleName), 0, xbin-1);
+  TH1D* h_high = hist->ProjectionY(TString::Format("%s_high_%s", histName, sampleName), xbin, nbinsx+1);
 
   TCanvas* c1 = new TCanvas();
   c1->Divide(2,2);
@@ -24,14 +29,14 @@ TH1D* compareShapes(char* sampleName, char* histName, char* yname) {
   h_low->Draw();
   c1->cd(3);
   TF1* fexp = new TF1("fexp", "exp([0]*x+[1])", 0.2, 1);
-  TH1F* h_high_fit = h_high->Clone();
+  TH1F* h_high_fit = (TH1F*)h_high->Clone();
   h_high_fit->Fit("fexp", "RVWL");
   h_high_fit->Draw();
   c1->cd(2);
   hist->Draw("colz");
   c1->cd(4);
   h_low->SetLineColor(2);
-  TH1F* h_low_normalized = h_low->Clone();
+  TH1F* h_low_normalized = (TH1F*)h_low->Clone();
   h_low_normalized->Scale(1./h_low->Integral());
   h_low_normalized->GetYaxis()->SetRangeUser(0,1);
   h_low_normalized->Draw();
@@ -54,13 +59,13 @@ TH1D* compareShapes(char* sampleName, char* histName, char* yname) {
   return h_high;
 }
 
-void compareMasses(char* lifetime, char* histName, char* yname) {
-  TH1D* h_M0200 = compareShapes(TString::Format("mfv_neutralino_%s_M0200", lifetime), histName, yname);
-  TH1D* h_M0300 = compareShapes(TString::Format("mfv_neutralino_%s_M0300", lifetime), histName, yname);
-  TH1D* h_M0400 = compareShapes(TString::Format("mfv_neutralino_%s_M0400", lifetime), histName, yname);
-  TH1D* h_M0600 = compareShapes(TString::Format("mfv_neutralino_%s_M0600", lifetime), histName, yname);
-  TH1D* h_M0800 = compareShapes(TString::Format("mfv_neutralino_%s_M0800", lifetime), histName, yname);
-  TH1D* h_M1000 = compareShapes(TString::Format("mfv_neutralino_%s_M1000", lifetime), histName, yname);
+void compareMasses(const char* lifetime, const char* histName) {
+  TH1D* h_M0200 = compareShapes(TString::Format("mfv_neutralino_%s_M0200", lifetime), histName);
+  TH1D* h_M0300 = compareShapes(TString::Format("mfv_neutralino_%s_M0300", lifetime), histName);
+  TH1D* h_M0400 = compareShapes(TString::Format("mfv_neutralino_%s_M0400", lifetime), histName);
+  TH1D* h_M0600 = compareShapes(TString::Format("mfv_neutralino_%s_M0600", lifetime), histName);
+  TH1D* h_M0800 = compareShapes(TString::Format("mfv_neutralino_%s_M0800", lifetime), histName);
+  TH1D* h_M1000 = compareShapes(TString::Format("mfv_neutralino_%s_M1000", lifetime), histName);
 
   TCanvas* c1 = new TCanvas();
   c1->SetLogy(1);
@@ -79,35 +84,37 @@ void compareMasses(char* lifetime, char* histName, char* yname) {
   c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/%s/%s.pdf", histName, lifetime));
 }
 
-void plot_all_samples(char* histName, char* yname) {
-  compareMasses("tau0000um", histName, yname);
-  compareMasses("tau0010um", histName, yname);
-  compareMasses("tau0100um", histName, yname);
-  compareMasses("tau0300um", histName, yname);
-  compareMasses("tau1000um", histName, yname);
-  compareMasses("tau9900um", histName, yname);
+void plot_all_samples(const char* histName) {
+  compareMasses("tau0000um", histName);
+  compareMasses("tau0010um", histName);
+  compareMasses("tau0100um", histName);
+  compareMasses("tau0300um", histName);
+  compareMasses("tau1000um", histName);
+  compareMasses("tau9900um", histName);
 
-  compareShapes("ttbarhadronic", histName, yname);
-  compareShapes("ttbarsemilep", histName, yname);
-  compareShapes("ttbardilep", histName, yname);
-  compareShapes("ttbar", histName, yname);
-  compareShapes("qcdht0100", histName, yname);
-  compareShapes("qcdht0250", histName, yname);
-  compareShapes("qcdht0500", histName, yname);
-  compareShapes("qcdht1000", histName, yname);
-  compareShapes("qcd", histName, yname);
-  compareShapes("background", histName, yname);
+  compareShapes("ttbarhadronic", histName);
+  compareShapes("ttbarsemilep", histName);
+  compareShapes("ttbardilep", histName);
+  compareShapes("ttbar", histName);
+  compareShapes("qcdht0100", histName);
+  compareShapes("qcdht0250", histName);
+  compareShapes("qcdht0500", histName);
+  compareShapes("qcdht1000", histName);
+  compareShapes("qcd", histName);
+  compareShapes("background", histName);
 }
 
 void lifetime_v_mass() {
-  plot_all_samples("h_bs2ddist01_tkonlymass01", "bs2ddist01");
-  plot_all_samples("h_pv2ddist01_tkonlymass01", "pv2ddist01");
-  plot_all_samples("h_pv3ddist01_tkonlymass01", "pv3ddist01");
-  plot_all_samples("h_pv3dtkonlyctau01_tkonlymass01", "pv3dtkonlyctau01");
-  plot_all_samples("h_pv3djetsntkctau01_tkonlymass01", "pv3djetsntkctau01");
-  plot_all_samples("h_pv3dtksjetsntkctau01_tkonlymass01", "pv3dtksjetsntkctau01");
-  plot_all_samples("h_svdist2d_tkonlymass01", "svdist2d");
-  plot_all_samples("h_svdist3d_tkonlymass01", "svdist3d");
-  plot_all_samples("h_svdist3dcmz_tkonlymass01", "svdist3dcmz");
-  plot_all_samples("h_svctau3dcmz_tkonlymass01", "svctau3dcmz");
+  plot_all_samples("h_bs2ddist01_tkonlymass01");
+  plot_all_samples("h_pv2ddist01_tkonlymass01");
+  plot_all_samples("h_pv3ddist01_tkonlymass01");
+  plot_all_samples("h_pv3dtkonlyctau01_tkonlymass01");
+  plot_all_samples("h_pv3djetsntkctau01_tkonlymass01");
+  plot_all_samples("h_pv3dtksjetsntkctau01_tkonlymass01");
+  plot_all_samples("h_svdist2d_tkonlymass01");
+  plot_all_samples("h_svdist3d_tkonlymass01");
+  plot_all_samples("h_svdist2dcmz_tkonlymass01");
+  plot_all_samples("h_svdist3dcmz_tkonlymass01");
+  plot_all_samples("h_svctau2dcmz_tkonlymass01");
+  plot_all_samples("h_svctau3dcmz_tkonlymass01");
 }
