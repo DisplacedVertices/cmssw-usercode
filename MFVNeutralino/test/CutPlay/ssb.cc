@@ -249,6 +249,8 @@ struct z_calculator {
       TH1F* hnm1 = (TH1F*)file->Get("nm1");
       nm1 = hnm1->GetBinContent(1);
 
+      printf("name: %40s  raw nevents: %7.1f\n", name.c_str(), ((TH1F*)file->Get("nleptons"))->GetBinContent(1));
+
       for (const std::string& var : vars)
         hists[var] = (TH1F*)file->Get(var.c_str());
     }
