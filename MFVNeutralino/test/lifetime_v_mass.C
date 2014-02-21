@@ -4,15 +4,15 @@
 #include "TCanvas.h"
 #include "TF1.h"
 
+double xcut;
+double ycut;
+
 TH1D* compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
   TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_4/%s_scaled.root", sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistos/%s", histName));
 
   hist->Rebin2D(10,5);
-
-  double xcut = 90;
-  double ycut = 0.1;
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
@@ -105,6 +105,8 @@ void plot_all_samples(const char* histName) {
 }
 
 void lifetime_v_mass() {
+  xcut = 90;
+  ycut = 0.1;
   plot_all_samples("h_bs2ddist01_tkonlymass01");
   plot_all_samples("h_pv2ddist01_tkonlymass01");
   plot_all_samples("h_pv3ddist01_tkonlymass01");
@@ -117,4 +119,13 @@ void lifetime_v_mass() {
   plot_all_samples("h_svdist3dcmz_tkonlymass01");
   plot_all_samples("h_svctau2dcmz_tkonlymass01");
   plot_all_samples("h_svctau3dcmz_tkonlymass01");
+
+  xcut = 45;
+  ycut = 0.05;
+  plot_all_samples("h_bs2ddist0_tkonlymass0");
+  plot_all_samples("h_pv2ddist0_tkonlymass0");
+  plot_all_samples("h_pv3ddist0_tkonlymass0");
+  plot_all_samples("h_pv3dtkonlyctau0_tkonlymass0");
+  plot_all_samples("h_pv3djetsntkctau0_tkonlymass0");
+  plot_all_samples("h_pv3dtksjetsntkctau0_tkonlymass0");
 }
