@@ -61,7 +61,10 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_betagamma0lab_betagamma1lab;
   TH2F* h_betagamma0cmz_betagamma1cmz;
 
+  TH2F* h_svdist2dcmz_tkonlymass01;
   TH2F* h_svdist3dcmz_tkonlymass01;
+
+  TH2F* h_svctau2dcmz_tkonlymass01;
   TH2F* h_svctau3dcmz_tkonlymass01;
 };
 
@@ -113,7 +116,10 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_betagamma0lab_betagamma1lab = fs->make<TH2F>("h_betagamma0lab_betagamma1lab", ";betagamma1lab;betagamma0lab", 100, 0, 10, 100, 0, 10);
   h_betagamma0cmz_betagamma1cmz = fs->make<TH2F>("h_betagamma0cmz_betagamma1cmz", ";betagamma1cmz;betagamma0cmz", 100, 0, 10, 100, 0, 10);
 
+  h_svdist2dcmz_tkonlymass01 = fs->make<TH2F>("h_svdist2dcmz_tkonlymass01", ";tkonlymass01;svdist2dcmz", 500, 0, 500, 100, 0, 1);
   h_svdist3dcmz_tkonlymass01 = fs->make<TH2F>("h_svdist3dcmz_tkonlymass01", ";tkonlymass01;svdist3dcmz", 500, 0, 500, 100, 0, 1);
+
+  h_svctau2dcmz_tkonlymass01 = fs->make<TH2F>("h_svctau2dcmz_tkonlymass01", ";tkonlymass01;svtkonlyctau2dcmz", 500, 0, 500, 100, 0, 1);
   h_svctau3dcmz_tkonlymass01 = fs->make<TH2F>("h_svctau3dcmz_tkonlymass01", ";tkonlymass01;svtkonlyctau3dcmz", 500, 0, 500, 100, 0, 1);
 }
 
@@ -196,9 +202,14 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_cosanglemom01cmz->Fill(cos(p0.Angle(p1.Vect())));
     h_betagamma0cmz_betagamma1cmz->Fill(p1.Beta() * p1.Gamma(), p0.Beta() * p0.Gamma());
 
+    double svdist2dcmz = mag(x0.X() - x1.X(), x0.Y() - x1.Y());
     double svdist3dcmz = mag(x0.X() - x1.X(), x0.Y() - x1.Y(), x0.Z() - x1.Z());
-    double svctau3dcmz = 2 * svdist3dcmz / (p0.Beta()*p0.Gamma() + p1.Beta()*p1.Gamma());
+    h_svdist2dcmz_tkonlymass01->Fill(v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly], svdist2dcmz);
     h_svdist3dcmz_tkonlymass01->Fill(v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly], svdist3dcmz);
+
+    double svctau2dcmz = 2 * svdist2dcmz / (p0.Beta()*p0.Gamma() + p1.Beta()*p1.Gamma());
+    double svctau3dcmz = 2 * svdist3dcmz / (p0.Beta()*p0.Gamma() + p1.Beta()*p1.Gamma());
+    h_svctau2dcmz_tkonlymass01->Fill(v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly], svctau2dcmz);
     h_svctau3dcmz_tkonlymass01->Fill(v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly], svctau3dcmz);
   }
 }
