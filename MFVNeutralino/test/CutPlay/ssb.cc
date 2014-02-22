@@ -43,7 +43,7 @@ struct option_driver {
       signal_xsec(20.),
       bigw(true),
       syst_frac(-1),
-      min_scan_events(5),
+      min_scan_events(5)
   {}
 
   bool one_double(char sw, double* d) {
