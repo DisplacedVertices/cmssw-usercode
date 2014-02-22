@@ -2,15 +2,26 @@
 
 # author: J. Tucker
 
-import glob, os, re, subprocess, sys, time, getpass
+import glob, os, re, subprocess, sys, time, getpass, zlib
 import xml.etree.cElementTree
 from collections import defaultdict
-from ConfigParser import ConfigParser, NoOptionError
+from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 from JMTucker.Tools.hadd import hadd
 
 username = getpass.getuser()
 mycrab_tmp_dir = '/tmp/%s/mycrab' % username
 os.system('mkdir -p %s' % mycrab_tmp_dir)
+
+# JMTBAD improve global options
+allow_insecure_stupidity = False
+global_options_path = os.path.expanduser('~/.jmtct')
+if os.path.isfile(global_options_path):
+    global_options_cfg = ConfigParser()
+    global_options_cfg.read(global_options_path)
+    try:
+        allow_insecure_stupidity = global_options_cfg.get('Global', 'allow_insecure_stupidity')
+    except (NoSectionError, NoOptionError):
+        pass
 
 if os.path.exists('/uscms_data'):
     crab_working_dir_default_root = '/uscms_data/d2/%s/crab_dirs' % username
@@ -769,6 +780,41 @@ def crab_ownpublish(batch_name, working_dirs, sample_name=lambda wd: wd.replace(
     print '\n --- cut here ---\n'
     pprint(d)
 
+def crab_get_and_save_grid_passphrase(path=None):
+    if path is None:
+        path = os.path.expanduser('~/.jmtctgpp')
+
+    print '''
+*******************************************************************************
+WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+
+DO NOT, under any circumstances, enter your GRID passphrase at the prompts.
+It will not be treated securely, and may end up in the hands of anyone.
+
+WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+*******************************************************************************
+'''
+
+    while 1:
+        pp = getpass.getpass('GRID passphrase:')
+        pp2 = getpass.getpass('again:')
+        if pp != pp2 or len(pp) < 4:
+            print 'did not match'
+        else:
+            break
+
+    open(path, 'wt').write(zlib.compress(pp))
+    os.chmod(path, 0400)
+    return pp
+
+def crab_load_grid_passphrase(path=None):
+    if path is None:
+        path = os.path.expanduser('~/.jmtctgpp')
+    if os.path.isfile(path):
+        return zlib.decompress(open(path).read())
+    else:
+        return crab_get_and_save_grid_passphrase(path)
+
 def crab_need_renew_proxy(min_hours=144):
     # JMTBAD should use the CRAB function (an api! an api! my kingdom for an api!)
     if os.system('voms-proxy-info -exists -valid %i:0' % min_hours) != 0:
@@ -782,8 +828,23 @@ def crab_need_renew_proxy(min_hours=144):
 
 def crab_renew_proxy_if_needed(min_hours=144):
     if crab_need_renew_proxy(min_hours):
-        os.system('voms-proxy-init -voms cms -valid 192:00')
-        os.system('myproxy-init -d -n -s myproxy.cern.ch')
+        if allow_insecure_stupidity:
+            try:
+                import pexpect
+            except ImportError:
+                raise ImportError('need pexpect module to do this insecure stupidity')
+            pp = crab_load_grid_passphrase()
+            p = pexpect.spawn('voms-proxy-init -voms cms -valid 192:00')
+            p.expect('.*GRID.*:')
+            p.sendline(pp)
+            p.interact()
+            p = pexpect.spawn('myproxy-init -d -n -s myproxy.cern.ch')
+            p.expect('.*GRID.*:')
+            p.sendline(pp)
+            p.interact()
+        else:
+            os.system('voms-proxy-init -voms cms -valid 192:00')
+            os.system('myproxy-init -d -n -s myproxy.cern.ch')
 
 if __name__ == '__main__':
     from pprint import pprint
