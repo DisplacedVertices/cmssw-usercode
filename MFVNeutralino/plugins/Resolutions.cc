@@ -24,9 +24,12 @@ class MFVResolutions : public edm::EDAnalyzer {
   const double max_dr;
   const double max_dist;
 
-  TH1F* h_lsp_nmatch[2];
   TH1F* h_dr;
   TH1F* h_dist;
+
+  TH1F* h_lsp_nmatch[2];
+  TH2F* h_lsp0nmatch_lsp1nmatch;
+  TH2F* h_vtxmatch_vtxtotal;
 
   TH1F* h_dx;
   TH1F* h_dy;
@@ -52,6 +55,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_f_pt;
   TH1F* h_f_mass;
 
+  TH2F* h_rp_rmass;
+  TH2F* h_fp_fmass;
+
   TH2F* h_s_p;
   TH2F* h_s_pt;
   TH2F* h_s_eta;
@@ -65,7 +71,6 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_betagamma;
   TH2F* h_s_avgbetagammalab;
   TH2F* h_s_avgbetagammacmz;
-
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -79,11 +84,14 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
 
+  h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
+  h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
+
   for (int i = 0; i < 2; ++i) {
     h_lsp_nmatch[i] = fs->make<TH1F>(TString::Format("h_lsp%d_nmatch", i), TString::Format(";number of vertices that match lsp%d;events", i), 15, 0, 15);
   }
-  h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
-  h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
+  h_lsp0nmatch_lsp1nmatch = fs->make<TH2F>("h_lsp0nmatch_lsp1nmatch", ";lsp1_nmatch;lsp0_nmatch", 15, 0, 15, 15, 0, 15);
+  h_vtxmatch_vtxtotal = fs->make<TH2F>("h_vtxmatch_vtxtotal", ";total number of vertices in the event;number of vertices that match an lsp", 15, 0, 15, 15, 0, 15);
 
   h_dx = fs->make<TH1F>("h_dx", ";x resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dy = fs->make<TH1F>("h_dy", ";y resolution (cm);number of vertices", 200, -0.02, 0.02);
@@ -106,17 +114,20 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_r_avgbetagammacmz = fs->make<TH1F>("h_r_avgbetagammacmz", ";avgbetagammacmz resolution;events", 200, -10, 10);
 
   h_f_p = fs->make<TH1F>("h_f_p", ";fractional p resolution;number of vertices", 100, -5, 5);
-  h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional pt resolution;number of vertices", 100, -5, 5);
+  h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional p_{T} resolution;number of vertices", 100, -5, 5);
   h_f_mass = fs->make<TH1F>("h_f_mass", ";fractional mass resolution;number of vertices", 100, -5, 5);
+
+  h_rp_rmass = fs->make<TH2F>("h_rp_rmass", ";mass resolution;p resolution", 300, -1500, 1500, 300, -1500, 1500);
+  h_fp_fmass = fs->make<TH2F>("h_fp_fmass", ";fractional mass resolution;fractional p resolution", 100, -5, 5, 100, -5, 5);
 
   h_s_p = fs->make<TH2F>("h_s_p", ";generated p;reconstructed p", 150, 0, 1500, 150, 0, 1500);
   h_s_pt = fs->make<TH2F>("h_s_pt", ";generated pt;reconstructed pt", 150, 0, 1500, 150, 0, 1500);
   h_s_eta = fs->make<TH2F>("h_s_eta", ";generated eta;reconstructed eta", 50, -4, 4, 50, -4, 4);
   h_s_phi = fs->make<TH2F>("h_s_phi", ";generated phi;reconstructed phi", 50, -3.15, 3.15, 50, -3.15, 3.15);
   h_s_mass = fs->make<TH2F>("h_s_mass", ";generated mass;reconstructed mass", 150, 0, 1500, 150, 0, 1500);
-  h_s_px = fs->make<TH2F>("h_s_px", ";generated px;reconstructed px", 150, 0, 1500, 150, 0, 1500);
-  h_s_py = fs->make<TH2F>("h_s_py", ";generated py;reconstructed py", 150, 0, 1500, 150, 0, 1500);
-  h_s_pz = fs->make<TH2F>("h_s_pz", ";generated pz;reconstructed pz", 150, 0, 1500, 150, 0, 1500);
+  h_s_px = fs->make<TH2F>("h_s_px", ";generated px;reconstructed px", 300, -1500, 1500, 300, -1500, 1500);
+  h_s_py = fs->make<TH2F>("h_s_py", ";generated py;reconstructed py", 300, -1500, 1500, 300, -1500, 1500);
+  h_s_pz = fs->make<TH2F>("h_s_pz", ";generated pz;reconstructed pz", 300, -1500, 1500, 300, -1500, 1500);
   h_s_rapidity = fs->make<TH2F>("h_s_rapidity", ";generated rapidity;reconstructed rapidity", 50, -4, 4, 50, -4, 4);
   h_s_theta = fs->make<TH2F>("h_s_theta", ";generated theta;reconstructed theta", 50, 0, 3.15, 50, 0, 3.15);
   h_s_betagamma = fs->make<TH2F>("h_s_betagamma", ";generated betagamma;reconstructed betagamma", 100, 0, 10, 100, 0, 10);
@@ -151,6 +162,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
   int lsp_nmatch[2] = {0,0};
+  int nvtx_match = 0;
 
   for (const MFVVertexAux& vtx : *vertices) {
     double dr = 1e99, dist = 1e99;
@@ -196,7 +208,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (ilsp < 0)
       continue;
 
-
+    ++nvtx_match;
     const TLorentzVector& lsp_p4 = lsp_p4s[ilsp];
     const TLorentzVector& vtx_p4 = vtx.p4(which_mom);
 
@@ -231,6 +243,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_f_pt->Fill((vtx_p4.Pt() - lsp_p4.Pt()) / lsp_p4.Pt());
     h_f_mass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M());
 
+    h_rp_rmass->Fill(vtx_p4.M() - lsp_p4.M(), vtx_p4.P() - lsp_p4.P());
+    h_fp_fmass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M(), (vtx_p4.P() - lsp_p4.P()) / lsp_p4.P());
+
     h_s_p->Fill(lsp_p4.P(), vtx_p4.P());
     h_s_pt->Fill(lsp_p4.Pt(), vtx_p4.Pt());
     h_s_eta->Fill(lsp_p4.Eta(), vtx_p4.Eta());
@@ -244,24 +259,27 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx_p4.Beta()*vtx_p4.Gamma());
   }
 
-  // histogram lsp_nmatch[i]
+  // histogram lsp_nmatch
   for (int i = 0; i < 2; ++i) {
     h_lsp_nmatch[i]->Fill(lsp_nmatch[i]);
   }
+  h_lsp0nmatch_lsp1nmatch->Fill(lsp_nmatch[1], lsp_nmatch[0]);
+
+  const int nsv = int(vertices->size());
+  h_vtxmatch_vtxtotal->Fill(nsv, nvtx_match);
 
   // histogram average betagamma resolutions
-  const int nsv = int(vertices->size());
   if (nsv >= 2) {
     const MFVVertexAux& v0 = vertices->at(0);
     const MFVVertexAux& v1 = vertices->at(1);
 
     TLorentzVector lsp0_p4 = lsp_p4s[0];
     TLorentzVector lsp1_p4 = lsp_p4s[1];
-    double lsp_avgbetagammalab = (lsp0_p4.Beta()*lsp1_p4.Gamma() + lsp0_p4.Beta()*lsp1_p4.Gamma()) / 2;
+    double lsp_avgbetagammalab = (lsp0_p4.Beta()*lsp0_p4.Gamma() + lsp1_p4.Beta()*lsp1_p4.Gamma()) / 2;
     TVector3 lsp_betacmz = TVector3(0, 0, -(lsp0_p4.Pz() + lsp1_p4.Pz()) / (lsp0_p4.E() + lsp1_p4.E()));
     lsp0_p4.Boost(lsp_betacmz);
     lsp1_p4.Boost(lsp_betacmz);
-    double lsp_avgbetagammacmz = (lsp0_p4.Beta()*lsp1_p4.Gamma() + lsp0_p4.Beta()*lsp1_p4.Gamma()) / 2;
+    double lsp_avgbetagammacmz = (lsp0_p4.Beta()*lsp0_p4.Gamma() + lsp1_p4.Beta()*lsp1_p4.Gamma()) / 2;
 
     TLorentzVector vtx0_p4 = v0.p4(which_mom);
     TLorentzVector vtx1_p4 = v1.p4(which_mom);
@@ -269,7 +287,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     TVector3 vtx_betacmz = TVector3(0, 0, -(vtx0_p4.Pz() + vtx1_p4.Pz()) / (vtx0_p4.E() + vtx1_p4.E()));
     vtx0_p4.Boost(vtx_betacmz);
     vtx1_p4.Boost(vtx_betacmz);
-    double vtx_avgbetagammacmz = (vtx0_p4.Beta()*vtx1_p4.Gamma() + vtx0_p4.Beta()*vtx1_p4.Gamma()) / 2;
+    double vtx_avgbetagammacmz = (vtx0_p4.Beta()*vtx0_p4.Gamma() + vtx1_p4.Beta()*vtx1_p4.Gamma()) / 2;
 
     h_r_avgbetagammalab->Fill(vtx_avgbetagammalab - lsp_avgbetagammalab);
     h_r_avgbetagammacmz->Fill(vtx_avgbetagammacmz - lsp_avgbetagammacmz);
