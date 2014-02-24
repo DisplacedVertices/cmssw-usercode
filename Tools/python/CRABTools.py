@@ -247,6 +247,8 @@ def crab_status(working_dir, verbose=True, debug=False):
         # hurr should redo this with regexps, then not have to use these hacks
         x = x.replace('Cancelled by user', 'CancelledByUser')
         x = x.replace('red.unl.edu red.unl.edu', 'red.unl.edu') # remote screwup 1/9/14
+        x = x.replace('red-gw1.unl.edu red-gw1.unl.edu', 'red-gw1.unl.edu')
+        x = x.replace('red-gw2.unl.edu red-gw2.unl.edu', 'red-gw2.unl.edu')
         x = x.replace('tusker-gw1.unl.edu tusker-gw1.unl.edu', 'tusker-gw1.unl.edu')
         x = [y.strip() for y in x.split() if y.strip()]
         #print len(x), x
