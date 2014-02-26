@@ -186,6 +186,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackdzerravg", "SV avg{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 1);
   hs.add("trackdzerrrms", "SV rms{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 0.4);
 
+  hs.add("trackdxyzerrmin", "SV min{#sigma trk_{i} dxyz(PV)} (cm)", 50, 0, 0.01);
+  hs.add("trackdxyzerrmax", "SV max{#sigma trk_{i} dxyz(PV)} (cm)", 50, 0, 2);
+  hs.add("trackdxyzerravg", "SV avg{#sigma trk_{i} dxyz(PV)} (cm)", 50, 0, 1);
+  hs.add("trackdxyzerrrms", "SV rms{#sigma trk_{i} dxyz(PV)} (cm)", 50, 0, 0.4);
+
   hs.add("trackpairmassmin", "SV min{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 2);
   hs.add("trackpairmassmax", "SV max{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 100);
   hs.add("trackpairmassavg", "SV avg{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 20);
@@ -456,6 +461,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"trackdzerrmax", aux.trackdzerrmax},
         {"trackdzerravg", aux.trackdzerravg},
         {"trackdzerrrms", aux.trackdzerrrms},
+
+        {"trackdxyzerrmin", mag(aux.trackdzerrmin, aux.trackdzerrmin)},
+        {"trackdxyzerrmax", mag(aux.trackdzerrmax, aux.trackdzerrmax)},
+        {"trackdxyzerravg", mag(aux.trackdzerravg, aux.trackdzerravg)},
+        {"trackdxyzerrrms", mag(aux.trackdzerrrms, aux.trackdzerrrms)},
 
         {"trackpairmassmin", aux.trackpairmassmin},
         {"trackpairmassmax", aux.trackpairmassmax},
