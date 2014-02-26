@@ -754,18 +754,22 @@ def get_bin_content_error(hist, value):
     bin = hist.FindBin(*value)
     return (hist.GetBinContent(bin), hist.GetBinError(bin))
 
-def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin=True):
+def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin=True, x_are_bins=False):
     """For the given histogram, return the integral of the bins
     corresponding to the values xlo to xhi along with its error.
     """
 
     if xlo is None:
         binlo = 0
+    elif x_are_bins:
+        binlo = xlo
     else:
         binlo = hist.FindBin(xlo)
 
     if xhi is None:
         binhi = hist.GetNbinsX()+1
+    elif x_are_bins:
+        binhi = xhi
     else:
         binhi = hist.FindBin(xhi)
         if not include_last_bin:
