@@ -3,13 +3,6 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
 SampleFiles.setup(process, 'MFVNtupleV15', 'mfv_neutralino_tau1000um_M0400', 500)
-#SampleFiles.setup(process, 'MFVNtupleV15', 'ttbarhadronic', 2503433)
-#SampleFiles.setup(process, 'MFVNtupleV15', 'ttbarsemilep', 3489937)
-#SampleFiles.setup(process, 'MFVNtupleV15', 'ttbardilep', 797006)
-#SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht0100', 18744)
-#SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht0250', 822457)
-#SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht0500', 4759413)
-#SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht1000', 3088150)
 process.TFileService.fileName = 'abcd_histos.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -17,10 +10,14 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 process.abcdHistos = cms.EDAnalyzer('ABCDHistos',
                                     mfv_event_src = cms.InputTag('mfvEvent'),
-                                    vertex_src = cms.InputTag('mfvSelectedVerticesTight')
+                                    vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
+                                    which_mom = cms.int32(0),
                                     )
 
-process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.abcdHistos)
+process.abcdHistosTrks = process.abcdHistos.clone()
+process.abcdHistosJets = process.abcdHistos.clone(which_mom = 1)
+process.abcdHistosTrksJets = process.abcdHistos.clone(which_mom = 2)
+process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.abcdHistosTrks * process.abcdHistosJets * process.abcdHistosTrksJets)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *

@@ -9,8 +9,8 @@ double ycut;
 
 TH1D* compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_4/%s_scaled.root", sampleName));
-  TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistos/%s", histName));
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_6/%s_scaled.root", sampleName));
+  TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistosTrksJets/%s", histName));
 
   hist->Rebin2D(10,5);
 
@@ -55,7 +55,8 @@ TH1D* compareShapes(const char* sampleName, const char* histName) {
   printf("\tA = %5.2f +/- %5.2f, B = %5.2f +/- %5.2f, C = %5.2f +/- %5.2f, D = %5.2f +/- %5.2f\n", A, errA, B, errB, C, errC, D, errD);
   printf("\tD = %5.2f +/- %5.2f, B/A*C = %5.2f +/- %5.2f, correlation factor = %5.2f\n", D, errD, Dpred, errPred, hist->GetCorrelationFactor());
 
-  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/%s/%s.pdf", histName, sampleName));
+  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.pdf", histName, sampleName));
+  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.root", histName, sampleName));
   return h_high;
 }
 
@@ -81,7 +82,7 @@ void compareMasses(const char* lifetime, const char* histName) {
   h_M0300->Draw("same");
   h_M0200->SetLineColor(6);
   h_M0200->Draw("same");
-  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/%s/%s.pdf", histName, lifetime));
+  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.pdf", histName, lifetime));
 }
 
 void plot_all_samples(const char* histName) {
@@ -107,25 +108,21 @@ void plot_all_samples(const char* histName) {
 void lifetime_v_mass() {
   xcut = 90;
   ycut = 0.1;
-  plot_all_samples("h_bs2ddist01_tkonlymass01");
-  plot_all_samples("h_pv2ddist01_tkonlymass01");
-  plot_all_samples("h_pv3ddist01_tkonlymass01");
-  plot_all_samples("h_pv3dtkonlyctau01_tkonlymass01");
-  plot_all_samples("h_pv3djetsntkctau01_tkonlymass01");
-  plot_all_samples("h_pv3dtksjetsntkctau01_tkonlymass01");
-  plot_all_samples("h_svdist2d_tkonlymass01");
-  plot_all_samples("h_svdist3d_tkonlymass01");
-  plot_all_samples("h_svdist2dcmz_tkonlymass01");
-  plot_all_samples("h_svdist3dcmz_tkonlymass01");
-  plot_all_samples("h_svctau2dcmz_tkonlymass01");
-  plot_all_samples("h_svctau3dcmz_tkonlymass01");
+  plot_all_samples("h_bs2ddist01_mass01");
+  plot_all_samples("h_pv2ddist01_mass01");
+  plot_all_samples("h_pv3ddist01_mass01");
+  plot_all_samples("h_pv3dctau01_mass01");
+  plot_all_samples("h_svdist2d_mass01");
+  plot_all_samples("h_svdist3d_mass01");
+  plot_all_samples("h_svdist2dcmz_mass01");
+  plot_all_samples("h_svdist3dcmz_mass01");
+  plot_all_samples("h_svctau2dcmz_mass01");
+  plot_all_samples("h_svctau3dcmz_mass01");
 
   xcut = 45;
   ycut = 0.05;
-  plot_all_samples("h_bs2ddist0_tkonlymass0");
-  plot_all_samples("h_pv2ddist0_tkonlymass0");
-  plot_all_samples("h_pv3ddist0_tkonlymass0");
-  plot_all_samples("h_pv3dtkonlyctau0_tkonlymass0");
-  plot_all_samples("h_pv3djetsntkctau0_tkonlymass0");
-  plot_all_samples("h_pv3dtksjetsntkctau0_tkonlymass0");
+  plot_all_samples("h_bs2ddist0_mass0");
+  plot_all_samples("h_pv2ddist0_mass0");
+  plot_all_samples("h_pv3ddist0_mass0");
+  plot_all_samples("h_pv3dctau0_mass0");
 }
