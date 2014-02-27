@@ -42,6 +42,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_r_eta;
   TH1F* h_r_phi;
   TH1F* h_r_mass;
+  TH1F* h_r_energy;
   TH1F* h_r_px;
   TH1F* h_r_py;
   TH1F* h_r_pz;
@@ -54,15 +55,22 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_f_p;
   TH1F* h_f_pt;
   TH1F* h_f_mass;
+  TH1F* h_f_energy;
 
   TH2F* h_rp_rmass;
   TH2F* h_fp_fmass;
+  TH2F* h_s_p_mass;
+
+  TH2F* h_rp_renergy;
+  TH2F* h_fp_fenergy;
+  TH2F* h_s_p_energy;
 
   TH2F* h_s_p;
   TH2F* h_s_pt;
   TH2F* h_s_eta;
   TH2F* h_s_phi;
   TH2F* h_s_mass;
+  TH2F* h_s_energy;
   TH2F* h_s_px;
   TH2F* h_s_py;
   TH2F* h_s_pz;
@@ -104,6 +112,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_r_eta = fs->make<TH1F>("h_r_eta", ";eta resolution;number of vertices", 50, -4, 4);
   h_r_phi = fs->make<TH1F>("h_r_phi", ";phi resolution;number of vertices", 50, -3.15, 3.15);
   h_r_mass = fs->make<TH1F>("h_r_mass", ";mass resolution (GeV);number of vertices", 300, -1500, 1500);
+  h_r_energy = fs->make<TH1F>("h_r_energy", ";energy resolution (GeV);number of vertices", 300, -1500, 1500);
   h_r_px = fs->make<TH1F>("h_r_px", ";px resolution (GeV);number of vertices", 300, -1500, 1500);
   h_r_py = fs->make<TH1F>("h_r_py", ";py resolution (GeV);number of vertices", 300, -1500, 1500);
   h_r_pz = fs->make<TH1F>("h_r_pz", ";pz resolution (GeV);number of vertices", 300, -1500, 1500);
@@ -113,18 +122,25 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_r_avgbetagammalab = fs->make<TH1F>("h_r_avgbetagammalab", ";avgbetagammalab resolution;events", 200, -10, 10);
   h_r_avgbetagammacmz = fs->make<TH1F>("h_r_avgbetagammacmz", ";avgbetagammacmz resolution;events", 200, -10, 10);
 
-  h_f_p = fs->make<TH1F>("h_f_p", ";fractional p resolution;number of vertices", 100, -5, 5);
-  h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional p_{T} resolution;number of vertices", 100, -5, 5);
-  h_f_mass = fs->make<TH1F>("h_f_mass", ";fractional mass resolution;number of vertices", 100, -5, 5);
+  h_f_p = fs->make<TH1F>("h_f_p", ";fractional p resolution;number of vertices", 100, -1, 5);
+  h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional p_{T} resolution;number of vertices", 100, -1, 5);
+  h_f_mass = fs->make<TH1F>("h_f_mass", ";fractional mass resolution;number of vertices", 100, -1, 5);
+  h_f_energy = fs->make<TH1F>("h_f_energy", ";fractional energy resolution;number of vertices", 100, -1, 5);
 
   h_rp_rmass = fs->make<TH2F>("h_rp_rmass", ";mass resolution;p resolution", 300, -1500, 1500, 300, -1500, 1500);
-  h_fp_fmass = fs->make<TH2F>("h_fp_fmass", ";fractional mass resolution;fractional p resolution", 100, -5, 5, 100, -5, 5);
+  h_fp_fmass = fs->make<TH2F>("h_fp_fmass", ";fractional mass resolution;fractional p resolution", 300, -1, 2, 300, -1, 2);
+  h_s_p_mass = fs->make<TH2F>("h_s_p_mass", ";reconstructed mass;reconstructed p", 150, 0, 1500, 150, 0, 1500);
+
+  h_rp_renergy = fs->make<TH2F>("h_rp_renergy", ";energy resolution;p resolution", 300, -1500, 1500, 300, -1500, 1500);
+  h_fp_fenergy = fs->make<TH2F>("h_fp_fenergy", ";fractional energy resolution;fractional p resolution", 300, -1, 2, 300, -1, 2);
+  h_s_p_energy = fs->make<TH2F>("h_s_p_energy", ";reconstructed energy;reconstructed p", 150, 0, 1500, 150, 0, 1500);
 
   h_s_p = fs->make<TH2F>("h_s_p", ";generated p;reconstructed p", 150, 0, 1500, 150, 0, 1500);
   h_s_pt = fs->make<TH2F>("h_s_pt", ";generated pt;reconstructed pt", 150, 0, 1500, 150, 0, 1500);
   h_s_eta = fs->make<TH2F>("h_s_eta", ";generated eta;reconstructed eta", 50, -4, 4, 50, -4, 4);
   h_s_phi = fs->make<TH2F>("h_s_phi", ";generated phi;reconstructed phi", 50, -3.15, 3.15, 50, -3.15, 3.15);
   h_s_mass = fs->make<TH2F>("h_s_mass", ";generated mass;reconstructed mass", 150, 0, 1500, 150, 0, 1500);
+  h_s_energy = fs->make<TH2F>("h_s_energy", ";generated energy;reconstructed energy", 150, 0, 1500, 150, 0, 1500);
   h_s_px = fs->make<TH2F>("h_s_px", ";generated px;reconstructed px", 300, -1500, 1500, 300, -1500, 1500);
   h_s_py = fs->make<TH2F>("h_s_py", ";generated py;reconstructed py", 300, -1500, 1500, 300, -1500, 1500);
   h_s_pz = fs->make<TH2F>("h_s_pz", ";generated pz;reconstructed pz", 300, -1500, 1500, 300, -1500, 1500);
@@ -226,12 +242,13 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
 
-    // histogram momentum resolutions: p, pt, eta, phi, mass, px, py, pz, rapidity, theta, betagamma
+    // histogram momentum resolutions: p, pt, eta, phi, mass, energy, px, py, pz, rapidity, theta, betagamma
     h_r_p->Fill(vtx_p4.P() - lsp_p4.P());
     h_r_pt->Fill(vtx_p4.Pt() - lsp_p4.Pt());
     h_r_eta->Fill(vtx_p4.Eta() - lsp_p4.Eta());
     h_r_phi->Fill(reco::deltaPhi(vtx_p4.Phi(), lsp_p4.Phi()));
     h_r_mass->Fill(vtx_p4.M() - lsp_p4.M());
+    h_r_energy->Fill(vtx_p4.E() - lsp_p4.E());
     h_r_px->Fill(vtx_p4.Px() - lsp_p4.Px());
     h_r_py->Fill(vtx_p4.Py() - lsp_p4.Py());
     h_r_pz->Fill(vtx_p4.Pz() - lsp_p4.Pz());
@@ -242,15 +259,22 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_f_p->Fill((vtx_p4.P() - lsp_p4.P()) / lsp_p4.P());
     h_f_pt->Fill((vtx_p4.Pt() - lsp_p4.Pt()) / lsp_p4.Pt());
     h_f_mass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M());
+    h_f_energy->Fill((vtx_p4.E() - lsp_p4.E()) / lsp_p4.E());
 
     h_rp_rmass->Fill(vtx_p4.M() - lsp_p4.M(), vtx_p4.P() - lsp_p4.P());
     h_fp_fmass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M(), (vtx_p4.P() - lsp_p4.P()) / lsp_p4.P());
+    h_s_p_mass->Fill(vtx_p4.M(), vtx_p4.P());
+
+    h_rp_renergy->Fill(vtx_p4.M() - lsp_p4.M(), vtx_p4.E() - lsp_p4.E());
+    h_fp_fenergy->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M(), (vtx_p4.E() - lsp_p4.E()) / lsp_p4.E());
+    h_s_p_energy->Fill(vtx_p4.M(), vtx_p4.E());
 
     h_s_p->Fill(lsp_p4.P(), vtx_p4.P());
     h_s_pt->Fill(lsp_p4.Pt(), vtx_p4.Pt());
     h_s_eta->Fill(lsp_p4.Eta(), vtx_p4.Eta());
     h_s_phi->Fill(lsp_p4.Phi(), vtx_p4.Phi());
     h_s_mass->Fill(lsp_p4.M(), vtx_p4.M());
+    h_s_energy->Fill(lsp_p4.E(), vtx_p4.E());
     h_s_px->Fill(lsp_p4.Px(), vtx_p4.Px());
     h_s_py->Fill(lsp_p4.Py(), vtx_p4.Py());
     h_s_pz->Fill(lsp_p4.Pz(), vtx_p4.Pz());
