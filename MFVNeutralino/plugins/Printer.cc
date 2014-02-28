@@ -1,3 +1,5 @@
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -12,14 +14,16 @@ class MFVPrinter : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
-  const edm::InputTag event_src;
   const edm::InputTag vertex_src;
+  const edm::InputTag event_src;
+  const edm::InputTag vertex_aux_src;
   const std::string name;
 };
 
 MFVPrinter::MFVPrinter(const edm::ParameterSet& cfg)
-  : event_src(cfg.getParameter<edm::InputTag>("event_src")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+  : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    event_src(cfg.getParameter<edm::InputTag>("event_src")),
+    vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
     name(cfg.getParameter<std::string>("@module_label"))
 {
 }
@@ -28,6 +32,42 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup&) {
   printf("================================================================================\n");
   printf(" %s   run, lumi, event: (%u, %u, %u)\n", name.c_str(), event.id().run(), event.luminosityBlock(), event.id().event());
   printf("================================================================================\n");
+
+  if (vertex_src.label() != "") {
+    edm::Handle<reco::VertexCollection> vertices;
+    event.getByLabel(vertex_src, vertices);
+
+    printf("------- recoVertices: -------\n");
+
+    const int nsv = int(vertices->size());
+    printf("# vertices: %i\n", nsv);
+
+    for (int j = 0; j < nsv; ++j) {
+      const reco::Vertex& v = vertices->at(j);
+      printf("-----\n\n");
+      printf("vertex #%i:\n", j);
+      printf("x, y, z: (%11.4e, %11.4e, %11.4e)\n", v.x(), v.y(), v.z());
+      printf("covariance matrix: %11.4e %11.4e %11.4e\n", v.covariance(0,0), v.covariance(0,1), v.covariance(0,2));
+      printf("                   %11s %11.4e %11.4e\n", "", v.covariance(1,1), v.covariance(1,2));
+      printf("                   %11s %11s %11.4e\n", "", "", v.covariance(2,2));
+      printf("chi2/ndf: %11.4e / %11.4e\n", v.chi2(), v.ndof());
+      printf("p4: (%11.4e, %11.4e, %11.4e, %11.4e)\n", v.p4().pt(), v.p4().eta(), v.p4().phi(), v.p4().mass());
+      printf("ntracks: %u\n", v.nTracks());
+      int itk = 0;
+      for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+        const reco::TrackBaseRef& tk = *it;
+        printf("   tk #%3i:  q: %2i  chi2/dof: %6.3f/%6.3f  npx: %i  nst: %i\n", itk++, tk->charge(), tk->chi2(), tk->ndof(), tk->hitPattern().numberOfValidPixelHits(), tk->hitPattern().numberOfValidStripHits());
+        printf("      pt: %11.4e +/- %11.4e\n", tk->pt(), tk->ptError());
+        printf("     eta: %11.4e +/- %11.4e\n", tk->eta(), tk->etaError());
+        printf("     phi: %11.4e +/- %11.4e\n", tk->phi(), tk->phiError());
+        printf("     dxy: %11.4e +/- %11.4e\n", tk->dxy(), tk->dxyError());
+        printf("      dz: %11.4e +/- %11.4e\n", tk->dz(),  tk->dzError());
+      }
+      printf("\n");
+    }
+  }
+  else
+    printf("------- Not printing recoVertices -------\n\n");
 
   if (event_src.label() != "") {
     edm::Handle<MFVEvent> mevent;
@@ -84,9 +124,9 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup&) {
   else
     printf("------- Not printing event -------\n\n");
 
-  if (vertex_src.label() != "") {
+  if (vertex_aux_src.label() != "") {
     edm::Handle<MFVVertexAuxCollection> vertices;
-    event.getByLabel(vertex_src, vertices);
+    event.getByLabel(vertex_aux_src, vertices);
 
     printf("------- MFVVertexAuxes: -------\n");
 

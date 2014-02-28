@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
 #SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau1000um_M0400', 10)
-process.source.fileNames = ['file:selected_v13.root']
+process.source.fileNames = ['file:ntuple.root']
 process.source.noEventSort = cms.untracked.bool(False)
 
 del process.TFileService
@@ -13,17 +13,19 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 printer = cms.EDAnalyzer('MFVPrinter',
-                         event_src = cms.InputTag(''),
                          vertex_src = cms.InputTag(''),
+                         event_src = cms.InputTag(''),
+                         vertex_aux_src = cms.InputTag(''),
                          )
 
+process.printRecoVertices = printer.clone(vertex_src = 'mfvVertices')
 process.printEventAll = printer.clone(event_src = 'mfvEvent')
 process.printEventSel = printer.clone(event_src = 'mfvEvent')
-process.printVertexAll = printer.clone(vertex_src = 'mfvVerticesAux')
-process.printVertexSel = printer.clone(vertex_src = 'mfvSelectedVerticesTight')
-process.printVertexSelEvtSel = printer.clone(vertex_src = 'mfvSelectedVerticesTight')
+process.printVertexAll = printer.clone(vertex_aux_src = 'mfvVerticesAux')
+process.printVertexSel = printer.clone(vertex_aux_src = 'mfvSelectedVerticesTight')
+process.printVertexSelEvtSel = printer.clone(vertex_aux_src = 'mfvSelectedVerticesTight')
 
-process.p = cms.Path(process.mfvSelectedVerticesTight * process.printEventAll * process.printVertexAll * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
+process.p = cms.Path(process.printRecoVertices * process.mfvSelectedVerticesTight * process.printEventAll * process.printVertexAll * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
 
 if __name__ == '__main__' and 'splitlog' in sys.argv:
     log_fn = sys.argv[sys.argv.index('splitlog')+1]
