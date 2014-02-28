@@ -249,7 +249,7 @@ struct z_calculator {
       TH1F* hnm1 = (TH1F*)file->Get("nm1");
       nm1 = hnm1->GetBinContent(1);
 
-      printf("name: %40s  raw nevents: %7.1f\n", name.c_str(), ((TH1F*)file->Get("nleptons"))->GetBinContent(1));
+      printf("name: %40s   raw nevents: %7.1f   weight: %7.4e\n", name.c_str(), nm1, weight());
 
       for (const std::string& var : vars)
         hists[var] = (TH1F*)file->Get(var.c_str());
@@ -287,6 +287,7 @@ struct z_calculator {
     }
 
     int n_sig_samples = 0;
+    double nbkg_var = 0;
     for (const sample& s : samples) {
       samples_by_name[s.name] = &s;
 
@@ -298,6 +299,7 @@ struct z_calculator {
       else {
         nbkg_nm1 += s.weight() * s.nm1;
         nbkg_tot += s.weight() * s.nevents;
+        nbkg_var += s.weight()*s.weight() * s.nm1;
       }
     }
 
@@ -305,7 +307,7 @@ struct z_calculator {
 
     if (!bannered) {
       bannered = true;
-      printf("nsig_nm1 = %f, nbkg_nm1 = %f\n", nsig_nm1, nbkg_nm1);
+      printf("nsig_nm1 = %f, nbkg_nm1 = %f +/- %f\n", nsig_nm1, nbkg_nm1, sqrt(nbkg_var));
       printf("z_calculator setup:\nint lumi 'data': %f/fb\n", options.int_lumi);
       for (const sample& s : samples)
         if (!s.is_signal)
