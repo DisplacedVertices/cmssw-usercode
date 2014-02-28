@@ -7,7 +7,7 @@ version = 'v15'
 def pat_tuple_process(runOnMC=True, suppress_stdout=True):
     process = cms.Process('PAT')
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7A-v1/0000/FED775BD-B8E1-E111-8ED5-003048C69036.root' if runOnMC else '/store/data/Run2012B/MultiJet1Parked/AOD/05Nov2012-v2/10000/0003D331-5C49-E211-8210-00259020081C.root'))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00001/FCAF3F92-5A16-E211-ACCC-E0CB4E19F95A.root' if runOnMC else '/store/data/Run2012B/MultiJet1Parked/AOD/05Nov2012-v2/10000/0003D331-5C49-E211-8210-00259020081C.root'))
     process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
     process.load('FWCore.MessageLogger.MessageLogger_cfi')
     process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
