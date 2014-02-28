@@ -55,7 +55,13 @@ private:
   const double min_maxm1trackpt;
   const double min_maxm2trackpt;
   const double max_trackdxyerrmin;
+  const double max_trackdxyerrmax;
+  const double max_trackdxyerravg;
+  const double max_trackdxyerrrms;
   const double max_trackdzerrmin;
+  const double max_trackdzerrmax;
+  const double max_trackdzerravg;
+  const double max_trackdzerrrms;
   const double min_drmin;
   const double max_drmin;
   const double min_drmax;
@@ -111,7 +117,13 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_maxm1trackpt(cfg.getParameter<double>("min_maxm1trackpt")),
     min_maxm2trackpt(cfg.getParameter<double>("min_maxm2trackpt")),
     max_trackdxyerrmin(cfg.getParameter<double>("max_trackdxyerrmin")),
+    max_trackdxyerrmax(cfg.getParameter<double>("max_trackdxyerrmax")),
+    max_trackdxyerravg(cfg.getParameter<double>("max_trackdxyerravg")),
+    max_trackdxyerrrms(cfg.getParameter<double>("max_trackdxyerrrms")),
     max_trackdzerrmin(cfg.getParameter<double>("max_trackdzerrmin")),
+    max_trackdzerrmax(cfg.getParameter<double>("max_trackdzerrmax")),
+    max_trackdzerravg(cfg.getParameter<double>("max_trackdzerravg")),
+    max_trackdzerrrms(cfg.getParameter<double>("max_trackdzerrrms")),
     min_drmin(cfg.getParameter<double>("min_drmin")),
     max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
@@ -173,7 +185,13 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.maxm1trackpt >= min_maxm1trackpt &&
     vtx.maxm2trackpt >= min_maxm2trackpt &&
     vtx.trackdxyerrmin < max_trackdxyerrmin &&
+    vtx.trackdxyerrmax < max_trackdxyerrmax &&
+    vtx.trackdxyerravg < max_trackdxyerravg &&
+    vtx.trackdxyerrrms < max_trackdxyerrrms &&
     vtx.trackdzerrmin < max_trackdzerrmin &&
+    vtx.trackdzerrmax < max_trackdzerrmax &&
+    vtx.trackdzerravg < max_trackdzerravg &&
+    vtx.trackdzerrrms < max_trackdzerrrms &&
     vtx.drmin >= min_drmin &&
     vtx.drmin <  max_drmin &&
     vtx.drmax >= min_drmax &&

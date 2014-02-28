@@ -88,7 +88,25 @@ for i in xrange(0,50):
     changes.append(('trackdxyerrminX%s'%pize(0.0002*i,4), 'max_trackdxyerrmin = %f'%(0.0002*i), ''))
 
 for i in xrange(0,50):
+    changes.append(('trackdxyerrmaxX%s'%pize(0.04*i,2), 'max_trackdxyerrmax = %f'%(0.04*i), ''))
+
+for i in xrange(0,50):
+    changes.append(('trackdxyerravgX%s'%pize(0.002*i,3), 'max_trackdxyerravg = %f'%(0.002*i), ''))
+
+for i in xrange(0,50):
+    changes.append(('trackdxyerrrmsX%s'%pize(0.002*i,3), 'max_trackdxyerrrms = %f'%(0.002*i), ''))
+
+for i in xrange(0,50):
     changes.append(('trackdzerrminX%s'%pize(0.0002*i,4), 'max_trackdzerrmin = %f'%(0.0002*i), ''))
+
+for i in xrange(0,50):
+    changes.append(('trackdzerrmaxX%s'%pize(0.04*i,2), 'max_trackdzerrmax = %f'%(0.04*i), ''))
+
+for i in xrange(0,50):
+    changes.append(('trackdzerravgX%s'%pize(0.002*i,3), 'max_trackdzerravg = %f'%(0.002*i), ''))
+
+for i in xrange(0,50):
+    changes.append(('trackdzerrrmsX%s'%pize(0.002*i,3), 'max_trackdzerrrms = %f'%(0.002*i), ''))
 
 for i in xrange(0,100):
     changes.append(('drminX%s'%pize(0.01*i,2), 'max_drmin = %f'%(0.01*i), ''))
@@ -170,14 +188,14 @@ process.p = cms.EndPath(process.effs)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import *
     bkg_samples = ttbar_samples + qcd_samples
-    samples = [mfv_neutralino_tau0100um_M0200, mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400] + bkg_samples
+    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0300um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400] + bkg_samples
     for sample in bkg_samples:
         sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
     
-    cs = CRABSubmitter('CutPlayV15_30',
+    cs = CRABSubmitter('CutPlayV15',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        manual_datasets = SampleFiles['MFVNtupleV15'],
