@@ -24,6 +24,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
  private:
   const edm::InputTag mfv_event_src;
   const edm::InputTag vertex_aux_src;
+  const edm::InputTag vertex_src;
   const edm::InputTag weight_src;
   const bool do_scatterplots;
 
@@ -40,6 +41,9 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   // indices for h_sv below:
   enum sv_index { sv_best0, sv_best1, sv_best2, sv_rest, sv_top2, sv_all, sv_num_indices };
   static const char* sv_index_names[sv_num_indices];
+
+  // max number of extra track-related plots to make
+  static const int max_ntracks;
 
   void fill_multi(TH1F** hs, const int isv, const double val, const double weight) const;
   void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
@@ -75,10 +79,12 @@ class MFVVertexHistos : public edm::EDAnalyzer {
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "best2", "rest", "top2", "all" };
+const int MFVVertexHistos::max_ntracks = 5;
 
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
     vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
+    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
@@ -90,6 +96,13 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_nsv_v_lspdist3d = fs->make<TH2F>("h_nsv_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
 
   PairwiseHistos::HistoDefs hs;
+
+  if (vertex_src.label() != "") {
+    for (int itk = 0; itk < max_ntracks; ++itk) {
+      //hs.add(TString::Format("trackpt%i", itk).Data(), ...);
+    }
+  }
+
   hs.add("mva", "MVA output", 100, -2, 3);
 
   hs.add("nlep", "# leptons", 10, 0, 10);
@@ -353,6 +366,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByLabel(vertex_aux_src, auxes);
 
+  edm::Handle<reco::VertexCollection> vertices;
+  if (vertex_src.label() != "")
+    event.getByLabel(vertex_src, vertices);
+
   const int nsv = int(auxes->size());
 
   for (int isv = 0; isv < nsv; ++isv) {
@@ -540,6 +557,20 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"pvdzerr",                 aux.pvdzerr()},
         {"pvdzsig",                 aux.pvdzsig()}
     };
+
+    if (vertex_src.label() != "") {
+      const reco::Vertex& rv = vertices->at(aux.which);
+      std::vector<reco::TrackBase> tracks;
+      for (auto it = rv.tracks_begin(), ite = rv.tracks_end(); it != ite; ++it) {
+        const reco::TrackBaseRef& tk = *it;
+        tracks.push_back(*tk);
+      }
+      std::sort(tracks.begin(), tracks.end(), [](const reco::TrackBase& tk1, const reco::TrackBase& tk2) { return tk1.pt() > tk2.pt(); });
+
+      for (int itk = 0, itke = std::min(int(tracks.size()), max_ntracks); itk < itke; ++itk) {
+        v[TString::Format("trackpt%i", itk).Data()] = tracks[itk].pt(); // ??? etc.
+      }
+    }
 
     fill_multi(h_sv, isv, v, *weight);
 
