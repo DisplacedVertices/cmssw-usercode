@@ -63,13 +63,18 @@ class CRABSubmitter:
         self.git_status_dir = self.batch_dir + '/gitstatus/'
         mkdirs_if_needed(self.git_status_dir)
         os.system("git log --pretty=format:'%%H' -n 1 > %shash" % self.git_status_dir)
-        os.system("git status --untracked-files=all --ignored > %sstatus" % self.git_status_dir)
+        os.system("git status --untracked-files=all --ignored | grep -v pyc > %sstatus" % self.git_status_dir)
         self.git_untracked_tmp_fn = '/tmp/%s/untracked.tgz' % self.username
-        os.system("tar czf %s -C `git rev-parse --show-toplevel` `git status --porcelain | grep '^??' | sed 's/??//'`" % self.git_untracked_tmp_fn)
-        if os.stat(self.git_untracked_tmp_fn).st_size > 100*1024**2:
-            print '\033[36;7m warning: \033[m git-untracked tarball is bigger than 100M, leaving in %s' % self.git_untracked_tmp_fn
-        else:
-            os.system('mv %s %s' % (self.git_untracked_tmp_fn, self.git_status_dir))
+        git_untracked_file_list_cmd = "git status --porcelain | grep '^??' | sed 's/??//'"
+        git_untracked_file_list = crab_popen(git_untracked_file_list_cmd)
+        if git_untracked_file_list:
+            git_tar_ret = os.system("tar czf %s -C `git rev-parse --show-toplevel` `%s`" % (self.git_untracked_tmp_fn, git_untracked_file_list_cmd))
+            if git_tar_ret != 0:
+                print '\033[36;7m warning: \033[m git-untracked tar returned non-zero exit code'
+            elif os.stat(self.git_untracked_tmp_fn).st_size > 100*1024**2:
+                print '\033[36;7m warning: \033[m git-untracked tarball is bigger than 100M, leaving in %s' % self.git_untracked_tmp_fn
+            else:
+                os.system('mv %s %s' % (self.git_untracked_tmp_fn, self.git_status_dir))
         os.system('git diff > %sdiff' % self.git_status_dir)
         
         self.testing = testing
