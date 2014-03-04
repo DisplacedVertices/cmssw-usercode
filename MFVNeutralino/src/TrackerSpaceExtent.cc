@@ -38,6 +38,37 @@ void TrackerSpaceExtents::print() const {
   }
 }
 
+SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp) const {
+  SpatialExtents ret;
+
+  for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
+    uint32_t hit = hp.getHitPattern(ihit);
+        
+    bool is_valid = hp.getHitType(hit) == 0;
+    if (!is_valid)
+      continue;
+
+    bool is_tk = (hit >> 10) & 0x1;
+    if (!is_tk)
+      continue;
+
+    uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
+    uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
+        
+    map_t::const_iterator it = map.find(std::make_pair(int(sub), int(subsub)));
+    assert(it != map.end());
+    const TrackerSpaceExtent& extent = it->second;
+    if (sub == PixelSubdetector::PixelBarrel || sub == StripSubdetector::TIB || sub == StripSubdetector::TOB) {
+      ret.update_r(extent.avg_r);
+    }
+    else if (sub == PixelSubdetector::PixelEndcap || sub == StripSubdetector::TID || sub == StripSubdetector::TEC) {
+      ret.update_z(extent.avg_z);
+    }
+  }
+
+  return ret;
+}
+
 int TrackerSpaceExtents::numHitsBehind(const reco::HitPattern& hp, const double r, const double z) const {
   int nhitsbehind = 0;
 
