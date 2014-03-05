@@ -108,16 +108,16 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       hs.add(TString::Format("track%i_dzbs",    itk).Data(), TString::Format("track%i dz(BS) (cm)",                    itk).Data(), 400, -20,      20);
       hs.add(TString::Format("track%i_dxypv",   itk).Data(), TString::Format("track%i dxy(PV) (cm)",                   itk).Data(), 100,  -2,       2);
       hs.add(TString::Format("track%i_dzpv",    itk).Data(), TString::Format("track%i dz(PV) (cm)",                    itk).Data(), 400, -20,      20);
-      hs.add(TString::Format("track%i_dxyerr",  itk).Data(), TString::Format("track%i #sigma(dxy(BS)) (cm)",           itk).Data(),  50,   0,       0.5);
-      hs.add(TString::Format("track%i_dzerr",   itk).Data(), TString::Format("track%i #sigma(dz(PV)) (cm)",            itk).Data(),  50,   0,       2);
+      hs.add(TString::Format("track%i_dxyerr",  itk).Data(), TString::Format("track%i #sigma(dxy) (cm)",               itk).Data(),  50,   0,       0.5);
+      hs.add(TString::Format("track%i_dzerr",   itk).Data(), TString::Format("track%i #sigma(dz) (cm)",                itk).Data(),  50,   0,       2);
       hs.add(TString::Format("track%i_chi2dof", itk).Data(), TString::Format("track%i #chi^2/dof",                     itk).Data(),  50,   0,       7);
       hs.add(TString::Format("track%i_nhits",   itk).Data(), TString::Format("track%i number of hits",                 itk).Data(),  40,   0,      40);
       hs.add(TString::Format("track%i_npixel",  itk).Data(), TString::Format("track%i number of pixel hits",           itk).Data(),  40,   0,      40);
       hs.add(TString::Format("track%i_nstrip",  itk).Data(), TString::Format("track%i number of strip hits",           itk).Data(),  40,   0,      40);
-      hs.add(TString::Format("track%i_minr",    itk).Data(), TString::Format("track%i innermost radius of hit module", itk).Data(),  50,   0,      50);
-      hs.add(TString::Format("track%i_minz",    itk).Data(), TString::Format("track%i innermost z of hit module",      itk).Data(),  50,   0,     100);
-      hs.add(TString::Format("track%i_maxr",    itk).Data(), TString::Format("track%i outermost radius of hit module", itk).Data(),  50,   0,     120);
-      hs.add(TString::Format("track%i_maxz",    itk).Data(), TString::Format("track%i outermost z of hit module",      itk).Data(),  50,   0,     300);
+      hs.add(TString::Format("track%i_minr",    itk).Data(), TString::Format("track%i innermost radius of hit module", itk).Data(), 100,   0,     500);
+      hs.add(TString::Format("track%i_minz",    itk).Data(), TString::Format("track%i innermost z of hit module",      itk).Data(),  56,   0,     280);
+      hs.add(TString::Format("track%i_maxr",    itk).Data(), TString::Format("track%i outermost radius of hit module", itk).Data(), 100,   0,     500);
+      hs.add(TString::Format("track%i_maxz",    itk).Data(), TString::Format("track%i outermost z of hit module",      itk).Data(),  56,   0,     280);
     }
   }
 
