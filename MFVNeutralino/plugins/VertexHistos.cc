@@ -100,6 +100,18 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   if (vertex_src.label() != "") {
     for (int itk = 0; itk < max_ntracks; ++itk) {
       //hs.add(TString::Format("trackpt%i", itk).Data(), ...);
+      hs.add(TString::Format("track%i_pt",      itk).Data(), TString::Format("track%i p_{T}",                itk).Data(), 100,   0,     150);
+      hs.add(TString::Format("track%i_eta",     itk).Data(), TString::Format("track%i #eta",                 itk).Data(),  50,  -4,       4);
+      hs.add(TString::Format("track%i_phi",     itk).Data(), TString::Format("track%i #phi",                 itk).Data(),  50,  -3.15,    3.15);
+      hs.add(TString::Format("track%i_charge",  itk).Data(), TString::Format("track%i charge",               itk).Data(),   4,  -2,       2);
+      hs.add(TString::Format("track%i_dxy",     itk).Data(), TString::Format("track%i dxy(BS) (cm)",         itk).Data(), 100,  -2,       2);
+      hs.add(TString::Format("track%i_dz",      itk).Data(), TString::Format("track%i dz(PV) (cm)",          itk).Data(), 400, -20,      20);
+      hs.add(TString::Format("track%i_dxyerr",  itk).Data(), TString::Format("track%i #sigma(dxy(BS)) (cm)", itk).Data(),  50,   0,       0.5);
+      hs.add(TString::Format("track%i_dzerr",   itk).Data(), TString::Format("track%i #sigma(dz(PV)) (cm)",  itk).Data(),  50,   0,       2);
+      hs.add(TString::Format("track%i_chi2dof", itk).Data(), TString::Format("track%i #chi^2/dof",           itk).Data(),  50,   0,       7);
+      hs.add(TString::Format("track%i_nhits",   itk).Data(), TString::Format("track%i number of hits",       itk).Data(),  40,   0,      40);
+      hs.add(TString::Format("track%i_npixel",  itk).Data(), TString::Format("track%i number of pixel hits", itk).Data(),  40,   0,      40);
+      hs.add(TString::Format("track%i_nstrip",  itk).Data(), TString::Format("track%i number of strip hits", itk).Data(),  40,   0,      40);
     }
   }
 
@@ -568,7 +580,19 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       std::sort(tracks.begin(), tracks.end(), [](const reco::TrackBase& tk1, const reco::TrackBase& tk2) { return tk1.pt() > tk2.pt(); });
 
       for (int itk = 0, itke = std::min(int(tracks.size()), max_ntracks); itk < itke; ++itk) {
-        v[TString::Format("trackpt%i", itk).Data()] = tracks[itk].pt(); // ??? etc.
+        //v[TString::Format("trackpt%i", itk).Data()] = tracks[itk].pt(); // ??? etc.
+        v[TString::Format("track%i_pt",      itk).Data()] = tracks[itk].pt();
+        v[TString::Format("track%i_eta",     itk).Data()] = tracks[itk].eta();
+        v[TString::Format("track%i_phi",     itk).Data()] = tracks[itk].phi();
+        v[TString::Format("track%i_charge",  itk).Data()] = tracks[itk].charge();
+        v[TString::Format("track%i_dxy",     itk).Data()] = tracks[itk].dxy();
+        v[TString::Format("track%i_dz",      itk).Data()] = tracks[itk].dz();
+        v[TString::Format("track%i_dxyerr",  itk).Data()] = tracks[itk].dxyError();
+        v[TString::Format("track%i_dzerr",   itk).Data()] = tracks[itk].dzError();
+        v[TString::Format("track%i_chi2dof", itk).Data()] = tracks[itk].chi2() / tracks[itk].ndof();
+        v[TString::Format("track%i_nhits",   itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits();
+        v[TString::Format("track%i_npixel",  itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits();
+        v[TString::Format("track%i_nstrip",  itk).Data()] = tracks[itk].hitPattern().numberOfValidStripHits();
       }
     }
 
