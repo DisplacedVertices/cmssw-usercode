@@ -19,7 +19,7 @@ class Sample(object):
     ANA_SCHEDULER = 'condor'
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
-    ANA_DBS_URL_NUM = 2
+    ANA_DBS_URL_NUM = 3
     ANA_HASH = ''
     PUBLISH_USER = ''
     ANA_VERSION = 'v11'
@@ -56,7 +56,9 @@ class Sample(object):
             print x, ':', a
 
     def _get_dbs_url(self, num):
-        return '' if not num else 'dbs_url = https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_0%i_writer/servlet/DBSServlet' % num
+        if num != 0 and num != 3:
+            raise ValueError('only supported nums for dbs_url are 0 and 3')
+        return '' if not num else 'dbs_url = phys03'
     
     @property
     def dbs_url(self):
@@ -360,7 +362,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.events_per = 1500
     sample.no_skimming_cuts = True
     sample.is_pythia8 = True
-    sample.dbs_url_num = 2
+    sample.dbs_url_num = 3
     sample.re_pat = True
     sample.scheduler = 'condor'
     sample.ana_hash = '5c05eb42bbf1b04cf0f00b96bae48439'
