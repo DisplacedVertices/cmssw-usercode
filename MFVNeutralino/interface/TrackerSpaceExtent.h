@@ -45,24 +45,28 @@ struct TrackerSpaceExtent {
   }
 };
 
-struct SpatialExtents {
-  double min_r;
-  double max_r;
-  double min_z;
-  double max_z;
+template <typename T>
+struct Extents {
+  T min_r;
+  T max_r;
+  T min_z;
+  T max_z;
 
-  SpatialExtents() : min_r(1e99), max_r(-1e99), min_z(1e99), max_z(-1e99) {}
+  Extents() : min_r(2e9), max_r(-2e9), min_z(2e9), max_z(-2e9) {}
 
-  void update_r(double r) {
+  void update_r(T r) {
     if (r > max_r) max_r = r;
     if (r < min_r) min_r = r;
   }
 
-  void update_z(double z) {
+  void update_z(T z) {
     if (z > max_z) max_z = z;
     if (z < min_z) min_z = z;
   }
 };
+
+typedef Extents<double> SpatialExtents;
+typedef Extents<int> NumExtents;
 
 class TrackerSpaceExtents {
 public:
@@ -71,6 +75,7 @@ public:
 
   void fill(const edm::EventSetup&, const GlobalPoint& origin);
   void print() const;
+  NumExtents numExtentInRAndZ(const reco::HitPattern&) const;
   SpatialExtents extentInRAndZ(const reco::HitPattern&) const;
   int numHitsBehind(const reco::HitPattern&, const double r, const double z) const;
 
