@@ -177,7 +177,8 @@ class CRABSubmitter:
                     raise ValueError('refusing to set up publishing when writing to EOS/resilient')
                 cfg.set('USER', 'publish_data', 1)
                 cfg.set('USER', 'publish_data_name', publish_data_name)
-                cfg.set('USER', 'dbs_url_for_publication', 'https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet')
+                cfg.set('USER', 'dbs_url_for_publication', 'phys03')
+                cfg.set('CMSSW', 'use_dbs3', '1')
 
         self.use_ana_dataset = use_ana_dataset
         if not self.manual_datasets:
@@ -221,6 +222,7 @@ class CRABSubmitter:
 
         if not self.manual_datasets:
             dbs_url = sample.ana_dbs_url if self.use_ana_dataset else sample.dbs_url # assume if use_parent_dataset the dbs_url is the same
+            cfg.set('CMSSW', 'use_dbs3', '1')
             if dbs_url:
                 cfg.set('CMSSW', 'dbs_url', dbs_url.replace('dbs_url = ', ''))
             if self.job_control_from_sample:
