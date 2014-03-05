@@ -38,6 +38,44 @@ void TrackerSpaceExtents::print() const {
   }
 }
 
+// JMTBAD reduce code duplication
+
+NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp) const {
+  NumExtents ret;
+
+  for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
+    uint32_t hit = hp.getHitPattern(ihit);
+        
+    bool is_valid = hp.getHitType(hit) == 0;
+    if (!is_valid)
+      continue;
+
+    bool is_tk = (hit >> 10) & 0x1;
+    if (!is_tk)
+      continue;
+
+    uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
+    uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
+        
+    if (sub == PixelSubdetector::PixelBarrel)
+      ret.update_r(subsub);
+    else if (sub == StripSubdetector::TIB)
+      ret.update_r(3 + subsub);
+    else if (sub == StripSubdetector::TOB)
+      ret.update_r(7 + subsub);
+    else if (sub == PixelSubdetector::PixelEndcap)
+      ret.update_z(subsub);
+    else if (sub == StripSubdetector::TID)
+      ret.update_z(2 + subsub);
+    else if (sub == StripSubdetector::TEC)
+      ret.update_z(5 + subsub);
+    else
+      throw cms::Exception("TrackerSpaceExtents") << "unknown sub " << sub << " with subsub " << subsub;
+  }
+
+  return ret;
+}
+
 SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp) const {
   SpatialExtents ret;
 
