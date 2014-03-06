@@ -2,7 +2,7 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.set(process, 'MFVNtupleV11', 'mfv_neutralino_tau0100um_M0400', 100000)
+SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht1000', 100000)
 process.TFileService.fileName = 'pileup.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -21,18 +21,18 @@ changes.append(('nm1', '', ''))
 changes.append(('tightX3', '', 'max_npv = 5'))
 changes.append(('ABCDX3', 'min_ntracks = 5, min_maxtrackpt = 0', 'min_ntracks01 = 0, min_maxtrackpt01 = 0, max_npv = 5'))
 changes.append(('triggerX3', '', 'apply_vertex_cuts = False, max_npv = 5'))
-changes.append(('nocutsX3', '', 'trigger_bit = -1, min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, max_npv = 5'))
+changes.append(('nocutsX3', '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, max_npv = 5, min_sumht = 0'))
 
 for i in xrange(6,30,3):
     changes.append(('tightX%i'%i, '', 'min_npv = %i, max_npv = %i+2'%(i,i)))
     changes.append(('ABCDX%i'%i, 'min_ntracks = 5, min_maxtrackpt = 0', 'min_ntracks01 = 0, min_maxtrackpt01 = 0, min_npv = %i, max_npv = %i+2'%(i,i)))
     changes.append(('triggerX%i'%i, '', 'apply_vertex_cuts = False, min_npv = %i, max_npv = %i+2'%(i,i)))
-    changes.append(('nocutsX%i'%i, '', 'trigger_bit = -1, min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = %i, max_npv = %i+2'%(i,i)))
+    changes.append(('nocutsX%i'%i, '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = %i, max_npv = %i+2, min_sumht = 0'%(i,i)))
 
 changes.append(('tightX30', '', 'min_npv = 30'))
 changes.append(('ABCDX30', 'min_ntracks = 5, min_maxtrackpt = 0', 'min_ntracks01 = 0, min_maxtrackpt01 = 0, min_npv = 30'))
 changes.append(('triggerX30', '', 'apply_vertex_cuts = False, min_npv = 30'))
-changes.append(('nocutsX30', '', 'trigger_bit = -1, min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = 30'))
+changes.append(('nocutsX30', '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = 30, min_sumht = 0'))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
@@ -56,20 +56,29 @@ process.effs = cms.EDAnalyzer('SimpleTriggerEfficiency',
                               )
 process.p = cms.EndPath(process.effs)
 
-
+hackrundata = False # JMTBAD
+if hackrundata:
+    from FWCore.PythonUtilities.LumiList import LumiList
+    l = LumiList('ana.json').getCMSSWString().split(',')
+    process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*l)
+    
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import *
-    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau1000um_M0400] + ttbar_samples + qcd_samples
-    for sample in ttbar_samples + qcd_samples:
-        sample.total_events = sample.nevents_orig/2
+    import JMTucker.Tools.Samples as Samples
+    samples = Samples.ttbar_samples + Samples.qcd_samples
+    samples += [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
+
+    #samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
-    
-    cs = CRABSubmitter('PileupV11',
-                       job_control_from_sample = True,
-                       use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV11'],
-                       )
-    cs.submit_all(samples)
 
+    cs = CRABSubmitter('PileupV15',
+                       total_number_of_events = -1,
+                       events_per_job = 200000,
+                       manual_datasets = SampleFiles['MFVNtupleV15'],
+                       )
+
+    if not hackrundata:
+        cs.submit_all(samples)
+    else:
+        cs.submit_all([Samples.MultiJetPk2012B])
