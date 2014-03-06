@@ -709,6 +709,21 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True, chu
     l = len(files)
     if l != expected:
         print '\033[36;7m num files %i != expected %i \033[m' % (l, expected)
+        print '\033[36;7m Removing the duplicated files \033[m'
+        extra_jobs=[]
+        extra_ids=[]
+        for f in files:            
+            where=f.split("/")
+            job=(where[-1].split("_"))
+            job_numb=job[-3]
+            job_id=job[-2]
+            extra_jobs.append(job_numb)
+            extra_ids.append(job_id)
+        for x,y in zip(extra_jobs,extra_ids):
+            if extra_jobs.count(x)  == 2: #JCBAD this only works for one resubmission
+                for f in files:
+                    if "_"+x+"_"+y in f and int(y)==1:
+                        files.remove(f)            
     if l == 0:
         msg = 'crab_hadd: no files found in %s' % working_dir
         if raise_on_empty:
