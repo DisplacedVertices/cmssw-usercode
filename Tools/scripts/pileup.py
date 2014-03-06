@@ -64,7 +64,7 @@ for i in xrange(1, ndata+1):
     m = mc_h.GetBinContent(i)
     w = -1
     if m == 0:
-        if d > 1e-9:
+        if d > 1e-4:
             raise ValueError('m == 0 and d = %e != 0 for i = %i' % (d, i))
         w = 0
     else:
@@ -74,8 +74,12 @@ for i in xrange(1, ndata+1):
 print 'sum weights =', sum(weights), 'average weight =', sum(weights)/len(weights)
 while weights[-1] == 0:
     weights.pop()
+sw=sum(weights)
+weights2=[w for w in weights]
+weights=[w/sw for w in weights]
 print '\npython:\n'
 print 'weights = %r' % weights
+print 'weights2 = %r' % weights2
 print '\nc++:\n'
 print 'const int max_npu = %i;' % len(weights)
 print 'const double pileup_weights[max_npu] = {'
