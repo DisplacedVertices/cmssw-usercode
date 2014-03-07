@@ -7,7 +7,8 @@ tuple_version = version
 
 runOnMC = True # magic line, don't touch
 prepare_vis = False
-keep_everything = prepare_vis
+keep_extra = False
+keep_all = prepare_vis
 process, common_seq = pat_tuple_process(runOnMC)
 #set_events_to_process(process, [])
 #process.source.fileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/ACE17BB6-A20E-E211-819A-00266CF9B630.root']
@@ -15,7 +16,7 @@ process, common_seq = pat_tuple_process(runOnMC)
 no_skimming_cuts(process)
 
 process.out.fileName = 'ntuple.root'
-if keep_everything:
+if keep_all:
     process.out.outputCommands = ['keep *']
 else:
     process.out.outputCommands = [
@@ -23,13 +24,26 @@ else:
         'keep MFVEvent_mfvEvent__*',
         'keep MFVVertexAuxs_mfvVerticesAux__*',
         ]
+
+    if keep_extra:
+        process.out.outputCommands += [
+            'keep recoTracks_generalTracks__*',
+            'keep recoVertexs_offlinePrimaryVertices__*',
+            'keep recoBeamSpot_offlineBeamSpot__*',
+            'keep *_selectedPatJets*_*_*',
+            'drop *_selectedPatJetsForMETtype1p2CorrPF_*_*',
+            'drop *_selectedPatJetsForMETtype2CorrPF_*_*',
+            'drop CaloTowers_*_*_*',
+            'keep recoVertexs_mfvVertices__*',
+            ]
+
     process.out.dropMetaData = cms.untracked.string('ALL')
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
-if keep_everything:
+if keep_all:
     process.mfvEvent.skip_event_filter = ''
     process.mfvSelectedVerticesTight.produce_vertices = True
 else:
@@ -111,15 +125,26 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    cs = CRABSubmitter('MFVNtuple' + tuple_version.upper(),
+
+    if keep_extra:
+        batch_name_extra = '_WExtra'
+    elif prepare_vis:
+        batch_name_extra = '_WVis'
+    elif keep_all:
+        batch_name_extra = '_WAll'
+    else:
+        batch_name_extra = ''
+
+    cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + batch_name_extra,
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        get_edm_output = True,
                        data_retrieval = 'fnal_eos',
-                       #publish_data_name = 'mfvntuple_' + tuple_version,
+                       #publish_data_name = 'mfvntuple_' + tuple_version + batch_name_extra.lower(),
                        #manual_datasets = SampleFiles['mfv300s'],
                        max_threads = 3,
                        )
+
 
     timing = { 'dyjetstollM10': 0.011203, 'dyjetstollM50': 0.019867, 'qcdbce020': 0.008660, 'qcdbce030': 0.007796, 'qcdbce080': 0.061260, 'qcdbce170': 0.328891, 'qcdbce250': 0.481813, 'qcdbce350': 0.519482, 'qcdem020': 0.010137, 'qcdem030': 0.01, 'qcdem080': 0.037925, 'qcdem170': 0.286123, 'qcdem250': 0.471398, 'qcdem350': 0.686303, 'qcdht0100': 0.008273, 'qcdht0250': 0.116181, 'qcdht0500': 0.738374, 'qcdht1000': 1.002745, 'qcdmu0020': 0.012301, 'qcdmu0030': 0.015762, 'qcdmu0050': 0.018178, 'qcdmu0080': 0.119300, 'qcdmu0120': 0.245562, 'qcdmu0170': 0.32, 'qcdmu0300': 0.419818, 'qcdmu0470': 0.584266, 'qcdmu0600': 0.455305, 'qcdmu0800': 0.879171, 'qcdmu1000': 1.075712, 'singletop_s': 0.093429, 'singletop_s_tbar': 0.146642, 'singletop_tW': 0.327386, 'singletop_tW_tbar': 0.184349, 'singletop_t': 0.092783, 'singletop_t_tbar': 0.060983, 'ttbarhadronic': 0.752852, 'ttbarsemilep': 0.419073, 'ttbardilep': 0.295437, 'ttgjets': 0.861987, 'ttwjets': 0.714156, 'ttzjets': 0.827464, 'wjetstolnu': 0.010842, 'ww': 0.046754, 'wz': 0.049839, 'zz': 0.059791, }
     timing.update({ 'qcdpt0000': 0.005460, 'qcdpt0005': 0.008174, 'qcdpt0015': 0.007915, 'qcdpt0030': 0.014118, 'qcdpt0050': 0.011146, 'qcdpt0080': 0.040685, 'qcdpt0120': 0.141580, 'qcdpt0170': 0.374554, 'qcdpt0300': 0.509502, 'qcdpt0470': 0.830390, 'qcdpt0600': 0.996345, 'qcdpt0800': 0.428342, 'qcdpt1000': 0.546948, 'qcdpt1400': 0.544585, 'qcdpt1800': 2.078266, })
@@ -135,6 +160,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.events_per = 500
         s.timed = True
 
+
     x = Samples.mfv_signal_samples
     Samples.mfv_signal_samples = []
     Samples.mfv300 = []
@@ -143,6 +169,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.mfv300.append(y)
         else:
             Samples.mfv_signal_samples.append(y)
+
     
     if 'smaller' in sys.argv:
         samples = Samples.smaller_background_samples
@@ -165,12 +192,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400, Samples.ttbarhadronic, Samples.qcdht1000]
     elif 'mfv300' in sys.argv:
         samples = Samples.mfv300
+    elif 'tthad' in sys.argv:
+        samples = [Samples.ttbarhadronic]
     else:
         samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
+
 
     for sample in samples:
         if sample.is_mc:
             sample.total_events = -1
             assert hasattr(sample, 'timed')
+
 
     cs.submit_all(samples)
