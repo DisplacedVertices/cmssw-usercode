@@ -705,25 +705,46 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=True, chu
         files = ['dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/11/' + pfn.split('/11/')[1] for pfn in pfns] # JMTBAD
     else:    
         files = glob.glob(os.path.join(working_dir, 'res/*root'))
-        
+
+    job_nums = defaultdict(lambda: defaultdict(list))
+    for f in files:
+        f_ = f.split('_')
+        job, num = int(f_[-3]), int(f_[-2])
+        job_nums[job][num].append(f)
+
+    sexpected = set(xrange(1,expected+1))
+    sjobs = set(job_nums)
+    if sjobs != sexpected:
+        print '\033[36;7m files found %r not what expected \033[m' % sorted(sjobs)
+
+        missing = sorted(sexpected - sjobs)
+        print '\033[36;7m     missing: %r \033[m' % missing
+
+        to_drop = []
+        for job, nums_and_fs in job_nums.iteritems():
+            for num, fs in nums_and_fs.iteritems():
+                if len(fs) > 1:
+                    print '\033[36;7m     for job %i, more than one file with resub num %i *** will keep latest by mtime *** \033[m' % (job, num)
+                    fs.sort(key=lambda f: os.stat(f).st_mtime)
+                    good_f = fs[-1]
+                    while len(fs) > 1:
+                        bad_f = fs.pop(0)
+                        to_drop.append((bad_f, good_f))
+            if len(nums_and_fs) > 1:
+                good_num = max(nums_and_fs)
+                assert len(nums_and_fs[good_num]) == 1
+                good_f = nums_and_fs[good_num][0]
+                for num, fs in nums_and_fs.iteritems():
+                    if num != good_num:
+                        assert len(fs) == 1
+                        to_drop.append((fs[0], good_f))
+
+        for f, good_f in to_drop:
+            print '\033[36;7m     dropping %s in favor of %s \033[m' % (f, good_f)
+            files.remove(f)
+
+    
     l = len(files)
-    if l != expected:
-        print '\033[36;7m num files %i != expected %i \033[m' % (l, expected)
-        print '\033[36;7m Removing the duplicated files \033[m'
-        extra_jobs=[]
-        extra_ids=[]
-        for f in files:            
-            where=f.split("/")
-            job=(where[-1].split("_"))
-            job_numb=job[-3]
-            job_id=job[-2]
-            extra_jobs.append(job_numb)
-            extra_ids.append(job_id)
-        for x,y in zip(extra_jobs,extra_ids):
-            if extra_jobs.count(x)  == 2: #JCBAD this only works for one resubmission
-                for f in files:
-                    if "_"+x+"_"+y in f and int(y)==1:
-                        files.remove(f)            
     if l == 0:
         msg = 'crab_hadd: no files found in %s' % working_dir
         if raise_on_empty:
