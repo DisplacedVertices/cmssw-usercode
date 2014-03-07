@@ -377,7 +377,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
     bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
 
-    if (max_all_track_dxyerr > 0 || max_all_track_d3derr > 0) {
+    if (use && (max_all_track_dxyerr > 0 || max_all_track_d3derr > 0)) {
       reco::TransientTrack ttk = tt_builder->build(tk);
       if (max_all_track_dxyerr > 0) {
         auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, primary_vertex);
@@ -444,7 +444,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     double itk_npxhits = seed_tracks[itk].track().hitPattern().numberOfValidPixelHits();
     bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits;
 
-    if (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0) {
+    if (itk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
       if (max_seed_track_dxyerr > 0) {
         auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[itk], primary_vertex);
         itk_use = itk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyerr;
@@ -462,7 +462,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       double jtk_npxhits = seed_tracks[jtk].track().hitPattern().numberOfValidPixelHits();
       bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits;
 
-      if (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0) {
+      if (jtk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
         if (max_seed_track_dxyerr > 0) {
           auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[jtk], primary_vertex);
           jtk_use = jtk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyerr;
