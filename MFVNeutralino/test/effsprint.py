@@ -10,8 +10,8 @@ cuts = ('Ntracks', 'Drmin', 'Drmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt
 def effs(fn):
     global sum, var
     f = ROOT.TFile(fn)
-    den = f.Get('mfvEventHistosNoCuts/h_npv').GetEntries()
-    numall = f.Get('mfvEventHistos/h_npv').GetEntries()
+    den = f.Get('mfvEventHistosNoCuts/h_npv').Integral()
+    numall = f.Get('mfvEventHistos/h_npv').Integral()
     h = f.Get('mfvVertexHistos/h_nsv')
     numvtx = h.Integral(h.FindBin(2), 1000000)
     sname = os.path.basename(fn).replace('.root','')

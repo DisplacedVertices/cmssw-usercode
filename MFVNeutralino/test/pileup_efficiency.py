@@ -2,9 +2,9 @@
 
 from JMTucker.Tools.ROOTTools import ROOT, histogram_divide
 
-samples = ["mfv_neutralino_tau0100um_M0400", "mfv_neutralino_tau1000um_M0400", "ttbarhadronic", "ttbarsemilep", "ttbardilep", "qcdht0100", "qcdht0250", "qcdht0500", "qcdht1000"]
+samples = ["mfv_neutralino_tau1000um_M0400", "ttbarhadronic", "ttbarsemilep", "ttbardilep", "qcdht0100", "qcdht0250", "qcdht0500", "qcdht1000"]
 for sample in samples:
-    file = ROOT.TFile("crab/PileupV11/%s_mangled.root" % sample)
+    file = ROOT.TFile("~/nobackup/crab/PileupV15/Mangle/%s_mangled.root" % sample)
     max1 = 0
     for i in range(file.ABCD.GetNbinsX()):
         if (file.trigger.GetBinContent(i+1) == 0):
@@ -20,8 +20,12 @@ for sample in samples:
     c1 = ROOT.TCanvas()
     c1.Divide(2,2)
     c1.cd(1)
+    file.ABCD.Rebin(2)
+    file.nocuts.Rebin(2)
+    file.tight.Rebin(2)
+    file.trigger.Rebin(2)
     eff1 = histogram_divide(file.ABCD, file.nocuts)
-    eff1.SetTitle("ABCD_nocuts")
+    eff1.SetTitle("ABCD_nocuts:")
 #    max = 0
 #    for i in range(file.ABCD.GetNbinsX()):
 #        if (file.nocuts.GetBinContent(i+1) == 0):
@@ -29,11 +33,13 @@ for sample in samples:
 #        if (file.ABCD.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)):
 #            max = file.ABCD.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)
     eff1.SetMaximum(max1)
+    eff1.SetMinimum(0)
     eff1.Draw("AP")
     c1.cd(2)
     eff2 = histogram_divide(file.ABCD, file.trigger)
     eff2.SetTitle("ABCD_trigger")
     eff2.SetMaximum(max1)
+    eff2.SetMinimum(0)
     eff2.Draw("AP")
     c1.cd(3)
     eff3 = histogram_divide(file.tight, file.nocuts)
@@ -44,10 +50,11 @@ for sample in samples:
 #        if (file.tight.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)):
 #            max = file.tight.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)
     eff3.SetMaximum(max2)
+    eff3.SetMinimum(0)
     eff3.Draw("AP")
     c1.cd(4)
     eff4 = histogram_divide(file.tight, file.trigger)
-    eff4.SetTitle("tight_trigger")
+    eff4.SetTitle("tight_trigger;Number of pileup interaction;efficiency")
 #    for i in range(file.ABCD.GetNbinsX()):
 #        if (file.trigger.GetBinContent(i+1) == 0):
 #            continue
@@ -55,4 +62,5 @@ for sample in samples:
 #            max = file.tight.GetBinContent(i+1)/file.trigger.GetBinContent(i+1)
     eff4.SetMaximum(max2)
     eff4.Draw("AP")
+    eff4.SetMinimum(0)
     c1.SaveAs("plots/PileupEfficiency/%s.pdf" % sample)
