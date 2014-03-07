@@ -25,6 +25,8 @@ parser.add_argument('--mc-fn', default='pileup_mc.root',
                     help='The input filename for the MC distribution (default %(default)s).')
 parser.add_argument('--mc-path', default='pileup',
                     help='The name of the input MC histogram in the file given by --mc-fn (default %(default)s).')
+parser.add_argument('--tol', type=float, default=1e-9,
+                    help='The tolerance for the data npu value when the MC npu value is == 0 (default %(default)g).')
 
 options = parser.parse_args()
 
@@ -64,8 +66,8 @@ for i in xrange(1, ndata+1):
     m = mc_h.GetBinContent(i)
     w = -1
     if m == 0:
-        if d > 1e-4:
-            raise ValueError('m == 0 and d = %e != 0 for i = %i' % (d, i))
+        if d > options.tol:
+            raise ValueError('m == 0 and d = %g > %g for i = %i (see --tol)' % (d, options.tol, i))
         w = 0
     else:
         w = d/m
@@ -74,12 +76,13 @@ for i in xrange(1, ndata+1):
 print 'sum weights =', sum(weights), 'average weight =', sum(weights)/len(weights)
 while weights[-1] == 0:
     weights.pop()
-sw=sum(weights)
-weights2=[w for w in weights]
-weights=[w/sw for w in weights]
+
+sw = sum(weights)
+weights_normalized = [w/sw for w in weights]
+
 print '\npython:\n'
 print 'weights = %r' % weights
-print 'weights2 = %r' % weights2
+print '\n(normalized: %r)' % weights_normalized
 print '\nc++:\n'
 print 'const int max_npu = %i;' % len(weights)
 print 'const double pileup_weights[max_npu] = {'
