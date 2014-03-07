@@ -1,11 +1,12 @@
 import sys, os
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
 #SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau1000um_M0400', 10)
 process.source.fileNames = ['file:ntuple.root']
-process.source.noEventSort = cms.untracked.bool(False)
+#process.source.noEventSort = cms.untracked.bool(False)
 
+geometry_etc(process, 'START53_V27::All')
 del process.TFileService
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
@@ -13,19 +14,23 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 printer = cms.EDAnalyzer('MFVPrinter',
-                         vertex_src = cms.InputTag(''),
-                         event_src = cms.InputTag(''),
-                         vertex_aux_src = cms.InputTag(''),
+                         print_vertex = cms.bool(False),
+                         print_event = cms.bool(False),
+                         print_vertex_aux = cms.bool(False),
+                         vertex_src = cms.InputTag('mfvVertices'),
+                         event_src = cms.InputTag('mfvEvent'),
+                         vertex_aux_src = cms.InputTag('mfvVerticesAux'),
                          )
 
-process.printRecoVertices = printer.clone(vertex_src = 'mfvVertices')
-process.printEventAll = printer.clone(event_src = 'mfvEvent')
-process.printEventSel = printer.clone(event_src = 'mfvEvent')
-process.printVertexAll = printer.clone(vertex_aux_src = 'mfvVerticesAux')
-process.printVertexSel = printer.clone(vertex_aux_src = 'mfvSelectedVerticesTight')
-process.printVertexSelEvtSel = printer.clone(vertex_aux_src = 'mfvSelectedVerticesTight')
+process.printRecoVertices = printer.clone(print_vertex = True)
+process.printRecoVerticesTight = printer.clone(print_vertex = True, vertex_src = 'mfvSelectedVerticesTight')
+process.printEventAll = printer.clone(print_event = True)
+process.printEventSel = printer.clone(print_event = True)
+process.printVertexAll = printer.clone(print_vertex_aux = True)
+process.printVertexSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
+process.printVertexSelEvtSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
 
-process.p = cms.Path(process.printRecoVertices * process.mfvSelectedVerticesTight * process.printEventAll * process.printVertexAll * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
+process.p = cms.Path(process.printRecoVerticesTight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
 
 if __name__ == '__main__' and 'splitlog' in sys.argv:
     log_fn = sys.argv[sys.argv.index('splitlog')+1]
