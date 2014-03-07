@@ -127,9 +127,11 @@ private:
   const double min_all_track_pt;
   const double min_all_track_dxy;
   const int min_all_track_nhits;
+  const int min_all_track_npxhits;
   const double min_seed_track_pt;
   const double min_seed_track_dxy;
   const int min_seed_track_nhits;
+  const int min_seed_track_npxhits;
   const bool seed_by_sums;
   const double min_seed_sum_pt;
   const double min_seed_sum_dxy;
@@ -204,9 +206,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_all_track_pt(cfg.getParameter<double>("min_all_track_pt")),
     min_all_track_dxy(cfg.getParameter<double>("min_all_track_dxy")),
     min_all_track_nhits(cfg.getParameter<int>("min_all_track_nhits")),
+    min_all_track_npxhits(cfg.getParameter<int>("min_all_track_npxhits")),
     min_seed_track_pt(cfg.getParameter<double>("min_seed_track_pt")),
     min_seed_track_dxy(cfg.getParameter<double>("min_seed_track_dxy")),
     min_seed_track_nhits(cfg.getParameter<int>("min_seed_track_nhits")),
+    min_seed_track_npxhits(cfg.getParameter<int>("min_seed_track_npxhits")),
     seed_by_sums(cfg.getParameter<bool>("seed_by_sums")),
     min_seed_sum_pt(cfg.getParameter<double>("min_seed_sum_pt")),
     min_seed_sum_dxy(cfg.getParameter<double>("min_seed_sum_dxy")),
@@ -356,7 +360,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const double pt = tk->pt();
     const double dxy = tk->dxy(beamspot->position());
     const int nhits = tk->hitPattern().numberOfValidHits();
-    const bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits;
+    const int npxhits = tk->hitPattern().numberOfValidPixelHits();
+    const bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
 
     if (use) {
       seed_tracks.push_back(tt_builder->build(tk));
@@ -410,13 +415,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     double itk_pt    = seed_tracks[itk].track().pt();
     double itk_dxy   = seed_tracks[itk].track().dxy(beamspot->position());
     double itk_nhits = seed_tracks[itk].track().hitPattern().numberOfValidHits();
-    bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && itk_nhits >= min_seed_track_nhits;
+    double itk_npxhits = seed_tracks[itk].track().hitPattern().numberOfValidPixelHits();
+    bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits;
 
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
       double jtk_pt    = seed_tracks[jtk].track().pt();
       double jtk_dxy   = seed_tracks[jtk].track().dxy(beamspot->position());
       double jtk_nhits = seed_tracks[jtk].track().hitPattern().numberOfValidHits();
-      bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && jtk_nhits >= min_seed_track_nhits;
+      double jtk_npxhits = seed_tracks[jtk].track().hitPattern().numberOfValidPixelHits();
+      bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits;
 
       if (histos) {
         h_seed_pair_pt->Fill(itk_pt, jtk_pt);
