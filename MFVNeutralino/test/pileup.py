@@ -56,18 +56,11 @@ process.effs = cms.EDAnalyzer('SimpleTriggerEfficiency',
                               )
 process.p = cms.EndPath(process.effs)
 
-hackrundata = False # JMTBAD
-if hackrundata:
-    from FWCore.PythonUtilities.LumiList import LumiList
-    l = LumiList('ana.json').getCMSSWString().split(',')
-    process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*l)
-    
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     samples = Samples.ttbar_samples + Samples.qcd_samples
     samples += [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 
-    #samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
@@ -77,8 +70,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        events_per_job = 200000,
                        manual_datasets = SampleFiles['MFVNtupleV15'],
                        )
+    cs.submit_all(samples)
 
-    if not hackrundata:
-        cs.submit_all(samples)
-    else:
-        cs.submit_all([Samples.MultiJetPk2012B])
