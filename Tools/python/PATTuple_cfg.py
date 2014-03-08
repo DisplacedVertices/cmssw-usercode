@@ -349,7 +349,7 @@ def disable_pujetid(process):
 
 if __name__ == '__main__':
     # JMTBAD no idea if this works with submit_tuple.py ...
-    process = pat_tuple_process()
+    process = pat_tuple_process()[0]
     if 'dump' in sys.argv:
         open('dumptup.py','wt').write(process.dumpPython())
 
