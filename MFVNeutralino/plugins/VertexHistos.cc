@@ -77,6 +77,25 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_pair3ddist;
   TH1F* h_pair3derr;
   TH1F* h_pair3dsig;
+
+  TH1F* h_sv_tracks_pt[sv_num_indices];
+  TH1F* h_sv_tracks_eta[sv_num_indices];
+  TH1F* h_sv_tracks_phi[sv_num_indices];
+  TH1F* h_sv_tracks_charge[sv_num_indices];
+  TH1F* h_sv_tracks_dxybs[sv_num_indices];
+  TH1F* h_sv_tracks_dzbs[sv_num_indices];
+  TH1F* h_sv_tracks_dxypv[sv_num_indices];
+  TH1F* h_sv_tracks_dzpv[sv_num_indices];
+  TH1F* h_sv_tracks_dxyerr[sv_num_indices];
+  TH1F* h_sv_tracks_dzerr[sv_num_indices];
+  TH1F* h_sv_tracks_chi2dof[sv_num_indices];
+  TH1F* h_sv_tracks_nhits[sv_num_indices];
+  TH1F* h_sv_tracks_npixel[sv_num_indices];
+  TH1F* h_sv_tracks_nstrip[sv_num_indices];
+  TH1F* h_sv_tracks_minr[sv_num_indices];
+  TH1F* h_sv_tracks_minz[sv_num_indices];
+  TH1F* h_sv_tracks_maxr[sv_num_indices];
+  TH1F* h_sv_tracks_maxz[sv_num_indices];
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "best2", "rest", "top2", "all" };
@@ -311,6 +330,27 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     }
 
     h_sv[j].Init("h_sv_" + ex, hs, true, do_scatterplots);
+
+    if (vertex_src.label() != "") {
+      h_sv_tracks_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_pt", exc), TString::Format(";%s SV tracks p_{T};arb. units", exc), 100, 0, 150);
+      h_sv_tracks_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_eta", exc), TString::Format(";%s SV tracks #eta;arb. units", exc), 50, -4, 4);
+      h_sv_tracks_phi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_phi", exc), TString::Format(";%s SV tracks #phi;arb. units", exc), 50, -3.15, 3.15);
+      h_sv_tracks_charge[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_charge", exc), TString::Format(";%s SV tracks charge;arb. units", exc), 4, -2, 2);
+      h_sv_tracks_dxybs[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_dxybs", exc), TString::Format(";%s SV tracks dxy(BS) (cm);arb. units", exc), 400, -2, 2);
+      h_sv_tracks_dzbs[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_dzbs", exc), TString::Format(";%s SV tracks dz(BS) (cm);arb. units", exc), 100, -20, 20);
+      h_sv_tracks_dxypv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_dxypv", exc), TString::Format(";%s SV tracks dxy(PV) (cm);arb. units", exc), 400, -2, 2);
+      h_sv_tracks_dzpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_dzpv", exc), TString::Format(";%s SV tracks dz(PV) (cm);arb. units", exc), 100, -20, 20);
+      h_sv_tracks_dxyerr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_dxyerr", exc), TString::Format(";%s SV tracks #sigma(dxy) (cm);arb. units", exc), 50, 0, 0.5);
+      h_sv_tracks_dzerr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_dzerr", exc), TString::Format(";%s SV tracks #sigma(dz) (cm);arb. units", exc), 50, 0, 2);
+      h_sv_tracks_chi2dof[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_chi2dof", exc), TString::Format(";%s SV tracks #chi^2/dof;arb. units", exc), 50, 0, 7);
+      h_sv_tracks_nhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_nhits", exc), TString::Format(";%s SV tracks number of hits;arb. units", exc), 40, 0, 40);
+      h_sv_tracks_npixel[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_npixel", exc), TString::Format(";%s SV tracks number of pixel hits;arb. units", exc), 40, 0, 40);
+      h_sv_tracks_nstrip[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_nstrip", exc), TString::Format(";%s SV tracks number of strip hits;arb. units", exc), 40, 0, 40);
+      h_sv_tracks_minr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_minr", exc), TString::Format(";%s SV tracks innermost radius of hit module;arb. units", exc), 14, 0, 14);
+      h_sv_tracks_minz[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_minz", exc), TString::Format(";%s SV tracks innermost z of hit module;arb. units", exc), 15, 0, 15);
+      h_sv_tracks_maxr[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_maxr", exc), TString::Format(";%s SV tracks outermost radius of hit module;arb. units", exc), 14, 0, 14);
+      h_sv_tracks_maxz[j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_maxz", exc), TString::Format(";%s SV tracks outermost z of hit module;arb. units", exc), 15, 0, 15);
+    }
   }
 
   for (int j = 0; j < 3; ++j) {
@@ -589,6 +629,29 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       }
       std::sort(tracks.begin(), tracks.end(), [](const reco::TrackBase& tk1, const reco::TrackBase& tk2) { return tk1.pt() > tk2.pt(); });
 
+      for (int itk = 0, itke = int(tracks.size()); itk < itke; ++itk) {
+        fill_multi(h_sv_tracks_pt,      isv, tracks[itk].pt(), *weight);
+        fill_multi(h_sv_tracks_eta,     isv, tracks[itk].eta(), *weight);
+        fill_multi(h_sv_tracks_phi,     isv, tracks[itk].phi(), *weight);
+        fill_multi(h_sv_tracks_charge,  isv, tracks[itk].charge(), *weight);
+        fill_multi(h_sv_tracks_dxybs,   isv, tracks[itk].dxy(bs), *weight);
+        fill_multi(h_sv_tracks_dzbs,    isv, tracks[itk].dz(bs), *weight);
+        fill_multi(h_sv_tracks_dxypv,   isv, tracks[itk].dxy(pv), *weight);
+        fill_multi(h_sv_tracks_dzpv,    isv, tracks[itk].dz(pv), *weight);
+        fill_multi(h_sv_tracks_dxyerr,  isv, tracks[itk].dxyError(), *weight);
+        fill_multi(h_sv_tracks_dzerr,   isv, tracks[itk].dzError(), *weight);
+        fill_multi(h_sv_tracks_chi2dof, isv, tracks[itk].chi2() / tracks[itk].ndof(), *weight);
+        fill_multi(h_sv_tracks_nhits,   isv, tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
+        fill_multi(h_sv_tracks_npixel,  isv, tracks[itk].hitPattern().numberOfValidPixelHits(), *weight);
+        fill_multi(h_sv_tracks_nstrip,  isv, tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
+
+        NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern());
+        fill_multi(h_sv_tracks_minr,    isv, se.min_r, *weight);
+        fill_multi(h_sv_tracks_minz,    isv, se.min_z, *weight);
+        fill_multi(h_sv_tracks_maxr,    isv, se.max_r, *weight);
+        fill_multi(h_sv_tracks_maxz,    isv, se.max_z, *weight);
+      }
+
       for (int itk = 0, itke = std::min(int(tracks.size()), max_ntracks); itk < itke; ++itk) {
         v[TString::Format("track%i_pt",      itk).Data()] = tracks[itk].pt();
         v[TString::Format("track%i_eta",     itk).Data()] = tracks[itk].eta();
@@ -606,10 +669,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         v[TString::Format("track%i_nstrip",  itk).Data()] = tracks[itk].hitPattern().numberOfValidStripHits();
 
         NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern());
-        v[TString::Format("track%i_minr", itk).Data()] = se.min_r;
-        v[TString::Format("track%i_minz", itk).Data()] = se.min_z;
-        v[TString::Format("track%i_maxr", itk).Data()] = se.max_r;
-        v[TString::Format("track%i_maxz", itk).Data()] = se.max_z;
+        v[TString::Format("track%i_minr",    itk).Data()] = se.min_r;
+        v[TString::Format("track%i_minz",    itk).Data()] = se.min_z;
+        v[TString::Format("track%i_maxr",    itk).Data()] = se.max_r;
+        v[TString::Format("track%i_maxz",    itk).Data()] = se.max_z;
       }
     }
 
