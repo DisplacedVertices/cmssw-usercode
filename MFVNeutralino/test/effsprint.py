@@ -5,7 +5,7 @@ import JMTucker.Tools.Samples as Samples
 sum = 0.
 var = 0.
 int_lumi = 20000.
-cuts = ('Ntracks', 'Drmin', 'Drmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3')
+cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3')
 
 def effs(fn):
     global sum, var
