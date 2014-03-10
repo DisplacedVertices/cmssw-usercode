@@ -13,6 +13,7 @@ public:
 private:
   const edm::InputTag mevent_src;
   const bool enable;
+  const bool print;
 
   const bool weight_pileup;
   const std::vector<double> pileup_weights;
@@ -25,6 +26,7 @@ private:
 MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     enable(cfg.getParameter<bool>("enable")),
+    print(cfg.getUntrackedParameter<bool>("print", false)),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
@@ -62,6 +64,9 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   h_sums->Fill(sum_weight, *weight);
+
+  if (print)
+    printf("MFVWeight: r,l,e: %u, %u, %u   weight: %g\n", event.id().run(), event.luminosityBlock(), event.id().event(), *weight);
 
   event.put(weight);
 }
