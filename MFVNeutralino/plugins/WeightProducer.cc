@@ -13,7 +13,7 @@ public:
 private:
   const edm::InputTag mevent_src;
   const bool enable;
-  const bool print;
+  const bool prints;
 
   const bool weight_pileup;
   const std::vector<double> pileup_weights;
@@ -26,7 +26,7 @@ private:
 MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     enable(cfg.getParameter<bool>("enable")),
-    print(cfg.getUntrackedParameter<bool>("print", false)),
+    prints(cfg.getUntrackedParameter<bool>("prints", false)),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
