@@ -41,7 +41,9 @@ else:
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
-process.p = cms.Path(common_seq * process.mfvVertexSequence)
+process.load('JMTucker.MFVNeutralino.JECPATProducer_cfi')
+
+process.p = cms.Path(common_seq * process.JECPATProducer * process.mfvVertexSequence)
 
 if keep_all:
     process.mfvEvent.skip_event_filter = ''
@@ -64,6 +66,10 @@ process.outp = cms.EndPath(process.mfvEvent * process.out)
 # we can't match leptons by track to vertices.
 process.patMuonsPF.embedTrack = False
 process.patElectronsPF.embedTrack = False
+#process.mfvVerticesToJets.jet_src = 'JECPATProducer'
+process.JECPATProducer.jes_uncertainty = False
+process.JECPATProducer.jes_way = False
+process.JECPATProducer.jer_way = False
 
 if prepare_vis:
     process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
@@ -77,24 +83,25 @@ if prepare_vis:
 
 if 'histos' in sys.argv:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
-    process.mfvVertices.histos = True
+    #process.mfvVertices.histos = True
     process.mfvVerticesToJets.histos = True
-    process.load('JMTucker.MFVNeutralino.Histos_cff')
-    process.outp.replace(process.mfvEvent, process.mfvEvent * process.mfvHistos) # in outp because histos needs to read mfvEvent
+    #process.load('JMTucker.MFVNeutralino.Histos_cff')
+    #process.outp.replace(process.mfvEvent, process.mfvEvent * process.mfvHistos) # in outp because histos needs to read mfvEvent
 
 if 'test' in sys.argv:
     process.source.fileNames = [
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_2_2_vbl.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_3_2_yEE.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_4_1_vkj.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_5_3_Tce.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_6_1_a0t.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_7_2_Qv8.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_8_1_3WZ.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_9_1_ANl.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_2_2_vbl.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_3_2_yEE.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_4_1_vkj.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_5_3_Tce.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_6_1_a0t.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_7_2_Qv8.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_8_1_3WZ.root',
+        #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_9_1_ANl.root',
+        'file:/uscms/home/tucker/nobackup/FCAF3F92-5A16-E211-ACCC-E0CB4E19F95A.ttbarhadronic.root'
     ]
-    process.maxEvents.input = 100
+    process.maxEvents.input = -1
     input_is_pythia8(process)
     re_pat(process)
     process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')
@@ -202,6 +209,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if sample.is_mc:
             sample.total_events = -1
             assert hasattr(sample, 'timed')
-
 
     cs.submit_all(samples)
