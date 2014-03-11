@@ -39,6 +39,7 @@ private:
   TH2F* h_n_jets_v_vertices;
   TH1F* h_n_vertex_tracks;
   TH1F* h_n_jet_tracks;
+  TH1F* h_n_jet_tracks_phi;
 
   TH1F* h_ntracks;
   TH1F* h_ntracks_ptmin;
@@ -96,6 +97,7 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     h_n_jets_v_vertices = fs->make<TH2F>("h_n_jets_v_vertices", ";# of vertices;# of jets", 20, 0, 20, 20, 0, 20);
     h_n_vertex_tracks = fs->make<TH1F>("h_n_vertex_tracks", ";# tracks per vertex;arb. units", 50, 0, 50);
     h_n_jet_tracks = fs->make<TH1F>("h_n_jet_tracks", ";# tracks per jet;arb. units", 50, 0, 50);
+    h_n_jet_tracks_phi = fs->make<TH1F>("h_n_jet_tracks_phi", ";# tracks phi;arb. units", 50, -4, 4);
 
     h_ntracks = fs->make<TH1F>("h_ntracks", ";# tracks shared w. a vertex;arb. units", 20, 0, 20);
     h_ntracks_ptmin = fs->make<TH1F>("h_ntracks_ptmin", ";# tracks (p_{T} cut) shared w. a vertex;arb. units", 20, 0, 20);
@@ -135,7 +137,7 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
 void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jet_src, jets);
-
+  //std::cout<<"Jets:"<<jet_src<<std::endl;
   std::vector<reco::VertexRef> vertices;
 
   if (input_is_refs) {
@@ -241,6 +243,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
           reco::TrackRef tk = itk->castTo<reco::TrackRef>();
           if (jet_tracks.count(tk) > 0) {
             ++ntracks;
+	   
             if (tk->pt() > min_track_pt)
               ++ntracks_ptmin;
             sum_nhits += tk->hitPattern().numberOfValidHits();
@@ -351,10 +354,24 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
 
     for (size_t ijet = 0; ijet < n_jets; ++ijet) {
       pat::JetRef jetref(jets, ijet);
+      pat::Jet jet = jets->at(ijet);
+
+      std::set<reco::TrackRef> jet_tracks;
+      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
+	const reco::TrackRef& tk = pfcand->trackRef();
+	if (tk.isNonnull())
+	  jet_tracks.insert(tk);
+      }
       
       if (index_by_ntracks[ijet] == int(ivtx)) {
         assoc[mfv::JByNtracks]->insert(vtxref, jetref);
         ++these_n_matchedjets[mfv::JByNtracks];
+	
+	for (auto track = jet_tracks.begin(); track != jet_tracks.end(); ++track) {
+	  reco::TrackRef tk = *track;
+	  if(histos) 
+	    h_n_jet_tracks_phi->Fill(tk->phi());
+	}
       }
 
       if (index_by_ntracks_ptmin[ijet] == int(ivtx)) {
