@@ -7,6 +7,8 @@
   <use name="DataFormats/PatCandidates"/>
   <use name="DataFormats/TrackReco"/>
   <use name="DataFormats/VertexReco"/>
+  <use name="DataFormats/Math"/>
+  <use name="CondFormats/JetMETObjects"/>
   <use name="PhysicsTools/CandUtils"/>
   <use name="RecoBTag/SecondaryVertex"/>
   <use name="RecoVertex/ConfigurableVertexReco"/>
