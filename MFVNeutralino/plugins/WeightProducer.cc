@@ -65,7 +65,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
   h_sums->Fill(sum_weight, *weight);
 
-  if (print)
+  if (prints)
     printf("MFVWeight: r,l,e: %u, %u, %u   weight: %g\n", event.id().run(), event.luminosityBlock(), event.id().event(), *weight);
 
   event.put(weight);
