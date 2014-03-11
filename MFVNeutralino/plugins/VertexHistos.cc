@@ -46,6 +46,10 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   // max number of extra track-related plots to make
   static const int max_ntracks;
 
+  // indices for h_sv_tracks below:
+  enum sv_tracks_index { sv_tracks_all, sv_tracks_jet, sv_tracks_track, sv_tracks_num_indices };
+  static const char* sv_tracks_index_names[sv_tracks_num_indices];
+
   void fill_multi(TH1F** hs, const int isv, const double val, const double weight) const;
   void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
   void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const;
@@ -77,10 +81,32 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_pair3ddist;
   TH1F* h_pair3derr;
   TH1F* h_pair3dsig;
+
+  TH1F* h_sv_tracks_pt[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_eta[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_phi[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_charge[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dxybs[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dzbs[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dxypv[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dzpv[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dxyerr[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dzerr[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_chi2dof[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_nhits[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_npixel[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_nstrip[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_minr[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_minz[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_maxr[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_maxz[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_jetdr[sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_jetdphi[sv_tracks_num_indices][sv_num_indices];
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "best2", "rest", "top2", "all" };
 const int MFVVertexHistos::max_ntracks = 5;
+const char* MFVVertexHistos::sv_tracks_index_names[MFVVertexHistos::sv_tracks_num_indices] = { "all", "jet", "track" };
 
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
@@ -105,9 +131,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       hs.add(TString::Format("track%i_phi",     itk).Data(), TString::Format("track%i #phi",                           itk).Data(),  50,  -3.15,    3.15);
       hs.add(TString::Format("track%i_charge",  itk).Data(), TString::Format("track%i charge",                         itk).Data(),   4,  -2,       2);
       hs.add(TString::Format("track%i_dxybs",   itk).Data(), TString::Format("track%i dxy(BS) (cm)",                   itk).Data(), 100,  -2,       2);
-      hs.add(TString::Format("track%i_dzbs",    itk).Data(), TString::Format("track%i dz(BS) (cm)",                    itk).Data(), 400, -20,      20);
+      hs.add(TString::Format("track%i_dzbs",    itk).Data(), TString::Format("track%i dz(BS) (cm)",                    itk).Data(), 100, -20,      20);
       hs.add(TString::Format("track%i_dxypv",   itk).Data(), TString::Format("track%i dxy(PV) (cm)",                   itk).Data(), 100,  -2,       2);
-      hs.add(TString::Format("track%i_dzpv",    itk).Data(), TString::Format("track%i dz(PV) (cm)",                    itk).Data(), 400, -20,      20);
+      hs.add(TString::Format("track%i_dzpv",    itk).Data(), TString::Format("track%i dz(PV) (cm)",                    itk).Data(), 100, -20,      20);
       hs.add(TString::Format("track%i_dxyerr",  itk).Data(), TString::Format("track%i #sigma(dxy) (cm)",               itk).Data(),  50,   0,       0.5);
       hs.add(TString::Format("track%i_dzerr",   itk).Data(), TString::Format("track%i #sigma(dz) (cm)",                itk).Data(),  50,   0,       2);
       hs.add(TString::Format("track%i_chi2dof", itk).Data(), TString::Format("track%i #chi^2/dof",                     itk).Data(),  50,   0,       7);
@@ -118,7 +144,14 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       hs.add(TString::Format("track%i_minz",    itk).Data(), TString::Format("track%i innermost z of hit module",      itk).Data(),  15,   0,      15);
       hs.add(TString::Format("track%i_maxr",    itk).Data(), TString::Format("track%i outermost radius of hit module", itk).Data(),  14,   0,      14);
       hs.add(TString::Format("track%i_maxz",    itk).Data(), TString::Format("track%i outermost z of hit module",      itk).Data(),  15,   0,      15);
+      hs.add(TString::Format("track%i_jetdr",   itk).Data(), TString::Format("track%i #Delta R(jets,track)",           itk).Data(),  50,   0,       7);
+      hs.add(TString::Format("track%i_jetdphi", itk).Data(), TString::Format("track%i #Delta #phi(jets,track)",        itk).Data(),  64,  -3.2,       3.2);
     }
+
+    hs.add("ntracksdr0p00to0p50", "ntracksdr0p00to0p50", 40, 0, 40);
+    hs.add("ntracksdr0p50to1p57", "ntracksdr0p50to1p57", 40, 0, 40);
+    hs.add("ntracksdr1p57to3p14", "ntracksdr1p57to3p14", 40, 0, 40);
+    hs.add("ntracksdr3p14toinf",  "ntracksdr3p14toinf",  40, 0, 40);
   }
 
   hs.add("mva", "MVA output", 100, -2, 3);
@@ -311,6 +344,34 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     }
 
     h_sv[j].Init("h_sv_" + ex, hs, true, do_scatterplots);
+
+    if (vertex_src.label() != "") {
+      for (int i = 0; i < sv_tracks_num_indices; ++i) {
+        const std::string ext = sv_tracks_index_names[i];
+        const char* extc = ext.c_str();
+
+        h_sv_tracks_pt[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_pt", exc, extc), TString::Format(";%s SV %s tracks p_{T};arb. units", exc, extc), 100, 0, 150);
+        h_sv_tracks_eta[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_eta", exc, extc), TString::Format(";%s SV %s tracks #eta;arb. units", exc, extc), 50, -4, 4);
+        h_sv_tracks_phi[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_phi", exc, extc), TString::Format(";%s SV %s tracks #phi;arb. units", exc, extc), 50, -3.15, 3.15);
+        h_sv_tracks_charge[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_charge", exc, extc), TString::Format(";%s SV %s tracks charge;arb. units", exc, extc), 4, -2, 2);
+        h_sv_tracks_dxybs[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_dxybs", exc, extc), TString::Format(";%s SV %s tracks dxy(BS) (cm);arb. units", exc, extc), 100, -2, 2);
+        h_sv_tracks_dzbs[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_dzbs", exc, extc), TString::Format(";%s SV %s tracks dz(BS) (cm);arb. units", exc, extc), 100, -20, 20);
+        h_sv_tracks_dxypv[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_dxypv", exc, extc), TString::Format(";%s SV %s tracks dxy(PV) (cm);arb. units", exc, extc), 100, -2, 2);
+        h_sv_tracks_dzpv[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_dzpv", exc, extc), TString::Format(";%s SV %s tracks dz(PV) (cm);arb. units", exc, extc), 100, -20, 20);
+        h_sv_tracks_dxyerr[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_dxyerr", exc, extc), TString::Format(";%s SV %s tracks #sigma(dxy) (cm);arb. units", exc, extc), 50, 0, 0.5);
+        h_sv_tracks_dzerr[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_dzerr", exc, extc), TString::Format(";%s SV %s tracks #sigma(dz) (cm);arb. units", exc, extc), 50, 0, 2);
+        h_sv_tracks_chi2dof[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_chi2dof", exc, extc), TString::Format(";%s SV %s tracks #chi^2/dof;arb. units", exc, extc), 50, 0, 7);
+        h_sv_tracks_nhits[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_nhits", exc, extc), TString::Format(";%s SV %s tracks number of hits;arb. units", exc, extc), 40, 0, 40);
+        h_sv_tracks_npixel[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_npixel", exc, extc), TString::Format(";%s SV %s tracks number of pixel hits;arb. units", exc, extc), 40, 0, 40);
+        h_sv_tracks_nstrip[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_nstrip", exc, extc), TString::Format(";%s SV %s tracks number of strip hits;arb. units", exc, extc), 40, 0, 40);
+        h_sv_tracks_minr[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_minr", exc, extc), TString::Format(";%s SV %s tracks innermost radius of hit module;arb. units", exc, extc), 14, 0, 14);
+        h_sv_tracks_minz[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_minz", exc, extc), TString::Format(";%s SV %s tracks innermost z of hit module;arb. units", exc, extc), 15, 0, 15);
+        h_sv_tracks_maxr[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_maxr", exc, extc), TString::Format(";%s SV %s tracks outermost radius of hit module;arb. units", exc, extc), 14, 0, 14);
+        h_sv_tracks_maxz[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_maxz", exc, extc), TString::Format(";%s SV %s tracks outermost z of hit module;arb. units", exc, extc), 15, 0, 15);
+        h_sv_tracks_jetdr[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_jetdr", exc, extc), TString::Format(";%s SV %s tracks #Delta R(jets,track);arb. units", exc, extc), 50, 0, 7);
+        h_sv_tracks_jetdphi[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_tracks_%s_jetdphi", exc, extc), TString::Format(";%s SV %s tracks #Delta #phi(jets,track);arb. units", exc, extc), 64, -3.2, 3.2);
+      }
+    }
   }
 
   for (int j = 0; j < 3; ++j) {
@@ -589,6 +650,53 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       }
       std::sort(tracks.begin(), tracks.end(), [](const reco::TrackBase& tk1, const reco::TrackBase& tk2) { return tk1.pt() > tk2.pt(); });
 
+      int ntracksdr0p00to0p50 = 0;
+      int ntracksdr0p50to1p57 = 0;
+      int ntracksdr1p57to3p14 = 0;
+      int ntracksdr3p14toinf = 0;
+      for (int itk = 0, itke = int(tracks.size()); itk < itke; ++itk) {
+        NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern());
+        double trackjetdr = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
+        if (trackjetdr < 0.5) {
+          ntracksdr0p00to0p50++;
+        } else if (trackjetdr < 1.57) {
+          ntracksdr0p50to1p57++;
+        } else if (trackjetdr < 3.14) {
+          ntracksdr1p57to3p14++;
+        } else {
+          ntracksdr3p14toinf++;
+        }
+
+        for (int i = 0; i < sv_tracks_num_indices; ++i) {
+          if (i == 1 && trackjetdr >= 0.5) continue;
+          if (i == 2 && trackjetdr < 1.57) continue;
+          fill_multi(h_sv_tracks_pt[i],      isv, tracks[itk].pt(), *weight);
+          fill_multi(h_sv_tracks_eta[i],     isv, tracks[itk].eta(), *weight);
+          fill_multi(h_sv_tracks_phi[i],     isv, tracks[itk].phi(), *weight);
+          fill_multi(h_sv_tracks_charge[i],  isv, tracks[itk].charge(), *weight);
+          fill_multi(h_sv_tracks_dxybs[i],   isv, tracks[itk].dxy(bs), *weight);
+          fill_multi(h_sv_tracks_dzbs[i],    isv, tracks[itk].dz(bs), *weight);
+          fill_multi(h_sv_tracks_dxypv[i],   isv, tracks[itk].dxy(pv), *weight);
+          fill_multi(h_sv_tracks_dzpv[i],    isv, tracks[itk].dz(pv), *weight);
+          fill_multi(h_sv_tracks_dxyerr[i],  isv, tracks[itk].dxyError(), *weight);
+          fill_multi(h_sv_tracks_dzerr[i],   isv, tracks[itk].dzError(), *weight);
+          fill_multi(h_sv_tracks_chi2dof[i], isv, tracks[itk].chi2() / tracks[itk].ndof(), *weight);
+          fill_multi(h_sv_tracks_nhits[i],   isv, tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
+          fill_multi(h_sv_tracks_npixel[i],  isv, tracks[itk].hitPattern().numberOfValidPixelHits(), *weight);
+          fill_multi(h_sv_tracks_nstrip[i],  isv, tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
+          fill_multi(h_sv_tracks_minr[i],    isv, se.min_r, *weight);
+          fill_multi(h_sv_tracks_minz[i],    isv, se.min_z, *weight);
+          fill_multi(h_sv_tracks_maxr[i],    isv, se.max_r, *weight);
+          fill_multi(h_sv_tracks_maxz[i],    isv, se.max_z, *weight);
+          fill_multi(h_sv_tracks_jetdr[i],   isv, trackjetdr, *weight);
+          fill_multi(h_sv_tracks_jetdphi[i], isv, reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi()), *weight);
+        }
+      }
+      v["ntracksdr0p00to0p50"] = ntracksdr0p00to0p50;
+      v["ntracksdr0p50to1p57"] = ntracksdr0p50to1p57;
+      v["ntracksdr1p57to3p14"] = ntracksdr1p57to3p14;
+      v["ntracksdr3p14toinf"]  = ntracksdr3p14toinf;
+
       for (int itk = 0, itke = std::min(int(tracks.size()), max_ntracks); itk < itke; ++itk) {
         v[TString::Format("track%i_pt",      itk).Data()] = tracks[itk].pt();
         v[TString::Format("track%i_eta",     itk).Data()] = tracks[itk].eta();
@@ -606,10 +714,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         v[TString::Format("track%i_nstrip",  itk).Data()] = tracks[itk].hitPattern().numberOfValidStripHits();
 
         NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern());
-        v[TString::Format("track%i_minr", itk).Data()] = se.min_r;
-        v[TString::Format("track%i_minz", itk).Data()] = se.min_z;
-        v[TString::Format("track%i_maxr", itk).Data()] = se.max_r;
-        v[TString::Format("track%i_maxz", itk).Data()] = se.max_z;
+        v[TString::Format("track%i_minr",    itk).Data()] = se.min_r;
+        v[TString::Format("track%i_minz",    itk).Data()] = se.min_z;
+        v[TString::Format("track%i_maxr",    itk).Data()] = se.max_r;
+        v[TString::Format("track%i_maxz",    itk).Data()] = se.max_z;
+
+        v[TString::Format("track%i_jetdr",   itk).Data()] = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
+        v[TString::Format("track%i_jetdphi", itk).Data()] = reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi());
       }
     }
 
