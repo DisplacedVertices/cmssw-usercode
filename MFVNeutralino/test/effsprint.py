@@ -6,12 +6,19 @@ sum = 0.
 var = 0.
 int_lumi = 20000.
 cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3')
+integral = 'entries' not in sys.argv
+if not integral:
+    print 'entries specified, "pass vtx only" still uses Integral()'
 
 def effs(fn):
     global sum, var
     f = ROOT.TFile(fn)
-    den = f.Get('mfvEventHistosNoCuts/h_npv').Integral()
-    numall = f.Get('mfvEventHistos/h_npv').Integral()
+    if integral:
+        den = f.Get('mfvEventHistosNoCuts/h_npv').Integral()
+        numall = f.Get('mfvEventHistos/h_npv').Integral()
+    else:
+        den = f.Get('mfvEventHistosNoCuts/h_npv').GetEntries()
+        numall = f.Get('mfvEventHistos/h_npv').GetEntries()
     h = f.Get('mfvVertexHistos/h_nsv')
     numvtx = h.Integral(h.FindBin(2), 1000000)
     sname = os.path.basename(fn).replace('.root','')
