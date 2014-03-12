@@ -40,11 +40,13 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bsx;
   TH1F* h_bsy;
   TH1F* h_bsz;
+  TH1F* h_bsphi;
 
   TH1F* h_npv;
   TH1F* h_pvx;
   TH1F* h_pvy;
   TH1F* h_pvz;
+  TH1F* h_pvphi;
   TH1F* h_pv_ntracks;
   TH1F* h_pv_sumpt2;
   TH1F* h_pv_rho;
@@ -98,11 +100,13 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bsx = fs->make<TH1F>("h_bsx", ";beamspot x (cm);events/0.1 mm", 200, -1, 1);
   h_bsy = fs->make<TH1F>("h_bsy", ";beamspot y (cm);events/0.1 mm", 200, -1, 1);
   h_bsz = fs->make<TH1F>("h_bsz", ";beamspot z (cm);events/mm", 200, -10, 10);
+  h_bsphi = fs->make<TH1F>("h_bsphi", ";beamspot #phi (rad);events/.063", 100, -3.1416, 3.1416);
 
   h_npv = fs->make<TH1F>("h_npv", ";# of primary vertices;events", 65, 0, 65);
   h_pvx = fs->make<TH1F>("h_pvx", ";primary vertex x (cm);events/10 #mum", 200, -0.1, 0.1);
   h_pvy = fs->make<TH1F>("h_pvy", ";primary vertex y (cm);events/10 #mum", 200, -0.1, 0.1);
   h_pvz = fs->make<TH1F>("h_pvz", ";primary vertex z (cm);events/1.5 mm", 200, -15, 15);
+  h_pvphi = fs->make<TH1F>("h_pvphi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_pv_ntracks = fs->make<TH1F>("h_pv_ntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
   h_pv_sumpt2 = fs->make<TH1F>("h_pv_sumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
   h_pv_rho = fs->make<TH1F>("h_pv_rho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
@@ -179,11 +183,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_bsx->Fill(mevent->bsx, w);
   h_bsy->Fill(mevent->bsy, w);
   h_bsz->Fill(mevent->bsz, w);
+  h_bsphi->Fill(atan2(mevent->bsy, mevent->bsx), w);
 
   h_npv->Fill(mevent->npv, w);
   h_pvx->Fill(mevent->pvx - mevent->bsx, w);
   h_pvy->Fill(mevent->pvy - mevent->bsy, w);
   h_pvz->Fill(mevent->pvz - mevent->bsz, w);
+  h_pvphi->Fill(atan2(mevent->pvy - mevent->bsy, mevent->pvx - mevent->bsx), w);
   h_pv_ntracks->Fill(mevent->pv_ntracks, w);
   h_pv_sumpt2->Fill(mevent->pv_sumpt2, w);
   h_pv_rho->Fill(mevent->pv_rho(), w);
