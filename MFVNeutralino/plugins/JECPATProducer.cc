@@ -54,7 +54,7 @@ void JECPATProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   for(std::vector<pat::Jet>::const_iterator jet = jets->begin(); jet != jets->end(); ++jet) {
 
     float uncertainty = -1000;
-    float scaled_pt = 999;
+    float scale = 999;
     pat::Jet mjet = *jet;
     auto mp4 = jet->p4();
 
@@ -63,9 +63,9 @@ void JECPATProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
       jecUnc_->setJetPt( jet->pt() ); // here you must use the CORRECTED jet pt
       uncertainty = jecUnc_->getUncertainty(jes_way);
       if(jes_way)
-	scaled_pt = (1+uncertainty)*jet->pt();
+	scale = (1+uncertainty);
       else
-	scaled_pt = (1-uncertainty)*jet->pt();
+	scale = (1-uncertainty);
     }
     else{
       float JER_scale_up,JER_scale_down;
@@ -90,25 +90,22 @@ void JECPATProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	JER_scale_up   = 1.488;
 	JER_scale_down = 1.089;
       }
-      float gen_jet_pt = -999;
+      float gen_jet_energy = -999;
       if(jet->genJet())
-	gen_jet_pt = jet->genJet()->pt();
+	gen_jet_energy = jet->genJet()->energy();
       else {
-	std::cout<<"no gen jet"<<std::endl;
 	continue;
       }
       if(jer_way)
-	scaled_pt = gen_jet_pt + JER_scale_up*(jet->pt() - gen_jet_pt);
+	scale = (gen_jet_energy + JER_scale_up*(jet->energy() - gen_jet_energy))/jet->energy();
       else
-	scaled_pt = gen_jet_pt + JER_scale_down*(jet->pt() - gen_jet_pt);
+	scale = (gen_jet_energy + JER_scale_down*(jet->energy() - gen_jet_energy))/jet->energy();
     }
     
-    mp4.SetPx(scaled_pt*TMath::Cos(jet->phi()));
-    mp4.SetPy(scaled_pt*TMath::Sin(jet->phi()));
-    mjet.setP4(mp4);
-    std::cout<<"Jet Pt "<<jet->pt()<<", Mod jet Pt "<<mjet.pt()<<std::endl; 
-    if(jet->pt()==mjet.pt())
-      std::cout<<"EQUAL"<<std::endl;
+    mjet.scaleEnergy(scale);
+    //std::cout<<"Jet Pt "<<jet->pt()<<", Mod jet Pt "<<mjet.pt()<<std::endl; 
+    //if(jet->pt()==mjet.pt())
+    //std::cout<<"EQUAL"<<std::endl;
     mjets->push_back(mjet);
 
     
