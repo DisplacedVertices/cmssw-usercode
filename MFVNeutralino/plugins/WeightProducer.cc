@@ -38,7 +38,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 }
 
 double MFVWeightProducer::pileup_weight(int mc_npu) const {
-  if (mc_npu < 0 || mc_npu > int(pileup_weights.size()))
+  if (mc_npu < 0 || mc_npu >= int(pileup_weights.size()))
     return 0;
   else
     return pileup_weights[mc_npu];
@@ -46,6 +46,9 @@ double MFVWeightProducer::pileup_weight(int mc_npu) const {
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   h_sums->Fill(n_sums);
+
+  if (prints)
+    printf("MFVWeight: r,l,e: %u, %u, %u   ", event.id().run(), event.luminosityBlock(), event.id().event());
 
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
@@ -57,6 +60,8 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     if (!event.isRealData()) {
       if (weight_pileup) {
         const double pu_w = pileup_weight(mevent->npu);
+        if (prints)
+          printf("mc_npu: %g  pu weight: %g  ", mevent->npu, pu_w);
         h_sums->Fill(sum_pileup_weight, pu_w);
         *weight *= pu_w;
       }
@@ -66,7 +71,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   h_sums->Fill(sum_weight, *weight);
 
   if (prints)
-    printf("MFVWeight: r,l,e: %u, %u, %u   weight: %g\n", event.id().run(), event.luminosityBlock(), event.id().event(), *weight);
+    printf("total weight: %g\n", *weight);
 
   event.put(weight);
 }
