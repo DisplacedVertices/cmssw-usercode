@@ -56,9 +56,9 @@ class Sample(object):
             print x, ':', a
 
     def _get_dbs_url(self, num):
-        if num != 0 and num != 3:
-            raise ValueError('only supported nums for dbs_url are 0 and 3')
-        return '' if not num else 'dbs_url = phys03'
+        if num < 0 or num > 3:
+            raise ValueError('only supported nums for dbs_url are 0 (global) - 3')
+        return '' if not num else 'dbs_url = phys0%i' % num
     
     @property
     def dbs_url(self):
@@ -362,7 +362,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.events_per = 1500
     sample.no_skimming_cuts = True
     sample.is_pythia8 = True
-    sample.dbs_url_num = 3
+    sample.dbs_url_num = 2
     sample.re_pat = True
     sample.scheduler = 'condor'
     sample.ana_hash = '5c05eb42bbf1b04cf0f00b96bae48439'
