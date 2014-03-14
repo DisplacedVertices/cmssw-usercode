@@ -5,7 +5,7 @@ import JMTucker.Tools.Samples as Samples
 sum = 0.
 var = 0.
 int_lumi = 20000.
-cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3')
+cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3', 'Sumnhitsbehind')
 integral = 'entries' not in sys.argv
 if not integral:
     print 'entries specified, "pass vtx only" still uses Integral()'
