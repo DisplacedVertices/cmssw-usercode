@@ -8,10 +8,6 @@ process.TFileService.fileName = 'histos.root'
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.Histos_cff')
 
-if False:
-    geometry_etc(process, 'START53_V27::All')
-    process.mfvVertexHistosOneVtx.vertex_src = 'mfvSelectedVerticesTight'
-
 process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvHistos)
 
 nm1s = [
@@ -25,6 +21,12 @@ nm1s = [
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
     ('Sumnhitsbehind', 'max_sumnhitsbehind = 1000000'),
     ]
+
+if False:
+    geometry_etc(process, 'START53_V27::All')
+    SampleFiles.setup(process, 'MFVNtupleV15WMore', 'ttbarhadronic', 500)
+    process.mfvVertexHistosOneVtx.vertex_src = 'mfvVertices'
+    nm1s = []
 
 for name, cut in nm1s:
     vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
@@ -46,17 +48,18 @@ if hackrundata:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.ttbar_samples + Samples.qcd_samples
-    samples += [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
-
     #samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
+    bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
+    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples
+    for sample in bkg_samples:
+        sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
 
     cs = CRABSubmitter('MFVHistosV15',
-                       total_number_of_events = -1,
-                       events_per_job = 200000,
+                       job_control_from_sample = True,
+                       use_ana_dataset = True,
                        manual_datasets = SampleFiles['MFVNtupleV15'],
                        )
 
