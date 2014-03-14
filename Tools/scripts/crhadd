@@ -22,14 +22,18 @@ if len(options.positional) == 0:
 
 crab_dirs = options.positional
 
+ok = False
+
 for x in crab_dirs:
     if is_crab_working_dir(x):
+        ok = True
         crab_hadd(x, chunk_size=options.chunk_size)
     elif os.path.isdir(x):
-        # if we have a dir of crab dirs, make a new dir of the same
-        # name and haddcrab all their files into it.
-        sub_dirs = [d for d in glob.glob(os.path.join(x, '*')) if os.path.isdir(d)]
-        new_dir = os.path.basename(x)
-        os.system('mkdir -p %s' % new_dir)
+        # if we have a dir of crab dirs, crab_hadd all the directories in it.
+        sub_dirs = [d for d in glob.glob(os.path.join(x, '*')) if is_crab_working_dir(d)]
         for y in sub_dirs:
-            crab_hadd(y, new_dir=new_dir, chunk_size=options.chunk_size)
+            ok = True
+            crab_hadd(y, new_dir=x, chunk_size=options.chunk_size)
+
+if not ok:
+    raise ValueError('no crab dirs found in argv')
