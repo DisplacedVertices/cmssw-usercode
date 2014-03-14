@@ -23,7 +23,7 @@ nm1s = [
     ('Njets',   'min_njetsntks = 0'),
     ('Bs2dsig', 'min_bs2dsig = 0'),
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
-    ('Sumnhitsbehind', 'max_sumnhitsbehind = 1000000'),
+    ('15p0', 'min_drmax = 0, max_sumnhitsbehind = 1000000'),
     ]
 
 for name, cut in nm1s:
