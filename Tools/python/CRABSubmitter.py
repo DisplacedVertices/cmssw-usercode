@@ -39,13 +39,20 @@ class CRABSubmitter:
                  get_edm_output = False,
                  use_parent = False,
                  other_cfg_lines = (),
-                 testing = 'testing' in sys.argv,
+                 testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  max_threads = 5,
                  ssh_control_persist = False,
                  crab_cfg_modifier = None,
                  aaa = False,
                  manual_datasets = None,
                  **kwargs):
+
+        if '/' in batch_name:
+            raise ValueError('/ not allowed in batch name')
+        self.batch_name = batch_name
+        self.batch_dir = 'crab/%s' % batch_name
+        if os.path.exists(self.batch_dir) and 'cs_append' not in sys.argv:
+            raise ValueError('batch_dir %s already exists, refusing to clobber ("cs_append" in argv to override)' % self.batch_dir)
 
         if not testing and CRABSubmitter.get_proxy:
             print 'CRABSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
@@ -54,10 +61,6 @@ class CRABSubmitter:
 
         self.username = os.environ['USER']
         
-        if '/' in batch_name:
-            raise ValueError('/ not allowed in batch name')
-        self.batch_name = batch_name
-        self.batch_dir = 'crab/%s' % batch_name
         mkdirs_if_needed(self.batch_dir + '/publish_logs/')
 
         self.git_status_dir = self.batch_dir + '/gitstatus/'
