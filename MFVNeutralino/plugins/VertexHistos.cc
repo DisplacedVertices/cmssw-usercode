@@ -485,18 +485,18 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   const math::XYZPoint bs(bsx, bsy, bsz);
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
 
-  edm::ESHandle<TransientTrackBuilder> tt_builder;
-  setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
-
-  TrackerSpaceExtents tracker_extents;
-  tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
-  
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByLabel(vertex_aux_src, auxes);
 
   edm::Handle<reco::VertexCollection> vertices;
-  if (vertex_src.label() != "")
+  edm::ESHandle<TransientTrackBuilder> tt_builder;
+  TrackerSpaceExtents tracker_extents;
+  
+  if (vertex_src.label() != "") { 
     event.getByLabel(vertex_src, vertices);
+    setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
+    tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
+  }
 
   const int nsv = int(auxes->size());
 
