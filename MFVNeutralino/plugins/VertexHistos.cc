@@ -719,7 +719,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
         for (int i = 0; i < sv_tracks_num_indices; ++i) {
           if (i == 1 && trackjetdr >= 0.5) continue;
-          if (i == 2 && trackjetdr < 1.57) continue;
+          if (i == 2 && (trackjetdr < 1.57 || tracks[itk].dxyError() < 0.02)) continue;
           fill_multi(h_sv_tracks_pt[i],        isv, tracks[itk].pt(), *weight);
           fill_multi(h_sv_tracks_eta[i],       isv, tracks[itk].eta(), *weight);
           fill_multi(h_sv_tracks_phi[i],       isv, tracks[itk].phi(), *weight);
