@@ -1,12 +1,16 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht1000', 200000)
+SampleFiles.setup(process, 'MFVNtupleV15', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.Histos_cff')
+
+if False:
+    geometry_etc(process, 'START53_V27::All')
+    process.mfvVertexHistosOneVtx.vertex_src = 'mfvSelectedVerticesTight'
 
 process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvHistos)
 
@@ -14,10 +18,12 @@ nm1s = [
     ('Ntracks', 'min_ntracks = 0'),
     ('Drmin',   'max_drmin = 1e9'),
     ('Drmax',   'max_drmax = 1e9'),
+    ('Mindrmax','min_drmax = 0'),
     ('Bs2derr', 'max_bs2derr = 1e9'),
     ('Njets',   'min_njetsntks = 0'),
     ('Bs2dsig', 'min_bs2dsig = 0'),
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
+    ('Sumnhitsbehind', 'max_sumnhitsbehind = 1000000'),
     ]
 
 for name, cut in nm1s:
@@ -53,6 +59,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        events_per_job = 200000,
                        manual_datasets = SampleFiles['MFVNtupleV15'],
                        )
+
+    if 'two' in sys.argv:
+        samples = [Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400]
 
     if not hackrundata:
         cs.submit_all(samples)
