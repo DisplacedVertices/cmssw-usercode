@@ -35,6 +35,7 @@ else:
             'drop *_selectedPatJetsForMETtype2CorrPF_*_*',
             'drop CaloTowers_*_*_*',
             'keep recoVertexs_mfvVertices__*',
+            'keep *_mfvVerticesToJets_*_*',
             ]
 
     process.out.dropMetaData = cms.untracked.string('ALL')
