@@ -8,7 +8,7 @@ int_lumi = 20000.
 cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3', 'Sumnhitsbehind')
 integral = 'entries' not in sys.argv
 if not integral:
-    print 'entries specified, "pass vtx only" still uses Integral()'
+    print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
 def effs(fn):
     global sum, var
