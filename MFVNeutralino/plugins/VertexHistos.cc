@@ -488,11 +488,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByLabel(vertex_aux_src, auxes);
 
+  edm::Handle<reco::VertexCollection> primary_vertices;
   edm::Handle<reco::VertexCollection> vertices;
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   TrackerSpaceExtents tracker_extents;
   
   if (vertex_src.label() != "") { 
+    event.getByLabel("offlinePrimaryVertices", primary_vertices);
     event.getByLabel(vertex_src, vertices);
     setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
     tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
@@ -683,8 +685,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     };
 
     if (vertex_src.label() != "") {
-      edm::Handle<reco::VertexCollection> primary_vertices;
-      event.getByLabel("offlinePrimaryVertices", primary_vertices);
       const reco::Vertex& thepv = primary_vertices->at(0);
 
       const reco::Vertex& rv = vertices->at(aux.which);
@@ -719,7 +719,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
         for (int i = 0; i < sv_tracks_num_indices; ++i) {
           if (i == 1 && trackjetdr >= 0.5) continue;
-          if (i == 2 && trackjetdr < 1.57) continue;
+          if (i == 2 && (trackjetdr < 1.57 || tracks[itk].dxyError() < 0.02)) continue;
           fill_multi(h_sv_tracks_pt[i],        isv, tracks[itk].pt(), *weight);
           fill_multi(h_sv_tracks_eta[i],       isv, tracks[itk].eta(), *weight);
           fill_multi(h_sv_tracks_phi[i],       isv, tracks[itk].phi(), *weight);
