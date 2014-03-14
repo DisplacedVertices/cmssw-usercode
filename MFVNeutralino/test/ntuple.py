@@ -6,6 +6,7 @@ from JMTucker.Tools.PATTuple_cfg import *
 tuple_version = version
 
 runOnMC = True # magic line, don't touch
+require_pixel_hit = False
 prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
@@ -43,6 +44,9 @@ else:
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
+
+if require_pixel_hit:
+    process.mfvVertices.min_all_track_npxhits = 1
 
 if keep_all:
     process.mfvEvent.skip_event_filter = ''
@@ -127,14 +131,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
 
+    batch_name_extra = ''
+
+    if require_pixel_hit:
+        batch_name_extra += '_WPixel'
+        
     if keep_extra:
-        batch_name_extra = '_WExtra'
+        batch_name_extra += '_WExtra'
     elif prepare_vis:
-        batch_name_extra = '_WVis'
+        batch_name_extra += '_WVis'
     elif keep_all:
-        batch_name_extra = '_WAll'
-    else:
-        batch_name_extra = ''
+        batch_name_extra += '_WAll'
+
 
     cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + batch_name_extra,
                        pset_modifier = modify,
