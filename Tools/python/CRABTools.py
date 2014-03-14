@@ -886,7 +886,6 @@ def crab_renew_proxy_if_needed(min_hours=144):
 
 if __name__ == '__main__':
     from pprint import pprint
-    from mymisc import bool_from_argv
     from FWCore.PythonUtilities.LumiList import LumiList
 
     if bool_from_argv('-cleanUp'):
