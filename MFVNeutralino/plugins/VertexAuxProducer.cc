@@ -36,6 +36,8 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   void produce(edm::Event&, const edm::EventSetup&);
 
  private:
+  typedef mfv::JetVertexAssociation Association;
+
   const edm::InputTag primary_vertex_src;
   const edm::InputTag muons_src;
   const edm::InputTag electrons_src;
@@ -55,6 +57,9 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     sorter(cfg.getParameter<std::string>("sort_by"))
 {
   produces<std::vector<MFVVertexAux> >();
+
+  for (int i = 0; i < mfv::NJetsByUse; ++i)
+    produces<Association>(mfv::jetsby_names[i]);
 }
 
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -106,6 +111,30 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   if (use_sv_to_jets)
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       event.getByLabel(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i]), sv_to_jets[i]);
+
+
+  std::auto_ptr<Association> assoc[mfv::NJetsByUse];
+  for (int i = 0; i < mfv::NJetsByUse; ++i)
+    assoc[i].reset(new Association);
+  
+  for (int isv = 0; isv < nsv; ++isv) {
+    const reco::VertexRef svref(secondary_vertices, isv);
+    if (use_sv_to_jets) {
+      for (int i = 0; i < mfv::NJetsByUse; ++i) {
+	int njets = sv_to_jets[i]->numberOfAssociations(svref);
+        if (njets > 0) {
+	  const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i])[svref];
+	  for (size_t ijet = 0; ijet < jets.size(); ++ijet) {
+	    pat::JetRef jetref(jets, ijet);
+	    assoc[i]->insert(svref, jetref);
+	  }
+	}
+      }
+    }
+  }
+  
+  for (int i = 0; i < mfv::NJetsByUse; ++i)
+    event.put(assoc[i], mfv::jetsby_names[i]);
 
   //////////////////////////////////////////////////////////////////////
 
