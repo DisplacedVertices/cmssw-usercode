@@ -59,6 +59,9 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      min_bs3ddist         = cms.double(0),
                                      max_sumnhitsbehind   = cms.int32(1000000),
                                      sort_by = cms.string('ntracks_then_mass'),
+                                     sv_to_jets_src = cms.string('mfvVerticesAux'),
+                                     use_sv_to_jets = cms.bool(True),
+                                     histos = cms.bool(False),
                                      )
 
 mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
@@ -85,6 +88,7 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_bs2dsig = 10,
     min_ntracksptgt3 = 3,
     max_sumnhitsbehind = 0,
+    use_sv_to_jets = cms.bool(True),
     )
 
 mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesTight)
