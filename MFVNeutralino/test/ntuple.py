@@ -66,10 +66,10 @@ process.outp = cms.EndPath(process.mfvEvent * process.out)
 # we can't match leptons by track to vertices.
 process.patMuonsPF.embedTrack = False
 process.patElectronsPF.embedTrack = False
-#process.mfvVerticesToJets.jet_src = 'JECPATProducer'
+process.mfvVerticesToJets.jet_src = 'JECPATProducer'
 process.JECPATProducer.jes_uncertainty = False
 process.JECPATProducer.jes_way = False
-process.JECPATProducer.jer_way = False
+process.JECPATProducer.jer_way = True
 
 if prepare_vis:
     process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
@@ -85,6 +85,8 @@ if 'histos' in sys.argv:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
     #process.mfvVertices.histos = True
     process.mfvVerticesToJets.histos = True
+    process.mfvSelectedVerticesTight.histos = True
+    process.maxEvents.input = 1000
     #process.load('JMTucker.MFVNeutralino.Histos_cff')
     #process.outp.replace(process.mfvEvent, process.mfvEvent * process.mfvHistos) # in outp because histos needs to read mfvEvent
 
@@ -101,7 +103,7 @@ if 'test' in sys.argv:
         #'/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_9_1_ANl.root',
         'file:/uscms/home/tucker/nobackup/FCAF3F92-5A16-E211-ACCC-E0CB4E19F95A.ttbarhadronic.root'
     ]
-    process.maxEvents.input = -1
+    process.maxEvents.input = 10
     input_is_pythia8(process)
     re_pat(process)
     process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')
@@ -142,11 +144,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     else:
         batch_name_extra = ''
 
-    cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + batch_name_extra,
+    cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + batch_name_extra + '_JER_up',
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        get_edm_output = True,
                        data_retrieval = 'fnal_eos',
+                       USER_additional_input_files = 'Summer13_V4_MC_Uncertainty_AK5PF.txt',
                        #publish_data_name = 'mfvntuple_' + tuple_version + batch_name_extra.lower(),
                        #manual_datasets = SampleFiles['mfv300s'],
                        max_threads = 3,
