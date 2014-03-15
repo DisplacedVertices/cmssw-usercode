@@ -7,7 +7,9 @@ from JMTucker.MFVNeutralino.VertexSelector_cfi import mfvSelectedVerticesLoose, 
 from JMTucker.MFVNeutralino.JetVertexAssociator_cfi import mfvVerticesToJets
 
 mfvSelectedVerticesTmp = mfvSelectedVerticesLoose.clone(vertex_aux_src = 'mfvVerticesAuxTmp',
-                                                        produce_refs = True)
+                                                        produce_refs = True,
+                                                        sv_to_jets_src = cms.string('mfvVerticesAuxTmp'),
+                                                        use_sv_to_jets = cms.bool(False))
 
 mfvVertexSequence = cms.Sequence(mfvVertices *
                                  mfvGenVertices *
@@ -16,6 +18,7 @@ mfvVertexSequence = cms.Sequence(mfvVertices *
                                  mfvVerticesToJets *
                                  mfvVerticesAux *
                                  mfvSelectedVerticesTight)
+
 
 ################################################################################
 
