@@ -1,3 +1,7 @@
+#include "TH1F.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -79,6 +83,11 @@ private:
   const double min_bs2dsig;
   const double min_bs3ddist;
   const int max_sumnhitsbehind;
+
+  const std::string sv_to_jets_src;
+  const bool use_sv_to_jets;
+  const bool histos;
+  TH1F* h_n_jet_tracks_phi;
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
@@ -140,8 +149,15 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
     min_bs2dsig(cfg.getParameter<double>("min_bs2dsig")),
     min_bs3ddist(cfg.getParameter<double>("min_bs3ddist")),
-    max_sumnhitsbehind(cfg.getParameter<int>("max_sumnhitsbehind"))
+    max_sumnhitsbehind(cfg.getParameter<int>("max_sumnhitsbehind")),
+    sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
+    use_sv_to_jets(cfg.getParameter<bool>("use_sv_to_jets")),
+    histos(cfg.getParameter<bool>("histos"))
 {
+  edm::Service<TFileService> fs;
+  if (histos)
+    h_n_jet_tracks_phi = fs->make<TH1F>("h_n_jet_tracks_phi", ";# tracks phi;arb. units", 50, -4, 4);
+
   if (produce_refs)
     produces<reco::VertexRefVector>();
   else
@@ -241,6 +257,36 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
     else
       event.put(selected_vertex_refs);
   }
+
+  
+  if (use_sv_to_jets) {
+    edm::Handle<mfv::JetVertexAssociation> sv_to_jets[mfv::NJetsByUse];
+    for (int i = 0; i < mfv::NJetsByUse; ++i)
+      event.getByLabel(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i]), sv_to_jets[i]);
+
+    for (const MFVVertexAux& aux : *selected) {    
+      for (int i = 0; i < mfv::NJetsByUse; ++i) {
+	int njets = sv_to_jets[i]->numberOfAssociations(reco::VertexRef(vertices, aux.which));
+	if (njets > 0) {
+	  const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i])[reco::VertexRef(vertices, aux.which)];
+	  std::set<reco::TrackRef> jets_tracks;
+	  for (int ijet = 0; ijet < njets; ++ijet) {
+	    for (const reco::PFCandidatePtr& pfcand : jets[ijet]->getPFConstituents()) {
+	      const reco::TrackRef& tk = pfcand->trackRef();
+	      if (tk.isNonnull())
+		jets_tracks.insert(tk);
+	    }
+	    for (auto track = jets_tracks.begin(); track != jets_tracks.end(); ++track) {
+	      reco::TrackRef tk = *track;
+	      if (histos)
+		h_n_jet_tracks_phi->Fill(tk->phi());
+	    }
+	  }
+	}
+      }
+    }
+  }
+  
 
   event.put(selected);
 }
