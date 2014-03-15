@@ -483,7 +483,7 @@ def crab_get_output_files(working_dir, _re=re.compile(r'\$SOFTWARE_DIR/(.*?)[,"]
         
     return list(sorted(files))
 
-def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_stuck_done=False, resub_none=False, site_control='', status_until_none_done=True, resub_created=False):
+def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_done_stuck=False, resub_none=False, site_control='', status_until_none_done=True, resub_created=False):
     use_server = crab_is_using_server(working_dir)
     to_kill = []
     to_resub = []
@@ -503,7 +503,7 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
                     if not d['Done']:
                         del d['Done']
                 d['DoneStuck'] = missing
-                if resub_stuck_done:
+                if resub_done_stuck:
                     to_force.extend(missing)
         if not d['Done'] or not status_until_none_done or iterations > 2:
             break

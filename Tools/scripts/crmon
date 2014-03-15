@@ -20,12 +20,12 @@ parser.add_option('--no-status-until-none-done', action='store_false', dest='sta
                   help='In each iteration, by default we loop over status->getoutput->status->... until none are in Done. I.e. we resolve all Done jobs to their Retrieved_X_Y status codes before trying to resubmit/displaying the status code table/etc. Supplying this option will return us to the previous behavior of only doing status->getoutput per iteration.')
 parser.add_option('--resub-any', action='store_true', default=False,
                   help='Resubmit any job that has status Retrieved but with exit code non-zero.')
-parser.add_option('--resub-stuck-done', action='store_true', default=False,
+parser.add_option('--resub-done-stuck', action='store_true', default=False,
                   help='Resubmit any job that has status DoneStuck: Done, but whose output cannot be retrieved.')
 parser.add_option('--resub-created', action='store_true', default=False,
                   help='(Re)submit any job that has status Created.')
 parser.add_option('--resub-all', action='store_true', default=False,
-                  help='Resubmit all jobs that need it (equivalent to --resub-any --resub-stuck-done --resub-created).')
+                  help='Resubmit all jobs that need it (equivalent to --resub-any --resub-done-stuck --resub-created).')
 parser.add_option('--resub-none', action='store_true', default=False,
                   help='Do not resubmit any jobs (i.e. allow getting output, but do not do anything with e.g. those that are Aborted).')
 parser.add_option('--resub-site-control', default='',
@@ -61,7 +61,7 @@ def print_subheader(s):
     print '\033[32m%s\033[0m' % s
 
 if options.resub_all:
-    options.resub_any = options.resub_stuck_done = options.resub_created = True
+    options.resub_any = options.resub_done_stuck = options.resub_created = True
 
 if options.status_only and not options.once:
     print '--status-only implies --once, setting it.'
@@ -130,7 +130,7 @@ def check_fcn(crab_dir, verbose):
     if options.status_only:
         return crab_status(crab_dir, verbose=verbose, debug=options.debug_output)
     else:
-        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_stuck_done=options.resub_stuck_done, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created)
+        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_done_stuck=options.resub_done_stuck, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created)
 
 dirs = crab_dirs_from_argv()
 if not dirs:
