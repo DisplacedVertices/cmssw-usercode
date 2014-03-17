@@ -51,8 +51,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
     bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
     samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples
-    for sample in bkg_samples:
-        sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
+    if 'full' not in sys.argv:
+        for sample in bkg_samples:
+            sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
