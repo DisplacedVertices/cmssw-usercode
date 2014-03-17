@@ -14,8 +14,8 @@ def effs(fn):
     global sum, var
     f = ROOT.TFile(fn)
     if integral:
-        den = f.Get('mfvEventHistosNoCuts/h_npv').Integral()
-        numall = f.Get('mfvEventHistos/h_npv').Integral()
+        den = f.Get('mfvEventHistosNoCuts/h_npv').Integral(0,1000000)
+        numall = f.Get('mfvEventHistos/h_npv').Integral(0,1000000)
     else:
         den = f.Get('mfvEventHistosNoCuts/h_npv').GetEntries()
         numall = f.Get('mfvEventHistos/h_npv').GetEntries()
