@@ -33,15 +33,15 @@ for name, cut in nm1s:
     vtx_name = 'vtxNo' + name
     ana = process.mfvAnalysisCuts.clone(vertex_src = vtx_name)
     ana_name = 'anaNo' + name
+    evt_hst = process.mfvEventHistos.clone()
+    evt_hst_name = 'evtHstNo' + name
     vtx_hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
     vtx_hst_name = 'vtxHstNo' + name
-    evt_hst = process.mfvEventHistos.clone(vertex_aux_src = vtx_name)
-    evt_hst_name = 'evtHstNo' + name
     setattr(process, vtx_name, vtx)
     setattr(process, ana_name, ana)
     setattr(process, evt_hst_name, evt_hst)
     setattr(process, vtx_hst_name, vtx_hst)
-    setattr(process, 'p' + name, cms.Path(vtx * ana * hst))
+    setattr(process, 'p' + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
 hackrundata = False # JMTBAD
 if hackrundata:
