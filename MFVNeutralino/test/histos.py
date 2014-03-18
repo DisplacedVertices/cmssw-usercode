@@ -68,8 +68,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
 
-    ex = '_WMore' if wmore else ''
-    
+    ex = 'WMore' if wmore else ''
+
     cs = CRABSubmitter('MFVHistosV15' + ex,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
