@@ -5,7 +5,7 @@ from JMTucker.MFVNeutralino.VertexHistos_cfi import *
 from JMTucker.MFVNeutralino.EventHistos_cfi import *
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 
-mfvVertexHistosNoCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvVerticesAux')
+mfvVertexHistosNoCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesLoose')
 mfvVertexHistosTrigCut = mfvVertexHistos.clone()
 mfvVertexHistosOneVtx = mfvVertexHistos.clone()
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
