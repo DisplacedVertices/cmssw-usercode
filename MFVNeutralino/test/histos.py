@@ -2,6 +2,8 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
+wmore = False
+
 SampleFiles.setup(process, 'MFVNtupleV15', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
@@ -22,10 +24,15 @@ nm1s = [
     ('15p0', 'min_drmax = 0, max_sumnhitsbehind = 1000000'),
     ]
 
-if False:
+if wmore:
     geometry_etc(process, 'START53_V27::All')
     SampleFiles.setup(process, 'MFVNtupleV15WMore', 'ttbarhadronic', 500)
+    from JMTucker.MFVNeutralino.Vertexer_cff import mfvSelectedVerticesTmp
+    process.mfvSelectedVerticesTmp = mfvSelectedVerticesTmp.clone(vertex_aux_src = 'mfvVerticesAux')
+    process.load('JMTucker.MFVNeutralino.JetVertexAssociator_cfi')
+    process.p.insert(0, process.mfvSelectedVerticesTmp * process.mfvVerticesToJets)
     process.mfvVertexHistosOneVtx.vertex_src = 'mfvVertices'
+    process.mfvVertexHistosOneVtx.vertex_to_jets_src = cms.InputTag('mfvVerticesToJets','ByNtracks')
     nm1s = []
 
 for name, cut in nm1s:
@@ -61,14 +68,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
 
-    cs = CRABSubmitter('MFVHistosV15',
+    ex = '_WMore' if wmore else ''
+    
+    cs = CRABSubmitter('MFVHistosV15' + ex,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV15'],
+                       manual_datasets = SampleFiles['MFVNtupleV15' + ex],
                        )
 
     if 'two' in sys.argv:
         samples = [Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400]
+    elif wmore:
+        samples = [Samples.ttbarhadronic]
 
     if not hackrundata:
         cs.submit_all(samples)
