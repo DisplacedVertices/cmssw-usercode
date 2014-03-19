@@ -28,6 +28,7 @@ struct option_driver {
   bool bigw;
   double syst_frac;
   double min_scan_events;
+  std::vector<std::string> vars;
   std::string file_path;
   std::string signal_file_suffix() const { return TString::Format("%ifb", int(signal_xsec)).Data(); }
   std::string signal_path() const { return file_path + "/" + signal_name + "_" + signal_file_suffix() + ".root"; }
@@ -67,8 +68,9 @@ struct option_driver {
   int parse_args(int argc, char** argv) {
     bool help = false;
 
+    char* vv = 0;
     int c;
-    while (!help && (c = getopt(argc, argv, "hpmsz:l:n:x:bf:")) != -1) {
+    while (!help && (c = getopt(argc, argv, "hpmsz:l:n:x:bf:e:v:")) != -1) {
       switch (c) {
       case 'h':
         help = true;
@@ -110,7 +112,18 @@ struct option_driver {
         if (!one_double('e', &min_scan_events))
           return 1;
 	break;
-        
+      case 'v':
+        if (optarg && optarg[0] == '\0') {
+          fprintf(stderr, "error: -v argument takes a string\n");
+          return 1;
+        }
+        vv = strtok(optarg, ",");
+        while (vv) {
+          vars.push_back(std::string(vv));
+          vv = strtok(0, ",");
+        }
+        break;
+          
       case '?':
         if (strchr("", optopt))
           fprintf(stderr, "error: option -%c requires an argument\n", optopt);
@@ -134,11 +147,12 @@ struct option_driver {
       fprintf(stderr, "  -s                      turn on saving of plots (default: off)\n");
       fprintf(stderr, "  -z plot_path            path to save plots to (implies -s, default: plots/SSB/signal_name/)\n");
       fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20)\n");
-      fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau0100um_M0400)\n");
+      fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau1000um_M0400)\n");
       fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 20)\n");
       fprintf(stderr, "  -b                      do not use big-weights samples (default: on)\n");
       fprintf(stderr, "  -f syst_frac            fraction systematic uncertainty to use in PL calculation (default: -1)\n");
       fprintf(stderr, "  -e min_scan_events      minimum number of events to allow in scan (default: 5)\n");
+      fprintf(stderr, "  -v vars_to_scan         comma separated list (no whitespace) of variables to scan (default: hardcoded list in main())\n);
       return 1;
     }
 
@@ -263,12 +277,14 @@ struct z_calculator {
   double nbkg_nm1;
   double nsig_tot;
   double nbkg_tot;
+  FILE* html;
 
   z_calculator(const std::vector<std::string>& vars)
     : nsig_nm1(0),
       nbkg_nm1(0),
       nsig_tot(0),
-      nbkg_tot(0)
+      nbkg_tot(0),
+      html(0)
   {
     samples.push_back(sample(options.signal_name, options.signal_xsec, kRed,       vars));
     samples.push_back(sample("ttbarhadronic",     225.2e3 * 0.457,     kBlue,      vars));
@@ -312,6 +328,13 @@ struct z_calculator {
       for (const sample& s : samples)
         if (!s.is_signal)
           printf("bkg: %20s   int lumi: %.3e/fb    tau: %.3e\n", s.name.c_str(), s.lumi(), s.tau());
+    }
+
+    if (options.saveplots) {
+      std::string p = options.plot_path + "/" + options.signal_name + "/_index.html";
+      html = fopen(p.c_str(), "wt");
+      if (!html)
+        fprintf(stderr, "could not open html file %s for writing\n", p.c_str());
     }
   }
 
@@ -497,7 +520,7 @@ struct z_calculator {
 
     if (options.saveplots) {
       for (int logy = 0; logy < 2; ++logy) {
-        TCanvas* c1 = new TCanvas("c1", "", 1110, 1020);
+        TCanvas* c1 = new TCanvas("c1", "", 600, 600);
         c1->Divide(2,2);
         c1->cd(1)->SetLogy(logy);
         sigHist->Draw();
@@ -517,6 +540,15 @@ struct z_calculator {
         c1->SaveAs((p + ".png").c_str());
         if (!logy) c1->SaveAs((p + ".root").c_str());
         delete c1;
+      }
+
+      if (html) {
+        const char* v = var.c_str();
+        fprintf(html, "<h1>%s</h1><br>\n", v);
+        fprintf(html, "<a href=\"%s.pdf\"><img src=\"%s.png\"></a><br><br>\n", v, v);
+        //fprintf(html, "<br><b>%s (log)</b><br>\n", v);
+        fprintf(html, "<a href=\"%s_log.pdf\"><img src=\"%s_log.png\"></a><br><br>\n", v, v);
+        fprintf(html, "<hr>\n");
       }
     }
 
@@ -545,6 +577,8 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickY(1);
 
   std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "ntracksptgt5", "ntracksptgt10", "njetsntks", "tkonlypt", "abstkonlyeta", "tkonlymass", "jetsntkpt", "absjetsntketa", "jetsntkmass", "tksjetsntkpt", "abstksjetsntketa", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "maxm1trackpt", "trackdxyerrmin", "trackdxyerrmax", "trackdxyerravg", "trackdxyerrrms", "trackdzerrmin", "trackdzerrmax", "trackdzerravg", "trackdzerrrms", "drmin", "drmax", "mindrmax", "jetpairdrmin", "jetpairdrmax", "bs2ddist", "bs2derr", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "nsemileptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01", "absdeltaphi01"};
+  if (options.vars.size())
+    vars = options.vars;
 
   z_calculator z_calc(vars);
 
