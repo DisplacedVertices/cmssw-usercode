@@ -1,5 +1,6 @@
 #include "TH2F.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -9,6 +10,8 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 
+#define NBDISC 2
+
 class MFVEventHistos : public edm::EDAnalyzer {
  public:
   explicit MFVEventHistos(const edm::ParameterSet&);
@@ -16,6 +19,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag mfv_event_src;
+  const edm::InputTag jets_src;
   const edm::InputTag weight_src;
   const bool re_trigger;
 
@@ -68,10 +72,21 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_nmuons[3];
   TH1F* h_nelectrons[3];
   TH1F* h_nleptons[3];
+
+  TH1F* h_jets_n;
+  TH1F* h_jets_pt;
+  TH1F* h_jets_eta;
+  TH1F* h_jets_phi;
+
+  TH1F* h_bjets_n[NBDISC][3];
+  TH1F* h_bjets_pt[NBDISC][3];
+  TH1F* h_bjets_eta[NBDISC][3];
+  TH1F* h_bjets_phi[NBDISC][3];
 };
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     re_trigger(cfg.getParameter<bool>("re_trigger"))
 {
@@ -134,6 +149,21 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_nmuons[i] = fs->make<TH1F>(TString::Format("h_nmuons_%s", lep_ex[i]), TString::Format(";# of %s muons;events", lep_ex[i]), 5, 0, 5);
     h_nelectrons[i] = fs->make<TH1F>(TString::Format("h_nelectrons_%s", lep_ex[i]), TString::Format(";# of %s electrons;events", lep_ex[i]), 5, 0, 5);
     h_nleptons[i] = fs->make<TH1F>(TString::Format("h_nleptons_%s", lep_ex[i]), TString::Format(";# of %s leptons;events", lep_ex[i]), 5, 0, 5);
+  }
+
+  h_jets_n = fs->make<TH1F>("h_jets_n", ";# of jets;events", 20, 0, 20);
+  h_jets_pt = fs->make<TH1F>("h_jets_pt", ";jet pt;number of jets", 100, 0, 500);
+  h_jets_eta = fs->make<TH1F>("h_jets_eta", ";jet eta;number of jets", 50, -4, 4);
+  h_jets_phi = fs->make<TH1F>("h_jets_phi", ";jet phi;number of jets", 50, -3.15, 3.15);
+
+  const char* b_wpnames[NBDISC] = {"JP", "CSV"};
+  for (int i = 0; i < NBDISC; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      h_bjets_n[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_n", b_wpnames[i], lmt_ex[j]), TString::Format(";# of %s %s bjets;events", b_wpnames[i], lmt_ex[j]), 20, 0, 20);
+      h_bjets_pt[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_pt", b_wpnames[i], lmt_ex[j]), TString::Format(";%s %s bjet pt;number of bjets", b_wpnames[i], lmt_ex[j]), 100, 0, 500);
+      h_bjets_eta[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_eta", b_wpnames[i], lmt_ex[j]), TString::Format(";%s %s bjet eta;number of bjets", b_wpnames[i], lmt_ex[j]), 50, -4, 4);
+      h_bjets_phi[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_phi", b_wpnames[i], lmt_ex[j]), TString::Format(";%s %s bjet phi;number of bjets", b_wpnames[i], lmt_ex[j]), 50, -3.15, 3.15);
+    }
   }
 }
 
@@ -213,6 +243,41 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_nmuons[i]->Fill(mevent->nmu(i), w);
     h_nelectrons[i]->Fill(mevent->nel(i), w);
     h_nleptons[i]->Fill(mevent->nlep(i), w);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  edm::Handle<pat::JetCollection> jets;
+  if (jets_src.label() != "") {
+    event.getByLabel(jets_src, jets);
+
+    const int njets = int(jets->size());
+    h_jets_n->Fill(njets, w);
+
+    const char* b_discriminators[NBDISC] = {"jetProbabilityBJetTags", "combinedSecondaryVertexBJetTags"};
+    const double b_discriminator_mins[NBDISC][3] = {{0.275, 0.545, 0.790}, {0.244, 0.679, 0.898}};
+    int nbjets[NBDISC][3] = {{0, 0, 0}, {0, 0, 0}};
+    for (int i = 0; i < njets; ++i) {
+      const pat::Jet& jet = jets->at(i);
+      h_jets_pt->Fill(jet.pt(), w);
+      h_jets_eta->Fill(jet.eta(), w);
+      h_jets_phi->Fill(jet.phi(), w);
+      for (int j = 0; j < NBDISC; ++j) {
+        for (int k = 0; k < 3; ++k) {
+          if (jet.bDiscriminator(b_discriminators[j]) > b_discriminator_mins[j][k]) {
+            nbjets[j][k] += 1;
+            h_bjets_pt[j][k]->Fill(jet.pt(), w);
+            h_bjets_eta[j][k]->Fill(jet.eta(), w);
+            h_bjets_phi[j][k]->Fill(jet.phi(), w);
+          }
+        }
+      }
+    }
+    for (int j = 0; j < NBDISC; ++j) {
+      for (int k = 0; k < 3; ++k) {
+        h_bjets_n[j][k]->Fill(nbjets[j][k], w);
+      }
+    }
   }
 }
 

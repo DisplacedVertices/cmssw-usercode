@@ -33,6 +33,8 @@ if wmore:
     process.p.insert(0, process.mfvSelectedVerticesTmp * process.mfvVerticesToJets)
     process.mfvVertexHistosOneVtx.vertex_src = 'mfvVertices'
     process.mfvVertexHistosOneVtx.vertex_to_jets_src = cms.InputTag('mfvVerticesToJets','ByNtracks')
+    process.mfvEventHistosOneVtx.jets_src = 'selectedPatJetsPF'
+    process.mfvEventHistosNoCuts.jets_src = 'selectedPatJetsPF'
     nm1s = []
 
 for name, cut in nm1s:
