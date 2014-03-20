@@ -19,6 +19,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag mfv_event_src;
+  const edm::InputTag primary_vertex_src;
   const edm::InputTag jets_src;
   const edm::InputTag weight_src;
   const bool re_trigger;
@@ -50,10 +51,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvx;
   TH1F* h_pvy;
   TH1F* h_pvz;
+  TH1F* h_pvrho;
   TH1F* h_pvphi;
-  TH1F* h_pv_ntracks;
-  TH1F* h_pv_sumpt2;
-  TH1F* h_pv_rho;
+  TH1F* h_pvntracks;
+  TH1F* h_pvsumpt2;
 
   TH1F* h_njets;
   TH1F* h_njetsnopu[3];
@@ -73,6 +74,15 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_nelectrons[3];
   TH1F* h_nleptons[3];
 
+  TH1F* h_pv_n;
+  TH1F* h_pv_x[4];
+  TH1F* h_pv_y[4];
+  TH1F* h_pv_z[4];
+  TH1F* h_pv_rho[4];
+  TH1F* h_pv_phi[4];
+  TH1F* h_pv_ntracks[4];
+  TH1F* h_pv_sumpt2[4];
+
   TH1F* h_jets_n;
   TH1F* h_jets_pt;
   TH1F* h_jets_eta;
@@ -86,6 +96,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     re_trigger(cfg.getParameter<bool>("re_trigger"))
@@ -121,10 +132,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvx = fs->make<TH1F>("h_pvx", ";primary vertex x (cm);events/10 #mum", 200, -0.1, 0.1);
   h_pvy = fs->make<TH1F>("h_pvy", ";primary vertex y (cm);events/10 #mum", 200, -0.1, 0.1);
   h_pvz = fs->make<TH1F>("h_pvz", ";primary vertex z (cm);events/1.5 mm", 200, -15, 15);
-  h_pvphi = fs->make<TH1F>("h_pvphi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
-  h_pv_ntracks = fs->make<TH1F>("h_pv_ntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
-  h_pv_sumpt2 = fs->make<TH1F>("h_pv_sumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
-  h_pv_rho = fs->make<TH1F>("h_pv_rho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
+  h_pvrho = fs->make<TH1F>("h_pv_rho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
+  h_pvphi = fs->make<TH1F>("h_pv_phi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  h_pvntracks = fs->make<TH1F>("h_pv_ntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
+  h_pvsumpt2 = fs->make<TH1F>("h_pv_sumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
 
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
 
@@ -149,6 +160,18 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_nmuons[i] = fs->make<TH1F>(TString::Format("h_nmuons_%s", lep_ex[i]), TString::Format(";# of %s muons;events", lep_ex[i]), 5, 0, 5);
     h_nelectrons[i] = fs->make<TH1F>(TString::Format("h_nelectrons_%s", lep_ex[i]), TString::Format(";# of %s electrons;events", lep_ex[i]), 5, 0, 5);
     h_nleptons[i] = fs->make<TH1F>(TString::Format("h_nleptons_%s", lep_ex[i]), TString::Format(";# of %s leptons;events", lep_ex[i]), 5, 0, 5);
+  }
+
+  h_pv_n = fs->make<TH1F>("h_pv_n", ";# of primary vertices;events", 65, 0, 65);
+  const char* pv_names[4] = {"pv1_sumpt2", "rest_sumpt2", "pv1_absdz", "rest_absdz"};
+  for (int i = 0; i < 4; ++i) {
+    h_pv_x[i] = fs->make<TH1F>(TString::Format("h_%s_x", pv_names[i]), TString::Format(";%s x (cm);events/10 #mum", pv_names[i]), 200, -0.1, 0.1);
+    h_pv_y[i] = fs->make<TH1F>(TString::Format("h_%s_y", pv_names[i]), TString::Format(";%s y (cm);events/10 #mum", pv_names[i]), 200, -0.1, 0.1);
+    h_pv_z[i] = fs->make<TH1F>(TString::Format("h_%s_z", pv_names[i]), TString::Format(";%s z (cm);events/1.5 mm", pv_names[i]), 200, -15, 15);
+    h_pv_rho[i] = fs->make<TH1F>(TString::Format("h_%s_rho", pv_names[i]), TString::Format(";%s rho (cm);events/5 #mum", pv_names[i]), 200, 0, 0.1);
+    h_pv_phi[i] = fs->make<TH1F>(TString::Format("h_%s_phi", pv_names[i]), TString::Format(";%s #phi (rad);events/.063", pv_names[i]), 100, -3.1416, 3.1416);
+    h_pv_ntracks[i] = fs->make<TH1F>(TString::Format("h_%s_ntracks", pv_names[i]), TString::Format(";%s # of tracks in primary vertex;events", pv_names[i]), 200, 0, 200);
+    h_pv_sumpt2[i] = fs->make<TH1F>(TString::Format("h_%s_sumpt2", pv_names[i]), TString::Format(";%s #Sigma p_{T}^{2} (GeV^{2});events/10 GeV^{2}", pv_names[i]), 200, 0, 2000);
   }
 
   h_jets_n = fs->make<TH1F>("h_jets_n", ";# of jets;events", 20, 0, 20);
@@ -220,9 +243,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pvy->Fill(mevent->pvy - mevent->bsy, w);
   h_pvz->Fill(mevent->pvz - mevent->bsz, w);
   h_pvphi->Fill(atan2(mevent->pvy - mevent->bsy, mevent->pvx - mevent->bsx), w);
-  h_pv_ntracks->Fill(mevent->pv_ntracks, w);
-  h_pv_sumpt2->Fill(mevent->pv_sumpt2, w);
-  h_pv_rho->Fill(mevent->pv_rho(), w);
+  h_pvntracks->Fill(mevent->pv_ntracks, w);
+  h_pvsumpt2->Fill(mevent->pv_sumpt2, w);
+  h_pvrho->Fill(mevent->pv_rho(), w);
 
   h_njets->Fill(mevent->njets, w);
   for (int i = 0; i < 3; ++i)
@@ -243,6 +266,54 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_nmuons[i]->Fill(mevent->nmu(i), w);
     h_nelectrons[i]->Fill(mevent->nel(i), w);
     h_nleptons[i]->Fill(mevent->nlep(i), w);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  edm::Handle<reco::VertexCollection> primary_vertices;
+  if (primary_vertex_src.label() != "") {
+    event.getByLabel(primary_vertex_src, primary_vertices);
+
+    const int npv = int(primary_vertices->size());
+    h_pv_n->Fill(npv, w);
+
+    const reco::Vertex& pv0 = primary_vertices->at(0);
+    double absdz = 100000;
+    int ipvdz = 0;
+    for (int ipv = 1; ipv < npv; ++ipv) {
+      const reco::Vertex& pv = primary_vertices->at(ipv);
+      if (fabs(pv.z() - pv0.z()) < absdz) {
+        absdz = fabs(pv.z() - pv0.z());
+        ipvdz = ipv;
+      }
+    }
+
+    for (int ipv = 1; ipv < npv; ++ipv) {
+      const reco::Vertex& pv = primary_vertices->at(ipv);
+      double sumpt2 = 0;
+      for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki) {
+        double trkpt = (*trki)->pt();
+        sumpt2 += trkpt * trkpt;
+      }
+
+      const int isumpt2 = ipv == 1 ? 0 : 1;
+      h_pv_x[isumpt2]->Fill(pv.x() - mevent->bsx, w);
+      h_pv_y[isumpt2]->Fill(pv.y() - mevent->bsy, w);
+      h_pv_z[isumpt2]->Fill(pv.z() - mevent->bsz, w);
+      h_pv_rho[isumpt2]->Fill(sqrt((pv.x() - mevent->bsx) * (pv.x() - mevent->bsx) + (pv.y() - mevent->bsy) * (pv.y() - mevent->bsy)), w);
+      h_pv_phi[isumpt2]->Fill(atan2(pv.y() - mevent->bsy, pv.x() - mevent->bsx), w);
+      h_pv_ntracks[isumpt2]->Fill(pv.nTracks(), w);
+      h_pv_sumpt2[isumpt2]->Fill(sumpt2, w);
+
+      const int iabsdz = ipv == ipvdz ? 2 : 3;
+      h_pv_x[iabsdz]->Fill(pv.x() - mevent->bsx, w);
+      h_pv_y[iabsdz]->Fill(pv.y() - mevent->bsy, w);
+      h_pv_z[iabsdz]->Fill(pv.z() - mevent->bsz, w);
+      h_pv_rho[iabsdz]->Fill(sqrt((pv.x() - mevent->bsx) * (pv.x() - mevent->bsx) + (pv.y() - mevent->bsy) * (pv.y() - mevent->bsy)), w);
+      h_pv_phi[iabsdz]->Fill(atan2(pv.y() - mevent->bsy, pv.x() - mevent->bsx), w);
+      h_pv_ntracks[iabsdz]->Fill(pv.nTracks(), w);
+      h_pv_sumpt2[iabsdz]->Fill(sumpt2, w);
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////

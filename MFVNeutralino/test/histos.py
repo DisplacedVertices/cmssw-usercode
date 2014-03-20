@@ -33,6 +33,10 @@ if wmore:
     process.p.insert(0, process.mfvSelectedVerticesTmp * process.mfvVerticesToJets)
     process.mfvVertexHistosOneVtx.vertex_src = 'mfvVertices'
     process.mfvVertexHistosOneVtx.vertex_to_jets_src = cms.InputTag('mfvVerticesToJets','ByNtracks')
+    process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+    process.goodOfflinePrimaryVertices.filter = cms.bool(True)
+    process.p.insert(0, process.goodOfflinePrimaryVertices)
+    process.mfvEventHistosOneVtx.primary_vertex_src = 'goodOfflinePrimaryVertices'
     process.mfvEventHistosOneVtx.jets_src = 'selectedPatJetsPF'
     process.mfvEventHistosNoCuts.jets_src = 'selectedPatJetsPF'
     nm1s = []
