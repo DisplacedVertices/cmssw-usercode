@@ -152,7 +152,7 @@ struct option_driver {
       fprintf(stderr, "  -b                      do not use big-weights samples (default: on)\n");
       fprintf(stderr, "  -f syst_frac            fraction systematic uncertainty to use in PL calculation (default: -1)\n");
       fprintf(stderr, "  -e min_scan_events      minimum number of events to allow in scan (default: 5)\n");
-      fprintf(stderr, "  -v vars_to_scan         comma separated list (no whitespace) of variables to scan (default: hardcoded list in main())\n);
+      fprintf(stderr, "  -v vars_to_scan         comma separated list (no whitespace) of variables to scan (default: hardcoded list in main())\n");
       return 1;
     }
 
