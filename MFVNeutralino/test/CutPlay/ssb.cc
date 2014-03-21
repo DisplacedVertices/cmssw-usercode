@@ -520,7 +520,7 @@ struct z_calculator {
 
     if (options.saveplots) {
       for (int logy = 0; logy < 2; ++logy) {
-        TCanvas* c1 = new TCanvas("c1", "", 600, 600);
+        TCanvas* c1 = new TCanvas("c1", "", 1000, 1000);
         c1->Divide(2,2);
         c1->cd(1)->SetLogy(logy);
         sigHist->Draw();
@@ -545,9 +545,7 @@ struct z_calculator {
       if (html) {
         const char* v = var.c_str();
         fprintf(html, "<h1>%s</h1><br>\n", v);
-        fprintf(html, "<a href=\"%s.pdf\"><img src=\"%s.png\"></a><br><br>\n", v, v);
-        //fprintf(html, "<br><b>%s (log)</b><br>\n", v);
-        fprintf(html, "<a href=\"%s_log.pdf\"><img src=\"%s_log.png\"></a><br><br>\n", v, v);
+        fprintf(html, "<a href=\"%s_log.png\"><img src=\"%s.png\"></a><br><br>\n", v, v);
         fprintf(html, "<hr>\n");
       }
     }
