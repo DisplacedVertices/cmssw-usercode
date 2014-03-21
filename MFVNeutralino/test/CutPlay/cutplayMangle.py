@@ -6,7 +6,7 @@ def depize(s):
     return float(s.replace('p','.').replace('n','-'))
 
 def cutplayMangle(filename):
-    debug = True
+    debug = False
 
     file = ROOT.TFile.Open(filename)
     if not file.IsOpen():
@@ -69,7 +69,8 @@ def cutplayMangle(filename):
         binwidth = hminplus1 - hmin
         hmaxminus1 = depize(scan[-1][0])
         hmax = hmaxminus1 + binwidth
-        print 'hmin: ', hmin, ' hminplus1: ', hminplus1, ' binwidth: ', binwidth, ' hmaxminus1: ', hmaxminus1, ' hmax: ', hmax
+        if debug:
+            print 'hmin: ', hmin, ' hminplus1: ', hminplus1, ' binwidth: ', binwidth, ' hmaxminus1: ', hmaxminus1, ' hmax: ', hmax
 
         hist = ROOT.TH1F(cut_name, '', len(scan), hmin, hmax)
         output_hists.append(hist)
