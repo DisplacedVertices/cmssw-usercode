@@ -64,6 +64,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_pos_2d[4][3];
   TH2F* h_sv_pos_rz[4];
   TH1F* h_sv_pos_phi[4];
+  TH1F* h_sv_pos_phi_2pi[4];
 
   PairwiseHistos h_sv[sv_num_indices];
   PairwiseHistos h_sv_sums[3]; // top2, top3, all
@@ -391,6 +392,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
       h_sv_pos_rz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_rz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
       h_sv_pos_phi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_phi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 50, -3.15, 3.15);
+      h_sv_pos_phi_2pi[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_2pi_%i", j), TString::Format(";%s SV phi from 0 to 2#pi;arb. units", exc), 50, 0, 6.30);
     }
 
     h_sv[j].Init("h_sv_" + std::string(exc), hs, true, do_scatterplots);
@@ -559,7 +561,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_sv_pos_2d[svndx][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
     h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
     h_sv_pos_rz[svndx]->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, *weight);
-    h_sv_pos_phi[svndx]->Fill(atan2(aux.y - bsy, aux.x - bsx) , *weight);
+    double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
+    h_sv_pos_phi[svndx]->Fill(pos_phi, *weight);
+    h_sv_pos_phi_2pi[svndx]->Fill(pos_phi >= 0 ? pos_phi : pos_phi + 6.2832, *weight);
 
     PairwiseHistos::ValueMap v = {
         {"mva",                     mva.value(aux)},
