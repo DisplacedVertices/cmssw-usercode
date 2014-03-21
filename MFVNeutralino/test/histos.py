@@ -36,9 +36,12 @@ if wmore:
     process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
     process.goodOfflinePrimaryVertices.filter = cms.bool(True)
     process.p.insert(0, process.goodOfflinePrimaryVertices)
+    process.mfvEventHistosNoCuts.primary_vertex_src = 'goodOfflinePrimaryVertices'
+    process.mfvEventHistosNoCuts.jets_src = 'selectedPatJetsPF'
     process.mfvEventHistosOneVtx.primary_vertex_src = 'goodOfflinePrimaryVertices'
     process.mfvEventHistosOneVtx.jets_src = 'selectedPatJetsPF'
-    process.mfvEventHistosNoCuts.jets_src = 'selectedPatJetsPF'
+    process.mfvEventHistos.primary_vertex_src = 'goodOfflinePrimaryVertices'
+    process.mfvEventHistos.jets_src = 'selectedPatJetsPF'
     nm1s = []
 
 for name, cut in nm1s:
