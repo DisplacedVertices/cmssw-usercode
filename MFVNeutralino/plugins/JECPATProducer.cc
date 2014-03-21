@@ -29,6 +29,7 @@ public:
 private:
   void produce(edm::Event&, const edm::EventSetup&);
   const edm::InputTag jet_src;
+  const bool use_correction;
   const bool jes_uncertainty;
   const bool jes_way;
   const bool jer_way;
@@ -36,6 +37,7 @@ private:
 
 JECPATProducer::JECPATProducer(const edm::ParameterSet& cfg)
   : jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
+    use_correction(cfg.getParameter<bool>("use_correction")),
     jes_uncertainty(cfg.getParameter<bool>("jes_uncertainty")),
     jes_way(cfg.getParameter<bool>("jes_way")),
     jer_way(cfg.getParameter<bool>("jer_way"))
@@ -56,7 +58,6 @@ void JECPATProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
     float uncertainty = -1000;
     float scale = 999;
     pat::Jet mjet = *jet;
-    auto mp4 = jet->p4();
 
     if(jes_uncertainty){
       jecUnc_->setJetEta( jet->eta() );
@@ -102,13 +103,10 @@ void JECPATProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	scale = (gen_jet_energy + JER_scale_down*(jet->energy() - gen_jet_energy))/jet->energy();
     }
     
-    mjet.scaleEnergy(scale);
-    //std::cout<<"Jet Pt "<<jet->pt()<<", Mod jet Pt "<<mjet.pt()<<std::endl; 
-    //if(jet->pt()==mjet.pt())
-    //std::cout<<"EQUAL"<<std::endl;
+    if(use_correction)
+      mjet.scaleEnergy(scale);
     mjets->push_back(mjet);
 
-    
   }
   event.put(mjets);
 
