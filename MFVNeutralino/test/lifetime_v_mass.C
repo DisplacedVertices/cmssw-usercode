@@ -9,7 +9,7 @@ double ycut;
 
 TH1D* compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_6/%s_scaled.root", sampleName));
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_7/%s_scaled.root", sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistosTrksJets/%s", histName));
 
   hist->Rebin2D(10,5);
@@ -55,8 +55,9 @@ TH1D* compareShapes(const char* sampleName, const char* histName) {
   printf("\tA = %5.2f +/- %5.2f, B = %5.2f +/- %5.2f, C = %5.2f +/- %5.2f, D = %5.2f +/- %5.2f\n", A, errA, B, errB, C, errC, D, errD);
   printf("\tD = %5.2f +/- %5.2f, B/A*C = %5.2f +/- %5.2f, correlation factor = %5.2f\n", D, errD, Dpred, errPred, hist->GetCorrelationFactor());
 
-  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.pdf", histName, sampleName));
-  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.root", histName, sampleName));
+//  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.pdf", histName, sampleName));
+//  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.root", histName, sampleName));
+  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/WPixel/TrksJets/%s/%s.pdf", histName, sampleName));
   return h_high;
 }
 
@@ -86,12 +87,17 @@ void compareMasses(const char* lifetime, const char* histName) {
 }
 
 void plot_all_samples(const char* histName) {
+/*
   compareMasses("tau0000um", histName);
   compareMasses("tau0010um", histName);
   compareMasses("tau0100um", histName);
   compareMasses("tau0300um", histName);
   compareMasses("tau1000um", histName);
   compareMasses("tau9900um", histName);
+*/
+  compareShapes("mfv_neutralino_tau0100um_M0400", histName);
+  compareShapes("mfv_neutralino_tau1000um_M0400", histName);
+  compareShapes("mfv_neutralino_tau9900um_M0400", histName);
 
   compareShapes("ttbarhadronic", histName);
   compareShapes("ttbarsemilep", histName);
