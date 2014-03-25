@@ -12,6 +12,7 @@
 #include "TH1.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TLine.h"
 #include "TMath.h"
 #include "TStyle.h"
 #include "SigCalc.h"
@@ -532,6 +533,9 @@ struct z_calculator {
         c1->cd(4)->SetLogy(logy);
         draw_in_order(std::vector<TH1F*>({h_sigfrac, h_bkgfrac}));
         g_bkgpl->Draw("ZP");
+        TLine l(h_sigfrac->GetXaxis()->GetXmin(), 1, h_sigfrac->GetXaxis()->GetXmax(), 1);
+        l.SetLineStyle(2);
+        l.Draw();
         std::string p = options.plot_path + "/" + options.signal_name + "/";
         p += var;
         if (logy)
