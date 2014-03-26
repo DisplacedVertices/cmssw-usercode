@@ -28,7 +28,21 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_bs2derr_drmax_trackdzerrmax0p2;
   TH2F* h_trackdxyerrmax_trackdzerrmax;
 
+  TH1F* h_absdeltaphibs01;
+  TH1F* h_absdeltaphipv01;
+
+  TH1F* h_pz01lab;
+  TH1F* h_pz01cmz;
+
+  TH1F* h_cosanglemom01lab;
+  TH1F* h_cosanglemom01cmz;
+
+  TH2F* h_betagamma0lab_betagamma1lab;
+  TH2F* h_betagamma0cmz_betagamma1cmz;
+
   TH2F* h_bs2ddist0_bs2ddist1;
+
+  //mass
   TH2F* h_mass0_mass1;
 
   TH2F* h_bs2ddist01_mass01;
@@ -50,23 +64,39 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_svdist2d_mass01;
   TH2F* h_svdist3d_mass01;
 
-  TH1F* h_absdeltaphibs01;
-  TH1F* h_absdeltaphipv01;
-
-  TH1F* h_pz01lab;
-  TH1F* h_pz01cmz;
-
-  TH1F* h_cosanglemom01lab;
-  TH1F* h_cosanglemom01cmz;
-
-  TH2F* h_betagamma0lab_betagamma1lab;
-  TH2F* h_betagamma0cmz_betagamma1cmz;
-
   TH2F* h_svdist2dcmz_mass01;
   TH2F* h_svdist3dcmz_mass01;
 
   TH2F* h_svctau2dcmz_mass01;
   TH2F* h_svctau3dcmz_mass01;
+
+  //ntracks
+  TH2F* h_ntracks0_ntracks1;
+
+  TH2F* h_bs2ddist01_ntracks01;
+  TH2F* h_bs2ddist0_ntracks0;
+  TH2F* h_bs2ddist1_ntracks1;
+
+  TH2F* h_bs2ddist1_ntracks0;
+  TH2F* h_bs2ddist0_ntracks1;
+
+  TH2F* h_pv2ddist01_ntracks01;
+  TH2F* h_pv2ddist0_ntracks0;
+
+  TH2F* h_pv3ddist01_ntracks01;
+  TH2F* h_pv3ddist0_ntracks0;
+
+  TH2F* h_pv3dctau01_ntracks01;
+  TH2F* h_pv3dctau0_ntracks0;
+
+  TH2F* h_svdist2d_ntracks01;
+  TH2F* h_svdist3d_ntracks01;
+
+  TH2F* h_svdist2dcmz_ntracks01;
+  TH2F* h_svdist3dcmz_ntracks01;
+
+  TH2F* h_svctau2dcmz_ntracks01;
+  TH2F* h_svctau3dcmz_ntracks01;
 };
 
 ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
@@ -86,7 +116,21 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_bs2derr_drmax_trackdzerrmax0p2 = fs->make<TH2F>("h_bs2derr_drmax_trackdzerrmax0p2", "trackdzerrmax <= 0.2;drmax;bs2derr", 150, 0, 7, 100, 0, 0.05);
   h_trackdxyerrmax_trackdzerrmax = fs->make<TH2F>("h_trackdxyerrmax_trackdzerrmax", ";trackdzerrmax;trackdxyerrmax", 50, 0, 2, 50, 0, 0.5);
 
+  h_absdeltaphibs01 = fs->make<TH1F>("h_absdeltaphibs01", ";absdeltaphibs01;events", 315, 0, 3.15);
+  h_absdeltaphipv01 = fs->make<TH1F>("h_absdeltaphipv01", ";absdeltaphipv01;events", 315, 0, 3.15);
+
+  h_pz01lab = fs->make<TH1F>("h_pz01lab", ";pz01lab;events", 100, -300, 300);
+  h_pz01cmz = fs->make<TH1F>("h_pz01cmz", ";pz01cmz;events", 100, -300, 300);
+
+  h_cosanglemom01lab = fs->make<TH1F>("h_cosanglemom01lab", ";cosanglemom01lab;events", 100, -1, 1);
+  h_cosanglemom01cmz = fs->make<TH1F>("h_cosanglemom01cmz", ";cosanglemom01cmz;events", 100, -1, 1);
+
+  h_betagamma0lab_betagamma1lab = fs->make<TH2F>("h_betagamma0lab_betagamma1lab", ";betagamma1lab;betagamma0lab", 100, 0, 10, 100, 0, 10);
+  h_betagamma0cmz_betagamma1cmz = fs->make<TH2F>("h_betagamma0cmz_betagamma1cmz", ";betagamma1cmz;betagamma0cmz", 100, 0, 10, 100, 0, 10);
+
   h_bs2ddist0_bs2ddist1 = fs->make<TH2F>("h_bs2ddist0_bs2ddist1", ";bs2ddist1;bs2ddist0", 50, 0, 0.5, 50, 0, 0.5);
+
+  //mass
   h_mass0_mass1 = fs->make<TH2F>("h_mass0_mass1", ";mass1;mass0", 1000, 0, 1000, 1000, 0, 1000);
 
   h_bs2ddist01_mass01 = fs->make<TH2F>("h_bs2ddist01_mass01", ";mass01;bs2ddist01", 1000, 0, 1000, 100, 0, 1);
@@ -108,23 +152,39 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_svdist2d_mass01 = fs->make<TH2F>("h_svdist2d_mass01", ";mass01;svdist2d", 1000, 0, 1000, 100, 0, 1);
   h_svdist3d_mass01 = fs->make<TH2F>("h_svdist3d_mass01", ";mass01;svdist3d", 1000, 0, 1000, 100, 0, 1);
 
-  h_absdeltaphibs01 = fs->make<TH1F>("h_absdeltaphibs01", ";absdeltaphibs01;events", 315, 0, 3.15);
-  h_absdeltaphipv01 = fs->make<TH1F>("h_absdeltaphipv01", ";absdeltaphipv01;events", 315, 0, 3.15);
-
-  h_pz01lab = fs->make<TH1F>("h_pz01lab", ";pz01lab;events", 100, -300, 300);
-  h_pz01cmz = fs->make<TH1F>("h_pz01cmz", ";pz01cmz;events", 100, -300, 300);
-
-  h_cosanglemom01lab = fs->make<TH1F>("h_cosanglemom01lab", ";cosanglemom01lab;events", 100, -1, 1);
-  h_cosanglemom01cmz = fs->make<TH1F>("h_cosanglemom01cmz", ";cosanglemom01cmz;events", 100, -1, 1);
-
-  h_betagamma0lab_betagamma1lab = fs->make<TH2F>("h_betagamma0lab_betagamma1lab", ";betagamma1lab;betagamma0lab", 100, 0, 10, 100, 0, 10);
-  h_betagamma0cmz_betagamma1cmz = fs->make<TH2F>("h_betagamma0cmz_betagamma1cmz", ";betagamma1cmz;betagamma0cmz", 100, 0, 10, 100, 0, 10);
-
   h_svdist2dcmz_mass01 = fs->make<TH2F>("h_svdist2dcmz_mass01", ";mass01;svdist2dcmz", 1000, 0, 1000, 100, 0, 1);
   h_svdist3dcmz_mass01 = fs->make<TH2F>("h_svdist3dcmz_mass01", ";mass01;svdist3dcmz", 1000, 0, 1000, 100, 0, 1);
 
   h_svctau2dcmz_mass01 = fs->make<TH2F>("h_svctau2dcmz_mass01", ";mass01;svctau2dcmz", 1000, 0, 1000, 100, 0, 1);
   h_svctau3dcmz_mass01 = fs->make<TH2F>("h_svctau3dcmz_mass01", ";mass01;svctau3dcmz", 1000, 0, 1000, 100, 0, 1);
+
+  //ntracks
+  h_ntracks0_ntracks1 = fs->make<TH2F>("h_ntracks0_ntracks1", ";ntracks1;ntracks0", 80, 0, 80, 80, 0, 80);
+
+  h_bs2ddist01_ntracks01 = fs->make<TH2F>("h_bs2ddist01_ntracks01", ";ntracks01;bs2ddist01", 80, 0, 80, 100, 0, 1);
+  h_bs2ddist0_ntracks0 = fs->make<TH2F>("h_bs2ddist0_ntracks0", ";ntracks0;bs2ddist0", 40, 0, 40, 50, 0, 0.5);
+  h_bs2ddist1_ntracks1 = fs->make<TH2F>("h_bs2ddist1_ntracks1", ";ntracks1;bs2ddist1", 40, 0, 40, 50, 0, 0.5);
+
+  h_bs2ddist1_ntracks0 = fs->make<TH2F>("h_bs2ddist1_ntracks0", ";ntracks0;bs2ddist1", 40, 0, 40, 50, 0, 0.5);
+  h_bs2ddist0_ntracks1 = fs->make<TH2F>("h_bs2ddist0_ntracks1", ";ntracks1;bs2ddist0", 40, 0, 40, 50, 0, 0.5);
+
+  h_pv2ddist01_ntracks01 = fs->make<TH2F>("h_pv2ddist01_ntracks01", ";ntracks01;pv2ddist01", 80, 0, 80, 100, 0, 1);
+  h_pv2ddist0_ntracks0 = fs->make<TH2F>("h_pv2ddist0_ntracks0", ";ntracks0;pv2ddist0", 40, 0, 40, 50, 0, 0.5);
+
+  h_pv3ddist01_ntracks01 = fs->make<TH2F>("h_pv3ddist01_ntracks01", ";ntracks01;pv3ddist01", 80, 0, 80, 100, 0, 1);
+  h_pv3ddist0_ntracks0 = fs->make<TH2F>("h_pv3ddist0_ntracks0", ";ntracks0;pv3ddist0", 40, 0, 40, 50, 0, 0.5);
+
+  h_pv3dctau01_ntracks01 = fs->make<TH2F>("h_pv3dctau01_ntracks01", ";ntracks01;pv3dctau01", 80, 0, 80, 100, 0, 1);
+  h_pv3dctau0_ntracks0 = fs->make<TH2F>("h_pv3dctau0_ntracks0", ";ntracks0;pv3dctau0", 40, 0, 40, 50, 0, 0.5);
+
+  h_svdist2d_ntracks01 = fs->make<TH2F>("h_svdist2d_ntracks01", ";ntracks01;svdist2d", 80, 0, 80, 100, 0, 1);
+  h_svdist3d_ntracks01 = fs->make<TH2F>("h_svdist3d_ntracks01", ";ntracks01;svdist3d", 80, 0, 80, 100, 0, 1);
+
+  h_svdist2dcmz_ntracks01 = fs->make<TH2F>("h_svdist2dcmz_ntracks01", ";ntracks01;svdist2dcmz", 80, 0, 80, 100, 0, 1);
+  h_svdist3dcmz_ntracks01 = fs->make<TH2F>("h_svdist3dcmz_ntracks01", ";ntracks01;svdist3dcmz", 80, 0, 80, 100, 0, 1);
+
+  h_svctau2dcmz_ntracks01 = fs->make<TH2F>("h_svctau2dcmz_ntracks01", ";ntracks01;svctau2dcmz", 80, 0, 80, 100, 0, 1);
+  h_svctau3dcmz_ntracks01 = fs->make<TH2F>("h_svctau3dcmz_ntracks01", ";ntracks01;svctau3dcmz", 80, 0, 80, 100, 0, 1);
 }
 
 void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -221,6 +281,34 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     double svctau3dcmz = 2 * svdist3dcmz / (p0.Beta()*p0.Gamma() + p1.Beta()*p1.Gamma());
     h_svctau2dcmz_mass01->Fill(v0.mass[which_mom] + v1.mass[which_mom], svctau2dcmz, w);
     h_svctau3dcmz_mass01->Fill(v0.mass[which_mom] + v1.mass[which_mom], svctau3dcmz, w);
+
+    //ntracks
+    h_ntracks0_ntracks1->Fill(v1.ntracks, v0.ntracks, w);
+
+    h_bs2ddist01_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.bs2ddist + v1.bs2ddist, w);
+    h_bs2ddist0_ntracks0->Fill(v0.ntracks, v0.bs2ddist, w);
+    h_bs2ddist1_ntracks1->Fill(v1.ntracks, v1.bs2ddist, w);
+
+    h_bs2ddist1_ntracks0->Fill(v0.ntracks, v1.bs2ddist, w);
+    h_bs2ddist0_ntracks1->Fill(v1.ntracks, v0.bs2ddist, w);
+
+    h_pv2ddist01_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.pv2ddist + v1.pv2ddist, w);
+    h_pv2ddist0_ntracks0->Fill(v0.ntracks, v0.pv2ddist, w);
+
+    h_pv3ddist01_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.pv3ddist + v1.pv3ddist, w);
+    h_pv3ddist0_ntracks0->Fill(v0.ntracks, v0.pv3ddist, w);
+
+    h_pv3dctau01_ntracks01->Fill(v0.ntracks + v1.ntracks, pv3dctau0 + pv3dctau1, w);
+    h_pv3dctau0_ntracks0->Fill(v0.ntracks, pv3dctau0, w);
+
+    h_svdist2d_ntracks01->Fill(v0.ntracks + v1.ntracks, svdist2d, w);
+    h_svdist3d_ntracks01->Fill(v0.ntracks + v1.ntracks, svdist3d, w);
+
+    h_svdist2dcmz_ntracks01->Fill(v0.ntracks + v1.ntracks, svdist2dcmz, w);
+    h_svdist3dcmz_ntracks01->Fill(v0.ntracks + v1.ntracks, svdist3dcmz, w);
+
+    h_svctau2dcmz_ntracks01->Fill(v0.ntracks + v1.ntracks, svctau2dcmz, w);
+    h_svctau3dcmz_ntracks01->Fill(v0.ntracks + v1.ntracks, svctau3dcmz, w);
   }
 }
 

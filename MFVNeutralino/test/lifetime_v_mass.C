@@ -9,10 +9,11 @@ double ycut;
 
 TH1D* compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_7/%s_scaled.root", sampleName));
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_9/%s_scaled.root", sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistosTrksJets/%s", histName));
 
-  hist->Rebin2D(10,5);
+  //hist->Rebin2D(10,5);
+  hist->Rebin2D(1,5);
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
@@ -83,7 +84,7 @@ void compareMasses(const char* lifetime, const char* histName) {
   h_M0300->Draw("same");
   h_M0200->SetLineColor(6);
   h_M0200->Draw("same");
-  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.pdf", histName, lifetime));
+//  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/TrksJets/%s/%s.pdf", histName, lifetime));
 }
 
 void plot_all_samples(const char* histName) {
@@ -111,7 +112,7 @@ void plot_all_samples(const char* histName) {
   compareShapes("background", histName);
 }
 
-void lifetime_v_mass() {
+void mass() {
   xcut = 90;
   ycut = 0.1;
   plot_all_samples("h_bs2ddist01_mass01");
@@ -131,4 +132,31 @@ void lifetime_v_mass() {
   plot_all_samples("h_pv2ddist0_mass0");
   plot_all_samples("h_pv3ddist0_mass0");
   plot_all_samples("h_pv3dctau0_mass0");
+}
+
+void ntracks() {
+  xcut = 15;
+  ycut = 0.1;
+  plot_all_samples("h_bs2ddist01_ntracks01");
+  plot_all_samples("h_pv2ddist01_ntracks01");
+  plot_all_samples("h_pv3ddist01_ntracks01");
+  plot_all_samples("h_pv3dctau01_ntracks01");
+  plot_all_samples("h_svdist2d_ntracks01");
+  plot_all_samples("h_svdist3d_ntracks01");
+  plot_all_samples("h_svdist2dcmz_ntracks01");
+  plot_all_samples("h_svdist3dcmz_ntracks01");
+  plot_all_samples("h_svctau2dcmz_ntracks01");
+  plot_all_samples("h_svctau3dcmz_ntracks01");
+
+  xcut = 7;
+  ycut = 0.05;
+  plot_all_samples("h_bs2ddist0_ntracks0");
+  plot_all_samples("h_pv2ddist0_ntracks0");
+  plot_all_samples("h_pv3ddist0_ntracks0");
+  plot_all_samples("h_pv3dctau0_ntracks0");
+}
+
+void lifetime_v_mass() {
+  //mass();
+  ntracks();
 }
