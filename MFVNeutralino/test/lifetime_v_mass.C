@@ -9,7 +9,7 @@ double ycut;
 
 TH1D* compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_9/%s_scaled.root", sampleName));
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_10/%s_scaled.root", sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistosTrksJets/%s", histName));
 
   //hist->Rebin2D(10,5);
@@ -156,7 +156,39 @@ void ntracks() {
   plot_all_samples("h_pv3dctau0_ntracks0");
 }
 
+void sumht() {
+  xcut = 700;
+  ycut = 0.1;
+  plot_all_samples("h_bs2ddist01_sumht");
+  plot_all_samples("h_pv2ddist01_sumht");
+  plot_all_samples("h_pv3ddist01_sumht");
+  plot_all_samples("h_pv3dctau01_sumht");
+  plot_all_samples("h_svdist2d_sumht");
+  plot_all_samples("h_svdist3d_sumht");
+  plot_all_samples("h_svdist2dcmz_sumht");
+  plot_all_samples("h_svdist3dcmz_sumht");
+  plot_all_samples("h_svctau2dcmz_sumht");
+  plot_all_samples("h_svctau3dcmz_sumht");
+}
+
+void njets() {
+  xcut = 5;
+  ycut = 0.1;
+  plot_all_samples("h_bs2ddist01_njets");
+  plot_all_samples("h_pv2ddist01_njets");
+  plot_all_samples("h_pv3ddist01_njets");
+  plot_all_samples("h_pv3dctau01_njets");
+  plot_all_samples("h_svdist2d_njets");
+  plot_all_samples("h_svdist3d_njets");
+  plot_all_samples("h_svdist2dcmz_njets");
+  plot_all_samples("h_svdist3dcmz_njets");
+  plot_all_samples("h_svctau2dcmz_njets");
+  plot_all_samples("h_svctau3dcmz_njets");
+}
+
 void lifetime_v_mass() {
   //mass();
-  ntracks();
+  //ntracks();
+  //sumht();
+  //njets();
 }

@@ -23,10 +23,8 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH1F* h_nsv;
   TH2F* h_ntracks01_maxtrackpt01;
 
+  TH2F* h_bs2derr_ntracks;
   TH2F* h_bs2derr_drmax;
-  TH2F* h_bs2derr_drmax_trackdxyerrmax0p1;
-  TH2F* h_bs2derr_drmax_trackdzerrmax0p2;
-  TH2F* h_trackdxyerrmax_trackdzerrmax;
 
   TH1F* h_absdeltaphibs01;
   TH1F* h_absdeltaphipv01;
@@ -97,6 +95,30 @@ class ABCDHistos : public edm::EDAnalyzer {
 
   TH2F* h_svctau2dcmz_ntracks01;
   TH2F* h_svctau3dcmz_ntracks01;
+
+  //sumht
+  TH2F* h_bs2ddist01_sumht;
+  TH2F* h_pv2ddist01_sumht;
+  TH2F* h_pv3ddist01_sumht;
+  TH2F* h_pv3dctau01_sumht;
+  TH2F* h_svdist2d_sumht;
+  TH2F* h_svdist3d_sumht;
+  TH2F* h_svdist2dcmz_sumht;
+  TH2F* h_svdist3dcmz_sumht;
+  TH2F* h_svctau2dcmz_sumht;
+  TH2F* h_svctau3dcmz_sumht;
+
+  //njets
+  TH2F* h_bs2ddist01_njets;
+  TH2F* h_pv2ddist01_njets;
+  TH2F* h_pv3ddist01_njets;
+  TH2F* h_pv3dctau01_njets;
+  TH2F* h_svdist2d_njets;
+  TH2F* h_svdist3d_njets;
+  TH2F* h_svdist2dcmz_njets;
+  TH2F* h_svdist3dcmz_njets;
+  TH2F* h_svctau2dcmz_njets;
+  TH2F* h_svctau3dcmz_njets;
 };
 
 ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
@@ -111,10 +133,8 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_nsv = fs->make<TH1F>("h_nsv", ";number of secondary vertices;events", 15, 0, 15);
   h_ntracks01_maxtrackpt01 = fs->make<TH2F>("h_ntracks01_maxtrackpt01", ";sum of maxtrackpt for the two SV's with the highest ntracks;sum of ntracks for the two SV's with the highest ntracks", 300, 0, 300, 80, 0, 80);
 
+  h_bs2derr_ntracks = fs->make<TH2F>("h_bs2derr_ntracks", ";ntracks;bs2derr", 40, 0, 40, 100, 0, 0.05);
   h_bs2derr_drmax = fs->make<TH2F>("h_bs2derr_drmax", ";drmax;bs2derr", 150, 0, 7, 100, 0, 0.05);
-  h_bs2derr_drmax_trackdxyerrmax0p1 = fs->make<TH2F>("h_bs2derr_drmax_trackdxyerrmax0p1", "trackdxyerrmax <= 0.1;drmax;bs2derr", 150, 0, 7, 100, 0, 0.05);
-  h_bs2derr_drmax_trackdzerrmax0p2 = fs->make<TH2F>("h_bs2derr_drmax_trackdzerrmax0p2", "trackdzerrmax <= 0.2;drmax;bs2derr", 150, 0, 7, 100, 0, 0.05);
-  h_trackdxyerrmax_trackdzerrmax = fs->make<TH2F>("h_trackdxyerrmax_trackdzerrmax", ";trackdzerrmax;trackdxyerrmax", 50, 0, 2, 50, 0, 0.5);
 
   h_absdeltaphibs01 = fs->make<TH1F>("h_absdeltaphibs01", ";absdeltaphibs01;events", 315, 0, 3.15);
   h_absdeltaphipv01 = fs->make<TH1F>("h_absdeltaphipv01", ";absdeltaphipv01;events", 315, 0, 3.15);
@@ -185,6 +205,30 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
 
   h_svctau2dcmz_ntracks01 = fs->make<TH2F>("h_svctau2dcmz_ntracks01", ";ntracks01;svctau2dcmz", 80, 0, 80, 100, 0, 1);
   h_svctau3dcmz_ntracks01 = fs->make<TH2F>("h_svctau3dcmz_ntracks01", ";ntracks01;svctau3dcmz", 80, 0, 80, 100, 0, 1);
+
+  //sumht
+  h_bs2ddist01_sumht = fs->make<TH2F>("h_bs2ddist01_sumht", ";sumht;bs2ddist01", 500, 0, 5000, 100, 0, 1);
+  h_pv2ddist01_sumht = fs->make<TH2F>("h_pv2ddist01_sumht", ";sumht;pv2ddist01", 500, 0, 5000, 100, 0, 1);
+  h_pv3ddist01_sumht = fs->make<TH2F>("h_pv3ddist01_sumht", ";sumht;pv3ddist01", 500, 0, 5000, 100, 0, 1);
+  h_pv3dctau01_sumht = fs->make<TH2F>("h_pv3dctau01_sumht", ";sumht;pv3dctau01", 500, 0, 5000, 100, 0, 1);
+  h_svdist2d_sumht = fs->make<TH2F>("h_svdist2d_sumht", ";sumht;svdist2d", 500, 0, 5000, 100, 0, 1);
+  h_svdist3d_sumht = fs->make<TH2F>("h_svdist3d_sumht", ";sumht;svdist3d", 500, 0, 5000, 100, 0, 1);
+  h_svdist2dcmz_sumht = fs->make<TH2F>("h_svdist2dcmz_sumht", ";sumht;svdist2dcmz", 500, 0, 5000, 100, 0, 1);
+  h_svdist3dcmz_sumht = fs->make<TH2F>("h_svdist3dcmz_sumht", ";sumht;svdist3dcmz", 500, 0, 5000, 100, 0, 1);
+  h_svctau2dcmz_sumht = fs->make<TH2F>("h_svctau2dcmz_sumht", ";sumht;svctau2dcmz", 500, 0, 5000, 100, 0, 1);
+  h_svctau3dcmz_sumht = fs->make<TH2F>("h_svctau3dcmz_sumht", ";sumht;svctau3dcmz", 500, 0, 5000, 100, 0, 1);
+
+  //njets
+  h_bs2ddist01_njets = fs->make<TH2F>("h_bs2ddist01_njets", ";njets;bs2ddist01", 20, 0, 20, 100, 0, 1);
+  h_pv2ddist01_njets = fs->make<TH2F>("h_pv2ddist01_njets", ";njets;pv2ddist01", 20, 0, 20, 100, 0, 1);
+  h_pv3ddist01_njets = fs->make<TH2F>("h_pv3ddist01_njets", ";njets;pv3ddist01", 20, 0, 20, 100, 0, 1);
+  h_pv3dctau01_njets = fs->make<TH2F>("h_pv3dctau01_njets", ";njets;pv3dctau01", 20, 0, 20, 100, 0, 1);
+  h_svdist2d_njets = fs->make<TH2F>("h_svdist2d_njets", ";njets;svdist2d", 20, 0, 20, 100, 0, 1);
+  h_svdist3d_njets = fs->make<TH2F>("h_svdist3d_njets", ";njets;svdist3d", 20, 0, 20, 100, 0, 1);
+  h_svdist2dcmz_njets = fs->make<TH2F>("h_svdist2dcmz_njets", ";njets;svdist2dcmz", 20, 0, 20, 100, 0, 1);
+  h_svdist3dcmz_njets = fs->make<TH2F>("h_svdist3dcmz_njets", ";njets;svdist3dcmz", 20, 0, 20, 100, 0, 1);
+  h_svctau2dcmz_njets = fs->make<TH2F>("h_svctau2dcmz_njets", ";njets;svctau2dcmz", 20, 0, 20, 100, 0, 1);
+  h_svctau3dcmz_njets = fs->make<TH2F>("h_svctau3dcmz_njets", ";njets;svctau3dcmz", 20, 0, 20, 100, 0, 1);
 }
 
 void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -207,14 +251,8 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& vtx = vertices->at(isv);
+    h_bs2derr_ntracks->Fill(vtx.ntracks, vtx.bs2derr, w);
     h_bs2derr_drmax->Fill(vtx.drmax, vtx.bs2derr, w);
-    h_trackdxyerrmax_trackdzerrmax->Fill(vtx.trackdzerrmax, vtx.trackdxyerrmax, w);
-    if (vtx.trackdxyerrmax < 0.1) {
-      h_bs2derr_drmax_trackdxyerrmax0p1->Fill(vtx.drmax, vtx.bs2derr, w);
-    }
-    if (vtx.trackdzerrmax < 0.2) {
-      h_bs2derr_drmax_trackdzerrmax0p2->Fill(vtx.drmax, vtx.bs2derr, w);
-    }
   }
 
   if (nsv >= 2) {
@@ -309,6 +347,30 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     h_svctau2dcmz_ntracks01->Fill(v0.ntracks + v1.ntracks, svctau2dcmz, w);
     h_svctau3dcmz_ntracks01->Fill(v0.ntracks + v1.ntracks, svctau3dcmz, w);
+
+    //sumht
+    h_bs2ddist01_sumht->Fill(mevent->jet_sum_ht, v0.bs2ddist + v1.bs2ddist, w);
+    h_pv2ddist01_sumht->Fill(mevent->jet_sum_ht, v0.pv2ddist + v1.pv2ddist, w);
+    h_pv3ddist01_sumht->Fill(mevent->jet_sum_ht, v0.pv3ddist + v1.pv3ddist, w);
+    h_pv3dctau01_sumht->Fill(mevent->jet_sum_ht, pv3dctau0 + pv3dctau1, w);
+    h_svdist2d_sumht->Fill(mevent->jet_sum_ht, svdist2d, w);
+    h_svdist3d_sumht->Fill(mevent->jet_sum_ht, svdist3d, w);
+    h_svdist2dcmz_sumht->Fill(mevent->jet_sum_ht, svdist2dcmz, w);
+    h_svdist3dcmz_sumht->Fill(mevent->jet_sum_ht, svdist3dcmz, w);
+    h_svctau2dcmz_sumht->Fill(mevent->jet_sum_ht, svctau2dcmz, w);
+    h_svctau3dcmz_sumht->Fill(mevent->jet_sum_ht, svctau2dcmz, w);
+
+    //njets
+    h_bs2ddist01_njets->Fill(mevent->njets, v0.bs2ddist + v1.bs2ddist, w);
+    h_pv2ddist01_njets->Fill(mevent->njets, v0.pv2ddist + v1.pv2ddist, w);
+    h_pv3ddist01_njets->Fill(mevent->njets, v0.pv3ddist + v1.pv3ddist, w);
+    h_pv3dctau01_njets->Fill(mevent->njets, pv3dctau0 + pv3dctau1, w);
+    h_svdist2d_njets->Fill(mevent->njets, svdist2d, w);
+    h_svdist3d_njets->Fill(mevent->njets, svdist3d, w);
+    h_svdist2dcmz_njets->Fill(mevent->njets, svdist2dcmz, w);
+    h_svdist3dcmz_njets->Fill(mevent->njets, svdist3dcmz, w);
+    h_svctau2dcmz_njets->Fill(mevent->njets, svctau2dcmz, w);
+    h_svctau3dcmz_njets->Fill(mevent->njets, svctau2dcmz, w);
   }
 }
 
