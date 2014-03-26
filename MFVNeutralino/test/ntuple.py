@@ -151,6 +151,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif keep_all:
         batch_name_extra += '_WAll'
 
+    if debug:
+        batch_name_extra += '_WDebug'
+
 
     cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + batch_name_extra,
                        pset_modifier = modify,
