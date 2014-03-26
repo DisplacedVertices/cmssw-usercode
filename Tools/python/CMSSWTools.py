@@ -71,16 +71,7 @@ def replay_event(process, filename, rle, new_process_name='REPLAY'):
     process.RandomNumberGeneratorService.restoreStateLabel = cms.untracked.string('randomEngineStateProducer')
     process.setName_(new_process_name)
 
-def set_events_to_process(process, run_events, run=None):
-    '''Set the PoolSource parameter eventsToProcess appropriately,
-    given the desired runs/event numbers passed in. If run is None,
-    run_events must be a list of 2-tuples, each entry being a (run,
-    event) pair. Otherwise, the run number is taken from run, and
-    run_events is just a list of event numbers to be paired with run.
-
-    run_events can also be a list of 3-tuples, where the middle entry
-    in each is the lumisection number. This is ignored for now.
-    '''
+def set_events_to_process_ex(run_events, run=None):
     if run is not None:
         for event in run_events:
             if type(event) != int:
@@ -89,9 +80,54 @@ def set_events_to_process(process, run_events, run=None):
     lengths = list(set(len(x) for x in run_events))
     if len(lengths) != 1 or lengths[0] not in (2,3):
         raise ValueError('expected either list of (run,event) or (run,ls,event) in run_events')
+    return run_events
+
+def set_events_to_process(process, run_events, run=None):
+    '''Set the PoolSource parameter eventsToProcess appropriately,
+    given the desired runs/event numbers passed in. If run is None,
+    run_events must be a list of 2-tuples, each entry being a (run,
+    event) pair. Otherwise, the run number is taken from run, and
+    run_events is just a list of event numbers to be paired with run.
+
+    run_events can also be a list of 3-tuples, where the middle entry
+    in each is the lumisection number.
+    '''
+    run_events = set_events_to_process_ex(run_events, run)
     process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[-1],x[0],x[-1]) for x in run_events])
-    if lengths[0] == 3:
+    if len(run_events[0]) == 3:
         process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*[cms.untracked.LuminosityBlockRange(x[0],x[1],x[0],x[1]) for x in run_events])
+
+def set_events_to_process_by_filter(process, run_events, run=None, temp_fn='set_events_to_process_by_filter.txt'):
+    '''Like the other function, only run specific events specified in
+    run_events. Here we use the EventIdVeto plugin with a temp file
+    listing the events. This works better with splitting among batch
+    jobs where event numbers might be duplicated in different lumis,
+    or the particular combination of events/lumisToProcess
+    specifications result in no events and invalid root files returned
+    in certain jobs.
+
+    The run_events list must include luminosity block (i.e. a list of
+    3-tuples).
+    
+    We return the filename for the list of events so that it can be
+    passed to e.g. CRABSubmitter.
+    '''
+    run_events = set_events_to_process_ex(run_events, run)
+    if len(run_events[0]) == 3:
+        raise ValueError('run_events must be a list of 3-tuples (run, lumi, event)')
+
+    f = open(temp_fn, 'wt')
+    for rle in run_events:
+        f.write('(%i,%i,%i),\n', % rle)
+    f.close()
+
+    if hasattr(process, 'EventIdVeto'):
+        raise ValueError('process already has EventIdVeto object')
+    process.EventIdVeto = cms.EDFilter('EventIdVeto', list_fn = cms.string(temp_fn))
+    for p in process.paths.keys():
+        getattr(process, p).insert(0, ~process.EventIdVeto)
+
+    return temp_fn
 
 def set_seeds(process, seed=12191982, size=2**24):
     '''Set all the seeds for the RandomNumberGeneratorService in a
