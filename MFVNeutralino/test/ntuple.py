@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.CMSSWTools import set_events_to_process
+from JMTucker.Tools.CMSSWTools import set_events_to_process, set_events_to_process_by_filter
 from JMTucker.Tools.PATTuple_cfg import *
 tuple_version = version
 
 runOnMC = True # magic line, don't touch
+debug = False
 require_pixel_hit = False
 prepare_vis = False
 keep_extra = False
@@ -104,6 +105,13 @@ if 'test' in sys.argv:
     re_pat(process)
     process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')
 
+if debug:
+    run_events_fn = 'events_to_debug.txt'
+    set_events_to_process_by_filter(process, run_events_fn=run_events_fn)
+    process.mfvVertices.histos = True
+    process.mfvVertices.verbose = True
+    process.TFileService = cms.Service('TFileService', fileName = cms.string('vertexer_debug.root'))
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
@@ -152,6 +160,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        #publish_data_name = 'mfvntuple_' + tuple_version + batch_name_extra.lower(),
                        #manual_datasets = SampleFiles['mfv300s'],
                        max_threads = 3,
+                       #USER_additional_input_files = run_events_fn,
                        )
 
 
