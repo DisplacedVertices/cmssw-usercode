@@ -122,7 +122,7 @@ def set_events_to_process_by_filter(process, run_events=None, run=None, run_even
 
         f = open(run_events_fn, 'wt')
         for rle in run_events:
-            f.write('(%i,%i,%i),\n', % rle)
+            f.write('(%i,%i,%i),\n' % rle)
         f.close()
 
     if hasattr(process, 'EventIdVeto'):
