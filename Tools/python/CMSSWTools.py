@@ -97,7 +97,7 @@ def set_events_to_process(process, run_events, run=None):
     if len(run_events[0]) == 3:
         process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*[cms.untracked.LuminosityBlockRange(x[0],x[1],x[0],x[1]) for x in run_events])
 
-def set_events_to_process_by_filter(process, run_events, run=None, temp_fn='set_events_to_process_by_filter.txt'):
+def set_events_to_process_by_filter(process, run_events=None, run=None, run_events_fn='set_events_to_process_by_filter.txt'):
     '''Like the other function, only run specific events specified in
     run_events. Here we use the EventIdVeto plugin with a temp file
     listing the events. This works better with splitting among batch
@@ -108,26 +108,30 @@ def set_events_to_process_by_filter(process, run_events, run=None, temp_fn='set_
 
     The run_events list must include luminosity block (i.e. a list of
     3-tuples).
+
+    Or if run_events is None, take the list pre-made from run_events_fn (no
+    value checking done).
     
     We return the filename for the list of events so that it can be
     passed to e.g. CRABSubmitter.
     '''
-    run_events = set_events_to_process_ex(run_events, run)
-    if len(run_events[0]) == 3:
-        raise ValueError('run_events must be a list of 3-tuples (run, lumi, event)')
+    if run_events is not None:
+        run_events = set_events_to_process_ex(run_events, run)
+        if len(run_events[0]) == 3:
+            raise ValueError('run_events must be a list of 3-tuples (run, lumi, event)')
 
-    f = open(temp_fn, 'wt')
-    for rle in run_events:
-        f.write('(%i,%i,%i),\n', % rle)
-    f.close()
+        f = open(run_events_fn, 'wt')
+        for rle in run_events:
+            f.write('(%i,%i,%i),\n', % rle)
+        f.close()
 
     if hasattr(process, 'EventIdVeto'):
         raise ValueError('process already has EventIdVeto object')
-    process.EventIdVeto = cms.EDFilter('EventIdVeto', list_fn = cms.string(temp_fn))
+    process.EventIdVeto = cms.EDFilter('EventIdVeto', list_fn = cms.string(run_events_fn))
     for p in process.paths.keys():
         getattr(process, p).insert(0, ~process.EventIdVeto)
 
-    return temp_fn
+    return run_events_fn
 
 def set_seeds(process, seed=12191982, size=2**24):
     '''Set all the seeds for the RandomNumberGeneratorService in a
