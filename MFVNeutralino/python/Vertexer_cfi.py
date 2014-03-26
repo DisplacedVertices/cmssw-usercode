@@ -53,4 +53,5 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              remove_one_track_at_a_time = cms.bool(True),
                              histos = cms.untracked.bool(False),
                              verbose = cms.untracked.bool(False),
+                             phitest = cms.untracked.bool(False),
                              )

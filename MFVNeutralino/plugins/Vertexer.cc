@@ -1,5 +1,6 @@
 #include "TH2.h"
 #include "TMath.h"
+#include "TFitResult.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -155,6 +156,7 @@ private:
   const bool remove_one_track_at_a_time;
   const bool histos;
   const bool verbose;
+  const bool phitest;
 
   TH1F* h_n_all_tracks;
   TH1F* h_all_track_pt;
@@ -195,6 +197,15 @@ private:
   TH1F* h_noshare_track_multiplicity;
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
+
+  TH1F* h_phitest_nev;
+  TH1F* h_phitest_nvtx;
+  TH1F* h_phitest_mean;
+  TH1F* h_phitest_rms;
+  TH1F* h_phitest_p0;
+  TH1F* h_phitest_p0e;
+  TH1F* h_phitest_p1;
+  TH1F* h_phitest_p1e;
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
@@ -239,8 +250,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     max_track_vertex_sig(cfg.getParameter<double>("max_track_vertex_sig")),
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
-    histos(cfg.getUntrackedParameter<bool>("histos", true)),
-    verbose(cfg.getUntrackedParameter<bool>("verbose", false))
+    histos(cfg.getUntrackedParameter<bool>("histos", false)),
+    verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
+    phitest(cfg.getUntrackedParameter<bool>("phitest", false))
 {
   if (use_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/pf_candidates/pf_jets/pat_jets";
@@ -288,6 +300,18 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_noshare_track_multiplicity     = fs->make<TH1F>("h_noshare_track_multiplicity",     "",  40,   0,     40);
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 200,   0,    200);
+
+    if (phitest) {
+      h_phitest_nev = fs->make<TH1F>("h_phitest_nev", "", 1, 0, 1);
+      const int N = 1500;
+      h_phitest_nvtx = fs->make<TH1F>("h_phitest_nvtx", "", N, 0, N);
+      h_phitest_mean = fs->make<TH1F>("phitest_mean",   "", N, 0, N);
+      h_phitest_rms  = fs->make<TH1F>("phitest_rms",    "", N, 0, N);
+      h_phitest_p0   = fs->make<TH1F>("phitest_p0",     "", N, 0, N);
+      h_phitest_p0e  = fs->make<TH1F>("phitest_p0e",    "", N, 0, N);
+      h_phitest_p1   = fs->make<TH1F>("phitest_p1",     "", N, 0, N);
+      h_phitest_p1e  = fs->make<TH1F>("phitest_p1e",    "", N, 0, N);
+    }
   }
 }
 
@@ -305,6 +329,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     printf("------------------------------------------------------------------------\n");
     printf("MFVVertexer::produce: run %u, lumi %u, event %u\n", event.id().run(), event.luminosityBlock(), event.id().event());
   }
+
+  int iphitest = 0;
+  if (phitest)
+    h_phitest_nev->Fill(0);
 
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByLabel(beamspot_src, beamspot);
@@ -816,6 +844,22 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       ++n_resets;
       if (verbose) printf("   resetting from vertices %lu and %lu. # of resets: %i\n", ivtx[0], ivtx[1], n_resets);
       
+      if (phitest) {
+        TH1F* phi_temp = new TH1F("phi_temp", "", 50, -3.14159266, 3.14159266);
+        for (const reco::Vertex& v : *vertices)
+          phi_temp->Fill(atan2(v.y(), v.x()));
+        TFitResultPtr fit = phi_temp->Fit("pol1");
+        h_phitest_nvtx->SetBinContent(iphitest, vertices->size());
+        h_phitest_mean->SetBinContent(iphitest, phi_temp->GetMean());
+        h_phitest_rms ->SetBinContent(iphitest, phi_temp->GetRMS());
+        h_phitest_p0  ->SetBinContent(iphitest, fit->Parameter(0));
+        h_phitest_p0e ->SetBinContent(iphitest, fit->ParError(0));
+        h_phitest_p1  ->SetBinContent(iphitest, fit->Parameter(1));
+        h_phitest_p1e ->SetBinContent(iphitest, fit->ParError(1));
+        ++iphitest;
+        delete phi_temp;
+      }
+
       //if (n_resets == 3000)
       //  throw "I'm dumb";
     }
@@ -884,7 +928,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   //////////////////////////////////////////////////////////////////////
-  // Merge vertices that are still "close".
+  // Merge vertices that are still "close". JMTBAD this doesn't do anything currently.
   //////////////////////////////////////////////////////////////////////
 
   if (verbose)
