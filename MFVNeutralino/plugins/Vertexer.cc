@@ -174,6 +174,7 @@ private:
   TH1F* h_seed_vertex_x;
   TH1F* h_seed_vertex_y;
   TH1F* h_seed_vertex_rho;
+  TH1F* h_seed_vertex_phi;
   TH1F* h_seed_vertex_z;
   TH1F* h_seed_vertex_r;
   TH1F* h_seed_track_multiplicity;
@@ -188,6 +189,7 @@ private:
   TH1F* h_noshare_vertex_x;
   TH1F* h_noshare_vertex_y;
   TH1F* h_noshare_vertex_rho;
+  TH1F* h_noshare_vertex_phi;
   TH1F* h_noshare_vertex_z;
   TH1F* h_noshare_vertex_r;
   TH1F* h_noshare_track_multiplicity;
@@ -265,6 +267,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  "", 200,  -1,      1);
     h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  "", 200,  -1,      1);
     h_seed_vertex_rho                = fs->make<TH1F>("h_seed_vertex_rho",                "", 200,   0,      2);
+    h_seed_vertex_phi                = fs->make<TH1F>("h_seed_vertex_phi",                "", 200,  -3.15,   3.15);
     h_seed_vertex_z                  = fs->make<TH1F>("h_seed_vertex_z",                  "", 200, -20,     20);
     h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  "", 200,   0,      2);
     h_seed_track_multiplicity        = fs->make<TH1F>("h_seed_track_multiplicity",        "",  40,   0,     40);
@@ -279,6 +282,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_noshare_vertex_x               = fs->make<TH1F>("h_noshare_vertex_x",               "", 200,  -1,      1);
     h_noshare_vertex_y               = fs->make<TH1F>("h_noshare_vertex_y",               "", 200,  -1,      1);
     h_noshare_vertex_rho             = fs->make<TH1F>("h_noshare_vertex_rho",             "", 200,   0,      2);
+    h_noshare_vertex_phi             = fs->make<TH1F>("h_noshare_vertex_phi",             "", 200,  -3.15,   3.15);
     h_noshare_vertex_z               = fs->make<TH1F>("h_noshare_vertex_z",               "", 200, -20,     20);
     h_noshare_vertex_r               = fs->make<TH1F>("h_noshare_vertex_r",               "", 200,   0,      2);
     h_noshare_track_multiplicity     = fs->make<TH1F>("h_noshare_track_multiplicity",     "",  40,   0,     40);
@@ -510,10 +514,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const double vx = v.position().x() - bs_x;
           const double vy = v.position().y() - bs_y;
           const double vz = v.position().z() - bs_z;
+          const double phi = atan2(vy, vx);
           const double rho = mag(vx, vy);
           const double r = mag(vx, vy, vz);
           if (verbose)
-            printf("from tracks %3lu and %3lu: vertex #%3lu: chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  r: %7.3f\n", itk, jtk, vertices->size()-1, vchi2, vndof, vx, vy, vz, rho, r);
+            printf("from tracks %3lu and %3lu: vertex #%3lu: chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  phi: %7.3f  r: %7.3f\n", itk, jtk, vertices->size()-1, vchi2, vndof, vx, vy, vz, rho, phi, r);
           if (histos) {
             for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it)
               h_seed_vertex_track_weights->Fill(v.trackWeight(*it));
@@ -522,6 +527,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
             h_seed_vertex_x->Fill(vx);
             h_seed_vertex_y->Fill(vy);
             h_seed_vertex_rho->Fill(rho);
+            h_seed_vertex_phi->Fill(phi);
             h_seed_vertex_z->Fill(vz);
             h_seed_vertex_r->Fill(r);
           }
@@ -834,6 +840,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       const double vy = v.position().y() - bs_y;
       const double vz = v.position().z() - bs_z;
       const double rho = mag(vx, vy);
+      const double phi = atan2(vy, vx);
       const double r = mag(vx, vy, vz);
       for (const auto& r : vertex_track_set(v)) {
         if (track_use.find(r) != track_use.end())
@@ -843,7 +850,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
 
       if (verbose)
-        printf("no-share vertex #%3lu: ntracks: %i chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  r: %7.3f\n", i, ntracks, vchi2, vndof, vx, vy, vz, rho, r);
+        printf("no-share vertex #%3lu: ntracks: %i chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  phi: %7.3f  r: %7.3f\n", i, ntracks, vchi2, vndof, vx, vy, vz, rho, phi, r);
 
       if (histos) {
         h_noshare_vertex_ntracks->Fill(ntracks);
@@ -854,6 +861,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         h_noshare_vertex_x->Fill(vx);
         h_noshare_vertex_y->Fill(vy);
         h_noshare_vertex_rho->Fill(rho);
+        h_noshare_vertex_phi->Fill(phi);
         h_noshare_vertex_z->Fill(vz);
         h_noshare_vertex_r->Fill(r);
       }
