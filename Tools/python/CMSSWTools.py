@@ -127,7 +127,10 @@ def set_events_to_process_by_filter(process, run_events=None, run=None, run_even
 
     if hasattr(process, 'EventIdVeto'):
         raise ValueError('process already has EventIdVeto object')
-    process.EventIdVeto = cms.EDFilter('EventIdVeto', list_fn = cms.string(run_events_fn))
+    process.EventIdVeto = cms.EDFilter('EventIdVeto',
+                                       use_run = cms.bool(False),
+                                       list_fn = cms.string(run_events_fn)
+                                       )
     for p in process.paths.keys():
         getattr(process, p).insert(0, ~process.EventIdVeto)
 
