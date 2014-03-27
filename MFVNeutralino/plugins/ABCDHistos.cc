@@ -119,6 +119,12 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_svdist3dcmz_njets;
   TH2F* h_svctau2dcmz_njets;
   TH2F* h_svctau3dcmz_njets;
+
+  //other variables
+  TH2F* h_svctau3dcmz_maxtrackpt01;
+  TH2F* h_svctau3dcmz_maxm1trackpt01;
+  TH2F* h_svctau3dcmz_ntracksptgt301;
+  TH2F* h_svctau3dcmz_msptm01;
 };
 
 ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
@@ -229,6 +235,12 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_svdist3dcmz_njets = fs->make<TH2F>("h_svdist3dcmz_njets", ";njets;svdist3dcmz", 20, 0, 20, 100, 0, 1);
   h_svctau2dcmz_njets = fs->make<TH2F>("h_svctau2dcmz_njets", ";njets;svctau2dcmz", 20, 0, 20, 100, 0, 1);
   h_svctau3dcmz_njets = fs->make<TH2F>("h_svctau3dcmz_njets", ";njets;svctau3dcmz", 20, 0, 20, 100, 0, 1);
+
+  //other variables
+  h_svctau3dcmz_maxtrackpt01 = fs->make<TH2F>("h_svctau3dcmz_maxtrackpt01", ";maxtrackpt01;svctau3dcmz", 300, 0, 300, 100, 0, 1);
+  h_svctau3dcmz_maxm1trackpt01 = fs->make<TH2F>("h_svctau3dcmz_maxm1trackpt01", ";maxm1trackpt01;svctau3dcmz", 300, 0, 300, 100, 0, 1);
+  h_svctau3dcmz_ntracksptgt301 = fs->make<TH2F>("h_svctau3dcmz_ntracksptgt301", ";ntracksptgt301;svctau3dcmz", 80, 0, 80, 100, 0, 1);
+  h_svctau3dcmz_msptm01 = fs->make<TH2F>("h_svctau3dcmz_msptm01", ";msptm01;svctau3dcmz", 500, 0, 5000, 100, 0, 1);
 }
 
 void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -358,7 +370,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_svdist2dcmz_sumht->Fill(mevent->jet_sum_ht, svdist2dcmz, w);
     h_svdist3dcmz_sumht->Fill(mevent->jet_sum_ht, svdist3dcmz, w);
     h_svctau2dcmz_sumht->Fill(mevent->jet_sum_ht, svctau2dcmz, w);
-    h_svctau3dcmz_sumht->Fill(mevent->jet_sum_ht, svctau2dcmz, w);
+    h_svctau3dcmz_sumht->Fill(mevent->jet_sum_ht, svctau3dcmz, w);
 
     //njets
     h_bs2ddist01_njets->Fill(mevent->njets, v0.bs2ddist + v1.bs2ddist, w);
@@ -370,7 +382,15 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_svdist2dcmz_njets->Fill(mevent->njets, svdist2dcmz, w);
     h_svdist3dcmz_njets->Fill(mevent->njets, svdist3dcmz, w);
     h_svctau2dcmz_njets->Fill(mevent->njets, svctau2dcmz, w);
-    h_svctau3dcmz_njets->Fill(mevent->njets, svctau2dcmz, w);
+    h_svctau3dcmz_njets->Fill(mevent->njets, svctau3dcmz, w);
+
+    //other variables
+    h_svctau3dcmz_maxtrackpt01->Fill(v0.maxtrackpt + v1.maxtrackpt, svctau3dcmz, w);
+    h_svctau3dcmz_maxm1trackpt01->Fill(v0.maxm1trackpt + v1.maxm1trackpt, svctau3dcmz, w);
+    h_svctau3dcmz_ntracksptgt301->Fill(v0.ntracksptgt3 + v1.ntracksptgt3, svctau3dcmz, w);
+    double msptm0 = sqrt(v0.mass[which_mom] * v0.mass[which_mom] + v0.pt[which_mom] * v0.pt[which_mom]) + fabs(v0.pt[which_mom]);
+    double msptm1 = sqrt(v1.mass[which_mom] * v1.mass[which_mom] + v1.pt[which_mom] * v1.pt[which_mom]) + fabs(v1.pt[which_mom]);
+    h_svctau3dcmz_msptm01->Fill(msptm0 + msptm1, svctau3dcmz, w);
   }
 }
 
