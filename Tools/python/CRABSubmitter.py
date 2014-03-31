@@ -30,6 +30,7 @@ class CRABSubmitter:
                  pset_modifier = None,
                  working_dir_pattern = '%BATCH/crab_%(name)s',
                  pset_fn_pattern = '%BATCH/%(name)s',
+                 scheduler = None,
                  job_control_from_sample = False,
                  job_splitting = (),
                  data_retrieval = 'return',
@@ -90,7 +91,7 @@ class CRABSubmitter:
 
         cfg = ConfigParserEx()
         cfg.set('CRAB', 'jobtype', 'cmssw')
-        cfg.set('CRAB', 'scheduler', '%(scheduler)s' if not use_ana_dataset else '%(ana_scheduler)s')
+        cfg.set('CRAB', 'scheduler', scheduler if scheduler else ('%(scheduler)s' if not use_ana_dataset else '%(ana_scheduler)s'))
         if not ssh_control_persist:
             cfg.set('USER', 'ssh_control_persist', 'no')
 
