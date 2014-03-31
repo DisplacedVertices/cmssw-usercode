@@ -203,9 +203,7 @@ private:
   TH1F* h_phitest_mean;
   TH1F* h_phitest_rms;
   TH1F* h_phitest_p0;
-  TH1F* h_phitest_p0e;
   TH1F* h_phitest_p1;
-  TH1F* h_phitest_p1e;
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
@@ -308,9 +306,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       h_phitest_mean = fs->make<TH1F>("phitest_mean",   "", N, 0, N);
       h_phitest_rms  = fs->make<TH1F>("phitest_rms",    "", N, 0, N);
       h_phitest_p0   = fs->make<TH1F>("phitest_p0",     "", N, 0, N);
-      h_phitest_p0e  = fs->make<TH1F>("phitest_p0e",    "", N, 0, N);
       h_phitest_p1   = fs->make<TH1F>("phitest_p1",     "", N, 0, N);
-      h_phitest_p1e  = fs->make<TH1F>("phitest_p1e",    "", N, 0, N);
+      for (TH1F* h : { h_phitest_nvtx, h_phitest_mean, h_phitest_rms, h_phitest_p0, h_phitest_p1 })
+        h->Sumw2();
     }
   }
 }
@@ -851,11 +849,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         TFitResultPtr fit = phi_temp->Fit("pol1", "Q0LS");
         h_phitest_nvtx->SetBinContent(iphitest, vertices->size());
         h_phitest_mean->SetBinContent(iphitest, phi_temp->GetMean());
+        h_phitest_mean->SetBinError  (iphitest, phi_temp->GetMeanError());
         h_phitest_rms ->SetBinContent(iphitest, phi_temp->GetRMS());
+        h_phitest_rms ->SetBinError  (iphitest, phi_temp->GetRMSError());
         h_phitest_p0  ->SetBinContent(iphitest, fit->Parameter(0));
-        h_phitest_p0e ->SetBinContent(iphitest, fit->ParError(0));
+        h_phitest_p0  ->SetBinError  (iphitest, fit->ParError(0));
         h_phitest_p1  ->SetBinContent(iphitest, fit->Parameter(1));
-        h_phitest_p1e ->SetBinContent(iphitest, fit->ParError(1));
+        h_phitest_p1  ->SetBinError  (iphitest, fit->ParError(1));
         ++iphitest;
         delete phi_temp;
       }
