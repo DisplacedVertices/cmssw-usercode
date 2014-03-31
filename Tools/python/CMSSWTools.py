@@ -134,6 +134,11 @@ def set_events_to_process_by_filter(process, run_events=None, run=None, run_even
     for p in process.paths.keys():
         getattr(process, p).insert(0, ~process.EventIdVeto)
 
+    process.maxEvents.input = cms.untracked.int32(-1)
+    for x in 'skipEvents eventsToSkip lumisToSkip eventsToProcess lumisToProcess firstRun firstLuminosityBlock firstEvent'.split():
+        if hasattr(process.source, x):
+            delattr(process.source, x)
+    
     return run_events_fn
 
 def set_seeds(process, seed=12191982, size=2**24):
