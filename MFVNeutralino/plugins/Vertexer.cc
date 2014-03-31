@@ -848,7 +848,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         TH1F* phi_temp = new TH1F("phi_temp", "", 50, -3.14159266, 3.14159266);
         for (const reco::Vertex& v : *vertices)
           phi_temp->Fill(atan2(v.y(), v.x()));
-        TFitResultPtr fit = phi_temp->Fit("pol1");
+        TFitResultPtr fit = phi_temp->Fit("pol1", "Q0LS");
         h_phitest_nvtx->SetBinContent(iphitest, vertices->size());
         h_phitest_mean->SetBinContent(iphitest, phi_temp->GetMean());
         h_phitest_rms ->SetBinContent(iphitest, phi_temp->GetRMS());
