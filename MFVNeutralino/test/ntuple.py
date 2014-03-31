@@ -110,6 +110,7 @@ if debug:
     set_events_to_process_by_filter(process, run_events_fn=run_events_fn)
     process.mfvVertices.histos = True
     process.mfvVertices.verbose = True
+    process.mfvVertices.phitest = True
     process.TFileService = cms.Service('TFileService', fileName = cms.string('vertexer_debug.root'))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
