@@ -16,10 +16,12 @@ private:
   std::set<RLE> mrle;
 
   const bool use_run;
+  const bool debug;
 };
 
 EventIdVeto::EventIdVeto(const edm::ParameterSet& cfg) 
-  : use_run(cfg.getParameter<bool>("use_run"))
+  : use_run(cfg.getParameter<bool>("use_run")),
+    debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
   const std::string& fn(cfg.getParameter<std::string>("list_fn"));
   FILE* f = fopen(fn.c_str(), "rt");
@@ -28,8 +30,11 @@ EventIdVeto::EventIdVeto(const edm::ParameterSet& cfg)
 
   char line[1024];
   while (fgets(line, 1024, f) != 0) {
+    if (debug) printf("EventIdVeto debug: file line read: %s", line);
     unsigned r,l,e;
-    if (sscanf(line, "(%u,%u,%u),", &r, &l, &e) != 3)
+    int res = sscanf(line, "(%u,%u,%u),", &r, &l, &e);
+    if (debug) printf("    sscanf returned %i, r,l,e = %u, %u, %u\n", res, r,l,e);
+    if (res != 3)
       continue;
     if (use_run)
       mrle.insert(RLE(r,l,e));
