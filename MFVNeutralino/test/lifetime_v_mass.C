@@ -25,17 +25,19 @@ TH1D* compareShapes(const char* sampleName, const char* histName) {
 
   TCanvas* c1 = new TCanvas();
   c1->Divide(2,2);
-  c1->cd(1);
-  h_low->Draw();
-  c1->cd(3);
+  h_low->SetLineColor(2);
   TF1* fexp = new TF1("fexp", "exp([0]*x+[1])", 0.2, 1);
+  c1->cd(1);
+  TH1F* h_low_fit = (TH1F*)h_low->Clone();
+  h_low_fit->Fit("fexp", "IRVWL");
+  h_low_fit->Draw();
+  c1->cd(3);
   TH1F* h_high_fit = (TH1F*)h_high->Clone();
-  h_high_fit->Fit("fexp", "RVWL");
+  h_high_fit->Fit("fexp", "IRVWL");
   h_high_fit->Draw();
   c1->cd(2);
   hist->Draw("colz");
   c1->cd(4);
-  h_low->SetLineColor(2);
   TH1F* h_low_normalized = (TH1F*)h_low->Clone();
   h_low_normalized->Scale(1./h_low->Integral());
   h_low_normalized->GetYaxis()->SetRangeUser(0,1);
@@ -56,6 +58,11 @@ TH1D* compareShapes(const char* sampleName, const char* histName) {
   printf("\tD = %5.2f +/- %5.2f, B/A*C = %5.2f +/- %5.2f, correlation factor = %5.2f\n", D, errD, Dpred, errPred, hist->GetCorrelationFactor());
 
   c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/WPixel/TrksJets/%s/%s.pdf", histName, sampleName));
+  c1->cd(1)->SetLogy();
+  c1->cd(3)->SetLogy();
+  h_low_normalized->GetYaxis()->SetRangeUser(0.00001,1);
+  c1->cd(4)->SetLogy();
+  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/WPixel/TrksJets/%s/%s_logy.pdf", histName, sampleName));
   return h_high;
 }
 
