@@ -153,10 +153,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.pv_cyz = primary_vertex->covariance(1,2);
     aux.pv_czz = primary_vertex->covariance(2,2);
 
-    math::XYZVector pv2sv;
-    if (primary_vertex != 0)
-      pv2sv = sv.position() - primary_vertex->position();
-
     if (use_sv_to_jets) {
       assert(mfv::NJetsByUse == 1); // otherwise NMomenta is wrong, and we don't handle jet_assoctype in VertexAux (yet)
 
