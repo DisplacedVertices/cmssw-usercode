@@ -167,7 +167,7 @@ struct MFVVertexAux {
 
   static float _min(const std::vector<float>& v) { return v.size() ? *std::min_element(v.begin(), v.end()) : 1e99; }
   static float _max(const std::vector<float>& v) { return v.size() ? *std::max_element(v.begin(), v.end()) : -1e99; }
-  static float _avg(const std::vector<float>& v) { return std::accumulate(v.begin(), v.end(), 0) / v.size(); }
+  static float _avg(const std::vector<float>& v) { return v.size() ? std::accumulate(v.begin(), v.end(), 0) / v.size() : 0; }
   static float _rms(std::vector<float> v) {
     if (v.size() == 0) return 0;
     float avg = _avg(v);
@@ -216,16 +216,6 @@ struct MFVVertexAux {
   float trackdzerravg() const { return _avg(track_dz_err); }
   float trackdzerrrms() const { return _rms(track_dz_err); }
 
-  static std::vector<std::pair<size_t, size_t> > _pair_gen(size_t n) {
-    std::vector<std::pair<size_t, size_t> > res;
-    if (n <= 1)
-      return res;
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        res.push_back(std::make_pair(i, j));
-    return res;
-  }
-
   struct stats {
     float min, max, avg, rms;
     stats(const std::vector<float>& v) : min(_min(v)), max(_max(v)), avg(_avg(v)), rms(_rms(v)) {}
@@ -234,9 +224,10 @@ struct MFVVertexAux {
   std::vector<float> trackpairdetas() const {
     std::vector<float> v;
     size_t n = ntracks();
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        v.push_back(fabs(track_eta[i] - track_eta[j]));
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        for (size_t j = i+1, je = n; j < je; ++j)
+          v.push_back(fabs(track_eta[i] - track_eta[j]));
     return v;
   }
 
@@ -248,9 +239,10 @@ struct MFVVertexAux {
   std::vector<float> trackpairdphis() const {
     std::vector<float> v;
     size_t n = ntracks();
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        for (size_t j = i+1, je = n; j < je; ++j)
+          v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
     return v;
   }
 
@@ -262,10 +254,11 @@ struct MFVVertexAux {
   std::vector<float> trackpairdrs() const {
     std::vector<float> v;
     size_t n = ntracks();
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        v.push_back(reco::deltaR(track_eta[i], track_phi[i],
-                                 track_eta[j], track_phi[j]));
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        for (size_t j = i+1, je = n; j < je; ++j)
+          v.push_back(reco::deltaR(track_eta[i], track_phi[i],
+                                   track_eta[j], track_phi[j]));
     return v;
   }
 
@@ -282,9 +275,10 @@ struct MFVVertexAux {
   std::vector<float> trackpairmasses(float mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        v.push_back((track_p4(i, mass) + track_p4(j, mass)).M());
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        for (size_t j = i+1, je = n; j < je; ++j)
+          v.push_back((track_p4(i, mass) + track_p4(j, mass)).M());
     return v;
   }
   
@@ -296,10 +290,11 @@ struct MFVVertexAux {
   std::vector<float> tracktripmasses(float mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
-    for (size_t i = 0, ie = n-2; i < ie; ++i)
-      for (size_t j = i+1, je = n-1; j < je; ++j)
-        for (size_t k = j+1, ke = n; k < ke; ++k)
-          v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass)).M());
+    if (n >= 3)
+      for (size_t i = 0, ie = n-2; i < ie; ++i)
+        for (size_t j = i+1, je = n-1; j < je; ++j)
+          for (size_t k = j+1, ke = n; k < ke; ++k)
+            v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass)).M());
     return v;
   }
   
@@ -311,11 +306,12 @@ struct MFVVertexAux {
   std::vector<float> trackquadmasses(float mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
-    for (size_t i = 0, ie = n-3; i < ie; ++i)
-      for (size_t j = i+1, je = n-2; j < je; ++j)
-        for (size_t k = j+1, ke = n-1; k < ke; ++k)
-          for (size_t l = k+1, le = n; l < le; ++l)
-            v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass) + track_p4(l, mass)).M());
+    if (n >= 4)
+      for (size_t i = 0, ie = n-3; i < ie; ++i)
+        for (size_t j = i+1, je = n-2; j < je; ++j)
+          for (size_t k = j+1, ke = n-1; k < ke; ++k)
+            for (size_t l = k+1, le = n; l < le; ++l)
+              v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass) + track_p4(l, mass)).M());
     return v;
   }
   
@@ -338,9 +334,10 @@ struct MFVVertexAux {
   std::vector<float> jetpairdetas() const {
     std::vector<float> v;
     size_t n = njets();
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        v.push_back(fabs(jet_eta[i] - jet_eta[j]));
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        for (size_t j = i+1, je = n; j < je; ++j)
+          v.push_back(fabs(jet_eta[i] - jet_eta[j]));
     return v;
   }
 
@@ -352,9 +349,10 @@ struct MFVVertexAux {
   std::vector<float> jetpairdphis() const {
     std::vector<float> v;
     size_t n = njets();
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        v.push_back(reco::deltaPhi(jet_phi[i], jet_phi[j]));
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        for (size_t j = i+1, je = n; j < je; ++j)
+          v.push_back(reco::deltaPhi(jet_phi[i], jet_phi[j]));
     return v;
   }
 
@@ -366,10 +364,11 @@ struct MFVVertexAux {
   std::vector<float> jetpairdrs() const {
     std::vector<float> v;
     size_t n = njets();
-    for (size_t i = 0, ie = n-1; i < ie; ++i)
-      for (size_t j = i+1, je = n; j < je; ++j)
-        v.push_back(reco::deltaR(jet_eta[i], jet_phi[i],
-                                 jet_eta[j], jet_phi[j]));
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        for (size_t j = i+1, je = n; j < je; ++j)
+          v.push_back(reco::deltaR(jet_eta[i], jet_phi[i],
+                                   jet_eta[j], jet_phi[j]));
     return v;
   }
 
@@ -479,6 +478,7 @@ struct MFVVertexAux {
     return std::make_pair(dist, err);
   }
 
+  // JMTBAD finish these too
   float gen2ddist;
   float gen2derr;
   float gen2dsig() const { return _sig(gen2ddist, gen2derr); }
