@@ -330,8 +330,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("drmax",                         "SV max{#Delta R(i,j)}",                                                       150,    0,       7);
   hs.add("dravg",                         "SV avg{#Delta R(i,j)}",                                                       150,    0,       5);
   hs.add("drrms",                         "SV rms{#Delta R(i,j)}",                                                       150,    0,       3);
-  hs.add("dravgw",                        "SV wavg{#Delta R(i,j)}",                                                      150,    0,       5);
-  hs.add("drrmsw",                        "SV wrms{#Delta R(i,j)}",                                                      150,    0,       3);
 
   hs.add("jetpairdetamin", "SV min{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 5);
   hs.add("jetpairdetamax", "SV max{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 7);
@@ -364,7 +362,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   200,    0,      20);
   hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           100,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
-  hs.add("bs3ddist",                      "dist2d(SV, beamspot) * sin(SV theta) (cm)",                                   100,    0,       0.5);
   hs.add("pv2dcompatscss",                "compat2d(SV, PV) success",                                                      2,    0,       2);
   hs.add("pv2dcompat",                    "compat2d(SV, PV)",                                                            100,    0,    1000);
   hs.add("pv2ddist",                      "dist2d(SV, PV) (cm)",                                                         100,    0,       0.5);
@@ -560,7 +557,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_sv_pos_2d[svndx][0]->Fill(aux.x - bsx, aux.y - bsy, *weight);
     h_sv_pos_2d[svndx][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
     h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
-    h_sv_pos_rz[svndx]->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, *weight);
+    h_sv_pos_rz[svndx]->Fill(aux.bs2ddist() * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, *weight);
     double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
     h_sv_pos_phi[svndx]->Fill(pos_phi, *weight);
     h_sv_pos_phi_2pi[svndx]->Fill(pos_phi >= 0 ? pos_phi : pos_phi + 6.2832, *weight);
@@ -568,37 +565,37 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     PairwiseHistos::ValueMap v = {
         {"mva",                     mva.value(aux)},
         {"nlep",                    aux.which_lep.size()},
-        {"ntracks",                 aux.ntracks},
-        {"nbadtracks",              aux.nbadtracks},
-        {"ntracksptgt3",            aux.ntracksptgt3},
-        {"ntracksptgt5",            aux.ntracksptgt5},
-        {"ntracksptgt10",           aux.ntracksptgt10},
-        {"trackminnhits",           aux.trackminnhits},
-        {"trackmaxnhits",           aux.trackmaxnhits},
-        {"njetsntks",               aux.njets[mfv::JByNtracks]},
+        {"ntracks",                 aux.ntracks()},
+        {"nbadtracks",              aux.nbadtracks()},
+        {"ntracksptgt3",            aux.ntracksptgt(3)},
+        {"ntracksptgt5",            aux.ntracksptgt(5)},
+        {"ntracksptgt10",           aux.ntracksptgt(10)},
+        {"trackminnhits",           aux.trackminnhits()},
+        {"trackmaxnhits",           aux.trackmaxnhits()},
+        {"njetsntks",               aux.njets(mfv::JByNtracks)},
         {"chi2dof",                 aux.chi2/aux.ndof},
         {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof)},
 
         {"tkonlyp",             aux.p4(mfv::PTracksOnly).P()},
-        {"tkonlypt",            aux.pt[mfv::PTracksOnly]},
-        {"tkonlyeta",           aux.eta[mfv::PTracksOnly]},
+        {"tkonlypt",            aux.pt(mfv::PTracksOnly)},
+        {"tkonlyeta",           aux.eta(mfv::PTracksOnly)},
         {"tkonlyrapidity",      aux.p4(mfv::PTracksOnly).Rapidity()},
-        {"tkonlyphi",           aux.phi[mfv::PTracksOnly]},
-        {"tkonlymass",          aux.mass[mfv::PTracksOnly]},
+        {"tkonlyphi",           aux.phi(mfv::PTracksOnly)},
+        {"tkonlymass",          aux.mass(mfv::PTracksOnly)},
 
         {"jetsntkp",             aux.p4(mfv::PJetsByNtracks).P()},
-        {"jetsntkpt",            aux.pt[mfv::PJetsByNtracks]},
-        {"jetsntketa",           aux.eta[mfv::PJetsByNtracks]},
+        {"jetsntkpt",            aux.pt(mfv::PJetsByNtracks)},
+        {"jetsntketa",           aux.eta(mfv::PJetsByNtracks)},
         {"jetsntkrapidity",      aux.p4(mfv::PJetsByNtracks).Rapidity()},
-        {"jetsntkphi",           aux.phi[mfv::PJetsByNtracks]},
-        {"jetsntkmass",          aux.mass[mfv::PJetsByNtracks]},
+        {"jetsntkphi",           aux.phi(mfv::PJetsByNtracks)},
+        {"jetsntkmass",          aux.mass(mfv::PJetsByNtracks)},
 
         {"tksjetsntkp",             aux.p4(mfv::PTracksPlusJetsByNtracks).P()},
-        {"tksjetsntkpt",            aux.pt[mfv::PTracksPlusJetsByNtracks]},
-        {"tksjetsntketa",           aux.eta[mfv::PTracksPlusJetsByNtracks]},
+        {"tksjetsntkpt",            aux.pt(mfv::PTracksPlusJetsByNtracks)},
+        {"tksjetsntketa",           aux.eta(mfv::PTracksPlusJetsByNtracks)},
         {"tksjetsntkrapidity",      aux.p4(mfv::PTracksPlusJetsByNtracks).Rapidity()},
-        {"tksjetsntkphi",           aux.phi[mfv::PTracksPlusJetsByNtracks]},
-        {"tksjetsntkmass",          aux.mass[mfv::PTracksPlusJetsByNtracks]},
+        {"tksjetsntkphi",           aux.phi(mfv::PTracksPlusJetsByNtracks)},
+        {"tksjetsntkmass",          aux.mass(mfv::PTracksPlusJetsByNtracks)},
 
         {"costhtkonlymombs",         aux.costhmombs  [mfv::PTracksOnly]},
         {"costhtkonlymompv2d",       aux.costhmompv2d[mfv::PTracksOnly]},
@@ -624,78 +621,76 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"missdisttksjetsntkpverr",     aux.missdistpverr[mfv::PTracksPlusJetsByNtracks]},
         {"missdisttksjetsntkpvsig",     aux.missdistpvsig(mfv::PTracksPlusJetsByNtracks)},
 
-        {"sumpt2",                  aux.sumpt2},
-        {"sumnhitsbehind",          aux.sumnhitsbehind},
-        {"maxnhitsbehind",          aux.maxnhitsbehind},
-        {"mintrackpt",              aux.mintrackpt},
-        {"maxtrackpt",              aux.maxtrackpt},
-        {"maxm1trackpt",            aux.maxm1trackpt},
-        {"maxm2trackpt",            aux.maxm2trackpt},
+        {"sumpt2",                  aux.sumpt2()},
+        {"sumnhitsbehind",          aux.sumnhitsbehind()},
+        {"maxnhitsbehind",          aux.maxnhitsbehind()},
+        {"mintrackpt",              aux.mintrackpt()},
+        {"maxtrackpt",              aux.maxtrackpt()},
+        {"maxm1trackpt",            aux.maxmntrackpt(1)},
+        {"maxm2trackpt",            aux.maxmntrackpt(2)},
 
-        {"trackptavg", aux.trackptavg},
-        {"trackptrms", aux.trackptrms},
+        {"trackptavg", aux.trackptavg()},
+        {"trackptrms", aux.trackptrms()},
 
-        {"trackdxymin", aux.trackdxymin},
-        {"trackdxymax", aux.trackdxymax},
-        {"trackdxyavg", aux.trackdxyavg},
-        {"trackdxyrms", aux.trackdxyrms},
+        {"trackdxymin", aux.trackdxymin()},
+        {"trackdxymax", aux.trackdxymax()},
+        {"trackdxyavg", aux.trackdxyavg()},
+        {"trackdxyrms", aux.trackdxyrms()},
 
-        {"trackdzmin", aux.trackdzmin},
-        {"trackdzmax", aux.trackdzmax},
-        {"trackdzavg", aux.trackdzavg},
-        {"trackdzrms", aux.trackdzrms},
+        {"trackdzmin", aux.trackdzmin()},
+        {"trackdzmax", aux.trackdzmax()},
+        {"trackdzavg", aux.trackdzavg()},
+        {"trackdzrms", aux.trackdzrms()},
 
-        {"trackpterrmin", aux.trackpterrmin},
-        {"trackpterrmax", aux.trackpterrmax},
-        {"trackpterravg", aux.trackpterravg},
-        {"trackpterrrms", aux.trackpterrrms},
+        {"trackpterrmin", aux.trackpterrmin()},
+        {"trackpterrmax", aux.trackpterrmax()},
+        {"trackpterravg", aux.trackpterravg()},
+        {"trackpterrrms", aux.trackpterrrms()},
 
-        {"trackdxyerrmin", aux.trackdxyerrmin},
-        {"trackdxyerrmax", aux.trackdxyerrmax},
-        {"trackdxyerravg", aux.trackdxyerravg},
-        {"trackdxyerrrms", aux.trackdxyerrrms},
+        {"trackdxyerrmin", aux.trackdxyerrmin()},
+        {"trackdxyerrmax", aux.trackdxyerrmax()},
+        {"trackdxyerravg", aux.trackdxyerravg()},
+        {"trackdxyerrrms", aux.trackdxyerrrms()},
 
-        {"trackdzerrmin", aux.trackdzerrmin},
-        {"trackdzerrmax", aux.trackdzerrmax},
-        {"trackdzerravg", aux.trackdzerravg},
-        {"trackdzerrrms", aux.trackdzerrrms},
+        {"trackdzerrmin", aux.trackdzerrmin()},
+        {"trackdzerrmax", aux.trackdzerrmax()},
+        {"trackdzerravg", aux.trackdzerravg()},
+        {"trackdzerrrms", aux.trackdzerrrms()},
 
-        {"trackpairmassmin", aux.trackpairmassmin},
-        {"trackpairmassmax", aux.trackpairmassmax},
-        {"trackpairmassavg", aux.trackpairmassavg},
-        {"trackpairmassrms", aux.trackpairmassrms},
+        {"trackpairmassmin", aux.trackpairmassmin()},
+        {"trackpairmassmax", aux.trackpairmassmax()},
+        {"trackpairmassavg", aux.trackpairmassavg()},
+        {"trackpairmassrms", aux.trackpairmassrms()},
 
-        {"tracktripmassmin", aux.tracktripmassmin},
-        {"tracktripmassmax", aux.tracktripmassmax},
-        {"tracktripmassavg", aux.tracktripmassavg},
-        {"tracktripmassrms", aux.tracktripmassrms},
+        {"tracktripmassmin", aux.tracktripmassmin()},
+        {"tracktripmassmax", aux.tracktripmassmax()},
+        {"tracktripmassavg", aux.tracktripmassavg()},
+        {"tracktripmassrms", aux.tracktripmassrms()},
 
-        {"trackquadmassmin", aux.trackquadmassmin},
-        {"trackquadmassmax", aux.trackquadmassmax},
-        {"trackquadmassavg", aux.trackquadmassavg},
-        {"trackquadmassrms", aux.trackquadmassrms},
+        {"trackquadmassmin", aux.trackquadmassmin()},
+        {"trackquadmassmax", aux.trackquadmassmax()},
+        {"trackquadmassavg", aux.trackquadmassavg()},
+        {"trackquadmassrms", aux.trackquadmassrms()},
 
-        {"trackpairdetamin", aux.trackpairdetamin},
-        {"trackpairdetamax", aux.trackpairdetamax},
-        {"trackpairdetaavg", aux.trackpairdetaavg},
-        {"trackpairdetarms", aux.trackpairdetarms},
+        {"trackpairdetamin", aux.trackpairdetamin()},
+        {"trackpairdetamax", aux.trackpairdetamax()},
+        {"trackpairdetaavg", aux.trackpairdetaavg()},
+        {"trackpairdetarms", aux.trackpairdetarms()},
 
-        {"drmin",  aux.drmin},
-        {"drmax",  aux.drmax},
-        {"dravg",  aux.dravg},
-        {"drrms",  aux.drrms},
-        {"dravgw", aux.dravgw},
-        {"drrmsw", aux.drrmsw},
+        {"drmin",  aux.drmin()},
+        {"drmax",  aux.drmax()},
+        {"dravg",  aux.dravg()},
+        {"drrms",  aux.drrms()},
 
-        {"jetpairdetamin", aux.jetpairdetamin},
-        {"jetpairdetamax", aux.jetpairdetamax},
-        {"jetpairdetaavg", aux.jetpairdetaavg},
-        {"jetpairdetarms", aux.jetpairdetarms},
+        {"jetpairdetamin", aux.jetpairdetamin()},
+        {"jetpairdetamax", aux.jetpairdetamax()},
+        {"jetpairdetaavg", aux.jetpairdetaavg()},
+        {"jetpairdetarms", aux.jetpairdetarms()},
 
-        {"jetpairdrmin", aux.jetpairdrmin},
-        {"jetpairdrmax", aux.jetpairdrmax},
-        {"jetpairdravg", aux.jetpairdravg},
-        {"jetpairdrrms", aux.jetpairdrrms},
+        {"jetpairdrmin", aux.jetpairdrmin()},
+        {"jetpairdrmax", aux.jetpairdrmax()},
+        {"jetpairdravg", aux.jetpairdravg()},
+        {"jetpairdrrms", aux.jetpairdrrms()},
 
         {"costhtkmomvtxdispmin", aux.costhtkmomvtxdispmin},
         {"costhtkmomvtxdispmax", aux.costhtkmomvtxdispmax},
@@ -713,21 +708,20 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"gen3ddist",               aux.gen3ddist},
         {"gen3derr",                aux.gen3derr},
         {"gen3dsig",                aux.gen3dsig()},
-        {"bs2dcompatscss",          aux.bs2dcompatscss},
-        {"bs2dcompat",              aux.bs2dcompat},
-        {"bs2ddist",                aux.bs2ddist},
-        {"bs2derr",                 aux.bs2derr},
+        {"bs2dcompatscss",          aux.bs2dcompatscss()},
+        {"bs2dcompat",              aux.bs2dcompat()},
+        {"bs2ddist",                aux.bs2ddist()},
+        {"bs2derr",                 aux.bs2derr()},
         {"bs2dsig",                 aux.bs2dsig()},
-        {"bs3ddist",                aux.bs3ddist},
-        {"pv2dcompatscss",          aux.pv2dcompatscss},
-        {"pv2dcompat",              aux.pv2dcompat},
-        {"pv2ddist",                aux.pv2ddist},
-        {"pv2derr",                 aux.pv2derr},
+        {"pv2dcompatscss",          aux.pv2dcompatscss()},
+        {"pv2dcompat",              aux.pv2dcompat()},
+        {"pv2ddist",                aux.pv2ddist()},
+        {"pv2derr",                 aux.pv2derr()},
         {"pv2dsig",                 aux.pv2dsig()},
-        {"pv3dcompatscss",          aux.pv3dcompatscss},
-        {"pv3dcompat",              aux.pv3dcompat},
-        {"pv3ddist",                aux.pv3ddist},
-        {"pv3derr",                 aux.pv3derr},
+        {"pv3dcompatscss",          aux.pv3dcompatscss()},
+        {"pv3dcompat",              aux.pv3dcompat()},
+        {"pv3ddist",                aux.pv3ddist()},
+        {"pv3derr",                 aux.pv3derr()},
         {"pv3dsig",                 aux.pv3dsig()},
         {"pvdz",                    aux.pvdz()},
         {"pvdzerr",                 aux.pvdzerr()},
@@ -758,7 +752,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         auto d3d_isv = IPTools::absoluteImpactParameter3D(ttk, rv);
 
         NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern());
-        double trackjetdr = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
+        double trackjetdr = reco::deltaR(aux.eta(mfv::PJetsByNtracks), aux.phi(mfv::PJetsByNtracks), tracks[itk].eta(), tracks[itk].phi());
         if (trackjetdr < 0.5) {
           ntracksdrlt0p50++;
         } else if (trackjetdr < 1.57) {
@@ -802,8 +796,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
           fill_multi(h_sv_tracks_maxr[0][i],      isv, se.max_r, *weight);
           fill_multi(h_sv_tracks_maxz[0][i],      isv, se.max_z, *weight);
           fill_multi(h_sv_tracks_jetdr[0][i],     isv, trackjetdr, *weight);
-          fill_multi(h_sv_tracks_jetdphi[0][i],   isv, reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi()), *weight);
-          fill_multi(h_sv_tracks_bs2derr_jetdr[0][i], isv, trackjetdr, aux.bs2derr, *weight);
+          fill_multi(h_sv_tracks_jetdphi[0][i],   isv, reco::deltaPhi(aux.phi(mfv::PJetsByNtracks), tracks[itk].phi()), *weight);
+          fill_multi(h_sv_tracks_bs2derr_jetdr[0][i], isv, trackjetdr, aux.bs2derr(), *weight);
         }
       }
       v["ntracksdrlt0p50"] = ntracksdrlt0p50;
@@ -854,13 +848,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         v[TString::Format("track%i_maxr",      itk).Data()] = se.max_r;
         v[TString::Format("track%i_maxz",      itk).Data()] = se.max_z;
 
-        v[TString::Format("track%i_jetdr",     itk).Data()] = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
-        v[TString::Format("track%i_jetdphi",   itk).Data()] = reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi());
+        v[TString::Format("track%i_jetdr",     itk).Data()] = reco::deltaR(aux.eta(mfv::PJetsByNtracks), aux.phi(mfv::PJetsByNtracks), tracks[itk].eta(), tracks[itk].phi());
+        v[TString::Format("track%i_jetdphi",   itk).Data()] = reco::deltaPhi(aux.phi(mfv::PJetsByNtracks), tracks[itk].phi());
       }
 
       if (vertex_to_jets_src.label() != "") {
         int njets = vertices_to_jets->numberOfAssociations(rvref);
-        assert(njets == aux.njets[0]); // JMTBAD
+        assert(njets == aux.njets(0)); // JMTBAD
 
         if (njets > 0) {
           const edm::RefVector<pat::JetCollection>& jets = (*vertices_to_jets)[rvref];

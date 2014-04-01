@@ -153,64 +153,63 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
 
 bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
   if (use_mva) {
-    if (vtx.ntracks < 5)
+    if (vtx.ntracks() < 5)
       return false;
 
     return mva->value(vtx) > mva_cut;
   }
 
   return 
-    vtx.ntracks >= min_ntracks &&
-    vtx.ntracksptgt3 >= min_ntracksptgt3 &&
-    vtx.ntracksptgt5 >= min_ntracksptgt5 &&
-    vtx.ntracksptgt10 >= min_ntracksptgt10 &&
-    vtx.njets[mfv::JByNtracks] >= min_njetsntks &&
-    vtx.njets[mfv::JByNtracks] <= max_njetsntks &&
+    vtx.ntracks() >= min_ntracks &&
+    vtx.ntracksptgt(3) >= min_ntracksptgt3 &&
+    vtx.ntracksptgt(5) >= min_ntracksptgt5 &&
+    vtx.ntracksptgt(10) >= min_ntracksptgt10 &&
+    vtx.njets(mfv::JByNtracks) >= min_njetsntks &&
+    vtx.njets(mfv::JByNtracks) <= max_njetsntks &&
     vtx.chi2/vtx.ndof < max_chi2dof &&
-    vtx.pt[mfv::PTracksOnly] >= min_tkonlypt &&
-    fabs(vtx.eta[mfv::PTracksOnly]) < max_abstkonlyeta &&
-    vtx.mass[mfv::PTracksOnly] >= min_tkonlymass &&
-    vtx.pt[mfv::PJetsByNtracks] >= min_jetsntkpt &&
-    fabs(vtx.eta[mfv::PJetsByNtracks]) < max_absjetsntketa &&
-    vtx.mass[mfv::PJetsByNtracks] >= min_jetsntkmass &&
-    vtx.pt[mfv::PTracksPlusJetsByNtracks] >= min_tksjetsntkpt &&
-    fabs(vtx.eta[mfv::PTracksPlusJetsByNtracks]) < max_abstksjetsntketa &&
-    vtx.mass[mfv::PTracksPlusJetsByNtracks] >= min_tksjetsntkmass &&
+    vtx.pt(mfv::PTracksOnly) >= min_tkonlypt &&
+    fabs(vtx.eta(mfv::PTracksOnly)) < max_abstkonlyeta &&
+    vtx.mass(mfv::PTracksOnly) >= min_tkonlymass &&
+    vtx.pt(mfv::PJetsByNtracks) >= min_jetsntkpt &&
+    fabs(vtx.eta(mfv::PJetsByNtracks)) < max_absjetsntketa &&
+    vtx.mass(mfv::PJetsByNtracks) >= min_jetsntkmass &&
+    vtx.pt(mfv::PTracksPlusJetsByNtracks) >= min_tksjetsntkpt &&
+    fabs(vtx.eta(mfv::PTracksPlusJetsByNtracks)) < max_abstksjetsntketa &&
+    vtx.mass(mfv::PTracksPlusJetsByNtracks) >= min_tksjetsntkmass &&
     vtx.costhmombs[mfv::PTracksOnly] >= min_costhtkonlymombs &&
     vtx.costhmombs[mfv::PJetsByNtracks] >= min_costhjetsntkmombs &&
     vtx.costhmombs[mfv::PTracksPlusJetsByNtracks] >= min_costhtksjetsntkmombs &&
     vtx.missdistpvsig(mfv::PTracksOnly) >= min_missdisttkonlypvsig &&
     vtx.missdistpvsig(mfv::PJetsByNtracks) >= min_missdistjetsntkpvsig &&
     vtx.missdistpvsig(mfv::PTracksPlusJetsByNtracks) >= min_missdisttksjetsntkpvsig &&
-    vtx.sumpt2 >= min_sumpt2 &&
-    vtx.maxtrackpt >= min_maxtrackpt &&
-    vtx.maxm1trackpt >= min_maxm1trackpt &&
-    vtx.maxm2trackpt >= min_maxm2trackpt &&
-    vtx.trackdxyerrmin < max_trackdxyerrmin &&
-    vtx.trackdxyerrmax < max_trackdxyerrmax &&
-    vtx.trackdxyerravg < max_trackdxyerravg &&
-    vtx.trackdxyerrrms < max_trackdxyerrrms &&
-    vtx.trackdzerrmin < max_trackdzerrmin &&
-    vtx.trackdzerrmax < max_trackdzerrmax &&
-    vtx.trackdzerravg < max_trackdzerravg &&
-    vtx.trackdzerrrms < max_trackdzerrrms &&
-    vtx.drmin >= min_drmin &&
-    vtx.drmin <  max_drmin &&
-    vtx.drmax >= min_drmax &&
-    vtx.drmax <  max_drmax &&
-    (max_jetpairdrmin > 1e6 || vtx.jetpairdrmin < max_jetpairdrmin) &&
-    vtx.jetpairdrmax < max_jetpairdrmax &&
+    vtx.sumpt2() >= min_sumpt2 &&
+    vtx.maxtrackpt() >= min_maxtrackpt &&
+    vtx.maxmntrackpt(1) >= min_maxm1trackpt &&
+    vtx.maxmntrackpt(2) >= min_maxm2trackpt &&
+    vtx.trackdxyerrmin() < max_trackdxyerrmin &&
+    vtx.trackdxyerrmax() < max_trackdxyerrmax &&
+    vtx.trackdxyerravg() < max_trackdxyerravg &&
+    vtx.trackdxyerrrms() < max_trackdxyerrrms &&
+    vtx.trackdzerrmin() < max_trackdzerrmin &&
+    vtx.trackdzerrmax() < max_trackdzerrmax &&
+    vtx.trackdzerravg() < max_trackdzerravg &&
+    vtx.trackdzerrrms() < max_trackdzerrrms &&
+    vtx.drmin() >= min_drmin &&
+    vtx.drmin() <  max_drmin &&
+    vtx.drmax() >= min_drmax &&
+    vtx.drmax() <  max_drmax &&
+    (max_jetpairdrmin > 1e6 || vtx.jetpairdrmin() < max_jetpairdrmin) &&
+    vtx.jetpairdrmax() < max_jetpairdrmax &&
     vtx.gen2derr < max_err2d &&
     vtx.gen3derr < max_err3d &&
     vtx.gen3dsig() >= min_gen3dsig &&
     vtx.gen3dsig() <  max_gen3dsig &&
-    vtx.bs2ddist >= min_bs2ddist &&
-    vtx.bs2ddist < max_bs2ddist &&
-    vtx.bs2derr >= min_bs2derr &&
-    vtx.bs2derr < max_bs2derr &&
+    vtx.bs2ddist() >= min_bs2ddist &&
+    vtx.bs2ddist() < max_bs2ddist &&
+    vtx.bs2derr() >= min_bs2derr &&
+    vtx.bs2derr() < max_bs2derr &&
     vtx.bs2dsig() >= min_bs2dsig &&
-    vtx.bs3ddist >= min_bs3ddist &&
-    vtx.sumnhitsbehind <= max_sumnhitsbehind &&
+    vtx.sumnhitsbehind() <= max_sumnhitsbehind &&
     ((bs_hemisphere == 0) ||
      (bs_hemisphere == 1 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >=  2.5857  || atan2(vtx.y - 0.3928, vtx.x - 0.244) < -0.5558)) ||
      (bs_hemisphere == 2 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >= -0.5558  && atan2(vtx.y - 0.3928, vtx.x - 0.244) <  2.5857)));

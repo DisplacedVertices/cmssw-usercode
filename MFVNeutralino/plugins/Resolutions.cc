@@ -186,8 +186,8 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     int ilsp = -1;
     if (max_dr > 0) {
       double drs[2] = {
-        reco::deltaR(lsp_p4s[0].Eta(), lsp_p4s[0].Phi(), vtx.eta[which_mom], vtx.phi[which_mom]),
-        reco::deltaR(lsp_p4s[1].Eta(), lsp_p4s[1].Phi(), vtx.eta[which_mom], vtx.phi[which_mom])
+        reco::deltaR(lsp_p4s[0].Eta(), lsp_p4s[0].Phi(), vtx.eta(which_mom), vtx.phi(which_mom)),
+        reco::deltaR(lsp_p4s[1].Eta(), lsp_p4s[1].Phi(), vtx.eta(which_mom), vtx.phi(which_mom))
       };
       
       for (int i = 0; i < 2; ++i) {

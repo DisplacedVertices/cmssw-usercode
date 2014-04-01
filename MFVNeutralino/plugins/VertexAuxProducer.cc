@@ -66,8 +66,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   const float bsx = beamspot->x0();
   const float bsy = beamspot->y0();
   const float bsz = beamspot->z0();
-  const GlobalPoint origin(bsx, bsy, bsz);
-  const reco::Vertex fake_bs_vtx(beamspot->position(), beamspot->covariance3D());
 
   //////////////////////////////////////////////////////////////////////
 
@@ -88,7 +86,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   //////////////////////////////////////////////////////////////////////
 
   TrackerSpaceExtents tracker_extents;
-  tracker_extents.fill(setup, origin);
+  tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
   
   //////////////////////////////////////////////////////////////////////
 
@@ -103,6 +101,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   const bool use_sv_to_jets = sv_to_jets_src != "dummy";
   edm::Handle<mfv::JetVertexAssociation> sv_to_jets[mfv::NJetsByUse];
+  std::set<reco::TrackRef> jets_tracks;
   if (use_sv_to_jets)
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       event.getByLabel(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i]), sv_to_jets[i]);
@@ -117,7 +116,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     const reco::VertexRef svref(secondary_vertices, isv);
     MFVVertexAux& aux = auxes->at(isv);
     aux.which = int2uchar(isv);
-    aux.which_lep.clear();
 
     aux.x = sv.x();
     aux.y = sv.y();
@@ -133,127 +131,64 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.chi2 = sv.chi2();
     aux.ndof = sv.ndof();
 
+    aux.bs_x = bsx;
+    aux.bs_y = bsy;
+    aux.bs_z = bsz;
+
+    aux.bs_cxx = beamspot->covariance3D()(0,0);
+    aux.bs_cxy = beamspot->covariance3D()(0,1);
+    aux.bs_cxz = beamspot->covariance3D()(0,2);
+    aux.bs_cyy = beamspot->covariance3D()(1,1);
+    aux.bs_cyz = beamspot->covariance3D()(1,2);
+    aux.bs_czz = beamspot->covariance3D()(2,2);
+
+    aux.pv_x = primary_vertex->x();
+    aux.pv_y = primary_vertex->y();
+    aux.pv_z = primary_vertex->z();
+
+    aux.pv_cxx = primary_vertex->covariance(0,0);
+    aux.pv_cxy = primary_vertex->covariance(0,1);
+    aux.pv_cxz = primary_vertex->covariance(0,2);
+    aux.pv_cyy = primary_vertex->covariance(1,1);
+    aux.pv_cyz = primary_vertex->covariance(1,2);
+    aux.pv_czz = primary_vertex->covariance(2,2);
+
     math::XYZVector pv2sv;
     if (primary_vertex != 0)
       pv2sv = sv.position() - primary_vertex->position();
 
-    std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
-    p4s[mfv::PTracksOnly] = sv.p4();
-
-    for (int i = 0; i < mfv::NJetsByUse; ++i)
-      aux.njets[i] = 0;
-
-    std::vector<double> jetpairdetas[mfv::NJetsByUse];
-    std::vector<double> jetpairdrs[mfv::NJetsByUse];
-    std::vector<double> costhjetmomvtxdisps[mfv::NJetsByUse];
-
     if (use_sv_to_jets) {
+      assert(mfv::NJetsByUse == 1); // otherwise NMomenta is wrong, and we don't handle jet_assoctype in VertexAux (yet)
+
       for (int i = 0; i < mfv::NJetsByUse; ++i) {
         int njets = sv_to_jets[i]->numberOfAssociations(svref);
-        aux.njets[i] = int2uchar(njets);
-      
-        if (njets > 0) {
+        if (njets) {
           const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i])[svref];
-          std::set<reco::TrackRef> jets_tracks;
 
           for (int ijet = 0; ijet < njets; ++ijet) {
-            p4s[1+i] += jets[ijet]->p4();
+            aux.jet_pt.push_back(jets[ijet]->pt());
+            aux.jet_eta.push_back(jets[ijet]->eta());
+            aux.jet_phi.push_back(jets[ijet]->phi());
+            aux.jet_energy.push_back(jets[ijet]->energy());
 
             for (const reco::PFCandidatePtr& pfcand : jets[ijet]->getPFConstituents()) {
               const reco::TrackRef& tk = pfcand->trackRef();
               if (tk.isNonnull())
                 jets_tracks.insert(tk);
             }
-
-            if (primary_vertex)
-              costhjetmomvtxdisps[i].push_back(costh3(jets[ijet]->p4(), pv2sv));
-            else
-              costhjetmomvtxdisps[i].push_back(-2);
-
-            for (int jjet = ijet+1; jjet < njets; ++jjet) {
-              jetpairdetas[i].push_back(fabs(jets[ijet]->eta() - jets[jjet]->eta()));
-              jetpairdrs[i].push_back(reco::deltaR(*jets[ijet], *jets[jjet]));
-            }
           }
-        
-          math::XYZTLorentzVector jpt_p4 = p4s[1+i];
-
-          for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
-            if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
-              reco::TrackRef tk = it->castTo<reco::TrackRef>();
-              if (!jets_tracks.count(tk))
-                jpt_p4 += math::XYZTLorentzVector(tk->px(), tk->py(), tk->pz(), tk->p());
-            }
-          }
-
-          p4s[1 + i + mfv::NJetsByUse] = jpt_p4;
         }
       }
 
-      distrib_calculator jetpairdeta(jetpairdetas[mfv::JByNtracks], std::vector<double>());
-      aux.jetpairdetamin = jetpairdeta.min;
-      aux.jetpairdetamax = jetpairdeta.max;
-      aux.jetpairdetaavg = jetpairdeta.avg;
-      aux.jetpairdetarms = jetpairdeta.rms;
-
-      distrib_calculator jetpairdr(jetpairdrs[mfv::JByNtracks], std::vector<double>());
-      aux.jetpairdrmin = jetpairdr.min;
-      aux.jetpairdrmax = jetpairdr.max;
-      aux.jetpairdravg = jetpairdr.avg;
-      aux.jetpairdrrms = jetpairdr.rms;
-
-      if (aux.njets[mfv::JByNtracks] > 0) {
-        distrib_calculator costhjetmomvtxdisp(costhjetmomvtxdisps[mfv::JByNtracks], std::vector<double>());
-        aux.costhjetmomvtxdispmin = costhjetmomvtxdisp.min;
-        aux.costhjetmomvtxdispmax = costhjetmomvtxdisp.max;
-        aux.costhjetmomvtxdispavg = costhjetmomvtxdisp.avg;
-        aux.costhjetmomvtxdisprms = costhjetmomvtxdisp.rms;
-      }
-      else
-        aux.costhjetmomvtxdispmin = aux.costhjetmomvtxdispmax = aux.costhjetmomvtxdispavg = aux.costhjetmomvtxdisprms = -2;
+      aux.costhjetmomvtxdispmin = aux.costhjetmomvtxdispmax = aux.costhjetmomvtxdispavg = aux.costhjetmomvtxdisprms = -2;
     }
 
-    for (int i = 0; i < mfv::NMomenta; ++i) {
-      aux.pt[i]   = p4s[i].pt();
-      aux.eta[i]  = p4s[i].eta();
-      aux.phi[i]  = p4s[i].phi();
-      aux.mass[i] = p4s[i].mass();
-    }
-
-      
+    
     const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
     const double sv_z = fabs(sv.position().z() - bsz);
 
     auto trkb = sv.tracks_begin();
     auto trke = sv.tracks_end();
-
-    aux.ntracks = 0;
-    aux.nbadtracks = 0;
-    aux.ntracksptgt3 = 0;
-    aux.ntracksptgt5 = 0;
-    aux.ntracksptgt10 = 0;
-    aux.trackminnhits = 255;
-    aux.trackmaxnhits = 0;
-    aux.sumpt2 = 0;
-    aux.maxnhitsbehind = 0;
-    aux.sumnhitsbehind = 0;
-
-    std::vector<double> trackws;
-    std::vector<double> trackpts;
-    std::vector<double> trackdxys;
-    std::vector<double> trackdzs;
-    std::vector<double> trackpterrs;
-    std::vector<double> trackdxyerrs;
-    std::vector<double> trackdzerrs;
-    std::vector<double> costhtkmomvtxdisps;
-
-    std::vector<double> trackpairws;
-    std::vector<double> trackpairdetas;
-    std::vector<double> trackpairdrs;
-    std::vector<double> trackpairmasses;
-
-    std::vector<double> tracktripmasses;
-    std::vector<double> trackquadmasses;
 
     for (auto trki = trkb; trki != trke; ++trki) {
       const reco::TrackBaseRef& tri = *trki;
@@ -268,10 +203,14 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
 
-      inc_uchar(aux.ntracks);
-
       if (tri->ptError() / tri->pt() > 0.5) {
-        inc_uchar(aux.nbadtracks);
+        // For really bad tracks, only store the track weight and the
+        // pt(error). insert_track makes a placeholder so the vectors
+        // don't get out of sync JMTBAD.
+        aux.insert_track();
+        aux.track_w.back() = sv.trackWeight(tri);
+        aux.track_pt_err.back() = tri->ptError();
+        aux.track_pt.back() = tri->pt();
         continue;
       }
 
@@ -287,182 +226,40 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             aux.which_lep.push_back(i | (1<<7));
 
 
-      trackws.push_back(tri->pt());
-
-      const double pti = tri->pt();
-      trackpts.push_back(pti);
-      trackdxys.push_back(fabs(tri->dxy(beamspot->position())));
-      if (primary_vertex)
-        trackdzs.push_back(fabs(tri->dz(primary_vertex->position())));
-
-      trackpterrs.push_back(tri->ptError()/tri->pt());
-      trackdxyerrs.push_back(tri->dxyError());
-      trackdzerrs.push_back(tri->dzError());
-      costhtkmomvtxdisps.push_back(costh3(tri->momentum(), pv2sv));
-
-      if (pti > 3)  inc_uchar(aux.ntracksptgt3);
-      if (pti > 5)  inc_uchar(aux.ntracksptgt5);
-      if (pti > 10) inc_uchar(aux.ntracksptgt10);
-
-      aux.sumpt2 += pti*pti;
-
-      const uchar nhits = int2uchar(tri->numberOfValidHits());
-      if (nhits < aux.trackminnhits)
-        aux.trackminnhits = nhits;
-      if (nhits > aux.trackmaxnhits)
-        aux.trackmaxnhits = nhits;
-
-      const uchar nhitsbehind = int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
-      if (nhitsbehind > aux.maxnhitsbehind)
-        aux.maxnhitsbehind = nhitsbehind;
-      if (int(aux.sumnhitsbehind) + int(nhitsbehind) > 255)
-        aux.sumnhitsbehind = 255;
-      else
-        aux.sumnhitsbehind += nhitsbehind;
-
-      for (auto trkj = trki + 1; trkj != trke; ++trkj) {
-        const reco::TrackBaseRef& trj = *trkj;
-        const math::XYZTLorentzVector trj_p4(trj->px(), trj->py(), trj->pz(), trj->p());
-        if (sv.trackWeight(trj) < mfv::track_vertex_weight_min)
-          continue;
-
-        trackpairws.push_back(0.5*(tri->pt() + trj->pt()));
-
-        trackpairdetas.push_back(fabs(tri->eta() - trj->eta()));
-        trackpairdrs.push_back(reco::deltaR(*tri, *trj));
-        trackpairmasses.push_back((tri_p4 + trj_p4).M());
-
-        for (auto trkk = trkj + 1; trkk != trke; ++trkk) {
-          const reco::TrackBaseRef& trk = *trkk;
-          const math::XYZTLorentzVector trk_p4(trk->px(), trk->py(), trk->pz(), trk->p());
-          if (sv.trackWeight(trk) < mfv::track_vertex_weight_min)
-            continue;
-
-          tracktripmasses.push_back((tri_p4 + trj_p4 + trk_p4).M());
-
-          for (auto trkl = trkk + 1; trkl != trke; ++trkl) {
-            const reco::TrackBaseRef& trl = *trkl;
-            const math::XYZTLorentzVector trl_p4(trl->px(), trl->py(), trl->pz(), trl->p());
-            if (sv.trackWeight(trk) < mfv::track_vertex_weight_min)
-              continue;
-
-            trackquadmasses.push_back((tri_p4 + trj_p4 + trk_p4 + trl_p4).M());
-          }
-        }
-      }
+      aux.track_w.push_back(MFVVertexAux::make_track_weight(sv.trackWeight(tri)));
+      aux.track_chg.push_back(MFVVertexAux::make_track_q(tri->charge()));
+      aux.track_pt.push_back(tri->pt());
+      aux.track_eta.push_back(tri->eta());
+      aux.track_phi.push_back(tri->phi());
+      aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
+      aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV
+      aux.track_pt_err.push_back(tri->ptError()/tri->pt());
+      aux.track_dxy_err.push_back(tri->dxyError());
+      aux.track_dz_err.push_back(tri->dzError());
+      aux.track_chi2dof.push_back(tri->normalizedChi2());
+      aux.track_hitpattern.push_back(MFVVertexAux::make_track_hitpattern(tri->hitPattern().numberOfValidPixelHits(),
+                                                                         tri->hitPattern().numberOfValidStripHits(),
+                                                                         tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z)));
+      aux.track_injet.push_back(jets_tracks.count(trref));
     }
 
-    if (trackpts.size()) {
-      std::sort(trackpts.begin(), trackpts.end());
-      aux.mintrackpt = trackpts[0];
-      aux.maxtrackpt = trackpts[trackpts.size()-1];
-      aux.maxm1trackpt = trackpts[trackpts.size()-2];
-      aux.maxm2trackpt = trackpts.size() > 2 ? trackpts[trackpts.size()-3] : -1;
-    }
-    else
-      aux.mintrackpt = aux.maxtrackpt = aux.maxm1trackpt = aux.maxm2trackpt = -1;
-      
-    const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
+    auto g2d = mfv::gen_dist(sv, *gen_vertices, false);
+    auto g3d = mfv::gen_dist(sv, *gen_vertices, true);
+    aux.gen2ddist       = g2d.value();
+    aux.gen2derr        = g2d.error();
+    aux.gen3ddist       = g3d.value();
+    aux.gen3derr        = g3d.error();
 
-    distrib_calculator trackpt(trackpts, trackws);
-    aux.trackptavg = trackpt.avg;
-    aux.trackptrms = trackpt.rms;
+//    for (int i = 0; i < mfv::NMomenta; ++i) {
+//      aux.costhmombs  [i] = vtx_distances.costhmombs[i];
+//      aux.costhmompv2d[i] = vtx_distances.costhmompv2d[i];
+//      aux.costhmompv3d[i] = vtx_distances.costhmompv3d[i];
+//
+//      aux.missdistpv   [i] = vtx_distances.missdistpv[i].value();
+//      aux.missdistpverr[i] = vtx_distances.missdistpv[i].error();
+//    }
 
-    distrib_calculator trackdxy(trackdxys, trackws);
-    aux.trackdxymin = trackdxy.min;
-    aux.trackdxymax = trackdxy.max;
-    aux.trackdxyavg = trackdxy.avg;
-    aux.trackdxyrms = trackdxy.rms;
-
-    distrib_calculator trackdz(trackdzs, trackws);
-    aux.trackdzmin = trackdz.min;
-    aux.trackdzmax = trackdz.max;
-    aux.trackdzavg = trackdz.avg;
-    aux.trackdzrms = trackdz.rms;
-
-    distrib_calculator trackpterr(trackpterrs, trackws);
-    aux.trackpterrmin = trackpterr.min;
-    aux.trackpterrmax = trackpterr.max;
-    aux.trackpterravg = trackpterr.avg;
-    aux.trackpterrrms = trackpterr.rms;
-
-    distrib_calculator trackdxyerr(trackdxyerrs, trackws);
-    aux.trackdxyerrmin = trackdxyerr.min;
-    aux.trackdxyerrmax = trackdxyerr.max;
-    aux.trackdxyerravg = trackdxyerr.avg;
-    aux.trackdxyerrrms = trackdxyerr.rms;
-
-    distrib_calculator trackdzerr(trackdzerrs, trackws);
-    aux.trackdzerrmin = trackdzerr.min;
-    aux.trackdzerrmax = trackdzerr.max;
-    aux.trackdzerravg = trackdzerr.avg;
-    aux.trackdzerrrms = trackdzerr.rms;
-
-    distrib_calculator costhtkmomvtxdisp(costhtkmomvtxdisps, trackws);
-    aux.costhtkmomvtxdispmin = costhtkmomvtxdisp.min;
-    aux.costhtkmomvtxdispmax = costhtkmomvtxdisp.max;
-    aux.costhtkmomvtxdispavg = costhtkmomvtxdisp.avg;
-    aux.costhtkmomvtxdisprms = costhtkmomvtxdisp.rms;
-
-    distrib_calculator trackpairdeta(trackpairdetas, trackpairws);
-    aux.trackpairdetamin = trackpairdeta.min;
-    aux.trackpairdetamax = trackpairdeta.max;
-    aux.trackpairdetaavg = trackpairdeta.avg;
-    aux.trackpairdetarms = trackpairdeta.rms;
-
-    distrib_calculator trackpairdr(trackpairdrs, trackpairws);
-    aux.drmin = trackpairdr.min;
-    aux.drmax = trackpairdr.max;
-    aux.dravg = trackpairdr.avg;
-    aux.drrms = trackpairdr.rms;
-    aux.dravgw = trackpairdr.avgw;
-    aux.drrmsw = trackpairdr.rmsw;
-
-    distrib_calculator trackpairmass(trackpairmasses, trackpairws);
-    aux.trackpairmassmin = trackpairmass.min;
-    aux.trackpairmassmax = trackpairmass.max;
-    aux.trackpairmassavg = trackpairmass.avg;
-    aux.trackpairmassrms = trackpairmass.rms;
-
-    distrib_calculator tracktripmass(tracktripmasses, std::vector<double>());
-    aux.tracktripmassmin = tracktripmass.min;
-    aux.tracktripmassmax = tracktripmass.max;
-    aux.tracktripmassavg = tracktripmass.avg;
-    aux.tracktripmassrms = tracktripmass.rms;
-
-    distrib_calculator trackquadmass(trackquadmasses, std::vector<double>());
-    aux.trackquadmassmin = trackquadmass.min;
-    aux.trackquadmassmax = trackquadmass.max;
-    aux.trackquadmassavg = trackquadmass.avg;
-    aux.trackquadmassrms = trackquadmass.rms;
-
-    aux.gen2ddist       = vtx_distances.gen2ddist.value();
-    aux.gen2derr        = vtx_distances.gen2ddist.error();
-    aux.gen3ddist       = vtx_distances.gen3ddist.value();
-    aux.gen3derr        = vtx_distances.gen3ddist.error();
-    aux.bs2dcompatscss  = vtx_distances.bs2dcompat.first;
-    aux.bs2dcompat      = vtx_distances.bs2dcompat.second;
-    aux.bs2ddist        = vtx_distances.bs2ddist.value();
-    aux.bs2derr         = vtx_distances.bs2ddist.error();
-    aux.bs3ddist        = vtx_distances.bs3ddist;
-    aux.pv2dcompatscss  = vtx_distances.pv2dcompat.first;
-    aux.pv2dcompat      = vtx_distances.pv2dcompat.second;
-    aux.pv2ddist        = vtx_distances.pv2ddist_val;
-    aux.pv2derr         = vtx_distances.pv2ddist_err;
-    aux.pv3dcompatscss  = vtx_distances.pv3dcompat.first;
-    aux.pv3dcompat      = vtx_distances.pv3dcompat.second;
-    aux.pv3ddist        = vtx_distances.pv3ddist_val;
-    aux.pv3derr         = vtx_distances.pv3ddist_err;
-
-    for (int i = 0; i < mfv::NMomenta; ++i) {
-      aux.costhmombs  [i] = vtx_distances.costhmombs[i];
-      aux.costhmompv2d[i] = vtx_distances.costhmompv2d[i];
-      aux.costhmompv3d[i] = vtx_distances.costhmompv3d[i];
-
-      aux.missdistpv   [i] = vtx_distances.missdistpv[i].value();
-      aux.missdistpverr[i] = vtx_distances.missdistpv[i].error();
-    }
-
+    assert(aux.tracks_ok() && aux.jets_ok());
   }
 
   sorter.sort(*auxes);

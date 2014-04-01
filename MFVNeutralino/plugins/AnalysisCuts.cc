@@ -141,21 +141,21 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       const MFVVertexAux& v0 = vertices->at(0);
       const MFVVertexAux& v1 = vertices->at(1);
 
-      if (v0.ntracks + v1.ntracks < min_ntracks01)
+      if (v0.ntracks() + v1.ntracks() < min_ntracks01)
         return false;
-      if (v0.ntracks + v1.ntracks > max_ntracks01)
+      if (v0.ntracks() + v1.ntracks() > max_ntracks01)
         return false;
-      if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
+      if (v0.maxtrackpt() + v1.maxtrackpt() < min_maxtrackpt01)
         return false;
-      if (v0.maxtrackpt + v1.maxtrackpt > max_maxtrackpt01)
+      if (v0.maxtrackpt() + v1.maxtrackpt() > max_maxtrackpt01)
         return false;
-      if (v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks] < min_njetsntks01)
+      if (v0.njets(mfv::JByNtracks) + v1.njets(mfv::JByNtracks) < min_njetsntks01)
         return false;
-      if (v0.mass[mfv::PTracksOnly] + v1.mass[mfv::PTracksOnly] < min_tkonlymass01)
+      if (v0.mass(mfv::PTracksOnly) + v1.mass(mfv::PTracksOnly) < min_tkonlymass01)
         return false;
-      if (v0.mass[mfv::PJetsByNtracks] + v1.mass[mfv::PJetsByNtracks] < min_jetsntkmass01)
+      if (v0.mass(mfv::PJetsByNtracks) + v1.mass(mfv::PJetsByNtracks) < min_jetsntkmass01)
         return false;
-      if (v0.mass[mfv::PTracksPlusJetsByNtracks] + v1.mass[mfv::PTracksPlusJetsByNtracks] < min_tksjetsntkmass01)
+      if (v0.mass(mfv::PTracksPlusJetsByNtracks) + v1.mass(mfv::PTracksPlusJetsByNtracks) < min_tksjetsntkmass01)
         return false;
 
       double phi0 = atan2(v0.y - mevent->bsy, v0.x - mevent->bsx);
@@ -163,7 +163,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (fabs(reco::deltaPhi(phi0, phi1)) < min_absdeltaphi01)
         return false;
 
-      if (v0.bs2ddist + v1.bs2ddist < min_bs2ddist01)
+      if (v0.bs2ddist() + v1.bs2ddist() < min_bs2ddist01)
         return false;
     }
   }
