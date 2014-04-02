@@ -2,7 +2,6 @@ import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-#SampleFiles.setup(process, 'MFVNtupleV13', 'mfv_neutralino_tau1000um_M0400', 10)
 process.source.fileNames = ['file:ntuple.root']
 #process.source.noEventSort = cms.untracked.bool(False)
 
@@ -30,7 +29,7 @@ process.printVertexAll = printer.clone(print_vertex_aux = True)
 process.printVertexSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
 process.printVertexSelEvtSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
 
-process.p = cms.Path(process.printRecoVerticesTight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
+process.p = cms.Path(process.printEventAll * process.printVertexAll * process.mfvSelectedVerticesTight * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
 
 if __name__ == '__main__' and 'splitlog' in sys.argv:
     log_fn = sys.argv[sys.argv.index('splitlog')+1]
