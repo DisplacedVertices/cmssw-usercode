@@ -467,7 +467,7 @@ struct z_calculator {
       bkgpl_eyh[i-1] = 0; //bkgpl_v.upper - bkgpl_v.hat;
 
       if (options.printall)
-        printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", xax->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl, s/nsig_nm1, s/nsig_tot, b/nbkg_nm1, b/nbkg_tot);
+        printf("%16s%6.3f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", xax->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl, s/nsig_nm1, s/nsig_tot, b/nbkg_nm1, b/nbkg_tot);
 
       h_sigfrac->SetBinContent(i, s/nsig_nm1);
       h_bkgfrac->SetBinContent(i, b/nbkg_nm1);
