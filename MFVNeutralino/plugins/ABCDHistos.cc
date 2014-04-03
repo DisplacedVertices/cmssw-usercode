@@ -125,6 +125,9 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_svctau3dcmz_maxm1trackpt01;
   TH2F* h_svctau3dcmz_ntracksptgt301;
   TH2F* h_svctau3dcmz_msptm01;
+
+  TH2F* h_sumht1_sumht0[2]; // 3d, 2d
+  TH1F* h_sumhtdiff[2];
 };
 
 ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
@@ -241,6 +244,12 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_svctau3dcmz_maxm1trackpt01 = fs->make<TH2F>("h_svctau3dcmz_maxm1trackpt01", ";maxm1trackpt01;svctau3dcmz", 300, 0, 300, 100, 0, 1);
   h_svctau3dcmz_ntracksptgt301 = fs->make<TH2F>("h_svctau3dcmz_ntracksptgt301", ";ntracksptgt301;svctau3dcmz", 80, 0, 80, 100, 0, 1);
   h_svctau3dcmz_msptm01 = fs->make<TH2F>("h_svctau3dcmz_msptm01", ";msptm01;svctau3dcmz", 500, 0, 5000, 100, 0, 1);
+
+  h_sumht1_sumht0[0] = fs->make<TH2F>("h_sumht1_sumht0_3d", ";sumht (3D hemisphere 0);sumht (3D hemisphere 1)", 100, 0, 1000, 100, 0, 1000);
+  h_sumht1_sumht0[1] = fs->make<TH2F>("h_sumht1_sumht0_2d", ";sumht (2D hemisphere 0);sumht (2D hemisphere 1)", 100, 0, 1000, 100, 0, 1000);
+  h_sumhtdiff[0] = fs->make<TH1F>("h_sumhtdiff_3d", ";sumht diff (3D hemisphere 0 - 1);arb. units", 100, -500, 500);
+  h_sumhtdiff[1] = fs->make<TH1F>("h_sumhtdiff_2d", ";sumht diff (2D hemisphere 0 - 1);arb. units", 100, -500, 500);
+
 }
 
 void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -391,6 +400,33 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     double msptm0 = sqrt(v0.mass[which_mom] * v0.mass[which_mom] + v0.pt[which_mom] * v0.pt[which_mom]) + fabs(v0.pt[which_mom]);
     double msptm1 = sqrt(v1.mass[which_mom] * v1.mass[which_mom] + v1.pt[which_mom] * v1.pt[which_mom]) + fabs(v1.pt[which_mom]);
     h_svctau3dcmz_msptm01->Fill(msptm0 + msptm1, svctau3dcmz, w);
+
+
+    TVector3 pos0(v0.x, v0.y, v0.z);
+    TVector3 pos1(v1.x, v1.y, v1.z);
+    TVector3 posavg = 0.5*(pos0 + pos1);
+    pos0 = pos0 - posavg;
+    pos1 = pos1 - posavg;
+    for (int j = 0; j < 2; ++j) {
+      if (j == 1) {
+        pos0.SetZ(0);
+        pos1.SetZ(0);
+        posavg.SetZ(0);
+      }
+      float sumht0 = 0, sumht1 = 0;
+      for (int i = 0, ie = mevent->njets(); i < ie; ++i) {
+        TVector3 jet_dir = mevent->jet_p4(i).Vect();
+        if (j == 1)
+          jet_dir.SetZ(0); // not really necessary
+        if (pos0.Dot(jet_dir) >= 0)
+          sumht0 += mevent->jet_pt[i];
+        else
+          sumht1 += mevent->jet_pt[i];
+      }
+      
+      h_sumht1_sumht0[j]->Fill(sumht0, sumht1);
+      h_sumhtdiff[j]->Fill(sumht0 - sumht1);
+    }
   }
 }
 
