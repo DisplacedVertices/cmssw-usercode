@@ -7,7 +7,7 @@ tuple_version = version
 
 runOnMC = True # magic line, don't touch
 debug = False
-require_pixel_hit = False
+require_pixel_hit = True
 prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
@@ -142,9 +142,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     batch_name_extra = ''
 
-    if require_pixel_hit:
-        batch_name_extra += '_WPixel'
-        
+    if not require_pixel_hit:
+        batch_name_extra += '_WOPixel'
+
     if keep_extra:
         batch_name_extra += '_WExtra'
     elif prepare_vis:
