@@ -1,6 +1,7 @@
 #ifndef JMTucker_MFVNeutralinoFormats_interface_Event_h
 #define JMTucker_MFVNeutralinoFormats_interface_Event_h
 
+#include <numeric>
 #include "TLorentzVector.h"
 
 namespace mfv {
@@ -15,10 +16,8 @@ struct MFVEvent {
 
   MFVEvent() {
     gen_valid = passoldskim = 0;
-    gen_partons_in_acc = npfjets = npv = pv_ntracks = njets = 0;
-    pfjetpt4 = pfjetpt5 = pfjetpt6 = npu = bsx = bsy = bsz = pvx = pvy = pvz = pv_sumpt2 = jetpt4 = jetpt5 = jetpt6 = jet_sum_ht = metx = mety = metsig = metdphimin = 0;
-    for (int i = 0; i < 3; ++i)
-      njetsnopu[i] = nbtags[i];
+    gen_partons_in_acc = npfjets = npv = pv_ntracks = 0;
+    pfjetpt4 = pfjetpt5 = pfjetpt6 = npu = bsx = bsy = bsz = pvx = pvy = pvz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -104,20 +103,54 @@ struct MFVEvent {
   float pv_sumpt2;
   float pv_rho() const { return mag(pvx - bsx, pvy - bsy); }
 
-  uchar njets;
-  uchar njetsnopu[3]; // loose, medium, tight
-  float jetpt4;
-  float jetpt5;
-  float jetpt6;
-  float jet_sum_ht;
+  std::vector<uchar> jet_id;
+  std::vector<float> jet_pt;
+  std::vector<float> jet_eta;
+  std::vector<float> jet_phi;
+  std::vector<float> jet_energy;
+
+  TLorentzVector jet_p4(int w) const {
+    TLorentzVector v;
+    v.SetPtEtaPhiE(jet_pt[w], jet_eta[w], jet_phi[w], jet_energy[w]);
+    return v;
+  }
+    
+  int njets() const { return int(jet_id.size()); }
+  float jetpt4() const { return jet_pt[3]; }
+  float jetpt5() const { return jet_pt[4]; }
+  float jetpt6() const { return jet_pt[5]; }
+  float jet_sum_ht() const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0); }
+
+  static uchar encode_jet_id(int pu_level, int bdisc_level) {
+    uchar id = 0;
+    assert(pu_level >= 0 && pu_level <= 3);
+    assert(bdisc_level >= 0 && bdisc_level <= 3);
+    id = (bdisc_level << 2) | pu_level;
+    return id;
+  }
+  
+  int njetsnopu(int level) const {
+    int c = 0;
+    for (int i = 0, ie = njets(); i < ie; ++i)
+      if ((jet_id[i] & 3) >= level + 1)
+        ++c;
+    return c;
+  }
+
+  int nbtags(int level) const {
+    int c = 0;
+    for (int i = 0, ie = njets(); i < ie; ++i)
+      if (((jet_id[i] >> 2) & 3) >= level + 1)
+        ++c;
+    return c;
+  }
+
   float metx;
   float mety;
   float metsig;
   float met() const { return mag(metx, mety); }
   float metphi() const { return atan2(mety, metx); }
   float metdphimin;
-
-  uchar nbtags[3]; // loose, medium, tight
 
   std::vector<uchar> lep_id; // bit field: bit 0 (lsb) = mu, 1 = el, bit 1 = loosest (veto) id (always 1 for now), bit 2 = semilep id, bit 3 = dilep id, bit4 = 1 if electron and closestCtfTrack is not null
   std::vector<float> lep_pt;
