@@ -9,7 +9,7 @@ double ycut;
 
 TH1D* compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
-  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_12/%s_scaled.root", sampleName));
+  TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_15/%s_scaled.root", sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("abcdHistosTrksJets/%s", histName));
 
   hist->Rebin2D(1,5);
@@ -58,6 +58,7 @@ TH1D* compareShapes(const char* sampleName, const char* histName) {
   printf("\tD = %5.2f +/- %5.2f, B/A*C = %5.2f +/- %5.2f, correlation factor = %5.2f\n", D, errD, Dpred, errPred, hist->GetCorrelationFactor());
 
   c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/WPixel/TrksJets/%s/%s.pdf", histName, sampleName));
+  c1->SaveAs(TString::Format("plots/ABCD/lifetime_v_mass/WPixel/TrksJets/%s/%s.root", histName, sampleName));
   c1->cd(1)->SetLogy();
   c1->cd(3)->SetLogy();
   h_low_normalized->GetYaxis()->SetRangeUser(0.00001,1);
@@ -151,6 +152,13 @@ void ntracks() {
   plot_all_samples("h_svdist3dcmz_ntracks01");
   plot_all_samples("h_svctau2dcmz_ntracks01");
   plot_all_samples("h_svctau3dcmz_ntracks01");
+
+  xcut = 15;
+  ycut = 0.02;
+  plot_all_samples("h_bs2ddist0_ntracks01");
+  plot_all_samples("h_pv2ddist0_ntracks01");
+  plot_all_samples("h_pv3ddist0_ntracks01");
+  plot_all_samples("h_pv3dctau0_ntracks01");
 
   xcut = 7;
   ycut = 0.05;
