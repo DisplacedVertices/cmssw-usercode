@@ -361,7 +361,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("gen3dsig",                      "N#sigma(dist3d(SV, closest gen vtx)) (cm)",                                   200,    0,     100);
   hs.add("bs2dcompatscss",                "compat2d(SV, beamspot) success",                                                2,    0,       2);
   hs.add("bs2dcompat",                    "compat2d(SV, beamspot)",                                                      100,    0,    1000);
-  hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   200,    0,      20);
+  hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   500,    0,       5);
   hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           100,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
   hs.add("bs3ddist",                      "dist2d(SV, beamspot) * sin(SV theta) (cm)",                                   100,    0,       0.5);
