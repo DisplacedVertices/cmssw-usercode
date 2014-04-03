@@ -25,6 +25,7 @@ class ABCDHistos : public edm::EDAnalyzer {
 
   TH2F* h_bs2derr_ntracks;
   TH2F* h_bs2derr_drmax;
+  TH2F* h_ntracks01_sumht;
 
   TH1F* h_absdeltaphibs01;
   TH1F* h_absdeltaphipv01;
@@ -72,6 +73,7 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_ntracks0_ntracks1;
 
   TH2F* h_bs2ddist01_ntracks01;
+  TH2F* h_bs2ddist0_ntracks01;
   TH2F* h_bs2ddist0_ntracks0;
   TH2F* h_bs2ddist1_ntracks1;
 
@@ -79,12 +81,15 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_bs2ddist0_ntracks1;
 
   TH2F* h_pv2ddist01_ntracks01;
+  TH2F* h_pv2ddist0_ntracks01;
   TH2F* h_pv2ddist0_ntracks0;
 
   TH2F* h_pv3ddist01_ntracks01;
+  TH2F* h_pv3ddist0_ntracks01;
   TH2F* h_pv3ddist0_ntracks0;
 
   TH2F* h_pv3dctau01_ntracks01;
+  TH2F* h_pv3dctau0_ntracks01;
   TH2F* h_pv3dctau0_ntracks0;
 
   TH2F* h_svdist2d_ntracks01;
@@ -141,6 +146,7 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
 
   h_bs2derr_ntracks = fs->make<TH2F>("h_bs2derr_ntracks", ";ntracks;bs2derr", 40, 0, 40, 100, 0, 0.05);
   h_bs2derr_drmax = fs->make<TH2F>("h_bs2derr_drmax", ";drmax;bs2derr", 150, 0, 7, 100, 0, 0.05);
+  h_ntracks01_sumht = fs->make<TH2F>("h_ntracks01_sumht", ";sumht;ntracks01", 500, 0, 5000, 80, 0, 80);
 
   h_absdeltaphibs01 = fs->make<TH1F>("h_absdeltaphibs01", ";absdeltaphibs01;events", 315, 0, 3.15);
   h_absdeltaphipv01 = fs->make<TH1F>("h_absdeltaphipv01", ";absdeltaphipv01;events", 315, 0, 3.15);
@@ -188,6 +194,7 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_ntracks0_ntracks1 = fs->make<TH2F>("h_ntracks0_ntracks1", ";ntracks1;ntracks0", 80, 0, 80, 80, 0, 80);
 
   h_bs2ddist01_ntracks01 = fs->make<TH2F>("h_bs2ddist01_ntracks01", ";ntracks01;bs2ddist01", 80, 0, 80, 100, 0, 1);
+  h_bs2ddist0_ntracks01 = fs->make<TH2F>("h_bs2ddist0_ntracks01", ";ntracks01;bs2ddist0", 80, 0, 80, 50, 0, 0.5);
   h_bs2ddist0_ntracks0 = fs->make<TH2F>("h_bs2ddist0_ntracks0", ";ntracks0;bs2ddist0", 40, 0, 40, 50, 0, 0.5);
   h_bs2ddist1_ntracks1 = fs->make<TH2F>("h_bs2ddist1_ntracks1", ";ntracks1;bs2ddist1", 40, 0, 40, 50, 0, 0.5);
 
@@ -195,12 +202,15 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_bs2ddist0_ntracks1 = fs->make<TH2F>("h_bs2ddist0_ntracks1", ";ntracks1;bs2ddist0", 40, 0, 40, 50, 0, 0.5);
 
   h_pv2ddist01_ntracks01 = fs->make<TH2F>("h_pv2ddist01_ntracks01", ";ntracks01;pv2ddist01", 80, 0, 80, 100, 0, 1);
+  h_pv2ddist0_ntracks01 = fs->make<TH2F>("h_pv2ddist0_ntracks01", ";ntracks01;pv2ddist0", 80, 0, 80, 50, 0, 0.5);
   h_pv2ddist0_ntracks0 = fs->make<TH2F>("h_pv2ddist0_ntracks0", ";ntracks0;pv2ddist0", 40, 0, 40, 50, 0, 0.5);
 
   h_pv3ddist01_ntracks01 = fs->make<TH2F>("h_pv3ddist01_ntracks01", ";ntracks01;pv3ddist01", 80, 0, 80, 100, 0, 1);
+  h_pv3ddist0_ntracks01 = fs->make<TH2F>("h_pv3ddist0_ntracks01", ";ntracks01;pv3ddist0", 80, 0, 80, 50, 0, 0.5);
   h_pv3ddist0_ntracks0 = fs->make<TH2F>("h_pv3ddist0_ntracks0", ";ntracks0;pv3ddist0", 40, 0, 40, 50, 0, 0.5);
 
   h_pv3dctau01_ntracks01 = fs->make<TH2F>("h_pv3dctau01_ntracks01", ";ntracks01;pv3dctau01", 80, 0, 80, 100, 0, 1);
+  h_pv3dctau0_ntracks01 = fs->make<TH2F>("h_pv3dctau0_ntracks01", ";ntracks01;pv3dctau0", 80, 0, 80, 50, 0, 0.5);
   h_pv3dctau0_ntracks0 = fs->make<TH2F>("h_pv3dctau0_ntracks0", ";ntracks0;pv3dctau0", 40, 0, 40, 50, 0, 0.5);
 
   h_svdist2d_ntracks01 = fs->make<TH2F>("h_svdist2d_ntracks01", ";ntracks01;svdist2d", 80, 0, 80, 100, 0, 1);
@@ -271,6 +281,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const MFVVertexAux& v0 = vertices->at(0);
     const MFVVertexAux& v1 = vertices->at(1);
     h_ntracks01_maxtrackpt01->Fill(v0.maxtrackpt + v1.maxtrackpt, v0.ntracks + v1.ntracks, w);
+    h_ntracks01_sumht->Fill(mevent->jet_sum_ht, v0.ntracks + v1.ntracks, w);
 
     h_bs2ddist0_bs2ddist1->Fill(v1.bs2ddist, v0.bs2ddist, w);
     h_mass0_mass1->Fill(v1.mass[which_mom], v0.mass[which_mom], w);
@@ -336,6 +347,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_ntracks0_ntracks1->Fill(v1.ntracks, v0.ntracks, w);
 
     h_bs2ddist01_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.bs2ddist + v1.bs2ddist, w);
+    h_bs2ddist0_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.bs2ddist, w);
     h_bs2ddist0_ntracks0->Fill(v0.ntracks, v0.bs2ddist, w);
     h_bs2ddist1_ntracks1->Fill(v1.ntracks, v1.bs2ddist, w);
 
@@ -343,12 +355,15 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_bs2ddist0_ntracks1->Fill(v1.ntracks, v0.bs2ddist, w);
 
     h_pv2ddist01_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.pv2ddist + v1.pv2ddist, w);
+    h_pv2ddist0_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.pv2ddist, w);
     h_pv2ddist0_ntracks0->Fill(v0.ntracks, v0.pv2ddist, w);
 
     h_pv3ddist01_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.pv3ddist + v1.pv3ddist, w);
+    h_pv3ddist0_ntracks01->Fill(v0.ntracks + v1.ntracks, v0.pv3ddist, w);
     h_pv3ddist0_ntracks0->Fill(v0.ntracks, v0.pv3ddist, w);
 
     h_pv3dctau01_ntracks01->Fill(v0.ntracks + v1.ntracks, pv3dctau0 + pv3dctau1, w);
+    h_pv3dctau0_ntracks01->Fill(v0.ntracks + v1.ntracks, pv3dctau0, w);
     h_pv3dctau0_ntracks0->Fill(v0.ntracks, pv3dctau0, w);
 
     h_svdist2d_ntracks01->Fill(v0.ntracks + v1.ntracks, svdist2d, w);
