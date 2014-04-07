@@ -39,6 +39,9 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_betagamma0lab_betagamma1lab;
   TH2F* h_betagamma0cmz_betagamma1cmz;
 
+  TH1F* h_avgbetagammalab;
+  TH1F* h_avgbetagammacmz;
+
   TH2F* h_bs2ddist0_bs2ddist1;
 
   //mass
@@ -159,6 +162,9 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
 
   h_betagamma0lab_betagamma1lab = fs->make<TH2F>("h_betagamma0lab_betagamma1lab", ";betagamma1lab;betagamma0lab", 100, 0, 10, 100, 0, 10);
   h_betagamma0cmz_betagamma1cmz = fs->make<TH2F>("h_betagamma0cmz_betagamma1cmz", ";betagamma1cmz;betagamma0cmz", 100, 0, 10, 100, 0, 10);
+
+  h_avgbetagammalab = fs->make<TH1F>("h_avgbetagammalab", ";avgbetagammalab;events", 100, 0, 10);
+  h_avgbetagammacmz = fs->make<TH1F>("h_avgbetagammacmz", ";avgbetagammacmz;events", 100, 0, 10);
 
   h_bs2ddist0_bs2ddist1 = fs->make<TH2F>("h_bs2ddist0_bs2ddist1", ";bs2ddist1;bs2ddist0", 50, 0, 0.5, 50, 0, 0.5);
 
@@ -323,6 +329,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_pz01lab->Fill(p0.Pz() + p1.Pz(), w);
     h_cosanglemom01lab->Fill(cos(p0.Angle(p1.Vect())), w);
     h_betagamma0lab_betagamma1lab->Fill(p1.Beta() * p1.Gamma(), p0.Beta() * p0.Gamma(), w);
+    h_avgbetagammalab->Fill((p0.Beta() * p0.Gamma() + p1.Beta() * p1.Gamma()) / 2, w);
 
     TVector3 betacmz = TVector3(0, 0, -(p0.Pz() + p1.Pz()) / (p0.E() + p1.E()));
     x0.Boost(betacmz);
@@ -332,6 +339,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_pz01cmz->Fill(p0.Pz() + p1.Pz(), w);
     h_cosanglemom01cmz->Fill(cos(p0.Angle(p1.Vect())), w);
     h_betagamma0cmz_betagamma1cmz->Fill(p1.Beta() * p1.Gamma(), p0.Beta() * p0.Gamma(), w);
+    h_avgbetagammacmz->Fill((p0.Beta() * p0.Gamma() + p1.Beta() * p1.Gamma()) / 2, w);
 
     double svdist2dcmz = mag(x0.X() - x1.X(), x0.Y() - x1.Y());
     double svdist3dcmz = mag(x0.X() - x1.X(), x0.Y() - x1.Y(), x0.Z() - x1.Z());
