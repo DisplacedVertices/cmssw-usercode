@@ -354,9 +354,13 @@ mfv_signal_samples_ex = [
     (9900, 1000, MCSample('mfv_neutralino_tau9900um_M1000', 'M_{tbs} = 1000 GeV, #tau = 9.9 mm',   '/mfv_neutralino_tau9900um_M1000/tucker-mfv_neutralino_tau9900um_M1000-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99899, 2, *mfv_xsec[1000]),), 
     ]
 
+mfv_signal_samples_nouse = []
 mfv_signal_samples = []
 for tau, mass, sample in mfv_signal_samples_ex:
-    mfv_signal_samples.append(sample)
+    if tau < 100:
+        mfv_signal_samples_nouse.append(sample)
+    else:
+        mfv_signal_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
     sample.events_per = 1500
@@ -385,7 +389,7 @@ auxiliary_data_samples = [
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples 
+all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse
 all_samples = all_data_samples + all_mc_samples
 
 samples_by_name = {}
