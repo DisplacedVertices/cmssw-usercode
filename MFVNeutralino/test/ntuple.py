@@ -216,6 +216,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.mfv300
     elif 'tthad' in sys.argv:
         samples = [Samples.ttbarhadronic]
+    elif 'signal' in sys.argv:
+        samples = Samples.mfv_signal_samples
     else:
         samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
 
