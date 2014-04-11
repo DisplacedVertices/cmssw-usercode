@@ -79,6 +79,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv0pvdzsig_v_sv1pvdzsig;
   TH1F* h_absdeltaphi01;
   TH2F* h_pvmosttracksshared;
+  TH1F* h_fractrackssharedwpv01;
+  TH1F* h_fractrackssharedwpvs01;
 
   TH1F* h_pair2dcompatscss;
   TH1F* h_pair2dcompat;
@@ -489,7 +491,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
   h_sv0pvdzsig_v_sv1pvdzsig = fs->make<TH2F>("h_sv0pvdzsig_v_sv1pvdzsig", ";N#sigma(sv #1 dz to PV);sv N#sigma(#0 dz to PV)", 100, 0, 50, 100, 0, 50);
   h_absdeltaphi01 = fs->make<TH1F>("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 315, 0, 3.15);
-  h_pvmosttracksshared = fs->make<TH2F>("h_pvmosttracksshared", ";index of pv most-shared to sv #0; index of pv most-shared to sv #1", 70, 0, 70, 70, 0, 70);
+  h_fractrackssharedwpv01 = fs->make<TH1F>("h_fractrackssharedwpv01", ";fraction of sv #0 and sv #1 tracks shared with the PV;arb. units", 41, 0, 1.025);
+  h_fractrackssharedwpvs01 = fs->make<TH1F>("h_fractrackssharedwpvs01", ";fraction of sv #0 and sv #1 tracks shared with the PV;arb. units", 41, 0, 1.025);
+  h_pvmosttracksshared = fs->make<TH2F>("h_pvmosttracksshared", ";index of pv most-shared to sv #0; index of pv most-shared to sv #1", 71, -1, 70, 71, -1, 70);
 
   h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
   h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
@@ -986,13 +990,17 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_svdist2d_v_lspdist2d->Fill(mevent->lspdist2d(), svdist2d, *weight);
     h_svdist3d_v_lspdist3d->Fill(mevent->lspdist3d(), svdist3d, *weight);
     h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, *weight);
-    h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz());
-    h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig());
+    h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), *weight);
+    h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig(), *weight);
     double phi0 = atan2(sv0.y - mevent->bsy, sv0.x - mevent->bsx);
     double phi1 = atan2(sv1.y - mevent->bsy, sv1.x - mevent->bsx);
-    h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)));
+    h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)), *weight);
 
-    h_pvmosttracksshared->Fill(sv0.pvmosttracksshared, sv1.pvmosttracksshared, *weight);
+    h_fractrackssharedwpv01 ->Fill(float(sv0.ntrackssharedwpv  + sv1.ntrackssharedwpv )/(sv0.ntracks + sv1.ntracks), *weight);
+    h_fractrackssharedwpvs01->Fill(float(sv0.ntrackssharedwpvs + sv1.ntrackssharedwpvs)/(sv0.ntracks + sv1.ntracks), *weight);
+    h_pvmosttracksshared->Fill(sv0.ntrackssharedwpvs ? sv0.pvmosttracksshared : -1,
+                               sv1.ntrackssharedwpvs ? sv1.pvmosttracksshared : -1,
+                               *weight);
   }
 
   for (int ivtx = 0; ivtx < nsv; ++ivtx) {
