@@ -22,7 +22,7 @@ class Sample(object):
     ANA_DBS_URL_NUM = 3
     ANA_HASH = ''
     PUBLISH_USER = ''
-    ANA_VERSION = 'v11'
+    ANA_VERSION = 'v17'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -405,9 +405,6 @@ for sample in all_samples:
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
 
-ttbardilep.total_events = ttbardilep.nevents_orig - 3*42648
-ttbarhadronic.total_events = ttbarhadronic.nevents_orig - 23*16736
-
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
 mfv_neutralino_tau0000um_M0600.ana_filter_eff = 9.9495e-01  #    99495 /   100000
@@ -445,8 +442,8 @@ singletop_t.ana_filter_eff          = 5.4126e-02  #   203416 /  3758227
 singletop_tW.ana_filter_eff         = 1.8520e-01  #    92167 /   497658
 singletop_tW_tbar.ana_filter_eff    = 1.8475e-01  #    91167 /   493460
 singletop_t_tbar.ana_filter_eff     = 5.3102e-02  #   102756 /  1935072
-ttbardilep.ana_filter_eff           = 1.3153e-01  #  1577210 / 11991069
-ttbarhadronic.ana_filter_eff        = 4.7515e-01  #  4823997 / 10152516
+ttbardilep.ana_filter_eff           = 1.3151e-01  #  1593779 / 12119013
+ttbarhadronic.ana_filter_eff        = 4.7517e-01  #  5007127 / 10537444
 ttbarsemilep.ana_filter_eff         = 2.7453e-01  #  6979960 / 25424818
 ttgjets.ana_filter_eff              = 5.0128e-01  #   862177 /  1719954
 ttwjets.ana_filter_eff              = 6.0494e-01  #   118596 /   196046
