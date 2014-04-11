@@ -119,6 +119,8 @@ private:
   const edm::InputTag primary_vertices_src;
   const bool use_tracks;
   const edm::InputTag track_src;
+  const bool use_non_pv_tracks;
+  const bool use_non_pvs_tracks;
   const bool use_pf_candidates;
   const edm::InputTag pf_candidate_src;
   const bool use_pf_jets;
@@ -213,6 +215,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     primary_vertices_src(cfg.getParameter<edm::InputTag>("primary_vertices_src")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    use_non_pv_tracks(cfg.getParameter<bool>("use_non_pv_tracks")),
+    use_non_pvs_tracks(cfg.getParameter<bool>("use_non_pvs_tracks")),
     use_pf_candidates(cfg.getParameter<bool>("use_pf_candidates")),
     pf_candidate_src(cfg.getParameter<edm::InputTag>("pf_candidate_src")),
     use_pf_jets(cfg.getParameter<bool>("use_pf_jets")),
@@ -252,8 +256,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     phitest(cfg.getUntrackedParameter<bool>("phitest", false))
 {
-  if (use_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
-    throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/pf_candidates/pf_jets/pat_jets";
+  if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
+    throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
 
   produces<reco::VertexCollection>();
 
@@ -359,6 +363,32 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     event.getByLabel(track_src, tracks);
     for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
       all_tracks.push_back(reco::TrackRef(tracks, i));
+  }
+  else if (use_non_pv_tracks || use_non_pvs_tracks) {
+    std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
+    for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
+      const reco::Vertex& pv = primary_vertices->at(i);
+      for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
+        float w = pv.trackWeight(*it);
+        reco::TrackRef tk = it->castTo<reco::TrackRef>();
+        tracks_in_pvs[tk].push_back(std::make_pair(i, w));
+      }
+    }
+
+    edm::Handle<reco::TrackCollection> tracks;
+    event.getByLabel(track_src, tracks);
+    for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
+      reco::TrackRef tkref(tracks, i);
+      bool ok = true;
+      for (const auto& pv_use : tracks_in_pvs[tkref])
+        if (use_non_pvs_tracks || (use_non_pv_tracks && pv_use.first == 0)) {
+          ok = false;
+          break;
+        }
+
+      if (ok)
+        all_tracks.push_back(tkref);
+    }
   }
   else if (use_pf_candidates) {
     edm::Handle<reco::PFCandidateCollection> pf_candidates;
