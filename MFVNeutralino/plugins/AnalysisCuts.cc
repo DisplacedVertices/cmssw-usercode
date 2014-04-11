@@ -18,6 +18,8 @@ private:
   const edm::InputTag mevent_src;
   const int trigger_bit;
   const bool re_trigger;
+  const int min_npv;
+  const int max_npv;
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
   const double min_6th_jet_pt;
@@ -44,15 +46,18 @@ private:
   const double min_tksjetsntkmass01;
   const double min_absdeltaphi01;
   const double min_bs2ddist01;
-
-  const int min_npv;
-  const int max_npv;
+  const int max_ntrackssharedwpv01;
+  const int max_ntrackssharedwpvs01;
+  const int max_fractrackssharedwpv01;
+  const int max_fractrackssharedwpvs01;
 };
 
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
     re_trigger(cfg.getParameter<bool>("re_trigger")),
+    min_npv(cfg.getParameter<int>("min_npv")),
+    max_npv(cfg.getParameter<int>("max_npv")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
     min_6th_jet_pt(cfg.getParameter<double>("min_6th_jet_pt")),
@@ -78,8 +83,10 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01")),
     min_absdeltaphi01(cfg.getParameter<double>("min_absdeltaphi01")),
     min_bs2ddist01(cfg.getParameter<double>("min_bs2ddist01")),
-    min_npv(cfg.getParameter<int>("min_npv")),
-    max_npv(cfg.getParameter<int>("max_npv"))
+    max_ntrackssharedwpv01(cfg.getParameter<int>("max_ntrackssharedwpv01")),
+    max_ntrackssharedwpvs01(cfg.getParameter<int>("max_ntrackssharedwpvs01")),
+    max_fractrackssharedwpv01(cfg.getParameter<double>("max_ntrackssharedwpv01")),
+    max_fractrackssharedwpvs01(cfg.getParameter<double>("max_ntrackssharedwpvs01"))
 {
 }
 
@@ -98,6 +105,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     else if (!mevent->pass_trigger[trigger_bit])
       return false;
   }
+
+  if (mevent->npv < min_npv || mevent->npv > max_npv)
+    return false;
 
   if (mevent->nmu(0) < min_nmuons)
     return false;
@@ -134,7 +144,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex)
       return false;
 
-    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0) {
+    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0 || max_ntrackssharedwpv01 < 100000 || max_ntrackssharedwpvs01 < 100000 || max_fractrackssharedwpv01 < 1e6 || max_fractrackssharedwpvs01 < 1e6) {
       if (nsv < 2)
         return false;
 
@@ -165,11 +175,17 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
       if (v0.bs2ddist + v1.bs2ddist < min_bs2ddist01)
         return false;
+
+      if (v0.ntrackssharedwpv  + v1.ntrackssharedwpv  > max_ntrackssharedwpv01)
+        return false;
+      if (v0.ntrackssharedwpvs + v1.ntrackssharedwpvs > max_ntrackssharedwpvs01)
+        return false;
+      if (float(v0.ntrackssharedwpv  + v1.ntrackssharedwpv )/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpv01)
+        return false;
+      if (float(v0.ntrackssharedwpvs + v1.ntrackssharedwpvs)/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpvs01)
+        return false;
     }
   }
-
-  if (mevent->npv < min_npv || mevent->npv > max_npv)
-    return false;
 
   return true;
 }
