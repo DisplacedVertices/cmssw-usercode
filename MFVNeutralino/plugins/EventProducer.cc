@@ -227,14 +227,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  mevent->njets = 0;
-  mevent->jetpt4 = mevent->jetpt5 = mevent->jetpt6 = 0;
-  mevent->jet_sum_ht = 0;
-  for (int i = 0; i < 3; ++i) {
-    mevent->njetsnopu[i] = 0;
-    mevent->nbtags[i] = 0;
-  }
-
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jets_src, jets);
 
@@ -260,21 +252,23 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (jet.pt() < jet_pt_min)
       continue;
 
-    inc_uchar(mevent->njets);
+    mevent->jet_pt.push_back(jet.pt());
+    mevent->jet_eta.push_back(jet.eta());
+    mevent->jet_phi.push_back(jet.phi());
+    mevent->jet_energy.push_back(jet.energy());
 
     int puid = (*puids)[pat::JetRef(jets, jjet)];
+    int pu_level = 0;
     for (int i = 0; i < 3; ++i)
       if (PileupJetIdentifier::passJetId(puid, puidlevel[i]))
-        inc_uchar(mevent->njetsnopu[i]);
+        pu_level = i+1;
 
-    if (mevent->njets == 4)
-      mevent->jetpt4 = jet.pt();
-    else if (mevent->njets == 5)
-      mevent->jetpt5 = jet.pt();
-    else if (mevent->njets == 6)
-      mevent->jetpt6 = jet.pt();
+    int bdisc_level = 0;
+    for (int i = 0; i < 3; ++i)
+      if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
+        bdisc_level = i+1;
 
-    mevent->jet_sum_ht += jet.pt();
+    mevent->jet_id.push_back(MFVEvent::encode_jet_id(pu_level, bdisc_level));
 
     if (jjet < 4) {
       double deltatsum = 0;
@@ -289,10 +283,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (dphi < mevent->metdphimin)
         mevent->metdphimin = dphi;
     }
-      
-    for (int i = 0; i < 3; ++i)
-      if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
-        inc_uchar(mevent->nbtags[i]);
   }
 
   //////////////////////////////////////////////////////////////////////

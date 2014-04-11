@@ -111,19 +111,19 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (mevent->nlep(1) < min_nsemileptons)
     return false;
 
-  if (mevent->njets < min_njets || mevent->njets > max_njets)
+  if (mevent->njets() < min_njets || mevent->njets() > max_njets)
     return false;
 
-  if((min_4th_jet_pt > 0 && mevent->jetpt4 < min_4th_jet_pt) ||
-     (min_5th_jet_pt > 0 && mevent->jetpt5 < min_5th_jet_pt) ||
-     (min_6th_jet_pt > 0 && mevent->jetpt6 < min_6th_jet_pt))
+  if((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||
+     (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt) ||
+     (min_6th_jet_pt > 0 && mevent->jetpt6() < min_6th_jet_pt))
     return false;
 
   for (int i = 0; i < 3; ++i)
-    if (mevent->nbtags[i] < min_nbtags[i] || mevent->nbtags[i] > max_nbtags[i])
+    if (mevent->nbtags(i) < min_nbtags[i] || mevent->nbtags(i) > max_nbtags[i])
       return false;
 
-  if (mevent->jet_sum_ht < min_sumht)
+  if (mevent->jet_sum_ht() < min_sumht)
     return false;
 
   if (apply_vertex_cuts) {

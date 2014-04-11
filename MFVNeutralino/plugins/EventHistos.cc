@@ -247,13 +247,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pvsumpt2->Fill(mevent->pv_sumpt2, w);
   h_pvrho->Fill(mevent->pv_rho(), w);
 
-  h_njets->Fill(mevent->njets, w);
+  h_njets->Fill(mevent->njets(), w);
   for (int i = 0; i < 3; ++i)
-    h_njetsnopu[i]->Fill(mevent->njetsnopu[i], w);
-  h_jetpt4->Fill(mevent->jetpt4, w);
-  h_jetpt5->Fill(mevent->jetpt5, w);
-  h_jetpt6->Fill(mevent->jetpt6, w);
-  h_jet_sum_ht->Fill(mevent->jet_sum_ht, w);
+    h_njetsnopu[i]->Fill(mevent->njetsnopu(i), w);
+  h_jetpt4->Fill(mevent->jetpt4(), w);
+  h_jetpt5->Fill(mevent->jetpt5(), w);
+  h_jetpt6->Fill(mevent->jetpt6(), w);
+  h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
   h_metx->Fill(mevent->metx);
   h_mety->Fill(mevent->mety);
   h_metsig->Fill(mevent->metsig);
@@ -262,7 +262,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_metdphimin->Fill(mevent->metdphimin);
 
   for (int i = 0; i < 3; ++i) {
-    h_nbtags[i]->Fill(mevent->nbtags[i], w);
+    h_nbtags[i]->Fill(mevent->nbtags(i), w);
     h_nmuons[i]->Fill(mevent->nmu(i), w);
     h_nelectrons[i]->Fill(mevent->nel(i), w);
     h_nleptons[i]->Fill(mevent->nlep(i), w);

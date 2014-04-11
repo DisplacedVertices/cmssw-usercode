@@ -78,6 +78,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv0pvdz_v_sv1pvdz;
   TH2F* h_sv0pvdzsig_v_sv1pvdzsig;
   TH1F* h_absdeltaphi01;
+  TH2F* h_pvmosttracksshared;
 
   TH1F* h_pair2dcompatscss;
   TH1F* h_pair2dcompat;
@@ -274,6 +275,12 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("maxnhitsbehind",                "max number of hits behind SV",                                                 15,    0,      15);
   hs.add("sumnhitsbehind",                "sum number of hits behind SV",                                                100,    0,     100);
 
+  hs.add("ntrackssharedwpv",  "number of tracks shared with the PV", 40, 0, 40);
+  hs.add("ntrackssharedwpvs", "number of tracks shared with any PV", 40, 0, 40);
+  hs.add("fractrackssharedwpv",  "fraction of tracks shared with the PV", 41, 0, 1.025);
+  hs.add("fractrackssharedwpvs", "fraction of tracks shared with any PV", 41, 0, 1.025);
+  hs.add("npvswtracksshared", "number of PVs having tracks shared",  40, 0, 40);
+  
   hs.add("mintrackpt",                    "SV min{trk_{i} p_{T}} (GeV)",                                                  50,    0,      10);
   hs.add("maxtrackpt",                    "SV max{trk_{i} p_{T}} (GeV)",                                                 100,    0,     150);
   hs.add("maxm1trackpt",                  "SV max-1{trk_{i} p_{T}} (GeV)",                                               100,    0,     150);
@@ -482,6 +489,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
   h_sv0pvdzsig_v_sv1pvdzsig = fs->make<TH2F>("h_sv0pvdzsig_v_sv1pvdzsig", ";N#sigma(sv #1 dz to PV);sv N#sigma(#0 dz to PV)", 100, 0, 50, 100, 0, 50);
   h_absdeltaphi01 = fs->make<TH1F>("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 315, 0, 3.15);
+  h_pvmosttracksshared = fs->make<TH2F>("h_pvmosttracksshared", ";index of pv most-shared to sv #0; index of pv most-shared to sv #1", 70, 0, 70, 70, 0, 70);
 
   h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
   h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
@@ -627,6 +635,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"sumpt2",                  aux.sumpt2},
         {"sumnhitsbehind",          aux.sumnhitsbehind},
         {"maxnhitsbehind",          aux.maxnhitsbehind},
+
+        {"ntrackssharedwpv", aux.ntrackssharedwpv},
+        {"ntrackssharedwpvs", aux.ntrackssharedwpvs},
+        {"fractrackssharedwpv", float(aux.ntrackssharedwpv) / aux.ntracks},
+        {"fractrackssharedwpvs", float(aux.ntrackssharedwpvs) / aux.ntracks},
+        {"npvswtracksshared", aux.npvswtracksshared},
+
         {"mintrackpt",              aux.mintrackpt},
         {"maxtrackpt",              aux.maxtrackpt},
         {"maxm1trackpt",            aux.maxm1trackpt},
@@ -976,6 +991,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     double phi0 = atan2(sv0.y - mevent->bsy, sv0.x - mevent->bsx);
     double phi1 = atan2(sv1.y - mevent->bsy, sv1.x - mevent->bsx);
     h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)));
+
+    h_pvmosttracksshared->Fill(sv0.pvmosttracksshared, sv1.pvmosttracksshared, *weight);
   }
 
   for (int ivtx = 0; ivtx < nsv; ++ivtx) {

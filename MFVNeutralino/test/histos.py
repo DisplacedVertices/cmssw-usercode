@@ -4,7 +4,7 @@ from JMTucker.Tools import SampleFiles
 
 wmore = False
 
-SampleFiles.setup(process, 'MFVNtupleV15', 'mfv_neutralino_tau1000um_M0400', 10000)
+SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -25,6 +25,7 @@ nm1s = [
     ]
 
 if wmore:
+    raise ValueError('no wmore for V17 yet')
     geometry_etc(process, 'START53_V27::All')
     SampleFiles.setup(process, 'MFVNtupleV15WMore', 'ttbarhadronic', 500)
     from JMTucker.MFVNeutralino.Vertexer_cff import mfvSelectedVerticesTmp
@@ -79,10 +80,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     ex = 'WMore' if wmore else ''
 
-    cs = CRABSubmitter('MFVHistosV15' + ex,
+    cs = CRABSubmitter('MFVHistosV17' + ex,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV15' + ex],
+                       manual_datasets = SampleFiles['MFVNtupleV17' + ex],
                        )
 
     if 'two' in sys.argv:

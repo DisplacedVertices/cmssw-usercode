@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV15_WPixel', 'mfv_neutralino_tau1000um_M0400', 500)
+SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 500)
 process.TFileService.fileName = 'abcd_histos.root'
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -31,10 +31,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
 
-    cs = CRABSubmitter('ABCDHistosV15',
+    cs = CRABSubmitter('ABCDHistosV17',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV15_WPixel'],
+                       manual_datasets = SampleFiles['MFVNtupleV17'],
                        )
     cs.submit_all(samples)
 

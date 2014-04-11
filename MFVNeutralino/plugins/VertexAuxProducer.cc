@@ -77,6 +77,16 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
 
+  std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
+  for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
+    const reco::Vertex& pv = primary_vertices->at(i);
+    for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
+      float w = pv.trackWeight(*it);
+      reco::TrackRef tk = it->castTo<reco::TrackRef>();
+      tracks_in_pvs[tk].push_back(std::make_pair(i, w));
+    }
+  }
+
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<pat::MuonCollection> muons;
@@ -237,6 +247,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.sumpt2 = 0;
     aux.maxnhitsbehind = 0;
     aux.sumnhitsbehind = 0;
+    aux.ntrackssharedwpv = 0;
+    aux.ntrackssharedwpvs = 0;
+    aux.npvswtracksshared = 0;
 
     std::vector<double> trackws;
     std::vector<double> trackpts;
@@ -254,6 +267,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     std::vector<double> tracktripmasses;
     std::vector<double> trackquadmasses;
+
+    std::set<int> pvswtracksshared;
+    std::vector<int> pvtrackssharecount(primary_vertices->size(), 0);
 
     for (auto trki = trkb; trki != trke; ++trki) {
       const reco::TrackBaseRef& tri = *trki;
@@ -320,6 +336,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       else
         aux.sumnhitsbehind += nhitsbehind;
 
+      const std::vector<std::pair<int, float> >& pv_for_track = tracks_in_pvs[trref];
+      if (pv_for_track.size() > 1)
+        throw cms::Exception("VertexAuxProducer") << "multiple PV for a track";
+      else if (pv_for_track.size()) {
+        int pv = pv_for_track[0].first;
+        ++aux.ntrackssharedwpvs;
+        if (pv == 0)
+          ++aux.ntrackssharedwpv;
+        pvswtracksshared.insert(pv);
+        ++pvtrackssharecount[pv];
+      }
+
       for (auto trkj = trki + 1; trkj != trke; ++trkj) {
         const reco::TrackBaseRef& trj = *trkj;
         const math::XYZTLorentzVector trj_p4(trj->px(), trj->py(), trj->pz(), trj->p());
@@ -351,6 +379,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         }
       }
     }
+
+    aux.npvswtracksshared = pvswtracksshared.size();
+    aux.pvmosttracksshared = std::max_element(pvtrackssharecount.begin(), pvtrackssharecount.end()) - pvtrackssharecount.begin();
 
     if (trackpts.size()) {
       std::sort(trackpts.begin(), trackpts.end());

@@ -22,7 +22,7 @@ class Sample(object):
     ANA_DBS_URL_NUM = 3
     ANA_HASH = ''
     PUBLISH_USER = ''
-    ANA_VERSION = 'v11'
+    ANA_VERSION = 'v17'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -354,9 +354,13 @@ mfv_signal_samples_ex = [
     (9900, 1000, MCSample('mfv_neutralino_tau9900um_M1000', 'M_{tbs} = 1000 GeV, #tau = 9.9 mm',   '/mfv_neutralino_tau9900um_M1000/tucker-mfv_neutralino_tau9900um_M1000-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99899, 2, *mfv_xsec[1000]),), 
     ]
 
+mfv_signal_samples_nouse = []
 mfv_signal_samples = []
 for tau, mass, sample in mfv_signal_samples_ex:
-    mfv_signal_samples.append(sample)
+    if tau < 100:
+        mfv_signal_samples_nouse.append(sample)
+    else:
+        mfv_signal_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
     sample.events_per = 1500
@@ -385,7 +389,7 @@ auxiliary_data_samples = [
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples 
+all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse
 all_samples = all_data_samples + all_mc_samples
 
 samples_by_name = {}
@@ -400,9 +404,6 @@ for sample in all_samples:
 
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
-
-ttbardilep.total_events = ttbardilep.nevents_orig - 3*42648
-ttbarhadronic.total_events = ttbarhadronic.nevents_orig - 23*16736
 
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
@@ -441,8 +442,8 @@ singletop_t.ana_filter_eff          = 5.4126e-02  #   203416 /  3758227
 singletop_tW.ana_filter_eff         = 1.8520e-01  #    92167 /   497658
 singletop_tW_tbar.ana_filter_eff    = 1.8475e-01  #    91167 /   493460
 singletop_t_tbar.ana_filter_eff     = 5.3102e-02  #   102756 /  1935072
-ttbardilep.ana_filter_eff           = 1.3153e-01  #  1577210 / 11991069
-ttbarhadronic.ana_filter_eff        = 4.7515e-01  #  4823997 / 10152516
+ttbardilep.ana_filter_eff           = 1.3151e-01  #  1593779 / 12119013
+ttbarhadronic.ana_filter_eff        = 4.7517e-01  #  5007127 / 10537444
 ttbarsemilep.ana_filter_eff         = 2.7453e-01  #  6979960 / 25424818
 ttgjets.ana_filter_eff              = 5.0128e-01  #   862177 /  1719954
 ttwjets.ana_filter_eff              = 6.0494e-01  #   118596 /   196046

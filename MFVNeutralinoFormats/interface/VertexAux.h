@@ -11,7 +11,7 @@ struct MFVVertexAux {
   typedef unsigned int uint;
 
   MFVVertexAux() {
-    which = ntracks = nbadtracks = ntracksptgt3 = ntracksptgt5 = ntracksptgt10 = trackminnhits = trackmaxnhits = sumnhitsbehind = maxnhitsbehind = bs2dcompatscss = pv2dcompatscss = pv3dcompatscss = 0;
+    which = ntracks = nbadtracks = ntracksptgt3 = ntracksptgt5 = ntracksptgt10 = trackminnhits = trackmaxnhits = sumnhitsbehind = maxnhitsbehind = ntrackssharedwpv = ntrackssharedwpvs = npvswtracksshared = bs2dcompatscss = pv2dcompatscss = pv3dcompatscss = 0;
     x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = sumpt2 = mintrackpt = maxtrackpt = maxm1trackpt = maxm2trackpt = drmin = drmax = dravg = drrms = dravgw = drrmsw = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2dcompat = bs2ddist = bs2derr = bs3ddist = pv2dcompat = pv2ddist = pv2derr = pv3dcompat = pv3ddist = pv3derr = trackptavg = trackptrms = trackdxymin = trackdxymax = trackdxyavg = trackdxyrms = trackdzmin = trackdzmax = trackdzavg = trackdzrms = trackpterrmin = trackpterrmax = trackpterravg = trackpterrrms = trackdxyerrmin = trackdxyerrmax = trackdxyerravg = trackdxyerrrms = trackdzerrmin = trackdzerrmax = trackdzerravg = trackdzerrrms = trackpairmassmin = trackpairmassmax = trackpairmassavg = trackpairmassrms = tracktripmassmin = tracktripmassmax = tracktripmassavg = tracktripmassrms = trackquadmassmin = trackquadmassmax = trackquadmassavg = trackquadmassrms = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       njets[i] = 0;
@@ -63,6 +63,11 @@ struct MFVVertexAux {
 
   uchar sumnhitsbehind;
   uchar maxnhitsbehind;
+
+  uchar ntrackssharedwpv;
+  uchar ntrackssharedwpvs;
+  uchar npvswtracksshared;
+  uchar pvmosttracksshared;
 
   float mintrackpt;
   float maxtrackpt;
