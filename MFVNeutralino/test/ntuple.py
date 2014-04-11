@@ -8,6 +8,7 @@ tuple_version = version
 runOnMC = True # magic line, don't touch
 debug = False
 require_pixel_hit = True
+track_used_req = None
 prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
@@ -48,6 +49,13 @@ process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
 if require_pixel_hit:
     process.mfvVertices.min_all_track_npxhits = 1
+
+if track_used_req == 'nopv':
+    process.mfvVertices.use_tracks = False
+    process.mfvVertices.use_non_pv_tracks = True
+elif track_used_req == 'nopvs':
+    process.mfvVertices.use_tracks = False
+    process.mfvVertices.use_non_pvs_tracks = True
 
 if keep_all:
     process.mfvEvent.skip_event_filter = ''
@@ -144,6 +152,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if not require_pixel_hit:
         batch_name_extra += '_WOPixel'
+
+    if track_use_req == 'nopv':
+        batch_name_extra += '_NoPVTks'
+    elif track_use_req == 'nopvs':
+        batch_name_extra += '_NoPVsTks'
 
     if keep_extra:
         batch_name_extra += '_WExtra'
