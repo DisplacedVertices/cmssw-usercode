@@ -153,9 +153,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if not require_pixel_hit:
         batch_name_extra += '_WOPixel'
 
-    if track_use_req == 'nopv':
+    if track_used_req == 'nopv':
         batch_name_extra += '_NoPVTks'
-    elif track_use_req == 'nopvs':
+    elif track_used_req == 'nopvs':
         batch_name_extra += '_NoPVsTks'
 
     if keep_extra:
