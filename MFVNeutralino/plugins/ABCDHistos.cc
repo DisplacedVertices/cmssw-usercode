@@ -296,7 +296,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const MFVVertexAux& v0 = vertices->at(0);
     const MFVVertexAux& v1 = vertices->at(1);
     h_ntracks01_maxtrackpt01->Fill(v0.maxtrackpt + v1.maxtrackpt, v0.ntracks + v1.ntracks, w);
-    h_ntracks01_sumht->Fill(mevent->jet_sum_ht, v0.ntracks + v1.ntracks, w);
+    h_ntracks01_sumht->Fill(mevent->jet_sum_ht(), v0.ntracks + v1.ntracks, w);
 
     h_bs2ddist0_bs2ddist1->Fill(v1.bs2ddist, v0.bs2ddist, w);
     h_mass0_mass1->Fill(v1.mass[which_mom], v0.mass[which_mom], w);
