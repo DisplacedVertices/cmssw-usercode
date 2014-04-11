@@ -186,10 +186,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     from JMTucker.Tools.SampleFiles import SampleFiles
     
-    cs = CRABSubmitter('CutPlayV15',
+    cs = CRABSubmitter('CutPlayV17',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV15'],
+                       manual_datasets = SampleFiles['MFVNtupleV17'],
                        )
     cs.submit_all(samples)
 
