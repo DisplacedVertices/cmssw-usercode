@@ -85,8 +85,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_bs2ddist01(cfg.getParameter<double>("min_bs2ddist01")),
     max_ntrackssharedwpv01(cfg.getParameter<int>("max_ntrackssharedwpv01")),
     max_ntrackssharedwpvs01(cfg.getParameter<int>("max_ntrackssharedwpvs01")),
-    max_fractrackssharedwpv01(cfg.getParameter<double>("max_ntrackssharedwpv01")),
-    max_fractrackssharedwpvs01(cfg.getParameter<double>("max_ntrackssharedwpvs01"))
+    max_fractrackssharedwpv01(cfg.getParameter<double>("max_fractrackssharedwpv01")),
+    max_fractrackssharedwpvs01(cfg.getParameter<double>("max_fractrackssharedwpvs01"))
 {
 }
 
