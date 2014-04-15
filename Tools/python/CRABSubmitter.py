@@ -127,7 +127,7 @@ class CRABSubmitter:
             for opt in s.split():
                 val = kwargs.get(opt, None)
                 if val is not None:
-                    l.append((opt, val))
+                    l.append((opt, int(val)))
             if len(l) > 2:
                 raise ValueError('can only set two of %s' % s)
             return l
