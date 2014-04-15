@@ -23,6 +23,7 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag gen_src;
+  const edm::InputTag gen_jet_src;
   const bool check_all_gen_particles;
   bool mci_warned;
 
@@ -73,10 +74,33 @@ class MFVGenHistos : public edm::EDAnalyzer {
   TH2F* h_nbhadronsvsbquarks_wcuts;
 
   TH1F* h_npartons_in_acc;
+
+  TH1F* NJets;
+  BasicKinematicHists* Jets;
+  TH1F* JetAuxE;
+  TH1F* JetEmE;
+  TH1F* JetHadE;
+  TH1F* JetInvE;
+  TH1F* JetNConstituents;
+  TH1F* JetNChargedConst;
+  TH1F* JetFChargedConst;
+
+  TH1F* JetIds;
+
+  TH1F* NBJets;
+  BasicKinematicHists* BJets;
+  TH1F* BJetAuxE;
+  TH1F* BJetEmE;
+  TH1F* BJetHadE;
+  TH1F* BJetInvE;
+  TH1F* BJetNConstituents;
+  TH1F* BJetNChargedConst;
+  TH1F* BJetFChargedConst;
 };
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
+    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     check_all_gen_particles(cfg.getParameter<bool>("check_all_gen_particles")),
     mci_warned(false)
 {
@@ -287,6 +311,46 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_nbhadronsvsbquarks_wcuts = fs->make<TH2F>("h_nbhadronsvsbquarks_wcuts", "", 20, 0, 20, 20, 0, 20);
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
+
+  NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 30, 0, 30);
+  Jets = bkh_factory->make("Jets", "gen jets");
+  Jets->BookE (200, 0, 2000, "10");
+  Jets->BookP (200, 0, 2000, "10");
+  Jets->BookPt(200, 0, 2000, "10");
+  Jets->BookPz(200, 0, 2000, "10");
+  Jets->BookM (200, 0, 2000, "10");
+  Jets->BookRapEta(200, "0.1");
+  Jets->BookPhi(50, "0.125");
+  
+  JetAuxE = fs->make<TH1F>("JetAuxE", ";auxiliary energy of jet;jets/5 GeV", 200, 0, 1000);
+  JetEmE = fs->make<TH1F>("JetEmE", ";EM energy of jet;jets/5 GeV", 200, 0, 1000);
+  JetHadE = fs->make<TH1F>("JetEmE", ";hadronic energy of jet;jets/5 GeV", 200, 0, 1000);
+  JetInvE = fs->make<TH1F>("JetEmE", ";invisible energy of jet;jets/5 GeV", 200, 0, 1000);
+  JetNConstituents = fs->make<TH1F>("JetNConstituents", ";# of constituents of jet;jets", 200, 0, 200);
+  JetNChargedConst = fs->make<TH1F>("JetNChargedConst", ";# of charged constituents of jet;jets", 200, 0, 200);
+  JetFChargedConst = fs->make<TH1F>("JetFChargedConst", ";fraction of charged constituents of jet;jets", 200, 0, 1);
+
+  JetIds = fs->make<TH1F>("JetIds", ";pdg id of jet;jets", 11, 0, 11);
+  const char* JetIdLabels[] = { "d", "u", "s", "c", "b", "dbar", "ubar", "sbar", "cbar", "bbar", "N/A" };
+  set_bin_labels(JetIds->GetXaxis(), JetIdLabels);
+
+  NBJets = fs->make<TH1F>("NBJets", ";number of b jets;Events", 30, 0, 30);
+  BJets = bkh_factory->make("BJets", "gen jets with b id");
+  BJets->BookE (200, 0, 2000, "10");
+  BJets->BookP (200, 0, 2000, "10");
+  BJets->BookPt(200, 0, 2000, "10");
+  BJets->BookPz(200, 0, 2000, "10");
+  BJets->BookM (200, 0, 2000, "10");
+  BJets->BookRapEta(200, "0.1");
+  BJets->BookPhi(50, "0.125");
+
+  BJetAuxE = fs->make<TH1F>("BJetAuxE", ";auxiliary energy of b jet;jets/5 GeV", 200, 0, 1000);
+  BJetEmE = fs->make<TH1F>("BJetEmE", ";EM energy of b jet;jets/5 GeV", 200, 0, 1000);
+  BJetHadE = fs->make<TH1F>("BJetEmE", ";hadronic energy of b jet;jets/5 GeV", 200, 0, 1000);
+  BJetInvE = fs->make<TH1F>("BJetEmE", ";invisible energy of b jet;jets/5 GeV", 200, 0, 1000);
+  BJetNConstituents = fs->make<TH1F>("BJetNConstituents", ";# of constituents of b jet;jets", 200, 0, 200);
+  BJetNChargedConst = fs->make<TH1F>("BJetNChargedConst", ";# of charged constituents of b jet;jets", 200, 0, 200);
+  BJetFChargedConst = fs->make<TH1F>("BJetFChargedConst", ";fraction of charged constituents of b jet;jets", 200, 0, 1);
 }
 
 namespace {
@@ -526,6 +590,47 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
   h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts);
+
+  
+  edm::Handle<reco::GenJetCollection> gen_jets;
+  event.getByLabel(gen_jet_src, gen_jets);
+
+  NJets->Fill(gen_jets->size());
+  int nbjets = 0;
+  for (const reco::GenJet& jet : *gen_jets) {
+    int nchg = 0;
+    int id = gen_jet_id(jet);
+    for (const reco::GenParticle* g : jet.getGenConstituents())
+      if (g->charge())
+        ++nchg;
+
+    float fchg = float(nchg)/jet.nConstituents();
+
+    Jets->Fill(&jet);
+    JetAuxE->Fill(jet.auxiliaryEnergy());
+    JetEmE->Fill(jet.emEnergy());
+    JetHadE->Fill(jet.hadEnergy());
+    JetInvE->Fill(jet.invisibleEnergy());
+    JetNConstituents->Fill(jet.nConstituents());
+    JetNChargedConst->Fill(nchg);
+    JetFChargedConst->Fill(fchg);
+
+    fill_by_label(JetIds, id != 0 ? pdt->particle(id)->name() : "N/A");
+
+    if (id == 5) {
+      ++nbjets;
+
+      BJets->Fill(&jet);
+      BJetAuxE->Fill(jet.auxiliaryEnergy());
+      BJetEmE->Fill(jet.emEnergy());
+      BJetHadE->Fill(jet.hadEnergy());
+      BJetInvE->Fill(jet.invisibleEnergy());
+      BJetNConstituents->Fill(jet.nConstituents());
+      BJetNChargedConst->Fill(nchg);
+      BJetFChargedConst->Fill(fchg);
+    }      
+  }
+  NBJets->Fill(nbjets);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);
