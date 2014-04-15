@@ -213,6 +213,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.leptonic_background_samples
     elif 'qcdpt' in sys.argv:
         samples = [s for s in Samples.auxiliary_background_samples if s.name.startswith('qcdpt')]
+    elif 'bjets' in sys.argv:
+        samples = [s for s in Samples.auxiliary_background_samples if s.name.startswith('bjets')]
     elif 'qcdlep' in sys.argv:
         samples = []
         for s in Samples.auxiliary_background_samples:
