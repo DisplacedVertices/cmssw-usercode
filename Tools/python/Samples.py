@@ -405,6 +405,8 @@ for sample in all_samples:
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
 
+mfv_neutralino_tau1000um_M0300.total_events -= 500
+
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
 mfv_neutralino_tau0000um_M0600.ana_filter_eff = 9.9495e-01  #    99495 /   100000
@@ -416,16 +418,25 @@ mfv_neutralino_tau0010um_M0600.ana_filter_eff = 9.9530e-01  #    99231 /    9970
 mfv_neutralino_tau0010um_M0800.ana_filter_eff = 9.9795e-01  #    99745 /    99950
 mfv_neutralino_tau0010um_M1000.ana_filter_eff = 9.9892e-01  #    99791 /    99899
 mfv_neutralino_tau0100um_M0200.ana_filter_eff = 4.7951e-01  #    47807 /    99700
+mfv_neutralino_tau0100um_M0300.ana_filter_eff = 8.6538e-01  #    86538 /   100000
 mfv_neutralino_tau0100um_M0400.ana_filter_eff = 9.6769e-01  #    96043 /    99250
 mfv_neutralino_tau0100um_M0600.ana_filter_eff = 9.9554e-01  #    99206 /    99650
 mfv_neutralino_tau0100um_M0800.ana_filter_eff = 9.9795e-01  #    99795 /   100000
 mfv_neutralino_tau0100um_M1000.ana_filter_eff = 9.9890e-01  #    99639 /    99749
+mfv_neutralino_tau0300um_M0200.ana_filter_eff = 4.7439e-01  #    47439 /   100000
+mfv_neutralino_tau0300um_M0300.ana_filter_eff = 8.2247e-01  #    82247 /   100000
+mfv_neutralino_tau0300um_M0400.ana_filter_eff = 9.6975e-01  #    96975 /   100000
+mfv_neutralino_tau0300um_M0600.ana_filter_eff = 9.3989e-01  #    93989 /   100000
+mfv_neutralino_tau0300um_M0800.ana_filter_eff = 9.9264e-01  #    99264 /   100000
+mfv_neutralino_tau0300um_M1000.ana_filter_eff = 9.9035e-01  #    99035 /   100000
 mfv_neutralino_tau1000um_M0200.ana_filter_eff = 4.7873e-01  #    47754 /    99752
+mfv_neutralino_tau1000um_M0300.ana_filter_eff = 7.9684e-01  #    79286 /    99500
 mfv_neutralino_tau1000um_M0400.ana_filter_eff = 9.6798e-01  #    96653 /    99850
 mfv_neutralino_tau1000um_M0600.ana_filter_eff = 9.9508e-01  #    99360 /    99851
 mfv_neutralino_tau1000um_M0800.ana_filter_eff = 9.9825e-01  #    99774 /    99949
 mfv_neutralino_tau1000um_M1000.ana_filter_eff = 9.9866e-01  #    99866 /   100000
 mfv_neutralino_tau9900um_M0200.ana_filter_eff = 4.7714e-01  #    47690 /    99950
+mfv_neutralino_tau9900um_M0300.ana_filter_eff = 8.6473e-01  #    86473 /   100000
 mfv_neutralino_tau9900um_M0400.ana_filter_eff = 9.6734e-01  #    96734 /   100000
 mfv_neutralino_tau9900um_M0600.ana_filter_eff = 9.9511e-01  #    99461 /    99950
 mfv_neutralino_tau9900um_M0800.ana_filter_eff = 9.9818e-01  #    99718 /    99900
