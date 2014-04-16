@@ -77,7 +77,6 @@ void MinBiasHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	//jet.neutralEmEnergyFraction() < 0.90
 	) 
       {
-	int id=0;
 	njets++;
 	if (gen_jet_id(jet) == 5)
 	  nbjets++;
