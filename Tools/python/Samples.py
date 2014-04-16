@@ -407,7 +407,7 @@ for sample in all_samples:
 # JMTBAD need to distinguish between total_events and ana_total_events
 # (and need a better name for total_events)
 
-mfv_neutralino_tau1000um_M0300.total_events -= 500
+mfv_neutralino_tau1000um_M0300.total_events = mfv_neutralino_tau1000um_M0300.nevents_orig - 500
 
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
