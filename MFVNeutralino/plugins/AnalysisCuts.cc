@@ -29,8 +29,8 @@ private:
   const std::vector<int> max_nbtags;
   const double min_sumht;
   const double max_sumht;
-  const bool primary_vtx_cut;
-  const double pvtx_min_pt;
+  const double min_sum_other_pv_sumpt2;
+  const double max_sum_other_pv_sumpt2;
   const int min_nmuons;
   const int min_nsemilepmuons;
   const int min_nleptons;
@@ -70,8 +70,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
     min_sumht(cfg.getParameter<double>("min_sumht")),
     max_sumht(cfg.getParameter<double>("max_sumht")),
-    primary_vtx_cut(cfg.getParameter<bool>("primary_vtx_cut")),
-    pvtx_min_pt(cfg.getParameter<double>("pvtx_min_pt")),
+    min_sum_other_pv_sumpt2(cfg.getParameter<double>("min_sum_other_pv_sumpt2")),
+    max_sum_other_pv_sumpt2(cfg.getParameter<double>("max_sum_other_pv_sumpt2")),
     min_nmuons(cfg.getParameter<int>("min_nmuons")),
     min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
@@ -145,18 +145,19 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (mevent->jet_sum_ht() > max_sumht)
     return false;
 
-  if (primary_vtx_cut) {
+  if (min_sum_other_pv_sumpt2 > 0 || max_sum_other_pv_sumpt2 < 1e9) {
     edm::Handle<reco::VertexCollection> primary_vertices;
     event.getByLabel("offlinePrimaryVertices", primary_vertices);
-    float pv_sumpt = 0.0;
-    for (unsigned int i = 1; i < primary_vertices->size(); i++ ) {
-      const reco::Vertex& primary_vertex = primary_vertices->at(i);
-      pv_sumpt += primary_vertex.p4().pt();
+    double other_pv_sumpt2 = 0;
+    for (size_t i = 1; i < primary_vertices->size(); ++i) {
+      const reco::Vertex& pv = primary_vertices->at(i);
+      for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki)
+        other_pv_sumpt2 += (*trki)->pt() * (*trki)->pt();
     }
-    if (pv_sumpt > pvtx_min_pt)
-      return true;
-  }
 
+    if (other_pv_sumpt2 < min_sum_other_pv_sumpt2 || other_pv_sumpt2 > max_sum_other_pv_sumpt2)
+      return false;
+  }
 
   if (apply_vertex_cuts) {
     edm::Handle<MFVVertexAuxCollection> vertices;
