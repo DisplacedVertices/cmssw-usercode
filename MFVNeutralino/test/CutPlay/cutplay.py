@@ -9,6 +9,9 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVerticesTight
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+use_pv_cut = True
+process.mfvAnalysisCuts.primary_vtx_cut = use_pv_cut
+process.mfvAnalysisCuts.pvtx_min_pt = 100
 ana_sel = process.mfvAnalysisCuts
 
 def pize(f,sz):
@@ -162,7 +165,8 @@ for name, vtx_change, ana_change in changes:
     ana_obj = eval('ana_sel.clone(%s)' % ana_change)
 
     ana_obj.vertex_src = vtx_name
-
+    ana_obj.primary_vtx_cut = use_pv_cut
+    
     setattr(process, vtx_name, vtx_obj)
     setattr(process, ana_name, ana_obj)
 
@@ -187,8 +191,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.SampleFiles import SampleFiles
     
     cs = CRABSubmitter('CutPlayV17',
+                       total_number_of_events = 1000,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
+                       use_parent = use_pv_cut,
                        manual_datasets = SampleFiles['MFVNtupleV17'],
                        )
     cs.submit_all(samples)
