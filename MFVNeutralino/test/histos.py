@@ -2,8 +2,6 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-wmore = False
-
 SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
@@ -24,27 +22,6 @@ nm1s = [
     ('15p0', 'min_drmax = 0, max_sumnhitsbehind = 1000000'),
     ]
 
-if wmore:
-    raise ValueError('no wmore for V17 yet')
-    geometry_etc(process, 'START53_V27::All')
-    SampleFiles.setup(process, 'MFVNtupleV15WMore', 'ttbarhadronic', 500)
-    from JMTucker.MFVNeutralino.Vertexer_cff import mfvSelectedVerticesTmp
-    process.mfvSelectedVerticesTmp = mfvSelectedVerticesTmp.clone(vertex_aux_src = 'mfvVerticesAux')
-    process.load('JMTucker.MFVNeutralino.JetVertexAssociator_cfi')
-    process.p.insert(0, process.mfvSelectedVerticesTmp * process.mfvVerticesToJets)
-    process.mfvVertexHistosOneVtx.vertex_src = 'mfvVertices'
-    process.mfvVertexHistosOneVtx.vertex_to_jets_src = cms.InputTag('mfvVerticesToJets','ByNtracks')
-    process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-    process.goodOfflinePrimaryVertices.filter = cms.bool(True)
-    process.p.insert(0, process.goodOfflinePrimaryVertices)
-    process.mfvEventHistosNoCuts.primary_vertex_src = 'goodOfflinePrimaryVertices'
-    process.mfvEventHistosNoCuts.jets_src = 'selectedPatJetsPF'
-    process.mfvEventHistosOneVtx.primary_vertex_src = 'goodOfflinePrimaryVertices'
-    process.mfvEventHistosOneVtx.jets_src = 'selectedPatJetsPF'
-    process.mfvEventHistos.primary_vertex_src = 'goodOfflinePrimaryVertices'
-    process.mfvEventHistos.jets_src = 'selectedPatJetsPF'
-    nm1s = []
-
 for name, cut in nm1s:
     vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
     vtx_name = 'vtxNo' + name
@@ -60,15 +37,8 @@ for name, cut in nm1s:
     setattr(process, vtx_hst_name, vtx_hst)
     setattr(process, 'p' + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
-hackrundata = False # JMTBAD
-if hackrundata:
-    from FWCore.PythonUtilities.LumiList import LumiList
-    l = LumiList('ana.json').getCMSSWString().split(',')
-    process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*l)
-
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    #samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples + Samples.smaller_background_samples + Samples.mfv_signal_samples
     bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
     samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples
     if 'full' not in sys.argv:
@@ -76,22 +46,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    from JMTucker.Tools.SampleFiles import SampleFiles
 
-    ex = 'WMore' if wmore else ''
-
-    cs = CRABSubmitter('MFVHistosV17' + ex,
+    cs = CRABSubmitter('MFVHistosV17',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV17' + ex],
+                       manual_datasets = SampleFiles['MFVNtupleV17'],
                        )
 
-    if 'two' in sys.argv:
-        samples = [Samples.ttbarhadronic, Samples.mfv_neutralino_tau1000um_M0400]
-    elif wmore:
-        samples = [Samples.ttbarhadronic]
-
-    if not hackrundata:
-        cs.submit_all(samples)
-    else:
-        cs.submit_all([Samples.MultiJetPk2012B])
+    cs.submit_all(samples)
