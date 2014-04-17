@@ -20,22 +20,30 @@ nm1s = [
     ('Bs2dsig', 'min_bs2dsig = 0'),
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
     ('15p0', 'min_drmax = 0, max_sumnhitsbehind = 1000000'),
+    ('Dr', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0'),
+    ('Bs2d', 'max_bs2derr = 1e9, min_bs2dsig = 0'),
+    ('DrOrBs2d', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0'),
+    ('DrOrNjets', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, min_njetsntks = 0'),
+    ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0'),
+    ('ButNtracks', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0, min_ntracksptgt3 = 0'),
     ]
 
 for name, cut in nm1s:
     vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
     vtx_name = 'vtxNo' + name
-    ana = process.mfvAnalysisCuts.clone(vertex_src = vtx_name)
-    ana_name = 'anaNo' + name
-    evt_hst = process.mfvEventHistos.clone()
-    evt_hst_name = 'evtHstNo' + name
-    vtx_hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
-    vtx_hst_name = 'vtxHstNo' + name
-    setattr(process, vtx_name, vtx)
-    setattr(process, ana_name, ana)
-    setattr(process, evt_hst_name, evt_hst)
-    setattr(process, vtx_hst_name, vtx_hst)
-    setattr(process, 'p' + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
+    for nv in (1,2):
+        ana = process.mfvAnalysisCuts.clone(vertex_src = vtx_name)
+        ana.min_nvertex = nv
+        ana_name = 'ana%iVNo' % nv + name
+        evt_hst = process.mfvEventHistos.clone()
+        evt_hst_name = 'evtHst%iVNo' % nv + name
+        vtx_hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
+        vtx_hst_name = 'vtxHst%iVNo' % nv + name
+        setattr(process, vtx_name, vtx)
+        setattr(process, ana_name, ana)
+        setattr(process, evt_hst_name, evt_hst)
+        setattr(process, vtx_hst_name, vtx_hst)
+        setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
