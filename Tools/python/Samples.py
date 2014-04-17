@@ -136,13 +136,20 @@ class MCSample(Sample):
             f = ROOT.TFile(fn)
         return f.Get(hist_path).GetEntries()
 
+    # JMTBAD need to distinguish between total_events and ana_total_events
+    # (and need a better name for total_events)
+
     @property
     def nevents(self):
         if self.total_events >= 0 and self.total_events < self.nevents_orig:
             return self.total_events
         else:
             return self.nevents_orig
-        
+
+    def reduce_total_events_by(self, minus):
+        assert self.total_events < 0
+        self.total_events = self.nevents_orig - minus
+
     @property
     def partial_weight(self):
         return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
@@ -404,10 +411,16 @@ for sample in all_samples:
 
 ########################################################################
 
-# JMTBAD need to distinguish between total_events and ana_total_events
-# (and need a better name for total_events)
+# Bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-mfv_neutralino_tau1000um_M0300.total_events = mfv_neutralino_tau1000um_M0300.nevents_orig - 500
+for sample, reduce_by in [
+    (mfv_neutralino_tau1000um_M0300, 500),
+    (bjetsht0250, 108451*4),
+    (bjetsht0250, 17064*4),
+    (qcdpt0170, 33640*2),
+    ]:
+    sample.reduce_total_events_by(reduce_by)
+
 
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
@@ -574,4 +587,3 @@ if __name__ == '__main__':
         cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
         print cmd
         os.system(cmd)
-
