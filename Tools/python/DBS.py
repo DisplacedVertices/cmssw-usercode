@@ -54,3 +54,8 @@ def files_numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
             return None
     return dbs_query(ana01, ana02, ana03)('dataset=%s file | grep file.name,file.nevents' % dataset,
                                           line_xform=xform)
+
+def sites_for_dataset(dataset, ana01=False, ana02=False, ana03=False):
+    return dbs_query(ana01, ana02, ana03)('dataset=%s site' % dataset,
+                                          line_filter=lambda s: s.startswith('T'))
+
