@@ -44,7 +44,7 @@ def effs(fn):
         for icut, cut in enumerate(cuts):
             h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
             h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-            nm1 = get_n('evtHstNo%s' % cut)
+            nm1 = get_n('evtHst2VNo%s' % cut)
             nm1_abs = float(nm1)/den
             nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
             h_nm1_abs.SetBinContent(icut+1, nm1_abs)
