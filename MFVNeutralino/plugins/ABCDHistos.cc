@@ -25,7 +25,24 @@ class ABCDHistos : public edm::EDAnalyzer {
 
   TH2F* h_bs2derr_ntracks;
   TH2F* h_bs2derr_drmax;
+
   TH2F* h_ntracks01_sumht;
+  TH2F* h_drmin_sumht;
+  TH2F* h_drmax_sumht;
+  TH2F* h_bs2derr_sumht;
+  TH2F* h_njetsntks_sumht;
+  TH2F* h_bs2dsig_sumht;
+  TH2F* h_ntracksptgt3_sumht;
+  TH2F* h_sumnhitsbehind_sumht;
+
+  TH2F* h_ntracks0_sumht;
+  TH2F* h_drmin0_sumht;
+  TH2F* h_drmax0_sumht;
+  TH2F* h_bs2derr0_sumht;
+  TH2F* h_njetsntks0_sumht;
+  TH2F* h_bs2dsig0_sumht;
+  TH2F* h_ntracksptgt30_sumht;
+  TH2F* h_sumnhitsbehind0_sumht;
 
   TH1F* h_absdeltaphibs01;
   TH1F* h_absdeltaphipv01;
@@ -152,7 +169,24 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
 
   h_bs2derr_ntracks = fs->make<TH2F>("h_bs2derr_ntracks", ";ntracks;bs2derr", 40, 0, 40, 100, 0, 0.05);
   h_bs2derr_drmax = fs->make<TH2F>("h_bs2derr_drmax", ";drmax;bs2derr", 150, 0, 7, 100, 0, 0.05);
+
   h_ntracks01_sumht = fs->make<TH2F>("h_ntracks01_sumht", ";sumht;ntracks01", 500, 0, 5000, 80, 0, 80);
+  h_drmin_sumht = fs->make<TH2F>("h_drmin_sumht", ";sumht;drmin", 500, 0, 5000, 150, 0, 1.5);
+  h_drmax_sumht = fs->make<TH2F>("h_drmax_sumht", ";sumht;drmax", 500, 0, 5000, 150, 0, 7);
+  h_bs2derr_sumht = fs->make<TH2F>("h_bs2derr_sumht", ";sumht;bs2derr", 500, 0, 5000, 100, 0, 0.05);
+  h_njetsntks_sumht = fs->make<TH2F>("h_njetsntks_sumht", ";sumht;njetntks", 500, 0, 5000, 10, 0, 10);
+  h_bs2dsig_sumht = fs->make<TH2F>("h_bs2dsig_sumht", ";sumht;bs2dsig", 500, 0, 5000, 100, 0, 100);
+  h_ntracksptgt3_sumht = fs->make<TH2F>("h_ntracksptgt3_sumht", ";sumht;ntracksptgt3", 500, 0, 5000, 40, 0, 40);
+  h_sumnhitsbehind_sumht = fs->make<TH2F>("h_sumnhitsbehind_sumht", ";sumht;sumnhitsbehind", 500, 0, 5000, 100, 0, 100);
+
+  h_ntracks0_sumht = fs->make<TH2F>("h_ntracks0_sumht", ";sumht;ntracks0", 500, 0, 5000, 40, 0, 40);
+  h_drmin0_sumht = fs->make<TH2F>("h_drmin0_sumht", ";sumht;drmin0", 500, 0, 5000, 150, 0, 1.5);
+  h_drmax0_sumht = fs->make<TH2F>("h_drmax0_sumht", ";sumht;drmax0", 500, 0, 5000, 150, 0, 7);
+  h_bs2derr0_sumht = fs->make<TH2F>("h_bs2derr0_sumht", ";sumht;bs2derr0", 500, 0, 5000, 100, 0, 0.05);
+  h_njetsntks0_sumht = fs->make<TH2F>("h_njetsntks0_sumht", ";sumht;njetntks0", 500, 0, 5000, 10, 0, 10);
+  h_bs2dsig0_sumht = fs->make<TH2F>("h_bs2dsig0_sumht", ";sumht;bs2dsig0", 500, 0, 5000, 100, 0, 100);
+  h_ntracksptgt30_sumht = fs->make<TH2F>("h_ntracksptgt30_sumht", ";sumht;ntracksptgt30", 500, 0, 5000, 40, 0, 40);
+  h_sumnhitsbehind0_sumht = fs->make<TH2F>("h_sumnhitsbehind0_sumht", ";sumht;sumnhitsbehind0", 500, 0, 5000, 100, 0, 100);
 
   h_absdeltaphibs01 = fs->make<TH1F>("h_absdeltaphibs01", ";absdeltaphibs01;events", 315, 0, 3.15);
   h_absdeltaphipv01 = fs->make<TH1F>("h_absdeltaphipv01", ";absdeltaphipv01;events", 315, 0, 3.15);
@@ -290,6 +324,26 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const MFVVertexAux& vtx = vertices->at(isv);
     h_bs2derr_ntracks->Fill(vtx.ntracks, vtx.bs2derr, w);
     h_bs2derr_drmax->Fill(vtx.drmax, vtx.bs2derr, w);
+
+    h_drmin_sumht->Fill(mevent->jet_sum_ht(), vtx.drmin, w);
+    h_drmax_sumht->Fill(mevent->jet_sum_ht(), vtx.drmax, w);
+    h_bs2derr_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2derr, w);
+    h_njetsntks_sumht->Fill(mevent->jet_sum_ht(), vtx.njets[mfv::JByNtracks], w);
+    h_bs2dsig_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2dsig(), w);
+    h_ntracksptgt3_sumht->Fill(mevent->jet_sum_ht(), vtx.ntracksptgt3, w);
+    h_sumnhitsbehind_sumht->Fill(mevent->jet_sum_ht(), vtx.sumnhitsbehind, w);
+  }
+
+  if (nsv >= 1) {
+    const MFVVertexAux& vtx = vertices->at(0);
+    h_ntracks0_sumht->Fill(mevent->jet_sum_ht(), vtx.ntracks, w);
+    h_drmin0_sumht->Fill(mevent->jet_sum_ht(), vtx.drmin, w);
+    h_drmax0_sumht->Fill(mevent->jet_sum_ht(), vtx.drmax, w);
+    h_bs2derr0_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2derr, w);
+    h_njetsntks0_sumht->Fill(mevent->jet_sum_ht(), vtx.njets[mfv::JByNtracks], w);
+    h_bs2dsig0_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2dsig(), w);
+    h_ntracksptgt30_sumht->Fill(mevent->jet_sum_ht(), vtx.ntracksptgt3, w);
+    h_sumnhitsbehind0_sumht->Fill(mevent->jet_sum_ht(), vtx.sumnhitsbehind, w);
   }
 
   if (nsv >= 2) {

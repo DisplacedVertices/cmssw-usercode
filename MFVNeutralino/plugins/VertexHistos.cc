@@ -228,6 +228,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("chi2dof",                       "SV #chi^2/dof",                                                                50,    0,       7);
   hs.add("chi2dofprob",                   "SV p(#chi^2, dof)",                                                            50,    0,       1.2);
 
+  hs.add("msptm",                         "SV p_{T}-corrected mass (GeV)",                                               100,    0,    1500);
+
   hs.add("tkonlyp",                       "SV tracks-only p (GeV)",                                                      100,    0,     300);
   hs.add("tkonlypt",                      "SV tracks-only p_{T} (GeV)",                                                  100,    0,     300);
   hs.add("tkonlyeta",                     "SV tracks-only #eta",                                                          50,   -4,       4);
@@ -590,6 +592,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"njetsntks",               aux.njets[mfv::JByNtracks]},
         {"chi2dof",                 aux.chi2/aux.ndof},
         {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof)},
+
+        {"msptm",                   sqrt(aux.mass[mfv::PTracksOnly] * aux.mass[mfv::PTracksOnly] + aux.pt[mfv::PTracksOnly] * aux.pt[mfv::PTracksOnly]) + fabs(aux.pt[mfv::PTracksOnly])},
 
         {"tkonlyp",             aux.p4(mfv::PTracksOnly).P()},
         {"tkonlypt",            aux.pt[mfv::PTracksOnly]},
