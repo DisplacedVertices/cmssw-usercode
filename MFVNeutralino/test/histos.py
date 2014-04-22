@@ -58,7 +58,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('MFVHistosV17',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV17'],
+                       manual_datasets = SampleFiles.SampleFiles['MFVNtupleV17'],
                        )
 
     cs.submit_all(samples)
