@@ -1,6 +1,6 @@
 double xcut;
 double ycut;
-const char* crab_path = "crab/ABCDHistosV17_0";
+const char* crab_path = "crab/ABCDHistosV17_1";
 const char* hist_path = "abcdHistosTrksJets";
 const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/TrksJets";
 
@@ -141,6 +141,24 @@ void compareMasses(const char* lifetime, double xmax, const char* histName) {
   h_background->GetYaxis()->SetRangeUser(0.0001,50);
   c1->SetLogy();
   c1->SaveAs(TString::Format("%s/%s/%s_logy.pdf", plot_path, histName, lifetime));
+
+  TCanvas* c2 = new TCanvas();
+  h_background->DrawNormalized();
+  h_ttbar->DrawNormalized("same");
+  h_background_nobigw->DrawNormalized("same");
+  h_background_qcdht1000->DrawNormalized("same");
+  h_background_noqcdht0500->DrawNormalized("same");
+  h_M0200->DrawNormalized("same");
+  h_M0300->DrawNormalized("same");
+  h_M0400->DrawNormalized("same");
+  h_M0600->DrawNormalized("same");
+  h_M0800->DrawNormalized("same");
+  h_M1000->DrawNormalized("same");
+  legend->Draw();
+
+  c2->SaveAs(TString::Format("%s/%s/%s_normalized.pdf", plot_path, histName, lifetime));
+  c2->SetLogy();
+  c2->SaveAs(TString::Format("%s/%s/%s_normalized_logy.pdf", plot_path, histName, lifetime));
 }
 
 void plot_all_samples(const char* histName) {
@@ -192,7 +210,7 @@ void mass() {
 }
 
 void ntracks() {
-  xcut = 15;
+  xcut = 12;
   ycut = 0.05;
 //  plot_all_samples("h_bs2ddist01_ntracks01");
 //  plot_all_samples("h_pv2ddist01_ntracks01");
@@ -253,9 +271,9 @@ void njets() {
 }
 
 void lifetime_v_mass() {
-  mass();
+//  mass();
   ntracks();
-  sumht();
+//  sumht();
 //  njets();
 //  ycut = 0.1;
 //  xcut = 40;  plot_all_samples("h_svctau3dcmz_maxtrackpt01");
