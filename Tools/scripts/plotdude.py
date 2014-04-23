@@ -6,11 +6,18 @@
 
 import getpass, os, subprocess, sys, tarfile, time
 
-do_it = True
+def bool_from_argv(s):
+    val = s in sys.argv
+    if val:
+        sys.argv.remove(s)
+    return val
+
+testing = bool_from_argv('--testing')
+rm_dir = bool_from_argv('--rm')
 
 def cmd(c):
     print c
-    if do_it:
+    if not testing:
         return os.system(c)
     else:
         return 0
@@ -51,7 +58,7 @@ host_dest_dir = '/home/plotdude/public_html'
 if not os.path.isfile(os.path.expanduser('~/.ssh/id_plotdude')) or os.system('grep "Host %s" ~/.ssh/config > /dev/null' % host_name) != 0:
     die('must have plotdude keyfile and doubletunnel set up in ~/.ssh')
 
-for x in 'do_it to_tar to_tar_basename user timestamp arc_name temp_fn local_temp_fn host_name host_temp_dir host_temp_fn host_dest_dir'.split():
+for x in 'testing rm_dir to_tar to_tar_basename user timestamp arc_name temp_fn local_temp_fn host_name host_temp_dir host_temp_fn host_dest_dir'.split():
     print x.ljust(30), ':', eval(x)
 
 ################################################################################
@@ -91,3 +98,7 @@ cmd("ssh %s 'tar -C %s -jxf %s'" % (host_name, host_dest_dir, host_temp_fn))
 print 'deleting temp files'
 cmd('rm %s' % local_temp_fn)
 cmd("ssh %s 'rm %s'" % (host_name, host_temp_fn))
+
+if rm_dir:
+    print 'deleting directory'
+    cmd('rm -r %s' % to_tar)
