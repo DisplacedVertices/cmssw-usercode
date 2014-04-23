@@ -22,6 +22,7 @@ class MinBiasHistos : public edm::EDAnalyzer {
  private:
   const edm::InputTag jet_src;
   const edm::InputTag btag_src;
+  const edm::InputTag gen_particle_src;
   const double jet_pt_min;
   const double bdisc_min;
 
@@ -31,6 +32,7 @@ class MinBiasHistos : public edm::EDAnalyzer {
   TH1F* h_ndisc;
   TH1F* h_njets;
   TH1F* h_nbjets;
+  TH1F* h_nbquarks;
   TH1F* h_nconstituents;
   TH1F* h_Energy;
   TH1F* h_emEnergy;
@@ -43,6 +45,7 @@ class MinBiasHistos : public edm::EDAnalyzer {
 MinBiasHistos::MinBiasHistos(const edm::ParameterSet& cfg)
   :jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
    btag_src(cfg.getParameter<edm::InputTag>("btag_src")),
+   gen_particle_src(cfg.getParameter<edm::InputTag>("gen_particle_src")),
    jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
    bdisc_min(cfg.getParameter<double>("bdisc_min"))
 {
@@ -54,6 +57,7 @@ MinBiasHistos::MinBiasHistos(const edm::ParameterSet& cfg)
   h_ndisc = fs->make<TH1F>("h_ndisc", "Btag disc", 100,-1,2);
   h_njets = fs->make<TH1F>("h_njets", "Numb jets", 10,0,10);
   h_nbjets = fs->make<TH1F>("h_nbjets", "Numb b jets", 10,0,10);
+  h_nbquarks = fs->make<TH1F>("h_nbquarks", "Numb b quarks", 10,0,10);
   h_nconstituents = fs->make<TH1F>("h_nconstituents", "Numb constituents", 10,0,20);
   h_Energy = fs->make<TH1F>("h_Energy", "MinBias Jet Energy", 100,0,1000);
   h_emEnergy = fs->make<TH1F>("h_emEnergy", "MinBias Jet EM Energy", 100,0,1000);
@@ -66,6 +70,16 @@ void MinBiasHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<reco::GenJetCollection> jets;
   event.getByLabel(jet_src, jets);
+  
+  edm::Handle<reco::GenParticleCollection> gen_particles;
+  event.getByLabel(gen_particle_src, gen_particles);
+
+  int nbquarks=0;
+  for (const auto& gen_p : *gen_particles)
+    if (abs(gen_p.pdgId())==5 && gen_p.status() == 2)
+      nbquarks++;
+  h_nbquarks->Fill(nbquarks);
+
   int njets = 0;
   int nbjets = 0;
   for (const auto& jet : *jets) {
@@ -77,7 +91,6 @@ void MinBiasHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	//jet.neutralEmEnergyFraction() < 0.90
 	) 
       {
-	int id=0;
 	njets++;
 	if (gen_jet_id(jet) == 5)
 	  nbjets++;
@@ -92,6 +105,9 @@ void MinBiasHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
        
       }    
   }  
+  if (nbjets==1)
+    std::cout<<"Run="<<event.id().run()<<" Event="<<event.id().event()<<std::endl;
+    
   h_njets->Fill(njets);
   h_nbjets->Fill(nbjets);
 }
