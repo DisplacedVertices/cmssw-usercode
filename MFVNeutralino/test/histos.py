@@ -29,16 +29,25 @@ nm1s = [
     ]
 
 for name, cut in nm1s:
+    evt_cut = ''
+    if type(cut) == tuple:
+        cut, evt_cut = cut
+
     vtx = eval('process.mfvSelectedVerticesTight.clone(%s)' % cut)
     vtx_name = 'vtxNo' + name
+
     for nv in (1,2):
-        ana = process.mfvAnalysisCuts.clone(vertex_src = vtx_name)
+        ana = eval('process.mfvAnalysisCuts.clone(%s)' % evt_cut)
+        ana.vertex_src = vtx_name
         ana.min_nvertex = nv
         ana_name = 'ana%iVNo' % nv + name
+
         evt_hst = process.mfvEventHistos.clone()
         evt_hst_name = 'evtHst%iVNo' % nv + name
+
         vtx_hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
         vtx_hst_name = 'vtxHst%iVNo' % nv + name
+
         setattr(process, vtx_name, vtx)
         setattr(process, ana_name, ana)
         setattr(process, evt_hst_name, evt_hst)
