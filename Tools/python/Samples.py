@@ -2,7 +2,7 @@
 
 import os, re, sys
 from copy import copy
-from JMTucker.Tools.DBS import files_in_dataset
+import JMTucker.Tools.DBS as DBS
 from JMTucker.Tools.ROOTTools import ROOT
 from JMTucker.Tools.general import big_warn
 
@@ -20,8 +20,8 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 3
-    ANA_HASH = ''
-    PUBLISH_USER = ''
+    ANA_HASH = 'f1615d49c4ae9d19e350601d059c4237'
+    PUBLISH_USER = 'tucker'
     ANA_VERSION = 'v17'
 
     def __init__(self, name, nice_name, dataset):
@@ -68,6 +68,9 @@ class Sample(object):
     def ana_dbs_url(self):
         return self._get_dbs_url(self.ana_dbs_url_num)
 
+    def dbs_inst_dict(self, num):
+        return dict(('ana0%i' % i, num == i) for i in xrange(1,4))
+
     @property
     def primary_dataset(self):
         return self.dataset.split('/')[1]
@@ -84,9 +87,9 @@ class Sample(object):
         if self.local_filenames:
             return self.local_filenames
         if ana:
-            return files_in_dataset(self.ana_dataset, ana01=self.ana_dbs_url_num == 1, ana02=self.ana_dbs_url_num == 2)
+            return DBS.files_in_dataset(self.ana_dataset, **self.dbs_inst_dict(self.ana_dbs_url_num))
         else:
-            return files_in_dataset(self.dataset, ana01=self.dbs_url_num == 1, ana02=self.dbs_url_num == 2)
+            return DBS.files_in_dataset(self.dataset,     **self.dbs_inst_dict(self.dbs_url_num))
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -136,13 +139,20 @@ class MCSample(Sample):
             f = ROOT.TFile(fn)
         return f.Get(hist_path).GetEntries()
 
+    # JMTBAD need to distinguish between total_events and ana_total_events
+    # (and need a better name for total_events)
+
     @property
     def nevents(self):
         if self.total_events >= 0 and self.total_events < self.nevents_orig:
             return self.total_events
         else:
             return self.nevents_orig
-        
+
+    def reduce_total_events_by(self, minus):
+        assert self.total_events < 0
+        self.total_events = self.nevents_orig - minus
+
     @property
     def partial_weight(self):
         return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
@@ -215,6 +225,9 @@ ttbar_samples = [
     MCSample('ttbarsemilep',     't#bar{t}, semileptonic',                                  '/TTJets_SemiLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM',             25424818,   4, 0.15, 225.2 * 0.438),
     MCSample('ttbardilep',       't#bar{t}, dileptonic',                                    '/TTJets_FullLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',                 12119013,   4, 0.15, 225.2 * 0.105),
     ]
+
+# JMTBAD
+ttbarhadronicext = MCSample('ttbarhadronic', 't#bar{t}, hadronic', '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM', 31223821, 4, 0.15, 225.2 * 0.457)
 
 qcd_samples = [
     MCSample('qcdht0100',        'QCD, 100 < H_{T} < 250 GeV',                              '/QCD_HT-100To250_TuneZ2star_8TeV-madgraph-pythia/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',       50129518, 801, 0.10, 1.04e7),
@@ -371,7 +384,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.dbs_url_num = 2
     sample.re_pat = True
     sample.scheduler = 'condor'
-    sample.ana_hash = '5c05eb42bbf1b04cf0f00b96bae48439'
+    sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
     sample.cross_section = 0.020
 
 ########################################################################
@@ -399,15 +412,31 @@ for sample in all_samples:
     exec '%s = sample' % sample.name
     samples_by_name[sample.name] = sample
 
-#for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
-#    sample.ana_ready = True
-
 ########################################################################
 
-# JMTBAD need to distinguish between total_events and ana_total_events
-# (and need a better name for total_events)
+# Bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-mfv_neutralino_tau1000um_M0300.total_events -= 500
+bjetsqcdpt = [s for s in auxiliary_background_samples if s.name.startswith('bjetsht') or s.name.startswith('qcdpt')]
+
+for sample in bjetsqcdpt:
+    sample.ana_hash = '737cfa6c7e996d624e490a5253db2bb8'
+
+for sample in ttbar_samples + qcd_samples + mfv_signal_samples + bjetsqcdpt:
+    sample.ana_ready = True
+
+for sample in mfv_signal_samples:
+    if '0300' in sample.name:
+        sample.ana_ready = False
+
+# JMTBAD replace ana_ready with ana_dict and check that
+
+for sample, reduce_by in [
+    (mfv_neutralino_tau1000um_M0300, 500),
+    (bjetsht0250, 108451*4),
+    (bjetsht0500, 17064*4),
+    (qcdpt0170, 33640*2),
+    ]:
+    sample.reduce_total_events_by(reduce_by)
 
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
@@ -480,6 +509,10 @@ qcdpt0800.ana_filter_eff =  2.505e-01
 qcdpt1000.ana_filter_eff =  2.341e-01
 qcdpt1400.ana_filter_eff =  1.969e-01
 qcdpt1800.ana_filter_eff =  1.546e-01
+bjetsht0100.ana_filter_eff = 1.0520e-03  #    15177 / 14426854
+bjetsht0250.ana_filter_eff = 8.1803e-02  #  1042986 / 12750008
+bjetsht0500.ana_filter_eff = 3.4381e-01  #  2262942 /  6581987
+bjetsht1000.ana_filter_eff = 4.7193e-01  #  1480886 /  3137949
 
 ########################################################################
 
@@ -513,27 +546,45 @@ if __name__ == '__main__':
         for sample in all_samples:
             sample.dump()
             print
+
     elif 'sites' in sys.argv:
-        from mydbs import *
         for sample in all_samples:
-            sites = sites_for_dataset(sample.dataset)
+            sites = DBS.sites_for_dataset(sample.dataset)
             print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
+
     elif 'checknumevents' in sys.argv:
-        from JMTucker.Tools.DBS import *
+        # this only applies if there is no filter applied
         diffs = []
         for sample in all_mc_samples:
             if not sample.ana_ready:
                 continue
-            x,y = sample.nevents, numevents_in_dataset(sample.ana_dataset, ana01=sample.ana_dbs_url_num == 1, ana02=sample.ana_dbs_url_num == 2)
-            print '%30s %14i %14i %s' % (sample.name, x, y, x == y)
+            x,y = sample.nevents, DBS.numevents_in_dataset(sample.ana_dataset, **sample.dbs_inst_dict(sample.ana_dbs_url_num))
+            print '%30s %14i %14i %14i %s' % (sample.name, x, y, x == y)
             if x != y:
                 diffs.append((sample.name, y))
         print '\nsuggested change:'
         for diff in diffs:
             print '%s.total_events = %i' % diff
+
+    elif 'filtereffs' in sys.argv:
+        diffs = []
+        for sample in all_mc_samples:
+            if not sample.ana_ready:
+                continue
+            o,x,y = sample.nevents_orig, sample.nevents, DBS.numevents_in_dataset(sample.ana_dataset, **sample.dbs_inst_dict(sample.ana_dbs_url_num))
+            print '%30s %14i %14i %14i' % (sample.name, o, y, x)
+            if x != y:
+                diffs.append((sample, y, x))
+        print '\nsuggested change:'
+        for sample, y, x in diffs:
+            eff = float(y)/x
+            if abs(eff - sample.ana_filter_eff) > 1e-4:
+                print '%s.ana_filter_eff = %9.4e  # %8i / %8i' % (sample.name, eff, y, x)
+
     elif 'getnewevents' in sys.argv:
         path = sys.argv[sys.argv.index('getnewevents')+1]
         check_nevents(all_mc_samples, path)
+
     elif 'merge' in sys.argv:
         files = []
         output = 'merge.root'
@@ -574,4 +625,3 @@ if __name__ == '__main__':
         cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
         print cmd
         os.system(cmd)
-

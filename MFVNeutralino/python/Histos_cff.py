@@ -14,6 +14,9 @@ mfvEventHistosTrigCut = mfvEventHistos.clone()
 mfvEventHistosOneVtx = mfvEventHistos.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 
+mfvEventIdsOneVtx = cms.EDAnalyzer('EventIdRecorder')
+mfvEventIds       = cms.EDAnalyzer('EventIdRecorder')
+
 mfvHistos = cms.Sequence(mfvWeight *
                          mfvVertexHistos *
                          mfvVertexHistosNoCuts *
@@ -22,9 +25,11 @@ mfvHistos = cms.Sequence(mfvWeight *
                          mfvVertexHistosTrigCut *
                          mfvEventHistosTrigCut *
                          mfvAnalysisCutsOneVtx *
+                         mfvEventIdsOneVtx *
                          mfvVertexHistosOneVtx *
                          mfvEventHistosOneVtx *
                          mfvAnalysisCuts *
+                         mfvEventIds *
                          mfvEventHistos *
                          mfvVertexHistosNoCutsWAnaCuts *
                          mfvVertexHistosWAnaCuts)

@@ -1,34 +1,28 @@
 #!/usr/bin/env python
 
 import os, sys
-from JMTucker.Tools.CRABTools import crab_dirs_from_argv
+from JMTucker.Tools.CRABTools import bool_from_argv, crab_dirs_from_argv
 
-NoInp = 'NoInp'
-if NoInp in sys.argv:
-    sys.argv.remove(NoInp)
-else:
-    NoInp = ''
-
-if not os.path.isdir('publish_logs'):
-    print 'Refusing to work: no publish_logs directory!'
-    sys.exit(1)
+NoInp = 'NoInp' if bool_from_argv('NoInp') else ''
+append = bool_from_argv('append')
 
 dirs = []
 for d in crab_dirs_from_argv():
     d = os.path.normpath(d)
-    bd = os.path.basename(d)
-    if bd == d:
-        p = 'publish_logs/publish.%s' % d
-    else:
-        dd = os.path.dirname(d)
-        os.system('mkdir -p publish_logs/%s' % dd)
-        p = 'publish_logs/%s/publish.%s' % (dd, bd)
-    if os.path.isfile(p):
-        print 'Refusing to launch for %s: %s already exists!' % (d,p)
-    else:
-        dirs.append((d, p))
+    bn = os.path.basename(d)
+    dn = os.path.dirname(d)
+    p = os.path.join(dn, 'publish_logs/%s.log' % bn.replace('crab_', ''))
 
-for d, p in dirs:
-    cmd = 'crab -c %s -publish%s >& %s &' % (d, NoInp, p)
+    app = ''
+    if os.path.isfile(p):
+        if append:
+            app = '>'
+        else:
+            print 'Refusing to launch for %s: %s already exists!' % (d,p)
+            continue
+    dirs.append((d, app, p))
+
+for d, app, p in dirs:
+    cmd = 'crab -c %s -publish%s >%s& %s &' % (d, NoInp, app, p)
     print cmd
     os.system(cmd)

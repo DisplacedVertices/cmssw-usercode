@@ -62,8 +62,6 @@ class CRABSubmitter:
 
         self.username = os.environ['USER']
         
-        mkdirs_if_needed(self.batch_dir + '/publish_logs/')
-
         self.git_status_dir = self.batch_dir + '/gitstatus/'
         mkdirs_if_needed(self.git_status_dir)
         os.system("git log --pretty=format:'%%H' -n 1 > %shash" % self.git_status_dir)
