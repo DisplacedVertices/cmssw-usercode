@@ -236,7 +236,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif 'signal' in sys.argv:
         samples = Samples.mfv_signal_samples
     elif 'myttbar' in sys.argv:
-        samples = Samples.myttbar
+        samples = Samples.myttbar_samples
     else:
         samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
 
