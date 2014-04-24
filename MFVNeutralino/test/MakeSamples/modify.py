@@ -1,3 +1,5 @@
+import FWCore.ParameterSet.Config as cms
+
 def set_particle_tau0(process, id, tau0):
     params = [x for x in process.generator.PythiaParameters.processParameters.value() if ':tau0' not in x]
     process.generator.PythiaParameters.processParameters = params
