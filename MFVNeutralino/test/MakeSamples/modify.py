@@ -1,3 +1,5 @@
+import FWCore.ParameterSet.Config as cms
+
 def set_particle_tau0(process, id, tau0):
     params = [x for x in process.generator.PythiaParameters.processParameters.value() if ':tau0' not in x]
     process.generator.PythiaParameters.processParameters = params
@@ -55,3 +57,32 @@ DECAY   1000022     0.01E+00   # neutralino decays
      0.5E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
 '''
     open(fn, 'wt').write(slha % locals())
+
+
+# JMTBAD these two don't do the full story for removing BS
+# pos/tilt/width
+
+def gauss_bs(process):
+    from IOMC.EventVertexGenerators.VtxSmearedParameters_cfi import VtxSmearedCommon, GaussVtxSmearingParameters
+    process.VtxSmeared = cms.EDProducer("GaussEvtVtxGenerator",
+                                        GaussVtxSmearingParameters,
+                                        VtxSmearedCommon
+                                        )
+
+def center_bs(process):
+    process.VtxSmeared.X0 = 0
+    process.VtxSmeared.Y0 = 0
+    process.VtxSmeared.Y0 = 0
+
+def nopu(process):
+    process.load('SimGeneral.MixingModule.mixNoPU_cfi')
+
+def ttbar(process):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'Main:timesAllowErrors = 10000',
+        'Top:gg2ttbar = on',
+        'Top:qqbar2ttbar = on',
+        '24:onMode = off',
+        '24:onIfAny = 1 2 3 4 5',
+        'Tune:pp 5',
+        )

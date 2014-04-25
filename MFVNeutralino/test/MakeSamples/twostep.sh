@@ -25,7 +25,7 @@ fi
 echo
 echo done with gensimhlt step at `date`, starting reco step
 echo
-cmsRun reco.py
+cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml reco.py
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -33,16 +33,18 @@ if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   exit $exit_code
 fi
-echo
-echo done with reco at `date`, starting pat step
-echo
-cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml pat.py
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  echo cmsRun exited pat step with error code $exit_code
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  exit $exit_code
+if [ -f pat.py ]; then
+  echo
+  echo done with reco at `date`, starting pat step
+  echo
+  cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml pat.py
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    echo cmsRun exited pat step with error code $exit_code
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    exit $exit_code
+  fi
 fi
 echo
 echo done at `date`
