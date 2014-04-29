@@ -222,7 +222,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             if (s.name != 'qcdmupt15' and 'qcdmu' in s.name) or 'qcdem' in s.name or 'qcdbce' in s.name:
                 samples.append(s)
     elif 'data' in sys.argv:
-        samples = Samples.data_samples[:1]
+        samples = Samples.data_samples
+        for sample in samples:
+            sample.json = 'ana_5pc.json'
     elif 'auxdata' in sys.argv:
         samples = Samples.auxiliary_data_samples
     elif '100k' in sys.argv:
