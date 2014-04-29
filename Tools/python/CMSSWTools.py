@@ -31,7 +31,7 @@ def file_event_from_argv(process):
             except ValueError:
                 pass
     if file is not None:
-        if not file.startswith('/store'):
+        if not file.startswith('/store') and not file.startswith('root://'):
             file = 'file:' + file
         print 'filename from argv:', file
         process.source.fileNames = [file]
