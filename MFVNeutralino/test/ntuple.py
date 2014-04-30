@@ -60,6 +60,8 @@ elif track_used_req == 'nopvs':
 if keep_all:
     process.mfvEvent.skip_event_filter = ''
     process.mfvSelectedVerticesTight.produce_vertices = True
+    process.mfvSelectedVerticesTightLargeErr = process.mfvSelectedVerticesTight.clone(min_bs2derr = 0.008, max_bs2derr = 1e9)
+    process.p.replace(process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTight * process.mfvSelectedVerticesTightLargeErr)
 else:
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
     process.triggerFilter = hltHighLevel.clone()
