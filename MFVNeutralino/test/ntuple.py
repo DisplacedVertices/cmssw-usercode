@@ -7,6 +7,7 @@ tuple_version = version
 
 runOnMC = True # magic line, don't touch
 debug = False
+track_histos_only = False
 require_pixel_hit = True
 track_used_req = None
 prepare_vis = False
@@ -91,12 +92,15 @@ if prepare_vis:
     process.pp = cms.Path(process.mfvGenParticles * process.ParticleListDrawer)
 
 
-if 'histos' in sys.argv:
+if 'histos' in sys.argv or track_histos_only:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
     process.mfvVertices.histos = True
     process.mfvVerticesToJets.histos = True
-    process.load('JMTucker.MFVNeutralino.Histos_cff')
-    process.outp.replace(process.mfvEvent, process.mfvEvent * process.mfvHistos) # in outp because histos needs to read mfvEvent
+
+if track_histos_only:
+    process.mfvVertices.track_histos_only = True
+    del process.out
+    del process.outp
 
 if 'test' in sys.argv:
     process.source.fileNames = [
