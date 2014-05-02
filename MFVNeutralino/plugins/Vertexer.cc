@@ -157,6 +157,7 @@ private:
   const double min_track_vertex_sig_to_remove;
   const bool remove_one_track_at_a_time;
   const bool histos;
+  const bool track_histos_only;
   const bool verbose;
   const bool phitest;
 
@@ -261,6 +262,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
+    track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     phitest(cfg.getUntrackedParameter<bool>("phitest", false))
 {
@@ -546,9 +548,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   std::auto_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
   std::vector<std::vector<std::pair<int, int> > > track_use(ntk);
 
-  if (ntk == 0) {
-    if (verbose)
-      printf("no seed tracks -> putting empty vertex collection into event\n");
+  if (ntk == 0 || track_histos_only) {
+    if (verbose) {
+      if (ntk == 0)
+        printf("no seed tracks");
+      else
+        printf("track histos only");
+      printf(" -> putting empty vertex collection into event\n");
+    }
     finish(event, vertices);
     return;
   }

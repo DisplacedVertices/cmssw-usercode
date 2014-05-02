@@ -54,6 +54,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              min_track_vertex_sig_to_remove = cms.double(1.5),
                              remove_one_track_at_a_time = cms.bool(True),
                              histos = cms.untracked.bool(False),
+                             track_histos_only = cms.untracked.bool(False),
                              verbose = cms.untracked.bool(False),
                              phitest = cms.untracked.bool(False),
                              )
