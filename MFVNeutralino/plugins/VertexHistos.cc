@@ -126,6 +126,9 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_tracks_jetdr[2][sv_tracks_num_indices][sv_num_indices];
   TH1F* h_sv_tracks_jetdphi[2][sv_tracks_num_indices][sv_num_indices];
   TH2F* h_sv_tracks_bs2derr_jetdr[2][sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dzpv0[2][sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dzpv1[2][sv_tracks_num_indices][sv_num_indices];
+  TH1F* h_sv_tracks_dzpv2[2][sv_tracks_num_indices][sv_num_indices];
 
   TH1F* h_sv_jets_ntracks[sv_num_indices];
   TH1F* h_sv_jets_ntracksinvtx[sv_num_indices];
@@ -200,8 +203,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       hs.add(TString::Format("track%i_minz",      itk).Data(), TString::Format("track%i innermost z of hit module",      itk).Data(),  15,   0,      15);
       hs.add(TString::Format("track%i_maxr",      itk).Data(), TString::Format("track%i outermost radius of hit module", itk).Data(),  14,   0,      14);
       hs.add(TString::Format("track%i_maxz",      itk).Data(), TString::Format("track%i outermost z of hit module",      itk).Data(),  15,   0,      15);
-      hs.add(TString::Format("track%i_jetdr",     itk).Data(), TString::Format("track%i #DeltaR(jets,track)",           itk).Data(),  50,   0,       7);
-      hs.add(TString::Format("track%i_jetdphi",   itk).Data(), TString::Format("track%i #Delta#phi(jets,track)",        itk).Data(),  64,  -3.2,       3.2);
+      hs.add(TString::Format("track%i_jetdr",     itk).Data(), TString::Format("track%i #DeltaR(jets,track)",            itk).Data(),  50,   0,       7);
+      hs.add(TString::Format("track%i_jetdphi",   itk).Data(), TString::Format("track%i #Delta#phi(jets,track)",         itk).Data(),  64,  -3.2,     3.2);
+      hs.add(TString::Format("track%i_dzpv0",     itk).Data(), TString::Format("track%i dz(the PV) (cm)",                itk).Data(), 100,   0,       2);
+      hs.add(TString::Format("track%i_dzpv1",     itk).Data(), TString::Format("track%i dz(closest PV) (cm)",            itk).Data(), 100,   0,       2);
+      hs.add(TString::Format("track%i_dzpv2",     itk).Data(), TString::Format("track%i dz(closest PV not the PV) (cm)", itk).Data(), 100,   0,       2);
     }
 
     hs.add("ntracksdrlt0p50", "# of tracks/SV w/ #DeltaR(jets,track) < 0.50", 40, 0, 40);
@@ -448,6 +454,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
           h_sv_tracks_jetdr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_jetdr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #DeltaR(jets,track);arb. units", exc, extc2, extc), 50, 0, 7);
           h_sv_tracks_jetdphi[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_jetdphi", exc, extc2, extc), TString::Format(";%s SV %s %stracks #Delta#phi(jets,track);arb. units", exc, extc2, extc), 64, -3.2, 3.2);
           h_sv_tracks_bs2derr_jetdr[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracks_%s_bs2derr_jetdr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #DeltaR(jets,track);bs2derr", exc, extc2, extc), 50, 0, 7, 100, 0, 0.05);
+          h_sv_tracks_dzpv0[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzpv0", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(the PV) (cm);arb. units", exc, extc2, extc), 100, 0, 2);
+          h_sv_tracks_dzpv1[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzpv1", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(closest PV) (cm);arb. units", exc, extc2, extc), 100, 0, 2);
+          h_sv_tracks_dzpv2[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzpv2", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(closest PV not the PV) (cm);arb. units", exc, extc2, extc), 100, 0, 2);
         }
       }
 
@@ -791,6 +800,56 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
           tracksdrlt1p57 -= TVector3(tracks[itk].px(), tracks[itk].py(), tracks[itk].pz());
         }
 
+        double absdz = 100000;
+        for (int i = 1; i < int(primary_vertices->size()); ++i) {
+          const reco::Vertex& pvi = primary_vertices->at(i);
+          const math::XYZPoint pvi_xyz(pvi.x(), pvi.y(), pvi.z());
+            if (fabs(tracks[itk].dz(pvi_xyz)) < absdz) {
+              absdz = fabs(tracks[itk].dz(pvi_xyz));
+            }
+        }
+        double absdz0 = fabs(tracks[itk].dz(pv));
+        double absdz1 = absdz0 < absdz ? absdz0 : absdz;
+        double absdz2 = absdz;
+
+        if (itk < max_ntracks) {
+          v[TString::Format("track%i_pt",        itk).Data()] = tracks[itk].pt();
+          v[TString::Format("track%i_eta",       itk).Data()] = tracks[itk].eta();
+          v[TString::Format("track%i_phi",       itk).Data()] = tracks[itk].phi();
+          v[TString::Format("track%i_charge",    itk).Data()] = tracks[itk].charge();
+          v[TString::Format("track%i_dxybs",     itk).Data()] = tracks[itk].dxy(bs);
+          v[TString::Format("track%i_dzbs",      itk).Data()] = tracks[itk].dz(bs);
+          v[TString::Format("track%i_dxypv",     itk).Data()] = tracks[itk].dxy(pv);
+          v[TString::Format("track%i_dzpv",      itk).Data()] = tracks[itk].dz(pv);
+          v[TString::Format("track%i_dxyerr",    itk).Data()] = tracks[itk].dxyError();
+          v[TString::Format("track%i_dzerr",     itk).Data()] = tracks[itk].dzError();
+          v[TString::Format("track%i_dxyipv1",   itk).Data()] = dxy_ipv.first;
+          v[TString::Format("track%i_dxyipv",    itk).Data()] = dxy_ipv.second.value();
+          v[TString::Format("track%i_dxyipverr", itk).Data()] = dxy_ipv.second.error();
+          v[TString::Format("track%i_d3dipv1",   itk).Data()] = d3d_ipv.first;
+          v[TString::Format("track%i_d3dipv",    itk).Data()] = d3d_ipv.second.value();
+          v[TString::Format("track%i_d3dipverr", itk).Data()] = d3d_ipv.second.error();
+          v[TString::Format("track%i_dxyisv1",   itk).Data()] = dxy_isv.first;
+          v[TString::Format("track%i_dxyisv",    itk).Data()] = dxy_isv.second.value();
+          v[TString::Format("track%i_dxyisverr", itk).Data()] = dxy_isv.second.error();
+          v[TString::Format("track%i_d3disv1",   itk).Data()] = d3d_isv.first;
+          v[TString::Format("track%i_d3disv",    itk).Data()] = d3d_isv.second.value();
+          v[TString::Format("track%i_d3disverr", itk).Data()] = d3d_isv.second.error();
+          v[TString::Format("track%i_chi2dof",   itk).Data()] = tracks[itk].chi2() / tracks[itk].ndof();
+          v[TString::Format("track%i_nhits",     itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits();
+          v[TString::Format("track%i_npixel",    itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits();
+          v[TString::Format("track%i_nstrip",    itk).Data()] = tracks[itk].hitPattern().numberOfValidStripHits();
+          v[TString::Format("track%i_minr",      itk).Data()] = se.min_r;
+          v[TString::Format("track%i_minz",      itk).Data()] = se.min_z;
+          v[TString::Format("track%i_maxr",      itk).Data()] = se.max_r;
+          v[TString::Format("track%i_maxz",      itk).Data()] = se.max_z;
+          v[TString::Format("track%i_jetdr",     itk).Data()] = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
+          v[TString::Format("track%i_jetdphi",   itk).Data()] = reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi());
+          v[TString::Format("track%i_dzpv0",     itk).Data()] = absdz0;
+          v[TString::Format("track%i_dzpv1",     itk).Data()] = absdz1;
+          v[TString::Format("track%i_dzpv2",     itk).Data()] = absdz2;
+        }
+
         for (int i = 0; i < sv_tracks_num_indices; ++i) {
           if (i == 1 && trackjetdr >= 0.5) continue;
           if (i == 2 && (trackjetdr < 1.57 || tracks[itk].dxyError() < 0.02)) continue;
@@ -827,6 +886,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
           fill_multi(h_sv_tracks_jetdr[0][i],     isv, trackjetdr, *weight);
           fill_multi(h_sv_tracks_jetdphi[0][i],   isv, reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi()), *weight);
           fill_multi(h_sv_tracks_bs2derr_jetdr[0][i], isv, trackjetdr, aux.bs2derr, *weight);
+          fill_multi(h_sv_tracks_dzpv0[0][i],     isv, absdz0, *weight);
+          fill_multi(h_sv_tracks_dzpv1[0][i],     isv, absdz1, *weight);
+          fill_multi(h_sv_tracks_dzpv2[0][i],     isv, absdz2, *weight);
         }
       }
       v["ntracksdrlt0p50"] = ntracksdrlt0p50;
@@ -835,51 +897,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       v["tracksdrlt1p57pt"] = tracksdrlt1p57.Pt();
       v["tracksdrlt1p57eta"] = tracksdrlt1p57.Eta();
       v["tracksdrlt1p57phi"] = tracksdrlt1p57.Phi();
-
-      for (int itk = 0, itke = std::min(int(tracks.size()), max_ntracks); itk < itke; ++itk) {
-        v[TString::Format("track%i_pt",        itk).Data()] = tracks[itk].pt();
-        v[TString::Format("track%i_eta",       itk).Data()] = tracks[itk].eta();
-        v[TString::Format("track%i_phi",       itk).Data()] = tracks[itk].phi();
-        v[TString::Format("track%i_charge",    itk).Data()] = tracks[itk].charge();
-        v[TString::Format("track%i_dxybs",     itk).Data()] = tracks[itk].dxy(bs);
-        v[TString::Format("track%i_dzbs",      itk).Data()] = tracks[itk].dz(bs);
-        v[TString::Format("track%i_dxypv",     itk).Data()] = tracks[itk].dxy(pv);
-        v[TString::Format("track%i_dzpv",      itk).Data()] = tracks[itk].dz(pv);
-        v[TString::Format("track%i_dxyerr",    itk).Data()] = tracks[itk].dxyError();
-        v[TString::Format("track%i_dzerr",     itk).Data()] = tracks[itk].dzError();
-
-        const reco::TransientTrack& ttk = tt_builder->build((const reco::Track*)(&tracks[itk]));
-        auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, thepv);
-        auto dxy_isv = IPTools::absoluteTransverseImpactParameter(ttk, rv);
-        auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, thepv);
-        auto d3d_isv = IPTools::absoluteImpactParameter3D(ttk, rv);
-        v[TString::Format("track%i_dxyipv1",   itk).Data()] = dxy_ipv.first;
-        v[TString::Format("track%i_dxyipv",    itk).Data()] = dxy_ipv.second.value();
-        v[TString::Format("track%i_dxyipverr", itk).Data()] = dxy_ipv.second.error();
-        v[TString::Format("track%i_d3dipv1",   itk).Data()] = d3d_ipv.first;
-        v[TString::Format("track%i_d3dipv",    itk).Data()] = d3d_ipv.second.value();
-        v[TString::Format("track%i_d3dipverr", itk).Data()] = d3d_ipv.second.error();
-        v[TString::Format("track%i_dxyisv1",   itk).Data()] = dxy_isv.first;
-        v[TString::Format("track%i_dxyisv",    itk).Data()] = dxy_isv.second.value();
-        v[TString::Format("track%i_dxyisverr", itk).Data()] = dxy_isv.second.error();
-        v[TString::Format("track%i_d3disv1",   itk).Data()] = d3d_isv.first;
-        v[TString::Format("track%i_d3disv",    itk).Data()] = d3d_isv.second.value();
-        v[TString::Format("track%i_d3disverr", itk).Data()] = d3d_isv.second.error();
-
-        v[TString::Format("track%i_chi2dof",   itk).Data()] = tracks[itk].chi2() / tracks[itk].ndof();
-        v[TString::Format("track%i_nhits",     itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits();
-        v[TString::Format("track%i_npixel",    itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits();
-        v[TString::Format("track%i_nstrip",    itk).Data()] = tracks[itk].hitPattern().numberOfValidStripHits();
-
-        NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern());
-        v[TString::Format("track%i_minr",      itk).Data()] = se.min_r;
-        v[TString::Format("track%i_minz",      itk).Data()] = se.min_z;
-        v[TString::Format("track%i_maxr",      itk).Data()] = se.max_r;
-        v[TString::Format("track%i_maxz",      itk).Data()] = se.max_z;
-
-        v[TString::Format("track%i_jetdr",     itk).Data()] = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
-        v[TString::Format("track%i_jetdphi",   itk).Data()] = reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi());
-      }
 
       if (vertex_to_jets_src.label() != "") {
         int njets = vertices_to_jets->numberOfAssociations(rvref);
