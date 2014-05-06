@@ -171,6 +171,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif keep_all:
         batch_name_extra += '_WAll'
 
+    if track_histos_only:
+        batch_name_extra += '_TrackHistosOnly'
+
     if debug:
         batch_name_extra += '_WDebug'
 
@@ -244,7 +247,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif 'signal' in sys.argv:
         samples = Samples.mfv_signal_samples
     elif 'myttbar' in sys.argv:
-        samples = Samples.myttbar_samples
+        samples = [Samples.myttbarpynopu] #Samples.myttbar_samples
     else:
         samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
 
