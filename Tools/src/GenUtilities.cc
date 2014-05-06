@@ -267,3 +267,16 @@ void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::
   p.print_vertex = print_vtx;
   p.Print(c, name);
 }
+
+int gen_jet_id(const reco::GenJet& jet) {
+  int id = 0;
+  for (const reco::GenParticle* g : jet.getGenConstituents()) {
+    if (id == 0) {
+      if (has_any_ancestor_such_that(g, [](const reco::Candidate* c) { return is_bhadron(c); }))
+        id = 5;
+      else if (has_any_ancestor_such_that(g, [](const reco::Candidate* c) { return is_chadron(c); }))
+        id = 4;
+    }
+  }
+  return id;
+}

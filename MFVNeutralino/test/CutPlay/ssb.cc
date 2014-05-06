@@ -2,6 +2,7 @@
 #include <cassert>
 #include <map>
 #include <memory>
+#include <set>
 #include <vector>
 #include <getopt.h>
 #include "Math/QuantFuncMathCore.h"
@@ -241,6 +242,7 @@ struct z_calculator {
     double tau() const { return lumi() / options.int_lumi; }
 
     std::map<std::string, TH1F*> hists;
+    std::set<std::string> vars_ok;
 
     const TH1F* hist(const std::string& var) const {
       auto it = hists.find(var);
@@ -266,8 +268,13 @@ struct z_calculator {
 
       printf("name: %40s   raw nevents: %7.1f   weight: %7.4e\n", name.c_str(), nm1, weight());
 
-      for (const std::string& var : vars)
-        hists[var] = (TH1F*)file->Get(var.c_str());
+      for (const std::string& var : vars) {
+        TObject* o = file->Get(var.c_str());
+        if (o) {
+          vars_ok.insert(var);
+          hists[var] = (TH1F*)o;
+        }
+      }
     }
   };
 
@@ -377,6 +384,12 @@ struct z_calculator {
       if (s.is_signal == signal) {
         double w = s.weight();
 
+        if (s.vars_ok.find(var) == s.vars_ok.end()) {
+          fprintf(stderr, "total_hist: %s var not found", var.c_str());
+          delete hs;
+          return 0;
+        }
+
         TH1F* h = (TH1F*)s.hist(var)->Clone(TString::Format("total_%s", var.c_str()));
         h->Sumw2();
         h->SetFillColor(s.color);
@@ -422,6 +435,11 @@ struct z_calculator {
 
   void max_z(const std::string& var) const {
     THStack* sigHist = total_hist(var, true, true);
+    if (sigHist == 0) {
+      fprintf(stderr, "skipping var %s\n", var.c_str());
+      return;
+    }
+
     THStack* bkgHist = total_hist(var, false, true);
     TAxis* xax = ((TH1F*)sigHist->GetHists()->First())->GetXaxis();
 
@@ -467,7 +485,7 @@ struct z_calculator {
       bkgpl_eyh[i-1] = 0; //bkgpl_v.upper - bkgpl_v.hat;
 
       if (options.printall)
-        printf("%16s%6.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", xax->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl, s/nsig_nm1, s/nsig_tot, b/nbkg_nm1, b/nbkg_tot);
+        printf("%16s%6.3f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f%9.2f %9.2e %9.2e %9.2e %9.2e\n", "", xax->GetBinLowEdge(i), s, b, sigb, zssb, zssb20, zssbsb, zssbsb20, zpl, s/nsig_nm1, s/nsig_tot, b/nbkg_nm1, b/nbkg_tot);
 
       h_sigfrac->SetBinContent(i, s/nsig_nm1);
       h_bkgfrac->SetBinContent(i, b/nbkg_nm1);

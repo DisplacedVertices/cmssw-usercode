@@ -32,6 +32,7 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
 std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::Candidate* c, int allowed_others);
 const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others);
 void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus=true, const bool print_vtx=false);
+int gen_jet_id(const reco::GenJet& jet);
 
 template <typename T>
 std::vector<const reco::GenParticle*> constituents_from_ancestors(const reco::GenJet& gen_jet, const T& ancestors) {

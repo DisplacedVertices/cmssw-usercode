@@ -59,6 +59,9 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      min_bs3ddist         = cms.double(0),
                                      max_sumnhitsbehind   = cms.int32(1000000),
                                      bs_hemisphere        = cms.int32(0),
+                                     max_ntrackssharedwpv = cms.int32(1000000),
+                                     max_ntrackssharedwpvs = cms.int32(1000000),
+                                     max_npvswtracksshared = cms.int32(1000000),
                                      sort_by = cms.string('ntracks_then_mass'),
                                      )
 
@@ -78,4 +81,9 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_sumnhitsbehind = 0,
     )
 
-mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose * mfvSelectedVerticesTight)
+mfvSelectedVerticesTightLargeErr = mfvSelectedVerticesTight.clone(
+    min_bs2derr = 0.008,
+    max_bs2derr = 1e9,
+    )
+
+mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose * mfvSelectedVerticesTight * mfvSelectedVerticesTightLargeErr)

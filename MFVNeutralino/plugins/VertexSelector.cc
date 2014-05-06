@@ -80,6 +80,9 @@ private:
   const double min_bs3ddist;
   const int max_sumnhitsbehind;
   const int bs_hemisphere;
+  const int max_ntrackssharedwpv;
+  const int max_ntrackssharedwpvs;
+  const int max_npvswtracksshared;
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
@@ -142,7 +145,10 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_bs2dsig(cfg.getParameter<double>("min_bs2dsig")),
     min_bs3ddist(cfg.getParameter<double>("min_bs3ddist")),
     max_sumnhitsbehind(cfg.getParameter<int>("max_sumnhitsbehind")),
-    bs_hemisphere(cfg.getParameter<int>("bs_hemisphere"))
+    bs_hemisphere(cfg.getParameter<int>("bs_hemisphere")),
+    max_ntrackssharedwpv(cfg.getParameter<int>("max_ntrackssharedwpv")),
+    max_ntrackssharedwpvs(cfg.getParameter<int>("max_ntrackssharedwpvs")),
+    max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared"))
 {
   if (produce_refs)
     produces<reco::VertexRefVector>();
@@ -212,7 +218,10 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.sumnhitsbehind() <= max_sumnhitsbehind &&
     ((bs_hemisphere == 0) ||
      (bs_hemisphere == 1 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >=  2.5857  || atan2(vtx.y - 0.3928, vtx.x - 0.244) < -0.5558)) ||
-     (bs_hemisphere == 2 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >= -0.5558  && atan2(vtx.y - 0.3928, vtx.x - 0.244) <  2.5857)));
+     (bs_hemisphere == 2 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >= -0.5558  && atan2(vtx.y - 0.3928, vtx.x - 0.244) <  2.5857))) &&
+    vtx.ntrackssharedwpv <= max_ntrackssharedwpv &&
+    vtx.ntrackssharedwpvs <= max_ntrackssharedwpvs &&
+    vtx.npvswtracksshared <= max_npvswtracksshared;
 }
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {

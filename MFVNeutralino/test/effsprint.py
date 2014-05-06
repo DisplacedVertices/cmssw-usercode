@@ -12,6 +12,7 @@ int_lumi = 20000.
 cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3', '15p0')
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
+nm1nvtx = 1 if 'nm1one' in sys.argv else 2
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
@@ -44,7 +45,7 @@ def effs(fn):
         for icut, cut in enumerate(cuts):
             h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
             h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-            nm1 = get_n('evtHstNo%s' % cut)
+            nm1 = get_n('evtHst%sVNo%s' % (nm1nvtx, cut))
             nm1_abs = float(nm1)/den
             nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
             h_nm1_abs.SetBinContent(icut+1, nm1_abs)

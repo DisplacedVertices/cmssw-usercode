@@ -2,7 +2,7 @@
 
 import os, re, sys
 from copy import copy
-from JMTucker.Tools.DBS import files_in_dataset
+import JMTucker.Tools.DBS as DBS
 from JMTucker.Tools.ROOTTools import ROOT
 from JMTucker.Tools.general import big_warn
 
@@ -20,9 +20,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 3
-    ANA_HASH = ''
-    PUBLISH_USER = ''
-    ANA_VERSION = 'v11'
+    ANA_HASH = 'f1615d49c4ae9d19e350601d059c4237'
+    PUBLISH_USER = 'tucker'
+    ANA_VERSION = 'v17'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -68,6 +68,9 @@ class Sample(object):
     def ana_dbs_url(self):
         return self._get_dbs_url(self.ana_dbs_url_num)
 
+    def dbs_inst_dict(self, num):
+        return dict(('ana0%i' % i, num == i) for i in xrange(1,4))
+
     @property
     def primary_dataset(self):
         return self.dataset.split('/')[1]
@@ -84,9 +87,9 @@ class Sample(object):
         if self.local_filenames:
             return self.local_filenames
         if ana:
-            return files_in_dataset(self.ana_dataset, ana01=self.ana_dbs_url_num == 1, ana02=self.ana_dbs_url_num == 2)
+            return DBS.files_in_dataset(self.ana_dataset, **self.dbs_inst_dict(self.ana_dbs_url_num))
         else:
-            return files_in_dataset(self.dataset, ana01=self.dbs_url_num == 1, ana02=self.dbs_url_num == 2)
+            return DBS.files_in_dataset(self.dataset,     **self.dbs_inst_dict(self.dbs_url_num))
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -136,13 +139,20 @@ class MCSample(Sample):
             f = ROOT.TFile(fn)
         return f.Get(hist_path).GetEntries()
 
+    # JMTBAD need to distinguish between total_events and ana_total_events
+    # (and need a better name for total_events)
+
     @property
     def nevents(self):
         if self.total_events >= 0 and self.total_events < self.nevents_orig:
             return self.total_events
         else:
             return self.nevents_orig
-        
+
+    def reduce_total_events_by(self, minus):
+        assert self.total_events < 0
+        self.total_events = self.nevents_orig - minus
+
     @property
     def partial_weight(self):
         return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
@@ -215,6 +225,9 @@ ttbar_samples = [
     MCSample('ttbarsemilep',     't#bar{t}, semileptonic',                                  '/TTJets_SemiLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM',             25424818,   4, 0.15, 225.2 * 0.438),
     MCSample('ttbardilep',       't#bar{t}, dileptonic',                                    '/TTJets_FullLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',                 12119013,   4, 0.15, 225.2 * 0.105),
     ]
+
+# JMTBAD
+ttbarhadronicext = MCSample('ttbarhadronic', 't#bar{t}, hadronic', '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM', 31223821, 4, 0.15, 225.2 * 0.457)
 
 qcd_samples = [
     MCSample('qcdht0100',        'QCD, 100 < H_{T} < 250 GeV',                              '/QCD_HT-100To250_TuneZ2star_8TeV-madgraph-pythia/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',       50129518, 801, 0.10, 1.04e7),
@@ -301,6 +314,8 @@ auxiliary_background_samples = [
     MCSample('qcdbce170', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_170_250_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1948112, 801, 0.10, 2.04e-2*3.10e4),
     MCSample('qcdbce250', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_250_350_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 2026521, 801, 0.10, 2.43e-2*4.25e3),
     MCSample('qcdbce350', 'QCDbce, < #hat{p}_{T} < GeV', '/QCD_Pt_350_BCtoE_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',     1948532, 801, 0.10, 2.95e-2*8.10e2),
+
+    MCSample('qcdb150', 'QCDb, #hat{p}_{T} > 150 GeV', '/QCD_Pt-150_bEnriched_TuneZ2star_8TeV-pythia6-evtgen/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 474151, 801, 0.10, 6.73e4*1.26e-1),
 ]
 
 ########################################################################
@@ -354,9 +369,13 @@ mfv_signal_samples_ex = [
     (9900, 1000, MCSample('mfv_neutralino_tau9900um_M1000', 'M_{tbs} = 1000 GeV, #tau = 9.9 mm',   '/mfv_neutralino_tau9900um_M1000/tucker-mfv_neutralino_tau9900um_M1000-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99899, 2, *mfv_xsec[1000]),), 
     ]
 
+mfv_signal_samples_nouse = []
 mfv_signal_samples = []
 for tau, mass, sample in mfv_signal_samples_ex:
-    mfv_signal_samples.append(sample)
+    if tau < 100:
+        mfv_signal_samples_nouse.append(sample)
+    else:
+        mfv_signal_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
     sample.events_per = 1500
@@ -365,8 +384,18 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.dbs_url_num = 2
     sample.re_pat = True
     sample.scheduler = 'condor'
-    sample.ana_hash = '5c05eb42bbf1b04cf0f00b96bae48439'
+    sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
     sample.cross_section = 0.020
+
+########################################################################
+
+myttbarpythia =  MCSample('myttbarpythia', '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER', 99850, 4, 0.15, 225.2 * 0.457)
+myttbarpynopu =  MCSample('myttbarpynopu', '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',       99950, 4, 0.15, 225.2 * 0.457)
+
+myttbar_samples = [myttbarpythia, myttbarpynopu]
+for s in myttbar_samples:
+    s.is_pythia8 = True
+    s.dbs_url_num = 3
 
 ########################################################################
 
@@ -385,7 +414,7 @@ auxiliary_data_samples = [
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples 
+all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse + myttbar_samples
 all_samples = all_data_samples + all_mc_samples
 
 samples_by_name = {}
@@ -393,16 +422,31 @@ for sample in all_samples:
     exec '%s = sample' % sample.name
     samples_by_name[sample.name] = sample
 
-#for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
-#    sample.ana_ready = True
-
 ########################################################################
 
-# JMTBAD need to distinguish between total_events and ana_total_events
-# (and need a better name for total_events)
+# Bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-ttbardilep.total_events = ttbardilep.nevents_orig - 3*42648
-ttbarhadronic.total_events = ttbarhadronic.nevents_orig - 23*16736
+bjetsqcdpt = [s for s in auxiliary_background_samples if s.name.startswith('bjetsht') or s.name.startswith('qcdpt')]
+
+for sample in bjetsqcdpt:
+    sample.ana_hash = '737cfa6c7e996d624e490a5253db2bb8'
+
+for sample in ttbar_samples + qcd_samples + mfv_signal_samples + bjetsqcdpt:
+    sample.ana_ready = True
+
+for sample in mfv_signal_samples:
+    if '0300' in sample.name:
+        sample.ana_ready = False
+
+# JMTBAD replace ana_ready with ana_dict and check that
+
+for sample, reduce_by in [
+    (mfv_neutralino_tau1000um_M0300, 500),
+    (bjetsht0250, 108451*4),
+    (bjetsht0500, 17064*4),
+    (qcdpt0170, 33640*2),
+    ]:
+    sample.reduce_total_events_by(reduce_by)
 
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
@@ -415,16 +459,25 @@ mfv_neutralino_tau0010um_M0600.ana_filter_eff = 9.9530e-01  #    99231 /    9970
 mfv_neutralino_tau0010um_M0800.ana_filter_eff = 9.9795e-01  #    99745 /    99950
 mfv_neutralino_tau0010um_M1000.ana_filter_eff = 9.9892e-01  #    99791 /    99899
 mfv_neutralino_tau0100um_M0200.ana_filter_eff = 4.7951e-01  #    47807 /    99700
+mfv_neutralino_tau0100um_M0300.ana_filter_eff = 8.6538e-01  #    86538 /   100000
 mfv_neutralino_tau0100um_M0400.ana_filter_eff = 9.6769e-01  #    96043 /    99250
 mfv_neutralino_tau0100um_M0600.ana_filter_eff = 9.9554e-01  #    99206 /    99650
 mfv_neutralino_tau0100um_M0800.ana_filter_eff = 9.9795e-01  #    99795 /   100000
 mfv_neutralino_tau0100um_M1000.ana_filter_eff = 9.9890e-01  #    99639 /    99749
+mfv_neutralino_tau0300um_M0200.ana_filter_eff = 4.7439e-01  #    47439 /   100000
+mfv_neutralino_tau0300um_M0300.ana_filter_eff = 8.2247e-01  #    82247 /   100000
+mfv_neutralino_tau0300um_M0400.ana_filter_eff = 9.6975e-01  #    96975 /   100000
+mfv_neutralino_tau0300um_M0600.ana_filter_eff = 9.3989e-01  #    93989 /   100000
+mfv_neutralino_tau0300um_M0800.ana_filter_eff = 9.9264e-01  #    99264 /   100000
+mfv_neutralino_tau0300um_M1000.ana_filter_eff = 9.9035e-01  #    99035 /   100000
 mfv_neutralino_tau1000um_M0200.ana_filter_eff = 4.7873e-01  #    47754 /    99752
+mfv_neutralino_tau1000um_M0300.ana_filter_eff = 7.9684e-01  #    79286 /    99500
 mfv_neutralino_tau1000um_M0400.ana_filter_eff = 9.6798e-01  #    96653 /    99850
 mfv_neutralino_tau1000um_M0600.ana_filter_eff = 9.9508e-01  #    99360 /    99851
 mfv_neutralino_tau1000um_M0800.ana_filter_eff = 9.9825e-01  #    99774 /    99949
 mfv_neutralino_tau1000um_M1000.ana_filter_eff = 9.9866e-01  #    99866 /   100000
 mfv_neutralino_tau9900um_M0200.ana_filter_eff = 4.7714e-01  #    47690 /    99950
+mfv_neutralino_tau9900um_M0300.ana_filter_eff = 8.6473e-01  #    86473 /   100000
 mfv_neutralino_tau9900um_M0400.ana_filter_eff = 9.6734e-01  #    96734 /   100000
 mfv_neutralino_tau9900um_M0600.ana_filter_eff = 9.9511e-01  #    99461 /    99950
 mfv_neutralino_tau9900um_M0800.ana_filter_eff = 9.9818e-01  #    99718 /    99900
@@ -441,8 +494,8 @@ singletop_t.ana_filter_eff          = 5.4126e-02  #   203416 /  3758227
 singletop_tW.ana_filter_eff         = 1.8520e-01  #    92167 /   497658
 singletop_tW_tbar.ana_filter_eff    = 1.8475e-01  #    91167 /   493460
 singletop_t_tbar.ana_filter_eff     = 5.3102e-02  #   102756 /  1935072
-ttbardilep.ana_filter_eff           = 1.3153e-01  #  1577210 / 11991069
-ttbarhadronic.ana_filter_eff        = 4.7515e-01  #  4823997 / 10152516
+ttbardilep.ana_filter_eff           = 1.3151e-01  #  1593779 / 12119013
+ttbarhadronic.ana_filter_eff        = 4.7517e-01  #  5007127 / 10537444
 ttbarsemilep.ana_filter_eff         = 2.7453e-01  #  6979960 / 25424818
 ttgjets.ana_filter_eff              = 5.0128e-01  #   862177 /  1719954
 ttwjets.ana_filter_eff              = 6.0494e-01  #   118596 /   196046
@@ -466,6 +519,10 @@ qcdpt0800.ana_filter_eff =  2.505e-01
 qcdpt1000.ana_filter_eff =  2.341e-01
 qcdpt1400.ana_filter_eff =  1.969e-01
 qcdpt1800.ana_filter_eff =  1.546e-01
+bjetsht0100.ana_filter_eff = 1.0520e-03  #    15177 / 14426854
+bjetsht0250.ana_filter_eff = 8.1803e-02  #  1042986 / 12750008
+bjetsht0500.ana_filter_eff = 3.4381e-01  #  2262942 /  6581987
+bjetsht1000.ana_filter_eff = 4.7193e-01  #  1480886 /  3137949
 
 ########################################################################
 
@@ -499,27 +556,45 @@ if __name__ == '__main__':
         for sample in all_samples:
             sample.dump()
             print
+
     elif 'sites' in sys.argv:
-        from mydbs import *
         for sample in all_samples:
-            sites = sites_for_dataset(sample.dataset)
+            sites = DBS.sites_for_dataset(sample.dataset)
             print '%20s%15s %s' % (sample.name, num_events(sample.dataset), 'AT fnal' if [x for x in sites if 'fnal' in x] else 'NOT at fnal')
+
     elif 'checknumevents' in sys.argv:
-        from JMTucker.Tools.DBS import *
+        # this only applies if there is no filter applied
         diffs = []
         for sample in all_mc_samples:
             if not sample.ana_ready:
                 continue
-            x,y = sample.nevents, numevents_in_dataset(sample.ana_dataset, ana01=sample.ana_dbs_url_num == 1, ana02=sample.ana_dbs_url_num == 2)
-            print '%30s %14i %14i %s' % (sample.name, x, y, x == y)
+            x,y = sample.nevents, DBS.numevents_in_dataset(sample.ana_dataset, **sample.dbs_inst_dict(sample.ana_dbs_url_num))
+            print '%30s %14i %14i %14i %s' % (sample.name, x, y, x == y)
             if x != y:
                 diffs.append((sample.name, y))
         print '\nsuggested change:'
         for diff in diffs:
             print '%s.total_events = %i' % diff
+
+    elif 'filtereffs' in sys.argv:
+        diffs = []
+        for sample in all_mc_samples:
+            if not sample.ana_ready:
+                continue
+            o,x,y = sample.nevents_orig, sample.nevents, DBS.numevents_in_dataset(sample.ana_dataset, **sample.dbs_inst_dict(sample.ana_dbs_url_num))
+            print '%30s %14i %14i %14i' % (sample.name, o, y, x)
+            if x != y:
+                diffs.append((sample, y, x))
+        print '\nsuggested change:'
+        for sample, y, x in diffs:
+            eff = float(y)/x
+            if abs(eff - sample.ana_filter_eff) > 1e-4:
+                print '%s.ana_filter_eff = %9.4e  # %8i / %8i' % (sample.name, eff, y, x)
+
     elif 'getnewevents' in sys.argv:
         path = sys.argv[sys.argv.index('getnewevents')+1]
         check_nevents(all_mc_samples, path)
+
     elif 'merge' in sys.argv:
         files = []
         output = 'merge.root'
@@ -560,4 +635,3 @@ if __name__ == '__main__':
         cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
         print cmd
         os.system(cmd)
-

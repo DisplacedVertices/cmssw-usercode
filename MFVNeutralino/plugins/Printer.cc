@@ -146,11 +146,11 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     printf("beamspot: (%11.3g, %11.3g, %11.3g)\n", mevent->bsx, mevent->bsy, mevent->bsz);
     printf("npv: %u\n", mevent->npv);
     printf("pv: ntracks: %u   sumpt2: %11.3g   coords: (%11.3g, %11.3g, %11.3g)   rho: %11.3g\n", mevent->pv_ntracks, mevent->pv_sumpt2, mevent->pvx, mevent->pvy, mevent->pvz, mevent->pv_rho());
-    printf("njets: %u  (no pu l: %u  m: %u  t: %u)  jet_sum_ht: %11.3g   pt of jet #4: %11.3g   pt of jet #4: %11.3g   pt of jet #4: %11.3g\n", mevent->njets, mevent->njetsnopu[0], mevent->njetsnopu[1], mevent->njetsnopu[2], mevent->jet_sum_ht, mevent->jetpt4, mevent->jetpt5, mevent->jetpt6);
+    printf("njets: %u  (no pu l: %u  m: %u  t: %u)  jet_sum_ht: %11.3g   pt of jet #4: %11.3g   pt of jet #4: %11.3g   pt of jet #4: %11.3g\n", mevent->njets(), mevent->njetsnopu(0), mevent->njetsnopu(1), mevent->njetsnopu(2), mevent->jet_sum_ht(), mevent->jetpt4(), mevent->jetpt5(), mevent->jetpt6());
     printf("met: %11.3g   metx,y: (%11.3g, %11.3g)   phi: %11.3g   sig: %11.3g   dphimin: %11.3g\n", mevent->met(), mevent->metx, mevent->mety, mevent->metphi(), mevent->metsig, mevent->metdphimin);
     printf("nbtags (l,m,t): ");
-    for (uchar i : mevent->nbtags)
-      printf("%u ", i);
+    for (int i = 0; i < 3; ++i)
+      printf("%u ", mevent->nbtags(i));
     printf("\n");
     printf("nmu (l,m,t): ");
     for (int i = 0; i < 3; ++i)

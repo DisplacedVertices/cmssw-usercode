@@ -119,6 +119,8 @@ private:
   const edm::InputTag primary_vertices_src;
   const bool use_tracks;
   const edm::InputTag track_src;
+  const bool use_non_pv_tracks;
+  const bool use_non_pvs_tracks;
   const bool use_pf_candidates;
   const edm::InputTag pf_candidate_src;
   const bool use_pf_jets;
@@ -155,17 +157,26 @@ private:
   const double min_track_vertex_sig_to_remove;
   const bool remove_one_track_at_a_time;
   const bool histos;
+  const bool track_histos_only;
   const bool verbose;
   const bool phitest;
 
   TH1F* h_n_all_tracks;
-  TH1F* h_all_track_pt;
-  TH1F* h_all_track_dxy;
+  TH1F* h_all_track_pars[5];
+  TH1F* h_all_track_errs[5];
+  TH2F* h_all_track_pars_v_pars[5][4];
+  TH2F* h_all_track_errs_v_pars[5][5];
   TH1F* h_all_track_nhits;
+  TH1F* h_all_track_npxhits;
+  TH1F* h_all_track_nsthits;
   TH1F* h_n_seed_tracks;
-  TH1F* h_seed_track_pt;
-  TH1F* h_seed_track_dxy;
+  TH1F* h_seed_track_pars[5];
+  TH1F* h_seed_track_errs[5];
+  TH2F* h_seed_track_pars_v_pars[5][4];
+  TH2F* h_seed_track_errs_v_pars[5][5];
   TH1F* h_seed_track_nhits;
+  TH1F* h_seed_track_npxhits;
+  TH1F* h_seed_track_nsthits;
   TH2F* h_seed_pair_pt;
   TH2F* h_seed_pair_dxy;
   TH2F* h_seed_pair_nhits;
@@ -213,6 +224,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     primary_vertices_src(cfg.getParameter<edm::InputTag>("primary_vertices_src")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    use_non_pv_tracks(cfg.getParameter<bool>("use_non_pv_tracks")),
+    use_non_pvs_tracks(cfg.getParameter<bool>("use_non_pvs_tracks")),
     use_pf_candidates(cfg.getParameter<bool>("use_pf_candidates")),
     pf_candidate_src(cfg.getParameter<edm::InputTag>("pf_candidate_src")),
     use_pf_jets(cfg.getParameter<bool>("use_pf_jets")),
@@ -249,24 +262,51 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
+    track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     phitest(cfg.getUntrackedParameter<bool>("phitest", false))
 {
-  if (use_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
-    throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/pf_candidates/pf_jets/pat_jets";
+  if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
+    throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
 
   produces<reco::VertexCollection>();
 
   if (histos) {
     edm::Service<TFileService> fs;
     h_n_all_tracks                   = fs->make<TH1F>("h_n_all_tracks",                   "", 200,   0,   2000);
-    h_all_track_pt                   = fs->make<TH1F>("h_all_track_pt",                   "", 250,   0,    500);
-    h_all_track_dxy                  = fs->make<TH1F>("h_all_track_dxy",                  "", 200,  -0.1,    0.1);
+    const char* par_names[5] = {"pt", "eta", "phi", "dxy", "dz"};
+    const int par_nbins[5] = { 200, 200, 200, 200, 200 };
+    const double par_lo[5] = {   0, -2.6, -3.15, -0.2, -20 };
+    const double par_hi[5] = {  15,  2.6,  3.15,  0.2,  20 };
+    const double err_lo[5] = { 0 };
+    const double err_hi[5] = { 0.25, 0.1, 0.1, 0.5, 0.5 };
+    for (int i = 0; i < 5; ++i)
+      h_all_track_pars[i] = fs->make<TH1F>(TString::Format("h_all_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
+    for (int i = 0; i < 5; ++i)
+      h_all_track_errs[i] = fs->make<TH1F>(TString::Format("h_all_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
+    for (int i = 0; i < 5; ++i)
+      for (int j = i+1; j < 5; ++j)
+        h_all_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
+    for (int i = 0; i < 5; ++i)
+      for (int j = 0; j < 5; ++j)
+        h_all_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
+    h_all_track_npxhits              = fs->make<TH1F>("h_all_track_npxhits",              "",  12,   0,     12);
+    h_all_track_nsthits              = fs->make<TH1F>("h_all_track_nsthits",              "",  28,   0,     28);
     h_n_seed_tracks                  = fs->make<TH1F>("h_n_seed_tracks",                  "", 200,   0,    600);
-    h_seed_track_pt                  = fs->make<TH1F>("h_seed_track_pt",                  "", 250,   0,    500);
-    h_seed_track_dxy                 = fs->make<TH1F>("h_seed_track_dxy",                 "", 200,  -0.1,    0.1);
+    for (int i = 0; i < 5; ++i)
+      h_seed_track_pars[i] = fs->make<TH1F>(TString::Format("h_seed_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
+    for (int i = 0; i < 5; ++i)
+      h_seed_track_errs[i] = fs->make<TH1F>(TString::Format("h_seed_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
+    for (int i = 0; i < 5; ++i)
+      for (int j = i+1; j < 5; ++j)
+        h_seed_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
+    for (int i = 0; i < 5; ++i)
+      for (int j = 0; j < 5; ++j)
+        h_seed_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
     h_seed_track_nhits               = fs->make<TH1F>("h_seed_track_nhits",               "",  40,   0,     40);
+    h_seed_track_npxhits             = fs->make<TH1F>("h_seed_track_npxhits",              "",  12,   0,     12);
+    h_seed_track_nsthits             = fs->make<TH1F>("h_seed_track_nsthits",              "",  28,   0,     28);
     h_seed_pair_pt                   = fs->make<TH2F>("h_seed_pair_pt",                   "",  50,   0,    500,    50,   0,    500);
     h_seed_pair_dxy                  = fs->make<TH2F>("h_seed_pair_dxy",                  "",  40,  -0.1,    0.1,  40,  -0.1,    0.1);
     h_seed_pair_nhits                = fs->make<TH2F>("h_seed_pair_nhits",                "",  15,   0,     45,    15,   0,     45);
@@ -360,6 +400,32 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
       all_tracks.push_back(reco::TrackRef(tracks, i));
   }
+  else if (use_non_pv_tracks || use_non_pvs_tracks) {
+    std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
+    for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
+      const reco::Vertex& pv = primary_vertices->at(i);
+      for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
+        float w = pv.trackWeight(*it);
+        reco::TrackRef tk = it->castTo<reco::TrackRef>();
+        tracks_in_pvs[tk].push_back(std::make_pair(i, w));
+      }
+    }
+
+    edm::Handle<reco::TrackCollection> tracks;
+    event.getByLabel(track_src, tracks);
+    for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
+      reco::TrackRef tkref(tracks, i);
+      bool ok = true;
+      for (const auto& pv_use : tracks_in_pvs[tkref])
+        if (use_non_pvs_tracks || (use_non_pv_tracks && pv_use.first == 0)) {
+          ok = false;
+          break;
+        }
+
+      if (ok)
+        all_tracks.push_back(tkref);
+    }
+  }
   else if (use_pf_candidates) {
     edm::Handle<reco::PFCandidateCollection> pf_candidates;
     event.getByLabel(pf_candidate_src, pf_candidates);
@@ -432,13 +498,37 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }        
 
     if (histos) {
-      h_all_track_pt->Fill(pt);
-      h_all_track_dxy->Fill(dxy);
+      const double pars[5] = {pt, tk->eta(), tk->phi(), dxy, tk->dz(beamspot->position()) };
+      const double errs[5] = { tk->ptError(), tk->etaError(), tk->phiError(), tk->dxyError(), tk->dzError() };
+
+      for (int i = 0; i < 5; ++i) {
+        h_all_track_pars[i]->Fill(pars[i]);
+        h_all_track_errs[i]->Fill(errs[i]);
+        for (int j = 0; j < 5; ++j) {
+          if (j >= i+1)
+            h_all_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
+          h_all_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+        }
+      }
+
       h_all_track_nhits->Fill(nhits);
+      h_all_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
+      h_all_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
+
       if (use) {
-        h_seed_track_pt->Fill(pt);
-        h_seed_track_dxy->Fill(dxy);
+        for (int i = 0; i < 5; ++i) {
+          h_seed_track_pars[i]->Fill(pars[i]);
+          h_seed_track_errs[i]->Fill(errs[i]);
+          for (int j = 0; j < 5; ++j) {
+            if (j >= i+1)
+              h_seed_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
+            h_seed_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+          }
+        }
+
         h_seed_track_nhits->Fill(nhits);
+        h_seed_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
+        h_seed_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
       }
     }
   }
@@ -460,9 +550,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   std::auto_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
   std::vector<std::vector<std::pair<int, int> > > track_use(ntk);
 
-  if (ntk == 0) {
-    if (verbose)
-      printf("no seed tracks -> putting empty vertex collection into event\n");
+  if (ntk == 0 || track_histos_only) {
+    if (verbose) {
+      if (ntk == 0)
+        printf("no seed tracks");
+      else
+        printf("track histos only");
+      printf(" -> putting empty vertex collection into event\n");
+    }
     finish(event, vertices);
     return;
   }

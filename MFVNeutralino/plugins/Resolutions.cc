@@ -42,6 +42,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_r_eta;
   TH1F* h_r_phi;
   TH1F* h_r_mass;
+  TH1F* h_r_msptm;
+  TH1F* h_r_msptm_mass;
   TH1F* h_r_energy;
   TH1F* h_r_px;
   TH1F* h_r_py;
@@ -55,6 +57,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_f_p;
   TH1F* h_f_pt;
   TH1F* h_f_mass;
+  TH1F* h_f_msptm;
+  TH1F* h_f_msptm_mass;
   TH1F* h_f_energy;
 
   TH2F* h_rp_rmass;
@@ -70,6 +74,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_eta;
   TH2F* h_s_phi;
   TH2F* h_s_mass;
+  TH2F* h_s_msptm;
+  TH2F* h_s_msptm_mass;
   TH2F* h_s_energy;
   TH2F* h_s_px;
   TH2F* h_s_py;
@@ -112,6 +118,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_r_eta = fs->make<TH1F>("h_r_eta", ";eta resolution;number of vertices", 50, -4, 4);
   h_r_phi = fs->make<TH1F>("h_r_phi", ";phi resolution;number of vertices", 50, -3.15, 3.15);
   h_r_mass = fs->make<TH1F>("h_r_mass", ";mass resolution (GeV);number of vertices", 300, -1500, 1500);
+  h_r_msptm = fs->make<TH1F>("h_r_msptm", ";msptm resolution (GeV);number of vertices", 300, -1500, 1500);
+  h_r_msptm_mass = fs->make<TH1F>("h_r_msptm_mass", ";msptm resolution w.r.t. mass (GeV);number of vertices", 300, -1500, 1500);
   h_r_energy = fs->make<TH1F>("h_r_energy", ";energy resolution (GeV);number of vertices", 300, -1500, 1500);
   h_r_px = fs->make<TH1F>("h_r_px", ";px resolution (GeV);number of vertices", 300, -1500, 1500);
   h_r_py = fs->make<TH1F>("h_r_py", ";py resolution (GeV);number of vertices", 300, -1500, 1500);
@@ -125,6 +133,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_f_p = fs->make<TH1F>("h_f_p", ";fractional p resolution;number of vertices", 100, -1, 5);
   h_f_pt = fs->make<TH1F>("h_f_pt", ";fractional p_{T} resolution;number of vertices", 100, -1, 5);
   h_f_mass = fs->make<TH1F>("h_f_mass", ";fractional mass resolution;number of vertices", 100, -1, 5);
+  h_f_msptm = fs->make<TH1F>("h_f_msptm", ";fractional msptm resolution;number of vertices", 100, -1, 5);
+  h_f_msptm_mass = fs->make<TH1F>("h_f_msptm_mass", ";fractional msptm resolution w.r.t. mass;number of vertices", 100, -1, 5);
   h_f_energy = fs->make<TH1F>("h_f_energy", ";fractional energy resolution;number of vertices", 100, -1, 5);
 
   h_rp_rmass = fs->make<TH2F>("h_rp_rmass", ";mass resolution;p resolution", 300, -1500, 1500, 300, -1500, 1500);
@@ -140,6 +150,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_eta = fs->make<TH2F>("h_s_eta", ";generated eta;reconstructed eta", 50, -4, 4, 50, -4, 4);
   h_s_phi = fs->make<TH2F>("h_s_phi", ";generated phi;reconstructed phi", 50, -3.15, 3.15, 50, -3.15, 3.15);
   h_s_mass = fs->make<TH2F>("h_s_mass", ";generated mass;reconstructed mass", 150, 0, 1500, 150, 0, 1500);
+  h_s_msptm = fs->make<TH2F>("h_s_msptm", ";generated msptm;reconstructed msptm", 150, 0, 1500, 150, 0, 1500);
+  h_s_msptm_mass = fs->make<TH2F>("h_s_msptm_mass", ";generated mass;reconstructed msptm", 150, 0, 1500, 150, 0, 1500);
   h_s_energy = fs->make<TH2F>("h_s_energy", ";generated energy;reconstructed energy", 150, 0, 1500, 150, 0, 1500);
   h_s_px = fs->make<TH2F>("h_s_px", ";generated px;reconstructed px", 300, -1500, 1500, 300, -1500, 1500);
   h_s_py = fs->make<TH2F>("h_s_py", ";generated py;reconstructed py", 300, -1500, 1500, 300, -1500, 1500);
@@ -243,11 +255,16 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
 
     // histogram momentum resolutions: p, pt, eta, phi, mass, energy, px, py, pz, rapidity, theta, betagamma
+    double vtx_msptm = sqrt(vtx_p4.M() * vtx_p4.M() + vtx_p4.Pt() * vtx_p4.Pt())+ fabs(vtx_p4.Pt());
+    double lsp_msptm = sqrt(lsp_p4.M() * lsp_p4.M() + lsp_p4.Pt() * lsp_p4.Pt())+ fabs(lsp_p4.Pt());
+
     h_r_p->Fill(vtx_p4.P() - lsp_p4.P());
     h_r_pt->Fill(vtx_p4.Pt() - lsp_p4.Pt());
     h_r_eta->Fill(vtx_p4.Eta() - lsp_p4.Eta());
     h_r_phi->Fill(reco::deltaPhi(vtx_p4.Phi(), lsp_p4.Phi()));
     h_r_mass->Fill(vtx_p4.M() - lsp_p4.M());
+    h_r_msptm->Fill(vtx_msptm - lsp_msptm);
+    h_r_msptm_mass->Fill(vtx_msptm - lsp_p4.M());
     h_r_energy->Fill(vtx_p4.E() - lsp_p4.E());
     h_r_px->Fill(vtx_p4.Px() - lsp_p4.Px());
     h_r_py->Fill(vtx_p4.Py() - lsp_p4.Py());
@@ -259,6 +276,8 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_f_p->Fill((vtx_p4.P() - lsp_p4.P()) / lsp_p4.P());
     h_f_pt->Fill((vtx_p4.Pt() - lsp_p4.Pt()) / lsp_p4.Pt());
     h_f_mass->Fill((vtx_p4.M() - lsp_p4.M()) / lsp_p4.M());
+    h_f_msptm->Fill((vtx_msptm - lsp_msptm) / lsp_msptm);
+    h_f_msptm_mass->Fill((vtx_msptm - lsp_p4.M()) / lsp_p4.M());
     h_f_energy->Fill((vtx_p4.E() - lsp_p4.E()) / lsp_p4.E());
 
     h_rp_rmass->Fill(vtx_p4.M() - lsp_p4.M(), vtx_p4.P() - lsp_p4.P());
@@ -274,6 +293,8 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_eta->Fill(lsp_p4.Eta(), vtx_p4.Eta());
     h_s_phi->Fill(lsp_p4.Phi(), vtx_p4.Phi());
     h_s_mass->Fill(lsp_p4.M(), vtx_p4.M());
+    h_s_msptm->Fill(lsp_msptm, vtx_msptm);
+    h_s_msptm_mass->Fill(lsp_p4.M(), vtx_msptm);
     h_s_energy->Fill(lsp_p4.E(), vtx_p4.E());
     h_s_px->Fill(lsp_p4.Px(), vtx_p4.Px());
     h_s_py->Fill(lsp_p4.Py(), vtx_p4.Py());

@@ -18,6 +18,8 @@ private:
   const edm::InputTag mevent_src;
   const int trigger_bit;
   const bool re_trigger;
+  const int min_npv;
+  const int max_npv;
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
   const double min_6th_jet_pt;
@@ -26,6 +28,9 @@ private:
   const std::vector<int> min_nbtags;
   const std::vector<int> max_nbtags;
   const double min_sumht;
+  const double max_sumht;
+  const double min_sum_other_pv_sumpt2;
+  const double max_sum_other_pv_sumpt2;
   const int min_nmuons;
   const int min_nsemilepmuons;
   const int min_nleptons;
@@ -44,15 +49,18 @@ private:
   const double min_tksjetsntkmass01;
   const double min_absdeltaphi01;
   const double min_bs2ddist01;
-
-  const int min_npv;
-  const int max_npv;
+  const int max_ntrackssharedwpv01;
+  const int max_ntrackssharedwpvs01;
+  const int max_fractrackssharedwpv01;
+  const int max_fractrackssharedwpvs01;
 };
 
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
     re_trigger(cfg.getParameter<bool>("re_trigger")),
+    min_npv(cfg.getParameter<int>("min_npv")),
+    max_npv(cfg.getParameter<int>("max_npv")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
     min_6th_jet_pt(cfg.getParameter<double>("min_6th_jet_pt")),
@@ -61,6 +69,9 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_nbtags(cfg.getParameter<std::vector<int> >("min_nbtags")),
     max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
     min_sumht(cfg.getParameter<double>("min_sumht")),
+    max_sumht(cfg.getParameter<double>("max_sumht")),
+    min_sum_other_pv_sumpt2(cfg.getParameter<double>("min_sum_other_pv_sumpt2")),
+    max_sum_other_pv_sumpt2(cfg.getParameter<double>("max_sum_other_pv_sumpt2")),
     min_nmuons(cfg.getParameter<int>("min_nmuons")),
     min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
@@ -78,8 +89,10 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01")),
     min_absdeltaphi01(cfg.getParameter<double>("min_absdeltaphi01")),
     min_bs2ddist01(cfg.getParameter<double>("min_bs2ddist01")),
-    min_npv(cfg.getParameter<int>("min_npv")),
-    max_npv(cfg.getParameter<int>("max_npv"))
+    max_ntrackssharedwpv01(cfg.getParameter<int>("max_ntrackssharedwpv01")),
+    max_ntrackssharedwpvs01(cfg.getParameter<int>("max_ntrackssharedwpvs01")),
+    max_fractrackssharedwpv01(cfg.getParameter<double>("max_fractrackssharedwpv01")),
+    max_fractrackssharedwpvs01(cfg.getParameter<double>("max_fractrackssharedwpvs01"))
 {
 }
 
@@ -99,6 +112,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
   }
 
+  if (mevent->npv < min_npv || mevent->npv > max_npv)
+    return false;
+
   if (mevent->nmu(0) < min_nmuons)
     return false;
 
@@ -111,20 +127,37 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (mevent->nlep(1) < min_nsemileptons)
     return false;
 
-  if (mevent->njets < min_njets || mevent->njets > max_njets)
+  if (mevent->njets() < min_njets || mevent->njets() > max_njets)
     return false;
 
-  if((min_4th_jet_pt > 0 && mevent->jetpt4 < min_4th_jet_pt) ||
-     (min_5th_jet_pt > 0 && mevent->jetpt5 < min_5th_jet_pt) ||
-     (min_6th_jet_pt > 0 && mevent->jetpt6 < min_6th_jet_pt))
+  if((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||
+     (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt) ||
+     (min_6th_jet_pt > 0 && mevent->jetpt6() < min_6th_jet_pt))
     return false;
 
   for (int i = 0; i < 3; ++i)
-    if (mevent->nbtags[i] < min_nbtags[i] || mevent->nbtags[i] > max_nbtags[i])
+    if (mevent->nbtags(i) < min_nbtags[i] || mevent->nbtags(i) > max_nbtags[i])
       return false;
 
-  if (mevent->jet_sum_ht < min_sumht)
+  if (mevent->jet_sum_ht() < min_sumht)
     return false;
+
+  if (mevent->jet_sum_ht() > max_sumht)
+    return false;
+
+  if (min_sum_other_pv_sumpt2 > 0 || max_sum_other_pv_sumpt2 < 1e9) {
+    edm::Handle<reco::VertexCollection> primary_vertices;
+    event.getByLabel("offlinePrimaryVertices", primary_vertices);
+    double other_pv_sumpt2 = 0;
+    for (size_t i = 1; i < primary_vertices->size(); ++i) {
+      const reco::Vertex& pv = primary_vertices->at(i);
+      for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki)
+        other_pv_sumpt2 += (*trki)->pt() * (*trki)->pt();
+    }
+
+    if (other_pv_sumpt2 < min_sum_other_pv_sumpt2 || other_pv_sumpt2 > max_sum_other_pv_sumpt2)
+      return false;
+  }
 
   if (apply_vertex_cuts) {
     edm::Handle<MFVVertexAuxCollection> vertices;
@@ -134,7 +167,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex)
       return false;
 
-    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0) {
+    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0 || max_ntrackssharedwpv01 < 100000 || max_ntrackssharedwpvs01 < 100000 || max_fractrackssharedwpv01 < 1e6 || max_fractrackssharedwpvs01 < 1e6) {
       if (nsv < 2)
         return false;
 
@@ -165,11 +198,17 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
       if (v0.bs2ddist() + v1.bs2ddist() < min_bs2ddist01)
         return false;
+
+      if (v0.ntrackssharedwpv  + v1.ntrackssharedwpv  > max_ntrackssharedwpv01)
+        return false;
+      if (v0.ntrackssharedwpvs + v1.ntrackssharedwpvs > max_ntrackssharedwpvs01)
+        return false;
+      if (float(v0.ntrackssharedwpv  + v1.ntrackssharedwpv )/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpv01)
+        return false;
+      if (float(v0.ntrackssharedwpvs + v1.ntrackssharedwpvs)/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpvs01)
+        return false;
     }
   }
-
-  if (mevent->npv < min_npv || mevent->npv > max_npv)
-    return false;
 
   return true;
 }

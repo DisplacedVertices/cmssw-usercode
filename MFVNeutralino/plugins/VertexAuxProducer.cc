@@ -75,6 +75,16 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
 
+  std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
+  for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
+    const reco::Vertex& pv = primary_vertices->at(i);
+    for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
+      float w = pv.trackWeight(*it);
+      reco::TrackRef tk = it->castTo<reco::TrackRef>();
+      tracks_in_pvs[tk].push_back(std::make_pair(i, w));
+    }
+  }
+
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<pat::MuonCollection> muons;
