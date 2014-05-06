@@ -219,9 +219,9 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     ((bs_hemisphere == 0) ||
      (bs_hemisphere == 1 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >=  2.5857  || atan2(vtx.y - 0.3928, vtx.x - 0.244) < -0.5558)) ||
      (bs_hemisphere == 2 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >= -0.5558  && atan2(vtx.y - 0.3928, vtx.x - 0.244) <  2.5857))) &&
-    vtx.ntrackssharedwpv <= max_ntrackssharedwpv &&
-    vtx.ntrackssharedwpvs <= max_ntrackssharedwpvs &&
-    vtx.npvswtracksshared <= max_npvswtracksshared;
+    vtx.ntrackssharedwpv() <= max_ntrackssharedwpv &&
+    vtx.ntrackssharedwpvs() <= max_ntrackssharedwpvs &&
+    vtx.npvswtracksshared() <= max_npvswtracksshared;
 }
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {

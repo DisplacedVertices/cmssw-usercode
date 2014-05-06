@@ -247,6 +247,11 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
                                                                          tri->hitPattern().numberOfValidStripHits(),
                                                                          tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z)));
       aux.track_injet.push_back(jets_tracks.count(trref));
+      
+      const std::vector<std::pair<int, float> >& pv_for_track = tracks_in_pvs[trref];
+      if (pv_for_track.size() > 1)
+        throw cms::Exception("VertexAuxProducer") << "multiple PV for a track";
+      aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
     }
 
     auto g2d = mfv::gen_dist(sv, *gen_vertices, false);

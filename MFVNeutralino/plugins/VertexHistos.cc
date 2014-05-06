@@ -590,7 +590,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"chi2dof",                 aux.chi2/aux.ndof},
         {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof)},
 
-        {"msptm",                   sqrt(aux.mass[mfv::PTracksOnly] * aux.mass[mfv::PTracksOnly] + aux.pt[mfv::PTracksOnly] * aux.pt[mfv::PTracksOnly]) + fabs(aux.pt[mfv::PTracksOnly])},
+        {"msptm",                   sqrt(aux.mass(mfv::PTracksOnly) * aux.mass(mfv::PTracksOnly) + aux.pt(mfv::PTracksOnly) * aux.pt(mfv::PTracksOnly)) + aux.pt(mfv::PTracksOnly)},
 
         {"tkonlyp",             aux.p4(mfv::PTracksOnly).P()},
         {"tkonlypt",            aux.pt(mfv::PTracksOnly)},
@@ -640,6 +640,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"sumpt2",                  aux.sumpt2()},
         {"sumnhitsbehind",          aux.sumnhitsbehind()},
         {"maxnhitsbehind",          aux.maxnhitsbehind()},
+
+        {"ntrackssharedwpv",     aux.ntrackssharedwpv()},
+        {"ntrackssharedwpvs",    aux.ntrackssharedwpvs()},
+        {"fractrackssharedwpv",  float(aux.ntrackssharedwpv())  / aux.ntracks()},
+        {"fractrackssharedwpvs", float(aux.ntrackssharedwpvs()) / aux.ntracks()},
+        {"npvswtracksshared",    aux.npvswtracksshared()},
+
         {"mintrackpt",              aux.mintrackpt()},
         {"maxtrackpt",              aux.maxtrackpt()},
         {"maxm1trackpt",            aux.maxmntrackpt(1)},
@@ -987,10 +994,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     double phi1 = atan2(sv1.y - mevent->bsy, sv1.x - mevent->bsx);
     h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)), *weight);
 
-    h_fractrackssharedwpv01 ->Fill(float(sv0.ntrackssharedwpv  + sv1.ntrackssharedwpv )/(sv0.ntracks + sv1.ntracks), *weight);
-    h_fractrackssharedwpvs01->Fill(float(sv0.ntrackssharedwpvs + sv1.ntrackssharedwpvs)/(sv0.ntracks + sv1.ntracks), *weight);
-    h_pvmosttracksshared->Fill(sv0.ntrackssharedwpvs ? sv0.pvmosttracksshared : -1,
-                               sv1.ntrackssharedwpvs ? sv1.pvmosttracksshared : -1,
+    h_fractrackssharedwpv01 ->Fill(float(sv0.ntrackssharedwpv () + sv1.ntrackssharedwpv ())/(sv0.ntracks() + sv1.ntracks()), *weight);
+    h_fractrackssharedwpvs01->Fill(float(sv0.ntrackssharedwpvs() + sv1.ntrackssharedwpvs())/(sv0.ntracks() + sv1.ntracks()), *weight);
+    h_pvmosttracksshared->Fill(sv0.ntrackssharedwpvs() ? sv0.pvmosttracksshared() : -1,
+                               sv1.ntrackssharedwpvs() ? sv1.pvmosttracksshared() : -1,
                                *weight);
   }
 

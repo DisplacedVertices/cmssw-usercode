@@ -199,13 +199,13 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (v0.bs2ddist() + v1.bs2ddist() < min_bs2ddist01)
         return false;
 
-      if (v0.ntrackssharedwpv  + v1.ntrackssharedwpv  > max_ntrackssharedwpv01)
+      if (v0.ntrackssharedwpv()  + v1.ntrackssharedwpv()  > max_ntrackssharedwpv01)
         return false;
-      if (v0.ntrackssharedwpvs + v1.ntrackssharedwpvs > max_ntrackssharedwpvs01)
+      if (v0.ntrackssharedwpvs() + v1.ntrackssharedwpvs() > max_ntrackssharedwpvs01)
         return false;
-      if (float(v0.ntrackssharedwpv  + v1.ntrackssharedwpv )/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpv01)
+      if (float(v0.ntrackssharedwpv()  + v1.ntrackssharedwpv() )/(v0.ntracks() + v1.ntracks()) > max_fractrackssharedwpv01)
         return false;
-      if (float(v0.ntrackssharedwpvs + v1.ntrackssharedwpvs)/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpvs01)
+      if (float(v0.ntrackssharedwpvs() + v1.ntrackssharedwpvs())/(v0.ntracks() + v1.ntracks()) > max_fractrackssharedwpvs01)
         return false;
     }
   }

@@ -328,10 +328,10 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_drmin_sumht->Fill(mevent->jet_sum_ht(), vtx.drmin(), w);
     h_drmax_sumht->Fill(mevent->jet_sum_ht(), vtx.drmax(), w);
     h_bs2derr_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2derr(), w);
-    h_njetsntks_sumht->Fill(mevent->jet_sum_ht(), vtx.njets[mfv::JByNtracks], w);
+    h_njetsntks_sumht->Fill(mevent->jet_sum_ht(), vtx.njets(mfv::JByNtracks), w);
     h_bs2dsig_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2dsig(), w);
-    h_ntracksptgt3_sumht->Fill(mevent->jet_sum_ht(), vtx.ntracksptgt3(), w);
-    h_sumnhitsbehind_sumht->Fill(mevent->jet_sum_ht(), vtx.sumnhitsbehind, w);
+    h_ntracksptgt3_sumht->Fill(mevent->jet_sum_ht(), vtx.ntracksptgt(3), w);
+    h_sumnhitsbehind_sumht->Fill(mevent->jet_sum_ht(), vtx.sumnhitsbehind(), w);
   }
 
   if (nsv >= 1) {
@@ -340,10 +340,10 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_drmin0_sumht->Fill(mevent->jet_sum_ht(), vtx.drmin(), w);
     h_drmax0_sumht->Fill(mevent->jet_sum_ht(), vtx.drmax(), w);
     h_bs2derr0_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2derr(), w);
-    h_njetsntks0_sumht->Fill(mevent->jet_sum_ht(), vtx.njets[mfv::JByNtracks], w);
+    h_njetsntks0_sumht->Fill(mevent->jet_sum_ht(), vtx.njets(mfv::JByNtracks), w);
     h_bs2dsig0_sumht->Fill(mevent->jet_sum_ht(), vtx.bs2dsig(), w);
-    h_ntracksptgt30_sumht->Fill(mevent->jet_sum_ht(), vtx.ntracksptgt3(), w);
-    h_sumnhitsbehind0_sumht->Fill(mevent->jet_sum_ht(), vtx.sumnhitsbehind, w);
+    h_ntracksptgt30_sumht->Fill(mevent->jet_sum_ht(), vtx.ntracksptgt(3), w);
+    h_sumnhitsbehind0_sumht->Fill(mevent->jet_sum_ht(), vtx.sumnhitsbehind(), w);
   }
 
   if (nsv >= 2) {

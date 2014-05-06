@@ -75,6 +75,7 @@ struct MFVVertexAux {
   int track_nhitsbehind(int i) const { return (track_hitpattern[i] >> 8) & 0xF; }
   int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
   std::vector<bool> track_injet;
+  std::vector<short> track_inpv;
 
   void insert_track() {
     track_w.push_back(0);
@@ -90,6 +91,7 @@ struct MFVVertexAux {
     track_chi2dof.push_back(0);
     track_hitpattern.push_back(0);
     track_injet.push_back(0);
+    track_inpv.push_back(0);
   }
 
   bool tracks_ok() const {
@@ -106,7 +108,8 @@ struct MFVVertexAux {
       n == track_dz_err.size() &&
       n == track_chi2dof.size() &&
       n == track_hitpattern.size() &&
-      n == track_injet.size();
+      n == track_injet.size() &&
+      n == track_inpv.size();
   }
 
   int ntracks() const { return int(track_pt.size()); }
@@ -163,6 +166,48 @@ struct MFVVertexAux {
       if ((m2 = track_nhitsbehind(i)) > m)
         m = m2;
     return m;
+  }
+
+  int ntrackssharedwpv() const {
+    int c = 0;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      if (track_inpv[i] == 0)
+        ++c;
+    return c;
+  }
+
+  int ntrackssharedwpvs() const {
+    int c = 0;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      if (track_inpv[i] >= 0)
+        ++c;
+    return c;
+  }
+
+  std::map<int,int> pvswtracksshared() const {
+    std::map<int,int> m;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      ++m[track_inpv[i]];
+    return m;
+  }
+
+  int npvswtracksshared() const {
+    std::map<int,int> m = pvswtracksshared();
+    int c = int(m.size());
+    if (m.find(-1) != m.end())
+      --c;
+    return c;
+  }
+
+  int pvmosttracksshared() const {
+    std::map<int,int> m = pvswtracksshared();
+    int mi = -1, mc = 0;
+    for (std::map<int,int>::const_iterator it = m.begin(), ite = m.end(); it != ite; ++it)
+      if (it->second > mc) {
+        mc = it->second;
+        mi = it->first;
+      }
+    return mi;
   }
 
   static float _min(const std::vector<float>& v) { return v.size() ? *std::min_element(v.begin(), v.end()) : 1e99; }
