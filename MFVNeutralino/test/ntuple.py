@@ -7,6 +7,7 @@ tuple_version = version
 
 runOnMC = True # magic line, don't touch
 debug = False
+track_histos_only = False
 require_pixel_hit = True
 track_used_req = None
 prepare_vis = False
@@ -60,6 +61,8 @@ elif track_used_req == 'nopvs':
 if keep_all:
     process.mfvEvent.skip_event_filter = ''
     process.mfvSelectedVerticesTight.produce_vertices = True
+    process.mfvSelectedVerticesTightLargeErr = process.mfvSelectedVerticesTight.clone(min_bs2derr = 0.008, max_bs2derr = 1e9)
+    process.p.replace(process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTight * process.mfvSelectedVerticesTightLargeErr)
 else:
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
     process.triggerFilter = hltHighLevel.clone()
@@ -89,12 +92,15 @@ if prepare_vis:
     process.pp = cms.Path(process.mfvGenParticles * process.ParticleListDrawer)
 
 
-if 'histos' in sys.argv:
+if 'histos' in sys.argv or track_histos_only:
     process.TFileService = cms.Service('TFileService', fileName = cms.string('ntuple_histos.root'))
     process.mfvVertices.histos = True
     process.mfvVerticesToJets.histos = True
-    process.load('JMTucker.MFVNeutralino.Histos_cff')
-    process.outp.replace(process.mfvEvent, process.mfvEvent * process.mfvHistos) # in outp because histos needs to read mfvEvent
+
+if track_histos_only:
+    process.mfvVertices.track_histos_only = True
+    del process.out
+    del process.outp
 
 if 'test' in sys.argv:
     process.source.fileNames = [
@@ -164,6 +170,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         batch_name_extra += '_WVis'
     elif keep_all:
         batch_name_extra += '_WAll'
+
+    if track_histos_only:
+        batch_name_extra += '_TrackHistosOnly'
 
     if debug:
         batch_name_extra += '_WDebug'
@@ -238,7 +247,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif 'signal' in sys.argv:
         samples = Samples.mfv_signal_samples
     elif 'myttbar' in sys.argv:
-        samples = Samples.myttbar_samples
+        samples = [Samples.myttbarpynopu] #Samples.myttbar_samples
     else:
         samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
 

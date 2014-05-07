@@ -1,12 +1,14 @@
+#include <utility>
+
 double xcut;
 double ycut;
 const char* crab_path = "crab/ABCDHistosV17_1";
 const char* hist_path = "abcdHistosTrksJets";
-bool plot = 1;
+bool plot = 0;
 const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/TrksJets";
 const double ymax = 50;
 
-TH1D* compareShapes(const char* sampleName, const char* histName) {
+std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
   TFile* file = TFile::Open(TString::Format("%s/%s_scaled.root", crab_path, sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("%s/%s", hist_path, histName));
@@ -28,8 +30,7 @@ TH1D* compareShapes(const char* sampleName, const char* histName) {
   double Dpred = B/A*C;
   double errPred = Dpred * sqrt(errA/A * errA/A + errB/B * errB/B + errC/C * errC/C);
 
-  printf("%30s\tA = %5.2f +/- %5.2f, B = %5.2f +/- %5.2f, C = %5.2f +/- %5.2f, D = %5.2f +/- %5.2f\n", sampleName, A, errA, B, errB, C, errC, D, errD);
-  printf("%30s\tD = %5.2f +/- %5.2f, B/A*C = %5.2f +/- %5.2f, correlation factor = %5.2f\n", "", D, errD, Dpred, errPred, hist->GetCorrelationFactor());
+  printf("%30s\tA = %6.2f +/- %6.2f, B = %6.2f +/- %6.2f, C = %6.2f +/- %6.2f, D = %6.2f +/- %6.2f, B/A*C = %6.2f +/- %6.2f, correlation factor = %6.2f\n", sampleName, A, errA, B, errB, C, errC, D, errD, Dpred, errPred, hist->GetCorrelationFactor());
 
   TH1D* h_low = hist->ProjectionY(TString::Format("%s_low_%s", histName, sampleName), 0, xbin-1);
   TH1D* h_high = hist->ProjectionY(TString::Format("%s_high_%s", histName, sampleName), xbin, nbinsx+1);
@@ -68,33 +69,43 @@ TH1D* compareShapes(const char* sampleName, const char* histName) {
     h_low_normalized->GetYaxis()->SetRangeUser(0,1);
     h_low_normalized->Draw();
     h_high->DrawNormalized("same");
-    c1->SaveAs(TString::Format("%s/%s/%s.pdf", plot_path, histName, sampleName));
+    c1->SaveAs(TString::Format("%s/%s_%d/%s.pdf", plot_path, histName, int(xcut), sampleName));
     c1->cd(1)->SetLogy();
     c1->cd(3)->SetLogy();
     h_low_normalized->GetYaxis()->SetRangeUser(0.00001,1);
     c1->cd(4)->SetLogy();
-    c1->SaveAs(TString::Format("%s/%s/%s_logy.pdf", plot_path, histName, sampleName));
+    c1->SaveAs(TString::Format("%s/%s_%d/%s_logy.pdf", plot_path, histName, int(xcut), sampleName));
   }
 
   h_high->SetDirectory(0);
+  h_low->SetDirectory(0);
   file->Close();
-  return h_high;
+  return std::make_pair(h_high, h_low);
 }
 
 void compareMasses(const char* lifetime, double xmax, const char* histName) {
-  TH1D* h_M0300 = compareShapes(TString::Format("mfv_neutralino_%s_M0300", lifetime), histName);
-  TH1D* h_M0400 = compareShapes(TString::Format("mfv_neutralino_%s_M0400", lifetime), histName);
-  TH1D* h_M0600 = compareShapes(TString::Format("mfv_neutralino_%s_M0600", lifetime), histName);
-  TH1D* h_M1000 = compareShapes(TString::Format("mfv_neutralino_%s_M1000", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M0300 = compareShapes(TString::Format("mfv_neutralino_%s_M0300", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M0400 = compareShapes(TString::Format("mfv_neutralino_%s_M0400", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M0600 = compareShapes(TString::Format("mfv_neutralino_%s_M0600", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M1000 = compareShapes(TString::Format("mfv_neutralino_%s_M1000", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_ttbar = compareShapes("ttbar", histName);
+  std::pair<TH1D*,TH1D*> h_pair_background_nobigw = compareShapes("background_nobigw", histName);
+  std::pair<TH1D*,TH1D*> h_pair_ttbar_sq_qcdht1000 = compareShapes("ttbar_sq_qcdht1000", histName);
+  std::pair<TH1D*,TH1D*> h_pair_sb_ttbar_qcdht1000 = compareShapes("sb_ttbar_qcdht1000", histName);
+  std::pair<TH1D*,TH1D*> h_pair_background = compareShapes("background", histName);
 
-  TH1D* h_ttbar = compareShapes("ttbar", histName);
-  TH1D* h_background_nobigw = compareShapes("background_nobigw", histName);
-  TH1D* h_ttbar_sq_qcdht1000 = compareShapes("ttbar_sq_qcdht1000", histName);
-  TH1D* h_sb_ttbar_qcdht1000 = compareShapes("sb_ttbar_qcdht1000", histName);
-  TH1D* h_background = compareShapes("background", histName);
+  TH1D* h_M0300 = h_pair_M0300.first;
+  TH1D* h_M0400 = h_pair_M0400.first;
+  TH1D* h_M0600 = h_pair_M0600.first;
+  TH1D* h_M1000 = h_pair_M1000.first;
+  TH1D* h_ttbar = h_pair_ttbar.first;
+  TH1D* h_background_nobigw = h_pair_background_nobigw.first;
+  TH1D* h_ttbar_sq_qcdht1000 = h_pair_ttbar_sq_qcdht1000.first;
+  TH1D* h_sb_ttbar_qcdht1000 = h_pair_sb_ttbar_qcdht1000.first;
+  TH1D* h_background = h_pair_background.first;
 
   if (plot) {
-    TFile* file = TFile::Open(TString::Format("%s/%s/%s.root", plot_path, histName, lifetime), "RECREATE");
+    TFile* file = TFile::Open(TString::Format("%s/%s_%d/%s.root", plot_path, histName, int(xcut), lifetime), "RECREATE");
     h_M0300->Write();
     h_M0400->Write();
     h_M0600->Write();
@@ -104,6 +115,16 @@ void compareMasses(const char* lifetime, double xmax, const char* histName) {
     h_ttbar_sq_qcdht1000->Write();
     h_sb_ttbar_qcdht1000->Write();
     h_background->Write();
+
+    h_pair_M0300.second->Write();
+    h_pair_M0400.second->Write();
+    h_pair_M0600.second->Write();
+    h_pair_M1000.second->Write();
+    h_pair_ttbar.second->Write();
+    h_pair_background_nobigw.second->Write();
+    h_pair_ttbar_sq_qcdht1000.second->Write();
+    h_pair_sb_ttbar_qcdht1000.second->Write();
+    h_pair_background.second->Write();
     file->Close();
   }
 
@@ -154,10 +175,10 @@ void compareMasses(const char* lifetime, double xmax, const char* histName) {
   legend->Draw();
 
   if (plot) {
-    c1->SaveAs(TString::Format("%s/%s/%s.pdf", plot_path, histName, lifetime));
+    c1->SaveAs(TString::Format("%s/%s_%d/%s.pdf", plot_path, histName, int(xcut), lifetime));
     h_background->GetYaxis()->SetRangeUser(0.0001,ymax);
     c1->SetLogy();
-    c1->SaveAs(TString::Format("%s/%s/%s_logy.pdf", plot_path, histName, lifetime));
+    c1->SaveAs(TString::Format("%s/%s_%d/%s_logy.pdf", plot_path, histName, int(xcut), lifetime));
   }
 
   TCanvas* c2 = new TCanvas();
@@ -167,9 +188,9 @@ void compareMasses(const char* lifetime, double xmax, const char* histName) {
   h_M0600->DrawNormalized("same");
   legend->Draw();
   if (plot) {
-    c2->SaveAs(TString::Format("%s/%s/%s_nobkg_normalized.pdf", plot_path, histName, lifetime));
+    c2->SaveAs(TString::Format("%s/%s_%d/%s_nobkg_normalized.pdf", plot_path, histName, int(xcut), lifetime));
     c2->SetLogy();
-    c2->SaveAs(TString::Format("%s/%s/%s_nobkg_normalized_logy.pdf", plot_path, histName, lifetime));
+    c2->SaveAs(TString::Format("%s/%s_%d/%s_nobkg_normalized_logy.pdf", plot_path, histName, int(xcut), lifetime));
   }
 
   TCanvas* c3 = new TCanvas();
@@ -187,10 +208,10 @@ void compareMasses(const char* lifetime, double xmax, const char* histName) {
   h_M1000->DrawNormalized("same");
   legend->Draw();
   if (plot) {
-    c3->SaveAs(TString::Format("%s/%s/%s_normalized.pdf", plot_path, histName, lifetime));
+    c3->SaveAs(TString::Format("%s/%s_%d/%s_normalized.pdf", plot_path, histName, int(xcut), lifetime));
     h_background_normalized->GetYaxis()->SetRangeUser(0.00001,1);
     c3->SetLogy();
-    c3->SaveAs(TString::Format("%s/%s/%s_normalized_logy.pdf", plot_path, histName, lifetime));
+    c3->SaveAs(TString::Format("%s/%s_%d/%s_normalized_logy.pdf", plot_path, histName, int(xcut), lifetime));
   }
 }
 
@@ -198,7 +219,7 @@ void plot_all_samples(const char* histName) {
   printf("%s, xcut = %f, ycut = %f\n", histName, xcut, ycut);
 
   if (plot) {
-    const char* cmd = TString::Format("mkdir %s/%s", plot_path, histName);
+    const char* cmd = TString::Format("mkdir %s/%s_%d", plot_path, histName, int(xcut));
     system(cmd);
     compareMasses("tau0100um", 0.2, histName);
     compareMasses("tau0300um", 0.3, histName);
@@ -321,5 +342,6 @@ void lifetime_v_mass() {
 //  xcut = 8;   plot_all_samples("h_svctau3dcmz_ntracksptgt301");
 //  xcut = 700; plot_all_samples("h_svctau3dcmz_msptm01");
 
+  xcut = 12; ycut = 0.04; plot_all_samples("h_svdist2d_ntracks01");
   xcut = 15; ycut = 0.04; plot_all_samples("h_svdist2d_ntracks01");
 }
