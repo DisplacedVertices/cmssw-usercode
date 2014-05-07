@@ -108,6 +108,9 @@ def submit(name, tau0=None, mass=None):
     else:
         raise RuntimeError("don't know what LSP to use")
 
+    if 'design' in name:
+        new_py += "\nprocess.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')\n"
+
     if 'nopu' in name:
         new_py += '\nfrom modify import nopu\n'
         new_py += '\nnopu(process)\n'
