@@ -263,18 +263,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("costhtksjetsntkmompv2d",        "cos(angle(2-momentum (tracks-plus-jets-by-ntracks), 2-dist to PV))",          101,   -1,       1.02);
   hs.add("costhtksjetsntkmompv3d",        "cos(angle(3-momentum (tracks-plus-jets-by-ntracks), 3-dist to PV))",          101,   -1,       1.02);
 
-  hs.add("missdisttkonlypv",              "miss dist. (tracks-only) of SV to PV (cm)",                                   100,    0,       2);
-  hs.add("missdisttkonlypverr",           "#sigma(miss dist. (tracks-only) of SV to PV) (cm)",                           100,    0,       0.05);
-  hs.add("missdisttkonlypvsig",           "N#sigma(miss dist. (tracks-only) of SV to PV) (cm)",                          100,    0,     100);
-
-  hs.add("missdistjetsntkpv",             "miss dist. (jets-by-ntracks -only) of SV to PV (cm)",                         100,    0,       2);
-  hs.add("missdistjetsntkpverr",          "#sigma(miss dist. (jets-by-ntracks -only) of SV to PV) (cm)",                 100,    0,       0.05);
-  hs.add("missdistjetsntkpvsig",          "N#sigma(miss dist. (jets-by-ntracks -only) of SV to PV) (cm)",                100,    0,     100);
-
-  hs.add("missdisttksjetsntkpv",          "miss dist. (tracks-plus-jets-by-ntracks) of SV to PV (cm)",                   100,    0,       2);
-  hs.add("missdisttksjetsntkpverr",       "#sigma(miss dist. (tracks-plus-jets-by-ntracks) of SV to PV) (cm)",           100,    0,       0.05);
-  hs.add("missdisttksjetsntkpvsig",       "N#sigma(miss dist. (tracks-plus-jets-by-ntracks) of SV to PV) (cm)",          100,    0,     100);
-					  
   hs.add("sumpt2",                        "SV #Sigma p_{T}^{2} (GeV^2)",                                                 300,    0,    6000);
   hs.add("maxnhitsbehind",                "max number of hits behind SV",                                                 15,    0,      15);
   hs.add("sumnhitsbehind",                "sum number of hits behind SV",                                                100,    0,     100);
@@ -613,29 +601,17 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"tksjetsntkphi",           aux.phi(mfv::PTracksPlusJetsByNtracks)},
         {"tksjetsntkmass",          aux.mass(mfv::PTracksPlusJetsByNtracks)},
 
-        {"costhtkonlymombs",         aux.costhmombs  [mfv::PTracksOnly]},
-        {"costhtkonlymompv2d",       aux.costhmompv2d[mfv::PTracksOnly]},
-        {"costhtkonlymompv3d",       aux.costhmompv3d[mfv::PTracksOnly]},
+        {"costhtkonlymombs",         aux.costhmombs  (mfv::PTracksOnly)},
+        {"costhtkonlymompv2d",       aux.costhmompv2d(mfv::PTracksOnly)},
+        {"costhtkonlymompv3d",       aux.costhmompv3d(mfv::PTracksOnly)},
 
-        {"costhjetsntkmombs",        aux.costhmombs  [mfv::PJetsByNtracks]},
-        {"costhjetsntkmompv2d",      aux.costhmompv2d[mfv::PJetsByNtracks]},
-        {"costhjetsntkmompv3d",      aux.costhmompv3d[mfv::PJetsByNtracks]},
+        {"costhjetsntkmombs",        aux.costhmombs  (mfv::PJetsByNtracks)},
+        {"costhjetsntkmompv2d",      aux.costhmompv2d(mfv::PJetsByNtracks)},
+        {"costhjetsntkmompv3d",      aux.costhmompv3d(mfv::PJetsByNtracks)},
 
-        {"costhtksjetsntkmombs",     aux.costhmombs  [mfv::PTracksPlusJetsByNtracks]},
-        {"costhtksjetsntkmompv2d",   aux.costhmompv2d[mfv::PTracksPlusJetsByNtracks]},
-        {"costhtksjetsntkmompv3d",   aux.costhmompv3d[mfv::PTracksPlusJetsByNtracks]},
-
-        {"missdisttkonlypv",        aux.missdistpv   [mfv::PTracksOnly]},
-        {"missdisttkonlypverr",     aux.missdistpverr[mfv::PTracksOnly]},
-        {"missdisttkonlypvsig",     aux.missdistpvsig(mfv::PTracksOnly)},
-
-        {"missdistjetsntkpv",        aux.missdistpv   [mfv::PJetsByNtracks]},
-        {"missdistjetsntkpverr",     aux.missdistpverr[mfv::PJetsByNtracks]},
-        {"missdistjetsntkpvsig",     aux.missdistpvsig(mfv::PJetsByNtracks)},
-
-        {"missdisttksjetsntkpv",        aux.missdistpv   [mfv::PTracksPlusJetsByNtracks]},
-        {"missdisttksjetsntkpverr",     aux.missdistpverr[mfv::PTracksPlusJetsByNtracks]},
-        {"missdisttksjetsntkpvsig",     aux.missdistpvsig(mfv::PTracksPlusJetsByNtracks)},
+        {"costhtksjetsntkmombs",     aux.costhmombs  (mfv::PTracksPlusJetsByNtracks)},
+        {"costhtksjetsntkmompv2d",   aux.costhmompv2d(mfv::PTracksPlusJetsByNtracks)},
+        {"costhtksjetsntkmompv3d",   aux.costhmompv3d(mfv::PTracksPlusJetsByNtracks)},
 
         {"sumpt2",                  aux.sumpt2()},
         {"sumnhitsbehind",          aux.sumnhitsbehind()},
@@ -715,15 +691,15 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"jetpairdravg", aux.jetpairdravg()},
         {"jetpairdrrms", aux.jetpairdrrms()},
 
-        {"costhtkmomvtxdispmin", aux.costhtkmomvtxdispmin},
-        {"costhtkmomvtxdispmax", aux.costhtkmomvtxdispmax},
-        {"costhtkmomvtxdispavg", aux.costhtkmomvtxdispavg},
-        {"costhtkmomvtxdisprms", aux.costhtkmomvtxdisprms},
+        {"costhtkmomvtxdispmin", aux.costhtkmomdispmin()},
+        {"costhtkmomvtxdispmax", aux.costhtkmomdispmax()},
+        {"costhtkmomvtxdispavg", aux.costhtkmomdispavg()},
+        {"costhtkmomvtxdisprms", aux.costhtkmomdisprms()},
 
-        {"costhjetmomvtxdispmin", aux.costhjetmomvtxdispmin},
-        {"costhjetmomvtxdispmax", aux.costhjetmomvtxdispmax},
-        {"costhjetmomvtxdispavg", aux.costhjetmomvtxdispavg},
-        {"costhjetmomvtxdisprms", aux.costhjetmomvtxdisprms},
+        {"costhjetmomvtxdispmin", aux.costhjetmomdispmin()},
+        {"costhjetmomvtxdispmax", aux.costhjetmomdispmax()},
+        {"costhjetmomvtxdispavg", aux.costhjetmomdispavg()},
+        {"costhjetmomvtxdisprms", aux.costhjetmomdisprms()},
 
         {"gen2ddist",               aux.gen2ddist},
         {"gen2derr",                aux.gen2derr},

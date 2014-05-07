@@ -219,8 +219,8 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("dr                 min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.drmin(), v.drmax(), v.dravg(), v.drrms());
       printf("trackpairmass      min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.trackpairmassmin(), v.trackpairmassmax(), v.trackpairmassavg(), v.trackpairmassrms());
       printf("jetpairdr          min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.jetpairdrmin(), v.jetpairdrmax(), v.jetpairdravg(), v.jetpairdrrms());
-      printf("costhtkmomvtxdisp  min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhtkmomvtxdispmin, v.costhtkmomvtxdispmax, v.costhtkmomvtxdispavg, v.costhtkmomvtxdisprms);
-      printf("costhjetmomvtxdisp min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhjetmomvtxdispmin, v.costhjetmomvtxdispmax, v.costhjetmomvtxdispavg, v.costhjetmomvtxdisprms);
+      printf("costhtkmomvtxdisp  min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhtkmomdispmin(), v.costhtkmomdispmax(), v.costhtkmomdispavg(), v.costhtkmomdisprms());
+      printf("costhjetmomvtxdisp min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhjetmomdispmin(), v.costhjetmomdispmax(), v.costhjetmomdispavg(), v.costhjetmomdisprms());
       printf("gen2d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen2ddist, v.gen2derr, v.gen2dsig());
       printf("gen3d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen3ddist, v.gen3derr, v.gen3dsig());
       printf("bs2d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.bs2dcompatscss(), v.bs2dcompat(), v.bs2ddist(), v.bs2derr(), v.bs2dsig());
@@ -229,7 +229,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("pvdz: %11.3g +/- %11.3g (%11.3g sig)\n", v.pvdz(), v.pvdzerr(), v.pvdzsig());
       printf("costh, missdists for %i momenta:\n", mfv::NMomenta);
       for (int i = 0; i < mfv::NMomenta; ++i)
-        printf("mom %i: costhmombs: %11.4f   costhmompv2d: %11.4f   costhmompv3d: %11.4f   missdistpv: %11.3g +/- %11.3g (%11.3g sig)\n", i, v.costhmombs[i], v.costhmompv2d[i], v.costhmompv3d[i], v.missdistpv[i], v.missdistpverr[i], v.missdistpvsig(i));
+        printf("mom %i: costhmombs: %11.4f   costhmompv2d: %11.4f   costhmompv3d: %11.4f\n", i, v.costhmombs(i), v.costhmompv2d(i), v.costhmompv3d(i));
 
       printf("\n");
     }

@@ -182,12 +182,9 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.pt(mfv::PTracksPlusJetsByNtracks) >= min_tksjetsntkpt &&
     fabs(vtx.eta(mfv::PTracksPlusJetsByNtracks)) < max_abstksjetsntketa &&
     vtx.mass(mfv::PTracksPlusJetsByNtracks) >= min_tksjetsntkmass &&
-    vtx.costhmombs[mfv::PTracksOnly] >= min_costhtkonlymombs &&
-    vtx.costhmombs[mfv::PJetsByNtracks] >= min_costhjetsntkmombs &&
-    vtx.costhmombs[mfv::PTracksPlusJetsByNtracks] >= min_costhtksjetsntkmombs &&
-    vtx.missdistpvsig(mfv::PTracksOnly) >= min_missdisttkonlypvsig &&
-    vtx.missdistpvsig(mfv::PJetsByNtracks) >= min_missdistjetsntkpvsig &&
-    vtx.missdistpvsig(mfv::PTracksPlusJetsByNtracks) >= min_missdisttksjetsntkpvsig &&
+    vtx.costhmombs(mfv::PTracksOnly) >= min_costhtkonlymombs &&
+    vtx.costhmombs(mfv::PJetsByNtracks) >= min_costhjetsntkmombs &&
+    vtx.costhmombs(mfv::PTracksPlusJetsByNtracks) >= min_costhtksjetsntkmombs &&
     vtx.sumpt2() >= min_sumpt2 &&
     vtx.maxtrackpt() >= min_maxtrackpt &&
     vtx.maxmntrackpt(1) >= min_maxm1trackpt &&

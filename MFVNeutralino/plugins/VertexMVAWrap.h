@@ -17,11 +17,11 @@ public:
       double(vtx.ntracksptgt(3)),
       TMath::Prob(vtx.chi2, vtx.ndof),
       vtx.eta(0),
-      vtx.costhmompv3d[2],
+      vtx.costhmompv3d(2),
       vtx.trackdxyerrmin(),
       vtx.trackdzerrmin(),
       0, // JMTBAD
-      vtx.costhtkmomvtxdispavg,
+      vtx.costhtkmomdispavg(),
       vtx.mass(2),
       vtx.maxtrackpt(),
       vtx.drmin(),
