@@ -18,18 +18,6 @@
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
-namespace {
-  template <typename T, typename T2>
-  double dot3(const T& a, const T2& b) {
-    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
-  }
-
-  template <typename T, typename T2>
-  double costh3(const T& a, const T2& b) {
-    return dot3(a,b) / mag(a.x(), a.y(), a.z()) / mag(b.x(), b.y(), b.z());
-  }
-}
-
 class MFVVertexAuxProducer : public edm::EDProducer {
  public:
   explicit MFVVertexAuxProducer(const edm::ParameterSet&);
@@ -152,16 +140,19 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.bs_cyz = beamspot->covariance3D()(1,2);
     aux.bs_czz = beamspot->covariance3D()(2,2);
 
-    aux.pv_x = primary_vertex->x();
-    aux.pv_y = primary_vertex->y();
-    aux.pv_z = primary_vertex->z();
+    if (primary_vertex) {
+      aux.pv_ok = true;
+      aux.pv_x = primary_vertex->x();
+      aux.pv_y = primary_vertex->y();
+      aux.pv_z = primary_vertex->z();
 
-    aux.pv_cxx = primary_vertex->covariance(0,0);
-    aux.pv_cxy = primary_vertex->covariance(0,1);
-    aux.pv_cxz = primary_vertex->covariance(0,2);
-    aux.pv_cyy = primary_vertex->covariance(1,1);
-    aux.pv_cyz = primary_vertex->covariance(1,2);
-    aux.pv_czz = primary_vertex->covariance(2,2);
+      aux.pv_cxx = primary_vertex->covariance(0,0);
+      aux.pv_cxy = primary_vertex->covariance(0,1);
+      aux.pv_cxz = primary_vertex->covariance(0,2);
+      aux.pv_cyy = primary_vertex->covariance(1,1);
+      aux.pv_cyz = primary_vertex->covariance(1,2);
+      aux.pv_czz = primary_vertex->covariance(2,2);
+    }
 
     if (use_sv_to_jets) {
       assert(mfv::NJetsByUse == 1); // otherwise NMomenta is wrong, and we don't handle jet_assoctype in VertexAux (yet)
@@ -185,8 +176,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           }
         }
       }
-
-      aux.costhjetmomvtxdispmin = aux.costhjetmomvtxdispmax = aux.costhjetmomvtxdispavg = aux.costhjetmomvtxdisprms = -2;
     }
 
     
@@ -260,15 +249,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.gen2derr        = g2d.error();
     aux.gen3ddist       = g3d.value();
     aux.gen3derr        = g3d.error();
-
-//    for (int i = 0; i < mfv::NMomenta; ++i) {
-//      aux.costhmombs  [i] = vtx_distances.costhmombs[i];
-//      aux.costhmompv2d[i] = vtx_distances.costhmompv2d[i];
-//      aux.costhmompv3d[i] = vtx_distances.costhmompv3d[i];
-//
-//      aux.missdistpv   [i] = vtx_distances.missdistpv[i].value();
-//      aux.missdistpverr[i] = vtx_distances.missdistpv[i].error();
-//    }
 
     assert(aux.tracks_ok() && aux.jets_ok());
   }
