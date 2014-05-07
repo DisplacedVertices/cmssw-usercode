@@ -23,9 +23,8 @@ struct MFVVertexAux {
     which = 0;
     x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = 0;
     bs_x = bs_y = bs_z = bs_cxx = bs_cxy = bs_cxz = bs_cyy = bs_cyz = bs_czz = 0;
+    pv_ok = false;
     pv_x = pv_y = pv_z = pv_cxx = pv_cxy = pv_cxz = pv_cyy = pv_cyz = pv_czz = 0;
-    for (int i = 0; i < mfv::NMomenta; ++i)
-      missdistpv[i] = missdistpverr[i] = 0;
   }
 
   uchar which;
@@ -475,6 +474,7 @@ struct MFVVertexAux {
   vec3 bs_pos() const { return vec3(bs_x, bs_y, bs_z); }
   symmat3 bs_cov() const { return symmat3(vec6(bs_cxx, bs_cxy, bs_cxz, bs_cyy, bs_cyz, bs_czz)); }
 
+  bool pv_ok;
   float pv_x;
   float pv_y;
   float pv_z;
@@ -538,40 +538,74 @@ struct MFVVertexAux {
   float bs2derr() const { return _dist(pos(), cov(), bs_pos(), bs_cov()).second; }
   float bs2dsig() const { std::pair<float, float> d = _dist(pos(), cov(), bs_pos(), bs_cov()); return _sig(d.first, d.second); }
 
-  bool pv2dcompatscss() const { return _compat2(pos(), cov(), pv_pos(), pv_cov()).first; }
-  float pv2dcompat() const { return _compat2(pos(), cov(), pv_pos(), pv_cov()).second; }
-  float pv2ddist() const { return _mag(x - pv_x, y - pv_y); }
-  float pv2derr() const { return _dist(pos(), cov(), pv_pos(), pv_cov()).second; }
-  float pv2dsig() const { std::pair<float, float> d = _dist(pos(), cov(), pv_pos(), pv_cov()); return _sig(d.first, d.second); }
+  bool pv2dcompatscss() const { return !pv_ok ? false : _compat2(pos(), cov(), pv_pos(), pv_cov()).first; }
+  float pv2dcompat() const { return !pv_ok ? -1 : _compat2(pos(), cov(), pv_pos(), pv_cov()).second; }
+  float pv2ddist() const { return !pv_ok ? -1 : _mag(x - pv_x, y - pv_y); }
+  float pv2derr() const { return !pv_ok ? -1 : _dist(pos(), cov(), pv_pos(), pv_cov()).second; }
+  float pv2dsig() const { if (!pv_ok) return -1; std::pair<float, float> d = _dist(pos(), cov(), pv_pos(), pv_cov()); return _sig(d.first, d.second); }
 
-  bool pv3dcompatscss() const { return _compat3(pos(), cov(), pv_pos(), pv_cov()).first; }
-  float pv3dcompat() const { return _compat3(pos(), cov(), pv_pos(), pv_cov()).second; }
-  float pv3ddist() const { return _mag(x - pv_x, y - pv_y, z - pv_z); }
-  float pv3derr() const { return _dist(pos(), cov(), pv_pos(), pv_cov(), false).second; }
-  float pv3dsig() const { std::pair<float, float> d = _dist(pos(), cov(), pv_pos(), pv_cov(), false); return _sig(d.first, d.second); }
+  bool pv3dcompatscss() const { return !pv_ok ? false : _compat3(pos(), cov(), pv_pos(), pv_cov()).first; }
+  float pv3dcompat() const { return !pv_ok ? -1 : _compat3(pos(), cov(), pv_pos(), pv_cov()).second; }
+  float pv3ddist() const { return !pv_ok ? -1 : _mag(x - pv_x, y - pv_y, z - pv_z); }
+  float pv3derr() const { return !pv_ok ? -1 : _dist(pos(), cov(), pv_pos(), pv_cov(), false).second; }
+  float pv3dsig() const { if (!pv_ok) return -1; std::pair<float, float> d = _dist(pos(), cov(), pv_pos(), pv_cov(), false); return _sig(d.first, d.second); }
 
   float pvdz() const { return fabs(z - pv_z); }
-  float pvdzerr() const { return _mag(czz, pv_czz); } // JMTBAD
+  float pvdzerr() const { return sqrt(czz + pv_czz); } // JMTBAD
   float pvdzsig() const { return _sig(pvdz(), pvdzerr()); }
 
-  // JMTBAD finish up
-  float costhtkmomvtxdispmin;
-  float costhtkmomvtxdispmax;
-  float costhtkmomvtxdispavg;
-  float costhtkmomvtxdisprms;
+  enum costhmomdisps_type { costhmomdisps_tracks, costhmomdisps_jets };
+  std::vector<float> costhmomdisps(costhmomdisps_type which) const {
+    std::vector<float> v;
+    TVector3 pv2sv(x - pv_x, y - pv_y, z - pv_z);
+    pv2sv.SetMag(1);
+    size_t n = which == costhmomdisps_tracks ? ntracks() : njets();
+    for (size_t i = 0; i < n; ++i) {
+      TVector3 mom;
+      if (which == costhmomdisps_tracks)
+        mom.SetPtEtaPhi(track_pt[i], track_eta[i], track_phi[i]);
+      else
+        mom.SetPtEtaPhi(jet_pt[i], jet_eta[i], jet_phi[i]);
+      mom.SetMag(1);
+      v.push_back(mom.Dot(pv2sv));
+    }
+    return v;
+  }
 
-  float costhjetmomvtxdispmin;
-  float costhjetmomvtxdispmax;
-  float costhjetmomvtxdispavg;
-  float costhjetmomvtxdisprms;
+  float costhtkmomdispmin() const { return stats(costhmomdisps(costhmomdisps_tracks)).min; }
+  float costhtkmomdispmax() const { return stats(costhmomdisps(costhmomdisps_tracks)).max; }
+  float costhtkmomdispavg() const { return stats(costhmomdisps(costhmomdisps_tracks)).avg; }
+  float costhtkmomdisprms() const { return stats(costhmomdisps(costhmomdisps_tracks)).rms; }
 
-  float costhmombs  [mfv::NMomenta];
-  float costhmompv2d[mfv::NMomenta];
-  float costhmompv3d[mfv::NMomenta];
+  float costhjetmomdispmin() const { return stats(costhmomdisps(costhmomdisps_jets)).min; }
+  float costhjetmomdispmax() const { return stats(costhmomdisps(costhmomdisps_jets)).max; }
+  float costhjetmomdispavg() const { return stats(costhmomdisps(costhmomdisps_jets)).avg; }
+  float costhjetmomdisprms() const { return stats(costhmomdisps(costhmomdisps_jets)).rms; }
 
-  float missdistpv   [mfv::NMomenta];
-  float missdistpverr[mfv::NMomenta];
-  float missdistpvsig(int w) const { return _sig(missdistpv[w], missdistpverr[w]); }
+  enum costhmomdisp_type { costhmomdisp_bs, costhmomdisp_pv2d, costhmomdisp_pv3d };
+  float costhmomdisp(costhmomdisp_type type, int which_mom) const {
+    if (type != costhmomdisp_bs && !pv_ok)
+      return -2;
+
+    TLorentzVector mom = p4(which_mom);
+    if (mom.Pt() > 0) {
+      TVector3 disp;
+      if (type == costhmomdisp_bs)
+        disp.SetXYZ(x - bs_x, y - bs_y, 0);
+      else if (type == costhmomdisp_pv2d)
+        disp.SetXYZ(x - pv_x, y - pv_y, 0);
+      else if (type == costhmomdisp_pv3d)
+        disp.SetXYZ(x - pv_x, y - pv_y, z - pv_z);
+      disp.SetMag(1);
+      return mom.Vect().Unit().Dot(disp);
+    }
+    else
+      return -2;
+  }
+
+  float costhmombs  (int w) const { return costhmomdisp(costhmomdisp_bs,   w); }
+  float costhmompv2d(int w) const { return costhmomdisp(costhmomdisp_pv2d, w); }
+  float costhmompv3d(int w) const { return costhmomdisp(costhmomdisp_pv3d, w); }
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;
