@@ -115,9 +115,8 @@ def submit(name, tau0=None, mass=None):
         glb_snip = "\nprocess.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')\n"
         new_py += glb_snip
         new_reco_py += glb_snip + '''
-from CondCore.DBCommon.CondDBSetup_cfi import *
-process.castorThing = cms.ESSource('PoolDBESSource', CondDBSetup, connect = cms.string('frontier://FrontierProd/CMS_COND_HCAL_000'), toGet = cms.VPSet(cms.PSet(record = cms.string('CastorSaturationCorrsRcd'), tag = cms.string('CastorSaturationCorrs_v1.00_mc'))))
-process.es_prefer_castorThing = cms.ESPrefer('PoolDBESSource', 'castorThing')
+from modify import prefer_it
+prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', 'CastorSaturationCorrsRcd', 'CastorSaturationCorrs_v1.00_mc')
 '''
 
     if 'nopu' in name:
@@ -137,7 +136,7 @@ process.es_prefer_castorThing = cms.ESPrefer('PoolDBESSource', 'castorThing')
         snip += 'gauss_bs(process, True, True)\n'
         new_py += snip
         new_reco_py += snip
-    
+
     open(pset_fn, 'wt').write(new_py)
     open(reco_pset_fn, 'wt').write(new_reco_py)
 
@@ -154,7 +153,7 @@ process.es_prefer_castorThing = cms.ESPrefer('PoolDBESSource', 'castorThing')
 ################################################################################
 
 if run_ttbar:
-    for name in 'default nopu designnopu'.split():
+    for name in 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split():
         submit('ttbar_' + name)
 else:
     tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
