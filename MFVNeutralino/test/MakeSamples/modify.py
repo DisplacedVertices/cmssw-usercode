@@ -62,14 +62,34 @@ DECAY   1000022     0.01E+00   # neutralino decays
 # JMTBAD these two don't do the full story for removing BS
 # pos/tilt/width
 
-def gauss_bs(process):
+def ideal_bs_tag(process):
+    from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+    process.idealCenteredBS = cms.ESSource('PoolDBESSource',
+                                           CondDBSetup,
+                                           connect = cms.string('frontier://FrontierProd/CMS_COND_31X_BEAMSPOT'),
+                                           toGet = cms.VPSet(
+                                               cms.PSet(record = cms.string('BeamSpotObjectsRcd'),
+                                                        tag = cms.string('Ideal_Centered_MC_44_V1'),
+                                                        )
+                                               )
+                                           )
+    process.es_prefer_idealCenteredBS = cms.ESPrefer('PoolDBESSource', 'idealCenteredBS')
+
+def gauss_bs(process, noxy=False, noz=False):
+    ideal_bs_tag(process)
     from IOMC.EventVertexGenerators.VtxSmearedParameters_cfi import VtxSmearedCommon, GaussVtxSmearingParameters
     process.VtxSmeared = cms.EDProducer("GaussEvtVtxGenerator",
                                         GaussVtxSmearingParameters,
                                         VtxSmearedCommon
                                         )
+    if noxy:
+        process.VtxSmeared.SigmaX = 1e-12
+        process.VtxSmeared.SigmaY = 1e-12
+    if noz:
+        process.VtxSmeared.SigmaZ = 1e-12
 
 def center_bs(process):
+    ideal_bs_tag(process)
     process.VtxSmeared.X0 = 0
     process.VtxSmeared.Y0 = 0
     process.VtxSmeared.Y0 = 0
