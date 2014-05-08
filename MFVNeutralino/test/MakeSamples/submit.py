@@ -137,6 +137,13 @@ prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', '
         new_py += snip
         new_reco_py += snip
 
+    if 'ali_' in name:
+        ali_tag = name.split('ali_')[-1].capitalize()
+        new_reco_py += '''
+from modify import prefer_it
+prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc')
+''' % ali_tag
+
     open(pset_fn, 'wt').write(new_py)
     open(reco_pset_fn, 'wt').write(new_reco_py)
 
@@ -148,13 +155,14 @@ prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', '
         os.system('crab -create')
         for i in xrange(4):
             os.system('crab -c %s -submit 500' % ui_working_dir)
-        os.system('rm -f crab.cfg reco.pyc')
+        os.system('rm -f crab.cfg reco.pyc my_reco.py')
 
 ################################################################################
 
 if run_ttbar:
-    for name in 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split():
-        submit('ttbar_' + name)
+    alis = ['bowing', 'elliptical', 'curl', 'radial', 'sagitta', 'skew', 'telescope', 'twist', 'zexpansion']
+    for ali in alis:
+        submit('ttbar_' + 'ali_' + ali)
 else:
     tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
     masses = [200, 300, 400, 600, 800, 1000]
