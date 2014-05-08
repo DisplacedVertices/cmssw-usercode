@@ -389,10 +389,12 @@ for tau, mass, sample in mfv_signal_samples_ex:
 
 ########################################################################
 
-myttbarpythia =  MCSample('myttbarpythia', '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER', 99850, 4, 0.15, 225.2 * 0.457)
-myttbarpynopu =  MCSample('myttbarpynopu', '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',       99950, 4, 0.15, 225.2 * 0.457)
+myttbar_samples = [
+    MCSample('myttbarpythia',       '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER',        99850, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbarpynopu',       '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',              99950, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbarpydesignnopu', '', '/mfv_ttbar_designnopu/tucker-mfv_ttbar_designnopu-03e053ea4788fabdfdc6964bc26befc0/USER', 100000, 4, 0.15, 225.2 * 0.457),
+    ]
 
-myttbar_samples = [myttbarpythia, myttbarpynopu]
 for s in myttbar_samples:
     s.is_pythia8 = True
     s.dbs_url_num = 3
