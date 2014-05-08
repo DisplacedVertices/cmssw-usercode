@@ -128,7 +128,7 @@ def submit(name, tau0=None, mass=None):
 ################################################################################
 
 if run_ttbar:
-    for name in 'default nopu'.split():
+    for name in 'default nopu designnopu'.split():
         submit('ttbar_' + name)
 else:
     tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
