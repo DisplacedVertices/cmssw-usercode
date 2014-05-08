@@ -59,29 +59,20 @@ DECAY   1000022     0.01E+00   # neutralino decays
     open(fn, 'wt').write(slha % locals())
 
 
-# JMTBAD these two don't do the full story for removing BS
-# pos/tilt/width
+def prefer_it(process, name, connect, record, tag):
+    from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
+    es_source = cms.ESSource('PoolDBESSource', CondDBSetup, connect = cms.string(connect), toGet = cms.VPSet(cms.PSet(record = cms.string(record), tag = cms.string(tag))))
+    es_prefer = cms.ESPrefer('PoolDBESSource', name)
+    setattr(process, name, es_source)
+    setattr(process, 'es_prefer_' + name, es_prefer)
 
 def ideal_bs_tag(process):
-    from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
-    process.idealCenteredBS = cms.ESSource('PoolDBESSource',
-                                           CondDBSetup,
-                                           connect = cms.string('frontier://FrontierProd/CMS_COND_31X_BEAMSPOT'),
-                                           toGet = cms.VPSet(
-                                               cms.PSet(record = cms.string('BeamSpotObjectsRcd'),
-                                                        tag = cms.string('Ideal_Centered_MC_44_V1'),
-                                                        )
-                                               )
-                                           )
-    process.es_prefer_idealCenteredBS = cms.ESPrefer('PoolDBESSource', 'idealCenteredBS')
+    prefer_it(process, 'idealCenteredBS', 'frontier://FrontierProd/CMS_COND_31X_BEAMSPOT', 'BeamSpotObjectsRcd', 'Ideal_Centered_MC_44_V1')
 
 def gauss_bs(process, noxy=False, noz=False):
     ideal_bs_tag(process)
     from IOMC.EventVertexGenerators.VtxSmearedParameters_cfi import VtxSmearedCommon, GaussVtxSmearingParameters
-    process.VtxSmeared = cms.EDProducer("GaussEvtVtxGenerator",
-                                        GaussVtxSmearingParameters,
-                                        VtxSmearedCommon
-                                        )
+    process.VtxSmeared = cms.EDProducer("GaussEvtVtxGenerator", GaussVtxSmearingParameters, VtxSmearedCommon)
     if noxy:
         process.VtxSmeared.SigmaX = 1e-12
         process.VtxSmeared.SigmaY = 1e-12
