@@ -25,7 +25,7 @@ fi
 echo
 echo done with gensimhlt step at `date`, starting reco step
 echo
-cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml reco.py
+cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml my_reco.py
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

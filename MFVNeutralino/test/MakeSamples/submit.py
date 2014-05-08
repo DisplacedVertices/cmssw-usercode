@@ -76,15 +76,18 @@ def submit(name, tau0=None, mass=None):
     else:
         output_file = 'reco.root'
 
-    additional_input_files = ['minSLHA.spc', 'reco.py']
+    additional_input_files = ['minSLHA.spc']
     if run_pat:
         additional_input_files.append('pat.py')
     if run_ttbar:
         additional_input_files.remove('minSLHA.spc')
-    additional_input_files = ', '.join(additional_input_files)
 
     pset_fn = os.path.join(dir, 'psets/mfv_%(name)s.py' % locals())
     new_py = open('gensimhlt.py').read()
+
+    reco_pset_fn = 'my_reco.py'
+    additional_input_files.append(reco_pset_fn)
+    new_reco_py = open('reco.py').read()
 
     if 'ttbar' not in name:
         assert tau0 is not None and mass is not None
@@ -109,13 +112,36 @@ def submit(name, tau0=None, mass=None):
         raise RuntimeError("don't know what LSP to use")
 
     if 'design' in name:
-        new_py += "\nprocess.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')\n"
+        glb_snip = "\nprocess.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')\n"
+        new_py += glb_snip
+        new_reco_py += glb_snip + '''
+from CondCore.DBCommon.CondDBSetup_cfi import *
+process.castorThing = cms.ESSource('PoolDBESSource', CondDBSetup, connect = cms.string('frontier://FrontierProd/CMS_COND_HCAL_000'), toGet = cms.VPSet(cms.PSet(record = cms.string('CastorSaturationCorrsRcd'), tag = cms.string('CastorSaturationCorrs_v1.00_mc'))))
+process.es_prefer_castorThing = cms.ESPrefer('PoolDBESSource', 'castorThing')
+'''
 
     if 'nopu' in name:
         new_py += '\nfrom modify import nopu\n'
-        new_py += '\nnopu(process)\n'
+        new_py += 'nopu(process)\n'
 
+    snip = '\nfrom modify import ideal_bs_tag, gauss_bs\n'
+    if 'gaubs' in name:
+        snip += 'gauss_bs(process)\n'
+        new_py += snip
+        new_reco_py += snip
+    elif 'gaunxybs' in name:
+        snip += 'gauss_bs(process, True)\n'
+        new_py += snip
+        new_reco_py += snip
+    elif 'gaunxyzbs' in name:
+        snip += 'gauss_bs(process, True, True)\n'
+        new_py += snip
+        new_reco_py += snip
+    
     open(pset_fn, 'wt').write(new_py)
+    open(reco_pset_fn, 'wt').write(new_reco_py)
+
+    additional_input_files = ', '.join(additional_input_files)
 
     ui_working_dir = os.path.join(dir, 'crab_mfv_%s' % name)
     open('crab.cfg','wt').write(crab_cfg % locals())
