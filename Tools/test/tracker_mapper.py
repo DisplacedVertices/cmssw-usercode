@@ -6,16 +6,14 @@ process.TFileService.fileName = 'tracker_mapper.root'
 
 #process.source.fileNames = ['/store/user/tucker/RelValSingleMuPt1000_CMSSW_5_3_6-START53_V14-v2_GEN-SIM-RECO.7C1AEF1C-FF29-E211-BA60-003048678B20.root']
 
-process.p = cms.EDAnalyzer('TrackerMapper',
-                           track_src = cms.InputTag('generalTracks'),
-                           )
-process.p0 = cms.Path(process.p)
+process.TrackerMapper = cms.EDAnalyzer('TrackerMapper', track_src = cms.InputTag('generalTracks'))
+process.p = cms.Path(process.TrackerMapper)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import ttbarhadronic, myttbar_samples
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('EffCheck',
+    cs = CRABSubmitter('TrackerMapper',
                        total_number_of_events = -1,
                        events_per_job = 10000,
                        )
