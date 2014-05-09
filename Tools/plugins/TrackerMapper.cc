@@ -56,9 +56,16 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_weird_track_errs[5];
   TH2F* h_weird_track_pars_v_pars[5][4];
   TH2F* h_weird_track_errs_v_pars[5][5];
+  TH1F* h_weird_track_q;
   TH1F* h_weird_track_nhits;
   TH1F* h_weird_track_npxhits;
   TH1F* h_weird_track_nsthits;
+  TH1F* h_weird_track_chi2;
+  TH1F* h_weird_track_dof;
+  TH1F* h_weird_track_chi2dof;
+  TH1F* h_weird_track_algo;
+  TH1F* h_weird_track_quality;
+  TH1F* h_weird_track_nloops;
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -120,24 +127,32 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
 
   h_n_weird_tracks = fs->make<TH1F>("h_n_weird_tracks", "", 200, 0, 200);
   const char* par_names[5] = {"pt", "eta", "phi", "dxy", "dz"};
-  const int par_nbins[5] = { 200, 200, 200, 200, 200 };
-  const double par_lo[5] = {   0, -2.6, -3.15, -0.2, -20 };
-  const double par_hi[5] = {  15,  2.6,  3.15,  0.2,  20 };
+  const int par_nbins[5] = { 500,   10,     10,  400, 400 };
+  const double par_lo[5] = {   0, -2.6, -2.772,   -2, -20 };
+  const double par_hi[5] = { 100, -2.4, -2.646,    2,  20 };
+  const int err_nbins[5] = { 100, 100, 100, 200, 200 };
   const double err_lo[5] = { 0 };
-  const double err_hi[5] = { 0.25, 0.1, 0.1, 0.5, 0.5 };
+  const double err_hi[5] = {   5, 0.1, 0.1, 0.5, 2 };
   for (int i = 0; i < 5; ++i)
     h_weird_track_pars[i] = fs->make<TH1F>(TString::Format("h_weird_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
   for (int i = 0; i < 5; ++i)
-    h_weird_track_errs[i] = fs->make<TH1F>(TString::Format("h_weird_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
+    h_weird_track_errs[i] = fs->make<TH1F>(TString::Format("h_weird_track_err%s", par_names[i]), "", err_nbins[i], err_lo[i], err_hi[i]);
   for (int i = 0; i < 5; ++i)
     for (int j = i+1; j < 5; ++j)
       h_weird_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
   for (int i = 0; i < 5; ++i)
     for (int j = 0; j < 5; ++j)
-      h_weird_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
+      h_weird_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], err_nbins[j], err_lo[j], err_hi[j]);
+  h_weird_track_q = fs->make<TH1F>("h_weird_track_q", "", 3, -1, 2);
   h_weird_track_nhits   = fs->make<TH1F>("h_weird_track_nhits",   "",  40, 0, 40);
   h_weird_track_npxhits = fs->make<TH1F>("h_weird_track_npxhits", "",  12, 0, 12);
   h_weird_track_nsthits = fs->make<TH1F>("h_weird_track_nsthits", "",  28, 0, 28);
+  h_weird_track_chi2 = fs->make<TH1F>("h_weird_track_chi2", "", 50, 0, 100);
+  h_weird_track_dof = fs->make<TH1F>("h_weird_track_dof", "", 50, 0, 100);
+  h_weird_track_chi2dof = fs->make<TH1F>("h_weird_track_chi2dof", "", 50, 0, 10);
+  h_weird_track_algo = fs->make<TH1F>("h_weird_track_algo", "", 30, 0, 30);
+  h_weird_track_quality = fs->make<TH1F>("h_weird_track_quality", "", 7, 0, 7);
+  h_weird_track_nloops = fs->make<TH1F>("h_weird_track_nloops", "", 10, 0, 10);
 }
 
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -216,9 +231,17 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
         }
       }
 
+      h_weird_track_q->Fill(tk.charge());
       h_weird_track_nhits  ->Fill(tk.hitPattern().numberOfValidHits());
       h_weird_track_npxhits->Fill(tk.hitPattern().numberOfValidPixelHits());
       h_weird_track_nsthits->Fill(tk.hitPattern().numberOfValidStripHits());
+      h_weird_track_chi2->Fill(tk.chi2());
+      h_weird_track_dof->Fill(tk.ndof());
+      h_weird_track_chi2dof->Fill(tk.chi2()/tk.ndof());
+      h_weird_track_algo->Fill(int(tk.algo()));
+      for (int i = 0; i < 7; ++i)
+        h_weird_track_quality->Fill(tk.quality(reco::Track::TrackQuality(i)));
+      h_weird_track_nloops->Fill(tk.nLoops());
 
 #ifdef USE_DUMPERS
       if (!dumpers_evented) {
