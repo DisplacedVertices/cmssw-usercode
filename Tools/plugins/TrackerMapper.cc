@@ -8,9 +8,9 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
-class EffCheck : public edm::EDAnalyzer {
+class TrackerMapper : public edm::EDAnalyzer {
  public:
-  explicit EffCheck(const edm::ParameterSet&);
+  explicit TrackerMapper(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
  
  private:
@@ -47,7 +47,7 @@ class EffCheck : public edm::EDAnalyzer {
   TH2F* h_tracks_eta_phi_nstrip_gt[2][3][9];
 };
 
-EffCheck::EffCheck(const edm::ParameterSet& cfg)
+TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   : track_src(cfg.getParameter<edm::InputTag>("track_src"))
 {
   edm::Service<TFileService> fs;
@@ -105,7 +105,7 @@ EffCheck::EffCheck(const edm::ParameterSet& cfg)
   }
 }
 
-void EffCheck::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<reco::TrackCollection> tracks;
   event.getByLabel(track_src, tracks);
 
@@ -157,4 +157,4 @@ void EffCheck::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   }
 }
 
-DEFINE_FWK_MODULE(EffCheck);
+DEFINE_FWK_MODULE(TrackerMapper);
