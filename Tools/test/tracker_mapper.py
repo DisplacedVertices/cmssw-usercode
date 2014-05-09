@@ -15,6 +15,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('TrackerMapper',
                        total_number_of_events = -1,
-                       events_per_job = 10000,
+                       events_per_job = 500000,
                        )
-    cs.submit_all(myttbar_samples + [ttbarhadronic])
+    cs.submit_all([ttbarhadronic])
