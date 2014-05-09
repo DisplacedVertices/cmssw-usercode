@@ -8,6 +8,11 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
+//#define USE_DUMPERS // you also have to add JMTucker/Dumpers to the BuildFile.xml for this
+#ifdef USE_DUMPERS
+#include "JMTucker/Dumpers/interface/Dumpers.h"
+#endif
+
 class TrackerMapper : public edm::EDAnalyzer {
  public:
   explicit TrackerMapper(const edm::ParameterSet&);
@@ -45,6 +50,15 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH2F* h_tracks_eta_phi_npixel_gt[2][3][6];
   TH2F* h_tracks_eta_phi_nstrip_eq[2][3][9];
   TH2F* h_tracks_eta_phi_nstrip_gt[2][3][9];
+
+  TH1F* h_n_weird_tracks;
+  TH1F* h_weird_track_pars[5];
+  TH1F* h_weird_track_errs[5];
+  TH2F* h_weird_track_pars_v_pars[5][4];
+  TH2F* h_weird_track_errs_v_pars[5][5];
+  TH1F* h_weird_track_nhits;
+  TH1F* h_weird_track_npxhits;
+  TH1F* h_weird_track_nsthits;
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -103,20 +117,51 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
       }
     }
   }
+
+  h_n_weird_tracks = fs->make<TH1F>("h_n_weird_tracks", "", 200, 0, 200);
+  const char* par_names[5] = {"pt", "eta", "phi", "dxy", "dz"};
+  const int par_nbins[5] = { 200, 200, 200, 200, 200 };
+  const double par_lo[5] = {   0, -2.6, -3.15, -0.2, -20 };
+  const double par_hi[5] = {  15,  2.6,  3.15,  0.2,  20 };
+  const double err_lo[5] = { 0 };
+  const double err_hi[5] = { 0.25, 0.1, 0.1, 0.5, 0.5 };
+  for (int i = 0; i < 5; ++i)
+    h_weird_track_pars[i] = fs->make<TH1F>(TString::Format("h_weird_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
+  for (int i = 0; i < 5; ++i)
+    h_weird_track_errs[i] = fs->make<TH1F>(TString::Format("h_weird_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
+  for (int i = 0; i < 5; ++i)
+    for (int j = i+1; j < 5; ++j)
+      h_weird_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
+  for (int i = 0; i < 5; ++i)
+    for (int j = 0; j < 5; ++j)
+      h_weird_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
+  h_weird_track_nhits   = fs->make<TH1F>("h_weird_track_nhits",   "",  40, 0, 40);
+  h_weird_track_npxhits = fs->make<TH1F>("h_weird_track_npxhits", "",  12, 0, 12);
+  h_weird_track_nsthits = fs->make<TH1F>("h_weird_track_nsthits", "",  28, 0, 28);
 }
 
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+#ifdef USE_DUMPERS
+  bool dumpers_evented = false;
+#endif
+
   edm::Handle<reco::TrackCollection> tracks;
   event.getByLabel(track_src, tracks);
 
   h_ntracks->Fill(int(tracks->size()));
 
+  int n_weird = 0;
+
   for (const reco::Track& tk : *tracks) {
+    const bool v1 = tk.vx()*tk.vx() + tk.vy()*tk.vy() + tk.vz()*tk.vz() < 1;
+
     for (int i = 0; i < 2; ++i) {
-      if (i == 1 && (tk.vx()*tk.vx() + tk.vy()*tk.vy() + tk.vz()*tk.vz()) >= 1) continue;
+      if (i == 1 && !v1) continue;
+
       for (int j = 0; j < 3; ++j) {
         if (j == 1 && tk.pt() <= 1) continue;
         if (j == 2 && tk.pt() <= 3) continue;
+
         h_tracks_pt[i][j]->Fill(tk.pt());
         h_tracks_eta[i][j]->Fill(tk.eta());
         h_tracks_phi[i][j]->Fill(tk.phi());
@@ -154,7 +199,40 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
         }
       }
     }
+    
+    if (v1 && tk.dxyError() >= 0.05 && tk.pt() > 3 && tk.phi() >= -2.772 && tk.phi() <= -2.646 && tk.eta() >= -2.56 && tk.eta() <= -2.4) {
+      ++n_weird;
+
+      const double pars[5] = { tk.pt(),      tk.eta(),      tk.phi(),      tk.dxy(),      tk.dz()      };
+      const double errs[5] = { tk.ptError(), tk.etaError(), tk.phiError(), tk.dxyError(), tk.dzError() };
+
+      for (int i = 0; i < 5; ++i) {
+        h_weird_track_pars[i]->Fill(pars[i]);
+        h_weird_track_errs[i]->Fill(errs[i]);
+        for (int j = 0; j < 5; ++j) {
+          if (j >= i+1)
+            h_weird_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
+          h_weird_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+        }
+      }
+
+      h_weird_track_nhits  ->Fill(tk.hitPattern().numberOfValidHits());
+      h_weird_track_npxhits->Fill(tk.hitPattern().numberOfValidPixelHits());
+      h_weird_track_nsthits->Fill(tk.hitPattern().numberOfValidStripHits());
+
+#ifdef USE_DUMPERS
+      if (!dumpers_evented) {
+        JMTDumper::set(event, setup);
+        std::cout << event;
+        dumpers_evented = true;
+      }
+
+      std::cout << "weird track:\n" << tk;
+#endif
+    }
   }
+
+  h_n_weird_tracks->Fill(n_weird);
 }
 
 DEFINE_FWK_MODULE(TrackerMapper);
