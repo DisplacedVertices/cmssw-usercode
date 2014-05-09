@@ -58,7 +58,7 @@ process.generator = cms.EDFilter('Pythia8GeneratorFilter',
                                          'SUSY:idA = 1000021',
                                          'SUSY:idB = 1000021',
                                          'Tune:pp 5',
-					 )
+                                        )
                                      ),
 				 )
 

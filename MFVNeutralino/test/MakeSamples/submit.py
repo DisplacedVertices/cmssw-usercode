@@ -22,7 +22,7 @@ get_edm_output = 0
 ignore_edm_output = 1
 output_file = %(output_file)s
 events_per_job = 50
-total_number_of_events = 100000
+total_number_of_events = 100
 first_lumi = 1
 use_dbs3 = 1
 
@@ -31,7 +31,7 @@ script_exe = twostep.sh
 additional_input_files = %(additional_input_files)s
 ui_working_dir = %(ui_working_dir)s
 copy_data = 1
-storage_element = T3_US_Cornell
+storage_element = T3_US_FNALLPC
 publish_data = 1
 publish_data_name = mfv_%(name)s
 dbs_url_for_publication = phys03
@@ -39,7 +39,7 @@ dbs_url_for_publication = phys03
 ssh_control_persist = no
 
 [GRID]
-se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_Warsaw,T3_US_Baylor,T2_FR_IPHC,T3_MX_Cinvestav,T2_TH_CUNSTDA,T3_US_TTU,T2_UA_KIPT,T2_BR_SPRACE,T3_US_OSU,T2_RU_PNPI,T2_FI_HIP,T2_BE_IIHE,T3_US_UCD,T2_AT_Vienna,T3_US_Omaha,T2_FR_CCIN2P3,T2_RU_RRC_KI,T2_TW_Taiwan,T3_US_Rutgers
+se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_Warsaw,T3_US_Baylor,T2_FR_IPHC,T3_MX_Cinvestav,T2_TH_CUNSTDA,T3_US_TTU,T2_UA_KIPT,T2_BR_SPRACE,T3_US_OSU,T2_RU_PNPI,T2_FI_HIP,T2_BE_IIHE,T3_US_UCD,T2_AT_Vienna,T3_US_Omaha,T2_FR_CCIN2P3,T2_RU_RRC_KI,T2_TW_Taiwan,T3_US_Rutgers, T3_UK_London_QMUL
 '''
 
 ################################################################################
@@ -76,7 +76,7 @@ def submit(name, tau0=None, mass=None):
     else:
         output_file = 'reco.root'
 
-    additional_input_files = ['minSLHA.spc']
+    additional_input_files = ['minSLHA.spc','modify.py']
     if run_pat:
         additional_input_files.append('pat.py')
     if run_ttbar:
@@ -96,7 +96,7 @@ def submit(name, tau0=None, mass=None):
 
     if 'gluino' in name:
         new_py += '\nfrom modify import set_gluino_tau0\n'
-        new_py += '\nset_gluino_tau0(process, %e)\n' % tau0
+        new_py += '\nset_gluino_tau0(process, %e)\n' % tau0       
         from modify import set_mass
         set_mass(mass)
     elif 'neutralino' in name:
@@ -144,6 +144,10 @@ from modify import prefer_it
 prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc')
 ''' % ali_tag
 
+    if 'tune_' in name:
+        new_py += '\nfrom modify import set_tune\n'
+        new_py += '\nset_tune(process,%s)\n' % name.split('tune_')[1]
+                
     open(pset_fn, 'wt').write(new_py)
     open(reco_pset_fn, 'wt').write(new_reco_py)
 
@@ -164,12 +168,17 @@ if run_ttbar:
     for ali in alis:
         submit('ttbar_' + 'ali_' + ali)
 else:
-    tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
-    masses = [200, 300, 400, 600, 800, 1000]
+    #tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
+    #masses = [200, 300, 400, 600, 800, 1000]
+    #tunes = [1,2,3,4,5,6]
+    tau0s = [0.]
+    masses = [200]
+    tunes = [1]
 
     #to_do = [(0.3, m) for m in masses] + [(t, 300) for t in tau0s]
-    to_do = [(t,m) for m in masses for t in tau0s]
+    to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 
-    for tau0, mass in to_do:
-        name = 'neutralino_tau%04ium_M%04i' % (int(tau0*1000), mass)
+    for tau0, mass, tune in to_do:
+        name = 'neutralino_tau%04ium_M%04i_tune_%i' % (int(tau0*1000), mass, tune)
         submit(name, tau0, mass)
+        
