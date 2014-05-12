@@ -51,6 +51,9 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH2F* h_tracks_eta_phi_nstrip_eq[2][3][9];
   TH2F* h_tracks_eta_phi_nstrip_gt[2][3][9];
 
+  TH2F* h_tracks_npixel_phi_eta_eq[2][3][8];
+  TH2F* h_tracks_nstrip_phi_eta_eq[2][3][8];
+
   TH1F* h_n_weird_tracks;
   TH1F* h_weird_track_pars[5];
   TH1F* h_weird_track_errs[5];
@@ -88,9 +91,9 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
       h_tracks_nstrip[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_nstrip", exi[i], exj[j]), TString::Format("%s tracks%s;tracks nstrip;arb. units", exi[i], exj[j]), 40, 0, 40);
 
       h_tracks_dxyerr_eta[i][j] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_dxyerr_eta", exi[i], exj[j]), TString::Format("%s tracks%s;eta;dxyerr", exi[i], exj[j]), 50, -4.00, 4.00, 1000, 0, 2);
-      h_tracks_dxyerr_phi[i][j] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_dxyerr_phi", exi[i], exj[j]), TString::Format("%s tracks%s;phi;dxyerr", exi[i], exj[j]), 50, -4.00, 4.00, 1000, 0, 2);
+      h_tracks_dxyerr_phi[i][j] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_dxyerr_phi", exi[i], exj[j]), TString::Format("%s tracks%s;phi;dxyerr", exi[i], exj[j]), 50, -3.15, 3.15, 1000, 0, 2);
       h_tracks_dzerr_eta[i][j] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_dzerr_eta", exi[i], exj[j]), TString::Format("%s tracks%s;eta;dzerr", exi[i], exj[j]), 50, -4.00, 4.00, 1000, 0, 2);
-      h_tracks_dzerr_phi[i][j] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_dzerr_phi", exi[i], exj[j]), TString::Format("%s tracks%s;phi;dzerr", exi[i], exj[j]), 50, -4.00, 4.00, 1000, 0, 2);
+      h_tracks_dzerr_phi[i][j] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_dzerr_phi", exi[i], exj[j]), TString::Format("%s tracks%s;phi;dzerr", exi[i], exj[j]), 50, -3.15, 3.15, 1000, 0, 2);
 
       for (int k = 0; k < 11; ++k) {
         h_tracks_eta_phi_dxyerr_eq[i][j][k] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_eta_phi_dxyerr_eq_%d", exi[i], exj[j], k), TString::Format("%s tracks%s w/ %4.3f <= dxyerr < %4.3f;phi;eta", exi[i], exj[j], 0.005*k, 0.005*(k+1)), 50, -3.15, 3.15, 50, -4, 4);
@@ -122,6 +125,24 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
       for (int k = 0; k < 9; ++k) {
         h_tracks_eta_phi_nstrip_gt[i][j][k] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_eta_phi_nstrip_gt_%d", exi[i], exj[j], k), TString::Format("%s tracks%s w/ nstrip >= %d;phi;eta", exi[i], exj[j], 2*k), 50, -3.15, 3.15, 50, -4, 4);
       }
+
+      h_tracks_npixel_phi_eta_eq[i][j][0] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_0", exi[i], exj[j]), TString::Format("%s tracks%s w/ eta < -2.5;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_npixel_phi_eta_eq[i][j][1] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_1", exi[i], exj[j]), TString::Format("%s tracks%s w/ -2.5 <= eta < -1.5;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_npixel_phi_eta_eq[i][j][2] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_2", exi[i], exj[j]), TString::Format("%s tracks%s w/ -1.5 <= eta < -0.9;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_npixel_phi_eta_eq[i][j][3] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_3", exi[i], exj[j]), TString::Format("%s tracks%s w/ -0.9 <= eta < 0.0;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_npixel_phi_eta_eq[i][j][4] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_4", exi[i], exj[j]), TString::Format("%s tracks%s w/ 0.0 <= eta < 0.9;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_npixel_phi_eta_eq[i][j][5] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_5", exi[i], exj[j]), TString::Format("%s tracks%s w/ 0.9 <= eta < 1.5;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_npixel_phi_eta_eq[i][j][6] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_6", exi[i], exj[j]), TString::Format("%s tracks%s w/ 1.5 <= eta < 2.5;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_npixel_phi_eta_eq[i][j][7] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_npixel_phi_eta_eq_7", exi[i], exj[j]), TString::Format("%s tracks%s w/ eta >= 2.5;phi;npixel", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+
+      h_tracks_nstrip_phi_eta_eq[i][j][0] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_0", exi[i], exj[j]), TString::Format("%s tracks%s w/ eta < -2.5;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_nstrip_phi_eta_eq[i][j][1] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_1", exi[i], exj[j]), TString::Format("%s tracks%s w/ -2.5 <= eta < -1.5;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_nstrip_phi_eta_eq[i][j][2] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_2", exi[i], exj[j]), TString::Format("%s tracks%s w/ -1.5 <= eta < -0.9;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_nstrip_phi_eta_eq[i][j][3] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_3", exi[i], exj[j]), TString::Format("%s tracks%s w/ -0.9 <= eta < 0.0;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_nstrip_phi_eta_eq[i][j][4] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_4", exi[i], exj[j]), TString::Format("%s tracks%s w/ 0.0 <= eta < 0.9;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_nstrip_phi_eta_eq[i][j][5] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_5", exi[i], exj[j]), TString::Format("%s tracks%s w/ 0.9 <= eta < 1.5;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_nstrip_phi_eta_eq[i][j][6] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_6", exi[i], exj[j]), TString::Format("%s tracks%s w/ 1.5 <= eta < 2.5;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
+      h_tracks_nstrip_phi_eta_eq[i][j][7] = fs->make<TH2F>(TString::Format("h_tracks_%s_%s_nstrip_phi_eta_eq_7", exi[i], exj[j]), TString::Format("%s tracks%s w/ eta >= 2.5;phi;nstrip", exi[i], exj[j]), 50, -3.15, 3.15, 40, 0, 40);
     }
   }
 
@@ -211,6 +232,32 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
         for (int k = 0; k < 9; ++k) {
           if (tk.hitPattern().numberOfValidStripHits() == 2*k || tk.hitPattern().numberOfValidStripHits() == 2*k+1) h_tracks_eta_phi_nstrip_eq[i][j][k]->Fill(tk.phi(), tk.eta());
           if (tk.hitPattern().numberOfValidStripHits() >= 2*k) h_tracks_eta_phi_nstrip_gt[i][j][k]->Fill(tk.phi(), tk.eta());
+        }
+
+        if (tk.eta() < -2.5) {
+          h_tracks_npixel_phi_eta_eq[i][j][0]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][0]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        } else if (tk.eta() < -1.5) {
+          h_tracks_npixel_phi_eta_eq[i][j][1]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][1]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        } else if (tk.eta() < -0.9) {
+          h_tracks_npixel_phi_eta_eq[i][j][2]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][2]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        } else if (tk.eta() < 0.0) {
+          h_tracks_npixel_phi_eta_eq[i][j][3]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][3]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        } else if (tk.eta() < 0.9) {
+          h_tracks_npixel_phi_eta_eq[i][j][4]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][4]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        } else if (tk.eta() < 1.5) {
+          h_tracks_npixel_phi_eta_eq[i][j][5]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][5]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        } else if (tk.eta() < 2.5) {
+          h_tracks_npixel_phi_eta_eq[i][j][6]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][6]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        } else {
+          h_tracks_npixel_phi_eta_eq[i][j][7]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+          h_tracks_nstrip_phi_eta_eq[i][j][7]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
         }
       }
     }
