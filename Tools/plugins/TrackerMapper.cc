@@ -287,7 +287,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_weird_track_chi2dof->Fill(tk.chi2()/tk.ndof());
       h_weird_track_algo->Fill(int(tk.algo()));
       for (int i = 0; i < 7; ++i)
-        h_weird_track_quality->Fill(tk.quality(reco::Track::TrackQuality(i)));
+        if (tk.quality(reco::Track::TrackQuality(i))) h_weird_track_quality->Fill(i);
       h_weird_track_nloops->Fill(tk.nLoops());
 
 #ifdef USE_DUMPERS
