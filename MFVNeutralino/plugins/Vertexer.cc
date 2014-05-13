@@ -161,6 +161,7 @@ private:
   const double min_track_vertex_sig_to_remove;
   const bool remove_one_track_at_a_time;
   const bool jumble_tracks;
+  const bool write_tracks;
   const bool histos;
   const bool track_histos_only;
   const bool verbose;
@@ -267,6 +268,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     jumble_tracks(cfg.getParameter<bool>("jumble_tracks")),
+    write_tracks(cfg.getParameter<bool>("write_tracks")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
@@ -279,6 +281,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling tracks!\n";
 
   produces<reco::VertexCollection>();
+
+  if (write_tracks)
+    produces<reco::TrackCollection>();
 
   if (histos) {
     edm::Service<TFileService> fs;
@@ -363,6 +368,18 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 }
 
 void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection> vertices) {
+  if (write_tracks) {
+    std::auto_ptr<reco::TrackCollection> tracks(new reco::TrackCollection);
+
+    for (const reco::Vertex& v : *vertices)
+      for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+        reco::TrackRef tk = it->castTo<reco::TrackRef>();
+        tracks->push_back(*tk);
+      }
+
+    event.put(tracks);
+  }
+
   if (verbose)
     printf("n_output_vertices: %lu\n", vertices->size());
   if (histos)
