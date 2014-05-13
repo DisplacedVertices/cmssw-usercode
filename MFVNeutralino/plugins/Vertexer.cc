@@ -1,6 +1,7 @@
 #include "TH2.h"
 #include "TMath.h"
 #include "TFitResult.h"
+#include "CLHEP/Random/RandomEngine.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -12,6 +13,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "RecoVertex/ConfigurableVertexReco/interface/ConfigurableVertexReconstructor.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
@@ -115,6 +117,8 @@ private:
     return v;
   }
 
+  edm::Service<edm::RandomNumberGenerator> rng;
+
   const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertices_src;
   const bool use_tracks;
@@ -156,6 +160,7 @@ private:
   const double max_track_vertex_sig;
   const double min_track_vertex_sig_to_remove;
   const bool remove_one_track_at_a_time;
+  const bool jumble_tracks;
   const bool histos;
   const bool track_histos_only;
   const bool verbose;
@@ -261,6 +266,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     max_track_vertex_sig(cfg.getParameter<double>("max_track_vertex_sig")),
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
+    jumble_tracks(cfg.getParameter<bool>("jumble_tracks")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
@@ -268,6 +274,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 {
   if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
+
+  if (jumble_tracks && !rng.isAvailable())
+    throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling tracks!\n";
 
   produces<reco::VertexCollection>();
 
@@ -390,7 +399,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
-  reco::TrackRefVector all_tracks;
+  std::vector<reco::TrackRef> all_tracks;
   std::vector<reco::TransientTrack> seed_tracks;
   std::map<reco::TrackRef, size_t> seed_track_ref_map;
 
@@ -463,6 +472,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         }
       }
     }
+  }
+
+  if (jumble_tracks) {
+    auto random_converter = [&rng](size_t n) { return size_t(rng->getEngine().flat() * n); };
+    std::random_shuffle(all_tracks.begin(), all_tracks.end(), random_converter);
   }
 
   for (size_t i = 0, ie = all_tracks.size(); i < ie; ++i) {
