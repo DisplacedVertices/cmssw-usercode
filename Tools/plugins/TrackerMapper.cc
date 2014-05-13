@@ -148,7 +148,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
 
   h_n_weird_tracks = fs->make<TH1F>("h_n_weird_tracks", "", 200, 0, 200);
   const char* par_names[5] = {"pt", "eta", "phi", "dxy", "dz"};
-  const int par_nbins[5] = { 500,   10,     10,  400, 400 };
+  const int par_nbins[5] = { 500,  100,    100,  400, 400 };
   const double par_lo[5] = {   0, -2.6, -2.772,   -2, -20 };
   const double par_hi[5] = { 100, -2.4, -2.646,    2,  20 };
   const int err_nbins[5] = { 100, 100, 100, 200, 200 };
