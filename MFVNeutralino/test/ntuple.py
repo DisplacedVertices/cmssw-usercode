@@ -87,6 +87,10 @@ process.patMuonsPF.embedTrack = False
 process.patElectronsPF.embedTrack = False
 
 if prepare_vis:
+    process.mfvVertices.write_tracks = True
+    process.mfvSelectedVerticesTight.produce_tracks = True
+    process.mfvSelectedVerticesTightLargeErr.produce_tracks = True
+
     process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
     process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
     process.mfvVertexRefitsLargeErr = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr')
