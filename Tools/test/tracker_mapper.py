@@ -10,7 +10,10 @@ process.TrackerMapper = cms.EDAnalyzer('TrackerMapper', track_src = cms.InputTag
 process.p = cms.Path(process.TrackerMapper)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import ttbarhadronic, myttbar_samples
+    from JMTucker.Tools.Samples import ttbarhadronic, myttbar_samples, data_samples
+
+    for s in data_samples:
+        s.json = 'ana_5pc.json'
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('TrackerMapper',
