@@ -66,8 +66,7 @@ elif track_used_req == 'nopvs':
 if keep_all:
     process.mfvEvent.skip_event_filter = ''
     process.mfvSelectedVerticesTight.produce_vertices = True
-    process.mfvSelectedVerticesTightLargeErr = process.mfvSelectedVerticesTight.clone(min_bs2derr = 0.008, max_bs2derr = 1e9)
-    process.p.replace(process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTight * process.mfvSelectedVerticesTightLargeErr)
+    process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
 else:
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
     process.triggerFilter = hltHighLevel.clone()
@@ -88,6 +87,12 @@ process.patMuonsPF.embedTrack = False
 process.patElectronsPF.embedTrack = False
 
 if prepare_vis:
+    process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
+    process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
+    process.mfvVertexRefitsLargeErr = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr')
+    process.mfvVertexRefitsLargeErrDrop2 = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr', n_tracks_to_drop = 2)
+    process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 * process.mfvVertexRefitsLargeErr * process.mfvVertexRefitsLargeErrDrop2
+
     process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
                                              gen_src = cms.InputTag('genParticles'),
                                              print_info = cms.bool(True),
