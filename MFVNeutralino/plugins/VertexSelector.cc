@@ -21,6 +21,7 @@ private:
   const edm::InputTag vertex_src;
   const edm::InputTag vertex_aux_src;
   const bool produce_vertices;
+  const bool produce_tracks;
   const bool produce_refs;
   const MFVVertexAuxSorter sorter;
 
@@ -89,6 +90,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
   : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
     produce_vertices(cfg.getParameter<bool>("produce_vertices")),
+    produce_tracks(cfg.getParameter<bool>("produce_tracks")),
     produce_refs(cfg.getParameter<bool>("produce_refs")),
     sorter(cfg.getParameter<std::string>("sort_by")),
     use_mva(cfg.getParameter<bool>("use_mva")),
@@ -154,6 +156,13 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     produces<reco::VertexRefVector>();
   else
     produces<reco::VertexCollection>();
+
+  if (produce_tracks) {
+    if (!produce_vertices)
+      throw cms::Exception("VertexSelector") << "cannot produce tracks if not producing vertices";
+    produces<reco::TrackCollection>();
+  }
+
   produces<MFVVertexAuxCollection>();
 }
 
@@ -248,9 +257,21 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
     if (produce_vertices) {
       std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
-      for (const reco::VertexRef& v : *selected_vertex_refs)
+      std::auto_ptr<reco::TrackCollection> selected_tracks(new reco::TrackCollection);
+
+      for (const reco::VertexRef& v : *selected_vertex_refs) {
         selected_vertices->push_back(*v);
+        if (produce_tracks) {
+          for (auto it = v->tracks_begin(), ite = v->tracks_end(); it != ite; ++it) {
+            reco::TrackRef tk = it->castTo<reco::TrackRef>();
+            selected_tracks->push_back(*tk);
+          }
+        }
+      }
+
       event.put(selected_vertices);
+      if (produce_tracks)
+        event.put(selected_tracks);
     }
     else
       event.put(selected_vertex_refs);
