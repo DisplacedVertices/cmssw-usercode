@@ -1,6 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
+from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
+
 mfvVertexRefits = cms.EDProducer('MFVVertexRefitter',
+                                 kvr_params = kvr_params,
                                  beamspot_src = cms.InputTag('offlineBeamSpot'),
                                  vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                  n_tracks_to_drop = cms.uint32(1),

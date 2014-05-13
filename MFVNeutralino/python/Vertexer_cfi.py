@@ -1,11 +1,13 @@
 import FWCore.ParameterSet.Config as cms
 
+kvr_params = cms.PSet(
+    maxDistance = cms.double(0.01),
+    maxNbrOfIterations = cms.int32(10),
+    doSmoothing = cms.bool(True),
+)
+
 mfvVertices = cms.EDProducer('MFVVertexer',
-                             kvr_params = cms.PSet(
-                                 maxDistance = cms.double(0.01),
-                                 maxNbrOfIterations = cms.int32(10),
-                                 doSmoothing = cms.bool(True),
-                                 ),
+                             kvr_params = kvr_params,
                              avr_params = cms.PSet(
                                  finder = cms.string('avr'),
                                  primcut = cms.double(1.0),
