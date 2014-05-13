@@ -137,6 +137,10 @@ if debug:
     process.mfvVertices.phitest = True
     process.TFileService = cms.Service('TFileService', fileName = cms.string('vertexer_debug.root'))
 
+if 'seo' in sys.argv:
+    import JMTucker.MFVNeutralino.SelectedEventsOnly as SEO
+    SEO.setup(process, sys.argv[sys.argv.index('seo')+1])
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
