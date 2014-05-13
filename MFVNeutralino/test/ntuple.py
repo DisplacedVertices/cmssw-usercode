@@ -8,6 +8,7 @@ tuple_version = version
 runOnMC = True # magic line, don't touch
 debug = False
 track_histos_only = False
+jumble_tracks = False
 require_pixel_hit = True
 track_used_req = None
 prepare_vis = False
@@ -47,6 +48,10 @@ else:
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
+
+if jumble_tracks:
+    process.mfvVertices.jumble_tracks = True
+    process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219)))
 
 if require_pixel_hit:
     process.mfvVertices.min_all_track_npxhits = 1
@@ -155,6 +160,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
 
     batch_name_extra = ''
+
+    if jumble_tracks:
+        batch_name_extra += '_JumbleTks'
 
     if not require_pixel_hit:
         batch_name_extra += '_WOPixel'
