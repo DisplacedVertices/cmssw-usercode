@@ -164,21 +164,21 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
 ################################################################################
 
 if run_ttbar:
-    alis = ['bowing', 'elliptical', 'curl', 'radial', 'sagitta', 'skew', 'telescope', 'twist', 'zexpansion']
-    for ali in alis:
-        submit('ttbar_' + 'ali_' + ali)
-else:
-    #tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
-    #masses = [200, 300, 400, 600, 800, 1000]
-    #tunes = [1,2,3,4,5,6]
-    tau0s = [0.]
-    masses = [200]
-    tunes = [1]
+    to_run = ['ali_' + x for x in ['bowing', 'elliptical', 'curl', 'radial', 'sagitta', 'skew', 'telescope', 'twist', 'zexpansion']]
+    to_run = 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split()
 
-    #to_do = [(0.3, m) for m in masses] + [(t, 300) for t in tau0s]
+    for name in to_run:
+        submit('ttbar_' + run)
+else:
+    tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
+    masses = [200, 300, 400, 600, 800, 1000]
+    tunes = [5]
+
+    #to_do = [(0.3, m, 5) for m in masses] + [(t, 300, 5) for t in tau0s]
     to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 
     for tau0, mass, tune in to_do:
-        name = 'neutralino_tau%04ium_M%04i_tune_%i' % (int(tau0*1000), mass, tune)
+        name = 'neutralino_tau%04ium_M%04i' % (int(tau0*1000), mass)
+        if tune != 5:
+            name += '_tune_%i' % tune
         submit(name, tau0, mass)
-        
