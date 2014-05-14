@@ -49,6 +49,7 @@ private:
   const double min_tksjetsntkmass01;
   const double min_absdeltaphi01;
   const double min_bs2ddist01;
+  const double min_svdist2d;
   const int max_ntrackssharedwpv01;
   const int max_ntrackssharedwpvs01;
   const int max_fractrackssharedwpv01;
@@ -89,11 +90,19 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01")),
     min_absdeltaphi01(cfg.getParameter<double>("min_absdeltaphi01")),
     min_bs2ddist01(cfg.getParameter<double>("min_bs2ddist01")),
+    min_svdist2d(cfg.getParameter<double>("min_svdist2d")),
     max_ntrackssharedwpv01(cfg.getParameter<int>("max_ntrackssharedwpv01")),
     max_ntrackssharedwpvs01(cfg.getParameter<int>("max_ntrackssharedwpvs01")),
     max_fractrackssharedwpv01(cfg.getParameter<double>("max_fractrackssharedwpv01")),
     max_fractrackssharedwpvs01(cfg.getParameter<double>("max_fractrackssharedwpvs01"))
 {
+}
+
+namespace {
+  template <typename T>
+  T mag(T x, T y) {
+    return sqrt(x*x + y*y);
+  }
 }
 
 bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
@@ -167,7 +176,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex)
       return false;
 
-    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0 || max_ntrackssharedwpv01 < 100000 || max_ntrackssharedwpvs01 < 100000 || max_fractrackssharedwpv01 < 1e6 || max_fractrackssharedwpvs01 < 1e6) {
+    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0 || min_svdist2d > 0 || max_ntrackssharedwpv01 < 100000 || max_ntrackssharedwpvs01 < 100000 || max_fractrackssharedwpv01 < 1e6 || max_fractrackssharedwpvs01 < 1e6) {
       if (nsv < 2)
         return false;
 
@@ -197,6 +206,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
 
       if (v0.bs2ddist + v1.bs2ddist < min_bs2ddist01)
+        return false;
+      if (mag(v0.x - v1.x, v0.y - v1.y) < min_svdist2d)
         return false;
 
       if (v0.ntrackssharedwpv  + v1.ntrackssharedwpv  > max_ntrackssharedwpv01)
