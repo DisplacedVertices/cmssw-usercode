@@ -22,7 +22,7 @@ get_edm_output = 0
 ignore_edm_output = 1
 output_file = %(output_file)s
 events_per_job = 50
-total_number_of_events = 100
+total_number_of_events = 100000
 first_lumi = 1
 use_dbs3 = 1
 
@@ -31,7 +31,7 @@ script_exe = twostep.sh
 additional_input_files = %(additional_input_files)s
 ui_working_dir = %(ui_working_dir)s
 copy_data = 1
-storage_element = T3_US_FNALLPC
+storage_element = T3_US_Cornell
 publish_data = 1
 publish_data_name = mfv_%(name)s
 dbs_url_for_publication = phys03
@@ -39,7 +39,7 @@ dbs_url_for_publication = phys03
 ssh_control_persist = no
 
 [GRID]
-se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_Warsaw,T3_US_Baylor,T2_FR_IPHC,T3_MX_Cinvestav,T2_TH_CUNSTDA,T3_US_TTU,T2_UA_KIPT,T2_BR_SPRACE,T3_US_OSU,T2_RU_PNPI,T2_FI_HIP,T2_BE_IIHE,T3_US_UCD,T2_AT_Vienna,T3_US_Omaha,T2_FR_CCIN2P3,T2_RU_RRC_KI,T2_TW_Taiwan,T3_US_Rutgers, T3_UK_London_QMUL
+se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_Warsaw,T3_US_Baylor,T2_FR_IPHC,T3_MX_Cinvestav,T2_TH_CUNSTDA,T3_US_TTU,T2_UA_KIPT,T2_BR_SPRACE,T3_US_OSU,T2_RU_PNPI,T2_FI_HIP,T2_BE_IIHE,T3_US_UCD,T2_AT_Vienna,T3_US_Omaha,T2_FR_CCIN2P3,T2_RU_RRC_KI,T2_TW_Taiwan,T3_US_Rutgers,T3_UK_London_QMUL
 '''
 
 ################################################################################
@@ -76,7 +76,7 @@ def submit(name, tau0=None, mass=None):
     else:
         output_file = 'reco.root'
 
-    additional_input_files = ['minSLHA.spc','modify.py']
+    additional_input_files = ['minSLHA.spc', 'modify.py']
     if run_pat:
         additional_input_files.append('pat.py')
     if run_ttbar:
@@ -147,7 +147,7 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
     if 'tune_' in name:
         new_py += '\nfrom modify import set_tune\n'
         new_py += '\nset_tune(process,%s)\n' % name.split('tune_')[1]
-                
+
     open(pset_fn, 'wt').write(new_py)
     open(reco_pset_fn, 'wt').write(new_reco_py)
 
