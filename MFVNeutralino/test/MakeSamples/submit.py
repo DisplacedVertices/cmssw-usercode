@@ -171,7 +171,7 @@ if run_ttbar:
     to_run = 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split()
     to_run = ['designnoputkex']
 
-    for name in to_run:
+    for run in to_run:
         submit('ttbar_' + run)
 else:
     tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
