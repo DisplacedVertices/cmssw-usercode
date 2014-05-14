@@ -201,7 +201,7 @@ struct MFVVertexAux {
 
 
   std::vector<uchar> track_w;
-  static uchar make_track_weight(float weight) { return uchar(weight*255); }
+  static uchar make_track_weight(float weight) { assert(weight >= 0 && weight <= 1); return uchar(weight*255); }
   float track_weight(int i) const { return float(track_w[i])/255.f; }
   std::vector<float> track_qpt;
   float track_q(int i) const { return track_qpt[i] > 0 ? 1 : -1; }
@@ -217,16 +217,18 @@ struct MFVVertexAux {
   std::vector<float> track_dz_err;
   std::vector<float> track_chi2dof;
   std::vector<ushort> track_hitpattern;
-  static ushort make_track_hitpattern(int npx, int nst, int nbehind) {
+  static ushort make_track_hitpattern(int npx, int nst, int nbehind, int nlost) {
+    assert(npx >= 0 && nst >= 0 && nbehind >= 0 && nlost >= 0);
     if (npx > 7) npx = 7;
     if (nst > 31) nst = 31;
-    if (nbehind > 15) nbehind = 15;
-    return (nbehind << 8) | (nst << 3) | npx;
+    if (nbehind > 15) nbehind = 7;
+    if (nlost > 15) nlost = 15;
+    return (nlost << 12) | (nbehind << 8) | (nst << 3) | npx;
   }
   int track_npxhits(int i) const { return track_hitpattern[i] & 0x7; }
   int track_nsthits(int i) const { return (track_hitpattern[i] >> 3) & 0x1F; }
-  int track_nhitslost(int i) const { assert(0); }
   int track_nhitsbehind(int i) const { return (track_hitpattern[i] >> 8) & 0xF; }
+  int track_nhitslost(int i) const { return (track_hitpattern[i] >> 12) & 0xF; }
   int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
   std::vector<bool> track_injet;
   std::vector<short> track_inpv;
