@@ -131,13 +131,17 @@ class MCSample(Sample):
         self.ana_events_per = self.ANA_EVENTS_PER
         self.total_events = self.TOTAL_EVENTS
 
-    def nevents_from_file(self, hist_path, fn_pattern='%(name)s.root', f=None):
+    def nevents_from_file(self, hist_path, fn_pattern='%(name)s.root', f=None, last_bin=False):
         if f is None:
             fn = fn_pattern % self
             if not os.path.isfile(fn):
                 return -999
             f = ROOT.TFile(fn)
-        return f.Get(hist_path).GetEntries()
+        h = f.Get(hist_path)
+        if last_bin:
+            return h.GetBinContent(h.GetNbinsX())
+        else:
+            return h.GetEntries()
 
     # JMTBAD need to distinguish between total_events and ana_total_events
     # (and need a better name for total_events)
@@ -385,7 +389,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.re_pat = True
     sample.scheduler = 'condor'
     sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
-    sample.cross_section = 0.020
+    sample.cross_section = 0.001
 
 ########################################################################
 
@@ -602,6 +606,8 @@ if __name__ == '__main__':
         output = 'merge.root'
         norm_to = 1
         path_for_nevents = ''
+        last_bin = False
+
         for x in sys.argv:
             if x.endswith('.root'):
                 if os.path.isfile(x):
@@ -610,28 +616,40 @@ if __name__ == '__main__':
                     output = x
             elif x.startswith('path_for_nevents='):
                 path_for_nevents = x.replace('path_for_nevents=', '')
+            elif x == 'last_bin':
+                last_bin = True
             else:
                 try:
                     norm_to = float(x)
                 except ValueError:
                     pass
 
-        print 'norm sum of weights to', norm_to
+        if norm_to > 0:
+            print 'norm sum of weights to', norm_to
+        else:
+            print 'multiply every weight by', -norm_to
+
         if not path_for_nevents:
+            if last_bin:
+                raise ValueError('cannot last_bin if no path_for_nevents')
             print 'taking nevents from samples'
         else:
-            print 'taking nevents from file with path', path_for_nevents
+            print 'taking nevents from file with path %s%s' % (path_for_nevents, (' using last bin contents' if last_bin else ''))
 
         weights = []
         for fn in files:
             sname = os.path.splitext(os.path.basename(fn))[0]
             sample = samples_by_name[sname]
             if path_for_nevents:
-                sample.total_events = sample.nevents_from_file(path_for_nevents, fn)
+                sample.total_events = sample.nevents_from_file(path_for_nevents, fn, last_bin=last_bin)
             weights.append(sample.partial_weight)
 
-        sw = sum(weights)
-        weights = [w/sw*norm_to for w in weights]
+        if norm_to > 0:
+            norm_to /= sum(weights)
+        else:
+            norm_to *= -1
+
+        weights = [w*norm_to for w in weights]
         
         weights = ','.join('%f' % w for w in weights)
         cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
