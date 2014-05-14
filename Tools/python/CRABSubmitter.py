@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, threading, time, ConfigParser, StringIO
+import sys, os, glob, threading, time, ConfigParser, StringIO
 from StringIO import StringIO
 from CRABTools import crab_popen, crab_submit_in_batches, crab_renew_proxy_if_needed
     
@@ -52,8 +52,11 @@ class CRABSubmitter:
             raise ValueError('/ not allowed in batch name')
         self.batch_name = batch_name
         self.batch_dir = 'crab/%s' % batch_name
-        if os.path.exists(self.batch_dir) and 'cs_append' not in sys.argv:
-            raise ValueError('batch_dir %s already exists, refusing to clobber ("cs_append" in argv to override)' % self.batch_dir)
+        self.existed = False
+        if os.path.exists(self.batch_dir):
+            if 'cs_append' not in sys.argv:
+                raise ValueError('batch_dir %s already exists, refusing to clobber ("cs_append" in argv to override)' % self.batch_dir)
+            self.existed = True
 
         if not testing and CRABSubmitter.get_proxy:
             print 'CRABSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
@@ -61,9 +64,16 @@ class CRABSubmitter:
             CRABSubmitter.get_proxy = False
 
         self.username = os.environ['USER']
-        
+
         self.git_status_dir = self.batch_dir + '/gitstatus/'
         mkdirs_if_needed(self.git_status_dir)
+        if self.existed:
+            files = glob.glob(os.path.join(self.git_status_dir, '*'))
+            if files:
+                replaced_git_status_dir = os.path.join(self.git_status_dir, str(int(time.time())))
+                os.mkdir(replaced_git_status_dir)
+                for f in files:
+                    os.rename(f, os.path.join(replaced_git_status_dir, os.path.basename(f)))
         os.system("git log --pretty=format:'%%H' -n 1 > %shash" % self.git_status_dir)
         os.system("git status --untracked-files=all --ignored | grep -v pyc > %sstatus" % self.git_status_dir)
         self.git_untracked_tmp_fn = '/tmp/%s/untracked.tgz' % self.username
