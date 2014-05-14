@@ -16,7 +16,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:gensimhlt.root'))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 if not 'debug' in sys.argv:
@@ -35,16 +35,6 @@ process.output = cms.OutputModule('PoolOutputModule',
 
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'START53_V21::All', '')
-
-if 'misalign' in sys.argv:
-    misalign = "TrackerAlignment_2010RealisticPlusBowing_mc"
-    process.GlobalTag.toGet = cms.VPSet(
-    cms.PSet(record = cms.string("TrackerAlignmentRcd"),
-            tag = cms.string(misalign),
-            connect = cms.untracked.string("frontier://FrontierPrep/CMS_COND_ALIGNMENT")
-            )
-    )
-    print misalign
 
 process.raw2digi_step = cms.Path(process.RawToDigi)
 process.L1Reco_step = cms.Path(process.L1Reco)
