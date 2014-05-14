@@ -148,6 +148,9 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
         new_py += '\nfrom modify import set_tune\n'
         new_py += '\nset_tune(process,%s)\n' % name.split('tune_')[1]
 
+    if 'tkex' in name:
+        new_reco_py += "\nprocess.output.outputCommands += ['keep recoTrackExtras_generalTracks__*', 'keep TrackingRecHitsOwned_generalTracks__*']\n"
+
     open(pset_fn, 'wt').write(new_py)
     open(reco_pset_fn, 'wt').write(new_reco_py)
 
@@ -166,6 +169,7 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
 if run_ttbar:
     to_run = ['ali_' + x for x in ['bowing', 'elliptical', 'curl', 'radial', 'sagitta', 'skew', 'telescope', 'twist', 'zexpansion']]
     to_run = 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split()
+    to_run = ['designnoputkex']
 
     for name in to_run:
         submit('ttbar_' + run)
