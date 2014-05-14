@@ -198,6 +198,76 @@ struct MFVVertexAux {
   float missdistpv   [mfv::NMomenta];
   float missdistpverr[mfv::NMomenta];
   float missdistpvsig(int w) const { return sig(missdistpv[w], missdistpverr[w]); }
+
+
+  std::vector<uchar> track_w;
+  static uchar make_track_weight(float weight) { return uchar(weight*255); }
+  float track_weight(int i) const { return float(track_w[i])/255.f; }
+  std::vector<float> track_qpt;
+  float track_q(int i) const { return track_qpt[i] > 0 ? 1 : -1; }
+  float track_pt(int i) const { return fabs(track_qpt[i]); }
+  std::vector<float> track_eta;
+  std::vector<float> track_phi;
+  std::vector<float> track_dxy;
+  std::vector<float> track_dz;
+  std::vector<float> track_pt_err; // relative to pt, rest are absolute values
+  std::vector<float> track_eta_err;
+  std::vector<float> track_phi_err;
+  std::vector<float> track_dxy_err;
+  std::vector<float> track_dz_err;
+  std::vector<float> track_chi2dof;
+  std::vector<ushort> track_hitpattern;
+  static ushort make_track_hitpattern(int npx, int nst, int nbehind) {
+    if (npx > 7) npx = 7;
+    if (nst > 31) nst = 31;
+    if (nbehind > 15) nbehind = 15;
+    return (nbehind << 8) | (nst << 3) | npx;
+  }
+  int track_npxhits(int i) const { return track_hitpattern[i] & 0x7; }
+  int track_nsthits(int i) const { return (track_hitpattern[i] >> 3) & 0x1F; }
+  int track_nhitslost(int i) const { assert(0); }
+  int track_nhitsbehind(int i) const { return (track_hitpattern[i] >> 8) & 0xF; }
+  int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
+  std::vector<bool> track_injet;
+  std::vector<short> track_inpv;
+
+  void insert_track() {
+    track_w.push_back(0);
+    track_qpt.push_back(0);
+    track_eta.push_back(0);
+    track_phi.push_back(0);
+    track_dxy.push_back(0);
+    track_dz.push_back(0);
+    track_pt_err.push_back(0);
+    track_eta_err.push_back(0);
+    track_phi_err.push_back(0);
+    track_dxy_err.push_back(0);
+    track_dz_err.push_back(0);
+    track_chi2dof.push_back(0);
+    track_hitpattern.push_back(0);
+    track_injet.push_back(0);
+    track_inpv.push_back(0);
+  }
+
+  bool tracks_ok() const {
+    const size_t n = ntracks;
+    return
+      n == track_w.size() &&
+      n == track_qpt.size() &&
+      n == track_eta.size() &&
+      n == track_phi.size() &&
+      n == track_dxy.size() &&
+      n == track_dz.size() &&
+      n == track_pt_err.size() &&
+      n == track_eta_err.size() &&
+      n == track_phi_err.size() &&
+      n == track_dxy_err.size() &&
+      n == track_dz_err.size() &&
+      n == track_chi2dof.size() &&
+      n == track_hitpattern.size() &&
+      n == track_injet.size() &&
+      n == track_inpv.size();
+  }
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;

@@ -156,6 +156,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     std::vector<double> jetpairdetas[mfv::NJetsByUse];
     std::vector<double> jetpairdrs[mfv::NJetsByUse];
     std::vector<double> costhjetmomvtxdisps[mfv::NJetsByUse];
+    std::set<reco::TrackRef> jets_tracks[mfv::NJetsByUse];
 
     if (use_sv_to_jets) {
       for (int i = 0; i < mfv::NJetsByUse; ++i) {
@@ -164,7 +165,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       
         if (njets > 0) {
           const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i])[svref];
-          std::set<reco::TrackRef> jets_tracks;
 
           for (int ijet = 0; ijet < njets; ++ijet) {
             p4s[1+i] += jets[ijet]->p4();
@@ -172,7 +172,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             for (const reco::PFCandidatePtr& pfcand : jets[ijet]->getPFConstituents()) {
               const reco::TrackRef& tk = pfcand->trackRef();
               if (tk.isNonnull())
-                jets_tracks.insert(tk);
+                jets_tracks[i].insert(tk);
             }
 
             if (primary_vertex)
@@ -191,7 +191,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
             if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
               reco::TrackRef tk = it->castTo<reco::TrackRef>();
-              if (!jets_tracks.count(tk))
+              if (!jets_tracks[i].count(tk))
                 jpt_p4 += math::XYZTLorentzVector(tk->px(), tk->py(), tk->pz(), tk->p());
             }
           }
@@ -288,6 +288,14 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
       if (tri->ptError() / tri->pt() > 0.5) {
         inc_uchar(aux.nbadtracks);
+
+        // For really bad tracks, only store the track weight and the
+        // pt(error). insert_track makes a placeholder so the vectors
+        // don't get out of sync JMTBAD.
+        aux.insert_track();
+        aux.track_w.back() = sv.trackWeight(tri);
+        aux.track_pt_err.back() = tri->ptError();
+        aux.track_qpt.back() = tri->charge() * tri->pt();
         continue;
       }
 
@@ -347,6 +355,24 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         pvswtracksshared.insert(pv);
         ++pvtrackssharecount[pv];
       }
+
+
+      aux.track_w.push_back(MFVVertexAux::make_track_weight(sv.trackWeight(tri)));
+      aux.track_qpt.push_back(tri->charge() * tri->pt());
+      aux.track_eta.push_back(tri->eta());
+      aux.track_phi.push_back(tri->phi());
+      aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
+      aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV
+      aux.track_pt_err.push_back(tri->ptError()/tri->pt());
+      aux.track_eta_err.push_back(tri->etaError());
+      aux.track_phi_err.push_back(tri->phiError());
+      aux.track_dxy_err.push_back(tri->dxyError());
+      aux.track_dz_err.push_back(tri->dzError());
+      aux.track_chi2dof.push_back(tri->normalizedChi2());
+      aux.track_hitpattern.push_back(MFVVertexAux::make_track_hitpattern(tri->hitPattern().numberOfValidPixelHits(), tri->hitPattern().numberOfValidStripHits(), nhitsbehind));
+      aux.track_injet.push_back(jets_tracks[0].count(trref)); // JMTBAD
+      aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
+
 
       for (auto trkj = trki + 1; trkj != trke; ++trkj) {
         const reco::TrackBaseRef& trj = *trkj;
