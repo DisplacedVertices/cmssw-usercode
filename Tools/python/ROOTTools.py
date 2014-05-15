@@ -426,6 +426,8 @@ def data_mc_comparison(name,
                        res_draw_cmd = 'apez',
                        legend_pos = None,
                        verbose = False,
+                       cut_line = None,
+                       background_uncertainty = None,
                        ):
     """JMTBAD.
 
@@ -533,6 +535,20 @@ def data_mc_comparison(name,
     stack.GetYaxis().SetTitleOffset(y_title_offset)
     stack.GetYaxis().SetLabelSize(y_label_size)
 
+    if background_uncertainty is not None:
+        bkg_uncert_label, extra_bkg_uncert_frac, bkg_uncert_color, bkg_uncert_style = background_uncertainty
+        sum_background_uncert = sum_background.Clone('sum_background_uncert')
+        if extra_bkg_uncert_frac is not None and extra_bkg_uncert_frac > 0:
+            for i in xrange(1, sum_background_uncert.GetNbinsX()+1):
+                v = sum_background_uncert.GetBinContent(i)
+                e = sum_background_uncert.GetBinError(i)
+                e = (e**2 + (extra_bkg_uncert_frac*v)**2)**0.5
+                sum_background_uncert.SetBinError(i, e)
+        sum_background_uncert.SetLineColor(bkg_uncert_color)
+        sum_background_uncert.SetFillColor(bkg_uncert_color)
+        sum_background_uncert.SetFillStyle(bkg_uncert_style)
+        sum_background_uncert.Draw('E2 same')
+
     if x_range is not None:
         stack.GetXaxis().SetLimits(*x_range)
     y_range_min, y_range_max = y_range
@@ -563,6 +579,8 @@ def data_mc_comparison(name,
         legend.SetBorderSize(0)
         for l in legend_entries:
             legend.AddEntry(*l)
+        if background_uncertainty is not None:
+            legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
             legend.AddEntry(sample.hist, sample.nice_name, 'L')
         if data_sample is not None:
@@ -570,6 +588,14 @@ def data_mc_comparison(name,
         legend.Draw()
     else:
         legend = None
+
+    if cut_line is not None:
+        cut_line_coords, cut_line_color, cut_line_width, cut_line_style = cut_line
+        cut_line = ROOT.TLine(*cut_line_coords)
+        cut_line.SetLineColor(cut_line_color)
+        cut_line.SetLineWidth(cut_line_width)
+        cut_line.SetLineStyle(cut_line_style)
+        cut_line.Draw()
 
     if int_lumi_nice is not None:
         t = ROOT.TPaveLabel(0.214, 0.898, 0.875, 0.998, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
@@ -580,7 +606,8 @@ def data_mc_comparison(name,
         t.Draw()
 
     if verbose:
-        print 'data integral:', data_sample.hist.Integral(0, data_sample.hist.GetNbinsX()+1)
+        if data_sample is not None:
+            print 'data integral:', data_sample.hist.Integral(0, data_sample.hist.GetNbinsX()+1)
         print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
         print
     
