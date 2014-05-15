@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 verbose = True
-plot_dir = 'plots/MFVDataMCCompV15'
+plot_dir = 'plots/MFVDataMCCompV17Sig6'
 plot_size = (600,600)
-int_lumi = 950. # /pb
-int_lumi_nice = '0.95 fb^{-1}'
+int_lumi = 20000. # /pb
+int_lumi_nice = '20 fb^{-1}'
 scale_factor = 1. #720/768.
-root_file_dir = 'crab/MFVHistosV15_looser'
-root_file_dir = 'crab/MFVHistosV15_looser_fixnm1'
+root_file_dir = 'crab/MFVHistosV17_Sig6'
 hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
 
 ################################################################################
@@ -22,21 +21,18 @@ ps = plot_saver(plot_dir, size=plot_size)
 
 data_sample = Samples.MultiJetPk2012B
 
-background_samples = Samples.smaller_background_samples + Samples.ttbar_samples + Samples.qcd_samples
-signal_samples = [Samples.mfv_neutralino_tau0100um_M1000, Samples.mfv_neutralino_tau1000um_M1000, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
-Samples.mfv_neutralino_tau0100um_M1000.color = 6
+background_samples = Samples.ttbar_samples + Samples.qcd_samples
+signal_samples = [Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
+signal_samples = [Samples.mfv_neutralino_tau1000um_M0400]
+Samples.mfv_neutralino_tau1000um_M0400.nice_name = '#tau = 1 mm, M = 400 GeV signal'
+Samples.mfv_neutralino_tau0300um_M0400.color = 6
 Samples.mfv_neutralino_tau1000um_M0400.color = 8
-Samples.mfv_neutralino_tau1000um_M1000.color = 7
 Samples.mfv_neutralino_tau9900um_M0400.color = 2
 
 for s in Samples.qcdht0100, Samples.qcdht0250, Samples.qcdht0500, Samples.qcdht1000:
-    s.join_info = True, 'QCD', Samples.qcdht0100.color
+    s.join_info = True, 'QCD', ROOT.kBlue-9 # Samples.qcdht0100.color
 for s in Samples.ttbardilep, Samples.ttbarsemilep, Samples.ttbarhadronic:
-    s.join_info = True, 't#bar{t}', Samples.ttbardilep.color
-for s in Samples.dyjetstollM10, Samples.dyjetstollM50:
-    s.join_info = True, 'DY + jets #rightarrow ll', Samples.dyjetstollM10.color
-for s in Samples.smaller_background_samples:
-    s.join_info = True, 'single t, VV, ttV', 46
+    s.join_info = True, 't#bar{t}', ROOT.kBlue-7 # Samples.ttbardilep.color
 
 if verbose:
     print 'weights:'
@@ -46,7 +42,7 @@ if verbose:
 C = partial(data_mc_comparison,
             background_samples = background_samples,
             signal_samples = signal_samples,
-            data_sample = data_sample,
+            data_sample = None,
             plot_saver = ps,
             file_path = os.path.join(root_file_dir, '%(name)s.root'),
             int_lumi = int_lumi * scale_factor,
@@ -207,14 +203,46 @@ if 0:
       legend_pos = (0.435, 0.687, 0.878, 0.920),
       )
 
-if 0:
+if 1:
     C('nsvnocut',
-      histogram_path = 'mfvVertexHistosTrigCut/h_nsv',
-      x_title = 'number of SV',
-      y_title = 'events',
+      histogram_path = 'mfvVertexHistos/h_nsv',
+      x_title = 'number of vertices',
+      y_title = 'events/(20 fb^{-1})',
       x_range = (0,5),
-      y_range = (1, 1e7),
-      legend_pos = (0.435, 0.687, 0.878, 0.920),
+      y_range = (1, 1e9),
+      int_lumi_nice = None,
+      background_uncertainty = ('Stat. uncert. on MC bkg', None, ROOT.kBlack, 3004),
+      cut_line = ((2, 0, 2, 2.5e9), 2, 5, 1),
+      legend_pos = (0.424, 0.631, 0.868, 0.865),
+      )
+
+if 0:
+    C('svdist2d',
+      histogram_path = 'vtxHst2VNoSvdist2d/h_svdist2d',
+      x_title = 'xy distance between top two vertices (cm)',
+      y_title = 'events/(0.01 cm)/(20 fb^{-1})',
+      x_range = (0,0.3),
+      y_range = (0,4),
+      int_lumi_nice = None,
+      overflow_in_last = True,
+      rebin = 5,
+      background_uncertainty = ('Stat. uncert. on MC bkg', None, ROOT.kBlack, 3004),
+      cut_line = ((0.04, 0, 0.04, 4.2), 2, 5, 1),
+      legend_pos = (0.424, 0.631, 0.868, 0.865),
+      )
+
+if 0:
+    C('ntracks01',
+      histogram_path = 'vtxHst2VNoNtracks01/h_sv_sumtop2_ntracks',
+      x_title = 'sum of number of tracks in top two vertices',
+      y_title = 'events/(20 fb^{-1})',
+      x_range = (10,35),
+      y_range = (0.02, 40),
+      int_lumi_nice = None,
+      overflow_in_last = True,
+      background_uncertainty = ('Stat. uncert. on MC bkg', None, ROOT.kBlack, 3004),
+      cut_line = ((16, 0, 16, 64), 2, 5, 1),
+      legend_pos = (0.424, 0.631, 0.868, 0.865),
       )
 
 if 0:
@@ -246,7 +274,7 @@ if 0:
       legend_pos = (0.553, 0.687, 0.878, 0.920)
       )
 
-if 1:
+if 0:
     C('sv_top2_ntracksptgt3_nm1',
       histogram_path = 'hstNoNtracksptgt3/h_sv_top2_ntracksptgt3',
       x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
@@ -359,7 +387,7 @@ if 0:
       legend_pos = (0.435, 0.687, 0.878, 0.920),
       )
 
-if 1:
+if 0:
     C('sv_top2_drmin_nm1',
       histogram_path = 'hstNoDrmin/h_sv_top2_drmin',
       x_title = 'min{#Delta R{track i,j}}',
@@ -380,7 +408,7 @@ if 0:
       legend_pos = (0.135, 0.687, 0.578, 0.920)
       )
 
-if 1:
+if 0:
     C('sv_top2_drmax_nm1',
       histogram_path = 'hstNoDrmax/h_sv_top2_drmax',
       rebin = 3,
@@ -400,7 +428,7 @@ if 0:
       legend_pos = (0.589, 0.704, 0.878, 0.921),
       )
 
-if 1:
+if 0:
     C('sv_top2_njetsntks_nm1',
       histogram_path = 'hstNoNjets/h_sv_top2_njetsntks',
       x_title = 'number of associated jets',
@@ -428,7 +456,7 @@ if 0:
       y_range = (None, 275),
       )
 
-if 1:
+if 0:
     C('sv_top2_bs2derr_nm1',
       histogram_path = 'hstNoBs2derr/h_sv_top2_bs2derr',
       x_title = '#sigma(xy distance to beamspot) (cm)',
@@ -448,7 +476,7 @@ if 0:
       legend_pos = (0.435, 0.687, 0.878, 0.920),
       )
 
-if 1:
+if 0:
     C('sv_top2_bs2dsig_nm1',
       histogram_path = 'hstNoBs2dsig/h_sv_top2_bs2dsig',
       x_title = 'N#sigma(2D distance to BS) for two "best" SV',
