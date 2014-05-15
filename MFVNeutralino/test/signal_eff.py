@@ -5,13 +5,13 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
 set_style()
-ps = plot_saver('plots/mfvsigeff', size=(600,600))
+ps = plot_saver('plots/mfvsigeff_sig6', size=(600,600))
 
 samples = mfv_signal_samples
 samples = [sample for sample in mfv_signal_samples if '0000um' not in sample.name]
 
 per_div = 6
-y_range = 0.8
+y_range = 1.
 
 def curve(name, root_file_dir, num_path, den_path, color):
     heff = ROOT.TH1F(name, ';;efficiency', len(samples), 0, len(samples))
@@ -23,6 +23,8 @@ def curve(name, root_file_dir, num_path, den_path, color):
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
         den = hden.Integral(0, hden.GetNbinsX() + 2)
         eff = num/float(den)
+        if name == 'trig_only':
+            eff *= sample.ana_filter_eff
         heff.SetBinContent(i+1, eff)
         heff.SetBinError(i+1, 0)
 
@@ -40,17 +42,17 @@ def curve(name, root_file_dir, num_path, den_path, color):
     heff.SetStats(0)
     return heff
 
-#trig_only = curve('trig_only', 'crab/MFVHistosV15', 'mfvEventHistosTrigOnly/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
-looser = curve('looser', 'crab/MFVHistosV15_looser', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kGreen+2)
-abcd = curve('abcd', 'crab/MFVHistosV15', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
-dreg = curve('dreg', 'crab/MFVHistosV15_tightest', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
+#trig_only = curve('trig_only', 'crab/MFVHistosV17_Sig6', 'mfvEventHistosTrigCut/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kGreen+2)
+#looser = curve('looser', 'crab/MFVHistosV15_looser', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kGreen+2)
+abcd = curve('abcd', 'crab/MFVHistosV17_Sig6', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
+dreg = curve('dreg', 'crab/MFVHistosV17_Sig6DReg', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
 
-#trig_only.Draw('')
-looser.Draw()
-abcd.Draw('same')
+#trig_only.Draw()
+#looser.Draw()
+abcd.Draw()
 dreg.Draw('same')
 
-hmax = looser.GetYaxis().GetXmax()
+hmax = abcd.GetYaxis().GetXmax()
 print hmax
 lines = []
 for i in xrange(0, len(samples), per_div):
@@ -72,7 +74,7 @@ for i in xrange(0, len(samples), per_div):
 
 leg = ROOT.TLegend(0.151,0.635,0.602,0.858)
 #leg.AddEntry(trig_only, 'Trigger+offline jets', 'L')
-leg.AddEntry(looser, 'Preselection', 'L')
+#leg.AddEntry(looser, 'Preselection', 'L')
 leg.AddEntry(abcd, 'Sideband+signal', 'L')
 leg.AddEntry(dreg, 'Signal region', 'L')
 leg.Draw()
