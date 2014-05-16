@@ -183,13 +183,13 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       const MFVVertexAux& v0 = vertices->at(0);
       const MFVVertexAux& v1 = vertices->at(1);
 
-      if (v0.ntracks + v1.ntracks < min_ntracks01)
+      if (v0.ntracks() + v1.ntracks() < min_ntracks01)
         return false;
-      if (v0.ntracks + v1.ntracks > max_ntracks01)
+      if (v0.ntracks() + v1.ntracks() > max_ntracks01)
         return false;
-      if (v0.maxtrackpt + v1.maxtrackpt < min_maxtrackpt01)
+      if (v0.maxtrackpt() + v1.maxtrackpt() < min_maxtrackpt01)
         return false;
-      if (v0.maxtrackpt + v1.maxtrackpt > max_maxtrackpt01)
+      if (v0.maxtrackpt() + v1.maxtrackpt() > max_maxtrackpt01)
         return false;
       if (v0.njets[mfv::JByNtracks] + v1.njets[mfv::JByNtracks] < min_njetsntks01)
         return false;
@@ -200,8 +200,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (v0.mass[mfv::PTracksPlusJetsByNtracks] + v1.mass[mfv::PTracksPlusJetsByNtracks] < min_tksjetsntkmass01)
         return false;
 
-      double phi0 = atan2(v0.y - mevent->bsy, v0.x - mevent->bsx);
-      double phi1 = atan2(v1.y - mevent->bsy, v1.x - mevent->bsx);
+      const double phi0 = atan2(v0.y - mevent->bsy, v0.x - mevent->bsx);
+      const double phi1 = atan2(v1.y - mevent->bsy, v1.x - mevent->bsx);
       if (fabs(reco::deltaPhi(phi0, phi1)) < min_absdeltaphi01)
         return false;
 
@@ -210,13 +210,13 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (mag(v0.x - v1.x, v0.y - v1.y) < min_svdist2d)
         return false;
 
-      if (v0.ntrackssharedwpv  + v1.ntrackssharedwpv  > max_ntrackssharedwpv01)
+      if (v0.ntrackssharedwpv()  + v1.ntrackssharedwpv()  > max_ntrackssharedwpv01)
         return false;
-      if (v0.ntrackssharedwpvs + v1.ntrackssharedwpvs > max_ntrackssharedwpvs01)
+      if (v0.ntrackssharedwpvs() + v1.ntrackssharedwpvs() > max_ntrackssharedwpvs01)
         return false;
-      if (float(v0.ntrackssharedwpv  + v1.ntrackssharedwpv )/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpv01)
+      if (float(v0.ntrackssharedwpv()  + v1.ntrackssharedwpv ())/(v0.ntracks() + v1.ntracks()) > max_fractrackssharedwpv01)
         return false;
-      if (float(v0.ntrackssharedwpvs + v1.ntrackssharedwpvs)/(v0.ntracks + v1.ntracks) > max_fractrackssharedwpvs01)
+      if (float(v0.ntrackssharedwpvs() + v1.ntrackssharedwpvs())/(v0.ntracks() + v1.ntracks()) > max_fractrackssharedwpvs01)
         return false;
     }
   }
