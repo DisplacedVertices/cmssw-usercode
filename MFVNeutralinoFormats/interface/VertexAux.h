@@ -323,7 +323,7 @@ struct MFVVertexAux {
     float avg = _avg(v);
     for (size_t i = 0, ie = v.size(); i < ie; ++i)
       v[i] = pow(v[i] - avg, 2);
-    return sqrt(std::accumulate(v.begin(), v.end(), 0.f))/v.size();
+    return sqrt(std::accumulate(v.begin(), v.end(), 0.f)/v.size());
   }
 
   struct stats {
