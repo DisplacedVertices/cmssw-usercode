@@ -31,7 +31,7 @@ parser.add_option('--resub-none', action='store_true', default=False,
 parser.add_option('--resub-site-control', default='',
                   help='Deprecated, use --resub-black-list.')
 parser.add_option('--resub-black-list', default='',
-                  help='Comma-separated list of sites (no spaces!) of sites to blacklist when resubmitting.')
+                  help='Comma-separated list (no spaces!) of sites to blacklist when resubmitting.')
 parser.add_option('--tee', type='str', metavar='FILE',
                   help='Duplicate stdout to FILE.')
 parser.add_option('--fake-results', type='str', metavar='FILE',
