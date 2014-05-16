@@ -13,7 +13,7 @@ struct MFVVertexAux {
 
   MFVVertexAux() {
     which = bs2dcompatscss = pv2dcompatscss = pv3dcompatscss = 0;
-    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2dcompat = bs2ddist = bs2derr = bs3ddist = pv2dcompat = pv2ddist = pv2derr = pv3dcompat = pv3ddist = pv3derr = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
+    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2dcompat = bs2ddist = bs2derr = pv2dcompat = pv2ddist = pv2derr = pv3dcompat = pv3ddist = pv3derr = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i)
@@ -48,6 +48,11 @@ struct MFVVertexAux {
     TLorentzVector v;
     v.SetPtEtaPhiM(pt[w], eta[w], phi[w], mass[w]);
     return v;
+  }
+
+  double betagamma(int w=0) const {
+    TLorentzVector v = p4(w);
+    return v.Beta() * v.Gamma();
   }
 
   float jetpairdetamin;
@@ -87,20 +92,21 @@ struct MFVVertexAux {
   float bs2ddist;
   float bs2derr;
   float bs2dsig() const { return sig(bs2ddist, bs2derr); }
-
-  float bs3ddist;
+  float bs2dctau() const { return bs2ddist / betagamma(); }
 
   uchar pv2dcompatscss;
   float pv2dcompat;
   float pv2ddist;
   float pv2derr;
   float pv2dsig() const { return sig(pv2ddist, pv2derr); }
+  float pv2dctau() const { return pv2ddist / betagamma(); }
 
   uchar pv3dcompatscss;
   float pv3dcompat;
   float pv3ddist;
   float pv3derr;
   float pv3dsig() const { return sig(pv3ddist, pv3derr); }
+  float pv3dctau() const { return pv3ddist / betagamma(); }
 
   float pvdz() const { return sqrt(pv3ddist*pv3ddist - pv2ddist*pv2ddist); }
   float pvdzerr() const {
