@@ -397,7 +397,7 @@ myttbar_samples = [
     MCSample('myttbarpythia',       '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER',        99850, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarpynopu',       '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',              99950, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarpydesignnopu', '', '/mfv_ttbar_designnopu/tucker-mfv_ttbar_designnopu-03e053ea4788fabdfdc6964bc26befc0/USER', 100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbarpydesignnoputkex', '/mfv_ttbar_designnoputkex/tucker-mfv_ttbar_designnoputkex-03e053ea4788fabdfdc6964bc26befc0/USER', 750000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbarpydesignnoputkex', '', '/mfv_ttbar_designnoputkex/tucker-mfv_ttbar_designnoputkex-03e053ea4788fabdfdc6964bc26befc0/USER', 750000, 4, 0.15, 225.2 * 0.457),
     ]
 
 for s in myttbar_samples:
