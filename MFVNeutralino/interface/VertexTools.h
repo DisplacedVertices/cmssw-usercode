@@ -47,7 +47,7 @@ struct MFVVertexAuxSorter {
   }
 
   static bool by_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
-    return a.mass > b.mass;
+    return a.mass[0] > b.mass[0];
   }
 
   static bool by_ntracks(const MFVVertexAux& a, const MFVVertexAux& b) {
