@@ -9,6 +9,13 @@
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 //#define USE_DUMPERS // you also have to add JMTucker/Dumpers to the BuildFile.xml for this
+#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
+#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
+#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+
 #ifdef USE_DUMPERS
 #include "JMTucker/Dumpers/interface/Dumpers.h"
 #endif
@@ -20,6 +27,7 @@ class TrackerMapper : public edm::EDAnalyzer {
  
  private:
   const edm::InputTag track_src;
+  const bool use_rechits;
 
   TH1F* h_ntracks;
 
@@ -69,10 +77,18 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_weird_track_algo;
   TH1F* h_weird_track_quality;
   TH1F* h_weird_track_nloops;
+  TH1F* h_weird_track_unknown_detid;
+  TH2F* h_weird_track_pxb_ladder_module[4];
+  TH2F* h_weird_track_pxf_panel_module[2][2][4];
+  TH2F* h_weird_track_tib_layer_string[2][4];
+  TH2F* h_weird_track_tob_rod_module[2][8];
+  TH2F* h_weird_track_tid_ring_module[2][4];
+  TH2F* h_weird_track_tec_petal_module[2][16][8];
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
-  : track_src(cfg.getParameter<edm::InputTag>("track_src"))
+  : track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    use_rechits(cfg.getParameter<bool>("use_rechits"))
 {
   edm::Service<TFileService> fs;
 
@@ -174,6 +190,35 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_weird_track_algo = fs->make<TH1F>("h_weird_track_algo", "", 30, 0, 30);
   h_weird_track_quality = fs->make<TH1F>("h_weird_track_quality", "", 7, 0, 7);
   h_weird_track_nloops = fs->make<TH1F>("h_weird_track_nloops", "", 10, 0, 10);
+
+  if (use_rechits) {
+    h_weird_track_unknown_detid = fs->make<TH1F>("h_weird_track_unknown_detid", "", 1, 0, 1);
+
+    for (int i = 0; i < 3; ++i)
+      h_weird_track_pxb_ladder_module[i] = fs->make<TH2F>(TString::Format("h_weird_track_pxb_layer_%i_ladder_module", i+1), ";ladder;module", 256, 0, 256, 64, 0, 64);
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 2; ++j)
+        for (int k = 0; k < 4; ++k)
+          h_weird_track_pxf_panel_module[i][j][k] = fs->make<TH2F>(TString::Format("h_weird_track_pxf_side_%i_disk_%i_panel_%i_blade_module", i+1, j+1, k+1), ";blade;module", 64, 0, 64, 64, 0, 64);
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 4; ++j)
+        h_weird_track_tib_layer_string[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tib_side_%i_module_%i_layer_string", i+1, j+1), ";layer;string", 8, 0, 8, 64, 0, 64);
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 8; ++j)
+        h_weird_track_tob_rod_module[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tob_side_%i_layer_%i_rod_module", i+1, j+1), ";rod;module", 128, 0, 128, 8, 0, 8);
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 4; ++j)
+        h_weird_track_tid_ring_module[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tid_side_%i_wheel_%i_ring_module", i+1, j+1), ";ring;module", 4, 0, 4, 32, 0, 32);
+
+    for (int i = 0; i < 2; ++i)
+      for (int j = 0; j < 16; ++j)
+        for (int k = 0; k < 8; ++k)
+          h_weird_track_tec_petal_module[i][j][k] = fs->make<TH2F>(TString::Format("h_weird_track_tec_side_%i_wheel_%i_ring_%i_petal_module", i+1, j+1, k+1), ";petal;module", 16, 0, 16, 8, 0, 8);
+  }
 }
 
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -289,6 +334,40 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       for (int i = 0; i < 7; ++i)
         if (tk.quality(reco::Track::TrackQuality(i))) h_weird_track_quality->Fill(i);
       h_weird_track_nloops->Fill(tk.nLoops());
+
+      if (use_rechits) {
+        for (int i = 0, ie = int(tk.recHitsSize()); i < ie; ++i) {
+          DetId dd = tk.recHit(i)->geographicalId();
+          if (dd.det() == DetId::Tracker) {
+            if (dd.subdetId() == (int) PixelSubdetector::PixelBarrel) {
+              PXBDetId d(dd);
+              h_weird_track_pxb_ladder_module[d.layer()]->Fill(d.ladder(), d.module());
+            }
+            else if (dd.subdetId() == (int) PixelSubdetector::PixelEndcap) {
+              PXFDetId d(dd);
+              h_weird_track_pxf_panel_module[d.side()][d.disk()][d.panel()]->Fill(d.blade(), d.module());
+            }
+            if (dd.subdetId() == StripSubdetector::TIB) {
+              TIBDetId d(dd);
+              h_weird_track_tib_layer_string[d.side()][d.module()]->Fill(d.layer(), d.stringNumber());
+            }
+            else if (dd.subdetId() == StripSubdetector::TOB) {
+              TOBDetId d(dd);
+              h_weird_track_tob_rod_module[d.side()][d.layer()]->Fill(d.rodNumber(), d.module());
+            }
+            else if (dd.subdetId() == StripSubdetector::TID) {
+              TIDDetId d(dd);
+              h_weird_track_tid_ring_module[d.side()][d.wheel()]->Fill(d.ring(), d.moduleNumber());
+            }
+            else if (dd.subdetId() == StripSubdetector::TEC) {
+              TECDetId d(dd);
+              h_weird_track_tec_petal_module[d.side()][d.wheel()][d.ring()]->Fill(d.petalNumber(), d.module());
+            }
+            else
+              h_weird_track_unknown_detid->Fill(0);
+          }
+        }
+      }
 
 #ifdef USE_DUMPERS
       if (!dumpers_evented) {
