@@ -78,12 +78,12 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_weird_track_quality;
   TH1F* h_weird_track_nloops;
   TH1F* h_weird_track_unknown_detid;
-  TH2F* h_weird_track_pxb_ladder_module[4];
-  TH2F* h_weird_track_pxf_panel_module[2][2][4];
-  TH2F* h_weird_track_tib_layer_string[2][4];
-  TH2F* h_weird_track_tob_rod_module[2][8];
-  TH2F* h_weird_track_tid_ring_module[2][4];
-  TH2F* h_weird_track_tec_petal_module[2][16][8];
+  TH2F* h_weird_track_pxb_ladder_module[3];
+  TH2F* h_weird_track_pxf_panel_module[3][3][5];
+  TH2F* h_weird_track_tib_layer_string[3][5];
+  TH2F* h_weird_track_tob_rod_module[3][9];
+  TH2F* h_weird_track_tid_ring_module[3][5];
+  TH2F* h_weird_track_tec_petal_module[3][17][9];
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -194,29 +194,29 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   if (use_rechits) {
     h_weird_track_unknown_detid = fs->make<TH1F>("h_weird_track_unknown_detid", "", 1, 0, 1);
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i <= 3; ++i)
       h_weird_track_pxb_ladder_module[i] = fs->make<TH2F>(TString::Format("h_weird_track_pxb_layer_%i_ladder_module", i+1), ";ladder;module", 256, 0, 256, 64, 0, 64);
 
-    for (int i = 0; i < 2; ++i)
-      for (int j = 0; j < 2; ++j)
-        for (int k = 0; k < 4; ++k)
+    for (int i = 0; i <= 2; ++i)
+      for (int j = 0; j <= 2; ++j)
+        for (int k = 0; k <= 4; ++k)
           h_weird_track_pxf_panel_module[i][j][k] = fs->make<TH2F>(TString::Format("h_weird_track_pxf_side_%i_disk_%i_panel_%i_blade_module", i+1, j+1, k+1), ";blade;module", 64, 0, 64, 64, 0, 64);
 
-    for (int i = 0; i < 2; ++i)
-      for (int j = 0; j < 4; ++j)
+    for (int i = 0; i <= 2; ++i)
+      for (int j = 0; j <= 4; ++j)
         h_weird_track_tib_layer_string[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tib_side_%i_module_%i_layer_string", i+1, j+1), ";layer;string", 8, 0, 8, 64, 0, 64);
 
-    for (int i = 0; i < 2; ++i)
-      for (int j = 0; j < 8; ++j)
+    for (int i = 0; i <= 2; ++i)
+      for (int j = 0; j <= 8; ++j)
         h_weird_track_tob_rod_module[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tob_side_%i_layer_%i_rod_module", i+1, j+1), ";rod;module", 128, 0, 128, 8, 0, 8);
 
-    for (int i = 0; i < 2; ++i)
-      for (int j = 0; j < 4; ++j)
+    for (int i = 0; i <= 2; ++i)
+      for (int j = 0; j <= 4; ++j)
         h_weird_track_tid_ring_module[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tid_side_%i_wheel_%i_ring_module", i+1, j+1), ";ring;module", 4, 0, 4, 32, 0, 32);
 
-    for (int i = 0; i < 2; ++i)
-      for (int j = 0; j < 16; ++j)
-        for (int k = 0; k < 8; ++k)
+    for (int i = 0; i <= 2; ++i)
+      for (int j = 0; j <= 16; ++j)
+        for (int k = 0; k <= 8; ++k)
           h_weird_track_tec_petal_module[i][j][k] = fs->make<TH2F>(TString::Format("h_weird_track_tec_side_%i_wheel_%i_ring_%i_petal_module", i+1, j+1, k+1), ";petal;module", 16, 0, 16, 8, 0, 8);
   }
 }
