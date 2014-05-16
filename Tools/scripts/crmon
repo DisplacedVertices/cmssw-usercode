@@ -29,7 +29,9 @@ parser.add_option('--resub-all', action='store_true', default=False,
 parser.add_option('--resub-none', action='store_true', default=False,
                   help='Do not resubmit any jobs (i.e. allow getting output, but do not do anything with e.g. those that are Aborted).')
 parser.add_option('--resub-site-control', default='',
-                  help='Site control for resubmitting jobs (e.g. ce_black_list=<comma separated list of sites>, no spaces!).')
+                  help='Deprecated, use --resub-black-list.')
+parser.add_option('--resub-black-list', default='',
+                  help='Comma-separated list (no spaces!) of sites to blacklist when resubmitting.')
 parser.add_option('--tee', type='str', metavar='FILE',
                   help='Duplicate stdout to FILE.')
 parser.add_option('--fake-results', type='str', metavar='FILE',
@@ -59,6 +61,11 @@ def print_header(s):
     print '\033[1m%s\033[0m' % s
 def print_subheader(s):
     print '\033[32m%s\033[0m' % s
+
+if options.resub_black_list:
+    if options.resub_site_control:
+        raise ValueError('Cannot use both --resub-black-list and --resub-site-control')
+    options.resub_site_control = '-GRID.se_black_list=' + options.resub_black_list
 
 if options.resub_all:
     options.resub_any = options.resub_done_stuck = options.resub_created = True
