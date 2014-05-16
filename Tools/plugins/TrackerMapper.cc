@@ -15,6 +15,7 @@
 #include "DataFormats/SiStripDetId/interface/TOBDetId.h"
 #include "DataFormats/SiStripDetId/interface/TIDDetId.h"
 #include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "JMTucker/Tools/interface/TrackHistos.h"
 
 #ifdef USE_DUMPERS
 #include "JMTucker/Dumpers/interface/Dumpers.h"
@@ -23,6 +24,10 @@
 class TrackerMapper : public edm::EDAnalyzer {
  public:
   explicit TrackerMapper(const edm::ParameterSet&);
+  ~TrackerMapper() {
+    delete h_v1ptgt3_tracks;
+    delete h_weird_tracks;
+  }
   void analyze(const edm::Event&, const edm::EventSetup&);
  
  private:
@@ -62,28 +67,9 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH2F* h_tracks_npixel_phi_eta_eq[2][3][8];
   TH2F* h_tracks_nstrip_phi_eta_eq[2][3][8];
 
+  TrackHistos* h_v1ptgt3_tracks;
   TH1F* h_n_weird_tracks;
-  TH1F* h_weird_track_pars[5];
-  TH1F* h_weird_track_errs[5];
-  TH2F* h_weird_track_pars_v_pars[5][4];
-  TH2F* h_weird_track_errs_v_pars[5][5];
-  TH1F* h_weird_track_q;
-  TH1F* h_weird_track_nhits;
-  TH1F* h_weird_track_npxhits;
-  TH1F* h_weird_track_nsthits;
-  TH1F* h_weird_track_chi2;
-  TH1F* h_weird_track_dof;
-  TH1F* h_weird_track_chi2dof;
-  TH1F* h_weird_track_algo;
-  TH1F* h_weird_track_quality;
-  TH1F* h_weird_track_nloops;
-  TH1F* h_weird_track_unknown_detid;
-  TH2F* h_weird_track_pxb_ladder_module[3];
-  TH2F* h_weird_track_pxf_panel_module[3][3][5];
-  TH2F* h_weird_track_tib_layer_string[3][5];
-  TH2F* h_weird_track_tob_rod_module[3][9];
-  TH2F* h_weird_track_tid_ring_module[3][5];
-  TH2F* h_weird_track_tec_petal_module[3][17][9];
+  TrackHistos* h_weird_tracks;
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -162,63 +148,15 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     }
   }
 
-  h_n_weird_tracks = fs->make<TH1F>("h_n_weird_tracks", "", 200, 0, 200);
-  const char* par_names[5] = {"pt", "eta", "phi", "dxy", "dz"};
   const int par_nbins[5] = { 500,  100,    100,  400, 400 };
   const double par_lo[5] = {   0, -2.6, -2.772,   -2, -20 };
   const double par_hi[5] = { 100, -2.4, -2.646,    2,  20 };
   const int err_nbins[5] = { 100, 100, 100, 200, 200 };
   const double err_lo[5] = { 0 };
   const double err_hi[5] = {   5, 0.1, 0.1, 0.5, 2 };
-  for (int i = 0; i < 5; ++i)
-    h_weird_track_pars[i] = fs->make<TH1F>(TString::Format("h_weird_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
-  for (int i = 0; i < 5; ++i)
-    h_weird_track_errs[i] = fs->make<TH1F>(TString::Format("h_weird_track_err%s", par_names[i]), "", err_nbins[i], err_lo[i], err_hi[i]);
-  for (int i = 0; i < 5; ++i)
-    for (int j = i+1; j < 5; ++j)
-      h_weird_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
-  for (int i = 0; i < 5; ++i)
-    for (int j = 0; j < 5; ++j)
-      h_weird_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], err_nbins[j], err_lo[j], err_hi[j]);
-  h_weird_track_q = fs->make<TH1F>("h_weird_track_q", "", 3, -1, 2);
-  h_weird_track_nhits   = fs->make<TH1F>("h_weird_track_nhits",   "",  40, 0, 40);
-  h_weird_track_npxhits = fs->make<TH1F>("h_weird_track_npxhits", "",  12, 0, 12);
-  h_weird_track_nsthits = fs->make<TH1F>("h_weird_track_nsthits", "",  28, 0, 28);
-  h_weird_track_chi2 = fs->make<TH1F>("h_weird_track_chi2", "", 50, 0, 100);
-  h_weird_track_dof = fs->make<TH1F>("h_weird_track_dof", "", 50, 0, 100);
-  h_weird_track_chi2dof = fs->make<TH1F>("h_weird_track_chi2dof", "", 50, 0, 10);
-  h_weird_track_algo = fs->make<TH1F>("h_weird_track_algo", "", 30, 0, 30);
-  h_weird_track_quality = fs->make<TH1F>("h_weird_track_quality", "", 7, 0, 7);
-  h_weird_track_nloops = fs->make<TH1F>("h_weird_track_nloops", "", 10, 0, 10);
-
-  if (use_rechits) {
-    h_weird_track_unknown_detid = fs->make<TH1F>("h_weird_track_unknown_detid", "", 1, 0, 1);
-
-    for (int i = 0; i <= 3; ++i)
-      h_weird_track_pxb_ladder_module[i] = fs->make<TH2F>(TString::Format("h_weird_track_pxb_layer_%i_ladder_module", i+1), ";ladder;module", 256, 0, 256, 64, 0, 64);
-
-    for (int i = 0; i <= 2; ++i)
-      for (int j = 0; j <= 2; ++j)
-        for (int k = 0; k <= 4; ++k)
-          h_weird_track_pxf_panel_module[i][j][k] = fs->make<TH2F>(TString::Format("h_weird_track_pxf_side_%i_disk_%i_panel_%i_blade_module", i+1, j+1, k+1), ";blade;module", 64, 0, 64, 64, 0, 64);
-
-    for (int i = 0; i <= 2; ++i)
-      for (int j = 0; j <= 4; ++j)
-        h_weird_track_tib_layer_string[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tib_side_%i_module_%i_layer_string", i+1, j+1), ";layer;string", 8, 0, 8, 64, 0, 64);
-
-    for (int i = 0; i <= 2; ++i)
-      for (int j = 0; j <= 8; ++j)
-        h_weird_track_tob_rod_module[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tob_side_%i_layer_%i_rod_module", i+1, j+1), ";rod;module", 128, 0, 128, 8, 0, 8);
-
-    for (int i = 0; i <= 2; ++i)
-      for (int j = 0; j <= 4; ++j)
-        h_weird_track_tid_ring_module[i][j] = fs->make<TH2F>(TString::Format("h_weird_track_tid_side_%i_wheel_%i_ring_module", i+1, j+1), ";ring;module", 4, 0, 4, 32, 0, 32);
-
-    for (int i = 0; i <= 2; ++i)
-      for (int j = 0; j <= 16; ++j)
-        for (int k = 0; k <= 8; ++k)
-          h_weird_track_tec_petal_module[i][j][k] = fs->make<TH2F>(TString::Format("h_weird_track_tec_side_%i_wheel_%i_ring_%i_petal_module", i+1, j+1, k+1), ";petal;module", 16, 0, 16, 8, 0, 8);
-  }
+  h_v1ptgt3_tracks = new TrackHistos("v1ptgt3", use_rechits, par_nbins, par_lo, par_hi, err_nbins, err_lo, err_hi);
+  h_n_weird_tracks = fs->make<TH1F>("h_n_weird_tracks", "", 200, 0, 200);
+  h_weird_tracks   = new TrackHistos("weird",   use_rechits, par_nbins, par_lo, par_hi, err_nbins, err_lo, err_hi);
 }
 
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -234,6 +172,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   int n_weird = 0;
 
   for (const reco::Track& tk : *tracks) {
+    //std::cout << "a track:\n" << tk;
     const bool v1 = tk.vx()*tk.vx() + tk.vy()*tk.vy() + tk.vz()*tk.vz() < 1;
 
     for (int i = 0; i < 2; ++i) {
@@ -279,105 +218,33 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
           if (tk.hitPattern().numberOfValidStripHits() >= 2*k) h_tracks_eta_phi_nstrip_gt[i][j][k]->Fill(tk.phi(), tk.eta());
         }
 
-        if (tk.eta() < -2.5) {
-          h_tracks_npixel_phi_eta_eq[i][j][0]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][0]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
-        } else if (tk.eta() < -1.5) {
-          h_tracks_npixel_phi_eta_eq[i][j][1]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][1]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
-        } else if (tk.eta() < -0.9) {
-          h_tracks_npixel_phi_eta_eq[i][j][2]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][2]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
-        } else if (tk.eta() < 0.0) {
-          h_tracks_npixel_phi_eta_eq[i][j][3]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][3]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
-        } else if (tk.eta() < 0.9) {
-          h_tracks_npixel_phi_eta_eq[i][j][4]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][4]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
-        } else if (tk.eta() < 1.5) {
-          h_tracks_npixel_phi_eta_eq[i][j][5]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][5]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
-        } else if (tk.eta() < 2.5) {
-          h_tracks_npixel_phi_eta_eq[i][j][6]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][6]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
-        } else {
-          h_tracks_npixel_phi_eta_eq[i][j][7]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
-          h_tracks_nstrip_phi_eta_eq[i][j][7]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+        const double etabins[9] = { -1e99, -2.5, -1.5, -0.9, 0, 0.9, 1.5, 2.5, 1e99 };
+        for (int k = 0; k < 8; ++k) {
+          if (tk.eta() > etabins[k] && tk.eta() < etabins[k+1]) {
+            h_tracks_npixel_phi_eta_eq[i][j][k]->Fill(tk.phi(), tk.hitPattern().numberOfValidPixelHits());
+            h_tracks_nstrip_phi_eta_eq[i][j][k]->Fill(tk.phi(), tk.hitPattern().numberOfValidStripHits());
+          }
         }
       }
     }
     
-    if (v1 && tk.dxyError() >= 0.05 && tk.pt() > 3 && tk.phi() >= -2.772 && tk.phi() <= -2.646 && tk.eta() >= -2.56 && tk.eta() <= -2.4) {
-      ++n_weird;
+    if (v1 && tk.pt() > 3) {
+      h_v1ptgt3_tracks->Fill(tk);
 
-      const double pars[5] = { tk.pt(),      tk.eta(),      tk.phi(),      tk.dxy(),      tk.dz()      };
-      const double errs[5] = { tk.ptError(), tk.etaError(), tk.phiError(), tk.dxyError(), tk.dzError() };
-
-      for (int i = 0; i < 5; ++i) {
-        h_weird_track_pars[i]->Fill(pars[i]);
-        h_weird_track_errs[i]->Fill(errs[i]);
-        for (int j = 0; j < 5; ++j) {
-          if (j >= i+1)
-            h_weird_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
-          h_weird_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
-        }
-      }
-
-      h_weird_track_q->Fill(tk.charge());
-      h_weird_track_nhits  ->Fill(tk.hitPattern().numberOfValidHits());
-      h_weird_track_npxhits->Fill(tk.hitPattern().numberOfValidPixelHits());
-      h_weird_track_nsthits->Fill(tk.hitPattern().numberOfValidStripHits());
-      h_weird_track_chi2->Fill(tk.chi2());
-      h_weird_track_dof->Fill(tk.ndof());
-      h_weird_track_chi2dof->Fill(tk.chi2()/tk.ndof());
-      h_weird_track_algo->Fill(int(tk.algo()));
-      for (int i = 0; i < 7; ++i)
-        if (tk.quality(reco::Track::TrackQuality(i))) h_weird_track_quality->Fill(i);
-      h_weird_track_nloops->Fill(tk.nLoops());
-
-      if (use_rechits) {
-        for (int i = 0, ie = int(tk.recHitsSize()); i < ie; ++i) {
-          DetId dd = tk.recHit(i)->geographicalId();
-          if (dd.det() == DetId::Tracker) {
-            if (dd.subdetId() == (int) PixelSubdetector::PixelBarrel) {
-              PXBDetId d(dd);
-              h_weird_track_pxb_ladder_module[d.layer()]->Fill(d.ladder(), d.module());
-            }
-            else if (dd.subdetId() == (int) PixelSubdetector::PixelEndcap) {
-              PXFDetId d(dd);
-              h_weird_track_pxf_panel_module[d.side()][d.disk()][d.panel()]->Fill(d.blade(), d.module());
-            }
-            if (dd.subdetId() == StripSubdetector::TIB) {
-              TIBDetId d(dd);
-              h_weird_track_tib_layer_string[d.side()][d.module()]->Fill(d.layer(), d.stringNumber());
-            }
-            else if (dd.subdetId() == StripSubdetector::TOB) {
-              TOBDetId d(dd);
-              h_weird_track_tob_rod_module[d.side()][d.layer()]->Fill(d.rodNumber(), d.module());
-            }
-            else if (dd.subdetId() == StripSubdetector::TID) {
-              TIDDetId d(dd);
-              h_weird_track_tid_ring_module[d.side()][d.wheel()]->Fill(d.ring(), d.moduleNumber());
-            }
-            else if (dd.subdetId() == StripSubdetector::TEC) {
-              TECDetId d(dd);
-              h_weird_track_tec_petal_module[d.side()][d.wheel()][d.ring()]->Fill(d.petalNumber(), d.module());
-            }
-            else
-              h_weird_track_unknown_detid->Fill(0);
-          }
-        }
-      }
+      if (tk.dxyError() >= 0.05 && tk.phi() >= -2.772 && tk.phi() <= -2.646 && tk.eta() >= -2.56 && tk.eta() <= -2.4) {
+        ++n_weird;
+        h_weird_tracks->Fill(tk);
 
 #ifdef USE_DUMPERS
-      if (!dumpers_evented) {
-        JMTDumper::set(event, setup);
-        std::cout << event;
-        dumpers_evented = true;
-      }
+        if (!dumpers_evented) {
+          JMTDumper::set(event, setup);
+          std::cout << event;
+          dumpers_evented = true;
+        }
 
-      std::cout << "weird track:\n" << tk;
+        std::cout << "weird track:\n" << tk;
 #endif
+      }
     }
   }
 
