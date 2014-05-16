@@ -194,12 +194,12 @@ std::ostream& operator<<(std::ostream& out, const reco::HitPattern& hp) {
   for (int i = 0, ie = hp.numberOfHits(); i < ie; ++i) {
     uint32_t hit = hp.getHitPattern(i);
 
-    out << "hit #" << i << " in binary format = "; 
+    out << "hit #" << std::setw(2) << i << " in binary format = ";
     for (int j = 10; j >= 0; --j) {
       int bit = (hit >> j) & 0x1;
+      out << bit;
       if (j == 10 || j == 7 || j == 3 || j == 2)
         out << " ";
-      out << bit;
     }
     out << std::endl;
   }
@@ -222,7 +222,7 @@ std::ostream& operator<<(std::ostream& out, const reco::Track& tk) {
   else
     out << "  no TrackExtra available\n";
 
-  out << tk.hitPattern();
+  out << "HitPattern:\n" << tk.hitPattern();
 
   if (tk.extra().isAvailable() && tk.recHit(0).isAvailable()) {
     out << "  hits (size: " << tk.recHitsSize() << "):\n";
