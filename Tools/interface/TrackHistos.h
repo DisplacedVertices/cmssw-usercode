@@ -48,30 +48,30 @@ struct TrackHistos {
     if (use_rechits) {
       h_track_unknown_detid = fs->make<TH1F>(TString::Format("h_%s_track_unknown_detid", name), "", 1, 0, 1);
 
-      for (int i = 0; i <= 3; ++i)
-        h_track_pxb_ladder_module[i] = fs->make<TH2F>(TString::Format("h_%s_track_pxb_layer_%i_ladder_module", name, i+1), ";ladder;module", 256, 0, 256, 64, 0, 64);
+      for (int i = 1; i <= 3; ++i)
+        h_track_pxb_ladder_module[i] = fs->make<TH2F>(TString::Format("h_%s_track_pxb_layer_%i_ladder_module", name, i), ";ladder;module", 256, 0, 256, 64, 0, 64);
 
-      for (int i = 0; i <= 2; ++i)
-        for (int j = 0; j <= 2; ++j)
-          for (int k = 0; k <= 4; ++k)
-            h_track_pxf_panel_module[i][j][k] = fs->make<TH2F>(TString::Format("h_%s_track_pxf_side_%i_disk_%i_panel_%i_blade_module", name, i+1, j+1, k+1), ";blade;module", 64, 0, 64, 64, 0, 64);
+      for (int i = 1; i <= 2; ++i)
+        for (int j = 1; j <= 2; ++j)
+          for (int k = 1; k <= 4; ++k)
+            h_track_pxf_panel_module[i][j][k] = fs->make<TH2F>(TString::Format("h_%s_track_pxf_side_%i_disk_%i_panel_%i_blade_module", name, i, j, k), ";blade;module", 64, 0, 64, 64, 0, 64);
 
-      for (int i = 0; i <= 2; ++i)
-        for (int j = 0; j <= 4; ++j)
-          h_track_tib_layer_string[i][j] = fs->make<TH2F>(TString::Format("h_%s_track_tib_side_%i_module_%i_layer_string", name, i+1, j+1), ";layer;string", 8, 0, 8, 64, 0, 64);
+      for (int i = 1; i <= 2; ++i)
+        for (int j = 1; j <= 4; ++j)
+          h_track_tib_layer_string[i][j] = fs->make<TH2F>(TString::Format("h_%s_track_tib_side_%i_module_%i_layer_string", name, i, j), ";layer;string", 8, 0, 8, 64, 0, 64);
 
-      for (int i = 0; i <= 2; ++i)
-        for (int j = 0; j <= 8; ++j)
-          h_track_tob_rod_module[i][j] = fs->make<TH2F>(TString::Format("h_%s_track_tob_side_%i_layer_%i_rod_module", name, i+1, j+1), ";rod;module", 128, 0, 128, 8, 0, 8);
+      for (int i = 1; i <= 2; ++i)
+        for (int j = 1; j <= 8; ++j)
+          h_track_tob_rod_module[i][j] = fs->make<TH2F>(TString::Format("h_%s_track_tob_side_%i_layer_%i_rod_module", name, i, j), ";rod;module", 128, 0, 128, 8, 0, 8);
 
-      for (int i = 0; i <= 2; ++i)
-        for (int j = 0; j <= 4; ++j)
-          h_track_tid_ring_module[i][j] = fs->make<TH2F>(TString::Format("h_%s_track_tid_side_%i_wheel_%i_ring_module", name, i+1, j+1), ";ring;module", 4, 0, 4, 32, 0, 32);
+      for (int i = 1; i <= 2; ++i)
+        for (int j = 1; j <= 4; ++j)
+          h_track_tid_ring_module[i][j] = fs->make<TH2F>(TString::Format("h_%s_track_tid_side_%i_wheel_%i_ring_module", name, i, j), ";ring;module", 4, 0, 4, 32, 0, 32);
 
-      for (int i = 0; i <= 2; ++i)
-        for (int j = 0; j <= 16; ++j)
-          for (int k = 0; k <= 8; ++k)
-            h_track_tec_petal_module[i][j][k] = fs->make<TH2F>(TString::Format("h_%s_track_tec_side_%i_wheel_%i_ring_%i_petal_module", name, i+1, j+1, k+1), ";petal;module", 16, 0, 16, 8, 0, 8);
+      for (int i = 1; i <= 2; ++i)
+        for (int j = 1; j <= 16; ++j)
+          for (int k = 1; k <= 8; ++k)
+            h_track_tec_petal_module[i][j][k] = fs->make<TH2F>(TString::Format("h_%s_track_tec_side_%i_wheel_%i_ring_%i_petal_module", name, i, j, k), ";petal;module", 16, 0, 16, 8, 0, 8);
     }
   }
 
