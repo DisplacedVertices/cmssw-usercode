@@ -13,7 +13,7 @@ struct MFVVertexAux {
 
   MFVVertexAux() {
     which = bs2dcompatscss = pv2dcompatscss = pv3dcompatscss = 0;
-    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2dcompat = bs2ddist = bs2derr = pv2dcompat = pv2ddist = pv2derr = pv3dcompat = pv3ddist = pv3derr = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
+    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2dcompat = bs2ddist = bs2derr = bs3ddist = pv2dcompat = pv2ddist = pv2derr = pv3dcompat = pv3ddist = pv3derr = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i)
@@ -93,6 +93,8 @@ struct MFVVertexAux {
   float bs2derr;
   float bs2dsig() const { return sig(bs2ddist, bs2derr); }
   float bs2dctau() const { return bs2ddist / betagamma(); }
+
+  float bs3ddist;
 
   uchar pv2dcompatscss;
   float pv2dcompat;
