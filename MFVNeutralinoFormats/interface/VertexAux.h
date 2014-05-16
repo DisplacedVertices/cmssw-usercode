@@ -210,12 +210,21 @@ struct MFVVertexAux {
     return int(track_w.size());
   }
 
-  int nbadtracks(float thr=0.5) const {
+  bool use_track(size_t i) const {
+    static const float pt_err_thr = 0.5;
+    return track_pt_err[i] < pt_err_thr;
+  }
+
+  int nbadtracks() const {
     int c = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if (track_pt_err[i] > thr)
+      if (!use_track(i))
         ++c;
     return c;
+  }
+
+  int ngoodtracks() const {
+    return ntracks() - nbadtracks();
   }
 
   int ntracksptgt(float thr) const {
