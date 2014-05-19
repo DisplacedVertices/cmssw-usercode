@@ -30,6 +30,7 @@ private:
   const double mva_cut;
 
   const int min_ntracks;
+  const int max_ntracks;
   const int min_ntracksptgt3;
   const int min_ntracksptgt5;
   const int min_ntracksptgt10;
@@ -97,6 +98,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     mva(use_mva ? new MFVVertexMVAWrap : 0),
     mva_cut(cfg.getParameter<double>("mva_cut")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
+    max_ntracks(cfg.getParameter<int>("max_ntracks")),
     min_ntracksptgt3(cfg.getParameter<int>("min_ntracksptgt3")),
     min_ntracksptgt5(cfg.getParameter<int>("min_ntracksptgt5")),
     min_ntracksptgt10(cfg.getParameter<int>("min_ntracksptgt10")),
@@ -176,6 +178,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
 
   return 
     vtx.ntracks >= min_ntracks &&
+    vtx.ntracks <= max_ntracks &&
     vtx.ntracksptgt3 >= min_ntracksptgt3 &&
     vtx.ntracksptgt5 >= min_ntracksptgt5 &&
     vtx.ntracksptgt10 >= min_ntracksptgt10 &&
