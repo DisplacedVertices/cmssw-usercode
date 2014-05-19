@@ -345,7 +345,7 @@ struct MFVVertexAux {
   float maxmntrackpt(int n) const {
     int nt = ntracks();
     if (n > nt - 1)
-      return mintrackpt();
+      return -1;
     std::vector<float> pt = track_pts();
     std::sort(pt.begin(), pt.end());
     return pt[nt-1-n];
