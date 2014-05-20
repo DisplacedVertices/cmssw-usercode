@@ -165,6 +165,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             magic = 'runOnMC = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'runOnMC = False', err))
+            to_add.append('process.dummyToMakeDiffHash = cms.PSet(sampleName = cms.string("%s"))' % sample.name) # would not have to do if changed globaltags JMTBAD
 
         if sample.is_mc and sample.re_pat:
             to_add.append("process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')") # JMTBAD rework re_pat
@@ -253,14 +254,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                 samples.append(s)
     elif 'data' in sys.argv:
         samples = Samples.data_samples
-        for sample in samples:
-            sample.json = 'ana_5pc.json'
     elif 'auxdata' in sys.argv:
         samples = Samples.auxiliary_data_samples
     elif '100k' in sys.argv:
         samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples
     elif 'few' in sys.argv:
-        samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400, Samples.ttbarhadronic, Samples.qcdht1000]
+        samples = [Samples.mfv_neutralino_tau1000um_M0400, Samples.ttbarhadronic, Samples.qcdht1000, Samples.MultiJetPk2012D2]
     elif 'mfv300' in sys.argv:
         samples = Samples.mfv300
     elif 'tthad' in sys.argv:
