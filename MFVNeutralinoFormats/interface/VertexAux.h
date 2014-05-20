@@ -308,7 +308,7 @@ struct MFVVertexAux {
     std::map<int,int> m = pvswtracksshared();
     int mi = -1, mc = 0;
     for (std::map<int,int>::const_iterator it = m.begin(), ite = m.end(); it != ite; ++it)
-      if (it->second > mc) {
+      if (it->first != -1 && it->second > mc) {
         mc = it->second;
         mi = it->first;
       }
