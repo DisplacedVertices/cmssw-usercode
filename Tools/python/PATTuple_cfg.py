@@ -1,6 +1,6 @@
 import sys, FWCore.ParameterSet.Config as cms
 
-version = 'v17'
+version = 'v18'
 
 ################################################################################
 
