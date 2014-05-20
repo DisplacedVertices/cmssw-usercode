@@ -209,6 +209,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
         printf("   (%11.3g, %11.3g, %11.3g, %11.3g)\n", v.p4(i).Px(), v.p4(i).Py(), v.p4(i).Pz(), v.p4(i).E());
       printf("ntracks: %u   nbad: %u   nptgt3: %u   nptgt5: %u   nptgt10: %u\n", v.ntracks(), v.nbadtracks(), v.ntracksptgt(3), v.ntracksptgt(5), v.ntracksptgt(10));
       printf("trackminnhits: %u   trackmaxnhits: %u   sumnhitsbehind: %u   maxnhitsbehind: %u\n", v.trackminnhits(), v.trackmaxnhits(), v.sumnhitsbehind(), v.maxnhitsbehind());
+      printf("ntracksshared wpv: %u  wpvs: %u  npvs: %u  pvmost: %i\n", v.ntrackssharedwpv(), v.ntrackssharedwpvs(), v.npvswtracksshared(), v.pvmosttracksshared());
       printf("sumpt2: %11.3g   mintrackpt: %11.3g   maxtrackpt: %11.3g   maxm1trackpt: %11.3g   maxm2trackpt: %11.3g   trackptavg: %11.3g   trackptrms: %11.3g\n", v.sumpt2(), v.mintrackpt(), v.maxtrackpt(), v.maxmntrackpt(1), v.maxmntrackpt(2), v.trackptavg(), v.trackptrms());
       printf("trackdxy           min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.trackdxymin(), v.trackdxymax(), v.trackdxyavg(), v.trackdxyrms());
       printf("trackdz            min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.trackdzmin(), v.trackdzmax(), v.trackdzavg(), v.trackdzrms());
@@ -220,6 +221,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("trackpairmass      min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.trackpairmassmin(), v.trackpairmassmax(), v.trackpairmassavg(), v.trackpairmassrms());
       printf("tracktripmass      min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.tracktripmassmin(), v.tracktripmassmax(), v.tracktripmassavg(), v.tracktripmassrms());
       printf("trackquadmass      min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.trackquadmassmin(), v.trackquadmassmax(), v.trackquadmassavg(), v.trackquadmassrms());
+      printf("jetpairdeta        min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.jetpairdetamin, v.jetpairdetamax, v.jetpairdetaavg, v.jetpairdetarms);
       printf("jetpairdr          min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.jetpairdrmin, v.jetpairdrmax, v.jetpairdravg, v.jetpairdrrms);
       printf("costhtkmomvtxdisp  min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhtkmomvtxdispmin, v.costhtkmomvtxdispmax, v.costhtkmomvtxdispavg, v.costhtkmomvtxdisprms);
       printf("costhjetmomvtxdisp min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhjetmomvtxdispmin, v.costhjetmomvtxdispmax, v.costhjetmomvtxdispavg, v.costhjetmomvtxdisprms);
