@@ -24,7 +24,7 @@ process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * proc
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
-    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples
+    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples
     for sample in bkg_samples:
         sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
 
