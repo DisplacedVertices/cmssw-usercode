@@ -2,18 +2,16 @@
 
 double xcut;
 double ycut;
-const char* crab_path = "crab/ABCDHistosV17_1";
+const char* crab_path = "crab/ABCDHistosV17_10";
 const char* hist_path = "abcdHistosTrksJets";
 bool plot = 0;
-const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/TrksJets";
+const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/NoSig_bs2derr0p0025";
 const double ymax = 50;
 
 std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
   TFile* file = TFile::Open(TString::Format("%s/%s_scaled.root", crab_path, sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("%s/%s", hist_path, histName));
-
-  hist->Rebin2D(1,4);
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
@@ -84,10 +82,10 @@ std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histNam
 }
 
 void compareMasses(const char* lifetime, double xmax, const char* histName) {
-  std::pair<TH1D*,TH1D*> h_pair_M0300 = compareShapes(TString::Format("mfv_neutralino_%s_M0300", lifetime), histName);
-  std::pair<TH1D*,TH1D*> h_pair_M0400 = compareShapes(TString::Format("mfv_neutralino_%s_M0400", lifetime), histName);
-  std::pair<TH1D*,TH1D*> h_pair_M0600 = compareShapes(TString::Format("mfv_neutralino_%s_M0600", lifetime), histName);
-  std::pair<TH1D*,TH1D*> h_pair_M1000 = compareShapes(TString::Format("mfv_neutralino_%s_M1000", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M0300 = compareShapes(TString::Format("mfv_neutralino_%s_M0300_1fb", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M0400 = compareShapes(TString::Format("mfv_neutralino_%s_M0400_1fb", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M0600 = compareShapes(TString::Format("mfv_neutralino_%s_M0600_1fb", lifetime), histName);
+  std::pair<TH1D*,TH1D*> h_pair_M1000 = compareShapes(TString::Format("mfv_neutralino_%s_M1000_1fb", lifetime), histName);
   std::pair<TH1D*,TH1D*> h_pair_ttbar = compareShapes("ttbar", histName);
   std::pair<TH1D*,TH1D*> h_pair_background_nobigw = compareShapes("background_nobigw", histName);
   std::pair<TH1D*,TH1D*> h_pair_ttbar_sq_qcdht1000 = compareShapes("ttbar_sq_qcdht1000", histName);
@@ -221,14 +219,14 @@ void plot_all_samples(const char* histName) {
   if (plot) {
     const char* cmd = TString::Format("mkdir %s/%s_%d", plot_path, histName, int(xcut));
     system(cmd);
-    compareMasses("tau0100um", 0.2, histName);
-    compareMasses("tau0300um", 0.3, histName);
-    compareMasses("tau1000um", 0.4, histName);
-    compareMasses("tau9900um", 1.0, histName);
+//    compareMasses("tau0100um", 0.2, histName);
+//    compareMasses("tau0300um", 0.3, histName);
+//    compareMasses("tau1000um", 0.4, histName);
+//    compareMasses("tau9900um", 1.0, histName);
   }
 
-  compareShapes("mfv_neutralino_tau0300um_M0400", histName);
-  compareShapes("mfv_neutralino_tau1000um_M0400", histName);
+  compareShapes("mfv_neutralino_tau0300um_M0400_1fb", histName);
+  compareShapes("mfv_neutralino_tau1000um_M0400_1fb", histName);
   compareShapes("ttbarhadronic", histName);
   compareShapes("ttbarsemilep", histName);
   compareShapes("ttbardilep", histName);
@@ -238,9 +236,9 @@ void plot_all_samples(const char* histName) {
   compareShapes("qcdht0500", histName);
   compareShapes("qcdht1000", histName);
   compareShapes("qcd", histName);
-  compareShapes("ttbar_sq_qcdht1000", histName);
-  compareShapes("sb_ttbar_qcdht1000", histName);
-  compareShapes("background_nobigw", histName);
+//  compareShapes("ttbar_sq_qcdht1000", histName);
+//  compareShapes("sb_ttbar_qcdht1000", histName);
+//  compareShapes("background_nobigw", histName);
   compareShapes("background", histName);
 
   printf("\n");
@@ -342,6 +340,5 @@ void lifetime_v_mass() {
 //  xcut = 8;   plot_all_samples("h_svctau3dcmz_ntracksptgt301");
 //  xcut = 700; plot_all_samples("h_svctau3dcmz_msptm01");
 
-  xcut = 12; ycut = 0.04; plot_all_samples("h_svdist2d_ntracks01");
-  xcut = 15; ycut = 0.04; plot_all_samples("h_svdist2d_ntracks01");
+  xcut = 16; ycut = 0.05; plot_all_samples("h_svdist2d_ntracks01");
 }
