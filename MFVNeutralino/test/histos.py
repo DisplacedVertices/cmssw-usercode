@@ -89,16 +89,29 @@ if 'qcdht1000' in sys.argv:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
-    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples
+    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples + Samples.data_samples
     if 'full' not in sys.argv:
         for sample in bkg_samples:
             sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
 
+    for s in Samples.data_samples:
+        s.json = 'ana_5pc.json'
+
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+
+    def modify(sample):
+        to_add = []
+        to_replace = []
+
+        if not sample.is_mc:
+            to_add.append('process.mfvWeight.weight_pileup = False')
+
+        return to_add, to_replace
 
     ex = ''
     exn = ''
     cs = CRABSubmitter('MFVHistosV17' + ex + exn,
+                       pset_modifier = modify,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        manual_datasets = SampleFiles.SampleFiles['MFVNtupleV17' + ex],
