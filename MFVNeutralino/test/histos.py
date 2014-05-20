@@ -89,6 +89,9 @@ if 'qcdht1000' in sys.argv:
 
 if run_pileup_weights:
     process.mfvWeight.weight_pileup = False
+    for p in process.paths.keys():
+        delattr(process, p)
+    process.p = cms.Path(process.mfvWeight * process.mfvEventHistosNoCuts)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
