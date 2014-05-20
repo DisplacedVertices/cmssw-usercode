@@ -269,8 +269,13 @@ class CRABSubmitter:
 
         if self.job_control_from_sample:
             jcc = dict(sample.job_control_commands(ana=self.use_ana_dataset))
-            total_number_of_events = jcc['total_number_of_events']
-            events_per_job = jcc['events_per_job']
+            try:
+                total_number_of_events = jcc['total_number_of_events']
+                events_per_job = jcc['events_per_job']
+            except KeyError:
+                print '\033[36;7m warning: \033[m manual_splits: no total_number_of_events, events_per_job for %s' % sample.name
+                total_number_of_events = jcc.get('total_number_of_events', -1)
+                events_per_job = jcc.get('events_per_job', 100000)
         else:
             total_number_of_events = self.manual_total_number_of_events
             events_per_job = self.manual_events_per_job

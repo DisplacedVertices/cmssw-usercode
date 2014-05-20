@@ -387,7 +387,7 @@ def cut(*cuts):
 def data_mc_comparison(name,
                        background_samples,
                        signal_samples = [],
-                       data_sample = None,
+                       data_samples = [],
                        output_fn = None,
                        plot_saver = None,
                        histogram_path = None,
@@ -447,8 +447,9 @@ def data_mc_comparison(name,
     """
 
     all_samples = background_samples + signal_samples
-    if data_sample is not None:
-         all_samples.append(data_sample)
+
+    if data_samples:
+         all_samples.extend(data_samples)
     
     if output_fn is None and plot_saver is None:
         raise ValueError('at least one of output_fn, plot_saver must be supplied')
@@ -469,13 +470,13 @@ def data_mc_comparison(name,
                 sample._datamccomp_file_path = file_path
                 sample._datamccomp_filename = file_path % sample
                 sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
-                if sample != data_sample and hist_path_for_nevents_check is not None:
+                if sample not in data_samples and hist_path_for_nevents_check is not None:
                     if sample.nevents_from_file(hist_path_for_nevents_check, f=sample._datamccomp_file) != sample.nevents:
                         raise ValueError('wrong number of events for %s' % sample.name)
             sample.hist = sample._datamccomp_file.Get(histogram_path)
             if not issubclass(type(sample.hist), ROOT.TH1):
                 raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
-            if sample != data_sample:
+            if sample not in data_samples:
                 sample.hist.Scale(sample.partial_weight * int_lumi)
             if rebin is not None:
                 sample.hist.Rebin(rebin)
@@ -484,6 +485,15 @@ def data_mc_comparison(name,
                     move_above_into_bin(sample.hist, x_range[1])
                 else:
                     move_overflow_into_last_bin(sample.hist)
+
+    data_sample = None
+    if len(data_samples) >= 1:
+        print 'len data samples', len(data_samples)
+        data_sample = data_samples[0]
+        print 'integ', data_sample.hist.Integral(0,1000000)
+        for ds in data_samples[1:]:
+            data_sample.hist.Add(ds.hist)
+            print 'integ', data_sample.hist.Integral(0,1000000)
 
     #####################
 
