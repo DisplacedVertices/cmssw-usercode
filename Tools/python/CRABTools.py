@@ -912,6 +912,24 @@ if __name__ == '__main__':
             ll = LumiList(runsAndLumis=crab_lumis_from_arguments_xml(d))
             ll.writeJSON(os.path.join(d, 'res/expectedLumis.json'))
 
+    elif bool_from_argv('-checkLumiDups'):
+        print 'comparing lumiSummary.jsons:'
+        from itertools import combinations
+        files = [os.path.join(d, 'res/lumiSummary.json') for d in crab_dirs_from_argv()]
+        for f1, f2 in combinations(files, 2):
+            print f1, f2
+            both = LumiList(f1) & LumiList(f2)
+            if both:
+                print '\033[36;7m duplicates: \033[m', both
+
+    elif bool_from_argv('-addLumiSummaries'):
+        out_fn = 'addedLumiSummaries.json'
+        if os.path.isfile(out_fn):
+            raise ValueError('%s already exists' % out_fn)
+        files = ' '.join(os.path.join(d, 'res/lumiSummary.json') for d in crab_dirs_from_argv())
+        cmd = 'mergeJSON.py %s --output=%s' % (files, out_fn)
+        print_run_cmd(cmd)
+
     elif bool_from_argv('-condorClusters'):
         pprint([(d, crab_get_condor_clusters(d)) for d in crab_dirs_from_argv()])
 
