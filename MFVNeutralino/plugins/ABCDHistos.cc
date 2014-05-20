@@ -23,6 +23,7 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH1F* h_nsv;
   TH2F* h_ntracks01_maxtrackpt01;
 
+  TH2F* h_bs2dsig_bs2ddist;
   TH2F* h_bs2derr_ntracks;
   TH2F* h_bs2derr_drmax;
 
@@ -167,6 +168,7 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_nsv = fs->make<TH1F>("h_nsv", ";number of secondary vertices;events", 15, 0, 15);
   h_ntracks01_maxtrackpt01 = fs->make<TH2F>("h_ntracks01_maxtrackpt01", ";sum of maxtrackpt for the two SV's with the highest ntracks;sum of ntracks for the two SV's with the highest ntracks", 300, 0, 300, 80, 0, 80);
 
+  h_bs2dsig_bs2ddist = fs->make<TH2F>("h_bs2dsig_bs2ddist", ";bs2ddist;bs2dsig", 500, 0, 5, 100, 0, 100);
   h_bs2derr_ntracks = fs->make<TH2F>("h_bs2derr_ntracks", ";ntracks;bs2derr", 40, 0, 40, 100, 0, 0.05);
   h_bs2derr_drmax = fs->make<TH2F>("h_bs2derr_drmax", ";drmax;bs2derr", 150, 0, 7, 100, 0, 0.05);
 
@@ -322,6 +324,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& vtx = vertices->at(isv);
+    h_bs2dsig_bs2ddist->Fill(vtx.bs2ddist, vtx.bs2dsig(), w);
     h_bs2derr_ntracks->Fill(vtx.ntracks, vtx.bs2derr, w);
     h_bs2derr_drmax->Fill(vtx.drmax, vtx.bs2derr, w);
 
