@@ -3,6 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
 wmore = False
+run_pileup_weights = False
 
 SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
@@ -86,6 +87,9 @@ if 'qcdht1000' in sys.argv:
     process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/qcdht1000.root']
     process.TFileService.fileName = 'histos_qcdht1000.root'
 
+if run_pileup_weights:
+    process.mfvWeight.weight_pileup = False
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
@@ -110,6 +114,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     ex = ''
     exn = ''
+
+    if run_pileup_weights:
+        exn += '_PileupWeights'
+        samples = [Samples.mfv_neutralino_tau1000um_M0400, Samples.qcdht1000] + Samples.data_samples
+
     cs = CRABSubmitter('MFVHistosV17' + ex + exn,
                        pset_modifier = modify,
                        job_control_from_sample = True,
