@@ -207,7 +207,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        data_retrieval = 'fnal',
                        publish_data_name = 'mfvntuple_' + tuple_version + batch_name_extra.lower(),
                        #manual_datasets = SampleFiles['mfv300s'],
-                       max_threads = 3,
+                       max_threads = 2,
                        #USER_additional_input_files = run_events_fn,
                        )
 
