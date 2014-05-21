@@ -114,6 +114,9 @@ for i in xrange(0,20):
 for i in xrange(0,20):
     changes.append(('bs2ddistX%s'%pize(0.002*i,3), 'min_bs2ddist = %f'%(0.002*i), ''))
 
+for i in xrange(15,41):
+    changes.append(('maxbs2ddistX%s'%pize(0.1*i,1), 'max_bs2ddist = %f'%(0.1*i), ''))
+
 for i in xrange(0,50):
     changes.append(('bs2derrX%s'%pize(0.0005*i,4), 'max_bs2derr = %f'%(0.0005*i), ''))
 
