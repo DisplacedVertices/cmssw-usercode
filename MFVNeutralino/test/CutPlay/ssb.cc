@@ -596,7 +596,7 @@ int main(int argc, char** argv) {
   gStyle->SetPadTickX(1);
   gStyle->SetPadTickY(1);
 
-  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "ntracksptgt5", "ntracksptgt10", "njetsntks", "tkonlypt", "abstkonlyeta", "tkonlymass", "jetsntkpt", "absjetsntketa", "jetsntkmass", "tksjetsntkpt", "abstksjetsntketa", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "maxm1trackpt", "trackdxyerrmin", "trackdxyerrmax", "trackdxyerravg", "trackdxyerrrms", "trackdzerrmin", "trackdzerrmax", "trackdzerravg", "trackdzerrrms", "drmin", "drmax", "mindrmax", "jetpairdrmin", "jetpairdrmax", "bs2ddist", "bs2derr", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "nsemileptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01", "absdeltaphi01"};
+  std::vector<std::string> vars = {"ntracks", "ntracksptgt3", "ntracksptgt5", "ntracksptgt10", "njetsntks", "tkonlypt", "abstkonlyeta", "tkonlymass", "jetsntkpt", "absjetsntketa", "jetsntkmass", "tksjetsntkpt", "abstksjetsntketa", "tksjetsntkmass", "costhtkonlymombs", "costhjetsntkmombs", "costhtksjetsntkmombs", "missdisttksjetsntkpvsig", "sumpt2", "maxtrackpt", "maxm1trackpt", "trackdxyerrmin", "trackdxyerrmax", "trackdxyerravg", "trackdxyerrrms", "trackdzerrmin", "trackdzerrmax", "trackdzerravg", "trackdzerrrms", "drmin", "drmax", "mindrmax", "jetpairdrmin", "jetpairdrmax", "bs2ddist", "bs2derr", "bs2dsig", "sumht", "nsemilepmuons", "nleptons", "nsemileptons", "ntracks01", "maxtrackpt01", "njetsntks01", "tkonlymass01", "jetsntkmass01", "tksjetsntkmass01", "absdeltaphi01", "svdist2d"};
   if (options.vars.size())
     vars = options.vars;
 
