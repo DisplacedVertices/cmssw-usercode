@@ -8,11 +8,14 @@ bool plot = 0;
 const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/NoSig_bs2derr0p0025";
 const double ymax = 50;
 bool no_y_overflow = 0;
+double ylow = 0;
 
 std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
   TFile* file = TFile::Open(TString::Format("%s/%s_scaled.root", crab_path, sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("%s/%s", hist_path, histName));
+
+  int ybinlow = hist->GetYaxis()->FindBin(ylow);
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
@@ -21,15 +24,15 @@ std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histNam
   int nbinsy = hist->GetNbinsY();
 
   double errA, errB, errC, errD;
-  double A = hist->IntegralAndError(0, xbin-1, 0, ybin-1, errA);
+  double A = hist->IntegralAndError(0, xbin-1, ybinlow, ybin-1, errA);
   double B = hist->IntegralAndError(0, xbin-1, ybin, nbinsy+1, errB);
-  double C = hist->IntegralAndError(xbin, nbinsx+1, 0, ybin-1, errC);
+  double C = hist->IntegralAndError(xbin, nbinsx+1, ybinlow, ybin-1, errC);
   double D = hist->IntegralAndError(xbin, nbinsx+1, ybin, nbinsy+1, errD);
 
   if (no_y_overflow) {
-    A = hist->IntegralAndError(0, xbin-1, 0, ybin-1, errA);
+    A = hist->IntegralAndError(0, xbin-1, ybinlow, ybin-1, errA);
     B = hist->IntegralAndError(0, xbin-1, ybin, nbinsy, errB);
-    C = hist->IntegralAndError(xbin, nbinsx+1, 0, ybin-1, errC);
+    C = hist->IntegralAndError(xbin, nbinsx+1, ybinlow, ybin-1, errC);
     D = hist->IntegralAndError(xbin, nbinsx+1, ybin, nbinsy, errD);
   }
 
