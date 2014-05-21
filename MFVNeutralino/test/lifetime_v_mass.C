@@ -2,16 +2,20 @@
 
 double xcut;
 double ycut;
-const char* crab_path = "crab/ABCDHistosV17_10";
+const char* crab_path = "crab/ABCDHistosV17_11";
 const char* hist_path = "abcdHistosTrksJets";
 bool plot = 0;
 const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/NoSig_bs2derr0p0025";
 const double ymax = 50;
+bool no_y_overflow = 0;
+double ylow = 0;
 
 std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
   TFile* file = TFile::Open(TString::Format("%s/%s_scaled.root", crab_path, sampleName));
   TH2F* hist = (TH2F*)file->Get(TString::Format("%s/%s", hist_path, histName));
+
+  int ybinlow = hist->GetYaxis()->FindBin(ylow);
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
@@ -20,15 +24,22 @@ std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histNam
   int nbinsy = hist->GetNbinsY();
 
   double errA, errB, errC, errD;
-  double A = hist->IntegralAndError(0, xbin-1, 0, ybin-1, errA);
+  double A = hist->IntegralAndError(0, xbin-1, ybinlow, ybin-1, errA);
   double B = hist->IntegralAndError(0, xbin-1, ybin, nbinsy+1, errB);
-  double C = hist->IntegralAndError(xbin, nbinsx+1, 0, ybin-1, errC);
+  double C = hist->IntegralAndError(xbin, nbinsx+1, ybinlow, ybin-1, errC);
   double D = hist->IntegralAndError(xbin, nbinsx+1, ybin, nbinsy+1, errD);
+
+  if (no_y_overflow) {
+    A = hist->IntegralAndError(0, xbin-1, ybinlow, ybin-1, errA);
+    B = hist->IntegralAndError(0, xbin-1, ybin, nbinsy, errB);
+    C = hist->IntegralAndError(xbin, nbinsx+1, ybinlow, ybin-1, errC);
+    D = hist->IntegralAndError(xbin, nbinsx+1, ybin, nbinsy, errD);
+  }
 
   double Dpred = B/A*C;
   double errPred = Dpred * sqrt(errA/A * errA/A + errB/B * errB/B + errC/C * errC/C);
 
-  printf("%30s\tA = %6.2f +/- %6.2f, B = %6.2f +/- %6.2f, C = %6.2f +/- %6.2f, D = %6.2f +/- %6.2f, B/A*C = %6.2f +/- %6.2f, correlation factor = %6.2f\n", sampleName, A, errA, B, errB, C, errC, D, errD, Dpred, errPred, hist->GetCorrelationFactor());
+  printf("%35s A = %9.2f +/- %9.2f, B = %7.2f +/- %7.2f, C = %8.2f +/- %8.2f, D = %6.2f +/- %6.2f, B/A*C = %7.2f +/- %7.2f, C.F.= %5.2f\n", sampleName, A, errA, B, errB, C, errC, D, errD, Dpred, errPred, hist->GetCorrelationFactor());
 
   TH1D* h_low = hist->ProjectionY(TString::Format("%s_low_%s", histName, sampleName), 0, xbin-1);
   TH1D* h_high = hist->ProjectionY(TString::Format("%s_high_%s", histName, sampleName), xbin, nbinsx+1);
@@ -341,4 +352,5 @@ void lifetime_v_mass() {
 //  xcut = 700; plot_all_samples("h_svctau3dcmz_msptm01");
 
   xcut = 16; ycut = 0.05; plot_all_samples("h_svdist2d_ntracks01");
+  xcut = 10; ycut = 0.03; plot_all_samples("h_sv_best0_bs2ddist_ntracks");
 }

@@ -156,6 +156,9 @@ for i in xrange(0,501,25):
 for i in xrange(0,32,2):
     changes.append(('absdeltaphi01X%s'%pize(0.1*i,1), '', 'min_absdeltaphi01 = %f'%(0.1*i)))
 
+for i in xrange(0,100):
+    changes.append(('svdist2dX%s'%pize(0.005*i,3), '', 'min_svdist2d = %f'%(0.005*i)))
+
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
     ana_name = 'Ana' + name

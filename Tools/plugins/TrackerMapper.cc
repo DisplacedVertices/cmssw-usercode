@@ -5,6 +5,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
@@ -70,6 +71,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TrackHistos* h_v1ptgt3_tracks;
   TH1F* h_n_weird_tracks;
   TrackHistos* h_weird_tracks;
+
+  TH2F* h_gen_eta_phi;
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -157,6 +160,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_v1ptgt3_tracks = new TrackHistos("v1ptgt3", use_rechits, par_nbins, par_lo, par_hi, err_nbins, err_lo, err_hi);
   h_n_weird_tracks = fs->make<TH1F>("h_n_weird_tracks", "", 200, 0, 200);
   h_weird_tracks   = new TrackHistos("weird",   use_rechits, par_nbins, par_lo, par_hi, err_nbins, err_lo, err_hi);
+
+  h_gen_eta_phi = fs->make<TH2F>("h_gen_eta_phi", "charged gen particles w/ status 1;phi;eta", 50, -3.15, 3.15, 50, -4, 4);
 }
 
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -249,6 +254,14 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   }
 
   h_n_weird_tracks->Fill(n_weird);
+
+  edm::Handle<reco::GenParticleCollection> gen_particles;
+  event.getByLabel("genParticles", gen_particles);
+  for (const reco::GenParticle& gen : *gen_particles) {
+    if (gen.status() == 1 && gen.charge() != 0) {
+      h_gen_eta_phi->Fill(gen.phi(), gen.eta());
+    }
+  }
 }
 
 DEFINE_FWK_MODULE(TrackerMapper);
