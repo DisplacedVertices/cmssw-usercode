@@ -12,6 +12,7 @@ def bool_from_argv(s):
         sys.argv.remove(s)
     return val
 
+timestamp = bool_from_argv('--timestamp')
 testing = bool_from_argv('--testing')
 rm_dir = bool_from_argv('--rm')
 
@@ -45,8 +46,8 @@ if not to_tar_basename: # avoid '/'
     usage('refusing to use /\n')
 
 user = getpass.getuser()
-timestamp = time.strftime('%Y%m%d-%H%M%S')
-arc_name = '%(user)s/%(timestamp)s_%(to_tar_basename)s' % locals()
+timestamp = time.strftime('%Y%m%d-%H%M%S_') if timestamp else ''
+arc_name = '%(user)s/%(timestamp)s%(to_tar_basename)s' % locals()
 temp_fn = timestamp + '.plotdude.tar.bz2'
 local_temp_fn = '/tmp/%s/' % user + temp_fn
 host_name = 'plotdude'
