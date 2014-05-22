@@ -215,7 +215,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     timing.update({ 'qcdpt0000': 0.005460, 'qcdpt0005': 0.008174, 'qcdpt0015': 0.007915, 'qcdpt0030': 0.014118, 'qcdpt0050': 0.011146, 'qcdpt0080': 0.040685, 'qcdpt0120': 0.141580, 'qcdpt0170': 0.374554, 'qcdpt0300': 0.509502, 'qcdpt0470': 0.830390, 'qcdpt0600': 0.996345, 'qcdpt0800': 0.428342, 'qcdpt1000': 0.546948, 'qcdpt1400': 0.544585, 'qcdpt1800': 2.078266, })
     timing.update({ 'bjetsht0100': 0.008273, 'bjetsht0250': 0.116181, 'bjetsht0500': 0.738374, 'bjetsht1000': 1.002745, })
     timing.update({ 'myttbarpythia': 0.752852, 'myttbarpynopu': 0.25, 'myttbarpydesignnopu': 0.25 })
-
+    timing.update({ 'myttbar_tune_samples': 0.25, 'myttbar_ali_samples': 0.25})
+    
     for sample in Samples.all_mc_samples:
         if timing.has_key(sample.name):
             sample.events_per = int(3.5*3600/timing[sample.name])
@@ -279,4 +280,24 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             assert hasattr(sample, 'timed')
 
 
+    if 'systematics' in sys.argv:
+        for sample in Samples.myttbar_tune_samples + myttbar_ali_samples:
+            if timing.has_key(sample.name):
+                sample.events_per = int(3.5*3600/timing[sample.name])
+                sample.timed = True
+                nj = int(sample.nevents_orig / float(sample.events_per)) + 1
+                assert nj < 5000
+    
+        for s in Samples.mysignal_tune_samples:
+            s.events_per = 500
+            s.timed = True
+
+        if 'ttbar' in sys.argv:
+            if 'ali' in sys.argv:
+                samples = [Samples.myttbar_ali_samples]
+            if 'tunes' in sys.argv:
+                samples = [Samples.myttbar_tune_samples]
+        if 'signal' in sys.argv:
+            samples = [Samples.mysignal_tune_samples]
+                
     cs.submit_all(samples)
