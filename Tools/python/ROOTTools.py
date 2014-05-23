@@ -425,6 +425,7 @@ def data_mc_comparison(name,
                        res_y_label_size = 0.03,
                        res_draw_cmd = 'apez',
                        legend_pos = None,
+                       enable_legend = True,
                        verbose = False,
                        cut_line = None,
                        background_uncertainty = None,
@@ -583,7 +584,7 @@ def data_mc_comparison(name,
         else:
             data_sample.hist.Draw('same ' + data_draw_cmd)
 
-    if legend_pos is not None:
+    if enable_legend and legend_pos is not None:
         legend_entries.reverse()
         legend = ROOT.TLegend(*legend_pos)
         legend.SetBorderSize(0)

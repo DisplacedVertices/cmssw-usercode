@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
+import os
+
 verbose = True
+root_file_dir = 'crab/MFVHistosV17SideBandBetterPUweights'
+plot_dir = os.path.join('plots', os.path.basename(root_file_dir)) # 'plots/MFVHistosV17SideBandBetterPUweights'
 event_histo_path = 'mfvEventHistosOneVtx'
 vertex_histo_path = 'mfvVertexHistosOneVtx'
-plot_dir = 'plots/MFVDataMCCompV17Sideband'
+hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
 plot_size = (600,600)
 int_lumi = 876. # /pb
 int_lumi_nice = '876 pb^{-1}'
-scale_factor = 1. #720/768.
-root_file_dir = 'crab/MFVHistosV17Sideband'
-hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
+scale_factor = 1970/682.47
 
 ################################################################################
 
-import os
 from functools import partial
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 import JMTucker.Tools.Samples as Samples
@@ -53,8 +54,9 @@ C = partial(data_mc_comparison,
             int_lumi_nice = int_lumi_nice,
             background_uncertainty = ('Stat. uncert. on MC bkg', None, ROOT.kBlack, 3004),
             hist_path_for_nevents_check = hist_path_for_nevents_check,
-            overflow_in_last = False,
+            overflow_in_last = True,
             poisson_intervals = True,
+            enable_legend = False,
             verbose = verbose,
             )
 
@@ -64,12 +66,27 @@ def vertex_histo(s):
     return vertex_histo_path + '/' + s
 
 enabled = [x.strip() for x in '''
-nsv
 npv
+pvntracks
+pvsumpt2
+pvrho
+pvz
+njets
+njetsnoputight
+jetpt4
+jetpt5
+jetpt6
+jetsumht
+nbtags
+nsemimuons
+nsemielectrons
+nsemileptons
+nsvnocut
+nsv
 '''.split('\n') if not x.strip().startswith('#')]
 
 def is_enabled(s):
-    return s in enabled or s.startswith('clean')
+    return s in enabled # or s.startswith('clean')
 
 def D(*args, **kwargs):
     if is_enabled(args[0]):
@@ -86,9 +103,8 @@ for i in xrange(20):
 D('npv',
   histogram_path = event_histo('h_npv'),
   x_title = 'number of PV',
-  y_title = 'events',
+  y_title = 'events/2',
   x_range = (0, 40),
-  y_range = (None, 140),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -98,7 +114,6 @@ D('pvntracks',
   rebin = 10,
   x_title = 'number of tracks in PV',
   y_title = 'events/10',
-  y_range = (None, 250),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -113,15 +128,15 @@ D('pvsumpt2',
 D('pvrho',
   histogram_path = event_histo('h_pv_rho'),
   x_title = 'PV #rho (cm)',
-  y_title = 'events/0.01 cm',
-  x_range = (0, 0.1),
+  y_title = 'events/??0.005 cm',
+  x_range = (0, 0.01),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('pvz',
   histogram_path = event_histo('h_pvz'),
   x_title = 'PV z (cm)',
-  y_title = 'events/cm',
+  y_title = 'events/1.5 cm',
   rebin = 10,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -131,7 +146,6 @@ D('njets',
   x_title = 'number of jets',
   y_title = 'events',
   x_range = (4,16),
-  y_range = (None, 230),
   legend_pos = (0.572, 0.687, 0.884, 0.920),
   )
 
@@ -140,7 +154,6 @@ D('njetsnoputight',
   x_title = 'number of jets (tight PU id)',
   y_title = 'events',
   x_range = (4,16),
-  y_range = (None, 230),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -208,12 +221,10 @@ D('nsemileptons',
   )
 
 D('nsvnocut',
-  histogram_path = vertex_histo('h_nsv'),
+  histogram_path = 'mfvVertexHistosTrigCut/h_nsv',
   x_title = 'number of vertices',
   y_title = 'events/(20 fb^{-1})',
   x_range = (0,5),
-  y_range = (1, 1e9),
-  cut_line = ((2, 0, 2, 2.5e9), 2, 5, 1),
   legend_pos = (0.424, 0.631, 0.868, 0.865),
   )
 
@@ -249,7 +260,6 @@ D('nsv',
   x_title = 'number of SV',
   y_title = 'events',
   x_range = (1,5),
-  y_range = (None, 1e3),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 

@@ -140,6 +140,11 @@ def check_fcn(crab_dir, verbose):
         return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_done_stuck=options.resub_done_stuck, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created)
 
 dirs = crab_dirs_from_argv()
+for x in sys.argv:
+    if os.path.isdir(x):
+        # if we have a dir of crab dirs, crab_hadd all the directories in it.
+        dirs.extend([d for d in glob.glob(os.path.join(x, '*')) if is_crab_working_dir(d)])
+
 if not dirs:
     print 'space-separated list of existing crab dirs required in argv (see --help)'
     sys.exit(1)
