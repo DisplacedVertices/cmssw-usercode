@@ -406,6 +406,64 @@ for s in myttbar_samples:
 
 ########################################################################
 
+myttbar_tune_samples = [
+    MCSample('myttbartune3',       '', '/mfv_ttbar_tune_3/jchavesb-mfv_ttbar_tune_3-e3674fd6eec136ae079fabace84be5fa/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartune4',       '', '/mfv_ttbar_tune_4/jchavesb-mfv_ttbar_tune_4-2ab11a6f2e6e96d6779b5e2cdd1bc9d7/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartune5',       '', '/mfv_ttbar_tune_5/jchavesb-mfv_ttbar_tune_5-84bbc883c4d7ec08aa60419295f8ddab/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartune6',       '', '/mfv_ttbar_tune_6/jchavesb-mfv_ttbar_tune_6-5e5c8b6e5ae97e632829881f70a96bef/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartune7',       '', '/mfv_ttbar_tune_7/jchavesb-mfv_ttbar_tune_7-aed1494d928e44cf1085663860ab1a07/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartune8',       '', '/mfv_ttbar_tune_8/jchavesb-mfv_ttbar_tune_8-39b59d827dfea83a5b26108b211413ab/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, 225.2 * 0.457),
+    ]
+
+for s in myttbar_tune_samples:
+    s.is_pythia8 = True
+    s.dbs_url_num = 3
+
+########################################################################
+
+myttbar_ali_samples = [
+    MCSample('myttbarelliptical',    '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbarsagitta',       '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbarskew',          '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbartwist',         '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, 225.2 * 0.457),
+    MCSample('myttbarzexpansion',    '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
+    ]
+
+for s in myttbar_ali_samples:
+    s.is_pythia8 = True
+    s.dbs_url_num = 3
+
+########################################################################
+
+mysignal_tune_samples_ex = [
+    (1000,  400, MCSample('mysignaltune3',       '', '/mfv_neutralino_tau1000um_M0400_tune_3/jchavesb-mfv_neutralino_tau1000um_M0400_tune_3-e17c423e411c7625ebf79112981b92b0/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune4',       '', '/mfv_neutralino_tau1000um_M0400_tune_4/jchavesb-mfv_neutralino_tau1000um_M0400_tune_4-832390b7c0947e4b08135391c0924f95/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune5',       '', '/mfv_neutralino_tau1000um_M0400_tune_5/jchavesb-mfv_neutralino_tau1000um_M0400_tune_5-998e97fcda3ca47d1d647f0835952d27/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune6',       '', '/mfv_neutralino_tau1000um_M0400_tune_6/jchavesb-mfv_neutralino_tau1000um_M0400_tune_6-0369ff42a15fed597e0a363b3f8edc1c/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune7',       '', '/mfv_neutralino_tau1000um_M0400_tune_7/jchavesb-mfv_neutralino_tau1000um_M0400_tune_7-6003addd1979663f588d0c5aa78e6346/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune8',       '', '/mfv_neutralino_tau1000um_M0400_tune_8/jchavesb-mfv_neutralino_tau1000um_M0400_tune_8-dd3c8ceba2a82a60a712f74b7ca5a607/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune12',      '', '/mfv_neutralino_tau1000um_M0400_tune_12/jchavesb-mfv_neutralino_tau1000um_M0400_tune_12-60f88ed1269b264f1bd7c4bb048dc5d9/USER',      100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune13',      '', '/mfv_neutralino_tau1000um_M0400_tune_13/jchavesb-mfv_neutralino_tau1000um_M0400_tune_13-8a6cd8ad72ac2ecdec2acf901a5ae85a/USER',      100000, 2, *mfv_xsec[ 400]),),
+    ]
+
+mysignal_tune_samples = []
+for tau, mass, sample in mysignal_tune_samples_ex:
+    mysignal_tune_samples.append(sample)
+    sample.tau = tau
+    sample.mass = mass
+    sample.events_per = 1500
+    sample.no_skimming_cuts = True
+    sample.is_pythia8 = True
+    sample.dbs_url_num = 3
+    sample.re_pat = True
+    sample.scheduler = 'condor'
+    sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
+    sample.cross_section = 0.001
+
+########################################################################
+
 data_samples = [
     DataSample('MultiJetPk2012B', '/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD'),
     DataSample('MultiJetPk2012C1', '/MultiJet1Parked/Run2012C-part1_05Nov2012-v2/AOD'),
