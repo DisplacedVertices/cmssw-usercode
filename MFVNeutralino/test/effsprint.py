@@ -2,9 +2,11 @@ import sys, os
 from JMTucker.Tools.ROOTTools import *
 import JMTucker.Tools.Samples as Samples
 
-set_style()
-ROOT.gStyle.SetPaintTextFormat('.2g')
-ps = plot_saver('plots/nm1s', size=(500,500), log=False)
+plots = 'plots' in sys.argv
+if plots:
+    set_style()
+    ROOT.gStyle.SetPaintTextFormat('.2g')
+    ps = plot_saver('plots/nm1s', size=(500,500), log=False)
 
 sum = 0.
 var = 0.
@@ -54,6 +56,8 @@ def effs(fn):
         h_nm1_abs.GetXaxis().SetBinLabel(len(cuts)+1, 'all')
         h_nm1_abs.SetBinContent(len(cuts)+1, float(numall)/den)
         def draw(h):
+            if not plots:
+                return
             h.SetStats(0)
             h.GetYaxis().SetRangeUser(0,1.05)
             h.SetMarkerSize(2)
