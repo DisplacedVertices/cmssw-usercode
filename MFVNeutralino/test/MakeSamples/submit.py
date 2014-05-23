@@ -71,6 +71,8 @@ if run_pat:
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
 
 def submit(name, tau0=None, mass=None):
+    print name
+
     if run_pat:
         output_file = 'aodpat.root'
     else:
@@ -174,15 +176,14 @@ if run_ttbar:
     for run in to_run:
         submit('ttbar_' + run)
 else:
-    tau0s = [0., 0.01, 0.1, 0.3, 1.0, 9.9]
-    masses = [200, 300, 400, 600, 800, 1000]
+    tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.]
+    masses = range(200, 1501, 100)
     tunes = [5]
 
-    #to_do = [(0.3, m, 5) for m in masses] + [(t, 300, 5) for t in tau0s]
     to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 
     for tau0, mass, tune in to_do:
-        name = 'neutralino_tau%04ium_M%04i' % (int(tau0*1000), mass)
+        name = 'neutralino_tau%05ium_M%04i' % (int(tau0*1000), mass)
         if tune != 5:
             name += '_tune_%i' % tune
         submit(name, tau0, mass)
