@@ -198,12 +198,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if debug:
         batch_name_extra += '_WDebug'
 
+    if 'systematics' in sys.argv:
+        batch_name_extra += '_Systematics'
 
     cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + batch_name_extra,
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        get_edm_output = True,
-                       data_retrieval = 'fnal',
+                       data_retrieval = 'cornell',
                        publish_data_name = 'mfvntuple_' + tuple_version + batch_name_extra.lower(),
                        #manual_datasets = SampleFiles['mfv300s'],
                        max_threads = 3,
@@ -281,7 +283,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
 
     if 'systematics' in sys.argv:
-        for sample in Samples.myttbar_tune_samples + myttbar_ali_samples:
+        for sample in Samples.myttbar_tune_samples + Samples.myttbar_ali_samples:
             if timing.has_key(sample.name):
                 sample.events_per = int(3.5*3600/timing[sample.name])
                 sample.timed = True
@@ -294,10 +296,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         if 'ttbar' in sys.argv:
             if 'ali' in sys.argv:
-                samples = [Samples.myttbar_ali_samples]
+                samples = Samples.myttbar_ali_samples
             if 'tunes' in sys.argv:
-                samples = [Samples.myttbar_tune_samples]
+                samples = Samples.myttbar_tune_samples
         if 'signal' in sys.argv:
-            samples = [Samples.mysignal_tune_samples]
+            samples = Samples.mysignal_tune_samples
                 
     cs.submit_all(samples)

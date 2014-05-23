@@ -437,7 +437,7 @@ for s in myttbar_ali_samples:
 
 ########################################################################
 
-mysignal_tune_samples = [
+mysignal_tune_samples_ex = [
     (1000,  400, MCSample('mysignaltune3',       '', '/mfv_neutralino_tau1000um_M0400_tune_3/jchavesb-mfv_neutralino_tau1000um_M0400_tune_3-e17c423e411c7625ebf79112981b92b0/USER',        100000, 2, *mfv_xsec[ 400]),),
     (1000,  400, MCSample('mysignaltune4',       '', '/mfv_neutralino_tau1000um_M0400_tune_4/jchavesb-mfv_neutralino_tau1000um_M0400_tune_4-832390b7c0947e4b08135391c0924f95/USER',        100000, 2, *mfv_xsec[ 400]),),
     (1000,  400, MCSample('mysignaltune5',       '', '/mfv_neutralino_tau1000um_M0400_tune_5/jchavesb-mfv_neutralino_tau1000um_M0400_tune_5-998e97fcda3ca47d1d647f0835952d27/USER',        100000, 2, *mfv_xsec[ 400]),),
@@ -448,13 +448,15 @@ mysignal_tune_samples = [
     (1000,  400, MCSample('mysignaltune13',      '', '/mfv_neutralino_tau1000um_M0400_tune_13/jchavesb-mfv_neutralino_tau1000um_M0400_tune_13-8a6cd8ad72ac2ecdec2acf901a5ae85a/USER',      100000, 2, *mfv_xsec[ 400]),),
     ]
 
-for tau, mass, sample in mysignal_tune_samples:
+mysignal_tune_samples = []
+for tau, mass, sample in mysignal_tune_samples_ex:
+    mysignal_tune_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
     sample.events_per = 1500
     sample.no_skimming_cuts = True
     sample.is_pythia8 = True
-    sample.dbs_url_num = 2
+    sample.dbs_url_num = 3
     sample.re_pat = True
     sample.scheduler = 'condor'
     sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
