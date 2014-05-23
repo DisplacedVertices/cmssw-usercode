@@ -23,7 +23,15 @@ EventIdVeto::EventIdVeto(const edm::ParameterSet& cfg)
   : use_run(cfg.getParameter<bool>("use_run")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
-  const std::string& fn(cfg.getParameter<std::string>("list_fn"));
+  std::string fn(cfg.getParameter<std::string>("list_fn"));
+  printf("EventIdVeto: fn is %s\n", fn.c_str());
+  if (fn.length() > 3 && fn.compare(fn.length() - 3, 3, ".gz") == 0) {
+    printf("EventIdVeto: gunzipping\n");
+    if (system(("gunzip " + fn).c_str()) != 0)
+      throw cms::Exception("EventIdVeto") << "could not unzip file " << fn;
+    fn.erase(fn.length() - 3, 3);
+  }
+
   FILE* f = fopen(fn.c_str(), "rt");
   if (!f)
     throw cms::Exception("EventIdVeto") << "could not read file " << fn;
@@ -32,9 +40,13 @@ EventIdVeto::EventIdVeto(const edm::ParameterSet& cfg)
   while (fgets(line, 1024, f) != 0) {
     if (debug) printf("EventIdVeto debug: file line read: %s", line);
     unsigned r,l,e;
-    int res = sscanf(line, "(%u,%u,%u),", &r, &l, &e);
+    int res;
+    if (use_run)
+      res = sscanf(line, "(%u,%u,%u),", &r, &l, &e);
+    else
+      res = sscanf(line, "(%u,%u),", &l, &e);
     if (debug) printf("    sscanf returned %i, r,l,e = %u, %u, %u\n", res, r,l,e);
-    if (res != 3)
+    if (res != (use_run ? 3 : 2))
       continue;
     if (use_run)
       mrle.insert(RLE(r,l,e));
@@ -43,7 +55,10 @@ EventIdVeto::EventIdVeto(const edm::ParameterSet& cfg)
   }
   fclose(f);
 
-  printf("EventIdVeto: vetoing %lu events\n", (use_run ? mrle.size() : mle.size()));
+  const size_t nveto = use_run ? mrle.size() : mle.size();
+  if (nveto == 0)
+    throw cms::Exception("EventIdVeto") << "found zero events to veto in file " << fn;
+  printf("EventIdVeto: vetoing %lu events\n", nveto);
 }
 
 bool EventIdVeto::filter(edm::Event& event, const edm::EventSetup&) {
