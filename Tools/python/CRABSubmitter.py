@@ -23,6 +23,7 @@ def mkdirs_if_needed(path):
 class CRABSubmitter:
     get_proxy = True
     aaa_locations = 'T1_US_FNAL,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin,T2_US_Vanderbilt,T3_US_Brown,T3_US_Colorado,T3_US_NotreDame,T3_US_UMiss'
+    half_mc_path = '/uscms/home/tucker/mfvrecipe/HalfMCLists/%s.txt.gz'
     
     def __init__(self,
                  batch_name,
@@ -46,6 +47,7 @@ class CRABSubmitter:
                  crab_cfg_modifier = None,
                  aaa = False,
                  manual_datasets = None,
+                 run_half_mc = False,
                  **kwargs):
 
         if '/' in batch_name:
@@ -119,6 +121,8 @@ class CRABSubmitter:
 
         self.manual_datasets = manual_datasets
         if manual_datasets is not None:
+            if run_half_mc:
+                raise ValueError('run_half_mc is not for manual_datasets mode')
             if not job_control_from_sample:
                 for opt in 'total_number_of_events events_per_job'.split():
                     if not kwargs.has_key(opt):
@@ -129,6 +133,8 @@ class CRABSubmitter:
             cfg.set('CMSSW', 'datasetpath', 'None')
             cfg.set('CRAB', 'scheduler', 'condor')
             # crab_cfg below has to set out CMSSW.number_of_jobs
+
+        self.run_half_mc = run_half_mc
 
         def get_two_max(s):
             l = []
@@ -214,6 +220,10 @@ class CRABSubmitter:
         cfg.write(self.crab_cfg_template)
         self.crab_cfg_template = self.crab_cfg_template.getvalue()
 
+    def half_mc_fn(self, sample):
+        half_mc_fn = self.half_mc_path % sample.name
+        return half_mc_fn if os.path.isfile(half_mc_fn) else ''
+
     def crab_cfg(self, sample):
         cfg = ConfigParserEx()
         cfg.readfp(StringIO(self.crab_cfg_template))
@@ -237,6 +247,16 @@ class CRABSubmitter:
             ret = self.crab_cfg_modifier(sample)
             for entry in ret:
                 cfg.set(*entry)
+
+        if self.run_half_mc:
+            half_mc_fn = self.half_mc_fn(sample)
+            if half_mc_fn:
+                try:
+                    aif = cfg.get('USER', 'additional_input_files') + ',' + half_mc_fn
+                except ConfigParser.NoOptionError:
+                    aif = half_mc_fn
+                cfg.set('USER', 'additional_input_files', aif)
+
         crab_cfg_fn = 'crab.%s.%s.cfg' % (self.batch_name, sample.name)
         cfg.write(open(crab_cfg_fn, 'wt'))
         return crab_cfg_fn, open(crab_cfg_fn, 'rt').read(), cfg
@@ -256,6 +276,21 @@ class CRABSubmitter:
                 pset = pset.replace(a,b)
             pset += '\n' + '\n'.join(to_add) + '\n'
         pset_fn = self.pset_fn_pattern % sample if tmp_fn is None else tmp_fn
+
+        if self.run_half_mc:
+            if not self.half_mc_fn(sample):
+                print '\033[1m warning: \033[0m half_mc not available for sample %s' % (sample.name)
+            else:
+                # This must be the last modification because we will
+                # modify all the paths and they must be finalized.
+                pset += '''
+process.runHalfMCVeto = cms.EDFilter('EventIdVeto',
+                                     list_fn = cms.string('%s.txt.gz'),
+                                     use_run = cms.bool(False))
+for p in process.paths.keys():
+    getattr(process, p).insert(0, ~process.runHalfMCVeto)
+''' % sample.name
+
         open(pset_fn, 'wt').write(pset)
         return pset_fn, pset
 
@@ -402,7 +437,7 @@ exit $ECODE
                     else:
                         print '\033[36;7m warning: \033[m sample %s might have had problem(s) submitting, check the log in /tmp' % sample.name
             else:
-                print '\033[36;7m warning: \033[m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
+                print '\033[1m warning: \033[0m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
             os.system('rm -f %s' % ' '.join(cleanup))
         else:
             print 'in testing mode, not submitting anything.'
