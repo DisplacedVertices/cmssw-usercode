@@ -6,6 +6,7 @@ import glob, os, re, subprocess, sys, time, getpass, zlib
 import xml.etree.cElementTree
 from collections import defaultdict
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
+from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.hadd import hadd
 
 username = getpass.getuser()
@@ -28,15 +29,6 @@ if os.path.exists('/uscms_data'):
 else:
     print 'warning: not using crab_working_dir_default_root!'
     crab_working_dir_default_root = None
-
-def bool_from_argv(s, remove=True, return_pos=False):
-    val = s in sys.argv
-    ret = val
-    if val and return_pos:
-        ret = val, sys.argv.index(s) 
-    if val and remove:
-        sys.argv.remove(s)
-    return ret
 
 def confirm_cmd(cmd, always=False):
     ret = []

@@ -1,12 +1,21 @@
 #!/usr/bin/env python
 
-import gzip, cPickle
+import sys, gzip, cPickle
 
 def big_warn(s):
     x = '#' * 80
     print x
     print s
     print x
+
+def bool_from_argv(s, remove=True, return_pos=False):
+    val = s in sys.argv
+    ret = val
+    if val and return_pos:
+        ret = val, sys.argv.index(s) 
+    if val and remove:
+        sys.argv.remove(s)
+    return ret
 
 def from_pickle(fn, comp=False):
     if comp or '.gzpickle' in fn:
@@ -38,6 +47,7 @@ def typed_from_argv(type_, default_value=None, raise_on_multiple=False):
         return default_value
 
 __all__ = [
+    'bool_from_argv',
     'big_warn',
     'from_pickle',
     'to_pickle',
