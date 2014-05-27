@@ -742,14 +742,16 @@ def draw_in_order(hists_and_cmds, sames=False):
     if type(hists_and_cmds[1]) == str:
         cmd = hists_and_cmds[1]
         hists_and_cmds = [(h,cmd) for h in hists_and_cmds[0]]
-    hists = [(h, h.GetMaximum(), cmd) for h,cmd in hists_and_cmds]
+    hists = [(h, h.GetMaximum(), cmd, i) for i,(h,cmd) in enumerate(hists_and_cmds)]
     hists.sort(key=lambda x: x[1], reverse=True)
-    for i, (h, m, cmd) in enumerate(hists):
+    for i, (h, m, cmd, iorig) in enumerate(hists):
         if i > 0 and 'same' not in cmd:
             cmd += ' same'
             if sames:
                 cmd += 's'
         h.Draw(cmd)
+    order = dict((x[0], x[-1]) for x in hists)
+    return order
 
 def flatten_directory(dir, prefix=''):
     """Take an input TDirectory object (a TFile is a TDirectory) and
