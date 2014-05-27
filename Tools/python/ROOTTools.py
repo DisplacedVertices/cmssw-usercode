@@ -572,6 +572,12 @@ def data_mc_comparison(name,
         sample.hist.SetLineColor(sample.color if signal_color_override is None else signal_color_override(sample))
         sample.hist.SetLineWidth(signal_line_width)
         sample.hist.Draw('same ' + signal_draw_cmd)
+        if verbose:
+            integ = get_integral(sample.hist, 0)
+            if integ[0] == 0:
+                print sample.name, '<', 3 * sample.partial_weight * int_lumi, '@95%CL'
+            else:
+                print sample.name, integ
 
     if data_sample is not None:
         data_sample.hist.SetMarkerStyle(data_marker_style)
@@ -622,7 +628,7 @@ def data_mc_comparison(name,
         print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
         print
     
-    ratio_pad, res_g = None, None
+    ratio_pad, res_g, old_opt_fit = None, None, None
     if data_sample is not None:
         ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
         ratio_pad.SetTopMargin(0.71)
@@ -651,12 +657,31 @@ def data_mc_comparison(name,
         ln.SetLineColor(ROOT.kBlue+3)
         ln.Draw()
 
+        old_opt_fit = ROOT.gStyle.GetOptFit()
+        ROOT.gStyle.SetOptFit(0)
+        fit_opt = 's ex0'
+        fit_opt += ' q' if not verbose else ' v'
+        fit_res = res_g.Fit('pol0', fit_opt)
+        ratio_pad.Update()
+        fit_tpt = ROOT.TPaveText(0.12, 0.25, 0.4, 0.27, 'ndc')
+        fit_tpt.SetBorderSize(0)
+        fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
+        fit_tpt.Draw()
+        #fit_stat_box = res_g.GetListOfFunctions().FindObject('stats')
+        #fit_stat_box.SetX1NDC(0)
+        #fit_stat_box.SetX2NDC(0)
+        #fit_stat_box.SetY1NDC(0)
+        #fit_stat_box.SetY2NDC(0)
+
     if plot_saver is not None:
         plot_saver.save(name)
         plot_saver.c = plot_saver.old_c
         plot_saver.c.cd()
     elif output_fn is not None:
         canvas.SaveAs(output_fn)
+
+    if old_opt_fit is not None:
+        ROOT.gStyle.SetOptFit(old_opt_fit)
 
     return canvas, stack, sum_background, legend, ratio_pad, res_g
 
