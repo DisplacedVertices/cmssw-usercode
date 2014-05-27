@@ -156,6 +156,8 @@ class ABCDHistos : public edm::EDAnalyzer {
   TH2F* h_svctau3dcmz_maxm1trackpt01;
   TH2F* h_svctau3dcmz_ntracksptgt301;
   TH2F* h_svctau3dcmz_msptm01;
+  TH2F* h_absdeltaphi01_bs2ddist01;
+  TH2F* h_absdeltaphi01_ntracks01;
 
   TH2F* h_sumht1_sumht0[2]; // 3d, 2d
   TH1F* h_sumhtdiff[2];
@@ -306,6 +308,8 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
   h_svctau3dcmz_maxm1trackpt01 = fs->make<TH2F>("h_svctau3dcmz_maxm1trackpt01", ";maxm1trackpt01;svctau3dcmz", 300, 0, 300, 100, 0, 1);
   h_svctau3dcmz_ntracksptgt301 = fs->make<TH2F>("h_svctau3dcmz_ntracksptgt301", ";ntracksptgt301;svctau3dcmz", 80, 0, 80, 100, 0, 1);
   h_svctau3dcmz_msptm01 = fs->make<TH2F>("h_svctau3dcmz_msptm01", ";msptm01;svctau3dcmz", 500, 0, 5000, 100, 0, 1);
+  h_absdeltaphi01_bs2ddist01 = fs->make<TH2F>("h_absdeltaphi01_bs2ddist01", ";bs2ddist01;absdeltaphi01", 100, 0, 1, 315, 0, 3.15);
+  h_absdeltaphi01_ntracks01 = fs->make<TH2F>("h_absdeltaphi01_ntracks01", ";ntracks01;absdeltaphi01", 80, 0, 80, 315, 0, 3.15);
 
   h_sumht1_sumht0[0] = fs->make<TH2F>("h_sumht1_sumht0_3d", ";sumht (3D hemisphere 0);sumht (3D hemisphere 1)", 100, 0, 1000, 100, 0, 1000);
   h_sumht1_sumht0[1] = fs->make<TH2F>("h_sumht1_sumht0_2d", ";sumht (2D hemisphere 0);sumht (2D hemisphere 1)", 100, 0, 1000, 100, 0, 1000);
@@ -496,7 +500,8 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     double msptm0 = sqrt(v0.mass[which_mom] * v0.mass[which_mom] + v0.pt[which_mom] * v0.pt[which_mom]) + fabs(v0.pt[which_mom]);
     double msptm1 = sqrt(v1.mass[which_mom] * v1.mass[which_mom] + v1.pt[which_mom] * v1.pt[which_mom]) + fabs(v1.pt[which_mom]);
     h_svctau3dcmz_msptm01->Fill(msptm0 + msptm1, svctau3dcmz, w);
-
+    h_absdeltaphi01_bs2ddist01->Fill(v0.bs2ddist + v1.bs2ddist, fabs(reco::deltaPhi(phibs0, phibs1)), w);
+    h_absdeltaphi01_ntracks01->Fill(v0.ntracks + v1.ntracks, fabs(reco::deltaPhi(phibs0, phibs1)), w);
 
     TVector3 pos0(v0.x, v0.y, v0.z);
     TVector3 pos1(v1.x, v1.y, v1.z);
