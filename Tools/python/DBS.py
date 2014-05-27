@@ -2,10 +2,12 @@
 
 import os
 
-# Could use DBSAPI, but easier to just use popen.
+# Could use DBSAPI or DASAPI or whatever, but I'm too lazy to learn it.
 
-class dbs_query:
+class das_query:
     def __init__(self, ana01=False, ana02=False, ana03=False):
+        if sum((ana01, ana02, ana03)) > 1:
+            raise ValueError('only one of ana0X options allowed')
         self.ana01 = ana01
         self.ana02 = ana02
         self.ana03 = ana03
@@ -27,11 +29,11 @@ class dbs_query:
                 if x is not None:
                     ret.append(x)
         if not ret:
-            raise RuntimeError('query %r (ana01: %s ana02: %s ana03: %s) did not succeed. full dbs command:\n%s\ndbs command output:\n%s' % (query, self.ana01, self.ana02, self.ana03, full_cmd, ''.join(cmdout) if cmdout else cmdout))
+            raise RuntimeError('query %r (ana01: %s ana02: %s ana03: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.ana01, self.ana02, self.ana03, full_cmd, ''.join(cmdout) if cmdout else cmdout))
         return ret
 
 def files_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
-    return dbs_query(ana01, ana02, ana03)('dataset=%s file' % dataset,
+    return das_query(ana01, ana02, ana03)('dataset=%s file' % dataset,
                                           lambda s: s.endswith('.root'))
 
 def numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
@@ -40,7 +42,7 @@ def numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
             return int(line)
         except ValueError:
             return None
-    return dbs_query(ana01, ana02, ana03)('dataset=%s | grep dataset.nevents' % dataset,
+    return das_query(ana01, ana02, ana03)('dataset=%s | grep dataset.nevents' % dataset,
                                           line_xform=xform)[0]
 
 def files_numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
@@ -52,10 +54,10 @@ def files_numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
             return line[0], int(line[1])
         except ValueError:
             return None
-    return dbs_query(ana01, ana02, ana03)('dataset=%s file | grep file.name,file.nevents' % dataset,
+    return das_query(ana01, ana02, ana03)('dataset=%s file | grep file.name,file.nevents' % dataset,
                                           line_xform=xform)
 
 def sites_for_dataset(dataset, ana01=False, ana02=False, ana03=False):
-    return dbs_query(ana01, ana02, ana03)('dataset=%s site' % dataset,
+    return das_query(ana01, ana02, ana03)('dataset=%s site' % dataset,
                                           line_filter=lambda s: s.startswith('T'))
 
