@@ -173,7 +173,7 @@ ABCDHistos::ABCDHistos(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
   h_nsv = fs->make<TH1F>("h_nsv", ";number of secondary vertices;events", 15, 0, 15);
-  h_sv_best0_bs2ddist_ntracks = fs->make<TH2F>("h_sv_best0_bs2ddist_ntracks", "sv_best0;ntracks;bs2ddist", 40, 0, 40, 100, 0, 1);
+  h_sv_best0_bs2ddist_ntracks = fs->make<TH2F>("h_sv_best0_bs2ddist_ntracks", "sv_best0;ntracks;bs2ddist", 40, 0, 40, 1000, 0, 1);
 
   h_ntracks01_maxtrackpt01 = fs->make<TH2F>("h_ntracks01_maxtrackpt01", ";sum of maxtrackpt for the two SV's with the highest ntracks;sum of ntracks for the two SV's with the highest ntracks", 300, 0, 300, 80, 0, 80);
 
