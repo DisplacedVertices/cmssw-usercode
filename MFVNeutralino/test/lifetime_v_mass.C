@@ -2,13 +2,13 @@
 
 double xcut;
 double ycut;
-const char* crab_path = "crab/ABCDHistosV17_11";
+const char* crab_path = "crab/ABCDHistosV17_16";
 const char* hist_path = "abcdHistosTrksJets";
 bool plot = 0;
 const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/NoSig_bs2derr0p0025";
 const double ymax = 50;
 bool no_y_overflow = 0;
-double ylow = 0;
+double ylow = 0.000;
 
 std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histName) {
   TH1::SetDefaultSumw2();
@@ -16,9 +16,19 @@ std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histNam
   TH2F* hist = (TH2F*)file->Get(TString::Format("%s/%s", hist_path, histName));
 
   int ybinlow = hist->GetYaxis()->FindBin(ylow);
+  TH2F* cutHist = new TH2F("cutHist", TString::Format("y > %4.3f", ylow), hist->GetNbinsX(), hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax(),
+                                                                          hist->GetNbinsY(), hist->GetYaxis()->GetXmin(), hist->GetYaxis()->GetXmax());
+  for (int i = 0; i <= hist->GetNbinsX() + 1; ++i) {
+    for (int j = ybinlow; j <= hist->GetNbinsY() + 1; ++j) {
+      cutHist->SetBinContent(i, j, hist->GetBinContent(i,j));
+      cutHist->SetBinError(i, j, hist->GetBinError(i,j));
+    }
+  }
 
   int xbin = hist->GetXaxis()->FindBin(xcut);
   int ybin = hist->GetYaxis()->FindBin(ycut);
+  printf("ylow = %f, ybinlow = %3d, ybinlow low edge = %f\n", ylow, ybinlow, hist->GetYaxis()->GetBinLowEdge(ybinlow));
+  printf("ycut = %f, ybin-1  = %3d, ybin    low edge = %f\n", ycut, ybin-1, hist->GetYaxis()->GetBinLowEdge(ybin));
 
   int nbinsx = hist->GetNbinsX();
   int nbinsy = hist->GetNbinsY();
@@ -39,7 +49,7 @@ std::pair<TH1D*,TH1D*> compareShapes(const char* sampleName, const char* histNam
   double Dpred = B/A*C;
   double errPred = Dpred * sqrt(errA/A * errA/A + errB/B * errB/B + errC/C * errC/C);
 
-  printf("%35s A = %9.2f +/- %9.2f, B = %7.2f +/- %7.2f, C = %8.2f +/- %8.2f, D = %6.2f +/- %6.2f, B/A*C = %7.2f +/- %7.2f, C.F.= %5.2f\n", sampleName, A, errA, B, errB, C, errC, D, errD, Dpred, errPred, hist->GetCorrelationFactor());
+  printf("%35s A = %9.2f +/- %9.2f, B = %7.2f +/- %7.2f, C = %8.2f +/- %8.2f, D = %6.2f +/- %6.2f, B/A*C = %7.2f +/- %7.2f, C.F.= %5.2f\n", sampleName, A, errA, B, errB, C, errC, D, errD, Dpred, errPred, cutHist->GetCorrelationFactor());
 
   TH1D* h_low = hist->ProjectionY(TString::Format("%s_low_%s", histName, sampleName), 0, xbin-1);
   TH1D* h_high = hist->ProjectionY(TString::Format("%s_high_%s", histName, sampleName), xbin, nbinsx+1);
@@ -351,6 +361,6 @@ void lifetime_v_mass() {
 //  xcut = 8;   plot_all_samples("h_svctau3dcmz_ntracksptgt301");
 //  xcut = 700; plot_all_samples("h_svctau3dcmz_msptm01");
 
-  xcut = 16; ycut = 0.05; plot_all_samples("h_svdist2d_ntracks01");
-  xcut = 10; ycut = 0.03; plot_all_samples("h_sv_best0_bs2ddist_ntracks");
+//  xcut = 16; ycut = 0.05; plot_all_samples("h_svdist2d_ntracks01");
+  xcut =  8; ycut = 0.05; plot_all_samples("h_sv_best0_bs2ddist_ntracks");
 }
