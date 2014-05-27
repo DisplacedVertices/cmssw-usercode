@@ -86,6 +86,7 @@ nsv
 '''.split('\n') if not x.strip().startswith('#')]
 
 def is_enabled(s):
+    return not s.startswith('clean')
     return s in enabled # or s.startswith('clean')
 
 def D(*args, **kwargs):
@@ -105,6 +106,7 @@ D('npv',
   x_title = 'number of PV',
   y_title = 'events/2',
   x_range = (0, 40),
+  y_range = (None, 350),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -114,6 +116,7 @@ D('pvntracks',
   rebin = 10,
   x_title = 'number of tracks in PV',
   y_title = 'events/10',
+  y_range = (None, 450),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -122,6 +125,7 @@ D('pvsumpt2',
   rebin = 10,
   x_title = '#Sigma p_{T}^{2} of tracks in PV (GeV^{2})',
   y_title = 'events/1000 GeV^{2}',
+  y_range = (None, 400),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -130,6 +134,7 @@ D('pvrho',
   x_title = 'PV #rho (cm)',
   y_title = 'events/??0.005 cm',
   x_range = (0, 0.01),
+  y_range = (None, 400),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -138,6 +143,7 @@ D('pvz',
   x_title = 'PV z (cm)',
   y_title = 'events/1.5 cm',
   rebin = 10,
+  y_range = (None, 250),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -146,6 +152,7 @@ D('njets',
   x_title = 'number of jets',
   y_title = 'events',
   x_range = (4,16),
+  y_range = (None, 660),
   legend_pos = (0.572, 0.687, 0.884, 0.920),
   )
 
@@ -154,30 +161,37 @@ D('njetsnoputight',
   x_title = 'number of jets (tight PU id)',
   y_title = 'events',
   x_range = (4,16),
+  y_range = (None, 650),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('jetpt4',
   histogram_path = event_histo('h_jetpt4'),
   x_title = 'jet #4 p_{T} (GeV)',
-  y_title = 'events/5 GeV',
+  y_title = 'events/10 GeV',
   x_range = (60,250),
+  y_range = (None, 550),
+  rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('jetpt5',
   histogram_path = event_histo('h_jetpt5'),
   x_title = 'jet #5 p_{T} (GeV)',
-  y_title = 'events/5 GeV',
+  y_title = 'events/10 GeV',
   x_range = (60,250),
+  y_range = (None, 330),
+  rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('jetpt6',
   histogram_path = event_histo('h_jetpt6'),
   x_title = 'jet #6 p_{T} (GeV)',
-  y_title = 'events/5 GeV',
+  y_title = 'events/10 GeV',
+  rebin = 2,
   x_range = (60,250),
+  y_range = (None, 100),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -195,7 +209,7 @@ D('nbtags',
   x_title = '# CSVM b-tagged jets',
   y_title = 'events',
   x_range = (0,10),
-  y_range = (None, 6e2),
+  y_range = (None, 950),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -203,6 +217,7 @@ D('nsemimuons',
   histogram_path = event_histo('h_nmuons_semilep'),
   x_title = 'number of semilep muons',
   y_title = 'events',
+  y_range = (None, 2200),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -210,6 +225,7 @@ D('nsemielectrons',
   histogram_path = event_histo('h_nelectrons_semilep'),
   x_title = 'number of semilep electrons',
   y_title = 'events',
+  y_range = (None, 2200),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -217,6 +233,7 @@ D('nsemileptons',
   histogram_path = event_histo('h_nleptons_semilep'),
   x_title = 'number of semilep electrons',
   y_title = 'events',
+  y_range = (None, 2200),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -228,7 +245,8 @@ D('nsvnocut',
   legend_pos = (0.424, 0.631, 0.868, 0.865),
   )
 
-D('svdist2d',
+if 0:
+    D('svdist2d',
   histogram_path = 'vtxHst2VNoSvdist2d/h_svdist2d',
   x_title = 'xy distance between top two vertices (cm)',
   y_title = 'events/(0.01 cm)/(20 fb^{-1})',
@@ -242,7 +260,7 @@ D('svdist2d',
   legend_pos = (0.424, 0.631, 0.868, 0.865),
   )
 
-D('ntracks01',
+    D('ntracks01',
   histogram_path = 'vtxHst2VNoNtracks01/h_sv_sumtop2_ntracks',
   x_title = 'sum of number of tracks in top two vertices',
   y_title = 'events/(20 fb^{-1})',
@@ -260,6 +278,7 @@ D('nsv',
   x_title = 'number of SV',
   y_title = 'events',
   x_range = (1,5),
+  y_range = (None, 2200),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -267,7 +286,8 @@ D('sv_top2_ntracks',
   histogram_path = vertex_histo('h_sv_top2_ntracks'),
   x_title = 'number of tracks/vertex',
   y_title = 'vertices',
-  x_range = (5, 20),
+  x_range = (5, 8),
+  y_range = (None, 900),
   legend_pos = (0.435, 0.687, 0.878, 0.920)
   )
 
@@ -275,17 +295,17 @@ D('sv_top2_ntracksptgt3',
   histogram_path = vertex_histo('h_sv_top2_ntracksptgt3'),
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
-  x_range = (1, 10),
-  y_range = (None, 700),
+  x_range = (3, 9),
+  y_range = (None, 1800),
   legend_pos = (0.553, 0.687, 0.878, 0.920)
   )
 
 D('sv_top2_ntracksptgt3_nm1',
-  histogram_path = 'hstNoNtracksptgt3/h_sv_top2_ntracksptgt3',
+  histogram_path = 'vtxHst1VNoNtracksptgt3/h_sv_top2_ntracksptgt3',
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
-  x_range = (0, 10),
-  #y_range = (None, 700),
+  x_range = (0, 9),
+  y_range = (None, 3500),
   legend_pos = (0.553, 0.687, 0.878, 0.920)
   )
 
@@ -294,7 +314,8 @@ D('sv_top2_chi2dof',
   x_title = '#chi^{2}/dof for vertex fit',
   y_title = 'vertices/0.14',
   x_range = (0, 5),
-  y_range = (None, 180),
+  rebin = 2,
+  y_range = (None, 260),
   legend_pos = (0.435, 0.687, 0.878, 0.920)
   )
 
@@ -303,109 +324,111 @@ D('sv_top2_chi2dofprob',
   x_title = 'P(#chi^{2},dof) for vertex fit',
   y_title = 'vertices/0.024',
   x_range = (0,1),
+  rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920)
   )
 
 D('sv_top2_tkonlyp',
   histogram_path = vertex_histo('h_sv_top2_tkonlyp'),
-  rebin = 4,
+  rebin = 5,
   x_title = 'track-only vertex momentum (GeV)',
-  y_title = 'vertices/12 GeV',
-  y_range = (None, 450),
+  y_title = 'vertices/15 GeV',
+  y_range = (None, 550),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_tkonlypt',
   histogram_path = vertex_histo('h_sv_top2_tkonlypt'),
-  rebin = 4,
+  rebin = 5,
   x_title = 'track-only vertex p_{T} (GeV)',
-  y_title = 'vertices/12 GeV',
+  y_title = 'vertices/15 GeV',
   legend_pos = (0.570, 0.748, 0.878, 0.921),
   )
 
 D('sv_top2_tkonlymass',
   histogram_path = vertex_histo('h_sv_top2_tkonlymass'),
-  rebin = 4,
+  rebin = 6,
   x_title = 'track-only vertex mass (GeV)',
-  y_title = 'vertices/10 GeV',
+  y_title = 'vertices/15 GeV',
+  y_range = (None, 650),
   legend_pos = (0.45, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_jetsntkmass',
   histogram_path = vertex_histo('h_sv_top2_jetsntkmass'),
-  rebin = 4,
+  rebin = 6,
   x_title = 'associated jets\' mass (GeV)',
-  y_title = 'vertices/60 GeV',
+  y_title = 'vertices/90 GeV',
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_tksjetsntkmass',
   histogram_path = vertex_histo('h_sv_top2_tksjetsntkmass'),
-  rebin = 4,
+  rebin = 6,
   x_title = 'tracks + associated jets\' mass (GeV)',
-  y_title = 'vertices/60 GeV',
-  y_range = (None, 500),
+  y_title = 'vertices/90 GeV',
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_costhtkonlymombs',
   histogram_path = vertex_histo('h_sv_top2_costhtkonlymombs'),
-  rebin = 4,
-  y_range = (1e-4, 270),
+  rebin = 5,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
+  overflow_in_last = False,
   )
 
 D('sv_top2_maxtrackpt',
   histogram_path = vertex_histo('h_sv_top2_maxtrackpt'),
-  rebin = 4,
+  rebin = 6,
   x_title = 'max{track p_{T,i}} (GeV)',
-  y_title = 'vertices/6 GeV',
+  y_title = 'vertices/9 GeV',
+  y_range = (None, 820),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_sumpt2',
   histogram_path = vertex_histo('h_sv_top2_sumpt2'),
-  rebin = 10,
+  rebin = 15,
   x_title = '#Sigma p_{T}^{2} (GeV^{2})',
-  y_title = 'vertices/200 GeV^{2}',
+  y_title = 'vertices/300 GeV^{2}',
+  y_range = (None, 820),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_drmin',
   histogram_path = vertex_histo('h_sv_top2_drmin'),
-  rebin = 2,
+  rebin = 4,
   x_title = 'min{#Delta R{track i,j}}',
-  y_title = 'vertices/0.02',
+  y_title = 'vertices/0.04',
   x_range = (0, 0.4),
-  #y_range = (1e-1, 2e2),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_drmin_nm1',
-  histogram_path = 'hstNoDrmin/h_sv_top2_drmin',
+  histogram_path = 'vtxHst1VNoDrmin/h_sv_top2_drmin',
   x_title = 'min{#Delta R{track i,j}}',
-  y_title = 'vertices/0.05',
-  rebin = 5,
+  y_title = 'vertices/0.08',
+  rebin = 8,
   #x_range = (0, 0.4),
-  #y_range = (1e-1, 2e2),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_drmax',
   histogram_path = vertex_histo('h_sv_top2_drmax'),
-  rebin = 3,
+  rebin = 6,
   x_title = 'max{#Delta R{track i,j}} for two "best" SV (GeV)',
-  y_title = 'vertices/0.14',
-  x_range = (0, 4),
+  y_title = 'vertices/0.28',
+  x_range = (1.2, 4.2),
+  y_range = (None, 550),
   legend_pos = (0.135, 0.687, 0.578, 0.920)
   )
 
 D('sv_top2_drmax_nm1',
-  histogram_path = 'hstNoDrmax/h_sv_top2_drmax',
-  rebin = 3,
+  histogram_path = 'vtxHst1VNoDrmax/h_sv_top2_drmax',
+  rebin = 6,
   x_title = 'max{#Delta R{track i,j}} for two "best" SV (GeV)',
-  y_title = 'vertices/0.14',
-  #x_range = (0, 4),
+  y_title = 'vertices/0.28',
+  x_range = (1.2, 4),
   legend_pos = (0.135, 0.687, 0.578, 0.920)
   )
 
@@ -414,16 +437,16 @@ D('sv_top2_njetsntks',
   x_title = 'number of associated jets',
   y_title = 'vertices',
   x_range = (1, 6),
-  y_range = (None, 1100),
+  y_range = (None, 1350),
   legend_pos = (0.589, 0.704, 0.878, 0.921),
   )
 
 D('sv_top2_njetsntks_nm1',
-  histogram_path = 'hstNoNjets/h_sv_top2_njetsntks',
+  histogram_path = 'vtxHst1VNoNjets/h_sv_top2_njetsntks',
   x_title = 'number of associated jets',
   y_title = 'vertices',
-  #x_range = (1, 6),
-  y_range = (None, 1100),
+  x_range = (0, 6),
+  y_range = (None, 1350),
   legend_pos = (0.589, 0.704, 0.878, 0.921),
   )
 
@@ -432,6 +455,7 @@ D('sv_top2_bs2ddist',
   x_title = 'xy distance to beamspot (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.1),
+  y_range = (None, 1200),
   legend_pos = (0.547, 0.755, 0.878, 0.921),
   )
 
@@ -439,16 +463,14 @@ D('sv_top2_bs2derr',
   histogram_path = vertex_histo('h_sv_top2_bs2derr'),
   x_title = '#sigma(xy distance to beamspot) (cm)',
   y_title = 'vertices/5 #mum',
-  x_range = (0, 0.008),
-  y_range = (None, 275),
+  x_range = (0, 0.003),
   )
 
 D('sv_top2_bs2derr_nm1',
-  histogram_path = 'hstNoBs2derr/h_sv_top2_bs2derr',
+  histogram_path = 'vtxHst1VNoBs2derr/h_sv_top2_bs2derr',
   x_title = '#sigma(xy distance to beamspot) (cm)',
   y_title = 'vertices/25 #mum',
   rebin = 5,
-  #y_range = (None, 275),
   )
 
 D('sv_top2_bs2dsig',
@@ -457,33 +479,14 @@ D('sv_top2_bs2dsig',
   y_title = 'vertices/2',
   rebin = 2,
   x_range = (10, 50),
-  #y_range = (1e-1, 2e2),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
 D('sv_top2_bs2dsig_nm1',
-  histogram_path = 'hstNoBs2dsig/h_sv_top2_bs2dsig',
+  histogram_path = 'vtxHst1VNoBs2dsig/h_sv_top2_bs2dsig',
   x_title = 'N#sigma(2D distance to BS) for two "best" SV',
   y_title = 'vertices/2',
-  #rebin = 0,
-  x_range = (0, 10),
-  #y_range = (1e-1, 2e2),
+  rebin = 2,
+  x_range = (0, 50),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
-  )
-
-D('sv_sumtop2_ntracks',
-  histogram_path = vertex_histo('h_sv_sumtop2_ntracks'),
-  x_title = 'ntracks01',
-  y_title = 'events',
-  x_range = (10, 40),
-  legend_pos = (0.435, 0.687, 0.878, 0.920)
-  )
-
-D('sv_sumtop2_maxtrackpt',
-  histogram_path = vertex_histo('h_sv_sumtop2_maxtrackpt'),
-  x_title = 'maxtrackpt01 (GeV)',
-  y_title = 'events/6 GeV',
-  rebin = 4,
-  #x_range = (0, 40),
-  legend_pos = (0.435, 0.687, 0.878, 0.920)
   )
