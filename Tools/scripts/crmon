@@ -467,6 +467,8 @@ while 1:
     if options.tee:
         del tee
 
+    pass_count += 1
+
     try:
         time.sleep(options.wait_time)
     except KeyboardInterrupt:
