@@ -42,9 +42,6 @@ for name, cut in nm1s:
         ana.min_nvertex = nv
         ana_name = 'ana%iVNo' % nv + name
 
-        ids = process.mfvEventIds.clone()
-        ids_name = 'ids%iVNo' % nv + name
-
         evt_hst = process.mfvEventHistos.clone()
         evt_hst_name = 'evtHst%iVNo' % nv + name
 
@@ -53,10 +50,12 @@ for name, cut in nm1s:
 
         setattr(process, vtx_name, vtx)
         setattr(process, ana_name, ana)
-        setattr(process, ids_name, ids)
         setattr(process, evt_hst_name, evt_hst)
         setattr(process, vtx_hst_name, vtx_hst)
-        setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * ids * evt_hst * vtx_hst))
+        setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
+
+import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
+SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
