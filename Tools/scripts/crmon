@@ -179,11 +179,15 @@ if options.run_in_debugger:
     print 'running in debugger'
     pdb.set_trace()
 
+pass_count = 0
+pass_string = ''
+
 while 1:
     if options.tee:
         tee = Tee(options.tee)
 
-    print '\n*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\nmaking a pass:\n'
+    pass_string = str(int(time.time()))
+    print '\n*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\nmaking a pass (#%i string %s):\n' % (pass_count, pass_string)
     if options.fake_results:
         # Fake statuses for debugging the table printing below.
         print 'fake_results dict:'
@@ -454,7 +458,7 @@ while 1:
     now = datetime.datetime.now()
     then = now + datetime.timedelta(seconds=options.wait_time)
     print
-    print_header('Going to sleep for %i seconds at' % options.wait_time)
+    print_header('That was pass #%i string %s\nGoing to sleep for %i seconds at' % (pass_count, pass_string, options.wait_time))
     print '  ', now
     print 'Will wake up at'
     print '  ', then
