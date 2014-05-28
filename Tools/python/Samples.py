@@ -416,10 +416,15 @@ myttbar_tune_samples = [
     MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, 225.2 * 0.457),
     ]
-
-for s in myttbar_tune_samples:
+    
+myttbar_tune_samples2 = [
+    MCSample('myttbartune10',       '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',        100000, 4, 0.15, 225.2 * 0.457),
+    ]
+for s in myttbar_tune_samples+myttbar_tune_samples2:
     s.is_pythia8 = True
     s.dbs_url_num = 3
+    if sample in myttbar_tune_samples:
+        s.scheduler = 'condor'
 
 ########################################################################
 
@@ -431,9 +436,16 @@ myttbar_ali_samples = [
     MCSample('myttbarzexpansion',    '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
     ]
 
-for s in myttbar_ali_samples:
+myttbar_ali_samples2 = [
+    MCSample('myttbartelescope',    '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
+    ]
+    
+for s in myttbar_ali_samples+myttbar_ali_samples2:
     s.is_pythia8 = True
     s.dbs_url_num = 3
+    if sample in myttbar_ali_samples:
+        s.scheduler = 'condor'
+
 
 ########################################################################
 
@@ -448,8 +460,13 @@ mysignal_tune_samples_ex = [
     (1000,  400, MCSample('mysignaltune13',      '', '/mfv_neutralino_tau1000um_M0400_tune_13/jchavesb-mfv_neutralino_tau1000um_M0400_tune_13-8a6cd8ad72ac2ecdec2acf901a5ae85a/USER',      100000, 2, *mfv_xsec[ 400]),),
     ]
 
+mysignal_tune_samples_ex_2 = [
+    (1000,  400, MCSample('mysignaltune10',      '', '/mfv_neutralino_tau1000um_M0400_tune_10/jchavesb-mfv_neutralino_tau1000um_M0400_tune_10-55f49472d01964c4ac6513539e4c2ae0/USER',      100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune11',      '', '/mfv_neutralino_tau1000um_M0400_tune_11/jchavesb-mfv_neutralino_tau1000um_M0400_tune_11-a748cba579d381b275857b446cd677ea/USER',      100000, 2, *mfv_xsec[ 400]),),
+    ]
+    
 mysignal_tune_samples = []
-for tau, mass, sample in mysignal_tune_samples_ex:
+for tau, mass, sample in mysignal_tune_samples_ex+mysignal_tune_samples_ex_2:
     mysignal_tune_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
@@ -458,7 +475,8 @@ for tau, mass, sample in mysignal_tune_samples_ex:
     sample.is_pythia8 = True
     sample.dbs_url_num = 3
     sample.re_pat = True
-    sample.scheduler = 'condor'
+    if sample in mysignal_tune_samples_ex:
+        sample.scheduler = 'condor'
     sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
     sample.cross_section = 0.001
 
