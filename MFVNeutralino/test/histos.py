@@ -70,8 +70,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     ex = ''
     exn = ''
-    cs = CRABSubmitter('MFVHistosV17' + ex + exn,
-                       pset_modifier = modify,
+    cs = CRABSubmitter('HistosV17' + ex + exn,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        manual_datasets = SampleFiles.SampleFiles['MFVNtupleV17' + ex],
