@@ -40,6 +40,3 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                max_fractrackssharedwpv01 = cms.double(1e9),
                                max_fractrackssharedwpvs01 = cms.double(1e9),
                                )
-
-mfvAnalysisCutsTrigOnly = mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-mfvAnalysisCutsOneVtx = mfvAnalysisCuts.clone(min_nvertex = 1)
