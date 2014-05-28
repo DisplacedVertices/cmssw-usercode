@@ -1,20 +1,40 @@
 #!/usr/bin/env python
 
-import os, sys
+import sys
+from JMTucker.Tools.general import bool_from_argv
+from JMTucker.Tools.DBS import das_query
 
-cmd = 'dbs search --query="%s"'
+ana01 = bool_from_argv('ana01')
+ana02 = bool_from_argv('ana02')
+ana03 = bool_from_argv('ana03')
 
-if 'ex' in sys.argv:
-    raise RuntimeError('you troglodyte')
+dq = das_query(ana01, ana02, ana03)
 
-if 'ana01' in sys.argv:
-    sys.argv.remove('ana01')
-    cmd += ' --url https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_01_writer/servlet/DBSServlet'
-elif 'ana02' in sys.argv:
-    sys.argv.remove('ana02')
-    cmd += ' --url https://cmsdbsprod.cern.ch:8443/cms_dbs_ph_analysis_02_writer/servlet/DBSServlet'
+def form_query(cmd, query_fmt, nargs):
+    query = None
+    i = sys.argv.index(cmd)
+    ok = i >= 0 and i + nargs < len(sys.argv)
+    if ok:
+        query = query_fmt % tuple(sys.argv[i+1:i+1+nargs])
+    return query
 
-if 'find' not in sys.argv:
+query_infos = [
+    (('file', 'file dataset=%s', 1), lambda s: s.endswith('.root')),
+    ]
+
+found = False
+
+for query_info, line_filter in query_infos:
+    query = form_query(*query_info)
+    if query is not None:
+        print '\n'.join(dq(query, line_filter))
+        found = True
+        break
+
+if not found:
+    raise ValueError('did not understand command')
+
+'''
     if 'size' in sys.argv:
         sys.argv.remove('size')
         c = 'find sum(file.size) where dataset=%s' % sys.argv[1]
@@ -94,9 +114,4 @@ if 'find' not in sys.argv:
         del sys.argv[n:n+3]
         c = 'find file where dataset=%s and run=%i and lumi=%i' % (sys.argv[1], r, l)
         cmd = cmd % c
-else:
-    cmd = cmd % ' '.join(sys.argv[1:])
-
-print cmd
-
-os.system(cmd)
+'''
