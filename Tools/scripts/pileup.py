@@ -27,10 +27,12 @@ parser.add_argument('--mc-path', default='pileup',
                     help='The name of the input MC histogram in the file given by --mc-fn (default %(default)s).')
 parser.add_argument('--tol', type=float, default=1e-9,
                     help='The tolerance for the data npu value when the MC npu value is == 0 (default %(default)g).')
+parser.add_argument('--plots', action='store_true',
+                    help='Whether to make an overlay plot of the input histograms and the derived weights.')
 
 options = parser.parse_args()
 
-if options.ana_json is None:
+if options.ana_json is None and options.run_pileupcalc:
     raise ValueError('need an ana JSON input')
 
 ################################################################################
@@ -50,10 +52,20 @@ data_h = data_f.Get(options.data_path)
 mc_h   = mc_f.Get(options.mc_path)
 
 def norm(h):
+    h = h.Clone(h.GetName() + '_norm')
     h.Scale(1/h.Integral(1, h.GetNbinsX()+1))
+    return h
 
-norm(data_h)
-norm(mc_h)
+data_h.SetMarkerStyle(20)
+data_h.SetMarkerSize(1)
+mc_h.SetLineColor(ROOT.kRed)
+mc_h.SetLineWidth(2)
+
+data_h_orig = data_h
+mc_h_orig = mc_h
+
+data_h = norm(data_h)
+mc_h = norm(mc_h)
 
 ndata = data_h.GetNbinsX()
 nmc = mc_h.GetNbinsX()
@@ -88,3 +100,28 @@ print 'const int max_npu = %i;' % len(weights)
 print 'const double pileup_weights[max_npu] = {'
 print ', '.join(repr(w) for w in weights)
 print '};'
+
+if options.plots:
+    from JMTucker.Tools.ROOTTools import *
+    set_style()
+    ps = plot_saver('plots/pileup', size=(600,600))
+
+    draw_in_order([(data_h_orig, 'e'), (mc_h_orig, 'e')], sames=True)
+    ps.c.Update()
+    differentiate_stat_box(mc_h_orig)
+    ps.save('dists')
+
+    draw_in_order([(data_h, 'e'), (mc_h, 'e')], sames=True)
+    ps.c.Update()
+    differentiate_stat_box(mc_h)
+    ps.save('dists_normalized')
+
+    h_w = ROOT.TH1F('h_w', ';;weight', ndata, data_h.GetXaxis().GetXmin(), data_h.GetXaxis().GetXmax())
+    for i,w in enumerate(weights):
+        h_w.SetBinContent(i+1, w)
+
+    h_w.Draw()
+    ps.save('weights')
+
+    h_w.DrawNormalized()
+    ps.save('weights_normalized')
