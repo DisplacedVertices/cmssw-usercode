@@ -5,10 +5,10 @@ from JMTucker.Tools import SampleFiles
 SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.Histos_cff')
 
-process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvHistos)
+import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
+SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 nm1s = [
     ('Ntracks', 'min_ntracks = 0'),
@@ -54,8 +54,6 @@ for name, cut in nm1s:
         setattr(process, vtx_hst_name, vtx_hst)
         setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
-import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
-SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
