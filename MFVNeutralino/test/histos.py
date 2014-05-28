@@ -2,9 +2,6 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-wmore = False
-run_pileup_weights = False
-
 SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
@@ -30,23 +27,6 @@ nm1s = [
     ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0'),
     ('ButNtracks', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0, min_ntracksptgt3 = 0'),
     ]
-
-if wmore:
-    geometry_etc(process, 'START53_V27::All')
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/ttbarhadronic.root']
-    process.mfvSelectedVerticesTight.max_bs2derr = 1e9
-    from JMTucker.MFVNeutralino.Vertexer_cff import mfvSelectedVerticesTmp
-    process.mfvSelectedVerticesTmp = mfvSelectedVerticesTmp.clone(vertex_aux_src = 'mfvVerticesAux')
-    process.load('JMTucker.MFVNeutralino.JetVertexAssociator_cfi')
-    process.p.insert(0, process.mfvSelectedVerticesTmp * process.mfvVerticesToJets)
-    process.mfvVertexHistos.vertex_src = 'mfvVertices'
-    process.mfvVertexHistos.vertex_to_jets_src = cms.InputTag('mfvVerticesToJets','ByNtracks')
-    process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-    process.goodOfflinePrimaryVertices.filter = cms.bool(True)
-    process.p.insert(0, process.goodOfflinePrimaryVertices)
-    process.mfvEventHistos.primary_vertex_src = 'goodOfflinePrimaryVertices'
-    process.mfvEventHistos.jets_src = 'selectedPatJetsPF'
-    nm1s = []
 
 for name, cut in nm1s:
     evt_cut = ''
@@ -74,25 +54,6 @@ for name, cut in nm1s:
         setattr(process, vtx_hst_name, vtx_hst)
         setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
-if 'ttbarhadronic' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/ttbarhadronic.root']
-    process.TFileService.fileName = 'histos_ttbarhadronic.root'
-if 'ttbarsemilep' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/ttbarsemilep.root']
-    process.TFileService.fileName = 'histos_ttbarsemilep.root'
-if 'qcdht0500' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/qcdht0500.root']
-    process.TFileService.fileName = 'histos_qcdht0500.root'
-if 'qcdht1000' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/qcdht1000.root']
-    process.TFileService.fileName = 'histos_qcdht1000.root'
-
-if run_pileup_weights:
-    process.mfvWeight.weight_pileup = False
-    for p in process.paths.keys():
-        delattr(process, p)
-    process.p = cms.Path(process.mfvWeight * process.mfvEventHistosNoCuts)
-
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
@@ -106,22 +67,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
 
-    def modify(sample):
-        to_add = []
-        to_replace = []
-
-        if not sample.is_mc:
-            to_add.append('process.mfvWeight.weight_pileup = False')
-
-        return to_add, to_replace
-
     ex = ''
     exn = ''
-
-    if run_pileup_weights:
-        exn += '_PileupWeights'
-        samples = [Samples.mfv_neutralino_tau1000um_M0400, Samples.qcdht1000] + Samples.data_samples
-
     cs = CRABSubmitter('MFVHistosV17' + ex + exn,
                        pset_modifier = modify,
                        job_control_from_sample = True,
