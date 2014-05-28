@@ -73,18 +73,8 @@ for name, cut in nm1s:
         setattr(process, vtx_hst_name, vtx_hst)
         setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
-if 'ttbarhadronic' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/ttbarhadronic.root']
-    process.TFileService.fileName = 'histos_ttbarhadronic.root'
-if 'ttbarsemilep' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/ttbarsemilep.root']
-    process.TFileService.fileName = 'histos_ttbarsemilep.root'
-if 'qcdht0500' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/qcdht0500.root']
-    process.TFileService.fileName = 'histos_qcdht0500.root'
-if 'qcdht1000' in sys.argv:
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/qcdht1000.root']
-    process.TFileService.fileName = 'histos_qcdht1000.root'
+import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
+SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
