@@ -70,7 +70,8 @@ fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
 if not fns:
     dir = [x for x in sys.argv[1:] if os.path.isdir(x)][0]
     fns = [os.path.join(dir, fn) for fn in 'qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root ttbardilep.root ttbarhadronic.root ttbarsemilep.root'.split()]
-fns.sort()
+if 'nosort' not in sys.argv:
+    fns.sort()
 for fn in fns:
     effs(fn)
 print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (int_lumi, sum, var**0.5)
