@@ -286,7 +286,7 @@ while 1:
         resub_crrejobs = []
         resub_crjobprobs = ['cat << EOF | crjobprobs']
         for d,jobs in to_resub.iteritems():
-            jobs = crabify_list(jobs)
+            jobs = crabify_list(jobs, False)
             resub_crlogs.append('crlog %s %s ; \\' % (d, jobs))
             resub_crrejobs.append('crrejob %s %s doit ; \\' % (d, jobs))
             resub_crjobprobs.append('%s %s' % (d, jobs))
