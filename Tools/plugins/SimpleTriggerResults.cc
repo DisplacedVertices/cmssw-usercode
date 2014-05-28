@@ -17,6 +17,8 @@ private:
   std::string branch_name(const std::string& path_name) const;
 
   const edm::InputTag trigger_results_src;
+  const edm::InputTag weight_src;
+  const bool use_weight;
   const bool deversion;
 
   TTree* tree;
@@ -28,17 +30,22 @@ private:
   unsigned run;
   unsigned lumi;
   unsigned evt;
+  double weight;
 };
 
 SimpleTriggerResults::SimpleTriggerResults(const edm::ParameterSet& cfg) 
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
+    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
+    use_weight(weight_src.label() != ""),
     deversion(cfg.getParameter<bool>("deversion"))
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
-  tree->Branch("run",   &run,   "run/i");
-  tree->Branch("lumi",  &lumi,  "lumi/i");
-  tree->Branch("event", &evt,   "event/i");
+  tree->Branch("run",    &run,    "run/i");
+  tree->Branch("lumi",   &lumi,   "lumi/i");
+  tree->Branch("event",  &evt,    "event/i");
+  if (use_weight)
+    tree->Branch("weight", &weight, "weight/D");
 }
 
 std::string SimpleTriggerResults::branch_name(const std::string& path_name) const {
@@ -55,6 +62,12 @@ void SimpleTriggerResults::analyze(const edm::Event& event, const edm::EventSetu
   run  = event.id().run();
   lumi = event.luminosityBlock();
   evt  = event.id().event();
+
+  if (use_weight) {
+    edm::Handle<double> weight_h;
+    event.getByLabel(weight_src, weight_h);
+    weight = *weight_h;
+  }
 
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByLabel(trigger_results_src, trigger_results);
