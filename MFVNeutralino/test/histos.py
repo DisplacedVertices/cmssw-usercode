@@ -2,8 +2,6 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-wmore = False
-
 SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
@@ -29,23 +27,6 @@ nm1s = [
     ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0'),
     ('ButNtracks', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0, min_ntracksptgt3 = 0'),
     ]
-
-if wmore:
-    geometry_etc(process, 'START53_V27::All')
-    process.source.fileNames = ['file:/eos/uscms/store/user/jchu/background_V17/ttbarhadronic.root']
-    process.mfvSelectedVerticesTight.max_bs2derr = 1e9
-    from JMTucker.MFVNeutralino.Vertexer_cff import mfvSelectedVerticesTmp
-    process.mfvSelectedVerticesTmp = mfvSelectedVerticesTmp.clone(vertex_aux_src = 'mfvVerticesAux')
-    process.load('JMTucker.MFVNeutralino.JetVertexAssociator_cfi')
-    process.p.insert(0, process.mfvSelectedVerticesTmp * process.mfvVerticesToJets)
-    process.mfvVertexHistos.vertex_src = 'mfvVertices'
-    process.mfvVertexHistos.vertex_to_jets_src = cms.InputTag('mfvVerticesToJets','ByNtracks')
-    process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-    process.goodOfflinePrimaryVertices.filter = cms.bool(True)
-    process.p.insert(0, process.goodOfflinePrimaryVertices)
-    process.mfvEventHistos.primary_vertex_src = 'goodOfflinePrimaryVertices'
-    process.mfvEventHistos.jets_src = 'selectedPatJetsPF'
-    nm1s = []
 
 for name, cut in nm1s:
     evt_cut = ''
