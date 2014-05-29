@@ -2,6 +2,7 @@
 
 import os, re, sys
 from copy import copy
+from fnmatch import fnmatch
 import JMTucker.Tools.DBS as DBS
 from JMTucker.Tools.ROOTTools import ROOT
 from JMTucker.Tools.general import big_warn
@@ -464,6 +465,18 @@ for sample in all_samples:
     exec '%s = sample' % sample.name
     samples_by_name[sample.name] = sample
 
+def from_argv(default=None):
+    samples = []
+    all_samples_names = samples_by_name.keys()
+    for arg in sys.argv:
+        if any(c in arg for c in '[]*?!'):
+            for sample in Samples.all_samples:
+                if fnmatch(sample.name, arg):
+                    samples.append(sample)
+        elif arg in all_samples_names:
+            samples.append(sample)
+    return samples if samples else default
+
 ########################################################################
 
 # Bookkeeping of numbers of events in missing jobs/etc. goes here.
@@ -585,6 +598,7 @@ __all__ = ['data_samples', 'auxiliary_data_samples', 'all_data_samples']
 __all__ += ['ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'leptonic_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples', 'mfv_signal_samples_nouse', 'mfv_signal_samples_systematics', 'myttbar_samples', 'all_mc_samples']
 __all__ += ['all_samples']
 __all__ += [s.name for s in all_samples]
+__all__ += ['check_nevents', 'from_argv']
 
 if __name__ == '__main__':
     if 'dump' in sys.argv:

@@ -229,21 +229,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.timed = True
 
 
-    samples = []
-
-    all_samples_names = [s.name for s in Samples.all_samples]
-    from fnmatch import fnmatch
-    for arg in sys.argv:
-        if any(c in arg for c in '[]*?!'):
-            for sample in Samples.all_samples:
-                if fnmatch(sample.name, arg):
-                    samples.append(sample)
-        elif arg in all_samples_names:
-            samples.append(sample)
-
-    if not samples:
-        samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples
-
+    samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
+                                 Samples.mfv_neutralino_tau1000um_M0400,
+                                 Samples.mfv_neutralino_tau0300um_M0400,
+                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
 
     for sample in samples:
         if sample.is_mc:
