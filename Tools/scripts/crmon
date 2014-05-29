@@ -162,13 +162,16 @@ else:
     for d in dirs:
         print d
 
-if options.renew_proxies:
-    print 'checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
-    crab_renew_proxy_if_needed()
-    for d in dirs:
-        if crab_is_using_server(d):
-            print_run_cmd('crab -c %s -renewCredential' % d)
-    
+def check_proxies():
+    if options.renew_proxies:
+        print 'checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
+        crab_renew_proxy_if_needed()
+        for d in dirs:
+            if crab_is_using_server(d):
+                print_run_cmd('crab -c %s -renewCredential' % d)
+
+check_proxies()
+
 if options.delay:
     print 'delay requested: sleeping %i seconds before doing anything' % options.wait_time
     time.sleep(options.wait_time)
@@ -181,8 +184,14 @@ if options.run_in_debugger:
 
 pass_count = 0
 pass_string = ''
+last_proxy_check = time.time()
 
 while 1:
+    the_time = time.time()
+    if (the_time - last_proxy_check)/3600. > 20:
+        check_proxies()
+        last_proxy_check = the_time
+
     if options.tee:
         tee = Tee(options.tee)
 
