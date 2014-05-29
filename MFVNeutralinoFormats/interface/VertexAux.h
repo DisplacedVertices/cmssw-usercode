@@ -212,7 +212,7 @@ struct MFVVertexAux {
 
   bool use_track(size_t i) const {
     static const float pt_err_thr = 0.5;
-    return track_pt_err[i] < pt_err_thr;
+    return track_pt_err[i] / track_pt(i) <= pt_err_thr;
   }
 
   int nbadtracks() const {
@@ -230,7 +230,7 @@ struct MFVVertexAux {
   int ntracksptgt(float thr) const {
     int c = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if (track_pt(i) > thr)
+      if (use_track(i) && track_pt(i) > thr)
         ++c;
     return c;
   }
@@ -238,7 +238,7 @@ struct MFVVertexAux {
   int trackminnhits() const {
     int m = 255, m2;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if ((m2 = track_nhits(i)) < m)
+      if (use_track(i) && (m2 = track_nhits(i)) < m)
         m = m2;
     return m;
   }
@@ -246,7 +246,7 @@ struct MFVVertexAux {
   int trackmaxnhits() const {
     int m = 0, m2;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if ((m2 = track_nhits(i)) > m)
+      if (use_track(i) && (m2 = track_nhits(i)) > m)
         m = m2;
     return m;
   }
@@ -254,21 +254,23 @@ struct MFVVertexAux {
   float sumpt2() const {
     float sum = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      sum += pow(track_pt(i), 2);
+      if (use_track(i))
+        sum += pow(track_pt(i), 2);
     return sum;
   }
 
   int sumnhitsbehind() const {
     int c = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      c += track_nhitsbehind(i);
+      if (use_track(i))
+        c += track_nhitsbehind(i);
     return c;
   }
 
   int maxnhitsbehind() const {
     int m = 0, m2;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if ((m2 = track_nhitsbehind(i)) > m)
+      if (use_track(i) && (m2 = track_nhitsbehind(i)) > m)
         m = m2;
     return m;
   }
@@ -276,7 +278,7 @@ struct MFVVertexAux {
   int ntrackssharedwpv() const {
     int c = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if (track_inpv[i] == 0)
+      if (use_track(i) && track_inpv[i] == 0)
         ++c;
     return c;
   }
@@ -284,7 +286,7 @@ struct MFVVertexAux {
   int ntrackssharedwpvs() const {
     int c = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if (track_inpv[i] >= 0)
+      if (use_track(i) && track_inpv[i] >= 0)
         ++c;
     return c;
   }
@@ -292,7 +294,8 @@ struct MFVVertexAux {
   std::map<int,int> pvswtracksshared() const {
     std::map<int,int> m;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      ++m[track_inpv[i]];
+      if (use_track(i))
+        ++m[track_inpv[i]];
     return m;
   }
 
@@ -315,44 +318,78 @@ struct MFVVertexAux {
     return mi;
   }
 
-  static float _min(const std::vector<float>& v) { return v.size() ? *std::min_element(v.begin(), v.end()) :  1e99; }
-  static float _max(const std::vector<float>& v) { return v.size() ? *std::max_element(v.begin(), v.end()) : -1e99; }
-  static float _avg(const std::vector<float>& v) { return v.size() ? std::accumulate(v.begin(), v.end(), 0.f) / v.size() : 0.f; }
-  static float _rms(std::vector<float> v) {
-    if (v.size() == 0) return 0.f;
-    float avg = _avg(v);
+  float _min(const std::vector<float>& v, const bool filter=true) const {
+    float m = 1e99;
     for (size_t i = 0, ie = v.size(); i < ie; ++i)
-      v[i] = pow(v[i] - avg, 2);
-    return sqrt(std::accumulate(v.begin(), v.end(), 0.f)/v.size());
+      if (!filter || use_track(i))
+        if (v[i] < m)
+          m = v[i];
+    return m;
+  }
+
+  float _max(const std::vector<float>& v, const bool filter=true) const {
+    float m = -1e99;
+    for (size_t i = 0, ie = v.size(); i < ie; ++i)
+      if (!filter || use_track(i))
+        if (v[i] > m)
+          m = v[i];
+    return m;
+  }
+
+  float _avg(const std::vector<float>& v, const bool filter=true) const {
+    float a = 0.f;
+    int c = 0;
+    for (size_t i = 0, ie = v.size(); i < ie; ++i)
+      if (!filter || use_track(i)) {
+        a += v[i];
+        ++c;
+      }
+    return a / c;
+  }
+
+  float _rms(const std::vector<float>& v, const bool filter=true) const {
+    if (v.size() == 0) return 0.f;
+    float avg = _avg(v, filter);
+    std::vector<float> v2;
+    for (size_t i = 0, ie = v.size(); i < ie; ++i)
+      if (!filter || use_track(i))
+        v2.push_back(pow(v[i] - avg, 2));
+    return sqrt(std::accumulate(v2.begin(), v2.end(), 0.f)/v2.size());
   }
 
   struct stats {
     float min, max, avg, rms;
-    stats(const std::vector<float>& v) : min(_min(v)), max(_max(v)), avg(_avg(v)), rms(_rms(v)) {}
+    stats(const MFVVertexAux* a, const std::vector<float>& v, const bool filter=false)
+      : min(a->_min(v, filter)),
+        max(a->_max(v, filter)),
+        avg(a->_avg(v, filter)),
+        rms(a->_rms(v, filter))
+    {}
   };
 
 
   std::vector<float> track_pts() const {
     std::vector<float> pts;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      pts.push_back(track_pt(i));
+      if (use_track(i))
+        pts.push_back(track_pt(i));
     return pts;
   }
 
-  float mintrackpt() const { return _min(track_pts()); }
-  float maxtrackpt() const { return _max(track_pts()); }
+  float mintrackpt() const { return _min(track_pts(), false); } // already filtered
+  float maxtrackpt() const { return _max(track_pts(), false); }
 
   float maxmntrackpt(int n) const {
-    int nt = ntracks();
+    std::vector<float> pt = track_pts();
+    int nt = int(pt.size());
     if (n > nt - 1)
       return -1;
-    std::vector<float> pt = track_pts();
     std::sort(pt.begin(), pt.end());
     return pt[nt-1-n];
   }
 
-  float trackptavg() const { return _avg(track_pts()); }
-  float trackptrms() const { return _rms(track_pts()); }
+  float trackptavg() const { return _avg(track_pts(), false); }
+  float trackptrms() const { return _rms(track_pts(), false); }
 
   float trackdxymin() const { return _min(track_dxy); }
   float trackdxymax() const { return _max(track_dxy); }
@@ -384,46 +421,52 @@ struct MFVVertexAux {
     size_t n = ntracks();
     if (n >= 2)
       for (size_t i = 0, ie = n-1; i < ie; ++i)
-        for (size_t j = i+1, je = n; j < je; ++j)
-          v.push_back(fabs(track_eta[i] - track_eta[j]));
+        if (use_track(i))
+          for (size_t j = i+1, je = n; j < je; ++j)
+            if (use_track(j))
+              v.push_back(fabs(track_eta[i] - track_eta[j]));
     return v;
   }
 
-  float trackpairdetamin() const { return stats(trackpairdetas()).min; }
-  float trackpairdetamax() const { return stats(trackpairdetas()).max; }
-  float trackpairdetaavg() const { return stats(trackpairdetas()).avg; }
-  float trackpairdetarms() const { return stats(trackpairdetas()).rms; }
+  float trackpairdetamin() const { return stats(this, trackpairdetas()).min; }
+  float trackpairdetamax() const { return stats(this, trackpairdetas()).max; }
+  float trackpairdetaavg() const { return stats(this, trackpairdetas()).avg; }
+  float trackpairdetarms() const { return stats(this, trackpairdetas()).rms; }
 
   std::vector<float> trackpairdphis() const {
     std::vector<float> v;
     size_t n = ntracks();
     if (n >= 2)
       for (size_t i = 0, ie = n-1; i < ie; ++i)
-        for (size_t j = i+1, je = n; j < je; ++j)
-          v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
+        if (use_track(i))
+          for (size_t j = i+1, je = n; j < je; ++j)
+            if (use_track(j))
+              v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
     return v;
   }
 
-  float trackpairdphimin() const { return stats(trackpairdphis()).min; }
-  float trackpairdphimax() const { return stats(trackpairdphis()).max; }
-  float trackpairdphiavg() const { return stats(trackpairdphis()).avg; }
-  float trackpairdphirms() const { return stats(trackpairdphis()).rms; }
+  float trackpairdphimin() const { return stats(this, trackpairdphis()).min; }
+  float trackpairdphimax() const { return stats(this, trackpairdphis()).max; }
+  float trackpairdphiavg() const { return stats(this, trackpairdphis()).avg; }
+  float trackpairdphirms() const { return stats(this, trackpairdphis()).rms; }
 
   std::vector<float> trackpairdrs() const {
     std::vector<float> v;
     size_t n = ntracks();
     if (n >= 2)
       for (size_t i = 0, ie = n-1; i < ie; ++i)
-        for (size_t j = i+1, je = n; j < je; ++j)
-          v.push_back(reco::deltaR(track_eta[i], track_phi[i],
-                                   track_eta[j], track_phi[j]));
+        if (use_track(i))
+          for (size_t j = i+1, je = n; j < je; ++j)
+            if (use_track(j))
+              v.push_back(reco::deltaR(track_eta[i], track_phi[i],
+                                       track_eta[j], track_phi[j]));
     return v;
   }
 
-  float trackpairdrmin() const { return stats(trackpairdrs()).min; }
-  float trackpairdrmax() const { return stats(trackpairdrs()).max; }
-  float trackpairdravg() const { return stats(trackpairdrs()).avg; }
-  float trackpairdrrms() const { return stats(trackpairdrs()).rms; }
+  float trackpairdrmin() const { return stats(this, trackpairdrs()).min; }
+  float trackpairdrmax() const { return stats(this, trackpairdrs()).max; }
+  float trackpairdravg() const { return stats(this, trackpairdrs()).avg; }
+  float trackpairdrrms() const { return stats(this, trackpairdrs()).rms; }
 
   float drmin() const { return trackpairdrmin(); }
   float drmax() const { return trackpairdrmax(); }
@@ -435,48 +478,57 @@ struct MFVVertexAux {
     size_t n = ntracks();
     if (n >= 2)
       for (size_t i = 0, ie = n-1; i < ie; ++i)
-        for (size_t j = i+1, je = n; j < je; ++j)
-          v.push_back((track_p4(i, mass) + track_p4(j, mass)).M());
+        if (use_track(i))
+          for (size_t j = i+1, je = n; j < je; ++j)
+            if (use_track(j))
+              v.push_back((track_p4(i, mass) + track_p4(j, mass)).M());
     return v;
   }
 
-  float trackpairmassmin() const { return stats(trackpairmasses()).min; }
-  float trackpairmassmax() const { return stats(trackpairmasses()).max; }
-  float trackpairmassavg() const { return stats(trackpairmasses()).avg; }
-  float trackpairmassrms() const { return stats(trackpairmasses()).rms; }
+  float trackpairmassmin() const { return stats(this, trackpairmasses()).min; }
+  float trackpairmassmax() const { return stats(this, trackpairmasses()).max; }
+  float trackpairmassavg() const { return stats(this, trackpairmasses()).avg; }
+  float trackpairmassrms() const { return stats(this, trackpairmasses()).rms; }
 
   std::vector<float> tracktripmasses(float mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
     if (n >= 3)
       for (size_t i = 0, ie = n-2; i < ie; ++i)
-        for (size_t j = i+1, je = n-1; j < je; ++j)
-          for (size_t k = j+1, ke = n; k < ke; ++k)
-            v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass)).M());
+        if (use_track(i))
+          for (size_t j = i+1, je = n-1; j < je; ++j)
+            if (use_track(j))
+              for (size_t k = j+1, ke = n; k < ke; ++k)
+                if (use_track(k))
+                  v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass)).M());
     return v;
   }
 
-  float tracktripmassmin() const { return stats(tracktripmasses()).min; }
-  float tracktripmassmax() const { return stats(tracktripmasses()).max; }
-  float tracktripmassavg() const { return stats(tracktripmasses()).avg; }
-  float tracktripmassrms() const { return stats(tracktripmasses()).rms; }
+  float tracktripmassmin() const { return stats(this, tracktripmasses()).min; }
+  float tracktripmassmax() const { return stats(this, tracktripmasses()).max; }
+  float tracktripmassavg() const { return stats(this, tracktripmasses()).avg; }
+  float tracktripmassrms() const { return stats(this, tracktripmasses()).rms; }
 
   std::vector<float> trackquadmasses(float mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
     if (n >= 4)
       for (size_t i = 0, ie = n-3; i < ie; ++i)
-        for (size_t j = i+1, je = n-2; j < je; ++j)
-          for (size_t k = j+1, ke = n-1; k < ke; ++k)
-            for (size_t l = k+1, le = n; l < le; ++l)
-              v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass) + track_p4(l, mass)).M());
+        if (use_track(i))
+          for (size_t j = i+1, je = n-2; j < je; ++j)
+            if (use_track(j))
+              for (size_t k = j+1, ke = n-1; k < ke; ++k)
+                if (use_track(k))
+                  for (size_t l = k+1, le = n; l < le; ++l)
+                    if (use_track(l))
+                      v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass) + track_p4(l, mass)).M());
     return v;
   }
 
-  float trackquadmassmin() const { return stats(trackquadmasses()).min; }
-  float trackquadmassmax() const { return stats(trackquadmasses()).max; }
-  float trackquadmassavg() const { return stats(trackquadmasses()).avg; }
-  float trackquadmassrms() const { return stats(trackquadmasses()).rms; }
+  float trackquadmassmin() const { return stats(this, trackquadmasses()).min; }
+  float trackquadmassmax() const { return stats(this, trackquadmasses()).max; }
+  float trackquadmassavg() const { return stats(this, trackquadmasses()).avg; }
+  float trackquadmassrms() const { return stats(this, trackquadmasses()).rms; }
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;
