@@ -13,7 +13,7 @@ process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.mfv_signal_samples #+ Samples.leptonic_background_samples + Samples.data_samples[:1]
+    samples = Samples.from_argv(Samples.ttbar_samples + Samples.qcd_samples + Samples.mfv_signal_samples)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('EventIdsV18',
