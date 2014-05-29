@@ -465,7 +465,7 @@ for sample in all_samples:
     exec '%s = sample' % sample.name
     samples_by_name[sample.name] = sample
 
-def from_argv(default=None):
+def from_argv(default=None, sort_and_set=True):
     samples = []
     all_samples_names = samples_by_name.keys()
     for arg in sys.argv:
@@ -475,7 +475,12 @@ def from_argv(default=None):
                     samples.append(sample)
         elif arg in all_samples_names:
             samples.append(sample)
-    return samples if samples else default
+    if samples:
+        if sort_and_set:
+            samples = sorted(set(samples))
+        return samples
+    else:
+        return default
 
 ########################################################################
 
