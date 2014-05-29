@@ -820,6 +820,24 @@ def crab_ownpublish(batch_name, working_dirs, sample_name=lambda wd: wd.replace(
     print '\n --- cut here ---\n'
     pprint(d)
 
+def crab_numevents_read(working_dir):
+    n = 0
+
+    for fjr_fn in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml')):
+        try:
+            fjr = crab_fjr_xml(fjr_fn)
+        except SyntaxError:
+            print 'problem with parsing xml in', fjr_fn, ', skipping'
+            continue
+
+        if fjr.getroot().get('Status') != 'Success':
+            continue
+
+        for input_file in fjr.getroot().findall('InputFile'):
+            n += int(input_file.find('EventsRead').text.strip())
+
+    return n
+
 def crab_get_and_save_grid_passphrase(path=None):
     if path is None:
         path = os.path.expanduser('~/.jmtctgpp')
@@ -1012,3 +1030,7 @@ if __name__ == '__main__':
                 print 'SkipEvents[%i]=%i' % (jc + i, skip + i*per)
                 print 'MaxEvents[%i]=%i' % (jc + i, per)
             jc += n
+
+    elif bool_from_argv('-numEventsRead'):
+        for dir in crab_dirs_from_argv():
+            print dir, crab_numevents_read(dir)
