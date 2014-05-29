@@ -372,13 +372,29 @@ mfv_signal_samples_ex = [
     ( 300, 1000, MCSample('mfv_neutralino_tau0300um_M1000', 'M_{tbs} = 1000 GeV, #tau = 300 #mum', '/mfv_neutralino_tau0300um_M3000/jchu-mfv_neutralino_tau0300um_M1000-0fcc6f04c7b2260cb6c49261d41edaca/USER',  99149, 2, *mfv_xsec[1000]),),
     (1000,  300, MCSample('mfv_neutralino_tau1000um_M0300', 'M_{tbs} = 300 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0300/jchu-mfv_neutralino_tau1000um_M0300-a6ab3419cb64660d6c68351b3cff9fb0/USER',  91800, 2, *mfv_xsec[ 300]),),
     (9900,  300, MCSample('mfv_neutralino_tau9900um_M0300', 'M_{tbs} = 300 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0300/jchu-mfv_neutralino_tau9900um_M0300-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 300]),),
+
+    (1000,  400, MCSample('mysignaltune3',       '', '/mfv_neutralino_tau1000um_M0400_tune_3/jchavesb-mfv_neutralino_tau1000um_M0400_tune_3-e17c423e411c7625ebf79112981b92b0/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune4',       '', '/mfv_neutralino_tau1000um_M0400_tune_4/jchavesb-mfv_neutralino_tau1000um_M0400_tune_4-832390b7c0947e4b08135391c0924f95/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune5',       '', '/mfv_neutralino_tau1000um_M0400_tune_5/jchavesb-mfv_neutralino_tau1000um_M0400_tune_5-998e97fcda3ca47d1d647f0835952d27/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune6',       '', '/mfv_neutralino_tau1000um_M0400_tune_6/jchavesb-mfv_neutralino_tau1000um_M0400_tune_6-0369ff42a15fed597e0a363b3f8edc1c/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune7',       '', '/mfv_neutralino_tau1000um_M0400_tune_7/jchavesb-mfv_neutralino_tau1000um_M0400_tune_7-6003addd1979663f588d0c5aa78e6346/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune8',       '', '/mfv_neutralino_tau1000um_M0400_tune_8/jchavesb-mfv_neutralino_tau1000um_M0400_tune_8-dd3c8ceba2a82a60a712f74b7ca5a607/USER',        100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune12',      '', '/mfv_neutralino_tau1000um_M0400_tune_12/jchavesb-mfv_neutralino_tau1000um_M0400_tune_12-60f88ed1269b264f1bd7c4bb048dc5d9/USER',      100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune13',      '', '/mfv_neutralino_tau1000um_M0400_tune_13/jchavesb-mfv_neutralino_tau1000um_M0400_tune_13-8a6cd8ad72ac2ecdec2acf901a5ae85a/USER',      100000, 2, *mfv_xsec[ 400]),),
+
+    (1000,  400, MCSample('mysignaltune10',      '', '/mfv_neutralino_tau1000um_M0400_tune_10/jchavesb-mfv_neutralino_tau1000um_M0400_tune_10-55f49472d01964c4ac6513539e4c2ae0/USER',      100000, 2, *mfv_xsec[ 400]),),
+    (1000,  400, MCSample('mysignaltune11',      '', '/mfv_neutralino_tau1000um_M0400_tune_11/jchavesb-mfv_neutralino_tau1000um_M0400_tune_11-a748cba579d381b275857b446cd677ea/USER',      100000, 2, *mfv_xsec[ 400]),),
     ]
 
 mfv_signal_samples_nouse = []
 mfv_signal_samples = []
+mfv_signal_samples_systematics = []
 for tau, mass, sample in mfv_signal_samples_ex:
+    is_syst = 'jchavesb' in sample.dataset
     if tau < 100:
         mfv_signal_samples_nouse.append(sample)
+    elif is_syst:
+        mfv_signal_samples_systematics.append(sample)
     else:
         mfv_signal_samples.append(sample)
     sample.tau = tau
@@ -386,10 +402,11 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.events_per = 1500
     sample.no_skimming_cuts = True
     sample.is_pythia8 = True
-    sample.dbs_url_num = 3 if '0300' in sample.name else 2
+    sample.dbs_url_num = 3 if ('0300' in sample.name or is_syst) else 2
     sample.re_pat = True
-    sample.scheduler = 'condor'
-    sample.ana_hash = '0a90ffb9bb56aadc18a0859a54bf4f31'
+    if not ('tune10' in sample.name or 'tune11' in sample.name):
+        sample.scheduler = 'condor' 
+    sample.ana_hash = '0a90ffb9bb56aadc18a0859a54bf4f31' if not is_syst else '0db49a3df21e20de5584b04b90b2376b'
     sample.cross_section = 0.001
 
 ########################################################################
@@ -399,15 +416,6 @@ myttbar_samples = [
     MCSample('myttbarpynopu',       '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',              99950, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarpydesignnopu', '', '/mfv_ttbar_designnopu/tucker-mfv_ttbar_designnopu-03e053ea4788fabdfdc6964bc26befc0/USER', 100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarpydesignnoputkex', '', '/mfv_ttbar_designnoputkex/tucker-mfv_ttbar_designnoputkex-03e053ea4788fabdfdc6964bc26befc0/USER', 750000, 4, 0.15, 225.2 * 0.457),
-    ]
-
-for s in myttbar_samples:
-    s.is_pythia8 = True
-    s.dbs_url_num = 3
-
-########################################################################
-
-myttbar_tune_samples = [
     MCSample('myttbartune3',       '', '/mfv_ttbar_tune_3/jchavesb-mfv_ttbar_tune_3-e3674fd6eec136ae079fabace84be5fa/USER',        100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbartune4',       '', '/mfv_ttbar_tune_4/jchavesb-mfv_ttbar_tune_4-2ab11a6f2e6e96d6779b5e2cdd1bc9d7/USER',        100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbartune5',       '', '/mfv_ttbar_tune_5/jchavesb-mfv_ttbar_tune_5-84bbc883c4d7ec08aa60419295f8ddab/USER',        100000, 4, 0.15, 225.2 * 0.457),
@@ -415,71 +423,21 @@ myttbar_tune_samples = [
     MCSample('myttbartune7',       '', '/mfv_ttbar_tune_7/jchavesb-mfv_ttbar_tune_7-aed1494d928e44cf1085663860ab1a07/USER',        100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbartune8',       '', '/mfv_ttbar_tune_8/jchavesb-mfv_ttbar_tune_8-39b59d827dfea83a5b26108b211413ab/USER',        100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, 225.2 * 0.457),
-    ]
-    
-myttbar_tune_samples2 = [
     MCSample('myttbartune10',       '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    ]
-for s in myttbar_tune_samples+myttbar_tune_samples2:
-    s.is_pythia8 = True
-    s.dbs_url_num = 3
-    if sample in myttbar_tune_samples:
-        s.scheduler = 'condor'
-
-########################################################################
-
-myttbar_ali_samples = [
+    MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarelliptical',    '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarsagitta',       '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarskew',          '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbartwist',         '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, 225.2 * 0.457),
     MCSample('myttbarzexpansion',    '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
-    ]
-
-myttbar_ali_samples2 = [
     MCSample('myttbartelescope',    '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
     ]
-    
-for s in myttbar_ali_samples+myttbar_ali_samples2:
+
+for s in myttbar_samples:
     s.is_pythia8 = True
     s.dbs_url_num = 3
-    if sample in myttbar_ali_samples:
+    if 'jchavesb' in s.dataset and not 'tune10' in s.name and not 'telescope' in s.name:
         s.scheduler = 'condor'
-
-
-########################################################################
-
-mysignal_tune_samples_ex = [
-    (1000,  400, MCSample('mysignaltune3',       '', '/mfv_neutralino_tau1000um_M0400_tune_3/jchavesb-mfv_neutralino_tau1000um_M0400_tune_3-e17c423e411c7625ebf79112981b92b0/USER',        100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune4',       '', '/mfv_neutralino_tau1000um_M0400_tune_4/jchavesb-mfv_neutralino_tau1000um_M0400_tune_4-832390b7c0947e4b08135391c0924f95/USER',        100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune5',       '', '/mfv_neutralino_tau1000um_M0400_tune_5/jchavesb-mfv_neutralino_tau1000um_M0400_tune_5-998e97fcda3ca47d1d647f0835952d27/USER',        100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune6',       '', '/mfv_neutralino_tau1000um_M0400_tune_6/jchavesb-mfv_neutralino_tau1000um_M0400_tune_6-0369ff42a15fed597e0a363b3f8edc1c/USER',        100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune7',       '', '/mfv_neutralino_tau1000um_M0400_tune_7/jchavesb-mfv_neutralino_tau1000um_M0400_tune_7-6003addd1979663f588d0c5aa78e6346/USER',        100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune8',       '', '/mfv_neutralino_tau1000um_M0400_tune_8/jchavesb-mfv_neutralino_tau1000um_M0400_tune_8-dd3c8ceba2a82a60a712f74b7ca5a607/USER',        100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune12',      '', '/mfv_neutralino_tau1000um_M0400_tune_12/jchavesb-mfv_neutralino_tau1000um_M0400_tune_12-60f88ed1269b264f1bd7c4bb048dc5d9/USER',      100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune13',      '', '/mfv_neutralino_tau1000um_M0400_tune_13/jchavesb-mfv_neutralino_tau1000um_M0400_tune_13-8a6cd8ad72ac2ecdec2acf901a5ae85a/USER',      100000, 2, *mfv_xsec[ 400]),),
-    ]
-
-mysignal_tune_samples_ex_2 = [
-    (1000,  400, MCSample('mysignaltune10',      '', '/mfv_neutralino_tau1000um_M0400_tune_10/jchavesb-mfv_neutralino_tau1000um_M0400_tune_10-55f49472d01964c4ac6513539e4c2ae0/USER',      100000, 2, *mfv_xsec[ 400]),),
-    (1000,  400, MCSample('mysignaltune11',      '', '/mfv_neutralino_tau1000um_M0400_tune_11/jchavesb-mfv_neutralino_tau1000um_M0400_tune_11-a748cba579d381b275857b446cd677ea/USER',      100000, 2, *mfv_xsec[ 400]),),
-    ]
-    
-mysignal_tune_samples = []
-for tau, mass, sample in mysignal_tune_samples_ex+mysignal_tune_samples_ex_2:
-    mysignal_tune_samples.append(sample)
-    sample.tau = tau
-    sample.mass = mass
-    sample.events_per = 1500
-    sample.no_skimming_cuts = True
-    sample.is_pythia8 = True
-    sample.dbs_url_num = 3
-    sample.re_pat = True
-    if sample in mysignal_tune_samples_ex:
-        sample.scheduler = 'condor'
-    sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
-    sample.cross_section = 0.001
 
 ########################################################################
 
@@ -498,7 +456,7 @@ auxiliary_data_samples = [
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse + myttbar_samples
+all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse + mfv_signal_samples_systematics + myttbar_samples
 all_samples = all_data_samples + all_mc_samples
 
 samples_by_name = {}
@@ -510,16 +468,13 @@ for sample in all_samples:
 
 # Bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-#for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
-#    sample.ana_ready = True
+for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
+    if '0300' not in sample.name:
+        sample.ana_ready = True
 
 # JMTBAD replace ana_ready with ana_dict and check that
 
 for sample, reduce_by in [
-    (mfv_neutralino_tau1000um_M0300, 500),
-    (bjetsht0250, 108451*4),
-    (bjetsht0500, 17064*4),
-    (qcdpt0170, 33640*2),
     ]:
     sample.reduce_total_events_by(reduce_by)
 
