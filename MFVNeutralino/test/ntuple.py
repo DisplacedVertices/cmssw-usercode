@@ -199,6 +199,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if debug:
         batch_name_extra += '_WDebug'
 
+
     cs = CRABSubmitter('MFVNtuple' + tuple_version.upper() + batch_name_extra,
                        pset_modifier = modify,
                        job_control_from_sample = True,
@@ -228,53 +229,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.timed = True
 
 
-    x = Samples.mfv_signal_samples
-    Samples.mfv_signal_samples = []
-    Samples.mfv300 = []
-    for y in x:
-        if '300' in y.name:
-            Samples.mfv300.append(y)
-        else:
-            Samples.mfv_signal_samples.append(y)
+    samples = []
 
-    
-    if 'smaller' in sys.argv:
-        samples = Samples.smaller_background_samples
-    elif 'leptonic' in sys.argv:
-        samples = Samples.leptonic_background_samples
-    elif 'qcdpt' in sys.argv:
-        samples = [s for s in Samples.auxiliary_background_samples if s.name.startswith('qcdpt')]
-    elif 'bjets' in sys.argv:
-        samples = [s for s in Samples.auxiliary_background_samples if s.name.startswith('bjets')]
-    elif 'qcdlep' in sys.argv:
-        samples = []
-        for s in Samples.auxiliary_background_samples:
-            if (s.name != 'qcdmupt15' and 'qcdmu' in s.name) or 'qcdem' in s.name or 'qcdbce' in s.name:
-                samples.append(s)
-    elif 'data' in sys.argv:
-        samples = Samples.data_samples
-    elif 'auxdata' in sys.argv:
-        samples = Samples.auxiliary_data_samples
-    elif '100k' in sys.argv:
-        samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples
-    elif 'few' in sys.argv:
-        samples = [Samples.mfv_neutralino_tau1000um_M0400, Samples.ttbarhadronic, Samples.qcdht1000, Samples.MultiJetPk2012D2]
-    elif 'mfv300' in sys.argv:
-        samples = Samples.mfv300
-    elif 'tthad' in sys.argv:
-        samples = [Samples.ttbarhadronic]
-    elif 'signal' in sys.argv:
-        samples = Samples.mfv_signal_samples
-    elif 'myttbar' in sys.argv:
-        samples = [Samples.myttbarpynopu] #Samples.myttbar_samples
-    elif 'ttbarali' in sys.argv:
-        samples = [s for s in Samples.myttbar_samples if 'ali' in s.name]
-    elif 'ttbartunes' in sys.argv:
-        samples = [s for s in Samples.myttbar_samples if 'tune' in s.name]
-    elif 'signaltunes' in sys.argv:
-        samples = Samples.mfv_signal_samples_systematics
-    else:
-        samples = Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples
+    all_samples_names = [s.name for s in Samples.all_samples]
+    from fnmatch import fnmatch
+    for arg in sys.argv:
+        if any(c in arg for c in '[]*?!'):
+            for sample in Samples.all_samples:
+                if fnmatch(sample.name, arg):
+                    samples.append(sample)
+        elif arg in all_samples_names:
+            samples.append(sample)
+
+    if not samples:
+        samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples
 
 
     for sample in samples:
