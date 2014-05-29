@@ -509,7 +509,7 @@ void ABCDHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const double msptm1 = sqrt(v1.mass[which_mom] * v1.mass[which_mom] + v1.pt[which_mom] * v1.pt[which_mom]) + fabs(v1.pt[which_mom]);
     h_svctau3dcmz_msptm01->Fill(msptm0 + msptm1, svctau3dcmz, w);
     h_absdeltaphi01_bs2ddist01->Fill(v0.bs2ddist + v1.bs2ddist, fabs(reco::deltaPhi(phibs0, phibs1)), w);
-    h_absdeltaphi01_ntracks01->Fill(v0.ntracks + v1.ntracks, fabs(reco::deltaPhi(phibs0, phibs1)), w);
+    h_absdeltaphi01_ntracks01->Fill(v0.ntracks() + v1.ntracks(), fabs(reco::deltaPhi(phibs0, phibs1)), w);
 
     TVector3 pos0(v0.x, v0.y, v0.z);
     TVector3 pos1(v1.x, v1.y, v1.z);
