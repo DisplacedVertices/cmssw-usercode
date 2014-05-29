@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 10000)
+SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 10000)
 process.TFileService.fileName = 'histos.root'
 
 process.load('JMTucker.MFVNeutralino.Histos_cff')
@@ -57,12 +57,7 @@ for name, cut in nm1s:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
-    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples + Samples.data_samples
-    if 'full' not in sys.argv:
-        for sample in bkg_samples:
-            sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
-
+    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples + Samples.data_samples
     for s in Samples.data_samples:
         s.json = 'ana_5pc.json'
 
@@ -70,10 +65,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     ex = ''
     exn = ''
-    cs = CRABSubmitter('HistosV17' + ex + exn,
+    cs = CRABSubmitter('HistosV18' + ex + exn,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles.SampleFiles['MFVNtupleV17' + ex],
+                       run_half_mc = True,
                        )
 
     cs.submit_all(samples)
