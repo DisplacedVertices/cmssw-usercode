@@ -76,9 +76,9 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_drmin = 0.4,
     min_drmax = 1.2,
     max_drmax = 4,
-    max_bs2derr = 0.008,
+    max_bs2ddist = 2.87,
+    max_bs2derr = 0.0025,
     min_njetsntks = 1,
-    min_bs2dsig = 10,
     min_ntracksptgt3 = 3,
     max_sumnhitsbehind = 0,
     )
