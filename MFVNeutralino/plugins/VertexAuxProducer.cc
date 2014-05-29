@@ -289,7 +289,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_phi.push_back(tri->phi());
       aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
       aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV
-      aux.track_pt_err.push_back(tri->ptError()/tri->pt());
+      aux.track_pt_err.push_back(tri->ptError());
       aux.track_eta_err.push_back(tri->etaError());
       aux.track_phi_err.push_back(tri->phiError());
       aux.track_dxy_err.push_back(tri->dxyError());
