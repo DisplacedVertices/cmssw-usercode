@@ -454,6 +454,9 @@ auxiliary_data_samples = [
     DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD')
     ]
 
+for s in data_samples:
+    s.ana_hash = 'bff65ebcd1e8cb7cf157d69554917e7e'
+
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
