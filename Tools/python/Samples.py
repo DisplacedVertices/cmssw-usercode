@@ -470,7 +470,7 @@ def from_argv(default=None):
     all_samples_names = samples_by_name.keys()
     for arg in sys.argv:
         if any(c in arg for c in '[]*?!'):
-            for sample in Samples.all_samples:
+            for sample in all_samples:
                 if fnmatch(sample.name, arg):
                     samples.append(sample)
         elif arg in all_samples_names:
