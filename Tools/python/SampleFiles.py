@@ -4,6 +4,11 @@ import os, sys
 from collections import defaultdict
 
 # Data structure is {batch_name : {sample_name : [(file1, nevents1), ...]}}
+
+# To find things to clean:
+#   cat SampleFiles.py | grep "': [{\[]" > order
+# then edit and pass to pprint
+
 SampleFiles = {
     'MFVNtupleV18': {
         'mfv_neutralino_tau0100um_M0200': [
