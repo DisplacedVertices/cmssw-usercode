@@ -46,15 +46,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                  Samples.mfv_neutralino_tau0300um_M0400,
                                  Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
 
+    run_half = True
+
     def modify(sample):
         to_add = []
         to_replace = []
 
         to_add.append('''
-process.mfvSampleInfo.sample = %(name)s
-process.mfvSampleInfo.numEvents = %(nevents)i
-process.mfvSampleInfo.crossSection = %(cross_section)g
-''' % sample)
+process.mfvSampleInfo.sample = '%s'
+process.mfvSampleInfo.numEvents = %s
+process.mfvSampleInfo.crossSection = %g
+''' % (sample.name,
+       'int(%i*0.5)' % sample.nevents if (run_half and sample in Samples.ttbar_samples + Samples.qcd_samples) else sample.nevents,
+       sample.cross_section)
+                      )
 
         return to_add, to_replace
 
@@ -65,5 +70,6 @@ process.mfvSampleInfo.crossSection = %(cross_section)g
                        events_per_job = 200000,
                        get_edm_output = True,
                        data_retrieval = 'fnal',
+                       run_half_mc = run_half,
                        )
     cs.submit_all(samples)
