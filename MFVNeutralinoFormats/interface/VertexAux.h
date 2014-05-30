@@ -94,7 +94,7 @@ struct MFVVertexAux {
   float bs2dsig() const { return sig(bs2ddist, bs2derr); }
   float bs2dctau() const { return bs2ddist / betagamma(); }
 
-  float bs3ddist;
+  float bs3ddist; // JMTBAD remove me
 
   uchar pv2dcompatscss;
   float pv2dcompat;
