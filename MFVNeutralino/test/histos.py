@@ -17,15 +17,9 @@ nm1s = [
     ('Mindrmax','min_drmax = 0'),
     ('Bs2derr', 'max_bs2derr = 1e9'),
     ('Njets',   'min_njetsntks = 0'),
-    ('Bs2dsig', 'min_bs2dsig = 0'),
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
-    ('15p0', 'min_drmax = 0, max_sumnhitsbehind = 1000000'),
-    ('Dr', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0'),
-    ('Bs2d', 'max_bs2derr = 1e9, min_bs2dsig = 0'),
-    ('DrOrBs2d', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0'),
-    ('DrOrNjets', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, min_njetsntks = 0'),
-    ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0'),
-    ('ButNtracks', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0, min_ntracksptgt3 = 0'),
+    ('Sumnhitsbehind', 'max_sumnhitsbehind = 1000000'),
+    ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_njetsntks = 0'),
     ]
 
 for name, cut in nm1s:

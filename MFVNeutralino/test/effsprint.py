@@ -11,7 +11,7 @@ if plots:
 sum = 0.
 var = 0.
 int_lumi = 20000.
-cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3', '15p0')
+cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Ntracksptgt3', 'Sumnhitsbehind', 'ButNtracksAndGt3')
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
 nm1nvtx = 1 if 'nm1one' in sys.argv else 2
