@@ -65,11 +65,13 @@ process.mfvSampleInfo.crossSection = %g
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('MiniNtupleV18',
+                       use_ana_dataset = True,
                        pset_modifier = modify,
                        total_number_of_events = -1,
                        events_per_job = 200000,
                        get_edm_output = True,
                        data_retrieval = 'fnal',
+                       publish_data_name = 'mfvminintuple_v18',
                        run_half_mc = run_half,
                        )
     cs.submit_all(samples)
