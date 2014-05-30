@@ -225,7 +225,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             assert nj < 5000
 
     for s in Samples.mfv_signal_samples + Samples.mfv_signal_samples_systematics:
-        s.events_per = 500
+        s.events_per = 2000
         s.timed = True
 
 
