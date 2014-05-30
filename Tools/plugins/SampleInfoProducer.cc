@@ -66,6 +66,7 @@ void SampleInfoProducer::produce(edm::Event& event, const edm::EventSetup&) {
   event.put(p_num_events, "numEvents");
   event.put(p_cross_section, "crossSection");
   event.put(p_partial_weight, "partialWeight");
+  event.put(p_lumi_weight, "lumiWeight");
   event.put(p_extra_weight, "extraWeight");
   event.put(p_weight, "weight");
 }
