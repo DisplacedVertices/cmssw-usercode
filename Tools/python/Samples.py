@@ -395,6 +395,8 @@ mfv_signal_samples = []
 mfv_signal_samples_systematics = []
 for tau, mass, sample in mfv_signal_samples_ex:
     is_syst = 'jchavesb' in sample.dataset
+    is_300 = '0300' in sample.name
+
     if tau < 100:
         mfv_signal_samples_nouse.append(sample)
     elif is_syst:
@@ -409,8 +411,13 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.dbs_url_num = 3 if ('0300' in sample.name or is_syst) else 2
     sample.re_pat = True
     if not ('tune10' in sample.name or 'tune11' in sample.name):
-        sample.scheduler = 'condor' 
-    sample.ana_hash = '0a90ffb9bb56aadc18a0859a54bf4f31' if not is_syst else '0db49a3df21e20de5584b04b90b2376b'
+        sample.scheduler = 'condor'
+    if is_300:
+        sample.ana_hash = 'd193341bef5d5840d6be68a15a36c5f0'
+    elif is_syst:
+        sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
+    else:
+        sample.ana_hash = '0a90ffb9bb56aadc18a0859a54bf4f31'
     sample.cross_section = 0.001
 
 ########################################################################
@@ -493,8 +500,7 @@ def from_argv(default=None, sort_and_set=True):
 # Bookkeeping of numbers of events in missing jobs/etc. goes here.
 
 for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
-    if '0300' not in sample.name:
-        sample.ana_ready = True
+    sample.ana_ready = True
 
 # JMTBAD replace ana_ready with ana_dict and check that
 
