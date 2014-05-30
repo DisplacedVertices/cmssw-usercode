@@ -497,7 +497,33 @@ def from_argv(default=None, sort_and_set=True):
 
 ########################################################################
 
-# Bookkeeping of numbers of events in missing jobs/etc. goes here.
+# Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
+
+# JMTBAD ana_dict...
+mfv_neutralino_tau0100um_M0200.ana_dataset_override = '/mfv_neutralino_tau0100um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0300.ana_dataset_override = '/mfv_neutralino_tau0100um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0600.ana_dataset_override = '/mfv_neutralino_tau0100um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0800.ana_dataset_override = '/mfv_neutralino_tau0100um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M1000.ana_dataset_override = '/mfv_neutralino_tau0100um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0200.ana_dataset_override = '/mfv_neutralino_tau0300um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0300.ana_dataset_override = '/mfv_neutralino_tau0300um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0400.ana_dataset_override = '/mfv_neutralino_tau0300um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0600.ana_dataset_override = '/mfv_neutralino_tau0300um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0800.ana_dataset_override = '/mfv_neutralino_tau0300um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M1000.ana_dataset_override = '/mfv_neutralino_tau0300um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0200.ana_dataset_override = '/mfv_neutralino_tau1000um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0300.ana_dataset_override = '/mfv_neutralino_tau1000um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0600.ana_dataset_override = '/mfv_neutralino_tau1000um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0800.ana_dataset_override = '/mfv_neutralino_tau1000um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0200.ana_dataset_override = '/mfv_neutralino_tau9900um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0300.ana_dataset_override = '/mfv_neutralino_tau9900um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0600.ana_dataset_override = '/mfv_neutralino_tau9900um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0800.ana_dataset_override = '/mfv_neutralino_tau9900um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M1000.ana_dataset_override = '/mfv_neutralino_tau9900um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
 
 for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
     sample.ana_ready = True
@@ -645,7 +671,7 @@ if __name__ == '__main__':
 
     elif 'filtereffs' in sys.argv:
         diffs = []
-        for sample in all_mc_samples:
+        for sample in from_argv(all_mc_samples):
             if not sample.ana_ready:
                 continue
             o,x,y = sample.nevents_orig, sample.nevents, DBS.numevents_in_dataset(sample.ana_dataset, **sample.dbs_inst_dict(sample.ana_dbs_url_num))
