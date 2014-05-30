@@ -45,7 +45,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_nsv_v_lspdist3d;
 
   // indices for h_sv below:
-  enum sv_index { sv_best0, sv_best1, sv_best2, sv_rest, sv_top2, sv_all, sv_num_indices };
+  enum sv_index { sv_best0, sv_best1, sv_all, sv_num_indices };
   static const char* sv_index_names[sv_num_indices];
 
   // max number of extra track-related plots to make
@@ -60,11 +60,11 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
   void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const;
 
-  TH1F* h_sv_pos_1d[4][3];
-  TH2F* h_sv_pos_2d[4][3];
-  TH2F* h_sv_pos_rz[4];
-  TH1F* h_sv_pos_phi[4];
-  TH1F* h_sv_pos_phi_2pi[4];
+  TH1F* h_sv_pos_1d[2][3];
+  TH2F* h_sv_pos_2d[2][3];
+  TH2F* h_sv_pos_rz[2];
+  TH1F* h_sv_pos_phi[2];
+  TH1F* h_sv_pos_phi_2pi[2];
 
   PairwiseHistos h_sv[sv_num_indices];
   PairwiseHistos h_sv_sumtop2;
@@ -162,7 +162,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_jets_maxDist[sv_num_indices];
 };
 
-const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "best2", "rest", "top2", "all" };
+const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "all" };
 const int MFVVertexHistos::max_ntracks = 5;
 const char* MFVVertexHistos::sv_tracks_index_names[2][MFVVertexHistos::sv_tracks_num_indices] = { { "all", "jet", "track" }, {"all", "jet", "vertex" } };
 
@@ -410,7 +410,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   for (int j = 0; j < sv_num_indices; ++j) {
     const char* exc = sv_index_names[j];
 
-    if (j < 4) {
+    if (j < 2) {
       for (int i = 0; i < 3; ++i) {
         float l = i == 2 ? 25 : 20;
         h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
@@ -533,23 +533,20 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
 // JMTBAD ugh
 void MFVVertexHistos::fill_multi(TH1F** hs, const int isv, const double val, const double weight) const {
-  hs[isv < 3 ? isv : sv_rest]->Fill(val, weight);
-  if (isv < 2)
-    hs[sv_top2]->Fill(val, weight);
+  if (isv < sv_all)
+    hs[isv]->Fill(val, weight);
   hs[sv_all]->Fill(val, weight);
 }
 
 void MFVVertexHistos::fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const {
-  hs[isv < 3 ? isv : sv_rest]->Fill(val, val2, weight);
-  if (isv < 2)
-    hs[sv_top2]->Fill(val, val2, weight);
+  if (isv < sv_all)
+    hs[isv]->Fill(val, val2, weight);
   hs[sv_all]->Fill(val, val2, weight);
 }
 
 void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const {
-  hs[isv < 3 ? isv : sv_rest].Fill(val, -1, weight);
-  if (isv < 2)
-    hs[sv_top2].Fill(val, -1, weight);
+  if (isv < sv_all)
+    hs[isv].Fill(val, -1, weight);
   hs[sv_all].Fill(val, -1, weight);
 }
 
@@ -589,17 +586,18 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
 
-    const int svndx = isv >= 3 ? 3 : isv; // don't use fill_multi for the position plots
-    h_sv_pos_1d[svndx][0]->Fill(aux.x - bsx, *weight);
-    h_sv_pos_1d[svndx][1]->Fill(aux.y - bsy, *weight);
-    h_sv_pos_1d[svndx][2]->Fill(aux.z - bsz, *weight);
-    h_sv_pos_2d[svndx][0]->Fill(aux.x - bsx, aux.y - bsy, *weight);
-    h_sv_pos_2d[svndx][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
-    h_sv_pos_2d[svndx][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
-    h_sv_pos_rz[svndx]->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, *weight);
-    double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
-    h_sv_pos_phi[svndx]->Fill(pos_phi, *weight);
-    h_sv_pos_phi_2pi[svndx]->Fill(pos_phi >= 0 ? pos_phi : pos_phi + 6.2832, *weight);
+    if (isv < 2) {
+      h_sv_pos_1d[isv][0]->Fill(aux.x - bsx, *weight);
+      h_sv_pos_1d[isv][1]->Fill(aux.y - bsy, *weight);
+      h_sv_pos_1d[isv][2]->Fill(aux.z - bsz, *weight);
+      h_sv_pos_2d[isv][0]->Fill(aux.x - bsx, aux.y - bsy, *weight);
+      h_sv_pos_2d[isv][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
+      h_sv_pos_2d[isv][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
+      h_sv_pos_rz[isv]->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, *weight);
+      const double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
+      h_sv_pos_phi[isv]->Fill(pos_phi, *weight);
+      h_sv_pos_phi_2pi[isv]->Fill(pos_phi >= 0 ? pos_phi : pos_phi + 6.2832, *weight);
+    }
 
     PairwiseHistos::ValueMap v = {
         {"mva",                     mva.value(aux)},
