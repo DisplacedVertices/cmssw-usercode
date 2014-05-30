@@ -14,7 +14,6 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 
 process.mfvAnalysisCuts.min_nvertex = 1
-process.mfvAnalysisCuts.vertex_src = 'mfvSelectedVerticesMedium'
 process.mfvWeight.histos = cms.untracked.bool(False)
 
 process.mfvSampleInfo = cms.EDProducer('SampleInfoProducer',
@@ -25,7 +24,7 @@ process.mfvSampleInfo = cms.EDProducer('SampleInfoProducer',
                                        int_lumi = cms.double(20000),
                                        )
 
-process.p = cms.Path(process.mfvSelectedVerticesMedium * process.mfvAnalysisCuts * process.mfvWeight * process.mfvSampleInfo)
+process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvWeight * process.mfvSampleInfo)
 
 process.out = cms.OutputModule('PoolOutputModule',
                                fileName = cms.untracked.string('minintuple.root'),
@@ -33,7 +32,7 @@ process.out = cms.OutputModule('PoolOutputModule',
                                outputCommands = cms.untracked.vstring(
                                    'drop *',
                                    'keep MFVEvent_mfvEvent__*',
-                                   'keep MFVVertexAuxs_mfvSelectedVerticesMedium__*',
+                                   'keep MFVVertexAuxs_mfvSelectedVerticesTight__*',
                                    'keep *_mfvSampleInfo_*_*',
                                    )
                                )
