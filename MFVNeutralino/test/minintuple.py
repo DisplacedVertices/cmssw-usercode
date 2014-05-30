@@ -11,17 +11,21 @@ SampleFiles.setup(process, 'MFVNtupleV18', s.name, 50000)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 
 process.mfvAnalysisCuts.min_nvertex = 1
+process.mfvAnalysisCuts.vertex_src = 'mfvSelectedVerticesMedium'
+process.mfvWeight.histos = cms.untracked.bool(False)
 
 process.mfvSampleInfo = cms.EDProducer('SampleInfoProducer',
+                                       extra_weight_src = cms.InputTag('mfvWeight'),
                                        sample = cms.string(s.name),
-                                       numEvents = cms.int32(s.nevents),
-                                       crossSection = cms.double(s.cross_section),
-                                       intLumi = cms.double(20000),
+                                       num_events = cms.int32(s.nevents),
+                                       cross_section = cms.double(s.cross_section),
+                                       int_lumi = cms.double(20000),
                                        )
 
-process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvAnalysisCuts * process.mfvSampleInfo)
+process.p = cms.Path(process.mfvSelectedVerticesMedium * process.mfvAnalysisCuts * process.mfvWeight * process.mfvSampleInfo)
 
 process.out = cms.OutputModule('PoolOutputModule',
                                fileName = cms.untracked.string('minintuple.root'),
@@ -54,8 +58,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         to_add.append('''
 process.mfvSampleInfo.sample = '%s'
-process.mfvSampleInfo.numEvents = %s
-process.mfvSampleInfo.crossSection = %g
+process.mfvSampleInfo.num_events = %s
+process.mfvSampleInfo.cross_section = %g
 ''' % (sample.name,
        'int(%i*0.5)' % sample.nevents if (run_half and sample in Samples.ttbar_samples + Samples.qcd_samples) else sample.nevents,
        sample.cross_section)
