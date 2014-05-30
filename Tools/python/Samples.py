@@ -536,15 +536,15 @@ mfv_neutralino_tau9900um_M0600.ana_filter_eff = 9.9511e-01  #    99461 /    9995
 mfv_neutralino_tau9900um_M0800.ana_filter_eff = 9.9818e-01  #    99718 /    99900
 mfv_neutralino_tau9900um_M1000.ana_filter_eff = 9.9904e-01  #    99803 /    99899
 
-#mfv_neutralino_tau0100um_M0300.ana_filter_eff = 8.6538e-01  #    86538 /   100000
-#mfv_neutralino_tau0300um_M0200.ana_filter_eff = 4.7439e-01  #    47439 /   100000
-#mfv_neutralino_tau0300um_M0300.ana_filter_eff = 8.2247e-01  #    82247 /   100000
-#mfv_neutralino_tau0300um_M0400.ana_filter_eff = 9.6975e-01  #    96975 /   100000
-#mfv_neutralino_tau0300um_M0600.ana_filter_eff = 9.3989e-01  #    93989 /   100000
-#mfv_neutralino_tau0300um_M0800.ana_filter_eff = 9.9264e-01  #    99264 /   100000
-#mfv_neutralino_tau0300um_M1000.ana_filter_eff = 9.9035e-01  #    99035 /   100000
-#mfv_neutralino_tau1000um_M0300.ana_filter_eff = 7.9684e-01  #    79286 /    99500
-#mfv_neutralino_tau9900um_M0300.ana_filter_eff = 8.6473e-01  #    86473 /   100000
+mfv_neutralino_tau0100um_M0300.ana_filter_eff = 8.6538e-01  #    86538 /   100000
+mfv_neutralino_tau0300um_M0200.ana_filter_eff = 4.7942e-01  #    47439 /    98950
+mfv_neutralino_tau0300um_M0300.ana_filter_eff = 8.6713e-01  #    82247 /    94850
+mfv_neutralino_tau0300um_M0400.ana_filter_eff = 9.6975e-01  #    96975 /   100000
+mfv_neutralino_tau0300um_M0600.ana_filter_eff = 9.9512e-01  #    93989 /    94450
+mfv_neutralino_tau0300um_M0800.ana_filter_eff = 9.9813e-01  #    99264 /    99450
+mfv_neutralino_tau0300um_M1000.ana_filter_eff = 9.9885e-01  #    99035 /    99149
+mfv_neutralino_tau1000um_M0300.ana_filter_eff = 8.6837e-01  #    79282 /    91300
+mfv_neutralino_tau9900um_M0300.ana_filter_eff = 8.6473e-01  #    86473 /   100000
 
 dyjetstollM10.ana_filter_eff        = 4.3913e-04  #     3132 /  7132223
 dyjetstollM50.ana_filter_eff        = 2.8337e-03  #    86313 / 30459503
