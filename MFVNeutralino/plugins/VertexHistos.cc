@@ -67,7 +67,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_pos_phi_2pi[4];
 
   PairwiseHistos h_sv[sv_num_indices];
-  PairwiseHistos h_sv_sums[3]; // top2, top3, all
+  PairwiseHistos h_sv_sumtop2;
 
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
@@ -504,17 +504,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     }
   }
 
-  for (int j = 0; j < 3; ++j) {
-    std::string ex;
-    if (j == 0)
-      ex = "sumtop2";
-    else if (j == 1)
-      ex = "sumtop3";
-    else if (j == 2)
-      ex = "sumtop4";
-
-    h_sv_sums[j].Init("h_sv_" + ex, hs, true, do_scatterplots, j+2);
-  }    
+  h_sv_sumtop2.Init("h_sv_sumtop2", hs, true, do_scatterplots, 2);
 
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 1);
@@ -1030,8 +1020,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
     fill_multi(h_sv, isv, v, *weight);
 
-    for (PairwiseHistos& h : h_sv_sums)
-      h.Fill(v, isv, *weight);
+    h_sv_sumtop2.Fill(v, isv, *weight);
   }
 
   //////////////////////////////////////////////////////////////////////
