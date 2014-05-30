@@ -1260,7 +1260,7 @@ def set_style(date_pages=False):
     ROOT.gStyle.SetFillColor(0)
     if date_pages:
         ROOT.gStyle.SetOptDate()
-    ROOT.gStyle.SetOptStat(111111)
+    ROOT.gStyle.SetOptStat(1111111)
     ROOT.gStyle.SetOptFit(1111)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
