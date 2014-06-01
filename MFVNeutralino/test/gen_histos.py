@@ -2,7 +2,7 @@ import os, sys, glob
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 debug = 'debug' in sys.argv
 
-process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root']
+file_event_from_argv(process)
 process.TFileService.fileName = 'gen_histos.root'
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
