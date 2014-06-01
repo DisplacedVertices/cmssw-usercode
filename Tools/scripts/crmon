@@ -188,7 +188,7 @@ last_proxy_check = time.time()
 
 while 1:
     the_time = time.time()
-    if (the_time - last_proxy_check)/3600. > 20:
+    if (the_time - last_proxy_check)/3600. > 8:
         check_proxies()
         last_proxy_check = the_time
 
