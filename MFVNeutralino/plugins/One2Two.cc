@@ -90,15 +90,20 @@ public:
   TH2F* h_2v_bs2ddist_v_bsdz_1;
   TH1F* h_2v_bsdz_1;
   TH1F* h_2v_svdist2d;
+  TH1F* h_2v_svdz;
   TH1F* h_2v_delta_phi;
   TH1F* h_2v_abs_delta_phi;
+  TH2F* h_2v_svdz_v_delta_phi;
 
   TH1F* h_1v_worep_bs2ddist;
   TH2F* h_1v_worep_bs2ddist_v_bsdz;
   TH1F* h_1v_worep_bsdz;
   TH1F* h_1v_worep_svdist2d;
+  TH1F* h_1v_worep_svdz;
+  TH1F* h_1v_worep_svdz_all;
   TH1F* h_1v_worep_delta_phi;
   TH1F* h_1v_worep_abs_delta_phi;
+  TH2F* h_1v_worep_svdz_v_delta_phi;
 
   TH1F* h_1v_wrep_svdist2d;
   TH1F* h_1v_wrep_delta_phi;
@@ -126,15 +131,20 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_2v_bs2ddist_v_bsdz_1 = fs->make<TH2F>("h_2v_bs2ddist_v_bsdz_1", "", 200, -20, 20, 100, 0, 0.1);
   h_2v_bsdz_1 = fs->make<TH1F>("h_2v_bsdz_1", "", 200, -20, 20);
   h_2v_svdist2d = fs->make<TH1F>("h_2v_svdist2d", "", 100, 0, 0.1);
+  h_2v_svdz = fs->make<TH1F>("h_2v_svdz", "", 50, -0.1, 0.1);
   h_2v_delta_phi = fs->make<TH1F>("h_2v_delta_phi", "", 10, -M_PI, M_PI);
   h_2v_abs_delta_phi = fs->make<TH1F>("h_2v_abs_delta_phi", "", 10, 0, M_PI);
+  h_2v_svdz_v_delta_phi = fs->make<TH2F>("h_2v_svdz_v_delta_phi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
   h_1v_worep_bs2ddist = fs->make<TH1F>("h_1v_worep_bs2ddist", "", 100, 0, 0.1);
   h_1v_worep_bs2ddist_v_bsdz = fs->make<TH2F>("h_1v_worep_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
   h_1v_worep_bsdz = fs->make<TH1F>("h_1v_worep_bsdz", "", 200, -20, 20);
   h_1v_worep_svdist2d = fs->make<TH1F>("h_1v_worep_svdist2d", "", 100, 0, 0.1);
+  h_1v_worep_svdz = fs->make<TH1F>("h_1v_worep_svdz", "", 50, -0.1, 0.1);
+  h_1v_worep_svdz_all = fs->make<TH1F>("h_1v_worep_svdz_all", "", 200, -10, 10);
   h_1v_worep_delta_phi = fs->make<TH1F>("h_1v_worep_delta_phi", "", 10, -M_PI, M_PI);
   h_1v_worep_abs_delta_phi = fs->make<TH1F>("h_1v_worep_abs_delta_phi", "", 10, 0, M_PI);
+  h_1v_worep_svdz_v_delta_phi = fs->make<TH2F>("h_1v_worep_svdz_v_delta_phi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
   h_1v_wrep_svdist2d = fs->make<TH1F>("h_1v_wrep_svdist2d", "", 100, 0, 0.1);
   h_1v_wrep_delta_phi = fs->make<TH1F>("h_1v_wrep_delta_phi", "", 10, -M_PI, M_PI);
@@ -211,8 +221,10 @@ void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_2v_bsdz_1->Fill(v1.z);
 
     h_2v_svdist2d->Fill(svdist2d(v0, v1));
+    h_2v_svdz->Fill(v0.z - v1.z);
     h_2v_delta_phi->Fill(delta_phi(v0, v1));
     h_2v_abs_delta_phi->Fill(fabs(delta_phi(v0, v1)));
+    h_2v_svdz_v_delta_phi->Fill(delta_phi(v0, v1), v0.z - v1.z);
   }
 }
 
@@ -271,8 +283,11 @@ void MFVOne2Two::endJob() {
     h_1v_worep_bsdz->Fill(v1.z);
 
     h_1v_worep_svdist2d->Fill(svdist2d(v0, v1));
+    h_1v_worep_svdz->Fill(v0.z - v1.z);
+    h_1v_worep_svdz_all->Fill(v0.z - v1.z);
     h_1v_worep_delta_phi->Fill(delta_phi(v0, v1));
     h_1v_worep_abs_delta_phi->Fill(fabs(delta_phi(v0, v1)));
+    h_1v_worep_svdz_v_delta_phi->Fill(delta_phi(v0, v1), v0.z - v1.z);
   }
 
   // sample with replacement

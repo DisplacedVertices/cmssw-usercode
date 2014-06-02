@@ -11,6 +11,42 @@ f = ROOT.TFile('one2two.root')
 
 ####
 
+for name in 'h_2v_bs2ddist h_2v_bs2ddist_0 h_2v_bs2ddist_1 h_1v_worep_bs2ddist'.split():
+    h = f.Get('MFVOne2Two/%s' % name)
+    h.Rebin(2)
+    h.SetTitle(';vertex xy distance to beamspot (cm);vertices/20 #mum')
+    h.Draw()
+    ps.save(name)
+
+for name in 'h_2v_bsdz h_2v_bsdz_0 h_2v_bsdz_1 h_1v_worep_bsdz'.split():
+    h = f.Get('MFVOne2Two/%s' % name)
+    h.Rebin(2)
+    h.SetTitle(';vertex #Delta z to beamspot (cm);vertices/0.4 cm')
+    h.Draw()
+    ps.save(name)
+
+for name in 'h_2v_bs2ddist_v_bsdz h_2v_bs2ddist_v_bsdz_0 h_2v_bs2ddist_v_bsdz_1 h_1v_worep_bs2ddist_v_bsdz'.split():
+    h = f.Get('MFVOne2Two/%s' % name)
+    h.SetTitle(';vertex #Delta z to beamspot (cm);vertex xy distance to beamspot (cm)')
+    h.SetStats(0)
+    h.Draw('colz')
+    ps.save(name, logz=True)
+
+for name in 'h_2v_svdz h_1v_worep_svdz h_1v_worep_svdz_all'.split():
+    h = f.Get('MFVOne2Two/%s' % name)
+    h.SetTitle(';vertex #Delta z (cm);events/100 #mum')
+    h.Draw()
+    ps.save(name)
+
+for name in 'h_2v_svdz_v_delta_phi h_1v_worep_svdz_v_delta_phi'.split():
+    h = f.Get('MFVOne2Two/%s' % name)
+    h.SetTitle(';vertex #Delta #phi;vertex #Delta z (cm)')
+    h.SetStats(0)
+    h.Draw('colz')
+    ps.save(name, logz=True)
+
+####
+
 h2v = f.Get('MFVOne2Two/h_2v_delta_phi')
 h1v = f.Get('MFVOne2Two/h_1v_worep_delta_phi')
 hfn = f.Get('MFVOne2Two/h_fcn_delta_phi')
