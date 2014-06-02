@@ -33,8 +33,8 @@ ps.save('deltaphi')
 
 ####
 
-for norm_below in (1, 0.024):
-    norm_name = ('%.1f' % norm_below).replace('.','p')
+for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
+    norm_name = ('%.3f' % norm_below).replace('.','p')
     
     h2v = f.Get('MFVOne2Two/h_2v_svdist2d').Clone('h2v')
     h1v = f.Get('MFVOne2Two/h_1v_worep_svdist2d').Clone('h1v')
@@ -73,22 +73,21 @@ for norm_below in (1, 0.024):
 
 ####
 
-h = f.Get('MFVOne2Two/h_2v_delta_phi')
+if 0:
+    h = f.Get('MFVOne2Two/h_2v_delta_phi')
 
-for i in xrange(2, 17, 2):
-    print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
-    fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
-    res = h.Fit(fcn, 'IQRS')
-    ps.save('power_%i' % i)
-    #res.Print()
+    for i in xrange(2, 17, 2):
+        print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
+        fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
+        res = h.Fit(fcn, 'IQRS')
+        ps.save('power_%i' % i)
+        #res.Print()
 
-h = f.Get('MFVOne2Two/h_2v_abs_delta_phi')
+    h = f.Get('MFVOne2Two/h_2v_abs_delta_phi')
 
-for i in xrange(2, 17, 2):
-    print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
-    fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
-    res = h.Fit(fcn, 'IQRS')
-    ps.save('abs_power_%i' % i)
-    #res.Print()
-
-
+    for i in xrange(2, 17, 2):
+        print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
+        fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
+        res = h.Fit(fcn, 'IQRS')
+        ps.save('abs_power_%i' % i)
+        #res.Print()
