@@ -113,6 +113,7 @@ public:
   TH1F* h_1v_worep_dphi;
   TH1F* h_1v_worep_abs_dphi;
   TH2F* h_1v_worep_svdz_v_dphi;
+  TH2F* h_1v_worep_svdz_all_v_dphi;
 
   TH1F* h_1v_wrep_svdist2d;
   TH1F* h_1v_wrep_dphi;
@@ -158,6 +159,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_1v_worep_dphi = fs->make<TH1F>("h_1v_worep_dphi", "", 10, -M_PI, M_PI);
   h_1v_worep_abs_dphi = fs->make<TH1F>("h_1v_worep_abs_dphi", "", 10, 0, M_PI);
   h_1v_worep_svdz_v_dphi = fs->make<TH2F>("h_1v_worep_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
+  h_1v_worep_svdz_all_v_dphi = fs->make<TH2F>("h_1v_worep_svdz_all_v_dphi", "", 10, -M_PI, M_PI, 200, -10, 10);
 
 #if 0
   h_1v_wrep_svdist2d = fs->make<TH1F>("h_1v_wrep_svdist2d", "", 100, 0, 0.1);
@@ -288,7 +290,7 @@ void MFVOne2Two::endJob() {
       int x = gRandom->Integer(nonevertices);
       if (!used[x]) {
 	const MFVVertexAux& vx = one_vertices[x];
-	if (prob_dphi(v0, vx) > gRandom->Rndm() && prob_dz(v0, vx) > gRandom->Rndm()) {
+	if (prob_dphi(v0, vx) * prob_dz(v0, vx) > gRandom->Rndm()) {
 	  jv = x;
 	  used[x] = true;
 	  break;
@@ -311,6 +313,7 @@ void MFVOne2Two::endJob() {
     h_1v_worep_dphi->Fill(dphi(v0, v1));
     h_1v_worep_abs_dphi->Fill(fabs(dphi(v0, v1)));
     h_1v_worep_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
+    h_1v_worep_svdz_all_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
   }
 
 #if 0
