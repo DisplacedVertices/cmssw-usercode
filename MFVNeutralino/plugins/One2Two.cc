@@ -45,12 +45,12 @@ namespace {
     return mag(v0.x - v1.x, v0.y - v1.y);
   }
 
-  double delta_phi(const MFVVertexAux& v0, const MFVVertexAux& v1) {
+  double dphi(const MFVVertexAux& v0, const MFVVertexAux& v1) {
     return reco::deltaPhi(atan2(v0.y, v0.x),
 			  atan2(v1.y, v1.x));
   }
 
-  double delta_phi(const MFVEvent& mevent, const MFVVertexAux& v0, const MFVVertexAux& v1) {
+  double dphi(const MFVEvent& mevent, const MFVVertexAux& v0, const MFVVertexAux& v1) {
     return reco::deltaPhi(atan2(v0.y - mevent.bsy, v0.x - mevent.bsx),
 			  atan2(v1.y - mevent.bsy, v1.x - mevent.bsx));
   }
@@ -65,10 +65,10 @@ public:
   bool sel_vertex(const MFVEvent&, const MFVVertexAux&) const;
   MFVVertexAux xform_vertex(const MFVEvent&, const MFVVertexAux&) const;
 
-  TF1* f_delta_phi;
-  TH1F* h_fcn_delta_phi;
-  double prob_delta_phi(const double) const;
-  double prob_delta_phi(const MFVVertexAux&, const MFVVertexAux&) const;
+  TF1* f_dphi;
+  TH1F* h_fcn_dphi;
+  double prob_dphi(const double) const;
+  double prob_dphi(const MFVVertexAux&, const MFVVertexAux&) const;
 
   void analyze(const edm::Event&, const edm::EventSetup&);
   void endJob();
@@ -91,9 +91,9 @@ public:
   TH1F* h_2v_bsdz_1;
   TH1F* h_2v_svdist2d;
   TH1F* h_2v_svdz;
-  TH1F* h_2v_delta_phi;
-  TH1F* h_2v_abs_delta_phi;
-  TH2F* h_2v_svdz_v_delta_phi;
+  TH1F* h_2v_dphi;
+  TH1F* h_2v_abs_dphi;
+  TH2F* h_2v_svdz_v_dphi;
 
   TH1F* h_1v_worep_bs2ddist;
   TH2F* h_1v_worep_bs2ddist_v_bsdz;
@@ -101,13 +101,13 @@ public:
   TH1F* h_1v_worep_svdist2d;
   TH1F* h_1v_worep_svdz;
   TH1F* h_1v_worep_svdz_all;
-  TH1F* h_1v_worep_delta_phi;
-  TH1F* h_1v_worep_abs_delta_phi;
-  TH2F* h_1v_worep_svdz_v_delta_phi;
+  TH1F* h_1v_worep_dphi;
+  TH1F* h_1v_worep_abs_dphi;
+  TH2F* h_1v_worep_svdz_v_dphi;
 
   TH1F* h_1v_wrep_svdist2d;
-  TH1F* h_1v_wrep_delta_phi;
-  TH1F* h_1v_wrep_abs_delta_phi;
+  TH1F* h_1v_wrep_dphi;
+  TH1F* h_1v_wrep_abs_dphi;
 };
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
@@ -117,9 +117,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
   gRandom = new TRandom3(121982);
 
-  f_delta_phi = new TF1("f_delta_phi", "x*x*x*x/122.4078739141", -M_PI, M_PI);
-  h_fcn_delta_phi = fs->make<TH1F>("h_fcn_delta_phi", "", 10, -M_PI, M_PI);
-  h_fcn_delta_phi->FillRandom("f_delta_phi", 100000);
+  f_dphi = new TF1("f_dphi", "x*x*x*x/122.4078739141", -M_PI, M_PI);
+  h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 10, -M_PI, M_PI);
+  h_fcn_dphi->FillRandom("f_dphi", 100000);
 
   h_2v_bs2ddist = fs->make<TH1F>("h_2v_bs2ddist", "", 100, 0, 0.1);
   h_2v_bs2ddist_v_bsdz = fs->make<TH2F>("h_2v_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
@@ -132,9 +132,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_2v_bsdz_1 = fs->make<TH1F>("h_2v_bsdz_1", "", 200, -20, 20);
   h_2v_svdist2d = fs->make<TH1F>("h_2v_svdist2d", "", 100, 0, 0.1);
   h_2v_svdz = fs->make<TH1F>("h_2v_svdz", "", 50, -0.1, 0.1);
-  h_2v_delta_phi = fs->make<TH1F>("h_2v_delta_phi", "", 10, -M_PI, M_PI);
-  h_2v_abs_delta_phi = fs->make<TH1F>("h_2v_abs_delta_phi", "", 10, 0, M_PI);
-  h_2v_svdz_v_delta_phi = fs->make<TH2F>("h_2v_svdz_v_delta_phi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
+  h_2v_dphi = fs->make<TH1F>("h_2v_dphi", "", 10, -M_PI, M_PI);
+  h_2v_abs_dphi = fs->make<TH1F>("h_2v_abs_dphi", "", 10, 0, M_PI);
+  h_2v_svdz_v_dphi = fs->make<TH2F>("h_2v_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
   h_1v_worep_bs2ddist = fs->make<TH1F>("h_1v_worep_bs2ddist", "", 100, 0, 0.1);
   h_1v_worep_bs2ddist_v_bsdz = fs->make<TH2F>("h_1v_worep_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
@@ -142,17 +142,17 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_1v_worep_svdist2d = fs->make<TH1F>("h_1v_worep_svdist2d", "", 100, 0, 0.1);
   h_1v_worep_svdz = fs->make<TH1F>("h_1v_worep_svdz", "", 50, -0.1, 0.1);
   h_1v_worep_svdz_all = fs->make<TH1F>("h_1v_worep_svdz_all", "", 200, -10, 10);
-  h_1v_worep_delta_phi = fs->make<TH1F>("h_1v_worep_delta_phi", "", 10, -M_PI, M_PI);
-  h_1v_worep_abs_delta_phi = fs->make<TH1F>("h_1v_worep_abs_delta_phi", "", 10, 0, M_PI);
-  h_1v_worep_svdz_v_delta_phi = fs->make<TH2F>("h_1v_worep_svdz_v_delta_phi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
+  h_1v_worep_dphi = fs->make<TH1F>("h_1v_worep_dphi", "", 10, -M_PI, M_PI);
+  h_1v_worep_abs_dphi = fs->make<TH1F>("h_1v_worep_abs_dphi", "", 10, 0, M_PI);
+  h_1v_worep_svdz_v_dphi = fs->make<TH2F>("h_1v_worep_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
   h_1v_wrep_svdist2d = fs->make<TH1F>("h_1v_wrep_svdist2d", "", 100, 0, 0.1);
-  h_1v_wrep_delta_phi = fs->make<TH1F>("h_1v_wrep_delta_phi", "", 10, -M_PI, M_PI);
-  h_1v_wrep_abs_delta_phi = fs->make<TH1F>("h_1v_wrep_abs_delta_phi", "", 10, 0, M_PI);
+  h_1v_wrep_dphi = fs->make<TH1F>("h_1v_wrep_dphi", "", 10, -M_PI, M_PI);
+  h_1v_wrep_abs_dphi = fs->make<TH1F>("h_1v_wrep_abs_dphi", "", 10, 0, M_PI);
 }
 
 MFVOne2Two::~MFVOne2Two() {
-  delete f_delta_phi;
+  delete f_dphi;
 }
 
 bool MFVOne2Two::sel_event(const MFVEvent&) const {
@@ -171,12 +171,12 @@ MFVVertexAux MFVOne2Two::xform_vertex(const MFVEvent& mevent, const MFVVertexAux
   return v2;
 }
 
-double MFVOne2Two::prob_delta_phi(const double delta_phi) const {
-  return f_delta_phi->Eval(delta_phi);
+double MFVOne2Two::prob_dphi(const double dphi) const {
+  return f_dphi->Eval(dphi);
 }
 
-double MFVOne2Two::prob_delta_phi(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
-  return prob_delta_phi(delta_phi(v0, v1));
+double MFVOne2Two::prob_dphi(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  return prob_dphi(dphi(v0, v1));
 }
 
 void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -222,9 +222,9 @@ void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     h_2v_svdist2d->Fill(svdist2d(v0, v1));
     h_2v_svdz->Fill(v0.z - v1.z);
-    h_2v_delta_phi->Fill(delta_phi(v0, v1));
-    h_2v_abs_delta_phi->Fill(fabs(delta_phi(v0, v1)));
-    h_2v_svdz_v_delta_phi->Fill(delta_phi(v0, v1), v0.z - v1.z);
+    h_2v_dphi->Fill(dphi(v0, v1));
+    h_2v_abs_dphi->Fill(fabs(dphi(v0, v1)));
+    h_2v_svdz_v_dphi->Fill(dphi(v0, v1), v0.z - v1.z);
   }
 }
 
@@ -265,7 +265,7 @@ void MFVOne2Two::endJob() {
       int x = gRandom->Integer(nonevertices);
       if (!used[x]) {
 	const MFVVertexAux& vx = one_vertices[x];
-	if (prob_delta_phi(v0, vx) > gRandom->Rndm()) {
+	if (prob_dphi(v0, vx) > gRandom->Rndm()) {
 	  jv = x;
 	  used[x] = true;
 	  break;
@@ -285,9 +285,9 @@ void MFVOne2Two::endJob() {
     h_1v_worep_svdist2d->Fill(svdist2d(v0, v1));
     h_1v_worep_svdz->Fill(v0.z - v1.z);
     h_1v_worep_svdz_all->Fill(v0.z - v1.z);
-    h_1v_worep_delta_phi->Fill(delta_phi(v0, v1));
-    h_1v_worep_abs_delta_phi->Fill(fabs(delta_phi(v0, v1)));
-    h_1v_worep_svdz_v_delta_phi->Fill(delta_phi(v0, v1), v0.z - v1.z);
+    h_1v_worep_dphi->Fill(dphi(v0, v1));
+    h_1v_worep_abs_dphi->Fill(fabs(dphi(v0, v1)));
+    h_1v_worep_svdz_v_dphi->Fill(dphi(v0, v1), v0.z - v1.z);
   }
 
   // sample with replacement
@@ -299,7 +299,7 @@ void MFVOne2Two::endJob() {
     while (jv == -1) {
       int x = gRandom->Integer(nonevertices);
       const MFVVertexAux& vx = one_vertices[x];
-      if (prob_delta_phi(v0, vx) > gRandom->Rndm()) {
+      if (prob_dphi(v0, vx) > gRandom->Rndm()) {
 	jv = x;
 	break;
       }
@@ -308,8 +308,8 @@ void MFVOne2Two::endJob() {
     const MFVVertexAux& v1 = one_vertices[jv];
 
     h_1v_wrep_svdist2d->Fill(svdist2d(v0, v1));
-    h_1v_wrep_delta_phi->Fill(delta_phi(v0, v1));
-    h_1v_wrep_abs_delta_phi->Fill(fabs(delta_phi(v0, v1)));
+    h_1v_wrep_dphi->Fill(dphi(v0, v1));
+    h_1v_wrep_abs_dphi->Fill(fabs(dphi(v0, v1)));
   }
 }
 
