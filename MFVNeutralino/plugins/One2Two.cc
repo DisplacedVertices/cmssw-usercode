@@ -54,6 +54,10 @@ namespace {
     return reco::deltaPhi(atan2(v0.y - mevent.bsy, v0.x - mevent.bsx),
 			  atan2(v1.y - mevent.bsy, v1.x - mevent.bsx));
   }
+
+  double dz(const MFVVertexAux& v0, const MFVVertexAux& v1) {
+    return v0.z - v1.z;
+  }
 }
 
 class MFVOne2Two : public edm::EDAnalyzer {
@@ -69,6 +73,11 @@ public:
   TH1F* h_fcn_dphi;
   double prob_dphi(const double) const;
   double prob_dphi(const MFVVertexAux&, const MFVVertexAux&) const;
+
+  TF1* f_dz;
+  TH1F* h_fcn_dz;
+  double prob_dz(const double) const;
+  double prob_dz(const MFVVertexAux&, const MFVVertexAux&) const;
 
   void analyze(const edm::Event&, const edm::EventSetup&);
   void endJob();
@@ -121,6 +130,10 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 10, -M_PI, M_PI);
   h_fcn_dphi->FillRandom("f_dphi", 100000);
 
+  f_dz = new TF1("f_dz", "1/sqrt(2*3.14159265*0.01635**2)*exp(-x*x/2/0.01635**2)", -50, 50);
+  h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 10, -0.1, 0.1);
+  h_fcn_dz->FillRandom("f_dz", 100000);
+
   h_2v_bs2ddist = fs->make<TH1F>("h_2v_bs2ddist", "", 100, 0, 0.1);
   h_2v_bs2ddist_v_bsdz = fs->make<TH2F>("h_2v_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
   h_2v_bsdz = fs->make<TH1F>("h_2v_bsdz", "", 200, -20, 20);
@@ -146,9 +159,11 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_1v_worep_abs_dphi = fs->make<TH1F>("h_1v_worep_abs_dphi", "", 10, 0, M_PI);
   h_1v_worep_svdz_v_dphi = fs->make<TH2F>("h_1v_worep_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
+#if 0
   h_1v_wrep_svdist2d = fs->make<TH1F>("h_1v_wrep_svdist2d", "", 100, 0, 0.1);
   h_1v_wrep_dphi = fs->make<TH1F>("h_1v_wrep_dphi", "", 10, -M_PI, M_PI);
   h_1v_wrep_abs_dphi = fs->make<TH1F>("h_1v_wrep_abs_dphi", "", 10, 0, M_PI);
+#endif
 }
 
 MFVOne2Two::~MFVOne2Two() {
@@ -177,6 +192,14 @@ double MFVOne2Two::prob_dphi(const double dphi) const {
 
 double MFVOne2Two::prob_dphi(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
   return prob_dphi(dphi(v0, v1));
+}
+
+double MFVOne2Two::prob_dz(const double dz) const {
+  return f_dz->Eval(dz);
+}
+
+double MFVOne2Two::prob_dz(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  return prob_dz(dz(v0, v1));
 }
 
 void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -221,10 +244,10 @@ void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_2v_bsdz_1->Fill(v1.z);
 
     h_2v_svdist2d->Fill(svdist2d(v0, v1));
-    h_2v_svdz->Fill(v0.z - v1.z);
+    h_2v_svdz->Fill(dz(v0, v1));
     h_2v_dphi->Fill(dphi(v0, v1));
     h_2v_abs_dphi->Fill(fabs(dphi(v0, v1)));
-    h_2v_svdz_v_dphi->Fill(dphi(v0, v1), v0.z - v1.z);
+    h_2v_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
   }
 }
 
@@ -265,7 +288,7 @@ void MFVOne2Two::endJob() {
       int x = gRandom->Integer(nonevertices);
       if (!used[x]) {
 	const MFVVertexAux& vx = one_vertices[x];
-	if (prob_dphi(v0, vx) > gRandom->Rndm()) {
+	if (prob_dphi(v0, vx) > gRandom->Rndm() && prob_dz(v0, vx) > gRandom->Rndm()) {
 	  jv = x;
 	  used[x] = true;
 	  break;
@@ -283,13 +306,14 @@ void MFVOne2Two::endJob() {
     h_1v_worep_bsdz->Fill(v1.z);
 
     h_1v_worep_svdist2d->Fill(svdist2d(v0, v1));
-    h_1v_worep_svdz->Fill(v0.z - v1.z);
-    h_1v_worep_svdz_all->Fill(v0.z - v1.z);
+    h_1v_worep_svdz->Fill(dz(v0, v1));
+    h_1v_worep_svdz_all->Fill(dz(v0, v1));
     h_1v_worep_dphi->Fill(dphi(v0, v1));
     h_1v_worep_abs_dphi->Fill(fabs(dphi(v0, v1)));
-    h_1v_worep_svdz_v_dphi->Fill(dphi(v0, v1), v0.z - v1.z);
+    h_1v_worep_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
   }
 
+#if 0
   // sample with replacement
   for (int ipair = 0; ipair < npairs; ++ipair) {
     int iv = gRandom->Integer(nonevertices);
@@ -311,6 +335,7 @@ void MFVOne2Two::endJob() {
     h_1v_wrep_dphi->Fill(dphi(v0, v1));
     h_1v_wrep_abs_dphi->Fill(fabs(dphi(v0, v1)));
   }
+#endif
 }
 
 DEFINE_FWK_MODULE(MFVOne2Two);
