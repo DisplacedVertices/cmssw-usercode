@@ -78,6 +78,8 @@ public:
   TH1F* h_2v_bs2ddist_1;
   TH2F* h_2v_bs2ddist_v_bsdz_1;
   TH1F* h_2v_bsdz_1;
+  TH2F* h_2v_ntracks;
+  TH1F* h_2v_ntracks01;
   TH1F* h_2v_svdist2d;
   TH1F* h_2v_svdz;
   TH1F* h_2v_dphi;
@@ -87,6 +89,8 @@ public:
   TH1F* h_1v_bs2ddist;
   TH2F* h_1v_bs2ddist_v_bsdz;
   TH1F* h_1v_bsdz;
+  TH2F* h_1v_ntracks;
+  TH1F* h_1v_ntracks01;
   TH1F* h_1v_svdist2d;
   TH1F* h_1v_svdz;
   TH1F* h_1v_svdz_all;
@@ -125,6 +129,8 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_2v_bs2ddist_1 = fs->make<TH1F>("h_2v_bs2ddist_1", "", 100, 0, 0.1);
   h_2v_bs2ddist_v_bsdz_1 = fs->make<TH2F>("h_2v_bs2ddist_v_bsdz_1", "", 200, -20, 20, 100, 0, 0.1);
   h_2v_bsdz_1 = fs->make<TH1F>("h_2v_bsdz_1", "", 200, -20, 20);
+  h_2v_ntracks = fs->make<TH2F>("h_2v_ntracks", "", 20, 0, 20, 20, 0, 20);
+  h_2v_ntracks01 = fs->make<TH1F>("h_2v_ntracks01", "", 30, 0, 30);
   h_2v_svdist2d = fs->make<TH1F>("h_2v_svdist2d", "", 100, 0, 0.1);
   h_2v_svdz = fs->make<TH1F>("h_2v_svdz", "", 50, -0.1, 0.1);
   h_2v_dphi = fs->make<TH1F>("h_2v_dphi", "", 10, -M_PI, M_PI);
@@ -134,6 +140,8 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_1v_bs2ddist = fs->make<TH1F>("h_1v_bs2ddist", "", 100, 0, 0.1);
   h_1v_bs2ddist_v_bsdz = fs->make<TH2F>("h_1v_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
   h_1v_bsdz = fs->make<TH1F>("h_1v_bsdz", "", 200, -20, 20);
+  h_1v_ntracks = fs->make<TH2F>("h_1v_ntracks", "", 20, 0, 20, 20, 0, 20);
+  h_1v_ntracks01 = fs->make<TH1F>("h_1v_ntracks01", "", 30, 0, 30);
   h_1v_svdist2d = fs->make<TH1F>("h_1v_svdist2d", "", 100, 0, 0.1);
   h_1v_svdz = fs->make<TH1F>("h_1v_svdz", "", 50, -0.1, 0.1);
   h_1v_svdz_all = fs->make<TH1F>("h_1v_svdz_all", "", 200, -10, 10);
@@ -283,6 +291,8 @@ void MFVOne2Two::endJob() {
     h_2v_bsdz_0->Fill(v0.z);
     h_2v_bsdz_1->Fill(v1.z);
 
+    h_2v_ntracks->Fill(v0.ntracks(), v1.ntracks());
+    h_2v_ntracks01->Fill(v0.ntracks() + v1.ntracks());
     h_2v_svdist2d->Fill(svdist2d(v0, v1));
     h_2v_svdz->Fill(dz(v0, v1));
     h_2v_dphi->Fill(dphi(v0, v1));
@@ -319,7 +329,7 @@ void MFVOne2Two::endJob() {
 	const double u1 = gRandom->Rndm();
 	const double u2 = gRandom->Rndm();
 
-	if (p_dphi > u1 && p_dz > u2) {
+	if (p_dphi > u1 && fabs(v0.z-vx.z) < 0.025 && v0.ntracks() + vx.ntracks() < 20) { //p_dz > u2) {
 	  jv = x;
 	  used[x] = true;
 	  printf("\r%200s\r", "");
@@ -351,6 +361,8 @@ void MFVOne2Two::endJob() {
     h_1v_bsdz->Fill(v0.z);
     h_1v_bsdz->Fill(v1.z);
 
+    h_1v_ntracks->Fill(v0.ntracks(), v1.ntracks());
+    h_1v_ntracks01->Fill(v0.ntracks() + v1.ntracks());
     h_1v_svdist2d->Fill(svdist2d(v0, v1));
     h_1v_svdz->Fill(dz(v0, v1));
     h_1v_svdz_all->Fill(dz(v0, v1));
