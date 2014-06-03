@@ -179,7 +179,26 @@ def svdist2d_comp(norm_below, shift=None, rebin=None):
         ch1v.SetLineColor(ROOT.kRed)
         ch2v.Draw()
         ch1v.Draw('hist same')
-        ps.save('svdist2d_norm%s_cumul_%s' % (norm_name, opt))
+        ps.save('svdist2d_%s_cumul%s' % (name, opt))
+
+    return ks
+
+for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
+    svdist2d_comp(norm_below, 0)
+
+n = 30
+shifts = range(n)
+kses = [svdist2d_comp(1, shift) for shift in shifts]
+for i,(a,b) in enumerate(kses):
+    print i, a, b
+shifts = array('d', shifts)
+for i,name in enumerate(('dist', 'prob')):
+    g = ROOT.TGraph(n, shifts, array('d', [x[i] for x in kses]))
+    g.SetTitle(';shift;KS %s' % name)
+    g.SetMarkerStyle(20)
+    g.SetMarkerSize(1)
+    g.Draw('ALP')
+    ps.save('KS_%s_v_shift' % name)
 
 ####
 
