@@ -354,14 +354,7 @@ void MFVOne2Two::endJob() {
 	if (phi_ok && dz_ok && ntracks_ok) {
 	  jv = x;
 	  used[x] = true;
-	  printf("\r%200s\r", "");
-	  fflush(stdout);
 	  break;
-	}
-
-	if (++tries % 20000 == 0) {
-	  printf("\rtry %12i on pair %6i with v0 = %i (%f, %f, %f)   vx = %i (%f, %f, %f)  p_dphi %f  p_dz %f  u1 %f  u2 %f", tries, ipair, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z, p_dphi, p_dz, u1, u2);
-	  fflush(stdout);
 	}
 
 	if (tries == giveup)
