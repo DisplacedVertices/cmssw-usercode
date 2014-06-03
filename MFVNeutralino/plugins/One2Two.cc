@@ -43,6 +43,7 @@ public:
 
   bool sel_event(const MFVEvent&) const;
   bool sel_vertex(const MFVEvent&, const MFVVertexAux&) const;
+  bool sel_vertex_aft(const MFVVertexAux&) const;
   MFVVertexAux xform_vertex(const MFVEvent&, const MFVVertexAux&) const;
 
   TF1* f_dphi;
@@ -62,6 +63,8 @@ public:
   const edm::InputTag event_src;
   const edm::InputTag vertex_src;
   const bool wrep;
+  const int min_ntracks;
+  const int min_ntracks_aft;
 
   MFVVertexAuxCollection one_vertices;
   std::vector<std::pair<MFVVertexAux, MFVVertexAux> >  two_vertices;
@@ -106,7 +109,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   : filename(cfg.getParameter<std::string>("filename")),
     event_src(cfg.getParameter<edm::InputTag>("event_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    wrep(cfg.getParameter<bool>("wrep"))
+    wrep(cfg.getParameter<bool>("wrep")),
+    min_ntracks(cfg.getParameter<int>("min_ntracks")),
+    min_ntracks_aft(cfg.getParameter<int>("min_ntracks_aft"))
 {
   edm::Service<TFileService> fs;
   gRandom = new TRandom3(121982);
@@ -171,7 +176,11 @@ bool MFVOne2Two::sel_event(const MFVEvent&) const {
 }
 
 bool MFVOne2Two::sel_vertex(const MFVEvent&, const MFVVertexAux& v) const {
-  return v.ntracks() >= 6;
+  return v.ntracks() >= min_ntracks;
+}
+
+bool MFVOne2Two::sel_vertex_aft(const MFVVertexAux& v) const {
+  return v.ntracks() >= min_ntracks_aft;
 }
 
 MFVVertexAux MFVOne2Two::xform_vertex(const MFVEvent& mevent, const MFVVertexAux& v) const {
@@ -256,7 +265,8 @@ void MFVOne2Two::endJob() {
 	v0.x = x0; v0.y = y0; v0.z = z0; v0.bs2ddist = mag(x0, y0);
 	for (int i = 0; i < ntk0; ++i)
 	  v0.insert_track();
-	one_vertices.push_back(v0);
+	if (sel_vertex_aft(v0))
+	  one_vertices.push_back(v0);
       }
       else if (res == 8) {
 	MFVVertexAux v0, v1;
@@ -264,7 +274,14 @@ void MFVOne2Two::endJob() {
 	v1.x = x1; v1.y = y1; v1.z = z1; v1.bs2ddist = mag(x1, y1);
 	for (int i = 0; i < ntk0; ++i) v0.insert_track();
 	for (int i = 0; i < ntk1; ++i) v1.insert_track();
-	two_vertices.push_back(std::make_pair(v0, v1));
+	bool sel0 = sel_vertex_aft(v0);
+	bool sel1 = sel_vertex_aft(v1);
+	if (sel0 && sel1)
+	  two_vertices.push_back(std::make_pair(v0, v1));
+	else if (sel0)
+	  one_vertices.push_back(v0);
+	else if (sel1)
+	  one_vertices.push_back(v1);
       }
     }
 
