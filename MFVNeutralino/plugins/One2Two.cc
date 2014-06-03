@@ -61,6 +61,7 @@ public:
   const std::string filename;
   const edm::InputTag event_src;
   const edm::InputTag vertex_src;
+  const bool wrep;
 
   MFVVertexAuxCollection one_vertices;
   std::vector<std::pair<MFVVertexAux, MFVVertexAux> >  two_vertices;
@@ -83,26 +84,23 @@ public:
   TH1F* h_2v_abs_dphi;
   TH2F* h_2v_svdz_v_dphi;
 
-  TH1F* h_1v_worep_bs2ddist;
-  TH2F* h_1v_worep_bs2ddist_v_bsdz;
-  TH1F* h_1v_worep_bsdz;
-  TH1F* h_1v_worep_svdist2d;
-  TH1F* h_1v_worep_svdz;
-  TH1F* h_1v_worep_svdz_all;
-  TH1F* h_1v_worep_dphi;
-  TH1F* h_1v_worep_abs_dphi;
-  TH2F* h_1v_worep_svdz_v_dphi;
-  TH2F* h_1v_worep_svdz_all_v_dphi;
-
-  TH1F* h_1v_wrep_svdist2d;
-  TH1F* h_1v_wrep_dphi;
-  TH1F* h_1v_wrep_abs_dphi;
+  TH1F* h_1v_bs2ddist;
+  TH2F* h_1v_bs2ddist_v_bsdz;
+  TH1F* h_1v_bsdz;
+  TH1F* h_1v_svdist2d;
+  TH1F* h_1v_svdz;
+  TH1F* h_1v_svdz_all;
+  TH1F* h_1v_dphi;
+  TH1F* h_1v_abs_dphi;
+  TH2F* h_1v_svdz_v_dphi;
+  TH2F* h_1v_svdz_all_v_dphi;
 };
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   : filename(cfg.getParameter<std::string>("filename")),
     event_src(cfg.getParameter<edm::InputTag>("event_src")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src"))
+    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    wrep(cfg.getParameter<bool>("wrep"))
 {
   edm::Service<TFileService> fs;
   gRandom = new TRandom3(121982);
@@ -133,16 +131,16 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_2v_abs_dphi = fs->make<TH1F>("h_2v_abs_dphi", "", 10, 0, M_PI);
   h_2v_svdz_v_dphi = fs->make<TH2F>("h_2v_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
-  h_1v_worep_bs2ddist = fs->make<TH1F>("h_1v_worep_bs2ddist", "", 100, 0, 0.1);
-  h_1v_worep_bs2ddist_v_bsdz = fs->make<TH2F>("h_1v_worep_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
-  h_1v_worep_bsdz = fs->make<TH1F>("h_1v_worep_bsdz", "", 200, -20, 20);
-  h_1v_worep_svdist2d = fs->make<TH1F>("h_1v_worep_svdist2d", "", 100, 0, 0.1);
-  h_1v_worep_svdz = fs->make<TH1F>("h_1v_worep_svdz", "", 50, -0.1, 0.1);
-  h_1v_worep_svdz_all = fs->make<TH1F>("h_1v_worep_svdz_all", "", 200, -10, 10);
-  h_1v_worep_dphi = fs->make<TH1F>("h_1v_worep_dphi", "", 10, -M_PI, M_PI);
-  h_1v_worep_abs_dphi = fs->make<TH1F>("h_1v_worep_abs_dphi", "", 10, 0, M_PI);
-  h_1v_worep_svdz_v_dphi = fs->make<TH2F>("h_1v_worep_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
-  h_1v_worep_svdz_all_v_dphi = fs->make<TH2F>("h_1v_worep_svdz_all_v_dphi", "", 10, -M_PI, M_PI, 200, -10, 10);
+  h_1v_bs2ddist = fs->make<TH1F>("h_1v_bs2ddist", "", 100, 0, 0.1);
+  h_1v_bs2ddist_v_bsdz = fs->make<TH2F>("h_1v_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
+  h_1v_bsdz = fs->make<TH1F>("h_1v_bsdz", "", 200, -20, 20);
+  h_1v_svdist2d = fs->make<TH1F>("h_1v_svdist2d", "", 100, 0, 0.1);
+  h_1v_svdz = fs->make<TH1F>("h_1v_svdz", "", 50, -0.1, 0.1);
+  h_1v_svdz_all = fs->make<TH1F>("h_1v_svdz_all", "", 200, -10, 10);
+  h_1v_dphi = fs->make<TH1F>("h_1v_dphi", "", 10, -M_PI, M_PI);
+  h_1v_abs_dphi = fs->make<TH1F>("h_1v_abs_dphi", "", 10, 0, M_PI);
+  h_1v_svdz_v_dphi = fs->make<TH2F>("h_1v_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
+  h_1v_svdz_all_v_dphi = fs->make<TH2F>("h_1v_svdz_all_v_dphi", "", 10, -M_PI, M_PI, 200, -10, 10);
 
 #if 0
   h_1v_wrep_svdist2d = fs->make<TH1F>("h_1v_wrep_svdist2d", "", 100, 0, 0.1);
@@ -229,7 +227,7 @@ void MFVOne2Two::endJob() {
     if (!f)
       throw cms::Exception("One2Two") << "could not read file " << filename;
 
-    const bool debug = true;
+    const bool debug = false;
     char line[1024];
     while (fgets(line, 1024, f) != 0) {
       if (debug) printf("One2Two debug: file line read: %s", line);
@@ -243,15 +241,15 @@ void MFVOne2Two::endJob() {
 
       if (res == 4) {
 	MFVVertexAux v0;
-	v0.x = x0; v0.y = y0; v0.z = z0;
+	v0.x = x0; v0.y = y0; v0.z = z0; v0.bs2ddist = mag(x0, y0);
 	for (int i = 0; i < ntk0; ++i)
 	  v0.insert_track();
 	one_vertices.push_back(v0);
       }
       else if (res == 8) {
 	MFVVertexAux v0, v1;
-	v0.x = x0; v0.y = y0; v0.z = z0;
-	v1.x = x1; v1.y = y1; v1.z = z1;
+	v0.x = x0; v0.y = y0; v0.z = z0; v0.bs2ddist = mag(x0, y0);
+	v1.x = x1; v1.y = y1; v1.z = z1; v1.bs2ddist = mag(x1, y1);
 	for (int i = 0; i < ntk0; ++i) v0.insert_track();
 	for (int i = 0; i < ntk1; ++i) v1.insert_track();
 	two_vertices.push_back(std::make_pair(v0, v1));
@@ -293,15 +291,15 @@ void MFVOne2Two::endJob() {
   }
 
   const int nonevertices = int(one_vertices.size());
+  const int giveup = 20*nonevertices;
 
-  // sample without replacement
   std::vector<bool> used(nonevertices, 0);
   const int npairs = nonevertices/2;
   for (int ipair = 0; ipair < npairs; ++ipair) {
     int iv = -1;
     while (iv == -1) {
       int x = gRandom->Integer(nonevertices);
-      if (!used[x]) {
+      if (wrep || !used[x]) {
 	iv = x;
 	used[x] = true;
 	break;
@@ -309,61 +307,58 @@ void MFVOne2Two::endJob() {
     }
 
     const MFVVertexAux& v0 = one_vertices[iv];
+    int tries = 0;
 
     int jv = -1;
     while (jv == -1) {
       int x = gRandom->Integer(nonevertices);
-      if (!used[x]) {
+      if (x != iv && (wrep || !used[x])) {
 	const MFVVertexAux& vx = one_vertices[x];
-	if (prob_dphi(v0, vx) * prob_dz(v0, vx) > gRandom->Rndm()) {
+	const double p_dphi = prob_dphi(v0, vx);
+	const double p_dz   = prob_dz  (v0, vx);
+	const double u1 = gRandom->Rndm();
+	const double u2 = gRandom->Rndm();
+
+	if (p_dphi > u1 && p_dz > u2) {
 	  jv = x;
 	  used[x] = true;
+	  printf("\r%200s\r", "");
+	  fflush(stdout);
 	  break;
 	}
+
+	if (++tries % 20000 == 0) {
+	  printf("\rtry %12i on pair %6i with v0 = %i (%f, %f, %f)   vx = %i (%f, %f, %f)  p_dphi %f  p_dz %f  u1 %f  u2 %f", tries, ipair, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z, p_dphi, p_dz, u1, u2);
+	  fflush(stdout);
+	}
+
+	if (tries == giveup)
+	  break;
       }
     }
-    
-    const MFVVertexAux& v1 = one_vertices[jv];
 
-    h_1v_worep_bs2ddist->Fill(v0.bs2ddist);
-    h_1v_worep_bs2ddist->Fill(v1.bs2ddist);
-    h_1v_worep_bs2ddist_v_bsdz->Fill(v0.z, v0.bs2ddist);
-    h_1v_worep_bs2ddist_v_bsdz->Fill(v1.z, v1.bs2ddist);
-    h_1v_worep_bsdz->Fill(v0.z);
-    h_1v_worep_bsdz->Fill(v1.z);
-
-    h_1v_worep_svdist2d->Fill(svdist2d(v0, v1));
-    h_1v_worep_svdz->Fill(dz(v0, v1));
-    h_1v_worep_svdz_all->Fill(dz(v0, v1));
-    h_1v_worep_dphi->Fill(dphi(v0, v1));
-    h_1v_worep_abs_dphi->Fill(fabs(dphi(v0, v1)));
-    h_1v_worep_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
-    h_1v_worep_svdz_all_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
-  }
-
-#if 0
-  // sample with replacement
-  for (int ipair = 0; ipair < npairs; ++ipair) {
-    int iv = gRandom->Integer(nonevertices);
-    const MFVVertexAux& v0 = one_vertices[iv];
-
-    int jv = -1;
-    while (jv == -1) {
-      int x = gRandom->Integer(nonevertices);
-      const MFVVertexAux& vx = one_vertices[x];
-      if (prob_dphi(v0, vx) > gRandom->Rndm()) {
-	jv = x;
-	break;
-      }
+    if (jv == -1) { // tries == giveup, forget about this guy.
+      --ipair;
+      continue;
     }
-    
+
     const MFVVertexAux& v1 = one_vertices[jv];
 
-    h_1v_wrep_svdist2d->Fill(svdist2d(v0, v1));
-    h_1v_wrep_dphi->Fill(dphi(v0, v1));
-    h_1v_wrep_abs_dphi->Fill(fabs(dphi(v0, v1)));
+    h_1v_bs2ddist->Fill(v0.bs2ddist);
+    h_1v_bs2ddist->Fill(v1.bs2ddist);
+    h_1v_bs2ddist_v_bsdz->Fill(v0.z, v0.bs2ddist);
+    h_1v_bs2ddist_v_bsdz->Fill(v1.z, v1.bs2ddist);
+    h_1v_bsdz->Fill(v0.z);
+    h_1v_bsdz->Fill(v1.z);
+
+    h_1v_svdist2d->Fill(svdist2d(v0, v1));
+    h_1v_svdz->Fill(dz(v0, v1));
+    h_1v_svdz_all->Fill(dz(v0, v1));
+    h_1v_dphi->Fill(dphi(v0, v1));
+    h_1v_abs_dphi->Fill(fabs(dphi(v0, v1)));
+    h_1v_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
+    h_1v_svdz_all_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
   }
-#endif
 }
 
 DEFINE_FWK_MODULE(MFVOne2Two);
