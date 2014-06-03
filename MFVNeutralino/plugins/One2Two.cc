@@ -158,12 +158,6 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_1v_abs_dphi = fs->make<TH1F>("h_1v_abs_dphi", "", 10, 0, M_PI);
   h_1v_svdz_v_dphi = fs->make<TH2F>("h_1v_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
   h_1v_svdz_all_v_dphi = fs->make<TH2F>("h_1v_svdz_all_v_dphi", "", 10, -M_PI, M_PI, 200, -10, 10);
-
-#if 0
-  h_1v_wrep_svdist2d = fs->make<TH1F>("h_1v_wrep_svdist2d", "", 100, 0, 0.1);
-  h_1v_wrep_dphi = fs->make<TH1F>("h_1v_wrep_dphi", "", 10, -M_PI, M_PI);
-  h_1v_wrep_abs_dphi = fs->make<TH1F>("h_1v_wrep_abs_dphi", "", 10, 0, M_PI);
-#endif
 }
 
 MFVOne2Two::~MFVOne2Two() {
