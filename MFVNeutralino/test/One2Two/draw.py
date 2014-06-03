@@ -16,12 +16,17 @@ f = ROOT.TFile(input_fn)
 
 ####
 
-for name in 'h_2v_xy h_1v_xy'.split():
+for name in 'h_1v_xy h_2v_xy'.split():
     h = f.Get('MFVOne2Two/%s' % name)
     h.SetTitle(';vertex x (cm);vertex y (cm)')
     h.SetStats(0)
-    h.Draw('colz')
-    ps.save(name, logz=True)
+    if '1v' in name:
+        h.Draw('colz')
+    else:
+        h.SetMarkerStyle(20)
+        h.SetMarkerSize(1.3)
+        h.Draw('scat same')
+        ps.save(name, logz=True)
 
 for name in 'h_2v_bs2ddist h_2v_bs2ddist_0 h_2v_bs2ddist_1 h_1v_bs2ddist'.split():
     h = f.Get('MFVOne2Two/%s' % name)
