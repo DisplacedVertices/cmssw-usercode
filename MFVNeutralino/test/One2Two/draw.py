@@ -203,20 +203,23 @@ for i,name in enumerate(('dist', 'prob')):
 ####
 
 if 1:
+    verbose = 'Q'
     h = f.Get('MFVOne2Two/h_2v_dphi')
 
     for i in xrange(2, 17, 2):
-        print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
+        if verbose == 'V':
+            print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
         fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
-        res = h.Fit(fcn, 'IQRS')
+        res = h.Fit(fcn, 'IRS' + verbose)
         ps.save('power_%i' % i)
         #res.Print()
 
     h = f.Get('MFVOne2Two/h_2v_abs_dphi')
 
     for i in xrange(2, 17, 2):
-        print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
+        if verbose == 'V':
+            print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
         fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
-        res = h.Fit(fcn, 'IQRS')
+        res = h.Fit(fcn, 'IRS' + verbose)
         ps.save('abs_power_%i' % i)
         #res.Print()
