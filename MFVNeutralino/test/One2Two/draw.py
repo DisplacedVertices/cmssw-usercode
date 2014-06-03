@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 import sys, os
-input_fn = [x for x in sys.argv if x.endswith('.root') and os.path.isfile(x)][0]
+input_fn = [x for x in sys.argv if x.endswith('_histos.root') and os.path.isfile(x)][0]
 from math import pi
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.gStyle.SetOptStat(2222222)
 ROOT.gStyle.SetOptFit(2222)
-ps = plot_saver('plots/one2two/%s' % input_fn.replace('.root', ''), size=(600,600))
+ps = plot_saver('plots/one2two/%s' % input_fn.replace('_histos.root', ''), size=(600,600))
 
 f = ROOT.TFile(input_fn)
 
