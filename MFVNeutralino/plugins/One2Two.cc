@@ -381,7 +381,12 @@ void MFVOne2Two::endJob() {
     h_1v_bsdz->Fill(v0.z);
     h_1v_bsdz->Fill(v1.z);
 
-    h_1v_ntracks->Fill(v0.ntracks(), v1.ntracks());
+    int ntk0 = v0.ntracks();
+    int ntk1 = v1.ntracks();
+    if (ntk1 > ntk0)
+      h_1v_ntracks->Fill(ntk1, ntk0);
+    else
+      h_1v_ntracks->Fill(ntk0, ntk1);
     h_1v_ntracks01->Fill(v0.ntracks() + v1.ntracks());
     h_1v_svdist2d->Fill(svdist2d(v0, v1));
     h_1v_svdz->Fill(dz(v0, v1));
