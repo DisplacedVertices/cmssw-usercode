@@ -2,6 +2,8 @@
 
 import sys, os
 input_fn = [x for x in sys.argv if x.endswith('_histos.root') and os.path.isfile(x)][0]
+
+from array import array
 from math import pi
 from JMTucker.Tools.ROOTTools import *
 set_style()
@@ -115,30 +117,51 @@ ps.save('dz')
 
 ####
 
-for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
-    norm_name = ('%.3f' % norm_below).replace('.','p')
+def svdist2d_comp(norm_below, shift=None, rebin=None):
+    name = ('norm%.3f' % norm_below).replace('.','p')
+    if shift is not None:
+        name += '_shift%i' % shift
     
     h2v = f.Get('MFVOne2Two/h_2v_svdist2d').Clone('h2v')
     h1v = f.Get('MFVOne2Two/h_1v_svdist2d').Clone('h1v')
 
-    #h2v.Rebin(4)
-    #h1v.Rebin(4)
+    if rebin is not None:
+        h2v.Rebin(rebin)
+        h1v.Rebin(rebin)
+
+    h1v.Scale(1/h1v.Integral())
+    nbins = h1v.GetNbinsX()
+
+    if shift is not None:
+        h1v_vals = [h1v.GetBinContent(i+1) for i in xrange(nbins)]
+        h1v_vals_new = []
+        for i in xrange(nbins):
+            ifrom = i - shift
+            h1v_vals_new.append(h1v_vals[ifrom] if ifrom >= 0 else 0.)
+
+        h1v = ROOT.TH1F('h1v_shift%i' % shift, '', nbins, h1v.GetXaxis().GetXmin(), h1v.GetXaxis().GetXmax())
+        for i in xrange(nbins):
+            h1v.SetBinContent(i+1, h1v_vals_new[i])
+            h1v.SetBinError(i+1, 0)
+        print 'shift', shift, 'mean', h1v.GetMean()
+
+    ksdist = h1v.KolmogorovTest(h2v, 'M')
+    ksprob = h1v.KolmogorovTest(h2v)
+    ks = (ksdist, ksprob)
 
     h2v.SetLineWidth(2)
     h1v.SetLineColor(ROOT.kRed)
 
-    scale = h2v.Integral(1, h2v.FindBin(norm_below))/h1v.Integral(1, h1v.FindBin(norm_below))
-    print 'scale factor for norm_below = %f: %f' % (norm_below, scale)
-    h1v.Scale(scale)
+    h1v.Scale(h2v.Integral(1, h2v.FindBin(norm_below))/h1v.Integral(1, h1v.FindBin(norm_below)))
 
-    h2v.SetTitle(';xy distance between vertex 0 and 1 (cm);events/40 #mum')
+    h2v.SetTitle('norm_below %f shift %i;xy distance between vertex 0 and 1 (cm);events/40 #mum' % (norm_below, shift))
 
     h2v.Draw('e')
     h1v.Draw('sames')
     ps.c.Update()
     differentiate_stat_box(h2v, 0, new_size=(0.3, 0.3))
     differentiate_stat_box(h1v,    new_size=(0.3, 0.3))
-    ps.save('svdist2d_norm%s' % norm_name)
+    ps.save('svdist2d_%s' % name)
 
     for opt in ('ge', 'le'):
         ch2v = cumulative_histogram(h2v, opt)
