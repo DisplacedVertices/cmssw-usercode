@@ -1,15 +1,27 @@
 #!/usr/bin/env python
 
+import sys, os
+input_fn = [x for x in sys.argv if x.endswith('.root') and os.path.isfile(x)][0]
 from math import pi
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.gStyle.SetOptStat(2222222)
 ROOT.gStyle.SetOptFit(2222)
-ps = plot_saver('plots/one2two', size=(600,600))
+ps = plot_saver('plots/one2two/%s' % input_fn.replace('.root', ''), size=(600,600))
 
-f = ROOT.TFile('one2two.root')
+f = ROOT.TFile(input_fn)
 
 ####
+
+for name in 'h_2v_ntracks h_1v_ntracks h_2v_ntracks01 h_1v_ntracks01'.split():
+    h = f.Get('MFVOne2Two/%s' % name)
+    if '01' in name:
+        h.SetTitle(';sum of ntracks 0 and 1;events')
+        h.Draw()
+    else:
+        h.SetTitle(';ntracks 0;ntracks 1')
+        h.Draw('colz')
+    ps.save(name)
 
 for name in 'h_2v_bs2ddist h_2v_bs2ddist_0 h_2v_bs2ddist_1 h_1v_bs2ddist'.split():
     h = f.Get('MFVOne2Two/%s' % name)
@@ -32,7 +44,11 @@ for name in 'h_2v_bs2ddist_v_bsdz h_2v_bs2ddist_v_bsdz_0 h_2v_bs2ddist_v_bsdz_1 
     h.Draw('colz')
     ps.save(name, logz=True)
 
-for name in 'h_2v_svdz h_1v_svdz h_1v_svdz_all'.split():
+h = f.Get('MFVOne2Two/h_2v_svdz')
+h.Fit('gaus', 'il')
+ps.save('h_2v_svdz')
+
+for name in 'h_1v_svdz h_1v_svdz_all'.split():
     h = f.Get('MFVOne2Two/%s' % name)
     h.SetTitle(';vertex #Delta z (cm);events/100 #mum')
     h.Draw()
@@ -69,14 +85,36 @@ ps.save('deltaphi')
 
 ####
 
+h2v = f.Get('MFVOne2Two/h_2v_svdz')
+h1v = f.Get('MFVOne2Two/h_1v_svdz')
+hfn = f.Get('MFVOne2Two/h_fcn_dz')
+
+h1v.SetLineColor(ROOT.kRed)
+hfn.SetLineColor(ROOT.kGreen+2)
+
+h1v.Scale(h2v.Integral()/h1v.Integral())
+hfn.Scale(h2v.Integral()/hfn.Integral())
+
+h2v.SetTitle(';#Delta z;events/0.02 cm')
+h2v.Draw()
+h1v.Draw('sames')
+hfn.Draw('sames')
+ps.c.Update()
+differentiate_stat_box(h2v, (1,0), new_size=(0.25, 0.25))
+differentiate_stat_box(h1v, (1,1), new_size=(0.25, 0.25))
+differentiate_stat_box(hfn, (1,2), new_size=(0.25, 0.25))
+ps.save('dz')
+
+####
+
 for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
     norm_name = ('%.3f' % norm_below).replace('.','p')
     
     h2v = f.Get('MFVOne2Two/h_2v_svdist2d').Clone('h2v')
     h1v = f.Get('MFVOne2Two/h_1v_svdist2d').Clone('h1v')
 
-    h2v.Rebin(4)
-    h1v.Rebin(4)
+    #h2v.Rebin(4)
+    #h1v.Rebin(4)
 
     h2v.SetLineWidth(2)
     h1v.SetLineColor(ROOT.kRed)
@@ -109,7 +147,7 @@ for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
 
 ####
 
-if 0:
+if 1:
     h = f.Get('MFVOne2Two/h_2v_dphi')
 
     for i in xrange(2, 17, 2):
