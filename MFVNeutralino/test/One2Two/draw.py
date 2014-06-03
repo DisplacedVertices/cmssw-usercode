@@ -11,34 +11,34 @@ f = ROOT.TFile('one2two.root')
 
 ####
 
-for name in 'h_2v_bs2ddist h_2v_bs2ddist_0 h_2v_bs2ddist_1 h_1v_worep_bs2ddist'.split():
+for name in 'h_2v_bs2ddist h_2v_bs2ddist_0 h_2v_bs2ddist_1 h_1v_bs2ddist'.split():
     h = f.Get('MFVOne2Two/%s' % name)
     h.Rebin(2)
     h.SetTitle(';vertex xy distance to beamspot (cm);vertices/20 #mum')
     h.Draw()
     ps.save(name)
 
-for name in 'h_2v_bsdz h_2v_bsdz_0 h_2v_bsdz_1 h_1v_worep_bsdz'.split():
+for name in 'h_2v_bsdz h_2v_bsdz_0 h_2v_bsdz_1 h_1v_bsdz'.split():
     h = f.Get('MFVOne2Two/%s' % name)
     h.Rebin(2)
     h.SetTitle(';vertex #Delta z to beamspot (cm);vertices/0.4 cm')
     h.Draw()
     ps.save(name)
 
-for name in 'h_2v_bs2ddist_v_bsdz h_2v_bs2ddist_v_bsdz_0 h_2v_bs2ddist_v_bsdz_1 h_1v_worep_bs2ddist_v_bsdz'.split():
+for name in 'h_2v_bs2ddist_v_bsdz h_2v_bs2ddist_v_bsdz_0 h_2v_bs2ddist_v_bsdz_1 h_1v_bs2ddist_v_bsdz'.split():
     h = f.Get('MFVOne2Two/%s' % name)
     h.SetTitle(';vertex #Delta z to beamspot (cm);vertex xy distance to beamspot (cm)')
     h.SetStats(0)
     h.Draw('colz')
     ps.save(name, logz=True)
 
-for name in 'h_2v_svdz h_1v_worep_svdz h_1v_worep_svdz_all'.split():
+for name in 'h_2v_svdz h_1v_svdz h_1v_svdz_all'.split():
     h = f.Get('MFVOne2Two/%s' % name)
     h.SetTitle(';vertex #Delta z (cm);events/100 #mum')
     h.Draw()
     ps.save(name)
 
-for name in 'h_2v_svdz_v_delta_phi h_1v_worep_svdz_v_delta_phi'.split():
+for name in 'h_2v_svdz_v_dphi h_1v_svdz_v_dphi'.split():
     h = f.Get('MFVOne2Two/%s' % name)
     h.SetTitle(';vertex #Delta #phi;vertex #Delta z (cm)')
     h.SetStats(0)
@@ -47,9 +47,9 @@ for name in 'h_2v_svdz_v_delta_phi h_1v_worep_svdz_v_delta_phi'.split():
 
 ####
 
-h2v = f.Get('MFVOne2Two/h_2v_delta_phi')
-h1v = f.Get('MFVOne2Two/h_1v_worep_delta_phi')
-hfn = f.Get('MFVOne2Two/h_fcn_delta_phi')
+h2v = f.Get('MFVOne2Two/h_2v_dphi')
+h1v = f.Get('MFVOne2Two/h_1v_dphi')
+hfn = f.Get('MFVOne2Two/h_fcn_dphi')
 
 h1v.SetLineColor(ROOT.kRed)
 hfn.SetLineColor(ROOT.kGreen+2)
@@ -73,7 +73,7 @@ for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
     norm_name = ('%.3f' % norm_below).replace('.','p')
     
     h2v = f.Get('MFVOne2Two/h_2v_svdist2d').Clone('h2v')
-    h1v = f.Get('MFVOne2Two/h_1v_worep_svdist2d').Clone('h1v')
+    h1v = f.Get('MFVOne2Two/h_1v_svdist2d').Clone('h1v')
 
     h2v.Rebin(4)
     h1v.Rebin(4)
@@ -110,7 +110,7 @@ for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
 ####
 
 if 0:
-    h = f.Get('MFVOne2Two/h_2v_delta_phi')
+    h = f.Get('MFVOne2Two/h_2v_dphi')
 
     for i in xrange(2, 17, 2):
         print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
@@ -119,7 +119,7 @@ if 0:
         ps.save('power_%i' % i)
         #res.Print()
 
-    h = f.Get('MFVOne2Two/h_2v_abs_delta_phi')
+    h = f.Get('MFVOne2Two/h_2v_abs_dphi')
 
     for i in xrange(2, 17, 2):
         print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
