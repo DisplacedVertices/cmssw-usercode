@@ -69,6 +69,7 @@ public:
   TH1F* h_nsv;
   TH1F* h_nsvsel;
 
+  TH2F* h_2v_xy;
   TH1F* h_2v_bs2ddist;
   TH2F* h_2v_bs2ddist_v_bsdz;
   TH1F* h_2v_bsdz;
@@ -86,6 +87,7 @@ public:
   TH1F* h_2v_abs_dphi;
   TH2F* h_2v_svdz_v_dphi;
 
+  TH2F* h_1v_xy;
   TH1F* h_1v_bs2ddist;
   TH2F* h_1v_bs2ddist_v_bsdz;
   TH1F* h_1v_bsdz;
@@ -120,6 +122,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 10, -0.1, 0.1);
   h_fcn_dz->FillRandom("f_dz", 100000);
 
+  h_2v_xy = fs->make<TH2F>("h_2v_xy", 100, -0.05, 0.05, 100, 0.05, 0.05);
   h_2v_bs2ddist = fs->make<TH1F>("h_2v_bs2ddist", "", 100, 0, 0.1);
   h_2v_bs2ddist_v_bsdz = fs->make<TH2F>("h_2v_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
   h_2v_bsdz = fs->make<TH1F>("h_2v_bsdz", "", 200, -20, 20);
@@ -137,6 +140,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_2v_abs_dphi = fs->make<TH1F>("h_2v_abs_dphi", "", 10, 0, M_PI);
   h_2v_svdz_v_dphi = fs->make<TH2F>("h_2v_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
+  h_1v_xy = fs->make<TH2F>("h_1v_xy", 100, -0.05, 0.05, 100, 0.05, 0.05);
   h_1v_bs2ddist = fs->make<TH1F>("h_1v_bs2ddist", "", 100, 0, 0.1);
   h_1v_bs2ddist_v_bsdz = fs->make<TH2F>("h_1v_bs2ddist_v_bsdz", "", 200, -20, 20, 100, 0, 0.1);
   h_1v_bsdz = fs->make<TH1F>("h_1v_bsdz", "", 200, -20, 20);
@@ -278,6 +282,8 @@ void MFVOne2Two::endJob() {
     const MFVVertexAux& v0 = pair.first;
     const MFVVertexAux& v1 = pair.second;
     
+    h_2v_xy->Fill(v0.x, v0.y);
+    h_2v_xy->Fill(v1.x, v1.y);
     h_2v_bs2ddist->Fill(v0.bs2ddist);
     h_2v_bs2ddist->Fill(v1.bs2ddist);
     h_2v_bs2ddist_0->Fill(v0.bs2ddist);
@@ -355,6 +361,8 @@ void MFVOne2Two::endJob() {
 
     const MFVVertexAux& v1 = one_vertices[jv];
 
+    h_1v_xy->Fill(v0.x, v0.y);
+    h_1v_xy->Fill(v1.x, v1.y);
     h_1v_bs2ddist->Fill(v0.bs2ddist);
     h_1v_bs2ddist->Fill(v1.bs2ddist);
     h_1v_bs2ddist_v_bsdz->Fill(v0.z, v0.bs2ddist);
