@@ -65,6 +65,9 @@ public:
   const bool wrep;
   const int min_ntracks;
   const int min_ntracks_aft;
+  const bool use_f_dz;
+  const double max_1v_dz;
+  const int max_1v_ntracks;
 
   MFVVertexAuxCollection one_vertices;
   std::vector<std::pair<MFVVertexAux, MFVVertexAux> >  two_vertices;
@@ -111,7 +114,10 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     wrep(cfg.getParameter<bool>("wrep")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
-    min_ntracks_aft(cfg.getParameter<int>("min_ntracks_aft"))
+    min_ntracks_aft(cfg.getParameter<int>("min_ntracks_aft")),
+    use_f_dz(cfg.getParameter<bool>("use_f_dz")),
+    max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
+    max_1v_ntracks(cfg.getParameter<int>("max_1v_ntracks"))
 {
   edm::Service<TFileService> fs;
   gRandom = new TRandom3(121982);
@@ -341,13 +347,11 @@ void MFVOne2Two::endJob() {
       int x = gRandom->Integer(nonevertices);
       if (x != iv && (wrep || !used[x])) {
 	const MFVVertexAux& vx = one_vertices[x];
-	const double p_dphi = prob_dphi(v0, vx);
-	const double p_dz   = prob_dz  (v0, vx);
-	const double u1 = gRandom->Rndm();
-	const double u2 = gRandom->Rndm();
+	const bool phi_ok = prob_dphi(v0, vx) > gRandom->Rndm();
+	const bool dz_ok = use_f_dz ? prob_dz(v0, vx) > gRandom->Rndm() : fabs(v0.z - vx.z) < max_1v_dz;
+	const bool ntracks_ok = v0.ntracks() + vx.ntracks() < max_1v_ntracks;
 
-	if (p_dphi > u1 && p_dz > u2) {
-	  //	if (p_dphi > u1 && fabs(v0.z-vx.z) < 0.025 && v0.ntracks() + vx.ntracks() < 20) { //p_dz > u2) {
+	if (phi_ok && dz_ok && ntracks_ok) {
 	  jv = x;
 	  used[x] = true;
 	  printf("\r%200s\r", "");
