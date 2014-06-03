@@ -2,7 +2,7 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
-process.source.fileNames = ['file:qcdht1000.root']
+process.source.fileNames = ['file:ttbarhadronic.root']
 process.source.noEventSort = cms.untracked.bool(True)
 process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 process.TFileService.fileName = 'one2two.root'
@@ -16,7 +16,15 @@ add_analyzer('MFVOne2Two',
              )
 
 for arg in sys.argv:
-    if arg.endswith('.vertices') and os.path.isfile(arg):
-        process.source = cms.Source('EmptySource')
-        process.maxEvents.input = 0
-        process.MFVOne2Two.filename = arg
+    if os.path.isfile(arg):
+        if arg.endswith('.vertices'):
+            process.source = cms.Source('EmptySource')
+            process.maxEvents.input = 0
+            process.MFVOne2Two.filename = arg
+            process.TFileService.fileName = arg.replace('.vertices', '_histos.root')
+            print 'running 2nd step with', arg
+            break
+        elif arg.endswith('.root'):
+            process.source.fileNames = ['file:' + arg]
+            print 'running 1st step with', arg
+            break
