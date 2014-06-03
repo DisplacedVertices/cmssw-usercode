@@ -329,7 +329,8 @@ void MFVOne2Two::endJob() {
 	const double u1 = gRandom->Rndm();
 	const double u2 = gRandom->Rndm();
 
-	if (p_dphi > u1 && fabs(v0.z-vx.z) < 0.025 && v0.ntracks() + vx.ntracks() < 20) { //p_dz > u2) {
+	if (p_dphi > u1 && p_dz > u2) {
+	  //	if (p_dphi > u1 && fabs(v0.z-vx.z) < 0.025 && v0.ntracks() + vx.ntracks() < 20) { //p_dz > u2) {
 	  jv = x;
 	  used[x] = true;
 	  printf("\r%200s\r", "");
