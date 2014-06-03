@@ -5,6 +5,7 @@ input_fn = [x for x in sys.argv if x.endswith('_histos.root') and os.path.isfile
 from math import pi
 from JMTucker.Tools.ROOTTools import *
 set_style()
+ROOT.TH1.AddDirectory(0)
 ROOT.gStyle.SetOptStat(2222222)
 ROOT.gStyle.SetOptFit(2222)
 ps = plot_saver('plots/one2two/%s' % input_fn.replace('_histos.root', ''), size=(600,600))
