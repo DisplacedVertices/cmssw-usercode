@@ -13,15 +13,12 @@ f = ROOT.TFile(input_fn)
 
 ####
 
-for name in 'h_2v_ntracks h_1v_ntracks h_2v_ntracks01 h_1v_ntracks01'.split():
+for name in 'h_2v_xy h_1v_xy'.split():
     h = f.Get('MFVOne2Two/%s' % name)
-    if '01' in name:
-        h.SetTitle(';sum of ntracks 0 and 1;events')
-        h.Draw()
-    else:
-        h.SetTitle(';ntracks 0;ntracks 1')
-        h.Draw('colz')
-    ps.save(name)
+    h.SetTitle(';vertex x (cm);vertex y (cm)')
+    h.SetStats(0)
+    h.Draw('colz')
+    ps.save(name, logz=True)
 
 for name in 'h_2v_bs2ddist h_2v_bs2ddist_0 h_2v_bs2ddist_1 h_1v_bs2ddist'.split():
     h = f.Get('MFVOne2Two/%s' % name)
@@ -60,6 +57,16 @@ for name in 'h_2v_svdz_v_dphi h_1v_svdz_v_dphi'.split():
     h.SetStats(0)
     h.Draw('colz')
     ps.save(name, logz=True)
+
+for name in 'h_2v_ntracks h_1v_ntracks h_2v_ntracks01 h_1v_ntracks01'.split():
+    h = f.Get('MFVOne2Two/%s' % name)
+    if '01' in name:
+        h.SetTitle(';sum of ntracks 0 and 1;events')
+        h.Draw()
+    else:
+        h.SetTitle(';ntracks 0;ntracks 1')
+        h.Draw('colz')
+    ps.save(name)
 
 ####
 
