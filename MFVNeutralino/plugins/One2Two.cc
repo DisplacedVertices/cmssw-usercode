@@ -12,30 +12,6 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 namespace {
-  struct RLE {
-    unsigned run;
-    unsigned lumi;
-    unsigned event;
-
-    RLE(const edm::Event& event) : run(event.id().run()), lumi(event.luminosityBlock()), event(event.id().event()) {}
-  };
-
-  bool operator<(const RLE& a, const RLE& b) {
-    if (a.run == b.run) {
-      if (a.lumi == b.lumi)
-	return a.event < b.event;
-      else
-	return a.lumi < b.lumi;
-    }
-    else
-      return a.run < b.run;
-  }
-
-  std::ostream& operator<<(std::ostream& o, const RLE& rle) {
-    o << "(" << rle.run << "," << rle.lumi << "," << rle.event << ")";
-    return o;
-  }    
-
   template <typename T>
   T mag(T x, T y) {
     return sqrt(x*x + y*y);
@@ -82,12 +58,15 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
   void endJob();
 
+  const std::string filename;
   const edm::InputTag event_src;
   const edm::InputTag vertex_src;
 
-  std::map<RLE, MFVEvent> mevents;
-  std::map<RLE, MFVVertexAuxCollection> all_vertices;
   MFVVertexAuxCollection one_vertices;
+  std::vector<std::pair<MFVVertexAux, MFVVertexAux> >  two_vertices;
+
+  TH1F* h_nsv;
+  TH1F* h_nsvsel;
 
   TH1F* h_2v_bs2ddist;
   TH2F* h_2v_bs2ddist_v_bsdz;
@@ -121,11 +100,15 @@ public:
 };
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
-  : event_src(cfg.getParameter<edm::InputTag>("event_src")),
+  : filename(cfg.getParameter<std::string>("filename")),
+    event_src(cfg.getParameter<edm::InputTag>("event_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src"))
 {
   edm::Service<TFileService> fs;
   gRandom = new TRandom3(121982);
+
+  h_nsv = new TH1F("h_nsv", "", 10, 0, 10);
+  h_nsvsel = new TH1F("h_nsvsel", "", 10, 0, 10);
 
   f_dphi = new TF1("f_dphi", "x*x*x*x/122.4078739141", -M_PI, M_PI);
   h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 10, -M_PI, M_PI);
@@ -170,6 +153,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
 MFVOne2Two::~MFVOne2Two() {
   delete f_dphi;
+  delete f_dz;
 }
 
 bool MFVOne2Two::sel_event(const MFVEvent&) const {
@@ -205,8 +189,8 @@ double MFVOne2Two::prob_dz(const MFVVertexAux& v0, const MFVVertexAux& v1) const
 }
 
 void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
-  RLE rle(event); 
-  //std::cout << "RLE: " << rle << std::endl;
+  if (filename != "")
+    return;
 
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(event_src, mevent);
@@ -214,24 +198,80 @@ void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
   if (!sel_event(*mevent))
     return;
 
-  mevents[rle] = *mevent;
-
   edm::Handle<MFVVertexAuxCollection> input_vertices;
   event.getByLabel(vertex_src, input_vertices);
 
-  MFVVertexAuxCollection& vertices = all_vertices[rle];
+  MFVVertexAuxCollection vertices;
 
   for (const MFVVertexAux& v : *input_vertices)
     if (sel_vertex(*mevent, v))
       vertices.push_back(xform_vertex(*mevent, v));
 
+  h_nsv->Fill(input_vertices->size());
+  h_nsvsel->Fill(vertices.size());
+  
   if (vertices.size() == 1) {
-    one_vertices.push_back(vertices[0]);
+    const MFVVertexAux& v0 = vertices[0];
+    one_vertices.push_back(v0);
+    printf("TREETHIS1v %i %.6g %.6g %.6g\n", v0.ntracks(), v0.x, v0.y, v0.z);
   }
   else if (vertices.size() >= 2) {
-    const MFVVertexAux& v0 = vertices.at(0);
-    const MFVVertexAux& v1 = vertices.at(1);
+    const MFVVertexAux& v0 = vertices[0];
+    const MFVVertexAux& v1 = vertices[1];
+    two_vertices.push_back(std::make_pair(v0, v1));
+    printf("TREETHIS2v %i %.6g %.6g %.6g %i %.6g %.6g %.6g\n", v0.ntracks(), v0.x, v0.y, v0.z, v1.ntracks(), v1.x, v1.y, v1.z);
+  }
+}
 
+void MFVOne2Two::endJob() {
+  if (filename != "") {
+    FILE* f = fopen(filename.c_str(), "rt");
+    if (!f)
+      throw cms::Exception("One2Two") << "could not read file " << filename;
+
+    const bool debug = true;
+    char line[1024];
+    while (fgets(line, 1024, f) != 0) {
+      if (debug) printf("One2Two debug: file line read: %s", line);
+      int res = 0;
+      int ntk0, ntk1;
+      float x0,y0,z0, x1,y1,z1;
+      if      ((res = sscanf(line, "TREETHIS1v %i %f %f %f",             &ntk0, &x0, &y0, &z0                      )) == 4)
+	;
+      else if ((res = sscanf(line, "TREETHIS2v %i %f %f %f %i %f %f %f", &ntk0, &x0, &y0, &z0, &ntk1, &x1, &y1, &z1)) == 8)
+	;
+
+      if (res == 4) {
+	MFVVertexAux v0;
+	v0.x = x0; v0.y = y0; v0.z = z0;
+	for (int i = 0; i < ntk0; ++i)
+	  v0.insert_track();
+	one_vertices.push_back(v0);
+      }
+      else if (res == 8) {
+	MFVVertexAux v0, v1;
+	v0.x = x0; v0.y = y0; v0.z = z0;
+	v1.x = x1; v1.y = y1; v1.z = z1;
+	for (int i = 0; i < ntk0; ++i) v0.insert_track();
+	for (int i = 0; i < ntk1; ++i) v1.insert_track();
+	two_vertices.push_back(std::make_pair(v0, v1));
+      }
+    }
+
+    fclose(f);
+  }
+
+  printf("h_nsv:");      for (int i = 1; i <= 10; ++i) printf(" %i", int(h_nsv   ->GetBinContent(i)));
+  printf("\nh_nsvsel:"); for (int i = 1; i <= 10; ++i) printf(" %i", int(h_nsvsel->GetBinContent(i)));
+  printf("\n# 1v: %i  # 2v: %i\n", int(one_vertices.size()), int(two_vertices.size()));
+
+  if (filename == "")
+    return;
+
+  for (const auto& pair : two_vertices) {
+    const MFVVertexAux& v0 = pair.first;
+    const MFVVertexAux& v1 = pair.second;
+    
     h_2v_bs2ddist->Fill(v0.bs2ddist);
     h_2v_bs2ddist->Fill(v1.bs2ddist);
     h_2v_bs2ddist_0->Fill(v0.bs2ddist);
@@ -251,26 +291,11 @@ void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_2v_abs_dphi->Fill(fabs(dphi(v0, v1)));
     h_2v_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
   }
-}
 
-void MFVOne2Two::endJob() {
-  assert(mevents.size() == all_vertices.size());
-  const int nevents = int(mevents.size());
-  int nallvertices = 0;
-  int nonevertices = 0;
-  for (const auto& it : all_vertices) {
-    //const RLE& rle = it.first;
-    const MFVVertexAuxCollection& vertices = it.second;
-    nallvertices += int(vertices.size());
-    if (vertices.size() == 1)
-      ++nonevertices;
-  }
-
-  printf("hi in endJob: %i events processed, with %i vertices (avg %f/event)\n# one-vertex events: %i", nevents, nallvertices, float(nallvertices)/nevents, nonevertices);
-  assert(int(one_vertices.size()) == nonevertices);
+  const int nonevertices = int(one_vertices.size());
 
   // sample without replacement
-  std::vector<bool> used(one_vertices.size(), 0);
+  std::vector<bool> used(nonevertices, 0);
   const int npairs = nonevertices/2;
   for (int ipair = 0; ipair < npairs; ++ipair) {
     int iv = -1;
