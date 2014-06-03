@@ -11,7 +11,8 @@ report_every(100)
 add_analyzer('MFVOne2Two',
              filename = cms.string(''),
              event_src = cms.InputTag('mfvEvent'),
-             vertex_src = cms.InputTag('mfvSelectedVerticesTight')
+             vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
+             wrep = cms.bool(True),
              )
 
 for arg in sys.argv:
