@@ -14,7 +14,7 @@ set_style()
 ROOT.TH1.AddDirectory(0)
 ROOT.gStyle.SetOptStat(2222222)
 ROOT.gStyle.SetOptFit(2222)
-ps = plot_saver('plots/one2two/ntracks%i_%s' % (ntracks, input_fn.replace('_histos.root', ''), size=(600,600)))
+ps = plot_saver('plots/one2two/ntracks%i_%s' % (ntracks, input_fn.replace('_histos.root', '')), size=(600,600))
 
 f = ROOT.TFile(input_fn)
 
