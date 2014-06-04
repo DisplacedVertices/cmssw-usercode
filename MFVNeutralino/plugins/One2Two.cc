@@ -63,6 +63,7 @@ public:
   const edm::InputTag event_src;
   const edm::InputTag vertex_src;
   const bool wrep;
+  const int npairs;
   const int min_ntracks;
   const int min_ntracks_aft;
   const bool use_f_dz;
@@ -113,6 +114,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     event_src(cfg.getParameter<edm::InputTag>("event_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     wrep(cfg.getParameter<bool>("wrep")),
+    npairs(cfg.getParameter<int>("npairs")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     min_ntracks_aft(cfg.getParameter<int>("min_ntracks_aft")),
     use_f_dz(cfg.getParameter<bool>("use_f_dz")),
@@ -327,8 +329,8 @@ void MFVOne2Two::endJob() {
   const int giveup = 20*nonevertices;
 
   std::vector<bool> used(nonevertices, 0);
-  const int npairs = nonevertices/2;
-  for (int ipair = 0; ipair < npairs; ++ipair) {
+  const int npairsuse = npairs > 0 ? npairs : nonevertices/2;
+  for (int ipair = 0; ipair < npairsuse; ++ipair) {
     int iv = -1;
     while (iv == -1) {
       int x = gRandom->Integer(nonevertices);
