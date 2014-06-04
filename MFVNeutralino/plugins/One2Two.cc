@@ -352,6 +352,7 @@ void MFVOne2Two::endJob() {
 	const bool phi_ok = prob_dphi(v0, vx) > gRandom->Rndm();
 	const bool dz_ok = use_f_dz ? prob_dz(v0, vx) > gRandom->Rndm() : fabs(v0.z - vx.z) < max_1v_dz;
 	const bool ntracks_ok = v0.ntracks() + vx.ntracks() < max_1v_ntracks;
+        ++tries;
 
 	if (phi_ok && dz_ok && ntracks_ok) {
 	  jv = x;
