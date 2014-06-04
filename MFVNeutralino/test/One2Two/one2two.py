@@ -13,6 +13,12 @@ add_analyzer('MFVOne2Two',
              event_src = cms.InputTag('mfvEvent'),
              vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
              wrep = cms.bool(True),
+             npairs = cms.int32(-1),
+             min_ntracks = cms.int32(5),
+             min_ntracks_aft = cms.int32(5),
+             use_f_dz = cms.bool(False),
+             max_1v_dz = cms.double(0.025),
+             max_1v_ntracks = cms.int32(1000000)
              )
 
 for arg in sys.argv:
