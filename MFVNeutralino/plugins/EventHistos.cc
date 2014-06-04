@@ -1,5 +1,6 @@
 #include "TH2F.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -73,6 +74,24 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_nmuons[3];
   TH1F* h_nelectrons[3];
   TH1F* h_nleptons[3];
+
+  TH1F* h_bjets_absdphi[3][2];
+  TH1F* h_bjets_dphi[3][2];
+  TH1F* h_bjets_deta[3][2];
+  TH2F* h_bjets_deta_dphi[3][2];
+  TH1F* h_bjets_avgeta[3][2];
+  TH2F* h_bjets_avgeta_dphi[3][2];
+  TH1F* h_bjets_dR[3][2];
+  TH2F* h_bjets_dR_dphi[3][2];
+
+  TH1F* h_muons_absdphi[3];
+  TH1F* h_muons_dphi[3];
+  TH1F* h_muons_deta[3];
+  TH2F* h_muons_deta_dphi[3];
+  TH1F* h_muons_avgeta[3];
+  TH2F* h_muons_avgeta_dphi[3];
+  TH1F* h_muons_dR[3];
+  TH2F* h_muons_dR_dphi[3];
 
   TH1F* h_pv_n;
   TH1F* h_pv_x[4];
@@ -155,11 +174,32 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_metdphimin = fs->make<TH1F>("h_metdphimin", ";#Delta #hat{#phi}_{min} (rad);events/0.1", 100, 0, 10);
 
   const char* lep_ex[3] = {"veto", "semilep", "dilep"};
+  const char* bjets_pt[2] = {"20", "50"};
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i] = fs->make<TH1F>(TString::Format("h_nbtags_%s", lmt_ex[i]), TString::Format(";# of %s b-tags;events", lmt_ex[i]), 20, 0, 20);
     h_nmuons[i] = fs->make<TH1F>(TString::Format("h_nmuons_%s", lep_ex[i]), TString::Format(";# of %s muons;events", lep_ex[i]), 5, 0, 5);
     h_nelectrons[i] = fs->make<TH1F>(TString::Format("h_nelectrons_%s", lep_ex[i]), TString::Format(";# of %s electrons;events", lep_ex[i]), 5, 0, 5);
     h_nleptons[i] = fs->make<TH1F>(TString::Format("h_nleptons_%s", lep_ex[i]), TString::Format(";# of %s leptons;events", lep_ex[i]), 5, 0, 5);
+
+    for (int j = 0; j < 2; ++j) {
+      h_bjets_absdphi[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s_ptgt%s_absdphi", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;|#Delta#phi| (rad);events/0.126", bjets_pt[j], lmt_ex[i]), 25, 0, 3.15);
+      h_bjets_dphi[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s_ptgt%s_dphi", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;#Delta#phi (rad);events/0.126", bjets_pt[j], lmt_ex[i]), 50, -3.15, 3.15);
+      h_bjets_deta[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s_ptgt%s_deta", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;#Delta#eta (rad);events/0.16", bjets_pt[j], lmt_ex[i]), 50, -4, 4);
+      h_bjets_deta_dphi[i][j] = fs->make<TH2F>(TString::Format("h_bjets_%s_ptgt%s_deta_dphi", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;#Delta#phi (rad);#Delta#eta (rad)", bjets_pt[j], lmt_ex[i]), 50, -3.15, 3.15, 50, -4, 4);
+      h_bjets_avgeta[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s_ptgt%s_avgeta", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;avg #eta (rad);events/0.16", bjets_pt[j], lmt_ex[i]), 50, -4, 4);
+      h_bjets_avgeta_dphi[i][j] = fs->make<TH2F>(TString::Format("h_bjets_%s_ptgt%s_avgeta_dphi", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;#Delta#phi (rad); avg #eta (rad)", bjets_pt[j], lmt_ex[i]), 50, -3.15, 3.15, 50, -4, 4);
+      h_bjets_dR[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s_ptgt%s_dR", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;#Delta R (rad); events/0.14", bjets_pt[j], lmt_ex[i]), 50, 0, 7);
+      h_bjets_dR_dphi[i][j] = fs->make<TH2F>(TString::Format("h_bjets_%s_ptgt%s_dR_dphi", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;#Delta#phi (rad);#Delta R (rad)", bjets_pt[j], lmt_ex[i]), 50, -3.15, 3.15, 50, 0, 7);
+    }
+
+    h_muons_absdphi[i] = fs->make<TH1F>(TString::Format("h_muons_%s_absdphi", lep_ex[i]), TString::Format("events with two %s muons;|#Delta#phi| (rad);events/0.126", lep_ex[i]), 25, 0, 3.15);
+    h_muons_dphi[i] = fs->make<TH1F>(TString::Format("h_muons_%s_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);events/0.126", lep_ex[i]), 50, -3.15, 3.15);
+    h_muons_deta[i] = fs->make<TH1F>(TString::Format("h_muons_%s_deta", lep_ex[i]), TString::Format("events with two %s muons;#Delta#eta (rad);events/0.16", lep_ex[i]), 50, -4, 4);
+    h_muons_deta_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_deta_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);#Delta#eta (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, -4, 4);
+    h_muons_avgeta[i] = fs->make<TH1F>(TString::Format("h_muons_%s_avgeta", lep_ex[i]), TString::Format("events with two %s muons;avg #eta (rad);events/0.16", lep_ex[i]), 50, -4, 4);
+    h_muons_avgeta_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_avgeta_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);avg #eta (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, -4, 4);
+    h_muons_dR[i] = fs->make<TH1F>(TString::Format("h_muons_%s_dR", lep_ex[i]), TString::Format("events with two %s muons;#Delta R (rad);events/0.14", lep_ex[i]), 50, 0, 7);
+    h_muons_dR_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_dR_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);#Delta R (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, 0, 7);
   }
 
   if (primary_vertex_src.label() != "") {
@@ -265,11 +305,62 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_metphi->Fill(mevent->metphi());
   h_metdphimin->Fill(mevent->metdphimin);
 
+  std::vector<double> bjets_eta[3][2];
+  std::vector<double> bjets_phi[3][2];
+  std::vector<double> muons_eta[3];
+  std::vector<double> muons_phi[3];
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
     h_nmuons[i]->Fill(mevent->nmu(i), w);
     h_nelectrons[i]->Fill(mevent->nel(i), w);
     h_nleptons[i]->Fill(mevent->nlep(i), w);
+
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      if (((mevent->jet_id[ijet] >> 2) & 3) >= i + 1) {
+        for (int j = 0; j < 2; ++j) {
+          if (j==1 && mevent->jet_pt[ijet] < 50) continue;
+          bjets_eta[i][j].push_back(mevent->jet_eta[ijet]);
+          bjets_phi[i][j].push_back(mevent->jet_phi[ijet]);
+        }
+      }
+    }
+    for (int j = 0; j < 2; ++j) {
+      if (bjets_phi[i][j].size() == 2) {
+        double dphi = reco::deltaPhi(bjets_phi[i][j][0], bjets_phi[i][j][1]);
+        double deta = bjets_eta[i][j][0] - bjets_eta[i][j][1];
+        double avgeta = (bjets_eta[i][j][0] + bjets_eta[i][j][1]) / 2;
+        double dR = reco::deltaR(bjets_eta[i][j][0], bjets_phi[i][j][0], bjets_eta[i][j][1], bjets_phi[i][j][1]);
+        h_bjets_absdphi[i][j]->Fill(fabs(dphi));
+        h_bjets_dphi[i][j]->Fill(dphi);
+        h_bjets_deta[i][j]->Fill(deta);
+        h_bjets_deta_dphi[i][j]->Fill(dphi, deta);
+        h_bjets_avgeta[i][j]->Fill(avgeta);
+        h_bjets_avgeta_dphi[i][j]->Fill(dphi, avgeta);
+        h_bjets_dR[i][j]->Fill(dR);
+        h_bjets_dR_dphi[i][j]->Fill(dphi, dR);
+      }
+    }
+
+    for (size_t ilep = 0; ilep < mevent->lep_id.size(); ++ilep) {
+      if ((mevent->lep_id[ilep] & 1) == 0 && (mevent->lep_id[ilep] & (1 << (i+1)))) {
+        muons_eta[i].push_back(mevent->lep_eta[ilep]);
+        muons_phi[i].push_back(mevent->lep_phi[ilep]);
+      }
+    }
+    if (muons_phi[i].size() == 2) {
+      double dphi = reco::deltaPhi(muons_phi[i][0], muons_phi[i][1]);
+      double deta = muons_eta[i][0] - muons_eta[i][1];
+      double avgeta = (muons_eta[i][0] + muons_eta[i][1]) / 2;
+      double dR = reco::deltaR(muons_eta[i][0], muons_phi[i][0], muons_eta[i][1], muons_phi[i][1]);
+      h_muons_absdphi[i]->Fill(fabs(dphi));
+      h_muons_dphi[i]->Fill(dphi);
+      h_muons_deta[i]->Fill(deta);
+      h_muons_deta_dphi[i]->Fill(dphi, deta);
+      h_muons_avgeta[i]->Fill(avgeta);
+      h_muons_avgeta_dphi[i]->Fill(dphi, avgeta);
+      h_muons_dR[i]->Fill(dR);
+      h_muons_dR_dphi[i]->Fill(dphi, dR);
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
