@@ -132,7 +132,7 @@ ps.save('dz')
 
 ####
 
-def svdist2d_comp(norm_below, shift=None, rebin=None):
+def svdist2d_comp(norm_below, shift=None, rebin=None, save=True):
     name = ('norm%.3f' % norm_below).replace('.','p')
     if shift is not None:
         name += '_shift%i' % shift
@@ -158,7 +158,7 @@ def svdist2d_comp(norm_below, shift=None, rebin=None):
         for i in xrange(nbins):
             h1v.SetBinContent(i+1, h1v_vals_new[i])
             h1v.SetBinError(i+1, 0)
-        print 'shift', shift, 'mean', h1v.GetMean()
+        #print 'shift', shift, 'mean', h1v.GetMean()
 
     ksdist = h1v.KolmogorovTest(h2v, 'M')
     ksprob = h1v.KolmogorovTest(h2v)
@@ -176,7 +176,8 @@ def svdist2d_comp(norm_below, shift=None, rebin=None):
     ps.c.Update()
     differentiate_stat_box(h2v, 0, new_size=(0.3, 0.3))
     differentiate_stat_box(h1v,    new_size=(0.3, 0.3))
-    ps.save('svdist2d_%s' % name)
+    if save:
+        ps.save('svdist2d_%s' % name)
 
     for opt in ('ge', 'le'):
         ch2v = cumulative_histogram(h2v, opt)
@@ -189,18 +190,24 @@ def svdist2d_comp(norm_below, shift=None, rebin=None):
         ch1v.SetLineColor(ROOT.kRed)
         ch2v.Draw()
         ch1v.Draw('hist same')
-        ps.save('svdist2d_%s_cumul%s' % (name, opt))
+        if save:
+            ps.save('svdist2d_%s_cumul%s' % (name, opt))
 
     return ks
 
-for norm_below in (1, 0.024, 0.032, 0.048, 0.052):
+for norm_below in (1, 0.024, 0.048):
     svdist2d_comp(norm_below, 0)
 
 n = 30
 shifts = range(n)
-kses = [svdist2d_comp(1, shift) for shift in shifts]
-for i,(a,b) in enumerate(kses):
-    print i, a, b
+kses = [svdist2d_comp(1, shift, save=False) for shift in shifts]
+min_ksdist = 1e99
+best_shift = None
+for i, (ksdist, ksprob) in enumerate(kses):
+    if ksdist < min_ksdist:
+        min_ksdist = ksdist
+        best_shift = shifts[i]
+
 shifts = array('d', shifts)
 for i,name in enumerate(('dist', 'prob')):
     g = ROOT.TGraph(n, shifts, array('d', [x[i] for x in kses]))
@@ -209,6 +216,9 @@ for i,name in enumerate(('dist', 'prob')):
     g.SetMarkerSize(1)
     g.Draw('ALP')
     ps.save('KS_%s_v_shift' % name)
+
+for norm_below in (1, 0.024, 0.048):
+    svdist2d_comp(norm_below, best_shift)
 
 ####
 
