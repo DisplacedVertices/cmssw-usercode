@@ -29,6 +29,12 @@ for arg in sys.argv:
             process.maxEvents.input = 0
             process.MFVOne2Two.filename = arg
             process.TFileService.fileName = arg.replace('.vertices', '_histos.root')
+
+            for i in (6,7,8):
+                o = process.MFVOne2Two.clone(min_ntracks_aft = i)
+                setattr(process, 'MFVOne2TwoNtracks%i' % i, o)
+                process.pMFVOne2Two *= o
+
             print 'running 2nd step with', arg
             argv_ok = True
             break
