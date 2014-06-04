@@ -13,6 +13,7 @@ process.mfvAnalysisCuts.min_nvertex = 1
 
 process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     filename = cms.string(''),
+                                    tree_path = cms.string('mfvOne2Two/t'),
                                     event_src = cms.InputTag('mfvEvent'),
                                     vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                     wrep = cms.bool(True),
