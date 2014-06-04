@@ -56,28 +56,35 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
   void endJob();
 
-  const std::string filename;
-  const std::string tree_path;
   const edm::InputTag event_src;
   const edm::InputTag vertex_src;
+  const int min_ntracks;
+
+  const std::string tree_path;
+  const std::string filename;
+  const std::vector<std::string> filenames;
+  const std::vector<int> n1vs;
+  const std::vector<double> weights;
+  const std::vector<int> npairses;
   const bool wrep;
   const int npairs;
-  const int min_ntracks;
   const int min_ntracks_aft;
   const bool use_f_dz;
   const double max_1v_dz;
   const int max_1v_ntracks;
+
+  const std::string form_dphi;
+  const std::string form_dz;
+  TF1* f_dphi;
+  TF1* f_dz;
+  TH1F* h_fcn_dphi;
+  TH1F* h_fcn_dz;
 
   MFVVertexAuxCollection one_vertices;
   std::vector<std::pair<MFVVertexAux, MFVVertexAux> >  two_vertices;
 
   TH1F* h_nsv;
   TH1F* h_nsvsel;
-
-  TF1* f_dphi;
-  TH1F* h_fcn_dphi;
-  TF1* f_dz;
-  TH1F* h_fcn_dz;
 
   TH2F* h_2v_xy;
   TH1F* h_2v_bs2ddist;
@@ -130,17 +137,24 @@ public:
 };
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
-  : filename(cfg.getParameter<std::string>("filename")),
-    tree_path(cfg.getParameter<std::string>("tree_path")),
-    event_src(cfg.getParameter<edm::InputTag>("event_src")),
+  : event_src(cfg.getParameter<edm::InputTag>("event_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    min_ntracks(cfg.getParameter<int>("min_ntracks")),
+
+    tree_path(cfg.getParameter<std::string>("tree_path")),
+    filename(cfg.getParameter<std::string>("filename")),
+    filenames(cfg.getParameter<std::vector<std::string> >("filenames")),
+    n1vs(cfg.getParameter<std::vector<int> >("n1vs")),
+    weights(cfg.getParameter<std::vector<double> >("weights")),
+    npairses(cfg.getParameter<std::vector<int> >("npairses")),
     wrep(cfg.getParameter<bool>("wrep")),
     npairs(cfg.getParameter<int>("npairs")),
-    min_ntracks(cfg.getParameter<int>("min_ntracks")),
     min_ntracks_aft(cfg.getParameter<int>("min_ntracks_aft")),
     use_f_dz(cfg.getParameter<bool>("use_f_dz")),
     max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
     max_1v_ntracks(cfg.getParameter<int>("max_1v_ntracks")),
+    form_dphi(cfg.getParameter<std::string>("form_dphi")),
+    form_dz(cfg.getParameter<std::string>("form_dz")),
     f_dphi(0),
     f_dz(0)
 {
@@ -165,11 +179,11 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     tree->Branch("z1", &nt.z1, "z1/F");
   }
   else {
-    f_dphi = new TF1("f_dphi", "x*x*x*x/122.4078739141", -M_PI, M_PI);
+    f_dphi = new TF1("f_dphi", form_dphi.c_str(), -M_PI, M_PI);
     h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 10, -M_PI, M_PI);
     h_fcn_dphi->FillRandom("f_dphi", 100000);
 
-    f_dz = new TF1("f_dz", "1/sqrt(2*3.14159265*0.01635**2)*exp(-x*x/2/0.01635**2)", -50, 50);
+    f_dz = new TF1("f_dz", form_dz.c_str(), -50, 50);
     h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 10, -0.1, 0.1);
     h_fcn_dz->FillRandom("f_dz", 100000);
 

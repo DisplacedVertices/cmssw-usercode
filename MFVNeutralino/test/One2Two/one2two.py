@@ -12,17 +12,24 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvAnalysisCuts.min_nvertex = 1
 
 process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
-                                    filename = cms.string(''),
-                                    tree_path = cms.string('mfvOne2Two/t'),
                                     event_src = cms.InputTag('mfvEvent'),
                                     vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
+                                    min_ntracks = cms.int32(5),
+
+                                    tree_path = cms.string('mfvOne2Two/t'),
+                                    filename = cms.string(''),
+                                    filenames = cms.vstring(),
+                                    n1vs = cms.vint32(),
+                                    weights = cms.vdouble(),
+                                    npairses = cms.vint32(),
                                     wrep = cms.bool(True),
                                     npairs = cms.int32(-1),
-                                    min_ntracks = cms.int32(5),
                                     min_ntracks_aft = cms.int32(5),
                                     use_f_dz = cms.bool(False),
                                     max_1v_dz = cms.double(0.025),
-                                    max_1v_ntracks = cms.int32(1000000)
+                                    max_1v_ntracks = cms.int32(1000000),
+                                    form_dphi = cms.string('x*x*x*x/122.4078739141'),
+                                    form_dz = cms.string('1/sqrt(2*3.14159265*0.01635**2)*exp(-x*x/2/0.01635**2)'),
                                     )
 
 process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvOne2Two)
