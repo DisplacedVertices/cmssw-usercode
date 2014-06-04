@@ -31,6 +31,8 @@ for arg in sys.argv:
             print 'running 2nd step with', arg
             break
         elif arg.endswith('.root'):
-            process.source.fileNames = ['file:' + arg]
+            if not arg.startswith('/store'):
+                arg = 'file:' + arg
+            process.source.fileNames = [arg]
             print 'running 1st step with', arg
             break
