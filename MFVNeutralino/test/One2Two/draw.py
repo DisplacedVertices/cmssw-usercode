@@ -60,7 +60,7 @@ for name in 'h_2v_bs2ddist_v_bsdz h_2v_bs2ddist_v_bsdz_0 h_2v_bs2ddist_v_bsdz_1 
     ps.save(name, logz=True)
 
 h = get_h('h_2v_svdz')
-h.Fit('gaus', 'il')
+h.Fit('gaus', 'ILQ')
 ps.save('h_2v_svdz')
 
 for name in 'h_1v_svdz h_1v_svdz_all'.split():
