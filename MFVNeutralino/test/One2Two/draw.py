@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 import sys, os
+from JMTucker.Tools.general import typed_from_argv
 input_fn = [x for x in sys.argv if x.endswith('_histos.root') and os.path.isfile(x)][0]
+ntracks = typed_from_argv(int)
+if ntracks is None:
+    ntracks = 5
 
 from array import array
 from math import pi
@@ -10,14 +14,20 @@ set_style()
 ROOT.TH1.AddDirectory(0)
 ROOT.gStyle.SetOptStat(2222222)
 ROOT.gStyle.SetOptFit(2222)
-ps = plot_saver('plots/one2two/%s' % input_fn.replace('_histos.root', ''), size=(600,600))
+ps = plot_saver('plots/one2two/ntracks%i_%s' % (ntracks, input_fn.replace('_histos.root', ''), size=(600,600)))
 
 f = ROOT.TFile(input_fn)
+
+def get_h(name):
+    ex = ''
+    if ntracks != 5:
+        ex = 'Ntracks%i' % ntracks
+    return f.Get('MFVOne2Two%s/%s' % (ex, name))
 
 ####
 
 for name in 'h_1v_xy h_2v_xy'.split():
-    h = f.Get('MFVOne2Two/%s' % name)
+    h = get_h(name)
     h.SetTitle(';vertex x (cm);vertex y (cm)')
     h.SetStats(0)
     if '1v' in name:
@@ -29,45 +39,45 @@ for name in 'h_1v_xy h_2v_xy'.split():
         ps.save(name, logz=True)
 
 for name in 'h_2v_bs2ddist h_2v_bs2ddist_0 h_2v_bs2ddist_1 h_1v_bs2ddist'.split():
-    h = f.Get('MFVOne2Two/%s' % name)
+    h = get_h(name)
     h.Rebin(2)
     h.SetTitle(';vertex xy distance to beamspot (cm);vertices/20 #mum')
     h.Draw()
     ps.save(name)
 
 for name in 'h_2v_bsdz h_2v_bsdz_0 h_2v_bsdz_1 h_1v_bsdz'.split():
-    h = f.Get('MFVOne2Two/%s' % name)
+    h = get_h(name)
     h.Rebin(2)
     h.SetTitle(';vertex #Delta z to beamspot (cm);vertices/0.4 cm')
     h.Draw()
     ps.save(name)
 
 for name in 'h_2v_bs2ddist_v_bsdz h_2v_bs2ddist_v_bsdz_0 h_2v_bs2ddist_v_bsdz_1 h_1v_bs2ddist_v_bsdz'.split():
-    h = f.Get('MFVOne2Two/%s' % name)
+    h = get_h(name)
     h.SetTitle(';vertex #Delta z to beamspot (cm);vertex xy distance to beamspot (cm)')
     h.SetStats(0)
     h.Draw('colz')
     ps.save(name, logz=True)
 
-h = f.Get('MFVOne2Two/h_2v_svdz')
+h = get_h('h_2v_svdz')
 h.Fit('gaus', 'il')
 ps.save('h_2v_svdz')
 
 for name in 'h_1v_svdz h_1v_svdz_all'.split():
-    h = f.Get('MFVOne2Two/%s' % name)
+    h = get_h(name)
     h.SetTitle(';vertex #Delta z (cm);events/100 #mum')
     h.Draw()
     ps.save(name)
 
 for name in 'h_2v_svdz_v_dphi h_1v_svdz_v_dphi'.split():
-    h = f.Get('MFVOne2Two/%s' % name)
+    h = get_h(name)
     h.SetTitle(';vertex #Delta #phi;vertex #Delta z (cm)')
     h.SetStats(0)
     h.Draw('colz')
     ps.save(name, logz=True)
 
 for name in 'h_2v_ntracks h_1v_ntracks h_2v_ntracks01 h_1v_ntracks01'.split():
-    h = f.Get('MFVOne2Two/%s' % name)
+    h = get_h(name)
     if '01' in name:
         h.SetTitle(';sum of ntracks 0 and 1;events')
         h.Draw()
@@ -78,9 +88,9 @@ for name in 'h_2v_ntracks h_1v_ntracks h_2v_ntracks01 h_1v_ntracks01'.split():
 
 ####
 
-h2v = f.Get('MFVOne2Two/h_2v_dphi')
-h1v = f.Get('MFVOne2Two/h_1v_dphi')
-hfn = f.Get('MFVOne2Two/h_fcn_dphi')
+h2v = get_h('h_2v_dphi')
+h1v = get_h('h_1v_dphi')
+hfn = get_h('h_fcn_dphi')
 
 h1v.SetLineColor(ROOT.kRed)
 hfn.SetLineColor(ROOT.kGreen+2)
@@ -100,9 +110,9 @@ ps.save('deltaphi')
 
 ####
 
-h2v = f.Get('MFVOne2Two/h_2v_svdz')
-h1v = f.Get('MFVOne2Two/h_1v_svdz')
-hfn = f.Get('MFVOne2Two/h_fcn_dz')
+h2v = get_h('h_2v_svdz')
+h1v = get_h('h_1v_svdz')
+hfn = get_h('h_fcn_dz')
 
 h1v.SetLineColor(ROOT.kRed)
 hfn.SetLineColor(ROOT.kGreen+2)
@@ -127,8 +137,8 @@ def svdist2d_comp(norm_below, shift=None, rebin=None):
     if shift is not None:
         name += '_shift%i' % shift
     
-    h2v = f.Get('MFVOne2Two/h_2v_svdist2d').Clone('h2v')
-    h1v = f.Get('MFVOne2Two/h_1v_svdist2d').Clone('h1v')
+    h2v = get_h('h_2v_svdist2d').Clone('h2v')
+    h1v = get_h('h_1v_svdist2d').Clone('h1v')
 
     if rebin is not None:
         h2v.Rebin(rebin)
@@ -204,7 +214,7 @@ for i,name in enumerate(('dist', 'prob')):
 
 if 1:
     verbose = 'Q'
-    h = f.Get('MFVOne2Two/h_2v_dphi')
+    h = get_h('h_2v_dphi')
 
     for i in xrange(2, 17, 2):
         if verbose == 'V':
@@ -214,7 +224,7 @@ if 1:
         ps.save('power_%i' % i)
         #res.Print()
 
-    h = f.Get('MFVOne2Two/h_2v_abs_dphi')
+    h = get_h('h_2v_abs_dphi')
 
     for i in xrange(2, 17, 2):
         if verbose == 'V':
