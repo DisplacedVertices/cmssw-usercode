@@ -145,7 +145,6 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     f_dz(0)
 {
   edm::Service<TFileService> fs;
-  gRandom = new TRandom3(121982);
 
   h_nsv = new TH1F("h_nsv", "", 10, 0, 10);
   h_nsvsel = new TH1F("h_nsvsel", "", 10, 0, 10);
@@ -395,13 +394,14 @@ void MFVOne2Two::endJob() {
 
   const int nonevertices = int(one_vertices.size());
   const int giveup = 20*nonevertices;
+  TRandom3* rand = new TRandom3(121982);
 
   std::vector<bool> used(nonevertices, 0);
   const int npairsuse = npairs > 0 ? npairs : nonevertices/2;
   for (int ipair = 0; ipair < npairsuse; ++ipair) {
     int iv = -1;
     while (iv == -1) {
-      int x = gRandom->Integer(nonevertices);
+      int x = rand->Integer(nonevertices);
       if (wrep || !used[x]) {
 	iv = x;
 	used[x] = true;
@@ -414,11 +414,11 @@ void MFVOne2Two::endJob() {
 
     int jv = -1;
     while (jv == -1) {
-      int x = gRandom->Integer(nonevertices);
+      int x = rand->Integer(nonevertices);
       if (x != iv && (wrep || !used[x])) {
 	const MFVVertexAux& vx = one_vertices[x];
-	const bool phi_ok = prob_dphi(v0, vx) > gRandom->Rndm();
-	const bool dz_ok = use_f_dz ? prob_dz(v0, vx) > gRandom->Rndm() : fabs(v0.z - vx.z) < max_1v_dz;
+	const bool phi_ok = prob_dphi(v0, vx) > rand->Rndm();
+	const bool dz_ok = use_f_dz ? prob_dz(v0, vx) > rand->Rndm() : fabs(v0.z - vx.z) < max_1v_dz;
 	const bool ntracks_ok = v0.ntracks() + vx.ntracks() < max_1v_ntracks;
         ++tries;
 
@@ -464,6 +464,8 @@ void MFVOne2Two::endJob() {
     h_1v_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
     h_1v_svdz_all_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
   }
+
+  delete rand;
 }
 
 DEFINE_FWK_MODULE(MFVOne2Two);
