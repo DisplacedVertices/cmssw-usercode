@@ -47,13 +47,16 @@ for arg in sys.argv:
             break
 
 if not argv_ok:
-    fn = {
-        'qcdht0250': '/store/user/tucker/QCD_HT-250To500_TuneZ2star_8TeV-madgraph-pythia6/mfvminintuple_v18/ba03008a9ad7512ae49ff8fbd40bf0d3/merged.root',
-        'qcdht0500': '/store/user/tucker/QCD_HT-500To1000_TuneZ2star_8TeV-madgraph-pythia6/mfvminintuple_v18/ab2723f55b544e44b6f7c283e78a4fd3/merged.root',
-        'qcdht1000': '/store/user/tucker/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/mfvminintuple_v18/59dbce4c4744ce2cb534302fb0e499de/merged.root',
-        'ttbardilep': '/store/user/tucker/TTJets_FullLeptMGDecays_8TeV-madgraph/mfvminintuple_v18/79f73fd0971c6914ff132951d86b1e20/merged.root',
-        'ttbarhadronic': '/store/user/tucker/TTJets_HadronicMGDecays_8TeV-madgraph/mfvminintuple_v18/d59b961e9ce571db158eb644bd3fcd7e/merged.root',
-        'ttbarsemilep': '/store/user/tucker/TTJets_SemiLeptMGDecays_8TeV-madgraph/mfvminintuple_v18/3b2cc1ecca69c57de3286e3135a6660c/merged.root',
-        }[sys.argv[-1]]
-    process.source.fileNames = [fn]
-    print 'running 1st step with', fn
+    try:
+        fn = {
+            'qcdht0250': '/store/user/tucker/QCD_HT-250To500_TuneZ2star_8TeV-madgraph-pythia6/mfvminintuple_v18/ba03008a9ad7512ae49ff8fbd40bf0d3/merged.root',
+            'qcdht0500': '/store/user/tucker/QCD_HT-500To1000_TuneZ2star_8TeV-madgraph-pythia6/mfvminintuple_v18/ab2723f55b544e44b6f7c283e78a4fd3/merged.root',
+            'qcdht1000': '/store/user/tucker/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/mfvminintuple_v18/59dbce4c4744ce2cb534302fb0e499de/merged.root',
+            'ttbardilep': '/store/user/tucker/TTJets_FullLeptMGDecays_8TeV-madgraph/mfvminintuple_v18/79f73fd0971c6914ff132951d86b1e20/merged.root',
+            'ttbarhadronic': '/store/user/tucker/TTJets_HadronicMGDecays_8TeV-madgraph/mfvminintuple_v18/d59b961e9ce571db158eb644bd3fcd7e/merged.root',
+            'ttbarsemilep': '/store/user/tucker/TTJets_SemiLeptMGDecays_8TeV-madgraph/mfvminintuple_v18/3b2cc1ecca69c57de3286e3135a6660c/merged.root',
+            }[sys.argv[-1]]
+        process.source.fileNames = [fn]
+        print 'running 1st step with', fn
+    except KeyError:
+        pass
