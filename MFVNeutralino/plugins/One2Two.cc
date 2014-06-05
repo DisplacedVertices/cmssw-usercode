@@ -318,8 +318,11 @@ void MFVOne2Two::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
   }
-  else
+  else {
+    if (vertices.size() != 0)
+      throw cms::Exception("CheckYourPremises") << "more than two vertices (" << vertices.size() << ") in this event";
     return;
+  }
 
   tree->Fill();
 }
