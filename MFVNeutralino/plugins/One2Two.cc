@@ -102,6 +102,10 @@ public:
   TH1F* h_2v_svdz;
   TH1F* h_2v_dphi;
   TH1F* h_2v_abs_dphi;
+  TH1F* h_2v_lt35_dphi;
+  TH1F* h_2v_lt35_abs_dphi;
+  TH1F* h_2v_gt35_dphi;
+  TH1F* h_2v_gt35_abs_dphi;
   TH2F* h_2v_svdz_v_dphi;
 
   TH2F* h_1v_xy;
@@ -203,6 +207,10 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_2v_svdz = fs->make<TH1F>("h_2v_svdz", "", 50, -0.1, 0.1);
     h_2v_dphi = fs->make<TH1F>("h_2v_dphi", "", 10, -M_PI, M_PI);
     h_2v_abs_dphi = fs->make<TH1F>("h_2v_abs_dphi", "", 10, 0, M_PI);
+    h_2v_lt35_dphi = fs->make<TH1F>("h_2v_lt35_dphi", "", 10, -M_PI, M_PI);
+    h_2v_lt35_abs_dphi = fs->make<TH1F>("h_2v_lt35_abs_dphi", "", 10, 0, M_PI);
+    h_2v_gt35_dphi = fs->make<TH1F>("h_2v_gt35_dphi", "", 10, -M_PI, M_PI);
+    h_2v_gt35_abs_dphi = fs->make<TH1F>("h_2v_gt35_abs_dphi", "", 10, 0, M_PI);
     h_2v_svdz_v_dphi = fs->make<TH2F>("h_2v_svdz_v_dphi", "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
 
     h_1v_xy = fs->make<TH2F>("h_1v_xy", "", 100, -0.05, 0.05, 100, 0.05, 0.05);
@@ -403,6 +411,14 @@ void MFVOne2Two::endJob() {
     h_2v_svdz->Fill(dz(v0, v1));
     h_2v_dphi->Fill(dphi(v0, v1));
     h_2v_abs_dphi->Fill(fabs(dphi(v0, v1)));
+    if (svdist2d(v0, v1) < 0.035) {
+      h_2v_lt35_dphi->Fill(dphi(v0, v1));
+      h_2v_lt35_abs_dphi->Fill(fabs(dphi(v0, v1)));
+    }
+    else {
+      h_2v_gt35_dphi->Fill(dphi(v0, v1));
+      h_2v_gt35_abs_dphi->Fill(fabs(dphi(v0, v1)));
+    }
     h_2v_svdz_v_dphi->Fill(dphi(v0, v1), dz(v0, v1));
   }
 
