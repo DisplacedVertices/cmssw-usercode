@@ -110,6 +110,19 @@ ps.save('deltaphi')
 
 ####
 
+h2v_lt35 = get_h('h_2v_lt35_dphi')
+h2v_gt35 = get_h('h_2v_lt35_dphi')
+
+h2v_gt35.SetLineColor(ROOT.kRed)
+
+h2v_lt35.Draw()
+h2v_gt35.Draw('sames')
+ps.c.Update()
+differentiate_stat_box(h2v_gt35)
+ps.save('deltaphi_ltgt35')
+
+####
+
 h2v = get_h('h_2v_svdz')
 h1v = get_h('h_1v_svdz')
 hfn = get_h('h_fcn_dz')
