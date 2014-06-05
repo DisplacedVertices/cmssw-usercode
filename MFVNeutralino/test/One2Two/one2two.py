@@ -11,6 +11,14 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvAnalysisCuts.min_nvertex = 1
 
+from math import pi
+from JMTucker.Tools.general import typed_from_argv
+phiexp = typed_from_argv(float)
+if phiexp is None:
+    phiexp = 4
+phiint = 2*pi**(phiexp+1)/(phiexp+1)
+print '|x|^%.1f / %.4f' % (phiexp, phiint)
+
 process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     event_src = cms.InputTag('mfvEvent'),
                                     vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
@@ -28,7 +36,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     use_f_dz = cms.bool(False),
                                     max_1v_dz = cms.double(0.025),
                                     max_1v_ntracks = cms.int32(1000000),
-                                    form_dphi = cms.string('x*x*x*x/122.4078739141'),
+                                    form_dphi = cms.string('abs(x)**%.4f/%.8f' % (phiexp, phiint)),
                                     form_dz = cms.string('1/sqrt(2*3.14159265*0.01635**2)*exp(-x*x/2/0.01635**2)'),
                                     )
 
