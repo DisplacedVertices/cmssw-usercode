@@ -255,7 +255,7 @@ MFVVertexAux MFVOne2Two::xform_vertex(const MFVEvent& mevent, const MFVVertexAux
 }
 
 double MFVOne2Two::prob_dphi(const double dphi) const {
-  return f_dphi->Eval(dphi);
+  return f_dphi->Eval(fabs(dphi));
 }
 
 double MFVOne2Two::prob_dphi(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
