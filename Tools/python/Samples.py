@@ -264,6 +264,16 @@ leptonic_background_samples = [
     MCSample('dyjetstollM50',    'DY + jets #rightarrow ll, M > 50 GeV',                    '/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      30459503,  32, 0.10, 2.95e3),
 ]
 
+ttbar_systematic_samples = [
+    MCSample('ttbarsystMSDecays', 't#bar{t} (MSDecays)',    '/TTJets_MSDecays_central_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',       62131965, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystM166p5',   't#bar{t} (M=166.5 GeV)', '/TTJets_MSDecays_mass166_5_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',     27078777, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystM178p5',   't#bar{t} (M=178.5 GeV)', '/TTJets_MSDecays_mass178_5_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',     24359161, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystMatchDn',  't#bar{t} (match down)',  '/TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM',  20646562, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystMatchUp',  't#bar{t} (match up)',    '/TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM',    65679170, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystScaleDn',  't#bar{t} (Q^2 down)',    '/TTJets_MSDecays_scaledown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',     39286663, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystScaleUp',  't#bar{t} (Q^2 up)',      '/TTJets_MSDecays_scaleup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',       41908271, 4, 0.15, ttbar_xsec),
+]
+
 auxiliary_background_samples = [
     MCSample('ttbarincl',        't#bar{t}',                                                '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 6923750,   4, 0.15, ttbar_xsec),
     MCSample('qcdmupt15',        'QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV',           '/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      7529312, 801, 0.10, 3.64e8*3.7e-4),
