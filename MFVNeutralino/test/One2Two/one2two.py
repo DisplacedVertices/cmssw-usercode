@@ -1,3 +1,4 @@
+import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 process.source = cms.Source('EmptySource')
@@ -44,7 +45,7 @@ if 'toy' in sys.argv:
         (Samples.ttbarsemilep,   14),
         ]
 
-    n1v_ttbardilep = 5 # 101 5-track 1v ttdil events in 20/fb...
+    n1v_ttbardilep = 3 # 101 (23) 5- (8-)track 1v ttdil events in 20/fb...
     mfvOne2Two.filenames = ['crab/MiniTreeV18/%s.root' % s[0].name for s in sample_info]
     mfvOne2Two.n1vs = [s[1]*n1v_ttbardilep for s in sample_info]
     mfvOne2Two.weights = [s[0].partial_weight * 20000 for s in sample_info]
