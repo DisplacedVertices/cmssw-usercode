@@ -77,6 +77,7 @@ public:
   TF1* f_dphi;
   TF1* f_dz;
   TH1F* h_fcn_dphi;
+  TH1F* h_fcn_abs_dphi;
   TH1F* h_fcn_dz;
 
   TH2F* h_xy[2];
@@ -132,9 +133,11 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   f_dphi = new TF1("f_dphi", form_dphi.c_str(), 0, M_PI);
   h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 8, -M_PI, M_PI);
   h_fcn_dphi->FillRandom("f_dphi", 100000);
+  h_fcn_abs_dphi = fs->make<TH1F>("h_fcn_abs_dphi", "", 8, 0, M_PI);
+  h_fcn_abs_dphi->FillRandom("f_dphi", 100000);
 
   f_dz = new TF1("f_dz", form_dz.c_str(), -50, 50);
-  h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 10, -0.1, 0.1);
+  h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 20, -0.1, 0.1);
   h_fcn_dz->FillRandom("f_dz", 100000);
 
   for (int i = 0; i < 2; ++i) {
@@ -153,10 +156,11 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_ntracks 	      	[i] = fs->make<TH2F>(TString::Format("h_%iv_ntracks"	       , iv), "", 20, 0, 20, 20, 0, 20);
     h_ntracks01 	[i] = fs->make<TH1F>(TString::Format("h_%iv_ntracks01"	       , iv), "", 30, 0, 30);
     h_svdist2d 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_svdist2d"	       , iv), "", 100, 0, 0.1);
-    h_svdz 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_svdz"	       , iv), "", 50, -0.1, 0.1);
-    h_dphi 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_dphi"	       , iv), "", 10, -M_PI, M_PI);
-    h_abs_dphi 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_abs_dphi"	       , iv), "", 10, 0, M_PI);
-    h_svdz_v_dphi       [i] = fs->make<TH2F>(TString::Format("h_%iv_svdz_v_dphi"       , iv), "", 10, -M_PI, M_PI, 50, -0.1, 0.1);
+    h_svdz 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_svdz"	       , iv), "", 20, -0.1, 0.1);
+    h_svdz_all          [i] = fs->make<TH1F>(TString::Format("h_%iv_svdz_all"          , iv), "", 400, -20, 20);
+    h_dphi 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_dphi"	       , iv), "", 8, -M_PI, M_PI);
+    h_abs_dphi 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_abs_dphi"	       , iv), "", 8, 0, M_PI);
+    h_svdz_v_dphi       [i] = fs->make<TH2F>(TString::Format("h_%iv_svdz_v_dphi"       , iv), "", 8, -M_PI, M_PI, 50, -0.1, 0.1);
   }
 }
 
@@ -258,6 +262,8 @@ void MFVOne2Two::endJob() {
       const int N1v = int(v1v.size());
       if (n1v > N1v)
         throw cms::Exception("NotEnough") << "not enough v1vs (" << N1v << " to sample " << n1v << " of them";
+      
+      printf("sampling %i/%i events from %s\n", n1v, N1v, filenames[ifile].c_str());
 
       // Knuth sample-without-replacement.
       int t = 0, m = 0;
@@ -312,7 +318,7 @@ void MFVOne2Two::endJob() {
 
   const int N1v = int(one_vertices.size());
   std::vector<bool> used(N1v, 0);
-  const int giveup = 20*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
+  const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
   const int npairsuse = npairs > 0 ? npairs : N1v/2;
 
   for (int ipair = 0; ipair < npairsuse; ++ipair) {
@@ -337,13 +343,16 @@ void MFVOne2Two::endJob() {
 	const bool phi_ok = prob_dphi(v0, vx) > rand->Rndm();
 	const bool dz_ok = use_f_dz ? prob_dz(v0, vx) > rand->Rndm() : fabs(v0.z - vx.z) < max_1v_dz;
 	const bool ntracks_ok = v0.ntracks() + vx.ntracks() < max_1v_ntracks;
-        ++tries;
 
 	if (phi_ok && dz_ok && ntracks_ok) {
 	  jv = x;
 	  used[x] = true;
+          if (tries > 100000) printf("\r%200s\r", "");
 	  break;
 	}
+
+        if (++tries % 100000 == 0)
+          printf("\ripair %10i try %10i with v0 = %2i (%12f, %12f, %12f) and v1 = %2i (%12f, %12f, %12f)", ipair, tries, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z);
 
 	if (tries == giveup)
 	  break;
