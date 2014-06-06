@@ -102,4 +102,4 @@ mfvSelectedVerticesTightLargeErr = mfvSelectedVerticesTight.clone(
     max_bs2derr = 1e9,
     )
 
-mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose * mfvSelectedVerticesTight * mfvSelectedVerticesMedium * mfvSelectedVerticesTightLargeErr)
+mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose * mfvSelectedVerticesTight * mfvSelectedVerticesTightSig * mfvSelectedVerticesMedium * mfvSelectedVerticesTightLargeErr)
