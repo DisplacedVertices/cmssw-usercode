@@ -39,6 +39,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
 
+  TH1F* h_w;
+
   TH1F* h_nsv;
   TH2F* h_nsv_v_minlspdist2d;
   TH2F* h_nsv_v_lspdist2d;
@@ -175,6 +177,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
   edm::Service<TFileService> fs;
+
+  h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 15, 0, 15);
   h_nsv_v_minlspdist2d = fs->make<TH2F>("h_nsv_v_minlspdist2d", ";min dist2d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
@@ -560,6 +564,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
   edm::Handle<double> weight;
   event.getByLabel(weight_src, weight);
+  const double w = *weight;
+  h_w->Fill(w);
 
   const float bsx = mevent->bsx;
   const float bsy = mevent->bsy;
@@ -591,16 +597,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     const MFVVertexAux& aux = auxes->at(isv);
 
     if (isv < 2) {
-      h_sv_pos_1d[isv][0]->Fill(aux.x - bsx, *weight);
-      h_sv_pos_1d[isv][1]->Fill(aux.y - bsy, *weight);
-      h_sv_pos_1d[isv][2]->Fill(aux.z - bsz, *weight);
-      h_sv_pos_2d[isv][0]->Fill(aux.x - bsx, aux.y - bsy, *weight);
-      h_sv_pos_2d[isv][1]->Fill(aux.x - bsx, aux.z - bsz, *weight);
-      h_sv_pos_2d[isv][2]->Fill(aux.y - bsy, aux.z - bsz, *weight);
-      h_sv_pos_rz[isv]->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, *weight);
+      h_sv_pos_1d[isv][0]->Fill(aux.x - bsx, w);
+      h_sv_pos_1d[isv][1]->Fill(aux.y - bsy, w);
+      h_sv_pos_1d[isv][2]->Fill(aux.z - bsz, w);
+      h_sv_pos_2d[isv][0]->Fill(aux.x - bsx, aux.y - bsy, w);
+      h_sv_pos_2d[isv][1]->Fill(aux.x - bsx, aux.z - bsz, w);
+      h_sv_pos_2d[isv][2]->Fill(aux.y - bsy, aux.z - bsz, w);
+      h_sv_pos_rz[isv]->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, w);
       const double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
-      h_sv_pos_phi[isv]->Fill(pos_phi, *weight);
-      h_sv_pos_phi_2pi[isv]->Fill(pos_phi >= 0 ? pos_phi : pos_phi + 6.2832, *weight);
+      h_sv_pos_phi[isv]->Fill(pos_phi, w);
+      h_sv_pos_phi_2pi[isv]->Fill(pos_phi >= 0 ? pos_phi : pos_phi + 6.2832, w);
     }
 
     PairwiseHistos::ValueMap v = {
@@ -877,59 +883,59 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         for (int i = 0; i < sv_tracks_num_indices; ++i) {
           if (i == 1 && trackjetdr >= 0.5) continue;
           if (i == 2 && (trackjetdr < 1.57 || tracks[itk].dxyError() < 0.02)) continue;
-          fill_multi(h_sv_tracks_pt[0][i],        isv, tracks[itk].pt(), *weight);
-          fill_multi(h_sv_tracks_eta[0][i],       isv, tracks[itk].eta(), *weight);
-          fill_multi(h_sv_tracks_phi[0][i],       isv, tracks[itk].phi(), *weight);
-          fill_multi(h_sv_tracks_charge[0][i],    isv, tracks[itk].charge(), *weight);
-          fill_multi(h_sv_tracks_dxybs[0][i],     isv, tracks[itk].dxy(bs), *weight);
-          fill_multi(h_sv_tracks_dzbs[0][i],      isv, tracks[itk].dz(bs), *weight);
-          fill_multi(h_sv_tracks_dxypv[0][i],     isv, tracks[itk].dxy(pv), *weight);
-          fill_multi(h_sv_tracks_dzpv[0][i],      isv, tracks[itk].dz(pv), *weight);
-          fill_multi(h_sv_tracks_dxyerr[0][i],    isv, tracks[itk].dxyError(), *weight);
-          fill_multi(h_sv_tracks_dzerr[0][i],     isv, tracks[itk].dzError(), *weight);
-          fill_multi(h_sv_tracks_dxyipv1[0][i],   isv, dxy_ipv.first, *weight);
-          fill_multi(h_sv_tracks_dxyipv[0][i],    isv, dxy_ipv.second.value(), *weight);
-          fill_multi(h_sv_tracks_dxyipverr[0][i], isv, dxy_ipv.second.error(), *weight);
-          fill_multi(h_sv_tracks_d3dipv1[0][i],   isv, d3d_ipv.first, *weight);
-          fill_multi(h_sv_tracks_d3dipv[0][i],    isv, d3d_ipv.second.value(), *weight);
-          fill_multi(h_sv_tracks_d3dipverr[0][i], isv, d3d_ipv.second.error(), *weight);
-          fill_multi(h_sv_tracks_dxyisv1[0][i],   isv, dxy_isv.first, *weight);
-          fill_multi(h_sv_tracks_dxyisv[0][i],    isv, dxy_isv.second.value(), *weight);
-          fill_multi(h_sv_tracks_dxyisverr[0][i], isv, dxy_isv.second.error(), *weight);
-          fill_multi(h_sv_tracks_d3disv1[0][i],   isv, d3d_isv.first, *weight);
-          fill_multi(h_sv_tracks_d3disv[0][i],    isv, d3d_isv.second.value(), *weight);
-          fill_multi(h_sv_tracks_d3disverr[0][i], isv, d3d_isv.second.error(), *weight);
-          fill_multi(h_sv_tracks_chi2dof[0][i],   isv, tracks[itk].chi2() / tracks[itk].ndof(), *weight);
-          fill_multi(h_sv_tracks_nhits[0][i],     isv, tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
-          fill_multi(h_sv_tracks_npixel[0][i],    isv, tracks[itk].hitPattern().numberOfValidPixelHits(), *weight);
-          fill_multi(h_sv_tracks_nstrip[0][i],    isv, tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
-          fill_multi(h_sv_tracks_minr[0][i],      isv, se.min_r, *weight);
-          fill_multi(h_sv_tracks_minz[0][i],      isv, se.min_z, *weight);
-          fill_multi(h_sv_tracks_maxr[0][i],      isv, se.max_r, *weight);
-          fill_multi(h_sv_tracks_maxz[0][i],      isv, se.max_z, *weight);
-          fill_multi(h_sv_tracks_jetdr[0][i],     isv, trackjetdr, *weight);
-          fill_multi(h_sv_tracks_jetdphi[0][i],   isv, reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi()), *weight);
-          fill_multi(h_sv_tracks_bs2derr_jetdr[0][i], isv, trackjetdr, aux.bs2derr, *weight);
-          fill_multi(h_sv_tracks_dzpv0[0][i],     isv, absdz0, *weight);
-          fill_multi(h_sv_tracks_dzpv1[0][i],     isv, absdz1, *weight);
-          fill_multi(h_sv_tracks_dzpv2[0][i],     isv, absdz2, *weight);
-          fill_multi(h_sv_tracks_dzpv2_dzpv0[0][i], isv, absdz0, absdz2, *weight);
-          fill_multi(h_sv_tracks_dzpv2sig_dzpv0sig[0][i], isv, absdz0 / tracks[itk].dzError(), absdz2 / tracks[itk].dzError(), *weight);
+          fill_multi(h_sv_tracks_pt[0][i],        isv, tracks[itk].pt(), w);
+          fill_multi(h_sv_tracks_eta[0][i],       isv, tracks[itk].eta(), w);
+          fill_multi(h_sv_tracks_phi[0][i],       isv, tracks[itk].phi(), w);
+          fill_multi(h_sv_tracks_charge[0][i],    isv, tracks[itk].charge(), w);
+          fill_multi(h_sv_tracks_dxybs[0][i],     isv, tracks[itk].dxy(bs), w);
+          fill_multi(h_sv_tracks_dzbs[0][i],      isv, tracks[itk].dz(bs), w);
+          fill_multi(h_sv_tracks_dxypv[0][i],     isv, tracks[itk].dxy(pv), w);
+          fill_multi(h_sv_tracks_dzpv[0][i],      isv, tracks[itk].dz(pv), w);
+          fill_multi(h_sv_tracks_dxyerr[0][i],    isv, tracks[itk].dxyError(), w);
+          fill_multi(h_sv_tracks_dzerr[0][i],     isv, tracks[itk].dzError(), w);
+          fill_multi(h_sv_tracks_dxyipv1[0][i],   isv, dxy_ipv.first, w);
+          fill_multi(h_sv_tracks_dxyipv[0][i],    isv, dxy_ipv.second.value(), w);
+          fill_multi(h_sv_tracks_dxyipverr[0][i], isv, dxy_ipv.second.error(), w);
+          fill_multi(h_sv_tracks_d3dipv1[0][i],   isv, d3d_ipv.first, w);
+          fill_multi(h_sv_tracks_d3dipv[0][i],    isv, d3d_ipv.second.value(), w);
+          fill_multi(h_sv_tracks_d3dipverr[0][i], isv, d3d_ipv.second.error(), w);
+          fill_multi(h_sv_tracks_dxyisv1[0][i],   isv, dxy_isv.first, w);
+          fill_multi(h_sv_tracks_dxyisv[0][i],    isv, dxy_isv.second.value(), w);
+          fill_multi(h_sv_tracks_dxyisverr[0][i], isv, dxy_isv.second.error(), w);
+          fill_multi(h_sv_tracks_d3disv1[0][i],   isv, d3d_isv.first, w);
+          fill_multi(h_sv_tracks_d3disv[0][i],    isv, d3d_isv.second.value(), w);
+          fill_multi(h_sv_tracks_d3disverr[0][i], isv, d3d_isv.second.error(), w);
+          fill_multi(h_sv_tracks_chi2dof[0][i],   isv, tracks[itk].chi2() / tracks[itk].ndof(), w);
+          fill_multi(h_sv_tracks_nhits[0][i],     isv, tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits(), w);
+          fill_multi(h_sv_tracks_npixel[0][i],    isv, tracks[itk].hitPattern().numberOfValidPixelHits(), w);
+          fill_multi(h_sv_tracks_nstrip[0][i],    isv, tracks[itk].hitPattern().numberOfValidStripHits(), w);
+          fill_multi(h_sv_tracks_minr[0][i],      isv, se.min_r, w);
+          fill_multi(h_sv_tracks_minz[0][i],      isv, se.min_z, w);
+          fill_multi(h_sv_tracks_maxr[0][i],      isv, se.max_r, w);
+          fill_multi(h_sv_tracks_maxz[0][i],      isv, se.max_z, w);
+          fill_multi(h_sv_tracks_jetdr[0][i],     isv, trackjetdr, w);
+          fill_multi(h_sv_tracks_jetdphi[0][i],   isv, reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi()), w);
+          fill_multi(h_sv_tracks_bs2derr_jetdr[0][i], isv, trackjetdr, aux.bs2derr, w);
+          fill_multi(h_sv_tracks_dzpv0[0][i],     isv, absdz0, w);
+          fill_multi(h_sv_tracks_dzpv1[0][i],     isv, absdz1, w);
+          fill_multi(h_sv_tracks_dzpv2[0][i],     isv, absdz2, w);
+          fill_multi(h_sv_tracks_dzpv2_dzpv0[0][i], isv, absdz0, absdz2, w);
+          fill_multi(h_sv_tracks_dzpv2sig_dzpv0sig[0][i], isv, absdz0 / tracks[itk].dzError(), absdz2 / tracks[itk].dzError(), w);
           if (tracks[itk].pt() > 1) {
-            fill_multi(h_sv_tracksptgt1_npixel_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidPixelHits(), *weight);
-            fill_multi(h_sv_tracksptgt1_npixel_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidPixelHits(), *weight);
-            fill_multi(h_sv_tracksptgt1_nstrip_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
-            fill_multi(h_sv_tracksptgt1_nstrip_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
+            fill_multi(h_sv_tracksptgt1_npixel_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
+            fill_multi(h_sv_tracksptgt1_npixel_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
+            fill_multi(h_sv_tracksptgt1_nstrip_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
+            fill_multi(h_sv_tracksptgt1_nstrip_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
           }
           if (tracks[itk].pt() > 3) {
-            fill_multi(h_sv_tracksptgt3_npixel_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidPixelHits(), *weight);
-            fill_multi(h_sv_tracksptgt3_npixel_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidPixelHits(), *weight);
-            fill_multi(h_sv_tracksptgt3_nstrip_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
-            fill_multi(h_sv_tracksptgt3_nstrip_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidStripHits(), *weight);
+            fill_multi(h_sv_tracksptgt3_npixel_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
+            fill_multi(h_sv_tracksptgt3_npixel_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
+            fill_multi(h_sv_tracksptgt3_nstrip_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
+            fill_multi(h_sv_tracksptgt3_nstrip_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
           }
-          fill_multi(h_sv_tracks_algo[0][i],      isv, tracks[itk].algo(), *weight);
+          fill_multi(h_sv_tracks_algo[0][i],      isv, tracks[itk].algo(), w);
           for (int j = 0; j < 7; ++j) {
-            if (tracks[itk].quality(reco::Track::TrackQuality(j))) fill_multi(h_sv_tracks_quality[0][i], isv, j, *weight);
+            if (tracks[itk].quality(reco::Track::TrackQuality(j))) fill_multi(h_sv_tracks_quality[0][i], isv, j, w);
           }
         }
       }
@@ -973,96 +979,96 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
                       (i == sv_jet_tracks_vertex && !tk_in_vtx))
                     continue;
 
-                  fill_multi(h_sv_tracks_pt[1][i],        isv, tk->pt(), *weight);
-                  fill_multi(h_sv_tracks_eta[1][i],       isv, tk->eta(), *weight);
-                  fill_multi(h_sv_tracks_phi[1][i],       isv, tk->phi(), *weight);
-                  fill_multi(h_sv_tracks_charge[1][i],    isv, tk->charge(), *weight);
-                  fill_multi(h_sv_tracks_dxybs[1][i],     isv, tk->dxy(bs), *weight);
-                  fill_multi(h_sv_tracks_dzbs[1][i],      isv, tk->dz(bs), *weight);
-                  fill_multi(h_sv_tracks_dxypv[1][i],     isv, tk->dxy(pv), *weight);
-                  fill_multi(h_sv_tracks_dzpv[1][i],      isv, tk->dz(pv), *weight);
-                  fill_multi(h_sv_tracks_dxyerr[1][i],    isv, tk->dxyError(), *weight);
-                  fill_multi(h_sv_tracks_dzerr[1][i],     isv, tk->dzError(), *weight);
-                  fill_multi(h_sv_tracks_dxyipv1[1][i],   isv, dxy_ipv.first, *weight);
-                  fill_multi(h_sv_tracks_dxyipv[1][i],    isv, dxy_ipv.second.value(), *weight);
-                  fill_multi(h_sv_tracks_dxyipverr[1][i], isv, dxy_ipv.second.error(), *weight);
-                  fill_multi(h_sv_tracks_d3dipv1[1][i],   isv, d3d_ipv.first, *weight);
-                  fill_multi(h_sv_tracks_d3dipv[1][i],    isv, d3d_ipv.second.value(), *weight);
-                  fill_multi(h_sv_tracks_d3dipverr[1][i], isv, d3d_ipv.second.error(), *weight);
-                  fill_multi(h_sv_tracks_dxyisv1[1][i],   isv, dxy_isv.first, *weight);
-                  fill_multi(h_sv_tracks_dxyisv[1][i],    isv, dxy_isv.second.value(), *weight);
-                  fill_multi(h_sv_tracks_dxyisverr[1][i], isv, dxy_isv.second.error(), *weight);
-                  fill_multi(h_sv_tracks_d3disv1[1][i],   isv, d3d_isv.first, *weight);
-                  fill_multi(h_sv_tracks_d3disv[1][i],    isv, d3d_isv.second.value(), *weight);
-                  fill_multi(h_sv_tracks_d3disverr[1][i], isv, d3d_isv.second.error(), *weight);
-                  fill_multi(h_sv_tracks_chi2dof[1][i],   isv, tk->chi2() / tk->ndof(), *weight);
-                  fill_multi(h_sv_tracks_nhits[1][i],     isv, tk->hitPattern().numberOfValidPixelHits() + tk->hitPattern().numberOfValidStripHits(), *weight);
-                  fill_multi(h_sv_tracks_npixel[1][i],    isv, tk->hitPattern().numberOfValidPixelHits(), *weight);
-                  fill_multi(h_sv_tracks_nstrip[1][i],    isv, tk->hitPattern().numberOfValidStripHits(), *weight);
-                  fill_multi(h_sv_tracks_minr[1][i],      isv, se.min_r, *weight);
-                  fill_multi(h_sv_tracks_minz[1][i],      isv, se.min_z, *weight);
-                  fill_multi(h_sv_tracks_maxr[1][i],      isv, se.max_r, *weight);
-                  fill_multi(h_sv_tracks_maxz[1][i],      isv, se.max_z, *weight);
+                  fill_multi(h_sv_tracks_pt[1][i],        isv, tk->pt(), w);
+                  fill_multi(h_sv_tracks_eta[1][i],       isv, tk->eta(), w);
+                  fill_multi(h_sv_tracks_phi[1][i],       isv, tk->phi(), w);
+                  fill_multi(h_sv_tracks_charge[1][i],    isv, tk->charge(), w);
+                  fill_multi(h_sv_tracks_dxybs[1][i],     isv, tk->dxy(bs), w);
+                  fill_multi(h_sv_tracks_dzbs[1][i],      isv, tk->dz(bs), w);
+                  fill_multi(h_sv_tracks_dxypv[1][i],     isv, tk->dxy(pv), w);
+                  fill_multi(h_sv_tracks_dzpv[1][i],      isv, tk->dz(pv), w);
+                  fill_multi(h_sv_tracks_dxyerr[1][i],    isv, tk->dxyError(), w);
+                  fill_multi(h_sv_tracks_dzerr[1][i],     isv, tk->dzError(), w);
+                  fill_multi(h_sv_tracks_dxyipv1[1][i],   isv, dxy_ipv.first, w);
+                  fill_multi(h_sv_tracks_dxyipv[1][i],    isv, dxy_ipv.second.value(), w);
+                  fill_multi(h_sv_tracks_dxyipverr[1][i], isv, dxy_ipv.second.error(), w);
+                  fill_multi(h_sv_tracks_d3dipv1[1][i],   isv, d3d_ipv.first, w);
+                  fill_multi(h_sv_tracks_d3dipv[1][i],    isv, d3d_ipv.second.value(), w);
+                  fill_multi(h_sv_tracks_d3dipverr[1][i], isv, d3d_ipv.second.error(), w);
+                  fill_multi(h_sv_tracks_dxyisv1[1][i],   isv, dxy_isv.first, w);
+                  fill_multi(h_sv_tracks_dxyisv[1][i],    isv, dxy_isv.second.value(), w);
+                  fill_multi(h_sv_tracks_dxyisverr[1][i], isv, dxy_isv.second.error(), w);
+                  fill_multi(h_sv_tracks_d3disv1[1][i],   isv, d3d_isv.first, w);
+                  fill_multi(h_sv_tracks_d3disv[1][i],    isv, d3d_isv.second.value(), w);
+                  fill_multi(h_sv_tracks_d3disverr[1][i], isv, d3d_isv.second.error(), w);
+                  fill_multi(h_sv_tracks_chi2dof[1][i],   isv, tk->chi2() / tk->ndof(), w);
+                  fill_multi(h_sv_tracks_nhits[1][i],     isv, tk->hitPattern().numberOfValidPixelHits() + tk->hitPattern().numberOfValidStripHits(), w);
+                  fill_multi(h_sv_tracks_npixel[1][i],    isv, tk->hitPattern().numberOfValidPixelHits(), w);
+                  fill_multi(h_sv_tracks_nstrip[1][i],    isv, tk->hitPattern().numberOfValidStripHits(), w);
+                  fill_multi(h_sv_tracks_minr[1][i],      isv, se.min_r, w);
+                  fill_multi(h_sv_tracks_minz[1][i],      isv, se.min_z, w);
+                  fill_multi(h_sv_tracks_maxr[1][i],      isv, se.max_r, w);
+                  fill_multi(h_sv_tracks_maxz[1][i],      isv, se.max_z, w);
                 }
               }
             }
 
-            fill_multi(h_sv_jets_ntracks,      isv, njettk,                                                        *weight);
-            fill_multi(h_sv_jets_ntracksinvtx, isv, njettkinvtx,                                                   *weight);
-            fill_multi(h_sv_jets_energy,       isv, jets[ijet]->energy(),                                          *weight);
-            fill_multi(h_sv_jets_pt,           isv, jets[ijet]->pt(),                                              *weight);
-            fill_multi(h_sv_jets_eta,          isv, jets[ijet]->eta(),                                             *weight);
-            fill_multi(h_sv_jets_phi,          isv, jets[ijet]->phi(),                                             *weight);
-            fill_multi(h_sv_jets_mass,         isv, jets[ijet]->mass(),                                            *weight);
-            fill_multi(h_sv_jets_bdisc,        isv, jets[ijet]->bDiscriminator("combinedSecondaryVertexBJetTags"), *weight);
-            fill_multi(h_sv_jets_numDaughters, isv, jets[ijet]->numberOfDaughters(), *weight);
-            fill_multi(h_sv_jets_neutralHadEnFrac, isv, jets[ijet]->neutralHadronEnergyFraction(), *weight);
-            fill_multi(h_sv_jets_neutralEmEnFrac, isv, jets[ijet]->neutralEmEnergyFraction(), *weight);
-            fill_multi(h_sv_jets_chargedHadEnFrac, isv, jets[ijet]->chargedHadronEnergyFraction(), *weight);
-            fill_multi(h_sv_jets_chargedEmEnFrac, isv, jets[ijet]->chargedEmEnergyFraction(), *weight);
-            fill_multi(h_sv_jets_chargedMult, isv, jets[ijet]->chargedMultiplicity(), *weight);
-            fill_multi(h_sv_jets_n60, isv, jets[ijet]->n60(), *weight);
-            fill_multi(h_sv_jets_n90, isv, jets[ijet]->n90(), *weight);
-            fill_multi(h_sv_jets_area, isv, jets[ijet]->jetArea(), *weight);
-            fill_multi(h_sv_jets_maxDist, isv, jets[ijet]->maxDistance(), *weight);
+            fill_multi(h_sv_jets_ntracks,      isv, njettk,                                                        w);
+            fill_multi(h_sv_jets_ntracksinvtx, isv, njettkinvtx,                                                   w);
+            fill_multi(h_sv_jets_energy,       isv, jets[ijet]->energy(),                                          w);
+            fill_multi(h_sv_jets_pt,           isv, jets[ijet]->pt(),                                              w);
+            fill_multi(h_sv_jets_eta,          isv, jets[ijet]->eta(),                                             w);
+            fill_multi(h_sv_jets_phi,          isv, jets[ijet]->phi(),                                             w);
+            fill_multi(h_sv_jets_mass,         isv, jets[ijet]->mass(),                                            w);
+            fill_multi(h_sv_jets_bdisc,        isv, jets[ijet]->bDiscriminator("combinedSecondaryVertexBJetTags"), w);
+            fill_multi(h_sv_jets_numDaughters, isv, jets[ijet]->numberOfDaughters(), w);
+            fill_multi(h_sv_jets_neutralHadEnFrac, isv, jets[ijet]->neutralHadronEnergyFraction(), w);
+            fill_multi(h_sv_jets_neutralEmEnFrac, isv, jets[ijet]->neutralEmEnergyFraction(), w);
+            fill_multi(h_sv_jets_chargedHadEnFrac, isv, jets[ijet]->chargedHadronEnergyFraction(), w);
+            fill_multi(h_sv_jets_chargedEmEnFrac, isv, jets[ijet]->chargedEmEnergyFraction(), w);
+            fill_multi(h_sv_jets_chargedMult, isv, jets[ijet]->chargedMultiplicity(), w);
+            fill_multi(h_sv_jets_n60, isv, jets[ijet]->n60(), w);
+            fill_multi(h_sv_jets_n90, isv, jets[ijet]->n90(), w);
+            fill_multi(h_sv_jets_area, isv, jets[ijet]->jetArea(), w);
+            fill_multi(h_sv_jets_maxDist, isv, jets[ijet]->maxDistance(), w);
           }
         }
       }
     }
 
-    fill_multi(h_sv, isv, v, *weight);
+    fill_multi(h_sv, isv, v, w);
 
-    h_sv_sumtop2.Fill(v, isv, *weight);
+    h_sv_sumtop2.Fill(v, isv, w);
   }
 
   //////////////////////////////////////////////////////////////////////
 
-  h_nsv->Fill(nsv, *weight);
-  h_nsv_v_minlspdist2d->Fill(mevent->minlspdist2d(), nsv, *weight);
-  h_nsv_v_lspdist2d->Fill(mevent->lspdist2d(), nsv, *weight);
-  h_nsv_v_lspdist3d->Fill(mevent->lspdist3d(), nsv, *weight);
+  h_nsv->Fill(nsv, w);
+  h_nsv_v_minlspdist2d->Fill(mevent->minlspdist2d(), nsv, w);
+  h_nsv_v_lspdist2d->Fill(mevent->lspdist2d(), nsv, w);
+  h_nsv_v_lspdist3d->Fill(mevent->lspdist3d(), nsv, w);
 
   if (nsv >= 2) {
     const MFVVertexAux& sv0 = auxes->at(0);
     const MFVVertexAux& sv1 = auxes->at(1);
     double svdist2d = mag(sv0.x - sv1.x, sv0.y - sv1.y);
     double svdist3d = mag(sv0.x - sv1.x, sv0.y - sv1.y, sv0.z - sv1.z);
-    h_svdist2d->Fill(svdist2d, *weight);
-    h_svdist3d->Fill(svdist3d, *weight);
-    h_svdist2d_v_lspdist2d->Fill(mevent->lspdist2d(), svdist2d, *weight);
-    h_svdist3d_v_lspdist3d->Fill(mevent->lspdist3d(), svdist3d, *weight);
-    h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, *weight);
-    h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), *weight);
-    h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig(), *weight);
+    h_svdist2d->Fill(svdist2d, w);
+    h_svdist3d->Fill(svdist3d, w);
+    h_svdist2d_v_lspdist2d->Fill(mevent->lspdist2d(), svdist2d, w);
+    h_svdist3d_v_lspdist3d->Fill(mevent->lspdist3d(), svdist3d, w);
+    h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, w);
+    h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), w);
+    h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig(), w);
     double phi0 = atan2(sv0.y - mevent->bsy, sv0.x - mevent->bsx);
     double phi1 = atan2(sv1.y - mevent->bsy, sv1.x - mevent->bsx);
-    h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)), *weight);
+    h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)), w);
 
-    h_fractrackssharedwpv01 ->Fill(float(sv0.ntrackssharedwpv () + sv1.ntrackssharedwpv ())/(sv0.ntracks() + sv1.ntracks()), *weight);
-    h_fractrackssharedwpvs01->Fill(float(sv0.ntrackssharedwpvs() + sv1.ntrackssharedwpvs())/(sv0.ntracks() + sv1.ntracks()), *weight);
+    h_fractrackssharedwpv01 ->Fill(float(sv0.ntrackssharedwpv () + sv1.ntrackssharedwpv ())/(sv0.ntracks() + sv1.ntracks()), w);
+    h_fractrackssharedwpvs01->Fill(float(sv0.ntrackssharedwpvs() + sv1.ntrackssharedwpvs())/(sv0.ntracks() + sv1.ntracks()), w);
     h_pvmosttracksshared->Fill(sv0.ntrackssharedwpvs() ? sv0.pvmosttracksshared() : -1,
                                sv1.ntrackssharedwpvs() ? sv1.pvmosttracksshared() : -1,
-                               *weight);
+                               w);
   }
 
   for (int ivtx = 0; ivtx < nsv; ++ivtx) {
@@ -1079,16 +1085,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       std::pair<bool, float> pair2dcompat = mfv::compatibility(vtxi, vtxj, false);
       std::pair<bool, float> pair3dcompat = mfv::compatibility(vtxi, vtxj, true);
 
-      h_pair2dcompatscss->Fill(pair2dcompat.first, *weight);
-      h_pair2dcompat->Fill(pair2dcompat.second, *weight);
-      h_pair2ddist->Fill(pair2ddist.value(), *weight);
-      h_pair2derr->Fill(pair2ddist.error(), *weight);
-      h_pair2dsig->Fill(pair2ddist.significance(), *weight);
-      h_pair3dcompatscss->Fill(pair3dcompat.first, *weight);
-      h_pair3dcompat->Fill(pair3dcompat.second, *weight);
-      h_pair3ddist->Fill(pair3ddist.value(), *weight);
-      h_pair3derr->Fill(pair3ddist.error(), *weight);
-      h_pair3dsig->Fill(pair3ddist.significance(), *weight);
+      h_pair2dcompatscss->Fill(pair2dcompat.first, w);
+      h_pair2dcompat->Fill(pair2dcompat.second, w);
+      h_pair2ddist->Fill(pair2ddist.value(), w);
+      h_pair2derr->Fill(pair2ddist.error(), w);
+      h_pair2dsig->Fill(pair2ddist.significance(), w);
+      h_pair3dcompatscss->Fill(pair3dcompat.first, w);
+      h_pair3dcompat->Fill(pair3dcompat.second, w);
+      h_pair3ddist->Fill(pair3ddist.value(), w);
+      h_pair3derr->Fill(pair3ddist.error(), w);
+      h_pair3dsig->Fill(pair3ddist.significance(), w);
     }
   }
 }
