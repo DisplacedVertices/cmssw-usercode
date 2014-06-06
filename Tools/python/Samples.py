@@ -491,13 +491,16 @@ for sample in all_samples:
 def from_argv(default=None, sort_and_set=True):
     samples = []
     all_samples_names = samples_by_name.keys()
+    ready_only = 'ready_only' in sys.argv
     for arg in sys.argv:
         if any(c in arg for c in '[]*?!'):
             for sample in all_samples:
-                if fnmatch(sample.name, arg):
+                if (not ready_only or sample.ana_ready) and fnmatch(sample.name, arg):
                     samples.append(sample)
         elif arg in all_samples_names:
-            samples.append(samples_by_name[arg])
+            sample = samples_by_name[arg]
+            if not ready_only or sample.ana_ready:
+                samples.append(sample)
     if samples:
         if sort_and_set:
             samples = sorted(set(samples))
