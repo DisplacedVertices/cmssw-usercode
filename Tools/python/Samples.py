@@ -755,3 +755,7 @@ if __name__ == '__main__':
         cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
         print cmd
         os.system(cmd)
+
+    elif 'anadatasets' in sys.argv:
+        for sample in from_argv(all_samples):
+            print sample.name.ljust(30), sample.ana_dataset
