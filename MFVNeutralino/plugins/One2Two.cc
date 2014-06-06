@@ -275,7 +275,7 @@ void MFVOne2Two::endJob() {
   // Fill all the 2v histograms. In toy_mode we add together many
   // samples with appropriate weights.
   for (size_t ifile = 0; ifile < nfiles; ++ifile) {
-    const double w = weights[ifile];
+    const double w = toy_mode ? weights[ifile] : 1;
 
     for (const auto& pair : two_vertices[ifile]) {
       const MFVVertexAux& v0 = pair.first;
