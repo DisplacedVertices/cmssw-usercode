@@ -16,7 +16,7 @@ process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                      )
 
-process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvOne2Two)
+process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
         
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
