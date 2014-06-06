@@ -19,10 +19,7 @@ ps = plot_saver('plots/one2two/ntracks%i_%s' % (ntracks, input_fn.replace('_hist
 f = ROOT.TFile(input_fn)
 
 def get_h(name):
-    ex = ''
-    if ntracks != 5:
-        ex = 'Ntracks%i' % ntracks
-    return f.Get('mfvOne2Two%s/%s' % (ex, name))
+    return f.Get('mfvOne2TwoNtracks%i/%s' % (ntracks, name))
 
 ####
 
@@ -110,16 +107,25 @@ ps.save('deltaphi')
 
 ####
 
-h2v_lt35 = get_h('h_2v_lt35_dphi')
-h2v_gt35 = get_h('h_2v_lt35_dphi')
+h2v = get_h('h_2v_abs_dphi')
+h1v = get_h('h_1v_abs_dphi')
+hfn = get_h('h_fcn_abs_dphi')
 
-h2v_gt35.SetLineColor(ROOT.kRed)
+h1v.SetLineColor(ROOT.kRed)
+hfn.SetLineColor(ROOT.kGreen+2)
 
-h2v_lt35.Draw()
-h2v_gt35.Draw('sames')
+h1v.Scale(h2v.Integral()/h1v.Integral())
+hfn.Scale(h2v.Integral()/hfn.Integral())
+
+h2v.SetTitle(';|#Delta#phi|;events/0.63')
+h2v.Draw()
+h1v.Draw('sames')
+hfn.Draw('sames')
 ps.c.Update()
-differentiate_stat_box(h2v_gt35)
-ps.save('deltaphi_ltgt35')
+differentiate_stat_box(h2v, (1,0), new_size=(0.25, 0.25))
+differentiate_stat_box(h1v, (1,1), new_size=(0.25, 0.25))
+differentiate_stat_box(hfn, (1,2), new_size=(0.25, 0.25))
+ps.save('absdeltaphi')
 
 ####
 
