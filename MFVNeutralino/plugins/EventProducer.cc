@@ -217,6 +217,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pvx = primary_vertex->x();
     mevent->pvy = primary_vertex->y();
     mevent->pvz = primary_vertex->z();
+    mevent->pvcxx = primary_vertex->covariance(0,0);
+    mevent->pvcxy = primary_vertex->covariance(0,1);
+    mevent->pvcxz = primary_vertex->covariance(0,2);
+    mevent->pvcyy = primary_vertex->covariance(1,1);
+    mevent->pvcyz = primary_vertex->covariance(1,2);
+    mevent->pvczz = primary_vertex->covariance(2,2);
+
     mevent->pv_ntracks = int2uchar_clamp(primary_vertex->nTracks());
     mevent->pv_sumpt2 = 0;
     for (auto trki = primary_vertex->tracks_begin(), trke = primary_vertex->tracks_end(); trki != trke; ++trki) {
@@ -282,6 +289,44 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       const double dphi = fabs(reco::deltaPhi(jet, met)/asin(deltat/met.pt()));
       if (dphi < mevent->metdphimin)
         mevent->metdphimin = dphi;
+    }
+    const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
+    if (svtag) {
+      mevent->jet_svnvertices.push_back(svtag->nVertices());
+    } else {
+      mevent->jet_svnvertices.push_back(-1);
+    }
+
+    if (svtag && svtag->nVertices() > 0) {
+      const reco::Vertex &sv = svtag->secondaryVertex(0);
+      mevent->jet_svntracks.push_back(sv.nTracks());
+      double svsumpt2 = 0;
+      for (auto trki = sv.tracks_begin(), trke = sv.tracks_end(); trki != trke; ++trki) {
+        double trkpt = (*trki)->pt();
+        svsumpt2 += trkpt * trkpt;
+      }
+      mevent->jet_svsumpt2.push_back(svsumpt2);
+      mevent->jet_svx.push_back(sv.x());
+      mevent->jet_svy.push_back(sv.y());
+      mevent->jet_svz.push_back(sv.z());
+      mevent->jet_svcxx.push_back(sv.covariance(0,0));
+      mevent->jet_svcxy.push_back(sv.covariance(0,1));
+      mevent->jet_svcxz.push_back(sv.covariance(0,2));
+      mevent->jet_svcyy.push_back(sv.covariance(1,1));
+      mevent->jet_svcyz.push_back(sv.covariance(1,2));
+      mevent->jet_svczz.push_back(sv.covariance(2,2));
+    } else {
+      mevent->jet_svntracks.push_back(0);
+      mevent->jet_svsumpt2.push_back(0);
+      mevent->jet_svx.push_back(0);
+      mevent->jet_svy.push_back(0);
+      mevent->jet_svz.push_back(0);
+      mevent->jet_svcxx.push_back(0);
+      mevent->jet_svcxy.push_back(0);
+      mevent->jet_svcxz.push_back(0);
+      mevent->jet_svcyy.push_back(0);
+      mevent->jet_svcyz.push_back(0);
+      mevent->jet_svczz.push_back(0);
     }
   }
 

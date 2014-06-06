@@ -54,6 +54,12 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvx;
   TH1F* h_pvy;
   TH1F* h_pvz;
+  TH1F* h_pvcxx;
+  TH1F* h_pvcxy;
+  TH1F* h_pvcxz;
+  TH1F* h_pvcyy;
+  TH1F* h_pvcyz;
+  TH1F* h_pvczz;
   TH1F* h_pvrho;
   TH1F* h_pvphi;
   TH1F* h_pvntracks;
@@ -94,6 +100,22 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_muons_avgeta_dphi[3];
   TH1F* h_muons_dR[3];
   TH2F* h_muons_dR_dphi[3];
+
+  TH1F* h_jet_svnvertices;
+  TH1F* h_jet_svntracks;
+  TH1F* h_jet_svsumpt2;
+  TH1F* h_jet_svx;
+  TH1F* h_jet_svy;
+  TH1F* h_jet_svz;
+  TH1F* h_jet_svcxx;
+  TH1F* h_jet_svcxy;
+  TH1F* h_jet_svcxz;
+  TH1F* h_jet_svcyy;
+  TH1F* h_jet_svcyz;
+  TH1F* h_jet_svczz;
+  TH1F* h_jet_svpv2ddist;
+  TH1F* h_jet_svpv2derr;
+  TH1F* h_jet_svpv2dsig;
 
   TH1F* h_pv_n;
   TH1F* h_pv_x[4];
@@ -155,6 +177,12 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvx = fs->make<TH1F>("h_pvx", ";primary vertex x (cm);events/10 #mum", 200, -0.1, 0.1);
   h_pvy = fs->make<TH1F>("h_pvy", ";primary vertex y (cm);events/10 #mum", 200, -0.1, 0.1);
   h_pvz = fs->make<TH1F>("h_pvz", ";primary vertex z (cm);events/1.5 mm", 200, -15, 15);
+  h_pvcxx = fs->make<TH1F>("h_pvcxx", ";primary vertex cxx;events", 100, -1e-6, 1e-6);
+  h_pvcxy = fs->make<TH1F>("h_pvcxy", ";primary vertex cxy;events", 100, -1e-6, 1e-6);
+  h_pvcxz = fs->make<TH1F>("h_pvcxz", ";primary vertex cxz;events", 100, -1e-6, 1e-6);
+  h_pvcyy = fs->make<TH1F>("h_pvcyy", ";primary vertex cyy;events", 100, -1e-6, 1e-6);
+  h_pvcyz = fs->make<TH1F>("h_pvcyz", ";primary vertex cyz;events", 100, -1e-6, 1e-6);
+  h_pvczz = fs->make<TH1F>("h_pvczz", ";primary vertex czz;events", 100, -1e-6, 1e-6);
   h_pvrho = fs->make<TH1F>("h_pv_rho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
   h_pvphi = fs->make<TH1F>("h_pv_phi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_pvntracks = fs->make<TH1F>("h_pv_ntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
@@ -205,6 +233,22 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_muons_dR[i] = fs->make<TH1F>(TString::Format("h_muons_%s_dR", lep_ex[i]), TString::Format("events with two %s muons;#Delta R (rad);events/0.14", lep_ex[i]), 50, 0, 7);
     h_muons_dR_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_dR_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);#Delta R (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, 0, 7);
   }
+
+  h_jet_svnvertices = fs->make<TH1F>("h_jet_svnvertices", ";number of secondary vertices;number of jets", 10, 0, 10);
+  h_jet_svntracks = fs->make<TH1F>("h_jet_svntracks", ";# of tracks/SV;number of jets", 40, 0, 40);
+  h_jet_svsumpt2 = fs->make<TH1F>("h_jet_sumpt2", ";SV #Sigma p_{T}^{2} (GeV^2);number of jets", 300, 0, 6000);
+  h_jet_svx = fs->make<TH1F>("h_jet_svx", ";SV x (cm);number of jets", 100, -20, 20);
+  h_jet_svy = fs->make<TH1F>("h_jet_svy", ";SV y (cm);number of jets", 100, -20, 20);
+  h_jet_svz = fs->make<TH1F>("h_jet_svz", ";SV z (cm);number of jets", 100, -25, 25);
+  h_jet_svcxx = fs->make<TH1F>("h_jet_svcxx", ";SV cxx;number of jets", 100, -0.01, 0.01);
+  h_jet_svcxy = fs->make<TH1F>("h_jet_svcxy", ";SV cxy;number of jets", 100, -0.01, 0.01);
+  h_jet_svcxz = fs->make<TH1F>("h_jet_svcxz", ";SV cxz;number of jets", 100, -0.01, 0.01);
+  h_jet_svcyy = fs->make<TH1F>("h_jet_svcyy", ";SV cyy;number of jets", 100, -0.01, 0.01);
+  h_jet_svcyz = fs->make<TH1F>("h_jet_svcyz", ";SV cyz;number of jets", 100, -0.01, 0.01);
+  h_jet_svczz = fs->make<TH1F>("h_jet_svczz", ";SV czz;number of jets", 100, -0.01, 0.01);
+  h_jet_svpv2ddist = fs->make<TH1F>("h_jet_svpv2ddist", ";dist2d(SV, PV) (cm);number of jets", 100, 0, 5);
+  h_jet_svpv2derr = fs->make<TH1F>("h_jet_svpv2derr", ";#sigma(dist2d(SV, PV)) (cm);number of jets", 100, 0, 0.05);
+  h_jet_svpv2dsig = fs->make<TH1F>("h_jet_svpv2dsig", ";N#sigma(dist2d(SV, PV));number of jets", 100, 0, 100);
 
   if (primary_vertex_src.label() != "") {
     h_pv_n = fs->make<TH1F>("h_pv_n", ";# of primary vertices;events", 65, 0, 65);
@@ -291,6 +335,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pvx->Fill(mevent->pvx - mevent->bsx, w);
   h_pvy->Fill(mevent->pvy - mevent->bsy, w);
   h_pvz->Fill(mevent->pvz - mevent->bsz, w);
+  h_pvcxx->Fill(mevent->pvcxx, w);
+  h_pvcxy->Fill(mevent->pvcxy, w);
+  h_pvcxz->Fill(mevent->pvcxz, w);
+  h_pvcyy->Fill(mevent->pvcyy, w);
+  h_pvcyz->Fill(mevent->pvcyz, w);
+  h_pvczz->Fill(mevent->pvczz, w);
   h_pvphi->Fill(atan2(mevent->pvy - mevent->bsy, mevent->pvx - mevent->bsx), w);
   h_pvntracks->Fill(mevent->pv_ntracks, w);
   h_pvsumpt2->Fill(mevent->pv_sumpt2, w);
@@ -365,6 +415,26 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_muons_avgeta_dphi[i]->Fill(dphi, avgeta);
       h_muons_dR[i]->Fill(dR);
       h_muons_dR_dphi[i]->Fill(dphi, dR);
+    }
+  }
+
+  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    h_jet_svnvertices->Fill(mevent->jet_svnvertices[ijet]);
+    if (mevent->jet_svnvertices[ijet] > 0) {
+      h_jet_svntracks->Fill(mevent->jet_svntracks[ijet]);
+      h_jet_svsumpt2->Fill(mevent->jet_svsumpt2[ijet]);
+      h_jet_svx->Fill(mevent->jet_svx[ijet]);
+      h_jet_svy->Fill(mevent->jet_svy[ijet]);
+      h_jet_svz->Fill(mevent->jet_svz[ijet]);
+      h_jet_svcxx->Fill(mevent->jet_svcxx[ijet]);
+      h_jet_svcxy->Fill(mevent->jet_svcxy[ijet]);
+      h_jet_svcxz->Fill(mevent->jet_svcxz[ijet]);
+      h_jet_svcyy->Fill(mevent->jet_svcyy[ijet]);
+      h_jet_svcyz->Fill(mevent->jet_svcyz[ijet]);
+      h_jet_svczz->Fill(mevent->jet_svczz[ijet]);
+      h_jet_svpv2ddist->Fill(mevent->jet_svpv2ddist(ijet));
+      h_jet_svpv2derr->Fill(mevent->jet_svpv2derr(ijet));
+      h_jet_svpv2dsig->Fill(mevent->jet_svpv2dsig(ijet));
     }
   }
 
