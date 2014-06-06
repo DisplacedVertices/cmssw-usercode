@@ -356,6 +356,10 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackpairdetaavg", "SV avg{#Delta #eta(i,j)}", 150,    0,       5);
   hs.add("trackpairdetarms", "SV rms{#Delta #eta(i,j)}", 150,    0,       3);
 
+  hs.add("trackpairdphimax",   "SV max{#Delta #phi(i,j)}",   25, 0, 3.15);
+  hs.add("trackpairdphimaxm1", "SV max-1{#Delta #phi(i,j)}", 25, 0, 3.15);
+  hs.add("trackpairdphimaxm2", "SV max-2{#Delta #phi(i,j)}", 25, 0, 3.15);
+
   hs.add("drmin",                         "SV min{#Delta R(i,j)}",                                                       150,    0,       1.5);
   hs.add("drmax",                         "SV max{#Delta R(i,j)}",                                                       150,    0,       7);
   hs.add("dravg",                         "SV avg{#Delta R(i,j)}",                                                       150,    0,       5);
@@ -774,6 +778,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"pvdzerr",                 aux.pvdzerr()},
         {"pvdzsig",                 aux.pvdzsig()}
     };
+
+    std::vector<float> trackpairdphis = aux.trackpairdphis();
+    int npairs = trackpairdphis.size();
+    for (int i = 0; i < npairs; ++i) {
+      trackpairdphis[i] = fabs(trackpairdphis[i]);
+    }
+    std::sort(trackpairdphis.begin(), trackpairdphis.end());
+    v["trackpairdphimax"] = 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0];
+    v["trackpairdphimaxm1"] = 1 > npairs - 1 ? -1 : trackpairdphis[npairs-1-1];
+    v["trackpairdphimaxm2"] = 2 > npairs - 1 ? -1 : trackpairdphis[npairs-1-2];
 
     if (vertex_src.label() != "") {
       const reco::Vertex& thepv = primary_vertices->at(0);
