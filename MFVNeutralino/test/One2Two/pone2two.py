@@ -35,9 +35,6 @@ t.Draw('abs(svdphi) >> h_2v_sideband_absdphi(%i, 0, %f)' % (nbins, pi), 'nvtx ==
 h_2v_sideband_absdphi = ROOT.h_2v_sideband_absdphi.Clone('h_2v_sideband_absdphi')
 
 def fit_dphi(h, is_abs, plot_name=None):
-    class Result:
-        def __init__(self, *args):
-            self.exp, self.fcn, self.fit = args
 
     # Fitting to [0]*x**[1] doesn't work so well. Fit in steps of the
     # exponent and find the best chi2 ourselves.
@@ -50,7 +47,8 @@ def fit_dphi(h, is_abs, plot_name=None):
         formula = '[0]*abs(x)**%.2f/%.9f' % (exp, integ)
         fcn = ROOT.TF1('f_absdphi_%s' % ('%.2f' % exp).replace('.', 'p'), formula, 0 if is_abs else -pi, pi)
         fit = h.Fit(fcn, 'ILRQS')
-        results.append(Result(exp, fcn, fit))
+        results.append(FitResult(fcn, fit))
+        results[-1].exp = exp
     best = min(results, key=lambda result: result.fit.Chi2())
 
     # Go up by chi2 = 1 on either side to calculate rough 68% CL on exp.
@@ -95,7 +93,7 @@ def fit_dphi(h, is_abs, plot_name=None):
             xtitle = '|%s|' % xtitle
         bin_width = hh.GetBinLowEdge(2) - hh.GetBinLowEdge(1)
         hh.SetTitle('best exp: %.2f (%.2f-%.2f @68%%CL);%s;events/%.3f' % (best.exp, best.exp_lo, best.exp_hi, xtitle, bin_width))
-        ps.c.Update()
+        ps.update_canvas()
         s = move_stat_box(hh, (0.143, 0.497, 0.555, 0.862) if is_abs else (0.299, 0.5, 0.713, 0.864))
         s.SetOptStat(2222220)
         ps.save(plot_name + '_bestfit')
@@ -119,7 +117,32 @@ for h in (h_2v_dphi, h_2v_absdphi, h_2v_sideband_dphi, h_2v_sideband_absdphi):
                                                                                            best.exp_hi,
                                                                                            best.fit.Chi2(), best.fit.Ndf(), best.fit.Prob())
 
-########################################
+################################################################################
 
 # Assemble h_dz. When run on MC, derive f_dz from this. When on data
 # (and opening the box), check that h_dz is similar to MC.
+
+for sideband in (False, True)
+    cut = 'nvtx == 2 && min_ntracks_ok'
+    if sideband:
+        cut += ' && svdist < %f' % svdist_cut
+
+    t.Draw('svdz >> h_2v_dz_all(400, -20, 20)', cut)
+    h_2v_dz_all = ROOT.h_2v_dz_all.Clone('h_2v_dz_all')
+    h_2v_dz_all.SetTitle('2v events;z0 - z1 (cm);events/1 mm')
+    h_2v_dz_all.Draw()
+    ps.update_canvas()
+    s = move_stat_box(h_2v_dz_all, (0.673, 0.736, 0.980, 0.997))
+    s.SetOptStat(2222220)
+    ps.save('2v_%sdz_all' % ('sideband_' if sideband else ''))
+
+    z_range = (-0.1, 0.1)
+    t.Draw('svdz >> h_2v_dz(20, %f, %f)' % z_range, cut)
+    h_2v_dz = ROOT.h_2v_dz.Clone('h_2v_dz')
+    h_2v_dz.SetTitle('2v events;z0 - z1 (cm);events/100 #mum')
+    fcn_dz = ROOT.TF1('f_dz', 'gaus', *z_range)
+    f_dz = FitResult(fcn_dz, h_2v_dz.Fit(fcn_dz, 'RLQS'))
+    ps.update_canvas()
+    s = move_stat_box(h_2v_dz, (0.673, 0.686, 0.980, 0.997))
+    s.SetOptStat(2222220)
+    ps.save('2v_%sdz' % ('sideband_' if sideband else ''))
