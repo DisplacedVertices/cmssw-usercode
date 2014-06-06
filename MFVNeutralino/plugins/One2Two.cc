@@ -237,7 +237,7 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
   f->Close();
   delete f;
 
-  printf("# 1v: %i  # 2v: %i\n", int(one_vertices.size()), int(two_vertices.size()));
+  printf("# 1v: %i  # 2v: %i\n", int(one_vertices.size()), int(two_vertices.size())); fflush(stdout);
 }
 
 void MFVOne2Two::endJob() {
@@ -263,7 +263,7 @@ void MFVOne2Two::endJob() {
       if (n1v > N1v)
         throw cms::Exception("NotEnough") << "not enough v1vs (" << N1v << " to sample " << n1v << " of them";
       
-      printf("sampling %i/%i events from %s\n", n1v, N1v, filenames[ifile].c_str());
+      printf("sampling %i/%i events from %s\n", n1v, N1v, filenames[ifile].c_str()); fflush(stdout);
 
       // Knuth sample-without-replacement.
       int t = 0, m = 0;
@@ -347,12 +347,12 @@ void MFVOne2Two::endJob() {
 	if (phi_ok && dz_ok && ntracks_ok) {
 	  jv = x;
 	  used[x] = true;
-          if (tries > 100000) printf("\r%200s\r", "");
+          if (tries >= 50000) printf("\r%200s\r", "");
 	  break;
 	}
 
-        if (++tries % 100000 == 0)
-          printf("\ripair %10i try %10i with v0 = %2i (%12f, %12f, %12f) and v1 = %2i (%12f, %12f, %12f)", ipair, tries, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z);
+        if (++tries % 50000 == 0)
+          printf("\ripair %10i try %10i with v0 = %2i (%12f, %12f, %12f) and v1 = %2i (%12f, %12f, %12f)", ipair, tries, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z); fflush(stdout);
 
 	if (tries == giveup)
 	  break;
