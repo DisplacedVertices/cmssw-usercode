@@ -3,7 +3,7 @@
 double xcut;
 double ycut;
 const char* crab_path = "crab/ABCDHistosV17_16";
-const char* hist_path = "abcdHistosTrksJets";
+const char* hist_path = "mfvAbcdHistosTrksJets";
 bool plot = 0;
 const char* plot_path = "plots/ABCD/lifetime_v_mass/version17/NoSig_bs2derr0p0025";
 const double ymax = 50;

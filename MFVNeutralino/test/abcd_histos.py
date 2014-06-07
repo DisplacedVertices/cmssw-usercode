@@ -8,18 +8,9 @@ process.TFileService.fileName = 'abcd_histos.root'
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.ABCDHistos_cfi')
 
-process.abcdHistos = cms.EDAnalyzer('ABCDHistos',
-                                    mfv_event_src = cms.InputTag('mfvEvent'),
-                                    weight_src = cms.InputTag('mfvWeight'),
-                                    vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
-                                    which_mom = cms.int32(0),
-                                    )
-
-process.abcdHistosTrks = process.abcdHistos.clone()
-process.abcdHistosJets = process.abcdHistos.clone(which_mom = 1)
-process.abcdHistosTrksJets = process.abcdHistos.clone(which_mom = 2)
-process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.abcdHistosTrks * process.abcdHistosJets * process.abcdHistosTrksJets)
+process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesSeq * process.mfvAnalysisCuts * process.mfvAbcdHistosSeq)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
@@ -35,4 +26,3 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        run_half_mc = True,
                        )
     cs.submit_all(samples)
-
