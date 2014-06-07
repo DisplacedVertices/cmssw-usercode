@@ -540,13 +540,19 @@ mfv_neutralino_tau9900um_M0600.ana_dataset_override = '/mfv_neutralino_tau9900um
 mfv_neutralino_tau9900um_M0800.ana_dataset_override = '/mfv_neutralino_tau9900um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
 mfv_neutralino_tau9900um_M1000.ana_dataset_override = '/mfv_neutralino_tau9900um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
 
-for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
+for sample in ttbar_systematics_samples:
+    sample.ana_hash = '63d51abe304b0c3d40e1872ac2d8fed6'
+
+for sample in ttbar_samples + qcd_samples + mfv_signal_samples + ttbar_systematics_samples:
     sample.ana_ready = True
 
 # JMTBAD replace ana_ready with ana_dict and check that
 
 for sample, reduce_by in [
     (mfv_neutralino_tau1000um_M0300, 500),
+    (ttbarsystM166p5, 7*16736),
+    (ttbarsystMatchDn, 16736),
+    (ttbarsystScaleUp, 16736),
     ]:
     sample.reduce_total_events_by(reduce_by)
 
@@ -628,6 +634,13 @@ bjetsht0100.ana_filter_eff = 1.0520e-03  #    15177 / 14426854
 bjetsht0250.ana_filter_eff = 8.1803e-02  #  1042986 / 12750008
 bjetsht0500.ana_filter_eff = 3.4381e-01  #  2262942 /  6581987
 bjetsht1000.ana_filter_eff = 4.7193e-01  #  1480886 /  3137949
+ttbarsystMSDecays.ana_filter_eff = 3.0109e-01  # 18707579 / 62131965
+ttbarsystM166p5.ana_filter_eff   = 2.7456e-01  #  7402529 / 26961625
+ttbarsystM178p5.ana_filter_eff   = 3.2599e-01  #  7940939 / 24359161
+ttbarsystMatchDn.ana_filter_eff  = 3.0599e-01  #  6312540 / 20629826
+ttbarsystMatchUp.ana_filter_eff  = 1.6852e-01  # 11068189 / 65679170
+ttbarsystScaleDn.ana_filter_eff  = 3.1763e-01  # 12478570 / 39286663
+ttbarsystScaleUp.ana_filter_eff  = 2.8428e-01  # 11908952 / 41891535
 
 ########################################################################
 
@@ -687,8 +700,6 @@ if __name__ == '__main__':
     elif 'filtereffs' in sys.argv:
         diffs = []
         for sample in from_argv(all_mc_samples):
-            if not sample.ana_ready:
-                continue
             o,x,y = sample.nevents_orig, sample.nevents, DBS.numevents_in_dataset(sample.ana_dataset, **sample.dbs_inst_dict(sample.ana_dbs_url_num))
             print '%30s %14i %14i %14i' % (sample.name, o, y, x)
             if x != y:
