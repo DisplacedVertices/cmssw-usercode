@@ -430,6 +430,8 @@ for tau, mass, sample in mfv_signal_samples_ex:
         sample.ana_hash = '0a90ffb9bb56aadc18a0859a54bf4f31'
     sample.cross_section = 0.001
 
+    sample.ana_events_per = 10000
+
 ########################################################################
 
 myttbar_samples = [
