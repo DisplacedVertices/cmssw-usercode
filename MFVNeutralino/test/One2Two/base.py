@@ -2,6 +2,7 @@ import sys, os
 from array import array
 from collections import namedtuple
 from math import log, pi
+from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.ROOTTools import *
 import JMTucker.Tools.Samples as Samples
 set_style()
