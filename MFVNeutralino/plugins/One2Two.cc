@@ -1,4 +1,5 @@
 #include "TF1.h"
+#include "TFitResult.h"
 #include "TH2F.h"
 #include "TRandom3.h"
 #include "TTree.h"
@@ -53,6 +54,7 @@ public:
   void endJob();
 
   const int min_ntracks;
+  const double svdist2d_cut;
 
   const std::string tree_path;
   const std::vector<std::string> filenames;
@@ -66,9 +68,12 @@ public:
   const bool wrep;
   const int npairs;
 
+  const bool find_gs;
+  const bool find_fs;
   const std::string form_dphi;
   const std::string form_dz;
   const std::string form_g_dz;
+
   const bool use_f_dz;
   const double max_1v_dz;
   const int max_1v_ntracks;
@@ -76,33 +81,42 @@ public:
   TF1* f_dphi;
   TF1* f_dz;
   TF1* g_dz;
+  TH1F* h_1v_dphi_env;
+  TH1F* h_1v_absdphi_env;
+  TH1F* h_1v_dz_env;
   TH1F* h_fcn_dphi;
   TH1F* h_fcn_abs_dphi;
   TH1F* h_fcn_dz;
   TH1F* h_fcn_g_dz;
 
-  TH2F* h_xy[2];
-  TH1F* h_bs2ddist[2];
-  TH2F* h_bs2ddist_v_bsdz[2];
-  TH1F* h_bsdz[2];
-  TH1F* h_bs2ddist_0[2];
-  TH2F* h_bs2ddist_v_bsdz_0[2];
-  TH1F* h_bsdz_0[2];
-  TH1F* h_bs2ddist_1[2];
-  TH2F* h_bs2ddist_v_bsdz_1[2];
-  TH1F* h_bsdz_1[2];
-  TH2F* h_ntracks[2];
-  TH1F* h_ntracks01[2];
-  TH1F* h_svdist2d[2];
-  TH1F* h_svdz[2];
-  TH1F* h_svdz_all[2];
-  TH1F* h_dphi[2];
-  TH1F* h_abs_dphi[2];
-  TH2F* h_svdz_v_dphi[2];
+  enum { t_2v, t_2vsideband, t_1v, n_t };
+  static const char* t_names[n_t];
+
+  TH2F* h_xy[n_t];
+  TH1F* h_bs2ddist[n_t];
+  TH2F* h_bs2ddist_v_bsdz[n_t];
+  TH1F* h_bsdz[n_t];
+  TH1F* h_bs2ddist_0[n_t];
+  TH2F* h_bs2ddist_v_bsdz_0[n_t];
+  TH1F* h_bsdz_0[n_t];
+  TH1F* h_bs2ddist_1[n_t];
+  TH2F* h_bs2ddist_v_bsdz_1[n_t];
+  TH1F* h_bsdz_1[n_t];
+  TH2F* h_ntracks[n_t];
+  TH1F* h_ntracks01[n_t];
+  TH1F* h_svdist2d[n_t];
+  TH1F* h_svdz[n_t];
+  TH1F* h_svdz_all[n_t];
+  TH1F* h_dphi[n_t];
+  TH1F* h_abs_dphi[n_t];
+  TH2F* h_svdz_v_dphi[n_t];
 };
+
+const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vsideband", "1v" };
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   : min_ntracks(cfg.getParameter<int>("min_ntracks")),
+    svdist2d_cut(cfg.getParameter<double>("svdist2d_cut")),
 
     tree_path(cfg.getParameter<std::string>("tree_path")),
     filenames(cfg.getParameter<std::vector<std::string> >("filenames")),
@@ -116,12 +130,16 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     wrep(cfg.getParameter<bool>("wrep")),
     npairs(cfg.getParameter<int>("npairs")),
 
+    find_gs(cfg.getParameter<bool>("find_gs")),
+    find_fs(cfg.getParameter<bool>("find_fs")),
     form_dphi(cfg.getParameter<std::string>("form_dphi")),
     form_dz(cfg.getParameter<std::string>("form_dz")),
     form_g_dz(cfg.getParameter<std::string>("form_g_dz")),
+
     use_f_dz(cfg.getParameter<bool>("use_f_dz")),
     max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
     max_1v_ntracks(cfg.getParameter<int>("max_1v_ntracks")),
+
     f_dphi(0),
     f_dz(0),
     g_dz(0)
@@ -133,40 +151,39 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   TH1::SetDefaultSumw2();
 
   f_dphi = new TF1("f_dphi", form_dphi.c_str(), 0, M_PI);
-  h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 8, -M_PI, M_PI);
-  h_fcn_dphi->FillRandom("f_dphi", 100000);
-  h_fcn_abs_dphi = fs->make<TH1F>("h_fcn_abs_dphi", "", 8, 0, M_PI);
-  h_fcn_abs_dphi->FillRandom("f_dphi", 100000);
-
   f_dz = new TF1("f_dz", form_dz.c_str(), -40, 40);
-  h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 20, -0.1, 0.1);
-  h_fcn_dz->FillRandom("f_dz", 100000);
-
   g_dz = new TF1("g_dz", form_g_dz.c_str(), -40, 40);
+  
+  h_1v_dphi_env = fs->make<TH1F>("h_1v_dphi_env", "", 8, -M_PI, M_PI);
+  h_1v_absdphi_env = fs->make<TH1F>("h_1v_absdphi_env", "", 8, 0, M_PI);
+  h_1v_dz_env = fs->make<TH1F>("h_1v_dz_env", "", 20, -0.1, 0.1);
+  h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 8, -M_PI, M_PI);
+  h_fcn_abs_dphi = fs->make<TH1F>("h_fcn_abs_dphi", "", 8, 0, M_PI);
+  h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 20, -0.1, 0.1);
   h_fcn_g_dz = fs->make<TH1F>("h_fcn_g_dz", "", 200, -40, 40);
-  h_fcn_g_dz->FillRandom("g_dz", 100000);
 
-  for (int i = 0; i < 2; ++i) {
-    int iv = i == 0 ? 2 : 1;
-    h_xy 		[i] = fs->make<TH2F>(TString::Format("h_%iv_xy"		       , iv), "", 100, -0.05, 0.05, 100, 0.05, 0.05);
-    h_bs2ddist 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_bs2ddist"	       , iv), "", 100, 0, 0.1);
-    h_bs2ddist_v_bsdz   [i] = fs->make<TH2F>(TString::Format("h_%iv_bs2ddist_v_bsdz"   , iv), "", 200, -20, 20, 100, 0, 0.1);
-    h_bsdz 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_bsdz"	       , iv), "", 200, -20, 20);
-    h_bs2ddist_0 	[i] = fs->make<TH1F>(TString::Format("h_%iv_bs2ddist_0"	       , iv), "", 100, 0, 0.1);
-    h_bs2ddist_v_bsdz_0 [i] = fs->make<TH2F>(TString::Format("h_%iv_bs2ddist_v_bsdz_0" , iv), "", 200, -20, 20, 100, 0, 0.1);
-    h_bsdz_0 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_bsdz_0"	       , iv), "", 200, -20, 20);
-    h_bs2ddist_1 	[i] = fs->make<TH1F>(TString::Format("h_%iv_bs2ddist_1"	       , iv), "", 100, 0, 0.1);
-    h_bs2ddist_v_bsdz_1 [i] = fs->make<TH2F>(TString::Format("h_%iv_bs2ddist_v_bsdz_1" , iv), "", 200, -20, 20, 100, 0, 0.1);
-    h_bsdz_1 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_bsdz_1"	       , iv), "", 200, -20, 20);
+  for (int i = 0; i < n_t; ++i) {
+    const char* iv = t_names[i];
 
-    h_ntracks 	      	[i] = fs->make<TH2F>(TString::Format("h_%iv_ntracks"	       , iv), "", 20, 0, 20, 20, 0, 20);
-    h_ntracks01 	[i] = fs->make<TH1F>(TString::Format("h_%iv_ntracks01"	       , iv), "", 30, 0, 30);
-    h_svdist2d 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_svdist2d"	       , iv), "", 100, 0, 0.1);
-    h_svdz 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_svdz"	       , iv), "", 20, -0.1, 0.1);
-    h_svdz_all          [i] = fs->make<TH1F>(TString::Format("h_%iv_svdz_all"          , iv), "", 400, -20, 20);
-    h_dphi 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_dphi"	       , iv), "", 8, -M_PI, M_PI);
-    h_abs_dphi 	      	[i] = fs->make<TH1F>(TString::Format("h_%iv_abs_dphi"	       , iv), "", 8, 0, M_PI);
-    h_svdz_v_dphi       [i] = fs->make<TH2F>(TString::Format("h_%iv_svdz_v_dphi"       , iv), "", 8, -M_PI, M_PI, 50, -0.1, 0.1);
+    h_xy                [i] = fs->make<TH2F>(TString::Format("h_%s_xy"                , iv), "", 100, -0.05, 0.05, 100, 0.05, 0.05);
+    h_bs2ddist          [i] = fs->make<TH1F>(TString::Format("h_%s_bs2ddist"          , iv), "", 100, 0, 0.1);
+    h_bs2ddist_v_bsdz   [i] = fs->make<TH2F>(TString::Format("h_%s_bs2ddist_v_bsdz"   , iv), "", 200, -20, 20, 100, 0, 0.1);
+    h_bsdz              [i] = fs->make<TH1F>(TString::Format("h_%s_bsdz"              , iv), "", 200, -20, 20);
+    h_bs2ddist_0        [i] = fs->make<TH1F>(TString::Format("h_%s_bs2ddist_0"        , iv), "", 100, 0, 0.1);
+    h_bs2ddist_v_bsdz_0 [i] = fs->make<TH2F>(TString::Format("h_%s_bs2ddist_v_bsdz_0" , iv), "", 200, -20, 20, 100, 0, 0.1);
+    h_bsdz_0            [i] = fs->make<TH1F>(TString::Format("h_%s_bsdz_0"            , iv), "", 200, -20, 20);
+    h_bs2ddist_1        [i] = fs->make<TH1F>(TString::Format("h_%s_bs2ddist_1"        , iv), "", 100, 0, 0.1);
+    h_bs2ddist_v_bsdz_1 [i] = fs->make<TH2F>(TString::Format("h_%s_bs2ddist_v_bsdz_1" , iv), "", 200, -20, 20, 100, 0, 0.1);
+    h_bsdz_1            [i] = fs->make<TH1F>(TString::Format("h_%s_bsdz_1"            , iv), "", 200, -20, 20);
+
+    h_ntracks           [i] = fs->make<TH2F>(TString::Format("h_%s_ntracks"           , iv), "", 20, 0, 20, 20, 0, 20);
+    h_ntracks01         [i] = fs->make<TH1F>(TString::Format("h_%s_ntracks01"         , iv), "", 30, 0, 30);
+    h_svdist2d          [i] = fs->make<TH1F>(TString::Format("h_%s_svdist2d"          , iv), "", 100, 0, 0.1);
+    h_svdz              [i] = fs->make<TH1F>(TString::Format("h_%s_svdz"              , iv), "", 20, -0.1, 0.1);
+    h_svdz_all          [i] = fs->make<TH1F>(TString::Format("h_%s_svdz_all"          , iv), "", 400, -20, 20);
+    h_dphi              [i] = fs->make<TH1F>(TString::Format("h_%s_dphi"              , iv), "", 8, -M_PI, M_PI);
+    h_abs_dphi          [i] = fs->make<TH1F>(TString::Format("h_%s_abs_dphi"          , iv), "", 8, 0, M_PI);
+    h_svdz_v_dphi       [i] = fs->make<TH2F>(TString::Format("h_%s_svdz_v_dphi"       , iv), "", 8, -M_PI, M_PI, 50, -0.1, 0.1);
   }
 }
 
@@ -234,6 +251,10 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
 void MFVOne2Two::endJob() {
   TRandom3* rand = new TRandom3(121982 + seed);
 
+  // Read all vertices from the input files. Two modes: unweighted,
+  // single sample, or combine multiple samples, reading a random
+  // subset of events.
+
   MFVVertexAuxCollection one_vertices;
   std::vector<MFVVertexPairCollection> two_vertices(nfiles);
 
@@ -269,8 +290,37 @@ void MFVOne2Two::endJob() {
     }
   }
 
+  const int N1v = int(one_vertices.size());
+
+
+  // Find the envelope functions for dphi (just check that it is flat)
+  // and dz.
+
+  if (find_gs) {
+    for (int iv = 0; iv < N1v; ++iv) {
+      const MFVVertexAux& v0 = one_vertices[iv];
+      for (int jv = iv+1; jv < N1v; ++jv) {
+        const MFVVertexAux& v1 = one_vertices[jv];
+        h_1v_dphi_env->Fill(dphi(v0, v1));
+        h_1v_absdphi_env->Fill(fabs(dphi(v0, v1)));
+        h_1v_dz_env->Fill(dz(v0, v1));
+      }
+    }
+
+    TFitResultPtr res = h_1v_absdphi_env->Fit("pol0", "QS");
+    printf("g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    
+    res = h_1v_dz_env->Fit(g_dz, "LRQS");
+    printf("g_dz fit to gaus sigma %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    g_dz->FixParameter(0, res->Parameter(0));
+  }
+
+  h_fcn_g_dz->FillRandom("g_dz", 100000);
+
+
   // Fill all the 2v histograms. In toy_mode we add together many
-  // samples with appropriate weights.
+  // samples with appropriate weights. Also fit f_dphi and f_dz from
+  // the 2v events in the sideband.
   for (size_t ifile = 0; ifile < nfiles; ++ifile) {
     const double w = toy_mode ? weights[ifile] : 1;
 
@@ -278,36 +328,59 @@ void MFVOne2Two::endJob() {
       const MFVVertexAux& v0 = pair.first;
       const MFVVertexAux& v1 = pair.second;
 
-      h_xy[0]->Fill(v0.x, v0.y, w);
-      h_xy[0]->Fill(v1.x, v1.y, w);
-      h_bs2ddist[0]->Fill(v0.bs2ddist, w);
-      h_bs2ddist[0]->Fill(v1.bs2ddist, w);
-      h_bs2ddist_0[0]->Fill(v0.bs2ddist, w);
-      h_bs2ddist_1[0]->Fill(v1.bs2ddist, w);
-      h_bs2ddist_v_bsdz[0]->Fill(v0.z, v0.bs2ddist, w);
-      h_bs2ddist_v_bsdz[0]->Fill(v1.z, v1.bs2ddist, w);
-      h_bs2ddist_v_bsdz_0[0]->Fill(v0.z, v0.bs2ddist, w);
-      h_bs2ddist_v_bsdz_1[0]->Fill(v1.z, v1.bs2ddist, w);
-      h_bsdz[0]->Fill(v0.z, w);
-      h_bsdz[0]->Fill(v1.z, w);
-      h_bsdz_0[0]->Fill(v0.z, w);
-      h_bsdz_1[0]->Fill(v1.z, w);
+      for (int ih = 0; ih < 2; ++ih) {
+        if (ih == t_2vsideband && svdist2d(v0, v1) >= svdist2d_cut)
+          continue;
 
-      h_ntracks[0]->Fill(v0.ntracks(), v1.ntracks(), w);
-      h_ntracks01[0]->Fill(v0.ntracks() + v1.ntracks(), w);
-      h_svdist2d[0]->Fill(svdist2d(v0, v1), w);
-      h_svdz[0]->Fill(dz(v0, v1), w);
-      h_dphi[0]->Fill(dphi(v0, v1), w);
-      h_abs_dphi[0]->Fill(fabs(dphi(v0, v1)), w);
-      h_svdz_v_dphi[0]->Fill(dphi(v0, v1), dz(v0, v1), w);
+        h_xy[ih]->Fill(v0.x, v0.y, w);
+        h_xy[ih]->Fill(v1.x, v1.y, w);
+        h_bs2ddist[ih]->Fill(v0.bs2ddist, w);
+        h_bs2ddist[ih]->Fill(v1.bs2ddist, w);
+        h_bs2ddist_0[ih]->Fill(v0.bs2ddist, w);
+        h_bs2ddist_1[ih]->Fill(v1.bs2ddist, w);
+        h_bs2ddist_v_bsdz[ih]->Fill(v0.z, v0.bs2ddist, w);
+        h_bs2ddist_v_bsdz[ih]->Fill(v1.z, v1.bs2ddist, w);
+        h_bs2ddist_v_bsdz_0[ih]->Fill(v0.z, v0.bs2ddist, w);
+        h_bs2ddist_v_bsdz_1[ih]->Fill(v1.z, v1.bs2ddist, w);
+        h_bsdz[ih]->Fill(v0.z, w);
+        h_bsdz[ih]->Fill(v1.z, w);
+        h_bsdz_0[ih]->Fill(v0.z, w);
+        h_bsdz_1[ih]->Fill(v1.z, w);
+
+        h_ntracks[ih]->Fill(v0.ntracks(), v1.ntracks(), w);
+        h_ntracks01[ih]->Fill(v0.ntracks() + v1.ntracks(), w);
+        h_svdist2d[ih]->Fill(svdist2d(v0, v1), w);
+        h_svdz[ih]->Fill(dz(v0, v1), w);
+        h_dphi[ih]->Fill(dphi(v0, v1), w);
+        h_abs_dphi[ih]->Fill(fabs(dphi(v0, v1)), w);
+        h_svdz_v_dphi[ih]->Fill(dphi(v0, v1), dz(v0, v1), w);
+      }
     }
   }
+
+  if (find_fs) {
+    TString opt = "LIRQS";
+    if (toy_mode)
+      opt = "W" + opt;
+
+    TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi, opt);
+    printf("f_dphi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    f_dphi->FixParameter(0, res->Parameter(0));
+
+    res = h_svdz[t_2vsideband]->Fit(f_dz, opt);
+    printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    f_dz->FixParameter(0, res->Parameter(0));
+  }
+
+  h_fcn_dphi->FillRandom("f_dphi", 100000);
+  h_fcn_abs_dphi->FillRandom("f_dphi", 100000);
+  h_fcn_dz->FillRandom("f_dz", 100000);
+
 
   // Now try to sample npairs from the one_vertices
   // sample. With/without replacement is controlled by the config
   // flag.
 
-  const int N1v = int(one_vertices.size());
   std::vector<bool> used(N1v, 0);
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
   const int npairsuse = npairs > 0 ? npairs : N1v/2;
@@ -373,32 +446,32 @@ void MFVOne2Two::endJob() {
 
     // We've got the pair -- fill histos.
 
-    h_xy[1]->Fill(v0.x, v0.y);
-    h_xy[1]->Fill(v1.x, v1.y);
-    h_bs2ddist[1]->Fill(v0.bs2ddist);
-    h_bs2ddist[1]->Fill(v1.bs2ddist);
-    h_bs2ddist_0[1]->Fill(v0.bs2ddist);
-    h_bs2ddist_1[1]->Fill(v1.bs2ddist);
-    h_bs2ddist_v_bsdz[1]->Fill(v0.z, v0.bs2ddist);
-    h_bs2ddist_v_bsdz[1]->Fill(v1.z, v1.bs2ddist);
-    h_bs2ddist_v_bsdz_0[1]->Fill(v0.z, v0.bs2ddist);
-    h_bs2ddist_v_bsdz_1[1]->Fill(v1.z, v1.bs2ddist);
-    h_bsdz[1]->Fill(v0.z);
-    h_bsdz[1]->Fill(v1.z);
-    h_bsdz_0[1]->Fill(v0.z);
-    h_bsdz_1[1]->Fill(v1.z);
+    h_xy[t_1v]->Fill(v0.x, v0.y);
+    h_xy[t_1v]->Fill(v1.x, v1.y);
+    h_bs2ddist[t_1v]->Fill(v0.bs2ddist);
+    h_bs2ddist[t_1v]->Fill(v1.bs2ddist);
+    h_bs2ddist_0[t_1v]->Fill(v0.bs2ddist);
+    h_bs2ddist_1[t_1v]->Fill(v1.bs2ddist);
+    h_bs2ddist_v_bsdz[t_1v]->Fill(v0.z, v0.bs2ddist);
+    h_bs2ddist_v_bsdz[t_1v]->Fill(v1.z, v1.bs2ddist);
+    h_bs2ddist_v_bsdz_0[t_1v]->Fill(v0.z, v0.bs2ddist);
+    h_bs2ddist_v_bsdz_1[t_1v]->Fill(v1.z, v1.bs2ddist);
+    h_bsdz[t_1v]->Fill(v0.z);
+    h_bsdz[t_1v]->Fill(v1.z);
+    h_bsdz_0[t_1v]->Fill(v0.z);
+    h_bsdz_1[t_1v]->Fill(v1.z);
     const int ntk0 = v0.ntracks(); // The 2v pairs are ordered with ntk0 > ntk1,
     const int ntk1 = v1.ntracks(); //  so fill here the same way.
     if (ntk1 > ntk0)
-      h_ntracks[1]->Fill(ntk1, ntk0);
+      h_ntracks[t_1v]->Fill(ntk1, ntk0);
     else
-      h_ntracks[1]->Fill(ntk0, ntk1);
-    h_ntracks01[1]->Fill(ntk0 + ntk1);
-    h_svdist2d[1]->Fill(svdist2d(v0, v1));
-    h_svdz[1]->Fill(dz(v0, v1));
-    h_dphi[1]->Fill(dphi(v0, v1));
-    h_abs_dphi[1]->Fill(fabs(dphi(v0, v1)));
-    h_svdz_v_dphi[1]->Fill(dphi(v0, v1), dz(v0, v1));
+      h_ntracks[t_1v]->Fill(ntk0, ntk1);
+    h_ntracks01[t_1v]->Fill(ntk0 + ntk1);
+    h_svdist2d[t_1v]->Fill(svdist2d(v0, v1));
+    h_svdz[t_1v]->Fill(dz(v0, v1));
+    h_dphi[t_1v]->Fill(dphi(v0, v1));
+    h_abs_dphi[t_1v]->Fill(fabs(dphi(v0, v1)));
+    h_svdz_v_dphi[t_1v]->Fill(dphi(v0, v1), dz(v0, v1));
   }
 
   delete rand;

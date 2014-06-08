@@ -10,6 +10,7 @@ min_ntracks = typed_from_argv(int, 5)
 
 mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                             min_ntracks = cms.int32(min_ntracks),
+                            svdist2d_cut = cms.double(0.05),
 
                             tree_path = cms.string('mfvMiniTree/t'),
                             filenames = cms.vstring('crab/MiniTreeV18/qcdht1000.root'),
@@ -22,22 +23,27 @@ mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                             wrep = cms.bool(True),
                             npairs = cms.int32(50000),
 
+                            find_gs = cms.bool(True),
+                            find_fs = cms.bool(True),
+                            form_dphi = cms.string('abs(x)**[0]/(3.14159265**([0]+1)/([0]+1))'),
+                            form_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
+                            form_g_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
+
                             use_f_dz = cms.bool(True),
                             max_1v_dz = cms.double(0.025),
                             max_1v_ntracks = cms.int32(1000000),
-                            form_dphi = cms.string('abs(x)**2.5/15.702056'),
-                            form_dz = cms.string('1/sqrt(2*3.14159265*0.01718**2)*exp(-x*x/2/0.01718**2)'),
-                            form_g_dz = cms.string('1/sqrt(2*3.14159265*9.273**2)*exp(-x*x/2/9.273**2)'),
                             )
 
 
 if 'toy' in sys.argv:
+    mfvOne2Two.toy_mode = True
+
     try:
         mfvOne2Two.seed = int(sys.argv[sys.argv.index('toy')+1])
     except IndexError:
         pass
 
-    mfvOne2Two.toy_mode = True
+    process.TFileService.fileName = 'toy_histos_seed%i.root' % mfvOne2Two.seed.value()
 
     import JMTucker.Tools.Samples as Samples
     sample_info = [
