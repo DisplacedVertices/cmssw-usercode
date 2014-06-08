@@ -30,6 +30,11 @@ namespace {
   double dz(const MFVVertexAux& v0, const MFVVertexAux& v1) {
     return v0.z - v1.z;
   }
+
+  bool accept(TRandom* rand, const double f, const double g, const double M) {
+    const double u = rand->Rndm();
+    return u < f/(M*g);
+  }
 }
 
 class MFVOne2Two : public edm::EDAnalyzer {
@@ -39,12 +44,6 @@ public:
 
   MFVVertexAux xform_vertex(const MFVVertexAux&) const;
   bool sel_vertex(const MFVVertexAux&) const;
-
-  double prob_dphi(const double) const;
-  double prob_dphi(const MFVVertexAux&, const MFVVertexAux&) const;
-
-  double prob_dz(const double) const;
-  double prob_dz(const MFVVertexAux&, const MFVVertexAux&) const;
 
   typedef std::vector<std::pair<MFVVertexAux, MFVVertexAux> > MFVVertexPairCollection;
 
@@ -70,15 +69,18 @@ public:
 
   const std::string form_dphi;
   const std::string form_dz;
+  const std::string form_g_dz;
   const bool use_f_dz;
   const double max_1v_dz;
   const int max_1v_ntracks;
 
   TF1* f_dphi;
   TF1* f_dz;
+  TF1* g_dz;
   TH1F* h_fcn_dphi;
   TH1F* h_fcn_abs_dphi;
   TH1F* h_fcn_dz;
+  TH1F* h_fcn_g_dz;
 
   TH2F* h_xy[2];
   TH1F* h_bs2ddist[2];
@@ -118,11 +120,13 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
     form_dphi(cfg.getParameter<std::string>("form_dphi")),
     form_dz(cfg.getParameter<std::string>("form_dz")),
+    form_g_dz(cfg.getParameter<std::string>("form_g_dz")),
     use_f_dz(cfg.getParameter<bool>("use_f_dz")),
     max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
     max_1v_ntracks(cfg.getParameter<int>("max_1v_ntracks")),
     f_dphi(0),
-    f_dz(0)
+    f_dz(0),
+    g_dz(0)
 {
   if (n1vs.size() != weights.size() || (toy_mode && nfiles != n1vs.size()))
     throw cms::Exception("VectorMismatch") << "inconsistent sample info";
@@ -136,9 +140,13 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_fcn_abs_dphi = fs->make<TH1F>("h_fcn_abs_dphi", "", 8, 0, M_PI);
   h_fcn_abs_dphi->FillRandom("f_dphi", 100000);
 
-  f_dz = new TF1("f_dz", form_dz.c_str(), -50, 50);
+  f_dz = new TF1("f_dz", form_dz.c_str(), -40, 40);
   h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 20, -0.1, 0.1);
   h_fcn_dz->FillRandom("f_dz", 100000);
+
+  g_dz = new TF1("g_dz", form_g_dz.c_str(), -40, 40);
+  h_fcn_g_dz = fs->make<TH1F>("h_fcn_g_dz", "", 200, -40, 40);
+  h_fcn_g_dz->FillRandom("g_dz", 100000);
 
   for (int i = 0; i < 2; ++i) {
     int iv = i == 0 ? 2 : 1;
@@ -167,6 +175,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 MFVOne2Two::~MFVOne2Two() {
   delete f_dphi;
   delete f_dz;
+  delete g_dz;
 }
 
 MFVVertexAux MFVOne2Two::xform_vertex(const MFVVertexAux& v) const {
@@ -175,22 +184,6 @@ MFVVertexAux MFVOne2Two::xform_vertex(const MFVVertexAux& v) const {
 
 bool MFVOne2Two::sel_vertex(const MFVVertexAux& v) const {
   return v.ntracks() >= min_ntracks;
-}
-
-double MFVOne2Two::prob_dphi(const double dphi) const {
-  return f_dphi->Eval(fabs(dphi));
-}
-
-double MFVOne2Two::prob_dphi(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
-  return prob_dphi(dphi(v0, v1));
-}
-
-double MFVOne2Two::prob_dz(const double dz) const {
-  return f_dz->Eval(dz);
-}
-
-double MFVOne2Two::prob_dz(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
-  return prob_dz(dz(v0, v1));
 }
 
 void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& one_vertices, MFVVertexPairCollection& two_vertices) const {
@@ -321,6 +314,14 @@ void MFVOne2Two::endJob() {
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
   const int npairsuse = npairs > 0 ? npairs : N1v/2;
 
+  const double gdpmax = 1./2/M_PI;
+  const double fdpmax = f_dphi->GetMaximum();
+  const double Mdp = fdpmax/gdpmax;
+
+  const double gdzmax = g_dz->GetMaximum();
+  const double fdzmax = f_dz->GetMaximum();
+  const double Mdz = fdzmax/gdzmax;
+
   for (int ipair = 0; ipair < npairsuse; ++ipair) {
     int iv = -1;
     while (iv == -1) {
@@ -340,11 +341,16 @@ void MFVOne2Two::endJob() {
       int x = rand->Integer(N1v);
       if (x != iv && (wrep || !used[x])) {
 	const MFVVertexAux& vx = one_vertices[x];
-	const bool phi_ok = prob_dphi(v0, vx) > rand->Rndm();
-	const bool dz_ok = use_f_dz ? prob_dz(v0, vx) > rand->Rndm() : fabs(v0.z - vx.z) < max_1v_dz;
-	const bool ntracks_ok = v0.ntracks() + vx.ntracks() < max_1v_ntracks;
 
-	if (phi_ok && dz_ok && ntracks_ok) {
+        const double dp = dphi(v0, vx);
+        const double dz = v0.z - vx.z;
+
+        const bool ok =
+          v0.ntracks() + vx.ntracks() < max_1v_ntracks &&
+          accept(rand, f_dphi->Eval(dp), gdpmax, Mdp) &&
+          (use_f_dz ? accept(rand, f_dz->Eval(dz), g_dz->Eval(dz), Mdz) : fabs(dz) < max_1v_dz);
+
+        if (ok) {
 	  jv = x;
 	  used[x] = true;
           if (tries >= 50000) printf("\r%200s\r", "");
