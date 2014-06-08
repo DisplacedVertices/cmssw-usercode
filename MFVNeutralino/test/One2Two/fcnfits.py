@@ -19,7 +19,7 @@ plot_dir = 'plots/one2two/phifit_ntracks%i_svdist%s_%s' % (min_ntracks, svdist_c
 
 ps = plot_saver(plot_dir, size=(600,600))
 
-########################################
+################################################################################
 
 # Fit delta phi = "dphi" in the sideband, and compare result to fit
 # for all 2v events. Also construct the 1v_dphi distribution, to be
@@ -39,10 +39,19 @@ for sample in samples:
     n2v = t.Draw('svdphi', weight_str % ('nvtx == 2 && min_ntracks_ok'))
     print 'Sample: %s  n2v: %f' % (sample.name, n2v)
 
-    t.Draw('svdphi >>+h_2v_dphi',                  weight_str % ('nvtx == 2 && min_ntracks_ok'))
-    t.Draw('abs(svdphi) >>+h_2v_absdphi',          weight_str % ('nvtx == 2 && min_ntracks_ok'))
-    t.Draw('svdphi >>+h_2v_sideband_dphi',         weight_str % ('nvtx == 2 && min_ntracks_ok && svdist < %f' % svdist_cut))
-    t.Draw('abs(svdphi) >>+h_2v_sideband_absdphi', weight_str % ('nvtx == 2 && min_ntracks_ok && svdist < %f' % svdist_cut))
+    for svdphi, is_sideband in detree(t, 'svdphi:svdist < %f' % svdist_cut, 'nvtx == 2 && min_ntracks_ok', lambda x: (float(x[0]), bool(x[1]))):
+        if sample.weight is None:
+            h_2v_dphi.Fill(svdphi)
+            h_2v_absdphi.Fill(abs(svdphi))
+            if is_sideband:
+                h_2v_sideband_dphi.Fill(svdphi)
+                h_2v_sideband_absdphi.Fill(abs(svdphi))
+        else:
+            h_2v_dphi.Fill(svdphi, sample.weight)
+            h_2v_absdphi.Fill(abs(svdphi), sample.weight)
+            if is_sideband:
+                h_2v_sideband_dphi.Fill(svdphi, sample.weight)
+                h_2v_sideband_absdphi.Fill(abs(svdphi), sample.weight)
 
 def fit_dphi(h, is_abs, plot_name=None):
     # Fitting to [0]*x**[1] doesn't work so well. Fit in steps of the
