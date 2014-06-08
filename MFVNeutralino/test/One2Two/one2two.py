@@ -7,7 +7,6 @@ process.TFileService.fileName = 'one2two.root'
 
 mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                             min_ntracks = cms.int32(5),
-                            svdist2d_cut = cms.double(0.048),
 
                             tree_path = cms.string('mfvMiniTree/t'),
                             filenames = cms.vstring('crab/MiniTreeV18/qcdht1000.root'),

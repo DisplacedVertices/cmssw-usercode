@@ -53,7 +53,6 @@ public:
   void endJob();
 
   const int min_ntracks;
-  const double svdist2d_cut; 
 
   const std::string tree_path;
   const std::vector<std::string> filenames;
@@ -104,7 +103,6 @@ public:
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   : min_ntracks(cfg.getParameter<int>("min_ntracks")),
-    svdist2d_cut(cfg.getParameter<double>("svdist2d_cut")),
 
     tree_path(cfg.getParameter<std::string>("tree_path")),
     filenames(cfg.getParameter<std::vector<std::string> >("filenames")),
