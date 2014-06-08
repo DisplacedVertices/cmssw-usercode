@@ -2,40 +2,49 @@
 
 from base import *
 
-sample = Samples.qcdht1000
+samples = [Samples.qcdht1000]
+use_weights = len(samples) > 1
+for s in samples:
+    s.weight = s.partial_weight * 20000 if use_weights else None
+if use_weights:
+    ROOT.TH1.SetDefaultSumw2()
+sample_name = 'toy' if len(samples) > 1 else samples[0].name
+
 svdist_cut = 0.048
 svdist_cut_name = ('%.3f'% svdist_cut).replace('.', 'p')
 min_ntracks = 5
-plot_dir = 'plots/one2two/phifit_ntracks%i_svdist%s_%s' % (min_ntracks, svdist_cut_name, sample.name)
+plot_dir = 'plots/one2two/phifit_ntracks%i_svdist%s_%s' % (min_ntracks, svdist_cut_name, sample_name)
 
 ################################################################################
 
 ps = plot_saver(plot_dir, size=(600,600))
-f, t = get_f_t(sample, min_ntracks)
 
 ########################################
 
 # Fit delta phi = "dphi" in the sideband, and compare result to fit
-# for all 2v events.
+# for all 2v events. Also construct the 1v_dphi distribution, to be
+# used when doing the 1v sampling.
 
-n2v = t.Draw('svdphi', 'nvtx == 2 && min_ntracks_ok')
-nbins = int(round(1 + log(n2v, 2)))
-print 'Sample: %s  n2v: %f  nbins: %i' % (sample.name, n2v, nbins)
+nbins = 8
 
-t.Draw('svdphi >> h_2v_dphi(%i, %f, %f)' % (nbins, -pi, pi), 'nvtx == 2 && min_ntracks_ok')
-h_2v_dphi = ROOT.h_2v_dphi.Clone('h_2v_dphi')
+h_2v_dphi             = ROOT.TH1F('h_2v_dphi'             , '', nbins, -pi, pi)
+h_2v_absdphi          = ROOT.TH1F('h_2v_absdphi'          , '', nbins,   0, pi)
+h_2v_sideband_dphi    = ROOT.TH1F('h_2v_sideband_dphi'    , '', nbins, -pi, pi)
+h_2v_sideband_absdphi = ROOT.TH1F('h_2v_sideband_absdphi' , '', nbins,   0, pi)
 
-t.Draw('abs(svdphi) >> h_2v_absdphi(%i, 0, %f)' % (nbins, pi), 'nvtx == 2 && min_ntracks_ok')
-h_2v_absdphi = ROOT.h_2v_absdphi.Clone('h_2v_absdphi')
+for sample in samples:
+    f, t = get_f_t(sample, min_ntracks)
+    weight_str = '%s' if sample.weight is None else '%f*(%%s)' % sample.weight
 
-t.Draw('svdphi >> h_2v_sideband_dphi(%i, %f, %f)' % (nbins, -pi, pi), 'nvtx == 2 && min_ntracks_ok && svdist < %f' % svdist_cut)
-h_2v_sideband_dphi = ROOT.h_2v_sideband_dphi.Clone('h_2v_sideband_dphi')
+    n2v = t.Draw('svdphi', weight_str % ('nvtx == 2 && min_ntracks_ok'))
+    print 'Sample: %s  n2v: %f' % (sample.name, n2v)
 
-t.Draw('abs(svdphi) >> h_2v_sideband_absdphi(%i, 0, %f)' % (nbins, pi), 'nvtx == 2 && min_ntracks_ok && svdist < %f' % svdist_cut)
-h_2v_sideband_absdphi = ROOT.h_2v_sideband_absdphi.Clone('h_2v_sideband_absdphi')
+    t.Draw('svdphi >>+h_2v_dphi',                  weight_str % ('nvtx == 2 && min_ntracks_ok'))
+    t.Draw('abs(svdphi) >>+h_2v_absdphi',          weight_str % ('nvtx == 2 && min_ntracks_ok'))
+    t.Draw('svdphi >>+h_2v_sideband_dphi',         weight_str % ('nvtx == 2 && min_ntracks_ok && svdist < %f' % svdist_cut))
+    t.Draw('abs(svdphi) >>+h_2v_sideband_absdphi', weight_str % ('nvtx == 2 && min_ntracks_ok && svdist < %f' % svdist_cut))
 
 def fit_dphi(h, is_abs, plot_name=None):
-
     # Fitting to [0]*x**[1] doesn't work so well. Fit in steps of the
     # exponent and find the best chi2 ourselves.
     nsteps = 130
@@ -122,7 +131,7 @@ for h in (h_2v_dphi, h_2v_absdphi, h_2v_sideband_dphi, h_2v_sideband_absdphi):
 # Assemble h_dz. When run on MC, derive f_dz from this. When on data
 # (and opening the box), check that h_dz is similar to MC.
 
-for sideband in (False, True)
+for sideband in (False, True):
     cut = 'nvtx == 2 && min_ntracks_ok'
     if sideband:
         cut += ' && svdist < %f' % svdist_cut
