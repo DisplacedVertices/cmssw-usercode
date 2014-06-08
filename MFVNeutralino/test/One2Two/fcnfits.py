@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 
+'''
+foreach ntk ( 5 6 7 8 )
+  foreach sam (qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep)
+    py fcnfits.py $ntk $sam >&! out.fcnfits.ntk$ntk.$sam
+  end
+end
+'''
+
 from base import *
 
 sample_name = None
-samples = [Samples.qcdht1000]
+samples = Samples.from_argv([Samples.qcdht1000])
 #sample_name = 'qcdht1000andttbar'; samples = [Samples.qcdht1000] + Samples.ttbar_samples
 #sample_name = 'qcdht5001000andttbar'; samples = [Samples.qcdht0500, Samples.qcdht1000] + Samples.ttbar_samples
 
@@ -18,7 +26,7 @@ if sample_name is None:
 svdist_cut = 0.048
 svdist_cut_name = ('%.3f'% svdist_cut).replace('.', 'p')
 min_ntracks = typed_from_argv(int, 5)
-plot_dir = 'plots/one2two/phifit_ntracks%i_svdist%s_%s' % (min_ntracks, svdist_cut_name, sample_name)
+plot_dir = 'plots/one2twoNew/fcnfit_ntracks%i_svdist%s_%s' % (min_ntracks, svdist_cut_name, sample_name)
 
 ################################################################################
 
@@ -89,7 +97,11 @@ def fit_dphi(h, is_abs, plot_name=None):
         i, chi2 = i_min, min_chi2
         while chi2 < min_chi2 + 1:
             i += delta
+            if i < 0 or i >= len(results):
+                break
             chi2 = results[i].fit.Chi2()
+        if chi2 - min_chi2 < 1:
+            print 'WARNING COULD NOT FIND INTERVAL'
         if delta < 0:
             best.exp_lo = results[i].exp
             best.chi2_lo = chi2
