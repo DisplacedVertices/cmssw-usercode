@@ -14,7 +14,7 @@ set_style()
 ROOT.TH1.AddDirectory(0)
 ROOT.gStyle.SetOptStat(2222222)
 ROOT.gStyle.SetOptFit(2222)
-ps = plot_saver('plots/one2two/ntracks%i_%s' % (ntracks, input_fn.replace('_histos.root', '')), size=(600,600))
+ps = plot_saver('plots/one2twoNew/one2two_ntracks%i_%s' % (ntracks, input_fn.replace('_histos.root', '')), size=(600,600))
 
 f = ROOT.TFile(input_fn)
 
@@ -122,9 +122,9 @@ h2v.Draw()
 h1v.Draw('sames')
 hfn.Draw('sames')
 ps.c.Update()
-differentiate_stat_box(h2v, (1,0), new_size=(0.25, 0.25))
-differentiate_stat_box(h1v, (1,1), new_size=(0.25, 0.25))
-differentiate_stat_box(hfn, (1,2), new_size=(0.25, 0.25))
+differentiate_stat_box(h2v, (2,0), new_size=(0.25, 0.25))
+differentiate_stat_box(h1v, (2,1), new_size=(0.25, 0.25))
+differentiate_stat_box(hfn, (2,2), new_size=(0.25, 0.25))
 ps.save('absdeltaphi')
 
 ####
