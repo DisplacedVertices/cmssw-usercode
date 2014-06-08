@@ -3,9 +3,9 @@
 from base import *
 
 sample_name = None
-#samples = [Samples.qcdht1000]
+samples = [Samples.qcdht1000]
 #sample_name = 'qcdht1000andttbar'; samples = [Samples.qcdht1000] + Samples.ttbar_samples
-sample_name = 'qcdht5001000andttbar'; samples = [Samples.qcdht0500, Samples.qcdht1000] + Samples.ttbar_samples
+#sample_name = 'qcdht5001000andttbar'; samples = [Samples.qcdht0500, Samples.qcdht1000] + Samples.ttbar_samples
 
 use_weights = len(samples) > 1
 for s in samples:
@@ -17,7 +17,9 @@ if sample_name is None:
 
 svdist_cut = 0.048
 svdist_cut_name = ('%.3f'% svdist_cut).replace('.', 'p')
-min_ntracks = 5
+min_ntracks = typed_from_argv(int)
+if min_ntracks is None:
+    min_ntracks = 5
 plot_dir = 'plots/one2two/phifit_ntracks%i_svdist%s_%s' % (min_ntracks, svdist_cut_name, sample_name)
 
 ################################################################################
