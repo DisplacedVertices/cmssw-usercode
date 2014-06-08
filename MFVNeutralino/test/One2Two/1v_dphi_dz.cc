@@ -1,10 +1,11 @@
-// rootg++ -I../../../.. ../../src/MiniNtuple.cc 1v_dphi_dz.cc -o 1v_dphi_dz.exe && ./1v_dphi_dz.exe && cp 1v_dphi_dz.root ~/asdf/
+// rootg++ -std=c++0x -I../../../.. ../../src/MiniNtuple.cc 1v_dphi_dz.cc -o 1v_dphi_dz.exe && ./1v_dphi_dz.exe && cp 1v_dphi_dz.root ~/asdf/
 
 #include <cmath>
 #include <cstdlib>
 #include "TCanvas.h"
 #include "TError.h"
 #include "TFile.h"
+#include "TFitResult.h"
 #include "TH1.h"
 #include "TPaveStats.h"
 #include "TRandom3.h"
@@ -12,9 +13,6 @@
 #include "TTree.h"
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
-
-int nbins_phi = 8;
-int min_ntracks = 5;
 
 struct V {
   double phi;
@@ -29,22 +27,20 @@ struct V {
   {}
 };
 
-int main() {
-  gStyle->SetOptStat(2222222);
-  gStyle->SetOptFit(2222);
-  gStyle->SetPadTickX(1);
-  gStyle->SetPadTickY(1);
-  gErrorIgnoreLevel = 1001;
+const char* path = "/uscms/home/tucker/asdf/plots/1v_dphi_dz";
+FILE* fhtml = 0;
 
-  TFile* fout = new TFile("1v_dphi_dz.root", "recreate");
-  TH1F* h_1v_phi     = new TH1F("h_1v_phi",     TString::Format("1v events (# tracks #geq %i);#phi;vertices/%.2f",               min_ntracks, 2*M_PI/nbins_phi), nbins_phi, -M_PI, M_PI);
-  TH1F* h_1v_dphi    = new TH1F("h_1v_dphi",    TString::Format("pairs of 1v events (# tracks #geq %i);#Delta#phi;pairs/%.2f",   min_ntracks, 2*M_PI/nbins_phi), nbins_phi, -M_PI, M_PI);
-  TH1F* h_1v_absdphi = new TH1F("h_1v_absdphi", TString::Format("pairs of 1v events (# tracks #geq %i);|#Delta#phi|;pairs/%.2f", min_ntracks, 2*M_PI/nbins_phi), nbins_phi,     0, M_PI);
-  TH1F* h_1v_z  = new TH1F("h_1v_z",  TString::Format("1v events (# tracks #geq %i);z (cm);vertices/%.1f",    min_ntracks, 80./200), 200, -40, 40);
-  TH1F* h_1v_dz = new TH1F("h_1v_dz", TString::Format("1v events (# tracks #geq %i);#Deltaz (cm);pairs/%.1f", min_ntracks, 80./400), 400, -40, 40);
+void doit(const int min_ntracks, const char* sample) {
+  const int nbins_phi = 8;
+
+  TH1F* h_1v_phi     = new TH1F(TString::Format("h_ntk%i_%s_1v_phi",     min_ntracks, sample), TString::Format("1v events (# tracks #geq %i);#phi;vertices/%.2f",               min_ntracks, 2*M_PI/nbins_phi), nbins_phi, -M_PI, M_PI);
+  TH1F* h_1v_dphi    = new TH1F(TString::Format("h_ntk%i_%s_1v_dphi",    min_ntracks, sample), TString::Format("pairs of 1v events (# tracks #geq %i);#Delta#phi;pairs/%.2f",   min_ntracks, 2*M_PI/nbins_phi), nbins_phi, -M_PI, M_PI);
+  TH1F* h_1v_absdphi = new TH1F(TString::Format("h_ntk%i_%s_1v_absdphi", min_ntracks, sample), TString::Format("pairs of 1v events (# tracks #geq %i);|#Delta#phi|;pairs/%.2f", min_ntracks, 2*M_PI/nbins_phi), nbins_phi,     0, M_PI);
+  TH1F* h_1v_z  = new TH1F(TString::Format("h_ntk%i_%s_1v_z",  min_ntracks, sample), TString::Format("1v events (# tracks #geq %i);z (cm);vertices/%.1f",    min_ntracks, 80./200), 200, -40, 40);
+  TH1F* h_1v_dz = new TH1F(TString::Format("h_ntk%i_%s_1v_dz", min_ntracks, sample), TString::Format("1v events (# tracks #geq %i);#Deltaz (cm);pairs/%.1f", min_ntracks, 80./400), 400, -40, 40);
 
   mfv::MiniNtuple nt;
-  TFile* f = TFile::Open("crab/MiniTreeV18/qcdht1000.root");
+  TFile* f = TFile::Open(TString::Format("crab/MiniTreeV18/%s.root", sample));
   TTree* t = (TTree*)f->Get("mfvMiniTree/t");
   
   mfv::read_from_tree(t, nt);
@@ -71,10 +67,13 @@ int main() {
     }
   }
 
-  const int n = int(v1v.size());
-  printf("%i v1vs.\n", n);
+  f->Close();
+  delete f;
 
-  const int npairs = 100000;
+  const int n = int(v1v.size());
+  printf("ntracks >= %i, sample %15s:   %6i v1vs.\n", min_ntracks, sample, n);
+
+  const int npairs = -1;
   if (npairs > 0) {
     for (int ii = 0; ii < npairs; ++ii) {
       const int i = gRandom->Integer(n);
@@ -102,19 +101,11 @@ int main() {
       }
     }
 
-    printf("\r                       \ri: %i\npairs: %i\n", i, int(h_1v_dphi->GetEntries()));
+    printf("\r                       \ri: %5i pairs: %i\n", i, int(h_1v_dphi->GetEntries()));
   }
 
-  const TString path("/uscms/home/tucker/asdf/plots/1v_dphi_dz");
-  system(("mkdir -p " + path).Data());
 
   TCanvas* c = new TCanvas("c", "", 600, 600);
-
-  FILE* fhtml = fopen((path + "/index.html").Data(), "wt");
-  if (!fhtml) {
-    fprintf(stderr, "can't open html file?\n");
-    return 1;
-  }
 
   TH1F* hphis[3] = { h_1v_phi, h_1v_dphi, h_1v_absdphi };
   for (int i = 0; i < 3; ++i) {
@@ -124,7 +115,7 @@ int main() {
       if ((x = h->GetBinContent(ib)) > m)
         m = x;
     h->GetYaxis()->SetRangeUser(0, m*1.05);
-    h->Fit("pol0", "Q");
+    TFitResultPtr res = h->Fit("pol0", "QS");
     c->Update();
     TPaveStats* s = (TPaveStats*)h->FindObject("stats");
     s->SetX1NDC(0.471);
@@ -132,18 +123,19 @@ int main() {
     s->SetX2NDC(0.864);
     s->SetY2NDC(0.509);
     TString n = h->GetName();
+    if (i == 2)
+      printf("%30s fit to pol0 chi2/ndf = %6.3f/%.1f = %6.3f   prob: %g\n", n.Data(), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     n.Remove(0, 2);
-    const char* nn = n.Data();
-    c->SaveAs(TString::Format("%s/%i_%s.root", path.Data(), i, nn));
-    c->SaveAs(TString::Format("%s/%i_%s.png",  path.Data(), i, nn));
-    fprintf(fhtml, "<h4>%i_%s</h4>:<br><a href=\"%i_%s.root\"><img src=\"%i_%s.png\"></a>\n<br>\n", i, nn, i, nn, i, nn);
+    const char* bb = n.Data();
+    c->SaveAs(TString::Format("%s/%s.root", path, bb));
+    c->SaveAs(TString::Format("%s/%s.png",  path, bb));
+    fprintf(fhtml, "<h4>%s</h4>:<br><a href=\"%s.root\"><img src=\"%s.png\"></a>\n<br>\n", bb, bb, bb);
   }
-
 
   TH1F* hzs[2] = { h_1v_z, h_1v_dz };
   for (int i = 0; i < 2; ++i) {
     TH1F* h = hzs[i];
-    h->Fit("gaus", "Q");
+    TFitResultPtr res = h->Fit("gaus", "QS");
     c->Update();
     TPaveStats* s = (TPaveStats*)h->FindObject("stats");
     s->SetX1NDC(0.604);
@@ -151,15 +143,44 @@ int main() {
     s->SetX2NDC(0.997);
     s->SetY2NDC(0.860);
     TString n = h->GetName();
+    if (i == 1)
+      printf("%30s fit to gaus sigma %6.3f +- %6.3f   chi2/ndf = %6.3f/%.1f = %6.3f   prob: %g\n", n.Data(), res->Parameter(2), res->ParError(2), res->Chi2(), res->Ndf(), res->Prob());
     n.Remove(0, 2);
-    const char* nn = n.Data();
-    const int j = 3+i;
-    c->SaveAs(TString::Format("%s/%i_%s.root", path.Data(), j, nn));
-    c->SaveAs(TString::Format("%s/%i_%s.png",  path.Data(), j, nn));
+    const char* bb = n.Data();
+    c->SaveAs(TString::Format("%s/%s.root", path, bb));
+    c->SaveAs(TString::Format("%s/%s.png",  path, bb));
     c->SetLogy();
-    c->SaveAs(TString::Format("%s/%i_%s_log.png",  path.Data(), i, nn));
+    c->SaveAs(TString::Format("%s/%s_log.png",  path, bb));
     c->SetLogy(0);
-    fprintf(fhtml, "<h4>%i_%s</h4>:<br><a href=\"%i_%s.root\"><img src=\"%i_%s.png\"></a><a href=\"%i_%s.root\"><img src=\"%i_%s_log.png\"></a>\n<br>\n", j, nn, j, nn, j, nn, j, nn, j, nn);
+    fprintf(fhtml, "<h4>%s</h4>:<br><a href=\"%s.root\"><img src=\"%s.png\"></a><a href=\"%s.root\"><img src=\"%s_log.png\"></a>\n<br>\n", bb, bb, bb, bb, bb);
+  }
+
+  delete c;
+}
+
+int main() {
+  gStyle->SetOptStat(2222222);
+  gStyle->SetOptFit(2222);
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
+  gErrorIgnoreLevel = 1001;
+
+  system(("mkdir -p " + TString(path)).Data());
+  fhtml = fopen((TString(path) + "/index.html").Data(), "wt");
+  if (!fhtml) {
+    fprintf(stderr, "can't open html file?\n");
+    return 1;
+  }
+
+  TFile* fout = new TFile("1v_dphi_dz.root", "recreate");
+
+  const char* samples[] = {"qcdht0500", "qcdht1000", "ttbarhadronic", "ttbarsemilep", "ttbardilep"};
+  const int min_ntrackses[] = { 5, 6, 7, 8 };
+
+  for (int min_ntracks : min_ntrackses) {
+    for (const char* sample : samples)
+      doit(min_ntracks, sample);
+    printf("\n");
   }
 
   fclose(fhtml);
@@ -167,6 +188,4 @@ int main() {
   fout->Write();
   fout->Close();
   delete fout;
-  f->Close();
-  delete f;
 }
