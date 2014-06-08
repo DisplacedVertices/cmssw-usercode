@@ -1,12 +1,15 @@
 import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.general import typed_from_argv
 
 process.source = cms.Source('EmptySource')
 process.maxEvents.input = 0
 process.TFileService.fileName = 'one2two.root'
 
+min_ntracks = typed_from_argv(int, 5)
+
 mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
-                            min_ntracks = cms.int32(5),
+                            min_ntracks = cms.int32(min_ntracks),
 
                             tree_path = cms.string('mfvMiniTree/t'),
                             filenames = cms.vstring('crab/MiniTreeV18/qcdht1000.root'),
