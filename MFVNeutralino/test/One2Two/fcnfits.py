@@ -2,13 +2,18 @@
 
 from base import *
 
-samples = [Samples.qcdht1000]
+sample_name = None
+#samples = [Samples.qcdht1000]
+#sample_name = 'qcdht1000andttbar'; samples = [Samples.qcdht1000] + Samples.ttbar_samples
+sample_name = 'qcdht5001000andttbar'; samples = [Samples.qcdht0500, Samples.qcdht1000] + Samples.ttbar_samples
+
 use_weights = len(samples) > 1
 for s in samples:
-    s.weight = s.partial_weight * 20000 if use_weights else None
+    s.weight = s.partial_weight * 20000 if use_weights else 1
 if use_weights:
     ROOT.TH1.SetDefaultSumw2()
-sample_name = 'toy' if len(samples) > 1 else samples[0].name
+if sample_name is None:
+    sample_name = 'toy' if len(samples) > 1 else samples[0].name
 
 svdist_cut = 0.048
 svdist_cut_name = ('%.3f'% svdist_cut).replace('.', 'p')
@@ -22,8 +27,7 @@ ps = plot_saver(plot_dir, size=(600,600))
 ################################################################################
 
 # Fit delta phi = "dphi" in the sideband, and compare result to fit
-# for all 2v events. Also construct the 1v_dphi distribution, to be
-# used when doing the 1v sampling.
+# for all 2v events. Do the same with delta z.
 
 nbins = 8
 
@@ -32,26 +36,31 @@ h_2v_absdphi          = ROOT.TH1F('h_2v_absdphi'          , '', nbins,   0, pi)
 h_2v_sideband_dphi    = ROOT.TH1F('h_2v_sideband_dphi'    , '', nbins, -pi, pi)
 h_2v_sideband_absdphi = ROOT.TH1F('h_2v_sideband_absdphi' , '', nbins,   0, pi)
 
+h_2v_dz_all          = ROOT.TH1F('h_2v_dz_all',      '2v events;z0 - z1 (cm);events/1 mm',                 400, -20, 20)
+h_2v_dz              = ROOT.TH1F('h_2v_dz',          '2v events;z0 - z1 (cm);events/100 #mum',              20, -0.1, 0.1)
+h_2v_sideband_dz_all = ROOT.TH1F('h_2v_dz_all',      '2v events in sideband;z0 - z1 (cm);events/1 mm',     400, -20, 20)
+h_2v_sideband_dz     = ROOT.TH1F('h_2v_sideband_dz', '2v events in sideband;z0 - z1 (cm);events/100 #mum',  20, -0.1, 0.1)
+
 for sample in samples:
     f, t = get_f_t(sample, min_ntracks)
     weight_str = '%s' if sample.weight is None else '%f*(%%s)' % sample.weight
-
     n2v = t.Draw('svdphi', weight_str % ('nvtx == 2 && min_ntracks_ok'))
     print 'Sample: %s  n2v: %f' % (sample.name, n2v)
 
-    for svdphi, is_sideband in detree(t, 'svdphi:svdist < %f' % svdist_cut, 'nvtx == 2 && min_ntracks_ok', lambda x: (float(x[0]), bool(x[1]))):
-        if sample.weight is None:
-            h_2v_dphi.Fill(svdphi)
-            h_2v_absdphi.Fill(abs(svdphi))
-            if is_sideband:
-                h_2v_sideband_dphi.Fill(svdphi)
-                h_2v_sideband_absdphi.Fill(abs(svdphi))
-        else:
-            h_2v_dphi.Fill(svdphi, sample.weight)
-            h_2v_absdphi.Fill(abs(svdphi), sample.weight)
-            if is_sideband:
-                h_2v_sideband_dphi.Fill(svdphi, sample.weight)
-                h_2v_sideband_absdphi.Fill(abs(svdphi), sample.weight)
+    v2v = detree(t,
+                 'svdphi:svdz:svdist < %f' % svdist_cut,
+                 'nvtx == 2 && min_ntracks_ok',
+                 lambda x: (float(x[0]), float(x[1]), bool(int(x[2]))))
+
+    for svdphi, svdz, is_sideband in v2v:
+        h_2v_dphi.Fill(svdphi, sample.weight)
+        h_2v_absdphi.Fill(abs(svdphi), sample.weight)
+        h_2v_dz_all.Fill(svdz, sample.weight)
+        h_2v_dz.Fill(svdz, sample.weight)
+        if is_sideband:
+            h_2v_sideband_dphi.Fill(svdphi, sample.weight)
+            h_2v_sideband_absdphi.Fill(abs(svdphi), sample.weight)
+            h_2v_sideband_dz.Fill(svdz, sample.weight)
 
 def fit_dphi(h, is_abs, plot_name=None):
     # Fitting to [0]*x**[1] doesn't work so well. Fit in steps of the
@@ -64,7 +73,10 @@ def fit_dphi(h, is_abs, plot_name=None):
         integ = pi**(exp+1)/(exp+1)
         formula = '[0]*abs(x)**%.2f/%.9f' % (exp, integ)
         fcn = ROOT.TF1('f_absdphi_%s' % ('%.2f' % exp).replace('.', 'p'), formula, 0 if is_abs else -pi, pi)
-        fit = h.Fit(fcn, 'ILRQS')
+        fit_options = 'ILRQS'
+        if use_weights:
+            fit_options = fit_options.replace('L', 'WL')
+        fit = h.Fit(fcn, fit_options)
         results.append(FitResult(fcn, fit))
         results[-1].exp = exp
     best = min(results, key=lambda result: result.fit.Chi2())
@@ -118,8 +130,7 @@ def fit_dphi(h, is_abs, plot_name=None):
 
     return best, results
 
-# Do the fits comparing dphi, |dphi| and sideband, all, and keep
-# |dphi| sideband as f_dphi to use in the rest of the analysis.
+# Do the fits comparing dphi, |dphi| and sideband, all.
 f_dphi = None
 for h in (h_2v_dphi, h_2v_absdphi, h_2v_sideband_dphi, h_2v_sideband_absdphi):
     hn = h.GetName().replace('h_','')
@@ -135,32 +146,25 @@ for h in (h_2v_dphi, h_2v_absdphi, h_2v_sideband_dphi, h_2v_sideband_absdphi):
                                                                                            best.exp_hi,
                                                                                            best.fit.Chi2(), best.fit.Ndf(), best.fit.Prob())
 
-################################################################################
-
-# Assemble h_dz. When run on MC, derive f_dz from this. When on data
-# (and opening the box), check that h_dz is similar to MC.
-
+# Do the dz fits.
 for sideband in (False, True):
-    cut = 'nvtx == 2 && min_ntracks_ok'
-    if sideband:
-        cut += ' && svdist < %f' % svdist_cut
+    sideband_str = 'sideband_' if sideband else ''
 
-    t.Draw('svdz >> h_2v_dz_all(400, -20, 20)', cut)
-    h_2v_dz_all = ROOT.h_2v_dz_all.Clone('h_2v_dz_all')
-    h_2v_dz_all.SetTitle('2v events;z0 - z1 (cm);events/1 mm')
-    h_2v_dz_all.Draw()
+    name = '2v_%sdz_all' % sideband_str
+    h = eval('h_' + name)
+    h.Draw()
     ps.update_canvas()
-    s = move_stat_box(h_2v_dz_all, (0.673, 0.736, 0.980, 0.997))
+    s = move_stat_box(h, (0.673, 0.736, 0.980, 0.997))
     s.SetOptStat(2222220)
-    ps.save('2v_%sdz_all' % ('sideband_' if sideband else ''))
+    ps.save(name)
 
-    z_range = (-0.1, 0.1)
-    t.Draw('svdz >> h_2v_dz(20, %f, %f)' % z_range, cut)
-    h_2v_dz = ROOT.h_2v_dz.Clone('h_2v_dz')
-    h_2v_dz.SetTitle('2v events;z0 - z1 (cm);events/100 #mum')
-    fcn_dz = ROOT.TF1('f_dz', 'gaus', *z_range)
-    f_dz = FitResult(fcn_dz, h_2v_dz.Fit(fcn_dz, 'RLQS'))
+    name = '2v_%sdz' % sideband_str
+    h = eval('h_' + name)
+    fcn_name = 'f_%sdz' % sideband_str
+    fcn_dz = ROOT.TF1(fcn_name, 'gaus', -0.1, 0.1)
+    exec '%s = fcn_dz' % fcn_name
+    f_dz = FitResult(fcn_dz, h.Fit(fcn_dz, 'RLQS'))
     ps.update_canvas()
-    s = move_stat_box(h_2v_dz, (0.673, 0.686, 0.980, 0.997))
+    s = move_stat_box(h, (0.673, 0.686, 0.980, 0.997))
     s.SetOptStat(2222220)
-    ps.save('2v_%sdz' % ('sideband_' if sideband else ''))
+    ps.save(name)
