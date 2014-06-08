@@ -6,7 +6,7 @@ sample = Samples.qcdht1000
 svdist_cut = 0.048
 svdist_cut_name = ('%.3f'% svdist_cut).replace('.', 'p')
 min_ntracks = 5
-plot_dir = 'plots/one2two/ntracks%i_%s_%s' % (min_ntracks, sample.name, svdist_cut_name)
+plot_dir = 'plots/one2two/phifit_ntracks%i_svdist%s_%s' % (min_ntracks, svdist_cut_name, sample.name)
 
 ################################################################################
 
