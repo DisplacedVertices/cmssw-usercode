@@ -241,24 +241,23 @@ for norm_below in (1, 0.024, 0.048):
 
 ####
 
-if 1:
-    verbose = 'Q'
-    h = get_h('h_2v_dphi')
+verbose = 'Q'
+h = get_h('h_2v_dphi')
 
-    for i in xrange(2, 17, 2):
-        if verbose == 'V':
-            print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
-        fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
-        res = h.Fit(fcn, 'IRS' + verbose)
-        ps.save('power_%i' % i)
-        #res.Print()
+for i in xrange(2, 17, 2):
+    if verbose == 'V':
+        print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
+    fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
+    res = h.Fit(fcn, 'IRS' + verbose)
+    ps.save('power_%i' % i)
+    #res.Print()
 
-    h = get_h('h_2v_abs_dphi')
+h = get_h('h_2v_abs_dphi')
 
-    for i in xrange(2, 17, 2):
-        if verbose == 'V':
-            print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
-        fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
-        res = h.Fit(fcn, 'IRS' + verbose)
-        ps.save('abs_power_%i' % i)
-        #res.Print()
+for i in xrange(2, 17, 2):
+    if verbose == 'V':
+        print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n%i' % i
+    fcn = ROOT.TF1('fcn', '[0]*x**%i' % i, pi, pi)
+    res = h.Fit(fcn, 'IRS' + verbose)
+    ps.save('abs_power_%i' % i)
+    #res.Print()
