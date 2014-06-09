@@ -21,9 +21,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 3
-    ANA_HASH = 'c761ddfa7f093d8f86a338439e06a1d4'
-    PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v18'
+    ANA_HASH = '1e5098e5b5206d90a9bd7c495dab839b'
+    PUBLISH_USER = 'jchu'
+    ANA_VERSION = 'v19'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -427,7 +427,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     elif is_syst:
         sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
     else:
-        sample.ana_hash = '0a90ffb9bb56aadc18a0859a54bf4f31'
+        sample.ana_hash = '8bd4ec017426329be3c6efbb2bbe1ebc'
     sample.cross_section = 0.001
 
 ########################################################################
@@ -509,41 +509,9 @@ def from_argv(default=None, sort_and_set=True):
 
 # Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-# JMTBAD ana_dict...
-mfv_neutralino_tau0100um_M0200.ana_dataset_override = '/mfv_neutralino_tau0100um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0100um_M0300.ana_dataset_override = '/mfv_neutralino_tau0100um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0100um_M0600.ana_dataset_override = '/mfv_neutralino_tau0100um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0100um_M0800.ana_dataset_override = '/mfv_neutralino_tau0100um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0100um_M1000.ana_dataset_override = '/mfv_neutralino_tau0100um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0300um_M0200.ana_dataset_override = '/mfv_neutralino_tau0300um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0300um_M0300.ana_dataset_override = '/mfv_neutralino_tau0300um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0300um_M0400.ana_dataset_override = '/mfv_neutralino_tau0300um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0300um_M0600.ana_dataset_override = '/mfv_neutralino_tau0300um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0300um_M0800.ana_dataset_override = '/mfv_neutralino_tau0300um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau0300um_M1000.ana_dataset_override = '/mfv_neutralino_tau0300um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau1000um_M0200.ana_dataset_override = '/mfv_neutralino_tau1000um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau1000um_M0300.ana_dataset_override = '/mfv_neutralino_tau1000um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau1000um_M0600.ana_dataset_override = '/mfv_neutralino_tau1000um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau1000um_M0800.ana_dataset_override = '/mfv_neutralino_tau1000um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau9900um_M0200.ana_dataset_override = '/mfv_neutralino_tau9900um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau9900um_M0300.ana_dataset_override = '/mfv_neutralino_tau9900um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau9900um_M0600.ana_dataset_override = '/mfv_neutralino_tau9900um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau9900um_M0800.ana_dataset_override = '/mfv_neutralino_tau9900um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-mfv_neutralino_tau9900um_M1000.ana_dataset_override = '/mfv_neutralino_tau9900um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
-
-for sample in ttbar_samples + qcd_samples + mfv_signal_samples:
-    sample.ana_ready = True
-
-# JMTBAD replace ana_ready with ana_dict and check that
-
-for sample, reduce_by in [
-    (mfv_neutralino_tau1000um_M0300, 500),
-    ]:
-    sample.reduce_total_events_by(reduce_by)
+mfv_neutralino_tau1000um_M0400.ana_ready = True
+ttbarhadronic.ana_ready = True
+qcdht1000.ana_ready = True
 
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
 mfv_neutralino_tau0000um_M0400.ana_filter_eff = 9.6890e-01  #    96890 /   100000
