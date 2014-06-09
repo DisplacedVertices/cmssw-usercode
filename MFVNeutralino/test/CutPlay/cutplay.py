@@ -2,14 +2,14 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 500)
+SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 500)
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-vtx_sel = process.mfvSelectedVerticesTight
+vtx_sel = process.mfvSelectedVerticesTightSig
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-ana_sel = process.mfvAnalysisCuts
+ana_sel = process.mfvAnalysisCutsSig
 
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
@@ -157,7 +157,7 @@ for i in xrange(0,32,2):
     changes.append(('absdeltaphi01X%s'%pize(0.1*i,1), '', 'min_absdeltaphi01 = %f'%(0.1*i)))
 
 for i in xrange(0,100):
-    changes.append(('svdist2dX%s'%pize(0.005*i,3), '', 'min_svdist2d = %f'%(0.005*i)))
+    changes.append(('svdist2dX%s'%pize(0.0025*i,4), '', 'min_svdist2d = %f'%(0.0025*i)))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
@@ -183,19 +183,17 @@ process.p = cms.EndPath(process.effs)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import *
-    bkg_samples = ttbar_samples + qcd_samples
-    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0300um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400] + bkg_samples
-    for sample in bkg_samples:
-        sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
+    import JMTucker.Tools.Samples as Samples
+    samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
+                                 Samples.mfv_neutralino_tau1000um_M0400,
+                                 Samples.mfv_neutralino_tau0300um_M0400,
+                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    from JMTucker.Tools.SampleFiles import SampleFiles
-    
-    cs = CRABSubmitter('CutPlayV17',
+    cs = CRABSubmitter('CutPlayV18',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles['MFVNtupleV17'],
+                       run_half_mc = True,
                        )
     cs.submit_all(samples)
 

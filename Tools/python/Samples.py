@@ -2,6 +2,7 @@
 
 import os, re, sys
 from copy import copy
+from fnmatch import fnmatch
 import JMTucker.Tools.DBS as DBS
 from JMTucker.Tools.ROOTTools import ROOT
 from JMTucker.Tools.general import big_warn
@@ -20,9 +21,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 3
-    ANA_HASH = 'f1615d49c4ae9d19e350601d059c4237'
+    ANA_HASH = 'c761ddfa7f093d8f86a338439e06a1d4'
     PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v17'
+    ANA_VERSION = 'v18'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -222,16 +223,18 @@ class DataSample(Sample):
 
 ########################################################################
 
+ttbar_xsec = 245.8 # for world-combination m_top = 173.3 GeV (252.9 at CMS-measured m_top = 172.5)
+
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV or PREP for xsecs
 ttbar_samples = [
     #        name                title                                                      dataset                                                                                                nevents  clr  syst  xsec (pb)
-    MCSample('ttbarhadronic',    't#bar{t}, hadronic',                                      '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                 10537444,   4, 0.15, 225.2 * 0.457),
-    MCSample('ttbarsemilep',     't#bar{t}, semileptonic',                                  '/TTJets_SemiLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM',             25424818,   4, 0.15, 225.2 * 0.438),
-    MCSample('ttbardilep',       't#bar{t}, dileptonic',                                    '/TTJets_FullLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',                 12119013,   4, 0.15, 225.2 * 0.105),
+    MCSample('ttbarhadronic',    't#bar{t}, hadronic',                                      '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                 10537444,   4, 0.15, ttbar_xsec * 0.457),
+    MCSample('ttbarsemilep',     't#bar{t}, semileptonic',                                  '/TTJets_SemiLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM',             25424818,   4, 0.15, ttbar_xsec * 0.438),
+    MCSample('ttbardilep',       't#bar{t}, dileptonic',                                    '/TTJets_FullLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',                 12119013,   4, 0.15, ttbar_xsec * 0.105),
     ]
 
 # JMTBAD
-ttbarhadronicext = MCSample('ttbarhadronic', 't#bar{t}, hadronic', '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM', 31223821, 4, 0.15, 225.2 * 0.457)
+ttbarhadronicext = MCSample('ttbarhadronic', 't#bar{t}, hadronic', '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM', 31223821, 4, 0.15, ttbar_xsec * 0.457)
 
 qcd_samples = [
     MCSample('qcdht0100',        'QCD, 100 < H_{T} < 250 GeV',                              '/QCD_HT-100To250_TuneZ2star_8TeV-madgraph-pythia/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',       50129518, 801, 0.10, 1.04e7),
@@ -261,8 +264,18 @@ leptonic_background_samples = [
     MCSample('dyjetstollM50',    'DY + jets #rightarrow ll, M > 50 GeV',                    '/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      30459503,  32, 0.10, 2.95e3),
 ]
 
+ttbar_systematics_samples = [
+    MCSample('ttbarsystMSDecays', 't#bar{t} (MSDecays)',    '/TTJets_MSDecays_central_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',       62131965, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystM166p5',   't#bar{t} (M=166.5 GeV)', '/TTJets_MSDecays_mass166_5_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',     27078777, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystM178p5',   't#bar{t} (M=178.5 GeV)', '/TTJets_MSDecays_mass178_5_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',     24359161, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystMatchDn',  't#bar{t} (match down)',  '/TTJets_MSDecays_matchingdown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM',  20646562, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystMatchUp',  't#bar{t} (match up)',    '/TTJets_MSDecays_matchingup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v2/AODSIM',    65679170, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystScaleDn',  't#bar{t} (Q^2 down)',    '/TTJets_MSDecays_scaledown_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',     39286663, 4, 0.15, ttbar_xsec),
+    MCSample('ttbarsystScaleUp',  't#bar{t} (Q^2 up)',      '/TTJets_MSDecays_scaleup_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V19-v1/AODSIM',       41908271, 4, 0.15, ttbar_xsec),
+]
+
 auxiliary_background_samples = [
-    MCSample('ttbarincl',        't#bar{t}',                                                '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 6923750,   4, 0.15, 225.2),
+    MCSample('ttbarincl',        't#bar{t}',                                                '/TTJets_MassiveBinDECAY_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 6923750,   4, 0.15, ttbar_xsec),
     MCSample('qcdmupt15',        'QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV',           '/QCD_Pt_20_MuEnrichedPt_15_TuneZ2star_8TeV_pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',      7529312, 801, 0.10, 3.64e8*3.7e-4),
     MCSample('tttt',             't#bar{t}t#bar{t}',                                        '/TTTT_TuneZ2star_8TeV-madgraph-tauola/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                     99994,  -1, 0.20, 7.16E-4),
     MCSample('tthbb',            'ttH, H #rightarrow bb',                                   '/TTH_HToBB_M-125_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                           1000008,  -1, 0.13, 0.1293 * 0.577),
@@ -336,120 +349,44 @@ mfv_xsec = {
 
 mfv_signal_samples_ex = [
     (   0,  200, MCSample('mfv_neutralino_tau0000um_M0200', 'M_{tbs} = 200 GeV, prompt',           '/mfv_neutralino_tau0000um_M0200/tucker-mfv_neutralino_tau0000um_M0200-4c5a3e1bd487f486a1b444615e104727/USER',  99850, 2, *mfv_xsec[ 200]),),
-    (   0,  300, MCSample('mfv_neutralino_tau0000um_M0300', 'M_{tbs} = 300 GeV, prompt',           '/mfv_neutralino_tau0000um_M0300/tucker-mfv_neutralino_tau0000um_M0300-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 300]),),
     (   0,  400, MCSample('mfv_neutralino_tau0000um_M0400', 'M_{tbs} = 400 GeV, prompt',           '/mfv_neutralino_tau0000um_M0400/tucker-mfv_neutralino_tau0000um_M0400-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 400]),),
     (   0,  600, MCSample('mfv_neutralino_tau0000um_M0600', 'M_{tbs} = 600 GeV, prompt',           '/mfv_neutralino_tau0000um_M0600/tucker-mfv_neutralino_tau0000um_M0600-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 600]),),
     (   0,  800, MCSample('mfv_neutralino_tau0000um_M0800', 'M_{tbs} = 800 GeV, prompt',           '/mfv_neutralino_tau0000um_M0800/tucker-mfv_neutralino_tau0000um_M0800-4c5a3e1bd487f486a1b444615e104727/USER',  99900, 2, *mfv_xsec[ 800]),),
     (   0, 1000, MCSample('mfv_neutralino_tau0000um_M1000', 'M_{tbs} = 1000 GeV, prompt',          '/mfv_neutralino_tau0000um_M1000/tucker-mfv_neutralino_tau0000um_M1000-4c5a3e1bd487f486a1b444615e104727/USER',  99996, 2, *mfv_xsec[1000]),),
     (  10,  200, MCSample('mfv_neutralino_tau0010um_M0200', 'M_{tbs} = 200 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0200/tucker-mfv_neutralino_tau0010um_M0200-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 200]),),
-    (  10,  300, MCSample('mfv_neutralino_tau0010um_M0300', 'M_{tbs} = 300 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0300/tucker-mfv_neutralino_tau0010um_M0300-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 300]),),
     (  10,  400, MCSample('mfv_neutralino_tau0010um_M0400', 'M_{tbs} = 400 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0400/tucker-mfv_neutralino_tau0010um_M0400-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER', 100000, 2, *mfv_xsec[ 400]),),
     (  10,  600, MCSample('mfv_neutralino_tau0010um_M0600', 'M_{tbs} = 600 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0600/tucker-mfv_neutralino_tau0010um_M0600-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99700, 2, *mfv_xsec[ 600]),),
     (  10,  800, MCSample('mfv_neutralino_tau0010um_M0800', 'M_{tbs} = 800 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0800/tucker-mfv_neutralino_tau0010um_M0800-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99950, 2, *mfv_xsec[ 800]),),
     (  10, 1000, MCSample('mfv_neutralino_tau0010um_M1000', 'M_{tbs} = 1000 GeV, #tau = 10 #mum',  '/mfv_neutralino_tau0010um_M1000/tucker-mfv_neutralino_tau0010um_M1000-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99899, 2, *mfv_xsec[1000]),),
+
     ( 100,  200, MCSample('mfv_neutralino_tau0100um_M0200', 'M_{tbs} = 200 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0200/tucker-mfv_neutralino_tau0100um_M0200-86ebc7c9963ad7f892ad94c512f4c308/USER',  99700, 2, *mfv_xsec[ 200]),),
-    ( 100,  300, MCSample('mfv_neutralino_tau0100um_M0300', 'M_{tbs} = 300 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0300/tucker-mfv_neutralino_tau0100um_M0300-86ebc7c9963ad7f892ad94c512f4c308/USER', 100000, 2, *mfv_xsec[ 300]),),
     ( 100,  400, MCSample('mfv_neutralino_tau0100um_M0400', 'M_{tbs} = 400 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0400/tucker-mfv_neutralino_tau0100um_M0400-86ebc7c9963ad7f892ad94c512f4c308/USER',  99250, 2, *mfv_xsec[ 400]),),
     ( 100,  600, MCSample('mfv_neutralino_tau0100um_M0600', 'M_{tbs} = 600 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0600/tucker-mfv_neutralino_tau0100um_M0600-86ebc7c9963ad7f892ad94c512f4c308/USER',  99650, 2, *mfv_xsec[ 600]),),
     ( 100,  800, MCSample('mfv_neutralino_tau0100um_M0800', 'M_{tbs} = 800 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0800/tucker-mfv_neutralino_tau0100um_M0800-86ebc7c9963ad7f892ad94c512f4c308/USER', 100000, 2, *mfv_xsec[ 800]),),
     ( 100, 1000, MCSample('mfv_neutralino_tau0100um_M1000', 'M_{tbs} = 1000 GeV, #tau = 100 #mum', '/mfv_neutralino_tau0100um_M1000/tucker-mfv_neutralino_tau0100um_M1000-86ebc7c9963ad7f892ad94c512f4c308/USER',  99749, 2, *mfv_xsec[1000]),),
-    ( 300,  200, MCSample('mfv_neutralino_tau0300um_M0200', 'M_{tbs} = 200 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0200/tucker-mfv_neutralino_tau0300um_M0200-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 200]),),
-    ( 300,  300, MCSample('mfv_neutralino_tau0300um_M0300', 'M_{tbs} = 300 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0300/tucker-mfv_neutralino_tau0300um_M0300-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 300]),),
-    ( 300,  400, MCSample('mfv_neutralino_tau0300um_M0400', 'M_{tbs} = 400 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0400/tucker-mfv_neutralino_tau0300um_M0400-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 400]),),
-    ( 300,  600, MCSample('mfv_neutralino_tau0300um_M0600', 'M_{tbs} = 600 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0600/tucker-mfv_neutralino_tau0300um_M0600-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 600]),),
-    ( 300,  800, MCSample('mfv_neutralino_tau0300um_M0800', 'M_{tbs} = 800 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0800/tucker-mfv_neutralino_tau0300um_M0800-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 800]),),
-    ( 300, 1000, MCSample('mfv_neutralino_tau0300um_M1000', 'M_{tbs} = 1000 GeV, #tau = 300 #mum', '/mfv_neutralino_tau0300um_M3000/tucker-mfv_neutralino_tau0300um_M1000-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[1000]),),
     (1000,  200, MCSample('mfv_neutralino_tau1000um_M0200', 'M_{tbs} = 200 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0200/tucker-mfv_neutralino_tau1000um_M0200-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99752, 2, *mfv_xsec[ 200]),),
-    (1000,  300, MCSample('mfv_neutralino_tau1000um_M0300', 'M_{tbs} = 300 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0300/tucker-mfv_neutralino_tau1000um_M0300-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[ 300]),),
     (1000,  400, MCSample('mfv_neutralino_tau1000um_M0400', 'M_{tbs} = 400 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0400/tucker-mfv_neutralino_tau1000um_M0400-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99850, 2, *mfv_xsec[ 400]),),
     (1000,  600, MCSample('mfv_neutralino_tau1000um_M0600', 'M_{tbs} = 600 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0600/tucker-mfv_neutralino_tau1000um_M0600-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99851, 2, *mfv_xsec[ 600]),),
     (1000,  800, MCSample('mfv_neutralino_tau1000um_M0800', 'M_{tbs} = 800 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0800/tucker-mfv_neutralino_tau1000um_M0800-a6ab3419cb64660d6c68351b3cff9fb0/USER',  99949, 2, *mfv_xsec[ 800]),),
     (1000, 1000, MCSample('mfv_neutralino_tau1000um_M1000', 'M_{tbs} = 1000 GeV, #tau = 1 mm',     '/mfv_neutralino_tau1000um_M1000/tucker-mfv_neutralino_tau1000um_M1000-a6ab3419cb64660d6c68351b3cff9fb0/USER', 100000, 2, *mfv_xsec[1000]),),
     (9900,  200, MCSample('mfv_neutralino_tau9900um_M0200', 'M_{tbs} = 200 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0200/tucker-mfv_neutralino_tau9900um_M0200-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 200]),),
-    (9900,  300, MCSample('mfv_neutralino_tau9900um_M0300', 'M_{tbs} = 300 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0300/tucker-mfv_neutralino_tau9900um_M0300-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 300]),),
     (9900,  400, MCSample('mfv_neutralino_tau9900um_M0400', 'M_{tbs} = 400 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0400/tucker-mfv_neutralino_tau9900um_M0400-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 400]),),
     (9900,  600, MCSample('mfv_neutralino_tau9900um_M0600', 'M_{tbs} = 600 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0600/tucker-mfv_neutralino_tau9900um_M0600-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99950, 2, *mfv_xsec[ 600]),),
     (9900,  800, MCSample('mfv_neutralino_tau9900um_M0800', 'M_{tbs} = 800 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0800/tucker-mfv_neutralino_tau9900um_M0800-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99900, 2, *mfv_xsec[ 800]),),
     (9900, 1000, MCSample('mfv_neutralino_tau9900um_M1000', 'M_{tbs} = 1000 GeV, #tau = 9.9 mm',   '/mfv_neutralino_tau9900um_M1000/tucker-mfv_neutralino_tau9900um_M1000-3c4ccd1d95a3d8658f6b5a18424712b3/USER',  99899, 2, *mfv_xsec[1000]),), 
-    ]
 
-mfv_signal_samples_nouse = []
-mfv_signal_samples = []
-for tau, mass, sample in mfv_signal_samples_ex:
-    if tau < 100:
-        mfv_signal_samples_nouse.append(sample)
-    else:
-        mfv_signal_samples.append(sample)
-    sample.tau = tau
-    sample.mass = mass
-    sample.events_per = 1500
-    sample.no_skimming_cuts = True
-    sample.is_pythia8 = True
-    sample.dbs_url_num = 2
-    sample.re_pat = True
-    sample.scheduler = 'condor'
-    sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
-    sample.cross_section = 0.001
+    (   0,  300, MCSample('mfv_neutralino_tau0000um_M0300', 'M_{tbs} = 300 GeV, prompt',           '/mfv_neutralino_tau0000um_M0300/jchu-mfv_neutralino_tau0000um_M0300-4c5a3e1bd487f486a1b444615e104727/USER', 100000, 2, *mfv_xsec[ 300]),),
+    (  10,  300, MCSample('mfv_neutralino_tau0010um_M0300', 'M_{tbs} = 300 GeV, #tau = 10 #mum',   '/mfv_neutralino_tau0010um_M0300/jchu-mfv_neutralino_tau0010um_M0300-1c71e23d89dd4b2c2e4deb43ae6cdc5a/USER',  99700, 2, *mfv_xsec[ 300]),),
+    ( 100,  300, MCSample('mfv_neutralino_tau0100um_M0300', 'M_{tbs} = 300 GeV, #tau = 100 #mum',  '/mfv_neutralino_tau0100um_M0300/jchu-mfv_neutralino_tau0100um_M0300-86ebc7c9963ad7f892ad94c512f4c308/USER', 100000, 2, *mfv_xsec[ 300]),),
+    ( 300,  200, MCSample('mfv_neutralino_tau0300um_M0200', 'M_{tbs} = 200 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0200/jchu-mfv_neutralino_tau0300um_M0200-0fcc6f04c7b2260cb6c49261d41edaca/USER',  98950, 2, *mfv_xsec[ 200]),),
+    ( 300,  300, MCSample('mfv_neutralino_tau0300um_M0300', 'M_{tbs} = 300 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0300/jchu-mfv_neutralino_tau0300um_M0300-0fcc6f04c7b2260cb6c49261d41edaca/USER',  94850, 2, *mfv_xsec[ 300]),),
+    ( 300,  400, MCSample('mfv_neutralino_tau0300um_M0400', 'M_{tbs} = 400 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0400/jchu-mfv_neutralino_tau0300um_M0400-0fcc6f04c7b2260cb6c49261d41edaca/USER', 100000, 2, *mfv_xsec[ 400]),),
+    ( 300,  600, MCSample('mfv_neutralino_tau0300um_M0600', 'M_{tbs} = 600 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0600/jchu-mfv_neutralino_tau0300um_M0600-0fcc6f04c7b2260cb6c49261d41edaca/USER',  94450, 2, *mfv_xsec[ 600]),),
+    ( 300,  800, MCSample('mfv_neutralino_tau0300um_M0800', 'M_{tbs} = 800 GeV, #tau = 300 #mum',  '/mfv_neutralino_tau0300um_M0800/jchu-mfv_neutralino_tau0300um_M0800-0fcc6f04c7b2260cb6c49261d41edaca/USER',  99450, 2, *mfv_xsec[ 800]),),
+    ( 300, 1000, MCSample('mfv_neutralino_tau0300um_M1000', 'M_{tbs} = 1000 GeV, #tau = 300 #mum', '/mfv_neutralino_tau0300um_M1000/jchu-mfv_neutralino_tau0300um_M1000-0fcc6f04c7b2260cb6c49261d41edaca/USER',  99149, 2, *mfv_xsec[1000]),),
+    (1000,  300, MCSample('mfv_neutralino_tau1000um_M0300', 'M_{tbs} = 300 GeV, #tau = 1 mm',      '/mfv_neutralino_tau1000um_M0300/jchu-mfv_neutralino_tau1000um_M0300-a6ab3419cb64660d6c68351b3cff9fb0/USER',  91800, 2, *mfv_xsec[ 300]),),
+    (9900,  300, MCSample('mfv_neutralino_tau9900um_M0300', 'M_{tbs} = 300 GeV, #tau = 9.9 mm',    '/mfv_neutralino_tau9900um_M0300/jchu-mfv_neutralino_tau9900um_M0300-3c4ccd1d95a3d8658f6b5a18424712b3/USER', 100000, 2, *mfv_xsec[ 300]),),
 
-########################################################################
-
-myttbar_samples = [
-    MCSample('myttbarpythia',       '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER',        99850, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbarpynopu',       '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',              99950, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbarpydesignnopu', '', '/mfv_ttbar_designnopu/tucker-mfv_ttbar_designnopu-03e053ea4788fabdfdc6964bc26befc0/USER', 100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbarpydesignnoputkex', '', '/mfv_ttbar_designnoputkex/tucker-mfv_ttbar_designnoputkex-03e053ea4788fabdfdc6964bc26befc0/USER', 750000, 4, 0.15, 225.2 * 0.457),
-    ]
-
-for s in myttbar_samples:
-    s.is_pythia8 = True
-    s.dbs_url_num = 3
-
-########################################################################
-
-myttbar_tune_samples = [
-    MCSample('myttbartune3',       '', '/mfv_ttbar_tune_3/jchavesb-mfv_ttbar_tune_3-e3674fd6eec136ae079fabace84be5fa/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune4',       '', '/mfv_ttbar_tune_4/jchavesb-mfv_ttbar_tune_4-2ab11a6f2e6e96d6779b5e2cdd1bc9d7/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune5',       '', '/mfv_ttbar_tune_5/jchavesb-mfv_ttbar_tune_5-84bbc883c4d7ec08aa60419295f8ddab/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune6',       '', '/mfv_ttbar_tune_6/jchavesb-mfv_ttbar_tune_6-5e5c8b6e5ae97e632829881f70a96bef/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune7',       '', '/mfv_ttbar_tune_7/jchavesb-mfv_ttbar_tune_7-aed1494d928e44cf1085663860ab1a07/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune8',       '', '/mfv_ttbar_tune_8/jchavesb-mfv_ttbar_tune_8-39b59d827dfea83a5b26108b211413ab/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, 225.2 * 0.457),
-    ]
-    
-myttbar_tune_samples2 = [
-    MCSample('myttbartune10',       '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',        100000, 4, 0.15, 225.2 * 0.457),
-    ]
-for s in myttbar_tune_samples+myttbar_tune_samples2:
-    s.is_pythia8 = True
-    s.dbs_url_num = 3
-    if sample in myttbar_tune_samples:
-        s.scheduler = 'condor'
-
-########################################################################
-
-myttbar_ali_samples = [
-    MCSample('myttbarelliptical',    '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbarsagitta',       '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbarskew',          '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbartwist',         '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, 225.2 * 0.457),
-    MCSample('myttbarzexpansion',    '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
-    ]
-
-myttbar_ali_samples2 = [
-    MCSample('myttbartelescope',    '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, 225.2 * 0.457),
-    ]
-    
-for s in myttbar_ali_samples+myttbar_ali_samples2:
-    s.is_pythia8 = True
-    s.dbs_url_num = 3
-    if sample in myttbar_ali_samples:
-        s.scheduler = 'condor'
-
-
-########################################################################
-
-mysignal_tune_samples_ex = [
     (1000,  400, MCSample('mysignaltune3',       '', '/mfv_neutralino_tau1000um_M0400_tune_3/jchavesb-mfv_neutralino_tau1000um_M0400_tune_3-e17c423e411c7625ebf79112981b92b0/USER',        100000, 2, *mfv_xsec[ 400]),),
     (1000,  400, MCSample('mysignaltune4',       '', '/mfv_neutralino_tau1000um_M0400_tune_4/jchavesb-mfv_neutralino_tau1000um_M0400_tune_4-832390b7c0947e4b08135391c0924f95/USER',        100000, 2, *mfv_xsec[ 400]),),
     (1000,  400, MCSample('mysignaltune5',       '', '/mfv_neutralino_tau1000um_M0400_tune_5/jchavesb-mfv_neutralino_tau1000um_M0400_tune_5-998e97fcda3ca47d1d647f0835952d27/USER',        100000, 2, *mfv_xsec[ 400]),),
@@ -458,27 +395,72 @@ mysignal_tune_samples_ex = [
     (1000,  400, MCSample('mysignaltune8',       '', '/mfv_neutralino_tau1000um_M0400_tune_8/jchavesb-mfv_neutralino_tau1000um_M0400_tune_8-dd3c8ceba2a82a60a712f74b7ca5a607/USER',        100000, 2, *mfv_xsec[ 400]),),
     (1000,  400, MCSample('mysignaltune12',      '', '/mfv_neutralino_tau1000um_M0400_tune_12/jchavesb-mfv_neutralino_tau1000um_M0400_tune_12-60f88ed1269b264f1bd7c4bb048dc5d9/USER',      100000, 2, *mfv_xsec[ 400]),),
     (1000,  400, MCSample('mysignaltune13',      '', '/mfv_neutralino_tau1000um_M0400_tune_13/jchavesb-mfv_neutralino_tau1000um_M0400_tune_13-8a6cd8ad72ac2ecdec2acf901a5ae85a/USER',      100000, 2, *mfv_xsec[ 400]),),
-    ]
 
-mysignal_tune_samples_ex_2 = [
     (1000,  400, MCSample('mysignaltune10',      '', '/mfv_neutralino_tau1000um_M0400_tune_10/jchavesb-mfv_neutralino_tau1000um_M0400_tune_10-55f49472d01964c4ac6513539e4c2ae0/USER',      100000, 2, *mfv_xsec[ 400]),),
     (1000,  400, MCSample('mysignaltune11',      '', '/mfv_neutralino_tau1000um_M0400_tune_11/jchavesb-mfv_neutralino_tau1000um_M0400_tune_11-a748cba579d381b275857b446cd677ea/USER',      100000, 2, *mfv_xsec[ 400]),),
     ]
-    
-mysignal_tune_samples = []
-for tau, mass, sample in mysignal_tune_samples_ex+mysignal_tune_samples_ex_2:
-    mysignal_tune_samples.append(sample)
+
+mfv_signal_samples_nouse = []
+mfv_signal_samples = []
+mfv_signal_samples_systematics = []
+for tau, mass, sample in mfv_signal_samples_ex:
+    is_syst = 'jchavesb' in sample.dataset
+    is_300 = '0300' in sample.name
+
+    if tau < 100:
+        mfv_signal_samples_nouse.append(sample)
+    elif is_syst:
+        mfv_signal_samples_systematics.append(sample)
+    else:
+        mfv_signal_samples.append(sample)
     sample.tau = tau
     sample.mass = mass
     sample.events_per = 1500
     sample.no_skimming_cuts = True
     sample.is_pythia8 = True
-    sample.dbs_url_num = 3
+    sample.dbs_url_num = 3 if ('0300' in sample.name or is_syst) else 2
     sample.re_pat = True
-    if sample in mysignal_tune_samples_ex:
+    if not ('tune10' in sample.name or 'tune11' in sample.name):
         sample.scheduler = 'condor'
-    sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
+    if is_300:
+        sample.ana_hash = 'd193341bef5d5840d6be68a15a36c5f0'
+    elif is_syst:
+        sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
+    else:
+        sample.ana_hash = '0a90ffb9bb56aadc18a0859a54bf4f31'
     sample.cross_section = 0.001
+
+    sample.ana_events_per = 10000
+
+########################################################################
+
+myttbar_samples = [
+    MCSample('myttbarpythia',       '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER',        99850, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarpynopu',       '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',              99950, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarpydesignnopu', '', '/mfv_ttbar_designnopu/tucker-mfv_ttbar_designnopu-03e053ea4788fabdfdc6964bc26befc0/USER', 100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarpydesignnoputkex', '', '/mfv_ttbar_designnoputkex/tucker-mfv_ttbar_designnoputkex-03e053ea4788fabdfdc6964bc26befc0/USER', 750000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune3',       '', '/mfv_ttbar_tune_3/jchavesb-mfv_ttbar_tune_3-e3674fd6eec136ae079fabace84be5fa/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune4',       '', '/mfv_ttbar_tune_4/jchavesb-mfv_ttbar_tune_4-2ab11a6f2e6e96d6779b5e2cdd1bc9d7/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune5',       '', '/mfv_ttbar_tune_5/jchavesb-mfv_ttbar_tune_5-84bbc883c4d7ec08aa60419295f8ddab/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune6',       '', '/mfv_ttbar_tune_6/jchavesb-mfv_ttbar_tune_6-5e5c8b6e5ae97e632829881f70a96bef/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune7',       '', '/mfv_ttbar_tune_7/jchavesb-mfv_ttbar_tune_7-aed1494d928e44cf1085663860ab1a07/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune8',       '', '/mfv_ttbar_tune_8/jchavesb-mfv_ttbar_tune_8-39b59d827dfea83a5b26108b211413ab/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune10',       '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarelliptical',    '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarsagitta',       '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarskew',          '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartwist',         '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarzexpansion',    '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartelescope',    '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    ]
+
+for s in myttbar_samples:
+    s.is_pythia8 = True
+    s.dbs_url_num = 3
+    if 'jchavesb' in s.dataset and not 'tune10' in s.name and not 'telescope' in s.name:
+        s.scheduler = 'condor'
 
 ########################################################################
 
@@ -494,10 +476,13 @@ auxiliary_data_samples = [
     DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD')
     ]
 
+for s in data_samples:
+    s.ana_hash = 'bff65ebcd1e8cb7cf157d69554917e7e'
+
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse + myttbar_samples
+all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse + mfv_signal_samples_systematics + myttbar_samples + ttbar_systematics_samples
 all_samples = all_data_samples + all_mc_samples
 
 samples_by_name = {}
@@ -505,29 +490,69 @@ for sample in all_samples:
     exec '%s = sample' % sample.name
     samples_by_name[sample.name] = sample
 
+def from_argv(default=None, sort_and_set=True):
+    samples = []
+    all_samples_names = samples_by_name.keys()
+    ready_only = 'ready_only' in sys.argv
+    for arg in sys.argv:
+        if any(c in arg for c in '[]*?!'):
+            for sample in all_samples:
+                if (not ready_only or sample.ana_ready) and fnmatch(sample.name, arg):
+                    samples.append(sample)
+        elif arg in all_samples_names:
+            sample = samples_by_name[arg]
+            if not ready_only or sample.ana_ready:
+                samples.append(sample)
+    if samples:
+        if sort_and_set:
+            samples = sorted(set(samples))
+        return samples
+    else:
+        return default
+
 ########################################################################
 
-# Bookkeeping of numbers of events in missing jobs/etc. goes here.
+# Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-bjetsqcdpt = [s for s in auxiliary_background_samples if s.name.startswith('bjetsht') or s.name.startswith('qcdpt')]
+# JMTBAD ana_dict...
+mfv_neutralino_tau0100um_M0200.ana_dataset_override = '/mfv_neutralino_tau0100um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0300.ana_dataset_override = '/mfv_neutralino_tau0100um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0600.ana_dataset_override = '/mfv_neutralino_tau0100um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M0800.ana_dataset_override = '/mfv_neutralino_tau0100um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0100um_M1000.ana_dataset_override = '/mfv_neutralino_tau0100um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0200.ana_dataset_override = '/mfv_neutralino_tau0300um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0300.ana_dataset_override = '/mfv_neutralino_tau0300um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0400.ana_dataset_override = '/mfv_neutralino_tau0300um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0600.ana_dataset_override = '/mfv_neutralino_tau0300um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M0800.ana_dataset_override = '/mfv_neutralino_tau0300um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau0300um_M1000.ana_dataset_override = '/mfv_neutralino_tau0300um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0200.ana_dataset_override = '/mfv_neutralino_tau1000um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0300.ana_dataset_override = '/mfv_neutralino_tau1000um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0600.ana_dataset_override = '/mfv_neutralino_tau1000um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M0800.ana_dataset_override = '/mfv_neutralino_tau1000um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0200.ana_dataset_override = '/mfv_neutralino_tau9900um_M0200/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0300.ana_dataset_override = '/mfv_neutralino_tau9900um_M0300/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0600.ana_dataset_override = '/mfv_neutralino_tau9900um_M0600/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M0800.ana_dataset_override = '/mfv_neutralino_tau9900um_M0800/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
+mfv_neutralino_tau9900um_M1000.ana_dataset_override = '/mfv_neutralino_tau9900um_M1000/tucker-mfvmergentuple_v18-2f015b87b0f183c443d811e67eceec2e/USER'
 
-for sample in bjetsqcdpt:
-    sample.ana_hash = '737cfa6c7e996d624e490a5253db2bb8'
+for sample in ttbar_systematics_samples:
+    sample.ana_hash = '63d51abe304b0c3d40e1872ac2d8fed6'
 
-for sample in ttbar_samples + qcd_samples + mfv_signal_samples + bjetsqcdpt:
+for sample in ttbar_samples + qcd_samples + mfv_signal_samples + ttbar_systematics_samples:
     sample.ana_ready = True
-
-for sample in mfv_signal_samples:
-    if '0300' in sample.name:
-        sample.ana_ready = False
 
 # JMTBAD replace ana_ready with ana_dict and check that
 
 for sample, reduce_by in [
     (mfv_neutralino_tau1000um_M0300, 500),
-    (bjetsht0250, 108451*4),
-    (bjetsht0500, 17064*4),
-    (qcdpt0170, 33640*2),
+    (ttbarsystM166p5, 7*16736),
+    (ttbarsystMatchDn, 16736),
+    (ttbarsystScaleUp, 16736),
     ]:
     sample.reduce_total_events_by(reduce_by)
 
@@ -541,30 +566,33 @@ mfv_neutralino_tau0010um_M0400.ana_filter_eff = 9.6750e-01  #    96750 /   10000
 mfv_neutralino_tau0010um_M0600.ana_filter_eff = 9.9530e-01  #    99231 /    99700
 mfv_neutralino_tau0010um_M0800.ana_filter_eff = 9.9795e-01  #    99745 /    99950
 mfv_neutralino_tau0010um_M1000.ana_filter_eff = 9.9892e-01  #    99791 /    99899
+
 mfv_neutralino_tau0100um_M0200.ana_filter_eff = 4.7951e-01  #    47807 /    99700
-mfv_neutralino_tau0100um_M0300.ana_filter_eff = 8.6538e-01  #    86538 /   100000
 mfv_neutralino_tau0100um_M0400.ana_filter_eff = 9.6769e-01  #    96043 /    99250
 mfv_neutralino_tau0100um_M0600.ana_filter_eff = 9.9554e-01  #    99206 /    99650
 mfv_neutralino_tau0100um_M0800.ana_filter_eff = 9.9795e-01  #    99795 /   100000
 mfv_neutralino_tau0100um_M1000.ana_filter_eff = 9.9890e-01  #    99639 /    99749
-mfv_neutralino_tau0300um_M0200.ana_filter_eff = 4.7439e-01  #    47439 /   100000
-mfv_neutralino_tau0300um_M0300.ana_filter_eff = 8.2247e-01  #    82247 /   100000
-mfv_neutralino_tau0300um_M0400.ana_filter_eff = 9.6975e-01  #    96975 /   100000
-mfv_neutralino_tau0300um_M0600.ana_filter_eff = 9.3989e-01  #    93989 /   100000
-mfv_neutralino_tau0300um_M0800.ana_filter_eff = 9.9264e-01  #    99264 /   100000
-mfv_neutralino_tau0300um_M1000.ana_filter_eff = 9.9035e-01  #    99035 /   100000
 mfv_neutralino_tau1000um_M0200.ana_filter_eff = 4.7873e-01  #    47754 /    99752
-mfv_neutralino_tau1000um_M0300.ana_filter_eff = 7.9684e-01  #    79286 /    99500
 mfv_neutralino_tau1000um_M0400.ana_filter_eff = 9.6798e-01  #    96653 /    99850
 mfv_neutralino_tau1000um_M0600.ana_filter_eff = 9.9508e-01  #    99360 /    99851
 mfv_neutralino_tau1000um_M0800.ana_filter_eff = 9.9825e-01  #    99774 /    99949
 mfv_neutralino_tau1000um_M1000.ana_filter_eff = 9.9866e-01  #    99866 /   100000
 mfv_neutralino_tau9900um_M0200.ana_filter_eff = 4.7714e-01  #    47690 /    99950
-mfv_neutralino_tau9900um_M0300.ana_filter_eff = 8.6473e-01  #    86473 /   100000
 mfv_neutralino_tau9900um_M0400.ana_filter_eff = 9.6734e-01  #    96734 /   100000
 mfv_neutralino_tau9900um_M0600.ana_filter_eff = 9.9511e-01  #    99461 /    99950
 mfv_neutralino_tau9900um_M0800.ana_filter_eff = 9.9818e-01  #    99718 /    99900
 mfv_neutralino_tau9900um_M1000.ana_filter_eff = 9.9904e-01  #    99803 /    99899
+
+mfv_neutralino_tau0100um_M0300.ana_filter_eff = 8.6538e-01  #    86538 /   100000
+mfv_neutralino_tau0300um_M0200.ana_filter_eff = 4.7942e-01  #    47439 /    98950
+mfv_neutralino_tau0300um_M0300.ana_filter_eff = 8.6713e-01  #    82247 /    94850
+mfv_neutralino_tau0300um_M0400.ana_filter_eff = 9.6975e-01  #    96975 /   100000
+mfv_neutralino_tau0300um_M0600.ana_filter_eff = 9.9512e-01  #    93989 /    94450
+mfv_neutralino_tau0300um_M0800.ana_filter_eff = 9.9813e-01  #    99264 /    99450
+mfv_neutralino_tau0300um_M1000.ana_filter_eff = 9.9885e-01  #    99035 /    99149
+mfv_neutralino_tau1000um_M0300.ana_filter_eff = 8.6837e-01  #    79282 /    91300
+mfv_neutralino_tau9900um_M0300.ana_filter_eff = 8.6473e-01  #    86473 /   100000
+
 dyjetstollM10.ana_filter_eff        = 4.3913e-04  #     3132 /  7132223
 dyjetstollM50.ana_filter_eff        = 2.8337e-03  #    86313 / 30459503
 qcdht0100.ana_filter_eff            = 7.4784e-04  #    37489 / 50129518
@@ -606,6 +634,13 @@ bjetsht0100.ana_filter_eff = 1.0520e-03  #    15177 / 14426854
 bjetsht0250.ana_filter_eff = 8.1803e-02  #  1042986 / 12750008
 bjetsht0500.ana_filter_eff = 3.4381e-01  #  2262942 /  6581987
 bjetsht1000.ana_filter_eff = 4.7193e-01  #  1480886 /  3137949
+ttbarsystMSDecays.ana_filter_eff = 3.0109e-01  # 18707579 / 62131965
+ttbarsystM166p5.ana_filter_eff   = 2.7456e-01  #  7402529 / 26961625
+ttbarsystM178p5.ana_filter_eff   = 3.2599e-01  #  7940939 / 24359161
+ttbarsystMatchDn.ana_filter_eff  = 3.0599e-01  #  6312540 / 20629826
+ttbarsystMatchUp.ana_filter_eff  = 1.6852e-01  # 11068189 / 65679170
+ttbarsystScaleDn.ana_filter_eff  = 3.1763e-01  # 12478570 / 39286663
+ttbarsystScaleUp.ana_filter_eff  = 2.8428e-01  # 11908952 / 41891535
 
 ########################################################################
 
@@ -631,8 +666,11 @@ def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
 
 ########################################################################
 
-__all__ = ['data_samples', 'auxiliary_data_samples', 'ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'leptonic_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples']
+__all__ = ['data_samples', 'auxiliary_data_samples', 'all_data_samples']
+__all__ += ['ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'leptonic_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples', 'mfv_signal_samples_nouse', 'mfv_signal_samples_systematics', 'myttbar_samples', 'all_mc_samples']
+__all__ += ['all_samples']
 __all__ += [s.name for s in all_samples]
+__all__ += ['check_nevents', 'from_argv']
 
 if __name__ == '__main__':
     if 'dump' in sys.argv:
@@ -661,9 +699,7 @@ if __name__ == '__main__':
 
     elif 'filtereffs' in sys.argv:
         diffs = []
-        for sample in all_mc_samples:
-            if not sample.ana_ready:
-                continue
+        for sample in from_argv(all_mc_samples):
             o,x,y = sample.nevents_orig, sample.nevents, DBS.numevents_in_dataset(sample.ana_dataset, **sample.dbs_inst_dict(sample.ana_dbs_url_num))
             print '%30s %14i %14i %14i' % (sample.name, o, y, x)
             if x != y:
@@ -732,3 +768,7 @@ if __name__ == '__main__':
         cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
         print cmd
         os.system(cmd)
+
+    elif 'anadatasets' in sys.argv:
+        for sample in from_argv(all_samples):
+            print sample.name.ljust(30), sample.ana_dataset

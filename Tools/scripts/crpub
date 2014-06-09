@@ -1,28 +1,10 @@
 #!/usr/bin/env python
 
 import os, sys
-from JMTucker.Tools.CRABTools import bool_from_argv, crab_dirs_from_argv
+from JMTucker.Tools.CRABTools import crab_dirs_from_argv
 
-NoInp = 'NoInp' if bool_from_argv('NoInp') else ''
-append = bool_from_argv('append')
-
-dirs = []
 for d in crab_dirs_from_argv():
-    d = os.path.normpath(d)
-    bn = os.path.basename(d)
-    dn = os.path.dirname(d)
-    p = os.path.join(dn, 'publish_logs/%s.log' % bn.replace('crab_', ''))
-
-    app = ''
-    if os.path.isfile(p):
-        if append:
-            app = '>'
-        else:
-            print 'Refusing to launch for %s: %s already exists!' % (d,p)
-            continue
-    dirs.append((d, app, p))
-
-for d, app, p in dirs:
-    cmd = 'crab -c %s -publish%s >%s& %s &' % (d, NoInp, app, p)
+    # JMTBAD Make this check that all R_0 jobs were published...
+    cmd = 'crab -c %s -publish' % d
     print cmd
     os.system(cmd)

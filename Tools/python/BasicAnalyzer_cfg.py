@@ -18,3 +18,15 @@ def geometry_etc(process, tag):
     
 def add_analyzer(name, **kwargs):
     return _add_analyzer(process, name, **kwargs)
+
+def report_every(i):
+    process.MessageLogger.cerr.FwkReport.reportEvery = i
+
+__all__ = [
+    'cms',
+    'process',
+    'file_event_from_argv',
+    'geometry_etc',
+    'add_analyzer',
+    'report_every'
+    ]

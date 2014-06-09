@@ -2,10 +2,15 @@ import os, sys, glob
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 debug = 'debug' in sys.argv
 
+<<<<<<< HEAD
 process.source.fileNames = ['/store/user/jchavesb/mfv_ttbar_ali_elliptical/mfv_ttbar_ali_elliptical/84bbc883c4d7ec08aa60419295f8ddab/reco_1000_1_CH2.root']
 #process.source.fileNames = ['/store/user/jchavesb/mfv_ttbar_ali_elliptical/mfv_ttbar_ali_elliptical/84bbc883c4d7ec08aa60419295f8ddab/reco_172_1_lj6.root']
 #process.source.fileNames = ['/store/user/jchavesb/mfv_neutralino_tau1000um_M0400_tune_3/mfv_neutralino_tau1000um_M0400_tune_3/e17c423e411c7625ebf79112981b92b0/reco_1000_1_5td.root']
 process.TFileService.fileName = 'gen_histos2.root'
+=======
+file_event_from_argv(process)
+process.TFileService.fileName = 'gen_histos.root'
+>>>>>>> 9818c1be0f8709fe7eaadbd08fd1be12708187a5
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')

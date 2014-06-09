@@ -14,6 +14,7 @@ private:
   const edm::InputTag mevent_src;
   const bool enable;
   const bool prints;
+  const bool histos;
 
   const bool weight_pileup;
   const std::vector<double> pileup_weights;
@@ -27,14 +28,17 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
+    histos(cfg.getUntrackedParameter<bool>("histos", true)),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
   produces<double>();
 
-  edm::Service<TFileService> fs;
-  TH1::SetDefaultSumw2();
-  h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
+  if (histos) {
+    edm::Service<TFileService> fs;
+    TH1::SetDefaultSumw2();
+    h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
+  }
 }
 
 double MFVWeightProducer::pileup_weight(int mc_npu) const {
@@ -45,7 +49,8 @@ double MFVWeightProducer::pileup_weight(int mc_npu) const {
 }
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
-  h_sums->Fill(n_sums);
+  if (histos)
+    h_sums->Fill(n_sums);
 
   if (prints)
     printf("MFVWeight: r,l,e: %u, %u, %u   ", event.id().run(), event.luminosityBlock(), event.id().event());
@@ -62,13 +67,15 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         const double pu_w = pileup_weight(mevent->npu);
         if (prints)
           printf("mc_npu: %g  pu weight: %g  ", mevent->npu, pu_w);
-        h_sums->Fill(sum_pileup_weight, pu_w);
+        if (histos)
+          h_sums->Fill(sum_pileup_weight, pu_w);
         *weight *= pu_w;
       }
     }
   }
 
-  h_sums->Fill(sum_weight, *weight);
+  if (histos)
+    h_sums->Fill(sum_weight, *weight);
 
   if (prints)
     printf("total weight: %g\n", *weight);

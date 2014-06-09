@@ -849,6 +849,21 @@ def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin
         wsq += hist.GetBinError(i)**2
     return integral, wsq**0.5
 
+def get_hist_quantiles(hist, probs):
+    """Get the quantiles for the histogram corresponding to the listed
+    probs (e.g. probs = [0.1, 0.5, 0.9] to find the first decile, the
+    mean, and the last decile."""
+
+    was_list = False
+    if type(probs) != array:
+        was_list = True
+        probs = array('d', probs)
+    quantiles = array('d', [0]*len(probs))
+    hist.GetQuantiles(len(probs), quantiles, probs)
+    if was_list:
+        probs = list(probs)
+    return probs
+
 def get_hist_stats(hist, factor=None, draw=False):
     """For the given histogram, return a five-tuple of the number of
     entries, the underflow and overflow counts, the fitted sigma
@@ -1023,6 +1038,21 @@ def move_overflow_into_last_bin(h):
     h.SetBinError(nb, (h.GetBinError(nb)**2 + h.GetBinError(nb+1)**2)**0.5)
     h.SetBinContent(nb+1, 0)
     h.SetBinError(nb+1, 0)
+
+def move_stat_box(s, ndc_coords):
+    """Move the stat box s (or if s is its hist, get s from it) to the
+    NDC coords (x1, y1, x2, y2) specified. (Remember to call
+    TCanvas::Update first.)"""
+
+    if type(s) != ROOT.TPaveStats:
+        s = s.FindObject('stats')
+
+    s.SetX1NDC(ndc_coords[0])
+    s.SetY1NDC(ndc_coords[1])
+    s.SetX2NDC(ndc_coords[2])
+    s.SetY2NDC(ndc_coords[3])
+
+    return s
 
 def poisson_means_divide(h1, h2, no_zeroes=False):
     return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
@@ -1260,7 +1290,7 @@ def set_style(date_pages=False):
     ROOT.gStyle.SetFillColor(0)
     if date_pages:
         ROOT.gStyle.SetOptDate()
-    ROOT.gStyle.SetOptStat(111111)
+    ROOT.gStyle.SetOptStat(1111111)
     ROOT.gStyle.SetOptFit(1111)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
@@ -1315,12 +1345,14 @@ __all__ = [
     'fit_gaussian',
     'get_bin_content_error',
     'get_integral',
+    'get_hist_quantiles',
     'get_hist_stats',
     'draw_hist_register',
     'make_rms_hist',
     'move_below_into_bin',
     'move_above_into_bin',
     'move_overflow_into_last_bin',
+    'move_stat_box',
     'plot_saver',
     'poisson_intervalize',
     'poisson_means_divide',

@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV17', 'mfv_neutralino_tau1000um_M0400', 10000)
+SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 100)
 process.TFileService.fileName = 'histos.root'
 
 process.load('JMTucker.MFVNeutralino.Histos_cff')
@@ -17,15 +17,9 @@ nm1s = [
     ('Mindrmax','min_drmax = 0'),
     ('Bs2derr', 'max_bs2derr = 1e9'),
     ('Njets',   'min_njetsntks = 0'),
-    ('Bs2dsig', 'min_bs2dsig = 0'),
     ('Ntracksptgt3', 'min_ntracksptgt3 = 0'),
-    ('15p0', 'min_drmax = 0, max_sumnhitsbehind = 1000000'),
-    ('Dr', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0'),
-    ('Bs2d', 'max_bs2derr = 1e9, min_bs2dsig = 0'),
-    ('DrOrBs2d', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0'),
-    ('DrOrNjets', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, min_njetsntks = 0'),
-    ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0'),
-    ('ButNtracks', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_bs2dsig = 0, min_njetsntks = 0, min_ntracksptgt3 = 0'),
+    ('Sumnhitsbehind', 'max_sumnhitsbehind = 1000000'),
+    ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_njetsntks = 0'),
     ]
 
 for name, cut in nm1s:
@@ -57,23 +51,18 @@ for name, cut in nm1s:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
-    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400] + bkg_samples + Samples.data_samples
-    if 'full' not in sys.argv:
-        for sample in bkg_samples:
-            sample.total_events = int(sample.nevents_orig/2 * sample.ana_filter_eff)
+    samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
+                                 Samples.mfv_neutralino_tau1000um_M0400,
+                                 Samples.mfv_neutralino_tau0300um_M0400,
+                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
 
     for s in Samples.data_samples:
         s.json = 'ana_5pc.json'
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-
-    ex = ''
-    exn = ''
-    cs = CRABSubmitter('HistosV17' + ex + exn,
+    cs = CRABSubmitter('HistosV18',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       manual_datasets = SampleFiles.SampleFiles['MFVNtupleV17' + ex],
+                       run_half_mc = True,
                        )
-
     cs.submit_all(samples)

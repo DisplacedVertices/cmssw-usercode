@@ -71,16 +71,30 @@ mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
     min_ntracks = 5
     )
 
+mfvSelectedVerticesMedium = mfvSelectedVertices.clone(
+    min_ntracks = 5,
+    max_drmin = 0.4,
+    max_drmax = 4,
+    max_bs2ddist = 2.87,
+    max_bs2derr = 0.004,
+    min_ntracksptgt3 = 3,
+    max_sumnhitsbehind = 0,
+    )
+
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_ntracks = 5,
     max_drmin = 0.4,
     min_drmax = 1.2,
     max_drmax = 4,
-    max_bs2derr = 0.008,
+    max_bs2ddist = 2.87,
+    max_bs2derr = 0.0025,
     min_njetsntks = 1,
-    min_bs2dsig = 10,
     min_ntracksptgt3 = 3,
     max_sumnhitsbehind = 0,
+    )
+
+mfvSelectedVerticesTightSig = mfvSelectedVerticesTight.clone(
+    min_ntracks = 7
     )
 
 mfvSelectedVerticesTightLargeErr = mfvSelectedVerticesTight.clone(
@@ -88,4 +102,4 @@ mfvSelectedVerticesTightLargeErr = mfvSelectedVerticesTight.clone(
     max_bs2derr = 1e9,
     )
 
-mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose * mfvSelectedVerticesTight * mfvSelectedVerticesTightLargeErr)
+mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose * mfvSelectedVerticesTight * mfvSelectedVerticesTightSig * mfvSelectedVerticesMedium * mfvSelectedVerticesTightLargeErr)

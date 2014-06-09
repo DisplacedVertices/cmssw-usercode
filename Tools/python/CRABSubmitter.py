@@ -485,7 +485,7 @@ exit $ECODE
         print 'done waiting for threads!'
 
         os.system('mkdir -p /tmp/%s' % self.username)
-        log_fn = '/tmp/%s/CRABSubmitter_%s.log' % (self.username, self.batch_name)
+        log_fn = os.path.join(self.git_status_dir, 'crabsubmitter.log')
         log = open(log_fn, 'wt')
         for name in sorted(results.keys()):
             log.write('*' * 250)

@@ -4,6 +4,8 @@ import sys
 from pprint import pprint
 from JMTucker.Tools.ROOTTools import ROOT, flatten_directory, check_consistency
 
+ROOT.TH1.AddDirectory(0)
+
 fn1, fn2 = fns = [x for x in sys.argv[1:] if '.root' in x]
 print 'comparing', fn1, fn2
 f1, f2 = fs = [ROOT.TFile(fn) for fn in fns]
@@ -28,9 +30,17 @@ elif in1not2 or in2not1:
     print
 
 problem_seen = False
+verbose = 'verbose' in sys.argv
+done = {}
 
 for n in d:
-    #print n
+    b = n.split('/')[0]
+    if verbose:
+        print 'comparing', n
+    elif not done.has_key(b):
+        print 'comparing dir', b
+    done[b] = 1
+
     h1 = f1.Get(n)
     h2 = f2.Get(n)
     if not issubclass(type(h1), ROOT.TH1):
@@ -45,4 +55,3 @@ for n in d:
         problem_seen = True
 
 sys.exit(1 if problem_seen else 0)
-

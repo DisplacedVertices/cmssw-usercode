@@ -11,10 +11,10 @@ if plots:
 sum = 0.
 var = 0.
 int_lumi = 20000.
-cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Bs2dsig', 'Ntracksptgt3', '15p0')
+cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Ntracksptgt3', 'Sumnhitsbehind', 'ButNtracksAndGt3')
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
-nm1nvtx = 1 if 'nm1one' in sys.argv else 2
+nvtx = 1 if 'one' in sys.argv else 2
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
@@ -26,9 +26,9 @@ def effs(fn):
         return h.Integral(0,1000000) if integral else h.GetEntries()
 
     den = get_n('mfvEventHistosNoCuts')
-    numall = get_n('mfvEventHistos')
-    h = f.Get('mfvVertexHistos/h_nsv')
-    numvtx = h.Integral(h.FindBin(2), 1000000)
+    numall = get_n('mfvEventHistos%s' % ('OneVtx' if nvtx == 1 else ''))
+    h = f.Get('mfvVertexHistos%s/h_nsv' % ('OneVtx' if nvtx == 1 else ''))
+    numvtx = h.Integral(h.FindBin(nvtx), 1000000)
     sname = os.path.basename(fn).replace('.root','')
     try:
         s = getattr(Samples, sname)
@@ -47,7 +47,7 @@ def effs(fn):
         for icut, cut in enumerate(cuts):
             h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
             h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-            nm1 = get_n('evtHst%sVNo%s' % (nm1nvtx, cut))
+            nm1 = get_n('evtHst%sVNo%s' % (nvtx, cut))
             nm1_abs = float(nm1)/den
             nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
             h_nm1_abs.SetBinContent(icut+1, nm1_abs)
