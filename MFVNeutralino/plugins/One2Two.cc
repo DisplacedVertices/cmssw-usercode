@@ -110,6 +110,13 @@ public:
   TH1F* h_dphi[n_t];
   TH1F* h_abs_dphi[n_t];
   TH2F* h_svdz_v_dphi[n_t];
+
+  TH1F* h_1v_svdist2d_fit_2v;
+  TH1F* h_1v_svdist2d_fit_2v_ksdist;
+  TH1F* h_1v_svdist2d_fit_2v_ksprob;
+
+  TH2F* h_pred_v_real;
+  TH1F* h_pred_m_real;
 };
 
 const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vsideband", "1v" };
@@ -139,6 +146,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     use_f_dz(cfg.getParameter<bool>("use_f_dz")),
     max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
     max_1v_ntracks(cfg.getParameter<int>("max_1v_ntracks")),
+
+    //    signal_files(cfg.getParameter<std::vector<std::string> >("signal_files")),
+    //    signal_weights(cfg.getParameter<std::vector<double> >("signal_weights")),
 
     f_dphi(0),
     f_dz(0),
@@ -186,6 +196,13 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_abs_dphi          [i] = fs->make<TH1F>(TString::Format("h_%s_abs_dphi"          , iv), "", 8, 0, M_PI);
     h_svdz_v_dphi       [i] = fs->make<TH2F>(TString::Format("h_%s_svdz_v_dphi"       , iv), "", 8, -M_PI, M_PI, 50, -0.1, 0.1);
   }
+
+  h_1v_svdist2d_fit_2v = fs->make<TH1F>("h_1v_svdist2d_fit_2v", "", 100, 0, 0.1);
+  h_1v_svdist2d_fit_2v_ksdist = fs->make<TH1F>("h_1v_svdist2d_fit_2v_ksdist", "", 30, 0, 30);
+  h_1v_svdist2d_fit_2v_ksprob = fs->make<TH1F>("h_1v_svdist2d_fit_2v_ksprob", "", 30, 0, 30);
+
+  h_pred_v_real = fs->make<TH2F>("h_pred_v_real", "", 100, 0, 20, 100, 0, 20);
+  h_pred_m_real = fs->make<TH1F>("h_pred_m_real", "", 100, -20, 20);
 }
 
 MFVOne2Two::~MFVOne2Two() {
@@ -251,6 +268,12 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
 
 void MFVOne2Two::endJob() {
   TRandom3* rand = new TRandom3(121982 + seed);
+
+  // Read all signal samples to print signal contamination in sideband
+  // and signal strength in signal region. 
+  //  for (int i = 0, ie = int(signal_samples.size()); i < ie; ++i) {
+    
+  //  }
 
   // Read all vertices from the input files. Two modes: unweighted,
   // single sample, or combine multiple samples, reading a random
@@ -432,12 +455,12 @@ void MFVOne2Two::endJob() {
         if (ok) {
 	  jv = x;
 	  used[x] = true;
-          if (tries >= 50000) printf("\r%200s\r", "");
+          //if (tries >= 50000) printf("\r%200s\r", "");
 	  break;
 	}
 
         if (++tries % 50000 == 0)
-          printf("\ripair %10i try %10i with v0 = %2i (%12f, %12f, %12f) and v1 = %2i (%12f, %12f, %12f)", ipair, tries, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z); fflush(stdout);
+          ; //printf("\ripair %10i try %10i with v0 = %2i (%12f, %12f, %12f) and v1 = %2i (%12f, %12f, %12f)", ipair, tries, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z); fflush(stdout);
 
 	if (tries == giveup)
 	  break;
@@ -481,6 +504,59 @@ void MFVOne2Two::endJob() {
     h_abs_dphi[t_1v]->Fill(fabs(dphi(v0, v1)));
     h_svdz_v_dphi[t_1v]->Fill(dphi(v0, v1), dz(v0, v1));
   }
+
+  // Fit the 1v distribution to the 2v one by shifting it over and
+  // scaling in the sideband.
+  const int nbins = h_svdist2d[t_1v]->GetNbinsX();
+  int best_shift = 0;
+  double best_ksdist = 1e99;
+  std::vector<TH1F*> h1vs;
+  for (int shift = 0; shift < 30; ++shift) {
+    TH1F* h1v = (TH1F*)h_svdist2d[t_1v]->Clone("h1v");
+    h1vs.push_back(h1v);
+    h1v->Scale(1./h1v->Integral());
+
+    for (int ibin = 1; ibin <= nbins; ++ibin) {
+      const int ifrom = ibin - shift;
+      h1v->SetBinContent(ibin, ifrom >= 0 ? h_svdist2d[t_1v]->GetBinContent(ifrom) : 0.);
+      h1v->SetBinError(ibin, 0);
+    }
+
+    const double ksdist = h1v->KolmogorovTest(h_svdist2d[t_2vsideband], "M");
+    const double ksprob = h1v->KolmogorovTest(h_svdist2d[t_2vsideband]);
+    if (ksdist < best_ksdist) {
+      best_shift = shift;
+      best_ksdist = ksdist;
+    }
+
+    h_1v_svdist2d_fit_2v_ksdist->SetBinContent(shift+1, ksdist);
+    h_1v_svdist2d_fit_2v_ksprob->SetBinContent(shift+1, ksprob);
+  }
+
+  if (best_shift == 29)
+    printf("WARNING SHIFT AT LIMIT\n");
+
+  TH1F* h1v = h1vs[best_shift];
+  for (int ibin = 1; ibin <= nbins; ++ibin) {
+    h_1v_svdist2d_fit_2v->SetBinContent(ibin, h1v->GetBinContent(ibin));
+    h_1v_svdist2d_fit_2v->SetBinError(ibin, 0);
+  }
+
+  for (TH1F* h : h1vs)
+    delete h;
+
+  int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut)-1;
+  h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2vsideband]->Integral()/h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
+  
+  double pred_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins);
+  double real_bkg = h_svdist2d[t_2v]->Integral(last_sideband_bin+1, nbins);
+  printf("h_1v_svdist2d_fit_2v integral in sideband: %f\n", h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
+  printf("h_1v_svdist2d_fit_2v integral in signal  : %f\n", pred_bkg);
+  printf("h_2v_svdist2d integral in sideband: %f\n", h_svdist2d[t_2v]->Integral(1, last_sideband_bin));
+  printf("h_2v_svdist2d integral in signal  : %f\n", real_bkg);
+
+  h_pred_v_real->Fill(real_bkg, pred_bkg);
+  h_pred_m_real->Fill(pred_bkg - real_bkg);
 
   delete rand;
 }
