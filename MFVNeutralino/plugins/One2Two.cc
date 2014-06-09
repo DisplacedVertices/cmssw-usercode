@@ -148,7 +148,8 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     throw cms::Exception("VectorMismatch") << "inconsistent sample info";
 
   edm::Service<TFileService> fs;
-  TH1::SetDefaultSumw2();
+  if (toy_mode)
+    TH1::SetDefaultSumw2();
 
   f_dphi = new TF1("f_dphi", form_dphi.c_str(), 0, M_PI);
   f_dz = new TF1("f_dz", form_dz.c_str(), -40, 40);
@@ -156,7 +157,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   
   h_1v_dphi_env = fs->make<TH1F>("h_1v_dphi_env", "", 8, -M_PI, M_PI);
   h_1v_absdphi_env = fs->make<TH1F>("h_1v_absdphi_env", "", 8, 0, M_PI);
-  h_1v_dz_env = fs->make<TH1F>("h_1v_dz_env", "", 20, -0.1, 0.1);
+  h_1v_dz_env = fs->make<TH1F>("h_1v_dz_env", "", 200, -40, 40);
   h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 8, -M_PI, M_PI);
   h_fcn_abs_dphi = fs->make<TH1F>("h_fcn_abs_dphi", "", 8, 0, M_PI);
   h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 20, -0.1, 0.1);
@@ -307,9 +308,11 @@ void MFVOne2Two::endJob() {
       }
     }
 
+    h_1v_absdphi_env->Scale(1./h_1v_absdphi_env->Integral());
     TFitResultPtr res = h_1v_absdphi_env->Fit("pol0", "QS");
     printf("g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     
+    h_1v_dz_env->Scale(1./h_1v_dz_env->Integral());
     res = h_1v_dz_env->Fit(g_dz, "LRQS");
     printf("g_dz fit to gaus sigma %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     g_dz->FixParameter(0, res->Parameter(0));
@@ -327,9 +330,10 @@ void MFVOne2Two::endJob() {
     for (const auto& pair : two_vertices[ifile]) {
       const MFVVertexAux& v0 = pair.first;
       const MFVVertexAux& v1 = pair.second;
+      const bool sideband = svdist2d(v0, v1) < svdist2d_cut;
 
       for (int ih = 0; ih < 2; ++ih) {
-        if (ih == t_2vsideband && svdist2d(v0, v1) >= svdist2d_cut)
+        if (ih == t_2vsideband && !sideband)
           continue;
 
         h_xy[ih]->Fill(v0.x, v0.y, w);
@@ -363,13 +367,17 @@ void MFVOne2Two::endJob() {
     if (toy_mode)
       opt = "W" + opt;
 
-    TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi, opt);
+    TF1* f_dphi_temp = new TF1("f_dphi_temp", TString::Format("%f*(%s)", h_abs_dphi[t_2vsideband]->Integral()*h_abs_dphi[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_dphi.c_str()), 0, M_PI);
+    TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi_temp, opt);
     printf("f_dphi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     f_dphi->FixParameter(0, res->Parameter(0));
+    delete f_dphi_temp;
 
-    res = h_svdz[t_2vsideband]->Fit(f_dz, opt);
+    TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_dz.c_str()), -40, 40);
+    res = h_svdz[t_2vsideband]->Fit(f_dz_temp, opt);
     printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     f_dz->FixParameter(0, res->Parameter(0));
+    delete f_dz_temp;
   }
 
   h_fcn_dphi->FillRandom("f_dphi", 100000);
