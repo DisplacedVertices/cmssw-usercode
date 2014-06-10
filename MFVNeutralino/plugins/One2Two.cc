@@ -535,7 +535,7 @@ void MFVOne2Two::endJob() {
   // Output 1v usage counts (versus z).
   {
     TTree* t_use = fs->make<TTree>("t_use", "");
-    unsigned char c;
+    unsigned char b;
     unsigned short s;
     float z;
     bool use_short = false;
@@ -551,13 +551,13 @@ void MFVOne2Two::endJob() {
     if (use_short)
       t_use->Branch("nuse", &s, "nuse/s");
     else
-      t_use->Branch("nuse", &c, "nuse/c");
+      t_use->Branch("nuse", &b, "nuse/b");
     for (int i = 0; i < N1v; ++i) {
       z = one_vertices[i].z;
       if (use_short)
         s = used[i];
       else
-        c = used[i];
+        b = used[i];
       t_use->Fill();
     }
   }
