@@ -52,6 +52,9 @@ public:
   void read_file(const std::string& filename, MFVVertexAuxCollection&, MFVVertexPairCollection&) const;
   void fill_2d(const int ih, const double weight, const MFVVertexAux&, const MFVVertexAux&) const;
 
+  bool accept_1v_pair(const MFVVertexAux&, const MFVVertexAux&) const;
+  void fill_1d(const MFVVertexAux&, const MFVVertexAux&) const;
+
   void analyze(const edm::Event&, const edm::EventSetup&) {}
   void endJob();
 
@@ -77,6 +80,13 @@ public:
   const std::string form_f_dphi;
   const bool find_f_dz;
   const std::string form_f_dz;
+
+  double gdpmax;
+  double fdpmax;
+  double Mdp;
+  double gdzmax;
+  double fdzmax;
+  double Mdz;
 
   const bool use_f_dz;
   const double max_1v_dz;
@@ -328,6 +338,46 @@ void MFVOne2Two::fill_2d(const int ih, const double w, const MFVVertexAux& v0, c
   h_svdz_v_dphi[ih]->Fill(dphi(v0, v1), dz(v0, v1), w);
 }
 
+bool MFVOne2Two::accept_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  const double dp = dphi(v0, v1);
+  const double dz = v0.z - v1.z;
+
+  return
+    v0.ntracks() + v1.ntracks() < max_1v_ntracks &&
+    accept(rand, f_dphi->Eval(dp), gdpmax, Mdp) &&
+    (use_f_dz ? accept(rand, f_dz->Eval(dz), g_dz->Eval(dz), Mdz) : fabs(dz) < max_1v_dz);
+}
+
+void MFVOne2Two::fill_1d(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  h_xy[t_1v]->Fill(v0.x, v0.y);
+  h_xy[t_1v]->Fill(v1.x, v1.y);
+  h_bs2ddist[t_1v]->Fill(v0.bs2ddist);
+  h_bs2ddist[t_1v]->Fill(v1.bs2ddist);
+  h_bs2ddist_0[t_1v]->Fill(v0.bs2ddist);
+  h_bs2ddist_1[t_1v]->Fill(v1.bs2ddist);
+  h_bs2ddist_v_bsdz[t_1v]->Fill(v0.z, v0.bs2ddist);
+  h_bs2ddist_v_bsdz[t_1v]->Fill(v1.z, v1.bs2ddist);
+  h_bs2ddist_v_bsdz_0[t_1v]->Fill(v0.z, v0.bs2ddist);
+  h_bs2ddist_v_bsdz_1[t_1v]->Fill(v1.z, v1.bs2ddist);
+  h_bsdz[t_1v]->Fill(v0.z);
+  h_bsdz[t_1v]->Fill(v1.z);
+  h_bsdz_0[t_1v]->Fill(v0.z);
+  h_bsdz_1[t_1v]->Fill(v1.z);
+  const int ntk0 = v0.ntracks(); // The 2v pairs are ordered with ntk0 > ntk1,
+  const int ntk1 = v1.ntracks(); //  so fill here the same way.
+  if (ntk1 > ntk0)
+    h_ntracks[t_1v]->Fill(ntk1, ntk0);
+  else
+    h_ntracks[t_1v]->Fill(ntk0, ntk1);
+  h_ntracks01[t_1v]->Fill(ntk0 + ntk1);
+  h_svdist2d[t_1v]->Fill(svdist2d(v0, v1));
+  h_svdz[t_1v]->Fill(dz(v0, v1));
+  h_svdz_all[t_1v]->Fill(dz(v0, v1));
+  h_dphi[t_1v]->Fill(dphi(v0, v1));
+  h_abs_dphi[t_1v]->Fill(fabs(dphi(v0, v1)));
+  h_svdz_v_dphi[t_1v]->Fill(dphi(v0, v1), dz(v0, v1));
+}
+
 void MFVOne2Two::endJob() {
   edm::Service<TFileService> fs;
   rand = new TRandom3(121982 + seed);
@@ -525,6 +575,15 @@ void MFVOne2Two::endJob() {
   h_fcn_dz->FillRandom("f_dz", 100000);
 
 
+  gdpmax = 1./2/M_PI;
+  fdpmax = f_dphi->GetMaximum();
+  Mdp = fdpmax/gdpmax;
+
+  gdzmax = g_dz->GetMaximum();
+  fdzmax = f_dz->GetMaximum();
+  Mdz = fdzmax/gdzmax;
+
+
   // Now try to sample npairs from the one_vertices
   // sample. With/without replacement is controlled by the config
   // flag.
@@ -535,96 +594,47 @@ void MFVOne2Two::endJob() {
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
   const int npairsuse = npairs > 0 ? npairs : N1v/2;
 
-  const double gdpmax = 1./2/M_PI;
-  const double fdpmax = f_dphi->GetMaximum();
-  const double Mdp = fdpmax/gdpmax;
+  if (wrep) {
+    for (int ipair = 0; ipair < npairsuse; ++ipair) {
+      int iv = rand->Integer(N1v);
+      ++used[iv];
+      const MFVVertexAux& v0 = one_vertices[iv];
+      int tries = 0;
+      int jv = -1;
+      while (jv == -1) {
+        int x = rand->Integer(N1v);
+        if (x != iv) {
+          const MFVVertexAux& v1 = one_vertices[x];
+          if (accept_1v_pair(v0, v1)) {
+            jv = x;
+            ++used[jv];
+            fill_1d(v0, v1);
+            break;
+          }
 
-  const double gdzmax = g_dz->GetMaximum();
-  const double fdzmax = f_dz->GetMaximum();
-  const double Mdz = fdzmax/gdzmax;
+          if (++tries % 50000 == 0)
+            ; //printf("\ripair %10i try %10i with v0 = %2i (%12f, %12f, %12f) and v1 = %2i (%12f, %12f, %12f)", ipair, tries, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z); fflush(stdout);
 
-  for (int ipair = 0; ipair < npairsuse; ++ipair) {
-    int iv = -1;
-    while (iv == -1) {
-      int x = rand->Integer(N1v);
-      if (wrep || !used[x]) {
-	iv = x;
-	break;
+          if (tries == giveup)
+            break;
+        }
+      }
+
+      if (jv == -1) {
+        assert(tries == giveup);
+        --ipair;
       }
     }
-
-    const MFVVertexAux& v0 = one_vertices[iv];
-    int tries = 0;
-
-    int jv = -1;
-    while (jv == -1) {
-      int x = rand->Integer(N1v);
-      if (x != iv && (wrep || !used[x])) {
-	const MFVVertexAux& vx = one_vertices[x];
-
-        const double dp = dphi(v0, vx);
-        const double dz = v0.z - vx.z;
-
-        const bool ok =
-          v0.ntracks() + vx.ntracks() < max_1v_ntracks &&
-          accept(rand, f_dphi->Eval(dp), gdpmax, Mdp) &&
-          (use_f_dz ? accept(rand, f_dz->Eval(dz), g_dz->Eval(dz), Mdz) : fabs(dz) < max_1v_dz);
-
-        if (ok) {
-	  jv = x;
-          //if (tries >= 50000) printf("\r%200s\r", "");
-	  break;
-	}
-
-        if (++tries % 50000 == 0)
-          ; //printf("\ripair %10i try %10i with v0 = %2i (%12f, %12f, %12f) and v1 = %2i (%12f, %12f, %12f)", ipair, tries, v0.ntracks(), v0.x, v0.y, v0.z, vx.ntracks(), vx.x, vx.y, vx.z); fflush(stdout);
-
-	if (tries == giveup)
-	  break;
+  }
+  else {
+    for (int iv = 0; iv < N1v; ++iv) {
+      for (int jv = iv+1; jv < N1v; ++jv) {
+        const MFVVertexAux& v0 = one_vertices[iv];
+        const MFVVertexAux& v1 = one_vertices[jv];
+        if (accept_1v_pair(v0, v1))
+          fill_1d(v0, v1);
       }
     }
-
-    if (jv == -1) {
-      assert(tries == giveup);
-      used[iv] = -1;
-      --ipair;
-      continue;
-    }
-
-    ++used[iv];
-    ++used[jv];
-
-    const MFVVertexAux& v1 = one_vertices[jv];
-
-    // We've got the pair -- fill histos.
-
-    h_xy[t_1v]->Fill(v0.x, v0.y);
-    h_xy[t_1v]->Fill(v1.x, v1.y);
-    h_bs2ddist[t_1v]->Fill(v0.bs2ddist);
-    h_bs2ddist[t_1v]->Fill(v1.bs2ddist);
-    h_bs2ddist_0[t_1v]->Fill(v0.bs2ddist);
-    h_bs2ddist_1[t_1v]->Fill(v1.bs2ddist);
-    h_bs2ddist_v_bsdz[t_1v]->Fill(v0.z, v0.bs2ddist);
-    h_bs2ddist_v_bsdz[t_1v]->Fill(v1.z, v1.bs2ddist);
-    h_bs2ddist_v_bsdz_0[t_1v]->Fill(v0.z, v0.bs2ddist);
-    h_bs2ddist_v_bsdz_1[t_1v]->Fill(v1.z, v1.bs2ddist);
-    h_bsdz[t_1v]->Fill(v0.z);
-    h_bsdz[t_1v]->Fill(v1.z);
-    h_bsdz_0[t_1v]->Fill(v0.z);
-    h_bsdz_1[t_1v]->Fill(v1.z);
-    const int ntk0 = v0.ntracks(); // The 2v pairs are ordered with ntk0 > ntk1,
-    const int ntk1 = v1.ntracks(); //  so fill here the same way.
-    if (ntk1 > ntk0)
-      h_ntracks[t_1v]->Fill(ntk1, ntk0);
-    else
-      h_ntracks[t_1v]->Fill(ntk0, ntk1);
-    h_ntracks01[t_1v]->Fill(ntk0 + ntk1);
-    h_svdist2d[t_1v]->Fill(svdist2d(v0, v1));
-    h_svdz[t_1v]->Fill(dz(v0, v1));
-    h_svdz_all[t_1v]->Fill(dz(v0, v1));
-    h_dphi[t_1v]->Fill(dphi(v0, v1));
-    h_abs_dphi[t_1v]->Fill(fabs(dphi(v0, v1)));
-    h_svdz_v_dphi[t_1v]->Fill(dphi(v0, v1), dz(v0, v1));
   }
 
 
