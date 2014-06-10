@@ -284,13 +284,16 @@ void MFVOne2Two::endJob() {
 
   if (!toy_mode) {
     // In regular mode, take all events from the file (with weight 1).
+    printf("\n\n==================================================================\n\nsingle sample mode, filename: %s  ntracks >= %i  svdist2d sideband <= %f\n", filenames[0].c_str(), min_ntracks, svdist2d_cut);
     read_file(filenames[0], one_vertices, two_vertices[0]);
   }
   else {
     // Config file specifies how many to take (or the Poisson-mean
     // number) from each sample. Directly keep the 2vs; they will be
     // histogrammed with config-specified weights below.
+    printf("\n\n==================================================================\n\nmultiple sample mode, #filenames: %i  ntracks >= %i  svdist2d sideband <= %f\n", int(filenames.size()), min_ntracks, svdist2d_cut);
     for (size_t ifile = 0; ifile < nfiles; ++ifile) {
+      printf("file: %s\n", filenames[ifile].c_str());
       MFVVertexAuxCollection v1v;
       read_file(filenames[ifile], v1v, two_vertices[ifile]);
 
