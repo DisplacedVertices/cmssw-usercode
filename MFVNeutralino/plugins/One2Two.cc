@@ -45,6 +45,7 @@ public:
 
   MFVVertexAux xform_vertex(const MFVVertexAux&) const;
   bool sel_vertex(const MFVVertexAux&) const;
+  bool is_sideband(const MFVVertexAux&, const MFVVertexAux&) const;
 
   typedef std::vector<std::pair<MFVVertexAux, MFVVertexAux> > MFVVertexPairCollection;
 
@@ -238,6 +239,10 @@ bool MFVOne2Two::sel_vertex(const MFVVertexAux& v) const {
   return v.ntracks() >= min_ntracks;
 }
 
+bool MFVOne2Two::is_sideband(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  return svdist2d(v0, v1) < svdist2d_cut;
+}
+
 void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& one_vertices, MFVVertexPairCollection& two_vertices) const {
   TFile* f = new TFile(filename.c_str());
   if (!f)
@@ -301,8 +306,16 @@ void MFVOne2Two::endJob() {
     for (size_t isig = 0; isig < nsignals; ++isig) {
       printf("%s ", signal_files[isig].c_str());
       read_file(signal_files[isig], signal_one_vertices[isig], signal_two_vertices[isig]);
+
+      int nside = 0, nsig = 0;
+      for (const auto& pair : signal_two_vertices[isig])
+        if (is_sideband(pair.first, pair.second))
+          ++nside;
+        else
+          ++nsig;
+
       const double w = signal_weights[isig];
-      printf("  scaled: # 1v: %f  # 2v: %f\n", signal_one_vertices[isig].size()*w, signal_two_vertices[isig].size()*w);
+      printf("  scaled: # 1v: %f  # 2v: %f = (%f sideband + %f signal region)\n", signal_one_vertices[isig].size()*w, signal_two_vertices[isig].size()*w, nside*w, nsig*w);
     }
   }
 
@@ -367,6 +380,7 @@ void MFVOne2Two::endJob() {
 
   // Find the envelope functions for dphi (just check that it is flat)
   // and dz.
+  printf("\n==============================\n\nfitting envelopes\n");
 
   for (int iv = 0; iv < N1v; ++iv) {
     const MFVVertexAux& v0 = one_vertices[iv];
@@ -406,10 +420,9 @@ void MFVOne2Two::endJob() {
     for (const auto& pair : two_vertices[ifile]) {
       const MFVVertexAux& v0 = pair.first;
       const MFVVertexAux& v1 = pair.second;
-      const bool sideband = svdist2d(v0, v1) < svdist2d_cut;
 
       for (int ih = 0; ih < 2; ++ih) {
-        if (ih == t_2vsideband && !sideband)
+        if (ih == t_2vsideband && !is_sideband(v0, v1))
           continue;
 
         h_xy[ih]->Fill(v0.x, v0.y, w);
@@ -438,6 +451,9 @@ void MFVOne2Two::endJob() {
       }
     }
   }
+
+
+  printf("\n==============================\n\nfitting fs\n");
 
   {
     TString opt = "LIRQS";
@@ -469,6 +485,8 @@ void MFVOne2Two::endJob() {
   // Now try to sample npairs from the one_vertices
   // sample. With/without replacement is controlled by the config
   // flag.
+
+  printf("\n==============================\n\nsampling 1v pairs\n");
 
   std::vector<int> used(N1v, 0);
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
@@ -600,6 +618,8 @@ void MFVOne2Two::endJob() {
 
   // Fit the 1v distribution to the 2v one by shifting it over and
   // scaling in the sideband.
+  printf("\n==============================\n\nfitting 1v shape to 2v dist\n");
+
   const int nbins = h_svdist2d[t_1v]->GetNbinsX();
   int best_shift = 0;
   double best_ksdist = 1e99;
@@ -639,7 +659,7 @@ void MFVOne2Two::endJob() {
     delete h;
 
   const int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut)-1;
-  h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2vsideband]->Integral()/h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
+  h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2vsideband]->Integral(1, last_sideband_bin)/h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
   
   const double pred_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins);
   const double real_bkg = h_svdist2d[t_2v]->Integral(last_sideband_bin+1, nbins);
