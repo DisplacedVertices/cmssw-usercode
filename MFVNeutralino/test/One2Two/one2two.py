@@ -43,6 +43,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     signal_files = cms.vstring(*[file_path % n for n in signal_samples]),
                                     signal_n1vs = cms.vint32(*([-1]*nsignals)),
                                     signal_weights = cms.vdouble(*([2e-4]*nsignals)),
+                                    signal_contamination = cms.int32(-1),
                                     )
 
 process.p = cms.Path(process.mfvOne2Two)
@@ -86,10 +87,11 @@ else:
     from_env('svdist2d_cut', float)
     from_env('just_print',   bool)
     from_env('seed',         int)
-    toy_mode = from_env('toy_mode',     bool)
+    toy_mode = from_env('toy_mode', bool)
     from_env('poisson_n1vs', bool)
     from_env('wrep',         bool)
     from_env('npairs',       int)
+    from_env('signal_contamination', int)
 
     phi_exp = env.get(env_var('phi_exp'), '[0]')
     process.mfvOne2Two.form_f_dphi = process.mfvOne2Two.form_f_dphi.value().replace('[0]', phi_exp)
@@ -122,7 +124,7 @@ else:
         process.mfvOne2Two.weights = weights
 
 print 'CFG BEGIN'
-for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs wrep npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks signal_files signal_n1vs signal_weights'.split():
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs wrep npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks signal_files signal_n1vs signal_weights signal_contamination'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 

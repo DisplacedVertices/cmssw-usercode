@@ -50,6 +50,7 @@ public:
   typedef std::vector<std::pair<MFVVertexAux, MFVVertexAux> > MFVVertexPairCollection;
 
   void read_file(const std::string& filename, MFVVertexAuxCollection&, MFVVertexPairCollection&) const;
+  void fill_2d(const int ih, const double weight, const MFVVertexAux&, const MFVVertexAux&) const;
 
   void analyze(const edm::Event&, const edm::EventSetup&) {}
   void endJob();
@@ -85,6 +86,7 @@ public:
   const size_t nsignals;
   const std::vector<int> signal_n1vs;
   const std::vector<double> signal_weights;
+  const int signal_contamination;
 
   TF1* f_dphi;
   TF1* f_dz;
@@ -165,6 +167,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     nsignals(signal_files.size()),
     signal_n1vs(cfg.getParameter<std::vector<int> >("signal_n1vs")),
     signal_weights(cfg.getParameter<std::vector<double> >("signal_weights")),
+    signal_contamination(cfg.getParameter<int>("signal_contamination")),
 
     f_dphi(0),
     f_dz(0),
@@ -172,10 +175,13 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     rand(0)
 {
   if (n1vs.size() != weights.size() || (toy_mode && nfiles != n1vs.size()))
-    throw cms::Exception("VectorMismatch") << "inconsistent sample info";
+    throw cms::Exception("VectorMismatch", "inconsistent sample info");
 
   if (nsignals != signal_n1vs.size() || nsignals != signal_weights.size())
-    throw cms::Exception("VectorMismatch") << "inconsistent signal sample info";
+    throw cms::Exception("VectorMismatch", "inconsistent signal sample info");
+
+  if (signal_contamination >= 0 && !toy_mode)
+    throw cms::Exception("Misconfiguration", "no signal contamination when not in toy mode");
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -290,6 +296,35 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
   printf("# 1v: %i  # 2v: %i\n", int(one_vertices.size()), int(two_vertices.size())); fflush(stdout);
 }
 
+void MFVOne2Two::fill_2d(const int ih, const double w, const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  if (ih == t_2vsideband && !is_sideband(v0, v1))
+    return;
+
+  h_xy[ih]->Fill(v0.x, v0.y, w);
+  h_xy[ih]->Fill(v1.x, v1.y, w);
+  h_bs2ddist[ih]->Fill(v0.bs2ddist, w);
+  h_bs2ddist[ih]->Fill(v1.bs2ddist, w);
+  h_bs2ddist_0[ih]->Fill(v0.bs2ddist, w);
+  h_bs2ddist_1[ih]->Fill(v1.bs2ddist, w);
+  h_bs2ddist_v_bsdz[ih]->Fill(v0.z, v0.bs2ddist, w);
+  h_bs2ddist_v_bsdz[ih]->Fill(v1.z, v1.bs2ddist, w);
+  h_bs2ddist_v_bsdz_0[ih]->Fill(v0.z, v0.bs2ddist, w);
+  h_bs2ddist_v_bsdz_1[ih]->Fill(v1.z, v1.bs2ddist, w);
+  h_bsdz[ih]->Fill(v0.z, w);
+  h_bsdz[ih]->Fill(v1.z, w);
+  h_bsdz_0[ih]->Fill(v0.z, w);
+  h_bsdz_1[ih]->Fill(v1.z, w);
+
+  h_ntracks[ih]->Fill(v0.ntracks(), v1.ntracks(), w);
+  h_ntracks01[ih]->Fill(v0.ntracks() + v1.ntracks(), w);
+  h_svdist2d[ih]->Fill(svdist2d(v0, v1), w);
+  h_svdz[ih]->Fill(dz(v0, v1), w);
+  h_svdz_all[ih]->Fill(dz(v0, v1), w);
+  h_dphi[ih]->Fill(dphi(v0, v1), w);
+  h_abs_dphi[ih]->Fill(fabs(dphi(v0, v1)), w);
+  h_svdz_v_dphi[ih]->Fill(dphi(v0, v1), dz(v0, v1), w);
+}
+
 void MFVOne2Two::endJob() {
   edm::Service<TFileService> fs;
   rand = new TRandom3(121982 + seed);
@@ -370,6 +405,32 @@ void MFVOne2Two::endJob() {
         }
       }
     }
+
+    if (signal_contamination >= 0) {
+      const size_t isig(signal_contamination);
+      const MFVVertexAuxCollection& v1v = signal_one_vertices[isig];
+      const double w = signal_weights[isig];
+      const double n1v_d = v1v.size() * w;
+      const int n1v = poisson_n1vs ? rand->Poisson(n1v_d) : int(n1v_d) + 1;
+      const int N1v = int(v1v.size());
+
+      printf("including signal contamination from %s: %i/%i 1v events", signal_files[isig].c_str(), n1v, N1v);
+      int t = 0, m = 0;
+      while (m < n1v) {
+        if ((N1v - t) * rand->Rndm() >= n1v - m)
+          ++t;
+        else {
+          ++m;
+          b = 100 + isig;
+          s = t;
+          t_sample_use->Fill();
+          one_vertices.push_back(v1v[t++]);
+        }
+      }
+
+      const int N2v(signal_two_vertices[isig].size());
+      printf(" and %f (%i unweighted) 2v events\n", w*N2v, N2v);
+    }
   }
 
   if (just_print)
@@ -414,42 +475,20 @@ void MFVOne2Two::endJob() {
   // Fill all the 2v histograms. In toy_mode we add together many
   // samples with appropriate weights. Also fit f_dphi and f_dz from
   // the 2v events in the sideband.
+
   for (size_t ifile = 0; ifile < nfiles; ++ifile) {
     const double w = toy_mode ? weights[ifile] : 1;
 
-    for (const auto& pair : two_vertices[ifile]) {
-      const MFVVertexAux& v0 = pair.first;
-      const MFVVertexAux& v1 = pair.second;
+    for (const auto& pair : two_vertices[ifile])
+      for (int ih = 0; ih < 2; ++ih)
+        fill_2d(ih, w, pair.first, pair.second);
+  }
 
-      for (int ih = 0; ih < 2; ++ih) {
-        if (ih == t_2vsideband && !is_sideband(v0, v1))
-          continue;
-
-        h_xy[ih]->Fill(v0.x, v0.y, w);
-        h_xy[ih]->Fill(v1.x, v1.y, w);
-        h_bs2ddist[ih]->Fill(v0.bs2ddist, w);
-        h_bs2ddist[ih]->Fill(v1.bs2ddist, w);
-        h_bs2ddist_0[ih]->Fill(v0.bs2ddist, w);
-        h_bs2ddist_1[ih]->Fill(v1.bs2ddist, w);
-        h_bs2ddist_v_bsdz[ih]->Fill(v0.z, v0.bs2ddist, w);
-        h_bs2ddist_v_bsdz[ih]->Fill(v1.z, v1.bs2ddist, w);
-        h_bs2ddist_v_bsdz_0[ih]->Fill(v0.z, v0.bs2ddist, w);
-        h_bs2ddist_v_bsdz_1[ih]->Fill(v1.z, v1.bs2ddist, w);
-        h_bsdz[ih]->Fill(v0.z, w);
-        h_bsdz[ih]->Fill(v1.z, w);
-        h_bsdz_0[ih]->Fill(v0.z, w);
-        h_bsdz_1[ih]->Fill(v1.z, w);
-
-        h_ntracks[ih]->Fill(v0.ntracks(), v1.ntracks(), w);
-        h_ntracks01[ih]->Fill(v0.ntracks() + v1.ntracks(), w);
-        h_svdist2d[ih]->Fill(svdist2d(v0, v1), w);
-        h_svdz[ih]->Fill(dz(v0, v1), w);
-        h_svdz_all[ih]->Fill(dz(v0, v1), w);
-        h_dphi[ih]->Fill(dphi(v0, v1), w);
-        h_abs_dphi[ih]->Fill(fabs(dphi(v0, v1)), w);
-        h_svdz_v_dphi[ih]->Fill(dphi(v0, v1), dz(v0, v1), w);
-      }
-    }
+  if (signal_contamination >= 0) {
+    const size_t isig = signal_contamination;
+    for (const auto& pair : signal_two_vertices[isig])
+      for (int ih = 0; ih < 2; ++ih)
+        fill_2d(ih, signal_weights[isig], pair.first, pair.second);
   }
 
 
