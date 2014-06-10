@@ -396,6 +396,7 @@ void MFVOne2Two::endJob() {
         h_ntracks01[ih]->Fill(v0.ntracks() + v1.ntracks(), w);
         h_svdist2d[ih]->Fill(svdist2d(v0, v1), w);
         h_svdz[ih]->Fill(dz(v0, v1), w);
+        h_svdz_all[ih]->Fill(dz(v0, v1), w);
         h_dphi[ih]->Fill(dphi(v0, v1), w);
         h_abs_dphi[ih]->Fill(fabs(dphi(v0, v1)), w);
         h_svdz_v_dphi[ih]->Fill(dphi(v0, v1), dz(v0, v1), w);
@@ -524,6 +525,7 @@ void MFVOne2Two::endJob() {
     h_ntracks01[t_1v]->Fill(ntk0 + ntk1);
     h_svdist2d[t_1v]->Fill(svdist2d(v0, v1));
     h_svdz[t_1v]->Fill(dz(v0, v1));
+    h_svdz_all[t_1v]->Fill(dz(v0, v1));
     h_dphi[t_1v]->Fill(dphi(v0, v1));
     h_abs_dphi[t_1v]->Fill(fabs(dphi(v0, v1)));
     h_svdz_v_dphi[t_1v]->Fill(dphi(v0, v1), dz(v0, v1));
