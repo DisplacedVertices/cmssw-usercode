@@ -42,10 +42,25 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
 process.p = cms.Path(process.mfvOne2Two)
 
 
+import JMTucker.Tools.Samples as Samples
+SampleInfo = namedtuple('SampleInfo', 'sample events_rel')
+sample_infos = [
+    SampleInfo(Samples.qcdht0500,     (1220, 1463, 1737, 2247)),
+    SampleInfo(Samples.qcdht1000,     ( 112,  133,  157,  200)),
+    SampleInfo(Samples.ttbardilep,    (   1,    1,    1,    1)),
+    SampleInfo(Samples.ttbarhadronic, (  44,   46,   48,   53)),
+    SampleInfo(Samples.ttbarsemilep,  (  14,   15,   15,   16)),
+    ]
+
+n1v_scales = {5: 102, 6: 69, 7: 44, 8: 23}
+
+def sample_name(fn):
+    return os.path.basename(fn).replace('.root', '')
+
 if 'env' not in sys.argv:
     for arg in sys.argv:
         if arg.endswith('.root') and os.path.isfile(arg):
-            process.TFileService.fileName = os.path.basename(arg).replace('.root', '_histos.root')
+            process.TFileService.fileName = sample_name(arg) + '_histos.root'
             process.mfvOne2Two.filenames = [arg]
 else:
     env = os.environ
@@ -56,47 +71,53 @@ else:
         if env.has_key(key):
             val = type_(env[key])
             setattr(process.mfvOne2Two, name, val)
+            return val
 
-    from_env('min_ntracks',  int)
+    from_env('min_ntracks', int)
+    min_ntracks = process.mfvOne2Two.min_ntracks.value()
+    if not 5 <= min_ntracks <= 8:
+        raise ValueError('min_ntracks must be 5-8')
     from_env('svdist2d_cut', float)
     from_env('just_print',   bool)
     from_env('seed',         int)
+    toy_mode = from_env('toy_mode',     bool)
     from_env('poisson_n1vs', bool)
     from_env('wrep',         bool)
     from_env('npairs',       int)
 
-    phiexp = env.get(env_var('phiexp'), '[0]')
-    process.mfvOne2Two.form_f_dphi = process.mfvOne2Two.form_f_dphi.value().replace('[0]', phiexp)
+    phi_exp = env.get(env_var('phi_exp'), '[0]')
+    process.mfvOne2Two.form_f_dphi = process.mfvOne2Two.form_f_dphi.value().replace('[0]', phi_exp)
 
     sample = env.get(env_var('sample'), 'qcdht1000')
-    if sample != 'toy':
+    if sample != 'all':
         process.mfvOne2Two.filenames = [file_path % sample]
     else:
-        process.mfvOne2Two.toy_mode = True
-
-        import JMTucker.Tools.Samples as Samples
-        SampleInfo = namedtuple('SampleInfo', ['sample', 'events_rel'])
-        sample_infos = [
-            SampleInfo(Samples.qcdht0500,    1220),
-            SampleInfo(Samples.qcdht1000,     112),
-            SampleInfo(Samples.ttbardilep,      1),
-            SampleInfo(Samples.ttbarhadronic,  44),
-            SampleInfo(Samples.ttbarsemilep,   14),
-            ]
+        process.mfvOne2Two.toy_mode = toy_mode = True
 
         use_qcd500 = bool(env.get('mfvo2t_use_qcd500', ''))
         if not use_qcd500:
             sample_infos.pop(0)
 
-        n1v_scale = int(env.get('mfvo2t_n1v_scale', '3'))   # 101 (23) 5- (8-)track 1v ttdil events in 20/fb...
+        process.mfvOne2Two.filenames = [file_path % s.sample.name for s in sample_infos]
+
+    samples = [sample_name(fn) for fn in process.mfvOne2Two.filenames]
+
+    if toy_mode:
+        n1v_scale = int(env.get('mfvo2t_n1v_scale', '8'))   # 101 (23) 5- (8-)track 1v ttdil events in 20/fb...
         int_lumi = float(env.get('mfvo2t_int_lumi', '20000'))
 
-        process.mfvOne2Two.filenames = [file_path % s.sample.name for s in sample_infos]
-        process.mfvOne2Two.n1vs = [s.events_rel*n1v_scale for s in sample_info]
-        process.mfvOne2Two.weights = [s.sample.partial_weight * int_lumi for s in sample_info]
+        n1vs, weights = [], []
+        for s in sample_infos:
+            if s.sample.name in samples:
+                n1vs.append(s.events_rel[min_ntracks - 5] * n1v_scale)
+                weights.append(s.sample.partial_weight * int_lumi if len(samples) > 1 else 1)
+
+        process.mfvOne2Two.n1vs = n1vs
+        process.mfvOne2Two.weights = weights
 
 print 'CFG BEGIN'
-print process.mfvOne2Two.dumpPython()
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs wrep npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks'.split():
+    print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 
 '''
