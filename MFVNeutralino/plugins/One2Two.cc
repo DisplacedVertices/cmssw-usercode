@@ -267,6 +267,8 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
 }
 
 void MFVOne2Two::endJob() {
+  edm::Service<TFileService> fs;
+
   TRandom3* rand = new TRandom3(121982 + seed);
 
   // Read all signal samples to print signal contamination in sideband
@@ -318,7 +320,6 @@ void MFVOne2Two::endJob() {
   }
 
   const int N1v = int(one_vertices.size());
-
 
   // Find the envelope functions for dphi (just check that it is flat)
   // and dz.
@@ -416,6 +417,7 @@ void MFVOne2Two::endJob() {
   // flag.
 
   std::vector<bool> used(N1v, 0);
+  TH1I* h_1v_use = fs->make<TH1I>("h_1v_use", "", N1v, 0, N1v);
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
   const int npairsuse = npairs > 0 ? npairs : N1v/2;
 
@@ -475,6 +477,9 @@ void MFVOne2Two::endJob() {
       --ipair;
       continue;
     }
+
+    h_1v_use->Fill(iv);
+    h_1v_use->Fill(jv);
 
     const MFVVertexAux& v1 = one_vertices[jv];
 
@@ -548,11 +553,11 @@ void MFVOne2Two::endJob() {
   for (TH1F* h : h1vs)
     delete h;
 
-  int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut)-1;
+  const int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut)-1;
   h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2vsideband]->Integral()/h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
   
-  double pred_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins);
-  double real_bkg = h_svdist2d[t_2v]->Integral(last_sideband_bin+1, nbins);
+  const double pred_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins);
+  const double real_bkg = h_svdist2d[t_2v]->Integral(last_sideband_bin+1, nbins);
   printf("h_1v_svdist2d_fit_2v integral in sideband: %f\n", h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
   printf("h_1v_svdist2d_fit_2v integral in signal  : %f\n", pred_bkg);
   printf("h_2v_svdist2d integral in sideband: %f\n", h_svdist2d[t_2v]->Integral(1, last_sideband_bin));
