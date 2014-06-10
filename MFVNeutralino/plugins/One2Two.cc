@@ -167,8 +167,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     throw cms::Exception("VectorMismatch") << "inconsistent sample info";
 
   edm::Service<TFileService> fs;
-  if (toy_mode)
-    TH1::SetDefaultSumw2();
+  TH1::SetDefaultSumw2();
 
   f_dphi = new TF1("f_dphi", form_f_dphi.c_str(), 0, M_PI);
   f_dz = new TF1("f_dz", form_f_dz.c_str(), -40, 40);
@@ -435,8 +434,7 @@ void MFVOne2Two::endJob() {
   // sample. With/without replacement is controlled by the config
   // flag.
 
-  std::vector<bool> used(N1v, 0);
-  TH1I* h_1v_use = fs->make<TH1I>("h_1v_use", "", N1v, 0, N1v);
+  std::vector<int> used(N1v, 0);
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
   const int npairsuse = npairs > 0 ? npairs : N1v/2;
 
@@ -454,7 +452,6 @@ void MFVOne2Two::endJob() {
       int x = rand->Integer(N1v);
       if (wrep || !used[x]) {
 	iv = x;
-	used[x] = true;
 	break;
       }
     }
@@ -478,7 +475,6 @@ void MFVOne2Two::endJob() {
 
         if (ok) {
 	  jv = x;
-	  used[x] = true;
           //if (tries >= 50000) printf("\r%200s\r", "");
 	  break;
 	}
@@ -493,12 +489,13 @@ void MFVOne2Two::endJob() {
 
     if (jv == -1) {
       assert(tries == giveup);
+      used[iv] = -1;
       --ipair;
       continue;
     }
 
-    h_1v_use->Fill(iv);
-    h_1v_use->Fill(jv);
+    ++used[iv];
+    ++used[jv];
 
     const MFVVertexAux& v1 = one_vertices[jv];
 
@@ -531,6 +528,38 @@ void MFVOne2Two::endJob() {
     h_abs_dphi[t_1v]->Fill(fabs(dphi(v0, v1)));
     h_svdz_v_dphi[t_1v]->Fill(dphi(v0, v1), dz(v0, v1));
   }
+
+
+  // Output 1v usage counts (versus z).
+  {
+    TTree* t_use = fs->make<TTree>("t_use", "");
+    unsigned char c;
+    unsigned short s;
+    float z;
+    bool use_short = false;
+    for (int i = 0; i < N1v; ++i) {
+      if (used[i] >= 65536)
+        throw cms::Exception("problemo");
+      else if (used[i] >= 256) {
+        use_short = true;
+        break;
+      }
+    }
+    t_use->Branch("z", &z, "z/F");
+    if (use_short)
+      t_use->Branch("nuse", &s, "nuse/s");
+    else
+      t_use->Branch("nuse", &c, "nuse/c");
+    for (int i = 0; i < N1v; ++i) {
+      z = one_vertices[i].z;
+      if (use_short)
+        s = used[i];
+      else
+        c = used[i];
+      t_use->Fill();
+    }
+  }
+
 
   // Fit the 1v distribution to the 2v one by shifting it over and
   // scaling in the sideband.
