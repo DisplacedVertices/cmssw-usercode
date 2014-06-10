@@ -8,6 +8,8 @@ process.maxEvents.input = 0
 process.TFileService.fileName = 'one2two.root'
 
 file_path = 'crab/MiniTreeV18/%s.root'
+signal_samples = ['mfv_neutralino_tau0100um_M0400', 'mfv_neutralino_tau0300um_M0400', 'mfv_neutralino_tau1000um_M0400', 'mfv_neutralino_tau9900um_M0400']
+nsignals = len(signal_samples)
 
 process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     min_ntracks = cms.int32(5),
@@ -37,6 +39,10 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     use_f_dz = cms.bool(True),
                                     max_1v_dz = cms.double(0.025), # only used if use_f_dz false
                                     max_1v_ntracks = cms.int32(1000000),
+
+                                    signal_files = cms.vstring(*[file_path % n for n in signal_samples]),
+                                    signal_n1vs = cms.vint32(*([-1]*nsignals)),
+                                    signal_weights = cms.vdouble(*([2e-4]*nsignals)),
                                     )
 
 process.p = cms.Path(process.mfvOne2Two)
@@ -116,7 +122,7 @@ else:
         process.mfvOne2Two.weights = weights
 
 print 'CFG BEGIN'
-for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs wrep npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks'.split():
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs wrep npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks signal_files signal_n1vs signal_weights'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 

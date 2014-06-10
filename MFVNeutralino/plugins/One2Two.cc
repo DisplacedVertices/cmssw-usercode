@@ -80,6 +80,11 @@ public:
   const double max_1v_dz;
   const int max_1v_ntracks;
 
+  const std::vector<std::string> signal_files;
+  const size_t nsignals;
+  const std::vector<int> signal_n1vs;
+  const std::vector<double> signal_weights;
+
   TF1* f_dphi;
   TF1* f_dz;
   TF1* g_dz;
@@ -155,8 +160,10 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
     max_1v_ntracks(cfg.getParameter<int>("max_1v_ntracks")),
 
-    //    signal_files(cfg.getParameter<std::vector<std::string> >("signal_files")),
-    //    signal_weights(cfg.getParameter<std::vector<double> >("signal_weights")),
+    signal_files(cfg.getParameter<std::vector<std::string> >("signal_files")),
+    nsignals(signal_files.size()),
+    signal_n1vs(cfg.getParameter<std::vector<int> >("signal_n1vs")),
+    signal_weights(cfg.getParameter<std::vector<double> >("signal_weights")),
 
     f_dphi(0),
     f_dz(0),
@@ -165,6 +172,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 {
   if (n1vs.size() != weights.size() || (toy_mode && nfiles != n1vs.size()))
     throw cms::Exception("VectorMismatch") << "inconsistent sample info";
+
+  if (nsignals != signal_n1vs.size() || nsignals != signal_weights.size())
+    throw cms::Exception("VectorMismatch") << "inconsistent signal sample info";
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -279,11 +289,23 @@ void MFVOne2Two::endJob() {
   edm::Service<TFileService> fs;
   rand = new TRandom3(121982 + seed);
 
-  // Read all signal samples to print signal contamination in sideband
-  // and signal strength in signal region. 
-  //  for (int i = 0, ie = int(signal_samples.size()); i < ie; ++i) {
-    
-  //  }
+  printf("\n\n==================================================================\n\nconfig: ntracks >= %i  svdist2d sideband <= %f\n", min_ntracks, svdist2d_cut);
+
+  // When in all-sample mode (i.e. when we're scaling numbers to data
+  // luminosity), read all signal samples to print signal
+  // contamination in sideband and signal strength in signal region.
+  std::vector<MFVVertexAuxCollection> signal_one_vertices(nsignals);
+  std::vector<MFVVertexPairCollection> signal_two_vertices(nsignals);
+  if (nfiles > 1) {
+    printf("reading %lu signals\n", nsignals);
+    for (size_t isig = 0; isig < nsignals; ++isig) {
+      printf("%s ", signal_files[isig].c_str());
+      read_file(signal_files[isig], signal_one_vertices[isig], signal_two_vertices[isig]);
+      const double w = signal_weights[isig];
+      printf("  scaled: # 1v: %f  # 2v: %f\n", signal_one_vertices[isig].size()*w, signal_two_vertices[isig].size()*w);
+    }
+  }
+
 
   // Read all vertices from the input files. Two modes: unweighted,
   // single sample, or combine multiple samples, reading a random
@@ -294,14 +316,21 @@ void MFVOne2Two::endJob() {
 
   if (!toy_mode) {
     // In regular mode, take all events from the file (with weight 1).
-    printf("\n\n==================================================================\n\nsingle sample mode, filename: %s  ntracks >= %i  svdist2d sideband <= %f\n", filenames[0].c_str(), min_ntracks, svdist2d_cut);
+    printf("\n==============================\n\nsingle sample mode, filename: %s\n", filenames[0].c_str());
     read_file(filenames[0], one_vertices, two_vertices[0]);
   }
   else {
     // Config file specifies how many to take (or the Poisson-mean
     // number) from each sample. Directly keep the 2vs; they will be
     // histogrammed with config-specified weights below.
-    printf("\n\n==================================================================\n\nmultiple sample mode, #filenames: %i  ntracks >= %i  svdist2d sideband <= %f\n", int(filenames.size()), min_ntracks, svdist2d_cut);
+    printf("\n==============================\n\nmultiple sample mode, #filenames: %i\n", int(filenames.size()));
+
+    TTree* t_sample_use = fs->make<TTree>("t_sample_use", "");
+    unsigned char b;
+    unsigned short s;
+    t_sample_use->Branch("ifile", &b, "ifile/b");
+    t_sample_use->Branch("evuse", &s, "evuse/s");
+
     for (size_t ifile = 0; ifile < nfiles; ++ifile) {
       printf("file: %s\n", filenames[ifile].c_str());
       MFVVertexAuxCollection v1v;
@@ -321,6 +350,9 @@ void MFVOne2Two::endJob() {
           ++t;
         else {
           ++m;
+          b = ifile;
+          s = t;
+          t_sample_use->Fill();
           one_vertices.push_back(v1v[t++]);
         }
       }
@@ -329,6 +361,7 @@ void MFVOne2Two::endJob() {
 
   if (just_print)
     return;
+
 
   const int N1v = int(one_vertices.size());
 
