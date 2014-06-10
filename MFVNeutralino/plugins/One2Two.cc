@@ -101,7 +101,7 @@ public:
 
   TRandom3* rand;
 
-  enum { t_2v, t_2vsideband, t_1v, n_t };
+  enum { t_2v, t_2vsideband, t_1v, t_sig, n_t };
   static const char* t_names[n_t];
 
   TH2F* h_xy[n_t];
@@ -117,6 +117,7 @@ public:
   TH2F* h_ntracks[n_t];
   TH1F* h_ntracks01[n_t];
   TH1F* h_svdist2d[n_t];
+  TH1F* h_svdist2d_all[n_t];
   TH1F* h_svdz[n_t];
   TH1F* h_svdz_all[n_t];
   TH1F* h_dphi[n_t];
@@ -131,7 +132,7 @@ public:
   TH1F* h_pred_m_real;
 };
 
-const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vsideband", "1v" };
+const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vsideband", "1v", "2vsig" };
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   : min_ntracks(cfg.getParameter<int>("min_ntracks")),
@@ -215,6 +216,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_ntracks           [i] = fs->make<TH2F>(TString::Format("h_%s_ntracks"           , iv), "", 20, 0, 20, 20, 0, 20);
     h_ntracks01         [i] = fs->make<TH1F>(TString::Format("h_%s_ntracks01"         , iv), "", 30, 0, 30);
     h_svdist2d          [i] = fs->make<TH1F>(TString::Format("h_%s_svdist2d"          , iv), "", 100, 0, 0.1);
+    h_svdist2d_all      [i] = fs->make<TH1F>(TString::Format("h_%s_svdist2d_all"      , iv), "", 1000, 0, 1);
     h_svdz              [i] = fs->make<TH1F>(TString::Format("h_%s_svdz"              , iv), "", 20, -0.1, 0.1);
     h_svdz_all          [i] = fs->make<TH1F>(TString::Format("h_%s_svdz_all"          , iv), "", 400, -20, 20);
     h_dphi              [i] = fs->make<TH1F>(TString::Format("h_%s_dphi"              , iv), "", 8, -M_PI, M_PI);
@@ -318,6 +320,7 @@ void MFVOne2Two::fill_2d(const int ih, const double w, const MFVVertexAux& v0, c
   h_ntracks[ih]->Fill(v0.ntracks(), v1.ntracks(), w);
   h_ntracks01[ih]->Fill(v0.ntracks() + v1.ntracks(), w);
   h_svdist2d[ih]->Fill(svdist2d(v0, v1), w);
+  h_svdist2d_all[ih]->Fill(svdist2d(v0, v1), w);
   h_svdz[ih]->Fill(dz(v0, v1), w);
   h_svdz_all[ih]->Fill(dz(v0, v1), w);
   h_dphi[ih]->Fill(dphi(v0, v1), w);
@@ -441,7 +444,7 @@ void MFVOne2Two::endJob() {
 
   // Find the envelope functions for dphi (just check that it is flat)
   // and dz.
-  printf("\n==============================\n\nfitting envelopes\n");
+  printf("\n==============================\n\nfitting envelopes\n"); fflush(stdout);
 
   for (int iv = 0; iv < N1v; ++iv) {
     const MFVVertexAux& v0 = one_vertices[iv];
@@ -487,12 +490,13 @@ void MFVOne2Two::endJob() {
   if (signal_contamination >= 0) {
     const size_t isig = signal_contamination;
     for (const auto& pair : signal_two_vertices[isig])
-      for (int ih = 0; ih < 2; ++ih)
-        fill_2d(ih, signal_weights[isig], pair.first, pair.second);
+      for (int ih = 0; ih < n_t; ++ih)
+        if (ih != t_1v)
+          fill_2d(ih, signal_weights[isig], pair.first, pair.second);
   }
 
 
-  printf("\n==============================\n\nfitting fs\n");
+  printf("\n==============================\n\nfitting fs\n"); fflush(stdout);
 
   {
     TString opt = "LIRQS";
@@ -525,7 +529,7 @@ void MFVOne2Two::endJob() {
   // sample. With/without replacement is controlled by the config
   // flag.
 
-  printf("\n==============================\n\nsampling 1v pairs\n");
+  printf("\n==============================\n\nsampling 1v pairs\n"); fflush(stdout);
 
   std::vector<int> used(N1v, 0);
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
@@ -657,7 +661,7 @@ void MFVOne2Two::endJob() {
 
   // Fit the 1v distribution to the 2v one by shifting it over and
   // scaling in the sideband.
-  printf("\n==============================\n\nfitting 1v shape to 2v dist\n");
+  printf("\n==============================\n\nfitting 1v shape to 2v dist\n"); fflush(stdout);
 
   const int nbins = h_svdist2d[t_1v]->GetNbinsX();
   int best_shift = 0;
@@ -701,11 +705,13 @@ void MFVOne2Two::endJob() {
   h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2vsideband]->Integral(1, last_sideband_bin)/h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
   
   const double pred_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins);
-  const double real_bkg = h_svdist2d[t_2v]->Integral(last_sideband_bin+1, nbins);
-  printf("h_1v_svdist2d_fit_2v integral in sideband: %f\n", h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
-  printf("h_1v_svdist2d_fit_2v integral in signal  : %f\n", pred_bkg);
-  printf("h_2v_svdist2d integral in sideband: %f\n", h_svdist2d[t_2v]->Integral(1, last_sideband_bin));
-  printf("h_2v_svdist2d integral in signal  : %f\n", real_bkg);
+  const double real_sigreg = h_svdist2d[t_2v]->Integral(last_sideband_bin+1, nbins+1);
+  const double real_bkg = real_sigreg - h_svdist2d[t_sig]->Integral(last_sideband_bin+1, nbins+1);
+  printf("h_1v_svdist2d_fit_2v integral in sideband : %f\n", h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
+  printf("h_1v_svdist2d_fit_2v integral in signal   : %f\n", pred_bkg);
+  printf("h_2v_svdist2d integral in sideband        : %f\n", h_svdist2d[t_2v]->Integral(1, last_sideband_bin));
+  printf("h_2v_svdist2d integral in signal          : %f\n", real_sigreg);
+  printf("h_2v_svdist2d integral in signal, bkg only: %f\n", real_bkg);
 
   h_pred_v_real->Fill(real_bkg, pred_bkg);
   h_pred_m_real->Fill(pred_bkg - real_bkg);
