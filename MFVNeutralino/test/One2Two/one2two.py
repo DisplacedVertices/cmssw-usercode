@@ -23,14 +23,17 @@ mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                             wrep = cms.bool(True),
                             npairs = cms.int32(50000),
 
-                            find_gs = cms.bool(True),
-                            find_fs = cms.bool(True),
-                            form_dphi = cms.string('abs(x)**[0]/(3.14159265**([0]+1)/([0]+1))'),
-                            form_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
+                            find_g_dz = cms.bool(True),
                             form_g_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
 
+                            find_f_dphi = cms.bool(True),
+                            form_f_dphi = cms.string('abs(x)**[0]/(3.14159265**([0]+1)/([0]+1))'),
+
+                            find_f_dz = cms.bool(True),
+                            form_f_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
+
                             use_f_dz = cms.bool(True),
-                            max_1v_dz = cms.double(0.025),
+                            max_1v_dz = cms.double(0.025), # only used if use_f_dz false
                             max_1v_ntracks = cms.int32(1000000),
                             )
 

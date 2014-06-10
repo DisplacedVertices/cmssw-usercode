@@ -68,11 +68,12 @@ public:
   const bool wrep;
   const int npairs;
 
-  const bool find_gs;
-  const bool find_fs;
-  const std::string form_dphi;
-  const std::string form_dz;
+  const bool find_g_dz;
   const std::string form_g_dz;
+  const bool find_f_dphi;
+  const std::string form_f_dphi;
+  const bool find_f_dz;
+  const std::string form_f_dz;
 
   const bool use_f_dz;
   const double max_1v_dz;
@@ -137,11 +138,14 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     wrep(cfg.getParameter<bool>("wrep")),
     npairs(cfg.getParameter<int>("npairs")),
 
-    find_gs(cfg.getParameter<bool>("find_gs")),
-    find_fs(cfg.getParameter<bool>("find_fs")),
-    form_dphi(cfg.getParameter<std::string>("form_dphi")),
-    form_dz(cfg.getParameter<std::string>("form_dz")),
+    find_g_dz(cfg.getParameter<bool>("find_g_dz")),
     form_g_dz(cfg.getParameter<std::string>("form_g_dz")),
+
+    find_f_dphi(cfg.getParameter<bool>("find_f_dphi")),
+    form_f_dphi(cfg.getParameter<std::string>("form_f_dphi")),
+
+    find_f_dz(cfg.getParameter<bool>("find_f_dz")),
+    form_f_dz(cfg.getParameter<std::string>("form_f_dz")),
 
     use_f_dz(cfg.getParameter<bool>("use_f_dz")),
     max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
@@ -161,8 +165,8 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   if (toy_mode)
     TH1::SetDefaultSumw2();
 
-  f_dphi = new TF1("f_dphi", form_dphi.c_str(), 0, M_PI);
-  f_dz = new TF1("f_dz", form_dz.c_str(), -40, 40);
+  f_dphi = new TF1("f_dphi", form_f_dphi.c_str(), 0, M_PI);
+  f_dz = new TF1("f_dz", form_f_dz.c_str(), -40, 40);
   g_dz = new TF1("g_dz", form_g_dz.c_str(), -40, 40);
   
   h_1v_dphi_env = fs->make<TH1F>("h_1v_dphi_env", "", 8, -M_PI, M_PI);
@@ -324,23 +328,26 @@ void MFVOne2Two::endJob() {
   // Find the envelope functions for dphi (just check that it is flat)
   // and dz.
 
-  if (find_gs) {
-    for (int iv = 0; iv < N1v; ++iv) {
-      const MFVVertexAux& v0 = one_vertices[iv];
-      for (int jv = iv+1; jv < N1v; ++jv) {
-        const MFVVertexAux& v1 = one_vertices[jv];
-        h_1v_dphi_env->Fill(dphi(v0, v1));
-        h_1v_absdphi_env->Fill(fabs(dphi(v0, v1)));
-        h_1v_dz_env->Fill(dz(v0, v1));
-      }
+  for (int iv = 0; iv < N1v; ++iv) {
+    const MFVVertexAux& v0 = one_vertices[iv];
+    for (int jv = iv+1; jv < N1v; ++jv) {
+      const MFVVertexAux& v1 = one_vertices[jv];
+      h_1v_dphi_env->Fill(dphi(v0, v1));
+      h_1v_absdphi_env->Fill(fabs(dphi(v0, v1)));
+      h_1v_dz_env->Fill(dz(v0, v1));
     }
+  }
 
-    h_1v_absdphi_env->Scale(1./h_1v_absdphi_env->Integral());
+  h_1v_absdphi_env->Scale(1./h_1v_absdphi_env->Integral());
+  h_1v_dz_env     ->Scale(1./h_1v_dz_env     ->Integral());
+
+  if (1) { // no find_g_dphi, just assuming it's flat and checking that assumption here.
     TFitResultPtr res = h_1v_absdphi_env->Fit("pol0", "QS");
     printf("g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
-    
-    h_1v_dz_env->Scale(1./h_1v_dz_env->Integral());
-    res = h_1v_dz_env->Fit(g_dz, "LRQS");
+  }
+
+  if (find_g_dz) { 
+    TFitResultPtr res = h_1v_dz_env->Fit(g_dz, "LRQS");
     printf("g_dz fit to gaus sigma %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     g_dz->FixParameter(0, res->Parameter(0));
   }
@@ -389,22 +396,26 @@ void MFVOne2Two::endJob() {
     }
   }
 
-  if (find_fs) {
+  {
     TString opt = "LIRQS";
     if (toy_mode)
       opt = "W" + opt;
 
-    TF1* f_dphi_temp = new TF1("f_dphi_temp", TString::Format("%f*(%s)", h_abs_dphi[t_2vsideband]->Integral()*h_abs_dphi[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_dphi.c_str()), 0, M_PI);
-    TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi_temp, opt);
-    printf("f_dphi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
-    f_dphi->FixParameter(0, res->Parameter(0));
-    delete f_dphi_temp;
+    if (find_f_dphi) {
+      TF1* f_dphi_temp = new TF1("f_dphi_temp", TString::Format("%f*(%s)", h_abs_dphi[t_2vsideband]->Integral()*h_abs_dphi[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dphi.c_str()), 0, M_PI);
+      TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi_temp, opt);
+      printf("f_dphi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+      f_dphi->FixParameter(0, res->Parameter(0));
+      delete f_dphi_temp;
+    }
 
-    TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_dz.c_str()), -40, 40);
-    res = h_svdz[t_2vsideband]->Fit(f_dz_temp, opt);
-    printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
-    f_dz->FixParameter(0, res->Parameter(0));
-    delete f_dz_temp;
+    if (find_f_dz) {
+      TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dz.c_str()), -40, 40);
+      TFitResultPtr res = h_svdz[t_2vsideband]->Fit(f_dz_temp, opt);
+      printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+      f_dz->FixParameter(0, res->Parameter(0));
+      delete f_dz_temp;
+    }
   }
 
   h_fcn_dphi->FillRandom("f_dphi", 100000);
