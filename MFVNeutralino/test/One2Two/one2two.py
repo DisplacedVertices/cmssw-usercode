@@ -98,3 +98,11 @@ else:
 print 'CFG BEGIN'
 print process.mfvOne2Two.dumpPython()
 print 'CFG END'
+
+'''
+foreach sam (qcdht0100 qcdht0250 qcdht0500 qcdht1000 ttbardilep ttbarhadronic ttbarsemilep mfv_neutralino_tau0100um_M0400 mfv_neutralino_tau0300um_M0400 mfv_neutralino_tau1000um_M0400 mfv_neutralino_tau9900um_M0400)
+  foreach ntk (5 6 7 8)
+    env mfvo2t_just_print=1 mfvo2t_sample=$sam mfvo2t_min_ntracks=$ntk cmsRun one2two.py env >&! out.justprint_${ntk}_${sam}
+  end
+end
+'''
