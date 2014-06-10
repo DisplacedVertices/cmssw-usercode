@@ -61,6 +61,7 @@ public:
   const size_t nfiles;
   const std::vector<int> n1vs;
   const std::vector<double> weights;
+  const bool just_print;
 
   const int seed;
   const bool toy_mode;
@@ -89,6 +90,8 @@ public:
   TH1F* h_fcn_abs_dphi;
   TH1F* h_fcn_dz;
   TH1F* h_fcn_g_dz;
+
+  TRandom3* rand;
 
   enum { t_2v, t_2vsideband, t_1v, n_t };
   static const char* t_names[n_t];
@@ -131,6 +134,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     nfiles(filenames.size()),
     n1vs(cfg.getParameter<std::vector<int> >("n1vs")),
     weights(cfg.getParameter<std::vector<double> >("weights")),
+    just_print(cfg.getParameter<bool>("just_print")),
 
     seed(cfg.getParameter<int>("seed")),
     toy_mode(cfg.getParameter<bool>("toy_mode")),
@@ -156,7 +160,8 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
     f_dphi(0),
     f_dz(0),
-    g_dz(0)
+    g_dz(0),
+    rand(0)
 {
   if (n1vs.size() != weights.size() || (toy_mode && nfiles != n1vs.size()))
     throw cms::Exception("VectorMismatch") << "inconsistent sample info";
@@ -213,6 +218,7 @@ MFVOne2Two::~MFVOne2Two() {
   delete f_dphi;
   delete f_dz;
   delete g_dz;
+  delete rand;
 }
 
 MFVVertexAux MFVOne2Two::xform_vertex(const MFVVertexAux& v) const {
@@ -272,8 +278,7 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
 
 void MFVOne2Two::endJob() {
   edm::Service<TFileService> fs;
-
-  TRandom3* rand = new TRandom3(121982 + seed);
+  rand = new TRandom3(121982 + seed);
 
   // Read all signal samples to print signal contamination in sideband
   // and signal strength in signal region. 
@@ -322,6 +327,9 @@ void MFVOne2Two::endJob() {
       }
     }
   }
+
+  if (just_print)
+    return;
 
   const int N1v = int(one_vertices.size());
 
@@ -576,8 +584,6 @@ void MFVOne2Two::endJob() {
 
   h_pred_v_real->Fill(real_bkg, pred_bkg);
   h_pred_m_real->Fill(pred_bkg - real_bkg);
-
-  delete rand;
 }
 
 DEFINE_FWK_MODULE(MFVOne2Two);

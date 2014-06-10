@@ -17,6 +17,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     filenames = cms.vstring(file_path % 'qcdht1000'),
                                     n1vs = cms.vint32(),
                                     weights = cms.vdouble(),
+                                    just_print = cms.bool(False),
 
                                     seed = cms.int32(0),
                                     toy_mode = cms.bool(False),
@@ -58,6 +59,7 @@ else:
 
     from_env('min_ntracks',  int)
     from_env('svdist2d_cut', float)
+    from_env('just_print',   bool)
     from_env('seed',         int)
     from_env('poisson_n1vs', bool)
     from_env('wrep',         bool)
