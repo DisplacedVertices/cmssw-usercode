@@ -353,10 +353,12 @@ void MFVOne2Two::endJob() {
     printf("g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
   }
 
-  if (find_g_dz) { 
-    TFitResultPtr res = h_1v_dz_env->Fit(g_dz, "LRQS");
+  if (find_g_dz) {
+    TF1* g_dz_temp = new TF1("g_dz_temp", TString::Format("%f*(%s)", h_1v_dz_env->Integral()*h_1v_dz_env->GetXaxis()->GetBinWidth(1), form_g_dz.c_str()), g_dz->GetXmin(), g_dz->GetXmax());
+    TFitResultPtr res = h_1v_dz_env->Fit(g_dz_temp, "LRQS");
     printf("g_dz fit to gaus sigma %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     g_dz->FixParameter(0, res->Parameter(0));
+    delete g_dz_temp;
   }
 
   h_fcn_g_dz->FillRandom("g_dz", 100000);
@@ -418,7 +420,7 @@ void MFVOne2Two::endJob() {
     }
 
     if (find_f_dz) {
-      TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dz.c_str()), -40, 40);
+      TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dz.c_str()), f_dz->GetXmin(), f_dz->GetXmax());
       TFitResultPtr res = h_svdz[t_2vsideband]->Fit(f_dz_temp, opt);
       printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
       f_dz->FixParameter(0, res->Parameter(0));
