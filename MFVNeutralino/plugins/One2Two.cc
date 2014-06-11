@@ -1,6 +1,6 @@
 #include "TF1.h"
 #include "TFitResult.h"
-#include "TH2F.h"
+#include "TH2D.h"
 #include "TRandom3.h"
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -105,42 +105,42 @@ public:
   TF1* f_dphi;
   TF1* f_dz;
   TF1* g_dz;
-  TH1F* h_1v_dphi_env;
-  TH1F* h_1v_absdphi_env;
-  TH1F* h_1v_dz_env;
-  TH1F* h_fcn_dphi;
-  TH1F* h_fcn_abs_dphi;
-  TH1F* h_fcn_dz;
-  TH1F* h_fcn_g_dz;
+  TH1D* h_1v_dphi_env;
+  TH1D* h_1v_absdphi_env;
+  TH1D* h_1v_dz_env;
+  TH1D* h_fcn_dphi;
+  TH1D* h_fcn_abs_dphi;
+  TH1D* h_fcn_dz;
+  TH1D* h_fcn_g_dz;
 
   TRandom3* rand;
 
   enum { t_2v, t_2vsideband, t_1v, t_sig, n_t };
   static const char* t_names[n_t];
 
-  TH2F* h_xy[n_t];
-  TH1F* h_bs2ddist[n_t];
-  TH2F* h_bs2ddist_v_bsdz[n_t];
-  TH1F* h_bsdz[n_t];
-  TH1F* h_bs2ddist_0[n_t];
-  TH2F* h_bs2ddist_v_bsdz_0[n_t];
-  TH1F* h_bsdz_0[n_t];
-  TH1F* h_bs2ddist_1[n_t];
-  TH2F* h_bs2ddist_v_bsdz_1[n_t];
-  TH1F* h_bsdz_1[n_t];
-  TH2F* h_ntracks[n_t];
-  TH1F* h_ntracks01[n_t];
-  TH1F* h_svdist2d[n_t];
-  TH1F* h_svdist2d_all[n_t];
-  TH1F* h_svdz[n_t];
-  TH1F* h_svdz_all[n_t];
-  TH1F* h_dphi[n_t];
-  TH1F* h_abs_dphi[n_t];
-  TH2F* h_svdz_v_dphi[n_t];
+  TH2D* h_xy[n_t];
+  TH1D* h_bs2ddist[n_t];
+  TH2D* h_bs2ddist_v_bsdz[n_t];
+  TH1D* h_bsdz[n_t];
+  TH1D* h_bs2ddist_0[n_t];
+  TH2D* h_bs2ddist_v_bsdz_0[n_t];
+  TH1D* h_bsdz_0[n_t];
+  TH1D* h_bs2ddist_1[n_t];
+  TH2D* h_bs2ddist_v_bsdz_1[n_t];
+  TH1D* h_bsdz_1[n_t];
+  TH2D* h_ntracks[n_t];
+  TH1D* h_ntracks01[n_t];
+  TH1D* h_svdist2d[n_t];
+  TH1D* h_svdist2d_all[n_t];
+  TH1D* h_svdz[n_t];
+  TH1D* h_svdz_all[n_t];
+  TH1D* h_dphi[n_t];
+  TH1D* h_abs_dphi[n_t];
+  TH2D* h_svdz_v_dphi[n_t];
 
-  TH1F* h_1v_svdist2d_fit_2v;
-  TH2F* h_pred_v_real;
-  TH1F* h_pred_m_real;
+  TH1D* h_1v_svdist2d_fit_2v;
+  TH2D* h_pred_v_real;
+  TH1D* h_pred_m_real;
 };
 
 const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vsideband", "1v", "2vsig" };
@@ -205,42 +205,42 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   f_dz = new TF1("f_dz", form_f_dz.c_str(), -40, 40);
   g_dz = new TF1("g_dz", form_g_dz.c_str(), -40, 40);
   
-  h_1v_dphi_env = fs->make<TH1F>("h_1v_dphi_env", "", 8, -M_PI, M_PI);
-  h_1v_absdphi_env = fs->make<TH1F>("h_1v_absdphi_env", "", 8, 0, M_PI);
-  h_1v_dz_env = fs->make<TH1F>("h_1v_dz_env", "", 200, -40, 40);
-  h_fcn_dphi = fs->make<TH1F>("h_fcn_dphi", "", 8, -M_PI, M_PI);
-  h_fcn_abs_dphi = fs->make<TH1F>("h_fcn_abs_dphi", "", 8, 0, M_PI);
-  h_fcn_dz = fs->make<TH1F>("h_fcn_dz", "", 20, -0.1, 0.1);
-  h_fcn_g_dz = fs->make<TH1F>("h_fcn_g_dz", "", 200, -40, 40);
+  h_1v_dphi_env = fs->make<TH1D>("h_1v_dphi_env", "", 8, -M_PI, M_PI);
+  h_1v_absdphi_env = fs->make<TH1D>("h_1v_absdphi_env", "", 8, 0, M_PI);
+  h_1v_dz_env = fs->make<TH1D>("h_1v_dz_env", "", 200, -40, 40);
+  h_fcn_dphi = fs->make<TH1D>("h_fcn_dphi", "", 8, -M_PI, M_PI);
+  h_fcn_abs_dphi = fs->make<TH1D>("h_fcn_abs_dphi", "", 8, 0, M_PI);
+  h_fcn_dz = fs->make<TH1D>("h_fcn_dz", "", 20, -0.1, 0.1);
+  h_fcn_g_dz = fs->make<TH1D>("h_fcn_g_dz", "", 200, -40, 40);
 
   for (int i = 0; i < n_t; ++i) {
     const char* iv = t_names[i];
 
-    h_xy                [i] = fs->make<TH2F>(TString::Format("h_%s_xy"                , iv), "", 100, -0.05, 0.05, 100, 0.05, 0.05);
-    h_bs2ddist          [i] = fs->make<TH1F>(TString::Format("h_%s_bs2ddist"          , iv), "", 100, 0, 0.1);
-    h_bs2ddist_v_bsdz   [i] = fs->make<TH2F>(TString::Format("h_%s_bs2ddist_v_bsdz"   , iv), "", 200, -20, 20, 100, 0, 0.1);
-    h_bsdz              [i] = fs->make<TH1F>(TString::Format("h_%s_bsdz"              , iv), "", 200, -20, 20);
-    h_bs2ddist_0        [i] = fs->make<TH1F>(TString::Format("h_%s_bs2ddist_0"        , iv), "", 100, 0, 0.1);
-    h_bs2ddist_v_bsdz_0 [i] = fs->make<TH2F>(TString::Format("h_%s_bs2ddist_v_bsdz_0" , iv), "", 200, -20, 20, 100, 0, 0.1);
-    h_bsdz_0            [i] = fs->make<TH1F>(TString::Format("h_%s_bsdz_0"            , iv), "", 200, -20, 20);
-    h_bs2ddist_1        [i] = fs->make<TH1F>(TString::Format("h_%s_bs2ddist_1"        , iv), "", 100, 0, 0.1);
-    h_bs2ddist_v_bsdz_1 [i] = fs->make<TH2F>(TString::Format("h_%s_bs2ddist_v_bsdz_1" , iv), "", 200, -20, 20, 100, 0, 0.1);
-    h_bsdz_1            [i] = fs->make<TH1F>(TString::Format("h_%s_bsdz_1"            , iv), "", 200, -20, 20);
+    h_xy                [i] = fs->make<TH2D>(TString::Format("h_%s_xy"                , iv), "", 100, -0.05, 0.05, 100, 0.05, 0.05);
+    h_bs2ddist          [i] = fs->make<TH1D>(TString::Format("h_%s_bs2ddist"          , iv), "", 100, 0, 0.1);
+    h_bs2ddist_v_bsdz   [i] = fs->make<TH2D>(TString::Format("h_%s_bs2ddist_v_bsdz"   , iv), "", 200, -20, 20, 100, 0, 0.1);
+    h_bsdz              [i] = fs->make<TH1D>(TString::Format("h_%s_bsdz"              , iv), "", 200, -20, 20);
+    h_bs2ddist_0        [i] = fs->make<TH1D>(TString::Format("h_%s_bs2ddist_0"        , iv), "", 100, 0, 0.1);
+    h_bs2ddist_v_bsdz_0 [i] = fs->make<TH2D>(TString::Format("h_%s_bs2ddist_v_bsdz_0" , iv), "", 200, -20, 20, 100, 0, 0.1);
+    h_bsdz_0            [i] = fs->make<TH1D>(TString::Format("h_%s_bsdz_0"            , iv), "", 200, -20, 20);
+    h_bs2ddist_1        [i] = fs->make<TH1D>(TString::Format("h_%s_bs2ddist_1"        , iv), "", 100, 0, 0.1);
+    h_bs2ddist_v_bsdz_1 [i] = fs->make<TH2D>(TString::Format("h_%s_bs2ddist_v_bsdz_1" , iv), "", 200, -20, 20, 100, 0, 0.1);
+    h_bsdz_1            [i] = fs->make<TH1D>(TString::Format("h_%s_bsdz_1"            , iv), "", 200, -20, 20);
 
-    h_ntracks           [i] = fs->make<TH2F>(TString::Format("h_%s_ntracks"           , iv), "", 20, 0, 20, 20, 0, 20);
-    h_ntracks01         [i] = fs->make<TH1F>(TString::Format("h_%s_ntracks01"         , iv), "", 30, 0, 30);
-    h_svdist2d          [i] = fs->make<TH1F>(TString::Format("h_%s_svdist2d"          , iv), "", 100, 0, 0.1);
-    h_svdist2d_all      [i] = fs->make<TH1F>(TString::Format("h_%s_svdist2d_all"      , iv), "", 1000, 0, 1);
-    h_svdz              [i] = fs->make<TH1F>(TString::Format("h_%s_svdz"              , iv), "", 20, -0.1, 0.1);
-    h_svdz_all          [i] = fs->make<TH1F>(TString::Format("h_%s_svdz_all"          , iv), "", 400, -20, 20);
-    h_dphi              [i] = fs->make<TH1F>(TString::Format("h_%s_dphi"              , iv), "", 8, -M_PI, M_PI);
-    h_abs_dphi          [i] = fs->make<TH1F>(TString::Format("h_%s_abs_dphi"          , iv), "", 8, 0, M_PI);
-    h_svdz_v_dphi       [i] = fs->make<TH2F>(TString::Format("h_%s_svdz_v_dphi"       , iv), "", 8, -M_PI, M_PI, 50, -0.1, 0.1);
+    h_ntracks           [i] = fs->make<TH2D>(TString::Format("h_%s_ntracks"           , iv), "", 20, 0, 20, 20, 0, 20);
+    h_ntracks01         [i] = fs->make<TH1D>(TString::Format("h_%s_ntracks01"         , iv), "", 30, 0, 30);
+    h_svdist2d          [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d"          , iv), "", 100, 0, 0.1);
+    h_svdist2d_all      [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d_all"      , iv), "", 1000, 0, 1);
+    h_svdz              [i] = fs->make<TH1D>(TString::Format("h_%s_svdz"              , iv), "", 20, -0.1, 0.1);
+    h_svdz_all          [i] = fs->make<TH1D>(TString::Format("h_%s_svdz_all"          , iv), "", 400, -20, 20);
+    h_dphi              [i] = fs->make<TH1D>(TString::Format("h_%s_dphi"              , iv), "", 8, -M_PI, M_PI);
+    h_abs_dphi          [i] = fs->make<TH1D>(TString::Format("h_%s_abs_dphi"          , iv), "", 8, 0, M_PI);
+    h_svdz_v_dphi       [i] = fs->make<TH2D>(TString::Format("h_%s_svdz_v_dphi"       , iv), "", 8, -M_PI, M_PI, 50, -0.1, 0.1);
   }
 
-  h_1v_svdist2d_fit_2v = fs->make<TH1F>("h_1v_svdist2d_fit_2v", "", 100, 0, 0.1);
-  h_pred_v_real = fs->make<TH2F>("h_pred_v_real", "", 100, 0, 20, 100, 0, 20);
-  h_pred_m_real = fs->make<TH1F>("h_pred_m_real", "", 100, -20, 20);
+  h_1v_svdist2d_fit_2v = fs->make<TH1D>("h_1v_svdist2d_fit_2v", "", 100, 0, 0.1);
+  h_pred_v_real = fs->make<TH2D>("h_pred_v_real", "", 100, 0, 20, 100, 0, 20);
+  h_pred_m_real = fs->make<TH1D>("h_pred_m_real", "", 100, -20, 20);
 }
 
 MFVOne2Two::~MFVOne2Two() {
