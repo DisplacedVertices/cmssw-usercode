@@ -83,6 +83,7 @@ def make_tars():
     if not tars_made:
         print 'making tars'
         os.system('mkdir -p ' + output_root)
+        os.system('cp one2two.py ' + output_root)
         os.system('cd $CMSSW_BASE/lib/* ; tar czf %s/lib.tgz * .edmplugincache ; cd - > /dev/null' % output_root)
         os.system('cd $CMSSW_BASE/src/ ; tar czf %s/py.tgz JMTucker/Tools/python/Samples.py JMTucker/Tools/python/ROOTTools.py JMTucker/Tools/python/general.py JMTucker/Tools/python/DBS.py ; cd - > /dev/null' % output_root)
         tars_made = True
@@ -103,6 +104,7 @@ def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_con
     old_wd = os.getcwd()
     os.chdir(batch_wd)
 
+    os.system('cp %s/one2two.py .' % output_root)
     os.system('cp %s/lib.tgz .' % output_root)
     os.system('cp %s/py.tgz .' % output_root)
 
@@ -139,6 +141,9 @@ def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_con
     open('runme.csh', 'wt').write(script_template % {'env': env})
     open('runme.jdl', 'wt').write(jdl_template % {'njobs': njobs})
 
+    if 'doit' in sys.argv:
+        os.system('condor_submit runme.jdl')
+
     os.chdir(old_wd)
 
 # For ntracks in 5-8:
@@ -165,11 +170,11 @@ for min_ntracks, n1v_scale in ((5,50),(6,50),(7,38),(8,20)):
         for sample in 'all all500'.split():
             if 'all' in sample and 'full' in how_events:
                 continue
-            if '500' in sample:
-                n1v_scale = int(n1v_scale/5.)
-            batches.append((min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contam, n1v_scale, sample))
+            batches.append((min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contam, int(n1v_scale/5.) if '500' in sample else n1v_scale, sample))
 
-print len(batches), len(batches)*100
+raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
+for batch in batches:
+    submit(200, *batch)
 
 '''
 qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep
