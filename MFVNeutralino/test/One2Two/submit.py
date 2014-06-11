@@ -158,7 +158,7 @@ def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, s
 #                             Test all samples, sampling N_20ifb events in each pseudoexp.
 #                             Test all samples, sampling Pois(N_20ifb events) in each pseudoexp.
 
-sampling_type = 0
+sampling_type = 2
 phi_exp = None
 signal_contam = None
 batches = []
