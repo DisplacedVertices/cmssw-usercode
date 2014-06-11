@@ -2,10 +2,7 @@
 
 import sys, os
 from JMTucker.Tools.general import typed_from_argv
-input_fn = [x for x in sys.argv if x.endswith('_histos.root') and os.path.isfile(x)][0]
-ntracks = typed_from_argv(int)
-if ntracks is None:
-    ntracks = 5
+input_fn = [x for x in sys.argv if x.endswith('.root') and os.path.isfile(x)][0]
 
 from array import array
 from math import pi
@@ -14,12 +11,14 @@ set_style()
 ROOT.TH1.AddDirectory(0)
 ROOT.gStyle.SetOptStat(2222222)
 ROOT.gStyle.SetOptFit(2222)
-ps = plot_saver('plots/one2twoNew/one2two_ntracks%i_%s' % (ntracks, input_fn.replace('_histos.root', '')), size=(600,600))
+plot_path = os.path.join('plots/one2two', os.path.basename(input_fn).replace('.root', ''))
+ps = plot_saver(plot_path, size=(600,600))
 
 f = ROOT.TFile(input_fn)
 
 def get_h(name):
-    return f.Get('mfvOne2TwoNtracks%i/%s' % (ntracks, name))
+    #print name
+    return f.Get('mfvOne2Two/%s' % name)
 
 ####
 
