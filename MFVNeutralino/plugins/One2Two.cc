@@ -673,43 +673,24 @@ void MFVOne2Two::endJob() {
   // scaling in the sideband.
   printf("\n==============================\n\nfitting 1v shape to 2v dist\n"); fflush(stdout);
 
+  const double meandiff = h_svdist2d[t_2v]->GetMean() - h_svdist2d[t_1v]->GetMean();
   const int nbins = h_svdist2d[t_1v]->GetNbinsX();
-  int best_shift = 0;
-  double best_ksdist = 1e99;
-  std::vector<TH1F*> h1vs;
-  for (int shift = 0; shift < 30; ++shift) {
-    TH1F* h1v = (TH1F*)h_svdist2d[t_1v]->Clone("h1v");
-    h1vs.push_back(h1v);
-    h1v->Scale(1./h1v->Integral());
+  assert(h_svdist2d[t_2v]->GetNbinsX() == nbins);
+  assert(fabs(h_svdist2d[t_2v]->GetBinWidth(1) - h_svdist2d[t_1v]->GetBinWidth(1)) < 1e-5);
 
-    for (int ibin = 1; ibin <= nbins; ++ibin) {
-      const int ifrom = ibin - shift;
-      h1v->SetBinContent(ibin, ifrom >= 0 ? h_svdist2d[t_1v]->GetBinContent(ifrom) : 0.);
-      h1v->SetBinError(ibin, 0);
-    }
+  const int shift = int(round(meandiff/h_svdist2d[t_1v]->GetBinWidth(1)));
+  printf("shift by %i bins (mean diff %f)\n", shift, meandiff);
 
-    const double ksdist = h1v->KolmogorovTest(h_svdist2d[t_2vsideband], "M");
-    const double ksprob = h1v->KolmogorovTest(h_svdist2d[t_2vsideband]);
-    if (ksdist < best_ksdist) {
-      best_shift = shift;
-      best_ksdist = ksdist;
-    }
-
-    h_1v_svdist2d_fit_2v_ksdist->SetBinContent(shift+1, ksdist);
-    h_1v_svdist2d_fit_2v_ksprob->SetBinContent(shift+1, ksprob);
-  }
-
-  if (best_shift == 29)
-    printf("WARNING SHIFT AT LIMIT\n");
-
-  TH1F* h1v = h1vs[best_shift];
   for (int ibin = 1; ibin <= nbins; ++ibin) {
-    h_1v_svdist2d_fit_2v->SetBinContent(ibin, h1v->GetBinContent(ibin));
-    h_1v_svdist2d_fit_2v->SetBinError(ibin, 0);
+    const int ifrom = ibin - shift;
+    double val = 0, err = 0;
+    if (ifrom >= 0) {
+      val = h_svdist2d[t_1v]->GetBinContent(ifrom);
+      err = h_svdist2d[t_1v]->GetBinError(ifrom);
+    }
+    h_1v_svdist2d_fit_2v->SetBinContent(ibin, val);
+    h_1v_svdist2d_fit_2v->SetBinError  (ibin, err);
   }
-
-  for (TH1F* h : h1vs)
-    delete h;
 
   const int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut)-1;
   h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2vsideband]->Integral(1, last_sideband_bin)/h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
