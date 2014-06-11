@@ -681,12 +681,20 @@ void MFVOne2Two::endJob() {
   const int shift = int(round(meandiff/h_svdist2d[t_1v]->GetBinWidth(1)));
   printf("shift by %i bins (mean diff %f)\n", shift, meandiff);
 
-  for (int ibin = 1; ibin <= nbins; ++ibin) {
+  for (int ibin = 1; ibin <= nbins+1; ++ibin) {
     const int ifrom = ibin - shift;
     double val = 0, err = 0;
     if (ifrom >= 0) {
       val = h_svdist2d[t_1v]->GetBinContent(ifrom);
-      err = h_svdist2d[t_1v]->GetBinError(ifrom);
+      err = h_svdist2d[t_1v]->GetBinError  (ifrom);
+    }
+    if (ibin == nbins+1) {
+      double var = err*err;
+      for (int irest = ifrom+1; irest <= nbins+1; ++irest) {
+        val += h_svdist2d[t_1v]->GetBinContent(irest);
+        var += pow(h_svdist2d[t_1v]->GetBinError(irest), 2);
+      }
+      err = sqrt(var);
     }
     h_1v_svdist2d_fit_2v->SetBinContent(ibin, val);
     h_1v_svdist2d_fit_2v->SetBinError  (ibin, err);
