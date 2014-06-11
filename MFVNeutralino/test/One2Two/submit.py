@@ -184,3 +184,43 @@ qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep
                     continue
                 batches.append((min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contam, sample))
 '''
+
+'''
+grep -L 'Normal termination (return value 0)' condor_log*
+tar --remove-files -czf condor_logs.tgz condor_log.*
+
+
+find . -name stderr\* -size 0
+rm stderr*
+
+
+less stdout.*_0
+
+foreach x (stdout*)
+  sed --in-place -e 's@condor/execute/dir_[0-9]*@@g' $x
+end
+
+touch diffstdouts
+foreach x (stdout*)
+  foreach y (stdout*)
+    if ($x != $y) then
+      diff $x $y >> diffstdouts
+    endif
+  end
+end
+sort -o diffstdouts diffstdouts
+
+tar --remove-files -czf stdouts.tgz stdout.*
+
+
+mkdir outs
+mv out.* outs/
+
+mkdir roots
+mv *.root roots/
+
+
+py ~/test/One2Two draw.py roots/one2two_0.root
+...
+mv plots/one2two plots/one2two_`basename $PWD`
+'''
