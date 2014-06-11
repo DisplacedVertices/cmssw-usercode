@@ -624,10 +624,8 @@ void MFVOne2Two::endJob() {
     }
   }
 
-  h_1v_absdphi_env->Scale(1./h_1v_absdphi_env->Integral());
-  h_1v_dz_env     ->Scale(1./h_1v_dz_env     ->Integral());
-
   if (1) { // no find_g_dphi, just assuming it's flat and checking that assumption here.
+    h_1v_absdphi_env->Scale(1./h_1v_absdphi_env->Integral());
     TFitResultPtr res = h_1v_absdphi_env->Fit("pol0", "QS");
     printf("h_dphi_env mean %.3f +- %.3f  rms %.3f +- %.3f   g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", h_1v_absdphi_env->GetMean(), h_1v_absdphi_env->GetMeanError(), h_1v_absdphi_env->GetRMS(), h_1v_absdphi_env->GetRMSError(), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     h_dphi_env_mean    ->Fill(h_1v_absdphi_env->GetMean());
@@ -642,8 +640,10 @@ void MFVOne2Two::endJob() {
   }
 
   if (find_g_dz) {
+    h_1v_dz_env->Scale(1./h_1v_dz_env->Integral());
     TF1* g_dz_temp = new TF1("g_dz_temp", TString::Format("%f*(%s)", h_1v_dz_env->Integral()*h_1v_dz_env->GetXaxis()->GetBinWidth(1), form_g_dz.c_str()), g_dz->GetXmin(), g_dz->GetXmax());
-    TFitResultPtr res = h_1v_dz_env->Fit(g_dz_temp, "LRQS");
+    g_dz_temp->SetParameter(0, 10);
+    TFitResultPtr res = h_1v_dz_env->Fit(g_dz_temp, "RQS");
     printf("g_dz fit to gaus sigma %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     g_dz->FixParameter(0, res->Parameter(0));
 
@@ -661,7 +661,6 @@ void MFVOne2Two::endJob() {
   }
 
   h_fcn_g_dz->FillRandom("g_dz", 100000);
-
 
   // Fill all the 2v histograms. In toy_mode we add together many
   // samples with appropriate weights. Also fit f_dphi and f_dz from
