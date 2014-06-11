@@ -60,7 +60,8 @@ sample_infos = [
     SampleInfo(Samples.ttbarsemilep,  (  14,   15,   15,   16)),
     ]
 
-n1v_scales = {5: 102, 6: 69, 7: 44, 8: 23}
+n1v_scales_no500 = {5: 102, 6: 69, 7: 44, 8: 23}
+n1v_scales = {5: 9, 6: 6, 7: 3, 8: 2}
 
 def sample_name(fn):
     return os.path.basename(fn).replace('.root', '')
@@ -110,6 +111,7 @@ else:
 
         use_qcd500 = bool(env.get('mfvo2t_use_qcd500', ''))
         if not use_qcd500:
+            n1v_scales = n1v_scales_no500
             sample_infos.pop(0)
 
         process.mfvOne2Two.filenames = [file_path % s.sample.name for s in sample_infos]
@@ -117,13 +119,12 @@ else:
     samples = [sample_name(fn) for fn in process.mfvOne2Two.filenames]
 
     if toy_mode:
-        n1v_scale = int(env.get('mfvo2t_n1v_scale', '100'))   # 101 (23) 5- (8-)track 1v ttdil events in 20/fb...
         int_lumi = float(env.get('mfvo2t_int_lumi', '20000'))
 
         n1vs, weights = [], []
         for s in sample_infos:
             if s.sample.name in samples:
-                n1vs.append(s.events_rel[min_ntracks - 5] * n1v_scale)
+                n1vs.append(s.events_rel[min_ntracks - 5] * n1v_scales[min_ntracks])
                 weights.append(s.sample.partial_weight * int_lumi if len(samples) > 1 else 1)
 
         process.mfvOne2Two.n1vs = n1vs

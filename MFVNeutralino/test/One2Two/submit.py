@@ -88,16 +88,15 @@ def make_tars():
         os.system('cd $CMSSW_BASE/src/ ; tar czf %s/py.tgz JMTucker/Tools/python/Samples.py JMTucker/Tools/python/ROOTTools.py JMTucker/Tools/python/general.py JMTucker/Tools/python/DBS.py ; cd - > /dev/null' % output_root)
         tars_made = True
 
-def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contamination, n1v_scale, samples):
+def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contamination, samples):
     make_tars()
-    batch_name = 'Ntk%i_Svd%s_Styp%i_HE%s_Phi%s_SC%s_Nsc%i_S%s' % (min_ntracks,
-                                                                   ('%.3f' % svdist_cut).replace('.','p'),
-                                                                   sampling_type,
-                                                                   how_events,
-                                                                   'fit' if phi_exp is None else ('%.2f' % phi_exp).replace('.','p'),
-                                                                   'no' if signal_contamination is None else 'n%ix%i' % signal_contamination,
-                                                                   n1v_scale,
-                                                                   samples)
+    batch_name = 'Ntk%i_Svd%s_Styp%i_HE%s_Phi%s_SC%s_S%s' % (min_ntracks,
+                                                             ('%.3f' % svdist_cut).replace('.','p'),
+                                                             sampling_type,
+                                                             how_events,
+                                                             'fit' if phi_exp is None else ('%.2f' % phi_exp).replace('.','p'),
+                                                             'no' if signal_contamination is None else 'n%ix%i' % signal_contamination,
+                                                             samples)
 
     batch_wd = os.path.join(output_root, batch_name)
     os.system('mkdir -p ' + batch_wd)
@@ -112,7 +111,6 @@ def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, s
         'min_ntracks %i' % min_ntracks,
         'svdist2d_cut %f' % svdist_cut,
         'sampling_type %s' % sampling_type,
-        'n1v_scale %i' % n1v_scale,
         ]
 
     if signal_contamination is not None:
@@ -165,12 +163,12 @@ phi_exp = None
 signal_contam = None
 batches = []
 how_events = 'toypois'
-for min_ntracks, n1v_scale in ((5,50),(6,50),(7,38),(8,20)):
+for min_ntracks in (5,6,7,8):
     for svdist_cut in [0.036 + 0.002*i for i in xrange(7)]:
         for sample in 'all all500'.split():
             if 'all' in sample and 'full' in how_events:
                 continue
-            batches.append((min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contam, int(n1v_scale/5.) if '500' in sample else n1v_scale, sample))
+            batches.append((min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contam, sample))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
 for batch in batches:
