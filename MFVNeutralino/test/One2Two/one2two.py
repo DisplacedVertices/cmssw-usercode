@@ -1,11 +1,11 @@
-import sys, os
+<import sys, os, FWCore.ParameterSet.Config as cms
 from collections import namedtuple
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.general import typed_from_argv
 
+process = cms.Process('One2Two')
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(0))
 process.source = cms.Source('EmptySource')
-process.maxEvents.input = 0
-process.TFileService.fileName = 'one2two.root'
+process.TFileService = cms.Service('TFileService', fileName = cms.string('one2two.root'))
+
 
 file_path = 'crab/MiniTreeV18/%s.root'
 signal_samples = ['mfv_neutralino_tau0100um_M0400', 'mfv_neutralino_tau0300um_M0400', 'mfv_neutralino_tau1000um_M0400', 'mfv_neutralino_tau9900um_M0400']
@@ -93,6 +93,11 @@ else:
     from_env('npairs',       int)
     from_env('signal_contamination', int)
 
+    signal_scale = env.get('signal_scale', None)
+    if signal_scale:
+        signal_scale = float(signal_scale)
+        process.mfvOne2Two.signal_weights = [signal_scale*w for w in process.mfvOne2Two.signal_weights.value()]
+
     phi_exp = env.get(env_var('phi_exp'), '[0]')
     process.mfvOne2Two.form_f_dphi = process.mfvOne2Two.form_f_dphi.value().replace('[0]', phi_exp)
 
@@ -111,7 +116,7 @@ else:
     samples = [sample_name(fn) for fn in process.mfvOne2Two.filenames]
 
     if toy_mode:
-        n1v_scale = int(env.get('mfvo2t_n1v_scale', '8'))   # 101 (23) 5- (8-)track 1v ttdil events in 20/fb...
+        n1v_scale = int(env.get('mfvo2t_n1v_scale', '100'))   # 101 (23) 5- (8-)track 1v ttdil events in 20/fb...
         int_lumi = float(env.get('mfvo2t_int_lumi', '20000'))
 
         n1vs, weights = [], []
@@ -123,6 +128,11 @@ else:
         process.mfvOne2Two.n1vs = n1vs
         process.mfvOne2Two.weights = weights
 
+    job_num = env.get('mfvo2t_job_num', '')
+    if job_num:
+        print 'in batch mode, job number', job_num, '\n'
+        process.TFileService.fileName = process.TFileService.fileName.value().replace('.root', '_%s.root' % job_num)
+    
 print 'CFG BEGIN'
 for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs wrep npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks signal_files signal_n1vs signal_weights signal_contamination'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
