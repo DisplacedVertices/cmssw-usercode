@@ -24,7 +24,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     seed = cms.int32(0),
                                     toy_mode = cms.bool(False),
                                     poisson_n1vs = cms.bool(False),
-                                    wrep = cms.bool(True),
+                                    sampling_type = cms.int32(0),
                                     npairs = cms.int32(100000),
 
                                     find_g_dz = cms.bool(True),
@@ -89,7 +89,7 @@ else:
     from_env('seed',         int)
     toy_mode = from_env('toy_mode', bool)
     from_env('poisson_n1vs', bool)
-    from_env('wrep',         bool)
+    from_env('sampling_type',int)
     from_env('npairs',       int)
     from_env('signal_contamination', int)
 
@@ -134,7 +134,7 @@ else:
         process.TFileService.fileName = process.TFileService.fileName.value().replace('.root', '_%s.root' % job_num)
     
 print 'CFG BEGIN'
-for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs wrep npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks signal_files signal_n1vs signal_weights signal_contamination'.split():
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks signal_files signal_n1vs signal_weights signal_contamination'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 

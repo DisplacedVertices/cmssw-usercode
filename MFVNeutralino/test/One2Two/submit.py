@@ -88,11 +88,11 @@ def make_tars():
         os.system('cd $CMSSW_BASE/src/ ; tar czf %s/py.tgz JMTucker/Tools/python/Samples.py JMTucker/Tools/python/ROOTTools.py JMTucker/Tools/python/general.py JMTucker/Tools/python/DBS.py ; cd - > /dev/null' % output_root)
         tars_made = True
 
-def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contamination, n1v_scale, samples):
+def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contamination, n1v_scale, samples):
     make_tars()
-    batch_name = 'Ntk%i_Svd%s_Wrep%i_HE%s_Phi%s_SC%s_Nsc%i_S%s' % (min_ntracks,
+    batch_name = 'Ntk%i_Svd%s_Styp%i_HE%s_Phi%s_SC%s_Nsc%i_S%s' % (min_ntracks,
                                                                    ('%.3f' % svdist_cut).replace('.','p'),
-                                                                   int(wrep),
+                                                                   sampling_type,
                                                                    how_events,
                                                                    'fit' if phi_exp is None else ('%.2f' % phi_exp).replace('.','p'),
                                                                    'no' if signal_contamination is None else 'n%ix%i' % signal_contamination,
@@ -111,7 +111,7 @@ def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_con
     env = [
         'min_ntracks %i' % min_ntracks,
         'svdist2d_cut %f' % svdist_cut,
-        'wrep %s' % (1 if wrep else "''"),
+        'sampling_type %s' % sampling_type,
         'n1v_scale %i' % n1v_scale,
         ]
 
@@ -160,7 +160,7 @@ def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_con
 #                             Test all samples, sampling N_20ifb events in each pseudoexp.
 #                             Test all samples, sampling Pois(N_20ifb events) in each pseudoexp.
 
-wrep = True
+sampling_type = 0
 phi_exp = None
 signal_contam = None
 batches = []
@@ -170,7 +170,7 @@ for min_ntracks, n1v_scale in ((5,50),(6,50),(7,38),(8,20)):
         for sample in 'all all500'.split():
             if 'all' in sample and 'full' in how_events:
                 continue
-            batches.append((min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contam, int(n1v_scale/5.) if '500' in sample else n1v_scale, sample))
+            batches.append((min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contam, int(n1v_scale/5.) if '500' in sample else n1v_scale, sample))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
 for batch in batches:
@@ -182,7 +182,7 @@ qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep
             for sample in 'qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep all all500'.split():
                 if 'all' in sample and 'full' in how_events:
                     continue
-                batches.append((min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contam, sample))
+                batches.append((min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contam, sample))
 '''
 
 '''

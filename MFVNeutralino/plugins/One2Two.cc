@@ -32,9 +32,12 @@ namespace {
     return v0.z - v1.z;
   }
 
+  double accept_prob(const double f, const double g, const double M) {
+    return f/(M*g);
+  }
+
   bool accept(TRandom* rand, const double f, const double g, const double M) {
-    const double u = rand->Rndm();
-    return u < f/(M*g);
+    return rand->Rndm() < accept_prob(f, g, M);
   }
 }
 
@@ -51,10 +54,11 @@ public:
 
   void read_file(const std::string& filename, MFVVertexAuxCollection&, MFVVertexPairCollection&) const;
   void fill_2d(const int ih, const double weight, const MFVVertexAux&, const MFVVertexAux&) const;
+  void fill_1d(              const double weight, const MFVVertexAux&, const MFVVertexAux&) const;
 
+  double prob_1v_pair(const MFVVertexAux&, const MFVVertexAux&) const;
   bool accept_1v_pair(const MFVVertexAux&, const MFVVertexAux&) const;
-  void fill_1d(const MFVVertexAux&, const MFVVertexAux&) const;
-
+ 
   void analyze(const edm::Event&, const edm::EventSetup&) {}
   void endJob();
 
@@ -71,7 +75,7 @@ public:
   const int seed;
   const bool toy_mode;
   const bool poisson_n1vs;
-  const bool wrep;
+  const int sampling_type; // 0 = sample random pairs with replacement, 1 = sample all unique pairs and accept/reject, 2 = sample all unique pairs and fill 1v dists with weight according to accept/reject prob
   const int npairs;
 
   const bool find_g_dz;
@@ -135,9 +139,6 @@ public:
   TH2F* h_svdz_v_dphi[n_t];
 
   TH1F* h_1v_svdist2d_fit_2v;
-  TH1F* h_1v_svdist2d_fit_2v_ksdist;
-  TH1F* h_1v_svdist2d_fit_2v_ksprob;
-
   TH2F* h_pred_v_real;
   TH1F* h_pred_m_real;
 };
@@ -158,7 +159,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     seed(cfg.getParameter<int>("seed")),
     toy_mode(cfg.getParameter<bool>("toy_mode")),
     poisson_n1vs(cfg.getParameter<bool>("poisson_n1vs")),
-    wrep(cfg.getParameter<bool>("wrep")),
+    sampling_type(cfg.getParameter<int>("sampling_type")),
     npairs(cfg.getParameter<int>("npairs")),
 
     find_g_dz(cfg.getParameter<bool>("find_g_dz")),
@@ -193,6 +194,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
   if (signal_contamination >= 0 && !toy_mode)
     throw cms::Exception("Misconfiguration", "no signal contamination when not in toy mode");
+
+  if (sampling_type < 0 || sampling_type > 2)
+    throw cms::Exception("Misconfiguration", "sampling_type must be one of 0,1,2");
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -235,9 +239,6 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   }
 
   h_1v_svdist2d_fit_2v = fs->make<TH1F>("h_1v_svdist2d_fit_2v", "", 100, 0, 0.1);
-  h_1v_svdist2d_fit_2v_ksdist = fs->make<TH1F>("h_1v_svdist2d_fit_2v_ksdist", "", 30, 0, 30);
-  h_1v_svdist2d_fit_2v_ksprob = fs->make<TH1F>("h_1v_svdist2d_fit_2v_ksprob", "", 30, 0, 30);
-
   h_pred_v_real = fs->make<TH2F>("h_pred_v_real", "", 100, 0, 20, 100, 0, 20);
   h_pred_m_real = fs->make<TH1F>("h_pred_m_real", "", 100, -20, 20);
 }
@@ -338,6 +339,25 @@ void MFVOne2Two::fill_2d(const int ih, const double w, const MFVVertexAux& v0, c
   h_svdz_v_dphi[ih]->Fill(dphi(v0, v1), dz(v0, v1), w);
 }
 
+void MFVOne2Two::fill_1d(const double w, const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  // The 2v pairs are ordered with ntk0 > ntk1, so fill here the same way.
+  const int ntk0 = v0.ntracks(); 
+  const int ntk1 = v1.ntracks();
+  if (ntk1 > ntk0)
+    fill_2d(t_1v, w, v1, v0);
+  else
+    fill_2d(t_1v, w, v0, v1);
+}
+
+double MFVOne2Two::prob_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
+  const double dp = dphi(v0, v1);
+  const double dz = v0.z - v1.z;
+
+  return
+    accept_prob(f_dphi->Eval(dp), gdpmax,         Mdp) *
+    accept_prob(f_dz  ->Eval(dz), g_dz->Eval(dz), Mdz);
+}
+
 bool MFVOne2Two::accept_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
   const double dp = dphi(v0, v1);
   const double dz = v0.z - v1.z;
@@ -346,36 +366,6 @@ bool MFVOne2Two::accept_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) 
     v0.ntracks() + v1.ntracks() < max_1v_ntracks &&
     accept(rand, f_dphi->Eval(dp), gdpmax, Mdp) &&
     (use_f_dz ? accept(rand, f_dz->Eval(dz), g_dz->Eval(dz), Mdz) : fabs(dz) < max_1v_dz);
-}
-
-void MFVOne2Two::fill_1d(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
-  h_xy[t_1v]->Fill(v0.x, v0.y);
-  h_xy[t_1v]->Fill(v1.x, v1.y);
-  h_bs2ddist[t_1v]->Fill(v0.bs2ddist);
-  h_bs2ddist[t_1v]->Fill(v1.bs2ddist);
-  h_bs2ddist_0[t_1v]->Fill(v0.bs2ddist);
-  h_bs2ddist_1[t_1v]->Fill(v1.bs2ddist);
-  h_bs2ddist_v_bsdz[t_1v]->Fill(v0.z, v0.bs2ddist);
-  h_bs2ddist_v_bsdz[t_1v]->Fill(v1.z, v1.bs2ddist);
-  h_bs2ddist_v_bsdz_0[t_1v]->Fill(v0.z, v0.bs2ddist);
-  h_bs2ddist_v_bsdz_1[t_1v]->Fill(v1.z, v1.bs2ddist);
-  h_bsdz[t_1v]->Fill(v0.z);
-  h_bsdz[t_1v]->Fill(v1.z);
-  h_bsdz_0[t_1v]->Fill(v0.z);
-  h_bsdz_1[t_1v]->Fill(v1.z);
-  const int ntk0 = v0.ntracks(); // The 2v pairs are ordered with ntk0 > ntk1,
-  const int ntk1 = v1.ntracks(); //  so fill here the same way.
-  if (ntk1 > ntk0)
-    h_ntracks[t_1v]->Fill(ntk1, ntk0);
-  else
-    h_ntracks[t_1v]->Fill(ntk0, ntk1);
-  h_ntracks01[t_1v]->Fill(ntk0 + ntk1);
-  h_svdist2d[t_1v]->Fill(svdist2d(v0, v1));
-  h_svdz[t_1v]->Fill(dz(v0, v1));
-  h_svdz_all[t_1v]->Fill(dz(v0, v1));
-  h_dphi[t_1v]->Fill(dphi(v0, v1));
-  h_abs_dphi[t_1v]->Fill(fabs(dphi(v0, v1)));
-  h_svdz_v_dphi[t_1v]->Fill(dphi(v0, v1), dz(v0, v1));
 }
 
 void MFVOne2Two::endJob() {
@@ -511,7 +501,7 @@ void MFVOne2Two::endJob() {
 
   if (1) { // no find_g_dphi, just assuming it's flat and checking that assumption here.
     TFitResultPtr res = h_1v_absdphi_env->Fit("pol0", "QS");
-    printf("g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    printf("h_dphi_env mean %.3f +- %.3f  rms %.3f +- %.3f   g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", h_1v_absdphi_env->GetMean(), h_1v_absdphi_env->GetMeanError(), h_1v_absdphi_env->GetRMS(), h_1v_absdphi_env->GetRMSError(), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
   }
 
   if (find_g_dz) {
@@ -594,7 +584,7 @@ void MFVOne2Two::endJob() {
   const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
   const int npairsuse = npairs > 0 ? npairs : N1v/2;
 
-  if (wrep) {
+  if (sampling_type == 0) {
     for (int ipair = 0; ipair < npairsuse; ++ipair) {
       int iv = rand->Integer(N1v);
       ++used[iv];
@@ -608,7 +598,7 @@ void MFVOne2Two::endJob() {
           if (accept_1v_pair(v0, v1)) {
             jv = x;
             ++used[jv];
-            fill_1d(v0, v1);
+            fill_1d(1, v0, v1);
             break;
           }
 
@@ -626,13 +616,23 @@ void MFVOne2Two::endJob() {
       }
     }
   }
-  else {
+  else if (sampling_type == 1) {
     for (int iv = 0; iv < N1v; ++iv) {
       for (int jv = iv+1; jv < N1v; ++jv) {
         const MFVVertexAux& v0 = one_vertices[iv];
         const MFVVertexAux& v1 = one_vertices[jv];
         if (accept_1v_pair(v0, v1))
-          fill_1d(v0, v1);
+          fill_1d(1, v0, v1);
+      }
+    }
+  }
+  else if (sampling_type == 2) {
+    for (int iv = 0; iv < N1v; ++iv) {
+      for (int jv = iv+1; jv < N1v; ++jv) {
+        const MFVVertexAux& v0 = one_vertices[iv];
+        const MFVVertexAux& v1 = one_vertices[jv];
+        const double w = prob_1v_pair(v0, v1);
+        fill_1d(w, v0, v1);
       }
     }
   }
