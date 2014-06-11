@@ -1,3 +1,4 @@
+#include "Math/QuantFuncMathCore.h"
 #include "TF1.h"
 #include "TFitResult.h"
 #include "TH2D.h"
@@ -38,6 +39,39 @@ namespace {
 
   bool accept(TRandom* rand, const double f, const double g, const double M) {
     return rand->Rndm() < accept_prob(f, g, M);
+  }
+
+  double clopper_pearson(const double n_on, const double n_tot, double& lower, double& upper) {
+    const double alpha=1-0.6827;
+    const bool equal_tailed=true;
+    const double alpha_min = equal_tailed ? alpha/2 : alpha;
+    lower = 0;
+    upper = 1;
+
+    if (n_on > 0)
+      lower = ROOT::Math::beta_quantile(alpha_min, n_on, n_tot - n_on + 1);
+    if (n_tot - n_on > 0)
+      upper = ROOT::Math::beta_quantile_c(alpha_min, n_on + 1, n_tot - n_on);
+
+    if (n_on == 0 and n_tot == 0)
+      return 0;
+    else
+      return n_on/n_tot;
+  }
+
+  double clopper_pearson_poisson_means(const double x, const double y, double& lower, double& upper) {
+    double rl, rh;
+    clopper_pearson(x, x+y, rl, rh);
+
+    lower = rl/(1-rl);
+
+    if (y == 0 or fabs(rh - 1) < 1e-9) {
+      upper = 0;
+      return 0;
+    }
+
+    upper = rh/(1-rh);
+    return x/y;
   }
 }
 
@@ -113,6 +147,45 @@ public:
   TH1D* h_fcn_dz;
   TH1D* h_fcn_g_dz;
 
+  TH1D* h_dphi_env_mean;
+  TH1D* h_dphi_env_mean_err;
+  TH1D* h_dphi_env_rms;
+  TH1D* h_dphi_env_rms_err;
+  TH1D* h_dphi_env_fit_p0;
+  TH1D* h_dphi_env_fit_p0_err;
+  TH1D* h_dphi_env_fit_p0_pull;
+  TH1D* h_dphi_env_fit_chi2;
+  TH1D* h_dphi_env_fit_chi2prob;
+  TH1D* h_dz_env_mean;
+  TH1D* h_dz_env_mean_err;
+  TH1D* h_dz_env_rms;
+  TH1D* h_dz_env_rms_err;
+  TH1D* h_dz_env_fit_sig;
+  TH1D* h_dz_env_fit_sig_err;
+  TH1D* h_dz_env_fit_sig_pull;
+  TH1D* h_dz_env_fit_chi2;
+  TH1D* h_dz_env_fit_chi2prob;
+  TH1D* h_dphi_mean;
+  TH1D* h_dphi_mean_err;
+  TH1D* h_dphi_rms;
+  TH1D* h_dphi_rms_err;
+  TH1D* h_dphi_asym;
+  TH1D* h_dphi_asym_err;
+  TH1D* h_dphi_fit_exp;
+  TH1D* h_dphi_fit_exp_err;
+  TH1D* h_dphi_fit_exp_pull;
+  TH1D* h_dphi_fit_chi2;
+  TH1D* h_dphi_fit_chi2prob;
+  TH1D* h_dz_mean;
+  TH1D* h_dz_mean_err;
+  TH1D* h_dz_rms;
+  TH1D* h_dz_rms_err;
+  TH1D* h_dz_fit_sig;
+  TH1D* h_dz_fit_sig_err;
+  TH1D* h_dz_fit_sig_pull;
+  TH1D* h_dz_fit_chi2;
+  TH1D* h_dz_fit_chi2prob;
+
   TRandom3* rand;
 
   enum { t_2v, t_2vsideband, t_1v, t_sig, n_t };
@@ -139,8 +212,16 @@ public:
   TH2D* h_svdz_v_dphi[n_t];
 
   TH1D* h_1v_svdist2d_fit_2v;
-  TH2D* h_pred_v_real;
-  TH1D* h_pred_m_real;
+
+  TH1D* h_meandiff;
+  TH1D* h_shift;
+  TH1D* h_ksdist;
+  TH1D* h_ksprob;
+  TH1D* h_ksdistX;
+  TH1D* h_ksprobX;
+
+  TH2D* h_pred_v_true;
+  TH1D* h_pred_m_true;
 };
 
 const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vsideband", "1v", "2vsig" };
@@ -213,6 +294,45 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_fcn_dz = fs->make<TH1D>("h_fcn_dz", "", 20, -0.1, 0.1);
   h_fcn_g_dz = fs->make<TH1D>("h_fcn_g_dz", "", 200, -40, 40);
 
+  h_dphi_env_mean         = fs->make<TH1D>("h_dphi_env_mean"         , "", 100, 1.54, 1.6);
+  h_dphi_env_mean_err     = fs->make<TH1D>("h_dphi_env_mean_err"     , "", 100, 0, 4e-4);
+  h_dphi_env_rms          = fs->make<TH1D>("h_dphi_env_rms"          , "", 100, .85, .97);
+  h_dphi_env_rms_err      = fs->make<TH1D>("h_dphi_env_rms_err"      , "", 100, 0, 4e-4);
+  h_dphi_env_fit_p0       = fs->make<TH1D>("h_dphi_env_fit_p0"       , "", 100, 0.1245, 0.1255);
+  h_dphi_env_fit_p0_err   = fs->make<TH1D>("h_dphi_env_fit_p0_err"   , "", 100, 0, 4e-4);
+  h_dphi_env_fit_p0_pull  = fs->make<TH1D>("h_dphi_env_fit_p0_pull"  , "", 100, -5, 5);
+  h_dphi_env_fit_chi2     = fs->make<TH1D>("h_dphi_env_fit_chi2"     , "", 100, 0, 20);
+  h_dphi_env_fit_chi2prob = fs->make<TH1D>("h_dphi_env_fit_chi2prob" , "", 100, 0, 1);
+  h_dz_env_mean           = fs->make<TH1D>("h_dz_env_mean"           , "", 100, -0.1, 0.1);
+  h_dz_env_mean_err       = fs->make<TH1D>("h_dz_env_mean_err"       , "", 100, 0, 0.004);
+  h_dz_env_rms            = fs->make<TH1D>("h_dz_env_rms"            , "", 100, 8.8, 9.8);
+  h_dz_env_rms_err        = fs->make<TH1D>("h_dz_env_rms_err"        , "", 100, 0, 0.004);
+  h_dz_env_fit_sig        = fs->make<TH1D>("h_dz_env_fit_sig"        , "", 100, 8.8, 9.8);
+  h_dz_env_fit_sig_err    = fs->make<TH1D>("h_dz_env_fit_sig_err"    , "", 100, 0, 0.004);
+  h_dz_env_fit_sig_pull   = fs->make<TH1D>("h_dz_env_fit_sig_pull"   , "", 100, -5, 5);
+  h_dz_env_fit_chi2       = fs->make<TH1D>("h_dz_env_fit_chi2"       , "", 100, 0, 20);
+  h_dz_env_fit_chi2prob   = fs->make<TH1D>("h_dz_env_fit_chi2prob"   , "", 100, 0, 1);
+  h_dphi_mean             = fs->make<TH1D>("h_dphi_mean"             , "", 100, 1.5, 3);
+  h_dphi_mean_err         = fs->make<TH1D>("h_dphi_mean_err"         , "", 100, 0, 0.2);
+  h_dphi_rms              = fs->make<TH1D>("h_dphi_rms"              , "", 100, 0, 2);
+  h_dphi_rms_err          = fs->make<TH1D>("h_dphi_rms_err"          , "", 100, 0, 0.2);
+  h_dphi_asym             = fs->make<TH1D>("h_dphi_asym"             , "", 100, 0, 2);
+  h_dphi_asym_err         = fs->make<TH1D>("h_dphi_asym_err"         , "", 100, 0, 2);
+  h_dphi_fit_exp          = fs->make<TH1D>("h_dphi_fit_exp"          , "", 100, 0, 8);
+  h_dphi_fit_exp_err      = fs->make<TH1D>("h_dphi_fit_exp_err"      , "", 100, 0, 4);
+  h_dphi_fit_exp_pull     = fs->make<TH1D>("h_dphi_fit_exp_pull"     , "", 100, -5, 5);
+  h_dphi_fit_chi2         = fs->make<TH1D>("h_dphi_fit_chi2"         , "", 100, 0, 20);
+  h_dphi_fit_chi2prob     = fs->make<TH1D>("h_dphi_fit_chi2prob"     , "", 100, 0, 1);
+  h_dz_mean           = fs->make<TH1D>("h_dz_mean"           , "", 100, -0.1, 0.1);
+  h_dz_mean_err       = fs->make<TH1D>("h_dz_mean_err"       , "", 100, 0, 0.004);
+  h_dz_rms            = fs->make<TH1D>("h_dz_rms"            , "", 100, 0, 0.04);
+  h_dz_rms_err        = fs->make<TH1D>("h_dz_rms_err"        , "", 100, 0, 0.004);
+  h_dz_fit_sig        = fs->make<TH1D>("h_dz_fit_sig"        , "", 100, 0, 0.04);
+  h_dz_fit_sig_err    = fs->make<TH1D>("h_dz_fit_sig_err"    , "", 100, 0, 0.004);
+  h_dz_fit_sig_pull   = fs->make<TH1D>("h_dz_fit_sig_pull"   , "", 100, -5, 5);
+  h_dz_fit_chi2       = fs->make<TH1D>("h_dz_fit_chi2"       , "", 100, 0, 20);
+  h_dz_fit_chi2prob   = fs->make<TH1D>("h_dz_fit_chi2prob"   , "", 100, 0, 1);
+
   for (int i = 0; i < n_t; ++i) {
     const char* iv = t_names[i];
 
@@ -239,8 +359,16 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   }
 
   h_1v_svdist2d_fit_2v = fs->make<TH1D>("h_1v_svdist2d_fit_2v", "", 100, 0, 0.1);
-  h_pred_v_real = fs->make<TH2D>("h_pred_v_real", "", 100, 0, 20, 100, 0, 20);
-  h_pred_m_real = fs->make<TH1D>("h_pred_m_real", "", 100, -20, 20);
+
+  h_meandiff = fs->make<TH1D>("h_meandiff", "", 100, 0, 0.05);
+  h_shift = fs->make<TH1D>("h_shift", "", 100, 0, 100);
+  h_ksdist  = fs->make<TH1D>("h_ksdist",  "", 101, 0, 1.01);
+  h_ksprob  = fs->make<TH1D>("h_ksprob",  "", 101, 0, 1.01);
+  h_ksdistX = fs->make<TH1D>("h_ksdistX", "", 101, 0, 1.01);
+  h_ksprobX = fs->make<TH1D>("h_ksprobX", "", 101, 0, 1.01);
+
+  h_pred_v_true = fs->make<TH2D>("h_pred_v_true", "", 100, 0, 20, 100, 0, 20);
+  h_pred_m_true = fs->make<TH1D>("h_pred_m_true", "", 100, -20, 20);
 }
 
 MFVOne2Two::~MFVOne2Two() {
@@ -502,6 +630,15 @@ void MFVOne2Two::endJob() {
   if (1) { // no find_g_dphi, just assuming it's flat and checking that assumption here.
     TFitResultPtr res = h_1v_absdphi_env->Fit("pol0", "QS");
     printf("h_dphi_env mean %.3f +- %.3f  rms %.3f +- %.3f   g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", h_1v_absdphi_env->GetMean(), h_1v_absdphi_env->GetMeanError(), h_1v_absdphi_env->GetRMS(), h_1v_absdphi_env->GetRMSError(), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    h_dphi_env_mean    ->Fill(h_1v_absdphi_env->GetMean());
+    h_dphi_env_mean_err->Fill(h_1v_absdphi_env->GetMeanError());
+    h_dphi_env_rms     ->Fill(h_1v_absdphi_env->GetRMS());
+    h_dphi_env_rms_err ->Fill(h_1v_absdphi_env->GetRMSError());
+    h_dphi_env_fit_p0      ->Fill(res->Parameter(0));
+    h_dphi_env_fit_p0_err  ->Fill(res->ParError(0));
+    h_dphi_env_fit_p0_pull ->Fill((res->Parameter(0) - 0.125) / res->ParError(0));
+    h_dphi_env_fit_chi2    ->Fill(res->Chi2() / res->Ndf());
+    h_dphi_env_fit_chi2prob->Fill(res->Prob());
   }
 
   if (find_g_dz) {
@@ -509,6 +646,17 @@ void MFVOne2Two::endJob() {
     TFitResultPtr res = h_1v_dz_env->Fit(g_dz_temp, "LRQS");
     printf("g_dz fit to gaus sigma %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     g_dz->FixParameter(0, res->Parameter(0));
+
+    h_dz_env_mean    ->Fill(h_1v_dz_env->GetMean());
+    h_dz_env_mean_err->Fill(h_1v_dz_env->GetMeanError());
+    h_dz_env_rms     ->Fill(h_1v_dz_env->GetRMS());
+    h_dz_env_rms_err ->Fill(h_1v_dz_env->GetRMSError());
+    h_dz_env_fit_sig     ->Fill(res->Parameter(0));
+    h_dz_env_fit_sig_err ->Fill(res->Parameter(0));
+    h_dz_env_fit_sig_pull->Fill((res->Parameter(0) - h_1v_dz_env->GetRMS()) / res->ParError(0));
+    h_dz_env_fit_chi2    ->Fill(res->Chi2() / res->Ndf());
+    h_dz_env_fit_chi2prob->Fill(res->Prob());
+
     delete g_dz_temp;
   }
 
@@ -538,26 +686,55 @@ void MFVOne2Two::endJob() {
 
   printf("\n==============================\n\nfitting fs\n"); fflush(stdout);
 
-  {
-    TString opt = "LIRQS";
-    if (toy_mode)
-      opt = "W" + opt;
+  TString opt = "LIRQS";
+  if (toy_mode)
+    opt = "W" + opt;
 
-    if (find_f_dphi) {
-      TF1* f_dphi_temp = new TF1("f_dphi_temp", TString::Format("%f*(%s)", h_abs_dphi[t_2vsideband]->Integral()*h_abs_dphi[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dphi.c_str()), 0, M_PI);
-      TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi_temp, opt);
-      printf("f_dphi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
-      f_dphi->FixParameter(0, res->Parameter(0));
-      delete f_dphi_temp;
-    }
+  if (find_f_dphi) {
+    TF1* f_dphi_temp = new TF1("f_dphi_temp", TString::Format("%f*(%s)", h_abs_dphi[t_2vsideband]->Integral()*h_abs_dphi[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dphi.c_str()), 0, M_PI);
+    TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi_temp, opt);
+    printf("f_dphi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    f_dphi->FixParameter(0, res->Parameter(0));
 
-    if (find_f_dz) {
-      TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dz.c_str()), f_dz->GetXmin(), f_dz->GetXmax());
-      TFitResultPtr res = h_svdz[t_2vsideband]->Fit(f_dz_temp, opt);
-      printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
-      f_dz->FixParameter(0, res->Parameter(0));
-      delete f_dz_temp;
-    }
+    h_dphi_mean    ->Fill(h_abs_dphi[t_2vsideband]->GetMean());
+    h_dphi_mean_err->Fill(h_abs_dphi[t_2vsideband]->GetMeanError());
+    h_dphi_rms     ->Fill(h_abs_dphi[t_2vsideband]->GetRMS());
+    h_dphi_rms_err ->Fill(h_abs_dphi[t_2vsideband]->GetRMSError());
+    double integ1, err1, integ2, err2;
+    integ1 = h_abs_dphi[t_2vsideband]->IntegralAndError(1,5, err1);
+    integ2 = h_abs_dphi[t_2vsideband]->IntegralAndError(6,8, err2);
+    double N1 = pow(integ1/err1, 2);
+    double N2 = pow(integ2/err2, 2);
+    double asym, asymlo, asymhi;
+    asym = clopper_pearson_poisson_means(N1, N2, asymlo, asymhi);
+    h_dphi_asym      ->Fill(asym);
+    h_dphi_asym_err  ->Fill((asymhi - asymlo)/2);
+    h_dphi_fit_exp     ->Fill(res->Parameter(0));
+    h_dphi_fit_exp_err ->Fill(res->ParError(0));
+    h_dphi_fit_exp_pull->Fill((res->Parameter(0) - 2) / res->ParError(0)); // JMTBAD
+    h_dphi_fit_chi2    ->Fill(res->Chi2() / res->Ndf());
+    h_dphi_fit_chi2prob->Fill(res->Prob());
+
+    delete f_dphi_temp;
+  }
+
+  if (find_f_dz) {
+    TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dz.c_str()), f_dz->GetXmin(), f_dz->GetXmax());
+    TFitResultPtr res = h_svdz[t_2vsideband]->Fit(f_dz_temp, opt);
+    printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    f_dz->FixParameter(0, res->Parameter(0));
+
+    h_dz_mean    ->Fill(h_svdz[t_2vsideband]->GetMean());
+    h_dz_mean_err->Fill(h_svdz[t_2vsideband]->GetMeanError());
+    h_dz_rms     ->Fill(h_svdz[t_2vsideband]->GetRMS());
+    h_dz_rms_err ->Fill(h_svdz[t_2vsideband]->GetRMSError());
+    h_dz_fit_sig     ->Fill(res->Parameter(0));
+    h_dz_fit_sig_err ->Fill(res->ParError(0));
+    h_dz_fit_sig_pull->Fill((res->Parameter(0) - h_svdz[t_2vsideband]->GetRMS()) / res->ParError(0));
+    h_dz_fit_chi2    ->Fill(res->Chi2() / res->Ndf());
+    h_dz_fit_chi2prob->Fill(res->Prob());
+
+    delete f_dz_temp;
   }
 
   h_fcn_dphi->FillRandom("f_dphi", 100000);
@@ -574,17 +751,21 @@ void MFVOne2Two::endJob() {
   Mdz = fdzmax/gdzmax;
 
 
-  // Now try to sample npairs from the one_vertices
-  // sample. With/without replacement is controlled by the config
-  // flag.
+  // Now sample npairs from the one_vertices sample.
+  // - sampling_type = 0: sample random pairs with replacement,
+  // accepting according to the f_dphi/dz functions.
+  // - sampling_type = 1: for every unique pair, accept according to
+  // f_dphi/dz.
+  // - sampling_type = 2: for every unique pair, use pair with weight
+  // = prob according to f_dphi/dz.
 
   printf("\n==============================\n\nsampling 1v pairs\n"); fflush(stdout);
 
-  std::vector<int> used(N1v, 0);
-  const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
-  const int npairsuse = npairs > 0 ? npairs : N1v/2;
-
   if (sampling_type == 0) {
+    std::vector<int> used(N1v, 0);
+    const int giveup = 10*N1v; // After choosing one vertex, may be so far out in e.g. dz tail that you can't find another one. Give up after trying this many times.
+    const int npairsuse = npairs > 0 ? npairs : N1v/2;
+
     for (int ipair = 0; ipair < npairsuse; ++ipair) {
       int iv = rand->Integer(N1v);
       ++used[iv];
@@ -615,31 +796,8 @@ void MFVOne2Two::endJob() {
         --ipair;
       }
     }
-  }
-  else if (sampling_type == 1) {
-    for (int iv = 0; iv < N1v; ++iv) {
-      for (int jv = iv+1; jv < N1v; ++jv) {
-        const MFVVertexAux& v0 = one_vertices[iv];
-        const MFVVertexAux& v1 = one_vertices[jv];
-        if (accept_1v_pair(v0, v1))
-          fill_1d(1, v0, v1);
-      }
-    }
-  }
-  else if (sampling_type == 2) {
-    for (int iv = 0; iv < N1v; ++iv) {
-      for (int jv = iv+1; jv < N1v; ++jv) {
-        const MFVVertexAux& v0 = one_vertices[iv];
-        const MFVVertexAux& v1 = one_vertices[jv];
-        const double w = prob_1v_pair(v0, v1);
-        fill_1d(w, v0, v1);
-      }
-    }
-  }
 
-
-  // Output 1v usage counts (versus z).
-  {
+    // Output 1v usage counts (versus z).
     TTree* t_use = fs->make<TTree>("t_use", "");
     unsigned char b;
     unsigned short s;
@@ -667,6 +825,26 @@ void MFVOne2Two::endJob() {
       t_use->Fill();
     }
   }
+  else if (sampling_type == 1) {
+    for (int iv = 0; iv < N1v; ++iv) {
+      for (int jv = iv+1; jv < N1v; ++jv) {
+        const MFVVertexAux& v0 = one_vertices[iv];
+        const MFVVertexAux& v1 = one_vertices[jv];
+        if (accept_1v_pair(v0, v1))
+          fill_1d(1, v0, v1);
+      }
+    }
+  }
+  else if (sampling_type == 2) {
+    for (int iv = 0; iv < N1v; ++iv) {
+      for (int jv = iv+1; jv < N1v; ++jv) {
+        const MFVVertexAux& v0 = one_vertices[iv];
+        const MFVVertexAux& v1 = one_vertices[jv];
+        const double w = prob_1v_pair(v0, v1);
+        fill_1d(w, v0, v1);
+      }
+    }
+  }
 
 
   // Fit the 1v distribution to the 2v one by shifting it over and
@@ -679,7 +857,10 @@ void MFVOne2Two::endJob() {
   assert(fabs(h_svdist2d[t_2v]->GetBinWidth(1) - h_svdist2d[t_1v]->GetBinWidth(1)) < 1e-5);
 
   const int shift = int(round(meandiff/h_svdist2d[t_1v]->GetBinWidth(1)));
-  printf("shift by %i bins (mean diff %f)\n", shift, meandiff);
+  printf("shift by %i bins (mean diff %f)\n", shift, meandiff); fflush(stdout);
+
+  h_meandiff->Fill(meandiff);
+  h_shift->Fill(shift);
 
   for (int ibin = 1; ibin <= nbins+1; ++ibin) {
     const int ifrom = ibin - shift;
@@ -700,20 +881,43 @@ void MFVOne2Two::endJob() {
     h_1v_svdist2d_fit_2v->SetBinError  (ibin, err);
   }
 
-  const int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut)-1;
-  h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2vsideband]->Integral(1, last_sideband_bin)/h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
-  
-  const double pred_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins);
-  const double real_sigreg = h_svdist2d[t_2v]->Integral(last_sideband_bin+1, nbins+1);
-  const double real_bkg = real_sigreg - h_svdist2d[t_sig]->Integral(last_sideband_bin+1, nbins+1);
-  printf("h_1v_svdist2d_fit_2v integral in sideband : %f\n", h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
-  printf("h_1v_svdist2d_fit_2v integral in signal   : %f\n", pred_bkg);
-  printf("h_2v_svdist2d integral in sideband        : %f\n", h_svdist2d[t_2v]->Integral(1, last_sideband_bin));
-  printf("h_2v_svdist2d integral in signal          : %f\n", real_sigreg);
-  printf("h_2v_svdist2d integral in signal, bkg only: %f\n", real_bkg);
+  const int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut) - 1;
+  h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2v]    ->Integral(1, last_sideband_bin) / 
+                              h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin));
 
-  h_pred_v_real->Fill(real_bkg, pred_bkg);
-  h_pred_m_real->Fill(pred_bkg - real_bkg);
+  printf("KStest(h_1v_svdist2d_fit_2v, h_2v_svdist2d): "); fflush(stdout);
+  const double ksdist = h_1v_svdist2d_fit_2v->KolmogorovTest(h_svdist2d[t_2v], "MO");
+  const double ksprob = h_1v_svdist2d_fit_2v->KolmogorovTest(h_svdist2d[t_2v], "O");
+  const double ksdistX = h_1v_svdist2d_fit_2v->KolmogorovTest(h_svdist2d[t_2v], "MOX");
+  const double ksprobX = h_1v_svdist2d_fit_2v->KolmogorovTest(h_svdist2d[t_2v], "OX");
+  printf(" dist = %f (X: %f)  pval = %g (X: %g)\n", ksdist, ksprob, ksdistX, ksprobX); fflush(stdout);
+
+  h_ksdist->Fill(ksdist);
+  h_ksprob->Fill(ksprob);
+  h_ksdistX->Fill(ksdistX);
+  h_ksprobX->Fill(ksprobX);
+  
+  const double pred_sidereg_bkg = h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin);
+  const double true_sidereg     = h_svdist2d[t_2v]    ->Integral(1, last_sideband_bin);
+  const double true_sidereg_sig = h_svdist2d[t_sig]   ->Integral(1, last_sideband_bin);
+  const double pred_signreg_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins+1);
+  const double true_signreg     = h_svdist2d[t_2v]    ->Integral(last_sideband_bin+1, nbins+1);
+  const double true_signreg_sig = h_svdist2d[t_sig]   ->Integral(last_sideband_bin+1, nbins+1);
+
+  const double true_sidereg_bkg = true_sidereg - true_sidereg_sig;
+  const double true_signreg_bkg = true_signreg - true_signreg_sig;
+
+  printf("h_1v_svdist2d_fit_2v integral in sideband    : %f\n", pred_sidereg_bkg);
+  printf("h_1v_svdist2d_fit_2v integral in signal      : %f\n", pred_signreg_bkg);
+  printf("h_2v_svdist2d integral in sideband           : %f\n", true_sidereg);
+  printf("h_2v_svdist2d integral in sideband, sig cont.: %f\n", true_sidereg_sig);
+  printf("h_2v_svdist2d integral in sideband, bkg only : %f\n", true_sidereg_bkg);
+  printf("h_2v_svdist2d integral in sig.reg.           : %f\n", true_signreg);
+  printf("h_2v_svdist2d integral in sig.reg., signal   : %f\n", true_signreg_sig);
+  printf("h_2v_svdist2d integral in sig.reg., bkg only : %f\n", true_signreg_bkg);
+
+  h_pred_v_true->Fill(true_signreg_bkg, pred_signreg_bkg);
+  h_pred_m_true->Fill(pred_signreg_bkg - true_signreg_bkg);
 }
 
 DEFINE_FWK_MODULE(MFVOne2Two);
