@@ -27,6 +27,9 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     sampling_type = cms.int32(0),
                                     npairs = cms.int32(100000),
 
+                                    find_g_dphi = cms.bool(True),
+                                    form_g_dphi = cms.string('([0] + [1]*abs(x-3.14159265/2))/([0]*3.14159265 + [1]*2.46740110)'),
+
                                     find_g_dz = cms.bool(True),
                                     form_g_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
 
@@ -36,9 +39,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     find_f_dz = cms.bool(True),
                                     form_f_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
 
-                                    use_f_dz = cms.bool(True),
-                                    max_1v_dz = cms.double(0.025), # only used if use_f_dz false
-                                    max_1v_ntracks = cms.int32(1000000),
+                                    max_1v_ntracks01 = cms.int32(1000000),
 
                                     signal_files = cms.vstring(*[file_path % n for n in signal_samples]),
                                     signal_n1vs = cms.vint32(*([-1]*nsignals)),
@@ -134,7 +135,7 @@ else:
         process.TFileService.fileName = process.TFileService.fileName.value().replace('.root', '_%s.root' % job_num)
     
 print 'CFG BEGIN'
-for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type npairs find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz use_f_dz max_1v_dz max_1v_ntracks signal_files signal_n1vs signal_weights signal_contamination'.split():
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type npairs find_g_dphi form_g_dphi find_g_dz form_g_dz find_f_dphi form_f_dphi find_f_dz form_f_dz max_1v_ntracks01 signal_files signal_n1vs signal_weights signal_contamination'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 

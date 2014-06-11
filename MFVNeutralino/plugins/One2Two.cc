@@ -112,6 +112,8 @@ public:
   const int sampling_type; // 0 = sample random pairs with replacement, 1 = sample all unique pairs and accept/reject, 2 = sample all unique pairs and fill 1v dists with weight according to accept/reject prob
   const int npairs;
 
+  const bool find_g_dphi;
+  const std::string form_g_dphi;
   const bool find_g_dz;
   const std::string form_g_dz;
   const bool find_f_dphi;
@@ -126,9 +128,7 @@ public:
   double fdzmax;
   double Mdz;
 
-  const bool use_f_dz;
-  const double max_1v_dz;
-  const int max_1v_ntracks;
+  const int max_1v_ntracks01;
 
   const std::vector<std::string> signal_files;
   const size_t nsignals;
@@ -138,12 +138,14 @@ public:
 
   TF1* f_dphi;
   TF1* f_dz;
+  TF1* g_dphi;
   TF1* g_dz;
   TH1D* h_1v_dphi_env;
   TH1D* h_1v_absdphi_env;
   TH1D* h_1v_dz_env;
   TH1D* h_fcn_dphi;
   TH1D* h_fcn_abs_dphi;
+  TH1D* h_fcn_g_dphi;
   TH1D* h_fcn_dz;
   TH1D* h_fcn_g_dz;
 
@@ -151,9 +153,12 @@ public:
   TH1D* h_dphi_env_mean_err;
   TH1D* h_dphi_env_rms;
   TH1D* h_dphi_env_rms_err;
-  TH1D* h_dphi_env_fit_p0;
-  TH1D* h_dphi_env_fit_p0_err;
-  TH1D* h_dphi_env_fit_p0_pull;
+  TH1D* h_dphi_env_fit_offset;
+  TH1D* h_dphi_env_fit_offset_err;
+  TH1D* h_dphi_env_fit_offset_pull;
+  TH1D* h_dphi_env_fit_slope;
+  TH1D* h_dphi_env_fit_slope_err;
+  TH1D* h_dphi_env_fit_slope_pull;
   TH1D* h_dphi_env_fit_chi2;
   TH1D* h_dphi_env_fit_chi2prob;
   TH1D* h_dz_env_mean;
@@ -243,6 +248,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     sampling_type(cfg.getParameter<int>("sampling_type")),
     npairs(cfg.getParameter<int>("npairs")),
 
+    find_g_dphi(cfg.getParameter<bool>("find_g_dphi")),
+    form_g_dphi(cfg.getParameter<std::string>("form_g_dphi")),
+
     find_g_dz(cfg.getParameter<bool>("find_g_dz")),
     form_g_dz(cfg.getParameter<std::string>("form_g_dz")),
 
@@ -252,9 +260,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     find_f_dz(cfg.getParameter<bool>("find_f_dz")),
     form_f_dz(cfg.getParameter<std::string>("form_f_dz")),
 
-    use_f_dz(cfg.getParameter<bool>("use_f_dz")),
-    max_1v_dz(cfg.getParameter<double>("max_1v_dz")),
-    max_1v_ntracks(cfg.getParameter<int>("max_1v_ntracks")),
+    max_1v_ntracks01(cfg.getParameter<int>("max_1v_ntracks01")),
 
     signal_files(cfg.getParameter<std::vector<std::string> >("signal_files")),
     nsignals(signal_files.size()),
@@ -264,6 +270,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
     f_dphi(0),
     f_dz(0),
+    g_dphi(0),
     g_dz(0),
     rand(0)
 {
@@ -284,6 +291,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
   f_dphi = new TF1("f_dphi", form_f_dphi.c_str(), 0, M_PI);
   f_dz = new TF1("f_dz", form_f_dz.c_str(), -40, 40);
+  g_dphi = new TF1("g_dphi", form_g_dphi.c_str(), 0, M_PI);
   g_dz = new TF1("g_dz", form_g_dz.c_str(), -40, 40);
   
   h_1v_dphi_env = fs->make<TH1D>("h_1v_dphi_env", "", 8, -M_PI, M_PI);
@@ -291,6 +299,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_1v_dz_env = fs->make<TH1D>("h_1v_dz_env", "", 200, -40, 40);
   h_fcn_dphi = fs->make<TH1D>("h_fcn_dphi", "", 8, -M_PI, M_PI);
   h_fcn_abs_dphi = fs->make<TH1D>("h_fcn_abs_dphi", "", 8, 0, M_PI);
+  h_fcn_g_dphi = fs->make<TH1D>("h_fcn_g_dphi", "", 8, 0, M_PI);
   h_fcn_dz = fs->make<TH1D>("h_fcn_dz", "", 20, -0.1, 0.1);
   h_fcn_g_dz = fs->make<TH1D>("h_fcn_g_dz", "", 200, -40, 40);
 
@@ -298,9 +307,12 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_dphi_env_mean_err     = fs->make<TH1D>("h_dphi_env_mean_err"     , "", 100, 0, 4e-4);
   h_dphi_env_rms          = fs->make<TH1D>("h_dphi_env_rms"          , "", 100, .85, .97);
   h_dphi_env_rms_err      = fs->make<TH1D>("h_dphi_env_rms_err"      , "", 100, 0, 4e-4);
-  h_dphi_env_fit_p0       = fs->make<TH1D>("h_dphi_env_fit_p0"       , "", 100, 0.1245, 0.1255);
-  h_dphi_env_fit_p0_err   = fs->make<TH1D>("h_dphi_env_fit_p0_err"   , "", 100, 0, 4e-4);
-  h_dphi_env_fit_p0_pull  = fs->make<TH1D>("h_dphi_env_fit_p0_pull"  , "", 100, -5, 5);
+  h_dphi_env_fit_offset       = fs->make<TH1D>("h_dphi_env_fit_offset"       , "", 100, 0.15, 0.17);
+  h_dphi_env_fit_offset_err   = fs->make<TH1D>("h_dphi_env_fit_offset_err"   , "", 100, 0, 1);
+  h_dphi_env_fit_offset_pull  = fs->make<TH1D>("h_dphi_env_fit_offset_pull"  , "", 100, -5, 5);
+  h_dphi_env_fit_slope       = fs->make<TH1D>("h_dphi_env_fit_slope"       , "", 100, 0., 1e-3);
+  h_dphi_env_fit_slope_err   = fs->make<TH1D>("h_dphi_env_fit_slope_err"   , "", 100, 0, 4e-3);
+  h_dphi_env_fit_slope_pull  = fs->make<TH1D>("h_dphi_env_fit_slope_pull"  , "", 100, -5, 5);
   h_dphi_env_fit_chi2     = fs->make<TH1D>("h_dphi_env_fit_chi2"     , "", 100, 0, 20);
   h_dphi_env_fit_chi2prob = fs->make<TH1D>("h_dphi_env_fit_chi2prob" , "", 100, 0, 1);
   h_dz_env_mean           = fs->make<TH1D>("h_dz_env_mean"           , "", 100, -0.1, 0.1);
@@ -374,6 +386,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 MFVOne2Two::~MFVOne2Two() {
   delete f_dphi;
   delete f_dz;
+  delete g_dphi;
   delete g_dz;
   delete rand;
 }
@@ -482,8 +495,8 @@ double MFVOne2Two::prob_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) 
   const double dz = v0.z - v1.z;
 
   return
-    accept_prob(f_dphi->Eval(dp), gdpmax,         Mdp) *
-    accept_prob(f_dz  ->Eval(dz), g_dz->Eval(dz), Mdz);
+    accept_prob(f_dphi->Eval(dp), g_dphi->Eval(dp), Mdp) *
+    accept_prob(f_dz  ->Eval(dz), g_dz  ->Eval(dz), Mdz);
 }
 
 bool MFVOne2Two::accept_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
@@ -491,9 +504,9 @@ bool MFVOne2Two::accept_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) 
   const double dz = v0.z - v1.z;
 
   return
-    v0.ntracks() + v1.ntracks() < max_1v_ntracks &&
-    accept(rand, f_dphi->Eval(dp), gdpmax, Mdp) &&
-    (use_f_dz ? accept(rand, f_dz->Eval(dz), g_dz->Eval(dz), Mdz) : fabs(dz) < max_1v_dz);
+    v0.ntracks() + v1.ntracks() < max_1v_ntracks01 &&
+    accept(rand, f_dphi->Eval(dp), g_dphi->Eval(dp), Mdp) &&
+    accept(rand, f_dz  ->Eval(dz), g_dz  ->Eval(dz), Mdz);
 }
 
 void MFVOne2Two::endJob() {
@@ -624,19 +637,31 @@ void MFVOne2Two::endJob() {
     }
   }
 
-  if (1) { // no find_g_dphi, just assuming it's flat and checking that assumption here.
+  if (find_g_dphi) {
     h_1v_absdphi_env->Scale(1./h_1v_absdphi_env->Integral());
-    TFitResultPtr res = h_1v_absdphi_env->Fit("pol0", "QS");
-    printf("h_dphi_env mean %.3f +- %.3f  rms %.3f +- %.3f   g_dphi fit to pol0 chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", h_1v_absdphi_env->GetMean(), h_1v_absdphi_env->GetMeanError(), h_1v_absdphi_env->GetRMS(), h_1v_absdphi_env->GetRMSError(), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    const double integxwidth = h_1v_absdphi_env->Integral()*h_1v_absdphi_env->GetXaxis()->GetBinWidth(1);
+    TF1* g_dphi_temp = new TF1("g_dphi_temp", TString::Format("%f*(%s)", integxwidth, form_g_dphi.c_str()), g_dphi->GetXmin(), g_dphi->GetXmax());
+    g_dphi_temp->SetParameter(0, 0.125);
+    g_dphi_temp->SetParameter(1, 5e-4);
+    TFitResultPtr res = h_1v_absdphi_env->Fit("g_dphi_temp", "RQS");
+    printf("h_dphi_env mean %.3f +- %.3f  rms %.3f +- %.3f   g_dphi fit offset %.4f +- %.4f  slope %.4f +- %.4f  chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", h_1v_absdphi_env->GetMean(), h_1v_absdphi_env->GetMeanError(), h_1v_absdphi_env->GetRMS(), h_1v_absdphi_env->GetRMSError(), res->Parameter(0), res->ParError(0), res->Parameter(1), res->ParError(1), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
+    g_dphi->FixParameter(0, res->Parameter(0));
+    g_dphi->FixParameter(1, res->Parameter(1));
+
     h_dphi_env_mean    ->Fill(h_1v_absdphi_env->GetMean());
     h_dphi_env_mean_err->Fill(h_1v_absdphi_env->GetMeanError());
     h_dphi_env_rms     ->Fill(h_1v_absdphi_env->GetRMS());
     h_dphi_env_rms_err ->Fill(h_1v_absdphi_env->GetRMSError());
-    h_dphi_env_fit_p0      ->Fill(res->Parameter(0));
-    h_dphi_env_fit_p0_err  ->Fill(res->ParError(0));
-    h_dphi_env_fit_p0_pull ->Fill((res->Parameter(0) - 0.125) / res->ParError(0));
+    h_dphi_env_fit_offset     ->Fill(res->Parameter(0));
+    h_dphi_env_fit_offset_err ->Fill(res->ParError(0));
+    h_dphi_env_fit_offset_pull->Fill((res->Parameter(0) - 0.1587) / res->ParError(0));
+    h_dphi_env_fit_slope      ->Fill(res->Parameter(1));
+    h_dphi_env_fit_slope_err  ->Fill(res->ParError(1));
+    h_dphi_env_fit_slope_pull ->Fill((res->Parameter(1) - 5e-4) / res->ParError(0));
     h_dphi_env_fit_chi2    ->Fill(res->Chi2() / res->Ndf());
     h_dphi_env_fit_chi2prob->Fill(res->Prob());
+
+    delete g_dphi_temp;
   }
 
   if (find_g_dz) {
@@ -660,7 +685,8 @@ void MFVOne2Two::endJob() {
     delete g_dz_temp;
   }
 
-  h_fcn_g_dz->FillRandom("g_dz", 100000);
+  h_fcn_g_dphi->FillRandom("g_dphi", 100000);
+  h_fcn_g_dz  ->FillRandom("g_dz",   100000);
 
   // Fill all the 2v histograms. In toy_mode we add together many
   // samples with appropriate weights. Also fit f_dphi and f_dz from
@@ -741,7 +767,7 @@ void MFVOne2Two::endJob() {
   h_fcn_dz->FillRandom("f_dz", 100000);
 
 
-  gdpmax = 1./2/M_PI;
+  gdpmax = g_dphi->GetMaximum();
   fdpmax = f_dphi->GetMaximum();
   Mdp = fdpmax/gdpmax;
 
