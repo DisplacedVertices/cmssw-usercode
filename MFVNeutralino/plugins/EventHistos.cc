@@ -107,6 +107,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_svx;
   TH1F* h_jet_svy;
   TH1F* h_jet_svz;
+  TH2F* h_jet_svyx;
+  TH2F* h_jet_svzr;
   TH1F* h_jet_svcxx;
   TH1F* h_jet_svcxy;
   TH1F* h_jet_svcxz;
@@ -116,6 +118,28 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_svpv2ddist;
   TH1F* h_jet_svpv2derr;
   TH1F* h_jet_svpv2dsig;
+
+  TH1F* h_jetsv_absdphi;
+  TH1F* h_jetsv_dxy;
+  TH1F* h_jetsv_dxyerr;
+  TH1F* h_jetsv_dxysig;
+  TH1F* h_jetsv_dz;
+  TH1F* h_jetsv_dzerr;
+  TH1F* h_jetsv_dzsig;
+  TH1F* h_jetsv_d3d;
+  TH1F* h_jetsv_d3derr;
+  TH1F* h_jetsv_d3dsig;
+
+  TH1F* h_bjetsv_absdphi;
+  TH1F* h_bjetsv_dxy;
+  TH1F* h_bjetsv_dxyerr;
+  TH1F* h_bjetsv_dxysig;
+  TH1F* h_bjetsv_dz;
+  TH1F* h_bjetsv_dzerr;
+  TH1F* h_bjetsv_dzsig;
+  TH1F* h_bjetsv_d3d;
+  TH1F* h_bjetsv_d3derr;
+  TH1F* h_bjetsv_d3dsig;
 
   TH1F* h_pv_n;
   TH1F* h_pv_x[4];
@@ -237,9 +261,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_svnvertices = fs->make<TH1F>("h_jet_svnvertices", ";number of secondary vertices;number of jets", 10, 0, 10);
   h_jet_svntracks = fs->make<TH1F>("h_jet_svntracks", ";# of tracks/SV;number of jets", 40, 0, 40);
   h_jet_svsumpt2 = fs->make<TH1F>("h_jet_sumpt2", ";SV #Sigma p_{T}^{2} (GeV^2);number of jets", 300, 0, 6000);
-  h_jet_svx = fs->make<TH1F>("h_jet_svx", ";SV x (cm);number of jets", 100, -20, 20);
-  h_jet_svy = fs->make<TH1F>("h_jet_svy", ";SV y (cm);number of jets", 100, -20, 20);
+  h_jet_svx = fs->make<TH1F>("h_jet_svx", ";SV x (cm);number of jets", 100, -8, 8);
+  h_jet_svy = fs->make<TH1F>("h_jet_svy", ";SV y (cm);number of jets", 100, -8, 8);
   h_jet_svz = fs->make<TH1F>("h_jet_svz", ";SV z (cm);number of jets", 100, -25, 25);
+  h_jet_svyx = fs->make<TH2F>("h_jet_svyx", ";SV x (cm);SV y (cm)", 100, -8, 8, 100, -8, 8);
+  h_jet_svzr = fs->make<TH2F>("h_jet_svzr", ";SV rho (cm);SV z (cm)", 100, -8, 8, 100, -25, 25);
   h_jet_svcxx = fs->make<TH1F>("h_jet_svcxx", ";SV cxx;number of jets", 100, -0.01, 0.01);
   h_jet_svcxy = fs->make<TH1F>("h_jet_svcxy", ";SV cxy;number of jets", 100, -0.01, 0.01);
   h_jet_svcxz = fs->make<TH1F>("h_jet_svcxz", ";SV cxz;number of jets", 100, -0.01, 0.01);
@@ -249,6 +275,28 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_svpv2ddist = fs->make<TH1F>("h_jet_svpv2ddist", ";dist2d(SV, PV) (cm);number of jets", 100, 0, 5);
   h_jet_svpv2derr = fs->make<TH1F>("h_jet_svpv2derr", ";#sigma(dist2d(SV, PV)) (cm);number of jets", 100, 0, 0.05);
   h_jet_svpv2dsig = fs->make<TH1F>("h_jet_svpv2dsig", ";N#sigma(dist2d(SV, PV));number of jets", 100, 0, 100);
+
+  h_jetsv_absdphi = fs->make<TH1F>("h_jetsv_dphi", "events with two jet vertices;|#Delta#phi| (rad);events/0.126", 25, 0, 3.15);
+  h_jetsv_dxy = fs->make<TH1F>("h_jetsv_dxy", "events with two jet vertices;dist2d(sv #0, #1) (cm);arb. units", 500, 0, 5);
+  h_jetsv_dxyerr = fs->make<TH1F>("h_jetsv_dxyerr", "events with two jet vertices;#sigma(dist2d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
+  h_jetsv_dxysig = fs->make<TH1F>("h_jetsv_dxysig", "events with two jet vertices;N#sigma(dist2d(sv #0, #1));arb. units", 100, 0, 100);
+  h_jetsv_dz = fs->make<TH1F>("h_jetsv_dz", "events with two jet vertices;|dz(sv #0, #1)| (cm);arb. units", 500, 0, 5);
+  h_jetsv_dzerr = fs->make<TH1F>("h_jetsv_dzerr", "events with two jet vertices;#sigma(dz(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
+  h_jetsv_dzsig = fs->make<TH1F>("h_jetsv_dzsig", "events with two jet vertices;N#sigma(dz(sv #0, #1));arb. units", 100, 0, 100);
+  h_jetsv_d3d = fs->make<TH1F>("h_jetsv_d3d", "events with two jet vertices;dist3d(sv #0, #1) (cm);arb. units", 500, 0, 5);
+  h_jetsv_d3derr = fs->make<TH1F>("h_jetsv_d3derr", "events with two jet vertices;#sigma(dist3d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
+  h_jetsv_d3dsig = fs->make<TH1F>("h_jetsv_d3dsig", "events with two jet vertices;N#sigma(dist3d(sv #0, #1));arb. units", 100, 0, 100);
+
+  h_bjetsv_absdphi = fs->make<TH1F>("h_bjetsv_dphi", "events with two bjet vertices;|#Delta#phi| (rad);events/0.126", 25, 0, 3.15);
+  h_bjetsv_dxy = fs->make<TH1F>("h_bjetsv_dxy", "events with two bjet vertices;dist2d(sv #0, #1) (cm);arb. units", 500, 0, 5);
+  h_bjetsv_dxyerr = fs->make<TH1F>("h_bjetsv_dxyerr", "events with two bjet vertices;#sigma(dist2d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
+  h_bjetsv_dxysig = fs->make<TH1F>("h_bjetsv_dxysig", "events with two bjet vertices;N#sigma(dist2d(sv #0, #1));arb. units", 100, 0, 100);
+  h_bjetsv_dz = fs->make<TH1F>("h_bjetsv_dz", "events with two bjet vertices;|dz(sv #0, #1)| (cm);arb. units", 500, 0, 5);
+  h_bjetsv_dzerr = fs->make<TH1F>("h_bjetsv_dzerr", "events with two bjet vertices;#sigma(dz(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
+  h_bjetsv_dzsig = fs->make<TH1F>("h_bjetsv_dzsig", "events with two bjet vertices;N#sigma(dz(sv #0, #1));arb. units", 100, 0, 100);
+  h_bjetsv_d3d = fs->make<TH1F>("h_bjetsv_d3d", "events with two bjet vertices;dist3d(sv #0, #1) (cm);arb. units", 500, 0, 5);
+  h_bjetsv_d3derr = fs->make<TH1F>("h_bjetsv_d3derr", "events with two bjet vertices;#sigma(dist3d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
+  h_bjetsv_d3dsig = fs->make<TH1F>("h_bjetsv_d3dsig", "events with two bjet vertices;N#sigma(dist3d(sv #0, #1));arb. units", 100, 0, 100);
 
   if (primary_vertex_src.label() != "") {
     h_pv_n = fs->make<TH1F>("h_pv_n", ";# of primary vertices;events", 65, 0, 65);
@@ -418,14 +466,36 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
+  std::vector<double> jetsv_x;
+  std::vector<double> jetsv_y;
+  std::vector<double> jetsv_z;
+  std::vector<double> jetsv_cxx;
+  std::vector<double> jetsv_cxy;
+  std::vector<double> jetsv_cxz;
+  std::vector<double> jetsv_cyy;
+  std::vector<double> jetsv_cyz;
+  std::vector<double> jetsv_czz;
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_jet_svnvertices->Fill(mevent->jet_svnvertices[ijet]);
     if (mevent->jet_svnvertices[ijet] > 0) {
+      jetsv_x.push_back(mevent->jet_svx[ijet] - mevent->bsx);
+      jetsv_y.push_back(mevent->jet_svy[ijet] - mevent->bsy);
+      jetsv_z.push_back(mevent->jet_svz[ijet] - mevent->bsz);
+      jetsv_cxx.push_back(mevent->jet_svcxx[ijet]);
+      jetsv_cxy.push_back(mevent->jet_svcxy[ijet]);
+      jetsv_cxz.push_back(mevent->jet_svcxz[ijet]);
+      jetsv_cyy.push_back(mevent->jet_svcyy[ijet]);
+      jetsv_cyz.push_back(mevent->jet_svcyz[ijet]);
+      jetsv_czz.push_back(mevent->jet_svczz[ijet]);
+
       h_jet_svntracks->Fill(mevent->jet_svntracks[ijet]);
       h_jet_svsumpt2->Fill(mevent->jet_svsumpt2[ijet]);
-      h_jet_svx->Fill(mevent->jet_svx[ijet]);
-      h_jet_svy->Fill(mevent->jet_svy[ijet]);
-      h_jet_svz->Fill(mevent->jet_svz[ijet]);
+      h_jet_svx->Fill(mevent->jet_svx[ijet] - mevent->bsx);
+      h_jet_svy->Fill(mevent->jet_svy[ijet] - mevent->bsy);
+      h_jet_svz->Fill(mevent->jet_svz[ijet] - mevent->bsz);
+      h_jet_svyx->Fill(mevent->jet_svx[ijet] - mevent->bsx, mevent->jet_svy[ijet] - mevent->bsy);
+      float svr = sqrt((mevent->jet_svx[ijet] - mevent->bsx) * (mevent->jet_svx[ijet] - mevent->bsx) + (mevent->jet_svy[ijet] - mevent->bsy) * (mevent->jet_svy[ijet] - mevent->bsy));
+      h_jet_svzr->Fill(svr * (mevent->jet_svy[ijet] - mevent->bsy >= 0 ? 1 : -1), mevent->jet_svz[ijet] - mevent->bsz);
       h_jet_svcxx->Fill(mevent->jet_svcxx[ijet]);
       h_jet_svcxy->Fill(mevent->jet_svcxy[ijet]);
       h_jet_svcxz->Fill(mevent->jet_svcxz[ijet]);
@@ -436,6 +506,86 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_svpv2derr->Fill(mevent->jet_svpv2derr(ijet));
       h_jet_svpv2dsig->Fill(mevent->jet_svpv2dsig(ijet));
     }
+  }
+  if (jetsv_x.size() == 2) {
+    double dphi = reco::deltaPhi(atan2(jetsv_y[0], jetsv_x[0]), atan2(jetsv_y[1], jetsv_x[1]));
+    h_jetsv_absdphi->Fill(fabs(dphi));
+
+    double dxy = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]));
+    double dx = (jetsv_x[0] - jetsv_x[1]) / dxy;
+    double dy = (jetsv_y[0] - jetsv_y[1]) / dxy;
+    double dxyerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dx*dx + (jetsv_cyy[0] + jetsv_cyy[1])*dy*dy + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dx*dy);
+    h_jetsv_dxy->Fill(dxy);
+    h_jetsv_dxyerr->Fill(dxyerr);
+    h_jetsv_dxysig->Fill(dxy / dxyerr);
+
+    double dz = fabs(jetsv_z[0] - jetsv_z[1]);
+    double dzerr = sqrt(jetsv_czz[0] + jetsv_czz[1]);
+    h_jetsv_dz->Fill(dz);
+    h_jetsv_dzerr->Fill(dzerr);
+    h_jetsv_dzsig->Fill(dz / dzerr);
+
+    double dr = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]) + (jetsv_z[0] - jetsv_z[1]) * (jetsv_z[0] - jetsv_z[1]));
+    double dxr = (jetsv_x[0] - jetsv_x[1]) / dr;
+    double dyr = (jetsv_y[0] - jetsv_y[1]) / dr;
+    double dzr = (jetsv_z[0] - jetsv_z[1]) / dr;
+    double drerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dxr*dxr + (jetsv_cyy[0] + jetsv_cyy[1])*dyr*dyr + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dxr*dyr
+                    + 2*(jetsv_cxz[0] + jetsv_cxz[1])*dxr*dzr + 2*(jetsv_cyz[0] + jetsv_cyz[1])*dyr*dzr + (jetsv_czz[0] + jetsv_czz[1])*dzr*dzr);
+    h_jetsv_d3d->Fill(dr);
+    h_jetsv_d3derr->Fill(drerr);
+    h_jetsv_d3dsig->Fill(dr / drerr);
+  }
+
+  jetsv_x.clear();
+  jetsv_y.clear();
+  jetsv_z.clear();
+  jetsv_cxx.clear();
+  jetsv_cxy.clear();
+  jetsv_cxz.clear();
+  jetsv_cyy.clear();
+  jetsv_cyz.clear();
+  jetsv_czz.clear();
+  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    if (((mevent->jet_id[ijet] >> 2) & 3) >= 2 && mevent->jet_svnvertices[ijet] > 0) {
+      jetsv_x.push_back(mevent->jet_svx[ijet] - mevent->bsx);
+      jetsv_y.push_back(mevent->jet_svy[ijet] - mevent->bsy);
+      jetsv_z.push_back(mevent->jet_svz[ijet] - mevent->bsz);
+      jetsv_cxx.push_back(mevent->jet_svcxx[ijet]);
+      jetsv_cxy.push_back(mevent->jet_svcxy[ijet]);
+      jetsv_cxz.push_back(mevent->jet_svcxz[ijet]);
+      jetsv_cyy.push_back(mevent->jet_svcyy[ijet]);
+      jetsv_cyz.push_back(mevent->jet_svcyz[ijet]);
+      jetsv_czz.push_back(mevent->jet_svczz[ijet]);
+    }
+  }
+
+  if (jetsv_x.size() == 2) {
+    double dphi = reco::deltaPhi(atan2(jetsv_y[0], jetsv_x[0]), atan2(jetsv_y[1], jetsv_x[1]));
+    h_bjetsv_absdphi->Fill(fabs(dphi));
+
+    double dxy = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]));
+    double dx = (jetsv_x[0] - jetsv_x[1]) / dxy;
+    double dy = (jetsv_y[0] - jetsv_y[1]) / dxy;
+    double dxyerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dx*dx + (jetsv_cyy[0] + jetsv_cyy[1])*dy*dy + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dx*dy);
+    h_bjetsv_dxy->Fill(dxy);
+    h_bjetsv_dxyerr->Fill(dxyerr);
+    h_bjetsv_dxysig->Fill(dxy / dxyerr);
+
+    double dz = fabs(jetsv_z[0] - jetsv_z[1]);
+    double dzerr = sqrt(jetsv_czz[0] + jetsv_czz[1]);
+    h_bjetsv_dz->Fill(dz);
+    h_bjetsv_dzerr->Fill(dzerr);
+    h_bjetsv_dzsig->Fill(dz / dzerr);
+
+    double dr = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]) + (jetsv_z[0] - jetsv_z[1]) * (jetsv_z[0] - jetsv_z[1]));
+    double dxr = (jetsv_x[0] - jetsv_x[1]) / dr;
+    double dyr = (jetsv_y[0] - jetsv_y[1]) / dr;
+    double dzr = (jetsv_z[0] - jetsv_z[1]) / dr;
+    double drerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dxr*dxr + (jetsv_cyy[0] + jetsv_cyy[1])*dyr*dyr + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dxr*dyr
+                    + 2*(jetsv_cxz[0] + jetsv_cxz[1])*dxr*dzr + 2*(jetsv_cyz[0] + jetsv_cyz[1])*dyr*dzr + (jetsv_czz[0] + jetsv_czz[1])*dzr*dzr);
+    h_bjetsv_d3d->Fill(dr);
+    h_bjetsv_d3derr->Fill(drerr);
+    h_bjetsv_d3dsig->Fill(dr / drerr);
   }
 
   //////////////////////////////////////////////////////////////////////////////
