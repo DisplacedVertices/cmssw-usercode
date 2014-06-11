@@ -2,20 +2,6 @@
 
 import os, sys
 
-# For ntracks in 5-8:
-#     For svdist_cut in 0.02-0.05 in steps of 10 micron:
-#         With and without replacement:
-#             For phi_exp in (fit for), 1-5 in steps of 0.5:
-#                 For signal contamination in None + (1x, 10x, 50x, 100x) * (100um, 300um, 1000um, 9900um)
-#                     For seed in 0-1000:
-#                         if signal_contam is None
-#                             Test all the samples individually, with full statistics available.
-#                             Test all the samples individually, sampling N_20ifb events in each pseudoexp.
-#                             Test all the samples individually, sampling Pois(N_20ifb events) in each pseudoexp.
-#                         With and without qcd500:
-#                             Test all samples, sampling N_20ifb events in each pseudoexp.
-#                             Test all samples, sampling Pois(N_20ifb events) in each pseudoexp.
-
 script_template = '''#!/bin/tcsh
 echo script starting on `date`
 echo script args: $argv
@@ -90,19 +76,27 @@ x509userproxy = $ENV(X509_USER_PROXY)
 Queue %(njobs)s
 '''
 
+tars_made = False
 output_root = '/uscms/home/tucker/nobackup/One2Two'
-os.system('mkdir -p ' + output_root)
-os.system('cd $CMSSW_BASE/lib/* ; tar czf %s/lib.tgz * .edmplugincache ; cd - > /dev/null' % output_root)
-os.system('cd $CMSSW_BASE/src/ ; tar czf %s/py.tgz JMTucker/Tools/python/Samples.py JMTucker/Tools/python/ROOTTools.py JMTucker/Tools/python/general.py JMTucker/Tools/python/DBS.py ; cd - > /dev/null' % output_root)
+def make_tars():
+    global tars_made
+    if not tars_made:
+        print 'making tars'
+        os.system('mkdir -p ' + output_root)
+        os.system('cd $CMSSW_BASE/lib/* ; tar czf %s/lib.tgz * .edmplugincache ; cd - > /dev/null' % output_root)
+        os.system('cd $CMSSW_BASE/src/ ; tar czf %s/py.tgz JMTucker/Tools/python/Samples.py JMTucker/Tools/python/ROOTTools.py JMTucker/Tools/python/general.py JMTucker/Tools/python/DBS.py ; cd - > /dev/null' % output_root)
+        tars_made = True
 
-def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contamination, samples):
-    batch_name = 'Ntk%iSvd%sWrep%iHE%sPhi%sSC%sSam%s' % (min_ntracks,
-                                                         ('%.3f' % svdist_cut).replace('.','p'),
-                                                         int(wrep),
-                                                         how_events,
-                                                         'fit' if phi_exp is None else ('%.2f' % phi_exp).replace('.','p'),
-                                                         'no' if signal_contamination is None else 'n%ix%i' % signal_contamination,
-                                                         samples)
+def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contamination, n1v_scale, samples):
+    make_tars()
+    batch_name = 'Ntk%i_Svd%s_Wrep%i_HE%s_Phi%s_SC%s_Nsc%i_S%s' % (min_ntracks,
+                                                                   ('%.3f' % svdist_cut).replace('.','p'),
+                                                                   int(wrep),
+                                                                   how_events,
+                                                                   'fit' if phi_exp is None else ('%.2f' % phi_exp).replace('.','p'),
+                                                                   'no' if signal_contamination is None else 'n%ix%i' % signal_contamination,
+                                                                   n1v_scale,
+                                                                   samples)
 
     batch_wd = os.path.join(output_root, batch_name)
     os.system('mkdir -p ' + batch_wd)
@@ -114,8 +108,9 @@ def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_con
 
     env = [
         'min_ntracks %i' % min_ntracks,
-        'svdist2d_cut %f' % svdist2d_cut,
+        'svdist2d_cut %f' % svdist_cut,
         'wrep %s' % (1 if wrep else "''"),
+        'n1v_scale %i' % n1v_scale,
         ]
 
     if signal_contamination is not None:
@@ -146,5 +141,41 @@ def submit(njobs, min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_con
 
     os.chdir(old_wd)
 
-submit(100, 5, 0.048, True, 'tbd', None, None, 'qcdht1000')
+# For ntracks in 5-8:
+#     For svdist_cut in 0.02-0.05 in steps of 10 micron:
+#         With and without replacement:
+#             For phi_exp in (fit for), 1-5 in steps of 0.5:
+#                 For signal contamination in None + (1x, 10x, 50x, 100x) * (100um, 300um, 1000um, 9900um)
+#                     For seed in 0-1000:
+#                         if signal_contam is None
+#                             Test all the samples individually, with full statistics available.
+#                             Test all the samples individually, sampling N_20ifb events in each pseudoexp.
+#                             Test all the samples individually, sampling Pois(N_20ifb events) in each pseudoexp.
+#                         With and without qcd500:
+#                             Test all samples, sampling N_20ifb events in each pseudoexp.
+#                             Test all samples, sampling Pois(N_20ifb events) in each pseudoexp.
 
+wrep = True
+phi_exp = None
+signal_contam = None
+batches = []
+how_events = 'toypois'
+for min_ntracks, n1v_scale in ((5,50),(6,50),(7,38),(8,20)):
+    for svdist_cut in [0.036 + 0.002*i for i in xrange(7)]:
+        for sample in 'all all500'.split():
+            if 'all' in sample and 'full' in how_events:
+                continue
+            if '500' in sample:
+                n1v_scale = int(n1v_scale/5.)
+            batches.append((min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contam, n1v_scale, sample))
+
+print len(batches), len(batches)*100
+
+'''
+qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep
+        for how_events in 'full toy toypois'.split():
+            for sample in 'qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep all all500'.split():
+                if 'all' in sample and 'full' in how_events:
+                    continue
+                batches.append((min_ntracks, svdist_cut, wrep, how_events, phi_exp, signal_contam, sample))
+'''
