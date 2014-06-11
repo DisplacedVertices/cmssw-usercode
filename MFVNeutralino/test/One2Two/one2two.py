@@ -1,4 +1,4 @@
-<import sys, os, FWCore.ParameterSet.Config as cms
+import sys, os, FWCore.ParameterSet.Config as cms
 from collections import namedtuple
 
 process = cms.Process('One2Two')
