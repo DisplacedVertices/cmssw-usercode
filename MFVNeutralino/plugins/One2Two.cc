@@ -350,7 +350,7 @@ void MFVOne2Two::fill_1d(const double w, const MFVVertexAux& v0, const MFVVertex
 }
 
 double MFVOne2Two::prob_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
-  const double dp = dphi(v0, v1);
+  const double dp = fabs(dphi(v0, v1));
   const double dz = v0.z - v1.z;
 
   return
@@ -359,7 +359,7 @@ double MFVOne2Two::prob_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) 
 }
 
 bool MFVOne2Two::accept_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
-  const double dp = dphi(v0, v1);
+  const double dp = fabs(dphi(v0, v1));
   const double dz = v0.z - v1.z;
 
   return
