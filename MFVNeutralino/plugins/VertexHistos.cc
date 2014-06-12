@@ -46,8 +46,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_nsv_v_lspdist2d;
   TH2F* h_nsv_v_lspdist3d;
 
-  TH1F* h_njetsv3dsig5;
-  TH1F* h_nbjetsv3dsig5;
+  TH1F* h_njetsv3dsig10[2];
 
   // indices for h_sv below:
   enum sv_index { sv_best0, sv_best1, sv_all, sv_num_indices };
@@ -187,9 +186,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_nsv_v_minlspdist2d = fs->make<TH2F>("h_nsv_v_minlspdist2d", ";min dist2d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
   h_nsv_v_lspdist2d = fs->make<TH2F>("h_nsv_v_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
   h_nsv_v_lspdist3d = fs->make<TH2F>("h_nsv_v_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);# of secondary vertices", 600, 0, 3, 5, 0, 5);
-
-  h_njetsv3dsig5 = fs->make<TH1F>("h_njetsv3dsig5", ";# of SV within 5 sigma to a jet vertex;arb. units", 15, 0, 15);
-  h_nbjetsv3dsig5 = fs->make<TH1F>("h_nbjetsv3dsig5", ";# of SV within 5 sigma to a bjet vertex;arb. units", 15, 0, 15);
 
   PairwiseHistos::HistoDefs hs;
 
@@ -420,17 +416,21 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("pvdz",                          "dz(SV, PV) (cm)",                                                             100,    0,       0.5);
   hs.add("pvdzerr",                       "#sigma(dz(SV, PV)) (cm)",                                                     100,    0,       0.1);
   hs.add("pvdzsig",                       "N#sigma(dz(SV, PV))",                                                         100,    0,     100);
-  hs.add("jetsv3ddist",                   "dist3d(SV, closest jet vtx) (cm)",                                            500,    0,       5);
-  hs.add("jetsv3derr",                    "#sigma(dist3d(SV, closest jet vtx)) (cm)",                                    100,    0,       0.05);
-  hs.add("jetsv3dsig",                    "N#sigma(dist3d(SV, closest jet vtx))",                                        100,    0,     100);
-  hs.add("bjetsv3ddist",                  "dist3d(SV, closest bjet vtx) (cm)",                                           500,    0,       5);
-  hs.add("bjetsv3derr",                   "#sigma(dist3d(SV, closest bjet vtx)) (cm)",                                   100,    0,       0.05);
-  hs.add("bjetsv3dsig",                   "N#sigma(dist3d(SV, closest bjet vtx))",                                       100,    0,     100);
+
+  for (int i = 0; i < 2; ++i) {
+    const char* ex = i == 1 ? "b" : "";
+    h_njetsv3dsig10[i] = fs->make<TH1F>(TString::Format("h_n%sjetsv3dsig10", ex), TString::Format(";# of SV within 10 sigma to a %sjet vertex;arb. units", ex), 15, 0, 15);
+    hs.add(TString::Format("%sjetsv3ddist",   ex).Data(), TString::Format("dist3d(SV, closest %sjet vtx) (cm)",                  ex).Data(), 500, 0,   5);
+    hs.add(TString::Format("%sjetsv3derr",    ex).Data(), TString::Format("#sigma(dist3d(SV, closest %sjet vtx)) (cm)",          ex).Data(), 100, 0,   0.05);
+    hs.add(TString::Format("%sjetsv3dsig",    ex).Data(), TString::Format("N#sigma(dist3d(SV, closest %sjet vtx))",              ex).Data(), 100, 0, 100);
+    hs.add(TString::Format("%sjetsvdphidist", ex).Data(), TString::Format("|#Delta#phi| to closest %sjet vtx (by dist3d)",       ex).Data(),  25, 0,   3.15);
+    hs.add(TString::Format("%sjetsvdphidphi", ex).Data(), TString::Format("|#Delta#phi| to closest %sjet vtx (by |#Delta#phi|)", ex).Data(),  25, 0,   3.15);
+  }
 
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
   for (int i = 0; i < 3; ++i) {
-    hs.add(TString::Format("bjet%d_deltaphi0", i).Data(), TString::Format("|#Delta#phi| to closest %s bjet", lmt_ex[i]).Data(), 25, 0, 3.15);
-    hs.add(TString::Format("bjet%d_deltaphi1", i).Data(), TString::Format("|#Delta#phi| to next closest %s bjet", lmt_ex[i]).Data(), 25, 0, 3.15);
+    hs.add(TString::Format("bjet%d_deltaphi0", i).Data(), TString::Format("|#Delta#phi| to closest %s bjet", lmt_ex[i]).Data(),               25, 0,   3.15);
+    hs.add(TString::Format("bjet%d_deltaphi1", i).Data(), TString::Format("|#Delta#phi| to next closest %s bjet", lmt_ex[i]).Data(),          25, 0,   3.15);
   }
 
   for (int j = 0; j < sv_num_indices; ++j) {
@@ -611,8 +611,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
   const int nsv = int(auxes->size());
 
-  int njetsv3dsig5 = 0;
-  int nbjetsv3dsig5 = 0;
+  int njetsv3dsig10[2] = {0};
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
 
@@ -815,55 +814,41 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     v["trackpairdphimaxm1"] = 1 > npairs - 1 ? -1 : trackpairdphis[npairs-1-1];
     v["trackpairdphimaxm2"] = 2 > npairs - 1 ? -1 : trackpairdphis[npairs-1-2];
 
-    double jetsv3ddist = 100000;
-    double jetsv3derr = -1;
-    printf("aux.cxx = %f, aux.cxy = %f, aux.cxz = %f, aux.cyy = %f, aux.cyz = %f, aux.czz = %f\n", aux.cxx, aux.cxy, aux.cxz, aux.cyy, aux.cyz, aux.czz);
-    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-      if (mevent->jet_svnvertices[ijet] > 0) {
-        double dr = sqrt((aux.x - mevent->jet_svx[ijet]) * (aux.x - mevent->jet_svx[ijet])
-                       + (aux.y - mevent->jet_svy[ijet]) * (aux.y - mevent->jet_svy[ijet])
-                       + (aux.z - mevent->jet_svz[ijet]) * (aux.z - mevent->jet_svz[ijet]));
-        if (dr < jetsv3ddist) {
-          jetsv3ddist = dr;
-          double dx = (aux.x - mevent->jet_svx[ijet]) / dr;
-          double dy = (aux.x - mevent->jet_svx[ijet]) / dr;
-          double dz = (aux.z - mevent->jet_svz[ijet]) / dr;
-          jetsv3derr = sqrt((aux.cxx + mevent->jet_svcxx[ijet])*dx*dx + (aux.cyy + mevent->jet_svcyy[ijet])*dy*dy + (aux.czz + mevent->jet_svczz[ijet])*dz*dz
-                       + 2*((aux.cxy + mevent->jet_svcxy[ijet])*dx*dy + (aux.cxz + mevent->jet_svcxz[ijet])*dx*dz + (aux.cyz + mevent->jet_svcyz[ijet])*dy*dz));
-          printf("jsv.cxx = %f, jsv.cxy = %f, jsv.cxz = %f, jsv.cyy = %f, jsv.cyz = %f, jsv.czz = %f\n", mevent->jet_svcxx[ijet], mevent->jet_svcxy[ijet], mevent->jet_svcxz[ijet], mevent->jet_svcyy[ijet], mevent->jet_svcyz[ijet], mevent->jet_svczz[ijet]);
+    for (int i = 0; i < 2; ++i) {
+      const char* ex = i == 1 ? "b" : "";
+      double jetsv3ddist = 100000;
+      double jetsv3derr = -1;
+      double jetsvdphidist = 4;
+      double jetsvdphidphi = 4;
+      for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+        if (i == 1 && ((mevent->jet_id[ijet] >> 2) & 3) < 2) continue;
+        if (mevent->jet_svnvertices[ijet] > 0) {
+          double dr = sqrt((aux.x - mevent->jet_svx[ijet]) * (aux.x - mevent->jet_svx[ijet])
+                         + (aux.y - mevent->jet_svy[ijet]) * (aux.y - mevent->jet_svy[ijet])
+                         + (aux.z - mevent->jet_svz[ijet]) * (aux.z - mevent->jet_svz[ijet]));
+          double dphi = fabs(reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), atan2(mevent->jet_svy[ijet] - bsy, mevent->jet_svx[ijet] - bsx)));
+          if (dr < jetsv3ddist) {
+            jetsv3ddist = dr;
+            jetsvdphidist = dphi;
+            double dx = (aux.x - mevent->jet_svx[ijet]) / dr;
+            double dy = (aux.x - mevent->jet_svx[ijet]) / dr;
+            double dz = (aux.z - mevent->jet_svz[ijet]) / dr;
+            jetsv3derr = sqrt((aux.cxx + mevent->jet_svcxx[ijet])*dx*dx + (aux.cyy + mevent->jet_svcyy[ijet])*dy*dy + (aux.czz + mevent->jet_svczz[ijet])*dz*dz
+                         + 2*((aux.cxy + mevent->jet_svcxy[ijet])*dx*dy + (aux.cxz + mevent->jet_svcxz[ijet])*dx*dz + (aux.cyz + mevent->jet_svcyz[ijet])*dy*dz));
+          }
+          if (dphi < jetsvdphidphi) {
+            jetsvdphidphi = dphi;
+          }
         }
       }
-    }
-    v["jetsv3ddist"] = jetsv3ddist == 100000 ? -1 : jetsv3ddist;
-    v["jetsv3derr"] = jetsv3derr;
-    printf("jetsv3derr = %f\n", jetsv3derr);
-    v["jetsv3dsig"] = jetsv3ddist / jetsv3derr;
-    if (jetsv3ddist / jetsv3derr < 5) {
-      njetsv3dsig5++;
-    }
-
-    double bjetsv3ddist = 100000;
-    double bjetsv3derr = -1;
-    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-      if (((mevent->jet_id[ijet] >> 2) & 3) >= 2 && mevent->jet_svnvertices[ijet] > 0) {
-        double dr = sqrt((aux.x - mevent->jet_svx[ijet]) * (aux.x - mevent->jet_svx[ijet])
-                       + (aux.y - mevent->jet_svy[ijet]) * (aux.y - mevent->jet_svy[ijet])
-                       + (aux.z - mevent->jet_svz[ijet]) * (aux.z - mevent->jet_svz[ijet]));
-        if (dr < bjetsv3ddist) {
-          bjetsv3ddist = dr;
-          double dx = (aux.x - mevent->jet_svx[ijet]) / dr;
-          double dy = (aux.x - mevent->jet_svx[ijet]) / dr;
-          double dz = (aux.z - mevent->jet_svz[ijet]) / dr;
-          bjetsv3derr = sqrt((aux.cxx + mevent->jet_svcxx[ijet])*dx*dx + (aux.cyy + mevent->jet_svcyy[ijet])*dy*dy + (aux.czz + mevent->jet_svczz[ijet])*dz*dz
-                        + 2*((aux.cxy + mevent->jet_svcxy[ijet])*dx*dy + (aux.cxz + mevent->jet_svcxz[ijet])*dx*dz + (aux.cyz + mevent->jet_svcyz[ijet])*dy*dz));
-        }
+      v[TString::Format("%sjetsv3ddist", ex).Data()] = jetsv3ddist == 100000 ? -1 : jetsv3ddist;
+      v[TString::Format("%sjetsv3derr", ex).Data()] = jetsv3derr;
+      v[TString::Format("%sjetsv3dsig", ex).Data()] = jetsv3ddist / jetsv3derr;
+      if (jetsv3ddist / jetsv3derr < 10) {
+        njetsv3dsig10[i]++;
       }
-    }
-    v["bjetsv3ddist"] = bjetsv3ddist == 100000 ? -1 : bjetsv3ddist;
-    v["bjetsv3derr"] = bjetsv3derr;
-    v["bjetsv3dsig"] = bjetsv3ddist / bjetsv3derr;
-    if (bjetsv3ddist / bjetsv3derr < 5) {
-      nbjetsv3dsig5++;
+      v[TString::Format("%sjetsvdphidist", ex).Data()] = jetsvdphidist;
+      v[TString::Format("%sjetsvdphidphi", ex).Data()] = jetsvdphidphi;
     }
 
     std::vector<double> bjetdeltaphis;
@@ -1126,8 +1111,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_sv_sumtop2.Fill(v, isv, w);
   }
 
-  h_njetsv3dsig5->Fill(njetsv3dsig5, w);
-  h_nbjetsv3dsig5->Fill(nbjetsv3dsig5, w);
+  for (int i = 0; i < 2; ++i) {
+    h_njetsv3dsig10[i]->Fill(njetsv3dsig10[i], w);
+  }
 
   //////////////////////////////////////////////////////////////////////
 
