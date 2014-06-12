@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 10000)
+SampleFiles.setup(process, 'MFVNtupleV19', 'ttbarhadronic', 500)
 process.TFileService.fileName = 'histos.root'
 
 process.load('JMTucker.MFVNeutralino.Histos_cff')
@@ -60,7 +60,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.json = 'ana_5pc.json'
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('HistosV18',
+    cs = CRABSubmitter('HistosV19',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
