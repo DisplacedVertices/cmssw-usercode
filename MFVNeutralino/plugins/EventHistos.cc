@@ -109,6 +109,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_svz;
   TH2F* h_jet_svyx;
   TH2F* h_jet_svzr;
+  TH2F* h_jet_momphi_posphi;
   TH1F* h_jet_svcxx;
   TH1F* h_jet_svcxy;
   TH1F* h_jet_svcxz;
@@ -260,12 +261,13 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   h_jet_svnvertices = fs->make<TH1F>("h_jet_svnvertices", ";number of secondary vertices;number of jets", 10, 0, 10);
   h_jet_svntracks = fs->make<TH1F>("h_jet_svntracks", ";# of tracks/SV;number of jets", 40, 0, 40);
-  h_jet_svsumpt2 = fs->make<TH1F>("h_jet_sumpt2", ";SV #Sigma p_{T}^{2} (GeV^2);number of jets", 300, 0, 6000);
+  h_jet_svsumpt2 = fs->make<TH1F>("h_jet_svsumpt2", ";SV #Sigma p_{T}^{2} (GeV^2);number of jets", 300, 0, 6000);
   h_jet_svx = fs->make<TH1F>("h_jet_svx", ";SV x (cm);number of jets", 100, -8, 8);
   h_jet_svy = fs->make<TH1F>("h_jet_svy", ";SV y (cm);number of jets", 100, -8, 8);
   h_jet_svz = fs->make<TH1F>("h_jet_svz", ";SV z (cm);number of jets", 100, -25, 25);
   h_jet_svyx = fs->make<TH2F>("h_jet_svyx", ";SV x (cm);SV y (cm)", 100, -8, 8, 100, -8, 8);
   h_jet_svzr = fs->make<TH2F>("h_jet_svzr", ";SV rho (cm);SV z (cm)", 100, -8, 8, 100, -25, 25);
+  h_jet_momphi_posphi = fs->make<TH2F>("h_jet_momphi_posphi", ";SV position phi;jet momentum phi", 50, -3.15, 3.15, 50, -3.15, 3.15);
   h_jet_svcxx = fs->make<TH1F>("h_jet_svcxx", ";SV cxx;number of jets", 100, -0.01, 0.01);
   h_jet_svcxy = fs->make<TH1F>("h_jet_svcxy", ";SV cxy;number of jets", 100, -0.01, 0.01);
   h_jet_svcxz = fs->make<TH1F>("h_jet_svcxz", ";SV cxz;number of jets", 100, -0.01, 0.01);
@@ -496,6 +498,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_svyx->Fill(mevent->jet_svx[ijet] - mevent->bsx, mevent->jet_svy[ijet] - mevent->bsy);
       float svr = sqrt((mevent->jet_svx[ijet] - mevent->bsx) * (mevent->jet_svx[ijet] - mevent->bsx) + (mevent->jet_svy[ijet] - mevent->bsy) * (mevent->jet_svy[ijet] - mevent->bsy));
       h_jet_svzr->Fill(svr * (mevent->jet_svy[ijet] - mevent->bsy >= 0 ? 1 : -1), mevent->jet_svz[ijet] - mevent->bsz);
+      h_jet_momphi_posphi->Fill(atan2(mevent->jet_svy[ijet] - mevent->bsy, mevent->jet_svx[ijet] - mevent->bsx), mevent->jet_phi[ijet]);
       h_jet_svcxx->Fill(mevent->jet_svcxx[ijet]);
       h_jet_svcxy->Fill(mevent->jet_svcxy[ijet]);
       h_jet_svcxz->Fill(mevent->jet_svcxz[ijet]);
