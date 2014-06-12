@@ -132,7 +132,6 @@ public:
 
   const std::vector<std::string> signal_files;
   const size_t nsignals;
-  const std::vector<int> signal_n1vs;
   const std::vector<double> signal_weights;
   const int signal_contamination;
 
@@ -264,7 +263,6 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
     signal_files(cfg.getParameter<std::vector<std::string> >("signal_files")),
     nsignals(signal_files.size()),
-    signal_n1vs(cfg.getParameter<std::vector<int> >("signal_n1vs")),
     signal_weights(cfg.getParameter<std::vector<double> >("signal_weights")),
     signal_contamination(cfg.getParameter<int>("signal_contamination")),
 
@@ -275,10 +273,10 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     rand(0)
 {
   if (n1vs.size() != weights.size() || (toy_mode && nfiles != n1vs.size()))
-    throw cms::Exception("VectorMismatch", "inconsistent sample info");
+    throw cms::Exception("Misconfiguration", "inconsistent sample info");
 
-  if (nsignals != signal_n1vs.size() || nsignals != signal_weights.size())
-    throw cms::Exception("VectorMismatch", "inconsistent signal sample info");
+  if (nsignals != signal_weights.size())
+    throw cms::Exception("Misconfiguration", "inconsistent signal sample info");
 
   if (signal_contamination >= 0 && !toy_mode)
     throw cms::Exception("Misconfiguration", "no signal contamination when not in toy mode");
