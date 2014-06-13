@@ -20,6 +20,8 @@ class CosmicMuons : public edm::EDAnalyzer {
  private:
   const edm::InputTag track_src;
   const edm::InputTag primary_vertex_src;
+  const edm::InputTag beamspot_src;
+  const edm::InputTag general_track_src;
   const edm::InputTag gen_particle_src;
   const double min_pt;
   const double max_eta;
@@ -30,7 +32,7 @@ class CosmicMuons : public edm::EDAnalyzer {
   const double max_relpterr;
 
   TH1F* h_ntracks;
-  TH1F* h_ntracks_wcuts;
+  TH1F* h_ntrackswcuts;
 
   TH1F* h_tracks_pt;
   TH1F* h_tracks_pterr;
@@ -49,8 +51,18 @@ class CosmicMuons : public edm::EDAnalyzer {
   TH1F* h_tracks_nsthits;
   TH1F* h_tracks_nmuhits;
   TH1F* h_tracks_chi2dof;
+  TH2F* h_tracks_vy_vx;
+  TH2F* h_tracks_frachitsshared_ntracks;
 
+  TH1F* h_nmuons;
   TH2F* h_ntracks_nmuons;
+  TH2F* h_ntrackswcuts_nmuons;
+
+  TH1F* h_muons_pt;
+  TH1F* h_muons_eta;
+  TH1F* h_muons_phi;
+  TH1F* h_muons_dxy;
+  TH1F* h_muons_dz;
 
   TH1F* h_2tracks_deltaphi;
   TH1F* h_2tracks_deltaR;
@@ -61,6 +73,8 @@ class CosmicMuons : public edm::EDAnalyzer {
 CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   : track_src(cfg.getParameter<edm::InputTag>("track_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
+    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
+    general_track_src(cfg.getParameter<edm::InputTag>("general_track_src")),
     gen_particle_src(cfg.getParameter<edm::InputTag>("gen_particle_src")),
     min_pt(cfg.getParameter<double>("min_pt")),
     max_eta(cfg.getParameter<double>("max_eta")),
@@ -73,7 +87,7 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   h_ntracks = fs->make<TH1F>("h_ntracks", ";number of tracks;events", 10, 0, 10);
-  h_ntracks_wcuts = fs->make<TH1F>("h_ntracks_wcuts", TString::Format("p_{T} > %3.1f GeV, |#eta| < %3.1f, %d pixel hit, %d strip hits, %d muon hits, |dxy| > %4.2f cm, #sigma(p_{T})/p_{T} < %3.1f;number of tracks;events", min_pt, max_eta, min_npxhits, min_nsthits, min_nmuhits, min_dxy, max_relpterr), 10, 0, 10);
+  h_ntrackswcuts = fs->make<TH1F>("h_ntrackswcuts", TString::Format("p_{T} > %3.1f GeV, |#eta| < %3.1f, %d pixel hit, %d strip hits, %d muon hits, |dxy| > %4.2f cm, #sigma(p_{T})/p_{T} < %3.1f;number of tracks;events", min_pt, max_eta, min_npxhits, min_nsthits, min_nmuhits, min_dxy, max_relpterr), 10, 0, 10);
 
   h_tracks_pt = fs->make<TH1F>("h_tracks_pt", ";tracks p_{T} (GeV);arb. units", 150, 0, 150);
   h_tracks_pterr = fs->make<TH1F>("h_tracks_pterr", ";tracks #sigma(p_{T}) (GeV);arb. units", 100, 0, 5);
@@ -92,8 +106,18 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   h_tracks_nsthits = fs->make<TH1F>("h_tracks_nsthits", ";tracks number of strip hits; arb. units", 28, 0, 28);
   h_tracks_nmuhits = fs->make<TH1F>("h_tracks_nmuhits", ";tracks number of muon hits; arb. units", 5, 0, 5);
   h_tracks_chi2dof = fs->make<TH1F>("h_tracks_chi2dof", ";tracks #chi^2/dof;arb. units", 100, 0, 100);
+  h_tracks_vy_vx = fs->make<TH2F>("h_tracks_vy_vx", ";tracks vx (cm);tracks vy (cm)", 100, -0.5, 0.5, 100, -0.5, 0.5);
+  h_tracks_frachitsshared_ntracks = fs->make<TH2F>("h_tracks_frachitsshared_ntracks", ";number of tracks that share this fraction;fraction of hits shared", 200, 0, 200, 105, 0, 1.05);
 
-  h_ntracks_nmuons = fs->make<TH2F>("h_ntracks_nmuons", ";number of generated muons;number of tracks", 10, 0, 10, 10, 0, 10);
+  h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
+  h_ntracks_nmuons = fs->make<TH2F>("h_ntracks_nmuonswcuts", ";number of generated muons;number of tracks", 10, 0, 10, 10, 0, 10);
+  h_ntrackswcuts_nmuons = fs->make<TH2F>("h_ntrackswcuts_nmuonswcuts", ";number of generated muons;number of tracks with cuts", 10, 0, 10, 10, 0, 10);
+
+  h_muons_pt = fs->make<TH1F>("h_muons_pt", ";muons p_{T} (GeV);arb. units", 150, 0, 150);
+  h_muons_eta = fs->make<TH1F>("h_muons_eta", ";muons #eta;arb. units", 50, -4, 4);
+  h_muons_phi = fs->make<TH1F>("h_muons_phi", ";muons #phi;arb. units", 50, -3.15, 3.15);
+  h_muons_dxy = fs->make<TH1F>("h_muons_dxy", ";muons sqrt((vx-pvx)^{2}+(vy-pvy)^{2}) (cm);arb. units", 100, 0, 10);
+  h_muons_dz = fs->make<TH1F>("h_muons_dz", ";muons vz-pvz (cm);arb. units", 200, -10, 10);
 
   h_2tracks_deltaphi = fs->make<TH1F>("h_2tracks_deltaphi", "events with 2 tracks;#Delta#phi;arb. units", 50, -3.15, 3.15);
   h_2tracks_deltaR = fs->make<TH1F>("h_2tracks_deltaR", "events with 2 tracks;#DeltaR;arb. units", 50, 0, 7);
@@ -108,12 +132,25 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByLabel(primary_vertex_src, primary_vertices);
   const reco::Vertex& primary_vertex = primary_vertices->at(0);
-  const math::XYZPoint pv(primary_vertex.x(), primary_vertex.y(), primary_vertex.z());
+  const double pvx = primary_vertex.x();
+  const double pvy = primary_vertex.y();
+  const double pvz = primary_vertex.z();
+  const math::XYZPoint pv(pvx, pvy, pvz);
+
+  edm::Handle<reco::BeamSpot> beamspot;
+  event.getByLabel(beamspot_src, beamspot);
+  const double bsx = beamspot->x0();
+  const double bsy = beamspot->y0();
+
+  edm::Handle<reco::TrackCollection> general_tracks;
+  event.getByLabel(general_track_src, general_tracks);
 
   h_ntracks->Fill(int(tracks->size()));
 
   int ntracks = 0;
   for (const reco::Track& tk : *tracks) {
+    const reco::HitPattern& hp = tk.hitPattern();
+
     if (tk.pt() < min_pt || fabs(tk.eta()) > max_eta || tk.hitPattern().numberOfValidPixelHits() < min_npxhits || tk.hitPattern().numberOfValidStripHits() < min_nsthits || tk.hitPattern().muonStationsWithValidHits() < min_nmuhits || fabs(tk.dxy(pv)) < min_dxy || tk.ptError()/tk.pt() > max_relpterr) continue;
     ntracks++;
 
@@ -134,8 +171,38 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_tracks_nsthits->Fill(tk.hitPattern().numberOfValidStripHits());
     h_tracks_nmuhits->Fill(tk.hitPattern().muonStationsWithValidHits());
     h_tracks_chi2dof->Fill(tk.chi2()/tk.ndof());
+    h_tracks_vy_vx->Fill(tk.vx() - bsx, tk.vy() - bsy);
+
+    int ntracksnhits[100] = {0};
+    for (const reco::Track& gtk : *general_tracks) {
+      const reco::HitPattern& ghp = gtk.hitPattern();
+      int nhits = 0;
+
+      for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
+        uint32_t hit = hp.getHitPattern(ihit);
+        if (!(hp.getHitType(hit) == 0) || !((hit >> 10) & 0x1)) continue;
+        uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
+        uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
+
+        for (int jhit = 0, je = ghp.numberOfHits(); jhit < je; ++jhit) {
+          uint32_t ghit = ghp.getHitPattern(jhit);
+          if (!(ghp.getHitType(ghit) == 0) || !((ghit >> 10) & 0x1)) continue;
+          uint32_t gsub    = reco::HitPattern::getSubStructure   (ghit);
+          uint32_t gsubsub = reco::HitPattern::getSubSubStructure(ghit);
+
+          if (sub == gsub && subsub == gsubsub) {
+            nhits++;
+            break;
+          }
+        }
+      }
+      ntracksnhits[nhits]++;
+    }
+    for (int nhits = 0; nhits <= tk.hitPattern().numberOfValidTrackerHits(); ++nhits) {
+      h_tracks_frachitsshared_ntracks->Fill(ntracksnhits[nhits], double(nhits) / tk.hitPattern().numberOfValidTrackerHits());
+    }
   }
-  h_ntracks_wcuts->Fill(ntracks);
+  h_ntrackswcuts->Fill(ntracks);
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_particle_src, gen_particles);
@@ -145,9 +212,16 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     if (gen.status() == 1 && abs(gen.pdgId()) == 13) {
       if (gen.pt() < min_pt || fabs(gen.eta()) > max_eta) continue;
       nmuons++;
+      h_muons_pt->Fill(gen.pt());
+      h_muons_eta->Fill(gen.eta());
+      h_muons_phi->Fill(gen.phi());
+      h_muons_dxy->Fill(sqrt((gen.vx() - pvx) * (gen.vx() - pvx) + (gen.vy() - pvy) * (gen.vy() - pvy)));
+      h_muons_dz->Fill(gen.vz() - pvz);
     }
   }
-  h_ntracks_nmuons->Fill(nmuons, ntracks);
+  h_nmuons->Fill(nmuons);
+  h_ntracks_nmuons->Fill(nmuons, int(tracks->size()));
+  h_ntrackswcuts_nmuons->Fill(nmuons, ntracks);
 
   if (ntracks == 2) {
     std::vector<reco::Track> tracks_wcuts;
