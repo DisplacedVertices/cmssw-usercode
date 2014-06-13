@@ -21,6 +21,8 @@ process.triggerFilter.andOr = True # = OR
 process.CosmicMuons = cms.EDAnalyzer('CosmicMuons',
                                      track_src = cms.InputTag('globalCosmicMuons'),
                                      primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                                     beamspot_src = cms.InputTag('offlineBeamSpot'),
+                                     general_track_src = cms.InputTag('generalTracks'),
                                      gen_particle_src = cms.InputTag('genParticles'),
                                      min_pt = cms.double(5),
                                      max_eta = cms.double(2.4),
