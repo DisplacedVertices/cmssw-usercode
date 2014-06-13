@@ -8,6 +8,9 @@ struct MCInteractionTops : public MCInteraction {
   const reco::GenParticle* Ws[2]; // plus, minus
   const reco::GenParticle* bottoms[2]; // b, bbar
   const reco::GenParticle* W_daughters[2][2]; // first index is Wplus, Wminus, second is W daughters in order (d-type, u-type quark) or (charged lepton, neutrino)
+  
+  const reco::GenParticle* last_Ws[2];
+  const reco::GenParticle* last_tops[2];
 
   std::vector<const reco::Candidate*> gluons_from_tops[2];
 
@@ -54,7 +57,7 @@ struct MCInteractionTops : public MCInteraction {
   int& decay_plus;
   int& decay_minus;
 
-  MCInteractionTops(MCInteraction::Generator g=MCInteraction::pythia6)
+  MCInteractionTops(MCInteraction::Generator g=MCInteraction::pythia8)
     : MCInteraction(g),
       top(tops[0]),
       topbar(tops[1]),

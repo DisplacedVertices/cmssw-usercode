@@ -20,51 +20,77 @@ bool MCInteractionTops::Valid() {
 
 void MCInteractionTops::Fill() {
   // Find the top and topbar.
-  for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
+  for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {    
     const reco::GenParticle& gen = gen_particles->at(i);
-    if      (gen.pdgId() ==  6) tops[0] = &gen;
-    else if (gen.pdgId() == -6) tops[1] = &gen;
+    if (gen.pdgId() ==  6) {
+      tops[0] = &gen;
+    }
+    else if (gen.pdgId() == -6) {
+      tops[1] = &gen;
+    }
   }
-  
+    // Find the Ws and bs from top decay, and any gluons off the
+    // tops. Bottom or bottombar might not be there, since |Vtb| isn't
+    // exactly 1.
+    die_if_not(tops[0]->numberOfDaughters() >= 2 &&
+	       tops[1]->numberOfDaughters() >= 2,
+	       "at least one top doesn't have at least two daughters: top %i topbar %i",
+	       tops[0]->numberOfDaughters(), tops[1]->numberOfDaughters());
+
+    const reco::Candidate* last_top0 = final_candidate(tops[0], 3); // the 3 means allow gluons or photons
+    last_tops[0] = dynamic_cast<const reco::GenParticle*>(last_top0);
+    const reco::Candidate* last_top1 = final_candidate(tops[1], 3); // the 3 means allow gluons or photons
+    last_tops[1] = dynamic_cast<const reco::GenParticle*>(last_top1);
+
+    Ws[0] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(top,     24));
+    Ws[1] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(topbar, -24));
+    bottoms[0] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(top,     5));
+    bottoms[1] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(topbar, -5));
+    die_if_not(Ws[0] && Ws[1], "at least one W not found: W+ %p W- %p", Ws[0], Ws[1]);
+
+    daughters_with_id(tops[0], 21, gluons_from_tops[0]);
+    daughters_with_id(tops[1], 21, gluons_from_tops[1]);
+    
+    // The W may have a lot of copies, but the copies should always
+    // have just one daughter until we reach the actual W decay (qq'
+    // or lnu). Find the last one.
+    const reco::Candidate* last_W0 = final_candidate(Ws[0], 2); // 2 means allow photons only in the decay chain.
+    const reco::Candidate* last_W1 = final_candidate(Ws[1], 2); // 2 means allow photons only in the decay chain.
+    last_Ws[0] = dynamic_cast<const reco::GenParticle*>(last_W0);
+    last_Ws[1] = dynamic_cast<const reco::GenParticle*>(last_W1);
+
+    die_if_not(Ws[0], "W[0] from top decay not found");
+    die_if_not(Ws[1], "W[1] from top decay not found");
+    die_if_not(last_W0, "last_W[0] not found");
+    die_if_not(last_W1, "last_W[1] not found");
+    die_if_not(last_W0->numberOfDaughters() >= 2, "W[0] did not have at least two daughters: id %i numDau %i", Ws[0]->pdgId(), Ws[0]->numberOfDaughters());
+    die_if_not(last_W1->numberOfDaughters() >= 2, "W[1] did not have at least two daughters: id %i numDau %i", Ws[1]->pdgId(), Ws[1]->numberOfDaughters());
+    
+    // Find the W daughters, and store them in the order (down-type
+    // quark, up-type quark) or (charged lepton, neutrino).
+    std::vector<const reco::GenParticle*> daus0;
+    std::vector<const reco::GenParticle*> daus1;
+    for (int j = 0, je = last_W0->numberOfDaughters(); j < je; ++j) {
+      const reco::Candidate* d = last_W0->daughter(j);
+      if (d->pdgId() != last_W0->pdgId()) // The W can have a copy of itself as a daughter, in addition to qqbar' or lnu.
+      daus0.push_back(dynamic_cast<const reco::GenParticle*>(d));
+    }
+    for (int j = 0, je = last_W1->numberOfDaughters(); j < je; ++j) {
+      const reco::Candidate* d = last_W1->daughter(j);
+      if (d->pdgId() != last_W1->pdgId()) // The W can have a copy of itself as a daughter, in addition to qqbar' or lnu.
+      daus1.push_back(dynamic_cast<const reco::GenParticle*>(d));
+    }
+    die_if_not(daus0.size() == 2, "W[0] did not have exactly two non-W daughters");
+    die_if_not(daus1.size() == 2, "W[1] did not have exactly two non-W daughters");
+    const int order0 = abs(daus0[0]->pdgId()) % 2 == 0;
+    const int order1 = abs(daus1[0]->pdgId()) % 2 == 0;
+    W_daughters[0][0] = daus0[ order0];
+    W_daughters[0][1] = daus0[!order0];
+    W_daughters[1][0] = daus1[ order1];
+    W_daughters[1][1] = daus1[!order1];
+    
   if (!Valid())
     return;
-
-  // Find the Ws and bs from top decay, and any gluons off the
-  // tops. Bottom or bottombar might not be there, since |Vtb| isn't
-  // exactly 1.
-  die_if_not(tops[0]->numberOfDaughters() >= 2 &&
-	     tops[1]->numberOfDaughters() >= 2,
-	     "at least one top doesn't have at least two daughters: top %i topbar %i",
-	     tops[0]->numberOfDaughters(), tops[1]->numberOfDaughters());
-
-  Ws[0] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(top,     24));
-  Ws[1] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(topbar, -24));
-  bottoms[0] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(top,     5));
-  bottoms[1] = dynamic_cast<const reco::GenParticle*>(daughter_with_id(topbar, -5));
-  die_if_not(Ws[0] && Ws[1], "at least one W not found: W+ %p W- %p", Ws[0], Ws[1]);
-
-  daughters_with_id(tops[0], 21, gluons_from_tops[0]);
-  daughters_with_id(tops[1], 21, gluons_from_tops[1]);
-
-  // W decays: hadronic, semi-leptonic, or dileptonic?
-  assert(Ws[0]->numberOfDaughters() == 3 &&
-	 Ws[1]->numberOfDaughters() == 3); // 3 because one W daughter is a status-2 W, plus 2 decay products
-
-  // Find the non-status-2-W daughters, and store them in the order
-  // (down-type quark, up-type quark) or (charged lepton, neutrino).
-  // JMTBAD actually we're just getting the status-2 daughters...
-  for (int i = 0; i < 2; ++i) {
-    std::vector<const reco::GenParticle*> daus;
-    for (int j = 0; j < 3; ++j) {
-      const reco::Candidate* d = Ws[i]->daughter(j);
-      if (d->pdgId() != Ws[i]->pdgId())
-	daus.push_back(dynamic_cast<const reco::GenParticle*>(d));
-    }
-    die_if_not(daus.size() == 2, "a W did not have exactly two non-W daughters: i=%i", i);
-    const int order = abs(daus[0]->pdgId()) % 2 == 0;
-    W_daughters[i][0] = daus[ order];
-    W_daughters[i][1] = daus[!order];
-  }
 
   // Count and store decay types: e, mu, tau, hadronic (0-3).
   num_leptonic = 0;
@@ -74,14 +100,14 @@ void MCInteractionTops::Fill() {
     else {
       die_if_not(is_lepton(W_daughters[i][0]) && is_lepton(W_daughters[i][1]), "one W daughter is lepton and other is not");
       ++num_leptonic;
-    }
-
+    }  
     decay_type[i] = lepton_code(W_daughters[i][0]);
   }
-
+  
   for (int j = 0; j < 2; ++j)
     for (int k = 0; k < 2; ++k)
       immediate_nus.push_back(dynamic_cast<const reco::Candidate*>(W_daughters[j][k]));
+
 }
 
 void MCInteractionTops::SetFourVectors() {

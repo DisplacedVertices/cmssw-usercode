@@ -170,8 +170,9 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
 
 if run_ttbar:
     to_run = ['ali_' + x for x in ['bowing', 'elliptical', 'curl', 'radial', 'sagitta', 'skew', 'telescope', 'twist', 'zexpansion']]
-    to_run = 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split()
-    to_run = ['designnoputkex']
+    #to_run = 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split()
+    #to_run = ['designnoputkex']
+    to_run = ['tune_' + x for x in ['3','4','5','6','7','8','9','10','11','12','13']]
 
     for run in to_run:
         submit('ttbar_' + run)

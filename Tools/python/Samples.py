@@ -446,20 +446,28 @@ myttbar_samples = [
     MCSample('myttbartune7',       '', '/mfv_ttbar_tune_7/jchavesb-mfv_ttbar_tune_7-aed1494d928e44cf1085663860ab1a07/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
     MCSample('myttbartune8',       '', '/mfv_ttbar_tune_8/jchavesb-mfv_ttbar_tune_8-39b59d827dfea83a5b26108b211413ab/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
     MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune10',       '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune10',      '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
     MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarelliptical',    '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarsagitta',       '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarskew',          '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartwist',         '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarzexpansion',    '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartelescope',    '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune12',      '', '/mfv_ttbar_tune_12/jchavesb-mfv_ttbar_tune_12-2c2b6eebe1f1fceaad303986dd747739/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartune13',      '', '/mfv_ttbar_tune_13/jchavesb-mfv_ttbar_tune_13-aa936efd43cebbfaadfc1013d94768d4/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarbowing',      '', '/mfv_ttbar_ali_bowing/jchavesb-mfv_ttbar_ali_bowing-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarcurl',        '', '/mfv_ttbar_ali_curl/jchavesb-mfv_ttbar_ali_curl-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarelliptical',  '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarradial',      '', '/mfv_ttbar_ali_radial/jchavesb-mfv_ttbar_ali_radial-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarsagitta',     '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarskew',        '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartelescope',   '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbartwist',       '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, ttbar_xsec * 0.457),
+    MCSample('myttbarzexpansion',  '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
     ]
 
+#files at FNAL:
+at_FNAL = ['myttbarelliptical','myttbartune3','myttbartune5','myttbartune6']
+    
 for s in myttbar_samples:
     s.is_pythia8 = True
     s.dbs_url_num = 3
-    if 'jchavesb' in s.dataset and not 'tune10' in s.name and not 'telescope' in s.name:
+    if 'jchavesb' in s.dataset and s.name in at_FNAL:
         s.scheduler = 'condor'
 
 ########################################################################
