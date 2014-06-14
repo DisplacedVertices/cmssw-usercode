@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
-process.TFileService.fileName = 'gen_dphi.root'
+process.TFileService.fileName = 'which_gen.root'
 process.source.fileNames = ['/store/user/tucker/TTJets_HadronicMGDecays_8TeV-madgraph/mfvntuple_v18/c761ddfa7f093d8f86a338439e06a1d4/ntuple_100_1_NHs.root']
 process.source.secondaryFileNames = cms.untracked.vstring(*'''/store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00000/0E9DCF01-0216-E211-934F-20CF3019DF0F.root
 /store/mc/Summer12_DR53X/TTJets_HadronicMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/00000/E0F2FA59-1016-E211-A573-00259073E3A8.root
@@ -11,14 +11,14 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.mfvAnalysisCutsOneVtx = process.mfvAnalysisCuts.clone(min_nvertex = 1)
 
-process.GenParticleDphiOneVtx = cms.EDAnalyzer('MFVGenParticleDphi',
+process.WhichGenParticleOneVtx = cms.EDAnalyzer('MFVWhichGenParticle',
                                                gen_particles_src = cms.InputTag('genParticles'),
                                                mevent_src = cms.InputTag('mfvEvent'),
                                                vertices_src = cms.InputTag('mfvSelectedVerticesTight'),
                                                )
-process.GenParticleDphiTwoVtx = process.GenParticleDphiOneVtx.clone()
+process.WhichGenParticleTwoVtx = process.WhichGenParticleOneVtx.clone()
 
-process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvAnalysisCutsOneVtx * process.GenParticleDphiOneVtx * process.mfvAnalysisCuts * process.GenParticleDphiTwoVtx)
+process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvAnalysisCutsOneVtx * process.WhichGenParticleOneVtx * process.mfvAnalysisCuts * process.WhichGenParticleTwoVtx)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -26,7 +26,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = Samples.from_argv(Samples.ttbar_samples + Samples.qcd_samples)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('GenDphi',
+    cs = CRABSubmitter('WhichGenParticle',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        use_parent = True,

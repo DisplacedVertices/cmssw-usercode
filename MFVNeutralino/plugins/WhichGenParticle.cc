@@ -28,6 +28,7 @@ class MFVWhichGenParticle : public edm::EDAnalyzer {
   std::map<std::string, TH1F*> m_h_nxx;
   std::map<std::string, TH2F*> m_h_nsv_v_nxx;
   std::map<std::string, TH1F*> m_h_dphi_sv_xx;
+  std::map<std::string, TH1F*> m_h_dist_sv_xx;
 
   typedef std::vector<const reco::GenParticle*> GenParticlePointers;
   void fill(const std::string name, const MFVVertexAuxCollection&, const GenParticlePointers&);
@@ -47,6 +48,7 @@ MFVWhichGenParticle::MFVWhichGenParticle(const edm::ParameterSet& cfg)
     m_h_nxx       [part] = fs->make<TH1F>(TString::Format("h_n%s",         part), TString::Format(";number of %s;events",                                     part), 100, 0, 100);
     m_h_nsv_v_nxx [part] = fs->make<TH2F>(TString::Format("h_nsv_v_n%s",   part), TString::Format(";number of %s;number of vertices",                         part), 100, 0, 100, 10, 0, 10);
     m_h_dphi_sv_xx[part] = fs->make<TH1F>(TString::Format("h_dphi_sv_n%s", part), TString::Format(";smallest #Delta#phi(%s_{i}, each vertex);vertices/0.063", part), 100, -M_PI, M_PI);
+    m_h_dist_sv_xx[part] = fs->make<TH1F>(TString::Format("h_dist_sv_n%s", part), TString::Format(";smallest dist3d(%s_{i}, each vertex);vertices/0.0005 cm", part), 100, 0, 0.05);
   }
 }
 
@@ -54,6 +56,7 @@ void MFVWhichGenParticle::fill(const std::string name, const MFVVertexAuxCollect
   TH1F* h_nxx        = m_h_nxx       [name];
   TH2F* h_nsv_v_nxx  = m_h_nsv_v_nxx [name];
   TH1F* h_dphi_sv_xx = m_h_dphi_sv_xx[name];
+  TH1F* h_dist_sv_xx = m_h_dist_sv_xx[name];
 
   static const bool debug = false;
   if (debug) printf("%s:\n", name.c_str());
@@ -65,6 +68,7 @@ void MFVWhichGenParticle::fill(const std::string name, const MFVVertexAuxCollect
   h_nsv_v_nxx->Fill(nxx, nsv);
 
   std::vector<double> dphis(nsv*nxx);
+  std::vector<double> dists(nsv*nxx);
 
   for (int ixx = 0; ixx < nxx; ++ixx) {
     const reco::GenParticle* b = xx[ixx];
@@ -72,8 +76,10 @@ void MFVWhichGenParticle::fill(const std::string name, const MFVVertexAuxCollect
       const MFVVertexAux& vtx = sv.at(isv);
       const double vtx_phi = atan2(vtx.y - bsy, vtx.x - bsx);
       const double dphi = reco::deltaPhi(vtx_phi, b->phi());
-      if (debug) printf("ixx %i isv %i dphi %f\n", ixx, isv, dphi);
+      const double dist = sqrt((vtx.x - b->vx()) * (vtx.x - b->vx()) + (vtx.y - b->vy()) * (vtx.y - b->vy()) + (vtx.z - b->vz()) * (vtx.z - b->vz()));
+      if (debug) printf("ixx %i isv %i dphi %f dist %f\n", ixx, isv, dphi, dist);
       dphis[ixx*nsv + isv] = dphi;
+      dists[ixx*nsv + isv] = dist;
     }
   }
 
@@ -103,10 +109,36 @@ void MFVWhichGenParticle::fill(const std::string name, const MFVVertexAuxCollect
     ++used_cnt;
   }
 
+  std::vector<double> min_dists(nsv, 1e99);
+  xx_used.assign(nxx, 0);
+  sv_used.assign(nsv, 0);
+  used_cnt = 0;
+  while (used_cnt < stop) {
+    double min_dist = 1e99;
+    int idist_min = -1;
+    for (int idist = 0; idist < nsv*nxx; ++idist) {
+      if (xx_used[idist / nsv] || sv_used[idist % nsv])
+        continue;
+      if (dists[idist] < min_dist) {
+        min_dist = dists[idist];
+        idist_min = idist;
+      }
+    }
+
+    const int ixx_min = idist_min / nsv;
+    const int isv_min = idist_min % nsv;
+    min_dists[isv_min] = min_dist;
+    xx_used[ixx_min] = 1;
+    sv_used[isv_min] = 1;
+    if (debug) printf("using ixx %i for isv %i with dist %f\n", ixx_min, isv_min, min_dist);
+    ++used_cnt;
+  }
+
   if (debug) printf("best:\n");
   for (int isv = 0; isv < nsv; ++isv) {
     h_dphi_sv_xx->Fill(min_dphis[isv]);
-    if (debug) printf("isv: %i dphi: %f\n", isv, min_dphis[isv]);
+    h_dist_sv_xx->Fill(min_dists[isv]);
+    if (debug) printf("isv: %i dphi: %f dist: %f\n", isv, min_dphis[isv], min_dists[isv]);
   }
 }
 
