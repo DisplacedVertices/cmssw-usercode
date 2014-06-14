@@ -52,7 +52,8 @@ class CosmicMuons : public edm::EDAnalyzer {
   TH1F* h_tracks_nmuhits;
   TH1F* h_tracks_chi2dof;
   TH2F* h_tracks_vy_vx;
-  TH2F* h_tracks_frachitsshared_ntracks;
+  TH1F* h_tracks_ntkhits;
+  TH2F* h_tracks_ngtracks_frachitsshared;
 
   TH1F* h_nmuons;
   TH2F* h_ntracks_nmuons;
@@ -101,13 +102,14 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   h_tracks_dz = fs->make<TH1F>("h_tracks_dz", ";tracks dz(PV) (cm);arb. units", 100, -2, 2);
   h_tracks_dzerr = fs->make<TH1F>("h_tracks_dzerr", ";tracks #sigma(dz) (cm);arb. units", 100, 0, 0.1);
 
-  h_tracks_nhits = fs->make<TH1F>("h_tracks_nhits", ";tracks number of hits; arb. units", 100, 0, 100);
-  h_tracks_npxhits = fs->make<TH1F>("h_tracks_npxhits", ";tracks number of pixel hits; arb. units", 12, 0, 12);
-  h_tracks_nsthits = fs->make<TH1F>("h_tracks_nsthits", ";tracks number of strip hits; arb. units", 28, 0, 28);
-  h_tracks_nmuhits = fs->make<TH1F>("h_tracks_nmuhits", ";tracks number of muon hits; arb. units", 5, 0, 5);
+  h_tracks_nhits = fs->make<TH1F>("h_tracks_nhits", ";tracks number of hits;arb. units", 100, 0, 100);
+  h_tracks_npxhits = fs->make<TH1F>("h_tracks_npxhits", ";tracks number of pixel hits;arb. units", 12, 0, 12);
+  h_tracks_nsthits = fs->make<TH1F>("h_tracks_nsthits", ";tracks number of strip hits;arb. units", 28, 0, 28);
+  h_tracks_nmuhits = fs->make<TH1F>("h_tracks_nmuhits", ";tracks number of muon hits;arb. units", 5, 0, 5);
   h_tracks_chi2dof = fs->make<TH1F>("h_tracks_chi2dof", ";tracks #chi^2/dof;arb. units", 100, 0, 100);
   h_tracks_vy_vx = fs->make<TH2F>("h_tracks_vy_vx", ";tracks vx (cm);tracks vy (cm)", 100, -0.5, 0.5, 100, -0.5, 0.5);
-  h_tracks_frachitsshared_ntracks = fs->make<TH2F>("h_tracks_frachitsshared_ntracks", ";number of tracks that share this fraction;fraction of hits shared", 200, 0, 200, 105, 0, 1.05);
+  h_tracks_ntkhits = fs->make<TH1F>("h_tracks_ntkhits", ";tracks number of tracker hits;arb. units", 40, 0, 40);
+  h_tracks_ngtracks_frachitsshared = fs->make<TH2F>("h_tracks_ngtracks_frachitsshared", ";fraction of hits shared;number of general tracks that share this fraction", 105, 0, 1.05, 200, 0, 200);
 
   h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
   h_ntracks_nmuons = fs->make<TH2F>("h_ntracks_nmuonswcuts", ";number of generated muons;number of tracks", 10, 0, 10, 10, 0, 10);
@@ -172,8 +174,9 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_tracks_nmuhits->Fill(tk.hitPattern().muonStationsWithValidHits());
     h_tracks_chi2dof->Fill(tk.chi2()/tk.ndof());
     h_tracks_vy_vx->Fill(tk.vx() - bsx, tk.vy() - bsy);
+    h_tracks_ntkhits->Fill(tk.hitPattern().numberOfValidTrackerHits());
 
-    int ntracksnhits[100] = {0};
+    int ngtracksnhits[100] = {0};
     for (const reco::Track& gtk : *general_tracks) {
       const reco::HitPattern& ghp = gtk.hitPattern();
       int nhits = 0;
@@ -196,10 +199,11 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
           }
         }
       }
-      ntracksnhits[nhits]++;
+
+      ngtracksnhits[nhits]++;
     }
     for (int nhits = 0; nhits <= tk.hitPattern().numberOfValidTrackerHits(); ++nhits) {
-      h_tracks_frachitsshared_ntracks->Fill(ntracksnhits[nhits], double(nhits) / tk.hitPattern().numberOfValidTrackerHits());
+      h_tracks_ngtracks_frachitsshared->Fill(double(nhits) / tk.hitPattern().numberOfValidTrackerHits(), ngtracksnhits[nhits]);
     }
   }
   h_ntrackswcuts->Fill(ntracks);
