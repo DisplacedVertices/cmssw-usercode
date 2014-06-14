@@ -54,6 +54,8 @@ class CosmicMuons : public edm::EDAnalyzer {
   TH2F* h_tracks_vy_vx;
   TH1F* h_tracks_ntkhits;
   TH2F* h_tracks_ngtracks_frachitsshared;
+  TH1F* h_gtracks_theta;
+  TH1F* h_tracks_gtracksmintheta;
 
   TH1F* h_nmuons;
   TH2F* h_ntracks_nmuons;
@@ -110,6 +112,8 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   h_tracks_vy_vx = fs->make<TH2F>("h_tracks_vy_vx", ";tracks vx (cm);tracks vy (cm)", 100, -0.5, 0.5, 100, -0.5, 0.5);
   h_tracks_ntkhits = fs->make<TH1F>("h_tracks_ntkhits", ";tracks number of tracker hits;arb. units", 40, 0, 40);
   h_tracks_ngtracks_frachitsshared = fs->make<TH2F>("h_tracks_ngtracks_frachitsshared", ";fraction of hits shared;number of general tracks that share this fraction", 105, 0, 1.05, 200, 0, 200);
+  h_gtracks_theta = fs->make<TH1F>("h_gtracks_theta", ";3D space angle between cosmic track and general tracks that share all hits;arb. units", 50, 0, 3.15);
+  h_tracks_gtracksmintheta = fs->make<TH1F>("h_tracks_gtracksmintheta", ";3D space angle from cosmic track to closest general track that shares all hits", 50, 0, 3.15);
 
   h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
   h_ntracks_nmuons = fs->make<TH2F>("h_ntracks_nmuonswcuts", ";number of generated muons;number of tracks", 10, 0, 10, 10, 0, 10);
@@ -177,6 +181,7 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_tracks_ntkhits->Fill(tk.hitPattern().numberOfValidTrackerHits());
 
     int ngtracksnhits[100] = {0};
+    std::vector<double> gtrackstheta;
     for (const reco::Track& gtk : *general_tracks) {
       const reco::HitPattern& ghp = gtk.hitPattern();
       int nhits = 0;
@@ -199,11 +204,19 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
           }
         }
       }
-
       ngtracksnhits[nhits]++;
+
+      if (nhits == tk.hitPattern().numberOfValidTrackerHits()) {
+        h_gtracks_theta->Fill(acos(tk.momentum().Dot(gtk.momentum()) / (tk.p() * gtk.p())));
+        gtrackstheta.push_back(acos(tk.momentum().Dot(gtk.momentum()) / (tk.p() * gtk.p())));
+      }
     }
     for (int nhits = 0; nhits <= tk.hitPattern().numberOfValidTrackerHits(); ++nhits) {
       h_tracks_ngtracks_frachitsshared->Fill(double(nhits) / tk.hitPattern().numberOfValidTrackerHits(), ngtracksnhits[nhits]);
+    }
+    std::sort(gtrackstheta.begin(), gtrackstheta.end());
+    if (gtrackstheta.size() > 0) {
+      h_tracks_gtracksmintheta->Fill(gtrackstheta[0]);
     }
   }
   h_ntrackswcuts->Fill(ntracks);
