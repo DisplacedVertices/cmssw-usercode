@@ -67,7 +67,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('CosmicActivity',
                        pset_modifier = modify,
                        total_number_of_lumis = -1,
-                       lumis_per_job = 50,
+                       lumis_per_job = 100,
                        GRID_data_location_override = 'T2_US',
                        USER_jmt_skip_input_files = 'src/EgammaAnalysis/ElectronTools/data/*,src/CMGTools/External/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml,lib/slc5_amd64_gcc462/libCMGToolsExternal.so',
                        )
