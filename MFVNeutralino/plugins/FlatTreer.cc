@@ -148,6 +148,25 @@ void MFVFlatTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.vtx_pv2derr.push_back(v.pv2derr);
     nt.vtx_pv3ddist.push_back(v.pv3ddist);
     nt.vtx_pv3derr.push_back(v.pv3derr);
+
+    nt.reserve_tracks(v.ntracks());
+    for (int i = 0; i < v.ntracks(); ++i) {
+      nt.track_w.back()[i] = v.track_w[i];
+      nt.track_qpt.back()[i] = v.track_qpt[i];
+      nt.track_eta.back()[i] = v.track_eta[i];
+      nt.track_phi.back()[i] = v.track_phi[i];
+      nt.track_dxy.back()[i] = v.track_dxy[i];
+      nt.track_dz.back()[i] = v.track_dz[i];
+      nt.track_pt_err.back()[i] = v.track_pt_err[i];
+      nt.track_eta_err.back()[i] = v.track_eta_err[i];
+      nt.track_phi_err.back()[i] = v.track_phi_err[i];
+      nt.track_dxy_err.back()[i] = v.track_dxy_err[i];
+      nt.track_dz_err.back()[i] = v.track_dz_err[i];
+      nt.track_chi2dof.back()[i] = v.track_chi2dof[i];
+      nt.track_hitpattern.back()[i] = v.track_hitpattern[i];
+      nt.track_injet.back()[i] = v.track_injet[i];
+      nt.track_inpv.back()[i] = v.track_inpv[i];
+    }
   }
 
   tree->Fill();

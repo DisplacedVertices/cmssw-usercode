@@ -105,6 +105,21 @@ namespace mfv {
     tree->Branch("vtx_pv3dcompat", &nt.vtx_pv3dcompat);
     tree->Branch("vtx_pv3ddist", &nt.vtx_pv3ddist);
     tree->Branch("vtx_pv3derr", &nt.vtx_pv3derr);
+    tree->Branch("track_w", &nt.track_w);
+    tree->Branch("track_qpt", &nt.track_qpt);
+    tree->Branch("track_eta", &nt.track_eta);
+    tree->Branch("track_phi", &nt.track_phi);
+    tree->Branch("track_dxy", &nt.track_dxy);
+    tree->Branch("track_dz", &nt.track_dz);
+    tree->Branch("track_pt_err", &nt.track_pt_err);
+    tree->Branch("track_eta_err", &nt.track_eta_err);
+    tree->Branch("track_phi_err", &nt.track_phi_err);
+    tree->Branch("track_dxy_err", &nt.track_dxy_err);
+    tree->Branch("track_dz_err", &nt.track_dz_err);
+    tree->Branch("track_chi2dof", &nt.track_chi2dof);
+    tree->Branch("track_hitpattern", &nt.track_hitpattern);
+    tree->Branch("track_injet", &nt.track_injet);
+    tree->Branch("track_inpv", &nt.track_inpv);
   }
 
   void read_from_tree(TTree* tree, FlatNtuple& nt) {
@@ -205,5 +220,20 @@ namespace mfv {
     tree->SetBranchAddress("vtx_pv3dcompat", &nt.vtx_pv3dcompat);
     tree->SetBranchAddress("vtx_pv3ddist", &nt.vtx_pv3ddist);
     tree->SetBranchAddress("vtx_pv3derr", &nt.vtx_pv3derr);
+    tree->SetBranchAddress("track_w", &nt.track_w);
+    tree->SetBranchAddress("track_qpt", &nt.track_qpt);
+    tree->SetBranchAddress("track_eta", &nt.track_eta);
+    tree->SetBranchAddress("track_phi", &nt.track_phi);
+    tree->SetBranchAddress("track_dxy", &nt.track_dxy);
+    tree->SetBranchAddress("track_dz", &nt.track_dz);
+    tree->SetBranchAddress("track_pt_err", &nt.track_pt_err);
+    tree->SetBranchAddress("track_eta_err", &nt.track_eta_err);
+    tree->SetBranchAddress("track_phi_err", &nt.track_phi_err);
+    tree->SetBranchAddress("track_dxy_err", &nt.track_dxy_err);
+    tree->SetBranchAddress("track_dz_err", &nt.track_dz_err);
+    tree->SetBranchAddress("track_chi2dof", &nt.track_chi2dof);
+    tree->SetBranchAddress("track_hitpattern", &nt.track_hitpattern);
+    tree->SetBranchAddress("track_injet", &nt.track_injet);
+    tree->SetBranchAddress("track_inpv", &nt.track_inpv);
   }
 }

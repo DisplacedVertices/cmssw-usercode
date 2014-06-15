@@ -1,10 +1,12 @@
 #ifndef JMTucker_MFVNeutralino_interface_FlatNtuple_h
 #define JMTucker_MFVNeutralino_interface_FlatNtuple_h
 
+#include <cassert>
 #include <numeric>
 #include <vector>
 #include "TLorentzVector.h"
 #include "TTree.h"
+#include "TVector2.h"
 
 namespace mfv {
   struct FlatNtuple {
@@ -99,8 +101,41 @@ namespace mfv {
       vtx_pv3dcompat.clear();
       vtx_pv3ddist.clear();
       vtx_pv3derr.clear();
+      track_w.clear();
+      track_qpt.clear();
+      track_eta.clear();
+      track_phi.clear();
+      track_dxy.clear();
+      track_dz.clear();
+      track_pt_err.clear();
+      track_eta_err.clear();
+      track_phi_err.clear();
+      track_dxy_err.clear();
+      track_dz_err.clear();
+      track_chi2dof.clear();
+      track_hitpattern.clear();
+      track_injet.clear();
+      track_inpv.clear();
     }
 
+    void reserve_tracks(const int ntk) {
+      track_w.push_back(std::vector<ushort>(ntk, 0));
+      track_qpt.push_back(std::vector<float>(ntk, 0));
+      track_eta.push_back(std::vector<float>(ntk, 0));
+      track_phi.push_back(std::vector<float>(ntk, 0));
+      track_dxy.push_back(std::vector<float>(ntk, 0));
+      track_dz.push_back(std::vector<float>(ntk, 0));
+      track_pt_err.push_back(std::vector<float>(ntk, 0));
+      track_eta_err.push_back(std::vector<float>(ntk, 0));
+      track_phi_err.push_back(std::vector<float>(ntk, 0));
+      track_dxy_err.push_back(std::vector<float>(ntk, 0));
+      track_dz_err.push_back(std::vector<float>(ntk, 0));
+      track_chi2dof.push_back(std::vector<float>(ntk, 0));
+      track_hitpattern.push_back(std::vector<ushort>(ntk, 0));
+      track_injet.push_back(std::vector<ushort>(ntk, 0));
+      track_inpv.push_back(std::vector<short>(ntk, 0));
+    }
+ 
     static TLorentzVector p4(float pt, float eta, float phi, float mass) {
       TLorentzVector v;
       v.SetPtEtaPhiM(pt, eta, phi, mass);
@@ -367,26 +402,25 @@ namespace mfv {
     }
     float vtx_pvdzsig(int w) const { return sig(vtx_pvdz(w), vtx_pvdzerr(w)); }
 
-#if 0
     ////////////////
 
-    std::vector<uchar> track_w;
+    std::vector<std::vector<ushort> > track_w;
     static uchar make_track_weight(float weight) { assert(weight >= 0 && weight <= 1); return uchar(weight*255); }
-    float track_weight(int i) const { return float(track_w[i])/255.f; }
-    std::vector<float> track_qpt;
-    float track_q(int i) const { return track_qpt[i] > 0 ? 1 : -1; }
-    float track_pt(int i) const { return fabs(track_qpt[i]); }
-    std::vector<float> track_eta;
-    std::vector<float> track_phi;
-    std::vector<float> track_dxy;
-    std::vector<float> track_dz;
-    std::vector<float> track_pt_err; // relative to pt, rest are absolute values
-    std::vector<float> track_eta_err;
-    std::vector<float> track_phi_err;
-    std::vector<float> track_dxy_err;
-    std::vector<float> track_dz_err;
-    std::vector<float> track_chi2dof;
-    std::vector<ushort> track_hitpattern;
+    float track_weight(int w, int i) const { return float(track_w[w][i])/255.f; }
+    std::vector<std::vector<float> > track_qpt;
+    float track_q(int w, int i) const { return track_qpt[w][i] > 0 ? 1 : -1; }
+    float track_pt(int w, int i) const { return fabs(track_qpt[w][i]); }
+    std::vector<std::vector<float> > track_eta;
+    std::vector<std::vector<float> > track_phi;
+    std::vector<std::vector<float> > track_dxy;
+    std::vector<std::vector<float> > track_dz;
+    std::vector<std::vector<float> > track_pt_err;
+    std::vector<std::vector<float> > track_eta_err;
+    std::vector<std::vector<float> > track_phi_err;
+    std::vector<std::vector<float> > track_dxy_err;
+    std::vector<std::vector<float> > track_dz_err;
+    std::vector<std::vector<float> > track_chi2dof;
+    std::vector<std::vector<ushort> > track_hitpattern;
     static ushort make_track_hitpattern(int npx, int nst, int nbehind, int nlost) {
       assert(npx >= 0 && nst >= 0 && nbehind >= 0 && nlost >= 0);
       if (npx > 7) npx = 7;
@@ -395,161 +429,123 @@ namespace mfv {
       if (nlost > 15) nlost = 15;
       return (nlost << 12) | (nbehind << 8) | (nst << 3) | npx;
     }
-    int track_npxhits(int i) const { return track_hitpattern[i] & 0x7; }
-    int track_nsthits(int i) const { return (track_hitpattern[i] >> 3) & 0x1F; }
-    int track_nhitsbehind(int i) const { return (track_hitpattern[i] >> 8) & 0xF; }
-    int track_nhitslost(int i) const { return (track_hitpattern[i] >> 12) & 0xF; }
-    int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
-    std::vector<bool> track_injet;
-    std::vector<short> track_inpv;
+    int track_npxhits(int w, int i) const { return track_hitpattern[w][i] & 0x7; }
+    int track_nsthits(int w, int i) const { return (track_hitpattern[w][i] >> 3) & 0x1F; }
+    int track_nhitsbehind(int w, int i) const { return (track_hitpattern[w][i] >> 8) & 0xF; }
+    int track_nhitslost(int w, int i) const { return (track_hitpattern[w][i] >> 12) & 0xF; }
+    int track_nhits(int w, int i) const { return track_npxhits(w,i) + track_nsthits(w,i); }
+    std::vector<std::vector<ushort> > track_injet;
+    std::vector<std::vector<short> > track_inpv;
 
-    void insert_track() {
-      track_w.push_back(0);
-      track_qpt.push_back(0);
-      track_eta.push_back(0);
-      track_phi.push_back(0);
-      track_dxy.push_back(0);
-      track_dz.push_back(0);
-      track_pt_err.push_back(0);
-      track_eta_err.push_back(0);
-      track_phi_err.push_back(0);
-      track_dxy_err.push_back(0);
-      track_dz_err.push_back(0);
-      track_chi2dof.push_back(0);
-      track_hitpattern.push_back(0);
-      track_injet.push_back(0);
-      track_inpv.push_back(0);
-    }
-
-    bool tracks_ok() const {
-      const size_t n = ntracks();
-      return
-        n == track_w.size() &&
-        n == track_qpt.size() &&
-        n == track_eta.size() &&
-        n == track_phi.size() &&
-        n == track_dxy.size() &&
-        n == track_dz.size() &&
-        n == track_pt_err.size() &&
-        n == track_eta_err.size() &&
-        n == track_phi_err.size() &&
-        n == track_dxy_err.size() &&
-        n == track_dz_err.size() &&
-        n == track_chi2dof.size() &&
-        n == track_hitpattern.size() &&
-        n == track_injet.size() &&
-        n == track_inpv.size();
-    }
-
-    TLorentzVector track_p4(int i, float mass=0) const {
+    TLorentzVector track_p4(int w, int i, float mass=0) const {
       TLorentzVector v;
-      v.SetPtEtaPhiM(track_pt(i), track_eta[i], track_phi[i], mass);
+      v.SetPtEtaPhiM(track_pt(w,i), track_eta[w][i], track_phi[w][i], mass);
       return v;
     }
 
-    int ntracks() const {
-      return int(track_w.size());
+    int ntracks(int w) const {
+      return int(track_w[w].size());
     }
 
-    bool use_track(size_t i) const {
+    bool use_track(int w, size_t i) const {
       static const float pt_err_thr = 0.5;
-      return track_pt_err[i] / track_pt(i) <= pt_err_thr;
+      return track_pt_err[w][i] / track_pt(w,i) <= pt_err_thr;
     }
 
-    int nbadtracks() const {
+    int nbadtracks(int w) const {
       int c = 0;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (!use_track(i))
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (!use_track(w, i))
           ++c;
       return c;
     }
 
-    int ngoodtracks() const {
-      return ntracks() - nbadtracks();
+    int ngoodtracks(int w) const {
+      return ntracks(w) - nbadtracks(w);
     }
 
-    int ntracksptgt(float thr) const {
+    int ntracksptgt(int w, float thr) const {
       int c = 0;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i) && track_pt(i) > thr)
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i) && track_pt(w,i) > thr)
           ++c;
       return c;
     }
 
-    int trackminnhits() const {
+    int trackminnhits(int w) const {
       int m = 255, m2;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i) && (m2 = track_nhits(i)) < m)
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i) && (m2 = track_nhits(w,i)) < m)
           m = m2;
       return m;
     }
 
-    int trackmaxnhits() const {
+    int trackmaxnhits(int w) const {
       int m = 0, m2;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i) && (m2 = track_nhits(i)) > m)
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i) && (m2 = track_nhits(w,i)) > m)
           m = m2;
       return m;
     }
 
-    float sumpt2() const {
+    float sumpt2(int w) const {
       float sum = 0;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i))
-          sum += pow(track_pt(i), 2);
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i))
+          sum += pow(track_pt(w,i), 2);
       return sum;
     }
 
-    int sumnhitsbehind() const {
+    int sumnhitsbehind(int w) const {
       int c = 0;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i))
-          c += track_nhitsbehind(i);
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i))
+          c += track_nhitsbehind(w,i);
       return c;
     }
 
-    int maxnhitsbehind() const {
+    int maxnhitsbehind(int w) const {
       int m = 0, m2;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i) && (m2 = track_nhitsbehind(i)) > m)
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i) && (m2 = track_nhitsbehind(w,i)) > m)
           m = m2;
       return m;
     }
 
-    int ntrackssharedwpv() const {
+    int ntrackssharedwpv(int w) const {
       int c = 0;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i) && track_inpv[i] == 0)
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i) && track_inpv[w][i] == 0)
           ++c;
       return c;
     }
 
-    int ntrackssharedwpvs() const {
+    int ntrackssharedwpvs(int w) const {
       int c = 0;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i) && track_inpv[i] >= 0)
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i) && track_inpv[w][i] >= 0)
           ++c;
       return c;
     }
 
-    std::map<int,int> pvswtracksshared() const {
+    std::map<int,int> pvswtracksshared(int w) const {
       std::map<int,int> m;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i))
-          ++m[track_inpv[i]];
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i))
+          ++m[track_inpv[w][i]];
       return m;
     }
 
-    int npvswtracksshared() const {
-      std::map<int,int> m = pvswtracksshared();
+    int npvswtracksshared(int w) const {
+      std::map<int,int> m = pvswtracksshared(w);
       int c = int(m.size());
       if (m.find(-1) != m.end())
         --c;
       return c;
     }
 
-    int pvmosttracksshared() const {
-      std::map<int,int> m = pvswtracksshared();
+    int pvmosttracksshared(int w) const {
+      std::map<int,int> m = pvswtracksshared(w);
       int mi = -1, mc = 0;
       for (std::map<int,int>::const_iterator it = m.begin(), ite = m.end(); it != ite; ++it)
         if (it->first != -1 && it->second > mc) {
@@ -559,69 +555,54 @@ namespace mfv {
       return mi;
     }
 
-    float _min(const std::vector<float>& v, const bool filter=true) const {
-      float m = 1e99;
-      for (size_t i = 0, ie = v.size(); i < ie; ++i)
-        if (!filter || use_track(i))
-          if (v[i] < m)
-            m = v[i];
-      return m;
-    }
-
-    float _max(const std::vector<float>& v, const bool filter=true) const {
-      float m = -1e99;
-      for (size_t i = 0, ie = v.size(); i < ie; ++i)
-        if (!filter || use_track(i))
-          if (v[i] > m)
-            m = v[i];
-      return m;
-    }
-
-    float _avg(const std::vector<float>& v, const bool filter=true) const {
-      float a = 0.f;
-      int c = 0;
-      for (size_t i = 0, ie = v.size(); i < ie; ++i)
-        if (!filter || use_track(i)) {
-          a += v[i];
-          ++c;
-        }
-      return a / c;
-    }
-
-    float _rms(const std::vector<float>& v, const bool filter=true) const {
-      if (v.size() == 0) return 0.f;
-      float avg = _avg(v, filter);
-      std::vector<float> v2;
-      for (size_t i = 0, ie = v.size(); i < ie; ++i)
-        if (!filter || use_track(i))
-          v2.push_back(pow(v[i] - avg, 2));
-      return sqrt(std::accumulate(v2.begin(), v2.end(), 0.f)/v2.size());
-    }
-
-    struct stats {
-      float min, max, avg, rms;
-      stats(const MFVVertexAux* a, const std::vector<float>& v, const bool filter=false)
-        : min(a->_min(v, filter)),
-          max(a->_max(v, filter)),
-          avg(a->_avg(v, filter)),
-          rms(a->_rms(v, filter))
-      {}
-    };
-
-
-    std::vector<float> track_pts() const {
+    std::vector<float> track_pts(int w) const {
       std::vector<float> pts;
-      for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-        if (use_track(i))
-          pts.push_back(track_pt(i));
+      for (size_t i = 0, ie = ntracks(w); i < ie; ++i)
+        if (use_track(w,i))
+          pts.push_back(track_pt(w,i));
       return pts;
     }
 
-    float mintrackpt() const { return _min(track_pts(), false); } // already filtered
-    float maxtrackpt() const { return _max(track_pts(), false); }
+    static float _min(const std::vector<float>& v) {
+      float m = 1e99;
+      for (size_t i = 0, ie = v.size(); i < ie; ++i)
+        if (v[i] < m)
+          m = v[i];
+      return m;
+    }
 
-    float maxmntrackpt(int n) const {
-      std::vector<float> pt = track_pts();
+    static float _max(const std::vector<float>& v) {
+      float m = -1e99;
+      for (size_t i = 0, ie = v.size(); i < ie; ++i)
+        if (v[i] > m)
+          m = v[i];
+      return m;
+    }
+
+    static float _avg(const std::vector<float>& v) {
+      float a = 0.f;
+      int c = 0;
+      for (size_t i = 0, ie = v.size(); i < ie; ++i) {
+        a += v[i];
+        ++c;
+      }
+      return a / c;
+    }
+
+    static float _rms(const std::vector<float>& v) {
+      if (v.size() == 0) return 0.f;
+      float avg = _avg(v);
+      std::vector<float> v2;
+      for (size_t i = 0, ie = v.size(); i < ie; ++i)
+        v2.push_back(pow(v[i] - avg, 2));
+      return sqrt(std::accumulate(v2.begin(), v2.end(), 0.f)/v2.size());
+    }
+    
+    float mintrackpt(int w) const { return _min(track_pts(w)); }
+    float maxtrackpt(int w) const { return _max(track_pts(w)); }
+
+    float maxmntrackpt(int w, int n) const {
+      std::vector<float> pt = track_pts(w);
       int nt = int(pt.size());
       if (n > nt - 1)
         return -1;
@@ -629,148 +610,22 @@ namespace mfv {
       return pt[nt-1-n];
     }
 
-    float trackptavg() const { return _avg(track_pts(), false); }
-    float trackptrms() const { return _rms(track_pts(), false); }
-
-    float trackdxymin() const { return _min(track_dxy); }
-    float trackdxymax() const { return _max(track_dxy); }
-    float trackdxyavg() const { return _avg(track_dxy); }
-    float trackdxyrms() const { return _rms(track_dxy); }
-
-    float trackdzmin() const { return _min(track_dz); }
-    float trackdzmax() const { return _max(track_dz); }
-    float trackdzavg() const { return _avg(track_dz); }
-    float trackdzrms() const { return _rms(track_dz); }
-
-    float trackpterrmin() const { return _min(track_pt_err); }
-    float trackpterrmax() const { return _max(track_pt_err); }
-    float trackpterravg() const { return _avg(track_pt_err); }
-    float trackpterrrms() const { return _rms(track_pt_err); }
-
-    float trackdxyerrmin() const { return _min(track_dxy_err); }
-    float trackdxyerrmax() const { return _max(track_dxy_err); }
-    float trackdxyerravg() const { return _avg(track_dxy_err); }
-    float trackdxyerrrms() const { return _rms(track_dxy_err); }
-
-    float trackdzerrmin() const { return _min(track_dz_err); }
-    float trackdzerrmax() const { return _max(track_dz_err); }
-    float trackdzerravg() const { return _avg(track_dz_err); }
-    float trackdzerrrms() const { return _rms(track_dz_err); }
-
-    std::vector<float> trackpairdetas() const {
+    std::vector<float> trackpairdrs(int w) const {
       std::vector<float> v;
-      size_t n = ntracks();
+      size_t n = ntracks(w);
       if (n >= 2)
         for (size_t i = 0, ie = n-1; i < ie; ++i)
-          if (use_track(i))
+          if (use_track(w,i))
             for (size_t j = i+1, je = n; j < je; ++j)
-              if (use_track(j))
-                v.push_back(fabs(track_eta[i] - track_eta[j]));
+              if (use_track(w,j))
+                v.push_back(sqrt(pow(track_eta[w][i] - track_eta[w][j], 2) + pow(TVector2::Phi_mpi_pi(track_phi[w][i] - track_phi[w][j]), 2)));
       return v;
     }
 
-    float trackpairdetamin() const { return stats(this, trackpairdetas()).min; }
-    float trackpairdetamax() const { return stats(this, trackpairdetas()).max; }
-    float trackpairdetaavg() const { return stats(this, trackpairdetas()).avg; }
-    float trackpairdetarms() const { return stats(this, trackpairdetas()).rms; }
-
-    std::vector<float> trackpairdphis() const {
-      std::vector<float> v;
-      size_t n = ntracks();
-      if (n >= 2)
-        for (size_t i = 0, ie = n-1; i < ie; ++i)
-          if (use_track(i))
-            for (size_t j = i+1, je = n; j < je; ++j)
-              if (use_track(j))
-                v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
-      return v;
-    }
-
-    float trackpairdphimin() const { return stats(this, trackpairdphis()).min; }
-    float trackpairdphimax() const { return stats(this, trackpairdphis()).max; }
-    float trackpairdphiavg() const { return stats(this, trackpairdphis()).avg; }
-    float trackpairdphirms() const { return stats(this, trackpairdphis()).rms; }
-
-    std::vector<float> trackpairdrs() const {
-      std::vector<float> v;
-      size_t n = ntracks();
-      if (n >= 2)
-        for (size_t i = 0, ie = n-1; i < ie; ++i)
-          if (use_track(i))
-            for (size_t j = i+1, je = n; j < je; ++j)
-              if (use_track(j))
-                v.push_back(reco::deltaR(track_eta[i], track_phi[i],
-                                         track_eta[j], track_phi[j]));
-      return v;
-    }
-
-    float trackpairdrmin() const { return stats(this, trackpairdrs()).min; }
-    float trackpairdrmax() const { return stats(this, trackpairdrs()).max; }
-    float trackpairdravg() const { return stats(this, trackpairdrs()).avg; }
-    float trackpairdrrms() const { return stats(this, trackpairdrs()).rms; }
-
-    float drmin() const { return trackpairdrmin(); }
-    float drmax() const { return trackpairdrmax(); }
-    float dravg() const { return trackpairdravg(); }
-    float drrms() const { return trackpairdrrms(); }
-
-    std::vector<float> trackpairmasses(float mass=0) const {
-      std::vector<float> v;
-      size_t n = ntracks();
-      if (n >= 2)
-        for (size_t i = 0, ie = n-1; i < ie; ++i)
-          if (use_track(i))
-            for (size_t j = i+1, je = n; j < je; ++j)
-              if (use_track(j))
-                v.push_back((track_p4(i, mass) + track_p4(j, mass)).M());
-      return v;
-    }
-
-    float trackpairmassmin() const { return stats(this, trackpairmasses()).min; }
-    float trackpairmassmax() const { return stats(this, trackpairmasses()).max; }
-    float trackpairmassavg() const { return stats(this, trackpairmasses()).avg; }
-    float trackpairmassrms() const { return stats(this, trackpairmasses()).rms; }
-
-    std::vector<float> tracktripmasses(float mass=0) const {
-      std::vector<float> v;
-      size_t n = ntracks();
-      if (n >= 3)
-        for (size_t i = 0, ie = n-2; i < ie; ++i)
-          if (use_track(i))
-            for (size_t j = i+1, je = n-1; j < je; ++j)
-              if (use_track(j))
-                for (size_t k = j+1, ke = n; k < ke; ++k)
-                  if (use_track(k))
-                    v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass)).M());
-      return v;
-    }
-
-    float tracktripmassmin() const { return stats(this, tracktripmasses()).min; }
-    float tracktripmassmax() const { return stats(this, tracktripmasses()).max; }
-    float tracktripmassavg() const { return stats(this, tracktripmasses()).avg; }
-    float tracktripmassrms() const { return stats(this, tracktripmasses()).rms; }
-
-    std::vector<float> trackquadmasses(float mass=0) const {
-      std::vector<float> v;
-      size_t n = ntracks();
-      if (n >= 4)
-        for (size_t i = 0, ie = n-3; i < ie; ++i)
-          if (use_track(i))
-            for (size_t j = i+1, je = n-2; j < je; ++j)
-              if (use_track(j))
-                for (size_t k = j+1, ke = n-1; k < ke; ++k)
-                  if (use_track(k))
-                    for (size_t l = k+1, le = n; l < le; ++l)
-                      if (use_track(l))
-                        v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass) + track_p4(l, mass)).M());
-      return v;
-    }
-
-    float trackquadmassmin() const { return stats(this, trackquadmasses()).min; }
-    float trackquadmassmax() const { return stats(this, trackquadmasses()).max; }
-    float trackquadmassavg() const { return stats(this, trackquadmasses()).avg; }
-    float trackquadmassrms() const { return stats(this, trackquadmasses()).rms; }
-#endif    
+    float trackpairdrmin(int w) const { return _min(trackpairdrs(w)); }
+    float trackpairdrmax(int w) const { return _max(trackpairdrs(w)); }
+    float trackpairdravg(int w) const { return _avg(trackpairdrs(w)); }
+    float trackpairdrrms(int w) const { return _rms(trackpairdrs(w)); }
   };
 
   void write_to_tree(TTree* tree, FlatNtuple& nt);
