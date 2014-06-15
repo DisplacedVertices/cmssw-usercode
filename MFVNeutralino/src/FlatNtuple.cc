@@ -10,7 +10,7 @@ namespace mfv {
     tree->Branch("run", &nt.run, "run/i");
     tree->Branch("lumi", &nt.lumi, "lumi/i");
     tree->Branch("event", &nt.event, "event/i");
-    tree->Branch("sample", &nt.sample, "sample/b");
+    tree->Branch("sample", &nt.sample, "sample/B");
     tree->Branch("gen_valid", &nt.gen_valid, "gen_valid/O");
     tree->Branch("gen_lsp_pt", nt.gen_lsp_pt, "gen_lsp_pt[2]/F");
     tree->Branch("gen_lsp_eta", nt.gen_lsp_eta, "gen_lsp_eta[2]/F");

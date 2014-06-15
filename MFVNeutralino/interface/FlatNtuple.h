@@ -18,7 +18,8 @@ namespace mfv {
 
     void clear() {
       run = lumi = event = 0;
-      sample = gen_partons_in_acc = npv = pv_ntracks = nvertices = 0;
+      sample = 0;
+      gen_partons_in_acc = npv = pv_ntracks = nvertices = 0;
       gen_valid = 0;
       for (int i = 0; i < 2; ++i) {
         gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -127,7 +128,7 @@ namespace mfv {
     uint run;
     uint lumi;
     uint event;
-    uchar sample;
+    char sample;
 
     ////////////////////////////////////////////////////////////////////
 

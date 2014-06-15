@@ -16,7 +16,7 @@ public:
 
   const edm::InputTag event_src;
   const edm::InputTag vertex_src;
-  const unsigned sample;
+  const int sample;
 
   mfv::FlatNtuple nt;
   TTree* tree;
@@ -25,7 +25,7 @@ public:
 MFVFlatTreer::MFVFlatTreer(const edm::ParameterSet& cfg)
   : event_src(cfg.getParameter<edm::InputTag>("event_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    sample(cfg.getParameter<unsigned>("sample"))
+    sample(cfg.getParameter<int>("sample"))
 {
   assert(sample <= 255);
   edm::Service<TFileService> fs;
