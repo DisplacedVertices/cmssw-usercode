@@ -10,20 +10,27 @@ process.TFileService.fileName = 'flattree.root'
 process.mfvFlatTree = cms.EDAnalyzer('MFVFlatTreer',
                                      event_src = cms.InputTag('mfvEvent'),
                                      vertex_src = cms.InputTag('mfvVerticesAux'),
-                                     sample = cms.uint32(0),
+                                     sample = cms.int32(0),
                                      )
 
 process.p = cms.Path(process.mfvFlatTree)
         
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
-                                 Samples.mfv_neutralino_tau1000um_M0400,
-                                 Samples.mfv_neutralino_tau0300um_M0400,
-                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
+    samples = [Samples.mfv_neutralino_tau0100um_M0400,
+               Samples.mfv_neutralino_tau1000um_M0400,
+               Samples.mfv_neutralino_tau0300um_M0400,
+               Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples
+
+    def modify(sample):
+        ndx = samples.index(sample)
+        id = ndx - 3
+        to_add = ['process.mfvFlatTree.sample = %i' % id]
+        return to_add, []
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('FlatTreeV18',
+                       pset_modifier = modify,
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
