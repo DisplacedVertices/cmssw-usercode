@@ -43,7 +43,7 @@ process.p = cms.Path(
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import DataSample
 
-    data_samples = [
+    samples = [
         DataSample('MultiJetPk2012B', '/MultiJet1Parked/Run2012B-v1/RAW'),
         DataSample('MultiJetPk2012C', '/MultiJet1Parked/Run2012C-v1/RAW'),
         DataSample('MultiJetPk2012D', '/MultiJet1Parked/Run2012D-v1/RAW'),
@@ -59,7 +59,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         elif sample.name.endswith('D'):
             tag = 'FT_P_V42D'
         if tag is not None:
-            to_add.append("process.GlobalTag.globaltag = tag + '::All'")
+            to_add.append("process.GlobalTag.globaltag = '%s::All'" % tag)
 
         return to_add, to_replace
     
@@ -68,6 +68,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = modify,
                        total_number_of_lumis = -1,
                        lumis_per_job = 50,
-                       USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
+                       GRID_data_location_override = 'T2_US',
+                       USER_jmt_skip_input_files = 'src/EgammaAnalysis/ElectronTools/data/*,src/CMGTools/External/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml,lib/slc5_amd64_gcc462/libCMGToolsExternal.so',
                        )
     cs.submit_all(samples)
