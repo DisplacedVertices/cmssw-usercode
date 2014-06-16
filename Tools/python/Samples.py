@@ -547,13 +547,16 @@ mfv_neutralino_tau9900um_M1000.ana_dataset_override = '/mfv_neutralino_tau9900um
 for sample in ttbar_systematics_samples:
     sample.ana_hash = '63d51abe304b0c3d40e1872ac2d8fed6'
 
+for sample in smaller_background_samples:
+    sample.ana_hash = '3ced1937b91bc4f554accd4ebbc93952'
+
 MultiJetPk2012B.ana_hash = 'bff65ebcd1e8cb7cf157d69554917e7e'
 MultiJetPk2012C1.ana_hash = '7e213eec0d0ac129da23820d65a3042c'
 MultiJetPk2012C2.ana_hash = 'eecbfc9eed4af2df7dabe690a1ba0aee'
 MultiJetPk2012D1.ana_hash = '19f5425d37432fa14e1f344294f78697'
 MultiJetPk2012D2.ana_hash = '5945168ee727e69cc82af38e183c5777'
 
-for sample in ttbar_samples + qcd_samples + mfv_signal_samples + ttbar_systematics_samples + data_samples:
+for sample in ttbar_samples + qcd_samples + smaller_background_samples + mfv_signal_samples + ttbar_systematics_samples + data_samples:
     sample.ana_ready = True
 
 # JMTBAD replace ana_ready with ana_dict and check that
