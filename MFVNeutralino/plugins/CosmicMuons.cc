@@ -55,8 +55,8 @@ class CosmicMuons : public edm::EDAnalyzer {
   TH2F* h_tracks_vy_vx;
   TH1F* h_tracks_ntkhits;
   TH2F* h_tracks_ngtracks_frachitsshared;
-  TH1F* h_gtracks_theta[3];
-  TH1F* h_tracks_gtracksmintheta[3];
+  TH1F* h_gtracks_theta[11];
+  TH1F* h_tracks_gtracksmintheta[11];
 
   TH1F* h_nmuons;
   TH2F* h_ntracks_nmuons;
@@ -114,10 +114,9 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   h_tracks_vy_vx = fs->make<TH2F>("h_tracks_vy_vx", ";tracks vx (cm);tracks vy (cm)", 100, -0.5, 0.5, 100, -0.5, 0.5);
   h_tracks_ntkhits = fs->make<TH1F>("h_tracks_ntkhits", ";tracks number of tracker hits;arb. units", 40, 0, 40);
   h_tracks_ngtracks_frachitsshared = fs->make<TH2F>("h_tracks_ngtracks_frachitsshared", ";fraction of hits shared;number of general tracks that share this fraction", 105, 0, 1.05, 200, 0, 200);
-  const char* percent[3] = {"80", "90", "100"};
-  for (int i = 0; i < 3; ++i) {
-    h_gtracks_theta[i] = fs->make<TH1F>(TString::Format("h_gtracks_theta_%s", percent[i]), TString::Format(";3D space angle between cosmic track and general tracks that share %s percent of hits;arb. units", percent[i]), 315, 0, 3.15);
-    h_tracks_gtracksmintheta[i] = fs->make<TH1F>(TString::Format("h_tracks_gtracksmintheta_%s", percent[i]), TString::Format(";3D space angle from cosmic track to closest general track that shares %s percent of hits", percent[i]), 315, 0, 3.15);
+  for (int i = 0; i < 11; ++i) {
+    h_gtracks_theta[i] = fs->make<TH1F>(TString::Format("h_gtracks_theta_%d", i), TString::Format(";3D space angle between cosmic track and general tracks that share at least %d percent of hits;arb. units", 10*i), 315, 0, 3.15);
+    h_tracks_gtracksmintheta[i] = fs->make<TH1F>(TString::Format("h_tracks_gtracksmintheta_%d", i), TString::Format(";3D space angle from cosmic track to closest general track that shares %d at least percent of hits", 10*i), 315, 0, 3.15);
   }
 
   h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
@@ -187,7 +186,7 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_tracks_ntkhits->Fill(tk.hitPattern().numberOfValidTrackerHits());
 
     int ngtracksnhits[100] = {0};
-    std::vector<double> gtrackstheta[3];
+    std::vector<double> gtrackstheta[11];
     for (const reco::Track& gtk : *general_tracks) {
       const reco::HitPattern& ghp = gtk.hitPattern();
       int nhits = 0;
@@ -212,9 +211,8 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
       }
       ngtracksnhits[nhits]++;
 
-      const double fraction[3] = {0.8, 0.9, 1.0};
-      for (int i = 0; i < 3; ++i) {
-        if (double(nhits) / tk.hitPattern().numberOfValidTrackerHits() >= fraction[i]) {
+      for (int i = 0; i < 11; ++i) {
+        if (double(nhits) / tk.hitPattern().numberOfValidTrackerHits() >= 0.1*i) {
           h_gtracks_theta[i]->Fill(acos(tk.momentum().Dot(gtk.momentum()) / (tk.p() * gtk.p())));
           gtrackstheta[i].push_back(acos(tk.momentum().Dot(gtk.momentum()) / (tk.p() * gtk.p())));
         }
@@ -223,7 +221,7 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     for (int nhits = 0; nhits <= tk.hitPattern().numberOfValidTrackerHits(); ++nhits) {
       h_tracks_ngtracks_frachitsshared->Fill(double(nhits) / tk.hitPattern().numberOfValidTrackerHits(), ngtracksnhits[nhits]);
     }
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 11; ++i) {
       std::sort(gtrackstheta[i].begin(), gtrackstheta[i].end());
       if (gtrackstheta[i].size() > 0) {
         h_tracks_gtracksmintheta[i]->Fill(gtrackstheta[i][0]);
