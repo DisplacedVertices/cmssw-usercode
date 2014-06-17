@@ -148,6 +148,28 @@ void MFVFlatTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.vtx_pv2derr.push_back(v.pv2derr);
     nt.vtx_pv3ddist.push_back(v.pv3ddist);
     nt.vtx_pv3derr.push_back(v.pv3derr);
+    nt.vtx_ntracks.push_back(v.ntracks());
+    nt.vtx_nbadtracks.push_back(v.nbadtracks());
+    nt.vtx_ntracksptgt3.push_back(v.ntracksptgt(3));
+    nt.vtx_ntracksptgt5.push_back(v.ntracksptgt(5));
+    nt.vtx_ntracksptgt10.push_back(v.ntracksptgt(10));
+    nt.vtx_trackminnhits.push_back(v.trackminnhits());
+    nt.vtx_trackmaxnhits.push_back(v.trackmaxnhits());
+    nt.vtx_sumpt2.push_back(v.sumpt2());
+    nt.vtx_sumnhitsbehind.push_back(v.sumnhitsbehind());
+    nt.vtx_maxnhitsbehind.push_back(v.maxnhitsbehind());
+    nt.vtx_ntrackssharedwpv.push_back(v.ntrackssharedwpv());
+    nt.vtx_ntrackssharedwpvs.push_back(v.ntrackssharedwpvs());
+    nt.vtx_npvswtracksshared.push_back(v.npvswtracksshared());
+    nt.vtx_pvmosttracksshared.push_back(v.pvmosttracksshared());
+    nt.vtx_mintrackpt.push_back(v.mintrackpt());
+    nt.vtx_maxtrackpt.push_back(v.maxtrackpt());
+    nt.vtx_maxm1trackpt.push_back(v.maxmntrackpt(1));
+    nt.vtx_maxm2trackpt.push_back(v.maxmntrackpt(2));
+    nt.vtx_trackpairdrmin.push_back(v.trackpairdrmin());
+    nt.vtx_trackpairdrmax.push_back(v.trackpairdrmax());
+    nt.vtx_trackpairdravg.push_back(v.trackpairdravg());
+    nt.vtx_trackpairdrrms.push_back(v.trackpairdrrms());
   }
 
   tree->Fill();
