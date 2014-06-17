@@ -31,6 +31,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('FlatTreeV18',
                        pset_modifier = modify,
+                       get_edm_output = True,
+                       data_retrieval = 'fnal',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
