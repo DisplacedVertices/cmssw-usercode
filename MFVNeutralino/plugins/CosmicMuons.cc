@@ -57,8 +57,10 @@ class CosmicMuons : public edm::EDAnalyzer {
   TH2F* h_tracks_ngtracks_frachitsshared;
   TH1F* h_gtracks_theta[11];
   TH1F* h_tracks_gtracksmintheta[11];
-  TH1F* h_gtracks_frachitsshared;
-  TH1F* h_tracks_gtracksmaxfrachitsshared;
+  TH1F* h_gtracks_theta0p1_frac;
+  TH1F* h_tracks_gtrackstheta0p1_maxfrac;
+  TH1F* h_gtracks_theta0p01_frac;
+  TH1F* h_tracks_gtrackstheta0p01_maxfrac;
 
   TH1F* h_nmuons;
   TH2F* h_ntracks_nmuons;
@@ -120,8 +122,10 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
     h_gtracks_theta[i] = fs->make<TH1F>(TString::Format("h_gtracks_theta_%d", i), TString::Format(";3D space angle between cosmic track and general tracks that share at least %d percent of layers;arb. units", 10*i), 315, 0, 3.15);
     h_tracks_gtracksmintheta[i] = fs->make<TH1F>(TString::Format("h_tracks_gtracksmintheta_%d", i), TString::Format(";3D space angle from cosmic track to closest general track that shares %d at least percent of layers;arb. units", 10*i), 315, 0, 3.15);
   }
-  h_gtracks_frachitsshared = fs->make<TH1F>("h_gtracks_frachitsshared", ";fraction of layers shared with general tracks that have theta < 0.1 to cosmic track;arb. units", 105, 0, 1.05);
-  h_tracks_gtracksmaxfrachitsshared = fs->make<TH1F>("h_tracks_gtracksmaxfrachitsshared", ";highest fraction of layers shared with general tracks that have theta < 0.1 to cosmic track;arb. units", 105, 0, 1.05);
+  h_gtracks_theta0p1_frac = fs->make<TH1F>("h_gtracks_theta0p1_frac", ";fraction of layers shared with general tracks that have theta < 0.1 to cosmic track;arb. units", 105, 0, 1.05);
+  h_tracks_gtrackstheta0p1_maxfrac = fs->make<TH1F>("h_tracks_gtrackstheta0p1_maxfrac", ";highest fraction of layers shared with general tracks that have theta < 0.1 to cosmic track;arb. units", 105, 0, 1.05);
+  h_gtracks_theta0p01_frac = fs->make<TH1F>("h_gtracks_theta0p01_frac", ";fraction of layers shared with general tracks that have theta < 0.01 to cosmic track;arb. units", 105, 0, 1.05);
+  h_tracks_gtrackstheta0p01_maxfrac = fs->make<TH1F>("h_tracks_gtrackstheta0p01_maxfrac", ";highest fraction of layers shared with general tracks that have theta < 0.01 to cosmic track;arb. units", 105, 0, 1.05);
 
   h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
   h_ntracks_nmuons = fs->make<TH2F>("h_ntracks_nmuonswcuts", ";number of generated muons;number of tracks", 10, 0, 10, 10, 0, 10);
@@ -218,7 +222,8 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
 
     int ngtracksnhits[100] = {0};
     std::vector<double> gtrackstheta[11];
-    std::vector<double> gtracksfrac;
+    std::vector<double> gtrackstheta0p1frac;
+    std::vector<double> gtrackstheta0p01frac;
     for (const reco::Track& gtk : *general_tracks) {
       const reco::HitPattern& ghp = gtk.hitPattern();
       int gsignature[27] = {0};
@@ -261,8 +266,12 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
       }
 
       if (theta < 0.1) {
-        h_gtracks_frachitsshared->Fill(frac);
-        gtracksfrac.push_back(frac);
+        h_gtracks_theta0p1_frac->Fill(frac);
+        gtrackstheta0p1frac.push_back(frac);
+      }
+      if (theta < 0.01) {
+        h_gtracks_theta0p01_frac->Fill(frac);
+        gtrackstheta0p01frac.push_back(frac);
       }
     }
 
@@ -275,9 +284,13 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
         h_tracks_gtracksmintheta[i]->Fill(gtrackstheta[i][0]);
       }
     }
-    std::sort(gtracksfrac.begin(), gtracksfrac.end());
-    if (gtracksfrac.size() > 0) {
-      h_tracks_gtracksmaxfrachitsshared->Fill(gtracksfrac[int(gtracksfrac.size())-1]);
+    std::sort(gtrackstheta0p1frac.begin(), gtrackstheta0p1frac.end());
+    if (gtrackstheta0p1frac.size() > 0) {
+      h_tracks_gtrackstheta0p1_maxfrac->Fill(gtrackstheta0p1frac[int(gtrackstheta0p1frac.size())-1]);
+    }
+    std::sort(gtrackstheta0p01frac.begin(), gtrackstheta0p01frac.end());
+    if (gtrackstheta0p01frac.size() > 0) {
+      h_tracks_gtrackstheta0p01_maxfrac->Fill(gtrackstheta0p01frac[int(gtrackstheta0p01frac.size())-1]);
     }
   }
   h_ntrackswcuts->Fill(ntracks);
