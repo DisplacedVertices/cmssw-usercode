@@ -35,6 +35,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        data_retrieval = 'fnal',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
+                       publish_data_name = 'flattree_v18',
                        run_half_mc = True,
                        )
     cs.submit_all(samples)
