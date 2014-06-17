@@ -113,10 +113,10 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   h_tracks_chi2dof = fs->make<TH1F>("h_tracks_chi2dof", ";tracks #chi^2/dof;arb. units", 100, 0, 100);
   h_tracks_vy_vx = fs->make<TH2F>("h_tracks_vy_vx", ";tracks vx (cm);tracks vy (cm)", 100, -0.5, 0.5, 100, -0.5, 0.5);
   h_tracks_ntkhits = fs->make<TH1F>("h_tracks_ntkhits", ";tracks number of tracker hits;arb. units", 40, 0, 40);
-  h_tracks_ngtracks_frachitsshared = fs->make<TH2F>("h_tracks_ngtracks_frachitsshared", ";fraction of hits shared;number of general tracks that share this fraction", 105, 0, 1.05, 200, 0, 200);
+  h_tracks_ngtracks_frachitsshared = fs->make<TH2F>("h_tracks_ngtracks_frachitsshared", ";fraction of layers shared;number of general tracks that share this fraction", 105, 0, 1.05, 200, 0, 200);
   for (int i = 0; i < 11; ++i) {
-    h_gtracks_theta[i] = fs->make<TH1F>(TString::Format("h_gtracks_theta_%d", i), TString::Format(";3D space angle between cosmic track and general tracks that share at least %d percent of hits;arb. units", 10*i), 315, 0, 3.15);
-    h_tracks_gtracksmintheta[i] = fs->make<TH1F>(TString::Format("h_tracks_gtracksmintheta_%d", i), TString::Format(";3D space angle from cosmic track to closest general track that shares %d at least percent of hits", 10*i), 315, 0, 3.15);
+    h_gtracks_theta[i] = fs->make<TH1F>(TString::Format("h_gtracks_theta_%d", i), TString::Format(";3D space angle between cosmic track and general tracks that share at least %d percent of layers;arb. units", 10*i), 315, 0, 3.15);
+    h_tracks_gtracksmintheta[i] = fs->make<TH1F>(TString::Format("h_tracks_gtracksmintheta_%d", i), TString::Format(";3D space angle from cosmic track to closest general track that shares %d at least percent of layers", 10*i), 315, 0, 3.15);
   }
 
   h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
@@ -185,29 +185,62 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_tracks_vy_vx->Fill(tk.vx() - bsx, tk.vy() - bsy);
     h_tracks_ntkhits->Fill(tk.hitPattern().numberOfValidTrackerHits());
 
+
+    int signature[27] = {0};
+    for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
+      uint32_t hit = hp.getHitPattern(ihit);
+      if (!(hp.getHitType(hit) == 0) || !((hit >> 10) & 0x1)) continue;
+      uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
+      uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
+      // subsubsub = {(1,1), (1,2), (1,3), (2,1), (2,2), (3,1), (3,2), (3,3), (3,4), (4,1), (4,2), (4,3), (5,1), (5,2), (5,3), (5,4), (5,5), (5,6), (6,1), (6,2), (6,3), (6,4), (6,5), (6,6), (6,7), (6,8), (6,9)};
+
+      if (sub == 1) {
+        signature[subsub - 1]++;
+      } else if (sub == 2) {
+        signature[subsub + 2]++;
+      } else if (sub == 3) {
+        signature[subsub + 4]++;
+      } else if (sub == 4) {
+        signature[subsub + 8]++;
+      } else if (sub == 5) {
+        signature[subsub + 11]++;
+      } else if (sub == 6) {
+        signature[subsub + 17]++;
+      } else {
+        throw cms::Exception("CosmicMuons") << "unknown sub " << sub << " with subsub " << subsub;
+      }
+    }
+
     int ngtracksnhits[100] = {0};
     std::vector<double> gtrackstheta[11];
     for (const reco::Track& gtk : *general_tracks) {
       const reco::HitPattern& ghp = gtk.hitPattern();
-      int nhits = 0;
-
-      for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
-        uint32_t hit = hp.getHitPattern(ihit);
+      int gsignature[27] = {0};
+      for (int ihit = 0, ie = ghp.numberOfHits(); ihit < ie; ++ihit) {
+        uint32_t hit = ghp.getHitPattern(ihit);
         if (!(hp.getHitType(hit) == 0) || !((hit >> 10) & 0x1)) continue;
         uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
         uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
-
-        for (int jhit = 0, je = ghp.numberOfHits(); jhit < je; ++jhit) {
-          uint32_t ghit = ghp.getHitPattern(jhit);
-          if (!(ghp.getHitType(ghit) == 0) || !((ghit >> 10) & 0x1)) continue;
-          uint32_t gsub    = reco::HitPattern::getSubStructure   (ghit);
-          uint32_t gsubsub = reco::HitPattern::getSubSubStructure(ghit);
-
-          if (sub == gsub && subsub == gsubsub) {
-            nhits++;
-            break;
-          }
+        if (sub == 1) {
+          gsignature[subsub - 1]++;
+        } else if (sub == 2) {
+          gsignature[subsub + 2]++;
+        } else if (sub == 3) {
+          gsignature[subsub + 4]++;
+        } else if (sub == 4) {
+          gsignature[subsub + 8]++;
+        } else if (sub == 5) {
+          gsignature[subsub + 11]++;
+        } else if (sub == 6) {
+          gsignature[subsub + 17]++;
+        } else {
+          throw cms::Exception("CosmicMuons") << "unknown sub " << sub << " with subsub " << subsub;
         }
+      }
+
+      int nhits = 0;
+      for (int i = 0; i < 27; ++i) {
+        nhits += std::min(signature[i], gsignature[i]);
       }
       ngtracksnhits[nhits]++;
 
@@ -218,6 +251,7 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
         }
       }
     }
+
     for (int nhits = 0; nhits <= tk.hitPattern().numberOfValidTrackerHits(); ++nhits) {
       h_tracks_ngtracks_frachitsshared->Fill(double(nhits) / tk.hitPattern().numberOfValidTrackerHits(), ngtracksnhits[nhits]);
     }
