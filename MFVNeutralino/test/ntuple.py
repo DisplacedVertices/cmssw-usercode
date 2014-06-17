@@ -14,7 +14,7 @@ track_used_req = None
 prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
-apply_vertex_selection = ''
+apply_vertex_selection = None
 
 process, common_seq = pat_tuple_process(runOnMC)
 #set_events_to_process(process, [])
@@ -51,8 +51,9 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
-if apply_vertex_selection:
+if apply_vertex_selection is not None:
     process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+    process.mfvAnalysisCuts.mevent_src = ''
     exec apply_vertex_selection
 
 if jumble_tracks:
@@ -79,11 +80,11 @@ for name, path in process.paths.items():
         path.insert(0, process.triggerFilter)
 process.psel = cms.Path(process.triggerFilter)
 
-if apply_vertex_selection:
+if apply_vertex_selection is not None:
     process.psel *= process.mfvVertexSequence * process.mfvAnalysisCuts
 
 if keep_all:
-    if apply_vertex_selection:
+    if apply_vertex_selection is not None:
         process.psel = cms.Path(process.mfvAnalysisCuts)
     else:
         process.mfvEvent.skip_event_filter = ''
@@ -208,6 +209,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         batch_name_extra += '_WVis'
     elif keep_all:
         batch_name_extra += '_WAll'
+
+    if apply_vertex_selection is not None:
+        batch_name_extra += '_Seld'
 
     if track_histos_only:
         batch_name_extra += '_TrackHistosOnly'
