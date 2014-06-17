@@ -16,6 +16,7 @@ private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   const edm::InputTag mevent_src;
+  const bool use_mevent;
   const int trigger_bit;
   const bool re_trigger;
   const int min_npv;
@@ -58,6 +59,7 @@ private:
 
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
+    use_mevent(mevent_src.label() != ""),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
     re_trigger(cfg.getParameter<bool>("re_trigger")),
     min_npv(cfg.getParameter<int>("min_npv")),
@@ -107,65 +109,68 @@ namespace {
 
 bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mevent_src, mevent);
 
-  if (trigger_bit >= 0) {
-    if (re_trigger) {
-      bool pass_trigger[mfv::n_trigger_paths] = { 0 };
-      TriggerHelper trig_helper(event, edm::InputTag("TriggerResults", "", "HLT"));
-      mfv::trigger_decision(trig_helper, pass_trigger);
-      if (!pass_trigger[trigger_bit])
+  if (use_mevent) {
+    event.getByLabel(mevent_src, mevent);
+
+    if (trigger_bit >= 0) {
+      if (re_trigger) {
+        bool pass_trigger[mfv::n_trigger_paths] = { 0 };
+        TriggerHelper trig_helper(event, edm::InputTag("TriggerResults", "", "HLT"));
+        mfv::trigger_decision(trig_helper, pass_trigger);
+        if (!pass_trigger[trigger_bit])
+          return false;
+      }
+      else if (!mevent->pass_trigger[trigger_bit])
         return false;
     }
-    else if (!mevent->pass_trigger[trigger_bit])
-      return false;
-  }
 
-  if (mevent->npv < min_npv || mevent->npv > max_npv)
-    return false;
-
-  if (mevent->nmu(0) < min_nmuons)
-    return false;
-
-  if (mevent->nmu(1) < min_nsemilepmuons)
-    return false;
-
-  if (mevent->nlep(0) < min_nleptons)
-    return false;
-
-  if (mevent->nlep(1) < min_nsemileptons)
-    return false;
-
-  if (mevent->njets() < min_njets || mevent->njets() > max_njets)
-    return false;
-
-  if((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||
-     (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt) ||
-     (min_6th_jet_pt > 0 && mevent->jetpt6() < min_6th_jet_pt))
-    return false;
-
-  for (int i = 0; i < 3; ++i)
-    if (mevent->nbtags(i) < min_nbtags[i] || mevent->nbtags(i) > max_nbtags[i])
+    if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;
 
-  if (mevent->jet_sum_ht() < min_sumht)
-    return false;
+    if (mevent->nmu(0) < min_nmuons)
+      return false;
 
-  if (mevent->jet_sum_ht() > max_sumht)
-    return false;
+    if (mevent->nmu(1) < min_nsemilepmuons)
+      return false;
 
-  if (min_sum_other_pv_sumpt2 > 0 || max_sum_other_pv_sumpt2 < 1e9) {
-    edm::Handle<reco::VertexCollection> primary_vertices;
-    event.getByLabel("offlinePrimaryVertices", primary_vertices);
-    double other_pv_sumpt2 = 0;
-    for (size_t i = 1; i < primary_vertices->size(); ++i) {
-      const reco::Vertex& pv = primary_vertices->at(i);
-      for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki)
-        other_pv_sumpt2 += (*trki)->pt() * (*trki)->pt();
+    if (mevent->nlep(0) < min_nleptons)
+      return false;
+
+    if (mevent->nlep(1) < min_nsemileptons)
+      return false;
+
+    if (mevent->njets() < min_njets || mevent->njets() > max_njets)
+      return false;
+
+    if((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||
+       (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt) ||
+       (min_6th_jet_pt > 0 && mevent->jetpt6() < min_6th_jet_pt))
+      return false;
+
+    for (int i = 0; i < 3; ++i)
+      if (mevent->nbtags(i) < min_nbtags[i] || mevent->nbtags(i) > max_nbtags[i])
+        return false;
+
+    if (mevent->jet_sum_ht() < min_sumht)
+      return false;
+
+    if (mevent->jet_sum_ht() > max_sumht)
+      return false;
+
+    if (min_sum_other_pv_sumpt2 > 0 || max_sum_other_pv_sumpt2 < 1e9) {
+      edm::Handle<reco::VertexCollection> primary_vertices;
+      event.getByLabel("offlinePrimaryVertices", primary_vertices);
+      double other_pv_sumpt2 = 0;
+      for (size_t i = 1; i < primary_vertices->size(); ++i) {
+        const reco::Vertex& pv = primary_vertices->at(i);
+        for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki)
+          other_pv_sumpt2 += (*trki)->pt() * (*trki)->pt();
+      }
+
+      if (other_pv_sumpt2 < min_sum_other_pv_sumpt2 || other_pv_sumpt2 > max_sum_other_pv_sumpt2)
+        return false;
     }
-
-    if (other_pv_sumpt2 < min_sum_other_pv_sumpt2 || other_pv_sumpt2 > max_sum_other_pv_sumpt2)
-      return false;
   }
 
   if (apply_vertex_cuts) {
@@ -200,10 +205,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (v0.mass[mfv::PTracksPlusJetsByNtracks] + v1.mass[mfv::PTracksPlusJetsByNtracks] < min_tksjetsntkmass01)
         return false;
 
-      const double phi0 = atan2(v0.y - mevent->bsy, v0.x - mevent->bsx);
-      const double phi1 = atan2(v1.y - mevent->bsy, v1.x - mevent->bsx);
-      if (fabs(reco::deltaPhi(phi0, phi1)) < min_absdeltaphi01)
-        return false;
+      if (use_mevent) {
+        const double phi0 = atan2(v0.y - mevent->bsy, v0.x - mevent->bsx);
+        const double phi1 = atan2(v1.y - mevent->bsy, v1.x - mevent->bsx);
+        if (fabs(reco::deltaPhi(phi0, phi1)) < min_absdeltaphi01)
+          return false;
+      }
 
       if (v0.bs2ddist + v1.bs2ddist < min_bs2ddist01)
         return false;
