@@ -189,6 +189,7 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     h_tracks_vy_vx->Fill(tk.vx() - bsx, tk.vy() - bsy);
     h_tracks_ntkhits->Fill(tk.hitPattern().numberOfValidTrackerHits());
 
+    if (tk.hitPattern().numberOfValidTrackerHits() == 0) continue;
 
     int signature[27] = {0};
     for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
