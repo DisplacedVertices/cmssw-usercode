@@ -497,7 +497,7 @@ for sample in all_samples:
 def from_argv(default=None, sort_and_set=True):
     samples = []
     all_samples_names = samples_by_name.keys()
-    ready_only = 'ready_only' in sys.argv
+    ready_only = 'fa_ready_only' in sys.argv
     for arg in sys.argv:
         if any(c in arg for c in '[]*?!'):
             for sample in all_samples:
@@ -510,9 +510,14 @@ def from_argv(default=None, sort_and_set=True):
     if samples:
         if sort_and_set:
             samples = sorted(set(samples))
-        return samples
-    else:
-        return default
+
+    if 'fa_check' in sys.argv:
+        print 'from_argv got these:'
+        for s in samples:
+            print s.name
+        raw_input('ok?')
+
+    return samples if samples else default
 
 ########################################################################
 
