@@ -29,22 +29,22 @@ process.CosmicMuons = cms.EDAnalyzer('CosmicMuons',
                                      min_npxhits = cms.int32(1),
                                      min_nsthits = cms.int32(6),
                                      min_nmuhits = cms.int32(2),
-                                     min_dxy = cms.double(0),
+                                     min_dxy = cms.double(0.01),
                                      max_relpterr = cms.double(0.5),
                                      )
 
-process.CosmicMuonsPt1Nsthits6Dxy0 = process.CosmicMuons.clone()
-process.CosmicMuonsPt1Nsthits6Dxy100 = process.CosmicMuons.clone(min_dxy = 0.01)
-process.CosmicMuonsPt1Nsthits8Dxy0 = process.CosmicMuons.clone(min_nsthits = 8)
-process.CosmicMuonsPt1Nsthits8Dxy100 = process.CosmicMuons.clone(min_nsthits = 8, min_dxy = 0.01)
-process.CosmicMuonsPt5Nsthits6Dxy0 = process.CosmicMuons.clone(min_pt = 5)
-process.CosmicMuonsPt5Nsthits6Dxy100 = process.CosmicMuons.clone(min_pt = 5, min_dxy = 0.01)
-process.CosmicMuonsPt5Nsthits8Dxy0 = process.CosmicMuons.clone(min_pt = 5, min_nsthits = 8)
-process.CosmicMuonsPt5Nsthits8Dxy100 = process.CosmicMuons.clone(min_pt = 5, min_nsthits = 8, min_dxy = 0.01)
+process.CosmicMuonsPt1Nsthits6Dxy0 = process.CosmicMuons.clone(min_dxy = 0)
+process.CosmicMuonsPt1Nsthits6Dxy100 = process.CosmicMuons.clone()
+process.CosmicMuonsPt1Nsthits8Dxy0 = process.CosmicMuons.clone(min_nsthits = 8, min_dxy = 0)
+process.CosmicMuonsPt1Nsthits8Dxy100 = process.CosmicMuons.clone(min_nsthits = 8)
+process.CosmicMuonsPt5Nsthits6Dxy0 = process.CosmicMuons.clone(min_pt = 5, min_dxy = 0)
+process.CosmicMuonsPt5Nsthits6Dxy100 = process.CosmicMuons.clone(min_pt = 5)
+process.CosmicMuonsPt5Nsthits8Dxy0 = process.CosmicMuons.clone(min_pt = 5, min_nsthits = 8, min_dxy = 0)
+process.CosmicMuonsPt5Nsthits8Dxy100 = process.CosmicMuons.clone(min_pt = 5, min_nsthits = 8)
 
-process.cosmicMuons = process.CosmicMuons.clone(track_src = 'cosmicMuons', min_dxy = 0.01)
-process.cosmicMuons1Leg = process.CosmicMuons.clone(track_src = 'cosmicMuons1Leg', min_dxy = 0.01)
-process.regionalCosmicTracks = process.CosmicMuons.clone(track_src = 'regionalCosmicTracks', min_dxy = 0.01)
+process.cosmicMuons = process.CosmicMuons.clone(track_src = 'cosmicMuons', min_npxhits = 0, min_nsthits = 0)
+process.cosmicMuons1Leg = process.CosmicMuons.clone(track_src = 'cosmicMuons1Leg', min_npxhits = 0, min_nsthits = 0)
+process.regionalCosmicTracks = process.CosmicMuons.clone(track_src = 'regionalCosmicTracks', min_nmuhits = 0)
 
 process.p = cms.Path(process.triggerFilter
                    * process.CosmicMuonsPt1Nsthits6Dxy0
