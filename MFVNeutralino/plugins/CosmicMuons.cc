@@ -68,6 +68,8 @@ class CosmicMuons : public edm::EDAnalyzer {
   TH1F* h_tracks_gtrackstheta0p01_maxfrac;
   TH1F* h_gtracks_theta0p0003_frac;
   TH1F* h_tracks_gtrackstheta0p0003_maxfrac;
+  TH1F* h_gtracks_theta0p0003pi_frac;
+  TH1F* h_tracks_gtrackstheta0p0003pi_maxfrac;
 
   TH1F* h_nmuons;
   TH2F* h_ntracks_nmuons;
@@ -140,6 +142,8 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   h_tracks_gtrackstheta0p01_maxfrac = fs->make<TH1F>("h_tracks_gtrackstheta0p01_maxfrac", ";highest fraction of layers shared with general tracks that have theta < 0.01 to cosmic track;arb. units", 105, 0, 1.05);
   h_gtracks_theta0p0003_frac = fs->make<TH1F>("h_gtracks_theta0p0003_frac", ";fraction of layers shared with general tracks that have theta < 0.0003 to cosmic track;arb. units", 105, 0, 1.05);
   h_tracks_gtrackstheta0p0003_maxfrac = fs->make<TH1F>("h_tracks_gtrackstheta0p0003_maxfrac", ";highest fraction of layers shared with general tracks that have theta < 0.0003 to cosmic track;arb. units", 105, 0, 1.05);
+  h_gtracks_theta0p0003pi_frac = fs->make<TH1F>("h_gtracks_theta0p0003pi_frac", ";fraction of layers shared with general tracks that have theta < 0.0003 or theta > 3.1413 to cosmic track;arb. units", 105, 0, 1.05);
+  h_tracks_gtrackstheta0p0003pi_maxfrac = fs->make<TH1F>("h_tracks_gtrackstheta0p0003pi_maxfrac", ";highest fraction of layers shared with general tracks that have theta < 0.0003 or theta > 3.1413 to cosmic track;arb. units", 105, 0, 1.05);
 
   h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
   h_ntracks_nmuons = fs->make<TH2F>("h_ntracks_nmuonswcuts", ";number of generated muons;number of tracks", 10, 0, 10, 10, 0, 10);
@@ -239,6 +243,7 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     std::vector<double> gtrackstheta0p1frac;
     std::vector<double> gtrackstheta0p01frac;
     std::vector<double> gtrackstheta0p0003frac;
+    std::vector<double> gtrackstheta0p0003pifrac;
     for (const reco::Track& gtk : *general_tracks) {
       const reco::HitPattern& ghp = gtk.hitPattern();
       int gsignature[27] = {0};
@@ -299,6 +304,10 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
         h_gtracks_theta0p0003_frac->Fill(frac);
         gtrackstheta0p0003frac.push_back(frac);
       }
+      if (theta < 0.0003 || theta > 3.1413) {
+        h_gtracks_theta0p0003pi_frac->Fill(frac);
+        gtrackstheta0p0003pifrac.push_back(frac);
+      }
     }
 
     for (int nhits = 0; nhits <= tk.hitPattern().numberOfValidTrackerHits(); ++nhits) {
@@ -321,6 +330,10 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     std::sort(gtrackstheta0p0003frac.begin(), gtrackstheta0p0003frac.end());
     if (gtrackstheta0p0003frac.size() > 0) {
       h_tracks_gtrackstheta0p0003_maxfrac->Fill(gtrackstheta0p0003frac[int(gtrackstheta0p0003frac.size())-1]);
+    }
+    std::sort(gtrackstheta0p0003pifrac.begin(), gtrackstheta0p0003pifrac.end());
+    if (gtrackstheta0p0003pifrac.size() > 0) {
+      h_tracks_gtrackstheta0p0003pi_maxfrac->Fill(gtrackstheta0p0003pifrac[int(gtrackstheta0p0003pifrac.size())-1]);
     }
   }
   h_ntrackswcuts->Fill(ntracks);
