@@ -70,6 +70,7 @@ class CosmicMuons : public edm::EDAnalyzer {
   TH1F* h_tracks_gtrackstheta0p0003_maxfrac;
   TH1F* h_gtracks_theta0p0003pi_frac;
   TH1F* h_tracks_gtrackstheta0p0003pi_maxfrac;
+  TH2F* h_gtracks_ptratio_pt;
 
   TH1F* h_nmuons;
   TH2F* h_ntracks_nmuons;
@@ -144,6 +145,7 @@ CosmicMuons::CosmicMuons(const edm::ParameterSet& cfg)
   h_tracks_gtrackstheta0p0003_maxfrac = fs->make<TH1F>("h_tracks_gtrackstheta0p0003_maxfrac", ";highest fraction of layers shared with general tracks that have theta < 0.0003 to cosmic track;arb. units", 105, 0, 1.05);
   h_gtracks_theta0p0003pi_frac = fs->make<TH1F>("h_gtracks_theta0p0003pi_frac", ";fraction of layers shared with general tracks that have theta < 0.0003 or theta > 3.1413 to cosmic track;arb. units", 105, 0, 1.05);
   h_tracks_gtrackstheta0p0003pi_maxfrac = fs->make<TH1F>("h_tracks_gtrackstheta0p0003pi_maxfrac", ";highest fraction of layers shared with general tracks that have theta < 0.0003 or theta > 3.1413 to cosmic track;arb. units", 105, 0, 1.05);
+  h_gtracks_ptratio_pt = fs->make<TH2F>("h_gtracks_ptratio_pt", "matched tracks;cosmic track p_{T};cosmic track p_{T} / general track p_{T}", 150, 0, 150, 100, 0, 10);
 
   h_nmuons = fs->make<TH1F>("h_nmuons", ";number of generated muons;arb. units", 10, 0, 10);
   h_ntracks_nmuons = fs->make<TH2F>("h_ntracks_nmuonswcuts", ";number of generated muons;number of tracks", 10, 0, 10, 10, 0, 10);
@@ -307,6 +309,9 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
       if (theta < 0.0003 || theta > 3.1413) {
         h_gtracks_theta0p0003pi_frac->Fill(frac);
         gtrackstheta0p0003pifrac.push_back(frac);
+        if (frac > 0.85) {
+          h_gtracks_ptratio_pt->Fill(tk.pt(), tk.pt() / gtk.pt());
+        }
       }
     }
 
