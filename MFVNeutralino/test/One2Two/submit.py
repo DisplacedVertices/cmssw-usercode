@@ -163,6 +163,7 @@ phi_exp = None
 signal_contam = None
 batches = []
 how_events = 'toypois'
+'''
 for min_ntracks in (5,6,7,8):
     for svdist_cut in [0.036 + 0.002*i for i in xrange(7)]:
         for sample in 'all all500'.split():
@@ -173,6 +174,9 @@ for min_ntracks in (5,6,7,8):
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
 for batch in batches:
     submit(200, *batch)
+'''
+
+submit(200, 5, 0.04, sampling_type, 'toypois', phi_exp, signal_contam, 'all')
 
 '''
 qcdht0500 qcdht1000 ttbarhadronic ttbarsemilep ttbardilep
