@@ -7,7 +7,7 @@ from JMTucker.Tools.ROOTTools import *
 import JMTucker.Tools.Samples as Samples
 set_style()
 ROOT.TH1.AddDirectory(0)
-ROOT.gStyle.SetOptStat(2222222)
+ROOT.gStyle.SetOptStat(1222222)
 ROOT.gStyle.SetOptFit(2222)
 
 def arrit(l):
