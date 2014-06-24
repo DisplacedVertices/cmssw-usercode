@@ -24,6 +24,11 @@ mfvEventHistosOneVtx = mfvEventHistos.clone()
 mfvVertexHistosOneVtx = mfvVertexHistos.clone()
 pOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOneVtx * mfvEventHistosOneVtx * mfvVertexHistosOneVtx)
 
+mfvAnalysisCutsOnlyOneVtx = mfvAnalysisCuts.clone(min_nvertex = 1, max_nvertex = 1)
+mfvEventHistosOnlyOneVtx = mfvEventHistos.clone()
+mfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone()
+pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnlyOneVtx * mfvVertexHistosOnlyOneVtx)
+
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts * mfvAbcdHistosSeq)
