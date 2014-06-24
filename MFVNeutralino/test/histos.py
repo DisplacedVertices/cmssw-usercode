@@ -48,7 +48,7 @@ for name, cut in nm1s:
         setattr(process, vtx_hst_name, vtx_hst)
         setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
-def force_bs(ana, bs):
+def force_bs(process, bs):
     for ana in process.analyzers:
         if hasattr(ana, 'force_bs'):
             ana.force_bs = bs
