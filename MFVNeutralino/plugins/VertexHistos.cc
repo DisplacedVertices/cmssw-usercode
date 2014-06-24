@@ -28,6 +28,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag mfv_event_src;
+  const std::vector<double> force_bs;
   const edm::InputTag vertex_aux_src;
   const edm::InputTag vertex_src;
   const edm::InputTag vertex_to_jets_src;
@@ -170,12 +171,16 @@ const char* MFVVertexHistos::sv_tracks_index_names[2][MFVVertexHistos::sv_tracks
 
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+    force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     vertex_to_jets_src(cfg.getParameter<edm::InputTag>("vertex_to_jets_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
+  if (force_bs.size() && force_bs.size() != 3)
+    throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
+
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
@@ -567,9 +572,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   const double w = *weight;
   h_w->Fill(w);
 
-  const float bsx = mevent->bsx;
-  const float bsy = mevent->bsy;
-  const float bsz = mevent->bsz;
+  const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
+  const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;
+  const double bsz = force_bs.size() ? force_bs[2] : mevent->bsz;
   const math::XYZPoint bs(bsx, bsy, bsz);
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
 
@@ -1060,8 +1065,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     h_svdist2d_v_minlspdist2d->Fill(mevent->minlspdist2d(), svdist2d, w);
     h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), w);
     h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig(), w);
-    double phi0 = atan2(sv0.y - mevent->bsy, sv0.x - mevent->bsx);
-    double phi1 = atan2(sv1.y - mevent->bsy, sv1.x - mevent->bsx);
+    double phi0 = atan2(sv0.y - bsy, sv0.x - bsx);
+    double phi1 = atan2(sv1.y - bsy, sv1.x - bsx);
     h_absdeltaphi01->Fill(fabs(reco::deltaPhi(phi0, phi1)), w);
 
     h_fractrackssharedwpv01 ->Fill(float(sv0.ntrackssharedwpv () + sv1.ntrackssharedwpv ())/(sv0.ntracks() + sv1.ntracks()), w);

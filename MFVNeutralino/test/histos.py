@@ -48,6 +48,10 @@ for name, cut in nm1s:
         setattr(process, vtx_hst_name, vtx_hst)
         setattr(process, 'p%iV' % nv + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
 
+def force_bs(ana, bs):
+    for ana in process.analyzers:
+        if hasattr(ana, 'force_bs'):
+            ana.force_bs = bs
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples

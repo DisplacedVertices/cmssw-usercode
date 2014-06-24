@@ -20,6 +20,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag mfv_event_src;
+  const std::vector<double> force_bs;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag jets_src;
   const edm::InputTag weight_src;
@@ -117,11 +118,15 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+    force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     re_trigger(cfg.getParameter<bool>("re_trigger"))
 {
+  if (force_bs.size() && force_bs.size() != 3)
+    throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
+
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
@@ -247,6 +252,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const double w = *weight;
   h_w->Fill(w);
 
+  const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
+  const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;
+  const double bsz = force_bs.size() ? force_bs[2] : mevent->bsz;
+
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
@@ -282,16 +291,16 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_npu->Fill(mevent->npu, w);
 
-  h_bsx->Fill(mevent->bsx, w);
-  h_bsy->Fill(mevent->bsy, w);
-  h_bsz->Fill(mevent->bsz, w);
-  h_bsphi->Fill(atan2(mevent->bsy, mevent->bsx), w);
+  h_bsx->Fill(bsx, w);
+  h_bsy->Fill(bsy, w);
+  h_bsz->Fill(bsz, w);
+  h_bsphi->Fill(atan2(bsy, bsx), w);
 
   h_npv->Fill(mevent->npv, w);
-  h_pvx->Fill(mevent->pvx - mevent->bsx, w);
-  h_pvy->Fill(mevent->pvy - mevent->bsy, w);
-  h_pvz->Fill(mevent->pvz - mevent->bsz, w);
-  h_pvphi->Fill(atan2(mevent->pvy - mevent->bsy, mevent->pvx - mevent->bsx), w);
+  h_pvx->Fill(mevent->pvx - bsx, w);
+  h_pvy->Fill(mevent->pvy - bsy, w);
+  h_pvz->Fill(mevent->pvz - bsz, w);
+  h_pvphi->Fill(atan2(mevent->pvy - bsy, mevent->pvx - bsx), w);
   h_pvntracks->Fill(mevent->pv_ntracks, w);
   h_pvsumpt2->Fill(mevent->pv_sumpt2, w);
   h_pvrho->Fill(mevent->pv_rho(), w);
@@ -397,20 +406,20 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
 
       const int isumpt2 = ipv == 1 ? 0 : 1;
-      h_pv_x[isumpt2]->Fill(pv.x() - mevent->bsx, w);
-      h_pv_y[isumpt2]->Fill(pv.y() - mevent->bsy, w);
-      h_pv_z[isumpt2]->Fill(pv.z() - mevent->bsz, w);
-      h_pv_rho[isumpt2]->Fill(sqrt((pv.x() - mevent->bsx) * (pv.x() - mevent->bsx) + (pv.y() - mevent->bsy) * (pv.y() - mevent->bsy)), w);
-      h_pv_phi[isumpt2]->Fill(atan2(pv.y() - mevent->bsy, pv.x() - mevent->bsx), w);
+      h_pv_x[isumpt2]->Fill(pv.x() - bsx, w);
+      h_pv_y[isumpt2]->Fill(pv.y() - bsy, w);
+      h_pv_z[isumpt2]->Fill(pv.z() - bsz, w);
+      h_pv_rho[isumpt2]->Fill(sqrt((pv.x() - bsx) * (pv.x() - bsx) + (pv.y() - bsy) * (pv.y() - bsy)), w);
+      h_pv_phi[isumpt2]->Fill(atan2(pv.y() - bsy, pv.x() - bsx), w);
       h_pv_ntracks[isumpt2]->Fill(pv.nTracks(), w);
       h_pv_sumpt2[isumpt2]->Fill(sumpt2, w);
 
       const int iabsdz = ipv == ipvdz ? 2 : 3;
-      h_pv_x[iabsdz]->Fill(pv.x() - mevent->bsx, w);
-      h_pv_y[iabsdz]->Fill(pv.y() - mevent->bsy, w);
-      h_pv_z[iabsdz]->Fill(pv.z() - mevent->bsz, w);
-      h_pv_rho[iabsdz]->Fill(sqrt((pv.x() - mevent->bsx) * (pv.x() - mevent->bsx) + (pv.y() - mevent->bsy) * (pv.y() - mevent->bsy)), w);
-      h_pv_phi[iabsdz]->Fill(atan2(pv.y() - mevent->bsy, pv.x() - mevent->bsx), w);
+      h_pv_x[iabsdz]->Fill(pv.x() - bsx, w);
+      h_pv_y[iabsdz]->Fill(pv.y() - bsy, w);
+      h_pv_z[iabsdz]->Fill(pv.z() - bsz, w);
+      h_pv_rho[iabsdz]->Fill(sqrt((pv.x() - bsx) * (pv.x() - bsx) + (pv.y() - bsy) * (pv.y() - bsy)), w);
+      h_pv_phi[iabsdz]->Fill(atan2(pv.y() - bsy, pv.x() - bsx), w);
       h_pv_ntracks[iabsdz]->Fill(pv.nTracks(), w);
       h_pv_sumpt2[iabsdz]->Fill(sumpt2, w);
     }
