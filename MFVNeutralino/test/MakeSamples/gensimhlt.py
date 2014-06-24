@@ -41,7 +41,7 @@ process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'START53_V7C::All', '')
 
-process.generator = cms.EDFilter('Pythia8GeneratorFilter',
+process.generator = cms.EDFilter('Pythia8175GeneratorFilter',
 				 crossSection = cms.untracked.double(1),
 				 maxEventsToPrint = cms.untracked.int32(0),
 				 pythiaPylistVerbosity = cms.untracked.int32(0),

@@ -35,7 +35,6 @@ storage_element = T3_US_Cornell
 publish_data = 1
 publish_data_name = mfv_%(name)s
 dbs_url_for_publication = phys03
-%(jmt_externals_hack)s
 ssh_control_persist = no
 
 [GRID]
@@ -43,9 +42,6 @@ se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_W
 '''
 
 ################################################################################
-
-if os.environ['USER'] != 'tucker' and not run_ttbar:
-    raw_input('do you have the jmt_externals_hack for crab? if not, ^C now.')
 
 if not skip_tests:
     print 'testing gensimhlt.py'
@@ -94,8 +90,6 @@ def submit(name, tau0=None, mass=None):
     if 'ttbar' not in name:
         assert tau0 is not None and mass is not None
 
-    jmt_externals_hack = 'jmt_externals_hack = pythia8_hack'
-
     if 'gluino' in name:
         new_py += '\nfrom modify import set_gluino_tau0\n'
         new_py += '\nset_gluino_tau0(process, %e)\n' % tau0       
@@ -107,7 +101,6 @@ def submit(name, tau0=None, mass=None):
         from modify import set_masses
         set_masses(mass+5, mass)
     elif 'ttbar' in name:
-        jmt_externals_hack = ''
         new_py += '\nfrom modify import ttbar\n'
         new_py += '\nttbar(process)\n'
     else:
