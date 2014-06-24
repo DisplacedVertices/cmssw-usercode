@@ -9,7 +9,7 @@ parser.add_argument('--ana-json',
                     help='The JSON file produced from crab -report (or multiple crab reports, added together with mergeJSON.py).')
 parser.add_argument('--lumi-json', default='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_latest.txt',
                     help='The centrally produced lumi-weighted pileup JSON (default %(default)s).')
-parser.add_argument('--max-npu', type=int, default=65,
+parser.add_argument('--max-npu', type=int, default=100,
                     help='The maximum pileup bin (default %(default)s).')
 parser.add_argument('--pileupcalc-mode', default='true',
                     help='The mode for pileupCalc.py: "true" or "observed" (default %(default)s).')
