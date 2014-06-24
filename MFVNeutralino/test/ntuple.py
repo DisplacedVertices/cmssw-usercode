@@ -14,8 +14,6 @@ track_used_req = None
 prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
-apply_vertex_selection = ''
-
 process, common_seq = pat_tuple_process(runOnMC)
 #set_events_to_process(process, [])
 #process.source.fileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/ACE17BB6-A20E-E211-819A-00266CF9B630.root']
@@ -51,10 +49,6 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.p = cms.Path(common_seq * process.mfvVertexSequence)
 
-if apply_vertex_selection:
-    process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-    exec apply_vertex_selection
-
 if jumble_tracks:
     process.mfvVertices.jumble_tracks = True
     process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219)))
@@ -69,30 +63,20 @@ elif track_used_req == 'nopvs':
     process.mfvVertices.use_tracks = False
     process.mfvVertices.use_non_pvs_tracks = True
 
-
-from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-process.triggerFilter = hltHighLevel.clone()
-process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
-process.triggerFilter.andOr = True # = OR
-for name, path in process.paths.items():
-    if not name.startswith('eventCleaning'):
-        path.insert(0, process.triggerFilter)
-process.psel = cms.Path(process.triggerFilter)
-
-if apply_vertex_selection:
-    process.psel *= process.mfvVertexSequence * process.mfvAnalysisCuts
-
 if keep_all:
-    if apply_vertex_selection:
-        process.psel = cms.Path(process.mfvAnalysisCuts)
-    else:
-        process.mfvEvent.skip_event_filter = ''
+    process.mfvEvent.skip_event_filter = ''
     process.mfvSelectedVerticesTight.produce_vertices = True
     process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
-
-if process.mfvEvent.skip_event_filter.value():
-    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(process.mfvEvent.skip_event_filter.value()))
-
+else:
+    from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
+    process.triggerFilter = hltHighLevel.clone()
+    process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
+    process.triggerFilter.andOr = True # = OR
+    for name, path in process.paths.items():
+        if not name.startswith('eventCleaning'):
+            path.insert(0, process.triggerFilter)
+    process.ptrig = cms.Path(process.triggerFilter)
+    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
