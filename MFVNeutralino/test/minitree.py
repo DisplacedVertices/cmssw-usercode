@@ -13,6 +13,7 @@ process.mfvAnalysisCuts.min_nvertex = 1
 
 process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      event_src = cms.InputTag('mfvEvent'),
+                                     force_bs = cms.vdouble(),
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                      )
 
