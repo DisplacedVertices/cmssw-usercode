@@ -690,6 +690,10 @@ void MFVOne2Two::endJob() {
 
     delete g_dphi_temp;
   }
+  else {
+    g_dphi->FixParameter(0, 1/M_PI);
+    g_dphi->FixParameter(1, 0);
+  }
 
   if (find_g_dz) {
     h_1v_dz_env->Scale(1./h_1v_dz_env->Integral());
@@ -711,6 +715,8 @@ void MFVOne2Two::endJob() {
 
     delete g_dz_temp;
   }
+  else
+    g_dz->FixParameter(0, 9.25);
 
   h_fcn_g_dphi->FillRandom("g_dphi", 100000);
   h_fcn_g_dz  ->FillRandom("g_dz",   100000);
@@ -771,6 +777,8 @@ void MFVOne2Two::endJob() {
 
     delete f_dphi_temp;
   }
+  else
+    f_dphi->FixParameter(0, 1.5);
 
   if (find_f_dz) {
     const int t_which = find_f_dz_bkgonly ? t_2vsbbkg : t_2vsb;
@@ -792,6 +800,8 @@ void MFVOne2Two::endJob() {
 
     delete f_dz_temp;
   }
+  else
+    f_dz->FixParameter(0, 0.02);
 
   h_fcn_dphi->FillRandom("f_dphi", 100000);
   h_fcn_abs_dphi->FillRandom("f_dphi", 100000);
