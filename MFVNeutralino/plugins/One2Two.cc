@@ -81,12 +81,14 @@ public:
   ~MFVOne2Two();
 
   MFVVertexAux xform_vertex(const MFVVertexAux&) const;
+  void set_sig(MFVVertexAux&) const;
+  bool is_sig(const MFVVertexAux&) const;
   bool sel_vertex(const MFVVertexAux&) const;
   bool is_sideband(const MFVVertexAux&, const MFVVertexAux&) const;
 
   typedef std::vector<std::pair<MFVVertexAux, MFVVertexAux> > MFVVertexPairCollection;
 
-  void read_file(const std::string& filename, MFVVertexAuxCollection&, MFVVertexPairCollection&) const;
+  void read_file(const std::string& filename, const bool sig, MFVVertexAuxCollection&, MFVVertexPairCollection&) const;
   void fill_2d(const int ih, const double weight, const MFVVertexAux&, const MFVVertexAux&) const;
   void fill_1d(              const double weight, const MFVVertexAux&, const MFVVertexAux&) const;
 
@@ -117,8 +119,10 @@ public:
   const bool find_g_dz;
   const std::string form_g_dz;
   const bool find_f_dphi;
+  const bool find_f_dphi_bkgonly;
   const std::string form_f_dphi;
   const bool find_f_dz;
+  const bool find_f_dz_bkgonly;
   const std::string form_f_dz;
 
   double gdpmax;
@@ -192,7 +196,7 @@ public:
 
   TRandom3* rand;
 
-  enum { t_2v, t_2vsideband, t_1v, t_sig, n_t };
+  enum { t_2v, t_2vbkg, t_2vsig, t_2vsb, t_2vsbbkg, t_2vsbsig,  n_t_2v = t_2vsbsig, t_1v, t_1vsb, n_t };
   static const char* t_names[n_t];
 
   TH2D* h_xy[n_t];
@@ -228,7 +232,7 @@ public:
   TH1D* h_pred_m_true;
 };
 
-const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vsideband", "1v", "2vsig" };
+const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb" };
 
 MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   : min_ntracks(cfg.getParameter<int>("min_ntracks")),
@@ -254,9 +258,11 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     form_g_dz(cfg.getParameter<std::string>("form_g_dz")),
 
     find_f_dphi(cfg.getParameter<bool>("find_f_dphi")),
+    find_f_dphi_bkgonly(cfg.getParameter<bool>("find_f_dphi_bkgonly")),
     form_f_dphi(cfg.getParameter<std::string>("form_f_dphi")),
 
     find_f_dz(cfg.getParameter<bool>("find_f_dz")),
+    find_f_dz_bkgonly(cfg.getParameter<bool>("find_f_dz_bkgonly")),
     form_f_dz(cfg.getParameter<std::string>("form_f_dz")),
 
     max_1v_ntracks01(cfg.getParameter<int>("max_1v_ntracks01")),
@@ -393,6 +399,14 @@ MFVVertexAux MFVOne2Two::xform_vertex(const MFVVertexAux& v) const {
   return v;
 }
 
+void MFVOne2Two::set_sig(MFVVertexAux& v) const {
+  v.which = 255;
+}
+
+bool MFVOne2Two::is_sig(const MFVVertexAux& v) const {
+  return v.which == 255;
+}
+
 bool MFVOne2Two::sel_vertex(const MFVVertexAux& v) const {
   return v.ntracks() >= min_ntracks;
 }
@@ -401,7 +415,7 @@ bool MFVOne2Two::is_sideband(const MFVVertexAux& v0, const MFVVertexAux& v1) con
   return svdist2d(v0, v1) < svdist2d_cut;
 }
 
-void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& one_vertices, MFVVertexPairCollection& two_vertices) const {
+void MFVOne2Two::read_file(const std::string& filename, const bool sig, MFVVertexAuxCollection& one_vertices, MFVVertexPairCollection& two_vertices) const {
   TFile* f = new TFile(filename.c_str());
   if (!f)
     throw cms::Exception("One2Two") << "could not read file " << filename;
@@ -420,6 +434,7 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
     if (nt.nvtx == 1) {
       MFVVertexAux v0;
       v0.x = nt.x0; v0.y = nt.y0; v0.z = nt.z0; v0.bs2ddist = mag(nt.x0, nt.y0);
+      if (sig) set_sig(v0);
       for (int i = 0; i < nt.ntk0; ++i)
 	v0.insert_track();
       if (sel_vertex(v0))
@@ -427,6 +442,10 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
     }
     else if (nt.nvtx == 2) {
       MFVVertexAux v0, v1;
+      if (sig) { 
+        set_sig(v0);
+        set_sig(v1);
+      }
       v0.x = nt.x0; v0.y = nt.y0; v0.z = nt.z0; v0.bs2ddist = mag(nt.x0, nt.y0);
       v1.x = nt.x1; v1.y = nt.y1; v1.z = nt.z1; v1.bs2ddist = mag(nt.x1, nt.y1);
       for (int i = 0; i < nt.ntk0; ++i) v0.insert_track();
@@ -449,7 +468,13 @@ void MFVOne2Two::read_file(const std::string& filename, MFVVertexAuxCollection& 
 }
 
 void MFVOne2Two::fill_2d(const int ih, const double w, const MFVVertexAux& v0, const MFVVertexAux& v1) const {
-  if (ih == t_2vsideband && !is_sideband(v0, v1))
+  if ((ih == t_2vsb || ih == t_2vsbbkg || ih == t_2vsbsig || ih == t_1vsb) && !is_sideband(v0, v1))
+    return;
+
+  if ((ih == t_2vsig || ih == t_2vsbsig) && (!is_sig(v0) || !is_sig(v1)))
+    return;
+
+  if ((ih == t_2vbkg || ih == t_2vsbbkg) && (is_sig(v0) || is_sig(v1)))
     return;
 
   h_xy[ih]->Fill(v0.x, v0.y, w);
@@ -482,10 +507,14 @@ void MFVOne2Two::fill_1d(const double w, const MFVVertexAux& v0, const MFVVertex
   // The 2v pairs are ordered with ntk0 > ntk1, so fill here the same way.
   const int ntk0 = v0.ntracks(); 
   const int ntk1 = v1.ntracks();
-  if (ntk1 > ntk0)
-    fill_2d(t_1v, w, v1, v0);
-  else
-    fill_2d(t_1v, w, v0, v1);
+  if (ntk1 > ntk0) {
+    fill_2d(t_1v,   w, v1, v0);
+    fill_2d(t_1vsb, w, v1, v0);
+  }
+  else {
+    fill_2d(t_1v,   w, v0, v1);
+    fill_2d(t_1vsb, w, v0, v1);
+  }
 }
 
 double MFVOne2Two::prob_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) const {
@@ -522,7 +551,7 @@ void MFVOne2Two::endJob() {
     printf("reading %lu signals\n", nsignals);
     for (size_t isig = 0; isig < nsignals; ++isig) {
       printf("%s ", signal_files[isig].c_str());
-      read_file(signal_files[isig], signal_one_vertices[isig], signal_two_vertices[isig]);
+      read_file(signal_files[isig], true, signal_one_vertices[isig], signal_two_vertices[isig]);
 
       int nside = 0, nsig = 0;
       for (const auto& pair : signal_two_vertices[isig])
@@ -547,7 +576,7 @@ void MFVOne2Two::endJob() {
   if (!toy_mode) {
     // In regular mode, take all events from the file (with weight 1).
     printf("\n==============================\n\nsingle sample mode, filename: %s\n", filenames[0].c_str());
-    read_file(filenames[0], one_vertices, two_vertices[0]);
+    read_file(filenames[0], false, one_vertices, two_vertices[0]);
   }
   else {
     // Config file specifies how many to take (or the Poisson-mean
@@ -564,7 +593,7 @@ void MFVOne2Two::endJob() {
     for (size_t ifile = 0; ifile < nfiles; ++ifile) {
       printf("file: %s\n", filenames[ifile].c_str());
       MFVVertexAuxCollection v1v;
-      read_file(filenames[ifile], v1v, two_vertices[ifile]);
+      read_file(filenames[ifile], false, v1v, two_vertices[ifile]);
 
       const int n1v = poisson_n1vs ? rand->Poisson(n1vs[ifile]) : n1vs[ifile];
       const int N1v = int(v1v.size());
@@ -694,14 +723,14 @@ void MFVOne2Two::endJob() {
     const double w = toy_mode ? weights[ifile] : 1;
 
     for (const auto& pair : two_vertices[ifile])
-      for (int ih = 0; ih < 2; ++ih)
+      for (int ih = 0; ih < n_t_2v; ++ih)
         fill_2d(ih, w, pair.first, pair.second);
   }
 
   if (signal_contamination >= 0) {
     const size_t isig = signal_contamination;
     for (const auto& pair : signal_two_vertices[isig])
-      for (int ih = 0; ih < n_t; ++ih)
+      for (int ih = 0; ih < n_t_2v; ++ih)
         if (ih != t_1v)
           fill_2d(ih, signal_weights[isig], pair.first, pair.second);
   }
@@ -714,18 +743,20 @@ void MFVOne2Two::endJob() {
     opt = "W" + opt;
 
   if (find_f_dphi) {
-    TF1* f_dphi_temp = new TF1("f_dphi_temp", TString::Format("%f*(%s)", h_abs_dphi[t_2vsideband]->Integral()*h_abs_dphi[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dphi.c_str()), 0, M_PI);
-    TFitResultPtr res = h_abs_dphi[t_2vsideband]->Fit(f_dphi_temp, opt);
+    const int t_which = find_f_dphi_bkgonly ? t_2vsbbkg : t_2vsb;
+
+    TF1* f_dphi_temp = new TF1("f_dphi_temp", TString::Format("%f*(%s)", h_abs_dphi[t_which]->Integral()*h_abs_dphi[t_which]->GetXaxis()->GetBinWidth(1), form_f_dphi.c_str()), 0, M_PI);
+    TFitResultPtr res = h_abs_dphi[t_which]->Fit(f_dphi_temp, opt);
     printf("f_dphi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     f_dphi->FixParameter(0, res->Parameter(0));
 
-    h_dphi_mean    ->Fill(h_abs_dphi[t_2vsideband]->GetMean());
-    h_dphi_mean_err->Fill(h_abs_dphi[t_2vsideband]->GetMeanError());
-    h_dphi_rms     ->Fill(h_abs_dphi[t_2vsideband]->GetRMS());
-    h_dphi_rms_err ->Fill(h_abs_dphi[t_2vsideband]->GetRMSError());
+    h_dphi_mean    ->Fill(h_abs_dphi[t_which]->GetMean());
+    h_dphi_mean_err->Fill(h_abs_dphi[t_which]->GetMeanError());
+    h_dphi_rms     ->Fill(h_abs_dphi[t_which]->GetRMS());
+    h_dphi_rms_err ->Fill(h_abs_dphi[t_which]->GetRMSError());
     double integ1, err1, integ2, err2;
-    integ1 = h_abs_dphi[t_2vsideband]->IntegralAndError(1,5, err1);
-    integ2 = h_abs_dphi[t_2vsideband]->IntegralAndError(6,8, err2);
+    integ1 = h_abs_dphi[t_which]->IntegralAndError(1,5, err1);
+    integ2 = h_abs_dphi[t_which]->IntegralAndError(6,8, err2);
     double N1 = pow(integ1/err1, 2);
     double N2 = pow(integ2/err2, 2);
     double asym, asymlo, asymhi;
@@ -742,18 +773,20 @@ void MFVOne2Two::endJob() {
   }
 
   if (find_f_dz) {
-    TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_2vsideband]->Integral()*h_svdz[t_2vsideband]->GetXaxis()->GetBinWidth(1), form_f_dz.c_str()), f_dz->GetXmin(), f_dz->GetXmax());
-    TFitResultPtr res = h_svdz[t_2vsideband]->Fit(f_dz_temp, opt);
+    const int t_which = find_f_dz_bkgonly ? t_2vsbbkg : t_2vsb;
+
+    TF1* f_dz_temp = new TF1("f_dz_temp", TString::Format("%f*(%s)", h_svdz[t_which]->Integral()*h_svdz[t_which]->GetXaxis()->GetBinWidth(1), form_f_dz.c_str()), f_dz->GetXmin(), f_dz->GetXmax());
+    TFitResultPtr res = h_svdz[t_which]->Fit(f_dz_temp, opt);
     printf("f_dz fit gaus sigma = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n", res->Parameter(0), res->ParError(0), res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
     f_dz->FixParameter(0, res->Parameter(0));
 
-    h_dz_mean    ->Fill(h_svdz[t_2vsideband]->GetMean());
-    h_dz_mean_err->Fill(h_svdz[t_2vsideband]->GetMeanError());
-    h_dz_rms     ->Fill(h_svdz[t_2vsideband]->GetRMS());
-    h_dz_rms_err ->Fill(h_svdz[t_2vsideband]->GetRMSError());
+    h_dz_mean    ->Fill(h_svdz[t_which]->GetMean());
+    h_dz_mean_err->Fill(h_svdz[t_which]->GetMeanError());
+    h_dz_rms     ->Fill(h_svdz[t_which]->GetRMS());
+    h_dz_rms_err ->Fill(h_svdz[t_which]->GetRMSError());
     h_dz_fit_sig     ->Fill(res->Parameter(0));
     h_dz_fit_sig_err ->Fill(res->ParError(0));
-    h_dz_fit_sig_pull->Fill((res->Parameter(0) - h_svdz[t_2vsideband]->GetRMS()) / res->ParError(0));
+    h_dz_fit_sig_pull->Fill((res->Parameter(0) - h_svdz[t_which]->GetRMS()) / res->ParError(0));
     h_dz_fit_chi2    ->Fill(res->Chi2() / res->Ndf());
     h_dz_fit_chi2prob->Fill(res->Prob());
 
@@ -922,10 +955,10 @@ void MFVOne2Two::endJob() {
   
   const double pred_sidereg_bkg = h_1v_svdist2d_fit_2v->Integral(1, last_sideband_bin);
   const double true_sidereg     = h_svdist2d[t_2v]    ->Integral(1, last_sideband_bin);
-  const double true_sidereg_sig = h_svdist2d[t_sig]   ->Integral(1, last_sideband_bin);
+  const double true_sidereg_sig = h_svdist2d[t_2vsig] ->Integral(1, last_sideband_bin);
   const double pred_signreg_bkg = h_1v_svdist2d_fit_2v->Integral(last_sideband_bin+1, nbins+1);
   const double true_signreg     = h_svdist2d[t_2v]    ->Integral(last_sideband_bin+1, nbins+1);
-  const double true_signreg_sig = h_svdist2d[t_sig]   ->Integral(last_sideband_bin+1, nbins+1);
+  const double true_signreg_sig = h_svdist2d[t_2vsig] ->Integral(last_sideband_bin+1, nbins+1);
 
   const double true_sidereg_bkg = true_sidereg - true_sidereg_sig;
   const double true_signreg_bkg = true_signreg - true_signreg_sig;
