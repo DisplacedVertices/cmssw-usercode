@@ -40,6 +40,7 @@ private:
   const bool apply_vertex_cuts;
   const edm::InputTag vertex_src;
   const int min_nvertex;
+  const int max_nvertex;
   const int min_ntracks01;
   const int max_ntracks01;
   const double min_maxtrackpt01;
@@ -82,6 +83,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
+    max_nvertex(cfg.getParameter<int>("max_nvertex")),
     min_ntracks01(cfg.getParameter<int>("min_ntracks01")),
     max_ntracks01(cfg.getParameter<int>("max_ntracks01")),
     min_maxtrackpt01(cfg.getParameter<double>("min_maxtrackpt01")),
@@ -178,7 +180,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     event.getByLabel(vertex_src, vertices);
 
     const int nsv = int(vertices->size());
-    if (nsv < min_nvertex)
+    if (nsv < min_nvertex || nsv > max_nvertex)
       return false;
 
     if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0 || min_svdist2d > 0 || max_ntrackssharedwpv01 < 100000 || max_ntrackssharedwpvs01 < 100000 || max_fractrackssharedwpv01 < 1e6 || max_fractrackssharedwpvs01 < 1e6) {
