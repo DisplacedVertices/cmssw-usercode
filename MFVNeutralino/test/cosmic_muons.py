@@ -60,7 +60,7 @@ process.p = cms.Path(process.triggerFilter
                    * process.regionalCosmicTracks)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import mfv_signal_samples
+    from JMTucker.Tools.Samples import mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0300um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
 
     cs = CRABSubmitter('CosmicMuons',
@@ -68,5 +68,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        events_per_job = 10000,
                        )
 
-    samples = mfv_signal_samples
+    samples = [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0300um_M0400, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0400]
     cs.submit_all(samples)

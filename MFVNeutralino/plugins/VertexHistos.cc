@@ -72,6 +72,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   PairwiseHistos h_sv[sv_num_indices];
   PairwiseHistos h_sv_sumtop2;
 
+  TH1F* h_sv_jets_deltaphi[4][sv_num_indices];
+
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
   TH2F* h_svdist2d_v_lspdist2d;
@@ -438,6 +440,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
     h_sv[j].Init("h_sv_" + std::string(exc), hs, true, do_scatterplots);
 
+    const char* lmt_ex[4] = {"", "loose_b", "medium_b", "tight_b"};
+    for (int i = 0; i < 4; ++i) {
+      h_sv_jets_deltaphi[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%sjets_deltaphi", exc, lmt_ex[i]), TString::Format(";%s SV #Delta#phi to %sjets;arb. units", exc, lmt_ex[i]), 50, -3.15, 3.15);
+    }
+
     if (vertex_src.label() != "") {
       assert(int(sv_tracks_num_indices) == int(sv_jet_tracks_num_indices));
       for (int k = 0; k < 2; ++k) {
@@ -799,6 +806,14 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     v["trackpairdphimax"] = 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0];
     v["trackpairdphimaxm1"] = 1 > npairs - 1 ? -1 : trackpairdphis[npairs-1-1];
     v["trackpairdphimaxm2"] = 2 > npairs - 1 ? -1 : trackpairdphis[npairs-1-2];
+
+    for (int i = 0; i < 4; ++i) {
+      for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+        if (((mevent->jet_id[ijet] >> 2) & 3) >= i) {
+          fill_multi(h_sv_jets_deltaphi[i], isv, reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet]), w);
+        }
+      }
+    }
 
     if (vertex_src.label() != "") {
       const reco::Vertex& thepv = primary_vertices->at(0);

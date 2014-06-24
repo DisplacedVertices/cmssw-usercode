@@ -28,7 +28,9 @@ class MFVWhichGenParticle : public edm::EDAnalyzer {
   std::map<std::string, TH1F*> m_h_nxx;
   std::map<std::string, TH2F*> m_h_nsv_v_nxx;
   std::map<std::string, TH1F*> m_h_dphi_sv_xx;
+  std::map<std::string, TH1F*> m_h_min_dphi_sv_xx;
   std::map<std::string, TH1F*> m_h_dist_sv_xx;
+  std::map<std::string, TH1F*> m_h_min_dist_sv_xx;
 
   typedef std::vector<const reco::GenParticle*> GenParticlePointers;
   void fill(const std::string name, const MFVVertexAuxCollection&, const GenParticlePointers&);
@@ -47,8 +49,10 @@ MFVWhichGenParticle::MFVWhichGenParticle(const edm::ParameterSet& cfg)
   for (const char* part : parts) {
     m_h_nxx       [part] = fs->make<TH1F>(TString::Format("h_n%s",         part), TString::Format(";number of %s;events",                                     part), 100, 0, 100);
     m_h_nsv_v_nxx [part] = fs->make<TH2F>(TString::Format("h_nsv_v_n%s",   part), TString::Format(";number of %s;number of vertices",                         part), 100, 0, 100, 10, 0, 10);
-    m_h_dphi_sv_xx[part] = fs->make<TH1F>(TString::Format("h_dphi_sv_n%s", part), TString::Format(";smallest #Delta#phi(%s_{i}, each vertex);vertices/0.063", part), 100, -M_PI, M_PI);
-    m_h_dist_sv_xx[part] = fs->make<TH1F>(TString::Format("h_dist_sv_n%s", part), TString::Format(";smallest dist3d(%s_{i}, each vertex);vertices/0.0005 cm", part), 100, 0, 0.05);
+    m_h_dphi_sv_xx[part] = fs->make<TH1F>(TString::Format("h_dphi_sv_n%s", part), TString::Format(";#Delta#phi(%s_{i}, each vertex);vertices/0.063", part), 100, -M_PI, M_PI);
+    m_h_min_dphi_sv_xx[part] = fs->make<TH1F>(TString::Format("h_min_dphi_sv_n%s", part), TString::Format(";smallest #Delta#phi(%s_{i}, each vertex);vertices/0.063", part), 100, -M_PI, M_PI);
+    m_h_dist_sv_xx[part] = fs->make<TH1F>(TString::Format("h_dist_sv_n%s", part), TString::Format(";dist3d(%s_{i}, each vertex);vertices/0.0005 cm", part), 100, 0, 0.05);
+    m_h_min_dist_sv_xx[part] = fs->make<TH1F>(TString::Format("h_min_dist_sv_n%s", part), TString::Format(";smallest dist3d(%s_{i}, each vertex);vertices/0.0005 cm", part), 100, 0, 0.05);
   }
 }
 
@@ -56,7 +60,9 @@ void MFVWhichGenParticle::fill(const std::string name, const MFVVertexAuxCollect
   TH1F* h_nxx        = m_h_nxx       [name];
   TH2F* h_nsv_v_nxx  = m_h_nsv_v_nxx [name];
   TH1F* h_dphi_sv_xx = m_h_dphi_sv_xx[name];
+  TH1F* h_min_dphi_sv_xx = m_h_min_dphi_sv_xx[name];
   TH1F* h_dist_sv_xx = m_h_dist_sv_xx[name];
+  TH1F* h_min_dist_sv_xx = m_h_min_dist_sv_xx[name];
 
   static const bool debug = false;
   if (debug) printf("%s:\n", name.c_str());
@@ -80,6 +86,8 @@ void MFVWhichGenParticle::fill(const std::string name, const MFVVertexAuxCollect
       if (debug) printf("ixx %i isv %i dphi %f dist %f\n", ixx, isv, dphi, dist);
       dphis[ixx*nsv + isv] = dphi;
       dists[ixx*nsv + isv] = dist;
+      h_dphi_sv_xx->Fill(dphi);
+      h_dist_sv_xx->Fill(dist);
     }
   }
 
@@ -136,8 +144,8 @@ void MFVWhichGenParticle::fill(const std::string name, const MFVVertexAuxCollect
 
   if (debug) printf("best:\n");
   for (int isv = 0; isv < nsv; ++isv) {
-    h_dphi_sv_xx->Fill(min_dphis[isv]);
-    h_dist_sv_xx->Fill(min_dists[isv]);
+    h_min_dphi_sv_xx->Fill(min_dphis[isv]);
+    h_min_dist_sv_xx->Fill(min_dists[isv]);
     if (debug) printf("isv: %i dphi: %f dist: %f\n", isv, min_dphis[isv], min_dists[isv]);
   }
 }
