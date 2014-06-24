@@ -478,6 +478,9 @@ data_samples = [
     DataSample('MultiJetPk2012C2', '/MultiJet1Parked/Run2012C-part2_05Nov2012-v2/AOD'),
     DataSample('MultiJetPk2012D1', '/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD'),
     DataSample('MultiJetPk2012D2', '/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD'),
+    DataSample('MultiJetPk2012C2_Missing', '/MultiJet1Parked/Run2012C-part2_05Nov2012-v2/AOD'),
+    DataSample('MultiJetPk2012D1_Missing', '/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD'), # still missing 4 jobs
+    DataSample('MultiJetPk2012D2_Missing', '/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD'), # "     "       1 "
     ]
 
 auxiliary_data_samples = [
@@ -560,6 +563,10 @@ MultiJetPk2012C1.ana_hash = '7e213eec0d0ac129da23820d65a3042c'
 MultiJetPk2012C2.ana_hash = 'eecbfc9eed4af2df7dabe690a1ba0aee'
 MultiJetPk2012D1.ana_hash = '19f5425d37432fa14e1f344294f78697'
 MultiJetPk2012D2.ana_hash = '5945168ee727e69cc82af38e183c5777'
+
+MultiJetPk2012C2_Missing.ana_dataset_override = '/MultiJet1Parked/tucker-mfvntuple_v18_missing2-69dce4df0c4f9088a95a2c64af274e3b/USER'
+MultiJetPk2012D1_Missing.ana_dataset_override = '/MultiJet1Parked/tucker-mfvntuple_v18_missing2-f0522e16e0ee21cb226d5e3436309c30/USER'
+MultiJetPk2012D2_Missing.ana_dataset_override = '/MultiJet1Parked/tucker-mfvntuple_v18_missing2-236a6a2925b9ee236e97c4dfcbbda544/USER'
 
 for sample in ttbar_samples + qcd_samples + smaller_background_samples + mfv_signal_samples + ttbar_systematics_samples + data_samples:
     sample.ana_ready = True
