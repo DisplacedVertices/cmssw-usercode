@@ -12,7 +12,15 @@ def get_h(name):
     return f.Get('mfvOne2Two/%s' % name)
 
 ####
+
 '''
+for ex in [''] + 'bkg sig sb sbbkg sbsig'.split():
+    for name in 'h_1v_xy h_2v_xy'.split():
+        if '1v' in name:
+            ex = ex.replace('bkg','').replace('sig','')
+        name = name.replace('v_', 'v%s_' % ex)
+'''
+
 for name in 'h_1v_xy h_2v_xy'.split():
     h = get_h(name)
     h.SetTitle(';vertex x (cm);vertex y (cm)')
@@ -138,7 +146,17 @@ differentiate_stat_box(h2v, (1,0), new_size=(0.25, 0.25))
 differentiate_stat_box(h1v, (1,1), new_size=(0.25, 0.25))
 differentiate_stat_box(hfn, (1,2), new_size=(0.25, 0.25))
 ps.save('dz')
-'''
+
+####
+
+for name in 'h_2v_svdist2d h_2vbkg_svdist2d h_2vsig_svdist2d h_2vsb_svdist2d h_2vsbbkg_svdist2d h_2vsbsig_svdist2d h_1v_svdist2d h_1vsb_svdist2d'.split():
+    h = get_h(name)
+    h.SetTitle(';xy distance between vertex 0 and 1 (cm);events/10 #mum')
+    h.Draw()
+    ps.update_canvas()
+    move_stat_box(h, (0.634, 0.591, 0.980, 0.997))
+    ps.save(name)
+
 ####
 
 def svdist2d_comp(norm_below, rebin=None, shift=None, save=None):
@@ -239,8 +257,8 @@ svdist2d_cut = 0.05
 for shift in xrange(20):
     svdist2d_comp(svdist2d_cut, None, shift, 'shift%i' % shift)
 
-h2v = get_h('h_2vsideband_svdist2d').Clone('h2v')
-h1v = get_h('h_1v_svdist2d').Clone('h1v')
+h2v = get_h('h_2vsb_svdist2d').Clone('h2v')
+h1v = get_h('h_1vsb_svdist2d').Clone('h1v')
 bin_size = h2v.GetBinWidth(1)
 shift_by_means = int(round((h2v.GetMean() - h1v.GetMean())/bin_size))
 svdist2d_comp(svdist2d_cut, None, shift_by_means, 'bymeans')
