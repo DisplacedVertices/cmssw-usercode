@@ -24,7 +24,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     seed = cms.int32(0),
                                     toy_mode = cms.bool(False),
                                     poisson_n1vs = cms.bool(False),
-                                    sampling_type = cms.int32(0),
+                                    sampling_type = cms.int32(2),
                                     npairs = cms.int32(100000),
 
                                     find_g_dphi = cms.bool(True),
