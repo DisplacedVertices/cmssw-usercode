@@ -2,11 +2,22 @@
 
 import sys, os
 
-run_pat = 'pat' in sys.argv
+# JMTBAD argparse
+
+run_reco = 'gensim' not in sys.argv
+run_pat = run_reco and 'pat' in sys.argv
 run_ttbar = 'ttbar' in sys.argv
 skip_tests = 'skip_tests' in sys.argv
 testing = 'testing' in sys.argv
-dir = 'crab/MakeSamples'
+
+dir = [x for x in sys.argv if x.startswith('crab/')]
+dir = 'crab/MakeSamples' if not dir else dir[0]
+
+nevents = [int(x.replace('nevents=', '')) for x in sys.argv if x.startswith('nevents=')]
+nevents = 100000 if not nevents else nevents[0]
+
+events_per = [int(x.replace('events_per=', '')) for x in sys.argv if x.startswith('events_per=')]
+events_per = 50 if not nevents else events_per[0]
 
 ################################################################################
 
@@ -22,7 +33,7 @@ get_edm_output = 0
 ignore_edm_output = 1
 output_file = %(output_file)s
 events_per_job = 50
-total_number_of_events = 100000
+total_number_of_events = %(nevents)i
 first_lumi = 1
 use_dbs3 = 1
 
@@ -48,9 +59,10 @@ if not skip_tests:
     if os.system('python gensimhlt.py') != 0: # cannot just import or else this screws up singleton services like MessageLogger when we expand pat.py below
         raise RuntimeError('gensimhlt.py does not work')
 
-    print 'testing reco.py (may need to expand if you have modified the base reconstruction)'
-    if os.system('python reco.py') != 0:
-        raise RuntimeError('reco.py does not work')
+    if run_reco:
+        print 'testing reco.py (may need to expand if you have modified the base reconstruction)'
+        if os.system('python reco.py') != 0:
+            raise RuntimeError('reco.py does not work')
 
 if run_pat:
     print 'expanding pat.py'
@@ -71,8 +83,10 @@ def submit(name, tau0=None, mass=None):
 
     if run_pat:
         output_file = 'aodpat.root'
-    else:
+    elif run_reco:
         output_file = 'reco.root'
+    else:
+        output_file = 'gensim.root'
 
     additional_input_files = ['minSLHA.spc', 'modify.py']
     if run_pat:
@@ -83,9 +97,12 @@ def submit(name, tau0=None, mass=None):
     pset_fn = os.path.join(dir, 'psets/mfv_%(name)s.py' % locals())
     new_py = open('gensimhlt.py').read()
 
-    reco_pset_fn = 'my_reco.py'
-    additional_input_files.append(reco_pset_fn)
-    new_reco_py = open('reco.py').read()
+    if run_reco:
+        reco_pset_fn = 'my_reco.py'
+        additional_input_files.append(reco_pset_fn)
+        new_reco_py = open('reco.py').read()
+    else:
+        new_reco_py = ''
 
     if 'ttbar' not in name:
         assert tau0 is not None and mass is not None
@@ -133,6 +150,9 @@ prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', '
         new_reco_py += snip
 
     if 'ali_' in name:
+        if not run_reco:
+            raise ValueError('alignment means nothing if not running reco')
+
         ali_tag = name.split('ali_')[-1].capitalize()
         new_reco_py += '''
 from modify import prefer_it
@@ -144,15 +164,20 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
         new_py += '\nset_tune(process,%s)\n' % name.split('tune_')[1]
 
     if 'tkex' in name:
+        if not run_reco:
+            raise ValueError('tkex means nothing if not running reco')
         new_reco_py += "\nprocess.output.outputCommands += ['keep recoTrackExtras_generalTracks__*', 'keep TrackingRecHitsOwned_generalTracks__*']\n"
 
     open(pset_fn, 'wt').write(new_py)
-    open(reco_pset_fn, 'wt').write(new_reco_py)
+    if run_reco:
+        open(reco_pset_fn, 'wt').write(new_reco_py)
 
     additional_input_files = ', '.join(additional_input_files)
 
     ui_working_dir = os.path.join(dir, 'crab_mfv_%s' % name)
-    open('crab.cfg','wt').write(crab_cfg % locals())
+    vd = locals()
+    vd['nevents'] = nevents
+    open('crab.cfg','wt').write(crab_cfg % vd)
     if not testing:
         os.system('crab -create')
         for i in xrange(4):
@@ -162,13 +187,16 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
 ################################################################################
 
 if run_ttbar:
-    to_run = ['ali_' + x for x in ['bowing', 'elliptical', 'curl', 'radial', 'sagitta', 'skew', 'telescope', 'twist', 'zexpansion']]
+    #to_run = ['ali_' + x for x in ['bowing', 'elliptical', 'curl', 'radial', 'sagitta', 'skew', 'telescope', 'twist', 'zexpansion']]
     #to_run = 'designnopugaubs designnopugaunxybs designnopugaunxyzbs'.split()
     #to_run = ['designnoputkex']
-    to_run = ['tune_' + x for x in ['3','4','5','6','7','8','9','10','11','12','13']]
+    #to_run = ['tune_' + x for x in ['3','4','5','6','7','8','9','10','11','12','13']]
+    #to_run = ['tune_' + x for x in ['3','4','5','6','7','8','9','10','11','12','13']]
 
-    for run in to_run:
-        submit('ttbar_' + run)
+    #for run in to_run:
+    #    submit('ttbar_' + run)
+
+    submit('ttbarhad_syststudies')
 else:
     tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.]
     masses = range(200, 1501, 100)
