@@ -32,7 +32,7 @@ pset = %(pset_fn)s
 get_edm_output = 0
 ignore_edm_output = 1
 output_file = %(output_file)s
-events_per_job = 50
+events_per_job = %(events_per)i
 total_number_of_events = %(nevents)i
 first_lumi = 1
 use_dbs3 = 1
@@ -177,6 +177,7 @@ prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'Tra
     ui_working_dir = os.path.join(dir, 'crab_mfv_%s' % name)
     vd = locals()
     vd['nevents'] = nevents
+    vd['events_per'] = events_per
     open('crab.cfg','wt').write(crab_cfg % vd)
     if not testing:
         os.system('crab -create')
