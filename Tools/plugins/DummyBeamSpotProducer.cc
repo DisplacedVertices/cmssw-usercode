@@ -1,23 +1,16 @@
-
-#include "RecoVertex/BeamSpotProducer/interface/BeamSpotProducer.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/Framework/interface/IOVSyncValue.h"
-#include "CondFormats/DataRecord/interface/BeamSpotObjectsRcd.h"
-#include "CondFormats/BeamSpotObjects/interface/BeamSpotObjects.h"
-
 #include "DataFormats/Math/interface/Error.h"
 #include "DataFormats/Math/interface/Point3D.h"
+#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 
-
-class dummyBeamSpotProducer : public edm::EDProducer {
+class DummyBeamSpotProducer : public edm::EDProducer {
 public:
-  dummyBeamSpotProducer(const edm::ParameterSet&);
+  DummyBeamSpotProducer(const edm::ParameterSet&);
   virtual void produce(edm::Event&, const edm::EventSetup&);
+
 private:
   const double X0;
   const double Y0;
@@ -32,16 +25,14 @@ private:
   const double EmittanceY;
   const double BetaStar;
 
+  reco::BeamSpot spot;
 };
 
-//
-// constructors and destructor
-//
-dummyBeamSpotProducer::dummyBeamSpotProducer(const edm::ParameterSet& cfg)
+DummyBeamSpotProducer::DummyBeamSpotProducer(const edm::ParameterSet& cfg)
   : X0(cfg.getParameter<double>("X0")),
     Y0(cfg.getParameter<double>("Y0")),
     Z0(cfg.getParameter<double>("Z0")),
-    covariance(cfg.getParameter<std::vector<double>>("covariance")),
+    covariance(cfg.getParameter<std::vector<double> >("covariance")),
     SigmaZ(cfg.getParameter<double>("SigmaZ")),
     dxdz(cfg.getParameter<double>("dxdz")),
     dydz(cfg.getParameter<double>("dydz")),
@@ -51,79 +42,20 @@ dummyBeamSpotProducer::dummyBeamSpotProducer(const edm::ParameterSet& cfg)
     EmittanceY(cfg.getParameter<double>("EmittanceY")),
     BetaStar(cfg.getParameter<double>("BetaStar"))
 {
-	
-	edm::LogInfo("RecoVertex/BeamSpotProducer") 
-		<< "Initializing Beam Spot producer " << "\n";
-  
-	//fVerbose=conf.getUntrackedParameter<bool>("verbose", false);
-	
-	produces<reco::BeamSpot>();
+  const reco::BeamSpot::Point pos(X0, Y0, Z0);
+  const reco::BeamSpot::CovarianceMatrix cov(covariance.begin(), covariance.end(), true, false);
 
+  spot = reco::BeamSpot(pos, SigmaZ, dxdz, dydz, BeamWidthX, cov);
+  spot.setBeamWidthY(BeamWidthY);
+  spot.setEmittanceX(EmittanceX);
+  spot.setEmittanceY(EmittanceY);
+  spot.setbetaStar(BetaStar);
+
+  produces<reco::BeamSpot>();
 }
 
-
-//
-// member functions
-//
-
-// ------------ method called to produce the data  ------------
-void
-dummyBeamSpotProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-	
-	using namespace edm;
-
-	std::auto_ptr<reco::BeamSpot> result(new reco::BeamSpot);
-
-	reco::BeamSpot aSpot;
-
-	
-	//typedef math::XYZPoint Point;
-    //enum { dimension = 7 };
-    //typedef math::Error<dimension>::type CovarianceMatrix;
-
-	
-	//try {
-	edm::LogInfo("RecoVertex/BeamSpotProducer") 
-	  << "Reconstructing event number: " << iEvent.id() << "\n";
-
-	// translate from BeamSpotObjects to reco::BeamSpot
-	reco::BeamSpot::Point apoint( X0, Y0, Z0 );
-		
-	reco::BeamSpot::CovarianceMatrix matrix;
-	int k = 0;
-	for ( int i=0; i<7; ++i ) {
-	  for ( int j=0; j<7; ++j ) {
-	    matrix(i,j) = covariance[k];
-	    k++;
-	  }
-	}
-	
-	// this assume beam width same in x and y
-	aSpot = reco::BeamSpot( apoint,
-				SigmaZ,
-				dxdz,
-				dydz,
-				BeamWidthX,
-				matrix );
-	aSpot.setBeamWidthY( BeamWidthY );
-	aSpot.setEmittanceX( EmittanceX );
-	aSpot.setEmittanceY( EmittanceY );
-	aSpot.setbetaStar( BetaStar );
-		
-	//}
-	//
-	//catch (std::exception & err) {
-	//	edm::LogInfo("RecoVertex/BeamSpotProducer") 
-	//		<< "Exception during event number: " << iEvent.id() 
-	//		<< "\n" << err.what() << "\n";
-	//}
-
-	*result = aSpot;
-	
-	iEvent.put(result);
-	
+void DummyBeamSpotProducer::produce(edm::Event& event, const edm::EventSetup&) {
+  event.put(std::auto_ptr<reco::BeamSpot>(new reco::BeamSpot(spot)));
 }
 
-//define this as a plug-in
-DEFINE_FWK_MODULE(dummyBeamSpotProducer);
-
+DEFINE_FWK_MODULE(DummyBeamSpotProducer);
