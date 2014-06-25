@@ -163,8 +163,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                 to_add.append('re_pat(process)')
 
             if sample.name in '':
-                to_add.append('import JMTucker.Tools.DummyBeamspots_cff as DummyBeamspots')
-                to_add.append('dummy_beamspot(process, DummyBeamspots.%s)' % sample.name)
+                to_add.append('import JMTucker.Tools.DummyBeamSpots_cff as DummyBeamSpots')
+                to_add.append('dummy_beamspot(process, DummyBeamSpots.%s)' % sample.name)
         else:
             magic = 'runOnMC = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
