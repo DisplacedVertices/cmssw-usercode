@@ -114,10 +114,12 @@ public:
   void read_vertices();
   void fill_2d_histos();
   void fit_envelopes();
-  void update_f_weighting_pars();
   void fit_fs_with_sideband();
+  void update_f_weighting_pars();
   void choose_2v_from_1v(const bool output_usage=false);
   void fill_1d_histos();
+  TH1D* shift_hist(const TH1D* h, const int shift, TH1D** hshifted) const;
+  void by_means();
 
   void run();
 
@@ -823,16 +825,6 @@ void MFVOne2Two::fit_envelopes() {
   h_fcn_g_dz  ->FillRandom("g_dz",   100000);
 }
 
-void MFVOne2Two::update_f_weighting_pars() {
-  gdpmax = g_dphi->GetMaximum();
-  fdpmax = f_dphi->GetMaximum();
-  Mdp = fdpmax/gdpmax;
-
-  gdzmax = g_dz->GetMaximum();
-  fdzmax = f_dz->GetMaximum();
-  Mdz = fdzmax/gdzmax;
-}
-
 void MFVOne2Two::fit_fs_with_sideband() {
   // Fit f_dphi and f_dz from the 2v events in the sideband.
 
@@ -902,6 +894,16 @@ void MFVOne2Two::fit_fs_with_sideband() {
   h_fcn_dphi->FillRandom("f_dphi", 100000);
   h_fcn_abs_dphi->FillRandom("f_dphi", 100000);
   h_fcn_dz->FillRandom("f_dz", 100000);
+}
+
+void MFVOne2Two::update_f_weighting_pars() {
+  gdpmax = g_dphi->GetMaximum();
+  fdpmax = f_dphi->GetMaximum();
+  Mdp = fdpmax/gdpmax;
+
+  gdzmax = g_dz->GetMaximum();
+  fdzmax = f_dz->GetMaximum();
+  Mdz = fdzmax/gdzmax;
 }
 
 void MFVOne2Two::choose_2v_from_1v(const bool output_usage) {
@@ -1011,24 +1013,34 @@ void MFVOne2Two::fill_1d_histos() {
     fill_1d(pair.w, v0(pair), v1(pair));
 }
 
-void MFVOne2Two::run() {
-  print_config();
+TH1D* MFVOne2Two::shift_hist(const TH1D* h, const int shift, TH1D** hshifted) const {
+  const int nbins = h->GetNbinsX();
+  if (*hshifted == 0)
+    *hshifted = fs->make<TH1D>(TString::Format("%s_shift%i", h->GetName(), shift), "", nbins, h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax());
 
-  read_signals();
-  read_vertices();
+  for (int ibin = 1; ibin <= nbins+1; ++ibin) {
+    const int ifrom = ibin - shift;
+    double val = 0, err = 0;
+    if (ifrom >= 1) { // don't shift in from underflow, shouldn't be any with svdist = positive quantity anyway
+      val = h->GetBinContent(ifrom);
+      err = h->GetBinError  (ifrom);
+    }
+    if (ibin == nbins+1) {
+      double var = err*err;
+      for (int irest = ifrom+1; irest <= nbins+1; ++irest) {
+        val += h->GetBinContent(irest);
+        var += pow(h->GetBinError(irest), 2);
+      }
+      err = sqrt(var);
+    }
+    (*hshifted)->SetBinContent(ibin, val);
+    (*hshifted)->SetBinError  (ibin, err);
+  }
 
-  if (just_print)
-    return;
+  return *hshifted;
+}
 
-  fill_2d_histos();
-
-  fit_envelopes();
-  fit_fs_with_sideband();
-
-  choose_2v_from_1v(true);
-  fill_1d_histos();
-
-
+void MFVOne2Two::by_means() {
   // Fit the 1v distribution to the 2v one by shifting it over and
   // scaling in the sideband.
   printf("\n==============================\n\nfitting 1v shape to 2v dist\n"); fflush(stdout);
@@ -1044,24 +1056,7 @@ void MFVOne2Two::run() {
   h_meandiff->Fill(meandiff);
   h_shift->Fill(shift);
 
-  for (int ibin = 1; ibin <= nbins+1; ++ibin) {
-    const int ifrom = ibin - shift;
-    double val = 0, err = 0;
-    if (ifrom >= 0) {
-      val = h_svdist2d[t_1v]->GetBinContent(ifrom);
-      err = h_svdist2d[t_1v]->GetBinError  (ifrom);
-    }
-    if (ibin == nbins+1) {
-      double var = err*err;
-      for (int irest = ifrom+1; irest <= nbins+1; ++irest) {
-        val += h_svdist2d[t_1v]->GetBinContent(irest);
-        var += pow(h_svdist2d[t_1v]->GetBinError(irest), 2);
-      }
-      err = sqrt(var);
-    }
-    h_1v_svdist2d_fit_2v->SetBinContent(ibin, val);
-    h_1v_svdist2d_fit_2v->SetBinError  (ibin, err);
-  }
+  shift_hist(h_svdist2d[t_1v], shift, &h_1v_svdist2d_fit_2v);
 
   const int last_sideband_bin = h_1v_svdist2d_fit_2v->FindBin(svdist2d_cut) - 1;
   h_1v_svdist2d_fit_2v->Scale(h_svdist2d[t_2v]    ->Integral(1, last_sideband_bin) / 
@@ -1100,6 +1095,26 @@ void MFVOne2Two::run() {
 
   h_pred_v_true->Fill(true_signreg_bkg, pred_signreg_bkg);
   h_pred_m_true->Fill(pred_signreg_bkg - true_signreg_bkg);
+}
+
+void MFVOne2Two::run() {
+  print_config();
+
+  read_signals();
+  read_vertices();
+
+  if (just_print)
+    return;
+
+  fill_2d_histos();
+
+  fit_envelopes();
+  fit_fs_with_sideband();
+
+  choose_2v_from_1v(true);
+  fill_1d_histos();
+
+  by_means();
 }
 
 DEFINE_FWK_MODULE(MFVOne2Two);
