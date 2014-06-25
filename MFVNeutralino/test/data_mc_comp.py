@@ -3,15 +3,15 @@
 import os
 
 verbose = True
-root_file_dir = 'crab/MFVHistosV17SideBandBetterPUweights'
+root_file_dir = 'crab/HistosV18_Data0'
 plot_dir = os.path.join('plots', os.path.basename(root_file_dir)) # 'plots/MFVHistosV17SideBandBetterPUweights'
-event_histo_path = 'mfvEventHistosOneVtx'
-vertex_histo_path = 'mfvVertexHistosOneVtx'
+event_histo_path = 'mfvEventHistosOnlyOneVtx'
+vertex_histo_path = 'mfvVertexHistosOnlyOneVtx'
 hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
 plot_size = (600,600)
-int_lumi = 876. # /pb
-int_lumi_nice = '876 pb^{-1}'
-scale_factor = 1970/682.47
+int_lumi = 18200. # /pb
+int_lumi_nice = '18.2 fb^{-1}'
+scale_factor = 1970/682.47/2
 
 ################################################################################
 
@@ -25,6 +25,9 @@ ps = plot_saver(plot_dir, size=plot_size)
 data_samples = Samples.data_samples
 
 background_samples = Samples.ttbar_samples + Samples.qcd_samples
+for sample in background_samples:
+    sample.total_events = sample.nevents_orig/2
+
 signal_samples = [Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 #signal_samples = [Samples.mfv_neutralino_tau1000um_M0400]
 Samples.mfv_neutralino_tau0300um_M0400.nice_name = '#tau = 300 #mum, M = 400 GeV signal'
@@ -42,7 +45,7 @@ for s in Samples.ttbardilep, Samples.ttbarsemilep, Samples.ttbarhadronic:
 if verbose:
     print 'weights:'
     for sample in background_samples:
-        print '%20s: %e' % (sample.name, sample.partial_weight*int_lumi)
+        print (sample.name, sample.nevents, sample.nevents_orig, sample.cross_section, sample.partial_weight*int_lumi)
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,
@@ -67,26 +70,32 @@ def vertex_histo(s):
 
 enabled = [x.strip() for x in '''
 npv
-pvntracks
-pvsumpt2
-pvrho
-pvz
+#pvntracks
+#pvsumpt2
+#pvrho
+#pvz
 njets
-njetsnoputight
+#njetsnoputight
 jetpt4
-jetpt5
-jetpt6
+#jetpt5
+#jetpt6
 jetsumht
-nbtags
-nsemimuons
-nsemielectrons
-nsemileptons
-nsvnocut
+#nbtags
+#nsemimuons
+#nsemielectrons
+#nsemileptons
+#nsvnocut
 nsv
+sv_best0_ntracks
+sv_best0_ntracksptgt3
+sv_best0_njetsntks
+sv_best0_drmin
+sv_best0_drmax
+sv_best0_bs2derr
 '''.split('\n') if not x.strip().startswith('#')]
 
 def is_enabled(s):
-    return not s.startswith('clean')
+#    return not s.startswith('clean')
     return s in enabled # or s.startswith('clean')
 
 def D(*args, **kwargs):
@@ -106,7 +115,7 @@ D('npv',
   x_title = 'number of PV',
   y_title = 'events/2',
   x_range = (0, 40),
-  y_range = (None, 350),
+  #y_range = (None, 350),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -152,7 +161,7 @@ D('njets',
   x_title = 'number of jets',
   y_title = 'events',
   x_range = (4,16),
-  y_range = (None, 660),
+  #y_range = (None, 660),
   legend_pos = (0.572, 0.687, 0.884, 0.920),
   )
 
@@ -170,7 +179,7 @@ D('jetpt4',
   x_title = 'jet #4 p_{T} (GeV)',
   y_title = 'events/10 GeV',
   x_range = (60,250),
-  y_range = (None, 550),
+  #y_range = (None, 550),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -231,7 +240,7 @@ D('nsemielectrons',
 
 D('nsemileptons',
   histogram_path = event_histo('h_nleptons_semilep'),
-  x_title = 'number of semilep electrons',
+  x_title = 'number of semilep leptons',
   y_title = 'events',
   y_range = (None, 2200),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
@@ -278,25 +287,25 @@ D('nsv',
   x_title = 'number of SV',
   y_title = 'events',
   x_range = (1,5),
-  y_range = (None, 2200),
+  #y_range = (None, 2200),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
-D('sv_top2_ntracks',
-  histogram_path = vertex_histo('h_sv_top2_ntracks'),
+D('sv_best0_ntracks',
+  histogram_path = vertex_histo('h_sv_best0_ntracks'),
   x_title = 'number of tracks/vertex',
   y_title = 'vertices',
   x_range = (5, 8),
-  y_range = (None, 900),
+  #y_range = (None, 900),
   legend_pos = (0.435, 0.687, 0.878, 0.920)
   )
 
-D('sv_top2_ntracksptgt3',
-  histogram_path = vertex_histo('h_sv_top2_ntracksptgt3'),
+D('sv_best0_ntracksptgt3',
+  histogram_path = vertex_histo('h_sv_best0_ntracksptgt3'),
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
   x_range = (3, 9),
-  y_range = (None, 1800),
+  #y_range = (None, 1800),
   legend_pos = (0.553, 0.687, 0.878, 0.920)
   )
 
@@ -395,8 +404,8 @@ D('sv_top2_sumpt2',
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
-D('sv_top2_drmin',
-  histogram_path = vertex_histo('h_sv_top2_drmin'),
+D('sv_best0_drmin',
+  histogram_path = vertex_histo('h_sv_best0_drmin'),
   rebin = 4,
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.04',
@@ -413,13 +422,13 @@ D('sv_top2_drmin_nm1',
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
-D('sv_top2_drmax',
-  histogram_path = vertex_histo('h_sv_top2_drmax'),
+D('sv_best0_drmax',
+  histogram_path = vertex_histo('h_sv_best0_drmax'),
   rebin = 6,
-  x_title = 'max{#Delta R{track i,j}} for two "best" SV (GeV)',
+  x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
   x_range = (1.2, 4.2),
-  y_range = (None, 550),
+  #y_range = (None, 550),
   legend_pos = (0.135, 0.687, 0.578, 0.920)
   )
 
@@ -432,12 +441,12 @@ D('sv_top2_drmax_nm1',
   legend_pos = (0.135, 0.687, 0.578, 0.920)
   )
 
-D('sv_top2_njetsntks',
-  histogram_path = vertex_histo('h_sv_top2_njetsntks'),
+D('sv_best0_njetsntks',
+  histogram_path = vertex_histo('h_sv_best0_njetsntks'),
   x_title = 'number of associated jets',
   y_title = 'vertices',
   x_range = (1, 6),
-  y_range = (None, 1350),
+  #y_range = (None, 1350),
   legend_pos = (0.589, 0.704, 0.878, 0.921),
   )
 
@@ -459,8 +468,8 @@ D('sv_top2_bs2ddist',
   legend_pos = (0.547, 0.755, 0.878, 0.921),
   )
 
-D('sv_top2_bs2derr',
-  histogram_path = vertex_histo('h_sv_top2_bs2derr'),
+D('sv_best0_bs2derr',
+  histogram_path = vertex_histo('h_sv_best0_bs2derr'),
   x_title = '#sigma(xy distance to beamspot) (cm)',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.003),
