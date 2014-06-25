@@ -24,6 +24,7 @@ class CRABSubmitter:
     get_proxy = True
     aaa_locations = 'T1_US_FNAL,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin,T2_US_Vanderbilt,T3_US_Brown,T3_US_Colorado,T3_US_NotreDame,T3_US_UMiss'
     half_mc_path = '/uscms/home/tucker/mfvrecipe/HalfMCLists/%s.txt.gz'
+    skip_common_files = 'src/EgammaAnalysis/ElectronTools/data/*,src/CMGTools/External/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml,lib/slc5_amd64_gcc462/libCMGToolsExternal.so',
     
     def __init__(self,
                  batch_name,
@@ -48,6 +49,7 @@ class CRABSubmitter:
                  aaa = False,
                  manual_datasets = None,
                  run_half_mc = False,
+                 skip_common = False,
                  **kwargs):
 
         if '/' in batch_name:
@@ -135,6 +137,10 @@ class CRABSubmitter:
             # crab_cfg below has to set out CMSSW.number_of_jobs
 
         self.run_half_mc = run_half_mc
+
+        self.skip_common = skip_common
+        if skip_common:
+            cfg.set('USER', 'jmt_skip_input_files', self.skip_common_files)
 
         def get_two_max(s):
             l = []

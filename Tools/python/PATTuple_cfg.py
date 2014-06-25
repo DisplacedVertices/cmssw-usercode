@@ -347,6 +347,18 @@ def disable_pujetid(process):
         getattr(process, p).remove(process.puJetIdChs)
         getattr(process, p).remove(process.puJetMvaChs)
 
+def dummy_beamspot(process, params):
+    process.myBeamSpot = cms.EDProducer('DummyBeamSpotProducer', params)
+
+    for name, path in process.paths.items():
+        if not name.startswith('eventCleaning'):
+            path.insert(0, process.myBeamSpot)
+
+    import itertools
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    for path_name, path in itertools.chain(process.paths.iteritems(), process.endpaths.iteritems()):
+        massSearchReplaceAnyInputTag(path, cms.InputTag('offlineBeamSpot'), cms.InputTag('myBeamSpot'), verbose=True)
+
 if __name__ == '__main__':
     # JMTBAD no idea if this works with submit_tuple.py ...
     process = pat_tuple_process()[0]

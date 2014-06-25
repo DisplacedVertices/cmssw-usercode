@@ -42,16 +42,7 @@ process.reconstruction_step = cms.Path(process.reconstruction)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.output_step = cms.EndPath(process.output)
 
-
-process.load('SimTracker.TrackAssociation.TrackAssociatorByHits_cfi')
-process.mfvTrackMatches = cms.EDProducer('MFVTrackMatcherLight',
-                                         gen_particles_src = cms.InputTag('genParticles'),
-                                         tracking_particles_src = cms.InputTag('mergedtruth','MergedTrackTruth'),
-                                         tracks_src = cms.InputTag('generalTracks'),
-                                         )
-process.reconstruction_step *= process.mfvTrackMatches
-process.output.outputCommands += ['keep *_mfvTrackMatches_*_*',
-                                  'keep *_randomEngineStateProducer_*_*',
+process.output.outputCommands += ['keep *_randomEngineStateProducer_*_*',
                                   'keep CrossingFramePlaybackInfoExtended_*_*_*']
 
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.output_step)

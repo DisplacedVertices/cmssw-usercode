@@ -73,6 +73,18 @@ namespace {
     upper = rh/(1-rh);
     return x/y;
   }
+
+  double fcn_g_dphi(const double* x, const double* par) {
+    return (par[0] + par[1]*fabs(x[0] - M_PI/2.))/(par[0]*M_PI + par[1]*2.46740110);
+  }
+
+  double fcn_f_dphi(const double* x, const double* par) {
+    return pow(fabs(x[0]), par[0])/(pow(M_PI, (par[0]+1))/(par[0]+1));
+  }
+
+  double fcn_fg_dz(const double* x, const double* par) {
+    return exp(-x[0]*x[0]/2./par[0]/par[0])/sqrt(2.*M_PI*par[0]*par[0]);
+  }
 }
 
 class MFVOne2Two : public edm::EDAnalyzer {
@@ -115,14 +127,18 @@ public:
   const int npairs;
 
   const bool find_g_dphi;
+  const bool use_form_g_dphi;
   const std::string form_g_dphi;
   const bool find_g_dz;
+  const bool use_form_g_dz;
   const std::string form_g_dz;
   const bool find_f_dphi;
   const bool find_f_dphi_bkgonly;
+  const bool use_form_f_dphi;
   const std::string form_f_dphi;
   const bool find_f_dz;
   const bool find_f_dz_bkgonly;
+  const bool use_form_f_dz;
   const std::string form_f_dz;
 
   double gdpmax;
@@ -252,17 +268,21 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     npairs(cfg.getParameter<int>("npairs")),
 
     find_g_dphi(cfg.getParameter<bool>("find_g_dphi")),
+    use_form_g_dphi(cfg.getParameter<bool>("use_form_g_dphi")),
     form_g_dphi(cfg.getParameter<std::string>("form_g_dphi")),
 
     find_g_dz(cfg.getParameter<bool>("find_g_dz")),
+    use_form_g_dz(cfg.getParameter<bool>("use_form_g_dz")),
     form_g_dz(cfg.getParameter<std::string>("form_g_dz")),
 
     find_f_dphi(cfg.getParameter<bool>("find_f_dphi")),
     find_f_dphi_bkgonly(cfg.getParameter<bool>("find_f_dphi_bkgonly")),
+    use_form_f_dphi(cfg.getParameter<bool>("use_form_f_dphi")),
     form_f_dphi(cfg.getParameter<std::string>("form_f_dphi")),
 
     find_f_dz(cfg.getParameter<bool>("find_f_dz")),
     find_f_dz_bkgonly(cfg.getParameter<bool>("find_f_dz_bkgonly")),
+    use_form_f_dz(cfg.getParameter<bool>("use_form_f_dz")),
     form_f_dz(cfg.getParameter<std::string>("form_f_dz")),
 
     max_1v_ntracks01(cfg.getParameter<int>("max_1v_ntracks01")),
@@ -293,10 +313,25 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
-  f_dphi = new TF1("f_dphi", form_f_dphi.c_str(), 0, M_PI);
-  f_dz = new TF1("f_dz", form_f_dz.c_str(), -40, 40);
-  g_dphi = new TF1("g_dphi", form_g_dphi.c_str(), 0, M_PI);
-  g_dz = new TF1("g_dz", form_g_dz.c_str(), -40, 40);
+  if (use_form_g_dphi)
+    g_dphi = new TF1("g_dphi", form_g_dphi.c_str(), 0, M_PI);
+  else
+    g_dphi = new TF1("g_dphi", fcn_g_dphi, 0, M_PI, 2);
+
+  if (use_form_g_dz)
+    g_dz = new TF1("g_dz", form_g_dz.c_str(), -40, 40);
+  else
+    g_dz = new TF1("g_dz", fcn_fg_dz, -40, 40, 1);
+
+  if (use_form_f_dphi)
+    f_dphi = new TF1("f_dphi", form_f_dphi.c_str(), 0, M_PI);
+  else
+    f_dphi = new TF1("f_dphi", fcn_f_dphi, 0, M_PI, 1);
+
+  if (use_form_f_dz)
+    f_dz = new TF1("f_dz", form_f_dz.c_str(), -40, 40);
+  else
+    f_dz = new TF1("f_dz", fcn_fg_dz, -40, 40, 1);
   
   h_1v_dphi_env = fs->make<TH1D>("h_1v_dphi_env", "", 8, -M_PI, M_PI);
   h_1v_absdphi_env = fs->make<TH1D>("h_1v_absdphi_env", "", 8, 0, M_PI);

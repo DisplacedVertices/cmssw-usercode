@@ -31,6 +31,7 @@ private:
   const std::string skip_event_filter;
   const edm::InputTag pfjets_src;
   const double jet_pt_min;
+  const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_particles_src;
   const edm::InputTag jets_src;
@@ -52,6 +53,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     skip_event_filter(cfg.getParameter<std::string>("skip_event_filter")),
     pfjets_src(cfg.getParameter<edm::InputTag>("pfjets_src")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
+    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
@@ -77,7 +79,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   std::auto_ptr<MFVEvent> mevent(new MFVEvent);
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel("offlineBeamSpot", beamspot);
+  event.getByLabel(beamspot_src, beamspot);
   mevent->bsx = beamspot->x0();
   mevent->bsy = beamspot->y0();
   mevent->bsz = beamspot->z0();

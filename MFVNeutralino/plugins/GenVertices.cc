@@ -16,11 +16,13 @@ private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
   const edm::InputTag gen_src;
+  const edm::InputTag beamspot_src;
   const bool debug;
 };
 
 MFVGenVertices::MFVGenVertices(const edm::ParameterSet& cfg) 
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
+    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
   produces<std::vector<double> >();
@@ -31,7 +33,7 @@ void MFVGenVertices::produce(edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(gen_src, gen_particles);
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel("offlineBeamSpot", beamspot);
+  event.getByLabel(beamspot_src, beamspot);
 
   std::auto_ptr<std::vector<double> > decay_vertices(new std::vector<double>);
 
