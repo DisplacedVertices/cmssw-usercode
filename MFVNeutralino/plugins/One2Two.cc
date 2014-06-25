@@ -90,6 +90,8 @@ namespace {
 class MFVOne2Two : public edm::EDAnalyzer {
 public:
   explicit MFVOne2Two(const edm::ParameterSet&);
+  void analyze(const edm::Event&, const edm::EventSetup&) {}
+  void endJob() { run(); }
   ~MFVOne2Two();
 
   MFVVertexAux xform_vertex(const MFVVertexAux&) const;
@@ -106,9 +108,18 @@ public:
 
   double prob_1v_pair(const MFVVertexAux&, const MFVVertexAux&) const;
   bool accept_1v_pair(const MFVVertexAux&, const MFVVertexAux&) const;
- 
-  void analyze(const edm::Event&, const edm::EventSetup&) {}
-  void endJob();
+
+  void print_config() const;
+  void read_signals();
+  void read_vertices();
+  void fill_2d_histos();
+  void fit_envelopes();
+  void update_f_weighting_pars();
+  void fit_fs_with_sideband();
+  void choose_2v_from_1v(const bool output_usage=false);
+  void fill_1d_histos();
+
+  void run();
 
   const int min_ntracks;
   const double svdist2d_cut;
@@ -126,28 +137,6 @@ public:
   const int sampling_type; // 0 = sample random pairs with replacement, 1 = sample all unique pairs and accept/reject, 2 = sample all unique pairs and fill 1v dists with weight according to accept/reject prob
   const int npairs;
 
-  const bool find_g_dphi;
-  const bool use_form_g_dphi;
-  const std::string form_g_dphi;
-  const bool find_g_dz;
-  const bool use_form_g_dz;
-  const std::string form_g_dz;
-  const bool find_f_dphi;
-  const bool find_f_dphi_bkgonly;
-  const bool use_form_f_dphi;
-  const std::string form_f_dphi;
-  const bool find_f_dz;
-  const bool find_f_dz_bkgonly;
-  const bool use_form_f_dz;
-  const std::string form_f_dz;
-
-  double gdpmax;
-  double fdpmax;
-  double Mdp;
-  double gdzmax;
-  double fdzmax;
-  double Mdz;
-
   const int max_1v_ntracks01;
 
   const std::vector<std::string> signal_files;
@@ -155,10 +144,34 @@ public:
   const std::vector<double> signal_weights;
   const int signal_contamination;
 
+  const bool find_g_dphi;
+  const bool use_form_g_dphi;
+  const std::string form_g_dphi;
+
+  const bool find_g_dz;
+  const bool use_form_g_dz;
+  const std::string form_g_dz;
+
+  const bool find_f_dphi;
+  const bool find_f_dphi_bkgonly;
+  const bool use_form_f_dphi;
+  const std::string form_f_dphi;
+
+  const bool find_f_dz;
+  const bool find_f_dz_bkgonly;
+  const bool use_form_f_dz;
+  const std::string form_f_dz;
+
   TF1* f_dphi;
   TF1* f_dz;
   TF1* g_dphi;
   TF1* g_dz;
+  double gdpmax;
+  double fdpmax;
+  double Mdp;
+  double gdzmax;
+  double fdzmax;
+  double Mdz;
   TH1D* h_1v_dphi_env;
   TH1D* h_1v_absdphi_env;
   TH1D* h_1v_dz_env;
@@ -167,7 +180,6 @@ public:
   TH1D* h_fcn_g_dphi;
   TH1D* h_fcn_dz;
   TH1D* h_fcn_g_dz;
-
   TH1D* h_dphi_env_mean;
   TH1D* h_dphi_env_mean_err;
   TH1D* h_dphi_env_rms;
@@ -210,7 +222,29 @@ public:
   TH1D* h_dz_fit_chi2;
   TH1D* h_dz_fit_chi2prob;
 
-  TRandom3* rand;
+  std::vector<MFVVertexAuxCollection> signal_one_vertices;
+  std::vector<MFVVertexPairCollection> signal_two_vertices;
+  MFVVertexAuxCollection one_vertices;
+  std::vector<MFVVertexPairCollection> two_vertices;
+
+  struct WeightedMFVVertexPair {
+    typedef unsigned short index_t;
+    static const index_t bad_index = 65535;
+
+    WeightedMFVVertexPair()                                  : w(1.), i(bad_index), j(bad_index) {}
+    WeightedMFVVertexPair(           index_t i_, index_t j_) : w(1.), i(i_), j(j_) {}
+    WeightedMFVVertexPair(double w_, index_t i_, index_t j_) : w(w_), i(i_), j(j_) {}
+    bool ok() const { return i != bad_index && j != bad_index; }
+    double w;
+    index_t i;
+    index_t j;
+  };
+
+  const MFVVertexAux& v0(const WeightedMFVVertexPair& pair) const { assert(pair.ok()); return one_vertices[pair.i]; }
+  const MFVVertexAux& v1(const WeightedMFVVertexPair& pair) const { assert(pair.ok()); return one_vertices[pair.j]; }
+
+  typedef std::vector<WeightedMFVVertexPair> WeightedMFVVertexPairs;
+  WeightedMFVVertexPairs two_vertices_from_1v;
 
   enum { t_2v, t_2vbkg, t_2vsig, t_2vsb, t_2vsbbkg, t_2vsbsig,  n_t_2v = t_2vsbsig, t_1v, t_1vsb, n_t };
   static const char* t_names[n_t];
@@ -246,6 +280,9 @@ public:
 
   TH2D* h_pred_v_true;
   TH1D* h_pred_m_true;
+
+  TRandom3* rand;
+  edm::Service<TFileService> fs;
 };
 
 const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb" };
@@ -267,6 +304,13 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     sampling_type(cfg.getParameter<int>("sampling_type")),
     npairs(cfg.getParameter<int>("npairs")),
 
+    max_1v_ntracks01(cfg.getParameter<int>("max_1v_ntracks01")),
+
+    signal_files(cfg.getParameter<std::vector<std::string> >("signal_files")),
+    nsignals(signal_files.size()),
+    signal_weights(cfg.getParameter<std::vector<double> >("signal_weights")),
+    signal_contamination(cfg.getParameter<int>("signal_contamination")),
+
     find_g_dphi(cfg.getParameter<bool>("find_g_dphi")),
     use_form_g_dphi(cfg.getParameter<bool>("use_form_g_dphi")),
     form_g_dphi(cfg.getParameter<std::string>("form_g_dphi")),
@@ -285,18 +329,22 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     use_form_f_dz(cfg.getParameter<bool>("use_form_f_dz")),
     form_f_dz(cfg.getParameter<std::string>("form_f_dz")),
 
-    max_1v_ntracks01(cfg.getParameter<int>("max_1v_ntracks01")),
-
-    signal_files(cfg.getParameter<std::vector<std::string> >("signal_files")),
-    nsignals(signal_files.size()),
-    signal_weights(cfg.getParameter<std::vector<double> >("signal_weights")),
-    signal_contamination(cfg.getParameter<int>("signal_contamination")),
-
     f_dphi(0),
     f_dz(0),
     g_dphi(0),
     g_dz(0),
-    rand(0)
+    gdpmax(0),
+    fdpmax(0),
+    Mdp(0),
+    gdzmax(0),
+    fdzmax(0),
+    Mdz(0),
+    
+    signal_one_vertices(std::vector<MFVVertexAuxCollection> (nsignals)),
+    signal_two_vertices(std::vector<MFVVertexPairCollection>(nsignals)),
+    two_vertices(std::vector<MFVVertexPairCollection>(nfiles)),
+
+    rand(new TRandom3(12191982 + seed))
 {
   if (n1vs.size() != weights.size() || (toy_mode && nfiles != n1vs.size()))
     throw cms::Exception("Misconfiguration", "inconsistent sample info");
@@ -310,7 +358,6 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   if (sampling_type < 0 || sampling_type > 2)
     throw cms::Exception("Misconfiguration", "sampling_type must be one of 0,1,2");
 
-  edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
   if (use_form_g_dphi)
@@ -571,18 +618,16 @@ bool MFVOne2Two::accept_1v_pair(const MFVVertexAux& v0, const MFVVertexAux& v1) 
     accept(rand, f_dz  ->Eval(dz), g_dz  ->Eval(dz), Mdz);
 }
 
-void MFVOne2Two::endJob() {
-  edm::Service<TFileService> fs;
-  rand = new TRandom3(121982 + seed);
-
+void MFVOne2Two::print_config() const {
   printf("\n\n==================================================================\n\nconfig: ntracks >= %i  svdist2d sideband <= %f\n", min_ntracks, svdist2d_cut);
+}
 
+void MFVOne2Two::read_signals() {
   // When in all-sample mode (i.e. when we're scaling numbers to data
   // luminosity), read all signal samples to print signal
   // contamination in sideband and signal strength in signal region.
-  std::vector<MFVVertexAuxCollection> signal_one_vertices(nsignals);
-  std::vector<MFVVertexPairCollection> signal_two_vertices(nsignals);
-  if (nfiles > 1) {
+
+  if (nfiles > 1) { // i.e. only in all-sample mode
     printf("reading %lu signals\n", nsignals);
     for (size_t isig = 0; isig < nsignals; ++isig) {
       printf("%s ", signal_files[isig].c_str());
@@ -599,14 +644,12 @@ void MFVOne2Two::endJob() {
       printf("  scaled: # 1v: %f  # 2v: %f = (%f sideband + %f signal region)\n", signal_one_vertices[isig].size()*w, signal_two_vertices[isig].size()*w, nside*w, nsig*w);
     }
   }
+}
 
-
+void MFVOne2Two::read_vertices() {
   // Read all vertices from the input files. Two modes: unweighted,
   // single sample, or combine multiple samples, reading a random
-  // subset of events.
-
-  MFVVertexAuxCollection one_vertices;
-  std::vector<MFVVertexPairCollection> two_vertices(nfiles);
+  // subset of events. The latter can include signal contamination.
 
   if (!toy_mode) {
     // In regular mode, take all events from the file (with weight 1).
@@ -679,16 +722,38 @@ void MFVOne2Two::endJob() {
     }
   }
 
-  if (just_print)
-    return;
+  assert(one_vertices.size() <= WeightedMFVVertexPair::bad_index); // storing pairs later by index of type ushort, and index 65535 is reserved for uninitialized pair 
+}
 
+void MFVOne2Two::fill_2d_histos() {
+  // Fill all the 2v histograms. In toy_mode we add together many
+  // samples with appropriate weights. 
+
+  for (size_t ifile = 0; ifile < nfiles; ++ifile) {
+    const double w = toy_mode ? weights[ifile] : 1;
+
+    for (const auto& pair : two_vertices[ifile])
+      for (int ih = 0; ih < n_t_2v; ++ih)
+        fill_2d(ih, w, pair.first, pair.second);
+  }
+
+  if (signal_contamination >= 0) {
+    const size_t isig = signal_contamination;
+    for (const auto& pair : signal_two_vertices[isig])
+      for (int ih = 0; ih < n_t_2v; ++ih)
+        if (ih != t_1v)
+          fill_2d(ih, signal_weights[isig], pair.first, pair.second);
+  }
+}
+
+void MFVOne2Two::fit_envelopes() {
+  // Find the envelope functions for dphi and dz.
+
+  printf("\n==============================\n\nfitting envelopes\n"); fflush(stdout);
 
   const int N1v = int(one_vertices.size());
 
-  // Find the envelope functions for dphi (just check that it is flat)
-  // and dz.
-  printf("\n==============================\n\nfitting envelopes\n"); fflush(stdout);
-
+  // Fill the envelope histos to be fit with all unique 1v pairs.
   for (int iv = 0; iv < N1v; ++iv) {
     const MFVVertexAux& v0 = one_vertices[iv];
     for (int jv = iv+1; jv < N1v; ++jv) {
@@ -753,29 +818,23 @@ void MFVOne2Two::endJob() {
   else
     g_dz->FixParameter(0, 9.25);
 
+  // Fill histos with 1e5 samples of each to check things went OK.
   h_fcn_g_dphi->FillRandom("g_dphi", 100000);
   h_fcn_g_dz  ->FillRandom("g_dz",   100000);
+}
 
-  // Fill all the 2v histograms. In toy_mode we add together many
-  // samples with appropriate weights. Also fit f_dphi and f_dz from
-  // the 2v events in the sideband.
+void MFVOne2Two::update_f_weighting_pars() {
+  gdpmax = g_dphi->GetMaximum();
+  fdpmax = f_dphi->GetMaximum();
+  Mdp = fdpmax/gdpmax;
 
-  for (size_t ifile = 0; ifile < nfiles; ++ifile) {
-    const double w = toy_mode ? weights[ifile] : 1;
+  gdzmax = g_dz->GetMaximum();
+  fdzmax = f_dz->GetMaximum();
+  Mdz = fdzmax/gdzmax;
+}
 
-    for (const auto& pair : two_vertices[ifile])
-      for (int ih = 0; ih < n_t_2v; ++ih)
-        fill_2d(ih, w, pair.first, pair.second);
-  }
-
-  if (signal_contamination >= 0) {
-    const size_t isig = signal_contamination;
-    for (const auto& pair : signal_two_vertices[isig])
-      for (int ih = 0; ih < n_t_2v; ++ih)
-        if (ih != t_1v)
-          fill_2d(ih, signal_weights[isig], pair.first, pair.second);
-  }
-
+void MFVOne2Two::fit_fs_with_sideband() {
+  // Fit f_dphi and f_dz from the 2v events in the sideband.
 
   printf("\n==============================\n\nfitting fs\n"); fflush(stdout);
 
@@ -838,22 +897,16 @@ void MFVOne2Two::endJob() {
   else
     f_dz->FixParameter(0, 0.02);
 
+  update_f_weighting_pars();
+
   h_fcn_dphi->FillRandom("f_dphi", 100000);
   h_fcn_abs_dphi->FillRandom("f_dphi", 100000);
   h_fcn_dz->FillRandom("f_dz", 100000);
+}
 
-
-  gdpmax = g_dphi->GetMaximum();
-  fdpmax = f_dphi->GetMaximum();
-  Mdp = fdpmax/gdpmax;
-
-  gdzmax = g_dz->GetMaximum();
-  fdzmax = f_dz->GetMaximum();
-  Mdz = fdzmax/gdzmax;
-
-
-  // Now sample npairs from the one_vertices sample.
-  // - sampling_type = 0: sample random pairs with replacement,
+void MFVOne2Two::choose_2v_from_1v(const bool output_usage) {
+  // Sample npairs from the one_vertices sample.
+  // - sampling_type = 0: sample npairs randomly with replacement,
   // accepting according to the f_dphi/dz functions.
   // - sampling_type = 1: for every unique pair, accept according to
   // f_dphi/dz.
@@ -861,6 +914,9 @@ void MFVOne2Two::endJob() {
   // = prob according to f_dphi/dz.
 
   printf("\n==============================\n\nsampling 1v pairs\n"); fflush(stdout);
+
+  two_vertices_from_1v.clear();
+  const int N1v = int(one_vertices.size());
 
   if (sampling_type == 0) {
     std::vector<int> used(N1v, 0);
@@ -880,7 +936,7 @@ void MFVOne2Two::endJob() {
           if (accept_1v_pair(v0, v1)) {
             jv = x;
             ++used[jv];
-            fill_1d(1, v0, v1);
+            two_vertices_from_1v.push_back(WeightedMFVVertexPair(iv, x));
             break;
           }
 
@@ -898,32 +954,34 @@ void MFVOne2Two::endJob() {
       }
     }
 
-    // Output 1v usage counts (versus z).
-    TTree* t_use = fs->make<TTree>("t_use", "");
-    unsigned char b;
-    unsigned short s;
-    float z;
-    bool use_short = false;
-    for (int i = 0; i < N1v; ++i) {
-      if (used[i] >= 65536)
-        throw cms::Exception("problemo");
-      else if (used[i] >= 256) {
-        use_short = true;
-        break;
+    if (output_usage) {
+      // Output 1v usage counts (versus z).
+      TTree* t_use = fs->make<TTree>("t_use", "");
+      unsigned char b;
+      unsigned short s;
+      float z;
+      bool use_short = false;
+      for (int i = 0; i < N1v; ++i) {
+        if (used[i] >= 65536)
+          throw cms::Exception("problemo");
+        else if (used[i] >= 256) {
+          use_short = true;
+          break;
+        }
       }
-    }
-    t_use->Branch("z", &z, "z/F");
-    if (use_short)
-      t_use->Branch("nuse", &s, "nuse/s");
-    else
-      t_use->Branch("nuse", &b, "nuse/b");
-    for (int i = 0; i < N1v; ++i) {
-      z = one_vertices[i].z;
+      t_use->Branch("z", &z, "z/F");
       if (use_short)
-        s = used[i];
+        t_use->Branch("nuse", &s, "nuse/s");
       else
-        b = used[i];
-      t_use->Fill();
+        t_use->Branch("nuse", &b, "nuse/b");
+      for (int i = 0; i < N1v; ++i) {
+        z = one_vertices[i].z;
+        if (use_short)
+          s = used[i];
+        else
+          b = used[i];
+        t_use->Fill();
+      }
     }
   }
   else if (sampling_type == 1) {
@@ -932,7 +990,7 @@ void MFVOne2Two::endJob() {
         const MFVVertexAux& v0 = one_vertices[iv];
         const MFVVertexAux& v1 = one_vertices[jv];
         if (accept_1v_pair(v0, v1))
-          fill_1d(1, v0, v1);
+          two_vertices_from_1v.push_back(WeightedMFVVertexPair(iv, jv));
       }
     }
   }
@@ -942,10 +1000,33 @@ void MFVOne2Two::endJob() {
         const MFVVertexAux& v0 = one_vertices[iv];
         const MFVVertexAux& v1 = one_vertices[jv];
         const double w = prob_1v_pair(v0, v1);
-        fill_1d(w, v0, v1);
+        two_vertices_from_1v.push_back(WeightedMFVVertexPair(w, iv, jv));
       }
     }
   }
+}
+
+void MFVOne2Two::fill_1d_histos() {
+  for (const auto& pair : two_vertices_from_1v)
+    fill_1d(pair.w, v0(pair), v1(pair));
+}
+
+void MFVOne2Two::run() {
+  print_config();
+
+  read_signals();
+  read_vertices();
+
+  if (just_print)
+    return;
+
+  fill_2d_histos();
+
+  fit_envelopes();
+  fit_fs_with_sideband();
+
+  choose_2v_from_1v(true);
+  fill_1d_histos();
 
 
   // Fit the 1v distribution to the 2v one by shifting it over and
