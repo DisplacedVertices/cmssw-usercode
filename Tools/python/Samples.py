@@ -158,6 +158,10 @@ class MCSample(Sample):
         assert self.total_events < 0
         self.total_events = self.nevents_orig - minus
 
+    def multiply_total_events_by(self, factor):
+        assert self.total_events < 0
+        self.total_events = int(factor * self.nevents_orig)
+
     @property
     def partial_weight(self):
         return self.cross_section / float(self.nevents) * self.k_factor # the total weight is partial_weight * integrated_luminosity (in 1/pb, cross_section is assumed to be in pb)
