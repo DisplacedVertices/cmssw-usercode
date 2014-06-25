@@ -21,7 +21,7 @@ if debug:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     samples = [
-        TupleOnlyMCSample('mfv01000', '/mfv_neutralino_tau01000um_M0400/tucker-mfv_neutralino_tau01000um_M0400-554987f53c5d1493b23246ebbecfd44a/USER')
+        Samples.TupleOnlyMCSample('mfv01000', '/mfv_neutralino_tau01000um_M0400/tucker-mfv_neutralino_tau01000um_M0400-554987f53c5d1493b23246ebbecfd44a/USER')
         ]
     for sample in samples:
         sample.dbs_url_num = 3
