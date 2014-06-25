@@ -141,7 +141,7 @@ else:
         process.TFileService.fileName = process.TFileService.fileName.value().replace('.root', '_%s.root' % job_num)
     
 print 'CFG BEGIN'
-for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type npairs find_g_dphi form_g_dphi find_g_dz form_g_dz find_f_dphi find_f_dphi_bkgonly form_f_dphi find_f_dz find_f_dz_bkgonly form_f_dz max_1v_ntracks01 signal_files signal_weights signal_contamination'.split():
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type npairs find_g_dphi use_form_g_dphi form_g_dphi find_g_dz use_form_g_dz form_g_dz find_f_dphi find_f_dphi_bkgonly use_form_f_dphi form_f_dphi find_f_dz find_f_dz_bkgonly use_form_f_dz form_f_dz max_1v_ntracks01 signal_files signal_weights signal_contamination'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 
