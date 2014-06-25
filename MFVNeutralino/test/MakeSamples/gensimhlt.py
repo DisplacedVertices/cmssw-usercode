@@ -31,7 +31,7 @@ process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.output = cms.OutputModule('PoolOutputModule',
 				  splitLevel = cms.untracked.int32(0),
 				  eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-				  outputCommands = process.RAWDEBUGEventContent.outputCommands,
+				  outputCommands = process.RAWSIMEventContent.outputCommands,
 				  fileName = cms.untracked.string('gensimhlt.root'),
 				  dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('GEN-SIM-RAW')),
 				  SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('generation_step')),
