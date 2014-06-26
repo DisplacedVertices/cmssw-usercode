@@ -450,7 +450,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_ntracks           [i] = fs->make<TH2D>(TString::Format("h_%s_ntracks"           , iv), "", 20, 0, 20, 20, 0, 20);
     h_ntracks01         [i] = fs->make<TH1D>(TString::Format("h_%s_ntracks01"         , iv), "", 30, 0, 30);
     h_svdist2d          [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d"          , iv), "", 100, 0, 0.1);
-    h_svdist2d_all      [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d_all"      , iv), "", 1000, 0, 1);
+    h_svdist2d_all      [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d_all"      , iv), "", 10000, 0, 10);
     h_svdz              [i] = fs->make<TH1D>(TString::Format("h_%s_svdz"              , iv), "", 20, -0.1, 0.1);
     h_svdz_all          [i] = fs->make<TH1D>(TString::Format("h_%s_svdz_all"          , iv), "", 400, -20, 20);
     h_dphi              [i] = fs->make<TH1D>(TString::Format("h_%s_dphi"              , iv), "", 8, -M_PI, M_PI);
