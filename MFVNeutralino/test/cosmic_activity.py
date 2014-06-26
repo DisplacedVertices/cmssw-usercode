@@ -1,5 +1,8 @@
 import sys, os, FWCore.ParameterSet.Config as cms
 
+limited_reco = True
+write_reco = False
+
 process = cms.Process('LocalReco')
 
 process.load('Configuration.StandardSequences.Services_cff')
@@ -35,16 +38,51 @@ process.triggerFilter = hltHighLevel.clone()
 process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
 process.triggerFilter.andOr = True # = OR
 
-process.p = cms.Path(
-    process.triggerFilter *
-    process.muonCSCDigis * process.muonDTDigis * process.muonRPCDigis *
-    process.L1Reco *
-    process.offlineBeamSpot *
-    process.muonlocalreco * process.standAloneMuonSeeds * process.standAloneMuons *
-    process.CosmicMuonSeed * process.cosmicMuons * process.cosmicMuons1Leg *
-    process.CosmicActivity
-    )
+process.p = cms.Path(process.triggerFilter)
 
+if limited_reco:
+    process.p *= (process.muonCSCDigis * process.muonDTDigis * process.muonRPCDigis *
+                  process.L1Reco *
+                  process.offlineBeamSpot *
+                  process.muonlocalreco * process.standAloneMuonSeeds * process.standAloneMuons *
+                  process.CosmicMuonSeed * process.cosmicMuons * process.cosmicMuons1Leg)
+else:
+    process.p *= process.RawToDigi * process.L1Reco * process.reconstruction
+    process.p.remove(process.castorreco)
+    process.p.remove(process.CastorFullReco)
+
+process.p *= process.CosmicActivity
+
+if write_reco:
+    to_keep = [
+        'drop *',
+        'keep triggerTriggerEvent_hltTriggerSummaryAOD__HLT',
+        'keep L1GlobalTriggerObjectMapRecord_hltL1GtObjectMap__HLT',
+        'keep edmTriggerResults_TriggerResults__HLT',
+        'keep *_offlineBeamSpot_*_*',
+        'keep *_offlinePrimaryVertices_*_*',
+        'drop *_offlinePrimaryVertices_WithBS_*',
+        'keep *_dt1DRecHits_*_*',
+        'keep *_dt4DSegments_*_*',
+        'keep *_dt1DCosmicRecHits_*_*',
+        'keep *_dt4DCosmicSegments_*_*',
+        'keep *_csc2DRecHits_*_*',
+        'keep *_cscSegments_*_*',
+        'keep *_rpcRecHits_*_*',
+        'keep *_ancientMuonSeed_*_*',
+        'keep *_standAloneMuons_*_*',
+        'drop *_standAloneMuons_UpdatedAtVtx_*',
+        'keep *_CosmicMuonSeed_*_*',
+        'keep *_cosmicMuons_*_*',
+        'keep *_cosmicMuons1Leg_*_*',
+        ]
+
+    process.out = cms.OutputModule('PoolOutputModule',
+                                   fileName = cms.untracked.string('cosmicac.root'),
+                                   SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p')),
+                                   outputCommands = cms.untracked.vstring(*to_keep),
+                                   )
+    process.outp = cms.EndPath(process.out)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import DataSample
@@ -76,6 +114,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        lumis_per_job = 20,
                        CMSSW_lumi_mask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt',
                        GRID_data_location_override = 'T2_US',
-                       USER_jmt_skip_input_files = 'src/EgammaAnalysis/ElectronTools/data/*,src/CMGTools/External/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml,lib/slc5_amd64_gcc462/libCMGToolsExternal.so',
+                       skip_common = True,
                        )
     cs.submit_all(samples)
