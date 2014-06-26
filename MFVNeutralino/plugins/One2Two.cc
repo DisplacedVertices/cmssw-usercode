@@ -248,6 +248,9 @@ public:
   typedef std::vector<WeightedMFVVertexPair> WeightedMFVVertexPairs;
   WeightedMFVVertexPairs two_vertices_from_1v;
 
+  std::map<int, std::pair<double, TH1D*> > h_1v_templates;
+  double curr_phi_exp;
+
   enum { t_2v, t_2vbkg, t_2vsig, t_2vsb, t_2vsbbkg, t_2vsbsig,  n_t_2v = t_2vsbsig, t_1v, t_1vsb, n_t };
   static const char* t_names[n_t];
 
@@ -345,6 +348,8 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     signal_one_vertices(std::vector<MFVVertexAuxCollection> (nsignals)),
     signal_two_vertices(std::vector<MFVVertexPairCollection>(nsignals)),
     two_vertices(std::vector<MFVVertexPairCollection>(nfiles)),
+
+    curr_phi_exp(-1.),
 
     rand(new TRandom3(12191982 + seed))
 {
@@ -915,7 +920,7 @@ void MFVOne2Two::choose_2v_from_1v(const bool output_usage) {
   // - sampling_type = 2: for every unique pair, use pair with weight
   // = prob according to f_dphi/dz.
 
-  printf("\n==============================\n\nsampling 1v pairs\n"); fflush(stdout);
+  printf("\n==============================\n\nsampling 1v pairs with phi_exp = %f\n", curr_phi_exp); fflush(stdout);
 
   two_vertices_from_1v.clear();
   const int N1v = int(one_vertices.size());
@@ -1115,6 +1120,24 @@ void MFVOne2Two::run() {
   fill_1d_histos();
 
   by_means();
+
+  ////////////////////////////////////////
+
+  const double phi_exp_min = 0;
+  const double phi_exp_max = 6;
+  const int n_phi_exp = 13;
+  const double d_phi_exp = (phi_exp_max - phi_exp_min)/(n_phi_exp - 1);
+  for (int i_phi = 0; i_phi < n_phi_exp; ++i_phi) {
+    curr_phi_exp = phi_exp_min + i_phi * d_phi_exp;
+    TH1D* h_1v_template = fs->make<TH1D>(TString::Format("h_1v_template_phi%i", i_phi), TString::Format("phi_exp = %f\n", curr_phi_exp), 10000, 0, 10);
+
+    f_dphi->FixParameter(0, curr_phi_exp);
+    choose_2v_from_1v();
+    for (const auto& pair : two_vertices_from_1v)
+      h_1v_template->Fill(svdist2d(v0(pair), v1(pair)), pair.w);
+
+    h_1v_templates[i_phi] = std::make_pair(curr_phi_exp, h_1v_template);
+  }
 }
 
 DEFINE_FWK_MODULE(MFVOne2Two);
