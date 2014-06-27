@@ -17,7 +17,7 @@ nevents = [int(x.replace('nevents=', '')) for x in sys.argv if x.startswith('nev
 nevents = 100000 if not nevents else nevents[0]
 
 events_per = [int(x.replace('events_per=', '')) for x in sys.argv if x.startswith('events_per=')]
-events_per = 50 if not nevents else events_per[0]
+events_per = 50 if not events_per else events_per[0]
 
 ################################################################################
 
