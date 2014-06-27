@@ -778,7 +778,7 @@ void MFVOne2Two::fit_envelopes() {
 
   printf("\n==============================\n\nfitting envelopes\n"); fflush(stdout);
 
-  const int N1v = int(one_vertices.size());
+  const int N1v = sample_only > 0 ? sample_only : int(one_vertices.size());
 
   // Fill the envelope histos to be fit with all unique 1v pairs.
   for (int iv = 0; iv < N1v; ++iv) {
@@ -1188,15 +1188,14 @@ void MFVOne2Two::run() {
   read_signals();
   read_vertices();
 
+  fill_2d_histos();
+
   if (just_print)
     return;
 
-  fill_2d_histos();
-
-  fit_envelopes();
-  fit_fs_with_sideband();
-
   if (do_by_means) {
+    fit_envelopes();
+    fit_fs_with_sideband();
     choose_2v_from_1v(true);
     fill_1d_histos();
     by_means();
