@@ -27,6 +27,12 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     sampling_type = cms.int32(2),
                                     npairs = cms.int32(100000),
 
+                                    max_1v_ntracks01 = cms.int32(1000000),
+
+                                    signal_files = cms.vstring(*[file_path % n for n in signal_samples]),
+                                    signal_weights = cms.vdouble(*([2e-4]*nsignals)),
+                                    signal_contamination = cms.int32(-1),
+
                                     find_g_dphi = cms.bool(True),
                                     use_form_g_dphi = cms.bool(False),
                                     form_g_dphi = cms.string('([0] + [1]*abs(x-3.14159265/2))/([0]*3.14159265 + [1]*2.46740110)'),
@@ -44,12 +50,6 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     find_f_dz_bkgonly = cms.bool(False),
                                     use_form_f_dz = cms.bool(False),
                                     form_f_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
-
-                                    max_1v_ntracks01 = cms.int32(1000000),
-
-                                    signal_files = cms.vstring(*[file_path % n for n in signal_samples]),
-                                    signal_weights = cms.vdouble(*([2e-4]*nsignals)),
-                                    signal_contamination = cms.int32(-1),
                                     )
 
 process.p = cms.Path(process.mfvOne2Two)
