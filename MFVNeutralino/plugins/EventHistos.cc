@@ -324,7 +324,16 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   double vtx_phi = 0;
   if (mevent->njets() > 0) {
-    double rjetphi = mevent->jet_phi[gRandom->Integer(mevent->njets())];
+    double rjetphi = 0;
+    double rand = gRandom->Rndm();
+    double sumpt = 0;
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      sumpt += mevent->jet_pt[ijet];
+      if (rand < sumpt/mevent->jet_sum_ht()) {
+        rjetphi = mevent->jet_phi[ijet];
+        break;
+      }
+    }
     double rdphi = gRandom->Gaus(1.57, 0.4);
     if (gRandom->Rndm() < 0.5) {
       vtx_phi = rjetphi - rdphi;
