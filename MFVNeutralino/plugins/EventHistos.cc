@@ -186,7 +186,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_svjetdphi = fs->make<TH1F>("h_svjetdphi", ";constructed #Delta#phi(SV, jets) (rad);jets/.126", 50, -3.15, 3.15);
   h_svpairdphi = fs->make<TH1F>("h_svpairdphi", ";constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
-  h_svpairdist = fs->make<TH1F>("h_svpairdist", ";constructed vertex pair distance (cm);events", 100, 0, 1);
+  h_svpairdist = fs->make<TH1F>("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
 
   h_metx = fs->make<TH1F>("h_metx", ";MET x (GeV);events/5 GeV", 100, -250, 250);
   h_mety = fs->make<TH1F>("h_mety", ";MET y (GeV);events/5 GeV", 100, -250, 250);
@@ -375,11 +375,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     double dphi = reco::deltaPhi(vtx0_phi, vtx1_phi);
-    double vtx0_dist = gRandom->Exp(0.01);
-    double vtx1_dist = gRandom->Exp(0.01);
+    double vtx0_dist = gRandom->Exp(0.005);
+    double vtx1_dist = gRandom->Exp(0.005);
     double svdist = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi)));
-    h_svpairdphi->Fill(dphi);
     h_svpairdist->Fill(svdist);
+    if (svdist > 0.02) {
+      h_svpairdphi->Fill(dphi);
+    }
   }
 
   h_metx->Fill(mevent->metx);
