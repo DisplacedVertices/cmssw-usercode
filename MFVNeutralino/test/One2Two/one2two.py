@@ -25,6 +25,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     toy_mode = cms.bool(False),
                                     poisson_n1vs = cms.bool(False),
                                     sampling_type = cms.int32(2),
+                                    sample_only = cms.int32(-1),
                                     npairs = cms.int32(100000),
 
                                     max_1v_ntracks01 = cms.int32(1000000),
@@ -50,6 +51,12 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     find_f_dz_bkgonly = cms.bool(False),
                                     use_form_f_dz = cms.bool(False),
                                     form_f_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
+
+                                    do_by_means = cms.bool(False),
+
+                                    template_binning = cms.vdouble(20000, 0, 10),
+                                    template_fn = cms.string('temptest.root'),
+                                    template_dir = cms.string('mfvOne2Two'),
                                     )
 
 process.p = cms.Path(process.mfvOne2Two)
