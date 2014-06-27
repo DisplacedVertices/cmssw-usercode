@@ -86,7 +86,7 @@ def submit(name, tau0=None, mass=None):
     elif run_reco:
         output_file = 'reco.root'
     else:
-        output_file = 'gensim.root'
+        output_file = 'gensimhlt.root'
 
     additional_input_files = ['minSLHA.spc', 'modify.py']
     if run_pat:
