@@ -133,6 +133,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
 
   edm::Service<TFileService> fs;
+  gRandom->SetSeed(0);
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
@@ -321,17 +322,14 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jetpt6->Fill(mevent->jetpt6(), w);
   h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
 
-  if (mevent->njets() >= 4) {
-    double rjetphi = mevent->jet_phi[gRandom->Integer(4)];
-    double rdphi = gRandom->Gaus(1.57, 0.3);
-    double vtx_phi;
+  double vtx_phi = 0;
+  if (mevent->njets() > 0) {
+    double rjetphi = mevent->jet_phi[gRandom->Integer(mevent->njets())];
+    double rdphi = gRandom->Gaus(1.57, 0.4);
     if (gRandom->Rndm() < 0.5) {
       vtx_phi = rjetphi - rdphi;
     } else {
       vtx_phi = rjetphi + rdphi;
-    }
-    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-      h_svjetdphi->Fill(reco::deltaPhi(vtx_phi, mevent->jet_phi[ijet]));
     }
   }
 
@@ -340,6 +338,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
       h_jetpairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
     }
+    h_svjetdphi->Fill(reco::deltaPhi(vtx_phi, mevent->jet_phi[ijet]));
   }
 
   h_metx->Fill(mevent->metx);
