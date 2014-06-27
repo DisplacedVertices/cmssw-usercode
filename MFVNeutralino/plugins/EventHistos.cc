@@ -70,6 +70,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetphi;
   TH1F* h_jetpairdphi;
   TH1F* h_svjetdphi;
+  TH1F* h_svpairdphi;
 
   TH1F* h_metx;
   TH1F* h_mety;
@@ -183,6 +184,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
   h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_svjetdphi = fs->make<TH1F>("h_svjetdphi", ";constructed #Delta#phi(SV, jets) (rad);jets/.126", 50, -3.15, 3.15);
+  h_svpairdphi = fs->make<TH1F>("h_svpairdphi", ";constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
 
   h_metx = fs->make<TH1F>("h_metx", ";MET x (GeV);events/5 GeV", 100, -250, 250);
   h_mety = fs->make<TH1F>("h_mety", ";MET y (GeV);events/5 GeV", 100, -250, 250);
@@ -348,6 +350,27 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jetpairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
     }
     h_svjetdphi->Fill(reco::deltaPhi(vtx_phi, mevent->jet_phi[ijet]));
+  }
+
+  if (mevent->njets() > 0) {
+    double vtx1_phi = 0;
+    double rjetphi = 0;
+    double rand = gRandom->Rndm();
+    double sumpt = 0;
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      sumpt += mevent->jet_pt[ijet];
+      if (rand < sumpt/mevent->jet_sum_ht()) {
+        rjetphi = mevent->jet_phi[ijet];
+        break;
+      }
+    }
+    double rdphi = gRandom->Gaus(1.57, 0.4);
+    if (gRandom->Rndm() < 0.5) {
+      vtx1_phi = rjetphi - rdphi;
+    } else {
+      vtx1_phi = rjetphi + rdphi;
+    }
+    h_svpairdphi->Fill(reco::deltaPhi(vtx_phi, vtx1_phi));
   }
 
   h_metx->Fill(mevent->metx);
