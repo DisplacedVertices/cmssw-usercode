@@ -23,9 +23,16 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
 
                                     seed = cms.int32(0),
                                     toy_mode = cms.bool(False),
-                                    poisson_n1vs = cms.bool(False),
+                                    poisson_n1vs = cms.bool(True),
                                     sampling_type = cms.int32(2),
+                                    sample_only = cms.int32(-1),
                                     npairs = cms.int32(100000),
+
+                                    max_1v_ntracks01 = cms.int32(1000000),
+
+                                    signal_files = cms.vstring(*[file_path % n for n in signal_samples]),
+                                    signal_weights = cms.vdouble(*([2e-4]*nsignals)),
+                                    signal_contamination = cms.int32(-1),
 
                                     find_g_dphi = cms.bool(True),
                                     use_form_g_dphi = cms.bool(False),
@@ -45,11 +52,12 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
                                     use_form_f_dz = cms.bool(False),
                                     form_f_dz = cms.string('1/sqrt(2*3.14159265*[0]**2)*exp(-x*x/2/[0]**2)'),
 
-                                    max_1v_ntracks01 = cms.int32(1000000),
+                                    do_by_means = cms.bool(False),
 
-                                    signal_files = cms.vstring(*[file_path % n for n in signal_samples]),
-                                    signal_weights = cms.vdouble(*([2e-4]*nsignals)),
-                                    signal_contamination = cms.int32(-1),
+                                    template_range = cms.vdouble(0, 6.1, 0.25),
+                                    template_binning = cms.vdouble(20000, 0, 10),
+                                    template_fn = cms.string(''),
+                                    template_dir = cms.string('mfvOne2Two'),
                                     )
 
 process.p = cms.Path(process.mfvOne2Two)
@@ -71,7 +79,8 @@ n1v_scales = {5: 9, 6: 6, 7: 3, 8: 2}
 def sample_name(fn):
     return os.path.basename(fn).replace('.root', '')
 
-if 'env' not in sys.argv:
+
+if False:
     for arg in sys.argv:
         if arg.endswith('.root') and os.path.isfile(arg):
             process.TFileService.fileName = sample_name(arg) + '_histos.root'
@@ -141,7 +150,7 @@ else:
         process.TFileService.fileName = process.TFileService.fileName.value().replace('.root', '_%s.root' % job_num)
     
 print 'CFG BEGIN'
-for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type npairs find_g_dphi use_form_g_dphi form_g_dphi find_g_dz use_form_g_dz form_g_dz find_f_dphi find_f_dphi_bkgonly use_form_f_dphi form_f_dphi find_f_dz find_f_dz_bkgonly use_form_f_dz form_f_dz max_1v_ntracks01 signal_files signal_weights signal_contamination'.split():
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type sample_only npairs max_1v_ntracks01 signal_files signal_weights signal_contamination find_g_dphi use_form_g_dphi form_g_dphi find_g_dz use_form_g_dz form_g_dz find_f_dphi find_f_dphi_bkgonly use_form_f_dphi form_f_dphi find_f_dz find_f_dz_bkgonly use_form_f_dz form_f_dz do_by_means template_binning template_fn template_dir'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 

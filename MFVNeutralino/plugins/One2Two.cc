@@ -116,10 +116,14 @@ public:
   void fit_envelopes();
   void fit_fs_with_sideband();
   void update_f_weighting_pars();
+  void set_phi_exp(double);
   void choose_2v_from_1v(const bool output_usage=false);
   void fill_1d_histos();
   TH1D* shift_hist(const TH1D* h, const int shift, TH1D** hshifted) const;
   void by_means();
+  void make_1v_templates();
+  void load_1v_templates(const std::string& fn, const std::string& dir);
+  TH1D* make_2v_toy();
 
   void run();
 
@@ -137,6 +141,7 @@ public:
   const bool toy_mode;
   const bool poisson_n1vs;
   const int sampling_type; // 0 = sample random pairs with replacement, 1 = sample all unique pairs and accept/reject, 2 = sample all unique pairs and fill 1v dists with weight according to accept/reject prob
+  const int sample_only;
   const int npairs;
 
   const int max_1v_ntracks01;
@@ -163,6 +168,13 @@ public:
   const bool find_f_dz_bkgonly;
   const bool use_form_f_dz;
   const std::string form_f_dz;
+
+  const bool do_by_means;
+
+  const std::vector<double> template_range;
+  const std::vector<double> template_binning;
+  const std::string template_fn;
+  const std::string template_dir;
 
   TF1* f_dphi;
   TF1* f_dz;
@@ -251,7 +263,9 @@ public:
   std::map<int, std::pair<double, TH1D*> > h_1v_templates;
   double curr_phi_exp;
 
-  enum { t_2v, t_2vbkg, t_2vsig, t_2vsb, t_2vsbbkg, t_2vsbsig,  n_t_2v = t_2vsbsig, t_1v, t_1vsb, n_t };
+  int n_2v_toys;
+
+  enum { t_2v, t_2vbkg, t_2vsig, t_2vsb, t_2vsbbkg, t_2vsbsig,  n_t_2v, t_1v = n_t_2v, t_1vsb, n_t };
   static const char* t_names[n_t];
 
   TH2D* h_xy[n_t];
@@ -307,6 +321,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     toy_mode(cfg.getParameter<bool>("toy_mode")),
     poisson_n1vs(cfg.getParameter<bool>("poisson_n1vs")),
     sampling_type(cfg.getParameter<int>("sampling_type")),
+    sample_only(cfg.getParameter<int>("sample_only")),
     npairs(cfg.getParameter<int>("npairs")),
 
     max_1v_ntracks01(cfg.getParameter<int>("max_1v_ntracks01")),
@@ -334,6 +349,13 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     use_form_f_dz(cfg.getParameter<bool>("use_form_f_dz")),
     form_f_dz(cfg.getParameter<std::string>("form_f_dz")),
 
+    do_by_means(cfg.getParameter<bool>("do_by_means")),
+
+    template_range(cfg.getParameter<std::vector<double> >("template_range")),
+    template_binning(cfg.getParameter<std::vector<double> >("template_binning")),
+    template_fn(cfg.getParameter<std::string>("template_fn")),
+    template_dir(cfg.getParameter<std::string>("template_dir")),
+
     f_dphi(0),
     f_dz(0),
     g_dphi(0),
@@ -351,9 +373,11 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
     curr_phi_exp(-1.),
 
+    n_2v_toys(0),
+
     rand(new TRandom3(12191982 + seed))
 {
-  if (n1vs.size() != weights.size() || (toy_mode && nfiles != n1vs.size()))
+  if ((weights.size() > 0 && n1vs.size() != weights.size()) || (toy_mode && nfiles != n1vs.size()))
     throw cms::Exception("Misconfiguration", "inconsistent sample info");
 
   if (nsignals != signal_weights.size())
@@ -364,6 +388,12 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
   if (sampling_type < 0 || sampling_type > 2)
     throw cms::Exception("Misconfiguration", "sampling_type must be one of 0,1,2");
+
+  if (template_range.size() < 3 || template_range[0] < 0 || template_range[1] < template_range[0])
+    throw cms::Exception("Misconfiguration", "template_range messed up");
+
+  if (template_binning.size() < 3 || template_binning[0] < 1 || template_binning[2] < template_binning[1])
+    throw cms::Exception("Misconfiguration", "template_binning messed up");
 
   TH1::SetDefaultSumw2();
 
@@ -439,6 +469,9 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
   h_dz_fit_chi2prob   = fs->make<TH1D>("h_dz_fit_chi2prob"   , "", 100, 0, 1);
 
   for (int i = 0; i < n_t; ++i) {
+    if (!do_by_means && i == n_t_2v)
+      break;
+
     const char* iv = t_names[i];
 
     h_xy                [i] = fs->make<TH2D>(TString::Format("h_%s_xy"                , iv), "", 100, -0.05, 0.05, 100, 0.05, 0.05);
@@ -455,7 +488,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_ntracks           [i] = fs->make<TH2D>(TString::Format("h_%s_ntracks"           , iv), "", 20, 0, 20, 20, 0, 20);
     h_ntracks01         [i] = fs->make<TH1D>(TString::Format("h_%s_ntracks01"         , iv), "", 30, 0, 30);
     h_svdist2d          [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d"          , iv), "", 100, 0, 0.1);
-    h_svdist2d_all      [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d_all"      , iv), "", 10000, 0, 10);
+    h_svdist2d_all      [i] = fs->make<TH1D>(TString::Format("h_%s_svdist2d_all"      , iv), "", int(template_binning[0]), template_binning[1], template_binning[2]);
     h_svdz              [i] = fs->make<TH1D>(TString::Format("h_%s_svdz"              , iv), "", 20, -0.1, 0.1);
     h_svdz_all          [i] = fs->make<TH1D>(TString::Format("h_%s_svdz_all"          , iv), "", 400, -20, 20);
     h_dphi              [i] = fs->make<TH1D>(TString::Format("h_%s_dphi"              , iv), "", 8, -M_PI, M_PI);
@@ -463,17 +496,19 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_svdz_v_dphi       [i] = fs->make<TH2D>(TString::Format("h_%s_svdz_v_dphi"       , iv), "", 8, -M_PI, M_PI, 50, -0.1, 0.1);
   }
 
-  h_1v_svdist2d_fit_2v = fs->make<TH1D>("h_1v_svdist2d_fit_2v", "", 100, 0, 0.1);
+  if (do_by_means) {
+    h_1v_svdist2d_fit_2v = fs->make<TH1D>("h_1v_svdist2d_fit_2v", "", 100, 0, 0.1);
 
-  h_meandiff = fs->make<TH1D>("h_meandiff", "", 100, 0, 0.05);
-  h_shift = fs->make<TH1D>("h_shift", "", 100, 0, 100);
-  h_ksdist  = fs->make<TH1D>("h_ksdist",  "", 101, 0, 1.01);
-  h_ksprob  = fs->make<TH1D>("h_ksprob",  "", 101, 0, 1.01);
-  h_ksdistX = fs->make<TH1D>("h_ksdistX", "", 101, 0, 1.01);
-  h_ksprobX = fs->make<TH1D>("h_ksprobX", "", 101, 0, 1.01);
+    h_meandiff = fs->make<TH1D>("h_meandiff", "", 100, 0, 0.05);
+    h_shift = fs->make<TH1D>("h_shift", "", 100, 0, 100);
+    h_ksdist  = fs->make<TH1D>("h_ksdist",  "", 101, 0, 1.01);
+    h_ksprob  = fs->make<TH1D>("h_ksprob",  "", 101, 0, 1.01);
+    h_ksdistX = fs->make<TH1D>("h_ksdistX", "", 101, 0, 1.01);
+    h_ksprobX = fs->make<TH1D>("h_ksprobX", "", 101, 0, 1.01);
 
-  h_pred_v_true = fs->make<TH2D>("h_pred_v_true", "", 100, 0, 20, 100, 0, 20);
-  h_pred_m_true = fs->make<TH1D>("h_pred_m_true", "", 100, -20, 20);
+    h_pred_v_true = fs->make<TH2D>("h_pred_v_true", "", 100, 0, 20, 100, 0, 20);
+    h_pred_m_true = fs->make<TH1D>("h_pred_m_true", "", 100, -20, 20);
+  }
 }
 
 MFVOne2Two::~MFVOne2Two() {
@@ -505,7 +540,7 @@ bool MFVOne2Two::is_sideband(const MFVVertexAux& v0, const MFVVertexAux& v1) con
 }
 
 void MFVOne2Two::read_file(const std::string& filename, const bool sig, MFVVertexAuxCollection& one_vertices, MFVVertexPairCollection& two_vertices) const {
-  TFile* f = new TFile(filename.c_str());
+  TFile* f = TFile::Open(filename.c_str());
   if (!f)
     throw cms::Exception("One2Two") << "could not read file " << filename;
 
@@ -758,7 +793,7 @@ void MFVOne2Two::fit_envelopes() {
 
   printf("\n==============================\n\nfitting envelopes\n"); fflush(stdout);
 
-  const int N1v = int(one_vertices.size());
+  const int N1v = sample_only > 0 ? sample_only : int(one_vertices.size());
 
   // Fill the envelope histos to be fit with all unique 1v pairs.
   for (int iv = 0; iv < N1v; ++iv) {
@@ -911,6 +946,11 @@ void MFVOne2Two::update_f_weighting_pars() {
   Mdz = fdzmax/gdzmax;
 }
 
+void MFVOne2Two::set_phi_exp(double p) {
+  f_dphi->FixParameter(0, p);
+  update_f_weighting_pars();
+}
+
 void MFVOne2Two::choose_2v_from_1v(const bool output_usage) {
   // Sample npairs from the one_vertices sample.
   // - sampling_type = 0: sample npairs randomly with replacement,
@@ -923,7 +963,7 @@ void MFVOne2Two::choose_2v_from_1v(const bool output_usage) {
   printf("\n==============================\n\nsampling 1v pairs with phi_exp = %f\n", curr_phi_exp); fflush(stdout);
 
   two_vertices_from_1v.clear();
-  const int N1v = int(one_vertices.size());
+  const int N1v = sample_only > 0 ? sample_only : int(one_vertices.size());
 
   if (sampling_type == 0) {
     std::vector<int> used(N1v, 0);
@@ -1102,41 +1142,139 @@ void MFVOne2Two::by_means() {
   h_pred_m_true->Fill(pred_signreg_bkg - true_signreg_bkg);
 }
 
+void MFVOne2Two::make_1v_templates() {
+  const double phi_exp_min = template_range[0];
+  const double phi_exp_max = template_range[1];
+  const double d_phi_exp = template_range[2];
+
+  printf("\n==============================\n\nsaving 1v templates: phi = range(%f, %f, %f)\n", phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
+
+  for (int i_phi = 0; curr_phi_exp + d_phi_exp < phi_exp_max; ++i_phi) {
+    curr_phi_exp = phi_exp_min + i_phi * d_phi_exp;
+    set_phi_exp(curr_phi_exp);
+
+    TH1D* h_1v_template = fs->make<TH1D>(TString::Format("h_1v_template_phi%i", i_phi), TString::Format("phi_exp = %f\n", curr_phi_exp), int(template_binning[0]), template_binning[1], template_binning[2]);
+
+    choose_2v_from_1v();
+
+    for (const auto& pair : two_vertices_from_1v)
+      h_1v_template->Fill(svdist2d(v0(pair), v1(pair)), pair.w);
+
+    h_1v_templates[i_phi] = std::make_pair(curr_phi_exp, h_1v_template);
+  }
+}
+
+void MFVOne2Two::load_1v_templates(const std::string& fn, const std::string& dir) {
+  printf("\n==============================\n\nloading 1v templates from %s/%s\n", fn.c_str(), dir.c_str()); fflush(stdout);
+
+  TFile* f = TFile::Open(fn.c_str());
+  if (!f)
+    throw cms::Exception("ReadError", "could not read template file");
+
+  TDirectory* d = (TDirectory*)f->Get(dir.c_str());
+  if (!d)
+    throw cms::Exception("ReadError", "could not read template file");
+
+  int i_phi = 0;
+  for (; i_phi < 1000; ++i_phi) {
+    TH1D* h = (TH1D*)d->Get(TString::Format("h_1v_template_phi%i", i_phi));
+    if (!h)
+      break;
+
+    const char* title = h->GetTitle();
+    double p;
+    const int r = sscanf(title, "phi_exp = %lf", &p);
+    if (!r)
+      throw cms::Exception("ReadError", "could not read template file");
+
+    h_1v_templates[i_phi] = std::make_pair(p, h);
+    printf("iphi: %i  phiexp: %f  rms: %f\n", i_phi, p, h->GetRMS());
+  }
+
+  if (i_phi == 0)
+    throw cms::Exception("ReadError", "could not read template file");
+
+  printf("\n==============================\n\nread %i 1v templates\n", i_phi);
+}
+
+TH1D* MFVOne2Two::make_2v_toy() {
+  printf("\n==============================\n\nthrowing a 2v toy\n"); fflush(stdout);
+
+  TH1D* h_2v_toy = fs->make<TH1D>(TString::Format("h_2v_toy_%i_%i", seed, n_2v_toys++), "", int(template_binning[0]), template_binning[1], template_binning[2]);
+
+  for (size_t ifile = 0; ifile < nfiles; ++ifile) {
+    const double w = weights[ifile];
+    const int N2v = int(two_vertices[ifile].size());
+    const double n2v_d = w * N2v;
+    const int n2v = rand->Poisson(n2v_d);
+
+    printf("events used from file #%lu:%s: %i / %i\n", ifile, filenames[ifile].c_str(), n2v, N2v);
+
+    int t = 0, m = 0;
+    while (m < n2v) {
+      if ((N2v - t) * rand->Rndm() >= n2v - m)
+        ++t;
+      else {
+        ++m;
+        const auto& pair = two_vertices[ifile][t++];
+        h_2v_toy->Fill(svdist2d(pair.first, pair.second));
+      }
+    }
+  }
+
+  if (signal_contamination >= 0) {
+    const size_t isig(signal_contamination);
+    const double w = signal_weights[isig];
+    const int N2v = int(signal_two_vertices[isig].size());
+    const double n2v_d = w * N2v;
+    const int n2v = rand->Poisson(n2v_d);
+
+    printf("including signal contamination from %s: %i / %i", signal_files[isig].c_str(), n2v, N2v);
+
+    int t = 0, m = 0;
+    while (m < n2v) {
+      if ((N2v - t) * rand->Rndm() >= n2v - m)
+        ++t;
+      else {
+        ++m;
+        const auto& pair = signal_two_vertices[isig][t++];
+        h_2v_toy->Fill(svdist2d(pair.first, pair.second));
+      }
+    }
+  }
+  
+  return h_2v_toy;
+}
+
 void MFVOne2Two::run() {
   print_config();
 
   read_signals();
   read_vertices();
 
+  fill_2d_histos();
+
   if (just_print)
     return;
-
-  fill_2d_histos();
 
   fit_envelopes();
   fit_fs_with_sideband();
 
-  choose_2v_from_1v(true);
-  fill_1d_histos();
-
-  by_means();
+  if (do_by_means) {
+    choose_2v_from_1v(true);
+    fill_1d_histos();
+    by_means();
+  }
 
   ////////////////////////////////////////
 
-  const double phi_exp_min = 0;
-  const double phi_exp_max = 6;
-  const int n_phi_exp = 13;
-  const double d_phi_exp = (phi_exp_max - phi_exp_min)/(n_phi_exp - 1);
-  for (int i_phi = 0; i_phi < n_phi_exp; ++i_phi) {
-    curr_phi_exp = phi_exp_min + i_phi * d_phi_exp;
-    TH1D* h_1v_template = fs->make<TH1D>(TString::Format("h_1v_template_phi%i", i_phi), TString::Format("phi_exp = %f\n", curr_phi_exp), 10000, 0, 10);
+  if (template_fn.size() == 0)
+    make_1v_templates();
+  else
+    load_1v_templates(template_fn, template_dir);
 
-    f_dphi->FixParameter(0, curr_phi_exp);
-    choose_2v_from_1v();
-    for (const auto& pair : two_vertices_from_1v)
-      h_1v_template->Fill(svdist2d(v0(pair), v1(pair)), pair.w);
-
-    h_1v_templates[i_phi] = std::make_pair(curr_phi_exp, h_1v_template);
+  if (toy_mode) {
+    make_2v_toy();
   }
 }
 
