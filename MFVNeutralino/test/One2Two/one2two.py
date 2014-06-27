@@ -54,6 +54,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
 
                                     do_by_means = cms.bool(False),
 
+                                    template_range = cms.vdouble(0, 6.1, 0.25),
                                     template_binning = cms.vdouble(20000, 0, 10),
                                     template_fn = cms.string(''),
                                     template_dir = cms.string('mfvOne2Two'),
@@ -78,7 +79,8 @@ n1v_scales = {5: 9, 6: 6, 7: 3, 8: 2}
 def sample_name(fn):
     return os.path.basename(fn).replace('.root', '')
 
-if 'env' not in sys.argv:
+
+if False:
     for arg in sys.argv:
         if arg.endswith('.root') and os.path.isfile(arg):
             process.TFileService.fileName = sample_name(arg) + '_histos.root'
