@@ -6,14 +6,16 @@ from JMTucker.Tools.PATTuple_cfg import *
 runOnMC = True # magic line, don't touch
 process, common_seq = pat_tuple_process(runOnMC)
 
-process.source.fileNames = ['/store/user/tucker/Run2012D_SingleMu_AOD_22Jan2013-v1_10000_0015EC7D-EAA7-E211-A9B9-E0CB4E5536A7.root']
+process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A_ext-v1/00000/FEDD73E4-5424-E211-8271-001E67398142.root' if runOnMC else '/store/user/tucker/Run2012D_SingleMu_AOD_22Jan2013-v1_10000_0015EC7D-EAA7-E211-A9B9-E0CB4E5536A7.root']
+
 del process.out
 del process.outp
 
 process.TFileService = cms.Service('TFileService', fileName = cms.string('quadjettrigeff.root'))
 
 process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
-process.patJets.addJetCharge = False
+for attr in 'embedGenJetMatch addGenJetMatch embedGenPartonMatch addGenPartonMatch getJetMCFlavour addJetCharge'.split():
+    setattr(process.patJets, attr, False)
 process.selectedPatJets.cut = ''
 common_seq *= process.patJetCorrFactors * process.patJets * process.selectedPatJets
 
@@ -47,7 +49,7 @@ for no_prescale in (True, False):
         setattr(process, 'p' + name + 'num', cms.Path(process.IsoMu25Eta2p1 * process.QuadJet50 * common_seq * num))
         setattr(process, 'p' + name + 'den', cms.Path(process.IsoMu25Eta2p1 *                     common_seq * den))
 
-process.options.wantSummary = True
+#process.options.wantSummary = True
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
@@ -85,6 +87,3 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                 datasamples)
 
     cs.submit_all(samples)
-
-
-
