@@ -69,9 +69,20 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_sum_ht;
   TH1F* h_jetphi;
   TH1F* h_jetpairdphi;
-  TH1F* h_svjetdphi;
+
+  TH1F* h_sv0phi;
+  TH1F* h_sv1phi;
+  TH1F* h_sv0jetdphi;
+  TH1F* h_sv1jetdphi;
   TH1F* h_svpairdphi;
+
+  TH1F* h_sv0bs2ddist;
+  TH1F* h_sv1bs2ddist;
   TH1F* h_svpairdist;
+  TH2F* h_svdist_dphi;
+  TH2F* h_svdist_bs2ddist0;
+  TH2F* h_svdist_bs2ddist1;
+  TH2F* h_bs2ddist1_bs2ddist0;
 
   TH1F* h_metx;
   TH1F* h_mety;
@@ -184,9 +195,20 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_sum_ht = fs->make<TH1F>("h_jet_sum_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
   h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
-  h_svjetdphi = fs->make<TH1F>("h_svjetdphi", ";constructed #Delta#phi(SV, jets) (rad);jets/.126", 50, -3.15, 3.15);
+
+  h_sv0phi = fs->make<TH1F>("h_sv0phi", ";constructed SV0 #phi (rad);events/.126", 50, -3.15, 3.15);
+  h_sv1phi = fs->make<TH1F>("h_sv1phi", ";constructed SV1 #phi (rad);events/.126", 50, -3.15, 3.15);
+  h_sv0jetdphi = fs->make<TH1F>("h_sv0jetdphi", ";constructed #Delta#phi(SV0, jets) (rad);jets/.126", 50, -3.15, 3.15);
+  h_sv1jetdphi = fs->make<TH1F>("h_sv1jetdphi", ";constructed #Delta#phi(SV1, jets) (rad);jets/.126", 50, -3.15, 3.15);
   h_svpairdphi = fs->make<TH1F>("h_svpairdphi", ";constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
+
+  h_sv0bs2ddist = fs->make<TH1F>("h_sv0bs2ddist", ";constructed SV0 distance (cm);vertices", 500, 0, 1);
+  h_sv1bs2ddist = fs->make<TH1F>("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   h_svpairdist = fs->make<TH1F>("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
+  h_svdist_dphi = fs->make<TH2F>("h_svdist_dphi", "constructed vertex pair;#Delta#phi (rad);distance (cm)", 50, -3.15, 3.15, 200, 0, 0.2);
+  h_svdist_bs2ddist0 = fs->make<TH2F>("h_svdist_bs2ddist0", ";bs2ddist0;svdist2d", 500, 0, 1, 1000, 0, 2);
+  h_svdist_bs2ddist1 = fs->make<TH2F>("h_svdist_bs2ddist1", ";bs2ddist1;svdist2d", 500, 0, 1, 1000, 0, 2);
+  h_bs2ddist1_bs2ddist0 = fs->make<TH2F>("h_bs2ddist1_bs2ddist0", ";bs2ddist0;bs2ddist1", 500, 0, 1, 500, 0, 1);
 
   h_metx = fs->make<TH1F>("h_metx", ";MET x (GeV);events/5 GeV", 100, -250, 250);
   h_mety = fs->make<TH1F>("h_mety", ";MET y (GeV);events/5 GeV", 100, -250, 250);
@@ -325,38 +347,14 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jetpt5->Fill(mevent->jetpt5(), w);
   h_jetpt6->Fill(mevent->jetpt6(), w);
   h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
-
-  double vtx_phi = 0;
-  if (mevent->njets() > 0) {
-    double rjetphi = 0;
-    double rand = gRandom->Rndm();
-    double sumpt = 0;
-    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-      sumpt += mevent->jet_pt[ijet];
-      if (rand < sumpt/mevent->jet_sum_ht()) {
-        rjetphi = mevent->jet_phi[ijet];
-        break;
-      }
-    }
-    double rdphi = gRandom->Gaus(1.57, 0.4);
-    if (gRandom->Rndm() < 0.5) {
-      vtx_phi = rjetphi - rdphi;
-    } else {
-      vtx_phi = rjetphi + rdphi;
-    }
-  }
-
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_jetphi->Fill(mevent->jet_phi[ijet]);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
       h_jetpairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
     }
-    h_svjetdphi->Fill(reco::deltaPhi(vtx_phi, mevent->jet_phi[ijet]));
   }
 
   if (mevent->njets() > 0) {
-    double vtx0_phi = vtx_phi;
-    double vtx1_phi = 0;
     double rjetphi = 0;
     double rand = gRandom->Rndm();
     double sumpt = 0;
@@ -368,6 +366,27 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
     double rdphi = gRandom->Gaus(1.57, 0.4);
+
+    double vtx0_phi = 0;
+    if (gRandom->Rndm() < 0.5) {
+      vtx0_phi = rjetphi - rdphi;
+    } else {
+      vtx0_phi = rjetphi + rdphi;
+    }
+
+    rjetphi = 0;
+    rand = gRandom->Rndm();
+    sumpt = 0;
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      sumpt += mevent->jet_pt[ijet];
+      if (rand < sumpt/mevent->jet_sum_ht()) {
+        rjetphi = mevent->jet_phi[ijet];
+        break;
+      }
+    }
+    rdphi = gRandom->Gaus(1.57, 0.4);
+
+    double vtx1_phi = 0;
     if (gRandom->Rndm() < 0.5) {
       vtx1_phi = rjetphi - rdphi;
     } else {
@@ -377,8 +396,22 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     double dphi = reco::deltaPhi(vtx0_phi, vtx1_phi);
     double vtx0_dist = gRandom->Exp(0.005);
     double vtx1_dist = gRandom->Exp(0.005);
+
+    h_sv0phi->Fill(vtx0_phi);
+    h_sv1phi->Fill(vtx1_phi);
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      h_sv0jetdphi->Fill(reco::deltaPhi(vtx0_phi, mevent->jet_phi[ijet]));
+      h_sv1jetdphi->Fill(reco::deltaPhi(vtx1_phi, mevent->jet_phi[ijet]));
+    }
+
+    h_sv0bs2ddist->Fill(vtx0_dist);
+    h_sv1bs2ddist->Fill(vtx1_dist);
     double svdist = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi)));
     h_svpairdist->Fill(svdist);
+    h_svdist_dphi->Fill(dphi, svdist);
+    h_svdist_bs2ddist0->Fill(vtx0_dist, svdist);
+    h_svdist_bs2ddist1->Fill(vtx1_dist, svdist);
+    h_bs2ddist1_bs2ddist0->Fill(vtx0_dist, vtx1_dist);
     if (svdist > 0.02) {
       h_svpairdphi->Fill(dphi);
     }
