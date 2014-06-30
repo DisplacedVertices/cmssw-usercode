@@ -1155,10 +1155,27 @@ void MFVOne2Two::make_1v_templates() {
 
     TH1D* h_1v_template = fs->make<TH1D>(TString::Format("h_1v_template_phi%i", i_phi), TString::Format("phi_exp = %f\n", curr_phi_exp), int(template_binning[0]), template_binning[1], template_binning[2]);
 
-    choose_2v_from_1v();
+    if (sampling_type != 2) {
+      choose_2v_from_1v();
 
-    for (const auto& pair : two_vertices_from_1v)
-      h_1v_template->Fill(svdist2d(v0(pair), v1(pair)), pair.w);
+      for (const auto& pair : two_vertices_from_1v)
+        h_1v_template->Fill(svdist2d(v0(pair), v1(pair)), pair.w);
+    }
+    else {
+      printf("\n==============================\n\nsampling 1v pairs with phi_exp = %f\n", curr_phi_exp); fflush(stdout);
+
+      two_vertices_from_1v.clear();
+      const int N1v = sample_only > 0 ? sample_only : int(one_vertices.size());
+
+      for (int iv = 0; iv < N1v; ++iv) {
+        for (int jv = iv+1; jv < N1v; ++jv) {
+          const MFVVertexAux& v0 = one_vertices[iv];
+          const MFVVertexAux& v1 = one_vertices[jv];
+          const double w = prob_1v_pair(v0, v1);
+          h_1v_template->Fill(svdist2d(v0, v1), w);
+        }
+      }
+    }
 
     h_1v_templates[i_phi] = std::make_pair(curr_phi_exp, h_1v_template);
   }
