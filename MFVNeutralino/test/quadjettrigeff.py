@@ -29,25 +29,35 @@ for name, path in process.paths.items():
         path.insert(0, process.IsoMu25Eta2p1)
 
 for no_prescale in (True, False):
-    for kind in ('pf', 'cl', 0, 1, 2, 3):
-        if type(kind) == int:
-            sel = kind
-            kind = 'cl'
-        else:
-            sel = -1
+    for apply_prescale in (True, False):
+        if no_prescale and apply_prescale:
+            continue
 
-        src = 'selectedPatJets'
-        if kind == 'pf':
-            src += 'PF'
+        for kind in ('pf', 'cl', 0, 1, 2, 3):
+            if type(kind) == int:
+                sel = kind
+                kind = 'cl'
+            else:
+                sel = -1
 
-        num = cms.EDAnalyzer('QuadJetTrigEff', jets_src = cms.InputTag(src), sel = cms.int32(sel), no_prescale = cms.bool(no_prescale))
-        den = num.clone()
+            src = 'selectedPatJets'
+            if kind == 'pf':
+                src += 'PF'
 
-        name = '%s%s' % (kind, '' if sel == -1 else sel)
-        setattr(process, name + 'num', num)
-        setattr(process, name + 'den', den)
-        setattr(process, 'p' + name + 'num', cms.Path(process.IsoMu25Eta2p1 * process.QuadJet50 * common_seq * num))
-        setattr(process, 'p' + name + 'den', cms.Path(process.IsoMu25Eta2p1 *                     common_seq * den))
+            num = cms.EDAnalyzer('QuadJetTrigEff',
+                                 jets_src = cms.InputTag(src),
+                                 sel = cms.int32(sel),
+                                 no_prescale = cms.bool(no_prescale),
+                                 apply_prescale = cms.bool(apply_prescale),
+                                 )
+            den = num.clone()
+
+            name = 'NP%iAP%i' % (int(no_prescale), int(apply_prescale))
+            name += '%s%s' % (kind, '' if sel == -1 else sel)
+            setattr(process, name + 'num', num)
+            setattr(process, name + 'den', den)
+            setattr(process, 'p' + name + 'num', cms.Path(process.IsoMu25Eta2p1 * process.QuadJet50 * common_seq * num))
+            setattr(process, 'p' + name + 'den', cms.Path(process.IsoMu25Eta2p1 *                     common_seq * den))
 
 #process.options.wantSummary = True
 
