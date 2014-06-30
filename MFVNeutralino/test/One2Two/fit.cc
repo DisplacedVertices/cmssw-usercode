@@ -13,6 +13,7 @@
 #include <TPaveStats.h>
 #include <TMinuit.h>
 #include <TFile.h>
+#include <TTree.h>
 
 bool batch = true;
 TFile* fin = 0;
@@ -24,8 +25,13 @@ TH1D* h_data = 0;
 TH1D* h_sig = 0;
 TH1D* h_bkg[25] = {0};
 
+const char* par_names[4] = { "mu_sig", "mu_bkg", "phi_exp", "shift" };
+const int par_steps[4] = { 300, 300, 100, 100 };
+const double par_min[4] = {  0,  0, 0.5, 0.   };
+const double par_max[4] = {  3,  3, 6,   0.02 };
+
 double glb_maxtwolnL = -1e300;
-double glb_max_pars[2];
+double glb_max_pars[4] = {1e99, 1e99, 1e99, 1e99};
 
 int i_phi(double phi_exp) {
   return int(round(phi_exp*4));
@@ -122,10 +128,6 @@ void save(const TString& base_fn) {
 }
 
 void draw_likelihood(int iexp, double pars[4]) {
-  const char* par_names[4] = { "mu_sig", "mu_bkg", "phi_exp", "shift" };
-  const int par_steps[4] = { 300, 300, 100, 100 };
-  const double par_min[4] = {  0,  0, 0.5, 0.   };
-  const double par_max[4] = {  3,  3, 6,   0.02 };
   double d_par[4] = {0};
 
   int found = 0;
@@ -164,7 +166,7 @@ void draw_likelihood(int iexp, double pars[4]) {
   h->SetDirectory(fout);
 
   double maxtwolnL = -1e300;
-  double max_pars[2];
+  double max_pars[4] = {1e99, 1e99, 1e99, 1e99};
 
   for (int i = 1; i <= par_steps[ipar]; ++i) {
     pars[ipar] = par_min[ipar] + i * d_par[ipar];
@@ -177,8 +179,8 @@ void draw_likelihood(int iexp, double pars[4]) {
       const double tolnL = twolnL(pars[0], pars[1], pars[2], pars[3]);
       if (tolnL > maxtwolnL) {
         maxtwolnL = tolnL;
-        max_pars[0] = pars[ipar];
-        max_pars[1] = pars[jpar];
+        for (int pp = 0; pp < 4; ++pp)
+          max_pars[pp] = pars[pp];
       }
       h->SetBinContent(i, j, tolnL);
     }
@@ -188,8 +190,8 @@ void draw_likelihood(int iexp, double pars[4]) {
   if (maxtwolnL > glb_maxtwolnL) {
     printf("  ^ new global max!\n");
     glb_maxtwolnL = maxtwolnL;
-    glb_max_pars[0] = max_pars[0];
-    glb_max_pars[1] = max_pars[1];
+    for (int pp = 0; pp < 4; ++pp)
+      glb_max_pars[pp] = max_pars[pp];
   }
 
   if (!batch) {
@@ -256,10 +258,13 @@ int main(int argc, char** argv) {
     save("data_sig");
   }
 
+  double data_integ = h_data->Integral();
+  data_integ = ((TH1D*)fin->Get("mfvOne2Two/h_2vbkg_svdist2d_all"))->Integral();
+
   for (int ip = 24; ip >= 0; --ip) {
     TH1D* h = h_bkg[ip] = (TH1D*)fin->Get(TString::Format("mfvOne2Two/h_1v_template_phi%i", ip))->Clone(TString::Format("h_bkg_%i", ip));
     h->SetDirectory(fout);
-    h->Scale(h_data->Integral()/h->Integral());
+    h->Scale(data_integ/h->Integral());
 
     if (!batch) {
       if (ip < 24)
@@ -272,6 +277,7 @@ int main(int argc, char** argv) {
       h->GetXaxis()->SetRangeUser(0, 0.08);
     }
   }
+
   if (!batch) {
     save("templates");
     c->SetLogy();
@@ -287,20 +293,35 @@ int main(int argc, char** argv) {
     for (int is = 0; is < 10; ++is) {
       double pars[4] = { 1e99, 1e99, ip*0.25, 0.001*is };
       draw_likelihood(iexp++, pars);
-      save(TString::Format("likelihood_test_iphi%i_ishift%i", ip, is));
+      if (!batch)
+        save(TString::Format("likelihood_test_iphi%i_ishift%i", ip, is));
     }
   }
 
-
-  double min_value, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, phi_exp, err_phi_exp, shift, err_shift;
+  double min_value, minuit_pars[4], minuit_par_errs[4];
   int ret = minimize_likelihood(min_value,
-                                mu_sig, err_mu_sig,
-                                mu_bkg, err_mu_bkg,
-                                phi_exp, err_phi_exp,
-                                shift, err_shift, 
+                                minuit_pars[0], minuit_par_errs[0],
+                                minuit_pars[1], minuit_par_errs[1],
+                                minuit_pars[2], minuit_par_errs[2],
+                                minuit_pars[3], minuit_par_errs[3],
                                 2);
   printf(" minuit ret %i\n", ret);
-  
+
+
+  fout->cd(); TTree* t_out = new TTree("t_out", "");
+
+  for (int pp = 0; pp < 4; ++pp)
+    t_out->Branch(TString::Format("manscan_%s", par_names[pp]), &glb_max_pars[pp], TString::Format("manscan_%s/D", par_names[pp]));
+
+  for (int pp = 0; pp < 4; ++pp) {
+    t_out->Branch(TString::Format("minuit_%s",     par_names[pp]), &minuit_pars[pp],     TString::Format("minuit_%s/D",     par_names[pp]));
+    t_out->Branch(TString::Format("minuit_%s_err", par_names[pp]), &minuit_par_errs[pp], TString::Format("minuit_%s_err/D", par_names[pp]));
+  }
+
+  t_out->Branch("minuit_ret", &ret, "minuit_ret/I");
+  t_out->Branch("minuit_val", &min_value, "minuit_val/D");
+
+  t_out->Fill();
 
   fout->Write();
   fout->Close();
