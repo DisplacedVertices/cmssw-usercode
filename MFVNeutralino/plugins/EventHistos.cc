@@ -75,10 +75,12 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_sv0jetdphi;
   TH1F* h_sv1jetdphi;
   TH1F* h_svpairdphi;
+  TH1F* h_svpairdphi_cut;
 
   TH1F* h_sv0bs2ddist;
   TH1F* h_sv1bs2ddist;
   TH1F* h_svpairdist;
+  TH1F* h_svpairdist_cut;
   TH2F* h_svdist_dphi;
   TH2F* h_svdist_bs2ddist0;
   TH2F* h_svdist_bs2ddist1;
@@ -201,10 +203,12 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_sv0jetdphi = fs->make<TH1F>("h_sv0jetdphi", ";constructed #Delta#phi(SV0, jets) (rad);jets/.126", 50, -3.15, 3.15);
   h_sv1jetdphi = fs->make<TH1F>("h_sv1jetdphi", ";constructed #Delta#phi(SV1, jets) (rad);jets/.126", 50, -3.15, 3.15);
   h_svpairdphi = fs->make<TH1F>("h_svpairdphi", ";constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
+  h_svpairdphi_cut = fs->make<TH1F>("h_svpairdphi_cut", "#Delta#phi with space clearing;constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
 
   h_sv0bs2ddist = fs->make<TH1F>("h_sv0bs2ddist", ";constructed SV0 distance (cm);vertices", 500, 0, 1);
   h_sv1bs2ddist = fs->make<TH1F>("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   h_svpairdist = fs->make<TH1F>("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
+  h_svpairdist_cut = fs->make<TH1F>("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 200, 0, 0.2);
   h_svdist_dphi = fs->make<TH2F>("h_svdist_dphi", "constructed vertex pair;#Delta#phi (rad);distance (cm)", 50, -3.15, 3.15, 200, 0, 0.2);
   h_svdist_bs2ddist0 = fs->make<TH2F>("h_svdist_bs2ddist0", ";bs2ddist0;svdist2d", 500, 0, 1, 1000, 0, 2);
   h_svdist_bs2ddist1 = fs->make<TH2F>("h_svdist_bs2ddist1", ";bs2ddist1;svdist2d", 500, 0, 1, 1000, 0, 2);
@@ -403,6 +407,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_sv0jetdphi->Fill(reco::deltaPhi(vtx0_phi, mevent->jet_phi[ijet]));
       h_sv1jetdphi->Fill(reco::deltaPhi(vtx1_phi, mevent->jet_phi[ijet]));
     }
+    h_svpairdphi->Fill(dphi);
 
     h_sv0bs2ddist->Fill(vtx0_dist);
     h_sv1bs2ddist->Fill(vtx1_dist);
@@ -413,7 +418,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_svdist_bs2ddist1->Fill(vtx1_dist, svdist);
     h_bs2ddist1_bs2ddist0->Fill(vtx0_dist, vtx1_dist);
     if (svdist > 0.02) {
-      h_svpairdphi->Fill(dphi);
+      h_svpairdphi_cut->Fill(dphi);
+      h_svpairdist_cut->Fill(svdist);
     }
   }
 
