@@ -77,6 +77,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_svpairdphi;
   TH1F* h_svpairdphi_cut;
 
+  TH1F* h_bs2ddist1v;
   TH1F* h_sv0bs2ddist;
   TH1F* h_sv1bs2ddist;
   TH1F* h_svpairdist;
@@ -149,6 +150,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
   gRandom->SetSeed(0);
+  TFile* f = TFile::Open("aaaa.root");
+  h_bs2ddist1v = (TH1F*)(f->Get("bs2ddist1v"))->Clone();
+  f->Close();
+  delete f;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
@@ -398,8 +403,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     double dphi = reco::deltaPhi(vtx0_phi, vtx1_phi);
-    double vtx0_dist = gRandom->Exp(0.005);
-    double vtx1_dist = gRandom->Exp(0.005);
+    double vtx0_dist = h_bs2ddist1v->GetRandom();
+    double vtx1_dist = h_bs2ddist1v->GetRandom();
 
     h_sv0phi->Fill(reco::deltaPhi(vtx0_phi, 0.0));
     h_sv1phi->Fill(reco::deltaPhi(vtx1_phi, 0.0));
