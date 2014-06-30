@@ -397,8 +397,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     double vtx0_dist = gRandom->Exp(0.005);
     double vtx1_dist = gRandom->Exp(0.005);
 
-    h_sv0phi->Fill(vtx0_phi);
-    h_sv1phi->Fill(vtx1_phi);
+    h_sv0phi->Fill(reco::deltaPhi(vtx0_phi, 0.0));
+    h_sv1phi->Fill(reco::deltaPhi(vtx1_phi, 0.0));
     for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
       h_sv0jetdphi->Fill(reco::deltaPhi(vtx0_phi, mevent->jet_phi[ijet]));
       h_sv1jetdphi->Fill(reco::deltaPhi(vtx1_phi, mevent->jet_phi[ijet]));
