@@ -106,6 +106,7 @@ else:
     toy_mode = from_env('toy_mode', bool)
     from_env('poisson_n1vs', bool)
     from_env('sampling_type',int)
+    from_env('sample_only',  int)
     from_env('npairs',       int)
     from_env('signal_contamination', int)
 
