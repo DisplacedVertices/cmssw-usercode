@@ -74,16 +74,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        max_threads = 2,
                        )
 
-    datasamples = [
+    mc_samples = [Samples.qcdmupt15] + Samples.ttbar_samples + Samples.leptonic_background_samples
+
+    data_samples = [
         Samples.DataSample('SingleMu2012A', '/SingleMu/Run2012A-22Jan2013-v1/AOD'),
         Samples.DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD'),
         Samples.DataSample('SingleMu2012C', '/SingleMu/Run2012C-22Jan2013-v1/AOD'),
         Samples.DataSample('SingleMu2012D', '/SingleMu/Run2012D-22Jan2013-v1/AOD'),
         ]
-        
-    samples = Samples.from_argv([Samples.qcdmupt15] +
-                                Samples.ttbar_samples +
-                                Samples.leptonic_background_samples +
-                                datasamples)
+
+    for sample in mc_samples:
+        sample.events_per = 20000
+    for sample in data_samples:
+        sample.lumis_per = 50
+
+    samples = Samples.from_argv(mc_samples + data_samples)
 
     cs.submit_all(samples)
