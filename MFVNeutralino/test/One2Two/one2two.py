@@ -140,7 +140,7 @@ else:
         for s in sample_infos:
             if s.sample.name in samples:
                 n1vs.append(s.events_rel[min_ntracks - 5] * n1v_scales[min_ntracks])
-                weights.append(s.sample.partial_weight * int_lumi if len(samples) > 1 else 1)
+                weights.append(s.sample.partial_weight*2 * int_lumi if len(samples) > 1 else 1)
 
         process.mfvOne2Two.n1vs = n1vs
         process.mfvOne2Two.weights = weights
