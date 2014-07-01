@@ -134,6 +134,13 @@ def dummy_beamspot(process, params):
     for name, path in process.paths.items():
         path.insert(0, process.myBeamSpot)
 
+    for name, out in process.outputModules.items():
+        new_cmds = []
+        for cmd in out.outputCommands:
+            if 'offlineBeamSpot' in cmd:
+                new_cmds.append(cmd.replace('offlineBeamSpot', 'myBeamSpot'))
+        out.outputCommands += new_cmds
+
     import itertools
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     for path_name, path in itertools.chain(process.paths.iteritems(), process.endpaths.iteritems()):
