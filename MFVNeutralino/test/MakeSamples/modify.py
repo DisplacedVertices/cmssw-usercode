@@ -102,3 +102,21 @@ def ttbar(process):
         '24:onIfAny = 1 2 3 4 5',
         'Tune:pp 5',
         )
+
+def tracker_alignment(process, tag):
+    prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc' % tag.capitalize())
+
+def keep_random_info(process):
+    process.output.outputCommands += [
+        'drop *_randomEngineStateProducer_*_*',
+        'drop CrossingFramePlaybackInfoExtended_*_*_*'
+        ]
+
+def castor_thing(process):
+    prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', 'CastorSaturationCorrsRcd', 'CastorSaturationCorrs_v1.00_mc')
+
+def keep_tracker_extras(process):
+    process.output.outputCommands += [
+        'keep recoTrackExtras_generalTracks__*',
+        'keep TrackingRecHitsOwned_generalTracks__*'
+        ]
