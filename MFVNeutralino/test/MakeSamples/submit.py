@@ -4,9 +4,11 @@ import sys, os
 
 # JMTBAD argparse
 
-run_reco = 'gensim' not in sys.argv
+run_reco = 'gensimonly' not in sys.argv
 run_pat = run_reco and 'pat' in sys.argv
+
 run_ttbar = 'ttbar' in sys.argv
+
 skip_tests = 'skip_tests' in sys.argv
 testing = 'testing' in sys.argv
 
@@ -80,6 +82,12 @@ os.system('mkdir -p ' + os.path.join(dir, 'psets'))
 
 def submit(name, tau0=None, mass=None):
     print name
+    is_signal = tau0 is not None and mass is not None
+    if not is_signal:
+        if tau0 is not None or mass is not None:
+            raise ValueError('must specify both tau0 and mass if either specified')
+        if 'ttbar' not in name:
+            raise ValueError('if not signal, must only be ttbar')
 
     if run_pat:
         output_file = 'aodpat.root'
@@ -101,24 +109,20 @@ def submit(name, tau0=None, mass=None):
         reco_pset_fn = 'my_reco.py'
         additional_input_files.append(reco_pset_fn)
         new_reco_py = open('reco.py').read()
+        if is_signal:
+            new_reco_py += '\nkeep_random_info(process)\n'
     else:
         new_reco_py = ''
 
-    if 'ttbar' not in name:
-        assert tau0 is not None and mass is not None
-
     if 'gluino' in name:
-        new_py += '\nfrom modify import set_gluino_tau0\n'
         new_py += '\nset_gluino_tau0(process, %e)\n' % tau0       
         from modify import set_mass
         set_mass(mass)
     elif 'neutralino' in name:
-        new_py += '\nfrom modify import set_neutralino_tau0\n'
         new_py += '\nset_neutralino_tau0(process, %e)\n' % tau0
         from modify import set_masses
         set_masses(mass+5, mass)
     elif 'ttbar' in name:
-        new_py += '\nfrom modify import ttbar\n'
         new_py += '\nttbar(process)\n'
     else:
         raise RuntimeError("don't know what LSP to use")
@@ -126,47 +130,37 @@ def submit(name, tau0=None, mass=None):
     if 'design' in name:
         glb_snip = "\nprocess.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')\n"
         new_py += glb_snip
-        new_reco_py += glb_snip + '''
-from modify import prefer_it
-prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', 'CastorSaturationCorrsRcd', 'CastorSaturationCorrs_v1.00_mc')
-'''
+        new_reco_py += glb_snip + 'castor_thing(process)\n'
 
     if 'nopu' in name:
-        new_py += '\nfrom modify import nopu\n'
-        new_py += 'nopu(process)\n'
+        new_py += '\nnopu(process)\n'
 
-    snip = '\nfrom modify import ideal_bs_tag, gauss_bs\n'
     if 'gaubs' in name:
-        snip += 'gauss_bs(process)\n'
+        snip = '\ngauss_bs(process)\n'
         new_py += snip
         new_reco_py += snip
     elif 'gaunxybs' in name:
-        snip += 'gauss_bs(process, True)\n'
+        snip = '\ngauss_bs(process, True)\n'
         new_py += snip
         new_reco_py += snip
     elif 'gaunxyzbs' in name:
-        snip += 'gauss_bs(process, True, True)\n'
+        snip = '\ngauss_bs(process, True, True)\n'
         new_py += snip
         new_reco_py += snip
 
     if 'ali_' in name:
         if not run_reco:
             raise ValueError('alignment means nothing if not running reco')
-
         ali_tag = name.split('ali_')[-1].capitalize()
-        new_reco_py += '''
-from modify import prefer_it
-prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc')
-''' % ali_tag
+        new_reco_py += 'tracker_alignment(process, "%s")\n' % ali_tag
 
     if 'tune_' in name:
-        new_py += '\nfrom modify import set_tune\n'
         new_py += '\nset_tune(process,%s)\n' % name.split('tune_')[1]
 
     if 'tkex' in name:
         if not run_reco:
             raise ValueError('tkex means nothing if not running reco')
-        new_reco_py += "\nprocess.output.outputCommands += ['keep recoTrackExtras_generalTracks__*', 'keep TrackingRecHitsOwned_generalTracks__*']\n"
+        new_reco_py += '\nkeep_tracker_extras(process)\n'
 
     open(pset_fn, 'wt').write(new_py)
     if run_reco:
@@ -197,11 +191,13 @@ if run_ttbar:
     #for run in to_run:
     #    submit('ttbar_' + run)
 
-    submit('ttbarhad_syststudies')
+    for i in xrange(10):
+        submit('ttbarhad_syststudies_%02i' % i)
 else:
-    tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.]
-    masses = range(200, 1501, 100)
+    tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.][-2:]
+    masses = range(500, 1501, 200)
     tunes = [5]
+    masses = [400]
 
     to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 
