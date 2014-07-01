@@ -1,4 +1,5 @@
 import sys, os, FWCore.ParameterSet.Config as cms
+from modify import *
 
 process = cms.Process('HLT')
 
@@ -87,7 +88,6 @@ for category in ['TwoTrackMinimumDistance']:
     setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
 
 if 'modify' in sys.argv:
-    from modify import set_neutralino_tau0, set_masses
     set_neutralino_tau0(process, 1)
     set_masses(405, 400)
 
