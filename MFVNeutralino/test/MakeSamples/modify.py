@@ -120,3 +120,21 @@ def keep_tracker_extras(process):
         'keep recoTrackExtras_generalTracks__*',
         'keep TrackingRecHitsOwned_generalTracks__*'
         ]
+
+def dummy_beamspot(process, params):
+    if type(params) == str:
+        try:
+            import JMTucker.Tools.DummyBeamSpots_cff as DummyBeamSpots
+        except ImportError:
+            import DummyBeamSpots_cff as DummyBeamSpots
+        params = getattr(DummyBeamSpots, params)
+
+    process.myBeamSpot = cms.EDProducer('DummyBeamSpotProducer', params)
+
+    for name, path in process.paths.items():
+        path.insert(0, process.myBeamSpot)
+
+    import itertools
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    for path_name, path in itertools.chain(process.paths.iteritems(), process.endpaths.iteritems()):
+        massSearchReplaceAnyInputTag(path, cms.InputTag('offlineBeamSpot'), cms.InputTag('myBeamSpot'), verbose=True)
