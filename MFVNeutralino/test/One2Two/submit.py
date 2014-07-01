@@ -71,12 +71,14 @@ echo
 echo run fit.exe
 ./fit.exe $JOB_NUM >& $JOB_NUM.out.o2tfit
 set exit_code=$?
-if [ $exit_code -ne 0 ]; then
+if ($exit_code != 0) then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   echo @@@@ fit.exe exited with error code $exit_code
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   exit $exit_code
-fi
+endif
+echo fit.exe done
+echo
 '''
 
 jdl_template = '''universe = vanilla
