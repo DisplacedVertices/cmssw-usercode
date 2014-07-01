@@ -228,17 +228,18 @@ class DataSample(Sample):
 ########################################################################
 
 ttbar_xsec = 245.8 # for world-combination m_top = 173.3 GeV (252.9 at CMS-measured m_top = 172.5)
+ttbar_xsec_had = ttbar_xsec * 0.457
 
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV or PREP for xsecs
 ttbar_samples = [
     #        name                title                                                      dataset                                                                                                nevents  clr  syst  xsec (pb)
-    MCSample('ttbarhadronic',    't#bar{t}, hadronic',                                      '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                 10537444,   4, 0.15, ttbar_xsec * 0.457),
+    MCSample('ttbarhadronic',    't#bar{t}, hadronic',                                      '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',                 10537444,   4, 0.15, ttbar_xsec_had),
     MCSample('ttbarsemilep',     't#bar{t}, semileptonic',                                  '/TTJets_SemiLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM',             25424818,   4, 0.15, ttbar_xsec * 0.438),
     MCSample('ttbardilep',       't#bar{t}, dileptonic',                                    '/TTJets_FullLeptMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM',                 12119013,   4, 0.15, ttbar_xsec * 0.105),
     ]
 
 # JMTBAD
-ttbarhadronicext = MCSample('ttbarhadronic', 't#bar{t}, hadronic', '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM', 31223821, 4, 0.15, ttbar_xsec * 0.457)
+ttbarhadronicext = MCSample('ttbarhadronic', 't#bar{t}, hadronic', '/TTJets_HadronicMGDecays_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A_ext-v1/AODSIM', 31223821, 4, 0.15, ttbar_xsec_had)
 
 qcd_samples = [
     MCSample('qcdht0100',        'QCD, 100 < H_{T} < 250 GeV',                              '/QCD_HT-100To250_TuneZ2star_8TeV-madgraph-pythia/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM',       50129518, 801, 0.10, 1.04e7),
@@ -439,40 +440,48 @@ for tau, mass, sample in mfv_signal_samples_ex:
 ########################################################################
 
 myttbar_samples = [
-    MCSample('myttbarpythia',       '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER',        99850, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarpynopu',       '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',              99950, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarpydesignnopu', '', '/mfv_ttbar_designnopu/tucker-mfv_ttbar_designnopu-03e053ea4788fabdfdc6964bc26befc0/USER', 100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarpydesignnoputkex', '', '/mfv_ttbar_designnoputkex/tucker-mfv_ttbar_designnoputkex-03e053ea4788fabdfdc6964bc26befc0/USER', 750000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune3',       '', '/mfv_ttbar_tune_3/jchavesb-mfv_ttbar_tune_3-e3674fd6eec136ae079fabace84be5fa/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune4',       '', '/mfv_ttbar_tune_4/jchavesb-mfv_ttbar_tune_4-2ab11a6f2e6e96d6779b5e2cdd1bc9d7/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune5',       '', '/mfv_ttbar_tune_5/jchavesb-mfv_ttbar_tune_5-84bbc883c4d7ec08aa60419295f8ddab/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune6',       '', '/mfv_ttbar_tune_6/jchavesb-mfv_ttbar_tune_6-5e5c8b6e5ae97e632829881f70a96bef/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune7',       '', '/mfv_ttbar_tune_7/jchavesb-mfv_ttbar_tune_7-aed1494d928e44cf1085663860ab1a07/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune8',       '', '/mfv_ttbar_tune_8/jchavesb-mfv_ttbar_tune_8-39b59d827dfea83a5b26108b211413ab/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune10',      '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune12',      '', '/mfv_ttbar_tune_12/jchavesb-mfv_ttbar_tune_12-2c2b6eebe1f1fceaad303986dd747739/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartune13',      '', '/mfv_ttbar_tune_13/jchavesb-mfv_ttbar_tune_13-aa936efd43cebbfaadfc1013d94768d4/USER',      100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarbowing',      '', '/mfv_ttbar_ali_bowing/jchavesb-mfv_ttbar_ali_bowing-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarcurl',        '', '/mfv_ttbar_ali_curl/jchavesb-mfv_ttbar_ali_curl-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarelliptical',  '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarradial',      '', '/mfv_ttbar_ali_radial/jchavesb-mfv_ttbar_ali_radial-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarsagitta',     '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarskew',        '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartelescope',   '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbartwist',       '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, ttbar_xsec * 0.457),
-    MCSample('myttbarzexpansion',  '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec * 0.457),
-    ]
+    MCSample('myttbarpythia',       '', '/mfv_ttbar_default/tucker-mfv_ttbar_default-84bbc883c4d7ec08aa60419295f8ddab/USER',        99850, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarpynopu',       '', '/mfv_ttbar_nopu/tucker-mfv_ttbar_nopu-de5b96ddc03a24cfcdf41da57e270038/USER',              99950, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarpydesignnopu', '', '/mfv_ttbar_designnopu/tucker-mfv_ttbar_designnopu-03e053ea4788fabdfdc6964bc26befc0/USER', 100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarpydesignnoputkex', '', '/mfv_ttbar_designnoputkex/tucker-mfv_ttbar_designnoputkex-03e053ea4788fabdfdc6964bc26befc0/USER', 750000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune3',       '', '/mfv_ttbar_tune_3/jchavesb-mfv_ttbar_tune_3-e3674fd6eec136ae079fabace84be5fa/USER',        100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune4',       '', '/mfv_ttbar_tune_4/jchavesb-mfv_ttbar_tune_4-2ab11a6f2e6e96d6779b5e2cdd1bc9d7/USER',        100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune5',       '', '/mfv_ttbar_tune_5/jchavesb-mfv_ttbar_tune_5-84bbc883c4d7ec08aa60419295f8ddab/USER',        100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune6',       '', '/mfv_ttbar_tune_6/jchavesb-mfv_ttbar_tune_6-5e5c8b6e5ae97e632829881f70a96bef/USER',        100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune7',       '', '/mfv_ttbar_tune_7/jchavesb-mfv_ttbar_tune_7-aed1494d928e44cf1085663860ab1a07/USER',        100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune8',       '', '/mfv_ttbar_tune_8/jchavesb-mfv_ttbar_tune_8-39b59d827dfea83a5b26108b211413ab/USER',        100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune9',       '', '/mfv_ttbar_tune_9/jchavesb-mfv_ttbar_tune_9-90218df95d8a7fe3d94d722599f21aa6/USER',        100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune10',      '', '/mfv_ttbar_tune_10/jchavesb-mfv_ttbar_tune_10-f90c435f681f63bce4d0bb86d798a78b/USER',      100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune11',      '', '/mfv_ttbar_tune_11/jchavesb-mfv_ttbar_tune_11-941817f3c97288ac74e8b6edc1ce6faa/USER',      100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune12',      '', '/mfv_ttbar_tune_12/jchavesb-mfv_ttbar_tune_12-2c2b6eebe1f1fceaad303986dd747739/USER',      100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartune13',      '', '/mfv_ttbar_tune_13/jchavesb-mfv_ttbar_tune_13-aa936efd43cebbfaadfc1013d94768d4/USER',      100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarbowing',      '', '/mfv_ttbar_ali_bowing/jchavesb-mfv_ttbar_ali_bowing-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarcurl',        '', '/mfv_ttbar_ali_curl/jchavesb-mfv_ttbar_ali_curl-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarelliptical',  '', '/mfv_ttbar_ali_elliptical/jchavesb-mfv_ttbar_ali_elliptical-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarradial',      '', '/mfv_ttbar_ali_radial/jchavesb-mfv_ttbar_ali_radial-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarsagitta',     '', '/mfv_ttbar_ali_sagitta/jchavesb-mfv_ttbar_ali_sagitta-84bbc883c4d7ec08aa60419295f8ddab/USER',             100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarskew',        '', '/mfv_ttbar_ali_skew/jchavesb-mfv_ttbar_ali_skew-84bbc883c4d7ec08aa60419295f8ddab/USER',                   100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartelescope',   '', '/mfv_ttbar_ali_telescope/jchavesb-mfv_ttbar_ali_telescope-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbartwist',       '', '/mfv_ttbar_ali_twist/jchavesb-mfv_ttbar_ali_twist-84bbc883c4d7ec08aa60419295f8ddab/USER',                 100000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbarzexpansion',  '', '/mfv_ttbar_ali_zexpansion/jchavesb-mfv_ttbar_ali_zexpansion-84bbc883c4d7ec08aa60419295f8ddab/USER',       100000, 4, 0.15, ttbar_xsec_had),
 
-#files at FNAL:
-at_FNAL = ['myttbarelliptical','myttbartune3','myttbartune5','myttbartune6']
+    MCSample('myttbar00', '', '/mfv_ttbarhad_syststudies_00/tucker-mfv_ttbarhad_syststudies_00-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar01', '', '/mfv_ttbarhad_syststudies_01/tucker-mfv_ttbarhad_syststudies_01-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar02', '', '/mfv_ttbarhad_syststudies_02/tucker-mfv_ttbarhad_syststudies_02-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar03', '', '/mfv_ttbarhad_syststudies_03/tucker-mfv_ttbarhad_syststudies_03-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar04', '', '/mfv_ttbarhad_syststudies_04/tucker-mfv_ttbarhad_syststudies_04-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar05', '', '/mfv_ttbarhad_syststudies_05/tucker-mfv_ttbarhad_syststudies_05-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar06', '', '/mfv_ttbarhad_syststudies_06/tucker-mfv_ttbarhad_syststudies_06-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar07', '', '/mfv_ttbarhad_syststudies_07/tucker-mfv_ttbarhad_syststudies_07-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar08', '', '/mfv_ttbarhad_syststudies_08/tucker-mfv_ttbarhad_syststudies_08-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar09', '', '/mfv_ttbarhad_syststudies_09/tucker-mfv_ttbarhad_syststudies_09-fcaaeb06b6648094feb634d80e6400ee/USER', 500000, 4, 0.15, ttbar_xsec_had),
+    ]
     
 for s in myttbar_samples:
     s.is_pythia8 = True
     s.dbs_url_num = 3
-    if 'jchavesb' in s.dataset and s.name in at_FNAL:
-        s.scheduler = 'condor'
+    if s.name in 'myttbarelliptical myttbartune3 myttbartune5 myttbartune6':
+        s.scheduler = 'condor' # at fnal
 
 ########################################################################
 
