@@ -525,7 +525,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_toy_nevents_from.push_back(h);
   }
   h_toy_nevents = fs->make<TH1D>("h_toy_nevents", "", 200, 0, 200);
-  h_toy_nevents_signal = fs->make<TH1D>("h_toy_nevents_signal", "", 200, 0, 200);
+  h_toy_nevents_signal = fs->make<TH1D>("h_toy_nevents_signal", "", 1000, 0, 1000);
 }
 
 MFVOne2Two::~MFVOne2Two() {
