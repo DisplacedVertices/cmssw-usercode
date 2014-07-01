@@ -100,7 +100,7 @@ def compile():
     global compiled
     if not compiled:
         os.system('sba')
-        os.system('rootg++ -Wall fit.cc -lMinuit -o fit.exe')
+        os.system('g++ `root-config --cflags --libs --glibs` -Wall fit.cc -lMinuit -o fit.exe')
         raw_input('did the compiles go OK?')
         compiled = True
 
