@@ -51,6 +51,21 @@ if [ -f pat.py ]; then
     exit $exit_code
   fi
 fi
+
+if [ -f ntuple.py ]; then
+  echo
+  echo done with reco at `date`, starting ntuple step
+  echo
+  cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml ntuple.py
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    echo cmsRun exited ntuple step with error code $exit_code
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    exit $exit_code
+  fi
+fi
+
 echo
 echo done at `date`
 echo TWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEP
