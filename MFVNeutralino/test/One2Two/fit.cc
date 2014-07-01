@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
   if (!batch)
     c = new TCanvas("c", "", 800, 800);
 
-  const TString in_fn = jobnum >= 0 ? TString::Format("one2two_%i.root", jobnum) : "one2two.root";
+  const TString in_fn = jobnum >= 0 ? TString::Format("%i.one2two.root", jobnum) : "one2two.root";
   printf("fit.exe: input file %s\n", in_fn.Data());
   TFile* fin = new TFile(in_fn);
   if (!fin || !fin->IsOpen()) {
@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  const TString out_fn = jobnum >= 0 ? TString::Format("o2tfit_%i.root", jobnum) : "o2tfit.root";
+  const TString out_fn = jobnum >= 0 ? TString::Format("%i.o2tfit.root", jobnum) : "o2tfit.root";
   printf("fit.exe: output file %s\n", out_fn.Data());
   fout = new TFile(out_fn, "recreate");
 
