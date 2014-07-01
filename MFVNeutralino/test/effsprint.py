@@ -26,12 +26,14 @@ def effs(fn):
         h = f.Get('%s/h_npv' % dir_name)
         return h.Integral(0,1000000) if integral else h.GetEntries()
 
-    den = get_n('mfvEventHistosNoCuts')
     namenumall = 'mfvEventHistos%s' % ('OneVtx' if nvtx == 1 else '')
-    namenumall = namenumall.replace('One', 'OnlyOne')
-    numall = get_n(namenumall)
     namenumvtx = 'mfvVertexHistos%s/h_nsv' % ('OneVtx' if nvtx == 1 else '')
-    namenumvtx = namenumvtx.replace('One', 'OnlyOne')
+    if nvtx == 1 and only:
+        namenumall = namenumall.replace('One', 'OnlyOne')
+        namenumvtx = namenumvtx.replace('One', 'OnlyOne')
+
+    den = get_n('mfvEventHistosNoCuts')
+    numall = get_n(namenumall)
     h = f.Get(namenumvtx)
     numvtx = h.Integral(h.FindBin(nvtx), 1000000)
     sname = os.path.basename(fn).replace('.root','')
