@@ -49,6 +49,7 @@ for no_prescale in (True, False):
                                  sel = cms.int32(sel),
                                  no_prescale = cms.bool(no_prescale),
                                  apply_prescale = cms.bool(apply_prescale),
+                                 prints = cms.string(''),
                                  )
             den = num.clone()
 
@@ -58,6 +59,9 @@ for no_prescale in (True, False):
             setattr(process, name + 'den', den)
             setattr(process, 'p' + name + 'num', cms.Path(process.IsoMu25Eta2p1 * process.QuadJet50 * common_seq * num))
             setattr(process, 'p' + name + 'den', cms.Path(process.IsoMu25Eta2p1 *                     common_seq * den))
+
+process.NP0AP1pfnum.prints = 'pfnum'
+process.NP0AP1pfden.prints = 'pfden'
 
 #process.options.wantSummary = True
 
