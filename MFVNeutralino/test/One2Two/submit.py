@@ -58,19 +58,19 @@ setenv mfvo2t_seed $JOB_NUM
 %(env)s
 
 cmsRun one2two.py env >& $JOB_NUM.out.one2two
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
+set exit_code=$?
+if ($exit_code != 0) then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   echo @@@@ cmsRun exited one2two step with error code $exit_code
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   exit $exit_code
-fi
+endif
 echo one2two.py done
 echo
 
 echo run fit.exe
 ./fit.exe $JOB_NUM >& $JOB_NUM.out.o2tfit
-exit_code=$?
+set exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   echo @@@@ fit.exe exited with error code $exit_code
@@ -82,9 +82,9 @@ fi
 jdl_template = '''universe = vanilla
 Executable = runme.csh
 arguments = $(Process)
-Output = $(Process)_$(Cluster).stdout
-Error = $(Process)_$(Cluster).stderr
-Log = $(Process).$(Cluster).condor
+Output = $(Process).stdout
+Error = $(Process).stderr
+Log = $(Process).condor
 stream_output = false
 stream_error  = false
 notification  = never
