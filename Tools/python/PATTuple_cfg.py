@@ -295,7 +295,10 @@ def keep_selected_tracks(process):
     process.out.outputCommands.append('keep *_selectTracks_*_*')
 
 def no_skimming_cuts(process):
-    del process.out.SelectEvents
+    try:
+        del process.out.SelectEvents
+    except AttributeError:
+        pass
 
 def drop_gen_particles(process):
     process.out.outputCommands.append('drop *_genParticles_*_*')
