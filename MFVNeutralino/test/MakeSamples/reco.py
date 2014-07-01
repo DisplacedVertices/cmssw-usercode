@@ -48,14 +48,26 @@ process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,proces
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
-    samples = []
 
-    cs = CRABSubmitter('MakeSamplesReco',
+    samples = [s for s in Samples.myttbar_samples if s.name.startswith('myttbar0')]
+
+    align = 'curl'
+    ex = 'ali_' + align
+
+    def pset_modifier(sample):
+        to_add = [
+            'tracker_alignment(process, "%s")' % align,
+            'dummy_beamspot(process, "myttbar%s")' % align,
+            ]
+        return to_add, []
+
+    cs = CRABSubmitter('MakeSamples_ttbarsyst_reco_' + ex,
+                       pset_modifier = pset_modifier,
                        get_edm_output = True,
                        data_retrieval = 'cornell',
                        total_number_of_events = -1,
-                       events_per_job = 1000,
-                       publish_data_name = 'reco',
+                       events_per_job = 2000,
+                       publish_data_name = 'reco_' + ex,
                        skip_common = True,
                        )
     cs.submit_all(samples)
