@@ -206,6 +206,8 @@ void draw_likelihood(int iexp, double pars[4]) {
 }
 
 int main(int argc, char** argv) {
+  const int jobnum = argc > 1 ? atoi(argv[1]) : -1;
+
   gROOT->SetStyle("Plain");
   gStyle->SetPalette(1);
   gStyle->SetFillColor(0);
@@ -225,15 +227,20 @@ int main(int argc, char** argv) {
   if (!batch)
     c = new TCanvas("c", "", 800, 800);
 
-  TFile* fin = new TFile("one2two.root");
-  if (!fin) {
+  const TString in_fn = jobnum >= 0 ? TString::Format("one2two_%i.root", jobnum) : "one2two.root";
+  printf("fit.exe: input file %s\n", in_fn.Data());
+  TFile* fin = new TFile(in_fn);
+  if (!fin || !fin->IsOpen()) {
     fprintf(stderr, "bad fin\n");
     return 1;
   }
 
-  fout = new TFile("o2tfit.root", "recreate");
+  const TString out_fn = jobnum >= 0 ? TString::Format("o2tfit_%i.root", jobnum) : "o2tfit.root";
+  printf("fit.exe: output file %s\n", out_fn.Data());
+  fout = new TFile(out_fn, "recreate");
 
-  fout->cd(); h_data = (TH1D*) fin->Get("mfvOne2Two/h_2v_toy_0_0")->Clone("h_data");
+  const TString data_path = TString::Format("mfvOne2Two/h_2v_toy_%i_0", jobnum >= 0 ? jobnum : 0);
+  fout->cd(); h_data = (TH1D*) fin->Get(data_path)->Clone("h_data");
   n_bins = h_data->GetNbinsX();
   if (n_bins < 100)
     n_bins = 100;
