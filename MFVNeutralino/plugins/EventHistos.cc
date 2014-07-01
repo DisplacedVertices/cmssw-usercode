@@ -423,7 +423,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_svdist_bs2ddist1->Fill(vtx1_dist, svdist);
     h_bs2ddist1_bs2ddist0->Fill(vtx0_dist, vtx1_dist);
 
-    if (TMath::Erf((svdist - 0.025)/0.005) > gRandom->Uniform(-1,1)) {
+    if (TMath::Erf((svdist - 0.028)/0.005) > gRandom->Uniform(-1,1)) {
       h_svpairdphi_cut->Fill(dphi);
       h_svpairdist_cut->Fill(svdist);
     }
