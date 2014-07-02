@@ -154,9 +154,9 @@ def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, s
         sig_samp, sig_scale = signal_contamination
         env.append('signal_contamination %i' % sig_samp)
         env.append('signal_scale %f' % sig_scale)
-        fit_args = '%i %i %f' % (min_ntracks, sig_samp, sig_scale)
+        fit_args = '%i %i' % (min_ntracks, sig_samp)
     else:
-        fit_args = '%i 2 1' % min_ntracks
+        fit_args = '%i 2' % min_ntracks
 
     if phi_exp is not None:
         env.append('phi_exp %f' % phi_exp)
@@ -211,7 +211,7 @@ for min_ntracks in (5,6): #,7,8):
         batches.append((min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contam, sample))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
-for batch in batches[1:2]:
+for batch in batches[0:2]:
     submit(200, *batch)
 
 '''
