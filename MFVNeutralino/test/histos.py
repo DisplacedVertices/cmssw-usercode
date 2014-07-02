@@ -2,7 +2,8 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 100)
+#SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 100)
+process.source.fileNames = ['/store/user/tucker/TTJets_HadronicMGDecays_8TeV-madgraph/mfvntuple_v18/c761ddfa7f093d8f86a338439e06a1d4/ntuple_100_1_NHs.root']
 process.TFileService.fileName = 'histos.root'
 
 process.load('JMTucker.MFVNeutralino.Histos_cff')
@@ -74,5 +75,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
+                       #USER_additional_input_files = 'aaaa.root',
                        )
     cs.submit_all(samples)

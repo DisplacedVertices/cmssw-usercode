@@ -37,6 +37,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_dist2d;
   TH1F* h_dist3d;
 
+  TH1F* h_pull_dz;
+  TH1F* h_pull_dist2d;
+
   TH1F* h_r_p;
   TH1F* h_r_pt;
   TH1F* h_r_eta;
@@ -112,6 +115,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_dz = fs->make<TH1F>("h_dz", ";z resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dist2d = fs->make<TH1F>("h_dist2d", ";dist2d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
   h_dist3d = fs->make<TH1F>("h_dist3d", ";dist3d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
+
+  h_pull_dz = fs->make<TH1F>("h_pull_dz", ";pull on z resolution;number of vertices", 100, -5, 5);
+  h_pull_dist2d = fs->make<TH1F>("h_pull_dist2d", ";pull on dist2d resolution;number of vertices", 100, 0, 5);
 
   h_r_p = fs->make<TH1F>("h_r_p", ";p resolution (GeV);number of vertices", 300, -1500, 1500);
   h_r_pt = fs->make<TH1F>("h_r_pt", ";p_{T} resolution (GeV);number of vertices", 300, -1500, 1500);
@@ -253,6 +259,11 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_dist3d->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
+
+    // histogram space pulls: z, dist2d
+    h_pull_dz->Fill((vtx.z - mevent->gen_lsp_decay[ilsp*3+2]) / sqrt(vtx.czz));
+    h_pull_dist2d->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
+                            mevent->gen_lsp_decay[ilsp*3+1] - vtx.y) / vtx.bs2derr);
 
     // histogram momentum resolutions: p, pt, eta, phi, mass, energy, px, py, pz, rapidity, theta, betagamma
     double vtx_msptm = sqrt(vtx_p4.M() * vtx_p4.M() + vtx_p4.Pt() * vtx_p4.Pt())+ fabs(vtx_p4.Pt());
