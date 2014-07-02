@@ -139,6 +139,7 @@ public:
 
   const int seed;
   const bool toy_mode;
+  const bool toy_only;
   const bool poisson_n1vs;
   const int sampling_type; // 0 = sample random pairs with replacement, 1 = sample all unique pairs and accept/reject, 2 = sample all unique pairs and fill 1v dists with weight according to accept/reject prob
   const int sample_only;
@@ -324,6 +325,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
     seed(cfg.getParameter<int>("seed")),
     toy_mode(cfg.getParameter<bool>("toy_mode")),
+    toy_only(cfg.getParameter<bool>("toy_only")),
     poisson_n1vs(cfg.getParameter<bool>("poisson_n1vs")),
     sampling_type(cfg.getParameter<int>("sampling_type")),
     sample_only(cfg.getParameter<int>("sample_only")),
@@ -1258,7 +1260,7 @@ TH1D* MFVOne2Two::make_2v_toy() {
       }
     }
 
-    printf("events used from file #%lu:%s: %i wanted, %i actual / %i\n", ifile, filenames[ifile].c_str(), n2v, m, N2v);
+    printf("events used from file #%lu:%s: %i wanted, %i actual / %i, hist integral now %.2f\n", ifile, filenames[ifile].c_str(), n2v, m, N2v, h_2v_toy->Integral());
   }
 
   h_toy_nevents->Fill(sum_n2v);
@@ -1282,7 +1284,7 @@ TH1D* MFVOne2Two::make_2v_toy() {
       }
     }
 
-    printf("including signal contamination from %s: %i wanted, %i actual / %i\n", signal_files[isig].c_str(), n2v, m, N2v);
+    printf("including signal contamination from %s: %i wanted, %i actual / %i, hist integral now %.2f\n", signal_files[isig].c_str(), n2v, m, N2v, h_2v_toy->Integral());
   }
   
   return h_2v_toy;
@@ -1299,13 +1301,15 @@ void MFVOne2Two::run() {
   if (just_print)
     return;
 
-  fit_envelopes();
-  fit_fs_with_sideband();
+  if (!toy_only) {
+    fit_envelopes();
+    fit_fs_with_sideband();
 
-  if (do_by_means) {
-    choose_2v_from_1v(true);
-    fill_1d_histos();
-    by_means();
+    if (do_by_means) {
+      choose_2v_from_1v(true);
+      fill_1d_histos();
+      by_means();
+    }
   }
 
   ////////////////////////////////////////

@@ -23,6 +23,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
 
                                     seed = cms.int32(0),
                                     toy_mode = cms.bool(False),
+                                    toy_only = cms.bool(False),
                                     poisson_n1vs = cms.bool(True),
                                     sampling_type = cms.int32(2),
                                     sample_only = cms.int32(-1),
@@ -152,7 +153,7 @@ else:
         process.TFileService.fileName = '%s.one2two.root' % job_num
     
 print 'CFG BEGIN'
-for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type sample_only npairs max_1v_ntracks01 signal_files signal_weights signal_contamination find_g_dphi use_form_g_dphi form_g_dphi find_g_dz use_form_g_dz form_g_dz find_f_dphi find_f_dphi_bkgonly use_form_f_dphi form_f_dphi find_f_dz find_f_dz_bkgonly use_form_f_dz form_f_dz do_by_means template_binning template_fn template_dir'.split():
+for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode toy_only poisson_n1vs sampling_type sample_only npairs max_1v_ntracks01 signal_files signal_weights signal_contamination find_g_dphi use_form_g_dphi form_g_dphi find_g_dz use_form_g_dz form_g_dz find_f_dphi find_f_dphi_bkgonly use_form_f_dphi form_f_dphi find_f_dz find_f_dz_bkgonly use_form_f_dz form_f_dz do_by_means make_templates template_binning template_fn template_dir'.split():
     print var.ljust(25), getattr(process.mfvOne2Two, var).value()
 print 'CFG END'
 
