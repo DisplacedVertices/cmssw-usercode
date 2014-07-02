@@ -276,7 +276,7 @@ int main(int argc, char** argv) {
   const int min_ntracks = atoi(argv[2]);
   const int signum = atoi(argv[3]);
   const char* signames[] = { "mfv_neutralino_tau0100um_M0400", "mfv_neutralino_tau0300um_M0400", "mfv_neutralino_tau1000um_M0400", "mfv_neutralino_tau9900um_M0400" };
-  const char* signame = signames[signum];
+  const char* signame = signames[signum >= 0 && signum < 4 ? signum : 2];
   const double sigweight = 2e-4*atof(argv[4]);
 
   gROOT->SetStyle("Plain");
@@ -326,7 +326,9 @@ int main(int argc, char** argv) {
   //    --n_bins;
   printf("using n_bins = %i (low edge %f)\n", n_bins, h_data->GetBinLowEdge(n_bins));
 
-  fout->cd(); h_sig = finalize_binning((TH1D*)fsig->Get(TString::Format("h_sig_ntk%i_%s", min_ntracks, signame))->Clone("h_sig"));
+  const TString sig_path = TString::Format("h_sig_ntk%i_%s", min_ntracks, signame);
+  printf("loading signal template from %s\n", sig_path.Data()); fflush(stdout);
+  fout->cd(); h_sig = finalize_binning((TH1D*)fsig->Get(sig_path)->Clone("h_sig"));
   h_sig->Scale(sigweight);
 
   if (!batch) {
@@ -347,6 +349,7 @@ int main(int argc, char** argv) {
   double data_integ = h_data->Integral();
   data_integ = ((TH1D*)fin->Get("mfvOne2Two/h_2vbkg_svdist2d_all"))->Integral();
 
+  printf("loading background templates\n"); fflush(stdout);
   TH1D* h_templates[25] = {0};
   for (int ip = 24; ip >= 0; --ip) {
     fout->cd();
@@ -359,7 +362,7 @@ int main(int argc, char** argv) {
       else
         h->Draw("hist");
       h->SetStats(0);
-      h->SetTitle("phi exponent 0.5-6;1v pair svdist2d (cm);pairs/10 #mum");
+      h->SetTitle("phi exponent 0-6;1v pair svdist2d (cm);pairs/10 #mum");
       h->SetLineColor(kRed+ip-1);
       h->GetXaxis()->SetRangeUser(0, 0.08);
     }
@@ -372,6 +375,7 @@ int main(int argc, char** argv) {
     c->SetLogy(0);
   }
 
+  printf("morphing background templates: "); fflush(stdout);
   for (int ip = 0; ip < 24; ++ip) {
     TH1D* h0 = h_templates[ip];
     TH1D* h1 = h_templates[ip+1];
@@ -390,12 +394,55 @@ int main(int argc, char** argv) {
         delete hh;
         h_bkgs.push_back(hh_rebinned);
       }
+      printf("."); fflush(stdout);
     }
-  }    
+  }
+  printf(" done\n"); fflush(stdout);
+
+  if (!batch) {
+    printf("dumping morphed templates: "); fflush(stdout);
+    c->SaveAs("plots/o2tfit/templates_rebinned_shift.pdf[");
+    for (int ip = 0; ip < 24; ++ip) {
+      for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
+        for (int ish = 0; ish < n_shift_per_phi; ++ish) {
+          TH1D* h = h_bkgs[ip*n_phi_interp*n_shift_per_phi + ipi*n_shift_per_phi + ish];
+          h->SetLineColor(kBlack);
+          h->SetLineWidth(2);
+          h->SetStats(0);
+          h->GetXaxis()->SetRangeUser(0, 0.1);
+          h->GetYaxis()->SetRangeUser(0, 12);
+          h->Draw("hist");
+          c->SaveAs("plots/o2tfit/templates_rebinned_shift.pdf");
+        }
+        printf("."); fflush(stdout);
+      }
+    }
+    c->SaveAs("plots/o2tfit/templates_rebinned_shift.pdf]");
+
+    c->SaveAs("plots/o2tfit/templates_rebinned_phi.pdf[");
+    for (int ish = 0; ish < n_shift_per_phi; ++ish) {
+      for (int ip = 0; ip < 24; ++ip) {
+        for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
+          TH1D* h = h_bkgs[ip*n_phi_interp*n_shift_per_phi + ipi*n_shift_per_phi + ish];
+          h->SetLineColor(kBlack);
+          h->SetLineWidth(2);
+          h->SetStats(0);
+          h->GetXaxis()->SetRangeUser(0, 0.1);
+          h->GetYaxis()->SetRangeUser(0, 12);
+          h->Draw("hist");
+          c->SaveAs("plots/o2tfit/templates_rebinned_phi.pdf");
+        }
+        printf("."); fflush(stdout);
+      }
+    }
+    c->SaveAs("plots/o2tfit/templates_rebinned_phi.pdf]");
+    printf(" done\n"); fflush(stdout);
+  }
 
   //    twolnL(1,1,2,0.006);
 
 #if 0
+
   int iexp = 0;
   for (int ip = 0; ip <= 24; ++ip) {
     for (int is = 0; is < 10; ++is) {
@@ -435,6 +482,7 @@ int main(int argc, char** argv) {
   t_out->Branch("minuit_val", &min_value, "minuit_val/D");
 
   t_out->Fill();
+
   //#endif
 
   fout->Write();
