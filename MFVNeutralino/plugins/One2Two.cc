@@ -1245,8 +1245,6 @@ TH1D* MFVOne2Two::make_2v_toy() {
     sum_n2v += n2v;
     h_toy_nevents_from[ifile]->Fill(n2v);
 
-    printf("events used from file #%lu:%s: %i / %i\n", ifile, filenames[ifile].c_str(), n2v, N2v);
-
     int t = 0, m = 0;
     while (m < n2v) {
       if ((N2v - t) * rand->Rndm() >= n2v - m)
@@ -1257,6 +1255,8 @@ TH1D* MFVOne2Two::make_2v_toy() {
         h_2v_toy->Fill(svdist2d(pair.first, pair.second));
       }
     }
+
+    printf("events used from file #%lu:%s: %i wanted, %i actual / %i\n", ifile, filenames[ifile].c_str(), n2v, m, N2v);
   }
 
   h_toy_nevents->Fill(sum_n2v);
@@ -1269,8 +1269,6 @@ TH1D* MFVOne2Two::make_2v_toy() {
     const int n2v = rand->Poisson(n2v_d);
     h_toy_nevents_signal->Fill(n2v);
 
-    printf("including signal contamination from %s: %i / %i", signal_files[isig].c_str(), n2v, N2v);
-
     int t = 0, m = 0;
     while (m < n2v) {
       if ((N2v - t) * rand->Rndm() >= n2v - m)
@@ -1281,6 +1279,8 @@ TH1D* MFVOne2Two::make_2v_toy() {
         h_2v_toy->Fill(svdist2d(pair.first, pair.second));
       }
     }
+
+    printf("including signal contamination from %s: %i wanted, %i actual / %i\n", signal_files[isig].c_str(), n2v, m, N2v);
   }
   
   return h_2v_toy;
