@@ -68,8 +68,8 @@ endif
 echo one2two.py done
 echo
 
-echo run fit.exe
-./fit.exe $JOB_NUM >& $JOB_NUM.out.o2tfit
+echo run fit.exe $JOB_NUM %(fit_args)s
+./fit.exe $JOB_NUM %(fit_args)s >& $JOB_NUM.out.o2tfit
 set exit_code=$?
 if ($exit_code != 0) then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -92,7 +92,7 @@ stream_error  = false
 notification  = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = one2two.py, /uscms_data/d2/tucker/crab_dirs/mfv_535/MiniTreeV18/all_trees.tgz, lib.tgz, py.tgz, fit.exe
+transfer_input_files = one2two.py, /uscms_data/d2/tucker/crab_dirs/mfv_535/MiniTreeV18/all_trees.tgz, lib.tgz, py.tgz, fit.exe, signal_templates.root
 x509userproxy = $ENV(X509_USER_PROXY)
 Queue %(njobs)s
 '''
@@ -115,6 +115,7 @@ def make_tars():
         os.system('mkdir -p ' + output_root)
         os.system('cp one2two.py ' + output_root)
         os.system('cp fit.exe ' + output_root)
+        os.system('cp signal_templates.root ' + output_root)
         os.system('cd $CMSSW_BASE/lib/* ; tar czf %s/lib.tgz * .edmplugincache ; cd - > /dev/null' % output_root)
         os.system('cd $CMSSW_BASE/src/ ; tar czf %s/py.tgz JMTucker/Tools/python/Samples.py JMTucker/Tools/python/ROOTTools.py JMTucker/Tools/python/general.py JMTucker/Tools/python/DBS.py ; cd - > /dev/null' % output_root)
         tars_made = True
@@ -138,6 +139,7 @@ def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, s
 
     os.system('cp %s/one2two.py .' % output_root)
     os.system('cp %s/fit.exe .' % output_root)
+    os.system('cp %s/signal_templates.root .' % output_root)
     os.system('cp %s/lib.tgz .' % output_root)
     os.system('cp %s/py.tgz .' % output_root)
 
@@ -147,10 +149,14 @@ def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, s
         'sampling_type %s' % sampling_type,
         ]
 
+
     if signal_contamination is not None:
         sig_samp, sig_scale = signal_contamination
         env.append('signal_contamination %i' % sig_samp)
         env.append('signal_scale %f' % sig_scale)
+        fit_args = '%i %i %f' % (min_ntracks, sig_samp, sig_scale)
+    else:
+        fit_args = '%i 2 1' % min_ntracks
 
     if phi_exp is not None:
         env.append('phi_exp %f' % phi_exp)
@@ -170,7 +176,7 @@ def submit(njobs, min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, s
         env.append('sample %s' % samples)
 
     env = '\n'.join('setenv mfvo2t_' + e for e in env)
-    open('runme.csh', 'wt').write(script_template % {'env': env})
+    open('runme.csh', 'wt').write(script_template % {'env': env, 'fit_args': fit_args})
     open('runme.jdl', 'wt').write(jdl_template % {'njobs': njobs})
 
     if 'doit' in sys.argv:
@@ -205,21 +211,22 @@ for min_ntracks in (5,6): #,7,8):
         batches.append((min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contam, sample))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
-for batch in batches[:2]:
+for batch in batches[1:2]:
     submit(200, *batch)
 
 '''
-grep -L 'Normal termination (return value 0)' condor_log*
-tar --remove-files -czf condor_logs.tgz condor_log.*
+grep -L 'Normal termination (return value 0)' *.condor
+tar --remove-files -czf condor_logs.tgz *.condor
 
 
-find . -name stderr\* -size 0
-rm stderr*
+find . -name \*.stderr -size 0
+find . -name \*.stderr -size +0
+rm *.stderr
 
 
-less stdout.*_0
+less 0.stdout
 
-foreach x (stdout*)
+foreach x (*.stdout)
   sed --in-place -e 's@condor/execute/dir_[0-9]*@@g' $x
 end
 
@@ -235,9 +242,14 @@ sort -o diffstdouts diffstdouts
 
 tar --remove-files -czf stdouts.tgz stdout.*
 
+hadd.py one2two_all.root *.one2two.root
+hadd.py o2tfit_all.root *.o2tfit.root
+
+mkdir in
+mv signal_templates.root fit.exe one2two.py lib.tgz py.tgz runme.* in/
 
 mkdir outs
-mv out.* outs/
+mv *.out.* outs/
 
 mkdir roots
 mv *.root roots/
