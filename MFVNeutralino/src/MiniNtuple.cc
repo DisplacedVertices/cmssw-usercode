@@ -35,6 +35,11 @@ namespace mfv {
     tree->SetBranchAddress("run", &nt.run);
     tree->SetBranchAddress("lumi", &nt.lumi);
     tree->SetBranchAddress("event", &nt.event);
+    tree->SetBranchAddress("njets", &nt.njets);
+    tree->SetBranchAddress("jet_pt", nt.jet_pt);
+    tree->SetBranchAddress("jet_eta", nt.jet_eta);
+    tree->SetBranchAddress("jet_phi", nt.jet_phi);
+    tree->SetBranchAddress("jet_energy", nt.jet_energy);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
     tree->SetBranchAddress("ntk0", &nt.ntk0);
     tree->SetBranchAddress("x0", &nt.x0);
