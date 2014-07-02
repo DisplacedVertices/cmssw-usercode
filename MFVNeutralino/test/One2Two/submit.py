@@ -102,7 +102,7 @@ def compile():
     global compiled
     if not compiled:
         os.system('sba')
-        os.system('g++ `root-config --cflags --libs --glibs` -Wall fit.cc -lMinuit -o fit.exe')
+        os.system('g++ -g -std=c++0x `root-config --cflags --libs --glibs` -Wall fit.cc -lMinuit -o fit.exe')
         raw_input('did the compiles go OK?')
         compiled = True
 
@@ -206,12 +206,12 @@ batches = []
 how_events = 'toypois'
 sample = 'all'
 
-for min_ntracks in (5,6): #,7,8):
-    for signal_contam in ((-1, 1), (1, 1), (1, 10), (1, 30), (2, 1), (2, 10), (2, 30), (3, 1), (3, 10), (3, 30)):
+for min_ntracks in (5,): #6,7,8):
+    for signal_contam in ((-1, 1), (2, 1), (2, 10)): # (-1, 1), (1, 1), (1, 10), (1, 30), (2, 1), (2, 10), (2, 30), (3, 1), (3, 10), (3, 30)):
         batches.append((min_ntracks, svdist_cut, sampling_type, how_events, phi_exp, signal_contam, sample))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
-for batch in batches[0:2]:
+for batch in batches:
     submit(200, *batch)
 
 '''
