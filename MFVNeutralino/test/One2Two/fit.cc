@@ -1,4 +1,4 @@
-// rootg++ -Wall fit.cc -lMinuit -o fit.exe && ./fit.exe
+// rootg++ -g -std=c++0x -Wall fit.cc -lMinuit -o fit.exe && ./fit.exe
 
 #include <cassert>
 #include <cmath>
@@ -26,8 +26,10 @@ TH1D* h_sig = 0;
 std::vector<TH1D*> h_bkgs;
 
 double glb_maxtwolnL = -1e300;
-double glb_max_pars[4] = {1e99, 1e99, 1e99, 1e99};
+double glb_max_pars     [4] = {1e99, 1e99, 1e99, 1e99};
+double glb_max_pars_errs[4] = {1e99, 1e99, 1e99, 1e99};
 
+const int n_phi_templates = 24;
 const int n_phi_interp = 20;
 const int n_shift_per_phi = 40;
 const double phi_orig_width = 0.25;
@@ -85,7 +87,7 @@ int minimize_likelihood(double& min_value,
                         double& shift, double& err_shift,
                         bool bkg_only,
                         int print_level=-1) {
-  TMinuit* m = new TMinuit(3);
+  TMinuit* m = new TMinuit(4);
   m->SetPrintLevel(print_level);
   m->SetFCN(minfcn);
   int ierr;
@@ -219,7 +221,71 @@ void draw_likelihood(int iexp, double pars[4], const char* name) {
       save(name);
     }
   }
+}
 
+bool scanmin_likelihood(bool bkg_only, int print_level=-1) {
+
+  std::vector<int> istats;
+  bool all_ok = true;
+
+  glb_maxtwolnL = -1e300;
+
+  printf("scanminning (bkg_only = %i): ", bkg_only);
+
+  for (int ip = 0; ip < n_phi_templates; ++ip) {
+    if (print_level == -1) { printf("."); fflush(stdout); }
+    for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
+      for (int ish = 0; ish < n_shift_per_phi; ++ish) {
+        const double phi_exp = ip*0.25 + ipi*phi_interp_width;
+        const double shift = shift_width * ish;
+
+        TMinuit* m = new TMinuit(4);
+        m->SetPrintLevel(print_level);
+        m->SetFCN(minfcn);
+        int ierr;
+        m->mnparm(0, "mu_sig",   0    , 0.1,  0,   1e6,    ierr);
+        m->mnparm(1, "mu_bkg",   10   , 0.1,  0,   1e6,    ierr);
+
+        m->mnparm(2, "phi_exp",  phi_exp,  0.05,   0,0, ierr); m->FixParameter(2);
+        m->mnparm(3, "shift",    shift,    0.0005, 0,0, ierr); m->FixParameter(3);
+        
+        if (bkg_only)
+          m->FixParameter(0);
+
+        m->Migrad();
+        //  m->mnmnos();
+        double fmin, fedm, errdef;
+        int npari, nparx, istat;
+        m->mnstat(fmin, fedm, errdef, npari, nparx, istat);
+
+        const double maxtwolnL = -fmin;
+        double mu_sig, err_mu_sig, mu_bkg, err_mu_bkg;
+        m->GetParameter(0, mu_sig,  err_mu_sig);
+        m->GetParameter(1, mu_bkg,  err_mu_bkg);
+
+        printf("scanmin_likelihood: phi_exp %6f shift %6f  istat: %i   maxtwolnL: %e   mu_sig: %f +- %f  mu_bkg: %f +- %f\n", phi_exp, shift, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
+
+        if (maxtwolnL > glb_maxtwolnL) {
+          printf("  ^ new global max!\n");
+          glb_maxtwolnL = maxtwolnL;
+          glb_max_pars[0] = mu_sig;
+          glb_max_pars[1] = mu_bkg;
+          glb_max_pars_errs[0] = err_mu_sig;
+          glb_max_pars_errs[1] = err_mu_bkg;
+          glb_max_pars[2] = phi_exp;
+          glb_max_pars[3] = shift;
+        }
+
+        istats.push_back(istat);
+        if (istat != 3)
+          all_ok = false;
+
+        delete m;
+      }
+    }
+  }
+
+  return all_ok;
 }
 
 TH1D* shift_hist(const TH1D* h, const int shift) {
@@ -251,12 +317,14 @@ TH1D* shift_hist(const TH1D* h, const int shift) {
 
 TH1D* finalize_binning(TH1D* h) {
   std::vector<double> bins;
-  for (int i = 0; i < 50; ++i)
+  for (int i = 0; i < 20; ++i)
     bins.push_back(i * 0.01);
-  for (int i = 0; i < 10; ++i)
-    bins.push_back(0.5 + i * 0.05);
-  for (int i = 0; i <= 10; ++i)
-    bins.push_back(1 + i*0.2);
+  bins.push_back(0.2);
+  bins.push_back(0.4);
+  bins.push_back(0.6);
+  bins.push_back(1);
+  bins.push_back(2);
+  bins.push_back(3);
   TH1D* hh = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_rebinned", h->GetName()), &bins[0]);
   if (n_bins < 0)
     n_bins = hh->GetNbinsX();
@@ -350,13 +418,13 @@ int main(int argc, char** argv) {
 
   printf("loading background templates\n"); fflush(stdout);
   TH1D* h_templates[25] = {0};
-  for (int ip = 24; ip >= 0; --ip) {
+  for (int ip = n_phi_templates; ip >= 0; --ip) {
     fout->cd();
     TH1D* h = h_templates[ip] = (TH1D*)fin->Get(TString::Format("mfvOne2Two/h_1v_template_phi%i", ip))->Clone(TString::Format("h_bkg_%i", ip));
     h->Scale(1./h->Integral());
 
     if (!batch) {
-      if (ip < 24)
+      if (ip < n_phi_templates)
         h->Draw("hist same");
       else
         h->Draw("hist");
@@ -375,10 +443,17 @@ int main(int argc, char** argv) {
   }
 
   printf("morphing background templates: "); fflush(stdout);
-  for (int ip = 0; ip < 24; ++ip) {
+  for (int ip = 0; ip < n_phi_templates; ++ip) {
+    TDirectory* d = fout->mkdir(TString::Format("background_templates_%i", ip));
+
     TH1D* h0 = h_templates[ip];
     TH1D* h1 = h_templates[ip+1];
+    h0->SetDirectory(d);
+    h1->SetDirectory(d);
+
     for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
+      TDirectory* dd = d->mkdir(TString::Format("background_templates_%i_%i", ip, ipi));
+
       TH1D* h = (TH1D*)h0->Clone(TString::Format("%s_ip%i", h0->GetName(), ipi));
       h->SetDirectory(0);
       double f1 = double(ipi)/n_phi_interp;
@@ -387,15 +462,18 @@ int main(int argc, char** argv) {
 
       for (int ish = 0; ish < n_shift_per_phi; ++ish) {
         TH1D* hh = shift_hist(h, ish);
+        hh->SetDirectory(0);
         hh->SetTitle(TString::Format("phi_exp = %f shift = %f\n", ip * phi_orig_width + ipi * phi_interp_width, ish * shift_width));
         TH1D* hh_rebinned = finalize_binning(hh);
-        hh_rebinned->SetDirectory(fout);
+        hh_rebinned->SetDirectory(dd);
         delete hh;
         h_bkgs.push_back(hh_rebinned);
       }
+      delete h;
       printf("."); fflush(stdout);
     }
   }
+  fout->cd();
   printf(" done\n"); fflush(stdout);
 
   double largest_norm_diff = 0;
@@ -409,7 +487,7 @@ int main(int argc, char** argv) {
   if (false && !batch) {
     printf("dumping morphed templates: "); fflush(stdout);
     c->SaveAs("plots/o2tfit/templates_rebinned_shift.pdf[");
-    for (int ip = 0; ip < 24; ++ip) {
+    for (int ip = 0; ip < n_phi_templates; ++ip) {
       for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
         for (int ish = 0; ish < n_shift_per_phi; ++ish) {
           TH1D* h = h_bkgs[ip*n_phi_interp*n_shift_per_phi + ipi*n_shift_per_phi + ish];
@@ -428,7 +506,7 @@ int main(int argc, char** argv) {
 
     c->SaveAs("plots/o2tfit/templates_rebinned_phi.pdf[");
     for (int ish = 0; ish < n_shift_per_phi; ++ish) {
-      for (int ip = 0; ip < 24; ++ip) {
+      for (int ip = 0; ip < n_phi_templates; ++ip) {
         for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
           TH1D* h = h_bkgs[ip*n_phi_interp*n_shift_per_phi + ipi*n_shift_per_phi + ish];
           h->SetLineColor(kBlack);
@@ -449,14 +527,64 @@ int main(int argc, char** argv) {
   //    twolnL(1,1,2,0.006);
 
 
-  if (1) {
+  {
     double pars[4] = { 1e99, 1e99, 3, 0.002};
     draw_likelihood(-1, pars, "likelihood_test_phi3_shift0p002");
   }
 
+  int sb_ok;
+  int b_ok;
+  double maxtwolnLsb,  maxtwolnLb;
+  double sb_max_pars[4];
+  double sb_max_pars_errs[4];
+  double b_max_pars[4];
+  double b_max_pars_errs[4];
+  sb_ok = scanmin_likelihood(false);
+  maxtwolnLsb = glb_maxtwolnL;
+  for (int pp = 0; pp < 4; ++pp) {
+    sb_max_pars[pp] = glb_max_pars[pp];
+    sb_max_pars_errs[pp] = glb_max_pars_errs[pp];
+  }
+  printf("sig+bkg ok? %i   maxtwolnLsb: %g\n", sb_ok, maxtwolnLsb);
+  {
+    double pars[4] = { 1e99, 1e99, sb_max_pars[2], sb_max_pars[3] };
+    draw_likelihood(100, pars, "likelihood_test_sbmax");
+  }
+
+  b_ok = scanmin_likelihood(true);
+  maxtwolnLb = glb_maxtwolnL;
+  for (int pp = 0; pp < 4; ++pp) {
+    b_max_pars[pp] = glb_max_pars[pp];
+    b_max_pars_errs[pp] = glb_max_pars_errs[pp];
+  }
+  printf("b only  ok? %i   maxtwolnLb : %g\n", b_ok, maxtwolnLb);
+  {
+    double pars[4] = { 1e99, 1e99, b_max_pars[2], b_max_pars[3] };
+    draw_likelihood(200, pars, "likelihood_test_b");
+  }
+
+  double sig = sqrt(maxtwolnLsb - maxtwolnLb);
+  printf("\nsig: %f\n", sig);
+
+  fout->cd(); TTree* t_out = new TTree("t_out", "");
+
+  for (int pp = 0; pp < 4; ++pp) {
+    t_out->Branch(TString::Format("scanmin_sb_%s",     par_names[pp]), &sb_max_pars[pp],      TString::Format("scanmin_sb_%s/D",     par_names[pp]));
+    t_out->Branch(TString::Format("scanmin_sb_err_%s", par_names[pp]), &sb_max_pars_errs[pp], TString::Format("scanmin_sb_err_%s/D", par_names[pp]));
+  }
+  t_out->Branch("maxtwolnLsb", &maxtwolnLsb, "maxtwolnLsb/D");
+  for (int pp = 0; pp < 4; ++pp) {
+    t_out->Branch(TString::Format("scanmin_b_%s",     par_names[pp]), &b_max_pars[pp],      TString::Format("scanmin_b_%s/D",     par_names[pp]));
+    t_out->Branch(TString::Format("scanmin_b_err_%s", par_names[pp]), &b_max_pars_errs[pp], TString::Format("scanmin_b_err_%s/D", par_names[pp]));
+  }
+  t_out->Branch("maxtwolnLb", &maxtwolnLb, "maxtwolnLb/D");
+  t_out->Branch("sig", &sig, "sig/D");
+
+  t_out->Fill();
+
 #if 0
   int iexp = 0;
-  for (int ip = 0; ip < 24; ++ip) {
+  for (int ip = 0; ip < n_phi_templates; ++ip) {
     for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
       for (int ish = 0; ish < n_shift_per_phi; ++ish) {
         double pars[4] = { 1e99, 1e99, ip*0.25 + ipi*phi_interp_width, shift_width * ish };
@@ -466,6 +594,7 @@ int main(int argc, char** argv) {
   }
 #endif
 
+#if 0
   double min_value, minuit_pars[4], minuit_par_errs[4];
   int ret = minimize_likelihood(min_value,
                                 minuit_pars[0], minuit_par_errs[0],
@@ -498,7 +627,7 @@ int main(int argc, char** argv) {
 
   t_out->Fill();
 
-  //#endif
+#endif
 
   fout->Write();
   fout->Close();
