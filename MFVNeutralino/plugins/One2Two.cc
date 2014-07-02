@@ -302,6 +302,10 @@ public:
 
   TRandom3* rand;
   edm::Service<TFileService> fs;
+
+  std::vector<TH1D*> h_toy_nevents_from;
+  TH1D* h_toy_nevents;
+  TH1D* h_toy_nevents_signal;
 };
 
 const char* MFVOne2Two::t_names[MFVOne2Two::n_t] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb" };
@@ -509,6 +513,19 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
     h_pred_v_true = fs->make<TH2D>("h_pred_v_true", "", 100, 0, 20, 100, 0, 20);
     h_pred_m_true = fs->make<TH1D>("h_pred_m_true", "", 100, -20, 20);
   }
+
+  for (std::string fn : filenames) {
+    size_t pos = fn.find_last_of('/');
+    if (pos != std::string::npos)
+      fn.erase(0, pos + 1);
+    pos = fn.find(".root");
+    fn.erase(pos, std::string::npos);
+    fn = "h_toy_nevents_" + fn;
+    TH1D* h = fs->make<TH1D>(fn.c_str(), "", 200, 0, 200);
+    h_toy_nevents_from.push_back(h);
+  }
+  h_toy_nevents = fs->make<TH1D>("h_toy_nevents", "", 200, 0, 200);
+  h_toy_nevents_signal = fs->make<TH1D>("h_toy_nevents_signal", "", 1000, 0, 1000);
 }
 
 MFVOne2Two::~MFVOne2Two() {
@@ -1155,10 +1172,27 @@ void MFVOne2Two::make_1v_templates() {
 
     TH1D* h_1v_template = fs->make<TH1D>(TString::Format("h_1v_template_phi%i", i_phi), TString::Format("phi_exp = %f\n", curr_phi_exp), int(template_binning[0]), template_binning[1], template_binning[2]);
 
-    choose_2v_from_1v();
+    if (sampling_type != 2) {
+      choose_2v_from_1v();
 
-    for (const auto& pair : two_vertices_from_1v)
-      h_1v_template->Fill(svdist2d(v0(pair), v1(pair)), pair.w);
+      for (const auto& pair : two_vertices_from_1v)
+        h_1v_template->Fill(svdist2d(v0(pair), v1(pair)), pair.w);
+    }
+    else {
+      printf("\n==============================\n\nsampling 1v pairs with phi_exp = %f\n", curr_phi_exp); fflush(stdout);
+
+      two_vertices_from_1v.clear();
+      const int N1v = sample_only > 0 ? sample_only : int(one_vertices.size());
+
+      for (int iv = 0; iv < N1v; ++iv) {
+        for (int jv = iv+1; jv < N1v; ++jv) {
+          const MFVVertexAux& v0 = one_vertices[iv];
+          const MFVVertexAux& v1 = one_vertices[jv];
+          const double w = prob_1v_pair(v0, v1);
+          h_1v_template->Fill(svdist2d(v0, v1), w);
+        }
+      }
+    }
 
     h_1v_templates[i_phi] = std::make_pair(curr_phi_exp, h_1v_template);
   }
@@ -1202,11 +1236,14 @@ TH1D* MFVOne2Two::make_2v_toy() {
 
   TH1D* h_2v_toy = fs->make<TH1D>(TString::Format("h_2v_toy_%i_%i", seed, n_2v_toys++), "", int(template_binning[0]), template_binning[1], template_binning[2]);
 
+  int sum_n2v = 0;
   for (size_t ifile = 0; ifile < nfiles; ++ifile) {
     const double w = weights[ifile];
     const int N2v = int(two_vertices[ifile].size());
     const double n2v_d = w * N2v;
     const int n2v = rand->Poisson(n2v_d);
+    sum_n2v += n2v;
+    h_toy_nevents_from[ifile]->Fill(n2v);
 
     printf("events used from file #%lu:%s: %i / %i\n", ifile, filenames[ifile].c_str(), n2v, N2v);
 
@@ -1222,12 +1259,15 @@ TH1D* MFVOne2Two::make_2v_toy() {
     }
   }
 
+  h_toy_nevents->Fill(sum_n2v);
+
   if (signal_contamination >= 0) {
     const size_t isig(signal_contamination);
     const double w = signal_weights[isig];
     const int N2v = int(signal_two_vertices[isig].size());
     const double n2v_d = w * N2v;
     const int n2v = rand->Poisson(n2v_d);
+    h_toy_nevents_signal->Fill(n2v);
 
     printf("including signal contamination from %s: %i / %i", signal_files[isig].c_str(), n2v, N2v);
 

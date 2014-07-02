@@ -102,3 +102,46 @@ def ttbar(process):
         '24:onIfAny = 1 2 3 4 5',
         'Tune:pp 5',
         )
+
+def tracker_alignment(process, tag):
+    prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc' % tag.capitalize())
+
+def keep_random_info(process):
+    process.output.outputCommands += [
+        'drop *_randomEngineStateProducer_*_*',
+        'drop CrossingFramePlaybackInfoExtended_*_*_*'
+        ]
+
+def castor_thing(process):
+    prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', 'CastorSaturationCorrsRcd', 'CastorSaturationCorrs_v1.00_mc')
+
+def keep_tracker_extras(process):
+    process.output.outputCommands += [
+        'keep recoTrackExtras_generalTracks__*',
+        'keep TrackingRecHitsOwned_generalTracks__*'
+        ]
+
+def dummy_beamspot(process, params):
+    if type(params) == str:
+        try:
+            import JMTucker.Tools.DummyBeamSpots_cff as DummyBeamSpots
+        except ImportError:
+            import DummyBeamSpots_cff as DummyBeamSpots
+        params = getattr(DummyBeamSpots, params)
+
+    process.myBeamSpot = cms.EDProducer('DummyBeamSpotProducer', params)
+
+    for name, path in process.paths.items():
+        path.insert(0, process.myBeamSpot)
+
+    for name, out in process.outputModules.items():
+        new_cmds = []
+        for cmd in out.outputCommands:
+            if 'offlineBeamSpot' in cmd:
+                new_cmds.append(cmd.replace('offlineBeamSpot', 'myBeamSpot'))
+        out.outputCommands += new_cmds
+
+    import itertools
+    from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+    for path_name, path in itertools.chain(process.paths.iteritems(), process.endpaths.iteritems()):
+        massSearchReplaceAnyInputTag(path, cms.InputTag('offlineBeamSpot'), cms.InputTag('myBeamSpot'), verbose=True)

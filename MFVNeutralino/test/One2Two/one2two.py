@@ -106,6 +106,7 @@ else:
     toy_mode = from_env('toy_mode', bool)
     from_env('poisson_n1vs', bool)
     from_env('sampling_type',int)
+    from_env('sample_only',  int)
     from_env('npairs',       int)
     from_env('signal_contamination', int)
 
@@ -139,7 +140,7 @@ else:
         for s in sample_infos:
             if s.sample.name in samples:
                 n1vs.append(s.events_rel[min_ntracks - 5] * n1v_scales[min_ntracks])
-                weights.append(s.sample.partial_weight * int_lumi if len(samples) > 1 else 1)
+                weights.append(s.sample.partial_weight*2 * int_lumi if len(samples) > 1 else 1)
 
         process.mfvOne2Two.n1vs = n1vs
         process.mfvOne2Two.weights = weights
@@ -147,7 +148,7 @@ else:
     job_num = env.get('mfvo2t_job_num', '')
     if job_num:
         print 'in batch mode, job number', job_num, '\n'
-        process.TFileService.fileName = process.TFileService.fileName.value().replace('.root', '_%s.root' % job_num)
+        process.TFileService.fileName = '%s.one2two.root' % job_num
     
 print 'CFG BEGIN'
 for var in 'min_ntracks svdist2d_cut tree_path filenames n1vs weights just_print seed toy_mode poisson_n1vs sampling_type sample_only npairs max_1v_ntracks01 signal_files signal_weights signal_contamination find_g_dphi use_form_g_dphi form_g_dphi find_g_dz use_form_g_dz form_g_dz find_f_dphi find_f_dphi_bkgonly use_form_f_dphi form_f_dphi find_f_dz find_f_dz_bkgonly use_form_f_dz form_f_dz do_by_means template_binning template_fn template_dir'.split():

@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
 import sys, os
+from modify import *
 
 # JMTBAD argparse
 
-run_reco = 'gensim' not in sys.argv
+run_reco = 'gensimonly' not in sys.argv
 run_pat = run_reco and 'pat' in sys.argv
+run_ntuple = run_reco and 'ntuple' in sys.argv
+
 run_ttbar = 'ttbar' in sys.argv
+
 skip_tests = 'skip_tests' in sys.argv
 testing = 'testing' in sys.argv
 
@@ -17,7 +21,7 @@ nevents = [int(x.replace('nevents=', '')) for x in sys.argv if x.startswith('nev
 nevents = 100000 if not nevents else nevents[0]
 
 events_per = [int(x.replace('events_per=', '')) for x in sys.argv if x.startswith('events_per=')]
-events_per = 50 if not nevents else events_per[0]
+events_per = 50 if not events_per else events_per[0]
 
 ################################################################################
 
@@ -54,6 +58,9 @@ se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_W
 
 ################################################################################
 
+if run_pat and run_ntuple:
+    raise ValueError('cannot do both pat and ntuple')
+
 if not skip_tests:
     print 'testing gensimhlt.py'
     if os.system('python gensimhlt.py') != 0: # cannot just import or else this screws up singleton services like MessageLogger when we expand pat.py below
@@ -64,32 +71,49 @@ if not skip_tests:
         if os.system('python reco.py') != 0:
             raise RuntimeError('reco.py does not work')
 
+_final = None
+
 if run_pat:
     print 'expanding pat.py'
-    import JMTucker.Tools.PATTuple_cfg as _pat
-    _pat.process.source.fileNames = ['file:reco.root']
-    _pat.process.maxEvents.input = -1
-    _pat.no_skimming_cuts(_pat.process)
-    _pat.aod_plus_pat(_pat.process)
-    _pat.input_is_pythia8(_pat.process)
-    _pat.keep_random_state(_pat.process)
-    _pat.keep_mixing_info(_pat.process)
-    open('pat.py', 'wt').write(_pat.process.dumpPython())
+    import JMTucker.Tools.PATTuple_cfg as _final
+    _final.aod_plus_pat(_final.process)
+    _final.keep_random_state(_final.process)
+    _final.keep_mixing_info(_final.process)
+elif run_ntuple:
+    print 'expanding ntuple.py'
+    sys.path.insert(0, '..')
+    import ntuple as _final
+
+if _final:
+    _final.process.source.fileNames = ['file:reco.root']
+    _final.process.maxEvents.input = -1
+    _final.no_skimming_cuts(_final.process)
+    _final.input_is_pythia8(_final.process)
 
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
 
 def submit(name, tau0=None, mass=None):
     print name
+    is_signal = tau0 is not None and mass is not None
+    if not is_signal:
+        if tau0 is not None or mass is not None:
+            raise ValueError('must specify both tau0 and mass if either specified')
+        if 'ttbar' not in name:
+            raise ValueError('if not signal, must only be ttbar')
 
-    if run_pat:
+    if run_ntuple:
+        output_file = 'ntuple.root'
+    elif run_pat:
         output_file = 'aodpat.root'
     elif run_reco:
         output_file = 'reco.root'
     else:
-        output_file = 'gensim.root'
+        output_file = 'gensimhlt.root'
 
     additional_input_files = ['minSLHA.spc', 'modify.py']
-    if run_pat:
+    if run_ntuple:
+        additional_input_files.append('ntuple.py')
+    elif run_pat:
         additional_input_files.append('pat.py')
     if run_ttbar:
         additional_input_files.remove('minSLHA.spc')
@@ -101,76 +125,70 @@ def submit(name, tau0=None, mass=None):
         reco_pset_fn = 'my_reco.py'
         additional_input_files.append(reco_pset_fn)
         new_reco_py = open('reco.py').read()
+        if is_signal:
+            new_reco_py += '\nkeep_random_info(process)\n'
     else:
         new_reco_py = ''
 
-    if 'ttbar' not in name:
-        assert tau0 is not None and mass is not None
-
     if 'gluino' in name:
-        new_py += '\nfrom modify import set_gluino_tau0\n'
         new_py += '\nset_gluino_tau0(process, %e)\n' % tau0       
-        from modify import set_mass
         set_mass(mass)
     elif 'neutralino' in name:
-        new_py += '\nfrom modify import set_neutralino_tau0\n'
         new_py += '\nset_neutralino_tau0(process, %e)\n' % tau0
-        from modify import set_masses
         set_masses(mass+5, mass)
     elif 'ttbar' in name:
-        new_py += '\nfrom modify import ttbar\n'
         new_py += '\nttbar(process)\n'
     else:
-        raise RuntimeError("don't know what LSP to use")
+        raise RuntimeError("don't know what generation type to use")
 
     if 'design' in name:
         glb_snip = "\nprocess.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')\n"
         new_py += glb_snip
-        new_reco_py += glb_snip + '''
-from modify import prefer_it
-prefer_it(process, 'castorThing', 'frontier://FrontierProd/CMS_COND_HCAL_000', 'CastorSaturationCorrsRcd', 'CastorSaturationCorrs_v1.00_mc')
-'''
+        new_reco_py += glb_snip + 'castor_thing(process)\n'
+        if _final:
+            _final.process.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')
+            castor_thing(_final.process)
 
     if 'nopu' in name:
-        new_py += '\nfrom modify import nopu\n'
-        new_py += 'nopu(process)\n'
+        new_py += '\nnopu(process)\n'
 
-    snip = '\nfrom modify import ideal_bs_tag, gauss_bs\n'
     if 'gaubs' in name:
-        snip += 'gauss_bs(process)\n'
+        snip = '\ngauss_bs(process)\n'
         new_py += snip
         new_reco_py += snip
     elif 'gaunxybs' in name:
-        snip += 'gauss_bs(process, True)\n'
+        snip = '\ngauss_bs(process, True)\n'
         new_py += snip
         new_reco_py += snip
     elif 'gaunxyzbs' in name:
-        snip += 'gauss_bs(process, True, True)\n'
+        snip = '\ngauss_bs(process, True, True)\n'
         new_py += snip
         new_reco_py += snip
 
     if 'ali_' in name:
         if not run_reco:
             raise ValueError('alignment means nothing if not running reco')
-
         ali_tag = name.split('ali_')[-1].capitalize()
-        new_reco_py += '''
-from modify import prefer_it
-prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc')
-''' % ali_tag
+        new_reco_py += '\ntracker_alignment(process, "%s")\n' % ali_tag
+        new_reco_py += 'dummy_beamspot(process, "myttbar%s")\n' % ali_tag
+        if _final:
+            tracker_alignment(_final.process, ali_tag)
+            dummy_beamspot(_final.process, 'myttbar' + ali_tag)
 
     if 'tune_' in name:
-        new_py += '\nfrom modify import set_tune\n'
         new_py += '\nset_tune(process,%s)\n' % name.split('tune_')[1]
 
     if 'tkex' in name:
         if not run_reco:
             raise ValueError('tkex means nothing if not running reco')
-        new_reco_py += "\nprocess.output.outputCommands += ['keep recoTrackExtras_generalTracks__*', 'keep TrackingRecHitsOwned_generalTracks__*']\n"
+        new_reco_py += '\nkeep_tracker_extras(process)\n'
 
     open(pset_fn, 'wt').write(new_py)
     if run_reco:
         open(reco_pset_fn, 'wt').write(new_reco_py)
+
+    if _final:
+        open('ntuple.py' if run_ntuple else 'pat.py', 'wt').write(_final.process.dumpPython())
 
     additional_input_files = ', '.join(additional_input_files)
 
@@ -197,11 +215,13 @@ if run_ttbar:
     #for run in to_run:
     #    submit('ttbar_' + run)
 
-    submit('ttbarhad_syststudies')
+    for i in xrange(10):
+        submit('ttbarhad_syststudies_%02i' % i)
 else:
-    tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.]
-    masses = range(200, 1501, 100)
+    tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.][-2:]
+    masses = range(500, 1501, 200)
     tunes = [5]
+    masses = [400]
 
     to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 

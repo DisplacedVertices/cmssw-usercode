@@ -15,6 +15,7 @@ cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
 nvtx = 1 if 'one' in sys.argv else 2
+only = 'Only' if 'only' in sys.argv else ''
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
@@ -25,9 +26,15 @@ def effs(fn):
         h = f.Get('%s/h_npv' % dir_name)
         return h.Integral(0,1000000) if integral else h.GetEntries()
 
+    namenumall = 'mfvEventHistos%s' % ('OneVtx' if nvtx == 1 else '')
+    namenumvtx = 'mfvVertexHistos%s/h_nsv' % ('OneVtx' if nvtx == 1 else '')
+    if nvtx == 1 and only:
+        namenumall = namenumall.replace('One', 'OnlyOne')
+        namenumvtx = namenumvtx.replace('One', 'OnlyOne')
+
     den = get_n('mfvEventHistosNoCuts')
-    numall = get_n('mfvEventHistos%s' % ('OneVtx' if nvtx == 1 else ''))
-    h = f.Get('mfvVertexHistos%s/h_nsv' % ('OneVtx' if nvtx == 1 else ''))
+    numall = get_n(namenumall)
+    h = f.Get(namenumvtx)
     numvtx = h.Integral(h.FindBin(nvtx), 1000000)
     sname = os.path.basename(fn).replace('.root','')
     try:
@@ -47,7 +54,7 @@ def effs(fn):
         for icut, cut in enumerate(cuts):
             h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
             h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-            nm1 = get_n('evtHst%sVNo%s' % (nvtx, cut))
+            nm1 = get_n('evtHst%s%sVNo%s' % (only, nvtx, cut))
             nm1_abs = float(nm1)/den
             nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
             h_nm1_abs.SetBinContent(icut+1, nm1_abs)

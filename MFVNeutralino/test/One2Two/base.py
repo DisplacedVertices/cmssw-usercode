@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, glob
 from array import array
 from collections import namedtuple
 from math import log, pi
@@ -7,8 +7,6 @@ from JMTucker.Tools.ROOTTools import *
 import JMTucker.Tools.Samples as Samples
 set_style()
 ROOT.TH1.AddDirectory(0)
-ROOT.gStyle.SetOptStat(1222222)
-ROOT.gStyle.SetOptFit(2222)
 
 def arrit(l):
     return array('d', l)
@@ -20,11 +18,12 @@ def get_f_t(x, min_ntracks):
     elif type(x) == str:
         input_fn = x
     f = ROOT.TFile(input_fn)
-    t = f.Get('mfvOne2Two/t')
+    t = f.Get('mfvMiniTree/t')
     t.SetAlias('svdist', 'sqrt((x0-x1)**2 + (y0-y1)**2)')
     t.SetAlias('svdphi', 'TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))')
     t.SetAlias('svdz',   'z0 - z1')
-    t.SetAlias('min_ntracks_ok', 'ntk0 >= %i && ntk1 >= %i' % (min_ntracks, min_ntracks))
+    if min_ntracks is not None:
+        t.SetAlias('min_ntracks_ok', 'ntk0 >= %i && ntk1 >= %i' % (min_ntracks, min_ntracks))
     return f, t
 
 bkg_samples = Samples.ttbar_samples + Samples.qcd_samples

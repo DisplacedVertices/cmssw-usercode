@@ -295,7 +295,10 @@ def keep_selected_tracks(process):
     process.out.outputCommands.append('keep *_selectTracks_*_*')
 
 def no_skimming_cuts(process):
-    del process.out.SelectEvents
+    try:
+        del process.out.SelectEvents
+    except AttributeError:
+        pass
 
 def drop_gen_particles(process):
     process.out.outputCommands.append('drop *_genParticles_*_*')
@@ -348,11 +351,21 @@ def disable_pujetid(process):
         getattr(process, p).remove(process.puJetMvaChs)
 
 def dummy_beamspot(process, params):
+    if type(params) == str:
+        import JMTucker.Tools.DummyBeamSpots_cff as DummyBeamSpots
+        params = getattr(DummyBeamSpots, params)
+
     process.myBeamSpot = cms.EDProducer('DummyBeamSpotProducer', params)
 
     for name, path in process.paths.items():
-        if not name.startswith('eventCleaning'):
-            path.insert(0, process.myBeamSpot)
+        path.insert(0, process.myBeamSpot)
+
+    for name, out in process.outputModules.items():
+        new_cmds = []
+        for cmd in out.outputCommands:
+            if 'offlineBeamSpot' in cmd:
+                new_cmds.append(cmd.replace('offlineBeamSpot', 'myBeamSpot'))
+        out.outputCommands += new_cmds
 
     import itertools
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
