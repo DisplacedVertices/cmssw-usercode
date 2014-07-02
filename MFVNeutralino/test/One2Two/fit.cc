@@ -20,24 +20,25 @@ TFile* fin = 0;
 TFile* fout = 0;
 TCanvas* c = 0;
 
-int n_bins = 100;
+int n_bins = -1;
 TH1D* h_data = 0;
 TH1D* h_sig = 0;
 std::vector<TH1D*> h_bkgs;
-
-const char* par_names[4] = { "mu_sig", "mu_bkg", "phi_exp", "shift" };
-const int par_steps[4] = { 300, 300, 100, 100 };
-const double par_min[4] = {  0,  0, 0.5, 0.   };
-const double par_max[4] = {  3,  3, 6,   0.02 };
 
 double glb_maxtwolnL = -1e300;
 double glb_max_pars[4] = {1e99, 1e99, 1e99, 1e99};
 
 const int n_phi_interp = 20;
-const int n_shift_per_phi = 20;
+const int n_shift_per_phi = 40;
 const double phi_orig_width = 0.25;
 const double phi_interp_width = phi_orig_width/n_phi_interp;
 const double shift_width = 0.0005;
+
+const char* par_names[4] = { "mu_sig", "mu_bkg", "phi_exp", "shift" };
+const int par_steps[4] = { 400, 400, 200,  40   };
+const double par_min[4] = {  0,  0,  0.,   0.   };
+const double par_max[4] = {100, 200, 6 - phi_interp_width, 0.02 - shift_width };
+
 
 int i_phi(double phi_exp) {
   return int(phi_exp/phi_interp_width);
@@ -88,10 +89,10 @@ int minimize_likelihood(double& min_value,
   m->SetPrintLevel(print_level);
   m->SetFCN(minfcn);
   int ierr;
-  m->mnparm(0, "mu_sig",   0    , 0.01,    0,   10,    ierr);
-  m->mnparm(1, "mu_bkg",   1    , 0.01,    0,   10,    ierr);
+  m->mnparm(0, "mu_sig",   0    , 0.1,  0,   1e6,    ierr);
+  m->mnparm(1, "mu_bkg",   10   , 0.1,  0,   1e6,    ierr);
   m->mnparm(2, "phi_exp",  2    , 0.05,    0.1, 6,    ierr);
-  m->mnparm(3, "shift",    0.002, 0.0005,  0,   0.01, ierr);
+  m->mnparm(3, "shift",    0.002, 0.0005,  0,   0.02, ierr);
 
   if (bkg_only)
     m->FixParameter(0);
@@ -115,11 +116,11 @@ int minimize_likelihood(double& min_value,
   return istat;
 }
 
-double significance(int& istat0, int& istat1) {
+double significance(int& istat0, int& istat1, int print_level=-1) {
   double twolnL_sb, twolnL_b;
   double a,b,c,d,e,f,g,h;
-  istat0 = minimize_likelihood(twolnL_sb, a,b,c,d,e,f,g,h, false, 2);
-  istat1 = minimize_likelihood(twolnL_b,  a,b,c,d,e,f,g,h, true,  2);
+  istat0 = minimize_likelihood(twolnL_sb, a,b,c,d,e,f,g,h, false, print_level);
+  istat1 = minimize_likelihood(twolnL_b,  a,b,c,d,e,f,g,h, true,  print_level);
   return sqrt(twolnL_sb - twolnL_b);
 }  
 
@@ -140,7 +141,7 @@ void save(const TString& base_fn) {
   c->SetLogy(lg);
 }
 
-void draw_likelihood(int iexp, double pars[4]) {
+void draw_likelihood(int iexp, double pars[4], const char* name) {
   double d_par[4] = {0};
 
   int found = 0;
@@ -205,17 +206,20 @@ void draw_likelihood(int iexp, double pars[4]) {
     glb_maxtwolnL = maxtwolnL;
     for (int pp = 0; pp < 4; ++pp)
       glb_max_pars[pp] = max_pars[pp];
+
+    if (!batch) {
+      h->Draw("colz");
+      h->SetStats(0);
+
+      TText* t = new TText(max_pars[0], max_pars[1], TString::Format(". max 2lnL = %f @ (%f, %f)", maxtwolnL, max_pars[0], max_pars[1]));
+      t->SetTextColor(kWhite);
+      t->SetTextSize(0.025);
+      t->Draw();
+
+      save(name);
+    }
   }
 
-  if (!batch) {
-    h->Draw("colz");
-    h->SetStats(0);
-
-    TText* t = new TText(max_pars[0], max_pars[1], TString::Format(". max 2lnL = %f @ (%f, %f)", maxtwolnL, max_pars[0], max_pars[1]));
-    t->SetTextColor(kWhite);
-    t->SetTextSize(0.025);
-    t->Draw();
-  }
 }
 
 TH1D* shift_hist(const TH1D* h, const int shift) {
@@ -254,6 +258,8 @@ TH1D* finalize_binning(TH1D* h) {
   for (int i = 0; i <= 10; ++i)
     bins.push_back(1 + i*0.2);
   TH1D* hh = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_rebinned", h->GetName()), &bins[0]);
+  if (n_bins < 0)
+    n_bins = hh->GetNbinsX();
   const int nb = hh->GetNbinsX();
   const double l  = hh->GetBinContent(nb);
   const double le = hh->GetBinError  (nb);
@@ -267,8 +273,8 @@ TH1D* finalize_binning(TH1D* h) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 5) {
-    fprintf(stderr, "usage: fit.exe jobnum min_ntracks signum sigscale\n");
+  if (argc < 4) {
+    fprintf(stderr, "usage: fit.exe jobnum min_ntracks signum\n");
     return 1;
   }
 
@@ -277,7 +283,7 @@ int main(int argc, char** argv) {
   const int signum = atoi(argv[3]);
   const char* signames[] = { "mfv_neutralino_tau0100um_M0400", "mfv_neutralino_tau0300um_M0400", "mfv_neutralino_tau1000um_M0400", "mfv_neutralino_tau9900um_M0400" };
   const char* signame = signames[signum >= 0 && signum < 4 ? signum : 2];
-  const double sigweight = 2e-4*atof(argv[4]);
+
 
   gROOT->SetStyle("Plain");
   gStyle->SetPalette(1);
@@ -319,21 +325,16 @@ int main(int argc, char** argv) {
 
   const TString data_path = TString::Format("mfvOne2Two/h_2v_toy_%i_0", jobnum >= 0 ? jobnum : 0);
   fout->cd(); h_data = finalize_binning((TH1D*) fin->Get(data_path)->Clone("h_data"));
-  n_bins = h_data->GetNbinsX();
-  //  if (n_bins < 100)
-  //    n_bins = 100;
-  //  while (n_bins > 100 && h_data->GetBinContent(n_bins) < 1e-6)
-  //    --n_bins;
   printf("using n_bins = %i (low edge %f)\n", n_bins, h_data->GetBinLowEdge(n_bins));
 
   const TString sig_path = TString::Format("h_sig_ntk%i_%s", min_ntracks, signame);
   printf("loading signal template from %s\n", sig_path.Data()); fflush(stdout);
   fout->cd(); h_sig = finalize_binning((TH1D*)fsig->Get(sig_path)->Clone("h_sig"));
-  h_sig->Scale(sigweight);
+  h_sig->Scale(1./h_sig->Integral());
 
   if (!batch) {
     h_data->Draw();
-    h_data->GetXaxis()->SetRangeUser(0, 0.08);
+    h_data->GetXaxis()->SetRangeUser(0, 3);
     h_sig->SetFillColor(kRed);
     h_sig->Draw("sames");
     h_sig->SetStats(0);
@@ -346,15 +347,13 @@ int main(int argc, char** argv) {
     save("data_sig");
   }
 
-  double data_integ = h_data->Integral();
-  data_integ = ((TH1D*)fin->Get("mfvOne2Two/h_2vbkg_svdist2d_all"))->Integral();
 
   printf("loading background templates\n"); fflush(stdout);
   TH1D* h_templates[25] = {0};
   for (int ip = 24; ip >= 0; --ip) {
     fout->cd();
     TH1D* h = h_templates[ip] = (TH1D*)fin->Get(TString::Format("mfvOne2Two/h_1v_template_phi%i", ip))->Clone(TString::Format("h_bkg_%i", ip));
-    h->Scale(data_integ/h->Integral());
+    h->Scale(1./h->Integral());
 
     if (!batch) {
       if (ip < 24)
@@ -399,7 +398,15 @@ int main(int argc, char** argv) {
   }
   printf(" done\n"); fflush(stdout);
 
-  if (!batch) {
+  double largest_norm_diff = 0;
+  for (const TH1D* h : h_bkgs) {
+    double diff = fabs(h->Integral() - 1);
+    if (diff > largest_norm_diff)
+      largest_norm_diff = diff;
+  }
+  printf("largest norm diff = %f\n", largest_norm_diff);
+      
+  if (false && !batch) {
     printf("dumping morphed templates: "); fflush(stdout);
     c->SaveAs("plots/o2tfit/templates_rebinned_shift.pdf[");
     for (int ip = 0; ip < 24; ++ip) {
@@ -441,15 +448,20 @@ int main(int argc, char** argv) {
 
   //    twolnL(1,1,2,0.006);
 
-#if 0
 
+  if (1) {
+    double pars[4] = { 1e99, 1e99, 3, 0.002};
+    draw_likelihood(-1, pars, "likelihood_test_phi3_shift0p002");
+  }
+
+#if 0
   int iexp = 0;
-  for (int ip = 0; ip <= 24; ++ip) {
-    for (int is = 0; is < 10; ++is) {
-      double pars[4] = { 1e99, 1e99, ip*0.25, 0.001*is };
-      draw_likelihood(iexp++, pars);
-      if (!batch)
-        save(TString::Format("likelihood_test_iphi%i_ishift%i", ip, is));
+  for (int ip = 0; ip < 24; ++ip) {
+    for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
+      for (int ish = 0; ish < n_shift_per_phi; ++ish) {
+        double pars[4] = { 1e99, 1e99, ip*0.25 + ipi*phi_interp_width, shift_width * ish };
+        draw_likelihood(iexp++, pars, TString::Format("likelihood_test_iphi%i_ishift%i", ip, ish));
+      }
     }
   }
 #endif
@@ -466,7 +478,8 @@ int main(int argc, char** argv) {
 
   printf("\n\n\n\nsignifififififif\n\n\n\n");
   int ret2;
-  printf("significance %f\n", significance(ret, ret2));
+  double sig = significance(ret, ret2);
+  printf("significance %f\n", sig);
 
   fout->cd(); TTree* t_out = new TTree("t_out", "");
 
@@ -479,7 +492,9 @@ int main(int argc, char** argv) {
   }
 
   t_out->Branch("minuit_ret", &ret, "minuit_ret/I");
-  t_out->Branch("minuit_val", &min_value, "minuit_val/D");
+  t_out->Branch("minuit_ret2", &ret2, "minuit_ret/I");
+  t_out->Branch("minuit_2lnLsb", &min_value, "minuit_val/D");
+  t_out->Branch("sig", &sig, "sig/D");
 
   t_out->Fill();
 
