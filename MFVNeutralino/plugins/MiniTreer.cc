@@ -60,6 +60,17 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(event_src, mevent);
 
+  nt.njets = mevent->njets();
+  if (nt.njets > 50)
+    throw cms::Exception("CheckYourPremises") << "too many jets in event: " << nt.njets;
+
+  for (int i = 0; i < mevent->njets(); ++i) {
+    nt.jet_pt[i] = mevent->jet_pt[i];
+    nt.jet_eta[i] = mevent->jet_eta[i];
+    nt.jet_phi[i] = mevent->jet_phi[i];
+    nt.jet_energy[i] = mevent->jet_energy[i];
+  }
+
   const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
   const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;
   const double bsz = force_bs.size() ? force_bs[2] : mevent->bsz;

@@ -5,6 +5,13 @@ namespace mfv {
     tree->Branch("run", &nt.run, "run/i");
     tree->Branch("lumi", &nt.lumi, "lumi/i");
     tree->Branch("event", &nt.event, "event/i");
+
+    tree->Branch("njets", &nt.njets, "njets/s");
+    tree->Branch("jet_pt", nt.jet_pt, "jet_pt[njets]/F");
+    tree->Branch("jet_eta", nt.jet_eta, "jet_eta[njets]/F");
+    tree->Branch("jet_phi", nt.jet_phi, "jet_phi[njets]/F");
+    tree->Branch("jet_energy", nt.jet_energy, "jet_energy[njets]/F");
+
     tree->Branch("nvtx", &nt.nvtx, "nvtx/s");
     tree->Branch("ntk0", &nt.ntk0, "ntk0/s");
     tree->Branch("x0", &nt.x0, "x0/F");
