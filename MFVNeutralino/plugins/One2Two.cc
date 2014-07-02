@@ -171,6 +171,7 @@ public:
 
   const bool do_by_means;
 
+  const bool make_templates;
   const std::vector<double> template_range;
   const std::vector<double> template_binning;
   const std::string template_fn;
@@ -355,6 +356,7 @@ MFVOne2Two::MFVOne2Two(const edm::ParameterSet& cfg)
 
     do_by_means(cfg.getParameter<bool>("do_by_means")),
 
+    make_templates(cfg.getParameter<bool>("make_templates")),
     template_range(cfg.getParameter<std::vector<double> >("template_range")),
     template_binning(cfg.getParameter<std::vector<double> >("template_binning")),
     template_fn(cfg.getParameter<std::string>("template_fn")),
@@ -1308,10 +1310,12 @@ void MFVOne2Two::run() {
 
   ////////////////////////////////////////
 
-  if (template_fn.size() == 0)
-    make_1v_templates();
-  else
-    load_1v_templates(template_fn, template_dir);
+  if (make_templates) {
+    if (template_fn.size() == 0)
+      make_1v_templates();
+    else
+      load_1v_templates(template_fn, template_dir);
+  }
 
   if (toy_mode) {
     make_2v_toy();

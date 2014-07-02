@@ -54,6 +54,7 @@ process.mfvOne2Two = cms.EDAnalyzer('MFVOne2Two',
 
                                     do_by_means = cms.bool(False),
 
+                                    make_templates = cms.bool(True),
                                     template_range = cms.vdouble(0, 6.1, 0.25),
                                     template_binning = cms.vdouble(20000, 0, 10),
                                     template_fn = cms.string(''),
