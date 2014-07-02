@@ -23,7 +23,7 @@ TCanvas* c = 0;
 int n_bins = 100;
 TH1D* h_data = 0;
 TH1D* h_sig = 0;
-TH1D* h_bkg[25] = {0};
+std::vector<TH1D*> h_bkgs;
 
 const char* par_names[4] = { "mu_sig", "mu_bkg", "phi_exp", "shift" };
 const int par_steps[4] = { 300, 300, 100, 100 };
@@ -33,32 +33,42 @@ const double par_max[4] = {  3,  3, 6,   0.02 };
 double glb_maxtwolnL = -1e300;
 double glb_max_pars[4] = {1e99, 1e99, 1e99, 1e99};
 
+const int n_phi_interp = 20;
+const int n_shift_per_phi = 20;
+const double phi_orig_width = 0.25;
+const double phi_interp_width = phi_orig_width/n_phi_interp;
+const double shift_width = 0.0005;
+
 int i_phi(double phi_exp) {
-  return int(round(phi_exp*4));
+  return int(phi_exp/phi_interp_width);
 }
 
 int i_shift(double shift) {
-  return int(shift/0.0005);
+  return int(shift/shift_width);
 }
 
+TH1D* get_h_bkg(double phi_exp, double shift) {
+  const int ip = i_phi(phi_exp);
+  const int is = i_shift(shift);
+  const int x = ip*n_shift_per_phi + is;
+  //  printf("phi_exp %f ip %i shift %f is %i x %i nbkg %i\n", phi_exp, ip, shift, is, x, int(h_bkgs.size()));
+  return h_bkgs[x];
+}
+  
 double twolnL(double mu_sig, double mu_bkg, double phi_exp, double shift) {
-  int ip = i_phi(phi_exp);
-  int is = i_shift(shift);
-  TH1D* h_bkg_ip = h_bkg[ip];
-  //printf("ip %i h_bkg %p\n", ip, h_bkg_ip);
+  TH1D* h_bkg = get_h_bkg(phi_exp, shift);
 
   double lnL = 0;
   for (int i = 1; i <= n_bins; ++i) {
-    const double nu_sig = mu_sig * h_sig ->GetBinContent(i);
-    const int ifrom = i - is;
-    const double nu_bkg = ifrom >= 0 ? mu_bkg * h_bkg_ip->GetBinContent(ifrom) : 0;
+    const double nu_sig = mu_sig * h_sig->GetBinContent(i);
+    const double nu_bkg = mu_bkg * h_bkg->GetBinContent(i);
     const double nu_sum = nu_sig + nu_bkg;
     const double nu = nu_sum > 0 ? nu_sum : 1e-300;
     const double n = h_data->GetBinContent(i);
     const double dlnL = -nu + n * log(nu); // log(nu/n);
     lnL += dlnL;
-    //printf("i: %i   mu_sig, mu_bkg, phi_exp, shift: (%f, %f, %f, %f)\n nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
-    //       i, mu_sig, mu_bkg, phi_exp, shift, nu_bkg, nu_sig, nu, n, dlnL, lnL);
+    //    printf("i: %i   mu_sig, mu_bkg, phi_exp, shift: (%f, %f, %f, %f)\n nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
+    //     i, mu_sig, mu_bkg, phi_exp, shift, nu_bkg, nu_sig, nu, n, dlnL, lnL);
   }
   return 2*lnL;
 }
@@ -72,17 +82,22 @@ int minimize_likelihood(double& min_value,
                         double& mu_bkg, double& err_mu_bkg,
                         double& phi_exp, double& err_phi_exp,
                         double& shift, double& err_shift,
+                        bool bkg_only,
                         int print_level=-1) {
   TMinuit* m = new TMinuit(3);
   m->SetPrintLevel(print_level);
   m->SetFCN(minfcn);
   int ierr;
-  m->mnparm(0, "mu_sig",   0.1, 0.01, 0, 0, ierr);
-  m->mnparm(1, "mu_bkg",   1  , 0.01, 0, 0, ierr);
-  m->mnparm(2, "phi_exp",  2  , 0.5,  0.1, 6, ierr);
-  m->mnparm(3, "shift",    0.004, 0.001,  0, 0.019, ierr);
+  m->mnparm(0, "mu_sig",   0    , 0.01,    0,   10,    ierr);
+  m->mnparm(1, "mu_bkg",   1    , 0.01,    0,   10,    ierr);
+  m->mnparm(2, "phi_exp",  2    , 0.05,    0.1, 6,    ierr);
+  m->mnparm(3, "shift",    0.002, 0.0005,  0,   0.01, ierr);
+
+  if (bkg_only)
+    m->FixParameter(0);
 
   m->Migrad();
+  //  m->mnmnos();
   double fmin, fedm, errdef;
   int npari, nparx, istat;
   m->mnstat(fmin, fedm, errdef, npari, nparx, istat);
@@ -100,15 +115,13 @@ int minimize_likelihood(double& min_value,
   return istat;
 }
 
-#if 0
 double significance(int& istat0, int& istat1) {
   double twolnL_sb, twolnL_b;
-  double mu_qcd, err_mu_qcd, mu_ttbar, err_mu_ttbar, mu_stop, err_mu_stop;
-  istat0 = minimize_likelihood(twolnL_sb, mu_qcd, err_mu_qcd, mu_ttbar, err_mu_ttbar, mu_stop, err_mu_stop, false);
-  istat1 = minimize_likelihood(twolnL_b,  mu_qcd, err_mu_qcd, mu_ttbar, err_mu_ttbar, mu_stop, err_mu_stop, true);
+  double a,b,c,d,e,f,g,h;
+  istat0 = minimize_likelihood(twolnL_sb, a,b,c,d,e,f,g,h, false, 2);
+  istat1 = minimize_likelihood(twolnL_b,  a,b,c,d,e,f,g,h, true,  2);
   return sqrt(twolnL_sb - twolnL_b);
 }  
-#endif
 
 void save(const TString& base_fn) {
   if (batch)
@@ -205,8 +218,66 @@ void draw_likelihood(int iexp, double pars[4]) {
   }
 }
 
+TH1D* shift_hist(const TH1D* h, const int shift) {
+  const int nbins = h->GetNbinsX();
+  TH1D* hshift = (TH1D*)h->Clone(TString::Format("%s_is%i", h->GetName(), shift));
+  
+  for (int ibin = 1; ibin <= nbins+1; ++ibin) {
+    const int ifrom = ibin - shift;
+    double val = 0, err = 0;
+    if (ifrom >= 1) { // don't shift in from underflow, shouldn't be any with svdist = positive quantity anyway
+      val = h->GetBinContent(ifrom);
+      err = h->GetBinError  (ifrom);
+    }
+    if (ibin == nbins+1) {
+      double var = err*err;
+      for (int irest = ifrom+1; irest <= nbins+1; ++irest) {
+        val += h->GetBinContent(irest);
+        var += pow(h->GetBinError(irest), 2);
+      }
+      err = sqrt(var);
+    }
+
+    hshift->SetBinContent(ibin, val);
+    hshift->SetBinError  (ibin, err);
+  }
+
+  return hshift;
+ }
+
+TH1D* finalize_binning(TH1D* h) {
+  std::vector<double> bins;
+  for (int i = 0; i < 50; ++i)
+    bins.push_back(i * 0.01);
+  for (int i = 0; i < 10; ++i)
+    bins.push_back(0.5 + i * 0.05);
+  for (int i = 0; i <= 10; ++i)
+    bins.push_back(1 + i*0.2);
+  TH1D* hh = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_rebinned", h->GetName()), &bins[0]);
+  const int nb = hh->GetNbinsX();
+  const double l  = hh->GetBinContent(nb);
+  const double le = hh->GetBinError  (nb);
+  const double o  = hh->GetBinContent(nb+1);
+  const double oe = hh->GetBinError  (nb+1);
+  hh->SetBinContent(nb, l + o);
+  hh->SetBinError  (nb, sqrt(le*le + oe*oe));
+  hh->SetBinContent(nb+1, 0);
+  hh->SetBinError  (nb+1, 0);
+  return hh;
+}
+
 int main(int argc, char** argv) {
-  const int jobnum = argc > 1 ? atoi(argv[1]) : -1;
+  if (argc < 5) {
+    fprintf(stderr, "usage: fit.exe jobnum min_ntracks signum sigscale\n");
+    return 1;
+  }
+
+  const int jobnum = atoi(argv[1]);
+  const int min_ntracks = atoi(argv[2]);
+  const int signum = atoi(argv[3]);
+  const char* signames[] = { "mfv_neutralino_tau0100um_M0400", "mfv_neutralino_tau0300um_M0400", "mfv_neutralino_tau1000um_M0400", "mfv_neutralino_tau9900um_M0400" };
+  const char* signame = signames[signum];
+  const double sigweight = 2e-4*atof(argv[4]);
 
   gROOT->SetStyle("Plain");
   gStyle->SetPalette(1);
@@ -223,6 +294,7 @@ int main(int argc, char** argv) {
   double palinfo[4][5] = {{0,0,0,1,1},{0,1,1,1,0},{1,1,0,0,0},{0,0.25,0.5,0.75,1}};
   TColor::CreateGradientColorTable(5, palinfo[3], palinfo[0], palinfo[1], palinfo[2], 500);
   gStyle->SetNumberContours(500);
+  TH1::SetDefaultSumw2();
 
   if (!batch)
     c = new TCanvas("c", "", 800, 800);
@@ -235,20 +307,27 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  TFile* fsig = new TFile("signal_templates.root");
+  if (!fsig || !fsig->IsOpen()) {
+    fprintf(stderr, "bad fsig\n");
+    return 1;
+  }
+
   const TString out_fn = jobnum >= 0 ? TString::Format("%i.o2tfit.root", jobnum) : "o2tfit.root";
   printf("fit.exe: output file %s\n", out_fn.Data());
   fout = new TFile(out_fn, "recreate");
 
   const TString data_path = TString::Format("mfvOne2Two/h_2v_toy_%i_0", jobnum >= 0 ? jobnum : 0);
-  fout->cd(); h_data = (TH1D*) fin->Get(data_path)->Clone("h_data");
+  fout->cd(); h_data = finalize_binning((TH1D*) fin->Get(data_path)->Clone("h_data"));
   n_bins = h_data->GetNbinsX();
-  if (n_bins < 100)
-    n_bins = 100;
-  while (n_bins > 100 && h_data->GetBinContent(n_bins) < 1e-6)
-    --n_bins;
-  printf("using n_bins = %i\n", n_bins);
+  //  if (n_bins < 100)
+  //    n_bins = 100;
+  //  while (n_bins > 100 && h_data->GetBinContent(n_bins) < 1e-6)
+  //    --n_bins;
+  printf("using n_bins = %i (low edge %f)\n", n_bins, h_data->GetBinLowEdge(n_bins));
 
-  fout->cd(); h_sig = (TH1D*)fin->Get("mfvOne2Two/h_2vsig_svdist2d_all")->Clone("h_sig");
+  fout->cd(); h_sig = finalize_binning((TH1D*)fsig->Get(TString::Format("h_sig_ntk%i_%s", min_ntracks, signame))->Clone("h_sig"));
+  h_sig->Scale(sigweight);
 
   if (!batch) {
     h_data->Draw();
@@ -268,9 +347,10 @@ int main(int argc, char** argv) {
   double data_integ = h_data->Integral();
   data_integ = ((TH1D*)fin->Get("mfvOne2Two/h_2vbkg_svdist2d_all"))->Integral();
 
+  TH1D* h_templates[25] = {0};
   for (int ip = 24; ip >= 0; --ip) {
-    TH1D* h = h_bkg[ip] = (TH1D*)fin->Get(TString::Format("mfvOne2Two/h_1v_template_phi%i", ip))->Clone(TString::Format("h_bkg_%i", ip));
-    h->SetDirectory(fout);
+    fout->cd();
+    TH1D* h = h_templates[ip] = (TH1D*)fin->Get(TString::Format("mfvOne2Two/h_1v_template_phi%i", ip))->Clone(TString::Format("h_bkg_%i", ip));
     h->Scale(data_integ/h->Integral());
 
     if (!batch) {
@@ -292,9 +372,30 @@ int main(int argc, char** argv) {
     c->SetLogy(0);
   }
 
-  //  twolnL(1,1,2,0.006);
+  for (int ip = 0; ip < 24; ++ip) {
+    TH1D* h0 = h_templates[ip];
+    TH1D* h1 = h_templates[ip+1];
+    for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
+      TH1D* h = (TH1D*)h0->Clone(TString::Format("%s_ip%i", h0->GetName(), ipi));
+      h->SetDirectory(0);
+      double f1 = double(ipi)/n_phi_interp;
+      h->Scale(1 - f1);
+      h->Add(h1, f1);
 
+      for (int ish = 0; ish < n_shift_per_phi; ++ish) {
+        TH1D* hh = shift_hist(h, ish);
+        hh->SetTitle(TString::Format("phi_exp = %f shift = %f\n", ip * phi_orig_width + ipi * phi_interp_width, ish * shift_width));
+        TH1D* hh_rebinned = finalize_binning(hh);
+        hh_rebinned->SetDirectory(fout);
+        delete hh;
+        h_bkgs.push_back(hh_rebinned);
+      }
+    }
+  }    
 
+  //    twolnL(1,1,2,0.006);
+
+#if 0
   int iexp = 0;
   for (int ip = 0; ip <= 24; ++ip) {
     for (int is = 0; is < 10; ++is) {
@@ -304,6 +405,7 @@ int main(int argc, char** argv) {
         save(TString::Format("likelihood_test_iphi%i_ishift%i", ip, is));
     }
   }
+#endif
 
   double min_value, minuit_pars[4], minuit_par_errs[4];
   int ret = minimize_likelihood(min_value,
@@ -311,9 +413,13 @@ int main(int argc, char** argv) {
                                 minuit_pars[1], minuit_par_errs[1],
                                 minuit_pars[2], minuit_par_errs[2],
                                 minuit_pars[3], minuit_par_errs[3],
+                                false,
                                 2);
   printf(" minuit ret %i\n", ret);
 
+  printf("\n\n\n\nsignifififififif\n\n\n\n");
+  int ret2;
+  printf("significance %f\n", significance(ret, ret2));
 
   fout->cd(); TTree* t_out = new TTree("t_out", "");
 
@@ -329,12 +435,15 @@ int main(int argc, char** argv) {
   t_out->Branch("minuit_val", &min_value, "minuit_val/D");
 
   t_out->Fill();
+  //#endif
 
   fout->Write();
   fout->Close();
   fin->Close();
+  fsig->Close();
   delete fout;
   delete fin;
+  delete fsig;
   delete c;
   return 0;
 }
