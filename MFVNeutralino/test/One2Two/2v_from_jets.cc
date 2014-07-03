@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <math.h>
+#include "TCanvas.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TMath.h"
@@ -118,15 +119,44 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
 }
 
 int main() {
+  TH1::SetDefaultSumw2();
   gRandom->SetSeed(0);
+
+  TH1F* h_svdist2d = new TH1F("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 10, 0, 0.1);
+  TH1F* h_absdeltaphi01 = new TH1F("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 5, 0, 3.15);
 
   const int nbkg = 4;
   const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
+  float weights[nbkg] = {0.589, 0.085, 0.426, 0.169};
   int sn1v[nbkg] = {11406, 101, 4425, 1458};
   int sn1vs = 0;
   for (int i = 0; i < nbkg; ++i) {
     toy_from_file(samples[i], sn1vs, sn1v[i]);
     sn1vs += sn1v[i];
+
+    mfv::MiniNtuple nt;
+    TFile* f = TFile::Open(TString::Format("/uscms_data/d2/tucker/crab_dirs/mfv_535/MiniTreeV18_Njets/%s.root", samples[i]));
+    if (!f || !f->IsOpen()) {
+      fprintf(stderr, "bad file");
+      exit(1);
+    }
+
+    TTree* t = (TTree*)f->Get("mfvMiniTree/t");
+    if (!t) {
+      fprintf(stderr, "bad tree");
+      exit(1);
+    }
+
+    mfv::read_from_tree(t, nt);
+    for (int j = 0, je = t->GetEntries(); j < je; ++j) {
+      if (t->LoadTree(j) < 0) break;
+      if (t->GetEntry(j) <= 0) continue;
+
+      if (nt.nvtx == 2) {
+        h_svdist2d->Fill(sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1)), weights[i]);
+        h_absdeltaphi01->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1)));
+      }
+    }
   }
 
   TH1F* h_njets = new TH1F("h_njets", ";# of jets;events", 20, 0, 20);
@@ -140,13 +170,16 @@ int main() {
   TH1F* h_sv1jetdphi = new TH1F("h_sv1jetdphi", ";constructed #Delta#phi(SV1, jets) (rad);jets/.126", 50, -3.15, 3.15);
   TH1F* h_svpairdphi = new TH1F("h_svpairdphi", ";constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
   TH1F* h_svpairdphi_cut = new TH1F("h_svpairdphi_cut", "#Delta#phi with space clearing;constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
+  TH1F* h_svpairabsdphi = new TH1F("h_svpairabsdphi", "|#Delta#phi| with space clearing;constructed vertex pair |#Delta#phi| (rad);events/.63", 5, 0, 3.15);
 
+  TH1F* h_bs2ddist1v = new TH1F("h_bs2ddist1v", "one-vertex-only events;bs2ddist;arb. units", 500, 0, 0.1);
   TH1F* h_sv0bs2ddist = new TH1F("h_sv0bs2ddist", ";constructed SV0 distance (cm);vertices", 500, 0, 1);
   TH1F* h_sv1bs2ddist = new TH1F("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   TH1F* h_svpairdist = new TH1F("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
-  TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 200, 0, 0.2);
+  TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 20, 0, 0.2);
 
   for (int i = 0; i < n1v; ++i) {
+    h_bs2ddist1v->Fill(bs2ddist[i]);
     h_njets->Fill(njets[i]);
     h_jet_sum_ht->Fill(sumht(i));
     for (int j = 0; j < njets[i]; ++j) {
@@ -178,11 +211,16 @@ int main() {
 
       if (TMath::Erf((svdist - 0.028)/0.005) > gRandom->Uniform(-1,1)) {
         h_svpairdphi_cut->Fill(dphi);
+        h_svpairabsdphi->Fill(fabs(dphi));
         h_svpairdist_cut->Fill(svdist);
       }
     }
   }
   TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
+  h_bs2ddist1v->Write();
+  h_svdist2d->Write();
+  h_absdeltaphi01->Write();
+
   h_njets->Write();
   h_jet_sum_ht->Write();
   h_jetphi->Write();
@@ -199,6 +237,22 @@ int main() {
   h_sv1bs2ddist->Write();
   h_svpairdist->Write();
   h_svpairdist_cut->Write();
+
+  TCanvas* c_svdist2d = new TCanvas("c_svdist2d");
+  h_svdist2d->DrawNormalized();
+  h_svpairdist_cut->SetLineColor(kRed);
+  h_svpairdist_cut->DrawNormalized("sames");
+  c_svdist2d->SetTickx();
+  c_svdist2d->SetTicky();
+  c_svdist2d->Write();
+
+  TCanvas* c_svpairdphi = new TCanvas("c_svpairdphi");
+  h_absdeltaphi01->DrawNormalized();
+  h_svpairabsdphi->SetLineColor(kRed);
+  h_svpairabsdphi->DrawNormalized("sames");
+  c_svpairdphi->SetTickx();
+  c_svpairdphi->SetTicky();
+  c_svpairdphi->Write();
 
   fh->Close();
 }
