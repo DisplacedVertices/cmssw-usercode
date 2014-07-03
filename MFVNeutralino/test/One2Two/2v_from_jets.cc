@@ -10,7 +10,9 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-const int n1v = 4425;
+//predicted number of one-vertex-only events in 20/fb of data
+//qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
+const int n1v = 11406 + 101 + 4425 + 1458;
 float bs2ddist[n1v];
 unsigned short njets[n1v];
 float jet_pts[n1v][50];
@@ -52,9 +54,9 @@ float throw_phi(int i) {
   return TVector2::Phi_mpi_pi(vtx_phi);
 }
 
-int main() {
+int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
   mfv::MiniNtuple nt;
-  TFile* f = TFile::Open(TString::Format("/uscms_data/d2/tucker/crab_dirs/mfv_535/MiniTreeV18_Njets/ttbarhadronic.root"));
+  TFile* f = TFile::Open(TString::Format("/uscms_data/d2/tucker/crab_dirs/mfv_535/MiniTreeV18_Njets/%s.root", sample));
   if (!f || !f->IsOpen()) {
     fprintf(stderr, "bad file");
     exit(1);
@@ -65,44 +67,66 @@ int main() {
     fprintf(stderr, "bad tree");
     exit(1);
   }
-  
+
   mfv::read_from_tree(t, nt);
 
-  gRandom->SetSeed(0);
+  float sbs2ddist[sn1v];
+  unsigned short snjets[sn1v];
+  float sjet_pts[sn1v][50];
+  float sjet_phis[sn1v][50];
+
   int i1v = 0;
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
     if (t->LoadTree(j) < 0) break;
     if (t->GetEntry(j) <= 0) continue;
 
-/*
-    printf("njets %i\n", nt.njets);
-    for (int i = 0; i < nt.njets; ++i) {
-      printf("jet #%i pt %f\n", i, nt.jet_pt[i]);
-    }
-*/
-
     if (nt.nvtx == 2) continue;
-    if (i1v < n1v) {
-      bs2ddist[i1v] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
-      njets[i1v] = nt.njets;
+    if (i1v < sn1v) {
+      sbs2ddist[i1v] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
+      snjets[i1v] = nt.njets;
       for (int i = 0; i < nt.njets; ++i) {
-        jet_pts[i1v][i] = nt.jet_pt[i];
-        jet_phis[i1v][i] = nt.jet_phi[i];
+        sjet_pts[i1v][i] = nt.jet_pt[i];
+        sjet_phis[i1v][i] = nt.jet_phi[i];
       }
     } else {
-      if (gRandom->Rndm() > float(n1v) / i1v) continue;
-      int r = gRandom->Integer(n1v);
-      bs2ddist[r] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
-      njets[r] = nt.njets;
+      if (gRandom->Rndm() > float(sn1v) / i1v) continue;
+      int r = gRandom->Integer(sn1v);
+      sbs2ddist[r] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
+      snjets[r] = nt.njets;
       for (int i = 0; i < nt.njets; ++i) {
-        jet_pts[r][i] = nt.jet_pt[i];
-        jet_phis[r][i] = nt.jet_phi[i];
+        sjet_pts[r][i] = nt.jet_pt[i];
+        sjet_phis[r][i] = nt.jet_phi[i];
       }
     }
     i1v++;
   }
-  if (i1v < n1v) {
-    printf("not enough v1vs (%d to sample %d of them)\n", i1v, n1v);
+  if (i1v < sn1v) {
+    printf("not enough v1vs (%d to sample %d of them)\n", i1v, sn1v);
+    exit(1);
+  }
+
+  for (int i = 0; i < sn1v; ++i) {
+    bs2ddist[sn1vs+i] = sbs2ddist[i];
+    njets[sn1vs+i] = snjets[i];
+    for (int j = 0; j < snjets[i]; ++j) {
+      jet_pts[sn1vs+i][j] = sjet_pts[i][j];
+      jet_phis[sn1vs+i][j] = sjet_phis[i][j];
+    }
+  }
+
+  return 0;
+}
+
+int main() {
+  gRandom->SetSeed(0);
+
+  const int nbkg = 4;
+  const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
+  int sn1v[nbkg] = {11406, 101, 4425, 1458};
+  int sn1vs = 0;
+  for (int i = 0; i < nbkg; ++i) {
+    toy_from_file(samples[i], sn1vs, sn1v[i]);
+    sn1vs += sn1v[i];
   }
 
   TH1F* h_njets = new TH1F("h_njets", ";# of jets;events", 20, 0, 20);
