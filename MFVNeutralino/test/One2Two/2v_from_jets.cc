@@ -232,6 +232,7 @@ int main() {
   h_sv1jetdphi->Write();
   h_svpairdphi->Write();
   h_svpairdphi_cut->Write();
+  h_svpairabsdphi->Write();
 
   h_sv0bs2ddist->Write();
   h_sv1bs2ddist->Write();
