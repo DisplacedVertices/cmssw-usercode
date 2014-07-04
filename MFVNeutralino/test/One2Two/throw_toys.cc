@@ -1,11 +1,15 @@
 #include "TFile.h"
 #include "ToyThrower.h"
 
-int main() {
+int main(int argc, char** argv) {
+  int ntoys = argc > 1 ? atoi(argv[1]) : 1;
+
   TFile f("throw_toys.root", "recreate");
   mfv::ToyThrower tt("", "crab/MiniTreeV18_Njets", &f);
-  tt.throw_toy();
-  tt.throw_toy();
+
+  for (int i = 0; i < ntoys; ++i)
+    tt.throw_toy();
+
   f.Write();
   f.Close();
 }
