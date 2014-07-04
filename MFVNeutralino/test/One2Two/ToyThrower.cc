@@ -153,6 +153,7 @@ namespace mfv {
 
 
     t_config = new TTree("t_config", "");
+    t_config->SetDirectory(d);
     t_config->SetAlias("name", name.c_str());
     t_config->SetAlias("path", path.c_str());
     t_config->Branch("seed", const_cast<int*>(&seed), "seed/I");
@@ -175,8 +176,8 @@ namespace mfv {
       int b_sample_info_N2v;
       t_sample_info->Branch("key", &b_sample_info_key, "key/I");
       t_sample_info->Branch("weight", &b_sample_info_weight, "weight/D");
-      t_sample_info->Branch("N1v", &b_sample_info_N1v, "N1v/D");
-      t_sample_info->Branch("N2v", &b_sample_info_N2v, "N2v/D");
+      t_sample_info->Branch("N1v", &b_sample_info_N1v, "N1v/I");
+      t_sample_info->Branch("N2v", &b_sample_info_N2v, "N2v/I");
 
       auto f = [this, &b_sample_info_key, &b_sample_info_weight, &b_sample_info_N1v, &b_sample_info_N2v](const Sample& sample) {
         t_sample_info->SetAlias(sample.name.c_str(), TString::Format("%i", sample.key));
@@ -192,17 +193,13 @@ namespace mfv {
 
     t_sample_usage_1v = new TTree("t_sample_usage_1v", "");
     t_sample_usage_1v->SetDirectory(d);
-    t_sample_usage_1v->Branch("b_sample_usage_1v_key", &b_sample_usage_1v_key, "b_sample_usage_1v_key/I");
-    t_sample_usage_1v->Branch("b_sample_usage_1v_run", &b_sample_usage_1v_run, "b_sample_usage_1v_run/I");
-    t_sample_usage_1v->Branch("b_sample_usage_1v_lumi", &b_sample_usage_1v_lumi, "b_sample_usage_1v_lumi/I");
-    t_sample_usage_1v->Branch("b_sample_usage_1v_event", &b_sample_usage_1v_event, "b_sample_usage_1v_event/I");
+    t_sample_usage_1v->Branch("key", &b_sample_usage_1v_key, "key/I");
+    t_sample_usage_1v->Branch("ndx", &b_sample_usage_1v_ndx, "ndx/I");
 
     t_sample_usage_2v = new TTree("t_sample_usage_2v", "");
     t_sample_usage_2v->SetDirectory(d);
-    t_sample_usage_2v->Branch("b_sample_usage_2v_key", &b_sample_usage_2v_key, "b_sample_usage_2v_key/I");
-    t_sample_usage_2v->Branch("b_sample_usage_2v_run", &b_sample_usage_2v_run, "b_sample_usage_2v_run/I");
-    t_sample_usage_2v->Branch("b_sample_usage_2v_lumi", &b_sample_usage_2v_lumi, "b_sample_usage_2v_lumi/I");
-    t_sample_usage_2v->Branch("b_sample_usage_2v_event", &b_sample_usage_2v_event, "b_sample_usage_2v_event/I");
+    t_sample_usage_2v->Branch("key", &b_sample_usage_2v_key, "key/I");
+    t_sample_usage_2v->Branch("ndx", &b_sample_usage_2v_ndx, "ndx/I");
 
     {
       t_toy_stats_1v = new TTree("t_toy_stats_1v", "");
@@ -218,6 +215,13 @@ namespace mfv {
       };
 
       loop_over_samples(f);
+
+      t_toy_stats_1v->Branch("sum_1v", &b_sum_1v, "sum_1v/I");
+      t_toy_stats_2v->Branch("sum_2v", &b_sum_2v, "sum_2v/I");
+      t_toy_stats_1v->Branch("sum_bkg_1v", &b_sum_bkg_1v, "sum_bkg_1v/I");
+      t_toy_stats_2v->Branch("sum_bkg_2v", &b_sum_bkg_2v, "sum_bkg_2v/I");
+      t_toy_stats_1v->Branch("sum_sig_1v", &b_sum_sig_1v, "sum_sig_1v/I");
+      t_toy_stats_2v->Branch("sum_sig_2v", &b_sum_sig_2v, "sum_sig_2v/I");
     }
   }
 
@@ -229,23 +233,25 @@ namespace mfv {
 
     printf("toy #%i:\n", ntoys);
 
-    int sum_1v = 0;
-    int sum_2v = 0;
+    b_sum_bkg_1v = 0;
+    b_sum_bkg_2v = 0;
 
-    auto f = [this, &sum_1v, &sum_2v](const Sample& sample) {
+    auto f = [this](const Sample& sample) {
       const double sc = sample.is_sig() ? signal_scale : scale;
 
       const int N1v = int(all_1v[sample.key].size());
       const double n1v_d = lambda_1v[sample.key] * sc;
       const int n1v_i = poisson_means ? rand->Poisson(n1v_d) : int(n1v_d) + 1;
       const int n1v = allow_cap ? std::min(n1v_i, N1v) : n1v_i;
-      sum_1v += n1v;
+      b_sum_1v += n1v;
+      if (!sample.is_sig()) b_sum_bkg_1v += n1v;
 
       const int N2v = int(all_2v[sample.key].size());
       const double n2v_d = lambda_2v[sample.key] * sc;
       const int n2v_i = poisson_means ? rand->Poisson(n2v_d) : int(n2v_d) + 1;
       const int n2v = allow_cap ? std::min(n2v_i, N2v) : n2v_i;
-      sum_2v += n2v;
+      b_sum_2v += n2v;
+      if (!sample.is_sig()) b_sum_bkg_2v += n2v;
 
       printf("  %-30s (%3i)  1v: lambda = %10.2f -> %10i events / %10i total\n", sample.name.c_str(), sample.key, n1v_d, n1v, N1v);
       printf("  %-30s        2v: lambda = %10.2f -> %10i events / %10i total\n", "",                              n2v_d, n2v, N2v);
@@ -255,9 +261,7 @@ namespace mfv {
         toy_1v.push_back(all_1v[sample.key][i1v]);
 
         b_sample_usage_1v_key = sample.key;
-        b_sample_usage_1v_run = events_1v[sample.key][i1v].run;
-        b_sample_usage_1v_lumi = events_1v[sample.key][i1v].lumi;
-        b_sample_usage_1v_event = events_1v[sample.key][i1v].event;
+        b_sample_usage_1v_ndx = i1v;
         t_sample_usage_1v->Fill();
       }
 
@@ -266,20 +270,25 @@ namespace mfv {
         toy_2v.push_back(all_2v[sample.key][i2v]);
 
         b_sample_usage_2v_key = sample.key;
-        b_sample_usage_2v_run = events_2v[sample.key][i2v].run;
-        b_sample_usage_2v_lumi = events_2v[sample.key][i2v].lumi;
-        b_sample_usage_2v_event = events_2v[sample.key][i2v].event;
+        b_sample_usage_2v_ndx = i2v;
         t_sample_usage_2v->Fill();
       }
 
-      b_toy_stats_1v[sample.key] = toy_events_1v.size();
-      b_toy_stats_2v[sample.key] = toy_events_2v.size();
-      t_toy_stats_1v->Fill();
-      t_toy_stats_2v->Fill();
+      b_toy_stats_1v[sample.key] = n1v;
+      b_toy_stats_2v[sample.key] = n2v;
     };
 
     loop_over_samples(f);
-    printf("  1v sum: %i  2v sum: %i\n", sum_1v, sum_2v);
+
+    b_sum_1v = toy_1v.size();
+    b_sum_2v = toy_2v.size();
+    b_sum_sig_1v = b_sum_1v - b_sum_bkg_1v;
+    b_sum_sig_2v = b_sum_2v - b_sum_bkg_2v;
+
+    printf("  1v sum: %i (%i bkg, %i sig)   2v sum: %i (%i bkg, %i sig)\n", b_sum_1v, b_sum_bkg_1v, b_sum_sig_1v, b_sum_2v, b_sum_bkg_2v, b_sum_sig_2v);
+
+    t_toy_stats_1v->Fill();
+    t_toy_stats_2v->Fill();
 
     ++ntoys;
   }      

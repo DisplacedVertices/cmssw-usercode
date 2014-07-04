@@ -56,18 +56,20 @@ namespace mfv {
     TTree* t_sample_info;
     TTree* t_sample_usage_1v;
     int b_sample_usage_1v_key;
-    unsigned b_sample_usage_1v_run;
-    unsigned b_sample_usage_1v_lumi;
-    unsigned b_sample_usage_1v_event;
+    int b_sample_usage_1v_ndx;
     TTree* t_sample_usage_2v;
     int b_sample_usage_2v_key;
-    unsigned b_sample_usage_2v_run;
-    unsigned b_sample_usage_2v_lumi;
-    unsigned b_sample_usage_2v_event;
+    int b_sample_usage_2v_ndx;
     TTree* t_toy_stats_1v;
     std::map<int, int> b_toy_stats_1v;
+    int b_sum_1v;
+    int b_sum_bkg_1v;
+    int b_sum_sig_1v;
     TTree* t_toy_stats_2v;
     std::map<int, int> b_toy_stats_2v;
+    int b_sum_2v;
+    int b_sum_bkg_2v;
+    int b_sum_sig_2v;
     
     ////////////////////////////////////////////////////////////////////////////
 
