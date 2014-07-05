@@ -2,6 +2,8 @@
 #include "ToyThrower.h"
 
 int main(int argc, char** argv) {
+  SetROOTStyle();
+
   int ntoys = argc > 1 ? atoi(argv[1]) : 1;
 
   TFile f("throw_toys.root", "recreate");
