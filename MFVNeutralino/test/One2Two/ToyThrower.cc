@@ -7,10 +7,11 @@
 
 namespace mfv {
   ToyThrower::ToyThrower(const std::string& name_, const std::string& path_, TFile* f)
-    : name(name_),
+    : name (name_.size() ? " " + name_ : ""),
+      uname(name_.size() ? "_" + name_ : ""),
       path(path_),
 
-      env(name.size() ? "mfvo2t_toythrower_" + name : "mfvo2t_toythrower"),
+      env("mfvo2t_toythrower" + uname),
       seed(env.get_int("seed", 0)),
       min_ntracks(env.get_int("min_ntracks", 5)),
       int_lumi(env.get_double("int_lumi", 18.2e3)),
@@ -22,15 +23,15 @@ namespace mfv {
       signal(env.get_int("signal", 0)),
       signal_scale(env.get_double("signal_scale", 1.)),
 
-      ntoys(0),
+      ntoys(-1),
 
       make_trees(f != 0),
       fout(f),
-      dout(make_trees ? f->mkdir(TString::Format("ToyThrower_%s_seed%i", name.c_str(), seed)) : 0),
+      dout(make_trees ? f->mkdir(TString::Format("ToyThrower%s_seed%i", uname.c_str(), seed)) : 0),
       own_rand(true),
       rand(new TRandom3(12191982 + seed))
   {
-    printf("ToyThrower %s config:\n", name.c_str());
+    printf("ToyThrower%s config:\n", name.c_str());
     printf("(read ntuples from %s)\n", path.c_str());
     printf("seed: %i\n", seed);
     printf("min_ntracks: %i\n", min_ntracks);
@@ -41,6 +42,7 @@ namespace mfv {
     printf("sample_only: %i (%s)\n", sample_only, samples.get(sample_only).name.c_str());
     printf("signal: %i (%s)\n", signal, samples.get(signal).name.c_str());
     printf("signal_scale: %g\n", signal_scale);
+    fflush(stdout);
 
     read_samples();
     book_trees();
@@ -226,12 +228,13 @@ namespace mfv {
   }
 
   void ToyThrower::throw_toy() {
+    ++ntoys;
+    printf("ToyThrower%s throwing toy #%i:\n", name.c_str(), ntoys);
+
     toy_events_1v.clear();
     toy_events_2v.clear();
     toy_1v.clear();
     toy_2v.clear();
-
-    printf("toy #%i:\n", ntoys);
 
     b_sum_bkg_1v = 0;
     b_sum_bkg_2v = 0;
@@ -289,7 +292,5 @@ namespace mfv {
 
     t_toy_stats_1v->Fill();
     t_toy_stats_2v->Fill();
-
-    ++ntoys;
   }      
 }
