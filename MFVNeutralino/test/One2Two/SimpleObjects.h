@@ -42,7 +42,7 @@ namespace mfv {
 
     double d2d(const VertexSimple& o) const { return jmt::mag(x - o.x, y - o.y);          }
     double d3d(const VertexSimple& o) const { return jmt::mag(x - o.x, y - o.y, z - o.z); }
-    double dz (const VertexSimple& o) const { return fabs(z - o.z); }
+    double dz (const VertexSimple& o) const { return z - o.z; }
     double phi(const VertexSimple& o) const { return TVector2::Phi_mpi_pi(phi() - o.phi()); }
   };
 
@@ -51,9 +51,10 @@ namespace mfv {
   struct VertexPair {
     VertexSimple first;
     VertexSimple second;
+    double weight;
 
-    VertexPair(const VertexSimple& f, const VertexSimple& s) : first(f), second(s) {}
-    VertexPair(const MiniNtuple& nt, bool is_sig) : first(nt, 0, is_sig), second(nt, 1, is_sig) {}
+    VertexPair(const VertexSimple& f, const VertexSimple& s) : first(f), second(s), weight(0.) {}
+    VertexPair(const MiniNtuple& nt, bool is_sig) : first(nt, 0, is_sig), second(nt, 1, is_sig), weight(0.) {}
     
     double d2d() const { return first.d2d(second); }
     double d3d() const { return first.d3d(second); }
