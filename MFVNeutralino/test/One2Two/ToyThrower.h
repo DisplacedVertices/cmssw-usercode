@@ -1,3 +1,6 @@
+#ifndef JMTucker_MFVNeutralino_One2Two_ToyThrower_h
+#define JMTucker_MFVNeutralino_One2Two_ToyThrower_h
+
 #include <functional>
 #include "ConfigFromEnv.h"
 #include "SimpleObjects.h"
@@ -10,6 +13,7 @@ class TRandom;
 namespace mfv {
   struct ToyThrower {
     const std::string name;
+    const std::string uname;
     const std::string path;
 
     jmt::ConfigFromEnv env;
@@ -52,6 +56,8 @@ namespace mfv {
     VertexSimples toy_1v;
     VertexPairs toy_2v;
 
+    ////////////////////////////////////////////////////////////////////////////
+
     TTree* t_config;
     TTree* t_sample_info;
     TTree* t_sample_usage_1v;
@@ -88,3 +94,5 @@ namespace mfv {
     void throw_toy();
   };
 }
+
+#endif
