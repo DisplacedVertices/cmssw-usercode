@@ -74,10 +74,10 @@ namespace mfv {
       jmt::vthrow("sampling_type must be 2");
 
     printf("One2TwoPhiShift%s config:\n", name.c_str());
-    printf("seed: %i\n", seed);
-    printf("toy: %i\n", toy);
-    printf("# 1v input: %lu\n", one_vertices->size());
-    printf("# 2v input: %lu\n", two_vertices->size());
+    printf("seed: %i  toy: %i\n", seed, toy);
+    const int N1v = int(one_vertices->size());
+    const int N1vpairs = N1v*(N1v-1)/2;
+    printf("# 1v input: %i (%i pairs)  2v input: %lu\n", N1v, N1vpairs, two_vertices->size());
     printf("d2d_cut: %f\n", d2d_cut);
     printf("sampling_type: %i\n", sampling_type);
     printf("sample_count_type: %i\n", sample_count);
@@ -91,6 +91,7 @@ namespace mfv {
     fill_2v_histos();
     fit_envelopes();
     fit_fs_in_sideband();
+    t_fit_info->Fill();
     fill_1v_histos();
   }
 
@@ -122,14 +123,22 @@ namespace mfv {
     h_fcn_f_dz = new TH1D("h_fcn_f_dz", "", 20, -0.1, 0.1);
 
     double phi_exp = 0;
-    for (int i_phi_exp = 0; phi_exp + d_phi_exp < phi_exp_max; ++i_phi_exp) {
+    for (int i_phi_exp = 0; ; ++i_phi_exp) {
       phi_exp = phi_exp_min + i_phi_exp * d_phi_exp;
+      if (phi_exp > phi_exp_max)
+        break;
       h_fcn_f_phis.push_back(new TH1D(TString::Format("h_fcn_f_phis_%i", i_phi_exp), TString::Format("phi_exp = %f", phi_exp), phi_nbins, phi_min, phi_max));
     }
 
 
     for (int i = 0; i < n_vt; ++i) {
       const char* iv = vt_names[i];
+      TDirectory* div = dout->mkdir(iv);
+      div->cd();
+
+      h_issig  [i] = new TH1D(TString::Format("h_%s_issig",   iv), "", 2, 0, 2);
+      h_issig_0[i] = new TH1D(TString::Format("h_%s_issig_0", iv), "", 2, 0, 2);
+      h_issig_1[i] = new TH1D(TString::Format("h_%s_issig_1", iv), "", 2, 0, 2);
 
       h_xy             [i] = new TH2D(TString::Format("h_%s_xy"             , iv), "", 100, -0.05, 0.05, 100, 0.05, 0.05);
       h_bsd2d          [i] = new TH1D(TString::Format("h_%s_bsd2d"          , iv), "", 100, 0, 0.1);
@@ -153,6 +162,7 @@ namespace mfv {
       h_phi      [i] = new TH1D(TString::Format("h_%s_phi"      , iv), "", phi_nbins, phi_min, phi_max);
     }
 
+    dout->cd();
 
     t_fit_info = new TTree("t_fit_info", "");
     t_fit_info->Branch("b_g_phi_mean", &b_g_phi_mean, "b_g_phi_mean/F");
@@ -211,6 +221,10 @@ namespace mfv {
     if ((ih == vt_2vbkg || ih == vt_2vsbbkg) && (v0.is_sig || v1.is_sig))
       return;
 
+    h_issig[ih]->Fill(v0.is_sig, w);
+    h_issig[ih]->Fill(v1.is_sig, w);
+    h_issig_0[ih]->Fill(v0.is_sig, w);
+    h_issig_1[ih]->Fill(v1.is_sig, w);
     h_xy[ih]->Fill(v0.x, v0.y, w);
     h_xy[ih]->Fill(v1.x, v1.y, w);
     h_bsd2d[ih]->Fill(v0.d2d(), w);
@@ -235,6 +249,7 @@ namespace mfv {
   }
 
   void One2TwoPhiShift::fill_2v_histos() {
+    printf("One2TwoPhiShift%s: fill 2v histos\n", name.c_str()); fflush(stdout);
     for (const VertexPair& p : *two_vertices)
       for (int ih = 0; ih < n_vt_2v; ++ih)
         fill_2v(ih, 1, p.first, p.second);
@@ -259,6 +274,8 @@ namespace mfv {
       h_1v_g_phi->Scale(1./h_1v_g_phi->Integral());
       const double integxwidth = h_1v_g_phi->Integral() * h_1v_g_phi->GetXaxis()->GetBinWidth(1);
       TF1* g_phi_temp = new TF1("g_phi_temp", fcn_g_phi, g_phi->GetXmin(), g_phi->GetXmax(), 3);
+      for (int i = 0; i < 3; ++i)
+        g_phi_temp->SetParName(i, g_phi->GetParName(i));
       g_phi_temp->FixParameter(0, integxwidth);
       g_phi_temp->SetParameter(1, 0.125);
       g_phi_temp->SetParameter(2, 5e-4);
@@ -294,6 +311,8 @@ namespace mfv {
       h_1v_g_dz->Scale(1./h_1v_g_dz->Integral());
       const double integxwidth = h_1v_g_dz->Integral() * h_1v_g_dz->GetXaxis()->GetBinWidth(1);
       TF1* g_dz_temp = new TF1("g_dz_temp", fcn_fg_dz, g_dz->GetXmin(), g_dz->GetXmax(), 3);
+      for (int i = 0; i < 3; ++i)
+        g_dz_temp->SetParName(i, g_dz->GetParName(i));
       g_dz_temp->FixParameter(0, integxwidth);
       g_dz_temp->SetParameter(1, 10.);
       g_dz_temp->SetParameter(2, 0.);
@@ -353,6 +372,8 @@ namespace mfv {
       const int vt_which = find_f_phi_bkgonly ? vt_2vsbbkg : vt_2vsb;
       const double integxwidth = h_phi[vt_which]->Integral()*h_phi[vt_which]->GetXaxis()->GetBinWidth(1);
       TF1* f_phi_temp = new TF1("f_phi_temp", fcn_f_phi, use_abs_phi ? 0 : -M_PI, M_PI, 2);
+      for (int i = 0; i < 2; ++i)
+        f_phi_temp->SetParName(i, f_phi->GetParName(i));
       f_phi_temp->FixParameter(0, integxwidth);
       f_phi_temp->SetParameter(1, 2.);
       TFitResultPtr res = h_phi[vt_which]->Fit(f_phi_temp, opt);
@@ -391,6 +412,8 @@ namespace mfv {
       const int vt_which = find_f_dz_bkgonly ? vt_2vsbbkg : vt_2vsb;
       const double integxwidth =  h_dz[vt_which]->Integral() * h_dz[vt_which]->GetXaxis()->GetBinWidth(1);
       TF1* f_dz_temp = new TF1("f_dz_temp", fcn_fg_dz, f_dz->GetXmin(), f_dz->GetXmax(), 3);
+      for (int i = 0; i < 3; ++i)
+        f_dz_temp->SetParName(i, f_dz->GetParName(i));
       f_dz_temp->FixParameter(0, integxwidth);
       f_dz_temp->SetParameter(1, 0.2);
       f_dz_temp->SetParameter(2, 0.);
@@ -448,6 +471,11 @@ namespace mfv {
     const int N1v_t = int(one_vertices->size());
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
 
+    int count = 0;
+    const int ndots = 100;
+    const int count_per_dot = N1v*(N1v-1)/2/ndots;
+    printf("["); for (int i = 0; i < ndots; ++i) printf(" "); printf("]\r[");
+
     for (int iv = 0; iv < N1v; ++iv) {
       const VertexSimple& v0 = one_vertices->at(iv);
       for (int jv = iv+1; jv < N1v; ++jv) {
@@ -455,24 +483,25 @@ namespace mfv {
         VertexPair p(v0, v1);
         p.weight = prob_1v_pair(v0, v1);
         fcn(p);
+
+        if (++count % count_per_dot == 0) {
+          printf("."); fflush(stdout);
+        }
       }
     }
+    printf("\n");
   }
 
   void One2TwoPhiShift::fill_1v_histos() {
-    auto f = [&](const VertexPair& p) {
-      const int ntk0 = p.first.ntracks; 
-      const int ntk1 = p.second.ntracks;
-      if (ntk1 > ntk0) {
-        fill_2v(vt_1v,   p.weight, p.second, p.first);
-        fill_2v(vt_1vsb, p.weight, p.second, p.first);
-      }
-      else {
-        fill_2v(vt_1v,   p.weight, p.first, p.second);
-        fill_2v(vt_1vsb, p.weight, p.first, p.second);
-      }
+    auto f = [this](const VertexPair& p) {
+      const bool swap = p.first.ntracks < p.second.ntracks;
+      const VertexSimple& first  = swap ? p.second : p.first;
+      const VertexSimple& second = swap ? p.first  : p.second;
+      for (int ih = vt_1v; ih <= vt_1vsb; ++ih)
+        fill_2v(ih, p.weight, first, second);
     };
 
+    printf("One2TwoPhiShift%s: fill 1v histos:\n", name.c_str()); fflush(stdout);
     loop_over_1v_pairs(f);
   }
 
@@ -481,21 +510,23 @@ namespace mfv {
 
     h_templates.clear();
 
-    double phi_exp;
+    double phi_exp = 0;
     for (int i_phi_exp = 0; ; ++i_phi_exp) {
       phi_exp = phi_exp_min + i_phi_exp * d_phi_exp;
       if (phi_exp > phi_exp_max)
         break;
       set_phi_exp(phi_exp);
-      printf("  sampling pairs with phi_exp = %f\n", phi_exp); fflush(stdout);
+
+      h_fcn_f_phis[i_phi_exp]->FillRandom("f_phi", 100000);
 
       TH1D* h_template = new TH1D(TString::Format("h_template_phi%i", i_phi_exp), TString::Format("phi_exp = %f\n", phi_exp), template_nbins, template_min, template_max);
       h_templates[i_phi_exp] = std::make_pair(phi_exp, h_template);
 
-      auto f = [&](const VertexPair& p) {
+      auto f = [&h_template](const VertexPair& p) {
         h_template->Fill(p.first.d2d(p.second), p.weight);
       };
 
+      printf("  pairing w/ phi_exp = %f\n", phi_exp); fflush(stdout);
       loop_over_1v_pairs(f);
     }
   }

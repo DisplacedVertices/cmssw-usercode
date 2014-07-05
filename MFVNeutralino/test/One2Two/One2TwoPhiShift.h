@@ -71,6 +71,9 @@ namespace mfv {
     enum { vt_2v, vt_2vbkg, vt_2vsig, vt_2vsb, vt_2vsbbkg, vt_2vsbsig,  n_vt_2v, vt_1v = n_vt_2v, vt_1vsb,  n_vt_pairs, vt_1vsingle = n_vt_pairs, n_vt };
     static const char* vt_names[n_vt];
 
+    TH1D* h_issig[n_vt];
+    TH1D* h_issig_0[n_vt];
+    TH1D* h_issig_1[n_vt];
     TH2D* h_xy[n_vt];
     TH1D* h_bsd2d[n_vt];
     TH2D* h_bsd2d_v_bsdz[n_vt];
