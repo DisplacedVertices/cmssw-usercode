@@ -307,7 +307,7 @@ namespace mfv {
       g_phi_temp->FixParameter(0, integxwidth);
       g_phi_temp->SetParameter(1, 0.125);
       g_phi_temp->SetParameter(2, 5e-4);
-      TFitResultPtr res = h_1v_g_phi->Fit("g_phi_temp", "RQS");
+      TFitResultPtr res = h_1v_g_phi->Fit("g_phi_temp", "0RQS");
       printf("  h_1v_g_phi mean %.3f +- %.3f  rms %.3f +- %.3f   g_phi fit offset %.4f +- %.4f  slope %.4f +- %.4f  chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n",
              h_1v_g_phi->GetMean(), h_1v_g_phi->GetMeanError(),
              h_1v_g_phi->GetRMS(),  h_1v_g_phi->GetRMSError(),
@@ -344,7 +344,7 @@ namespace mfv {
       g_dz_temp->FixParameter(0, integxwidth);
       g_dz_temp->SetParameter(1, 10.);
       g_dz_temp->SetParameter(2, 0.);
-      TFitResultPtr res = h_1v_g_dz->Fit(g_dz_temp, "RQS");
+      TFitResultPtr res = h_1v_g_dz->Fit(g_dz_temp, "0RQS");
       printf("  h_1v_g_dz mean %.3f +- %.3f  rms %.3f +- %.3f   g_dz fit sigma %6.3f +- %6.3f  mu %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n",
              h_1v_g_dz->GetMean(), h_1v_g_dz->GetMeanError(),
              h_1v_g_dz->GetRMS(),  h_1v_g_dz->GetRMSError(),
@@ -394,7 +394,7 @@ namespace mfv {
 
     printf("One2TwoPhiShift%s: fitting fs in sideband\n", name.c_str()); fflush(stdout);
 
-    const TString opt = "LIRQS";
+    const TString opt = "0LIRQS";
 
     if (find_f_phi) {
       const int vt_which = find_f_phi_bkgonly ? vt_2vsbbkg : vt_2vsb;
@@ -568,9 +568,12 @@ namespace mfv {
       printf("  pairing w/ phi_exp = %f\n", phi_exp); fflush(stdout);
       loop_over_1v_pairs(f);
     }
+
+    
   }
 
-  void One2TwoPhiShift::run_toy(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
+  void One2TwoPhiShift::process(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
+    // how about toy negative if data?
     toy = toy_;
     one_vertices = toy_1v;
     two_vertices = toy_2v;

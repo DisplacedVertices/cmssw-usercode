@@ -154,7 +154,7 @@ namespace mfv {
     void loop_over_1v_pairs(std::function<void(const VertexPair&)>);
     void fill_1v_histos();
     void make_templates();
-    void run_toy(int toy, const VertexSimples*, const VertexPairs*);
+    void process(int toy, const VertexSimples*, const VertexPairs*);
   };
 }
 
