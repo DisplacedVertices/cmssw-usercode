@@ -1,16 +1,15 @@
-SOURCES       = Utility.cc ToyThrower.cc
+SOURCES       = Utility.cc VAException.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc One2TwoPhiShift.cc Fitter.cc mfvo2t.cc
 INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
-OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
+OBJECTS       = $(patsubst %.cc, %.o, $(SOURCES))
 ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --nonew --glibs)
-CFLAGS       += $(ROOTCFLAGS) -I $(CMSSW_BASE)/src -std=c++0x -Wall -Werror -g
+CFLAGS       += $(ROOTCFLAGS) -I $(CMSSW_BASE)/src -std=c++0x -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -g
 LIBS         += $(ROOTLIBS) -lMinuit
 LDFLAGS       = -O
 
 all: $(OBJECTS)
 
 %.o : %.cc $(INCLUDES)
-	@mkdir -p bin
 	g++ $(CFLAGS) -c -o $@ $<
 
 test:

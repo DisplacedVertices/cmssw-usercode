@@ -2,9 +2,9 @@
 
 ########################
 
-fn_pattern = 'crab/MiniTreeV18/mfv*root'
+fn_pattern = 'crab/MiniTreeV18_Njets/mfv*root'
 out_fn = 'signal_templates.root'
-binning = '(20000,0,10)'
+binning = (20000,0,10)
 plot_dir = 'plots/o2t_signal_templates'
 ntrackses = (5,6,7,8)
 
@@ -26,7 +26,8 @@ for fn in fns:
     
     for min_ntracks in ntrackses:
         name = 'h_sig_ntk%i_%s' % (min_ntracks, sig_name)
-        t.Draw('svdist>>%s%s' % (name, binning), 'nvtx >= 2 && ntk0 >= %i && ntk1 >= %i' % (min_ntracks, min_ntracks))
+        h = ROOT.TH1D(name, '', *binning)
+        t.Draw('svdist>>%s' % name, 'nvtx >= 2 && ntk0 >= %i && ntk1 >= %i' % (min_ntracks, min_ntracks))
         h = getattr(ROOT, name)
         h.SetDirectory(fout)
         h.GetXaxis().SetRangeUser(0, 1)

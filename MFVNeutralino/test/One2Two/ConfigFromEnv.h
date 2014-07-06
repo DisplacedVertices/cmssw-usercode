@@ -1,6 +1,7 @@
 #ifndef JMTucker_MFVNeutralino_One2Two_ConfigFromEnv
 #define JMTucker_MFVNeutralino_One2Two_ConfigFromEnv
 
+#include <algorithm>
 #include <vector>
 #include <string>
 #include "Utility.h"
@@ -98,6 +99,11 @@ namespace jmt {
 
     std::string get_string(const char* name)                   const { return _get(name, parse_string);      }
     std::string get_string(const char* name, std::string def)  const { return _get(name, parse_string, def); }
+    std::string get_string_lower(const char* name, std::string def) const {
+      std::string s = _get(name, parse_string, def);
+      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+      return s;
+    }
 
     /*
       std::vector<std::string> env_get_vstring(const char* name) {

@@ -592,8 +592,10 @@ namespace mfv {
       TDirectory* d = dtemp->mkdir(TString::Format("ip%i", ip));
       d->cd();
 
-      const TH1D* h0 = orig_templates[ip  ]->h;
-      const TH1D* h1 = orig_templates[ip+1]->h;
+      TH1D* h0 = orig_templates[ip  ]->h;
+      TH1D* h1 = orig_templates[ip+1]->h;
+      h0->Scale(1./h0->Integral());
+      h1->Scale(1./h1->Integral());
 
       for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
         TDirectory* dd = d->mkdir(TString::Format("ipi%i", ipi));
@@ -649,4 +651,3 @@ namespace mfv {
     clear_templates();
   }
 }
-

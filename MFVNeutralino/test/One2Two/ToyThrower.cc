@@ -269,5 +269,5 @@ namespace mfv {
 
     t_toy_stats_1v->Fill();
     t_toy_stats_2v->Fill();
-  }      
+  }
 }
