@@ -6,7 +6,7 @@
 #include "ToyThrower.h"
 
 int main() {
-  jmt::SetROOTStyle();
+  jmt::set_root_style();
 
   jmt::ConfigFromEnv env("mfvo2t");
   const std::string out_fn = env.get_string("out_fn", "mfvo2t.root");
@@ -26,12 +26,14 @@ int main() {
 
   for (int itoy = 0; itoy < ntoys; ++itoy) {
     tt->throw_toy();
+
     if (templates_phishift) {
-      o_phishift->run_toy(itoy, &tt->toy_1v, &tt->toy_2v);
+      o_phishift->process(itoy, &tt->toy_1v, &tt->toy_2v);
     }
     else if (templates_clearedjets) {
       jmt::vthrow("templates_clearedjets not implemented");
     }
+
   }
 
   out_f->Write();
