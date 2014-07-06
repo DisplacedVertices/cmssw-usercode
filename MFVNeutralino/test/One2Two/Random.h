@@ -6,6 +6,8 @@
 class TRandom;
 
 namespace jmt {
+  extern const int seed_base;
+
   std::vector<int> knuth_choose_wo_replacement(TRandom* rand, int N, int n);
 }
 

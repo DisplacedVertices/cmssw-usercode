@@ -4,6 +4,8 @@
 #include "VAException.h"
 
 namespace jmt {
+  const int seed_base = 12191982;
+
   std::vector<int> knuth_choose_wo_replacement(TRandom* rand, int N, int n) {
     std::vector<int> r;
     if (n > N)
