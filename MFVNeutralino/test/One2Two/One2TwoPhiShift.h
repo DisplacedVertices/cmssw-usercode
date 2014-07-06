@@ -24,6 +24,8 @@ namespace mfv {
     const double phi_exp_min;
     const double phi_exp_max;
     const double d_phi_exp;
+    const int n_phi_interp;
+    const int n_shift;
     const bool use_abs_phi;
     const int template_nbins;
     const double template_min;
@@ -47,7 +49,14 @@ namespace mfv {
     const VertexSimples* one_vertices;
     const VertexPairs* two_vertices;
 
-    std::map<int, std::pair<double, TH1D*> > h_templates;
+    struct Template {
+      int i;
+      double phi_exp;
+      double shift;
+      TH1D* h;
+    };
+    typedef std::vector<Template> Templates;
+    Templates templates;
 
     TH1D* h_1v_g_phi;
     TH1D* h_1v_g_dz;

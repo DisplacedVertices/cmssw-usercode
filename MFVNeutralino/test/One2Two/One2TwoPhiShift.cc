@@ -6,6 +6,7 @@
 #include "TRandom3.h"
 #include "TTree.h"
 #include "Prob.h"
+#include "ROOTTools.h"
 #include "Random.h"
 
 namespace mfv {
@@ -44,6 +45,8 @@ namespace mfv {
       phi_exp_min(env.get_double("phi_exp_min", 0.)),
       phi_exp_max(env.get_double("phi_exp_max", 6.1)),
       d_phi_exp(env.get_double("d_phi_exp", 0.25)),
+      n_phi_interp(env.get_int("n_phi_interp", 20)),
+      n_shift(env.get_int("n_shift", 40)),
       use_abs_phi(env.get_bool("use_abs_phi", true)),
       template_nbins(env.get_int("template_nbins", 20000)),
       template_min(env.get_double("template_min", 0)),
@@ -80,6 +83,8 @@ namespace mfv {
     printf("sampling_type: %i\n", sampling_type);
     printf("sample_count: %i\n", sample_count);
     printf("phi_exp: (%f - %f) in %f increments\n", phi_exp_min, phi_exp_max, d_phi_exp);
+    printf("n_phi_interp: %i\n", n_phi_interp);
+    printf("n_shift: %i\n", n_shift);
     printf("use_abs_phi: %i\n", use_abs_phi);
     printf("template binning: (%i, %f, %f)\n", template_nbins, template_min, template_max);
     printf("find gs: phi? %i dz? %i   fs: phi? %i (bkgonly? %i) dz? %i (bkgonly? %i)\n", find_g_phi, find_g_dz, find_f_phi, find_f_phi_bkgonly, find_f_dz, find_f_dz_bkgonly);
@@ -99,6 +104,8 @@ namespace mfv {
     t_config->Branch("phi_exp_min", const_cast<double*>(&phi_exp_min), "phi_exp_min/D");
     t_config->Branch("phi_exp_max", const_cast<double*>(&phi_exp_max), "phi_exp_max/D");
     t_config->Branch("d_phi_exp", const_cast<double*>(&d_phi_exp), "d_phi_exp/D");
+    t_config->Branch("n_phi_interp", const_cast<int*>(&n_phi_interp), "n_phi_interp/I");
+    t_config->Branch("n_shift", const_cast<int*>(&n_shift), "n_shift/I");
     t_config->Branch("use_abs_phi", const_cast<bool*>(&use_abs_phi), "use_abs_phi/O");
     t_config->Branch("template_nbins", const_cast<int*>(&template_nbins), "template_nbins/I");
     t_config->Branch("template_min", const_cast<double*>(&template_min), "template_min/D");
@@ -546,30 +553,66 @@ namespace mfv {
   void One2TwoPhiShift::make_templates() {
     printf("One2TwoPhiShift%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
 
-    h_templates.clear();
-    dtoy->cd();
+    templates.clear();
 
-    double phi_exp = 0;
-    for (int i_phi_exp = 0; ; ++i_phi_exp) {
-      phi_exp = phi_exp_min + i_phi_exp * d_phi_exp;
+    TDirectory* dtemp = dtoy->mkdir("templates");
+    dtemp->cd();
+    
+    Templates orig_templates;
+
+    for (int ip = 0; ; ++ip) {
+      const double phi_exp = phi_exp_min + ip * d_phi_exp;
       if (phi_exp > phi_exp_max)
         break;
       set_phi_exp(phi_exp);
 
-      h_fcn_f_phis[i_phi_exp]->FillRandom("f_phi", 100000);
+      h_fcn_f_phis[ip]->FillRandom("f_phi", 100000);
 
-      TH1D* h_template = new TH1D(TString::Format("h_template_phi%i", i_phi_exp), TString::Format("phi_exp = %f\n", phi_exp), template_nbins, template_min, template_max);
-      h_templates[i_phi_exp] = std::make_pair(phi_exp, h_template);
+      TH1D* h = new TH1D(TString::Format("h_orig_template_ip%i", ip), TString::Format("phi_exp = %f", phi_exp), template_nbins, template_min, template_max);
+      orig_templates.push_back({ ip, phi_exp, 0., h });
 
-      auto f = [&h_template](const VertexPair& p) {
-        h_template->Fill(p.first.d2d(p.second), p.weight);
+      auto f = [&h](const VertexPair& p) {
+        h->Fill(p.first.d2d(p.second), p.weight);
       };
 
       printf("  pairing w/ phi_exp = %f\n", phi_exp); fflush(stdout);
       loop_over_1v_pairs(f);
     }
 
-    
+    printf("  morphing templates: ");
+    int iglb = 0;
+    for (int ip = 0, ipe = int(orig_templates.size()) - 1; ip < ipe; ++ip) {
+      TDirectory* d = dtemp->mkdir(TString::Format("ip%i", ip));
+      d->cd();
+
+      TH1D* h0 = orig_templates[ip  ].h;
+      TH1D* h1 = orig_templates[ip+1].h;
+
+      for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
+        TDirectory* dd = d->mkdir(TString::Format("ipi%i", ipi));
+        dd->cd();
+
+        TH1D* h = (TH1D*)h0->Clone(TString::Format("h_template_ip%i_ipi%i", ip, ipi));
+        h->SetDirectory(0);
+        double f1 = double(ipi)/n_phi_interp;
+        h->Scale(1 - f1);
+        h->Add(h1, f1);
+
+        for (int ish = 0; ish < n_shift; ++ish) {
+          TH1D* hh = jmt::shift_hist(h, ish);
+          hh->SetDirectory(dd);
+          const double phi_exp = orig_templates[ip].phi_exp + ipi * d_phi_exp / n_phi_interp;
+          const double shift = ish * hh->GetBinWidth(1);
+          hh->SetTitle(TString::Format("phi_exp = %f shift = %f\n", phi_exp, shift));
+
+          templates.push_back({ iglb++, phi_exp, shift, hh });
+        }
+
+        delete h;
+        printf("."); fflush(stdout);
+      }
+    }
+    printf("\n");
   }
 
   void One2TwoPhiShift::process(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
