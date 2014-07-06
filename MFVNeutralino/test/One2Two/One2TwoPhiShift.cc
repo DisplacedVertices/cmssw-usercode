@@ -14,7 +14,8 @@ namespace mfv {
   }
 
   double fcn_f_phi(const double* x, const double* par) {
-    return par[0] * pow(fabs(x[0]), par[1])/(pow(M_PI, (par[1]+1))/(par[1]+1));
+    const double p1 = par[1] + 1;
+    return par[0] * (par[2] + pow(fabs(x[0]), par[1])/(par[2]*M_PI + pow(M_PI, p1)/p1));
   }
 
   double fcn_fg_dz(const double* x, const double* par) {
@@ -56,6 +57,7 @@ namespace mfv {
 
       fout(f),
       dout(f->mkdir(TString::Format("One2TwoPhiShift%s", uname.c_str()))),
+      dtoy(0),
       rand(r),
       seed(r->GetSeed() - jmt::seed_base),
 
@@ -141,6 +143,8 @@ namespace mfv {
     t_fit_info->Branch("f_phi_asym_err", &b_f_phi_asym_err, "f_phi_asym_err/F");
     t_fit_info->Branch("f_phi_fit_exp", &b_f_phi_fit_exp, "f_phi_fit_exp/F");
     t_fit_info->Branch("f_phi_fit_exp_err", &b_f_phi_fit_exp_err, "f_phi_fit_exp_err/F");
+    t_fit_info->Branch("f_phi_fit_offset", &b_f_phi_fit_offset, "f_phi_fit_offset/F");
+    t_fit_info->Branch("f_phi_fit_offset_err", &b_f_phi_fit_offset_err, "f_phi_fit_offset_err/F");
     t_fit_info->Branch("f_phi_fit_chi2", &b_f_phi_fit_chi2, "f_phi_fit_chi2/F");
     t_fit_info->Branch("f_phi_fit_ndf", &b_f_phi_fit_ndf, "f_phi_fit_ndf/F");
     t_fit_info->Branch("f_dz_mean", &b_f_dz_mean, "f_dz_mean/F");
@@ -156,7 +160,7 @@ namespace mfv {
   }    
 
   void One2TwoPhiShift::book_toy_fcns_and_histos() {
-    TDirectory* dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, toy));
+    dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, toy));
     dtoy->cd();
 
     const int phi_nbins = 8;
@@ -164,11 +168,11 @@ namespace mfv {
     const double phi_max = M_PI;
 
     g_phi = new TF1("g_phi", fcn_g_phi, phi_min, phi_max, 3);
-    f_phi = new TF1("f_phi", fcn_f_phi, phi_min, phi_max, 2);
+    f_phi = new TF1("f_phi", fcn_f_phi, phi_min, phi_max, 3);
     g_dz  = new TF1("g_dz", fcn_fg_dz, -40, 40, 3);
     f_dz  = new TF1("f_dz", fcn_fg_dz, -40, 40, 3);
     g_phi->SetParNames("norm", "offset", "slope");
-    f_phi->SetParNames("norm", "exp");
+    f_phi->SetParNames("norm", "exp", "offset");
     for (TF1* fcn : {g_dz, f_dz})
       fcn->SetParNames("norm", "sigma", "mu");
     for (TF1* fcn : {g_phi, f_phi, g_dz, f_dz})
@@ -395,11 +399,13 @@ namespace mfv {
     if (find_f_phi) {
       const int vt_which = find_f_phi_bkgonly ? vt_2vsbbkg : vt_2vsb;
       const double integxwidth = h_phi[vt_which]->Integral()*h_phi[vt_which]->GetXaxis()->GetBinWidth(1);
-      TF1* f_phi_temp = new TF1("f_phi_temp", fcn_f_phi, use_abs_phi ? 0 : -M_PI, M_PI, 2);
-      for (int i = 0; i < 2; ++i)
+      TF1* f_phi_temp = new TF1("f_phi_temp", fcn_f_phi, use_abs_phi ? 0 : -M_PI, M_PI, 3);
+      for (int i = 0; i < 3; ++i)
         f_phi_temp->SetParName(i, f_phi->GetParName(i));
       f_phi_temp->FixParameter(0, integxwidth);
       f_phi_temp->SetParameter(1, 2.);
+      f_phi_temp->SetParameter(2, 0.);
+      f_phi_temp->SetParLimits(2, 0., 1);
       TFitResultPtr res = h_phi[vt_which]->Fit(f_phi_temp, opt);
       double err1, err2;
       const double integ1 = h_phi[vt_which]->IntegralAndError(1,5, err1);
@@ -407,14 +413,16 @@ namespace mfv {
       const double N1 = pow(integ1/err1, 2);
       const double N2 = pow(integ2/err2, 2);
       const jmt::interval asym = jmt::clopper_pearson_poisson_means_ratio(N1, N2);
-      printf("  h_phi[%s] mean %.3f +- %.3f  rms %.3f +- %.3f  asym %.3f +- %.3f   f_phi fit exp = %6.3f +- %6.3f   chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n",
+      printf("  h_phi[%s] mean %.3f +- %.3f  rms %.3f +- %.3f  asym %.3f +- %.3f   f_phi fit exp = %6.3f +- %6.3f  offset = %6.3f +- %6.3f  chi2/ndf = %6.3f/%i = %6.3f   prob: %g\n",
              vt_names[vt_which],
              h_phi[vt_which]->GetMean(), h_phi[vt_which]->GetMeanError(),
              h_phi[vt_which]->GetRMS(),  h_phi[vt_which]->GetRMSError(),
              asym.value, asym.error(),
              res->Parameter(1), res->ParError(1),
+             res->Parameter(2), res->ParError(2),
              res->Chi2(), res->Ndf(), res->Chi2()/res->Ndf(), res->Prob());
       f_phi->FixParameter(1, res->Parameter(1));
+      f_phi->FixParameter(2, res->Parameter(2));
 
       b_f_phi_mean        = h_phi[vt_which]->GetMean();
       b_f_phi_mean_err    = h_phi[vt_which]->GetMeanError();
@@ -423,7 +431,9 @@ namespace mfv {
       b_f_phi_asym        = asym.value;
       b_f_phi_asym_err    = asym.error();
       b_f_phi_fit_exp     = res->Parameter(1);
-      b_f_phi_fit_exp_err = res->ParError(1);
+      b_f_phi_fit_exp_err = res->ParError (1);
+      b_f_phi_fit_offset     = res->Parameter(2);
+      b_f_phi_fit_offset_err = res->ParError (2);
       b_f_phi_fit_chi2    = res->Chi2();
       b_f_phi_fit_ndf     = res->Ndf();
 
@@ -478,6 +488,7 @@ namespace mfv {
 
   void One2TwoPhiShift::set_phi_exp(double phi_exp) {
     f_phi->FixParameter(1, phi_exp);
+    f_phi->FixParameter(2, 0.);
     update_f_weighting_pars();
   }
 
@@ -536,6 +547,7 @@ namespace mfv {
     printf("One2TwoPhiShift%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
 
     h_templates.clear();
+    dtoy->cd();
 
     double phi_exp = 0;
     for (int i_phi_exp = 0; ; ++i_phi_exp) {

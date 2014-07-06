@@ -37,6 +37,7 @@ namespace mfv {
 
     TFile* fout;
     TDirectory* dout;
+    TDirectory* dtoy;
     TRandom* rand;
     const int seed;
 
@@ -121,6 +122,8 @@ namespace mfv {
     float b_f_phi_asym_err;
     float b_f_phi_fit_exp;
     float b_f_phi_fit_exp_err;
+    float b_f_phi_fit_offset;
+    float b_f_phi_fit_offset_err;
     float b_f_phi_fit_chi2;
     float b_f_phi_fit_ndf;
     float b_f_dz_mean;
