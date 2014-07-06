@@ -28,8 +28,8 @@ namespace mfv {
         const double n = h_data->GetBinContent(i);
         const double dlnL = -nu + n * log(nu); // log(nu/n);
         lnL += dlnL;
-        printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
-               i, mu_sig, mu_bkg, nu_bkg, nu_sig, nu, n, dlnL, lnL);
+        //printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
+        //i, mu_sig, mu_bkg, nu_bkg, nu_sig, nu, n, dlnL, lnL);
       }
       return 2*lnL;
     }
@@ -161,6 +161,8 @@ namespace mfv {
         const double mu_sig = mu_sig_min + i_mu_sig * d_mu_sig;
         for (int i_mu_bkg = 0; i_mu_bkg < mu_bkg_steps; ++i_mu_bkg) {
           const double mu_bkg = mu_bkg_min + i_mu_bkg * d_mu_bkg;
+          if (mu_sig < 1 || mu_bkg < 1)
+            continue;
 
           const double twolnL_ = fit::twolnL(mu_sig, mu_bkg);
           h->SetBinContent(i_mu_sig+1, i_mu_bkg+1, twolnL_);
