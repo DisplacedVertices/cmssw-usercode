@@ -1,0 +1,6 @@
+g++ \
+ -std=c++0x -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -g \
+ `root-config --cflags --libs --glibs` \
+ -I /uscms/home/tucker/private/mfv_5313/src \
+ /uscms/home/tucker/private/mfv_5313/src/JMTucker/MFVNeutralino/src/MiniNtuple.cc \
+ Utility.cc VAException.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc One2TwoPhiShift.cc mfvo2t.cc
