@@ -6,6 +6,7 @@
 #include "TRandom3.h"
 #include "TTree.h"
 #include "Prob.h"
+#include "Random.h"
 
 namespace mfv {
   double fcn_g_phi(const double* x, const double* par) {
@@ -31,8 +32,7 @@ namespace mfv {
 
   const char* One2TwoPhiShift::vt_names[One2TwoPhiShift::n_vt] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb", "1vsingle" };
 
-  One2TwoPhiShift::One2TwoPhiShift(const std::string& name_, TFile* f, TRandom* r, int seed_, int toy_,
-                                   const VertexSimples* v, const VertexPairs* p)
+  One2TwoPhiShift::One2TwoPhiShift(const std::string& name_, TFile* f, TRandom* r)
     : name (name_.size() ? " " + name_ : ""),
       uname(name_.size() ? "_" + name_ : ""),
 
@@ -54,14 +54,13 @@ namespace mfv {
       find_f_phi_bkgonly(env.get_bool("find_f_phi_bkgonly", false)),
       find_f_dz_bkgonly(env.get_bool("find_f_dz_bkgonly", false)),
 
-      seed(seed_),
-      toy(toy_),
       fout(f),
-      dout(f->mkdir(TString::Format("One2TwoPhiShift%s_seed%i_toy%i", uname.c_str(), seed, toy))),
+      dout(f->mkdir(TString::Format("One2TwoPhiShift%s", uname.c_str()))),
       rand(r),
+      seed(r->GetSeed() - jmt::seed_base),
 
-      one_vertices(v),
-      two_vertices(p),
+      one_vertices(0),
+      two_vertices(0),
 
       gdpmax(0),
       fdpmax(0),
@@ -74,31 +73,93 @@ namespace mfv {
       jmt::vthrow("sampling_type must be 2");
 
     printf("One2TwoPhiShift%s config:\n", name.c_str());
-    printf("seed: %i  toy: %i\n", seed, toy);
-    const int N1v = int(one_vertices->size());
-    const int N1vpairs = N1v*(N1v-1)/2;
-    printf("# 1v input: %i (%i pairs)  2v input: %lu\n", N1v, N1vpairs, two_vertices->size());
+    printf("seed: %i\n", seed);
     printf("d2d_cut: %f\n", d2d_cut);
     printf("sampling_type: %i\n", sampling_type);
-    printf("sample_count_type: %i\n", sample_count);
+    printf("sample_count: %i\n", sample_count);
     printf("phi_exp: (%f - %f) in %f increments\n", phi_exp_min, phi_exp_max, d_phi_exp);
     printf("use_abs_phi: %i\n", use_abs_phi);
     printf("template binning: (%i, %f, %f)\n", template_nbins, template_min, template_max);
     printf("find gs: phi? %i dz? %i   fs: phi? %i (bkgonly? %i) dz? %i (bkgonly? %i)\n", find_g_phi, find_g_dz, find_f_phi, find_f_phi_bkgonly, find_f_dz, find_f_dz_bkgonly);
     fflush(stdout);
 
-    book();
-    fill_2v_histos();
-    fit_envelopes();
-    fit_fs_in_sideband();
-    t_fit_info->Fill();
-    fill_1v_histos();
+    book_trees();
   }
 
-  void One2TwoPhiShift::book() {
+  void One2TwoPhiShift::book_trees() {
     dout->cd();
 
-    const int phi_nbins= 8;
+    TTree* t_config = new TTree("t_config", "");
+    t_config->Branch("seed", const_cast<int*>(&seed), "seed/I");
+    t_config->Branch("d2d_cut", const_cast<double*>(&d2d_cut), "d2d_cut/D");
+    t_config->Branch("sampling_type", const_cast<int*>(&sampling_type), "sampling_type/I");
+    t_config->Branch("sample_count", const_cast<int*>(&sample_count), "sample_count/I");
+    t_config->Branch("phi_exp_min", const_cast<double*>(&phi_exp_min), "phi_exp_min/D");
+    t_config->Branch("phi_exp_max", const_cast<double*>(&phi_exp_max), "phi_exp_max/D");
+    t_config->Branch("d_phi_exp", const_cast<double*>(&d_phi_exp), "d_phi_exp/D");
+    t_config->Branch("use_abs_phi", const_cast<bool*>(&use_abs_phi), "use_abs_phi/O");
+    t_config->Branch("template_nbins", const_cast<int*>(&template_nbins), "template_nbins/I");
+    t_config->Branch("template_min", const_cast<double*>(&template_min), "template_min/D");
+    t_config->Branch("template_max", const_cast<double*>(&template_max), "template_max/D");
+    t_config->Branch("find_g_phi", const_cast<bool*>(&find_g_phi), "find_g_phi/O");
+    t_config->Branch("find_g_dz", const_cast<bool*>(&find_g_dz), "find_g_dz/O");
+    t_config->Branch("find_f_phi", const_cast<bool*>(&find_f_phi), "find_f_phi/O");
+    t_config->Branch("find_f_dz", const_cast<bool*>(&find_f_dz), "find_f_dz/O");
+    t_config->Branch("find_f_phi_bkgonly", const_cast<bool*>(&find_f_phi_bkgonly), "find_f_phi_bkgonly/O");
+    t_config->Branch("find_f_dz_bkgonly", const_cast<bool*>(&find_f_dz_bkgonly), "find_f_dz_bkgonly/O");
+    t_config->Fill();
+
+
+    t_fit_info = new TTree("t_fit_info", "");
+    t_fit_info->Branch("seed", const_cast<int*>(&seed), "seed/I");
+    t_fit_info->Branch("toy", &toy, "toy/I");
+    t_fit_info->Branch("g_phi_mean", &b_g_phi_mean, "g_phi_mean/F");
+    t_fit_info->Branch("g_phi_mean_err", &b_g_phi_mean_err, "g_phi_mean_err/F");
+    t_fit_info->Branch("g_phi_rms", &b_g_phi_rms, "g_phi_rms/F");
+    t_fit_info->Branch("g_phi_rms_err", &b_g_phi_rms_err, "g_phi_rms_err/F");
+    t_fit_info->Branch("g_phi_fit_offset", &b_g_phi_fit_offset, "g_phi_fit_offset/F");
+    t_fit_info->Branch("g_phi_fit_offset_err", &b_g_phi_fit_offset_err, "g_phi_fit_offset_err/F");
+    t_fit_info->Branch("g_phi_fit_slope", &b_g_phi_fit_slope, "g_phi_fit_slope/F");
+    t_fit_info->Branch("g_phi_fit_slope_err", &b_g_phi_fit_slope_err, "g_phi_fit_slope_err/F");
+    t_fit_info->Branch("g_phi_fit_chi2", &b_g_phi_fit_chi2, "g_phi_fit_chi2/F");
+    t_fit_info->Branch("g_phi_fit_ndf", &b_g_phi_fit_ndf, "g_phi_fit_ndf/F");
+    t_fit_info->Branch("g_dz_mean", &b_g_dz_mean, "g_dz_mean/F");
+    t_fit_info->Branch("g_dz_mean_err", &b_g_dz_mean_err, "g_dz_mean_err/F");
+    t_fit_info->Branch("g_dz_rms", &b_g_dz_rms, "g_dz_rms/F");
+    t_fit_info->Branch("g_dz_rms_err", &b_g_dz_rms_err, "g_dz_rms_err/F");
+    t_fit_info->Branch("g_dz_fit_sigma", &b_g_dz_fit_sigma, "g_dz_fit_sigma/F");
+    t_fit_info->Branch("g_dz_fit_sigma_err", &b_g_dz_fit_sigma_err, "g_dz_fit_sigma_err/F");
+    t_fit_info->Branch("g_dz_fit_mu", &b_g_dz_fit_mu, "g_dz_fit_mu/F");
+    t_fit_info->Branch("g_dz_fit_mu_err", &b_g_dz_fit_mu_err, "g_dz_fit_mu_err/F");
+    t_fit_info->Branch("g_dz_fit_chi2", &b_g_dz_fit_chi2, "g_dz_fit_chi2/F");
+    t_fit_info->Branch("g_dz_fit_ndf", &b_g_dz_fit_ndf, "g_dz_fit_ndf/F");
+    t_fit_info->Branch("f_phi_mean", &b_f_phi_mean, "f_phi_mean/F");
+    t_fit_info->Branch("f_phi_mean_err", &b_f_phi_mean_err, "f_phi_mean_err/F");
+    t_fit_info->Branch("f_phi_rms", &b_f_phi_rms, "f_phi_rms/F");
+    t_fit_info->Branch("f_phi_rms_err", &b_f_phi_rms_err, "f_phi_rms_err/F");
+    t_fit_info->Branch("f_phi_asym", &b_f_phi_asym, "f_phi_asym/F");
+    t_fit_info->Branch("f_phi_asym_err", &b_f_phi_asym_err, "f_phi_asym_err/F");
+    t_fit_info->Branch("f_phi_fit_exp", &b_f_phi_fit_exp, "f_phi_fit_exp/F");
+    t_fit_info->Branch("f_phi_fit_exp_err", &b_f_phi_fit_exp_err, "f_phi_fit_exp_err/F");
+    t_fit_info->Branch("f_phi_fit_chi2", &b_f_phi_fit_chi2, "f_phi_fit_chi2/F");
+    t_fit_info->Branch("f_phi_fit_ndf", &b_f_phi_fit_ndf, "f_phi_fit_ndf/F");
+    t_fit_info->Branch("f_dz_mean", &b_f_dz_mean, "f_dz_mean/F");
+    t_fit_info->Branch("f_dz_mean_err", &b_f_dz_mean_err, "f_dz_mean_err/F");
+    t_fit_info->Branch("f_dz_rms", &b_f_dz_rms, "f_dz_rms/F");
+    t_fit_info->Branch("f_dz_rms_err", &b_f_dz_rms_err, "f_dz_rms_err/F");
+    t_fit_info->Branch("f_dz_fit_sigma", &b_f_dz_fit_sigma, "f_dz_fit_sigma/F");
+    t_fit_info->Branch("f_dz_fit_sigma_err", &b_f_dz_fit_sigma_err, "f_dz_fit_sigma_err/F");
+    t_fit_info->Branch("f_dz_fit_mu", &b_f_dz_fit_mu, "f_dz_fit_mu/F");
+    t_fit_info->Branch("f_dz_fit_mu_err", &b_f_dz_fit_mu_err, "f_dz_fit_mu_err/F");
+    t_fit_info->Branch("f_dz_fit_chi2", &b_f_dz_fit_chi2, "f_dz_fit_chi2/F");
+    t_fit_info->Branch("f_dz_fit_ndf", &b_f_dz_fit_ndf, "f_dz_fit_ndf/F");
+  }    
+
+  void One2TwoPhiShift::book_toy_fcns_and_histos() {
+    TDirectory* dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, toy));
+    dtoy->cd();
+
+    const int phi_nbins = 8;
     const double phi_min = use_abs_phi ? 0 : -M_PI;
     const double phi_max = M_PI;
 
@@ -123,6 +184,7 @@ namespace mfv {
     h_fcn_f_dz = new TH1D("h_fcn_f_dz", "", 20, -0.1, 0.1);
 
     double phi_exp = 0;
+    h_fcn_f_phis.clear();
     for (int i_phi_exp = 0; ; ++i_phi_exp) {
       phi_exp = phi_exp_min + i_phi_exp * d_phi_exp;
       if (phi_exp > phi_exp_max)
@@ -133,7 +195,7 @@ namespace mfv {
 
     for (int i = 0; i < n_vt; ++i) {
       const char* iv = vt_names[i];
-      TDirectory* div = dout->mkdir(iv);
+      TDirectory* div = dtoy->mkdir(iv);
       div->cd();
 
       h_issig  [i] = new TH1D("h_issig", "", 2, 0, 2);
@@ -161,50 +223,6 @@ namespace mfv {
       h_dz       [i] = new TH1D("h_dz"       , "", 20, -0.1, 0.1);
       h_phi      [i] = new TH1D("h_phi"      , "", phi_nbins, phi_min, phi_max);
     }
-
-    dout->cd();
-
-    t_fit_info = new TTree("t_fit_info", "");
-    t_fit_info->Branch("b_g_phi_mean", &b_g_phi_mean, "b_g_phi_mean/F");
-    t_fit_info->Branch("b_g_phi_mean_err", &b_g_phi_mean_err, "b_g_phi_mean_err/F");
-    t_fit_info->Branch("b_g_phi_rms", &b_g_phi_rms, "b_g_phi_rms/F");
-    t_fit_info->Branch("b_g_phi_rms_err", &b_g_phi_rms_err, "b_g_phi_rms_err/F");
-    t_fit_info->Branch("b_g_phi_fit_offset", &b_g_phi_fit_offset, "b_g_phi_fit_offset/F");
-    t_fit_info->Branch("b_g_phi_fit_offset_err", &b_g_phi_fit_offset_err, "b_g_phi_fit_offset_err/F");
-    t_fit_info->Branch("b_g_phi_fit_slope", &b_g_phi_fit_slope, "b_g_phi_fit_slope/F");
-    t_fit_info->Branch("b_g_phi_fit_slope_err", &b_g_phi_fit_slope_err, "b_g_phi_fit_slope_err/F");
-    t_fit_info->Branch("b_g_phi_fit_chi2", &b_g_phi_fit_chi2, "b_g_phi_fit_chi2/F");
-    t_fit_info->Branch("b_g_phi_fit_ndf", &b_g_phi_fit_ndf, "b_g_phi_fit_ndf/F");
-    t_fit_info->Branch("b_g_dz_mean", &b_g_dz_mean, "b_g_dz_mean/F");
-    t_fit_info->Branch("b_g_dz_mean_err", &b_g_dz_mean_err, "b_g_dz_mean_err/F");
-    t_fit_info->Branch("b_g_dz_rms", &b_g_dz_rms, "b_g_dz_rms/F");
-    t_fit_info->Branch("b_g_dz_rms_err", &b_g_dz_rms_err, "b_g_dz_rms_err/F");
-    t_fit_info->Branch("b_g_dz_fit_sigma", &b_g_dz_fit_sigma, "b_g_dz_fit_sigma/F");
-    t_fit_info->Branch("b_g_dz_fit_sigma_err", &b_g_dz_fit_sigma_err, "b_g_dz_fit_sigma_err/F");
-    t_fit_info->Branch("b_g_dz_fit_mu", &b_g_dz_fit_mu, "b_g_dz_fit_mu/F");
-    t_fit_info->Branch("b_g_dz_fit_mu_err", &b_g_dz_fit_mu_err, "b_g_dz_fit_mu_err/F");
-    t_fit_info->Branch("b_g_dz_fit_chi2", &b_g_dz_fit_chi2, "b_g_dz_fit_chi2/F");
-    t_fit_info->Branch("b_g_dz_fit_ndf", &b_g_dz_fit_ndf, "b_g_dz_fit_ndf/F");
-    t_fit_info->Branch("b_f_phi_mean", &b_f_phi_mean, "b_f_phi_mean/F");
-    t_fit_info->Branch("b_f_phi_mean_err", &b_f_phi_mean_err, "b_f_phi_mean_err/F");
-    t_fit_info->Branch("b_f_phi_rms", &b_f_phi_rms, "b_f_phi_rms/F");
-    t_fit_info->Branch("b_f_phi_rms_err", &b_f_phi_rms_err, "b_f_phi_rms_err/F");
-    t_fit_info->Branch("b_f_phi_asym", &b_f_phi_asym, "b_f_phi_asym/F");
-    t_fit_info->Branch("b_f_phi_asym_err", &b_f_phi_asym_err, "b_f_phi_asym_err/F");
-    t_fit_info->Branch("b_f_phi_fit_exp", &b_f_phi_fit_exp, "b_f_phi_fit_exp/F");
-    t_fit_info->Branch("b_f_phi_fit_exp_err", &b_f_phi_fit_exp_err, "b_f_phi_fit_exp_err/F");
-    t_fit_info->Branch("b_f_phi_fit_chi2", &b_f_phi_fit_chi2, "b_f_phi_fit_chi2/F");
-    t_fit_info->Branch("b_f_phi_fit_ndf", &b_f_phi_fit_ndf, "b_f_phi_fit_ndf/F");
-    t_fit_info->Branch("b_f_dz_mean", &b_f_dz_mean, "b_f_dz_mean/F");
-    t_fit_info->Branch("b_f_dz_mean_err", &b_f_dz_mean_err, "b_f_dz_mean_err/F");
-    t_fit_info->Branch("b_f_dz_rms", &b_f_dz_rms, "b_f_dz_rms/F");
-    t_fit_info->Branch("b_f_dz_rms_err", &b_f_dz_rms_err, "b_f_dz_rms_err/F");
-    t_fit_info->Branch("b_f_dz_fit_sigma", &b_f_dz_fit_sigma, "b_f_dz_fit_sigma/F");
-    t_fit_info->Branch("b_f_dz_fit_sigma_err", &b_f_dz_fit_sigma_err, "b_f_dz_fit_sigma_err/F");
-    t_fit_info->Branch("b_f_dz_fit_mu", &b_f_dz_fit_mu, "b_f_dz_fit_mu/F");
-    t_fit_info->Branch("b_f_dz_fit_mu_err", &b_f_dz_fit_mu_err, "b_f_dz_fit_mu_err/F");
-    t_fit_info->Branch("b_f_dz_fit_chi2", &b_f_dz_fit_chi2, "b_f_dz_fit_chi2/F");
-    t_fit_info->Branch("b_f_dz_fit_ndf", &b_f_dz_fit_ndf, "b_f_dz_fit_ndf/F");
   }
 
   bool One2TwoPhiShift::is_sideband(const VertexSimple& v0, const VertexSimple& v1) const {
@@ -249,6 +267,9 @@ namespace mfv {
   }
 
   void One2TwoPhiShift::fill_2v_histos() {
+    if (two_vertices == 0)
+      jmt::vthrow("One2TwoPhiShift::fill_2v_histos: must set vertices before using them");
+
     printf("One2TwoPhiShift%s: fill 2v histos\n", name.c_str()); fflush(stdout);
     for (const VertexPair& p : *two_vertices)
       for (int ih = 0; ih < n_vt_2v; ++ih)
@@ -256,6 +277,9 @@ namespace mfv {
   }
 
   void One2TwoPhiShift::fit_envelopes() {
+    if (one_vertices == 0)
+      jmt::vthrow("One2TwoPhiShift::fit_envelopes: must set vertices before using them");
+
     printf("One2TwoPhiShift%s: fitting envelopes\n", name.c_str()); fflush(stdout);
 
     const VertexSimples& v1v = *one_vertices;
@@ -468,6 +492,9 @@ namespace mfv {
   }
 
   void One2TwoPhiShift::loop_over_1v_pairs(std::function<void(const VertexPair&)> fcn) {
+    if (one_vertices == 0)
+      jmt::vthrow("One2TwoPhiShift::loop_over_1v_pairs: must set vertices before using them");
+
     const int N1v_t = int(one_vertices->size());
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
 
@@ -529,5 +556,24 @@ namespace mfv {
       printf("  pairing w/ phi_exp = %f\n", phi_exp); fflush(stdout);
       loop_over_1v_pairs(f);
     }
+  }
+
+  void One2TwoPhiShift::run_toy(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
+    toy = toy_;
+    one_vertices = toy_1v;
+    two_vertices = toy_2v;
+
+    printf("One2TwoPhiShift%s: run toy #%i\n", name.c_str(), toy);
+    const int N1v = int(one_vertices->size());
+    const int N1vpairs = N1v*(N1v-1)/2;
+    printf("  # 1v input: %i (%i pairs)  2v input: %lu\n", N1v, N1vpairs, two_vertices->size());
+
+    book_toy_fcns_and_histos();
+    fill_2v_histos();
+    fit_envelopes();
+    fit_fs_in_sideband();
+    t_fit_info->Fill();
+    fill_1v_histos();
+    make_templates();
   }
 }

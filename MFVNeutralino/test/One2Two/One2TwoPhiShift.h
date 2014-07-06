@@ -35,14 +35,14 @@ namespace mfv {
     const bool find_f_phi_bkgonly;
     const bool find_f_dz_bkgonly;
 
-    const int seed;
-    const int toy;
     TFile* fout;
     TDirectory* dout;
     TRandom* rand;
+    const int seed;
 
     ////////////////////////////////////////////////////////////////////////////
 
+    int toy;
     const VertexSimples* one_vertices;
     const VertexPairs* two_vertices;
 
@@ -136,13 +136,10 @@ namespace mfv {
     
     ////////////////////////////////////////////////////////////////////////////
 
-    One2TwoPhiShift(const std::string& name_, TFile* f, TRandom* r, int seed, int toy,
-                    const VertexSimples* v, const VertexPairs* p);
+    One2TwoPhiShift(const std::string& name_, TFile* f, TRandom* r);
 
-    ////////////////////////////////////////////////////////////////////////////
-
-    void book();
-    void fill();
+    void book_trees();
+    void book_toy_fcns_and_histos();
     bool is_sideband(const VertexSimple&, const VertexSimple&) const;
     void fill_2v(const int ih, const double w, const VertexSimple&, const VertexSimple&);
     void fill_2v_histos();
@@ -154,6 +151,7 @@ namespace mfv {
     void loop_over_1v_pairs(std::function<void(const VertexPair&)>);
     void fill_1v_histos();
     void make_templates();
+    void run_toy(int toy, const VertexSimples*, const VertexPairs*);
   };
 }
 

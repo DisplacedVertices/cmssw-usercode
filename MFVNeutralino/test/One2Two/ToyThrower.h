@@ -17,7 +17,6 @@ namespace mfv {
     const std::string path;
 
     jmt::ConfigFromEnv env;
-    const int seed;
     const int min_ntracks;
     const double int_lumi;
     const double scale;
@@ -33,11 +32,10 @@ namespace mfv {
 
     int ntoys;
 
-    const bool make_trees;
     TFile* fout;
     TDirectory* dout;
-    bool own_rand;
     TRandom* rand;
+    const int seed;
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -58,8 +56,6 @@ namespace mfv {
 
     ////////////////////////////////////////////////////////////////////////////
 
-    TTree* t_config;
-    TTree* t_sample_info;
     TTree* t_sample_usage_1v;
     int b_sample_usage_1v_key;
     int b_sample_usage_1v_ndx;
@@ -79,18 +75,14 @@ namespace mfv {
     
     ////////////////////////////////////////////////////////////////////////////
 
-    ToyThrower(const std::string& name_, const std::string& path_, TFile* f);
-    ~ToyThrower();
-    void set_rand(TRandom* r);
-
-    ////////////////////////////////////////////////////////////////////////////
+    ToyThrower(const std::string& name_, const std::string& path_, TFile* f, TRandom* r);
 
     bool sel_vertex(const VertexSimple& v) const;
     void read_sample(const Sample& sample);
     void loop_over_samples(std::function<void(const Sample&)> fcn);
     void update_poisson_means();
-    void book_trees();
     void read_samples();
+    void book_and_fill_some_trees();
     void throw_toy();
   };
 }

@@ -1,6 +1,8 @@
 #include "TFile.h"
-#include "One2TwoPhiShift.h"
+#include "TRandom3.h"
+#include "Random.h"
 #include "ROOTTools.h"
+#include "One2TwoPhiShift.h"
 #include "ToyThrower.h"
 
 int main() {
@@ -11,16 +13,25 @@ int main() {
   const std::string tree_path = env.get_string("tree_path", "crab/MiniTreeV18_Njets");
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
+  const std::string templates = env.get_string("templates", "phishift");
+  const bool templates_phishift = templates == "phishift";
+  const bool templates_clearedjets = templates == "clearedjets";
+  if (!(templates_phishift || templates_clearedjets))
+    jmt::vthrow("templates config must be one of \"phishift\", \"clearedjets\"");
 
   TFile* out_f = new TFile(out_fn.c_str(), "recreate");
-  TRandom3* rand = new TRandom3(12191982 + seed);
+  TRandom3* rand = new TRandom3(jmt::seed_base + seed);
   mfv::ToyThrower* tt = new mfv::ToyThrower("", tree_path, out_f, rand);
+  mfv::One2TwoPhiShift* o_phishift = new mfv::One2TwoPhiShift("", out_f, rand);
 
-  for (int i = 0; i < ntoys; ++i) {
+  for (int itoy = 0; itoy < ntoys; ++itoy) {
     tt->throw_toy();
-    mfv::One2TwoPhiShift* o = new mfv::One2TwoPhiShift("", f, tt->rand, tt->seed, tt->ntoys, &tt->toy_1v, &tt->toy_2v);
-    o->make_templates();
-    delete o;
+    if (templates_phishift) {
+      o_phishift->run_toy(itoy, &tt->toy_1v, &tt->toy_2v);
+    }
+    else if (templates_clearedjets) {
+      jmt::vthrow("templates_clearedjets not implemented");
+    }
   }
 
   out_f->Write();
