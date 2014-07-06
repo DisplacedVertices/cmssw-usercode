@@ -8,6 +8,7 @@
 #include "Prob.h"
 #include "ROOTTools.h"
 #include "Random.h"
+#include "Templates.h"
 
 namespace mfv {
   double fcn_g_phi(const double* x, const double* par) {
@@ -550,10 +551,16 @@ namespace mfv {
     loop_over_1v_pairs(f);
   }
 
+  void One2TwoPhiShift::clear_templates() {
+    for (Template* t : templates)
+      delete t;
+    templates.clear();
+  }
+
   void One2TwoPhiShift::make_templates() {
     printf("One2TwoPhiShift%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
 
-    templates.clear();
+    clear_templates();
 
     TDirectory* dtemp = dtoy->mkdir("templates");
     dtemp->cd();
@@ -569,7 +576,7 @@ namespace mfv {
       h_fcn_f_phis[ip]->FillRandom("f_phi", 100000);
 
       TH1D* h = new TH1D(TString::Format("h_orig_template_ip%i", ip), TString::Format("phi_exp = %f", phi_exp), template_nbins, template_min, template_max);
-      orig_templates.push_back({ ip, phi_exp, 0., h });
+      orig_templates.push_back(new PhiShiftTemplate(ip, h, phi_exp, 0.));
 
       auto f = [&h](const VertexPair& p) {
         h->Fill(p.first.d2d(p.second), p.weight);
@@ -585,8 +592,8 @@ namespace mfv {
       TDirectory* d = dtemp->mkdir(TString::Format("ip%i", ip));
       d->cd();
 
-      TH1D* h0 = orig_templates[ip  ].h;
-      TH1D* h1 = orig_templates[ip+1].h;
+      const TH1D* h0 = orig_templates[ip  ]->h;
+      const TH1D* h1 = orig_templates[ip+1]->h;
 
       for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
         TDirectory* dd = d->mkdir(TString::Format("ipi%i", ipi));
@@ -601,11 +608,11 @@ namespace mfv {
         for (int ish = 0; ish < n_shift; ++ish) {
           TH1D* hh = jmt::shift_hist(h, ish);
           hh->SetDirectory(dd);
-          const double phi_exp = orig_templates[ip].phi_exp + ipi * d_phi_exp / n_phi_interp;
+          const double phi_exp = static_cast<PhiShiftTemplate*>(orig_templates[ip])->phi_exp + ipi * d_phi_exp / n_phi_interp;
           const double shift = ish * hh->GetBinWidth(1);
           hh->SetTitle(TString::Format("phi_exp = %f shift = %f\n", phi_exp, shift));
 
-          templates.push_back({ iglb++, phi_exp, shift, hh });
+          templates.push_back(new PhiShiftTemplate(iglb++, hh, phi_exp, shift));
         }
 
         delete h;
@@ -613,6 +620,9 @@ namespace mfv {
       }
     }
     printf("\n");
+
+    for (Template* t : orig_templates)
+      delete t;
   }
 
   void One2TwoPhiShift::process(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
@@ -634,4 +644,9 @@ namespace mfv {
     fill_1v_histos();
     make_templates();
   }
+
+  One2TwoPhiShift::~One2TwoPhiShift() {
+    clear_templates();
+  }
 }
+

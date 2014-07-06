@@ -4,6 +4,7 @@
 #include <functional>
 #include "ConfigFromEnv.h"
 #include "SimpleObjects.h"
+#include "Templates.h"
 
 class TF1;
 class TFile;
@@ -49,13 +50,6 @@ namespace mfv {
     const VertexSimples* one_vertices;
     const VertexPairs* two_vertices;
 
-    struct Template {
-      int i;
-      double phi_exp;
-      double shift;
-      TH1D* h;
-    };
-    typedef std::vector<Template> Templates;
     Templates templates;
 
     TH1D* h_1v_g_phi;
@@ -149,6 +143,7 @@ namespace mfv {
     ////////////////////////////////////////////////////////////////////////////
 
     One2TwoPhiShift(const std::string& name_, TFile* f, TRandom* r);
+    ~One2TwoPhiShift();
 
     void book_trees();
     void book_toy_fcns_and_histos();
@@ -162,6 +157,7 @@ namespace mfv {
     double prob_1v_pair(const VertexSimple&, const VertexSimple&) const;
     void loop_over_1v_pairs(std::function<void(const VertexPair&)>);
     void fill_1v_histos();
+    void clear_templates();
     void make_templates();
     void process(int toy, const VertexSimples*, const VertexPairs*);
   };
