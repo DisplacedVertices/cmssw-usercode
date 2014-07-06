@@ -136,30 +136,30 @@ namespace mfv {
       TDirectory* div = dout->mkdir(iv);
       div->cd();
 
-      h_issig  [i] = new TH1D(TString::Format("h_%s_issig",   iv), "", 2, 0, 2);
-      h_issig_0[i] = new TH1D(TString::Format("h_%s_issig_0", iv), "", 2, 0, 2);
-      h_issig_1[i] = new TH1D(TString::Format("h_%s_issig_1", iv), "", 2, 0, 2);
+      h_issig  [i] = new TH1D("h_issig", "", 2, 0, 2);
+      h_issig_0[i] = new TH1D("h_issig_0", "", 2, 0, 2);
+      h_issig_1[i] = new TH1D("h_issig_1", "", 2, 0, 2);
 
-      h_xy             [i] = new TH2D(TString::Format("h_%s_xy"             , iv), "", 100, -0.05, 0.05, 100, 0.05, 0.05);
-      h_bsd2d          [i] = new TH1D(TString::Format("h_%s_bsd2d"          , iv), "", 100, 0, 0.1);
-      h_bsd2d_v_bsdz   [i] = new TH2D(TString::Format("h_%s_bsd2d_v_bsdz"   , iv), "", 200, -20, 20, 100, 0, 0.1);
-      h_bsdz           [i] = new TH1D(TString::Format("h_%s_bsdz"           , iv), "", 200, -20, 20);
-      h_bsd2d_0        [i] = new TH1D(TString::Format("h_%s_bsd2d_0"        , iv), "", 100, 0, 0.1);
-      h_bsd2d_v_bsdz_0 [i] = new TH2D(TString::Format("h_%s_bsd2d_v_bsdz_0" , iv), "", 200, -20, 20, 100, 0, 0.1);
-      h_bsdz_0         [i] = new TH1D(TString::Format("h_%s_bsdz_0"         , iv), "", 200, -20, 20);
+      h_xy             [i] = new TH2D("h_xy"             , "", 100, -0.05, 0.05, 100, 0.05, 0.05);
+      h_bsd2d          [i] = new TH1D("h_bsd2d"          , "", 100, 0, 0.1);
+      h_bsd2d_v_bsdz   [i] = new TH2D("h_bsd2d_v_bsdz"   , "", 200, -20, 20, 100, 0, 0.1);
+      h_bsdz           [i] = new TH1D("h_bsdz"           , "", 200, -20, 20);
+      h_bsd2d_0        [i] = new TH1D("h_bsd2d_0"        , "", 100, 0, 0.1);
+      h_bsd2d_v_bsdz_0 [i] = new TH2D("h_bsd2d_v_bsdz_0" , "", 200, -20, 20, 100, 0, 0.1);
+      h_bsdz_0         [i] = new TH1D("h_bsdz_0"         , "", 200, -20, 20);
 
       if (n_vt == n_vt_pairs)
         break;
 
-      h_bsd2d_1        [i] = new TH1D(TString::Format("h_%s_bsd2d_1"        , iv), "", 100, 0, 0.1);
-      h_bsd2d_v_bsdz_1 [i] = new TH2D(TString::Format("h_%s_bsd2d_v_bsdz_1" , iv), "", 200, -20, 20, 100, 0, 0.1);
-      h_bsdz_1         [i] = new TH1D(TString::Format("h_%s_bsdz_1"         , iv), "", 200, -20, 20);
+      h_bsd2d_1        [i] = new TH1D("h_bsd2d_1"        , "", 100, 0, 0.1);
+      h_bsd2d_v_bsdz_1 [i] = new TH2D("h_bsd2d_v_bsdz_1" , "", 200, -20, 20, 100, 0, 0.1);
+      h_bsdz_1         [i] = new TH1D("h_bsdz_1"         , "", 200, -20, 20);
 
-      h_ntracks  [i] = new TH2D(TString::Format("h_%s_ntracks"  , iv), "", 20, 0, 20, 20, 0, 20);
-      h_ntracks01[i] = new TH1D(TString::Format("h_%s_ntracks01", iv), "", 30, 0, 30);
-      h_d2d      [i] = new TH1D(TString::Format("h_%s_d2d"      , iv), "", template_nbins, template_min, template_max);
-      h_dz       [i] = new TH1D(TString::Format("h_%s_dz"       , iv), "", 20, -0.1, 0.1);
-      h_phi      [i] = new TH1D(TString::Format("h_%s_phi"      , iv), "", phi_nbins, phi_min, phi_max);
+      h_ntracks  [i] = new TH2D("h_ntracks"  , "", 20, 0, 20, 20, 0, 20);
+      h_ntracks01[i] = new TH1D("h_ntracks01", "", 30, 0, 30);
+      h_d2d      [i] = new TH1D("h_d2d"      , "", template_nbins, template_min, template_max);
+      h_dz       [i] = new TH1D("h_dz"       , "", 20, -0.1, 0.1);
+      h_phi      [i] = new TH1D("h_phi"      , "", phi_nbins, phi_min, phi_max);
     }
 
     dout->cd();
