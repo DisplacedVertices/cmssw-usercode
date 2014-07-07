@@ -183,6 +183,8 @@ def submit(name, tau0=None, mass=None):
             raise ValueError('tkex means nothing if not running reco')
         new_reco_py += '\nkeep_tracker_extras(process)\n'
 
+    new_py += 'process.dummyToMakeDiffHash = cms.PSet(submitName = cms.string("%s"))' % name
+
     open(pset_fn, 'wt').write(new_py)
     if run_reco:
         open(reco_pset_fn, 'wt').write(new_reco_py)
@@ -215,7 +217,7 @@ if run_ttbar:
     #for run in to_run:
     #    submit('ttbar_' + run)
 
-    for i in xrange(10):
+    for i in xrange(20):
         submit('ttbarhad_syststudies_%02i' % i)
 else:
     tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.][-2:]
