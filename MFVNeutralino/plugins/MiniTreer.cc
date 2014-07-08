@@ -19,6 +19,7 @@ public:
   const edm::InputTag event_src;
   const std::vector<double> force_bs;
   const edm::InputTag vertex_src;
+  const edm::InputTag weight_src;
 
   TH1F* h_nsv;
   TH1F* h_nsvsel;
@@ -30,7 +31,8 @@ public:
 MFVMiniTreer::MFVMiniTreer(const edm::ParameterSet& cfg)
   : event_src(cfg.getParameter<edm::InputTag>("event_src")),
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src"))
+    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    weight_src(cfg.getParameter<edm::InputTag>("weight_src"))
 {
   if (force_bs.size() && force_bs.size() != 3)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
@@ -59,6 +61,10 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(event_src, mevent);
+
+  edm::Handle<double> weight;
+  event.getByLabel(weight_src, weight);
+  nt.weight = *weight;
 
   nt.njets = mevent->njets();
   if (nt.njets > 50)
