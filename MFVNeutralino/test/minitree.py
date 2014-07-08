@@ -9,15 +9,17 @@ process.TFileService.fileName = 'minitree.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvAnalysisCuts.min_nvertex = 1
 
 process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      event_src = cms.InputTag('mfvEvent'),
                                      force_bs = cms.vdouble(),
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
+                                     weight_src = cms.InputTag('mfvWeight'),
                                      )
 
-process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
+process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
         
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
