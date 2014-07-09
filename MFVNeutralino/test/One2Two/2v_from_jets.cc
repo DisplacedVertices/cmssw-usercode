@@ -259,8 +259,10 @@ int main() {
   h_svpairdist_cut->Write();
 
   TCanvas* c_svjetdphi = new TCanvas("c_svjetdphi");
+  h_svjetdphi->SetName("'real'");
   h_svjetdphi->SetLineColor(kBlue);
   h_svjetdphi->Draw();
+  h_sv0jetdphi->SetName("'constructed'");
   h_sv0jetdphi->SetLineColor(kRed);
   h_sv0jetdphi->Draw("sames");
   c_svjetdphi->SetTickx();
@@ -268,7 +270,10 @@ int main() {
   c_svjetdphi->Write();
 
   TCanvas* c_svdist2d = new TCanvas("c_svdist2d");
+  h_svdist2d->SetName("'real'");
+  h_svdist2d->SetLineColor(kBlue);
   h_svdist2d->DrawNormalized();
+  h_svpairdist_cut->SetName("'constructed'");
   h_svpairdist_cut->SetLineColor(kRed);
   h_svpairdist_cut->DrawNormalized("sames");
   c_svdist2d->SetTickx();
@@ -276,7 +281,10 @@ int main() {
   c_svdist2d->Write();
 
   TCanvas* c_svpairdphi = new TCanvas("c_svpairdphi");
+  h_absdeltaphi01->SetName("'real'");
+  h_absdeltaphi01->SetLineColor(kBlue);
   h_absdeltaphi01->DrawNormalized();
+  h_svpairabsdphi->SetName("'constructed'");
   h_svpairabsdphi->SetLineColor(kRed);
   h_svpairabsdphi->DrawNormalized("sames");
   c_svpairdphi->SetTickx();
