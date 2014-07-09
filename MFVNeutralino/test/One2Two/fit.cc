@@ -126,7 +126,7 @@ double significance(int& istat0, int& istat1, int print_level=-1) {
   return sqrt(twolnL_sb - twolnL_b);
 }  
 
-void save(const TString& base_fn) {
+void save(const TString& base_fn, const char* opt=0) {
   if (batch)
     return;
 
@@ -135,12 +135,15 @@ void save(const TString& base_fn) {
     system("mkdir -p plots/o2tfit");
     mkdired = true;
   }
-  c->SaveAs(TString::Format("plots/o2tfit/%s.root", base_fn.Data()));
   c->SaveAs(TString::Format("plots/o2tfit/%s.png",  base_fn.Data()));
-  const int lg = c->GetLogy();
-  c->SetLogy();
-  c->SaveAs(TString::Format("plots/o2tfit/%s_log.png",  base_fn.Data()));
-  c->SetLogy(lg);
+  if (opt && strstr(opt, "root") != 0)
+    c->SaveAs(TString::Format("plots/o2tfit/%s.root", base_fn.Data()));
+  if (opt && strstr(opt, "log") != 0) {
+    const int lg = c->GetLogy();
+    c->SetLogy();
+    c->SaveAs(TString::Format("plots/o2tfit/%s_log.png",  base_fn.Data()));
+    c->SetLogy(lg);
+  }
 }
 
 void draw_likelihood(int iexp, double pars[4], const char* name) {
