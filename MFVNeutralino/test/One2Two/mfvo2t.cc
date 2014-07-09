@@ -42,22 +42,24 @@ int main() {
 
   TFile f_sig("signal_templates.root");
 
-  TH1D* h_sig = (TH1D*)f_sig.Get(TString::Format("h_sig_ntk%i_%s", tt->min_ntracks, tt->samples.get(tt->signal).name.c_str()))->Clone("h_sig_FIXME");
+  TH1D* h_sig = (TH1D*)f_sig.Get("h_sig_ntk5_mfv_neutralino_tau1000um_M0400"); //TString::Format("h_sig_ntk%i_%s", tt->min_ntracks, tt->samples.get(tt->signal).name.c_str()))->Clone("h_sig_FIXME");
   h_sig->SetDirectory(out_f);
 
   for (int itoy = 0; itoy < ntoys; ++itoy) {
     tt->throw_toy();
 
     mfv::Templates* templates = 0;
+    std::vector<double> true_pars;
     if (templates_phishift) {
       o_phishift->process(itoy, &tt->toy_1v, &tt->toy_2v);
       templates = &o_phishift->templates;
+      true_pars = std::vector<double>({ double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v), 0., 0. });
     }
     else if (templates_clearedjets) {
       jmt::vthrow("templates_clearedjets not implemented");
     }
 
-    fitter->fit(itoy, templates, h_sig, tt->toy_2v);
+    fitter->fit(itoy, templates, h_sig, tt->toy_2v, true_pars);
   }
 
   delete h_empty_sig_template;
