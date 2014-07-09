@@ -4,6 +4,7 @@
 class TH1D;
 
 namespace jmt {
+  void divide_by_bin_width(TH1D* h);
   void set_root_style();
   TH1D* shift_hist(const TH1D* h, const int shift);
 }

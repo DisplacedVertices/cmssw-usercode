@@ -7,6 +7,17 @@
 #include "TStyle.h"
 
 namespace jmt {
+  void divide_by_bin_width(TH1D* h) {
+    const int nbins = h->GetNbinsX();
+    for (int ibin = 1; ibin <= nbins; ++ibin) {
+      const double width = h->GetBinWidth(ibin);
+      const double val = h->GetBinContent(ibin);
+      const double err = h->GetBinError  (ibin);
+      h->SetBinContent(ibin, val/width);
+      h->SetBinError  (ibin, err/width);
+    }
+  }
+
   void set_root_style() {
     gROOT->SetStyle("Plain");
     gStyle->SetPalette(1);
