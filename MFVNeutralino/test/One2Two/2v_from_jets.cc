@@ -17,6 +17,7 @@ const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV1
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
 const int n1v = 11406 + 101 + 4425 + 1458;
 float bs2ddist[n1v];
+float vtx_phis[n1v];
 unsigned short njets[n1v];
 float jet_pts[n1v][50];
 float jet_phis[n1v][50];
@@ -75,6 +76,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
   mfv::read_from_tree(t, nt);
 
   float sbs2ddist[sn1v];
+  float svtx_phis[sn1v];
   unsigned short snjets[sn1v];
   float sjet_pts[sn1v][50];
   float sjet_phis[sn1v][50];
@@ -88,6 +90,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
     if (nt.nvtx == 2) continue;
     if (i1v < sn1v) {
       sbs2ddist[i1v] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
+      svtx_phis[i1v] = atan2(nt.y0, nt.x0);
       snjets[i1v] = nt.njets;
       for (int i = 0; i < nt.njets; ++i) {
         sjet_pts[i1v][i] = nt.jet_pt[i];
@@ -98,6 +101,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
       if (gRandom->Rndm() > float(sn1v) / i1v) continue;
       int r = gRandom->Integer(sn1v);
       sbs2ddist[r] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
+      svtx_phis[r] = atan2(nt.y0, nt.x0);
       snjets[r] = nt.njets;
       for (int i = 0; i < nt.njets; ++i) {
         sjet_pts[r][i] = nt.jet_pt[i];
@@ -114,6 +118,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
 
   for (int i = 0; i < sn1v; ++i) {
     bs2ddist[sn1vs+i] = sbs2ddist[i];
+    vtx_phis[sn1vs+i] = svtx_phis[i];
     njets[sn1vs+i] = snjets[i];
     for (int j = 0; j < snjets[i]; ++j) {
       jet_pts[sn1vs+i][j] = sjet_pts[i][j];
@@ -175,6 +180,7 @@ int main() {
 
   TH1F* h_sv0phi = new TH1F("h_sv0phi", ";constructed SV0 #phi (rad);events/.126", 50, -3.15, 3.15);
   TH1F* h_sv1phi = new TH1F("h_sv1phi", ";constructed SV1 #phi (rad);events/.126", 50, -3.15, 3.15);
+  TH1F* h_svjetdphi = new TH1F("h_svjetdphi", ";#Delta#phi(vertex position, jet momentum);arb. units", 50, -3.15, 3.15);
   TH1F* h_sv0jetdphi = new TH1F("h_sv0jetdphi", ";constructed #Delta#phi(SV0, jets) (rad);jets/.126", 50, -3.15, 3.15);
   TH1F* h_sv1jetdphi = new TH1F("h_sv1jetdphi", ";constructed #Delta#phi(SV1, jets) (rad);jets/.126", 50, -3.15, 3.15);
   TH1F* h_svpairdphi = new TH1F("h_svpairdphi", ";constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
@@ -198,6 +204,7 @@ int main() {
       for (int k = j+1; k < njets[i]; ++k) {
         h_jetpairdphi->Fill(TVector2::Phi_mpi_pi(jet_phis[i][j] - jet_phis[i][k]), w);
       }
+      h_svjetdphi->Fill(TVector2::Phi_mpi_pi(vtx_phis[i] - jet_phis[i][j]), w);
     }
     if (njets[i] > 0) {
       double vtx0_phi = throw_phi(i);
@@ -239,6 +246,7 @@ int main() {
 
   h_sv0phi->Write();
   h_sv1phi->Write();
+  h_svjetdphi->Write();
   h_sv0jetdphi->Write();
   h_sv1jetdphi->Write();
   h_svpairdphi->Write();
@@ -249,6 +257,15 @@ int main() {
   h_sv1bs2ddist->Write();
   h_svpairdist->Write();
   h_svpairdist_cut->Write();
+
+  TCanvas* c_svjetdphi = new TCanvas("c_svjetdphi");
+  h_svjetdphi->SetLineColor(kBlue);
+  h_svjetdphi->Draw();
+  h_sv0jetdphi->SetLineColor(kRed);
+  h_sv0jetdphi->Draw("sames");
+  c_svjetdphi->SetTickx();
+  c_svjetdphi->SetTicky();
+  c_svjetdphi->Write();
 
   TCanvas* c_svdist2d = new TCanvas("c_svdist2d");
   h_svdist2d->DrawNormalized();
