@@ -35,12 +35,20 @@ namespace mfv {
     int toy;
     Templates* bkg_templates;
 
+    std::vector<double> true_pars;
+
     double glb_scan_maxtwolnL;
     std::vector<double> glb_scan_max_pars;
     std::vector<double> glb_scan_max_pars_errs;
-    double glb_scanmin_maxtwolnL;
-    std::vector<double> glb_scanmin_max_pars;
-    std::vector<double> glb_scanmin_max_pars_errs;
+
+    double glb_scanmin_sb_maxtwolnL;
+    std::vector<double> glb_scanmin_sb_max_pars;
+    std::vector<double> glb_scanmin_sb_max_pars_errs;
+    Template* glb_scanmin_sb_template;
+    double glb_scanmin_b_maxtwolnL;
+    std::vector<double> glb_scanmin_b_max_pars;
+    std::vector<double> glb_scanmin_b_max_pars_errs;
+    Template* glb_scanmin_b_template;
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +68,7 @@ namespace mfv {
     void fit_globals_ok();
     bool scan_likelihood();
     bool scanmin_likelihood(bool bkg_only);
-    void fit(int toy_, Templates* bkg_templates, TH1D* sig_template, const VertexPairs& v2v);
+    void fit(int toy_, Templates* bkg_templates, TH1D* sig_template, const VertexPairs& v2v, const std::vector<double>& true_pars_);
   };
 }
 

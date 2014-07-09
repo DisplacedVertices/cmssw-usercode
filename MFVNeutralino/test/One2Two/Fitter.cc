@@ -2,12 +2,14 @@
 
 #include <cmath>
 
+#include "TCanvas.h"
 #include "TFile.h"
 #include "TH2.h"
 #include "TMinuit.h"
 #include "TRandom3.h"
 #include "TTree.h"
 
+#include "ROOTTools.h"
 #include "Random.h"
 
 namespace mfv {
@@ -72,6 +74,16 @@ namespace mfv {
     t_fit_info = new TTree("t_fit_info", "");
     t_fit_info->Branch("seed", const_cast<int*>(&seed), "seed/I");
     t_fit_info->Branch("toy", &toy, "toy/I");
+    t_fit_info->Branch("true_pars", &true_pars);
+    t_fit_info->Branch("glb_scan_maxtwolnL", &glb_scan_maxtwolnL, "glb_scan_maxtwolnL/D");
+    t_fit_info->Branch("glb_scan_max_pars", &glb_scan_max_pars);
+    t_fit_info->Branch("glb_scan_max_pars_errs", &glb_scan_max_pars_errs);
+    t_fit_info->Branch("glb_scanmin_sb_maxtwolnL", &glb_scanmin_sb_maxtwolnL, "glb_scanmin_sb_maxtwolnL/D");
+    t_fit_info->Branch("glb_scanmin_sb_max_pars", &glb_scanmin_sb_max_pars);
+    t_fit_info->Branch("glb_scanmin_sb_max_pars_errs", &glb_scanmin_sb_max_pars_errs);
+    t_fit_info->Branch("glb_scanmin_b_maxtwolnL", &glb_scanmin_b_maxtwolnL, "glb_scanmin_b_maxtwolnL/D");
+    t_fit_info->Branch("glb_scanmin_b_max_pars", &glb_scanmin_b_max_pars);
+    t_fit_info->Branch("glb_scanmin_b_max_pars_errs", &glb_scanmin_b_max_pars_errs);
   }    
 
   std::vector<double> Fitter::binning() const {
@@ -193,13 +205,32 @@ namespace mfv {
     std::vector<int> istats;
     bool all_ok = true;
 
-    glb_scanmin_maxtwolnL = -1e300;
-    glb_scanmin_max_pars.assign(5, -1);
-    glb_scanmin_max_pars_errs.assign(5, -1);
+    double* glb_scanmin_maxtwolnL = 0;
+    std::vector<double>* glb_scanmin_max_pars = 0;
+    std::vector<double>* glb_scanmin_max_pars_errs = 0;
+    Template** glb_scanmin_template = 0;
+
+    if (bkg_only) {
+      glb_scanmin_maxtwolnL = &glb_scanmin_b_maxtwolnL;
+      glb_scanmin_max_pars = &glb_scanmin_b_max_pars;
+      glb_scanmin_max_pars_errs = &glb_scanmin_b_max_pars_errs;
+      glb_scanmin_template = &glb_scanmin_b_template;
+    }
+    else {
+      glb_scanmin_maxtwolnL = &glb_scanmin_sb_maxtwolnL;
+      glb_scanmin_max_pars = &glb_scanmin_sb_max_pars;
+      glb_scanmin_max_pars_errs = &glb_scanmin_sb_max_pars_errs;
+      glb_scanmin_template = &glb_scanmin_sb_template;
+    }
+
+    *glb_scanmin_maxtwolnL = -1e300;
+    glb_scanmin_max_pars->assign(5, -1);
+    glb_scanmin_max_pars_errs->assign(5, -1);
+    *glb_scanmin_template = 0;
 
     printf("scanminning (bkg_only = %i): ", bkg_only);
 
-    TDirectory* d = dtoy->mkdir("scanmin_likelihood");
+    TDirectory* d = dtoy->mkdir(TString::Format("scanmin_likelihood_%s", bkg_only ? "b" : "sb"));
     d->cd();
 
     for (size_t i_template = 0, i_template_e = bkg_templates->size(); i_template < i_template_e; ++i_template) {
@@ -210,8 +241,8 @@ namespace mfv {
       m->SetPrintLevel(print_level);
       m->SetFCN(fit::minfcn);
       int ierr;
-      m->mnparm(0, "mu_sig", 0 , 0.1, 0, 0, ierr);
-      m->mnparm(1, "mu_bkg", 40, 0.1, 0, 0, ierr);
+      m->mnparm(0, "mu_sig", 0 , 0.1, 0, 1e9, ierr);
+      m->mnparm(1, "mu_bkg", 40, 0.1, 0, 1e9, ierr);
 
       if (bkg_only)
         m->FixParameter(0);
@@ -229,15 +260,16 @@ namespace mfv {
 
       printf("scanmin_likelihood: %s  istat: %i   maxtwolnL: %e   mu_sig: %f +- %f  mu_bkg: %f +- %f\n", bkg_template->title().c_str(), istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
 
-      if (maxtwolnL > glb_scanmin_maxtwolnL) {
+      if (maxtwolnL > *glb_scanmin_maxtwolnL) {
         printf("  ^ new global max!\n");
-        glb_scanmin_maxtwolnL = maxtwolnL;
-        glb_scanmin_max_pars[0] = mu_sig;
-        glb_scanmin_max_pars[1] = mu_bkg;
-        glb_scanmin_max_pars_errs[0] = err_mu_sig;
-        glb_scanmin_max_pars_errs[1] = err_mu_bkg;
+        *glb_scanmin_maxtwolnL = maxtwolnL;
+        (*glb_scanmin_max_pars)[0] = mu_sig;
+        (*glb_scanmin_max_pars)[1] = mu_bkg;
+        (*glb_scanmin_max_pars_errs)[0] = err_mu_sig;
+        (*glb_scanmin_max_pars_errs)[1] = err_mu_bkg;
         for (int ipar = 2; ipar < npars; ++ipar)
-          glb_scanmin_max_pars[ipar] = bkg_template->par(ipar-2); 
+          (*glb_scanmin_max_pars)[ipar] = bkg_template->par(ipar-2); 
+        *glb_scanmin_template = bkg_template;
       }
 
       istats.push_back(istat);
@@ -250,13 +282,13 @@ namespace mfv {
     return all_ok;
   }
 
-  void Fitter::fit(int toy_, Templates* bkg_templates_, TH1D* sig_template, const VertexPairs& v2v) {
+  void Fitter::fit(int toy_, Templates* bkg_templates_, TH1D* sig_template, const VertexPairs& v2v, const std::vector<double>& true_pars_) {
     toy = toy_;
+    true_pars = true_pars_;
 
     dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, toy));
-    TDirectory* d = dtoy->mkdir("finalized_templates");
-    d->cd();
 
+    dtoy->mkdir("finalized_templates")->cd();
     bkg_templates = bkg_templates_;
     for (Template* t : *bkg_templates)
       t->h_final = finalize_template(t->h);
@@ -269,6 +301,63 @@ namespace mfv {
       fit::h_data->Fill(p.d2d());
 
     scan_likelihood();
+
     scanmin_likelihood(false);
+    scanmin_likelihood(true);
+
+    dtoy->mkdir("fit_results")->cd();
+    for (int sb = 1; sb >= 0; --sb) {
+      const char* sb_or_b = sb ? "sb" : "b";
+      TCanvas* c = new TCanvas(TString::Format("c_%s_fit", sb_or_b));
+      Template* bkg_template = sb ? glb_scanmin_sb_template : glb_scanmin_b_template;
+      TH1D* h_bkg_fit = (TH1D*)bkg_template->h_final->Clone(TString::Format("h_bkg_%s_fit", sb_or_b));
+      TH1D* h_sig_fit = (TH1D*)fit::h_sig->CloneTString::Format("h_sig_%s_fit", sb_or_b));
+      TH1D* h_data_fit = (TH1D*)fit::h_data->CloneTString::Format("h_data_%s_fit", sb_or_b));
+      for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
+        h->SetLineWidth(2);
+        jmt::divide_by_bin_width(h);
+      }
+      h_sig_fit->SetLineColor(kRed);
+      h_sig_fit->SetFillStyle(3004);
+      h_bkg_fit->SetLineColor(kBlue);
+      h_bkg_fit->SetFillStyle(3005);
+      double mu_sig, err_mu_sig, mu_bkg, err_mu_bkg;
+      if (sb) {
+        mu_sig = glb_scanmin_sb_max_pars[0];
+        mu_bkg = glb_scanmin_sb_max_pars[1];
+        err_mu_sig = glb_scanmin_sb_max_pars_errs[0];
+        err_mu_bkg = glb_scanmin_sb_max_pars_errs[1];
+      }
+      else {
+        mu_sig = glb_scanmin_b_max_pars[0];
+        mu_bkg = glb_scanmin_b_max_pars[1];
+        err_mu_sig = glb_scanmin_b_max_pars_errs[0];
+        err_mu_bkg = glb_scanmin_b_max_pars_errs[1];
+      }
+
+      h_sig_fit->Scale(mu_sig);
+      h_bkg_fit->Scale(mu_bkg);
+
+      TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone("h_sum_fit");
+      h_sum_fit->SetLineColor(kMagenta);
+      h_sum_fit->Add(h_bkg_fit);
+      for (TH1D* h : {h_sum_fit, h_data_fit})
+        h->SetTitle(TString::Format("best %s fit with #mu_{sig} = %.2f #pm %.2f, #mu_{bkg} = %.2f #pm %.2f, %s;svdist2d (cm);events/bin width", (sb ? "sig + bkg" : "b only"), mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, bkg_template->title().c_str()));
+
+      if (h_data_fit->GetMaximum() > h_sum_fit->GetMaximum()) {
+        h_data_fit->Draw("e");
+        h_sum_fit->Draw("hist same");
+      }
+      else {
+        h_sum_fit->Draw("hist");
+        h_data_fit->Draw("same e");
+      }
+      h_sig_fit->Draw("same hist");
+      h_bkg_fit->Draw("same hist");
+      c->Write();
+      delete c;
+    }
+
+    t_fit_info->Fill();
   }
 }
