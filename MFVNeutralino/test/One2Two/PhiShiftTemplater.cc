@@ -36,8 +36,7 @@ namespace mfv {
   const char* PhiShiftTemplater::vt_names[PhiShiftTemplater::n_vt] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb", "1vsingle" };
 
   PhiShiftTemplater::PhiShiftTemplater(const std::string& name_, TFile* f, TRandom* r)
-    : name (name_.size() ? " " + name_ : ""),
-      uname(name_.size() ? "_" + name_ : ""),
+    : Templater(name_, f, r),
 
       env("mfvo2t_phishift" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.05)),
@@ -57,26 +56,12 @@ namespace mfv {
       find_f_phi(env.get_bool("find_f_phi", true)),
       find_f_dz(env.get_bool("find_f_dz", true)),
       find_f_phi_bkgonly(env.get_bool("find_f_phi_bkgonly", true)),
-      find_f_dz_bkgonly(env.get_bool("find_f_dz_bkgonly", false)),
-
-      fout(f),
-      dout(f->mkdir(TString::Format("PhiShiftTemplater%s", uname.c_str()))),
-      dtoy(0),
-      rand(r),
-      seed(r->GetSeed() - jmt::seed_base),
-
-      one_vertices(0),
-      two_vertices(0),
-
-      gdpmax(0),
-      fdpmax(0),
-      Mdp(0),
-      gdzmax(0),
-      fdzmax(0),
-      Mdz(0)
+      find_f_dz_bkgonly(env.get_bool("find_f_dz_bkgonly", false))
   {
     if (sampling_type != 2)
       jmt::vthrow("sampling_type must be 2");
+
+    dout = f->mkdir(TString::Format("PhiShiftTemplater%s", uname.c_str()));
 
     printf("PhiShiftTemplater%s config:\n", name.c_str());
     printf("seed: %i\n", seed);
@@ -551,12 +536,6 @@ namespace mfv {
     loop_over_1v_pairs(f);
   }
 
-  void PhiShiftTemplater::clear_templates() {
-    for (Template* t : templates)
-      delete t;
-    templates.clear();
-  }
-
   void PhiShiftTemplater::make_templates() {
     printf("PhiShiftTemplater%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
 
@@ -586,7 +565,7 @@ namespace mfv {
       loop_over_1v_pairs(f);
     }
 
-    printf("  morphing templates: ");
+    printf("  interpolating + shifting templates: ");
     int iglb = 0;
     for (int ip = 0, ipe = int(orig_templates.size()); ip < ipe; ++ip) {
       TDirectory* d = dtemp->mkdir(TString::Format("ip%i", ip));
@@ -636,12 +615,7 @@ namespace mfv {
       delete t;
   }
 
-  void PhiShiftTemplater::process(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
-    // how about toy negative if data?
-    toy = toy_;
-    one_vertices = toy_1v;
-    two_vertices = toy_2v;
-
+  void PhiShiftTemplater::process_imp() {
     printf("PhiShiftTemplater%s: run toy #%i\n", name.c_str(), toy);
     const int N1v = int(one_vertices->size());
     const int N1vpairs = N1v*(N1v-1)/2;
@@ -656,9 +630,5 @@ namespace mfv {
     t_fit_info->Fill();
     fill_1v_histos();
     make_templates();
-  }
-
-  PhiShiftTemplater::~PhiShiftTemplater() {
-    clear_templates();
   }
 }

@@ -3,8 +3,7 @@
 
 #include <functional>
 #include "ConfigFromEnv.h"
-#include "SimpleObjects.h"
-#include "Templates.h"
+#include "Templater.h"
 
 class TF1;
 class TFile;
@@ -14,10 +13,7 @@ class TRandom;
 class TTree;
 
 namespace mfv {
-  struct PhiShiftTemplater {
-    const std::string name;
-    const std::string uname;
-
+  struct PhiShiftTemplater : public Templater {
     jmt::ConfigFromEnv env;
     const double d2d_cut;
     const int sampling_type;
@@ -38,23 +34,11 @@ namespace mfv {
     const bool find_f_phi_bkgonly;
     const bool find_f_dz_bkgonly;
 
-    TFile* fout;
-    TDirectory* dout;
-    TDirectory* dtoy;
-    TRandom* rand;
-    const int seed;
-
     ////////////////////////////////////////////////////////////////////////////
-
-    int toy;
-    const VertexSimples* one_vertices;
-    const VertexPairs* two_vertices;
-
-    Templates templates;
 
     double phi_exp_bkgonly;
     double shift_means;
-    std::vector<double> true_pars() const { return std::vector<double>({phi_exp_bkgonly, shift_means}); }
+    virtual std::vector<double> true_pars() const { return std::vector<double>({phi_exp_bkgonly, shift_means}); }
 
     TH1D* h_1v_g_phi;
     TH1D* h_1v_g_dz;
@@ -161,9 +145,8 @@ namespace mfv {
     double prob_1v_pair(const VertexSimple&, const VertexSimple&) const;
     void loop_over_1v_pairs(std::function<void(const VertexPair&)>);
     void fill_1v_histos();
-    void clear_templates();
     void make_templates();
-    void process(int toy, const VertexSimples*, const VertexPairs*);
+    virtual void process_imp();
   };
 }
 

@@ -7,6 +7,7 @@
 
 #include "ToyThrower.h"
 #include "Templates.h"
+#include "ClearedJetsTemplater.h"
 #include "PhiShiftTemplater.h"
 #include "Fitter.h"
 
@@ -34,29 +35,28 @@ int main() {
   TFile* out_f = new TFile(out_fn.c_str(), "recreate");
   TRandom3* rand = new TRandom3(jmt::seed_base + seed);
   mfv::ToyThrower* tt = new mfv::ToyThrower("", tree_path, out_f, rand);
-  mfv::PhiShiftTemplater* ter_phishift = new mfv::PhiShiftTemplater("", out_f, rand);
+  mfv::Templater* ter = 0;
+  if (templates_phishift)
+    ter = new mfv::PhiShiftTemplater("", out_f, rand);
+  else if (templates_clearedjets) {
+    ter = new mfv::ClearedJetsTemplater("", out_f, rand);
+    
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);
 
   TFile f_sig("signal_templates.root");
-  printf("*** signal template is fixed to h_sig_ntk5_mfv_neutralino_tau1000um_M0400 ***\n");
+  printf("\n\n\n\n\n\n\n*** signal template is fixed to h_sig_ntk5_mfv_neutralino_tau1000um_M0400 ***\n\n\n\n\n\n\n");
   TH1D* h_sig = (TH1D*)f_sig.Get("h_sig_ntk5_mfv_neutralino_tau1000um_M0400"); //TString::Format("h_sig_ntk%i_%s", tt->min_ntracks, tt->samples.get(tt->signal).name.c_str()))->Clone("h_sig_FIXME");
   h_sig->SetDirectory(out_f);
 
   for (int itoy = 0; itoy < ntoys; ++itoy) {
     tt->throw_toy();
 
-    mfv::Templates* templates = 0;
-    std::vector<double> true_pars;
-    if (templates_phishift) {
-      ter_phishift->process(itoy, &tt->toy_1v, &tt->toy_2v);
-      templates = &ter_phishift->templates;
-      true_pars = std::vector<double>({ double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v), ter_phishift->phi_exp_bkgonly, ter_phishift->shift_means });
-    }
-    else if (templates_clearedjets) {
-      jmt::vthrow("templates_clearedjets not implemented");
-    }
+    std::vector<double> true_pars = { double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v) };
+    ter->process(itoy, &tt->toy_1v, &tt->toy_2v);
+    for (double tp : ter->true_pars())
+      true_pars.push_back(tp);
 
-    fitter->fit(itoy, templates, h_sig, tt->toy_2v, true_pars);
+    fitter->fit(itoy, &ter->templates, h_sig, tt->toy_2v, true_pars);
   }
 
   out_f->Write();
