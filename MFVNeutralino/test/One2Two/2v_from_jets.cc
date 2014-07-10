@@ -11,7 +11,7 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_Njets";
+const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_0";
 
 //predicted number of one-vertex-only events in 20/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
