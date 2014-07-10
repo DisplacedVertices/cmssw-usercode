@@ -51,6 +51,9 @@ namespace mfv {
     const VertexPairs* two_vertices;
 
     Templates templates;
+    double phi_exp_bkgonly;
+    double shift_means;
+
 
     TH1D* h_1v_g_phi;
     TH1D* h_1v_g_dz;

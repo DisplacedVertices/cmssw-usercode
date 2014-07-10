@@ -56,7 +56,7 @@ namespace mfv {
       find_g_dz(env.get_bool("find_g_dz", true)),
       find_f_phi(env.get_bool("find_f_phi", true)),
       find_f_dz(env.get_bool("find_f_dz", true)),
-      find_f_phi_bkgonly(env.get_bool("find_f_phi_bkgonly", false)),
+      find_f_phi_bkgonly(env.get_bool("find_f_phi_bkgonly", true)),
       find_f_dz_bkgonly(env.get_bool("find_f_dz_bkgonly", false)),
 
       fout(f),
@@ -588,24 +588,29 @@ namespace mfv {
 
     printf("  morphing templates: ");
     int iglb = 0;
-    for (int ip = 0, ipe = int(orig_templates.size()) - 1; ip < ipe; ++ip) {
+    for (int ip = 0, ipe = int(orig_templates.size()); ip < ipe; ++ip) {
       TDirectory* d = dtemp->mkdir(TString::Format("ip%i", ip));
       d->cd();
 
       TH1D* h0 = orig_templates[ip  ]->h;
-      TH1D* h1 = orig_templates[ip+1]->h;
+      TH1D* h1 = ip < ipe-1 ? orig_templates[ip+1]->h : 0;
       h0->Scale(1./h0->Integral());
-      h1->Scale(1./h1->Integral());
+      if (h1) h1->Scale(1./h1->Integral());
 
       for (int ipi = 0; ipi < n_phi_interp; ++ipi) {
         TDirectory* dd = d->mkdir(TString::Format("ipi%i", ipi));
         dd->cd();
 
-        TH1D* h = (TH1D*)h0->Clone(TString::Format("h_template_ip%i_ipi%i", ip, ipi));
-        h->SetDirectory(0);
-        double f1 = double(ipi)/n_phi_interp;
-        h->Scale(1 - f1);
-        h->Add(h1, f1);
+        TH1D* h = 0;
+        if (h1) {
+          h = (TH1D*)h0->Clone(TString::Format("h_template_ip%i_ipi%i", ip, ipi));
+          h->SetDirectory(0);
+          double f1 = double(ipi)/n_phi_interp;
+          h->Scale(1 - f1);
+          h->Add(h1, f1);
+        }
+        else
+          h = h0;
 
         for (int ish = 0; ish < n_shift; ++ish) {
           TH1D* hh = jmt::shift_hist(h, ish);
@@ -617,8 +622,12 @@ namespace mfv {
           templates.push_back(new PhiShiftTemplate(iglb++, hh, phi_exp, shift));
         }
 
-        delete h;
+        if (h1)
+          delete h;
         printf("."); fflush(stdout);
+
+        if (h1 == 0)
+          break;
       }
     }
     printf("\n");
@@ -642,6 +651,8 @@ namespace mfv {
     fill_2v_histos();
     fit_envelopes();
     fit_fs_in_sideband();
+    phi_exp_bkgonly = f_phi->GetParameter(1);
+    shift_means = h_d2d[vt_2vsbbkg]->GetMean() - h_d2d[vt_1vsb]->GetMean();
     t_fit_info->Fill();
     fill_1v_histos();
     make_templates();
