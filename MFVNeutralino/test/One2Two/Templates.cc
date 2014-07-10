@@ -12,6 +12,8 @@ namespace mfv {
       phi_exp(phi_exp_),
       shift(shift_)
   {
+    pars.push_back(phi_exp);
+    pars.push_back(shift);
   }
 
   double PhiShiftTemplate::chi2() const {

@@ -20,6 +20,7 @@ namespace mfv {
     virtual double par(size_t) const { return 0.; }
 
     static const int max_npars;
+    std::vector<double> pars;
   };
 
   //////////////////////////////////////////////////////////////////////////////
