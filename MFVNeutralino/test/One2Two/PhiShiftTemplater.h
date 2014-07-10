@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_One2Two_One2TwoPhiShift_h
-#define JMTucker_MFVNeutralino_One2Two_One2TwoPhiShift_h
+#ifndef JMTucker_MFVNeutralino_One2Two_PhiShiftTemplater_h
+#define JMTucker_MFVNeutralino_One2Two_PhiShiftTemplater_h
 
 #include <functional>
 #include "ConfigFromEnv.h"
@@ -14,7 +14,7 @@ class TRandom;
 class TTree;
 
 namespace mfv {
-  struct One2TwoPhiShift {
+  struct PhiShiftTemplater {
     const std::string name;
     const std::string uname;
 
@@ -51,9 +51,10 @@ namespace mfv {
     const VertexPairs* two_vertices;
 
     Templates templates;
+
     double phi_exp_bkgonly;
     double shift_means;
-
+    std::vector<double> true_pars() const { return std::vector<double>({phi_exp_bkgonly, shift_means}); }
 
     TH1D* h_1v_g_phi;
     TH1D* h_1v_g_dz;
@@ -145,8 +146,8 @@ namespace mfv {
     
     ////////////////////////////////////////////////////////////////////////////
 
-    One2TwoPhiShift(const std::string& name_, TFile* f, TRandom* r);
-    ~One2TwoPhiShift();
+    PhiShiftTemplater(const std::string& name_, TFile* f, TRandom* r);
+    ~PhiShiftTemplater();
 
     void book_trees();
     void book_toy_fcns_and_histos();

@@ -7,7 +7,7 @@
 
 #include "ToyThrower.h"
 #include "Templates.h"
-#include "One2TwoPhiShift.h"
+#include "PhiShiftTemplater.h"
 #include "Fitter.h"
 
 int main() {
@@ -34,7 +34,7 @@ int main() {
   TFile* out_f = new TFile(out_fn.c_str(), "recreate");
   TRandom3* rand = new TRandom3(jmt::seed_base + seed);
   mfv::ToyThrower* tt = new mfv::ToyThrower("", tree_path, out_f, rand);
-  mfv::One2TwoPhiShift* o_phishift = new mfv::One2TwoPhiShift("", out_f, rand);
+  mfv::PhiShiftTemplater* ter_phishift = new mfv::PhiShiftTemplater("", out_f, rand);
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);
 
   TFile f_sig("signal_templates.root");
@@ -48,9 +48,9 @@ int main() {
     mfv::Templates* templates = 0;
     std::vector<double> true_pars;
     if (templates_phishift) {
-      o_phishift->process(itoy, &tt->toy_1v, &tt->toy_2v);
-      templates = &o_phishift->templates;
-      true_pars = std::vector<double>({ double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v), o_phishift->phi_exp_bkgonly, o_phishift->shift_means });
+      ter_phishift->process(itoy, &tt->toy_1v, &tt->toy_2v);
+      templates = &ter_phishift->templates;
+      true_pars = std::vector<double>({ double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v), ter_phishift->phi_exp_bkgonly, ter_phishift->shift_means });
     }
     else if (templates_clearedjets) {
       jmt::vthrow("templates_clearedjets not implemented");

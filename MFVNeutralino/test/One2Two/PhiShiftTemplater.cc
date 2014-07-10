@@ -1,4 +1,4 @@
-#include "One2TwoPhiShift.h"
+#include "PhiShiftTemplater.h"
 #include "TF1.h"
 #include "TFile.h"
 #include "TFitResult.h"
@@ -33,9 +33,9 @@ namespace mfv {
     return rand->Rndm() < accept_prob(f, g, M);
   }
 
-  const char* One2TwoPhiShift::vt_names[One2TwoPhiShift::n_vt] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb", "1vsingle" };
+  const char* PhiShiftTemplater::vt_names[PhiShiftTemplater::n_vt] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb", "1vsingle" };
 
-  One2TwoPhiShift::One2TwoPhiShift(const std::string& name_, TFile* f, TRandom* r)
+  PhiShiftTemplater::PhiShiftTemplater(const std::string& name_, TFile* f, TRandom* r)
     : name (name_.size() ? " " + name_ : ""),
       uname(name_.size() ? "_" + name_ : ""),
 
@@ -60,7 +60,7 @@ namespace mfv {
       find_f_dz_bkgonly(env.get_bool("find_f_dz_bkgonly", false)),
 
       fout(f),
-      dout(f->mkdir(TString::Format("One2TwoPhiShift%s", uname.c_str()))),
+      dout(f->mkdir(TString::Format("PhiShiftTemplater%s", uname.c_str()))),
       dtoy(0),
       rand(r),
       seed(r->GetSeed() - jmt::seed_base),
@@ -78,7 +78,7 @@ namespace mfv {
     if (sampling_type != 2)
       jmt::vthrow("sampling_type must be 2");
 
-    printf("One2TwoPhiShift%s config:\n", name.c_str());
+    printf("PhiShiftTemplater%s config:\n", name.c_str());
     printf("seed: %i\n", seed);
     printf("d2d_cut: %f\n", d2d_cut);
     printf("sampling_type: %i\n", sampling_type);
@@ -94,7 +94,7 @@ namespace mfv {
     book_trees();
   }
 
-  void One2TwoPhiShift::book_trees() {
+  void PhiShiftTemplater::book_trees() {
     dout->cd();
 
     TTree* t_config = new TTree("t_config", "");
@@ -167,7 +167,7 @@ namespace mfv {
     t_fit_info->Branch("f_dz_fit_ndf", &b_f_dz_fit_ndf, "f_dz_fit_ndf/F");
   }    
 
-  void One2TwoPhiShift::book_toy_fcns_and_histos() {
+  void PhiShiftTemplater::book_toy_fcns_and_histos() {
     dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, toy));
     dtoy->cd();
 
@@ -237,11 +237,11 @@ namespace mfv {
     }
   }
 
-  bool One2TwoPhiShift::is_sideband(const VertexSimple& v0, const VertexSimple& v1) const {
+  bool PhiShiftTemplater::is_sideband(const VertexSimple& v0, const VertexSimple& v1) const {
     return v0.d2d(v1) < d2d_cut;
   }
 
-  void One2TwoPhiShift::fill_2v(const int ih, const double w, const VertexSimple& v0, const VertexSimple& v1) {
+  void PhiShiftTemplater::fill_2v(const int ih, const double w, const VertexSimple& v0, const VertexSimple& v1) {
     if ((ih == vt_2vsb || ih == vt_2vsbbkg || ih == vt_2vsbsig || ih == vt_1vsb) && !is_sideband(v0, v1))
       return;
 
@@ -278,21 +278,21 @@ namespace mfv {
     h_phi[ih]->Fill(use_abs_phi ? fabs(p) : p, w);
   }
 
-  void One2TwoPhiShift::fill_2v_histos() {
+  void PhiShiftTemplater::fill_2v_histos() {
     if (two_vertices == 0)
-      jmt::vthrow("One2TwoPhiShift::fill_2v_histos: must set vertices before using them");
+      jmt::vthrow("PhiShiftTemplater::fill_2v_histos: must set vertices before using them");
 
-    printf("One2TwoPhiShift%s: fill 2v histos\n", name.c_str()); fflush(stdout);
+    printf("PhiShiftTemplater%s: fill 2v histos\n", name.c_str()); fflush(stdout);
     for (const VertexPair& p : *two_vertices)
       for (int ih = 0; ih < n_vt_2v; ++ih)
         fill_2v(ih, 1, p.first, p.second);
   }
 
-  void One2TwoPhiShift::fit_envelopes() {
+  void PhiShiftTemplater::fit_envelopes() {
     if (one_vertices == 0)
-      jmt::vthrow("One2TwoPhiShift::fit_envelopes: must set vertices before using them");
+      jmt::vthrow("PhiShiftTemplater::fit_envelopes: must set vertices before using them");
 
-    printf("One2TwoPhiShift%s: fitting envelopes\n", name.c_str()); fflush(stdout);
+    printf("PhiShiftTemplater%s: fitting envelopes\n", name.c_str()); fflush(stdout);
 
     const VertexSimples& v1v = *one_vertices;
     const int N1v = sample_count > 0 ? sample_count : int(v1v.size());
@@ -385,7 +385,7 @@ namespace mfv {
     h_fcn_g_dz ->FillRandom("g_dz",  100000);
   }
 
-  void One2TwoPhiShift::update_f_weighting_pars() {
+  void PhiShiftTemplater::update_f_weighting_pars() {
     gdpmax = g_phi->GetMaximum();
     fdpmax = f_phi->GetMaximum();
     Mdp = fdpmax/gdpmax;
@@ -397,10 +397,10 @@ namespace mfv {
     printf("weighting pars updated: phi: g %f f %f M %f   dz:  g %f f %f M %f\n", gdpmax, fdpmax, Mdp, gdzmax, fdzmax, Mdz);
   }
 
-  void One2TwoPhiShift::fit_fs_in_sideband() {
+  void PhiShiftTemplater::fit_fs_in_sideband() {
     // Fit f_phi and f_dz from the 2v events in the sideband.
 
-    printf("One2TwoPhiShift%s: fitting fs in sideband\n", name.c_str()); fflush(stdout);
+    printf("PhiShiftTemplater%s: fitting fs in sideband\n", name.c_str()); fflush(stdout);
 
     const TString opt = "0LIRQS";
 
@@ -494,13 +494,13 @@ namespace mfv {
     h_fcn_f_dz ->FillRandom("f_dz",  100000);
   }
 
-  void One2TwoPhiShift::set_phi_exp(double phi_exp) {
+  void PhiShiftTemplater::set_phi_exp(double phi_exp) {
     f_phi->FixParameter(1, phi_exp);
     f_phi->FixParameter(2, 0.);
     update_f_weighting_pars();
   }
 
-  double One2TwoPhiShift::prob_1v_pair(const VertexSimple& v0, const VertexSimple& v1) const {
+  double PhiShiftTemplater::prob_1v_pair(const VertexSimple& v0, const VertexSimple& v1) const {
     const double phi = v0.phi(v1);
     const double dp = use_abs_phi ? fabs(phi) : phi;
     const double dz = v0.z - v1.z;
@@ -510,9 +510,9 @@ namespace mfv {
       accept_prob(f_dz ->Eval(dz), g_dz ->Eval(dz), Mdz);
   }
 
-  void One2TwoPhiShift::loop_over_1v_pairs(std::function<void(const VertexPair&)> fcn) {
+  void PhiShiftTemplater::loop_over_1v_pairs(std::function<void(const VertexPair&)> fcn) {
     if (one_vertices == 0)
-      jmt::vthrow("One2TwoPhiShift::loop_over_1v_pairs: must set vertices before using them");
+      jmt::vthrow("PhiShiftTemplater::loop_over_1v_pairs: must set vertices before using them");
 
     const int N1v_t = int(one_vertices->size());
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
@@ -538,7 +538,7 @@ namespace mfv {
     printf("\n");
   }
 
-  void One2TwoPhiShift::fill_1v_histos() {
+  void PhiShiftTemplater::fill_1v_histos() {
     auto f = [this](const VertexPair& p) {
       const bool swap = p.first.ntracks < p.second.ntracks;
       const VertexSimple& first  = swap ? p.second : p.first;
@@ -547,18 +547,18 @@ namespace mfv {
         fill_2v(ih, p.weight, first, second);
     };
 
-    printf("One2TwoPhiShift%s: fill 1v histos:\n", name.c_str()); fflush(stdout);
+    printf("PhiShiftTemplater%s: fill 1v histos:\n", name.c_str()); fflush(stdout);
     loop_over_1v_pairs(f);
   }
 
-  void One2TwoPhiShift::clear_templates() {
+  void PhiShiftTemplater::clear_templates() {
     for (Template* t : templates)
       delete t;
     templates.clear();
   }
 
-  void One2TwoPhiShift::make_templates() {
-    printf("One2TwoPhiShift%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
+  void PhiShiftTemplater::make_templates() {
+    printf("PhiShiftTemplater%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
 
     clear_templates();
 
@@ -636,13 +636,13 @@ namespace mfv {
       delete t;
   }
 
-  void One2TwoPhiShift::process(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
+  void PhiShiftTemplater::process(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
     // how about toy negative if data?
     toy = toy_;
     one_vertices = toy_1v;
     two_vertices = toy_2v;
 
-    printf("One2TwoPhiShift%s: run toy #%i\n", name.c_str(), toy);
+    printf("PhiShiftTemplater%s: run toy #%i\n", name.c_str(), toy);
     const int N1v = int(one_vertices->size());
     const int N1vpairs = N1v*(N1v-1)/2;
     printf("  # 1v input: %i (%i pairs)  2v input: %lu\n", N1v, N1vpairs, two_vertices->size());
@@ -658,7 +658,7 @@ namespace mfv {
     make_templates();
   }
 
-  One2TwoPhiShift::~One2TwoPhiShift() {
+  PhiShiftTemplater::~PhiShiftTemplater() {
     clear_templates();
   }
 }
