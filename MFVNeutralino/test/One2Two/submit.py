@@ -3,21 +3,21 @@
 import os, sys
 
 batch_root = 'crab/One2Two'
+dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
 os.system('mkdir -p %s' % batch_root)
 
-script_template = '''#!/bin/tcsh
+script_template = '''#!/bin/sh
 echo script starting on `date`
 echo script args: $argv
 echo wd: `pwd`
 
 setenv JMT_WD `pwd`
-setenv JOB_NUM $argv[1]
+setenv JOB_NUM $1
 
 echo get trees
 xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees.tgz .
 
 echo untar trees
-cd $JMT_WD
 tar zxvf all_trees.tgz
 echo
 
@@ -29,22 +29,19 @@ echo ls -la
 ls -la
 echo
 
-echo run one2two.py
-cd $JMT_WD
-
-setenv mfvo2t_seed $JOB_NUM
-setenv mfvo2t_ntoys 1
+export mfvo2t_seed=$JOB_NUM
+export mfvo2t_ntoys=1
 %(env)s
 
 echo run mfvo2t.exe
 ./mfvo2t.exe
-set exit_code=$?
-if ($exit_code != 0) then
+ECODE=$?
+if [ "$ECODE" -ne "0" ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   echo @@@@ mfvo2t.exe exited with error code $exit_code
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  exit $exit_code
-endif
+  exit $ECODE
+fi
 echo mfvo2t.exe done
 echo
 
@@ -57,11 +54,8 @@ mv crab_fjr $RUNTIME_AREA/crab_fjr_${JOB_NUM}.xml
 dummy_pset = '''
 import FWCore.ParameterSet.Config as cms
 process = cms.Process('One2Two')
+process.source = cms.Source('EmptySource')
 '''
-
-dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py'
-if not os.path.isfile(dummy_pset_fn):
-    open(dummy_pset_fn, 'wt').write(dummy_pset)
 
 crab_cfg = '''
 [CMSSW]
@@ -75,7 +69,7 @@ output_file=mfvo2t.root
 script_exe=runme.csh
 ui_working_dir=%(batch_root)s/crab_%(batch_name)s
 ssh_control_persist=no
-additional_input_files=fit.exe,signal_templates.root
+additional_input_files=mfvo2t.exe,signal_templates.root,crab_fjr.gz
 
 return_data=1
 
@@ -84,7 +78,7 @@ jobtype=cmssw
 scheduler=remoteGlidein
 '''
 
-compiled = False
+compiled = 'nocompile' in sys.argv
 def compile():
     global compiled
     if not compiled:
@@ -96,38 +90,42 @@ def compile():
 def submit(njobs, min_ntracks, signal_sample, samples):
     compile()
 
+    batch_root = 'crab/One2Two'
+    dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
+    open(dummy_pset_fn, 'wt').write(dummy_pset)
+
     batch_name = 'Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (min_ntracks,
                                                     'def',
-                                                    'no' if signal is None else 'n%ix%i' % signal_contamination,
+                                                    'no' if signal_sample is None else 'n%ix%i' % signal_sample,
                                                     samples)
 
     env = [
-        'toythrower_min_ntracks %i' % min_ntracks,
+        'toythrower_min_ntracks=%i' % min_ntracks,
         ]
 
-    if signal is not None:
-        sig_samp, sig_scale = signal
+    if signal_sample is not None:
+        sig_samp, sig_scale = signal_sample
         assert sig_samp < 0
-        env.append('toythrower_signal %i' % sig_samp)
-        env.append('toythrower_signal_scale %f' % sig_scale)
+        env.append('toythrower_signal=%i' % sig_samp)
+        env.append('toythrower_signal_scale=%f' % sig_scale)
 
     if type(samples) == int:
-        env.append('toythrower_sample_only %i' % samples)
+        env.append('toythrower_sample_only=%i' % samples)
     elif type(samples) == str and '500' in samples:
-        env.append('toythrower_use_qcd500 1')
+        env.append('toythrower_use_qcd500=1')
 
-    env = '\n'.join('setenv mfvo2t_' + e for e in env)
+    env = '\n'.join('export mfvo2t_' + e for e in env)
     open('runme.csh', 'wt').write(script_template % {'env': env})
     open('crab.cfg', 'wt').write(crab_cfg % locals())
-    os.system('crab -create')
+    os.system('crab -create -submit all')
 
-
-for min_ntracks in (5,): #6): #6,7,8):
-    for signal_sample in (None,):  # (-9, 1), (-9, 10)):
+batches = []
+for min_ntracks in (5,6,7):
+    for signal_sample in (None, (-9, 1), (-9, 10)):
         batches.append((min_ntracks, signal_sample, ''))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
-for batch in batches:
+for batch in batches[:1]:
     submit(20, *batch)
 
 '''
