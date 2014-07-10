@@ -8,6 +8,7 @@ namespace mfv {
     unsigned run;
     unsigned lumi;
     unsigned event;
+    unsigned short npu;
     float weight;
     unsigned short njets;
     float jet_pt[50];

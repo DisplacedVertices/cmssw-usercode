@@ -62,6 +62,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(event_src, mevent);
 
+  nt.npu = int(mevent->npu);
+
   edm::Handle<double> weight;
   event.getByLabel(weight_src, weight);
   nt.weight = *weight;
