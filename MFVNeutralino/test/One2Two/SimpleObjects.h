@@ -5,6 +5,7 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 #include "Utility.h"
+#include "VAException.h"
 
 namespace mfv {
   struct VertexSimple {
