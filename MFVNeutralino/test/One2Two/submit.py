@@ -38,7 +38,7 @@ echo run mfvo2t.exe
 ECODE=$?
 if [ "$ECODE" -ne "0" ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  echo @@@@ mfvo2t.exe exited with error code $exit_code
+  echo @@@@ mfvo2t.exe exited with error code $ECODE
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   exit $ECODE
 fi
