@@ -37,11 +37,8 @@ int main() {
   mfv::One2TwoPhiShift* o_phishift = new mfv::One2TwoPhiShift("", out_f, rand);
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);
 
-  TH1D* h_empty_sig_template = new TH1D("h_empty_sig_template", "", 20000, 0, 10);
-  h_empty_sig_template->SetDirectory(0);
-
   TFile f_sig("signal_templates.root");
-
+  printf("*** signal template is fixed to h_sig_ntk5_mfv_neutralino_tau1000um_M0400 ***\n");
   TH1D* h_sig = (TH1D*)f_sig.Get("h_sig_ntk5_mfv_neutralino_tau1000um_M0400"); //TString::Format("h_sig_ntk%i_%s", tt->min_ntracks, tt->samples.get(tt->signal).name.c_str()))->Clone("h_sig_FIXME");
   h_sig->SetDirectory(out_f);
 
@@ -53,7 +50,7 @@ int main() {
     if (templates_phishift) {
       o_phishift->process(itoy, &tt->toy_1v, &tt->toy_2v);
       templates = &o_phishift->templates;
-      true_pars = std::vector<double>({ double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v), 0., 0. });
+      true_pars = std::vector<double>({ double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v), o_phishift->phi_exp_bkgonly, o_phishift->shift_means });
     }
     else if (templates_clearedjets) {
       jmt::vthrow("templates_clearedjets not implemented");
@@ -61,8 +58,6 @@ int main() {
 
     fitter->fit(itoy, templates, h_sig, tt->toy_2v, true_pars);
   }
-
-  delete h_empty_sig_template;
 
   out_f->Write();
   out_f->Close();
