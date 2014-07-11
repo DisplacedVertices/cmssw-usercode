@@ -3,12 +3,11 @@
 import os, sys
 
 script_template = '''#!/bin/sh
-echo script starting on `date`
-echo script args: $argv
+echo mfvo2t script starting on `date`
+echo mfvo2t script args: $argv
 echo wd: `pwd`
 
-setenv JMT_WD `pwd`
-setenv JOB_NUM $1
+export JOB_NUM=$1
 
 echo get trees
 xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees_17879f2d0db8123dbf443e3b6613c4c3c0ba1d2f.tgz all_trees.tgz
@@ -74,28 +73,26 @@ scheduler=%(scheduler)s
 '''
 
 compiled = 'nocompile' in sys.argv
-def compile():
+setuped = False
+
+def submit(njobs, min_ntracks, signal_sample, samples):
     global compiled
+    global setuped
+
     if not compiled:
         if os.system('./compile') != 0:
             raise 'no compile'
         raw_input('did the compile go OK?')
         compiled = True
 
-setuped = False
-def setup():
-    global setuped
+    batch_root = 'crab/One2Two_condor'
+    dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
+
     if not setuped:
-        batch_root = 'crab/One2Two'
         os.system('mkdir -p %s' % batch_root)
-        dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
         open(dummy_pset_fn, 'wt').write(dummy_pset)
         setuped = True
-
-def submit(njobs, min_ntracks, signal_sample, samples):
-    compile()
-    setup()
-
+        
     scheduler = 'condor' if 'condor' in sys.argv else 'remoteGlidein'
 
     batch_name = 'Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (min_ntracks,
