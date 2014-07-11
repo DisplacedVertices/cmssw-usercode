@@ -502,6 +502,7 @@ namespace mfv {
 
           TH1D* hhh = Template::finalize_template(hh);
           hhh->SetDirectory(dd);
+          delete hh;
 
           templates.push_back(new PhiShiftTemplate(iglb++, hhh, phi_exp, shift));
         }
