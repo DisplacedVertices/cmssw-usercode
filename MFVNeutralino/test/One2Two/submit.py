@@ -15,7 +15,7 @@ setenv JMT_WD `pwd`
 setenv JOB_NUM $1
 
 echo get trees
-xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees.tgz .
+xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees_17879f2d0db8123dbf443e3b6613c4c3c0ba1d2f.tgz all_trees.tgz
 
 echo untar trees
 tar zxvf all_trees.tgz
