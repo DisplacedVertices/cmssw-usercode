@@ -2,10 +2,6 @@
 
 import os, sys
 
-batch_root = 'crab/One2Two'
-dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
-os.system('mkdir -p %s' % batch_root)
-
 script_template = '''#!/bin/sh
 echo script starting on `date`
 echo script args: $argv
@@ -74,7 +70,7 @@ return_data=1
 
 [CRAB]
 jobtype=cmssw
-scheduler=remoteGlidein
+scheduler=%(scheduler)s
 '''
 
 compiled = 'nocompile' in sys.argv
@@ -86,12 +82,21 @@ def compile():
         raw_input('did the compile go OK?')
         compiled = True
 
+setuped = False
+def setup():
+    global setuped
+    if not setuped:
+        batch_root = 'crab/One2Two'
+        os.system('mkdir -p %s' % batch_root)
+        dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
+        open(dummy_pset_fn, 'wt').write(dummy_pset)
+        setuped = True
+
 def submit(njobs, min_ntracks, signal_sample, samples):
     compile()
+    setup()
 
-    batch_root = 'crab/One2Two'
-    dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
-    open(dummy_pset_fn, 'wt').write(dummy_pset)
+    scheduler = 'condor' if 'condor' in sys.argv else 'remoteGlidein'
 
     batch_name = 'Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (min_ntracks,
                                                     'def',
