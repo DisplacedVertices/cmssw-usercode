@@ -5,6 +5,7 @@
 #include "TH2D.h"
 #include "TRandom3.h"
 #include "TTree.h"
+#include "Phi.h"
 #include "Prob.h"
 #include "ROOTTools.h"
 #include "Random.h"
@@ -33,10 +34,8 @@ namespace mfv {
     return rand->Rndm() < accept_prob(f, g, M);
   }
 
-  const char* PhiShiftTemplater::vt_names[PhiShiftTemplater::n_vt] = { "2v", "2vbkg", "2vsig", "2vsb", "2vsbbkg", "2vsbsig", "1v", "1vsb", "1vsingle" };
-
   PhiShiftTemplater::PhiShiftTemplater(const std::string& name_, TFile* f, TRandom* r)
-    : Templater(name_, f, r),
+    : Templater("PhiShift", name_, f, r),
 
       env("mfvo2t_phishift" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.05)),
@@ -47,10 +46,6 @@ namespace mfv {
       d_phi_exp(env.get_double("d_phi_exp", 0.25)),
       n_phi_interp(env.get_int("n_phi_interp", 20)),
       n_shift(env.get_int("n_shift", 40)),
-      use_abs_phi(env.get_bool("use_abs_phi", true)),
-      template_nbins(env.get_int("template_nbins", 20000)),
-      template_min(env.get_double("template_min", 0)),
-      template_max(env.get_double("template_max", 10)),
       find_g_phi(env.get_bool("find_g_phi", true)),
       find_g_dz(env.get_bool("find_g_dz", true)),
       find_f_phi(env.get_bool("find_f_phi", true)),
@@ -61,8 +56,6 @@ namespace mfv {
     if (sampling_type != 2)
       jmt::vthrow("sampling_type must be 2");
 
-    dout = f->mkdir(TString::Format("PhiShiftTemplater%s", uname.c_str()));
-
     printf("PhiShiftTemplater%s config:\n", name.c_str());
     printf("seed: %i\n", seed);
     printf("d2d_cut: %f\n", d2d_cut);
@@ -71,8 +64,6 @@ namespace mfv {
     printf("phi_exp: (%f - %f) in %f increments\n", phi_exp_min, phi_exp_max, d_phi_exp);
     printf("n_phi_interp: %i\n", n_phi_interp);
     printf("n_shift: %i\n", n_shift);
-    printf("use_abs_phi: %i\n", use_abs_phi);
-    printf("template binning: (%i, %f, %f)\n", template_nbins, template_min, template_max);
     printf("find gs: phi? %i dz? %i   fs: phi? %i (bkgonly? %i) dz? %i (bkgonly? %i)\n", find_g_phi, find_g_dz, find_f_phi, find_f_phi_bkgonly, find_f_dz, find_f_dz_bkgonly);
     fflush(stdout);
 
@@ -92,10 +83,6 @@ namespace mfv {
     t_config->Branch("d_phi_exp", const_cast<double*>(&d_phi_exp), "d_phi_exp/D");
     t_config->Branch("n_phi_interp", const_cast<int*>(&n_phi_interp), "n_phi_interp/I");
     t_config->Branch("n_shift", const_cast<int*>(&n_shift), "n_shift/I");
-    t_config->Branch("use_abs_phi", const_cast<bool*>(&use_abs_phi), "use_abs_phi/O");
-    t_config->Branch("template_nbins", const_cast<int*>(&template_nbins), "template_nbins/I");
-    t_config->Branch("template_min", const_cast<double*>(&template_min), "template_min/D");
-    t_config->Branch("template_max", const_cast<double*>(&template_max), "template_max/D");
     t_config->Branch("find_g_phi", const_cast<bool*>(&find_g_phi), "find_g_phi/O");
     t_config->Branch("find_g_dz", const_cast<bool*>(&find_g_dz), "find_g_dz/O");
     t_config->Branch("find_f_phi", const_cast<bool*>(&find_f_phi), "find_f_phi/O");
@@ -153,15 +140,10 @@ namespace mfv {
   }    
 
   void PhiShiftTemplater::book_toy_fcns_and_histos() {
-    dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, toy));
-    dtoy->cd();
+    Templater::book_hists();
 
-    const int phi_nbins = 8;
-    const double phi_min = use_abs_phi ? 0 : -M_PI;
-    const double phi_max = M_PI;
-
-    g_phi = new TF1("g_phi", fcn_g_phi, phi_min, phi_max, 3);
-    f_phi = new TF1("f_phi", fcn_f_phi, phi_min, phi_max, 3);
+    g_phi = new TF1("g_phi", fcn_g_phi, Phi::min, Phi::max, 3);
+    f_phi = new TF1("f_phi", fcn_f_phi, Phi::min, Phi::max, 3);
     g_dz  = new TF1("g_dz", fcn_fg_dz, -40, 40, 3);
     f_dz  = new TF1("f_dz", fcn_fg_dz, -40, 40, 3);
     g_phi->SetParNames("norm", "offset", "slope");
@@ -172,12 +154,12 @@ namespace mfv {
       fcn->FixParameter(0, 1.);
 
 
-    h_1v_g_phi  = new TH1D("h_1v_g_phi",  "", phi_nbins, phi_min, phi_max);
-    h_fcn_g_phi = new TH1D("h_fcn_g_phi", "", phi_nbins, phi_min, phi_max);
+    h_1v_g_phi  = Phi::new_1d_hist("h_1v_g_phi",  "");
+    h_fcn_g_phi = Phi::new_1d_hist("h_fcn_g_phi", "");
     h_1v_g_dz  = new TH1D("h_1v_g_dz",  "", 200, -40,  40);
     h_fcn_g_dz = new TH1D("h_fcn_g_dz", "",  20, -40,  40);
 
-    h_fcn_f_phi = new TH1D("h_fcn_f_phi", "", phi_nbins, phi_min, phi_max);
+    h_fcn_f_phi = Phi::new_1d_hist("h_fcn_f_phi", "");
     h_fcn_f_dz = new TH1D("h_fcn_f_dz", "", 20, -0.1, 0.1);
 
     double phi_exp = 0;
@@ -186,91 +168,12 @@ namespace mfv {
       phi_exp = phi_exp_min + i_phi_exp * d_phi_exp;
       if (phi_exp > phi_exp_max)
         break;
-      h_fcn_f_phis.push_back(new TH1D(TString::Format("h_fcn_f_phis_%i", i_phi_exp), TString::Format("phi_exp = %f", phi_exp), phi_nbins, phi_min, phi_max));
-    }
-
-
-    for (int i = 0; i < n_vt; ++i) {
-      const char* iv = vt_names[i];
-      TDirectory* div = dtoy->mkdir(iv);
-      div->cd();
-
-      h_issig  [i] = new TH1D("h_issig", "", 2, 0, 2);
-      h_issig_0[i] = new TH1D("h_issig_0", "", 2, 0, 2);
-      h_issig_1[i] = new TH1D("h_issig_1", "", 2, 0, 2);
-
-      h_xy             [i] = new TH2D("h_xy"             , "", 100, -0.05, 0.05, 100, 0.05, 0.05);
-      h_bsd2d          [i] = new TH1D("h_bsd2d"          , "", 100, 0, 0.1);
-      h_bsd2d_v_bsdz   [i] = new TH2D("h_bsd2d_v_bsdz"   , "", 200, -20, 20, 100, 0, 0.1);
-      h_bsdz           [i] = new TH1D("h_bsdz"           , "", 200, -20, 20);
-      h_bsd2d_0        [i] = new TH1D("h_bsd2d_0"        , "", 100, 0, 0.1);
-      h_bsd2d_v_bsdz_0 [i] = new TH2D("h_bsd2d_v_bsdz_0" , "", 200, -20, 20, 100, 0, 0.1);
-      h_bsdz_0         [i] = new TH1D("h_bsdz_0"         , "", 200, -20, 20);
-
-      if (n_vt == n_vt_pairs)
-        break;
-
-      h_bsd2d_1        [i] = new TH1D("h_bsd2d_1"        , "", 100, 0, 0.1);
-      h_bsd2d_v_bsdz_1 [i] = new TH2D("h_bsd2d_v_bsdz_1" , "", 200, -20, 20, 100, 0, 0.1);
-      h_bsdz_1         [i] = new TH1D("h_bsdz_1"         , "", 200, -20, 20);
-
-      h_ntracks  [i] = new TH2D("h_ntracks"  , "", 20, 0, 20, 20, 0, 20);
-      h_ntracks01[i] = new TH1D("h_ntracks01", "", 30, 0, 30);
-      h_d2d      [i] = new TH1D("h_d2d"      , "", template_nbins, template_min, template_max);
-      h_dz       [i] = new TH1D("h_dz"       , "", 20, -0.1, 0.1);
-      h_phi      [i] = new TH1D("h_phi"      , "", phi_nbins, phi_min, phi_max);
+      h_fcn_f_phis.push_back(Phi::new_1d_hist(TString::Format("h_fcn_f_phis_%i", i_phi_exp), TString::Format("phi_exp = %f", phi_exp)));
     }
   }
 
   bool PhiShiftTemplater::is_sideband(const VertexSimple& v0, const VertexSimple& v1) const {
     return v0.d2d(v1) < d2d_cut;
-  }
-
-  void PhiShiftTemplater::fill_2v(const int ih, const double w, const VertexSimple& v0, const VertexSimple& v1) {
-    if ((ih == vt_2vsb || ih == vt_2vsbbkg || ih == vt_2vsbsig || ih == vt_1vsb) && !is_sideband(v0, v1))
-      return;
-
-    if ((ih == vt_2vsig || ih == vt_2vsbsig) && (!v0.is_sig || !v1.is_sig))
-      return;
-
-    if ((ih == vt_2vbkg || ih == vt_2vsbbkg) && (v0.is_sig || v1.is_sig))
-      return;
-
-    h_issig[ih]->Fill(v0.is_sig, w);
-    h_issig[ih]->Fill(v1.is_sig, w);
-    h_issig_0[ih]->Fill(v0.is_sig, w);
-    h_issig_1[ih]->Fill(v1.is_sig, w);
-    h_xy[ih]->Fill(v0.x, v0.y, w);
-    h_xy[ih]->Fill(v1.x, v1.y, w);
-    h_bsd2d[ih]->Fill(v0.d2d(), w);
-    h_bsd2d[ih]->Fill(v1.d2d(), w);
-    h_bsd2d_0[ih]->Fill(v0.d2d(), w);
-    h_bsd2d_1[ih]->Fill(v1.d2d(), w);
-    h_bsd2d_v_bsdz[ih]->Fill(v0.z, v0.d2d(), w);
-    h_bsd2d_v_bsdz[ih]->Fill(v1.z, v1.d2d(), w);
-    h_bsd2d_v_bsdz_0[ih]->Fill(v0.z, v0.d2d(), w);
-    h_bsd2d_v_bsdz_1[ih]->Fill(v1.z, v1.d2d(), w);
-    h_bsdz[ih]->Fill(v0.z, w);
-    h_bsdz[ih]->Fill(v1.z, w);
-    h_bsdz_0[ih]->Fill(v0.z, w);
-    h_bsdz_1[ih]->Fill(v1.z, w);
-
-    h_ntracks[ih]->Fill(v0.ntracks, v1.ntracks, w);
-    h_ntracks01[ih]->Fill(v0.ntracks + v1.ntracks, w);
-    h_d2d[ih]->Fill(v0.d2d(v1), w);
-    h_dz[ih]->Fill(v0.dz(v1), w);
-    const double p = v0.phi(v1);
-    h_phi[ih]->Fill(use_abs_phi ? fabs(p) : p, w);
-  }
-
-  void PhiShiftTemplater::fill_2v_histos() {
-    if (two_vertices == 0)
-      jmt::vthrow("PhiShiftTemplater::fill_2v_histos: must set vertices before using them");
-
-    printf("PhiShiftTemplater%s: fill 2v histos\n", name.c_str()); fflush(stdout);
-    for (const VertexPair& p : *two_vertices)
-      for (int ih = 0; ih < n_vt_2v; ++ih)
-        fill_2v(ih, 1, p.first, p.second);
   }
 
   void PhiShiftTemplater::fit_envelopes() {
@@ -286,7 +189,7 @@ namespace mfv {
     for (int i = 0; i < N1v; ++i) {
       for (int j = i+1; j < N1v; ++j) {
         const double phi = v1v[i].phi(v1v[j]);
-        h_1v_g_phi->Fill(use_abs_phi ? fabs(phi) : phi);
+        h_1v_g_phi->Fill(Phi::use_abs ? fabs(phi) : phi);
         h_1v_g_dz->Fill(v1v[i].dz(v1v[j]));
       }
     }
@@ -324,7 +227,7 @@ namespace mfv {
       delete g_phi_temp;
     }
     else {
-      g_phi->FixParameter(1, use_abs_phi ? M_1_PI : 0.5/M_PI);
+      g_phi->FixParameter(1, Phi::use_abs ? M_1_PI : 0.5/M_PI);
       g_phi->FixParameter(2, 0);
     }
 
@@ -392,7 +295,7 @@ namespace mfv {
     if (find_f_phi) {
       const int vt_which = find_f_phi_bkgonly ? vt_2vsbbkg : vt_2vsb;
       const double integxwidth = h_phi[vt_which]->Integral()*h_phi[vt_which]->GetXaxis()->GetBinWidth(1);
-      TF1* f_phi_temp = new TF1("f_phi_temp", fcn_f_phi, use_abs_phi ? 0 : -M_PI, M_PI, 3);
+      TF1* f_phi_temp = new TF1("f_phi_temp", fcn_f_phi, Phi::use_abs ? 0 : -M_PI, M_PI, 3);
       for (int i = 0; i < 3; ++i)
         f_phi_temp->SetParName(i, f_phi->GetParName(i));
       f_phi_temp->FixParameter(0, integxwidth);
@@ -487,7 +390,7 @@ namespace mfv {
 
   double PhiShiftTemplater::prob_1v_pair(const VertexSimple& v0, const VertexSimple& v1) const {
     const double phi = v0.phi(v1);
-    const double dp = use_abs_phi ? fabs(phi) : phi;
+    const double dp = Phi::use_abs ? fabs(phi) : phi;
     const double dz = v0.z - v1.z;
 
     return
@@ -496,8 +399,7 @@ namespace mfv {
   }
 
   void PhiShiftTemplater::loop_over_1v_pairs(std::function<void(const VertexPair&)> fcn) {
-    if (one_vertices == 0)
-      jmt::vthrow("PhiShiftTemplater::loop_over_1v_pairs: must set vertices before using them");
+    vertices_ok();
 
     const int N1v_t = int(one_vertices->size());
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
@@ -554,7 +456,7 @@ namespace mfv {
 
       h_fcn_f_phis[ip]->FillRandom("f_phi", 100000);
 
-      TH1D* h = new TH1D(TString::Format("h_orig_template_ip%i", ip), TString::Format("phi_exp = %f", phi_exp), template_nbins, template_min, template_max);
+      TH1D* h = new TH1D(TString::Format("h_orig_template_ip%i", ip), TString::Format("phi_exp = %f", phi_exp), Template::nbins, Template::min_val, Template::max_val);
       orig_templates.push_back(new PhiShiftTemplate(ip, h, phi_exp, 0.));
 
       auto f = [&h](const VertexPair& p) {
@@ -593,12 +495,15 @@ namespace mfv {
 
         for (int ish = 0; ish < n_shift; ++ish) {
           TH1D* hh = jmt::shift_hist(h, ish);
-          hh->SetDirectory(dd);
+          hh->SetDirectory(0);
           const double phi_exp = static_cast<PhiShiftTemplate*>(orig_templates[ip])->phi_exp + ipi * d_phi_exp / n_phi_interp;
           const double shift = ish * hh->GetBinWidth(1);
           hh->SetTitle(TString::Format("phi_exp = %f shift = %f\n", phi_exp, shift));
 
-          templates.push_back(new PhiShiftTemplate(iglb++, hh, phi_exp, shift));
+          TH1D* hhh = Template::finalize_template(hh);
+          hhh->SetDirectory(dd);
+
+          templates.push_back(new PhiShiftTemplate(iglb++, hhh, phi_exp, shift));
         }
 
         if (h1)

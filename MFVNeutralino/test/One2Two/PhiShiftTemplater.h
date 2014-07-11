@@ -23,10 +23,6 @@ namespace mfv {
     const double d_phi_exp;
     const int n_phi_interp;
     const int n_shift;
-    const bool use_abs_phi;
-    const int template_nbins;
-    const double template_min;
-    const double template_max;
     const bool find_g_phi;
     const bool find_g_dz;
     const bool find_f_phi;
@@ -59,28 +55,6 @@ namespace mfv {
     double gdzmax;
     double fdzmax;
     double Mdz;
-
-    enum { vt_2v, vt_2vbkg, vt_2vsig, vt_2vsb, vt_2vsbbkg, vt_2vsbsig,  n_vt_2v, vt_1v = n_vt_2v, vt_1vsb,  n_vt_pairs, vt_1vsingle = n_vt_pairs, n_vt };
-    static const char* vt_names[n_vt];
-
-    TH1D* h_issig[n_vt];
-    TH1D* h_issig_0[n_vt];
-    TH1D* h_issig_1[n_vt];
-    TH2D* h_xy[n_vt];
-    TH1D* h_bsd2d[n_vt];
-    TH2D* h_bsd2d_v_bsdz[n_vt];
-    TH1D* h_bsdz[n_vt];
-    TH1D* h_bsd2d_0[n_vt];
-    TH2D* h_bsd2d_v_bsdz_0[n_vt];
-    TH1D* h_bsdz_0[n_vt];
-    TH1D* h_bsd2d_1[n_vt];
-    TH2D* h_bsd2d_v_bsdz_1[n_vt];
-    TH1D* h_bsdz_1[n_vt];
-    TH2D* h_ntracks[n_vt];
-    TH1D* h_ntracks01[n_vt];
-    TH1D* h_d2d[n_vt];
-    TH1D* h_phi[n_vt];
-    TH1D* h_dz[n_vt];
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -131,13 +105,10 @@ namespace mfv {
     ////////////////////////////////////////////////////////////////////////////
 
     PhiShiftTemplater(const std::string& name_, TFile* f, TRandom* r);
-    ~PhiShiftTemplater();
 
     void book_trees();
     void book_toy_fcns_and_histos();
     bool is_sideband(const VertexSimple&, const VertexSimple&) const;
-    void fill_2v(const int ih, const double w, const VertexSimple&, const VertexSimple&);
-    void fill_2v_histos();
     void fit_envelopes();
     void fit_fs_in_sideband();
     void update_f_weighting_pars();
