@@ -15,7 +15,7 @@ int main() {
   jmt::set_root_style();
 
   jmt::ConfigFromEnv env("mfvo2t");
-  const std::string tree_path = env.get_string("tree_path", "crab/MiniTreeV18_Njets");
+  const std::string tree_path = env.get_string("tree_path", "jen_crab");
   const std::string out_fn = env.get_string("out_fn", "mfvo2t.root");
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
