@@ -31,6 +31,7 @@ int main() {
   printf("seed: %i\n", seed);
   printf("ntoys: %i\n", ntoys);
   printf("template kind: %s (phishift? %i clearedjets? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets);
+  printf("template binning: (%i, %f, %f)\n", mfv::Template::nbins, mfv::Template::min_val, mfv::Template::max_val);
 
   TFile* out_f = new TFile(out_fn.c_str(), "recreate");
   TRandom3* rand = new TRandom3(jmt::seed_base + seed);
@@ -38,7 +39,7 @@ int main() {
   mfv::Templater* ter = 0;
   if (templates_phishift)
     ter = new mfv::PhiShiftTemplater("", out_f, rand);
-  else if (templates_clearedjets) {
+  else if (templates_clearedjets)
     ter = new mfv::ClearedJetsTemplater("", out_f, rand);
     
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);

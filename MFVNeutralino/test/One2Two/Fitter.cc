@@ -23,7 +23,7 @@ namespace mfv {
     TH1D* h_sig = 0;
 
     double twolnL(double mu_sig, double mu_bkg) {
-      const TH1D* h_bkg = curr_bkg_template->h_final;
+      const TH1D* h_bkg = curr_bkg_template->h;
       double lnL = 0;
       for (int i = 1; i <= n_bins; ++i) {
         const double nu_sig = mu_sig * h_sig->GetBinContent(i);
@@ -49,13 +49,15 @@ namespace mfv {
   const int Fitter::npars = 2 + Template::max_npars;
 
   void Fitter::min_lik_t::print(const char* header, const char* indent) const {
-    printf("%s%s  istat = %i  max_value = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
+    printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
   }
 
   void Fitter::test_stat_t::print(const char* header, const char* indent) const {
     printf("%s:  ok? %i  t = %f\n", header, ok(), t);
     h1.print("h1", indent);
+    printf("%s  ^ nuis: %s\n", indent, h1.nuis->title().c_str());
     h0.print("h0", indent);
+    printf("%s  ^ nuis: %s\n", indent, h0.nuis->title().c_str());
   }
 
   std::pair<std::vector<double>, std::vector<double> > Fitter::min_lik_t::get_template_par_ranges(const double up) const {
@@ -140,46 +142,6 @@ namespace mfv {
     t_fit_info->Branch("pval_limit", &pval_limit, "pval_limit/D");
     t_fit_info->Branch("mu_sig_limit", &mu_sig_limit, "mu_sig_limit/D");
   }    
-
-  std::vector<double> Fitter::binning() const {
-    std::vector<double> bins;
-    for (int i = 0; i < 20; ++i)
-      bins.push_back(i * 0.01);
-    bins.push_back(0.2);
-    bins.push_back(0.4);
-    bins.push_back(0.6);
-    bins.push_back(1);
-    bins.push_back(3);
-    if (fit::n_bins < 0)
-      fit::n_bins = bins.size() - 1;
-    return bins;
-  }
-
-  TH1D* Fitter::hist_with_binning(const TString& name_, const TString& title) {
-    std::vector<double> bins = binning();
-    return new TH1D(name_, title, bins.size()-1, &bins[0]);
-  }
-
-  TH1D* Fitter::finalize_binning(TH1D* h) {
-    std::vector<double> bins = binning();
-    TH1D* hh = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_rebinned", h->GetName()), &bins[0]);
-    const int nb = hh->GetNbinsX();
-    const double l  = hh->GetBinContent(nb);
-    const double le = hh->GetBinError  (nb);
-    const double o  = hh->GetBinContent(nb+1);
-    const double oe = hh->GetBinError  (nb+1);
-    hh->SetBinContent(nb, l + o);
-    hh->SetBinError  (nb, sqrt(le*le + oe*oe));
-    hh->SetBinContent(nb+1, 0);
-    hh->SetBinError  (nb+1, 0);
-    return hh;
-  }
-
-  TH1D* Fitter::finalize_template(TH1D* h) {
-    TH1D* hh = finalize_binning(h);
-    hh->Scale(1./hh->Integral());
-    return hh;
-  }
 
   void Fitter::fit_globals_ok() {
     if (fit::n_bins < 0 || fit::h_data == 0 || fit::curr_bkg_template == 0 || fit::h_sig == 0)
@@ -313,9 +275,9 @@ namespace mfv {
       const min_lik_t& ml = sb ? t.h1 : t.h0;
       TCanvas* c = new TCanvas(TString::Format("c_%s_fit", sb_or_b));
 
-      TH1D* h_bkg_fit  = (TH1D*)ml.nuis->h_final->Clone(TString::Format("h_bkg_%s_fit",  sb_or_b));
-      TH1D* h_sig_fit  = (TH1D*)fit::h_sig      ->Clone(TString::Format("h_sig_%s_fit",  sb_or_b));
-      TH1D* h_data_fit = (TH1D*)fit::h_data     ->Clone(TString::Format("h_data_%s_fit", sb_or_b));
+      TH1D* h_bkg_fit  = (TH1D*)ml.nuis->h ->Clone(TString::Format("h_bkg_%s_fit",  sb_or_b));
+      TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit",  sb_or_b));
+      TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit", sb_or_b));
 
       for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
         h->SetLineWidth(2);
@@ -429,9 +391,9 @@ namespace mfv {
     else if (i_toy_signif < 0)
       snprintf(s, 128, "h_%%s_seed%02i_toy%02i_limit%02i", seed, toy, i_toy_limit);
 
-    snprintf(s2, 128, s, "data_sig"); fit::h_data_sig = hist_with_binning(s2, "");
-    snprintf(s2, 128, s, "data_bkg"); fit::h_data_bkg = hist_with_binning(s2, "");
-    snprintf(s2, 128, s, "data");     fit::h_data     = hist_with_binning(s2, "");
+    snprintf(s2, 128, s, "data_sig"); fit::h_data_sig = Template::hist_with_binning(s2, "");
+    snprintf(s2, 128, s, "data_bkg"); fit::h_data_bkg = Template::hist_with_binning(s2, "");
+    snprintf(s2, 128, s, "data");     fit::h_data     = Template::hist_with_binning(s2, "");
 
     bool save = i_toy_signif < 0 && i_toy_limit < 0;
     for (TH1D* h : {fit::h_data_sig, fit::h_data_bkg, fit::h_data}) {
@@ -441,7 +403,7 @@ namespace mfv {
     }
   
     fit::h_data_sig->FillRandom(fit::h_sig, n_sig);
-    fit::h_data_bkg->FillRandom(fit::curr_bkg_template->h_final, n_bkg);
+    fit::h_data_bkg->FillRandom(fit::curr_bkg_template->h, n_bkg);
 
     fit::h_data->Add(fit::h_data_sig);
     fit::h_data->Add(fit::h_data_bkg);
@@ -458,13 +420,11 @@ namespace mfv {
     dtoy->mkdir("finalized_templates")->cd();
 
     bkg_templates = bkg_templates_;
-    for (Template* t : *bkg_templates)
-      t->h_final = finalize_template(t->h);
-
+    fit::n_bins = int(Template::binning().size());
     fit::curr_bkg_template = (*bkg_templates)[0];
-    fit::h_sig = finalize_template(sig_template);
+    fit::h_sig = Template::finalize_template(sig_template);
 
-    fit::h_data_real = fit::h_data = hist_with_binning("h_data", TString::Format("toy %i", toy));
+    fit::h_data_real = fit::h_data = Template::hist_with_binning("h_data", TString::Format("toy %i", toy));
     for (const VertexPair& p : v2v)
       fit::h_data->Fill(p.d2d());
     const int n_data = fit::h_data->Integral();

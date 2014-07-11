@@ -94,10 +94,6 @@ namespace mfv {
     //    ~Fitter();
 
     void book_trees();
-    std::vector<double> binning() const;
-    TH1D* hist_with_binning(const TString& name, const TString& title);
-    TH1D* finalize_binning(TH1D* h);
-    TH1D* finalize_template(TH1D* h);
     void book_toy_fcns_and_histos();
     void fit_globals_ok();
     //    bool scan_likelihood();

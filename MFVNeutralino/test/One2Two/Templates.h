@@ -10,14 +10,22 @@ namespace mfv {
   struct Template {
     int i;
     TH1D* h;
-    TH1D* h_final;
 
-    Template(int i_, TH1D* h_) : i(i_), h(h_), h_final(0) {}
+    Template(int i_, TH1D* h_) : i(i_), h(h_) {}
     virtual double chi2() const { return 0; }
     virtual std::string name() const { return std::string("NoName"); }
     virtual std::string title() const { return std::string("NoTitle"); }
     virtual size_t npars() const { return 0; }
     virtual double par(size_t) const { return 0.; }
+
+    static const int nbins;
+    static const double min_val;
+    static const double max_val;
+
+    static std::vector<double> binning();
+    static TH1D* hist_with_binning(const char* name, const char* title);
+    static TH1D* finalize_binning(TH1D* h);
+    static TH1D* finalize_template(TH1D* h);
 
     static const int max_npars;
     std::vector<double> pars;

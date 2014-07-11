@@ -70,7 +70,6 @@ script_exe=runme.csh
 ui_working_dir=%(batch_root)s/crab_%(batch_name)s
 ssh_control_persist=no
 additional_input_files=mfvo2t.exe,signal_templates.root,crab_fjr.gz
-
 return_data=1
 
 [CRAB]
