@@ -16,8 +16,9 @@ namespace mfv {
   namespace fit {
     int n_bins = -1;
     TH1D* h_data_real = 0;
-    TH1D* h_data_sig = 0;
-    TH1D* h_data_bkg = 0;
+    TH1D* h_data_toy_sig = 0;
+    TH1D* h_data_toy_bkg = 0;
+    TH1D* h_data_toy = 0;
     TH1D* h_data = 0;
     Template* curr_bkg_template = 0;
     TH1D* h_sig = 0;
@@ -73,7 +74,7 @@ namespace mfv {
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
       n_toy_signif(env.get_int("n_toy_signif", 10000)),
-      n_toy_limit(env.get_int("n_toy_limit", 5000)),
+      n_toy_limit(env.get_int("n_toy_limit", 1000)),
       print_toys(env.get_bool("print_toys", false)),
       save_toys(env.get_bool("save_toys", false)),
       do_limits(env.get_bool("do_limits", true)),
@@ -144,9 +145,9 @@ namespace mfv {
   }    
 
   void Fitter::fit_globals_ok() {
-    if (fit::n_bins < 0 || fit::h_data == 0 || fit::curr_bkg_template == 0 || fit::h_sig == 0)
-      jmt::vthrow("fit globals not set up properly: n_bins: %i  h_data: %p  curr_bkg_template: %p  h_sig: %p",
-                  fit::n_bins, fit::h_data, fit::curr_bkg_template, fit::h_sig);
+    if (fit::n_bins < 0 || fit::h_data == 0 || fit::curr_bkg_template == 0 || fit::h_sig == 0 || fit::h_data_real == 0)
+      jmt::vthrow("fit globals not set up properly: n_bins: %i  h_data: %p  curr_bkg_template: %p  h_sig: %p  h_data_real: %p",
+                  fit::n_bins, fit::h_data, fit::curr_bkg_template, fit::h_sig, fit::h_data_real);
   }
 
 #if 0
@@ -383,6 +384,10 @@ namespace mfv {
   }
 
   void Fitter::make_toy_data(int i_toy_signif, int i_toy_limit, int n_sig, int n_bkg) {
+    delete fit::h_data_toy_sig;
+    delete fit::h_data_toy_bkg;
+    delete fit::h_data_toy;
+
     char s[128], s2[128];
     if (i_toy_signif < 0 && i_toy_limit < 0)
       snprintf(s, 128, "h_%%s_seed%02i_toy%02i", seed, toy);
@@ -391,22 +396,21 @@ namespace mfv {
     else if (i_toy_signif < 0)
       snprintf(s, 128, "h_%%s_seed%02i_toy%02i_limit%02i", seed, toy, i_toy_limit);
 
-    snprintf(s2, 128, s, "data_sig"); fit::h_data_sig = Template::hist_with_binning(s2, "");
-    snprintf(s2, 128, s, "data_bkg"); fit::h_data_bkg = Template::hist_with_binning(s2, "");
-    snprintf(s2, 128, s, "data");     fit::h_data     = Template::hist_with_binning(s2, "");
+    snprintf(s2, 128, s, "data_toy_sig"); fit::h_data_toy_sig = Template::hist_with_binning(s2, "");
+    snprintf(s2, 128, s, "data_toy_bkg"); fit::h_data_toy_bkg = Template::hist_with_binning(s2, "");
+    snprintf(s2, 128, s, "data_toy");     fit::h_data_toy     = Template::hist_with_binning(s2, "");
 
-    bool save = i_toy_signif < 0 && i_toy_limit < 0;
-    for (TH1D* h : {fit::h_data_sig, fit::h_data_bkg, fit::h_data}) {
+    for (TH1D* h : {fit::h_data_toy_sig, fit::h_data_toy_bkg, fit::h_data_toy}) {
       h->SetLineWidth(2);
-      if (!save)
-        h->SetDirectory(0);
+      h->SetDirectory(0);
     }
   
-    fit::h_data_sig->FillRandom(fit::h_sig, n_sig);
-    fit::h_data_bkg->FillRandom(fit::curr_bkg_template->h, n_bkg);
+    fit::h_data_toy_sig->FillRandom(fit::h_sig, n_sig);
+    fit::h_data_toy_bkg->FillRandom(fit::curr_bkg_template->h, n_bkg);
 
-    fit::h_data->Add(fit::h_data_sig);
-    fit::h_data->Add(fit::h_data_bkg);
+    fit::h_data_toy->Add(fit::h_data_toy_sig);
+    fit::h_data_toy->Add(fit::h_data_toy_bkg);
+    fit::h_data = fit::h_data_toy;
   }
 
   void Fitter::fit(int toy_, Templates* bkg_templates_, TH1D* sig_template, const VertexPairs& v2v, const std::vector<double>& true_pars_) {
