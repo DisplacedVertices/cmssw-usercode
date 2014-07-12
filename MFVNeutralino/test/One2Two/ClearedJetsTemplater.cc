@@ -65,7 +65,7 @@ namespace mfv {
     TDirectory* dtemp = dtoy->mkdir("templates");
     dtemp->cd();
 
-    
+    jmt::vthrow("ClearedJetsTemplater::make_templates not implemented");
   }
 
   void ClearedJetsTemplater::process_imp() {
