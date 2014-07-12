@@ -456,7 +456,7 @@ namespace mfv {
 
       h_fcn_f_phis[ip]->FillRandom("f_phi", 100000);
 
-      TH1D* h = new TH1D(TString::Format("h_orig_template_ip%i", ip), TString::Format("phi_exp = %f", phi_exp), Template::nbins, Template::min_val, Template::max_val);
+      TH1D* h = new TH1D(TString::Format("h_template_ip%i", ip), TString::Format("phi_exp = %f", phi_exp), Template::nbins, Template::min_val, Template::max_val);
       orig_templates.push_back(new PhiShiftTemplate(ip, h, phi_exp, 0.));
 
       auto f = [&h](const VertexPair& p) {
