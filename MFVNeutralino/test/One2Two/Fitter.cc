@@ -75,19 +75,15 @@ namespace mfv {
     }
 
     double twolnL(double mu_sig, double mu_bkg) {
-      double lnL = 0;
+      double lnL = 0; //-(mu_sig + mu_bkg);
       for (int i = 1; i <= n_bins; ++i) {
-        const double nu_sig = mu_sig * a_sig[i];
-        const double nu_bkg = mu_bkg * a_bkg[i];
-        const double nu_sum = nu_sig + nu_bkg;
-        const double nu = nu_sum > 1e-12 ? nu_sum : 1e-12;
-        const double n = a_data[i];
-        //if (n > 0 && nu_sum == 0)
-        //  jmt::vthrow("in twolnL, n = %f and nu = 0 for bin i = %i", n, i);
-        const double dlnL = -nu + n * log(nu);
-        lnL += dlnL;
-        //        printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
-        //               i, mu_sig, mu_bkg, nu_bkg, nu_sig, nu, n, dlnL, lnL);
+        const double nu_sum = mu_sig * a_sig[i] + mu_bkg * a_bkg[i];
+        if (nu_sum > 1e-12)
+          lnL += -nu_sum + a_data[i] * log(nu_sum);
+        else
+          lnL -= 1e-12 + a_data[i] * 27.6310211159285473;
+        //printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
+        //     i, mu_sig, mu_bkg, mu_bkg * a_bkg[i], mu_sig * a_sig[i], mu_bkg * a_bkg[i] + mu_sig * a_sig[i], a_data[i], -nu_sum + a_data[i] * (nu_sum > 1e-12 ? log(nu_sum) : -27.6310211159285473), lnL);
       }
       return 2*lnL;
     }
@@ -128,7 +124,7 @@ namespace mfv {
       print_toys(env.get_bool("print_toys", false)),
       save_toys(env.get_bool("save_toys", false)),
       do_limits(env.get_bool("do_limits", true)),
-      mu_sig_limit_step(env.get_double("mu_sig_limit_step", 0.05)),
+      mu_sig_limit_step(env.get_double("mu_sig_limit_step", 0.2)),
 
       fout(f),
       dout(f->mkdir(TString::Format("Fitter%s", uname.c_str()))),
