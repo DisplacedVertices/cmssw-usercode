@@ -1,10 +1,8 @@
-echo
-echo
-echo
-echo
-echo
+#!/bin/bash -x
 g++ \
- -std=c++0x -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -g \
+ $* \
+ -std=c++0x \
+ -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual \
  `root-config --cflags --libs --glibs` \
  -lMinuit \
  -I /uscms/home/tucker/private/mfv_5313/src \
