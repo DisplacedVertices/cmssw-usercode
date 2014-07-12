@@ -15,23 +15,73 @@
 namespace mfv {
   namespace fit {
     int n_bins = -1;
+
+    TH1D* h_sig = 0;
+    const double* a_sig = 0;
+
+    Template* curr_bkg_template = 0;
+    TH1D* h_bkg = 0;
+    const double* a_bkg = 0;
+
     TH1D* h_data_real = 0;
     TH1D* h_data_toy_sig = 0;
     TH1D* h_data_toy_bkg = 0;
     TH1D* h_data_toy = 0;
     TH1D* h_data = 0;
-    Template* curr_bkg_template = 0;
-    TH1D* h_sig = 0;
+    const double* a_data = 0;
+
+    void set_or_check_n_bins(TH1D* h) {
+      if (n_bins < 0)
+        n_bins = h->GetNbinsX();
+      else if (h->GetNbinsX() != n_bins)
+        jmt::vthrow("%s binning bad: n_bins = %i, h # bins: %i", h->GetName(), n_bins, h->GetNbinsX());
+    }
+
+    void set_sig(TH1D* h) {
+      set_or_check_n_bins(h);
+      h_sig = h;
+      a_sig = h->GetArray();
+    }
+
+    void set_bkg_no_check(Template* t) {
+      curr_bkg_template = t;
+      h_bkg = t->h;
+      a_bkg = t->h->GetArray();
+    }
+
+    void set_bkg(Template* t) {
+      set_or_check_n_bins(t->h);
+      set_bkg_no_check(t);
+    }
+
+    void set_data_no_check(TH1D* h) {
+      h_data = h;
+      a_data = h->GetArray();
+    }
+
+    void set_data_real() {
+      set_data_no_check(h_data_real);
+    }
+
+    void set_data(TH1D* h) {
+      set_or_check_n_bins(h);
+      set_data_no_check(h);
+    }
+
+    void globals_ok() {
+      if (n_bins < 0 || h_data == 0 || curr_bkg_template == 0 || h_sig == 0 || h_data_real == 0)
+        jmt::vthrow("fit globals not set up properly: n_bins: %i  h_data: %p  curr_bkg_template: %p  h_sig: %p  h_data_real: %p",
+                    n_bins, h_data, curr_bkg_template, h_sig, h_data_real);
+    }
 
     double twolnL(double mu_sig, double mu_bkg) {
-      const TH1D* h_bkg = curr_bkg_template->h;
       double lnL = 0;
       for (int i = 1; i <= n_bins; ++i) {
-        const double nu_sig = mu_sig * h_sig->GetBinContent(i);
-        const double nu_bkg = mu_bkg * h_bkg->GetBinContent(i);
+        const double nu_sig = mu_sig * a_sig[i];
+        const double nu_bkg = mu_bkg * a_bkg[i];
         const double nu_sum = nu_sig + nu_bkg;
         const double nu = nu_sum > 1e-12 ? nu_sum : 1e-12;
-        const double n = h_data->GetBinContent(i);
+        const double n = a_data[i];
         //if (n > 0 && nu_sum == 0)
         //  jmt::vthrow("in twolnL, n = %f and nu = 0 for bin i = %i", n, i);
         const double dlnL = -nu + n * log(nu);
@@ -144,80 +194,6 @@ namespace mfv {
     t_fit_info->Branch("mu_sig_limit", &mu_sig_limit, "mu_sig_limit/D");
   }    
 
-  void Fitter::fit_globals_ok() {
-    if (fit::n_bins < 0 || fit::h_data == 0 || fit::curr_bkg_template == 0 || fit::h_sig == 0 || fit::h_data_real == 0)
-      jmt::vthrow("fit globals not set up properly: n_bins: %i  h_data: %p  curr_bkg_template: %p  h_sig: %p  h_data_real: %p",
-                  fit::n_bins, fit::h_data, fit::curr_bkg_template, fit::h_sig, fit::h_data_real);
-  }
-
-#if 0
-  bool Fitter::scan_likelihood() {
-    fit_globals_ok();
-
-    const double mu_sig_min = 0;
-    const double mu_sig_max = 100;
-    const double mu_bkg_min = 0;
-    const double mu_bkg_max = 100;
-    const int mu_sig_steps = 200;
-    const int mu_bkg_steps = 200;
-    const double d_mu_sig = (mu_sig_max - mu_sig_min) / mu_sig_steps;
-    const double d_mu_bkg = (mu_bkg_max - mu_bkg_min) / mu_bkg_steps;
-
-    printf("scanning likelihood mu_sig (%f, %f) in %i steps and mu_bkg (%f, %f) in %i steps, with %i templates:\n", mu_sig_min, mu_sig_max, mu_sig_steps, mu_bkg_min, mu_bkg_max, mu_bkg_steps, int(bkg_templates->size()));
-
-    glb_scan_maxtwolnL = -1e300;
-    glb_scan_max_pars.assign(5, -1);
-    glb_scan_max_pars_errs.assign(5, -1);
-
-    TDirectory* d = dtoy->mkdir("scan_likelihood");
-    d->cd();
-
-    for (size_t i_template = 0, i_template_e = bkg_templates->size(); i_template < i_template_e; ++i_template) {
-      Template* bkg_template = bkg_templates->at(i_template);
-      fit::curr_bkg_template = bkg_template;
-
-      TH2F* h = new TH2F(TString::Format("h_likelihood_template%s", bkg_template->name().c_str()),
-                         TString::Format("%s;#mu_{sig};#mu_{bkg}", bkg_template->title().c_str()),
-                         mu_sig_steps, mu_sig_min, mu_sig_max,
-                         mu_bkg_steps, mu_bkg_min, mu_bkg_max);
-
-      double maxtwolnL = -1e300;
-      std::vector<double> max_pars(npars);
-      max_pars[0] = max_pars[1] = -1;
-      for (int ipar = 2; ipar < npars; ++ipar)
-        max_pars[ipar] = bkg_template->par(ipar-2);
-
-      for (int i_mu_sig = 0; i_mu_sig < mu_sig_steps; ++i_mu_sig) {
-        const double mu_sig = mu_sig_min + i_mu_sig * d_mu_sig;
-        for (int i_mu_bkg = 0; i_mu_bkg < mu_bkg_steps; ++i_mu_bkg) {
-          const double mu_bkg = mu_bkg_min + i_mu_bkg * d_mu_bkg;
-          if (mu_sig < 1 || mu_bkg < 1)
-            continue;
-
-          const double twolnL_ = fit::twolnL(mu_sig, mu_bkg);
-          h->SetBinContent(i_mu_sig+1, i_mu_bkg+1, twolnL_);
-
-          if (twolnL_ > maxtwolnL) {
-            maxtwolnL = twolnL_;
-            max_pars[0] = mu_sig;
-            max_pars[1] = mu_bkg;
-          }
-        }
-      }
-
-      printf("%s (%s) max 2lnL = %f  for  mu_sig = %f  mu_bkg = %f\n", h->GetName(), h->GetTitle(), maxtwolnL, max_pars[0], max_pars[1]);
-      if (maxtwolnL > glb_scan_maxtwolnL) {
-        printf("  ^ new global max!\n");
-        glb_scan_maxtwolnL = maxtwolnL;
-        for (int ipar = 0; ipar < npars; ++ipar)
-          glb_scan_max_pars[ipar] = max_pars[ipar];
-      }
-    }
-
-    return glb_scan_maxtwolnL > -1e300;
-  }
-#endif
-
   void Fitter::draw_likelihood(const test_stat_t& t) {
     printf("draw_likelihood: ");
 
@@ -240,7 +216,8 @@ namespace mfv {
                          bkg_templates->size(), 0, bkg_templates->size() );
 
       for (size_t i_template = 0, i_template_e = bkg_templates->size(); i_template < i_template_e; ++i_template) {
-        Template* bkg_template = fit::curr_bkg_template = bkg_templates->at(i_template);
+        Template* bkg_template =  bkg_templates->at(i_template);
+        fit::set_bkg(bkg_template);
         const int ibin = int(i_template + 1);
 
         h->SetBinContent(ibin, fit::twolnL(ml.mu_sig, ml.mu_bkg));
@@ -255,7 +232,7 @@ namespace mfv {
                           n_mu_bkg, mu_bkg_min, mu_bkg_max
                           );
 
-      fit::curr_bkg_template = ml.nuis;
+      fit::set_bkg(ml.nuis);
 
       for (int i_mu_sig = 1; i_mu_sig < n_mu_sig; ++i_mu_sig) {
         const double mu_sig = mu_sig_min + i_mu_sig * d_mu_sig;
@@ -317,7 +294,7 @@ namespace mfv {
   }
 
   Fitter::min_lik_t Fitter::scanmin_likelihood(double mu_sig_start, bool fix_mu_sig) {
-    fit_globals_ok();
+    fit::globals_ok();
 
     min_lik_t ret;
 
@@ -328,7 +305,7 @@ namespace mfv {
 
     for (size_t i_template = 0, i_template_e = bkg_templates->size(); i_template < i_template_e; ++i_template) {
       Template* bkg_template = bkg_templates->at(i_template);
-      fit::curr_bkg_template = bkg_template;
+      fit::set_bkg(bkg_template);
 
       TMinuit* m = new TMinuit(2);
       m->SetPrintLevel(print_level);
@@ -410,7 +387,7 @@ namespace mfv {
 
     fit::h_data_toy->Add(fit::h_data_toy_sig);
     fit::h_data_toy->Add(fit::h_data_toy_bkg);
-    fit::h_data = fit::h_data_toy;
+    fit::set_data_no_check(fit::h_data_toy);
   }
 
   void Fitter::fit(int toy_, Templates* bkg_templates_, TH1D* sig_template, const VertexPairs& v2v, const std::vector<double>& true_pars_) {
@@ -423,15 +400,18 @@ namespace mfv {
 
     dtoy->mkdir("finalized_templates")->cd();
 
-    bkg_templates = bkg_templates_;
-    fit::n_bins = int(Template::binning().size());
-    fit::curr_bkg_template = (*bkg_templates)[0];
-    fit::h_sig = Template::finalize_template(sig_template);
+    fit::set_sig(Template::finalize_template(sig_template));
 
-    fit::h_data_real = fit::h_data = Template::hist_with_binning("h_data", TString::Format("toy %i", toy));
+    bkg_templates = bkg_templates_;
+    fit::set_bkg((*bkg_templates)[0]);
+
+    TH1D* h_data_temp = Template::hist_with_binning("h_data", TString::Format("toy %i", toy));
     for (const VertexPair& p : v2v)
-      fit::h_data->Fill(p.d2d());
-    const int n_data = fit::h_data->Integral();
+      h_data_temp->Fill(p.d2d());
+    fit::h_data_real = Template::finalize_binning(h_data_temp);
+    fit::set_data_real();
+    const int n_data = fit::h_data_real->Integral();
+    delete h_data_temp;
 
     ////
 
@@ -500,7 +480,7 @@ namespace mfv {
           printf("."); fflush(stdout);
         }
 
-        fit::h_data = fit::h_data_real;
+        fit::set_data_real();
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
         if (print_toys) {
