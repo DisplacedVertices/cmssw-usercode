@@ -1,7 +1,7 @@
 #!/bin/bash -x
 g++ \
  $* \
- -std=c++0x \
+ -O2 -std=c++0x \
  -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual \
  `root-config --cflags --libs --glibs` \
  -lMinuit \
