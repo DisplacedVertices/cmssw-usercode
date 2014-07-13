@@ -7,5 +7,5 @@ g++ \
  -lMinuit \
  -I /uscms/home/tucker/private/mfv_5313/src \
  /uscms/home/tucker/private/mfv_5313/src/JMTucker/MFVNeutralino/src/MiniNtuple.cc \
- Utility.cc VAException.cc Phi.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc Templater.cc PhiShiftTemplater.cc ClearedJetsTemplater.cc Fitter.cc mfvo2t.cc \
+ Utility.cc ProgressBar.cc VAException.cc Phi.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc Templater.cc PhiShiftTemplater.cc ClearedJetsTemplater.cc Fitter.cc mfvo2t.cc \
  -o mfvo2t.exe

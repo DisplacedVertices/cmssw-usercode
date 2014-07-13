@@ -9,6 +9,7 @@
 #include "TRandom3.h"
 #include "TTree.h"
 
+#include "ProgressBar.h"
 #include "ROOTTools.h"
 #include "Random.h"
 
@@ -432,15 +433,14 @@ namespace mfv {
     draw_likelihood(t_obs_0);
     draw_fit(t_obs_0);
 
-    printf("throwing %i significance toys: ", n_toy_signif);
+    printf("throwing %i significance toys:\n", n_toy_signif);
+    jmt::ProgressBar pb_signif(50, n_toy_signif);
+    if (!print_toys)
+      pb_signif.start();
 
-    int n_toys_per_dot = n_toy_signif / 50;
     int n_toy_signif_t_ge_obs = 0;
-    for (int i_toy_signif = 0; i_toy_signif < n_toy_signif; ++i_toy_signif) {
-      if (i_toy_signif % n_toys_per_dot == 0) {
-        printf("."); fflush(stdout);
-      }
 
+    for (int i_toy_signif = 0; i_toy_signif < n_toy_signif; ++i_toy_signif) {
       const int n_sig_signif = 0;
       const int n_bkg_signif = rand->Poisson(n_data);
       make_toy_data(i_toy_signif, -1, n_sig_signif, n_bkg_signif);
@@ -452,6 +452,8 @@ namespace mfv {
       if (print_toys) {
         t.print("t_signif toy %i");
       }
+      else
+        ++pb_signif;
 
       if (save_toys) {
         jmt::vthrow("save signif toys not implemented");
@@ -467,15 +469,13 @@ namespace mfv {
       std::vector<test_stat_t> t_obs_limits;
       const double limit_alpha = 0.05;
       const double mu_sig_limit_stop = n_data;
-      const int n_i_mu_per_dot = mu_sig_limit_stop / mu_sig_limit_step / 50;
-      int i_mu_sig_limit = 0;
+
+      jmt::ProgressBar pb_limits(50, mu_sig_limit_stop / mu_sig_limit_step);
+      if (!print_toys)
+        pb_limits.start();
 
       printf("scanning for %.1f%% upper limit: ", 100*(1-limit_alpha));
       while (mu_sig_limit < mu_sig_limit_stop) {
-        if (i_mu_sig_limit++ % n_i_mu_per_dot == 0) {
-          printf("."); fflush(stdout);
-        }
-
         fit::set_data_real();
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
@@ -483,6 +483,8 @@ namespace mfv {
           printf("mu_sig_limit: %f  ", mu_sig_limit);
           t_obs_limit_.print("t_obs_limit");
         }
+        else
+          ++pb_limits;
 
         if (save_toys) {
           jmt::vthrow("save limit toys not implemented");
