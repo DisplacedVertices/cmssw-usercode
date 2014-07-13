@@ -40,10 +40,23 @@ fi
 echo mfvo2t.exe done
 echo
 
-gunzip crab_fjr.gz
-mv crab_fjr $RUNTIME_AREA/crab_fjr_${JOB_NUM}.xml
+cat > $RUNTIME_AREA/crab_fjr_${JOB_NUM}.xml << EOF
+<FrameworkJobReport>
+<PerformanceReport>
+  <PerformanceSummary Metric="StorageStatistics">
+    <Metric Name="Parameter-untracked-bool-enabled" Value="true"/>
+    <Metric Name="Parameter-untracked-bool-stats" Value="true"/>
+    <Metric Name="Parameter-untracked-string-cacheHint" Value="application-only"/>
+    <Metric Name="Parameter-untracked-string-readHint" Value="auto-detect"/>
+    <Metric Name="ROOT-tfile-read-totalMegabytes" Value="0"/>
+    <Metric Name="ROOT-tfile-write-totalMegabytes" Value="0"/>
+  </PerformanceSummary>
+</PerformanceReport>
 
-#mv mfvo2t.root mfvo2t_${JOB_NUM}.root
+<GeneratorInfo>
+</GeneratorInfo>
+</FrameworkJobReport>
+EOF
 '''
 
 dummy_pset = '''
@@ -64,7 +77,7 @@ output_file=mfvo2t.root
 script_exe=runme.csh
 ui_working_dir=%(batch_root)s/crab_%(batch_name)s
 ssh_control_persist=no
-additional_input_files=mfvo2t.exe,signal_templates.root,crab_fjr.gz
+additional_input_files=mfvo2t.exe,signal_templates.root
 return_data=1
 
 [CRAB]
@@ -85,7 +98,10 @@ def submit(njobs, min_ntracks, signal_sample, samples):
         raw_input('did the compile go OK?')
         compiled = True
 
-    batch_root = 'crab/One2Two_condor'
+    scheduler = 'condor' if 'condor' in sys.argv else 'remoteGlidein'
+    batch_root = 'crab/One2Two'
+    if scheduler == 'condor':
+        batch_root += '_condor'
     dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
 
     if not setuped:
@@ -93,7 +109,6 @@ def submit(njobs, min_ntracks, signal_sample, samples):
         open(dummy_pset_fn, 'wt').write(dummy_pset)
         setuped = True
         
-    scheduler = 'condor' if 'condor' in sys.argv else 'remoteGlidein'
 
     batch_name = 'Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (min_ntracks,
                                                     'def',
