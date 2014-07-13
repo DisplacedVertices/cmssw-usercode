@@ -418,6 +418,7 @@ namespace mfv {
     for (double tp : true_pars)
       printf(" %f", tp);
     printf("\n");
+    printf("  # bkg templates: %lu\n", bkg_templates->size());
 
     t_obs_0 = calc_test_stat(0);
     t_obs_0.print("t_obs_0");
