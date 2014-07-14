@@ -6,8 +6,8 @@
 namespace jmt {
   class ProgressBar {
   private:
-    const bool n_dots;
-    const bool n_per_dot;
+    const int n_dots;
+    const int n_per_dot;
     const bool flush;
     const std::string chars;
     int i;

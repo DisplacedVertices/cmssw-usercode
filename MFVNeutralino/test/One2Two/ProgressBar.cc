@@ -1,10 +1,11 @@
 #include "ProgressBar.h"
 #include <cassert>
+#include <cstdio>
 
 namespace jmt {
   ProgressBar::ProgressBar(int n_dots_, int n_complete, bool flush_, const char* chars_)
     : n_dots(n_dots_),
-      n_per_dot(n_complete / n_dots),
+      n_per_dot(n_complete / n_dots > 0 ? n_complete / n_dots : 1),
       flush(flush_),
       chars(chars_),
       i(0),
