@@ -35,8 +35,11 @@ namespace mfv {
   }
 
   std::vector<TemplatePar> PhiShiftTemplater::par_info() const {
+    int n_phi = 1;
+    if (n_phi_exp > 1)
+      n_phi = (n_phi_exp - 1) * (n_phi_interp + 1);
     return std::vector<TemplatePar>({
-        { (n_phi_exp - 1) * n_phi_interp, phi_exp_min, d_phi_interp },
+        { n_phi, phi_exp_min, d_phi_interp },
         { n_shift, 0, Template::bin_width }
       });
   }
@@ -69,7 +72,7 @@ namespace mfv {
     printf("d2d_cut: %f\n", d2d_cut);
     printf("sampling_type: %i\n", sampling_type);
     printf("sample_count: %i\n", sample_count);
-    printf("phi_exp: %f + %i increments of %f\n", phi_exp_min, n_phi_exp, d_phi_exp);
+    printf("phi_exp: %i increments of %f starting from %f\n", n_phi_exp, d_phi_exp, phi_exp_min);
     printf("n_phi_interp: %i -> d_phi overall = %f\n", n_phi_interp, d_phi_exp/n_phi_interp);
     printf("n_shift: %i\n", n_shift);
     printf("find gs: phi? %i dz? %i   fs: phi? %i (bkgonly? %i) dz? %i (bkgonly? %i)\n", find_g_phi, find_g_dz, find_f_phi, find_f_phi_bkgonly, find_f_dz, find_f_dz_bkgonly);
