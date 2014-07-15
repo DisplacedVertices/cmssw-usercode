@@ -515,11 +515,11 @@ namespace mfv {
       const double limit_alpha = 0.05;
       const double mu_sig_limit_stop = n_data;
 
+      printf("scanning for %.1f%% upper limit:\n", 100*(1-limit_alpha));
       jmt::ProgressBar pb_limits(50, mu_sig_limit_stop / mu_sig_limit_step);
       if (!print_toys)
         pb_limits.start();
 
-      printf("scanning for %.1f%% upper limit: ", 100*(1-limit_alpha));
       while (mu_sig_limit < mu_sig_limit_stop) {
         fit::set_data_real();
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
