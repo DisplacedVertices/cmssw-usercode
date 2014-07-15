@@ -129,7 +129,7 @@ namespace mfv {
 
   int TemplateInterpolator::i_par(int i, double par) const {
     int ret((par - par_infos[i].start) / par_infos[i].step);
-    if (ret < 0)
+    if (ret <= 0)
       return 0;
     else if (ret >= par_infos[i].nsteps)
       return par_infos[i].nsteps - 1;
