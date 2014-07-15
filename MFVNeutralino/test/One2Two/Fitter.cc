@@ -435,10 +435,12 @@ namespace mfv {
     bkg_templates = bkg_templater->get_templates();
     fit::interp = new TemplateInterpolator(bkg_templates, fit::n_bins, bkg_templater->par_info(), fit::a_bkg);
 
-    int wrong_template_index_count = 0;
-    for (int i = 0, ie = bkg_templates->size(); i < ie; ++i)
-      if (i != fit::interp->i_Q(bkg_templates->at(i)->pars))
-        ++wrong_template_index_count;
+    std::map<int, int> template_index_deltas;
+    for (int i = 0, ie = bkg_templates->size(); i < ie; ++i) {
+      //printf("bkg template #%5i: %s\n", i, bkg_templates->at(i)->title().c_str());
+      const int delta = abs(i - fit::interp->i_Q(bkg_templates->at(i)->pars));
+      template_index_deltas[delta] += 1;
+    }
     //jmt::vthrow("something wrong with templates");
 
     TH1D* h_data_temp = Template::hist_with_binning("h_data", TString::Format("toy %i", toy));
@@ -457,7 +459,9 @@ namespace mfv {
     for (double tp : true_pars)
       printf(" %f", tp);
     printf("\n");
-    printf("  # bkg templates: %lu  wrong_template_index_count: %i\n", bkg_templates->size(), wrong_template_index_count);
+    printf("  # bkg templates: %lu  template_index_deltas seen:\n", bkg_templates->size());
+    for (const auto& p : template_index_deltas)
+      printf("%i: %i times\n", p.first, p.second);
 
     t_obs_0 = calc_test_stat(0);
     t_obs_0.print("t_obs_0");
