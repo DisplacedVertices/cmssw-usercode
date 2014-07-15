@@ -22,6 +22,7 @@ namespace mfv {
     const double phi_exp_max;
     const double d_phi_exp;
     const int n_phi_interp;
+    const double d_phi_interp;
     const int n_shift;
     const bool find_g_phi;
     const bool find_g_dz;
@@ -35,6 +36,7 @@ namespace mfv {
     double phi_exp_bkgonly;
     double shift_means;
     virtual std::vector<double> true_pars() const { return std::vector<double>({phi_exp_bkgonly, shift_means}); }
+    virtual std::vector<TemplatePar> par_info() const;
 
     TH1D* h_1v_g_phi;
     TH1D* h_1v_g_dz;

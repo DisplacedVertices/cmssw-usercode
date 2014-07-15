@@ -7,6 +7,14 @@
 class TH1D;
 
 namespace mfv {
+  struct TemplatePar {
+    // std::string name;
+    // double value;
+    int nsteps;
+    double start;
+    double step;
+  };
+
   struct Template {
     int i;
     TH1D* h;
@@ -15,12 +23,13 @@ namespace mfv {
     virtual double chi2() const { return 0; }
     virtual std::string name() const { return std::string("NoName"); }
     virtual std::string title() const { return std::string("NoTitle"); }
-    virtual size_t npars() const { return 0; }
+    virtual size_t npars() const { return pars.size(); }
     virtual double par(size_t) const { return 0.; }
 
     static const int nbins;
     static const double min_val;
     static const double max_val;
+    static const double bin_width;
 
     static std::vector<double> binning();
     static TH1D* hist_with_binning(const char* name, const char* title);
@@ -54,6 +63,30 @@ namespace mfv {
   //////////////////////////////////////////////////////////////////////////////
 
   typedef std::vector<Template*> Templates;
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  struct TemplateInterpolator {
+    Templates* templates;
+    int n_bins;
+    int n_pars;
+    std::vector<TemplatePar> par_infos;
+
+    std::vector<double>& a;
+
+    std::vector<double> curr_pars;
+    Templates Q;
+    std::vector<std::vector<double> > R;
+
+    TemplateInterpolator(Templates* templates_, int n_bins_,
+                         const std::vector<TemplatePar>& par_infos_,
+                         std::vector<double>& a_);
+    int i_par(int i, double par) const;
+    int i_Q(const std::vector<double>& pars) const;
+    Template* get_Q(const std::vector<double>& pars) const;
+    void interpolate(const std::vector<double>& pars, std::vector<double>* a_p=0);
+    void interpolate(double par0, double par1) { interpolate(std::vector<double>({par0,par1})); }
+  };
 }
 
 #endif

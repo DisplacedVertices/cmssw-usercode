@@ -27,6 +27,7 @@ namespace mfv {
     double clearing_mu_fit;
     double clearing_sigma_fit;
     virtual std::vector<double> true_pars() const { return std::vector<double>({clearing_mu_fit, clearing_sigma_fit}); }
+    virtual std::vector<TemplatePar> par_info() const { return std::vector<TemplatePar>(2); }
 
     ////////////////////////////////////////////////////////////////////////////
 

@@ -57,7 +57,7 @@ int main() {
     for (double tp : ter->true_pars())
       true_pars.push_back(tp);
 
-    fitter->fit(itoy, &ter->templates, h_sig, tt->toy_2v, true_pars);
+    fitter->fit(itoy, ter, h_sig, tt->toy_2v, true_pars);
   }
 
   out_f->Write();

@@ -34,6 +34,14 @@ namespace mfv {
     return rand->Rndm() < accept_prob(f, g, M);
   }
 
+  std::vector<TemplatePar> PhiShiftTemplater::par_info() const {
+    return std::vector<TemplatePar>( {
+        { n_phi_interp * int(ceil((phi_exp_max - phi_exp_min)/d_phi_exp)), phi_exp_min, d_phi_interp },
+        { n_shift, 0, Template::bin_width },
+          }
+      );
+  }
+
   PhiShiftTemplater::PhiShiftTemplater(const std::string& name_, TFile* f, TRandom* r)
     : Templater("PhiShift", name_, f, r),
 
@@ -45,6 +53,7 @@ namespace mfv {
       phi_exp_max(env.get_double("phi_exp_max", 6.1)),
       d_phi_exp(env.get_double("d_phi_exp", 0.25)),
       n_phi_interp(env.get_int("n_phi_interp", 20)),
+      d_phi_interp(d_phi_exp/n_phi_interp),
       n_shift(env.get_int("n_shift", 40)),
       find_g_phi(env.get_bool("find_g_phi", true)),
       find_g_dz(env.get_bool("find_g_dz", true)),
@@ -534,7 +543,7 @@ namespace mfv {
     phi_exp_bkgonly = f_phi->GetParameter(1);
     shift_means = h_d2d[vt_2vsbbkg]->GetMean() - h_d2d[vt_1vsb]->GetMean();
     t_fit_info->Fill();
-    fill_1v_histos();
+//    fill_1v_histos();
     make_templates();
   }
 }
