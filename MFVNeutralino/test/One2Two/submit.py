@@ -11,9 +11,24 @@ export JOB_NUM=$1
 
 echo get trees
 xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees_17879f2d0db8123dbf443e3b6613c4c3c0ba1d2f.tgz all_trees.tgz
+ECODE=$?
+if [ "$ECODE" -ne "0" ]; then
+  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  echo @@@@ xrdcp of trees failed
+  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  exit $ECODE
+fi
+echo
 
 echo untar trees
 tar zxvf all_trees.tgz
+ECODE=$?
+if [ "$ECODE" -ne "0" ]; then
+  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  echo @@@@ untar failed
+  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  exit $ECODE
+fi
 echo
 
 echo ROOTSYS: $ROOTSYS
