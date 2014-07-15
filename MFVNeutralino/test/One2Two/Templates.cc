@@ -128,7 +128,13 @@ namespace mfv {
   }
 
   int TemplateInterpolator::i_par(int i, double par) const {
-    return int((par - par_infos[i].start) / par_infos[i].step);
+    int ret((par - par_infos[i].start) / par_infos[i].step);
+    if (ret < 0)
+      return 0;
+    else if (ret >= par_infos[i].nsteps)
+      return par_infos[i].nsteps - 1;
+    else
+      return ret;
   }
 
   int TemplateInterpolator::i_Q(const std::vector<double>& pars) const {
@@ -162,16 +168,20 @@ namespace mfv {
 
     const int i_par0 = i_par(0, pars[0]);
     const int i_par1 = i_par(1, pars[1]);
+    const int i_par0_p1 = i_par0 == par_infos[0].nsteps - 1 ? i_par0 : i_par0 + 1;
+    const int i_par1_p1 = i_par1 == par_infos[1].nsteps - 1 ? i_par1 : i_par1 + 1;
     const int n_par1 = par_infos[1].nsteps;
 
-    Q[0] = (*templates)[ i_par0      * n_par1 + i_par1    ];
-    Q[1] = (*templates)[ i_par0      * n_par1 + i_par1 + 1];
-    Q[2] = (*templates)[(i_par0 + 1) * n_par1 + i_par1    ];
-    Q[3] = (*templates)[(i_par0 + 1) * n_par1 + i_par1 + 1];
+    Q[0] = Q[1] = Q[2] = Q[3] = 0;
 
-    //printf("interpolate: %f %f\n", pars[0], pars[1]);
-    //for (int i = 0; i < 4; ++i)
-    //  printf("Q%i: %s\n", i, Q[i]->title().c_str());
+    Q[0] = (*templates)[n_par1 * i_par0    + i_par1   ];
+    Q[1] = (*templates)[n_par1 * i_par0    + i_par1_p1];
+    Q[2] = (*templates)[n_par1 * i_par0_p1 + i_par1   ];
+    Q[3] = (*templates)[n_par1 * i_par0_p1 + i_par1_p1];
+
+    //    printf("interpolate: %f %f\n", pars[0], pars[1]);
+    //    for (int i = 0; i < 4; ++i)
+    //      printf("Q%i: %s\n", i, Q[i]->title().c_str());
 
     for (int i = 0; i < 2; ++i) {
       const double d = Q[2+i]->par(0) - Q[i]->par(0);

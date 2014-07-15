@@ -18,8 +18,8 @@ namespace mfv {
     const double d2d_cut;
     const int sampling_type;
     const int sample_count;
+    const int n_phi_exp;
     const double phi_exp_min;
-    const double phi_exp_max;
     const double d_phi_exp;
     const int n_phi_interp;
     const double d_phi_interp;

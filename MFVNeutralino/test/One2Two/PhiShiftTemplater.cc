@@ -35,11 +35,10 @@ namespace mfv {
   }
 
   std::vector<TemplatePar> PhiShiftTemplater::par_info() const {
-    return std::vector<TemplatePar>( {
-        { n_phi_interp * int(ceil((phi_exp_max - phi_exp_min)/d_phi_exp)), phi_exp_min, d_phi_interp },
-        { n_shift, 0, Template::bin_width },
-          }
-      );
+    return std::vector<TemplatePar>({
+        { (n_phi_exp - 1) * n_phi_interp, phi_exp_min, d_phi_interp },
+        { n_shift, 0, Template::bin_width }
+      });
   }
 
   PhiShiftTemplater::PhiShiftTemplater(const std::string& name_, TFile* f, TRandom* r)
@@ -49,8 +48,8 @@ namespace mfv {
       d2d_cut(env.get_double("d2d_cut", 0.05)),
       sampling_type(env.get_int("sampling_type", 2)),
       sample_count(env.get_int("sample_count", -1)),
+      n_phi_exp(env.get_int("n_phi_exp", 25)),
       phi_exp_min(env.get_double("phi_exp_min", 0.)),
-      phi_exp_max(env.get_double("phi_exp_max", 6.1)),
       d_phi_exp(env.get_double("d_phi_exp", 0.25)),
       n_phi_interp(env.get_int("n_phi_interp", 20)),
       d_phi_interp(d_phi_exp/n_phi_interp),
@@ -70,8 +69,8 @@ namespace mfv {
     printf("d2d_cut: %f\n", d2d_cut);
     printf("sampling_type: %i\n", sampling_type);
     printf("sample_count: %i\n", sample_count);
-    printf("phi_exp: (%f - %f) in %f increments\n", phi_exp_min, phi_exp_max, d_phi_exp);
-    printf("n_phi_interp: %i\n", n_phi_interp);
+    printf("phi_exp: %f + %i increments of %f\n", phi_exp_min, n_phi_exp, d_phi_exp);
+    printf("n_phi_interp: %i -> d_phi overall = %f\n", n_phi_interp, d_phi_exp/n_phi_interp);
     printf("n_shift: %i\n", n_shift);
     printf("find gs: phi? %i dz? %i   fs: phi? %i (bkgonly? %i) dz? %i (bkgonly? %i)\n", find_g_phi, find_g_dz, find_f_phi, find_f_phi_bkgonly, find_f_dz, find_f_dz_bkgonly);
     fflush(stdout);
@@ -87,8 +86,8 @@ namespace mfv {
     t_config->Branch("d2d_cut", const_cast<double*>(&d2d_cut), "d2d_cut/D");
     t_config->Branch("sampling_type", const_cast<int*>(&sampling_type), "sampling_type/I");
     t_config->Branch("sample_count", const_cast<int*>(&sample_count), "sample_count/I");
+    t_config->Branch("n_phi_exp", const_cast<int*>(&n_phi_exp), "n_phi_exp/I");
     t_config->Branch("phi_exp_min", const_cast<double*>(&phi_exp_min), "phi_exp_min/D");
-    t_config->Branch("phi_exp_max", const_cast<double*>(&phi_exp_max), "phi_exp_max/D");
     t_config->Branch("d_phi_exp", const_cast<double*>(&d_phi_exp), "d_phi_exp/D");
     t_config->Branch("n_phi_interp", const_cast<int*>(&n_phi_interp), "n_phi_interp/I");
     t_config->Branch("n_shift", const_cast<int*>(&n_shift), "n_shift/I");
@@ -171,12 +170,9 @@ namespace mfv {
     h_fcn_f_phi = Phi::new_1d_hist("h_fcn_f_phi", "");
     h_fcn_f_dz = new TH1D("h_fcn_f_dz", "", 20, -0.1, 0.1);
 
-    double phi_exp = 0;
     h_fcn_f_phis.clear();
-    for (int i_phi_exp = 0; ; ++i_phi_exp) {
-      phi_exp = phi_exp_min + i_phi_exp * d_phi_exp;
-      if (phi_exp > phi_exp_max)
-        break;
+    for (int i_phi_exp = 0; i_phi_exp < n_phi_exp; ++i_phi_exp) {
+      double phi_exp = phi_exp_min + i_phi_exp * d_phi_exp;
       h_fcn_f_phis.push_back(Phi::new_1d_hist(TString::Format("h_fcn_f_phis_%i", i_phi_exp), TString::Format("phi_exp = %f", phi_exp)));
     }
   }
@@ -448,7 +444,7 @@ namespace mfv {
   }
 
   void PhiShiftTemplater::make_templates() {
-    printf("PhiShiftTemplater%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, phi_exp_max, d_phi_exp); fflush(stdout);
+    printf("PhiShiftTemplater%s making templates: phi = range(%f, %f, %f)\n", name.c_str(), phi_exp_min, (n_phi_exp+1)*d_phi_exp, d_phi_exp); fflush(stdout);
 
     clear_templates();
 
@@ -457,10 +453,8 @@ namespace mfv {
     
     Templates orig_templates;
 
-    for (int ip = 0; ; ++ip) {
+    for (int ip = 0; ip < n_phi_exp; ++ip) {
       const double phi_exp = phi_exp_min + ip * d_phi_exp;
-      if (phi_exp > phi_exp_max)
-        break;
       set_phi_exp(phi_exp);
 
       h_fcn_f_phis[ip]->FillRandom("f_phi", 100000);
