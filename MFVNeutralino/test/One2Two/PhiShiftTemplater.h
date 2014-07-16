@@ -23,6 +23,7 @@ namespace mfv {
     const double d_phi_exp;
     const int n_phi_interp;
     const double d_phi_interp;
+    const int n_phi_total;
     const int n_shift;
     const bool find_g_phi;
     const bool find_g_dz;

@@ -35,11 +35,8 @@ namespace mfv {
   }
 
   std::vector<TemplatePar> PhiShiftTemplater::par_info() const {
-    int n_phi = 1;
-    if (n_phi_exp > 1)
-      n_phi = (n_phi_exp - 1) * (n_phi_interp + 1);
     return std::vector<TemplatePar>({
-        { n_phi, phi_exp_min, d_phi_interp },
+        { n_phi_total, phi_exp_min, d_phi_interp },
         { n_shift, 0, Template::bin_width }
       });
   }
@@ -56,6 +53,7 @@ namespace mfv {
       d_phi_exp(env.get_double("d_phi_exp", 0.25)),
       n_phi_interp(env.get_int("n_phi_interp", 20)),
       d_phi_interp(d_phi_exp/n_phi_interp),
+      n_phi_total((n_phi_exp - 1) * n_phi_interp + 1),
       n_shift(env.get_int("n_shift", 40)),
       find_g_phi(env.get_bool("find_g_phi", true)),
       find_g_dz(env.get_bool("find_g_dz", true)),
@@ -74,7 +72,7 @@ namespace mfv {
     printf("sample_count: %i\n", sample_count);
     printf("phi_exp: %i increments of %f starting from %f\n", n_phi_exp, d_phi_exp, phi_exp_min);
     printf("n_phi_interp: %i -> d_phi overall = %f\n", n_phi_interp, d_phi_exp/n_phi_interp);
-    printf("n_shift: %i\n", n_shift);
+    printf("n_phi_total: %i  n_shift: %i  n_templates\n", n_phi_total, n_shift, n_phi_total * n_shift);
     printf("find gs: phi? %i dz? %i   fs: phi? %i (bkgonly? %i) dz? %i (bkgonly? %i)\n", find_g_phi, find_g_dz, find_f_phi, find_f_phi_bkgonly, find_f_dz, find_f_dz_bkgonly);
     fflush(stdout);
 
@@ -412,22 +410,16 @@ namespace mfv {
     const int N1v_t = int(one_vertices->size());
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
 
-    int count = 0;
-    const int ndots = 100;
-    const int count_per_dot = N1v*(N1v-1)/2/ndots;
-    printf("["); for (int i = 0; i < ndots; ++i) printf(" "); printf("]\r[");
+    jmt::ProgressBar pb(50, N1v*(N1v-1)/2);
+    pb_signif.start();
 
     for (int iv = 0; iv < N1v; ++iv) {
       const VertexSimple& v0 = one_vertices->at(iv);
-      for (int jv = iv+1; jv < N1v; ++jv) {
+      for (int jv = iv+1; jv < N1v; ++jv, ++pb) {
         const VertexSimple& v1 = one_vertices->at(jv);
         VertexPair p(v0, v1);
         p.weight = prob_1v_pair(v0, v1);
         fcn(p);
-
-        if (++count % count_per_dot == 0) {
-          printf("."); fflush(stdout);
-        }
       }
     }
     printf("\n");
@@ -473,7 +465,9 @@ namespace mfv {
       loop_over_1v_pairs(f);
     }
 
-    printf("  interpolating + shifting templates: ");
+    printf("interpolating + shifting templates:\n");
+    jmt::ProgressBar pb(50, n_phi_total * n_shift);
+
     int iglb = 0;
     for (int ip = 0, ipe = int(orig_templates.size()); ip < ipe; ++ip) {
       TDirectory* d = dtemp->mkdir(TString::Format("ip%i", ip));
@@ -515,7 +509,8 @@ namespace mfv {
 
         if (h1)
           delete h;
-        printf("."); fflush(stdout);
+
+        ++pb;
 
         if (h1 == 0)
           break;
