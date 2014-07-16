@@ -172,8 +172,6 @@ namespace mfv {
     const int i_par1_p1 = i_par1 == par_infos[1].nsteps - 1 ? i_par1 : i_par1 + 1;
     const int n_par1 = par_infos[1].nsteps;
 
-    Q[0] = Q[1] = Q[2] = Q[3] = 0;
-
     Q[0] = (*templates)[n_par1 * i_par0    + i_par1   ];
     Q[1] = (*templates)[n_par1 * i_par0    + i_par1_p1];
     Q[2] = (*templates)[n_par1 * i_par0_p1 + i_par1   ];
@@ -183,22 +181,40 @@ namespace mfv {
     //    for (int i = 0; i < 4; ++i)
     //      printf("Q%i: %s\n", i, Q[i]->title().c_str());
 
-    for (int i = 0; i < 2; ++i) {
-      const double d = Q[2+i]->par(0) - Q[i]->par(0);
-      const double f = (Q[2+i]->par(0) - pars[0])/d;
-      //printf("R[%i] d %f f %f\n", i, d, f);
-      for (int ibin = 1; ibin <= n_bins; ++ibin) {
-        R[i][ibin] = f * Q[i]->h->GetBinContent(ibin) + (1-f) * Q[2+i]->h->GetBinContent(ibin);
-        //printf("   Q[%i].hc %f  Q[%i].hc %f  R[%i][%i] %f\n", i, Q[i]->h->GetBinContent(ibin), 2+i, Q[2+i]->h->GetBinContent(ibin), i, ibin, R[i][ibin]);
-      }
+    if (i_par0 == i_par0_p1 && i_par1 == i_par1_p1) {
+      for (int ibin = 1; ibin <= n_bins; ++ibin)
+        (*a_p)[ibin] = Q[0]->h->GetBinContent(ibin);
     }
+    else if (i_par0 == i_par0_p1) {
+      const double d = Q[1]->par(1) - Q[0]->par(1);
+      const double f = (Q[1]->par(1) - pars[1])/d;
+      for (int ibin = 1; ibin <= n_bins; ++ibin)
+        (*a_p)[ibin] = f * Q[0]->h->GetBinContent(ibin) + (1-f) * Q[1]->h->GetBinContent(ibin);
+    }
+    else if (i_par1 == i_par1_p1) {
+      const double d = Q[2]->par(0) - Q[0]->par(0);
+      const double f = (Q[2]->par(0) - pars[0])/d;
+      for (int ibin = 1; ibin <= n_bins; ++ibin)
+        (*a_p)[ibin] = f * Q[0]->h->GetBinContent(ibin) + (1-f) * Q[2]->h->GetBinContent(ibin);
+    }
+    else {
+      for (int i = 0; i < 2; ++i) {
+        const double d = Q[2+i]->par(0) - Q[i]->par(0);
+        const double f = (Q[2+i]->par(0) - pars[0])/d;
+        //printf("R[%i] d %f f %f\n", i, d, f);
+        for (int ibin = 1; ibin <= n_bins; ++ibin) {
+          R[i][ibin] = f * Q[i]->h->GetBinContent(ibin) + (1-f) * Q[2+i]->h->GetBinContent(ibin);
+          //printf("   Q[%i].hc %f  Q[%i].hc %f  R[%i][%i] %f\n", i, Q[i]->h->GetBinContent(ibin), 2+i, Q[2+i]->h->GetBinContent(ibin), i, ibin, R[i][ibin]);
+        }
+      }
 
-    const double d = Q[1]->par(1) - Q[0]->par(1);
-    const double f = (Q[1]->par(1) - pars[1])/d;
-    //printf("a d %f f %f\n", d, f);
-    for (int ibin = 1; ibin <= n_bins; ++ibin) {
-      (*a_p)[ibin] = f * R[0][ibin] + (1-f) * R[1][ibin];
-      //printf("   R[0][%i] %f R[1][%i] %f  a[%i] %f\n", ibin, R[0][ibin], ibin, R[1][ibin], ibin, (*a_p)[ibin]);
+      const double d = Q[1]->par(1) - Q[0]->par(1);
+      const double f = (Q[1]->par(1) - pars[1])/d;
+      //printf("a d %f f %f\n", d, f);
+      for (int ibin = 1; ibin <= n_bins; ++ibin) {
+        (*a_p)[ibin] = f * R[0][ibin] + (1-f) * R[1][ibin];
+        //printf("   R[0][%i] %f R[1][%i] %f  a[%i] %f\n", ibin, R[0][ibin], ibin, R[1][ibin], ibin, (*a_p)[ibin]);
+      }
     }
   }
 }
