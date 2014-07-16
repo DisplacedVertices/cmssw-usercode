@@ -531,10 +531,13 @@ namespace mfv {
     fill_2v_histos();
     fit_envelopes();
     fit_fs_in_sideband();
+
     phi_exp_bkgonly = f_phi->GetParameter(1);
     shift_means = h_d2d[vt_2vsbbkg]->GetMean() - h_d2d[vt_1vsb]->GetMean();
+
     t_fit_info->Fill();
-//    fill_1v_histos();
+
+    fill_1v_histos();
     make_templates();
   }
 }
