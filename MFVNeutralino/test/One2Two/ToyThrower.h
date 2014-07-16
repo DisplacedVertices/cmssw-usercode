@@ -6,6 +6,7 @@
 #include "SimpleObjects.h"
 #include "Samples.h"
 
+class TH1D;
 class TFile;
 class TTree;
 class TRandom;
@@ -24,8 +25,9 @@ namespace mfv {
     const bool poisson_means;
     const bool use_qcd500;
     const int sample_only;
-    const int signal;
-    const double signal_scale;
+    const int injected_signal;
+    const double injected_signal_scale;
+    const int template_signal;
 
     const Samples samples;
     std::string sample2fn(const Sample& s) { return path + "/" + s.name + ".root"; }
@@ -84,6 +86,8 @@ namespace mfv {
     void read_samples();
     void book_and_fill_some_trees();
     void throw_toy();
+    TH1D* hist_with_template_binning(const char* name, const char* title, const VertexPairs& v2v) const;
+    TH1D* signal_template(const char* name, const char* title) const;
   };
 }
 

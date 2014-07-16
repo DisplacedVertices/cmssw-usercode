@@ -1,9 +1,11 @@
 #include "ToyThrower.h"
 #include "TFile.h"
+#include "TH1.h"
 #include "TRandom3.h"
 #include "TTree.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 #include "Random.h"
+#include "Templates.h"
 
 namespace mfv {
   ToyThrower::ToyThrower(const std::string& name_, const std::string& path_, TFile* f, TRandom* r)
@@ -19,8 +21,9 @@ namespace mfv {
       poisson_means(env.get_bool("poisson_means", true)),
       use_qcd500(env.get_bool("use_qcd500", false)),
       sample_only(env.get_int("sample_only", 0)),
-      signal(env.get_int("signal", 0)),
-      signal_scale(env.get_double("signal_scale", 1.)),
+      injected_signal(env.get_int("injected_signal", 0)),
+      injected_signal_scale(env.get_double("injected_signal_scale", 1.)),
+      template_signal(env.get_int("template_signal", -15)),
 
       ntoys(-1),
 
@@ -38,8 +41,9 @@ namespace mfv {
     printf("poisson_means: %i\n", poisson_means);
     printf("use_qcd500: %i\n", use_qcd500);
     printf("sample_only: %i (%s)\n", sample_only, samples.get(sample_only).name.c_str());
-    printf("signal: %i (%s)\n", signal, samples.get(signal).name.c_str());
-    printf("signal_scale: %g\n", signal_scale);
+    printf("injected_signal: %i (%s)\n", injected_signal, samples.get(injected_signal).name.c_str());
+    printf("injected_signal_scale: %g\n", injected_signal_scale);
+    printf("template_signal: %i (%s)\n", template_signal, samples.get(template_signal).name.c_str());
     fflush(stdout);
 
     read_samples();
@@ -117,7 +121,7 @@ namespace mfv {
     else {
       for (const Sample& sample : samples.samples)
         //if (sample.name != "qcdht0100" && sample.name != "qcdht0250" && 
-        if ((!sample.is_sig() || sample.key == signal) && (use_qcd500 || sample.name != "qcdht0500"))
+        if ((!sample.is_sig() || sample.key == injected_signal || sample.key == template_signal) && (use_qcd500 || sample.name != "qcdht0500"))
           fcn(sample);
     }
   }
@@ -154,8 +158,8 @@ namespace mfv {
     t_config->Branch("poisson_means", const_cast<bool*>(&poisson_means), "poisson_means/O");
     t_config->Branch("use_qcd500", const_cast<bool*>(&use_qcd500), "use_qcd500/O");
     t_config->Branch("sample_only", const_cast<int*>(&sample_only), "sample_only/I");
-    t_config->Branch("signal", const_cast<int*>(&signal), "signal/I");
-    t_config->Branch("signal_scale", const_cast<double*>(&signal_scale), "signal_scale/D");
+    t_config->Branch("injected_signal", const_cast<int*>(&injected_signal), "injected_signal/I");
+    t_config->Branch("injected_signal_scale", const_cast<double*>(&injected_signal_scale), "injected_signal_scale/D");
     t_config->Fill();
 
     TTree* t_sample_info = new TTree("t_sample_info", "");
@@ -217,7 +221,10 @@ namespace mfv {
     b_sum_bkg_2v = 0;
 
     auto f = [this](const Sample& sample) {
-      const double sc = sample.is_sig() ? signal_scale : scale;
+      if (sample.is_sig() && sample.key != injected_signal)
+        return;
+
+      const double sc = sample.is_sig() ? injected_signal_scale : scale;
 
       const int N1v = int(all_1v[sample.key].size());
       const double n1v_d = lambda_1v[sample.key] * sc;
@@ -269,5 +276,20 @@ namespace mfv {
 
     t_toy_stats_1v->Fill();
     t_toy_stats_2v->Fill();
+  }
+
+  TH1D* ToyThrower::hist_with_template_binning(const char* name_, const char* title, const VertexPairs& v2v) const {
+    TH1D* h_temp = Template::hist_with_binning(name_, title);
+    h_temp->SetDirectory(0);
+    for (const VertexPair& p : v2v)
+      h_temp->Fill(p.d2d());
+    TH1D* h = Template::finalize_binning(h_temp);
+    h->SetDirectory(0);
+    delete h_temp;
+    return h;
+  }
+
+  TH1D* ToyThrower::signal_template(const char* name_, const char* title) const {
+    return hist_with_template_binning(name_, title, all_2v.find(template_signal)->second);
   }
 }
