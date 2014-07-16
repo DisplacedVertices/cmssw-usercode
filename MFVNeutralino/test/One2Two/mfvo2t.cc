@@ -51,7 +51,7 @@ int main() {
     tt->throw_toy();
 
     std::vector<double> true_pars = { double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v) };
-    ter->process(itoy, &tt->toy_1v, &tt->toy_2v);
+    ter->process(tt->toy_dataset);
     for (double tp : ter->true_pars())
       true_pars.push_back(tp);
 

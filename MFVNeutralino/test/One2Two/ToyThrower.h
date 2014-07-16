@@ -55,6 +55,7 @@ namespace mfv {
     EventSimples toy_events_2v;
     VertexSimples toy_1v;
     VertexPairs toy_2v;
+    Dataset toy_dataset;
 
     ////////////////////////////////////////////////////////////////////////////
 

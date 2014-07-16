@@ -104,7 +104,7 @@ namespace mfv {
 
     t_fit_info = new TTree("t_fit_info", "");
     t_fit_info->Branch("seed", const_cast<int*>(&seed), "seed/I");
-    t_fit_info->Branch("toy", &toy, "toy/I");
+    t_fit_info->Branch("toy", &dataset.toy, "toy/I");
     t_fit_info->Branch("g_phi_mean", &b_g_phi_mean, "g_phi_mean/F");
     t_fit_info->Branch("g_phi_mean_err", &b_g_phi_mean_err, "g_phi_mean_err/F");
     t_fit_info->Branch("g_phi_rms", &b_g_phi_rms, "g_phi_rms/F");
@@ -184,12 +184,12 @@ namespace mfv {
   }
 
   void PhiShiftTemplater::fit_envelopes() {
-    if (one_vertices == 0)
+    if (!dataset.ok())
       jmt::vthrow("PhiShiftTemplater::fit_envelopes: must set vertices before using them");
 
     printf("PhiShiftTemplater%s: fitting envelopes\n", name.c_str()); fflush(stdout);
 
-    const VertexSimples& v1v = *one_vertices;
+    const VertexSimples& v1v = *dataset.one_vertices;
     const int N1v = sample_count > 0 ? sample_count : int(v1v.size());
 
     // Fill the envelope histos to be fit with all unique 1v pairs.
@@ -406,18 +406,18 @@ namespace mfv {
   }
 
   void PhiShiftTemplater::loop_over_1v_pairs(std::function<void(const VertexPair&)> fcn) {
-    vertices_ok();
+    dataset_ok();
 
-    const int N1v_t = int(one_vertices->size());
+    const int N1v_t = int(dataset.one_vertices->size());
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
 
     jmt::ProgressBar pb(50, N1v*(N1v-1)/2);
     pb.start();
 
     for (int iv = 0; iv < N1v; ++iv) {
-      const VertexSimple& v0 = one_vertices->at(iv);
+      const VertexSimple& v0 = dataset.one_vertices->at(iv);
       for (int jv = iv+1; jv < N1v; ++jv, ++pb) {
-        const VertexSimple& v1 = one_vertices->at(jv);
+        const VertexSimple& v1 = dataset.one_vertices->at(jv);
         VertexPair p(v0, v1);
         p.weight = prob_1v_pair(v0, v1);
         fcn(p);
@@ -522,10 +522,10 @@ namespace mfv {
   }
 
   void PhiShiftTemplater::process_imp() {
-    printf("PhiShiftTemplater%s: run toy #%i\n", name.c_str(), toy);
-    const int N1v = int(one_vertices->size());
+    printf("PhiShiftTemplater%s: run toy #%i\n", name.c_str(), dataset.toy);
+    const int N1v = int(dataset.one_vertices->size());
     const int N1vpairs = N1v*(N1v-1)/2;
-    printf("  # 1v input: %i (%i pairs)  2v input: %lu\n", N1v, N1vpairs, two_vertices->size());
+    printf("  # 1v input: %i (%i pairs)  2v input: %lu\n", N1v, N1vpairs, dataset.two_vertices->size());
 
     book_toy_fcns_and_histos();
     fill_2v_histos();

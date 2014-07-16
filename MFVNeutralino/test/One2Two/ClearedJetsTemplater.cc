@@ -49,7 +49,7 @@ namespace mfv {
 
     t_fit_info = new TTree("t_fit_info", "");
     t_fit_info->Branch("seed", const_cast<int*>(&seed), "seed/I");
-    t_fit_info->Branch("toy", &toy, "toy/I");
+    t_fit_info->Branch("toy", &dataset.toy, "toy/I");
   }    
 
   void ClearedJetsTemplater::book_toy_fcns_and_histos() {
@@ -73,9 +73,9 @@ namespace mfv {
   }
 
   void ClearedJetsTemplater::process_imp() {
-    printf("ClearedJetsTemplater%s: run toy #%i\n", name.c_str(), toy);
-    const int N1v = int(one_vertices->size());
-    printf("  # 1v input: %i  2v input: %lu\n", N1v, two_vertices->size());
+    printf("ClearedJetsTemplater%s: run toy #%i\n", name.c_str(), dataset.toy);
+    const int N1v = int(dataset.one_vertices->size());
+    printf("  # 1v input: %i  2v input: %lu\n", N1v, dataset.two_vertices->size());
 
     book_toy_fcns_and_histos();
     fill_2v_histos();

@@ -23,9 +23,7 @@ namespace mfv {
 
     ////////////////////////////////////////////////////////////////////////////
 
-    int toy;
-    const VertexSimples* one_vertices;
-    const VertexPairs* two_vertices;
+    Dataset dataset;
 
     Templates templates;
     Templates* get_templates() { return &templates; }
@@ -64,10 +62,10 @@ namespace mfv {
 
     virtual void book_hists();
     virtual void fill_2v(const int ih, const double w, const VertexSimple& v0, const VertexSimple& v1);
-    virtual void vertices_ok();
+    virtual void dataset_ok();
     virtual void fill_2v_histos();
     virtual void clear_templates();
-    virtual void process(int toy, const VertexSimples*, const VertexPairs*);
+    virtual void process(const Dataset&);
     virtual void process_imp() = 0;
   };
 }

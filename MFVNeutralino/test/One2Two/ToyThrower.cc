@@ -46,6 +46,12 @@ namespace mfv {
     printf("template_signal: %i (%s)\n", template_signal, samples.get(template_signal).name.c_str());
     fflush(stdout);
 
+    toy_dataset.toy = ntoys;
+    toy_dataset.events_1v = &toy_events_1v;
+    toy_dataset.events_2v = &toy_events_2v;
+    toy_dataset.one_vertices = &toy_1v;
+    toy_dataset.two_vertices = &toy_2v;
+
     read_samples();
 
     const TString directory_name = TString::Format("ToyThrower%s", uname.c_str());
@@ -209,7 +215,7 @@ namespace mfv {
   }
 
   void ToyThrower::throw_toy() {
-    ++ntoys;
+    toy_dataset.toy = ++ntoys;
     printf("ToyThrower%s throwing toy #%i:\n", name.c_str(), ntoys);
 
     toy_events_1v.clear();

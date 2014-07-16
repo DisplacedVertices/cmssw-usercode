@@ -81,6 +81,18 @@ namespace mfv {
   typedef std::vector<VertexSimple> VertexSimples;
   typedef std::vector<VertexPair> VertexPairs;
   typedef std::vector<EventSimple> EventSimples;
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  struct Dataset {
+    int toy; // negative for real data
+    const EventSimples* events_1v;
+    const EventSimples* events_2v;
+    const VertexSimples* one_vertices;
+    const VertexPairs* two_vertices;
+    bool ok() { return events_1v && events_2v && one_vertices && two_vertices; }
+    Dataset() : toy(0), events_1v(0), events_2v(0), one_vertices(0), two_vertices(0) {}
+  };
 }
 
 #endif

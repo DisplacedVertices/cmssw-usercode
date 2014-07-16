@@ -23,10 +23,7 @@ namespace mfv {
       dout(f->mkdir(TString::Format("%sTemplater%s", dname.c_str(), uname.c_str()))),
       dtoy(0),
       rand(r),
-      seed(r->GetSeed() - jmt::seed_base),
-
-      one_vertices(0),
-      two_vertices(0)
+      seed(r->GetSeed() - jmt::seed_base)
   {
   }
 
@@ -35,7 +32,7 @@ namespace mfv {
   }
 
   void Templater::book_hists() {
-    dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, toy));
+    dtoy = dout->mkdir(TString::Format("seed%04i_toy%04i", seed, dataset.toy));
     dtoy->cd();
 
     for (int i = 0; i < n_vt; ++i) {
@@ -109,16 +106,16 @@ namespace mfv {
     h_phi[ih]->Fill(Phi::use_abs ? fabs(p) : p, w);
   }
 
-  void Templater::vertices_ok() {
-    if (one_vertices == 0 || two_vertices == 0)
-      jmt::vthrow("must set vertices before using them:  1v: %p  2v: %p", (void*)one_vertices, (void*)two_vertices);
+  void Templater::dataset_ok() {
+    if (!dataset.ok())
+      jmt::vthrow("must set dataset pointers before using them: e1v: %p  1v: %p  e2v: %p  2v: %p", dataset.events_1v, dataset.one_vertices, dataset.events_2v, dataset.two_vertices);
   }
 
   void Templater::fill_2v_histos() {
-    vertices_ok();
+    dataset_ok();
 
     printf("%sTemplater%s: fill 2v histos\n", dname.c_str(), name.c_str()); fflush(stdout);
-    for (const VertexPair& p : *two_vertices)
+    for (const VertexPair& p : *dataset.two_vertices)
       for (int ih = 0; ih < n_vt_2v; ++ih)
         fill_2v(ih, 1, p.first, p.second);
   }
@@ -129,12 +126,8 @@ namespace mfv {
     templates.clear();
   }
 
-  void Templater::process(int toy_, const VertexSimples* toy_1v, const VertexPairs* toy_2v) {
-    // toy negative if data?
-    toy = toy_;
-    one_vertices = toy_1v;
-    two_vertices = toy_2v;
-
+  void Templater::process(const Dataset& dataset_) {
+    dataset = dataset_;
     process_imp();
   }
 }
