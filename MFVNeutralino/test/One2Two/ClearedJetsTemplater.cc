@@ -18,15 +18,19 @@ namespace mfv {
       env("mfvo2t_clearedjets" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.05)),
       sample_count(env.get_int("sample_count", -1)),
-      angle_from_jet_mu(env.get_double("angle_from_jet_mu", M_PI_2)),
-      angle_from_jet_sigma(env.get_double("angle_from_jet_sigma", 0.4)),
+      flat_phis(env.get_bool("flat_phis", false)),
+      phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
+      phi_from_jet_sigma(env.get_double("phi_from_jet_sigma", 0.4)),
       clearing_mu(env.get_double("clearing_mu", 0.028)),
       clearing_sigma(env.get_double("clearing_sigma", 0.005))
   {
     printf("ClearedJetsTemplater%s config:\n", name.c_str());
     printf("d2d_cut: %f\n", d2d_cut);
     printf("sample_count: %i\n", sample_count);
-    printf("angle_from_jet ~ Gaus(%f, %f)\n", angle_from_jet_mu, angle_from_jet_sigma);
+    if (flat_phis)
+      printf("phis thrown flat\n");
+    else
+      printf("phi_from_jet ~ Gaus(%f, %f)\n", phi_from_jet_mu, phi_from_jet_sigma);
     printf("clearing ~ Erf(%f, %f)\n", clearing_mu, clearing_sigma);
     fflush(stdout);
 

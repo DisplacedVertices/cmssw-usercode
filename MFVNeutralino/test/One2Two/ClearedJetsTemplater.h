@@ -17,8 +17,9 @@ namespace mfv {
 
     const double d2d_cut;
     const int sample_count;
-    const double angle_from_jet_mu;
-    const double angle_from_jet_sigma;
+    const bool flat_phis;
+    const double phi_from_jet_mu;
+    const double phi_from_jet_sigma;
     const double clearing_mu;
     const double clearing_sigma;
 
