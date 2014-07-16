@@ -158,7 +158,7 @@ for min_ntracks in (5,6,7,8):
         batches.append((min_ntracks, signal_sample, ''))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
-for batch in batches[:1]:
+for batch in batches:
     submit(200, *batch)
 
 '''
