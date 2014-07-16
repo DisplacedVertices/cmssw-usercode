@@ -5,6 +5,7 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH1F.h"
+#include "TLegend.h"
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TTree.h"
@@ -134,7 +135,10 @@ int main() {
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(0);
 
-  TH1F* h_svdist2d = new TH1F("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 10, 0, 0.1);
+  TH1F* h_vtxjetdphi = new TH1F("h_vtxjetdphi", ";#Delta#phi(vertex position, jet momentum);arb. units", 50, -3.15, 3.15);
+  TH1F* h_vtx0jetdphi = new TH1F("h_vtx0jetdphi", ";#Delta#phi(vertex0 position, jet momentum);arb. units", 50, -3.15, 3.15);
+  TH1F* h_vtx1jetdphi = new TH1F("h_vtx1jetdphi", ";#Delta#phi(vertex1 position, jet momentum);arb. units", 50, -3.15, 3.15);
+  TH1F* h_svdist2d = new TH1F("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 30, 0, 0.3);
   TH1F* h_absdeltaphi01 = new TH1F("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 5, 0, 3.15);
 
   const int nbkg = 4;
@@ -165,6 +169,12 @@ int main() {
       if (t->GetEntry(j) <= 0) continue;
 
       if (nt.nvtx == 2) {
+        for (int k = 0; k < nt.njets; ++k) {
+          h_vtxjetdphi->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]), weights[i] * nt.weight);
+          h_vtxjetdphi->Fill(TVector2::Phi_mpi_pi(atan2(nt.y1,nt.x1) - nt.jet_phi[k]), weights[i] * nt.weight);
+          h_vtx0jetdphi->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]), weights[i] * nt.weight);
+          h_vtx1jetdphi->Fill(TVector2::Phi_mpi_pi(atan2(nt.y1,nt.x1) - nt.jet_phi[k]), weights[i] * nt.weight);
+        }
         h_svdist2d->Fill(sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1)), weights[i] * nt.weight);
         h_absdeltaphi01->Fill(fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1))), weights[i] * nt.weight);
       }
@@ -191,7 +201,7 @@ int main() {
   TH1F* h_sv0bs2ddist = new TH1F("h_sv0bs2ddist", ";constructed SV0 distance (cm);vertices", 500, 0, 1);
   TH1F* h_sv1bs2ddist = new TH1F("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   TH1F* h_svpairdist = new TH1F("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
-  TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 20, 0, 0.2);
+  TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 30, 0, 0.3);
 
   for (int i = 0; i < n1v; ++i) {
     const float w = puweights[i];
@@ -236,6 +246,9 @@ int main() {
   }
   TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
   h_bs2ddist1v->Write();
+  h_vtxjetdphi->Write();
+  h_vtx0jetdphi->Write();
+  h_vtx1jetdphi->Write();
   h_svdist2d->Write();
   h_absdeltaphi01->Write();
 
@@ -258,35 +271,85 @@ int main() {
   h_svpairdist->Write();
   h_svpairdist_cut->Write();
 
-  TCanvas* c_svjetdphi = new TCanvas("c_svjetdphi");
-  h_svjetdphi->SetName("'real'");
+  TCanvas* c_vtxjetdphi = new TCanvas("c_vtxjetdphi");
+  h_svjetdphi->SetName("one-vertex");
   h_svjetdphi->SetLineColor(kBlue);
+  h_svjetdphi->DrawNormalized();
+  h_vtxjetdphi->SetName("two-vertex");
+  h_vtxjetdphi->SetLineColor(kRed);
+  h_vtxjetdphi->DrawNormalized("sames");
+  h_vtx0jetdphi->SetName("two-vertex0");
+  h_vtx0jetdphi->SetLineColor(kGreen);
+  h_vtx0jetdphi->DrawNormalized("sames");
+  h_vtx1jetdphi->SetName("two-vertex1");
+  h_vtx1jetdphi->SetLineColor(kMagenta);
+  h_vtx1jetdphi->DrawNormalized("sames");
+  c_vtxjetdphi->SetTickx();
+  c_vtxjetdphi->SetTicky();
+  c_vtxjetdphi->Write();
+
+  TCanvas* c_svjetdphi = new TCanvas("c_svjetdphi", "c_svjetdphi", 700, 700);
+  h_svjetdphi->SetLineColor(kBlue);
+  h_svjetdphi->SetLineWidth(3);
+  h_svjetdphi->SetStats(0);
   h_svjetdphi->Draw();
-  h_sv0jetdphi->SetName("'constructed'");
   h_sv0jetdphi->SetLineColor(kRed);
+  h_sv0jetdphi->SetLineWidth(3);
+  h_sv0jetdphi->SetStats(0);
   h_sv0jetdphi->Draw("sames");
+  TLegend* l_svjetdphi = new TLegend(0.75, 0.9, 1, 1);
+  l_svjetdphi->AddEntry(h_svjetdphi, "actual MC", "LPE");
+  l_svjetdphi->AddEntry(h_sv0jetdphi, "our model", "LPE");
+  l_svjetdphi->SetFillColor(0);
+  l_svjetdphi->Draw();
   c_svjetdphi->SetTickx();
   c_svjetdphi->SetTicky();
   c_svjetdphi->Write();
 
-  TCanvas* c_svdist2d = new TCanvas("c_svdist2d");
-  h_svdist2d->SetName("'real'");
+  TCanvas* c_svdist2d = new TCanvas("c_svdist2d", "c_svdist2d", 700, 700);
   h_svdist2d->SetLineColor(kBlue);
+  h_svdist2d->SetLineWidth(3);
+  h_svdist2d->SetStats(0);
   h_svdist2d->DrawNormalized();
-  h_svpairdist_cut->SetName("'constructed'");
   h_svpairdist_cut->SetLineColor(kRed);
+  h_svpairdist_cut->SetLineWidth(3);
+  h_svpairdist_cut->SetStats(0);
   h_svpairdist_cut->DrawNormalized("sames");
+
+  TFile* sig_file = TFile::Open("../crab/HistosV18_Data0/mfv_neutralino_tau1000um_M0400.root");
+  TH1F* h_svdist2d_sig = (TH1F*)sig_file->Get("mfvVertexHistosWAnaCuts/h_svdist2d");
+  h_svdist2d_sig->Rebin(5);
+  h_svdist2d_sig->SetLineColor(8);
+  h_svdist2d_sig->SetLineWidth(3);
+  h_svdist2d_sig->SetStats(0);
+  h_svdist2d_sig->DrawNormalized("sames");
+
+  TLegend* l_svdist2d = new TLegend(0.25, 0.7, 0.85, 0.85);
+  l_svdist2d->AddEntry(h_svdist2d, "actual MC", "LPE");
+  l_svdist2d->AddEntry(h_svpairdist_cut, "our model", "LPE");
+  l_svdist2d->AddEntry(h_svdist2d_sig, "#tau = 1 mm, M = 400 GeV signal", "LPE");
+  l_svdist2d->SetFillColor(0);
+  l_svdist2d->Draw();
   c_svdist2d->SetTickx();
   c_svdist2d->SetTicky();
+  fh->cd();
   c_svdist2d->Write();
+  sig_file->Close();
 
-  TCanvas* c_svpairdphi = new TCanvas("c_svpairdphi");
-  h_absdeltaphi01->SetName("'real'");
+  TCanvas* c_svpairdphi = new TCanvas("c_svpairdphi", "c_svpairdphi", 700, 700);
   h_absdeltaphi01->SetLineColor(kBlue);
+  h_absdeltaphi01->SetLineWidth(3);
+  h_absdeltaphi01->SetStats(0);
   h_absdeltaphi01->DrawNormalized();
-  h_svpairabsdphi->SetName("'constructed'");
   h_svpairabsdphi->SetLineColor(kRed);
+  h_svpairabsdphi->SetLineWidth(3);
+  h_svpairabsdphi->SetStats(0);
   h_svpairabsdphi->DrawNormalized("sames");
+  TLegend* l_deltaphi = new TLegend(0.25, 0.7, 0.7, 0.85);
+  l_deltaphi->AddEntry(h_absdeltaphi01, "actual MC", "LPE");
+  l_deltaphi->AddEntry(h_svpairabsdphi, "our model", "LPE");
+  l_deltaphi->SetFillColor(0);
+  l_deltaphi->Draw();
   c_svpairdphi->SetTickx();
   c_svpairdphi->SetTicky();
   c_svpairdphi->Write();
