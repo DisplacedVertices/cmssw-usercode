@@ -7,6 +7,7 @@
 #include "TTree.h"
 #include "Phi.h"
 #include "Prob.h"
+#include "ProgressBar.h"
 #include "ROOTTools.h"
 #include "Random.h"
 #include "Templates.h"
@@ -72,7 +73,7 @@ namespace mfv {
     printf("sample_count: %i\n", sample_count);
     printf("phi_exp: %i increments of %f starting from %f\n", n_phi_exp, d_phi_exp, phi_exp_min);
     printf("n_phi_interp: %i -> d_phi overall = %f\n", n_phi_interp, d_phi_exp/n_phi_interp);
-    printf("n_phi_total: %i  n_shift: %i  n_templates\n", n_phi_total, n_shift, n_phi_total * n_shift);
+    printf("n_phi_total: %i  n_shift: %i  n_templates: %i\n", n_phi_total, n_shift, n_phi_total * n_shift);
     printf("find gs: phi? %i dz? %i   fs: phi? %i (bkgonly? %i) dz? %i (bkgonly? %i)\n", find_g_phi, find_g_dz, find_f_phi, find_f_phi_bkgonly, find_f_dz, find_f_dz_bkgonly);
     fflush(stdout);
 
@@ -411,7 +412,7 @@ namespace mfv {
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
 
     jmt::ProgressBar pb(50, N1v*(N1v-1)/2);
-    pb_signif.start();
+    pb.start();
 
     for (int iv = 0; iv < N1v; ++iv) {
       const VertexSimple& v0 = one_vertices->at(iv);
@@ -493,7 +494,7 @@ namespace mfv {
         else
           h = h0;
 
-        for (int ish = 0; ish < n_shift; ++ish) {
+        for (int ish = 0; ish < n_shift; ++ish, ++pb) {
           TH1D* hh = jmt::shift_hist(h, ish);
           hh->SetDirectory(0);
           const double phi_exp = static_cast<PhiShiftTemplate*>(orig_templates[ip])->phi_exp + ipi * d_phi_exp / n_phi_interp;
@@ -509,8 +510,6 @@ namespace mfv {
 
         if (h1)
           delete h;
-
-        ++pb;
 
         if (h1 == 0)
           break;
