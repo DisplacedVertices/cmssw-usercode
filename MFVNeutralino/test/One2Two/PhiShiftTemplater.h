@@ -52,11 +52,7 @@ namespace mfv {
     TH1D* h_fcn_f_phi;
     TH1D* h_fcn_f_dz;
 
-    double gdpmax;
-    double fdpmax;
     double Mdp;
-    double gdzmax;
-    double fdzmax;
     double Mdz;
 
     ////////////////////////////////////////////////////////////////////////////

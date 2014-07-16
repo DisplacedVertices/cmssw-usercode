@@ -281,12 +281,12 @@ namespace mfv {
   }
 
   void PhiShiftTemplater::update_f_weighting_pars() {
-    gdpmax = g_phi->GetMaximum();
-    fdpmax = f_phi->GetMaximum();
+    const double gdpmax = g_phi->GetMaximum();
+    const double fdpmax = f_phi->GetMaximum();
     Mdp = fdpmax/gdpmax;
 
-    gdzmax = g_dz->GetMaximum();
-    fdzmax = f_dz->GetMaximum();
+    const double gdzmax = g_dz->GetMaximum();
+    const double fdzmax = f_dz->GetMaximum();
     Mdz = fdzmax/gdzmax;
 
     printf("weighting pars updated: phi: g %f f %f M %f   dz:  g %f f %f M %f\n", gdpmax, fdpmax, Mdp, gdzmax, fdzmax, Mdz);
