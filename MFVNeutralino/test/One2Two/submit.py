@@ -41,6 +41,7 @@ echo
 
 export mfvo2t_seed=$JOB_NUM
 export mfvo2t_ntoys=1
+export mfvo2t_toythrower_allow_cap=1
 %(env)s
 
 echo run mfvo2t.exe
@@ -92,7 +93,7 @@ output_file=mfvo2t.root
 script_exe=runme.csh
 ui_working_dir=%(batch_root)s/crab_%(batch_name)s
 ssh_control_persist=no
-additional_input_files=mfvo2t.exe,signal_templates.root
+additional_input_files=mfvo2t.exe
 return_data=1
 
 [CRAB]
@@ -108,7 +109,7 @@ def submit(njobs, min_ntracks, signal_sample, samples):
     global setuped
 
     if not compiled:
-        if os.system('./compile') != 0:
+        if os.system('./compile -O2') != 0:
             raise 'no compile'
         raw_input('did the compile go OK?')
         compiled = True
@@ -137,8 +138,9 @@ def submit(njobs, min_ntracks, signal_sample, samples):
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
         assert sig_samp < 0
-        env.append('toythrower_signal=%i' % sig_samp)
-        env.append('toythrower_signal_scale=%f' % sig_scale)
+        env.append('toythrower_injected_signal=%i' % sig_samp)
+        env.append('toythrower_injected_signal_scale=%f' % sig_scale)
+        env.append('toythrower_template_signal=%i' % sig_samp)
 
     if type(samples) == int:
         env.append('toythrower_sample_only=%i' % samples)
@@ -151,13 +153,13 @@ def submit(njobs, min_ntracks, signal_sample, samples):
     os.system('crab -create -submit all')
 
 batches = []
-for min_ntracks in (5,6,7):
-    for signal_sample in (None, (-9, 1), (-9, 10)):
+for min_ntracks in (5,6,7,8):
+    for signal_sample in (None, (-9, 1), (-9, 10), (-15, 1), (-15, 10)):
         batches.append((min_ntracks, signal_sample, ''))
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
 for batch in batches[:1]:
-    submit(20, *batch)
+    submit(200, *batch)
 
 '''
 grep -L 'Normal termination (return value 0)' *.condor
