@@ -44,9 +44,7 @@ int main() {
     
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);
 
-  TFile f_sig("signal_templates.root");
-  printf("\n\n\n\n\n\n\n*** signal template is fixed to h_sig_ntk5_mfv_neutralino_tau1000um_M0400 ***\n\n\n\n\n\n\n");
-  TH1D* h_sig = (TH1D*)f_sig.Get("h_sig_ntk5_mfv_neutralino_tau1000um_M0400"); //TString::Format("h_sig_ntk%i_%s", tt->min_ntracks, tt->samples.get(tt->signal).name.c_str()))->Clone("h_sig_FIXME");
+  TH1D* h_sig = tt->signal_template("h_sig_template", "");
   h_sig->SetDirectory(out_f);
 
   for (int itoy = 0; itoy < ntoys; ++itoy) {
