@@ -89,6 +89,9 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
     if (t->GetEntry(j) <= 0) continue;
 
     if (nt.nvtx == 2) continue;
+    //if (nt.npu > 17) continue;
+    //if (nt.npu < 18 || nt.npu > 24) continue;
+    //if (nt.npu < 25) continue;
     if (i1v < sn1v) {
       sbs2ddist[i1v] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
       svtx_phis[i1v] = atan2(nt.y0, nt.x0);
@@ -202,6 +205,11 @@ int main() {
   TH1F* h_sv1bs2ddist = new TH1F("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   TH1F* h_svpairdist = new TH1F("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
   TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 30, 0, 0.3);
+  TH1F* h_svdist2d_mu[5];
+  float mu_clear[5] = {260, 270, 280, 290, 300};
+  for (int i = 0; i < 5; ++i) {
+    h_svdist2d_mu[i] = new TH1F(TString::Format("h_svdist2d_mu_%i", i), TString::Format("svdist2d with #mu_{clear} = %f #mum;constructed vertex pair distance (cm);events", mu_clear[i]), 10, 0, 0.1);
+  }
 
   for (int i = 0; i < n1v; ++i) {
     const float w = puweights[i];
@@ -241,6 +249,11 @@ int main() {
         h_svpairdphi_cut->Fill(dphi, w);
         h_svpairabsdphi->Fill(fabs(dphi), w);
         h_svpairdist_cut->Fill(svdist, w);
+      }
+      for (int j = 0; j < 5; ++j) {
+        if (TMath::Erf((svdist - mu_clear[j]/10000)/0.005) > gRandom->Uniform(-1,1)) {
+          h_svdist2d_mu[j]->Fill(svdist, w);
+        }
       }
     }
   }
@@ -353,6 +366,30 @@ int main() {
   c_svpairdphi->SetTickx();
   c_svpairdphi->SetTicky();
   c_svpairdphi->Write();
+
+  TCanvas* c_svdist2d_mu = new TCanvas("c_svdist2d_mu", "c_svdist2d_mu", 700, 700);
+  h_svdist2d->GetXaxis()->SetRangeUser(0, 0.1);
+  h_svdist2d->SetLineColor(kBlue);
+  h_svdist2d->SetLineWidth(3);
+  h_svdist2d->SetStats(0);
+  h_svdist2d->DrawNormalized();
+  for (int i = 0; i < 5; ++i) {
+    h_svdist2d_mu[i]->SetLineColor(kRed+i);
+    h_svdist2d_mu[i]->SetLineWidth(2);
+    h_svdist2d_mu[i]->SetStats(0);
+    h_svdist2d_mu[i]->DrawNormalized("sames");
+  }
+
+  TLegend* l_svdist2d_mu = new TLegend(0.5, 0.7, 0.85, 0.85);
+  l_svdist2d_mu->AddEntry(h_svdist2d, "actual MC", "LPE");
+  for (int i = 0; i < 5; ++i) {
+    l_svdist2d_mu->AddEntry(h_svdist2d_mu[i], TString::Format("#mu_{clear} = %i #mum", int(mu_clear[i])), "LPE");
+  }
+  l_svdist2d_mu->SetFillColor(0);
+  l_svdist2d_mu->Draw();
+  c_svdist2d_mu->SetTickx();
+  c_svdist2d_mu->SetTicky();
+  c_svdist2d_mu->Write();
 
   fh->Close();
 }
