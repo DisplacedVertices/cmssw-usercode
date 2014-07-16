@@ -153,6 +153,7 @@ int main() {
   float weights[nbkg] = {0.589, 0.085, 0.426, 0.169};
   int sn1v[nbkg] = {11406, 101, 4425, 1458};
   int sn1vs = 0;
+
   for (int i = 0; i < nbkg; ++i) {
     toy_from_file(samples[i], sn1vs, sn1v[i]);
     sn1vs += sn1v[i];
@@ -342,7 +343,7 @@ int main() {
   c_svjetdphi->Write();
 
   //overlay svdist2d for MC background, our model, and MC signal
-  TCanvas* c_svdist2d = new TCanvas("c_svdist2d", "c_svdist2d", 700, 700);
+  TCanvas* c_svdist2d_sig = new TCanvas("c_svdist2d_sig", "c_svdist2d_sig", 700, 700);
   h_svdist2d->SetLineColor(kBlue);
   h_svdist2d->SetLineWidth(3);
   h_svdist2d->SetStats(0);
@@ -360,17 +361,32 @@ int main() {
   h_svdist2d_sig->SetStats(0);
   h_svdist2d_sig->DrawNormalized("sames");
 
-  TLegend* l_svdist2d = new TLegend(0.25, 0.7, 0.85, 0.85);
-  l_svdist2d->AddEntry(h_svdist2d, "actual MC", "LPE");
-  l_svdist2d->AddEntry(h_svpairdist_cut, "our model", "LPE");
-  l_svdist2d->AddEntry(h_svdist2d_sig, "#tau = 1 mm, M = 400 GeV signal", "LPE");
-  l_svdist2d->SetFillColor(0);
-  l_svdist2d->Draw();
+  TLegend* l_svdist2d_sig = new TLegend(0.25, 0.7, 0.85, 0.85);
+  l_svdist2d_sig->AddEntry(h_svdist2d, "actual MC", "LPE");
+  l_svdist2d_sig->AddEntry(h_svpairdist_cut, "our model", "LPE");
+  l_svdist2d_sig->AddEntry(h_svdist2d_sig, "#tau = 1 mm, M = 400 GeV signal", "LPE");
+  l_svdist2d_sig->SetFillColor(0);
+  l_svdist2d_sig->Draw();
+  c_svdist2d_sig->SetTickx();
+  c_svdist2d_sig->SetTicky();
+  fh->cd();
+  c_svdist2d_sig->Write();
+  sig_file->Close();
+
+  //overlay svdist2d for MC background and our model
+  TCanvas* c_svdist2d = new TCanvas("c_svdist2d", "c_svdist2d", 700, 700);
+  h_svdist2d->GetXaxis()->SetRangeUser(0,0.1);
+  h_svdist2d->SetLineColor(kBlue);
+  h_svdist2d->SetLineWidth(3);
+  h_svdist2d->SetStats(1);
+  h_svdist2d->DrawNormalized();
+  h_svpairdist_cut->SetLineColor(kRed);
+  h_svpairdist_cut->SetLineWidth(3);
+  h_svpairdist_cut->SetStats(1);
+  h_svpairdist_cut->DrawNormalized("sames");
   c_svdist2d->SetTickx();
   c_svdist2d->SetTicky();
-  fh->cd();
   c_svdist2d->Write();
-  sig_file->Close();
 
   //overlay vertex-vertex deltaphi for actual MC and our model
   TCanvas* c_svpairdphi = new TCanvas("c_svpairdphi", "c_svpairdphi", 700, 700);
