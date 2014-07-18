@@ -20,15 +20,19 @@ namespace mfv {
     const bool flat_phis;
     const double phi_from_jet_mu;
     const double phi_from_jet_sigma;
-    const double clearing_mu;
-    const double clearing_sigma;
+    const double clearing_mu_start;
+    const double d_clearing_mu;
+    const int n_clearing_mu;
+    const double clearing_sigma_start;
+    const double d_clearing_sigma;
+    const int n_clearing_sigma;
 
     ////////////////////////////////////////////////////////////////////////////
 
     double clearing_mu_fit;
     double clearing_sigma_fit;
     virtual std::vector<double> true_pars() const { return std::vector<double>({clearing_mu_fit, clearing_sigma_fit}); }
-    virtual std::vector<TemplatePar> par_info() const { return std::vector<TemplatePar>(2); }
+    virtual std::vector<TemplatePar> par_info() const;
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -40,8 +44,9 @@ namespace mfv {
 
     void book_trees();
     void book_toy_fcns_and_histos();
-    void make_templates();
     bool is_sideband(const VertexSimple&, const VertexSimple&) const;
+    double throw_phi(const EventSimple& ev) const;
+    void make_templates();
     void process_imp();
   };
 }

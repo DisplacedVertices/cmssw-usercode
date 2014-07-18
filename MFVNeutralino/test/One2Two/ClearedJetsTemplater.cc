@@ -1,17 +1,19 @@
 #include "ClearedJetsTemplater.h"
-#include "TF1.h"
 #include "TFile.h"
-#include "TFitResult.h"
-#include "TH2D.h"
+#include "TH1.h"
+#include "TMath.h"
 #include "TRandom3.h"
 #include "TTree.h"
-#include "Phi.h"
-#include "Prob.h"
-#include "ROOTTools.h"
-#include "Random.h"
-#include "Templates.h"
+#include "ProgressBar.h"
 
 namespace mfv {
+  std::vector<TemplatePar> ClearedJetsTemplater::par_info() const {
+    return std::vector<TemplatePar>({
+        { n_clearing_mu, clearing_mu_start, d_clearing_mu },
+        { n_clearing_sigma, clearing_sigma_start, d_clearing_sigma }
+      });
+  }
+
   ClearedJetsTemplater::ClearedJetsTemplater(const std::string& name_, TFile* f, TRandom* r)
     : Templater("ClearedJets", name_, f, r),
 
@@ -21,8 +23,12 @@ namespace mfv {
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
       phi_from_jet_sigma(env.get_double("phi_from_jet_sigma", 0.4)),
-      clearing_mu(env.get_double("clearing_mu", 0.028)),
-      clearing_sigma(env.get_double("clearing_sigma", 0.005))
+      clearing_mu_start(env.get_double("clearing_mu_start", 0.)),
+      d_clearing_mu(env.get_double("d_clearing_mu", 0.001)),
+      n_clearing_mu(env.get_int("n_clearing_mu", 40)),
+      clearing_sigma_start(env.get_double("clearing_sigma_start", 0.0005)),
+      d_clearing_sigma(env.get_double("d_clearing_sigma", 0.0005)),
+      n_clearing_sigma(env.get_int("n_clearing_sigma", 20))
   {
     printf("ClearedJetsTemplater%s config:\n", name.c_str());
     printf("d2d_cut: %f\n", d2d_cut);
@@ -31,7 +37,9 @@ namespace mfv {
       printf("phis thrown flat\n");
     else
       printf("phi_from_jet ~ Gaus(%f, %f)\n", phi_from_jet_mu, phi_from_jet_sigma);
-    printf("clearing ~ Erf(%f, %f)\n", clearing_mu, clearing_sigma);
+    printf("clearing_mu: %i increments of %f starting from %f\n", n_clearing_mu, d_clearing_mu, clearing_mu_start);
+    printf("clearing_sigma: %i increments of %f starting from %f\n", n_clearing_sigma, d_clearing_sigma, clearing_sigma_start);
+
     fflush(stdout);
 
     book_trees();
@@ -54,22 +62,76 @@ namespace mfv {
 
   void ClearedJetsTemplater::book_toy_fcns_and_histos() {
     Templater::book_hists();
-
   }
 
   bool ClearedJetsTemplater::is_sideband(const VertexSimple& v0, const VertexSimple& v1) const {
     return v0.d2d(v1) < d2d_cut;
   }
 
+  double ClearedJetsTemplater::throw_phi(const EventSimple& ev) const {
+    if (flat_phis)
+      return rand->Uniform(-M_PI, M_PI);
+
+    double sumpt = 0;
+    for (unsigned short j = 0; j < ev.njets; ++j)
+      sumpt += ev.jet_pt[j];
+
+    const double r = rand->Rndm();
+    double rjetphi = 0;
+    double cumpt = 0;
+    for (unsigned short j = 0; j < ev.njets; ++j) {
+      cumpt += ev.jet_pt[j];
+      if (r < cumpt/sumpt) {
+        rjetphi = ev.jet_phi[j];
+        break;
+      }
+    }
+
+    const double rdphi = rand->Gaus(phi_from_jet_mu, phi_from_jet_sigma);
+    const int pm = rand->Rndm() < 0.5 ? -1 : 1;
+    return TVector2::Phi_mpi_pi(rjetphi + pm * rdphi);
+  }
+
   void ClearedJetsTemplater::make_templates() {
-    printf("ClearedJetsTemplater%s making templates: fill me in\n", name.c_str()); fflush(stdout);
+    dataset_ok();
+
+    printf("ClearedJetsTemplater%s making templates\n", name.c_str()); fflush(stdout);
+    jmt::ProgressBar pb(50, n_clearing_mu * n_clearing_sigma);
 
     clear_templates();
 
     TDirectory* dtemp = dtoy->mkdir("templates");
     dtemp->cd();
+    
+    int iglb = 0;
+    for (int imu = 0; imu < n_clearing_mu; ++imu) {
+      const double clearing_mu = clearing_mu_start + imu * d_clearing_mu;
 
-    jmt::vthrow("ClearedJetsTemplater::make_templates not implemented");
+      dtemp->mkdir(TString::Format("imu_%02i", imu))->cd();
+
+      for (int isig = 0; isig < n_clearing_sigma; ++isig, ++pb) {
+        const double clearing_sigma = clearing_sigma_start + isig * d_clearing_sigma;
+
+        TH1D* h = Template::hist_with_binning(TString::Format("h_template_imu%03i_isig%03i", imu, isig), "");
+
+        for (const EventSimple& ev : *dataset.events_1v) {
+          if (ev.njets > 0) {
+            const double bsd2d0 = h_bsd2d[vt_1v]->GetRandom();
+            const double bsd2d1 = h_bsd2d[vt_1v]->GetRandom();
+
+            const double phi0 = throw_phi(ev);
+            const double phi1 = throw_phi(ev);
+
+            const double d2d = sqrt(bsd2d0*bsd2d0 + bsd2d1*bsd2d1 - 2*bsd2d0*bsd2d1*cos(TVector2::Phi_mpi_pi(phi0 - phi1)));
+            if (TMath::Erf((d2d - clearing_mu)/clearing_sigma) > rand->Uniform(-1,1))
+              h->Fill(d2d);
+          }
+        }
+
+        Template::finalize_template_in_place(h);
+        templates.push_back(new ClearedJetsTemplate(iglb++, h, clearing_mu, clearing_sigma));
+      }
+    }
   }
 
   void ClearedJetsTemplater::process_imp() {
