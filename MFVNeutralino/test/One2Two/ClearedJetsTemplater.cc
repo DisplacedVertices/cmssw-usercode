@@ -97,6 +97,7 @@ namespace mfv {
 
     printf("ClearedJetsTemplater%s making templates\n", name.c_str()); fflush(stdout);
     jmt::ProgressBar pb(50, n_clearing_mu * n_clearing_sigma);
+    pb.start();
 
     clear_templates();
 
@@ -136,6 +137,8 @@ namespace mfv {
         templates.push_back(new ClearedJetsTemplate(iglb++, h, clearing_mu, clearing_sigma));
       }
     }
+
+    printf("\n");
   }
 
   void ClearedJetsTemplater::process_imp() {
