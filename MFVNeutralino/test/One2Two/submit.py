@@ -94,7 +94,11 @@ script_exe=runme.csh
 ui_working_dir=%(batch_root)s/crab_%(batch_name)s
 ssh_control_persist=no
 additional_input_files=mfvo2t.exe
-return_data=1
+copy_data=1
+publish_data_name=mfvo2t_%(batch_name)s
+publish_data=1
+dbs_url_for_publication=phys03
+storage_element=T3_US_FNALLPC
 
 [CRAB]
 jobtype=cmssw
