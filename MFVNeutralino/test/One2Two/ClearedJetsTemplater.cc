@@ -102,6 +102,9 @@ namespace mfv {
 
     TDirectory* dtemp = dtoy->mkdir("templates");
     dtemp->cd();
+
+    for (const VertexSimple& v : *dataset.one_vertices)
+      h_bsd2d[vt_1v]->Fill(v.d2d());
     
     int iglb = 0;
     for (int imu = 0; imu < n_clearing_mu; ++imu) {
@@ -112,7 +115,8 @@ namespace mfv {
       for (int isig = 0; isig < n_clearing_sigma; ++isig, ++pb) {
         const double clearing_sigma = clearing_sigma_start + isig * d_clearing_sigma;
 
-        TH1D* h = Template::hist_with_binning(TString::Format("h_template_imu%03i_isig%03i", imu, isig), "");
+        TH1D* h = Template::hist_with_binning(TString::Format("h_template_imu%03i_isig%03i", imu, isig),
+                                              TString::Format("clearing pars: #mu = %f  #sigma = %f", clearing_mu, clearing_sigma));
 
         for (const EventSimple& ev : *dataset.events_1v) {
           if (ev.njets > 0) {
