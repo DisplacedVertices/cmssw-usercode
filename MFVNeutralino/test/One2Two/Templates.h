@@ -32,9 +32,11 @@ namespace mfv {
     static const double bin_width;
 
     static std::vector<double> binning();
+    static void deoverflow(TH1D* hh);
     static TH1D* hist_with_binning(const char* name, const char* title);
     static TH1D* finalize_binning(TH1D* h);
     static TH1D* finalize_template(TH1D* h);
+    static void finalize_template_in_place(TH1D* h);
 
     static const int max_npars;
     std::vector<double> pars;
@@ -57,7 +59,13 @@ namespace mfv {
   //////////////////////////////////////////////////////////////////////////////
 
   struct ClearedJetsTemplate : public Template {
-    ClearedJetsTemplate(int i_, TH1D* h_);
+    double clearing_mu;
+    double clearing_sigma;
+
+    ClearedJetsTemplate(int i_, TH1D* h_, const double mu, const double sigma);
+    virtual std::string name() const;
+    virtual std::string title() const;
+    virtual double par(size_t w) const;
   };
 
   //////////////////////////////////////////////////////////////////////////////

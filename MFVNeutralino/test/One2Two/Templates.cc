@@ -28,9 +28,7 @@ namespace mfv {
     return new TH1D(name, title, bins.size()-1, &bins[0]);
   }
 
-  TH1D* Template::finalize_binning(TH1D* h) {
-    std::vector<double> bins = binning();
-    TH1D* hh = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_rebinned", h->GetName()), &bins[0]);
+  void Template::deoverflow(TH1D* hh) {
     const int nb = hh->GetNbinsX();
     const double l  = hh->GetBinContent(nb);
     const double le = hh->GetBinError  (nb);
@@ -40,6 +38,12 @@ namespace mfv {
     hh->SetBinError  (nb, sqrt(le*le + oe*oe));
     hh->SetBinContent(nb+1, 0);
     hh->SetBinError  (nb+1, 0);
+  }
+
+  TH1D* Template::finalize_binning(TH1D* h) {
+    std::vector<double> bins = binning();
+    TH1D* hh = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_rebinned", h->GetName()), &bins[0]);
+    deoverflow(hh);
     return hh;
   }
 
@@ -47,6 +51,11 @@ namespace mfv {
     TH1D* hh = finalize_binning(h);
     hh->Scale(1./hh->Integral());
     return hh;
+  }
+
+  void Template::finalize_template_in_place(TH1D* h) {
+    deoverflow(h);
+    h->Scale(1./h->Integral());
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -87,9 +96,34 @@ namespace mfv {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  ClearedJetsTemplate::ClearedJetsTemplate(int i_, TH1D* h_)
-    : Template(i_, h_)
+  ClearedJetsTemplate::ClearedJetsTemplate(int i_, TH1D* h_, const double mu, const double sigma)
+    : Template(i_, h_),
+      clearing_mu(mu),
+      clearing_sigma(sigma)
   {
+    pars.push_back(mu);
+    pars.push_back(sigma);
+  }
+
+  std::string ClearedJetsTemplate::name() const {
+    char buf[128];
+    snprintf(buf, 128, "clearedjets%04i", i);
+    return std::string(buf);
+  }
+
+  std::string ClearedJetsTemplate::title() const {
+    char buf[128];
+    snprintf(buf, 128, "clearing_mu = %f, clearing_sigma = %g", clearing_mu, clearing_sigma);
+    return std::string(buf);
+  }
+
+  double ClearedJetsTemplate::par(size_t w) const {
+    if (w == 0)
+      return clearing_mu;
+    else if (w == 1)
+      return clearing_sigma;
+    else
+      return 0.;
   }
 
   //////////////////////////////////////////////////////////////////////////////
