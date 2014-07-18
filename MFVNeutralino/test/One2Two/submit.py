@@ -42,6 +42,7 @@ echo
 export mfvo2t_seed=$JOB_NUM
 export mfvo2t_ntoys=1
 export mfvo2t_toythrower_allow_cap=1
+export mfvo2t_phishift_find_f_dz=0
 %(env)s
 
 echo run mfvo2t.exe
