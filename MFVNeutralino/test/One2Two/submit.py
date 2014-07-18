@@ -108,7 +108,7 @@ scheduler=%(scheduler)s
 compiled = 'nocompile' in sys.argv
 setuped = False
 
-def submit(njobs, min_ntracks, signal_sample, samples):
+def submit(njobs, template_type, min_ntracks, signal_sample, samples):
     global compiled
     global setuped
 
@@ -130,14 +130,18 @@ def submit(njobs, min_ntracks, signal_sample, samples):
         setuped = True
         
 
-    batch_name = 'Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (min_ntracks,
-                                                    'def',
-                                                    'no' if signal_sample is None else 'n%ix%i' % signal_sample,
-                                                    samples)
+    batch_name = 'Tmp%s_Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (template_type,
+                                                          min_ntracks,
+                                                          'def',
+                                                          'no' if signal_sample is None else 'n%ix%i' % signal_sample,
+                                                          samples)
 
     env = [
         'toythrower_min_ntracks=%i' % min_ntracks,
         ]
+
+    if template_type == 'CJ':
+        env.append('templates_kind=clearedjets')
 
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
@@ -156,14 +160,24 @@ def submit(njobs, min_ntracks, signal_sample, samples):
     open('crab.cfg', 'wt').write(crab_cfg % locals())
     os.system('crab -create -submit all')
 
+
 batches = []
-for min_ntracks in (5,6,7,8):
-    for signal_sample in (None, (-9, 1), (-9, 10), (-15, 1), (-15, 10)):
-        batches.append((min_ntracks, signal_sample, ''))
+for template_type in ('PS', 'CJ'):
+    for min_ntracks in (5,6,7,8):
+        for signal_sample in (None, (-9, 1), (-9, 10), (-15, 1), (-15, 10)):
+            batches.append((template_type, min_ntracks, signal_sample, ''))
+
 
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
 for batch in batches:
     submit(200, *batch)
+
+
+
+
+
+
+
 
 '''
 grep -L 'Normal termination (return value 0)' *.condor
