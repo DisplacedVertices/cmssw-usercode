@@ -13,15 +13,19 @@ namespace mfv {
     bool is_fake;
     int ntracks;
     double x, y, z;
+    double cxx, cxy, cyy;
 
-    VertexSimple() : is_sig(false), is_fake(false), ntracks(-1), x(0), y(0), z(0) {}
+    VertexSimple() : is_sig(false), is_fake(false), ntracks(-1), x(0), y(0), z(0), cxx(0), cxy(0), cyy(0) {}
 
     VertexSimple(const MiniNtuple& nt, int which, bool is_sig_)
       : is_sig(is_sig_),
         ntracks(which == 0 ? nt.ntk0 : nt.ntk1),
         x(which == 0 ? nt.x0 : nt.x1),
         y(which == 0 ? nt.y0 : nt.y1),
-        z(which == 0 ? nt.z0 : nt.z1)
+        z(which == 0 ? nt.z0 : nt.z1),
+        cxx(which == 0 ? nt.cxx0 : nt.cxx1),
+        cxy(which == 0 ? nt.cxy0 : nt.cxy1),
+        cyy(which == 0 ? nt.cyy0 : nt.cyy1)
     {
       if (which != 0 && which != 1)
         jmt::vthrow("can't make a VertexSimple out of MiniNtuple for which = %i", which);
@@ -33,7 +37,10 @@ namespace mfv {
         ntracks(999),
         x(d2d_ * cos(phi_)),
         y(d2d_ * sin(phi_)),
-        z(0)
+        z(0),
+        cxx(0),
+        cxy(0),
+        cyy(0)
     {}
 
     double d2d() const { return jmt::mag(x, y); }
@@ -45,7 +52,11 @@ namespace mfv {
     double d3d(const VertexSimple& o) const { return jmt::mag(x - o.x, y - o.y, z - o.z); }
     double dz (const VertexSimple& o) const { return z - o.z; }
     double phi(const VertexSimple& o) const { return TVector2::Phi_mpi_pi(phi() - o.phi()); }
-  };
+
+    double dxd(const VertexSimple& o) const { return (x - o.x) / d2d(o); }
+    double dyd(const VertexSimple& o) const { return (y - o.y) / d2d(o); }
+    double sig(const VertexSimple& o) const { return sqrt((cxx + o.cxx)*dxd(o)*dxd(o) + (cyy + o.cyy)*dyd(o)*dyd(o) + 2*(cxy + o.cxy)*dxd(o)*dyd(o)); }
+ };
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -61,6 +72,8 @@ namespace mfv {
     double d3d() const { return first.d3d(second); }
     double dz () const { return first.dz (second); }
     double phi() const { return first.phi(second); }
+
+    double sig() const { return first.sig(second); }
   };
 
   //////////////////////////////////////////////////////////////////////////////
