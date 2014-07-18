@@ -573,10 +573,11 @@ namespace mfv {
       for (i = int(pval_limits.size())-1; i >= 0; --i)
         if (pval_limits[i] > limit_alpha)
           break;
-      pval_limit = pval_limits[i+1];
-      mu_sig_limit = mu_sig_limits[i+1];
-      t_obs_limit = t_obs_limits[i+1];
-
+      if (i < int(pval_limits.size())-1) {
+        pval_limit = pval_limits[i+1];
+        mu_sig_limit = mu_sig_limits[i+1];
+        t_obs_limit = t_obs_limits[i+1];
+      }
 
       printf("pval_limit: %e  mu_sig_limit: %f\n", pval_limit, mu_sig_limit);
     }
