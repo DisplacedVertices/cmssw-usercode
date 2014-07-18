@@ -22,6 +22,8 @@ int main() {
   const std::string templates_kind = env.get_string_lower("templates_kind", "phishift");
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
+  const bool run_fit = env.get_bool("run_fit", true);
+
   if (!(templates_phishift || templates_clearedjets))
     jmt::vthrow("templates config must be one of \"phishift\", \"clearedjets\"");
 
@@ -55,7 +57,8 @@ int main() {
     for (double tp : ter->true_pars())
       true_pars.push_back(tp);
 
-    fitter->fit(itoy, ter, h_sig, tt->toy_2v, true_pars);
+    if (run_fit)
+      fitter->fit(itoy, ter, h_sig, tt->toy_2v, true_pars);
   }
 
   out_f->Write();
