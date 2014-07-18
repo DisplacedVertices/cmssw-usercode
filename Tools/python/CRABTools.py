@@ -657,7 +657,7 @@ def crab_output_files_from_fjr(working_dir):
     # Fragile xml parsing! Also assumes only one output file per job.
     wrapper_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="WrapperExitCode"/>')
     exe_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="ExeExitCode"/>')
-    filename_re = re.compile(r'[ \t](/store/user.*root)')
+    filename_re = re.compile(r'.*(/store/user.*root)')
     for fjr in fjrs:
         s = open(fjr).read()
         wrapper_mo = wrapper_re.search(s)
