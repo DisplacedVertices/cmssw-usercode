@@ -24,7 +24,7 @@ namespace mfv {
     ////////////////////////////////////////////////////////////////////////////
 
     double clearing_sigma_fit;
-    virtual std::vector<double> true_pars() const { return std::vector<double>({clearing_sigma_fit}); }
+    virtual std::vector<double> true_pars() const { return std::vector<double>({clearing_sigma_fit, 0}); }
     virtual std::vector<TemplatePar> par_info() const;
 
     ////////////////////////////////////////////////////////////////////////////
@@ -38,7 +38,6 @@ namespace mfv {
     void book_trees();
     void book_toy_fcns_and_histos();
     bool is_sideband(const VertexSimple&, const VertexSimple&) const;
-    double throw_phi(const EventSimple& ev) const;
     void make_templates();
     void process_imp();
   };

@@ -129,6 +129,35 @@ namespace mfv {
 
   //////////////////////////////////////////////////////////////////////////////
 
+  SimpleClearingTemplate::SimpleClearingTemplate(int i_, TH1D* h_, const double sigma)
+    : Template(i_, h_),
+      clearing_sigma(sigma)
+  {
+    pars.push_back(sigma);
+    pars.push_back(0);
+  }
+
+  std::string SimpleClearingTemplate::name() const {
+    char buf[128];
+    snprintf(buf, 128, "simpleclear%04i", i);
+    return std::string(buf);
+  }
+
+  std::string SimpleClearingTemplate::title() const {
+    char buf[128];
+    snprintf(buf, 128, "clearing_sigma = %g", clearing_sigma);
+    return std::string(buf);
+  }
+
+  double SimpleClearingTemplate::par(size_t w) const {
+    if (w == 0)
+      return clearing_sigma;
+    else
+      return 0.;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
   TemplateInterpolator::TemplateInterpolator(Templates* templates_, int n_bins_,
                                              const std::vector<TemplatePar>& par_infos_,
                                              std::vector<double>& a_)
@@ -138,7 +167,7 @@ namespace mfv {
       par_infos(par_infos_),
       a(a_)
   {
-    if (n_pars != 2)
+    if (n_pars > 2)
       jmt::vthrow("only n_pars = 2 implemented in TemplateInterpolator"); // JMTBAD
 
     if (int(par_infos.size()) != n_pars)
@@ -197,6 +226,18 @@ namespace mfv {
     if (a_p == 0)
       a_p = &a;
 
+    if (n_pars == 1) {
+      const int i_par0 = i_par(0, pars[0]);
+      const int i_par0_p1 = i_par0 == par_infos[0].nsteps - 1 ? i_par0 : i_par0 + 1;
+      Q[0] = (*templates)[i_par0   ];
+      Q[1] = (*templates)[i_par0_p1];
+      const double d = Q[1]->par(0) - Q[0]->par(0);
+      const double f = (Q[1]->par(0) - pars[0])/d;
+      for (int ibin = 1; ibin <= n_bins; ++ibin)
+        (*a_p)[ibin] = f * Q[0]->h->GetBinContent(ibin) + (1-f) * Q[1]->h->GetBinContent(ibin);
+      return;
+    }
+
     //std::vector<int> ipars;
     //for (int i = 0; i < n_pars; ++i)
     //  ipars = ipar(i, pars[i]);
@@ -212,9 +253,9 @@ namespace mfv {
     Q[2] = (*templates)[n_par1 * i_par0_p1 + i_par1   ];
     Q[3] = (*templates)[n_par1 * i_par0_p1 + i_par1_p1];
 
-    //    printf("interpolate: %f %f\n", pars[0], pars[1]);
-    //    for (int i = 0; i < 4; ++i)
-    //      printf("Q%i: %s\n", i, Q[i]->title().c_str());
+    //        printf("interpolate: %f %f\n", pars[0], pars[1]);
+    //        for (int i = 0; i < 4; ++i)
+    //          printf("Q%i: %s\n", i, Q[i]->title().c_str());
 
     if (i_par0 == i_par0_p1 && i_par1 == i_par1_p1) {
       for (int ibin = 1; ibin <= n_bins; ++ibin)

@@ -70,6 +70,17 @@ namespace mfv {
 
   //////////////////////////////////////////////////////////////////////////////
 
+  struct SimpleClearingTemplate : public Template {
+    double clearing_sigma;
+
+    SimpleClearingTemplate(int i_, TH1D* h_, const double sigma);
+    virtual std::string name() const;
+    virtual std::string title() const;
+    virtual double par(size_t w) const;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+
   typedef std::vector<Template*> Templates;
 
   //////////////////////////////////////////////////////////////////////////////

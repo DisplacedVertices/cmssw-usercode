@@ -132,6 +132,7 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
+      fix_nuis1(env.get_bool("fix_nuis1", 0)),
       n_toy_signif(env.get_int("n_toy_signif", 10000)),
       n_toy_limit(env.get_int("n_toy_limit", 1000)),
       print_toys(env.get_bool("print_toys", false)),
@@ -230,10 +231,15 @@ namespace mfv {
         if (t_par < mins[ipar])
           mins[ipar] = t_par;
       }
+    int n_nuis[2] = {200, 200};
+    if (maxs[1] <= mins[1]) {
+      maxs[1] = mins[1] + 1;
+      n_nuis[1] = 3;
+    }
 
     scan_t nuis_scan[2] = {
-      { 200, mins[0], maxs[0] },
-      { 200, mins[1], maxs[1] }
+      { n_nuis[0], mins[0], maxs[0] },
+      { n_nuis[1], mins[1], maxs[1] }
     };
 
     for (int sb = 1; sb >= 0; --sb) {
@@ -252,7 +258,9 @@ namespace mfv {
         const double nuispar0 = nuis_scan[0].v(i0);
         for (int i1 = 1; i1 < nuis_scan[1].n; ++i1) {
           const double nuispar1 = nuis_scan[1].v(i1);
-          h1->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, nuispar1));
+          const double twolnL = fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, nuispar1);
+          //printf("i0: %i %f  i1: %i %f  %f\n", i0, nuispar0, i1, nuispar1, twolnL);
+          h1->SetBinContent(i0, i1, twolnL);
         }
       }
 
@@ -364,8 +372,11 @@ namespace mfv {
     if (fix_mu_sig)
       m->FixParameter(0);
 
+    if (fix_nuis1)
+      m->FixParameter(3);
+
     m->Migrad();
-    //      m->mnmnos();
+    //m->mnmnos();
     double fmin, fedm, errdef;
     int npari, nparx, istat;
     m->mnstat(fmin, fedm, errdef, npari, nparx, istat);

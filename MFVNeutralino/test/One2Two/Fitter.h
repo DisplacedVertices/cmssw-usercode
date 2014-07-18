@@ -23,6 +23,7 @@ namespace mfv {
 
     jmt::ConfigFromEnv env;
     const int print_level;
+    const bool fix_nuis1;
     const int n_toy_signif;
     const int n_toy_limit;
     const bool print_toys;

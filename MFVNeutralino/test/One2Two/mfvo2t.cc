@@ -9,6 +9,7 @@
 #include "Templates.h"
 #include "ClearedJetsTemplater.h"
 #include "PhiShiftTemplater.h"
+#include "SimpleClearingTemplater.h"
 #include "Fitter.h"
 
 int main() {
@@ -22,17 +23,18 @@ int main() {
   const std::string templates_kind = env.get_string_lower("templates_kind", "phishift");
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
+  const bool templates_simpleclear = templates_kind == "simpleclear";
   const bool run_fit = env.get_bool("run_fit", true);
 
-  if (!(templates_phishift || templates_clearedjets))
-    jmt::vthrow("templates config must be one of \"phishift\", \"clearedjets\"");
+  if (!(templates_phishift || templates_clearedjets || templates_simpleclear))
+    jmt::vthrow("templates config must be one of \"phishift\", \"clearedjets\", \"simpleclear\"");
 
   printf("mfvo2t config:\n");
   printf("trees from %s\n", tree_path.c_str());
   printf("output to %s\n", out_fn.c_str());
   printf("seed: %i\n", seed);
   printf("ntoys: %i\n", ntoys);
-  printf("template kind: %s (phishift? %i clearedjets? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets);
+  printf("template kind: %s (phishift? %i clearedjets? %i simpleclear? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets, templates_simpleclear);
   printf("template binning: (%i, %f, %f)\n", mfv::Template::nbins, mfv::Template::min_val, mfv::Template::max_val);
 
   TFile* out_f = new TFile(out_fn.c_str(), "recreate");
@@ -43,6 +45,8 @@ int main() {
     ter = new mfv::PhiShiftTemplater("", out_f, rand);
   else if (templates_clearedjets)
     ter = new mfv::ClearedJetsTemplater("", out_f, rand);
+  else if (templates_simpleclear)
+    ter = new mfv::SimpleClearingTemplater("", out_f, rand);
     
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);
 
