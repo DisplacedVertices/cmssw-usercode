@@ -468,6 +468,7 @@ namespace mfv {
 
     printf("interpolating + shifting templates:\n");
     jmt::ProgressBar pb(50, n_phi_total * n_shift);
+    pb.start();
 
     int iglb = 0;
     for (int ip = 0, ipe = int(orig_templates.size()); ip < ipe; ++ip) {
