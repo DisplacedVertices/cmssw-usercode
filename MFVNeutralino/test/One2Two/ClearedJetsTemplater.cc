@@ -28,7 +28,10 @@ namespace mfv {
       n_clearing_mu(env.get_int("n_clearing_mu", 40)),
       clearing_sigma_start(env.get_double("clearing_sigma_start", 0.0005)),
       d_clearing_sigma(env.get_double("d_clearing_sigma", 0.0005)),
-      n_clearing_sigma(env.get_int("n_clearing_sigma", 20))
+      n_clearing_sigma(env.get_int("n_clearing_sigma", 20)),
+
+      clearing_mu_fit(0.028),
+      clearing_sigma_fit(0.005)
   {
     printf("ClearedJetsTemplater%s config:\n", name.c_str());
     printf("d2d_cut: %f\n", d2d_cut);
