@@ -101,6 +101,12 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
+    nt.cxx0 = v0.cxx;
+    nt.cxy0 = v0.cxy;
+    nt.cxz0 = v0.cxz;
+    nt.cyy0 = v0.cyy;
+    nt.cyz0 = v0.cyz;
+    nt.czz0 = v0.czz;
   }
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
@@ -108,8 +114,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.nvtx = 2;
     nt.ntk0 = v0.ntracks();
     nt.ntk1 = v1.ntracks();
-    nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
-    nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
+    nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z; nt.cxx0 = v0.cxx; nt.cxy0 = v0.cxy; nt.cxz0 = v0.cxz; nt.cyy0 = v0.cyy; nt.cyz0 = v0.cyz; nt.czz0 = v0.czz;
+    nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z; nt.cxx1 = v1.cxx; nt.cxy1 = v1.cxy; nt.cxz1 = v1.cxz; nt.cyy1 = v1.cyy; nt.cyz1 = v1.cyz; nt.czz1 = v1.czz;
   }
   else {
     if (vertices.size() != 0)

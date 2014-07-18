@@ -19,10 +19,22 @@ namespace mfv {
     tree->Branch("x0", &nt.x0, "x0/F");
     tree->Branch("y0", &nt.y0, "y0/F");
     tree->Branch("z0", &nt.z0, "z0/F");
+    tree->Branch("cxx0", &nt.cxx0, "cxx0/F");
+    tree->Branch("cxy0", &nt.cxy0, "cxy0/F");
+    tree->Branch("cxz0", &nt.cxz0, "cxz0/F");
+    tree->Branch("cyy0", &nt.cyy0, "cyy0/F");
+    tree->Branch("cyz0", &nt.cyz0, "cyz0/F");
+    tree->Branch("czz0", &nt.czz0, "czz0/F");
     tree->Branch("ntk1", &nt.ntk1, "ntk1/s");
     tree->Branch("x1", &nt.x1, "x1/F");
     tree->Branch("y1", &nt.y1, "y1/F");
     tree->Branch("z1", &nt.z1, "z1/F");
+    tree->Branch("cxx1", &nt.cxx1, "cxx1/F");
+    tree->Branch("cxy1", &nt.cxy1, "cxy1/F");
+    tree->Branch("cxz1", &nt.cxz1, "cxz1/F");
+    tree->Branch("cyy1", &nt.cyy1, "cyy1/F");
+    tree->Branch("cyz1", &nt.cyz1, "cyz1/F");
+    tree->Branch("czz1", &nt.czz1, "czz1/F");
 
     tree->SetAlias("dist0", "sqrt(x0**2 + y0**2)");
     tree->SetAlias("dist1", "sqrt(x1**2 + y1**2)");
@@ -49,9 +61,21 @@ namespace mfv {
     tree->SetBranchAddress("x0", &nt.x0);
     tree->SetBranchAddress("y0", &nt.y0);
     tree->SetBranchAddress("z0", &nt.z0);
+    tree->SetBranchAddress("cxx0", &nt.cxx0);
+    tree->SetBranchAddress("cxy0", &nt.cxy0);
+    tree->SetBranchAddress("cxz0", &nt.cxz0);
+    tree->SetBranchAddress("cyy0", &nt.cyy0);
+    tree->SetBranchAddress("cyz0", &nt.cyz0);
+    tree->SetBranchAddress("czz0", &nt.czz0);
     tree->SetBranchAddress("ntk1", &nt.ntk1);
     tree->SetBranchAddress("x1", &nt.x1);
     tree->SetBranchAddress("y1", &nt.y1);
     tree->SetBranchAddress("z1", &nt.z1);
+    tree->SetBranchAddress("cxx1", &nt.cxx1);
+    tree->SetBranchAddress("cxy1", &nt.cxy1);
+    tree->SetBranchAddress("cxz1", &nt.cxz1);
+    tree->SetBranchAddress("cyy1", &nt.cyy1);
+    tree->SetBranchAddress("cyz1", &nt.cyz1);
+    tree->SetBranchAddress("czz1", &nt.czz1);
   }
 }

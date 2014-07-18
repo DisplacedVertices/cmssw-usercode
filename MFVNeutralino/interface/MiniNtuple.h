@@ -20,10 +20,22 @@ namespace mfv {
     float x0;
     float y0;
     float z0;
+    float cxx0;
+    float cxy0;
+    float cxz0;
+    float cyy0;
+    float cyz0;
+    float czz0;
     unsigned short ntk1;
     float x1;
     float y1;
     float z1;
+    float cxx1;
+    float cxy1;
+    float cxz1;
+    float cyy1;
+    float cyz1;
+    float czz1;
   };
 
   void write_to_tree(TTree* tree, MiniNtuple& nt);
