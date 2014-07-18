@@ -36,7 +36,11 @@ float throw_bs2ddist() {
   return bs2ddist[gRandom->Integer(n1v)];
 }
 
-float throw_phi(int i) {
+float throw_uniform_phi() {
+  return gRandom->Uniform(-M_PI, M_PI);
+}
+
+float throw_gaussian_phi(int i) {
   double rjetphi = 0;
   double rand = gRandom->Rndm();
   double sumpt = 0;
@@ -89,6 +93,9 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
     if (t->GetEntry(j) <= 0) continue;
 
     if (nt.nvtx == 2) continue;
+    //if (nt.npu > 17) continue;
+    //if (nt.npu < 18 || nt.npu > 24) continue;
+    //if (nt.npu < 25) continue;
     if (i1v < sn1v) {
       sbs2ddist[i1v] = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
       svtx_phis[i1v] = atan2(nt.y0, nt.x0);
@@ -146,6 +153,7 @@ int main() {
   float weights[nbkg] = {0.589, 0.085, 0.426, 0.169};
   int sn1v[nbkg] = {11406, 101, 4425, 1458};
   int sn1vs = 0;
+
   for (int i = 0; i < nbkg; ++i) {
     toy_from_file(samples[i], sn1vs, sn1v[i]);
     sn1vs += sn1v[i];
@@ -203,6 +211,16 @@ int main() {
   TH1F* h_svpairdist = new TH1F("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
   TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 30, 0, 0.3);
 
+  TH1F* h_svdist2d_uniformphi = new TH1F("h_svdist2d_uniformphi", "svdist2d using uniform #phi distribution;constructed vertex pair distance (cm);events", 10, 0, 0.1);
+  float sigma_clear[5] = {30, 40, 50, 60, 70};
+  TH1F* h_svdist2d_sigma[5];
+  TH1F* h_svdist2d_mu[5];
+  float mu_clear[5] = {260, 270, 280, 290, 300};
+  for (int i = 0; i < 5; ++i) {
+    h_svdist2d_mu[i] = new TH1F(TString::Format("h_svdist2d_mu_%i", i), TString::Format("svdist2d with #mu_{clear} = %f #mum;constructed vertex pair distance (cm);events", mu_clear[i]), 10, 0, 0.1);
+    h_svdist2d_sigma[i] = new TH1F(TString::Format("h_svdist2d_sigma_%i", i), TString::Format("svdist2d with #sigma_{clear} = %f #mum;constructed vertex pair distance (cm);events", sigma_clear[i]), 10, 0, 0.1);
+  }
+
   for (int i = 0; i < n1v; ++i) {
     const float w = puweights[i];
 
@@ -217,8 +235,8 @@ int main() {
       h_svjetdphi->Fill(TVector2::Phi_mpi_pi(vtx_phis[i] - jet_phis[i][j]), w);
     }
     if (njets[i] > 0) {
-      double vtx0_phi = throw_phi(i);
-      double vtx1_phi = throw_phi(i);
+      double vtx0_phi = throw_gaussian_phi(i);
+      double vtx1_phi = throw_gaussian_phi(i);
       double dphi = TVector2::Phi_mpi_pi(vtx0_phi - vtx1_phi);
 
       double vtx0_dist = throw_bs2ddist();
@@ -237,10 +255,26 @@ int main() {
       double svdist = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi)));
       h_svpairdist->Fill(svdist, w);
 
-      if (TMath::Erf((svdist - 0.028)/0.005) > gRandom->Uniform(-1,1)) {
+      double rand = gRandom->Uniform(-1,1);
+      if (TMath::Erf((svdist - 0.028)/0.005) > rand) {
         h_svpairdphi_cut->Fill(dphi, w);
         h_svpairabsdphi->Fill(fabs(dphi), w);
         h_svpairdist_cut->Fill(svdist, w);
+      }
+
+      double dphi_uniformphi = TVector2::Phi_mpi_pi(throw_uniform_phi() - throw_uniform_phi());
+      double svdist_uniformphi = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi_uniformphi)));
+      if (TMath::Erf((svdist_uniformphi - 0.028)/0.005) > rand) {
+        h_svdist2d_uniformphi->Fill(svdist_uniformphi, w);
+      }
+
+      for (int j = 0; j < 5; ++j) {
+        if (TMath::Erf((svdist - mu_clear[j]/10000)/0.005) > rand) {
+          h_svdist2d_mu[j]->Fill(svdist, w);
+        }
+        if (TMath::Erf((svdist - 0.028)/(sigma_clear[j]/10000)) > rand) {
+          h_svdist2d_sigma[j]->Fill(svdist, w);
+        }
       }
     }
   }
@@ -271,6 +305,7 @@ int main() {
   h_svpairdist->Write();
   h_svpairdist_cut->Write();
 
+  //overlay vertex-jet deltaphi for one-vertex and two-vertex events
   TCanvas* c_vtxjetdphi = new TCanvas("c_vtxjetdphi");
   h_svjetdphi->SetName("one-vertex");
   h_svjetdphi->SetLineColor(kBlue);
@@ -288,6 +323,7 @@ int main() {
   c_vtxjetdphi->SetTicky();
   c_vtxjetdphi->Write();
 
+  //overlay vertex-jet deltaphi for actual MC and our model
   TCanvas* c_svjetdphi = new TCanvas("c_svjetdphi", "c_svjetdphi", 700, 700);
   h_svjetdphi->SetLineColor(kBlue);
   h_svjetdphi->SetLineWidth(3);
@@ -306,7 +342,8 @@ int main() {
   c_svjetdphi->SetTicky();
   c_svjetdphi->Write();
 
-  TCanvas* c_svdist2d = new TCanvas("c_svdist2d", "c_svdist2d", 700, 700);
+  //overlay svdist2d for MC background, our model, and MC signal
+  TCanvas* c_svdist2d_sig = new TCanvas("c_svdist2d_sig", "c_svdist2d_sig", 700, 700);
   h_svdist2d->SetLineColor(kBlue);
   h_svdist2d->SetLineWidth(3);
   h_svdist2d->SetStats(0);
@@ -324,18 +361,34 @@ int main() {
   h_svdist2d_sig->SetStats(0);
   h_svdist2d_sig->DrawNormalized("sames");
 
-  TLegend* l_svdist2d = new TLegend(0.25, 0.7, 0.85, 0.85);
-  l_svdist2d->AddEntry(h_svdist2d, "actual MC", "LPE");
-  l_svdist2d->AddEntry(h_svpairdist_cut, "our model", "LPE");
-  l_svdist2d->AddEntry(h_svdist2d_sig, "#tau = 1 mm, M = 400 GeV signal", "LPE");
-  l_svdist2d->SetFillColor(0);
-  l_svdist2d->Draw();
-  c_svdist2d->SetTickx();
-  c_svdist2d->SetTicky();
+  TLegend* l_svdist2d_sig = new TLegend(0.25, 0.7, 0.85, 0.85);
+  l_svdist2d_sig->AddEntry(h_svdist2d, "actual MC", "LPE");
+  l_svdist2d_sig->AddEntry(h_svpairdist_cut, "our model", "LPE");
+  l_svdist2d_sig->AddEntry(h_svdist2d_sig, "#tau = 1 mm, M = 400 GeV signal", "LPE");
+  l_svdist2d_sig->SetFillColor(0);
+  l_svdist2d_sig->Draw();
+  c_svdist2d_sig->SetTickx();
+  c_svdist2d_sig->SetTicky();
   fh->cd();
-  c_svdist2d->Write();
+  c_svdist2d_sig->Write();
   sig_file->Close();
 
+  //overlay svdist2d for MC background and our model
+  TCanvas* c_svdist2d = new TCanvas("c_svdist2d", "c_svdist2d", 700, 700);
+  h_svdist2d->GetXaxis()->SetRangeUser(0,0.1);
+  h_svdist2d->SetLineColor(kBlue);
+  h_svdist2d->SetLineWidth(3);
+  h_svdist2d->SetStats(1);
+  h_svdist2d->DrawNormalized();
+  h_svpairdist_cut->SetLineColor(kRed);
+  h_svpairdist_cut->SetLineWidth(3);
+  h_svpairdist_cut->SetStats(1);
+  h_svpairdist_cut->DrawNormalized("sames");
+  c_svdist2d->SetTickx();
+  c_svdist2d->SetTicky();
+  c_svdist2d->Write();
+
+  //overlay vertex-vertex deltaphi for actual MC and our model
   TCanvas* c_svpairdphi = new TCanvas("c_svpairdphi", "c_svpairdphi", 700, 700);
   h_absdeltaphi01->SetLineColor(kBlue);
   h_absdeltaphi01->SetLineWidth(3);
@@ -353,6 +406,82 @@ int main() {
   c_svpairdphi->SetTickx();
   c_svpairdphi->SetTicky();
   c_svpairdphi->Write();
+
+  //overlay svdist2d for actual MC and our model with gaussian phi, uniform phi
+  TCanvas* c_svdist2d_phi = new TCanvas("c_svdist2d_phi", "c_svdist2d_phi", 700, 700);
+  h_svdist2d->GetXaxis()->SetRangeUser(0, 0.1);
+  h_svdist2d->SetLineColor(kBlue);
+  h_svdist2d->SetLineWidth(3);
+  h_svdist2d->SetStats(0);
+  h_svdist2d->DrawNormalized();
+  h_svpairdist_cut->SetLineColor(kRed);
+  h_svpairdist_cut->SetLineWidth(3);
+  h_svpairdist_cut->SetStats(0);
+  h_svpairdist_cut->DrawNormalized("sames");
+  h_svdist2d_uniformphi->SetLineColor(8);
+  h_svdist2d_uniformphi->SetLineWidth(3);
+  h_svdist2d_uniformphi->SetStats(0);
+  h_svdist2d_uniformphi->DrawNormalized("sames");
+
+  TLegend* l_svdist2d_phi = new TLegend(0.5, 0.7, 0.85, 0.85);
+  l_svdist2d_phi->AddEntry(h_svdist2d, "actual MC", "LPE");
+  l_svdist2d_phi->AddEntry(h_svpairdist_cut, "our model, Gaussian phi", "LPE");
+  l_svdist2d_phi->AddEntry(h_svdist2d_uniformphi, "our model, uniform phi", "LPE");
+  l_svdist2d_phi->SetFillColor(0);
+  l_svdist2d_phi->Draw();
+  c_svdist2d_phi->SetTickx();
+  c_svdist2d_phi->SetTicky();
+  c_svdist2d_phi->Write();
+
+  //overlay svdist2d for actual MC and our model with mu_clear = {260, 270, 280, 290, 300} mum
+  TCanvas* c_svdist2d_mu = new TCanvas("c_svdist2d_mu", "c_svdist2d_mu", 700, 700);
+  h_svdist2d->GetXaxis()->SetRangeUser(0, 0.1);
+  h_svdist2d->SetLineColor(kBlue);
+  h_svdist2d->SetLineWidth(3);
+  h_svdist2d->SetStats(0);
+  h_svdist2d->DrawNormalized();
+  for (int i = 0; i < 5; ++i) {
+    h_svdist2d_mu[i]->SetLineColor(kRed+i);
+    h_svdist2d_mu[i]->SetLineWidth(2);
+    h_svdist2d_mu[i]->SetStats(0);
+    h_svdist2d_mu[i]->DrawNormalized("sames");
+  }
+
+  TLegend* l_svdist2d_mu = new TLegend(0.5, 0.7, 0.85, 0.85);
+  l_svdist2d_mu->AddEntry(h_svdist2d, "actual MC", "LPE");
+  for (int i = 0; i < 5; ++i) {
+    l_svdist2d_mu->AddEntry(h_svdist2d_mu[i], TString::Format("#mu_{clear} = %i #mum", int(mu_clear[i])), "LPE");
+  }
+  l_svdist2d_mu->SetFillColor(0);
+  l_svdist2d_mu->Draw();
+  c_svdist2d_mu->SetTickx();
+  c_svdist2d_mu->SetTicky();
+  c_svdist2d_mu->Write();
+
+  //overlay svdist2d for actual MC and our model with sigma_clear = {30, 40, 50, 60, 70} mum
+  TCanvas* c_svdist2d_sigma = new TCanvas("c_svdist2d_sigma", "c_svdist2d_sigma", 700, 700);
+  h_svdist2d->GetXaxis()->SetRangeUser(0, 0.1);
+  h_svdist2d->SetLineColor(kBlue);
+  h_svdist2d->SetLineWidth(3);
+  h_svdist2d->SetStats(0);
+  h_svdist2d->DrawNormalized();
+  for (int i = 0; i < 5; ++i) {
+    h_svdist2d_sigma[i]->SetLineColor(kRed+i);
+    h_svdist2d_sigma[i]->SetLineWidth(2);
+    h_svdist2d_sigma[i]->SetStats(0);
+    h_svdist2d_sigma[i]->DrawNormalized("sames");
+  }
+
+  TLegend* l_svdist2d_sigma = new TLegend(0.5, 0.7, 0.85, 0.85);
+  l_svdist2d_sigma->AddEntry(h_svdist2d, "actual MC", "LPE");
+  for (int i = 0; i < 5; ++i) {
+    l_svdist2d_sigma->AddEntry(h_svdist2d_sigma[i], TString::Format("#sigma_{clear} = %i #mum", int(sigma_clear[i])), "LPE");
+  }
+  l_svdist2d_sigma->SetFillColor(0);
+  l_svdist2d_sigma->Draw();
+  c_svdist2d_sigma->SetTickx();
+  c_svdist2d_sigma->SetTicky();
+  c_svdist2d_sigma->Write();
 
   fh->Close();
 }
