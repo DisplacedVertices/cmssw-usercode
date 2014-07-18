@@ -13,13 +13,14 @@ namespace mfv {
 
   std::vector<double> Template::binning() {
     std::vector<double> bins;
-    for (int i = 0; i < 20; ++i)
-      bins.push_back(i * 0.01);
+    for (int i = 0; i < 5; ++i)
+      bins.push_back(i * 0.02);
+    bins.push_back(0.1);
     bins.push_back(0.2);
     bins.push_back(0.4);
-    bins.push_back(0.6);
-    bins.push_back(1);
-    bins.push_back(3);
+    bins.push_back(0.8);
+    bins.push_back(1.6);
+    bins.push_back(3.2);
     return bins;
   }
 
