@@ -1182,11 +1182,13 @@ class plot_saver:
             raise ValueError('save_dir called before plot_dir set!')
         self.saved.append(n)
 
-    def save(self, n, log=None, root=None, pdf=None, pdf_log=None, C=None, C_log=None, logz=None):
+    def save(self, n, log=None, root=None, pdf=None, pdf_log=None, C=None, C_log=None, logz=None, other_c=None):
+        can = self.c if other_c is None else other_c
+
         if logz:
-            logfcn = self.c.SetLogz
+            logfcn = can.SetLogz
         else:
-            logfcn = self.c.SetLogy
+            logfcn = can.SetLogy
 
         log = self.log if log is None else log
         root = self.root if root is None else root
@@ -1197,32 +1199,32 @@ class plot_saver:
         
         if self.plot_dir is None:
             raise ValueError('save called before plot_dir set!')
-        self.c.SetLogy(0)
+        can.SetLogy(0)
         fn = os.path.join(self.plot_dir, n + '.png')
-        self.c.SaveAs(fn)
+        can.SaveAs(fn)
         if root:
             root = os.path.join(self.plot_dir, n + '.root')
-            self.c.SaveAs(root)
+            can.SaveAs(root)
         if log:
             logfcn(1)
             log = os.path.join(self.plot_dir, n + '_log.png')
-            self.c.SaveAs(log)
+            can.SaveAs(log)
             logfcn(0)
         if pdf:
             pdf = os.path.join(self.plot_dir, n + '.pdf')
-            self.c.SaveAs(pdf)
+            can.SaveAs(pdf)
         if pdf_log:
             logfcn(1)
             pdf_log = os.path.join(self.plot_dir, n + '_log.pdf')
-            self.c.SaveAs(pdf_log)
+            can.SaveAs(pdf_log)
             logfcn(0)
         if C:
             C = os.path.join(self.plot_dir, n + '.C')
-            self.c.SaveAs(C_fn)
+            can.SaveAs(C_fn)
         if C_log:
             logfcn(1)
             C_log = os.path.join(self.plot_dir, n + '_log.C')
-            self.c.SaveAs(C_log)
+            can.SaveAs(C_log)
             logfcn(0)
         self.saved.append((fn, log, root, pdf, pdf_log, C, C_log))
 
