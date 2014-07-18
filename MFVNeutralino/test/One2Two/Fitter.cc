@@ -67,6 +67,9 @@ namespace mfv {
     double twolnL(double mu_sig, double mu_bkg, double par0, double par1) {
       interp->interpolate(par0, par1);
 
+      if (mu_sig < 1e-6)
+        mu_sig = 1e-6;
+
       double lnL = 0;
       for (int i = 1; i <= n_bins; ++i) {
         const double nu_sum = mu_sig * a_sig[i] + mu_bkg * a_bkg[i];
