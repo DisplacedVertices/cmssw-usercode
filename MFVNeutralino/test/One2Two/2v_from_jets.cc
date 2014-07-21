@@ -12,7 +12,7 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_0";
+const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_1";
 
 //predicted number of one-vertex-only events in 20/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
@@ -23,6 +23,8 @@ unsigned short njets[n1v];
 float jet_pts[n1v][50];
 float jet_phis[n1v][50];
 float puweights[n1v];
+
+float x[n1v], y[n1v], z[n1v], cxx[n1v], cxy[n1v], cxz[n1v], cyy[n1v], cyz[n1v], czz[n1v];
 
 float sumht(int i) {
   double sum = 0;
@@ -86,6 +88,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
   float sjet_pts[sn1v][50];
   float sjet_phis[sn1v][50];
   float spuweights[sn1v];
+  float sx[sn1v], sy[sn1v], sz[sn1v], scxx[sn1v], scxy[sn1v], scxz[sn1v], scyy[sn1v], scyz[sn1v], sczz[sn1v];
 
   int i1v = 0;
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
@@ -105,6 +108,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
         sjet_phis[i1v][i] = nt.jet_phi[i];
       }
       spuweights[i1v] = nt.weight;
+      sx[i1v] = nt.x0; sy[i1v] = nt.y0; sz[i1v] = nt.z0; scxx[i1v] = nt.cxx0; scxy[i1v] = nt.cxy0; scxz[i1v] = nt.cxz0; scyy[i1v] = nt.cyy0; scyz[i1v] = nt.cyz0; sczz[i1v] = nt.czz0;
     } else {
       if (gRandom->Rndm() > float(sn1v) / i1v) continue;
       int r = gRandom->Integer(sn1v);
@@ -116,6 +120,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
         sjet_phis[r][i] = nt.jet_phi[i];
       }
       spuweights[r] = nt.weight;
+      sx[r] = nt.x0; sy[r] = nt.y0; sz[r] = nt.z0; scxx[r] = nt.cxx0; scxy[r] = nt.cxy0; scxz[r] = nt.cxz0; scyy[r] = nt.cyy0; scyz[r] = nt.cyz0; sczz[r] = nt.czz0;
     }
     i1v++;
   }
@@ -133,6 +138,7 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
       jet_phis[sn1vs+i][j] = sjet_phis[i][j];
     }
     puweights[sn1vs+i] = spuweights[i];
+    x[sn1vs+i] = sx[i]; y[sn1vs+i] = sy[i]; z[sn1vs+i] = sz[i]; cxx[sn1vs+i] = scxx[i]; cxy[sn1vs+i] = scxy[i]; cxz[sn1vs+i] = scxz[i]; cyy[sn1vs+i] = scyy[i]; cyz[sn1vs+i] = scyz[i]; czz[sn1vs+i] = sczz[i];
   }
 
   return 0;
@@ -147,6 +153,8 @@ int main() {
   TH1F* h_vtx1jetdphi = new TH1F("h_vtx1jetdphi", ";#Delta#phi(vertex1 position, jet momentum);arb. units", 50, -3.15, 3.15);
   TH1F* h_svdist2d = new TH1F("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 30, 0, 0.3);
   TH1F* h_absdeltaphi01 = new TH1F("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 5, 0, 3.15);
+  TH1D* h_sigmavv = new TH1D("h_sigmavv", ";#sigma(sv #0, #1) (cm);arb. units", 10, 0, 0.01);
+  TH1D* h_sigvv = new TH1D("h_sigvv", ";N#sigma(sv #0, #1);arb. units", 30, 0, 30);
 
   const int nbkg = 4;
   const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
@@ -185,6 +193,13 @@ int main() {
         }
         h_svdist2d->Fill(sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1)), weights[i] * nt.weight);
         h_absdeltaphi01->Fill(fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1))), weights[i] * nt.weight);
+
+        float svdist2d = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
+        float dx = (nt.x0-nt.x1) / svdist2d;
+        float dy = (nt.y0-nt.y1) / svdist2d;
+        float sigma = sqrt((nt.cxx0 + nt.cxx1)*dx*dx + (nt.cyy0 + nt.cyy1)*dy*dy + 2*(nt.cxy0 + nt.cxy1)*dx*dy);
+        h_sigmavv->Fill(sigma);
+        h_sigvv->Fill(svdist2d / sigma);
       }
     }
   }
@@ -278,6 +293,36 @@ int main() {
       }
     }
   }
+
+  TH1D* h_sigma = new TH1D("h_sigma", ";#sigma(sv #0, #1) (cm);arb. units", 10, 0, 0.01);
+  TH1D* h_sig = new TH1D("h_sig", ";N#sigma(sv #0, #1);arb. units", 30, 0, 30);
+  TH1D* h_svdist2d_lt4sigma = new TH1D("h_svdist2d_lt4sigma", "<  4 #sigma;dist2d(sv #0, #1) (cm);arb. units", 10, 0, 0.1);
+  TH1D* h_sig_gtnsigma[7];
+  TH1D* h_svdist2d_gtnsigma[7];
+  for (int i = 0; i < 7; ++i) {
+    h_sig_gtnsigma[i] = new TH1D(TString::Format("h_sig_gt%isigma", i+4), TString::Format(">= %i sigma;N#sigma(sv #0, #1) (cm);arb. units", i+4), 30, 0, 30);
+    h_svdist2d_gtnsigma[i] = new TH1D(TString::Format("h_svdist2d_gt%isigma", i+4), TString::Format(">= %i sigma;dist2d(sv #0, #1) (cm);arb. units", i+4), 10, 0, 0.1);
+  }
+  for (int i = 0; i < n1v; ++i) {
+    for (int j = i+1; j < n1v; ++j) {
+      float svdist2d = sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
+      float dx = (x[i] - x[j]) / svdist2d;
+      float dy = (y[i] - y[j]) / svdist2d;
+      float sigma = sqrt((cxx[i] + cxx[j])*dx*dx + (cyy[i] + cyy[j])*dy*dy + 2*(cxy[i] + cxy[j])*dx*dy);
+      h_sigma->Fill(sigma);
+      h_sig->Fill(svdist2d / sigma);
+      if (svdist2d / sigma < 4) {
+        h_svdist2d_lt4sigma->Fill(svdist2d);
+      }
+      for (int i = 0; i < 7; ++i) {
+        if (svdist2d / sigma > i+4) {
+          h_sig_gtnsigma[i]->Fill(svdist2d / sigma);
+          h_svdist2d_gtnsigma[i]->Fill(svdist2d);
+        }
+      }
+    }
+  }
+
   TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
   h_bs2ddist1v->Write();
   h_vtxjetdphi->Write();
@@ -285,6 +330,8 @@ int main() {
   h_vtx1jetdphi->Write();
   h_svdist2d->Write();
   h_absdeltaphi01->Write();
+  h_sigmavv->Write();
+  h_sigvv->Write();
 
   h_njets->Write();
   h_jet_sum_ht->Write();
@@ -304,6 +351,9 @@ int main() {
   h_sv1bs2ddist->Write();
   h_svpairdist->Write();
   h_svpairdist_cut->Write();
+
+  h_sigma->Write();
+  h_svdist2d_lt4sigma->Write();
 
   //overlay vertex-jet deltaphi for one-vertex and two-vertex events
   TCanvas* c_vtxjetdphi = new TCanvas("c_vtxjetdphi");
@@ -482,6 +532,84 @@ int main() {
   c_svdist2d_sigma->SetTickx();
   c_svdist2d_sigma->SetTicky();
   c_svdist2d_sigma->Write();
+
+  //overlay sigma for two-vertex MC and all one-vertex pairs
+  TCanvas* c_sigma = new TCanvas("c_sigma", "c_sigma", 700, 700);
+  h_sigmavv->SetLineColor(kBlue);
+  h_sigmavv->SetLineWidth(3);
+  h_sigmavv->DrawNormalized();
+  h_sigma->SetLineColor(kRed);
+  h_sigma->SetLineWidth(3);
+  h_sigma->DrawNormalized("sames");
+  c_sigma->SetTickx();
+  c_sigma->SetTicky();
+  c_sigma->Write();
+
+  //overlay significance for two-vertex MC and all one-vertex pairs
+  TCanvas* c_sig = new TCanvas("c_sig", "c_sig", 700, 700);
+  h_sigvv->SetLineColor(kBlue);
+  h_sigvv->SetLineWidth(3);
+  h_sigvv->DrawNormalized();
+  h_sig->SetLineColor(kRed);
+  h_sig->SetLineWidth(3);
+  h_sig->DrawNormalized("sames");
+  c_sig->SetTickx();
+  c_sig->SetTicky();
+  c_sig->Write();
+
+  //overlay significance for MC background and vertex pairs > n sigma apart
+  TCanvas* c_sig_gtnsigma = new TCanvas("c_sig_gtnsigma", "c_sig_gtnsigma", 700, 700);
+  h_sigvv->SetStats(0);
+  h_sigvv->DrawNormalized();
+  int colors[7] = {kRed, kOrange, kYellow, kGreen, kCyan, kBlue, kViolet};
+  for (int i = 0; i < 7; ++i) {
+    h_sig_gtnsigma[i]->SetLineColor(colors[i]);
+    h_sig_gtnsigma[i]->SetLineWidth(2);
+    h_sig_gtnsigma[i]->SetStats(0);
+    h_sig_gtnsigma[i]->DrawNormalized("sames");
+  }
+  TLegend* l_sig_gtnsigma = new TLegend(0.6, 0.6, 0.95, 0.95);
+  l_sig_gtnsigma->AddEntry(h_sigvv, "actual MC", "LPE");
+  for (int i = 0; i < 7; ++i) {
+    l_sig_gtnsigma->AddEntry(h_sig_gtnsigma[i], TString::Format("d_{vv} > %i #sigma_{vv}", i+4), "LPE");
+  }
+  l_sig_gtnsigma->SetFillColor(0);
+  l_sig_gtnsigma->Draw();
+  c_sig_gtnsigma->SetTickx();
+  c_sig_gtnsigma->SetTicky();
+  c_sig_gtnsigma->Write();
+
+  //overlay svdist2d for MC background and vertex pairs > 4 sigma apart
+  TCanvas* c_svdist2d_gt4sigma = new TCanvas("c_svdist2d_gt4sigma", "c_svdist2d_gt4sigma", 700, 700);
+  h_svdist2d->SetStats(1);
+  h_svdist2d->DrawNormalized();
+  h_svdist2d_gtnsigma[0]->SetLineColor(kRed);
+  h_svdist2d_gtnsigma[0]->SetLineWidth(3);
+  h_svdist2d_gtnsigma[0]->DrawNormalized("sames");
+  c_svdist2d_gt4sigma->SetTickx();
+  c_svdist2d_gt4sigma->SetTicky();
+  c_svdist2d_gt4sigma->Write();
+
+  //overlay svdist2d for MC background and vertex pairs > n sigma apart
+  TCanvas* c_svdist2d_gtnsigma = new TCanvas("c_svdist2d_gtnsigma", "c_svdist2d_gtnsigma", 700, 700);
+  h_svdist2d->SetStats(0);
+  h_svdist2d->DrawNormalized();
+  for (int i = 0; i < 7; ++i) {
+    h_svdist2d_gtnsigma[i]->SetLineColor(colors[i]);
+    h_svdist2d_gtnsigma[i]->SetLineWidth(2);
+    h_svdist2d_gtnsigma[i]->SetStats(0);
+    h_svdist2d_gtnsigma[i]->DrawNormalized("sames");
+  }
+  TLegend* l_svdist2d_gtnsigma = new TLegend(0.5, 0.5, 0.85, 0.85);
+  l_svdist2d_gtnsigma->AddEntry(h_svdist2d, "actual MC", "LPE");
+  for (int i = 0; i < 7; ++i) {
+    l_svdist2d_gtnsigma->AddEntry(h_svdist2d_gtnsigma[i], TString::Format("d_{vv} > %i #sigma_{vv}", i+4), "LPE");
+  }
+  l_svdist2d_gtnsigma->SetFillColor(0);
+  l_svdist2d_gtnsigma->Draw();
+  c_svdist2d_gtnsigma->SetTickx();
+  c_svdist2d_gtnsigma->SetTicky();
+  c_svdist2d_gtnsigma->Write();
 
   fh->Close();
 }
