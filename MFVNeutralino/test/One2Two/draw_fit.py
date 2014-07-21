@@ -3,7 +3,7 @@
 import sys, os, glob
 
 batch_fn_lst = [x for x in sys.argv if x.endswith('.lst')][0]
-batch_name = batch_fn_lst.replace('.lst','')
+batch_name = os.path.basename(batch_fn_lst).replace('.lst','')
 batch_root = glob.glob('/store/user/tucker/mfvo2t_%s/mfvo2t_%s/*/' % (batch_name, batch_name))
 assert len(batch_root) == 1
 batch_root = batch_root[0]
@@ -116,11 +116,14 @@ for n in ns:
     f = ROOT.TFile(fn)
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
     for t in 'sb b'.split():
+        leg = ROOT.TLegend(0.502, 0.620, 0.848, 0.861)
         s = dr.Get('h_sig_%s_fit' % t)
         b = dr.Get('h_bkg_%s_fit' % t)
         sb = dr.Get('h_sum_%s_fit' % t)
         dt = dr.Get('h_data_%s_fit' % t)
         for h in (s,b,sb,dt):
+            h.SetStats(0)
+            h.SetTitle(';d_{VV} (cm)')
             h.GetXaxis().SetRangeUser(0, 0.2)
         if dt.GetMaximum() > sb.GetMaximum():
             dt.Draw('e')
@@ -131,12 +134,21 @@ for n in ns:
         s.Draw('same hist')
         b.Draw('same hist')
 
+        leg.AddEntry(s, 'sig shape', 'F')
+        leg.AddEntry(b, 'bkg shape', 'F')
+        leg.AddEntry(sb, 'sig + bkg', 'F')
+        leg.AddEntry(dt, '"data"', 'LE')
+        leg.Draw()
+
         nm = '%s_fit_seed%i_toy%i_pval%s' % (t, seed, toy, str(x[-3]).replace('.','p'))
         ps.save(nm)
 
         h = dr.Get('h_likelihood_%s_scannuis' % t)
         h.Draw('colz')
         h.SetStats(0)
+        h.GetXaxis().SetLabelSize(0.02)
+        h.GetYaxis().SetLabelSize(0.02)
+        h.SetTitle(';#mu_{clear} (cm);#sigma_{clear} (cm)')
         ps.save(nm + '_scannuis')
 
         h.SetMinimum(h.GetMaximum() - 4)
@@ -146,6 +158,8 @@ for n in ns:
         h = dr.Get('h_likelihood_%s_scanmus' % t)
         h.Draw('colz')
         h.SetStats(0)
+        h.SetTitle(';s;b')
+        h.GetYaxis().SetTitleOffset(1.25)
         ps.save(nm + '_scanmus')
 
         h.SetMinimum(h.GetMaximum() - 4)
