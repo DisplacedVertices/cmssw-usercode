@@ -20,7 +20,8 @@ namespace mfv {
     jmt::ConfigFromEnv env;
     const int min_ntracks;
     const double int_lumi;
-    const double scale;
+    const double scale_1v;
+    const double scale_2v;
     const bool allow_cap;
     const bool poisson_means;
     const bool use_qcd500;

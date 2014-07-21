@@ -16,7 +16,8 @@ namespace mfv {
       env("mfvo2t_toythrower" + uname),
       min_ntracks(env.get_int("min_ntracks", 5)),
       int_lumi(env.get_double("int_lumi", 18.2e3)),
-      scale(env.get_double("scale", 1.)),
+      scale_1v(env.get_double("scale_1v", 1.)),
+      scale_2v(env.get_double("scale_2v", 1.)),
       allow_cap(env.get_bool("allow_cap", false)),
       poisson_means(env.get_bool("poisson_means", true)),
       use_qcd500(env.get_bool("use_qcd500", false)),
@@ -37,7 +38,7 @@ namespace mfv {
     printf("seed: %i\n", seed);
     printf("min_ntracks: %i\n", min_ntracks);
     printf("int_lumi: %f\n", int_lumi);
-    printf("scale: %f\n", scale);
+    printf("scale: %f 1v  %f 2v\n", scale_1v, scale_2v);
     printf("poisson_means: %i\n", poisson_means);
     printf("use_qcd500: %i\n", use_qcd500);
     printf("sample_only: %i (%s)\n", sample_only, samples.get(sample_only).name.c_str());
@@ -160,7 +161,8 @@ namespace mfv {
     t_config->Branch("seed", const_cast<int*>(&seed), "seed/I");
     t_config->Branch("min_ntracks", const_cast<int*>(&min_ntracks), "min_ntracks/I");
     t_config->Branch("int_lumi", const_cast<double*>(&int_lumi), "int_lumi/D");
-    t_config->Branch("scale", const_cast<double*>(&scale), "scale/D");
+    t_config->Branch("scale_1v", const_cast<double*>(&scale_1v), "scale_1v/D");
+    t_config->Branch("scale_2v", const_cast<double*>(&scale_2v), "scale_2v/D");
     t_config->Branch("poisson_means", const_cast<bool*>(&poisson_means), "poisson_means/O");
     t_config->Branch("use_qcd500", const_cast<bool*>(&use_qcd500), "use_qcd500/O");
     t_config->Branch("sample_only", const_cast<int*>(&sample_only), "sample_only/I");
@@ -230,17 +232,18 @@ namespace mfv {
       if (sample.is_sig() && sample.key != injected_signal)
         return;
 
-      const double sc = sample.is_sig() ? injected_signal_scale : scale;
+      const double sc1v = sample.is_sig() ? injected_signal_scale : scale_1v;
+      const double sc2v = sample.is_sig() ? injected_signal_scale : scale_2v;
 
       const int N1v = int(all_1v[sample.key].size());
-      const double n1v_d = lambda_1v[sample.key] * sc;
+      const double n1v_d = lambda_1v[sample.key] * sc1v;
       const int n1v_i = poisson_means ? rand->Poisson(n1v_d) : int(n1v_d) + 1;
       const int n1v = allow_cap ? std::min(n1v_i, N1v) : n1v_i;
       b_sum_1v += n1v;
       if (!sample.is_sig()) b_sum_bkg_1v += n1v;
 
       const int N2v = int(all_2v[sample.key].size());
-      const double n2v_d = lambda_2v[sample.key] * sc;
+      const double n2v_d = lambda_2v[sample.key] * sc2v;
       const int n2v_i = poisson_means ? rand->Poisson(n2v_d) : int(n2v_d) + 1;
       const int n2v = allow_cap ? std::min(n2v_i, N2v) : n2v_i;
       b_sum_2v += n2v;
