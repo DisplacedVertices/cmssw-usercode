@@ -123,8 +123,13 @@ namespace mfv {
   }
 
   void ToyThrower::loop_over_samples(std::function<void(const Sample&)> fcn) {
-    if (sample_only)
+    if (sample_only) {
       fcn(samples.get(sample_only));
+      if (injected_signal != 0)
+        fcn(samples.get(injected_signal));
+      if (template_signal != 0)
+        fcn(samples.get(template_signal));
+    }
     else {
       for (const Sample& sample : samples.samples)
         //if (sample.name != "qcdht0100" && sample.name != "qcdht0250" && 
