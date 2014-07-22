@@ -15,7 +15,7 @@ echo
 echo start gensimhlt step at `date`
 echo
 
-cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml pset.py $1
+cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml pset.py $1 &>/dev/null
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
