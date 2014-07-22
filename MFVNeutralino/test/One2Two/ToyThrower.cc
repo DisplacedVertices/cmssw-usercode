@@ -127,7 +127,7 @@ namespace mfv {
       fcn(samples.get(sample_only));
       if (injected_signal != 0)
         fcn(samples.get(injected_signal));
-      if (template_signal != 0)
+      if (template_signal != 0 && template_signal != injected_signal)
         fcn(samples.get(template_signal));
     }
     else {
