@@ -23,11 +23,13 @@ namespace mfv {
 
     jmt::ConfigFromEnv env;
     const int print_level;
+    const bool draw_bkg_templates;
     const bool fix_nuis1;
     const int n_toy_signif;
     const int n_toy_limit;
     const bool print_toys;
     const bool save_toys;
+    const bool do_signif;
     const bool do_limits;
     const double mu_sig_limit_step;
 

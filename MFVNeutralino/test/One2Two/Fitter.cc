@@ -132,11 +132,13 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
+      draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
       n_toy_signif(env.get_int("n_toy_signif", 10000)),
       n_toy_limit(env.get_int("n_toy_limit", 1000)),
       print_toys(env.get_bool("print_toys", false)),
       save_toys(env.get_bool("save_toys", false)),
+      do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
       mu_sig_limit_step(env.get_double("mu_sig_limit_step", 0.2)),
 
@@ -148,10 +150,13 @@ namespace mfv {
   {
     printf("Fitter%s config:\n", name.c_str());
     printf("print_level: %i\n", print_level);
+    printf("draw_bkg_templates: %i\n", draw_bkg_templates);
+    printf("fix_nuis1: %i\n", fix_nuis1);
     printf("n_toy_signif: %i\n", n_toy_signif);
     printf("n_toy_limit: %i\n", n_toy_limit);
     printf("print_toys? %i\n", print_toys);
     printf("save_toys? %i\n", save_toys);
+    printf("do_signif? %i\n", do_signif);
     printf("do_limits? %i\n", do_limits);
     printf("mu_sig_limit_step: %f\n", mu_sig_limit_step);
     fflush(stdout);
@@ -242,11 +247,24 @@ namespace mfv {
       { n_nuis[1], mins[1], maxs[1] }
     };
 
+    TDirectory* cwd = gDirectory;
+
     for (int sb = 1; sb >= 0; --sb) {
       const char* sb_or_b = sb ? "sb" : "b";
-      printf("%s ", sb_or_b); fflush(stdout);
+      printf("%s: ", sb_or_b); fflush(stdout);
       const char* sb_or_b_nice = sb ? "sig + bkg" : "b only";
       const min_lik_t& ml = sb ? t.h1 : t.h0;
+
+      TDirectory* subdir = 0;
+      if (draw_bkg_templates)
+        subdir = cwd->mkdir(TString::Format("bkg_template_scan_nuis_%s", sb_or_b));
+
+      jmt::ProgressBar pb(50, nuis_scan[0].n * nuis_scan[1].n + mu_scan[0].n * mu_scan[1].n);
+      pb.start();
+
+
+      if (draw_bkg_templates)
+        cwd->cd();
 
       TH2F* h1 = new TH2F(TString::Format("h_likelihood_%s_scannuis", sb_or_b),
                           TString::Format("Best %s fit: %s;nuis. par 0;nuis. par 1", sb_or_b_nice, ml.title().c_str()),
@@ -256,13 +274,24 @@ namespace mfv {
 
       for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
         const double nuispar0 = nuis_scan[0].v(i0);
-        for (int i1 = 1; i1 < nuis_scan[1].n; ++i1) {
+
+        if (draw_bkg_templates)
+          subdir->mkdir(TString::Format("nuis0_%03i", i0))->cd();
+
+        for (int i1 = 1; i1 < nuis_scan[1].n; ++i1, ++pb) {
           const double nuispar1 = nuis_scan[1].v(i1);
           const double twolnL = fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, nuispar1);
+
+          if (draw_bkg_templates)
+            make_h_bkg(TString::Format("h_bkg_template_scan_%s_nuis0_%03i_nuis1_%03i", sb_or_b, i0, i1), std::vector<double>({nuispar0, nuispar1}));
+
           //printf("i0: %i %f  i1: %i %f  %f\n", i0, nuispar0, i1, nuispar1, twolnL);
           h1->SetBinContent(i0, i1, twolnL);
         }
       }
+
+      if (draw_bkg_templates)
+        cwd->cd();
 
       TH2F* h2 = new TH2F(TString::Format("h_likelihood_%s_scanmus", sb_or_b),
                           TString::Format("Best %s fit: %s;#mu_{sig};#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
@@ -272,14 +301,14 @@ namespace mfv {
 
       for (int i0 = 1; i0 < mu_scan[0].n; ++i0) {
         const double mu_sig = mu_scan[0].v(i0);
-        for (int i1 = 1; i1 < mu_scan[1].n; ++i1) {
+        for (int i1 = 1; i1 < mu_scan[1].n; ++i1, ++pb) {
           const double mu_bkg = mu_scan[1].v(i1);
           h2->SetBinContent(i0, i1, fit::twolnL(mu_sig, mu_bkg, ml.nuis_pars[0], ml.nuis_pars[1]));
         }
       }
-    }
 
-    printf("\n");
+      printf("\n");
+    }
   }
 
   TH1D* Fitter::make_h_bkg(const char* n, const std::vector<double>& nuis_pars) {
@@ -479,6 +508,7 @@ namespace mfv {
 
     t_obs_0 = calc_test_stat(0);
     t_obs_0.print("t_obs_0");
+    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars);
 
     pval_signif = 1;
     pval_limits.clear();
@@ -490,37 +520,37 @@ namespace mfv {
     draw_likelihood(t_obs_0);
     draw_fit(t_obs_0);
 
+    if (do_signif) {
+      printf("throwing %i significance toys:\n", n_toy_signif);
+      jmt::ProgressBar pb_signif(50, n_toy_signif);
+      if (!print_toys)
+        pb_signif.start();
 
-    printf("throwing %i significance toys:\n", n_toy_signif);
-    jmt::ProgressBar pb_signif(50, n_toy_signif);
-    if (!print_toys)
-      pb_signif.start();
+      int n_toy_signif_t_ge_obs = 0;
 
-    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars);
-    int n_toy_signif_t_ge_obs = 0;
-
-    for (int i_toy_signif = 0; i_toy_signif < n_toy_signif; ++i_toy_signif) {
-      const int n_sig_signif = 0;
-      const int n_bkg_signif = rand->Poisson(n_data);
-      make_toy_data(i_toy_signif, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
+      for (int i_toy_signif = 0; i_toy_signif < n_toy_signif; ++i_toy_signif) {
+        const int n_sig_signif = 0;
+        const int n_bkg_signif = rand->Poisson(n_data);
+        make_toy_data(i_toy_signif, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
       
-      const test_stat_t t = calc_test_stat(0);
-      if (t.t >= t_obs_0.t)
-        ++n_toy_signif_t_ge_obs;
+        const test_stat_t t = calc_test_stat(0);
+        if (t.t >= t_obs_0.t)
+          ++n_toy_signif_t_ge_obs;
 
-      if (print_toys) {
-        t.print("t_signif toy %i");
-      }
-      else
-        ++pb_signif;
+        if (print_toys) {
+          t.print("t_signif toy %i");
+        }
+        else
+          ++pb_signif;
 
-      if (save_toys) {
-        jmt::vthrow("save signif toys not implemented");
+        if (save_toys) {
+          jmt::vthrow("save signif toys not implemented");
+        }
       }
+
+      pval_signif = double(n_toy_signif_t_ge_obs) / n_toy_signif;
+      printf("\npval_signif: %e\n", pval_signif); fflush(stdout);
     }
-
-    pval_signif = double(n_toy_signif_t_ge_obs) / n_toy_signif;
-    printf("\npval_signif: %e\n", pval_signif); fflush(stdout);
 
     if (do_limits) {
       mu_sig_limit = 1e-6;
