@@ -304,6 +304,9 @@ namespace mfv {
   }
 
   TH1D* ToyThrower::signal_template(const char* name_, const char* title) const {
-    return hist_with_template_binning(name_, title, all_2v.find(template_signal)->second);
+    std::map<int, VertexPairs>::const_iterator it = all_2v.find(template_signal);
+    if (it == all_2v.end())
+      jmt::vthrow("can't read signal sample to make template");
+    return hist_with_template_binning(name_, title, it->second);
   }
 }
