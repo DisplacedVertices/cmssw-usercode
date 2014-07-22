@@ -79,6 +79,7 @@ if run_pat:
     _final.aod_plus_pat(_final.process)
     _final.keep_random_state(_final.process)
     _final.keep_mixing_info(_final.process)
+    _final.no_skimming_cuts(_final.process)
 elif run_ntuple:
     print 'expanding ntuple.py'
     sys.path.insert(0, '..')
@@ -87,7 +88,6 @@ elif run_ntuple:
 if _final:
     _final.process.source.fileNames = ['file:reco.root']
     _final.process.maxEvents.input = -1
-    _final.no_skimming_cuts(_final.process)
     _final.input_is_pythia8(_final.process)
 
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
