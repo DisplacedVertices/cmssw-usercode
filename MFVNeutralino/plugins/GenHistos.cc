@@ -86,6 +86,10 @@ private:
 
   TH1F* h_npartons_in_acc;
 
+  TH1F* h_npartons_60;
+  TH1F* h_njets_60;
+  TH1F* h_sumht_20;
+
   TH1F* NJets;
   BasicKinematicHists* Jets;
   TH1F* JetAuxE;
@@ -334,6 +338,9 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   }
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
+  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons #E_T > 60 GeV;Events", 11, 0, 11);
+  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets #E_T > 60 GeV;Events", 11, 0, 11);
+  h_sumht_20 = fs->make<TH1F>("h_sumht_20", ";Sum #H_T for jets with #E_T > 60 GeV;Events", 100, 0, 2000);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 30, 0, 30);
   Jets = bkh_factory->make("Jets", "gen jets");
@@ -561,10 +568,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       } 
 
       int npartons_in_acc = 0;
-      for (const reco::GenParticle* p : lsp_partons) 
+      int npartons_60 = 0;
+      for (const reco::GenParticle* p : lsp_partons) {
 	if (p->pt() > 20 && fabs(p->eta()) < 2.5)
 	  ++npartons_in_acc;
+	if (p->pt() > 60 && fabs(p->eta()) < 2.5)
+	  ++npartons_60;
+      }
       h_npartons_in_acc->Fill(npartons_in_acc);
+      h_npartons_60->Fill(npartons_60);
     }
   }
 
@@ -762,6 +774,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   NJets->Fill(gen_jets->size());
   int nbjets = 0;
+  int njets60 = 0;
+  float sumht = 0.0;
   for (const reco::GenJet& jet : *gen_jets) {
     int nchg = 0;
     int id = gen_jet_id(jet);
@@ -770,6 +784,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         ++nchg;
 
     float fchg = float(nchg)/jet.nConstituents();
+
+    if (jet.pt() > 60 && fabs(jet.eta()) < 2.5)
+      ++njets60;
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
+      sumht = sumht + jet.pt();;
 
     Jets->Fill(&jet);
     JetAuxE->Fill(jet.auxiliaryEnergy());
@@ -796,6 +815,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }      
   }
   NBJets->Fill(nbjets);
+  h_njets_60->Fill(njets60);
+  h_sumht_20->Fill(sumht);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);
