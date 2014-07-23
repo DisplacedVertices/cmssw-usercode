@@ -25,6 +25,8 @@ namespace mfv {
     const int print_level;
     const bool draw_bkg_templates;
     const bool fix_nuis1;
+    const double start_nuis0;
+    const double start_nuis1;
     const int n_toy_signif;
     const int n_toy_limit;
     const bool print_toys;

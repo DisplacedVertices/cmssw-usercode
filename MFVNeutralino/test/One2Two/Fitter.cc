@@ -134,6 +134,8 @@ namespace mfv {
       print_level(env.get_int("print_level", -1)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
+      start_nuis0(env.get_double("start_nuis0", 0.025)),
+      start_nuis1(env.get_double("start_nuis1", 0.008)),
       n_toy_signif(env.get_int("n_toy_signif", 10000)),
       n_toy_limit(env.get_int("n_toy_limit", 1000)),
       print_toys(env.get_bool("print_toys", false)),
@@ -393,9 +395,8 @@ namespace mfv {
 
     static const char* nuis_par_names[2] = { "nuis0", "nuis1" };
     for (size_t ipar = 0; ipar < npars; ++ipar) {
-      double start = (maxs[ipar] + mins[ipar])/2;
-      double delta = (maxs[ipar] - mins[ipar])/20;
-      m->mnparm(2+ipar, nuis_par_names[ipar], start, delta, mins[ipar], maxs[ipar], ierr);
+      const double start = ipar == 0 ? start_nuis0 : start_nuis1;
+      m->mnparm(2+ipar, nuis_par_names[ipar], start, start/10., mins[ipar], maxs[ipar], ierr);
     }
 
     if (fix_mu_sig)
@@ -405,7 +406,7 @@ namespace mfv {
       m->FixParameter(3);
 
     m->Migrad();
-    //m->mnmnos();
+    m->mnmnos();
     double fmin, fedm, errdef;
     int npari, nparx, istat;
     m->mnstat(fmin, fedm, errdef, npari, nparx, istat);
