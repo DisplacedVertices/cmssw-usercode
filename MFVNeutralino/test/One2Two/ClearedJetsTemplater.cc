@@ -131,8 +131,8 @@ namespace mfv {
             const double phi1 = throw_phi(ev);
 
             const double d2d = sqrt(bsd2d0*bsd2d0 + bsd2d1*bsd2d1 - 2*bsd2d0*bsd2d1*cos(TVector2::Phi_mpi_pi(phi0 - phi1)));
-            if (TMath::Erf((d2d - clearing_mu)/clearing_sigma) > rand->Uniform(-1,1))
-              h->Fill(d2d);
+
+            h->Fill(d2d, 0.5*TMath::Erf((d2d - clearing_mu)/clearing_sigma) + 0.5);
           }
         }
 
