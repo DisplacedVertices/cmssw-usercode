@@ -141,11 +141,14 @@ def submit(njobs, template_type, min_ntracks, signal_sample, samples):
         'toythrower_min_ntracks=%i' % min_ntracks,
         ]
 
-    if template_type == 'CJ':
-        env.append('templates_kind=clearedjets')
+    if template_type == 'PS':
+        env.append('templates_kind=phishift')
+        env.append('fitter_start_nuis0=2')
+        env.append('fitter_start_nuis1=0.003')
     elif template_type == 'SC':
         env.append('templates_kind=simpleclear')
         env.append('fitter_fix_nuis1=1')
+        env.append('fitter_start_nuis0=10')
 
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
@@ -166,8 +169,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, samples):
 
 
 batches = []
-for template_type in ('SC', 'PS', 'CJ'):
-    for min_ntracks in (5,6,7,8):
+for template_type in ('PS', 'CJ'):
+    for min_ntracks in (5,6): #,7,8):
         for signal_sample in (None, (-9, 1), (-9, 10), (-15, 1), (-15, 10)):
             batches.append((template_type, min_ntracks, signal_sample, ''))
 
