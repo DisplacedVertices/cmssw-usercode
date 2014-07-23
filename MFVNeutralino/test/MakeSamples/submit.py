@@ -9,6 +9,8 @@ run_reco = 'gensimonly' not in sys.argv
 run_pat = run_reco and 'pat' in sys.argv
 run_ntuple = run_reco and 'ntuple' in sys.argv
 
+run_tkdqm = 'tkdqm' in sys.argv
+
 run_ttbar = 'ttbar' in sys.argv
 
 skip_tests = 'skip_tests' in sys.argv
@@ -121,6 +123,14 @@ def submit(name, tau0=None, mass=None):
     pset_fn = os.path.join(dir, 'psets/mfv_%(name)s.py' % locals())
     new_py = open('gensimhlt.py').read()
 
+    if run_tkdqm:
+        tkdqm_pset_fn = 'my_tkdqm.py'
+        additional_input_files.append(tkdqm_pset_fn)
+        output_file += ', tkdqm.root'
+        new_tkdqm_py = open('tkdqm.py').read()
+    else:
+        new_tkdqm_py = ''
+
     if run_reco:
         reco_pset_fn = 'my_reco.py'
         additional_input_files.append(reco_pset_fn)
@@ -144,6 +154,7 @@ def submit(name, tau0=None, mass=None):
     if 'design' in name:
         glb_snip = "\nprocess.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')\n"
         new_py += glb_snip
+        new_tkdqm_py += glb_snip + 'castor_thing(process)\n'
         new_reco_py += glb_snip + 'castor_thing(process)\n'
         if _final:
             _final.process.GlobalTag = GlobalTag(process.GlobalTag, 'DESIGN53_V18::All', '')
@@ -155,14 +166,17 @@ def submit(name, tau0=None, mass=None):
     if 'gaubs' in name:
         snip = '\ngauss_bs(process)\n'
         new_py += snip
+        new_tkdqm_py += snip
         new_reco_py += snip
     elif 'gaunxybs' in name:
         snip = '\ngauss_bs(process, True)\n'
         new_py += snip
+        new_tkdqm_py += snip
         new_reco_py += snip
     elif 'gaunxyzbs' in name:
         snip = '\ngauss_bs(process, True, True)\n'
         new_py += snip
+        new_tkdqm_py += snip
         new_reco_py += snip
 
     if 'ali_' in name:
@@ -171,6 +185,8 @@ def submit(name, tau0=None, mass=None):
         ali_tag = name.split('ali_')[-1].capitalize()
         new_reco_py += '\ntracker_alignment(process, "%s")\n' % ali_tag
         new_reco_py += 'dummy_beamspot(process, "myttbar%s")\n' % ali_tag
+        new_tkdqm_py += '\ntracker_alignment(process, "%s")\n' % ali_tag
+        new_tkdqm_py += 'dummy_beamspot(process, "myttbar%s")\n' % ali_tag
         if _final:
             tracker_alignment(_final.process, ali_tag)
             dummy_beamspot(_final.process, 'myttbar' + ali_tag)
@@ -186,6 +202,8 @@ def submit(name, tau0=None, mass=None):
     new_py += 'process.dummyToMakeDiffHash = cms.PSet(submitName = cms.string("%s"))' % name
 
     open(pset_fn, 'wt').write(new_py)
+    if run_tkdqm:
+        open(tkdqm_pset_fn, 'wt').write(new_tkdqm_py)
     if run_reco:
         open(reco_pset_fn, 'wt').write(new_reco_py)
 
@@ -217,8 +235,7 @@ if run_ttbar:
     #for run in to_run:
     #    submit('ttbar_' + run)
 
-    for i in xrange(20):
-        submit('ttbarhad_syststudies_%02i' % i)
+    submit('ttbar_ali_bowing')
 else:
     tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.][-2:]
     masses = range(500, 1501, 200)

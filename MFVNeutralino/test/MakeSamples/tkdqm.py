@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from modify import *
 
 process = cms.Process("MULTITRACKVALIDATOR")
 
@@ -42,7 +43,7 @@ process.load("Validation.Configuration.postValidation_cff")
 process.quickTrackAssociatorByHits.SimToRecoDenominator = cms.string('reco')
 
 ########### configuration MultiTrackValidator ########
-process.multiTrackValidator.outputFile = 'multitrackvalidator.root'
+process.multiTrackValidator.outputFile = 'tkdqm.root'
 process.multiTrackValidator.associators = ['quickTrackAssociatorByHits']
 process.multiTrackValidator.skipHistoFit=cms.untracked.bool(False)
 #process.cutsRecoTracks.quality = cms.vstring('','highPurity')

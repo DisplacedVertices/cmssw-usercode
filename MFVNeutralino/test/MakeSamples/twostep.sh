@@ -38,6 +38,20 @@ if [ -f my_reco.py ]; then
   fi
 fi
 
+if [ -f my_tkdqm.py ]; then
+  echo
+  echo done with reco at `date`, starting tkdqm
+  echo
+  cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml my_tkdqm.py
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    echo @@@@ cmsRun exited tkdqm step with error code $exit_code
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    exit $exit_code
+  fi
+fi
+
 if [ -f pat.py ]; then
   echo
   echo done with reco at `date`, starting pat step
