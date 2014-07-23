@@ -4,7 +4,7 @@
 #include <math.h>
 #include "TCanvas.h"
 #include "TFile.h"
-#include "TH1F.h"
+#include "TH2F.h"
 #include "TLegend.h"
 #include "TMath.h"
 #include "TRandom3.h"
@@ -13,6 +13,9 @@
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_1";
+
+//const char* sample_name = "ttbarhadronic";
+//const int n1v = 10379;
 
 //predicted number of one-vertex-only events in 20/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
@@ -154,13 +157,24 @@ int main() {
   TH1F* h_svdist2d = new TH1F("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 30, 0, 0.3);
   TH1F* h_absdeltaphi01 = new TH1F("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 5, 0, 3.15);
   TH1D* h_sigmavv = new TH1D("h_sigmavv", ";#sigma(sv #0, #1) (cm);arb. units", 10, 0, 0.01);
-  TH1D* h_sigvv = new TH1D("h_sigvv", ";N#sigma(sv #0, #1);arb. units", 30, 0, 30);
+  TH1D* h_sigvv = new TH1D("h_sigvv", ";N#sigma(sv #0, #1);arb. units", 15, 0, 30);
+  TH2F* h_sigmavv_dvv = new TH2F("h_sigmavv_dvv", "two-vertex MC;d_{vv} (cm);#sigma_{vv} (cm)", 30, 0, 0.3, 10, 0, 0.01);
+  TH1F* h_dvv_low_njets = new TH1F("h_dvv_low_njets", "njets <= 6;d_{vv} (cm);arb. units", 10, 0, 0.1);
+  TH1F* h_dvv_high_njets = new TH1F("h_dvv_high_njets", "njets >= 7;d_{vv} (cm);arb. units", 10, 0, 0.1);
 
   const int nbkg = 4;
   const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
   float weights[nbkg] = {0.589, 0.085, 0.426, 0.169};
   int sn1v[nbkg] = {11406, 101, 4425, 1458};
   int sn1vs = 0;
+
+/*
+  const int nbkg = 1;
+  const char* samples[nbkg] = {sample_name};
+  float weights[nbkg] = {1};
+  int sn1v[nbkg] = {n1v};
+  int sn1vs = 0;
+*/
 
   for (int i = 0; i < nbkg; ++i) {
     toy_from_file(samples[i], sn1vs, sn1v[i]);
@@ -200,6 +214,12 @@ int main() {
         float sigma = sqrt((nt.cxx0 + nt.cxx1)*dx*dx + (nt.cyy0 + nt.cyy1)*dy*dy + 2*(nt.cxy0 + nt.cxy1)*dx*dy);
         h_sigmavv->Fill(sigma);
         h_sigvv->Fill(svdist2d / sigma);
+        h_sigmavv_dvv->Fill(svdist2d, sigma);
+        if (nt.njets <= 6) {
+          h_dvv_low_njets->Fill(svdist2d);
+        } else {
+          h_dvv_high_njets->Fill(svdist2d);
+        }
       }
     }
   }
@@ -235,6 +255,9 @@ int main() {
     h_svdist2d_mu[i] = new TH1F(TString::Format("h_svdist2d_mu_%i", i), TString::Format("svdist2d with #mu_{clear} = %f #mum;constructed vertex pair distance (cm);events", mu_clear[i]), 10, 0, 0.1);
     h_svdist2d_sigma[i] = new TH1F(TString::Format("h_svdist2d_sigma_%i", i), TString::Format("svdist2d with #sigma_{clear} = %f #mum;constructed vertex pair distance (cm);events", sigma_clear[i]), 10, 0, 0.1);
   }
+
+  TH1F* h_dvv_jets_low = new TH1F("h_dvv_jets_low", "njets <= 6;d_{vv} (cm);arb. units", 10, 0, 0.1);
+  TH1F* h_dvv_jets_high = new TH1F("h_dvv_jets_high", "njets >= 7;d_{vv} (cm);arb. units", 10, 0, 0.1);
 
   for (int i = 0; i < n1v; ++i) {
     const float w = puweights[i];
@@ -275,6 +298,12 @@ int main() {
         h_svpairdphi_cut->Fill(dphi, w);
         h_svpairabsdphi->Fill(fabs(dphi), w);
         h_svpairdist_cut->Fill(svdist, w);
+
+        if (njets[i] <= 6) {
+          h_dvv_jets_low->Fill(svdist, w);
+        } else {
+          h_dvv_jets_high->Fill(svdist, w);
+        }
       }
 
       double dphi_uniformphi = TVector2::Phi_mpi_pi(throw_uniform_phi() - throw_uniform_phi());
@@ -295,14 +324,17 @@ int main() {
   }
 
   TH1D* h_sigma = new TH1D("h_sigma", ";#sigma(sv #0, #1) (cm);arb. units", 10, 0, 0.01);
-  TH1D* h_sig = new TH1D("h_sig", ";N#sigma(sv #0, #1);arb. units", 30, 0, 30);
+  TH1D* h_sig = new TH1D("h_sig", ";N#sigma(sv #0, #1);arb. units", 15, 0, 30);
   TH1D* h_svdist2d_lt4sigma = new TH1D("h_svdist2d_lt4sigma", "<  4 #sigma;dist2d(sv #0, #1) (cm);arb. units", 10, 0, 0.1);
   TH1D* h_sig_gtnsigma[7];
   TH1D* h_svdist2d_gtnsigma[7];
   for (int i = 0; i < 7; ++i) {
-    h_sig_gtnsigma[i] = new TH1D(TString::Format("h_sig_gt%isigma", i+4), TString::Format(">= %i sigma;N#sigma(sv #0, #1) (cm);arb. units", i+4), 30, 0, 30);
-    h_svdist2d_gtnsigma[i] = new TH1D(TString::Format("h_svdist2d_gt%isigma", i+4), TString::Format(">= %i sigma;dist2d(sv #0, #1) (cm);arb. units", i+4), 10, 0, 0.1);
+    h_sig_gtnsigma[i] = new TH1D(TString::Format("h_sig_gt%isigma", 2*(i+2)), TString::Format(">= %i sigma;N#sigma(sv #0, #1) (cm);arb. units", 2*(i+2)), 15, 0, 30);
+    h_svdist2d_gtnsigma[i] = new TH1D(TString::Format("h_svdist2d_gt%isigma", 2*(i+2)), TString::Format(">= %i sigma;dist2d(sv #0, #1) (cm);arb. units", 2*(i+2)), 10, 0, 0.1);
   }
+  TH1D* h_dvv_vtx_low = new TH1D("h_dvv_vtx_low", "njets <= 6;d_{vv} (cm);arb. units", 10, 0, 0.1);
+  TH1D* h_dvv_vtx_high = new TH1D("h_dvv_vtx_high", "njets >= 7;d_{vv} (cm);arb. units", 10, 0, 0.1);
+
   for (int i = 0; i < n1v; ++i) {
     for (int j = i+1; j < n1v; ++j) {
       float svdist2d = sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]));
@@ -314,10 +346,15 @@ int main() {
       if (svdist2d / sigma < 4) {
         h_svdist2d_lt4sigma->Fill(svdist2d);
       }
-      for (int i = 0; i < 7; ++i) {
-        if (svdist2d / sigma > i+4) {
-          h_sig_gtnsigma[i]->Fill(svdist2d / sigma);
-          h_svdist2d_gtnsigma[i]->Fill(svdist2d);
+      for (int k = 0; k < 7; ++k) {
+        if (svdist2d / sigma > 2*(k+2)) {
+          h_sig_gtnsigma[k]->Fill(svdist2d / sigma);
+          h_svdist2d_gtnsigma[k]->Fill(svdist2d);
+
+          if (2*(k+2) == 10) {
+            if (njets[i] <= 6 && njets[j] <= 6) h_dvv_vtx_low->Fill(svdist2d);
+            if (njets[i] >= 7 && njets[j] >= 7) h_dvv_vtx_high->Fill(svdist2d);
+          }
         }
       }
     }
@@ -332,6 +369,7 @@ int main() {
   h_absdeltaphi01->Write();
   h_sigmavv->Write();
   h_sigvv->Write();
+  h_sigmavv_dvv->Write();
 
   h_njets->Write();
   h_jet_sum_ht->Write();
@@ -571,7 +609,7 @@ int main() {
   TLegend* l_sig_gtnsigma = new TLegend(0.6, 0.6, 0.95, 0.95);
   l_sig_gtnsigma->AddEntry(h_sigvv, "actual MC", "LPE");
   for (int i = 0; i < 7; ++i) {
-    l_sig_gtnsigma->AddEntry(h_sig_gtnsigma[i], TString::Format("d_{vv} > %i #sigma_{vv}", i+4), "LPE");
+    l_sig_gtnsigma->AddEntry(h_sig_gtnsigma[i], TString::Format("d_{vv} > %i #sigma_{vv}", 2*(i+2)), "LPE");
   }
   l_sig_gtnsigma->SetFillColor(0);
   l_sig_gtnsigma->Draw();
@@ -603,13 +641,85 @@ int main() {
   TLegend* l_svdist2d_gtnsigma = new TLegend(0.5, 0.5, 0.85, 0.85);
   l_svdist2d_gtnsigma->AddEntry(h_svdist2d, "actual MC", "LPE");
   for (int i = 0; i < 7; ++i) {
-    l_svdist2d_gtnsigma->AddEntry(h_svdist2d_gtnsigma[i], TString::Format("d_{vv} > %i #sigma_{vv}", i+4), "LPE");
+    l_svdist2d_gtnsigma->AddEntry(h_svdist2d_gtnsigma[i], TString::Format("d_{vv} > %i #sigma_{vv}", 2*(i+2)), "LPE");
   }
   l_svdist2d_gtnsigma->SetFillColor(0);
   l_svdist2d_gtnsigma->Draw();
   c_svdist2d_gtnsigma->SetTickx();
   c_svdist2d_gtnsigma->SetTicky();
   c_svdist2d_gtnsigma->Write();
+
+  //overlay svdist2d for two-vertex MC, cleared jets, simple clearing
+  TCanvas* c_dvv = new TCanvas("c_dvv", "c_dvv", 700, 700);
+  h_svdist2d->DrawNormalized();
+  h_svpairdist_cut->DrawNormalized("sames");
+  h_svdist2d_gtnsigma[3]->SetLineColor(8);
+  h_svdist2d_gtnsigma[3]->SetLineWidth(3);
+  h_svdist2d_gtnsigma[3]->DrawNormalized("sames");
+  TLegend* l_dvv = new TLegend(0.4, 0.7, 0.9, 0.85);
+  l_dvv->AddEntry(h_svdist2d, "two-vertex MC");
+  l_dvv->AddEntry(h_svpairdist_cut, "cleared jets w/ #mu = 280 #mum, #sigma = 50 #mum");
+  l_dvv->AddEntry(h_svdist2d_gtnsigma[3], "simple clearing w/ d_{vv} > 10 #sigma_{vv}");
+  l_dvv->SetFillColor(0);
+  l_dvv->Draw();
+  c_dvv->SetTickx();
+  c_dvv->SetTicky();
+  c_dvv->Write();
+
+  //overlay low-njets svdist2d for two-vertex MC, cleared jets, simple clearing
+  TCanvas* c_dvv_low_njets = new TCanvas("c_dvv_low_njets", "c_dvv_low_njets", 700, 700);
+  h_dvv_low_njets->SetLineColor(kBlue);
+  h_dvv_low_njets->SetLineWidth(3);
+  h_dvv_low_njets->SetStats(0);
+  h_dvv_low_njets->DrawNormalized();
+  h_dvv_jets_low->SetLineColor(kRed);
+  h_dvv_jets_low->SetLineWidth(3);
+  h_dvv_jets_low->SetStats(0);
+  h_dvv_jets_low->DrawNormalized("sames");
+  h_dvv_vtx_low->SetLineColor(kGreen);
+  h_dvv_vtx_low->SetLineWidth(3);
+  h_dvv_vtx_low->SetStats(0);
+  h_dvv_vtx_low->DrawNormalized("sames");
+  TLegend* l_dvv_low_njets = new TLegend(0.5, 0.7, 0.85, 0.85);
+  l_dvv_low_njets->AddEntry(h_dvv_low_njets, "two-vertex MC");
+  l_dvv_low_njets->AddEntry(h_dvv_jets_low, "cleared jets w/ #mu = 280 #mum, #sigma = 50 #mum");
+  l_dvv_low_njets->AddEntry(h_dvv_vtx_low, "simple clearing w/ d_{vv} > 10 #sigma_{vv}");
+  l_dvv_low_njets->SetFillColor(0);
+  l_dvv_low_njets->Draw();
+  c_dvv_low_njets->SetTickx();
+  c_dvv_low_njets->SetTicky();
+  c_dvv_low_njets->Write();
+
+  //overlay high-njets svdist2d for two-vertex MC, cleared jets, simple clearing
+  TCanvas* c_dvv_high_njets = new TCanvas("c_dvv_high_njets", "c_dvv_high_njets", 700, 700);
+  h_dvv_high_njets->SetLineColor(kBlue);
+  h_dvv_high_njets->SetLineWidth(3);
+  h_dvv_high_njets->SetStats(0);
+  h_dvv_high_njets->DrawNormalized();
+  h_dvv_jets_high->SetLineColor(kRed);
+  h_dvv_jets_high->SetLineWidth(3);
+  h_dvv_jets_high->SetStats(0);
+  h_dvv_jets_high->DrawNormalized("sames");
+  h_dvv_vtx_high->SetLineColor(kGreen);
+  h_dvv_vtx_high->SetLineWidth(3);
+  h_dvv_vtx_high->SetStats(0);
+  h_dvv_vtx_high->DrawNormalized("sames");
+  TLegend* l_dvv_high_njets = new TLegend(0.5, 0.7, 0.85, 0.85);
+  l_dvv_high_njets->AddEntry(h_dvv_high_njets, "two-vertex MC");
+  l_dvv_high_njets->AddEntry(h_dvv_jets_high, "cleared jets w/ #mu = 280 #mum, #sigma = 50 #mum");
+  l_dvv_high_njets->AddEntry(h_dvv_vtx_high, "simple clearing w/ d_{vv} > 10 #sigma_{vv}");
+  l_dvv_high_njets->SetFillColor(0);
+  l_dvv_high_njets->Draw();
+  c_dvv_high_njets->SetTickx();
+  c_dvv_high_njets->SetTicky();
+  c_dvv_high_njets->Write();
+
+  h_dvv_low_njets->Write();
+  h_dvv_jets_low->Write();
+  h_dvv_vtx_low->Write();
+  h_dvv_high_njets->Write();
+  h_dvv_jets_high->Write();
+  h_dvv_vtx_high->Write();
 
   fh->Close();
 }

@@ -29,7 +29,7 @@ if not 'debug' in sys.argv:
 
 process.output = cms.OutputModule('PoolOutputModule',
                                   fileName = cms.untracked.string('reco.root'),
-                                  outputCommands = process.AODSIMEventContent.outputCommands,
+                                  outputCommands = process.RECOSIMEventContent.outputCommands,
                                   eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
                                   dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('AODSIM')),
                                   )

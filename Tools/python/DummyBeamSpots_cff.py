@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-myttbarbowing = cms.PSet(
+myttbarBowing = cms.PSet(
     X0 = cms.double(0.246344),
     Y0 = cms.double(0.389749),
     Z0 = cms.double(0.402745),
@@ -15,7 +15,7 @@ myttbarbowing = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbarcurl = cms.PSet(
+myttbarCurl = cms.PSet(
     X0 = cms.double(0.246597),
     Y0 = cms.double(0.38699),
     Z0 = cms.double(0.314451),
@@ -30,7 +30,7 @@ myttbarcurl = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbarelliptical = cms.PSet(
+myttbarElliptical = cms.PSet(
     X0 = cms.double(0.246156),
     Y0 = cms.double(0.389613),
     Z0 = cms.double(0.288198),
@@ -45,7 +45,7 @@ myttbarelliptical = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbarradial = cms.PSet(
+myttbarRadial = cms.PSet(
     X0 = cms.double(0.246322),
     Y0 = cms.double(0.389811),
     Z0 = cms.double(0.327943),
@@ -60,7 +60,7 @@ myttbarradial = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbarsagitta = cms.PSet(
+myttbarSagitta = cms.PSet(
     X0 = cms.double(0.235756),
     Y0 = cms.double(0.389839),
     Z0 = cms.double(0.451828),
@@ -75,7 +75,7 @@ myttbarsagitta = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbarskew = cms.PSet(
+myttbarSkew = cms.PSet(
     X0 = cms.double(0.246258),
     Y0 = cms.double(0.389962),
     Z0 = cms.double(0.386416),
@@ -90,7 +90,7 @@ myttbarskew = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbartelescope = cms.PSet(
+myttbarTelescope = cms.PSet(
     X0 = cms.double(0.245667),
     Y0 = cms.double(0.386495),
     Z0 = cms.double(0.425672),
@@ -105,7 +105,7 @@ myttbartelescope = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbartwist = cms.PSet(
+myttbarTwist = cms.PSet(
     X0 = cms.double(0.246196),
     Y0 = cms.double(0.389666),
     Z0 = cms.double(0.293139),
@@ -120,7 +120,7 @@ myttbartwist = cms.PSet(
     BetaStar = cms.double(0),
     )
 
-myttbarzexpansion = cms.PSet(
+myttbarZexpansion = cms.PSet(
     X0 = cms.double(0.246214),
     Y0 = cms.double(0.389698),
     Z0 = cms.double(0.394112),
