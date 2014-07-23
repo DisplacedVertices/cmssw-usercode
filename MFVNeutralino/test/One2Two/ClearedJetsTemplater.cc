@@ -25,10 +25,10 @@ namespace mfv {
       phi_from_jet_sigma(env.get_double("phi_from_jet_sigma", 0.4)),
       clearing_mu_start(env.get_double("clearing_mu_start", 0.)),
       d_clearing_mu(env.get_double("d_clearing_mu", 0.001)),
-      n_clearing_mu(env.get_int("n_clearing_mu", 40)),
+      n_clearing_mu(env.get_int("n_clearing_mu", 100)),
       clearing_sigma_start(env.get_double("clearing_sigma_start", 0.0005)),
       d_clearing_sigma(env.get_double("d_clearing_sigma", 0.0005)),
-      n_clearing_sigma(env.get_int("n_clearing_sigma", 20)),
+      n_clearing_sigma(env.get_int("n_clearing_sigma", 100)),
 
       clearing_mu_fit(0.028),
       clearing_sigma_fit(0.005)
