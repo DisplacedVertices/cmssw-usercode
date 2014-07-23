@@ -20,9 +20,9 @@ namespace mfv {
       env("mfvo2t_simpleclear" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.05)),
       sample_count(env.get_int("sample_count", -1)),
-      clearing_sigma_start(env.get_double("clearing_sigma_start", 4)),
-      d_clearing_sigma(env.get_double("d_clearing_sigma", 0.5)),
-      n_clearing_sigma(env.get_int("n_clearing_sigma", 14)),
+      clearing_sigma_start(env.get_double("clearing_sigma_start", 6)),
+      d_clearing_sigma(env.get_double("d_clearing_sigma", 0.25)),
+      n_clearing_sigma(env.get_int("n_clearing_sigma", 24)),
 
       clearing_sigma_fit(10)
   {
@@ -107,6 +107,11 @@ namespace mfv {
 
     book_toy_fcns_and_histos();
     fill_2v_histos();
+
+    for (int iv = 0; iv < N1v; ++iv) {
+      const VertexSimple& v0 = dataset.one_vertices->at(iv);
+      fill_2v(vt_1vsingle, 1, v0, v0);
+    }
 
     make_templates();
 
