@@ -5,10 +5,10 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
 set_style()
-ps = plot_saver('plots/mfvsigeff_sig6', size=(600,600))
+ps = plot_saver('plots/mfvsigeff', size=(600,600))
 
 samples = mfv_signal_samples
-samples = [sample for sample in mfv_signal_samples if '0000um' not in sample.name]
+samples.sort(key=lambda s: s.name)
 
 per_div = 6
 y_range = 1.
@@ -23,10 +23,11 @@ def curve(name, root_file_dir, num_path, den_path, color):
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
         den = hden.Integral(0, hden.GetNbinsX() + 2)
         eff = num/float(den)
-        if name == 'trig_only':
-            eff *= sample.ana_filter_eff
+        eff *= sample.ana_filter_eff
         heff.SetBinContent(i+1, eff)
-        heff.SetBinError(i+1, 0)
+        interval = clopper_pearson(num, den)
+        error = (interval[2] - interval[1]) / 2
+        heff.SetBinError(i+1, error)
 
         mass = sample.name.replace('M0','M').split('M')[1] + ' GeV'
         xax.SetBinLabel(i+1, mass)
@@ -42,20 +43,27 @@ def curve(name, root_file_dir, num_path, den_path, color):
     heff.SetStats(0)
     return heff
 
-#trig_only = curve('trig_only', 'crab/MFVHistosV17_Sig6', 'mfvEventHistosTrigCut/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kGreen+2)
-#looser = curve('looser', 'crab/MFVHistosV15_looser', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kGreen+2)
-abcd = curve('abcd', 'crab/MFVHistosV17_Sig6', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
-dreg = curve('dreg', 'crab/MFVHistosV17_Sig6DReg', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
+two = curve('two', 'crab/HistosV18_Data2', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
+one = curve('one', 'crab/HistosV18_Data2', 'mfvEventHistosOnlyOneVtx/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
 
-#trig_only.Draw()
-#looser.Draw()
-abcd.Draw()
-dreg.Draw('same')
+two.Draw('hist e')
+one.Draw('hist e same')
 
-hmax = abcd.GetYaxis().GetXmax()
+hmax = two.GetYaxis().GetXmax()
 print hmax
+
+taus = ['100 #mum', '300 #mum', '1 mm', '10 mm']
+ymin = [0.745, 0.745, 0.75, 0.75]
 lines = []
+paves = []
 for i in xrange(0, len(samples), per_div):
+    p = ROOT.TPaveText(i+1,ymin[i/per_div],i+per_div-1,ymin[i/per_div]+0.1)
+    p.AddText(taus[i/per_div])
+    p.SetTextSize(0.05)
+    p.SetBorderSize(0)
+    p.Draw()
+    paves.append(p)
+
     if i == 0:
         continue
 
@@ -72,12 +80,19 @@ for i in xrange(0, len(samples), per_div):
     lines.append(l)
 
 
-leg = ROOT.TLegend(0.151,0.635,0.602,0.858)
-#leg.AddEntry(trig_only, 'Trigger+offline jets', 'L')
-#leg.AddEntry(looser, 'Preselection', 'L')
-leg.AddEntry(abcd, 'Sideband+signal', 'L')
-leg.AddEntry(dreg, 'Signal region', 'L')
+leg = ROOT.TLegend(0.1,0.8,0.7,0.9)
+leg.AddEntry(two, 'two-or-more-vertex events', 'L')
+leg.AddEntry(one, 'exactly-one-vertex events', 'L')
 leg.Draw()
 
+lifetime = ROOT.TPaveText(1,0.65,3,0.74)
+lifetime.AddText('#tau_{#chi^{0}}')
+lifetime.SetBorderSize(0)
+lifetime.Draw()
+
+mass = ROOT.TPaveText(-3,-0.1,-0.01,-0.01)
+mass.AddText('M_{#chi^{0}}')
+mass.SetBorderSize(0)
+mass.Draw()
 
 ps.save('sigeff')
