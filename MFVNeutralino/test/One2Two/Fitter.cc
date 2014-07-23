@@ -154,6 +154,7 @@ namespace mfv {
     printf("print_level: %i\n", print_level);
     printf("draw_bkg_templates: %i\n", draw_bkg_templates);
     printf("fix_nuis1: %i\n", fix_nuis1);
+    printf("start_nuis: %f, %f\n", start_nuis0, start_nuis1);
     printf("n_toy_signif: %i\n", n_toy_signif);
     printf("n_toy_limit: %i\n", n_toy_limit);
     printf("print_toys? %i\n", print_toys);
