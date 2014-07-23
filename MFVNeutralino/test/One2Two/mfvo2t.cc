@@ -20,7 +20,7 @@ int main() {
   const std::string out_fn = env.get_string("out_fn", "mfvo2t.root");
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
-  const std::string templates_kind = env.get_string_lower("templates_kind", "phishift");
+  const std::string templates_kind = env.get_string_lower("templates_kind", "clearedjets");
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
   const bool templates_simpleclear = templates_kind == "simpleclear";
