@@ -80,22 +80,26 @@ namespace mfv {
       return;
 
     h_issig[ih]->Fill(v0.is_sig, w);
-    h_issig[ih]->Fill(v1.is_sig, w);
     h_issig_0[ih]->Fill(v0.is_sig, w);
-    h_issig_1[ih]->Fill(v1.is_sig, w);
     h_xy[ih]->Fill(v0.x, v0.y, w);
-    h_xy[ih]->Fill(v1.x, v1.y, w);
     h_bsd2d[ih]->Fill(v0.d2d(), w);
-    h_bsd2d[ih]->Fill(v1.d2d(), w);
     h_bsd2d_0[ih]->Fill(v0.d2d(), w);
-    h_bsd2d_1[ih]->Fill(v1.d2d(), w);
     h_bsd2d_v_bsdz[ih]->Fill(v0.z, v0.d2d(), w);
-    h_bsd2d_v_bsdz[ih]->Fill(v1.z, v1.d2d(), w);
     h_bsd2d_v_bsdz_0[ih]->Fill(v0.z, v0.d2d(), w);
-    h_bsd2d_v_bsdz_1[ih]->Fill(v1.z, v1.d2d(), w);
     h_bsdz[ih]->Fill(v0.z, w);
-    h_bsdz[ih]->Fill(v1.z, w);
     h_bsdz_0[ih]->Fill(v0.z, w);
+
+    if (ih == vt_1vsingle)
+      return;
+
+    h_issig[ih]->Fill(v1.is_sig, w);
+    h_issig_1[ih]->Fill(v1.is_sig, w);
+    h_xy[ih]->Fill(v1.x, v1.y, w);
+    h_bsd2d[ih]->Fill(v1.d2d(), w);
+    h_bsd2d_1[ih]->Fill(v1.d2d(), w);
+    h_bsd2d_v_bsdz[ih]->Fill(v1.z, v1.d2d(), w);
+    h_bsd2d_v_bsdz_1[ih]->Fill(v1.z, v1.d2d(), w);
+    h_bsdz[ih]->Fill(v1.z, w);
     h_bsdz_1[ih]->Fill(v1.z, w);
 
     h_ntracks[ih]->Fill(v0.ntracks, v1.ntracks, w);
