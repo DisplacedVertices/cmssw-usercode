@@ -26,15 +26,15 @@ import minbias
 process.mix.input.fileNames = minbias.files
 
 process.source = cms.Source('EmptySource')
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 process.output = cms.OutputModule('PoolOutputModule',
 				  splitLevel = cms.untracked.int32(0),
 				  eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-				  outputCommands = process.RAWSIMEventContent.outputCommands,
+				  outputCommands = process.FEVTDEBUGEventContent.outputCommands,
 				  fileName = cms.untracked.string('gensimhlt.root'),
-				  dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('GEN-SIM-RAW')),
+				  dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('FEVTDEBUG')),
 				  SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('generation_step')),
 				  )
 
