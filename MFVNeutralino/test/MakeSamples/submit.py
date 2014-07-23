@@ -182,7 +182,7 @@ def submit(name, tau0=None, mass=None):
     if 'ali_' in name:
         if not run_reco:
             raise ValueError('alignment means nothing if not running reco')
-        ali_tag = name.split('ali_')[-1].capitalize()
+        ali_tag = name.split('ali_')[-1].split("_")[0].capitalize()
         new_reco_py += '\ntracker_alignment(process, "%s")\n' % ali_tag
         new_reco_py += 'dummy_beamspot(process, "myttbar%s")\n' % ali_tag
         new_tkdqm_py += '\ntracker_alignment(process, "%s")\n' % ali_tag
@@ -212,7 +212,7 @@ def submit(name, tau0=None, mass=None):
 
     additional_input_files = ', '.join(additional_input_files)
 
-    ui_working_dir = os.path.join(dir, 'crab_mfv_%s' % name)
+    ui_working_dir = os.path.join(dir, 'crab_mfv_%s_%i' %(name,events_per))
     vd = locals()
     vd['nevents'] = nevents
     vd['events_per'] = events_per

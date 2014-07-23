@@ -4,9 +4,8 @@ from modify import *
 process = cms.Process("MULTITRACKVALIDATOR")
 
 # message logger
-process.MessageLogger = cms.Service("MessageLogger",
-     default = cms.untracked.PSet( limit = cms.untracked.int32(10) )
-)
+process.load('FWCore.MessageLogger.MessageLogger_cfi')
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 
 # source
 readFiles = cms.untracked.vstring()
