@@ -32,10 +32,11 @@ h = f.Get('ClearedJetsTemplater/seed0000_toy0000/templates/imu_21/h_template_imu
 h.SetStats(0)
 h.SetLineWidth(2)
 h.GetXaxis().SetRangeUser(2e-2, 3.2)
+h.Scale(1/h.Integral())
 h.SetTitle(';d_{VV} (cm);frac. / bin width')
 for ibin in xrange(1, h.GetNbinsX()+1):
     h.SetBinContent(ibin, h.GetBinContent(ibin) / h.GetBinWidth(ibin))
-h.Draw('hist')
+h.Draw('hist e')
 h.SetDirectory(0)
 hs.append(h)
 leg.AddEntry(h, 'Bkg: #mu_{clear} = 210 #mum, #sigma_{clear} = 50 #mum', 'L')
@@ -66,7 +67,7 @@ for fn in fns:
     h.GetXaxis().SetRangeUser(2e-2,3.2)
     h.SetLineColor(colors.pop(0))
     h.SetLineWidth(2)
-    h.Draw('same hist')
+    h.Draw('same hist e')
     leg.AddEntry(h, 'Sig: ' + titles.pop(0), 'L')
 
 leg.SetBorderSize(0)
