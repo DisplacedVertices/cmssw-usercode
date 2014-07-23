@@ -3,13 +3,15 @@
 import os,sys
 
 verbose = True
-root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_5313/HistosV18_Data0'
+root_file_dir = '/uscms_data/d3/jchaves/crab/HistosV18_extrabkg'
 #plot_dir = os.path.join('plots', os.path.basename(root_file_dir)) + '/' + sys.argv[1] # 'plots/MFVHistosV17SideBandBetterPUweights'
 #event_histo_path = 'mfvEventHistos'+sys.argv[1]
 #vertex_histo_path = 'mfvVertexHistos'+sys.argv[1]
 plot_dir = os.path.join('plots', os.path.basename(root_file_dir)) # 'plots/MFVHistosV17SideBandBetterPUweights'
-event_histo_path = 'mfvEventHistosOnlyOneVtx'
-vertex_histo_path = 'mfvVertexHistosOnlyOneVtx'
+#event_histo_path = 'evtHstOnly1VNoBs2derr'
+#event_histo_path = 'mfvEventHistosOneVtx'
+event_histo_path = 'evtHstOnly1VNoDrmax'
+vertex_histo_path = 'vtxHstOnly1VNoDrmax'
 hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
 plot_size = (600,600)
 int_lumi = 18200. # /pb
@@ -27,7 +29,7 @@ ps = plot_saver(plot_dir, size=plot_size)
 
 data_samples = Samples.data_samples
 
-background_samples = Samples.ttbar_samples + Samples.qcd_samples
+background_samples = Samples.smaller_background_samples + Samples.ttbar_samples + Samples.qcd_samples #+ Samples.leptonic_background_samples
 for sample in background_samples:
     sample.total_events = sample.nevents_orig/2
 
@@ -44,7 +46,12 @@ for s in Samples.qcdht0100, Samples.qcdht0250, Samples.qcdht0500, Samples.qcdht1
     s.join_info = True, 'QCD', ROOT.kBlue-9 # Samples.qcdht0100.color
 for s in Samples.ttbardilep, Samples.ttbarsemilep, Samples.ttbarhadronic:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7 # Samples.ttbardilep.color
+for s in Samples.leptonic_background_samples + Samples.auxiliary_background_samples:
+     s.join_info = True, 'other', ROOT.kBlue-5
+for s in Samples.smaller_background_samples:
+     s.join_info = True, 'other', ROOT.kBlue-3
 
+    
 if verbose:
     print 'weights:'
     for sample in background_samples:
@@ -54,11 +61,11 @@ C = partial(data_mc_comparison,
             background_samples = background_samples,
             signal_samples = signal_samples,
             data_samples = data_samples,
-            plot_saver = ps,
+            plot_saver = ps,            
             file_path = os.path.join(root_file_dir, '%(name)s.root'),
             int_lumi = int_lumi * scale_factor,
             int_lumi_nice = int_lumi_nice,
-            background_uncertainty = ('Stat. uncert. on MC bkg', None, ROOT.kBlack, 3004),
+            background_uncertainty = ('Uncert. on MC bkg', 0.2, ROOT.kBlack, 3004),
             hist_path_for_nevents_check = hist_path_for_nevents_check,
             overflow_in_last = True,
             poisson_intervals = True,
@@ -96,6 +103,9 @@ sv_best0_sumnhitsbehind
 sv_best0_drmin
 sv_best0_drmax
 sv_best0_bs2derr
+sv_best0_bs2ddist
+sv_best0_jets_deltaphi
+jetpairdphi
 clean0
 clean1
 clean2
@@ -139,7 +149,7 @@ D('npv',
   x_title = 'number of PV',
   y_title = 'events/2',
   x_range = (0, 40),
-  #y_range = (None, 350),
+  y_range = (None, 70000),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -185,8 +195,8 @@ D('njets',
   histogram_path = event_histo('h_njets'),
   x_title = 'number of jets',
   y_title = 'events',
-  x_range = (0,16),
-  #y_range = (None, 660),
+  x_range = (3,16),
+  y_range = (None, 100000),
   legend_pos = (0.572, 0.687, 0.884, 0.920),
   )
 
@@ -203,8 +213,8 @@ D('jetpt4',
   histogram_path = event_histo('h_jetpt4'),
   x_title = 'jet #4 p_{T} (GeV)',
   y_title = 'events/10 GeV',
-  x_range = (0,250),
-  #y_range = (None, 550),
+  x_range = (50,250),
+  y_range = (None, 80000),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -234,7 +244,8 @@ D('jetsumht',
   rebin = 4,
   x_title = '#Sigma H_{T} (GeV)',
   y_title = 'events/100 GeV',
-  x_range = (0, 3000),
+  x_range = (400, 2500),
+  y_range = (None, 110000),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -320,9 +331,11 @@ D('sv_best0_ntracks',
   histogram_path = vertex_histo('h_sv_best0_ntracks'),
   x_title = 'number of tracks/vertex',
   y_title = 'vertices',
-  x_range = (0, 20),
-  #y_range = (None, 900),
-  legend_pos = (0.435, 0.687, 0.878, 0.920)
+  x_range = (2, 20),
+  y_range = (None, 80000),
+  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  cut_line = ((5.,0.0,5.,180000),ROOT.kRed,1,1),
+
   )
 
 D('sv_best0_ntracksptgt3',
@@ -330,8 +343,9 @@ D('sv_best0_ntracksptgt3',
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
   x_range = (0, 9),
-  #y_range = (None, 1800),
-  legend_pos = (0.553, 0.687, 0.878, 0.920)
+  y_range = (None, 500000),
+  legend_pos = (0.553, 0.687, 0.878, 0.920),
+  cut_line = ((3.,0.0,3.,500000),ROOT.kRed,1,1),
   )
 
 D('sv_top2_ntracksptgt3_nm1',
@@ -434,8 +448,10 @@ D('sv_best0_drmin',
   rebin = 4,
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.04',
-  x_range = (0, 0.5),
+  x_range = (0, 0.6),
+  y_range = (None, 90000),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
+  cut_line = ((0.4,0.0,0.4,180000),ROOT.kRed,1,1),
   )
 
 D('sv_top2_drmin_nm1',
@@ -452,9 +468,10 @@ D('sv_best0_drmax',
   rebin = 6,
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
-  x_range = (0, 5),
-  #y_range = (None, 550),
-  legend_pos = (0.135, 0.687, 0.578, 0.920)
+  x_range = (0, 7.0),
+  y_range = (None, 100000),
+  legend_pos = (0.135, 0.687, 0.448, 0.920),
+  cut_line = ((4,0.0,4,180000),ROOT.kRed,1,1),
   )
 
 D('sv_top2_drmax_nm1',
@@ -472,7 +489,8 @@ D('sv_best0_njetsntks',
   y_title = 'vertices',
   x_range = (0, 6),
   #y_range = (None, 1350),
-  legend_pos = (0.589, 0.704, 0.878, 0.921),
+  legend_pos = (0.649, 0.704, 0.878, 0.921),
+    cut_line = ((1.,0.0,1.,180000),ROOT.kRed,1,1),
   )
 
 D('sv_best0_sumnhitsbehind',
@@ -506,7 +524,10 @@ D('sv_best0_bs2derr',
   histogram_path = vertex_histo('h_sv_best0_bs2derr'),
   x_title = '#sigma(xy distance to beamspot) (cm)',
   y_title = 'vertices/5 #mum',
-  x_range = (0, 0.003),
+  x_range = (0, 0.01),
+  y_range = (None, 180000),
+  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  cut_line = ((0.0025,0.0,0.0025,180000),ROOT.kRed,1,1),
   )
 
 D('sv_top2_bs2derr_nm1',
@@ -532,4 +553,30 @@ D('sv_top2_bs2dsig_nm1',
   rebin = 2,
   x_range = (0, 50),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
+  )
+D('sv_best0_bs2ddist',
+  histogram_path = vertex_histo('h_sv_best0_bs2ddist'),
+  x_title = 'xy distance to beamspot (cm)',
+  y_title = 'vertices/50 #mum',
+  x_range = (0, 0.1),
+  #y_range = (None, 1200),
+  legend_pos = (0.547, 0.755, 0.878, 0.921),
+  )
+D('sv_best0_jets_deltaphi',
+  histogram_path = vertex_histo('h_sv_best0_jets_deltaphi'),
+  x_title = 'best0 SV #Delta#phi to jets',
+  y_title = '',
+  x_range = (-3.15, 3.15),
+  #y_range = (None, 1200),
+  legend_pos = (0.547, 0.755, 0.878, 0.921),
+  rebin = 2,  
+  )
+D('jetpairdphi',
+  histogram_path = event_histo('h_jetpairdphi'),
+  x_title = 'jet pair #Delta#phi (rad)',
+  y_title = '',
+  x_range = (-3.15, 3.15),
+  #y_range = (None, 1200),
+  rebin = 2,
+  legend_pos = (0.547, 0.755, 0.878, 0.921),
   )
