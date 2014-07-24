@@ -149,6 +149,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, samples):
         env.append('templates_kind=simpleclear')
         env.append('fitter_fix_nuis1=1')
         env.append('fitter_start_nuis0=10')
+        env.append('fitter_start_nuis1=0')
 
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
