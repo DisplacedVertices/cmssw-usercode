@@ -54,11 +54,14 @@ namespace mfv {
       double mu_bkg;
       double err_mu_bkg;
       bool all_ok;
-      std::vector<double> nuis_pars;
-      std::vector<double> nuis_par_errs;
+      double nuis0;
+      double err_nuis0;
+      double nuis1;
+      double err_nuis1;
 
       min_lik_t() : ok(true), maxtwolnL(-1e300), mu_sig(-1), err_mu_sig(-1), mu_bkg(-1), err_mu_bkg(-1), all_ok(true) {}
 
+      std::vector<double> nuis_pars() const { return std::vector<double>({nuis0, nuis1}); }
       std::string nuis_title() const;
       std::string mu_title() const;
       std::string title() const;

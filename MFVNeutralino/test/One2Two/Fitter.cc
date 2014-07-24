@@ -91,13 +91,9 @@ namespace mfv {
   //////////////////////////////////////////////////////////////////////////////
 
   std::string Fitter::min_lik_t::nuis_title() const {
-    std::string s = "nuis. pars:";
     char buf[128];
-    for (size_t i = 0, ie = nuis_pars.size(); i < ie; ++i) {
-      snprintf(buf, 128, "  %f #pm %f", nuis_pars[i], nuis_par_errs[i]);
-      s += buf;
-    }
-    return s;
+    snprintf(buf, 128, "nuis 0:  %f #pm %f  nuis1: %f #pm %f", nuis0, err_nuis0, nuis1, err_nuis1);
+    return std::string(buf);
   }
 
   std::string Fitter::min_lik_t::mu_title() const {
@@ -113,9 +109,7 @@ namespace mfv {
 
   void Fitter::min_lik_t::print(const char* header, const char* indent) const {
     printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
-    for (size_t ipar = 0; ipar < nuis_pars.size(); ++ipar)
-      printf("  nuis%lu = %7.3f +- %7.3f", ipar, nuis_pars[ipar], nuis_par_errs[ipar]);
-    printf("\n");
+    printf("  nuis0 = %7.3f +- %7.3f  nuis1 = %7.3f +- %7.3f\n", nuis0, err_nuis0, nuis1, err_nuis1);
   }
 
   void Fitter::test_stat_t::print(const char* header, const char* indent) const {
@@ -185,12 +179,20 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h1_err_mu_sig", &t_obs_0.h1.err_mu_sig, "t_obs_0__h1_err_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h1_mu_bkg", &t_obs_0.h1.mu_bkg, "t_obs_0__h1_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h1_err_mu_bkg", &t_obs_0.h1.err_mu_bkg, "t_obs_0__h1_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h1_nuis0", &t_obs_0.h1.nuis0, "t_obs_0__h1_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h1_err_nuis0", &t_obs_0.h1.err_nuis0, "t_obs_0__h1_err_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h1_nuis1", &t_obs_0.h1.nuis1, "t_obs_0__h1_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h1_err_nuis1", &t_obs_0.h1.err_nuis1, "t_obs_0__h1_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_istat", &t_obs_0.h0.istat, "t_obs_0__h0_istat/I");
     t_fit_info->Branch("t_obs_0__h0_maxtwolnL", &t_obs_0.h0.maxtwolnL, "t_obs_0__h0_maxtwolnL/D");
     t_fit_info->Branch("t_obs_0__h0_mu_sig", &t_obs_0.h0.mu_sig, "t_obs_0__h0_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h0_err_mu_sig", &t_obs_0.h0.err_mu_sig, "t_obs_0__h0_err_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h0_mu_bkg", &t_obs_0.h0.mu_bkg, "t_obs_0__h0_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h0_err_mu_bkg", &t_obs_0.h0.err_mu_bkg, "t_obs_0__h0_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h0_nuis0", &t_obs_0.h0.nuis0, "t_obs_0__h0_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h0_err_nuis0", &t_obs_0.h0.err_nuis0, "t_obs_0__h0_err_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h0_nuis1", &t_obs_0.h0.nuis1, "t_obs_0__h0_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h0_err_nuis1", &t_obs_0.h0.err_nuis1, "t_obs_0__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__t", &t_obs_0.t, "t_obs_0__t/D");
     t_fit_info->Branch("pval_signif", &pval_signif, "pval_signif/D");
     t_fit_info->Branch("t_obs_limit__h1_istat", &t_obs_limit.h1.istat, "t_obs_limit__h1_istat/I");
@@ -199,17 +201,28 @@ namespace mfv {
     t_fit_info->Branch("t_obs_limit__h1_err_mu_sig", &t_obs_limit.h1.err_mu_sig, "t_obs_limit__h1_err_mu_sig/D");
     t_fit_info->Branch("t_obs_limit__h1_mu_bkg", &t_obs_limit.h1.mu_bkg, "t_obs_limit__h1_mu_bkg/D");
     t_fit_info->Branch("t_obs_limit__h1_err_mu_bkg", &t_obs_limit.h1.err_mu_bkg, "t_obs_limit__h1_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_limit__h1_nuis0", &t_obs_limit.h1.nuis0, "t_obs_limit__h1_nuis0/D");
+    t_fit_info->Branch("t_obs_limit__h1_err_nuis0", &t_obs_limit.h1.err_nuis0, "t_obs_limit__h1_err_nuis0/D");
+    t_fit_info->Branch("t_obs_limit__h1_nuis1", &t_obs_limit.h1.nuis1, "t_obs_limit__h1_nuis1/D");
+    t_fit_info->Branch("t_obs_limit__h1_err_nuis1", &t_obs_limit.h1.err_nuis1, "t_obs_limit__h1_err_nuis1/D");
     t_fit_info->Branch("t_obs_limit__h0_istat", &t_obs_limit.h0.istat, "t_obs_limit__h0_istat/I");
     t_fit_info->Branch("t_obs_limit__h0_maxtwolnL", &t_obs_limit.h0.maxtwolnL, "t_obs_limit__h0_maxtwolnL/D");
     t_fit_info->Branch("t_obs_limit__h0_mu_sig", &t_obs_limit.h0.mu_sig, "t_obs_limit__h0_mu_sig/D");
     t_fit_info->Branch("t_obs_limit__h0_err_mu_sig", &t_obs_limit.h0.err_mu_sig, "t_obs_limit__h0_err_mu_sig/D");
     t_fit_info->Branch("t_obs_limit__h0_mu_bkg", &t_obs_limit.h0.mu_bkg, "t_obs_limit__h0_mu_bkg/D");
     t_fit_info->Branch("t_obs_limit__h0_err_mu_bkg", &t_obs_limit.h0.err_mu_bkg, "t_obs_limit__h0_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_limit__h0_nuis0", &t_obs_limit.h0.nuis0, "t_obs_limit__h0_nuis0/D");
+    t_fit_info->Branch("t_obs_limit__h0_err_nuis0", &t_obs_limit.h0.err_nuis0, "t_obs_limit__h0_err_nuis0/D");
+    t_fit_info->Branch("t_obs_limit__h0_nuis1", &t_obs_limit.h0.nuis1, "t_obs_limit__h0_nuis1/D");
+    t_fit_info->Branch("t_obs_limit__h0_err_nuis1", &t_obs_limit.h0.err_nuis1, "t_obs_limit__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_limit__t", &t_obs_limit.t, "t_obs_limit__t/D");
     t_fit_info->Branch("pval_limits", &pval_limits);
     t_fit_info->Branch("mu_sig_limits", &mu_sig_limits);
     t_fit_info->Branch("pval_limit", &pval_limit, "pval_limit/D");
     t_fit_info->Branch("mu_sig_limit", &mu_sig_limit, "mu_sig_limit/D");
+
+    t_fit_info->SetAlias("s_true", "true_pars[0]");
+    t_fit_info->SetAlias("b_true", "true_pars[1]");
   }    
 
   void Fitter::draw_likelihood(const test_stat_t& t) {
@@ -306,7 +319,7 @@ namespace mfv {
         const double mu_sig = mu_scan[0].v(i0);
         for (int i1 = 1; i1 < mu_scan[1].n; ++i1, ++pb) {
           const double mu_bkg = mu_scan[1].v(i1);
-          h2->SetBinContent(i0, i1, fit::twolnL(mu_sig, mu_bkg, ml.nuis_pars[0], ml.nuis_pars[1]));
+          h2->SetBinContent(i0, i1, fit::twolnL(mu_sig, mu_bkg, ml.nuis0, ml.nuis1));
         }
       }
 
@@ -330,7 +343,7 @@ namespace mfv {
       const min_lik_t& ml = sb ? t.h1 : t.h0;
       TCanvas* c = new TCanvas(TString::Format("c_%s_fit", sb_or_b));
 
-      TH1D* h_bkg_fit = make_h_bkg(TString::Format("h_bkg_%s_fit",  sb_or_b), ml.nuis_pars);
+      TH1D* h_bkg_fit = make_h_bkg(TString::Format("h_bkg_%s_fit",  sb_or_b), ml.nuis_pars());
       TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit",  sb_or_b));
       TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit", sb_or_b));
 
@@ -415,10 +428,8 @@ namespace mfv {
     ret.maxtwolnL = -fmin;
     m->GetParameter(0, ret.mu_sig, ret.err_mu_sig);
     m->GetParameter(1, ret.mu_bkg, ret.err_mu_bkg);
-    ret.nuis_pars.resize(npars);
-    ret.nuis_par_errs.resize(npars);
-    for (size_t ipar = 0; ipar < npars; ++ipar)
-      m->GetParameter(2+ipar, ret.nuis_pars[ipar], ret.nuis_par_errs[ipar]);
+    m->GetParameter(2, ret.nuis0, ret.err_nuis0);
+    m->GetParameter(3, ret.nuis1, ret.err_nuis1);
     ret.ok = istat == 3;
     ret.istat = istat;
 
@@ -510,7 +521,7 @@ namespace mfv {
 
     t_obs_0 = calc_test_stat(0);
     t_obs_0.print("t_obs_0");
-    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars);
+    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars());
 
     pval_signif = 1;
     pval_limits.clear();
