@@ -99,7 +99,7 @@ namespace mfv {
     dataset_ok();
 
     printf("ClearedJetsTemplater%s making templates\n", name.c_str()); fflush(stdout);
-    jmt::ProgressBar pb(50, n_clearing_mu * n_clearing_sigma);
+    jmt::ProgressBar pb(50, dataset.events_1v->size());
     pb.start();
 
     clear_templates();
@@ -107,39 +107,43 @@ namespace mfv {
     TDirectory* dtemp = dtoy->mkdir("templates");
     dtemp->cd();
 
-    for (const VertexSimple& v : *dataset.one_vertices)
-      h_bsd2d[vt_1v]->Fill(v.d2d());
-    
     int iglb = 0;
     for (int imu = 0; imu < n_clearing_mu; ++imu) {
       const double clearing_mu = clearing_mu_start + imu * d_clearing_mu;
 
       dtemp->mkdir(TString::Format("imu_%02i", imu))->cd();
 
-      for (int isig = 0; isig < n_clearing_sigma; ++isig, ++pb) {
+      for (int isig = 0; isig < n_clearing_sigma; ++isig) {
         const double clearing_sigma = clearing_sigma_start + isig * d_clearing_sigma;
 
         TH1D* h = Template::hist_with_binning(TString::Format("h_template_imu%03i_isig%03i", imu, isig),
                                               TString::Format("clearing pars: #mu = %f  #sigma = %f", clearing_mu, clearing_sigma));
 
-        for (const EventSimple& ev : *dataset.events_1v) {
-          if (ev.njets > 0) {
-            const double bsd2d0 = h_bsd2d[vt_1v]->GetRandom();
-            const double bsd2d1 = h_bsd2d[vt_1v]->GetRandom();
-
-            const double phi0 = throw_phi(ev);
-            const double phi1 = throw_phi(ev);
-
-            const double d2d = sqrt(bsd2d0*bsd2d0 + bsd2d1*bsd2d1 - 2*bsd2d0*bsd2d1*cos(TVector2::Phi_mpi_pi(phi0 - phi1)));
-
-            h->Fill(d2d, 0.5*TMath::Erf((d2d - clearing_mu)/clearing_sigma) + 0.5);
-          }
-        }
-
-        Template::finalize_template_in_place(h);
         templates.push_back(new ClearedJetsTemplate(iglb++, h, clearing_mu, clearing_sigma));
       }
     }
+
+    for (const EventSimple& ev : *dataset.events_1v) {
+      if (ev.njets > 0) {
+        const double bsd2d0 = h_bsd2d[vt_1vsingle]->GetRandom();
+        const double bsd2d1 = h_bsd2d[vt_1vsingle]->GetRandom();
+
+        const double phi0 = throw_phi(ev);
+        const double phi1 = throw_phi(ev);
+
+        const double d2d = sqrt(bsd2d0*bsd2d0 + bsd2d1*bsd2d1 - 2*bsd2d0*bsd2d1*cos(TVector2::Phi_mpi_pi(phi0 - phi1)));
+
+        for (Template* t : templates) {
+          ClearedJetsTemplate* cjt = dynamic_cast<ClearedJetsTemplate*>(t);
+          t->h->Fill(d2d, 0.5*TMath::Erf((d2d - cjt->clearing_mu)/cjt->clearing_sigma) + 0.5);
+        }
+      }
+
+      ++pb;
+    }
+
+    for (Template* t : templates)
+      Template::finalize_template_in_place(t->h);
 
     printf("\n");
   }
@@ -151,6 +155,11 @@ namespace mfv {
 
     book_toy_fcns_and_histos();
     fill_2v_histos();
+
+    for (int iv = 0; iv < N1v; ++iv) {
+      const VertexSimple& v0 = dataset.one_vertices->at(iv);
+      fill_2v(vt_1vsingle, 1, v0, v0);
+    }
 
     make_templates();
 
