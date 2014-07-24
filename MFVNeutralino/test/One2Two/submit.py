@@ -109,7 +109,7 @@ scheduler=%(scheduler)s
 compiled = 'nocompile' in sys.argv
 setuped = False
 
-def submit(njobs, template_type, min_ntracks, signal_sample, samples):
+def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, samples):
     global compiled
     global setuped
 
@@ -133,12 +133,13 @@ def submit(njobs, template_type, min_ntracks, signal_sample, samples):
 
     batch_name = 'Tmp%s_Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (template_type,
                                                           min_ntracks,
-                                                          'def',
+                                                          template_signal,
                                                           'no' if signal_sample is None else 'n%ix%i' % signal_sample,
                                                           samples)
 
     env = [
         'toythrower_min_ntracks=%i' % min_ntracks,
+        'toythrower_template_signal=%i' % template_signal,
         ]
 
     if template_type == 'PS':
@@ -156,7 +157,6 @@ def submit(njobs, template_type, min_ntracks, signal_sample, samples):
         assert sig_samp < 0
         env.append('toythrower_injected_signal=%i' % sig_samp)
         env.append('toythrower_injected_signal_scale=%f' % sig_scale)
-        env.append('toythrower_template_signal=%i' % sig_samp)
 
     if type(samples) == int:
         env.append('toythrower_sample_only=%i' % samples)
@@ -170,12 +170,15 @@ def submit(njobs, template_type, min_ntracks, signal_sample, samples):
 
 
 batches = []
-for template_type in ('SC', 'PS', 'CJ'):
-    for min_ntracks in (5,6): #,7,8):
-        for signal_sample in (None, (-9, 1), (-9, 10), (-15, 1), (-15, 10)):
-            batches.append((template_type, min_ntracks, signal_sample, ''))
+for template_type in ('CJ',):
+    for min_ntracks in (5,): #6): #,7,8):
+        for injected_signal in xrange(-30, 0):
+            for strength in (1, 5, 10):
+                batches.append((template_type, min_ntracks, (injected_signal, strength), injected_signal, ''))
+        for template_signal in xrange(-30, 0):
+            batches.append((template_type, min_ntracks, None, template_signal, ''))
+            
 
-
-raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
+raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*1000))
 for batch in batches:
-    submit(200, *batch)
+    submit(1000, *batch)
