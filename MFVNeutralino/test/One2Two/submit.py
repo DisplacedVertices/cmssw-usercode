@@ -10,7 +10,7 @@ echo wd: `pwd`
 export JOB_NUM=$1
 
 echo get trees
-xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees_17879f2d0db8123dbf443e3b6613c4c3c0ba1d2f.tgz all_trees.tgz
+xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees_3c359678f94253163d849d8f53e4e5e65dddd79c.tgz all_trees.tgz
 ECODE=$?
 if [ "$ECODE" -ne "0" ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -169,7 +169,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, samples):
 
 
 batches = []
-for template_type in ('PS', 'CJ'):
+for template_type in ('SC', 'PS', 'CJ'):
     for min_ntracks in (5,6): #,7,8):
         for signal_sample in (None, (-9, 1), (-9, 10), (-15, 1), (-15, 10)):
             batches.append((template_type, min_ntracks, signal_sample, ''))
@@ -178,56 +178,3 @@ for template_type in ('PS', 'CJ'):
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*200))
 for batch in batches:
     submit(200, *batch)
-
-
-
-
-
-
-
-
-'''
-grep -L 'Normal termination (return value 0)' *.condor
-tar --remove-files -czf condor_logs.tgz *.condor
-
-
-find . -name \*.stderr -size 0
-find . -name \*.stderr -size +0
-rm *.stderr
-
-
-less 0.stdout
-
-foreach x (*.stdout)
-  sed --in-place -e 's@condor/execute/dir_[0-9]*@@g' $x
-end
-
-touch diffstdouts
-foreach x (stdout*)
-  foreach y (stdout*)
-    if ($x != $y) then
-      diff $x $y >> diffstdouts
-    endif
-  end
-end
-sort -o diffstdouts diffstdouts
-
-tar --remove-files -czf stdouts.tgz stdout.*
-
-hadd.py one2two_all.root *.one2two.root
-hadd.py o2tfit_all.root *.o2tfit.root
-
-mkdir in
-mv signal_templates.root fit.exe one2two.py lib.tgz py.tgz runme.* in/
-
-mkdir outs
-mv *.out.* outs/
-
-mkdir roots
-mv *.root roots/
-
-
-py ~/test/One2Two draw.py roots/one2two_0.root
-...
-mv plots/one2two plots/one2two_`basename $PWD`
-'''
