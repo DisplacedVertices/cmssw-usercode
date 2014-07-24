@@ -72,30 +72,36 @@ namespace mfv {
     const int N1v_t = int(dataset.one_vertices->size());
     const int N1v = sample_count > 0 && sample_count < N1v_t ? sample_count : N1v_t;
 
+    jmt::ProgressBar pb(50, N1v);
+    pb.start();
+
     int iglb = 0;
     for (int isig = 0; isig < n_clearing_sigma; ++isig) {
       const double clearing_sigma = clearing_sigma_start + isig * d_clearing_sigma;
-      printf("  pairing w/ clearing_sigma = %f\n", clearing_sigma); fflush(stdout);
-
-      jmt::ProgressBar pb(50, N1v);
-      pb.start();
 
       TH1D* h = Template::hist_with_binning(TString::Format("h_template_isig%03i", isig), TString::Format("clearing pars: #sigma = %f", clearing_sigma));
 
-      for (int iv = 0; iv < N1v; ++iv, ++pb) {
-        const VertexSimple& v0 = dataset.one_vertices->at(iv);
-        for (int jv = iv+1; jv < N1v; ++jv) {
-          const VertexSimple& v1 = dataset.one_vertices->at(jv);
-          VertexPair p(v0, v1);
-          if (p.d2d() / p.sig() > clearing_sigma)
-            h->Fill(p.d2d());
-        }
-      }
-      printf("\n");
-
-      Template::finalize_template_in_place(h);
       templates.push_back(new SimpleClearingTemplate(iglb++, h, clearing_sigma));
     }
+
+    for (int iv = 0; iv < N1v; ++iv, ++pb) {
+      const VertexSimple& v0 = dataset.one_vertices->at(iv);
+      for (int jv = iv+1; jv < N1v; ++jv) {
+        const VertexSimple& v1 = dataset.one_vertices->at(jv);
+        const VertexPair p(v0, v1);
+        const double d = p.d2d();
+        const double n = d / p.sig();
+
+        for (Template* t : templates) {
+          SimpleClearingTemplate* sct = dynamic_cast<SimpleClearingTemplate*>(t);
+          if (n > sct->clearing_sigma)
+            t->h->Fill(d);
+        }
+      }
+    }
+
+    for (Template* t : templates)
+      Template::finalize_template_in_place(t->h);
 
     printf("\n");
   }
