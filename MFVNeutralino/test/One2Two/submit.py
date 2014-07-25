@@ -178,7 +178,7 @@ for template_type in ('CJ',):
         for template_signal in xrange(-30, 0):
             batches.append((template_type, min_ntracks, None, template_signal, ''))
             
-
-raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*1000))
+nj = 500
+raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*nj))
 for batch in batches:
-    submit(1000, *batch)
+    submit(nj, *batch)
