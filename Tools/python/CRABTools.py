@@ -649,7 +649,7 @@ def crab_get_input_files(working_dir, jobs=None):
         jobs = args.keys()
     return dict((j, args[j]['InputFiles'].split(',')) for j in jobs)
 
-def crab_output_files_from_fjr(working_dir):
+def crab_output_files_from_fjr(working_dir, raise_on_missing=True):
     fjrs = glob.glob(os.path.join(working_dir, 'res', 'crab_fjr*xml'))
     fjrs.sort(key = lambda x: int(x.split('_')[-1].split('.xml')[0]))
     files = []
@@ -663,10 +663,11 @@ def crab_output_files_from_fjr(working_dir):
         wrapper_mo = wrapper_re.search(s)
         exe_mo = exe_re.search(s)
         filename_mo = filename_re.search(s)
-        if wrapper_mo is None or exe_mo is None or filename_mo is None:
-            raise RuntimeError('cannot parse %s for exit codes and output filename (wrapper_mo %s exe_mo %s filename_mo %s)' % (fjr, wrapper_mo, exe_mo, filename_mo))
-        if wrapper_mo.group(1) != '0' or exe_mo.group(1) != '0':
-            raise RuntimeError('exit codes for %s not 0 (wrapper %s, exe %s)' % (fjr, wrapper_mo.group(1), exe_mo.group(1)))
+        if raise_on_missing:
+            if wrapper_mo is None or exe_mo is None or filename_mo is None:
+                raise RuntimeError('cannot parse %s for exit codes and output filename (wrapper_mo %s exe_mo %s filename_mo %s)' % (fjr, wrapper_mo, exe_mo, filename_mo))
+            if wrapper_mo.group(1) != '0' or exe_mo.group(1) != '0':
+                raise RuntimeError('exit codes for %s not 0 (wrapper %s, exe %s)' % (fjr, wrapper_mo.group(1), exe_mo.group(1)))
         files.append(filename_mo.group(1))
 
     return files
