@@ -172,11 +172,10 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
 batches = []
 for template_type in ('CJ',):
     for min_ntracks in (5,): #6): #,7,8):
-        for injected_signal in xrange(-30, 0):
-            for strength in (1, 5, 10):
-                batches.append((template_type, min_ntracks, (injected_signal, strength), injected_signal, ''))
-        for template_signal in xrange(-30, 0):
-            batches.append((template_type, min_ntracks, None, template_signal, ''))
+        for signal in xrange(-24, 0):
+            for strength in (None, 1, 5, 10):
+                sg = (signal, strength) if strength is not None else None
+                batches.append((template_type, min_ntracks, sg, signal, ''))
             
 nj = 500
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*nj))
