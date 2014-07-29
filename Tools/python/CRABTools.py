@@ -995,9 +995,10 @@ if __name__ == '__main__':
                         print f
 
     elif bool_from_argv('-outputFromFJR'):
+        noraise = bool_from_argv('noraise')
         for dir in crab_dirs_from_argv():
             print dir
-            for fn in crab_output_files_from_fjr(dir):
+            for fn in crab_output_files_from_fjr(dir, raise_on_missing=not noraise):
                 print fn
 
     elif bool_from_argv('-arguments'):
