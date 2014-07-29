@@ -52,6 +52,11 @@ class CRABSubmitter:
                  skip_common = False,
                  **kwargs):
 
+        for arg in sys.argv:
+            if arg.startswith('cs_name='):
+                batch_name = arg.replace('cs_name=', '')
+                break
+
         if '/' in batch_name:
             raise ValueError('/ not allowed in batch name')
         self.batch_name = batch_name
