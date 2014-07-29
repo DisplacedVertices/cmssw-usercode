@@ -30,8 +30,12 @@ private:
   std::map<int,int> prescales_seen;
   std::map<std::string, std::map<int,int> > l1_prescales_seen;
 
-  TH1F* h_jet4_pt;
-  TH1F* h_jet4_eta;
+  TH1F* h_nnoseljets;
+  TH1F* h_njets;
+  TH1F* h_jet_e[20];
+  TH1F* h_jet_pt[20];
+  TH1F* h_jet_eta[20];
+  TH1F* h_jet_phi[20];
 };
 
 QuadJetTrigEff::QuadJetTrigEff(const edm::ParameterSet& cfg)
@@ -47,8 +51,14 @@ QuadJetTrigEff::QuadJetTrigEff(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
-  h_jet4_pt  = fs->make<TH1F>("h_jet4_pt",  "", 201, -1, 200);
-  h_jet4_eta = fs->make<TH1F>("h_jet4_pta", "", 200, -6, 6);
+  h_nnoseljets = fs->make<TH1F>("h_nnoseljets", "", 200, 0, 200);
+  h_njets = fs->make<TH1F>("h_njets", "", 20, 0, 20);
+  for (int i = 0; i < 20; ++i) {
+    h_jet_e[i]   = fs->make<TH1F>(TString::Format("h_jet_e_%i",   i), "", 2000, 0, 2000);
+    h_jet_pt[i]  = fs->make<TH1F>(TString::Format("h_jet_pt_%i",  i), "", 2000, 0, 2000);
+    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i), "", 200, -6, 6);
+    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%i", i), "", 200, -M_PI, M_PI);
+  }
 }
 
 void QuadJetTrigEff::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
@@ -103,21 +113,28 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jets_src, jets);
 
+  h_nnoseljets->Fill(jets->size());
+
   pat::strbitset ret = calojet_sel.getBitTemplate();
 
   int njet = 0;
-  double pt = -1, eta = -6;
   for (const pat::Jet& jet : *jets) {
     ret.set(false);
-    if (sel < 0 || calojet_sel(jet, ret))
-      if (++njet == 4) {
-        pt  = jet.pt();
-        eta = jet.eta();
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && (sel < 0 || calojet_sel(jet, ret))) {
+      ++njet;
+      if (njet == 20)
+        break;
+      int is[2] = {0, njet};
+      for (int i : is) {
+        h_jet_e[i]->Fill(jet.energy());
+        h_jet_pt[i]->Fill(jet.pt());
+        h_jet_eta[i]->Fill(jet.eta());
+        h_jet_phi[i]->Fill(jet.phi());
       }
+    }
   }
 
-  h_jet4_pt ->Fill(pt, prescale);
-  h_jet4_eta->Fill(eta, prescale);
+  h_njets->Fill(njet);
 }
 
 void QuadJetTrigEff::endJob() {
