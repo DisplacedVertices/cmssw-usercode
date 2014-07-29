@@ -32,6 +32,7 @@ for exclude_name, exclude in excludes:
     xsec        = ROOT.TGraphAsymmErrors(nruns)
     xsec_per_pu = ROOT.TGraphAsymmErrors(nruns)
 
+    runs_used = 0
     for i, run in enumerate(runs):
         if i in exclude:
             continue
@@ -62,6 +63,8 @@ for exclude_name, exclude in excludes:
             xsec_per_pu.SetPoint(i, x, y)
             xsec_per_pu.SetPointEYlow (i, y - yl)
             xsec_per_pu.SetPointEYhigh(i, yh - y)
+
+            runs_used += 1
         else:
             zero_lumis.append(run)
 
@@ -73,7 +76,7 @@ for exclude_name, exclude in excludes:
             print 'zero lumi for run %i with %i 1V events' % (run, nvtx[run])
 
     for g in (xsec, xsec_per_pu):
-        g.SetTitle('# runs: %i  total lumi: %.1f/fb;i_{run};1V event #sigma (pb)' % (i+1, lsum/1e3))
+        g.SetTitle('# runs: %i  total lumi: %.1f/fb;i_{run};1V event #sigma (pb)' % (runs_used, lsum/1e3))
         g.SetMarkerStyle(20)
         g.SetMarkerSize(0.5)
 
