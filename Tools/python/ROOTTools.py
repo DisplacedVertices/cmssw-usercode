@@ -1356,6 +1356,7 @@ __all__ = [
     'move_overflow_into_last_bin',
     'move_stat_box',
     'plot_saver',
+    'poisson_interval',
     'poisson_intervalize',
     'poisson_means_divide',
     'rainbow_palette',
