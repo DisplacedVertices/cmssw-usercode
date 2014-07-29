@@ -107,6 +107,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.cyy0 = v0.cyy;
     nt.cyz0 = v0.cyz;
     nt.czz0 = v0.czz;
+    nt.x1 = nt.y1 = nt.z1 = nt.cxx1 = nt.cxy1 = nt.cxz1 = nt.cyy1 = nt.cyz1 = nt.czz1 = 0;
   }
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
