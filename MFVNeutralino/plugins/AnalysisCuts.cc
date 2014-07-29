@@ -19,6 +19,8 @@ private:
   const bool use_mevent;
   const int trigger_bit;
   const bool re_trigger;
+  const int clean_bit;
+  const bool re_clean;
   const int min_npv;
   const int max_npv;
   const double min_4th_jet_pt;
@@ -63,6 +65,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     use_mevent(mevent_src.label() != ""),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
     re_trigger(cfg.getParameter<bool>("re_trigger")),
+    clean_bit(cfg.getParameter<int>("clean_bit")),
+    re_clean(cfg.getParameter<bool>("re_clean")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
@@ -124,6 +128,11 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
           return false;
       }
       else if (!mevent->pass_trigger[trigger_bit])
+        return false;
+    }
+
+    if (clean_bit >= 0) {
+      if (re_clean != mevent->pass_clean[clean_bit])
         return false;
     }
 
