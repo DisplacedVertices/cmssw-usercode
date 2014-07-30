@@ -146,19 +146,27 @@ struct MFVEvent {
     id = (bdisc_level << 2) | pu_level;
     return id;
   }
+
+  bool pass_nopu(int w, int level) const {
+    return (jet_id[w] & 3) >= level + 1;
+  }
   
   int njetsnopu(int level) const {
     int c = 0;
     for (int i = 0, ie = njets(); i < ie; ++i)
-      if ((jet_id[i] & 3) >= level + 1)
+      if (pass_nopu(i, level))
         ++c;
     return c;
+  }
+
+  bool is_btagged(int w, int level) const {
+    return ((jet_id[w] >> 2) & 3) >= level + 1;
   }
 
   int nbtags(int level) const {
     int c = 0;
     for (int i = 0, ie = njets(); i < ie; ++i)
-      if (((jet_id[i] >> 2) & 3) >= level + 1)
+      if (is_btagged(i, level))
         ++c;
     return c;
   }

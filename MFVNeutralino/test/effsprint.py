@@ -10,11 +10,12 @@ if plots:
 
 sum = 0.
 var = 0.
-int_lumi = 20000.
+int_lumi = 18200.
 cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Ntracksptgt3', 'Sumnhitsbehind', 'ButNtracksAndGt3')
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
 nvtx = 1 if 'one' in sys.argv else 2
+only = 'Only' if 'only' in sys.argv else ''
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
@@ -25,9 +26,15 @@ def effs(fn):
         h = f.Get('%s/h_npv' % dir_name)
         return h.Integral(0,1000000) if integral else h.GetEntries()
 
+    namenumall = 'mfvEventHistos%s' % ('OneVtx' if nvtx == 1 else '')
+    namenumvtx = 'mfvVertexHistos%s/h_nsv' % ('OneVtx' if nvtx == 1 else '')
+    if nvtx == 1 and only:
+        namenumall = namenumall.replace('One', 'OnlyOne')
+        namenumvtx = namenumvtx.replace('One', 'OnlyOne')
+
     den = get_n('mfvEventHistosNoCuts')
-    numall = get_n('mfvEventHistos%s' % ('OneVtx' if nvtx == 1 else ''))
-    h = f.Get('mfvVertexHistos%s/h_nsv' % ('OneVtx' if nvtx == 1 else ''))
+    numall = get_n(namenumall)
+    h = f.Get(namenumvtx)
     numvtx = h.Integral(h.FindBin(nvtx), 1000000)
     sname = os.path.basename(fn).replace('.root','')
     try:
@@ -37,7 +44,7 @@ def effs(fn):
         weight = 1.
     sum += numall * weight
     var += numall * weight**2
-    print '%s (w = %.3e): # ev: %5i  pass evt+vtx: %5i -> %5.3e  pass vtx only: %5i -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numvtx, float(numvtx)/den)
+    print '%s (w = %.3e): # ev: %10.1f (%10i)  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, den/s.ana_filter_eff, numall, float(numall)/den, numvtx, float(numvtx)/den)
     print '  weighted to %.1f/fb: %5.2f +/- %5.2f' % (int_lumi, numall*weight, numall**0.5 * weight)
 
     if cuts:
@@ -47,7 +54,7 @@ def effs(fn):
         for icut, cut in enumerate(cuts):
             h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
             h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-            nm1 = get_n('evtHst%sVNo%s' % (nvtx, cut))
+            nm1 = get_n('evtHst%s%sVNo%s' % (only, nvtx, cut))
             nm1_abs = float(nm1)/den
             nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
             h_nm1_abs.SetBinContent(icut+1, nm1_abs)
@@ -65,12 +72,14 @@ def effs(fn):
             ps.save(h.GetName())
         draw(h_nm1_abs)
         draw(h_nm1_rel)
-        
+
+nosort = 'nosort' in sys.argv
 fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
 if not fns:
     dir = [x for x in sys.argv[1:] if os.path.isdir(x)][0]
-    fns = [os.path.join(dir, fn) for fn in 'qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root ttbardilep.root ttbarhadronic.root ttbarsemilep.root'.split()]
-if 'nosort' not in sys.argv:
+    fns = [os.path.join(dir, fn) for fn in 'qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root ttbarhadronic.root ttbarsemilep.root ttbardilep.root'.split()]
+    nosort = True
+if not nosort:
     fns.sort()
 for fn in fns:
     effs(fn)

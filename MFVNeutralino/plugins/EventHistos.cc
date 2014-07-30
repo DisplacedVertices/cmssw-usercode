@@ -1,4 +1,5 @@
 #include "TH2F.h"
+#include "TRandom3.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -20,6 +21,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
  private:
   const edm::InputTag mfv_event_src;
+  const std::vector<double> force_bs;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag jets_src;
   const edm::InputTag weight_src;
@@ -71,6 +73,26 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetpt5;
   TH1F* h_jetpt6;
   TH1F* h_jet_sum_ht;
+  TH1F* h_jetphi;
+  TH1F* h_jetpairdphi;
+
+  TH1F* h_sv0phi;
+  TH1F* h_sv1phi;
+  TH1F* h_sv0jetdphi;
+  TH1F* h_sv1jetdphi;
+  TH1F* h_svpairdphi;
+  TH1F* h_svpairdphi_cut;
+
+  //TH1F* h_bs2ddist1v;
+  TH1F* h_sv0bs2ddist;
+  TH1F* h_sv1bs2ddist;
+  TH1F* h_svpairdist;
+  TH1F* h_svpairdist_cut;
+  TH2F* h_svdist_dphi;
+  TH2F* h_svdist_bs2ddist0;
+  TH2F* h_svdist_bs2ddist1;
+  TH2F* h_bs2ddist1_bs2ddist0;
+
   TH1F* h_metx;
   TH1F* h_mety;
   TH1F* h_metsig;
@@ -164,12 +186,21 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+    force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     re_trigger(cfg.getParameter<bool>("re_trigger"))
 {
+  if (force_bs.size() && force_bs.size() != 3)
+    throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
+
   edm::Service<TFileService> fs;
+  gRandom->SetSeed(0);
+  //TFile* f = TFile::Open("aaaa.root");
+  //h_bs2ddist1v = (TH1F*)(f->Get("bs2ddist1v"))->Clone();
+  //f->Close();
+  //delete f;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
@@ -222,6 +253,24 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt6 = fs->make<TH1F>("h_jetpt6", ";p_{T} of 6th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jet_sum_ht = fs->make<TH1F>("h_jet_sum_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
+  h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
+
+  h_sv0phi = fs->make<TH1F>("h_sv0phi", ";constructed SV0 #phi (rad);events/.126", 50, -3.15, 3.15);
+  h_sv1phi = fs->make<TH1F>("h_sv1phi", ";constructed SV1 #phi (rad);events/.126", 50, -3.15, 3.15);
+  h_sv0jetdphi = fs->make<TH1F>("h_sv0jetdphi", ";constructed #Delta#phi(SV0, jets) (rad);jets/.126", 50, -3.15, 3.15);
+  h_sv1jetdphi = fs->make<TH1F>("h_sv1jetdphi", ";constructed #Delta#phi(SV1, jets) (rad);jets/.126", 50, -3.15, 3.15);
+  h_svpairdphi = fs->make<TH1F>("h_svpairdphi", ";constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
+  h_svpairdphi_cut = fs->make<TH1F>("h_svpairdphi_cut", "#Delta#phi with space clearing;constructed vertex pair #Delta#phi (rad);events/.126", 50, -3.15, 3.15);
+
+  h_sv0bs2ddist = fs->make<TH1F>("h_sv0bs2ddist", ";constructed SV0 distance (cm);vertices", 500, 0, 1);
+  h_sv1bs2ddist = fs->make<TH1F>("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
+  h_svpairdist = fs->make<TH1F>("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
+  h_svpairdist_cut = fs->make<TH1F>("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 200, 0, 0.2);
+  h_svdist_dphi = fs->make<TH2F>("h_svdist_dphi", "constructed vertex pair;#Delta#phi (rad);distance (cm)", 50, -3.15, 3.15, 200, 0, 0.2);
+  h_svdist_bs2ddist0 = fs->make<TH2F>("h_svdist_bs2ddist0", ";bs2ddist0;svdist2d", 500, 0, 1, 1000, 0, 2);
+  h_svdist_bs2ddist1 = fs->make<TH2F>("h_svdist_bs2ddist1", ";bs2ddist1;svdist2d", 500, 0, 1, 1000, 0, 2);
+  h_bs2ddist1_bs2ddist0 = fs->make<TH2F>("h_bs2ddist1_bs2ddist0", ";bs2ddist0;bs2ddist1", 500, 0, 1, 500, 0, 1);
 
   h_metx = fs->make<TH1F>("h_metx", ";MET x (GeV);events/5 GeV", 100, -250, 250);
   h_mety = fs->make<TH1F>("h_mety", ";MET y (GeV);events/5 GeV", 100, -250, 250);
@@ -341,6 +390,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const double w = *weight;
   h_w->Fill(w);
 
+  const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
+  const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;
+  const double bsz = force_bs.size() ? force_bs[2] : mevent->bsz;
+
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
@@ -376,22 +429,22 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_npu->Fill(mevent->npu, w);
 
-  h_bsx->Fill(mevent->bsx, w);
-  h_bsy->Fill(mevent->bsy, w);
-  h_bsz->Fill(mevent->bsz, w);
-  h_bsphi->Fill(atan2(mevent->bsy, mevent->bsx), w);
+  h_bsx->Fill(bsx, w);
+  h_bsy->Fill(bsy, w);
+  h_bsz->Fill(bsz, w);
+  h_bsphi->Fill(atan2(bsy, bsx), w);
 
   h_npv->Fill(mevent->npv, w);
-  h_pvx->Fill(mevent->pvx - mevent->bsx, w);
-  h_pvy->Fill(mevent->pvy - mevent->bsy, w);
-  h_pvz->Fill(mevent->pvz - mevent->bsz, w);
+  h_pvx->Fill(mevent->pvx - bsx, w);
+  h_pvy->Fill(mevent->pvy - bsy, w);
+  h_pvz->Fill(mevent->pvz - bsz, w);
   h_pvcxx->Fill(mevent->pvcxx, w);
   h_pvcxy->Fill(mevent->pvcxy, w);
   h_pvcxz->Fill(mevent->pvcxz, w);
   h_pvcyy->Fill(mevent->pvcyy, w);
   h_pvcyz->Fill(mevent->pvcyz, w);
   h_pvczz->Fill(mevent->pvczz, w);
-  h_pvphi->Fill(atan2(mevent->pvy - mevent->bsy, mevent->pvx - mevent->bsx), w);
+  h_pvphi->Fill(atan2(mevent->pvy - bsy, mevent->pvx - bsx), w);
   h_pvntracks->Fill(mevent->pv_ntracks, w);
   h_pvsumpt2->Fill(mevent->pv_sumpt2, w);
   h_pvrho->Fill(mevent->pv_rho(), w);
@@ -403,6 +456,81 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jetpt5->Fill(mevent->jetpt5(), w);
   h_jetpt6->Fill(mevent->jetpt6(), w);
   h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
+  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    h_jetphi->Fill(mevent->jet_phi[ijet]);
+    for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
+      h_jetpairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
+    }
+  }
+
+  if (mevent->njets() > 0) {
+    double rjetphi = 0;
+    double rand = gRandom->Rndm();
+    double sumpt = 0;
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      sumpt += mevent->jet_pt[ijet];
+      if (rand < sumpt/mevent->jet_sum_ht()) {
+        rjetphi = mevent->jet_phi[ijet];
+        break;
+      }
+    }
+    double rdphi = gRandom->Gaus(1.57, 0.4);
+
+    double vtx0_phi = 0;
+    if (gRandom->Rndm() < 0.5) {
+      vtx0_phi = rjetphi - rdphi;
+    } else {
+      vtx0_phi = rjetphi + rdphi;
+    }
+
+    rjetphi = 0;
+    rand = gRandom->Rndm();
+    sumpt = 0;
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      sumpt += mevent->jet_pt[ijet];
+      if (rand < sumpt/mevent->jet_sum_ht()) {
+        rjetphi = mevent->jet_phi[ijet];
+        break;
+      }
+    }
+    rdphi = gRandom->Gaus(1.57, 0.4);
+
+    double vtx1_phi = 0;
+    if (gRandom->Rndm() < 0.5) {
+      vtx1_phi = rjetphi - rdphi;
+    } else {
+      vtx1_phi = rjetphi + rdphi;
+    }
+
+    double dphi = reco::deltaPhi(vtx0_phi, vtx1_phi);
+    //double vtx0_dist = h_bs2ddist1v->GetRandom();
+    //double vtx1_dist = h_bs2ddist1v->GetRandom();
+    double vtx0_dist = gRandom->Exp(0.005);
+    double vtx1_dist = gRandom->Exp(0.005);
+
+    h_sv0phi->Fill(reco::deltaPhi(vtx0_phi, 0.0));
+    h_sv1phi->Fill(reco::deltaPhi(vtx1_phi, 0.0));
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      h_sv0jetdphi->Fill(reco::deltaPhi(vtx0_phi, mevent->jet_phi[ijet]));
+      h_sv1jetdphi->Fill(reco::deltaPhi(vtx1_phi, mevent->jet_phi[ijet]));
+    }
+    h_svpairdphi->Fill(dphi);
+
+    h_sv0bs2ddist->Fill(vtx0_dist);
+    h_sv1bs2ddist->Fill(vtx1_dist);
+    double svdist = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi)));
+    h_svpairdist->Fill(svdist);
+    h_svdist_dphi->Fill(dphi, svdist);
+    h_svdist_bs2ddist0->Fill(vtx0_dist, svdist);
+    h_svdist_bs2ddist1->Fill(vtx1_dist, svdist);
+    h_bs2ddist1_bs2ddist0->Fill(vtx0_dist, vtx1_dist);
+
+    if (TMath::Erf((svdist - 0.028)/0.005) > gRandom->Uniform(-1,1)) {
+      h_svpairdphi_cut->Fill(dphi);
+      h_svpairdist_cut->Fill(svdist);
+    }
+  }
+
   h_metx->Fill(mevent->metx);
   h_mety->Fill(mevent->mety);
   h_metsig->Fill(mevent->metsig);
@@ -620,20 +748,20 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
 
       const int isumpt2 = ipv == 1 ? 0 : 1;
-      h_pv_x[isumpt2]->Fill(pv.x() - mevent->bsx, w);
-      h_pv_y[isumpt2]->Fill(pv.y() - mevent->bsy, w);
-      h_pv_z[isumpt2]->Fill(pv.z() - mevent->bsz, w);
-      h_pv_rho[isumpt2]->Fill(sqrt((pv.x() - mevent->bsx) * (pv.x() - mevent->bsx) + (pv.y() - mevent->bsy) * (pv.y() - mevent->bsy)), w);
-      h_pv_phi[isumpt2]->Fill(atan2(pv.y() - mevent->bsy, pv.x() - mevent->bsx), w);
+      h_pv_x[isumpt2]->Fill(pv.x() - bsx, w);
+      h_pv_y[isumpt2]->Fill(pv.y() - bsy, w);
+      h_pv_z[isumpt2]->Fill(pv.z() - bsz, w);
+      h_pv_rho[isumpt2]->Fill(sqrt((pv.x() - bsx) * (pv.x() - bsx) + (pv.y() - bsy) * (pv.y() - bsy)), w);
+      h_pv_phi[isumpt2]->Fill(atan2(pv.y() - bsy, pv.x() - bsx), w);
       h_pv_ntracks[isumpt2]->Fill(pv.nTracks(), w);
       h_pv_sumpt2[isumpt2]->Fill(sumpt2, w);
 
       const int iabsdz = ipv == ipvdz ? 2 : 3;
-      h_pv_x[iabsdz]->Fill(pv.x() - mevent->bsx, w);
-      h_pv_y[iabsdz]->Fill(pv.y() - mevent->bsy, w);
-      h_pv_z[iabsdz]->Fill(pv.z() - mevent->bsz, w);
-      h_pv_rho[iabsdz]->Fill(sqrt((pv.x() - mevent->bsx) * (pv.x() - mevent->bsx) + (pv.y() - mevent->bsy) * (pv.y() - mevent->bsy)), w);
-      h_pv_phi[iabsdz]->Fill(atan2(pv.y() - mevent->bsy, pv.x() - mevent->bsx), w);
+      h_pv_x[iabsdz]->Fill(pv.x() - bsx, w);
+      h_pv_y[iabsdz]->Fill(pv.y() - bsy, w);
+      h_pv_z[iabsdz]->Fill(pv.z() - bsz, w);
+      h_pv_rho[iabsdz]->Fill(sqrt((pv.x() - bsx) * (pv.x() - bsx) + (pv.y() - bsy) * (pv.y() - bsy)), w);
+      h_pv_phi[iabsdz]->Fill(atan2(pv.y() - bsy, pv.x() - bsx), w);
       h_pv_ntracks[iabsdz]->Fill(pv.nTracks(), w);
       h_pv_sumpt2[iabsdz]->Fill(sumpt2, w);
     }

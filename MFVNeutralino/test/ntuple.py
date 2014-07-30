@@ -161,6 +161,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                 to_add.append('input_is_pythia8(process)')
             if sample.re_pat:
                 to_add.append('re_pat(process)')
+
+            if 'ttbarali' in sample.name:
+                to_add.append('dummy_beamspot(process, "%s")' % sample.name)
         else:
             magic = 'runOnMC = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic

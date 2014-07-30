@@ -7,6 +7,7 @@ mfvCommon = cms.Sequence(mfvSelectedVerticesSeq * mfvWeight)
 
 from JMTucker.MFVNeutralino.VertexHistos_cfi import *
 from JMTucker.MFVNeutralino.EventHistos_cfi import *
+from JMTucker.MFVNeutralino.ABCDHistos_cfi import *
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 
 mfvEventHistosNoCuts = mfvEventHistos.clone()
@@ -23,9 +24,14 @@ mfvEventHistosOneVtx = mfvEventHistos.clone()
 mfvVertexHistosOneVtx = mfvVertexHistos.clone()
 pOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOneVtx * mfvEventHistosOneVtx * mfvVertexHistosOneVtx)
 
+mfvAnalysisCutsOnlyOneVtx = mfvAnalysisCuts.clone(min_nvertex = 1, max_nvertex = 1)
+mfvEventHistosOnlyOneVtx = mfvEventHistos.clone()
+mfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone()
+pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnlyOneVtx * mfvVertexHistosOnlyOneVtx)
+
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
-pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts)
+pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts * mfvAbcdHistosSeq)
 
 mfvVertexHistosSig = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesTightSig')
 mfvVertexHistosSigWAnaCuts = mfvVertexHistosSig.clone()

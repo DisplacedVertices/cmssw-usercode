@@ -1,4 +1,5 @@
 import sys, os, FWCore.ParameterSet.Config as cms
+from modify import *
 
 process = cms.Process('RECO')
 
@@ -28,7 +29,7 @@ if not 'debug' in sys.argv:
 
 process.output = cms.OutputModule('PoolOutputModule',
                                   fileName = cms.untracked.string('reco.root'),
-                                  outputCommands = process.AODSIMEventContent.outputCommands,
+                                  outputCommands = process.RECOSIMEventContent.outputCommands,
                                   eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
                                   dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('AODSIM')),
                                   )
@@ -42,30 +43,31 @@ process.reconstruction_step = cms.Path(process.reconstruction)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.output_step = cms.EndPath(process.output)
 
-
-process.load('SimTracker.TrackAssociation.TrackAssociatorByHits_cfi')
-process.mfvTrackMatches = cms.EDProducer('MFVTrackMatcherLight',
-                                         gen_particles_src = cms.InputTag('genParticles'),
-                                         tracking_particles_src = cms.InputTag('mergedtruth','MergedTrackTruth'),
-                                         tracks_src = cms.InputTag('generalTracks'),
-                                         )
-process.reconstruction_step *= process.mfvTrackMatches
-process.output.outputCommands += ['keep *_mfvTrackMatches_*_*',
-                                  'keep *_randomEngineStateProducer_*_*',
-                                  'keep CrossingFramePlaybackInfoExtended_*_*_*']
-
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.output_step)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    from JMTucker.Tools.Samples import mfv_signal_samples as samples
-    cs = CRABSubmitter('MFVReco',
-                       use_parent_dataset = True,
+    import JMTucker.Tools.Samples as Samples
+
+    samples = [s for s in Samples.myttbar_samples if s.name.startswith('myttbar0')]
+
+    align = 'curl'
+    ex = 'ali_' + align
+
+    def pset_modifier(sample):
+        to_add = [
+            'tracker_alignment(process, "%s")' % align,
+            'dummy_beamspot(process, "myttbar%s")' % align,
+            ]
+        return to_add, []
+
+    cs = CRABSubmitter('MakeSamples_ttbarsyst_reco_' + ex,
+                       pset_modifier = pset_modifier,
                        get_edm_output = True,
-                       data_retrieval = 'fnal',
+                       data_retrieval = 'cornell',
                        total_number_of_events = -1,
-                       events_per_job = 200,
-                       publish_data_name = 'reco',
-                       USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*',
+                       events_per_job = 2000,
+                       publish_data_name = 'reco_' + ex,
+                       skip_common = True,
                        )
     cs.submit_all(samples)

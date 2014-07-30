@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 mfvVertexHistos = cms.EDAnalyzer('MFVVertexHistos',
                                  mfv_event_src = cms.InputTag('mfvEvent'),
+                                 force_bs = cms.vdouble(),
                                  vertex_aux_src = cms.InputTag('mfvSelectedVerticesTight'),
                                  vertex_src = cms.InputTag(''),
                                  vertex_to_jets_src = cms.InputTag(''),

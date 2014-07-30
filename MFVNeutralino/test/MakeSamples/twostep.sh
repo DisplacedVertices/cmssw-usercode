@@ -14,7 +14,8 @@ echo
 echo
 echo start gensimhlt step at `date`
 echo
-cmsRun pset.py $1
+
+cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml pset.py $1 &>/dev/null
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -22,17 +23,35 @@ if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   exit $exit_code
 fi
-echo
-echo done with gensimhlt step at `date`, starting reco step
-echo
-cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml my_reco.py
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  echo @@@@ cmsRun exited reco step with error code $exit_code
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  exit $exit_code
+
+if [ -f my_reco.py ]; then 
+  echo
+  echo done with gensimhlt step at `date`, starting reco step
+  echo
+  cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml my_reco.py
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    echo @@@@ cmsRun exited reco step with error code $exit_code
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    exit $exit_code
+  fi
 fi
+
+if [ -f my_tkdqm.py ]; then
+  echo
+  echo done with reco at `date`, starting tkdqm
+  echo
+  cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml my_tkdqm.py
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    echo @@@@ cmsRun exited tkdqm step with error code $exit_code
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    exit $exit_code
+  fi
+fi
+
 if [ -f pat.py ]; then
   echo
   echo done with reco at `date`, starting pat step
@@ -46,6 +65,21 @@ if [ -f pat.py ]; then
     exit $exit_code
   fi
 fi
+
+if [ -f ntuple.py ]; then
+  echo
+  echo done with reco at `date`, starting ntuple step
+  echo
+  cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml ntuple.py
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    echo cmsRun exited ntuple step with error code $exit_code
+    echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    exit $exit_code
+  fi
+fi
+
 echo
 echo done at `date`
 echo TWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEP

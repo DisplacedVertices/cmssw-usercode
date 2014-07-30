@@ -36,6 +36,7 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   void produce(edm::Event&, const edm::EventSetup&);
 
  private:
+  const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag muons_src;
   const edm::InputTag electrons_src;
@@ -46,7 +47,8 @@ class MFVVertexAuxProducer : public edm::EDProducer {
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
-  : primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
+  : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
+    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     muons_src(cfg.getParameter<edm::InputTag>("muons_src")),
     electrons_src(cfg.getParameter<edm::InputTag>("electrons_src")),
     gen_vertices_src(cfg.getParameter<edm::InputTag>("gen_vertices_src")),
@@ -62,7 +64,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel("offlineBeamSpot", beamspot);
+  event.getByLabel(beamspot_src, beamspot);
   const float bsx = beamspot->x0();
   const float bsy = beamspot->y0();
   const float bsz = beamspot->z0();

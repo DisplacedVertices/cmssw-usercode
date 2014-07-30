@@ -7,8 +7,6 @@ process.TFileService.fileName = 'gen_histos.root'
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')
-process.mfvGenParticleFilter.cut_invalid = False
-process.mfvGenHistos.check_all_gen_particles = False
 
 process.p = cms.Path(process.mfvGenParticleFilter * process.mfvGenHistos)
 
@@ -21,17 +19,18 @@ if debug:
     file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    if debug:
-        raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
-
     import JMTucker.Tools.Samples as Samples
-    #samples = [s for s in Samples.mfv_signal_samples + Samples.background_samples + Samples.auxiliary_background_samples if 'qcdmu' not in s.name]
+    samples = [
+        Samples.TupleOnlyMCSample('mfv01000', '/mfv_neutralino_tau01000um_M0400/tucker-mfv_neutralino_tau01000um_M0400-554987f53c5d1493b23246ebbecfd44a/USER')
+        ]
+    for sample in samples:
+        sample.dbs_url_num = 3
+        sample.is_pythia8 = True
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('GenHistos',
                        total_number_of_events = -1,
                        events_per_job = 20000,
-                       USER_jmt_skip_input_files = 'src/EGamma/EGammaAnalysisTools/data/*'
+                       skip_common = True,
                        )
-    samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau1000um_M1000, Samples.mfv_neutralino_tau9900um_M0400, Samples.mfv_neutralino_tau9900um_M1000] + Samples.mfv_signal_samples
     cs.submit_all(samples)

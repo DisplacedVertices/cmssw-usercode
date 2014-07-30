@@ -12,20 +12,22 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
+#include "JMTucker/Tools/interface/MCInteractionTops.h"
 #include "JMTucker/Tools/interface/BasicKinematicHists.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVGenHistos : public edm::EDAnalyzer {
- public:
+public:
   explicit MFVGenHistos(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
- private:
+private:
   const edm::InputTag gen_src;
   const edm::InputTag gen_jet_src;
   const bool check_all_gen_particles;
   bool mci_warned;
+  const bool mci_bkg;
 
   edm::ESHandle<ParticleDataTable> pdt;
 
@@ -84,6 +86,10 @@ class MFVGenHistos : public edm::EDAnalyzer {
 
   TH1F* h_npartons_in_acc;
 
+  TH1F* h_npartons_60;
+  TH1F* h_njets_60;
+  TH1F* h_sumht_20;
+
   TH1F* NJets;
   BasicKinematicHists* Jets;
   TH1F* JetAuxE;
@@ -111,7 +117,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     check_all_gen_particles(cfg.getParameter<bool>("check_all_gen_particles")),
-    mci_warned(false)
+    mci_warned(false),
+    mci_bkg(cfg.getParameter<bool>("mci_bkg"))
 {
   edm::Service<TFileService> fs;
 
@@ -288,9 +295,9 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   const char* names[9] = {"lsp", "strange", "bottom", "bhadron", "from21", "from22", "fromq", "from21only", "from22only"};
   for (int i = 0; i < (check_all_gen_particles ? 9 : 4); ++i) {
-    h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 201, -1, 1, 201, -1, 1);
-    h_r2d[i] = fs->make<TH1F>(TString::Format("h_r2d_%s", names[i]), TString::Format(";%s 2D distance (cm);Events/0.05 cm", names[i]), 100, 0, 5);
-    h_r3d[i] = fs->make<TH1F>(TString::Format("h_r3d_%s", names[i]), TString::Format(";%s 3D distance (cm);Events/0.05 cm", names[i]), 100, 0, 5);
+    h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 200, -1, 1, 200, -1, 1);
+    h_r2d[i] = fs->make<TH1F>(TString::Format("h_r2d_%s", names[i]), TString::Format(";%s 2D distance (cm);Events/0.01 cm", names[i]), 500, 0, 5);
+    h_r3d[i] = fs->make<TH1F>(TString::Format("h_r3d_%s", names[i]), TString::Format(";%s 3D distance (cm);Events/0.01 cm", names[i]), 500, 0, 5);
   }
 
   h_t = fs->make<TH1F>("h_t", ";time to LSP decay (ns);Events/0.1 ns", 100, 0, 10);
@@ -331,6 +338,9 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   }
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
+  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons #E_T > 60 GeV;Events", 11, 0, 11);
+  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets #E_T > 60 GeV;Events", 11, 0, 11);
+  h_sumht_20 = fs->make<TH1F>("h_sumht_20", ";Sum #H_T for jets with #E_T > 60 GeV;Events", 100, 0, 2000);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 30, 0, 30);
   Jets = bkh_factory->make("Jets", "gen jets");
@@ -404,163 +414,282 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());
   };
 
-  MCInteractionMFV3j mci;
-  mci.Init(*gen_particles);
-  if (!mci.Valid()) {
-    if (!mci_warned)
-      edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
-    mci_warned = true;
-  }
-  else {
-    NumLeptons->Fill(mci.num_leptonic);
-    DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
+  if (!mci_bkg) {
+    MCInteractionMFV3j mci;
+    mci.Init(*gen_particles);
+    if (!mci.Valid()) {
+      if (!mci_warned)
+	edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
+      mci_warned = true;
+    }
+    else {
+      NumLeptons->Fill(mci.num_leptonic);
+      DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
 
-    for (int i = 0; i < 2; ++i) {
-      // For debugging, record all the daughter ids for tops, stops, Ws.
-      for (size_t j = 0, je = mci.last_tops[i]->numberOfDaughters(); j < je; ++j)
-        fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());
-      fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
+      for (int i = 0; i < 2; ++i) {
+	// For debugging, record all the daughter ids for tops, stops, Ws.
+	for (size_t j = 0, je = mci.last_tops[i]->numberOfDaughters(); j < je; ++j)
+	  fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());
+	fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
 
-      fill(Lsps           [i], mci.lsps             [i]);
-      fill(Stranges       [i], mci.stranges         [i]);
-      fill(Bottoms        [i], mci.bottoms          [i]);
-      fill(Tops           [i], mci.tops             [i]);
-      fill(Ws             [i], mci.Ws               [i]);
-      fill(BottomsFromTops[i], mci.bottoms_from_tops[i]);
+	fill(Lsps           [i], mci.lsps             [i]);
+	fill(Stranges       [i], mci.stranges         [i]);
+	fill(Bottoms        [i], mci.bottoms          [i]);
+	fill(Tops           [i], mci.tops             [i]);
+	fill(Ws             [i], mci.Ws               [i]);
+	fill(BottomsFromTops[i], mci.bottoms_from_tops[i]);
 
-      for (int j = 0; j < 2; ++j) {
-        const reco::Candidate* c = mci.W_daughters[i][j];
-        fill(WDaughters[i][j], c);
-        const int id = abs(c->pdgId());
-        if      (id == 11) { fill(Leptons, c); fill(LightLeptons, c); fill(Electrons, c); }
-        else if (id == 13) { fill(Leptons, c); fill(LightLeptons, c); fill(Muons,     c); }
-        else if (id == 15) { fill(Leptons, c);                        fill(Taus,      c); }
-      }
+	for (int j = 0; j < 2; ++j) {
+	  const reco::Candidate* c = mci.W_daughters[i][j];
+	  fill(WDaughters[i][j], c);
+	  const int id = abs(c->pdgId());
+	  if      (id == 11) { fill(Leptons, c); fill(LightLeptons, c); fill(Electrons, c); }
+	  else if (id == 13) { fill(Leptons, c); fill(LightLeptons, c); fill(Muons,     c); }
+	  else if (id == 15) { fill(Leptons, c);                        fill(Taus,      c); }
+	}
 
-      const reco::GenParticle& lsp = *mci.lsps[i];
-      const int ndau = 3;
-      const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.tops[i] };
+	const reco::GenParticle& lsp = *mci.lsps[i];
+	const int ndau = 3;
+	const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.tops[i] };
 
-      const double lspbeta  = lsp.p()/lsp.energy();
-      const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
-      h_lspbeta->Fill(lspbeta);
-      h_lspbetagamma->Fill(lspbetagamma);
+	const double lspbeta  = lsp.p()/lsp.energy();
+	const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
+	h_lspbeta->Fill(lspbeta);
+	h_lspbetagamma->Fill(lspbetagamma);
 
-      // Fill some simple histos: 2D vertex location, and distance to
-      // origin, and the min/max deltaR of the daughters (also versus
-      // lsp boost).
+	// Fill some simple histos: 2D vertex location, and distance to
+	// origin, and the min/max deltaR of the daughters (also versus
+	// lsp boost).
 
-      const reco::Candidate* particles[4] = { &lsp, mci.stranges[i], mci.bottoms[i], 0};
-      // For that last one, find the b hadron for the primary b quark.
-      std::vector<const reco::Candidate*> b_quark_descendants;
-      const reco::Candidate* last_b_quark = final_candidate(mci.bottoms[i], 3);
-      flatten_descendants(last_b_quark, b_quark_descendants);
-      for (const reco::Candidate* bdesc : b_quark_descendants) {
-        if (is_bhadron(bdesc)) {
-          particles[3] = bdesc;
-          break;
-        }
-      }
-      die_if_not(particles[3] != 0, "did not find b hadron");
+	const reco::Candidate* particles[4] = { &lsp, mci.stranges[i], mci.bottoms[i], 0};
+	// For that last one, find the b hadron for the primary b quark.
+	std::vector<const reco::Candidate*> b_quark_descendants;
+	const reco::Candidate* last_b_quark = final_candidate(mci.bottoms[i], 3);
+	flatten_descendants(last_b_quark, b_quark_descendants);
+	for (const reco::Candidate* bdesc : b_quark_descendants) {
+	  if (is_bhadron(bdesc)) {
+	    particles[3] = bdesc;
+	    break;
+	  }
+	}
+	die_if_not(particles[3] != 0, "did not find b hadron");
       
-      float dx [4] = {0}; 
-      float dy [4] = {0}; 
-      float dz [4] = {0}; 
-      float r2d[4] = {0};
-      float r3d[4] = {0};
-      for (int i = 0; i < 4; ++i) {
-        dx [i] = particles[i]->vx() - x0;
-        dy [i] = particles[i]->vy() - y0;
-        dz [i] = particles[i]->vz() - z0;
-        r2d[i] = mag(dx[i], dy[i]);
-        r3d[i] = mag(dx[i], dy[i], dz[i]);
-        h_vtx[i]->Fill(dx[i], dy[i]);
-        h_r2d[i]->Fill(r2d[i]);
-        h_r3d[i]->Fill(r3d[i]);
-      }
+	float dx [4] = {0}; 
+	float dy [4] = {0}; 
+	float dz [4] = {0}; 
+	float r2d[4] = {0};
+	float r3d[4] = {0};
+	for (int i = 0; i < 4; ++i) {
+	  dx [i] = particles[i]->vx() - x0;
+	  dy [i] = particles[i]->vy() - y0;
+	  dz [i] = particles[i]->vz() - z0;
+	  r2d[i] = mag(dx[i], dy[i]);
+	  r3d[i] = mag(dx[i], dy[i], dz[i]);
+	  h_vtx[i]->Fill(dx[i], dy[i]);
+	  h_r2d[i]->Fill(r2d[i]);
+	  h_r3d[i]->Fill(r3d[i]);
+	}
       
-      h_t->Fill(r3d[0]/lspbeta/30);
-      h_r3d_bhadron_v_bquark->Fill(r3d[2], r3d[3]);
-      if (fabs(r3d[2] - r3d[3]) > 0.001) // 10 micron
-        printf("difference between bquark and bhadron r3ds is %f for run,lumi,event %u, %u, %u\n", fabs(r3d[2] - r3d[3]), event.id().run(), event.luminosityBlock(), event.id().event());
+	h_t->Fill(r3d[0]/lspbeta/30);
+	h_r3d_bhadron_v_bquark->Fill(r3d[2], r3d[3]);
+	if (fabs(r3d[2] - r3d[3]) > 0.001) // 10 micron
+	  printf("difference between bquark and bhadron r3ds is %f for run,lumi,event %u, %u, %u\n", fabs(r3d[2] - r3d[3]), event.id().run(), event.luminosityBlock(), event.id().event());
         
-      if (check_all_gen_particles)
-        for (const auto& gen : *gen_particles) {
-          if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
-            const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
-            const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
-            const bool fromq = mci.Ancestor(&gen, "quark");
-            const float dx = gen.vx() - x0;
-            const float dy = gen.vy() - y0;
-            const float dz = gen.vz() - z0;
-            const float r2d = mag(dx, dy);
-            const float r3d = mag(dx, dy, dz);
-            std::vector<int> tofill;
-            h_status1origins->Fill((from21*4) | (from22*2) | (fromq*1));
-            if (from21) tofill.push_back(4);
-            if (from22) tofill.push_back(5);
-            if (fromq)  tofill.push_back(6);
-            if (from21 && !from22 && !fromq) tofill.push_back(7);
-            if (from22 && !from21 && !fromq) tofill.push_back(8);
-            for (int i : tofill) {
-              h_vtx[i]->Fill(dx, dy);
-              h_r2d[i]->Fill(r2d);
-              h_r3d[i]->Fill(r3d);
-            }
-          }
-        }
+	if (check_all_gen_particles)
+	  for (const auto& gen : *gen_particles) {
+	    if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
+	      const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
+	      const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
+	      const bool fromq = mci.Ancestor(&gen, "quark");
+	      const float dx = gen.vx() - x0;
+	      const float dy = gen.vy() - y0;
+	      const float dz = gen.vz() - z0;
+	      const float r2d = mag(dx, dy);
+	      const float r3d = mag(dx, dy, dz);
+	      std::vector<int> tofill;
+	      h_status1origins->Fill((from21*4) | (from22*2) | (fromq*1));
+	      if (from21) tofill.push_back(4);
+	      if (from22) tofill.push_back(5);
+	      if (fromq)  tofill.push_back(6);
+	      if (from21 && !from22 && !fromq) tofill.push_back(7);
+	      if (from22 && !from21 && !fromq) tofill.push_back(8);
+	      for (int i : tofill) {
+		h_vtx[i]->Fill(dx, dy);
+		h_r2d[i]->Fill(r2d);
+		h_r3d[i]->Fill(r3d);
+	      }
+	    }
+	  }
 
-      float min_dR =  1e99;
-      float max_dR = -1e99;
-      for (int i = 0; i < ndau; ++i) {
-        for (int j = i+1; j < ndau; ++j) {
-          float dR = reco::deltaR(*daughters[i], *daughters[j]);
-          if (dR < min_dR)
-            min_dR = dR;
-          if (dR > max_dR)
-            max_dR = dR;
-        }
+	float min_dR =  1e99;
+	float max_dR = -1e99;
+	for (int i = 0; i < ndau; ++i) {
+	  for (int j = i+1; j < ndau; ++j) {
+	    float dR = reco::deltaR(*daughters[i], *daughters[j]);
+	    if (dR < min_dR)
+	      min_dR = dR;
+	    if (dR > max_dR)
+	      max_dR = dR;
+	  }
+	}
+
+	h_min_dR->Fill(min_dR);
+	h_max_dR->Fill(max_dR);
+	h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR);
+	h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR);
+	h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
+	h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
       }
 
-      h_min_dR->Fill(min_dR);
-      h_max_dR->Fill(max_dR);
-      h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR);
-      h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR);
-      h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
-      h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
-    }
+      h_lsp_dist2d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
+			     mci.stranges[0]->vy() - mci.stranges[1]->vy()));
+      h_lsp_dist3d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
+			     mci.stranges[0]->vy() - mci.stranges[1]->vy(),
+			     mci.stranges[0]->vz() - mci.stranges[1]->vz()));
 
-    h_lsp_dist2d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
-                           mci.stranges[0]->vy() - mci.stranges[1]->vy()));
-    h_lsp_dist3d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
-                           mci.stranges[0]->vy() - mci.stranges[1]->vy(),
-                           mci.stranges[0]->vz() - mci.stranges[1]->vz()));
-
-    {
-      TVector3 lsp_mom_0 = mci.p4_lsps[0].Vect();
-      TVector3 lsp_mom_1 = mci.p4_lsps[1].Vect();
-      h_lsp_angle3->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
-      lsp_mom_0.SetZ(0);
-      lsp_mom_1.SetZ(0);
-      h_lsp_angle2->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
-    }
-
-    std::vector<const reco::GenParticle*> lsp_partons;
-    for (int i = 0; i < 2; ++i) {
-      lsp_partons.push_back(mci.stranges[i]);
-      lsp_partons.push_back(mci.bottoms[i]);
-      lsp_partons.push_back(mci.bottoms_from_tops[i]);
-      if (mci.decay_type[i] == 3) {
-        lsp_partons.push_back(mci.W_daughters[i][0]);
-        lsp_partons.push_back(mci.W_daughters[i][1]);
+      {
+	TVector3 lsp_mom_0 = mci.p4_lsps[0].Vect();
+	TVector3 lsp_mom_1 = mci.p4_lsps[1].Vect();
+	h_lsp_angle3->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
+	lsp_mom_0.SetZ(0);
+	lsp_mom_1.SetZ(0);
+	h_lsp_angle2->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
       }
-    } 
 
-    int npartons_in_acc = 0;
-    for (const reco::GenParticle* p : lsp_partons) 
-      if (p->pt() > 20 && fabs(p->eta()) < 2.5)
-        ++npartons_in_acc;
-    h_npartons_in_acc->Fill(npartons_in_acc);
+      std::vector<const reco::GenParticle*> lsp_partons;
+      for (int i = 0; i < 2; ++i) {
+	lsp_partons.push_back(mci.stranges[i]);
+	lsp_partons.push_back(mci.bottoms[i]);
+	lsp_partons.push_back(mci.bottoms_from_tops[i]);
+	if (mci.decay_type[i] == 3) {
+	  lsp_partons.push_back(mci.W_daughters[i][0]);
+	  lsp_partons.push_back(mci.W_daughters[i][1]);
+	}
+      } 
+
+      int npartons_in_acc = 0;
+      int npartons_60 = 0;
+      for (const reco::GenParticle* p : lsp_partons) {
+	if (p->pt() > 20 && fabs(p->eta()) < 2.5)
+	  ++npartons_in_acc;
+	if (p->pt() > 60 && fabs(p->eta()) < 2.5)
+	  ++npartons_60;
+      }
+      h_npartons_in_acc->Fill(npartons_in_acc);
+      h_npartons_60->Fill(npartons_60);
+    }
+  }
+
+  if (mci_bkg) {
+    MCInteractionTops mci;
+    mci.Init(*gen_particles);
+    if (!mci.Valid()) {
+      if (!mci_warned)
+    	edm::LogWarning("GenHistos") << "MCInteractionTops invalid; no further warnings!";
+      mci_warned = true;
+    }
+    else {
+      NumLeptons->Fill(mci.num_leptonic);
+      DecayType->Fill(mci.decay_type[0], mci.decay_type[1]);
+      
+      for (int i = 0; i < 2; ++i) {
+	// For debugging, record all the daughter ids for tops, stops, Ws.
+	for (size_t j = 0, je = mci.last_tops[i]->numberOfDaughters(); j < je; ++j)
+	  fill_by_label(TopDaughterIds[i], pdt->particle(mci.last_tops[i]->daughter(j)->pdgId())->name());	
+	fill_by_label(WDaughterIds[i], pdt->particle(mci.W_daughters[i][0]->pdgId())->name(), pdt->particle(mci.W_daughters[i][1]->pdgId())->name());
+	
+	if (mci.bottoms[i] != 0)
+	  fill(Bottoms      [i], mci.bottoms          [i]);
+	fill(Tops           [i], mci.tops             [i]);
+	fill(Ws             [i], mci.Ws               [i]);
+	
+	for (int j = 0; j < 2; ++j) {
+	  const reco::Candidate* c = mci.W_daughters[i][j];
+	  fill(WDaughters[i][j], c);
+	  const int id = abs(c->pdgId());
+	  if      (id == 11) { fill(Leptons, c); fill(LightLeptons, c); fill(Electrons, c); }
+	  else if (id == 13) { fill(Leptons, c); fill(LightLeptons, c); fill(Muons,     c); }
+	  else if (id == 15) { fill(Leptons, c);                        fill(Taus,      c); }
+	}
+	
+	const int ndau = 2;
+	if (mci.bottoms[i] != 0) {
+	  const reco::GenParticle* daughters[ndau] = { mci.bottoms[i], mci.Ws[i] };
+ 
+	  const reco::Candidate* particles[4] = { 0, 0, mci.bottoms[i], 0};
+	  // For that last one, find the b hadron for the primary b quark.
+	  std::vector<const reco::Candidate*> b_quark_descendants;
+	  const reco::Candidate* last_b_quark = final_candidate(mci.bottoms[i], 3);
+	  flatten_descendants(last_b_quark, b_quark_descendants);
+	  for (const reco::Candidate* bdesc : b_quark_descendants) {
+	    if (is_bhadron(bdesc)) {
+	      particles[3] = bdesc;
+	      break;
+	    }
+	  }
+	
+	  die_if_not(particles[3] != 0, "did not find b hadron");
+
+	  float dx [4] = {0}; 
+	  float dy [4] = {0}; 
+	  float dz [4] = {0}; 
+	  float r2d[4] = {0};
+	  float r3d[4] = {0};
+	  for (int i = 2; i < 4; ++i) {
+	    dx [i] = particles[i]->vx() - x0;
+	    dy [i] = particles[i]->vy() - y0;
+	    dz [i] = particles[i]->vz() - z0;
+	    r2d[i] = mag(dx[i], dy[i]);
+	    r3d[i] = mag(dx[i], dy[i], dz[i]);
+	    h_vtx[i]->Fill(dx[i], dy[i]);
+	    h_r2d[i]->Fill(r2d[i]);
+	    h_r3d[i]->Fill(r3d[i]);
+	  }
+	
+
+	  h_r3d_bhadron_v_bquark->Fill(r3d[2], r3d[3]);
+	
+	  if (check_all_gen_particles)
+	    for (const auto& gen : *gen_particles) {
+	      if (gen.status() == 1 && gen.charge() != 0 && mag(gen.vx(), gen.vy()) < 120 && abs(gen.vz()) < 300) {
+		const bool from21 = has_any_ancestor_with_id(&gen, 1000021);
+		const bool from22 = has_any_ancestor_with_id(&gen, 1000022);
+		const float dx = gen.vx() - x0;
+		const float dy = gen.vy() - y0;
+		const float dz = gen.vz() - z0;
+		const float r2d = mag(dx, dy);
+		const float r3d = mag(dx, dy, dz);
+		std::vector<int> tofill;
+		h_status1origins->Fill((from21*4) | (from22*2));
+		if (from21) tofill.push_back(4);
+		if (from22) tofill.push_back(5);
+		if (from21 && !from22 ) tofill.push_back(7);
+		if (from22 && !from21 ) tofill.push_back(8);
+		for (int i : tofill) {
+		  h_vtx[i]->Fill(dx, dy);
+		  h_r2d[i]->Fill(r2d);
+		  h_r3d[i]->Fill(r3d);
+		}
+	      }
+	    }	
+	
+	  float min_dR =  1e99;
+	  float max_dR = -1e99;
+	  for (int i = 0; i < ndau; ++i) {
+	    for (int j = i+1; j < ndau; ++j) {
+	      float dR = reco::deltaR(*daughters[i], *daughters[j]);
+	      if (dR < min_dR)
+		min_dR = dR;
+	      if (dR > max_dR)
+		max_dR = dR;
+	    }
+	  }
+	
+	  h_min_dR->Fill(min_dR);
+	  h_max_dR->Fill(max_dR);
+	}
+      }
+    }
   }
 
   // Now look at b quarks separately. Count the number of status-3 b
@@ -645,6 +774,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   NJets->Fill(gen_jets->size());
   int nbjets = 0;
+  int njets60 = 0;
+  float sumht = 0.0;
   for (const reco::GenJet& jet : *gen_jets) {
     int nchg = 0;
     int id = gen_jet_id(jet);
@@ -653,6 +784,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         ++nchg;
 
     float fchg = float(nchg)/jet.nConstituents();
+
+    if (jet.pt() > 60 && fabs(jet.eta()) < 2.5)
+      ++njets60;
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
+      sumht = sumht + jet.pt();;
 
     Jets->Fill(&jet);
     JetAuxE->Fill(jet.auxiliaryEnergy());
@@ -679,6 +815,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }      
   }
   NBJets->Fill(nbjets);
+  h_njets_60->Fill(njets60);
+  h_sumht_20->Fill(sumht);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);

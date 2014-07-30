@@ -83,7 +83,7 @@ jtupleParams = cms.PSet(
                                'trackingFailureFilter',
                                'eeBadScFilter',
                                'ecalLaserCorrFilter',
-                               'tobtecfakesfilter',
+                               'tobtecfakesfilter', # this should be a not
                                '~logErrorTooManyClusters',
                                '~logErrorTooManySeeds',
                                '~logErrorTooManySeedsDefault',

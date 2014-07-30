@@ -9,24 +9,27 @@ process.TFileService.fileName = 'minitree.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvAnalysisCuts.min_nvertex = 1
 
 process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      event_src = cms.InputTag('mfvEvent'),
+                                     force_bs = cms.vdouble(),
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
+                                     weight_src = cms.InputTag('mfvWeight'),
                                      )
 
-process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
+process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
         
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
-                                 Samples.mfv_neutralino_tau1000um_M0400,
-                                 Samples.mfv_neutralino_tau0300um_M0400,
-                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
+    samples = Samples.from_argv(Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.data_samples)
+
+    for s in Samples.data_samples:
+        s.json = 'ana_all.json'
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('MiniTreeV18',
+    cs = CRABSubmitter('MiniTreeV18_Njets',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,

@@ -7,5 +7,6 @@ mfvGenParticles = cms.EDProducer('MFVGenParticles',
 
 mfvGenVertices = cms.EDProducer('MFVGenVertices',
                                 gen_src = cms.InputTag('genParticles'),
+                                beamspot_src = cms.InputTag('offlineBeamSpot'),
                                 debug = cms.untracked.bool(False),
                                 )

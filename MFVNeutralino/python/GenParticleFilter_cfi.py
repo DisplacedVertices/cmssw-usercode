@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 mfvGenParticleFilter = cms.EDFilter('MFVGenParticleFilter',
                                     gen_src = cms.InputTag('genParticles'),
                                     print_info = cms.bool(False),
-                                    cut_invalid = cms.bool(True),
+                                    cut_invalid = cms.bool(False),
                                     required_num_leptonic = cms.int32(-1),
                                     allowed_decay_types = cms.vint32(),
                                     min_lepton_pt = cms.double(0),

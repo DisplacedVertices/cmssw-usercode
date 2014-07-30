@@ -1,4 +1,5 @@
 import sys, os, FWCore.ParameterSet.Config as cms
+from modify import *
 
 process = cms.Process('HLT')
 
@@ -25,15 +26,15 @@ import minbias
 process.mix.input.fileNames = minbias.files
 
 process.source = cms.Source('EmptySource')
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(20))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 
 process.output = cms.OutputModule('PoolOutputModule',
 				  splitLevel = cms.untracked.int32(0),
 				  eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-				  outputCommands = process.RAWDEBUGEventContent.outputCommands,
+				  outputCommands = process.FEVTDEBUGEventContent.outputCommands,
 				  fileName = cms.untracked.string('gensimhlt.root'),
-				  dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('GEN-SIM-RAW')),
+				  dataset = cms.untracked.PSet(filterName = cms.untracked.string(''), dataTier = cms.untracked.string('FEVTDEBUG')),
 				  SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('generation_step')),
 				  )
 
@@ -41,7 +42,7 @@ process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'START53_V7C::All', '')
 
-process.generator = cms.EDFilter('Pythia8GeneratorFilter',
+process.generator = cms.EDFilter('Pythia8175GeneratorFilter',
 				 crossSection = cms.untracked.double(1),
 				 maxEventsToPrint = cms.untracked.int32(0),
 				 pythiaPylistVerbosity = cms.untracked.int32(0),
@@ -87,7 +88,6 @@ for category in ['TwoTrackMinimumDistance']:
     setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
 
 if 'modify' in sys.argv:
-    from modify import set_neutralino_tau0, set_masses
     set_neutralino_tau0(process, 1)
     set_masses(405, 400)
 

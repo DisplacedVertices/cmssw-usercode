@@ -5,7 +5,7 @@ double ycut = 15;
 void compareShapes(char* sampleName) {
   TH1::SetDefaultSumw2();
   TFile* file = TFile::Open(TString::Format("crab/ABCDHistosV15_%d/%s_scaled.root", iteration, sampleName));
-  TH2F* hist = (TH2F*)abcdHistosTrksJets->Get("h_ntracks01_maxtrackpt01");
+  TH2F* hist = (TH2F*)mfvAbcdHistosTrksJets->Get("h_ntracks01_maxtrackpt01");
   char* xname = "maxtrackpt01";
   char* yname = "ntracks01";
 

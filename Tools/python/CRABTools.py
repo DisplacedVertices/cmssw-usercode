@@ -242,6 +242,7 @@ def crab_status(working_dir, verbose=True, debug=False):
         x = x.replace('red-gw1.unl.edu red-gw1.unl.edu', 'red-gw1.unl.edu')
         x = x.replace('red-gw2.unl.edu red-gw2.unl.edu', 'red-gw2.unl.edu')
         x = x.replace('tusker-gw1.unl.edu tusker-gw1.unl.edu', 'tusker-gw1.unl.edu')
+        x = x.replace('osg-gw-4.t2.ucsd.edu osg-gw-4.t2.ucsd.edu', 'osg-gw-4.t2.ucsd.edu') # 7/10/14 lol when will i correctly fix this problem
         x = [y.strip() for y in x.split() if y.strip()]
         #print len(x), x
         if len(x) < 4: continue
@@ -648,7 +649,7 @@ def crab_get_input_files(working_dir, jobs=None):
         jobs = args.keys()
     return dict((j, args[j]['InputFiles'].split(',')) for j in jobs)
 
-def crab_output_files_from_fjr(working_dir):
+def crab_output_files_from_fjr(working_dir, raise_on_missing=True):
     fjrs = glob.glob(os.path.join(working_dir, 'res', 'crab_fjr*xml'))
     fjrs.sort(key = lambda x: int(x.split('_')[-1].split('.xml')[0]))
     files = []
@@ -656,16 +657,17 @@ def crab_output_files_from_fjr(working_dir):
     # Fragile xml parsing! Also assumes only one output file per job.
     wrapper_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="WrapperExitCode"/>')
     exe_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="ExeExitCode"/>')
-    filename_re = re.compile(r'[ \t](/store/user.*root)')
+    filename_re = re.compile(r'.*(/store/user.*root)')
     for fjr in fjrs:
         s = open(fjr).read()
         wrapper_mo = wrapper_re.search(s)
         exe_mo = exe_re.search(s)
         filename_mo = filename_re.search(s)
-        if wrapper_mo is None or exe_mo is None or filename_mo is None:
-            raise RuntimeError('cannot parse %s for exit codes and output filename (wrapper_mo %s exe_mo %s filename_mo %s)' % (fjr, wrapper_mo, exe_mo, filename_mo))
-        if wrapper_mo.group(1) != '0' or exe_mo.group(1) != '0':
-            raise RuntimeError('exit codes for %s not 0 (wrapper %s, exe %s)' % (fjr, wrapper_mo.group(1), exe_mo.group(1)))
+        if raise_on_missing:
+            if wrapper_mo is None or exe_mo is None or filename_mo is None:
+                raise RuntimeError('cannot parse %s for exit codes and output filename (wrapper_mo %s exe_mo %s filename_mo %s)' % (fjr, wrapper_mo, exe_mo, filename_mo))
+            if wrapper_mo.group(1) != '0' or exe_mo.group(1) != '0':
+                raise RuntimeError('exit codes for %s not 0 (wrapper %s, exe %s)' % (fjr, wrapper_mo.group(1), exe_mo.group(1)))
         files.append(filename_mo.group(1))
 
     return files
@@ -993,9 +995,10 @@ if __name__ == '__main__':
                         print f
 
     elif bool_from_argv('-outputFromFJR'):
+        noraise = bool_from_argv('noraise')
         for dir in crab_dirs_from_argv():
             print dir
-            for fn in crab_output_files_from_fjr(dir):
+            for fn in crab_output_files_from_fjr(dir, raise_on_missing=not noraise):
                 print fn
 
     elif bool_from_argv('-arguments'):
