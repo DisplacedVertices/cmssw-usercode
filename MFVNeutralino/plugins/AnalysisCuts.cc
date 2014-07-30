@@ -132,7 +132,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     }
 
     if (clean_bit >= 0) {
-      if (invert_clean != mevent->pass_clean[clean_bit])
+      if (invert_clean == mevent->pass_clean[clean_bit])
         return false;
     }
 
