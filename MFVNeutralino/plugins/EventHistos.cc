@@ -38,6 +38,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_pass_trigger[mfv::n_trigger_paths];
   TH1F* h_pass_clean[mfv::n_clean_paths];
+  TH1F* h_pass_clean_all;
   TH1F* h_passoldskim;
 
   TH1F* h_npfjets;
@@ -168,6 +169,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_pass_trigger[i] = fs->make<TH1F>(TString::Format("h_pass_trigger_%i", i), TString::Format(";pass_trigger[%i];events", i), 2, 0, 2);
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i] = fs->make<TH1F>(TString::Format("h_pass_clean_%i", i), TString::Format(";pass_clean[%i];events", i), 2, 0, 2);
+  h_pass_clean_all = fs->make<TH1F>("h_pass_clean_all", ";pass_clean_all;events", 2, 0, 2);
   h_passoldskim = fs->make<TH1F>("h_passoldskim", ";pass old skim?;events", 2, 0, 2);
 
   h_npfjets = fs->make<TH1F>("h_npfjets", ";# of PF jets;events", 30, 0, 30);
@@ -323,6 +325,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i]->Fill(mevent->pass_clean[i], w);
+
+  bool pass_clean_all = !(mevent->pass_clean[11]);
+  int clean_all[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 18, 19};
+  for (int i = 0; i < 12; ++i) {
+    pass_clean_all = pass_clean_all && mevent->pass_clean[clean_all[i]];
+  }
+  h_pass_clean_all->Fill(pass_clean_all, w);
 
   h_passoldskim->Fill(mevent->passoldskim);
 
