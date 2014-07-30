@@ -23,7 +23,7 @@ nevents = [int(x.replace('nevents=', '')) for x in sys.argv if x.startswith('nev
 nevents = 100000 if not nevents else nevents[0]
 
 events_per = [int(x.replace('events_per=', '')) for x in sys.argv if x.startswith('events_per=')]
-events_per = 50 if not events_per else events_per[0]
+events_per = 200 if not events_per else events_per[0]
 
 ################################################################################
 
@@ -55,7 +55,7 @@ dbs_url_for_publication = phys03
 ssh_control_persist = no
 
 [GRID]
-se_black_list = T2_RU_ITEP,T3_FR_IPNL,T3_US_FIU,T2_GR_Ioannina,T3_US_UCR,T2_PL_Warsaw,T3_US_Baylor,T2_FR_IPHC,T3_MX_Cinvestav,T2_TH_CUNSTDA,T3_US_TTU,T2_UA_KIPT,T2_BR_SPRACE,T3_US_OSU,T2_RU_PNPI,T2_FI_HIP,T2_BE_IIHE,T3_US_UCD,T2_AT_Vienna,T3_US_Omaha,T2_FR_CCIN2P3,T2_RU_RRC_KI,T2_TW_Taiwan,T3_US_Rutgers,T3_UK_London_QMUL
+se_black_list = T3_MX_Cinvestav,T2_RU_RRC_KI
 '''
 
 ################################################################################
@@ -212,14 +212,14 @@ def submit(name, tau0=None, mass=None):
 
     additional_input_files = ', '.join(additional_input_files)
 
-    ui_working_dir = os.path.join(dir, 'crab_mfv_%s_%i' %(name,events_per))
+    ui_working_dir = os.path.join(dir, 'crab_mfv_%s' % name)
     vd = locals()
     vd['nevents'] = nevents
     vd['events_per'] = events_per
     open('crab.cfg','wt').write(crab_cfg % vd)
     if not testing:
         os.system('crab -create')
-        for i in xrange(4):
+        for i in xrange(nevents/events_per/500):
             os.system('crab -c %s -submit 500' % ui_working_dir)
         os.system('rm -f crab.cfg reco.pyc my_reco.py')
 
@@ -237,15 +237,19 @@ if run_ttbar:
 
     submit('ttbar_ali_bowing')
 else:
-    tau0s = [0., 0.1, 0.3, 1.0, 3.0, 9.9, 15., 30.][-2:]
-    masses = range(500, 1501, 200)
+    tau0s = [0.1, 0.3, 0.6, 1.0, 3.0, 6.0, 10, 20., 30.]
+    masses = range(200, 1501, 100)
     tunes = [5]
-    masses = [400]
 
     to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 
     for tau0, mass, tune in to_do:
+        if (mass % 200 == 0 and mass <= 1000) or mass == 300:
+            if tau0 in [0.1, 0.3, 1.0, 9.9]:
+                continue
         name = 'neutralino_tau%05ium_M%04i' % (int(tau0*1000), mass)
         if tune != 5:
             name += '_tune_%i' % tune
+
+        print name
         submit(name, tau0, mass)
