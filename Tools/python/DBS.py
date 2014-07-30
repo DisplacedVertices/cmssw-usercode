@@ -82,9 +82,13 @@ def files_for_events(run_events, dataset, ana01=False, ana02=False, ana03=False)
 
     json_str = das_query(ana01, ana02, ana03, json=True)('file,run,lumi dataset=%s' % dataset)
     #open('json_str','wt').write(json_str)
-    #json_str = open('json_str').read()
+    #json_str = open('json_str2').read()
     obj = eval(json_str) # json.loads doesn't work...
     #pprint(obj)
+
+    if type(obj) == dict and sorted(obj.keys()) == [u'apilist', u'ctime', u'das_server', u'data', u'incache', u'mongo_query', u'nresults', u'status', u'timestamp']:
+        obj = obj['data']
+
     for x in obj:
         #assert len(x['run']) == len(x['lumi'])
         assert len(set(y['name'] for y in x['file'])) == 1
@@ -116,4 +120,9 @@ def files_for_events(run_events, dataset, ana01=False, ana02=False, ana03=False)
     return files
 
 if __name__ == '__main__':
-    pprint(files_for_events([(194711,1,380339)], '/MultiJet1Parked/Run2012B-05Nov2012-v2/AOD'))
+    execfile('events_to_debug.txt')
+    #pprint(files_for_events(duh, 'fuh'))
+    #raise 1
+    from JMTucker.Tools.Samples import *
+    for s in data_samples[:5]:
+        pprint(files_for_events(duh, s.dataset))
