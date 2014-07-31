@@ -140,11 +140,11 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     }
 
     if (apply_cleaning_filters) {
-      bool pass_clean_all = !mevent->pass_clean[11];
-      int clean_all[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 18, 19};
-      for (int i = 0; i < 12; ++i) {
-        pass_clean_all = pass_clean_all && mevent->pass_clean[clean_all[i]];
-      }
+      bool pass_clean_all = true;
+      const int clean_all[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
+      for (int c : clean_all)
+        pass_clean_all = pass_clean_all && mevent->pass_clean[c];
+
       if (!pass_clean_all)
         return false;
     }
