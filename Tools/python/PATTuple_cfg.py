@@ -168,10 +168,16 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
     
     from PhysicsTools.PatAlgos.tools.coreTools import runOnData, removeSpecificPATObjects
     if not runOnMC:
+        runOnData(process, names = ['All'])
         runOnData(process, names = ['All'], postfix = postfix)
     removeSpecificPATObjects(process, names = ['Photons'], postfix = postfix) # will also remove cleaning
     
     common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
+
+    process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
+    if runOnMC:
+        common_seq += process.patJetGenJetMatch * process.patJetPartonMatch * process.patJetPartons * process.patJetPartonAssociation * process.patJetFlavourAssociation
+    common_seq += process.patJetCharge * process.patJetCorrFactors * process.patJets
     
     process.out.outputCommands = [
         'drop *',
@@ -194,7 +200,7 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
         buf.close()
         hsh = hash(pat_output)
         #open('pat_spam.txt', 'wt').write(pat_output)
-        hsh_expected = 6563257886911239637 if runOnMC else 3125511795667431709
+        hsh_expected = 6563257886911239637 if runOnMC else -2860884379390987858
         print 'PAT is done (spam hash %s, expected %s).' % (hsh, hsh_expected)
         if hsh != hsh_expected:
             from JMTucker.Tools.general import big_warn
