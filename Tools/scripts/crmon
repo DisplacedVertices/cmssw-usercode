@@ -158,7 +158,7 @@ pprint.pprint(options.__dict__)
 if options.fake_results:
     print 'using fake results dict from %s' % options.fake_results
 else:
-    print 'checking these dirs:'
+    print 'checking these %i dirs:' % len(dirs)
     for d in dirs:
         print d
 
