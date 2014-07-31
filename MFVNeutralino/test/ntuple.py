@@ -97,13 +97,13 @@ if prepare_vis:
     process.mfvVertexRefitsLargeErrDrop2 = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr', n_tracks_to_drop = 2)
     process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 * process.mfvVertexRefitsLargeErr * process.mfvVertexRefitsLargeErrDrop2
 
-    process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
-                                             gen_src = cms.InputTag('genParticles'),
-                                             print_info = cms.bool(True),
-                                             )
-
-    process.load('JMTucker.Tools.ParticleListDrawer_cff')
-    process.pp = cms.Path(process.mfvGenParticles * process.ParticleListDrawer)
+    if runOnMC:
+        process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
+                                                 gen_src = cms.InputTag('genParticles'),
+                                                 print_info = cms.bool(True),
+                                                 )
+        process.load('JMTucker.Tools.ParticleListDrawer_cff')
+        process.pp = cms.Path(process.mfvGenParticles * process.ParticleListDrawer)
 
 
 if 'histos' in sys.argv or track_histos_only:

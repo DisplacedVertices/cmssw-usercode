@@ -97,7 +97,7 @@ def set_events_to_process(process, run_events, run=None):
     if len(run_events[0]) == 3:
         process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*[cms.untracked.LuminosityBlockRange(x[0],x[1],x[0],x[1]) for x in run_events])
 
-def set_events_to_process_by_filter(process, run_events=None, run=None, run_events_fn='set_events_to_process_by_filter.txt'):
+def set_events_to_process_by_filter(process, run_events=None, run=None, run_events_fn='set_events_to_process_by_filter.txt', path_name=None):
     '''Like the other function, only run specific events specified in
     run_events. Here we use the EventIdVeto plugin with a temp file
     listing the events. This works better with splitting among batch
@@ -134,11 +134,14 @@ def set_events_to_process_by_filter(process, run_events=None, run=None, run_even
     for p in process.paths.keys():
         getattr(process, p).insert(0, ~process.EventIdVeto)
 
+    if path_name is not None:
+        setattr(process, path_name, cms.Path(~process.EventIdVeto))
+
     process.maxEvents.input = cms.untracked.int32(-1)
     for x in 'skipEvents eventsToSkip lumisToSkip eventsToProcess lumisToProcess firstRun firstLuminosityBlock firstEvent'.split():
         if hasattr(process.source, x):
             delattr(process.source, x)
-    
+
     return run_events_fn
 
 def set_seeds(process, seed=12191982, size=2**24):

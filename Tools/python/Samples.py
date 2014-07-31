@@ -730,6 +730,8 @@ data_samples = [
     DataSample('MultiJetPk2012D2_Missing', '/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD'), # "     "       1 "
     ]
 
+data_samples_orig = data_samples[:5]
+
 auxiliary_data_samples = [
     ]
 
@@ -885,7 +887,7 @@ def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
 
 ########################################################################
 
-__all__ = ['data_samples', 'auxiliary_data_samples', 'all_data_samples']
+__all__ = ['data_samples', 'data_samples_orig', 'auxiliary_data_samples', 'all_data_samples']
 __all__ += ['ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'leptonic_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples', 'mfv_signal_samples_nouse', 'mfv_signal_samples_systematics', 'myttbar_samples', 'all_mc_samples']
 __all__ += ['all_samples']
 __all__ += [s.name for s in all_samples]
