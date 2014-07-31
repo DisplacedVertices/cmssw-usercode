@@ -109,6 +109,16 @@ struct MFVEvent {
   float pv_sumpt2;
   float pv_rho() const { return mag(pvx - bsx, pvy - bsy); }
 
+  std::vector<uchar> calojet_id;
+  std::vector<float> calojet_pt;
+  std::vector<float> calojet_eta;
+  std::vector<float> calojet_phi;
+  std::vector<float> calojet_energy;
+
+  int ncalojets() const { return int(calojet_pt.size()); }
+  float calojetpt4() const { return ncalojets() >= 4 ? calojet_pt[3] : 0.f; }
+  float calojet_sum_ht() const { return std::accumulate(calojet_pt.begin(), calojet_pt.end(), 0.f); }
+
   std::vector<uchar> jet_id;
   std::vector<float> jet_pt;
   std::vector<float> jet_eta;

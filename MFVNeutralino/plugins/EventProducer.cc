@@ -13,6 +13,7 @@
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
@@ -34,6 +35,7 @@ private:
   const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag gen_particles_src;
+  const edm::InputTag calojets_src;
   const edm::InputTag jets_src;
   const edm::InputTag met_src;
   const std::string b_discriminator;
@@ -45,6 +47,8 @@ private:
   const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
   bool warned_non_mfv;
+
+  std::vector<JetIDSelectionFunctor> calojet_selectors;
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
@@ -56,6 +60,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
+    calojets_src(cfg.getParameter<edm::InputTag>("calojets_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     met_src(cfg.getParameter<edm::InputTag>("met_src")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
@@ -68,6 +73,9 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
     warned_non_mfv(false)
 {
+  for (int i = 0; i < 4; ++i)
+    calojet_selectors.push_back(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::Quality_t(i)));
+
   produces<MFVEvent>();
 }
 
@@ -232,6 +240,28 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       double trkpt = (*trki)->pt();
       mevent->pv_sumpt2 += trkpt * trkpt;
     }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+
+  edm::Handle<pat::JetCollection> calojets;
+  event.getByLabel(calojets_src, calojets);
+
+  for (const pat::Jet& jet : *calojets) {
+    if (jet.pt() < jet_pt_min)
+      continue;
+
+    uchar id = 0;
+    for (int i = 0; i < 4; ++i) {
+      pat::strbitset ret = calojet_selectors[i].getBitTemplate();
+      id = id | (calojet_selectors[i](jet, ret) << i);
+    }
+
+    mevent->calojet_id.push_back(id);
+    mevent->calojet_pt.push_back(jet.pt());
+    mevent->calojet_eta.push_back(jet.eta());
+    mevent->calojet_phi.push_back(jet.phi());
+    mevent->calojet_energy.push_back(jet.energy());
   }
 
   //////////////////////////////////////////////////////////////////////

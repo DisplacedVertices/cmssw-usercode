@@ -138,6 +138,10 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
 }
 
 void QuadJetTrigEff::endJob() {
+  printf("calojet selector BEG %s sel %i\n", jets_src.label().c_str(), sel);
+  calojet_sel.print(std::cout);
+  printf("calojet selector END %s sel %i\n", jets_src.label().c_str(), sel);
+
   if (prints != "") {
     printf("QuadJetTrigEff:%s BEGIN prints\nprescales seen:\n", prints.c_str());
     for (const auto& p : prescales_seen)
