@@ -21,6 +21,8 @@ private:
   const bool re_trigger;
   const int clean_bit;
   const bool invert_clean;
+  const bool apply_cleaning_filters;
+
   const int min_npv;
   const int max_npv;
   const double min_4th_jet_pt;
@@ -67,6 +69,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     re_trigger(cfg.getParameter<bool>("re_trigger")),
     clean_bit(cfg.getParameter<int>("clean_bit")),
     invert_clean(cfg.getParameter<bool>("invert_clean")),
+    apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
@@ -133,6 +136,16 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (clean_bit >= 0) {
       if (invert_clean == mevent->pass_clean[clean_bit])
+        return false;
+    }
+
+    if (apply_cleaning_filters) {
+      bool pass_clean_all = !mevent->pass_clean[11];
+      int clean_all[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 18, 19};
+      for (int i = 0; i < 12; ++i) {
+        pass_clean_all = pass_clean_all && mevent->pass_clean[clean_all[i]];
+      }
+      if (!pass_clean_all)
         return false;
     }
 
