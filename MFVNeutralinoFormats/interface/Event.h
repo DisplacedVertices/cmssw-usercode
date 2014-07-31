@@ -26,6 +26,11 @@ struct MFVEvent {
     }
     for (int i = 0; i < mfv::n_trigger_paths; ++i)
       pass_trigger[i] = 0;
+    for (int i = 0; i < 9; ++i) {
+      l1_prescale[i] = 0;
+      l1_pass[i] = 0;
+    }
+    hlt_prescale = 0;
     for (int i = 0; i < mfv::n_clean_paths; ++i)
       pass_clean[i] = 0;
   }
@@ -81,6 +86,9 @@ struct MFVEvent {
   }
 
   bool pass_trigger[mfv::n_trigger_paths];
+  ushort l1_prescale[9];
+  bool l1_pass[9];
+  ushort hlt_prescale;
   bool pass_clean[mfv::n_clean_paths]; // JMTBAD
 
   uchar npfjets;

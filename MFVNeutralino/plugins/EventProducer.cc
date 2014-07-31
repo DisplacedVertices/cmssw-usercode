@@ -13,6 +13,7 @@
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
@@ -25,7 +26,8 @@ class MFVEventProducer : public edm::EDProducer {
 public:
   explicit MFVEventProducer(const edm::ParameterSet&);
   void produce(edm::Event&, const edm::EventSetup&);
-  
+  virtual void beginRun(edm::Run&, const edm::EventSetup&);
+
 private:
   const edm::InputTag trigger_results_src;
   const edm::InputTag cleaning_results_src;
@@ -47,6 +49,9 @@ private:
   const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
   bool warned_non_mfv;
+
+  L1GtUtils l1_cfg;
+  HLTConfigProvider hlt_cfg;
 
   std::vector<JetIDSelectionFunctor> calojet_selectors;
 };
@@ -77,6 +82,14 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     calojet_selectors.push_back(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::Quality_t(i)));
 
   produces<MFVEvent>();
+}
+
+void MFVEventProducer::beginRun(edm::Run& run, const edm::EventSetup& setup) {
+  bool changed = true;
+  if (!hlt_cfg.init(run, setup, trigger_results_src.process(), changed))
+    throw cms::Exception("MFVEventProducer") << "HLTConfigProvider::init failed with process name " << trigger_results_src;
+  //if (changed)
+  //  hlt_cfg.dump("PrescaleTable");
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -149,6 +162,65 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   TriggerHelper trig_helper(event, trigger_results_src);
   mfv::trigger_decision(trig_helper, mevent->pass_trigger);
+
+  l1_cfg.getL1GtRunCache(event, setup, true, false);
+
+  const std::vector<std::string> all_l1_seeds = { "L1_QuadJetC32", "L1_QuadJetC36", "L1_QuadJetC40", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_DoubleJetC52", "L1_DoubleJetC56", "L1_DoubleJetC64" };
+  //const size_t nl1 = all_l1_seeds.size();
+  const std::vector<int> hlt_versions = {1,2,3,5};
+  const size_t nhlt = hlt_versions.size();
+
+  int l1_found = 0;
+  int hlt_found = 0;
+  for (size_t ihlt = 0; ihlt < nhlt; ++ihlt) {
+    const int hlt_version = hlt_versions[ihlt];
+    char path[1024];
+    snprintf(path, 1024, "HLT_QuadJet50_v%i", hlt_version);
+    if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
+      continue;
+
+    const int hlt_prescale = hlt_cfg.prescaleValue(event, setup, path);
+    mevent->hlt_prescale = hlt_prescale > 65535 ? 65535 : hlt_prescale;
+
+    if (++hlt_found > 1)
+      throw cms::Exception("BadAssumption") << "more than one QuadJet50";
+
+    const auto& v = hlt_cfg.hltL1GTSeeds(path);
+    if (v.size() != 1)
+      throw cms::Exception("BadAssumption") << "more than one seed returned: " << v.size();
+
+    std::string s = v[0].second;
+    const std::string delim = " OR ";
+    while (s.size()) {
+      const size_t pos = s.find(delim);
+      const std::string l1_path = s.substr(0, pos);
+      const auto& itl1 = std::find(all_l1_seeds.begin(), all_l1_seeds.end(), l1_path);
+      if (itl1 == all_l1_seeds.end())
+        throw cms::Exception("BadAssumption") << "L1 seed " << l1_path << " not expected";
+      const size_t il1 = itl1 - all_l1_seeds.begin();
+
+      ++l1_found;
+
+      int l1_err;
+
+      const int l1_prescale = l1_cfg.prescaleFactor(event, l1_path, l1_err);
+      if (l1_err != 0)
+        throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting prescale";
+      mevent->l1_prescale[il1] = l1_prescale > 65535 ? 65535 : l1_prescale;
+
+      mevent->l1_pass[il1] = l1_cfg.decision(event, l1_path, l1_err);
+      if (l1_err != 0)
+        throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting decision";
+
+      if (pos == std::string::npos)
+        break;
+      else
+        s.erase(0, pos + delim.length());
+    }
+  }
+
+  if (l1_found != 3 && l1_found != 9)
+    throw cms::Exception("BadAssumption") << "not the right L1 paths found: l1_found = " << l1_found;
 
   const std::string cleaning_paths[mfv::n_clean_paths] = { // JMTBAD take from PATTupleSelection_cfg
     "All",
