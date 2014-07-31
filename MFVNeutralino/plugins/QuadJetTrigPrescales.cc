@@ -24,28 +24,23 @@ private:
     unsigned run;
     unsigned lumi;
     unsigned event;
-    bool l1_was_seed[9];
-    bool hlt_found[4];
-    int l1_prescale[9];
-    int hlt_prescale[4];
-    bool pass_l1[9];
-    bool pass_hlt[4];
+    std::vector<bool> l1_was_seed;
+    std::vector<int> l1_prescale;
+    std::vector<bool> pass_l1;
+    std::vector<bool> hlt_found;
+    std::vector<int> hlt_prescale;
+    std::vector<bool> pass_hlt;
 
     tree_t() { clear(); }
 
     void clear() { 
       run = lumi = event = 0;
-      for (size_t i = 0; i < 9; ++i) {
-        l1_was_seed[i] = false;
-        l1_prescale[i] = 0;
-        pass_l1[i] = false;
-      }
-
-      for (size_t i = 0; i < 4; ++i) {
-        hlt_found[i] = false;
-        hlt_prescale[i] = 0;
-        pass_hlt[i] = false;
-      }
+      l1_was_seed.assign(9, 0);
+      l1_prescale.assign(9, 0);
+      pass_l1.assign(9, 0);
+      hlt_found.assign(4, 0);
+      hlt_prescale.assign(4, 0);
+      pass_hlt.assign(4, 0);
     }
   };
 
@@ -59,12 +54,12 @@ QuadJetTrigPrescales::QuadJetTrigPrescales(const edm::ParameterSet& cfg) {
   tree->Branch("run", &nt.run, "run/i");
   tree->Branch("lumi", &nt.lumi, "lumi/i");
   tree->Branch("event", &nt.event, "event/i");
-  tree->Branch("l1_was_seed", nt.l1_was_seed, "l1_was_seed[9]/O");
-  tree->Branch("hlt_found", nt.hlt_found, "hlt_found[4]/O");
-  tree->Branch("l1_prescale", nt.l1_prescale, "l1_prescale[9]/I");
-  tree->Branch("hlt_prescale", nt.hlt_prescale, "hlt_prescale[4]/I");
-  tree->Branch("pass_l1", nt.pass_l1, "pass_l1[9]/O");
-  tree->Branch("pass_hlt", nt.pass_hlt, "pass_hlt[4]/O");
+  tree->Branch("l1_was_seed", &nt.l1_was_seed);
+  tree->Branch("l1_prescale", &nt.l1_prescale);
+  tree->Branch("pass_l1", &nt.pass_l1);
+  tree->Branch("hlt_found", &nt.hlt_found);
+  tree->Branch("hlt_prescale", &nt.hlt_prescale);
+  tree->Branch("pass_hlt", &nt.pass_hlt);
 }
 
 void QuadJetTrigPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
@@ -143,10 +138,10 @@ void QuadJetTrigPrescales::analyze(const edm::Event& event, const edm::EventSetu
 
   int sum = 0;
 
-  if ((sum = std::accumulate(nt.l1_was_seed, nt.l1_was_seed+9, 0)) == 0)
+  if ((sum = std::accumulate(nt.l1_was_seed.begin(), nt.l1_was_seed.end(), 0)) == 0)
     throw cms::Exception("BadAssumption") << "none of the L1 paths were found";
 
-  if ((sum = std::accumulate(nt.hlt_found, nt.hlt_found+4, 0)) != 1)
+  if ((sum = std::accumulate(nt.hlt_found.begin(), nt.hlt_found.end(), 0)) != 1)
     throw cms::Exception("BadAssumption") << "not exactly one of the HLT path versions were found: " << sum;
 
   tree->Fill();
