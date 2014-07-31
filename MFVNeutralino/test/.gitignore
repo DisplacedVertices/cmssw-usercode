@@ -7,5 +7,5 @@ minSLHA.spc
 crab.cfg
 genfsimreco_crab.py
 plots
-events_to_debug.txt
+events_to_debug
 temp
