@@ -251,5 +251,4 @@ else:
         if tune != 5:
             name += '_tune_%i' % tune
 
-        print name
         submit(name, tau0, mass)
