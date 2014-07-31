@@ -15,7 +15,7 @@ struct MFVEvent {
   typedef unsigned int uint;
 
   MFVEvent() {
-    gen_valid = passoldskim = 0;
+    gen_valid = 0;
     gen_partons_in_acc = npfjets = npv = pv_ntracks = 0;
     pfjetpt4 = pfjetpt5 = pfjetpt6 = npu = bsx = bsy = bsz = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
     for (int i = 0; i < 2; ++i) {
@@ -82,7 +82,6 @@ struct MFVEvent {
 
   bool pass_trigger[mfv::n_trigger_paths];
   bool pass_clean[mfv::n_clean_paths]; // JMTBAD
-  bool passoldskim;
 
   uchar npfjets;
   float pfjetpt4;

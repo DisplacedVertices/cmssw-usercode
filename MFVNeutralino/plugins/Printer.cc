@@ -140,7 +140,6 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     for (int i : mevent->pass_clean)
       printf("%i ", i);
     printf("\n");
-    printf("pass old skim? %i\n", mevent->passoldskim);
     printf("npfjets: %u   pt of pf jet #4: %11.3g   pt of pf jet #4: %11.3g   pt of pf jet #4: %11.3g\n", mevent->npfjets, mevent->pfjetpt4, mevent->pfjetpt5, mevent->pfjetpt6);
     printf("npu: %f\n", mevent->npu);
     printf("beamspot: (%11.3g, %11.3g, %11.3g)\n", mevent->bsx, mevent->bsy, mevent->bsz);

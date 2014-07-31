@@ -175,11 +175,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
 
-  mevent->passoldskim = 
-    trig_helper_cleaning.pass("pHadronic") ||
-    trig_helper_cleaning.pass("pSemileptonic") ||
-    trig_helper_cleaning.pass("pDileptonic");
-  
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::PFJetCollection> pfjets;

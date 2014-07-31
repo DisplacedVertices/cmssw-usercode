@@ -426,8 +426,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     pass_clean_all = pass_clean_all && mevent->pass_clean[c];
   h_pass_clean_all->Fill(pass_clean_all, w);
 
-  h_passoldskim->Fill(mevent->passoldskim);
-
   //////////////////////////////////////////////////////////////////////////////
 
   h_npfjets->Fill(mevent->npfjets, w);

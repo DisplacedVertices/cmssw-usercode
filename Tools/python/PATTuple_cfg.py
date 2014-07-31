@@ -171,43 +171,8 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
         runOnData(process, names = ['All'], postfix = postfix)
     removeSpecificPATObjects(process, names = ['Photons'], postfix = postfix) # will also remove cleaning
     
-    # Make some extra SV producers for MFV studies. JMTBAD postfix junk
-    for cut in (1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.):
-        cut_name = ('%.1f' % cut).replace('.', 'p')
-                     
-        tag_info_name = 'secondaryVertexMaxDR%sTagInfosAODPF' % cut_name
-        tag_info_obj = process.secondaryVertexTagInfosAODPF.clone()
-        tag_info_obj.vertexCuts.maxDeltaRToJetAxis = cut
-        setattr(process, tag_info_name, tag_info_obj)
-        process.patJetsPF.tagInfoSources.append(cms.InputTag(tag_info_name))
-    
-        processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * processpostfix('patJets'))
-    
-    from JMTucker.Tools.PATTupleSelection_cfi import makeLeptonProducers
-    makeLeptonProducers(process, postfix=postfix, params=process.jtupleParams)
-    
     common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
     
-    process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-    common_seq *= process.mfvVertices
-    
-    # Require numbers of jets based on the trigger: hadronic channel will
-    # have at least a 4-jet trigger (maybe 6!), while semileptonic uses a
-    # 3-jet trigger. Dileptonic has no jets in trigger, but we'll require
-    # at least one b-tag anyway.
-    setprocesspostfix('countPatJetsHadronic',     processpostfix('countPatJets').clone(minNumber = 4))
-    setprocesspostfix('countPatJetsSemileptonic', processpostfix('countPatJets').clone(minNumber = 3))
-    setprocesspostfix('countPatJetsDileptonic',   processpostfix('countPatJets').clone(minNumber = 1))
-    
-    channels = ('Hadronic', 'Semileptonic', 'Dileptonic')
-    for channel in channels:
-        setattr(process, 'p' + channel, cms.Path(common_seq))
-    
-    process.pHadronic     *= processpostfix('countPatJetsHadronic')
-    process.pSemileptonic *= processpostfix('countPatJetsSemileptonic') + process.jtupleSemileptonSequence + process.countSemileptons
-    process.pDileptonic   *= processpostfix('countPatJetsDileptonic')   + process.jtupleDileptonSequence   + process.countDileptons
-    
-    process.out.SelectEvents.SelectEvents = ['p' + channel for channel in channels]
     process.out.outputCommands = [
         'drop *',
         'keep *_selectedPatElectrons*_*_*',
@@ -215,39 +180,12 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
         'keep *_selectedPatJets*_*_*',
         'drop *_selectedPatJetsForMETtype1p2CorrPF_*_*',
         'drop *_selectedPatJetsForMETtype2CorrPF_*_*',
-        'keep *_mfvVertices*_*_*',
         'drop CaloTowers_*_*_*',
         'keep *_patMETs*_*_*',
         'keep *_goodOfflinePrimaryVertices_*_*',
         'keep edmTriggerResults_TriggerResults__PAT', # for post-tuple filtering on the goodData paths
         'keep *_puJet*_*_*',
         ]
-    
-    # The normal TrigReport doesn't state how many events are written
-    # total to the file in case of OutputModule's SelectEvents having
-    # multiple paths. Add a summary to stdout that so that it is easy to
-    # see what the total number of events should be (for debugging CRAB
-    # jobs). (This means we can kill the normal TrigReport.)
-    process.ORTrigReport = cms.EDAnalyzer('ORTrigReport',
-                                          results_src = cms.InputTag('TriggerResults', '', process.name_()),
-                                          paths = process.out.SelectEvents.SelectEvents
-                                          )
-    process.pORTrigReport = cms.EndPath(process.ORTrigReport) # Must be on an EndPath.
-    
-    # As a simple check of the paths' efficiencies, add some lines to the
-    # summary showing stats on events with generator-level muons/electrons
-    # in acceptance from W decays.
-    if runOnMC:
-        for name, cut in [('Muon',     'abs(pdgId) == 13 && abs(eta) < 2.4 && abs(mother.pdgId) == 24 && pt > 20'),
-                          ('Electron', 'abs(pdgId) == 11 && abs(eta) < 2.5 && abs(mother.pdgId) == 24 && pt > 20'),
-                          ('Lepton',   '((abs(pdgId) == 13 && abs(eta) < 2.4) || (abs(pdgId) == 11 && abs(eta) < 2.5)) && abs(mother.pdgId) == 24 && pt > 20'),
-                          ]:
-            name = 'gen' + name + 's'
-            filter = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string(cut))
-            counter = cms.EDFilter('CandViewCountFilter', src = cms.InputTag(name), minNumber = cms.uint32(1))
-            setattr(process, name,           filter)
-            setattr(process, name + 'Count', counter)
-            setattr(process, 'p' + name + 'Count', cms.Path(filter*counter))
     
     # Check that the stdout spam from PAT was what we expect.
     if suppress_stdout:
@@ -325,7 +263,6 @@ def disable_nopileup(process):
 def re_pat(process, name='PAT2', old_name='PAT'):
     process.source.inputCommands = cms.untracked.vstring('keep *', 'drop *_*_*_%s' % old_name)
     process.setName_(name)
-    process.ORTrigReport.results_src.setProcessName(name)
     process.out.outputCommands.append('keep edmTriggerResults_TriggerResults__%s' % name)
 
 def pileup_removal_studies(process, keep_nopileup=True, no_closest_z_vtx=True):
