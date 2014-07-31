@@ -65,10 +65,10 @@ class LumiLines:
     def __init__(self, fn):
         self.lls = LumiLines.load(fn)
         self.by_run = defaultdict(list)
-        self.by_run_ls = defaultdict(list)
+        self.by_run_ls = {}
         for ll in self.lls:
             self.by_run[ll.run].append(ll)
-            self.by_run_ls[(ll.run, ll.ls)].append(ll)
+            self.by_run_ls[(ll.run, ll.ls)] = ll
 
     def recorded(self, run):
         return sum(ll.recorded for ll in self.by_run[run])
