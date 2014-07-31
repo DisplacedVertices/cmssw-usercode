@@ -5,7 +5,6 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 class BeamSpotTreeProducer : public edm::EDAnalyzer {
 public:
@@ -49,6 +48,9 @@ BeamSpotTreeProducer::BeamSpotTreeProducer(const edm::ParameterSet& cfg)
   tree->Branch("bsx", &nt.bsx, "bsx/F");
   tree->Branch("bsy", &nt.bsy, "bsy/F");
   tree->Branch("bsz", &nt.bsz, "bsz/F");
+  tree->Branch("pvx", &nt.pvx, "pvx/F");
+  tree->Branch("pvy", &nt.pvy, "pvy/F");
+  tree->Branch("pvz", &nt.pvz, "pvz/F");
 }
 
 void BeamSpotTreeProducer::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -63,9 +65,9 @@ void BeamSpotTreeProducer::analyze(const edm::Event& event, const edm::EventSetu
   nt.bsx = mevent->bsx;
   nt.bsy = mevent->bsy;
   nt.bsz = mevent->bsz;
-  nt.pvx = mevent->pvx;
-  nt.pvy = mevent->pvy;
-  nt.pvz = mevent->pvz;
+  nt.pvx = mevent->pvx - mevent->bsx;
+  nt.pvy = mevent->pvy - mevent->bsy;
+  nt.pvz = mevent->pvz - mevent->bsz;
 
   tree->Fill();
 }
