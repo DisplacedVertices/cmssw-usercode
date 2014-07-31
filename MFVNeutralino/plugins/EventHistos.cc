@@ -420,11 +420,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i]->Fill(mevent->pass_clean[i], w);
 
-  bool pass_clean_all = !(mevent->pass_clean[11]);
-  int clean_all[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 18, 19};
-  for (int i = 0; i < 12; ++i) {
-    pass_clean_all = pass_clean_all && mevent->pass_clean[clean_all[i]];
-  }
+  bool pass_clean_all = true;
+  const int clean_all[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
+  for (int c : clean_all)
+    pass_clean_all = pass_clean_all && mevent->pass_clean[c];
   h_pass_clean_all->Fill(pass_clean_all, w);
 
   h_passoldskim->Fill(mevent->passoldskim);
