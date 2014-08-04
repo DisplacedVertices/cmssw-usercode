@@ -5,6 +5,8 @@ from JMTucker.Tools.PATTuple_cfg import *
 
 runOnMC = True # magic line, don't touch
 process, common_seq = pat_tuple_process(runOnMC)
+for name, path in process.paths.items():
+    delattr(process, name)
 
 process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A_ext-v1/00000/FEDD73E4-5424-E211-8271-001E67398142.root' if runOnMC else '/store/user/tucker/Run2012D_SingleMu_AOD_22Jan2013-v1_10000_0015EC7D-EAA7-E211-A9B9-E0CB4E5536A7.root']
 
@@ -20,13 +22,9 @@ process.selectedPatJets.cut = ''
 common_seq *= process.patJetCorrFactors * process.patJets * process.selectedPatJets
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-process.QuadJet50 = hltHighLevel.clone()
-process.QuadJet50.HLTPaths = ['HLT_QuadJet50_v*']
-process.QuadJet50.andOr = True # = OR
-process.IsoMu25Eta2p1 = process.QuadJet50.clone(HLTPaths = ['HLT_IsoMu24_eta2p1_v*'])
-for name, path in process.paths.items():
-    if not name.startswith('eventCleaning'):
-        path.insert(0, process.IsoMu25Eta2p1)
+process.IsoMu24Eta2p1 = hltHighLevel.clone()
+process.IsoMu24Eta2p1.HLTPaths = ['HLT_IsoMu24_eta2p1_v*']
+process.IsoMu24Eta2p1.andOr = True # = OR
 
 for no_prescale in (True, False):
     for apply_prescale in (True, False):
@@ -49,19 +47,15 @@ for no_prescale in (True, False):
                                  sel = cms.int32(sel),
                                  no_prescale = cms.bool(no_prescale),
                                  apply_prescale = cms.bool(apply_prescale),
-                                 prints = cms.string(''),
+                                 require_trigger = cms.bool(True),
                                  )
-            den = num.clone()
+            den = num.clone(require_trigger = False)
 
             name = 'NP%iAP%i' % (int(no_prescale), int(apply_prescale))
             name += '%s%s' % (kind, '' if sel == -1 else sel)
             setattr(process, name + 'num', num)
             setattr(process, name + 'den', den)
-            setattr(process, 'p' + name + 'num', cms.Path(process.IsoMu25Eta2p1 * process.QuadJet50 * common_seq * num))
-            setattr(process, 'p' + name + 'den', cms.Path(process.IsoMu25Eta2p1 *                     common_seq * den))
-
-process.NP0AP1pfnum.prints = 'pfnum'
-process.NP0AP1pfden.prints = 'pfden'
+            setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
 
 #process.options.wantSummary = True
 
