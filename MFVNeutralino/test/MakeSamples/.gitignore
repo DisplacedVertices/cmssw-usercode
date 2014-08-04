@@ -4,3 +4,5 @@ pat.py
 *.root
 out.*.gz
 test
+ntuple.py
+my_reco.py
