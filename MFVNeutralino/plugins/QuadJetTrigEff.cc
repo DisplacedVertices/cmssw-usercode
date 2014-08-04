@@ -1,6 +1,8 @@
 #include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -16,7 +18,6 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
-  virtual void endJob();
 
   const edm::InputTag jets_src;
   const int sel;
@@ -25,10 +26,7 @@ private:
   L1GtUtils l1_cfg;
   const bool no_prescale;
   const bool apply_prescale;
-  const std::string prints;
-
-  std::map<int,int> prescales_seen;
-  std::map<std::string, std::map<int,int> > l1_prescales_seen;
+  const bool require_trigger;
 
   TH1F* h_nnoseljets;
   TH1F* h_njets;
@@ -44,7 +42,7 @@ QuadJetTrigEff::QuadJetTrigEff(const edm::ParameterSet& cfg)
     calojet_sel(JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::Quality_t(sel)),
     no_prescale(cfg.getParameter<bool>("no_prescale")),
     apply_prescale(cfg.getParameter<bool>("apply_prescale")),
-    prints(cfg.getParameter<std::string>("prints"))
+    require_trigger(cfg.getParameter<bool>("require_trigger"))
 {
   if (apply_prescale && no_prescale)
     throw cms::Exception("Misconfiguration", "can't apply_prescale and no_prescale");
@@ -69,40 +67,42 @@ void QuadJetTrigEff::beginRun(const edm::Run& run, const edm::EventSetup& setup)
 
 void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   l1_cfg.getL1GtRunCache(event, setup, true, false);
+
+  edm::Handle<edm::TriggerResults> hlt_results;
+  event.getByLabel(edm::InputTag("TriggerResults", "", "HLT"), hlt_results);
+  const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
+  const size_t npaths = hlt_names.size();
+
   int prescale = 1;
+  bool pass = false;
 
   for (int i = 0; i < 100; ++i) {
     char path[1024];
     snprintf(path, 1024, "HLT_QuadJet50_v%i", i);
-    if (hlt_cfg.triggerIndex(path) != hlt_cfg.size()) {
-      prescale = hlt_cfg.prescaleValue(event, setup, path);
+    if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
+      continue;
 
-      const auto& v = hlt_cfg.hltL1GTSeeds(path);
-      if (v.size() != 1)
-        throw cms::Exception("BadAssumption") << "more than one seed returned for quadjet50: " << v.size();
+    int l1err;
+    const bool l1_pass = l1_cfg.decision(event, "L1_QuadJetC32", l1err);
+    if (l1err != 0) throw cms::Exception("L1PrescaleError") << "error code when getting L1 decision: " << l1err;
+    const int l1_prescale = l1_cfg.prescaleFactor(event, "L1_QuadJetC32", l1err);
+    if (l1err != 0) throw cms::Exception("L1PrescaleError") << "error code when getting L1 prescale: " << l1err;
 
-      std::string s = v[0].second;
-      size_t pos = 0;
-      const std::string delim = " OR ";
-      int min_l1prescale = (1<<17)-1;
-      while ((pos = s.find(delim)) != std::string::npos) {
-        const std::string l1path = s.substr(0, pos);
-        int l1err;
-        const int l1prescale = l1_cfg.prescaleFactor(event, l1path, l1err);
-        if (l1err != 0)
-          throw cms::Exception("L1PrescaleError") << "error code " << l1err << " for path " << l1path;
-        if (l1prescale < min_l1prescale)
-          min_l1prescale = l1prescale;
-        l1_prescales_seen[l1path][l1prescale] += 1;
-        s.erase(0, pos + delim.length());
-      }
+    const int hlt_prescale = hlt_cfg.prescaleValue(event, setup, path);
 
-      if (min_l1prescale > 1 && min_l1prescale < (1<<17))
-        throw cms::Exception("L1PrescaleError") << "l1 prescale " << min_l1prescale;
+    const size_t ipath = hlt_names.triggerIndex(path);
+    if (!(ipath < npaths))
+      throw cms::Exception("BadAssumption") << "hlt_cfg and triggerNames don't agree on " << path;
+    const bool hlt_pass = hlt_results->accept(ipath);
 
-      prescales_seen[prescale] += 1;
-    }
+    prescale = l1_prescale * hlt_prescale;
+    pass = l1_pass && hlt_pass;
+
+    break;
   }
+
+  if (require_trigger && !pass)
+    return;
 
   if (no_prescale && prescale != 1)
     return;
@@ -135,22 +135,6 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
   }
 
   h_njets->Fill(njet);
-}
-
-void QuadJetTrigEff::endJob() {
-  if (prints != "") {
-    printf("QuadJetTrigEff:%s BEGIN prints\nprescales seen:\n", prints.c_str());
-    for (const auto& p : prescales_seen)
-      printf("%i: %i\n", p.first, p.second);
-    printf("l1 prescales seen:\n");
-    for (const auto& p : l1_prescales_seen) {
-      printf("path: %s:\n", p.first.c_str());
-      for (const auto& p2 : p.second) {
-        printf("%i: %i\n", p2.first, p2.second);
-      }
-    }
-    printf("QuadJetTrigEff:%s END prints\n", prints.c_str());
-  }
 }
 
 DEFINE_FWK_MODULE(QuadJetTrigEff);
