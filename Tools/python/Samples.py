@@ -21,8 +21,8 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 3
-    ANA_HASH = '1e5098e5b5206d90a9bd7c495dab839b'
-    PUBLISH_USER = 'jchu'
+    ANA_HASH = '1456c7a6c14e155fd50f9cee9c579b13'
+    PUBLISH_USER = 'tucker'
     ANA_VERSION = 'v19'
 
     def __init__(self, name, nice_name, dataset):
@@ -429,14 +429,8 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.re_pat = True
     if not ('tune10' in sample.name or 'tune11' in sample.name):
         sample.scheduler = 'condor'
-    if is_300:
-        sample.ana_hash = 'd193341bef5d5840d6be68a15a36c5f0'
-    elif is_syst:
-        sample.ana_hash = '0db49a3df21e20de5584b04b90b2376b'
-    else:
-        sample.ana_hash = '8bd4ec017426329be3c6efbb2bbe1ebc'
     sample.cross_section = 0.001
-
+    sample.ana_hash = '3b675468c132e35b291c67c94e024555'
     sample.ana_events_per = 10000
 
 ########################################################################
@@ -774,6 +768,9 @@ def from_argv(default=None, sort_and_set=True):
 ########################################################################
 
 # Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
+
+for sample, minus in [(ttbarsemilep, 30066*7)]:
+    sample.reduce_total_events_by(minus)
 
 # Overrides done.
 
