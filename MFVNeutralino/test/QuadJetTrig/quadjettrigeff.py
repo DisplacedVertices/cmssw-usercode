@@ -89,9 +89,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     data_samples = Samples.auxiliary_data_samples
 
     for sample in mc_samples:
-        sample.events_per = 20000
+        sample.events_per = 25000
     for sample in data_samples:
-        sample.lumis_per = 50
+        sample.lumis_per = 100
 
     samples = Samples.from_argv(mc_samples + data_samples)
 
