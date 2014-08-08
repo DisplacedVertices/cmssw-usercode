@@ -26,36 +26,38 @@ process.IsoMu24Eta2p1 = hltHighLevel.clone()
 process.IsoMu24Eta2p1.HLTPaths = ['HLT_IsoMu24_eta2p1_v*']
 process.IsoMu24Eta2p1.andOr = True # = OR
 
-for no_prescale in (True, False):
-    for apply_prescale in (True, False):
-        if no_prescale and apply_prescale:
-            continue
+for l1_path in (32, 36, 40):
+    for no_prescale in (True, False):
+        for apply_prescale in (True, False):
+            if no_prescale and apply_prescale:
+                continue
 
-        for kind in ('pf', 'cl', 0, 1, 2, 3):
-            if type(kind) == int:
-                sel = kind
-                kind = 'cl'
-            else:
-                sel = -1
+            for kind in ('pf', 'cl', 0, 1, 2, 3):
+                if type(kind) == int:
+                    sel = kind
+                    kind = 'cl'
+                else:
+                    sel = -1
 
-            src = 'selectedPatJets'
-            if kind == 'pf':
-                src += 'PF'
+                src = 'selectedPatJets'
+                if kind == 'pf':
+                    src += 'PF'
 
-            num = cms.EDAnalyzer('QuadJetTrigEff',
-                                 jets_src = cms.InputTag(src),
-                                 sel = cms.int32(sel),
-                                 no_prescale = cms.bool(no_prescale),
-                                 apply_prescale = cms.bool(apply_prescale),
-                                 require_trigger = cms.bool(True),
-                                 )
-            den = num.clone(require_trigger = False)
+                num = cms.EDAnalyzer('QuadJetTrigEff',
+                                     l1_path = cms.string('L1_QuadJetC%i' % l1_path),
+                                     jets_src = cms.InputTag(src),
+                                     sel = cms.int32(sel),
+                                     no_prescale = cms.bool(no_prescale),
+                                     apply_prescale = cms.bool(apply_prescale),
+                                     require_trigger = cms.bool(True),
+                                     )
+                den = num.clone(require_trigger = False)
 
-            name = 'NP%iAP%i' % (int(no_prescale), int(apply_prescale))
-            name += '%s%s' % (kind, '' if sel == -1 else sel)
-            setattr(process, name + 'num', num)
-            setattr(process, name + 'den', den)
-            setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
+                name = 'L1%iNP%iAP%i' % (l1_path, int(no_prescale), int(apply_prescale))
+                name += '%s%s' % (kind, '' if sel == -1 else sel)
+                setattr(process, name + 'num', num)
+                setattr(process, name + 'den', den)
+                setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
 
 #process.options.wantSummary = True
 

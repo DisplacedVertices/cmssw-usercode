@@ -19,6 +19,7 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
 
+  const std::string l1_path;
   const edm::InputTag jets_src;
   const int sel;
   JetIDSelectionFunctor calojet_sel;
@@ -37,7 +38,8 @@ private:
 };
 
 QuadJetTrigEff::QuadJetTrigEff(const edm::ParameterSet& cfg)
-  : jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
+  : l1_path(cfg.getParameter<std::string>("l1_path")),
+    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     sel(cfg.getParameter<int>("sel")),
     calojet_sel(JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::Quality_t(sel)),
     no_prescale(cfg.getParameter<bool>("no_prescale")),
@@ -83,9 +85,9 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
       continue;
 
     int l1err;
-    const bool l1_pass = l1_cfg.decision(event, "L1_QuadJetC32", l1err);
+    const bool l1_pass = l1_cfg.decision(event, l1_path, l1err);
     if (l1err != 0) throw cms::Exception("L1PrescaleError") << "error code when getting L1 decision: " << l1err;
-    const int l1_prescale = l1_cfg.prescaleFactor(event, "L1_QuadJetC32", l1err);
+    const int l1_prescale = l1_cfg.prescaleFactor(event, l1_path, l1err);
     if (l1err != 0) throw cms::Exception("L1PrescaleError") << "error code when getting L1 prescale: " << l1err;
 
     const int hlt_prescale = hlt_cfg.prescaleValue(event, setup, path);
