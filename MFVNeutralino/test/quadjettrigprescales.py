@@ -20,7 +20,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('QuadJetTrigPrescales2',
+    cs = CRABSubmitter('QuadJetTrigPrescales',
                        total_number_of_lumis = -1,
                        lumis_per_job = 500,
                        skip_common = True,
