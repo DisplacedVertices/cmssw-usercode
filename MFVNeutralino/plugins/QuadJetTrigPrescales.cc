@@ -26,6 +26,8 @@ private:
     unsigned event;
     std::vector<bool> l1_was_seed;
     std::vector<int> l1_prescale;
+    std::vector<int> l1_mask;
+    std::vector<bool> pass_l1_premask;
     std::vector<bool> pass_l1;
     std::vector<bool> hlt_found;
     std::vector<int> hlt_prescale;
@@ -37,6 +39,8 @@ private:
       run = lumi = event = 0;
       l1_was_seed.assign(9, 0);
       l1_prescale.assign(9, 0);
+      l1_mask.assign(9, 0);
+      pass_l1_premask.assign(9, 0);
       pass_l1.assign(9, 0);
       hlt_found.assign(4, 0);
       hlt_prescale.assign(4, 0);
@@ -56,6 +60,8 @@ QuadJetTrigPrescales::QuadJetTrigPrescales(const edm::ParameterSet& cfg) {
   tree->Branch("event", &nt.event, "event/i");
   tree->Branch("l1_was_seed", &nt.l1_was_seed);
   tree->Branch("l1_prescale", &nt.l1_prescale);
+  tree->Branch("l1_mask", &nt.l1_mask);
+  tree->Branch("pass_l1_premask", &nt.pass_l1_premask);
   tree->Branch("pass_l1", &nt.pass_l1);
   tree->Branch("hlt_found", &nt.hlt_found);
   tree->Branch("hlt_prescale", &nt.hlt_prescale);
@@ -125,7 +131,15 @@ void QuadJetTrigPrescales::analyze(const edm::Event& event, const edm::EventSetu
       if (l1_err != 0)
         throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting prescale";
 
-      nt.pass_l1[il1] = l1_cfg.decision(event, l1_path, l1_err);
+      nt.l1_mask[il1] = l1_cfg.triggerMask(event, l1_path, l1_err);
+      if (l1_err != 0)
+        throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting mask";
+
+      nt.pass_l1_premask[il1] = l1_cfg.decision(event, l1_path, l1_err);
+      if (l1_err != 0)
+        throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting pre-mask decision";
+      
+      nt.pass_l1[il1] = l1_cfg.decisionAfterMask(event, l1_path, l1_err);
       if (l1_err != 0)
         throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting decision";
       
