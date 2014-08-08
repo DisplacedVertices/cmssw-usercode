@@ -733,10 +733,10 @@ data_samples = [
 data_samples_orig = data_samples[:5]
 
 auxiliary_data_samples = [
-    Samples.DataSample('SingleMu2012A', '/SingleMu/Run2012A-22Jan2013-v1/AOD'),
-    Samples.DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD'),
-    Samples.DataSample('SingleMu2012C', '/SingleMu/Run2012C-22Jan2013-v1/AOD'),
-    Samples.DataSample('SingleMu2012D', '/SingleMu/Run2012D-22Jan2013-v1/AOD'),
+    DataSample('SingleMu2012A', '/SingleMu/Run2012A-22Jan2013-v1/AOD'),
+    DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD'),
+    DataSample('SingleMu2012C', '/SingleMu/Run2012C-22Jan2013-v1/AOD'),
+    DataSample('SingleMu2012D', '/SingleMu/Run2012D-22Jan2013-v1/AOD'),
     ]
 
 ########################################################################
