@@ -168,7 +168,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             magic = 'runOnMC = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'runOnMC = False', err))
-            to_add.append('process.dummyToMakeDiffHash = cms.PSet(sampleName = cms.string("%s"))' % sample.name) # would not have to do if changed globaltags JMTBAD
+            if sample.name.startswith('MultiJetPk2012'):
+                for name_part, tag in [
+                    ('2012B', 'FT_53_V6C_AN4'),
+                    ('2012C1', 'FT53_V10A_AN4'),
+                    ('2012C2', 'FT_P_V42C_AN4'),
+                    ('2012D1', 'FT_P_V42_AN4'),
+                    ('2012D2', 'FT_P_V42D_AN4'),
+                    ]:
+                    if name_part in sample.name:
+                        to_add.append('process.GlobalTag.globaltag = "%s::All"' % tag)
 
         if sample.is_mc and sample.re_pat:
             to_add.append("process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')") # JMTBAD rework re_pat
