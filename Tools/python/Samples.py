@@ -719,9 +719,6 @@ data_samples = [
     DataSample('MultiJetPk2012C2', '/MultiJet1Parked/Run2012C-part2_05Nov2012-v2/AOD'),
     DataSample('MultiJetPk2012D1', '/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD'),
     DataSample('MultiJetPk2012D2', '/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD'),
-    DataSample('MultiJetPk2012C2_Missing', '/MultiJet1Parked/Run2012C-part2_05Nov2012-v2/AOD'),
-    DataSample('MultiJetPk2012D1_Missing', '/MultiJet1Parked/Run2012D-part1_10Dec2012-v1/AOD'), # still missing 4 jobs
-    DataSample('MultiJetPk2012D2_Missing', '/MultiJet1Parked/Run2012D-part2_17Jan2013-v1/AOD'), # "     "       1 "
     ]
 
 data_samples_orig = data_samples[:5]
