@@ -1,3 +1,5 @@
+// g++ -std=c++0x `root-config --cflags --glibs` prescales.cc -o prescales.exe && ./prescales.exe
+
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -9,7 +11,6 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-
 #include <vector>
 
 class PRESCALES {
@@ -23,6 +24,8 @@ public :
    UInt_t          event;
    std::vector<bool>    *l1_was_seed;
    std::vector<int>     *l1_prescale;
+   std::vector<int>     *l1_mask;
+   std::vector<bool>    *pass_l1_premask;
    std::vector<bool>    *pass_l1;
    std::vector<bool>    *hlt_found;
    std::vector<int>     *hlt_prescale;
@@ -34,6 +37,8 @@ public :
    TBranch        *b_event;   //!
    TBranch        *b_l1_was_seed;   //!
    TBranch        *b_l1_prescale;   //!
+   TBranch        *b_l1_mask;   //!
+   TBranch        *b_pass_l1_premask;   //!
    TBranch        *b_pass_l1;   //!
    TBranch        *b_hlt_found;   //!
    TBranch        *b_hlt_prescale;   //!
@@ -52,11 +57,11 @@ PRESCALES::PRESCALES(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("crab/QuadJetTrigPrescales/all.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("all.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("crab/QuadJetTrigPrescales/all.root");
+         f = new TFile("all.root");
       }
-      TDirectory * dir = (TDirectory*)f->Get("crab/QuadJetTrigPrescales/all.root:/QuadJetTrigPrescales");
+      TDirectory * dir = (TDirectory*)f->Get("all.root:/QuadJetTrigPrescales");
       dir->GetObject("t",tree);
 
    }
@@ -100,6 +105,8 @@ void PRESCALES::Init(TTree *tree)
    // Set object pointer
    l1_was_seed = 0;
    l1_prescale = 0;
+   l1_mask = 0;
+   pass_l1_premask = 0;
    pass_l1 = 0;
    hlt_found = 0;
    hlt_prescale = 0;
@@ -115,6 +122,8 @@ void PRESCALES::Init(TTree *tree)
    fChain->SetBranchAddress("event", &event, &b_event);
    fChain->SetBranchAddress("l1_was_seed", &l1_was_seed, &b_l1_was_seed);
    fChain->SetBranchAddress("l1_prescale", &l1_prescale, &b_l1_prescale);
+   fChain->SetBranchAddress("l1_mask", &l1_mask, &b_l1_mask);
+   fChain->SetBranchAddress("pass_l1_premask", &pass_l1_premask, &b_pass_l1_premask);
    fChain->SetBranchAddress("pass_l1", &pass_l1, &b_pass_l1);
    fChain->SetBranchAddress("hlt_found", &hlt_found, &b_hlt_found);
    fChain->SetBranchAddress("hlt_prescale", &hlt_prescale, &b_hlt_prescale);
@@ -146,17 +155,28 @@ void PRESCALES::Loop() {
   std::map<std::pair<unsigned, unsigned>, bool> seen;
   std::map<std::pair<unsigned, unsigned>, bool> nolumi;
 
-  std::map<std::pair<int, int>, double> intlumi[3];
+  std::map<std::pair<int, int>, double> intlumi[6];
+  const char* intlumi_names[6] = { "all ls", "ls with tot. presc. != 0", "ls with tot. presc. != 0, scaled", "ls where bit mask == 0", "ls where bit mask == 0, tot. presc. != 0", "ls where bit mask == 0, tot. presc. != 0, scaled" };
 
   const char* l1s[9] = {"L1_QuadJetC32", "L1_QuadJetC36", "L1_QuadJetC40", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_DoubleJetC52", "L1_DoubleJetC56", "L1_DoubleJetC64"};
   const int hlt_vers[4] = {1,2,3,5};
+
+  int check_pass_l1[9][2][2] = {{{0}}};
+  int check_l1_mask[9][2][2] = {{{0}}};
+
+  int i_run_ls = 0;
 
   for (Long64_t jentry = 0; jentry < nentries; ++jentry) {
     if (LoadTree(jentry) < 0) break;
     fChain->GetEntry(jentry);
 
     if (jentry % 500000 == 0)
-      printf("%lli/%lli\n",jentry, nentries);
+      printf("%lli/%lli (# run/ls = %i)\n",jentry, nentries, i_run_ls);
+
+    for (int i = 0; i < 9; ++i) {
+      ++check_pass_l1[i][pass_l1_premask->at(i)][pass_l1->at(i)];
+      ++check_l1_mask[i][l1_mask->at(i)][pass_l1->at(i)];
+    }
 
     {
       const int c = std::accumulate(l1_was_seed->begin(), l1_was_seed->end(), 0);
@@ -173,7 +193,6 @@ void PRESCALES::Loop() {
       continue;
     }
 
-    
     for (int l1 = 0; l1 < 9; ++l1) {
       for (int hlt = 0; hlt < 4; ++hlt) {
         std::pair<int, int> l1_hlt = {l1, hlt};
@@ -184,16 +203,32 @@ void PRESCALES::Loop() {
         int p = l1p * hltp;
 
         intlumi[0][l1_hlt] += il;
+        if (l1_mask->at(l1) == 0)
+          intlumi[3][l1_hlt] += il;
         if (p > 0) {
           intlumi[1][l1_hlt] += il;
           intlumi[2][l1_hlt] += il / p;
+          if (l1_mask->at(l1) == 0) {
+            intlumi[4][l1_hlt] += il;
+            intlumi[5][l1_hlt] += il / p;
+          }
         }
       }
     }
+
+    ++i_run_ls;
+    //if (i_run_ls == 5000) break;
   }
 
-  for (int w = 0; w < 3 ; ++w) {
-    printf("w = %i\n", w);
+  printf("check_l1_mask:\n");
+  for (int l1 = 0; l1 < 9; ++l1)
+    printf("%25s: %20i %20i %20i %20i\n", l1s[l1], check_l1_mask[l1][0][0],check_l1_mask[l1][0][1],check_l1_mask[l1][1][0],check_l1_mask[l1][1][1]);
+  printf("check_pass_l1:\n");
+  for (int l1 = 0; l1 < 9; ++l1)
+    printf("%25s: %20i %20i %20i %20i\n", l1s[l1], check_pass_l1[l1][0][0],check_pass_l1[l1][0][1],check_pass_l1[l1][1][0],check_pass_l1[l1][1][1]);
+
+  for (int w = 0; w < 6; ++w) {
+    printf("w = %i: %s\n", w, intlumi_names[w]);
     for (int l1 = 0; l1 < 9; ++l1) {
       for (int hlt = 0; hlt < 4; ++hlt) {
         std::pair<int, int> l1_hlt = {l1, hlt};
