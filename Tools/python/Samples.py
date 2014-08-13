@@ -766,7 +766,8 @@ def from_argv(default=None, sort_and_set=True):
 
 # Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-for sample, minus in [(ttbarsemilep, 30066*7)]:
+for sample, minus in [(ttbarsemilep, 30066*7),
+                      (mfv_neutralino_tau1000um_M0300, 2000)]:
     sample.reduce_total_events_by(minus)
 
 # Overrides done.
