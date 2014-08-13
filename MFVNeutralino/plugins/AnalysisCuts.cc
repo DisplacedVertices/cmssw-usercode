@@ -173,9 +173,25 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->njets() < min_njets || mevent->njets() > max_njets)
       return false;
 
-    if((min_4th_calojet_pt > 0 && mevent->calojetpt4() < min_4th_calojet_pt) ||
-       (min_5th_calojet_pt > 0 && mevent->calojetpt5() < min_5th_calojet_pt))
-      return false;
+    if (min_4th_calojet_pt > 0 || min_5th_calojet_pt > 0) {
+      float pt4 = 0;
+      float pt5 = 0;
+      const int caloid = 3;
+      int ij = 0;
+      for (int i = 0, ie = int(mevent->calojet_id.size()); i < ie; ++i) {
+        if ((mevent->calojet_id[i] >> caloid) & 1) {
+          ++ij;
+          if (ij == 4)
+            pt4 = mevent->calojet_pt[i];
+          else if (ij == 5)
+            pt5 = mevent->calojet_pt[i];
+        }
+      }
+
+      if ((min_4th_calojet_pt > 0 && pt4 < min_4th_calojet_pt) ||
+          (min_5th_calojet_pt > 0 && pt5 < min_5th_calojet_pt))
+        return false;
+    }
 
     if((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||
        (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt))
