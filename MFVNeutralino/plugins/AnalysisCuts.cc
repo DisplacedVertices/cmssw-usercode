@@ -26,9 +26,10 @@ private:
 
   const int min_npv;
   const int max_npv;
+  const double min_4th_calojet_pt;
+  const double min_5th_calojet_pt;
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
-  const double min_6th_jet_pt;
   const int min_njets;
   const int max_njets;
   const std::vector<int> min_nbtags;
@@ -74,9 +75,10 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
+    min_4th_calojet_pt(cfg.getParameter<double>("min_4th_calojet_pt")),
+    min_5th_calojet_pt(cfg.getParameter<double>("min_5th_calojet_pt")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
-    min_6th_jet_pt(cfg.getParameter<double>("min_6th_jet_pt")),
     min_njets(cfg.getParameter<int>("min_njets")),
     max_njets(cfg.getParameter<int>("max_njets")),
     min_nbtags(cfg.getParameter<std::vector<int> >("min_nbtags")),
@@ -171,9 +173,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->njets() < min_njets || mevent->njets() > max_njets)
       return false;
 
+    if((min_4th_calojet_pt > 0 && mevent->calojetpt4() < min_4th_calojet_pt) ||
+       (min_5th_calojet_pt > 0 && mevent->calojetpt5() < min_5th_calojet_pt))
+      return false;
+
     if((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||
-       (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt) ||
-       (min_6th_jet_pt > 0 && mevent->jetpt6() < min_6th_jet_pt))
+       (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt))
       return false;
 
     for (int i = 0; i < 3; ++i)
