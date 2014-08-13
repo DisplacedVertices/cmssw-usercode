@@ -766,8 +766,7 @@ def from_argv(default=None, sort_and_set=True):
 
 # Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-for sample, minus in [(ttbarsemilep, 30066*7)]:
-    sample.reduce_total_events_by(minus)
+ttbarsemilep.ana_dataset_override = '/TTJets_SemiLeptMGDecays_8TeV-madgraph/jchu-mfvntuple_v19-1456c7a6c14e155fd50f9cee9c579b13/USER'
 
 # Overrides done.
 
