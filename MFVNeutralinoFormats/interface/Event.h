@@ -124,6 +124,7 @@ struct MFVEvent {
 
   int ncalojets() const { return int(calojet_pt.size()); }
   float calojetpt4() const { return ncalojets() >= 4 ? calojet_pt[3] : 0.f; }
+  float calojetpt5() const { return ncalojets() >= 5 ? calojet_pt[4] : 0.f; }
   float calojet_sum_ht() const { return std::accumulate(calojet_pt.begin(), calojet_pt.end(), 0.f); }
 
   std::vector<uchar> jet_id;
