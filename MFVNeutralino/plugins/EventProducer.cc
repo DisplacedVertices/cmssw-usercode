@@ -315,7 +315,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByLabel(calojets_src, calojets);
 
   for (const pat::Jet& jet : *calojets) {
-    if (jet.pt() < jet_pt_min)
+    if (jet.pt() < jet_pt_min) // JMTBAD should also require |eta| < 2.5
       continue;
 
     uchar id = 0;
