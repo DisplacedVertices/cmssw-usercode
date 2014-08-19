@@ -2,14 +2,14 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
-SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 500)
+process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v19/3b675468c132e35b291c67c94e024555/ntuple_1_1_1Ja.root']
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-vtx_sel = process.mfvSelectedVerticesTightSig
+vtx_sel = process.mfvSelectedVerticesTight
 
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-ana_sel = process.mfvAnalysisCutsSig
+ana_sel = process.mfvAnalysisCuts
 
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
@@ -149,15 +149,23 @@ for i in xrange(0,200,10):
 
 for i in xrange(0,501,25):
     changes.append(('jetsntkmass01X%i'%i, '', 'min_jetsntkmass01 = %i'%i))
+for i in xrange(40, 200, 5):
+    changes.append(('pf4ptX%i' % i, '', 'min_4th_jet_pt = %i' % i))
 
 for i in xrange(0,501,25):
     changes.append(('tksjetsntkmass01X%i'%i, '', 'min_tksjetsntkmass01 = %i'%i))
+for i in xrange(40, 200, 5):
+    changes.append(('pf5ptX%i' % i, '', 'min_5th_jet_pt = %i' % i))
 
 for i in xrange(0,32,2):
     changes.append(('absdeltaphi01X%s'%pize(0.1*i,1), '', 'min_absdeltaphi01 = %f'%(0.1*i)))
+for i in xrange(40, 200, 5):
+    changes.append(('cl4ptX%i' % i, '', 'min_4th_calojet_pt = %i' % i))
 
 for i in xrange(0,100):
     changes.append(('svdist2dX%s'%pize(0.0025*i,4), '', 'min_svdist2d = %f'%(0.0025*i)))
+for i in xrange(40, 200, 5):
+    changes.append(('cl5ptX%i' % i, '', 'min_5th_calojet_pt = %i' % i))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
@@ -190,7 +198,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                                  Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('CutPlayV18',
+    cs = CRABSubmitter('CutPlayV19',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
