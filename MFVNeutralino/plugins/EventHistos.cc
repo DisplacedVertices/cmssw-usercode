@@ -70,10 +70,23 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_njets;
   TH1F* h_njetsnopu[3];
+  TH1F* h_jetpt1;
+  TH1F* h_jetpt2;
+  TH1F* h_jetpt3;
   TH1F* h_jetpt4;
   TH1F* h_jetpt5;
   TH1F* h_jetpt6;
   TH1F* h_jet_sum_ht;
+
+  TH1F* h_ncalojets;
+  TH1F* h_calojetpt1;
+  TH1F* h_calojetpt2;
+  TH1F* h_calojetpt3;
+  TH1F* h_calojetpt4;
+  TH1F* h_calojetpt5;
+  TH1F* h_calojetpt6;
+  TH1F* h_calojet_sum_ht;
+
   TH1F* h_jetphi;
   TH1F* h_jetpairdphi;
 
@@ -251,10 +264,23 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
   for (int i = 0; i < 3; ++i)
     h_njetsnopu[i] = fs->make<TH1F>(TString::Format("h_njetsnopu_%s", lmt_ex[i]), TString::Format(";# of jets (%s PU id);events", lmt_ex[i]), 20, 0, 20);
+  h_jetpt1 = fs->make<TH1F>("h_jetpt1", ";p_{T} of 1st jet (GeV);events/5 GeV", 100, 0, 500);
+  h_jetpt2 = fs->make<TH1F>("h_jetpt2", ";p_{T} of 2nd jet (GeV);events/5 GeV", 100, 0, 500);
+  h_jetpt3 = fs->make<TH1F>("h_jetpt3", ";p_{T} of 3rd jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt6 = fs->make<TH1F>("h_jetpt6", ";p_{T} of 6th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jet_sum_ht = fs->make<TH1F>("h_jet_sum_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+
+  h_ncalojets = fs->make<TH1F>("h_ncalojets", ";# of calojets;events", 20, 0, 20);
+  h_calojetpt1 = fs->make<TH1F>("h_calojetpt1", ";p_{T} of 1st calojet (GeV);events/5 GeV", 100, 0, 500);
+  h_calojetpt2 = fs->make<TH1F>("h_calojetpt2", ";p_{T} of 2nd calojet (GeV);events/5 GeV", 100, 0, 500);
+  h_calojetpt3 = fs->make<TH1F>("h_calojetpt3", ";p_{T} of 3rd calojet (GeV);events/5 GeV", 100, 0, 500);
+  h_calojetpt4 = fs->make<TH1F>("h_calojetpt4", ";p_{T} of 4th calojet (GeV);events/5 GeV", 100, 0, 500);
+  h_calojetpt5 = fs->make<TH1F>("h_calojetpt5", ";p_{T} of 5th calojet (GeV);events/5 GeV", 100, 0, 500);
+  h_calojetpt6 = fs->make<TH1F>("h_calojetpt6", ";p_{T} of 6th calojet (GeV);events/5 GeV", 100, 0, 500);
+  h_calojet_sum_ht = fs->make<TH1F>("h_calojet_sum_ht", ";#Sigma H_{T} of calojets (GeV);events/25 GeV", 200, 0, 5000);
+
   h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
   h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
 
@@ -458,10 +484,23 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_njets->Fill(mevent->njets(), w);
   for (int i = 0; i < 3; ++i)
     h_njetsnopu[i]->Fill(mevent->njetsnopu(i), w);
+  h_jetpt1->Fill(mevent->njets() >= 1 ? mevent->jet_pt[0] : 0.f, w);
+  h_jetpt2->Fill(mevent->njets() >= 2 ? mevent->jet_pt[1] : 0.f, w);
+  h_jetpt3->Fill(mevent->njets() >= 3 ? mevent->jet_pt[2] : 0.f, w);
   h_jetpt4->Fill(mevent->jetpt4(), w);
   h_jetpt5->Fill(mevent->jetpt5(), w);
   h_jetpt6->Fill(mevent->jetpt6(), w);
   h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
+
+  h_ncalojets->Fill(mevent->ncalojets(), w);
+  h_calojetpt1->Fill(mevent->ncalojets() >= 1 ? mevent->calojet_pt[0] : 0.f, w);
+  h_calojetpt2->Fill(mevent->ncalojets() >= 2 ? mevent->calojet_pt[1] : 0.f, w);
+  h_calojetpt3->Fill(mevent->ncalojets() >= 3 ? mevent->calojet_pt[2] : 0.f, w);
+  h_calojetpt4->Fill(mevent->calojetpt4(), w);
+  h_calojetpt5->Fill(mevent->ncalojets() >= 5 ? mevent->calojet_pt[4] : 0.f, w);
+  h_calojetpt6->Fill(mevent->ncalojets() >= 6 ? mevent->calojet_pt[5] : 0.f, w);
+  h_calojet_sum_ht->Fill(mevent->calojet_sum_ht(), w);
+
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_jetphi->Fill(mevent->jet_phi[ijet]);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
