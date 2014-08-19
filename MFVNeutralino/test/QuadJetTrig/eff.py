@@ -5,6 +5,8 @@ from JMTucker.Tools.PATTuple_cfg import *
 
 runOnMC = True # magic line, don't touch
 process, common_seq = pat_tuple_process(runOnMC)
+for name, path in process.paths.items():
+    delattr(process, name)
 
 process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A_ext-v1/00000/FEDD73E4-5424-E211-8271-001E67398142.root' if runOnMC else '/store/user/tucker/Run2012D_SingleMu_AOD_22Jan2013-v1_10000_0015EC7D-EAA7-E211-A9B9-E0CB4E5536A7.root']
 
@@ -20,48 +22,42 @@ process.selectedPatJets.cut = ''
 common_seq *= process.patJetCorrFactors * process.patJets * process.selectedPatJets
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-process.QuadJet50 = hltHighLevel.clone()
-process.QuadJet50.HLTPaths = ['HLT_QuadJet50_v*']
-process.QuadJet50.andOr = True # = OR
-process.IsoMu25Eta2p1 = process.QuadJet50.clone(HLTPaths = ['HLT_IsoMu24_eta2p1_v*'])
-for name, path in process.paths.items():
-    if not name.startswith('eventCleaning'):
-        path.insert(0, process.IsoMu25Eta2p1)
+process.IsoMu24Eta2p1 = hltHighLevel.clone()
+process.IsoMu24Eta2p1.HLTPaths = ['HLT_IsoMu24_eta2p1_v*']
+process.IsoMu24Eta2p1.andOr = True # = OR
 
-for no_prescale in (True, False):
-    for apply_prescale in (True, False):
-        if no_prescale and apply_prescale:
-            continue
+for l1_path in (32, 36, 40):
+    for no_prescale in (True, False):
+        for apply_prescale in (True, False):
+            if no_prescale and apply_prescale:
+                continue
 
-        for kind in ('pf', 'cl', 0, 1, 2, 3):
-            if type(kind) == int:
-                sel = kind
-                kind = 'cl'
-            else:
-                sel = -1
+            for kind in ('pf', 'cl', 0, 1, 2, 3):
+                if type(kind) == int:
+                    sel = kind
+                    kind = 'cl'
+                else:
+                    sel = -1
 
-            src = 'selectedPatJets'
-            if kind == 'pf':
-                src += 'PF'
+                src = 'selectedPatJets'
+                if kind == 'pf':
+                    src += 'PF'
 
-            num = cms.EDAnalyzer('QuadJetTrigEff',
-                                 jets_src = cms.InputTag(src),
-                                 sel = cms.int32(sel),
-                                 no_prescale = cms.bool(no_prescale),
-                                 apply_prescale = cms.bool(apply_prescale),
-                                 prints = cms.string(''),
-                                 )
-            den = num.clone()
+                num = cms.EDAnalyzer('QuadJetTrigEff',
+                                     l1_path = cms.string('L1_QuadJetC%i' % l1_path),
+                                     jets_src = cms.InputTag(src),
+                                     sel = cms.int32(sel),
+                                     no_prescale = cms.bool(no_prescale),
+                                     apply_prescale = cms.bool(apply_prescale),
+                                     require_trigger = cms.bool(True),
+                                     )
+                den = num.clone(require_trigger = False)
 
-            name = 'NP%iAP%i' % (int(no_prescale), int(apply_prescale))
-            name += '%s%s' % (kind, '' if sel == -1 else sel)
-            setattr(process, name + 'num', num)
-            setattr(process, name + 'den', den)
-            setattr(process, 'p' + name + 'num', cms.Path(process.IsoMu25Eta2p1 * process.QuadJet50 * common_seq * num))
-            setattr(process, 'p' + name + 'den', cms.Path(process.IsoMu25Eta2p1 *                     common_seq * den))
-
-process.NP0AP1pfnum.prints = 'pfnum'
-process.NP0AP1pfden.prints = 'pfden'
+                name = 'L1%iNP%iAP%i' % (l1_path, int(no_prescale), int(apply_prescale))
+                name += '%s%s' % (kind, '' if sel == -1 else sel)
+                setattr(process, name + 'num', num)
+                setattr(process, name + 'den', den)
+                setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
 
 #process.options.wantSummary = True
 
@@ -90,17 +86,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     mc_samples = [Samples.qcdmupt15] + Samples.ttbar_samples + Samples.leptonic_background_samples
 
-    data_samples = [
-        Samples.DataSample('SingleMu2012A', '/SingleMu/Run2012A-22Jan2013-v1/AOD'),
-        Samples.DataSample('SingleMu2012B', '/SingleMu/Run2012B-22Jan2013-v1/AOD'),
-        Samples.DataSample('SingleMu2012C', '/SingleMu/Run2012C-22Jan2013-v1/AOD'),
-        Samples.DataSample('SingleMu2012D', '/SingleMu/Run2012D-22Jan2013-v1/AOD'),
-        ]
+    data_samples = Samples.auxiliary_data_samples
 
     for sample in mc_samples:
-        sample.events_per = 20000
+        sample.events_per = 25000
     for sample in data_samples:
-        sample.lumis_per = 50
+        sample.lumis_per = 100
 
     samples = Samples.from_argv(mc_samples + data_samples)
 

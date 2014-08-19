@@ -25,4 +25,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        lumis_per_job = 500,
                        skip_common = True,
                        )
-    cs.submit_all(Samples.data_samples_orig)
+    cs.submit_all(Samples.data_samples_orig + Samples.auxiliary_data_samples)
