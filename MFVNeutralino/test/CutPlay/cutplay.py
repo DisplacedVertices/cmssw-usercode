@@ -18,6 +18,14 @@ def pize(f,sz):
 changes = []
 changes.append(('nm1', '', ''))
 
+if False:
+    ana_sel.min_4th_jet_pt = 0
+    for i in xrange(40, 200, 5):
+        changes.append(('pf4ptX%i' % i, '', 'min_4th_jet_pt = %i' % i))
+        changes.append(('pf5ptX%i' % i, '', 'min_5th_jet_pt = %i' % i))
+        changes.append(('cl4ptX%i' % i, '', 'min_4th_calojet_pt = %i' % i))
+        changes.append(('cl5ptX%i' % i, '', 'min_5th_calojet_pt = %i' % i))
+
 for i in xrange(0,15):
     changes.append(('ntracksX%i'%i, 'min_ntracks = %i'%i, ''))
 
@@ -149,23 +157,15 @@ for i in xrange(0,200,10):
 
 for i in xrange(0,501,25):
     changes.append(('jetsntkmass01X%i'%i, '', 'min_jetsntkmass01 = %i'%i))
-for i in xrange(40, 200, 5):
-    changes.append(('pf4ptX%i' % i, '', 'min_4th_jet_pt = %i' % i))
 
 for i in xrange(0,501,25):
     changes.append(('tksjetsntkmass01X%i'%i, '', 'min_tksjetsntkmass01 = %i'%i))
-for i in xrange(40, 200, 5):
-    changes.append(('pf5ptX%i' % i, '', 'min_5th_jet_pt = %i' % i))
 
 for i in xrange(0,32,2):
     changes.append(('absdeltaphi01X%s'%pize(0.1*i,1), '', 'min_absdeltaphi01 = %f'%(0.1*i)))
-for i in xrange(40, 200, 5):
-    changes.append(('cl4ptX%i' % i, '', 'min_4th_calojet_pt = %i' % i))
 
 for i in xrange(0,100):
     changes.append(('svdist2dX%s'%pize(0.0025*i,4), '', 'min_svdist2d = %f'%(0.0025*i)))
-for i in xrange(40, 200, 5):
-    changes.append(('cl5ptX%i' % i, '', 'min_5th_calojet_pt = %i' % i))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
