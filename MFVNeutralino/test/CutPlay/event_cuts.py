@@ -4,6 +4,8 @@ from JMTucker.Tools import SampleFiles
 
 raise NotImplementedError('V15 samples have trigger selection already')
 
+use_weights = True
+
 process.options.wantSummary = True
 SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht0250', 10000)
 process.TFileService.fileName = 'events_cutplay.root'
@@ -25,8 +27,12 @@ process.trigonly = cuts.clone(min_njets = 0, min_4th_jet_pt = 0)
 for name in process.filters.keys():
     setattr(process, 'p' + name, cms.Path(getattr(process,name)))
 
-process.effs = cms.EDAnalyzer('SimpleTriggerEfficiency', trigger_results_src = cms.InputTag('TriggerResults', '', process.name_()))
-process.p = cms.EndPath(process.effs)
+if use_weights:
+    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+
+import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_weights else '')
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
