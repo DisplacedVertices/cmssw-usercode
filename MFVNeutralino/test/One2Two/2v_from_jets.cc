@@ -168,7 +168,12 @@ TH1D* hist_with_binning(const char* name, const char* title) {
   return new TH1D(name, title, bins.size()-1, &bins[0]);
 }
 
-int main() {
+int main(int argc, const char* argv[]) {
+  if (argc == 3) {
+    muclear = atof(argv[1]);
+    sigmaclear = atof(argv[2]);
+  }
+
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(0);
 
@@ -740,6 +745,27 @@ int main() {
 
   h_dvv->Write();
   h_dvvc->Write();
+  //overlay dvv with binning
+  TCanvas* c_dvvc = new TCanvas("c_dvvc", "c_dvvc", 700, 700);
+  h_dvv->SetLineColor(kBlue);
+  h_dvv->SetLineWidth(3);
+  h_dvv->DrawNormalized();
+  h_dvvc->SetLineColor(kRed);
+  h_dvvc->SetLineWidth(3);
+  h_dvvc->DrawNormalized("sames");
+  c_dvvc->Write();
 
   fh->Close();
+
+  h_dvv->Scale(1./h_dvv->Integral());
+  h_dvvc->Scale(1./h_dvvc->Integral());
+  double chi2 = 0;
+  for (int i = 1; i <= h_dvv->GetNbinsX(); ++i) {
+    double dvvc = h_dvvc->GetBinContent(i);
+    double dvv = h_dvv->GetBinContent(i);
+    if (dvv > 0) {
+      chi2 += (dvvc - dvv) * (dvvc - dvv) / dvv;
+    }
+  }
+  printf("muclear = %f, sigmaclear = %f, chi2 = %f\n", muclear, sigmaclear, chi2);
 }
