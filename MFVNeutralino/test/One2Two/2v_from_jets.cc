@@ -150,6 +150,24 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
   return 0;
 }
 
+std::vector<double> binning() {
+  std::vector<double> bins;
+  for (int i = 0; i < 5; ++i)
+    bins.push_back(i * 0.02);
+  bins.push_back(0.1);
+  bins.push_back(0.2);
+  bins.push_back(0.4);
+  bins.push_back(0.8);
+  bins.push_back(1.6);
+  bins.push_back(3.2);
+  return bins;
+}
+
+TH1D* hist_with_binning(const char* name, const char* title) {
+  std::vector<double> bins = binning();
+  return new TH1D(name, title, bins.size()-1, &bins[0]);
+}
+
 int main() {
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(0);
@@ -158,6 +176,7 @@ int main() {
   TH1F* h_vtx0jetdphi = new TH1F("h_vtx0jetdphi", ";#Delta#phi(vertex0 position, jet momentum);arb. units", 50, -3.15, 3.15);
   TH1F* h_vtx1jetdphi = new TH1F("h_vtx1jetdphi", ";#Delta#phi(vertex1 position, jet momentum);arb. units", 50, -3.15, 3.15);
   TH1F* h_svdist2d = new TH1F("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 30, 0, 0.3);
+  TH1D* h_dvv = hist_with_binning("h_dvv", ";d_{VV} (cm);arb. units");
   TH1F* h_absdeltaphi01 = new TH1F("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 5, 0, 3.15);
   TH1D* h_sigmavv = new TH1D("h_sigmavv", ";#sigma(sv #0, #1) (cm);arb. units", 10, 0, 0.01);
   TH1D* h_sigvv = new TH1D("h_sigvv", ";N#sigma(sv #0, #1);arb. units", 15, 0, 30);
@@ -215,6 +234,7 @@ int main() {
         float dx = (nt.x0-nt.x1) / svdist2d;
         float dy = (nt.y0-nt.y1) / svdist2d;
         float sigma = sqrt((nt.cxx0 + nt.cxx1)*dx*dx + (nt.cyy0 + nt.cyy1)*dy*dy + 2*(nt.cxy0 + nt.cxy1)*dx*dy);
+        h_dvv->Fill(svdist2d, weights[i] * nt.weight);
         h_sigmavv->Fill(sigma);
         h_sigvv->Fill(svdist2d / sigma);
         h_sigmavv_dvv->Fill(svdist2d, sigma);
@@ -248,6 +268,7 @@ int main() {
   TH1F* h_sv1bs2ddist = new TH1F("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   TH1F* h_svpairdist = new TH1F("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
   TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 30, 0, 0.3);
+  TH1D* h_dvvc = hist_with_binning("h_dvvc", ";d_{VV}^{C} (cm);arb. units");
 
   TH1F* h_svdist2d_uniformphi = new TH1F("h_svdist2d_uniformphi", "svdist2d using uniform #phi distribution;constructed vertex pair distance (cm);events", 10, 0, 0.1);
   float sigma_clear[5] = {30, 40, 50, 60, 70};
@@ -300,6 +321,7 @@ int main() {
       h_svpairdphi_cut->Fill(dphi, w * p);
       h_svpairabsdphi->Fill(fabs(dphi), w * p);
       h_svpairdist_cut->Fill(svdist, w * p);
+      h_dvvc->Fill(svdist, w * p);
 
       if (njets[i] <= 6) {
         h_dvv_jets_low->Fill(svdist, w * p);
@@ -715,6 +737,9 @@ int main() {
   h_dvv_high_njets->Write();
   h_dvv_jets_high->Write();
   h_dvv_vtx_high->Write();
+
+  h_dvv->Write();
+  h_dvvc->Write();
 
   fh->Close();
 }
