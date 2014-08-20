@@ -41,15 +41,18 @@ def cutplayMangle(filename):
 
     file.Close()
 
-    output_fn = os.path.basename(filename).replace('.root', '_mangled.root')
+    output_fn = filename.replace('.root', '_mangled.root')
     output_file = ROOT.TFile(output_fn, 'RECREATE')
 
     sample_name = os.path.basename(filename).replace('.root', '')
     sample = getattr(Samples, sample_name)
 
     h_ntot = ROOT.TH1F('ntot', '', 1, 0, 1)
-    h_ntot.SetBinContent(1, ntot[0] / sample.ana_filter_eff)
-    h_ntot.SetBinError(1, ntot[1] / sample.ana_filter_eff)
+    scale = sample.ana_filter_eff
+    if 'mfv' not in sample.name:
+        scale *= 2
+    h_ntot.SetBinContent(1, ntot[0] / scale)
+    h_ntot.SetBinError  (1, ntot[1] / scale)
 
     if nm1 is not None:
         h_nm1 = ROOT.TH1F('nm1', '', 1, 0, 1)
