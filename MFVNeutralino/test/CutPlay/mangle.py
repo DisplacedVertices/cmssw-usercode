@@ -12,7 +12,7 @@ def cutplayMangle(filename):
     if not file.IsOpen():
         raise RuntimeError('could not open %s' % filename)
 
-    x = file.Get('effs/triggers_pass_num')
+    x = file.Get('SimpleTriggerEfficiency/triggers_pass_num')
 
     cutscans = {}
     nm1 = None
@@ -36,7 +36,7 @@ def cutplayMangle(filename):
             cutscans[cut] = []
         cutscans[cut].append((cut_val, x.GetBinContent(i)))
 
-    h_intot = file.Get('effs/triggers_pass_den')
+    h_intot = file.Get('SimpleTriggerEfficiency/triggers_pass_den')
     ntot = h_intot.GetBinContent(1), h_intot.GetBinError(1)
 
     file.Close()
