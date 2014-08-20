@@ -755,17 +755,20 @@ int main(int argc, const char* argv[]) {
   h_dvvc->DrawNormalized("sames");
   c_dvvc->Write();
 
-  fh->Close();
-
   h_dvv->Scale(1./h_dvv->Integral());
   h_dvvc->Scale(1./h_dvvc->Integral());
+  TH1D* h_diff = hist_with_binning("h_diff", ";(d_{VV}^{C} - d_{VV}) / d_{VV};arb. units");
   double chi2 = 0;
   for (int i = 1; i <= h_dvv->GetNbinsX(); ++i) {
     double dvvc = h_dvvc->GetBinContent(i);
     double dvv = h_dvv->GetBinContent(i);
     if (dvv > 0) {
       chi2 += (dvvc - dvv) * (dvvc - dvv) / dvv;
+      h_diff->SetBinContent(i, (dvvc - dvv) /dvv);
     }
   }
   printf("muclear = %f, sigmaclear = %f, chi2 = %f\n", muclear, sigmaclear, chi2);
+  h_diff->Write();
+
+  fh->Close();
 }
