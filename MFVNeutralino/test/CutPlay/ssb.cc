@@ -41,7 +41,7 @@ struct option_driver {
       moreprints(0),
       saveplots(0),
       plot_path("plots/SSB"),
-      int_lumi(20.),
+      int_lumi(18.2),
       signal_name("mfv_neutralino_tau1000um_M0400"),
       signal_xsec(20.),
       bigw(true),
@@ -295,9 +295,9 @@ struct z_calculator {
       html(0)
   {
     samples.push_back(sample(options.signal_name, options.signal_xsec, kRed,       vars));
-    samples.push_back(sample("ttbarhadronic",     225.2e3 * 0.457,     kBlue,      vars));
-    samples.push_back(sample("ttbarsemilep",      225.2e3 * 0.438,     kBlue + 1,  vars));
-    samples.push_back(sample("ttbardilep",        225.2e3 * 0.105,     kBlue + 2,  vars));
+    samples.push_back(sample("ttbarhadronic",     245.8e3 * 0.457,     kBlue,      vars));
+    samples.push_back(sample("ttbarsemilep",      245.8e3 * 0.438,     kBlue + 1,  vars));
+    samples.push_back(sample("ttbardilep",        245.8e3 * 0.105,     kBlue + 2,  vars));
     samples.push_back(sample("qcdht0100",         1.04e10,             kGreen,     vars));
     samples.push_back(sample("qcdht0250",         2.76e8,              kGreen + 1, vars));
     samples.push_back(sample("qcdht0500",         8.43e6,              kGreen + 2, vars));
