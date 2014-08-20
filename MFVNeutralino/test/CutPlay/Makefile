@@ -1,6 +1,6 @@
 SIGCALC_PATH  = ../../../Tools/test/SigCalc
 SIGCALC_OBJS  = $(SIGCALC_PATH)/*.o
-PROGNAME      = ssb
+PROGNAME      = ssb.exe
 SOURCES       = ssb.cc
 OBJECTS       = $(patsubst %.cc, %.o, $(SOURCES))
 ROOTCFLAGS   := $(shell root-config --cflags)
