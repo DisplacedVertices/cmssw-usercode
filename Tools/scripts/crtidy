@@ -3,8 +3,11 @@
 import os, sys
 from JMTucker.Tools.CRABTools import *
 
-cmds = '''
+rm_root_files = bool_from_argv('rm_root_files')
+
+cmds = [x.strip() for x in '''
 touch crtidied
+touch crtidied_started
 tar czf share_condor_temp.tgz share/.condor_temp
 rm -r share/.condor_temp
 tar czf stdouterrxmlwatch.tgz res/*.stdout res/*.stderr res/*.xml res/Watchdog_* res/no_inp*
@@ -14,7 +17,11 @@ rm -r res/Submission_*
 rm -r res/crabcheckoutputat*
 rm -r res/crrejobat*
 gzip log/crab.log
-'''.split('\n')
+touch crtidied_finished
+'''.split('\n') if x.strip()]
+
+if rm_root_files:
+    cmds.append('rm -r res/*.root')
 
 wd = os.getcwd()
 
