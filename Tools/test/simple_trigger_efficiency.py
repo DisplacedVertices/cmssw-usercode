@@ -20,11 +20,9 @@ process.RandomNumberGeneratorService.SimpleTriggerEfficiencyMu = cms.PSet(initia
 process.RandomNumberGeneratorService.SimpleTriggerEfficiencyMuInAcc = cms.PSet(initialSeed = cms.untracked.uint32(1221))
 
 #import prescales
-process.SimpleTriggerEfficiency = cms.EDAnalyzer('SimpleTriggerEfficiency',
-                                                 trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
-                                                 prescale_paths = cms.vstring(), #*prescales.prescales.keys()),
-                                                 prescale_values = cms.vuint32(), #*[o for l,h,o in prescales.prescales.itervalues()]),
-                                                 )
+process.load('JMTucker.Tools.SimpleTriggerEfficiency_cfi')
+process.SimpleTriggerEfficiency.prescale_paths  = cms.vstring()  #*prescales.prescales.keys()),
+process.SimpleTriggerEfficiency.prescale_values = cms.vuint32()  #*[o for l,h,o in prescales.prescales.itervalues()]),
 
 process.SimpleTriggerEfficiencyMu      = process.SimpleTriggerEfficiency.clone()
 process.SimpleTriggerEfficiencyMuInAcc = process.SimpleTriggerEfficiency.clone()
