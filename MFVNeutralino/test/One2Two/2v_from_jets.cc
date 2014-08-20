@@ -296,32 +296,24 @@ int main() {
       double svdist = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi)));
       h_svpairdist->Fill(svdist, w);
 
-      double rand = gRandom->Uniform(-1,1);
-      if (TMath::Erf((svdist - muclear)/sigmaclear) > rand) {
-        h_svpairdphi_cut->Fill(dphi, w);
-        h_svpairabsdphi->Fill(fabs(dphi), w);
-        h_svpairdist_cut->Fill(svdist, w);
+      double p = 0.5 * TMath::Erf((svdist - muclear)/sigmaclear) + 0.5;
+      h_svpairdphi_cut->Fill(dphi, w * p);
+      h_svpairabsdphi->Fill(fabs(dphi), w * p);
+      h_svpairdist_cut->Fill(svdist, w * p);
 
-        if (njets[i] <= 6) {
-          h_dvv_jets_low->Fill(svdist, w);
-        } else {
-          h_dvv_jets_high->Fill(svdist, w);
-        }
+      if (njets[i] <= 6) {
+        h_dvv_jets_low->Fill(svdist, w * p);
+      } else {
+        h_dvv_jets_high->Fill(svdist, w * p);
       }
 
       double dphi_uniformphi = TVector2::Phi_mpi_pi(throw_uniform_phi() - throw_uniform_phi());
       double svdist_uniformphi = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi_uniformphi)));
-      if (TMath::Erf((svdist_uniformphi - muclear)/sigmaclear) > rand) {
-        h_svdist2d_uniformphi->Fill(svdist_uniformphi, w);
-      }
+      h_svdist2d_uniformphi->Fill(svdist_uniformphi, w * (0.5 * TMath::Erf((svdist_uniformphi - muclear)/sigmaclear) + 0.5));
 
       for (int j = 0; j < 5; ++j) {
-        if (TMath::Erf((svdist - mu_clear[j]/10000)/sigmaclear) > rand) {
-          h_svdist2d_mu[j]->Fill(svdist, w);
-        }
-        if (TMath::Erf((svdist - muclear)/(sigma_clear[j]/10000)) > rand) {
-          h_svdist2d_sigma[j]->Fill(svdist, w);
-        }
+        h_svdist2d_mu[j]->Fill(svdist, w * (0.5 * TMath::Erf((svdist - mu_clear[j]/10000)/sigmaclear) + 0.5));
+        h_svdist2d_sigma[j]->Fill(svdist, w * (0.5 * TMath::Erf((svdist - muclear)/(sigma_clear[j]/10000)) + 0.5));
       }
     }
   }
