@@ -2,6 +2,8 @@ import os, sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 from JMTucker.Tools import SampleFiles
 
+use_weights = True
+
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v19/3b675468c132e35b291c67c94e024555/ntuple_1_1_1Ja.root']
 process.TFileService.fileName = 'cutplay.root'
 
@@ -183,11 +185,11 @@ for name, vtx_change, ana_change in changes:
     setattr(process, path_name, cms.Path(vtx_obj * ana_obj))
 
 
+if use_weights:
+    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 
-process.effs = cms.EDAnalyzer('SimpleTriggerEfficiency',
-                              trigger_results_src = cms.InputTag('TriggerResults', '', process.name_()),
-                              )
-process.p = cms.EndPath(process.effs)
+import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_weights else '')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
