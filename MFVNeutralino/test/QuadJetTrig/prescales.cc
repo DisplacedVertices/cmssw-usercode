@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cmath>
 #include <map>
+#include <set>
 #include <numeric>
 #include <algorithm>
 #include <TROOT.h>
@@ -130,6 +131,16 @@ void PRESCALES::Init(TTree *tree)
    fChain->SetBranchAddress("pass_hlt", &pass_hlt, &b_pass_hlt);
 }
 
+void write_json(const char* fn, const std::set<std::pair<unsigned, unsigned> >& json) {
+  FILE* f = fopen("/tmp/writejson.py", "wt");
+  fprintf(f, "from FWCore.PythonUtilities.LumiList import LumiList\nlumis = []\n");
+  for (const auto& run_ls : json)
+    fprintf(f, "lumis.append((%u, %u))\n", run_ls.first, run_ls.second);
+  fprintf(f, "ll = LumiList(lumis=lumis)\nll.writeJSON('%s')\n", fn);
+  fclose(f);
+  system("python /tmp/writejson.py");
+}
+
 void PRESCALES::Loop() {
   const Long64_t nentries = fChain->GetEntriesFast();
 
@@ -155,8 +166,17 @@ void PRESCALES::Loop() {
   std::map<std::pair<unsigned, unsigned>, bool> seen;
   std::map<std::pair<unsigned, unsigned>, bool> nolumi;
 
-  std::map<std::pair<int, int>, double> intlumi[6];
-  const char* intlumi_names[6] = { "all ls", "ls with tot. presc. != 0", "ls with tot. presc. != 0, scaled", "ls where bit mask == 0", "ls where bit mask == 0, tot. presc. != 0", "ls where bit mask == 0, tot. presc. != 0, scaled" };
+  std::set<std::pair<unsigned, unsigned> > json[9][7];
+  std::map<std::pair<int, int>, double> intlumi[7];
+  const char* names[7] = {
+    "all ls",
+    "ls with tot. presc. != 0",
+    "ls with tot. presc. != 0, scaled",
+    "ls where bit mask == 0",
+    "ls where bit mask == 0, tot. presc. != 0",
+    "ls where bit mask == 0, tot. presc. != 0, scaled",
+    "ls where bit mask == 0, tot. presc. == 1"
+  };
 
   const char* l1s[9] = {"L1_QuadJetC32", "L1_QuadJetC36", "L1_QuadJetC40", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_DoubleJetC52", "L1_DoubleJetC56", "L1_DoubleJetC64"};
   const int hlt_vers[4] = {1,2,3,5};
@@ -203,14 +223,31 @@ void PRESCALES::Loop() {
         int p = l1p * hltp;
 
         intlumi[0][l1_hlt] += il;
-        if (l1_mask->at(l1) == 0)
+        json[l1][0].insert(run_ls);
+
+        if (l1_mask->at(l1) == 0) {
           intlumi[3][l1_hlt] += il;
+          json[l1][3].insert(run_ls);
+        }
+
         if (p > 0) {
           intlumi[1][l1_hlt] += il;
+          json[l1][1].insert(run_ls);
+
           intlumi[2][l1_hlt] += il / p;
+          json[l1][2].insert(run_ls);
+
           if (l1_mask->at(l1) == 0) {
             intlumi[4][l1_hlt] += il;
+            json[l1][4].insert(run_ls);
+
             intlumi[5][l1_hlt] += il / p;
+            json[l1][5].insert(run_ls);
+
+            if (p == 1) {
+              intlumi[6][l1_hlt] += il;
+              json[l1][6].insert(run_ls);
+            }
           }
         }
       }
@@ -227,13 +264,24 @@ void PRESCALES::Loop() {
   for (int l1 = 0; l1 < 9; ++l1)
     printf("%25s: %20i %20i %20i %20i\n", l1s[l1], check_pass_l1[l1][0][0],check_pass_l1[l1][0][1],check_pass_l1[l1][1][0],check_pass_l1[l1][1][1]);
 
-  for (int w = 0; w < 6; ++w) {
-    printf("w = %i: %s\n", w, intlumi_names[w]);
+  system("mkdir -p jsons");
+
+  for (int w = 0; w < 7; ++w) {
+    printf("========================================================================\nw = %i: %s\n", w, names[w]);
     for (int l1 = 0; l1 < 9; ++l1) {
+      double sum = 0;
+
       for (int hlt = 0; hlt < 4; ++hlt) {
         std::pair<int, int> l1_hlt = {l1, hlt};
-        printf("%25s  HLT_QuadJet50_v%i  %f\n", l1s[l1], hlt_vers[hlt], intlumi[w][l1_hlt]);
+        double il = intlumi[w][l1_hlt];
+        sum += il;
+        printf("%25s  HLT_QuadJet50_v%i   %f\n", l1s[l1], hlt_vers[hlt], il);
       }
+
+      printf("\n%25s  HLT_QuadJet50 tot  %f   %lu LS in json\n--------------------------------------------------------------------\n", l1s[l1], sum, json[l1][w].size());
+      char json_fn[1024];
+      snprintf(json_fn, 1024, "jsons/%s--%s.json", l1s[l1], names[w]);
+      write_json(json_fn, json[l1][w]);
     }
   }
 }
