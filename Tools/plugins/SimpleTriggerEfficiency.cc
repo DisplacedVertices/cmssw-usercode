@@ -19,6 +19,8 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   edm::InputTag trigger_results_src;
+  const edm::InputTag weight_src;
+  const bool use_weight;
   std::map<std::string, unsigned> prescales;
   edm::Service<edm::RandomNumberGenerator> rng;
 
@@ -32,6 +34,8 @@ private:
 
 SimpleTriggerEfficiency::SimpleTriggerEfficiency(const edm::ParameterSet& cfg) 
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
+    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
+    use_weight(weight_src.label() != ""),
     triggers_pass_num(0),
     triggers_pass_den(0),
     triggers2d_pass_num(0),
@@ -108,17 +112,24 @@ void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventS
     }
   }
 
+  double weight = 1;
+  if (use_weight) {
+    edm::Handle<double> weight_h;
+    event.getByLabel(weight_src, weight_h);
+    weight = *weight_h;
+  }
+
   for (size_t ipath = 0; ipath < npaths; ++ipath) {
-    triggers_pass_den->Fill(ipath);
+    triggers_pass_den->Fill(ipath, weight);
     const bool iacc = trigger_results->accept(ipath) && pass_prescale(trigger_names.triggerName(ipath));
     if (iacc)
-      triggers_pass_num->Fill(ipath);
+      triggers_pass_num->Fill(ipath, weight);
 
     for (size_t jpath = 0; jpath < ipath; ++jpath) {
-      triggers2d_pass_den->Fill(ipath, jpath);
+      triggers2d_pass_den->Fill(ipath, jpath, weight);
       const bool jacc = trigger_results->accept(jpath) && pass_prescale(trigger_names.triggerName(jpath));
       if (iacc || jacc)
-	triggers2d_pass_num->Fill(ipath, jpath);
+	triggers2d_pass_num->Fill(ipath, jpath, weight);
     }
   }
 }
