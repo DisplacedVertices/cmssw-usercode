@@ -12,6 +12,9 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+double    muclear = 0.028;
+double sigmaclear = 0.005;
+
 const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_1";
 
 //const char* sample_name = "ttbarhadronic";
@@ -294,7 +297,7 @@ int main() {
       h_svpairdist->Fill(svdist, w);
 
       double rand = gRandom->Uniform(-1,1);
-      if (TMath::Erf((svdist - 0.028)/0.005) > rand) {
+      if (TMath::Erf((svdist - muclear)/sigmaclear) > rand) {
         h_svpairdphi_cut->Fill(dphi, w);
         h_svpairabsdphi->Fill(fabs(dphi), w);
         h_svpairdist_cut->Fill(svdist, w);
@@ -308,15 +311,15 @@ int main() {
 
       double dphi_uniformphi = TVector2::Phi_mpi_pi(throw_uniform_phi() - throw_uniform_phi());
       double svdist_uniformphi = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi_uniformphi)));
-      if (TMath::Erf((svdist_uniformphi - 0.028)/0.005) > rand) {
+      if (TMath::Erf((svdist_uniformphi - muclear)/sigmaclear) > rand) {
         h_svdist2d_uniformphi->Fill(svdist_uniformphi, w);
       }
 
       for (int j = 0; j < 5; ++j) {
-        if (TMath::Erf((svdist - mu_clear[j]/10000)/0.005) > rand) {
+        if (TMath::Erf((svdist - mu_clear[j]/10000)/sigmaclear) > rand) {
           h_svdist2d_mu[j]->Fill(svdist, w);
         }
-        if (TMath::Erf((svdist - 0.028)/(sigma_clear[j]/10000)) > rand) {
+        if (TMath::Erf((svdist - muclear)/(sigma_clear[j]/10000)) > rand) {
           h_svdist2d_sigma[j]->Fill(svdist, w);
         }
       }
