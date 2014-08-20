@@ -190,8 +190,10 @@ void PRESCALES::Loop() {
     if (LoadTree(jentry) < 0) break;
     fChain->GetEntry(jentry);
 
-    if (jentry % 500000 == 0)
+    if (jentry % 500000 == 0) {
       printf("%lli/%lli (# run/ls = %i)\n",jentry, nentries, i_run_ls);
+      fflush(stdout);
+    }
 
     for (int i = 0; i < 9; ++i) {
       ++check_pass_l1[i][pass_l1_premask->at(i)][pass_l1->at(i)];
