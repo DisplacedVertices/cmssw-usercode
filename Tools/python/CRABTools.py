@@ -238,12 +238,16 @@ def crab_status(working_dir, verbose=True, debug=False):
     for x in s.split('\n'):
         # hurr should redo this with regexps, then not have to use these hacks
         x = x.replace('Cancelled by user', 'CancelledByUser')
-        x = x.replace('red.unl.edu red.unl.edu', 'red.unl.edu') # remote screwup 1/9/14
-        x = x.replace('red-gw1.unl.edu red-gw1.unl.edu', 'red-gw1.unl.edu')
-        x = x.replace('red-gw2.unl.edu red-gw2.unl.edu', 'red-gw2.unl.edu')
-        x = x.replace('tusker-gw1.unl.edu tusker-gw1.unl.edu', 'tusker-gw1.unl.edu')
-        x = x.replace('osg-gw-4.t2.ucsd.edu osg-gw-4.t2.ucsd.edu', 'osg-gw-4.t2.ucsd.edu') # 7/10/14 lol when will i correctly fix this problem
-        x = x.replace('ce-itb.ultralight.org ce-itb.ultralight.org', 'ce-itb.ultralight.org')
+        for bad in [
+            'red.unl.edu',
+            'red-gw1.unl.edu',
+            'red-gw2.unl.edu',
+            'tusker-gw1.unl.edu',
+            'osg-gw-4.t2.ucsd.edu',
+            'ce-itb.ultralight.org',
+            'cmsgrid03.hep.wisc.edu',
+            ]:
+            x = x.replace(bad + ' ' + bad, bad)
         x = [y.strip() for y in x.split() if y.strip()]
         #print len(x), x
         if len(x) < 4: continue
