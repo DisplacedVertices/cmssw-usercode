@@ -8,12 +8,12 @@ process, common_seq = pat_tuple_process(runOnMC)
 for name, path in process.paths.items():
     delattr(process, name)
 
-process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A_ext-v1/00000/FEDD73E4-5424-E211-8271-001E67398142.root' if runOnMC else '/store/user/tucker/Run2012D_SingleMu_AOD_22Jan2013-v1_10000_0015EC7D-EAA7-E211-A9B9-E0CB4E5536A7.root']
+process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A_ext-v1/00000/FEDD73E4-5424-E211-8271-001E67398142.root' if runOnMC else '/store/data/Run2012D/SingleMu/AOD/22Jan2013-v1/10000/0015EC7D-EAA7-E211-A9B9-E0CB4E5536A7.root']
 
 del process.out
 del process.outp
 
-process.TFileService = cms.Service('TFileService', fileName = cms.string('quadjettrigeff.root'))
+process.TFileService = cms.Service('TFileService', fileName = cms.string('eff.root'))
 
 process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
 for attr in 'embedGenJetMatch addGenJetMatch embedGenPartonMatch addGenPartonMatch getJetMCFlavour addJetCharge'.split():
@@ -26,38 +26,39 @@ process.IsoMu24Eta2p1 = hltHighLevel.clone()
 process.IsoMu24Eta2p1.HLTPaths = ['HLT_IsoMu24_eta2p1_v*']
 process.IsoMu24Eta2p1.andOr = True # = OR
 
-for l1_path in (32, 36, 40):
-    for no_prescale in (True, False):
-        for apply_prescale in (True, False):
-            if no_prescale and apply_prescale:
-                continue
+from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
-            for kind in ('pf', 'cl', 0, 1, 2, 3):
-                if type(kind) == int:
-                    sel = kind
-                    kind = 'cl'
-                else:
-                    sel = -1
+for require_muon in (True, False):
+    for kind in ('pf', 'cl', 0, 1, 2, 3):
+        if type(kind) == int:
+            sel = kind
+            kind = 'cl'
+        else:
+            sel = -1
 
-                src = 'selectedPatJets'
-                if kind == 'pf':
-                    src += 'PF'
+        src = 'selectedPatJets'
+        if kind == 'pf':
+            src += 'PF'
 
-                num = cms.EDAnalyzer('QuadJetTrigEff',
-                                     l1_path = cms.string('L1_QuadJetC%i' % l1_path),
-                                     jets_src = cms.InputTag(src),
-                                     sel = cms.int32(sel),
-                                     no_prescale = cms.bool(no_prescale),
-                                     apply_prescale = cms.bool(apply_prescale),
-                                     require_trigger = cms.bool(True),
-                                     )
-                den = num.clone(require_trigger = False)
+        num = cms.EDAnalyzer('QuadJetTrigEff',
+                             require_trigger = cms.bool(True),
+                             require_muon = cms.bool(require_muon),
+                             muons_src = cms.InputTag('selectedPatMuonsPF'),
+                             muon_cut = jtupleParams.semilepMuonCut,
+                             jets_src = cms.InputTag(src),
+                             jet_sel_num = cms.int32(sel),
+                             genjets_src = cms.InputTag('ak5GenJets' if runOnMC else ''),
+                             )
+        den = num.clone(require_trigger = False)
 
-                name = 'L1%iNP%iAP%i' % (l1_path, int(no_prescale), int(apply_prescale))
-                name += '%s%s' % (kind, '' if sel == -1 else sel)
-                setattr(process, name + 'num', num)
-                setattr(process, name + 'den', den)
-                setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
+        name = 'Mu%i' % int(require_muon)
+        name += '%s%s' % (kind, '' if sel == -1 else sel)
+        setattr(process, name + 'num', num)
+        setattr(process, name + 'den', den)
+        setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
+
+import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+SimpleTriggerEfficiency.setup_endpath(process)
 
 #process.options.wantSummary = True
 
@@ -91,7 +92,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in mc_samples:
         sample.events_per = 25000
     for sample in data_samples:
-        sample.lumis_per = 100
+        sample.lumis_per = 75
+        sample.json = '../ana_all.json'
 
     samples = Samples.from_argv(mc_samples + data_samples)
 
