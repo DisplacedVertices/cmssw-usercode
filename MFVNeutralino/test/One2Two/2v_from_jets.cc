@@ -12,6 +12,9 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+double    muclear = 0.028;
+double sigmaclear = 0.005;
+
 const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_1";
 
 //const char* sample_name = "ttbarhadronic";
@@ -147,7 +150,30 @@ int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
   return 0;
 }
 
-int main() {
+std::vector<double> binning() {
+  std::vector<double> bins;
+  for (int i = 0; i < 5; ++i)
+    bins.push_back(i * 0.02);
+  bins.push_back(0.1);
+  bins.push_back(0.2);
+  bins.push_back(0.4);
+  bins.push_back(0.8);
+  bins.push_back(1.6);
+  bins.push_back(3.2);
+  return bins;
+}
+
+TH1D* hist_with_binning(const char* name, const char* title) {
+  std::vector<double> bins = binning();
+  return new TH1D(name, title, bins.size()-1, &bins[0]);
+}
+
+int main(int argc, const char* argv[]) {
+  if (argc == 3) {
+    muclear = atof(argv[1]);
+    sigmaclear = atof(argv[2]);
+  }
+
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(0);
 
@@ -155,6 +181,7 @@ int main() {
   TH1F* h_vtx0jetdphi = new TH1F("h_vtx0jetdphi", ";#Delta#phi(vertex0 position, jet momentum);arb. units", 50, -3.15, 3.15);
   TH1F* h_vtx1jetdphi = new TH1F("h_vtx1jetdphi", ";#Delta#phi(vertex1 position, jet momentum);arb. units", 50, -3.15, 3.15);
   TH1F* h_svdist2d = new TH1F("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 30, 0, 0.3);
+  TH1D* h_dvv = hist_with_binning("h_dvv", ";d_{VV} (cm);arb. units");
   TH1F* h_absdeltaphi01 = new TH1F("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 5, 0, 3.15);
   TH1D* h_sigmavv = new TH1D("h_sigmavv", ";#sigma(sv #0, #1) (cm);arb. units", 10, 0, 0.01);
   TH1D* h_sigvv = new TH1D("h_sigvv", ";N#sigma(sv #0, #1);arb. units", 15, 0, 30);
@@ -212,6 +239,7 @@ int main() {
         float dx = (nt.x0-nt.x1) / svdist2d;
         float dy = (nt.y0-nt.y1) / svdist2d;
         float sigma = sqrt((nt.cxx0 + nt.cxx1)*dx*dx + (nt.cyy0 + nt.cyy1)*dy*dy + 2*(nt.cxy0 + nt.cxy1)*dx*dy);
+        h_dvv->Fill(svdist2d, weights[i] * nt.weight);
         h_sigmavv->Fill(sigma);
         h_sigvv->Fill(svdist2d / sigma);
         h_sigmavv_dvv->Fill(svdist2d, sigma);
@@ -245,6 +273,7 @@ int main() {
   TH1F* h_sv1bs2ddist = new TH1F("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   TH1F* h_svpairdist = new TH1F("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
   TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 30, 0, 0.3);
+  TH1D* h_dvvc = hist_with_binning("h_dvvc", ";d_{VV}^{C} (cm);arb. units");
 
   TH1F* h_svdist2d_uniformphi = new TH1F("h_svdist2d_uniformphi", "svdist2d using uniform #phi distribution;constructed vertex pair distance (cm);events", 10, 0, 0.1);
   float sigma_clear[5] = {30, 40, 50, 60, 70};
@@ -293,32 +322,25 @@ int main() {
       double svdist = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi)));
       h_svpairdist->Fill(svdist, w);
 
-      double rand = gRandom->Uniform(-1,1);
-      if (TMath::Erf((svdist - 0.028)/0.005) > rand) {
-        h_svpairdphi_cut->Fill(dphi, w);
-        h_svpairabsdphi->Fill(fabs(dphi), w);
-        h_svpairdist_cut->Fill(svdist, w);
+      double p = 0.5 * TMath::Erf((svdist - muclear)/sigmaclear) + 0.5;
+      h_svpairdphi_cut->Fill(dphi, w * p);
+      h_svpairabsdphi->Fill(fabs(dphi), w * p);
+      h_svpairdist_cut->Fill(svdist, w * p);
+      h_dvvc->Fill(svdist, w * p);
 
-        if (njets[i] <= 6) {
-          h_dvv_jets_low->Fill(svdist, w);
-        } else {
-          h_dvv_jets_high->Fill(svdist, w);
-        }
+      if (njets[i] <= 6) {
+        h_dvv_jets_low->Fill(svdist, w * p);
+      } else {
+        h_dvv_jets_high->Fill(svdist, w * p);
       }
 
       double dphi_uniformphi = TVector2::Phi_mpi_pi(throw_uniform_phi() - throw_uniform_phi());
       double svdist_uniformphi = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi_uniformphi)));
-      if (TMath::Erf((svdist_uniformphi - 0.028)/0.005) > rand) {
-        h_svdist2d_uniformphi->Fill(svdist_uniformphi, w);
-      }
+      h_svdist2d_uniformphi->Fill(svdist_uniformphi, w * (0.5 * TMath::Erf((svdist_uniformphi - muclear)/sigmaclear) + 0.5));
 
       for (int j = 0; j < 5; ++j) {
-        if (TMath::Erf((svdist - mu_clear[j]/10000)/0.005) > rand) {
-          h_svdist2d_mu[j]->Fill(svdist, w);
-        }
-        if (TMath::Erf((svdist - 0.028)/(sigma_clear[j]/10000)) > rand) {
-          h_svdist2d_sigma[j]->Fill(svdist, w);
-        }
+        h_svdist2d_mu[j]->Fill(svdist, w * (0.5 * TMath::Erf((svdist - mu_clear[j]/10000)/sigmaclear) + 0.5));
+        h_svdist2d_sigma[j]->Fill(svdist, w * (0.5 * TMath::Erf((svdist - muclear)/(sigma_clear[j]/10000)) + 0.5));
       }
     }
   }
@@ -720,6 +742,33 @@ int main() {
   h_dvv_high_njets->Write();
   h_dvv_jets_high->Write();
   h_dvv_vtx_high->Write();
+
+  h_dvv->Write();
+  h_dvvc->Write();
+  //overlay dvv with binning
+  TCanvas* c_dvvc = new TCanvas("c_dvvc", "c_dvvc", 700, 700);
+  h_dvv->SetLineColor(kBlue);
+  h_dvv->SetLineWidth(3);
+  h_dvv->DrawNormalized();
+  h_dvvc->SetLineColor(kRed);
+  h_dvvc->SetLineWidth(3);
+  h_dvvc->DrawNormalized("sames");
+  c_dvvc->Write();
+
+  h_dvv->Scale(1./h_dvv->Integral());
+  h_dvvc->Scale(1./h_dvvc->Integral());
+  TH1D* h_diff = hist_with_binning("h_diff", ";(d_{VV}^{C} - d_{VV}) / d_{VV};arb. units");
+  double chi2 = 0;
+  for (int i = 1; i <= h_dvv->GetNbinsX(); ++i) {
+    double dvvc = h_dvvc->GetBinContent(i);
+    double dvv = h_dvv->GetBinContent(i);
+    if (dvv > 0) {
+      chi2 += (dvvc - dvv) * (dvvc - dvv) / dvv;
+      h_diff->SetBinContent(i, (dvvc - dvv) /dvv);
+    }
+  }
+  printf("muclear = %f, sigmaclear = %f, chi2 = %f\n", muclear, sigmaclear, chi2);
+  h_diff->Write();
 
   fh->Close();
 }
