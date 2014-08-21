@@ -10,18 +10,15 @@ ROOT.TH1.AddDirectory(0)
 
 root_dir = 'crab/QuadJetTrigEff'
 
-int_lumi = 15167
-data_fn = os.path.join(root_dir, 'SingleMu2012BCD_partial.root')
+int_lumi = 17241.
+data_fn = os.path.join(root_dir, 'SingleMu2012BCD.partial.root')
 data_f = ROOT.TFile(data_fn)
 
-kind = 'L140NP0AP1pf'
-n = 'h_jet_pt_3'
-
-kinds = 'L140NP0AP1pf L140NP0AP1cl L140NP0AP1cl3'.split()
+kinds = 'Mu0pf Mu0cl Mu0cl3'.split()
 ns = 'h_jet_pt_3 h_jet_pt_4 h_jet_pt_5 h_jet_eta_3 h_jet_eta_4 h_jet_eta_5'.split()
 
-kinds = ['L140NP0AP1pf', 'L140NP0AP1cl3']
-ns = ['h_jet_pt_4', 'h_jet_pt_5']
+kinds = ['Mu0pf', 'Mu0cl3', 'Mu1pf', 'Mu1cl3']
+ns = ['h_jet_pt_4', 'h_jet_pt_5', 'h_jet_sumht']
 
 for kind in kinds:
     print kind
@@ -33,11 +30,18 @@ for kind in kinds:
             a = array('d', range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
             return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
+        def rebin_sumht(h):
+            a = array('d', range(0, 500, 20) + range(500, 1100, 60) + range(1100, 1500, 100) + range(1500, 2000, 250) + [2000, 2500, 3000])
+            return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
+
+
         def get(f,n):
             def rebin(h):
                 return h
             if 'pt' in n:
                 rebin = rebin_pt
+            elif 'sumht' in n:
+                rebin = rebin_sumht
             return rebin(f.Get(kind + 'num/%s' % n)), rebin(f.Get(kind + 'den/%s' % n))
 
         data_num, data_den = get(data_f, n)
@@ -54,7 +58,10 @@ for kind in kinds:
             num, den = sample.num, sample.den = get(sample.f, n)
             rat = histogram_divide(num, den)
             rat.Draw('AP')
-            rat.GetXaxis().SetRangeUser(0, 600)
+            if 'pt' in n:
+                rat.GetXaxis().SetLimits(0, 600)
+            elif 'sumht' in n:
+                rat.GetXaxis().SetLimits(0, 3000)
             #fcn = ROOT.TF1('f_' subsubname, 'pol0', 60, 500)
             fcn = ROOT.TF1('f_' + subsubname, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', 20, 500)
             fcn.SetParameters(0, 1, 48, 5)
@@ -91,6 +98,7 @@ for kind in kinds:
                 hpar.SetBinError  (isam+1, reses[isam].ParError (ipar))
                 hpar.GetXaxis().SetBinLabel(isam+1, sample.name)
             hpar.Draw('hist e')
+            hpar.SetLineWidth(2)
             fcnpar = ROOT.TF1('f_'  + subsubname, 'pol0')
             fcnpar.SetLineWidth(1)
             hpar.Fit(fcnpar, 'Q')
