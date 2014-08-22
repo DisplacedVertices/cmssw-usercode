@@ -8,9 +8,9 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
-class BeamSpotTreeProducer : public edm::EDAnalyzer {
+class BeamSpotTreer : public edm::EDAnalyzer {
 public:
-  explicit BeamSpotTreeProducer(const edm::ParameterSet&);
+  explicit BeamSpotTreer(const edm::ParameterSet&);
 
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
@@ -53,7 +53,7 @@ private:
   tree_t nt;
 };
 
-BeamSpotTreeProducer::BeamSpotTreeProducer(const edm::ParameterSet& cfg)
+BeamSpotTreer::BeamSpotTreer(const edm::ParameterSet& cfg)
   : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src"))
 {
@@ -76,7 +76,7 @@ BeamSpotTreeProducer::BeamSpotTreeProducer(const edm::ParameterSet& cfg)
   tree->Branch("pvndof", &nt.pvndof);
 }
 
-void BeamSpotTreeProducer::analyze(const edm::Event& event, const edm::EventSetup&) {
+void BeamSpotTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.clear();
   nt.run = event.id().run();
   nt.lumi = event.luminosityBlock();
@@ -105,4 +105,4 @@ void BeamSpotTreeProducer::analyze(const edm::Event& event, const edm::EventSetu
   tree->Fill();
 }
 
-DEFINE_FWK_MODULE(BeamSpotTreeProducer);
+DEFINE_FWK_MODULE(BeamSpotTreer);
