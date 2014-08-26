@@ -29,7 +29,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.json = 'ana_all.json'
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('MiniTreeV18_Njets',
+    cs = CRABSubmitter('MiniTreeV19',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
