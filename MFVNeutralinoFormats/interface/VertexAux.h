@@ -79,6 +79,9 @@ struct MFVVertexAux {
     return err <= 0 ? 0 : val/err;
   }
 
+  float geo2ddist() const { return sqrt(x*x + y*y); }
+  float geo3ddist() const { return sqrt(x*x + y*y + z*z); }
+
   float gen2ddist;
   float gen2derr;
   float gen2dsig() const { return sig(gen2ddist, gen2derr); }
