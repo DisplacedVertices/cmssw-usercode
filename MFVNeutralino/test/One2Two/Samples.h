@@ -41,6 +41,8 @@ namespace mfv {
           snprintf(buf, 128, "mfv_neutralino_tau%04ium_M%04i", t, m);
           samples.push_back({i--, std::string(buf), 1e-3, 100000});
         }
+      i = -99;
+      samples.push_back({i, "sigsyst", 1e-3, 100000});
     }
 
     const Sample& get(int i) const {
