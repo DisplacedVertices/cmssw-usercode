@@ -4,16 +4,13 @@ import os,sys
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 verbose = True
-root_file_dir = '/uscms_data/d3/jchaves/crab/HistosV18_extrabkg'
-#plot_dir = os.path.join('plots', os.path.basename(root_file_dir)) + '/' + sys.argv[1] # 'plots/MFVHistosV17SideBandBetterPUweights'
-#event_histo_path = 'mfvEventHistos'+sys.argv[1]
-#vertex_histo_path = 'mfvVertexHistos'+sys.argv[1]
-plot_dir = os.path.join('plots', os.path.basename(root_file_dir)) # 'plots/MFVHistosV17SideBandBetterPUweights'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/mfv_535/HistosV19'
+plot_dir = os.path.join('plots', os.path.basename(root_file_dir))
 event_histo_path = 'mfvEventHistosOnlyOneVtx'
 vertex_histo_path = 'mfvVertexHistosOnlyOneVtx'
 hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
 plot_size = (600,600)
-scale_factor = ac.scale_factor
+scale_factor = ac.scale_factor * 186076.0 / 137183.984375
 
 ################################################################################
 
@@ -26,12 +23,13 @@ ps = plot_saver(plot_dir, size=plot_size)
 
 data_samples = Samples.data_samples
 
-background_samples = Samples.smaller_background_samples + Samples.ttbar_samples + Samples.qcd_samples #+ Samples.leptonic_background_samples
+#background_samples = Samples.smaller_background_samples + Samples.ttbar_samples + Samples.qcd_samples #+ Samples.leptonic_background_samples
+background_samples = Samples.ttbar_samples + Samples.qcd_samples #+ Samples.leptonic_background_samples
 for sample in background_samples:
     sample.total_events = sample.nevents_orig/2
 
-signal_samples = [Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
-#signal_samples = [Samples.mfv_neutralino_tau1000um_M0400]
+#signal_samples = [Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
+signal_samples = [Samples.mfv_neutralino_tau1000um_M0400]
 Samples.mfv_neutralino_tau0300um_M0400.nice_name = '#tau = 300 #mum, M = 400 GeV signal'
 Samples.mfv_neutralino_tau1000um_M0400.nice_name = '#tau = 1 mm, M = 400 GeV signal'
 Samples.mfv_neutralino_tau9900um_M0400.nice_name = '#tau = 10 mm, M = 400 GeV signal'
