@@ -90,42 +90,21 @@ jetsumht
 #nsemielectrons
 #nsemileptons
 #nsvnocut
-nsv
+#nsv
 sv_best0_ntracks_nm1
 sv_best0_ntracksptgt3_nm1
 sv_best0_njetsntks_nm1
-sv_best0_sumnhitsbehind_nm1
+#sv_best0_sumnhitsbehind_nm1
 sv_best0_drmin_nm1
-sv_best0_mindrmax_nm1
+#sv_best0_mindrmax_nm1
 sv_best0_drmax_nm1
 sv_best0_bs2derr_nm1
-sv_best0_bs2ddist
-sv_best0_jets_deltaphi
-jetpairdphi
-clean0
-clean1
-clean2
-clean3
-clean4
-clean5
-clean6
-clean7
-clean8
-clean9
-clean10
-clean11
-clean12
-clean13
-clean14
-clean15
-clean16
-clean17
-clean18
-clean19
+#sv_best0_bs2ddist
+#sv_best0_jets_deltaphi
+#jetpairdphi
 '''.split('\n') if not x.strip().startswith('#')]
 
 def is_enabled(s):
-#    return not s.startswith('clean')
     return s in enabled # or s.startswith('clean')
 
 def D(*args, **kwargs):
@@ -145,7 +124,7 @@ D('npv',
   x_title = 'number of PV',
   y_title = 'events/2',
   x_range = (0, 40),
-  y_range = (None, 70000),
+  y_range = (None, 50000),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -192,7 +171,7 @@ D('njets',
   x_title = 'number of jets',
   y_title = 'events',
   x_range = (3,16),
-  y_range = (None, 100000),
+  y_range = (None, 70000),
   legend_pos = (0.572, 0.687, 0.884, 0.920),
   )
 
@@ -210,7 +189,7 @@ D('jetpt4',
   x_title = 'jet #4 p_{T} (GeV)',
   y_title = 'events/10 GeV',
   x_range = (50,250),
-  y_range = (None, 80000),
+  y_range = (None, 50000),
   rebin = 2,
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
@@ -241,7 +220,7 @@ D('jetsumht',
   x_title = '#Sigma H_{T} (GeV)',
   y_title = 'events/100 GeV',
   x_range = (400, 2500),
-  y_range = (None, 110000),
+  y_range = (None, 80000),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
   )
 
@@ -328,10 +307,9 @@ D('sv_best0_ntracks_nm1',
   x_title = 'number of tracks/vertex',
   y_title = 'vertices',
   x_range = (2, 20),
-  y_range = (None, 80000),
+  y_range = (None, 60000),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
-  cut_line = ((5.,0.0,5.,180000),ROOT.kRed,1,1),
-
+  cut_line = ((5.,0.0,5.,63000),ROOT.kRed,5,1),
   )
 
 D('sv_best0_ntracksptgt3_nm1',
@@ -339,9 +317,9 @@ D('sv_best0_ntracksptgt3_nm1',
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
   x_range = (0, 9),
-  y_range = (None, 500000),
+  y_range = (None, 350000),
   legend_pos = (0.553, 0.687, 0.878, 0.920),
-  cut_line = ((3.,0.0,3.,500000),ROOT.kRed,1,1),
+  cut_line = ((3.,0.0,3.,367000),ROOT.kRed,5,1),
   )
 
 D('sv_top2_chi2dof',
@@ -436,9 +414,9 @@ D('sv_best0_drmin_nm1',
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.04',
   x_range = (0, 0.6),
-  y_range = (None, 90000),
+  y_range = (None, 60000),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
-  cut_line = ((0.4,0.0,0.4,180000),ROOT.kRed,1,1),
+  cut_line = ((0.4,0.0,0.4,63000),ROOT.kRed,5,1),
   )
 
 D('sv_best0_mindrmax_nm1',
@@ -458,9 +436,9 @@ D('sv_best0_drmax_nm1',
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
   x_range = (0, 7.0),
-  y_range = (None, 100000),
+  y_range = (None, 70000),
   legend_pos = (0.135, 0.687, 0.448, 0.920),
-  cut_line = ((4,0.0,4,180000),ROOT.kRed,1,1),
+  cut_line = ((4,0.0,4,73500),ROOT.kRed,5,1),
   )
 
 D('sv_best0_njetsntks_nm1',
@@ -468,9 +446,9 @@ D('sv_best0_njetsntks_nm1',
   x_title = 'number of associated jets',
   y_title = 'vertices',
   x_range = (0, 6),
-  #y_range = (None, 1350),
+  y_range = (None, 120000),
   legend_pos = (0.649, 0.704, 0.878, 0.921),
-    cut_line = ((1.,0.0,1.,180000),ROOT.kRed,1,1),
+  cut_line = ((1.,0.0,1.,126000),ROOT.kRed,5,1),
   )
 
 D('sv_best0_sumnhitsbehind_nm1',
@@ -496,9 +474,9 @@ D('sv_best0_bs2derr_nm1',
   x_title = '#sigma(xy distance to beamspot) (cm)',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.01),
-  y_range = (None, 180000),
+  y_range = (None, 140000),
   legend_pos = (0.435, 0.687, 0.878, 0.920),
-  cut_line = ((0.0025,0.0,0.0025,180000),ROOT.kRed,1,1),
+  cut_line = ((0.0025,0.0,0.0025,147000),ROOT.kRed,5,1),
   )
 
 D('sv_top2_bs2dsig',
