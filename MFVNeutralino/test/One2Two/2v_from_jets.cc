@@ -16,9 +16,12 @@ double    muclear = 0.028;
 double sigmaclear = 0.005;
 
 const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_1";
-
 //const char* sample_name = "ttbarhadronic";
 //const int n1v = 10379;
+
+//const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_Systematics";
+//const char* sample_name = "myttbarbigcurl";
+//const int n1v = 13971;
 
 //predicted number of one-vertex-only events in 20/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
@@ -755,20 +758,28 @@ int main(int argc, const char* argv[]) {
   h_dvvc->DrawNormalized("sames");
   c_dvvc->Write();
 
+  double sum_dvv = h_dvv->Integral();
+  double sum_dvvc = h_dvvc->Integral();
+  TH1D* h_diff = hist_with_binning("h_diff", ";d_{VV}^{ C} - d_{VV};arb. units");
+  for (int i = 1; i <= h_dvv->GetNbinsX(); ++i) {
+    double dvvc = h_dvvc->GetBinContent(i);
+    double dvv = h_dvv->GetBinContent(i);
+    h_diff->SetBinContent(i, dvvc / sum_dvvc - dvv / sum_dvv);
+    h_diff->SetBinError(i, sqrt(dvv)/sum_dvv);
+  }
+  h_diff->Write();
+
+  fh->Close();
+
   h_dvv->Scale(1./h_dvv->Integral());
   h_dvvc->Scale(1./h_dvvc->Integral());
-  TH1D* h_diff = hist_with_binning("h_diff", ";(d_{VV}^{C} - d_{VV}) / d_{VV};arb. units");
   double chi2 = 0;
   for (int i = 1; i <= h_dvv->GetNbinsX(); ++i) {
     double dvvc = h_dvvc->GetBinContent(i);
     double dvv = h_dvv->GetBinContent(i);
     if (dvv > 0) {
       chi2 += (dvvc - dvv) * (dvvc - dvv) / dvv;
-      h_diff->SetBinContent(i, (dvvc - dvv) /dvv);
     }
   }
   printf("muclear = %f, sigmaclear = %f, chi2 = %f\n", muclear, sigmaclear, chi2);
-  h_diff->Write();
-
-  fh->Close();
 }
