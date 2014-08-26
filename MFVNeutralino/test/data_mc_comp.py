@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os,sys
+import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 verbose = True
 root_file_dir = '/uscms_data/d3/jchaves/crab/HistosV18_extrabkg'
@@ -12,9 +13,7 @@ event_histo_path = 'mfvEventHistosOnlyOneVtx'
 vertex_histo_path = 'mfvVertexHistosOnlyOneVtx'
 hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
 plot_size = (600,600)
-int_lumi = 18200. # /pb
-int_lumi_nice = '18.2 fb^{-1}'
-scale_factor = 253433.0/174559.114014#54685200.8472/45484519.0
+scale_factor = ac.scale_factor
 
 ################################################################################
 
@@ -53,7 +52,7 @@ for s in Samples.smaller_background_samples:
 if verbose:
     print 'weights:'
     for sample in background_samples:
-        print (sample.name, sample.nevents, sample.nevents_orig, sample.cross_section, sample.partial_weight*int_lumi)
+        print (sample.name, sample.nevents, sample.nevents_orig, sample.cross_section, sample.partial_weight*ac.int_lumi)
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,
@@ -61,8 +60,8 @@ C = partial(data_mc_comparison,
             data_samples = data_samples,
             plot_saver = ps,            
             file_path = os.path.join(root_file_dir, '%(name)s.root'),
-            int_lumi = int_lumi * scale_factor,
-            int_lumi_nice = int_lumi_nice,
+            int_lumi = ac.int_lumi * scale_factor,
+            int_lumi_nice = ac.int_lumi_nice,
             background_uncertainty = ('Uncert. on MC bkg', 0.2, ROOT.kBlack, 3004),
             hist_path_for_nevents_check = hist_path_for_nevents_check,
             overflow_in_last = True,

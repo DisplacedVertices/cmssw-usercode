@@ -17,6 +17,7 @@
 #include "TMath.h"
 #include "TStyle.h"
 #include "SigCalc.h"
+#include "AnalysisConstants.h"
 
 struct option_driver {
   bool weightfiles;
@@ -41,7 +42,7 @@ struct option_driver {
       moreprints(0),
       saveplots(0),
       plot_path("plots/SSB"),
-      int_lumi(18.2),
+      int_lumi(mfv::AnalysisConstants::int_lumi / 1000. * mfv::AnalysisConstants::scale_factor),
       signal_name("mfv_neutralino_tau1000um_M0400"),
       signal_xsec(20.),
       bigw(true),
@@ -148,7 +149,7 @@ struct option_driver {
       fprintf(stderr, "  -m                      turn on (all) prints (default: off)\n");
       fprintf(stderr, "  -s                      turn on saving of plots (default: off)\n");
       fprintf(stderr, "  -z plot_path            path to save plots to (implies -s, default: plots/SSB/signal_name/)\n");
-      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: 20)\n");
+      fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: %f)\n", int_lumi);
       fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau1000um_M0400)\n");
       fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 20)\n");
       fprintf(stderr, "  -b                      do not use big-weights samples (default: on)\n");

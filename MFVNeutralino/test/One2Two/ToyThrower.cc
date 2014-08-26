@@ -4,6 +4,7 @@
 #include "TRandom3.h"
 #include "TTree.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
+#include "JMTucker/MFVNeutralino/interface/AnalysisConstants.h"
 #include "Random.h"
 #include "Templates.h"
 
@@ -15,7 +16,7 @@ namespace mfv {
 
       env("mfvo2t_toythrower" + uname),
       min_ntracks(env.get_int("min_ntracks", 5)),
-      int_lumi(env.get_double("int_lumi", 18.2e3)),
+      int_lumi(env.get_double("int_lumi", mfv::AnalysisConstants::int_lumi * mfv::AnalysisConstants::scale_factor)),
       scale_1v(env.get_double("scale_1v", 1.)),
       scale_2v(env.get_double("scale_2v", 1.)),
       allow_cap(env.get_bool("allow_cap", false)),

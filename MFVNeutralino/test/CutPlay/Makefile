@@ -1,3 +1,4 @@
+ANALYSIS_PATH = ../../interface
 SIGCALC_PATH  = ../../../Tools/test/SigCalc
 SIGCALC_OBJS  = $(SIGCALC_PATH)/*.o
 PROGNAME      = ssb.exe
@@ -7,7 +8,7 @@ ROOTCFLAGS   := $(shell root-config --cflags)
 ROOTLIBS     := $(shell root-config --libs)
 ROOTGLIBS    := $(shell root-config --glibs)
 ROOTLIBS     := $(shell root-config --nonew --libs)
-CFLAGS       += $(ROOTCFLAGS) -I$(SIGCALC_PATH) -std=c++0x -Wall -Werror
+CFLAGS       += $(ROOTCFLAGS) -I$(ANALYSIS_PATH) -I$(SIGCALC_PATH) -std=c++0x -Wall -Werror
 LIBS         += $(ROOTLIBS)
 LIBS         += -lMinuit
 LDFLAGS       = -O

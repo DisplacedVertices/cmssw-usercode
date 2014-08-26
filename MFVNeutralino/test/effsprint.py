@@ -1,6 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 import JMTucker.Tools.Samples as Samples
+import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 plots = 'plots' in sys.argv
 if plots:
@@ -10,7 +11,6 @@ if plots:
 
 sum = 0.
 var = 0.
-int_lumi = 18200.
 cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Drmax', 'Mindrmax', 'Bs2derr', 'Njets', 'Ntracksptgt3', 'Sumnhitsbehind', 'ButNtracksAndGt3')
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
@@ -40,14 +40,14 @@ def effs(fn):
     try:
         s = getattr(Samples, sname)
         ana_filter_eff = s.ana_filter_eff
-        weight = s.cross_section*int_lumi/(den/ana_filter_eff)
+        weight = s.cross_section*ac.int_lumi/(den/ana_filter_eff)
     except AttributeError:
         weight = 1.
         ana_filter_eff = -1
     sum += numall * weight
     var += numall * weight**2
     print '%s (w = %.3e): # ev: %10.1f (%10i)  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, den/ana_filter_eff, numall, float(numall)/den, numvtx, float(numvtx)/den)
-    print '  weighted to %.1f/fb: %5.2f +/- %5.2f' % (int_lumi, numall*weight, numall**0.5 * weight)
+    print '  weighted to %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, numall*weight, numall**0.5 * weight)
 
     if cuts:
         nm1s_name = 'h_nm1_%s' % sname
@@ -85,4 +85,4 @@ if not nosort:
     fns.sort()
 for fn in fns:
     effs(fn)
-print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (int_lumi, sum, var**0.5)
+print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, sum, var**0.5)
