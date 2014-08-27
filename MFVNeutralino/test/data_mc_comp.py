@@ -52,6 +52,20 @@ if verbose:
     for sample in background_samples:
         print (sample.name, sample.nevents, sample.nevents_orig, sample.cross_section, sample.partial_weight*ac.int_lumi)
 
+B = partial(data_mc_comparison,
+            background_samples = background_samples,
+            signal_samples = signal_samples,
+            plot_saver = ps,
+            file_path = os.path.join(root_file_dir, '%(name)s.root'),
+            int_lumi = ac.int_lumi,
+            background_uncertainty = ('Uncert. on MC bkg', 0.2, ROOT.kBlack, 3004),
+            hist_path_for_nevents_check = hist_path_for_nevents_check,
+            overflow_in_last = True,
+            poisson_intervals = True,
+            enable_legend = True,
+            verbose = verbose,
+            )
+
 C = partial(data_mc_comparison,
             background_samples = background_samples,
             signal_samples = signal_samples,
@@ -73,7 +87,23 @@ def event_histo(s):
 def vertex_histo(s):
     return vertex_histo_path + '/' + s
 
-enabled = [x.strip() for x in '''
+signalmccomp = [x.strip() for x in '''
+calojetpt4_nocuts
+jetsumht_nocuts
+nsv
+sv_all_ntracks_nm1
+sv_all_ntracksptgt3_nm1
+sv_all_tksjetsntkmass
+sv_all_drmin_nm1
+sv_all_maxdrmax_nm1
+sv_all_mindrmax_nm1
+sv_all_njetsntks_nm1
+sv_all_bs2ddist
+sv_all_bs2derr_nm1
+sv_all_svdist2d
+'''.split('\n') if not x.strip().startswith('#')]
+
+datamccomp = [x.strip() for x in '''
 npv
 ncalojets
 calojetpt1
@@ -96,20 +126,13 @@ sv_best0_drmax_nm1
 sv_best0_bs2derr_nm1
 '''.split('\n') if not x.strip().startswith('#')]
 
-def is_enabled(s):
-    return s in enabled # or s.startswith('clean')
-
 def D(*args, **kwargs):
-    if is_enabled(args[0]):
+    if (args[0] in signalmccomp):
+        B(*args, **kwargs)
+    if (args[0] in datamccomp):
         C(*args, **kwargs)
 
 ################################################################################
-
-for i in xrange(20):
-    D('clean%i' % i,
-      histogram_path = event_histo('h_pass_clean_%i' % i),
-      legend_pos = (0.435, 0.687, 0.878, 0.920)
-      )
 
 D('npv',
   histogram_path = event_histo('h_npv'),
@@ -276,17 +299,6 @@ D('sv_best0_drmin_nm1',
   cut_line = ((0.4,0.0,0.4,63000),ROOT.kRed,5,1),
   )
 
-D('sv_best0_mindrmax_nm1',
-  histogram_path = 'vtxHstOnly1VNoMindrmax/h_sv_best0_drmax',
-  rebin = 6,
-  x_title = 'max{#Delta R{track i,j}}',
-  y_title = 'vertices/0.28',
-  x_range = (0, 7.0),
-  y_range = (None, 100000),
-  legend_pos = (0.47, 0.70, 0.87, 0.90),
-  cut_line = ((1.2,0.0,1.2,180000),ROOT.kRed,1,1),
-  )
-
 D('sv_best0_drmax_nm1',
   histogram_path = 'vtxHstOnly1VNoDrmax/h_sv_best0_drmax',
   rebin = 6,
@@ -314,4 +326,147 @@ D('sv_best0_bs2derr_nm1',
   y_range = (None, 140000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((0.0025,0.0,0.0025,147000),ROOT.kRed,5,1),
+  )
+
+################################################################################
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 10000
+D('calojetpt4_nocuts',
+  histogram_path = 'mfvEventHistosNoCuts/h_calojetpt4',
+  x_title = 'calorimeter jet #4 p_{T} (GeV)',
+  y_title = 'events/10 GeV',
+  x_range = (0,250),
+  y_range = (None, 250e6),
+  rebin = 2,
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  cut_line = ((60, 0, 60, 262e6), 2, 5, 1),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 10000
+D('jetsumht_nocuts',
+  histogram_path = 'mfvEventHistosNoCuts/h_jet_sum_ht',
+  rebin = 4,
+  x_title = 'particle-flow jet #Sigma H_{T} (GeV)',
+  y_title = 'events/100 GeV',
+  x_range = (0, 3000),
+  y_range = (None, 250e6),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  cut_line = ((500, 0, 500, 262e6), 2, 5, 1),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('nsv',
+  histogram_path = 'mfvVertexHistosPreSel/h_nsv',
+  x_title = 'number of vertices',
+  y_title = 'events',
+  x_range = (0,5),
+  y_range = (1, 1e8),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  cut_line = ((2, 0, 2, 2.5e8), 2, 5, 1),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_ntracks_nm1',
+  histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
+  x_title = 'number of tracks/vertex',
+  y_title = 'vertices',
+  y_range = (None, 50000),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  cut_line = ((5, 0, 5, 52500), 2, 5, 1),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_ntracksptgt3_nm1',
+  histogram_path = 'vtxHst1VNoNtracksptgt3/h_sv_all_ntracksptgt3',
+  x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
+  y_title = 'vertices',
+  x_range = (0, 20),
+  y_range = (None, 300000),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  cut_line = ((3, 0, 3, 315000), 2, 5, 1),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 1
+D('sv_all_tksjetsntkmass',
+  histogram_path = 'mfvVertexHistosOneVtx/h_sv_all_tksjetsntkmass',
+  rebin = 6,
+  x_title = 'tracks + associated jets\' mass (GeV)',
+  y_title = 'vertices/90 GeV',
+  y_range = (None, 25000),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_drmin_nm1',
+  histogram_path = 'vtxHst1VNoDrmin/h_sv_all_drmin',
+  x_title = 'min{#Delta R{track i,j}}',
+  y_title = 'vertices/0.08',
+  rebin = 8,
+  y_range = (None, 250000),
+  cut_line = ((0.4, 0, 0.4, 262500), 2, 5, 1),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_maxdrmax_nm1',
+  histogram_path = 'vtxHst1VNoDrmax/h_sv_all_drmax',
+  rebin = 6,
+  x_title = 'max{#Delta R{track i,j}}',
+  y_title = 'vertices/0.28',
+  y_range = (None, 100000),
+  cut_line = ((4, 0, 4, 105000), 2, 5, 1),
+  legend_pos = (0.5, 0.67, 0.87, 0.87),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_mindrmax_nm1',
+  histogram_path = 'vtxHst1VNoMindrmax/h_sv_all_drmax',
+  rebin = 6,
+  x_title = 'max{#Delta R{track i,j}}',
+  y_title = 'vertices/0.28',
+  y_range = (None, 100000),
+  cut_line = ((1.2, 0, 1.2, 105000), 2, 5, 1),
+  legend_pos = (0.5, 0.67, 0.87, 0.87),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_njetsntks_nm1',
+  histogram_path = 'vtxHst1VNoNjets/h_sv_all_njetsntks',
+  x_title = 'number of associated jets',
+  y_title = 'vertices',
+  y_range = (None, 100000),
+  cut_line = ((1, 0, 1, 105000), 2, 5, 1),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_bs2ddist',
+  histogram_path = 'mfvVertexHistosOneVtx/h_sv_all_bs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'vertices/50 #mum',
+  x_range = (0, 0.1),
+  y_range = (None, 150e3),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
+D('sv_all_bs2derr_nm1',
+  histogram_path = 'vtxHst1VNoBs2derr/h_sv_all_bs2derr',
+  x_title = '#sigma(d_{BV}) (cm)',
+  y_title = 'vertices/5 #mum',
+  x_range = (0, 0.01),
+  y_range = (None, 150000),
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
+  cut_line = ((0.0025, 0, 0.0025, 157000), 2, 5, 1),
+  )
+
+Samples.mfv_neutralino_tau1000um_M0400.cross_section = 0.1
+D('sv_all_svdist2d',
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
+  x_title = 'd_{VV} (cm)',
+  y_title = 'events/0.01 cm',
+  x_range = (0,0.3),
+  y_range = (None, 125),
+  rebin = 5,
+  legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
