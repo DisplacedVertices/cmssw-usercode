@@ -11,9 +11,13 @@ batch_name = os.path.basename(batch_fn_lst).replace('.lst','')
 batch_fns = [x.strip() for x in open(batch_fn_lst).readlines() if x.strip()]
 batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
 try:
-    sig_num = -int(batch_name.split('SigSamn')[1].split('_')[0].split('x')[0])
+    sig_nfo = batch_name.split('SigSamn')[1].split('_')[0]
+    sig_num, sig_scale = sig_nfo.split('x')
+    sig_num = -int(sig_num)
+    sig_scale = int(sig_scale)
 except ValueError:
     sig_num = 0
+    sig_scale = 0
 plot_dir = os.path.join('plots/o2t_fit', batch_name)
 
 ################################################################################
@@ -78,7 +82,7 @@ h_pval_limit.GetXaxis().SetRangeUser(0, 0.2)
 h_mu_sig_limit.GetXaxis().SetRangeUser(0,20)
 
 sig_true = [0., 0.03, 0.13, 0.23, 0.34, 0.37, 0.37, 0.18, 0.85, 1.52, 2.22, 2.41, 2.37, 0.45, 2.50, 4.59, 6.27, 6.73, 6.67, 1.01, 5.43, 9.74, 12.42, 12.86, 12.93]
-mu_sig_true_mean = sig_true[sig_num]
+mu_sig_true_mean = sig_true[sig_num] * sig_scale
 print 'sig_num', sig_num, 'mu_sig_true_mean', mu_sig_true_mean
 mu_bkg_true_mean = 45.3
 nuis0_true_mean = 0
