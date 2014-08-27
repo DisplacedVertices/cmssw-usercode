@@ -118,7 +118,7 @@ D('npv',
   x_range = (0, 40),
   y_range = (None, 50000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('ncalojets',
@@ -127,27 +127,25 @@ D('ncalojets',
   y_title = 'events',
   x_range = (3,16),
   y_range = (None, 70000),
-  legend_pos = (0.572, 0.687, 0.884, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt1',
   histogram_path = event_histo('h_calojetpt1'),
   x_title = 'calorimeter jet #1 p_{T} (GeV)',
   y_title = 'events/10 GeV',
-  x_range = (50,250),
   y_range = (None, 16000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt2',
   histogram_path = event_histo('h_calojetpt2'),
   x_title = 'calorimeter jet #2 p_{T} (GeV)',
   y_title = 'events/10 GeV',
-  x_range = (50,250),
   y_range = (None, 25000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt3',
@@ -157,7 +155,7 @@ D('calojetpt3',
   x_range = (50,250),
   y_range = (None, 50000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt4',
@@ -167,7 +165,7 @@ D('calojetpt4',
   x_range = (50,250),
   y_range = (None, 70000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt5',
@@ -177,7 +175,7 @@ D('calojetpt5',
   x_range = (0,250),
   y_range = (None, 35000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('npfjets',
@@ -186,27 +184,25 @@ D('npfjets',
   y_title = 'events',
   x_range = (3,16),
   y_range = (None, 70000),
-  legend_pos = (0.572, 0.687, 0.884, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt1',
   histogram_path = event_histo('h_jetpt1'),
   x_title = 'particle-flow jet #1 p_{T} (GeV)',
   y_title = 'events/10 GeV',
-  x_range = (50,250),
   y_range = (None, 16000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt2',
   histogram_path = event_histo('h_jetpt2'),
   x_title = 'particle-flow jet #2 p_{T} (GeV)',
   y_title = 'events/10 GeV',
-  x_range = (50,250),
   y_range = (None, 25000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt3',
@@ -216,7 +212,7 @@ D('pfjetpt3',
   x_range = (50,250),
   y_range = (None, 50000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt4',
@@ -226,7 +222,7 @@ D('pfjetpt4',
   x_range = (50,250),
   y_range = (None, 50000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt5',
@@ -236,7 +232,7 @@ D('pfjetpt5',
   x_range = (0,250),
   y_range = (None, 35000),
   rebin = 2,
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('jetsumht',
@@ -246,7 +242,7 @@ D('jetsumht',
   y_title = 'events/100 GeV',
   x_range = (400, 2500),
   y_range = (None, 80000),
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('sv_best0_ntracks_nm1',
@@ -255,7 +251,7 @@ D('sv_best0_ntracks_nm1',
   y_title = 'vertices',
   x_range = (2, 20),
   y_range = (None, 60000),
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((5.,0.0,5.,63000),ROOT.kRed,5,1),
   )
 
@@ -265,7 +261,7 @@ D('sv_best0_ntracksptgt3_nm1',
   y_title = 'vertices',
   x_range = (0, 9),
   y_range = (None, 350000),
-  legend_pos = (0.553, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((3.,0.0,3.,367000),ROOT.kRed,5,1),
   )
 
@@ -276,7 +272,7 @@ D('sv_best0_drmin_nm1',
   y_title = 'vertices/0.04',
   x_range = (0, 0.6),
   y_range = (None, 60000),
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((0.4,0.0,0.4,63000),ROOT.kRed,5,1),
   )
 
@@ -287,7 +283,7 @@ D('sv_best0_mindrmax_nm1',
   y_title = 'vertices/0.28',
   x_range = (0, 7.0),
   y_range = (None, 100000),
-  legend_pos = (0.135, 0.687, 0.448, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((1.2,0.0,1.2,180000),ROOT.kRed,1,1),
   )
 
@@ -296,9 +292,8 @@ D('sv_best0_drmax_nm1',
   rebin = 6,
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
-  x_range = (0, 7.0),
   y_range = (None, 70000),
-  legend_pos = (0.135, 0.687, 0.448, 0.920),
+  legend_pos = (0.13, 0.70, 0.43, 0.90),
   cut_line = ((4,0.0,4,73500),ROOT.kRed,5,1),
   )
 
@@ -306,9 +301,8 @@ D('sv_best0_njetsntks_nm1',
   histogram_path = 'vtxHstOnly1VNoNjets/h_sv_best0_njetsntks',
   x_title = 'number of associated jets',
   y_title = 'vertices',
-  x_range = (0, 6),
   y_range = (None, 120000),
-  legend_pos = (0.649, 0.704, 0.878, 0.921),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((1.,0.0,1.,126000),ROOT.kRed,5,1),
   )
 
@@ -318,6 +312,6 @@ D('sv_best0_bs2derr_nm1',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.01),
   y_range = (None, 140000),
-  legend_pos = (0.435, 0.687, 0.878, 0.920),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((0.0025,0.0,0.0025,147000),ROOT.kRed,5,1),
   )
