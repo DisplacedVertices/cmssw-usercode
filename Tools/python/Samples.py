@@ -459,7 +459,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     if ('mysignal_tune5' in sample.name or 'mysignal_ali' in sample.name):
         sample.scheduler = 'condor'
     sample.cross_section = 0.001
-    sample.ana_hash = '3b675468c132e35b291c67c94e024555'
+    sample.ana_hash = 'bd31f5ef1d43e676f9d2e0e32fd20055'
     sample.ana_events_per = 10000
 
 ########################################################################
@@ -688,6 +688,8 @@ MultiJetPk2012C1.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-4f4
 MultiJetPk2012C2.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-ef54595e69bf3e66025eeba0d4d66500/USER'
 MultiJetPk2012D1.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-9a4e5cb2c948914617d1ad201459cb29/USER'
 MultiJetPk2012D2.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-d0752f7718f9f56da3fab6d5d2748ef7/USER'
+for sample in [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0300um_M0300, mfv_neutralino_tau0300um_M0400, mfv_neutralino_tau1000um_M0200, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0200, mfv_neutralino_tau9900um_M0400]:
+    sample.ana_hash = '3b675468c132e35b291c67c94e024555'
 
 # Overrides done.
 
