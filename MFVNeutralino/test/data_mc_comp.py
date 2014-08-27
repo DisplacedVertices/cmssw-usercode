@@ -123,6 +123,7 @@ sv_best0_ntracksptgt3_nm1
 sv_best0_njetsntks_nm1
 sv_best0_drmin_nm1
 sv_best0_drmax_nm1
+sv_best0_bs2ddist
 sv_best0_bs2derr_nm1
 '''.split('\n') if not x.strip().startswith('#')]
 
@@ -318,9 +319,18 @@ D('sv_best0_njetsntks_nm1',
   cut_line = ((1.,0.0,1.,126000),ROOT.kRed,5,1),
   )
 
+D('sv_best0_bs2ddist',
+  histogram_path = vertex_histo('h_sv_best0_bs2ddist'),
+  x_title = 'd_{BV} (cm)',
+  y_title = 'vertices/50 #mum',
+  x_range = (0, 0.1),
+  y_range = (None, 180e3),
+  legend_pos = (0.47, 0.70, 0.87, 0.90),
+  )
+
 D('sv_best0_bs2derr_nm1',
   histogram_path = 'vtxHstOnly1VNoBs2derr/h_sv_best0_bs2derr',
-  x_title = '#sigma(xy distance to beamspot) (cm)',
+  x_title = '#sigma(d_{BV}) (cm)',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.01),
   y_range = (None, 140000),
