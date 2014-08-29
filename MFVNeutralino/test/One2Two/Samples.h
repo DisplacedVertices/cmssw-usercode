@@ -43,6 +43,10 @@ namespace mfv {
         }
       i = -99;
       samples.push_back({i, "sigsyst", 1e-3, 100000});
+
+      printf("Samples():\n");
+      for (const Sample& s : samples)
+        printf("key = %3i: name = %40s\n", s.key, s.name.c_str());
     }
 
     const Sample& get(int i) const {
