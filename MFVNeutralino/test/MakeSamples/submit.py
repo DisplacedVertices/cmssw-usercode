@@ -225,7 +225,7 @@ def submit(name, tau0=None, mass=None):
         os.system('crab -create')
         for i in xrange(int(math.ceil(float(nevents)/events_per/500))):
             os.system('crab -c %s -submit 500' % ui_working_dir)
-        os.system('rm -f crab.cfg reco.pyc my_reco.py')
+        os.system('rm -f crab.cfg reco.pyc my_reco.py my_tkdqm.py pat.py ntuple.py')
 
 ################################################################################
 
