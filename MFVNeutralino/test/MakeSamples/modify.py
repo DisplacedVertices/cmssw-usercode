@@ -283,8 +283,13 @@ def hlt_filter(process, hlt_path):
     process.triggerFilter.HLTPaths = [hlt_path]
     process.triggerFilter.andOr = True # = OR
     process.ptriggerFilter = cms.Path(process.triggerFilter)
-    if hasattr(process.out.SelectEvents):
-        raise ValueError('process.out already has SelectEvents: %r' % process.out.SelectEvents)
-    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptriggerFilter'))
+    process_out = None
+    try:
+        process_out = process.output
+    except AttributeError:
+        process_out = process.out
+    if hasattr(process_out.SelectEvents):
+        raise ValueError('process_out already has SelectEvents: %r' % process_out.SelectEvents)
+    process_out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptriggerFilter'))
     for name, path in process.paths.items():
         path.insert(0, process.triggerFilter)
