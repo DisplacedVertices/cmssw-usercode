@@ -24,6 +24,8 @@ if [ $exit_code -ne 0 ]; then
   exit $exit_code
 fi
 
+echo NEV gensimhlt.root `edmEventSize -v gensimhlt.root | head -1`
+
 if [ -f my_reco.py ]; then 
   echo
   echo done with gensimhlt step at `date`, starting reco step
@@ -36,7 +38,10 @@ if [ -f my_reco.py ]; then
     echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     exit $exit_code
   fi
+
+  echo NEV reco.root `edmEventSize -v reco.root | head -1`
 fi
+
 
 if [ -f my_tkdqm.py ]; then
   echo
@@ -64,6 +69,8 @@ if [ -f pat.py ]; then
     echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     exit $exit_code
   fi
+
+  echo NEV pat.root `edmEventSize -v pat.root | head -1`
 fi
 
 if [ -f ntuple.py ]; then
@@ -78,6 +85,8 @@ if [ -f ntuple.py ]; then
     echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     exit $exit_code
   fi
+
+  echo NEV ntuple.root `edmEventSize -v ntuple.root | head -1`
 fi
 
 echo
