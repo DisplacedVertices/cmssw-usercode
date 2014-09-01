@@ -276,3 +276,15 @@ def dummy_beamspot(process, params):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     for path_name, path in itertools.chain(process.paths.iteritems(), process.endpaths.iteritems()):
         massSearchReplaceAnyInputTag(path, cms.InputTag('offlineBeamSpot'), cms.InputTag('myBeamSpot'), verbose=True)
+
+def hlt_filter(process, hlt_path):
+    from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
+    process.triggerFilter = hltHighLevel.clone()
+    process.triggerFilter.HLTPaths = [hlt_path]
+    process.triggerFilter.andOr = True # = OR
+    process.ptriggerFilter = cms.Path(process.triggerFilter)
+    if hasattr(process.out.SelectEvents):
+        raise ValueError('process.out already has SelectEvents: %r' % process.out.SelectEvents)
+    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptriggerFilter'))
+    for name, path in process.paths.items():
+        path.insert(0, process.triggerFilter)
