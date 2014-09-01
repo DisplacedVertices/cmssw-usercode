@@ -24,7 +24,7 @@ if [ $exit_code -ne 0 ]; then
   exit $exit_code
 fi
 
-echo NEV gensimhlt.root `edmEventSize -v gensimhlt.root | head -1`
+echo NEV `edmEventSize -v gensimhlt.root | grep Events | head -1`
 
 if [ -f my_reco.py ]; then 
   echo
@@ -39,7 +39,7 @@ if [ -f my_reco.py ]; then
     exit $exit_code
   fi
 
-  echo NEV reco.root `edmEventSize -v reco.root | head -1`
+  echo NEV `edmEventSize -v reco.root | grep Events | head -1`
 fi
 
 
@@ -70,7 +70,7 @@ if [ -f pat.py ]; then
     exit $exit_code
   fi
 
-  echo NEV pat.root `edmEventSize -v pat.root | head -1`
+  echo NEV `edmEventSize -v pat.root | grep Events | head -1`
 fi
 
 if [ -f ntuple.py ]; then
@@ -86,7 +86,7 @@ if [ -f ntuple.py ]; then
     exit $exit_code
   fi
 
-  echo NEV ntuple.root `edmEventSize -v ntuple.root | head -1`
+  echo NEV `edmEventSize -v ntuple.root | grep Events | head -1`
 fi
 
 echo
