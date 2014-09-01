@@ -58,6 +58,8 @@ namespace mfv {
     VertexPairs toy_2v;
     Dataset toy_dataset;
 
+    Dataset data;
+    
     ////////////////////////////////////////////////////////////////////////////
 
     TTree* t_sample_usage_1v;

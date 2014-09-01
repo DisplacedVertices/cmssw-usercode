@@ -89,6 +89,9 @@ namespace mfv {
       if (tree->LoadTree(j) < 0) break;
       if (tree->GetEntry(j) <= 0) continue;
 
+      //if (sample.is_data() && j == 20000)
+      //  break;
+
       EventSimple e(nt);
       e.sample = sample.key;
       e.nvtx_sel = 0;
@@ -142,6 +145,8 @@ namespace mfv {
   void ToyThrower::update_poisson_means() {
     printf("ToyThrower(%s)::sample info (without any scaling):\n", name.c_str());
     auto f = [this](const Sample& sample) {
+      if (sample.is_data())
+        return;
       const double w = sample.weight(int_lumi);
       const int N1v = int(all_1v[sample.key].size());
       const int N2v = int(all_2v[sample.key].size());
@@ -156,6 +161,12 @@ namespace mfv {
   void ToyThrower::read_samples() {
     loop_over_samples([this](const Sample& s) { read_sample(s); });
     update_poisson_means();
+
+    data.toy = -1;
+    data.events_1v = &events_1v[0];
+    data.events_2v = &events_2v[0];
+    data.one_vertices = &all_1v[0];
+    data.two_vertices = &all_2v[0];
   }
 
   void ToyThrower::book_and_fill_some_trees() {
@@ -186,6 +197,8 @@ namespace mfv {
     t_sample_info->Branch("N1v", &b_sample_info_N1v, "N1v/I");
     t_sample_info->Branch("N2v", &b_sample_info_N2v, "N2v/I");
     loop_over_samples([&](const Sample& sample) {
+                        if (sample.is_data())
+                          return;
                         t_sample_info->SetAlias(sample.name.c_str(), TString::Format("%i", sample.key));
                         b_sample_info_key = sample.key;
                         b_sample_info_weight = sample.weight(int_lumi);
@@ -208,6 +221,8 @@ namespace mfv {
     t_toy_stats_2v = new TTree("t_toy_stats_2v", "");
 
     loop_over_samples([this](const Sample& sample) {
+                        if (sample.is_data())
+                          return;
                         b_toy_stats_1v[sample.key] = 0;
                         b_toy_stats_2v[sample.key] = 0;
                         t_toy_stats_1v->Branch(sample.name.c_str(), &(b_toy_stats_1v.find(sample.key)->second), TString::Format("%s/I", sample.name.c_str()));
@@ -235,7 +250,7 @@ namespace mfv {
     b_sum_bkg_2v = 0;
 
     auto f = [this](const Sample& sample) {
-      if (sample.is_sig() && sample.key != injected_signal)
+      if (sample.is_data() || (sample.is_sig() && sample.key != injected_signal))
         return;
 
       const double sc1v = sample.is_sig() ? injected_signal_scale : scale_1v;
