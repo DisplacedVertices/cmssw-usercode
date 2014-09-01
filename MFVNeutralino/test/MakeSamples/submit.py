@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, math
 from modify import *
 
 # JMTBAD argparse
+
+reco_triggered_only = 'triggeredonly' in sys.argv
 
 run_reco = 'gensimonly' not in sys.argv
 run_pat = run_reco and 'pat' in sys.argv
@@ -48,9 +50,9 @@ script_exe = twostep.sh
 additional_input_files = %(additional_input_files)s
 ui_working_dir = %(ui_working_dir)s
 copy_data = 1
-storage_element = T3_US_Cornell
+storage_element = T3_US_FNALLPC
 publish_data = 1
-publish_data_name = mfv_%(name)s
+publish_data_name = mfv_%(name)s_v19
 dbs_url_for_publication = phys03
 ssh_control_persist = no
 
@@ -137,6 +139,8 @@ def submit(name, tau0=None, mass=None):
         new_reco_py = open('reco.py').read()
         if is_signal:
             new_reco_py += '\nkeep_random_info(process)\n'
+        if reco_triggered_only:
+            new_reco_py += '\nhlt_filter(process, "HLT_QuadJet50_v*")\n'
     else:
         new_reco_py = ''
 
@@ -219,7 +223,7 @@ def submit(name, tau0=None, mass=None):
     open('crab.cfg','wt').write(crab_cfg % vd)
     if not testing:
         os.system('crab -create')
-        for i in xrange(nevents/events_per/500):
+        for i in xrange(int(math.ceil(float(nevents)/events_per/500))):
             os.system('crab -c %s -submit 500' % ui_working_dir)
         os.system('rm -f crab.cfg reco.pyc my_reco.py')
 
