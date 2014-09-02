@@ -178,7 +178,8 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
     if runOnMC:
         common_seq += process.patJetGenJetMatch * process.patJetPartonMatch * process.patJetPartons * process.patJetPartonAssociation * process.patJetFlavourAssociation
     common_seq += process.patJetCharge * process.patJetCorrFactors * process.patJets
-    
+    process.patJets.discriminatorSources = cms.VInputTag(cms.InputTag("combinedSecondaryVertexBJetTags"), cms.InputTag("combinedSecondaryVertexMVABJetTags"), cms.InputTag("jetBProbabilityBJetTags"), cms.InputTag("jetProbabilityBJetTags"), cms.InputTag("simpleSecondaryVertexHighEffBJetTags"), cms.InputTag("simpleSecondaryVertexHighPurBJetTags"), cms.InputTag("trackCountingHighEffBJetTags"), cms.InputTag("trackCountingHighPurBJetTags"))
+
     process.out.outputCommands = [
         'drop *',
         'keep *_selectedPatElectrons*_*_*',
