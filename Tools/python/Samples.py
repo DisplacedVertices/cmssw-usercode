@@ -679,17 +679,8 @@ def from_argv(default=None, sort_and_set=True):
 
 # Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-for sample, minus in [(mfv_neutralino_tau1000um_M0300, 2000)]:
+for sample, minus in []:
     sample.reduce_total_events_by(minus)
-
-ttbarsemilep.ana_dataset_override = '/TTJets_SemiLeptMGDecays_8TeV-madgraph/jchu-mfvntuple_v19-1456c7a6c14e155fd50f9cee9c579b13/USER'
-MultiJetPk2012B.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-722a1a9ddc1f42139adbba8cb91358b1/USER'
-MultiJetPk2012C1.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-4f49c3ee9f10bf565e513de067efe13f/USER'
-MultiJetPk2012C2.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-ef54595e69bf3e66025eeba0d4d66500/USER'
-MultiJetPk2012D1.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-9a4e5cb2c948914617d1ad201459cb29/USER'
-MultiJetPk2012D2.ana_dataset_override = '/MultiJet1Parked/jchu-mfvntuple_v19-d0752f7718f9f56da3fab6d5d2748ef7/USER'
-for sample in [mfv_neutralino_tau0100um_M0400, mfv_neutralino_tau0300um_M0300, mfv_neutralino_tau0300um_M0400, mfv_neutralino_tau1000um_M0200, mfv_neutralino_tau1000um_M0400, mfv_neutralino_tau9900um_M0200, mfv_neutralino_tau9900um_M0400]:
-    sample.ana_hash = '3b675468c132e35b291c67c94e024555'
 
 # Overrides done.
 
