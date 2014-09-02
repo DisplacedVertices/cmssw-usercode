@@ -5,7 +5,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
@@ -33,13 +32,26 @@ class TrackerMapper : public edm::EDAnalyzer {
  
  private:
   const edm::InputTag track_src;
+  const edm::InputTag beamspot_src;
   const bool use_rechits;
 
   TH1F* h_ntracks;
 
+  TH1F* h_bsx;
+  TH1F* h_bsy;
+  TH1F* h_bsz;
+
   TH1F* h_tracks_pt[2][3];
   TH1F* h_tracks_eta[2][3];
   TH1F* h_tracks_phi[2][3];
+  TH1F* h_tracks_vx[2][3];
+  TH1F* h_tracks_vy[2][3];
+  TH1F* h_tracks_vz[2][3];
+  TH1F* h_tracks_vphi[2][3];
+  TH1F* h_tracks_bsvx[2][3];
+  TH1F* h_tracks_bsvy[2][3];
+  TH1F* h_tracks_bsvz[2][3];
+  TH1F* h_tracks_bsvphi[2][3];
   TH1F* h_tracks_dxyerr[2][3];
   TH1F* h_tracks_dzerr[2][3];
   TH1F* h_tracks_npixel[2][3];
@@ -72,16 +84,20 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_n_weird_tracks;
   TrackHistos* h_weird_tracks;
 
-  TH2F* h_gen_eta_phi;
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   : track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     use_rechits(cfg.getParameter<bool>("use_rechits"))
 {
   edm::Service<TFileService> fs;
 
   h_ntracks = fs->make<TH1F>("h_ntracks", ";number of tracks;events", 100, 0, 5000);
+
+  h_bsx = fs->make<TH1F>("h_bsx", ";beamspot x (cm);events", 200, -1, 1);
+  h_bsy = fs->make<TH1F>("h_bsy", ";beamspot y (cm);events", 200, -1, 1);
+  h_bsz = fs->make<TH1F>("h_bsz", ";beamspot z (cm);events", 200, -1, 1);
 
   const char* exi[2] = {"all", "v1"};
   const char* exj[3] = {"ptgt0", "ptgt1", "ptgt3"};
@@ -90,6 +106,14 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
       h_tracks_pt[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_pt", exi[i], exj[j]), TString::Format("%s tracks%s;tracks pt;arb. units", exi[i], exj[j]), 150, 0, 150);
       h_tracks_phi[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_phi", exi[i], exj[j]), TString::Format("%s tracks%s;tracks phi;arb. units", exi[i], exj[j]), 50, -3.15, 3.15);
       h_tracks_eta[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_eta", exi[i], exj[j]), TString::Format("%s tracks%s;tracks eta;arb. units", exi[i], exj[j]), 50, -4, 4);
+      h_tracks_vx[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_vx", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vx;arb. units", exi[i], exj[j]), 200, -1, 1);
+      h_tracks_vy[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_vy", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vy;arb. units", exi[i], exj[j]), 200, -1, 1);
+      h_tracks_vz[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_vz", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vz;arb. units", exi[i], exj[j]), 400, -20, 20);
+      h_tracks_vphi[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_vphi", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vphi;arb. units", exi[i], exj[j]), 50, -3.15, 3.15);
+      h_tracks_bsvx[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_bsvx", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vx - beamspot x;arb. units", exi[i], exj[j]), 200, -1, 1);
+      h_tracks_bsvy[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_bsvy", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vy - beamspot y;arb. units", exi[i], exj[j]), 200, -1, 1);
+      h_tracks_bsvz[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_bsvz", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vz - beamspot z;arb. units", exi[i], exj[j]), 400, -20, 20);
+      h_tracks_bsvphi[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_bsvphi", exi[i], exj[j]), TString::Format("%s tracks%s;tracks vphi w.r.t. beamspot;arb. units", exi[i], exj[j]), 50, -3.15, 3.15);
       h_tracks_dxyerr[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_dxyerr", exi[i], exj[j]), TString::Format("%s tracks%s;tracks dxyerr;arb. units", exi[i], exj[j]), 1000, 0, 2);
       h_tracks_dzerr[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_dzerr", exi[i], exj[j]), TString::Format("%s tracks%s;tracks dzerr;arb. units", exi[i], exj[j]), 1000, 0, 2);
       h_tracks_npixel[i][j] = fs->make<TH1F>(TString::Format("h_tracks_%s_%s_npixel", exi[i], exj[j]), TString::Format("%s tracks%s;tracks npixel;arb. units", exi[i], exj[j]), 40, 0, 40);
@@ -160,8 +184,6 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_v1ptgt3_tracks = new TrackHistos("v1ptgt3", use_rechits, par_nbins, par_lo, par_hi, err_nbins, err_lo, err_hi);
   h_n_weird_tracks = fs->make<TH1F>("h_n_weird_tracks", "", 200, 0, 200);
   h_weird_tracks   = new TrackHistos("weird",   use_rechits, par_nbins, par_lo, par_hi, err_nbins, err_lo, err_hi);
-
-  h_gen_eta_phi = fs->make<TH2F>("h_gen_eta_phi", "charged gen particles w/ status 1;phi;eta", 50, -3.15, 3.15, 50, -4, 4);
 }
 
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -173,6 +195,17 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   event.getByLabel(track_src, tracks);
 
   h_ntracks->Fill(int(tracks->size()));
+
+  edm::Handle<reco::BeamSpot> beamspot;
+  event.getByLabel(beamspot_src, beamspot);
+
+  const float bsx = beamspot->x0();
+  const float bsy = beamspot->y0();
+  const float bsz = beamspot->z0();
+
+  h_bsx->Fill(bsx);
+  h_bsy->Fill(bsy);
+  h_bsz->Fill(bsz);
 
   int n_weird = 0;
 
@@ -190,6 +223,14 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
         h_tracks_pt[i][j]->Fill(tk.pt());
         h_tracks_eta[i][j]->Fill(tk.eta());
         h_tracks_phi[i][j]->Fill(tk.phi());
+        h_tracks_vx[i][j]->Fill(tk.vx());
+        h_tracks_vy[i][j]->Fill(tk.vy());
+        h_tracks_vz[i][j]->Fill(tk.vz());
+        h_tracks_vphi[i][j]->Fill(atan2(tk.vy(), tk.vx()));
+        h_tracks_bsvx[i][j]->Fill(tk.vx() - bsx);
+        h_tracks_bsvy[i][j]->Fill(tk.vy() - bsy);
+        h_tracks_bsvz[i][j]->Fill(tk.vz() - bsz);
+        h_tracks_bsvphi[i][j]->Fill(atan2(tk.vy() - bsy, tk.vx() - bsx));
         h_tracks_dxyerr[i][j]->Fill(tk.dxyError());
         h_tracks_dzerr[i][j]->Fill(tk.dzError());
         h_tracks_npixel[i][j]->Fill(tk.hitPattern().numberOfValidPixelHits());
@@ -254,14 +295,6 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   }
 
   h_n_weird_tracks->Fill(n_weird);
-
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel("genParticles", gen_particles);
-  for (const reco::GenParticle& gen : *gen_particles) {
-    if (gen.status() == 1 && gen.charge() != 0) {
-      h_gen_eta_phi->Fill(gen.phi(), gen.eta());
-    }
-  }
 }
 
 DEFINE_FWK_MODULE(TrackerMapper);
