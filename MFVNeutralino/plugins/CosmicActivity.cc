@@ -1,5 +1,6 @@
 #include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/CSCRecHit/interface/CSCRecHit2DCollection.h"
 #include "DataFormats/CSCRecHit/interface/CSCSegmentCollection.h"
 #include "DataFormats/DTRecHit/interface/DTRecHitCollection.h"
@@ -8,6 +9,7 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrajectorySeed/interface/TrajectorySeedCollection.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -40,6 +42,9 @@ public:
   TH2F* h_seg_dt_upper;
   TH2F* h_seg_csc;
   TH2F* h_seg_csc_upper;
+
+  TH1F* h_trigs_found;
+  TH1F* h_trigs_pass;
 };
 
 MFVCosmicActivity::MFVCosmicActivity(const edm::ParameterSet&) {
@@ -76,6 +81,9 @@ MFVCosmicActivity::MFVCosmicActivity(const edm::ParameterSet&) {
   h_seg_dt_upper  = fs->make<TH2F>("h_seg_dt_upper",  ";wheel;station", 5, -2, 3, 4, 1, 5);
   h_seg_csc       = fs->make<TH2F>("h_seg_csc",       ";station;ring", 9, -4, 5, 3, 1, 4);
   h_seg_csc_upper = fs->make<TH2F>("h_seg_csc_upper", ";station;ring", 9, -4, 5, 3, 1, 4);
+
+  h_trigs_found = fs->make<TH1F>("h_trigs_found", "", 3, 0, 3);
+  h_trigs_pass = fs->make<TH1F>("h_trigs_pass", "", 3, 0, 3);
 }
 
 const GeomDet* geom_det(const edm::EventSetup& setup, const DetId& id) {
@@ -146,6 +154,30 @@ void MFVCosmicActivity::analyze(const edm::Event& event, const edm::EventSetup& 
   h_n["muSegments_outer"]              ->Fill(dt_seg_stat34 + csc_seg_notME11or2);
   h_n["muSegments_outerupper"]         ->Fill(dt_seg_stat34upper + csc_seg_notME11or2upper);
 
+
+  edm::Handle<edm::TriggerResults> hlt_results;
+  event.getByLabel(edm::InputTag("TriggerResults", "", "HLT"), hlt_results);
+  const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
+  const size_t npaths = hlt_names.size();
+
+  const char* paths[3] = { "HLT_BeamHalo", "HLT_L1SingleMuOpen_AntiBPTX", "HLT_L1TrackerCosmics" };
+  bool found[3] = {0};
+  bool pass[3] = {0};
+  for (int i = 0; i < 3; ++i) {
+    for (int v = 0; v < 100; ++v) {
+      char path[1024];
+      snprintf(path, 1024, "%s_v%i", paths[i], v);
+      const size_t ipath = hlt_names.triggerIndex(path);
+      if (ipath >= npaths)
+        continue;
+      found[i] = true;
+      pass[i] = hlt_results->accept(ipath);
+      break;
+    }
+
+    if (found[i]) h_trigs_found->Fill(i);
+    if (pass [i]) h_trigs_pass ->Fill(i);
+  }
 }
 
 DEFINE_FWK_MODULE(MFVCosmicActivity);
