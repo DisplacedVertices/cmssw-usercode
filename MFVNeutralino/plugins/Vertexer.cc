@@ -499,7 +499,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   for (size_t i = 0, ie = all_tracks.size(); i < ie; ++i) {
     const reco::TrackRef& tk = all_tracks[i];
     const double pt = tk->pt();
-    const double dxy = tk->dxy(beamspot->position());
+    const double dxy = tk->dxy(*beamspot);
     const int nhits = tk->hitPattern().numberOfValidHits();
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
     bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
@@ -595,7 +595,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   for (size_t itk = 0; itk < ntk-1; ++itk) {
     double itk_pt    = seed_tracks[itk].track().pt();
-    double itk_dxy   = seed_tracks[itk].track().dxy(beamspot->position());
+    double itk_dxy   = seed_tracks[itk].track().dxy(*beamspot);
     double itk_nhits = seed_tracks[itk].track().hitPattern().numberOfValidHits();
     double itk_npxhits = seed_tracks[itk].track().hitPattern().numberOfValidPixelHits();
     bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits;
@@ -613,7 +613,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
       double jtk_pt    = seed_tracks[jtk].track().pt();
-      double jtk_dxy   = seed_tracks[jtk].track().dxy(beamspot->position());
+      double jtk_dxy   = seed_tracks[jtk].track().dxy(*beamspot);
       double jtk_nhits = seed_tracks[jtk].track().hitPattern().numberOfValidHits();
       double jtk_npxhits = seed_tracks[jtk].track().hitPattern().numberOfValidPixelHits();
       bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits;
