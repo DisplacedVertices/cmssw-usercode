@@ -178,7 +178,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                     ]:
                     if name_part in sample.name:
                         to_add.append('process.GlobalTag.globaltag = "%s::All"' % tag)
-
+            to_add.append('process.dummyToMakeDiffHash = cms.PSet(submitName = cms.string("%s"))' % (sample.name + 'hello'))
         if sample.is_mc and sample.re_pat:
             to_add.append("process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')") # JMTBAD rework re_pat
 
