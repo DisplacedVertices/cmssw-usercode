@@ -8,6 +8,10 @@ namespace mfv {
     unsigned run;
     unsigned lumi;
     unsigned event;
+    unsigned short npv;
+    float pvx;
+    float pvy;
+    float pvz;
     unsigned short npu;
     float weight;
     unsigned short njets;

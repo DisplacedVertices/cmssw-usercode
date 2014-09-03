@@ -62,6 +62,10 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(event_src, mevent);
 
+  nt.npv = mevent->npv;
+  nt.pvx = mevent->pvx;
+  nt.pvy = mevent->pvy;
+  nt.pvz = mevent->pvz;
   nt.npu = int(mevent->npu);
 
   edm::Handle<double> weight;

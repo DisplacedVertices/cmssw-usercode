@@ -5,7 +5,11 @@ namespace mfv {
     tree->Branch("run", &nt.run, "run/i");
     tree->Branch("lumi", &nt.lumi, "lumi/i");
     tree->Branch("event", &nt.event, "event/i");
-    tree->Branch("npu", &nt.npu, "event/s");
+    tree->Branch("npv", &nt.npv, "npv/s");
+    tree->Branch("pvx", &nt.pvx, "pvx/F");
+    tree->Branch("pvy", &nt.pvy, "pvy/F");
+    tree->Branch("pvz", &nt.pvz, "pvz/F");
+    tree->Branch("npu", &nt.npu, "npu/s");
     tree->Branch("weight", &nt.weight, "weight/F");
 
     tree->Branch("njets", &nt.njets, "njets/s");
@@ -49,6 +53,10 @@ namespace mfv {
     tree->SetBranchAddress("run", &nt.run);
     tree->SetBranchAddress("lumi", &nt.lumi);
     tree->SetBranchAddress("event", &nt.event);
+    tree->SetBranchAddress("npv", &nt.npv);
+    tree->SetBranchAddress("pvx", &nt.pvx);
+    tree->SetBranchAddress("pvy", &nt.pvy);
+    tree->SetBranchAddress("pvz", &nt.pvz);
     tree->SetBranchAddress("npu", &nt.npu);
     tree->SetBranchAddress("weight", &nt.weight);
     tree->SetBranchAddress("njets", &nt.njets);
