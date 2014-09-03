@@ -17,7 +17,7 @@ struct MFVEvent {
   MFVEvent() {
     gen_valid = 0;
     gen_partons_in_acc = npfjets = npv = pv_ntracks = 0;
-    pfjetpt4 = pfjetpt5 = pfjetpt6 = npu = bsx = bsy = bsz = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
+    pfjetpt4 = pfjetpt5 = pfjetpt6 = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -101,6 +101,10 @@ struct MFVEvent {
   float bsx;
   float bsy;
   float bsz;
+  float bsdxdz;
+  float bsdydz;
+  float bswidthx;
+  float bswidthy;
 
   uchar npv;
   float pvx;

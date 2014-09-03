@@ -104,6 +104,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->bsx = beamspot->x0();
   mevent->bsy = beamspot->y0();
   mevent->bsz = beamspot->z0();
+  mevent->bsdxdz = beamspot->dxdz();
+  mevent->bsdydz = beamspot->dydz();
+  mevent->bswidthx = beamspot->BeamWidthX();
+  mevent->bswidthy = beamspot->BeamWidthY();
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByLabel(primary_vertex_src, primary_vertices);
