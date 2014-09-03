@@ -52,7 +52,7 @@ ui_working_dir = %(ui_working_dir)s
 copy_data = 1
 storage_element = T3_US_FNALLPC
 publish_data = 1
-publish_data_name = mfv_%(name)s_v19
+publish_data_name = mfv_%(name)s_v20
 dbs_url_for_publication = phys03
 ssh_control_persist = no
 
