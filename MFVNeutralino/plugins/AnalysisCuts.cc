@@ -23,6 +23,7 @@ private:
   const int clean_bit;
   const bool invert_clean;
   const bool apply_cleaning_filters;
+  const bool invert_cleaning_filters;
 
   const int min_npv;
   const int max_npv;
@@ -74,6 +75,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     clean_bit(cfg.getParameter<int>("clean_bit")),
     invert_clean(cfg.getParameter<bool>("invert_clean")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
+    invert_cleaning_filters(cfg.getParameter<bool>("invert_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_4th_calojet_pt(cfg.getParameter<double>("min_4th_calojet_pt")),
@@ -153,7 +155,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       for (int c : clean_all)
         pass_clean_all = pass_clean_all && mevent->pass_clean[c];
 
-      if (!pass_clean_all)
+      if (invert_cleaning_filters == pass_clean_all)
         return false;
     }
 
