@@ -26,6 +26,7 @@ namespace mfv {
     virtual size_t npars() const { return pars.size(); }
     virtual double par(size_t) const { return 0.; }
 
+    static const bool fine_binning;
     static const int nbins;
     static const double min_val;
     static const double max_val;
