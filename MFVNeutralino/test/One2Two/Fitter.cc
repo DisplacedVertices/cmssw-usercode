@@ -136,6 +136,7 @@ namespace mfv {
       save_toys(env.get_bool("save_toys", false)),
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
+      only_fit(env.get_bool("only_fit", false)),
       mu_sig_limit_step(env.get_double("mu_sig_limit_step", 0.2)),
 
       fout(f),
@@ -155,6 +156,7 @@ namespace mfv {
     printf("save_toys? %i\n", save_toys);
     printf("do_signif? %i\n", do_signif);
     printf("do_limits? %i\n", do_limits);
+    printf("only_fit? %i\n", only_fit);
     printf("mu_sig_limit_step: %f\n", mu_sig_limit_step);
     fflush(stdout);
 
@@ -533,7 +535,7 @@ namespace mfv {
     draw_likelihood(t_obs_0);
     draw_fit(t_obs_0);
 
-    if (do_signif) {
+    if (!only_fit && do_signif) {
       printf("throwing %i significance toys:\n", n_toy_signif);
       jmt::ProgressBar pb_signif(50, n_toy_signif);
       if (!print_toys)
@@ -565,7 +567,7 @@ namespace mfv {
       printf("\npval_signif: %e\n", pval_signif); fflush(stdout);
     }
 
-    if (do_limits) {
+    if (!only_fit && do_limits) {
       mu_sig_limit = 1e-6;
       pval_limit = 1;
       std::vector<test_stat_t> t_obs_limits;

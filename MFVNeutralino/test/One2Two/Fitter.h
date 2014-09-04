@@ -33,6 +33,7 @@ namespace mfv {
     const bool save_toys;
     const bool do_signif;
     const bool do_limits;
+    const bool only_fit;
     const double mu_sig_limit_step;
 
     TFile* fout;
