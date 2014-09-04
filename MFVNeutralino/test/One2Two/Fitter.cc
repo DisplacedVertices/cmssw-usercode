@@ -126,6 +126,7 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
+      allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
       start_nuis0(env.get_double("start_nuis0", 0.025)),
@@ -394,7 +395,7 @@ namespace mfv {
     m->SetPrintLevel(print_level);
     m->SetFCN(fit::minfcn);
     int ierr;
-    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.1, 0, (mu_sig_start > 0 ? mu_sig_start : 5000), ierr);
+    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.1, 0, (mu_sig_start > 0 ? mu_sig_start : (allow_negative_mu_sig ? 0 : 5000)), ierr);
     m->mnparm(1, "mu_bkg", 50, 0.1, 0, 5000, ierr);
 
     const size_t npars = bkg_templates->at(0)->npars();
