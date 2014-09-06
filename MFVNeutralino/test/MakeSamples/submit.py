@@ -5,7 +5,7 @@ from modify import *
 
 # JMTBAD argparse
 
-reco_triggered_only = 'triggeredonly' in sys.argv
+reco_triggered_only = 'triggeredonly' in sys.argv or 'ntuple' in sys.argv
 
 run_reco = 'gensimonly' not in sys.argv
 run_pat = run_reco and 'pat' in sys.argv
