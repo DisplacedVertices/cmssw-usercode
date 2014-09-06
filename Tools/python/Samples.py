@@ -458,7 +458,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.re_pat = True
     sample.scheduler = 'condor'
     sample.cross_section = 0.001
-    sample.ana_hash = 'bd31f5ef1d43e676f9d2e0e32fd20055'
+    sample.ana_hash = 'aaaa7d7d2dcfa08aa71c1469df6ebf05'
     sample.ana_events_per = 10000
 
 ########################################################################
@@ -686,7 +686,10 @@ def from_argv(default=None, sort_and_set=True):
 
 # Specific overrides and bookkeeping of numbers of events in missing jobs/etc. goes here.
 
-for sample, minus in []:
+for sample in ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + mfv_signal_samples:
+    sample.ana_ready = True
+
+for sample, minus in [(mfv_neutralino_tau1000um_M0300, 2000)]:
     sample.reduce_total_events_by(minus)
 
 # Overrides done.
