@@ -21,9 +21,9 @@ class Sample(object):
     HLT_PROCESS_NAME = 'HLT'
     DBS_URL_NUM = 0
     ANA_DBS_URL_NUM = 3
-    ANA_HASH = '1456c7a6c14e155fd50f9cee9c579b13'
+    ANA_HASH = '056b2878a0d6f7000123ce289fafc9bf'
     PUBLISH_USER = 'tucker'
-    ANA_VERSION = 'v19'
+    ANA_VERSION = 'v20'
 
     def __init__(self, name, nice_name, dataset):
         self.name = name
@@ -456,8 +456,7 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.is_pythia8 = True
     sample.dbs_url_num = 3 if ('0300' in sample.name or is_syst) else 2
     sample.re_pat = True
-    if ('mysignal_tune5' in sample.name or 'mysignal_ali' in sample.name):
-        sample.scheduler = 'condor'
+    sample.scheduler = 'condor'
     sample.cross_section = 0.001
     sample.ana_hash = 'bd31f5ef1d43e676f9d2e0e32fd20055'
     sample.ana_events_per = 10000
@@ -654,6 +653,7 @@ def from_argv(default=None, sort_and_set=True):
     samples = []
     all_samples_names = samples_by_name.keys()
     ready_only = 'fa_ready_only' in sys.argv
+    objs = dict(globals())
     for arg in sys.argv:
         if any(c in arg for c in '[]*?!'):
             for sample in all_samples:
@@ -663,6 +663,13 @@ def from_argv(default=None, sort_and_set=True):
             sample = samples_by_name[arg]
             if not ready_only or sample.ana_ready:
                 samples.append(sample)
+        elif arg in objs:
+            obj = objs[arg]
+            if hasattr(obj, '__iter__'):
+                samples.extend(obj)
+            else:
+                samples.append(obj)
+            
     if samples:
         if sort_and_set:
             samples = sorted(set(samples))
