@@ -22,7 +22,7 @@ dir = [x for x in sys.argv if x.startswith('crab/')]
 dir = 'crab/MakeSamples' if not dir else dir[0]
 
 nevents = [int(x.replace('nevents=', '')) for x in sys.argv if x.startswith('nevents=')]
-nevents = 100000 if not nevents else nevents[0]
+nevents = 1000000 if not nevents else nevents[0]
 
 events_per = [int(x.replace('events_per=', '')) for x in sys.argv if x.startswith('events_per=')]
 events_per = 200 if not events_per else events_per[0]
@@ -50,7 +50,7 @@ script_exe = twostep.sh
 additional_input_files = %(additional_input_files)s
 ui_working_dir = %(ui_working_dir)s
 copy_data = 1
-storage_element = T3_US_FNALLPC
+storage_element = T3_US_Cornell
 publish_data = 1
 publish_data_name = mfv_%(name)s_v20
 dbs_url_for_publication = phys03
@@ -249,9 +249,6 @@ else:
     to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 
     for tau0, mass, tune in to_do:
-        if (mass % 200 == 0 and mass <= 1000) or mass == 300:
-            if tau0 in [0.1, 0.3, 1.0, 9.9]:
-                continue
         name = 'neutralino_tau%05ium_M%04i' % (int(tau0*1000), mass)
         if tune != 5:
             name += '_tune_%i' % tune
