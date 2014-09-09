@@ -294,13 +294,14 @@ class CRABSubmitter:
             else:
                 # This must be the last modification because we will
                 # modify all the paths and they must be finalized.
+                half_mc_mode = '' if str(self.run_half_mc).strip().lower() == 'other' else '~'
                 pset += '''
 process.runHalfMCVeto = cms.EDFilter('EventIdVeto',
                                      list_fn = cms.string('%s.txt.gz'),
                                      use_run = cms.bool(False))
 for p in process.paths.keys():
-    getattr(process, p).insert(0, ~process.runHalfMCVeto)
-''' % sample.name
+    getattr(process, p).insert(0, %sprocess.runHalfMCVeto)
+''' % (sample.name, half_mc_mode)
 
         open(pset_fn, 'wt').write(pset)
         return pset_fn, pset
