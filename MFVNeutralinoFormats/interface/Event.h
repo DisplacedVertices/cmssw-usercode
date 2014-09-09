@@ -106,6 +106,11 @@ struct MFVEvent {
   float bswidthx;
   float bswidthy;
 
+  float bsx_at_z(float z) const { return bsx + bsdxdz * (z - bsz); }
+  float bsy_at_z(float z) const { return bsy + bsdydz * (z - bsz); }
+  float bs2ddist(float x, float y, float z) const { return mag(x - bsx_at_z(z), y - bsy_at_z(z)); }
+  template <typename T> float bs2ddist(const T& t) { return bs2ddist(t.x, t.y, t.z); }
+
   uchar npv;
   float pvx;
   float pvy;
