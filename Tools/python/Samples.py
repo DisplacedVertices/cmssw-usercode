@@ -657,7 +657,7 @@ def from_argv(default=None, sort_and_set=True):
     for arg in sys.argv:
         if any(c in arg for c in '[]*?!'):
             for sample in all_samples:
-                if (not ready_only or sample.ana_ready) and fnmatch(sample.name, arg):
+                if fnmatch(sample.name, arg):
                     samples.append(sample)
         elif arg in all_samples_names:
             sample = samples_by_name[arg]
@@ -669,7 +669,10 @@ def from_argv(default=None, sort_and_set=True):
                 samples.extend(obj)
             else:
                 samples.append(obj)
-            
+
+    if ready_only:
+        samples = [s for s in samples if s.ana_ready]
+
     if samples:
         if sort_and_set:
             samples = sorted(set(samples))
