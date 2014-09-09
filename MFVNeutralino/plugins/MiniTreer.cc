@@ -14,10 +14,9 @@ public:
   explicit MFVMiniTreer(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
-  MFVVertexAux xform_vertex(const double bsx, const double bsy, const double bsz, const MFVVertexAux&) const;
+  MFVVertexAux xform_vertex(const MFVEvent&, const MFVVertexAux&) const;
 
   const edm::InputTag event_src;
-  const std::vector<double> force_bs;
   const edm::InputTag vertex_src;
   const edm::InputTag weight_src;
 
@@ -30,13 +29,9 @@ public:
 
 MFVMiniTreer::MFVMiniTreer(const edm::ParameterSet& cfg)
   : event_src(cfg.getParameter<edm::InputTag>("event_src")),
-    force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src"))
 {
-  if (force_bs.size() && force_bs.size() != 3)
-    throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
-
   edm::Service<TFileService> fs;
 
   h_nsv = new TH1F("h_nsv", "", 10, 0, 10);
@@ -46,11 +41,11 @@ MFVMiniTreer::MFVMiniTreer(const edm::ParameterSet& cfg)
   mfv::write_to_tree(tree, nt);
 }
 
-MFVVertexAux MFVMiniTreer::xform_vertex(const double bsx, const double bsy, const double bsz, const MFVVertexAux& v) const {
+MFVVertexAux MFVMiniTreer::xform_vertex(const MFVEvent& mevent, const MFVVertexAux& v) const {
   MFVVertexAux v2(v);
-  v2.x -= bsx;
-  v2.y -= bsy;
-  v2.z -= bsz;
+  v2.x -= mevent.bsx_at_z(v.z);
+  v2.y -= mevent.bsy_at_z(v.z);
+  v2.z -= mevent.bsz;
   return v2;
 }
 
@@ -63,8 +58,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(event_src, mevent);
 
   nt.npv = mevent->npv;
-  nt.pvx = mevent->pvx - mevent->bsx;
-  nt.pvy = mevent->pvy - mevent->bsy;
+  nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
+  nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);
   nt.pvz = mevent->pvz - mevent->bsz;
   nt.npu = int(mevent->npu);
 
@@ -83,17 +78,13 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_energy[i] = mevent->jet_energy[i];
   }
 
-  const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
-  const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;
-  const double bsz = force_bs.size() ? force_bs[2] : mevent->bsz;
-
   edm::Handle<MFVVertexAuxCollection> input_vertices;
   event.getByLabel(vertex_src, input_vertices);
 
   MFVVertexAuxCollection vertices;
 
   for (const MFVVertexAux& v : *input_vertices)
-    vertices.push_back(xform_vertex(bsx, bsy, bsz, v));
+    vertices.push_back(xform_vertex(*mevent, v));
 
   h_nsv->Fill(input_vertices->size());
   h_nsvsel->Fill(vertices.size());
