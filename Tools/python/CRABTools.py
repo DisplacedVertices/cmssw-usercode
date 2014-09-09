@@ -712,7 +712,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         files = ['dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/resilient/' + pfn.split('/resilient/')[1] for pfn in pfns] # JMTBAD
     elif on_store:
         pfns = [crab_analysis_file_pfn(path) for path in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml'))]
-        files = ['dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/11/' + pfn.split('/11/')[1] for pfn in pfns] # JMTBAD
+        files = ['root://cmsxrootd.fnal.gov//store' + pfn.split('/store')[1] for pfn in pfns] # JMTBAD
     else:    
         files = glob.glob(os.path.join(working_dir, 'res/*root'))
 
