@@ -1043,3 +1043,16 @@ if __name__ == '__main__':
     elif bool_from_argv('-numEventsRead'):
         for dir in crab_dirs_from_argv():
             print dir, crab_numevents_read(dir)
+
+    elif bool_from_argv('-cleanResubs'):
+        to_del = []
+        for dir in crab_dirs_from_argv():
+            for d in glob.glob(os.path.join(dir, 'res/Submission_*')) + glob.glob(os.path.join(dir, 'res/crabcheckout*')):
+                if os.path.isdir(d):
+                    to_del.append('rm -r ' + d)
+        print 'will do:'
+        pprint(to_del)
+        while raw_input('hit y if ok').strip().lower() != 'y':
+            pass
+        for d in to_del:
+            print_run_cmd(d)
