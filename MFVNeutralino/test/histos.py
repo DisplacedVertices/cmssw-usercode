@@ -70,7 +70,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.json = 'ana_all.json'
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('HistosV19',
+    cs = CRABSubmitter('HistosV20',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
