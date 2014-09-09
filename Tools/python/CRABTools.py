@@ -62,7 +62,7 @@ def crab_popen(cmd, return_exit_code=False, print_output=False, no_ssh_control_p
     else:
         return output
 
-def crabify_list(l, simple=True):
+def crabify_list(l, simple=False):
     if simple:
         return ','.join(str(x) for x in sorted(l))
 
