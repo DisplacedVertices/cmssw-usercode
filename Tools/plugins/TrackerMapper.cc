@@ -41,6 +41,9 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_bsy;
   TH1F* h_bsz;
 
+  TH1F* h_seed_tracks_dxy;
+  TH1F* h_seed_tracks_ndxy;
+
   TH1F* h_tracks_pt[2][3];
   TH1F* h_tracks_eta[2][3];
   TH1F* h_tracks_phi[2][3];
@@ -99,6 +102,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_bsy = fs->make<TH1F>("h_bsy", ";beamspot y (cm);events", 200, -1, 1);
   h_bsz = fs->make<TH1F>("h_bsz", ";beamspot z (cm);events", 200, -1, 1);
 
+  h_seed_tracks_dxy = fs->make<TH1F>("h_seed_tracks_dxy", "tracks with p_{T} > 1 GeV, 8 hits, 1 pixel hit;|dxy| to beamspot;number of tracks", 400, -0.2, 0.2);
+  h_seed_tracks_ndxy = fs->make<TH1F>("h_seed_tracks_ndxy", ";number of seed tracks;events", 500, 0, 500);
   const char* exi[2] = {"all", "v1"};
   const char* exj[3] = {"ptgt0", "ptgt1", "ptgt3"};
   for (int i = 0; i < 2; ++i) {
@@ -207,9 +212,16 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   h_bsy->Fill(bsy);
   h_bsz->Fill(bsz);
 
+  int n_seed_tracks = 0;
   int n_weird = 0;
 
   for (const reco::Track& tk : *tracks) {
+    if (tk.pt() > 1 && tk.hitPattern().numberOfValidHits() >= 8 && tk.hitPattern().numberOfValidPixelHits() >= 1) {
+      h_seed_tracks_dxy->Fill(tk.dxy(*beamspot));
+      if (fabs(tk.dxy(*beamspot))) {
+        ++n_seed_tracks;
+      }
+    }
     //std::cout << "a track:\n" << tk;
     const bool v1 = tk.vx()*tk.vx() + tk.vy()*tk.vy() + tk.vz()*tk.vz() < 1;
 
@@ -294,6 +306,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     }
   }
 
+  h_seed_tracks_ndxy->Fill(n_seed_tracks);
   h_n_weird_tracks->Fill(n_weird);
 }
 
