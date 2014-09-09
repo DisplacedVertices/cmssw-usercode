@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
-process.source.fileNames = ['/store/user/tucker/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/mfvntuple_v18/c761ddfa7f093d8f86a338439e06a1d4/ntuple_1_1_URD.root']
+process.source.fileNames = ['/store/user/tucker/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/mfvntuple_v20/056b2878a0d6f7000123ce289fafc9bf/ntuple_1_1_yQy.root']
 process.source.noEventSort = cms.untracked.bool(True)
 process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 process.TFileService.fileName = 'minitree.root'
@@ -14,7 +14,6 @@ process.mfvAnalysisCuts.min_nvertex = 1
 
 process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      event_src = cms.InputTag('mfvEvent'),
-                                     force_bs = cms.vdouble(),
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                      weight_src = cms.InputTag('mfvWeight'),
                                      )
@@ -29,7 +28,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.json = 'ana_all.json'
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('MiniTreeV19',
+    cs = CRABSubmitter('MiniTreeV20',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        run_half_mc = True,
