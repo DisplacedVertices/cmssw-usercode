@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 class TrackerMapper : public edm::EDAnalyzer {
  public:
@@ -14,8 +15,11 @@ class TrackerMapper : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
  
  private:
-  const edm::InputTag beamspot_src;
   const edm::InputTag track_src;
+  const edm::InputTag beamspot_src;
+
+  const std::vector<double> pileup_weights;
+  double pileup_weight(int mc_npu) const;
 
   TH1F* h_bsx;
   TH1F* h_bsy;
@@ -38,8 +42,9 @@ class TrackerMapper : public edm::EDAnalyzer {
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
-  : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    track_src(cfg.getParameter<edm::InputTag>("track_src"))
+  : track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
+    pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
   edm::Service<TFileService> fs;
 
@@ -66,7 +71,30 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   }
 }
 
+double TrackerMapper::pileup_weight(int mc_npu) const {
+  if (mc_npu < 0 || mc_npu >= int(pileup_weights.size()))
+    return 0;
+  else
+    return pileup_weights[mc_npu];
+}
+
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  std::auto_ptr<double> weight(new double);
+  *weight = 1;
+
+  int npu = -1;
+  if (!event.isRealData()) {
+    edm::Handle<std::vector<PileupSummaryInfo> > pileup;
+    event.getByLabel("addPileupInfo", pileup);
+
+    for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
+      if (psi->getBunchCrossing() == 0)
+        npu = psi->getTrueNumInteractions();
+
+    const double pu_w = pileup_weight(npu);
+    *weight *= pu_w;
+  }
+
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByLabel(beamspot_src, beamspot);
 
@@ -91,24 +119,24 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
       ++ntracks[i];
 
-      h_tracks_pt[i]->Fill(tk.pt());
-      h_tracks_eta[i]->Fill(tk.eta());
-      h_tracks_phi[i]->Fill(tk.phi());
-      h_tracks_vx[i]->Fill(tk.vx() - bsx);
-      h_tracks_vy[i]->Fill(tk.vy() - bsy);
-      h_tracks_vz[i]->Fill(tk.vz() - bsz);
-      h_tracks_vphi[i]->Fill(atan2(tk.vy() - bsy, tk.vx() - bsx));
-      h_tracks_dxy[i]->Fill(tk.dxy(*beamspot));
-      h_tracks_dxyerr[i]->Fill(tk.dxyError());
-      h_tracks_dzerr[i]->Fill(tk.dzError());
-      h_tracks_nhits[i]->Fill(tk.hitPattern().numberOfValidHits());
-      h_tracks_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits());
-      h_tracks_nsthits[i]->Fill(tk.hitPattern().numberOfValidStripHits());
+      h_tracks_pt[i]->Fill(tk.pt(), *weight);
+      h_tracks_eta[i]->Fill(tk.eta(), *weight);
+      h_tracks_phi[i]->Fill(tk.phi(), *weight);
+      h_tracks_vx[i]->Fill(tk.vx() - bsx, *weight);
+      h_tracks_vy[i]->Fill(tk.vy() - bsy, *weight);
+      h_tracks_vz[i]->Fill(tk.vz() - bsz, *weight);
+      h_tracks_vphi[i]->Fill(atan2(tk.vy() - bsy, tk.vx() - bsx), *weight);
+      h_tracks_dxy[i]->Fill(tk.dxy(*beamspot), *weight);
+      h_tracks_dxyerr[i]->Fill(tk.dxyError(), *weight);
+      h_tracks_dzerr[i]->Fill(tk.dzError(), *weight);
+      h_tracks_nhits[i]->Fill(tk.hitPattern().numberOfValidHits(), *weight);
+      h_tracks_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits(), *weight);
+      h_tracks_nsthits[i]->Fill(tk.hitPattern().numberOfValidStripHits(), *weight);
     }
   }
 
   for (int i = 0; i < 3; ++i) {
-    h_ntracks[i]->Fill(ntracks[i]);
+    h_ntracks[i]->Fill(ntracks[i], *weight);
   }
 }
 
