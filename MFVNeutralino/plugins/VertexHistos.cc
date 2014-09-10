@@ -661,7 +661,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       h_sv_pos_bs2d[isv][0]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
       h_sv_pos_bs2d[isv][1]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
       h_sv_pos_bs2d[isv][2]->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);
-      h_sv_pos_bsrz[isv]->Fill(mevent->bs2ddist(aux.x, aux.y, aux.z) * (aux.y - mevent->bsy_at_z(aux.z) >= 0 ? 1 : -1), aux.z - bsz, w);
+      h_sv_pos_bsrz[isv]->Fill(mevent->bs2ddist(aux) * (aux.y - mevent->bsy_at_z(aux.z) >= 0 ? 1 : -1), aux.z - bsz, w);
       const double pos_bsphi = atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z));
       h_sv_pos_bsphi[isv]->Fill(pos_bsphi, w);
     }
@@ -824,7 +824,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"bs2dcompatscss",          aux.bs2dcompatscss},
         {"bs2dcompat",              aux.bs2dcompat},
         {"bs2ddist",                aux.bs2ddist},
-        {"bsbs2ddist",              mevent->bs2ddist(aux.x, aux.y, aux.z)},
+        {"bsbs2ddist",              mevent->bs2ddist(aux)},
         {"bs2derr",                 aux.bs2derr},
         {"bs2dsig",                 aux.bs2dsig()},
         {"bs3ddist",                aux.bs3ddist},
