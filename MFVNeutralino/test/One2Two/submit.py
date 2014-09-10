@@ -10,7 +10,7 @@ echo wd: `pwd`
 export JOB_NUM=$1
 
 echo get trees
-xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees_3c359678f94253163d849d8f53e4e5e65dddd79c.tgz all_trees.tgz
+xrdcp root://cmseos.fnal.gov//store/user/tucker/all_trees_ece3d3459054ddc8f961b33583da974b2d8675c9.tgz all_trees.tgz
 ECODE=$?
 if [ "$ECODE" -ne "0" ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -173,8 +173,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
 batches = []
 for template_type in ('CJ',):
     for min_ntracks in (5,): #6): #,7,8):
-        for signal in xrange(-24, 0):
-            for strength in (None, 1, 5, 10):
+        for signal in [-15, -9]: #xrange(-24, 0):
+            for strength in (None, 1, 10):
                 sg = (signal, strength) if strength is not None else None
                 batches.append((template_type, min_ntracks, sg, signal, ''))
             
