@@ -10,9 +10,8 @@ process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
 process.triggerFilter.andOr = True # = OR
 
 process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
-                                       track_src = cms.InputTag('generalTracks'),
                                        beamspot_src = cms.InputTag('offlineBeamSpot'),
-                                       use_rechits = cms.bool(False)
+                                       track_src = cms.InputTag('generalTracks'),
                                        )
 
 process.p = cms.Path(process.triggerFilter * process.TrackerMapper)
