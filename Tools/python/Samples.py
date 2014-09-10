@@ -695,7 +695,7 @@ MultiJetPk2012C2.ana_hash = '7a99b0603c317c196d7960b9e6fdd1d1'
 MultiJetPk2012D1.ana_hash = 'f5cbd41bd39217ffe99ea2af90e70c62'
 MultiJetPk2012D2.ana_hash = '537edcd0cc37d931fefd0f79a8661086'
 
-for sample in ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + mfv_signal_samples:
+for sample in data_samples + ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + mfv_signal_samples:
     sample.ana_ready = True
 
 for sample, minus in [(mfv_neutralino_tau1000um_M0300, 2000)]:
