@@ -39,6 +39,7 @@ echo ls -la
 ls -la
 echo
 
+export mfvo2t_no_progressbar=1
 export mfvo2t_seed=$JOB_NUM
 export mfvo2t_ntoys=1
 export mfvo2t_toythrower_allow_cap=1

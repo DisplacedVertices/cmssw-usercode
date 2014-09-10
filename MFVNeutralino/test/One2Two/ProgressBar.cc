@@ -8,6 +8,7 @@ namespace jmt {
       n_per_dot(n_complete / n_dots > 0 ? n_complete / n_dots : 1),
       flush(flush_),
       chars(chars_),
+      enabled(getenv("mfvo2t_no_progressbar") == 0),
       i(0),
       idot(0)
   {
@@ -15,6 +16,8 @@ namespace jmt {
   }
 
   void ProgressBar::start() {
+    if (!enabled)
+      return;
     printf("%c", chars[0]);
     for (int j = 0; j < n_dots; ++j)
       printf("%c", chars[1]);
@@ -24,7 +27,7 @@ namespace jmt {
   }
 
   ProgressBar& ProgressBar::operator++() {
-    if (i++ % n_per_dot == 0) {
+    if (enabled && i++ % n_per_dot == 0) {
       ++idot;
       printf("%c", chars[3]);
       if (flush)

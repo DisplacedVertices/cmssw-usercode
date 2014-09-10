@@ -10,6 +10,7 @@ namespace jmt {
     const int n_per_dot;
     const bool flush;
     const std::string chars;
+    const bool enabled;
     int i;
     int idot;
 
