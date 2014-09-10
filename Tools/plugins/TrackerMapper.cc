@@ -7,6 +7,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 class TrackerMapper : public edm::EDAnalyzer {
@@ -17,6 +19,7 @@ class TrackerMapper : public edm::EDAnalyzer {
  private:
   const edm::InputTag track_src;
   const edm::InputTag beamspot_src;
+  const edm::InputTag primary_vertex_src;
 
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
@@ -24,6 +27,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_bsx;
   TH1F* h_bsy;
   TH1F* h_bsz;
+
+  TH1F* h_npv;
 
   TH1F* h_ntracks[3];
   TH1F* h_tracks_pt[3];
@@ -44,6 +49,7 @@ class TrackerMapper : public edm::EDAnalyzer {
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   : track_src(cfg.getParameter<edm::InputTag>("track_src")),
     beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
+    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
   edm::Service<TFileService> fs;
@@ -51,6 +57,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_bsx = fs->make<TH1F>("h_bsx", ";beamspot x (cm);events", 200, -1, 1);
   h_bsy = fs->make<TH1F>("h_bsy", ";beamspot y (cm);events", 200, -1, 1);
   h_bsz = fs->make<TH1F>("h_bsz", ";beamspot z (cm);events", 200, -1, 1);
+
+  h_npv = fs->make<TH1F>("h_npv", ";number of primary vertices;events", 65, 0, 65);
 
   const char* ex[3] = {"all", "sel", "seed"};
   for (int i = 0; i < 3; ++i) {
@@ -105,6 +113,10 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   h_bsx->Fill(bsx);
   h_bsy->Fill(bsy);
   h_bsz->Fill(bsz);
+
+  edm::Handle<reco::VertexCollection> primary_vertices;
+  event.getByLabel(primary_vertex_src, primary_vertices);
+  h_npv->Fill(int(primary_vertices->size()), *weight);
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByLabel(track_src, tracks);
