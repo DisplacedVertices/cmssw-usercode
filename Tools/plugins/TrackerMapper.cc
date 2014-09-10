@@ -39,6 +39,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_tracks_vz[3];
   TH1F* h_tracks_vphi[3];
   TH1F* h_tracks_dxy[3];
+  TH1F* h_tracks_dxy_zslices[3][6];
   TH1F* h_tracks_dxyerr[3];
   TH1F* h_tracks_dzerr[3];
   TH1F* h_tracks_nhits[3];
@@ -71,6 +72,9 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_vz[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_vz", ex[i]), TString::Format("%s tracks;tracks vz - beamspot z;arb. units", ex[i]), 400, -20, 20);
     h_tracks_vphi[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_vphi", ex[i]), TString::Format("%s tracks;tracks vphi w.r.t. beamspot;arb. units", ex[i]), 50, -3.15, 3.15);
     h_tracks_dxy[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
+    for (int j = 0; j < 6; ++j) {
+      h_tracks_dxy_zslices[i][j] = fs->make<TH1F>(TString::Format("h_%s_tracks_dxy_z%d", ex[i], j), TString::Format("%s tracks z%d;tracks dxy to beamspot;arb. units", ex[i], j), 400, -0.2, 0.2);
+    }
     h_tracks_dxyerr[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_dzerr[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 200, 0, 2);
     h_tracks_nhits[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_nhits", ex[i]), TString::Format("%s tracks;tracks nhits;arb. units", ex[i]), 40, 0, 40);
@@ -144,6 +148,15 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_nhits[i]->Fill(tk.hitPattern().numberOfValidHits(), *weight);
       h_tracks_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits(), *weight);
       h_tracks_nsthits[i]->Fill(tk.hitPattern().numberOfValidStripHits(), *weight);
+
+      double z = tk.vz() - bsz;
+      double dxy = tk.dxy(*beamspot);
+      if (z<-5)         h_tracks_dxy_zslices[i][0]->Fill(dxy, *weight);
+      if (z>-5 && z<-2) h_tracks_dxy_zslices[i][1]->Fill(dxy, *weight);
+      if (z>-2 && z<0)  h_tracks_dxy_zslices[i][2]->Fill(dxy, *weight);
+      if (z>0 && z<2)   h_tracks_dxy_zslices[i][3]->Fill(dxy, *weight);
+      if (z>2 && z<5)   h_tracks_dxy_zslices[i][4]->Fill(dxy, *weight);
+      if (z>5)          h_tracks_dxy_zslices[i][5]->Fill(dxy, *weight);
     }
   }
 
