@@ -23,7 +23,7 @@ BeamBackgroundSkim::BeamBackgroundSkim(const edm::ParameterSet& cfg)
   : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
     min_pt(cfg.getParameter<double>("min_pt")),
-    min_dxy(cfg.getParameter<double>("min_pt"))
+    min_dxy(cfg.getParameter<double>("min_dxy"))
 {
 }
 
