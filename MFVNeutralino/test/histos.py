@@ -73,7 +73,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('HistosV20',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
-                       run_half_mc = True,
                        #USER_additional_input_files = 'aaaa.root',
                        )
     cs.submit_all(samples)
