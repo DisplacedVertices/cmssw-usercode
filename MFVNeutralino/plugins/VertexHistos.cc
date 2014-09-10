@@ -72,6 +72,11 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_pos_phi_2pi[2];
   TH1F* h_sv_pos_phi_pv[2];
 
+  TH1F* h_sv_pos_bs1d[2][3];
+  TH2F* h_sv_pos_bs2d[2][3];
+  TH2F* h_sv_pos_bsrz[2];
+  TH1F* h_sv_pos_bsphi[2];
+
   PairwiseHistos h_sv[sv_num_indices];
   PairwiseHistos h_sv_sumtop2;
 
@@ -408,6 +413,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("bs2dcompatscss",                "compat2d(SV, beamspot) success",                                                2,    0,       2);
   hs.add("bs2dcompat",                    "compat2d(SV, beamspot)",                                                      100,    0,    1000);
   hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   500,    0,       5);
+  hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                   500,    0,       5);
   hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           100,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
   hs.add("bs3ddist",                      "dist2d(SV, beamspot) * sin(SV theta) (cm)",                                   100,    0,       0.5);
@@ -448,6 +454,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       for (int i = 0; i < 3; ++i) {
         float l = i == 2 ? 25 : 20;
         h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
+        h_sv_pos_bs1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_bs1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
       }
       h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -20, 20, 100, -20, 20);
       h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
@@ -456,6 +463,12 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       h_sv_pos_phi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_phi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 50, -3.15, 3.15);
       h_sv_pos_phi_2pi[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_2pi_%i", j), TString::Format(";%s SV phi from 0 to 2#pi;arb. units", exc), 50, 0, 6.30);
       h_sv_pos_phi_pv[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_pv_%i", j), TString::Format(";%s SV phi w.r.t. PV;arb. units", exc), 50, -3.15, 3.15);
+
+      h_sv_pos_bs2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -20, 20, 100, -20, 20);
+      h_sv_pos_bs2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
+      h_sv_pos_bs2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
+      h_sv_pos_bsrz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_bsrz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
+      h_sv_pos_bsphi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_bsphi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 50, -3.15, 3.15);
     }
 
     h_sv[j].Init("h_sv_" + std::string(exc), hs, true, do_scatterplots);
@@ -641,6 +654,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       h_sv_pos_phi[isv]->Fill(pos_phi, w);
       h_sv_pos_phi_2pi[isv]->Fill(pos_phi >= 0 ? pos_phi : pos_phi + 6.2832, w);
       h_sv_pos_phi_pv[isv]->Fill(atan2(aux.y - mevent->pvy, aux.x - mevent->pvx), w);
+
+      h_sv_pos_bs1d[isv][0]->Fill(aux.x - mevent->bsx_at_z(aux.z), w);
+      h_sv_pos_bs1d[isv][1]->Fill(aux.y - mevent->bsy_at_z(aux.z), w);
+      h_sv_pos_bs1d[isv][2]->Fill(aux.z - bsz, w);
+      h_sv_pos_bs2d[isv][0]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
+      h_sv_pos_bs2d[isv][1]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
+      h_sv_pos_bs2d[isv][2]->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);
+      h_sv_pos_bsrz[isv]->Fill(mevent->bs2ddist(aux.x, aux.y, aux.z) * (aux.y - mevent->bsy_at_z(aux.z) >= 0 ? 1 : -1), aux.z - bsz, w);
+      const double pos_bsphi = atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z));
+      h_sv_pos_bsphi[isv]->Fill(pos_bsphi, w);
     }
 
     PairwiseHistos::ValueMap v = {
@@ -801,6 +824,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"bs2dcompatscss",          aux.bs2dcompatscss},
         {"bs2dcompat",              aux.bs2dcompat},
         {"bs2ddist",                aux.bs2ddist},
+        {"bsbs2ddist",              mevent->bs2ddist(aux.x, aux.y, aux.z)},
         {"bs2derr",                 aux.bs2derr},
         {"bs2dsig",                 aux.bs2dsig()},
         {"bs3ddist",                aux.bs3ddist},
