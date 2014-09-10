@@ -127,6 +127,7 @@ namespace mfv {
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
       allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
+      run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
       start_nuis0(env.get_double("start_nuis0", 0.025)),
@@ -423,7 +424,8 @@ namespace mfv {
       m->FixParameter(3);
 
     m->Migrad();
-    m->mnmnos();
+    if (run_minos)
+      m->mnmnos();
     double fmin, fedm, errdef;
     int npari, nparx, istat;
     m->mnstat(fmin, fedm, errdef, npari, nparx, istat);

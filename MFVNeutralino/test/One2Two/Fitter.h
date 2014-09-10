@@ -24,6 +24,7 @@ namespace mfv {
     jmt::ConfigFromEnv env;
     const int print_level;
     const bool allow_negative_mu_sig;
+    const bool run_minos;
     const bool draw_bkg_templates;
     const bool fix_nuis1;
     const double start_nuis0;
