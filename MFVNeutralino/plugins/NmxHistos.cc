@@ -15,7 +15,6 @@ class NmxHistos : public edm::EDAnalyzer {
  private:
   const edm::InputTag weight_src;
   const bool use_weight;
-  const edm::InputTag mevent_src;
   const std::vector<edm::InputTag> vertex_srcs;
   const size_t n;
 
@@ -25,13 +24,12 @@ class NmxHistos : public edm::EDAnalyzer {
 NmxHistos::NmxHistos(const edm::ParameterSet& cfg)
   : weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     use_weight(cfg.getParameter<bool>("use_weight")),
-    mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     vertex_srcs(cfg.getParameter<std::vector<edm::InputTag> >("vertex_srcs")),
     n(vertex_srcs.size())
 {
   edm::Service<TFileService> fs;
 
-  h_nsv = fs->make<TH2F>("h_nsv", "", n, 0, n, 5, 0, 5);
+  h_nsv = fs->make<TH2F>("h_nsv", "", n, 0, n, 10, 0, 10);
   TAxis* xax = h_nsv->GetXaxis();
   for (size_t i = 0; i < n; ++i) {
     xax->SetBinLabel(i+1, vertex_srcs[i].label().c_str());
@@ -46,15 +44,12 @@ void NmxHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     w = *weight;
   }
 
-  edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mevent_src, mevent);
-
   for (size_t i = 0; i < n; ++i) {
     edm::Handle<MFVVertexAuxCollection> vertices;
     event.getByLabel(vertex_srcs[i], vertices);
 
     const int nsv = int(vertices->size());
-    h_nsv->Fill(n, nsv, w);
+    h_nsv->Fill(i, nsv, w);
   }
 }
 
