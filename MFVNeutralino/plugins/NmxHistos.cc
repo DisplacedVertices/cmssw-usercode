@@ -29,7 +29,7 @@ NmxHistos::NmxHistos(const edm::ParameterSet& cfg)
 {
   edm::Service<TFileService> fs;
 
-  h_nsv = fs->make<TH2F>("h_nsv", "", n, 0, n, 10, 0, 10);
+  h_nsv = fs->make<TH2F>("h_nsv", "", n, 0, n, 20, 0, 20);
   TAxis* xax = h_nsv->GetXaxis();
   for (size_t i = 0; i < n; ++i) {
     xax->SetBinLabel(i+1, vertex_srcs[i].label().c_str());
