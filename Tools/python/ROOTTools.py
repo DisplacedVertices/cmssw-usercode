@@ -559,6 +559,7 @@ def data_mc_comparison(name,
         sum_background_uncert.SetFillColor(bkg_uncert_color)
         sum_background_uncert.SetFillStyle(bkg_uncert_style)
         sum_background_uncert.Draw('E2 same')
+        stack.SetMaximum(stack.GetMaximum() * (1.1 + extra_bkg_uncert_frac))
 
     if x_range is not None:
         stack.GetXaxis().SetLimits(*x_range)
