@@ -29,7 +29,7 @@ namespace mfv {
           gen_lsp_decay[i*3+j] = 0;
         gen_decay_type[i] = 0;
       }
-      npu = bsx = bsy = bsz = pvx = pvy = pvz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
+      npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
       jet_id.clear();
       jet_pt.clear();
       jet_eta.clear();
@@ -186,6 +186,10 @@ namespace mfv {
     float bsx;
     float bsy;
     float bsz;
+    float bsdxdz;
+    float bsdydz;
+    float bswidthx;
+    float bswidthy;
 
     uchar npv;
     float pvx;

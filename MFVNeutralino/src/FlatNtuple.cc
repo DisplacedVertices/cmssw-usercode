@@ -23,6 +23,10 @@ namespace mfv {
     tree->Branch("bsx", &nt.bsx, "bsx/F");
     tree->Branch("bsy", &nt.bsy, "bsy/F");
     tree->Branch("bsz", &nt.bsz, "bsz/F");
+    tree->Branch("bsdxdz", &nt.bsdxdz, "bsdxdz/F");
+    tree->Branch("bsdydz", &nt.bsdydz, "bsdydz/F");
+    tree->Branch("bswidthx", &nt.bswidthx, "bswidthx/F");
+    tree->Branch("bswidthy", &nt.bswidthy, "bswidthy/F");
     tree->Branch("npv", &nt.npv, "npv/b");
     tree->Branch("pvx", &nt.pvx, "pvx/F");
     tree->Branch("pvy", &nt.pvy, "pvy/F");
@@ -139,6 +143,10 @@ namespace mfv {
     tree->SetBranchAddress("bsx", &nt.bsx);
     tree->SetBranchAddress("bsy", &nt.bsy);
     tree->SetBranchAddress("bsz", &nt.bsz);
+    tree->SetBranchAddress("bsdxdz", &nt.bsdxdz);
+    tree->SetBranchAddress("bsdydz", &nt.bsdydz);
+    tree->SetBranchAddress("bswidthx", &nt.bswidthx);
+    tree->SetBranchAddress("bswidthy", &nt.bswidthy);
     tree->SetBranchAddress("npv", &nt.npv);
     tree->SetBranchAddress("pvx", &nt.pvx);
     tree->SetBranchAddress("pvy", &nt.pvy);

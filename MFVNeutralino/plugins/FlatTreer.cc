@@ -59,6 +59,10 @@ void MFVFlatTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.bsx = mevent->bsx;
   nt.bsy = mevent->bsy;
   nt.bsz = mevent->bsz;
+  nt.bsdxdz = mevent->bsdxdz;
+  nt.bsdydz = mevent->bsdydz;
+  nt.bswidthx = mevent->bswidthx;
+  nt.bswidthy = mevent->bswidthy;
   nt.npv = mevent->npv;
   nt.pvx = mevent->pvx;
   nt.pvy = mevent->pvy;
