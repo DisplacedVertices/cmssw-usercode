@@ -29,17 +29,6 @@ mfvEventHistosOnlyOneVtx = mfvEventHistos.clone()
 mfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone()
 pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnlyOneVtx * mfvVertexHistosOnlyOneVtx)
 
-mfvSelectedVerticesNtk5 = mfvSelectedVerticesTight.clone(max_ntracks = 5)
-mfvAnalysisCuts2VSideA = mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNtk5', max_svdist2d = 0.04)
-mfvEventHistos2VSideA = mfvEventHistos.clone()
-mfvVertexHistos2VSideA = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesNtk5')
-p2VSideA = cms.Path(mfvCommon * mfvSelectedVerticesNtk5 * mfvAnalysisCuts2VSideA * mfvEventHistos2VSideA * mfvVertexHistos2VSideA)
-
-mfvAnalysisCuts2VSideB = mfvAnalysisCuts.clone(max_svdist2d = 0.04)
-mfvEventHistos2VSideB = mfvEventHistos.clone()
-mfvVertexHistos2VSideB = mfvVertexHistos.clone()
-p2VSideB = cms.Path(mfvCommon * mfvAnalysisCuts2VSideB * mfvEventHistos2VSideB * mfvVertexHistos2VSideB)
-
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts * mfvAbcdHistosSeq)
