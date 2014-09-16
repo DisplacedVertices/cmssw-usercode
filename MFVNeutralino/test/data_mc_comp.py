@@ -4,13 +4,13 @@ import os,sys
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 verbose = True
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/mfv_535/HistosV19'
-plot_dir = os.path.join('plots', os.path.basename(root_file_dir))
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/mfv_535/HistosV20'
 event_histo_path = 'mfvEventHistosOnlyOneVtx'
 vertex_histo_path = 'mfvVertexHistosOnlyOneVtx'
+plot_dir = os.path.join('plots', os.path.basename(root_file_dir), event_histo_path)
 hist_path_for_nevents_check = None # 'mfvEventHistosNoCuts/h_npu',
 plot_size = (600,600)
-scale_factor = ac.scale_factor * 186076.0 / 137183.984375
+scale_factor = ac.scale_factor * 181076.0 / 135591.837455
 
 ################################################################################
 
@@ -23,10 +23,7 @@ ps = plot_saver(plot_dir, size=plot_size)
 
 data_samples = Samples.data_samples
 
-#background_samples = Samples.smaller_background_samples + Samples.ttbar_samples + Samples.qcd_samples #+ Samples.leptonic_background_samples
-background_samples = Samples.ttbar_samples + Samples.qcd_samples #+ Samples.leptonic_background_samples
-for sample in background_samples:
-    sample.total_events = sample.nevents_orig/2
+background_samples = Samples.smaller_background_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples
 
 #signal_samples = [Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 signal_samples = [Samples.mfv_neutralino_tau1000um_M0400]
@@ -140,7 +137,6 @@ D('npv',
   x_title = 'number of PV',
   y_title = 'events/2',
   x_range = (0, 40),
-  y_range = (None, 50000),
   rebin = 2,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
@@ -150,55 +146,51 @@ D('ncalojets',
   x_title = 'number of calorimeter jets',
   y_title = 'events',
   x_range = (3,16),
-  y_range = (None, 70000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt1',
   histogram_path = event_histo('h_calojetpt1'),
   x_title = 'calorimeter jet #1 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
-  y_range = (None, 16000),
-  rebin = 2,
+  y_title = 'events/20 GeV',
+  x_range = (50,500),
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt2',
   histogram_path = event_histo('h_calojetpt2'),
   x_title = 'calorimeter jet #2 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
-  y_range = (None, 25000),
-  rebin = 2,
+  y_title = 'events/20 GeV',
+  x_range = (50,500),
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt3',
   histogram_path = event_histo('h_calojetpt3'),
   x_title = 'calorimeter jet #3 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
-  x_range = (50,250),
-  y_range = (None, 50000),
-  rebin = 2,
+  y_title = 'events/20 GeV',
+  x_range = (50,500),
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt4',
   histogram_path = event_histo('h_calojetpt4'),
   x_title = 'calorimeter jet #4 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
+  y_title = 'events/20 GeV',
   x_range = (50,250),
-  y_range = (None, 70000),
-  rebin = 2,
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('calojetpt5',
   histogram_path = event_histo('h_calojetpt5'),
   x_title = 'calorimeter jet #5 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
+  y_title = 'events/20 GeV',
   x_range = (0,250),
-  y_range = (None, 35000),
-  rebin = 2,
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
@@ -207,55 +199,48 @@ D('npfjets',
   x_title = 'number of particle-flow jets',
   y_title = 'events',
   x_range = (3,16),
-  y_range = (None, 70000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt1',
   histogram_path = event_histo('h_jetpt1'),
   x_title = 'particle-flow jet #1 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
-  y_range = (None, 16000),
-  rebin = 2,
+  y_title = 'events/20 GeV',
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt2',
   histogram_path = event_histo('h_jetpt2'),
   x_title = 'particle-flow jet #2 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
-  y_range = (None, 25000),
-  rebin = 2,
+  y_title = 'events/20 GeV',
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt3',
   histogram_path = event_histo('h_jetpt3'),
   x_title = 'particle-flow jet #3 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
-  x_range = (50,250),
-  y_range = (None, 50000),
-  rebin = 2,
+  y_title = 'events/20 GeV',
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt4',
   histogram_path = event_histo('h_jetpt4'),
   x_title = 'particle-flow jet #4 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
-  x_range = (50,250),
-  y_range = (None, 50000),
-  rebin = 2,
+  y_title = 'events/20 GeV',
+  x_range = (0,250),
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
 D('pfjetpt5',
   histogram_path = event_histo('h_jetpt5'),
   x_title = 'particle-flow jet #5 p_{T} (GeV)',
-  y_title = 'events/10 GeV',
+  y_title = 'events/20 GeV',
   x_range = (0,250),
-  y_range = (None, 35000),
-  rebin = 2,
+  rebin = 4,
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
@@ -265,7 +250,6 @@ D('jetsumht',
   x_title = 'particle-flow jet #Sigma H_{T} (GeV)',
   y_title = 'events/100 GeV',
   x_range = (400, 2500),
-  y_range = (None, 80000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
@@ -274,9 +258,8 @@ D('sv_best0_ntracks_nm1',
   x_title = 'number of tracks/vertex',
   y_title = 'vertices',
   x_range = (2, 20),
-  y_range = (None, 60000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
-  cut_line = ((5.,0.0,5.,63000),ROOT.kRed,5,1),
+  cut_line = ((5.,0.0,5.,52200),ROOT.kRed,5,1),
   )
 
 D('sv_best0_ntracksptgt3_nm1',
@@ -284,9 +267,8 @@ D('sv_best0_ntracksptgt3_nm1',
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
   x_range = (0, 9),
-  y_range = (None, 350000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
-  cut_line = ((3.,0.0,3.,367000),ROOT.kRed,5,1),
+  cut_line = ((3.,0.0,3.,380000),ROOT.kRed,5,1),
   )
 
 D('sv_best0_drmin_nm1',
@@ -295,9 +277,8 @@ D('sv_best0_drmin_nm1',
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.04',
   x_range = (0, 0.6),
-  y_range = (None, 60000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
-  cut_line = ((0.4,0.0,0.4,63000),ROOT.kRed,5,1),
+  cut_line = ((0.4,0.0,0.4,67700),ROOT.kRed,5,1),
   )
 
 D('sv_best0_drmax_nm1',
@@ -305,18 +286,16 @@ D('sv_best0_drmax_nm1',
   rebin = 6,
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
-  y_range = (None, 70000),
   legend_pos = (0.13, 0.70, 0.43, 0.90),
-  cut_line = ((4,0.0,4,73500),ROOT.kRed,5,1),
+  cut_line = ((4,0.0,4,71800),ROOT.kRed,5,1),
   )
 
 D('sv_best0_njetsntks_nm1',
   histogram_path = 'vtxHstOnly1VNoNjets/h_sv_best0_njetsntks',
   x_title = 'number of associated jets',
   y_title = 'vertices',
-  y_range = (None, 120000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
-  cut_line = ((1.,0.0,1.,126000),ROOT.kRed,5,1),
+  cut_line = ((1.,0.0,1.,128000),ROOT.kRed,5,1),
   )
 
 D('sv_best0_bs2ddist',
@@ -324,7 +303,6 @@ D('sv_best0_bs2ddist',
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.1),
-  y_range = (None, 180e3),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   )
 
@@ -333,9 +311,8 @@ D('sv_best0_bs2derr_nm1',
   x_title = '#sigma(d_{BV}) (cm)',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.01),
-  y_range = (None, 140000),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
-  cut_line = ((0.0025,0.0,0.0025,147000),ROOT.kRed,5,1),
+  cut_line = ((0.0025,0.0,0.0025,148000),ROOT.kRed,5,1),
   )
 
 ################################################################################
@@ -346,10 +323,9 @@ D('calojetpt4_nocuts',
   x_title = 'calorimeter jet #4 p_{T} (GeV)',
   y_title = 'events/10 GeV',
   x_range = (0,250),
-  y_range = (None, 250e6),
   rebin = 2,
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((60, 0, 60, 262e6), 2, 5, 1),
+  cut_line = ((60, 0, 60, 205e6), 2, 5, 1),
   )
 
 Samples.mfv_neutralino_tau1000um_M0400.cross_section = 10000
@@ -359,9 +335,8 @@ D('jetsumht_nocuts',
   x_title = 'particle-flow jet #Sigma H_{T} (GeV)',
   y_title = 'events/100 GeV',
   x_range = (0, 3000),
-  y_range = (None, 250e6),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((500, 0, 500, 262e6), 2, 5, 1),
+  cut_line = ((500, 0, 500, 200e6), 2, 5, 1),
   )
 
 Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
@@ -380,9 +355,8 @@ D('sv_all_ntracks_nm1',
   histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
   x_title = 'number of tracks/vertex',
   y_title = 'vertices',
-  y_range = (None, 50000),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((5, 0, 5, 52500), 2, 5, 1),
+  cut_line = ((5, 0, 5, 40200), 2, 5, 1),
   )
 
 Samples.mfv_neutralino_tau1000um_M0400.cross_section = 17.4
@@ -391,9 +365,8 @@ D('sv_all_ntracksptgt3_nm1',
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
   x_range = (0, 20),
-  y_range = (None, 300000),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((3, 0, 3, 315000), 2, 5, 1),
+  cut_line = ((3, 0, 3, 292000), 2, 5, 1),
   )
 
 Samples.mfv_neutralino_tau1000um_M0400.cross_section = 1
@@ -402,7 +375,6 @@ D('sv_all_tksjetsntkmass',
   rebin = 6,
   x_title = 'tracks + associated jets\' mass (GeV)',
   y_title = 'vertices/90 GeV',
-  y_range = (None, 25000),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
 
@@ -412,8 +384,7 @@ D('sv_all_drmin_nm1',
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.08',
   rebin = 8,
-  y_range = (None, 250000),
-  cut_line = ((0.4, 0, 0.4, 262500), 2, 5, 1),
+  cut_line = ((0.4, 0, 0.4, 88000), 2, 5, 1),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
 
@@ -455,7 +426,6 @@ D('sv_all_bs2ddist',
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.1),
-  y_range = (None, 150e3),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
 
@@ -476,7 +446,6 @@ D('sv_all_svdist2d',
   x_title = 'd_{VV} (cm)',
   y_title = 'events/0.01 cm',
   x_range = (0,0.3),
-  y_range = (None, 125),
   rebin = 5,
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
