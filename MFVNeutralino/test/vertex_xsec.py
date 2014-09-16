@@ -2,11 +2,11 @@ from collections import defaultdict
 from JMTucker.Tools.LumiLines import *
 from JMTucker.Tools.ROOTTools import *
 set_style()
-ps = plot_saver('plots/vertex_xsec', size=(1200,600), log=False)
+ps = plot_saver('plots/vertex_xsec_v20', size=(1200,600), log=False)
 
 lls = LumiLines('/uscms/home/tucker/mfvrecipe/lumi.gzpickle')
 
-f = ROOT.TFile('/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_1/MultiJetPk2012.root')
+f = ROOT.TFile('crab/MiniTreeV20_redux/MultiJetPk2012.root')
 t = f.Get('mfvMiniTree/t')
 
 nvtx = defaultdict(int)
