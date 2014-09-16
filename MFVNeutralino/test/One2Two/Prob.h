@@ -15,6 +15,9 @@ namespace jmt {
 
   interval clopper_pearson_poisson_means_ratio(const double x, const double y,
                                                const double alpha=1-0.6827, const bool equal_tailed=true);
+
+  class TRandom;
+  double lognormal(TRandom* r, double mu, double sig);
 }
 
 #endif

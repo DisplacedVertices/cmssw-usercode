@@ -1,6 +1,7 @@
 #include "Prob.h"
 #include <cmath>
 #include "Math/QuantFuncMathCore.h"
+#include "TRandom.h"
 
 namespace jmt {
   interval clopper_pearson_binom(const double n_on, const double n_tot,
@@ -30,5 +31,10 @@ namespace jmt {
     i.lower = rl/(1-rl);
     i.upper = i.success ? rh/(1-rh) : 0;
     return i;
+  }
+
+  double lognormal(TRandom* r, double mu, double sig) {
+    const double z = r->Gaus();
+    return exp(mu + sig * z);
   }
 }
