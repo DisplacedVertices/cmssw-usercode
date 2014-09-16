@@ -413,6 +413,6 @@ D('sv_all_svdist2d',
   x_title = 'd_{VV} (cm)',
   y_title = 'events/0.01 cm',
   x_range = (0,0.3),
-  rebin = 5,
+  rebin = 10,
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
