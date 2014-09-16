@@ -23,7 +23,7 @@ ps = plot_saver(plot_dir, size=plot_size)
 
 data_samples = Samples.data_samples
 
-background_samples = Samples.smaller_background_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.leptonic_background_samples
+background_samples = Samples.smaller_background_samples + Samples.leptonic_background_samples + Samples.ttbar_samples + Samples.qcd_samples
 
 #signal_samples = [Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 signal_samples = [Samples.mfv_neutralino_tau1000um_M0400]
@@ -38,9 +38,9 @@ for s in Samples.qcdht0100, Samples.qcdht0250, Samples.qcdht0500, Samples.qcdht1
     s.join_info = True, 'QCD', ROOT.kBlue-9 # Samples.qcdht0100.color
 for s in Samples.ttbardilep, Samples.ttbarsemilep, Samples.ttbarhadronic:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7 # Samples.ttbardilep.color
-for s in Samples.leptonic_background_samples + Samples.auxiliary_background_samples:
+for s in Samples.auxiliary_background_samples:
      s.join_info = True, 'other', ROOT.kBlue-5
-for s in Samples.smaller_background_samples:
+for s in Samples.smaller_background_samples + Samples.leptonic_background_samples:
      s.join_info = True, 'other', ROOT.kBlue-3
 
     
