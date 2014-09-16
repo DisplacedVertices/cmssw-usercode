@@ -336,7 +336,7 @@ D('sv_all_ntracks_nm1',
   x_title = 'number of tracks/vertex',
   y_title = 'vertices',
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((5, 0, 5, 40200), 2, 5, 1),
+  cut_line = ((5, 0, 5, 440), 2, 5, 1),
   )
 
 D('sv_all_ntracksptgt3_nm1',
@@ -345,7 +345,7 @@ D('sv_all_ntracksptgt3_nm1',
   y_title = 'vertices',
   x_range = (0, 20),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((3, 0, 3, 292000), 2, 5, 1),
+  cut_line = ((3, 0, 3, 2970), 2, 5, 1),
   )
 
 D('sv_all_tksjetsntkmass',
@@ -361,7 +361,7 @@ D('sv_all_drmin_nm1',
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.08',
   rebin = 8,
-  cut_line = ((0.4, 0, 0.4, 88000), 2, 5, 1),
+  cut_line = ((0.4, 0, 0.4, 435), 2, 5, 1),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
 
@@ -370,7 +370,7 @@ D('sv_all_maxdrmax_nm1',
   rebin = 6,
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
-  cut_line = ((4, 0, 4, 105000), 2, 5, 1),
+  cut_line = ((4, 0, 4, 333), 2, 5, 1),
   legend_pos = (0.13, 0.70, 0.43, 0.90),
   )
 
@@ -379,7 +379,7 @@ D('sv_all_mindrmax_nm1',
   rebin = 6,
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
-  cut_line = ((1.2, 0, 1.2, 105000), 2, 5, 1),
+  cut_line = ((1.2, 0, 1.2, 163), 2, 5, 1),
   legend_pos = (0.13, 0.70, 0.43, 0.90),
   )
 
@@ -387,7 +387,7 @@ D('sv_all_njetsntks_nm1',
   histogram_path = 'vtxHst2VNoNjets/h_sv_all_njetsntks',
   x_title = 'number of associated jets',
   y_title = 'vertices',
-  cut_line = ((1, 0, 1, 105000), 2, 5, 1),
+  cut_line = ((1, 0, 1, 352), 2, 5, 1),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
 
@@ -405,7 +405,7 @@ D('sv_all_bs2derr_nm1',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.01),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((0.0025, 0, 0.0025, 157000), 2, 5, 1),
+  cut_line = ((0.0025, 0, 0.0025, 960), 2, 5, 1),
   )
 
 D('sv_all_svdist2d',
