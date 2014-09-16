@@ -14,7 +14,7 @@ namespace mfv {
     double partial_weight() const { return xsec / nevents; }
     double weight(double int_lumi) const { return partial_weight() * int_lumi; }
     bool is_sig() const { return key < 0; }
-    bool is_data() const { return key == 100; }
+    bool is_data() const { return key == 0; }
   };
 
   struct Samples {
@@ -23,7 +23,7 @@ namespace mfv {
 
     Samples()
       : samples({
-          //          {100, "MultiJetPk2012", -1, -1},
+          {0, "MultiJetPk2012", -1, -1},
 
           //{1, "qcdht0100", 1.04e7, 50129518},
           //{2, "qcdht0250", 2.76e5, 27062078},
