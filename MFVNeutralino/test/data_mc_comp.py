@@ -371,7 +371,7 @@ D('sv_all_maxdrmax_nm1',
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
   cut_line = ((4, 0, 4, 105000), 2, 5, 1),
-  legend_pos = (0.5, 0.67, 0.87, 0.87),
+  legend_pos = (0.13, 0.70, 0.43, 0.90),
   )
 
 D('sv_all_mindrmax_nm1',
@@ -380,7 +380,7 @@ D('sv_all_mindrmax_nm1',
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
   cut_line = ((1.2, 0, 1.2, 105000), 2, 5, 1),
-  legend_pos = (0.5, 0.67, 0.87, 0.87),
+  legend_pos = (0.13, 0.70, 0.43, 0.90),
   )
 
 D('sv_all_njetsntks_nm1',
