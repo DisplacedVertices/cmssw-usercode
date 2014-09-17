@@ -36,7 +36,9 @@ namespace mfv {
     const bool do_signif;
     const bool do_limits;
     const bool only_fit;
-    const double mu_sig_limit_step;
+    const double sig_limit_step;
+    const double sig_eff;
+    const double sig_eff_uncert;
 
     TFile* fout;
     TDirectory* dout;
@@ -90,10 +92,10 @@ namespace mfv {
     test_stat_t t_obs_0;
     double pval_signif;
     std::vector<double> pval_limits;
-    std::vector<double> mu_sig_limits;
+    std::vector<double> sig_limits;
     test_stat_t t_obs_limit;
     double pval_limit;
-    double mu_sig_limit;
+    double sig_limit;
 
     ////////////////////////////////////////////////////////////////////////////
 

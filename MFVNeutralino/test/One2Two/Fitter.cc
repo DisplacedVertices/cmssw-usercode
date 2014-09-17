@@ -10,6 +10,7 @@
 #include "TRandom3.h"
 #include "TTree.h"
 
+#include "Prob.h"
 #include "ProgressBar.h"
 #include "ROOTTools.h"
 #include "Random.h"
@@ -139,7 +140,9 @@ namespace mfv {
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
       only_fit(env.get_bool("only_fit", false)),
-      mu_sig_limit_step(env.get_double("mu_sig_limit_step", 0.2)),
+      sig_limit_step(env.get_double("sig_limit_step", 0.1)),
+      sig_eff(env.get_double("sig_eff", 1.)),
+      sig_eff_uncert(env.get_double("sig_eff_uncert", 0.)),
 
       fout(f),
       dout(f->mkdir(TString::Format("Fitter%s", uname.c_str()))),
@@ -159,7 +162,9 @@ namespace mfv {
     printf("do_signif? %i\n", do_signif);
     printf("do_limits? %i\n", do_limits);
     printf("only_fit? %i\n", only_fit);
-    printf("mu_sig_limit_step: %f\n", mu_sig_limit_step);
+    printf("sig_limit_step: %f\n", sig_limit_step);
+    printf("sig_eff: %f +- %f\n", sig_eff, sig_eff_uncert);
+
     fflush(stdout);
 
     book_trees();
@@ -221,9 +226,9 @@ namespace mfv {
     t_fit_info->Branch("t_obs_limit__h0_err_nuis1", &t_obs_limit.h0.err_nuis1, "t_obs_limit__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_limit__t", &t_obs_limit.t, "t_obs_limit__t/D");
     t_fit_info->Branch("pval_limits", &pval_limits);
-    t_fit_info->Branch("mu_sig_limits", &mu_sig_limits);
+    t_fit_info->Branch("sig_limits", &sig_limits);
     t_fit_info->Branch("pval_limit", &pval_limit, "pval_limit/D");
-    t_fit_info->Branch("mu_sig_limit", &mu_sig_limit, "mu_sig_limit/D");
+    t_fit_info->Branch("sig_limit", &sig_limit, "sig_limit/D");
 
     t_fit_info->SetAlias("s_true", "true_pars[0]");
     t_fit_info->SetAlias("b_true", "true_pars[1]");
@@ -530,9 +535,9 @@ namespace mfv {
 
     pval_signif = 1;
     pval_limits.clear();
-    mu_sig_limits.clear();
+    sig_limits.clear();
     t_obs_limit = test_stat_t();
-    mu_sig_limit = 1e-6;
+    sig_limit = 1e-6;
     pval_limit = 1;
 
     draw_likelihood(t_obs_0);
@@ -571,23 +576,25 @@ namespace mfv {
     }
 
     if (!only_fit && do_limits) {
-      mu_sig_limit = 1e-6;
+      sig_limit = 1e-6; // units of fb
       pval_limit = 1;
       std::vector<test_stat_t> t_obs_limits;
       const double limit_alpha = 0.05;
-      const double mu_sig_limit_stop = n_data;
+      const double sig_limit_stop = 7; //n_data / (sig_eff + 2*sig_eff_uncert);
 
       printf("scanning for %.1f%% upper limit:\n", 100*(1-limit_alpha));
-      jmt::ProgressBar pb_limits(50, mu_sig_limit_stop / mu_sig_limit_step);
+      jmt::ProgressBar pb_limits(50, sig_limit_stop / sig_limit_step);
       if (!print_toys)
         pb_limits.start();
 
-      while (mu_sig_limit < mu_sig_limit_stop) {
+      while (sig_limit < sig_limit_stop) {
+        const double mu_sig_limit = sig_eff * sig_limit;
+
         fit::set_data_real();
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
         if (print_toys) {
-          printf("mu_sig_limit: %f  ", mu_sig_limit);
+          printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit, mu_sig_limit);
           t_obs_limit_.print("t_obs_limit");
         }
         else
@@ -599,8 +606,9 @@ namespace mfv {
 
         int n_toy_limit_t_ge_obs = 0;
         for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
-          const int n_sig_limit = rand->Poisson(mu_sig_limit);
-          const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit);
+          const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
+          const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
+          const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
 
           make_toy_data(-1, i_toy_limit, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
       
@@ -608,7 +616,7 @@ namespace mfv {
           if (t.t > t_obs_limit_.t)
             ++n_toy_limit_t_ge_obs;
 
-          if (print_toys) {
+          if (0 && print_toys) {
             printf("limit toy %i nsig %i nbkg %i n'data' %i\n", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
             t.print("t_limit");
           }
@@ -620,11 +628,19 @@ namespace mfv {
 
         pval_limit = double(n_toy_limit_t_ge_obs) / n_toy_limit;
 
+        if (print_toys) {
+          const double T = 1./n_toy_limit;
+          const double ptilde = (pval_limit + T/2)/(1 + T);
+          const double sigptilde = sqrt(pval_limit * (1 - pval_limit) * T + T*T/4)/(1 + T);
+          printf("  pval_limit = %f (%f +- %f)\n", pval_limit, ptilde, sigptilde);
+          fflush(stdout);
+        }
+
         pval_limits.push_back(pval_limit);
-        mu_sig_limits.push_back(mu_sig_limit);
+        sig_limits.push_back(sig_limit);
         t_obs_limits.push_back(t_obs_limit_);
 
-        mu_sig_limit += mu_sig_limit_step;
+        sig_limit += sig_limit_step;
       }
       printf("\n");
 
@@ -634,11 +650,11 @@ namespace mfv {
           break;
       if (i < int(pval_limits.size())-1) {
         pval_limit = pval_limits[i+1];
-        mu_sig_limit = mu_sig_limits[i+1];
+        sig_limit = sig_limits[i+1];
         t_obs_limit = t_obs_limits[i+1];
       }
 
-      printf("pval_limit: %e  mu_sig_limit: %f\n", pval_limit, mu_sig_limit);
+      printf("pval_limit: %e  sig_limit: %f\n", pval_limit, sig_limit);
     }
 
     t_fit_info->Fill();
