@@ -102,7 +102,7 @@ sv_all_drmin_nm1
 sv_all_maxdrmax_nm1
 sv_all_mindrmax_nm1
 sv_all_njetsntks_nm1
-sv_all_bs2ddist
+sv_all_bsbs2ddist
 sv_all_bs2derr_nm1
 sv_all_svdist2d
 '''.split('\n') if not x.strip().startswith('#')]
@@ -391,8 +391,8 @@ D('sv_all_njetsntks_nm1',
   legend_pos = (0.47, 0.67, 0.87, 0.87),
   )
 
-D('sv_all_bs2ddist',
-  histogram_path = vertex_histo('h_sv_all_bs2ddist'),
+D('sv_all_bsbs2ddist',
+  histogram_path = vertex_histo('h_sv_all_bsbs2ddist'),
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.1),
