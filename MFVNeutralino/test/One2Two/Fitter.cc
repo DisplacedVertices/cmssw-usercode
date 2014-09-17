@@ -5,6 +5,8 @@
 
 #include "TCanvas.h"
 #include "TFile.h"
+#include "TFitResult.h"
+#include "TGraphErrors.h"
 #include "TH2.h"
 #include "TMinuit.h"
 #include "TRandom3.h"
@@ -200,31 +202,31 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h0_err_nuis1", &t_obs_0.h0.err_nuis1, "t_obs_0__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__t", &t_obs_0.t, "t_obs_0__t/D");
     t_fit_info->Branch("pval_signif", &pval_signif, "pval_signif/D");
-    t_fit_info->Branch("t_obs_limit__h1_istat", &t_obs_limit.h1.istat, "t_obs_limit__h1_istat/I");
-    t_fit_info->Branch("t_obs_limit__h1_maxtwolnL", &t_obs_limit.h1.maxtwolnL, "t_obs_limit__h1_maxtwolnL/D");
-    t_fit_info->Branch("t_obs_limit__h1_mu_sig", &t_obs_limit.h1.mu_sig, "t_obs_limit__h1_mu_sig/D");
-    t_fit_info->Branch("t_obs_limit__h1_err_mu_sig", &t_obs_limit.h1.err_mu_sig, "t_obs_limit__h1_err_mu_sig/D");
-    t_fit_info->Branch("t_obs_limit__h1_mu_bkg", &t_obs_limit.h1.mu_bkg, "t_obs_limit__h1_mu_bkg/D");
-    t_fit_info->Branch("t_obs_limit__h1_err_mu_bkg", &t_obs_limit.h1.err_mu_bkg, "t_obs_limit__h1_err_mu_bkg/D");
-    t_fit_info->Branch("t_obs_limit__h1_nuis0", &t_obs_limit.h1.nuis0, "t_obs_limit__h1_nuis0/D");
-    t_fit_info->Branch("t_obs_limit__h1_err_nuis0", &t_obs_limit.h1.err_nuis0, "t_obs_limit__h1_err_nuis0/D");
-    t_fit_info->Branch("t_obs_limit__h1_nuis1", &t_obs_limit.h1.nuis1, "t_obs_limit__h1_nuis1/D");
-    t_fit_info->Branch("t_obs_limit__h1_err_nuis1", &t_obs_limit.h1.err_nuis1, "t_obs_limit__h1_err_nuis1/D");
-    t_fit_info->Branch("t_obs_limit__h0_istat", &t_obs_limit.h0.istat, "t_obs_limit__h0_istat/I");
-    t_fit_info->Branch("t_obs_limit__h0_maxtwolnL", &t_obs_limit.h0.maxtwolnL, "t_obs_limit__h0_maxtwolnL/D");
-    t_fit_info->Branch("t_obs_limit__h0_mu_sig", &t_obs_limit.h0.mu_sig, "t_obs_limit__h0_mu_sig/D");
-    t_fit_info->Branch("t_obs_limit__h0_err_mu_sig", &t_obs_limit.h0.err_mu_sig, "t_obs_limit__h0_err_mu_sig/D");
-    t_fit_info->Branch("t_obs_limit__h0_mu_bkg", &t_obs_limit.h0.mu_bkg, "t_obs_limit__h0_mu_bkg/D");
-    t_fit_info->Branch("t_obs_limit__h0_err_mu_bkg", &t_obs_limit.h0.err_mu_bkg, "t_obs_limit__h0_err_mu_bkg/D");
-    t_fit_info->Branch("t_obs_limit__h0_nuis0", &t_obs_limit.h0.nuis0, "t_obs_limit__h0_nuis0/D");
-    t_fit_info->Branch("t_obs_limit__h0_err_nuis0", &t_obs_limit.h0.err_nuis0, "t_obs_limit__h0_err_nuis0/D");
-    t_fit_info->Branch("t_obs_limit__h0_nuis1", &t_obs_limit.h0.nuis1, "t_obs_limit__h0_nuis1/D");
-    t_fit_info->Branch("t_obs_limit__h0_err_nuis1", &t_obs_limit.h0.err_nuis1, "t_obs_limit__h0_err_nuis1/D");
-    t_fit_info->Branch("t_obs_limit__t", &t_obs_limit.t, "t_obs_limit__t/D");
-    t_fit_info->Branch("pval_limits", &pval_limits);
-    t_fit_info->Branch("sig_limits", &sig_limits);
-    t_fit_info->Branch("pval_limit", &pval_limit, "pval_limit/D");
-    t_fit_info->Branch("sig_limit", &sig_limit, "sig_limit/D");
+    //t_fit_info->Branch("t_obs_limit__h1_istat", &t_obs_limit.h1.istat, "t_obs_limit__h1_istat/I");
+    //t_fit_info->Branch("t_obs_limit__h1_maxtwolnL", &t_obs_limit.h1.maxtwolnL, "t_obs_limit__h1_maxtwolnL/D");
+    //t_fit_info->Branch("t_obs_limit__h1_mu_sig", &t_obs_limit.h1.mu_sig, "t_obs_limit__h1_mu_sig/D");
+    //t_fit_info->Branch("t_obs_limit__h1_err_mu_sig", &t_obs_limit.h1.err_mu_sig, "t_obs_limit__h1_err_mu_sig/D");
+    //t_fit_info->Branch("t_obs_limit__h1_mu_bkg", &t_obs_limit.h1.mu_bkg, "t_obs_limit__h1_mu_bkg/D");
+    //t_fit_info->Branch("t_obs_limit__h1_err_mu_bkg", &t_obs_limit.h1.err_mu_bkg, "t_obs_limit__h1_err_mu_bkg/D");
+    //t_fit_info->Branch("t_obs_limit__h1_nuis0", &t_obs_limit.h1.nuis0, "t_obs_limit__h1_nuis0/D");
+    //t_fit_info->Branch("t_obs_limit__h1_err_nuis0", &t_obs_limit.h1.err_nuis0, "t_obs_limit__h1_err_nuis0/D");
+    //t_fit_info->Branch("t_obs_limit__h1_nuis1", &t_obs_limit.h1.nuis1, "t_obs_limit__h1_nuis1/D");
+    //t_fit_info->Branch("t_obs_limit__h1_err_nuis1", &t_obs_limit.h1.err_nuis1, "t_obs_limit__h1_err_nuis1/D");
+    //t_fit_info->Branch("t_obs_limit__h0_istat", &t_obs_limit.h0.istat, "t_obs_limit__h0_istat/I");
+    //t_fit_info->Branch("t_obs_limit__h0_maxtwolnL", &t_obs_limit.h0.maxtwolnL, "t_obs_limit__h0_maxtwolnL/D");
+    //t_fit_info->Branch("t_obs_limit__h0_mu_sig", &t_obs_limit.h0.mu_sig, "t_obs_limit__h0_mu_sig/D");
+    //t_fit_info->Branch("t_obs_limit__h0_err_mu_sig", &t_obs_limit.h0.err_mu_sig, "t_obs_limit__h0_err_mu_sig/D");
+    //t_fit_info->Branch("t_obs_limit__h0_mu_bkg", &t_obs_limit.h0.mu_bkg, "t_obs_limit__h0_mu_bkg/D");
+    //t_fit_info->Branch("t_obs_limit__h0_err_mu_bkg", &t_obs_limit.h0.err_mu_bkg, "t_obs_limit__h0_err_mu_bkg/D");
+    //t_fit_info->Branch("t_obs_limit__h0_nuis0", &t_obs_limit.h0.nuis0, "t_obs_limit__h0_nuis0/D");
+    //t_fit_info->Branch("t_obs_limit__h0_err_nuis0", &t_obs_limit.h0.err_nuis0, "t_obs_limit__h0_err_nuis0/D");
+    //t_fit_info->Branch("t_obs_limit__h0_nuis1", &t_obs_limit.h0.nuis1, "t_obs_limit__h0_nuis1/D");
+    //t_fit_info->Branch("t_obs_limit__h0_err_nuis1", &t_obs_limit.h0.err_nuis1, "t_obs_limit__h0_err_nuis1/D");
+    //t_fit_info->Branch("t_obs_limit__t", &t_obs_limit.t, "t_obs_limit__t/D");
+    //t_fit_info->Branch("pval_limits", &pval_limits);
+    //t_fit_info->Branch("sig_limits", &sig_limits);
+    //t_fit_info->Branch("pval_limit", &pval_limit, "pval_limit/D");
+    //t_fit_info->Branch("sig_limit", &sig_limit, "sig_limit/D");
 
     t_fit_info->SetAlias("s_true", "true_pars[0]");
     t_fit_info->SetAlias("b_true", "true_pars[1]");
@@ -530,11 +532,11 @@ namespace mfv {
     TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars());
 
     pval_signif = 1;
-    pval_limits.clear();
-    sig_limits.clear();
-    t_obs_limit = test_stat_t();
-    sig_limit = 1e-6;
-    pval_limit = 1;
+    //pval_limits.clear();
+    //sig_limits.clear();
+    //t_obs_limit = test_stat_t();
+    //sig_limit = 1e-6;
+    //pval_limit = 1;
 
     draw_likelihood(t_obs_0);
     draw_fit(t_obs_0);
@@ -572,23 +574,25 @@ namespace mfv {
     }
 
     if (!only_fit && do_limits) {
-      pval_limit = 1;
       const double limit_alpha = 0.05;
 
       printf("scanning for %.1f%% upper limit:\n", 100*(1-limit_alpha));
-      //jmt::ProgressBar pb_limits(50, sig_limit_stop / sig_limit_step);
-      //if (!print_toys)
-      //  pb_limits.start();
 
-      int n_toy_limit = 10000; // adjust higher as bracket gets smaller
-      const int n_limit_step = 5;
+      const int n_limit_step = 10;
+      const int n_toy_limit_start = 1000;
+      int n_toy_limit = n_toy_limit_start; // adjust higher as bracket gets smaller
       double sig_limit_lo = 1e-3; // units of fb
       double sig_limit_hi = n_data / (sig_eff + 2*sig_eff_uncert);
       double sig_limit_step = (sig_limit_hi - sig_limit_lo)/n_limit_step;
       bool bracket_changed = false;
+      bool done_bracketing = false;
 
-      while (sig_limit_hi - sig_limit_lo > 0.01) {
+      while (!done_bracketing) {
         sig_limit = sig_limit_lo;
+
+        std::vector<double> bracket_sig_limit;
+        std::vector<double> bracket_pval_limit;
+        std::vector<double> bracket_pval_limit_err;
 
         while (sig_limit < sig_limit_hi) {
           const double mu_sig_limit = sig_eff * sig_limit;
@@ -600,15 +604,16 @@ namespace mfv {
             printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit, mu_sig_limit);
             t_obs_limit_.print("t_obs_limit");
           }
-          else
-            {} //++pb_limits;
 
           if (save_toys) {
             jmt::vthrow("save limit toys not implemented");
           }
 
+          jmt::ProgressBar pb_limit_toys(50, n_toy_limit);
+          pb_limit_toys.start();
+
           int n_toy_limit_t_ge_obs = 0;
-          for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
+          for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit, ++pb_limit_toys) {
             const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
             if (mu_sig_limit_toy >= n_data) {
               --i_toy_limit;
@@ -632,24 +637,29 @@ namespace mfv {
               jmt::vthrow("save toys for limits not implemented");
             }
           }
+          printf("\n");
 
           const double T = 1./n_toy_limit;
           const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
-          pval_limit = (p_hat + T/2)/(1 + T);
-          pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+          const double pval_limit = (p_hat + T/2)/(1 + T);
+          const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+          bracket_sig_limit.push_back(sig_limit);
+          bracket_pval_limit.push_back(pval_limit);
+          bracket_pval_limit_err.push_back(pval_limit_err);
 
+          const double n_sigma_away = 3;
           if (print_toys) {
-            printf("  p_hat = %f -> %f +- %f  5s: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, pval_limit - 5*pval_limit_err, pval_limit + 5*pval_limit_err);
+            printf("  p_hat = %f -> %f +- %f  %is: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, pval_limit - n_sigma_away*pval_limit_err, pval_limit + n_sigma_away*pval_limit_err);
             fflush(stdout);
           }
 
           bool brk = false;
-          if (pval_limit - 5*pval_limit_err > limit_alpha) {
+          if (pval_limit - n_sigma_away*pval_limit_err > limit_alpha) {
             if (sig_limit_lo != sig_limit)
               bracket_changed = true;
             sig_limit_lo = sig_limit;
           }
-          if (pval_limit + 5*pval_limit_err < limit_alpha) {
+          if (pval_limit + n_sigma_away*pval_limit_err < limit_alpha) {
             if (sig_limit_hi != sig_limit)
               bracket_changed = true;
             sig_limit_hi = sig_limit;
@@ -663,13 +673,26 @@ namespace mfv {
         }
 
         if (!bracket_changed) {
-          n_toy_limit *= 4;
-          n_limit_step *= 2;
+          if (n_toy_limit >= n_toy_limit_start * 16) {
+            done_bracketing = true;
+            std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
+            TGraphErrors* g = new TGraphErrors(bracket_pval_limit.size(),
+                                               &bracket_sig_limit[0], &bracket_sig_limit_err[0],
+                                               &bracket_pval_limit[0], &bracket_pval_limit_err[0]);
+            g->SetMarkerStyle(5);
+            TFitResultPtr res = g->Fit("pol1", "S");
+            const double a = res->Parameter(0), ea = res->ParError(0);
+            const double b = res->Parameter(1), eb = res->ParError(1);
+            sig_limit = (limit_alpha - a)/b;
+            sig_limit_err = sig_limit * sqrt(pow(ea/a, 2) + pow(eb/b, 2));
+            sig_limit_prob = res->Prob();
+          }
+
+          n_toy_limit *= 2;
           if (print_toys)
             printf("  ** bracket [%f, %f] did not change so new n_toys = %i\n\n", sig_limit_lo, sig_limit_hi, n_toy_limit);
         }
         else {
-          n_toy_limit *= 2;
           bracket_changed = false;
           if (print_toys)
             printf("  ** new bracket [%f, %f]\n\n", sig_limit_lo, sig_limit_hi);
@@ -678,9 +701,9 @@ namespace mfv {
         sig_limit_step = (sig_limit_hi - sig_limit_lo)/n_limit_step;
       }
 
-      // need to set pval_limit, sig_limit, t_obs_limit in tree.
+      // need to set pval_limit, sig_limit, t_obs_limit, or whatever in tree.
 
-      printf("pval_limit: %e  sig_limit: %f\n", pval_limit, sig_limit);
+      printf("  *** done bracketing, y = %.2f at %f +- %f (prob: %f)\n", limit_alpha, sig_limit, sig_limit_err, sig_limit_prob);
     }
 
     t_fit_info->Fill();
