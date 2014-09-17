@@ -30,13 +30,11 @@ namespace mfv {
     const double start_nuis0;
     const double start_nuis1;
     const int n_toy_signif;
-    const int n_toy_limit;
     const bool print_toys;
     const bool save_toys;
     const bool do_signif;
     const bool do_limits;
     const bool only_fit;
-    const double sig_limit_step;
     const double sig_eff;
     const double sig_eff_uncert;
 
@@ -95,6 +93,7 @@ namespace mfv {
     std::vector<double> sig_limits;
     test_stat_t t_obs_limit;
     double pval_limit;
+    double pval_limit_err;
     double sig_limit;
 
     ////////////////////////////////////////////////////////////////////////////

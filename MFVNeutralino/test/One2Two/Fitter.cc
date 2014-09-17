@@ -134,13 +134,11 @@ namespace mfv {
       start_nuis0(env.get_double("start_nuis0", 0.025)),
       start_nuis1(env.get_double("start_nuis1", 0.008)),
       n_toy_signif(env.get_int("n_toy_signif", 10000)),
-      n_toy_limit(env.get_int("n_toy_limit", 1000)),
       print_toys(env.get_bool("print_toys", false)),
       save_toys(env.get_bool("save_toys", false)),
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
       only_fit(env.get_bool("only_fit", false)),
-      sig_limit_step(env.get_double("sig_limit_step", 0.1)),
       sig_eff(env.get_double("sig_eff", 1.)),
       sig_eff_uncert(env.get_double("sig_eff_uncert", 0.)),
 
@@ -156,13 +154,11 @@ namespace mfv {
     printf("fix_nuis1: %i\n", fix_nuis1);
     printf("start_nuis: %f, %f\n", start_nuis0, start_nuis1);
     printf("n_toy_signif: %i\n", n_toy_signif);
-    printf("n_toy_limit: %i\n", n_toy_limit);
     printf("print_toys? %i\n", print_toys);
     printf("save_toys? %i\n", save_toys);
     printf("do_signif? %i\n", do_signif);
     printf("do_limits? %i\n", do_limits);
     printf("only_fit? %i\n", only_fit);
-    printf("sig_limit_step: %f\n", sig_limit_step);
     printf("sig_eff: %f +- %f\n", sig_eff, sig_eff_uncert);
 
     fflush(stdout);
@@ -576,83 +572,113 @@ namespace mfv {
     }
 
     if (!only_fit && do_limits) {
-      sig_limit = 1e-6; // units of fb
       pval_limit = 1;
-      std::vector<test_stat_t> t_obs_limits;
       const double limit_alpha = 0.05;
-      const double sig_limit_stop = 7; //n_data / (sig_eff + 2*sig_eff_uncert);
 
       printf("scanning for %.1f%% upper limit:\n", 100*(1-limit_alpha));
-      jmt::ProgressBar pb_limits(50, sig_limit_stop / sig_limit_step);
-      if (!print_toys)
-        pb_limits.start();
+      //jmt::ProgressBar pb_limits(50, sig_limit_stop / sig_limit_step);
+      //if (!print_toys)
+      //  pb_limits.start();
 
-      while (sig_limit < sig_limit_stop) {
-        const double mu_sig_limit = sig_eff * sig_limit;
+      int n_toy_limit = 10000; // adjust higher as bracket gets smaller
+      const int n_limit_step = 5;
+      double sig_limit_lo = 1e-3; // units of fb
+      double sig_limit_hi = n_data / (sig_eff + 2*sig_eff_uncert);
+      double sig_limit_step = (sig_limit_hi - sig_limit_lo)/n_limit_step;
+      bool bracket_changed = false;
 
-        fit::set_data_real();
-        const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
+      while (sig_limit_hi - sig_limit_lo > 0.01) {
+        sig_limit = sig_limit_lo;
 
-        if (print_toys) {
-          printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit, mu_sig_limit);
-          t_obs_limit_.print("t_obs_limit");
-        }
-        else
-          ++pb_limits;
+        while (sig_limit < sig_limit_hi) {
+          const double mu_sig_limit = sig_eff * sig_limit;
 
-        if (save_toys) {
-          jmt::vthrow("save limit toys not implemented");
-        }
+          fit::set_data_real();
+          const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
-        int n_toy_limit_t_ge_obs = 0;
-        for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
-          const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
-          const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
-          const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
-
-          make_toy_data(-1, i_toy_limit, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
-      
-          const test_stat_t t = calc_test_stat(mu_sig_limit);
-          if (t.t > t_obs_limit_.t)
-            ++n_toy_limit_t_ge_obs;
-
-          if (0 && print_toys) {
-            printf("limit toy %i nsig %i nbkg %i n'data' %i\n", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
-            t.print("t_limit");
+          if (print_toys) {
+            printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit, mu_sig_limit);
+            t_obs_limit_.print("t_obs_limit");
           }
+          else
+            {} //++pb_limits;
 
           if (save_toys) {
-            jmt::vthrow("save toys for limits not implemented");
+            jmt::vthrow("save limit toys not implemented");
           }
-        }
 
-        pval_limit = double(n_toy_limit_t_ge_obs) / n_toy_limit;
+          int n_toy_limit_t_ge_obs = 0;
+          for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
+            const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
+            if (mu_sig_limit_toy >= n_data) {
+              --i_toy_limit;
+              continue;
+            }
+            const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
+            const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
 
-        if (print_toys) {
+            make_toy_data(-1, i_toy_limit, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
+      
+            const test_stat_t t = calc_test_stat(mu_sig_limit);
+            if (t.t > t_obs_limit_.t)
+              ++n_toy_limit_t_ge_obs;
+
+            if (0 && print_toys) {
+              printf("limit toy %i nsig %i nbkg %i n'data' %i\n", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
+              t.print("t_limit");
+            }
+
+            if (save_toys) {
+              jmt::vthrow("save toys for limits not implemented");
+            }
+          }
+
           const double T = 1./n_toy_limit;
-          const double ptilde = (pval_limit + T/2)/(1 + T);
-          const double sigptilde = sqrt(pval_limit * (1 - pval_limit) * T + T*T/4)/(1 + T);
-          printf("  pval_limit = %f (%f +- %f)\n", pval_limit, ptilde, sigptilde);
-          fflush(stdout);
+          const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
+          pval_limit = (p_hat + T/2)/(1 + T);
+          pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+
+          if (print_toys) {
+            printf("  p_hat = %f -> %f +- %f  5s: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, pval_limit - 5*pval_limit_err, pval_limit + 5*pval_limit_err);
+            fflush(stdout);
+          }
+
+          bool brk = false;
+          if (pval_limit - 5*pval_limit_err > limit_alpha) {
+            if (sig_limit_lo != sig_limit)
+              bracket_changed = true;
+            sig_limit_lo = sig_limit;
+          }
+          if (pval_limit + 5*pval_limit_err < limit_alpha) {
+            if (sig_limit_hi != sig_limit)
+              bracket_changed = true;
+            sig_limit_hi = sig_limit;
+            brk = true;
+          }
+
+          sig_limit += sig_limit_step;
+
+          if (brk)
+            break;
         }
 
-        pval_limits.push_back(pval_limit);
-        sig_limits.push_back(sig_limit);
-        t_obs_limits.push_back(t_obs_limit_);
+        if (!bracket_changed) {
+          n_toy_limit *= 4;
+          n_limit_step *= 2;
+          if (print_toys)
+            printf("  ** bracket [%f, %f] did not change so new n_toys = %i\n\n", sig_limit_lo, sig_limit_hi, n_toy_limit);
+        }
+        else {
+          n_toy_limit *= 2;
+          bracket_changed = false;
+          if (print_toys)
+            printf("  ** new bracket [%f, %f]\n\n", sig_limit_lo, sig_limit_hi);
+        }
 
-        sig_limit += sig_limit_step;
+        sig_limit_step = (sig_limit_hi - sig_limit_lo)/n_limit_step;
       }
-      printf("\n");
 
-      int i;
-      for (i = int(pval_limits.size())-1; i >= 0; --i)
-        if (pval_limits[i] > limit_alpha)
-          break;
-      if (i < int(pval_limits.size())-1) {
-        pval_limit = pval_limits[i+1];
-        sig_limit = sig_limits[i+1];
-        t_obs_limit = t_obs_limits[i+1];
-      }
+      // need to set pval_limit, sig_limit, t_obs_limit in tree.
 
       printf("pval_limit: %e  sig_limit: %f\n", pval_limit, sig_limit);
     }
