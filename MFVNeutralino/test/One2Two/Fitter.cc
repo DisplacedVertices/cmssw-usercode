@@ -141,6 +141,8 @@ namespace mfv {
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
       only_fit(env.get_bool("only_fit", false)),
+      n_toy_limit(env.get_int("n_toy_limit", 2000)),
+      sig_limit_step(env.get_double("sig_limit_step", 0.1)),
       sig_eff(env.get_double("sig_eff", 1.)),
       sig_eff_uncert(env.get_double("sig_eff_uncert", 0.)),
 
@@ -161,6 +163,8 @@ namespace mfv {
     printf("do_signif? %i\n", do_signif);
     printf("do_limits? %i\n", do_limits);
     printf("only_fit? %i\n", only_fit);
+    printf("n_toy_limit: %i (~%f uncert @ 0.05)\n", n_toy_limit, sqrt(0.05*0.95/n_toy_limit));
+    printf("sig_limit_step: %f\n", sig_limit_step);
     printf("sig_eff: %f +- %f\n", sig_eff, sig_eff_uncert);
 
     fflush(stdout);
@@ -576,134 +580,112 @@ namespace mfv {
     if (!only_fit && do_limits) {
       const double limit_alpha = 0.05;
 
+      const double sig_limit_lo = 1e-3; // units of fb
+      const double sig_limit_hi = n_data / (sig_eff + 2*sig_eff_uncert);
+      const int n_sigma_away = 4;
+
       printf("scanning for %.1f%% upper limit:\n", 100*(1-limit_alpha));
+      jmt::ProgressBar pb_limit(50, (sig_limit_hi - sig_limit_lo)/sig_limit_step);
+      if (!print_toys)
+        pb_limit.start();
 
-      const int n_limit_step = 10;
-      const int n_toy_limit_start = 1000;
-      int n_toy_limit = n_toy_limit_start; // adjust higher as bracket gets smaller
-      double sig_limit_lo = 1e-3; // units of fb
-      double sig_limit_hi = n_data / (sig_eff + 2*sig_eff_uncert);
-      double sig_limit_step = (sig_limit_hi - sig_limit_lo)/n_limit_step;
-      bool bracket_changed = false;
-      bool done_bracketing = false;
+      sig_limit = sig_limit_lo;
 
-      while (!done_bracketing) {
-        sig_limit = sig_limit_lo;
+      std::vector<double> bracket_sig_limit;
+      std::vector<double> bracket_pval_limit;
+      std::vector<double> bracket_pval_limit_err;
 
-        std::vector<double> bracket_sig_limit;
-        std::vector<double> bracket_pval_limit;
-        std::vector<double> bracket_pval_limit_err;
+      while (sig_limit < sig_limit_hi) {
+        const double mu_sig_limit = sig_eff * sig_limit;
 
-        while (sig_limit < sig_limit_hi) {
-          const double mu_sig_limit = sig_eff * sig_limit;
+        fit::set_data_real();
+        const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
-          fit::set_data_real();
-          const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
+        if (print_toys) {
+          printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit, mu_sig_limit);
+          t_obs_limit_.print("t_obs_limit");
+        }
+        else
+          ++pb_limit;
+
+        if (save_toys) {
+          jmt::vthrow("save limit toys not implemented");
+        }
+
+        int n_toy_limit_t_ge_obs = 0;
+
+        jmt::ProgressBar pb_limit_toys(50, n_toy_limit);
+        if (print_toys)
+          pb_limit_toys.start();
+
+        for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
+          const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
+          if (mu_sig_limit_toy >= n_data) {
+            --i_toy_limit;
+            continue;
+          }
+          const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
+          const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
+
+          make_toy_data(-1, i_toy_limit, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
+      
+          const test_stat_t t = calc_test_stat(mu_sig_limit);
+          if (t.t > t_obs_limit_.t)
+            ++n_toy_limit_t_ge_obs;
 
           if (print_toys) {
-            printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit, mu_sig_limit);
-            t_obs_limit_.print("t_obs_limit");
+            //printf("limit toy %i nsig %i nbkg %i n'data' %i\n", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
+            //t.print("t_limit");
+            ++pb_limit_toys;
           }
 
           if (save_toys) {
-            jmt::vthrow("save limit toys not implemented");
+            jmt::vthrow("save toys for limits not implemented");
           }
+        }
+        printf("\n");
 
-          jmt::ProgressBar pb_limit_toys(50, n_toy_limit);
-          pb_limit_toys.start();
+        const double T = 1./n_toy_limit;
+        const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
+        const double pval_limit = (p_hat + T/2)/(1 + T);
+        const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+        const double pval_limit_sglo = pval_limit - n_sigma_away * pval_limit_err;
+        const double pval_limit_sghi = pval_limit + n_sigma_away * pval_limit_err;
 
-          int n_toy_limit_t_ge_obs = 0;
-          for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit, ++pb_limit_toys) {
-            const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
-            if (mu_sig_limit_toy >= n_data) {
-              --i_toy_limit;
-              continue;
-            }
-            const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
-            const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
+        if (print_toys) {
+          printf("  p_hat = %f -> %f +- %f  %is: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, n_sigma_away, pval_limit_sglo, pval_limit_sghi);
+          fflush(stdout);
+        }
 
-            make_toy_data(-1, i_toy_limit, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
-      
-            const test_stat_t t = calc_test_stat(mu_sig_limit);
-            if (t.t > t_obs_limit_.t)
-              ++n_toy_limit_t_ge_obs;
-
-            if (0 && print_toys) {
-              printf("limit toy %i nsig %i nbkg %i n'data' %i\n", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
-              t.print("t_limit");
-            }
-
-            if (save_toys) {
-              jmt::vthrow("save toys for limits not implemented");
-            }
-          }
-          printf("\n");
-
-          const double T = 1./n_toy_limit;
-          const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
-          const double pval_limit = (p_hat + T/2)/(1 + T);
-          const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+        if (pval_limit_sglo <= limit_alpha) {
+          if (print_toys)
+            printf("  ** include in bracket\n");
           bracket_sig_limit.push_back(sig_limit);
           bracket_pval_limit.push_back(pval_limit);
           bracket_pval_limit_err.push_back(pval_limit_err);
-
-          const double n_sigma_away = 3;
-          if (print_toys) {
-            printf("  p_hat = %f -> %f +- %f  %is: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, pval_limit - n_sigma_away*pval_limit_err, pval_limit + n_sigma_away*pval_limit_err);
-            fflush(stdout);
-          }
-
-          bool brk = false;
-          if (pval_limit - n_sigma_away*pval_limit_err > limit_alpha) {
-            if (sig_limit_lo != sig_limit)
-              bracket_changed = true;
-            sig_limit_lo = sig_limit;
-          }
-          if (pval_limit + n_sigma_away*pval_limit_err < limit_alpha) {
-            if (sig_limit_hi != sig_limit)
-              bracket_changed = true;
-            sig_limit_hi = sig_limit;
-            brk = true;
-          }
-
-          sig_limit += sig_limit_step;
-
-          if (brk)
-            break;
         }
 
-        if (!bracket_changed) {
-          if (n_toy_limit >= n_toy_limit_start * 16) {
-            done_bracketing = true;
-            std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
-            TGraphErrors* g = new TGraphErrors(bracket_pval_limit.size(),
-                                               &bracket_sig_limit[0], &bracket_sig_limit_err[0],
-                                               &bracket_pval_limit[0], &bracket_pval_limit_err[0]);
-            g->SetMarkerStyle(5);
-            TFitResultPtr res = g->Fit("pol1", "S");
-            const double a = res->Parameter(0), ea = res->ParError(0);
-            const double b = res->Parameter(1), eb = res->ParError(1);
-            sig_limit = (limit_alpha - a)/b;
-            sig_limit_err = sig_limit * sqrt(pow(ea/a, 2) + pow(eb/b, 2));
-            sig_limit_prob = res->Prob();
-          }
+        if (pval_limit_sghi <= limit_alpha)
+          break;
 
-          n_toy_limit *= 2;
-          if (print_toys)
-            printf("  ** bracket [%f, %f] did not change so new n_toys = %i\n\n", sig_limit_lo, sig_limit_hi, n_toy_limit);
-        }
-        else {
-          bracket_changed = false;
-          if (print_toys)
-            printf("  ** new bracket [%f, %f]\n\n", sig_limit_lo, sig_limit_hi);
-        }
-
-        sig_limit_step = (sig_limit_hi - sig_limit_lo)/n_limit_step;
+        sig_limit += sig_limit_step;
       }
+
+      std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
+      TGraphErrors* g = new TGraphErrors(bracket_sig_limit.size(), &bracket_sig_limit[0], &bracket_pval_limit[0], &bracket_sig_limit_err[0], &bracket_pval_limit_err[0]);
+      g->SetMarkerStyle(5);
+      TFitResultPtr res = g->Fit("pol1", "S");
+      const double a = res->Parameter(0), ea = res->ParError(0);
+      const double b = res->Parameter(1), eb = res->ParError(1);
+      sig_limit = (limit_alpha - a)/b;
+      sig_limit_err = sig_limit * sqrt(pow(ea/a, 2) + pow(eb/b, 2));
+      sig_limit_prob = res->Prob();
+      g->SetName("g_limit_bracket_fit");
+      g->Write();
 
       // need to set pval_limit, sig_limit, t_obs_limit, or whatever in tree.
 
-      printf("  *** done bracketing, y = %.2f at %f +- %f (prob: %f)\n", limit_alpha, sig_limit, sig_limit_err, sig_limit_prob);
+      printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_prob);
     }
 
     t_fit_info->Fill();
