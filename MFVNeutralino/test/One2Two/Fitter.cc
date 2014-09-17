@@ -247,7 +247,7 @@ namespace mfv {
 
     scan_t mu_scan[2] = {
       { 200, 0, 200 },
-      { 200, 0, 200 }
+      { 400, 0, 400 }
     };
 
     const size_t npars = bkg_templates->at(0)->npars();
