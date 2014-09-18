@@ -81,10 +81,10 @@ h_mu_sig_limit = h('h_mu_sig_limit', '', 200, 0, 200)
 h_pval_limit.GetXaxis().SetRangeUser(0, 0.2)
 h_mu_sig_limit.GetXaxis().SetRangeUser(0,20)
 
-sig_true = [0., 0.03, 0.13, 0.23, 0.34, 0.37, 0.37, 0.18, 0.85, 1.52, 2.22, 2.41, 2.37, 0.45, 2.50, 4.59, 6.27, 6.73, 6.67, 1.01, 5.43, 9.74, 12.42, 12.86, 12.93]
+sig_true = [0., 0.0245, 0.1102, 0.2085, 0.3064, 0.3293, 0.3279, 0.1531, 0.7707, 1.4223, 2.0397, 2.1889, 2.1456, 0.3920, 2.2956, 4.2842, 5.8373, 6.1553, 6.0429, 0.7841, 4.5308, 8.5589, 11.0880, 11.4206, 11.3452]
 mu_sig_true_mean = sig_true[sig_num] * sig_scale
 print 'sig_num', sig_num, 'mu_sig_true_mean', mu_sig_true_mean
-mu_bkg_true_mean = 45.3
+mu_bkg_true_mean = 39.47
 nuis0_true_mean = 0
 nuis1_true_mean = 0
 for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,pval_limit,mu_sig_limit in d:
