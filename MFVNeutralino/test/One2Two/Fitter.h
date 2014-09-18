@@ -91,12 +91,14 @@ namespace mfv {
 
     test_stat_t t_obs_0;
     double pval_signif;
-    //std::vector<double> pval_limits;
-    //std::vector<double> sig_limits;
-    //test_stat_t t_obs_limit;
     double sig_limit;
     double sig_limit_err;
-    double sig_limit_prob;
+    int sig_limit_fit_n;
+    double sig_limit_fit_a;
+    double sig_limit_fit_b;
+    double sig_limit_fit_a_err;
+    double sig_limit_fit_b_err;
+    double sig_limit_fit_prob;
 
     ////////////////////////////////////////////////////////////////////////////
 

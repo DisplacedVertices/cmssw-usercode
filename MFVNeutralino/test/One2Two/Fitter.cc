@@ -177,6 +177,16 @@ namespace mfv {
 
     TTree* t_config = new TTree("t_config", "");
     t_config->Branch("seed", const_cast<int*>(&seed), "seed/I");
+    t_config->Branch("allow_negative_mu_sig", const_cast<bool*>(&allow_negative_mu_sig));
+    t_config->Branch("run_minos", const_cast<bool*>(&run_minos));
+    t_config->Branch("fix_nuis1", const_cast<bool*>(&fix_nuis1));
+    t_config->Branch("start_nuis0", const_cast<double*>(&start_nuis0));
+    t_config->Branch("start_nuis1", const_cast<double*>(&start_nuis1));
+    t_config->Branch("n_toy_signif", const_cast<int*>(&n_toy_signif));
+    t_config->Branch("n_toy_limit", const_cast<int*>(&n_toy_limit));
+    t_config->Branch("sig_limit_step", const_cast<double*>(&sig_limit_step));
+    t_config->Branch("sig_eff", const_cast<double*>(&sig_eff));
+    t_config->Branch("sig_eff_uncert", const_cast<double*>(&sig_eff_uncert));
     t_config->Fill();
 
 
@@ -205,32 +215,14 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h0_nuis1", &t_obs_0.h0.nuis1, "t_obs_0__h0_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_err_nuis1", &t_obs_0.h0.err_nuis1, "t_obs_0__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__t", &t_obs_0.t, "t_obs_0__t/D");
-    t_fit_info->Branch("pval_signif", &pval_signif, "pval_signif/D");
-    //t_fit_info->Branch("t_obs_limit__h1_istat", &t_obs_limit.h1.istat, "t_obs_limit__h1_istat/I");
-    //t_fit_info->Branch("t_obs_limit__h1_maxtwolnL", &t_obs_limit.h1.maxtwolnL, "t_obs_limit__h1_maxtwolnL/D");
-    //t_fit_info->Branch("t_obs_limit__h1_mu_sig", &t_obs_limit.h1.mu_sig, "t_obs_limit__h1_mu_sig/D");
-    //t_fit_info->Branch("t_obs_limit__h1_err_mu_sig", &t_obs_limit.h1.err_mu_sig, "t_obs_limit__h1_err_mu_sig/D");
-    //t_fit_info->Branch("t_obs_limit__h1_mu_bkg", &t_obs_limit.h1.mu_bkg, "t_obs_limit__h1_mu_bkg/D");
-    //t_fit_info->Branch("t_obs_limit__h1_err_mu_bkg", &t_obs_limit.h1.err_mu_bkg, "t_obs_limit__h1_err_mu_bkg/D");
-    //t_fit_info->Branch("t_obs_limit__h1_nuis0", &t_obs_limit.h1.nuis0, "t_obs_limit__h1_nuis0/D");
-    //t_fit_info->Branch("t_obs_limit__h1_err_nuis0", &t_obs_limit.h1.err_nuis0, "t_obs_limit__h1_err_nuis0/D");
-    //t_fit_info->Branch("t_obs_limit__h1_nuis1", &t_obs_limit.h1.nuis1, "t_obs_limit__h1_nuis1/D");
-    //t_fit_info->Branch("t_obs_limit__h1_err_nuis1", &t_obs_limit.h1.err_nuis1, "t_obs_limit__h1_err_nuis1/D");
-    //t_fit_info->Branch("t_obs_limit__h0_istat", &t_obs_limit.h0.istat, "t_obs_limit__h0_istat/I");
-    //t_fit_info->Branch("t_obs_limit__h0_maxtwolnL", &t_obs_limit.h0.maxtwolnL, "t_obs_limit__h0_maxtwolnL/D");
-    //t_fit_info->Branch("t_obs_limit__h0_mu_sig", &t_obs_limit.h0.mu_sig, "t_obs_limit__h0_mu_sig/D");
-    //t_fit_info->Branch("t_obs_limit__h0_err_mu_sig", &t_obs_limit.h0.err_mu_sig, "t_obs_limit__h0_err_mu_sig/D");
-    //t_fit_info->Branch("t_obs_limit__h0_mu_bkg", &t_obs_limit.h0.mu_bkg, "t_obs_limit__h0_mu_bkg/D");
-    //t_fit_info->Branch("t_obs_limit__h0_err_mu_bkg", &t_obs_limit.h0.err_mu_bkg, "t_obs_limit__h0_err_mu_bkg/D");
-    //t_fit_info->Branch("t_obs_limit__h0_nuis0", &t_obs_limit.h0.nuis0, "t_obs_limit__h0_nuis0/D");
-    //t_fit_info->Branch("t_obs_limit__h0_err_nuis0", &t_obs_limit.h0.err_nuis0, "t_obs_limit__h0_err_nuis0/D");
-    //t_fit_info->Branch("t_obs_limit__h0_nuis1", &t_obs_limit.h0.nuis1, "t_obs_limit__h0_nuis1/D");
-    //t_fit_info->Branch("t_obs_limit__h0_err_nuis1", &t_obs_limit.h0.err_nuis1, "t_obs_limit__h0_err_nuis1/D");
-    //t_fit_info->Branch("t_obs_limit__t", &t_obs_limit.t, "t_obs_limit__t/D");
-    //t_fit_info->Branch("pval_limits", &pval_limits);
-    //t_fit_info->Branch("sig_limits", &sig_limits);
-    //t_fit_info->Branch("pval_limit", &pval_limit, "pval_limit/D");
-    //t_fit_info->Branch("sig_limit", &sig_limit, "sig_limit/D");
+    t_fit_info->Branch("sig_limit", &sig_limit);
+    t_fit_info->Branch("sig_limit_err", &sig_limit_err);
+    t_fit_info->Branch("sig_limit_fit_n", &sig_limit_fit_n);
+    t_fit_info->Branch("sig_limit_fit_a", &sig_limit_fit_a);
+    t_fit_info->Branch("sig_limit_fit_b", &sig_limit_fit_b);
+    t_fit_info->Branch("sig_limit_fit_a_err", &sig_limit_fit_a_err);
+    t_fit_info->Branch("sig_limit_fit_b_err", &sig_limit_fit_b_err);
+    t_fit_info->Branch("sig_limit_fit_prob", &sig_limit_fit_prob);
 
     t_fit_info->SetAlias("s_true", "true_pars[0]");
     t_fit_info->SetAlias("b_true", "true_pars[1]");
@@ -643,7 +635,8 @@ namespace mfv {
             jmt::vthrow("save toys for limits not implemented");
           }
         }
-        printf("\n");
+        if (print_toys)
+          printf("\n");
 
         const double T = 1./n_toy_limit;
         const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
@@ -675,17 +668,20 @@ namespace mfv {
       TGraphErrors* g = new TGraphErrors(bracket_sig_limit.size(), &bracket_sig_limit[0], &bracket_pval_limit[0], &bracket_sig_limit_err[0], &bracket_pval_limit_err[0]);
       g->SetMarkerStyle(5);
       TFitResultPtr res = g->Fit("pol1", "S");
-      const double a = res->Parameter(0), ea = res->ParError(0);
-      const double b = res->Parameter(1), eb = res->ParError(1);
+      const double a = sig_limit_fit_a = res->Parameter(0);
+      const double b = sig_limit_fit_b = res->Parameter(1);
+      const double ea = sig_limit_fit_a_err = res->ParError(0);
+      const double eb = sig_limit_fit_b_err = res->ParError(1);
       sig_limit = (limit_alpha - a)/b;
       sig_limit_err = sig_limit * sqrt(pow(ea/a, 2) + pow(eb/b, 2));
-      sig_limit_prob = res->Prob();
+      sig_limit_fit_n = bracket_sig_limit.size();
+      sig_limit_fit_prob = res->Prob();
       g->SetName("g_limit_bracket_fit");
       g->Write();
 
       // need to set pval_limit, sig_limit, t_obs_limit, or whatever in tree.
 
-      printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_prob);
+      printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
     }
 
     t_fit_info->Fill();
