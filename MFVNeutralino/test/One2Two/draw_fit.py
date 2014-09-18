@@ -238,9 +238,7 @@ for n in ns:
 
 
 '''
-
 foreach x ( crab/One2Two/crab_* )
-  py ~/cmswork/Tools/python/CRABTools.py -outputFromFJR $x | grep root > `echo $x | sed -e 's/.*crab_//'`.lst
-  end
-
-  '''
+  crtools -outputFromFJR $x | grep root > `echo $x | sed -e 's/.*crab_//'`.lst
+end
+'''
