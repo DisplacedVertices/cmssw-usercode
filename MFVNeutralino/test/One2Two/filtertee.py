@@ -6,7 +6,9 @@ while 1:
     if count:
         count -= 1
         continue
-    if line == ' NEW MINIMUM FOUND.  GO BACK TO MINIMIZATION STEP.\n':
+    if line.endswith(' NEW MINIMUM FOUND.  GO BACK TO MINIMIZATION STEP.\n'):
         count = 9
         continue
+    if not line:
+        break
     print line,
