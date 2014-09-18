@@ -4,6 +4,7 @@ from collections import namedtuple
 from math import log, pi
 from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.ROOTTools import *
+import JMTucker.MFVNeutralino.AnalysisConstants as ac
 import JMTucker.Tools.Samples as Samples
 set_style()
 ROOT.TH1.AddDirectory(0)
@@ -11,7 +12,7 @@ ROOT.TH1.AddDirectory(0)
 def arrit(l):
     return array('d', l)
 
-def get_f_t(x, min_ntracks):
+def get_f_t(x, min_ntracks=None):
     if issubclass(type(x), Samples.Sample):
         sample = x
         input_fn = 'crab/One2Two/%s.root' % sample.name
