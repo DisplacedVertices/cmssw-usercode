@@ -5,7 +5,7 @@
 #include "VAException.h"
 
 namespace mfv {
-  const bool Template::fine_binning = true;
+  const bool Template::fine_binning = false;
   const int Template::nbins = 20000;
   const double Template::min_val = 0;
   const double Template::max_val = 10;
