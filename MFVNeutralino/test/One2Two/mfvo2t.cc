@@ -16,7 +16,7 @@ int main() {
   jmt::set_root_style();
 
   jmt::ConfigFromEnv env("mfvo2t");
-  const std::string tree_path = env.get_string("tree_path", "jen_crab");
+  const std::string tree_path = env.get_string("tree_path", "trees");
   const std::string out_fn = env.get_string("out_fn", "mfvo2t.root");
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
@@ -25,7 +25,7 @@ int main() {
   const bool templates_clearedjets = templates_kind == "clearedjets";
   const bool templates_simpleclear = templates_kind == "simpleclear";
   const bool run_fit = env.get_bool("run_fit", true);
-  const std::string data_fn = env.get_string("data_fn", "MultiJetPk2012.root"); // JMTBAD hook into Samples
+  const std::string data_fn = env.get_string("data_fn", "MultiJetPk2012.root");
   const bool process_data = env.get_bool("process_data", false);
 
   if (!(templates_phishift || templates_clearedjets || templates_simpleclear))
