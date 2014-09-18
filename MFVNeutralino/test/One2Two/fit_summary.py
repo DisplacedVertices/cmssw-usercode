@@ -4,7 +4,6 @@ import sys, os, glob
 from JMTucker.Tools.ROOTTools import *
 
 from JMTucker.Tools.Samples import mfv_signal_samples
-mfv_signal_samples.sort(key=lambda s: s.name)
 
 set_style()
 ROOT.gStyle.SetOptStat(1000000001)
@@ -12,10 +11,11 @@ ROOT.TH1.AddDirectory(0)
 ps = plot_saver('plots/o2t_fit_summary', size=(600,600), log=False)
 
 def wd(s, i):
+    special = 'firsthalf_'
     if s > 0:
-        return 'plots/o2t_fit/TmpCJ_Ntk5_SigTmp-%i_SigSamn-%ix%s_Sam' % (i, i, s)
+        return 'plots/o2t_fit/%sTmpCJ_Ntk5_SigTmp-%i_SigSamn-%ix%s_Sam' % (special, i, i, s)
     else:
-        return 'plots/o2t_fit/TmpCJ_Ntk5_SigTmp-%i_SigSamno_Sam' % i
+        return 'plots/o2t_fit/%sTmpCJ_Ntk5_SigTmp-%i_SigSamno_Sam' % (special, i)
 
 def file(s, i, n):
     return ROOT.TFile(os.path.join(wd(s, i), n))
@@ -69,7 +69,6 @@ def draw_h_labels(h, thing, stat, obj_cache=[]):
     xax.SetLabelFont(62)
     xax.LabelsOption('v')
     xax.SetRangeUser(0, 24)
-
     yax = h.GetYaxis()
     yax.SetRangeUser(*y_range)
     yax.SetTitle(yax_title)
@@ -126,13 +125,13 @@ def draw_h_labels(h, thing, stat, obj_cache=[]):
     obj_cache.append(lifetime)
     obj_cache.append(mass)
     obj_cache.append(eyeline)
-    
-for sig_strength in (0, 1, 5, 10):
-    #if sig_strength != 1:
-    #0    continue
 
+sig_strengths = (0, 1, 5, 10)
+sample_nums = range(1, 25)
+
+for sig_strength in sig_strengths:
     h = make_h('ss%i_nistat3' % sig_strength)
-    for i in xrange(1, 25):
+    for i in sample_nums:
         f = file(sig_strength, i, 'h_seed.root')
         hh = f.Get('c0').FindObject('h_seed')
         h.SetBinContent(i, hh.GetEntries())
@@ -154,7 +153,7 @@ for sig_strength in (0, 1, 5, 10):
                 stats = 'mean rms'.split()
             hs = dict((stat, make_h('ss%i_%s_%s_%s' % (sig_strength, hyp, thing, stat))) for stat in stats)
 
-            for i in xrange(1, 25):
+            for i in sample_nums:
                 hn ='h_%s_%s' % (hyp, thing)
                 f = file(sig_strength, i, hn + '.root')
                 h = f.Get('c0').FindObject(hn)
