@@ -47,7 +47,7 @@ export mfvo2t_phishift_find_f_dz=0
 %(env)s
 
 echo run mfvo2t.exe
-./mfvo2t.exe
+./mfvo2t.exe | python filtertee.py
 ECODE=$?
 if [ "$ECODE" -ne "0" ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -95,7 +95,7 @@ output_file=mfvo2t.root
 script_exe=runme.csh
 ui_working_dir=%(batch_root)s/crab_%(batch_name)s
 ssh_control_persist=no
-additional_input_files=mfvo2t.exe
+additional_input_files=mfvo2t.exe,filtertee.py
 copy_data=1
 publish_data_name=mfvo2t_%(batch_name)s
 publish_data=1
