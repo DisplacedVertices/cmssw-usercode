@@ -461,6 +461,9 @@ for tau, mass, sample in mfv_signal_samples_ex:
     sample.ana_hash = 'aaaa7d7d2dcfa08aa71c1469df6ebf05'
     sample.ana_events_per = 10000
 
+mfv_signal_samples_nouse.sort(key=lambda s: s.name)
+mfv_signal_samples.sort(key=lambda s: s.name)
+
 ########################################################################
 
 myttbar_samples = [
