@@ -215,6 +215,7 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h0_nuis1", &t_obs_0.h0.nuis1, "t_obs_0__h0_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_err_nuis1", &t_obs_0.h0.err_nuis1, "t_obs_0__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__t", &t_obs_0.t, "t_obs_0__t/D");
+    t_fit_info->Branch("pval_signif", &pval_signif);
     t_fit_info->Branch("sig_limit", &sig_limit);
     t_fit_info->Branch("sig_limit_err", &sig_limit_err);
     t_fit_info->Branch("sig_limit_fit_n", &sig_limit_fit_n);
@@ -528,11 +529,6 @@ namespace mfv {
     TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars());
 
     pval_signif = 1;
-    //pval_limits.clear();
-    //sig_limits.clear();
-    //t_obs_limit = test_stat_t();
-    //sig_limit = 1e-6;
-    //pval_limit = 1;
 
     draw_likelihood(t_obs_0);
     draw_fit(t_obs_0);
