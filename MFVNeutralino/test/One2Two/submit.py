@@ -44,6 +44,7 @@ export mfvo2t_seed=$JOB_NUM
 export mfvo2t_ntoys=1
 export mfvo2t_toythrower_allow_cap=1
 export mfvo2t_phishift_find_f_dz=0
+export mfvo2t_fitter_sig_eff_uncert=0.2
 %(env)s
 
 echo run mfvo2t.exe
@@ -130,7 +131,6 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         os.system('mkdir -p %s' % batch_root)
         open(dummy_pset_fn, 'wt').write(dummy_pset)
         setuped = True
-        
 
     batch_name = 'Tmp%s_Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (template_type,
                                                           min_ntracks,
@@ -156,8 +156,13 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
         assert sig_samp < 0
-        env.append('toythrower_injected_signal=%i' % sig_samp)
-        env.append('toythrower_injected_signal_scale=%f' % sig_scale)
+        if sig_scale < 0:
+            assert njobs <= 20
+            env.append('ntoys=0')
+            env.append('process_data=1')
+        else:
+            env.append('toythrower_injected_signal=%i' % sig_samp)
+            env.append('toythrower_injected_signal_scale=%f' % sig_scale)
 
     if type(samples) == int:
         env.append('toythrower_sample_only=%i' % samples)
@@ -177,7 +182,10 @@ for template_type in ('CJ',):
             for strength in (None, 1, 5, 10):
                 sg = (signal, strength) if strength is not None else None
                 batches.append((template_type, min_ntracks, sg, signal, ''))
-            
+
+for signal in xrange(-24, 0):
+    submit(20, 'CJ', 5, (signal, -1), signal, '')
+
 nj = 500
 raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*nj))
 for batch in batches:
