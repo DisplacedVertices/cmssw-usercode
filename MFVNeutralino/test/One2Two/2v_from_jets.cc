@@ -15,13 +15,15 @@
 double    muclear = 0.028;
 double sigmaclear = 0.005;
 
-const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_1";
+const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 //const char* sample_name = "ttbarhadronic";
-//const int n1v = 10379;
+//const int n1v = 18508;
 
-//const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV18_Systematics";
-//const char* sample_name = "myttbarbigcurl";
-//const int n1v = 13971;
+//const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV20_TtbarSyst";
+//const char* sample_name = "myttbarbowing";     const int n1v = 12863;
+//const char* sample_name = "myttbarcurl";       const int n1v = 12515;
+//const char* sample_name = "myttbarelliptical"; const int n1v = 12628;
+//const char* sample_name = "myttbarradial";     const int n1v = 12928;
 
 //predicted number of one-vertex-only events in 20/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
@@ -466,7 +468,7 @@ int main(int argc, const char* argv[]) {
   h_svpairdist_cut->SetStats(0);
   h_svpairdist_cut->DrawNormalized("sames");
 
-  TFile* sig_file = TFile::Open("../crab/HistosV18_Data0/mfv_neutralino_tau1000um_M0400.root");
+  TFile* sig_file = TFile::Open("/uscms/home/tucker/crab_dirs/HistosV20/mfv_neutralino_tau1000um_M0400.root");
   TH1F* h_svdist2d_sig = (TH1F*)sig_file->Get("mfvVertexHistosWAnaCuts/h_svdist2d");
   h_svdist2d_sig->Rebin(5);
   h_svdist2d_sig->SetLineColor(8);
