@@ -45,10 +45,15 @@ for job in jobs:
     if options.doit:
         crab_cleanup_aborted_job(dir, job, uniq)
 
+n = 500
 if to_force:
-    confirm_cmd('crab -c %s %s -forceResubmit %s' % (dir, options.extra, crabify_list(to_force)), options.doit)
+    for i in xrange(0, len(to_force), n):
+        these_jobs = jobs[i:i+n]
+        confirm_cmd('crab -c %s %s -forceResubmit %s' % (dir, options.extra, crabify_list(these_jobs)), options.doit)
 if to_resub:
-    confirm_cmd('crab -c %s %s -resubmit %s'      % (dir, options.extra, crabify_list(to_resub)), options.doit)
+    for i in xrange(0, len(to_resub), n):
+        these_jobs = jobs[i:i+n]
+        confirm_cmd('crab -c %s %s -resubmit %s'      % (dir, options.extra, crabify_list(these_jobs)), options.doit)
 
 if not options.doit and not 'doit' in sys.argv:
     print '\nre-run with --doit if this is right.'
