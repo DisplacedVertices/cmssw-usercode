@@ -492,6 +492,11 @@ myttbar_samples = [
     MCSample('myttbar02sagitta', '', '/mfv_ttbar_02ali_sagitta_v20/jchu-mfv_ttbar_02ali_sagitta_v20-c3c127e7ed0250a68f07cbd582e4d6d5/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar03sagitta', '', '/mfv_ttbar_03ali_sagitta_v20/jchu-mfv_ttbar_03ali_sagitta_v20-9bc16ec57ab0c6d94d36664789fbeb26/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar04sagitta', '', '/mfv_ttbar_04ali_sagitta_v20/jchu-mfv_ttbar_04ali_sagitta_v20-5331e828049cfb5872130a0a75a976fd/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar00skew', '', '/mfv_ttbar_00ali_skew_v20/jchavesb-mfv_ttbar_00ali_skew_v20-6890088ce4484851dcfeb98b71f9573a/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar01skew', '', '/mfv_ttbar_01ali_skew_v20/jchavesb-mfv_ttbar_01ali_skew_v20-1bed45ff8e7d8c15096902a88f6e08ed/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar02skew', '', '/mfv_ttbar_02ali_skew_v20/jchavesb-mfv_ttbar_02ali_skew_v20-86e7fddebe1a47434ac241c7ce02deb7/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar03skew', '', '/mfv_ttbar_03ali_skew_v20/jchavesb-mfv_ttbar_03ali_skew_v20-386cd7e1b61324ea39a126d2b96e40f4/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar04skew', '', '/mfv_ttbar_04ali_skew_v20/jchavesb-mfv_ttbar_04ali_skew_v20-e9fab59d0ee4107312b74a0c2ef1315c/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     ]
     
 for s in myttbar_samples:
