@@ -467,6 +467,11 @@ mfv_signal_samples.sort(key=lambda s: s.name)
 ########################################################################
 
 myttbar_samples = [
+    MCSample('myttbar00default', '', '/mfv_ttbar_00default_v20/jchu-mfv_ttbar_00default_v20-0f1e5c206200a17a58315c76d7345a3b/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar01default', '', '/mfv_ttbar_01default_v20/jchu-mfv_ttbar_01default_v20-e86c195b3a6dcc17485433d733193cc0/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar02default', '', '/mfv_ttbar_02default_v20/jchu-mfv_ttbar_02default_v20-fa4d7abdbd06467c453256b421a9622a/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar03default', '', '/mfv_ttbar_03default_v20/jchu-mfv_ttbar_03default_v20-8523838559fb37db158034f33ed41a4f/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar04default', '', '/mfv_ttbar_04default_v20/jchu-mfv_ttbar_04default_v20-b28a5832f3ec101a767645835513af8b/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar00bowing', '', '/mfv_ttbar_00ali_bowing_v20/jchu-mfv_ttbar_00ali_bowing_v20-2a53df30451713a2ff38aa3c0e7d4385/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar01bowing', '', '/mfv_ttbar_01ali_bowing_v20/jchu-mfv_ttbar_01ali_bowing_v20-61959a924445a5d0a4015a98015df76c/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar02bowing', '', '/mfv_ttbar_02ali_bowing_v20/jchu-mfv_ttbar_02ali_bowing_v20-d074b867c3d7ac2fd4ed0602ba398555/USER', 1000000, 4, 0.15, ttbar_xsec_had),
