@@ -20,10 +20,13 @@ const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 //const int n1v = 18508;
 
 //const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV20_TtbarSyst";
+//const char* sample_name = "myttbardefault";    const int n1v = 12373;
 //const char* sample_name = "myttbarbowing";     const int n1v = 12863;
 //const char* sample_name = "myttbarcurl";       const int n1v = 12515;
 //const char* sample_name = "myttbarelliptical"; const int n1v = 12628;
 //const char* sample_name = "myttbarradial";     const int n1v = 12928;
+//const char* sample_name = "myttbarsagitta";    const int n1v = 12314;
+//const char* sample_name = "myttbarskew";       const int n1v = 12526;
 
 //predicted number of one-vertex-only events in 20/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
