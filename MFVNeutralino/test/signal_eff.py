@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
 set_style()
-ps = plot_saver('plots/mfvsigeff', size=(600,600))
+ps = plot_saver('plots/mfvsigeff_v20', size=(600,600))
 
 samples = mfv_signal_samples
 samples.sort(key=lambda s: s.name)
@@ -43,8 +43,8 @@ def curve(name, root_file_dir, num_path, den_path, color):
     heff.SetStats(0)
     return heff
 
-two = curve('two', 'crab/HistosV18_Data2', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
-one = curve('one', 'crab/HistosV18_Data2', 'mfvEventHistosOnlyOneVtx/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
+two = curve('two', 'crab/HistosV20', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
+one = curve('one', 'crab/HistosV20', 'mfvEventHistosOnlyOneVtx/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
 
 two.Draw('hist e')
 one.Draw('hist e same')
