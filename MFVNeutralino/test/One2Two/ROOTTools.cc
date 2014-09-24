@@ -18,6 +18,19 @@ namespace jmt {
     }
   }
 
+  void cumulate(TH1D* h, const bool do_overflow) {
+    const int nbins = h->GetNbinsX();
+    int last = do_overflow ? nbins + 1 : nbins;
+    for (int ibin = 1; ibin <= last; ++ibin) {
+      const double valm1 = h->GetBinContent(ibin-1);
+      const double errm1 = h->GetBinError  (ibin-1);
+      const double val = h->GetBinContent(ibin);
+      const double err = h->GetBinError  (ibin);
+      h->SetBinContent(ibin, val + valm1);
+      h->SetBinError  (ibin, sqrt(err*err + errm1*errm1));
+    }
+  }
+
   void set_root_style() {
     gROOT->SetStyle("Plain");
     gStyle->SetPalette(1);
