@@ -8,6 +8,7 @@
 #include "TFitResult.h"
 #include "TGraphErrors.h"
 #include "TH2.h"
+#include "TMath.h"
 #include "TMinuit.h"
 #include "TRandom3.h"
 #include "TTree.h"
@@ -215,6 +216,10 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h0_nuis1", &t_obs_0.h0.nuis1, "t_obs_0__h0_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_err_nuis1", &t_obs_0.h0.err_nuis1, "t_obs_0__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__t", &t_obs_0.t, "t_obs_0__t/D");
+    t_fit_info->Branch("fs_chi2", &fit_stat.chi2);
+    t_fit_info->Branch("fs_ndof", &fit_stat.ndof);
+    t_fit_info->Branch("fs_prob", &fit_stat.prob);
+    t_fit_info->Branch("fs_ks", &fit_stat.ks);
     t_fit_info->Branch("pval_signif", &pval_signif);
     t_fit_info->Branch("sig_limit", &sig_limit);
     t_fit_info->Branch("sig_limit_err", &sig_limit_err);
@@ -340,7 +345,9 @@ namespace mfv {
     return h;
   }
 
-  void Fitter::draw_fit(const test_stat_t& t) {
+  Fitter::fit_stat_t Fitter::draw_fit(const test_stat_t& t) {
+    fit_stat_t ret;
+
     for (int div = 0; div <= 1; ++div) {
       for (int sb = 1; sb >= 0; --sb) {
         const char* div_or_no = div ? "div" : "nodiv";
@@ -388,8 +395,39 @@ namespace mfv {
         h_bkg_fit->Draw("same hist");
         c->Write();
         delete c;
+
+        if (!div) {
+          TH1D* h_sum_cumul = (TH1D*)h_sum_fit->Clone(TString::Format("h_sum_%s_cumul_%s", sb_or_b, div_or_no));
+          TH1D* h_data_cumul = (TH1D*)h_data_fit->Clone(TString::Format("h_data_%s_cumul_%s", sb_or_b, div_or_no));
+          h_sum_cumul->Scale(1/h_sum_cumul->Integral());
+          h_data_cumul->Scale(1/h_data_cumul->Integral());
+
+          for (TH1D* h : {h_sum_cumul, h_data_cumul})
+            jmt::cumulate(h, false);
+
+          TCanvas* c2 = new TCanvas(TString::Format("c_%s_cumul_%s", sb_or_b, div_or_no));
+          h_sum_cumul->Draw();
+          h_data_cumul->Draw("same e");
+          c2->Write();
+          delete c2;
+
+          ret.chi2 = 0;
+          ret.ndof = h_data_fit->GetNbinsX() - 2;
+          ret.ks = 0;
+          for (int ibin = 1; ibin <= h_data_fit->GetNbinsX(); ++ibin) {
+            if (h_sum_fit->GetBinContent(ibin) > 0)
+              ret.chi2 += pow(h_data_fit->GetBinContent(ibin) - h_sum_fit->GetBinContent(ibin), 2) / h_sum_fit->GetBinContent(ibin);
+
+            double ksd = fabs(h_sum_cumul->GetBinContent(ibin) - h_data_cumul->GetBinContent(ibin));
+            if (ksd > ret.ks)
+              ret.ks = ksd;
+          }
+          ret.prob = TMath::Prob(ret.chi2, ret.ndof);
+        }
       }
     }
+
+    return ret;
   }
 
   Fitter::min_lik_t Fitter::min_likelihood(double mu_sig_start, bool fix_mu_sig) {
@@ -536,7 +574,7 @@ namespace mfv {
     pval_signif = 1;
 
     draw_likelihood(t_obs_0);
-    draw_fit(t_obs_0);
+    fit_stat = draw_fit(t_obs_0);
 
     if (!only_fit && do_signif) {
       printf("throwing %i significance toys:\n", n_toy_signif);

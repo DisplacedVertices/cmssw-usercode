@@ -82,6 +82,13 @@ namespace mfv {
       void print(const char* header, const char* indent="  ") const;
     };
 
+    struct fit_stat_t {
+      double chi2;
+      double ndof;
+      double prob;
+      double ks;
+    };
+
     ////////////////////////////////////////////////////////////////////////////
 
     int toy;
@@ -90,6 +97,7 @@ namespace mfv {
     std::vector<double> true_pars;
 
     test_stat_t t_obs_0;
+    fit_stat_t fit_stat;
     double pval_signif;
     double sig_limit;
     double sig_limit_err;
@@ -113,7 +121,7 @@ namespace mfv {
     void fit_globals_ok();
     void draw_likelihood(const test_stat_t& t);
     TH1D* make_h_bkg(const char* n, const std::vector<double>& nuis_pars);
-    void draw_fit(const test_stat_t& t);
+    fit_stat_t draw_fit(const test_stat_t& t);
     min_lik_t min_likelihood(double mu_sig_start, bool fix_mu_sig);
     test_stat_t calc_test_stat(double fix_mu_sig_val);
     void make_toy_data(int i_toy_signif, int i_toy_limit, int n_sig, int n_bkg, TH1D* h_bkg);
