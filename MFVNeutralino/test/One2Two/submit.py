@@ -124,7 +124,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         compiled = True
 
     scheduler = 'condor' if 'condor' in sys.argv else 'remoteGlidein'
-    batch_root = 'crab/One2Two'
+    batch_root = 'crab/One2Two_ttbarsyst'
     if scheduler == 'condor':
         batch_root += '_condor'
     dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
@@ -188,18 +188,27 @@ cd -
     os.system('crab -create -submit all')
 
 
-batches = []
-for template_type in ('CJ',):
-    for min_ntracks in (5,): #6): #,7,8):
-        for signal in xrange(-24, 0):
-            for strength in (None, 1, 5, 10):
+if 0:
+    for signal in xrange(-24, 0):
+        submit(20, 'CJ', 5, (signal, -1), signal, '')
+
+if 0:
+    batches = []
+    for template_type in ('CJ',):
+        for min_ntracks in (5,): #6): #,7,8):
+            for signal in xrange(-24, 0):
+                for strength in (None, 1, 5, 10):
+                    sg = (signal, strength) if strength is not None else None
+                    batches.append((template_type, min_ntracks, sg, signal, ''))
+
+    nj = 500
+    raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*nj))
+    for batch in batches:
+        submit(nj, *batch)
+
+if 1:
+    for syst in 'default bowing curl elliptical radial sagitta skew'.split():
+        for signal in [-9, -15]:
+            for strength in (None, 1):
                 sg = (signal, strength) if strength is not None else None
-                batches.append((template_type, min_ntracks, sg, signal, ''))
-
-for signal in xrange(-24, 0):
-    submit(20, 'CJ', 5, (signal, -1), signal, '')
-
-nj = 500
-raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*nj))
-for batch in batches:
-    submit(nj, *batch)
+                submit(10, 'CJ', 5, sg, signal, syst)
