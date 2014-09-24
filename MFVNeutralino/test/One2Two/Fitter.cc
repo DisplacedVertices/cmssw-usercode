@@ -341,49 +341,54 @@ namespace mfv {
   }
 
   void Fitter::draw_fit(const test_stat_t& t) {
-    for (int sb = 1; sb >= 0; --sb) {
-      const char* sb_or_b = sb ? "sb" : "b";
-      const char* sb_or_b_nice = sb ? "sig + bkg" : "b only";
-      const min_lik_t& ml = sb ? t.h1 : t.h0;
-      TCanvas* c = new TCanvas(TString::Format("c_%s_fit", sb_or_b));
+    for (int div = 0; div <= 1; ++div) {
+      for (int sb = 1; sb >= 0; --sb) {
+        const char* div_or_no = div ? "div" : "nodiv";
+        const char* div_or_no_nice = div ? "/bin width" : "";
+        const char* sb_or_b = sb ? "sb" : "b";
+        const char* sb_or_b_nice = sb ? "sig + bkg" : "b only";
+        const min_lik_t& ml = sb ? t.h1 : t.h0;
+        TCanvas* c = new TCanvas(TString::Format("c_%s_fit_%s", sb_or_b, div_or_no));
 
-      TH1D* h_bkg_fit = make_h_bkg(TString::Format("h_bkg_%s_fit",  sb_or_b), ml.nuis_pars());
-      TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit",  sb_or_b));
-      TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit", sb_or_b));
+        TH1D* h_bkg_fit = make_h_bkg(TString::Format("h_bkg_%s_fit_%s",  sb_or_b, div_or_no), ml.nuis_pars());
+        TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit_%s",  sb_or_b, div_or_no));
+        TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s", sb_or_b, div_or_no));
 
-      for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
-        h->SetLineWidth(2);
-        jmt::divide_by_bin_width(h);
+        for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
+          h->SetLineWidth(2);
+          if (div)
+            jmt::divide_by_bin_width(h);
+        }
+
+        h_sig_fit->SetLineColor(kRed);
+        h_sig_fit->SetFillColor(kRed);
+        h_sig_fit->SetFillStyle(3004);
+        h_bkg_fit->SetLineColor(kBlue);
+        h_bkg_fit->SetFillColor(kBlue);
+        h_bkg_fit->SetFillStyle(3005);
+
+        h_sig_fit->Scale(ml.mu_sig);
+        h_bkg_fit->Scale(ml.mu_bkg);
+
+        TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit_%s", sb_or_b, div_or_no));
+        h_sum_fit->SetLineColor(kMagenta);
+        h_sum_fit->Add(h_bkg_fit);
+        for (TH1D* h : {h_sum_fit, h_data_fit})
+          h->SetTitle(TString::Format("best %s fit: %s;svdist2d (cm);events%s", sb_or_b_nice, ml.title().c_str(), div_or_no_nice));
+
+        if (h_data_fit->GetMaximum() > h_sum_fit->GetMaximum()) {
+          h_data_fit->Draw("e");
+          h_sum_fit->Draw("hist same");
+        }
+        else {
+          h_sum_fit->Draw("hist");
+          h_data_fit->Draw("same e");
+        }
+        h_sig_fit->Draw("same hist");
+        h_bkg_fit->Draw("same hist");
+        c->Write();
+        delete c;
       }
-
-      h_sig_fit->SetLineColor(kRed);
-      h_sig_fit->SetFillColor(kRed);
-      h_sig_fit->SetFillStyle(3004);
-      h_bkg_fit->SetLineColor(kBlue);
-      h_bkg_fit->SetFillColor(kBlue);
-      h_bkg_fit->SetFillStyle(3005);
-
-      h_sig_fit->Scale(ml.mu_sig);
-      h_bkg_fit->Scale(ml.mu_bkg);
-
-      TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit", sb_or_b));
-      h_sum_fit->SetLineColor(kMagenta);
-      h_sum_fit->Add(h_bkg_fit);
-      for (TH1D* h : {h_sum_fit, h_data_fit})
-        h->SetTitle(TString::Format("best %s fit: %s;svdist2d (cm);events/bin width", sb_or_b_nice, ml.title().c_str()));
-
-      if (h_data_fit->GetMaximum() > h_sum_fit->GetMaximum()) {
-        h_data_fit->Draw("e");
-        h_sum_fit->Draw("hist same");
-      }
-      else {
-        h_sum_fit->Draw("hist");
-        h_data_fit->Draw("same e");
-      }
-      h_sig_fit->Draw("same hist");
-      h_bkg_fit->Draw("same hist");
-      c->Write();
-      delete c;
     }
   }
 
