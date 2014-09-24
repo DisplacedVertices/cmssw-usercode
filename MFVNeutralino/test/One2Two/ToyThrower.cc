@@ -22,6 +22,7 @@ namespace mfv {
       allow_cap(env.get_bool("allow_cap", false)),
       poisson_means(env.get_bool("poisson_means", true)),
       use_qcd500(env.get_bool("use_qcd500", false)),
+      use_bkgsyst(env.get_bool("use_bkgsyst", false)),
       sample_only(env.get_int("sample_only", 0)),
       injected_signal(env.get_int("injected_signal", 0)),
       injected_signal_scale(env.get_double("injected_signal_scale", 1.)),
@@ -137,7 +138,7 @@ namespace mfv {
     else {
       for (const Sample& sample : samples.samples)
         //if (sample.name != "qcdht0100" && sample.name != "qcdht0250" && 
-        if ((!sample.is_sig() || sample.key == injected_signal || sample.key == template_signal) && (use_qcd500 || sample.name != "qcdht0500"))
+        if ((!sample.is_sig() || sample.key == injected_signal || sample.key == template_signal) && (use_qcd500 || sample.name != "qcdht0500") && (use_bkgsyst || sample.name != "bkgsyst"))
           fcn(sample);
     }
   }
