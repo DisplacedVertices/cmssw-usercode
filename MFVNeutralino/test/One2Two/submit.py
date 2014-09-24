@@ -10,7 +10,7 @@ echo wd: `pwd`
 export JOB_NUM=$1
 
 echo get trees
-xrdcp root://cmseos.fnal.gov//store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990.tgz all_trees.tgz
+xrdcp root://cmseos.fnal.gov//store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst.tgz all_trees.tgz
 ECODE=$?
 if [ "$ECODE" -ne "0" ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -46,6 +46,8 @@ export mfvo2t_toythrower_allow_cap=1
 export mfvo2t_phishift_find_f_dz=0
 export mfvo2t_fitter_sig_eff_uncert=0.2
 %(env)s
+
+%(extra_setup)s
 
 echo run mfvo2t.exe
 ./mfvo2t.exe | python filtertee.py
@@ -138,6 +140,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
                                                           'no' if signal_sample is None else 'n%ix%i' % signal_sample,
                                                           samples)
 
+    extra_setup = ''
+
     env = [
         'toythrower_min_ntracks=%i' % min_ntracks,
         'toythrower_template_signal=%i' % template_signal,
@@ -168,6 +172,15 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         env.append('toythrower_sample_only=%i' % samples)
     elif type(samples) == str and '500' in samples:
         env.append('toythrower_use_qcd500=1')
+
+    if 'ttbarsyst' in samples:
+        which_syst = samples.replace('ttbarsyst', '')
+        extra_setup += '''
+cd trees
+ln -s myttbar%s.root bkgsyst.root
+cd -
+'''
+        env.append('toythrower_sample_only=99')
 
     env = '\n'.join('export mfvo2t_' + e for e in env)
     open('runme.csh', 'wt').write(script_template % {'env': env})
