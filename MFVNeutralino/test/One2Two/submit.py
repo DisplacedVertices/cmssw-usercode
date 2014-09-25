@@ -183,7 +183,7 @@ cd -
         env.append('toythrower_sample_only=99')
 
     env = '\n'.join('export mfvo2t_' + e for e in env)
-    open('runme.csh', 'wt').write(script_template % {'env': env})
+    open('runme.csh', 'wt').write(script_template % {'env': env, 'extra_setup': extra_setup})
     open('crab.cfg', 'wt').write(crab_cfg % locals())
     os.system('crab -create -submit all')
 
