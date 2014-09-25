@@ -19,6 +19,7 @@ namespace mfv {
 
       env("mfvo2t_clearedjets" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.05)),
+      save_templates(env.get_bool("save_templates", false)),
       sample_count(env.get_int("sample_count", -1)),
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
@@ -104,20 +105,26 @@ namespace mfv {
 
     clear_templates();
 
-    TDirectory* dtemp = dtoy->mkdir("templates");
-    dtemp->cd();
+    TDirectory* dtemp = 0;
+    if (save_templates) {
+      dtemp = dtoy->mkdir("templates");
+      dtemp->cd();
+    }
 
     int iglb = 0;
     for (int imu = 0; imu < n_clearing_mu; ++imu) {
       const double clearing_mu = clearing_mu_start + imu * d_clearing_mu;
 
-      dtemp->mkdir(TString::Format("imu_%02i", imu))->cd();
+      if (save_templates)
+        dtemp->mkdir(TString::Format("imu_%02i", imu))->cd();
 
       for (int isig = 0; isig < n_clearing_sigma; ++isig) {
         const double clearing_sigma = clearing_sigma_start + isig * d_clearing_sigma;
 
         TH1D* h = Template::hist_with_binning(TString::Format("h_template_imu%03i_isig%03i", imu, isig),
                                               TString::Format("clearing pars: #mu = %f  #sigma = %f", clearing_mu, clearing_sigma));
+        if (!save_templates)
+          h->SetDirectory(0);
 
         templates.push_back(new ClearedJetsTemplate(iglb++, h, clearing_mu, clearing_sigma));
       }

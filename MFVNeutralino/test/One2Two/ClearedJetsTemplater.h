@@ -16,6 +16,7 @@ namespace mfv {
     jmt::ConfigFromEnv env;
 
     const double d2d_cut;
+    const bool save_templates;
     const int sample_count;
     const bool flat_phis;
     const double phi_from_jet_mu;
