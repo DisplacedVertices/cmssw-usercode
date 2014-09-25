@@ -11,7 +11,7 @@ fudge = 1. # 0.5 if 'fullhadded' not in batch_name else 1.
 #batch_root = batch_root[0]
 #batch_fns = glob.glob(os.path.join(batch_root, '*.root'))
 batch_fns = [x.strip() for x in open(batch_fn_lst).readlines() if x.strip()]
-batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
+#batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
 try:
     sig_nfo = batch_name.split('SigSamn')[1].split('_')[0]
     sig_num, sig_scale = sig_nfo.split('x')
