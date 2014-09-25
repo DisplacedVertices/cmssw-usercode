@@ -71,16 +71,13 @@ namespace mfv {
     double twolnL(double mu_sig, double mu_bkg, double par0, double par1) {
       interp->interpolate(par0, par1);
 
-      if (mu_sig < 1e-6)
-        mu_sig = 1e-6;
+      if (mu_sig < 1e-12)
+        mu_sig = 1e-12;
 
       double lnL = 0;
       for (int i = 1; i <= n_bins; ++i) {
         const double nu_sum = mu_sig * a_sig[i] + mu_bkg * a_bkg[i];
-        if (nu_sum > 1e-12)
-          lnL += -nu_sum + a_data[i] * log(nu_sum);
-        else
-          lnL -= 1e-12 + a_data[i] * 27.6310211159285473;
+        lnL += -nu_sum + a_data[i] * log(nu_sum);
         //printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
         //       i, mu_sig, mu_bkg, mu_bkg * a_bkg[i], mu_sig * a_sig[i], mu_bkg * a_bkg[i] + mu_sig * a_sig[i], a_data[i], -nu_sum + a_data[i] * (nu_sum > 1e-12 ? log(nu_sum) : -27.6310211159285473), lnL);
       }
@@ -130,7 +127,7 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
-      allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", true)),
+      allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
       run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
@@ -457,7 +454,7 @@ namespace mfv {
     static const char* nuis_par_names[2] = { "nuis0", "nuis1" };
     for (size_t ipar = 0; ipar < npars; ++ipar) {
       const double start = ipar == 0 ? start_nuis0 : start_nuis1;
-      m->mnparm(2+ipar, nuis_par_names[ipar], start, start/10., mins[ipar], maxs[ipar], ierr);
+      m->mnparm(2+ipar, nuis_par_names[ipar], start, start/100., mins[ipar], maxs[ipar], ierr);
     }
 
     if (fix_mu_sig)
@@ -466,6 +463,10 @@ namespace mfv {
     if (fix_nuis1)
       m->FixParameter(3);
 
+    m->Migrad();
+    //    m->mnsimp();
+    //    m->Migrad();
+    //    m->mnimpr();
     m->Migrad();
     if (run_minos)
       m->mnmnos();
