@@ -103,7 +103,7 @@ copy_data=1
 publish_data_name=mfvo2t_%(batch_name)s
 publish_data=1
 dbs_url_for_publication=phys03
-storage_element=T3_US_Cornell
+storage_element=%(storage_element)s
 
 [CRAB]
 jobtype=cmssw
@@ -123,10 +123,18 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         raw_input('did the compile go OK?')
         compiled = True
 
-    scheduler = 'condor' if 'condor' in sys.argv else 'remoteGlidein'
-    batch_root = 'crab/One2Two_ttbarsyst'
-    if scheduler == 'condor':
-        batch_root += '_condor'
+    cornell = 'cornell' in sys.argv
+    scheduler = 'condor' if not cornell else 'remoteGlidein'
+    storage_element = 'T3_US_FNALLPC' if not cornell else 'T3_US_Cornell'
+
+    extra_name = ''
+    batch_root = 'crab/One2Two'
+    for x in sys.argv:
+        if x.startswith(batch_root):
+            extra_name = x.replace(batch_root + '_', '') + '_'
+            batch_root = x
+            break
+
     dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
 
     if not setuped:
@@ -134,11 +142,12 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         open(dummy_pset_fn, 'wt').write(dummy_pset)
         setuped = True
 
-    batch_name = 'Tmp%s_Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (template_type,
-                                                          min_ntracks,
-                                                          template_signal,
-                                                          'no' if signal_sample is None else 'n%ix%i' % signal_sample,
-                                                          samples)
+    batch_name = '%sTmp%s_Ntk%i_SigTmp%s_SigSam%s_Sam%s' % (extra_name,
+                                                            template_type,
+                                                            min_ntracks,
+                                                            template_signal,
+                                                            'no' if signal_sample is None else 'n%ix%i' % signal_sample,
+                                                            samples)
 
     extra_setup = ''
 
@@ -172,8 +181,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         env.append('toythrower_sample_only=%i' % samples)
     elif type(samples) == str and '500' in samples:
         env.append('toythrower_use_qcd500=1')
-
-    if 'ttbarsyst' in samples:
+    elif 'ttbarsyst' in samples:
         which_syst = samples.replace('ttbarsyst', '')
         extra_setup += '''
 cd trees
@@ -183,10 +191,17 @@ cd -
         env.append('toythrower_sample_only=99')
 
     env = '\n'.join('export mfvo2t_' + e for e in env)
-    open('runme.csh', 'wt').write(script_template % {'env': env, 'extra_setup': extra_setup})
+
+    open('runme.csh', 'wt').write(script_template % locals())
     open('crab.cfg', 'wt').write(crab_cfg % locals())
     os.system('crab -create -submit all')
+    os.system('rm -f runme.csh crab.cfg')
 
+if 1:
+    for strength in (None, 1, 5):
+        signal = -15
+        sg = (signal, strength) if strength is not None else None
+        submit(500, 'CJ', 5, sg, signal, '')
 
 if 0:
     for signal in xrange(-24, 0):
@@ -206,7 +221,7 @@ if 0:
     for batch in batches:
         submit(nj, *batch)
 
-if 1:
+if 0:
     for syst in 'default bowing curl elliptical radial sagitta skew'.split():
         for signal in [-9, -15]:
             for strength in (None, 1):
