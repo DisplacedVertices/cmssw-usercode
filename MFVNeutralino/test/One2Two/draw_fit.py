@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 import sys, os, glob
+import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 batch_fn_lst = [x for x in sys.argv if x.endswith('.lst')][0]
 batch_name = os.path.basename(batch_fn_lst).replace('.lst','')
+fudge = 1. # 0.5 if 'fullhadded' not in batch_name else 1.
 #batch_root = glob.glob('/store/user/tucker/mfvo2t_%s/mfvo2t_%s/*/' % (batch_name, batch_name))
 #assert len(batch_root) == 1
 #batch_root = batch_root[0]
@@ -37,9 +39,19 @@ vars = 'seed toy true_pars[0] true_pars[1] true_pars[2] true_pars[3]'
 for y in 'h1 h0'.split():
     for x in 'istat maxtwolnL mu_sig err_mu_sig mu_bkg err_mu_bkg nuis0 err_nuis0 nuis1 err_nuis1'.split():
         vars += ' t_obs_0__%s_%s' % (y,x)
-vars += ' pval_signif pval_limit mu_sig_limit'
+vars += ' pval_signif sig_limit sig_limit_err sig_limit_fit_n sig_limit_fit_a sig_limit_fit_b sig_limit_fit_a_err sig_limit_fit_b_err sig_limit_fit_prob'
 
-d = list(detree(t, vars.replace(' ', ':'), xform=lambda x: tuple(float(y) for y in x)))
+def xform(x):
+    z = []
+    for y in x:
+        y = y.strip()
+        if not y:
+            z.append(0)
+        else:
+            z.append(float(y))
+    return tuple(z)
+
+d = list(detree(t, vars.replace(' ', ':'), xform=xform))
 
 h = ROOT.TH1D
 h2 = ROOT.TH2D
@@ -49,11 +61,11 @@ h_mu_sig_true = h('h_mu_sig_true', '', 200, 0, 200)
 h_mu_bkg_true = h('h_mu_bkg_true', '', 200, 0, 200)
 h_istat = h2('h_istat', '', 5, 0, 5, 5, 0, 5)
 h_istatsum_v_seed = h2('h_istatsum_v_seed', '', 201, 0, 201, 5, 0, 5)
-h_h1_maxtwolnL = h('h_h1_maxtwolnL', '', 200, -300, 300)
+h_h1_maxtwolnL = h('h_h1_maxtwolnL', '', 200, -300, 1500)
 h_h1_mu_sig = h('h_h1_mu_sig', '', 200, 0, 200)
 h_h1_mu_sig_err = h('h_h1_mu_sig_err', '', 200, 0, 50)
 h_h1_mu_sig_pull = h('h_h1_mu_sig_pull', '', 200, -10, 10)
-h_h1_mu_bkg = h('h_h1_mu_bkg', '', 200, 0, 200)
+h_h1_mu_bkg = h('h_h1_mu_bkg', '', 200, 0, 400)
 h_h1_mu_bkg_err = h('h_h1_mu_bkg_err', '', 200, 0, 50)
 h_h1_mu_bkg_pull = h('h_h1_mu_bkg_pull', '', 200, -10, 10)
 h_h1_nuis0 = h('h_h1_nuis0', '', 200, 0, 0.1)
@@ -62,7 +74,7 @@ h_h1_nuis0_pull = h('h_h1_nuis0_pull', '', 200, -10, 10)
 h_h1_nuis1 = h('h_h1_nuis1', '', 200, 0, 0.1)
 h_h1_nuis1_err = h('h_h1_nuis1_err', '', 200, 0, 0.1)
 h_h1_nuis1_pull = h('h_h1_nuis1_pull', '', 200, -10, 10)
-h_h0_maxtwolnL = h('h_h0_maxtwolnL', '', 200, -300, 300)
+h_h0_maxtwolnL = h('h_h0_maxtwolnL', '', 200, -300, 1500)
 h_h0_mu_bkg = h('h_h0_mu_bkg', '', 200, 0, 200)
 h_h0_mu_bkg_err = h('h_h0_mu_bkg_err', '', 200, 0, 50)
 h_h0_mu_bkg_pull = h('h_h0_mu_bkg_pull', '', 200, -10, 10)
@@ -76,18 +88,24 @@ h_pval_signif = h('h_pval_signif', '', 101, 0, 1.01)
 h_zval_signif = h('h_zval_signif', '', 100, 0, 20)
 h_zval_wilks = h('h_zval_wilks', '', 100, 0, 20)
 h_zvals = h2('h_zvals', '', 100, 0, 20, 100, 0, 20)
-h_pval_limit = h('h_pval_limit', '', 101, 0, 1.01)
-h_mu_sig_limit = h('h_mu_sig_limit', '', 200, 0, 200)
-h_pval_limit.GetXaxis().SetRangeUser(0, 0.2)
-h_mu_sig_limit.GetXaxis().SetRangeUser(0,20)
+h_sig_limit = h('h_sig_limit', '', 200, 0, 200)
+h_sig_limit.GetXaxis().SetRangeUser(0,50)
+h_sig_limit_scaled = h('h_sig_limit_scaled', '', 200, 0, 1000)
+h_sig_limit_err = h('h_sig_limit_err', '', 20, 0, 20)
+h_sig_limit_fit_n = h('h_sig_limit_fit_n', '', 50, 0, 50)
+h_sig_limit_fit_a = h('h_sig_limit_fit_a', '', 50, 0, 5)
+h_sig_limit_fit_b = h('h_sig_limit_fit_b', '', 50, -0.1, 0.1)
+h_sig_limit_fit_a_err = h('h_sig_limit_fit_a_err', '', 50, 0, 5)
+h_sig_limit_fit_b_err = h('h_sig_limit_fit_b_err', '', 50, 0, 1)
+h_sig_limit_fit_prob = h('h_sig_limit_fit_prob', '', 50, 0, 1)
 
 sig_true = [0., 0.0245, 0.1102, 0.2085, 0.3064, 0.3293, 0.3279, 0.1531, 0.7707, 1.4223, 2.0397, 2.1889, 2.1456, 0.3920, 2.2956, 4.2842, 5.8373, 6.1553, 6.0429, 0.7841, 4.5308, 8.5589, 11.0880, 11.4206, 11.3452]
 mu_sig_true_mean = sig_true[sig_num] * sig_scale
 print 'sig_num', sig_num, 'mu_sig_true_mean', mu_sig_true_mean
-mu_bkg_true_mean = 39.47
+mu_bkg_true_mean = 39.47 * fudge
 nuis0_true_mean = 0
 nuis1_true_mean = 0
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,pval_limit,mu_sig_limit in d:
+for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
     if h0_istat != 3 or h1_istat != 3:
         continue
     nuis0_true_mean += true_pars_2
@@ -96,8 +114,8 @@ n = len(d)
 nuis0_true_mean /= n
 nuis1_true_mean /= n
 
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,pval_limit,mu_sig_limit in d:
-    if h0_istat != 3 or h1_istat != 3:
+for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
+    if h0_istat != 3 or h1_istat != 3 or sig_limit_fit_n < 6:
         continue
     h_seed.Fill(seed)
     h_toy.Fill(toy)
@@ -134,10 +152,17 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     zval_wilks = h1_maxtwolnL - h0_maxtwolnL
     h_zval_wilks.Fill(zval_wilks)
     h_zvals.Fill(zval_signif, zval_wilks)
-    h_pval_limit.Fill(pval_limit)
-    h_mu_sig_limit.Fill(mu_sig_limit)
+    h_sig_limit.Fill(sig_limit)
+    h_sig_limit_scaled.Fill(sig_limit * ac.int_lumi / 1000. * ac.scale_factor)
+    h_sig_limit_err.Fill(sig_limit_err)
+    h_sig_limit_fit_n.Fill(sig_limit_fit_n)
+    h_sig_limit_fit_a.Fill(sig_limit_fit_a)
+    h_sig_limit_fit_b.Fill(sig_limit_fit_b)
+    h_sig_limit_fit_a_err.Fill(sig_limit_fit_a_err)
+    h_sig_limit_fit_b_err.Fill(sig_limit_fit_b_err)
+    h_sig_limit_fit_prob.Fill(sig_limit_fit_prob)
 
-for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_pval_signif h_zval_signif h_zval_wilks h_zvals h_pval_limit h_mu_sig_limit'.split():
+for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_pval_signif h_zval_signif h_zval_wilks h_zvals h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
     print x
     h = eval(x)
     if type(h) == ROOT.TH1D:
@@ -155,7 +180,7 @@ ns = [0,1] + [int(i*len(d)/3.) for i in xrange(1,3)] + [-2,-1]
 for n in ns:
     x = d[n]
     seed, toy = int(x[0]), int(x[1])
-    assert toy == 0
+    assert toy == 0 or toy == -1
     snip = '/mfvo2t_%i_' % seed
     fn = [fn for fn in batch_fns if snip in fn][0]
     f = ROOT.TFile(fn)
