@@ -5,17 +5,19 @@ from JMTucker.Tools.ROOTTools import *
 
 from JMTucker.Tools.Samples import mfv_signal_samples
 
+special = ''
+
 set_style()
 ROOT.gStyle.SetOptStat(1000000001)
 ROOT.TH1.AddDirectory(0)
-ps = plot_saver('plots/o2t_fit_summary', size=(600,600), log=False)
+ps = plot_saver('plots/o2t_fit_summary_%s' % special, size=(600,600), log=False)
 
 def wd(s, i):
-    special = 'firsthalf_'
+    spec = special + '_' if special else ''
     if s > 0:
-        return 'plots/o2t_fit/%sTmpCJ_Ntk5_SigTmp-%i_SigSamn-%ix%s_Sam' % (special, i, i, s)
+        return 'plots/o2t_fit/%sTmpCJ_Ntk5_SigTmp-%i_SigSamn-%ix%s_Sam' % (spec, i, i, s)
     else:
-        return 'plots/o2t_fit/%sTmpCJ_Ntk5_SigTmp-%i_SigSamno_Sam' % (special, i)
+        return 'plots/o2t_fit/%sTmpCJ_Ntk5_SigTmp-%i_SigSamno_Sam' % (spec, i)
 
 def file(s, i, n):
     return ROOT.TFile(os.path.join(wd(s, i), n))
@@ -129,6 +131,9 @@ def draw_h_labels(h, thing, stat, obj_cache=[]):
 sig_strengths = (0, 1, 5, 10)
 sample_nums = range(1, 25)
 
+#sig_strengths = (0, 1, 10)
+#sample_nums = (9, 15)
+
 for sig_strength in sig_strengths:
     h = make_h('ss%i_nistat3' % sig_strength)
     for i in sample_nums:
@@ -156,7 +161,11 @@ for sig_strength in sig_strengths:
             for i in sample_nums:
                 hn ='h_%s_%s' % (hyp, thing)
                 f = file(sig_strength, i, hn + '.root')
+                #print f.GetName(), hn
                 h = f.Get('c0').FindObject(hn)
+                if not h:
+                    print 'skip', f.GetName(), hn
+                    continue
 
                 hs['mean'].SetBinContent(i, h.GetMean())
                 hs['mean'].SetBinError(i, h.GetMeanError())
