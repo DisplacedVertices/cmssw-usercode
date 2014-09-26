@@ -142,7 +142,8 @@ namespace mfv {
 
         for (Template* t : templates) {
           ClearedJetsTemplate* cjt = dynamic_cast<ClearedJetsTemplate*>(t);
-          t->h->Fill(d2d, 0.5*TMath::Erf((d2d - cjt->clearing_mu)/cjt->clearing_sigma) + 0.5);
+          const double w = std::max(1e-12, 0.5*TMath::Erf((d2d - cjt->clearing_mu)/cjt->clearing_sigma) + 0.5);
+          t->h->Fill(d2d, w);
         }
       }
 
