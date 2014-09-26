@@ -297,7 +297,7 @@ namespace mfv {
 
       const double d = Q[1]->par(1) - Q[0]->par(1);
       const double f = (Q[1]->par(1) - pars[1])/d;
-      if (extra_prints) printf("a d %f f %f\n", d, f);
+      //if (extra_prints) printf("a d %f f %f\n", d, f);
       for (int ibin = 1; ibin <= n_bins; ++ibin) {
         (*a_p)[ibin] = f * R[0][ibin] + (1-f) * R[1][ibin];
         //if (extra_prints) printf("   R[0][%i] %f R[1][%i] %f  a[%i] %f\n", ibin, R[0][ibin], ibin, R[1][ibin], ibin, (*a_p)[ibin]);
