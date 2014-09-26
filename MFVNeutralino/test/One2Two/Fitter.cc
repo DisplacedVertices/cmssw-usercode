@@ -142,7 +142,7 @@ namespace mfv {
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
       only_fit(env.get_bool("only_fit", false)),
-      n_toy_limit(env.get_int("n_toy_limit", 10000)),
+      n_toy_limit(env.get_int("n_toy_limit", 20000)),
       sig_limit_step(env.get_double("sig_limit_step", 0.1)),
       sig_eff(env.get_double("sig_eff", 1.)),
       sig_eff_uncert(env.get_double("sig_eff_uncert", 0.)),
@@ -622,9 +622,9 @@ namespace mfv {
     if (!only_fit && do_limits) {
       const double limit_alpha = 0.05;
 
-      const double sig_limit_lo = 1e-3; // units of fb
-      const double sig_limit_hi = n_data / (sig_eff + 2*sig_eff_uncert);
-      const int n_sigma_away = 4;
+      const double sig_limit_lo = std::max(0., t_obs_0.h1.mu_sig / sig_eff); // units of fb
+      const double sig_limit_hi = 1000;
+      const int n_sigma_away = 5;
 
       printf("scanning for %.1f%% upper limit:\n", 100*(1-limit_alpha));
       jmt::ProgressBar pb_limit(50, (sig_limit_hi - sig_limit_lo)/sig_limit_step);
