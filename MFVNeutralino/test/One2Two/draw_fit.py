@@ -187,10 +187,10 @@ for n in ns:
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
     for t in 'sb b'.split():
         leg = ROOT.TLegend(0.502, 0.620, 0.848, 0.861)
-        s = dr.Get('h_sig_%s_fit' % t)
-        b = dr.Get('h_bkg_%s_fit' % t)
-        sb = dr.Get('h_sum_%s_fit' % t)
-        dt = dr.Get('h_data_%s_fit' % t)
+        s = dr.Get('h_sig_%s_fit_nodiv' % t)
+        b = dr.Get('h_bkg_%s_fit_nodiv' % t)
+        sb = dr.Get('h_sum_%s_fit_nodiv' % t)
+        dt = dr.Get('h_data_%s_fit_nodiv' % t)
         for h in (s,b,sb,dt):
             h.SetStats(0)
             h.SetTitle(';d_{VV} (cm)')
