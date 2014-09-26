@@ -21,6 +21,8 @@
 
 namespace mfv {
   namespace fit {
+    int extra_prints = 0;
+
     int n_bins = -1;
 
     std::vector<double> a_bkg;
@@ -78,8 +80,9 @@ namespace mfv {
       for (int i = 1; i <= n_bins; ++i) {
         const double nu_sum = mu_sig * a_sig[i] + mu_bkg * a_bkg[i];
         lnL += -nu_sum + a_data[i] * log(nu_sum);
-        //printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
-        //       i, mu_sig, mu_bkg, mu_bkg * a_bkg[i], mu_sig * a_sig[i], mu_bkg * a_bkg[i] + mu_sig * a_sig[i], a_data[i], -nu_sum + a_data[i] * (nu_sum > 1e-12 ? log(nu_sum) : -27.6310211159285473), lnL);
+        //if (extra_prints)
+        //  printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
+        //         i, mu_sig, mu_bkg, mu_bkg * a_bkg[i], mu_sig * a_sig[i], mu_bkg * a_bkg[i] + mu_sig * a_sig[i], a_data[i], -nu_sum + a_data[i] * (nu_sum > 1e-12 ? log(nu_sum) : -27.6310211159285473), lnL);
       }
       return 2*lnL;
     }
@@ -301,6 +304,9 @@ namespace mfv {
           subdir->mkdir(TString::Format("nuis0_%03i", i0))->cd();
 
         for (int i1 = 1; i1 < nuis_scan[1].n; ++i1, ++pb) {
+          //fit::extra_prints = i0 == 186 && i1 == 1;
+          //fit::interp->extra_prints = i0 == 186 && i1 == 1;
+
           const double nuispar1 = nuis_scan[1].v(i1);
           const double twolnL = fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, nuispar1);
 
@@ -543,6 +549,10 @@ namespace mfv {
     std::map<int, int> template_index_deltas;
     for (int i = 0, ie = bkg_templates->size(); i < ie; ++i) {
       //printf("bkg template #%5i: %s\n", i, bkg_templates->at(i)->title().c_str());
+      const TH1D* ht = bkg_templates->at(i)->h;
+      for (int ibin = 0; ibin <= ht->GetNbinsX()+1; ++ibin)
+        if (TMath::IsNaN(ht->GetBinContent(ibin)) || TMath::IsNaN(ht->GetBinContent(ibin)))
+          jmt::vthrow("NaN in template %i (%s) bin %i", i, bkg_templates->at(i)->title().c_str(), ibin);
       const int delta = abs(i - fit::interp->i_Q(bkg_templates->at(i)->pars));
       template_index_deltas[delta] += 1;
     }
