@@ -87,6 +87,8 @@ namespace mfv {
   //////////////////////////////////////////////////////////////////////////////
 
   struct TemplateInterpolator {
+    static int extra_prints;
+
     Templates* templates;
     int n_bins;
     int n_pars;
