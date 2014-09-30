@@ -307,7 +307,7 @@ print 'scaled limits:'
 stats(sig_limits_scaled, True)
 
 '''
-foreach x ( crab/One2Two/crab_* )
-  crtools -outputFromFJR $x | grep root > `echo $x | sed -e 's/.*crab_//'`.lst
+foreach x ( crab/One2Two_real*/crab_* )
+  crtools -outputFromFJR $x noraise | grep root > `echo $x | sed -e 's/.*crab_//'`.lst
 end
 '''
