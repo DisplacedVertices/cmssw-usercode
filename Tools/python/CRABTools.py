@@ -675,7 +675,8 @@ def crab_output_files_from_fjr(working_dir, raise_on_missing=True):
                 raise RuntimeError('cannot parse %s for exit codes and output filename (wrapper_mo %s exe_mo %s filename_mo %s)' % (fjr, wrapper_mo, exe_mo, filename_mo))
             if wrapper_mo.group(1) != '0' or exe_mo.group(1) != '0':
                 raise RuntimeError('exit codes for %s not 0 (wrapper %s, exe %s)' % (fjr, wrapper_mo.group(1), exe_mo.group(1)))
-        files.append(filename_mo.group(1))
+        if filename_mo:
+            files.append(filename_mo.group(1))
 
     return files
 
