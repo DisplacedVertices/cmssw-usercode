@@ -28,7 +28,8 @@ def curve(name, root_file_dir, num_path, den_path, color):
         interval = clopper_pearson(num, den)
         error = (interval[2] - interval[1]) / 2
         heff.SetBinError(i+1, error)
-
+        if name == 'two':
+            print sample.name, eff, interval
         mass = sample.name.replace('M0','M').split('M')[1] + ' GeV'
         xax.SetBinLabel(i+1, mass)
 
