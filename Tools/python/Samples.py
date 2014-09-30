@@ -502,6 +502,16 @@ myttbar_samples = [
     MCSample('myttbar02skew', '', '/mfv_ttbar_02ali_skew_v20/jchavesb-mfv_ttbar_02ali_skew_v20-86e7fddebe1a47434ac241c7ce02deb7/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar03skew', '', '/mfv_ttbar_03ali_skew_v20/jchavesb-mfv_ttbar_03ali_skew_v20-386cd7e1b61324ea39a126d2b96e40f4/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar04skew', '', '/mfv_ttbar_04ali_skew_v20/jchavesb-mfv_ttbar_04ali_skew_v20-e9fab59d0ee4107312b74a0c2ef1315c/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar00telescope', '', '/mfv_ttbar_00ali_telescope_v20/jchu-mfv_ttbar_00ali_telescope_v20-63c90d8ebbde77cc9e7430877c1bcace/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar01telescope', '', '/mfv_ttbar_01ali_telescope_v20/jchu-mfv_ttbar_01ali_telescope_v20-ebe653de6462789785ae57fe8be5cd27/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar02telescope', '', '/mfv_ttbar_02ali_telescope_v20/jchu-mfv_ttbar_02ali_telescope_v20-b323a18ef10f293063328e860abb2bc4/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar03telescope', '', '/mfv_ttbar_03ali_telescope_v20/jchu-mfv_ttbar_03ali_telescope_v20-cffe974808b4507c7f523f6bb3e3e567/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar04telescope', '', '/mfv_ttbar_04ali_telescope_v20/jchu-mfv_ttbar_04ali_telescope_v20-42414c31281fd2157dc090082a3b8315/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar00zexpansion', '', '/mfv_ttbar_00ali_zexpansion_v20/jchavesb-mfv_ttbar_00ali_zexpansion_v20-c5a634cb50f8d25e19089b9cd55dc1e5/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar01zexpansion', '', '/mfv_ttbar_01ali_zexpansion_v20/jchavesb-mfv_ttbar_01ali_zexpansion_v20-50a1ea8bf32a482281e3d063e93725f0/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar02zexpansion', '', '/mfv_ttbar_02ali_zexpansion_v20/jchavesb-mfv_ttbar_02ali_zexpansion_v20-f6fd0b290ef3a0a87804b0b08858b852/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar03zexpansion', '', '/mfv_ttbar_03ali_zexpansion_v20/jchavesb-mfv_ttbar_03ali_zexpansion_v20-79262d2b1acd3f342fdc89569cb7416f/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar04zexpansion', '', '/mfv_ttbar_04ali_zexpansion_v20/jchavesb-mfv_ttbar_04ali_zexpansion_v20-bfa11b67f6369716788c4a62f805fb19/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     ]
     
 for s in myttbar_samples:
