@@ -11,7 +11,8 @@ fudge = 1. # 0.5 if 'fullhadded' not in batch_name else 1.
 #batch_root = batch_root[0]
 #batch_fns = glob.glob(os.path.join(batch_root, '*.root'))
 batch_fns = [x.strip() for x in open(batch_fn_lst).readlines() if x.strip()]
-#batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
+batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
+sig_tmpl_num = -int(batch_name.split('SigTmp')[1].split('_')[0])
 try:
     sig_nfo = batch_name.split('SigSamn')[1].split('_')[0]
     sig_num, sig_scale = sig_nfo.split('x')
@@ -61,37 +62,37 @@ h_mu_sig_true = h('h_mu_sig_true', '', 200, 0, 200)
 h_mu_bkg_true = h('h_mu_bkg_true', '', 200, 0, 200)
 h_istat = h2('h_istat', '', 5, 0, 5, 5, 0, 5)
 h_istatsum_v_seed = h2('h_istatsum_v_seed', '', 201, 0, 201, 5, 0, 5)
-h_h1_maxtwolnL = h('h_h1_maxtwolnL', '', 200, -300, 1500)
-h_h1_mu_sig = h('h_h1_mu_sig', '', 200, 0, 200)
-h_h1_mu_sig_err = h('h_h1_mu_sig_err', '', 200, 0, 50)
-h_h1_mu_sig_pull = h('h_h1_mu_sig_pull', '', 200, -10, 10)
-h_h1_mu_bkg = h('h_h1_mu_bkg', '', 200, 0, 400)
-h_h1_mu_bkg_err = h('h_h1_mu_bkg_err', '', 200, 0, 50)
-h_h1_mu_bkg_pull = h('h_h1_mu_bkg_pull', '', 200, -10, 10)
-h_h1_nuis0 = h('h_h1_nuis0', '', 200, 0, 0.1)
-h_h1_nuis0_err = h('h_h1_nuis0_err', '', 200, 0, 0.1)
-h_h1_nuis0_pull = h('h_h1_nuis0_pull', '', 200, -10, 10)
-h_h1_nuis1 = h('h_h1_nuis1', '', 200, 0, 0.1)
-h_h1_nuis1_err = h('h_h1_nuis1_err', '', 200, 0, 0.1)
-h_h1_nuis1_pull = h('h_h1_nuis1_pull', '', 200, -10, 10)
-h_h0_maxtwolnL = h('h_h0_maxtwolnL', '', 200, -300, 1500)
-h_h0_mu_bkg = h('h_h0_mu_bkg', '', 200, 0, 200)
-h_h0_mu_bkg_err = h('h_h0_mu_bkg_err', '', 200, 0, 50)
-h_h0_mu_bkg_pull = h('h_h0_mu_bkg_pull', '', 200, -10, 10)
-h_h0_nuis0 = h('h_h0_nuis0', '', 200, 0, 0.1)
-h_h0_nuis0_err = h('h_h0_nuis0_err', '', 200, 0, 0.1)
-h_h0_nuis0_pull = h('h_h0_nuis0_pull', '', 200, -10, 10)
-h_h0_nuis1 = h('h_h0_nuis1', '', 200, 0, 0.1)
-h_h0_nuis1_err = h('h_h0_nuis1_err', '', 200, 0, 0.1)
-h_h0_nuis1_pull = h('h_h0_nuis1_pull', '', 200, -10, 10)
-h_pval_signif = h('h_pval_signif', '', 101, 0, 1.01)
-h_zval_signif = h('h_zval_signif', '', 100, 0, 20)
-h_zval_wilks = h('h_zval_wilks', '', 100, 0, 20)
-h_zvals = h2('h_zvals', '', 100, 0, 20, 100, 0, 20)
+h_h1_maxtwolnL = h('h_h1_maxtwolnL', '', 100, -300, 1500)
+h_h1_mu_sig = h('h_h1_mu_sig', '', 40, 0, 80)
+h_h1_mu_sig_err = h('h_h1_mu_sig_err', '', 40, 0, 40)
+h_h1_mu_sig_pull = h('h_h1_mu_sig_pull', '', 40, -10, 10)
+h_h1_mu_bkg = h('h_h1_mu_bkg', '', 100, 0, 400)
+h_h1_mu_bkg_err = h('h_h1_mu_bkg_err', '', 40, 0, 40)
+h_h1_mu_bkg_pull = h('h_h1_mu_bkg_pull', '', 40, -10, 10)
+h_h1_nuis0 = h('h_h1_nuis0', '', 40, 0, 0.2)
+h_h1_nuis0_err = h('h_h1_nuis0_err', '', 40, 0, 0.1)
+h_h1_nuis0_pull = h('h_h1_nuis0_pull', '', 40, -10, 10)
+h_h1_nuis1 = h('h_h1_nuis1', '', 40, 0, 0.1)
+h_h1_nuis1_err = h('h_h1_nuis1_err', '', 40, 0, 0.1)
+h_h1_nuis1_pull = h('h_h1_nuis1_pull', '', 40, -10, 10)
+h_h0_maxtwolnL = h('h_h0_maxtwolnL', '', 100, -300, 1500)
+h_h0_mu_bkg = h('h_h0_mu_bkg', '', 100, 0, 400)
+h_h0_mu_bkg_err = h('h_h0_mu_bkg_err', '', 40, 0, 40)
+h_h0_mu_bkg_pull = h('h_h0_mu_bkg_pull', '', 40, -10, 10)
+h_h0_nuis0 = h('h_h0_nuis0', '', 40, 0, 0.2)
+h_h0_nuis0_err = h('h_h0_nuis0_err', '', 40, 0, 0.1)
+h_h0_nuis0_pull = h('h_h0_nuis0_pull', '', 40, -10, 10)
+h_h0_nuis1 = h('h_h0_nuis1', '', 40, 0, 0.1)
+h_h0_nuis1_err = h('h_h0_nuis1_err', '', 40, 0, 0.1)
+h_h0_nuis1_pull = h('h_h0_nuis1_pull', '', 40, -10, 10)
+h_pval_signif = h('h_pval_signif', '', 51, 0, 1.02)
+h_zval_signif = h('h_zval_signif', '', 50, 0, 20)
+h_zval_wilks = h('h_zval_wilks', '', 50, 0, 20)
+h_zvals = h2('h_zvals', '', 50, 0, 20, 50, 0, 20)
 h_sig_limit = h('h_sig_limit', '', 200, 0, 200)
 h_sig_limit.GetXaxis().SetRangeUser(0,50)
-h_sig_limit_scaled = h('h_sig_limit_scaled', '', 200, 0, 1000)
-h_sig_limit_err = h('h_sig_limit_err', '', 20, 0, 20)
+h_sig_limit_scaled = h('h_sig_limit_scaled', '', 200, 0, 50)
+h_sig_limit_err = h('h_sig_limit_err', '', 40, 0, 20)
 h_sig_limit_fit_n = h('h_sig_limit_fit_n', '', 50, 0, 50)
 h_sig_limit_fit_a = h('h_sig_limit_fit_a', '', 50, 0, 5)
 h_sig_limit_fit_b = h('h_sig_limit_fit_b', '', 50, -0.1, 0.1)
@@ -99,14 +100,19 @@ h_sig_limit_fit_a_err = h('h_sig_limit_fit_a_err', '', 50, 0, 5)
 h_sig_limit_fit_b_err = h('h_sig_limit_fit_b_err', '', 50, 0, 1)
 h_sig_limit_fit_prob = h('h_sig_limit_fit_prob', '', 50, 0, 1)
 
+def skip(h0_istat, h1_istat, sig_limit_fit_n):
+    return h0_istat <= 1 or h1_istat <= 1 or sig_limit_fit_n < 4
+
 sig_true = [0., 0.0245, 0.1102, 0.2085, 0.3064, 0.3293, 0.3279, 0.1531, 0.7707, 1.4223, 2.0397, 2.1889, 2.1456, 0.3920, 2.2956, 4.2842, 5.8373, 6.1553, 6.0429, 0.7841, 4.5308, 8.5589, 11.0880, 11.4206, 11.3452]
+sig_effs = [x / (ac.int_lumi / 1000 * ac.scale_factor) for x in sig_true]
+sig_eff = sig_effs[sig_tmpl_num]
 mu_sig_true_mean = sig_true[sig_num] * sig_scale
 print 'sig_num', sig_num, 'mu_sig_true_mean', mu_sig_true_mean
 mu_bkg_true_mean = 39.47 * fudge
 nuis0_true_mean = 0
 nuis1_true_mean = 0
 for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
-    if h0_istat != 3 or h1_istat != 3:
+    if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
     nuis0_true_mean += true_pars_2
     nuis1_true_mean += true_pars_2
@@ -114,8 +120,11 @@ n = len(d)
 nuis0_true_mean /= n
 nuis1_true_mean /= n
 
+pval_signifs = []
+sig_limits = []
+sig_limits_scaled = []
 for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
-    if h0_istat != 3 or h1_istat != 3 or sig_limit_fit_n < 6:
+    if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
     h_seed.Fill(seed)
     h_toy.Fill(toy)
@@ -146,14 +155,18 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h0_nuis1.Fill(h0_nuis1)
     h_h0_nuis1_err.Fill(h0_err_nuis1)
     h_h0_nuis1_pull.Fill((h0_nuis1 - nuis1_true_mean)/h0_err_nuis1)
+    pval_signifs.append(pval_signif)
     h_pval_signif.Fill(pval_signif)
     zval_signif = 2**0.5*ROOT.TMath.ErfInverse(1.-2.*pval_signif)
     h_zval_signif.Fill(zval_signif)
     zval_wilks = h1_maxtwolnL - h0_maxtwolnL
     h_zval_wilks.Fill(zval_wilks)
     h_zvals.Fill(zval_signif, zval_wilks)
+    sig_limits.append(sig_limit)
     h_sig_limit.Fill(sig_limit)
-    h_sig_limit_scaled.Fill(sig_limit * ac.int_lumi / 1000. * ac.scale_factor)
+    sig_limit_scaled = sig_limit / (sig_eff * ac.int_lumi / 1000. * ac.scale_factor)
+    h_sig_limit_scaled.Fill(sig_limit_scaled)
+    sig_limits_scaled.append(sig_limit_scaled)
     h_sig_limit_err.Fill(sig_limit_err)
     h_sig_limit_fit_n.Fill(sig_limit_fit_n)
     h_sig_limit_fit_a.Fill(sig_limit_fit_a)
@@ -261,6 +274,37 @@ for n in ns:
             m.Draw()
             ps.save(nm + '_scanmus_2sg')
 
+    g = dr.Get('g_limit_bracket_fit')
+    g.Draw('ALP')
+    ps.save('limit_bracket_fit_seed%i_toy%i_pval%s' % (seed, toy, str(x[-3]).replace('.','p')))
+
+def stats(l, prints=False):
+    l.sort()
+    n = len(l)
+    if n % 2 == 0:
+        median = (l[n/2] + l[n/2-1])/2.
+    else:
+        median = l[n/2]
+    lo68 = l[int(n/2 - 0.34*n)]
+    hi68 = l[int(n/2 + 0.34*n)]
+    lo95 = l[int(n/2 - 0.475*n)]
+    hi95 = l[int(n/2 + 0.475*n)]
+    if prints:
+        print 'Expected  2.5%: r <', lo95
+        print 'Expected 16.0%: r <', lo68
+        print 'Expected 50.0%: r <', median
+        print 'Expected 84.0%: r <', hi68
+        print 'Expected 97.5%: r <', hi95
+        if n <= 20:
+            print 'Observed Limit: r <', median
+    return median, lo68, hi68, lo95, hi95
+
+#print 'limit on mu_sig:'
+#limit_stats(sig_limits)
+#print
+print 'median pval_signif:', stats(pval_signifs)[0]
+print 'scaled limits:'
+stats(sig_limits_scaled, True)
 
 '''
 foreach x ( crab/One2Two/crab_* )
