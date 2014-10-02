@@ -87,7 +87,7 @@ h_h0_nuis1_err = h('h_h0_nuis1_err', '', 40, 0, 0.1)
 h_h0_nuis1_pull = h('h_h0_nuis1_pull', '', 40, -10, 10)
 h_pval_signif = h('h_pval_signif', '', 51, 0, 1.02)
 h_zval_signif = h('h_zval_signif', '', 50, 0, 20)
-h_zval_wilks = h('h_zval_wilks', '', 50, 0, 20)
+h_zval2_wilks = h('h_zval2_wilks', '', 50, 0, 20)
 h_zvals = h2('h_zvals', '', 50, 0, 20, 50, 0, 20)
 h_sig_limit = h('h_sig_limit', '', 200, 0, 200)
 h_sig_limit.GetXaxis().SetRangeUser(0,50)
@@ -115,7 +115,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
     nuis0_true_mean += true_pars_2
-    nuis1_true_mean += true_pars_2
+    nuis1_true_mean += true_pars_3
 n = len(d)
 nuis0_true_mean /= n
 nuis1_true_mean /= n
@@ -159,9 +159,9 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_pval_signif.Fill(pval_signif)
     zval_signif = 2**0.5*ROOT.TMath.ErfInverse(1.-2.*pval_signif)
     h_zval_signif.Fill(zval_signif)
-    zval_wilks = h1_maxtwolnL - h0_maxtwolnL
-    h_zval_wilks.Fill(zval_wilks)
-    h_zvals.Fill(zval_signif, zval_wilks)
+    zval2_wilks = h1_maxtwolnL - h0_maxtwolnL
+    h_zval2_wilks.Fill(zval2_wilks)
+    h_zvals.Fill(zval_signif, zval2_wilks)
     sig_limits.append(sig_limit)
     h_sig_limit.Fill(sig_limit)
     sig_limit_scaled = sig_limit / (sig_eff * ac.int_lumi / 1000. * ac.scale_factor)
@@ -175,7 +175,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_sig_limit_fit_b_err.Fill(sig_limit_fit_b_err)
     h_sig_limit_fit_prob.Fill(sig_limit_fit_prob)
 
-for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_pval_signif h_zval_signif h_zval_wilks h_zvals h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
+for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
     print x
     h = eval(x)
     if type(h) == ROOT.TH1D:
@@ -188,7 +188,7 @@ for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h
         h.SetStats(0)
     ps.save(x)
 
-d.sort(key=lambda x: x[-3])
+d.sort(key=lambda x: x[-9])
 ns = [0,1] + [int(i*len(d)/3.) for i in xrange(1,3)] + [-2,-1]
 for n in ns:
     x = d[n]
@@ -224,7 +224,7 @@ for n in ns:
         leg.AddEntry(dt, '"data"', 'LE')
         leg.Draw()
 
-        nm = '%s_fit_seed%i_toy%i_pval%s' % (t, seed, toy, str(x[-3]).replace('.','p'))
+        nm = '%s_fit_seed%i_toy%i_pval%s' % (t, seed, toy, str(x[-9]).replace('.','p'))
         ps.save(nm)
 
         h = dr.Get('h_likelihood_%s_scannuis' % t)
