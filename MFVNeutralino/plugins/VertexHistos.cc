@@ -81,6 +81,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   PairwiseHistos h_sv_sumtop2;
 
   TH1F* h_sv_jets_deltaphi[4][sv_num_indices];
+  TH2F* h_sv_ntracksanypv_ntracksthepv[sv_num_indices];
+  TH2F* h_sv_ntracksnopv_ntracksanypv[sv_num_indices];
 
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
@@ -477,6 +479,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     for (int i = 0; i < 4; ++i) {
       h_sv_jets_deltaphi[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%sjets_deltaphi", exc, lmt_ex[i]), TString::Format(";%s SV #Delta#phi to %sjets;arb. units", exc, lmt_ex[i]), 50, -3.15, 3.15);
     }
+    h_sv_ntracksanypv_ntracksthepv[j] = fs->make<TH2F>(TString::Format("h_sv_%s_ntracksanypv_ntracksthepv", exc), TString::Format("%s SV;number of tracks in the PV;number of tracks in any PV", exc), 40, 0, 40, 40, 0, 40);
+    h_sv_ntracksnopv_ntracksanypv[j] = fs->make<TH2F>(TString::Format("h_sv_%s_ntracksnopv_ntracksanypv", exc), TString::Format("%s SV;number of tracks in any PV;number of tracks in no PV", exc), 40, 0, 40, 40, 0, 40);
 
     if (vertex_src.label() != "") {
       assert(int(sv_tracks_num_indices) == int(sv_jet_tracks_num_indices));
@@ -911,6 +915,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         }
       }
     }
+    int ntracksthepv = 0;
+    int ntracksanypv = 0;
+    int ntracksnopv = 0;
+    for (int i = 0; i < int(aux.track_inpv.size()); ++i) {
+      if (aux.track_inpv[i] == -1) ++ntracksnopv;
+      if (aux.track_inpv[i] == 0) ++ntracksthepv;
+      if (aux.track_inpv[i] >= 0) ++ntracksanypv;
+    }
+    fill_multi(h_sv_ntracksanypv_ntracksthepv, isv, ntracksthepv, ntracksanypv, w);
+    fill_multi(h_sv_ntracksnopv_ntracksanypv, isv, ntracksanypv, ntracksnopv, w);
 
     if (vertex_src.label() != "") {
       const reco::Vertex& thepv = primary_vertices->at(0);
