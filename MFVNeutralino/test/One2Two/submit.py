@@ -197,31 +197,22 @@ cd -
     os.system('crab -create -submit all')
     os.system('rm -f runme.csh crab.cfg')
 
-if 0:
-    for strength in (None, 1, 5):
-        for signal in (-9, -15, -24):
-            sg = (signal, strength) if strength is not None else None
-            submit(500, 'CJ', 5, sg, signal, '')
+###
 
 if 1:
-    for signal in xrange(-24, -6):
-        submit(20, 'CJ', 5, (signal, -1), signal, '')
-
-if 0:
     batches = []
     for template_type in ('CJ',):
-        for min_ntracks in (5,): #6): #,7,8):
-            for signal in xrange(-24, -6):
-                for strength in (None, 1, 5):
+        for min_ntracks in (5,):
+            for signal in xrange(-24, 0):
+                for strength in (-1, None, 1, 5):
                     sg = (signal, strength) if strength is not None else None
-                    batches.append((template_type, min_ntracks, sg, signal, ''))
+                    njobs = 20 if strength == -1 else 500
+                    batches.append((njobs, template_type, min_ntracks, sg, signal, ''))
 
-    nj = 500
-    raw_input('%i batches = %i jobs?' % (len(batches), len(batches)*nj))
     for batch in batches:
-        submit(nj, *batch)
+        submit(*batch)
 
-if 0:
+if 1:
     for syst in 'default bowing curl elliptical radial sagitta skew'.split():
         for signal in [-9, -15]:
             for strength in (None, 1):
