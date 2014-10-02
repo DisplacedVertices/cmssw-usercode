@@ -2,9 +2,9 @@
 
 from base import *
 
-fn_pattern = 'jen_crab/mfv*root'
+fn_pattern = 'trees/mfv*root'
 plot_dir = 'plots/o2t_signal_templates'
-binning = [0.02*i for i in xrange(5)] + [0.1, 0.2, 0.4, 0.8, 1.6, 3.2] # JMTBAD keep in sync with Templates.cc
+binning = [0.02*i for i in xrange(5)] + [0.1, 5] # JMTBAD keep in sync with Templates.cc
 binning = array('d', binning)
 nbins = len(binning) - 1
 min_ntracks = 5
