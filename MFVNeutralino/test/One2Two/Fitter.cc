@@ -547,16 +547,20 @@ namespace mfv {
     fit::interp = new TemplateInterpolator(bkg_templates, fit::n_bins, bkg_templater->par_info(), fit::a_bkg);
 
     std::map<int, int> template_index_deltas;
+    bool any_nan = false;
     for (int i = 0, ie = bkg_templates->size(); i < ie; ++i) {
       //printf("bkg template #%5i: %s\n", i, bkg_templates->at(i)->title().c_str());
       const TH1D* ht = bkg_templates->at(i)->h;
       for (int ibin = 0; ibin <= ht->GetNbinsX()+1; ++ibin)
-        if (TMath::IsNaN(ht->GetBinContent(ibin)) || TMath::IsNaN(ht->GetBinContent(ibin)))
-          jmt::vthrow("NaN in template %i (%s) bin %i", i, bkg_templates->at(i)->title().c_str(), ibin);
+        if (TMath::IsNaN(ht->GetBinContent(ibin)) || TMath::IsNaN(ht->GetBinError(ibin))) {
+          printf("NaN in template %i (%s) bin %i\n", i, bkg_templates->at(i)->title().c_str(), ibin);
+          any_nan = true;
+        }
       const int delta = abs(i - fit::interp->i_Q(bkg_templates->at(i)->pars));
       template_index_deltas[delta] += 1;
     }
-    //jmt::vthrow("something wrong with templates");
+    if (any_nan)
+      jmt::vthrow("something wrong with templates");
 
     TH1D* h_data_temp = Template::hist_with_binning("h_data", TString::Format("toy %i", toy));
     for (const VertexPair& p : v2v)
