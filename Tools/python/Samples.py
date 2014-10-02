@@ -512,6 +512,11 @@ myttbar_samples = [
     MCSample('myttbar02zexpansion', '', '/mfv_ttbar_02ali_zexpansion_v20/jchavesb-mfv_ttbar_02ali_zexpansion_v20-f6fd0b290ef3a0a87804b0b08858b852/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar03zexpansion', '', '/mfv_ttbar_03ali_zexpansion_v20/jchavesb-mfv_ttbar_03ali_zexpansion_v20-79262d2b1acd3f342fdc89569cb7416f/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     MCSample('myttbar04zexpansion', '', '/mfv_ttbar_04ali_zexpansion_v20/jchavesb-mfv_ttbar_04ali_zexpansion_v20-bfa11b67f6369716788c4a62f805fb19/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar00tune4', '', '/mfv_ttbar_00tune_4_v20/jchu-mfv_ttbar_00tune_4_v20-ace87fb88ed7e0f10fc37e4ecb2903e4/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar01tune4', '', '/mfv_ttbar_01tune_4_v20/jchu-mfv_ttbar_01tune_4_v20-1602c672deecfe3ce8f7f087ad60e854/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar02tune4', '', '/mfv_ttbar_02tune_4_v20/jchu-mfv_ttbar_02tune_4_v20-5cdaed4f13c64c3ce5f00fb5b73884b5/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar03tune4', '', '/mfv_ttbar_03tune_4_v20/jchu-mfv_ttbar_03tune_4_v20-8728b60fc54c7d1ce5ba3e1e25b1dcd6/USER', 1000000, 4, 0.15, ttbar_xsec_had),
+    MCSample('myttbar04tune4', '', '/mfv_ttbar_04tune_4_v20/jchu-mfv_ttbar_04tune_4_v20-22826ed79205ecae3b91a60c55a98870/USER', 1000000, 4, 0.15, ttbar_xsec_had),
     ]
     
 for s in myttbar_samples:
