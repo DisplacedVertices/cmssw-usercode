@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 
 from JMTucker.Tools.Samples import mfv_signal_samples
 
-special = ''
+special = 'real'
 
 set_style()
 ROOT.gStyle.SetOptStat(1000000001)
@@ -128,8 +128,10 @@ def draw_h_labels(h, thing, stat, obj_cache=[]):
     obj_cache.append(mass)
     obj_cache.append(eyeline)
 
-sig_strengths = (0, 1, 5, 10)
+sig_strengths = (0, 1, 5)
 sample_nums = range(1, 25)
+
+sample_nums = range(7, 25)
 
 #sig_strengths = (0, 1, 10)
 #sample_nums = (9, 15)
@@ -146,7 +148,7 @@ for sig_strength in sig_strengths:
 
     for hyp in 'h1 h0'.split():
         for thing in 'mu_sig mu_bkg mu_sig_err mu_bkg_err mu_sig_pull mu_bkg_pull nuis0 nuis0_err nuis1 nuis1_err'.split():
-            if hyp != 'h1' or (thing != 'mu_bkg_pull' and thing != 'mu_sig_pull'):
+            if (thing != 'mu_bkg_pull' and thing != 'mu_sig_pull'):
                 continue
             
             if hyp == 'h0' and 'sig' in thing:
