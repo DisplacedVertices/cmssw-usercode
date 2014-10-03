@@ -100,8 +100,9 @@ namespace mfv {
   void ClearedJetsTemplater::make_templates() {
     dataset_ok();
 
+    const int N1v = sample_count > 0 ? sample_count : int(dataset.events_1v->size());
     printf("ClearedJetsTemplater%s making templates\n", name.c_str()); fflush(stdout);
-    jmt::ProgressBar pb(50, dataset.events_1v->size());
+    jmt::ProgressBar pb(50, N1v);
     pb.start();
 
     clear_templates();
@@ -131,6 +132,7 @@ namespace mfv {
       }
     }
 
+    int evc = 0;
     for (const EventSimple& ev : *dataset.events_1v) {
       if (ev.njets > 0) {
         const double bsd2d0 = h_bsd2d[vt_1vsingle]->GetRandom();
@@ -150,6 +152,8 @@ namespace mfv {
       }
 
       ++pb;
+      if (++evc == N1v)
+        break;
     }
 
     if (finalize_templates)
