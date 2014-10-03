@@ -20,6 +20,7 @@ namespace mfv {
       env("mfvo2t_clearedjets" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.05)),
       save_templates(env.get_bool("save_templates", false)),
+      finalize_templates(env.get_bool("finalize_templates", true)),
       sample_count(env.get_int("sample_count", -1)),
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
@@ -151,8 +152,9 @@ namespace mfv {
       ++pb;
     }
 
-    for (Template* t : templates)
-      Template::finalize_template_in_place(t->h);
+    if (finalize_templates)
+      for (Template* t : templates)
+        Template::finalize_template_in_place(t->h);
 
     printf("\n");
   }
