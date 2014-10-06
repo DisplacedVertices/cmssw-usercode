@@ -19,18 +19,9 @@ const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 //const char* sample_name = "ttbarhadronic";
 //const int n1v = 18508;
 
-//const char* tree_path = "/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/MiniTreeV20_TtbarSyst";
-//const char* sample_name = "myttbardefault";    const int n1v = 12373;
-//const char* sample_name = "myttbarbowing";     const int n1v = 12863;
-//const char* sample_name = "myttbarcurl";       const int n1v = 12515;
-//const char* sample_name = "myttbarelliptical"; const int n1v = 12628;
-//const char* sample_name = "myttbarradial";     const int n1v = 12928;
-//const char* sample_name = "myttbarsagitta";    const int n1v = 12314;
-//const char* sample_name = "myttbarskew";       const int n1v = 12526;
-
-//predicted number of one-vertex-only events in 20/fb of data
+//predicted number of one-vertex-only events in 17.6/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
-const int n1v = 11406 + 101 + 4425 + 1458;
+const int n1v = 9235 + 99 + 3598 + 1274;
 float bs2ddist[n1v];
 float vtx_phis[n1v];
 unsigned short njets[n1v];
@@ -199,8 +190,8 @@ int main(int argc, const char* argv[]) {
 
   const int nbkg = 4;
   const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
-  float weights[nbkg] = {0.589, 0.085, 0.426, 0.169};
-  int sn1v[nbkg] = {11406, 101, 4425, 1458};
+  float weights[nbkg] = {0.259, 0.037, 0.188, 0.075};
+  int sn1v[nbkg] = {9235, 99, 3598, 1274};
   int sn1vs = 0;
 
 /*
