@@ -71,6 +71,35 @@ float throw_gaussian_phi(int i) {
   return TVector2::Phi_mpi_pi(vtx_phi);
 }
 
+float throw_phi(int njets, float* jet_pt, float* jet_phi) {
+  double sumht = 0;
+  for (int j = 0; j < njets; ++j) {
+    sumht += jet_pt[j];
+  }
+
+  double rjetphi = 0;
+  double rand = gRandom->Rndm();
+  double sumpt = 0;
+  for (int j = 0; j < njets; ++j) {
+    sumpt += jet_pt[j];
+    if (rand < sumpt/sumht) {
+      rjetphi = jet_phi[j];
+      break;
+    }
+  }
+
+  double rdphi = gRandom->Gaus(1.57, 0.4);
+
+  double vtx_phi = 0;
+  if (gRandom->Rndm() < 0.5) {
+    vtx_phi = rjetphi - rdphi;
+  } else {
+    vtx_phi = rjetphi + rdphi;
+  }
+
+  return TVector2::Phi_mpi_pi(vtx_phi);
+}
+
 int toy_from_file(const char* sample, const int sn1vs, const int sn1v) {
   mfv::MiniNtuple nt;
   TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, sample));
@@ -274,8 +303,8 @@ int main(int argc, const char* argv[]) {
       if (t->GetEntry(j) <= 0) continue;
 
       if (nt.nvtx == 1) {
-        double vtx0_phi = gRandom->Uniform(-M_PI, M_PI);
-        double vtx1_phi = gRandom->Uniform(-M_PI, M_PI);
+        double vtx0_phi = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
+        double vtx1_phi = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
         double dphi = TVector2::Phi_mpi_pi(vtx0_phi - vtx1_phi);
 
         double vtx0_dist = h_dbv_1v->GetRandom();
