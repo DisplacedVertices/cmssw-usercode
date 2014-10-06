@@ -15,7 +15,7 @@
 double    muclear = 0.028;
 double sigmaclear = 0.005;
 
-const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
+const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20";
 //const char* sample_name = "ttbarhadronic";
 //const int n1v = 18508;
 
@@ -154,11 +154,7 @@ std::vector<double> binning() {
   for (int i = 0; i < 5; ++i)
     bins.push_back(i * 0.02);
   bins.push_back(0.1);
-  bins.push_back(0.2);
-  bins.push_back(0.4);
-  bins.push_back(0.8);
-  bins.push_back(1.6);
-  bins.push_back(3.2);
+  bins.push_back(5.0);
   return bins;
 }
 
@@ -202,6 +198,9 @@ int main(int argc, const char* argv[]) {
   int sn1vs = 0;
 */
 
+  TH1F* h_dbv_1v = new TH1F("h_dbv_1v", "only-one-vertex events;d_{BV};events", 500, 0, 2.5);
+  TH1F* h_dvvc = new TH1F("h_dvvc", ";d_{VV}^{C} (cm);events", 6, 0, 0.12);
+
   for (int i = 0; i < nbkg; ++i) {
     toy_from_file(samples[i], sn1vs, sn1v[i]);
     sn1vs += sn1v[i];
@@ -223,6 +222,10 @@ int main(int argc, const char* argv[]) {
     for (int j = 0, je = t->GetEntries(); j < je; ++j) {
       if (t->LoadTree(j) < 0) break;
       if (t->GetEntry(j) <= 0) continue;
+
+      if (nt.nvtx == 1) {
+        h_dbv_1v->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), weights[i] * nt.weight);
+      }
 
       if (nt.nvtx == 2) {
         for (int k = 0; k < nt.njets; ++k) {
@@ -251,6 +254,42 @@ int main(int argc, const char* argv[]) {
     }
   }
 
+  for (int i = 0; i < nbkg; ++i) {
+    mfv::MiniNtuple nt;
+    TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, samples[i]));
+    if (!f || !f->IsOpen()) {
+      fprintf(stderr, "bad file");
+      exit(1);
+    }
+
+    TTree* t = (TTree*)f->Get("mfvMiniTree/t");
+    if (!t) {
+      fprintf(stderr, "bad tree");
+      exit(1);
+    }
+
+    mfv::read_from_tree(t, nt);
+    for (int j = 0, je = t->GetEntries(); j < je; ++j) {
+      if (t->LoadTree(j) < 0) break;
+      if (t->GetEntry(j) <= 0) continue;
+
+      if (nt.nvtx == 1) {
+        double vtx0_phi = gRandom->Uniform(-M_PI, M_PI);
+        double vtx1_phi = gRandom->Uniform(-M_PI, M_PI);
+        double dphi = TVector2::Phi_mpi_pi(vtx0_phi - vtx1_phi);
+
+        double vtx0_dist = h_dbv_1v->GetRandom();
+        double vtx1_dist = h_dbv_1v->GetRandom();
+
+        double svdist = sqrt(vtx0_dist*vtx0_dist + vtx1_dist*vtx1_dist - 2*vtx0_dist*vtx1_dist*cos(fabs(dphi)));
+
+        double p = 0.5 * TMath::Erf((svdist - muclear)/sigmaclear) + 0.5;
+        if (svdist > 0.11) svdist = 0.11;
+        h_dvvc->Fill(svdist, weights[i] * nt.weight * p);
+      }
+    }
+  }
+
   //toy_from_file("MultiJetPk2012", 0, 17390);
 
   TH1F* h_njets = new TH1F("h_njets", ";# of jets;events", 20, 0, 20);
@@ -272,7 +311,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_sv1bs2ddist = new TH1F("h_sv1bs2ddist", ";constructed SV1 distance (cm);vertices", 500, 0, 1);
   TH1F* h_svpairdist = new TH1F("h_svpairdist", ";constructed vertex pair distance (cm);events", 200, 0, 0.2);
   TH1F* h_svpairdist_cut = new TH1F("h_svpairdist_cut", "svdist2d with space clearing;constructed vertex pair distance (cm);events", 30, 0, 0.3);
-  TH1D* h_dvvc = hist_with_binning("h_dvvc", ";d_{VV}^{C} (cm);arb. units");
+  //TH1D* h_dvvc = hist_with_binning("h_dvvc", ";d_{VV}^{C} (cm);arb. units");
 
   TH1F* h_svdist2d_uniformphi = new TH1F("h_svdist2d_uniformphi", "svdist2d using uniform #phi distribution;constructed vertex pair distance (cm);events", 10, 0, 0.1);
   float sigma_clear[5] = {30, 40, 50, 60, 70};
@@ -325,7 +364,7 @@ int main(int argc, const char* argv[]) {
       h_svpairdphi_cut->Fill(dphi, w * p);
       h_svpairabsdphi->Fill(fabs(dphi), w * p);
       h_svpairdist_cut->Fill(svdist, w * p);
-      h_dvvc->Fill(svdist, w * p);
+      //h_dvvc->Fill(svdist, w * p);
 
       if (njets[i] <= 6) {
         h_dvv_jets_low->Fill(svdist, w * p);
