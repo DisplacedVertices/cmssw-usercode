@@ -215,7 +215,7 @@ int main(int argc, const char* argv[]) {
 
   const int nbkg = 4;
   const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
-  float weights[nbkg] = {0.259, 0.037, 0.188, 0.075};
+  float weights[nbkg] = {2*0.259, 2*0.037, 2*0.188, 2*0.075};
   int sn1v[nbkg] = {9235, 99, 3598, 1274};
   int sn1vs = 0;
 
