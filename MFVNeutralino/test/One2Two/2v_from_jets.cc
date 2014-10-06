@@ -17,7 +17,7 @@ double sigmaclear = 0.005;
 
 const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20";
 //const char* sample_name = "ttbarhadronic";
-//const int n1v = 18508;
+//const int n1v = 1000;
 
 //predicted number of one-vertex-only events in 17.6/fb of data
 //qcdht1000 + ttbardilep + ttbarhadronic + ttbarsemilep
@@ -213,10 +213,10 @@ int main(int argc, const char* argv[]) {
   TH1F* h_dvv_low_njets = new TH1F("h_dvv_low_njets", "njets <= 6;d_{vv} (cm);arb. units", 10, 0, 0.1);
   TH1F* h_dvv_high_njets = new TH1F("h_dvv_high_njets", "njets >= 7;d_{vv} (cm);arb. units", 10, 0, 0.1);
 
-  const int nbkg = 4;
-  const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
-  float weights[nbkg] = {2*0.259, 2*0.037, 2*0.188, 2*0.075};
-  int sn1v[nbkg] = {9235, 99, 3598, 1274};
+  const int nbkg = 5;
+  const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
+  float weights[nbkg] = {2*4.849, 2*0.259, 2*0.037, 2*0.188, 2*0.075};
+  int sn1v[nbkg] = {1000, 9235, 99, 3598, 1274};
   int sn1vs = 0;
 
 /*
