@@ -811,6 +811,7 @@ int main(int argc, const char* argv[]) {
   h_dvv_vtx_high->Write();
 
   h_dvv->Write();
+  h_dbv_1v->Write();
   h_dvvc->Write();
   //overlay dvv with binning
   TCanvas* c_dvvc = new TCanvas("c_dvvc", "c_dvvc", 700, 700);
