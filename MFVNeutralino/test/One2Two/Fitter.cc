@@ -495,7 +495,11 @@ namespace mfv {
 
   Fitter::test_stat_t Fitter::calc_test_stat(double fix_mu_sig_val) {
     test_stat_t t;
+    if (print_level > 0)
+      printf("calc_test_stat: H1\n");
     t.h1 = min_likelihood(fix_mu_sig_val, false);
+    if (print_level > 0)
+      printf("calc_test_stat: H0 (mu_sig fixed to %f)\n", fix_mu_sig_val);
     t.h0 = min_likelihood(fix_mu_sig_val, true);
     t.t = t.h1.maxtwolnL - t.h0.maxtwolnL;
     return t;
