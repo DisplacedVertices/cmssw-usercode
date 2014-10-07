@@ -28,6 +28,7 @@ namespace mfv {
     std::vector<double> a_bkg;
     TemplateInterpolator* interp;
 
+    double n_sig_orig = -1;
     TH1D* h_sig = 0;
     const double* a_sig = 0;
 
@@ -76,24 +77,80 @@ namespace mfv {
       if (mu_sig < 1e-12)
         mu_sig = 1e-12;
 
-      //if (extra_prints) {
-      //  printf("\n----\nmu_sig: %f  mu_bkg: %f\npar0: %f  par1: %f\n", mu_sig, mu_bkg, par0, par1);
-      //  printf("   %10s %10s\n", "a_bkg", "a_sig");
-      //  for (int i = 1; i <= n_bins; ++i)
-      //    printf("%2i %10f %10f\n", i, a_bkg[i], a_sig[i]);
-      //}
+      if (extra_prints)
+        printf("\n----\nmu_sig: %f  mu_bkg: %f\npar0: %f  par1: %f\n", mu_sig, mu_bkg, par0, par1);
+
+      std::vector<double> A_sig(n_bins+2, 0.);
+      std::vector<double> A_bkg(n_bins+2, 0.);
+
+      //static const double eta_bkg[7] = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 1.5 };
+      static const double eta_bkg[7] = { -1, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9 };
+
+      const double tol = 1e-7;
+      const double eps = 1e-14;
+      const int maxit = 100;
+
+      for (int i = 1; i <= n_bins; ++i) {
+        double t = 1;
+
+        if (a_data[i] > eps) {
+          double t_lo = -1./std::max(mu_sig, mu_bkg) + 1e-12;
+          double t_hi = 1;
+          bool found = false;
+
+          for (int it = 0; it < maxit; ++it) {
+            t = 0.5*(t_lo + t_hi);
+
+            if (t_hi - t_lo < tol) {
+              found = true;
+              break;
+            }
+
+            const double y = a_data[i] / (1 - t) - mu_bkg * a_bkg[i] / (1 + mu_bkg * t) - mu_sig * a_sig[i] / (1 + mu_sig * t);
+
+            if (y > 0)
+              t_hi = t;
+            else if (y < 0)
+              t_lo = t;
+
+            if (extra_prints)
+              printf("bin %i newt it#%i: d: %.1f  a_bkg: %f  a_sig: %f  t: %f  y: %f  new t_lo, t_hi: %f %f\n", i, it, a_data[i], a_bkg[i], a_sig[i], t, y, t_lo, t_hi);
+
+            if (fabs(y) < eps) {
+              found = true;
+              break;
+            }
+          }
+
+          if (!found)
+            jmt::vthrow("zero finding failed");
+        }
+
+        A_sig[i] = a_sig[i] / (t * mu_sig / n_sig_orig + 1);
+        A_bkg[i] = a_bkg[i] - t * mu_bkg * a_bkg[i] * a_bkg[i] * eta_bkg[i] * eta_bkg[i];
+      }
+
+      if (extra_prints) {
+        printf("   %10s %10s %10s %10s\n", "a_bkg", "a_sig", "A_bkg", "A_sig");
+        for (int i = 1; i <= n_bins; ++i)
+          printf("%2i %10f %10f %10f %10f\n", i, a_bkg[i], a_sig[i], A_bkg[i], A_sig[i]);
+      }
 
       double lnL = 0;
 
       for (int i = 1; i <= n_bins; ++i) {
-        const double nu_sig = mu_sig * a_sig[i];
-        const double nu_bkg = mu_bkg * a_bkg[i];
+        const double dlnL_bb_bkg = -0.5 * pow((a_bkg[i] - A_bkg[i])/a_bkg[i]/eta_bkg[i], 2);
+        const double dlnL_bb_sig = n_sig_orig * a_sig[i] * log(n_sig_orig * A_sig[i]) - n_sig_orig * A_sig[i]; 
+
+        const double nu_sig = mu_sig * A_sig[i];
+        const double nu_bkg = mu_bkg * A_bkg[i];
         const double nu_sum = nu_sig + nu_bkg;
         const double dlnL = -nu_sum + a_data[i] * log(nu_sum);
-        lnL += dlnL;
 
-        //if (extra_prints)
-        //  printf("i: %2i  nu_bkg: %6.3f  nu_sig: %6.3f  nu: %6.3f  n: %6.1f    dlnL: %10.6f   lnL: %10.6f\n", i, nu_bkg, nu_sig, nu_sum, a_data[i], dlnL, lnL);
+        lnL += dlnL + dlnL_bb_bkg + dlnL_bb_sig;
+
+        if (extra_prints)
+          printf("i: %2i  nu_bkg: %6.3f  nu_sig: %6.3f  nu: %6.3f  n: %6.1f    dlnL: %10.6f + %10.6f + %10.6f  lnL: %10.6f\n", i, nu_bkg, nu_sig, nu_sum, a_data[i], dlnL, dlnL_bb_bkg, dlnL_bb_sig, lnL);
       }
 
       return 2*lnL;
@@ -557,6 +614,7 @@ namespace mfv {
 
     dtoy->mkdir("finalized_templates")->cd();
 
+    fit::n_sig_orig = sig_template->Integral(1,100000);
     fit::set_sig(Template::finalize_template(sig_template));
 
     bkg_templates = bkg_templater->get_templates();
