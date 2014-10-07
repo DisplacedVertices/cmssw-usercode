@@ -76,14 +76,26 @@ namespace mfv {
       if (mu_sig < 1e-12)
         mu_sig = 1e-12;
 
+      //if (extra_prints) {
+      //  printf("\n----\nmu_sig: %f  mu_bkg: %f\npar0: %f  par1: %f\n", mu_sig, mu_bkg, par0, par1);
+      //  printf("   %10s %10s\n", "a_bkg", "a_sig");
+      //  for (int i = 1; i <= n_bins; ++i)
+      //    printf("%2i %10f %10f\n", i, a_bkg[i], a_sig[i]);
+      //}
+
       double lnL = 0;
+
       for (int i = 1; i <= n_bins; ++i) {
-        const double nu_sum = mu_sig * a_sig[i] + mu_bkg * a_bkg[i];
-        lnL += -nu_sum + a_data[i] * log(nu_sum);
+        const double nu_sig = mu_sig * a_sig[i];
+        const double nu_bkg = mu_bkg * a_bkg[i];
+        const double nu_sum = nu_sig + nu_bkg;
+        const double dlnL = -nu_sum + a_data[i] * log(nu_sum);
+        lnL += dlnL;
+
         //if (extra_prints)
-        //  printf("i: %i   mu_sig, mu_bkg (%f, %f)   nu_bkg: %f  nu_sig: %f  nu: %f  n: %f    dlnL: %f   lnL: %f\n",
-        //         i, mu_sig, mu_bkg, mu_bkg * a_bkg[i], mu_sig * a_sig[i], mu_bkg * a_bkg[i] + mu_sig * a_sig[i], a_data[i], -nu_sum + a_data[i] * (nu_sum > 1e-12 ? log(nu_sum) : -27.6310211159285473), lnL);
+        //  printf("i: %2i  nu_bkg: %6.3f  nu_sig: %6.3f  nu: %6.3f  n: %6.1f    dlnL: %10.6f   lnL: %10.6f\n", i, nu_bkg, nu_sig, nu_sum, a_data[i], dlnL, lnL);
       }
+
       return 2*lnL;
     }
 
