@@ -86,9 +86,8 @@ namespace mfv {
       //static const double eta_bkg[7] = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 1.5 };
       static const double eta_bkg[7] = { -1, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9 };
 
-      const double tol = 1e-7;
-      const double eps = 1e-14;
-      const int maxit = 100;
+      const double eps = 1e-7;
+      const int maxit = 1000;
 
       for (int i = 1; i <= n_bins; ++i) {
         double t = 1;
@@ -98,13 +97,11 @@ namespace mfv {
           double t_hi = 1;
           bool found = false;
 
+          if (extra_prints)
+            printf("find t: bin %i  d: %5.1f  a_bkg: %10.6f  a_sig: %10.6f\n", i, a_data[i], a_bkg[i], a_sig[i]);
+
           for (int it = 0; it < maxit; ++it) {
             t = 0.5*(t_lo + t_hi);
-
-            if (t_hi - t_lo < tol) {
-              found = true;
-              break;
-            }
 
             const double y = a_data[i] / (1 - t) - mu_bkg * a_bkg[i] / (1 + mu_bkg * t) - mu_sig * a_sig[i] / (1 + mu_sig * t);
 
@@ -114,9 +111,9 @@ namespace mfv {
               t_lo = t;
 
             if (extra_prints)
-              printf("bin %i newt it#%i: d: %.1f  a_bkg: %f  a_sig: %f  t: %f  y: %f  new t_lo, t_hi: %f %f\n", i, it, a_data[i], a_bkg[i], a_sig[i], t, y, t_lo, t_hi);
+              printf("  #%3i:  t: %11.6e  y: %11.6f  new t: [%11.6e %11.6e]\n", it, t, y, t_lo, t_hi);
 
-            if (fabs(y) < eps) {
+            if (fabs(y) < eps || t_hi - t_lo < eps) {
               found = true;
               break;
             }
@@ -125,15 +122,17 @@ namespace mfv {
           if (!found)
             jmt::vthrow("zero finding failed");
         }
+        else if (extra_prints)
+          printf("find t: bin %i  d: 0 -> t = 1\n", i);
 
         A_sig[i] = a_sig[i] / (t * mu_sig / n_sig_orig + 1);
         A_bkg[i] = a_bkg[i] - t * mu_bkg * a_bkg[i] * a_bkg[i] * eta_bkg[i] * eta_bkg[i];
       }
 
       if (extra_prints) {
-        printf("   %10s %10s %10s %10s\n", "a_bkg", "a_sig", "A_bkg", "A_sig");
+        printf("   %10s %10s %10s %10s %10s %10s\n", "a_bkg", "A_bkg", "dlt_bkg", "a_sig", "A_sig", "dlt_sig");
         for (int i = 1; i <= n_bins; ++i)
-          printf("%2i %10f %10f %10f %10f\n", i, a_bkg[i], a_sig[i], A_bkg[i], A_sig[i]);
+          printf("%2i %10f %10f %10f %10f %10f %10f\n", i, a_bkg[i], A_bkg[i], A_bkg[i] - a_bkg[i], a_sig[i], A_sig[i], A_sig[i] - a_sig[i]);
       }
 
       double lnL = 0;
@@ -150,7 +149,7 @@ namespace mfv {
         lnL += dlnL + dlnL_bb_bkg + dlnL_bb_sig;
 
         if (extra_prints)
-          printf("i: %2i  nu_bkg: %6.3f  nu_sig: %6.3f  nu: %6.3f  n: %6.1f    dlnL: %10.6f + %10.6f + %10.6f  lnL: %10.6f\n", i, nu_bkg, nu_sig, nu_sum, a_data[i], dlnL, dlnL_bb_bkg, dlnL_bb_sig, lnL);
+          printf("i: %2i  nu_bkg: %7.3f  nu_sig: %7.3f  nu: %7.3f  n: %6.1f    dlnL: %10.6f + %10.6f + %10.6f  lnL: %10.6f\n", i, nu_bkg, nu_sig, nu_sum, a_data[i], dlnL, dlnL_bb_bkg, dlnL_bb_sig, lnL);
       }
 
       return 2*lnL;
