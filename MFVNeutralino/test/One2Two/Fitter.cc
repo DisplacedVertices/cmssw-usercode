@@ -72,6 +72,14 @@ namespace mfv {
         jmt::vthrow("fit globals not set up properly: n_bins: %i  h_data: %p  h_sig: %p  h_data_real: %p  interp: %p", n_bins, h_data, h_sig, h_data_real, interp);
     }
 
+    double lnL_offset = 0;
+
+    void calc_lnL_offset() {
+      lnL_offset = 0;
+      for (int i = 1; i <= n_bins; ++i)
+        lnL_offset -= n_sig_orig * a_sig[i] * log(n_sig_orig * a_sig[i]) - n_sig_orig * a_sig[i]; 
+    }
+
     double twolnL(double mu_sig, double mu_bkg, double par0, double par1) {
       if (TMath::IsNaN(mu_sig) || TMath::IsNaN(mu_bkg) || TMath::IsNaN(par0) || TMath::IsNaN(par1))
         jmt::vthrow("NaN in twolnL(%f, %f, %f, %f)", mu_sig, mu_bkg, par0, par1);
@@ -153,7 +161,7 @@ namespace mfv {
         printf("   %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", a_bkg_sum, A_bkg_sum, A_bkg_sum - a_bkg_sum, a_sig_sum, A_sig_sum, A_sig_sum - a_sig_sum);
       }
 
-      double lnL = 0;
+      double lnL = lnL_offset;
 
       for (int i = 1; i <= n_bins; ++i) {
         A_bkg[i] /= A_bkg_sum;
@@ -668,6 +676,7 @@ namespace mfv {
 
     fit::n_sig_orig = sig_template->Integral(1,100000);
     fit::set_sig(Template::finalize_template(sig_template));
+    fit::calc_lnL_offset();
 
     fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15. };
     //fit::eta_bkg = { -1, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9 };
