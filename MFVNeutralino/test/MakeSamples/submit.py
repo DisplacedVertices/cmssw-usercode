@@ -240,7 +240,7 @@ if run_ttbar:
     #    submit('ttbar_' + run)
 
     for i in xrange(5):
-        submit('ttbar_%02iali_bowing' % i)
+        submit('ttbar_%02itune_11' % i)
 else:
     tau0s = [0.1, 0.3, 0.6, 1.0, 3.0, 6.0, 10, 20., 30.]
     masses = range(200, 1501, 100)
