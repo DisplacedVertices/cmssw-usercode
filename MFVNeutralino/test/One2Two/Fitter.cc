@@ -161,7 +161,9 @@ namespace mfv {
         printf("   %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", a_bkg_sum, A_bkg_sum, A_bkg_sum - a_bkg_sum, a_sig_sum, A_sig_sum, A_sig_sum - a_sig_sum);
       }
 
-      double lnL = lnL_offset;
+      double lnL_bb_bkg = 0;
+      double lnL_bb_sig = 0;
+      double lnL_fit = 0;
 
       for (int i = 1; i <= n_bins; ++i) {
         A_bkg[i] /= A_bkg_sum;
@@ -173,13 +175,19 @@ namespace mfv {
         const double nu_sig = mu_sig * A_sig[i];
         const double nu_bkg = mu_bkg * A_bkg[i];
         const double nu_sum = nu_sig + nu_bkg;
-        const double dlnL = -nu_sum + a_data[i] * log(nu_sum);
+        const double dlnL_fit = -nu_sum + a_data[i] * log(nu_sum);
 
-        lnL += dlnL + dlnL_bb_bkg + dlnL_bb_sig;
+        lnL_fit += dlnL_fit;
+        lnL_bb_bkg += dlnL_bb_bkg;
+        lnL_bb_sig += dlnL_bb_sig;
 
         if (extra_prints)
-          printf("i: %2i  nu_bkg: %7.3f  nu_sig: %7.3f  nu: %7.3f  n: %6.1f    dlnL: %10.6f + %10.6f + %10.6f  lnL: %10.6f\n", i, nu_bkg, nu_sig, nu_sum, a_data[i], dlnL, dlnL_bb_bkg, dlnL_bb_sig, lnL);
+          printf("i: %2i  nu_bkg: %7.3f  nu_sig: %7.3f  nu: %7.3f  n: %6.1f    dlnL: %10.6f + %10.6f + %10.6f  lnL: %10.6f + %10.6f + %10.6f\n", i, nu_bkg, nu_sig, nu_sum, a_data[i], dlnL_fit, dlnL_bb_bkg, dlnL_bb_sig, lnL_fit, lnL_bb_bkg, lnL_bb_sig);
       }
+
+      double lnL = lnL_fit; 
+      lnL += lnL_bb_bkg;
+      lnL += lnL_offset + lnL_bb_sig;
 
       return 2*lnL;
     }
