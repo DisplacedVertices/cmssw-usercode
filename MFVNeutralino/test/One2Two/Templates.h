@@ -32,7 +32,7 @@ namespace mfv {
     static const double max_val;
     static const double bin_width;
 
-    static std::vector<double> binning();
+    static std::vector<double> binning(const bool shorten_last=false);
     static void deoverflow(TH1D* hh);
     static TH1D* hist_with_binning(const char* name, const char* title);
     static TH1D* finalize_binning(TH1D* h);

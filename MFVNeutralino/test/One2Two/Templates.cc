@@ -12,19 +12,21 @@ namespace mfv {
   const double Template::bin_width = (Template::max_val - Template::min_val) / Template::nbins;
   const int Template::max_npars = 3;
 
-  std::vector<double> Template::binning() {
+  std::vector<double> Template::binning(const bool shorten_last) {
     std::vector<double> bins;
     for (int i = 0; i < 5; ++i)
       bins.push_back(i * 0.02);
     bins.push_back(0.1);
     if (fine_binning) {
+      if (shorten_last)
+        jmt::vthrow("cannot shorten_last when doing fine_binning");
       bins.push_back(0.2);
       bins.push_back(0.4);
       bins.push_back(0.8);
       bins.push_back(1.6);
       bins.push_back(3.2);
     }
-    bins.push_back(5);
+    bins.push_back(shorten_last ? 0.15 : 5);
     return bins;
   }
 
