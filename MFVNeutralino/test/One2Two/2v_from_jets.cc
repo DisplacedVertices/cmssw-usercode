@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <math.h>
+#include "TCanvas.h"
 #include "TFile.h"
 #include "TH2F.h"
 #include "TMath.h"
@@ -10,8 +11,8 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-double    mu_clear = 0.028;
-double sigma_clear = 0.005;
+double    mu_clear = 0.0300;
+double sigma_clear = 0.0070;
 
 const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20";
 
@@ -112,7 +113,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_phiv = new TH1F("h_c1v_phiv", "constructed from only-one-vertex events;vertex #phi;vertices", 50, -3.15, 3.15);
   TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 6, 0, 0.12);
-  TH1F* h_c1v_absphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi(vertex #0, vertex #1)|;events", 5, 0, 3.15);
+  TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi(vertex #0, vertex #1)|;events", 5, 0, 3.15);
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
@@ -149,7 +150,7 @@ int main(int argc, const char* argv[]) {
 
         double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
         h_c1v_dvv->Fill(dvvc, w * p);
-        h_c1v_absphivv->Fill(fabs(dphi), w * p);
+        h_c1v_absdphivv->Fill(fabs(dphi), w * p);
       }
     }
   }
@@ -170,7 +171,29 @@ int main(int argc, const char* argv[]) {
   h_c1v_phiv->Write();
   h_c1v_dphijv->Write();
   h_c1v_dvv->Write();
-  h_c1v_absphivv->Write();
+  h_c1v_absdphivv->Write();
+
+  TCanvas* c_dvv = new TCanvas("c_dvv", "c_dvv", 700, 700);
+  h_2v_dvv->SetLineColor(kBlue);
+  h_2v_dvv->SetLineWidth(3);
+  h_2v_dvv->Scale(251./h_2v_dvv->Integral());
+  h_2v_dvv->Draw();
+  h_c1v_dvv->SetLineColor(kRed);
+  h_c1v_dvv->SetLineWidth(3);
+  h_c1v_dvv->Scale(251./h_c1v_dvv->Integral());
+  h_c1v_dvv->Draw("sames");
+  c_dvv->Write();
+
+  TCanvas* c_absdphivv = new TCanvas("c_absdphivv", "c_absdphivv", 700, 700);
+  h_2v_absdphivv->SetLineColor(kBlue);
+  h_2v_absdphivv->SetLineWidth(3);
+  h_2v_absdphivv->Scale(251./h_2v_absdphivv->Integral());
+  h_2v_absdphivv->Draw();
+  h_c1v_absdphivv->SetLineColor(kRed);
+  h_c1v_absdphivv->SetLineWidth(3);
+  h_c1v_absdphivv->Scale(251./h_c1v_absdphivv->Integral());
+  h_c1v_absdphivv->Draw("sames");
+  c_absdphivv->Write();
 
   fh->Close();
 }
