@@ -25,6 +25,7 @@ namespace mfv {
 
     int n_bins = -1;
 
+    std::vector<double> eta_bkg;
     std::vector<double> a_bkg;
     TemplateInterpolator* interp;
 
@@ -88,28 +89,25 @@ namespace mfv {
 
       std::vector<double> A_sig(n_bins+2, 0.);
       std::vector<double> A_bkg(n_bins+2, 0.);
+      double A_sig_sum = 0, A_bkg_sum = 0;
 
-      //static const double eta_bkg[7] = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 1.5 };
-      static const double eta_bkg[7] = { -1, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9 };
-
-      const double eps = 1e-7;
-      const int maxit = 1000;
-
+      const double eps = 1e-12;
+      const int maxit = 10000;
       for (int i = 1; i <= n_bins; ++i) {
         double t = 1;
 
         if (a_data[i] > eps) {
-          double t_lo = -1./std::max(mu_sig, mu_bkg) + 1e-12;
-          double t_hi = 1;
+          double t_lo = -n_sig_orig/mu_sig + eps;
+          double t_hi = 1 - eps;
           bool found = false;
 
           if (extra_prints)
-            printf("find t: bin %i  d: %5.1f  a_bkg: %10.6f  a_sig: %10.6f\n", i, a_data[i], a_bkg[i], a_sig[i]);
+            printf("find t: bin %i  d: %5.1f  a_bkg: %10.3e  a_sig: %10.3e\n", i, a_data[i], a_bkg[i], a_sig[i]);
 
           for (int it = 0; it < maxit; ++it) {
             t = 0.5*(t_lo + t_hi);
 
-            const double y = a_data[i] / (1 - t) - mu_bkg * a_bkg[i] / (1 + mu_bkg * t) - mu_sig * a_sig[i] / (1 + mu_sig * t);
+            const double y = a_data[i] / (1 - t) - mu_bkg * (a_bkg[i] - t * mu_bkg * eta_bkg[i] * eta_bkg[i] * a_bkg[i] * a_bkg[i]) - mu_sig * a_sig[i] / (1 + t * mu_sig / n_sig_orig);
 
             if (y > 0)
               t_hi = t;
@@ -117,7 +115,7 @@ namespace mfv {
               t_lo = t;
 
             if (extra_prints)
-              printf("  #%3i:  t: %11.6e  y: %11.6f  new t: [%11.6e %11.6e]\n", it, t, y, t_lo, t_hi);
+              printf("  #%3i:  t: %13.6e  y: %13.6e  new t: [%13.6e %13.6e]\n", it, t, y, t_lo, t_hi);
 
             if (fabs(y) < eps || t_hi - t_lo < eps) {
               found = true;
@@ -133,17 +131,34 @@ namespace mfv {
 
         A_sig[i] = a_sig[i] / (t * mu_sig / n_sig_orig + 1);
         A_bkg[i] = a_bkg[i] - t * mu_bkg * a_bkg[i] * a_bkg[i] * eta_bkg[i] * eta_bkg[i];
+        if (A_bkg[i] < 0)
+          A_bkg[i] = 0;
+
+        if (A_sig[i] < 0 || A_bkg[i] < 0)
+          jmt::vthrow("negative As");
+
+        A_sig_sum += A_sig[i];
+        A_bkg_sum += A_bkg[i];
       }
 
       if (extra_prints) {
+        double a_sig_sum = 0, a_bkg_sum = 0;
         printf("   %10s %10s %10s %10s %10s %10s\n", "a_bkg", "A_bkg", "dlt_bkg", "a_sig", "A_sig", "dlt_sig");
-        for (int i = 1; i <= n_bins; ++i)
-          printf("%2i %10f %10f %10f %10f %10f %10f\n", i, a_bkg[i], A_bkg[i], A_bkg[i] - a_bkg[i], a_sig[i], A_sig[i], A_sig[i] - a_sig[i]);
+        for (int i = 1; i <= n_bins; ++i) {
+          a_bkg_sum += a_bkg[i];
+          a_sig_sum += a_sig[i];
+          printf("%2i %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", i, a_bkg[i], A_bkg[i], A_bkg[i] - a_bkg[i], a_sig[i], A_sig[i], A_sig[i] - a_sig[i]);
+        }
+        printf("sums:\n");
+        printf("   %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", a_bkg_sum, A_bkg_sum, A_bkg_sum - a_bkg_sum, a_sig_sum, A_sig_sum, A_sig_sum - a_sig_sum);
       }
 
       double lnL = 0;
 
       for (int i = 1; i <= n_bins; ++i) {
+        A_bkg[i] /= A_bkg_sum;
+        A_sig[i] /= A_sig_sum;
+
         const double dlnL_bb_bkg = -0.5 * pow((a_bkg[i] - A_bkg[i])/a_bkg[i]/eta_bkg[i], 2);
         const double dlnL_bb_sig = n_sig_orig * a_sig[i] * log(n_sig_orig * A_sig[i]) - n_sig_orig * A_sig[i]; 
 
@@ -653,6 +668,9 @@ namespace mfv {
 
     fit::n_sig_orig = sig_template->Integral(1,100000);
     fit::set_sig(Template::finalize_template(sig_template));
+
+    fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15. };
+    //fit::eta_bkg = { -1, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9 };
 
     bkg_templates = bkg_templater->get_templates();
     fit::interp = new TemplateInterpolator(bkg_templates, fit::n_bins, bkg_templater->par_info(), fit::a_bkg);
