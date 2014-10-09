@@ -72,7 +72,13 @@ namespace mfv {
     }
 
     double twolnL(double mu_sig, double mu_bkg, double par0, double par1) {
+      if (TMath::IsNaN(mu_sig) || TMath::IsNaN(mu_bkg) || TMath::IsNaN(par0) || TMath::IsNaN(par1))
+        jmt::vthrow("NaN in twolnL(%f, %f, %f, %f)", mu_sig, mu_bkg, par0, par1);
+
       interp->interpolate(par0, par1);
+      for (int i = 1; i < n_bins; ++i)
+        if (TMath::IsNaN(a_bkg[i]))
+          jmt::vthrow("NaN in interpolation (%f, %f) in bin %i", par0, par1, i);
 
       if (mu_sig < 1e-12)
         mu_sig = 1e-12;
@@ -432,6 +438,21 @@ namespace mfv {
         TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit_%s",  sb_or_b, div_or_no));
         TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s", sb_or_b, div_or_no));
 
+        for (TH1D** ph : {&h_bkg_fit, &h_sig_fit, &h_data_fit}) {
+          TH1D* h = *ph;
+          std::vector<double> bins = Template::binning(true);
+          TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
+          // Splitting the last bin puts its contents in the overflow -- move back into last bin.
+          int n = h_short->GetNbinsX();
+          double v = h_short->GetBinContent(n+1);
+          double e = h_short->GetBinError(n+1);
+          h_short->SetBinContent(n+1, 0);
+          h_short->SetBinError  (n+1, 0);
+          h_short->SetBinContent(n, v);
+          h_short->SetBinError  (n, e);
+          *ph = h_short;
+        }
+
         for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
           h->SetLineWidth(2);
           if (div)
@@ -601,6 +622,20 @@ namespace mfv {
     fit::h_data_toy->Add(fit::h_data_toy_sig);
     fit::h_data_toy->Add(fit::h_data_toy_bkg);
     fit::set_data_no_check(fit::h_data_toy);
+
+    if (print_level > 1) {
+      printf("make_toy_data: i_signif: %i i_limit: %i n_sig: %i n_bkg: %i\n", i_toy_signif, i_toy_limit, n_sig, n_bkg);
+      printf("toy_sig: ");
+      for (int i = 0; i <= fit::n_bins+1; ++i)
+        printf("%10.6f ", fit::h_data_toy_sig->GetBinContent(i));
+      printf("\ntoy_bkg: ");
+      for (int i = 0; i <= fit::n_bins+1; ++i)
+        printf("%10.6f ", fit::h_data_toy_bkg->GetBinContent(i));
+      printf("\ntoy: ");
+      for (int i = 0; i <= fit::n_bins+1; ++i)
+        printf("%10.6f ", fit::h_data_toy->GetBinContent(i));
+      printf("\n");
+    }
   }
 
   void Fitter::fit(int toy_, Templater* bkg_templater, TH1D* sig_template, const VertexPairs& v2v, const std::vector<double>& true_pars_) {
@@ -612,6 +647,9 @@ namespace mfv {
     ////
 
     dtoy->mkdir("finalized_templates")->cd();
+
+    if (!fit::extra_prints && print_level > 1)
+      fit::extra_prints = 1;
 
     fit::n_sig_orig = sig_template->Integral(1,100000);
     fit::set_sig(Template::finalize_template(sig_template));
