@@ -145,8 +145,8 @@ namespace mfv {
 
         for (Template* t : templates) {
           ClearedJetsTemplate* cjt = dynamic_cast<ClearedJetsTemplate*>(t);
-          //const double w = std::max(1e-12, 0.5*TMath::Erf((d2d - cjt->clearing_mu)/cjt->clearing_sigma) + 0.5);
-          const double w = 0.5*TMath::Erf((d2d - cjt->clearing_mu)/cjt->clearing_sigma) + 0.5;
+          const double w = std::max(1e-12, 0.5*TMath::Erf((d2d - cjt->clearing_mu)/cjt->clearing_sigma) + 0.5);
+          //const double w = 0.5*TMath::Erf((d2d - cjt->clearing_mu)/cjt->clearing_sigma) + 0.5;
           t->h->Fill(d2d, w);
         }
       }
@@ -155,6 +155,12 @@ namespace mfv {
       if (++evc == N1v)
         break;
     }
+
+    for (Template* t : templates)
+      if (t->h->Integral() < 1e-6) {
+        t->h->SetBinContent(t->h->GetNbinsX(), 1);
+        t->h->SetBinError(t->h->GetNbinsX(), 1);
+      }
 
     if (finalize_templates)
       for (Template* t : templates)
