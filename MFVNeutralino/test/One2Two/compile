@@ -5,7 +5,7 @@ g++ \
  -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual \
  `root-config --cflags --libs --glibs` \
  -lMinuit \
- -I /uscms/home/tucker/private/mfv_5313/src \
- /uscms/home/tucker/private/mfv_5313/src/JMTucker/MFVNeutralino/src/MiniNtuple.cc \
+ -I /uscms/home/$USER/private/mfv_5313/src \
+ /uscms/home/$USER/private/mfv_5313/src/JMTucker/MFVNeutralino/src/MiniNtuple.cc \
  Utility.cc ProgressBar.cc VAException.cc Phi.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc Templater.cc PhiShiftTemplater.cc ClearedJetsTemplater.cc SimpleClearingTemplater.cc Fitter.cc mfvo2t.cc \
  -o mfvo2t.exe
