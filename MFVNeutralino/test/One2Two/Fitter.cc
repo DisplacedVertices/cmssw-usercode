@@ -262,6 +262,7 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
+      bkg_gaussians(env.get_bool("bkg_gaussians", false)),
       allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
       run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
@@ -727,8 +728,10 @@ namespace mfv {
     fit::set_sig(Template::finalize_template(sig_template));
     fit::calc_lnL_offset();
 
-    //fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15. };
-    fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4 };
+    if (bkg_gaussians)
+      fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15. };
+    else
+      fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4 };
 
     bkg_templates = bkg_templater->get_templates();
     fit::interp = new TemplateInterpolator(bkg_templates, fit::n_bins, bkg_templater->par_info(), fit::a_bkg);
