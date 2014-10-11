@@ -59,7 +59,7 @@ namespace mfv {
       find_g_phi(env.get_bool("find_g_phi", true)),
       find_g_dz(env.get_bool("find_g_dz", true)),
       find_f_phi(env.get_bool("find_f_phi", true)),
-      find_f_dz(env.get_bool("find_f_dz", true)),
+      find_f_dz(env.get_bool("find_f_dz", false)),
       find_f_phi_bkgonly(env.get_bool("find_f_phi_bkgonly", true)),
       find_f_dz_bkgonly(env.get_bool("find_f_dz_bkgonly", false))
   {
