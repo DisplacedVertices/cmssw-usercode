@@ -43,8 +43,6 @@ export mfvo2t_no_progressbar=1
 export mfvo2t_seed=$JOB_NUM
 export mfvo2t_ntoys=1
 export mfvo2t_toythrower_allow_cap=1
-export mfvo2t_phishift_find_f_dz=0
-export mfvo2t_fitter_sig_eff_uncert=0.2
 %(env)s
 
 %(extra_setup)s
