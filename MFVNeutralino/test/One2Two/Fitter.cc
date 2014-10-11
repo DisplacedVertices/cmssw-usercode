@@ -39,6 +39,7 @@ namespace mfv {
     TH1D* h_data_toy = 0;
     TH1D* h_data = 0;
     const double* a_data = 0;
+    double a_data_integ = 0;
 
     void set_or_check_n_bins(TH1D* h) {
       if (n_bins < 0)
@@ -56,6 +57,7 @@ namespace mfv {
     void set_data_no_check(TH1D* h) {
       h_data = h;
       a_data = h->GetArray();
+      a_data_integ = h->Integral();
     }
 
     void set_data_real() {
@@ -81,25 +83,44 @@ namespace mfv {
     }
 
     double twolnL(double mu_sig, double mu_bkg, double par0, double par1) {
-      if (TMath::IsNaN(mu_sig) || TMath::IsNaN(mu_bkg) || TMath::IsNaN(par0) || TMath::IsNaN(par1))
-        jmt::vthrow("NaN in twolnL(%f, %f, %f, %f)", mu_sig, mu_bkg, par0, par1);
+      //return -pow(mu_sig - 0, 2) -pow(mu_bkg - 234, 2) - pow(par0 - 0.03, 2) - pow(par1 - 0.01, 2);
 
-      interp->interpolate(par0, par1);
-      for (int i = 1; i < n_bins; ++i)
+      //static int ncalls = 0;
+      //printf("call %i\n", ++ncalls);
+      //if (ncalls == 5075000) {
+      //  extra_prints=1;
+      //  TemplateInterpolator::extra_prints=1;
+      //}
+
+      //if (TMath::IsNaN(mu_sig) || TMath::IsNaN(mu_bkg) || TMath::IsNaN(par0) || TMath::IsNaN(par1))
+      //  jmt::vthrow("NaN in twolnL(%f, %f, %f, %f)", mu_sig, mu_bkg, par0, par1);
+
+      if (mu_sig < 1e-12 || TMath::IsNaN(mu_sig))
+        mu_sig = 1e-12;
+      if (mu_bkg < 1e-12 || TMath::IsNaN(mu_bkg))
+        mu_bkg = 1e-12;
+      if (par0 < 0 || TMath::IsNaN(par0))
+        par0 = 0;
+      if (par1 < 0.0005 || TMath::IsNaN(par1))
+        par1 = 0.0005;
+
+      interp->interpolate(std::vector<double>({par0, par1}), &a_bkg);
+      for (int i = 1; i < n_bins; ++i) {
         if (TMath::IsNaN(a_bkg[i]))
           jmt::vthrow("NaN in interpolation (%f, %f) in bin %i", par0, par1, i);
-
-      if (mu_sig < 1e-12)
-        mu_sig = 1e-12;
+        else if (a_bkg[i] < 0)
+          jmt::vthrow("negative in interpolation (%f, %f) in bin %i", par0, par1, i);
+      }
 
       if (extra_prints)
-        printf("\n----\nmu_sig: %f  mu_bkg: %f\npar0: %f  par1: %f\n", mu_sig, mu_bkg, par0, par1);
+        printf("\n--- twolnL call ---\nmu_sig: %f  mu_bkg: %f\npar0: %f  par1: %f\n", mu_sig, mu_bkg, par0, par1);
 
       std::vector<double> A_sig(n_bins+2, 0.);
       std::vector<double> A_bkg(n_bins+2, 0.);
       double A_sig_sum = 0, A_bkg_sum = 0;
 
-      const double eps = 1e-12;
+      const double eps = 1e-9;
+      const double sqrteps = sqrt(eps);
       const int maxit = 10000;
       for (int i = 1; i <= n_bins; ++i) {
         double t = 1;
@@ -107,15 +128,17 @@ namespace mfv {
         if (a_data[i] > eps) {
           double t_lo = -n_sig_orig/mu_sig + eps;
           double t_hi = 1 - eps;
+          double y = 1e99;
           bool found = false;
 
           if (extra_prints)
             printf("find t: bin %i  d: %5.1f  a_bkg: %10.3e  a_sig: %10.3e\n", i, a_data[i], a_bkg[i], a_sig[i]);
 
-          for (int it = 0; it < maxit; ++it) {
+          int it = 0;
+          for (; it < maxit; ++it) {
             t = 0.5*(t_lo + t_hi);
 
-            const double y = a_data[i] / (1 - t) - mu_bkg * (a_bkg[i] - t * mu_bkg * eta_bkg[i] * eta_bkg[i] * a_bkg[i] * a_bkg[i]) - mu_sig * a_sig[i] / (1 + t * mu_sig / n_sig_orig);
+            y = a_data[i] / (1 - t) - mu_bkg * (a_bkg[i] - t * mu_bkg * eta_bkg[i] * eta_bkg[i] * a_bkg[i] * a_bkg[i]) - mu_sig * a_sig[i] / (1 + t * mu_sig / n_sig_orig);
 
             if (y > 0)
               t_hi = t;
@@ -125,14 +148,14 @@ namespace mfv {
             if (extra_prints)
               printf("  #%3i:  t: %13.6e  y: %13.6e  new t: [%13.6e %13.6e]\n", it, t, y, t_lo, t_hi);
 
-            if (fabs(y) < eps || t_hi - t_lo < eps) {
+            if (fabs(y) < eps || (t_hi - t_lo < eps && fabs(y) < sqrteps)) {
               found = true;
               break;
             }
           }
 
           if (!found)
-            jmt::vthrow("zero finding failed");
+            jmt::vthrow("zero finding with mu_b %f mu_s %f par0 %f par1 %f failed at it %i with bin %i  d: %5.1f  a_bkg: %10.3e  a_sig: %10.3e t %f [%f %f] y %f\n", mu_bkg, mu_sig, par0, par1, it, i, a_data[i], a_bkg[i], a_sig[i], t, t_lo, t_hi, y);
         }
         else if (extra_prints)
           printf("find t: bin %i  d: 0 -> t = 1\n", i);
@@ -143,7 +166,7 @@ namespace mfv {
           A_bkg[i] = 0;
 
         if (A_sig[i] < 0 || A_bkg[i] < 0)
-          jmt::vthrow("negative As");
+          jmt::vthrow("negative A_sig");
 
         A_sig_sum += A_sig[i];
         A_bkg_sum += A_bkg[i];
@@ -169,7 +192,7 @@ namespace mfv {
         A_bkg[i] /= A_bkg_sum;
         A_sig[i] /= A_sig_sum;
 
-        const double dlnL_bb_bkg = -0.5 * pow((a_bkg[i] - A_bkg[i])/a_bkg[i]/eta_bkg[i], 2);
+        const double dlnL_bb_bkg = a_bkg[i] == 0. ? 0. : -0.5 * pow((a_bkg[i] - A_bkg[i])/a_bkg[i]/eta_bkg[i], 2);
         const double dlnL_bb_sig = n_sig_orig * a_sig[i] * log(n_sig_orig * A_sig[i]) - n_sig_orig * A_sig[i]; 
 
         const double nu_sig = mu_sig * A_sig[i];
@@ -189,6 +212,10 @@ namespace mfv {
       lnL += lnL_bb_bkg;
       lnL += lnL_offset + lnL_bb_sig;
 
+      //lnL += -0.5*pow((par0 - 0.03)/0.01, 2) - 0.5*pow((par1 - 0.01)/0.01, 2);
+
+      if (TMath::IsNaN(lnL))
+        jmt::vthrow("lnL is NaN");
       return 2*lnL;
     }
 
@@ -260,6 +287,8 @@ namespace mfv {
   {
     printf("Fitter%s config:\n", name.c_str());
     printf("print_level: %i\n", print_level);
+    printf("allow_negative_mu_sig: %i\n", allow_negative_mu_sig);
+    printf("run_minos: %i\n", run_minos);
     printf("draw_bkg_templates: %i\n", draw_bkg_templates);
     printf("fix_nuis1: %i\n", fix_nuis1);
     printf("start_nuis: %f, %f\n", start_nuis0, start_nuis1);
@@ -562,8 +591,8 @@ namespace mfv {
     m->SetPrintLevel(print_level);
     m->SetFCN(fit::minfcn);
     int ierr;
-    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.1, 0, (mu_sig_start > 0 ? mu_sig_start : (allow_negative_mu_sig ? 0 : 5000)), ierr);
-    m->mnparm(1, "mu_bkg", 50, 0.1, 0, 5000, ierr);
+    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.01, 0, (mu_sig_start > 0 ? mu_sig_start : (allow_negative_mu_sig ? 0 : 500)), ierr);
+    m->mnparm(1, "mu_bkg", fit::a_data_integ, 0.01, 0, 500, ierr);
 
     const size_t npars = bkg_templates->at(0)->npars();
     std::vector<double> mins(npars,  1e99);
@@ -579,8 +608,9 @@ namespace mfv {
 
     static const char* nuis_par_names[2] = { "nuis0", "nuis1" };
     for (size_t ipar = 0; ipar < npars; ++ipar) {
+      //printf("ipar %lu min %f max %f\n", ipar, mins[ipar],maxs[ipar]);
       const double start = ipar == 0 ? start_nuis0 : start_nuis1;
-      m->mnparm(2+ipar, nuis_par_names[ipar], start, start/100., mins[ipar], maxs[ipar], ierr);
+      m->mnparm(2+ipar, nuis_par_names[ipar], start, 0.0001, mins[ipar], maxs[ipar], ierr);
     }
 
     if (fix_mu_sig)
@@ -589,13 +619,24 @@ namespace mfv {
     if (fix_nuis1)
       m->FixParameter(3);
 
+    if (print_level > 0)
+      printf("call migrad\n");
     m->Migrad();
-    //    m->mnsimp();
-    //    m->Migrad();
-    //    m->mnimpr();
+
+    if (print_level > 0)
+      printf("call mnimpr\n");
+    m->mnimpr();
+
+    if (print_level > 0)
+      printf("call migrad again\n");
     m->Migrad();
-    if (run_minos)
+
+    if (run_minos) {
+      if (print_level > 0)
+        printf("call minos\n");
       m->mnmnos();
+    }
+
     double fmin, fedm, errdef;
     int npari, nparx, istat;
     m->mnstat(fmin, fedm, errdef, npari, nparx, istat);
@@ -686,11 +727,18 @@ namespace mfv {
     fit::set_sig(Template::finalize_template(sig_template));
     fit::calc_lnL_offset();
 
-    fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15. };
-    //fit::eta_bkg = { -1, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9, 1e-9 };
+    //fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15. };
+    fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4 };
 
     bkg_templates = bkg_templater->get_templates();
     fit::interp = new TemplateInterpolator(bkg_templates, fit::n_bins, bkg_templater->par_info(), fit::a_bkg);
+
+    //fit::a_bkg = {0.000000,0.020406,0.747983,0.218452,0.010790,0.002105,0.000263,0.000000};
+    //fit::interp->interpolate(0.03, 0.01);
+    //printf("a_bkg after one interp\n");
+    //for (double a : fit::a_bkg)
+    //  printf("%f ", a);
+    //printf("\n");
 
     std::map<int, int> template_index_deltas;
     bool any_nan = false;
