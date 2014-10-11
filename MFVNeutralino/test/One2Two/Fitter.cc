@@ -529,7 +529,7 @@ namespace mfv {
         h_sig_fit->Scale(ml.mu_sig);
         h_bkg_fit->Scale(ml.mu_bkg);
 
-        TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit_%s", sb_or_b, div_or_no));
+        TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit_%s_shortened", sb_or_b, div_or_no));
         h_sum_fit->SetLineColor(kMagenta);
         h_sum_fit->Add(h_bkg_fit);
         for (TH1D* h : {h_sum_fit, h_data_fit})
