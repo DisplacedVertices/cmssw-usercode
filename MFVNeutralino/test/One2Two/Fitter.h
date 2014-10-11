@@ -30,6 +30,7 @@ namespace mfv {
     const bool fix_nuis1;
     const double start_nuis0;
     const double start_nuis1;
+    const bool fluctuate_toys_shapes;
     const int n_toy_signif;
     const bool print_toys;
     const bool save_toys;
