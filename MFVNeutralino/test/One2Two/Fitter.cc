@@ -788,7 +788,7 @@ namespace mfv {
     if (!only_fit && do_limits) {
       const double limit_alpha = 0.05;
 
-      const double sig_limit_lo = std::max(0., t_obs_0.h1.mu_sig / sig_eff); // units of fb
+      const double sig_limit_lo = std::max(0., t_obs_0.h1.mu_sig / 2 / sig_eff); // units of fb
       const double sig_limit_hi = 1000;
       const int n_sigma_away = 5;
 
