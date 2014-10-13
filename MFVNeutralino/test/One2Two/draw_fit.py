@@ -11,7 +11,7 @@ fudge = 1. # 0.5 if 'fullhadded' not in batch_name else 1.
 #batch_root = batch_root[0]
 #batch_fns = glob.glob(os.path.join(batch_root, '*.root'))
 batch_fns = [x.strip() for x in open(batch_fn_lst).readlines() if x.strip()]
-batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
+#batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
 sig_tmpl_num = -int(batch_name.split('SigTmp')[1].split('_')[0])
 try:
     sig_nfo = batch_name.split('SigSamn')[1].split('_')[0]
@@ -41,6 +41,7 @@ for y in 'h1 h0'.split():
     for x in 'istat maxtwolnL mu_sig err_mu_sig mu_bkg err_mu_bkg nuis0 err_nuis0 nuis1 err_nuis1'.split():
         vars += ' t_obs_0__%s_%s' % (y,x)
 vars += ' pval_signif sig_limit sig_limit_err sig_limit_fit_n sig_limit_fit_a sig_limit_fit_b sig_limit_fit_a_err sig_limit_fit_b_err sig_limit_fit_prob'
+i_pval_signif = -9
 
 def xform(x):
     z = []
@@ -188,7 +189,7 @@ for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h
         h.SetStats(0)
     ps.save(x)
 
-d.sort(key=lambda x: x[-9])
+d.sort(key=lambda x: x[i_pval_signif])
 ns = [0,1] + [int(i*len(d)/3.) for i in xrange(1,3)] + [-2,-1]
 for n in ns:
     x = d[n]
@@ -200,10 +201,10 @@ for n in ns:
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
     for t in 'sb b'.split():
         leg = ROOT.TLegend(0.502, 0.620, 0.848, 0.861)
-        s = dr.Get('h_sig_%s_fit_nodiv' % t)
-        b = dr.Get('h_bkg_%s_fit_nodiv' % t)
-        sb = dr.Get('h_sum_%s_fit_nodiv' % t)
-        dt = dr.Get('h_data_%s_fit_nodiv' % t)
+        s = dr.Get('h_sig_%s_fit_nodiv_shortened' % t)
+        b = dr.Get('h_bkg_%s_fit_nodiv_shortened' % t)
+        sb = dr.Get('h_sum_%s_fit_nodiv_shortened' % t)
+        dt = dr.Get('h_data_%s_fit_nodiv_shortened' % t)
         for h in (s,b,sb,dt):
             h.SetStats(0)
             h.SetTitle(';d_{VV} (cm)')
@@ -224,7 +225,7 @@ for n in ns:
         leg.AddEntry(dt, '"data"', 'LE')
         leg.Draw()
 
-        nm = '%s_fit_seed%i_toy%i_pval%s' % (t, seed, toy, str(x[-9]).replace('.','p'))
+        nm = '%s_fit_seed%i_toy%i_pval%s' % (t, seed, toy, str(x[i_pval_signif]).replace('.','p'))
         ps.save(nm)
 
         h = dr.Get('h_likelihood_%s_scannuis' % t)
@@ -276,7 +277,7 @@ for n in ns:
 
     g = dr.Get('g_limit_bracket_fit')
     g.Draw('ALP')
-    ps.save('limit_bracket_fit_seed%i_toy%i_pval%s' % (seed, toy, str(x[-3]).replace('.','p')))
+    ps.save('limit_bracket_fit_seed%i_toy%i_pval%s' % (seed, toy, str(x[i_pval_signif]).replace('.','p')))
 
 def stats(l, prints=False):
     l.sort()
