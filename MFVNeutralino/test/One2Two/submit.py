@@ -108,21 +108,22 @@ jobtype=cmssw
 scheduler=%(scheduler)s
 '''
 
-compiled = 'nocompile' in sys.argv
+maked = 'nomake' in sys.argv
 setuped = False
 
 def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, samples):
-    global compiled
+    global maked
     global setuped
 
-    if not compiled:
-        if os.system('./compile -O2') != 0:
-            raise 'no compile'
-        raw_input('did the compile go OK?')
-        compiled = True
+    if not maked:
+        if os.system('make -j 16') != 0:
+            raise 'no make'
+        raw_input('did the make go OK?')
+        maked = True
 
     cornell = 'cornell' in sys.argv
-    scheduler = 'condor' if not cornell else 'remoteGlidein'
+    grid = 'condor' not in sys.argv
+    scheduler = 'condor' if not grid else 'remoteGlidein'
     storage_element = 'T3_US_FNALLPC' if not cornell else 'T3_US_Cornell'
 
     extra_name = ''
