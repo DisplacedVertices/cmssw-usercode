@@ -24,6 +24,7 @@ namespace mfv {
     jmt::ConfigFromEnv env;
     const int print_level;
     const bool bkg_gaussians;
+    const bool barlow_beeston;
     const bool bend_bkg;
     const bool allow_negative_mu_sig;
     const bool run_minos;
