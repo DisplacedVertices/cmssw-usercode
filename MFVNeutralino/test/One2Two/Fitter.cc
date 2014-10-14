@@ -210,6 +210,7 @@ namespace mfv {
       fluctuate_toys_shapes(env.get_bool("fluctuate_toys_shapes", true)),
       n_toy_signif(env.get_int("n_toy_signif", 100000)),
       print_toys(env.get_bool("print_toys", false)),
+      print_subtoys(env.get_bool("print_subtoys", false)),
       save_toys(env.get_bool("save_toys", false)),
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
@@ -236,7 +237,7 @@ namespace mfv {
     printf("start_nuis: %f, %f\n", start_nuis0, start_nuis1);
     printf("fluctuate_toys_shapes: %i (SIG NOT IMPLEMENTED)\n", fluctuate_toys_shapes);
     printf("n_toy_signif: %i\n", n_toy_signif);
-    printf("print_toys? %i\n", print_toys);
+    printf("print_toys? %i (sub? %i)\n", print_toys, print_subtoys);
     printf("save_toys? %i\n", save_toys);
     printf("do_signif? %i\n", do_signif);
     printf("do_limits? %i\n", do_limits);
@@ -795,7 +796,7 @@ namespace mfv {
     if (!only_fit && do_limits) {
       const double limit_alpha = 0.05;
 
-      const double sig_limit_lo = std::max(0., t_obs_0.h1.mu_sig / 2 / sig_eff); // units of fb
+      const double sig_limit_lo = std::max(0.01, t_obs_0.h1.mu_sig / 2 / sig_eff); // units of fb
       const double sig_limit_hi = 1000;
       const int n_sigma_away = 5;
 
@@ -830,7 +831,7 @@ namespace mfv {
         int n_toy_limit_t_ge_obs = 0;
 
         jmt::ProgressBar pb_limit_toys(50, n_toy_limit);
-        if (print_toys)
+        if (print_toys && !print_subtoys)
           pb_limit_toys.start();
 
         for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
@@ -849,9 +850,12 @@ namespace mfv {
             ++n_toy_limit_t_ge_obs;
 
           if (print_toys) {
-            //printf("limit toy %i nsig %i nbkg %i n'data' %i\n", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
-            //t.print("t_limit");
-            ++pb_limit_toys;
+            if (print_subtoys) {
+              printf("  limit toy %i nsig %i nbkg %i n'data' %i ", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
+              t.print("t_limit", -1, "    ");
+            }
+            else
+              ++pb_limit_toys;
           }
 
           if (save_toys) {

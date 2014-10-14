@@ -34,6 +34,7 @@ namespace mfv {
     const bool fluctuate_toys_shapes;
     const int n_toy_signif;
     const bool print_toys;
+    const bool print_subtoys;
     const bool save_toys;
     const bool do_signif;
     const bool do_limits;
