@@ -116,7 +116,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
     global setuped
 
     if not maked:
-        if os.system('make -j 16') != 0:
+        if os.system('make clean; make -j 16') != 0:
             raise 'no make'
         raw_input('did the make go OK?')
         maked = True
