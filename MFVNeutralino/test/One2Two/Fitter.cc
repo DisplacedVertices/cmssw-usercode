@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <limits>
 
 #include "TCanvas.h"
 #include "TFile.h"
@@ -84,16 +85,17 @@ namespace mfv {
     }
 
     double twolnL(double mu_sig, double mu_bkg, double par0, double par1) {
-      //if (TMath::IsNaN(mu_sig) || TMath::IsNaN(mu_bkg) || TMath::IsNaN(par0) || TMath::IsNaN(par1))
-      //  jmt::vthrow("NaN in twolnL(%f, %f, %f, %f)", mu_sig, mu_bkg, par0, par1);
+      if (TMath::IsNaN(mu_sig) || TMath::IsNaN(mu_bkg) || TMath::IsNaN(par0) || TMath::IsNaN(par1))
+        //jmt::vthrow("NaN in twolnL(%f, %f, %f, %f)", mu_sig, mu_bkg, par0, par1);
+        return std::numeric_limits<double>::quiet_NaN();
 
-      if (mu_sig < 1e-12 || TMath::IsNaN(mu_sig))
+      if (mu_sig < 1e-12)
         mu_sig = 1e-12;
-      if (mu_bkg < 1e-12 || TMath::IsNaN(mu_bkg))
+      if (mu_bkg < 1e-12)
         mu_bkg = 1e-12;
-      if (par0 < 0 || TMath::IsNaN(par0))
+      if (par0 < 0)
         par0 = 0;
-      if (par1 < 0.0005 || TMath::IsNaN(par1))
+      if (par1 < 0.0005)
         par1 = 0.0005;
 
       interp->interpolate(par0, par1);
@@ -114,7 +116,7 @@ namespace mfv {
 
       for (int i = 1; i <= n_bins; ++i) {
         A_sig_sum += (A_sig[i] = a_sig[i]);
-        A_bkg_sum += (A_bkg[i] = a_bkg[i]*(1 + bend_bkg ? eta_bkg[i] : 0));
+        A_bkg_sum += (A_bkg[i] = a_bkg[i]*(1 + (bend_bkg ? eta_bkg[i] : 0)));
       }
 
       if (extra_prints) {
@@ -532,8 +534,8 @@ namespace mfv {
     m->SetPrintLevel(print_level);
     m->SetFCN(fit::minfcn);
     int ierr;
-    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.01, 0, (mu_sig_start > 0 ? mu_sig_start : (allow_negative_mu_sig ? 0 : 500)), ierr);
-    m->mnparm(1, "mu_bkg", fit::a_data_integ, 0.01, 0, 500, ierr);
+    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.5, 0, (mu_sig_start > 0 ? mu_sig_start : (allow_negative_mu_sig ? 0 : 500)), ierr);
+    m->mnparm(1, "mu_bkg", fit::a_data_integ, 0.5, 0, 500, ierr);
 
     const size_t npars = bkg_templates->at(0)->npars();
     std::vector<double> mins(npars,  1e99);
@@ -551,7 +553,7 @@ namespace mfv {
     for (size_t ipar = 0; ipar < npars; ++ipar) {
       //printf("ipar %lu min %f max %f\n", ipar, mins[ipar],maxs[ipar]);
       const double start = ipar == 0 ? start_nuis0 : start_nuis1;
-      m->mnparm(2+ipar, nuis_par_names[ipar], start, 0.0001, mins[ipar], maxs[ipar], ierr);
+      m->mnparm(2+ipar, nuis_par_names[ipar], start, 0.001, mins[ipar], maxs[ipar], ierr);
     }
 
     if (fix_mu_sig)
@@ -637,14 +639,14 @@ namespace mfv {
       h_bkg_use->SetDirectory(0);
 
       double bs_sum = 0;
-      std::vector<double> bs;
+      std::vector<double> bs(fit::n_bins+2, 0.);
       for (int i = 1; i <= fit::n_bins; ++i) {
         double c = h_bkg->GetBinContent(i);
         double b = rand->Gaus(c, c*fit::eta_bkg[i]);
         if (b < 0)
           b = 0;
         bs_sum += b;
-        bs.push_back(b);
+        bs[i] = b;
       }
 
       for (int i = 1; i <= fit::n_bins; ++i)
@@ -765,6 +767,8 @@ namespace mfv {
       int n_toy_signif_t_ge_obs = 0;
 
       for (int i_toy_signif = 0; i_toy_signif < n_toy_signif; ++i_toy_signif) {
+        //fit::extra_prints = TemplateInterpolator::extra_prints = i_toy_signif == 91 || i_toy_signif == 90;
+        
         const int n_sig_signif = 0;
         const int n_bkg_signif = rand->Poisson(n_data);
         make_toy_data(i_toy_signif, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
