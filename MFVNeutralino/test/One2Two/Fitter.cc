@@ -176,12 +176,15 @@ namespace mfv {
 
 
   void Fitter::min_lik_t::print(const char* header, const char* indent) const {
-    printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
-    printf("  nuis0 = %7.3f +- %7.3f  nuis1 = %7.3f +- %7.3f\n", nuis0, err_nuis0, nuis1, err_nuis1);
+    printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f  nuis0 = %7.3f +- %7.3f  nuis1 = %7.3f +- %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, nuis0, err_nuis0, nuis1, err_nuis1);
   }
 
-  void Fitter::test_stat_t::print(const char* header, const char* indent) const {
-    printf("%s:  ok? %i  t = %f\n", header, ok(), t);
+  void Fitter::test_stat_t::print(const char* header, const int i, const char* indent) const {
+    if (i < 0)
+      printf("%s:", header);
+    else
+      printf("%s #%i:", header, i);
+    printf("  ok? %i  t = %f\n", ok(), t);
     h1.print("h1", indent);
     h0.print("h0", indent);
   }
@@ -771,7 +774,7 @@ namespace mfv {
           ++n_toy_signif_t_ge_obs;
 
         if (print_toys) {
-          t.print("t_signif toy %i");
+          t.print("t_signif toy", i_toy_signif);
         }
         else
           ++pb_signif;

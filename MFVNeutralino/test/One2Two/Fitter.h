@@ -82,7 +82,7 @@ namespace mfv {
       double t;
       bool ok() const { return h1.ok && h0.ok; }
 
-      void print(const char* header, const char* indent="  ") const;
+      void print(const char* header, const int i=-1, const char* indent="  ") const;
     };
 
     struct fit_stat_t {
