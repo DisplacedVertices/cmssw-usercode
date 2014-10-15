@@ -295,9 +295,10 @@ namespace mfv {
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
       only_fit(env.get_bool("only_fit", false)),
-      n_toy_limit(env.get_int("n_toy_limit", 20000)),
+      n_limit_scan(env.get_int("n_limit_scan", 500)),
+      n_toy_limit(env.get_int("n_toy_limit", 10000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
-      sig_limit_step(env.get_double("sig_limit_step", 0.1)),
+      sig_limit_step(env.get_double("sig_limit_step", 0.2)),
       sig_eff(env.get_double("sig_eff", 1.)),
       sig_eff_uncert(env.get_double("sig_eff_uncert", 0.2)),
 
@@ -324,6 +325,7 @@ namespace mfv {
     printf("do_signif? %i\n", do_signif);
     printf("do_limits? %i\n", do_limits);
     printf("only_fit? %i\n", only_fit);
+    printf("n_limit_scan: %i\n", n_limit_scan);
     printf("n_toy_limit: %i (~%f uncert @ 0.05)\n", n_toy_limit, sqrt(0.05*0.95/n_toy_limit));
     printf("sig_limit_step: %f\n", sig_limit_step);
     printf("sig_eff: %f +- %f\n", sig_eff, sig_eff_uncert);
@@ -338,13 +340,18 @@ namespace mfv {
 
     TTree* t_config = new TTree("t_config", "");
     t_config->Branch("seed", const_cast<int*>(&seed), "seed/I");
+    t_config->Branch("bkg_gaussians", const_cast<bool*>(&bkg_gaussians));
+    t_config->Branch("barlow_beeston", const_cast<bool*>(&barlow_beeston));
+    t_config->Branch("bend_bkg", const_cast<bool*>(&bend_bkg));
     t_config->Branch("allow_negative_mu_sig", const_cast<bool*>(&allow_negative_mu_sig));
     t_config->Branch("run_minos", const_cast<bool*>(&run_minos));
     t_config->Branch("fix_nuis1", const_cast<bool*>(&fix_nuis1));
     t_config->Branch("start_nuis0", const_cast<double*>(&start_nuis0));
     t_config->Branch("start_nuis1", const_cast<double*>(&start_nuis1));
+    t_config->Branch("fluctuate_toys_shapes", const_cast<bool*>(&fluctuate_toys_shapes));
     t_config->Branch("n_toy_signif", const_cast<int*>(&n_toy_signif));
     t_config->Branch("n_toy_limit", const_cast<int*>(&n_toy_limit));
+    t_config->Branch("sig_limit_start", const_cast<double*>(&sig_limit_start));
     t_config->Branch("sig_limit_step", const_cast<double*>(&sig_limit_step));
     t_config->Branch("sig_eff", const_cast<double*>(&sig_eff));
     t_config->Branch("sig_eff_uncert", const_cast<double*>(&sig_eff_uncert));
@@ -381,14 +388,18 @@ namespace mfv {
     t_fit_info->Branch("fs_prob", &fit_stat.prob);
     t_fit_info->Branch("fs_ks", &fit_stat.ks);
     t_fit_info->Branch("pval_signif", &pval_signif);
-    t_fit_info->Branch("sig_limit", &sig_limit);
-    t_fit_info->Branch("sig_limit_err", &sig_limit_err);
-    t_fit_info->Branch("sig_limit_fit_n", &sig_limit_fit_n);
-    t_fit_info->Branch("sig_limit_fit_a", &sig_limit_fit_a);
-    t_fit_info->Branch("sig_limit_fit_b", &sig_limit_fit_b);
-    t_fit_info->Branch("sig_limit_fit_a_err", &sig_limit_fit_a_err);
-    t_fit_info->Branch("sig_limit_fit_b_err", &sig_limit_fit_b_err);
-    t_fit_info->Branch("sig_limit_fit_prob", &sig_limit_fit_prob);
+    t_fit_info->Branch("observed_sig_limit", &observed_sig_limit);
+    t_fit_info->Branch("observed_sig_limit_err", &observed_sig_limit_err);
+    t_fit_info->Branch("observed_sig_limit_fit_n", &observed_sig_limit_fit_n);
+    t_fit_info->Branch("observed_sig_limit_fit_a", &observed_sig_limit_fit_a);
+    t_fit_info->Branch("observed_sig_limit_fit_b", &observed_sig_limit_fit_b);
+    t_fit_info->Branch("observed_sig_limit_fit_a_err", &observed_sig_limit_fit_a_err);
+    t_fit_info->Branch("observed_sig_limit_fit_b_err", &observed_sig_limit_fit_b_err);
+    t_fit_info->Branch("observed_sig_limit_fit_prob", &observed_sig_limit_fit_prob);
+    t_fit_info->Branch("expected_sig_limit", &expected_sig_limit);
+    t_fit_info->Branch("expected_sig_limit_err", &expected_sig_limit_err);
+    t_fit_info->Branch("expected_sig_limit_fit_n", &expected_sig_limit_fit_n);
+    t_fit_info->Branch("expected_sig_limit_fit_prob", &expected_sig_limit_fit_prob);
 
     t_fit_info->SetAlias("s_true", "true_pars[0]");
     t_fit_info->SetAlias("b_true", "true_pars[1]");
@@ -692,18 +703,20 @@ namespace mfv {
     return t;
   }
 
-  void Fitter::make_toy_data(int i_toy_signif, int i_toy_limit, int n_sig, int n_bkg, TH1D* h_bkg) {
+  void Fitter::make_toy_data(int i_toy_signif, int i_toy_limit, int i_toy_expect, int n_sig, int n_bkg, TH1D* h_bkg) {
     delete fit::h_data_toy_sig;
     delete fit::h_data_toy_bkg;
     delete fit::h_data_toy;
 
     char s[128], s2[128];
-    if (i_toy_signif < 0 && i_toy_limit < 0)
+    if (i_toy_signif < 0 && i_toy_limit < 0 && i_toy_expect < 0)
       snprintf(s, 128, "h_%%s_seed%02i_toy%02i", seed, toy);
-    else if (i_toy_limit < 0)
+    else if (i_toy_signif >= 0)
       snprintf(s, 128, "h_%%s_seed%02i_toy%02i_signif%02i", seed, toy, i_toy_signif);
-    else if (i_toy_signif < 0)
+    else if (i_toy_limit >= 0)
       snprintf(s, 128, "h_%%s_seed%02i_toy%02i_limit%02i", seed, toy, i_toy_limit);
+    else if (i_toy_expect >= 0)
+      snprintf(s, 128, "h_%%s_seed%02i_toy%02i_expect%02i", seed, toy, i_toy_expect);
 
     snprintf(s2, 128, s, "data_toy_sig"); fit::h_data_toy_sig = Template::hist_with_binning(s2, "");
     snprintf(s2, 128, s, "data_toy_bkg"); fit::h_data_toy_bkg = Template::hist_with_binning(s2, "");
@@ -855,7 +868,7 @@ namespace mfv {
         
         const int n_sig_signif = 0;
         const int n_bkg_signif = rand->Poisson(n_data);
-        make_toy_data(i_toy_signif, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
+        make_toy_data(i_toy_signif, -1, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
       
         const test_stat_t t = calc_test_stat(0);
         if (t.t >= t_obs_0.t)
@@ -879,119 +892,148 @@ namespace mfv {
     if (!only_fit && do_limits) {
       const double limit_alpha = 0.05;
 
-      const double sig_limit_lo = std::max(sig_limit_start, t_obs_0.h1.mu_sig / 2 / sig_eff); // units of fb
-      const double sig_limit_hi = 1000;
-      const int n_sigma_away = 5;
+      for (int i_limit_scan = -1; i_limit_scan < n_limit_scan; ++i_limit_scan) {
+        const double sig_limit_lo = sig_limit_start;
+        const double sig_limit_hi = 1000;
+        const int n_sigma_away = 5;
+        double sig_limit_scan = sig_limit_lo;
 
-      printf("scanning for %.1f%% upper limit:\n", 100*(1-limit_alpha));
-      jmt::ProgressBar pb_limit(50, (sig_limit_hi - sig_limit_lo)/sig_limit_step);
-      if (!print_toys)
-        pb_limit.start();
+        printf("scanning for %.1f%% upper limit, #%i (%s):\n", 100*(1-limit_alpha), i_limit_scan, i_limit_scan < 0 ? "observed" : "expected");
+        jmt::ProgressBar pb_limit(50, (sig_limit_hi - sig_limit_lo)/sig_limit_step);
+        if (!print_toys)
+          pb_limit.start();
 
-      sig_limit = sig_limit_lo;
+        std::vector<double> bracket_sig_limit;
+        std::vector<double> bracket_pval_limit;
+        std::vector<double> bracket_pval_limit_err;
 
-      std::vector<double> bracket_sig_limit;
-      std::vector<double> bracket_pval_limit;
-      std::vector<double> bracket_pval_limit_err;
-
-      while (sig_limit < sig_limit_hi) {
-        const double mu_sig_limit = sig_eff * sig_limit;
-
-        fit::set_data_real();
-        const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
-
-        if (print_toys) {
-          printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit, mu_sig_limit);
-          t_obs_limit_.print("t_obs_limit");
-        }
-        else
-          ++pb_limit;
-
-        if (save_toys) {
-          jmt::vthrow("save limit toys not implemented");
+        TH1D* h_toy_expected = 0;
+        if (i_limit_scan >= 0) {
+          make_toy_data(-1, -1, i_limit_scan, 0, rand->Poisson(n_data), h_bkg_obs_0);
+          h_toy_expected = (TH1D*)fit::h_data_toy->Clone("h_toy_expected");
+          h_toy_expected->SetDirectory(0);
         }
 
-        int n_toy_limit_t_ge_obs = 0;
+        while (sig_limit_scan < sig_limit_hi) {
+          const double mu_sig_limit = sig_eff * sig_limit_scan;
 
-        jmt::ProgressBar pb_limit_toys(50, n_toy_limit);
-        if (print_toys && !print_subtoys)
-          pb_limit_toys.start();
+          if (i_limit_scan < 0)
+            fit::set_data_real(); 
+          else
+            fit::set_data_no_check(h_toy_expected);
 
-        for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
-          const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
-          if (mu_sig_limit_toy >= n_data) {
-            --i_toy_limit;
-            continue;
-          }
-          const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
-          const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
-
-          make_toy_data(-1, i_toy_limit, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
-      
-          const test_stat_t t = calc_test_stat(mu_sig_limit);
-          if (t.t > t_obs_limit_.t)
-            ++n_toy_limit_t_ge_obs;
+          const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
           if (print_toys) {
-            if (print_subtoys) {
-              printf("  limit toy %i nsig %i nbkg %i n'data' %i ", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
-              t.print("t_limit", -1, "    ");
-            }
-            else
-              ++pb_limit_toys;
+            printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit_scan, mu_sig_limit);
+            t_obs_limit_.print("t_obs_limit");
           }
+          else
+            ++pb_limit;
 
           if (save_toys) {
-            jmt::vthrow("save toys for limits not implemented");
+            jmt::vthrow("save limit toys not implemented");
           }
-        }
-        if (print_toys)
-          printf("\n");
 
-        const double T = 1./n_toy_limit;
-        const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
-        const double pval_limit = (p_hat + T/2)/(1 + T);
-        const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
-        const double pval_limit_sglo = pval_limit - n_sigma_away * pval_limit_err;
-        const double pval_limit_sghi = pval_limit + n_sigma_away * pval_limit_err;
+          int n_toy_limit_t_ge_obs = 0;
 
-        if (print_toys) {
-          printf("  p_hat = %f -> %f +- %f  %is: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, n_sigma_away, pval_limit_sglo, pval_limit_sghi);
-          fflush(stdout);
-        }
+          jmt::ProgressBar pb_limit_toys(50, n_toy_limit);
+          if (print_toys && !print_subtoys)
+            pb_limit_toys.start();
 
-        if (pval_limit_sglo <= limit_alpha) {
+          for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
+            const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
+            if (mu_sig_limit_toy >= n_data) {
+              --i_toy_limit;
+              continue;
+            }
+            const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
+            const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
+
+            make_toy_data(-1, i_toy_limit, -1, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
+      
+            const test_stat_t t = calc_test_stat(mu_sig_limit);
+            if (t.t > t_obs_limit_.t)
+              ++n_toy_limit_t_ge_obs;
+
+            if (print_toys) {
+              if (print_subtoys) {
+                printf("  limit toy %i nsig %i nbkg %i n'data' %i ", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
+                t.print("t_limit", -1, "    ");
+              }
+              else
+                ++pb_limit_toys;
+            }
+
+            if (save_toys) {
+              jmt::vthrow("save toys for limits not implemented");
+            }
+          }
           if (print_toys)
-            printf("  ** include in bracket\n");
-          bracket_sig_limit.push_back(sig_limit);
-          bracket_pval_limit.push_back(pval_limit);
-          bracket_pval_limit_err.push_back(pval_limit_err);
+            printf("\n");
+
+          const double T = 1./n_toy_limit;
+          const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
+          const double pval_limit = (p_hat + T/2)/(1 + T);
+          const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+          const double pval_limit_sglo = pval_limit - n_sigma_away * pval_limit_err;
+          const double pval_limit_sghi = pval_limit + n_sigma_away * pval_limit_err;
+
+          if (print_toys) {
+            printf("  p_hat = %f -> %f +- %f  %is: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, n_sigma_away, pval_limit_sglo, pval_limit_sghi);
+            fflush(stdout);
+          }
+
+          if (pval_limit_sglo <= limit_alpha) {
+            if (print_toys)
+              printf("  ** include in bracket\n");
+            bracket_sig_limit.push_back(sig_limit_scan);
+            bracket_pval_limit.push_back(pval_limit);
+            bracket_pval_limit_err.push_back(pval_limit_err);
+          }
+
+          if (pval_limit_sghi <= limit_alpha && bracket_sig_limit.size() > 5)
+            break;
+
+          sig_limit_scan += sig_limit_step;
         }
 
-        if (pval_limit_sghi <= limit_alpha && bracket_sig_limit.size() > 5)
-          break;
+        std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
+        TGraphErrors* g = new TGraphErrors(bracket_sig_limit.size(), &bracket_sig_limit[0], &bracket_pval_limit[0], &bracket_sig_limit_err[0], &bracket_pval_limit_err[0]);
+        g->SetMarkerStyle(5);
+        TFitResultPtr res = g->Fit("pol1", "S");
+        const double a  = res->Parameter(0);
+        const double b  = res->Parameter(1);
+        const double ea = res->ParError(0);
+        const double eb = res->ParError(1);
+        const double sig_limit = (limit_alpha - a)/b;
+        const double sig_limit_err = sig_limit * sqrt(pow(ea/a, 2) + pow(eb/b, 2));
+        const size_t sig_limit_fit_n = bracket_sig_limit.size();
+        const double sig_limit_fit_prob = res->Prob();
+        if (i_limit_scan < 0) {
+          observed_sig_limit           = sig_limit;
+          observed_sig_limit_err       = sig_limit_err;
+          observed_sig_limit_fit_n     = sig_limit_fit_n;
+          observed_sig_limit_fit_a     = a;
+          observed_sig_limit_fit_b     = b;
+          observed_sig_limit_fit_a_err = ea;
+          observed_sig_limit_fit_b_err = eb;
+          observed_sig_limit_fit_prob  = sig_limit_fit_prob;
+          g->SetName("g_limit_bracket_fit");
+          g->Write();
+        }
+        else {
+          expected_sig_limit.push_back(sig_limit);
+          expected_sig_limit_err.push_back(sig_limit_err);
+          expected_sig_limit_fit_n.push_back(sig_limit_fit_n);
+          expected_sig_limit_fit_prob.push_back(sig_limit_fit_prob);
+        }
 
-        sig_limit += sig_limit_step;
+        printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
+
+        delete h_toy_expected;
+        h_toy_expected = 0;
       }
-
-      std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
-      TGraphErrors* g = new TGraphErrors(bracket_sig_limit.size(), &bracket_sig_limit[0], &bracket_pval_limit[0], &bracket_sig_limit_err[0], &bracket_pval_limit_err[0]);
-      g->SetMarkerStyle(5);
-      TFitResultPtr res = g->Fit("pol1", "S");
-      const double a = sig_limit_fit_a = res->Parameter(0);
-      const double b = sig_limit_fit_b = res->Parameter(1);
-      const double ea = sig_limit_fit_a_err = res->ParError(0);
-      const double eb = sig_limit_fit_b_err = res->ParError(1);
-      sig_limit = (limit_alpha - a)/b;
-      sig_limit_err = sig_limit * sqrt(pow(ea/a, 2) + pow(eb/b, 2));
-      sig_limit_fit_n = bracket_sig_limit.size();
-      sig_limit_fit_prob = res->Prob();
-      g->SetName("g_limit_bracket_fit");
-      g->Write();
-
-      // need to set pval_limit, sig_limit, t_obs_limit, or whatever in tree.
-
-      printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
     }
 
     t_fit_info->Fill();
