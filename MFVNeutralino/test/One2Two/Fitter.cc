@@ -296,6 +296,7 @@ namespace mfv {
       do_limits(env.get_bool("do_limits", true)),
       only_fit(env.get_bool("only_fit", false)),
       n_toy_limit(env.get_int("n_toy_limit", 20000)),
+      sig_limit_start(env.get_double("sig_limit_start", 0.01)),
       sig_limit_step(env.get_double("sig_limit_step", 0.1)),
       sig_eff(env.get_double("sig_eff", 1.)),
       sig_eff_uncert(env.get_double("sig_eff_uncert", 0.2)),
@@ -878,7 +879,7 @@ namespace mfv {
     if (!only_fit && do_limits) {
       const double limit_alpha = 0.05;
 
-      const double sig_limit_lo = std::max(0.01, t_obs_0.h1.mu_sig / 2 / sig_eff); // units of fb
+      const double sig_limit_lo = std::max(sig_limit_start, t_obs_0.h1.mu_sig / 2 / sig_eff); // units of fb
       const double sig_limit_hi = 1000;
       const int n_sigma_away = 5;
 
