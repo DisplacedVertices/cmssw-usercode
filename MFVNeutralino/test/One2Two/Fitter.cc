@@ -968,7 +968,7 @@ namespace mfv {
           bracket_pval_limit_err.push_back(pval_limit_err);
         }
 
-        if (pval_limit_sghi <= limit_alpha)
+        if (pval_limit_sghi <= limit_alpha && bracket_sig_limit.size() > 5)
           break;
 
         sig_limit += sig_limit_step;
