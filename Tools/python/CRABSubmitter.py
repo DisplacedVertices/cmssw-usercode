@@ -3,6 +3,7 @@
 import sys, os, glob, threading, time, ConfigParser, StringIO
 from StringIO import StringIO
 from CRABTools import crab_popen, crab_submit_in_batches, crab_renew_proxy_if_needed
+from general import save_git_status
     
 class ConfigParserEx(ConfigParser.ConfigParser):
     def set(self, section, option, value):
@@ -74,30 +75,9 @@ class CRABSubmitter:
 
         self.username = os.environ['USER']
 
-        self.git_status_dir = self.batch_dir + '/gitstatus/'
-        mkdirs_if_needed(self.git_status_dir)
-        if self.existed:
-            files = glob.glob(os.path.join(self.git_status_dir, '*'))
-            if files:
-                replaced_git_status_dir = os.path.join(self.git_status_dir, str(int(time.time())))
-                os.mkdir(replaced_git_status_dir)
-                for f in files:
-                    os.rename(f, os.path.join(replaced_git_status_dir, os.path.basename(f)))
-        os.system("git log --pretty=format:'%%H' -n 1 > %shash" % self.git_status_dir)
-        os.system("git status --untracked-files=all --ignored | grep -v pyc > %sstatus" % self.git_status_dir)
-        self.git_untracked_tmp_fn = '/tmp/%s/untracked.tgz' % self.username
-        git_untracked_file_list_cmd = "git status --porcelain | grep '^??' | sed 's/??//'"
-        git_untracked_file_list = crab_popen(git_untracked_file_list_cmd)
-        if git_untracked_file_list:
-            git_tar_ret = os.system("tar czf %s -C `git rev-parse --show-toplevel` `%s`" % (self.git_untracked_tmp_fn, git_untracked_file_list_cmd))
-            if git_tar_ret != 0:
-                print '\033[36;7m warning: \033[m git-untracked tar returned non-zero exit code'
-            elif os.stat(self.git_untracked_tmp_fn).st_size > 100*1024**2:
-                print '\033[36;7m warning: \033[m git-untracked tarball is bigger than 100M, leaving in %s' % self.git_untracked_tmp_fn
-            else:
-                os.system('mv %s %s' % (self.git_untracked_tmp_fn, self.git_status_dir))
-        os.system('git diff > %sdiff' % self.git_status_dir)
-        
+        self.git_status_dir = os.path.join(self.batch_dir, 'gitstatus')
+        save_git_status(self.git_status_dir)
+
         self.testing = testing
         self.max_threads = max_threads
 

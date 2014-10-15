@@ -6,7 +6,7 @@ import glob, os, re, subprocess, sys, time, getpass, zlib
 import xml.etree.cElementTree
 from collections import defaultdict
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
-from JMTucker.Tools.general import bool_from_argv
+from JMTucker.Tools.general import bool_from_argv, popen as general_popen
 from JMTucker.Tools.hadd import hadd
 
 username = getpass.getuser()
@@ -50,17 +50,7 @@ def print_run_cmd(cmd, _print=True):
 def crab_popen(cmd, return_exit_code=False, print_output=False, no_ssh_control_persist=True):
     if no_ssh_control_persist and 'crab ' in cmd:
         cmd = cmd.replace('crab ', 'crab -USER.ssh_control_persist=no ')
-    child = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    output = []
-    for line in child.stdout:
-        if print_output:
-            print line,
-        output.append(line)
-    output = ''.join(output)
-    if return_exit_code:
-        return output, child.returncode
-    else:
-        return output
+    return general_popen(cmd, return_exit_code, print_output)
 
 def crabify_list(l, simple=False):
     if simple:
