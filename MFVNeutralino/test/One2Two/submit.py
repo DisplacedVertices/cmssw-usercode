@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys
+from JMTucker.Tools.general import save_git_status
 
 script_template = '''#!/bin/sh
 echo mfvo2t script starting on `date`
@@ -138,6 +139,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
 
     if not setuped:
         os.system('mkdir -p %s' % batch_root)
+        save_git_status(os.path.join(batch_root, 'gitstatus'))
         open(dummy_pset_fn, 'wt').write(dummy_pset)
         setuped = True
 
