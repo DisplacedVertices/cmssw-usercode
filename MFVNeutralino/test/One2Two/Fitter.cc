@@ -279,7 +279,7 @@ namespace mfv {
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
       bkg_gaussians(env.get_bool("bkg_gaussians", true)),
-      barlow_beeston(env.get_bool("barlow_beeston", false)),
+      barlow_beeston(env.get_bool("barlow_beeston", true)),
       bend_bkg(env.get_bool("bend_bkg", false)),
       allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
       run_minos(env.get_bool("run_minos", true)),
