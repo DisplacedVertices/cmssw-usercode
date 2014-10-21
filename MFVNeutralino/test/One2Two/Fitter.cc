@@ -295,7 +295,7 @@ namespace mfv {
       do_signif(env.get_bool("do_signif", true)),
       do_limits(env.get_bool("do_limits", true)),
       only_fit(env.get_bool("only_fit", false)),
-      n_limit_scan(env.get_int("n_limit_scan", 500)),
+      n_limit_scan(env.get_int("n_limit_scan", 0)),
       n_toy_limit(env.get_int("n_toy_limit", 10000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
       sig_limit_step(env.get_double("sig_limit_step", 0.2)),
@@ -789,6 +789,7 @@ namespace mfv {
       fit::extra_prints = 1;
 
     fit::n_sig_orig = sig_template->Integral(1,100000);
+    printf("n_sig_orig: %.1f\n", fit::n_sig_orig);
     fit::set_sig(Template::finalize_template(sig_template));
     fit::calc_lnL_offset();
 
