@@ -107,6 +107,9 @@ storage_element=%(storage_element)s
 [CRAB]
 jobtype=cmssw
 scheduler=%(scheduler)s
+
+[GRID]
+se_black_list=T2_US_Purdue,T2_CH_CERN,T3_UK_SGrid_Oxford,T3_RU_FIAN,T2_RU_JINR
 '''
 
 maked = 'nomake' in sys.argv
