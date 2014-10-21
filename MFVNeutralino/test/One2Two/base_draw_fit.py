@@ -38,7 +38,7 @@ vars = 'seed toy true_pars[0] true_pars[1] true_pars[2] true_pars[3]'
 for y in 'h1 h0'.split():
     for x in 'istat maxtwolnL mu_sig err_mu_sig mu_bkg err_mu_bkg nuis0 err_nuis0 nuis1 err_nuis1'.split():
         vars += ' t_obs_0__%s_%s' % (y,x)
-vars += ' pval_signif sig_limit sig_limit_err sig_limit_fit_n sig_limit_fit_a sig_limit_fit_b sig_limit_fit_a_err sig_limit_fit_b_err sig_limit_fit_prob'
+vars += ' pval_signif observed_sig_limit observed_sig_limit_err observed_sig_limit_fit_n observed_sig_limit_fit_a observed_sig_limit_fit_b observed_sig_limit_fit_a_err observed_sig_limit_fit_b_err observed_sig_limit_fit_prob'
 i_pval_signif = -9
 
 def xform(x):
