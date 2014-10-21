@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, gzip, cPickle, subprocess, glob
+import os, sys, gzip, cPickle, subprocess, glob, time
 
 def big_warn(s):
     x = '#' * 80
