@@ -40,7 +40,7 @@ namespace mfv {
     const bool do_signif;
     const bool do_limits;
     const bool only_fit;
-    const int n_limit_scan;
+    const int i_limit_job;
     const int n_toy_limit;
     const double sig_limit_start;
     const double sig_limit_step;
@@ -106,18 +106,14 @@ namespace mfv {
     test_stat_t t_obs_0;
     fit_stat_t fit_stat;
     double pval_signif;
-    double observed_sig_limit;
-    double observed_sig_limit_err;
-    int    observed_sig_limit_fit_n;
-    double observed_sig_limit_fit_a;
-    double observed_sig_limit_fit_b;
-    double observed_sig_limit_fit_a_err;
-    double observed_sig_limit_fit_b_err;
-    double observed_sig_limit_fit_prob;
-    std::vector<double> expected_sig_limit;
-    std::vector<double> expected_sig_limit_err;
-    std::vector<double> expected_sig_limit_fit_n;
-    std::vector<double> expected_sig_limit_fit_prob;
+    double sig_limit;
+    double sig_limit_err;
+    int    sig_limit_fit_n;
+    double sig_limit_fit_a;
+    double sig_limit_fit_b;
+    double sig_limit_fit_a_err;
+    double sig_limit_fit_b_err;
+    double sig_limit_fit_prob;
 
     ////////////////////////////////////////////////////////////////////////////
 
