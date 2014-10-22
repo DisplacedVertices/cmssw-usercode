@@ -30,11 +30,13 @@ namespace mfv {
     bool bend_bkg = false;
     std::vector<double> eta_bkg;
     std::vector<double> a_bkg;
+    std::vector<double> A_bkg;
     TemplateInterpolator* interp;
 
     double n_sig_orig = -1;
     TH1D* h_sig = 0;
     const double* a_sig = 0;
+    std::vector<double> A_sig;
 
     TH1D* h_data_real = 0;
     TH1D* h_data_toy_sig = 0;
@@ -44,15 +46,24 @@ namespace mfv {
     const double* a_data = 0;
     double a_data_integ = 0;
 
-    void set_or_check_n_bins(TH1D* h) {
-      if (n_bins < 0)
-        n_bins = h->GetNbinsX();
-      else if (h->GetNbinsX() != n_bins)
+    void set_n_bins(int n) {
+      if (n_bins >= 0)
+        jmt::vthrow("set_n_bins called twice");
+
+      n_bins = n;
+      eta_bkg.resize(n+2, -1);
+      a_bkg.resize(n+2, -1);
+      A_bkg.resize(n+2, -1);
+      A_sig.resize(n+2, -1);
+    }
+
+    void check_n_bins(TH1D* h) {
+      if (h->GetNbinsX() != n_bins)
         jmt::vthrow("%s binning bad: n_bins = %i, h # bins: %i", h->GetName(), n_bins, h->GetNbinsX());
     }
 
     void set_sig(TH1D* h) {
-      set_or_check_n_bins(h);
+      check_n_bins(h);
       h_sig = h;
       a_sig = h->GetArray();
     }
@@ -65,11 +76,6 @@ namespace mfv {
 
     void set_data_real() {
       set_data_no_check(h_data_real);
-    }
-
-    void set_data(TH1D* h) {
-      set_or_check_n_bins(h);
-      set_data_no_check(h);
     }
 
     void globals_ok() {
@@ -120,8 +126,8 @@ namespace mfv {
       if (extra_prints)
         printf("\n--- twolnL call ---\nmu_sig: %f  mu_bkg: %f\npar0: %f  par1: %f\n", mu_sig, mu_bkg, par0, par1);
 
-      std::vector<double> A_sig(n_bins+2, 0.);
-      std::vector<double> A_bkg(n_bins+2, 0.);
+      A_sig.assign(n_bins+2, 0.);
+      A_bkg.assign(n_bins+2, 0.);
       double A_sig_sum = 0, A_bkg_sum = 0;
 
       const double eps = 1e-9;
@@ -784,15 +790,20 @@ namespace mfv {
     if (!fit::extra_prints && print_level > 1)
       fit::extra_prints = 1;
 
+    fit::set_n_bins(Template::binning().size());
+
     fit::n_sig_orig = sig_template->Integral(1,100000);
     printf("n_sig_orig: %.1f\n", fit::n_sig_orig);
     fit::set_sig(Template::finalize_template(sig_template));
     fit::calc_lnL_offset();
 
     if (bkg_gaussians)
-      fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15. };
+      fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15., -1};
     else
-      fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4 };
+      fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, -1 };
+
+    if (int(fit::eta_bkg.size()) != fit::n_bins+2)
+      jmt::vthrow("eta_bkg wrong size");
 
     fit::barlow_beeston = barlow_beeston;
     fit::bend_bkg = bend_bkg;
