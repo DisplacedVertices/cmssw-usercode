@@ -185,7 +185,9 @@ namespace mfv {
       if (int(t->npars()) != n_pars)
         jmt::vthrow("template mismatch in TemplateInterpolator");
 
-    a.resize(n_bins+2);
+    if (int(a.size()) != n_bins+2)
+      jmt::vthrow("TemplateInterpolator:: wrong n_bins in a");
+
     int nR = 0;
     int nQ = 1;
     for (int i = 0; i < n_pars; ++i) {
