@@ -23,6 +23,7 @@ namespace mfv {
 
     jmt::ConfigFromEnv env;
     const int print_level;
+    const int inject_in_last_bin;
     const bool bkg_gaussians;
     const bool barlow_beeston;
     const bool bend_bkg;

@@ -284,6 +284,7 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
+      inject_in_last_bin(env.get_int("inject_in_last_bin", 0)),
       bkg_gaussians(env.get_bool("bkg_gaussians", true)),
       barlow_beeston(env.get_bool("barlow_beeston", true)),
       bend_bkg(env.get_bool("bend_bkg", false)),
@@ -837,6 +838,8 @@ namespace mfv {
     TH1D* h_data_temp = Template::hist_with_binning("h_data", TString::Format("toy %i", toy));
     for (const VertexPair& p : v2v)
       h_data_temp->Fill(p.d2d());
+    for (int i = 0; i < inject_in_last_bin; ++i)
+      h_data_temp->Fill(2);
     fit::h_data_real = Template::finalize_binning(h_data_temp);
     fit::set_data_real();
     const int n_data = fit::h_data_real->Integral();
