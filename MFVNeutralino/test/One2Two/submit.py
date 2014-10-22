@@ -174,10 +174,15 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         sig_samp, sig_scale = signal_sample
         assert sig_samp < 0
         if sig_scale < 0:
-            assert njobs <= 20
             env.append('ntoys=0')
             env.append('process_data=1')
+            if sig_scale == -2:
+                env.append('seed=1')
+                env.append('fitter_i_limit_scan=$JOB_NUM')
+            else:
+                assert njobs <= 20
         else:
+            env.append('fitter_do_limits=0')
             env.append('toythrower_injected_signal=%i' % sig_samp)
             env.append('toythrower_injected_signal_scale=%f' % sig_scale)
 
@@ -208,7 +213,7 @@ if 1:
     for template_type in ('CJ',):
         for min_ntracks in (5,):
             for signal in xrange(-24, 0):
-                for strength in (-1, None, 1, 5):
+                for strength in (-2, -1, None, 1, 5):
                     sg = (signal, strength) if strength is not None else None
                     njobs = 20 if strength == -1 else 500
                     batches.append((njobs, template_type, min_ntracks, sg, signal, ''))
