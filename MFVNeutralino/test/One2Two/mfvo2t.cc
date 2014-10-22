@@ -24,6 +24,7 @@ int main() {
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
   const bool templates_simpleclear = templates_kind == "simpleclear";
+  const bool run_templater = env.get_bool("run_templater", true);
   const bool run_fit = env.get_bool("run_fit", true);
   const std::string data_fn = env.get_string("data_fn", "MultiJetPk2012.root");
   const bool process_data = env.get_bool("process_data", false);
@@ -62,12 +63,15 @@ int main() {
     tt->throw_toy();
 
     std::vector<double> true_pars = { double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v) };
-    ter->process(tt->toy_dataset);
-    for (double tp : ter->true_pars())
-      true_pars.push_back(tp);
 
-    if (run_fit)
-      fitter->fit(itoy, ter, h_sig, tt->toy_2v, true_pars);
+    if (run_templater) {
+      ter->process(tt->toy_dataset);
+      for (double tp : ter->true_pars())
+        true_pars.push_back(tp);
+
+      if (run_fit)
+        fitter->fit(itoy, ter, h_sig, tt->toy_2v, true_pars);
+    }
   }
 
   if (process_data) {
