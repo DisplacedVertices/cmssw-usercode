@@ -298,7 +298,7 @@ namespace mfv {
       i_limit_job(env.get_int("i_limit_job", -1)),
       n_toy_limit(env.get_int("n_toy_limit", 10000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
-      sig_limit_step(env.get_double("sig_limit_step", 0.2)),
+      sig_limit_step(env.get_double("sig_limit_step", 0.25)),
       sig_eff(env.get_double("sig_eff", 1.)),
       sig_eff_uncert(env.get_double("sig_eff_uncert", 0.2)),
 
