@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 
 from JMTucker.Tools.Samples import mfv_signal_samples
 
-special = 'real'
+special = 'BB'
 
 set_style()
 ROOT.gStyle.SetOptStat(1000000001)
@@ -130,8 +130,6 @@ def draw_h_labels(h, thing, stat, obj_cache=[]):
 
 sig_strengths = (0, 1, 5)
 sample_nums = range(1, 25)
-
-sample_nums = range(7, 25)
 
 #sig_strengths = (0, 1, 10)
 #sample_nums = (9, 15)
