@@ -71,6 +71,10 @@ namespace mfv {
       double err_nuis0;
       double nuis1;
       double err_nuis1;
+      std::vector<double> A_sig;
+      std::vector<double> A_bkg;
+      std::vector<double> A_sig_rel;
+      std::vector<double> A_bkg_rel;
 
       min_lik_t() : ok(true), maxtwolnL(-1e300), mu_sig(-1), err_mu_sig(-1), mu_bkg(-1), err_mu_bkg(-1), all_ok(true) {}
 

@@ -264,6 +264,12 @@ namespace mfv {
 
   void Fitter::min_lik_t::print(const char* header, const char* indent) const {
     printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f  nuis0 = %7.3f +- %7.3f  nuis1 = %7.3f +- %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, nuis0, err_nuis0, nuis1, err_nuis1);
+    printf("%s    A_sig ", indent);
+    const int ie = int(A_sig.size());
+    for (int i = 0; i < ie; ++i) printf("%5.3f (%3.1f) ", A_sig[i], A_sig_rel[i]);
+    printf("  A_bkg ");
+    for (int i = 0; i < ie; ++i) printf("%5.3f (%3.1f) ", A_bkg[i], A_bkg_rel[i]);
+    printf("\n");
   }
 
   void Fitter::test_stat_t::print(const char* header, const int i, const char* indent) const {
@@ -409,7 +415,7 @@ namespace mfv {
   }    
 
   void Fitter::draw_likelihood(const test_stat_t& t) {
-    printf("draw_likelihood: ");
+    //printf("draw_likelihood: ");
 
     struct scan_t {
       int n;
@@ -450,17 +456,13 @@ namespace mfv {
 
     for (int sb = 1; sb >= 0; --sb) {
       const char* sb_or_b = sb ? "sb" : "b";
-      printf("%s: ", sb_or_b); fflush(stdout);
+      //printf("%s: ", sb_or_b); fflush(stdout);
       const char* sb_or_b_nice = sb ? "sig + bkg" : "b only";
       const min_lik_t& ml = sb ? t.h1 : t.h0;
 
       TDirectory* subdir = 0;
       if (draw_bkg_templates)
         subdir = cwd->mkdir(TString::Format("bkg_template_scan_nuis_%s", sb_or_b));
-
-      jmt::ProgressBar pb(50, nuis_scan[0].n * nuis_scan[1].n + mu_scan[0].n * mu_scan[1].n);
-      pb.start();
-
 
       if (draw_bkg_templates)
         cwd->cd();
@@ -477,7 +479,7 @@ namespace mfv {
         if (draw_bkg_templates)
           subdir->mkdir(TString::Format("nuis0_%03i", i0))->cd();
 
-        for (int i1 = 1; i1 < nuis_scan[1].n; ++i1, ++pb) {
+        for (int i1 = 1; i1 < nuis_scan[1].n; ++i1) {
           //fit::extra_prints = i0 == 186 && i1 == 1;
           //fit::interp->extra_prints = i0 == 186 && i1 == 1;
 
@@ -503,7 +505,7 @@ namespace mfv {
 
       for (int i0 = 1; i0 < mu_scan[0].n; ++i0) {
         const double mu_sig = mu_scan[0].v(i0);
-        for (int i1 = 1; i1 < mu_scan[1].n; ++i1, ++pb) {
+        for (int i1 = 1; i1 < mu_scan[1].n; ++i1) {
           const double mu_bkg = mu_scan[1].v(i1);
           h2->SetBinContent(i0, i1, fit::twolnL(mu_sig, mu_bkg, ml.nuis0, ml.nuis1));
         }
@@ -689,6 +691,13 @@ namespace mfv {
     ret.ok = istat == 3;
     ret.istat = istat;
 
+    for (int i = 1; i <= fit::n_bins; ++i) {
+      ret.A_sig.push_back(fit::A_sig[i]);
+      ret.A_bkg.push_back(fit::A_bkg[i]);
+      ret.A_sig_rel.push_back(fit::A_sig[i] / fit::a_sig[i]);
+      ret.A_bkg_rel.push_back(fit::A_bkg[i] / fit::a_bkg[i]);
+    }
+
     //printf("min_likelihood: %s  istat: %i   maxtwolnL: %e   mu_sig: %f +- %f  mu_bkg: %f +- %f\n", bkg_template->title().c_str(), istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
     delete m;
     return ret;
@@ -849,7 +858,7 @@ namespace mfv {
 
     dtoy->mkdir("fit_results")->cd();
 
-    printf("Fitter: toy: %i  n_sig_true: %f  n_bkg_true: %f  true_pars:", toy, true_pars[0], true_pars[1]);
+    printf("Fitter: toy: %i  n_sig_true: %.1f  n_bkg_true: %.1f  true_pars:", toy, true_pars[0], true_pars[1]);
     for (double tp : true_pars)
       printf(" %f", tp);
     printf("\n");
