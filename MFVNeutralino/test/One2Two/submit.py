@@ -220,8 +220,10 @@ if 1:
 
     for batch in batches:
         submit(*batch)
+        print 'waiting 30 seconds'
+        time.sleep(30)
 
-if 1:
+if 0:
     for syst in 'default bowing curl elliptical radial sagitta skew'.split():
         for signal in [-9, -15]:
             for strength in (None, 1):
