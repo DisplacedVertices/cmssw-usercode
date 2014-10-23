@@ -265,10 +265,10 @@ namespace mfv {
   void Fitter::min_lik_t::print(const char* header, const char* indent) const {
     printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f  nuis0 = %7.3f +- %7.3f  nuis1 = %7.3f +- %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, nuis0, err_nuis0, nuis1, err_nuis1);
     printf("%s    A_sig ", indent);
-    const int ie = int(A_sig.size());
-    for (int i = 0; i < ie; ++i) printf("%5.3f (%3.1f) ", A_sig[i], A_sig_rel[i]);
+    const int ie = fit::n_bins; // JMTBAD
+    for (int i = 1; i <= ie; ++i) printf("%5.3f (%3.1f) ", A_sig[i], A_sig_rel[i]);
     printf("  A_bkg ");
-    for (int i = 0; i < ie; ++i) printf("%5.3f (%3.1f) ", A_bkg[i], A_bkg_rel[i]);
+    for (int i = 1; i <= ie; ++i) printf("%5.3f (%3.1f) ", A_bkg[i], A_bkg_rel[i]);
     printf("\n");
   }
 
@@ -691,11 +691,15 @@ namespace mfv {
     ret.ok = istat == 3;
     ret.istat = istat;
 
+    ret.A_sig.assign(fit::n_bins+2, -1);
+    ret.A_bkg.assign(fit::n_bins+2, -1);
+    ret.A_sig_rel.assign(fit::n_bins+2, -1);
+    ret.A_bkg_rel.assign(fit::n_bins+2, -1);
     for (int i = 1; i <= fit::n_bins; ++i) {
-      ret.A_sig.push_back(fit::A_sig[i]);
-      ret.A_bkg.push_back(fit::A_bkg[i]);
-      ret.A_sig_rel.push_back(fit::A_sig[i] / fit::a_sig[i]);
-      ret.A_bkg_rel.push_back(fit::A_bkg[i] / fit::a_bkg[i]);
+      ret.A_sig[i] = fit::A_sig[i];
+      ret.A_bkg[i] = fit::A_bkg[i];
+      ret.A_sig_rel[i] = fit::A_sig[i] / fit::a_sig[i];
+      ret.A_bkg_rel[i] = fit::A_bkg[i] / fit::a_bkg[i];
     }
 
     //printf("min_likelihood: %s  istat: %i   maxtwolnL: %e   mu_sig: %f +- %f  mu_bkg: %f +- %f\n", bkg_template->title().c_str(), istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg);
