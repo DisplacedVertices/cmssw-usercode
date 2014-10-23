@@ -681,16 +681,15 @@ namespace mfv {
     if (fix_nuis1)
       m->FixParameter(3);
 
+    m->Command("SET STRATEGY 2");
+
+    if (print_level > 0)
+      printf("call mnseek\n");
+    double seek_arg[2] = {100, 100};
+    m->mnexcm("SEE", seek_arg, 2, ierr);
+
     if (print_level > 0)
       printf("call migrad\n");
-    m->Migrad();
-
-    if (print_level > 0)
-      printf("call mnimpr\n");
-    m->mnimpr();
-
-    if (print_level > 0)
-      printf("call migrad again\n");
     m->Migrad();
 
     if (run_minos) {
