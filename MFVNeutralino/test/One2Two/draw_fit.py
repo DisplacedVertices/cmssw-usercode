@@ -125,6 +125,13 @@ for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h
             h.Fit('gaus')
         else:
             h.Draw()
+        ps.c.Update()
+        differentiate_stat_box(h, 0, new_size=(0.3,0.4))
+    elif x == 'h_istat':
+        h.SetStats(0)
+        h.SetMarkerSize(2)
+        h.SetMarkerColor(ROOT.kWhite)
+        h.Draw('colz text')
     else:
         h.Draw('colz')
         h.SetStats(0)
@@ -142,10 +149,10 @@ for n in ns:
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
     for t in 'sb b'.split():
         leg = ROOT.TLegend(0.502, 0.620, 0.848, 0.861)
-        s = dr.Get('h_sig_%s_fit_nodiv_shortened' % t)
-        b = dr.Get('h_bkg_%s_fit_nodiv_shortened' % t)
-        sb = dr.Get('h_sum_%s_fit_nodiv_shortened' % t)
-        dt = dr.Get('h_data_%s_fit_nodiv_shortened' % t)
+        s = dr.Get('h_sig_%s_fit_bb_nodiv_shortened' % t)
+        b = dr.Get('h_bkg_%s_fit_bb_nodiv_shortened' % t)
+        sb = dr.Get('h_sum_%s_fit_bb_nodiv_shortened' % t)
+        dt = dr.Get('h_data_%s_fit_bb_nodiv_shortened' % t)
         for h in (s,b,sb,dt):
             h.SetStats(0)
             h.SetTitle(';d_{VV} (cm)')
@@ -217,10 +224,11 @@ for n in ns:
             ps.save(nm + '_scanmus_2sg')
 
     g = dr.Get('g_limit_bracket_fit')
-    g.Draw('ALP')
-    ps.save('limit_bracket_fit_seed%i_toy%i_pval%s' % (seed, toy, str(x[i_pval_signif]).replace('.','p')))
+    if g:
+        g.Draw('ALP')
+        ps.save('limit_bracket_fit_seed%i_toy%i_pval%s' % (seed, toy, str(x[i_pval_signif]).replace('.','p')))
 
-def stats(l, prints=False):
+def stats(l, header=''):
     l.sort()
     n = len(l)
     if n % 2 == 0:
@@ -231,19 +239,22 @@ def stats(l, prints=False):
     hi68 = l[int(n/2 + 0.34*n)]
     lo95 = l[int(n/2 - 0.475*n)]
     hi95 = l[int(n/2 + 0.475*n)]
-    if prints:
-        print 'Expected  2.5%: r <', lo95
-        print 'Expected 16.0%: r <', lo68
-        print 'Expected 50.0%: r <', median
-        print 'Expected 84.0%: r <', hi68
-        print 'Expected 97.5%: r <', hi95
-        if n <= 20:
-            print 'Observed Limit: r <', median
+    print '\n'
+    print header
+    print header + ':Expected  2.5%: r <', lo95
+    print header + ':Expected 16.0%: r <', lo68
+    print header + ':Expected 50.0%: r <', median
+    print header + ':Expected 84.0%: r <', hi68
+    print header + ':Expected 97.5%: r <', hi95
+    print header + ':Observed Limit: r <', median
     return median, lo68, hi68, lo95, hi95
 
-#print 'limit on mu_sig:'
-#limit_stats(sig_limits)
-#print
-print 'median pval_signif:', stats(pval_signifs)[0]
-print 'scaled limits:'
-stats(sig_limits_scaled, True)
+stats(pval_signifs, 'pval_signif')
+stats(sig_limits, 'mu_sig_limit')
+stats(sig_limits_scaled, 'sigma_sig_limit')
+
+'''
+foreach x (lsts/*lst)
+  echo $x; py draw_fit.py $x >& `echo $x | sed -e s/.lst/.out/`
+end
+'''
