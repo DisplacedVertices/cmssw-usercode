@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, time
 from JMTucker.Tools.general import save_git_status
 
 script_template = '''#!/bin/sh
