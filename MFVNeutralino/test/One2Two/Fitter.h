@@ -132,7 +132,7 @@ namespace mfv {
     void book_toy_fcns_and_histos();
     void fit_globals_ok();
     void draw_likelihood(const test_stat_t& t);
-    TH1D* make_h_bkg(const char* n, const std::vector<double>& nuis_pars);
+    TH1D* make_h_bkg(const char* n, const std::vector<double>& nuis_pars, const std::vector<double>& A_bkg);
     fit_stat_t draw_fit(const test_stat_t& t);
     min_lik_t min_likelihood(double mu_sig_start, bool fix_mu_sig);
     test_stat_t calc_test_stat(double fix_mu_sig_val);

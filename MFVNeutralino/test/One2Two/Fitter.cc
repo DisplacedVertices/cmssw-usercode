@@ -487,7 +487,7 @@ namespace mfv {
           const double twolnL = fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, nuispar1);
 
           if (draw_bkg_templates)
-            make_h_bkg(TString::Format("h_bkg_template_scan_%s_nuis0_%03i_nuis1_%03i", sb_or_b, i0, i1), std::vector<double>({nuispar0, nuispar1}));
+            make_h_bkg(TString::Format("h_bkg_template_scan_%s_nuis0_%03i_nuis1_%03i", sb_or_b, i0, i1), std::vector<double>({nuispar0, nuispar1}), std::vector<double>());
 
           //printf("i0: %i %f  i1: %i %f  %f\n", i0, nuispar0, i1, nuispar1, twolnL);
           h1->SetBinContent(i0, i1, twolnL);
@@ -515,108 +515,128 @@ namespace mfv {
     }
   }
 
-  TH1D* Fitter::make_h_bkg(const char* n, const std::vector<double>& nuis_pars) {
-    std::vector<double> a(fit::n_bins+2, 0.);
+  TH1D* Fitter::make_h_bkg(const char* n, const std::vector<double>& nuis_pars, const std::vector<double>& A_bkg) {
     TH1D* h = (TH1D*)fit::interp->get_Q(nuis_pars)->h->Clone(n);
-    fit::interp->interpolate(nuis_pars, &a);
-    for (int ibin = 0; ibin <= fit::n_bins+1; ++ibin)
-      h->SetBinContent(ibin, a[ibin]);
+    if (A_bkg.size()) {
+      for (int ibin = 1; ibin <= fit::n_bins; ++ibin)
+        h->SetBinContent(ibin, A_bkg[ibin]);
+    }
+    else {
+      std::vector<double> a(fit::n_bins+2, 0.);
+      fit::interp->interpolate(nuis_pars, &a);
+      for (int ibin = 0; ibin <= fit::n_bins+1; ++ibin)
+        h->SetBinContent(ibin, a[ibin]);
+    }
     return h;
   }
 
   Fitter::fit_stat_t Fitter::draw_fit(const test_stat_t& t) {
     fit_stat_t ret;
 
-    for (int div = 0; div <= 1; ++div) {
-      for (int sb = 1; sb >= 0; --sb) {
-        const char* div_or_no = div ? "div" : "nodiv";
-        const char* div_or_no_nice = div ? "/bin width" : "";
-        const char* sb_or_b = sb ? "sb" : "b";
-        const char* sb_or_b_nice = sb ? "sig + bkg" : "b only";
-        const min_lik_t& ml = sb ? t.h1 : t.h0;
-        TCanvas* c = new TCanvas(TString::Format("c_%s_fit_%s", sb_or_b, div_or_no));
+   for (int div = 0; div <= 1; ++div) {
+     for (int bb = 1; bb >= 0; --bb) {
+        for (int sb = 1; sb >= 0; --sb) {
+          const char* bb_or_no = bb ? "bb" : "nobb";
+          const char* bb_or_no_nice = bb ? "w/ BB" : "w/o BB";
+          const char* div_or_no = div ? "div" : "nodiv";
+          const char* div_or_no_nice = div ? "/bin width" : "";
+          const char* sb_or_b = sb ? "sb" : "b";
+          const char* sb_or_b_nice = sb ? "sig + bkg" : "b only";
+          const min_lik_t& ml = sb ? t.h1 : t.h0;
+          TCanvas* c = new TCanvas(TString::Format("c_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));
 
-        TH1D* h_bkg_fit = make_h_bkg(TString::Format("h_bkg_%s_fit_%s",  sb_or_b, div_or_no), ml.nuis_pars());
-        TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit_%s",  sb_or_b, div_or_no));
-        TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s", sb_or_b, div_or_no));
+          TH1D* h_bkg_fit = make_h_bkg(TString::Format("h_bkg_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no), ml.nuis_pars(), bb ? ml.A_bkg : std::vector<double>());
+          TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit_%s_%s",  sb_or_b, bb_or_no, div_or_no));
+          TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));
 
-        for (TH1D** ph : {&h_bkg_fit, &h_sig_fit, &h_data_fit}) {
-          TH1D* h = *ph;
-          std::vector<double> bins = Template::binning(true);
-          TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
-          // Splitting the last bin puts its contents in the overflow -- move back into last bin.
-          int n = h_short->GetNbinsX();
-          double v = h_short->GetBinContent(n+1);
-          double e = h_short->GetBinError(n+1);
-          h_short->SetBinContent(n+1, 0);
-          h_short->SetBinError  (n+1, 0);
-          h_short->SetBinContent(n, v);
-          h_short->SetBinError  (n, e);
-          *ph = h_short;
-        }
-
-        for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
-          h->SetLineWidth(2);
-          if (div)
-            jmt::divide_by_bin_width(h);
-        }
-
-        h_sig_fit->SetLineColor(kRed);
-        h_sig_fit->SetFillColor(kRed);
-        h_sig_fit->SetFillStyle(3004);
-        h_bkg_fit->SetLineColor(kBlue);
-        h_bkg_fit->SetFillColor(kBlue);
-        h_bkg_fit->SetFillStyle(3005);
-
-        h_sig_fit->Scale(ml.mu_sig);
-        h_bkg_fit->Scale(ml.mu_bkg);
-
-        TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit_%s_shortened", sb_or_b, div_or_no));
-        h_sum_fit->SetLineColor(kMagenta);
-        h_sum_fit->Add(h_bkg_fit);
-        for (TH1D* h : {h_sum_fit, h_data_fit})
-          h->SetTitle(TString::Format("best %s fit: %s;svdist2d (cm);events%s", sb_or_b_nice, ml.title().c_str(), div_or_no_nice));
-
-        if (h_data_fit->GetMaximum() > h_sum_fit->GetMaximum()) {
-          h_data_fit->Draw("e");
-          h_sum_fit->Draw("hist same");
-        }
-        else {
-          h_sum_fit->Draw("hist");
-          h_data_fit->Draw("same e");
-        }
-        h_sig_fit->Draw("same hist");
-        h_bkg_fit->Draw("same hist");
-        c->Write();
-        delete c;
-
-        if (!div) {
-          TH1D* h_sum_cumul = (TH1D*)h_sum_fit->Clone(TString::Format("h_sum_%s_cumul_%s", sb_or_b, div_or_no));
-          TH1D* h_data_cumul = (TH1D*)h_data_fit->Clone(TString::Format("h_data_%s_cumul_%s", sb_or_b, div_or_no));
-          h_sum_cumul->Scale(1/h_sum_cumul->Integral());
-          h_data_cumul->Scale(1/h_data_cumul->Integral());
-
-          for (TH1D* h : {h_sum_cumul, h_data_cumul})
-            jmt::cumulate(h, false);
-
-          TCanvas* c2 = new TCanvas(TString::Format("c_%s_cumul_%s", sb_or_b, div_or_no));
-          h_sum_cumul->Draw();
-          h_data_cumul->Draw("same e");
-          c2->Write();
-          delete c2;
-
-          ret.chi2 = 0;
-          ret.ndof = h_data_fit->GetNbinsX() - 2;
-          ret.ks = 0;
-          for (int ibin = 1; ibin <= h_data_fit->GetNbinsX(); ++ibin) {
-            if (h_sum_fit->GetBinContent(ibin) > 0)
-              ret.chi2 += pow(h_data_fit->GetBinContent(ibin) - h_sum_fit->GetBinContent(ibin), 2) / h_sum_fit->GetBinContent(ibin);
-
-            double ksd = fabs(h_sum_cumul->GetBinContent(ibin) - h_data_cumul->GetBinContent(ibin));
-            if (ksd > ret.ks)
-              ret.ks = ksd;
+          for (TH1D** ph : {&h_bkg_fit, &h_sig_fit, &h_data_fit}) {
+            TH1D* h = *ph;
+            std::vector<double> bins = Template::binning(true);
+            TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
+            // Splitting the last bin puts its contents in the overflow -- move back into last bin.
+            int n = h_short->GetNbinsX();
+            double v = h_short->GetBinContent(n+1);
+            double e = h_short->GetBinError(n+1);
+            h_short->SetBinContent(n+1, 0);
+            h_short->SetBinError  (n+1, 0);
+            h_short->SetBinContent(n, v);
+            h_short->SetBinError  (n, e);
+            *ph = h_short;
           }
-          ret.prob = TMath::Prob(ret.chi2, ret.ndof);
+
+          for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
+            h->SetLineWidth(2);
+            if (div)
+              jmt::divide_by_bin_width(h);
+          }
+
+          h_sig_fit->SetLineColor(kRed);
+          h_sig_fit->SetFillColor(kRed);
+          h_sig_fit->SetFillStyle(3004);
+          h_bkg_fit->SetLineColor(kBlue);
+          h_bkg_fit->SetFillColor(kBlue);
+          h_bkg_fit->SetFillStyle(3005);
+
+          h_sig_fit->Scale(ml.mu_sig);
+          h_bkg_fit->Scale(ml.mu_bkg);
+
+          TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit_%s_%s_shortened", sb_or_b, bb_or_no, div_or_no));
+          h_sum_fit->SetLineColor(kMagenta);
+          h_sum_fit->Add(h_bkg_fit);
+          for (TH1D* h : {h_sum_fit, h_data_fit})
+            h->SetTitle(TString::Format("best %s fit %s: %s;svdist2d (cm);events%s", sb_or_b_nice, bb_or_no_nice, ml.title().c_str(), div_or_no_nice));
+
+          for (TH1D* h : {h_sum_fit, h_data_fit, h_sig_fit, h_bkg_fit})
+            h->SetStats(0);
+
+          if (h_data_fit->GetMaximum() > h_sum_fit->GetMaximum()) {
+            h_data_fit->Draw("e");
+            h_sum_fit->Draw("hist same");
+          }
+          else {
+            h_sum_fit->Draw("hist");
+            h_data_fit->Draw("same e");
+          }
+          h_sig_fit->Draw("same hist");
+          h_bkg_fit->Draw("same hist");
+          c->Write();
+          delete c;
+
+          for (TH1D* h : {h_sum_fit, h_data_fit, h_sig_fit, h_bkg_fit})
+            h->SetStats(1);
+
+          if (!div) {
+            TH1D* h_sum_cumul  = (TH1D*)h_sum_fit ->Clone(TString::Format("h_sum_%s_cumul_%s_%s",  sb_or_b, bb_or_no, div_or_no));
+            TH1D* h_data_cumul = (TH1D*)h_data_fit->Clone(TString::Format("h_data_%s_cumul_%s_%s", sb_or_b, bb_or_no, div_or_no));
+            h_sum_cumul->Scale(1/h_sum_cumul->Integral());
+            h_data_cumul->Scale(1/h_data_cumul->Integral());
+
+            for (TH1D* h : {h_sum_cumul, h_data_cumul})
+              jmt::cumulate(h, false);
+
+            TCanvas* c2 = new TCanvas(TString::Format("c_%s_cumul_%s_%s", sb_or_b, bb_or_no, div_or_no));
+            for (TH1D* h : {h_sum_cumul, h_data_cumul})
+              h->SetStats(0);
+            h_sum_cumul->Draw();
+            h_data_cumul->Draw("same e");
+            c2->Write();
+            delete c2;
+            for (TH1D* h : {h_sum_cumul, h_data_cumul})
+              h->SetStats(1);
+
+            ret.chi2 = 0;
+            ret.ndof = h_data_fit->GetNbinsX() - 2;
+            ret.ks = 0;
+            for (int ibin = 1; ibin <= h_data_fit->GetNbinsX(); ++ibin) {
+              if (h_sum_fit->GetBinContent(ibin) > 0)
+                ret.chi2 += pow(h_data_fit->GetBinContent(ibin) - h_sum_fit->GetBinContent(ibin), 2) / h_sum_fit->GetBinContent(ibin);
+
+              double ksd = fabs(h_sum_cumul->GetBinContent(ibin) - h_data_cumul->GetBinContent(ibin));
+              if (ksd > ret.ks)
+                ret.ks = ksd;
+            }
+            ret.prob = TMath::Prob(ret.chi2, ret.ndof);
+          }
         }
       }
     }
@@ -872,7 +892,7 @@ namespace mfv {
 
     t_obs_0 = calc_test_stat(0);
     t_obs_0.print("t_obs_0");
-    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars());
+    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
 
     pval_signif = 1;
 
