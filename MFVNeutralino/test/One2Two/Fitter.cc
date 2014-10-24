@@ -331,7 +331,7 @@ namespace mfv {
     printf("draw_bkg_templates: %i\n", draw_bkg_templates);
     printf("fix_nuis1: %i\n", fix_nuis1);
     printf("start_nuis: %f, %f\n", start_nuis0, start_nuis1);
-    printf("fluctuate_toys_shapes: %i (SIG NOT IMPLEMENTED)\n", fluctuate_toys_shapes);
+    printf("fluctuate_toys_shapes: %i\n", fluctuate_toys_shapes);
     printf("n_toy_signif: %i\n", n_toy_signif);
     printf("print_toys? %i (sub? %i)\n", print_toys, print_subtoys);
     printf("save_toys? %i\n", save_toys);
@@ -777,28 +777,40 @@ namespace mfv {
     TH1D* h_bkg_use = h_bkg;
 
     if (fluctuate_toys_shapes) {
+      h_sig_use = (TH1D*)fit::h_sig->Clone("h_sig_use");
       h_bkg_use = (TH1D*)h_bkg->Clone("h_bkg_use");
+      h_sig_use->SetDirectory(0);
       h_bkg_use->SetDirectory(0);
 
+      double ss_sum = 0;
       double bs_sum = 0;
+      std::vector<double> ss(fit::n_bins+2, 0.);
       std::vector<double> bs(fit::n_bins+2, 0.);
       for (int i = 1; i <= fit::n_bins; ++i) {
-        double c = h_bkg->GetBinContent(i);
-        double b = rand->Gaus(c, c*fit::eta_bkg[i]);
-        if (b < 0)
-          b = 0;
-        bs_sum += b;
-        bs[i] = b;
+        const double sc = fit::h_sig->GetBinContent(i);
+        const double sn = rand->Poisson(sc * fit::n_sig_orig);
+        ss_sum += sn;
+        ss[i] = sn;
+
+        const double bc = h_bkg->GetBinContent(i);
+        double bn = rand->Gaus(bc, bc*fit::eta_bkg[i]);
+        if (bn < 0)
+          bn = 0;
+        bs_sum += bn;
+        bs[i] = bn;
       }
 
-      for (int i = 1; i <= fit::n_bins; ++i)
+      for (int i = 1; i <= fit::n_bins; ++i) {
+        h_sig_use->SetBinContent(i, ss[i]/ss_sum);
         h_bkg_use->SetBinContent(i, bs[i]/bs_sum);
+      }
     }
 
     fit::h_data_toy_sig->FillRandom(h_sig_use, n_sig);
     fit::h_data_toy_bkg->FillRandom(h_bkg_use, n_bkg);
 
     if (fluctuate_toys_shapes) {
+      delete h_sig_use;
       delete h_bkg_use;
     }
 
