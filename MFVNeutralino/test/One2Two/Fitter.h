@@ -39,7 +39,7 @@ namespace mfv {
     const bool print_subtoys;
     const bool save_toys;
     const bool do_signif;
-    const bool do_limits;
+    const bool do_limit;
     const bool only_fit;
     const int i_limit_job;
     const int n_toy_limit;

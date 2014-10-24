@@ -306,7 +306,7 @@ namespace mfv {
       print_subtoys(env.get_bool("print_subtoys", false)),
       save_toys(env.get_bool("save_toys", false)),
       do_signif(env.get_bool("do_signif", true)),
-      do_limits(env.get_bool("do_limits", true)),
+      do_limit(env.get_bool("do_limit", true)),
       only_fit(env.get_bool("only_fit", false)),
       i_limit_job(env.get_int("i_limit_job", -1)),
       n_toy_limit(env.get_int("n_toy_limit", 10000)),
@@ -336,7 +336,7 @@ namespace mfv {
     printf("print_toys? %i (sub? %i)\n", print_toys, print_subtoys);
     printf("save_toys? %i\n", save_toys);
     printf("do_signif? %i\n", do_signif);
-    printf("do_limits? %i\n", do_limits);
+    printf("do_limit? %i\n", do_limit);
     printf("only_fit? %i\n", only_fit);
     printf("i_limit_job: %i\n", i_limit_job);
     printf("n_toy_limit: %i (~%f uncert @ 0.05)\n", n_toy_limit, sqrt(0.05*0.95/n_toy_limit));
@@ -955,7 +955,7 @@ namespace mfv {
       printf("\npval_signif: %e\n", pval_signif); fflush(stdout);
     }
 
-    if (!only_fit && do_limits) {
+    if (!only_fit && do_limit) {
       const double limit_alpha = 0.05;
 
       const double sig_limit_lo = sig_limit_start;
