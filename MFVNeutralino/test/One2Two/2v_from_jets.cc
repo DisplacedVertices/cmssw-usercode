@@ -21,9 +21,9 @@ const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadro
 float weights[nbkg] = {2*4.849, 2*0.259, 2*0.037, 2*0.188, 2*0.075};
 
 /*
-  const int nbkg = 1;
-  const char* samples[nbkg] = {"ttbarhadronic"};
-  float weights[nbkg] = {1};
+const int nbkg = 1;
+const char* samples[nbkg] = {"ttbarhadronic"};
+float weights[nbkg] = {1};
 */
 
 float sumht(int njets, float* jet_pt) {
@@ -102,7 +102,9 @@ int main(int argc, const char* argv[]) {
       }
 
       if (nt.nvtx == 2) {
-        h_2v_dvv->Fill(sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1)), w);
+        double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
+        if (dvv > 0.11) dvv = 0.11;
+        h_2v_dvv->Fill(dvv, w);
         h_2v_absdphivv->Fill(fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1))), w);
       }
     }
@@ -149,6 +151,7 @@ int main(int argc, const char* argv[]) {
         double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
 
         double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
+        if (dvvc > 0.11) dvvc = 0.11;
         h_c1v_dvv->Fill(dvvc, w * p);
         h_c1v_absdphivv->Fill(fabs(dphi), w * p);
       }
