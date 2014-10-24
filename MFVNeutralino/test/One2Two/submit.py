@@ -236,8 +236,6 @@ if 1:
 
     for batch in batches:
         submit(*batch)
-        print 'waiting 10 seconds'
-        time.sleep(10)
 
 if 0:
     for syst in 'default bowing curl elliptical radial sagitta skew'.split():
