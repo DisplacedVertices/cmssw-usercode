@@ -185,6 +185,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
             env.append('fitter_do_limits=0')
             env.append('toythrower_injected_signal=%i' % sig_samp)
             env.append('toythrower_injected_signal_scale=%f' % sig_scale)
+    else:
+        env.append('fitter_do_limits=0')
 
     if type(samples) == int:
         env.append('toythrower_sample_only=%i' % samples)
@@ -220,8 +222,8 @@ if 1:
 
     for batch in batches:
         submit(*batch)
-        print 'waiting 30 seconds'
-        time.sleep(30)
+        print 'waiting 10 seconds'
+        time.sleep(10)
 
 if 0:
     for syst in 'default bowing curl elliptical radial sagitta skew'.split():
