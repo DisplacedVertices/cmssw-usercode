@@ -516,16 +516,23 @@ namespace mfv {
   }
 
   TH1D* Fitter::make_h_bkg(const char* n, const std::vector<double>& nuis_pars, const std::vector<double>& A_bkg) {
+    if (print_level > 0) printf("make_h_bkg: %s  nuispars %f %f  A_bkg size %lu\n", n, nuis_pars[0], nuis_pars[1], A_bkg.size());
     TH1D* h = (TH1D*)fit::interp->get_Q(nuis_pars)->h->Clone(n);
     if (A_bkg.size()) {
-      for (int ibin = 1; ibin <= fit::n_bins; ++ibin)
+      if (print_level > 0) printf("read A_bkg directly\n");
+      for (int ibin = 1; ibin <= fit::n_bins; ++ibin) {
+        if (print_level > 0) printf("%i %f\n", ibin, A_bkg[ibin]);
         h->SetBinContent(ibin, A_bkg[ibin]);
+      }
     }
     else {
       std::vector<double> a(fit::n_bins+2, 0.);
       fit::interp->interpolate(nuis_pars, &a);
-      for (int ibin = 0; ibin <= fit::n_bins+1; ++ibin)
+      if (print_level > 0) printf("interpolate from nuispars\n");
+      for (int ibin = 0; ibin <= fit::n_bins+1; ++ibin) {
+        if (print_level > 0) printf("%i %f\n", ibin, a[ibin]);
         h->SetBinContent(ibin, a[ibin]);
+      }
     }
     return h;
   }
@@ -709,6 +716,10 @@ namespace mfv {
     m->GetParameter(3, ret.nuis1, ret.err_nuis1);
     ret.ok = istat == 3;
     ret.istat = istat;
+
+    if (print_level > 0)
+      printf("calling twolnL at last minimum so A_sig/bkg are updated\n");
+    fit::twolnL(ret.mu_sig, ret.mu_bkg, ret.nuis0, ret.nuis1);
 
     ret.A_sig.assign(fit::n_bins+2, -1);
     ret.A_bkg.assign(fit::n_bins+2, -1);
