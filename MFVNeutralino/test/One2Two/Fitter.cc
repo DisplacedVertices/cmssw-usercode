@@ -948,7 +948,7 @@ namespace mfv {
 
       const double sig_limit_lo = sig_limit_start;
       const double sig_limit_hi = 1000;
-      const int n_sigma_away = 5;
+      const int n_sigma_away = 10;
       double sig_limit_scan = sig_limit_lo;
 
       printf("scanning for %.1f%% upper limit, ", 100*(1-limit_alpha));
@@ -1053,7 +1053,7 @@ namespace mfv {
           bracket_pval_limit_err.push_back(pval_limit_err);
         }
 
-        if (pval_limit_sghi <= limit_alpha && bracket_sig_limit.size() > 5)
+        if (pval_limit_sghi <= limit_alpha)
           break;
 
         sig_limit_scan += sig_limit_step;
