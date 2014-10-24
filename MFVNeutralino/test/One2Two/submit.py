@@ -3,6 +3,16 @@
 import os, sys, time
 from JMTucker.Tools.general import save_git_status
 
+sample_number_to_name = {}
+i = -1
+for t in [100, 300, 1000, 9900]:
+    for m in [200, 300, 400, 600, 800, 1000]:
+        sample_number_to_name[i] = 'mfv_neutralino_tau%04ium_M%04i' % (t, m)
+        i -= 1
+#for i in xrange(-1, -25, -1):
+#    print i, sample_number_to_name[i]
+
+
 script_template = '''#!/bin/sh
 echo mfvo2t script starting on `date`
 echo mfvo2t script args: $argv
@@ -10,27 +20,7 @@ echo wd: `pwd`
 
 export JOB_NUM=$1
 
-echo get trees
-xrdcp root://cmseos.fnal.gov//store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst.tgz all_trees.tgz
-ECODE=$?
-if [ "$ECODE" -ne "0" ]; then
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  echo @@@@ xrdcp of trees failed
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  exit $ECODE
-fi
-echo
-
-echo untar trees
-tar zxvf all_trees.tgz
-ECODE=$?
-if [ "$ECODE" -ne "0" ]; then
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  echo @@@@ untar failed
-  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  exit $ECODE
-fi
-echo
+%(unzip_files)s
 
 echo ROOTSYS: $ROOTSYS
 echo root-config: `root-config --libdir --version`
@@ -40,6 +30,7 @@ echo ls -la
 ls -la
 echo
 
+export mfvo2t_tree_path=.
 export mfvo2t_no_progressbar=1
 export mfvo2t_seed=$JOB_NUM
 export mfvo2t_ntoys=1
@@ -97,19 +88,20 @@ output_file=mfvo2t.root
 script_exe=runme.csh
 ui_working_dir=%(batch_root)s/crab_%(batch_name)s
 ssh_control_persist=no
-additional_input_files=mfvo2t.exe,filtertee.py
+additional_input_files=mfvo2t.exe,filtertee.py,%(files_needed)s
 copy_data=1
 publish_data_name=mfvo2t_%(batch_name)s
 publish_data=1
 dbs_url_for_publication=phys03
 storage_element=%(storage_element)s
+jmt_skip_input_files=lib/*,src/*
 
 [CRAB]
 jobtype=cmssw
 scheduler=%(scheduler)s
 
 [GRID]
-se_black_list=T2_US_Purdue,T2_CH_CERN,T3_UK_SGrid_Oxford,T3_RU_FIAN,T2_RU_JINR
+#se_black_list=T2_US_Purdue,T2_CH_CERN,T3_UK_SGrid_Oxford,T3_RU_FIAN,T2_RU_JINR
 '''
 
 maked = 'nomake' in sys.argv
@@ -140,6 +132,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
 
     dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
 
+    files_needed = set()
+
     if not setuped:
         os.system('mkdir -p %s' % batch_root)
         save_git_status(os.path.join(batch_root, 'gitstatus'))
@@ -152,6 +146,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
                                                             template_signal,
                                                             'no' if signal_sample is None else 'n%ix%i' % signal_sample,
                                                             samples)
+
+    files_needed.add(sample_number_to_name[template_signal] + '.root.gz')
 
     extra_setup = ''
 
@@ -173,7 +169,10 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
         assert sig_samp < 0
+        files_needed.add(sample_number_to_name[sig_samp] + '.root.gz')
+
         if sig_scale < 0:
+            files_needed.add('MultiJetPk2012.root.gz')
             env.append('ntoys=0')
             env.append('process_data=1')
             if sig_scale == -2:
@@ -182,10 +181,12 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
             else:
                 assert njobs <= 20
         else:
+            files_needed.add('backgrounds.tgz')
             env.append('fitter_do_limits=0')
             env.append('toythrower_injected_signal=%i' % sig_samp)
             env.append('toythrower_injected_signal_scale=%f' % sig_scale)
     else:
+        files_needed.add('backgrounds.tgz')
         env.append('fitter_do_limits=0')
 
     if type(samples) == int:
@@ -194,14 +195,27 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         env.append('toythrower_use_qcd500=1')
     elif 'ttbarsyst' in samples:
         which_syst = samples.replace('ttbarsyst', '')
+        files_needed.add('myttbar%s.root.gz' % which_syst)
         extra_setup += '''
 cd trees
 ln -s myttbar%s.root bkgsyst.root
 cd -
-'''
+''' % which_syst
         env.append('toythrower_sample_only=99')
 
+    ###
+
     env = '\n'.join('export mfvo2t_' + e for e in env)
+
+    unzip_files = []
+    for fn in files_needed:
+        if fn.endswith('.tgz'):
+            unzip_files.append('tar zxf %s' % fn)
+        else:
+            unzip_files.append('gunzip %s' % fn)
+    unzip_files = '\n'.join(unzip_files)
+    tree_path = '/store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
+    files_needed = ','.join(os.path.join(tree_path, f) for f in files_needed)
 
     open('runme.csh', 'wt').write(script_template % locals())
     open('crab.cfg', 'wt').write(crab_cfg % locals())
