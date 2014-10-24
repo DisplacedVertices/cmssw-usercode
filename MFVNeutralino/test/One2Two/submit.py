@@ -40,6 +40,7 @@ export mfvo2t_toythrower_allow_cap=1
 %(extra_setup)s
 
 echo run mfvo2t.exe
+set -o pipefail
 ./mfvo2t.exe | python filtertee.py
 ECODE=$?
 if [ "$ECODE" -ne "0" ]; then
