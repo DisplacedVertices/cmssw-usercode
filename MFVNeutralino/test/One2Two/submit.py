@@ -148,6 +148,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
                                                             'no' if signal_sample is None else 'n%ix%i' % signal_sample,
                                                             samples)
 
+    files_needed.add('backgrounds.tgz')
+    files_needed.add('MultiJetPk2012.root.gz')
     files_needed.add(sample_number_to_name[template_signal] + '.root.gz')
 
     extra_setup = ''
@@ -173,7 +175,6 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         files_needed.add(sample_number_to_name[sig_samp] + '.root.gz')
 
         if sig_scale < 0:
-            files_needed.add('MultiJetPk2012.root.gz')
             env.append('ntoys=0')
             env.append('process_data=1')
             if sig_scale == -2:
@@ -182,12 +183,10 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
             else:
                 assert njobs <= 20
         else:
-            files_needed.add('backgrounds.tgz')
             env.append('fitter_do_limits=0')
             env.append('toythrower_injected_signal=%i' % sig_samp)
             env.append('toythrower_injected_signal_scale=%f' % sig_scale)
     else:
-        files_needed.add('backgrounds.tgz')
         env.append('fitter_do_limits=0')
 
     if type(samples) == int:
