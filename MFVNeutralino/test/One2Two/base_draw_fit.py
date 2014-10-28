@@ -73,6 +73,6 @@ mu_bkg_true_mean = 39.47 * fudge
 
 '''
 foreach x ( crab/One2Two_real*/crab_* )
-  crtools -outputFromFJR $x noraise | grep root > `echo $x | sed -e 's/.*crab_//'`.lst
+  echo $x;  crtools -outputFromFJR $x noraise | grep root > `echo $x | sed -e 's/.*crab_//'`.lst
 end
 '''
