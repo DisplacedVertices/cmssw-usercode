@@ -32,6 +32,10 @@ parser.add_option('--resub-site-control', default='',
                   help='Deprecated, use --resub-black-list.')
 parser.add_option('--resub-black-list', default='',
                   help='Comma-separated list (no spaces!) of sites to blacklist when resubmitting.')
+parser.add_option('--resub-white-codes', default='',
+                  help='Comma-separated list (no spaces!) of codes that are allowed to resubmit -- all others not resubmitted.')
+parser.add_option('--resub-black-codes', default='',
+                  help='Comma-separated list (no spaces!) of codes that are not allowed to resubmit -- all others are resubmitted.')
 parser.add_option('--tee', type='str', metavar='FILE',
                   help='Duplicate stdout to FILE.')
 parser.add_option('--fake-results', type='str', metavar='FILE',
@@ -66,6 +70,18 @@ if options.resub_black_list:
     if options.resub_site_control:
         raise ValueError('Cannot use both --resub-black-list and --resub-site-control')
     options.resub_site_control = '-GRID.se_black_list=' + options.resub_black_list
+
+if options.resub_white_codes and options.resub_black_codes:
+    raise ValueError('not smart enough to handle both --resub-white-codes and --resub-black-codes')
+
+if options.resub_white_codes:
+    options.resub_white_codes = ['.*%s' % x for x in options.resub_white_codes.split(',')]
+else:
+    options.resub_white_codes = []
+if options.resub_black_codes:
+    options.resub_black_codes = ['.*%s' % x for x in options.resub_black_codes.split(',')]
+else:
+    options.resub_black_codes = []
 
 if options.resub_all:
     options.resub_any = options.resub_done_stuck = options.resub_created = True
@@ -137,7 +153,7 @@ def check_fcn(crab_dir, verbose):
     if options.status_only:
         return crab_status(crab_dir, verbose=verbose, debug=options.debug_output)
     else:
-        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_done_stuck=options.resub_done_stuck, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created)
+        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_done_stuck=options.resub_done_stuck, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created, resub_white_codes=options.resub_white_codes, resub_black_codes=options.resub_black_codes)
 
 dirs = crab_dirs_from_argv()
 for x in sys.argv:

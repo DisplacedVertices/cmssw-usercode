@@ -473,7 +473,10 @@ def crab_get_output_files(working_dir, _re=re.compile(r'\$SOFTWARE_DIR/(.*?)[,"]
         
     return list(sorted(files))
 
-def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_done_stuck=False, resub_none=False, site_control='', status_until_none_done=True, resub_created=False):
+def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, resub_done_stuck=False, resub_none=False, site_control='', status_until_none_done=True, resub_created=False, resub_white_codes=[], resub_black_codes=[]):
+    if resub_white_codes and resub_black_codes:
+        raise ValueError("can't have both resub_white_codes, resub_black_codes")
+
     use_server = crab_is_using_server(working_dir)
     to_kill = []
     to_resub = []
@@ -522,18 +525,25 @@ def crab_check_output(working_dir, verbose=True, debug=False, resub_any=False, r
     if resub_created and d.has_key('Created'):
         to_sub.extend(d['Created'])
         
-    if resub_any:
+    if resub_any or resub_white_codes or resub_black_codes:
         for k in d.keys():
             if 'Retrieved' in k and not k.endswith('0_0'):
-                to_resub.extend(d[k])
-            
-    for code in []: # to be recommissioned
-        if type(code) != type(()):
-            code = str(code)
-            code = code, code
-        key = 'Retrieved_%s' % '_'.join(code)
-        if d.has_key(key):
-            to_resub.extend(d[key])
+                if resub_white_codes:
+                    do_resub = False
+                    for resub_filter in resub_white_codes:
+                        if re.search(resub_filter, k):
+                            do_resub = True
+                            break
+                elif resub_black_codes:
+                    do_resub = True
+                    for resub_filter in resub_black_codes:
+                        if re.search(resub_filter, k):
+                            do_resub = False
+                            break
+                else:
+                    do_resub = True
+                if do_resub:
+                    to_resub.extend(d[k])
 
     if to_kill:
         crab_kill(working_dir, to_kill)
