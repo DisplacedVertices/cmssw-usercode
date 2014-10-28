@@ -225,14 +225,22 @@ cd -
 ###
 
 if 1:
+    template_type = 'CJ'
+    min_ntracks = 5
+
+    sig_first = [-15, -21, -9, -6]
+    signals = sorted(set(range(-24, 0)) - set(sig_first))
+    #signals = range(-6,0)
+
+    strengths = (-2, -1, None, 1, 5)
+    #strengths = (None, 1, 5)
+
     batches = []
-    for template_type in ('CJ',):
-        for min_ntracks in (5,):
-            for signal in [-15, -21, -9, -6] + sorted(set(range(-24, 0)) - set([-15, -21, -9, -6])):
-                for strength in (-2, -1, None, 1, 5):
-                    sg = (signal, strength) if strength is not None else None
-                    njobs = 20 if strength == -1 else 500
-                    batches.append((njobs, template_type, min_ntracks, sg, signal, ''))
+    for signal in signals:
+        for strength in strengths:
+            sg = (signal, strength) if strength is not None else None
+            njobs = 20 if strength == -1 else 500
+            batches.append((njobs, template_type, min_ntracks, sg, signal, ''))
 
     for batch in batches:
         submit(*batch)
@@ -243,3 +251,12 @@ if 0:
             for strength in (None, 1):
                 sg = (signal, strength) if strength is not None else None
                 submit(10, 'CJ', 5, sg, signal, syst)
+
+'''
+for line in open('screen-exchange'):
+    if line.startswith('crab_'):
+        sam = int(line.split('SigTmp-')[1].split('_')[0])
+        if sam <= 6:
+            print line,
+
+'''
