@@ -5,6 +5,7 @@
 #include <limits>
 
 #include "TCanvas.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TFitResult.h"
 #include "TGraphErrors.h"
@@ -130,7 +131,7 @@ namespace mfv {
       A_bkg.assign(n_bins+2, 0.);
       double A_sig_sum = 0, A_bkg_sum = 0;
 
-      const double eps = 1e-9;
+      const double eps = 1e-4;
       const double sqrteps = sqrt(eps);
       const int maxit = 10000;
       for (int i = 1; i <= n_bins; ++i) {
@@ -206,9 +207,6 @@ namespace mfv {
       double lnL_fit = 0;
 
       for (int i = 1; i <= n_bins; ++i) {
-        A_bkg[i] /= A_bkg_sum;
-        A_sig[i] /= A_sig_sum;
-
         const double dlnL_bb_bkg = barlow_beeston ? (a_bkg[i] == 0. ? 0. : -0.5 * pow((a_bkg[i] - A_bkg[i])/a_bkg[i]/eta_bkg[i], 2)) : 0;
         const double dlnL_bb_sig = barlow_beeston ? (n_sig_orig * a_sig[i] * log(n_sig_orig * A_sig[i]) - n_sig_orig * A_sig[i]) : 0;
 
@@ -301,7 +299,7 @@ namespace mfv {
       start_nuis0(env.get_double("start_nuis0", 0.025)),
       start_nuis1(env.get_double("start_nuis1", 0.008)),
       fluctuate_toys_shapes(env.get_bool("fluctuate_toys_shapes", true)),
-      n_toy_signif(env.get_int("n_toy_signif", 100000)),
+      n_toy_signif(env.get_int("n_toy_signif", 10000)),
       print_toys(env.get_bool("print_toys", false)),
       print_subtoys(env.get_bool("print_subtoys", false)),
       save_toys(env.get_bool("save_toys", false)),
@@ -309,7 +307,7 @@ namespace mfv {
       do_limit(env.get_bool("do_limit", true)),
       only_fit(env.get_bool("only_fit", false)),
       i_limit_job(env.get_int("i_limit_job", -1)),
-      n_toy_limit(env.get_int("n_toy_limit", 10000)),
+      n_toy_limit(env.get_int("n_toy_limit", 2000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
       sig_limit_step(env.get_double("sig_limit_step", 0.25)),
       sig_eff(env.get_double("sig_eff", 1.)),
@@ -854,7 +852,7 @@ namespace mfv {
     fit::calc_lnL_offset();
 
     if (bkg_gaussians)
-      fit::eta_bkg = { -1, 0.001, 0.001, 0.01, 0.35, 1.5, 15., -1};
+      fit::eta_bkg = { -1, 0.01, 0.01, 0.01, 0.30, 3., 15., -1};
     else
       fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, -1 };
 
@@ -914,6 +912,18 @@ namespace mfv {
 
     t_obs_0 = calc_test_stat(0);
     t_obs_0.print("t_obs_0");
+
+    if (print_level > 0) {
+      fit::extra_prints = 1;
+      printf("twolnL_h1:\n");
+      const double twolnL_h1 = fit::twolnL(t_obs_0.h1.mu_sig, t_obs_0.h1.mu_bkg, t_obs_0.h1.nuis_pars()[0], t_obs_0.h1.nuis_pars()[1]);
+      printf("twolnL_h1 = %f\n", twolnL_h1);
+      printf("twolnL_h0:\n");
+      const double twolnL_h0 = fit::twolnL(t_obs_0.h0.mu_sig, t_obs_0.h0.mu_bkg, t_obs_0.h0.nuis_pars()[0], t_obs_0.h0.nuis_pars()[1]);
+      printf("twolnL_h0 = %f\n", twolnL_h0);
+      fit::extra_prints = 0;
+    }
+
     TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
 
     pval_signif = 1;
@@ -960,7 +970,7 @@ namespace mfv {
 
       const double sig_limit_lo = sig_limit_start;
       const double sig_limit_hi = 1000;
-      const int n_sigma_away = 10;
+      const int n_sigma_away = 5;
       double sig_limit_scan = sig_limit_lo;
 
       printf("scanning for %.1f%% upper limit, ", 100*(1-limit_alpha));
@@ -1074,13 +1084,18 @@ namespace mfv {
       std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
       TGraphErrors* g = new TGraphErrors(bracket_sig_limit.size(), &bracket_sig_limit[0], &bracket_pval_limit[0], &bracket_sig_limit_err[0], &bracket_pval_limit_err[0]);
       g->SetMarkerStyle(5);
-      TFitResultPtr res = g->Fit("pol1", "S");
+      TF1* interp_fcn = new TF1("interp_fcn", "[0]*exp(-[1]*x)", bracket_sig_limit.front(), bracket_sig_limit.back());
+      interp_fcn->SetParameters(0.5, 0.3);
+      TFitResultPtr res = g->Fit(interp_fcn, "RS");
       const double a  = res->Parameter(0);
       const double b  = res->Parameter(1);
       const double ea = res->ParError(0);
       const double eb = res->ParError(1);
-      sig_limit = (limit_alpha - a)/b;
-      sig_limit_err = sig_limit * sqrt(pow(ea/a, 2) + pow(eb/b, 2));
+      const double cov = res->CovMatrix(0,1);
+      const double dfda = 1/a/b;
+      sig_limit = -log(limit_alpha/a)/b;
+      const double dfdb = -sig_limit/b;
+      sig_limit_err = sqrt(dfda*dfda * ea*ea + dfdb*dfdb * eb*eb + 2 * dfda * dfdb * cov);
       sig_limit_fit_n = bracket_sig_limit.size();
       sig_limit_fit_a     = a;
       sig_limit_fit_b     = b;
