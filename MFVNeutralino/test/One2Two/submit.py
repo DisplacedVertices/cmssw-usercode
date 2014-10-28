@@ -228,7 +228,7 @@ if 1:
     batches = []
     for template_type in ('CJ',):
         for min_ntracks in (5,):
-            for signal in xrange(-24, 0):
+            for signal in [-15, -21, -9, -6] + sorted(set(range(-24, 0)) - set([-15, -21, -9, -6])):
                 for strength in (-2, -1, None, 1, 5):
                     sg = (signal, strength) if strength is not None else None
                     njobs = 20 if strength == -1 else 500
