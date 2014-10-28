@@ -183,11 +183,11 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
             else:
                 assert njobs <= 20
         else:
-            env.append('fitter_do_limits=0')
+            env.append('fitter_do_limit=0')
             env.append('toythrower_injected_signal=%i' % sig_samp)
             env.append('toythrower_injected_signal_scale=%f' % sig_scale)
     else:
-        env.append('fitter_do_limits=0')
+        env.append('fitter_do_limit=0')
 
     if type(samples) == int:
         env.append('toythrower_sample_only=%i' % samples)
