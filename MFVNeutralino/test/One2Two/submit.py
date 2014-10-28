@@ -179,7 +179,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
             env.append('process_data=1')
             if sig_scale == -2:
                 env.append('seed=1')
-                env.append('fitter_i_limit_scan=$JOB_NUM')
+                env.append('fitter_i_limit_job=$JOB_NUM')
             else:
                 assert njobs <= 20
         else:
