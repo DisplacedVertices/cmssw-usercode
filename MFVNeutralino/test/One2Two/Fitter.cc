@@ -902,6 +902,11 @@ namespace mfv {
 
     dtoy->mkdir("fit_results")->cd();
 
+    for (int i = 1; i <= fit::n_bins; ++i) {
+      h_signif_toy.push_back(new TH1F(TString::Format("h_signif_toys_bin_%i", i), "", 40, 0, n_data + sqrt(n_data) * 3));
+      h_limit_toy.push_back(new TH1F(TString::Format("h_limit_toys_bin_%i", i), "", 40, 0, n_data + sqrt(n_data) * 3));
+    }
+
     printf("Fitter: toy: %i  n_sig_true: %.1f  n_bkg_true: %.1f  true_pars:", toy, true_pars[0], true_pars[1]);
     for (double tp : true_pars)
       printf(" %f", tp);
@@ -945,6 +950,8 @@ namespace mfv {
         const int n_sig_signif = 0;
         const int n_bkg_signif = rand->Poisson(n_data);
         make_toy_data(i_toy_signif, -1, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
+        for (int i = 1; i <= fit::n_bins; ++i)
+          h_signif_toy[i-1]->Fill(fit::h_data->GetBinContent(i));
       
         const test_stat_t t = calc_test_stat(0);
         if (t.t >= t_obs_0.t)
@@ -994,6 +1001,14 @@ namespace mfv {
           make_toy_data(-1, -1, i_limit_job, 0, rand->Poisson(n_data), h_bkg_obs_0);
           h_toy_expected = (TH1D*)fit::h_data_toy->Clone("h_toy_expected");
           h_toy_expected->SetDirectory(0);
+          for (int i = 1; i <= fit::n_bins; ++i)
+            h_limit_toy[i-1]->Fill(fit::h_data_toy->GetBinContent(i));
+          if (print_subtoys && i_toy_expected < i_limit_job) {
+            printf("burning toy [ ");
+            for (int i = 1; i <= fit::n_bins; ++i)
+              printf("%i ", int(h_toy_expected->GetBinContent(i)));
+            printf("]\n");
+          }
         }
       }
 
@@ -1041,7 +1056,10 @@ namespace mfv {
 
           if (print_toys) {
             if (print_subtoys) {
-              printf("  limit toy %i nsig %i nbkg %i n'data' %i ", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
+              printf("  limit toy %i nsig %i nbkg %i n'data' %i [ ", i_toy_limit, n_sig_limit, n_bkg_limit, n_data);
+              for (int i = 1; i <= fit::n_bins; ++i)
+                printf("%i ", int(fit::h_data->GetBinContent(i)));
+              printf("] ");
               t.print("t_limit", -1, "    ");
             }
             else
