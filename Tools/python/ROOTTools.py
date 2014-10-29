@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, tempfile
 from array import array
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
@@ -692,7 +692,7 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
     xform parameter specifies the function transforming the tuple of
     strings into the desired format."""
     
-    tmp_fn = os.tmpnam()
+    tmp_fn = tempfile.mkstemp()[1]
     t.GetPlayer().SetScanRedirect(True)
     t.GetPlayer().SetScanFileName(tmp_fn)
     t.Scan(branches, cut, 'colsize=50')

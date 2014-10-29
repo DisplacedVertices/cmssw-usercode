@@ -13,6 +13,7 @@ class TFile;
 class TRandom;
 class TString;
 class TTree;
+class TH1F;
 
 namespace mfv {
   class Templater;
@@ -123,6 +124,8 @@ namespace mfv {
     ////////////////////////////////////////////////////////////////////////////
 
     TTree* t_fit_info;
+    std::vector<TH1F*> h_signif_toy;
+    std::vector<TH1F*> h_limit_toy;
     
     ////////////////////////////////////////////////////////////////////////////
 
