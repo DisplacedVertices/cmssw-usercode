@@ -124,6 +124,8 @@ for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h
     h = eval(x)
     if type(h) == ROOT.TH1D:
         if 'pull' in x:
+            if sig_scale < 0:
+                continue
             h.Fit('gaus')
         else:
             h.Draw()
