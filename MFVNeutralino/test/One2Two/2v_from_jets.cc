@@ -58,9 +58,38 @@ float throw_phi(int njets, float* jet_pt, float* jet_phi) {
   return TVector2::Phi_mpi_pi(vtx_phi);
 }
 
+int throw_jet(int njets, float* jet_pt) {
+  int jet = 0;
+  double rand = gRandom->Rndm();
+  double sumpt = 0;
+  for (int j = 0; j < njets; ++j) {
+    sumpt += jet_pt[j];
+    if (rand < sumpt/sumht(njets, jet_pt)) {
+      jet = j;
+      break;
+    }
+  }
+  return jet;
+}
+
+float throw_phi_from_jet(int j, float* jet_phi) {
+  double rjetphi = jet_phi[j];
+
+  double rdphi = gRandom->Gaus(1.57, 0.4);
+
+  double vtx_phi = 0;
+  if (gRandom->Rndm() < 0.5) {
+    vtx_phi = rjetphi - rdphi;
+  } else {
+    vtx_phi = rjetphi + rdphi;
+  }
+
+  return TVector2::Phi_mpi_pi(vtx_phi);
+}
+
 int main(int argc, const char* argv[]) {
   TH1::SetDefaultSumw2();
-  gRandom->SetSeed(0);
+  gRandom->SetSeed(12191982);
 
   //fill only-one-vertex dBV distribution
   TH1F* h_1v_dbv = new TH1F("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", 500, 0, 2.5);
@@ -137,8 +166,25 @@ int main(int argc, const char* argv[]) {
         h_c1v_dbv->Fill(dbv0, w);
         h_c1v_dbv->Fill(dbv1, w);
 
-        double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
-        double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
+        int jet0 = throw_jet(nt.njets, nt.jet_pt);
+        int jet1 = throw_jet(nt.njets, nt.jet_pt);
+/*
+        float nm1_jet_pt[50];
+        for (int k = 0; k < nt.njets; ++k) {
+          if (k == jet0) {
+            nm1_jet_pt[k] = 0;
+          } else {
+            nm1_jet_pt[k] = nt.jet_pt[k];
+          }
+        }
+        int jet1 = throw_jet(nt.njets, nm1_jet_pt);
+*/
+
+        double phi0 = throw_phi_from_jet(jet0, nt.jet_phi);
+        double phi1 = throw_phi_from_jet(jet1, nt.jet_phi);
+
+        //double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
+        //double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
         double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
         h_c1v_phiv->Fill(phi0, w);
         h_c1v_phiv->Fill(phi1, w);
