@@ -903,8 +903,9 @@ namespace mfv {
     dtoy->mkdir("fit_results")->cd();
 
     for (int i = 1; i <= fit::n_bins; ++i) {
-      h_signif_toy.push_back(new TH1F(TString::Format("h_signif_toys_bin_%i", i), "", 40, 0, n_data + sqrt(n_data) * 3));
-      h_limit_toy.push_back(new TH1F(TString::Format("h_limit_toys_bin_%i", i), "", 40, 0, n_data + sqrt(n_data) * 3));
+      const int nn(0.8*(n_data + sqrt(n_data) * 3));
+      h_signif_toy.push_back(new TH1F(TString::Format("h_signif_toys_bin_%i", i), "", nn, 0, nn));
+      h_limit_toy.push_back(new TH1F(TString::Format("h_limit_toys_bin_%i", i), "", nn, 0, nn));
     }
 
     printf("Fitter: toy: %i  n_sig_true: %.1f  n_bkg_true: %.1f  true_pars:", toy, true_pars[0], true_pars[1]);
