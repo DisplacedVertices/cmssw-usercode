@@ -3,7 +3,9 @@
 from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
-ps = plot_saver('plots/mfvlimits', log=False)
+ps = plot_saver('plots/mfvlimits', log=False, size=(600,600))
+
+draw_gluglu = False
 
 def fmt(t, title, color):
     t.SetFillColor(color)
@@ -38,33 +40,32 @@ def tgae(x, y, exl, exh, eyl, eyh, title, color):
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, color)
 
-#gluglu = [eval(x.strip()) for x in open('gluglu.csv').readlines() if x.strip()]
-#g_gluglu = tge(gluglu, 'hi', 9)
-#g_gluglu.Draw('A3')
-#ps.save('gluglu')
+if draw_gluglu:
+    gluglu = [eval(x.strip()) for x in open('gluglu.csv').readlines() if x.strip()]
+    gluglu = [(z[0],z[1]*1000,z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
+    g_gluglu = tge(gluglu, 'hi', 9)
+    g_gluglu.Draw('A3')
+    ps.save('gluglu', log=True)
 
 taus = [
-    #('0100um', '#tau = 100 #mum'),
+    ('0100um', '#tau = 100 #mum'),
     ('0300um', '#tau = 300 #mum'),
     ('1000um', '#tau = 1 mm'),
     ('9900um', '#tau = 9.9 mm'),
     ]
 
 watches = [
-    'Observed Limit: r < ',
-    'Expected  2.5%: r < ',
-    'Expected 16.0%: r < ',
-    'Expected 50.0%: r < ',
-    'Expected 84.0%: r < ',
-    'Expected 97.5%: r < ',
+    'sigma_sig_limit:Observed Limit: r < ',
+    'sigma_sig_limit:Expected  2.5%: r < ',
+    'sigma_sig_limit:Expected 16.0%: r < ',
+    'sigma_sig_limit:Expected 50.0%: r < ',
+    'sigma_sig_limit:Expected 84.0%: r < ',
+    'sigma_sig_limit:Expected 97.5%: r < ',
     ]
 
-nn = -7
+nn = -1
 for tau, tau_nice in taus:
-    if tau == '0100um':
-        masses = [600, 800, 1000]
-    else:
-        masses = [200, 300, 400, 600, 800, 1000]
+    masses = [200, 300, 400, 600, 800, 1000]
     observed = []
     expect50 = []
     expect68 = []
@@ -75,12 +76,12 @@ for tau, tau_nice in taus:
     expect95hi = []
 
     for mass in masses:
-        if mass == 200 or nn == -14 or nn == -18:
+        if False:
             print 'skip', tau, mass
             nn -= 1
             continue
-        fn = 'One2Two/lsts_real/real_TmpCJ_Ntk5_SigTmp%i_SigSamno_Sam.lst.drawlog' % nn
-        fn2 = 'One2Two/lsts_real/real_data_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.lst.drawlog' % (nn, nn)
+        fn  = 'outs/BBv4_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (nn, nn)
+        fn2 = 'outs/BBv4_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (nn, nn)
         print nn, fn, fn2
         nn -= 1
         vals = [None]*6
@@ -111,32 +112,39 @@ for tau, tau_nice in taus:
         expect95lo.append(exp95 - exp2p5)
         expect95hi.append(exp97p5 - exp95)
 
-    masses_ = masses[1:] if tau != '1000um' else [400, 600, 800]
-    g_observed = tgae(masses_, observed, None, None, None, None, tau_nice, 1)
+    for l in [masses, observed, expect50, expect68, expect68lo, expect68hi, expect95, expect95lo, expect95hi]:
+        l.pop(0)
+        #l.pop(0)
+        
+    g_observed = tgae(masses, observed, None, None, None, None, tau_nice, 1)
     g_observed.SetMarkerStyle(20)
     g_observed.SetMarkerSize(1.2)
     g_observed.Draw('ALP')
-    g_observed.GetYaxis().SetRangeUser(0, 30 if tau == '0300um' else (3 if tau == '1000um' else 1.5))
+    g_observed.GetYaxis().SetRangeUser(0, 50 if tau == '0300um' else (9 if tau == '1000um' else 4))
 
-    g_expect95 = tgae(masses_, expect95, None, None, expect95lo, expect95hi, tau_nice, 5)
+    g_expect95 = tgae(masses, expect95, None, None, expect95lo, expect95hi, tau_nice, 5)
     g_expect95.Draw('3')
 
-    g_expect68 = tgae(masses_, expect68, None, None, expect68lo, expect68hi, tau_nice, 3)
+    g_expect68 = tgae(masses, expect68, None, None, expect68lo, expect68hi, tau_nice, 3)
     g_expect68.Draw('3')
 
-    g_expect50 = tgae(masses_, expect50, None, None, None, None, tau_nice, 1)
+    g_expect50 = tgae(masses, expect50, None, None, None, None, tau_nice, 1)
     g_expect50.SetLineStyle(2)
     g_expect50.Draw('L')
 
-    #g_gluglu.SetFillStyle(3001)
-    #g_gluglu.Draw('3')
+    g_observed.Draw('LP')
+
+    if draw_gluglu:
+        g_gluglu.SetFillStyle(3001)
+        g_gluglu.Draw('3')
 
     leg = ROOT.TLegend(0.734, 0.716, 0.990, 0.988)
     leg.AddEntry(g_observed, 'Obs. limit', 'L')
     leg.AddEntry(g_expect50, 'Exp. limit', 'L')
     leg.AddEntry(g_expect68, 'Exp. #pm 1 #sigma', 'F')
     leg.AddEntry(g_expect95, 'Exp. #pm 2 #sigma', 'F')
-    #leg.AddEntry(g_gluglu,   'NLO + NLL #tilde{g} #tilde{g} production', 'F')
+    if draw_gluglu:
+        leg.AddEntry(g_gluglu, 'NLO + NLL #tilde{g} #tilde{g} production', 'F')
     leg.Draw()
     
     ps.save('tau%s' % tau)
