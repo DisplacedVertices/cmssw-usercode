@@ -16,6 +16,9 @@ namespace mfv {
     jmt::ConfigFromEnv env;
 
     const double d2d_cut;
+    const bool load_from_file;
+    const std::string load_from_file_fn;
+    const std::string load_from_file_path;
     const bool save_templates;
     const bool finalize_templates;
     const int sample_count;

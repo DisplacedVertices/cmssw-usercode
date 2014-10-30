@@ -1,6 +1,7 @@
 #include "ClearedJetsTemplater.h"
 #include "TFile.h"
 #include "TH1.h"
+#include "TKey.h"
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TTree.h"
@@ -19,6 +20,9 @@ namespace mfv {
 
       env("mfvo2t_clearedjets" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.05)),
+      load_from_file(env.get_bool("load_from_file", false)),
+      load_from_file_fn(env.get_string("load_from_file_fn", "mfvo2t_templates.root")),
+      load_from_file_path(env.get_string("load_from_file_path", "ClearedJetsTemplater/seed0000_toy0000/templates")),
       save_templates(env.get_bool("save_templates", false)),
       finalize_templates(env.get_bool("finalize_templates", true)),
       sample_count(env.get_int("sample_count", -1)),
@@ -36,12 +40,16 @@ namespace mfv {
       clearing_sigma_fit(0.005)
   {
     printf("ClearedJetsTemplater%s config:\n", name.c_str());
-    printf("d2d_cut: %f\n", d2d_cut);
-    printf("sample_count: %i\n", sample_count);
-    if (flat_phis)
-      printf("phis thrown flat\n");
-    else
-      printf("phi_from_jet ~ Gaus(%f, %f)\n", phi_from_jet_mu, phi_from_jet_sigma);
+    if (load_from_file)
+      printf("loading templates from %s:%s\n", load_from_file_fn.c_str(), load_from_file_path.c_str());
+    else {
+      printf("d2d_cut: %f\n", d2d_cut);
+      printf("sample_count: %i\n", sample_count);
+      if (flat_phis)
+        printf("phis thrown flat\n");
+      else
+        printf("phi_from_jet ~ Gaus(%f, %f)\n", phi_from_jet_mu, phi_from_jet_sigma);
+    }
     printf("clearing_mu: %i increments of %f starting from %f\n", n_clearing_mu, d_clearing_mu, clearing_mu_start);
     printf("clearing_sigma: %i increments of %f starting from %f\n", n_clearing_sigma, d_clearing_sigma, clearing_sigma_start);
 
@@ -100,12 +108,76 @@ namespace mfv {
   void ClearedJetsTemplater::make_templates() {
     dataset_ok();
 
+    clear_templates();
+    int iglb = 0;
+
+    if (load_from_file) {
+      TDirectory* previous_d = gDirectory->GetDirectory(gDirectory->GetPath());
+
+      TFile* f = new TFile(load_from_file_fn.c_str());
+      if (!f || !f->IsOpen())
+        jmt::vthrow("could not open templates file %s", load_from_file_fn.c_str());
+      TDirectory* d = (TDirectory*)f->Get(load_from_file_path.c_str());
+      if (!d)
+        jmt::vthrow("could not get template directory %s:%s", load_from_file_fn.c_str(), load_from_file_path.c_str());
+
+      int imu = 0;
+      TIter it_mu(d->GetListOfKeys());
+      TKey* k_mu;
+      while ((k_mu = (TKey*)it_mu())) {
+        TDirectory* d_mu = (TDirectory*)k_mu->ReadObj();
+        TString n_mu = d_mu->GetName();
+        n_mu.ReplaceAll("imu_", "");
+        const int imu_check = n_mu.Atoi();
+        if (imu != imu_check)
+          jmt::vthrow("problem reading template directory in %s:%s : %s != imu_%02i", load_from_file_fn.c_str(), load_from_file_path.c_str(), n_mu.Data(), imu);
+
+        int isig = 0;
+        TIter it_sig(d_mu->GetListOfKeys());
+        TKey* k_sig;
+        while ((k_sig = (TKey*)it_sig())) {
+          TH1D* h = (TH1D*)k_sig->ReadObj();
+
+          TString n_sig = h->GetName();
+          n_sig.ReplaceAll(TString::Format("h_template_imu%03i_isig", imu), "");
+          const int isig_check = n_sig.Atoi();
+          if (isig != isig_check)
+            jmt::vthrow("problem reading template directory in %s:%s : %s != isig_%03i", load_from_file_fn.c_str(), load_from_file_path.c_str(), n_sig.Data(), isig);
+
+          TString title = h->GetTitle();
+          TObjArray* arr = title.Tokenize(" ");
+          if (arr->GetEntries() != 8)
+            jmt::vthrow("cannot parse title %s", title.Data());
+          const double mu  = ((TObjString*)arr->At(4))->GetString().Atof();
+          const double sig = ((TObjString*)arr->At(7))->GetString().Atof();
+          delete arr;
+
+          const double clearing_mu = clearing_mu_start + imu * d_clearing_mu;
+          const double clearing_sigma = clearing_sigma_start + isig * d_clearing_sigma;
+
+          if (mu < 0 || mu > 0.1 || sig < 0 || sig > 0.1 || fabs(clearing_mu - mu) > 1e-4 || fabs(clearing_sigma - sig) > 1e-4)
+            jmt::vthrow("something wrong with parsing %s into %f and %f", h->GetTitle(), mu, sig);
+
+          TH1D* hh = (TH1D*)h->Clone();
+          hh->SetDirectory(0);
+          templates.push_back(new ClearedJetsTemplate(iglb++, hh, clearing_mu, clearing_sigma));
+
+          ++isig;
+        }
+
+        ++imu;
+      }
+
+      f->Close();
+      delete f;
+      previous_d->cd();
+      return;
+    }
+
     const int N1v = sample_count > 0 ? sample_count : int(dataset.events_1v->size());
     printf("ClearedJetsTemplater%s making templates\n", name.c_str()); fflush(stdout);
     jmt::ProgressBar pb(50, N1v);
     pb.start();
-
-    clear_templates();
 
     TDirectory* dtemp = 0;
     if (save_templates) {
@@ -113,7 +185,6 @@ namespace mfv {
       dtemp->cd();
     }
 
-    int iglb = 0;
     for (int imu = 0; imu < n_clearing_mu; ++imu) {
       const double clearing_mu = clearing_mu_start + imu * d_clearing_mu;
 
@@ -125,6 +196,7 @@ namespace mfv {
 
         TH1D* h = Template::hist_with_binning(TString::Format("h_template_imu%03i_isig%03i", imu, isig),
                                               TString::Format("clearing pars: #mu = %f  #sigma = %f", clearing_mu, clearing_sigma));
+
         if (!save_templates)
           h->SetDirectory(0);
 
