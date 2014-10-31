@@ -930,7 +930,7 @@ namespace mfv {
       fit::extra_prints = 0;
     }
 
-    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
+    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), std::vector<double>());
 
     pval_signif = 1;
 
