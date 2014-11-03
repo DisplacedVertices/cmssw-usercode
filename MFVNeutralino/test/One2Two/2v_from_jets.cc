@@ -70,6 +70,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_1v_phij = new TH1F("h_1v_phij", "only-one-vertex events;jets #phi;jets", 50, -3.15, 3.15);
   TH1F* h_1v_dphijj = new TH1F("h_1v_dphijj", "only-one-vertex events;jet pair #Delta#phi;jet pairs", 50, -3.15, 3.15);
   TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
+  TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 500, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", 6, 0, 0.12);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi(vertex #0, vertex #1)|;events", 5, 0, 3.15);
 
@@ -102,6 +103,8 @@ int main(int argc, const char* argv[]) {
       }
 
       if (nt.nvtx == 2) {
+        h_2v_dbv->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
+        h_2v_dbv->Fill(sqrt(nt.x1*nt.x1 + nt.y1*nt.y1), w);
         double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
         if (dvv > 0.11) dvv = 0.11;
         h_2v_dvv->Fill(dvv, w);
@@ -116,6 +119,8 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 6, 0, 0.12);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi(vertex #0, vertex #1)|;events", 5, 0, 3.15);
+  TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 500, 0, 2.5);
+  TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 500, 0, 2.5);
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
@@ -154,6 +159,8 @@ int main(int argc, const char* argv[]) {
         if (dvvc > 0.11) dvvc = 0.11;
         h_c1v_dvv->Fill(dvvc, w * p);
         h_c1v_absdphivv->Fill(fabs(dphi), w * p);
+        h_c1v_dbv0->Fill(dbv0, w * p);
+        h_c1v_dbv1->Fill(dbv1, w * p);
       }
     }
   }
@@ -167,6 +174,7 @@ int main(int argc, const char* argv[]) {
   h_1v_phij->Write();
   h_1v_dphijj->Write();
   h_1v_dphijv->Write();
+  h_2v_dbv->Write();
   h_2v_dvv->Write();
   h_2v_absdphivv->Write();
 
@@ -175,6 +183,8 @@ int main(int argc, const char* argv[]) {
   h_c1v_dphijv->Write();
   h_c1v_dvv->Write();
   h_c1v_absdphivv->Write();
+  h_c1v_dbv0->Write();
+  h_c1v_dbv1->Write();
 
   TCanvas* c_dvv = new TCanvas("c_dvv", "c_dvv", 700, 700);
   h_2v_dvv->SetLineColor(kBlue);
