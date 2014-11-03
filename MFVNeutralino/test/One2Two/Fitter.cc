@@ -538,8 +538,8 @@ namespace mfv {
   Fitter::fit_stat_t Fitter::draw_fit(const test_stat_t& t) {
     fit_stat_t ret;
 
-   for (int div = 0; div <= 1; ++div) {
-     for (int bb = 1; bb >= 0; --bb) {
+    for (int div = 0; div <= 1; ++div) {
+      for (int bb = 1; bb >= 0; --bb) {
         for (int sb = 1; sb >= 0; --sb) {
           const char* bb_or_no = bb ? "bb" : "nobb";
           const char* bb_or_no_nice = bb ? "w/ BB" : "w/o BB";
