@@ -230,11 +230,9 @@ if 1:
     min_ntracks = 5
 
     sig_first = [-15, -21, -9, -6]
-    signals = sorted(set(range(-24, 0)) - set(sig_first))
-    #signals = range(-6,0)
+    signals = sig_first + sorted(set(range(-24, 0)) - set(sig_first))
 
     strengths = (-2, -1, None, 1, 5)
-    #strengths = (None, 1, 5)
 
     batches = []
     for signal in signals:
