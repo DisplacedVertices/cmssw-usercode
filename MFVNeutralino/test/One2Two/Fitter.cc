@@ -8,8 +8,10 @@
 #include "TF1.h"
 #include "TFile.h"
 #include "TFitResult.h"
+#include "TGraphAsymmErrors.h"
 #include "TGraphErrors.h"
 #include "TH2.h"
+#include "TLegend.h"
 #include "TMath.h"
 #include "TMinuit.h"
 #include "TRandom3.h"
@@ -535,6 +537,98 @@ namespace mfv {
     return h;
   }
 
+  TH1D* Fitter::shorten_hist(TH1D* h, bool save) {
+    std::vector<double> bins = Template::binning(true);
+    TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
+    // Splitting the last bin puts its contents in the overflow -- move back into last bin.
+    int n = h_short->GetNbinsX();
+    double v = h_short->GetBinContent(n+1);
+    double e = h_short->GetBinError(n+1);
+    h_short->SetBinContent(n+1, 0);
+    h_short->SetBinError  (n+1, 0);
+    h_short->SetBinContent(n, v);
+    h_short->SetBinError  (n, e);
+    if (!save)
+      h_short->SetDirectory(0);
+    return h_short;
+  }
+
+  void Fitter::scan_template_chi2(const test_stat_t& t) {
+    TCanvas* c_scan_templates = new TCanvas("c_scan_templates");
+
+    std::vector<TH1D*> hs;
+
+    const int n_data = fit::h_data_real->Integral();
+    TH1D* h_data_shortened = shorten_hist(fit::h_data_real, false);
+    hs.push_back(h_data_shortened);
+
+    TGraphAsymmErrors* tgae_data_shortened = jmt::poisson_intervalize(h_data_shortened);
+    tgae_data_shortened->SetLineWidth(2);
+    tgae_data_shortened->SetMarkerStyle(20);
+    tgae_data_shortened->SetMarkerSize(1);
+    tgae_data_shortened->Draw("AP");
+
+    TH1D* h_bkg_fit = make_h_bkg("h_bkg_fit", t.h0.nuis_pars(), std::vector<double>());
+    h_bkg_fit->SetDirectory(0);
+    hs.push_back(h_bkg_fit);
+    h_bkg_fit->Scale(n_data / h_bkg_fit->Integral());
+    h_bkg_fit->SetLineWidth(2);
+    h_bkg_fit->SetLineColor(kBlue);
+    h_bkg_fit->Draw("same e");
+
+    const int Nbest = 2;
+    std::vector<double> best_chi2(Nbest, 1e99);
+    std::vector<Template*> best_template(Nbest, (Template*)0);
+
+    for (Template* tmp : *bkg_templates) {
+      const double norm = n_data / tmp->h->Integral();
+      std::vector<double> chi2(Nbest, 0);
+
+      for (int ibin = 1; ibin <= fit::n_bins; ++ibin) {
+        const double c = tmp->h->GetBinContent(ibin) * norm;
+        const double dchi2 = c > 0 ? pow(h_data_shortened->GetBinContent(ibin) - c, 2) / tmp->h->GetBinContent(ibin) : 0.;
+        for (int ibest = 0; ibest < Nbest; ++ibest)
+          if (ibest == 0 || (ibest == 1 && ibin >= 4))
+            chi2[ibest] += dchi2;
+      }
+
+      for (int ibest = 0; ibest < Nbest; ++ibest)
+        if (chi2[ibest] < best_chi2[ibest]) {
+          best_chi2[ibest] = chi2[ibest];
+          best_template[ibest] = tmp;
+        }
+    }
+
+    const int colors[Nbest] = { 2, 8 };
+    const char* legs[Nbest] = { "all bins", "last three bins" };
+    TLegend* leg = new TLegend(0.6,0.6,0.95,0.95);
+    leg->SetFillColor(kWhite);
+
+    leg->AddEntry(tgae_data_shortened, "data", "LPE");
+    leg->AddEntry(h_bkg_fit, "best b-only fit", "LPE");
+
+    for (int ibest = 0; ibest < Nbest; ++ibest) {
+      Template* tmp = best_template[ibest];
+      TH1D* h = shorten_hist(tmp->h, false);
+      hs.push_back(h);
+      h->Scale(n_data / h->Integral());
+      h->SetLineWidth(2);
+      h->SetLineColor(colors[ibest]);
+      leg->AddEntry(h, TString::Format("#nu = (%i, %i): best #chi^2(%s)", int(tmp->par(0)*10000), int(tmp->par(1)*10000), legs[ibest]), "LPE");
+      h->Draw("same e");
+    }
+
+    leg->Draw();
+
+    c_scan_templates->Write();
+    delete c_scan_templates;
+    delete tgae_data_shortened;
+    delete leg;
+    for (TH1D* h : hs)
+      delete h;
+    hs.clear();
+  }
+
   Fitter::fit_stat_t Fitter::draw_fit(const test_stat_t& t) {
     fit_stat_t ret;
 
@@ -554,20 +648,8 @@ namespace mfv {
           TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit_%s_%s",  sb_or_b, bb_or_no, div_or_no));
           TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));
 
-          for (TH1D** ph : {&h_bkg_fit, &h_sig_fit, &h_data_fit}) {
-            TH1D* h = *ph;
-            std::vector<double> bins = Template::binning(true);
-            TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
-            // Splitting the last bin puts its contents in the overflow -- move back into last bin.
-            int n = h_short->GetNbinsX();
-            double v = h_short->GetBinContent(n+1);
-            double e = h_short->GetBinError(n+1);
-            h_short->SetBinContent(n+1, 0);
-            h_short->SetBinError  (n+1, 0);
-            h_short->SetBinContent(n, v);
-            h_short->SetBinError  (n, e);
-            *ph = h_short;
-          }
+          for (TH1D** ph : {&h_bkg_fit, &h_sig_fit, &h_data_fit})
+            *ph = shorten_hist(*ph);
 
           for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
             h->SetLineWidth(2);
@@ -935,6 +1017,7 @@ namespace mfv {
     pval_signif = 1;
 
     draw_likelihood(t_obs_0);
+    scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
 
     if (!only_fit && do_signif) {

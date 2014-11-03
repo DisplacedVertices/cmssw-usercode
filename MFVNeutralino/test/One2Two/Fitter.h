@@ -136,6 +136,8 @@ namespace mfv {
     void fit_globals_ok();
     void draw_likelihood(const test_stat_t& t);
     TH1D* make_h_bkg(const char* n, const std::vector<double>& nuis_pars, const std::vector<double>& A_bkg);
+    TH1D* shorten_hist(TH1D* h, bool save=true);
+    void scan_template_chi2(const test_stat_t& t);
     fit_stat_t draw_fit(const test_stat_t& t);
     min_lik_t min_likelihood(double mu_sig_start, bool fix_mu_sig);
     test_stat_t calc_test_stat(double fix_mu_sig_val);
