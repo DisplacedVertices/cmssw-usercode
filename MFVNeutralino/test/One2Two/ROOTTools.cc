@@ -2,9 +2,11 @@
 #include <cassert>
 #include <cmath>
 #include "TColor.h"
+#include "TGraphAsymmErrors.h"
 #include "TH1.h"
 #include "TROOT.h"
 #include "TStyle.h"
+#include "Prob.h"
 
 namespace jmt {
   void divide_by_bin_width(TH1D* h) {
@@ -80,5 +82,39 @@ namespace jmt {
     }
 
     return hshift;
+  }
+
+  TGraphAsymmErrors* poisson_intervalize(const TH1D* h, const bool zero_x, const bool include_zero_bins) {
+    std::vector<int> bins;
+    for (int ibin = 1; ibin <= h->GetNbinsX(); ++ibin)
+      if (include_zero_bins || h->GetBinContent(ibin) > 0)
+        bins.push_back(ibin);
+
+    TGraphAsymmErrors* h2 = new TGraphAsymmErrors(bins.size());
+    int np = 0; // TGraphs count from 0
+    for (int ibin : bins) {
+      const double xl = h->GetBinLowEdge(ibin);
+      const double xh = h->GetBinLowEdge(ibin+1);
+      const double x = (xl + xh)/2;
+      const double y = h->GetBinContent(ibin);
+      const interval i = garwood_poisson(y);
+      h2->SetPoint(np, x, y);
+
+      if (zero_x) {
+        h2->SetPointEXlow (np, 0);
+        h2->SetPointEXhigh(np, 0);
+      }
+      else {
+        h2->SetPointEXlow (np, x - xl);
+        h2->SetPointEXhigh(np, xh - x);
+      }
+
+      h2->SetPointEYlow (np, y - i.lower);
+      h2->SetPointEYhigh(np, i.upper - y);
+
+      ++np;
+    }
+
+    return h2;
   }
 }
