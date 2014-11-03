@@ -4,6 +4,20 @@
 #include "TRandom.h"
 
 namespace jmt {
+  interval garwood_poisson(const double n, const double alpha, const double beta) {
+    double beta_ = beta;
+    interval i;
+    i.success = true;
+    i.value = n;
+    i.lower = 0;
+    if (n > 0)
+      i.lower = 0.5 * ROOT::Math::chisquared_quantile_c(1 - alpha, 2*n);
+    else if (n == 0)
+      beta_ *= 2;
+    i.upper = 0.5 * ROOT::Math::chisquared_quantile_c(beta, 2*(n+1));
+    return i;
+  }
+
   interval clopper_pearson_binom(const double n_on, const double n_tot,
                                  const double alpha, const bool equal_tailed) {
     const double alpha_min = equal_tailed ? alpha/2 : alpha;

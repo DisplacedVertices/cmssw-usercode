@@ -12,6 +12,8 @@ namespace jmt {
     double error() const { return (upper - lower)/2; }
   };
 
+  interval garwood_poisson(const double n, const double alpha=(1-0.6827)/2, const double beta=(1-0.6827)/2);
+
   interval clopper_pearson_binom(const double n_on, const double n_tot,
                                  const double alpha=1-0.6827, const bool equal_tailed=true);
 
