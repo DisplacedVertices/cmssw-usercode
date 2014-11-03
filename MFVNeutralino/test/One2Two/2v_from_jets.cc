@@ -72,7 +72,11 @@ int main(int argc, const char* argv[]) {
   TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 500, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", 6, 0, 0.12);
-  TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi(vertex #0, vertex #1)|;events", 5, 0, 3.15);
+  TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
+  TH1F* h_2v_dbv0_low_dbv1 = new TH1F("h_2v_dbv0_low_dbv1", "two-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
+  TH1F* h_2v_dbv0_high_dbv1 = new TH1F("h_2v_dbv0_high_dbv1", "two-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
+  TH1F* h_2v_dphi_low_dbv1 = new TH1F("h_2v_dphi_low_dbv1", "two-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
+  TH1F* h_2v_dphi_high_dbv1 = new TH1F("h_2v_dphi_high_dbv1", "two-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
@@ -103,12 +107,22 @@ int main(int argc, const char* argv[]) {
       }
 
       if (nt.nvtx == 2) {
-        h_2v_dbv->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
-        h_2v_dbv->Fill(sqrt(nt.x1*nt.x1 + nt.y1*nt.y1), w);
+        double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0+nt.y0);
+        double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
+        h_2v_dbv->Fill(dbv0, w);
+        h_2v_dbv->Fill(dbv1, w);
         double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
         if (dvv > 0.11) dvv = 0.11;
         h_2v_dvv->Fill(dvv, w);
-        h_2v_absdphivv->Fill(fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1))), w);
+        double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
+        h_2v_absdphivv->Fill(fabs(dphi), w);
+        if (dbv1 < 0.02) {
+          h_2v_dbv0_low_dbv1->Fill(dbv0, w);
+          h_2v_dphi_low_dbv1->Fill(fabs(dphi), w);
+        } else {
+          h_2v_dbv0_high_dbv1->Fill(dbv1, w);
+          h_2v_dphi_high_dbv1->Fill(fabs(dphi), w);
+        }
       }
     }
   }
@@ -118,9 +132,13 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_phiv = new TH1F("h_c1v_phiv", "constructed from only-one-vertex events;vertex #phi;vertices", 50, -3.15, 3.15);
   TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 6, 0, 0.12);
-  TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi(vertex #0, vertex #1)|;events", 5, 0, 3.15);
+  TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 500, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 500, 0, 2.5);
+  TH1F* h_c1v_dbv0_low_dbv1 = new TH1F("h_c1v_dbv0_low_dbv1", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
+  TH1F* h_c1v_dbv0_high_dbv1 = new TH1F("h_c1v_dbv0_high_dbv1", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
+  TH1F* h_c1v_dphi_low_dbv1 = new TH1F("h_c1v_dphi_low_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
+  TH1F* h_c1v_dphi_high_dbv1 = new TH1F("h_c1v_dphi_high_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
@@ -161,6 +179,13 @@ int main(int argc, const char* argv[]) {
         h_c1v_absdphivv->Fill(fabs(dphi), w * p);
         h_c1v_dbv0->Fill(dbv0, w * p);
         h_c1v_dbv1->Fill(dbv1, w * p);
+        if (dbv1 < 0.02) {
+          h_c1v_dbv0_low_dbv1->Fill(dbv0, w * p);
+          h_c1v_dphi_low_dbv1->Fill(fabs(dphi), w * p);
+        } else {
+          h_c1v_dbv0_high_dbv1->Fill(dbv0, w * p);
+          h_c1v_dphi_high_dbv1->Fill(fabs(dphi), w * p);
+        }
       }
     }
   }
@@ -207,6 +232,42 @@ int main(int argc, const char* argv[]) {
   h_c1v_absdphivv->Scale(251./h_c1v_absdphivv->Integral());
   h_c1v_absdphivv->Draw("sames");
   c_absdphivv->Write();
+
+  TCanvas* c_2v_dbv0_dbv1 = new TCanvas("c_2v_dbv0_dbv1", "c_2v_dbv0_dbv1", 700, 700);
+  h_2v_dbv0_low_dbv1->SetLineColor(kBlue);
+  h_2v_dbv0_low_dbv1->SetLineWidth(3);
+  h_2v_dbv0_low_dbv1->DrawNormalized();
+  h_2v_dbv0_high_dbv1->SetLineColor(kRed);
+  h_2v_dbv0_high_dbv1->SetLineWidth(3);
+  h_2v_dbv0_high_dbv1->DrawNormalized("sames");
+  c_2v_dbv0_dbv1->Write();
+
+  TCanvas* c_c1v_dbv0_dbv1 = new TCanvas("c_c1v_dbv0_dbv1", "c_c1v_dbv0_dbv1", 700, 700);
+  h_c1v_dbv0_low_dbv1->SetLineColor(kBlue);
+  h_c1v_dbv0_low_dbv1->SetLineWidth(3);
+  h_c1v_dbv0_low_dbv1->DrawNormalized();
+  h_c1v_dbv0_high_dbv1->SetLineColor(kRed);
+  h_c1v_dbv0_high_dbv1->SetLineWidth(3);
+  h_c1v_dbv0_high_dbv1->DrawNormalized("sames");
+  c_c1v_dbv0_dbv1->Write();
+
+  TCanvas* c_2v_dphi_dbv1 = new TCanvas("c_2v_dphi_dbv1", "c_2v_dphi_dbv1", 700, 700);
+  h_2v_dphi_low_dbv1->SetLineColor(kBlue);
+  h_2v_dphi_low_dbv1->SetLineWidth(3);
+  h_2v_dphi_low_dbv1->DrawNormalized();
+  h_2v_dphi_high_dbv1->SetLineColor(kRed);
+  h_2v_dphi_high_dbv1->SetLineWidth(3);
+  h_2v_dphi_high_dbv1->DrawNormalized("sames");
+  c_2v_dphi_dbv1->Write();
+
+  TCanvas* c_c1v_dphi_dbv1 = new TCanvas("c_c1v_dphi_dbv1", "c_c1v_dphi_dbv1", 700, 700);
+  h_c1v_dphi_low_dbv1->SetLineColor(kBlue);
+  h_c1v_dphi_low_dbv1->SetLineWidth(3);
+  h_c1v_dphi_low_dbv1->DrawNormalized();
+  h_c1v_dphi_high_dbv1->SetLineColor(kRed);
+  h_c1v_dphi_high_dbv1->SetLineWidth(3);
+  h_c1v_dphi_high_dbv1->DrawNormalized("sames");
+  c_c1v_dphi_dbv1->Write();
 
   fh->Close();
 }
