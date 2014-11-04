@@ -563,6 +563,8 @@ namespace mfv {
     hs.push_back(h_data_shortened);
 
     TGraphAsymmErrors* tgae_data_shortened = jmt::poisson_intervalize(h_data_shortened);
+    tgae_data_shortened->SetTitle(";d_{VV} (cm);events");
+    tgae_data_shortened->GetYaxis()->SetTitleOffset(1.2);
     tgae_data_shortened->SetLineWidth(2);
     tgae_data_shortened->SetMarkerStyle(20);
     tgae_data_shortened->SetMarkerSize(1);
@@ -570,42 +572,95 @@ namespace mfv {
 
     TH1D* h_bkg_fit = make_h_bkg("h_bkg_fit", t.h0.nuis_pars(), std::vector<double>());
     h_bkg_fit->SetDirectory(0);
+    TH1D* h_bkg_fit_shortened = shorten_hist(h_bkg_fit, false);
     hs.push_back(h_bkg_fit);
-    h_bkg_fit->Scale(n_data / h_bkg_fit->Integral());
-    h_bkg_fit->SetLineWidth(2);
-    h_bkg_fit->SetLineColor(kBlue);
-    h_bkg_fit->Draw("same e");
+    hs.push_back(h_bkg_fit_shortened);
+    h_bkg_fit_shortened->Scale(n_data / h_bkg_fit_shortened->Integral());
+    h_bkg_fit_shortened->SetLineWidth(2);
+    h_bkg_fit_shortened->SetLineColor(kBlue);
+    h_bkg_fit_shortened->Draw("same e");
 
-    const int Nbest = 2;
+    TH1D* h_bkg_fit_bb = make_h_bkg("h_bkg_fit", t.h0.nuis_pars(), t.h0.A_bkg);
+    h_bkg_fit_bb->SetDirectory(0);
+    TH1D* h_bkg_fit_bb_shortened = shorten_hist(h_bkg_fit_bb, false);
+    hs.push_back(h_bkg_fit_bb);
+    hs.push_back(h_bkg_fit_bb_shortened);
+    h_bkg_fit_bb_shortened->Scale(n_data / h_bkg_fit_bb_shortened->Integral());
+    h_bkg_fit_bb_shortened->SetLineWidth(2);
+    h_bkg_fit_bb_shortened->SetLineColor(9);
+    h_bkg_fit_bb_shortened->Draw("same e");
+
+    printf("bin contents:\n");
+    printf("%6s | %6s | prediction from nu0 = %.4f, nu1 = %.4f\n", "ibin", "n_i", t.h0.nuis_pars()[0], t.h0.nuis_pars()[1]);
+    for (int ibin = 1; ibin <= fit::n_bins; ++ibin) {
+      const double estat = h_bkg_fit_shortened->GetBinError(ibin);
+      const double esyst = h_bkg_fit_shortened->GetBinContent(ibin)*fit::eta_bkg[ibin];
+      printf("%6i | %6.1f | %7.3f +- %7.3f (stat) +- %7.3f (syst) (+- %7.3f tot)\n", ibin, fit::h_data_real->GetBinContent(ibin), h_bkg_fit_shortened->GetBinContent(ibin), estat, esyst, sqrt(estat*estat + esyst*esyst));
+    }
+
+    const int Nbest = 3;
     std::vector<double> best_chi2(Nbest, 1e99);
     std::vector<Template*> best_template(Nbest, (Template*)0);
 
     for (Template* tmp : *bkg_templates) {
-      const double norm = n_data / tmp->h->Integral();
-      std::vector<double> chi2(Nbest, 0);
+      assert(fabs(tmp->h->Integral() - 1) < 1e-4);
 
-      for (int ibin = 1; ibin <= fit::n_bins; ++ibin) {
-        const double c = tmp->h->GetBinContent(ibin) * norm;
-        const double dchi2 = c > 0 ? pow(h_data_shortened->GetBinContent(ibin) - c, 2) / tmp->h->GetBinContent(ibin) : 0.;
-        for (int ibest = 0; ibest < Nbest; ++ibest)
-          if (ibest == 0 || (ibest == 1 && ibin >= 4))
-            chi2[ibest] += dchi2;
+      std::vector<double> chi2(Nbest, 0.);
+
+      bool in_last_3 = true;
+
+      for (int ibin = 4; ibin <= fit::n_bins; ++ibin) {
+        const double cd = h_data_shortened->GetBinContent(ibin);
+        const double c = tmp->h->GetBinContent(ibin);
+        const int c_orig = int(pow(c / tmp->h->GetBinError(ibin), 2));
+        const double w = c / c_orig * n_data;
+        const double alphao2 = 2.7e-3; // 3sig
+        jmt::interval i = jmt::garwood_poisson(c_orig, alphao2, alphao2);
+        i.lower *= w;
+        i.upper *= w;
+
+        if (!i.in(cd))
+          in_last_3 = false;
       }
 
-      for (int ibest = 0; ibest < Nbest; ++ibest)
+      for (int ibin = 1; ibin <= fit::n_bins; ++ibin) {
+        const double cd = h_data_shortened->GetBinContent(ibin);
+        const double c  = tmp->h->GetBinContent(ibin);
+        const double dchi2 = c > 0 ? pow(cd - c * n_data, 2) / (c * n_data) : 0.;
+
+        for (int ibest = 0; ibest < Nbest; ++ibest) {
+          bool use = true;
+          if (ibest == 1)
+            use = ibin >= 4;
+          else if (ibest == 2)
+            use = ibin <= 3;
+
+          if (use)
+            chi2[ibest] += dchi2;
+        }
+      }
+
+      for (int ibest = 0; ibest < Nbest; ++ibest) {
+        if (ibest == 2 && !in_last_3)
+          continue;
         if (chi2[ibest] < best_chi2[ibest]) {
           best_chi2[ibest] = chi2[ibest];
           best_template[ibest] = tmp;
         }
+      }
     }
 
-    const int colors[Nbest] = { 2, 8 };
-    const char* legs[Nbest] = { "all bins", "last three bins" };
-    TLegend* leg = new TLegend(0.6,0.6,0.95,0.95);
+    for (int ibest = 0; ibest < Nbest; ++ibest)
+      printf("best scan: chi2=%f template=%s\n", best_chi2[ibest], best_template[ibest]->title().c_str());
+
+    const int colors[Nbest] = { 2, 8, 6 };
+    const char* legs[Nbest] = { "all bins", "last three bins", "1st three, touching last three" };
+    TLegend* leg = new TLegend(0.384,0.606,0.856,0.853);
     leg->SetFillColor(kWhite);
 
     leg->AddEntry(tgae_data_shortened, "data", "LPE");
-    leg->AddEntry(h_bkg_fit, "best b-only fit", "LPE");
+    leg->AddEntry(h_bkg_fit_shortened, "best b-only fit", "LPE");
+    leg->AddEntry(h_bkg_fit_bb_shortened, "best b-only fit w/BB", "LPE");
 
     for (int ibest = 0; ibest < Nbest; ++ibest) {
       Template* tmp = best_template[ibest];
@@ -614,7 +669,7 @@ namespace mfv {
       h->Scale(n_data / h->Integral());
       h->SetLineWidth(2);
       h->SetLineColor(colors[ibest]);
-      leg->AddEntry(h, TString::Format("#nu = (%i, %i): best #chi^2(%s)", int(tmp->par(0)*10000), int(tmp->par(1)*10000), legs[ibest]), "LPE");
+      leg->AddEntry(h, TString::Format("#nu = (%i #mum, %i #mum): best #chi^{2}(%s)", int(tmp->par(0)*10000), int(tmp->par(1)*10000), legs[ibest]), "LPE");
       h->Draw("same e");
     }
 
@@ -978,6 +1033,7 @@ namespace mfv {
     fit::h_data_real = Template::finalize_binning(h_data_temp);
     fit::set_data_real();
     const int n_data = fit::h_data_real->Integral();
+    printf("n_data: %i\n", n_data);
     delete h_data_temp;
 
     ////
