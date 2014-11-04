@@ -928,7 +928,12 @@ namespace mfv {
         ss[i] = sn;
 
         const double bc = h_bkg->GetBinContent(i);
-        double bn = rand->Gaus(bc, bc*fit::eta_bkg[i]);
+        double gw;
+        if (i == fit::n_bins)
+          gw = fabs(1./n_bkg - bc);
+        else
+          gw = bc*fit::eta_bkg[i];
+        double bn = rand->Gaus(bc, gw);
         if (bn < 0)
           bn = 0;
         bs_sum += bn;
@@ -989,7 +994,7 @@ namespace mfv {
     fit::calc_lnL_offset();
 
     if (bkg_gaussians)
-      fit::eta_bkg = { -1, 0.01, 0.01, 0.01, 0.30, 3., 15., -1};
+      fit::eta_bkg = { -1, 0.01, 0.01, 0.01, 0.7, 1., 15., -1};
     else
       fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, -1 };
 
@@ -1068,12 +1073,12 @@ namespace mfv {
       fit::extra_prints = 0;
     }
 
-    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), std::vector<double>());
+    TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
 
     pval_signif = 1;
 
     draw_likelihood(t_obs_0);
-    scan_template_chi2(t_obs_0);
+    //scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
 
     if (!only_fit && do_signif) {
