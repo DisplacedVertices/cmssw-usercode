@@ -14,7 +14,7 @@
 double    mu_clear = 0.0300;
 double sigma_clear = 0.0070;
 
-const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20";
+const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 
 const int nbkg = 5;
 const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
