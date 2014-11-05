@@ -107,7 +107,7 @@ int main(int argc, const char* argv[]) {
       }
 
       if (nt.nvtx == 2) {
-        double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0+nt.y0);
+        double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
         h_2v_dbv->Fill(dbv0, w);
         h_2v_dbv->Fill(dbv1, w);
@@ -120,7 +120,7 @@ int main(int argc, const char* argv[]) {
           h_2v_dbv0_low_dbv1->Fill(dbv0, w);
           h_2v_dphi_low_dbv1->Fill(fabs(dphi), w);
         } else {
-          h_2v_dbv0_high_dbv1->Fill(dbv1, w);
+          h_2v_dbv0_high_dbv1->Fill(dbv0, w);
           h_2v_dphi_high_dbv1->Fill(fabs(dphi), w);
         }
       }
