@@ -32,3 +32,25 @@ elif 'draws' in sys.argv:
             out_fn = lst_fn.replace('.lst', '.out')
             print lst_fn
             os.system('python draw_fit.py %s >& %s' % (lst_fn, out_fn))
+
+elif 'swapplots' in sys.argv:
+    try:
+        plots_crab = os.readlink('plots_crab')
+        plots_asdf = os.readlink('plots_asdf')
+        plots = os.readlink('plots')
+    except OSError:
+        raise RuntimeError('one of plots_crab, plots_asdf, plots missing')
+    if plots != plots_crab and plots != plots_asdf:
+        raise RuntimeError('bad setup: plots_crab: %s plots_asdf: %s plots: %s' % (plots_crab, plots_asdf, plots))
+
+    os.unlink('plots')
+    if plots == plots_crab:
+        os.symlink(plots_asdf, 'plots')
+    elif plots == plots_asdf:
+        os.symlink(plots_crab, 'plots')
+
+elif 'tarball' in sys.argv:
+    if not os.path.isdir('plots/'):
+        raise RuntimeError('no plots dir')
+    os.system('tar czf /tmp/a.tgz plots/')
+    print 'pscp -load cmslpc42 tucker@cmslpc42.fnal.gov:/tmp/a.tgz .'
