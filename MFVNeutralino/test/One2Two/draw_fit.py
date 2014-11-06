@@ -15,10 +15,14 @@ h_istat = h2('h_istat', '', 5, 0, 5, 5, 0, 5)
 h_istatsum_v_seed = h2('h_istatsum_v_seed', '', 201, 0, 201, 5, 0, 5)
 h_h1_maxtwolnL = h('h_h1_maxtwolnL', '', 100, -300, 2000)
 h_h1_mu_sig = h('h_h1_mu_sig', '', 40, 0, 80)
-h_h1_mu_sig_err = h('h_h1_mu_sig_err', '', 40, 0, 40)
+h_h1_mu_sig_err = h('h_h1_mu_sig_err', '', 40, 0, 80)
+h_h1_mu_sig_err_v_sig = h2('h_h1_mu_sig_err_v_sig', '', 40, 0, 80, 40, 0, 80)
+h_h1_mu_sig_v_true = h2('h_h1_mu_sig_v_true', '', 40, 0, 80, 40, 0, 80)
 h_h1_mu_sig_pull = h('h_h1_mu_sig_pull', '', 40, -10, 10)
 h_h1_mu_bkg = h('h_h1_mu_bkg', '', 100, 0, 400)
 h_h1_mu_bkg_err = h('h_h1_mu_bkg_err', '', 40, 0, 40)
+h_h1_mu_bkg_err_v_bkg = h2('h_h1_mu_bkg_err_v_bkg', '', 100, 0, 400, 10, 0, 40)
+h_h1_mu_bkg_v_true = h2('h_h1_mu_bkg_v_true', '', 100, 0, 400, 100, 0, 400)
 h_h1_mu_bkg_pull = h('h_h1_mu_bkg_pull', '', 40, -10, 10)
 h_h1_nuis0 = h('h_h1_nuis0', '', 40, 0, 0.2)
 h_h1_nuis0_err = h('h_h1_nuis0_err', '', 40, 0, 0.1)
@@ -30,6 +34,8 @@ h_h0_maxtwolnL = h('h_h0_maxtwolnL', '', 100, -300, 2000)
 h_h0_mu_bkg = h('h_h0_mu_bkg', '', 100, 0, 400)
 h_h0_mu_bkg_err = h('h_h0_mu_bkg_err', '', 40, 0, 40)
 h_h0_mu_bkg_pull = h('h_h0_mu_bkg_pull', '', 40, -10, 10)
+h_h0_mu_bkg_err_v_bkg = h2('h_h0_mu_err_v_bkg', '', 100, 0, 400, 10, 0, 40)
+h_h0_mu_bkg_v_true = h2('h_h0_mu_bkg_v_true', '', 100, 0, 400, 100, 0, 400)
 h_h0_nuis0 = h('h_h0_nuis0', '', 40, 0, 0.2)
 h_h0_nuis0_err = h('h_h0_nuis0_err', '', 40, 0, 0.1)
 h_h0_nuis0_pull = h('h_h0_nuis0_pull', '', 40, -10, 10)
@@ -78,9 +84,13 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h1_maxtwolnL.Fill(h1_maxtwolnL)
     h_h1_mu_sig.Fill(h1_mu_sig)
     h_h1_mu_sig_err.Fill(h1_err_mu_sig)
+    h_h1_mu_sig_err_v_sig.Fill(h1_mu_sig, h1_err_mu_sig)
+    h_h1_mu_sig_v_true.Fill(true_pars_0, h1_mu_sig)
     h_h1_mu_sig_pull.Fill((h1_mu_sig - mu_sig_true_mean)/h1_err_mu_sig)
     h_h1_mu_bkg.Fill(h1_mu_bkg)
     h_h1_mu_bkg_err.Fill(h1_err_mu_bkg)
+    h_h1_mu_bkg_err_v_bkg.Fill(h1_mu_bkg, h1_err_mu_bkg)
+    h_h1_mu_bkg_v_true.Fill(true_pars_1, h1_mu_bkg)
     h_h1_mu_bkg_pull.Fill((h1_mu_bkg - mu_bkg_true_mean)/h1_err_mu_bkg)
     h_h1_nuis0.Fill(h1_nuis0)
     h_h1_nuis0_err.Fill(h1_err_nuis0)
@@ -91,6 +101,8 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h0_maxtwolnL.Fill(h0_maxtwolnL)
     h_h0_mu_bkg.Fill(h0_mu_bkg)
     h_h0_mu_bkg_err.Fill(h0_err_mu_bkg)
+    h_h0_mu_bkg_err_v_bkg.Fill(h0_mu_bkg, h0_err_mu_bkg)
+    h_h0_mu_bkg_v_true.Fill(true_pars_1, h0_mu_bkg)
     h_h0_mu_bkg_pull.Fill((h0_mu_bkg - mu_bkg_true_mean)/h0_err_mu_bkg)
     h_h0_nuis0.Fill(h0_nuis0)
     h_h0_nuis0_err.Fill(h0_err_nuis0)
@@ -119,10 +131,12 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_sig_limit_fit_b_err.Fill(sig_limit_fit_b_err)
     h_sig_limit_fit_prob.Fill(sig_limit_fit_prob)
 
-for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_t h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
+for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_err_v_sig h_h1_mu_sig_v_true h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_err_v_bkg h_h1_mu_bkg_v_true h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_err_v_bkg h_h0_mu_bkg_v_true h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_t h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
     print x
     h = eval(x)
+    log = False
     if type(h) == ROOT.TH1D:
+        log = True
         if 'pull' in x:
             if sig_scale < 0:
                 continue
@@ -138,8 +152,8 @@ for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h
         h.Draw('colz text')
     else:
         h.Draw('colz')
-        h.SetStats(0)
-    ps.save(x)
+        #h.SetStats(0)
+    ps.save(x, log=log)
 
 d.sort(key=lambda x: x[i_pval_signif])
 ns = [0,1] + [int(i*len(d)/3.) for i in xrange(1,3)] + [-2,-1]
