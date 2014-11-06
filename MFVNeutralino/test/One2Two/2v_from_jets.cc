@@ -12,7 +12,7 @@
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 double    mu_clear = 0.0300;
-double sigma_clear = 0.0070;
+double sigma_clear = 0.0100;
 
 const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 
