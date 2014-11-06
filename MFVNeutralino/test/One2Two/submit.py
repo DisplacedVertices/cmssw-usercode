@@ -215,7 +215,7 @@ cd -
         else:
             unzip_files.append('gunzip %s' % fn)
     unzip_files = '\n'.join(unzip_files)
-    tree_path = '/store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
+    tree_path = '/uscms_data/d2/tucker/mfvo2t_trees/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
     files_needed = ','.join(os.path.join(tree_path, f) for f in files_needed)
 
     open('runme.csh', 'wt').write(script_template % locals())
