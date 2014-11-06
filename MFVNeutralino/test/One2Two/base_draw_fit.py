@@ -53,9 +53,6 @@ def xform(x):
 
 d = list(detree(t, vars.replace(' ', ':'), xform=xform))
 
-def skip(h0_istat, h1_istat, sig_limit_fit_n):
-    return h1_istat == 0 or sig_limit_fit_n <= 3 #h0_istat <= 1 or h1_istat <= 1 or sig_limit_fit_n < 4
-
 #for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
 #    if skip(h0_istat, h1_istat, sig_limit_fit_n):
 #        continue
@@ -71,3 +68,6 @@ print 'sig_num', sig_num, 'mu_sig_true_mean', mu_sig_true_mean
 if sig_scale < 0:
     print '( this is data )'
 mu_bkg_true_mean = 39.47 * fudge
+
+def skip(h0_istat, h1_istat, sig_limit_fit_n):
+    return h1_istat == 0 or (sig_scale < 0 and sig_limit_fit_n <= 3) #h0_istat <= 1 or h1_istat <= 1 or sig_limit_fit_n < 4
