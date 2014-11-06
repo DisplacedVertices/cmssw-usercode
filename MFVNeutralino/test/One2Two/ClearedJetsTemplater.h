@@ -21,6 +21,7 @@ namespace mfv {
     const std::string load_from_file_path;
     const bool save_templates;
     const bool finalize_templates;
+    const int sample_every;
     const int sample_count;
     const bool flat_phis;
     const double phi_from_jet_mu;

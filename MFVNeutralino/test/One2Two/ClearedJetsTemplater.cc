@@ -25,6 +25,7 @@ namespace mfv {
       load_from_file_path(env.get_string("load_from_file_path", "ClearedJetsTemplater/seed0000_toy0000/templates")),
       save_templates(env.get_bool("save_templates", false)),
       finalize_templates(env.get_bool("finalize_templates", true)),
+      sample_every(env.get_int("sample_every", -1)),
       sample_count(env.get_int("sample_count", -1)),
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
@@ -176,7 +177,7 @@ namespace mfv {
 
     const int N1v = sample_count > 0 ? sample_count : int(dataset.events_1v->size());
     printf("ClearedJetsTemplater%s making templates\n", name.c_str()); fflush(stdout);
-    jmt::ProgressBar pb(50, N1v);
+    jmt::ProgressBar pb(50, N1v / (sample_every > 0 ? sample_every : 1));
     pb.start();
 
     TDirectory* dtemp = 0;
@@ -206,6 +207,11 @@ namespace mfv {
 
     int evc = 0;
     for (const EventSimple& ev : *dataset.events_1v) {
+      if (sample_every > 0 && evc % sample_every != 0) {
+        ++evc;
+        continue;
+      }
+
       if (ev.njets > 0) {
         const double bsd2d0 = h_bsd2d[vt_1vsingle]->GetRandom();
         const double bsd2d1 = h_bsd2d[vt_1vsingle]->GetRandom();
