@@ -254,8 +254,9 @@ def stats(l, header=''):
     return median, lo68, hi68, lo95, hi95
 
 stats(pval_signifs, 'pval_signif')
-stats(sig_limits, 'mu_sig_limit')
-stats(sig_limits_scaled, 'sigma_sig_limit')
+if sig_scale < 0:
+    stats(sig_limits, 'mu_sig_limit')
+    stats(sig_limits_scaled, 'sigma_sig_limit')
 
 '''
 foreach x (lsts/*lst)
