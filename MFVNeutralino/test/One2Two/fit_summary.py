@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 
 from JMTucker.Tools.Samples import mfv_signal_samples
 
-special = 'BBv5'
+special = 'BBv7'
 
 set_style()
 ROOT.gStyle.SetOptStat(1000000001)
