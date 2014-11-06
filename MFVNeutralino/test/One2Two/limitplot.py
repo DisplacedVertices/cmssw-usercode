@@ -80,8 +80,8 @@ for tau, tau_nice in taus:
             print 'skip', tau, mass
             nn -= 1
             continue
-        fn  = 'outs/BBv4_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (nn, nn)
-        fn2 = 'outs/BBv4_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (nn, nn)
+        fn  = 'outs/BBv5_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (nn, nn)
+        fn2 = 'outs/BBv5_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (nn, nn)
         print nn, fn, fn2
         nn -= 1
         vals = [None]*6

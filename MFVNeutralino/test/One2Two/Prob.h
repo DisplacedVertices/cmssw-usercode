@@ -10,6 +10,7 @@ namespace jmt {
     double lower;
     double upper;
     double error() const { return (upper - lower)/2; }
+    double in(double v) const { return v >= lower && v <= upper; }
   };
 
   interval garwood_poisson(const double n, const double alpha=(1-0.6827)/2, const double beta=(1-0.6827)/2);
