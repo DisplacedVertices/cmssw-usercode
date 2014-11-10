@@ -71,6 +71,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_1v_dphijj = new TH1F("h_1v_dphijj", "only-one-vertex events;jet pair #Delta#phi;jet pairs", 50, -3.15, 3.15);
   TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 500, 0, 2.5);
+  TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 20, 0, 0.1, 20, 0, 0.1);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", 6, 0, 0.12);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_2v_dbv0_low_dbv1 = new TH1F("h_2v_dbv0_low_dbv1", "two-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
@@ -111,6 +112,7 @@ int main(int argc, const char* argv[]) {
         double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
         h_2v_dbv->Fill(dbv0, w);
         h_2v_dbv->Fill(dbv1, w);
+        h_2v_dbv1_dbv0->Fill(dbv0, dbv1, w);
         double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
         if (dvv > 0.11) dvv = 0.11;
         h_2v_dvv->Fill(dvv, w);
@@ -135,6 +137,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 500, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 500, 0, 2.5);
+  TH2F* h_c1v_dbv1_dbv0 = new TH2F("h_c1v_dbv1_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 20, 0, 0.1, 20, 0, 0.1);
   TH1F* h_c1v_dbv0_low_dbv1 = new TH1F("h_c1v_dbv0_low_dbv1", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
   TH1F* h_c1v_dbv0_high_dbv1 = new TH1F("h_c1v_dbv0_high_dbv1", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
   TH1F* h_c1v_dphi_low_dbv1 = new TH1F("h_c1v_dphi_low_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
@@ -179,6 +182,7 @@ int main(int argc, const char* argv[]) {
         h_c1v_absdphivv->Fill(fabs(dphi), w * p);
         h_c1v_dbv0->Fill(dbv0, w * p);
         h_c1v_dbv1->Fill(dbv1, w * p);
+        h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, w * p);
         if (dbv1 < 0.02) {
           h_c1v_dbv0_low_dbv1->Fill(dbv0, w * p);
           h_c1v_dphi_low_dbv1->Fill(fabs(dphi), w * p);
@@ -200,6 +204,7 @@ int main(int argc, const char* argv[]) {
   h_1v_dphijj->Write();
   h_1v_dphijv->Write();
   h_2v_dbv->Write();
+  h_2v_dbv1_dbv0->Write();
   h_2v_dvv->Write();
   h_2v_absdphivv->Write();
 
@@ -210,6 +215,7 @@ int main(int argc, const char* argv[]) {
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
   h_c1v_dbv1->Write();
+  h_c1v_dbv1_dbv0->Write();
 
   TCanvas* c_dvv = new TCanvas("c_dvv", "c_dvv", 700, 700);
   h_2v_dvv->SetLineColor(kBlue);
