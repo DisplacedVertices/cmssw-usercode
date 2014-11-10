@@ -338,9 +338,9 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   }
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
-  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons #E_T > 60 GeV;Events", 11, 0, 11);
-  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets #E_T > 60 GeV;Events", 11, 0, 11);
-  h_sumht_20 = fs->make<TH1F>("h_sumht_20", ";Sum #H_T for jets with #E_T > 60 GeV;Events", 100, 0, 2000);
+  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 11, 0, 11);
+  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 11, 0, 11);
+  h_sumht_20 = fs->make<TH1F>("h_sumht_20", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events", 100, 0, 2000);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 30, 0, 30);
   Jets = bkh_factory->make("Jets", "gen jets");
