@@ -16,15 +16,15 @@ double sigma_clear = 0.0100;
 
 const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 
+/*
 const int nbkg = 5;
 const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
 float weights[nbkg] = {2*4.849, 2*0.259, 2*0.037, 2*0.188, 2*0.075};
+*/
 
-/*
 const int nbkg = 1;
 const char* samples[nbkg] = {"ttbarhadronic"};
 float weights[nbkg] = {1};
-*/
 
 float sumht(int njets, float* jet_pt) {
   double sum = 0;
@@ -143,6 +143,15 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_dphi_low_dbv1 = new TH1F("h_c1v_dphi_low_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
   TH1F* h_c1v_dphi_high_dbv1 = new TH1F("h_c1v_dphi_high_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
 
+  TH1F* h_1v_dbv_low = (TH1F*)h_1v_dbv->Clone();
+  for (int i = 10; i <= 500; ++i) {
+    h_1v_dbv_low->SetBinContent(i,0);
+  }
+  TH1F* h_1v_dbv_high = (TH1F*)h_1v_dbv->Clone();
+  for (int i = 1; i <= 3; ++i) {
+    h_1v_dbv_high->SetBinContent(i,0);
+  }
+
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
     TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, samples[i]));
@@ -159,7 +168,13 @@ int main(int argc, const char* argv[]) {
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1 && nt.njets > 0) {
         double dbv0 = h_1v_dbv->GetRandom();
-        double dbv1 = h_1v_dbv->GetRandom();
+        //double dbv1 = h_1v_dbv->GetRandom();
+        double dbv1 = 0;
+        if (dbv0 < 0.02) {
+          dbv1 = h_1v_dbv_low->GetRandom();
+        } else {
+          dbv1 = h_1v_dbv_high->GetRandom();
+        }
         h_c1v_dbv->Fill(dbv0, w);
         h_c1v_dbv->Fill(dbv1, w);
 
