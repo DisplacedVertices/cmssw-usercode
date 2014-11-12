@@ -16,15 +16,15 @@ double sigma_clear = 0.0100;
 
 const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 
-/*
 const int nbkg = 5;
 const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
 float weights[nbkg] = {2*4.849, 2*0.259, 2*0.037, 2*0.188, 2*0.075};
-*/
 
+/*
 const int nbkg = 1;
 const char* samples[nbkg] = {"ttbarhadronic"};
 float weights[nbkg] = {1};
+*/
 
 float sumht(int njets, float* jet_pt) {
   double sum = 0;
@@ -168,13 +168,7 @@ int main(int argc, const char* argv[]) {
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1 && nt.njets > 0) {
         double dbv0 = h_1v_dbv->GetRandom();
-        //double dbv1 = h_1v_dbv->GetRandom();
-        double dbv1 = 0;
-        if (dbv0 < 0.02) {
-          dbv1 = h_1v_dbv_low->GetRandom();
-        } else {
-          dbv1 = h_1v_dbv_high->GetRandom();
-        }
+        double dbv1 = h_1v_dbv->GetRandom();
         h_c1v_dbv->Fill(dbv0, w);
         h_c1v_dbv->Fill(dbv1, w);
 
