@@ -74,6 +74,11 @@ private:
 
   TH2F* h_nbhadronsvsbquarks;
   TH2F* h_nbhadronsvsbquarks_wcuts;
+  TH1F* h_nbquarks;
+  TH1F* h_bquarks_pt;
+  TH1F* h_bquarks_eta;
+  TH1F* h_bquarks_phi;
+  TH1F* h_bquarks_energy;
 
   TH1F* h_bquarks_absdphi[2];
   TH1F* h_bquarks_dphi[2];
@@ -325,6 +330,11 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", ";number of b quarks;number of b hadrons", 20, 0, 20, 20, 0, 20);
   h_nbhadronsvsbquarks_wcuts = fs->make<TH2F>("h_nbhadronsvsbquarks_wcuts", "", 20, 0, 20, 20, 0, 20);
+  h_nbquarks = fs->make<TH1F>("h_nbquarks", ";number of b quarks;Events", 20, 0, 20);
+  h_bquarks_pt = fs->make<TH1F>("h_bquarks_pt", ";b quarks p_{T} (GeV);arb. units", 200, 0, 2000);
+  h_bquarks_eta = fs->make<TH1F>("h_bquarks_eta", ";b quarks #eta;arb. units", 50, -4, 4);
+  h_bquarks_phi = fs->make<TH1F>("h_bquarks_phi", ";b quarks #phi;arb. units", 50, -3.15, 3.15);
+  h_bquarks_energy = fs->make<TH1F>("h_bquarks_energy", ";b quarks energy (GeV);arb. units", 200, 0, 2000);
 
   for (int i = 0; i < 2; ++i) {
     h_bquarks_absdphi[i] = fs->make<TH1F>(TString::Format("h_bquarks_status%d_absdphi", i+2), TString::Format("events with two status%d bquarks;|#Delta#phi|;Events/0.126", i+2), 25, 0, 3.15);
@@ -706,6 +716,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   std::vector<int> ids[2];
   std::vector<double> eta[2];
   std::vector<double> phi[2];
+  int nbquarksstatus3 = 0;
   for (const reco::GenParticle& gen : *gen_particles) {
     if (abs(gen.pdgId()) == 5) {
       bool has_b_mom = false;
@@ -728,6 +739,13 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           phi[i].push_back(gen.phi());
         }
       }
+      if (gen.status() == 3) {
+        ++nbquarksstatus3;
+        h_bquarks_pt->Fill(gen.pt());
+        h_bquarks_eta->Fill(gen.eta());
+        h_bquarks_phi->Fill(gen.phi());
+        h_bquarks_energy->Fill(gen.energy());
+      }
     }
 
     if (is_bhadron(&gen)) {
@@ -749,6 +767,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
   h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts);
+  h_nbquarks->Fill(nbquarksstatus3);
   for (int i = 0; i < 2; ++i) {
     if (ids[i].size() == 2) {
       if (ids[i][0] * ids[i][1] < 0) {
