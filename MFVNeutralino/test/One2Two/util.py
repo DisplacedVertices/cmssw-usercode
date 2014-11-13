@@ -54,3 +54,9 @@ elif 'tarball' in sys.argv:
         raise RuntimeError('no plots dir')
     os.system('tar czf /tmp/a.tgz plots/')
     print 'pscp -load cmslpc42 tucker@cmslpc42.fnal.gov:/tmp/a.tgz .'
+
+elif 'recrabtar' in sys.argv:
+    for d in crab_dirs_from_argv():
+        path = os.path.join(d, 'share')
+        cmd = 'tar -zxf %(path)s/default.tgz -C %(path)s/ runme.csh mfvo2t.exe' % locals()
+        print cmd
