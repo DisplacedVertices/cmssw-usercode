@@ -1091,9 +1091,6 @@ namespace mfv {
 
     pval_signif = 1;
 
-    *const_cast<int*>(&print_level) = -1;
-    fit::extra_prints = 0;
-
     draw_likelihood(t_obs_0);
     //scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
