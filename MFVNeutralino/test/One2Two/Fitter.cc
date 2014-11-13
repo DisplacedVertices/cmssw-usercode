@@ -151,8 +151,11 @@ namespace mfv {
           double y = 1e99;
           bool found = false;
 
-          if (extra_prints)
-            printf("find t: bin %i  d: %5.1f  a_bkg: %10.3e  a_sig: %10.3e\n", i, a_data[i], a_bkg[i], a_sig[i]);
+          if (extra_prints) {
+            printf("find t: bin %i  d: %5.1f  eta_bkg: %10.3e a_bkg: %10.3e  a_sig: %10.3e\n", i, a_data[i], eta_bkg[i], a_bkg[i], a_sig[i]);
+            printf("f:=d/(1-t)-mb*(ab-t*mb*ab*ab*eb*eb)-ms*as/(1+t*ms/N);\n");
+            printf("solve(eval(f,{d=%.1f,mb=%.6e,ab=%.6e,eb=%.6e,ms=%.6e,as=%.6e,N=%.1f}),t);\n", a_data[i], mu_bkg, a_bkg[i], eta_bkg[i], mu_sig, a_sig[i], n_sig_orig);
+          }
 
           int it = 0;
           for (; it < maxit; ++it) {
@@ -193,15 +196,23 @@ namespace mfv {
       }
 
       if (extra_prints) {
-        double a_sig_sum = 0, a_bkg_sum = 0;
-        printf("   %10s %10s %10s %10s %10s %10s\n", "a_bkg", "A_bkg", "dlt_bkg", "a_sig", "A_sig", "dlt_sig");
-        for (int i = 1; i <= n_bins; ++i) {
-          a_bkg_sum += a_bkg[i];
-          a_sig_sum += a_sig[i];
-          printf("%2i %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", i, a_bkg[i], A_bkg[i], A_bkg[i] - a_bkg[i], a_sig[i], A_sig[i], A_sig[i] - a_sig[i]);
+        for (int times = 0; times < 2; ++times) {
+          if (times)
+            printf("mu*a -> mu*A:\n");
+          else
+            printf("a -> A (i.e. not times mu_sig/bkg):\n");
+          double a_sig_sum = 0, a_bkg_sum = 0;
+          const double m_sig = times ? mu_sig : 1;
+          const double m_bkg = times ? mu_bkg : 1;
+          printf("   %10s %10s %10s %10s %10s %10s\n", "a_bkg", "A_bkg", "dlt_bkg", "a_sig", "A_sig", "dlt_sig");
+          for (int i = 1; i <= n_bins; ++i) {
+            a_bkg_sum += a_bkg[i];
+            a_sig_sum += a_sig[i];
+            printf("%2i %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", i, m_bkg * a_bkg[i], m_bkg * A_bkg[i], m_bkg * (A_bkg[i] - a_bkg[i]), m_sig * a_sig[i], m_sig * A_sig[i], m_sig * (A_sig[i] - a_sig[i]));
+          }
+          printf("sums:\n");
+          printf("   %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", m_bkg * a_bkg_sum, m_bkg * A_bkg_sum, m_bkg * (A_bkg_sum - a_bkg_sum), m_sig * a_sig_sum, m_sig * A_sig_sum, m_sig * (A_sig_sum - a_sig_sum));
         }
-        printf("sums:\n");
-        printf("   %10.3e %10.3e %10.3e %10.3e %10.3e %10.3e\n", a_bkg_sum, A_bkg_sum, A_bkg_sum - a_bkg_sum, a_sig_sum, A_sig_sum, A_sig_sum - a_sig_sum);
       }
 
       double lnL_bb_bkg = 0;
@@ -1070,12 +1081,18 @@ namespace mfv {
       printf("twolnL_h0:\n");
       const double twolnL_h0 = fit::twolnL(t_obs_0.h0.mu_sig, t_obs_0.h0.mu_bkg, t_obs_0.h0.nuis_pars()[0], t_obs_0.h0.nuis_pars()[1]);
       printf("twolnL_h0 = %f\n", twolnL_h0);
+      printf("twolnL_true(mu_sig=%f, mu_bkg=%f, nuis0=%f, nuis1=%f:\n", true_pars[0], true_pars[1], 0.028, 0.01);
+      const double twolnL_true = fit::twolnL(true_pars[0], true_pars[1], 0.028, 0.01);
+      printf("twolnL_true = %f\n", twolnL_true);
       fit::extra_prints = 0;
     }
 
     TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
 
     pval_signif = 1;
+
+    *const_cast<int*>(&print_level) = -1;
+    fit::extra_prints = 0;
 
     draw_likelihood(t_obs_0);
     //scan_template_chi2(t_obs_0);
