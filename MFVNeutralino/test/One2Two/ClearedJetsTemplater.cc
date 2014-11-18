@@ -27,6 +27,7 @@ namespace mfv {
       finalize_templates(env.get_bool("finalize_templates", true)),
       sample_every(env.get_int("sample_every", -1)),
       sample_count(env.get_int("sample_count", -1)),
+      throw_dphi_from_2v(env.get_bool("throw_dphi_from_2v", false)),
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
       phi_from_jet_sigma(env.get_double("phi_from_jet_sigma", 0.4)),
@@ -46,10 +47,15 @@ namespace mfv {
     else {
       printf("d2d_cut: %f\n", d2d_cut);
       printf("sample_count: %i\n", sample_count);
-      if (flat_phis)
-        printf("phis thrown flat\n");
-      else
-        printf("phi_from_jet ~ Gaus(%f, %f)\n", phi_from_jet_mu, phi_from_jet_sigma);
+      if (throw_dphi_from_2v) {
+        printf("dphi thrown from 2v hist\n");
+      }
+      else {
+        if (flat_phis)
+          printf("phis thrown flat\n");
+        else
+          printf("phi_from_jet ~ Gaus(%f, %f)\n", phi_from_jet_mu, phi_from_jet_sigma);
+      }
     }
     printf("clearing_mu: %i increments of %f starting from %f\n", n_clearing_mu, d_clearing_mu, clearing_mu_start);
     printf("clearing_sigma: %i increments of %f starting from %f\n", n_clearing_sigma, d_clearing_sigma, clearing_sigma_start);
@@ -216,10 +222,16 @@ namespace mfv {
         const double bsd2d0 = h_bsd2d[vt_1vsingle]->GetRandom();
         const double bsd2d1 = h_bsd2d[vt_1vsingle]->GetRandom();
 
-        const double phi0 = throw_phi(ev);
-        const double phi1 = throw_phi(ev);
+        double dphi = 0;
+        if (throw_dphi_from_2v)
+          dphi = h_phi[vt_2v]->GetRandom();
+        else {
+          const double phi0 = throw_phi(ev);
+          const double phi1 = throw_phi(ev);
+          dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
+        }
 
-        const double d2d = sqrt(bsd2d0*bsd2d0 + bsd2d1*bsd2d1 - 2*bsd2d0*bsd2d1*cos(TVector2::Phi_mpi_pi(phi0 - phi1)));
+        const double d2d = sqrt(bsd2d0*bsd2d0 + bsd2d1*bsd2d1 - 2*bsd2d0*bsd2d1*cos(dphi));
 
         for (Template* t : templates) {
           ClearedJetsTemplate* cjt = dynamic_cast<ClearedJetsTemplate*>(t);

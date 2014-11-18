@@ -23,6 +23,7 @@ namespace mfv {
     const bool finalize_templates;
     const int sample_every;
     const int sample_count;
+    const bool throw_dphi_from_2v;
     const bool flat_phis;
     const double phi_from_jet_mu;
     const double phi_from_jet_sigma;
