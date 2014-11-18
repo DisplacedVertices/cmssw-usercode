@@ -19,6 +19,8 @@ namespace mfv {
       name (name_.size() ? " " + name_ : ""),
       uname(name_.size() ? "_" + name_ : ""),
 
+      bsd2d_var_bins(true), // JMTBAD env
+
       fout(f),
       dout(f->mkdir(TString::Format("%sTemplater%s", dname.c_str(), uname.c_str()))),
       dtoy(0),
@@ -44,8 +46,22 @@ namespace mfv {
       h_issig_0[i] = new TH1D("h_issig_0", "", 2, 0, 2);
       h_issig_1[i] = new TH1D("h_issig_1", "", 2, 0, 2);
 
+      if (bsd2d_var_bins) {
+        std::vector<double> bins;
+        for (int j = 0; j < 20; ++j)
+          bins.push_back(j*0.002);
+        bins.push_back(0.045);
+        bins.push_back(0.05);
+        bins.push_back(0.1);
+        bins.push_back(0.5);
+        bins.push_back(2.5);
+
+        h_bsd2d[i] = new TH1D("h_bsd2d", "", bins.size()-1, &bins[0]);
+      }
+      else
+        h_bsd2d[i] = new TH1D("h_bsd2d", "", 1250, 0, 2.5);
+
       h_xy             [i] = new TH2D("h_xy"             , "", 100, -0.05, 0.05, 100, 0.05, 0.05);
-      h_bsd2d          [i] = new TH1D("h_bsd2d"          , "", 100, 0, 0.1);
       h_bsd2d_v_bsdz   [i] = new TH2D("h_bsd2d_v_bsdz"   , "", 200, -20, 20, 100, 0, 0.1);
       h_bsdz           [i] = new TH1D("h_bsdz"           , "", 200, -20, 20);
       h_bsd2d_0        [i] = new TH1D("h_bsd2d_0"        , "", 100, 0, 0.1);
