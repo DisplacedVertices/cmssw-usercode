@@ -15,8 +15,6 @@ namespace mfv {
     const std::string name;
     const std::string uname;
 
-    const bool bsd2d_var_bins;
-
     TFile* fout;
     TDirectory* dout;
     TDirectory* dtoy;
