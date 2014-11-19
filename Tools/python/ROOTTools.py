@@ -690,8 +690,13 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
     """Dump specified branches from tree into a list of tuples, via an
     ascii file. By default all vars are converted into integers. The
     xform parameter specifies the function transforming the tuple of
-    strings into the desired format."""
-    
+    strings into the desired format; if xform is a type instance, it
+    is used on every column uniformly."""
+
+    if type(xform) == type(type):
+        xf = xform
+        xform = lambda x: tuple(xf(y) for y in x)
+
     tmp_fn = tempfile.mkstemp()[1]
     t.GetPlayer().SetScanRedirect(True)
     t.GetPlayer().SetScanFileName(tmp_fn)
