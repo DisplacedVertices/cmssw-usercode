@@ -23,7 +23,7 @@ namespace mfv {
     const std::string uname;
 
     jmt::ConfigFromEnv env;
-    const int print_level;
+    int print_level;
     const int inject_in_last_bin;
     const bool bkg_gaussians;
     const bool barlow_beeston;

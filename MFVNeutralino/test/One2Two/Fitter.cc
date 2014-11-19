@@ -1099,9 +1099,17 @@ namespace mfv {
 
     pval_signif = 1;
 
+    const int save_print_level = print_level;
+    const int save_extra_prints = fit::extra_prints;
+    print_level = -1;
+    fit::extra_prints = 0;
+
     draw_likelihood(t_obs_0);
     //scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
+
+    print_level = save_print_level;
+    fit::extra_prints = save_extra_prints;
 
     if (!only_fit && do_signif) {
       printf("throwing %i significance toys:\n", n_toy_signif);
