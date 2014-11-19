@@ -279,8 +279,16 @@ namespace mfv {
     const int ie = fit::n_bins; // JMTBAD
     for (int i = 1; i <= ie; ++i) printf("%5.3f (%3.1f) ", A_sig[i], A_sig_rel[i]);
     printf("  A_bkg ");
-    for (int i = 1; i <= ie; ++i) printf("%5.3f (%3.1f) ", A_bkg[i], A_bkg_rel[i]);
+    for (int i = 1; i <= ie; ++i) printf("%6.4f (%3.1f) ", A_bkg[i], A_bkg_rel[i]);
     printf("\n");
+    double sum = 0;
+    printf("  yield: ");
+    for (int i = 1; i <= ie; ++i) {
+      const double y = yield_in_bin(i);
+      sum += y;
+      printf("%6.2f ", y);
+    }
+    printf("  sum: %.2f\n", sum);
   }
 
   void Fitter::test_stat_t::print(const char* header, const int i, const char* indent) const {

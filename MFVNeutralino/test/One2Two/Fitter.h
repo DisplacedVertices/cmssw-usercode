@@ -79,6 +79,10 @@ namespace mfv {
 
       min_lik_t() : ok(true), maxtwolnL(-1e300), mu_sig(-1), err_mu_sig(-1), mu_bkg(-1), err_mu_bkg(-1), all_ok(true) {}
 
+      double sig_yield_in_bin(const size_t i) const { return mu_sig * A_sig[i]; }
+      double bkg_yield_in_bin(const size_t i) const { return mu_bkg * A_bkg[i]; }
+      double yield_in_bin(const size_t i) const { return sig_yield_in_bin(i) + bkg_yield_in_bin(i); }
+
       std::vector<double> nuis_pars() const { return std::vector<double>({nuis0, nuis1}); }
       std::string nuis_title() const;
       std::string mu_title() const;
