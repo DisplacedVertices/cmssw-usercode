@@ -5,3 +5,4 @@ MiniNtuple.cc
 outs
 plots_asdf
 plots_crab
+hogg_data.h
