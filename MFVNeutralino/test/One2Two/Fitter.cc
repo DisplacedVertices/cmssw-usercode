@@ -1057,7 +1057,10 @@ namespace mfv {
     fit::h_data_real = Template::finalize_binning(h_data_temp);
     fit::set_data_real();
     const int n_data = fit::h_data_real->Integral();
-    printf("n_data: %i\n", n_data);
+    printf("Fitter: data histogram: ");
+    for (int i = 1; i <= fit::n_bins; ++i)
+      printf("%.1f ", fit::h_data_real->GetBinContent(i));
+    printf("  sum: %.1f  n_data: %i\n", fit::h_data_real->Integral(), n_data);
     delete h_data_temp;
 
     ////
