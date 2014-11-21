@@ -1,4 +1,4 @@
-SOURCES       = MiniNtuple.cc Utility.cc ProgressBar.cc VAException.cc Phi.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc Templater.cc PhiShiftTemplater.cc ClearedJetsTemplater.cc SimpleClearingTemplater.cc Fitter.cc mfvo2t.cc
+SOURCES       = MiniNtuple.cc Utility.cc ProgressBar.cc VAException.cc Phi.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc Templater.cc PhiShiftTemplater.cc ClearedJetsTemplater.cc SimpleClearingTemplater.cc Fitter.cc
 INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
@@ -8,8 +8,11 @@ LIBS          = $(ROOTLIBS) -lMinuit
 
 all: mfvo2t.exe
 
-mfvo2t.exe: $(OBJECTS)
-	g++ -o $@ $(OBJECTS) $(LIBS) $(CFLAGS)
+mfvo2t.exe: $(OBJECTS) bin/mfvo2t.o
+	g++ -o $@ $(OBJECTS) bin/mfvo2t.o $(LIBS) $(CFLAGS)
+
+test_templates.exe: $(OBJECTS) bin/test_templates.o
+	g++ -o $@ $(OBJECTS) bin/test_templates.o $(LIBS) $(CFLAGS)
 
 bin/%.o : %.cc
 	g++ $(CFLAGS) -c -o $@ $<
