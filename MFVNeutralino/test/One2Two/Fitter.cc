@@ -15,6 +15,7 @@
 #include "TMath.h"
 #include "TMinuit.h"
 #include "TRandom3.h"
+#include "TStopwatch.h"
 #include "TTree.h"
 
 #include "Prob.h"
@@ -26,6 +27,7 @@
 namespace mfv {
   namespace fit {
     int extra_prints = 0;
+    int n_calls = 0;
 
     int n_bins = -1;
 
@@ -101,9 +103,9 @@ namespace mfv {
 
       //return -pow(mu_sig - 0, 2) -pow(mu_bkg - 234, 2) - pow(par0 - 0.03, 2) - pow(par1 - 0.01, 2);
 
-      //static int ncalls = 0;
-      //printf("call %i\n", ++ncalls);
-      //if (ncalls == 5075000) {
+      //static int local_ncalls = 0;
+      //printf("call %i\n", ++local_ncalls);
+      //if (local_ncalls == 5075000) {
       //  extra_prints=1;
       //  TemplateInterpolator::extra_prints=1;
       //}
@@ -243,6 +245,8 @@ namespace mfv {
       }
 
       //lnL += -0.5*pow((par0 - 0.03)/0.01, 2) - 0.5*pow((par1 - 0.01)/0.01, 2);
+
+      ++n_calls;
 
       if (TMath::IsNaN(lnL))
         jmt::vthrow("lnL is NaN");
@@ -1081,7 +1085,9 @@ namespace mfv {
     for (const auto& p : template_index_deltas)
       printf("%i: %i times\n", p.first, p.second);
 
+    TStopwatch tsw;
     t_obs_0 = calc_test_stat(0);
+    printf("n_calls: %i time to fit: ", fit::n_calls); tsw.Print();
     t_obs_0.print("t_obs_0");
 
     if (print_level > 0) {
@@ -1115,6 +1121,9 @@ namespace mfv {
     fit::extra_prints = save_extra_prints;
 
     if (!only_fit && do_signif) {
+      fit::n_calls = 0;
+      TStopwatch tsw_signif;
+
       printf("throwing %i significance toys:\n", n_toy_signif);
       jmt::ProgressBar pb_signif(50, n_toy_signif);
       if (!print_toys)
@@ -1148,9 +1157,13 @@ namespace mfv {
 
       pval_signif = double(n_toy_signif_t_ge_obs) / n_toy_signif;
       printf("\npval_signif: %e\n", pval_signif); fflush(stdout);
+      printf("n_calls: %i time for signif: ", fit::n_calls); tsw_signif.Print();
     }
 
     if (!only_fit && do_limit) {
+      fit::n_calls = 0;
+      TStopwatch tsw_limit;
+
       const double limit_alpha = 0.05;
 
       const double sig_limit_lo = sig_limit_start;
@@ -1276,6 +1289,8 @@ namespace mfv {
 
         sig_limit_scan += sig_limit_step;
       }
+
+      printf("n_calls: %i time for limit: ", fit::n_calls); tsw_limit.Print();
 
       std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
       TGraphErrors* g = new TGraphErrors(bracket_sig_limit.size(), &bracket_sig_limit[0], &bracket_pval_limit[0], &bracket_sig_limit_err[0], &bracket_pval_limit_err[0]);
