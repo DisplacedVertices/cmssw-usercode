@@ -261,6 +261,7 @@ namespace mfv {
 
     if (extra_prints) {
       printf("interpolate: %f %f\n", pars[0], pars[1]);
+      printf("ntemplates: %i  i_par0: %i  p1: %i  i_par1: %i  p1: %i  n_par1: %i\n", int(templates->size()), i_par0, i_par0_p1, i_par1, i_par1_p1, n_par1);
       for (int i = 0; i < 4; ++i) {
         printf("Q%i: %s\n", i, Q[i]->title().c_str());
         for (int ibin = 1; ibin <= n_bins; ++ibin)
