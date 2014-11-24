@@ -31,12 +31,13 @@ namespace mfv {
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
       phi_from_jet_sigma(env.get_double("phi_from_jet_sigma", 0.4)),
+      n_scale(env.get_int("n_scale", 1)),
       clearing_mu_start(env.get_double("clearing_mu_start", 0.)),
-      d_clearing_mu(env.get_double("d_clearing_mu", 0.0005)),
-      n_clearing_mu(env.get_int("n_clearing_mu", 180)),
+      d_clearing_mu(env.get_double("d_clearing_mu", 0.0005 * n_scale)),
+      n_clearing_mu(env.get_int("n_clearing_mu", 180 / n_scale)),
       clearing_sigma_start(env.get_double("clearing_sigma_start", 0.0005)),
-      d_clearing_sigma(env.get_double("d_clearing_sigma", 0.0005)),
-      n_clearing_sigma(env.get_int("n_clearing_sigma", 100)),
+      d_clearing_sigma(env.get_double("d_clearing_sigma", 0.0005 * n_scale)),
+      n_clearing_sigma(env.get_int("n_clearing_sigma", 100 / n_scale)),
 
       clearing_mu_fit(0.028),
       clearing_sigma_fit(0.005)

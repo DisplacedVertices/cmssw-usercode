@@ -27,6 +27,7 @@ namespace mfv {
     const bool flat_phis;
     const double phi_from_jet_mu;
     const double phi_from_jet_sigma;
+    const int n_scale;
     const double clearing_mu_start;
     const double d_clearing_mu;
     const int n_clearing_mu;
