@@ -8,13 +8,11 @@ LIBS          = $(ROOTLIBS) -lMinuit
 
 all: mfvo2t.exe
 
-mfvo2t.exe: $(OBJECTS) bin/mfvo2t.o
-	g++ -o $@ $(OBJECTS) bin/mfvo2t.o $(LIBS) $(CFLAGS)
-
-test_templates.exe: $(OBJECTS) bin/test_templates.o
-	g++ -o $@ $(OBJECTS) bin/test_templates.o $(LIBS) $(CFLAGS)
+%.exe: bin/%.o $(OBJECTS)
+	g++ -o $@ $(OBJECTS) $< $(LIBS) $(CFLAGS)
 
 bin/%.o : %.cc
+	@mkdir -p bin
 	g++ $(CFLAGS) -c -o $@ $<
 
 test:
@@ -27,5 +25,8 @@ test:
 	@echo CFLAGS:
 	@echo $(CFLAGS)
 
+.PRECIOUS: bin/%.o
+
 clean:	
-	-rm -f $(OBJECTS) mfvo2t.exe
+	-rm -f mfvo2t.exe test_templates.exe
+	-rm -rf bin/
