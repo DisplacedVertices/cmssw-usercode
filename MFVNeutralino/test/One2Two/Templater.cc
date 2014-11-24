@@ -4,6 +4,7 @@
 #include "TFitResult.h"
 #include "TH2D.h"
 #include "TRandom3.h"
+#include "TStopwatch.h"
 #include "TTree.h"
 #include "Phi.h"
 #include "Prob.h"
@@ -144,7 +145,9 @@ namespace mfv {
   }
 
   void Templater::process(const Dataset& dataset_) {
+    TStopwatch tsw;
     dataset = dataset_;
     process_imp();
+    printf("Templater stopwatch: "); tsw.Print();
   }
 }
