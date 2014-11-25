@@ -770,20 +770,18 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   h_nbquarks->Fill(nbquarksstatus3);
   for (int i = 0; i < 2; ++i) {
     if (ids[i].size() == 2) {
-      if (ids[i][0] * ids[i][1] < 0) {
-        double dphi = reco::deltaPhi(phi[i][0], phi[i][1]);
-        double deta = eta[i][0] - eta[i][1];
-        double avgeta = (eta[i][0] + eta[i][1]) / 2;
-        double dR = reco::deltaR(eta[i][0], phi[i][0], eta[i][1], phi[i][1]);
-        h_bquarks_absdphi[i]->Fill(fabs(dphi));
-        h_bquarks_dphi[i]->Fill(dphi);
-        h_bquarks_deta[i]->Fill(deta);
-        h_bquarks_deta_dphi[i]->Fill(dphi, deta);
-        h_bquarks_avgeta[i]->Fill(avgeta);
-        h_bquarks_avgeta_dphi[i]->Fill(dphi, avgeta);
-        h_bquarks_dR[i]->Fill(dR);
-        h_bquarks_dR_dphi[i]->Fill(dphi, dR);
-      }
+      double dphi = reco::deltaPhi(phi[i][0], phi[i][1]);
+      double deta = eta[i][0] - eta[i][1];
+      double avgeta = (eta[i][0] + eta[i][1]) / 2;
+      double dR = reco::deltaR(eta[i][0], phi[i][0], eta[i][1], phi[i][1]);
+      h_bquarks_absdphi[i]->Fill(fabs(dphi));
+      h_bquarks_dphi[i]->Fill(dphi);
+      h_bquarks_deta[i]->Fill(deta);
+      h_bquarks_deta_dphi[i]->Fill(dphi, deta);
+      h_bquarks_avgeta[i]->Fill(avgeta);
+      h_bquarks_avgeta_dphi[i]->Fill(dphi, avgeta);
+      h_bquarks_dR[i]->Fill(dR);
+      h_bquarks_dR_dphi[i]->Fill(dphi, dR);
     }
   }
 
