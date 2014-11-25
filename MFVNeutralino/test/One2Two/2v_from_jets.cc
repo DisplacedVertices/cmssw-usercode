@@ -11,14 +11,27 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-double    mu_clear = 0.0300;
-double sigma_clear = 0.0100;
+double    mu_clear = 0.0320;
+double sigma_clear = 0.0110;
 
 const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
+//const char* tree_path = "../crab/MiniTreeV20";
 
 const int nbkg = 5;
 const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
-float weights[nbkg] = {2*4.849, 2*0.259, 2*0.037, 2*0.188, 2*0.075};
+float weights[nbkg] = {4.849, 0.259, 0.037, 0.188, 0.075};
+
+/*
+const int nbkg = 5;
+const char* samples[nbkg] = {"qcdht0500_2b", "qcdht1000_2b", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
+float weights[nbkg] = {4.849, 0.259, 0.037, 0.188, 0.075};
+*/
+
+/*
+const int nbkg = 2;
+const char* samples[nbkg] = {"qcdht0500_0b", "qcdht1000_0b"};
+float weights[nbkg] = {4.849, 0.259};
+*/
 
 /*
 const int nbkg = 1;
@@ -63,7 +76,13 @@ int main(int argc, const char* argv[]) {
   gRandom->SetSeed(12191982);
 
   //fill only-one-vertex dBV distribution
-  TH1F* h_1v_dbv = new TH1F("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", 500, 0, 2.5);
+  std::vector<double> bins;
+  for (int j = 0; j < 20; ++j)
+    bins.push_back(j*0.002);
+  double b[] = {0.04, 0.0425, 0.045, 0.05, 0.055, 0.06, 0.07, 0.085, 0.1, 0.2, 0.4, 2.5};
+  for (int j = 0; j < 12; ++j)
+    bins.push_back(b[j]);
+  TH1D* h_1v_dbv = new TH1D("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
   TH1F* h_1v_sumht = new TH1F("h_1v_sumht", "only-one-vertex events;#Sigma H_{T} of jets (GeV);events", 200, 0, 5000);
