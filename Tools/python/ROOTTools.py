@@ -855,20 +855,36 @@ def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin
         wsq += hist.GetBinError(i)**2
     return integral, wsq**0.5
 
-def get_hist_quantiles(hist, probs):
+def get_hist_quantiles(hist, probs, options=''):
     """Get the quantiles for the histogram corresponding to the listed
     probs (e.g. probs = [0.1, 0.5, 0.9] to find the first decile, the
     mean, and the last decile."""
 
-    was_list = False
-    if type(probs) != array:
-        was_list = True
+    if type(probs) == int:
+        n = probs
+        probs = array('d', [float(i)/n for i in xrange(n+1)])
+    elif type(probs) != array:
         probs = array('d', probs)
-    quantiles = array('d', [0]*len(probs))
+    quantiles = array('d', [0.]*len(probs))
     hist.GetQuantiles(len(probs), quantiles, probs)
-    if was_list:
-        probs = list(probs)
-    return probs
+    if 'list' in options:
+        quantiles = list(quantiles)
+    if 'probs' in options:
+        return quantiles, probs
+    return quantiles
+
+def get_quantiles(l, binning, probs, options=''):
+    if binning is None:
+        mn = min(l)
+        mx = max(l)
+        n = 10000
+        d = (mx-mn)/n
+        binning = n+1, min(l), max(l)+d
+    h = ROOT.TH1D('get_quantiles_temp', '', *binning)
+    h.SetDirectory(0)
+    for x in l:
+        h.Fill(x)
+    return get_hist_quantiles(h, probs, options)
 
 def get_hist_stats(hist, factor=None, draw=False):
     """For the given histogram, return a five-tuple of the number of
@@ -1354,6 +1370,7 @@ __all__ = [
     'get_bin_content_error',
     'get_integral',
     'get_hist_quantiles',
+    'get_quantiles',
     'get_hist_stats',
     'draw_hist_register',
     'make_rms_hist',
