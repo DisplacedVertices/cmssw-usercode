@@ -96,6 +96,96 @@ namespace mfv {
         lnL_offset -= n_sig_orig * a_sig[i] * log(n_sig_orig * a_sig[i]) - n_sig_orig * a_sig[i]; 
     }
 
+    int RootsQuad(const long double* coef, long double& x0, long double& x1) {
+      long double a = coef[2];
+      long double b = coef[1];
+      long double c = coef[0];
+      long double det = b*b - 4*a*c;
+      int nrealroots = 2;
+      if (det < 0.L) {
+        nrealroots = 0;
+        x0 = -b/a/2.L;
+        x1 = sqrtl(-det)/a/2.L;
+      }
+      else if (det == 0.L) {
+        nrealroots = 1;
+        x0 = x1 = -b/a/2.L;
+      }
+      else {
+        x0 =(-b-sqrtl(det))/a/2.L;
+        x1 =(-b+sqrtl(det))/a/2.L;
+      }
+      return nrealroots;
+    }
+
+    Bool_t RootsCubic(const long double* coef, long double &a, long double &b, long double &c)
+    {
+      // Calculates roots of polynomial of 3rd order a*x^3 + b*x^2 + c*x + d, where
+      // a == coef[3], b == coef[2], c == coef[1], d == coef[0]
+      //coef[3] must be different from 0
+      // If the boolean returned by the method is false:
+      //    ==> there are 3 real roots a,b,c
+      // If the boolean returned by the method is true:
+      //    ==> there is one real root a and 2 complex conjugates roots (b+i*c,b-i*c)
+      // Author: Francois-Xavier Gentit
+
+      Bool_t complex = kFALSE;
+      long double r,s,t,p,q,d,ps3,ps33,qs2,u,v,tmp,lnu,lnv,su,sv,y1,y2,y3;
+      a    = 0.L;
+      b    = 0.L;
+      c    = 0.L;
+      if (coef[3] == 0.L) return complex;
+      r    = coef[2]/coef[3];
+      s    = coef[1]/coef[3];
+      t    = coef[0]/coef[3];
+      p    = s - (r*r)/3.L;
+      ps3  = p/3.L;
+      q    = (2.L*r*r*r)/27.L - (r*s)/3.L + t;
+      qs2  = q/2.L;
+      ps33 = ps3*ps3*ps3;
+      d    = ps33 + qs2*qs2;
+      if (d>=0.L) {
+        complex = kTRUE;
+        d   = sqrtl(d);
+        u   = -qs2 + d;
+        v   = -qs2 - d;
+        tmp = 1.L/3.L;
+        lnu = logl(fabsl(u));
+        lnv = logl(fabsl(v));
+        su  = u < 0 ? -1.L : 1.L;
+        sv  = v < 0 ? -1.L : 1.L;
+        u   = su*expl(tmp*lnu);
+        v   = sv*expl(tmp*lnv);
+        y1  = u + v;
+        y2  = -y1/2.L;
+        y3  = ((u-v)*sqrtl(3.L))/2.L;
+        tmp = r/3.L;
+        a   = y1 - tmp;
+        b   = y2 - tmp;
+        c   = y3;
+      } else {
+        long double phi,cphi,phis3,c1,c2,c3,pis3;
+        ps3   = -ps3;
+        ps33  = -ps33;
+        cphi  = -qs2/sqrtl(ps33);
+        phi   = acosl(cphi);
+        phis3 = phi/3.L;
+        pis3  = M_PI/3.L;
+        c1    = cosl(phis3);
+        c2    = cosl(pis3 + phis3);
+        c3    = cosl(pis3 - phis3);
+        tmp   = sqrtl(ps3);
+        y1    = 2.L*tmp*c1;
+        y2    = -2.L*tmp*c2;
+        y3    = -2.L*tmp*c3;
+        tmp = r/3.L;
+        a   = y1 - tmp;
+        b   = y2 - tmp;
+        c   = y3 - tmp;
+      }
+      return complex;
+    }
+
     double twolnL(double mu_sig, double mu_bkg, double par0, double par1) {
       if (TMath::IsNaN(mu_sig) || TMath::IsNaN(mu_bkg) || TMath::IsNaN(par0) || TMath::IsNaN(par1))
         //jmt::vthrow("NaN in twolnL(%f, %f, %f, %f)", mu_sig, mu_bkg, par0, par1);
@@ -135,9 +225,8 @@ namespace mfv {
       A_bkg.assign(n_bins+2, 0.);
       double A_sig_sum = 0, A_bkg_sum = 0;
 
-      const double eps = 1e-4;
-      const double sqrteps = sqrt(eps);
-      const int maxit = 10000;
+      const double eps = 1e-6;
+
       for (int i = 1; i <= n_bins; ++i) {
         const double sig_bkg = eta_bkg[i] / mu_bkg;
         const double sig_bkg_2 = sig_bkg * sig_bkg;
@@ -148,45 +237,63 @@ namespace mfv {
           continue;
         }
 
-        double t = 1;
+        double t = 0.;
 
         if (a_data[i] > eps) {
-          double t_lo = -n_sig_orig/mu_sig + eps;
-          double t_hi = std::min(a_bkg[i] / mu_bkg / sig_bkg_2, 1.) - eps;
-          double y = 1e99;
+          const double t_lo = -n_sig_orig/mu_sig;
+          const double t_hi = 1.; //std::min(a_bkg[i] / mu_bkg / sig_bkg_2, 1.);
+
+          const long double coeff[4] = {
+            a_data[i] - mu_sig * a_sig[i] - mu_bkg * a_bkg[i],
+            a_data[i] * mu_sig / n_sig_orig + mu_sig * a_sig[i] - (mu_sig / n_sig_orig - 1) * mu_bkg * a_bkg[i] + eta_bkg[i] * eta_bkg[i],
+            mu_bkg * a_bkg[i] * mu_sig / n_sig_orig + eta_bkg[i] * eta_bkg[i] * (mu_sig / n_sig_orig - 1),
+            - eta_bkg[i] * eta_bkg[i] * mu_sig / n_sig_orig
+          };
+
+          std::vector<long double> ts(3, 1e99);
+          int nr;
+          if (fabs(coeff[3]) > 1e-12)
+            nr = RootsCubic(coeff, ts[0], ts[1], ts[2]) ? 1 : 3;
+          else
+            nr = RootsQuad(coeff, ts[0], ts[1]);
+          std::sort(ts.begin(), ts.end(), [](long double x, long double y) { return fabs(x) < fabs(y); });
+
+          int nok = 0;
           bool found = false;
+          for (int ir = 0; ir < nr; ++ir)
+            if (ts[ir] >= t_lo && ts[ir] <= t_hi) {
+              ++nok;
+              if (!found) {
+                found = true;
+                t = ts[ir];
+              }
+            }
 
           if (extra_prints) {
             printf("find t: bin %i  d: %5.1f  eta_bkg: %10.3e  sig_bkg: %10.3e  a_bkg: %10.3e  a_sig: %10.3e -> t in [%e, %e]\n", i, a_data[i], eta_bkg[i], sig_bkg, a_bkg[i], a_sig[i], t_lo, t_hi);
             printf("f:=d/(1-t)-mb*(ab-t*mb*sigb*sigb)-ms*as/(1+t*ms/N);\n");
+            printf("Z:=ms/N; g:=(-(mb*sigb)^2*Z)*t^3 + (mb*ab*Z+(mb*sigb)^2*(Z-1))*t^2 + (d*Z+ms*as-(Z-1)*mb*ab+(mb*sigb)^2)*t + (d-ms*as-mb*ab);\n");
             printf("solve(eval(f,{d=%.1f,mb=%.6e,ab=%.6e,sigb=%.6e,ms=%.6e,as=%.6e,N=%.1f}),t);\n", a_data[i], mu_bkg, a_bkg[i], sig_bkg, mu_sig, a_sig[i], n_sig_orig);
+            printf("solve(eval(g,{d=%.1f,mb=%.6e,ab=%.6e,sigb=%.6e,ms=%.6e,as=%.6e,N=%.1f}),t);\n", a_data[i], mu_bkg, a_bkg[i], sig_bkg, mu_sig, a_sig[i], n_sig_orig);
+            printf("solve((%.6Le) + (%.6Le) * t + (%.6Le) * t^2 + (%.6Le) * t^3, t);\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+            printf("coeffs:  %.6Le  %.6Le  %.6Le  %.6Le\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+            fflush(stdout);
+            for (int jmt = 0; jmt < 4; ++jmt)
+              printf("coeff%i: %.6Le\n", jmt, coeff[jmt]);
+            fflush(stdout);
+            printf("num roots = %i : a = %.6Le  b = %.6Le  c = %.6Le -> num ok = %i\n", nr, ts[0], ts[1], ts[2], nok);
           }
 
-          int it = 0;
-          for (; it < maxit; ++it) {
-            t = 0.5*(t_lo + t_hi);
-
-            y = a_data[i] / (1 - t) - mu_bkg * (a_bkg[i] - t * mu_bkg * sig_bkg_2) - mu_sig * a_sig[i] / (1 + t * mu_sig / n_sig_orig);
-
-            if (y > 0)
-              t_hi = t;
-            else if (y < 0)
-              t_lo = t;
-
-            if (extra_prints)
-              printf("  #%3i:  t: %13.6e  y: %13.6e  new t: [%13.6e %13.6e]\n", it, t, y, t_lo, t_hi);
-
-            if (fabs(y) < eps || (t_hi - t_lo < eps && fabs(y) < sqrteps)) {
-              found = true;
-              break;
-            }
-          }
-
-          if (!found)
-            jmt::vthrow("zero finding with mu_b %f mu_s %f par0 %f par1 %f failed at it %i with bin %i  d: %5.1f  a_bkg: %10.3e  a_sig: %10.3e t %f [%f %f] y %f\n", mu_bkg, mu_sig, par0, par1, it, i, a_data[i], a_bkg[i], a_sig[i], t, t_lo, t_hi, y);
+          if (nok > 1)
+            jmt::vthrow("more than one solution for t");
+          else if (nok != 1)
+            jmt::vthrow("no solution for t");
         }
-        else if (extra_prints)
-          printf("find t: bin %i  d: 0 -> t = 1\n", i);
+        else {
+          t = 1.;
+          if (extra_prints)
+            printf("find t: bin %i  d: 0 -> t = 1\n", i);
+        }
 
         A_sig[i] = a_sig[i] / (t * mu_sig / n_sig_orig + 1);
         A_bkg[i] = a_bkg[i] - t * mu_bkg * sig_bkg_2;
@@ -1018,7 +1125,8 @@ namespace mfv {
     fit::calc_lnL_offset();
 
     if (bkg_gaussians)
-      fit::eta_bkg = { -1, 1, 1, 1, 1.16, 0.22, 0.25, -1 };
+      fit::eta_bkg = { -1, 1, 1, 4.5, 0.77, 0.54, 0.083, -1 };
+      //fit::eta_bkg = { -1, 1, 1, 1, 3, 1, 1, -1 };
     else
       fit::eta_bkg = { -1, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, -1 };
 
