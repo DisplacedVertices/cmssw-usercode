@@ -139,9 +139,12 @@ namespace mfv {
       const double sqrteps = sqrt(eps);
       const int maxit = 10000;
       for (int i = 1; i <= n_bins; ++i) {
+        const double sig_bkg = eta_bkg[i] / mu_bkg;
+        const double sig_bkg_2 = sig_bkg * sig_bkg;
+
         if (!barlow_beeston) {
           A_sig_sum += (A_sig[i] = a_sig[i]);
-          A_bkg_sum += (A_bkg[i] = a_bkg[i]*(1 + (bend_bkg ? eta_bkg[i] : 0)));
+          A_bkg_sum += (A_bkg[i] = a_bkg[i]*(1. + (bend_bkg ? sig_bkg : 0.)));
           continue;
         }
 
@@ -149,21 +152,21 @@ namespace mfv {
 
         if (a_data[i] > eps) {
           double t_lo = -n_sig_orig/mu_sig + eps;
-          double t_hi = 1 - eps;
+          double t_hi = std::min(a_bkg[i] / mu_bkg / sig_bkg_2, 1.) - eps;
           double y = 1e99;
           bool found = false;
 
           if (extra_prints) {
-            printf("find t: bin %i  d: %5.1f  eta_bkg: %10.3e a_bkg: %10.3e  a_sig: %10.3e\n", i, a_data[i], eta_bkg[i], a_bkg[i], a_sig[i]);
-            printf("f:=d/(1-t)-mb*(ab-t*mb*ab*ab*eb*eb)-ms*as/(1+t*ms/N);\n");
-            printf("solve(eval(f,{d=%.1f,mb=%.6e,ab=%.6e,eb=%.6e,ms=%.6e,as=%.6e,N=%.1f}),t);\n", a_data[i], mu_bkg, a_bkg[i], eta_bkg[i], mu_sig, a_sig[i], n_sig_orig);
+            printf("find t: bin %i  d: %5.1f  eta_bkg: %10.3e  sig_bkg: %10.3e  a_bkg: %10.3e  a_sig: %10.3e -> t in [%e, %e]\n", i, a_data[i], eta_bkg[i], sig_bkg, a_bkg[i], a_sig[i], t_lo, t_hi);
+            printf("f:=d/(1-t)-mb*(ab-t*mb*sigb*sigb)-ms*as/(1+t*ms/N);\n");
+            printf("solve(eval(f,{d=%.1f,mb=%.6e,ab=%.6e,sigb=%.6e,ms=%.6e,as=%.6e,N=%.1f}),t);\n", a_data[i], mu_bkg, a_bkg[i], sig_bkg, mu_sig, a_sig[i], n_sig_orig);
           }
 
           int it = 0;
           for (; it < maxit; ++it) {
             t = 0.5*(t_lo + t_hi);
 
-            y = a_data[i] / (1 - t) - mu_bkg * (a_bkg[i] - t * mu_bkg * eta_bkg[i] * eta_bkg[i] * a_bkg[i] * a_bkg[i]) - mu_sig * a_sig[i] / (1 + t * mu_sig / n_sig_orig);
+            y = a_data[i] / (1 - t) - mu_bkg * (a_bkg[i] - t * mu_bkg * sig_bkg_2) - mu_sig * a_sig[i] / (1 + t * mu_sig / n_sig_orig);
 
             if (y > 0)
               t_hi = t;
@@ -186,7 +189,7 @@ namespace mfv {
           printf("find t: bin %i  d: 0 -> t = 1\n", i);
 
         A_sig[i] = a_sig[i] / (t * mu_sig / n_sig_orig + 1);
-        A_bkg[i] = a_bkg[i] - t * mu_bkg * a_bkg[i] * a_bkg[i] * eta_bkg[i] * eta_bkg[i];
+        A_bkg[i] = a_bkg[i] - t * mu_bkg * sig_bkg_2;
         if (A_bkg[i] < 0)
           A_bkg[i] = 0;
 
@@ -222,7 +225,8 @@ namespace mfv {
       double lnL_fit = 0;
 
       for (int i = 1; i <= n_bins; ++i) {
-        const double dlnL_bb_bkg = barlow_beeston ? (a_bkg[i] == 0. ? 0. : -0.5 * pow((a_bkg[i] - A_bkg[i])/a_bkg[i]/eta_bkg[i], 2)) : 0;
+        const double sig_bkg = eta_bkg[i] / mu_bkg;
+        const double dlnL_bb_bkg = barlow_beeston ? (a_bkg[i] == 0. ? 0. : -0.5 * pow((a_bkg[i] - A_bkg[i])/sig_bkg, 2)) : 0;
         const double dlnL_bb_sig = barlow_beeston ? (n_sig_orig * a_sig[i] * log(n_sig_orig * A_sig[i]) - n_sig_orig * A_sig[i]) : 0;
 
         const double nu_sig = mu_sig * A_sig[i];
@@ -617,7 +621,7 @@ namespace mfv {
     printf("%6s | %6s | prediction from nu0 = %.4f, nu1 = %.4f\n", "ibin", "n_i", t.h0.nuis_pars()[0], t.h0.nuis_pars()[1]);
     for (int ibin = 1; ibin <= fit::n_bins; ++ibin) {
       const double estat = h_bkg_fit_shortened->GetBinError(ibin);
-      const double esyst = h_bkg_fit_shortened->GetBinContent(ibin)*fit::eta_bkg[ibin];
+      const double esyst = fit::eta_bkg[ibin];
       printf("%6i | %6.1f | %7.3f +- %7.3f (stat) +- %7.3f (syst) (+- %7.3f tot)\n", ibin, fit::h_data_real->GetBinContent(ibin), h_bkg_fit_shortened->GetBinContent(ibin), estat, esyst, sqrt(estat*estat + esyst*esyst));
     }
 
@@ -950,12 +954,9 @@ namespace mfv {
         ss_sum += sn;
         ss[i] = sn;
 
-        const double bc = h_bkg->GetBinContent(i);
-        double gw;
-        if (i == fit::n_bins)
-          gw = fabs(1./n_bkg - bc);
-        else
-          gw = bc*fit::eta_bkg[i];
+        const double bc  = h_bkg->GetBinContent(i);
+        const double bce = h_bkg->GetBinError(i);
+        const double gw = sqrt(pow(bce, 2) + pow(fit::eta_bkg[i], 2));
         double bn = rand->Gaus(bc, gw);
         if (bn < 0)
           bn = 0;
@@ -1017,9 +1018,9 @@ namespace mfv {
     fit::calc_lnL_offset();
 
     if (bkg_gaussians)
-      fit::eta_bkg = { -1, 0.01, 0.01, 0.01, 0.7, 1., 15., -1};
+      fit::eta_bkg = { -1, 1, 1, 1, 1.16, 0.22, 0.25, -1 };
     else
-      fit::eta_bkg = { -1, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, -1 };
+      fit::eta_bkg = { -1, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, -1 };
 
     if (int(fit::eta_bkg.size()) != fit::n_bins+2)
       jmt::vthrow("eta_bkg wrong size");
