@@ -92,6 +92,7 @@ enabled = [x.strip() for x in '''
 #sv_best0_drmax_nm1
 #sv_best0_bsbs2ddist
 #sv_best0_bs2derr_nm1
+#sv_best0_jets_deltaphi
 npv
 calojetpt4
 jetsumht
@@ -297,6 +298,15 @@ D('sv_best0_bs2derr_nm1',
   x_range = (0, 0.01),
   legend_pos = (0.47, 0.70, 0.87, 0.90),
   cut_line = ((0.0025,0.0,0.0025,148000),ROOT.kRed,5,1),
+  )
+
+D('sv_best0_jets_deltaphi',
+  histogram_path = vertex_histo('h_sv_best0_jets_deltaphi'),
+  x_title = '#Delta#phi_{JV}',
+  y_title = 'jet-vertex pairs/0.252',
+  y_range = (None,1e5),
+  legend_pos = (0.47, 0.78, 0.87, 0.93),
+  rebin = 2,
   )
 
 ################################################################################
