@@ -1089,7 +1089,13 @@ namespace mfv {
 
     if (print_level > 1) {
       printf("make_toy_data: i_signif: %i i_limit: %i n_sig: %i n_bkg: %i\n", i_toy_signif, i_toy_limit, n_sig, n_bkg);
-      printf("toy_sig: ");
+      printf("h_sig: ");
+      for (int i = 0; i <= fit::n_bins+1; ++i)
+        printf("%10.6f ", fit::h_sig->GetBinContent(i));
+      printf("\nh_bkg: ");
+      for (int i = 0; i <= fit::n_bins+1; ++i)
+        printf("%10.6f ", h_bkg->GetBinContent(i));
+      printf("\ntoy_sig: ");
       for (int i = 0; i <= fit::n_bins+1; ++i)
         printf("%10.6f ", fit::h_data_toy_sig->GetBinContent(i));
       printf("\ntoy_bkg: ");
