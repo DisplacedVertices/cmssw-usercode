@@ -441,7 +441,7 @@ namespace mfv {
       do_limit(env.get_bool("do_limit", true)),
       only_fit(env.get_bool("only_fit", false)),
       i_limit_job(env.get_int("i_limit_job", -1)),
-      n_toy_limit(env.get_int("n_toy_limit", 2000)),
+      n_toy_limit(env.get_int("n_toy_limit", 10000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
       sig_limit_step(env.get_double("sig_limit_step", 0.25)),
       sig_eff(env.get_double("sig_eff", 1.)),
@@ -1275,7 +1275,8 @@ namespace mfv {
 
       const double sig_limit_lo = sig_limit_start;
       const double sig_limit_hi = 1000;
-      const int n_sigma_away = 5;
+      const int n_sigma_away_lo = 7;
+      const int n_sigma_away_hi = 6;
       double sig_limit_scan = sig_limit_lo;
 
       printf("scanning for %.1f%% upper limit, ", 100*(1-limit_alpha));
@@ -1375,11 +1376,11 @@ namespace mfv {
         const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
         const double pval_limit = (p_hat + T/2)/(1 + T);
         const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
-        const double pval_limit_sglo = pval_limit - n_sigma_away * pval_limit_err;
-        const double pval_limit_sghi = pval_limit + n_sigma_away * pval_limit_err;
+        const double pval_limit_sglo = pval_limit - n_sigma_away_lo * pval_limit_err;
+        const double pval_limit_sghi = pval_limit + n_sigma_away_hi * pval_limit_err;
 
         if (print_toys) {
-          printf("  p_hat = %f -> %f +- %f  %is: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, n_sigma_away, pval_limit_sglo, pval_limit_sghi);
+          printf("  p_hat = %f -> %f +- %f  (%i,%i)s: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, n_sigma_away_lo, n_sigma_away_hi, pval_limit_sglo, pval_limit_sghi);
           fflush(stdout);
         }
 
