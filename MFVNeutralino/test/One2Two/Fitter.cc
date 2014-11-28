@@ -225,8 +225,6 @@ namespace mfv {
       A_bkg.assign(n_bins+2, 0.);
       double A_sig_sum = 0, A_bkg_sum = 0;
 
-      const double eps = 1e-6;
-
       for (int i = 1; i <= n_bins; ++i) {
         const double sig_bkg = eta_bkg[i] / mu_bkg;
         const double sig_bkg_2 = sig_bkg * sig_bkg;
@@ -239,7 +237,7 @@ namespace mfv {
 
         double t = 0.;
 
-        if (a_data[i] > eps) {
+        if (a_data[i] > 1e-6) {
           const double t_lo = -n_sig_orig/mu_sig;
           const double t_hi = 1.; //std::min(a_bkg[i] / mu_bkg / sig_bkg_2, 1.);
 
@@ -252,7 +250,7 @@ namespace mfv {
 
           std::vector<long double> ts(3, 1e99);
           int nr;
-          if (fabs(coeff[3]) > 1e-12)
+          if (fabs(coeff[3]/coeff[2]) > 1e-3)
             nr = RootsCubic(coeff, ts[0], ts[1], ts[2]) ? 1 : 3;
           else
             nr = RootsQuad(coeff, ts[0], ts[1]);
@@ -261,7 +259,7 @@ namespace mfv {
           int nok = 0;
           bool found = false;
           for (int ir = 0; ir < nr; ++ir)
-            if (ts[ir] >= t_lo && ts[ir] <= t_hi) {
+            if (ts[ir] > t_lo && ts[ir] < t_hi) {
               ++nok;
               if (!found) {
                 found = true;
@@ -276,11 +274,11 @@ namespace mfv {
             printf("solve(eval(f,{d=%.1f,mb=%.6e,ab=%.6e,sigb=%.6e,ms=%.6e,as=%.6e,N=%.1f}),t);\n", a_data[i], mu_bkg, a_bkg[i], sig_bkg, mu_sig, a_sig[i], n_sig_orig);
             printf("solve(eval(g,{d=%.1f,mb=%.6e,ab=%.6e,sigb=%.6e,ms=%.6e,as=%.6e,N=%.1f}),t);\n", a_data[i], mu_bkg, a_bkg[i], sig_bkg, mu_sig, a_sig[i], n_sig_orig);
             printf("solve((%.6Le) + (%.6Le) * t + (%.6Le) * t^2 + (%.6Le) * t^3, t);\n", coeff[0], coeff[1], coeff[2], coeff[3]);
-            printf("coeffs:  %.6Le  %.6Le  %.6Le  %.6Le\n", coeff[0], coeff[1], coeff[2], coeff[3]);
-            fflush(stdout);
-            for (int jmt = 0; jmt < 4; ++jmt)
-              printf("coeff%i: %.6Le\n", jmt, coeff[jmt]);
-            fflush(stdout);
+            //printf("coeffs:  %.6Le  %.6Le  %.6Le  %.6Le\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+            //fflush(stdout);
+            //for (int jmt = 0; jmt < 4; ++jmt)
+            //  printf("coeff%i: %.6Le\n", jmt, coeff[jmt]);
+            //fflush(stdout);
             printf("num roots = %i : a = %.6Le  b = %.6Le  c = %.6Le -> num ok = %i\n", nr, ts[0], ts[1], ts[2], nok);
           }
 
