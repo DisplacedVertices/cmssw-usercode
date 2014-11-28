@@ -1061,7 +1061,7 @@ namespace mfv {
 
         const double bc  = h_bkg->GetBinContent(i);
         const double bce = h_bkg->GetBinError(i);
-        const double gw = sqrt(pow(bce, 2) + pow(fit::eta_bkg[i], 2));
+        const double gw = sqrt(pow(bce, 2) + pow(fit::eta_bkg[i] / n_bkg, 2));
         double bn = rand->Gaus(bc, gw);
         if (bn < 0)
           bn = 0;
