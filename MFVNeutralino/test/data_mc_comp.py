@@ -90,7 +90,7 @@ enabled = [x.strip() for x in '''
 #sv_best0_njetsntks_nm1
 #sv_best0_drmin_nm1
 #sv_best0_drmax_nm1
-#sv_best0_bs2ddist
+#sv_best0_bsbs2ddist
 #sv_best0_bs2derr_nm1
 npv
 calojetpt4
@@ -282,8 +282,8 @@ D('sv_best0_njetsntks_nm1',
   cut_line = ((1.,0.0,1.,128000),ROOT.kRed,5,1),
   )
 
-D('sv_best0_bs2ddist',
-  histogram_path = vertex_histo('h_sv_best0_bs2ddist'),
+D('sv_best0_bsbs2ddist',
+  histogram_path = vertex_histo('h_sv_best0_bsbs2ddist'),
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.1),
