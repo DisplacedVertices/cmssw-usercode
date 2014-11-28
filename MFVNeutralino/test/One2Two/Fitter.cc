@@ -1204,6 +1204,7 @@ namespace mfv {
     t_obs_0.print("t_obs_0");
 
     if (print_level > 0) {
+      const int save_extra_prints = fit::extra_prints;
       fit::extra_prints = 1;
       printf("twolnL_h1:\n");
       const double twolnL_h1 = fit::twolnL(t_obs_0.h1.mu_sig, t_obs_0.h1.mu_bkg, t_obs_0.h1.nuis_pars()[0], t_obs_0.h1.nuis_pars()[1]);
@@ -1211,10 +1212,12 @@ namespace mfv {
       printf("twolnL_h0:\n");
       const double twolnL_h0 = fit::twolnL(t_obs_0.h0.mu_sig, t_obs_0.h0.mu_bkg, t_obs_0.h0.nuis_pars()[0], t_obs_0.h0.nuis_pars()[1]);
       printf("twolnL_h0 = %f\n", twolnL_h0);
-      printf("twolnL_true(mu_sig=%f, mu_bkg=%f, nuis0=%f, nuis1=%f:\n", true_pars[0], true_pars[1], 0.028, 0.01);
-      const double twolnL_true = fit::twolnL(true_pars[0], true_pars[1], 0.028, 0.01);
-      printf("twolnL_true = %f\n", twolnL_true);
-      fit::extra_prints = 0;
+      if (toy >= 0) {
+        printf("twolnL_true(mu_sig=%f, mu_bkg=%f, nuis0=%f, nuis1=%f:\n", true_pars[0], true_pars[1], 0.028, 0.01);
+        const double twolnL_true = fit::twolnL(true_pars[0], true_pars[1], 0.028, 0.01);
+        printf("twolnL_true = %f\n", twolnL_true);
+      }
+      fit::extra_prints = save_extra_prints;
     }
 
     TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
