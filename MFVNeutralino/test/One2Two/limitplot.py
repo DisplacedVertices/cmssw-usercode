@@ -66,6 +66,11 @@ watches = [
 nn = -1
 for tau, tau_nice in taus:
     masses = [200, 300, 400, 600, 800, 1000]
+    if tau == '0100um' or tau == '0300um':
+        print 'skip', tau
+        nn -= len(masses)
+        continue
+
     observed = []
     expect50 = []
     expect68 = []
@@ -80,8 +85,8 @@ for tau, tau_nice in taus:
             print 'skip', tau, mass
             nn -= 1
             continue
-        fn  = 'outs/BBv7_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (nn, nn)
-        fn2 = 'outs/BBv7_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (nn, nn)
+        fn  = 'outs/BBv8_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (nn, nn)
+        fn2 = 'outs/BBv8_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (nn, nn)
         print nn, fn, fn2
         nn -= 1
         vals = [None]*6
@@ -113,6 +118,7 @@ for tau, tau_nice in taus:
         expect95hi.append(exp97p5 - exp95)
 
     for l in [masses, observed, expect50, expect68, expect68lo, expect68hi, expect95, expect95lo, expect95hi]:
+        #pass
         l.pop(0)
         #l.pop(0)
         
