@@ -12,24 +12,35 @@
 int main() {
   jmt::set_root_style();
 
-  TFile* out_f = new TFile("test_templates.root", "recreate");
-  TRandom3* rand = new TRandom3(jmt::seed_base);
-  mfv::ToyThrower* tt = new mfv::ToyThrower("", "trees", out_f, rand);
-  mfv::Templater* ter = new mfv::ClearedJetsTemplater("", out_f, rand);
+  for (int seed = 0; seed < 10; ++seed) {
+    TFile* out_f = new TFile("test_templates.root", "recreate");
+    TRandom3* rand = new TRandom3(jmt::seed_base + seed);
+    mfv::ToyThrower* tt = new mfv::ToyThrower("", "trees", out_f, rand);
+    mfv::Templater* ter = new mfv::ClearedJetsTemplater("", out_f, rand);
 
-  ter->process(tt->data);
+    ter->process(tt->data);
 
-  std::vector<double> a_bkg(6+2,0.);
-  mfv::TemplateInterpolator* interp = new mfv::TemplateInterpolator(ter->get_templates(), mfv::Template::binning().size()-1, ter->par_info(), a_bkg);
+    std::vector<double> a_bkg(6+2,0.);
+    mfv::TemplateInterpolator* interp = new mfv::TemplateInterpolator(ter->get_templates(), mfv::Template::binning().size()-1, ter->par_info(), a_bkg);
 
-  mfv::Template* t = interp->get_Q(std::vector<double>({0.031, 0.01}));
+    mfv::Template* t = interp->get_Q(std::vector<double>({0.032283, 0.010945}));
+    //mfv::Template* t = interp->get_Q(std::vector<double>({0.032, 0.011}));
 
-  printf("%4s %12s %12s %12s %12s %12s %12s\n", "ibin", "val", "err", "val*251", "err*251", "norig", "rel err");
-  for (int i = 1; i <= 6; ++i) {
-    double c = t->h->GetBinContent(i);
-    double e = t->h->GetBinError(i);
-    printf("%4i %12.6e %12.6e %12.6e %12.6e %12.6e %12.6e\n", i, c, e, c*251, e*251, c*c/e/e, e/c);
+    printf("%4s %12s %12s %12s %12s %12s %12s\n", "ibin", "val", "err", "val*251", "err*251", "norig", "rel err");
+    for (int i = 1; i <= 6; ++i) {
+      double c = t->h->GetBinContent(i);
+      double e = t->h->GetBinError(i);
+      printf("%4i %12.6e %12.6e %12.6e %12.6e %12.6e %12.6e\n", i, c, e, c*251, e*251, c*c/e/e, e/c);
+    }
+
+    out_f->Write();
+    out_f->Close();
+    delete out_f;
+    delete tt;
+    delete ter;
+    delete interp;
   }
+
 
   /*
   mfv::TemplateInterpolator::extra_prints=1;
@@ -80,11 +91,4 @@ int main() {
     }
   }
   */
-
-  out_f->Write();
-  out_f->Close();
-  delete out_f;
-  delete tt;
-  delete ter;
-  delete interp;
 }
