@@ -218,7 +218,7 @@ namespace mfv {
       h_bsd2d_use = (TH1D*)h_bsd2d_use->Clone("h_bsd2d_use");
       h_bsd2d_use->SetDirectory(0);
       h_bsd2d_use->Reset();
-      h_bsd2d_use->FillRandom(h_bsd2d[vt_1vsingle], dataset.events_1v->size());
+      h_bsd2d_use->FillRandom(h_bsd2d[vt_1vsingle], rand->Poisson(dataset.events_1v->size()));
     }
 
     int evc = 0;
