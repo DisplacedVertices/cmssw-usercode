@@ -27,6 +27,7 @@ namespace mfv {
       finalize_templates(env.get_bool("finalize_templates", true)),
       sample_every(env.get_int("sample_every", -1)),
       sample_count(env.get_int("sample_count", -1)),
+      throw_h_bsd2d(env.get_bool("throw_h_bsd2d", false)),
       throw_dphi_from_2v(env.get_bool("throw_dphi_from_2v", false)),
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
@@ -212,6 +213,14 @@ namespace mfv {
       }
     }
 
+    TH1D* h_bsd2d_use = h_bsd2d[vt_1vsingle];
+    if (throw_h_bsd2d) {
+      h_bsd2d_use = (TH1D*)h_bsd2d_use->Clone("h_bsd2d_use");
+      h_bsd2d_use->SetDirectory(0);
+      h_bsd2d_use->Reset();
+      h_bsd2d_use->FillRandom(h_bsd2d[vt_1vsingle], dataset.events_1v->size());
+    }
+
     int evc = 0;
     for (const EventSimple& ev : *dataset.events_1v) {
       if (sample_every > 0 && evc % sample_every != 0) {
@@ -220,8 +229,8 @@ namespace mfv {
       }
 
       if (ev.njets > 0) {
-        const double bsd2d0 = h_bsd2d[vt_1vsingle]->GetRandom();
-        const double bsd2d1 = h_bsd2d[vt_1vsingle]->GetRandom();
+        const double bsd2d0 = h_bsd2d_use->GetRandom();
+        const double bsd2d1 = h_bsd2d_use->GetRandom();
 
         double dphi = 0;
         if (throw_dphi_from_2v)
@@ -246,6 +255,9 @@ namespace mfv {
       if (++evc == N1v)
         break;
     }
+
+    if (throw_h_bsd2d)
+      delete h_bsd2d_use;
 
     for (Template* t : templates)
       if (t->h->Integral() < 1e-6) {
