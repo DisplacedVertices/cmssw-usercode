@@ -93,10 +93,6 @@ int main(int argc, const char* argv[]) {
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 20, 0, 0.1, 20, 0, 0.1);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", 6, 0, 0.12);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
-  TH1F* h_2v_dbv0_low_dbv1 = new TH1F("h_2v_dbv0_low_dbv1", "two-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
-  TH1F* h_2v_dbv0_high_dbv1 = new TH1F("h_2v_dbv0_high_dbv1", "two-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
-  TH1F* h_2v_dphi_low_dbv1 = new TH1F("h_2v_dphi_low_dbv1", "two-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
-  TH1F* h_2v_dphi_high_dbv1 = new TH1F("h_2v_dphi_high_dbv1", "two-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
@@ -137,13 +133,6 @@ int main(int argc, const char* argv[]) {
         h_2v_dvv->Fill(dvv, w);
         double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
         h_2v_absdphivv->Fill(fabs(dphi), w);
-        if (dbv1 < 0.02) {
-          h_2v_dbv0_low_dbv1->Fill(dbv0, w);
-          h_2v_dphi_low_dbv1->Fill(fabs(dphi), w);
-        } else {
-          h_2v_dbv0_high_dbv1->Fill(dbv0, w);
-          h_2v_dphi_high_dbv1->Fill(fabs(dphi), w);
-        }
       }
     }
   }
@@ -157,22 +146,9 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 500, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 500, 0, 2.5);
   TH2F* h_c1v_dbv1_dbv0 = new TH2F("h_c1v_dbv1_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 20, 0, 0.1, 20, 0, 0.1);
-  TH1F* h_c1v_dbv0_low_dbv1 = new TH1F("h_c1v_dbv0_low_dbv1", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
-  TH1F* h_c1v_dbv0_high_dbv1 = new TH1F("h_c1v_dbv0_high_dbv1", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 10, 0, 0.05);
-  TH1F* h_c1v_dphi_low_dbv1 = new TH1F("h_c1v_dphi_low_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
-  TH1F* h_c1v_dphi_high_dbv1 = new TH1F("h_c1v_dphi_high_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
 
   TH1D* h_r1v_dbv = new TH1D("h_r1v_dbv", "random from only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
   h_r1v_dbv->FillRandom(h_1v_dbv, (int)h_1v_dbv->Integral());
-
-  TH1F* h_1v_dbv_low = (TH1F*)h_1v_dbv->Clone();
-  for (int i = 10; i <= 500; ++i) {
-    h_1v_dbv_low->SetBinContent(i,0);
-  }
-  TH1F* h_1v_dbv_high = (TH1F*)h_1v_dbv->Clone();
-  for (int i = 1; i <= 3; ++i) {
-    h_1v_dbv_high->SetBinContent(i,0);
-  }
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
@@ -214,13 +190,6 @@ int main(int argc, const char* argv[]) {
         h_c1v_dbv0->Fill(dbv0, w * p);
         h_c1v_dbv1->Fill(dbv1, w * p);
         h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, w * p);
-        if (dbv1 < 0.02) {
-          h_c1v_dbv0_low_dbv1->Fill(dbv0, w * p);
-          h_c1v_dphi_low_dbv1->Fill(fabs(dphi), w * p);
-        } else {
-          h_c1v_dbv0_high_dbv1->Fill(dbv0, w * p);
-          h_c1v_dphi_high_dbv1->Fill(fabs(dphi), w * p);
-        }
       }
     }
   }
@@ -270,42 +239,6 @@ int main(int argc, const char* argv[]) {
   h_c1v_absdphivv->Scale(251./h_c1v_absdphivv->Integral());
   h_c1v_absdphivv->Draw("sames");
   c_absdphivv->Write();
-
-  TCanvas* c_2v_dbv0_dbv1 = new TCanvas("c_2v_dbv0_dbv1", "c_2v_dbv0_dbv1", 700, 700);
-  h_2v_dbv0_low_dbv1->SetLineColor(kBlue);
-  h_2v_dbv0_low_dbv1->SetLineWidth(3);
-  h_2v_dbv0_low_dbv1->DrawNormalized();
-  h_2v_dbv0_high_dbv1->SetLineColor(kRed);
-  h_2v_dbv0_high_dbv1->SetLineWidth(3);
-  h_2v_dbv0_high_dbv1->DrawNormalized("sames");
-  c_2v_dbv0_dbv1->Write();
-
-  TCanvas* c_c1v_dbv0_dbv1 = new TCanvas("c_c1v_dbv0_dbv1", "c_c1v_dbv0_dbv1", 700, 700);
-  h_c1v_dbv0_low_dbv1->SetLineColor(kBlue);
-  h_c1v_dbv0_low_dbv1->SetLineWidth(3);
-  h_c1v_dbv0_low_dbv1->DrawNormalized();
-  h_c1v_dbv0_high_dbv1->SetLineColor(kRed);
-  h_c1v_dbv0_high_dbv1->SetLineWidth(3);
-  h_c1v_dbv0_high_dbv1->DrawNormalized("sames");
-  c_c1v_dbv0_dbv1->Write();
-
-  TCanvas* c_2v_dphi_dbv1 = new TCanvas("c_2v_dphi_dbv1", "c_2v_dphi_dbv1", 700, 700);
-  h_2v_dphi_low_dbv1->SetLineColor(kBlue);
-  h_2v_dphi_low_dbv1->SetLineWidth(3);
-  h_2v_dphi_low_dbv1->DrawNormalized();
-  h_2v_dphi_high_dbv1->SetLineColor(kRed);
-  h_2v_dphi_high_dbv1->SetLineWidth(3);
-  h_2v_dphi_high_dbv1->DrawNormalized("sames");
-  c_2v_dphi_dbv1->Write();
-
-  TCanvas* c_c1v_dphi_dbv1 = new TCanvas("c_c1v_dphi_dbv1", "c_c1v_dphi_dbv1", 700, 700);
-  h_c1v_dphi_low_dbv1->SetLineColor(kBlue);
-  h_c1v_dphi_low_dbv1->SetLineWidth(3);
-  h_c1v_dphi_low_dbv1->DrawNormalized();
-  h_c1v_dphi_high_dbv1->SetLineColor(kRed);
-  h_c1v_dphi_high_dbv1->SetLineWidth(3);
-  h_c1v_dphi_high_dbv1->DrawNormalized("sames");
-  c_c1v_dphi_dbv1->Write();
 
   fh->Close();
 }
