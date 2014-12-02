@@ -162,6 +162,9 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_dphi_low_dbv1 = new TH1F("h_c1v_dphi_low_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
   TH1F* h_c1v_dphi_high_dbv1 = new TH1F("h_c1v_dphi_high_dbv1", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 6, 0, 3.15);
 
+  TH1D* h_r1v_dbv = new TH1D("h_r1v_dbv", "random from only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
+  h_r1v_dbv->FillRandom(h_1v_dbv, (int)h_1v_dbv->Integral());
+
   TH1F* h_1v_dbv_low = (TH1F*)h_1v_dbv->Clone();
   for (int i = 10; i <= 500; ++i) {
     h_1v_dbv_low->SetBinContent(i,0);
@@ -236,6 +239,7 @@ int main(int argc, const char* argv[]) {
   h_2v_dvv->Write();
   h_2v_absdphivv->Write();
 
+  h_r1v_dbv->Write();
   h_c1v_dbv->Write();
   h_c1v_phiv->Write();
   h_c1v_dphijv->Write();
