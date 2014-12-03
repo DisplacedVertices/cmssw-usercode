@@ -442,11 +442,13 @@ namespace mfv {
       do_limit(env.get_bool("do_limit", true)),
       only_fit(env.get_bool("only_fit", false)),
       i_limit_job(env.get_int("i_limit_job", -1)),
-      n_toy_limit(env.get_int("n_toy_limit", 10000)),
+      n_toy_limit(env.get_int("n_toy_limit", 2000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
+      sig_limit_stop(env.get_double("sig_limit_stop", 250)),
       sig_limit_step(env.get_double("sig_limit_step", 0.25)),
       sig_eff(env.get_double("sig_eff", 1.)),
       sig_eff_uncert(env.get_double("sig_eff_uncert", 0.2)),
+      bracket_limit(env.get_bool("bracket_limit", false)),
 
       fout(f),
       dout(f->mkdir(TString::Format("Fitter%s", uname.c_str()))),
@@ -473,8 +475,9 @@ namespace mfv {
     printf("only_fit? %i\n", only_fit);
     printf("i_limit_job: %i\n", i_limit_job);
     printf("n_toy_limit: %i (~%f uncert @ 0.05)\n", n_toy_limit, sqrt(0.05*0.95/n_toy_limit));
-    printf("sig_limit_step: %f\n", sig_limit_step);
+    printf("sig_limit_scan: %f-%f in %f steps\n", sig_limit_start, sig_limit_stop, sig_limit_step);
     printf("sig_eff: %f +- %f\n", sig_eff, sig_eff_uncert);
+    printf("bracket_limit: %i\n", bracket_limit);
 
     fflush(stdout);
 
@@ -538,6 +541,9 @@ namespace mfv {
     t_fit_info->Branch("fs_prob", &fit_stat.prob);
     t_fit_info->Branch("fs_ks", &fit_stat.ks);
     t_fit_info->Branch("pval_signif", &pval_signif);
+    t_fit_info->Branch("sig_limits", &sig_limits);
+    t_fit_info->Branch("pval_limits", &pval_limits);
+    t_fit_info->Branch("pval_limit_errs", &pval_limit_errs);
     t_fit_info->Branch("sig_limit", &sig_limit);
     t_fit_info->Branch("sig_limit_err", &sig_limit_err);
     t_fit_info->Branch("sig_limit_fit_n", &sig_limit_fit_n);
@@ -1289,9 +1295,9 @@ namespace mfv {
       const double limit_alpha = 0.05;
 
       const double sig_limit_lo = sig_limit_start;
-      const double sig_limit_hi = 1000;
-      const int n_sigma_away_lo = 7;
-      const int n_sigma_away_hi = 6;
+      const double sig_limit_hi = sig_limit_stop;
+      const int n_sigma_away_lo = 6;
+      const int n_sigma_away_hi = 5;
       double sig_limit_scan = sig_limit_lo;
 
       printf("scanning for %.1f%% upper limit, ", 100*(1-limit_alpha));
@@ -1307,7 +1313,7 @@ namespace mfv {
       std::vector<double> bracket_sig_limit;
       std::vector<double> bracket_pval_limit;
       std::vector<double> bracket_pval_limit_err;
-      bool last_in_bracket = false;
+      int n_below = 0;
 
       TH1D* h_toy_expected = 0;
       if (i_limit_job >= 0) {
@@ -1395,39 +1401,36 @@ namespace mfv {
         const double pval_limit_sglo = pval_limit - n_sigma_away_lo * pval_limit_err;
         const double pval_limit_sghi = pval_limit + n_sigma_away_hi * pval_limit_err;
 
+        sig_limits.push_back(sig_limit_scan);
+        pval_limits.push_back(pval_limit);
+        pval_limit_errs.push_back(pval_limit_err);
+
         if (print_toys) {
           printf("  p_hat = %f -> %f +- %f  (%i,%i)s: [%f, %f]\n", p_hat, pval_limit, pval_limit_err, n_sigma_away_lo, n_sigma_away_hi, pval_limit_sglo, pval_limit_sghi);
           fflush(stdout);
         }
 
         if (pval_limit_sglo <= limit_alpha) {
-          if (!last_in_bracket) {
-            bracket_sig_limit.clear();
-            bracket_pval_limit.clear();
-            bracket_pval_limit_err.clear();
-          }
-
           if (print_toys)
             printf("  ** include in bracket\n");
 
           bracket_sig_limit.push_back(sig_limit_scan);
           bracket_pval_limit.push_back(pval_limit);
           bracket_pval_limit_err.push_back(pval_limit_err);
-          last_in_bracket = true;
         }
-        else
-          last_in_bracket = false;
 
-        if (pval_limit_sghi <= limit_alpha)
-          break;
+        if (pval_limit_sghi <= limit_alpha) {
+          if (bracket_limit || ++n_below > 10)
+            break;
+        }
 
         sig_limit_scan += sig_limit_step;
       }
 
       printf("n_calls: %i time for limit: ", fit::n_calls); tsw_limit.Print();
 
-      std::vector<double> bracket_sig_limit_err(bracket_pval_limit.size(), 0.);
-      TGraphErrors* g = new TGraphErrors(bracket_sig_limit.size(), &bracket_sig_limit[0], &bracket_pval_limit[0], &bracket_sig_limit_err[0], &bracket_pval_limit_err[0]);
+      std::vector<double> sig_limit_errs(pval_limits.size(), 0.);
+      TGraphErrors* g = new TGraphErrors(sig_limits.size(), &sig_limits[0], &pval_limits[0], &sig_limit_errs[0], &pval_limit_errs[0]);
       g->SetMarkerStyle(5);
       TF1* interp_fcn = new TF1("interp_fcn", "[0]*exp(-[1]*x)", bracket_sig_limit.front(), bracket_sig_limit.back());
       interp_fcn->SetParameters(0.5, 0.3);

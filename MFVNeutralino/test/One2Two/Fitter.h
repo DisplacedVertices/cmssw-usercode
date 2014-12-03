@@ -45,9 +45,11 @@ namespace mfv {
     const int i_limit_job;
     const int n_toy_limit;
     const double sig_limit_start;
+    const double sig_limit_stop;
     const double sig_limit_step;
     const double sig_eff;
     const double sig_eff_uncert;
+    const bool bracket_limit;
 
     TFile* fout;
     TDirectory* dout;
@@ -118,6 +120,9 @@ namespace mfv {
     test_stat_t t_obs_0;
     fit_stat_t fit_stat;
     double pval_signif;
+    std::vector<double> sig_limits;
+    std::vector<double> pval_limits;
+    std::vector<double> pval_limit_errs;
     double sig_limit;
     double sig_limit_err;
     int    sig_limit_fit_n;
