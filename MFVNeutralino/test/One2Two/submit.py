@@ -159,6 +159,9 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         'toythrower_template_signal=%i' % template_signal,
         ]
 
+    if template_signal >= -12:
+        env.append('fitter_sig_limit_step=1')
+
     if template_type == 'PS':
         env.append('templates_kind=phishift')
         env.append('fitter_start_nuis0=2')
