@@ -1141,7 +1141,8 @@ namespace mfv {
     fit::calc_lnL_offset();
 
     if (bkg_gaussians)
-      fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
+      fit::eta_bkg = { -1, 1e-3, 1e-3, 3.8, 1.4, 0.1, 0.1, -1 };
+      //fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
       //fit::eta_bkg = { -1, 1, 1, 1, 3, 1, 1, -1 };
     else
       fit::eta_bkg = { -1, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, -1 };
