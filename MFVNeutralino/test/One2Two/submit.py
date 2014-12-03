@@ -236,7 +236,7 @@ if 1:
     sig_first = [-15, -21, -9, -6]
     signals = sig_first + sorted(set(range(-24, 0)) - set(sig_first))
 
-    strengths = (-2, -1, None, 1, 5)
+    strengths = (-1, -2, None, 1, 5)
 
     batches = []
     for strength in strengths:
