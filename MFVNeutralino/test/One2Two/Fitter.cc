@@ -1307,6 +1307,7 @@ namespace mfv {
       std::vector<double> bracket_sig_limit;
       std::vector<double> bracket_pval_limit;
       std::vector<double> bracket_pval_limit_err;
+      bool last_in_bracket = false;
 
       TH1D* h_toy_expected = 0;
       if (i_limit_job >= 0) {
@@ -1400,12 +1401,22 @@ namespace mfv {
         }
 
         if (pval_limit_sglo <= limit_alpha) {
+          if (!last_in_bracket) {
+            bracket_sig_limit.clear();
+            bracket_pval_limit.clear();
+            bracket_pval_limit_err.clear();
+          }
+
           if (print_toys)
             printf("  ** include in bracket\n");
+
           bracket_sig_limit.push_back(sig_limit_scan);
           bracket_pval_limit.push_back(pval_limit);
           bracket_pval_limit_err.push_back(pval_limit_err);
+          last_in_bracket = true;
         }
+        else
+          last_in_bracket = false;
 
         if (pval_limit_sghi <= limit_alpha)
           break;
