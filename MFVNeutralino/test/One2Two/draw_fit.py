@@ -2,6 +2,8 @@
 
 from base_draw_fit import *
 
+d = do_detree()
+
 plot_dir = os.path.join('plots/o2t_fit', batch_name)
 ps = plot_saver(plot_dir, size=(600,600))
 
