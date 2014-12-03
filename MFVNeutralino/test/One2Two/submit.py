@@ -239,8 +239,8 @@ if 1:
     strengths = (-2, -1, None, 1, 5)
 
     batches = []
-    for signal in signals:
-        for strength in strengths:
+    for strength in strengths:
+        for signal in signals:
             sg = (signal, strength) if strength is not None else None
             njobs = 20 if strength == -1 else 500
             batches.append((njobs, template_type, min_ntracks, sg, signal, ''))
