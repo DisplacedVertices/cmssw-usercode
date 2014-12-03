@@ -997,6 +997,8 @@ namespace mfv {
     ret.A_bkg.assign(fit::n_bins+2, -1);
     ret.A_sig_rel.assign(fit::n_bins+2, -1);
     ret.A_bkg_rel.assign(fit::n_bins+2, -1);
+    ret.A_sig_sum = 0.;
+    ret.A_bkg_sum = 0.;
     for (int i = 1; i <= fit::n_bins; ++i) {
       ret.A_sig_sum += (ret.A_sig[i] = fit::A_sig[i]);
       ret.A_bkg_sum += (ret.A_bkg[i] = fit::A_bkg[i]);
