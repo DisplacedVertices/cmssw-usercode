@@ -387,15 +387,16 @@ namespace mfv {
 
 
   void Fitter::min_lik_t::print(const char* header, const char* indent) const {
-    printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f  mu_bkg = %7.3f +- %7.3f  nuis0 = %7.3f +- %7.3f  nuis1 = %7.3f +- %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, nuis0, err_nuis0, nuis1, err_nuis1);
+    printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f    mu_bkg = %7.3f +- %7.3f  nuis0 = %7.3f +- %7.3f  nuis1 = %7.3f +- %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, nuis0, err_nuis0, nuis1, err_nuis1);
     printf("%s    A_sig ", indent);
     const int ie = fit::n_bins; // JMTBAD
-    for (int i = 1; i <= ie; ++i) printf("%5.3f (%3.1f) ", A_sig[i], A_sig_rel[i]);
-    printf("  A_bkg ");
-    for (int i = 1; i <= ie; ++i) printf("%6.4f (%3.1f) ", A_bkg[i], A_bkg_rel[i]);
-    printf("\n");
+    for (int i = 1; i <= ie; ++i) printf("%6.4f (%4.2f) ", A_sig[i], A_sig_rel[i]);
+    printf("  sum: %5.3f\n", A_sig_sum);
+    printf("%s    A_bkg ", indent);
+    for (int i = 1; i <= ie; ++i) printf("%6.4f (%4.2f) ", A_bkg[i], A_bkg_rel[i]);
+    printf("  sum: %5.3f\n", A_bkg_sum);
     double sum = 0;
-    printf("  yield: ");
+    printf("%s    yield: ", indent);
     for (int i = 1; i <= ie; ++i) {
       const double y = yield_in_bin(i);
       sum += y;
@@ -511,8 +512,10 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h1_maxtwolnL", &t_obs_0.h1.maxtwolnL, "t_obs_0__h1_maxtwolnL/D");
     t_fit_info->Branch("t_obs_0__h1_mu_sig", &t_obs_0.h1.mu_sig, "t_obs_0__h1_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h1_err_mu_sig", &t_obs_0.h1.err_mu_sig, "t_obs_0__h1_err_mu_sig/D");
+    t_fit_info->Branch("t_obs_0__h1_A_sig_sum", &t_obs_0.h1.A_sig_sum);
     t_fit_info->Branch("t_obs_0__h1_mu_bkg", &t_obs_0.h1.mu_bkg, "t_obs_0__h1_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h1_err_mu_bkg", &t_obs_0.h1.err_mu_bkg, "t_obs_0__h1_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h1_A_bkg_sum", &t_obs_0.h1.A_bkg_sum);
     t_fit_info->Branch("t_obs_0__h1_nuis0", &t_obs_0.h1.nuis0, "t_obs_0__h1_nuis0/D");
     t_fit_info->Branch("t_obs_0__h1_err_nuis0", &t_obs_0.h1.err_nuis0, "t_obs_0__h1_err_nuis0/D");
     t_fit_info->Branch("t_obs_0__h1_nuis1", &t_obs_0.h1.nuis1, "t_obs_0__h1_nuis1/D");
@@ -521,8 +524,10 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h0_maxtwolnL", &t_obs_0.h0.maxtwolnL, "t_obs_0__h0_maxtwolnL/D");
     t_fit_info->Branch("t_obs_0__h0_mu_sig", &t_obs_0.h0.mu_sig, "t_obs_0__h0_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h0_err_mu_sig", &t_obs_0.h0.err_mu_sig, "t_obs_0__h0_err_mu_sig/D");
+    t_fit_info->Branch("t_obs_0__h0_A_sig_sum", &t_obs_0.h0.A_sig_sum);
     t_fit_info->Branch("t_obs_0__h0_mu_bkg", &t_obs_0.h0.mu_bkg, "t_obs_0__h0_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h0_err_mu_bkg", &t_obs_0.h0.err_mu_bkg, "t_obs_0__h0_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h0_A_bkg_sum", &t_obs_0.h0.A_bkg_sum);
     t_fit_info->Branch("t_obs_0__h0_nuis0", &t_obs_0.h0.nuis0, "t_obs_0__h0_nuis0/D");
     t_fit_info->Branch("t_obs_0__h0_err_nuis0", &t_obs_0.h0.err_nuis0, "t_obs_0__h0_err_nuis0/D");
     t_fit_info->Branch("t_obs_0__h0_nuis1", &t_obs_0.h0.nuis1, "t_obs_0__h0_nuis1/D");
@@ -993,8 +998,8 @@ namespace mfv {
     ret.A_sig_rel.assign(fit::n_bins+2, -1);
     ret.A_bkg_rel.assign(fit::n_bins+2, -1);
     for (int i = 1; i <= fit::n_bins; ++i) {
-      ret.A_sig[i] = fit::A_sig[i];
-      ret.A_bkg[i] = fit::A_bkg[i];
+      ret.A_sig_sum += (ret.A_sig[i] = fit::A_sig[i]);
+      ret.A_bkg_sum += (ret.A_bkg[i] = fit::A_bkg[i]);
       ret.A_sig_rel[i] = fit::A_sig[i] / fit::a_sig[i];
       ret.A_bkg_rel[i] = fit::A_bkg[i] / fit::a_bkg[i];
     }
