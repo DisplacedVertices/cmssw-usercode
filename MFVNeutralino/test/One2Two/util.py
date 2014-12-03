@@ -60,3 +60,23 @@ elif 'recrabtar' in sys.argv:
         path = os.path.join(d, 'share')
         cmd = 'tar -zxf %(path)s/default.tgz -C %(path)s/ runme.csh mfvo2t.exe' % locals()
         print cmd
+
+elif 'exercisefiles' in sys.argv:
+    lsts = []
+    for d in crab_dirs_from_argv():
+        print d
+        d_mangled = d.replace('/', '_')
+        lst_fn = '/tmp/tucker/o2ttmp_%s.lst' % d_mangled
+        lsts.append(lst_fn)
+        os.system('rm -f %s' % lst_fn)
+        os.system('crtools -outputFromFJR %s noraise | grep root > %s' % (d, lst_fn))
+    for lst in lsts:
+        print lst
+        from JMTucker.Tools.ROOTTools import ROOT, set_style
+        set_style()
+        t = ROOT.TChain('Fitter/t_fit_info')
+        for line in open(lst):
+            line = line.strip()
+            if line:
+                t.Add(line)
+        print t.Draw('seed:sig_limit_fit_prob', ''), 'entries'
