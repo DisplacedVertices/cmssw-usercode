@@ -1,6 +1,8 @@
 import sys
+from array import array
 from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
+set_style()
 
 def mean(l,w=None):
     if w is None:
@@ -101,11 +103,40 @@ if 1:
         assert len(d) == nbins
         assert all(len(x) == times for x in d.values())
 
-        print '%4s %10s %10s %10s' % ('ibin', 'mean(vals)', 'rms(vals)', 'mean(errs)')
+        print '%4s %10s %10s %10s %10s %10s' % ('ibin', 'mean(vals)', 'rms(vals)', 'mean(errs)', 'min(vals)', 'max(vals)')
         for ibin in xrange(1,nbins+1):
             #print ibin
             #print d[ibin]
 
             vals = [x.val for x in d[ibin]]
             errs = [x.err for x in d[ibin]]
-            print '%4i %10.6f %10.6f %10.6f' % (ibin, mean(vals), rms(vals), mean(errs))
+            print '%4i %10.6f %10.6f %10.6f %10.6f %10.6f' % (ibin, mean(vals), rms(vals), mean(errs), min(vals), max(vals))
+
+    if 1:
+        ps = plot_saver('plots/systtables_statspread', size=(600,600))
+
+        binning = [0.02*i for i in xrange(5)] + [0.1, .15] # JMTBAD keep in sync with Templates.cc
+        hs = [ROOT.TH1D('h%i' % i, ';d_{VV}^{C} (cm);events', len(binning)-1, array('d', binning)) for i in xrange(times)]
+
+        colors = range(1, 10) + [46]
+        assert len(colors) == times
+
+        for h,c in zip(hs, colors):
+            h.SetLineColor(c)
+            h.SetLineWidth(2)
+            h.Scale(251.)
+            h.SetStats(0)
+
+        for ibin in xrange(1, nbins+1):
+            for ih, x in enumerate(d[ibin]):
+                hs[ih].SetBinContent(ibin, x.val)
+                hs[ih].SetBinError  (ibin, x.err)
+
+        for i,h in enumerate(hs):
+            if i == 0:
+                h.Draw('hist e')
+            else:
+                h.Draw('hist e same')
+            h.GetYaxis().SetRangeUser(5e-2, 350)
+
+        ps.save('statspread')
