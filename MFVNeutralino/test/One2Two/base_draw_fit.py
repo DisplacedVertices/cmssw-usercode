@@ -52,7 +52,7 @@ def tree_xform(x):
     return tuple(z)
 
 def do_detree():
-    d = list(detree(t, tree_vars.replace(' ', ':'), xform=tree_xform))
+    return list(detree(t, tree_vars.replace(' ', ':'), xform=tree_xform))
 
 ################################################################################
 
