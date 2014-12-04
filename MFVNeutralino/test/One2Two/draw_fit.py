@@ -176,7 +176,7 @@ for n in ns:
         for h in (s,b,sb,dt):
             h.SetStats(0)
             h.SetTitle(';d_{VV} (cm)')
-            h.GetXaxis().SetRangeUser(0, 0.2)
+            h.GetYaxis().SetRangeUser(1e-2, 250)
         if dt.GetMaximum() > sb.GetMaximum():
             dt.Draw('e')
             sb.Draw('hist same')
