@@ -5,6 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 ps = plot_saver('plots/mfvlimits', log=False, size=(600,600))
 
+which = 'BBv9'
 draw_gluglu = False
 
 def fmt(t, title, color):
@@ -51,7 +52,7 @@ taus = [
     ('0100um', '#tau = 100 #mum'),
     ('0300um', '#tau = 300 #mum'),
     ('1000um', '#tau = 1 mm'),
-    ('9900um', '#tau = 9.9 mm'),
+    ('9900um', '#tau = 10 mm'),
     ]
 
 watches = [
@@ -66,7 +67,7 @@ watches = [
 nn = -1
 for tau, tau_nice in taus:
     masses = [200, 300, 400, 600, 800, 1000]
-    if tau == '0100um' or tau == '0300um':
+    if tau == '0100um': # or tau == '0300um':
         print 'skip', tau
         nn -= len(masses)
         continue
@@ -85,8 +86,8 @@ for tau, tau_nice in taus:
             print 'skip', tau, mass
             nn -= 1
             continue
-        fn  = 'outs/BBv8_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (nn, nn)
-        fn2 = 'outs/BBv8_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (nn, nn)
+        fn  = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
+        fn2 = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
         print nn, fn, fn2
         nn -= 1
         vals = [None]*6
