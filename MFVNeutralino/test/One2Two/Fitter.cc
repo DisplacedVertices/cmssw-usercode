@@ -945,7 +945,12 @@ namespace mfv {
     m->SetPrintLevel(print_level);
     m->SetFCN(fit::minfcn);
     int ierr;
-    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.5, 0, (mu_sig_start > 0 ? mu_sig_start : (allow_negative_mu_sig ? 0 : 500)), ierr);
+    double mu_sig_lo = 0, mu_sig_hi = 500;
+    if (mu_sig_start > 0)
+      mu_sig_hi = mu_sig_start;
+    if (allow_negative_mu_sig)
+      mu_sig_lo = -500;
+    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.5, mu_sig_lo, mu_sig_hi, ierr);
     m->mnparm(1, "mu_bkg", fit::a_data_integ, 0.5, 0, 500, ierr);
 
     const size_t npars = bkg_templates->at(0)->npars();
