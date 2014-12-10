@@ -146,7 +146,7 @@ namespace mfv {
     void book_trees();
     void book_toy_fcns_and_histos();
     void fit_globals_ok();
-    void draw_likelihood(const test_stat_t& t);
+    void draw_likelihood(const test_stat_t& t, const char* ex=0);
     TH1D* make_h_bkg(const char* n, const std::vector<double>& nuis_pars, const std::vector<double>& A_bkg);
     TH1D* shorten_hist(TH1D* h, bool save=true);
     void scan_template_chi2(const test_stat_t& t);

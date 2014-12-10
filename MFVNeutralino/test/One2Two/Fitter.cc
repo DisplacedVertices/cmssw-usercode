@@ -560,7 +560,7 @@ namespace mfv {
     t_fit_info->SetAlias("b_true", "true_pars[1]");
   }    
 
-  void Fitter::draw_likelihood(const test_stat_t& t) {
+  void Fitter::draw_likelihood(const test_stat_t& t, const char* ex) {
     //printf("draw_likelihood: ");
 
     struct scan_t {
@@ -600,6 +600,10 @@ namespace mfv {
 
     TDirectory* cwd = gDirectory;
 
+    TString ex_(ex);
+    if (ex)
+      ex_ += "_";
+
     for (int sb = 1; sb >= 0; --sb) {
       const char* sb_or_b = sb ? "sb" : "b";
       //printf("%s: ", sb_or_b); fflush(stdout);
@@ -613,7 +617,7 @@ namespace mfv {
       if (draw_bkg_templates)
         cwd->cd();
 
-      TH2F* h1 = new TH2F(TString::Format("h_likelihood_%s_scannuis", sb_or_b),
+      TH2F* h1 = new TH2F(TString::Format("h_likelihood_%s%s_scannuis", ex_.Data(), sb_or_b),
                           TString::Format("Best %s fit: %s;nuis. par 0;nuis. par 1", sb_or_b_nice, ml.title().c_str()),
                           nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
                           nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
@@ -643,7 +647,7 @@ namespace mfv {
       if (draw_bkg_templates)
         cwd->cd();
 
-      TH2F* h2 = new TH2F(TString::Format("h_likelihood_%s_scanmus", sb_or_b),
+      TH2F* h2 = new TH2F(TString::Format("h_likelihood_%s%s_scanmus", ex_.Data(), sb_or_b),
                           TString::Format("Best %s fit: %s;#mu_{sig};#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
                           mu_scan[0].n, mu_scan[0].min, mu_scan[0].max,
                           mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
