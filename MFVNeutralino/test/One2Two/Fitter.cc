@@ -428,6 +428,7 @@ namespace mfv {
       barlow_beeston(env.get_bool("barlow_beeston", true)),
       bend_bkg(env.get_bool("bend_bkg", false)),
       allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
+      run_mnseek(env.get_bool("run_mnseek", true)),
       run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
@@ -462,6 +463,7 @@ namespace mfv {
     printf("barlow_beeston: %i\n", barlow_beeston);
     printf("bend_bkg: %i\n", bend_bkg);
     printf("allow_negative_mu_sig: %i\n", allow_negative_mu_sig);
+    printf("run_mnseek: %i\n", run_mnseek);
     printf("run_minos: %i\n", run_minos);
     printf("draw_bkg_templates: %i\n", draw_bkg_templates);
     printf("fix_nuis1: %i\n", fix_nuis1);
@@ -493,6 +495,7 @@ namespace mfv {
     t_config->Branch("barlow_beeston", const_cast<bool*>(&barlow_beeston));
     t_config->Branch("bend_bkg", const_cast<bool*>(&bend_bkg));
     t_config->Branch("allow_negative_mu_sig", const_cast<bool*>(&allow_negative_mu_sig));
+    t_config->Branch("run_mnseek", const_cast<bool*>(&run_mnseek));
     t_config->Branch("run_minos", const_cast<bool*>(&run_minos));
     t_config->Branch("fix_nuis1", const_cast<bool*>(&fix_nuis1));
     t_config->Branch("start_nuis0", const_cast<double*>(&start_nuis0));
@@ -968,10 +971,12 @@ namespace mfv {
 
     m->Command("SET STRATEGY 2");
 
-    if (print_level > 0)
-      printf("call mnseek\n");
-    double seek_arg[2] = {100, 100};
-    m->mnexcm("SEE", seek_arg, 2, ierr);
+    if (run_mnseek) {
+      if (print_level > 0)
+        printf("call mnseek\n");
+      double seek_arg[2] = {100, 100};
+      m->mnexcm("SEE", seek_arg, 2, ierr);
+    }
 
     if (print_level > 0)
       printf("call migrad\n");

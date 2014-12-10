@@ -29,6 +29,7 @@ namespace mfv {
     const bool barlow_beeston;
     const bool bend_bkg;
     const bool allow_negative_mu_sig;
+    const bool run_mnseek;
     const bool run_minos;
     const bool draw_bkg_templates;
     const bool fix_nuis1;
