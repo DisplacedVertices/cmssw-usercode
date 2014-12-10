@@ -1346,6 +1346,28 @@ namespace mfv {
             printf("]\n");
           }
         }
+
+        printf("toy_expected [ ");
+        for (int i = 1; i <= fit::n_bins; ++i)
+          printf("%i ", int(h_toy_expected->GetBinContent(i)));
+        printf("]\n");
+      }
+
+      if (0) {
+        fit::set_data_no_check(h_toy_expected);
+        printf("start t076\n");
+        test_stat_t t076 = calc_test_stat(0.76);
+        t076.print("0.76");
+        printf("start t101\n");
+        test_stat_t t101 = calc_test_stat(1.01);
+        t101.print("1.01");
+
+        fit::extra_prints=0;
+        print_level=0;
+        draw_likelihood(t076, "0p76");
+        draw_likelihood(t101, "1p01");
+
+        sig_limit_scan = 1e99;
       }
 
       while (sig_limit_scan < sig_limit_hi) {
@@ -1359,7 +1381,10 @@ namespace mfv {
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
         if (print_toys) {
-          printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit_scan, mu_sig_limit);
+          printf("sig_limit: %f  mu_sig_limit: %f data: [ ", sig_limit_scan, mu_sig_limit);
+          for (int i = 1; i <= fit::n_bins; ++i)
+            printf("%i ", int(fit::h_data->GetBinContent(i)));
+          printf("] ");
           t_obs_limit_.print("t_obs_limit");
         }
         else
@@ -1444,31 +1469,33 @@ namespace mfv {
 
       printf("n_calls: %i time for limit: ", fit::n_calls); tsw_limit.Print();
 
-      std::vector<double> sig_limit_errs(pval_limits.size(), 0.);
-      TGraphErrors* g = new TGraphErrors(sig_limits.size(), &sig_limits[0], &pval_limits[0], &sig_limit_errs[0], &pval_limit_errs[0]);
-      g->SetMarkerStyle(5);
-      TF1* interp_fcn = new TF1("interp_fcn", "[0]*exp(-[1]*x)", bracket_sig_limit.front(), bracket_sig_limit.back());
-      interp_fcn->SetParameters(0.5, 0.3);
-      TFitResultPtr res = g->Fit(interp_fcn, "RS");
-      const double a  = res->Parameter(0);
-      const double b  = res->Parameter(1);
-      const double ea = res->ParError(0);
-      const double eb = res->ParError(1);
-      const double cov = res->CovMatrix(0,1);
-      const double dfda = 1/a/b;
-      sig_limit = -log(limit_alpha/a)/b;
-      const double dfdb = -sig_limit/b;
-      sig_limit_err = sqrt(dfda*dfda * ea*ea + dfdb*dfdb * eb*eb + 2 * dfda * dfdb * cov);
-      sig_limit_fit_n = bracket_sig_limit.size();
-      sig_limit_fit_a     = a;
-      sig_limit_fit_b     = b;
-      sig_limit_fit_a_err = ea;
-      sig_limit_fit_b_err = eb;
-      sig_limit_fit_prob = res->Prob();
-      g->SetName("g_limit_bracket_fit");
-      g->Write();
+      if (sig_limits.size()) {
+        std::vector<double> sig_limit_errs(pval_limits.size(), 0.);
+        TGraphErrors* g = new TGraphErrors(sig_limits.size(), &sig_limits[0], &pval_limits[0], &sig_limit_errs[0], &pval_limit_errs[0]);
+        g->SetMarkerStyle(5);
+        TF1* interp_fcn = new TF1("interp_fcn", "[0]*exp(-[1]*x)", bracket_sig_limit.front(), bracket_sig_limit.back());
+        interp_fcn->SetParameters(0.5, 0.3);
+        TFitResultPtr res = g->Fit(interp_fcn, "RS");
+        const double a  = res->Parameter(0);
+        const double b  = res->Parameter(1);
+        const double ea = res->ParError(0);
+        const double eb = res->ParError(1);
+        const double cov = res->CovMatrix(0,1);
+        const double dfda = 1/a/b;
+        sig_limit = -log(limit_alpha/a)/b;
+        const double dfdb = -sig_limit/b;
+        sig_limit_err = sqrt(dfda*dfda * ea*ea + dfdb*dfdb * eb*eb + 2 * dfda * dfdb * cov);
+        sig_limit_fit_n = bracket_sig_limit.size();
+        sig_limit_fit_a     = a;
+        sig_limit_fit_b     = b;
+        sig_limit_fit_a_err = ea;
+        sig_limit_fit_b_err = eb;
+        sig_limit_fit_prob = res->Prob();
+        g->SetName("g_limit_bracket_fit");
+        g->Write();
 
-      printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
+        printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
+      }
 
       delete h_toy_expected;
       h_toy_expected = 0;
