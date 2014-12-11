@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, math
+from JMTucker.Tools.general import save_git_status
 from modify import *
 
 # JMTBAD argparse
@@ -95,6 +96,7 @@ if _final:
     _final.input_is_pythia8(_final.process)
 
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
+save_git_status(os.path.join(dir, 'gitstatus'))
 
 def submit(name, tau0=None, mass=None):
     print name
