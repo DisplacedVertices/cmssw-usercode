@@ -69,7 +69,7 @@ storage_element = T3_US_FNALLPC
 publish_data = 1
 publish_data_name = mfv_%(name)s_v20
 dbs_url_for_publication = phys03
-'''
+''')
 
 ################################################################################
 
