@@ -29,6 +29,8 @@ nevents = 1000000 if not nevents else nevents[0]
 events_per = [int(x.replace('events_per=', '')) for x in sys.argv if x.startswith('events_per=')]
 events_per = 200 if not events_per else events_per[0]
 
+return_data = 'return' in sys.argv
+
 ################################################################################
 
 crab_cfg = '''
@@ -51,15 +53,22 @@ use_dbs3 = 1
 script_exe = twostep.sh
 additional_input_files = %(additional_input_files)s
 ui_working_dir = %(ui_working_dir)s
+ssh_control_persist = no
+RETURN_OR_COPY
+
+[GRID]
+se_black_list = T3_MX_Cinvestav,T2_RU_RRC_KI
+'''
+
+if return_data:
+    crab_cfg = crab_cfg.replace('RETURN_OR_COPY', 'return_data = 1')
+else:
+    crab_cfg = crab_cfg.replace('RETURN_OR_COPY', '''
 copy_data = 1
 storage_element = T3_US_FNALLPC
 publish_data = 1
 publish_data_name = mfv_%(name)s_v20
 dbs_url_for_publication = phys03
-ssh_control_persist = no
-
-[GRID]
-se_black_list = T3_MX_Cinvestav,T2_RU_RRC_KI
 '''
 
 ################################################################################
