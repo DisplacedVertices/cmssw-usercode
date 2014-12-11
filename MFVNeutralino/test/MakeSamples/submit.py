@@ -10,7 +10,8 @@ reco_triggered_only = 'triggeredonly' in sys.argv or 'ntuple' in sys.argv
 
 run_reco = 'gensimonly' not in sys.argv
 run_pat = run_reco and 'pat' in sys.argv
-run_ntuple = run_reco and 'ntuple' in sys.argv
+run_ntuple = run_reco and ('ntuple' in sys.argv or 'minitree' in sys.argv)
+run_minitree = run_ntuple and 'minitree' in sys.argv
 
 run_tkdqm = 'tkdqm' in sys.argv
 
@@ -77,6 +78,7 @@ if not skip_tests:
             raise RuntimeError('reco.py does not work')
 
 _final = None
+_post = None
 
 if run_pat:
     print 'expanding pat.py'
@@ -89,6 +91,10 @@ elif run_ntuple:
     print 'expanding ntuple.py'
     sys.path.insert(0, '..')
     import ntuple as _final
+    if run_minitree:
+        print 'expanding minitree.py'
+        import minitree as _post
+        _post.process.source.fileNames = ['file:ntuple.root']
 
 if _final:
     _final.process.source.fileNames = ['file:reco.root']
@@ -107,7 +113,9 @@ def submit(name, tau0=None, mass=None):
         if 'ttbar' not in name:
             raise ValueError('if not signal, must only be ttbar')
 
-    if run_ntuple:
+    if run_minitree:
+        output_file = 'minitree.root'
+    elif run_ntuple:
         output_file = 'ntuple.root'
     elif run_pat:
         output_file = 'aodpat.root'
@@ -117,6 +125,8 @@ def submit(name, tau0=None, mass=None):
         output_file = 'gensimhlt.root'
 
     additional_input_files = ['minSLHA.spc', 'modify.py']
+    if run_minitree:
+        additional_input_files.append('minitree.py')
     if run_ntuple:
         additional_input_files.append('ntuple.py')
     elif run_pat:
@@ -216,6 +226,9 @@ def submit(name, tau0=None, mass=None):
     if _final:
         open('ntuple.py' if run_ntuple else 'pat.py', 'wt').write(_final.process.dumpPython())
 
+    if _post:
+        open('minitree.py', 'wt').write(_post.process.dumpPython())
+
     additional_input_files = ', '.join(additional_input_files)
 
     ui_working_dir = os.path.join(dir, 'crab_mfv_%s' % name)
@@ -227,7 +240,7 @@ def submit(name, tau0=None, mass=None):
         os.system('crab -create')
         for i in xrange(int(math.ceil(float(nevents)/events_per/500))):
             os.system('crab -c %s -submit 500' % ui_working_dir)
-        os.system('rm -f crab.cfg reco.pyc my_reco.py my_tkdqm.py pat.py ntuple.py')
+        os.system('rm -f crab.cfg reco.pyc my_reco.py my_tkdqm.py pat.py ntuple.py minitree.py')
 
 ################################################################################
 
