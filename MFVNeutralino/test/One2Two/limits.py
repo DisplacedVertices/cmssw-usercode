@@ -127,6 +127,8 @@ def find_limit(name, tree):
         x_skip = find_x(fcn_skip)
         print x_lf, x_skip
         zzz = ''
+        if x_lf < 0:
+            zzz += '_NEG'
         if abs(x_lf - x_skip) > 0.3:
             zzz += '_BIGDIFF'
         if nused < 5:
@@ -137,7 +139,16 @@ def find_limit(name, tree):
 
     return limits
 
-def stats(l, header=''):
+def stats(l, header='', save_plot=True):
+    if save_plot:
+        h = ROOT.TH1F(header, '', 100, min(l) - 0.5, max(l) + 0.5)
+        for x in l:
+            h.Fill(x)
+        h.Draw()
+        ps.save(header)
+        hc = cumulative_histogram(h)
+        hc.Draw()
+        ps.save(header + '_cumu')
     l.sort()
     n = len(l)
     if n % 2 == 0:
