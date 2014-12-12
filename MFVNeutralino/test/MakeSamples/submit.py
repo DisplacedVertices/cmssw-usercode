@@ -57,7 +57,7 @@ ssh_control_persist = no
 RETURN_OR_COPY
 
 [GRID]
-se_black_list = T3_MX_Cinvestav,T2_RU_RRC_KI
+se_black_list = T3_MX_Cinvestav,T2_RU_RRC_KI,T3_UK_London_QMUL,T3_UK_ScotGrid_GLA,T3_US_UCD,T3_US_UMiss,T2_RU_PNPI,T3_RU_FIAN,T2_US_Purdue
 '''
 
 if return_data:
