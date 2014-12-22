@@ -166,7 +166,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Stranges[i]->BookRapEta(200, "0.1");
     Stranges[i]->BookPhi(50, "0.125");
     Stranges[i]->BookDxy(200, -2, 2, "0.02");
-    Stranges[i]->BookDz (200, -20, 20, "0.2");
+    Stranges[i]->BookDz (200, -2, 2, "0.02");
     Stranges[i]->BookQ();
 
     Bottoms[i] = bkh_factory->make(TString::Format("Bottoms#%i", i), TString::Format("bottom #%i", i));
@@ -177,8 +177,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Bottoms[i]->BookM (200, 0, 2000, "10");
     Bottoms[i]->BookRapEta(200, "0.1");
     Bottoms[i]->BookPhi(50, "0.125");
-    Bottoms[i]->BookDxy(200, -2, 20, "0.02");
-    Bottoms[i]->BookDz (200, -20, 20, "0.2");
+    Bottoms[i]->BookDxy(200, -2, 2, "0.02");
+    Bottoms[i]->BookDz (200, -2, 2, "0.02");
     Bottoms[i]->BookQ();
     
     Tops[i] = bkh_factory->make(TString::Format("Tops#%i", i), TString::Format("top #%i", i));
@@ -190,7 +190,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Tops[i]->BookRapEta(200, "0.1");
     Tops[i]->BookPhi(50, "0.125");
     Tops[i]->BookDxy(200, -2, 2, "0.02");
-    Tops[i]->BookDz (200, -20, 20, "0.2");
+    Tops[i]->BookDz (200, -2, 2, "0.02");
     Tops[i]->BookQ();
     
     Ws[i] = bkh_factory->make(TString::Format("Ws#%i", i), TString::Format("w #%i", i));
@@ -202,7 +202,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Ws[i]->BookRapEta(200, "0.1");
     Ws[i]->BookPhi(50, "0.125");
     Ws[i]->BookDxy(200, -2, 2, "0.02");
-    Ws[i]->BookDz (200, -20, 20, "0.2");
+    Ws[i]->BookDz (200, -2, 2, "0.02");
     Ws[i]->BookQ();
 
     BottomsFromTops[i] = bkh_factory->make(TString::Format("BottomsFromTops#%i", i), TString::Format("bottom from top #%i", i));
@@ -214,7 +214,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     BottomsFromTops[i]->BookRapEta(200, "0.1");
     BottomsFromTops[i]->BookPhi(50, "0.125");
     BottomsFromTops[i]->BookDxy(200, -2, 2, "0.02");
-    BottomsFromTops[i]->BookDz (200, -20, 20, "0.2");
+    BottomsFromTops[i]->BookDz (200, -2, 2, "0.02");
     BottomsFromTops[i]->BookQ();
 
     for (int j = 0; j < 2; ++j) {
@@ -227,7 +227,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
       WDaughters[i][j]->BookRapEta(200, "0.1");
       WDaughters[i][j]->BookPhi(50, "0.125");
       WDaughters[i][j]->BookDxy(200, -2, 2, "0.02");
-      WDaughters[i][j]->BookDz (200, -20, 20, "0.2");
+      WDaughters[i][j]->BookDz (200, -2, 2, "0.02");
       WDaughters[i][j]->BookQ();
     }
   }
@@ -241,7 +241,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Electrons->BookRapEta(200, "0.1");
   Electrons->BookPhi(50, "0.125");
   Electrons->BookDxy(200, -2, 2, "0.02");
-  Electrons->BookDz (200, -20, 20, "0.2");
+  Electrons->BookDz (200, -2, 2, "0.02");
   Electrons->BookQ();
 
   Muons = bkh_factory->make("Muons", "muons");
@@ -253,7 +253,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Muons->BookRapEta(200, "0.1");
   Muons->BookPhi(50, "0.125");
   Muons->BookDxy(200, -2, 2, "0.02");
-  Muons->BookDz (200, -20, 20, "0.2");
+  Muons->BookDz (200, -2, 2, "0.02");
   Muons->BookQ();
 
   Taus = bkh_factory->make("Taus", "taus");
@@ -265,7 +265,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Taus->BookRapEta(200, "0.1");
   Taus->BookPhi(50, "0.125");
   Taus->BookDxy(200, -2, 2, "0.02");
-  Taus->BookDz (200, -20, 20, "0.2");
+  Taus->BookDz (200, -2, 2, "0.02");
   Taus->BookQ();
 
   LightLeptons= bkh_factory->make("LightLeptons", "light leptons");
@@ -277,7 +277,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   LightLeptons->BookRapEta(200, "0.1");
   LightLeptons->BookPhi(50, "0.125");
   LightLeptons->BookDxy(200, -2, 2, "0.02");
-  LightLeptons->BookDz (200, -20, 20, "0.2");
+  LightLeptons->BookDz (200, -2, 2, "0.02");
   LightLeptons->BookQ();
 
   Leptons = bkh_factory->make("Leptons", "leptons");
@@ -289,7 +289,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Leptons->BookRapEta(200, "0.1");
   Leptons->BookPhi(50, "0.125");
   Leptons->BookDxy(200, -2, 2, "0.02");
-  Leptons->BookDz (200, -20, 20, "0.2");
+  Leptons->BookDz (200, -2, 2, "0.02");
   Leptons->BookQ();
 
   h_lsp_dist2d = fs->make<TH1F>("h_lsp_dist2d", ";2D distance between LSP decay positions (cm);Events/0.0025 cm", 400, 0, 1);
