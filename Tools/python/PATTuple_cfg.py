@@ -171,7 +171,19 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
         runOnData(process, names = ['All'])
         runOnData(process, names = ['All'], postfix = postfix)
     removeSpecificPATObjects(process, names = ['Photons'], postfix = postfix) # will also remove cleaning
-    
+
+    # Make some extra SV producers for MFV studies. JMTBAD postfix junk
+    for cut in (1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.):
+        cut_name = ('%.1f' % cut).replace('.', 'p')
+
+        tag_info_name = 'secondaryVertexMaxDR%sTagInfosAODPF' % cut_name
+        tag_info_obj = process.secondaryVertexTagInfosAODPF.clone()
+        tag_info_obj.vertexCuts.maxDeltaRToJetAxis = cut
+        setattr(process, tag_info_name, tag_info_obj)
+        process.patJetsPF.tagInfoSources.append(cms.InputTag(tag_info_name))
+
+        processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * processpostfix('patJets'))
+
     common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
 
     process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
