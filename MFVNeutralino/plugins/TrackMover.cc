@@ -1,169 +1,213 @@
+#include "TVector3.h"
 #include "CLHEP/Random/RandomEngine.h"
+#include "CLHEP/Random/RandExponential.h"
+#include "CLHEP/Random/RandGauss.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 
-class MFVTrackMover : public edm::EDProducer {
+class MFVTrackMover : public edm::EDFilter {
 public:
   explicit MFVTrackMover(const edm::ParameterSet&);
 
 private:
   bool select_track(const reco::TrackRef& tk) const;
 
-  virtual void produce(edm::Event&, const edm::EventSetup&);
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   const edm::InputTag tracks_src;
   const edm::InputTag primary_vertices_src;
   const edm::InputTag jets_src;
+  const double min_jet_pt;
+  const unsigned min_jet_ntracks;
+  const std::string b_discriminator;
+  const double b_discriminator_veto;
+  const double b_discriminator_tag;
 
-  const double delta_x;
-  const double delta_y;
-  const double delta_z;
+  const unsigned njets;
+  const unsigned nbjets;
+  const double tau;
+  const double sig_theta;
+  const double sig_phi;
 
   edm::Service<edm::RandomNumberGenerator> rng;
 
-  const reco::Vertex* primary_vertex;
-  const pat::JetCollection* jets;
-
-  TH1F* h_npv;
-  TH1F* h_pvntracks;
-  TH1F* h_pvsumpt2;
-  TH1F* h_ntracks;
-  TH1F* h_nselected;
-
-  TH1F* h_njets;
-  TH1F* h_jetntracks[10];
-  TH1F* h_jetdrs[10];
+  std::vector<int> knuth_select(int n, int N) {
+    std::vector<int> ts;
+    int t = 0, m = 0;
+    while (m < n) {
+      if ((N - t) * rng->getEngine().flat() >= n - m)
+        ++t;
+      else {
+        ++m;
+        ts.push_back(t++);
+      }
+    }
+    return ts;
+  }
 };
 
 MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg) 
   : tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
     primary_vertices_src(cfg.getParameter<edm::InputTag>("primary_vertices_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
-    delta_x(cfg.getParameter<double>("delta_x")),
-    delta_y(cfg.getParameter<double>("delta_y")),
-    delta_z(cfg.getParameter<double>("delta_z"))
+    min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
+    min_jet_ntracks(cfg.getParameter<unsigned>("min_jet_ntracks")),
+    b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
+    b_discriminator_veto(cfg.getParameter<double>("b_discriminator_veto")),
+    b_discriminator_tag(cfg.getParameter<double>("b_discriminator_tag")),
+    njets(cfg.getParameter<unsigned>("njets")),
+    nbjets(cfg.getParameter<unsigned>("nbjets")),
+    tau(cfg.getParameter<double>("tau")),
+    sig_theta(cfg.getParameter<double>("sig_theta")),
+    sig_phi(cfg.getParameter<double>("sig_phi"))
 {
   if (!rng.isAvailable())
     throw cms::Exception("MFVTrackMover", "RandomNumberGeneratorService not available");
 
-  edm::Service<TFileService> fs;
-  h_npv = fs->make<TH1F>("h_npv", ";number of primary vertices;events/2", 50, 0, 100);
-  h_pvntracks = fs->make<TH1F>("h_pvntracks", ";number of tracks in primary vertex;events/5", 100, 0, 500);
-  h_pvsumpt2 = fs->make<TH1F>("h_pvsumpt2", ";#Sigma p_{T}^{2} (GeV);events/200 GeV^{2}", 100, 0, 20000);
-  h_ntracks = fs->make<TH1F>("h_ntracks", ";number of tracks;events/20", 100, 0, 2000);
-  h_nselected = fs->make<TH1F>("h_nselected", ";number of selected tracks;events/2", 100, 0, 200);
-
-  h_njets = fs->make<TH1F>("h_njets", ";number of jets;events", 20, 0, 20);
-  for (int i = 0; i < 10; ++i) {
-    h_jetntracks[i] = fs->make<TH1F>(TString::Format("h_jetntracks_%i", i),
-                                     i == 0 ? ";number of tracks in jets;events/2" : TString::Format(";number of tracks in jet %i;events/2", i),
-                                     25, 0, 50);
-    h_jetdrs[i] = fs->make<TH1F>(TString::Format("h_jetdrs_%i", i),
-                                 i == 0 ? ";dR between jets;events/0.25" : TString::Format(";dR between jet 0 and %i;events/0.25", i),
-                                 20, 0, 5);
-  }
-
   produces<reco::TrackCollection>();
+  produces<reco::TrackCollection>("moved");
+  produces<pat::JetCollection>("jetsUsed");
+  produces<pat::JetCollection>("bjetsUsed");
+  produces<std::vector<double> >("flightAxis");
+  produces<std::vector<double> >("moveVertex");
 }
 
-bool MFVTrackMover::select_track(const reco::TrackRef& tk) const {
-  //const bool primary_vertex_has_tracks = primary_vertex->refittedTracks().size() == 0;
-  const bool primary_vertex_has_tracks = primary_vertex->tracks_end() - primary_vertex->tracks_begin();
-  if (!primary_vertex_has_tracks)
-    throw cms::Exception("MFVTrackMover", "no trackrefs in primary vertex");
-
-  const bool in_primary_vertex = std::find(primary_vertex->tracks_begin(), primary_vertex->tracks_end(), reco::TrackBaseRef(tk)) != primary_vertex->tracks_end();
-
-  bool in_jet = false;
-  for (const pat::Jet& jet : *jets) {
-    for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
-      if (tk == pfcand->trackRef()) {
-        in_jet = true;
-        break;
-      }
-    }
-    if (in_jet)
-      break;
-  }
-
-  return
-    in_primary_vertex &&
-    in_jet;
-  //  &&    rng->getEngine().flat() < 0.25;
-}
-
-void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
+bool MFVTrackMover::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::TrackCollection> tracks;
   event.getByLabel(tracks_src, tracks);
 
-  h_ntracks->Fill(tracks->size());
-
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByLabel(primary_vertices_src, primary_vertices);
-  primary_vertex = &primary_vertices->at(0);
+  const reco::Vertex& primary_vertex = primary_vertices->at(0);
+  const bool primary_vertex_has_tracks = primary_vertex.tracks_end() - primary_vertex.tracks_begin();
+  if (!primary_vertex_has_tracks)
+    throw cms::Exception("MFVTrackMover", "no trackrefs in primary vertex");
 
-  h_npv->Fill(primary_vertices->size());
-  h_pvntracks->Fill(primary_vertex->tracks_end() - primary_vertex->tracks_begin());
-  h_pvsumpt2->Fill(std::accumulate(primary_vertex->tracks_begin(), primary_vertex->tracks_end(), 0., 
-                                   [](const double sum, const reco::TrackBaseRef& tk) { return sum + pow(tk->pt(), 2); }));
+  edm::Handle<pat::JetCollection> jets;
+  event.getByLabel(jets_src, jets);
 
-  edm::Handle<pat::JetCollection> jets_h;
-  event.getByLabel(jets_src, jets_h);
-  jets = &*jets_h;
+  CLHEP::RandExponential rexp(rng->getEngine());
+  CLHEP::RandGauss rgau(rng->getEngine());
 
-  h_njets->Fill(jets->size());
-  std::vector<double> jetdrs;
-  for (size_t i = 0, ie = jets->size(); i < ie; ++i) {
-    const pat::Jet& jet = jets->at(i);
-    int ntracks = 0;
+  std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
+  std::auto_ptr<reco::TrackCollection> moved_tracks(new reco::TrackCollection);
+  std::auto_ptr<pat::JetCollection> jets_used(new pat::JetCollection);
+  std::auto_ptr<pat::JetCollection> bjets_used(new pat::JetCollection);
+  std::auto_ptr<std::vector<double> > flight_vect(new std::vector<double>(3, 0.));
+  std::auto_ptr<std::vector<double> > move_vertex(new std::vector<double>(3, 0.));
+
+  std::vector<const pat::Jet*> presel_jets;
+  std::vector<const pat::Jet*> presel_bjets;
+  std::vector<const pat::Jet*> selected_jets;
+
+  // Pick the (b-)jets we'll use.
+
+  for (const pat::Jet& jet : *jets) {
+    if (jet.pt() < min_jet_pt)
+      continue;
+
+    unsigned jet_ntracks = 0;
     for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
       if (pfcand->trackRef().isNonnull())
-        ++ntracks;
-    h_jetntracks[0]->Fill(ntracks);
-    if (i < 9)
-      h_jetntracks[i+1]->Fill(ntracks);
+        ++jet_ntracks;
+    if (jet_ntracks < min_jet_ntracks)
+      continue;
 
-    for (size_t j = i+1; j < ie; ++j)
-      jetdrs.push_back(reco::deltaR(jet, jets->at(j)));
+    const double b_disc = jet.bDiscriminator(b_discriminator);
+    if (b_disc < b_discriminator_veto)
+      presel_jets.push_back(&jet);
+    else if (b_disc > b_discriminator_tag)
+      presel_bjets.push_back(&jet);
   }
-  std::sort(jetdrs.begin(), jetdrs.end());
-  for (size_t i = 0, ie = std::min(int(jetdrs.size()), 9); i < ie; ++i) {
-    h_jetdrs[0]->Fill(jetdrs[i]);
-    h_jetdrs[i+1]->Fill(jetdrs[i]);
+
+  if (presel_jets.size() < njets || presel_bjets.size() < nbjets)
+    return false;
+
+  for (int i : knuth_select(njets, presel_jets.size())) {
+    selected_jets.push_back(presel_jets[i]);
+    jets_used->push_back(*presel_jets[i]);
   }
-    
-  std::auto_ptr<reco::TrackCollection> new_tracks(new reco::TrackCollection);
+
+  for (int i : knuth_select(nbjets, presel_bjets.size())) {
+    selected_jets.push_back(presel_bjets[i]);
+    bjets_used->push_back(*presel_bjets[i]);
+  }
+
+  // Find the energy-weighted average direction of all the (b-)jets to
+  // be the flight axis.
+
+  TVector3 flight_axis;
+  for (const pat::Jet* jet : selected_jets)
+    flight_axis += TVector3(jet->px(), jet->py(), jet->pz());
+  flight_axis.SetMag(1.);
+  flight_vect->at(0) = flight_axis.x();
+  flight_vect->at(1) = flight_axis.y();
+  flight_vect->at(2) = flight_axis.z();
+
+  // Find the move vertex: pick a flight distance using Exp(dist|tau)
+  // and a direction around the flight axis using
+  // Gaus(theta|sig_theta) * Gaus(phi|sig_phi).
+
+  const double dist = rexp.fire(tau);
+  const double theta = rgau.fire(flight_axis.Theta(), sig_theta);
+  const double phi   = rgau.fire(flight_axis.Phi(),   sig_phi);
+  TVector3 move;
+  move.SetMagThetaPhi(dist, theta, phi);
+  move_vertex->at(0) = primary_vertex.x() + move.x();
+  move_vertex->at(1) = primary_vertex.y() + move.y();
+  move_vertex->at(2) = primary_vertex.z() + move.z();
+  
+  // Copy all the input tracks, except for those corresponding to the
+  // above jets; for the latter, clone the tracks but move their
+  // reference points to the move vertex.
 
   for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
     reco::TrackRef tk(tracks, i);
-    if (select_track(tk)) {
-      reco::TrackBase::Point new_point(tk->vx() + delta_x,
-                                       tk->vy() + delta_y,
-                                       tk->vz() + delta_z);
+    bool to_move = false;
+    for (const pat::Jet* jet : selected_jets)
+      for (const reco::PFCandidatePtr& pfcand : jet->getPFConstituents())
+        if (tk == pfcand->trackRef()) {
+          to_move = true;
+          goto done_check_to_move;
+        }
+    done_check_to_move:
+    
+    if (to_move) {
+      reco::TrackBase::Point new_point(tk->vx() + move.x(),
+                                       tk->vy() + move.y(),
+                                       tk->vz() + move.z());
 
-      new_tracks->push_back(reco::Track(tk->chi2(), tk->ndof(), new_point, tk->momentum(), tk->charge(), tk->covariance(), tk->algo()));
-      reco::Track& new_tk = new_tracks->back();
+      output_tracks->push_back(reco::Track(tk->chi2(), tk->ndof(), new_point, tk->momentum(), tk->charge(), tk->covariance(), tk->algo()));
+      reco::Track& new_tk = output_tracks->back();
       new_tk.setQualityMask(tk->qualityMask());
       new_tk.setHitPattern(tk->hitPattern());
       new_tk.setNLoops(tk->nLoops());
       new_tk.setTrackerExpectedHitsInner(tk->trackerExpectedHitsInner());
       new_tk.setTrackerExpectedHitsOuter(tk->trackerExpectedHitsOuter());
+      moved_tracks->push_back(new_tk);
     }
+    else
+      output_tracks->push_back(*tk);
   }
 
-  h_nselected->Fill(new_tracks->size());
+  event.put(output_tracks);
+  event.put(moved_tracks, "moved");
+  event.put(jets_used, "jetsUsed");
+  event.put(bjets_used, "bjetsUsed");
+  event.put(flight_vect, "flightAxis");
+  event.put(move_vertex, "moveVertex");
 
-  event.put(new_tracks);
+  return true;
 }
 
 DEFINE_FWK_MODULE(MFVTrackMover);
