@@ -38,6 +38,8 @@ public:
     ushort ntracks;
     ushort nseltracks;
 
+    ushort npreseljets;
+    ushort npreselbjets;
     ushort nlightjets;
     std::vector<float> jets_pt;
     std::vector<float> jets_eta;
@@ -45,7 +47,9 @@ public:
     std::vector<float> jets_energy;
     std::vector<ushort> jets_ntracks;
 
-    TVector3 move_vertex;
+    float move_x;
+    float move_y;
+    float move_z;
 
     std::vector<float> vtxs_x;
     std::vector<float> vtxs_y;
@@ -58,14 +62,13 @@ public:
 
     void clear() {
       run = lumi = event = 0;
-      weight = pvx = pvy = pvz = 0;
-      npu = npv = pvntracks = pvsumpt2 = ntracks = nseltracks = nlightjets = 0;
+      weight = pvx = pvy = pvz = move_x = move_y = move_z = 0;
+      npu = npv = pvntracks = pvsumpt2 = ntracks = nseltracks = npreseljets = npreselbjets = nlightjets = 0;
       jets_pt.clear();
       jets_eta.clear();
       jets_phi.clear();
       jets_energy.clear();
       jets_ntracks.clear();
-      move_vertex.SetXYZ(0,0,0);
       vtxs_x.clear();
       vtxs_y.clear();
       vtxs_z.clear();
@@ -91,6 +94,9 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   tree = fs->make<TTree>("t", "");
+  tree->SetAlias("njets", "jets_pt@.size()");
+  tree->SetAlias("nvtxs", "vtxs_x@.size()");
+
   tree->Branch("run", &nt.run);
   tree->Branch("lumi", &nt.lumi);
   tree->Branch("event", &nt.event);
@@ -104,13 +110,17 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
   tree->Branch("pvsumpt2", &nt.pvsumpt2);
   tree->Branch("ntracks", &nt.ntracks);
   tree->Branch("nseltracks", &nt.nseltracks);
+  tree->Branch("npreseljets", &nt.npreseljets);
+  tree->Branch("npreselbjets", &nt.npreselbjets);
   tree->Branch("nlightjets", &nt.nlightjets);
   tree->Branch("jets_pt", &nt.jets_pt);
   tree->Branch("jets_eta", &nt.jets_eta);
   tree->Branch("jets_phi", &nt.jets_phi);
   tree->Branch("jets_energy", &nt.jets_energy);
   tree->Branch("jets_ntracks", &nt.jets_ntracks);
-  tree->Branch("move_vertex", &nt.move_vertex);
+  tree->Branch("move_x", &nt.move_x);
+  tree->Branch("move_y", &nt.move_y);
+  tree->Branch("move_z", &nt.move_z);
   tree->Branch("vtxs_x", &nt.vtxs_x);
   tree->Branch("vtxs_y", &nt.vtxs_y);
   tree->Branch("vtxs_z", &nt.vtxs_z);
@@ -144,16 +154,22 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.pvsumpt2 = mevent->pv_sumpt2;
 
   edm::Handle<reco::TrackCollection> tracks, moved_tracks;
+  edm::Handle<int> npreseljets, npreselbjets;
   edm::Handle<pat::JetCollection> jets_used, bjets_used;
   edm::Handle<std::vector<double> > move_vertex;
-  event.getByLabel(edm::InputTag(mover_src),               tracks);
-  event.getByLabel(edm::InputTag(mover_src, "moved"),      moved_tracks);
-  event.getByLabel(edm::InputTag(mover_src, "jetsUsed"),   jets_used);
-  event.getByLabel(edm::InputTag(mover_src, "bjetsUsed"),  bjets_used);
-  event.getByLabel(edm::InputTag(mover_src, "moveVertex"), move_vertex);
+  event.getByLabel(edm::InputTag(mover_src),                 tracks);
+  event.getByLabel(edm::InputTag(mover_src, "moved"),        moved_tracks);
+  event.getByLabel(edm::InputTag(mover_src, "npreseljets"),  npreseljets); 
+  event.getByLabel(edm::InputTag(mover_src, "npreselbjets"), npreselbjets); 
+  event.getByLabel(edm::InputTag(mover_src, "jetsUsed"),     jets_used);
+  event.getByLabel(edm::InputTag(mover_src, "bjetsUsed"),    bjets_used);
+  event.getByLabel(edm::InputTag(mover_src, "moveVertex"),   move_vertex);
 
   nt.ntracks = tracks->size();
   nt.nseltracks = moved_tracks->size();
+
+  nt.npreseljets  = *npreseljets;
+  nt.npreselbjets = *npreselbjets;
 
   nt.nlightjets = jets_used->size();
 
@@ -172,10 +188,9 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     }
   }
 
-  const float mv_z = move_vertex->at(2);
-  const float mv_x = move_vertex->at(0) - mevent->bsx_at_z(mv_z);
-  const float mv_y = move_vertex->at(1) - mevent->bsy_at_z(mv_z);
-  nt.move_vertex.SetXYZ(mv_x, mv_y, mv_z);
+  nt.move_z = move_vertex->at(2);
+  nt.move_x = move_vertex->at(0) - mevent->bsx_at_z(nt.move_z);
+  nt.move_y = move_vertex->at(1) - mevent->bsy_at_z(nt.move_z);
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByLabel(vertices_src, vertices);
@@ -185,9 +200,9 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     const double vy = v.y - mevent->bsy_at_z(v.z);
     const double vz = v.z;
 
-    const double dist2move = pow(pow(vx - mv_x, 2) +
-                                 pow(vy - mv_y, 2) +
-                                 pow(vz - mv_z, 2), 0.5);
+    const double dist2move = pow(pow(vx - nt.move_x, 2) +
+                                 pow(vy - nt.move_y, 2) +
+                                 pow(vz - nt.move_z, 2), 0.5);
     if (dist2move > max_dist2move)
       continue;
 
