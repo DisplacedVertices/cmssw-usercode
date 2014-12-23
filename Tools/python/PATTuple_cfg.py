@@ -25,7 +25,6 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
     from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string('pat.root'),
-                                   SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p')),
                                    outputCommands = cms.untracked.vstring(*patEventContent),
                                    )
     process.outp = cms.EndPath(process.out)
