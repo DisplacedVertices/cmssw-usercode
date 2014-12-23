@@ -1088,8 +1088,17 @@ def poisson_means_divide(h1, h2, no_zeroes=False):
 class plot_saver:
     i = 0
     
-    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1):
+    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=None):
         self.c = ROOT.TCanvas('c%i' % plot_saver.i, '', *size)
+        if canvas_margins is not None:
+            if type(canvas_margins) == int or type(canvas_margins) == float:
+                top, bottom, left, right = tuple(canvas_margins for x in xrange(4))
+            else:
+                top, bottom, left, right = canvas_margins
+            self.c.SetTopMargin(top)
+            self.c.SetBottomMargin(bottom)
+            self.c.SetLeftMargin(left)
+            self.c.SetRightMargin(right)
         plot_saver.i += 1
         self.saved = []
         self.html = html
