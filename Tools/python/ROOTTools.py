@@ -892,15 +892,15 @@ def get_quantiles(l, binning, probs, options=''):
         h.Fill(x)
     return get_hist_quantiles(h, probs, options)
 
-def get_hist_stats(hist, factor=None, draw=False):
+def get_hist_stats(hist, factor=None, draw=False, fit=True):
     """For the given histogram, return a five-tuple of the number of
     entries, the underflow and overflow counts, the fitted sigma
     (using the function specified by fcnname, which must be an
     already-made ROOT.TF1 whose parameter(2) is the value used), and the
     RMS.
     """
-    
-    results = fit_gaussian(hist, factor, draw)
+
+    results = fit_gaussian(hist, factor, draw) if fit else {}
     results.update({
         'entries': hist.GetEntries(),
         'under':   hist.GetBinContent(0),
