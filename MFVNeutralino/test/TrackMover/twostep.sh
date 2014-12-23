@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# mkdir /tmp/tucker/aaa ; env RUNTIME_AREA=/tmp/tucker/aaa NJob=1 ./twostep.sh
+# ln -sf ntuple.py pset.py ; mkdir /tmp/tucker/aaa ; env RUNTIME_AREA=/tmp/tucker/aaa NJob=1 ./twostep.sh
 
 echo TWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEP
 echo twostep.sh called with args:
