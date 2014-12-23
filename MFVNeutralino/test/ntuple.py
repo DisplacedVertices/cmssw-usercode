@@ -53,8 +53,8 @@ if jumble_tracks:
     process.mfvVertices.jumble_tracks = True
     process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219)))
 
-if require_pixel_hit:
-    process.mfvVertices.min_all_track_npxhits = 1
+if not require_pixel_hit:
+    process.mfvVertices.min_all_track_npxhits = 0
 
 if track_used_req == 'nopv':
     process.mfvVertices.use_tracks = False
