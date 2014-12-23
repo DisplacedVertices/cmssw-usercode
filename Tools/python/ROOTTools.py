@@ -697,15 +697,16 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
         xf = xform
         xform = lambda x: tuple(xf(y) for y in x)
 
-    tmp_fn = tempfile.mkstemp()[1]
+    tmp_f, tmp_fn = tempfile.mkstemp()
     t.GetPlayer().SetScanRedirect(True)
     t.GetPlayer().SetScanFileName(tmp_fn)
     t.Scan(branches, cut, 'colsize=50')
     t.GetPlayer().SetScanRedirect(False)
     nvp2 = branches.replace('::','').count(':') + 1 + 2
-    for line in open(tmp_fn):
-        if ' * ' in line and 'Row' not in line:
-            yield xform(line.split('*')[2:nvp2])
+    with os.fdopen(tmp_f) as file:
+        for line in file:
+            if ' * ' in line and 'Row' not in line:
+                yield xform(line.split('*')[2:nvp2])
     if delete_tmp:
         os.remove(tmp_fn)
 
