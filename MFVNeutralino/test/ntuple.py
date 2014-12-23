@@ -68,15 +68,8 @@ if keep_all:
     process.mfvSelectedVerticesTight.produce_vertices = True
     process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
 else:
-    from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-    process.triggerFilter = hltHighLevel.clone()
-    process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
-    process.triggerFilter.andOr = True # = OR
-    for name, path in process.paths.items():
-        if not name.startswith('eventCleaning'):
-            path.insert(0, process.triggerFilter)
-    process.ptrig = cms.Path(process.triggerFilter)
-    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
+    import JMTucker.MFVNeutralino.TriggerFilter
+    JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
