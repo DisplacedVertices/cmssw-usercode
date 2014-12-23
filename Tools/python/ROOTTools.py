@@ -710,7 +710,7 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
     if delete_tmp:
         os.remove(tmp_fn)
 
-def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, color_from_hist=True):
+def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, color_from_hist=True, offset=None):
     """Move hist's stat box and change its line/text color. If
     movement is just an int, that number specifies how many units to
     move the box downward. If it is a 2-tuple of ints (m,n), the stat
@@ -740,10 +740,15 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, colo
         x1 = x2 - new_size[0]
         y1 = y2 - new_size[1]
 
-    s.SetX1NDC(x1 - (x2-x1)*m)
-    s.SetX2NDC(x2 - (x2-x1)*m)
-    s.SetY1NDC(y1 - (y2-y1)*n)
-    s.SetY2NDC(y2 - (y2-y1)*n)
+    if offset is None:
+        ox, oy = 0, 0
+    else:
+        ox, oy = offset
+
+    s.SetX1NDC(x1 - (x2-x1)*m + ox)
+    s.SetX2NDC(x2 - (x2-x1)*m + ox)
+    s.SetY1NDC(y1 - (y2-y1)*n + oy)
+    s.SetY2NDC(y2 - (y2-y1)*n + oy)
 
 def draw_in_order(hists_and_cmds, sames=False):
     if type(hists_and_cmds[1]) == str:
