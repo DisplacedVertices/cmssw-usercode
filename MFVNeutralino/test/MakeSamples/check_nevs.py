@@ -37,6 +37,7 @@ for hn in hns:
         exec '%s = h' % h.GetName()
 
 for idir, dir in enumerate(dirs):
+    print dir
     njobs = crab_get_njobs(dir)
     missing_stdouts = []
     missing_roots = []
