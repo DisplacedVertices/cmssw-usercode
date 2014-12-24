@@ -30,7 +30,7 @@ echo NEV `edmEventSize -v ntuple.root | grep Events | head -1`
 echo
 echo done with ntuple step at `date`, starting treer step
 echo
-cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml treer.py
+cmsRun -j $RUNTIME_AREA/crab_fjr_$NJob.xml my_treer.py
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

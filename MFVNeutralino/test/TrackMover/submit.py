@@ -4,7 +4,7 @@ import sys, os, math
 from JMTucker.Tools.general import save_git_status
 
 skip_tests = 'skip_tests' in sys.argv
-testing = True # 'testing' in sys.argv
+testing = 'testing' in sys.argv
 
 dir = [x for x in sys.argv if x.startswith('crab/')]
 dir = 'crab/TrackMover' if not dir else dir[0]
@@ -27,7 +27,7 @@ JOB_CONTROL
 
 [USER]
 script_exe = twostep.sh
-additional_input_files = treer.py
+additional_input_files = my_treer.py
 ui_working_dir = %(ui_working_dir)s
 ssh_control_persist = no
 copy_data = 1
@@ -54,8 +54,6 @@ save_git_status(os.path.join(dir, 'gitstatus'))
 def submit(sample):
     print sample.name
 
-    additional_input_files = 'treer.py'
-
     pset_fn = os.path.join(dir, 'psets/%(name)s.py' % sample)
     new_py = open('ntuple.py').read()
 
@@ -75,6 +73,8 @@ def submit(sample):
         
     open(pset_fn, 'wt').write(new_py)
 
+    os.system('python -c \'import treer; open("my_treer.py","wt").write(treer.process.dumpPython())\'')
+
     ui_working_dir = os.path.join(dir, 'crab_%s' % sample.name)
 
     if sample.is_mc:
@@ -89,7 +89,7 @@ total_number_of_events = -1
 ''')
     else:
         crab_cfg = crab_cfg_template.replace('JOB_CONTROL', '''
-lumi_mask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt'
+lumi_mask = /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
 lumis_per_job = 20
 total_number_of_lumis = -1
 ''')
@@ -102,14 +102,12 @@ total_number_of_lumis = -1
     open('crab.cfg','wt').write(crab_cfg % vd)
     if not testing:
         os.system('crab -create')
-        for i in xrange(int(math.ceil(float(nevents)/events_per/500))):
-            os.system('crab -c %s -submit 500' % ui_working_dir)
-        os.system('rm -f crab.cfg reco.pyc my_reco.py my_tkdqm.py pat.py ntuple.py minitree.py')
+        os.system('crsuball %s' % ui_working_dir)
+        os.system('rm -f crab.cfg my_treer.py')
 
 ################################################################################
 
 import JMTucker.Tools.Samples as Samples
 
-#samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.
-submit(Samples.ttbarhadronic)
-submit(Samples.MultiJetPk2012C1)
+for sample in Samples.from_argv(Samples.ttbar_samples + Samples.qcd_samples + Samples.data_samples):
+    submit(sample)
