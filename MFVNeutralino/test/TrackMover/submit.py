@@ -90,7 +90,7 @@ total_number_of_events = -1
     else:
         crab_cfg = crab_cfg_template.replace('JOB_CONTROL', '''
 lumi_mask = /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt
-lumis_per_job = 20
+lumis_per_job = 13
 total_number_of_lumis = -1
 ''')
 
