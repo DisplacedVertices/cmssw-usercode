@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from JMTucker.Tools.CMSSWTools import set_events_to_process
 from JMTucker.Tools.PATTuple_cfg import *
 
 runOnMC = True # magic line, don't touch
@@ -32,6 +33,7 @@ process.p = cms.Path(common_seq * process.mfvGenVertices)
 
 import JMTucker.MFVNeutralino.TriggerFilter
 JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
+process.pevtsel *= process.eventCleaningAll._seq
 
 for njets in xrange(1,5):
     for nbjets in xrange(0,3):
@@ -45,7 +47,7 @@ for njets in xrange(1,5):
 
         mover = cms.EDProducer('MFVTrackMover',
                                tracks_src = cms.InputTag('generalTracks'),
-                               primary_vertices_src = cms.InputTag('offlinePrimaryVertices'),
+                               primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                                jets_src = cms.InputTag('selectedPatJetsPF'),
                                min_jet_pt = cms.double(50),
                                min_jet_ntracks = cms.uint32(4),
