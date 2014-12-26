@@ -9,4 +9,5 @@ def setup_trigger_filter(process):
         if not name.startswith('eventCleaning'):
             path.insert(0, process.triggerFilter)
     process.pevtsel = cms.Path(process.triggerFilter)
-    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('pevtsel'))
+    if hasattr(process, 'out'):
+        process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('pevtsel'))
