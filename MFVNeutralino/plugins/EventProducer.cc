@@ -93,8 +93,7 @@ void MFVEventProducer::beginRun(edm::Run& run, const edm::EventSetup& setup) {
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-  TriggerHelper trig_helper_cleaning(event, cleaning_results_src);
-  if (skip_event_filter != "" && !trig_helper_cleaning.pass(skip_event_filter))
+  if (cleaning_results_src.label() != "" && skip_event_filter != "" && !TriggerHelper(event, cleaning_results_src).pass(skip_event_filter))
     return;
 
   std::auto_ptr<MFVEvent> mevent(new MFVEvent);
@@ -226,30 +225,34 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (l1_found != 3 && l1_found != 9)
     throw cms::Exception("BadAssumption") << "not the right L1 paths found: l1_found = " << l1_found;
 
-  const std::string cleaning_paths[mfv::n_clean_paths] = { // JMTBAD take from PATTupleSelection_cfg
-    "All",
-    "hltPhysicsDeclared",
-    "FilterOutScraping",
-    "goodOfflinePrimaryVertices",
-    "HBHENoiseFilter",
-    "CSCTightHaloFilter",
-    "hcalLaserEventFilter",
-    "EcalDeadCellTriggerPrimitiveFilter",
-    "trackingFailureFilter",
-    "eeBadScFilter",
-    "ecalLaserCorrFilter",
-    "tobtecfakesfilter",
-    "logErrorTooManyClusters",
-    "logErrorTooManySeeds",
-    "logErrorTooManySeedsDefault",
-    "logErrorTooManySeedsMainIterations",
-    "logErrorTooManyTripletsPairs",
-    "logErrorTooManyTripletsPairsMainIterations",
-    "manystripclus53X",
-    "toomanystripclus53X"
-  };
-  for (int i = 0; i < mfv::n_clean_paths; ++i)
-    mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
+  if (cleaning_results_src.label() != "") {
+    const std::string cleaning_paths[mfv::n_clean_paths] = { // JMTBAD take from PATTupleSelection_cfg
+      "All",
+      "hltPhysicsDeclared",
+      "FilterOutScraping",
+      "goodOfflinePrimaryVertices",
+      "HBHENoiseFilter",
+      "CSCTightHaloFilter",
+      "hcalLaserEventFilter",
+      "EcalDeadCellTriggerPrimitiveFilter",
+      "trackingFailureFilter",
+      "eeBadScFilter",
+      "ecalLaserCorrFilter",
+      "tobtecfakesfilter",
+      "logErrorTooManyClusters",
+      "logErrorTooManySeeds",
+      "logErrorTooManySeedsDefault",
+      "logErrorTooManySeedsMainIterations",
+      "logErrorTooManyTripletsPairs",
+      "logErrorTooManyTripletsPairsMainIterations",
+      "manystripclus53X",
+      "toomanystripclus53X"
+    };
+
+    TriggerHelper trig_helper_cleaning(event, cleaning_results_src);
+    for (int i = 0; i < mfv::n_clean_paths; ++i)
+      mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
+  }
 
   //////////////////////////////////////////////////////////////////////
 
