@@ -164,7 +164,10 @@ def check_fcn(crab_dir, verbose):
             if k.startswith('Retrieved') and k.count('_') == 2:
                 k = k.split('_')
                 k = k[0] + '_' + k[-1]
-            res_final[k] = v
+            if res_final.has_key(k):
+                res_final[k].extend(v)
+            else:
+                res_final[k] = v
         res = res_final
     return res
 
