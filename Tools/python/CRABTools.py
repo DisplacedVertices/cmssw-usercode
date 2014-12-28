@@ -657,12 +657,30 @@ def crab_get_input_files(working_dir, jobs=None):
         jobs = args.keys()
     return dict((j, args[j]['InputFiles'].split(',')) for j in jobs)
 
+def crab_get_exit_codes(path, job=None):
+    ret = [None, None] # wrapper, exe
+    for elem in crab_fjr_xml(path, job).findall('FrameworkError'):
+        i, code = None, None
+        for a,b in elem.items():
+            if a == 'Type':
+                if b == 'WrapperExitCode':
+                    i = 0
+                elif b == 'ExeExitCode':
+                    i = 1
+            elif a == 'ExitStatus':
+                code = int(b)
+        if i is None or code is None:
+            raise ValueError('could not get codes')
+        ret[i] = code
+    return tuple(ret)
+
 def crab_output_files_from_fjr(working_dir, raise_on_missing=True):
     fjrs = glob.glob(os.path.join(working_dir, 'res', 'crab_fjr*xml'))
     fjrs.sort(key = lambda x: int(x.split('_')[-1].split('.xml')[0]))
     files = []
 
     # Fragile xml parsing! Also assumes only one output file per job.
+    # JMTBAD use crab_get_exit_codes
     wrapper_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="WrapperExitCode"/>')
     exe_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="ExeExitCode"/>')
     filename_re = re.compile(r'.*(/store/user.*root)')
