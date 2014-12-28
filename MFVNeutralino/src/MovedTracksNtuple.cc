@@ -3,6 +3,12 @@
 #include "TTree.h"
 
 namespace mfv {
+  MovedTracksNtuple::MovedTracksNtuple() {
+    clear();
+    p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_drmin = p_vtxs_drmax = p_vtxs_bs2derr = 0;
+    p_jets_ntracks = p_vtxs_ntracks = p_vtxs_ntracksptgt3 = 0;
+  }
+
   void MovedTracksNtuple::clear() {
     run = lumi = event = 0;
     weight = pvx = pvy = pvz = move_x = move_y = move_z = 0;
@@ -77,21 +83,21 @@ namespace mfv {
     tree->SetBranchAddress("npreseljets", &npreseljets);
     tree->SetBranchAddress("npreselbjets", &npreselbjets);
     tree->SetBranchAddress("nlightjets", &nlightjets);
-    tree->SetBranchAddress("jets_pt", &jets_pt);
-    tree->SetBranchAddress("jets_eta", &jets_eta);
-    tree->SetBranchAddress("jets_phi", &jets_phi);
-    tree->SetBranchAddress("jets_energy", &jets_energy);
-    tree->SetBranchAddress("jets_ntracks", &jets_ntracks);
+    tree->SetBranchAddress("jets_pt", &p_jets_pt);
+    tree->SetBranchAddress("jets_eta", &p_jets_eta);
+    tree->SetBranchAddress("jets_phi", &p_jets_phi);
+    tree->SetBranchAddress("jets_energy", &p_jets_energy);
+    tree->SetBranchAddress("jets_ntracks", &p_jets_ntracks);
     tree->SetBranchAddress("move_x", &move_x);
     tree->SetBranchAddress("move_y", &move_y);
     tree->SetBranchAddress("move_z", &move_z);
-    tree->SetBranchAddress("vtxs_x", &vtxs_x);
-    tree->SetBranchAddress("vtxs_y", &vtxs_y);
-    tree->SetBranchAddress("vtxs_z", &vtxs_z);
-    tree->SetBranchAddress("vtxs_ntracks", &vtxs_ntracks);
-    tree->SetBranchAddress("vtxs_ntracksptgt3", &vtxs_ntracksptgt3);
-    tree->SetBranchAddress("vtxs_drmin", &vtxs_drmin);
-    tree->SetBranchAddress("vtxs_drmax", &vtxs_drmax);
-    tree->SetBranchAddress("vtxs_bs2derr", &vtxs_bs2derr);
+    tree->SetBranchAddress("vtxs_x", &p_vtxs_x);
+    tree->SetBranchAddress("vtxs_y", &p_vtxs_y);
+    tree->SetBranchAddress("vtxs_z", &p_vtxs_z);
+    tree->SetBranchAddress("vtxs_ntracks", &p_vtxs_ntracks);
+    tree->SetBranchAddress("vtxs_ntracksptgt3", &p_vtxs_ntracksptgt3);
+    tree->SetBranchAddress("vtxs_drmin", &p_vtxs_drmin);
+    tree->SetBranchAddress("vtxs_drmax", &p_vtxs_drmax);
+    tree->SetBranchAddress("vtxs_bs2derr", &p_vtxs_bs2derr);
   }
 }

@@ -48,9 +48,25 @@ namespace mfv {
     std::vector<float> vtxs_drmax;
     std::vector<float> vtxs_bs2derr;
 
+    MovedTracksNtuple();
     void clear();
     void write_to_tree(TTree* tree);
     void read_from_tree(TTree* tree);
+
+    // ugh
+    std::vector<float>* p_jets_pt;
+    std::vector<float>* p_jets_eta;
+    std::vector<float>* p_jets_phi;
+    std::vector<float>* p_jets_energy;
+    std::vector<ushort>* p_jets_ntracks;
+    std::vector<float>* p_vtxs_x;
+    std::vector<float>* p_vtxs_y;
+    std::vector<float>* p_vtxs_z;
+    std::vector<ushort>* p_vtxs_ntracks;
+    std::vector<ushort>* p_vtxs_ntracksptgt3;
+    std::vector<float>* p_vtxs_drmin;
+    std::vector<float>* p_vtxs_drmax;
+    std::vector<float>* p_vtxs_bs2derr;
   };
 }
 
