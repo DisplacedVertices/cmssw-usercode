@@ -55,7 +55,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.npv = mevent->npv;
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);
-  nt.pvz = mevent->pvz - mevent->bsz;
+  nt.pvz = mevent->pvz;
   nt.pvntracks = mevent->pv_ntracks;
   nt.pvsumpt2 = mevent->pv_sumpt2;
 
