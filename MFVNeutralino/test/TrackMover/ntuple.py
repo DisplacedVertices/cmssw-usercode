@@ -26,7 +26,11 @@ process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
 process.mfvEvent.cleaning_results_src = ''
 
-process.p = cms.Path(process.eventCleaningAll._seq * common_seq * process.mfvEvent)
+cleaning_seq = process.eventCleaningAll._seq
+for p in process.paths.keys():
+    delattr(process, p)
+
+process.p = cms.Path(cleaning_seq * common_seq * process.mfvEvent)
 
 import JMTucker.MFVNeutralino.TriggerFilter
 JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
@@ -110,7 +114,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in Samples.data_samples:
         sample.lumis_per = 15
 
-    samples = Samples.from_argv([Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples])
+    samples = Samples.from_argv(Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples)
 
     for sample in samples:
         if sample.is_mc:
