@@ -5,6 +5,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
@@ -19,68 +20,7 @@ public:
   const std::string mover_src;
   const double max_dist2move;
 
-  typedef unsigned short ushort;
-  struct ntuple_t {
-    unsigned run;
-    unsigned lumi;
-    unsigned event;
-
-    float weight;
-
-    ushort npu;
-    ushort npv;
-    float pvx;
-    float pvy;
-    float pvz;
-    ushort pvntracks;
-    ushort pvsumpt2;
-
-    ushort ntracks;
-    ushort nseltracks;
-
-    ushort npreseljets;
-    ushort npreselbjets;
-    ushort nlightjets;
-    std::vector<float> jets_pt;
-    std::vector<float> jets_eta;
-    std::vector<float> jets_phi;
-    std::vector<float> jets_energy;
-    std::vector<ushort> jets_ntracks;
-
-    float move_x;
-    float move_y;
-    float move_z;
-
-    std::vector<float> vtxs_x;
-    std::vector<float> vtxs_y;
-    std::vector<float> vtxs_z;
-    std::vector<ushort> vtxs_ntracks;
-    std::vector<ushort> vtxs_ntracksptgt3;
-    std::vector<float> vtxs_drmin;
-    std::vector<float> vtxs_drmax;
-    std::vector<float> vtxs_bs2derr;
-
-    void clear() {
-      run = lumi = event = 0;
-      weight = pvx = pvy = pvz = move_x = move_y = move_z = 0;
-      npu = npv = pvntracks = pvsumpt2 = ntracks = nseltracks = npreseljets = npreselbjets = nlightjets = 0;
-      jets_pt.clear();
-      jets_eta.clear();
-      jets_phi.clear();
-      jets_energy.clear();
-      jets_ntracks.clear();
-      vtxs_x.clear();
-      vtxs_y.clear();
-      vtxs_z.clear();
-      vtxs_ntracks.clear();
-      vtxs_ntracksptgt3.clear();
-      vtxs_drmin.clear();
-      vtxs_drmax.clear();
-      vtxs_bs2derr.clear();
-    }
-  };
-
-  ntuple_t nt;
+  mfv::MovedTracksNtuple nt;
   TTree* tree;
 };
 
@@ -94,41 +34,7 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   tree = fs->make<TTree>("t", "");
-  tree->SetAlias("njets", "jets_pt@.size()");
-  tree->SetAlias("nvtxs", "vtxs_x@.size()");
-
-  tree->Branch("run", &nt.run);
-  tree->Branch("lumi", &nt.lumi);
-  tree->Branch("event", &nt.event);
-  tree->Branch("weight", &nt.weight);
-  tree->Branch("npu", &nt.npu);
-  tree->Branch("npv", &nt.npv);
-  tree->Branch("pvx", &nt.pvx);
-  tree->Branch("pvy", &nt.pvy);
-  tree->Branch("pvz", &nt.pvz);
-  tree->Branch("pvntracks", &nt.pvntracks);
-  tree->Branch("pvsumpt2", &nt.pvsumpt2);
-  tree->Branch("ntracks", &nt.ntracks);
-  tree->Branch("nseltracks", &nt.nseltracks);
-  tree->Branch("npreseljets", &nt.npreseljets);
-  tree->Branch("npreselbjets", &nt.npreselbjets);
-  tree->Branch("nlightjets", &nt.nlightjets);
-  tree->Branch("jets_pt", &nt.jets_pt);
-  tree->Branch("jets_eta", &nt.jets_eta);
-  tree->Branch("jets_phi", &nt.jets_phi);
-  tree->Branch("jets_energy", &nt.jets_energy);
-  tree->Branch("jets_ntracks", &nt.jets_ntracks);
-  tree->Branch("move_x", &nt.move_x);
-  tree->Branch("move_y", &nt.move_y);
-  tree->Branch("move_z", &nt.move_z);
-  tree->Branch("vtxs_x", &nt.vtxs_x);
-  tree->Branch("vtxs_y", &nt.vtxs_y);
-  tree->Branch("vtxs_z", &nt.vtxs_z);
-  tree->Branch("vtxs_ntracks", &nt.vtxs_ntracks);
-  tree->Branch("vtxs_ntracksptgt3", &nt.vtxs_ntracksptgt3);
-  tree->Branch("vtxs_drmin", &nt.vtxs_drmin);
-  tree->Branch("vtxs_drmax", &nt.vtxs_drmax);
-  tree->Branch("vtxs_bs2derr", &nt.vtxs_bs2derr);
+  nt.write_to_tree(tree);
 }
 
 void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
