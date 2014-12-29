@@ -663,7 +663,7 @@ def crab_get_exit_codes(path, job=None):
         i, code = None, None
         for a,b in elem.items():
             if a == 'Type':
-                if b == 'WrapperExitCode':
+                if b == 'WrapperExitCode' or b == 'Fatal Exception':
                     i = 0
                 elif b == 'ExeExitCode':
                     i = 1
