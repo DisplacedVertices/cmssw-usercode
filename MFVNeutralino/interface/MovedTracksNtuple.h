@@ -7,6 +7,7 @@ class TTree;
 
 namespace mfv {
   struct MovedTracksNtuple {
+    typedef unsigned short uchar;
     typedef unsigned short ushort;
 
     unsigned run;
@@ -15,25 +16,28 @@ namespace mfv {
 
     float weight;
 
-    ushort npu;
-    ushort npv;
+    uchar npu;
+    uchar npv;
     float pvx;
     float pvy;
     float pvz;
     ushort pvntracks;
-    ushort pvsumpt2;
-
+    float pvsumpt2;
+    float jetsumht;
+    float met;
+    uchar nlep;
     ushort ntracks;
-    ushort nseltracks;
+    uchar nseltracks;
+    uchar nalljets;
 
-    ushort npreseljets;
-    ushort npreselbjets;
-    ushort nlightjets;
+    uchar npreseljets;
+    uchar npreselbjets;
+    uchar nlightjets;
     std::vector<float> jets_pt;
     std::vector<float> jets_eta;
     std::vector<float> jets_phi;
     std::vector<float> jets_energy;
-    std::vector<ushort> jets_ntracks;
+    std::vector<uchar> jets_ntracks;
 
     float move_x;
     float move_y;
@@ -42,8 +46,8 @@ namespace mfv {
     std::vector<float> vtxs_x;
     std::vector<float> vtxs_y;
     std::vector<float> vtxs_z;
-    std::vector<ushort> vtxs_ntracks;
-    std::vector<ushort> vtxs_ntracksptgt3;
+    std::vector<uchar> vtxs_ntracks;
+    std::vector<uchar> vtxs_ntracksptgt3;
     std::vector<float> vtxs_drmin;
     std::vector<float> vtxs_drmax;
     std::vector<float> vtxs_bs2derr;
@@ -58,12 +62,12 @@ namespace mfv {
     std::vector<float>* p_jets_eta;
     std::vector<float>* p_jets_phi;
     std::vector<float>* p_jets_energy;
-    std::vector<ushort>* p_jets_ntracks;
+    std::vector<uchar>* p_jets_ntracks;
     std::vector<float>* p_vtxs_x;
     std::vector<float>* p_vtxs_y;
     std::vector<float>* p_vtxs_z;
-    std::vector<ushort>* p_vtxs_ntracks;
-    std::vector<ushort>* p_vtxs_ntracksptgt3;
+    std::vector<uchar>* p_vtxs_ntracks;
+    std::vector<uchar>* p_vtxs_ntracksptgt3;
     std::vector<float>* p_vtxs_drmin;
     std::vector<float>* p_vtxs_drmax;
     std::vector<float>* p_vtxs_bs2derr;

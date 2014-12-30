@@ -11,8 +11,9 @@ namespace mfv {
 
   void MovedTracksNtuple::clear() {
     run = lumi = event = 0;
-    weight = pvx = pvy = pvz = move_x = move_y = move_z = 0;
-    npu = npv = pvntracks = pvsumpt2 = ntracks = nseltracks = npreseljets = npreselbjets = nlightjets = 0;
+    weight = pvx = pvy = pvz = pvsumpt2 = jetsumht = met = move_x = move_y = move_z = 0;
+    npu = npv = nlep = nseltracks = nalljets = npreseljets = npreselbjets = nlightjets = 0;
+    pvntracks = ntracks = 0;
     jets_pt.clear();
     jets_eta.clear();
     jets_phi.clear();
@@ -43,8 +44,12 @@ namespace mfv {
     tree->Branch("pvz", &pvz);
     tree->Branch("pvntracks", &pvntracks);
     tree->Branch("pvsumpt2", &pvsumpt2);
+    tree->Branch("jetsumht", &jetsumht);
+    tree->Branch("met", &met);
+    tree->Branch("nlep", &nlep);
     tree->Branch("ntracks", &ntracks);
     tree->Branch("nseltracks", &nseltracks);
+    tree->Branch("nalljets", &nalljets);
     tree->Branch("npreseljets", &npreseljets);
     tree->Branch("npreselbjets", &npreselbjets);
     tree->Branch("nlightjets", &nlightjets);
@@ -78,8 +83,12 @@ namespace mfv {
     tree->SetBranchAddress("pvz", &pvz);
     tree->SetBranchAddress("pvntracks", &pvntracks);
     tree->SetBranchAddress("pvsumpt2", &pvsumpt2);
+    tree->SetBranchAddress("jetsumht", &jetsumht);
+    tree->SetBranchAddress("met", &met);
+    tree->SetBranchAddress("nlep", &nlep);
     tree->SetBranchAddress("ntracks", &ntracks);
     tree->SetBranchAddress("nseltracks", &nseltracks);
+    tree->SetBranchAddress("nalljets", &nalljets);
     tree->SetBranchAddress("npreseljets", &npreseljets);
     tree->SetBranchAddress("npreselbjets", &npreselbjets);
     tree->SetBranchAddress("nlightjets", &nlightjets);

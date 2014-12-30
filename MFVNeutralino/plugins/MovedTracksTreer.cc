@@ -58,6 +58,10 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.pvz = mevent->pvz;
   nt.pvntracks = mevent->pv_ntracks;
   nt.pvsumpt2 = mevent->pv_sumpt2;
+  nt.jetsumht = mevent->jet_sum_ht();
+  nt.met = mevent->met();
+  nt.nlep = mevent->nlep(2);
+  nt.nalljets = mevent->njets();
 
   edm::Handle<reco::TrackCollection> tracks, moved_tracks;
   edm::Handle<int> npreseljets, npreselbjets;
