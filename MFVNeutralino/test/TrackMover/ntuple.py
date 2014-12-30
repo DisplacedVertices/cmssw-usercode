@@ -1,11 +1,23 @@
 #!/usr/bin/env python
 
+import sys
 from JMTucker.Tools.CMSSWTools import set_events_to_process
 from JMTucker.Tools.PATTuple_cfg import *
 
 runOnMC = True # magic line, don't touch
 njets = 2
 nbjets = 1
+
+ints = []
+for x in sys.argv:
+    try:
+        ints.append(int(x))
+    except ValueError:
+        pass
+if len(ints) > 0:
+    if len(ints) != 2:
+        raise RuntimeError('if you put any ints there must be two')
+    njets, nbjets = ints
 
 process, common_seq = pat_tuple_process(runOnMC)
 no_skimming_cuts(process)
