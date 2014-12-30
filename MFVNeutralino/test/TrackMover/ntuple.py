@@ -93,12 +93,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    cs = CRABSubmitter('TrackMover',
+    ex = '%i%i' % (njets, nbjets)
+
+    cs = CRABSubmitter('TrackMover' + ex,
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        get_edm_output = False,
                        data_retrieval = 'fnal',
-                       publish_data_name = 'trackmover%i%i' % (njets, nbjets),
+                       publish_data_name = 'trackmover' + ex,
                        max_threads = 3,
                        )
 
