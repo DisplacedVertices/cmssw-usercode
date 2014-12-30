@@ -121,6 +121,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             sample.total_events = -1
             assert hasattr(sample, 'timed')
         else:
+            sample.json = '../ana_all.json'
             sample.total_lumis = -1
 
     cs.submit_all(samples)
