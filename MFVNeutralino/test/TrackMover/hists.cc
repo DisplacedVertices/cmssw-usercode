@@ -65,15 +65,15 @@ struct numdens {
 };
 
 int main(int argc, char** argv) {
-  if (argc < 3) {
+  if (argc < 5) {
     fprintf(stderr, "usage: hists.exe in.root out.root\n");
     return 1;
   }
 
   const char* in_fn  = argv[1];
   const char* out_fn = argv[2];
-  const int njets_req = 2;
-  const int nbjets_req = 1;
+  const int njets_req = atoi(argv[3]);
+  const int nbjets_req = atoi(argv[4]);
   const bool apply_weight = true;
 
   gROOT->SetStyle("Plain");
@@ -133,6 +133,9 @@ int main(int argc, char** argv) {
     nd.book("pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
     nd.book("pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book("pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
+    nd.book("sumht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
+    nd.book("met", ";MET (GeV);events/20 GeV", 25, 0, 500);
+    nd.book("nlep", ";# leptons;events", 5, 0, 5);
     nd.book("ntracks", ";# tracks;events/10", 200, 0, 2000);
     nd.book("nseltracks", ";# selected tracks;events/2", 200, 0, 400);
     nd.book("npreseljets", ";# preselected jets;events/1", 20, 0, 20);
@@ -185,6 +188,7 @@ int main(int argc, char** argv) {
     
     if (nt.npreseljets < njets_req || 
         nt.npreselbjets < nbjets_req ||
+        nt.jetsumht < 500 ||
         movedist2 < 0.03 ||
         movedist2 > 2.5 ||
         jet_drmax > 4)
@@ -205,6 +209,9 @@ int main(int argc, char** argv) {
       Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
       Fill(nd("pvntracks")    .den, nt.pvntracks);
       Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
+      Fill(nd("sumht")        .den, nt.jetsumht);
+      Fill(nd("met")          .den, nt.met);
+      Fill(nd("nlep")         .den, nt.nlep);
       Fill(nd("ntracks")      .den, nt.ntracks);
       Fill(nd("nseltracks")   .den, nt.nseltracks);
       Fill(nd("npreseljets")  .den, nt.npreseljets);
@@ -271,6 +278,9 @@ int main(int argc, char** argv) {
         Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
         Fill(nd("pvntracks")    .num, nt.pvntracks);
         Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
+        Fill(nd("sumht")        .num, nt.jetsumht);
+        Fill(nd("met")          .num, nt.met);
+        Fill(nd("nlep")         .num, nt.nlep);
         Fill(nd("ntracks")      .num, nt.ntracks);
         Fill(nd("nseltracks")   .num, nt.nseltracks);
         Fill(nd("npreseljets")  .num, nt.npreseljets);
