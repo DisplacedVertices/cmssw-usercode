@@ -1,0 +1,6 @@
+#!/bin/bash
+DIRS=$@
+crtools -reportDirs $DIRS
+crtools -checkLumiDups $DIRS
+crtools -addLumiSummaries $DIRS
+pixelLumiCalc.py -i addedLumiSummaries.json overview 2>&1 | tee addedLumiSummaries.json.lumilog
