@@ -147,7 +147,7 @@ def cmssw_setup():
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
     
-def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes=False):
+def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes=False, confint_params=()):
     nbins = h1.GetNbinsX()
     xax = h1.GetXaxis()
     if h2.GetNbinsX() != nbins: # or xax2.GetBinLowEdge(1) != xax.GetBinLowEdge(1) or xax2.GetBinLowEdge(nbins) != xax.GetBinLowEdge(nbins):
@@ -170,7 +170,7 @@ def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes
         if s > t and force_lt_1:
             print 'warning: bin %i has p_hat > 1, in interval forcing p_hat = 1' % ibin
             s = t
-        rat, a,b = confint(s,t)
+        rat, a,b = confint(s,t, *confint_params)
         #print ibin, s, t, a, b
 
         if b is None: # JMTBAD
