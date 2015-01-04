@@ -746,10 +746,10 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     sexpected = set(xrange(1,expected+1))
     sjobs = set(job_nums)
     if sjobs != sexpected:
-        print '\033[36;7m files found %r not what expected \033[m' % sorted(sjobs)
+        print '\033[36;7m %i files found %s not what expected \033[m' % (len(sjobs), crabify_list(sorted(sjobs)))
 
         missing = sorted(sexpected - sjobs)
-        print '\033[36;7m     missing: %r \033[m' % missing
+        print '\033[36;7m    %i missing: %r \033[m' % (len(missing), crabify_list(missing))
 
         to_drop = []
         for job, nums_and_fs in job_nums.iteritems():
