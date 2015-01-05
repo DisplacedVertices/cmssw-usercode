@@ -114,7 +114,8 @@ int main(int argc, char** argv) {
   TH1F* h_weight = new TH1F("h_weight", ";weight;events/0.01", 200, 0, 2);
   TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
 
-  numdens nds[6] = {
+  const int num_numdens = 6;
+  numdens nds[num_numdens] = {
     numdens("nocuts"),
     numdens("ntracks"),
     numdens("ntracksPptgt3"),
@@ -250,14 +251,14 @@ int main(int argc, char** argv) {
     const bool pass_ntrackscuts = pass_ntracks && pass_ntracksptgt3;
     const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
 
-                                                         nums["nocuts"]             += w;
-    if (pass_ntracks)                                    nums["ntracks"]            += w;
-    if (pass_ntrackscuts)                                nums["ntracksPptgt3"]      += w;
-    if (pass_ntrackscuts && pass_drcuts)                 nums["ntracksPptgt3Pdr"]   += w;
-    if (pass_ntrackscuts && pass_drcuts && pass_bs2derr) nums["all"]                += w;
-    if (pass_ntrackscuts                && pass_bs2derr) nums["ntracksPptgt3Pbs2d"] += w;
+    nums["nocuts"]             += w;
+    nums["ntracks"]            += w * int(pass_ntracks);
+    nums["ntracksPptgt3"]      += w * int(pass_ntrackscuts);
+    nums["ntracksPptgt3Pdr"]   += w * int(pass_ntrackscuts && pass_drcuts);
+    nums["all"]                += w * int(pass_ntrackscuts && pass_drcuts && pass_bs2derr);
+    nums["ntracksPptgt3Pbs2d"] += w * int(pass_ntrackscuts                && pass_bs2derr);
 
-    const bool passes[6] = {
+    const bool passes[num_numdens] = {
       true,
       pass_ntracks,
       pass_ntrackscuts,
@@ -266,7 +267,7 @@ int main(int argc, char** argv) {
       pass_ntrackscuts && pass_drcuts && pass_bs2derr
     };
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < num_numdens; ++i) {
       if (passes[i]) {
         numdens& nd = nds[i];
         Fill(nd("movedist2")    .num, movedist2);
