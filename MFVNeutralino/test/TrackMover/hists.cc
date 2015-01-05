@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
     nd.book("jetsume", ";#Sigma jet energy (GeV);events/5 GeV", 200, 0, 1000);
     nd.book("jetdrmax", ";max jet #Delta R;events/0.1", 70, 0, 7);
     nd.book("jetdravg", ";avg jet #Delta R;events/0.1", 70, 0, 7);
-    nd.book("jetsumntracks", ";#Sigma jet # tracks;events/2", 200, 0, 400);
+    nd.book("jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
   }
 
   double den = 0;
