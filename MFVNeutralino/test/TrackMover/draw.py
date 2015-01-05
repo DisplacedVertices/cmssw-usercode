@@ -1,12 +1,6 @@
 from JMTucker.Tools.ROOTTools import *
 set_style()
 
-njets = 2
-nbjets = 1
-ex = '%i%i' % (njets, nbjets)
-
-ps = plot_saver('plots/trackmover' + ex)
-
 def get_em(fn, alpha=1-0.6827):
     f = ROOT.TFile(fn)
     d = {}
@@ -16,6 +10,8 @@ def get_em(fn, alpha=1-0.6827):
 
     for key in f.GetListOfKeys():
         name = key.GetName()
+        if 'jetsumntracks' in name:
+            continue
         obj = f.Get(name)
         if name.startswith('h_'):
             l.append(name)
@@ -39,40 +35,61 @@ def get_em(fn, alpha=1-0.6827):
 
     return f, l, d
 
-f_data, l_data, d_data = get_em('ddddata.root')
-f_mc,   l_mc,   d_mc   = get_em('mc.root', 0.001)
-assert l_data == l_mc
-assert len(d_data) == len(d_mc)
-l = l_data
+def test():
+    ps = plot_saver('plots/trackmover_tmp')
 
-for name in l:
-    data = d_data[name]
-    mc   = d_mc  [name]
-    both = (data, mc)
-
-    if name.endswith('_rat'):
-        data.SetLineWidth(2)
-        data.SetMarkerStyle(20)
-        data.SetMarkerSize(0.8)
-        data.Draw('ALP')
-
-        mc.SetFillStyle(3001)
-        mc.SetFillColor(2)
-        mc.Draw('E2 same')
-
-        for g in both:
+    f,l,d = get_em('qcdht0250.root')
+    for name in l:
+        if name.endswith('_rat'):
+            g = d[name]
+            g.SetLineWidth(2)
+            g.SetMarkerStyle(20)
+            g.SetMarkerSize(0.8)
+            g.Draw('ALP')
             g.GetYaxis().SetRangeUser(0., 1.05)
+            ps.save(name)
+        
+def data_mc_comp(ex, mc_fn):
+    ps = plot_saver('plots/trackmover_' + ex)
 
-        ps.save(name)
+    f_data, l_data, d_data = get_em('data.root')
+    f_mc,   l_mc,   d_mc   = get_em(mc_fn)
+    assert l_data == l_mc
+    assert len(d_data) == len(d_mc)
+    l = l_data
 
-    elif not name.endswith('_num') and not name.endswith('_den'):
-        data.Draw()
-        mc.SetLineColor(ROOT.kRed)
-        mc.Draw('sames')
+    for name in l:
+        data = d_data[name]
+        mc   = d_mc  [name]
+        both = (data, mc)
 
-        ps.c.Update()
-        for i,h in enumerate((data, mc)):
-            h.SetLineWidth(2)
-            differentiate_stat_box(h, i, new_size=(0.2,0.2))
+        if name.endswith('_rat'):
+            data.SetLineWidth(2)
+            data.SetMarkerStyle(20)
+            data.SetMarkerSize(0.8)
+            data.Draw('ALP')
 
-        ps.save(name)
+            mc.SetFillStyle(3001)
+            mc.SetFillColor(2)
+            mc.Draw('E2 same')
+
+            for g in both:
+                g.GetYaxis().SetRangeUser(0., 1.05)
+
+            ps.save(name)
+
+        elif not name.endswith('_num') and not name.endswith('_den'):
+            data.Draw()
+            mc.SetLineColor(ROOT.kRed)
+            mc.Draw('sames')
+
+            ps.c.Update()
+            for i,h in enumerate((data, mc)):
+                h.SetLineWidth(2)
+                differentiate_stat_box(h, i, new_size=(0.2,0.2))
+
+            ps.save(name)
+
+data_mc_comp('32_all', 'merge_all.root')
+data_mc_comp('32_gt500', 'merge_gt500.root')
+
