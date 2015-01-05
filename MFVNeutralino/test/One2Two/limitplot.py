@@ -10,7 +10,7 @@ draw_gluglu = False
 
 def fmt(t, title, color):
     t.SetFillColor(color)
-    t.SetTitle('%s;mass (GeV);#sigma #times BR (fb)' % title)
+    t.SetTitle('%s;neutralino mass (GeV);#sigma #times BR (fb)' % title)
     return t
 
 def tge(xye, title, color):
@@ -42,7 +42,7 @@ def tgae(x, y, exl, exh, eyl, eyh, title, color):
     return fmt(t, title, color)
 
 if draw_gluglu:
-    gluglu = [eval(x.strip()) for x in open('gluglu.csv').readlines() if x.strip()]
+    gluglu = [eval(x.strip()) for x in open('/afs/fnal.gov/files/home/room3/tucker/gluglu.csv').readlines() if x.strip()]
     gluglu = [(z[0],z[1]*1000,z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
     g_gluglu = tge(gluglu, 'hi', 9)
     g_gluglu.Draw('A3')
