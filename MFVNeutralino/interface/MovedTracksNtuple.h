@@ -47,6 +47,8 @@ namespace mfv {
     std::vector<float> vtxs_x;
     std::vector<float> vtxs_y;
     std::vector<float> vtxs_z;
+    std::vector<float> vtxs_theta; // tracksplusjets
+    std::vector<float> vtxs_phi;
     std::vector<uchar> vtxs_ntracks;
     std::vector<uchar> vtxs_ntracksptgt3;
     std::vector<float> vtxs_drmin;
@@ -67,6 +69,8 @@ namespace mfv {
     std::vector<float>* p_vtxs_x;
     std::vector<float>* p_vtxs_y;
     std::vector<float>* p_vtxs_z;
+    std::vector<float>* p_vtxs_theta;
+    std::vector<float>* p_vtxs_phi;
     std::vector<uchar>* p_vtxs_ntracks;
     std::vector<uchar>* p_vtxs_ntracksptgt3;
     std::vector<float>* p_vtxs_drmin;

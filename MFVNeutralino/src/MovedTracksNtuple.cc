@@ -5,7 +5,7 @@
 namespace mfv {
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
-    p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_drmin = p_vtxs_drmax = p_vtxs_bs2derr = 0;
+    p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_theta = p_vtxs_phi = p_vtxs_drmin = p_vtxs_drmax = p_vtxs_bs2derr = 0;
     p_jets_ntracks = p_vtxs_ntracks = p_vtxs_ntracksptgt3 = 0;
   }
 
@@ -22,6 +22,8 @@ namespace mfv {
     vtxs_x.clear();
     vtxs_y.clear();
     vtxs_z.clear();
+    vtxs_theta.clear();
+    vtxs_phi.clear();
     vtxs_ntracks.clear();
     vtxs_ntracksptgt3.clear();
     vtxs_drmin.clear();
@@ -65,6 +67,8 @@ namespace mfv {
     tree->Branch("vtxs_x", &vtxs_x);
     tree->Branch("vtxs_y", &vtxs_y);
     tree->Branch("vtxs_z", &vtxs_z);
+    tree->Branch("vtxs_theta", &vtxs_theta);
+    tree->Branch("vtxs_phi", &vtxs_phi);
     tree->Branch("vtxs_ntracks", &vtxs_ntracks);
     tree->Branch("vtxs_ntracksptgt3", &vtxs_ntracksptgt3);
     tree->Branch("vtxs_drmin", &vtxs_drmin);
@@ -105,6 +109,8 @@ namespace mfv {
     tree->SetBranchAddress("vtxs_x", &p_vtxs_x);
     tree->SetBranchAddress("vtxs_y", &p_vtxs_y);
     tree->SetBranchAddress("vtxs_z", &p_vtxs_z);
+    tree->SetBranchAddress("vtxs_theta", &p_vtxs_theta);
+    tree->SetBranchAddress("vtxs_phi", &p_vtxs_phi);
     tree->SetBranchAddress("vtxs_ntracks", &p_vtxs_ntracks);
     tree->SetBranchAddress("vtxs_ntracksptgt3", &p_vtxs_ntracksptgt3);
     tree->SetBranchAddress("vtxs_drmin", &p_vtxs_drmin);

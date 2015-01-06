@@ -120,6 +120,8 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.vtxs_x.push_back(vx);
     nt.vtxs_y.push_back(vy);
     nt.vtxs_z.push_back(vz);
+    nt.vtxs_theta.push_back(2*atan(exp(-v.eta[mfv::PTracksPlusJetsByNtracks])));
+    nt.vtxs_phi.push_back(v.phi[mfv::PTracksPlusJetsByNtracks]);
     nt.vtxs_ntracks.push_back(v.ntracks());
     nt.vtxs_ntracksptgt3.push_back(v.ntracksptgt(3));
     nt.vtxs_drmin.push_back(v.drmin());
