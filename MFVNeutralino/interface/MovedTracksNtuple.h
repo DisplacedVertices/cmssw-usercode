@@ -24,6 +24,7 @@ namespace mfv {
     ushort pvntracks;
     float pvsumpt2;
     float jetsumht;
+    float jetpt4;
     float met;
     uchar nlep;
     ushort ntracks;
