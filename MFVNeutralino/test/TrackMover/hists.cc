@@ -226,6 +226,7 @@ int main(int argc, char** argv) {
 
     den += w;
 
+    int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;
     int n_pass_ntracksPptgt3 = 0;
     int n_pass_ntracksPptgt3Pdr = 0;
@@ -247,6 +248,8 @@ int main(int argc, char** argv) {
       const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
       const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
 
+      if (1)
+        ++n_pass_nocuts;
       if (pass_ntracks)
         ++n_pass_ntracks;
       if (pass_ntracks && pass_ntracksptgt3)
@@ -259,7 +262,7 @@ int main(int argc, char** argv) {
         ++n_pass_all;
     }
 
-    if (n_raw_vtx)                 nums["nocuts"]             += w;
+    if (n_pass_nocuts)             nums["nocuts"]             += w;
     if (n_pass_ntracks)            nums["ntracks"]            += w;
     if (n_pass_ntracksPptgt3)      nums["ntracksPptgt3"]      += w;
     if (n_pass_ntracksPptgt3Pdr)   nums["ntracksPptgt3Pdr"]   += w;
@@ -267,7 +270,7 @@ int main(int argc, char** argv) {
     if (n_pass_all)                nums["all"]                += w;
 
     const int passes[num_numdens] = {
-      int(n_raw_vtx),
+      n_pass_nocuts,
       n_pass_ntracks,
       n_pass_ntracksPptgt3,
       n_pass_ntracksPptgt3Pdr,
