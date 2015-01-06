@@ -270,6 +270,9 @@ else:
     masses = range(200, 1501, 100)
     tunes = [5]
 
+    tau0s = [0.1*x for x in xrange(1,10)] + [1.*x for x in xrange(1,11)] + range(12,31,2)
+    masses = [400, 1000]
+
     to_do = [(t,m,tu) for m in masses for t in tau0s for tu in tunes]
 
     for tau0, mass, tune in to_do:
