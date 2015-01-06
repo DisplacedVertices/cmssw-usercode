@@ -87,6 +87,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         to_add = []
         to_replace = []
 
+        to_replace.append(('njets = 2\nnbjets = 1', 'njets = %i\nnbjets = %i' % (njets, nbjets), 'could not find the magic string for njets/nbjets'))
+
         if not sample.is_mc:
             magic = 'runOnMC = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
