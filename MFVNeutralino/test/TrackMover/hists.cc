@@ -51,7 +51,7 @@ struct numden {
 };
 
 struct numdens {
-  numdens(const char* c) : common(c) {}
+  numdens(const char* c) : common(c + std::string("_")) {}
   void book(const char* name, const char* title, int nbins, double xlo, double xhi) {
     m.insert(std::make_pair(std::string(name), numden((common + name).c_str(), title, nbins, xlo, xhi)));
   }
@@ -226,46 +226,53 @@ int main(int argc, char** argv) {
 
     den += w;
 
-    int wvtx = -1;
-    if (n_raw_vtx > 2)
-      {}
-    if (n_raw_vtx == 1)
-      wvtx = 0;
-    else if (n_raw_vtx >= 2) {
-      for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
-        if (mag(nt.move_x - nt.p_vtxs_x->at(ivtx),
-                nt.move_y - nt.p_vtxs_y->at(ivtx)) < 0.005)
-          wvtx = int(ivtx);
-      }
+    int n_pass_ntracks = 0;
+    int n_pass_ntracksPptgt3 = 0;
+    int n_pass_ntracksPptgt3Pdr = 0;
+    int n_pass_ntracksPptgt3Pbs2d = 0;
+    int n_pass_all = 0;
+
+    for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
+      const double dist2move = mag(nt.move_x - nt.p_vtxs_x->at(ivtx),
+                                   nt.move_y - nt.p_vtxs_y->at(ivtx),
+                                   nt.move_z - nt.p_vtxs_z->at(ivtx));
+      if (dist2move > 0.005)
+        continue;
+
+      const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
+      const bool pass_ntracksptgt3 = nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
+      const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
+      const bool pass_drmax        = nt.p_vtxs_drmax       ->at(ivtx) < 4;
+      const bool pass_mindrmax     = nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
+      const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
+      const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
+
+      if (pass_ntracks)
+        ++n_pass_ntracks;
+      if (pass_ntracks && pass_ntracksptgt3)
+        ++n_pass_ntracksPptgt3;
+      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts)
+        ++n_pass_ntracksPptgt3Pdr;
+      if (pass_ntracks && pass_ntracksptgt3 &&                pass_bs2derr)
+        ++n_pass_ntracksPptgt3Pbs2d;
+      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts && pass_bs2derr)
+        ++n_pass_all;
     }
 
-    if (wvtx < 0)
-      continue;
+    if (n_raw_vtx)                 nums["nocuts"]             += w;
+    if (n_pass_ntracks)            nums["ntracks"]            += w;
+    if (n_pass_ntracksPptgt3)      nums["ntracksPptgt3"]      += w;
+    if (n_pass_ntracksPptgt3Pdr)   nums["ntracksPptgt3Pdr"]   += w;
+    if (n_pass_ntracksPptgt3Pbs2d) nums["ntracksPptgt3Pbs2d"] += w;
+    if (n_pass_all)                nums["all"]                += w;
 
-    const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(wvtx) >= 5;
-    const bool pass_ntracksptgt3 = nt.p_vtxs_ntracksptgt3->at(wvtx) >= 3;
-    const bool pass_drmin        = nt.p_vtxs_drmin       ->at(wvtx) < 0.4;
-    const bool pass_drmax        = nt.p_vtxs_drmax       ->at(wvtx) < 4;
-    const bool pass_mindrmax     = nt.p_vtxs_drmax       ->at(wvtx) > 1.2;
-    const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(wvtx) < 0.0025;
-
-    const bool pass_ntrackscuts = pass_ntracks && pass_ntracksptgt3;
-    const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
-
-    nums["nocuts"]             += w;
-    nums["ntracks"]            += w * int(pass_ntracks);
-    nums["ntracksPptgt3"]      += w * int(pass_ntrackscuts);
-    nums["ntracksPptgt3Pdr"]   += w * int(pass_ntrackscuts && pass_drcuts);
-    nums["all"]                += w * int(pass_ntrackscuts && pass_drcuts && pass_bs2derr);
-    nums["ntracksPptgt3Pbs2d"] += w * int(pass_ntrackscuts                && pass_bs2derr);
-
-    const bool passes[num_numdens] = {
-      true,
-      pass_ntracks,
-      pass_ntrackscuts,
-      pass_ntrackscuts && pass_drcuts,
-      pass_ntrackscuts                && pass_bs2derr,
-      pass_ntrackscuts && pass_drcuts && pass_bs2derr
+    const int passes[num_numdens] = {
+      int(n_raw_vtx),
+      n_pass_ntracks,
+      n_pass_ntracksPptgt3,
+      n_pass_ntracksPptgt3Pdr,
+      n_pass_ntracksPptgt3Pbs2d,
+      n_pass_all
     };
 
     for (int i = 0; i < num_numdens; ++i) {
