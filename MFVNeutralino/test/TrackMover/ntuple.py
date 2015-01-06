@@ -122,13 +122,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     for sample in Samples.all_mc_samples:
         if timing.has_key(sample.name):
-            sample.events_per = int(3.5*3600/timing[sample.name]/2)
+            sample.events_per = int(3.5*3600/timing[sample.name]/1.5)
             sample.timed = True
             nj = int(sample.nevents_orig / float(sample.events_per)) + 1
             assert nj < 5000
 
     for sample in Samples.data_samples:
-        sample.lumis_per = 15
+        sample.lumis_per = 12
 
     samples = Samples.from_argv(Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples)
 
