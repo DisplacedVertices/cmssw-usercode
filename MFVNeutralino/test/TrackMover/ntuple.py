@@ -75,6 +75,9 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                       mover_src = cms.string('mfvMovedTracks'),
                                       vertices_src = cms.InputTag('mfvVerticesAux'),
                                       max_dist2move = cms.double(0.02),
+                                      apply_presel = cms.bool(True),
+                                      njets_req = cms.uint32(njets),
+                                      nbjets_req = cms.uint32(nbjets),
                                       )
 
 process.p *= process.mfvMovedTree

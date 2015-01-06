@@ -19,6 +19,9 @@ public:
   const edm::InputTag weight_src;
   const std::string mover_src;
   const double max_dist2move;
+  const bool apply_presel;
+  const unsigned njets_req;
+  const unsigned nbjets_req;
 
   mfv::MovedTracksNtuple nt;
   TTree* tree;
@@ -29,7 +32,10 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
     vertices_src(cfg.getParameter<edm::InputTag>("vertices_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     mover_src(cfg.getParameter<std::string>("mover_src")),
-    max_dist2move(cfg.getParameter<double>("max_dist2move"))
+    max_dist2move(cfg.getParameter<double>("max_dist2move")),
+    apply_presel(cfg.getParameter<bool>("apply_presel")),
+    njets_req(cfg.getParameter<unsigned>("njets_req")),
+    nbjets_req(cfg.getParameter<unsigned>("nbjets_req"))
 {
   edm::Service<TFileService> fs;
 
@@ -128,6 +134,14 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.vtxs_drmax.push_back(v.drmax());
     nt.vtxs_bs2derr.push_back(v.bs2derr);
   }
+
+  if (apply_presel &&
+      (nt.npreseljets < njets_req ||
+       nt.npreselbjets < nbjets_req ||
+       nt.jetsumht < 500 ||
+       nt.jetpt4 < 60)
+      )
+    return;
 
   tree->Fill();
 }
