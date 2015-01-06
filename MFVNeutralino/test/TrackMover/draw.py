@@ -74,7 +74,7 @@ def get_em(fn, alpha=1-0.6827):
             g = histogram_divide(num, den, confint_params=(alpha,))
             g.SetTitle('')
             g.GetXaxis().SetTitle(num.GetXaxis().GetTitle())
-            g.GetYaxis().SetTitle(num.GetYaxis().GetTitle())
+            g.GetYaxis().SetTitle('efficiency')
             rat_name = name.replace('_num', '_rat')
 
             d[rat_name] = g
