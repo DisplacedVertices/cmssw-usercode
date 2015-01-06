@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+# py ~/cmswork/Tools/python/Samples.py merge qcdht0500.root qcdht1000.root  ttbar*root -3629.809
+
 from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
@@ -23,9 +27,9 @@ def get_em(fn, alpha=1-0.6827):
         return False
 
     def rebin(name, obj):
+        #print name
         if 'jetdravg_' in name or \
            'jetdrmax_' in name or \
-           'met_' in name or \
            'npv_' in name or \
            'sumht_' in name:
             obj.Rebin(2)
@@ -68,8 +72,9 @@ def get_em(fn, alpha=1-0.6827):
             num = d[name]
             den = d[name.replace('_num', '_den')]
             g = histogram_divide(num, den, confint_params=(alpha,))
-            title = num.GetTitle()
-            g.SetTitle(title)
+            g.SetTitle('')
+            g.GetXaxis().SetTitle(num.GetXaxis().GetTitle())
+            g.GetYaxis().SetTitle(num.GetYaxis().GetTitle())
             rat_name = name.replace('_num', '_rat')
 
             d[rat_name] = g
@@ -90,6 +95,9 @@ def get_em(fn, alpha=1-0.6827):
         num.SetBinError  (1, num_err)
         den.SetBinContent(1, den_int)
         den.SetBinError  (1, den_err)
+        ef, lo, hi = clopper_pearson(num_int, den_int, alpha)
+        ef, lo, hi = 100*ef, 100*lo, 100*hi
+        print '%40s %.2f [%.2f, %.2f] +%.2f -%.2f' % (cutset, ef, lo, hi, hi-ef, ef-lo)
         g = histogram_divide(num, den, confint_params=(alpha,))
         rat_name = cutset + '_rat'
         d[rat_name] = g
@@ -112,9 +120,12 @@ def test():
             ps.save(name)
         
 def data_mc_comp(ex, mc_fn):
-    ps = plot_saver('plots/trackmover_' + ex, log=False)
+    print ex
+    ps = plot_saver('plots/trackmover_' + ex, size=(600,600), log=False)
 
+    print 'data'
     f_data, l_data, d_data = get_em('data.root')
+    print 'mc'
     f_mc,   l_mc,   d_mc   = get_em(mc_fn)
     assert l_data == l_mc
     assert len(d_data) == len(d_mc)
@@ -152,7 +163,9 @@ def data_mc_comp(ex, mc_fn):
 
             ps.save(name)
 
-data_mc_comp('32_all', 'merge_all.root')
-data_mc_comp('32_gt500', 'merge_gt500.root')
-data_mc_comp('32_gt500_leadweight1', 'merge_gt500_leadweight1.root')
-
+#data_mc_comp('32_all', 'merge_all.root')
+#data_mc_comp('32_gt500', 'merge_gt500.root')
+data_mc_comp('21_gt250_leadweight1', 'merge_gt250_leadweight1.root')
+data_mc_comp('21_gt500_leadweight1', 'merge_gt500_leadweight1.root')
+data_mc_comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
+data_mc_comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
