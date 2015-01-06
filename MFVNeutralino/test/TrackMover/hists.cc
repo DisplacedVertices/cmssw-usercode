@@ -190,6 +190,7 @@ int main(int argc, char** argv) {
     if (nt.npreseljets < njets_req || 
         nt.npreselbjets < nbjets_req ||
         nt.jetsumht < 500 ||
+        nt.jetpt4 < 60 ||
         movedist2 < 0.03 ||
         movedist2 > 2.5 ||
         jet_drmax > 4)
