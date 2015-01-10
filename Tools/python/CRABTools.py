@@ -236,6 +236,7 @@ def crab_status(working_dir, verbose=True, debug=False):
             'osg-gw-4.t2.ucsd.edu',
             'ce-itb.ultralight.org',
             'cmsgrid03.hep.wisc.edu',
+            'ce1.accre.vanderbilt.edu',
             'ce2.accre.vanderbilt.edu',
             'cms-ce1-osg.rcac.purdue.edu',
             'cms.rc.ufl.edu',
