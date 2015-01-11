@@ -115,6 +115,21 @@ int main(int argc, char** argv) {
   TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
 
   const int num_numdens = 6;
+
+  TH1F* h_vtxntracks     [num_numdens] = {0};
+  TH1F* h_vtxntracksptgt3[num_numdens] = {0};
+  TH1F* h_vtxdrmin       [num_numdens] = {0};
+  TH1F* h_vtxdrmax       [num_numdens] = {0};
+  TH1F* h_vtxbs2derr     [num_numdens] = {0};
+
+  for (int i = 0; i < num_numdens; ++i) {
+    h_vtxntracks     [i] = new TH1F(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
+    h_vtxntracksptgt3[i] = new TH1F(TString::Format("h_%i_vtxntracksptgt3", i), ";# tracks w/ p_{T} > 3 GeV in largest vertex;events/1", 40, 0, 40);
+    h_vtxdrmin       [i] = new TH1F(TString::Format("h_%i_vtxdrmin",        i), ";min #Delta R_{ij} of tracks in largest vertex;events/0.05", 10, 0, 0.5);
+    h_vtxdrmax       [i] = new TH1F(TString::Format("h_%i_vtxdrmax",        i), ";max #Delta R_{ij} of tracks in largest vertex;events/0.5", 14, 0, 7);
+    h_vtxbs2derr     [i] = new TH1F(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
+  }
+
   numdens nds[num_numdens] = {
     numdens("nocuts"),
     numdens("ntracks"),
@@ -233,6 +248,9 @@ int main(int argc, char** argv) {
     int n_pass_ntracksPptgt3Pbs2d = 0;
     int n_pass_all = 0;
 
+    std::vector<int> first_vtx_to_pass(num_numdens, -1);
+    auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
+
     for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
       const double dist2move = mag(nt.move_x - nt.p_vtxs_x->at(ivtx),
                                    nt.move_y - nt.p_vtxs_y->at(ivtx),
@@ -248,18 +266,23 @@ int main(int argc, char** argv) {
       const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
       const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
 
-      if (1)
-        ++n_pass_nocuts;
-      if (pass_ntracks)
-        ++n_pass_ntracks;
-      if (pass_ntracks && pass_ntracksptgt3)
-        ++n_pass_ntracksPptgt3;
-      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts)
-        ++n_pass_ntracksPptgt3Pdr;
-      if (pass_ntracks && pass_ntracksptgt3 &&                pass_bs2derr)
-        ++n_pass_ntracksPptgt3Pbs2d;
-      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts && pass_bs2derr)
-        ++n_pass_all;
+      if (1)                                                                 { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;             }
+      if (pass_ntracks)                                                      { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;            }
+      if (pass_ntracks && pass_ntracksptgt3)                                 { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_ntracksPptgt3;      }
+      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts)                  { set_it_if_first(first_vtx_to_pass[3], ivtx); ++n_pass_ntracksPptgt3Pdr;   }
+      if (pass_ntracks && pass_ntracksptgt3 &&                pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[4], ivtx); ++n_pass_ntracksPptgt3Pbs2d; }
+      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[5], ivtx); ++n_pass_all;                }
+    }
+
+    for (int i = 0; i < num_numdens; ++i) {
+      int ivtx = first_vtx_to_pass[i];
+      if (ivtx != -1) {
+        h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks     ->at(ivtx));
+        h_vtxntracksptgt3 [i]->Fill(nt.p_vtxs_ntracksptgt3->at(ivtx));
+        h_vtxdrmin        [i]->Fill(nt.p_vtxs_drmin       ->at(ivtx));
+        h_vtxdrmax        [i]->Fill(nt.p_vtxs_drmax       ->at(ivtx));
+        h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr     ->at(ivtx));
+      }
     }
 
     if (n_pass_nocuts)             nums["nocuts"]             += w;
