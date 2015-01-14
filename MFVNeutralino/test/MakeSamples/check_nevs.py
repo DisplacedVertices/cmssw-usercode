@@ -36,6 +36,10 @@ for hn in hns:
         hstats.append(h)
         exec '%s = h' % h.GetName()
 
+exceptions = {
+    #'crab/MakeSamples_M1500/crab_mfv_neutralino_tau03000um_M1500': (34,),
+    }
+
 for idir, dir in enumerate(dirs):
     print dir
     njobs = crab_get_njobs(dir)
@@ -63,7 +67,8 @@ for idir, dir in enumerate(dirs):
                     try:
                         nev = int(line.split()[-1])
                     except ValueError:
-                        raise RuntimeError('parsing problem for NEV for %s job %i: %r' % (dir, job, line))
+                        if not exceptions.has_key(dir) or job not in exceptions[dir]:
+                            raise RuntimeError('parsing problem for NEV for %s job %i: %r' % (dir, job, line))
                     nevs.append(nev)
             if len(nevs) != 4:
                 raise RuntimeError('did not find 4 NEV lines for %s job %i' % (dir, job))
