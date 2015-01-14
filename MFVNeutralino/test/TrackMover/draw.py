@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 '''
+bash -c 'for x in /store/user/tucker/TrackMover21/*root; do ../hists.exe ${fnalxrootd}${x} `basename $x` 2 1 2>&1 | tee $(basename $x .root).log; done'
 hadd.py data.root MultiJetPk2012*root
 py ~/cmswork/Tools/python/Samples.py merge qcdht0500.root qcdht1000.root ttbar*root -3629.809 ; mv merge.root mc.root
 '''
