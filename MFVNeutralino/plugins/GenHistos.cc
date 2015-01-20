@@ -560,7 +560,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         float lsp_min_dR =  1e99;
         float lsp_max_dR = -1e99;
         for (int j = 0; j < lsp_ndau; ++j) {
+          if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
           for (int k = j+1; k < lsp_ndau; ++k) {
+            if (is_neutrino(lsp_daughters[k]) || fabs(lsp_daughters[k]->eta()) > 2.5) continue;
             float dR = reco::deltaR(*lsp_daughters[j], *lsp_daughters[k]);
             if (dR < lsp_min_dR)
               lsp_min_dR = dR;

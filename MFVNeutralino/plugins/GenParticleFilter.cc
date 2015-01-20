@@ -197,7 +197,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     float drmin =  1e99;
     float drmax = -1e99;
     for (int j = 0; j < ndau; ++j) {
+      if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5) continue;
       for (int k = j+1; k < ndau; ++k) {
+        if (is_neutrino(daughters[k]) || fabs(daughters[k]->eta()) > 2.5) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
         if (dr < drmin)
           drmin = dr;
