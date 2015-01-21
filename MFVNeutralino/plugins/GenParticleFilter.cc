@@ -17,7 +17,7 @@ private:
   const edm::InputTag gen_jet_src;
   const int min_njets;
   const double min_jet_pt;
-  const double min_sumht;
+  const double min_jet_sumht;
 
   const edm::InputTag gen_src;
   const bool print_info;
@@ -48,6 +48,9 @@ private:
     return lep->pt() < min_lepton_pt || fabs(lep->eta()) > max_lepton_eta;
   }
 
+  const int min_npartons;
+  const double min_parton_pt;
+  const double min_parton_sumht;
   const double max_drmin;
   const double min_drmax;
   const double max_drmax;
@@ -57,7 +60,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
   : gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
-    min_sumht(cfg.getParameter<double>("min_sumht")),
+    min_jet_sumht(cfg.getParameter<double>("min_jet_sumht")),
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     print_info(cfg.getParameter<bool>("print_info")),
     cut_invalid(cfg.getParameter<bool>("cut_invalid")),
@@ -82,6 +85,9 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_rsmaller(cfg.getParameter<double>("min_rsmaller")),
     max_rsmaller(cfg.getParameter<double>("max_rsmaller")),
     mci_warned(false),
+    min_npartons(cfg.getParameter<int>("min_npartons")),
+    min_parton_pt(cfg.getParameter<double>("min_parton_pt")),
+    min_parton_sumht(cfg.getParameter<double>("min_parton_sumht")),
     max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
@@ -104,20 +110,17 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::GenJetCollection> gen_jets;
   event.getByLabel(gen_jet_src, gen_jets);
 
-  if (int(gen_jets->size()) < min_njets)
-    return false;
-
   int njets_min_pt = 0;
-  double sumht = 0;
+  double jet_sumht = 0;
   for (const reco::GenJet& jet : *gen_jets) {
     if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
       ++njets_min_pt;
     if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-      sumht += jet.pt();
+      jet_sumht += jet.pt();
   }
   if (njets_min_pt < min_njets)
     return false;
-  if (sumht < min_sumht)
+  if (jet_sumht < min_jet_sumht)
     return false;
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
@@ -190,6 +193,8 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       (max_rsmaller > 0 && rsmaller > max_rsmaller))
     return false;
 
+  int npartons_min_pt = 0;
+  int parton_sumht = 0;
   for (int i = 0; i < 2; ++i) {
     const int ndau = 5;
     const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
@@ -198,6 +203,10 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     float drmax = -1e99;
     for (int j = 0; j < ndau; ++j) {
       if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5) continue;
+      if (daughters[j]->pt() > min_parton_pt)
+        ++npartons_min_pt;
+      if (daughters[j]->pt() > 20)
+        parton_sumht += daughters[j]->pt();
       for (int k = j+1; k < ndau; ++k) {
         if (is_neutrino(daughters[k]) || fabs(daughters[k]->eta()) > 2.5) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
@@ -215,6 +224,11 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     if (drmax > max_drmax)
       return false;
   }
+
+  if (npartons_min_pt < min_npartons)
+    return false;
+  if (parton_sumht < min_parton_sumht)
+    return false;
 
   return true;
 }
