@@ -104,6 +104,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::GenJetCollection> gen_jets;
   event.getByLabel(gen_jet_src, gen_jets);
 
+  if (int(gen_jets->size()) < min_njets)
+    return false;
+
   int njets_min_pt = 0;
   double sumht = 0;
   for (const reco::GenJet& jet : *gen_jets) {
@@ -115,9 +118,6 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   if (njets_min_pt < min_njets)
     return false;
   if (sumht < min_sumht)
-    return false;
-
-  if (int(gen_jets->size()) < min_njets)
     return false;
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
