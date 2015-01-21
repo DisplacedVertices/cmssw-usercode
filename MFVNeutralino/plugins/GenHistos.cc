@@ -69,6 +69,8 @@ private:
   TH2F* h_min_dR_vs_lspbeta;
   TH2F* h_max_dR_vs_lspbetagamma;
   TH2F* h_min_dR_vs_lspbetagamma;
+  TH1F* h_lsp_max_dR;
+  TH1F* h_lsp_min_dR;
 
   TH1F* h_status1origins;
 
@@ -316,6 +318,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", ";LSP #beta;min #DeltaR between partons", 100, 0, 1, 100, 0, 5);
   h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", ";LSP #beta#gamma;max #DeltaR between partons", 100, 0, 10, 100, 0, 5);
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
+  h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
+  h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
 
   h_status1origins = fs->make<TH1F>("status1origins", "", 8, 0, 8);
   TAxis* xax = h_status1origins->GetXaxis();
@@ -489,15 +493,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	float dz [4] = {0}; 
 	float r2d[4] = {0};
 	float r3d[4] = {0};
-	for (int i = 0; i < 4; ++i) {
-	  dx [i] = particles[i]->vx() - x0;
-	  dy [i] = particles[i]->vy() - y0;
-	  dz [i] = particles[i]->vz() - z0;
-	  r2d[i] = mag(dx[i], dy[i]);
-	  r3d[i] = mag(dx[i], dy[i], dz[i]);
-	  h_vtx[i]->Fill(dx[i], dy[i]);
-	  h_r2d[i]->Fill(r2d[i]);
-	  h_r3d[i]->Fill(r3d[i]);
+	for (int j = 0; j < 4; ++j) {
+	  dx [j] = particles[j]->vx() - x0;
+	  dy [j] = particles[j]->vy() - y0;
+	  dz [j] = particles[j]->vz() - z0;
+	  r2d[j] = mag(dx[j], dy[j]);
+	  r3d[j] = mag(dx[j], dy[j], dz[j]);
+	  h_vtx[j]->Fill(dx[j], dy[j]);
+	  h_r2d[j]->Fill(r2d[j]);
+	  h_r3d[j]->Fill(r3d[j]);
 	}
       
 	h_t->Fill(r3d[0]/lspbeta/30);
@@ -523,19 +527,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	      if (fromq)  tofill.push_back(6);
 	      if (from21 && !from22 && !fromq) tofill.push_back(7);
 	      if (from22 && !from21 && !fromq) tofill.push_back(8);
-	      for (int i : tofill) {
-		h_vtx[i]->Fill(dx, dy);
-		h_r2d[i]->Fill(r2d);
-		h_r3d[i]->Fill(r3d);
+	      for (int j : tofill) {
+		h_vtx[j]->Fill(dx, dy);
+		h_r2d[j]->Fill(r2d);
+		h_r3d[j]->Fill(r3d);
 	      }
 	    }
 	  }
 
 	float min_dR =  1e99;
 	float max_dR = -1e99;
-	for (int i = 0; i < ndau; ++i) {
-	  for (int j = i+1; j < ndau; ++j) {
-	    float dR = reco::deltaR(*daughters[i], *daughters[j]);
+	for (int j = 0; j < ndau; ++j) {
+	  for (int k = j+1; k < ndau; ++k) {
+	    float dR = reco::deltaR(*daughters[j], *daughters[k]);
 	    if (dR < min_dR)
 	      min_dR = dR;
 	    if (dR > max_dR)
@@ -549,6 +553,27 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR);
 	h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
 	h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
+
+        const int lsp_ndau = 5;
+        const reco::GenParticle* lsp_daughters[lsp_ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
+
+        float lsp_min_dR =  1e99;
+        float lsp_max_dR = -1e99;
+        for (int j = 0; j < lsp_ndau; ++j) {
+          if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
+          for (int k = j+1; k < lsp_ndau; ++k) {
+            if (is_neutrino(lsp_daughters[k]) || fabs(lsp_daughters[k]->eta()) > 2.5) continue;
+            float dR = reco::deltaR(*lsp_daughters[j], *lsp_daughters[k]);
+            if (dR < lsp_min_dR)
+              lsp_min_dR = dR;
+            if (dR > lsp_max_dR)
+              lsp_max_dR = dR;
+          }
+        }
+
+        h_lsp_min_dR->Fill(lsp_min_dR);
+        h_lsp_max_dR->Fill(lsp_max_dR);
+
       }
 
       h_lsp_dist2d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
@@ -645,15 +670,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	  float dz [4] = {0}; 
 	  float r2d[4] = {0};
 	  float r3d[4] = {0};
-	  for (int i = 2; i < 4; ++i) {
-	    dx [i] = particles[i]->vx() - x0;
-	    dy [i] = particles[i]->vy() - y0;
-	    dz [i] = particles[i]->vz() - z0;
-	    r2d[i] = mag(dx[i], dy[i]);
-	    r3d[i] = mag(dx[i], dy[i], dz[i]);
-	    h_vtx[i]->Fill(dx[i], dy[i]);
-	    h_r2d[i]->Fill(r2d[i]);
-	    h_r3d[i]->Fill(r3d[i]);
+	  for (int j = 2; j < 4; ++j) {
+	    dx [j] = particles[j]->vx() - x0;
+	    dy [j] = particles[j]->vy() - y0;
+	    dz [j] = particles[j]->vz() - z0;
+	    r2d[j] = mag(dx[j], dy[j]);
+	    r3d[j] = mag(dx[j], dy[j], dz[j]);
+	    h_vtx[j]->Fill(dx[j], dy[j]);
+	    h_r2d[j]->Fill(r2d[j]);
+	    h_r3d[j]->Fill(r3d[j]);
 	  }
 	
 
@@ -675,19 +700,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 		if (from22) tofill.push_back(5);
 		if (from21 && !from22 ) tofill.push_back(7);
 		if (from22 && !from21 ) tofill.push_back(8);
-		for (int i : tofill) {
-		  h_vtx[i]->Fill(dx, dy);
-		  h_r2d[i]->Fill(r2d);
-		  h_r3d[i]->Fill(r3d);
+		for (int j : tofill) {
+		  h_vtx[j]->Fill(dx, dy);
+		  h_r2d[j]->Fill(r2d);
+		  h_r3d[j]->Fill(r3d);
 		}
 	      }
 	    }	
 	
 	  float min_dR =  1e99;
 	  float max_dR = -1e99;
-	  for (int i = 0; i < ndau; ++i) {
-	    for (int j = i+1; j < ndau; ++j) {
-	      float dR = reco::deltaR(*daughters[i], *daughters[j]);
+	  for (int j = 0; j < ndau; ++j) {
+	    for (int k = j+1; k < ndau; ++k) {
+	      float dR = reco::deltaR(*daughters[j], *daughters[k]);
 	      if (dR < min_dR)
 		min_dR = dR;
 	      if (dR > max_dR)
