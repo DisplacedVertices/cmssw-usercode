@@ -69,6 +69,8 @@ private:
   TH2F* h_min_dR_vs_lspbeta;
   TH2F* h_max_dR_vs_lspbetagamma;
   TH2F* h_min_dR_vs_lspbetagamma;
+  TH1F* h_lsp_daughters_pt;
+  TH1F* h_lsp_daughters_eta;
   TH1F* h_lsp_max_dR;
   TH1F* h_lsp_min_dR;
 
@@ -318,6 +320,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", ";LSP #beta;min #DeltaR between partons", 100, 0, 1, 100, 0, 5);
   h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", ";LSP #beta#gamma;max #DeltaR between partons", 100, 0, 10, 100, 0, 5);
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
+  h_lsp_daughters_pt = fs->make<TH1F>("h_lsp_daughters_pt", ";p_{T} of partons (GeV);Events/1 GeV", 500, 0, 500);
+  h_lsp_daughters_eta = fs->make<TH1F>("h_lsp_daughters_eta", ";#eta of partons;Events/0.16", 50, -4, 4);
   h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
 
@@ -560,6 +564,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         float lsp_min_dR =  1e99;
         float lsp_max_dR = -1e99;
         for (int j = 0; j < lsp_ndau; ++j) {
+          h_lsp_daughters_pt->Fill(lsp_daughters[j]->pt());
+          h_lsp_daughters_eta->Fill(lsp_daughters[j]->eta());
           if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
           for (int k = j+1; k < lsp_ndau; ++k) {
             if (is_neutrino(lsp_daughters[k]) || fabs(lsp_daughters[k]->eta()) > 2.5) continue;
