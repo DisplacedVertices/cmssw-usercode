@@ -13,6 +13,8 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 which_mom = cms.int32(0),
                                 max_dr = cms.double(-1),
                                 max_dist = cms.double(0.005),
+                                gen_src = cms.InputTag('genParticles'),
+                                gen_jet_src = cms.InputTag('ak5GenJets'),
                                 )
 
 process.p = cms.Path(process.mfvSelectedVerticesSeq)
@@ -43,8 +45,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
 
+    Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+    Samples.mfv_neutralino_tau1000um_M0400.ana_scheduler = 'remoteGlidein'
+
     cs = CRABSubmitter('MFVResolutionsV20',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
                        )
-    cs.submit_all([Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400])
+    cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400])

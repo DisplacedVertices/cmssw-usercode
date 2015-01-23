@@ -24,6 +24,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   const double max_dr;
   const double max_dist;
 
+  const edm::InputTag gen_src;
+  const edm::InputTag gen_jet_src;
+
   TH1F* h_dr;
   TH1F* h_dist;
 
@@ -88,6 +91,11 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_betagamma;
   TH2F* h_s_avgbetagammalab;
   TH2F* h_s_avgbetagammacmz;
+
+  TH2F* h_s_njets;
+  TH2F* h_s_ncalojets;
+  TH2F* h_s_calojetpt4;
+  TH2F* h_s_jetsumht;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -95,7 +103,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
     mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     which_mom(cfg.getParameter<int>("which_mom")),
     max_dr(cfg.getParameter<double>("max_dr")),
-    max_dist(cfg.getParameter<double>("max_dist"))
+    max_dist(cfg.getParameter<double>("max_dist")),
+    gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
+    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src"))
 {
   die_if_not(which_mom >= 0 && which_mom < mfv::NMomenta, "invalid which_mom");
 
@@ -167,6 +177,11 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_betagamma = fs->make<TH2F>("h_s_betagamma", ";generated betagamma;reconstructed betagamma", 100, 0, 10, 100, 0, 10);
   h_s_avgbetagammalab = fs->make<TH2F>("h_s_avgbetagammalab", ";generated avgbetagammalab;reconstructed avgbetagammalab", 100, 0, 10, 100, 0, 10);
   h_s_avgbetagammacmz = fs->make<TH2F>("h_s_avgbetagammacmz", ";generated avgbetagammacmz;reconstructed avgbetagammacmz", 100, 0, 10, 100, 0, 10);
+
+  h_s_njets = fs->make<TH2F>("h_s_njets", ";number of genJets;number of PF jets", 20, 0, 20, 20, 0, 20);
+  h_s_ncalojets = fs->make<TH2F>("h_s_ncalojets", ";number of genJets;number of calojets", 20, 0, 20, 20, 0, 20);
+  h_s_calojetpt4 = fs->make<TH2F>("h_s_calojetpt4", ";p_{T} of 4th genJet (GeV);p_{T} of 4th calojet (GeV)", 100, 0, 500, 100, 0, 500);
+  h_s_jetsumht = fs->make<TH2F>("h_s_jetsumht", ";#SigmaH_{T} of genJets (GeV);#SigmaH_{T} of PF jets (GeV)", 200, 0, 5000, 200, 0, 5000);
 }
 
 namespace {
@@ -351,6 +366,21 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_avgbetagammacmz->Fill(lsp_avgbetagammacmz, vtx_avgbetagammacmz);
 
   }
+
+  // histogram njets, ncalojets, calojetpt4, jetsumht
+  edm::Handle<reco::GenJetCollection> gen_jets;
+  event.getByLabel(gen_jet_src, gen_jets);
+
+  h_s_njets->Fill(int(gen_jets->size()), mevent->njets());
+  h_s_ncalojets->Fill(int(gen_jets->size()), mevent->ncalojets());
+  h_s_calojetpt4->Fill(gen_jets->at(3).pt(), mevent->calojetpt4());
+
+  double jet_sumht = 0;
+  for (const reco::GenJet& jet : *gen_jets) {
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
+      jet_sumht += jet.pt();
+  }
+  h_s_jetsumht->Fill(jet_sumht, mevent->jet_sum_ht());
 }
 
 DEFINE_FWK_MODULE(MFVResolutions);
