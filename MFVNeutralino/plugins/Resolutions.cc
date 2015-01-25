@@ -8,9 +8,11 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/Tools/interface/GenUtilities.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVResolutions : public edm::EDAnalyzer {
  public:
@@ -25,6 +27,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   const double max_dist;
 
   const edm::InputTag gen_src;
+  bool mci_warned;
   const edm::InputTag gen_jet_src;
 
   TH1F* h_dr;
@@ -96,6 +99,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_ncalojets;
   TH2F* h_s_calojetpt4;
   TH2F* h_s_jetsumht;
+
+  TH2F* h_s_drmin;
+  TH2F* h_s_drmax;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -178,10 +184,13 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_avgbetagammalab = fs->make<TH2F>("h_s_avgbetagammalab", ";generated avgbetagammalab;reconstructed avgbetagammalab", 100, 0, 10, 100, 0, 10);
   h_s_avgbetagammacmz = fs->make<TH2F>("h_s_avgbetagammacmz", ";generated avgbetagammacmz;reconstructed avgbetagammacmz", 100, 0, 10, 100, 0, 10);
 
-  h_s_njets = fs->make<TH2F>("h_s_njets", ";number of genJets;number of PF jets", 20, 0, 20, 20, 0, 20);
-  h_s_ncalojets = fs->make<TH2F>("h_s_ncalojets", ";number of genJets;number of calojets", 20, 0, 20, 20, 0, 20);
+  h_s_njets = fs->make<TH2F>("h_s_njets", ";number of genJets;number of PF jets", 50, 0, 50, 50, 0, 50);
+  h_s_ncalojets = fs->make<TH2F>("h_s_ncalojets", ";number of genJets;number of calojets", 50, 0, 50, 50, 0, 50);
   h_s_calojetpt4 = fs->make<TH2F>("h_s_calojetpt4", ";p_{T} of 4th genJet (GeV);p_{T} of 4th calojet (GeV)", 100, 0, 500, 100, 0, 500);
   h_s_jetsumht = fs->make<TH2F>("h_s_jetsumht", ";#SigmaH_{T} of genJets (GeV);#SigmaH_{T} of PF jets (GeV)", 200, 0, 5000, 200, 0, 5000);
+
+  h_s_drmin = fs->make<TH2F>("h_s_drmin", ";min #DeltaR between partons;min #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
+  h_s_drmax = fs->make<TH2F>("h_s_drmax", ";max #DeltaR between partons;max #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
 }
 
 namespace {
@@ -208,6 +217,18 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByLabel(vertex_src, vertices);
+
+  edm::Handle<reco::GenParticleCollection> gen_particles;
+  event.getByLabel(gen_src, gen_particles);
+
+  MCInteractionMFV3j mci;
+  mci.Init(*gen_particles);
+
+  if (!mci.Valid()) {
+    if (!mci_warned)
+      edm::LogWarning("Resolutions") << "MCInteractionMFV3j invalid; no further warnings!";
+    mci_warned = true;
+  }
 
   TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
   int lsp_nmatch[2] = {0,0};
@@ -328,6 +349,27 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_rapidity->Fill(lsp_p4.Rapidity(), vtx_p4.Rapidity());
     h_s_theta->Fill(lsp_p4.Theta(), vtx_p4.Theta());
     h_s_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx_p4.Beta()*vtx_p4.Gamma());
+
+    // histogram drmin, drmax
+    const int ndau = 5;
+    const reco::GenParticle* daughters[ndau] = { mci.stranges[ilsp], mci.bottoms[ilsp], mci.bottoms_from_tops[ilsp], mci.W_daughters[ilsp][0], mci.W_daughters[ilsp][1] };
+
+    float drmin =  1e99;
+    float drmax = -1e99;
+    for (int j = 0; j < ndau; ++j) {
+      if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5) continue;
+      for (int k = j+1; k < ndau; ++k) {
+        if (is_neutrino(daughters[k]) || fabs(daughters[k]->eta()) > 2.5) continue;
+        float dr = reco::deltaR(*daughters[j], *daughters[k]);
+        if (dr < drmin)
+          drmin = dr;
+        if (dr > drmax)
+          drmax = dr;
+      }
+    }
+
+    h_s_drmin->Fill(drmin, vtx.drmin());
+    h_s_drmax->Fill(drmax, vtx.drmax());
   }
 
   // histogram lsp_nmatch
