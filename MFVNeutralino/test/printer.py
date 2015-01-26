@@ -1,6 +1,5 @@
 import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
-from JMTucker.Tools import SampleFiles
 
 process.source.fileNames = ['file:ntuple.root']
 #process.source.noEventSort = cms.untracked.bool(False)
