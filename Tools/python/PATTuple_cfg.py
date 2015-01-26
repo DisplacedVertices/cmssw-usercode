@@ -153,18 +153,6 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
     processpostfix('selectedPatMuons').cut = process.jtupleParams.muonCut
     processpostfix('selectedPatJets').cut = process.jtupleParams.jetCut
     
-    process.load('CMGTools.External.pujetidsequence_cff')
-    for x in (process.puJetId, process.puJetMva, process.puJetIdChs, process.puJetMvaChs):
-        x.jets = InputTagPostFix('selectedPatJets')
-        # fix bug in V00-03-04 of CMGTools/External
-        if hasattr(x, 'algos'):
-            bad, good = 'RecoJets/JetProducers', 'CMGTools/External'
-            for ps in x.algos:
-                if hasattr(ps, 'tmvaWeights'):
-                    s = ps.tmvaWeights.value()
-                    if s.startswith(bad):
-                        ps.tmvaWeights = s.replace(bad, good)
-    
     from PhysicsTools.PatAlgos.tools.coreTools import runOnData, removeSpecificPATObjects
     if not runOnMC:
         runOnData(process, names = ['All'])
@@ -183,11 +171,11 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
 
         processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * processpostfix('patJets'))
 
-    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
+    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
 
     process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
     if runOnMC:
-        common_seq += process.patJetGenJetMatch * process.patJetPartonMatch * process.patJetPartons * process.patJetPartonAssociation * process.patJetFlavourAssociation
+        common_seq += process.patJetGenJetMatch * process.patJetPartonMatch * process.patJetPartonsLegacy * process.patJetPartonAssociationLegacy * process.patJetFlavourAssociationLegacy
     common_seq += process.patJetCharge * process.patJetCorrFactors * process.patJets
     process.patJets.discriminatorSources = cms.VInputTag(cms.InputTag("combinedSecondaryVertexBJetTags"), cms.InputTag("combinedSecondaryVertexMVABJetTags"), cms.InputTag("jetBProbabilityBJetTags"), cms.InputTag("jetProbabilityBJetTags"), cms.InputTag("simpleSecondaryVertexHighEffBJetTags"), cms.InputTag("simpleSecondaryVertexHighPurBJetTags"), cms.InputTag("trackCountingHighEffBJetTags"), cms.InputTag("trackCountingHighPurBJetTags"))
 
@@ -300,11 +288,6 @@ def closest_z_in_pu(process):
     processpostfix('pfPileUp').checkClosestZVertex = True
     processpostfix('pfPileUpIso').checkClosestZVertex = True
 
-def disable_pujetid(process):
-    for p in process.paths_():
-        getattr(process, p).remove(process.puJetIdChs)
-        getattr(process, p).remove(process.puJetMvaChs)
-
 def dummy_beamspot(process, params):
     if type(params) == str:
         import JMTucker.Tools.DummyBeamSpots_cff as DummyBeamSpots
@@ -329,7 +312,7 @@ def dummy_beamspot(process, params):
 
 if __name__ == '__main__':
     # JMTBAD no idea if this works with submit_tuple.py ...
-    process = pat_tuple_process()[0]
+    process = pat_tuple_process(suppress_stdout=False)[0]
     if 'dump' in sys.argv:
         open('dumptup.py','wt').write(process.dumpPython())
 
