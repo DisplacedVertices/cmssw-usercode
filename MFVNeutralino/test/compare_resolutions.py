@@ -15,9 +15,9 @@ for sample in samples:
     print '%20s%40s%40s%40s' % ('', 'tracks only', 'jets only', 'tracks+jets')
     print '%20s%10s%10s%10s%10s%10s%10s%10s%10s%10s%10s%10s%10s' % ('', 'mean', 'rms', 'underflow', 'overflow', 'mean', 'rms', 'underflow', 'overflow', 'mean', 'rms', 'underflow', 'overflow')
     for name in histNames:
-        trks = file.mfvResolutionsFullSelByDistCutTrks.Get(name)
-        jets = file.mfvResolutionsFullSelByDistCutJets.Get(name)
-        trksjets = file.mfvResolutionsFullSelByDistCutTrksJets.Get(name)
+        trks = file.mfvResolutionsByDistCutTrks.Get(name)
+        jets = file.mfvResolutionsByDistCutJets.Get(name)
+        trksjets = file.mfvResolutionsByDistCutTrksJets.Get(name)
         hists = [trks, jets, trksjets]
         names = ['trks', 'jets', 'trksjets']
         colors = [ROOT.kRed, ROOT.kBlue, ROOT.kViolet]
