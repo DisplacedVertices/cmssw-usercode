@@ -433,7 +433,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_s_genjets_njets->Fill(int(gen_jet_pt.size()), mevent->njets());
   h_s_genjets_ncalojets->Fill(int(gen_jet_pt.size()), mevent->ncalojets());
   h_s_genjets_calojetpt4->Fill(int(gen_jet_pt.size()) >= 4 ? gen_jet_pt.at(3) : 0.f, mevent->calojetpt4());
-  h_s_genjets_jetsumht->Fill(std::accumulate(gen_jet_pt.begin(), gen_jet_pt.end(), 0.f));
+  h_s_genjets_jetsumht->Fill(std::accumulate(gen_jet_pt.begin(), gen_jet_pt.end(), 0.f), mevent->jet_sum_ht());
 
   // histogram njets, ncalojets, calojetpt4, jetsumht vs. partons
   std::vector<const reco::GenParticle*> partons;
@@ -457,7 +457,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_s_partons_njets->Fill(int(parton_pt.size()), mevent->njets());
   h_s_partons_ncalojets->Fill(int(parton_pt.size()), mevent->ncalojets());
   h_s_partons_calojetpt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f, mevent->calojetpt4());
-  h_s_partons_jetsumht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f));
+  h_s_partons_jetsumht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f), mevent->jet_sum_ht());
 }
 
 DEFINE_FWK_MODULE(MFVResolutions);
