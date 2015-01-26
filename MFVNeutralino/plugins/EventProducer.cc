@@ -1,4 +1,3 @@
-#include "CMGTools/External/interface/PileupJetIdentifier.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
@@ -347,9 +346,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByLabel(met_src, mets);
   const pat::MET& met = mets->at(0);
 
-  edm::Handle<edm::ValueMap<int> > puids;
-  event.getByLabel("puJetMvaChs", "fullId", puids);
-
   mevent->metx = met.px();
   mevent->mety = met.py();
   if (met.getSignificanceMatrix()(0,0) < 1e10 && met.getSignificanceMatrix()(1,1) < 1e10)
@@ -357,8 +353,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   else
     mevent->metsig = -999;
   mevent->metdphimin = 1e99;
-
-  const PileupJetIdentifier::Id puidlevel[3] = {PileupJetIdentifier::kLoose, PileupJetIdentifier::kMedium, PileupJetIdentifier::kTight};
 
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
@@ -370,18 +364,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_phi.push_back(jet.phi());
     mevent->jet_energy.push_back(jet.energy());
 
-    int puid = (*puids)[pat::JetRef(jets, jjet)];
-    int pu_level = 0;
-    for (int i = 0; i < 3; ++i)
-      if (PileupJetIdentifier::passJetId(puid, puidlevel[i]))
-        pu_level = i+1;
-
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
       if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
         bdisc_level = i+1;
 
-    mevent->jet_id.push_back(MFVEvent::encode_jet_id(pu_level, bdisc_level));
+    mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level));
 
     if (jjet < 4) {
       double deltatsum = 0;

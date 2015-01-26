@@ -492,7 +492,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   if (jumble_tracks) {
-    auto random_converter = [&rng](size_t n) { return size_t(rng->getEngine().flat() * n); };
+    auto random_converter = [&](size_t n) { return size_t(rng->getEngine().flat() * n); };
     std::random_shuffle(all_tracks.begin(), all_tracks.end(), random_converter);
   }
 
