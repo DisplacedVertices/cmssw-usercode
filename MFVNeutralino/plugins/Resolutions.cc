@@ -95,10 +95,15 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_avgbetagammalab;
   TH2F* h_s_avgbetagammacmz;
 
-  TH2F* h_s_njets;
-  TH2F* h_s_ncalojets;
-  TH2F* h_s_calojetpt4;
-  TH2F* h_s_jetsumht;
+  TH2F* h_s_genjets_njets;
+  TH2F* h_s_genjets_ncalojets;
+  TH2F* h_s_genjets_calojetpt4;
+  TH2F* h_s_genjets_jetsumht;
+
+  TH2F* h_s_partons_njets;
+  TH2F* h_s_partons_ncalojets;
+  TH2F* h_s_partons_calojetpt4;
+  TH2F* h_s_partons_jetsumht;
 
   TH2F* h_s_drmin;
   TH2F* h_s_drmax;
@@ -184,10 +189,15 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_avgbetagammalab = fs->make<TH2F>("h_s_avgbetagammalab", ";generated avgbetagammalab;reconstructed avgbetagammalab", 100, 0, 10, 100, 0, 10);
   h_s_avgbetagammacmz = fs->make<TH2F>("h_s_avgbetagammacmz", ";generated avgbetagammacmz;reconstructed avgbetagammacmz", 100, 0, 10, 100, 0, 10);
 
-  h_s_njets = fs->make<TH2F>("h_s_njets", ";number of genJets;number of PF jets", 50, 0, 50, 50, 0, 50);
-  h_s_ncalojets = fs->make<TH2F>("h_s_ncalojets", ";number of genJets;number of calojets", 50, 0, 50, 50, 0, 50);
-  h_s_calojetpt4 = fs->make<TH2F>("h_s_calojetpt4", ";p_{T} of 4th genJet (GeV);p_{T} of 4th calojet (GeV)", 100, 0, 500, 100, 0, 500);
-  h_s_jetsumht = fs->make<TH2F>("h_s_jetsumht", ";#SigmaH_{T} of genJets (GeV);#SigmaH_{T} of PF jets (GeV)", 200, 0, 5000, 200, 0, 5000);
+  h_s_genjets_njets = fs->make<TH2F>("h_s_genjets_njets", ";number of genJets;number of PF jets", 50, 0, 50, 50, 0, 50);
+  h_s_genjets_ncalojets = fs->make<TH2F>("h_s_genjets_ncalojets", ";number of genJets;number of calojets", 50, 0, 50, 50, 0, 50);
+  h_s_genjets_calojetpt4 = fs->make<TH2F>("h_s_genjets_calojetpt4", ";p_{T} of 4th genJet (GeV);p_{T} of 4th calojet (GeV)", 100, 0, 500, 100, 0, 500);
+  h_s_genjets_jetsumht = fs->make<TH2F>("h_s_genjets_jetsumht", ";#SigmaH_{T} of genJets (GeV);#SigmaH_{T} of PF jets (GeV)", 200, 0, 5000, 200, 0, 5000);
+
+  h_s_partons_njets = fs->make<TH2F>("h_s_partons_njets", ";number of partons;number of PF jets", 50, 0, 50, 50, 0, 50);
+  h_s_partons_ncalojets = fs->make<TH2F>("h_s_partons_ncalojets", ";number of partons;number of calojets", 50, 0, 50, 50, 0, 50);
+  h_s_partons_calojetpt4 = fs->make<TH2F>("h_s_partons_calojetpt4", ";p_{T} of 4th parton (GeV);p_{T} of 4th calojet (GeV)", 100, 0, 500, 100, 0, 500);
+  h_s_partons_jetsumht = fs->make<TH2F>("h_s_partons_jetsumht", ";#SigmaH_{T} of partons (GeV);#SigmaH_{T} of PF jets (GeV)", 200, 0, 5000, 200, 0, 5000);
 
   h_s_drmin = fs->make<TH2F>("h_s_drmin", ";min #DeltaR between partons;min #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
   h_s_drmax = fs->make<TH2F>("h_s_drmax", ";max #DeltaR between partons;max #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
@@ -409,20 +419,45 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   }
 
-  // histogram njets, ncalojets, calojetpt4, jetsumht
+  // histogram njets, ncalojets, calojetpt4, jetsumht vs. genJets
   edm::Handle<reco::GenJetCollection> gen_jets;
   event.getByLabel(gen_jet_src, gen_jets);
 
-  h_s_njets->Fill(int(gen_jets->size()), mevent->njets());
-  h_s_ncalojets->Fill(int(gen_jets->size()), mevent->ncalojets());
-  h_s_calojetpt4->Fill(gen_jets->at(3).pt(), mevent->calojetpt4());
-
-  double jet_sumht = 0;
+  std::vector<float> gen_jet_pt;
   for (const reco::GenJet& jet : *gen_jets) {
     if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-      jet_sumht += jet.pt();
+      gen_jet_pt.push_back(jet.pt());
   }
-  h_s_jetsumht->Fill(jet_sumht, mevent->jet_sum_ht());
+  std::sort(gen_jet_pt.begin(), gen_jet_pt.end());
+
+  h_s_genjets_njets->Fill(int(gen_jet_pt.size()), mevent->njets());
+  h_s_genjets_ncalojets->Fill(int(gen_jet_pt.size()), mevent->ncalojets());
+  h_s_genjets_calojetpt4->Fill(int(gen_jet_pt.size()) >= 4 ? gen_jet_pt.at(3) : 0.f, mevent->calojetpt4());
+  h_s_genjets_jetsumht->Fill(std::accumulate(gen_jet_pt.begin(), gen_jet_pt.end(), 0.f));
+
+  // histogram njets, ncalojets, calojetpt4, jetsumht vs. partons
+  std::vector<const reco::GenParticle*> partons;
+  for (int i = 0; i < 2; ++i) {
+    partons.push_back(mci.stranges[i]);
+    partons.push_back(mci.bottoms[i]);
+    partons.push_back(mci.bottoms_from_tops[i]);
+    if (mci.decay_type[i] == 3) {
+      partons.push_back(mci.W_daughters[i][0]);
+      partons.push_back(mci.W_daughters[i][1]);
+    }
+  }
+
+  std::vector<float> parton_pt;
+  for (const reco::GenParticle* p : partons) {
+    if (p->pt() > 20 && fabs(p->eta()) < 2.5)
+      parton_pt.push_back(p->pt());
+  }
+  std::sort(parton_pt.begin(), parton_pt.end());
+
+  h_s_partons_njets->Fill(int(parton_pt.size()), mevent->njets());
+  h_s_partons_ncalojets->Fill(int(parton_pt.size()), mevent->ncalojets());
+  h_s_partons_calojetpt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f, mevent->calojetpt4());
+  h_s_partons_jetsumht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f));
 }
 
 DEFINE_FWK_MODULE(MFVResolutions);
