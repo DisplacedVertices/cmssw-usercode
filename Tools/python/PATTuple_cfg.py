@@ -171,11 +171,11 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
 
         processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * processpostfix('patJets'))
 
-    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
+    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
 
     process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
     if runOnMC:
-        common_seq += process.patJetGenJetMatch * process.patJetPartonMatch * process.patJetPartonsLegacy * process.patJetPartonAssociationLegacy * process.patJetFlavourAssociationLegacy
+        common_seq += process.patJetGenJetMatch * process.patJetPartonMatch * process.patJetPartons * process.patJetPartonAssociation * process.patJetFlavourAssociation
     common_seq += process.patJetCharge * process.patJetCorrFactors * process.patJets
     process.patJets.discriminatorSources = cms.VInputTag(cms.InputTag("combinedSecondaryVertexBJetTags"), cms.InputTag("combinedSecondaryVertexMVABJetTags"), cms.InputTag("jetBProbabilityBJetTags"), cms.InputTag("jetProbabilityBJetTags"), cms.InputTag("simpleSecondaryVertexHighEffBJetTags"), cms.InputTag("simpleSecondaryVertexHighPurBJetTags"), cms.InputTag("trackCountingHighEffBJetTags"), cms.InputTag("trackCountingHighPurBJetTags"))
 
