@@ -171,7 +171,7 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
 
         processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * processpostfix('patJets'))
 
-    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
+    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
 
     process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
     if runOnMC:
