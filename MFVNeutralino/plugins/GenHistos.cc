@@ -73,6 +73,7 @@ private:
   TH1F* h_lsp_daughters_eta;
   TH1F* h_lsp_max_dR;
   TH1F* h_lsp_min_dR;
+  TH1F* h_lsp_daughters_jets_dR;
 
   TH1F* h_status1origins;
 
@@ -324,6 +325,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_lsp_daughters_eta = fs->make<TH1F>("h_lsp_daughters_eta", ";#eta of partons;Events/0.16", 50, -4, 4);
   h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
+  h_lsp_daughters_jets_dR = fs->make<TH1F>("h_lsp_daughters_jets_dR", ";#DeltaR between partons and jets;Events/0.05", 100, 0, 5);
 
   h_status1origins = fs->make<TH1F>("status1origins", "", 8, 0, 8);
   TAxis* xax = h_status1origins->GetXaxis();
@@ -422,6 +424,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
+
+  edm::Handle<reco::GenJetCollection> gen_jets;
+  event.getByLabel(gen_jet_src, gen_jets);
 
   const reco::GenParticle& for_vtx = gen_particles->at(2);
   const int for_vtx_id = abs(for_vtx.pdgId());
@@ -566,6 +571,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         for (int j = 0; j < lsp_ndau; ++j) {
           h_lsp_daughters_pt->Fill(lsp_daughters[j]->pt());
           h_lsp_daughters_eta->Fill(lsp_daughters[j]->eta());
+
+          for (const reco::GenJet& jet : *gen_jets) {
+            h_lsp_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
+          }
+
           if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
           for (int k = j+1; k < lsp_ndau; ++k) {
             if (is_neutrino(lsp_daughters[k]) || fabs(lsp_daughters[k]->eta()) > 2.5) continue;
@@ -816,9 +826,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
   }
 
-
-  edm::Handle<reco::GenJetCollection> gen_jets;
-  event.getByLabel(gen_jet_src, gen_jets);
 
   NJets->Fill(gen_jets->size());
   int nbjets = 0;
