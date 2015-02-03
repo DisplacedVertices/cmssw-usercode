@@ -1,9 +1,17 @@
 import sys
 from gensimhlt import cms, process
+from modify import *
 
 if 'replay' in sys.argv:
     from JMTucker.Tools.CMSSWTools import replay_event
     replay_event(process, filename=None, rle=None)
+
+if 'genonly' in sys.argv:
+    process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.output_step)
+    process.maxEvents.input = 100
+
+#set_neutralino_tau0(process, 10)
+#set_empirical_decay(405, 400, [[5,-5]])
 
 process.maxEvents.input = 1
 process.options.wantSummary = True
