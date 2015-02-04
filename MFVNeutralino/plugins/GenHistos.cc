@@ -582,12 +582,17 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
             h_lsp_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
             if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
               ++nmatch;
-              lsp_ntracks += jet.nConstituents();
             }
           }
           h_lsp_daughters_jets_nmatch->Fill(nmatch);
 
           if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
+          for (const reco::GenJet& jet : *gen_jets) {
+            if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
+              lsp_ntracks += jet.nConstituents();
+            }
+          }
+
           for (int k = j+1; k < lsp_ndau; ++k) {
             if (is_neutrino(lsp_daughters[k]) || fabs(lsp_daughters[k]->eta()) > 2.5) continue;
             float dR = reco::deltaR(*lsp_daughters[j], *lsp_daughters[k]);
