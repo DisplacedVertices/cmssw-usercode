@@ -63,6 +63,51 @@ DECAY   1000022     0.01E+00   # neutralino decays
 '''
     open(fn, 'wt').write(slha % locals())
 
+def set_empirical_decay(m_gluino, m_neutralino, decay_idses, fn='minSLHA.spc'):
+    n_decay_idses = len(decay_idses)
+    sum_br = 0.
+    decay_strs = []
+    for decay_ids in decay_idses:
+        if len(decay_ids) == 2 and type(decay_ids[0]) == float and (type(decay_ids[1]) == tuple or type(decay_ids[1]) == list):
+            br, decay_ids = decay_ids
+        else:
+            br = 1./n_decay_idses
+        sum_br += br
+
+        n_decay_ids = len(decay_ids)
+        if n_decay_ids not in (2,3):
+            raise ValueError('decay_ids must have len 2 or 3: %r' % decay_ids)
+
+        decay_strs.append('\t%.2E\t%i\t' % (br, n_decay_ids) +  '\t'.join(str(x) for x in decay_ids))
+
+    if abs(sum_br - 1) > 1e-4:
+        raise ValueError('brs did not sum to 1')
+
+    slha = '''
+BLOCK SPINFO  # Spectrum calculator information
+     1   Minimal    # spectrum calculator
+     2   1.0.0         # version number
+#
+BLOCK MODSEL  # Model selection
+     1     1   #
+#
+
+BLOCK MASS  # Mass Spectrum
+# PDG code           mass       particle
+  1000021     %(m_gluino)E       # ~g
+  1000022     %(m_neutralino)E   # ~chi_10
+
+DECAY   1000021     0.01E+00   # gluino decays
+#          BR         NDA      ID1       ID2
+    1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
+
+DECAY   1000022     0.01E+00   # neutralino decays
+#           BR         NDA      ID1       ID2       ID3
+'''
+
+    slha += '\n'.join(decay_strs) + '\n'
+
+    open(fn, 'wt').write(slha % locals())
 
 def prefer_it(process, name, connect, record, tag):
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
