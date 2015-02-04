@@ -75,6 +75,7 @@ private:
   TH1F* h_lsp_min_dR;
   TH1F* h_lsp_daughters_jets_dR;
   TH1F* h_lsp_daughters_jets_nmatch;
+  TH1F* h_lsp_ntracks;
 
   TH1F* h_status1origins;
 
@@ -328,6 +329,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_daughters_jets_dR = fs->make<TH1F>("h_lsp_daughters_jets_dR", ";#DeltaR between partons and jets;parton-jet pairs/0.05", 100, 0, 5);
   h_lsp_daughters_jets_nmatch = fs->make<TH1F>("h_lsp_daughters_jets_nmatch", ";number of genJets w/ #DeltaR < 0.4;LSP daughter partons", 10, 0, 10);
+  h_lsp_ntracks = fs->make<TH1F>("h_lsp_ntracks", ";total number of constituents in genJets w/ #DeltaR < 0.4;LSPs", 300, 0, 300);
 
   h_status1origins = fs->make<TH1F>("status1origins", "", 8, 0, 8);
   TAxis* xax = h_status1origins->GetXaxis();
@@ -568,6 +570,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         const int lsp_ndau = 5;
         const reco::GenParticle* lsp_daughters[lsp_ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
 
+        int lsp_ntracks = 0;
         float lsp_min_dR =  1e99;
         float lsp_max_dR = -1e99;
         for (int j = 0; j < lsp_ndau; ++j) {
@@ -579,6 +582,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
             h_lsp_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
             if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
               ++nmatch;
+              lsp_ntracks += jet.nConstituents();
             }
           }
           h_lsp_daughters_jets_nmatch->Fill(nmatch);
@@ -594,6 +598,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           }
         }
 
+        h_lsp_ntracks->Fill(lsp_ntracks);
         h_lsp_min_dR->Fill(lsp_min_dR);
         h_lsp_max_dR->Fill(lsp_max_dR);
 
