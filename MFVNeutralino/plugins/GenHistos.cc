@@ -587,9 +587,14 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           h_lsp_daughters_jets_nmatch->Fill(nmatch);
 
           if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
-          for (const reco::GenJet& jet : *gen_jets) {
-            if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
-              lsp_ntracks += jet.nConstituents();
+
+          if (is_lepton(lsp_daughters[j])) {
+           ++ lsp_ntracks;
+          } else {
+            for (const reco::GenJet& jet : *gen_jets) {
+              if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
+                lsp_ntracks += jet.nConstituents();
+              }
             }
           }
 
