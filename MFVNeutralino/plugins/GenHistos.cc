@@ -74,6 +74,7 @@ private:
   TH1F* h_lsp_max_dR;
   TH1F* h_lsp_min_dR;
   TH1F* h_lsp_daughters_jets_dR;
+  TH1F* h_lsp_daughters_jets_nmatch;
 
   TH1F* h_status1origins;
 
@@ -321,11 +322,12 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", ";LSP #beta;min #DeltaR between partons", 100, 0, 1, 100, 0, 5);
   h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", ";LSP #beta#gamma;max #DeltaR between partons", 100, 0, 10, 100, 0, 5);
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
-  h_lsp_daughters_pt = fs->make<TH1F>("h_lsp_daughters_pt", ";p_{T} of partons (GeV);Events/1 GeV", 500, 0, 500);
-  h_lsp_daughters_eta = fs->make<TH1F>("h_lsp_daughters_eta", ";#eta of partons;Events/0.16", 50, -4, 4);
+  h_lsp_daughters_pt = fs->make<TH1F>("h_lsp_daughters_pt", ";p_{T} of partons (GeV);LSP daughter partons/1 GeV", 500, 0, 500);
+  h_lsp_daughters_eta = fs->make<TH1F>("h_lsp_daughters_eta", ";#eta of partons;LSP daughter partons/0.16", 50, -4, 4);
   h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
-  h_lsp_daughters_jets_dR = fs->make<TH1F>("h_lsp_daughters_jets_dR", ";#DeltaR between partons and jets;Events/0.05", 100, 0, 5);
+  h_lsp_daughters_jets_dR = fs->make<TH1F>("h_lsp_daughters_jets_dR", ";#DeltaR between partons and jets;parton-jet pairs/0.05", 100, 0, 5);
+  h_lsp_daughters_jets_nmatch = fs->make<TH1F>("h_lsp_daughters_jets_nmatch", ";number of genJets w/ #DeltaR < 0.4;LSP daughter partons", 10, 0, 10);
 
   h_status1origins = fs->make<TH1F>("status1origins", "", 8, 0, 8);
   TAxis* xax = h_status1origins->GetXaxis();
@@ -572,9 +574,14 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           h_lsp_daughters_pt->Fill(lsp_daughters[j]->pt());
           h_lsp_daughters_eta->Fill(lsp_daughters[j]->eta());
 
+          int nmatch = 0;
           for (const reco::GenJet& jet : *gen_jets) {
             h_lsp_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
+            if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
+              ++nmatch;
+            }
           }
+          h_lsp_daughters_jets_nmatch->Fill(nmatch);
 
           if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
           for (int k = j+1; k < lsp_ndau; ++k) {
