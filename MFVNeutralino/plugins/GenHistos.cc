@@ -593,7 +593,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           } else {
             for (const reco::GenJet& jet : *gen_jets) {
               if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
-                lsp_ntracks += jet.nConstituents();
+                for (const reco::GenParticle* g : jet.getGenConstituents())
+                  if (g->charge())
+                    ++lsp_ntracks;
               }
             }
           }
