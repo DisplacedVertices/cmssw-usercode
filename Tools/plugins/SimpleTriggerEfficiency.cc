@@ -22,9 +22,8 @@ private:
   const edm::InputTag weight_src;
   const bool use_weight;
   std::map<std::string, unsigned> prescales;
-  edm::Service<edm::RandomNumberGenerator> rng;
 
-  bool pass_prescale(std::string) const;
+  bool pass_prescale(std::string path, double rand) const;
 
   TH1F* triggers_pass_num;
   TH1F* triggers_pass_den;
@@ -41,6 +40,10 @@ SimpleTriggerEfficiency::SimpleTriggerEfficiency(const edm::ParameterSet& cfg)
     triggers2d_pass_num(0),
     triggers2d_pass_den(0)
 {
+  edm::Service<edm::RandomNumberGenerator> rng;
+  if (!rng.isAvailable())
+    throw cms::Exception("Configuration", "RandomNumberGeneratorService not present in config");
+
   if (cfg.existsAs<std::vector<std::string> >("prescale_paths")) {
     const std::vector<std::string>& prescale_paths = cfg.getParameter<std::vector<std::string> >("prescale_paths");
     const std::vector<unsigned>& prescale_values = cfg.getParameter<std::vector<unsigned> >("prescale_values");
@@ -53,7 +56,7 @@ SimpleTriggerEfficiency::SimpleTriggerEfficiency(const edm::ParameterSet& cfg)
   }
 }
 
-bool SimpleTriggerEfficiency::pass_prescale(std::string path) const {
+bool SimpleTriggerEfficiency::pass_prescale(std::string path, double rand) const {
   // prescales map is empty => all paths have prescale 1.
   if (prescales.size() == 0)
     return true;
@@ -66,8 +69,8 @@ bool SimpleTriggerEfficiency::pass_prescale(std::string path) const {
   const unsigned prescale = it->second;
   if (prescale == 0)
     return false;
-  CLHEP::RandFlat rand(rng->getEngine());
-  return rand.fire() < 1./prescale;
+
+  return rand < 1./prescale;
 }
 
 void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -119,15 +122,23 @@ void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventS
     weight = *weight_h;
   }
 
+  edm::Service<edm::RandomNumberGenerator> rng;
+  CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
+
+  std::vector<bool> acc(npaths, false);
+  
+  for (size_t ipath = 0; ipath < npaths; ++ipath)
+    acc[ipath] = trigger_results->accept(ipath) && pass_prescale(trigger_names.triggerName(ipath), rng_engine.flat());
+  
   for (size_t ipath = 0; ipath < npaths; ++ipath) {
     triggers_pass_den->Fill(ipath, weight);
-    const bool iacc = trigger_results->accept(ipath) && pass_prescale(trigger_names.triggerName(ipath));
+    const bool iacc = acc[ipath];
     if (iacc)
       triggers_pass_num->Fill(ipath, weight);
 
     for (size_t jpath = 0; jpath < ipath; ++jpath) {
       triggers2d_pass_den->Fill(ipath, jpath, weight);
-      const bool jacc = trigger_results->accept(jpath) && pass_prescale(trigger_names.triggerName(jpath));
+      const bool jacc = acc[jpath];
       if (iacc || jacc)
 	triggers2d_pass_num->Fill(ipath, jpath, weight);
     }
