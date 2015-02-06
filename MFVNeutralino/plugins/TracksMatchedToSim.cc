@@ -69,7 +69,7 @@ void MFVTracksMatchedToSim::produce(edm::Event& event, const edm::EventSetup& se
   edm::ESHandle<TrackAssociatorBase> associator_handle;
   setup.get<TrackAssociatorRecord>().get("TrackAssociatorByHits", associator_handle);
   TrackAssociatorBase* associator = (TrackAssociatorBase*) associator_handle.product();
-  reco::RecoToSimCollection reco_to_sim = associator->associateRecoToSim(tracks, tracking_particles, &event);
+  reco::RecoToSimCollection reco_to_sim = associator->associateRecoToSim(tracks, tracking_particles, &event, &setup);
 
   std::auto_ptr<reco::TrackCollection> output(new reco::TrackCollection);
   std::auto_ptr<reco::TrackCollection> output_nonmatched(new reco::TrackCollection);
@@ -91,15 +91,12 @@ void MFVTracksMatchedToSim::produce(edm::Event& event, const edm::EventSetup& se
       const TrackingParticleRef tp = match.first;
       const double quality = match.second;
       if (quality >= min_match_quality) {
-	const size_t ngen = tp->genParticle().size();
+	const size_t ngen = tp->genParticles().size();
 	if (ngen > 1)
 	  throw cms::Exception("MFVTracksMatchedToSim") << "more than one gen particle match for track #" << i;
 	else if (ngen == 1) {
-	  const auto& hepmc = tp->genParticle()[0];
-	  if (hepmc->barcode() <= 0)
-	    throw cms::Exception("MFVTracksMatchedToSim") << "hepmc barcode <= 0 (=" << hepmc->barcode() << ") for track #" << i;
-	  const reco::GenParticle& gen = gen_particles->at(hepmc->barcode()-1);
-	  if (has_any_ancestor_with_id(&gen, 1000021) && track_ref->pt() > min_track_pt) {
+	  const reco::GenParticleRef& gen = tp->genParticles()[0];
+	  if (has_any_ancestor_with_id(&*gen, 1000021) && track_ref->pt() > min_track_pt) {
 	    h_used_quality->Fill(quality);
 	    put = true;
 	    output->push_back(*track_ref);

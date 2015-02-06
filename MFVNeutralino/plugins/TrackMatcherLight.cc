@@ -65,7 +65,7 @@ void MFVTrackMatcherLight::produce(edm::Event& event, const edm::EventSetup& set
   edm::ESHandle<TrackAssociatorBase> associator_handle;
   setup.get<TrackAssociatorRecord>().get("TrackAssociatorByHits", associator_handle);
   TrackAssociatorBase* associator = (TrackAssociatorBase*) associator_handle.product();
-  reco::RecoToSimCollection reco_to_sim = associator->associateRecoToSim(tracks, tracking_particles, &event);
+  reco::RecoToSimCollection reco_to_sim = associator->associateRecoToSim(tracks, tracking_particles, &event, &setup);
 
   std::auto_ptr<OutputType> output(new OutputType);
     
@@ -90,21 +90,17 @@ void MFVTrackMatcherLight::produce(edm::Event& event, const edm::EventSetup& set
       const auto& match = matches[0];
       const TrackingParticleRef tp = match.first;
       const double quality = match.second;
-      const size_t ngen = tp->genParticle().size();
+      const size_t ngen = tp->genParticles().size();
       if (ngen > 1)
 	throw cms::Exception("MFVTrackMatcherLight") << "more than one gen particle match for track #" << i;
       else if (ngen == 1) {
-	const auto& hepmc = tp->genParticle()[0];
-	if (hepmc->barcode() <= 0)
-	  throw cms::Exception("MFVTrackMatcherLight") << "hepmc barcode <= 0 (=" << hepmc->barcode() << ") for track #" << i;
-	int gen_ndx = hepmc->barcode()-1; // JMTBAD
-	const reco::GenParticle& gen = gen_particles->at(gen_ndx);
+	const reco::GenParticleRef& gen = tp->genParticles()[0];
 	(*output)[int(i)] = LightTrackMatch(quality,
-					    gen.pt(), gen.eta(), gen.phi(),
-					    gen_ndx,
+					    gen->pt(), gen->eta(), gen->phi(),
+					    gen.key(), // now useless I think
 					    nmatch > 1,
-					    has_any_ancestor_with_id(&gen, 1000021),
-                                            has_any_ancestor_with_id(&gen, 1000022));
+					    has_any_ancestor_with_id(&*gen, 1000021),
+                                            has_any_ancestor_with_id(&*gen, 1000022));
       }
     }
   }

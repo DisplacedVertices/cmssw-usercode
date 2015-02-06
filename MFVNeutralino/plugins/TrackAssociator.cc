@@ -258,7 +258,7 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
   edm::Handle<reco::VertexCollection> rec_vertices;
   event.getByLabel(rec_vertices_src, rec_vertices);
 
-  reco::RecoToSimCollection reco_to_sim = associator->associateRecoToSim(tracks, tracking_particles, &event);
+  reco::RecoToSimCollection reco_to_sim = associator->associateRecoToSim(tracks, tracking_particles, &event, &setup);
 
   if (do_checks) {
     std::cout << "checking hepmc -> genparticles by barcodes\n";
@@ -288,16 +288,13 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
 	  TrackingParticleRef tp = match.first;
 	  double quality = match.second;
 	  std::cout << "\t\tMCTrack " << std::setw(2) << tp.index() << " pT: " << std::setw(6) << tp->pt() << " NShared: " << quality << "\n\t\tTrackingParticle genParticles:\n";
-	  for (const auto& hepmc : tp->genParticle()) {
+	  for (const reco::GenParticleRef& gen : tp->genParticles()) {
 	    std::cout << "\t\t\t";
-	    hepmc->print(std::cout);
-	    assert(hepmc->barcode() > 0);
-	    const reco::GenParticle& gen = gen_particles->at(hepmc->barcode()-1);
-	    printf("\t\t\tVTX INFO %.3f %.3f %.3f\n", gen.vx(), gen.vy(), gen.vz());
-	    if (has_any_ancestor_with_id(&gen, 1000021) && track->pt() > 7) {
+	    printf("\t\t\tVTX INFO %.3f %.3f %.3f\n", gen->vx(), gen->vy(), gen->vz());
+	    if (has_any_ancestor_with_id(&*gen, 1000021) && track->pt() > 7) {
 	      printf("HELLO / IS IT ME YOU'RE LOOKING FOR\n");
 	      gpp.PrintHeader();
-	      gpp.Print(any_mother_with_id(&gen, 1000021), "LIONEL");
+	      gpp.Print(any_mother_with_id(&*gen, 1000021), "LIONEL");
 	    }
 	  }
 	}
@@ -306,16 +303,13 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
 
     std::cout << "                      ****************** Sim To Reco ****************** \n"
 	      << "-- Associator by hits --\n";
-    reco::SimToRecoCollection sim_to_reco = associator->associateSimToReco(tracks, tracking_particles, &event);
+    reco::SimToRecoCollection sim_to_reco = associator->associateSimToReco(tracks, tracking_particles, &event, &setup);
     for (size_t i = 0, ie = tracking_particles->size(); i < ie; ++i) {
       TrackingParticleRef tp(tracking_particles, i);
       std::vector<std::pair<edm::RefToBase<reco::Track>, double> > matches;
       std::cout << "tracking particle #" << i << " hepmc particles:\n";
-      for (const auto& hepmc : tp->genParticle()) {
-	hepmc->print(std::cout);
-	assert(hepmc->barcode() > 0);
-	const reco::GenParticle& gen = gen_particles->at(hepmc->barcode()-1);
-	if (has_any_ancestor_with_id(&gen, 1000021))
+      for (const reco::GenParticleRef& gen : tp->genParticles()) {
+	if (has_any_ancestor_with_id(&*gen, 1000021))
 	  printf("HELLO / IS IT ME YOU'RE LOOKING FOR\n");
       }
       try { 
@@ -359,8 +353,8 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
     hist_draw(signal_tracks_ids, "signal_tracks_ids");
     hist_draw(signal_tracks_charges, "signal_tracks_charges");
     for (const auto& tp : *tracking_particles) {
-      for (const auto& hepmc : tp.genParticle()) {
-	int ndx = hepmc->barcode()-1;
+      for (const reco::GenParticleRef& gen : tp.genParticles()) {
+	int ndx = gen.key(); // this check next is probably now useless after tp uses genparticles directly instead of hepmc::genparticles
 	if (signal_tracks_seen.find(ndx) != signal_tracks_seen.end())
 	  signal_tracks_seen[ndx] += 1;
       }
@@ -484,10 +478,8 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
 	for (const auto& match : matches) {
 	  TrackingParticleRef tp = match.first;
 	  //printf("\t\ttp match quality %.4f\n", match.second);
-	  for (const auto& hepmc : tp->genParticle()) {
-	    assert(hepmc->barcode() > 0);
-	    const reco::GenParticle& gen = gen_particles->at(hepmc->barcode()-1);
-	    if (has_any_ancestor_with_id(&gen, 1000021))
+	  for (const reco::GenParticleRef& gen : tp->genParticles()) {
+	    if (has_any_ancestor_with_id(&*gen, 1000021))
 	      ++sigmatched;
 	  }
 	}
@@ -527,27 +519,25 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
       for (const auto& match : matches) {
 	TrackingParticleRef tp = match.first;
 	//printf("\t\ttp match quality %.4f\n", match.second);
-	for (const auto& hepmc : tp->genParticle()) {
-	  assert(hepmc->barcode() > 0);
-	  const reco::GenParticle& gen = gen_particles->at(hepmc->barcode()-1);
-	  if (has_any_ancestor_with_id(&gen, 1000021)) {
+	for (const reco::GenParticleRef& gen : tp->genParticles()) {
+	  if (has_any_ancestor_with_id(&*gen, 1000021)) {
 	    ++nsigtracks;
 	    
-	    h_sigtrack_simxy->Fill(mag(gen.vx(), gen.vy()));
-	    h_sigtrack_simz->Fill(gen.vz());
-	    h_sigtrack_simxyz->Fill(mag(gen.vx(), gen.vy(), gen.vz()));
-	    h_sigtrack_simcosth->Fill(costh(gen.momentum(), gen.vertex()));
-	    h_sigtrack_simpt->Fill(gen.pt());
-	    h_sigtrack_simp->Fill(gen.p());
+	    h_sigtrack_simxy->Fill(mag(gen->vx(), gen->vy()));
+	    h_sigtrack_simz->Fill(gen->vz());
+	    h_sigtrack_simxyz->Fill(mag(gen->vx(), gen->vy(), gen->vz()));
+	    h_sigtrack_simcosth->Fill(costh(gen->momentum(), gen->vertex()));
+	    h_sigtrack_simpt->Fill(gen->pt());
+	    h_sigtrack_simp->Fill(gen->p());
 
 	    if (in_a_vertex) {
 	      ++ninvertex;
-	      h_sigtrack_invtx_simxy->Fill(mag(gen.vx(), gen.vy()));
-	      h_sigtrack_invtx_simz->Fill(gen.vz());
-	      h_sigtrack_invtx_simxyz->Fill(mag(gen.vx(), gen.vy(), gen.vz()));
-	      h_sigtrack_invtx_simcosth->Fill(costh(gen.momentum(), gen.vertex()));
-	      h_sigtrack_invtx_simpt->Fill(gen.pt());
-	      h_sigtrack_invtx_simp->Fill(gen.p());
+	      h_sigtrack_invtx_simxy->Fill(mag(gen->vx(), gen->vy()));
+	      h_sigtrack_invtx_simz->Fill(gen->vz());
+	      h_sigtrack_invtx_simxyz->Fill(mag(gen->vx(), gen->vy(), gen->vz()));
+	      h_sigtrack_invtx_simcosth->Fill(costh(gen->momentum(), gen->vertex()));
+	      h_sigtrack_invtx_simpt->Fill(gen->pt());
+	      h_sigtrack_invtx_simp->Fill(gen->p());
 	    }
 	  }
 	}
