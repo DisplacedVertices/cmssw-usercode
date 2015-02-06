@@ -9,7 +9,7 @@ namespace mfv {
   void write_to_tree(TTree* tree, FlatNtuple& nt) {
     tree->Branch("run", &nt.run, "run/i");
     tree->Branch("lumi", &nt.lumi, "lumi/i");
-    tree->Branch("event", &nt.event, "event/i");
+    tree->Branch("event", &nt.event);
     tree->Branch("sample", &nt.sample, "sample/B");
     tree->Branch("gen_valid", &nt.gen_valid, "gen_valid/O");
     tree->Branch("gen_lsp_pt", nt.gen_lsp_pt, "gen_lsp_pt[2]/F");

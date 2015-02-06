@@ -22,7 +22,7 @@ public :
    // Declaration of leaf types
    UInt_t          run;
    UInt_t          lumi;
-   UInt_t          event;
+   unsigned long long          event;
    std::vector<bool>    *l1_was_seed;
    std::vector<int>     *l1_prescale;
    std::vector<int>     *l1_mask;

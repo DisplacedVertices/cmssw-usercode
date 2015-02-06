@@ -4,7 +4,7 @@ namespace mfv {
   void write_to_tree(TTree* tree, MiniNtuple& nt) {
     tree->Branch("run", &nt.run, "run/i");
     tree->Branch("lumi", &nt.lumi, "lumi/i");
-    tree->Branch("event", &nt.event, "event/i");
+    tree->Branch("event", &nt.event);
     tree->Branch("npv", &nt.npv, "npv/s");
     tree->Branch("pvx", &nt.pvx, "pvx/F");
     tree->Branch("pvy", &nt.pvy, "pvy/F");

@@ -33,7 +33,7 @@ void GenParticlesGraphDumper::analyze(const edm::Event& event, const edm::EventS
   for (int i = 0, ie = gen_particles->size(); i < ie; ++i)
     index_cache[&gen_particles->at(i)] = i;
 
-  printf("graph_%u_%u = {\n", event.id().run(), event.id().event());
+  std::cout << "graph_" << event.id().run() << "_" << event.id().event() << " = {\n";
   for (int i = 0, ie = gen_particles->size(); i < ie; ++i) {
     const reco::GenParticle& gen = gen_particles->at(i);
     printf("    %i: %s[", i, include_id_and_stat ? "(" : "");

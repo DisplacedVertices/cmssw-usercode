@@ -109,7 +109,8 @@ namespace {
 void MFVVertexRefitter::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) {
     printf("------------------------------------------------------------------------\n");
-    printf("MFVVertexRefitter::produce: run %u, lumi %u, event %u\n", event.id().run(), event.luminosityBlock(), event.id().event());
+    printf("MFVVertexRefitter::produce: run %u, lumi %u, event ", event.id().run(), event.luminosityBlock());
+    std::cout << event.id().event() << "\n";
   }
 
 #if 0

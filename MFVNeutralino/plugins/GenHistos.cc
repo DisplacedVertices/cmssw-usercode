@@ -520,7 +520,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	h_t->Fill(r3d[0]/lspbeta/30);
 	h_r3d_bhadron_v_bquark->Fill(r3d[2], r3d[3]);
 	if (fabs(r3d[2] - r3d[3]) > 0.001) // 10 micron
-	  printf("difference between bquark and bhadron r3ds is %f for run,lumi,event %u, %u, %u\n", fabs(r3d[2] - r3d[3]), event.id().run(), event.luminosityBlock(), event.id().event());
+          std::cout << "difference between bquark and bhadron r3ds is " << fabs(r3d[2] - r3d[3]) << " for run,lumi,event " << event.id().run() << ", " << event.luminosityBlock() << ", " << event.id().event() << "\n";
         
 	if (check_all_gen_particles)
 	  for (const auto& gen : *gen_particles) {

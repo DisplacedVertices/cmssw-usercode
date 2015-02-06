@@ -390,7 +390,8 @@ void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) {
     printf("------------------------------------------------------------------------\n");
-    printf("MFVVertexer::produce: run %u, lumi %u, event %u\n", event.id().run(), event.luminosityBlock(), event.id().event());
+    printf("MFVVertexer::produce: run %u, lumi %u, event ", event.id().run(), event.luminosityBlock());
+    std::cout << event.id().event() << "\n";
   }
 
   int iphitest = 0;

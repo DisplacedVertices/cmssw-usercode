@@ -8,7 +8,7 @@
 
 const char* path = 0;
 
-typedef std::tuple<unsigned, unsigned, unsigned> RLE;
+typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
 std::map<RLE, std::set<int> > m;
 
 void process_file(const char* fn, int fileno) {
@@ -26,7 +26,7 @@ void process_file(const char* fn, int fileno) {
 
   unsigned run;
   unsigned lumi;
-  unsigned event;
+  unsigned long long event;
   t->SetBranchAddress("run", &run);
   t->SetBranchAddress("lumi", &lumi);
   t->SetBranchAddress("event", &event);
@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
   printf("common = [\n");
   for (auto p : m) {
     if (p.second.size() > 1) {
-      printf("(%u,%u,%u),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      printf("(%u,%u,%llu),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
       ++common;
     }
   }
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
   printf("only1 = [\n");
   for (auto p : m) {
     if (p.second.size() == 1 && p.second.find(0) != p.second.end()) {
-      printf("(%u,%u,%u),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      printf("(%u,%u,%llu),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
       ++only1;
     }
   }
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
   printf("only2 = [\n");
   for (auto p : m) {
     if (p.second.size() == 1 && p.second.find(1) != p.second.end()) {
-      printf("(%u,%u,%u),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      printf("(%u,%u,%llu),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
       ++only2;
     }
   }

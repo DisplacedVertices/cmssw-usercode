@@ -7,7 +7,7 @@ namespace mfv {
   struct MiniNtuple {
     unsigned run;
     unsigned lumi;
-    unsigned event;
+    unsigned long long event;
     unsigned short npv;
     float pvx;
     float pvy;

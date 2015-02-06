@@ -8,7 +8,7 @@
 
 const char* path = 0;
 
-typedef std::tuple<unsigned, unsigned, unsigned> RLE;
+typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
 std::map<RLE, std::set<int> > m;
 
 void process_file(const char* fn, int fileno) {
@@ -26,7 +26,7 @@ void process_file(const char* fn, int fileno) {
 
   unsigned run;
   unsigned lumi;
-  unsigned event;
+  unsigned long long event;
   t->SetBranchAddress("run", &run);
   t->SetBranchAddress("lumi", &lumi);
   t->SetBranchAddress("event", &event);
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     if (p.second.size() > 1) {
       if (dup_count == 0)
         printf("duplicates:\n");
-      printf("%u,%u,%u : ", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      printf("%u,%u,%llu : ", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
       for (int fileno : p.second)
         printf("%i ", fileno);
       printf("\n");

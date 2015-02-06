@@ -52,8 +52,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   if (histos)
     h_sums->Fill(n_sums);
 
-  if (prints)
-    printf("MFVWeight: r,l,e: %u, %u, %u   ", event.id().run(), event.luminosityBlock(), event.id().event());
+  if (prints) {
+    printf("MFVWeight: r,l,e: %u, %u, ", event.id().run(), event.luminosityBlock());
+    std::cout << event.id().event() << "  ";
+  }
 
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);

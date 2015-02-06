@@ -29,7 +29,7 @@ private:
   bool buf[MAX_NPATHS];
   unsigned run;
   unsigned lumi;
-  unsigned evt;
+  unsigned long long evt;
   double weight;
 };
 
@@ -43,7 +43,7 @@ SimpleTriggerResults::SimpleTriggerResults(const edm::ParameterSet& cfg)
   tree = fs->make<TTree>("t", "");
   tree->Branch("run",    &run,    "run/i");
   tree->Branch("lumi",   &lumi,   "lumi/i");
-  tree->Branch("event",  &evt,    "event/i");
+  tree->Branch("event",  &evt);
   if (use_weight)
     tree->Branch("weight", &weight, "weight/D");
 }

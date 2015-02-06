@@ -10,8 +10,8 @@ public:
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
-  typedef std::pair<unsigned, unsigned> LE;
-  typedef std::tuple<unsigned, unsigned, unsigned> RLE;
+  typedef std::pair<unsigned, unsigned long long> LE;
+  typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
   std::set<LE> mle;
   std::set<RLE> mrle;
 
@@ -39,13 +39,14 @@ EventIdVeto::EventIdVeto(const edm::ParameterSet& cfg)
   char line[1024];
   while (fgets(line, 1024, f) != 0) {
     if (debug) printf("EventIdVeto debug: file line read: %s", line);
-    unsigned r,l,e;
+    unsigned r,l;
+    unsigned long long e;
     int res;
     if (use_run)
-      res = sscanf(line, "(%u,%u,%u),", &r, &l, &e);
+      res = sscanf(line, "(%u,%u,%llu),", &r, &l, &e);
     else
-      res = sscanf(line, "(%u,%u),", &l, &e);
-    if (debug) printf("    sscanf returned %i, r,l,e = %u, %u, %u\n", res, r,l,e);
+      res = sscanf(line, "(%u,%llu),", &l, &e);
+    if (debug) printf("    sscanf returned %i, r,l,e = %u, %u, %llu\n", res, r,l,e);
     if (res != (use_run ? 3 : 2))
       continue;
     if (use_run)

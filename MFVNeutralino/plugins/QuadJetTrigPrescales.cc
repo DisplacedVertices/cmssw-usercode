@@ -23,7 +23,7 @@ private:
   struct tree_t {
     unsigned run;
     unsigned lumi;
-    unsigned event;
+    unsigned long long event;
     std::vector<bool> l1_was_seed;
     std::vector<int> l1_prescale;
     std::vector<int> l1_mask;
@@ -36,7 +36,8 @@ private:
     tree_t() { clear(); }
 
     void clear() { 
-      run = lumi = event = 0;
+      run = lumi = 0;
+      event = 0;
       l1_was_seed.assign(9, 0);
       l1_prescale.assign(9, 0);
       l1_mask.assign(9, 0);
@@ -57,7 +58,7 @@ QuadJetTrigPrescales::QuadJetTrigPrescales(const edm::ParameterSet& cfg) {
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
   tree->Branch("lumi", &nt.lumi, "lumi/i");
-  tree->Branch("event", &nt.event, "event/i");
+  tree->Branch("event", &nt.event);
   tree->Branch("l1_was_seed", &nt.l1_was_seed);
   tree->Branch("l1_prescale", &nt.l1_prescale);
   tree->Branch("l1_mask", &nt.l1_mask);

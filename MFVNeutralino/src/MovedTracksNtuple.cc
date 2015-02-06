@@ -10,7 +10,8 @@ namespace mfv {
   }
 
   void MovedTracksNtuple::clear() {
-    run = lumi = event = 0;
+    run = lumi = 0;
+    event = 0;
     weight = pvx = pvy = pvz = pvsumpt2 = jetsumht = jetpt4 = met = move_x = move_y = move_z = 0;
     npu = npv = nlep = nseltracks = nalljets = npreseljets = npreselbjets = nlightjets = 0;
     pvntracks = ntracks = 0;

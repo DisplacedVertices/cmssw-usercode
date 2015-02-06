@@ -16,7 +16,7 @@ class SimPUInfo : public edm::EDAnalyzer {
   struct Ntuple {
     unsigned run;
     unsigned lumi;
-    unsigned event;
+    unsigned long long event;
     unsigned short sim_pileup_num_int[3]; // early, in-time, late (sim BX = -1, 0, 1)
     float sim_pileup_true_num_int[3]; // 
   };
@@ -32,7 +32,7 @@ SimPUInfo::SimPUInfo(const edm::ParameterSet& cfg) {
   nt = new Ntuple;
   tree->Branch("run", &nt->run, "run/i");
   tree->Branch("lumi", &nt->lumi, "lumi/i");
-  tree->Branch("event", &nt->event, "event/i");
+  tree->Branch("event", &nt->event);
   tree->Branch("sim_pileup_num_int", nt->sim_pileup_num_int, "sim_pileup_num_int[3]/s");
   tree->Branch("sim_pileup_true_num_int", nt->sim_pileup_true_num_int, "sim_pileup_true_num_int[3]/F");
 

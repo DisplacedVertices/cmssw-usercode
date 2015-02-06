@@ -19,7 +19,8 @@ namespace mfv {
     }
 
     void clear() {
-      run = lumi = event = 0;
+      run = lumi = 0;
+      event = 0;
       sample = 0;
       gen_partons_in_acc = npv = pv_ntracks = nvertices = 0;
       gen_valid = 0;
@@ -145,7 +146,7 @@ namespace mfv {
 
     uint run;
     uint lumi;
-    uint event;
+    unsigned long long event;
     char sample;
 
     ////////////////////////////////////////////////////////////////////

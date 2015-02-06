@@ -23,7 +23,7 @@ private:
   struct tree_t {
     unsigned run;
     unsigned lumi;
-    unsigned event;
+    unsigned long long event;
     unsigned short npu;
 
     float bs_x;
@@ -59,7 +59,8 @@ private:
     tree_t() { clear(); }
 
     void clear() {
-      run = lumi = event = 0;
+      run = lumi = 0;
+      event = 0;
       npu = 0;
       bs_x = bs_y = bs_z = bs_sigmaz = bs_dxdz = bs_dydz = bs_width = 0;
       bs_err_x = bs_err_y = bs_err_z = bs_err_sigmaz = bs_err_dxdz = bs_err_dydz = bs_err_width = 0;
@@ -93,7 +94,7 @@ BeamSpotTreer::BeamSpotTreer(const edm::ParameterSet& cfg)
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
   tree->Branch("lumi", &nt.lumi, "lumi/i");
-  tree->Branch("event", &nt.event, "event/i");
+  tree->Branch("event", &nt.event);
   tree->Branch("npu", &nt.npu);
   tree->Branch("bs_x", &nt.bs_x, "bs_x/F");
   tree->Branch("bs_y", &nt.bs_y, "bs_y/F");

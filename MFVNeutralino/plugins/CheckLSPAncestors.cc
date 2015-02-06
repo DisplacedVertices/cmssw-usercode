@@ -31,7 +31,7 @@ void CheckLSPAncestors::analyze(const edm::Event& event, const edm::EventSetup&)
   }
   die_if_not(lsps_init.size() == 2, "did not find two initial copies of the LSPs");
 
-  printf("codes_%u_%u = {\n", event.id().run(), event.id().event());
+  std::cout << "codes_" << event.id().run() << "_" << event.id().event() << " = {\n";
   for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
     const reco::GenParticle& gen = gen_particles->at(i);
     int code = 0;

@@ -49,7 +49,8 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
   printf("================================================================================\n");
-  printf(" %s   run, lumi, event: (%u, %u, %u)\n", name.c_str(), event.id().run(), event.luminosityBlock(), event.id().event());
+  printf(" %s   run, lumi, event: (%u, %u, ", name.c_str(), event.id().run(), event.luminosityBlock());
+  std::cout << event.id().event() << ")\n";
   printf("================================================================================\n");
 
   if (print_vertex) {

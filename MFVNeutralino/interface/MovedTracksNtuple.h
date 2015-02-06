@@ -12,7 +12,7 @@ namespace mfv {
 
     unsigned run;
     unsigned lumi;
-    unsigned event;
+    unsigned long long event;
 
     float weight;
 

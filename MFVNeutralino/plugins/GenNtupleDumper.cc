@@ -18,7 +18,7 @@ class MFVGenNtupleDumper : public edm::EDAnalyzer {
   struct ntuple_t {
     unsigned run;
     unsigned lumi;
-    unsigned event;
+    unsigned long long event;
     float lsp_pt[2];
     float lsp_eta[2];
     float lsp_phi[2];
@@ -39,7 +39,7 @@ MFVGenNtupleDumper::MFVGenNtupleDumper(const edm::ParameterSet& cfg)
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
   tree->Branch("lumi", &nt.lumi, "lumi/i");
-  tree->Branch("event", &nt.event, "event/i");
+  tree->Branch("event", &nt.event);
   tree->Branch("lsp_pt", nt.lsp_pt, "lsp_pt[2]/F");
   tree->Branch("lsp_eta", nt.lsp_eta, "lsp_eta[2]/F");
   tree->Branch("lsp_phi", nt.lsp_phi, "lsp_phi[2]/F");
