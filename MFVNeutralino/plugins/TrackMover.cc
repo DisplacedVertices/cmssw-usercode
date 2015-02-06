@@ -194,10 +194,8 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
         output_tracks->push_back(reco::Track(tk->chi2(), tk->ndof(), new_point, tk->momentum(), tk->charge(), tk->covariance(), tk->algo()));
         reco::Track& new_tk = output_tracks->back();
         new_tk.setQualityMask(tk->qualityMask());
-        new_tk.setHitPattern(tk->hitPattern());
         new_tk.setNLoops(tk->nLoops());
-        new_tk.setTrackerExpectedHitsInner(tk->trackerExpectedHitsInner());
-        new_tk.setTrackerExpectedHitsOuter(tk->trackerExpectedHitsOuter());
+        reco::HitPattern* hp = const_cast<reco::HitPattern*>(&new_tk.hitPattern());  *hp = tk->hitPattern(); // lmao
         moved_tracks->push_back(new_tk);
       }
       else
