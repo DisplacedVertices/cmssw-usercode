@@ -117,8 +117,6 @@ private:
     return v;
   }
 
-  edm::Service<edm::RandomNumberGenerator> rng;
-
   const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertices_src;
   const bool use_tracks;
@@ -277,6 +275,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
 
+  edm::Service<edm::RandomNumberGenerator> rng;
   if (jumble_tracks && !rng.isAvailable())
     throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling tracks!\n";
 
@@ -492,7 +491,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   if (jumble_tracks) {
-    auto random_converter = [&](size_t n) { return size_t(rng->getEngine().flat() * n); };
+    edm::Service<edm::RandomNumberGenerator> rng;
+    CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
+    auto random_converter = [&](size_t n) { return size_t(rng_engine.flat() * n); };
     std::random_shuffle(all_tracks.begin(), all_tracks.end(), random_converter);
   }
 

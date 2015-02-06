@@ -35,22 +35,6 @@ private:
   const double tau;
   const double sig_theta;
   const double sig_phi;
-
-  edm::Service<edm::RandomNumberGenerator> rng;
-
-  std::vector<int> knuth_select(int n, int N) {
-    std::vector<int> ts;
-    int t = 0, m = 0;
-    while (m < n) {
-      if ((N - t) * rng->getEngine().flat() >= n - m)
-        ++t;
-      else {
-        ++m;
-        ts.push_back(t++);
-      }
-    }
-    return ts;
-  }
 };
 
 MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg) 
@@ -68,6 +52,7 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
     sig_theta(cfg.getParameter<double>("sig_theta")),
     sig_phi(cfg.getParameter<double>("sig_phi"))
 {
+  edm::Service<edm::RandomNumberGenerator> rng;
   if (!rng.isAvailable())
     throw cms::Exception("MFVTrackMover", "RandomNumberGeneratorService not available");
 
@@ -82,6 +67,23 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
 }
 
 void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
+  edm::Service<edm::RandomNumberGenerator> rng;
+  CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
+
+  auto knuth_select = [&](int n, int N) -> std::vector<int> {
+    std::vector<int> ts;
+    int t = 0, m = 0;
+    while (m < n) {
+      if ((N - t) * rng_engine.flat() >= n - m)
+        ++t;
+      else {
+        ++m;
+        ts.push_back(t++);
+      }
+    }
+    return ts;
+  };
+
   std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
   std::auto_ptr<reco::TrackCollection> moved_tracks(new reco::TrackCollection);
   std::auto_ptr<int> npreseljets(new int);
@@ -98,8 +100,8 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     edm::Handle<pat::JetCollection> jets;
     event.getByLabel(jets_src, jets);
 
-    CLHEP::RandExponential rexp(rng->getEngine());
-    CLHEP::RandGauss rgau(rng->getEngine());
+    CLHEP::RandExponential rexp(rng_engine);
+    CLHEP::RandGauss rgau(rng_engine);
 
     std::vector<const pat::Jet*> presel_jets;
     std::vector<const pat::Jet*> presel_bjets;
