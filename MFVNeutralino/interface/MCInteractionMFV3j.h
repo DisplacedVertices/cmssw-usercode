@@ -21,10 +21,15 @@ struct MCInteractionMFV3j : public MCInteraction {
 
   // "Plain" momentum four-vectors.
   TLorentzVector p4_lsps[2];
+  char dummy1;
   TLorentzVector p4_stranges[2];
+  char dummy2;
   TLorentzVector p4_bottoms[2];
+  char dummy3;
   TLorentzVector p4_tops[2];
+  char dummy4;
   TLorentzVector p4_Ws[2];
+  char dummy5;
   TLorentzVector p4_bottoms_from_tops[2];
   TLorentzVector p4_W_daughters[2][2];
   TLorentzVector p4_W_neutrinosum;
