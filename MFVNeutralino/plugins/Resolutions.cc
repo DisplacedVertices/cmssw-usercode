@@ -211,12 +211,6 @@ namespace {
   float mag(float x, float y, float z) {
     return sqrt(x*x + y*y + z*z);
   }
-  
-  float signed_mag(float x, float y) {
-    float m = mag(x,y);
-    if (y < 0) return -m;
-    return m;
-  }
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
