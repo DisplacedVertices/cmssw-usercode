@@ -10,6 +10,7 @@ struct MCInteractionTopsFromStops : public MCInteractionTops {
 
   // "Plain" momentum four-vectors.
   TLorentzVector p4_stops[2];
+  char dummy; // without this I get nonsense "array subscript above array bounds errors pointing to the line "struct MCInteraction..."
   TLorentzVector p4_neutralinos[2];
   TLorentzVector p4_stopstopbar;
   TLorentzVector p4_neutralinosum;
