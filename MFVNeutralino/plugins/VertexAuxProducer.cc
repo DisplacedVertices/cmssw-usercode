@@ -297,7 +297,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_dxy_err.push_back(tri->dxyError());
       aux.track_dz_err.push_back(tri->dzError());
       aux.track_chi2dof.push_back(tri->normalizedChi2());
-      aux.track_hitpattern.push_back(MFVVertexAux::make_track_hitpattern(tri->hitPattern().numberOfValidPixelHits(), tri->hitPattern().numberOfValidStripHits(), nhitsbehind, tri->hitPattern().numberOfLostHits()));
+      aux.track_hitpattern.push_back(MFVVertexAux::make_track_hitpattern(tri->hitPattern().numberOfValidPixelHits(), tri->hitPattern().numberOfValidStripHits(), nhitsbehind, tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS))); // JMTBAD could add missing inner, outer
       aux.track_injet.push_back(jets_tracks[0].count(trref)); // JMTBAD
       aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
     }

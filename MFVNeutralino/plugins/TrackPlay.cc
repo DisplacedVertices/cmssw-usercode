@@ -131,8 +131,8 @@ void MFVTrackPlay::analyze(const edm::Event& event, const edm::EventSetup&) {
       {"nsthits",        hp.numberOfValidStripHits()},
       {"npxlayers",      hp.pixelLayersWithMeasurement()},
       {"nstlayers",      hp.stripLayersWithMeasurement()},
-      {"nhitsmissinner", track.trackerExpectedHitsInner().numberOfHits()},
-      {"nhitsmissouter", track.trackerExpectedHitsOuter().numberOfHits()},
+      {"nhitsmissinner", hp.numberOfHits(reco::HitPattern::MISSING_INNER_HITS)},
+      {"nhitsmissouter", hp.numberOfHits(reco::HitPattern::MISSING_OUTER_HITS)},
       {"min_dr_jet",     min_dr_jet},
       {"min_dr_jet_pt",  min_dr_jet_pt}
     };

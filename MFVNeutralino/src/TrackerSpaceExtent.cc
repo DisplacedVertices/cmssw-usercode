@@ -43,8 +43,8 @@ void TrackerSpaceExtents::print() const {
 NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp) const {
   NumExtents ret;
 
-  for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
-    uint32_t hit = hp.getHitPattern(ihit);
+  for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+    uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
         
     bool is_valid = hp.getHitType(hit) == 0;
     if (!is_valid)
@@ -79,8 +79,8 @@ NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp) con
 SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp) const {
   SpatialExtents ret;
 
-  for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
-    uint32_t hit = hp.getHitPattern(ihit);
+  for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+    uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
         
     bool is_valid = hp.getHitType(hit) == 0;
     if (!is_valid)
@@ -110,8 +110,8 @@ SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp) co
 int TrackerSpaceExtents::numHitsBehind(const reco::HitPattern& hp, const double r, const double z) const {
   int nhitsbehind = 0;
 
-  for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
-    uint32_t hit = hp.getHitPattern(ihit);
+  for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+    uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
         
     bool is_valid = hp.getHitType(hit) == 0;
     if (!is_valid)
