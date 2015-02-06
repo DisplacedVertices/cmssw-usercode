@@ -216,8 +216,8 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     if (tk.hitPattern().numberOfValidTrackerHits() == 0) continue;
 
     int signature[27] = {0};
-    for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
-      uint32_t hit = hp.getHitPattern(ihit);
+    for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+      uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
       if (!(hp.getHitType(hit) == 0) || !((hit >> 10) & 0x1)) continue;
       uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
       uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
@@ -249,8 +249,8 @@ void CosmicMuons::analyze(const edm::Event& event, const edm::EventSetup& setup)
     for (const reco::Track& gtk : *general_tracks) {
       const reco::HitPattern& ghp = gtk.hitPattern();
       int gsignature[27] = {0};
-      for (int ihit = 0, ie = ghp.numberOfHits(); ihit < ie; ++ihit) {
-        uint32_t hit = ghp.getHitPattern(ihit);
+      for (int ihit = 0, ie = ghp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+        uint32_t hit = ghp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
         if (!(hp.getHitType(hit) == 0) || !((hit >> 10) & 0x1)) continue;
         uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
         uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
