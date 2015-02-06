@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 class BeamSpotTreer : public edm::EDAnalyzer {
 public:
@@ -17,11 +18,13 @@ private:
 
   const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertex_src;
+  const bool assert_diag_cov;
 
   struct tree_t {
     unsigned run;
     unsigned lumi;
     unsigned event;
+    unsigned short npu;
 
     float bs_x;
     float bs_y;
@@ -57,6 +60,7 @@ private:
 
     void clear() {
       run = lumi = event = 0;
+      npu = 0;
       bs_x = bs_y = bs_z = bs_sigmaz = bs_dxdz = bs_dydz = bs_width = 0;
       bs_err_x = bs_err_y = bs_err_z = bs_err_sigmaz = bs_err_dxdz = bs_err_dydz = bs_err_width = 0;
 
@@ -82,13 +86,15 @@ private:
 
 BeamSpotTreer::BeamSpotTreer(const edm::ParameterSet& cfg)
   : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src"))
+    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
+    assert_diag_cov(cfg.getParameter<bool>("assert_diag_cov"))
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
   tree->Branch("lumi", &nt.lumi, "lumi/i");
   tree->Branch("event", &nt.event, "event/i");
+  tree->Branch("npu", &nt.npu);
   tree->Branch("bs_x", &nt.bs_x, "bs_x/F");
   tree->Branch("bs_y", &nt.bs_y, "bs_y/F");
   tree->Branch("bs_z", &nt.bs_z, "bs_z/F");
@@ -124,6 +130,15 @@ void BeamSpotTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.lumi = event.luminosityBlock();
   nt.event = event.id().event();
 
+  if (!event.isRealData()) {
+    edm::Handle<std::vector<PileupSummaryInfo> > pileup;
+    event.getByLabel("addPileupInfo", pileup);
+
+    for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
+      if (psi->getBunchCrossing() == 0)
+        nt.npu = psi->getTrueNumInteractions();
+  }
+
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByLabel(beamspot_src, beamspot);
 
@@ -143,9 +158,10 @@ void BeamSpotTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.bs_err_dydz = beamspot->dydzError();
   nt.bs_err_width = beamspot->BeamWidthXError();
 
-  for (int i = 0; i < 7; ++i)
-    for (int j = i+1; j < 7; ++j)
-      assert(beamspot->covariance(i,j) == 0);
+  if (assert_diag_cov)
+    for (int i = 0; i < 7; ++i)
+      for (int j = i+1; j < 7; ++j)
+        assert(beamspot->covariance(i,j) == 0);
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByLabel(primary_vertex_src, primary_vertices);

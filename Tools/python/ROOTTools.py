@@ -147,7 +147,7 @@ def cmssw_setup():
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
     
-def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes=False):
+def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes=False, confint_params=()):
     nbins = h1.GetNbinsX()
     xax = h1.GetXaxis()
     if h2.GetNbinsX() != nbins: # or xax2.GetBinLowEdge(1) != xax.GetBinLowEdge(1) or xax2.GetBinLowEdge(nbins) != xax.GetBinLowEdge(nbins):
@@ -170,7 +170,7 @@ def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes
         if s > t and force_lt_1:
             print 'warning: bin %i has p_hat > 1, in interval forcing p_hat = 1' % ibin
             s = t
-        rat, a,b = confint(s,t)
+        rat, a,b = confint(s,t, *confint_params)
         #print ibin, s, t, a, b
 
         if b is None: # JMTBAD
@@ -686,7 +686,7 @@ def data_mc_comparison(name,
 
     return canvas, stack, sum_background, legend, ratio_pad, res_g
 
-def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x), delete_tmp=True):
+def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x), delete_tmp=True, save_fn=None):
     """Dump specified branches from tree into a list of tuples, via an
     ascii file. By default all vars are converted into integers. The
     xform parameter specifies the function transforming the tuple of
@@ -697,19 +697,22 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
         xf = xform
         xform = lambda x: tuple(xf(y) for y in x)
 
-    tmp_fn = tempfile.mkstemp()[1]
+    tmp_f, tmp_fn = tempfile.mkstemp()
     t.GetPlayer().SetScanRedirect(True)
     t.GetPlayer().SetScanFileName(tmp_fn)
     t.Scan(branches, cut, 'colsize=50')
     t.GetPlayer().SetScanRedirect(False)
     nvp2 = branches.replace('::','').count(':') + 1 + 2
-    for line in open(tmp_fn):
-        if ' * ' in line and 'Row' not in line:
-            yield xform(line.split('*')[2:nvp2])
+    with os.fdopen(tmp_f) as file:
+        for line in file:
+            if ' * ' in line and 'Row' not in line:
+                yield xform(line.split('*')[2:nvp2])
+    if save_fn:
+        os.system('cp %s %s' % (tmp_fn, save_fn))
     if delete_tmp:
         os.remove(tmp_fn)
 
-def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, color_from_hist=True):
+def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, color_from_hist=True, offset=None):
     """Move hist's stat box and change its line/text color. If
     movement is just an int, that number specifies how many units to
     move the box downward. If it is a 2-tuple of ints (m,n), the stat
@@ -739,10 +742,15 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, colo
         x1 = x2 - new_size[0]
         y1 = y2 - new_size[1]
 
-    s.SetX1NDC(x1 - (x2-x1)*m)
-    s.SetX2NDC(x2 - (x2-x1)*m)
-    s.SetY1NDC(y1 - (y2-y1)*n)
-    s.SetY2NDC(y2 - (y2-y1)*n)
+    if offset is None:
+        ox, oy = 0, 0
+    else:
+        ox, oy = offset
+
+    s.SetX1NDC(x1 - (x2-x1)*m + ox)
+    s.SetX2NDC(x2 - (x2-x1)*m + ox)
+    s.SetY1NDC(y1 - (y2-y1)*n + oy)
+    s.SetY2NDC(y2 - (y2-y1)*n + oy)
 
 def draw_in_order(hists_and_cmds, sames=False):
     if type(hists_and_cmds[1]) == str:
@@ -886,15 +894,15 @@ def get_quantiles(l, binning, probs, options=''):
         h.Fill(x)
     return get_hist_quantiles(h, probs, options)
 
-def get_hist_stats(hist, factor=None, draw=False):
+def get_hist_stats(hist, factor=None, draw=False, fit=True):
     """For the given histogram, return a five-tuple of the number of
     entries, the underflow and overflow counts, the fitted sigma
     (using the function specified by fcnname, which must be an
     already-made ROOT.TF1 whose parameter(2) is the value used), and the
     RMS.
     """
-    
-    results = fit_gaussian(hist, factor, draw)
+
+    results = fit_gaussian(hist, factor, draw) if fit else {}
     results.update({
         'entries': hist.GetEntries(),
         'under':   hist.GetBinContent(0),
@@ -1082,8 +1090,17 @@ def poisson_means_divide(h1, h2, no_zeroes=False):
 class plot_saver:
     i = 0
     
-    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1):
+    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=None):
         self.c = ROOT.TCanvas('c%i' % plot_saver.i, '', *size)
+        if canvas_margins is not None:
+            if type(canvas_margins) == int or type(canvas_margins) == float:
+                top, bottom, left, right = tuple(canvas_margins for x in xrange(4))
+            else:
+                top, bottom, left, right = canvas_margins
+            self.c.SetTopMargin(top)
+            self.c.SetBottomMargin(bottom)
+            self.c.SetLeftMargin(left)
+            self.c.SetRightMargin(right)
         plot_saver.i += 1
         self.saved = []
         self.html = html

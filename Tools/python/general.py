@@ -85,6 +85,40 @@ def save_git_status(path):
             os.system('mv %s %s' % (git_untracked_tmp_fn, path))
     os.system('git diff > %s' % os.path.join(path, 'diff'))
 
+def reverse_readline(filename, buf_size=8192):
+    """a generator that returns the lines of a file in reverse order
+
+    Ripped off from
+    http://stackoverflow.com/questions/2301789/read-a-file-in-reverse-order-using-python
+    """
+
+    with open(filename) as fh:
+        segment = None
+        offset = 0
+        fh.seek(0, os.SEEK_END)
+        total_size = remaining_size = fh.tell()
+        while remaining_size > 0:
+            offset = min(total_size, offset + buf_size)
+            fh.seek(-offset, os.SEEK_END)
+            buffer = fh.read(min(remaining_size, buf_size))
+            remaining_size -= buf_size
+            lines = buffer.split('\n')
+            # the first line of the buffer is probably not a complete line so
+            # we'll save it and append it to the last line of the next buffer
+            # we read
+            if segment is not None:
+                # if the previous chunk starts right from the beginning of line
+                # do not concact the segment to the last line of new chunk
+                # instead, yield the segment first
+                if buffer[-1] is not '\n':
+                    lines[-1] += segment
+                else:
+                    yield segment
+            segment = lines[0]
+            for index in range(len(lines) - 1, 0, -1):
+                yield lines[index]
+        yield segment
+
 __all__ = [
     'bool_from_argv',
     'big_warn',
@@ -92,5 +126,6 @@ __all__ = [
     'to_pickle',
     'typed_from_argv',
     'popen',
+    'reverse_readline',
     'save_git_status',
     ]

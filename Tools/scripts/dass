@@ -12,14 +12,25 @@ dq = das_query(ana01, ana02, ana03)
 
 def form_query(cmd, query_fmt, nargs):
     query = None
-    i = sys.argv.index(cmd)
+    try:
+        i = sys.argv.index(cmd)
+    except ValueError:
+        i = -1
     ok = i >= 0 and i + nargs < len(sys.argv)
     if ok:
         query = query_fmt % tuple(sys.argv[i+1:i+1+nargs])
     return query
 
+def intable(x):
+    try:
+        int(x)
+        return True
+    except ValueError:
+        return False
+
 query_infos = [
     (('file', 'file dataset=%s', 1), lambda s: s.endswith('.root')),
+    (('run', 'run dataset=%s', 1), lambda s: intable(s)),
     ]
 
 found = False

@@ -46,6 +46,8 @@ parser.add_option('-n', '--no-renew-proxies', action='store_false', dest='renew_
                   help='Do not renew proxies first.')
 parser.add_option('--debug-output', action='store_true', default=False,
                   help='Turn on extra debug output (just the full output of the -status command for now).')
+parser.add_option('--keep-exe-code', action='store_true', default=False,
+                  help='Keep the exe exit code in the statuses (e.g. "Retireved_143_50662" instead of just "Retrieved_50662").')
 parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_statuses', default=True,
                   help='Do not shorten statuses in the status table.')
 parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_zeroes', default=True,
@@ -65,6 +67,8 @@ def print_header(s):
     print '\033[1m%s\033[0m' % s
 def print_subheader(s):
     print '\033[32m%s\033[0m' % s
+
+options.retrieved_0_str = 'Retrieved_0_0' if options.keep_exe_code else 'Retrieved_0'
 
 if options.resub_black_list:
     if options.resub_site_control:
@@ -151,14 +155,26 @@ def backdoor_print(filename, l):
 
 def check_fcn(crab_dir, verbose):
     if options.status_only:
-        return crab_status(crab_dir, verbose=verbose, debug=options.debug_output)
+        res = crab_status(crab_dir, verbose=verbose, debug=options.debug_output)
     else:
-        return crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_done_stuck=options.resub_done_stuck, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created, resub_white_codes=options.resub_white_codes, resub_black_codes=options.resub_black_codes)
+        res = crab_check_output(crab_dir, verbose=verbose, debug=options.debug_output, resub_any=options.resub_any, resub_done_stuck=options.resub_done_stuck, resub_none=options.resub_none, site_control=options.resub_site_control, status_until_none_done=options.status_until_none_done, resub_created=options.resub_created, resub_white_codes=options.resub_white_codes, resub_black_codes=options.resub_black_codes)
+    if not options.keep_exe_code:
+        res_final = {}
+        for k,v in res.iteritems():
+            if k.startswith('Retrieved') and k.count('_') == 2:
+                k = k.split('_')
+                k = k[0] + '_' + k[-1]
+            if res_final.has_key(k):
+                res_final[k].extend(v)
+            else:
+                res_final[k] = v
+        res = res_final
+    return res
 
 dirs = crab_dirs_from_argv()
 for x in sys.argv:
     if os.path.isdir(x):
-        # if we have a dir of crab dirs, crab_hadd all the directories in it.
+        # if we have a dir of crab dirs, take all of them
         dirs.extend([d for d in glob.glob(os.path.join(x, '*')) if is_crab_working_dir(d)])
 
 if not dirs:
@@ -299,7 +315,7 @@ while 1:
         statuses = results[d]
         printed = False
         for status in sorted(statuses.keys()):
-            if status == 'Retrieved_0_0' or 'Retrieved' not in status:
+            if status == options.retrieved_0_str or 'Retrieved' not in status:
                 continue
             if not printed:
                 print_subheader('%s:' % d)
@@ -338,9 +354,9 @@ while 1:
     # or perhaps only doing it when the table would be wider than the
     # current terminal (not implemented yet).
     status_columns = sorted(set(sum((res.keys() for res in results.itervalues()), [])))
-    if 'Retrieved_0_0' in status_columns:
-        status_columns.remove('Retrieved_0_0')
-        status_columns = ['Retrieved_0_0'] + status_columns
+    if options.retrieved_0_str in status_columns:
+        status_columns.remove(options.retrieved_0_str)
+        status_columns = [options.retrieved_0_str] + status_columns
 
     status_columns_short = []
     status_columns_xlate = {}
@@ -360,7 +376,7 @@ while 1:
 
             if '0_0' in status_short:
                 status_short = status_short.replace('0_0', '0')
-            elif '_' in status_short:
+            elif '_' in status_short and status_short.count('_') == 2:
                 a,b,c = status_short.split('_')
                 if b == '0':
                     status_short = status_short.replace('0_', '')
@@ -419,7 +435,7 @@ while 1:
     done_stats_info_text = repr(tuple(sorted(done_stats)))
     done = []
     notdone = []
-    magic = 'Retrieved_0_0' if options.resub_any else 'Retrieved_'
+    magic = options.retrieved_0_str if options.resub_any else 'Retrieved_'
     for k,v in results.iteritems():
         statuses_left = set(stat for stat in v.keys() if magic not in stat)
         statuses_left -= done_stats
@@ -441,7 +457,7 @@ while 1:
                 to_resub_done[d] = to_resub[d]
             dirs.remove(d)
             d_statuses = results[d].keys()
-            if len(d_statuses) != 1 or d_statuses[0] != 'Retrieved_0_0':
+            if len(d_statuses) != 1 or d_statuses[0] != options.retrieved_0_str:
                 dirs_done.append((d,) + tuple(d_statuses))
             else:
                 dirs_done.append(d)

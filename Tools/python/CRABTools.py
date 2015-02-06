@@ -236,6 +236,7 @@ def crab_status(working_dir, verbose=True, debug=False):
             'osg-gw-4.t2.ucsd.edu',
             'ce-itb.ultralight.org',
             'cmsgrid03.hep.wisc.edu',
+            'ce1.accre.vanderbilt.edu',
             'ce2.accre.vanderbilt.edu',
             'cms-ce1-osg.rcac.purdue.edu',
             'cms.rc.ufl.edu',
@@ -657,12 +658,30 @@ def crab_get_input_files(working_dir, jobs=None):
         jobs = args.keys()
     return dict((j, args[j]['InputFiles'].split(',')) for j in jobs)
 
+def crab_get_exit_codes(path, job=None):
+    ret = [None, None] # wrapper, exe
+    for elem in crab_fjr_xml(path, job).findall('FrameworkError'):
+        i, code = None, None
+        for a,b in elem.items():
+            if a == 'Type':
+                if b == 'WrapperExitCode' or b == 'Fatal Exception':
+                    i = 0
+                elif b == 'ExeExitCode':
+                    i = 1
+            elif a == 'ExitStatus':
+                code = int(b)
+        if i is None or code is None:
+            raise ValueError('could not get codes')
+        ret[i] = code
+    return tuple(ret)
+
 def crab_output_files_from_fjr(working_dir, raise_on_missing=True):
     fjrs = glob.glob(os.path.join(working_dir, 'res', 'crab_fjr*xml'))
     fjrs.sort(key = lambda x: int(x.split('_')[-1].split('.xml')[0]))
     files = []
 
     # Fragile xml parsing! Also assumes only one output file per job.
+    # JMTBAD use crab_get_exit_codes
     wrapper_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="WrapperExitCode"/>')
     exe_re = re.compile(r'<FrameworkError ExitStatus="(.+)" Type="ExeExitCode"/>')
     filename_re = re.compile(r'.*(/store/user.*root)')
@@ -694,14 +713,8 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     expected = crab_get_njobs(working_dir)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
-    on_resilient = False
     on_store = False
     cfg = crab_cfg_parser(working_dir)
-    try:
-        storage_path = cfg.get('USER', 'storage_path')
-        on_resilient = 'resilient' in storage_path
-    except NoOptionError:
-        pass
     try:
         storage_element = cfg.get('USER', 'storage_element')
         on_store = storage_element == 'T3_US_FNALLPC'
@@ -710,11 +723,11 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
 
     files = []
     
-    if on_resilient:
-        pfns = [crab_analysis_file_pfn(path) for path in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml'))]
-        files = ['dcap://cmsdca3.fnal.gov:24145/pnfs/fnal.gov/usr/cms/WAX/resilient/' + pfn.split('/resilient/')[1] for pfn in pfns] # JMTBAD
-    elif on_store:
-        pfns = [crab_analysis_file_pfn(path) for path in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml'))]
+    if on_store:
+        pfns = []
+        for path in glob.glob(os.path.join(working_dir, 'res/crab_fjr*xml')):
+            if crab_get_exit_codes(path) == (0,0):
+                pfns.append(crab_analysis_file_pfn(path))
         files = ['root://cmsxrootd.fnal.gov//store' + pfn.split('/store')[1] for pfn in pfns] # JMTBAD
     else:    
         files = glob.glob(os.path.join(working_dir, 'res/*root'))
@@ -728,10 +741,10 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     sexpected = set(xrange(1,expected+1))
     sjobs = set(job_nums)
     if sjobs != sexpected:
-        print '\033[36;7m files found %r not what expected \033[m' % sorted(sjobs)
+        print '\033[36;7m %i files found %s not what expected \033[m' % (len(sjobs), crabify_list(sorted(sjobs)))
 
         missing = sorted(sexpected - sjobs)
-        print '\033[36;7m     missing: %r \033[m' % missing
+        print '\033[36;7m    %i missing: %r \033[m' % (len(missing), crabify_list(missing))
 
         to_drop = []
         for job, nums_and_fs in job_nums.iteritems():
@@ -771,7 +784,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         os.chmod(new_name, 0644)
     else:
         hadd(new_name, files, chunk_size)
-        
+
     return new_name
 
 def crab_event_summary_from_stdout(working_dir, path=None):

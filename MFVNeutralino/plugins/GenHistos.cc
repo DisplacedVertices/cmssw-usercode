@@ -69,6 +69,13 @@ private:
   TH2F* h_min_dR_vs_lspbeta;
   TH2F* h_max_dR_vs_lspbetagamma;
   TH2F* h_min_dR_vs_lspbetagamma;
+  TH1F* h_lsp_daughters_pt;
+  TH1F* h_lsp_daughters_eta;
+  TH1F* h_lsp_max_dR;
+  TH1F* h_lsp_min_dR;
+  TH1F* h_lsp_daughters_jets_dR;
+  TH1F* h_lsp_daughters_jets_nmatch;
+  TH1F* h_lsp_ntracks;
 
   TH1F* h_status1origins;
 
@@ -166,7 +173,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Stranges[i]->BookRapEta(200, "0.1");
     Stranges[i]->BookPhi(50, "0.125");
     Stranges[i]->BookDxy(200, -2, 2, "0.02");
-    Stranges[i]->BookDz (200, -20, 20, "0.2");
+    Stranges[i]->BookDz (200, -2, 2, "0.02");
     Stranges[i]->BookQ();
 
     Bottoms[i] = bkh_factory->make(TString::Format("Bottoms#%i", i), TString::Format("bottom #%i", i));
@@ -177,8 +184,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Bottoms[i]->BookM (200, 0, 2000, "10");
     Bottoms[i]->BookRapEta(200, "0.1");
     Bottoms[i]->BookPhi(50, "0.125");
-    Bottoms[i]->BookDxy(200, -2, 20, "0.02");
-    Bottoms[i]->BookDz (200, -20, 20, "0.2");
+    Bottoms[i]->BookDxy(200, -2, 2, "0.02");
+    Bottoms[i]->BookDz (200, -2, 2, "0.02");
     Bottoms[i]->BookQ();
     
     Tops[i] = bkh_factory->make(TString::Format("Tops#%i", i), TString::Format("top #%i", i));
@@ -190,7 +197,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Tops[i]->BookRapEta(200, "0.1");
     Tops[i]->BookPhi(50, "0.125");
     Tops[i]->BookDxy(200, -2, 2, "0.02");
-    Tops[i]->BookDz (200, -20, 20, "0.2");
+    Tops[i]->BookDz (200, -2, 2, "0.02");
     Tops[i]->BookQ();
     
     Ws[i] = bkh_factory->make(TString::Format("Ws#%i", i), TString::Format("w #%i", i));
@@ -202,7 +209,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Ws[i]->BookRapEta(200, "0.1");
     Ws[i]->BookPhi(50, "0.125");
     Ws[i]->BookDxy(200, -2, 2, "0.02");
-    Ws[i]->BookDz (200, -20, 20, "0.2");
+    Ws[i]->BookDz (200, -2, 2, "0.02");
     Ws[i]->BookQ();
 
     BottomsFromTops[i] = bkh_factory->make(TString::Format("BottomsFromTops#%i", i), TString::Format("bottom from top #%i", i));
@@ -214,7 +221,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     BottomsFromTops[i]->BookRapEta(200, "0.1");
     BottomsFromTops[i]->BookPhi(50, "0.125");
     BottomsFromTops[i]->BookDxy(200, -2, 2, "0.02");
-    BottomsFromTops[i]->BookDz (200, -20, 20, "0.2");
+    BottomsFromTops[i]->BookDz (200, -2, 2, "0.02");
     BottomsFromTops[i]->BookQ();
 
     for (int j = 0; j < 2; ++j) {
@@ -227,7 +234,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
       WDaughters[i][j]->BookRapEta(200, "0.1");
       WDaughters[i][j]->BookPhi(50, "0.125");
       WDaughters[i][j]->BookDxy(200, -2, 2, "0.02");
-      WDaughters[i][j]->BookDz (200, -20, 20, "0.2");
+      WDaughters[i][j]->BookDz (200, -2, 2, "0.02");
       WDaughters[i][j]->BookQ();
     }
   }
@@ -241,7 +248,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Electrons->BookRapEta(200, "0.1");
   Electrons->BookPhi(50, "0.125");
   Electrons->BookDxy(200, -2, 2, "0.02");
-  Electrons->BookDz (200, -20, 20, "0.2");
+  Electrons->BookDz (200, -2, 2, "0.02");
   Electrons->BookQ();
 
   Muons = bkh_factory->make("Muons", "muons");
@@ -253,7 +260,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Muons->BookRapEta(200, "0.1");
   Muons->BookPhi(50, "0.125");
   Muons->BookDxy(200, -2, 2, "0.02");
-  Muons->BookDz (200, -20, 20, "0.2");
+  Muons->BookDz (200, -2, 2, "0.02");
   Muons->BookQ();
 
   Taus = bkh_factory->make("Taus", "taus");
@@ -265,7 +272,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Taus->BookRapEta(200, "0.1");
   Taus->BookPhi(50, "0.125");
   Taus->BookDxy(200, -2, 2, "0.02");
-  Taus->BookDz (200, -20, 20, "0.2");
+  Taus->BookDz (200, -2, 2, "0.02");
   Taus->BookQ();
 
   LightLeptons= bkh_factory->make("LightLeptons", "light leptons");
@@ -277,7 +284,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   LightLeptons->BookRapEta(200, "0.1");
   LightLeptons->BookPhi(50, "0.125");
   LightLeptons->BookDxy(200, -2, 2, "0.02");
-  LightLeptons->BookDz (200, -20, 20, "0.2");
+  LightLeptons->BookDz (200, -2, 2, "0.02");
   LightLeptons->BookQ();
 
   Leptons = bkh_factory->make("Leptons", "leptons");
@@ -289,7 +296,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Leptons->BookRapEta(200, "0.1");
   Leptons->BookPhi(50, "0.125");
   Leptons->BookDxy(200, -2, 2, "0.02");
-  Leptons->BookDz (200, -20, 20, "0.2");
+  Leptons->BookDz (200, -2, 2, "0.02");
   Leptons->BookQ();
 
   h_lsp_dist2d = fs->make<TH1F>("h_lsp_dist2d", ";2D distance between LSP decay positions (cm);Events/0.0025 cm", 400, 0, 1);
@@ -316,6 +323,13 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", ";LSP #beta;min #DeltaR between partons", 100, 0, 1, 100, 0, 5);
   h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", ";LSP #beta#gamma;max #DeltaR between partons", 100, 0, 10, 100, 0, 5);
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
+  h_lsp_daughters_pt = fs->make<TH1F>("h_lsp_daughters_pt", ";p_{T} of partons (GeV);LSP daughter partons/1 GeV", 500, 0, 500);
+  h_lsp_daughters_eta = fs->make<TH1F>("h_lsp_daughters_eta", ";#eta of partons;LSP daughter partons/0.16", 50, -4, 4);
+  h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
+  h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
+  h_lsp_daughters_jets_dR = fs->make<TH1F>("h_lsp_daughters_jets_dR", ";#DeltaR between partons and jets;parton-jet pairs/0.05", 100, 0, 5);
+  h_lsp_daughters_jets_nmatch = fs->make<TH1F>("h_lsp_daughters_jets_nmatch", ";number of genJets w/ #DeltaR < 0.4;LSP daughter partons", 10, 0, 10);
+  h_lsp_ntracks = fs->make<TH1F>("h_lsp_ntracks", ";total number of constituents in genJets w/ #DeltaR < 0.4;LSPs", 300, 0, 300);
 
   h_status1origins = fs->make<TH1F>("status1origins", "", 8, 0, 8);
   TAxis* xax = h_status1origins->GetXaxis();
@@ -415,6 +429,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
 
+  edm::Handle<reco::GenJetCollection> gen_jets;
+  event.getByLabel(gen_jet_src, gen_jets);
+
   const reco::GenParticle& for_vtx = gen_particles->at(2);
   const int for_vtx_id = abs(for_vtx.pdgId());
   die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
@@ -489,15 +506,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	float dz [4] = {0}; 
 	float r2d[4] = {0};
 	float r3d[4] = {0};
-	for (int i = 0; i < 4; ++i) {
-	  dx [i] = particles[i]->vx() - x0;
-	  dy [i] = particles[i]->vy() - y0;
-	  dz [i] = particles[i]->vz() - z0;
-	  r2d[i] = mag(dx[i], dy[i]);
-	  r3d[i] = mag(dx[i], dy[i], dz[i]);
-	  h_vtx[i]->Fill(dx[i], dy[i]);
-	  h_r2d[i]->Fill(r2d[i]);
-	  h_r3d[i]->Fill(r3d[i]);
+	for (int j = 0; j < 4; ++j) {
+	  dx [j] = particles[j]->vx() - x0;
+	  dy [j] = particles[j]->vy() - y0;
+	  dz [j] = particles[j]->vz() - z0;
+	  r2d[j] = mag(dx[j], dy[j]);
+	  r3d[j] = mag(dx[j], dy[j], dz[j]);
+	  h_vtx[j]->Fill(dx[j], dy[j]);
+	  h_r2d[j]->Fill(r2d[j]);
+	  h_r3d[j]->Fill(r3d[j]);
 	}
       
 	h_t->Fill(r3d[0]/lspbeta/30);
@@ -523,19 +540,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	      if (fromq)  tofill.push_back(6);
 	      if (from21 && !from22 && !fromq) tofill.push_back(7);
 	      if (from22 && !from21 && !fromq) tofill.push_back(8);
-	      for (int i : tofill) {
-		h_vtx[i]->Fill(dx, dy);
-		h_r2d[i]->Fill(r2d);
-		h_r3d[i]->Fill(r3d);
+	      for (int j : tofill) {
+		h_vtx[j]->Fill(dx, dy);
+		h_r2d[j]->Fill(r2d);
+		h_r3d[j]->Fill(r3d);
 	      }
 	    }
 	  }
 
 	float min_dR =  1e99;
 	float max_dR = -1e99;
-	for (int i = 0; i < ndau; ++i) {
-	  for (int j = i+1; j < ndau; ++j) {
-	    float dR = reco::deltaR(*daughters[i], *daughters[j]);
+	for (int j = 0; j < ndau; ++j) {
+	  for (int k = j+1; k < ndau; ++k) {
+	    float dR = reco::deltaR(*daughters[j], *daughters[k]);
 	    if (dR < min_dR)
 	      min_dR = dR;
 	    if (dR > max_dR)
@@ -549,6 +566,54 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR);
 	h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
 	h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
+
+        const int lsp_ndau = 5;
+        const reco::GenParticle* lsp_daughters[lsp_ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
+
+        int lsp_ntracks = 0;
+        float lsp_min_dR =  1e99;
+        float lsp_max_dR = -1e99;
+        for (int j = 0; j < lsp_ndau; ++j) {
+          h_lsp_daughters_pt->Fill(lsp_daughters[j]->pt());
+          h_lsp_daughters_eta->Fill(lsp_daughters[j]->eta());
+
+          int nmatch = 0;
+          for (const reco::GenJet& jet : *gen_jets) {
+            h_lsp_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
+            if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
+              ++nmatch;
+            }
+          }
+          h_lsp_daughters_jets_nmatch->Fill(nmatch);
+
+          if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
+
+          if (is_lepton(lsp_daughters[j])) {
+           ++ lsp_ntracks;
+          } else {
+            for (const reco::GenJet& jet : *gen_jets) {
+              if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
+                for (const reco::GenParticle* g : jet.getGenConstituents())
+                  if (g->charge())
+                    ++lsp_ntracks;
+              }
+            }
+          }
+
+          for (int k = j+1; k < lsp_ndau; ++k) {
+            if (is_neutrino(lsp_daughters[k]) || fabs(lsp_daughters[k]->eta()) > 2.5) continue;
+            float dR = reco::deltaR(*lsp_daughters[j], *lsp_daughters[k]);
+            if (dR < lsp_min_dR)
+              lsp_min_dR = dR;
+            if (dR > lsp_max_dR)
+              lsp_max_dR = dR;
+          }
+        }
+
+        h_lsp_ntracks->Fill(lsp_ntracks);
+        h_lsp_min_dR->Fill(lsp_min_dR);
+        h_lsp_max_dR->Fill(lsp_max_dR);
+
       }
 
       h_lsp_dist2d->Fill(mag(mci.stranges[0]->vx() - mci.stranges[1]->vx(),
@@ -645,15 +710,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	  float dz [4] = {0}; 
 	  float r2d[4] = {0};
 	  float r3d[4] = {0};
-	  for (int i = 2; i < 4; ++i) {
-	    dx [i] = particles[i]->vx() - x0;
-	    dy [i] = particles[i]->vy() - y0;
-	    dz [i] = particles[i]->vz() - z0;
-	    r2d[i] = mag(dx[i], dy[i]);
-	    r3d[i] = mag(dx[i], dy[i], dz[i]);
-	    h_vtx[i]->Fill(dx[i], dy[i]);
-	    h_r2d[i]->Fill(r2d[i]);
-	    h_r3d[i]->Fill(r3d[i]);
+	  for (int j = 2; j < 4; ++j) {
+	    dx [j] = particles[j]->vx() - x0;
+	    dy [j] = particles[j]->vy() - y0;
+	    dz [j] = particles[j]->vz() - z0;
+	    r2d[j] = mag(dx[j], dy[j]);
+	    r3d[j] = mag(dx[j], dy[j], dz[j]);
+	    h_vtx[j]->Fill(dx[j], dy[j]);
+	    h_r2d[j]->Fill(r2d[j]);
+	    h_r3d[j]->Fill(r3d[j]);
 	  }
 	
 
@@ -675,19 +740,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 		if (from22) tofill.push_back(5);
 		if (from21 && !from22 ) tofill.push_back(7);
 		if (from22 && !from21 ) tofill.push_back(8);
-		for (int i : tofill) {
-		  h_vtx[i]->Fill(dx, dy);
-		  h_r2d[i]->Fill(r2d);
-		  h_r3d[i]->Fill(r3d);
+		for (int j : tofill) {
+		  h_vtx[j]->Fill(dx, dy);
+		  h_r2d[j]->Fill(r2d);
+		  h_r3d[j]->Fill(r3d);
 		}
 	      }
 	    }	
 	
 	  float min_dR =  1e99;
 	  float max_dR = -1e99;
-	  for (int i = 0; i < ndau; ++i) {
-	    for (int j = i+1; j < ndau; ++j) {
-	      float dR = reco::deltaR(*daughters[i], *daughters[j]);
+	  for (int j = 0; j < ndau; ++j) {
+	    for (int k = j+1; k < ndau; ++k) {
+	      float dR = reco::deltaR(*daughters[j], *daughters[k]);
 	      if (dR < min_dR)
 		min_dR = dR;
 	      if (dR > max_dR)
@@ -785,9 +850,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
   }
 
-
-  edm::Handle<reco::GenJetCollection> gen_jets;
-  event.getByLabel(gen_jet_src, gen_jets);
 
   NJets->Fill(gen_jets->size());
   int nbjets = 0;

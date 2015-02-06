@@ -11,7 +11,6 @@
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/Math/interface/deltaR.h"
-#include "CMGTools/External/interface/PileupJetIdentifier.h"
 
 class LeptonicNBAnalysis : public edm::EDAnalyzer {
  public:
@@ -177,9 +176,9 @@ void LeptonicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jet_src, jets);
 
+  assert(0); // puid not in 5324 or sl6
   //edm::Handle<edm::ValueMap<float> > puJetIdMva;
   //event.getByLabel("puJetMvaChs", "fullDiscriminant", puJetIdMva);
-
   edm::Handle<edm::ValueMap<int> > puJetIdFlag;
   event.getByLabel("puJetMvaChs", "fullId", puJetIdFlag);
 
@@ -190,10 +189,10 @@ void LeptonicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
   int nbtags_nocuts = 0;
   for (int i = 0; i < int(jets->size()); ++i) {
     pat::JetRef jetref(jets, i);
+/*
     //float mva   = (*puJetIdMva)[jetref];
     int idflag = (*puJetIdFlag)[jetref];
 
-/*
     std::cout << "jet " << i << " pt " << jetref->pt() << " eta " << jetref->eta() << " PU JetID MVA " << mva;
     if (PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kLoose)) {
       std::cout << " pass loose wp";
@@ -205,11 +204,11 @@ void LeptonicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
       std::cout << " pass tight wp";
     }
     std::cout << "\n";
-*/
 
     if (PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kLoose)) {
       ++njets_puJetId;
     }
+*/
 
     const pat::Jet& jet = jets->at(i);
     h_jet_pt->Fill(jet.pt());
@@ -226,7 +225,7 @@ void LeptonicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
       }
     }
     h_jet_deltaR->Fill(jet_deltaR);
-    if (jet.pt() > min_jet_pt && fabs(jet.eta()) < max_jet_eta && jet_deltaR && PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kLoose)) {
+    if (jet.pt() > min_jet_pt && fabs(jet.eta()) < max_jet_eta && jet_deltaR) { // && PileupJetIdentifier::passJetId(idflag, PileupJetIdentifier::kLoose)) {
       ++njets;
       if (bdisc > bdisc_min) {
         ++nbtags;

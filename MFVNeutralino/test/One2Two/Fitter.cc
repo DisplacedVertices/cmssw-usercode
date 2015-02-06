@@ -428,6 +428,7 @@ namespace mfv {
       barlow_beeston(env.get_bool("barlow_beeston", true)),
       bend_bkg(env.get_bool("bend_bkg", false)),
       allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
+      run_mnseek(env.get_bool("run_mnseek", true)),
       run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
@@ -462,6 +463,7 @@ namespace mfv {
     printf("barlow_beeston: %i\n", barlow_beeston);
     printf("bend_bkg: %i\n", bend_bkg);
     printf("allow_negative_mu_sig: %i\n", allow_negative_mu_sig);
+    printf("run_mnseek: %i\n", run_mnseek);
     printf("run_minos: %i\n", run_minos);
     printf("draw_bkg_templates: %i\n", draw_bkg_templates);
     printf("fix_nuis1: %i\n", fix_nuis1);
@@ -493,6 +495,7 @@ namespace mfv {
     t_config->Branch("barlow_beeston", const_cast<bool*>(&barlow_beeston));
     t_config->Branch("bend_bkg", const_cast<bool*>(&bend_bkg));
     t_config->Branch("allow_negative_mu_sig", const_cast<bool*>(&allow_negative_mu_sig));
+    t_config->Branch("run_mnseek", const_cast<bool*>(&run_mnseek));
     t_config->Branch("run_minos", const_cast<bool*>(&run_minos));
     t_config->Branch("fix_nuis1", const_cast<bool*>(&fix_nuis1));
     t_config->Branch("start_nuis0", const_cast<double*>(&start_nuis0));
@@ -557,7 +560,7 @@ namespace mfv {
     t_fit_info->SetAlias("b_true", "true_pars[1]");
   }    
 
-  void Fitter::draw_likelihood(const test_stat_t& t) {
+  void Fitter::draw_likelihood(const test_stat_t& t, const char* ex) {
     //printf("draw_likelihood: ");
 
     struct scan_t {
@@ -597,6 +600,10 @@ namespace mfv {
 
     TDirectory* cwd = gDirectory;
 
+    TString ex_(ex);
+    if (ex)
+      ex_ += "_";
+
     for (int sb = 1; sb >= 0; --sb) {
       const char* sb_or_b = sb ? "sb" : "b";
       //printf("%s: ", sb_or_b); fflush(stdout);
@@ -610,7 +617,7 @@ namespace mfv {
       if (draw_bkg_templates)
         cwd->cd();
 
-      TH2F* h1 = new TH2F(TString::Format("h_likelihood_%s_scannuis", sb_or_b),
+      TH2F* h1 = new TH2F(TString::Format("h_likelihood_%s%s_scannuis", ex_.Data(), sb_or_b),
                           TString::Format("Best %s fit: %s;nuis. par 0;nuis. par 1", sb_or_b_nice, ml.title().c_str()),
                           nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
                           nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
@@ -640,7 +647,7 @@ namespace mfv {
       if (draw_bkg_templates)
         cwd->cd();
 
-      TH2F* h2 = new TH2F(TString::Format("h_likelihood_%s_scanmus", sb_or_b),
+      TH2F* h2 = new TH2F(TString::Format("h_likelihood_%s%s_scanmus", ex_.Data(), sb_or_b),
                           TString::Format("Best %s fit: %s;#mu_{sig};#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
                           mu_scan[0].n, mu_scan[0].min, mu_scan[0].max,
                           mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
@@ -938,7 +945,12 @@ namespace mfv {
     m->SetPrintLevel(print_level);
     m->SetFCN(fit::minfcn);
     int ierr;
-    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.5, 0, (mu_sig_start > 0 ? mu_sig_start : (allow_negative_mu_sig ? 0 : 500)), ierr);
+    double mu_sig_lo = 0, mu_sig_hi = 500;
+    if (mu_sig_start > 0)
+      mu_sig_hi = mu_sig_start;
+    if (allow_negative_mu_sig)
+      mu_sig_lo = -500;
+    m->mnparm(0, "mu_sig", (mu_sig_start > 0 ? mu_sig_start : 0), 0.5, mu_sig_lo, mu_sig_hi, ierr);
     m->mnparm(1, "mu_bkg", fit::a_data_integ, 0.5, 0, 500, ierr);
 
     const size_t npars = bkg_templates->at(0)->npars();
@@ -968,10 +980,12 @@ namespace mfv {
 
     m->Command("SET STRATEGY 2");
 
-    if (print_level > 0)
-      printf("call mnseek\n");
-    double seek_arg[2] = {100, 100};
-    m->mnexcm("SEE", seek_arg, 2, ierr);
+    if (run_mnseek) {
+      if (print_level > 0)
+        printf("call mnseek\n");
+      double seek_arg[2] = {100, 100};
+      m->mnexcm("SEE", seek_arg, 2, ierr);
+    }
 
     if (print_level > 0)
       printf("call migrad\n");
@@ -1332,6 +1346,28 @@ namespace mfv {
             printf("]\n");
           }
         }
+
+        printf("toy_expected [ ");
+        for (int i = 1; i <= fit::n_bins; ++i)
+          printf("%i ", int(h_toy_expected->GetBinContent(i)));
+        printf("]\n");
+      }
+
+      if (0) {
+        fit::set_data_no_check(h_toy_expected);
+        printf("start t076\n");
+        test_stat_t t076 = calc_test_stat(0.76);
+        t076.print("0.76");
+        printf("start t101\n");
+        test_stat_t t101 = calc_test_stat(1.01);
+        t101.print("1.01");
+
+        fit::extra_prints=0;
+        print_level=0;
+        draw_likelihood(t076, "0p76");
+        draw_likelihood(t101, "1p01");
+
+        sig_limit_scan = 1e99;
       }
 
       while (sig_limit_scan < sig_limit_hi) {
@@ -1345,7 +1381,10 @@ namespace mfv {
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
         if (print_toys) {
-          printf("sig_limit: %f  mu_sig_limit: %f ", sig_limit_scan, mu_sig_limit);
+          printf("sig_limit: %f  mu_sig_limit: %f data: [ ", sig_limit_scan, mu_sig_limit);
+          for (int i = 1; i <= fit::n_bins; ++i)
+            printf("%i ", int(fit::h_data->GetBinContent(i)));
+          printf("] ");
           t_obs_limit_.print("t_obs_limit");
         }
         else
@@ -1430,31 +1469,33 @@ namespace mfv {
 
       printf("n_calls: %i time for limit: ", fit::n_calls); tsw_limit.Print();
 
-      std::vector<double> sig_limit_errs(pval_limits.size(), 0.);
-      TGraphErrors* g = new TGraphErrors(sig_limits.size(), &sig_limits[0], &pval_limits[0], &sig_limit_errs[0], &pval_limit_errs[0]);
-      g->SetMarkerStyle(5);
-      TF1* interp_fcn = new TF1("interp_fcn", "[0]*exp(-[1]*x)", bracket_sig_limit.front(), bracket_sig_limit.back());
-      interp_fcn->SetParameters(0.5, 0.3);
-      TFitResultPtr res = g->Fit(interp_fcn, "RS");
-      const double a  = res->Parameter(0);
-      const double b  = res->Parameter(1);
-      const double ea = res->ParError(0);
-      const double eb = res->ParError(1);
-      const double cov = res->CovMatrix(0,1);
-      const double dfda = 1/a/b;
-      sig_limit = -log(limit_alpha/a)/b;
-      const double dfdb = -sig_limit/b;
-      sig_limit_err = sqrt(dfda*dfda * ea*ea + dfdb*dfdb * eb*eb + 2 * dfda * dfdb * cov);
-      sig_limit_fit_n = bracket_sig_limit.size();
-      sig_limit_fit_a     = a;
-      sig_limit_fit_b     = b;
-      sig_limit_fit_a_err = ea;
-      sig_limit_fit_b_err = eb;
-      sig_limit_fit_prob = res->Prob();
-      g->SetName("g_limit_bracket_fit");
-      g->Write();
+      if (sig_limits.size()) {
+        std::vector<double> sig_limit_errs(pval_limits.size(), 0.);
+        TGraphErrors* g = new TGraphErrors(sig_limits.size(), &sig_limits[0], &pval_limits[0], &sig_limit_errs[0], &pval_limit_errs[0]);
+        g->SetMarkerStyle(5);
+        TF1* interp_fcn = new TF1("interp_fcn", "[0]*exp(-[1]*x)", bracket_sig_limit.front(), bracket_sig_limit.back());
+        interp_fcn->SetParameters(0.5, 0.3);
+        TFitResultPtr res = g->Fit(interp_fcn, "RS");
+        const double a  = res->Parameter(0);
+        const double b  = res->Parameter(1);
+        const double ea = res->ParError(0);
+        const double eb = res->ParError(1);
+        const double cov = res->CovMatrix(0,1);
+        const double dfda = 1/a/b;
+        sig_limit = -log(limit_alpha/a)/b;
+        const double dfdb = -sig_limit/b;
+        sig_limit_err = sqrt(dfda*dfda * ea*ea + dfdb*dfdb * eb*eb + 2 * dfda * dfdb * cov);
+        sig_limit_fit_n = bracket_sig_limit.size();
+        sig_limit_fit_a     = a;
+        sig_limit_fit_b     = b;
+        sig_limit_fit_a_err = ea;
+        sig_limit_fit_b_err = eb;
+        sig_limit_fit_prob = res->Prob();
+        g->SetName("g_limit_bracket_fit");
+        g->Write();
 
-      printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
+        printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
+      }
 
       delete h_toy_expected;
       h_toy_expected = 0;

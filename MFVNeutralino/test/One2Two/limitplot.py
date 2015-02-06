@@ -5,11 +5,12 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 ps = plot_saver('plots/mfvlimits', log=False, size=(600,600))
 
+which = 'BBv9'
 draw_gluglu = False
 
 def fmt(t, title, color):
     t.SetFillColor(color)
-    t.SetTitle('%s;mass (GeV);#sigma #times BR (fb)' % title)
+    t.SetTitle('%s;neutralino mass (GeV);#sigma #times BR (fb)' % title)
     return t
 
 def tge(xye, title, color):
@@ -41,7 +42,7 @@ def tgae(x, y, exl, exh, eyl, eyh, title, color):
     return fmt(t, title, color)
 
 if draw_gluglu:
-    gluglu = [eval(x.strip()) for x in open('gluglu.csv').readlines() if x.strip()]
+    gluglu = [eval(x.strip()) for x in open('/afs/fnal.gov/files/home/room3/tucker/gluglu.csv').readlines() if x.strip()]
     gluglu = [(z[0],z[1]*1000,z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
     g_gluglu = tge(gluglu, 'hi', 9)
     g_gluglu.Draw('A3')
@@ -51,7 +52,7 @@ taus = [
     ('0100um', '#tau = 100 #mum'),
     ('0300um', '#tau = 300 #mum'),
     ('1000um', '#tau = 1 mm'),
-    ('9900um', '#tau = 9.9 mm'),
+    ('9900um', '#tau = 10 mm'),
     ]
 
 watches = [
@@ -66,7 +67,7 @@ watches = [
 nn = -1
 for tau, tau_nice in taus:
     masses = [200, 300, 400, 600, 800, 1000]
-    if tau == '0100um' or tau == '0300um':
+    if tau == '0100um': # or tau == '0300um':
         print 'skip', tau
         nn -= len(masses)
         continue
@@ -85,8 +86,8 @@ for tau, tau_nice in taus:
             print 'skip', tau, mass
             nn -= 1
             continue
-        fn  = 'outs/BBv8_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (nn, nn)
-        fn2 = 'outs/BBv8_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (nn, nn)
+        fn  = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
+        fn2 = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
         print nn, fn, fn2
         nn -= 1
         vals = [None]*6

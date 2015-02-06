@@ -58,6 +58,8 @@ class CRABSubmitter:
                 batch_name = arg.replace('cs_name=', '')
                 break
 
+        self.create_only = 'cs_create_only' in sys.argv
+
         if '/' in batch_name:
             raise ValueError('/ not allowed in batch name')
         self.batch_name = batch_name
@@ -383,6 +385,9 @@ exit $ECODE
         return script_fn, script
 
     def submit(self, sample, cleanup_crab_cfg=True, cleanup_pset=False, cleanup_pset_pyc=True, cleanup_manual_script=True, create_only=False):
+        if self.create_only:
+            create_only = self.create_only
+
         print 'batch %s, submit sample %s' % (self.batch_name, sample.name)
 
         cleanup = []

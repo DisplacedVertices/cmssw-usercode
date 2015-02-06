@@ -5,6 +5,7 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH2F.h"
+#include "TLegend.h"
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TTree.h"
@@ -20,6 +21,18 @@ const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
 const int nbkg = 5;
 const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
 float weights[nbkg] = {4.849, 0.259, 0.037, 0.188, 0.075};
+
+/*
+const int nbkg = 3;
+const char* samples[nbkg] = {"ttbardilep", "ttbarhadronic", "ttbarsemilep"};
+float weights[nbkg] = {0.037, 0.188, 0.075};
+*/
+
+/*
+const int nbkg = 2;
+const char* samples[nbkg] = {"qcdht0500", "qcdht1000"};
+float weights[nbkg] = {4.849, 0.259};
+*/
 
 /*
 const int nbkg = 5;
@@ -221,25 +234,45 @@ int main(int argc, const char* argv[]) {
   h_c1v_dbv1_dbv0->Write();
 
   TCanvas* c_dvv = new TCanvas("c_dvv", "c_dvv", 700, 700);
+  TLegend* l_dvv = new TLegend(0.35,0.75,0.85,0.85);
+  h_2v_dvv->SetTitle(";d_{VV} (cm);events");
   h_2v_dvv->SetLineColor(kBlue);
   h_2v_dvv->SetLineWidth(3);
   h_2v_dvv->Scale(251./h_2v_dvv->Integral());
+  h_2v_dvv->SetStats(0);
   h_2v_dvv->Draw();
+  l_dvv->AddEntry(h_2v_dvv, "two-vertex events");
   h_c1v_dvv->SetLineColor(kRed);
   h_c1v_dvv->SetLineWidth(3);
   h_c1v_dvv->Scale(251./h_c1v_dvv->Integral());
+  h_c1v_dvv->SetStats(0);
   h_c1v_dvv->Draw("sames");
+  l_dvv->AddEntry(h_c1v_dvv, "constructed from only-one-vertex events");
+  l_dvv->SetFillColor(0);
+  l_dvv->Draw();
+  c_dvv->SetTickx();
+  c_dvv->SetTicky();
   c_dvv->Write();
 
   TCanvas* c_absdphivv = new TCanvas("c_absdphivv", "c_absdphivv", 700, 700);
+  TLegend* l_absdphivv = new TLegend(0.25,0.75,0.75,0.85);
+  h_2v_absdphivv->SetTitle(";|#Delta#phi_{VV}|;events");
   h_2v_absdphivv->SetLineColor(kBlue);
   h_2v_absdphivv->SetLineWidth(3);
   h_2v_absdphivv->Scale(251./h_2v_absdphivv->Integral());
+  h_2v_absdphivv->SetStats(0);
   h_2v_absdphivv->Draw();
+  l_absdphivv->AddEntry(h_2v_absdphivv, "two-vertex events");
   h_c1v_absdphivv->SetLineColor(kRed);
   h_c1v_absdphivv->SetLineWidth(3);
   h_c1v_absdphivv->Scale(251./h_c1v_absdphivv->Integral());
+  h_c1v_absdphivv->SetStats(0);
   h_c1v_absdphivv->Draw("sames");
+  l_absdphivv->AddEntry(h_c1v_absdphivv, "constructed from only-one-vertex events");
+  l_absdphivv->SetFillColor(0);
+  l_absdphivv->Draw();
+  c_absdphivv->SetTickx();
+  c_absdphivv->SetTicky();
   c_absdphivv->Write();
 
   fh->Close();

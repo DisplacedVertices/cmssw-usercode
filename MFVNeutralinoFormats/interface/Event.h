@@ -199,6 +199,7 @@ struct MFVEvent {
   float jet_sum_ht() const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f); }
 
   static uchar encode_jet_id(int pu_level, int bdisc_level) {
+    assert(pu_level == 0);
     uchar id = 0;
     assert(pu_level >= 0 && pu_level <= 3);
     assert(bdisc_level >= 0 && bdisc_level <= 3);
@@ -207,10 +208,12 @@ struct MFVEvent {
   }
 
   bool pass_nopu(int w, int level) const {
+    return false;
     return (jet_id[w] & 3) >= level + 1;
   }
   
   int njetsnopu(int level) const {
+    return -1;
     int c = 0;
     for (int i = 0, ie = njets(); i < ie; ++i)
       if (pass_nopu(i, level))

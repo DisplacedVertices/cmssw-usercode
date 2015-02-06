@@ -20,21 +20,27 @@ def add_analyzer(process, name, **kwargs):
 
 def file_event_from_argv(process):
     '''Set the filename and event to run on from argv.'''
-    file = None
+    files = []
     nums = []
     for arg in sys.argv[1:]:
         if arg.endswith('.root'):
-            file = arg
+            files.append(arg)
         else:
             try:
                 nums.append(int(arg))
             except ValueError:
                 pass
-    if file is not None:
-        if not file.startswith('/store') and not file.startswith('root://'):
-            file = 'file:' + file
-        print 'filename from argv:', file
-        process.source.fileNames = [file]
+    if files:
+        files_ = []
+        for file in files:
+            if not file.startswith('/store') and not file.startswith('root://'):
+                file = 'file:' + file
+            files_.append(file)
+        files = files_
+        print 'files from argv:'
+        for file in files:
+            print file
+        process.source.fileNames = files
     else:
         print 'file_event_from_argv warning: no filename found'
     l = len(nums)

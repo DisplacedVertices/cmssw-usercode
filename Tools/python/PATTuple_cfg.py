@@ -25,7 +25,6 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
     from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string('pat.root'),
-                                   SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p')),
                                    outputCommands = cms.untracked.vstring(*patEventContent),
                                    )
     process.outp = cms.EndPath(process.out)
@@ -154,25 +153,25 @@ def pat_tuple_process(runOnMC=True, suppress_stdout=True):
     processpostfix('selectedPatMuons').cut = process.jtupleParams.muonCut
     processpostfix('selectedPatJets').cut = process.jtupleParams.jetCut
     
-    process.load('CMGTools.External.pujetidsequence_cff')
-    for x in (process.puJetId, process.puJetMva, process.puJetIdChs, process.puJetMvaChs):
-        x.jets = InputTagPostFix('selectedPatJets')
-        # fix bug in V00-03-04 of CMGTools/External
-        if hasattr(x, 'algos'):
-            bad, good = 'RecoJets/JetProducers', 'CMGTools/External'
-            for ps in x.algos:
-                if hasattr(ps, 'tmvaWeights'):
-                    s = ps.tmvaWeights.value()
-                    if s.startswith(bad):
-                        ps.tmvaWeights = s.replace(bad, good)
-    
     from PhysicsTools.PatAlgos.tools.coreTools import runOnData, removeSpecificPATObjects
     if not runOnMC:
         runOnData(process, names = ['All'])
         runOnData(process, names = ['All'], postfix = postfix)
     removeSpecificPATObjects(process, names = ['Photons'], postfix = postfix) # will also remove cleaning
-    
-    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence') + process.puJetIdSqeuenceChs
+
+    # Make some extra SV producers for MFV studies. JMTBAD postfix junk
+    for cut in (1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6.):
+        cut_name = ('%.1f' % cut).replace('.', 'p')
+
+        tag_info_name = 'secondaryVertexMaxDR%sTagInfosAODPF' % cut_name
+        tag_info_obj = process.secondaryVertexTagInfosAODPF.clone()
+        tag_info_obj.vertexCuts.maxDeltaRToJetAxis = cut
+        setattr(process, tag_info_name, tag_info_obj)
+        process.patJetsPF.tagInfoSources.append(cms.InputTag(tag_info_name))
+
+        processpostfix('patPF2PATSequence').replace(processpostfix('patJets'), tag_info_obj * processpostfix('patJets'))
+
+    common_seq = cms.ignore(process.goodOfflinePrimaryVertices) + cms.ignore(process.mvaTrigV0) + cms.ignore(process.mvaNonTrigV0) + processpostfix('patPF2PATSequence')
 
     process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
     if runOnMC:
@@ -289,11 +288,6 @@ def closest_z_in_pu(process):
     processpostfix('pfPileUp').checkClosestZVertex = True
     processpostfix('pfPileUpIso').checkClosestZVertex = True
 
-def disable_pujetid(process):
-    for p in process.paths_():
-        getattr(process, p).remove(process.puJetIdChs)
-        getattr(process, p).remove(process.puJetMvaChs)
-
 def dummy_beamspot(process, params):
     if type(params) == str:
         import JMTucker.Tools.DummyBeamSpots_cff as DummyBeamSpots
@@ -318,7 +312,7 @@ def dummy_beamspot(process, params):
 
 if __name__ == '__main__':
     # JMTBAD no idea if this works with submit_tuple.py ...
-    process = pat_tuple_process()[0]
+    process = pat_tuple_process(suppress_stdout=False)[0]
     if 'dump' in sys.argv:
         open('dumptup.py','wt').write(process.dumpPython())
 

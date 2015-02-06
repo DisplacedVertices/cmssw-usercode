@@ -53,8 +53,8 @@ if jumble_tracks:
     process.mfvVertices.jumble_tracks = True
     process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219)))
 
-if require_pixel_hit:
-    process.mfvVertices.min_all_track_npxhits = 1
+if not require_pixel_hit:
+    process.mfvVertices.min_all_track_npxhits = 0
 
 if track_used_req == 'nopv':
     process.mfvVertices.use_tracks = False
@@ -68,15 +68,8 @@ if keep_all:
     process.mfvSelectedVerticesTight.produce_vertices = True
     process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
 else:
-    from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-    process.triggerFilter = hltHighLevel.clone()
-    process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
-    process.triggerFilter.andOr = True # = OR
-    for name, path in process.paths.items():
-        if not name.startswith('eventCleaning'):
-            path.insert(0, process.triggerFilter)
-    process.ptrig = cms.Path(process.triggerFilter)
-    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('ptrig'))
+    import JMTucker.MFVNeutralino.TriggerFilter
+    JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
@@ -244,11 +237,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
                                  Samples.mfv_neutralino_tau1000um_M0400,
                                  Samples.mfv_neutralino_tau0300um_M0400,
-                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples)
+                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples + Samples.data_samples)
 
     for sample in samples:
         if sample.is_mc:
             sample.total_events = -1
             assert hasattr(sample, 'timed')
+        else:
+            sample.json = 'ana_all.json'
 
     cs.submit_all(samples)

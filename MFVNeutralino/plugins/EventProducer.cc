@@ -1,4 +1,3 @@
-#include "CMGTools/External/interface/PileupJetIdentifier.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
@@ -93,8 +92,7 @@ void MFVEventProducer::beginRun(edm::Run& run, const edm::EventSetup& setup) {
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-  TriggerHelper trig_helper_cleaning(event, cleaning_results_src);
-  if (skip_event_filter != "" && !trig_helper_cleaning.pass(skip_event_filter))
+  if (cleaning_results_src.label() != "" && skip_event_filter != "" && !TriggerHelper(event, cleaning_results_src).pass(skip_event_filter))
     return;
 
   std::auto_ptr<MFVEvent> mevent(new MFVEvent);
@@ -226,30 +224,34 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (l1_found != 3 && l1_found != 9)
     throw cms::Exception("BadAssumption") << "not the right L1 paths found: l1_found = " << l1_found;
 
-  const std::string cleaning_paths[mfv::n_clean_paths] = { // JMTBAD take from PATTupleSelection_cfg
-    "All",
-    "hltPhysicsDeclared",
-    "FilterOutScraping",
-    "goodOfflinePrimaryVertices",
-    "HBHENoiseFilter",
-    "CSCTightHaloFilter",
-    "hcalLaserEventFilter",
-    "EcalDeadCellTriggerPrimitiveFilter",
-    "trackingFailureFilter",
-    "eeBadScFilter",
-    "ecalLaserCorrFilter",
-    "tobtecfakesfilter",
-    "logErrorTooManyClusters",
-    "logErrorTooManySeeds",
-    "logErrorTooManySeedsDefault",
-    "logErrorTooManySeedsMainIterations",
-    "logErrorTooManyTripletsPairs",
-    "logErrorTooManyTripletsPairsMainIterations",
-    "manystripclus53X",
-    "toomanystripclus53X"
-  };
-  for (int i = 0; i < mfv::n_clean_paths; ++i)
-    mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
+  if (cleaning_results_src.label() != "") {
+    const std::string cleaning_paths[mfv::n_clean_paths] = { // JMTBAD take from PATTupleSelection_cfg
+      "All",
+      "hltPhysicsDeclared",
+      "FilterOutScraping",
+      "goodOfflinePrimaryVertices",
+      "HBHENoiseFilter",
+      "CSCTightHaloFilter",
+      "hcalLaserEventFilter",
+      "EcalDeadCellTriggerPrimitiveFilter",
+      "trackingFailureFilter",
+      "eeBadScFilter",
+      "ecalLaserCorrFilter",
+      "tobtecfakesfilter",
+      "logErrorTooManyClusters",
+      "logErrorTooManySeeds",
+      "logErrorTooManySeedsDefault",
+      "logErrorTooManySeedsMainIterations",
+      "logErrorTooManyTripletsPairs",
+      "logErrorTooManyTripletsPairsMainIterations",
+      "manystripclus53X",
+      "toomanystripclus53X"
+    };
+
+    TriggerHelper trig_helper_cleaning(event, cleaning_results_src);
+    for (int i = 0; i < mfv::n_clean_paths; ++i)
+      mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
+  }
 
   //////////////////////////////////////////////////////////////////////
 
@@ -344,9 +346,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByLabel(met_src, mets);
   const pat::MET& met = mets->at(0);
 
-  edm::Handle<edm::ValueMap<int> > puids;
-  event.getByLabel("puJetMvaChs", "fullId", puids);
-
   mevent->metx = met.px();
   mevent->mety = met.py();
   if (met.getSignificanceMatrix()(0,0) < 1e10 && met.getSignificanceMatrix()(1,1) < 1e10)
@@ -354,8 +353,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   else
     mevent->metsig = -999;
   mevent->metdphimin = 1e99;
-
-  const PileupJetIdentifier::Id puidlevel[3] = {PileupJetIdentifier::kLoose, PileupJetIdentifier::kMedium, PileupJetIdentifier::kTight};
 
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
@@ -367,18 +364,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_phi.push_back(jet.phi());
     mevent->jet_energy.push_back(jet.energy());
 
-    int puid = (*puids)[pat::JetRef(jets, jjet)];
-    int pu_level = 0;
-    for (int i = 0; i < 3; ++i)
-      if (PileupJetIdentifier::passJetId(puid, puidlevel[i]))
-        pu_level = i+1;
-
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
       if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
         bdisc_level = i+1;
 
-    mevent->jet_id.push_back(MFVEvent::encode_jet_id(pu_level, bdisc_level));
+    mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level));
 
     if (jjet < 4) {
       double deltatsum = 0;
