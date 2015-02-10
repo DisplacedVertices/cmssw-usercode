@@ -107,6 +107,9 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH2F* h_s_drmin;
   TH2F* h_s_drmax;
+
+  TH2F* h_s_dbv;
+  TH2F* h_s_dvv;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -201,6 +204,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_s_drmin = fs->make<TH2F>("h_s_drmin", ";min #DeltaR between partons;min #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
   h_s_drmax = fs->make<TH2F>("h_s_drmax", ";max #DeltaR between partons;max #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
+
+  h_s_dbv = fs->make<TH2F>("h_s_dbv", ";generated d_{BV};reconstructed d_{BV}", 500, 0, 2.5, 500, 0, 2.5);
+  h_s_dvv = fs->make<TH2F>("h_s_dvv", ";generated d_{VV};reconstructed d_{VV}", 1000, 0, 5, 1000, 0, 5);
 }
 
 namespace {
@@ -380,6 +386,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     h_s_drmin->Fill(drmin, vtx.drmin());
     h_s_drmax->Fill(drmax, vtx.drmax());
+
+    // histogram dBV
+    h_s_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
   }
 
   // histogram lsp_nmatch
@@ -391,11 +400,11 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   const int nsv = int(vertices->size());
   h_vtxmatch_vtxtotal->Fill(nsv, nvtx_match);
 
-  // histogram average betagamma resolutions
   if (nsv >= 2) {
     const MFVVertexAux& v0 = vertices->at(0);
     const MFVVertexAux& v1 = vertices->at(1);
 
+    // histogram average betagamma resolutions
     TLorentzVector lsp0_p4 = lsp_p4s[0];
     TLorentzVector lsp1_p4 = lsp_p4s[1];
     double lsp_avgbetagammalab = (lsp0_p4.Beta()*lsp0_p4.Gamma() + lsp1_p4.Beta()*lsp1_p4.Gamma()) / 2;
@@ -417,6 +426,8 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_avgbetagammalab->Fill(lsp_avgbetagammalab, vtx_avgbetagammalab);
     h_s_avgbetagammacmz->Fill(lsp_avgbetagammacmz, vtx_avgbetagammacmz);
 
+    // histogram dVV
+    h_s_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]), mag(v0.x - v1.x, v0.y - v1.y));
   }
 
   // histogram njets, ncalojets, calojetpt4, jetsumht vs. genJets
