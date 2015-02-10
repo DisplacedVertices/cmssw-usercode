@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
-process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20/aaaa7d7d2dcfa08aa71c1469df6ebf05/ntuple_1_1_NQ9.root']
+process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_1_1_WwV.root']
 process.TFileService.fileName = 'resolutions.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
