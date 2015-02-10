@@ -51,7 +51,7 @@ namespace mfv {
     tree->Branch("gen_lsp_eta", gen_lsp_eta, "gen_lsp_eta[2]/F");
     tree->Branch("gen_lsp_phi", gen_lsp_phi, "gen_lsp_phi[2]/F");
     tree->Branch("gen_lsp_mass", gen_lsp_mass, "gen_lsp_mass[2]/F");
-    tree->Branch("gen_lsp_decay", gen_lsp_decay, "gen_lsp_decay[2*3]/F");
+    tree->Branch("gen_lsp_decay", gen_lsp_decay, "gen_lsp_decay[6]/F");
     tree->Branch("gen_decay_type", gen_decay_type, "gen_decay_type[2]/b");
     tree->Branch("gen_partons_in_acc", &gen_partons_in_acc, "gen_partons_in_acc/b");
     tree->Branch("pass_clean", &pass_clean, "pass_clean/O");
