@@ -88,6 +88,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_calojet_sum_ht;
 
   TH1F* h_jetphi;
+  TH1F* h_jeteta;
   TH1F* h_jetpairdphi;
 
   TH1F* h_sv0phi;
@@ -282,6 +283,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_calojet_sum_ht = fs->make<TH1F>("h_calojet_sum_ht", ";#Sigma H_{T} of calojets (GeV);events/25 GeV", 200, 0, 5000);
 
   h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
+  h_jeteta = fs->make<TH1F>("h_jeteta", ";jets #eta (rad);jets/.08", 100, -4, 4);
   h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
 
   h_sv0phi = fs->make<TH1F>("h_sv0phi", ";constructed SV0 #phi (rad);events/.126", 50, -3.15, 3.15);
@@ -503,6 +505,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_jetphi->Fill(mevent->jet_phi[ijet]);
+    h_jeteta->Fill(mevent->jet_eta[ijet]);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
       h_jetpairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
     }
