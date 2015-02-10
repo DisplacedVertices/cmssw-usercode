@@ -16,6 +16,16 @@ namespace mfv {
 
     float weight;
 
+    bool gen_valid;
+    float gen_lsp_pt[2];
+    float gen_lsp_eta[2];
+    float gen_lsp_phi[2];
+    float gen_lsp_mass[2];
+    float gen_lsp_decay[2*3];
+    uchar gen_decay_type[2];
+    uchar gen_partons_in_acc;
+
+    bool pass_clean;
     uchar npu;
     uchar npv;
     float pvx;
