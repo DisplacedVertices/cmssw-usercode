@@ -6,6 +6,7 @@ process.TFileService.fileName = 'resolutions.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
@@ -40,6 +41,23 @@ process.mfvResolutionsFullSelByDistCutTrksJets = mfvResolutions.clone(which_mom 
 process.p *= process.mfvResolutionsFullSelByDistCutTrksJets
 
 
+process.pGen = cms.Path(process.mfvSelectedVertices)
+
+process.mfvResolutionsGen = mfvResolutions.clone(vertex_src = 'mfvSelectedVertices')
+process.pGen *= process.mfvResolutionsGen
+
+process.mfvGenParticleFilter.min_npartons = 4
+process.mfvGenParticleFilter.min_parton_pt = 60
+process.mfvGenParticleFilter.min_parton_sumht = 500
+process.mfvGenParticleFilter.max_rho0 = 2.5
+process.mfvGenParticleFilter.max_rho1 = 2.5
+process.mfvGenParticleFilter.min_drmax = 1.2
+process.mfvGenParticleFilter.max_drmax = 4
+
+process.pGen *= process.mfvGenParticleFilter
+
+process.mfvResolutionsGenSel = mfvResolutions.clone(vertex_src = 'mfvSelectedVertices')
+process.pGen *= process.mfvResolutionsGenSel
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
