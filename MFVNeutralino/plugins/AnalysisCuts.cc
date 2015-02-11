@@ -149,15 +149,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
     }
 
-    if (apply_cleaning_filters) {
-      bool pass_clean_all = true;
-      const int clean_all[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
-      for (int c : clean_all)
-        pass_clean_all = pass_clean_all && mevent->pass_clean[c];
-
-      if (invert_cleaning_filters == pass_clean_all)
-        return false;
-    }
+    if (apply_cleaning_filters && invert_cleaning_filters == mevent->pass_clean_all())
+      return false;
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;

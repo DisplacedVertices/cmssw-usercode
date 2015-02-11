@@ -78,6 +78,7 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                       apply_presel = cms.bool(True),
                                       njets_req = cms.uint32(njets),
                                       nbjets_req = cms.uint32(nbjets),
+                                      for_mctruth = cms.bool(False),
                                       )
 
 process.p *= process.mfvMovedTree
