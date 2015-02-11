@@ -193,8 +193,29 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       (max_rsmaller > 0 && rsmaller > max_rsmaller))
     return false;
 
-  int npartons_min_pt = 0;
-  int parton_sumht = 0;
+  std::vector<const reco::GenParticle*> partons;
+  for (int i = 0; i < 2; ++i) {
+    partons.push_back(mci.stranges[i]);
+    partons.push_back(mci.bottoms[i]);
+    partons.push_back(mci.bottoms_from_tops[i]);
+    if (mci.decay_type[i] == 3) {
+      partons.push_back(mci.W_daughters[i][0]);
+      partons.push_back(mci.W_daughters[i][1]);
+    }
+  }
+
+  std::vector<float> parton_pt;
+  for (const reco::GenParticle* p : partons) {
+    if (p->pt() > 20 && fabs(p->eta()) < 2.5)
+      parton_pt.push_back(p->pt());
+  }
+  std::sort(parton_pt.begin(), parton_pt.end());
+
+  if (min_npartons > 0 && int(parton_pt.size()) >= min_npartons ? parton_pt.at(min_npartons-1) : 0.f < min_parton_pt)
+    return false;
+  if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f) < min_parton_sumht)
+    return false;
+
   for (int i = 0; i < 2; ++i) {
     const int ndau = 5;
     const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
@@ -203,10 +224,6 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     float drmax = -1e99;
     for (int j = 0; j < ndau; ++j) {
       if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5) continue;
-      if (daughters[j]->pt() > min_parton_pt)
-        ++npartons_min_pt;
-      if (daughters[j]->pt() > 20)
-        parton_sumht += daughters[j]->pt();
       for (int k = j+1; k < ndau; ++k) {
         if (is_neutrino(daughters[k]) || fabs(daughters[k]->eta()) > 2.5) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
@@ -224,11 +241,6 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     if (drmax > max_drmax)
       return false;
   }
-
-  if (npartons_min_pt < min_npartons)
-    return false;
-  if (parton_sumht < min_parton_sumht)
-    return false;
 
   return true;
 }
