@@ -12,7 +12,9 @@ int main(int argc, char** argv) {
 
   const char* in_fn  = argv[1];
   const char* out_fn = argv[2];
-  const bool apply_weight = true;
+  const bool apply_weight = false;
+  if (!apply_weight)
+    printf("******************************\nno pileup weight applied\n******************************\n");
 
   root_setup();
 
@@ -35,6 +37,9 @@ int main(int argc, char** argv) {
   };
 
   for (numdens& nd : nds) {
+    nd.book("lspdist2", ";2-dist between gen verts;events/0.01 cm", 200, 0, 2);
+    nd.book("lspdist3", ";3-dist between gen verts;events/0.01 cm", 200, 0, 2);
+    nd.book("lspdistz", ";z-dist between gen verts;events/0.01 cm", 200, 0, 2);
     nd.book("movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book("movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
     nd.book("npv", ";# PV;events/1", 100, 0, 100);
@@ -56,106 +61,132 @@ int main(int argc, char** argv) {
       fflush(stdout);
     }
 
+    if (nt.jetsumht < 500 || nt.jetpt4 < 60)
+      continue;
+
     const double w = apply_weight ? nt.weight : 1.;
+    h_weight->Fill(w);
+    h_npu->Fill(nt.npu, w);
+    auto Fill = [&w](TH1F* h, double v) { h->Fill(v, w); };
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
-    if (nt.jetsumht < 500 ||
-        nt.jetpt4 < 60)
-//        movedist2 < 0.03 ||
-//        movedist2 > 2.5 ||
-//        jet_drmax > 4)
+    const double lspdist2 = mag(nt.gen_lsp_decay[0] - nt.gen_lsp_decay[3],
+                                nt.gen_lsp_decay[1] - nt.gen_lsp_decay[4]);
+    const double lspdist3 = mag(nt.gen_lsp_decay[0] - nt.gen_lsp_decay[3],
+                                nt.gen_lsp_decay[1] - nt.gen_lsp_decay[4],
+                                nt.gen_lsp_decay[2] - nt.gen_lsp_decay[5]);
+    const double lspdistz = fabs(nt.gen_lsp_decay[2] - nt.gen_lsp_decay[5]);
+
+    if (lspdist2 < 0 ||
+        lspdist3 < 0.5 ||
+        lspdistz < 0)
       continue;
 
-    h_weight->Fill(w);
-    h_npu->Fill(nt.npu, w);
+    for (int ilsp = 0; ilsp < 2; ++ilsp) {
+      const double gen_vx = nt.gen_lsp_decay[ilsp*3 + 0];
+      const double gen_vy = nt.gen_lsp_decay[ilsp*3 + 1]; 
+      const double gen_vz = nt.gen_lsp_decay[ilsp*3 + 2];
+      const double movedist2 = mag(gen_vx, gen_vy);
+      const double movedist3 = mag(gen_vx, gen_vy, gen_vz);
 
-    auto Fill = [&w](TH1F* h, double v) { h->Fill(v, w); };
-
-    for (numdens& nd : nds) {
-      Fill(nd("movedist2")    .den, movedist2);
-      Fill(nd("movedist3")    .den, movedist3);
-      Fill(nd("npv")          .den, nt.npv);
-      Fill(nd("pvz")          .den, nt.pvz);
-      Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
-      Fill(nd("pvntracks")    .den, nt.pvntracks);
-      Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
-      Fill(nd("sumht")        .den, nt.jetsumht);
-    }
-
-    den += w;
-
-    int n_pass_nocuts = 0;
-    int n_pass_ntracks = 0;
-    int n_pass_ntracksPptgt3 = 0;
-    int n_pass_ntracksPptgt3Pdr = 0;
-    int n_pass_ntracksPptgt3Pbs2d = 0;
-    int n_pass_all = 0;
-
-    std::vector<int> first_vtx_to_pass(num_numdens, -1);
-    auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
-
-    for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
-      const double dist2move = mag(nt.move_x - nt.p_vtxs_x->at(ivtx),
-                                   nt.move_y - nt.p_vtxs_y->at(ivtx),
-                                   nt.move_z - nt.p_vtxs_z->at(ivtx));
-      if (dist2move > 0.005)
+      if (movedist2 < 0.03 ||
+          movedist2 > 2.5)
         continue;
 
-      const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
-      const bool pass_ntracksptgt3 = nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
-      const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
-      const bool pass_drmax        = nt.p_vtxs_drmax       ->at(ivtx) < 4;
-      const bool pass_mindrmax     = nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
-      const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
-      const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
-
-      if (1)                                                                 { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;             }
-      if (pass_ntracks)                                                      { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;            }
-      if (pass_ntracks && pass_ntracksptgt3)                                 { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_ntracksPptgt3;      }
-      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts)                  { set_it_if_first(first_vtx_to_pass[3], ivtx); ++n_pass_ntracksPptgt3Pdr;   }
-      if (pass_ntracks && pass_ntracksptgt3 &&                pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[4], ivtx); ++n_pass_ntracksPptgt3Pbs2d; }
-      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[5], ivtx); ++n_pass_all;                }
-    }
-
-    for (int i = 0; i < num_numdens; ++i) {
-      int ivtx = first_vtx_to_pass[i];
-      if (ivtx != -1) {
-        h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks     ->at(ivtx));
-        h_vtxntracksptgt3 [i]->Fill(nt.p_vtxs_ntracksptgt3->at(ivtx));
-        h_vtxdrmin        [i]->Fill(nt.p_vtxs_drmin       ->at(ivtx));
-        h_vtxdrmax        [i]->Fill(nt.p_vtxs_drmax       ->at(ivtx));
-        h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr     ->at(ivtx));
+      for (numdens& nd : nds) {
+        Fill(nd("lspdist2")     .den, lspdist2);
+        Fill(nd("lspdist3")     .den, lspdist3);
+        Fill(nd("lspdistz")     .den, lspdistz);
+        Fill(nd("movedist2")    .den, movedist2);
+        Fill(nd("movedist3")    .den, movedist3);
+        Fill(nd("npv")          .den, nt.npv);
+        Fill(nd("pvz")          .den, nt.pvz);
+        Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
+        Fill(nd("pvntracks")    .den, nt.pvntracks);
+        Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
+        Fill(nd("sumht")        .den, nt.jetsumht);
       }
-    }
 
-    if (n_pass_nocuts)             nums["nocuts"]             += w;
-    if (n_pass_ntracks)            nums["ntracks"]            += w;
-    if (n_pass_ntracksPptgt3)      nums["ntracksPptgt3"]      += w;
-    if (n_pass_ntracksPptgt3Pdr)   nums["ntracksPptgt3Pdr"]   += w;
-    if (n_pass_ntracksPptgt3Pbs2d) nums["ntracksPptgt3Pbs2d"] += w;
-    if (n_pass_all)                nums["all"]                += w;
+      den += w;
 
-    const int passes[num_numdens] = {
-      n_pass_nocuts,
-      n_pass_ntracks,
-      n_pass_ntracksPptgt3,
-      n_pass_ntracksPptgt3Pdr,
-      n_pass_ntracksPptgt3Pbs2d,
-      n_pass_all
-    };
+      int n_pass_nocuts = 0;
+      int n_pass_ntracks = 0;
+      int n_pass_ntracksPptgt3 = 0;
+      int n_pass_ntracksPptgt3Pdr = 0;
+      int n_pass_ntracksPptgt3Pbs2d = 0;
+      int n_pass_all = 0;
 
-    for (int i = 0; i < num_numdens; ++i) {
-      if (passes[i]) {
-        numdens& nd = nds[i];
-        Fill(nd("movedist2")    .num, movedist2);
-        Fill(nd("movedist3")    .num, movedist3);
-        Fill(nd("npv")          .num, nt.npv);
-        Fill(nd("pvz")          .num, nt.pvz);
-        Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
-        Fill(nd("pvntracks")    .num, nt.pvntracks);
-        Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
-        Fill(nd("sumht")        .num, nt.jetsumht);
+      std::vector<int> first_vtx_to_pass(num_numdens, -1);
+      auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
+
+      for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
+        const double dist2move = mag(gen_vx - nt.p_vtxs_x->at(ivtx),
+                                     gen_vy - nt.p_vtxs_y->at(ivtx),
+                                     gen_vz - nt.p_vtxs_z->at(ivtx));
+        if (dist2move > 0.005)
+          continue;
+
+        const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
+        const bool pass_ntracksptgt3 = nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
+        const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
+        const bool pass_drmax        = nt.p_vtxs_drmax       ->at(ivtx) < 4;
+        const bool pass_mindrmax     = nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
+        const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
+        const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
+
+        //printf("ivtx %lu dist2move %f passes: %i %i %i %i %i %i %i\n", ivtx, dist2move, pass_ntracks,pass_ntracksptgt3,pass_drmin,pass_drmax,pass_mindrmax,pass_bs2derr,pass_drcuts);
+
+        if (1)                                                                 { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;             }
+        if (pass_ntracks)                                                      { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;            }
+        if (pass_ntracks && pass_ntracksptgt3)                                 { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_ntracksPptgt3;      }
+        if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts)                  { set_it_if_first(first_vtx_to_pass[3], ivtx); ++n_pass_ntracksPptgt3Pdr;   }
+        if (pass_ntracks && pass_ntracksptgt3 &&                pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[4], ivtx); ++n_pass_ntracksPptgt3Pbs2d; }
+        if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[5], ivtx); ++n_pass_all;                }
+      }
+
+      //for (int i = 0; i < num_numdens; ++i) {
+      //  int ivtx = first_vtx_to_pass[i];
+      //  if (ivtx != -1) {
+      //    h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks     ->at(ivtx));
+      //    h_vtxntracksptgt3 [i]->Fill(nt.p_vtxs_ntracksptgt3->at(ivtx));
+      //    h_vtxdrmin        [i]->Fill(nt.p_vtxs_drmin       ->at(ivtx));
+      //    h_vtxdrmax        [i]->Fill(nt.p_vtxs_drmax       ->at(ivtx));
+      //    h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr     ->at(ivtx));
+      //  }
+      //}
+
+      if (n_pass_nocuts)             nums["nocuts"]             += w;
+      if (n_pass_ntracks)            nums["ntracks"]            += w;
+      if (n_pass_ntracksPptgt3)      nums["ntracksPptgt3"]      += w;
+      if (n_pass_ntracksPptgt3Pdr)   nums["ntracksPptgt3Pdr"]   += w;
+      if (n_pass_ntracksPptgt3Pbs2d) nums["ntracksPptgt3Pbs2d"] += w;
+      if (n_pass_all)                nums["all"]                += w;
+
+      const int passes[num_numdens] = {
+        n_pass_nocuts,
+        n_pass_ntracks,
+        n_pass_ntracksPptgt3,
+        n_pass_ntracksPptgt3Pdr,
+        n_pass_ntracksPptgt3Pbs2d,
+        n_pass_all
+      };
+
+      for (int i = 0; i < num_numdens; ++i) {
+        if (passes[i]) {
+          numdens& nd = nds[i];
+          Fill(nd("lspdist2")     .num, lspdist2);
+          Fill(nd("lspdist3")     .num, lspdist3);
+          Fill(nd("lspdistz")     .num, lspdistz);
+          Fill(nd("movedist2")    .num, movedist2);
+          Fill(nd("movedist3")    .num, movedist3);
+          Fill(nd("npv")          .num, nt.npv);
+          Fill(nd("pvz")          .num, nt.pvz);
+          Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
+          Fill(nd("pvntracks")    .num, nt.pvntracks);
+          Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
+          Fill(nd("sumht")        .num, nt.jetsumht);
+        }
       }
     }
   }
