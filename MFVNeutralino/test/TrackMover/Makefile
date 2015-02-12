@@ -1,4 +1,4 @@
-SOURCES       = MovedTracksNtuple.cc
+SOURCES       = MovedTracksNtuple.cc utils.cc
 INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
