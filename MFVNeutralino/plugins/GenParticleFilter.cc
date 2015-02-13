@@ -209,7 +209,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     if (p->pt() > 20 && fabs(p->eta()) < 2.5)
       parton_pt.push_back(p->pt());
   }
-  std::sort(parton_pt.begin(), parton_pt.end());
+  std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; });
 
   if (min_npartons > 0 && int(parton_pt.size()) >= min_npartons ? parton_pt.at(min_npartons-1) : 0.f < min_parton_pt)
     return false;

@@ -439,7 +439,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
       gen_jet_pt.push_back(jet.pt());
   }
-  std::sort(gen_jet_pt.begin(), gen_jet_pt.end());
+  std::sort(gen_jet_pt.begin(), gen_jet_pt.end(), [](float p1, float p2) { return p1 > p2; });
 
   h_s_genjets_njets->Fill(int(gen_jet_pt.size()), mevent->njets());
   h_s_genjets_ncalojets->Fill(int(gen_jet_pt.size()), mevent->ncalojets());
@@ -463,7 +463,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (p->pt() > 20 && fabs(p->eta()) < 2.5)
       parton_pt.push_back(p->pt());
   }
-  std::sort(parton_pt.begin(), parton_pt.end());
+  std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; });
 
   h_s_partons_njets->Fill(int(parton_pt.size()), mevent->njets());
   h_s_partons_ncalojets->Fill(int(parton_pt.size()), mevent->ncalojets());
