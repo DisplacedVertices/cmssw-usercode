@@ -5,14 +5,15 @@
 #include "utils.h"
 
 int main(int argc, char** argv) {
-  if (argc < 3) {
+  if (argc < 4) {
     fprintf(stderr, "usage: hists.exe in.root out.root\n");
     return 1;
   }
 
   const char* in_fn  = argv[1];
   const char* out_fn = argv[2];
-  const bool apply_weight = false;
+  const double min_lspdist3 = atof(argv[3]);
+  const bool apply_weight = true;
   if (!apply_weight)
     printf("******************************\nno pileup weight applied\n******************************\n");
 
@@ -79,7 +80,7 @@ int main(int argc, char** argv) {
     const double lspdistz = fabs(nt.gen_lsp_decay[2] - nt.gen_lsp_decay[5]);
 
     if (lspdist2 < 0 ||
-        lspdist3 < 0.5 ||
+        lspdist3 < min_lspdist3 ||
         lspdistz < 0)
       continue;
 
@@ -193,9 +194,9 @@ int main(int argc, char** argv) {
 
   printf("\r                                \n");
   printf("%f events in denominator\n", den);
-  printf("%30s  %12s  %12s   %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
+  printf("%20s  %12s  %10s +- %10s\n", "name", "num", "eff", "seff");
   for (const auto& p : nums) {
     const interval i = clopper_pearson_binom(p.second, den);
-    printf("%30s  %12f  %12f  %10f [%10f, %10f] +%10f -%10f\n", p.first.c_str(), p.second, den, i.value, i.lower, i.upper, i.upper - i.value, i.value - i.lower);
+    printf("%20s  %12.2f  %10.4f +- %10.4f\n", p.first.c_str(), p.second, i.value, (i.upper - i.lower)/2);
   }
 }
