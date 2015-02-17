@@ -162,6 +162,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
+#if 0  
   TriggerHelper trig_helper(event, trigger_results_src);
   mfv::trigger_decision(trig_helper, mevent->pass_trigger);
 
@@ -252,6 +253,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     for (int i = 0; i < mfv::n_clean_paths; ++i)
       mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
   }
+#endif
 
   //////////////////////////////////////////////////////////////////////
 
@@ -435,6 +437,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->lep_iso.clear();
   mevent->lep_mva.clear();
 
+#if 0
   edm::Handle<pat::MuonCollection> muons;
   event.getByLabel(muons_src, muons);
 
@@ -457,7 +460,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }
-  
+
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByLabel(electrons_src, electrons);
   
@@ -481,7 +484,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }
-  
+  #endif
   //////////////////////////////////////////////////////////////////////
 
   event.put(mevent);
