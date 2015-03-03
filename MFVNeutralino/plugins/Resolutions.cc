@@ -110,6 +110,11 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH2F* h_s_dbv;
   TH2F* h_s_dvv;
+
+  TH2F* h_s_dbv_betagamma;
+  TH2F* h_s_drmax_betagamma;
+
+  TH1F* h_gen_dbv;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -207,6 +212,11 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_s_dbv = fs->make<TH2F>("h_s_dbv", ";generated d_{BV};reconstructed d_{BV}", 500, 0, 2.5, 500, 0, 2.5);
   h_s_dvv = fs->make<TH2F>("h_s_dvv", ";generated d_{VV};reconstructed d_{VV}", 1000, 0, 5, 1000, 0, 5);
+
+  h_s_dbv_betagamma = fs->make<TH2F>("h_s_dbv_betagamma", ";generated #beta#gamma;generated d_{BV}", 100, 0, 10, 100, 0, 0.5);
+  h_s_drmax_betagamma = fs->make<TH2F>("h_s_drmax_betagamma", ";generated #beta#gamma;reconstructed drmax", 100, 0, 10, 100, 0, 5);
+
+  h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 50 #mum", 100, 0, 0.5);
 }
 
 namespace {
@@ -389,6 +399,25 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     // histogram dBV
     h_s_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
+
+    h_s_dbv_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()));
+    h_s_drmax_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx.drmax());
+  }
+
+  for (int ilsp = 0; ilsp < 2; ++ilsp) {
+    bool matched = false;
+    for (const MFVVertexAux& vtx : *vertices) {
+      double dist = mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
+                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
+                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z);
+      if (dist < max_dist) {
+        matched = true;
+        break;
+      }
+    }
+    if (matched) {
+      h_gen_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()));
+    }
   }
 
   // histogram lsp_nmatch
