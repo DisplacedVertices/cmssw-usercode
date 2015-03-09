@@ -113,6 +113,8 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH2F* h_s_dbv_betagamma;
   TH2F* h_s_drmax_betagamma;
+  TH2F* h_s_drmax_dbv;
+  TH2F* h_s_gendrmax_dbv;
 
   TH1F* h_gen_dbv;
 };
@@ -215,6 +217,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_s_dbv_betagamma = fs->make<TH2F>("h_s_dbv_betagamma", ";generated #beta#gamma;generated d_{BV}", 100, 0, 10, 100, 0, 0.5);
   h_s_drmax_betagamma = fs->make<TH2F>("h_s_drmax_betagamma", ";generated #beta#gamma;reconstructed drmax", 100, 0, 10, 100, 0, 5);
+  h_s_drmax_dbv = fs->make<TH2F>("h_s_drmax_dbv", ";generated d_{BV};reconstructed drmax", 100, 0, 0.5, 100, 0, 5);
+  h_s_gendrmax_dbv = fs->make<TH2F>("h_s_gendrmax_dbv", ";generated d_{BV};generated drmax", 100, 0, 0.5, 100, 0, 5);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 50 #mum", 100, 0, 0.5);
 }
@@ -402,6 +406,8 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     h_s_dbv_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()));
     h_s_drmax_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx.drmax());
+    h_s_drmax_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), vtx.drmax());
+    h_s_gendrmax_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), drmax);
   }
 
   for (int ilsp = 0; ilsp < 2; ++ilsp) {
