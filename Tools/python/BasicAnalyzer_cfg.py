@@ -12,8 +12,9 @@ process.TFileService = cms.Service('TFileService', fileName = cms.string('tfiles
 def geometry_etc(process, tag):
     process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
     process.load('Configuration.Geometry.GeometryIdeal_cff')
-    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-    process.GlobalTag.globaltag = tag
+    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+    from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+    process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
     process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
     
 def add_analyzer(name, **kwargs):
