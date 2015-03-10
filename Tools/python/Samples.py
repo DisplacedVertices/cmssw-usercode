@@ -483,6 +483,12 @@ exo12038_samples = [
     MCSample('chi2muqq_1500_494',  '', '/LongLivedChi0ToMuQQ_MSquark-1500_MChi-494_TuneZ2Star_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 10112, 1, 0.2, 0.001),
     ]
 
+for sample in exo12038_samples:
+    sample.no_skimming_cuts = True
+    sample.ana_hash = '34ecdb1fcc3dc1cba39058734246ffc8'
+    sample.dbs_url_num = 3
+    sample.ana_events_per = 10000
+
 ########################################################################
 
 myttbar_samples = [
