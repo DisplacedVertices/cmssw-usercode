@@ -464,6 +464,25 @@ for tau, mass, sample in mfv_signal_samples_ex:
 mfv_signal_samples_nouse.sort(key=lambda s: s.name)
 mfv_signal_samples.sort(key=lambda s: s.name)
 
+exo12038_samples = [
+    MCSample('h2x_120_20', '', '/HTo2LongLivedTo4F_MH-120_MFF-20_CTau13To1300_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_120_50', '', '/HTo2LongLivedTo4F_MH-120_MFF-50_CTau50To5000_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_125_50', '', '/HTo2LongLivedTo4F_MH-125_MFF-50_CTau50To5000_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_200_20', '', '/HTo2LongLivedTo4F_MH-200_MFF-20_CTau7To700_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_200_50', '', '/HTo2LongLivedTo4F_MH-200_MFF-50_CTau20To2000_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_400_20', '', '/HTo2LongLivedTo4F_MH-400_MFF-20_CTau4To400_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_400_50', '', '/HTo2LongLivedTo4F_MH-400_MFF-50_CTau8To800_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_400_150', '', '/HTo2LongLivedTo4F_MH-400_MFF-150_CTau40To4000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_1000_20', '', '/HTo2LongLivedTo4F_MH-1000_MFF-20_CTau1p5To150_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_1000_50', '', '/HTo2LongLivedTo4F_MH_1000_MFF_50_CTau4To400_8TeV_pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_1000_150', '', '/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/Summer12_DR53X-DEBUG_PU_S10_START53_V7A-v2/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('h2x_1000_350', '', '/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('chi2muqq_120_48', '', '/LongLivedChi0ToMuQQ_MSquark-120_MChi-48_TuneZ2Star_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('chi2muqq_350_148', '', '/LongLivedChi0ToMuQQ_MSquark-350_MChi-148_TuneZ2Star_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('chi2muqq_1000_148', '', '/LongLivedChi0ToMuQQ_MSquark-1000_MChi-148_TuneZ2Star_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    MCSample('chi2muqq_1500_494', '', '/LongLivedChi0ToMuQQ_MSquark-1500_MChi-494_TuneZ2Star_8TeV-pythia6/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM', 1, 1, 0.2, 0.001),
+    ]
+
 ########################################################################
 
 myttbar_samples = [
@@ -586,7 +605,7 @@ auxiliary_data_samples = [
 ########################################################################
 
 all_data_samples = data_samples + auxiliary_data_samples
-all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse + mfv_signal_samples_systematics + myttbar_samples + ttbar_systematics_samples
+all_mc_samples = ttbar_samples + qcd_samples + smaller_background_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples + mfv_signal_samples_nouse + exo12038_samples + mfv_signal_samples_systematics + myttbar_samples + ttbar_systematics_samples
 all_samples = all_data_samples + all_mc_samples
 
 samples_by_name = {}
@@ -759,7 +778,7 @@ def check_nevents(samples, hist_path, fn_pattern='%(name)s.root'):
 ########################################################################
 
 __all__ = ['data_samples', 'data_samples_orig', 'auxiliary_data_samples', 'all_data_samples']
-__all__ += ['ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'leptonic_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples', 'mfv_signal_samples_nouse', 'mfv_signal_samples_systematics', 'myttbar_samples', 'all_mc_samples']
+__all__ += ['ttbar_samples', 'qcd_samples', 'smaller_background_samples', 'leptonic_background_samples', 'auxiliary_background_samples', 'mfv_signal_samples', 'mfv_signal_samples_nouse', 'exo12038_samples', 'mfv_signal_samples_systematics', 'myttbar_samples', 'all_mc_samples']
 __all__ += ['all_samples']
 __all__ += [s.name for s in all_samples]
 __all__ += ['check_nevents', 'from_argv']
