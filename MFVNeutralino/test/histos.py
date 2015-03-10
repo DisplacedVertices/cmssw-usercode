@@ -4,6 +4,7 @@ from JMTucker.Tools import SampleFiles
 
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20/aaaa7d7d2dcfa08aa71c1469df6ebf05/ntuple_1_1_NQ9.root']
 process.TFileService.fileName = 'histos.root'
+process.maxEvents.input = 100
 
 process.load('JMTucker.MFVNeutralino.Histos_cff')
 
