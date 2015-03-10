@@ -228,10 +228,10 @@ class CRABSubmitter:
             cfg.set('GRID', 'data_location_override', self.aaa_locations)
             cfg.set('GRID', 'remove_default_blacklist', 1)
 
+        if storage_catalog_override == 'cornell':
+            storage_catalog_override = 'T3_US_Cornell'
         self.storage_catalog_override = storage_catalog_override
         if storage_catalog_override:
-            if storage_catalog_override == 'cornell':
-                storage_catalog_override = 'T3_US_Cornell'
             if not self.storage_catalog.has_key(storage_catalog_override):
                 raise ValueError('storage_catalog_override can be None or one of %r' % self.storage_catalog.keys())
             self.storage_catalog_fn = self.batch_dir + '/psets/storage.xml' # JMTBAD
