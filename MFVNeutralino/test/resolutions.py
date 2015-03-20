@@ -63,7 +63,7 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 mevent_src = cms.InputTag('mfvEvent'),
                                 which_mom = cms.int32(0),
                                 max_dr = cms.double(-1),
-                                max_dist = cms.double(0.005),
+                                max_dist = cms.double(0.012),
                                 gen_src = cms.InputTag('genParticles'),
                                 gen_jet_src = cms.InputTag('ak5GenJets'),
                                 )
