@@ -108,9 +108,11 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_drmin;
   TH2F* h_s_drmax;
 
+  TH1F* h_dbv_nomatch;
   TH2F* h_s_dbv;
   TH2F* h_s_dvv;
 
+  TH2F* h_s_dbv_gendvv;
   TH2F* h_s_dbv_betagamma;
   TH2F* h_s_drmax_betagamma;
   TH2F* h_s_drmax_dbv;
@@ -212,9 +214,11 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_drmin = fs->make<TH2F>("h_s_drmin", ";min #DeltaR between partons;min #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
   h_s_drmax = fs->make<TH2F>("h_s_drmax", ";max #DeltaR between partons;max #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
 
+  h_dbv_nomatch = fs->make<TH1F>("h_dbv_nomatch", ";reconstructed d_{BV};reconstructed vertices without matched generated vertex", 500, 0, 2.5);
   h_s_dbv = fs->make<TH2F>("h_s_dbv", ";generated d_{BV};reconstructed d_{BV}", 500, 0, 2.5, 500, 0, 2.5);
   h_s_dvv = fs->make<TH2F>("h_s_dvv", ";generated d_{VV};reconstructed d_{VV}", 1000, 0, 5, 1000, 0, 5);
 
+  h_s_dbv_gendvv = fs->make<TH2F>("h_s_dbv_gendvv", "d_{VV} > 300 #mum;generated d_{BV};reconstructed d_{BV}", 500, 0, 2.5, 500, 0, 2.5);
   h_s_dbv_betagamma = fs->make<TH2F>("h_s_dbv_betagamma", ";generated #beta#gamma;generated d_{BV}", 100, 0, 10, 100, 0, 0.5);
   h_s_drmax_betagamma = fs->make<TH2F>("h_s_drmax_betagamma", ";generated #beta#gamma;reconstructed drmax", 100, 0, 10, 100, 0, 5);
   h_s_drmax_dbv = fs->make<TH2F>("h_s_drmax_dbv", ";generated d_{BV};reconstructed drmax", 100, 0, 0.5, 100, 0, 5);
@@ -305,8 +309,10 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
 
-    if (ilsp < 0)
+    if (ilsp < 0) {
+      h_dbv_nomatch->Fill(mevent->bs2ddist(vtx));
       continue;
+    }
 
     ++nvtx_match;
     const TLorentzVector& lsp_p4 = lsp_p4s[ilsp];
@@ -403,6 +409,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     // histogram dBV
     h_s_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
+    if (mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]) > 0.03) {
+      h_s_dbv_gendvv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
+    }
 
     h_s_dbv_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()));
     h_s_drmax_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx.drmax());
