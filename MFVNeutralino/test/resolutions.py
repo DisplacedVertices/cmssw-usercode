@@ -57,6 +57,7 @@ process.TFileService.fileName = 'resolutions.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
@@ -116,6 +117,16 @@ for name, cut in nm1s:
     setattr(process, res_hst_name, res_hst)
     setattr(process, 'p%s' % name, cms.Path(vtx * process.mfvAnalysisCutsPreSel * res_hst))
 
+
+process.mfvGenParticleFilter.min_npartons = 4
+process.mfvGenParticleFilter.min_parton_pt = 60
+process.mfvGenParticleFilter.min_parton_sumht = 500
+process.mfvGenParticleFilter.min_ntracks = 3
+process.mfvGenParticleFilter.max_rho0 = 2.5
+process.mfvGenParticleFilter.max_rho1 = 2.5
+process.mfvGenParticleFilter.max_drmax = 4
+process.mfvResolutionsGen = mfvResolutions.clone()
+process.pGen = cms.Path(process.mfvGenParticleFilter * process.mfvResolutionsGen)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
