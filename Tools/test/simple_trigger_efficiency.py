@@ -18,6 +18,9 @@ process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService
 process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1219))
 process.RandomNumberGeneratorService.SimpleTriggerEfficiencyMu = cms.PSet(initialSeed = cms.untracked.uint32(1220))
 process.RandomNumberGeneratorService.SimpleTriggerEfficiencyMuInAcc = cms.PSet(initialSeed = cms.untracked.uint32(1221))
+process.RandomNumberGeneratorService.SimpleTriggerEfficiencyEl = cms.PSet(initialSeed = cms.untracked.uint32(1389))
+process.RandomNumberGeneratorService.SimpleTriggerEfficiencyElInAcc = cms.PSet(initialSeed = cms.untracked.uint32(123921))
+
 
 #import prescales
 process.load('JMTucker.Tools.SimpleTriggerEfficiency_cfi')
@@ -30,10 +33,10 @@ process.SimpleTriggerEfficiencyEl      = process.SimpleTriggerEfficiency.clone()
 process.SimpleTriggerEfficiencyElInAcc = process.SimpleTriggerEfficiency.clone()
 
 process.p1 = cms.Path(process.SimpleTriggerEfficiency)
-process.p2 = cms.Path(process.genMus      * process.genMuCount      * process.SimpleTriggerEfficiencyMu)
-process.p3 = cms.Path(process.genMusInAcc * process.genMuInAccCount * process.SimpleTriggerEfficiencyMuInAcc)
-process.p4 = cms.Path(process.genEls      * process.genElCount      * process.SimpleTriggerEfficiencyEl)
-process.p5 = cms.Path(process.genElsInAcc * process.genElInAccCount * process.SimpleTriggerEfficiencyElInAcc)
+#process.p2 = cms.Path(process.genMus      * process.genMuCount      * process.SimpleTriggerEfficiencyMu)
+#process.p3 = cms.Path(process.genMusInAcc * process.genMuInAccCount * process.SimpleTriggerEfficiencyMuInAcc)
+#process.p4 = cms.Path(process.genEls      * process.genElCount      * process.SimpleTriggerEfficiencyEl)
+#process.p5 = cms.Path(process.genElsInAcc * process.genElInAccCount * process.SimpleTriggerEfficiencyElInAcc)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import mfv_signal_samples 

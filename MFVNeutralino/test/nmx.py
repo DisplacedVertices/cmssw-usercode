@@ -46,7 +46,7 @@ for i in xrange(len(cuts)+1):
 
 process.nmx = cms.EDAnalyzer('NmxHistos',
                              weight_src = cms.InputTag('mfvWeight'),
-                             use_weight = cms.bool(True),
+                             use_weight = cms.bool(False),
                              vertex_srcs = cms.VInputTag(*vtx_srcs),
                              )
 

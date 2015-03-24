@@ -10,6 +10,8 @@ from JMTucker.MFVNeutralino.EventHistos_cfi import *
 from JMTucker.MFVNeutralino.ABCDHistos_cfi import *
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 
+from JMTucker.Tools.SimpleTriggerEfficiency_cfi import *
+
 mfvEventHistosNoCuts = mfvEventHistos.clone()
 mfvVertexHistosNoCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesLoose')
 pTrigSel = cms.Path(mfvCommon * mfvEventHistosNoCuts * mfvVertexHistos * mfvVertexHistosNoCuts)
@@ -32,3 +34,4 @@ pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnl
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts * mfvAbcdHistosSeq)
+#pFullSelEff = cms.Path( pFullSel * simpleTriggerEfficiency.clone())
