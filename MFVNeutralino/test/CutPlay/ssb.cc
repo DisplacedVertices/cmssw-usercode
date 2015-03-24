@@ -450,8 +450,8 @@ struct z_calculator {
     const int nbins = xax->GetNbins();
     const double xlow = xax->GetXmin();
     const double xup = xax->GetXmax();
-    TH1F* h_sigfrac = new TH1F("h_sigfrac", ";cut;sig frac", nbins, xlow, xup);
-    TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut;bkg frac", nbins, xlow, xup);
+    TH1F* h_sigfrac = new TH1F("h_sigfrac", ";cut value;efficiency", nbins, xlow, xup);
+    TH1F* h_bkgfrac = new TH1F("h_bkgfrac", ";cut value;efficiency", nbins, xlow, xup);
     double bkgpl_x[nbins], bkgpl_y[nbins], bkgpl_exl[nbins], bkgpl_exh[nbins], bkgpl_eyl[nbins], bkgpl_eyh[nbins];
     TH1F* h_zssb = new TH1F("h_zssb", ";cut;ssb", nbins, xlow, xup);
     TH1F* h_zssb20 = new TH1F("h_zssb20", ";cut;ssb20", nbins, xlow, xup);
@@ -555,6 +555,15 @@ struct z_calculator {
         TLine l(h_sigfrac->GetXaxis()->GetXmin(), 1, h_sigfrac->GetXaxis()->GetXmax(), 1);
         l.SetLineStyle(2);
         l.Draw();
+        TLegend* leg2 = new TLegend(0.8,0.85,1,0.95);
+        leg2->AddEntry(h_sigfrac, "signal", "L");
+        h_sigfrac->SetStats(0);
+        h_sigfrac->SetLineWidth(3);
+        leg2->AddEntry(h_bkgfrac, "background", "L");
+        h_bkgfrac->SetLineWidth(3);
+        h_bkgfrac->SetStats(0);
+        leg2->SetFillColor(0);
+        leg2->Draw();
         std::string p = options.plot_path + "/" + options.signal_name + "/";
         p += var;
         if (logy)
@@ -562,6 +571,7 @@ struct z_calculator {
         c1->SaveAs((p + ".pdf").c_str());
         c1->SaveAs((p + ".png").c_str());
         if (!logy) c1->SaveAs((p + ".root").c_str());
+        delete leg2;
         delete c1;
       }
 
