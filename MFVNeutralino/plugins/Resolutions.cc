@@ -119,6 +119,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_gendrmax_dbv;
 
   TH1F* h_gen_dbv;
+  TH1F* h_gen_dvv;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -225,6 +226,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_gendrmax_dbv = fs->make<TH2F>("h_s_gendrmax_dbv", ";generated d_{BV};generated drmax", 100, 0, 0.5, 100, 0, 5);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 50 #mum", 100, 0, 0.5);
+  h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
 }
 
 namespace {
@@ -473,6 +475,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     // histogram dVV
     h_s_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]), mag(v0.x - v1.x, v0.y - v1.y));
   }
+  h_gen_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
 
   // histogram njets, ncalojets, calojetpt4, jetsumht vs. genJets
   edm::Handle<reco::GenJetCollection> gen_jets;
