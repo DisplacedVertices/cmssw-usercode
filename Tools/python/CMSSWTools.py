@@ -18,7 +18,7 @@ def add_analyzer(process, name, **kwargs):
     else:
         setattr(process, path_name, cms.Path(obj))
 
-def file_event_from_argv(process):
+def file_event_from_argv(process, warn=True):
     '''Set the filename and event to run on from argv.'''
     files = []
     nums = []
@@ -41,7 +41,7 @@ def file_event_from_argv(process):
         for file in files:
             print file
         process.source.fileNames = files
-    else:
+    elif warn:
         print 'file_event_from_argv warning: no filename found'
     l = len(nums)
     if l == 1:
@@ -51,7 +51,7 @@ def file_event_from_argv(process):
         nums = tuple(nums)
         print 'set_events_to_process from argv:', nums
         set_events_to_process(process, [nums])
-    else:
+    elif warn:
         print 'file_event_from_argv warning: did not understand event number'
 
 def glob_store(pattern):
