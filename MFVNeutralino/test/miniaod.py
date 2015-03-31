@@ -14,7 +14,12 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:/uscms/home/tucker/nobackup/000470E0-3B75-E411-8B90-00266CFFA604.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(
+
+#400 
+'/store/user/mzientek/Neutralino_M400_13TeV_DisplaceVtx_GENSIM_721/Neutralino_731_m400_RECO/d44c2d8538052a1dfd80836022488188/step3_731_m400_10_1_KSd.root',
+
+))
 
 process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True))
 
@@ -49,7 +54,7 @@ process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.mfvEvent.skip_event_filter = ''
 #process.mfvEvent.trigger_results_src = ''
 process.mfvEvent.cleaning_results_src = ''
-process.MINIAODSIMoutput.outputCommands += ['keep MFVVertexAuxs_mfvVerticesAux_*_*', 'keep MFVEvent_mfvEvent__*']
+process.MINIAODSIMoutput.outputCommands += ['keep MFVVertexAuxs_mfvVerticesAux_*_*', 'keep MFVEvent_mfvEvent__*', 'keep edmTriggerResults_TriggerResults__HLT']
         
 process.pmfv = cms.Path(process.mfvVertexSequence * process.mfvEvent)
 
