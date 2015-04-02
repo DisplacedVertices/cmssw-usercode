@@ -1,6 +1,7 @@
 import sys, os
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, file_event_from_argv
 
+file_event_from_argv(process)
 process.TFileService.fileName = 'simple_trigger_efficiency.root'
 
 process.genMus = cms.EDFilter('CandViewSelector', src = cms.InputTag('genParticles'), cut = cms.string('abs(pdgId) == 13 && abs(mother.pdgId) == 24'))
