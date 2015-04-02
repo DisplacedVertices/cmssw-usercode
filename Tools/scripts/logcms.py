@@ -11,6 +11,7 @@ log_fn = 'out.out'
 gz = True
 move = True
 show = True
+alshow = False
 for a in sys.argv[1:]:
     if a.startswith('logfile='):
         log_fn = a.replace('logfile=', '')
@@ -20,6 +21,8 @@ for a in sys.argv[1:]:
         gz = False
     elif a == 'noshow':
         show = False
+    elif a == 'alshow':
+        alshow = True
     else:
         args.append(a)
 
@@ -57,12 +60,12 @@ elif move:
 if not move:
     print 'did not move logfile, is at', log_fn
 
-if show:
+if show or alshow:
     logf = (gzip.open if gz else open)(log_fn)
     l = 0
     for x in logf:
         l += 1
-    if exit_code != 0 or l < 85:
+    if alshow or exit_code != 0 or l < 85:
         print 'log file:'
         if l > 85:
             cmd = 'less'
