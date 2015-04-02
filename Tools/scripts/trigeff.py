@@ -5,7 +5,7 @@ import sys, optparse
 ################################################################################
 
 parser = optparse.OptionParser(usage='%prog [options] input.root [plot path]')
-parser.add_option('--dir',
+parser.add_option('--dir', default='SimpleTriggerEfficiency',
                   help='The directory name (i.e. the module label used for SimpleTriggerEfficiency).')
 parser.add_option('--dir2',
                   help='The second directory name (if applicable, e.g. in --compare).')
