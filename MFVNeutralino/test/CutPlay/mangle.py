@@ -49,8 +49,6 @@ def cutplayMangle(filename):
 
     h_ntot = ROOT.TH1F('ntot', '', 1, 0, 1)
     scale = sample.ana_filter_eff
-    if 'mfv' not in sample.name:
-        scale *= 2
     h_ntot.SetBinContent(1, ntot[0] / scale)
     h_ntot.SetBinError  (1, ntot[1] / scale)
 

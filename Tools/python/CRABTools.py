@@ -245,6 +245,8 @@ def crab_status(working_dir, verbose=True, debug=False):
             'cms-ce1-osg.rcac.purdue.edu',
             'osg.rc.ufl.edu',
             'cms.rc.ufl.edu',
+            'ce01.cmsaf.mit.edu',
+            'ce02.cmsaf.mit.edu',
             ]:
             x = x.replace(bad + ' ' + bad, bad)
         x = [y.strip() for y in x.split() if y.strip()]

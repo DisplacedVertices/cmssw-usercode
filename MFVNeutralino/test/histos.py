@@ -202,6 +202,7 @@ process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(
 
 
 process.TFileService.fileName = 'histos.root'
+process.maxEvents.input = 100
 
 process.load('JMTucker.MFVNeutralino.Histos_cff')
 

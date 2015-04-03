@@ -78,6 +78,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetpt6;
   TH1F* h_jet_sum_ht;
 
+  TH1F* h_jetphi;
+  TH1F* h_jeteta;
+  TH1F* h_jetpairdphi;
+  TH1F* h_jetpairdr;
+
   TH1F* h_ncalojets;
   TH1F* h_calojetpt1;
   TH1F* h_calojetpt2;
@@ -87,8 +92,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_calojetpt6;
   TH1F* h_calojet_sum_ht;
 
-  TH1F* h_jetphi;
-  TH1F* h_jetpairdphi;
+  TH1F* h_calojetphi;
+  TH1F* h_calojeteta;
+  TH1F* h_calojetpairdphi;
+  TH1F* h_calojetpairdr;
 
   TH1F* h_sv0phi;
   TH1F* h_sv1phi;
@@ -272,6 +279,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetpt6 = fs->make<TH1F>("h_jetpt6", ";p_{T} of 6th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jet_sum_ht = fs->make<TH1F>("h_jet_sum_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
 
+  h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
+  h_jeteta = fs->make<TH1F>("h_jeteta", ";jets #eta (rad);jets/.08", 100, -4, 4);
+  h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
+  h_jetpairdr = fs->make<TH1F>("h_jetpairdr", ";jet pair #DeltaR (rad);jet pairs/.047", 150, 0, 7);
+
   h_ncalojets = fs->make<TH1F>("h_ncalojets", ";# of calojets;events", 20, 0, 20);
   h_calojetpt1 = fs->make<TH1F>("h_calojetpt1", ";p_{T} of 1st calojet (GeV);events/5 GeV", 100, 0, 500);
   h_calojetpt2 = fs->make<TH1F>("h_calojetpt2", ";p_{T} of 2nd calojet (GeV);events/5 GeV", 100, 0, 500);
@@ -281,8 +293,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_calojetpt6 = fs->make<TH1F>("h_calojetpt6", ";p_{T} of 6th calojet (GeV);events/5 GeV", 100, 0, 500);
   h_calojet_sum_ht = fs->make<TH1F>("h_calojet_sum_ht", ";#Sigma H_{T} of calojets (GeV);events/25 GeV", 200, 0, 5000);
 
-  h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
-  h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
+  h_calojetphi = fs->make<TH1F>("h_calojetphi", ";calojets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
+  h_calojeteta = fs->make<TH1F>("h_calojeteta", ";calojets #eta (rad);jets/.08", 100, -4, 4);
+  h_calojetpairdphi = fs->make<TH1F>("h_calojetpairdphi", ";calojet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
+  h_calojetpairdr = fs->make<TH1F>("h_calojetpairdr", ";calojet pair #DeltaR (rad);jet pairs/.047", 150, 0, 7);
 
   h_sv0phi = fs->make<TH1F>("h_sv0phi", ";constructed SV0 #phi (rad);events/.126", 50, -3.15, 3.15);
   h_sv1phi = fs->make<TH1F>("h_sv1phi", ";constructed SV1 #phi (rad);events/.126", 50, -3.15, 3.15);
@@ -492,6 +506,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jetpt6->Fill(mevent->jetpt6(), w);
   h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
 
+  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    h_jetphi->Fill(mevent->jet_phi[ijet]);
+    h_jeteta->Fill(mevent->jet_eta[ijet]);
+    for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
+      h_jetpairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
+      h_jetpairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]));
+    }
+  }
+
   h_ncalojets->Fill(mevent->ncalojets(), w);
   h_calojetpt1->Fill(mevent->ncalojets() >= 1 ? mevent->calojet_pt[0] : 0.f, w);
   h_calojetpt2->Fill(mevent->ncalojets() >= 2 ? mevent->calojet_pt[1] : 0.f, w);
@@ -501,10 +524,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_calojetpt6->Fill(mevent->ncalojets() >= 6 ? mevent->calojet_pt[5] : 0.f, w);
   h_calojet_sum_ht->Fill(mevent->calojet_sum_ht(), w);
 
-  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-    h_jetphi->Fill(mevent->jet_phi[ijet]);
-    for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
-      h_jetpairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
+  for (size_t ijet = 0; ijet < mevent->calojet_id.size(); ++ijet) {
+    h_calojetphi->Fill(mevent->calojet_phi[ijet]);
+    h_calojeteta->Fill(mevent->calojet_eta[ijet]);
+    for (size_t jjet = ijet+1; jjet < mevent->calojet_id.size(); ++jjet) {
+      h_calojetpairdphi->Fill(reco::deltaPhi(mevent->calojet_phi[ijet], mevent->calojet_phi[jjet]));
+      h_calojetpairdr->Fill(reco::deltaR(mevent->calojet_eta[ijet], mevent->calojet_phi[ijet], mevent->calojet_eta[jjet], mevent->calojet_phi[jjet]));
     }
   }
 

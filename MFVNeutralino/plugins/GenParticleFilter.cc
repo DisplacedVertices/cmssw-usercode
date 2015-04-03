@@ -51,6 +51,7 @@ private:
   const int min_npartons;
   const double min_parton_pt;
   const double min_parton_sumht;
+  const int min_ntracks;
   const double max_drmin;
   const double min_drmax;
   const double max_drmax;
@@ -88,6 +89,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_npartons(cfg.getParameter<int>("min_npartons")),
     min_parton_pt(cfg.getParameter<double>("min_parton_pt")),
     min_parton_sumht(cfg.getParameter<double>("min_parton_sumht")),
+    min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
@@ -193,22 +195,78 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       (max_rsmaller > 0 && rsmaller > max_rsmaller))
     return false;
 
-  int npartons_min_pt = 0;
-  int parton_sumht = 0;
+  std::vector<const reco::GenParticle*> partons;
+  for (int i = 0; i < 2; ++i) {
+    partons.push_back(mci.stranges[i]);
+    partons.push_back(mci.bottoms[i]);
+    partons.push_back(mci.bottoms_from_tops[i]);
+    if (mci.decay_type[i] == 3) {
+      partons.push_back(mci.W_daughters[i][0]);
+      partons.push_back(mci.W_daughters[i][1]);
+    }
+  }
+
+  std::vector<std::vector<float> > parton_pt_eta_phi;
+  float parton_sumht = 0;
+  for (const reco::GenParticle* p : partons) {
+    if (p->pt() > 20 && fabs(p->eta()) < 2.5) {
+      std::vector<float> pt_eta_phi;
+      pt_eta_phi.push_back(p->pt());
+      pt_eta_phi.push_back(p->eta());
+      pt_eta_phi.push_back(p->phi());
+      parton_pt_eta_phi.push_back(pt_eta_phi);
+      parton_sumht += p->pt();
+    }
+  }
+  std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
+
+  bool unmerged = true;
+  while (unmerged) {
+    bool merged = false;
+    for (int i = 0; i < int(parton_pt_eta_phi.size()); ++i) {
+      std::vector<float> p1 = parton_pt_eta_phi.at(i);
+      for (int j = i+1; j < int(parton_pt_eta_phi.size()); ++j) {
+        std::vector<float> p2 = parton_pt_eta_phi.at(j);
+        if (reco::deltaR(p1.at(1), p1.at(2), p2.at(1), p2.at(2)) < 0.6) {
+          std::vector<float> pt_eta_phi;
+          pt_eta_phi.push_back(p1.at(0) + p2.at(0));
+          pt_eta_phi.push_back((p1.at(0) * p1.at(1) + p2.at(0) * p2.at(1)) / (p1.at(0) + p2.at(0)));
+          pt_eta_phi.push_back((p1.at(0) * p1.at(2) + p2.at(0) * p2.at(2)) / (p1.at(0) + p2.at(0)));
+          parton_pt_eta_phi.erase(parton_pt_eta_phi.begin() + j);
+          parton_pt_eta_phi.erase(parton_pt_eta_phi.begin() + i);
+          parton_pt_eta_phi.push_back(pt_eta_phi);
+          std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
+          merged = true;
+          break;
+        }
+      }
+      if (merged) {
+        break;
+      }
+    }
+    if (merged) {
+      continue;
+    }
+    unmerged = false;
+  }
+
+  if (min_npartons > 0 && (int(parton_pt_eta_phi.size()) >= min_npartons ? parton_pt_eta_phi.at(min_npartons-1).at(0) : 0.f) < min_parton_pt)
+    return false;
+  if (parton_sumht < min_parton_sumht)
+    return false;
+
   for (int i = 0; i < 2; ++i) {
     const int ndau = 5;
     const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
 
+    int ntracks = 0;
     float drmin =  1e99;
     float drmax = -1e99;
     for (int j = 0; j < ndau; ++j) {
-      if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5) continue;
-      if (daughters[j]->pt() > min_parton_pt)
-        ++npartons_min_pt;
-      if (daughters[j]->pt() > 20)
-        parton_sumht += daughters[j]->pt();
+      if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5) continue;
+      ++ntracks;
       for (int k = j+1; k < ndau; ++k) {
-        if (is_neutrino(daughters[k]) || fabs(daughters[k]->eta()) > 2.5) continue;
+        if (is_neutrino(daughters[k]) || daughters[k]->pt() < 20 || fabs(daughters[k]->eta()) > 2.5) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
         if (dr < drmin)
           drmin = dr;
@@ -217,6 +275,8 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       }
     }
 
+    if (ntracks < min_ntracks)
+      return false;
     if (drmin > max_drmin)
       return false;
     if (drmax < min_drmax)
@@ -224,11 +284,6 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     if (drmax > max_drmax)
       return false;
   }
-
-  if (npartons_min_pt < min_npartons)
-    return false;
-  if (parton_sumht < min_parton_sumht)
-    return false;
 
   return true;
 }

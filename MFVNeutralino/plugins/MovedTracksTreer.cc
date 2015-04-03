@@ -22,6 +22,7 @@ public:
   const bool apply_presel;
   const unsigned njets_req;
   const unsigned nbjets_req;
+  const bool for_mctruth;
 
   mfv::MovedTracksNtuple nt;
   TTree* tree;
@@ -35,7 +36,8 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
     max_dist2move(cfg.getParameter<double>("max_dist2move")),
     apply_presel(cfg.getParameter<bool>("apply_presel")),
     njets_req(cfg.getParameter<unsigned>("njets_req")),
-    nbjets_req(cfg.getParameter<unsigned>("nbjets_req"))
+    nbjets_req(cfg.getParameter<unsigned>("nbjets_req")),
+    for_mctruth(cfg.getParameter<bool>("for_mctruth"))
 {
   edm::Service<TFileService> fs;
 
@@ -57,6 +59,22 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(event_src, mevent);
 
+  if (for_mctruth && (nt.gen_valid = mevent->gen_valid)) {
+    for (int i = 0; i < 2; ++i) {
+      nt.gen_lsp_pt[i] = mevent->gen_lsp_pt[i];
+      nt.gen_lsp_eta[i] = mevent->gen_lsp_eta[i];
+      nt.gen_lsp_phi[i] = mevent->gen_lsp_phi[i];
+      nt.gen_lsp_mass[i] = mevent->gen_lsp_mass[i];
+      nt.gen_decay_type[i] = mevent->gen_decay_type[i];
+
+      const double z = nt.gen_lsp_decay[i*3+2] = mevent->gen_lsp_decay[i*3+2];
+      nt.gen_lsp_decay[i*3+0] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
+      nt.gen_lsp_decay[i*3+1] = mevent->gen_lsp_decay[i*3+1] - mevent->bsy_at_z(z);
+    }
+    nt.gen_partons_in_acc = mevent->gen_partons_in_acc;
+  }
+
+  nt.pass_clean = mevent->pass_clean_all();
   nt.npu = int(mevent->npu);
   nt.npv = mevent->npv;
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
@@ -70,44 +88,46 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.nlep = mevent->nlep(2);
   nt.nalljets = mevent->njets();
 
-  edm::Handle<reco::TrackCollection> tracks, moved_tracks;
-  edm::Handle<int> npreseljets, npreselbjets;
-  edm::Handle<pat::JetCollection> jets_used, bjets_used;
-  edm::Handle<std::vector<double> > move_vertex;
-  event.getByLabel(edm::InputTag(mover_src),                 tracks);
-  event.getByLabel(edm::InputTag(mover_src, "moved"),        moved_tracks);
-  event.getByLabel(edm::InputTag(mover_src, "npreseljets"),  npreseljets); 
-  event.getByLabel(edm::InputTag(mover_src, "npreselbjets"), npreselbjets); 
-  event.getByLabel(edm::InputTag(mover_src, "jetsUsed"),     jets_used);
-  event.getByLabel(edm::InputTag(mover_src, "bjetsUsed"),    bjets_used);
-  event.getByLabel(edm::InputTag(mover_src, "moveVertex"),   move_vertex);
+  if (!for_mctruth) {
+    edm::Handle<reco::TrackCollection> tracks, moved_tracks;
+    edm::Handle<int> npreseljets, npreselbjets;
+    edm::Handle<pat::JetCollection> jets_used, bjets_used;
+    edm::Handle<std::vector<double> > move_vertex;
+    event.getByLabel(edm::InputTag(mover_src),                 tracks);
+    event.getByLabel(edm::InputTag(mover_src, "moved"),        moved_tracks);
+    event.getByLabel(edm::InputTag(mover_src, "npreseljets"),  npreseljets); 
+    event.getByLabel(edm::InputTag(mover_src, "npreselbjets"), npreselbjets); 
+    event.getByLabel(edm::InputTag(mover_src, "jetsUsed"),     jets_used);
+    event.getByLabel(edm::InputTag(mover_src, "bjetsUsed"),    bjets_used);
+    event.getByLabel(edm::InputTag(mover_src, "moveVertex"),   move_vertex);
 
-  nt.ntracks = tracks->size();
-  nt.nseltracks = moved_tracks->size();
+    nt.ntracks = tracks->size();
+    nt.nseltracks = moved_tracks->size();
 
-  nt.npreseljets  = *npreseljets;
-  nt.npreselbjets = *npreselbjets;
+    nt.npreseljets  = *npreseljets;
+    nt.npreselbjets = *npreselbjets;
 
-  nt.nlightjets = jets_used->size();
+    nt.nlightjets = jets_used->size();
 
-  for (const pat::JetCollection* jets : { &*jets_used, &*bjets_used }) {
-    for (const pat::Jet& jet : *jets) {
-      nt.jets_pt.push_back(jet.pt());
-      nt.jets_eta.push_back(jet.eta());
-      nt.jets_phi.push_back(jet.phi());
-      nt.jets_energy.push_back(jet.energy());
+    for (const pat::JetCollection* jets : { &*jets_used, &*bjets_used }) {
+      for (const pat::Jet& jet : *jets) {
+        nt.jets_pt.push_back(jet.pt());
+        nt.jets_eta.push_back(jet.eta());
+        nt.jets_phi.push_back(jet.phi());
+        nt.jets_energy.push_back(jet.energy());
 
-      ushort jet_ntracks = 0;
-      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
-        if (pfcand->trackRef().isNonnull())
-          ++jet_ntracks;
-      nt.jets_ntracks.push_back(jet_ntracks);
+        ushort jet_ntracks = 0;
+        for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
+          if (pfcand->trackRef().isNonnull())
+            ++jet_ntracks;
+        nt.jets_ntracks.push_back(jet_ntracks);
+      }
     }
-  }
 
-  nt.move_z = move_vertex->at(2);
-  nt.move_x = move_vertex->at(0) - mevent->bsx_at_z(nt.move_z);
-  nt.move_y = move_vertex->at(1) - mevent->bsy_at_z(nt.move_z);
+    nt.move_z = move_vertex->at(2);
+    nt.move_x = move_vertex->at(0) - mevent->bsx_at_z(nt.move_z);
+    nt.move_y = move_vertex->at(1) - mevent->bsy_at_z(nt.move_z);
+  }
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByLabel(vertices_src, vertices);
@@ -117,11 +137,13 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     const double vy = v.y - mevent->bsy_at_z(v.z);
     const double vz = v.z;
 
-    const double dist2move = pow(pow(vx - nt.move_x, 2) +
-                                 pow(vy - nt.move_y, 2) +
-                                 pow(vz - nt.move_z, 2), 0.5);
-    if (dist2move > max_dist2move)
-      continue;
+    if (!for_mctruth) {
+      const double dist2move = pow(pow(vx - nt.move_x, 2) +
+                                   pow(vy - nt.move_y, 2) +
+                                   pow(vz - nt.move_z, 2), 0.5);
+      if (dist2move > max_dist2move)
+        continue;
+    }
 
     nt.vtxs_x.push_back(vx);
     nt.vtxs_y.push_back(vy);
@@ -135,13 +157,12 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.vtxs_bs2derr.push_back(v.bs2derr);
   }
 
-  if (apply_presel &&
-      (nt.npreseljets < njets_req ||
-       nt.npreselbjets < nbjets_req ||
-       nt.jetsumht < 500 ||
-       nt.jetpt4 < 60)
-      )
+  if (apply_presel) {
+    if ((!for_mctruth && (nt.npreseljets < njets_req || nt.npreselbjets < nbjets_req)) ||
+        nt.jetsumht < 500 ||
+        nt.jetpt4 < 60)
     return;
+  }
 
   tree->Fill();
 }
