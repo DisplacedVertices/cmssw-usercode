@@ -44,6 +44,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('HLTRun2_Sim',
                        events_per_job = 200,
                        total_number_of_events = -1,
+                       get_edm_output = 1,
+                       data_retrieval = 'cornell',
+                       publish_data_name = 'sim',
                        aaa = True,
                        storage_catalog_override = 'cornell',
                        )
