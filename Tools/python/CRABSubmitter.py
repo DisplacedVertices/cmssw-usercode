@@ -223,13 +223,15 @@ class CRABSubmitter:
         if get_edm_output:
             cfg.set('CMSSW', 'get_edm_output', 1)
 
+        if storage_catalog_override == 'cornell':
+            storage_catalog_override = 'T3_US_Cornell'
+            self.aaa_locations = self.aaa_locations.replace('T2_US_Purdue,', '') # 4/3/2015
+
         if aaa:
             cfg.set('CRAB', 'scheduler', 'remoteGlidein')
             cfg.set('GRID', 'data_location_override', self.aaa_locations)
             cfg.set('GRID', 'remove_default_blacklist', 1)
 
-        if storage_catalog_override == 'cornell':
-            storage_catalog_override = 'T3_US_Cornell'
         self.storage_catalog_override = storage_catalog_override
         if storage_catalog_override:
             if not self.storage_catalog.has_key(storage_catalog_override):
