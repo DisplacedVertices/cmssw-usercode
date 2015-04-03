@@ -104,6 +104,7 @@ first_lumi = 1
 use_dbs3 = 1
 
 [USER]
+ssh_control_persist = no
 additional_input_files = minSLHA.spc
 ui_working_dir = %(ui_working_dir)s
 copy_data = 1
