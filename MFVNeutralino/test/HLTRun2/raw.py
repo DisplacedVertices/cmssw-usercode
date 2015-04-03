@@ -48,6 +48,8 @@ process.RAWSIMoutput = cms.OutputModule('PoolOutputModule',
     splitLevel = cms.untracked.int32(0)
 )
 
+process.RAWSIMoutput.outputCommands += ['drop *_*_*_SIM']
+
 process.mix.input.nbPileupEvents.averageNumber = cms.double(40)
 process.mix.bunchspace = cms.int32(25)
 process.mix.minBunch = cms.int32(-12)
