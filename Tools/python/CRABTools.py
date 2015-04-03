@@ -250,7 +250,7 @@ def crab_status(working_dir, verbose=True, debug=False):
             ]:
             x = x.replace(bad + ' ' + bad, bad)
         x = [y.strip() for y in x.split() if y.strip()]
-        if len(x) > 4 and x[-1] == x[-2] and x[-1].count('.') > 2:
+        if len(x) > 4 and x[-1] == x[-2] and x[-1].count('.') >= 2:
             x.pop()
         #print len(x), x
         if len(x) < 4: continue
