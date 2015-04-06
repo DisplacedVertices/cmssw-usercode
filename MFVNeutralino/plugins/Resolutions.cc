@@ -43,6 +43,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_dist2d;
   TH1F* h_dist3d;
 
+  TH1F* h_pull_dx;
+  TH1F* h_pull_dy;
   TH1F* h_pull_dz;
   TH1F* h_pull_dist2d;
 
@@ -150,6 +152,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_dist2d = fs->make<TH1F>("h_dist2d", ";dist2d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
   h_dist3d = fs->make<TH1F>("h_dist3d", ";dist3d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
 
+  h_pull_dx = fs->make<TH1F>("h_pull_dx", ";pull on x resolution;number of vertices", 100, -5, 5);
+  h_pull_dy = fs->make<TH1F>("h_pull_dy", ";pull on y resolution;number of vertices", 100, -5, 5);
   h_pull_dz = fs->make<TH1F>("h_pull_dz", ";pull on z resolution;number of vertices", 100, -5, 5);
   h_pull_dist2d = fs->make<TH1F>("h_pull_dist2d", ";pull on dist2d resolution;number of vertices", 100, 0, 5);
 
@@ -334,7 +338,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
 
-    // histogram space pulls: z, dist2d
+    // histogram space pulls: x, y, z, dist2d
+    h_pull_dx->Fill((vtx.x - mevent->gen_lsp_decay[ilsp*3+0]) / sqrt(vtx.cxx));
+    h_pull_dy->Fill((vtx.y - mevent->gen_lsp_decay[ilsp*3+1]) / sqrt(vtx.cyy));
     h_pull_dz->Fill((vtx.z - mevent->gen_lsp_decay[ilsp*3+2]) / sqrt(vtx.czz));
     h_pull_dist2d->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
                             mevent->gen_lsp_decay[ilsp*3+1] - vtx.y) / vtx.bs2derr);
