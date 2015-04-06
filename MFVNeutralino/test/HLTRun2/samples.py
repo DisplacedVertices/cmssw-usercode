@@ -22,4 +22,13 @@ samples = [
     ]
 
 for sample in samples:
+    exec '%s = sample' % sample.name
     sample.dbs_url_num = 3
+
+    sample.gen_done = True
+    sample.gen_dataset = sample.dataset
+
+    sample.sim_done = False
+
+mfv_hltrun2_M0400.sim_dataset = '/mfv_hltrun2_M0400/tucker-sim-6f2bea2f4650fd314ffd47e16b4b2771/USER'
+mfv_hltrun2_M0400.sim_done = True
