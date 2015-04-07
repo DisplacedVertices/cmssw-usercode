@@ -13,8 +13,8 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
-process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5))
+process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True)) #, wantSummary = cms.untracked.bool(True))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:reco.root'))
 
 process.MINIAODSIMoutput = cms.OutputModule('PoolOutputModule',
@@ -64,3 +64,21 @@ process.patTrigger.processName = 'HLT2'
 
 process.MessageLogger.categories.extend(["GetManyWithoutRegistration","GetByLabelWithoutRegistration"])
 process.MessageLogger.cerr.GetManyWithoutRegistration = process.MessageLogger.cerr.GetByLabelWithoutRegistration = cms.untracked.PSet(reportEvery = cms.untracked.int32(1), optionalPSet = cms.untracked.bool(True), limit = cms.untracked.int32(10000000))
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from samples import samples
+    samples = [s for s in samples if s.recopu40_done == True]
+    for s in samples:
+        s.dataset = s.recopu40_dataset
+
+    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    cs = CRABSubmitter('HLTRun2_Patpu40',
+                       events_per_job = 400,
+                       total_number_of_events = -1,
+                       get_edm_output = 1,
+                       data_retrieval = 'cornell',
+                       publish_data_name = 'patpu40',
+                       aaa = True,
+                       storage_catalog_override = 'cornell',
+                       )
+    cs.submit_all(samples)
