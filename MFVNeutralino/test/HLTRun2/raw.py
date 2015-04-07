@@ -72,7 +72,7 @@ process = customisePostLS1(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from samples import samples
-    samples = [s for s in samples if s.sim_done = True]
+    samples = [s for s in samples if s.sim_done == True]
     for s in samples:
         s.dataset = s.sim_dataset
 
