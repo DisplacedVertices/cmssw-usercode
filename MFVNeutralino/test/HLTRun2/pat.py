@@ -1,6 +1,6 @@
 # 740: cmsDriver.py step5 --no_exec --mc --conditions MCRUN2_74_V7 -n 5 --eventcontent MINIAODSIM --runUnscheduled -s PAT --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1
 
-import FWCore.ParameterSet.Config as cms
+import sys, FWCore.ParameterSet.Config as cms
 
 process = cms.Process('PAT')
 
