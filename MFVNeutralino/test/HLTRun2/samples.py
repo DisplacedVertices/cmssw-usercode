@@ -30,9 +30,17 @@ for sample in samples:
 
     sample.sim_done = False
     sample.rawpu40_done = False
+    sample.hltpu40_done = False
+    sample.recopu40_done = False
 
 mfv_hltrun2_M0400.sim_dataset = '/mfv_hltrun2_M0400/tucker-sim-6f2bea2f4650fd314ffd47e16b4b2771/USER'
 mfv_hltrun2_M0400.sim_done = True
 
 mfv_hltrun2_M0400.rawpu40_dataset = '/mfv_hltrun2_M0400/tucker-rawpu40-5a59286feabf00f03677a86d7e0dd538/USER'
 mfv_hltrun2_M0400.rawpu40_done = True
+
+mfv_hltrun2_M0400.hltpu40_dataset = '/mfv_hltrun2_M0400/tucker-hltpu40-17e0ae5ebda92df9604093b8c31d7d4c/USER'
+mfv_hltrun2_M0400.hltpu40_done = True
+
+mfv_hltrun2_M0400.recopu40_dataset = '/mfv_hltrun2_M0400/tucker-recopu40-49797b714f9dfc7d08ee5c9f0726e700/USER'
+mfv_hltrun2_M0400.recopu40_done = True
