@@ -1,6 +1,6 @@
 # 740: cmsDriver.py step3 --conditions MCRUN2_74_V7 --no_exec -n 10 --eventcontent AODSIM -s RAW2DIGI,L1Reco,RECO,EI --datatier GEN-SIM-RECO --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --magField 38T_PostLS1
 
-import FWCore.ParameterSet.Config as cms
+import sys, FWCore.ParameterSet.Config as cms
 
 process = cms.Process('RECO')
 
@@ -19,7 +19,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condD
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:hlt.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_hltrun2_M0400/hltpu40/17e0ae5ebda92df9604093b8c31d7d4c/hlt_64_1_AKX.root'))
 
 process.AODSIMoutput = cms.OutputModule('PoolOutputModule',
     fileName = cms.untracked.string('reco.root'),
@@ -42,3 +42,21 @@ process.schedule = cms.Schedule(process.raw2digi_step, process.L1Reco_step, proc
 
 from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
 process = customisePostLS1(process)
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from samples import samples
+    samples = [s for s in samples if s.hltpu40_done == True]
+    for s in samples:
+        s.dataset = s.hltpu40_dataset
+
+    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    cs = CRABSubmitter('HLTRun2_Recopu40',
+                       events_per_job = 400,
+                       total_number_of_events = -1,
+                       get_edm_output = 1,
+                       data_retrieval = 'cornell',
+                       publish_data_name = 'recopu40',
+                       aaa = True,
+                       storage_catalog_override = 'cornell',
+                       )
+    cs.submit_all(samples)
