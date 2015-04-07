@@ -1,10 +1,10 @@
-# hltGetConfiguration /dev/CMSSW_7_4_0/GRun --full --offline --mc --unprescale --process TEST --globaltag MCRUN2_74_V7 
+# hltGetConfiguration /dev/CMSSW_7_4_0/GRun --full --offline --mc --unprescale --process HLT2 --globaltag MCRUN2_74_V7 
 # ( --l1-emulator 'stage1,gt' --l1Xml L1Menu_Collisions2015_25ns_v2_L1T_Scales_20141121_Imp0_0x1030.xml )
 # /dev/CMSSW_7_4_0/GRun/V33 (CMSSW_7_4_0_pre9)
 
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process('TEST')
+process = cms.Process('HLT2')
 
 process.HLTConfigVersion = cms.PSet(
   tableName = cms.string('/dev/CMSSW_7_4_0/GRun/V33')
@@ -46286,35 +46286,35 @@ process = loadL1menu(process)
 
 # adapt HLT modules to the correct process name
 if 'hltTrigReport' in process.__dict__:
-    process.hltTrigReport.HLTriggerResults                    = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltTrigReport.HLTriggerResults                    = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltPreExpressCosmicsOutputSmart' in process.__dict__:
-    process.hltPreExpressCosmicsOutputSmart.hltResults = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltPreExpressCosmicsOutputSmart.hltResults = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltPreExpressOutputSmart' in process.__dict__:
-    process.hltPreExpressOutputSmart.hltResults        = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltPreExpressOutputSmart.hltResults        = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltPreDQMForHIOutputSmart' in process.__dict__:
-    process.hltPreDQMForHIOutputSmart.hltResults       = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltPreDQMForHIOutputSmart.hltResults       = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltPreDQMForPPOutputSmart' in process.__dict__:
-    process.hltPreDQMForPPOutputSmart.hltResults       = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltPreDQMForPPOutputSmart.hltResults       = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltPreHLTDQMResultsOutputSmart' in process.__dict__:
-    process.hltPreHLTDQMResultsOutputSmart.hltResults  = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltPreHLTDQMResultsOutputSmart.hltResults  = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltPreHLTDQMOutputSmart' in process.__dict__:
-    process.hltPreHLTDQMOutputSmart.hltResults         = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltPreHLTDQMOutputSmart.hltResults         = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltPreHLTMONOutputSmart' in process.__dict__:
-    process.hltPreHLTMONOutputSmart.hltResults         = cms.InputTag( 'TriggerResults', '', 'TEST' )
+    process.hltPreHLTMONOutputSmart.hltResults         = cms.InputTag( 'TriggerResults', '', 'HLT2' )
 
 if 'hltDQMHLTScalers' in process.__dict__:
-    process.hltDQMHLTScalers.triggerResults                   = cms.InputTag( 'TriggerResults', '', 'TEST' )
-    process.hltDQMHLTScalers.processname                      = 'TEST'
+    process.hltDQMHLTScalers.triggerResults                   = cms.InputTag( 'TriggerResults', '', 'HLT2' )
+    process.hltDQMHLTScalers.processname                      = 'HLT2'
 
 if 'hltDQML1SeedLogicScalers' in process.__dict__:
-    process.hltDQML1SeedLogicScalers.processname              = 'TEST'
+    process.hltDQML1SeedLogicScalers.processname              = 'HLT2'
 
 # limit the number of events to be processed
 process.maxEvents = cms.untracked.PSet(
@@ -46400,3 +46400,21 @@ def add_ste(process):
                                  weight_src = cms.InputTag(''),
                                  )
     process.epste = cms.EndPath(process.ste)
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from samples import samples
+    samples = [s for s in samples if s.rawpu40_done == True]
+    for s in samples:
+        s.dataset = s.rawpu40_dataset
+
+    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    cs = CRABSubmitter('HLTRun2_HLTpu40',
+                       events_per_job = 400,
+                       total_number_of_events = -1,
+                       get_edm_output = 1,
+                       data_retrieval = 'cornell',
+                       publish_data_name = 'hltpu40',
+                       aaa = True,
+                       storage_catalog_override = 'cornell',
+                       )
+    cs.submit_all(samples)
