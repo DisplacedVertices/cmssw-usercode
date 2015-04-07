@@ -2,7 +2,7 @@
 # ( --l1-emulator 'stage1,gt' --l1Xml L1Menu_Collisions2015_25ns_v2_L1T_Scales_20141121_Imp0_0x1030.xml )
 # /dev/CMSSW_7_4_0/GRun/V33 (CMSSW_7_4_0_pre9)
 
-import FWCore.ParameterSet.Config as cms
+import sys, FWCore.ParameterSet.Config as cms
 
 process = cms.Process('HLT2')
 
