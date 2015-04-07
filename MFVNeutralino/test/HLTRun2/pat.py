@@ -45,7 +45,7 @@ process.MINIAODSIMoutput.outputCommands += [
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     'keep MFVEvent_mfvEvent__*',
     'keep edmTriggerResults_TriggerResults__HLT',
-    'keep edmTriggerResults_TriggerResults__TEST',
+    'keep edmTriggerResults_TriggerResults__HLT2',
     ]
         
 process.pmfv = cms.Path(process.mfvVertexSequence * process.mfvEvent)
@@ -60,7 +60,7 @@ process = miniAOD_customizeAllMC(process)
 
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
-process.patTrigger.processName = 'TEST'
+process.patTrigger.processName = 'HLT2'
 
 process.MessageLogger.categories.extend(["GetManyWithoutRegistration","GetByLabelWithoutRegistration"])
 process.MessageLogger.cerr.GetManyWithoutRegistration = process.MessageLogger.cerr.GetByLabelWithoutRegistration = cms.untracked.PSet(reportEvery = cms.untracked.int32(1), optionalPSet = cms.untracked.bool(True), limit = cms.untracked.int32(10000000))
