@@ -46264,7 +46264,7 @@ process.source = cms.Source( "PoolSource",
 #'file:/uscms/home/tucker/nobackup/00B2B0A4-E88D-E411-AAF5-0025905A612C.root'
 #'/store/user/mzientek/Neutralino_M400_13TeV_DisplaceVtx_GENSIM_721/Neutralino_731_m400_HLT/8bb1453964da032b385b47cbbd4968dd/step2_731_m400_topub_9_2_RdF.root'
 #'root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_hltrun2_M0900/sim/6f2bea2f4650fd314ffd47e16b4b2771/sim_1_1_InE.root',
-'file:raw2.root',
+'file:raw.root',
 
     ),
     inputCommands = cms.untracked.vstring(
