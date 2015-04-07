@@ -28,6 +28,11 @@ process.load('JMTucker.Tools.SimpleTriggerEfficiency_cfi')
 process.SimpleTriggerEfficiency.prescale_paths  = cms.vstring()  #*prescales.prescales.keys()),
 process.SimpleTriggerEfficiency.prescale_values = cms.vuint32()  #*[o for l,h,o in prescales.prescales.itervalues()]),
 
+for x in sys.argv:
+    if x.startswith('process='):
+        process_name = x.replace('process=', '')
+        process.SimpleTriggerEfficiency.trigger_results_src = cms.InputTag('TriggerResults', '', process_name)
+
 process.SimpleTriggerEfficiencyMu      = process.SimpleTriggerEfficiency.clone()
 process.SimpleTriggerEfficiencyMuInAcc = process.SimpleTriggerEfficiency.clone()
 process.SimpleTriggerEfficiencyEl      = process.SimpleTriggerEfficiency.clone()
