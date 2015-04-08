@@ -43,6 +43,11 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_dist2d;
   TH1F* h_dist3d;
 
+  TH1F* h_cxx;
+  TH1F* h_cyy;
+  TH1F* h_czz;
+  TH1F* h_bs2derr;
+
   TH1F* h_pull_dx;
   TH1F* h_pull_dy;
   TH1F* h_pull_dz;
@@ -151,6 +156,11 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_dz = fs->make<TH1F>("h_dz", ";z resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dist2d = fs->make<TH1F>("h_dist2d", ";dist2d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
   h_dist3d = fs->make<TH1F>("h_dist3d", ";dist3d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
+
+  h_cxx = fs->make<TH1F>("h_cxx", ";sqrt(cxx) (cm);number of vertices", 100, 0, 0.05);
+  h_cyy = fs->make<TH1F>("h_cyy", ";sqrt(cyy) (cm);number of vertices", 100, 0, 0.05);
+  h_czz = fs->make<TH1F>("h_czz", ";sqrt(czz) (cm);number of vertices", 100, 0, 0.05);
+  h_bs2derr = fs->make<TH1F>("h_bs2derr", ";bs2derr (cm);number of vertices", 100, 0, 0.05);
 
   h_pull_dx = fs->make<TH1F>("h_pull_dx", ";pull on x resolution;number of vertices", 100, -5, 5);
   h_pull_dy = fs->make<TH1F>("h_pull_dy", ";pull on y resolution;number of vertices", 100, -5, 5);
@@ -337,6 +347,12 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_dist3d->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
+
+    // histogram space uncertainties: sqrt(cxx), sqrt(cyy), sqrt(czz), bs2derr
+    h_cxx->Fill(sqrt(vtx.cxx));
+    h_cyy->Fill(sqrt(vtx.cyy));
+    h_czz->Fill(sqrt(vtx.czz));
+    h_bs2derr->Fill(vtx.bs2derr);
 
     // histogram space pulls: x, y, z, dist2d
     h_pull_dx->Fill((vtx.x - mevent->gen_lsp_decay[ilsp*3+0]) / sqrt(vtx.cxx));
