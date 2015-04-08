@@ -14,6 +14,8 @@ track_used_req = None
 prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
+keep_gen = False
+trig_filter = True
 process, common_seq = pat_tuple_process(runOnMC)
 #set_events_to_process(process, [])
 #process.source.fileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/ACE17BB6-A20E-E211-819A-00266CF9B630.root']
@@ -23,6 +25,7 @@ no_skimming_cuts(process)
 process.out.fileName = 'ntuple.root'
 if keep_all:
     process.out.outputCommands = ['keep *']
+    trig_filter = False
 else:
     process.out.outputCommands = [
         'drop *',
@@ -42,6 +45,9 @@ else:
             'keep recoVertexs_mfvVertices__*',
             'keep *_mfvVerticesToJets_*_*',
             ]
+
+    if keep_gen:
+        process.out.outputCommands += ['keep recoGenParticles_genParticles__*']
 
     process.out.dropMetaData = cms.untracked.string('ALL')
 
@@ -64,12 +70,13 @@ elif track_used_req == 'nopvs':
     process.mfvVertices.use_non_pvs_tracks = True
 
 if keep_all:
-    process.mfvEvent.skip_event_filter = ''
     process.mfvSelectedVerticesTight.produce_vertices = True
     process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
-else:
+if trig_filter:
     import JMTucker.MFVNeutralino.TriggerFilter
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
+else:
+    process.mfvEvent.skip_event_filter = ''
 
 del process.outp
 process.outp = cms.EndPath(process.mfvEvent * process.out)
@@ -141,7 +148,6 @@ if 'seo' in sys.argv:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
-    from JMTucker.Tools.SampleFiles import SampleFiles
 
     def modify(sample):
         to_add = []
@@ -229,10 +235,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             nj = int(sample.nevents_orig / float(sample.events_per)) + 1
             assert nj < 5000
 
-    for s in Samples.mfv_signal_samples + Samples.mfv_signal_samples_systematics:
+    for s in Samples.mfv_signal_samples + Samples.mfv_signal_samples_systematics + Samples.exo12038_samples:
         s.events_per = 2000
         s.timed = True
-
 
     samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
                                  Samples.mfv_neutralino_tau1000um_M0400,
