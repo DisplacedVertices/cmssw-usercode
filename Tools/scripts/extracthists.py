@@ -68,9 +68,11 @@ for src_obj, dst_path in zip(src_objs, dsts):
         if num_slashes > 1:
             raise ValueError('nested directories not supported yet')
         dst_dir, dst_name = os.path.split(dst_path)
-        dst_dir = fB.mkdir(dst_dir)
+        dst_dir_obj = fB.Get(dst_dir)
+        if repr(dst_dir_obj) == '<ROOT.TObject object at 0x(nil)>':
+            dst_dir_obj = fB.mkdir(dst_dir)
         dst_obj = src_obj.Clone(dst_name)
-        dst_obj.SetDirectory(dst_dir)
+        dst_obj.SetDirectory(dst_dir_obj)
     else:
         dst_obj = src_obj.Clone(dst_path)
         dst_obj.SetDirectory(fB)
