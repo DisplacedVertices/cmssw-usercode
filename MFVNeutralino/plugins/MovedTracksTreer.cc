@@ -66,9 +66,11 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
       nt.gen_lsp_phi[i] = mevent->gen_lsp_phi[i];
       nt.gen_lsp_mass[i] = mevent->gen_lsp_mass[i];
       nt.gen_decay_type[i] = mevent->gen_decay_type[i];
+
+      const double z = nt.gen_lsp_decay[i*3+2] = mevent->gen_lsp_decay[i*3+2];
+      nt.gen_lsp_decay[i*3+0] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
+      nt.gen_lsp_decay[i*3+1] = mevent->gen_lsp_decay[i*3+1] - mevent->bsy_at_z(z);
     }
-    for (int i = 0; i < 6; ++i)
-      nt.gen_lsp_decay[i] = mevent->gen_lsp_decay[i];
     nt.gen_partons_in_acc = mevent->gen_partons_in_acc;
   }
 

@@ -43,6 +43,13 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_dist2d;
   TH1F* h_dist3d;
 
+  TH1F* h_cxx;
+  TH1F* h_cyy;
+  TH1F* h_czz;
+  TH1F* h_bs2derr;
+
+  TH1F* h_pull_dx;
+  TH1F* h_pull_dy;
   TH1F* h_pull_dz;
   TH1F* h_pull_dist2d;
 
@@ -108,8 +115,18 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_drmin;
   TH2F* h_s_drmax;
 
+  TH1F* h_dbv_nomatch;
   TH2F* h_s_dbv;
   TH2F* h_s_dvv;
+
+  TH2F* h_s_dbv_gendvv;
+  TH2F* h_s_dbv_betagamma;
+  TH2F* h_s_drmax_betagamma;
+  TH2F* h_s_drmax_dbv;
+  TH2F* h_s_gendrmax_dbv;
+
+  TH1F* h_gen_dbv;
+  TH1F* h_gen_dvv;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -140,6 +157,13 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_dist2d = fs->make<TH1F>("h_dist2d", ";dist2d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
   h_dist3d = fs->make<TH1F>("h_dist3d", ";dist3d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
 
+  h_cxx = fs->make<TH1F>("h_cxx", ";sqrt(cxx) (cm);number of vertices", 100, 0, 0.05);
+  h_cyy = fs->make<TH1F>("h_cyy", ";sqrt(cyy) (cm);number of vertices", 100, 0, 0.05);
+  h_czz = fs->make<TH1F>("h_czz", ";sqrt(czz) (cm);number of vertices", 100, 0, 0.05);
+  h_bs2derr = fs->make<TH1F>("h_bs2derr", ";bs2derr (cm);number of vertices", 100, 0, 0.05);
+
+  h_pull_dx = fs->make<TH1F>("h_pull_dx", ";pull on x resolution;number of vertices", 100, -5, 5);
+  h_pull_dy = fs->make<TH1F>("h_pull_dy", ";pull on y resolution;number of vertices", 100, -5, 5);
   h_pull_dz = fs->make<TH1F>("h_pull_dz", ";pull on z resolution;number of vertices", 100, -5, 5);
   h_pull_dist2d = fs->make<TH1F>("h_pull_dist2d", ";pull on dist2d resolution;number of vertices", 100, 0, 5);
 
@@ -205,8 +229,18 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_drmin = fs->make<TH2F>("h_s_drmin", ";min #DeltaR between partons;min #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
   h_s_drmax = fs->make<TH2F>("h_s_drmax", ";max #DeltaR between partons;max #DeltaR between tracks", 100, 0, 5, 100, 0, 5);
 
+  h_dbv_nomatch = fs->make<TH1F>("h_dbv_nomatch", ";reconstructed d_{BV};reconstructed vertices without matched generated vertex", 500, 0, 2.5);
   h_s_dbv = fs->make<TH2F>("h_s_dbv", ";generated d_{BV};reconstructed d_{BV}", 500, 0, 2.5, 500, 0, 2.5);
   h_s_dvv = fs->make<TH2F>("h_s_dvv", ";generated d_{VV};reconstructed d_{VV}", 1000, 0, 5, 1000, 0, 5);
+
+  h_s_dbv_gendvv = fs->make<TH2F>("h_s_dbv_gendvv", "d_{VV} > 300 #mum;generated d_{BV};reconstructed d_{BV}", 500, 0, 2.5, 500, 0, 2.5);
+  h_s_dbv_betagamma = fs->make<TH2F>("h_s_dbv_betagamma", ";generated #beta#gamma;generated d_{BV}", 100, 0, 10, 100, 0, 0.5);
+  h_s_drmax_betagamma = fs->make<TH2F>("h_s_drmax_betagamma", ";generated #beta#gamma;reconstructed drmax", 100, 0, 10, 100, 0, 5);
+  h_s_drmax_dbv = fs->make<TH2F>("h_s_drmax_dbv", ";generated d_{BV};reconstructed drmax", 100, 0, 0.5, 100, 0, 5);
+  h_s_gendrmax_dbv = fs->make<TH2F>("h_s_gendrmax_dbv", ";generated d_{BV};generated drmax", 100, 0, 0.5, 100, 0, 5);
+
+  h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
+  h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
 }
 
 namespace {
@@ -291,8 +325,10 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
 
-    if (ilsp < 0)
+    if (ilsp < 0) {
+      h_dbv_nomatch->Fill(mevent->bs2ddist(vtx));
       continue;
+    }
 
     ++nvtx_match;
     const TLorentzVector& lsp_p4 = lsp_p4s[ilsp];
@@ -312,7 +348,15 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
 
-    // histogram space pulls: z, dist2d
+    // histogram space uncertainties: sqrt(cxx), sqrt(cyy), sqrt(czz), bs2derr
+    h_cxx->Fill(sqrt(vtx.cxx));
+    h_cyy->Fill(sqrt(vtx.cyy));
+    h_czz->Fill(sqrt(vtx.czz));
+    h_bs2derr->Fill(vtx.bs2derr);
+
+    // histogram space pulls: x, y, z, dist2d
+    h_pull_dx->Fill((vtx.x - mevent->gen_lsp_decay[ilsp*3+0]) / sqrt(vtx.cxx));
+    h_pull_dy->Fill((vtx.y - mevent->gen_lsp_decay[ilsp*3+1]) / sqrt(vtx.cyy));
     h_pull_dz->Fill((vtx.z - mevent->gen_lsp_decay[ilsp*3+2]) / sqrt(vtx.czz));
     h_pull_dist2d->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
                             mevent->gen_lsp_decay[ilsp*3+1] - vtx.y) / vtx.bs2derr);
@@ -389,6 +433,30 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     // histogram dBV
     h_s_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
+    if (mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]) > 0.03) {
+      h_s_dbv_gendvv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
+    }
+
+    h_s_dbv_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()));
+    h_s_drmax_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx.drmax());
+    h_s_drmax_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), vtx.drmax());
+    h_s_gendrmax_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), drmax);
+  }
+
+  for (int ilsp = 0; ilsp < 2; ++ilsp) {
+    bool matched = false;
+    for (const MFVVertexAux& vtx : *vertices) {
+      double dist = mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
+                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
+                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z);
+      if (dist < max_dist) {
+        matched = true;
+        break;
+      }
+    }
+    if (matched) {
+      h_gen_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()));
+    }
   }
 
   // histogram lsp_nmatch
@@ -429,6 +497,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     // histogram dVV
     h_s_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]), mag(v0.x - v1.x, v0.y - v1.y));
   }
+  h_gen_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
 
   // histogram njets, ncalojets, calojetpt4, jetsumht vs. genJets
   edm::Handle<reco::GenJetCollection> gen_jets;

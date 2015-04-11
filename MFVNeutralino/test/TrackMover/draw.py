@@ -131,31 +131,32 @@ def test():
             g.GetYaxis().SetRangeUser(0., 1.05)
             ps.save(name)
         
-def data_mc_comp(ex, mc_fn='mc.root'):
+def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
     print ex
     if ex:
         ex = '_' + ex
     ps = plot_saver('plots/trackmover' + ex, size=(600,600), log=False)
 
-    print 'data'
-    f_data, l_data, d_data, c_data, integ_data = get_em('data.root')
-    print 'mc'
-    f_mc,   l_mc,   d_mc,   c_mc,   integ_mc   = get_em(mc_fn)
-    assert l_data == l_mc
-    assert len(d_data) == len(d_mc)
-    l = l_data
+    print 'is_data_mc:', is_data_mc
+    print 'fn1:', fn1
+    f_1, l_1, d_1, c_1, integ_1 = get_em(fn1)
+    print 'fn2:', fn2
+    f_2, l_2, d_2, c_2, integ_2 = get_em(fn2)
+    assert l_1 == l_2
+    assert len(d_1) == len(d_2)
+    l = l_1
 
-    scale = integ_data / integ_mc
+    scale = integ_1 / integ_2
     print 'scale is %f = %f * (extra_factor=%f)' % (scale, scale/extra_factor, extra_factor)
     print 'diff (mc - data)'
-    for i, (cutset, eff_data, eeff_data) in enumerate(c_data):
-       cutset_mc, eff_mc, eeff_mc = c_mc[i]
-       assert cutset == cutset_mc
-       print '%40s %.2f +- %.2f' % (cutset, eff_mc - eff_data, (eeff_mc**2 + eeff_data**2)**0.5)
+    for i, (cutset, eff_1, eeff_1) in enumerate(c_1):
+       cutset_2, eff_2, eeff_2 = c_2[i]
+       assert cutset == cutset_2
+       print '%40s %.2f +- %.2f' % (cutset, eff_2 - eff_1, (eeff_2**2 + eeff_1**2)**0.5)
         
     for name in l:
-        data = d_data[name]
-        mc   = d_mc  [name]
+        data = d_1[name]
+        mc   = d_2  [name]
         both = (data, mc)
 
         if name.endswith('_rat'):
@@ -201,10 +202,10 @@ def data_mc_comp(ex, mc_fn='mc.root'):
             #ratio.Fit('pol1', 'Q')
             ps.save(name + '_ratio')
 
-#data_mc_comp('32_all', 'merge_all.root')
-#data_mc_comp('32_gt500', 'merge_gt500.root')
-#data_mc_comp('21_gt250_leadweight1', 'merge_gt250_leadweight1.root')
-#data_mc_comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
-#data_mc_comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
+#comp('32_all', 'merge_all.root')
+#comp('32_gt500', 'merge_gt500.root')
+#comp('21_gt250_leadweight1', 'merge_gt250_leadweight1.root')
+#comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
+#comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
 
-data_mc_comp('')
+comp('mctruth', 'a.root', 'a.root')

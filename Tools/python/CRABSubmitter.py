@@ -26,6 +26,34 @@ class CRABSubmitter:
     aaa_locations = 'T1_US_FNAL,T2_US_Florida,T2_US_MIT,T2_US_Nebraska,T2_US_Purdue,T2_US_UCSD,T2_US_Wisconsin,T2_US_Vanderbilt,T3_US_Brown,T3_US_Colorado,T3_US_NotreDame,T3_US_UMiss'
     half_mc_path = '/uscms/home/tucker/mfvrecipe/HalfMCLists/%s.txt.gz'
     skip_common_files = 'src/EgammaAnalysis/ElectronTools/data/*,src/CMGTools/External/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml,lib/slc5_amd64_gcc462/libCMGToolsExternal.so'
+    storage_catalog = {
+        'T3_US_Cornell': '''
+<storage-mapping>
+   <!-- LFN to PFN -->
+  <lfn-to-pfn protocol="direct" path-match="/+store/(.*)" result="/xrootdfs/cms/store/$1"/>
+  <lfn-to-pfn protocol="root"   path-match="/+store/user/(.*)"
+    result="root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/$1"/>
+  <lfn-to-pfn protocol="root"   path-match="/+store/(.*)"
+    result="root://osg-se.cac.cornell.edu//xrootd/path/cms/store/$1"/>
+  <lfn-to-pfn protocol="srmv2"  path-match="(.*)" chain="direct"
+    result="srm://osg-se.cac.cornell.edu:8443/srm/v2/server\?SFN=$1"/>
+  <lfn-to-pfn protocol="gsiftp" path-match="(.*)" chain="direct"
+    result="gsiftp://osg-se.cac.cornell.edu:8443/srm/v2/server\?SFN=$1"/>
+  <!-- Xrootd fallback rule -->
+  <lfn-to-pfn protocol="xrootd" destination-match=".*" path-match="/+store/(.*)"
+    result="root://xrootd.unl.edu//store/$1"/>
+
+  <!-- PFN to LFN -->
+  <pfn-to-lfn protocol="direct" path-match="/xrootdfs/cms/(.*)" result="/$1"/>
+  <pfn-to-lfn protocol="root"
+    path-match="root://osg-se.cac.cornell.edu//xrootd/path/cms/store/(.*)"
+    result="/store/$1"/>
+  <pfn-to-lfn protocol="srmv2"  path-match=".*\?SFN=(.*)" chain="direct" result="$1"/> 
+  <pfn-to-lfn protocol="gsiftp" path-match=".*\?SFN=(.*)" chain="direct" result="$1"/>
+
+</storage-mapping>
+'''
+        }
     
     def __init__(self,
                  batch_name,
@@ -51,6 +79,7 @@ class CRABSubmitter:
                  manual_datasets = None,
                  run_half_mc = False,
                  skip_common = False,
+                 storage_catalog_override = None,
                  **kwargs):
 
         for arg in sys.argv:
@@ -199,6 +228,15 @@ class CRABSubmitter:
             cfg.set('GRID', 'data_location_override', self.aaa_locations)
             cfg.set('GRID', 'remove_default_blacklist', 1)
 
+        if storage_catalog_override == 'cornell':
+            storage_catalog_override = 'T3_US_Cornell'
+        self.storage_catalog_override = storage_catalog_override
+        if storage_catalog_override:
+            if not self.storage_catalog.has_key(storage_catalog_override):
+                raise ValueError('storage_catalog_override can be None or one of %r' % self.storage_catalog.keys())
+            self.storage_catalog_fn = self.batch_dir + '/psets/storage.xml' # JMTBAD
+            open(self.storage_catalog_fn, 'wt').write(self.storage_catalog[self.storage_catalog_override])
+
         if len(other_cfg_lines) % 3 != 0:
             raise ValueError('other_cfg_lines must be flat sequence of (section, option, value, ...) triplets')
         for i in xrange(0, len(other_cfg_lines), 3):
@@ -250,6 +288,13 @@ class CRABSubmitter:
                     aif = half_mc_fn
                 cfg.set('USER', 'additional_input_files', aif)
 
+        if self.storage_catalog_override:
+            try:
+                aif = cfg.get('USER', 'additional_input_files') + ',' + self.storage_catalog_fn
+            except ConfigParser.NoOptionError:
+                aif = self.storage_catalog_fn
+            cfg.set('USER', 'additional_input_files', aif)
+            
         crab_cfg_fn = 'crab.%s.%s.cfg' % (self.batch_name, sample.name)
         cfg.write(open(crab_cfg_fn, 'wt'))
         return crab_cfg_fn, open(crab_cfg_fn, 'rt').read(), cfg
@@ -269,6 +314,13 @@ class CRABSubmitter:
                 pset = pset.replace(a,b)
             pset += '\n' + '\n'.join(to_add) + '\n'
         pset_fn = self.pset_fn_pattern % sample if tmp_fn is None else tmp_fn
+
+        if self.storage_catalog_override:
+            pset += """
+if not hasattr(process, 'source') or process.source.type_() != 'PoolSource':
+    raise ValueError('storage_catalog_override makes no sense for psets without a PoolSource source')
+process.source.overrideCatalog = cms.untracked.string('trivialcatalog_file:storage.xml?protocol=root')
+"""
 
         if self.run_half_mc:
             if not self.half_mc_fn(sample):

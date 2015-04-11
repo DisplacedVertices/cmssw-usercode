@@ -235,14 +235,23 @@ def crab_status(working_dir, verbose=True, debug=False):
             'tusker-gw1.unl.edu',
             'osg-gw-4.t2.ucsd.edu',
             'ce-itb.ultralight.org',
+            'ce01.cmsaf.mit.edu',
+            'ce02.cmsaf.mit.edu',
+            'cmsgrid01.hep.wisc.edu',
+            'cmsgrid02.hep.wisc.edu',
             'cmsgrid03.hep.wisc.edu',
             'ce1.accre.vanderbilt.edu',
             'ce2.accre.vanderbilt.edu',
             'cms-ce1-osg.rcac.purdue.edu',
+            'osg.rc.ufl.edu',
             'cms.rc.ufl.edu',
+            'ce01.cmsaf.mit.edu',
+            'ce02.cmsaf.mit.edu',
             ]:
             x = x.replace(bad + ' ' + bad, bad)
         x = [y.strip() for y in x.split() if y.strip()]
+        if len(x) > 4 and x[-1] == x[-2] and x[-1].count('.') >= 2:
+            x.pop()
         #print len(x), x
         if len(x) < 4: continue
 
