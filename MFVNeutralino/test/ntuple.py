@@ -9,6 +9,7 @@ runOnMC = True # magic line, don't touch
 debug = False
 track_histos_only = False
 jumble_tracks = False
+remove_tracks = None
 require_pixel_hit = True
 track_used_req = None
 prepare_vis = False
@@ -58,6 +59,10 @@ process.p = cms.Path(common_seq * process.mfvVertexSequence)
 if jumble_tracks:
     process.mfvVertices.jumble_tracks = True
     process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219)))
+
+if remove_tracks:
+    process.mfvVertices.remove_tracks_frac = remove_tracks[0]
+    process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219 + remove_tracks[1])))
 
 if not require_pixel_hit:
     process.mfvVertices.min_all_track_npxhits = 0
@@ -188,6 +193,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if jumble_tracks:
         batch_name_extra += '_JumbleTks'
+
+    if remove_tracks:
+        batch_name_extra += '_RemoveTks%i' % remove_tracks[1]
 
     if not require_pixel_hit:
         batch_name_extra += '_WOPixel'
