@@ -10,21 +10,20 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
-namespace {
-  namespace {
+namespace JMTucker_MFVNeutralinoFormats {
+  struct dictionary {
     edm::Wrapper<LightTrackMatch> ltm;
     std::map<int, LightTrackMatch> dummymiltm;
     edm::Wrapper<std::map<int, LightTrackMatch> > dummyWmiltm;
 
-    edm::Association<std::vector<reco::Vertex> > dummyAvV;
-    edm::Wrapper<edm::Association<std::vector<reco::Vertex> > > dummyWAvV;
-
     edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Jet>, unsigned int > > dummyAMrVpJ;
     edm::Wrapper<edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Jet>, unsigned int > > > dummyWAMrVpJ;
+
+    edm::helpers::KeyVal<edm::Ref<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> >,edm::RefVector<vector<pat::Jet>,pat::Jet,edm::refhelper::FindUsingAdvance<std::vector<pat::Jet>,pat::Jet> > > dummy1;
 
     edm::Wrapper<edm::RefVector<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> > > wvrv;
 
     edm::Wrapper<MFVEvent> we;
     edm::Wrapper<std::vector<MFVVertexAux> > wvva;
-  }
+  };
 }
