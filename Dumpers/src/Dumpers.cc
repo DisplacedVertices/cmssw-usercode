@@ -183,16 +183,16 @@ std::ostream& operator<<(std::ostream& out, const CSCSegment& seg) {
 }
 
 std::ostream& operator<<(std::ostream& out, const reco::HitPattern& hp) {
-  out << "# hits: " << hp.numberOfHits() << std::endl
+  out << "# hits: " << hp.numberOfHits(reco::HitPattern::TRACK_HITS) << std::endl
       << "# valid: tot: " << hp.numberOfValidHits() << " tk: " << hp.numberOfValidTrackerHits() << " pxb: " << hp.numberOfValidPixelBarrelHits() << " pxe: " << hp.numberOfValidPixelEndcapHits() << " tib: " << hp.numberOfValidStripTIBHits() << " tob: " << hp.numberOfValidStripTOBHits() << " tid: " << hp.numberOfValidStripTIDHits() << " tec: " << hp.numberOfValidStripTECHits() << " mu: " << hp.numberOfValidMuonHits() << " csc: " << hp.numberOfValidMuonCSCHits() << " dt: " << hp.numberOfValidMuonDTHits() << " rpc: " << hp.numberOfValidMuonRPCHits() << std::endl
-      << "# lost: tot: " << hp.numberOfLostHits() << " tk: " << hp.numberOfLostTrackerHits() << " pxb: " << hp.numberOfLostPixelBarrelHits() << " pxe: " << hp.numberOfLostPixelEndcapHits() << " tib: " << hp.numberOfLostStripTIBHits() << " tob: " << hp.numberOfLostStripTOBHits() << " tid: " << hp.numberOfLostStripTIDHits() << " tec: " << hp.numberOfLostStripTECHits() << " mu: " << hp.numberOfLostMuonHits() << " csc: " << hp.numberOfLostMuonCSCHits() << " dt: " << hp.numberOfLostMuonDTHits() << " rpc: " << hp.numberOfLostMuonRPCHits() << std::endl
+      << "# lost: tot: " << hp.numberOfLostHits(reco::HitPattern::TRACK_HITS) << " tk: " << hp.numberOfLostTrackerHits(reco::HitPattern::TRACK_HITS) << " pxb: " << hp.numberOfLostPixelBarrelHits(reco::HitPattern::TRACK_HITS) << " pxe: " << hp.numberOfLostPixelEndcapHits(reco::HitPattern::TRACK_HITS) << " tib: " << hp.numberOfLostStripTIBHits(reco::HitPattern::TRACK_HITS) << " tob: " << hp.numberOfLostStripTOBHits(reco::HitPattern::TRACK_HITS) << " tid: " << hp.numberOfLostStripTIDHits(reco::HitPattern::TRACK_HITS) << " tec: " << hp.numberOfLostStripTECHits(reco::HitPattern::TRACK_HITS) << " mu: " << hp.numberOfLostMuonHits() << " csc: " << hp.numberOfLostMuonCSCHits() << " dt: " << hp.numberOfLostMuonDTHits() << " rpc: " << hp.numberOfLostMuonRPCHits() << std::endl
       << "# bad: tot: " << hp.numberOfBadHits() << " mu: " << hp.numberOfBadMuonHits()  << " csc: " << hp.numberOfBadMuonCSCHits()  << " dt: " << hp.numberOfBadMuonDTHits()  << " rpc: " << hp.numberOfBadMuonRPCHits() << std::endl
-      << "# tk layers: with meas: " << hp.trackerLayersWithMeasurement() << " without: " << hp.trackerLayersWithoutMeasurement() << " totallyofforbad: " << hp.trackerLayersTotallyOffOrBad() << " null: " << hp.trackerLayersNull() << std::endl
-      << "# px layers: with meas: " << hp.pixelLayersWithMeasurement() << " without: " << hp.pixelLayersWithoutMeasurement() << " totallyofforbad: " << hp.pixelLayersTotallyOffOrBad() << " null: " << hp.pixelLayersNull() << std::endl
-      << "# si layers: with meas: " << hp.stripLayersWithMeasurement() << " without: " << hp.stripLayersWithoutMeasurement() << " totallyofforbad: " << hp.stripLayersTotallyOffOrBad() << " null: " << hp.stripLayersNull() << std::endl;
+      << "# tk layers: with meas: " << hp.trackerLayersWithMeasurement() << " without: " << hp.trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS) << " totallyofforbad: " << hp.trackerLayersTotallyOffOrBad() << " null: " << hp.trackerLayersNull() << std::endl
+      << "# px layers: with meas: " << hp.pixelLayersWithMeasurement() << " without: " << hp.pixelLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS) << " totallyofforbad: " << hp.pixelLayersTotallyOffOrBad() << " null: " << hp.pixelLayersNull() << std::endl
+      << "# si layers: with meas: " << hp.stripLayersWithMeasurement() << " without: " << hp.stripLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS) << " totallyofforbad: " << hp.stripLayersTotallyOffOrBad() << " null: " << hp.stripLayersNull() << std::endl;
 
-  for (int i = 0, ie = hp.numberOfHits(); i < ie; ++i) {
-    uint32_t hit = hp.getHitPattern(i);
+  for (int i = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); i < ie; ++i) {
+    uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, i);
 
     out << "hit #" << std::setw(2) << i << " in binary format = ";
     for (int j = 10; j >= 0; --j) {
@@ -235,16 +235,16 @@ std::ostream& operator<<(std::ostream& out, const reco::Track& tk) {
 }
 
 std::ostream& operator<<(std::ostream& out, const reco::Muon& mu) {
-  static const char* names[3] = {"global", "inner ", "outer "};
-  const reco::TrackRef refs[3] = { mu.globalTrack(), mu.innerTrack(), mu.outerTrack() };
-
+  static const char* names[7] = { 0, "inner ", "outer ", "global", "tpfms ", "picky ", "dyt   " };
+  const reco::TrackRef refs[7] = { reco::TrackRef(), mu.innerTrack(), mu.outerTrack(), mu.globalTrack(), mu.tpfmsTrack(), mu.pickyTrack(), mu.dytTrack() };
+  out << "(PF) best track type: " << names[int(mu.muonBestTrackType())] << "  tune P: " << names[int(mu.tunePMuonBestTrackType())] << std::endl;
   out << "pt: " << mu.pt() << " eta: " << mu.eta() << " phi: " << mu.phi() << "   " 
       << "isGlobal: " << mu.isGlobalMuon() << " isTracker: " << mu.isTrackerMuon() << " isStandAlone: " << mu.isStandAloneMuon() << std::endl;
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 1; i < 7; ++i) {
     if (refs[i].isAvailable()) {
       out << " " << names[i] << " track (pt: " << refs[i]->pt() << "): "; // (id: " << refs[i].index() << "): " << std::endl;
       JMTDumper::dump_ref(out, refs[i]);
-      //dump_tk(out, *refs[i]);
+      out << *refs[i];
     }
     else
       out << " " << names[i] << " track is not available!\n";
@@ -404,15 +404,15 @@ std::ostream& operator<<(std::ostream& out, const SimTrack& tk) {
 }
 
 std::ostream& operator<<(std::ostream& out, const TrackingParticle& tp) {
-  out << "encodedEventId: " << tp.eventId()
-      << "pdgId: " << tp.pdgId() << " charge: " << tp.charge() << " mass: " << tp.mass() << " pt,eta,phi,E: ("
-      << tp.pt() << ", " << tp.eta() << ", " << tp.phi() << ", " << tp.energy() << ") matchedHit: " << tp.matchedHit() << std::endl
-      << "simTracks:\n";
-  for (const SimTrack& tk : tp.g4Tracks())
-    out << tk;
-  out << "simHits:\n";
-  for (const PSimHit& hit : tp.trackPSimHit())
-    out << hit;
+//  out << "encodedEventId: " << tp.eventId()
+//      << "pdgId: " << tp.pdgId() << " charge: " << tp.charge() << " mass: " << tp.mass() << " pt,eta,phi,E: ("
+//      << tp.pt() << ", " << tp.eta() << ", " << tp.phi() << ", " << tp.energy() << ") matchedHit: " << tp.matchedHit() << std::endl
+//      << "simTracks:\n";
+//  for (const SimTrack& tk : tp.g4Tracks())
+//    out << tk;
+//  out << "simHits:\n";
+//  for (const PSimHit& hit : tp.trackPSimHit())
+//    out << hit;
   return out;
 }
 

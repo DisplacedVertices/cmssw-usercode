@@ -125,6 +125,12 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_drmax_dbv;
   TH2F* h_s_gendrmax_dbv;
 
+  TH2F* h_s_dx_drmax;
+  TH2F* h_s_dy_drmax;
+  TH2F* h_s_dz_drmax;
+  TH2F* h_s_dist2d_drmax;
+  TH2F* h_s_dist3d_drmax;
+
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
 };
@@ -238,6 +244,12 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_drmax_betagamma = fs->make<TH2F>("h_s_drmax_betagamma", ";generated #beta#gamma;reconstructed drmax", 100, 0, 10, 100, 0, 5);
   h_s_drmax_dbv = fs->make<TH2F>("h_s_drmax_dbv", ";generated d_{BV};reconstructed drmax", 100, 0, 0.5, 100, 0, 5);
   h_s_gendrmax_dbv = fs->make<TH2F>("h_s_gendrmax_dbv", ";generated d_{BV};generated drmax", 100, 0, 0.5, 100, 0, 5);
+
+  h_s_dx_drmax = fs->make<TH2F>("h_s_dx_drmax", ";max #DeltaR between tracks;x resolution (cm)", 100, 0, 5, 200, -0.02, 0.02);
+  h_s_dy_drmax = fs->make<TH2F>("h_s_dy_drmax", ";max #DeltaR between tracks;y resolution (cm)", 100, 0, 5, 200, -0.02, 0.02);
+  h_s_dz_drmax = fs->make<TH2F>("h_s_dz_drmax", ";max #DeltaR between tracks;z resolution (cm)", 100, 0, 5, 200, -0.02, 0.02);
+  h_s_dist2d_drmax = fs->make<TH2F>("h_s_dist2d_drmax", ";max #DeltaR between tracks;dist2d(lsp,vtx) (cm)", 100, 0, 5, 100, 0, 0.02);
+  h_s_dist3d_drmax = fs->make<TH2F>("h_s_dist3d_drmax", ";max #DeltaR between tracks;dist3d(lsp,vtx) (cm)", 100, 0, 5, 100, 0, 0.02);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
@@ -441,6 +453,12 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_drmax_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx.drmax());
     h_s_drmax_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), vtx.drmax());
     h_s_gendrmax_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), drmax);
+
+    h_s_dx_drmax->Fill(vtx.drmax(), vtx.x - mevent->gen_lsp_decay[ilsp*3+0]);
+    h_s_dy_drmax->Fill(vtx.drmax(), vtx.y - mevent->gen_lsp_decay[ilsp*3+1]);
+    h_s_dz_drmax->Fill(vtx.drmax(), vtx.z - mevent->gen_lsp_decay[ilsp*3+2]);
+    h_s_dist2d_drmax->Fill(vtx.drmax(), mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x, mevent->gen_lsp_decay[ilsp*3+1] - vtx.y));
+    h_s_dist3d_drmax->Fill(vtx.drmax(), mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x, mevent->gen_lsp_decay[ilsp*3+1] - vtx.y, mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
   }
 
   for (int ilsp = 0; ilsp < 2; ++ilsp) {
