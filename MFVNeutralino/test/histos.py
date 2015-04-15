@@ -1,6 +1,8 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, geometry_etc
 
+simple = False
+
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20/aaaa7d7d2dcfa08aa71c1469df6ebf05/ntuple_1_1_NQ9.root']
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = 100
@@ -21,6 +23,17 @@ nm1s = [
     ('Sumnhitsbehind', 'max_sumnhitsbehind = 1000000'),
     ('ButNtracksAndGt3', 'max_drmin = 1e9, max_drmax = 1e9, min_drmax = 0, max_bs2derr = 1e9, min_njetsntks = 0'),
     ]
+
+if simple:
+    nm1s = []
+
+    del process.pOneVtx
+    del process.pFullSel
+    del process.pOnlyOneVtx
+    del process.pPreSel
+    del process.pTrigSel
+
+    process.p = cms.Path(process.mfvSelectedVerticesTight + process.mfvWeight + process.mfvEventHistosNoCuts + process.mfvVertexHistos + process.mfvAnalysisCuts + process.mfvEventHistos + process.mfvVertexHistosWAnaCuts)
 
 for name, cut in nm1s:
     evt_cut = ''
