@@ -1,6 +1,6 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-process.setName_('Mini')
+process.setName_('Filter')
 del process.TFileService
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -23,7 +23,7 @@ process.mfvSampleInfo = cms.EDProducer('SampleInfoProducer',
 process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvWeight * process.mfvSampleInfo)
 
 process.out = cms.OutputModule('PoolOutputModule',
-                               fileName = cms.untracked.string('minintuple.root'),
+                               fileName = cms.untracked.string('filterntuple.root'),
                                SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p')),
                                outputCommands = cms.untracked.vstring(
                                    'drop *',
@@ -66,13 +66,13 @@ process.mfvSampleInfo.cross_section = %g
         return to_add, to_replace
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('MiniNtupleV20',
+    cs = CRABSubmitter('FilterNtupleV20',
                        use_ana_dataset = True,
                        pset_modifier = modify,
                        total_number_of_events = -1,
                        events_per_job = 200000,
                        get_edm_output = True,
                        data_retrieval = 'fnal',
-                       publish_data_name = 'mfvminintuple_v20',
+                       publish_data_name = 'mfvfilterntuple_v20',
                        )
     cs.submit_all(samples)
