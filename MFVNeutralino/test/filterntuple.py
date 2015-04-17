@@ -67,10 +67,9 @@ process.mfvSampleInfo.cross_section = %g
 
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('FilterNtupleV20',
+                       job_control_from_sample = True,
                        use_ana_dataset = True,
                        pset_modifier = modify,
-                       total_number_of_events = -1,
-                       events_per_job = 200000,
                        get_edm_output = True,
                        data_retrieval = 'fnal',
                        publish_data_name = 'mfvfilterntuple_v20',
