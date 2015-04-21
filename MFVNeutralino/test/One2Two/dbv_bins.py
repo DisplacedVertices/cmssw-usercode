@@ -5,6 +5,8 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 
 c = ROOT.TCanvas('c', '', 50, 50, 900, 500)
+c.SetTopMargin(0.05)
+c.SetRightMargin(0.05)
 c.SetLogx()
 c.SetLogy()
 
@@ -17,7 +19,7 @@ bins = array('d', bins)
 
 h = ROOT.TH1D('h', title, len(bins)-1, bins)
 hfine = ROOT.TH1D('hfine', title, 1250, 0, 2.5)
-
+fine_bin_width = hfine.GetXaxis().GetXmax() / hfine.GetNbinsX()
 h.SetLineWidth(2)
 hfine.SetLineColor(4)
 h.SetStats(0)
@@ -35,8 +37,16 @@ hfine.GetXaxis().SetRangeUser(0.02, 2.5)
 hfine.Draw('same e')
 c.SaveAs('~/asdf/a.png')
 
-h.Scale(1, 'width')
-h.SetTitle(title + '/bin width')
+#i = h.Integral(0,100000)
+for ibin in xrange(1, h.GetNbinsX()+1):
+    v = h.GetBinContent(ibin)
+    e = h.GetBinError(ibin)
+    w = fine_bin_width / h.GetBinWidth(ibin)
+    h.SetBinContent(ibin, v*w)
+    h.SetBinError  (ibin, e*w)
+
+assert abs(fine_bin_width - 0.002) < 1e-6
+h.SetTitle(title + ' / 20 #mum')
 h.Draw('e')
 hfine.Draw('same e')
 c.SaveAs('~/asdf/a2.png')
