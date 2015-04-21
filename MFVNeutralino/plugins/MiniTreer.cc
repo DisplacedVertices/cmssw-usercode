@@ -34,8 +34,8 @@ MFVMiniTreer::MFVMiniTreer(const edm::ParameterSet& cfg)
 {
   edm::Service<TFileService> fs;
 
-  h_nsv = new TH1F("h_nsv", "", 10, 0, 10);
-  h_nsvsel = new TH1F("h_nsvsel", "", 10, 0, 10);
+  h_nsv = fs->make<TH1F>("h_nsv", "", 10, 0, 10);
+  h_nsvsel = fs->make<TH1F>("h_nsvsel", "", 10, 0, 10);
 
   tree = fs->make<TTree>("t", "");
   mfv::write_to_tree(tree, nt);
@@ -88,7 +88,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_nsv->Fill(input_vertices->size());
   h_nsvsel->Fill(vertices.size());
-  
+
   if (vertices.size() == 1) {
     const MFVVertexAux& v0 = vertices[0];
     nt.nvtx = 1;
@@ -107,17 +107,14 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
     const MFVVertexAux& v1 = vertices[1];
-    nt.nvtx = 2;
+    nt.nvtx = vertices.size();
     nt.ntk0 = v0.ntracks();
     nt.ntk1 = v1.ntracks();
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z; nt.cxx0 = v0.cxx; nt.cxy0 = v0.cxy; nt.cxz0 = v0.cxz; nt.cyy0 = v0.cyy; nt.cyz0 = v0.cyz; nt.czz0 = v0.czz;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z; nt.cxx1 = v1.cxx; nt.cxy1 = v1.cxy; nt.cxz1 = v1.cxz; nt.cyy1 = v1.cyy; nt.cyz1 = v1.cyz; nt.czz1 = v1.czz;
   }
-  else {
-    if (vertices.size() != 0)
-      throw cms::Exception("CheckYourPremises") << "more than two vertices (" << vertices.size() << ") in this event";
+  else
     return;
-  }
 
   tree->Fill();
 }
