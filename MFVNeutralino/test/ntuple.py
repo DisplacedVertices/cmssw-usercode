@@ -97,10 +97,11 @@ if prepare_vis:
     process.mfvSelectedVerticesTightLargeErr.produce_tracks = True
 
     process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
+    process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
     process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
     process.mfvVertexRefitsLargeErr = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr')
     process.mfvVertexRefitsLargeErrDrop2 = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr', n_tracks_to_drop = 2)
-    process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 * process.mfvVertexRefitsLargeErr * process.mfvVertexRefitsLargeErrDrop2
+    process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0 * process.mfvVertexRefitsLargeErr * process.mfvVertexRefitsLargeErrDrop2
 
     if runOnMC:
         process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
