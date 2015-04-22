@@ -65,9 +65,6 @@ MFVVertexRefitter::MFVVertexRefitter(const edm::ParameterSet& cfg)
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
-  if (n_tracks_to_drop == 0)
-    throw cms::Exception("MFVVertexRefitter") << "n_tracks_to_drop cannot be zero";
-
   const std::string& sort_tracks_by_str = cfg.getParameter<std::string>("sort_tracks_by");
   if (sort_tracks_by_str == "dxyerr")
     sort_tracks_by = SortTracksByDxyErr;
