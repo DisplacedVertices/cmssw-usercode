@@ -74,7 +74,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         to_add = []
         to_replace = []
 
-        if not sample.is_mc:
+        if sample.is_mc:
+            if sample.is_fastsim:
+                to_add.append('input_is_fastsim(process)')
+            if sample.is_pythia8:
+                to_add.append('input_is_pythia8(process)')
+            if sample.re_pat:
+                to_add.append('re_pat(process)')
+        else:
             magic = 'runOnMC = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'runOnMC = False', err))
