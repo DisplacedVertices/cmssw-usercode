@@ -269,7 +269,8 @@ def disable_nopileup(process):
 def re_pat(process, name='PAT2', old_name='PAT'):
     process.source.inputCommands = cms.untracked.vstring('keep *', 'drop *_*_*_%s' % old_name)
     process.setName_(name)
-    process.out.outputCommands.append('keep edmTriggerResults_TriggerResults__%s' % name)
+    if hasattr(process, 'out'):
+        process.out.outputCommands.append('keep edmTriggerResults_TriggerResults__%s' % name)
 
 def pileup_removal_studies(process, keep_nopileup=True, no_closest_z_vtx=True):
     process.out.outputCommands.append('keep *_pfPileUp%s_*_*' % postfix)
