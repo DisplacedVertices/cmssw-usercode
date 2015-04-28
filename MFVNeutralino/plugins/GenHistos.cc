@@ -111,6 +111,8 @@ private:
   TH1F* JetNConstituents;
   TH1F* JetNChargedConst;
   TH1F* JetFChargedConst;
+  TH2F* JetNtracksPt;
+  TH2F* JetNtracksptgt3Pt;
 
   TH1F* JetIds;
 
@@ -383,6 +385,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   JetNConstituents = fs->make<TH1F>("JetNConstituents", ";# of constituents of jet;jets", 200, 0, 200);
   JetNChargedConst = fs->make<TH1F>("JetNChargedConst", ";# of charged constituents of jet;jets", 200, 0, 200);
   JetFChargedConst = fs->make<TH1F>("JetFChargedConst", ";fraction of charged constituents of jet;jets", 200, 0, 1);
+  JetNtracksPt = fs->make<TH2F>("JetNtracksPt", ";jet p_{T} (GeV);# of charged constituents of jet", 40, 0, 400, 40, 0, 40);
+  JetNtracksptgt3Pt = fs->make<TH2F>("JetNtracksptgt3Pt", ";jet p_{T} (GeV);# of charged constituents of jet with p_{T} > 3 GeV", 40, 0, 400, 40, 0, 40);
 
   JetIds = fs->make<TH1F>("JetIds", ";pdg id of jet;jets", 11, 0, 11);
   const char* JetIdLabels[] = { "d", "u", "s", "c", "b", "dbar", "ubar", "sbar", "cbar", "bbar", "N/A" };
@@ -858,9 +862,13 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   for (const reco::GenJet& jet : *gen_jets) {
     int nchg = 0;
     int id = gen_jet_id(jet);
-    for (const reco::GenParticle* g : jet.getGenConstituents())
+    int ntracksptgt3 = 0;
+    for (const reco::GenParticle* g : jet.getGenConstituents()) {
       if (g->charge())
         ++nchg;
+      if (g->charge() && g->pt() > 3)
+        ++ntracksptgt3;
+    }
 
     float fchg = float(nchg)/jet.nConstituents();
 
@@ -877,6 +885,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     JetNConstituents->Fill(jet.nConstituents());
     JetNChargedConst->Fill(nchg);
     JetFChargedConst->Fill(fchg);
+    JetNtracksPt->Fill(jet.pt(), nchg);
+    JetNtracksptgt3Pt->Fill(jet.pt(), ntracksptgt3);
 
     fill_by_label(JetIds, id != 0 ? pdt->particle(id)->name() : "N/A");
 
