@@ -131,6 +131,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_dist2d_drmax;
   TH2F* h_s_dist3d_drmax;
 
+  TH1F* h_partons_sumpt;
+
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
 };
@@ -250,6 +252,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_dz_drmax = fs->make<TH2F>("h_s_dz_drmax", ";max #DeltaR between tracks;z resolution (cm)", 100, 0, 5, 200, -0.02, 0.02);
   h_s_dist2d_drmax = fs->make<TH2F>("h_s_dist2d_drmax", ";max #DeltaR between tracks;dist2d(lsp,vtx) (cm)", 100, 0, 5, 100, 0, 0.02);
   h_s_dist3d_drmax = fs->make<TH2F>("h_s_dist3d_drmax", ";max #DeltaR between tracks;dist3d(lsp,vtx) (cm)", 100, 0, 5, 100, 0, 0.02);
+
+  h_partons_sumpt = fs->make<TH1F>("h_partons_sumpt", ";#Sigmap_{T} of partons (GeV);generated LSPs", 100, 0, 1000);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
@@ -422,14 +426,16 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_theta->Fill(lsp_p4.Theta(), vtx_p4.Theta());
     h_s_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx_p4.Beta()*vtx_p4.Gamma());
 
-    // histogram drmin, drmax
+    // histogram drmin, drmax, sumpt
     const int ndau = 5;
     const reco::GenParticle* daughters[ndau] = { mci.stranges[ilsp], mci.bottoms[ilsp], mci.bottoms_from_tops[ilsp], mci.W_daughters[ilsp][0], mci.W_daughters[ilsp][1] };
 
     float drmin =  1e99;
     float drmax = -1e99;
+    float sumpt = 0;
     for (int j = 0; j < ndau; ++j) {
       if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5) continue;
+      sumpt += daughters[j]->pt();
       for (int k = j+1; k < ndau; ++k) {
         if (is_neutrino(daughters[k]) || fabs(daughters[k]->eta()) > 2.5) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
@@ -440,6 +446,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
 
+    h_partons_sumpt->Fill(sumpt);
     h_s_drmin->Fill(drmin, vtx.drmin());
     h_s_drmax->Fill(drmax, vtx.drmax());
 
