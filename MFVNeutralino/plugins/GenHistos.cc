@@ -71,6 +71,7 @@ private:
   TH2F* h_min_dR_vs_lspbetagamma;
   TH1F* h_lsp_daughters_pt;
   TH1F* h_lsp_daughters_eta;
+  TH1F* h_lsp_daughters_dxy;
   TH1F* h_lsp_max_dR;
   TH1F* h_lsp_min_dR;
   TH1F* h_lsp_daughters_jets_dR;
@@ -327,6 +328,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
   h_lsp_daughters_pt = fs->make<TH1F>("h_lsp_daughters_pt", ";p_{T} of partons (GeV);LSP daughter partons/1 GeV", 500, 0, 500);
   h_lsp_daughters_eta = fs->make<TH1F>("h_lsp_daughters_eta", ";#eta of partons;LSP daughter partons/0.16", 50, -4, 4);
+  h_lsp_daughters_dxy = fs->make<TH1F>("h_lsp_daughters_dxy", ";dxy of partons;LSP daughter partons/10 #mum", 400, -0.2, 0.2);
   h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_daughters_jets_dR = fs->make<TH1F>("h_lsp_daughters_jets_dR", ";#DeltaR between partons and jets;parton-jet pairs/0.05", 100, 0, 5);
@@ -580,6 +582,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         for (int j = 0; j < lsp_ndau; ++j) {
           h_lsp_daughters_pt->Fill(lsp_daughters[j]->pt());
           h_lsp_daughters_eta->Fill(lsp_daughters[j]->eta());
+          h_lsp_daughters_dxy->Fill(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx())));
 
           int nmatch = 0;
           for (const reco::GenJet& jet : *gen_jets) {
