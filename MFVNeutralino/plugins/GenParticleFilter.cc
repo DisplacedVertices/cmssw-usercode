@@ -263,10 +263,10 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     float drmin =  1e99;
     float drmax = -1e99;
     for (int j = 0; j < ndau; ++j) {
-      if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5) continue;
+      if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx()))) < 0.01) continue;
       ++ntracks;
       for (int k = j+1; k < ndau; ++k) {
-        if (is_neutrino(daughters[k]) || daughters[k]->pt() < 20 || fabs(daughters[k]->eta()) > 2.5) continue;
+        if (is_neutrino(daughters[k]) || daughters[k]->pt() < 20 || fabs(daughters[k]->eta()) > 2.5 || fabs(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(daughters[k]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx()))) < 0.01) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
         if (dr < drmin)
           drmin = dr;
