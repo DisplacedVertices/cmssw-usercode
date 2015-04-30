@@ -426,16 +426,14 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_theta->Fill(lsp_p4.Theta(), vtx_p4.Theta());
     h_s_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx_p4.Beta()*vtx_p4.Gamma());
 
-    // histogram drmin, drmax, sumpt
+    // histogram drmin, drmax
     const int ndau = 5;
     const reco::GenParticle* daughters[ndau] = { mci.stranges[ilsp], mci.bottoms[ilsp], mci.bottoms_from_tops[ilsp], mci.W_daughters[ilsp][0], mci.W_daughters[ilsp][1] };
 
     float drmin =  1e99;
     float drmax = -1e99;
-    float sumpt = 0;
     for (int j = 0; j < ndau; ++j) {
       if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5) continue;
-      sumpt += daughters[j]->pt();
       for (int k = j+1; k < ndau; ++k) {
         if (is_neutrino(daughters[k]) || fabs(daughters[k]->eta()) > 2.5) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
@@ -446,9 +444,16 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
 
-    h_partons_sumpt->Fill(sumpt);
     h_s_drmin->Fill(drmin, vtx.drmin());
     h_s_drmax->Fill(drmax, vtx.drmax());
+
+    // histogram sumpt of partons
+    float sumpt = 0;
+    for (int j = 0; j < ndau; ++j) {
+      if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx(), mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy(), mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx()))) < 0.01) continue;
+      sumpt += daughters[j]->pt();
+    }
+    h_partons_sumpt->Fill(sumpt);
 
     // histogram dBV
     h_s_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
