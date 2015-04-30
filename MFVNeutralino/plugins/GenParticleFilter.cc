@@ -260,8 +260,8 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
 
     int ntracks = 0;
-    float drmin =  1e99;
-    float drmax = -1e99;
+    float drmin = 1e6;
+    float drmax = 0;
     for (int j = 0; j < ndau; ++j) {
       if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx()))) < 0.01) continue;
       ++ntracks;
