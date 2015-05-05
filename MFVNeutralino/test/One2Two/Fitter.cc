@@ -687,29 +687,13 @@ namespace mfv {
     return h;
   }
 
-  TH1D* Fitter::shorten_hist(TH1D* h, bool save) {
-    std::vector<double> bins = Template::binning(true);
-    TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
-    // Splitting the last bin puts its contents in the overflow -- move back into last bin.
-    int n = h_short->GetNbinsX();
-    double v = h_short->GetBinContent(n+1);
-    double e = h_short->GetBinError(n+1);
-    h_short->SetBinContent(n+1, 0);
-    h_short->SetBinError  (n+1, 0);
-    h_short->SetBinContent(n, v);
-    h_short->SetBinError  (n, e);
-    if (!save)
-      h_short->SetDirectory(0);
-    return h_short;
-  }
-
   void Fitter::scan_template_chi2(const test_stat_t& t) {
     TCanvas* c_scan_templates = new TCanvas("c_scan_templates");
 
     std::vector<TH1D*> hs;
 
     const int n_data = fit::h_data_real->Integral();
-    TH1D* h_data_shortened = shorten_hist(fit::h_data_real, false);
+    TH1D* h_data_shortened = Template::shorten_hist(fit::h_data_real, false);
     hs.push_back(h_data_shortened);
 
     TGraphAsymmErrors* tgae_data_shortened = jmt::poisson_intervalize(h_data_shortened);
@@ -722,7 +706,7 @@ namespace mfv {
 
     TH1D* h_bkg_fit = make_h_bkg("h_bkg_fit", t.h0.nuis_pars(), std::vector<double>());
     h_bkg_fit->SetDirectory(0);
-    TH1D* h_bkg_fit_shortened = shorten_hist(h_bkg_fit, false);
+    TH1D* h_bkg_fit_shortened = Template::shorten_hist(h_bkg_fit, false);
     hs.push_back(h_bkg_fit);
     hs.push_back(h_bkg_fit_shortened);
     h_bkg_fit_shortened->Scale(n_data / h_bkg_fit_shortened->Integral());
@@ -732,7 +716,7 @@ namespace mfv {
 
     TH1D* h_bkg_fit_bb = make_h_bkg("h_bkg_fit", t.h0.nuis_pars(), t.h0.A_bkg);
     h_bkg_fit_bb->SetDirectory(0);
-    TH1D* h_bkg_fit_bb_shortened = shorten_hist(h_bkg_fit_bb, false);
+    TH1D* h_bkg_fit_bb_shortened = Template::shorten_hist(h_bkg_fit_bb, false);
     hs.push_back(h_bkg_fit_bb);
     hs.push_back(h_bkg_fit_bb_shortened);
     h_bkg_fit_bb_shortened->Scale(n_data / h_bkg_fit_bb_shortened->Integral());
@@ -814,7 +798,7 @@ namespace mfv {
 
     for (int ibest = 0; ibest < Nbest; ++ibest) {
       Template* tmp = best_template[ibest];
-      TH1D* h = shorten_hist(tmp->h, false);
+      TH1D* h = Template::shorten_hist(tmp->h, false);
       hs.push_back(h);
       h->Scale(n_data / h->Integral());
       h->SetLineWidth(2);
@@ -854,7 +838,7 @@ namespace mfv {
           TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));
 
           for (TH1D** ph : {&h_bkg_fit, &h_sig_fit, &h_data_fit})
-            *ph = shorten_hist(*ph);
+            *ph = Template::shorten_hist(*ph, true);
 
           for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
             h->SetLineWidth(2);
