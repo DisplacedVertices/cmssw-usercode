@@ -113,7 +113,7 @@ if _final:
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
 save_git_status(os.path.join(dir, 'gitstatus'))
 
-def submit(name, tau0=None, mass=None):
+def submit(name, tau0=None, mass=None, decay_ids=None):
     print name
     is_signal = tau0 is not None and mass is not None
     if not is_signal:
@@ -171,6 +171,8 @@ def submit(name, tau0=None, mass=None):
     elif 'neutralino' in name:
         new_py += '\nset_neutralino_tau0(process, %e)\n' % tau0
         set_masses(mass+5, mass)
+    #elif 'empirical' in name:
+    #    new_py += '\nset_empirical_decay(process, %r)\n' % 
     elif 'ttbar' in name:
         new_py += '\nttbar(process)\n'
     else:
