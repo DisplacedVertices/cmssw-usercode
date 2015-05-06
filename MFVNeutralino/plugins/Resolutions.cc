@@ -135,6 +135,7 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
+  TH1F* h_gen_dvv_matched;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -257,6 +258,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
+  h_gen_dvv_matched = fs->make<TH1F>("h_gen_dvv_matched", ";generated d_{VV};events with two matched vertices", 200, 0, 1);
 }
 
 namespace {
@@ -526,6 +528,22 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     // histogram dVV
     h_s_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]), mag(v0.x - v1.x, v0.y - v1.y));
+
+    bool matched[2] = {false, false};
+    for (int ivtx = 0; ivtx < 2; ++ivtx) {
+      for (int ilsp = 0; ilsp < 2; ++ilsp) {
+        double dist = mag(mevent->gen_lsp_decay[ilsp*3+0] - vertices->at(ivtx).x,
+                          mevent->gen_lsp_decay[ilsp*3+1] - vertices->at(ivtx).y,
+                          mevent->gen_lsp_decay[ilsp*3+2] - vertices->at(ivtx).z);
+        if (dist < max_dist) {
+          matched[ivtx] = true;
+          break;
+        }
+      }
+    }
+    if (matched[0] && matched[1]) {
+      h_gen_dvv_matched->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
+    }
   }
   h_gen_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
 
