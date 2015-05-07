@@ -52,6 +52,7 @@ private:
   const double min_parton_pt;
   const double min_parton_sumht;
   const int min_ntracks;
+  const double min_sumpt;
   const double max_drmin;
   const double min_drmax;
   const double max_drmax;
@@ -90,6 +91,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_parton_pt(cfg.getParameter<double>("min_parton_pt")),
     min_parton_sumht(cfg.getParameter<double>("min_parton_sumht")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
+    min_sumpt(cfg.getParameter<double>("min_sumpt")),
     max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
@@ -260,11 +262,13 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
 
     int ntracks = 0;
+    float sumpt = 0;
     float drmin = 1e6;
     float drmax = 0;
     for (int j = 0; j < ndau; ++j) {
       if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx()))) < 0.01) continue;
       ++ntracks;
+      sumpt += daughters[j]->pt();
       for (int k = j+1; k < ndau; ++k) {
         if (is_neutrino(daughters[k]) || daughters[k]->pt() < 20 || fabs(daughters[k]->eta()) > 2.5 || fabs(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(daughters[k]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx()))) < 0.01) continue;
         float dr = reco::deltaR(*daughters[j], *daughters[k]);
@@ -276,6 +280,8 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
 
     if (ntracks < min_ntracks)
+      return false;
+    if (sumpt < min_sumpt)
       return false;
     if (drmin > max_drmin)
       return false;
