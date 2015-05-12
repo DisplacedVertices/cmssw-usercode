@@ -57,7 +57,7 @@ ssh_control_persist = no
 RETURN_OR_COPY
 
 [GRID]
-se_black_list = T3_MX_Cinvestav,T2_RU_RRC_KI,T3_UK_London_QMUL,T3_UK_ScotGrid_GLA,T3_US_UCD,T3_US_UMiss,T2_RU_PNPI,T3_RU_FIAN,T2_US_Purdue
+se_white_list = T2_US_UCSD,T2_US_Vanderbilt,T2_US_Florida,T2_FR_IPHC,T2_BR_SPRACE,T2_CH_CERN,T2_UK_SGrid_RALPP,T2_CN_Beijing,T3_FR_IPNL,T2_UK_London_Brunel,T2_DE_RWTH,T2_US_Caltech,T3_US_TAMU,T3_US_TTU,T2_HU_Budapest,T2_US_Wisconsin,T2_US_Nebraska,T2_US_MIT,T2_KR_KNU,T3_TW_NCU,T3_US_Colorado
 '''
 
 if return_data:
