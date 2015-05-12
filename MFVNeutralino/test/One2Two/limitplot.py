@@ -3,10 +3,10 @@
 from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
-ps = plot_saver('plots/mfvlimits', log=False, size=(600,600))
+ps = plot_saver('plots/mfvlimits_combine', log=False, size=(600,600))
 
-which = 'BBv9'
-draw_gluglu = False
+#which = 'BBv9'
+draw_gluglu = True
 
 def fmt(t, title, color):
     t.SetFillColor(color)
@@ -86,8 +86,10 @@ for tau, tau_nice in taus:
             print 'skip', tau, mass
             nn -= 1
             continue
-        fn  = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
-        fn2 = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
+        #fn  = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
+        #fn2 = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
+        fn  = 'combine/combine_n%ix-2.out' % nn
+        fn2 = 'combine/combine_n%ix-1.out' % nn
         print nn, fn, fn2
         nn -= 1
         vals = [None]*6
@@ -121,7 +123,6 @@ for tau, tau_nice in taus:
     for l in [masses, observed, expect50, expect68, expect68lo, expect68hi, expect95, expect95lo, expect95hi]:
         #pass
         l.pop(0)
-        #l.pop(0)
         
     g_observed = tgae(masses, observed, None, None, None, None, tau_nice, 1)
     g_observed.SetMarkerStyle(20)
