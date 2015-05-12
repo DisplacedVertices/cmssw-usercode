@@ -28,11 +28,32 @@ def make_h(name, contents):
     h.SetDirectory(out_f)
     return h
 
-data_obs = make_h('data_obs', [6, 193, 45, 5, 1, 1])
+data_obs = [6, 193, 45, 5, 1, 1]
+#data_obs = [a+5*b for a,b in zip(data_obs, [0.098629340529441833, 0.23323343694210052, 0.35974752902984619, 0.41603338718414307, 0.4215414822101593, 2.748539924621582])]
 
-background            = make_h('background',            [6.3,       192.4,       48.2,       3.5,       .34,      .26     ])
-background_bkgshpUp   = make_h('background_bkgshpUp',   [6.3 - 1.1, 192.4 - 4.3, 48.2 + 3.8, 3.5 + 1.4, .34 + .1, .26 + .1])
-background_bkgshpDown = make_h('background_bkgshpDown', [6.3 + 1.1, 192.4 + 4.3, 48.2 - 3.8, 3.5 - 1.4, .34 - .1, .26 - .1])
+background            = [6.3,       192.4,       48.2,       3.5,       .34,      .26     ]
+#data_obs = background[:]
+background_bkgshpUp   = [6.3 - 1.1, 192.4 - 4.3, 48.2 + 3.8, 3.5 + 1.4, .34 + .1, .26 + .1]
+background_bkgshpDown = [6.3 + 1.1, 192.4 + 4.3, 48.2 - 3.8, 3.5 - 1.4, .34 - .1, .26 - .1]
+
+scale = sum(data_obs) / sum(background)
+print 'scale is', scale
+
+sums = []
+
+for b in 'data_obs background background_bkgshpUp background_bkgshpDown'.split():
+    lb = eval(b)
+    sc = 1 if b == 'data_obs' else scale
+    lb = [sc*d for d in lb]
+    sums.append(sum(lb))
+    s = '%s = make_h("%s", %r)' % (b, b, lb)
+    exec s
+
+nobs = data_obs.Integral()
+nbkg = background.Integral()
+sums.append(nobs)
+#assert len(set([int(10*s) for s in sums])) == 1
+
 
 card_template = '''
 imax 1
@@ -42,12 +63,12 @@ kmax *
 shapes * * my-shapes.root $PROCESS $PROCESS_$SYSTEMATIC
 ---------------
 bin 1
-observation 251
+observation %(nobs)f
 ---------------------------------------
 bin             1            1
 process         %(signame)s  background
 process         0            1
-rate            %(nsig)f     251
+rate            %(nsig)f     %(nbkg)f
 ---------------------------------------
 sigsyst lnN     1.20         -
 bkgshp  shape   -            1
