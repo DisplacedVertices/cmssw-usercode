@@ -131,6 +131,11 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_dist2d_drmax;
   TH2F* h_s_dist3d_drmax;
 
+  TH1F* h_partons_pt1;
+  TH1F* h_partons_pt2;
+  TH1F* h_partons_pt3;
+  TH1F* h_partons_pt4;
+  TH1F* h_partons_pt5;
   TH1F* h_partons_sumpt;
 
   TH1F* h_gen_dbv;
@@ -254,7 +259,12 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_dist2d_drmax = fs->make<TH2F>("h_s_dist2d_drmax", ";max #DeltaR between tracks;dist2d(lsp,vtx) (cm)", 100, 0, 5, 100, 0, 0.02);
   h_s_dist3d_drmax = fs->make<TH2F>("h_s_dist3d_drmax", ";max #DeltaR between tracks;dist3d(lsp,vtx) (cm)", 100, 0, 5, 100, 0, 0.02);
 
-  h_partons_sumpt = fs->make<TH1F>("h_partons_sumpt", ";#Sigmap_{T} of partons (GeV);generated LSPs", 100, 0, 1000);
+  h_partons_pt1 = fs->make<TH1F>("h_partons_pt1", ";p_{T} of 1st accepted parton (GeV);generated LSPs", 100, 0, 1000);
+  h_partons_pt2 = fs->make<TH1F>("h_partons_pt2", ";p_{T} of 2nd accepted parton (GeV);generated LSPs", 100, 0, 1000);
+  h_partons_pt3 = fs->make<TH1F>("h_partons_pt3", ";p_{T} of 3rd accepted parton (GeV);generated LSPs", 100, 0, 1000);
+  h_partons_pt4 = fs->make<TH1F>("h_partons_pt4", ";p_{T} of 4th accepted parton (GeV);generated LSPs", 100, 0, 1000);
+  h_partons_pt5 = fs->make<TH1F>("h_partons_pt5", ";p_{T} of 5th accepted parton (GeV);generated LSPs", 100, 0, 1000);
+  h_partons_sumpt = fs->make<TH1F>("h_partons_sumpt", ";#Sigmap_{T} of accepted partons (GeV);generated LSPs", 100, 0, 1000);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
@@ -449,12 +459,20 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_drmin->Fill(drmin, vtx.drmin());
     h_s_drmax->Fill(drmax, vtx.drmax());
 
-    // histogram sumpt of partons
+    // histogram pt1, pt2, pt3, pt4, pt5, sumpt of partons
+    std::vector<float> parton_pt;
     float sumpt = 0;
     for (int j = 0; j < ndau; ++j) {
-      if (is_neutrino(daughters[j]) || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx(), mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy(), mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx()))) < 0.01) continue;
+      if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx(), mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy(), mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx()))) < 0.01) continue;
+      parton_pt.push_back(daughters[j]->pt());
       sumpt += daughters[j]->pt();
     }
+    std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
+    h_partons_pt1->Fill(int(parton_pt.size()) >= 1 ? parton_pt.at(0) : 0.f);
+    h_partons_pt2->Fill(int(parton_pt.size()) >= 2 ? parton_pt.at(1) : 0.f);
+    h_partons_pt3->Fill(int(parton_pt.size()) >= 3 ? parton_pt.at(2) : 0.f);
+    h_partons_pt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f);
+    h_partons_pt5->Fill(int(parton_pt.size()) >= 5 ? parton_pt.at(4) : 0.f);
     h_partons_sumpt->Fill(sumpt);
 
     // histogram dBV
