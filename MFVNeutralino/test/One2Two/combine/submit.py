@@ -50,7 +50,7 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 scram project CMSSW CMSSW_7_1_5
 cd CMSSW_7_1_5/src
 eval `scram ru -sh`
-tar zxf /eos/uscms/store/user/tucker/combine2.tgz
+tar zxf /eos/uscms/store/user/tucker/combine/combine2.tgz
 scram b -j 4
 
 cp /eos/uscms/store/user/tucker/combine/my-shapes.root .
