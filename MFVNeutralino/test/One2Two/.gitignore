@@ -7,3 +7,5 @@ plots_asdf
 plots_crab
 hogg_data.h
 *.log
+combine_new
+log*txt
