@@ -18,7 +18,7 @@ def get_f_t(x, min_ntracks=None):
         input_fn = 'crab/One2Two/%s.root' % sample.name
     elif type(x) == str:
         input_fn = x
-    f = ROOT.TFile(input_fn)
+    f = ROOT.TFile.Open(input_fn)
     t = f.Get('mfvMiniTree/t')
     t.SetAlias('svdist', 'sqrt((x0-x1)**2 + (y0-y1)**2)')
     t.SetAlias('svdphi', 'TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))')
