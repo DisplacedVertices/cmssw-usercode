@@ -7,7 +7,7 @@ from itertools import izip
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('plots/xxxlimits', size=(500,200), log=False, root=False)
+ps = plot_saver('plots/xxxlimits', size=(600,600), log=False, root=False)
 
 def make_tge(x, y, ey):
     n = len(x)
@@ -80,7 +80,7 @@ def find_limit(name, tree):
         for s, lp, lpe in izip(sig_limits, log_pval_limits, log_pval_limit_errs):
             lf.AddPoint(array('d', [s]), lp, lpe)
         lf_ret = lf.EvalRobust()
-        fcn_lf = make_fcn('fcn_lf', ROOT.kRed, fit_range, (lf.GetParameter(0), lf.GetParameter(1)))
+        fcn_lf = make_fcn('fcn_lf', ROOT.kMagenta, fit_range, (lf.GetParameter(0), lf.GetParameter(1)))
         bits = ROOT.TBits()
         lf.GetFitSample(bits)
         nused = bits.CountBits()
@@ -177,7 +177,7 @@ if 0:
     t = f.Get('Fitter/t_fit_info')
     find_limit('hello2', t)
 
-if 1:
+if 0:
     from base_draw_fit import *
     ROOT.gStyle.SetOptFit(0)
 
@@ -187,3 +187,15 @@ if 1:
 
     stats(limits, 'mu_sig_limit')
     stats(limits_scaled, 'sigma_sig_limit')
+
+if 1:
+    f = ROOT.TFile('mfvo2t_mfv_neutralino_tau0300um_M0300.root')
+    t = f.Get('Fitter/t_fit_info')
+    limits = find_limit('hello', t)
+    import JMTucker.MFVNeutralino.AnalysisConstants as ac
+    sig_true = 1.4223
+    sig_eff = sig_true / (ac.int_lumi / 1000. * ac.scale_factor)
+    scale = sig_eff * ac.int_lumi / 1000. * ac.scale_factor
+    limits_scaled = [limit / scale for limit in limits]
+    print limits, limits_scaled
+
