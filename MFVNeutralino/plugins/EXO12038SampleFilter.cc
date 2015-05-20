@@ -86,6 +86,8 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
         for (size_t idau = 0; idau < gen.numberOfDaughters(); ++idau) {
           const reco::Candidate* dau = gen.daughter(idau);
           int dauid = dau->pdgId();
+          // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
+          // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
           assert(dauid/6000000 == 1);
           dauid %= 6000000;
           const int h2x = dauid / 1000;
