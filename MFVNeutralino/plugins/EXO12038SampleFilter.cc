@@ -78,7 +78,8 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
   double v[2][3] = {{0}};
 
   if (doing_h2x) {
-    std::vector<const reco::GenParticle*> strings;
+    std::vector<const reco::GenParticle*> partons;
+
     for (size_t igen = 0; igen < ngen; ++igen) {
       const reco::GenParticle& gen = gen_particles->at(igen);
       if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
@@ -102,7 +103,14 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
           if (h2x != h2x_num || dauid != 4)
             return false;
 
-          
+          const size_t ngdau = gen.numberOfDaughters();
+          assert(ngdau == 2);
+          for (size_t igdau = 0; igdau < ngdau; ++igdau) {
+            const reco::Candidate* gdau = dau->daughter(igdau);
+            const int id = gdau->pdgId();
+            assert(abs(id) >= 1 && abs(id) <= 5);
+            partons.push_back(dynamic_cast<const reco::GenParticle*>(gdau));
+          }
         }
       }
     }
