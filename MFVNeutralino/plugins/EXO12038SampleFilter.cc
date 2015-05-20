@@ -114,6 +114,13 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
         }
       }
     }
+
+    assert(partons.size() == 4);
+    for (int i = 0; i < 2; ++i) {
+      v[i][0] = partons[i*2]->vx(); // i*2 since first two partons are from first X, second two partons are from second X
+      v[i][1] = partons[i*2]->vy();
+      v[i][2] = partons[i*2]->vz();
+    }
   }
   else if (doing_chi2muqq) {
     // Find the status-1 mu+ and mu- and use their vertices as the
