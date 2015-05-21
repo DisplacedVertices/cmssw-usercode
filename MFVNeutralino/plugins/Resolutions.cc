@@ -311,6 +311,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
   int lsp_nmatch[2] = {0,0};
   int nvtx_match = 0;
+  bool lsp_matched[2] = {false,false};
 
   for (const MFVVertexAux& vtx : *vertices) {
     double dr = 1e99, dist = 1e99;
@@ -460,20 +461,23 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_drmax->Fill(drmax, vtx.drmax());
 
     // histogram pt1, pt2, pt3, pt4, pt5, sumpt of partons
-    std::vector<float> parton_pt;
-    float sumpt = 0;
-    for (int j = 0; j < ndau; ++j) {
-      if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx(), mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy(), mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx()))) < 0.01) continue;
-      parton_pt.push_back(daughters[j]->pt());
-      sumpt += daughters[j]->pt();
+    if (!lsp_matched[ilsp]) {
+      lsp_matched[ilsp] = true;
+      std::vector<float> parton_pt;
+      float sumpt = 0;
+      for (int j = 0; j < ndau; ++j) {
+        if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx(), mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy(), mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx()))) < 0.01) continue;
+        parton_pt.push_back(daughters[j]->pt());
+        sumpt += daughters[j]->pt();
+      }
+      std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
+      h_partons_pt1->Fill(int(parton_pt.size()) >= 1 ? parton_pt.at(0) : 0.f);
+      h_partons_pt2->Fill(int(parton_pt.size()) >= 2 ? parton_pt.at(1) : 0.f);
+      h_partons_pt3->Fill(int(parton_pt.size()) >= 3 ? parton_pt.at(2) : 0.f);
+      h_partons_pt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f);
+      h_partons_pt5->Fill(int(parton_pt.size()) >= 5 ? parton_pt.at(4) : 0.f);
+      h_partons_sumpt->Fill(sumpt);
     }
-    std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
-    h_partons_pt1->Fill(int(parton_pt.size()) >= 1 ? parton_pt.at(0) : 0.f);
-    h_partons_pt2->Fill(int(parton_pt.size()) >= 2 ? parton_pt.at(1) : 0.f);
-    h_partons_pt3->Fill(int(parton_pt.size()) >= 3 ? parton_pt.at(2) : 0.f);
-    h_partons_pt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f);
-    h_partons_pt5->Fill(int(parton_pt.size()) >= 5 ? parton_pt.at(4) : 0.f);
-    h_partons_sumpt->Fill(sumpt);
 
     // histogram dBV
     h_s_dbv->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - gen_particles->at(2).vx(), mevent->gen_lsp_decay[ilsp*3+1] - gen_particles->at(2).vy()), mevent->bs2ddist(vtx));
