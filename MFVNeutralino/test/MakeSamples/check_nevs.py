@@ -55,6 +55,7 @@ for idir, dir in enumerate(dirs):
         hs.append(h)
         exec 'h_%s = h' % hn
 
+    three = 0
     for job in xrange(1, njobs+1):
         stdout = os.path.join(dir, 'res/CMSSW_%i.stdout' % job)
         if not os.path.isfile(stdout):
@@ -92,9 +93,10 @@ for idir, dir in enumerate(dirs):
                 elif nvtx == 2:
                     two += 1
                 else:
-                    raise RuntimeError('bad nvtx for %s job %i: %i' % (dir, job, nvtx))
+                    three += 1
             h_one.Fill(one)
             h_two.Fill(two)
+    print '%s: %i events with more than two vertices' % (dir, three)
 
     for i,h in enumerate(hs):
         if i == 0:
