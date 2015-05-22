@@ -34,3 +34,5 @@ class FitResult:
     def __init__(self, *args):
         self.fcn, self.fit = args
 
+binning = array('d', [0.02*i for i in xrange(5)] + [0.1, .15]) # JMTBAD keep in sync with Templates.cc
+nbins = len(binning) - 1

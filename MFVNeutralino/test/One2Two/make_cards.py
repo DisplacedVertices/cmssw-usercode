@@ -4,8 +4,6 @@ from base import *
 
 out_dir = 'combine_new'
 force_overwrite = 'force' in sys.argv
-binning = array('d', [0.02*i for i in xrange(5)] + [0.1, .15]) # JMTBAD keep in sync with Templates.cc
-nbins = len(binning) - 1
 
 if os.path.isdir(out_dir) and not force_overwrite:
     raise RuntimeError('move existing out_dir %s out of the way first' % out_dir)
@@ -44,8 +42,6 @@ def make_h(name, contents):
     return h
 
 data_obs = [6, 193, 45, 5, 1, 1]
-#data_obs = [a+5*b for a,b in zip(data_obs, [0.098629340529441833, 0.23323343694210052, 0.35974752902984619, 0.41603338718414307, 0.4215414822101593, 2.748539924621582])]
-
 background = [6.2, 192.2, 48., 3.5, .34, .26]
 s = systematics = [0, 0, 3.8, 1.4, .1, .1]
 pivot = 2
@@ -65,6 +61,8 @@ print background
 print background_bkgshpUp
 print background_bkgshpDown
 #data_obs = background[:]
+
+
 
 scale = sum(data_obs) / sum(background)
 print 'scale is', scale
