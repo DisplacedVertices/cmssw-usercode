@@ -2,21 +2,36 @@
 
 from base import *
 
-fn_pattern = 'trees/mfv*root'
+out_dir = 'combine_new'
+force_overwrite = 'force' in sys.argv
 binning = array('d', [0.02*i for i in xrange(5)] + [0.1, .15]) # JMTBAD keep in sync with Templates.cc
 nbins = len(binning) - 1
 
+if os.path.isdir(out_dir) and not force_overwrite:
+    raise RuntimeError('move existing out_dir %s out of the way first' % out_dir)
+elif not force_overwrite:
+    os.mkdir(out_dir)
+
 min_ntracks = 5
 
-fns = glob.glob(fn_pattern)
+fns = glob.glob('trees/mfv*root')
 fns.sort()
+#fns = [
+#    'trees/mfv_neutralino_tau0300um_M0300.root'
+#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0300.root',
+#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M0400.root',
+#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0500.root',
+#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M0600.root',
+#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0700.root',
+#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0900.root',
+#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M1000.root',
+#    'M1200temp.root',
+#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M1500.root'
+#    ]
 
 hs = []
 
-masses = range(200, 1001, 200)
-masses.insert(1, 300)
-
-out_f = ROOT.TFile('combine/my-shapes.root', 'recreate')
+out_f = ROOT.TFile(os.path.join(out_dir, 'my-shapes.root'), 'recreate')
 
 def make_h(name, contents):
     assert contents is None or len(contents) == nbins
@@ -31,10 +46,25 @@ def make_h(name, contents):
 data_obs = [6, 193, 45, 5, 1, 1]
 #data_obs = [a+5*b for a,b in zip(data_obs, [0.098629340529441833, 0.23323343694210052, 0.35974752902984619, 0.41603338718414307, 0.4215414822101593, 2.748539924621582])]
 
-background            = [6.3,       192.4,       48.2,       3.5,       .34,      .26     ]
+background = [6.2, 192.2, 48., 3.5, .34, .26]
+s = systematics = [0, 0, 3.8, 1.4, .1, .1]
+pivot = 2
+#s[0] = 1.1; s[1] = 4.3 # divide between first two bins by some ratio
+#s[1] = 5.4 # put it all in the second bin
+s[0] = 0.17; s[1] = 5.23 # divide between first two bins keeping shape fixed
+#s[0] = 0.14; s[1] = 4.21; s[2] = 1.05; pivot = 3 # divide between first three bins ditto
+
+background_bkgshpUp, background_bkgshpDown = [], []
+for i in xrange(nbins):
+    sign = -1 if i < pivot else 1
+    up = background[i] + sign * systematics[i]
+    dn = background[i] - sign * systematics[i]
+    background_bkgshpUp.append(up)
+    background_bkgshpDown.append(dn)
+print background
+print background_bkgshpUp
+print background_bkgshpDown
 #data_obs = background[:]
-background_bkgshpUp   = [6.3 - 1.1, 192.4 - 4.3, 48.2 + 3.8, 3.5 + 1.4, .34 + .1, .26 + .1]
-background_bkgshpDown = [6.3 + 1.1, 192.4 + 4.3, 48.2 - 3.8, 3.5 - 1.4, .34 - .1, .26 - .1]
 
 scale = sum(data_obs) / sum(background)
 print 'scale is', scale
@@ -88,7 +118,7 @@ for fn in fns:
             d = binning[-1] - 1e-4
         h.Fill(d)
 
-    nsig_gen = 100000
+    nsig_gen = 471*200 if 'M1200' in fn else 100000
     h.Scale(ac.int_lumi / 1000 * ac.scale_factor / nsig_gen)
     nsig = h.Integral(0, 1000)
 
@@ -96,12 +126,12 @@ for fn in fns:
     x = [signame, nsig] + [h.GetBinContent(i) for i in xrange(1, nbins+1)]
     sig_templates.append(x)
     
-    open(os.path.join('combine', signame + '.txt'), 'wt').write(card_template % locals())
+    open(os.path.join(out_dir, signame + '.txt'), 'wt').write(card_template % locals())
 
 out_f.Write()
 out_f.Close()
 
-title = '%30s %7s | %7s %7s %7s %7s | %7s %7s | %7s | %7s %7s %7s' % ('signal', 'nsig', 'c1', 'c2', 'c3', 'c456', 'c1/c2', 'c3/c2', 'sc', 'sc*c1', 'sc*c2', 'sc*c3')
+title = '%32s %6s | %6s %6s %6s %6s | %9s | %6s %6s | %6s | %6s %6s %6s' % ('signal', 'nsig', 'c1', 'c2', 'c3', 'c456', 'c123/c456', 'c1/c2', 'c3/c2', 'sc', 'sc*c1', 'sc*c2', 'sc*c3')
 line = len(title)*'-'
 print
 print title
@@ -110,6 +140,7 @@ for i,x in enumerate(sig_templates):
         print line
     signame = x.pop(0)
     nsig = x[0]
+    c123 = x[1] + x[2] + x[3]
     c456 = x[4] + x[5] + x[6]
     scale = 3/c456
-    print '%30s %7.2f | %7.2f %7.2f %7.2f %7.2f | %7.2f %7.2f | %7.2f | %7.2f %7.2f %7.2f' % (signame, nsig, x[1], x[2], x[3], c456, x[1]/x[2], x[3]/x[2], scale, x[1]*scale, x[2]*scale, x[3]*scale)
+    print '%32s %6.2f | %6.2f %6.2f %6.2f %6.2f | %9.2f | %6.2f %6.2f | %6.2f | %6.2f %6.2f %6.2f' % (signame, nsig, x[1], x[2], x[3], c456, c123/c456, x[1]/x[2], x[3]/x[2], scale, x[1]*scale, x[2]*scale, x[3]*scale)
