@@ -37,7 +37,9 @@ for hn in hns:
         exec '%s = h' % h.GetName()
 
 exceptions = {
-    #'crab/MakeSamples_M1500/crab_mfv_neutralino_tau03000um_M1500': (34,),
+    }
+
+skip = {
     }
 
 for idir, dir in enumerate(dirs):
@@ -57,6 +59,12 @@ for idir, dir in enumerate(dirs):
 
     three = 0
     for job in xrange(1, njobs+1):
+        roots = glob.glob(os.path.join(dir, 'res/*_%i_*_???.root' % job))
+
+        if skip.has_key(dir) and job in skip[dir]:
+            assert not roots
+            continue
+
         stdout = os.path.join(dir, 'res/CMSSW_%i.stdout' % job)
         if not os.path.isfile(stdout):
             missing_stdouts.append(job)
@@ -77,7 +85,6 @@ for idir, dir in enumerate(dirs):
             for h,nev in zip(hs, nevs):
                 h.Fill(nev)
 
-        roots = glob.glob(os.path.join(dir, 'res/*_%i_*_???.root' % job))
         if len(roots) > 1:
             raise RuntimeError('more than one match for %s job %i: %r' % (dir, job, roots))
         elif len(roots) == 0:
