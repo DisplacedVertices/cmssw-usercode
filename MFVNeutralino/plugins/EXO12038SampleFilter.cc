@@ -83,8 +83,8 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
     for (size_t igen = 0; igen < ngen; ++igen) {
       const reco::GenParticle& gen = gen_particles->at(igen);
       if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
-        assert(gen.numberOfDaughters() == 2);
-        for (size_t idau = 0; idau < gen.numberOfDaughters(); ++idau) {
+        assert(gen.numberOfDaughters() >= 2);
+        for (size_t idau = 0; idau < 2; ++idau) {
           const reco::Candidate* dau = gen.daughter(idau);
           int dauid = dau->pdgId();
           // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
@@ -104,8 +104,8 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
             return false;
 
           const size_t ngdau = dau->numberOfDaughters();
-          assert(ngdau == 2);
-          for (size_t igdau = 0; igdau < ngdau; ++igdau) {
+          assert(ngdau >= 2);
+          for (size_t igdau = 0; igdau < 2; ++igdau) {
             const reco::Candidate* gdau = dau->daughter(igdau);
             const int id = gdau->pdgId();
             assert(abs(id) >= 1 && abs(id) <= 5);
