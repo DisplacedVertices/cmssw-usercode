@@ -103,7 +103,7 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
           if (h2x != h2x_num || dauid != 4)
             return false;
 
-          const size_t ngdau = gen.numberOfDaughters();
+          const size_t ngdau = dau->numberOfDaughters();
           assert(ngdau == 2);
           for (size_t igdau = 0; igdau < ngdau; ++igdau) {
             const reco::Candidate* gdau = dau->daughter(igdau);
