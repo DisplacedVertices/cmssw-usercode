@@ -466,7 +466,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
       std::vector<float> parton_pt;
       float sumpt = 0;
       for (int j = 0; j < ndau; ++j) {
-        if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx(), mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy(), mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx()))) < 0.01) continue;
+        if (is_lepton(daughters[j]) || is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx(), mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[ilsp]->vy() - mci.lsps[ilsp]->vy(), mci.stranges[ilsp]->vx() - mci.lsps[ilsp]->vx()))) < 0.01) continue;
         parton_pt.push_back(daughters[j]->pt());
         sumpt += daughters[j]->pt();
       }
