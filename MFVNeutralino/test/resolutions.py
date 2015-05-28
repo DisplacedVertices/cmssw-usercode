@@ -100,35 +100,35 @@ process.mfvAnalysisCutsTwoVtxGeo2ddist = process.mfvAnalysisCuts.clone(vertex_sr
 process.mfvResolutionsTwoVtxGeo2ddist = mfvResolutions.clone()
 process.pTwoVtxGeo2ddist = cms.Path(process.mfvSelectedVerticesGeo2ddist * process.mfvAnalysisCutsTwoVtxGeo2ddist * process.mfvResolutionsTwoVtxGeo2ddist)
 
-process.mfvSelectedVerticesNtracks = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_ntracks = 5)
-process.mfvAnalysisCutsTwoVtxNtracks = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNtracks')
-process.mfvResolutionsTwoVtxNtracks = mfvResolutions.clone()
-process.pTwoVtxNtracks = cms.Path(process.mfvSelectedVerticesNtracks * process.mfvAnalysisCutsTwoVtxNtracks * process.mfvResolutionsTwoVtxNtracks)
-
-process.mfvSelectedVerticesNtracksptgt3 = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_ntracks = 5, min_ntracksptgt3 = 3)
-process.mfvAnalysisCutsTwoVtxNtracksptgt3 = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
-process.mfvResolutionsTwoVtxNtracksptgt3 = mfvResolutions.clone()
-process.pTwoVtxNtracksptgt3 = cms.Path(process.mfvSelectedVerticesNtracksptgt3 * process.mfvAnalysisCutsTwoVtxNtracksptgt3 * process.mfvResolutionsTwoVtxNtracksptgt3)
-
-process.mfvSelectedVerticesNjetsntks = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_ntracks = 5, min_ntracksptgt3 = 3, min_njetsntks = 1)
-process.mfvAnalysisCutsTwoVtxNjetsntks = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNjetsntks')
-process.mfvResolutionsTwoVtxNjetsntks = mfvResolutions.clone()
-process.pTwoVtxNjetsntks = cms.Path(process.mfvSelectedVerticesNjetsntks * process.mfvAnalysisCutsTwoVtxNjetsntks * process.mfvResolutionsTwoVtxNjetsntks)
-
-process.mfvSelectedVerticesBs2derr = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_ntracks = 5, min_ntracksptgt3 = 3, min_njetsntks = 1, max_bs2derr = 0.0025)
-process.mfvAnalysisCutsTwoVtxBs2derr = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesBs2derr')
-process.mfvResolutionsTwoVtxBs2derr = mfvResolutions.clone()
-process.pTwoVtxBs2derr = cms.Path(process.mfvSelectedVerticesBs2derr * process.mfvAnalysisCutsTwoVtxBs2derr * process.mfvResolutionsTwoVtxBs2derr)
-
-process.mfvSelectedVerticesMindrmax = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_ntracks = 5, min_ntracksptgt3 = 3, min_njetsntks = 1, max_bs2derr = 0.0025, min_drmax = 1.2)
+process.mfvSelectedVerticesMindrmax = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_drmax = 1.2)
 process.mfvAnalysisCutsTwoVtxMindrmax = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesMindrmax')
 process.mfvResolutionsTwoVtxMindrmax = mfvResolutions.clone()
 process.pTwoVtxMindrmax = cms.Path(process.mfvSelectedVerticesMindrmax * process.mfvAnalysisCutsTwoVtxMindrmax * process.mfvResolutionsTwoVtxMindrmax)
 
-process.mfvSelectedVerticesMaxdrmax = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_ntracks = 5, min_ntracksptgt3 = 3, min_njetsntks = 1, max_bs2derr = 0.0025, min_drmax = 1.2, max_drmax = 4)
+process.mfvSelectedVerticesMaxdrmax = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_drmax = 1.2, max_drmax = 4)
 process.mfvAnalysisCutsTwoVtxMaxdrmax = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesMaxdrmax')
 process.mfvResolutionsTwoVtxMaxdrmax = mfvResolutions.clone()
 process.pTwoVtxMaxdrmax = cms.Path(process.mfvSelectedVerticesMaxdrmax * process.mfvAnalysisCutsTwoVtxMaxdrmax * process.mfvResolutionsTwoVtxMaxdrmax)
+
+process.mfvSelectedVerticesDrmin = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4)
+process.mfvAnalysisCutsTwoVtxDrmin = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesDrmin')
+process.mfvResolutionsTwoVtxDrmin = mfvResolutions.clone()
+process.pTwoVtxDrmin = cms.Path(process.mfvSelectedVerticesDrmin * process.mfvAnalysisCutsTwoVtxDrmin * process.mfvResolutionsTwoVtxDrmin)
+
+process.mfvSelectedVerticesNtracks = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_ntracks = 5)
+process.mfvAnalysisCutsTwoVtxNtracks = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNtracks')
+process.mfvResolutionsTwoVtxNtracks = mfvResolutions.clone()
+process.pTwoVtxNtracks = cms.Path(process.mfvSelectedVerticesNtracks * process.mfvAnalysisCutsTwoVtxNtracks * process.mfvResolutionsTwoVtxNtracks)
+
+process.mfvSelectedVerticesNtracksptgt3 = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_ntracks = 5, min_ntracksptgt3 = 3)
+process.mfvAnalysisCutsTwoVtxNtracksptgt3 = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
+process.mfvResolutionsTwoVtxNtracksptgt3 = mfvResolutions.clone()
+process.pTwoVtxNtracksptgt3 = cms.Path(process.mfvSelectedVerticesNtracksptgt3 * process.mfvAnalysisCutsTwoVtxNtracksptgt3 * process.mfvResolutionsTwoVtxNtracksptgt3)
+
+process.mfvSelectedVerticesNjetsntks = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_ntracks = 5, min_ntracksptgt3 = 3, min_njetsntks = 1)
+process.mfvAnalysisCutsTwoVtxNjetsntks = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNjetsntks')
+process.mfvResolutionsTwoVtxNjetsntks = mfvResolutions.clone()
+process.pTwoVtxNjetsntks = cms.Path(process.mfvSelectedVerticesNjetsntks * process.mfvAnalysisCutsTwoVtxNjetsntks * process.mfvResolutionsTwoVtxNjetsntks)
 
 process.mfvResolutionsFullSel = mfvResolutions.clone()
 process.TwoVtxFullSel = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvResolutionsFullSel)
@@ -150,13 +150,13 @@ process.mfvGenParticleFilterGeo2ddist = process.mfvGenParticleFilter.clone(min_n
 process.mfvGenGeo2ddist = mfvResolutions.clone()
 process.pGenGeo2ddist = cms.Path(process.mfvGenParticleFilterGeo2ddist * process.mfvGenGeo2ddist)
 
-process.mfvGenParticleFilterNtracks = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 3)
-process.mfvGenNtracks = mfvResolutions.clone()
-process.pGenNtracks = cms.Path(process.mfvGenParticleFilterNtracks * process.mfvGenNtracks)
-
-process.mfvGenParticleFilterDrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 3, max_drmax = 4)
+process.mfvGenParticleFilterDrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, max_drmax = 4)
 process.mfvGenDrmax = mfvResolutions.clone()
 process.pGenDrmax = cms.Path(process.mfvGenParticleFilterDrmax * process.mfvGenDrmax)
+
+process.mfvGenParticleFilterNtracks = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, max_drmax = 4, min_ntracks = 3)
+process.mfvGenNtracks = mfvResolutions.clone()
+process.pGenNtracks = cms.Path(process.mfvGenParticleFilterNtracks * process.mfvGenNtracks)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
