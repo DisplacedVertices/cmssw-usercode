@@ -442,6 +442,8 @@ namespace mfv {
       do_signif(env.get_bool("do_signif", true)),
       do_limit(env.get_bool("do_limit", true)),
       only_fit(env.get_bool("only_fit", false)),
+      n_toy_cls(env.get_int("n_toy_cls", 10000)),
+      do_cls(env.get_bool("do_cls", true)),
       i_limit_job(env.get_int("i_limit_job", -1)),
       n_toy_limit(env.get_int("n_toy_limit", 2000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
@@ -475,6 +477,7 @@ namespace mfv {
     printf("do_signif? %i\n", do_signif);
     printf("do_limit? %i\n", do_limit);
     printf("only_fit? %i\n", only_fit);
+    printf("do_cls? %i  n_toy_cls: %i\n", do_cls, n_toy_cls);
     printf("i_limit_job: %i\n", i_limit_job);
     printf("n_toy_limit: %i (~%f uncert @ 0.05)\n", n_toy_limit, sqrt(0.05*0.95/n_toy_limit));
     printf("sig_limit_scan: %f-%f in %f steps\n", sig_limit_start, sig_limit_stop, sig_limit_step);
@@ -503,6 +506,8 @@ namespace mfv {
     t_config->Branch("fluctuate_toys_shapes", const_cast<bool*>(&fluctuate_toys_shapes));
     t_config->Branch("n_toy_signif", const_cast<int*>(&n_toy_signif));
     t_config->Branch("n_toy_limit", const_cast<int*>(&n_toy_limit));
+    t_config->Branch("n_toy_cls", const_cast<int*>(&n_toy_cls));
+    t_config->Branch("do_cls", const_cast<bool*>(&do_cls));
     t_config->Branch("sig_limit_start", const_cast<double*>(&sig_limit_start));
     t_config->Branch("sig_limit_step", const_cast<double*>(&sig_limit_step));
     t_config->Branch("sig_eff", const_cast<double*>(&sig_eff));
@@ -1183,6 +1188,13 @@ namespace mfv {
     for (int i = 0; i < inject_in_last_bin; ++i)
       h_data_temp->Fill(2);
     fit::h_data_real = Template::finalize_binning(h_data_temp);
+    if (0) {
+      printf("duhing\n");
+      std::vector<double> duh = { 7, 215, 49, 0, 0, 0 };
+      assert(int(duh.size()) == fit::n_bins);
+      for (int i = 0; i < fit::n_bins; ++i)
+        fit::h_data_real->SetBinContent(i+1, duh[i]);
+    }
     fit::set_data_real();
     const int n_data = fit::h_data_real->Integral();
     printf("Fitter: data histogram: ");
@@ -1354,6 +1366,51 @@ namespace mfv {
         sig_limit_scan = 1e99;
       }
 
+      double pval_cls = 1;
+      if (do_cls) {
+        fit::n_calls = 0;
+        TStopwatch tsw_cls;
+
+        if (i_limit_job < 0)
+          fit::set_data_real(); 
+        else
+          fit::set_data_no_check(h_toy_expected);
+
+        const test_stat_t t_obs_cls = calc_test_stat(0);
+        t_obs_cls.print("t_obs_cls");
+
+        printf("throwing %i toys for p_b for CLs:\n", n_toy_cls);
+        jmt::ProgressBar pb_cls(50, n_toy_cls);
+        if (!print_toys)
+          pb_cls.start();
+
+        int n_toy_cls_t_ge_obs = 0;
+        for (int i_toy_cls = 0; i_toy_cls < n_toy_cls; ++i_toy_cls) {
+          const int n_sig_cls = 0;
+          const int n_bkg_cls = rand->Poisson(n_data);
+          make_toy_data(i_toy_cls, -1, -1, n_sig_cls, n_bkg_cls, h_bkg_obs_0);
+
+          const test_stat_t t = calc_test_stat(0);
+          if (t.t >= t_obs_cls.t)
+            ++n_toy_cls_t_ge_obs;
+
+          if (print_toys) {
+            //t.print("t_cls toy", i_toy_cls);
+          }
+          else
+            ++pb_cls;
+
+          if (save_toys) {
+            jmt::vthrow("save cls toys not implemented");
+          }
+        }
+
+        assert(n_toy_cls_t_ge_obs > 5);
+        pval_cls = double(n_toy_cls_t_ge_obs) / n_toy_signif;
+        printf("\npval_cls: %e\n", pval_cls); fflush(stdout);
+        printf("n_calls: %i time for cls: ", fit::n_calls); tsw_cls.Print();
+      }
+
       while (sig_limit_scan < sig_limit_hi) {
         const double mu_sig_limit = sig_eff * sig_limit_scan;
 
@@ -1420,8 +1477,8 @@ namespace mfv {
 
         const double T = 1./n_toy_limit;
         const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
-        const double pval_limit = (p_hat + T/2)/(1 + T);
-        const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+        const double pval_limit = (p_hat + T/2)/(1 + T) / pval_cls;
+        const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T) / pval_cls;
         const double pval_limit_sglo = pval_limit - n_sigma_away_lo * pval_limit_err;
         const double pval_limit_sghi = pval_limit + n_sigma_away_hi * pval_limit_err;
 

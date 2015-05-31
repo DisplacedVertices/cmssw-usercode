@@ -43,6 +43,8 @@ namespace mfv {
     const bool do_signif;
     const bool do_limit;
     const bool only_fit;
+    const int n_toy_cls;
+    const bool do_cls;
     const int i_limit_job;
     const int n_toy_limit;
     const double sig_limit_start;
