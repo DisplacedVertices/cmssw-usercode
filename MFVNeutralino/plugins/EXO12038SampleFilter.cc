@@ -71,6 +71,8 @@ namespace {
 }
 
 bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) {
+  const bool debug = false;
+
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_particles_src, gen_particles);
   const size_t ngen = gen_particles->size();
@@ -78,14 +80,18 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
   double v[2][3] = {{0}};
 
   if (doing_h2x) {
+    if (debug) print_gen_and_daus(0, "header", *gen_particles, true, true);
+
     std::vector<const reco::GenParticle*> partons;
 
     for (size_t igen = 0; igen < ngen; ++igen) {
       const reco::GenParticle& gen = gen_particles->at(igen);
       if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
         assert(gen.numberOfDaughters() >= 2);
+        if (debug) print_gen_and_daus(&gen, "higgs", *gen_particles, true, true);
         for (size_t idau = 0; idau < 2; ++idau) {
           const reco::Candidate* dau = gen.daughter(idau);
+          if (debug) print_gen_and_daus(dau, TString::Format("X%lu", idau).Data(), *gen_particles, true, true);
           int dauid = dau->pdgId();
           // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
           // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
@@ -107,9 +113,16 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
           assert(ngdau >= 2);
           for (size_t igdau = 0; igdau < 2; ++igdau) {
             const reco::Candidate* gdau = dau->daughter(igdau);
+            if (debug) print_gen_and_daus(gdau, TString::Format("X%luD%lu", idau, igdau).Data(), *gen_particles, true, true);
             const int id = gdau->pdgId();
             assert(abs(id) >= 1 && abs(id) <= 5);
             partons.push_back(dynamic_cast<const reco::GenParticle*>(gdau));
+
+            const size_t nggdau = gdau->numberOfDaughters();
+            for (size_t iggdau = 0; iggdau < nggdau; ++iggdau) {
+              const reco::Candidate* ggdau = gdau->daughter(iggdau);
+              if (debug) print_gen_and_daus(ggdau, TString::Format("X%luD%luG%lu", idau, igdau, iggdau).Data(), *gen_particles, true, true);
+            }
           }
         }
       }
@@ -117,10 +130,14 @@ bool MFVEXO12038SampleFilter::filter(edm::Event& event, const edm::EventSetup&) 
 
     assert(partons.size() == 4);
     for (int i = 0; i < 2; ++i) {
-      v[i][0] = partons[i*2]->vx(); // i*2 since first two partons are from first X, second two partons are from second X
-      v[i][1] = partons[i*2]->vy();
-      v[i][2] = partons[i*2]->vz();
+      assert(partons[i*2]->numberOfDaughters() > 0);
+      v[i][0] = partons[i*2]->daughter(0)->vx(); // i*2 since first two partons are from first X, second two partons are from second X
+      v[i][1] = partons[i*2]->daughter(0)->vy();
+      v[i][2] = partons[i*2]->daughter(0)->vz();
+
+      if (debug) printf("decay vtx of X %i  %f, %f, %f\n", i, v[i][0], v[i][1], v[i][2]);
     }
+
   }
   else if (doing_chi2muqq) {
     // Find the status-1 mu+ and mu- and use their vertices as the
