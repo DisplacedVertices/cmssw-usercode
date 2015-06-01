@@ -64,7 +64,7 @@ void JMTParticleListDrawer::analyze(const edm::Event& event, const edm::EventSet
     const ParticleData* pd = pdt->particle(id);
     std::string particleName;
     if (!pd) {
-      snprintf(buf, 512, "P%i\n", id);
+      snprintf(buf, 512, "P%i", id);
       particleName = buf;
     }
     else
