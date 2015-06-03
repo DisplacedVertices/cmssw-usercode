@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, fnmatch, glob
 from pprint import pprint
 from JMTucker.Tools.CRABTools import *
 
@@ -24,6 +24,36 @@ if 'lists' in sys.argv:
     for lst_fn, cmd in to_do:
         print lst_fn
         os.system(cmd)
+
+elif 'manuallist' in sys.argv:
+    try:
+        path = sys.argv[sys.argv.index('manuallist') + 1]
+    except IndexError:
+        raise RuntimeError('syntax: manuallist path/to/files crab_jobs_list')
+    if not os.path.isdir(path):
+        raise RuntimeError('path %s does not exist' % path)
+
+    jobs = crab_jobs_from_argv()
+    if not jobs:
+        raise RuntimeError('no jobs in argv?')
+
+    roots = []
+    while not roots:
+        paths = glob.glob(os.path.join(path, '*'))
+        if all(x.endswith('.root') for x in paths):
+            roots = paths
+        else:
+            assert len(paths) == 1
+            path = paths[0]
+
+    for job in jobs:
+        root = fnmatch.filter(roots, '*/mfvo2t_%s_?_???.root' % job)
+        if len(root) != 1:
+            print "don't know what to do with job", job
+            pprint(root)
+            raise RuntimeError('fix it')
+        root = root[0].replace('/eos/uscms/store', 'root://cmsxrootd.fnal.gov//store')
+        print root
 
 elif 'draws' in sys.argv:
     for arg in sys.argv:
