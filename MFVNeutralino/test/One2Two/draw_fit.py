@@ -49,6 +49,7 @@ h_pval_signif = h('h_pval_signif', '', 51, 0, 1.02)
 h_zval_signif = h('h_zval_signif', '', 50, 0, 20)
 h_zval2_wilks = h('h_zval2_wilks', '', 50, 0, 20)
 h_zvals = h2('h_zvals', '', 50, 0, 20, 50, 0, 20)
+h_pval_signif = h('h_pval_cls', '', 51, 0, 1.02)
 h_sig_limit = h('h_sig_limit', '', 200, 0, 200)
 h_sig_limit.GetXaxis().SetRangeUser(0,50)
 h_sig_limit_scaled = h('h_sig_limit_scaled', '', 200, 0, 50)
@@ -62,7 +63,7 @@ h_sig_limit_fit_prob = h('h_sig_limit_fit_prob', '', 50, 0, 1)
 
 nuis0_true_mean = 0
 nuis1_true_mean = 0
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
+for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
     if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
     nuis0_true_mean += true_pars_2
@@ -74,7 +75,7 @@ nuis1_true_mean /= n
 pval_signifs = []
 sig_limits = []
 sig_limits_scaled = []
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
+for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_nuis0,h1_err_nuis0,h1_nuis1,h1_err_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_nuis0,h0_err_nuis0,h0_nuis1,h0_err_nuis1,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
     if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
     h_seed.Fill(seed)
@@ -120,6 +121,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     zval2_wilks = h1_maxtwolnL - h0_maxtwolnL
     h_zval2_wilks.Fill(zval2_wilks)
     h_zvals.Fill(zval_signif, zval2_wilks)
+    h_pval_cls.Fill(pval_cls)
     sig_limits.append(sig_limit)
     h_sig_limit.Fill(sig_limit)
     sig_limit_scaled = sig_limit / (sig_eff * ac.int_lumi / 1000. * ac.scale_factor)
@@ -133,7 +135,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_sig_limit_fit_b_err.Fill(sig_limit_fit_b_err)
     h_sig_limit_fit_prob.Fill(sig_limit_fit_prob)
 
-for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_err_v_sig h_h1_mu_sig_v_true h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_err_v_bkg h_h1_mu_bkg_v_true h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_err_v_bkg h_h0_mu_bkg_v_true h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_t h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
+for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_err_v_sig h_h1_mu_sig_v_true h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_err_v_bkg h_h1_mu_bkg_v_true h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_pull h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_err_v_bkg h_h0_mu_bkg_v_true h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_pull h_t h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_pval_cls h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
     print x
     h = eval(x)
     log = False
