@@ -5,6 +5,7 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 batch_fn_lst = [x for x in sys.argv if x.endswith('.lst')][0]
 batch_name = os.path.basename(batch_fn_lst).replace('.lst','')
+print 'batch name', batch_name
 fudge = 1. # 0.5 if 'fullhadded' not in batch_name else 1.
 #batch_root = glob.glob('/store/user/tucker/mfvo2t_%s/mfvo2t_%s/*/' % (batch_name, batch_name))
 #assert len(batch_root) == 1
