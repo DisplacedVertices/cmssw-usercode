@@ -52,7 +52,7 @@ elif 'manuallist' in sys.argv:
             print "don't know what to do with job", job
             pprint(root)
             raise RuntimeError('fix it')
-        root = root[0].replace('/eos/uscms/store', 'root://cmsxrootd.fnal.gov//store')
+        root = root[0].replace('/eos/uscms/store', '/store')
         print root
 
 elif 'draws' in sys.argv:
@@ -93,6 +93,10 @@ elif 'recrabtar' in sys.argv:
 
 elif 'exercisefiles' in sys.argv:
     lsts = []
+    for x in sys.argv:
+        if x.endswith('.lst'):
+            lsts.append(x)
+            
     for d in crab_dirs_from_argv():
         print d
         d_mangled = d.replace('/', '_')
@@ -100,13 +104,16 @@ elif 'exercisefiles' in sys.argv:
         lsts.append(lst_fn)
         os.system('rm -f %s' % lst_fn)
         os.system('crtools -outputFromFJR %s noraise | grep root > %s' % (d, lst_fn))
+
     for lst in lsts:
         print lst
-        from JMTucker.Tools.ROOTTools import ROOT, set_style
-        set_style()
-        t = ROOT.TChain('Fitter/t_fit_info')
+        from JMTucker.Tools.ROOTTools import ROOT
         for line in open(lst):
             line = line.strip()
             if line:
-                t.Add(line)
-        print t.Draw('seed:sig_limit_fit_prob', ''), 'entries'
+                line = line.replace('/store', 'root://cmsxrootd.fnal.gov//store')
+                print line
+                f = ROOT.TFile(line)
+                t = f.Get('Fitter/t_fit_info')
+                t.Scan('seed')
+                f.Close()
