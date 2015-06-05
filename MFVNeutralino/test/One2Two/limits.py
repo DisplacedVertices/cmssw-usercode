@@ -33,6 +33,10 @@ def find_limit(name, tree):
         for v in 'sig_limits pval_limits pval_limit_errs'.split():
             exec '%s = array("d", list(t.%s))' % (v,v)
 
+        if len(pval_limits) == 1000 or (len(pval_limits) > 100 and sum(pval_limits[-5:])/5 > 0.05):
+            print 'skipping a toy wtih # points = %i' % len(pval_limits)
+            continue
+
         log_pval_limits = array('d')
         log_pval_limit_errs = array('d')
         for p, pe in izip(pval_limits, pval_limit_errs):
@@ -177,7 +181,7 @@ if 0:
     t = f.Get('Fitter/t_fit_info')
     find_limit('hello2', t)
 
-if 0:
+if 1:
     from base_draw_fit import *
     ROOT.gStyle.SetOptFit(0)
 
@@ -188,14 +192,34 @@ if 0:
     stats(limits, 'mu_sig_limit')
     stats(limits_scaled, 'sigma_sig_limit')
 
-if 1:
-    f = ROOT.TFile('mfvo2t_mfv_neutralino_tau0300um_M0300.root')
+if 0:
+    #f = ROOT.TFile('mfvo2t_mfv_neutralino_tau0300um_M0300.root')
+    f = ROOT.TFile('mfvo2t_89_1_ynR.root')
     t = f.Get('Fitter/t_fit_info')
     limits = find_limit('hello', t)
     import JMTucker.MFVNeutralino.AnalysisConstants as ac
-    sig_true = 1.4223
+    sig_true = 0.7707
     sig_eff = sig_true / (ac.int_lumi / 1000. * ac.scale_factor)
+    print sig_eff
     scale = sig_eff * ac.int_lumi / 1000. * ac.scale_factor
     limits_scaled = [limit / scale for limit in limits]
     print limits, limits_scaled
 
+if 0:
+    limits = []
+    for fn in file('fns.txt'):
+        fn = fn.strip()
+        fn = fn.split('/')[-1]
+        num = fn.split('_')[1]
+        fn = '/uscms/home/tucker/scratch/' + fn
+        f = ROOT.TFile.Open(fn)
+        t = f.Get('Fitter/t_fit_info')
+        limits += find_limit('job' + num, t)
+        print 'XXX', fn, num, limits
+    print '\n'
+    stats(limits, 'zzz')
+        
+if 0:
+    f = ROOT.TFile.Open('mfvo2t.root')
+    t = f.Get('Fitter/t_fit_info')
+    find_limit('duh', t)
