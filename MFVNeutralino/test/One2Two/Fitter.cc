@@ -445,7 +445,7 @@ namespace mfv {
       n_toy_cls(env.get_int("n_toy_cls", 10000)),
       do_cls(env.get_bool("do_cls", true)),
       i_limit_job(env.get_int("i_limit_job", -1)),
-      n_toy_limit(env.get_int("n_toy_limit", 2000)),
+      n_toy_limit(env.get_int("n_toy_limit", 10000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
       sig_limit_stop(env.get_double("sig_limit_stop", 250)),
       sig_limit_step(env.get_double("sig_limit_step", 0.25)),
@@ -549,6 +549,7 @@ namespace mfv {
     t_fit_info->Branch("fs_prob", &fit_stat.prob);
     t_fit_info->Branch("fs_ks", &fit_stat.ks);
     t_fit_info->Branch("pval_signif", &pval_signif);
+    t_fit_info->Branch("pval_cls", &pval_signif);
     t_fit_info->Branch("sig_limits", &sig_limits);
     t_fit_info->Branch("pval_limits", &pval_limits);
     t_fit_info->Branch("pval_limit_errs", &pval_limit_errs);
@@ -1246,6 +1247,8 @@ namespace mfv {
     TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
 
     pval_signif = 1;
+    pval_cls = 1;
+    double pval_cls_err = 0;
 
     const int save_print_level = print_level;
     const int save_extra_prints = fit::extra_prints;
@@ -1366,7 +1369,6 @@ namespace mfv {
         sig_limit_scan = 1e99;
       }
 
-      double pval_cls = 1;
       if (do_cls) {
         fit::n_calls = 0;
         TStopwatch tsw_cls;
@@ -1395,6 +1397,13 @@ namespace mfv {
             ++n_toy_cls_t_ge_obs;
 
           if (print_toys) {
+            if (print_subtoys) {
+              printf("  cls toy %i nsig 0 nbkg %i n'data' %i [ ", i_toy_cls, n_bkg_cls, n_data);
+              for (int i = 1; i <= fit::n_bins; ++i)
+                printf("%i ", int(fit::h_data->GetBinContent(i)));
+              printf("] ");
+              t.print("t_cls", -1, "    ");
+            }
             //t.print("t_cls toy", i_toy_cls);
           }
           else
@@ -1406,9 +1415,15 @@ namespace mfv {
         }
 
         assert(n_toy_cls_t_ge_obs > 5);
-        pval_cls = double(n_toy_cls_t_ge_obs) / n_toy_signif;
-        printf("\npval_cls: %e\n", pval_cls); fflush(stdout);
+
+        const double T = 1./n_toy_cls;
+        const double p_hat = 1 - double(n_toy_cls_t_ge_obs) / n_toy_cls;
+        pval_cls = (p_hat + T/2)/(1 + T);
+        pval_cls_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+        
+        printf("\npval_cls: %e +- %e\n", pval_cls, pval_cls_err); fflush(stdout);
         printf("n_calls: %i time for cls: ", fit::n_calls); tsw_cls.Print();
+        printf("\n");
       }
 
       while (sig_limit_scan < sig_limit_hi) {
@@ -1478,7 +1493,7 @@ namespace mfv {
         const double T = 1./n_toy_limit;
         const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
         const double pval_limit = (p_hat + T/2)/(1 + T) / pval_cls;
-        const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T) / pval_cls;
+        const double pval_limit_err = sqrt((p_hat * (1 - p_hat) * T + T*T/4)/(1 + T) / pow(pval_cls, 2) + pow(pval_cls_err, 2));
         const double pval_limit_sglo = pval_limit - n_sigma_away_lo * pval_limit_err;
         const double pval_limit_sghi = pval_limit + n_sigma_away_hi * pval_limit_err;
 

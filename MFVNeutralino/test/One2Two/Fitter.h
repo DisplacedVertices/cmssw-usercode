@@ -123,6 +123,7 @@ namespace mfv {
     test_stat_t t_obs_0;
     fit_stat_t fit_stat;
     double pval_signif;
+    double pval_cls;
     std::vector<double> sig_limits;
     std::vector<double> pval_limits;
     std::vector<double> pval_limit_errs;
