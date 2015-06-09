@@ -13,7 +13,7 @@ fudge = 1. # 0.5 if 'fullhadded' not in batch_name else 1.
 #batch_fns = glob.glob(os.path.join(batch_root, '*.root'))
 batch_fns = [x.strip() for x in open(batch_fn_lst).readlines() if x.strip()]
 #batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
-batch_fns = ['root://cmsxrootd.fnal.gov/' + x for x in batch_fns]
+batch_fns = [('root://cmsxrootd.fnal.gov/' + x if x.startswith('/store') else x) for x in batch_fns]
 sig_tmpl_num = -int(batch_name.split('SigTmp')[1].split('_')[0])
 try:
     sig_nfo = batch_name.split('SigSamn')[1].split('_')[0]
