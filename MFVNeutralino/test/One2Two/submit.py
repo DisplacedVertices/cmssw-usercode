@@ -102,7 +102,7 @@ jobtype=cmssw
 scheduler=%(scheduler)s
 
 [GRID]
-#se_black_list=T2_US_Purdue,T2_CH_CERN,T3_UK_SGrid_Oxford,T3_RU_FIAN,T2_RU_JINR
+se_black_list=T3_GR_IASA,T3_IT_Napoli
 '''
 
 maked = 'nomake' in sys.argv
@@ -218,7 +218,7 @@ cd -
         else:
             unzip_files.append('gunzip %s' % fn)
     unzip_files = '\n'.join(unzip_files)
-    tree_path = '/uscms_data/d2/tucker/mfvo2t_trees/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
+    tree_path = '/eos/uscms/store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
     files_needed = ','.join(os.path.join(tree_path, f) for f in files_needed)
 
     open('runme.csh', 'wt').write(script_template % locals())
@@ -245,6 +245,7 @@ if 1:
             batches.append((njobs, template_type, min_ntracks, sg, signal, ''))
 
     for batch in batches:
+        #print batch
         submit(*batch)
 
 if 0:
