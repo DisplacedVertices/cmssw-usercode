@@ -3,9 +3,9 @@
 from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
-ps = plot_saver('plots/mfvlimits_combine', log=False, size=(600,600))
+ps = plot_saver('plots/mfvlimits_CLs', log=False, size=(600,600))
 
-#which = 'BBv9'
+which = 'v10p1'
 draw_gluglu = True
 
 def fmt(t, title, color):
@@ -86,10 +86,10 @@ for tau, tau_nice in taus:
             print 'skip', tau, mass
             nn -= 1
             continue
-        #fn  = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
-        #fn2 = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
-        fn  = 'combine/combine_n%ix-2.out' % nn
-        fn2 = 'combine/combine_n%ix-1.out' % nn
+        fn  = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
+        fn2 = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
+        #fn  = 'combine/combine_n%ix-2.out' % nn
+        #fn2 = 'combine/combine_n%ix-1.out' % nn
         print nn, fn, fn2
         nn -= 1
         vals = [None]*6
