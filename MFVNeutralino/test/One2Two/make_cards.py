@@ -10,22 +10,12 @@ if os.path.isdir(out_dir) and not force_overwrite:
 elif not force_overwrite:
     os.mkdir(out_dir)
 
-min_ntracks = 5
+for arg in sys.argv:
+    if arg.startswith('dir='):
+        out_dir = arg.replace('dir=', '')
 
 fns = glob.glob('trees/mfv*root')
 fns.sort()
-#fns = [
-#    'trees/mfv_neutralino_tau0300um_M0300.root'
-#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0300.root',
-#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M0400.root',
-#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0500.root',
-#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M0600.root',
-#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0700.root',
-#    'root://cmsxrootd.fnal.gov//store/user/jchu/mfv_sample_scan/mfv_neutralino_tau01000um_M0900.root',
-#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M1000.root',
-#    'M1200temp.root',
-#    'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/mfv_neutralino_tau01000um_M1500.root'
-#    ]
 
 hs = []
 
@@ -57,12 +47,10 @@ for i in xrange(nbins):
     dn = background[i] - sign * systematics[i]
     background_bkgshpUp.append(up)
     background_bkgshpDown.append(dn)
-print background
-print background_bkgshpUp
-print background_bkgshpDown
 #data_obs = background[:]
 
 
+    
 
 scale = sum(data_obs) / sum(background)
 print 'scale is', scale
@@ -82,6 +70,10 @@ nbkg = background.Integral()
 sums.append(nobs)
 #assert len(set([int(10*s) for s in sums])) == 1
 
+print 'data', data_obs
+print 'bckg', background
+print 'bkup', background_bkgshpUp
+print 'bkdn', background_bkgshpDown
 
 card_template = '''
 imax 1
@@ -107,10 +99,10 @@ sig_templates = []
 for fn in fns:
     print fn
     signame = os.path.basename(fn).replace('.root','')
-    f, t = get_f_t(fn, None)
+    f, t = get_f_t(fn, min_ntracks=5)
 
     h = make_h(signame, None)
-    x = detree(t, 'svdist', 'nvtx >= 2 && ntk0 >= %i && ntk1 >= %i' % (min_ntracks, min_ntracks), lambda x: (float(x[0]),))
+    x = detree(t, 'svdist', 'nvtx >= 2 && min_ntracks_ok', lambda x: (float(x[0]),))
     for (d,) in x:
         if d > binning[-1]:
             d = binning[-1] - 1e-4
@@ -129,7 +121,7 @@ for fn in fns:
 out_f.Write()
 out_f.Close()
 
-title = '%32s %6s | %6s %6s %6s %6s | %9s | %6s %6s | %6s | %6s %6s %6s' % ('signal', 'nsig', 'c1', 'c2', 'c3', 'c456', 'c123/c456', 'c1/c2', 'c3/c2', 'sc', 'sc*c1', 'sc*c2', 'sc*c3')
+title = '%32s %6s | %6s %6s %6s %6s %6s %6s | %6s | %9s | %6s %6s | %6s | %6s %6s %6s' % ('signal', 'nsig', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c456', 'c123/c456', 'c1/c2', 'c3/c2', 'sc', 'sc*c1', 'sc*c2', 'sc*c3')
 line = len(title)*'-'
 print
 print title
@@ -141,4 +133,4 @@ for i,x in enumerate(sig_templates):
     c123 = x[1] + x[2] + x[3]
     c456 = x[4] + x[5] + x[6]
     scale = 3/c456
-    print '%32s %6.2f | %6.2f %6.2f %6.2f %6.2f | %9.2f | %6.2f %6.2f | %6.2f | %6.2f %6.2f %6.2f' % (signame, nsig, x[1], x[2], x[3], c456, c123/c456, x[1]/x[2], x[3]/x[2], scale, x[1]*scale, x[2]*scale, x[3]*scale)
+    print '%32s %6.2f | %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f | %6.2f | %9.2f | %6.2f %6.2f | %6.2f | %6.2f %6.2f %6.2f' % (signame, nsig, x[1], x[2], x[3], x[4], x[5], x[6], c456, c123/c456, x[1]/x[2], x[3]/x[2], scale, x[1]*scale, x[2]*scale, x[3]*scale)
