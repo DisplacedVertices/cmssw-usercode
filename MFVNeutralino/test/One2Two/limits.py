@@ -33,8 +33,9 @@ def find_limit(name, tree):
         for v in 'sig_limits pval_limits pval_limit_errs'.split():
             exec '%s = array("d", list(t.%s))' % (v,v)
 
-        if len(pval_limits) == 1000 or (len(pval_limits) > 100 and sum(pval_limits[-5:])/5 > 0.05):
-            print 'skipping a toy wtih # points = %i' % len(pval_limits)
+        avg_last = sum(pval_limits[-5:])/5
+        if len(pval_limits) == 1000 or (len(pval_limits) > 100 and avg_last > 0.05):
+            print 'too many points = %i or did not converge %f' % (len(pval_limits), avg_last)
             continue
 
         log_pval_limits = array('d')
@@ -139,6 +140,8 @@ def find_limit(name, tree):
             zzz += '_FEWPTS'
         
         limits.append(x_lf)
+        l = ROOT.TLine(0, -2.9957, 100, -2.9957)
+        l.Draw()
         ps.save('%s_%i%s' % (name, j, zzz))
 
     return limits
@@ -186,6 +189,9 @@ if 1:
     ROOT.gStyle.SetOptFit(0)
 
     limits = find_limit('find', t)
+    n_all_limits = len(limits)
+    limits = [x for x in limits if x > 0]
+    print 'dropping %i neg limits' % (n_all_limits - len(limits))
     scale = sig_eff * ac.int_lumi / 1000. * ac.scale_factor
     limits_scaled = [limit / scale for limit in limits]
 
