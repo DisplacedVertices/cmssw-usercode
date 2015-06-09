@@ -5,14 +5,14 @@ from base import *
 out_dir = 'combine_new'
 force_overwrite = 'force' in sys.argv
 
+for arg in sys.argv:
+    if arg.startswith('dir='):
+        out_dir = arg.replace('dir=', '')
+
 if os.path.isdir(out_dir) and not force_overwrite:
     raise RuntimeError('move existing out_dir %s out of the way first' % out_dir)
 elif not force_overwrite:
     os.mkdir(out_dir)
-
-for arg in sys.argv:
-    if arg.startswith('dir='):
-        out_dir = arg.replace('dir=', '')
 
 fns = glob.glob('trees/mfv*root')
 fns.sort()
@@ -20,16 +20,6 @@ fns.sort()
 hs = []
 
 out_f = ROOT.TFile(os.path.join(out_dir, 'my-shapes.root'), 'recreate')
-
-def make_h(name, contents):
-    assert contents is None or len(contents) == nbins
-    h = ROOT.TH1F(name, '', nbins, binning)
-    hs.append(h)
-    if contents is not None:
-        for i,c in enumerate(contents):
-            h.SetBinContent(i+1, c)
-    h.SetDirectory(out_f)
-    return h
 
 data_obs = [6, 193, 45, 5, 1, 1]
 background = [6.2, 192.2, 48., 3.5, .34, .26]
@@ -49,9 +39,6 @@ for i in xrange(nbins):
     background_bkgshpDown.append(dn)
 #data_obs = background[:]
 
-
-    
-
 scale = sum(data_obs) / sum(background)
 print 'scale is', scale
 
@@ -62,7 +49,7 @@ for b in 'data_obs background background_bkgshpUp background_bkgshpDown'.split()
     sc = 1 if b == 'data_obs' else scale
     lb = [sc*d for d in lb]
     sums.append(sum(lb))
-    s = '%s = make_h("%s", %r)' % (b, b, lb)
+    s = '%s = make_h("%s", %r); %s.SetDirectory(out_f)' % (b, b, lb, b)
     exec s
 
 nobs = data_obs.Integral()
@@ -102,6 +89,7 @@ for fn in fns:
     f, t = get_f_t(fn, min_ntracks=5)
 
     h = make_h(signame, None)
+    h.SetDirectory(out_f)
     x = detree(t, 'svdist', 'nvtx >= 2 && min_ntracks_ok', lambda x: (float(x[0]),))
     for (d,) in x:
         if d > binning[-1]:

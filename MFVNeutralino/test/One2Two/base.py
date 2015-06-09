@@ -36,3 +36,12 @@ class FitResult:
 
 binning = array('d', [0.02*i for i in xrange(5)] + [0.1, .15]) # JMTBAD keep in sync with Templates.cc
 nbins = len(binning) - 1
+
+def make_h(name, contents):
+    assert contents is None or len(contents) == nbins
+    h = ROOT.TH1F(name, '', nbins, binning)
+    hs.append(h)
+    if contents is not None:
+        for i,c in enumerate(contents):
+            h.SetBinContent(i+1, c)
+    return h
