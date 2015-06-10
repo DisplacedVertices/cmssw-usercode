@@ -21,6 +21,7 @@ int main() {
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
   const std::string templates_kind = env.get_string_lower("templates_kind", "clearedjets");
+  const bool templates_save_plots = env.get_bool("templates_save_plots");
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
   const bool templates_simpleclear = templates_kind == "simpleclear";
@@ -37,6 +38,7 @@ int main() {
   printf("output to %s\n", out_fn.c_str());
   printf("seed: %i\n", seed);
   printf("ntoys: %i\n", ntoys);
+  printf("save plots in templater: %i\n", templates_save_plots);
   printf("template kind: %s (phishift? %i clearedjets? %i simpleclear? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets, templates_simpleclear);
   printf("template binning: (%i, %f, %f)\n", mfv::Template::nbins, mfv::Template::min_val, mfv::Template::max_val);
   printf("process data from %s? %s\n", data_fn.c_str(), (process_data ? "YES!" : "no"));
@@ -53,11 +55,17 @@ int main() {
     ter = new mfv::ClearedJetsTemplater("", out_f, rand);
   else if (templates_simpleclear)
     ter = new mfv::SimpleClearingTemplater("", out_f, rand);
-    
+  ter->save_plots = templates_save_plots;
+
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);
 
   TH1D* h_sig = tt->signal_template("h_sig_template", "");
   h_sig->SetDirectory(out_f);
+
+  printf("h_sig: [ ");
+  for (int ibin = 1; ibin <= h_sig->GetNbinsX(); ++ibin)
+    printf("%.1f ", h_sig->GetBinContent(ibin));
+  printf("]  sum: %.1f\n", h_sig->Integral());
 
   for (int itoy = 0; itoy < ntoys; ++itoy) {
     tt->throw_toy();
