@@ -24,12 +24,40 @@ namespace mfv {
       dout(f->mkdir(TString::Format("%sTemplater%s", dname.c_str(), uname.c_str()))),
       dtoy(0),
       rand(r),
-      seed(r->GetSeed() - jmt::seed_base)
+      seed(r->GetSeed() - jmt::seed_base),
+      save_plots(true)
   {
   }
 
   Templater::~Templater() {
     clear_templates();
+    // JMTBAD
+    if (!save_plots) {
+      for (int i = 0; i < n_vt; ++i) {
+        delete h_issig[i];
+        delete h_issig_0[i];
+        delete h_issig_1[i];
+        delete h_xy[i];
+        delete h_bsd2d[i];
+        delete h_bsd2d_v_bsdz[i];
+        delete h_bsdz[i];
+        delete h_bsd2d_0[i];
+        delete h_bsd2d_v_bsdz_0[i];
+        delete h_bsdz_0[i];
+
+        if (n_vt == n_vt_pairs)
+          break;
+
+        delete h_bsd2d_1[i];
+        delete h_bsd2d_v_bsdz_1[i];
+        delete h_bsdz_1[i];
+        delete h_ntracks[i];
+        delete h_ntracks01[i];
+        delete h_d2d[i];
+        delete h_phi[i];
+        delete h_dz[i];
+      }
+    }
   }
 
   void Templater::book_hists() {
@@ -78,6 +106,33 @@ namespace mfv {
       h_d2d      [i] = new TH1D("h_d2d"      , "", Template::nbins, Template::min_val, Template::max_val);
       h_dz       [i] = new TH1D("h_dz"       , "", 20, -0.1, 0.1);
       h_phi      [i] = Phi::new_1d_hist("h_phi" , "");
+    }
+
+    if (!save_plots) {
+      for (int i = 0; i < n_vt; ++i) {
+        h_issig[i]->SetDirectory(0);
+        h_issig_0[i]->SetDirectory(0);
+        h_issig_1[i]->SetDirectory(0);
+        h_xy[i]->SetDirectory(0);
+        h_bsd2d[i]->SetDirectory(0);
+        h_bsd2d_v_bsdz[i]->SetDirectory(0);
+        h_bsdz[i]->SetDirectory(0);
+        h_bsd2d_0[i]->SetDirectory(0);
+        h_bsd2d_v_bsdz_0[i]->SetDirectory(0);
+        h_bsdz_0[i]->SetDirectory(0);
+
+        if (n_vt == n_vt_pairs)
+          break;
+
+        h_bsd2d_1[i]->SetDirectory(0);
+        h_bsd2d_v_bsdz_1[i]->SetDirectory(0);
+        h_bsdz_1[i]->SetDirectory(0);
+        h_ntracks[i]->SetDirectory(0);
+        h_ntracks01[i]->SetDirectory(0);
+        h_d2d[i]->SetDirectory(0);
+        h_phi[i]->SetDirectory(0);
+        h_dz[i]->SetDirectory(0);
+      }
     }
 
     dtoy->cd();

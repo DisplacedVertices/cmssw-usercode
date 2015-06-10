@@ -20,6 +20,7 @@ namespace mfv {
     TDirectory* dtoy;
     TRandom* rand;
     const int seed;
+    bool save_plots;
 
     ////////////////////////////////////////////////////////////////////////////
 
