@@ -26,6 +26,7 @@ namespace mfv {
     const bool poisson_means;
     const bool use_qcd500;
     const bool use_bkgsyst;
+    const bool use_only_data_sample;
     const int sample_only;
     const int injected_signal;
     const double injected_signal_scale;

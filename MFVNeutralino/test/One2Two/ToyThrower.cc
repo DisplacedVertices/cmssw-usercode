@@ -23,6 +23,7 @@ namespace mfv {
       poisson_means(env.get_bool("poisson_means", true)),
       use_qcd500(env.get_bool("use_qcd500", false)),
       use_bkgsyst(env.get_bool("use_bkgsyst", false)),
+      use_only_data_sample(env.get_bool("use_only_data_sample", false)),
       sample_only(env.get_int("sample_only", 0)),
       injected_signal(env.get_int("injected_signal", 0)),
       injected_signal_scale(env.get_double("injected_signal_scale", 1.)),
@@ -43,6 +44,7 @@ namespace mfv {
     printf("scale: %f 1v  %f 2v\n", scale_1v, scale_2v);
     printf("poisson_means: %i\n", poisson_means);
     printf("use_qcd500: %i\n", use_qcd500);
+    printf("use_only_data_sample: %i\n", use_only_data_sample);
     printf("sample_only: %i (%s)\n", sample_only, samples.get(sample_only).name.c_str());
     printf("injected_signal: %i (%s)\n", injected_signal, samples.get(injected_signal).name.c_str());
     printf("injected_signal_scale: %g\n", injected_signal_scale);
@@ -72,6 +74,8 @@ namespace mfv {
   }
 
   void ToyThrower::read_sample(const Sample& sample) {
+    printf("ToyThrower::read_sample: %s\n", sample.name.c_str());
+
     std::string fn  = sample2fn(sample);
 
     TFile* f = TFile::Open(fn.c_str());
@@ -128,7 +132,10 @@ namespace mfv {
   }
 
   void ToyThrower::loop_over_samples(std::function<void(const Sample&)> fcn) {
-    if (sample_only) {
+    if (use_only_data_sample) {
+      fcn(samples.get(0));
+    }
+    else if (sample_only) {
       fcn(samples.get(sample_only));
       if (injected_signal != 0)
         fcn(samples.get(injected_signal));
