@@ -423,6 +423,7 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
+      save_plots(env.get_bool("save_plots", true)),
       inject_in_last_bin(env.get_int("inject_in_last_bin", 0)),
       bkg_gaussians(env.get_bool("bkg_gaussians", true)),
       barlow_beeston(env.get_bool("barlow_beeston", true)),
@@ -847,6 +848,7 @@ namespace mfv {
             *ph = Template::shorten_hist(*ph, true);
 
           for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
+            if (!save_plots) h->SetDirectory(0);
             h->SetLineWidth(2);
             if (div)
               jmt::divide_by_bin_width(h);
@@ -863,6 +865,7 @@ namespace mfv {
           h_bkg_fit->Scale(ml.mu_bkg);
 
           TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit_%s_%s_shortened", sb_or_b, bb_or_no, div_or_no));
+          if (!save_plots) h_sum_fit->SetDirectory(0);
           h_sum_fit->SetLineColor(kMagenta);
           h_sum_fit->Add(h_bkg_fit);
           for (TH1D* h : {h_sum_fit, h_data_fit})
@@ -881,7 +884,7 @@ namespace mfv {
           }
           h_sig_fit->Draw("same hist");
           h_bkg_fit->Draw("same hist");
-          c->Write();
+          if (save_plots) c->Write();
           delete c;
 
           for (TH1D* h : {h_sum_fit, h_data_fit, h_sig_fit, h_bkg_fit})
@@ -893,15 +896,17 @@ namespace mfv {
             h_sum_cumul->Scale(1/h_sum_cumul->Integral());
             h_data_cumul->Scale(1/h_data_cumul->Integral());
 
-            for (TH1D* h : {h_sum_cumul, h_data_cumul})
+            for (TH1D* h : {h_sum_cumul, h_data_cumul}) {
+              if (!save_plots) h->SetDirectory(0);
               jmt::cumulate(h, false);
+            }
 
             TCanvas* c2 = new TCanvas(TString::Format("c_%s_cumul_%s_%s", sb_or_b, bb_or_no, div_or_no));
             for (TH1D* h : {h_sum_cumul, h_data_cumul})
               h->SetStats(0);
             h_sum_cumul->Draw();
             h_data_cumul->Draw("same e");
-            c2->Write();
+            if (save_plots) c2->Write();
             delete c2;
             for (TH1D* h : {h_sum_cumul, h_data_cumul})
               h->SetStats(1);
@@ -918,6 +923,18 @@ namespace mfv {
                 ret.ks = ksd;
             }
             ret.prob = TMath::Prob(ret.chi2, ret.ndof);
+
+            if (!save_plots) {
+              delete h_sum_cumul;
+              delete h_data_cumul;
+            }
+          }
+
+          if (!save_plots) {
+            delete h_bkg_fit;
+            delete h_sig_fit;
+            delete h_data_fit;
+            delete h_sum_fit;
           }
         }
       }
@@ -1208,10 +1225,12 @@ namespace mfv {
 
     dtoy->mkdir("fit_results")->cd();
 
-    for (int i = 1; i <= fit::n_bins; ++i) {
-      const int nn(0.8*(n_data + sqrt(n_data) * 3));
-      h_signif_toy.push_back(new TH1F(TString::Format("h_signif_toys_bin_%i", i), "", nn, 0, nn));
-      h_limit_toy.push_back(new TH1F(TString::Format("h_limit_toys_bin_%i", i), "", nn, 0, nn));
+    if (save_plots) {
+      for (int i = 1; i <= fit::n_bins; ++i) {
+        const int nn(0.8*(n_data + sqrt(n_data) * 3));
+        h_signif_toy.push_back(new TH1F(TString::Format("h_signif_toys_bin_%i", i), "", nn, 0, nn));
+        h_limit_toy.push_back(new TH1F(TString::Format("h_limit_toys_bin_%i", i), "", nn, 0, nn));
+      }
     }
 
     printf("Fitter: toy: %i  n_sig_true: %.1f  n_bkg_true: %.1f  true_pars:", toy, true_pars[0], true_pars[1]);
@@ -1255,7 +1274,7 @@ namespace mfv {
     print_level = -1;
     fit::extra_prints = 0;
 
-    draw_likelihood(t_obs_0);
+    if (save_plots) draw_likelihood(t_obs_0);
     //scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
 
@@ -1279,8 +1298,9 @@ namespace mfv {
         const int n_sig_signif = 0;
         const int n_bkg_signif = rand->Poisson(n_data);
         make_toy_data(i_toy_signif, -1, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
-        for (int i = 1; i <= fit::n_bins; ++i)
-          h_signif_toy[i-1]->Fill(fit::h_data->GetBinContent(i));
+        if (save_plots)
+          for (int i = 1; i <= fit::n_bins; ++i)
+            h_signif_toy[i-1]->Fill(fit::h_data->GetBinContent(i));
       
         const test_stat_t t = calc_test_stat(0);
         if (t.t >= t_obs_0.t)
@@ -1336,8 +1356,9 @@ namespace mfv {
           make_toy_data(-1, -1, i_limit_job, 0, rand->Poisson(n_data), h_bkg_obs_0);
           h_toy_expected = (TH1D*)fit::h_data_toy->Clone("h_toy_expected");
           h_toy_expected->SetDirectory(0);
-          for (int i = 1; i <= fit::n_bins; ++i)
-            h_limit_toy[i-1]->Fill(fit::h_data_toy->GetBinContent(i));
+          if (save_plots)
+            for (int i = 1; i <= fit::n_bins; ++i)
+              h_limit_toy[i-1]->Fill(fit::h_data_toy->GetBinContent(i));
           if (print_subtoys && i_toy_expected < i_limit_job) {
             printf("burning toy [ ");
             for (int i = 1; i <= fit::n_bins; ++i)
@@ -1548,7 +1569,10 @@ namespace mfv {
         sig_limit_fit_b_err = eb;
         sig_limit_fit_prob = res->Prob();
         g->SetName("g_limit_bracket_fit");
-        g->Write();
+        if (save_plots)
+          g->Write();
+        else
+          delete g;
 
         printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
       }

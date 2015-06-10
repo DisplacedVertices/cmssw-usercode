@@ -24,6 +24,7 @@ namespace mfv {
 
     jmt::ConfigFromEnv env;
     int print_level;
+    const bool save_plots;
     const int inject_in_last_bin;
     const bool bkg_gaussians;
     const bool barlow_beeston;
