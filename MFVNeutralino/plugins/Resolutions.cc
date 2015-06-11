@@ -34,6 +34,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   bool mci_warned;
   const edm::InputTag gen_jet_src;
 
+/*
   TH1F* h_dr;
   TH1F* h_dist;
 
@@ -143,6 +144,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_partons_sumpt;
 
   TH1F* h_gen_dbv;
+*/
   TH1F* h_gen_dvv;
   TH1F* h_gen_dvv_gen600um;
   TH1F* h_gen_dvv_rec600um;
@@ -169,6 +171,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
 
+/*
   h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
 
@@ -280,6 +283,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_partons_sumpt = fs->make<TH1F>("h_partons_sumpt", ";#Sigmap_{T} of accepted partons (GeV);generated LSPs", 100, 0, 1000);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
+*/
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
   h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
   h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
@@ -377,6 +381,7 @@ if (doing_mfv3j) {
     mci_warned = true;
   }
 
+/*
   TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
   int lsp_nmatch[2] = {0,0};
   int nvtx_match = 0;
@@ -620,6 +625,7 @@ if (doing_mfv3j) {
     // histogram dVV
     h_s_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]), mag(v0.x - v1.x, v0.y - v1.y));
   }
+*/
 
   int vtxmatch[2] = {-1, -1};
   for (int ilsp = 0; ilsp < 2; ++ilsp) {
@@ -651,6 +657,7 @@ if (doing_mfv3j) {
     h_gen_dvv_gen600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
   }
 
+/*
   // histogram njets, ncalojets, calojetpt4, jetsumht vs. genJets
   edm::Handle<reco::GenJetCollection> gen_jets;
   event.getByLabel(gen_jet_src, gen_jets);
@@ -727,6 +734,7 @@ if (doing_mfv3j) {
   h_s_partons_ncalojets->Fill(int(parton_pt_eta_phi.size()), mevent->ncalojets());
   h_s_partons_calojetpt4->Fill(int(parton_pt_eta_phi.size()) >= 4 ? parton_pt_eta_phi.at(3).at(0) : 0.f, mevent->calojetpt4());
   h_s_partons_jetsumht->Fill(parton_sumht, mevent->jet_sum_ht());
+*/
 }
 }
 
