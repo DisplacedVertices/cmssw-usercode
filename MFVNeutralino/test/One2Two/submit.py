@@ -3,6 +3,8 @@
 import os, sys, time
 from JMTucker.Tools.general import save_git_status
 
+no_save_plots = True
+
 sample_number_to_name = {}
 i = -1
 for t in [100, 300, 1000, 9900]:
@@ -11,7 +13,6 @@ for t in [100, 300, 1000, 9900]:
         i -= 1
 #for i in xrange(-1, -25, -1):
 #    print i, sample_number_to_name[i]
-
 
 script_template = '''#!/bin/sh
 echo mfvo2t script starting on `date`
@@ -148,9 +149,12 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
                                                             'no' if signal_sample is None else 'n%ix%i' % signal_sample,
                                                             samples)
 
-    files_needed.add('backgrounds.tgz')
     files_needed.add('MultiJetPk2012.root.gz')
-    files_needed.add(sample_number_to_name[template_signal] + '.root.gz')
+    if template_signal > -100:
+        files_needed.add('backgrounds.tgz')
+        files_needed.add(sample_number_to_name[template_signal] + '.root.gz')
+    else:
+        files_needed.add('bigsigscan.root.gz')
 
     extra_setup = ''
 
@@ -159,7 +163,17 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         'toythrower_template_signal=%i' % template_signal,
         ]
 
-    if template_signal >= -12:
+    if no_save_plots:
+        env += [
+            'templates_save_plots=0',
+            'fitter_save_plots=0',
+            ]
+
+    if template_signal <= -101:
+        env.append('toythrower_use_only_data_sample=1')
+        env.append('sig_from_file_num=%i' % template_signal)
+
+    if template_signal >= -12 or (template_signal <= -101 and template_signal >= -zzz):
         env.append('fitter_sig_limit_step=1')
 
     if template_type == 'PS':
@@ -236,6 +250,9 @@ if 1:
     signals = sig_first + sorted(set(range(-24, 0)) - set(sig_first))
 
     strengths = (-1, -2, None, 1, 5)
+
+    signals = [-139]
+    strengths = [-1,-2]
 
     batches = []
     for strength in strengths:
