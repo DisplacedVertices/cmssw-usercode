@@ -619,29 +619,33 @@ if (doing_mfv3j) {
 
     // histogram dVV
     h_s_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]), mag(v0.x - v1.x, v0.y - v1.y));
+  }
 
-    bool matched[2] = {false, false};
-    for (int ivtx = 0; ivtx < 2; ++ivtx) {
-      for (int ilsp = 0; ilsp < 2; ++ilsp) {
-        double dist = mag(mevent->gen_lsp_decay[ilsp*3+0] - vertices->at(ivtx).x,
-                          mevent->gen_lsp_decay[ilsp*3+1] - vertices->at(ivtx).y,
-                          mevent->gen_lsp_decay[ilsp*3+2] - vertices->at(ivtx).z);
-        if (dist < max_dist) {
-          matched[ivtx] = true;
-          break;
-        }
+  int vtxmatch[2] = {-1, -1};
+  for (int ilsp = 0; ilsp < 2; ++ilsp) {
+    for (int ivtx = 0; ivtx < int(vertices->size()); ++ivtx) {
+       double dist = mag(mevent->gen_lsp_decay[ilsp*3+0] - vertices->at(ivtx).x,
+                         mevent->gen_lsp_decay[ilsp*3+1] - vertices->at(ivtx).y,
+                         mevent->gen_lsp_decay[ilsp*3+2] - vertices->at(ivtx).z);
+      if (dist < max_dist) {
+        vtxmatch[ilsp] = ivtx;
+        break;
       }
     }
-    if (matched[0] && matched[1]) {
-      h_gen_dvv_matched->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
-      if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
-        h_gen_dvv_matched_600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
-      }
+  }
+  if (vtxmatch[0] >= 0 && vtxmatch[1] >= 0) {
+    h_gen_dvv_matched->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
+    if (mag(vertices->at(vtxmatch[0]).x - vertices->at(vtxmatch[1]).x, vertices->at(vtxmatch[0]).y - vertices->at(vtxmatch[1]).y) > 0.06) {
+      h_gen_dvv_matched_600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
     }
+  }
+
+  if (int(vertices->size()) >= 2) {
     if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
       h_gen_dvv_rec600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
     }
   }
+
   h_gen_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
   if (mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]) > 0.06) {
     h_gen_dvv_gen600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
