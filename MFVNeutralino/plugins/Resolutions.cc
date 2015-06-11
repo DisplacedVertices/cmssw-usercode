@@ -144,7 +144,10 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
+  TH1F* h_gen_dvv_gen600um;
+  TH1F* h_gen_dvv_rec600um;
   TH1F* h_gen_dvv_matched;
+  TH1F* h_gen_dvv_matched_600um;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -278,7 +281,10 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
+  h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
+  h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
   h_gen_dvv_matched = fs->make<TH1F>("h_gen_dvv_matched", ";generated d_{VV};events with two matched vertices", 200, 0, 1);
+  h_gen_dvv_matched_600um = fs->make<TH1F>("h_gen_dvv_matched_600um", ";generated d_{VV};events with two matched vertices and d_{VV} > 600 #mum", 200, 0, 1);
 }
 
 namespace {
@@ -628,9 +634,18 @@ if (doing_mfv3j) {
     }
     if (matched[0] && matched[1]) {
       h_gen_dvv_matched->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
+      if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
+        h_gen_dvv_matched_600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
+      }
+    }
+    if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
+      h_gen_dvv_rec600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
     }
   }
   h_gen_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
+  if (mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]) > 0.06) {
+    h_gen_dvv_gen600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
+  }
 
   // histogram njets, ncalojets, calojetpt4, jetsumht vs. genJets
   edm::Handle<reco::GenJetCollection> gen_jets;
