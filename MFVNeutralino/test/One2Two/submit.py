@@ -173,7 +173,7 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         env.append('toythrower_use_only_data_sample=1')
         env.append('sig_from_file_num=%i' % template_signal)
 
-    if template_signal >= -12 or (template_signal <= -101 and template_signal >= -zzz):
+    if template_signal >= -12 or (template_signal <= -101 and template_signal >= -126):
         env.append('fitter_sig_limit_step=1')
 
     if template_type == 'PS':
@@ -189,7 +189,10 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
         assert sig_samp < 0
-        files_needed.add(sample_number_to_name[sig_samp] + '.root.gz')
+        if sig_samp > -100:
+            files_needed.add(sample_number_to_name[sig_samp] + '.root.gz')
+        else:
+            files_needed.add('bigsigscan.root.gz')
 
         if sig_scale < 0:
             env.append('ntoys=0')
