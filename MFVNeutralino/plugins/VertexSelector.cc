@@ -29,6 +29,11 @@ private:
   const MFVVertexMVAWrap* mva;
   const double mva_cut;
 
+  const edm::InputTag match_to_vertices_src;
+  const bool use_match_to_vertices;
+  const double match_distance;
+  const std::vector<double>* match_to_vertices;
+
   const int min_ntracks;
   const int max_ntracks;
   const int min_ntracksptgt3;
@@ -99,6 +104,10 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     use_mva(cfg.getParameter<bool>("use_mva")),
     mva(use_mva ? new MFVVertexMVAWrap : 0),
     mva_cut(cfg.getParameter<double>("mva_cut")),
+    match_to_vertices_src(cfg.getParameter<edm::InputTag>("match_to_vertices_src")),
+    use_match_to_vertices(match_to_vertices_src.label() != ""),
+    match_distance(cfg.getParameter<double>("match_distance")),
+    match_to_vertices(0),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_ntracks(cfg.getParameter<int>("max_ntracks")),
     min_ntracksptgt3(cfg.getParameter<int>("min_ntracksptgt3")),
@@ -172,12 +181,37 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
   produces<MFVVertexAuxCollection>();
 }
 
+namespace {
+  template <typename T>
+  T mag(T x, T y, T z) {
+    return sqrt(x*x + y*y + z*z);
+  }
+}
+
 bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
   if (use_mva) {
     if (vtx.ntracks() < 5)
       return false;
 
     return mva->value(vtx) > mva_cut;
+  }
+
+  if (use_match_to_vertices) {
+    bool ok = false;
+
+    const size_t nmatch = match_to_vertices->size() % 3;
+    for (size_t imatch = 0; imatch < nmatch; ++imatch) {
+      const double d = mag(vtx.x - (*match_to_vertices)[imatch*3 + 0],
+                           vtx.y - (*match_to_vertices)[imatch*3 + 1],
+                           vtx.z - (*match_to_vertices)[imatch*3 + 2]);
+      if (d < match_distance) {
+        ok = true;
+        break;
+      }
+    }
+
+    if (!ok)
+      return false;
   }
 
   return 
@@ -249,6 +283,14 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByLabel(vertex_aux_src, auxes);
+
+  if (use_match_to_vertices) {
+    edm::Handle<std::vector<double> > match_to_vertices_h;
+    event.getByLabel(match_to_vertices_src, match_to_vertices_h);
+    match_to_vertices = &*match_to_vertices_h;
+    if (match_to_vertices->size() % 3 != 0)
+      throw cms::Exception("bad length of match_to_vertices");
+  }
 
   std::auto_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
 
