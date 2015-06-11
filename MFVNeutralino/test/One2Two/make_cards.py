@@ -49,7 +49,7 @@ for b in 'data_obs background background_bkgshpUp background_bkgshpDown'.split()
     sc = 1 if b == 'data_obs' else scale
     lb = [sc*d for d in lb]
     sums.append(sum(lb))
-    s = '%s = make_h("%s", %r); %s.SetDirectory(out_f)' % (b, b, lb, b)
+    s = '%s = make_raw_h("%s", %r); %s.SetDirectory(out_f)' % (b, b, lb, b)
     exec s
 
 nobs = data_obs.Integral()
@@ -86,17 +86,10 @@ sig_templates = []
 for fn in fns:
     print fn
     signame = os.path.basename(fn).replace('.root','')
-    f, t = get_f_t(fn, min_ntracks=5)
-
-    h = make_h(signame, None)
+    h = make_h(fn, signame)
     h.SetDirectory(out_f)
-    x = detree(t, 'svdist', 'nvtx >= 2 && min_ntracks_ok', lambda x: (float(x[0]),))
-    for (d,) in x:
-        if d > binning[-1]:
-            d = binning[-1] - 1e-4
-        h.Fill(d)
 
-    nsig_gen = 471*200 if 'M1200' in fn else 100000
+    nsig_gen = 100000
     h.Scale(ac.int_lumi / 1000 * ac.scale_factor / nsig_gen)
     nsig = h.Integral(0, 1000)
 
