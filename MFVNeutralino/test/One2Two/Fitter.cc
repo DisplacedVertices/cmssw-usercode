@@ -40,7 +40,7 @@ namespace mfv {
 
     double n_sig_orig = -1;
     TH1D* h_sig = 0;
-    const double* a_sig = 0;
+    std::vector<double> a_sig;
     std::vector<double> A_sig;
 
     TH1D* h_data_real = 0;
@@ -59,6 +59,7 @@ namespace mfv {
       eta_bkg.resize(n+2, -1);
       a_bkg.resize(n+2, -1);
       A_bkg.resize(n+2, -1);
+      a_sig.resize(n+2, -1);
       A_sig.resize(n+2, -1);
     }
 
@@ -70,7 +71,8 @@ namespace mfv {
     void set_sig(TH1D* h) {
       check_n_bins(h);
       h_sig = h;
-      a_sig = h->GetArray();
+      for (int i = 1; i <= n_bins; ++i)
+        a_sig[i] = h->GetBinContent(i);
     }
 
     void set_data_no_check(TH1D* h) {
