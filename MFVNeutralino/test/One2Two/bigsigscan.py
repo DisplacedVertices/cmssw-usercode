@@ -12,8 +12,8 @@ name2mass = {}
 name2fn = {}
 
 i = -100
-for mass in masses:
-    for tau0 in tau0s:
+for tau0 in tau0s:
+    for mass in masses:
         i -= 1
         name = make_name(tau0, mass)
         if name == 'mfv_neutralino_tau12000um_M0900':
