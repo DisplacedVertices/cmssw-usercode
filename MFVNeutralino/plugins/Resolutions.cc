@@ -20,6 +20,10 @@ class MFVResolutions : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
+  const std::string mode;
+  const bool doing_mfv3j;
+  const bool doing_h2xqq;
+
   const edm::InputTag vertex_src;
   const edm::InputTag mevent_src;
   const int which_mom;
@@ -144,7 +148,10 @@ class MFVResolutions : public edm::EDAnalyzer {
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
-  : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+  : mode(cfg.getParameter<std::string>("mode")),
+    doing_mfv3j(mode == "mfv3j"),
+    doing_h2xqq(mode == "h2xqq"),
+    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     which_mom(cfg.getParameter<int>("which_mom")),
     max_dr(cfg.getParameter<double>("max_dr")),
@@ -152,6 +159,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src"))
 {
+  if (!(doing_mfv3j || doing_h2xqq))
+    throw cms::Exception("Configuration") << "mode must be either mfv3j or h2xqq, got " << mode;
+
   die_if_not(which_mom >= 0 && which_mom < mfv::NMomenta, "invalid which_mom");
 
   edm::Service<TFileService> fs;
@@ -288,6 +298,59 @@ namespace {
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
+if (doing_h2xqq) {
+  edm::Handle<reco::GenParticleCollection> gen_particles;
+  event.getByLabel(gen_src, gen_particles);
+  const size_t ngen = gen_particles->size();
+
+  double v[2][3] = {{0}};
+  std::vector<const reco::GenParticle*> partons;
+
+  for (size_t igen = 0; igen < ngen; ++igen) {
+    const reco::GenParticle& gen = gen_particles->at(igen);
+    if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
+      assert(gen.numberOfDaughters() >= 2);
+      for (size_t idau = 0; idau < 2; ++idau) {
+        const reco::Candidate* dau = gen.daughter(idau);
+        int dauid = dau->pdgId();
+        // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
+        // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
+        assert(dauid/6000000 == 1);
+        dauid %= 6000000;
+        const int h2x = dauid / 1000;
+        assert(h2x == 1 || h2x == 2 || h2x == 3);
+        dauid %= h2x*1000;
+        assert(dauid/100 == 1);
+        dauid %= 100;
+        assert(dauid/10 == 1);
+        dauid %= 10;
+        assert(dauid == 3 || dauid == 4);
+
+        const size_t ngdau = dau->numberOfDaughters();
+        assert(ngdau >= 2);
+        for (size_t igdau = 0; igdau < 2; ++igdau) {
+          const reco::Candidate* gdau = dau->daughter(igdau);
+          const int id = gdau->pdgId();
+          assert(abs(id) >= 1 && abs(id) <= 5);
+          partons.push_back(dynamic_cast<const reco::GenParticle*>(gdau));
+        }
+      }
+    }
+  }
+
+  assert(partons.size() == 4);
+  for (int i = 0; i < 2; ++i) {
+    assert(partons[i*2]->numberOfDaughters() > 0);
+    v[i][0] = partons[i*2]->daughter(0)->vx(); // i*2 since first two partons are from first X, second two partons are from second X
+    v[i][1] = partons[i*2]->daughter(0)->vy();
+    v[i][2] = partons[i*2]->daughter(0)->vz();
+  }
+  const double dvv = mag(v[0][0] - v[1][0],
+                         v[0][1] - v[1][1]);
+  h_gen_dvv->Fill(dvv);
+}
+
+if (doing_mfv3j) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
@@ -645,6 +708,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_s_partons_ncalojets->Fill(int(parton_pt_eta_phi.size()), mevent->ncalojets());
   h_s_partons_calojetpt4->Fill(int(parton_pt_eta_phi.size()) >= 4 ? parton_pt_eta_phi.at(3).at(0) : 0.f, mevent->calojetpt4());
   h_s_partons_jetsumht->Fill(parton_sumht, mevent->jet_sum_ht());
+}
 }
 
 DEFINE_FWK_MODULE(MFVResolutions);

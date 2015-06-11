@@ -60,6 +60,7 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
+                                mode = cms.string('mfv3j'),
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                 mevent_src = cms.InputTag('mfvEvent'),
                                 which_mom = cms.int32(0),
