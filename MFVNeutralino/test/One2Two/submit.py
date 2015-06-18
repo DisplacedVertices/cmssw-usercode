@@ -16,7 +16,7 @@ for t in [100, 300, 1000, 9900]:
 
 script_template = '''#!/bin/sh
 echo mfvo2t script starting on `date`
-echo mfvo2t script args: $argv
+echo mfvo2t script args: $*
 echo wd: `pwd`
 
 export JOB_NUM=$1
@@ -53,7 +53,7 @@ fi
 echo mfvo2t.exe done
 echo
 
-cat > $RUNTIME_AREA/crab_fjr_${JOB_NUM}.xml << EOF
+cat > FrameworkJobReport.xml << EOF
 <FrameworkJobReport>
 <PerformanceReport>
   <PerformanceSummary Metric="StorageStatistics">
@@ -79,31 +79,28 @@ process.source = cms.Source('EmptySource')
 '''
 
 crab_cfg = '''
-[CMSSW]
-events_per_job=1
-number_of_jobs=%(njobs)s
-pset=%(dummy_pset_fn)s
-datasetpath=None
-output_file=mfvo2t.root
+from CRABClient.UserUtilities import config as Config
+config = Config()
 
-[USER]
-script_exe=runme.csh
-ui_working_dir=%(batch_root)s/crab_%(batch_name)s
-ssh_control_persist=no
-additional_input_files=mfvo2t.exe,filtertee.py,%(files_needed)s
-copy_data=1
-publish_data_name=mfvo2t_%(batch_name)s
-publish_data=1
-dbs_url_for_publication=phys03
-storage_element=%(storage_element)s
-jmt_skip_input_files=lib/*,src/*
+config.General.transferLogs = True
+config.General.transferOutputs = True
+config.General.workArea = '%(batch_root)s'
+config.General.requestName = '%(batch_name)s'
 
-[CRAB]
-jobtype=cmssw
-scheduler=%(scheduler)s
+config.JobType.pluginName = 'PrivateMC'
+config.JobType.psetName = '%(dummy_pset_fn)s'
+config.JobType.scriptExe = 'runme.sh'
+config.JobType.inputFiles = ['mfvo2t.exe', 'filtertee.py', %(files_needed)s]
+config.JobType.outputFiles = ['mfvo2t.root']
 
-[GRID]
-se_black_list=T3_GR_IASA,T3_IT_Napoli
+config.Data.primaryDataset = '%(batch_name)s'
+config.Site.storageSite = 'T3_US_FNALLPC'
+#config.Site.blacklist = ['T3_GR_IASA', 'T3_IT_Napoli']
+config.Data.splitting = 'EventBased'
+
+config.Data.unitsPerJob = 1
+config.Data.totalUnits = %(njobs)s
+config.Data.publication = False
 '''
 
 maked = 'nomake' in sys.argv
@@ -119,13 +116,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         raw_input('did the make go OK?')
         maked = True
 
-    cornell = 'cornell' in sys.argv
-    grid = 'condor' not in sys.argv
-    scheduler = 'condor' if not grid else 'remoteGlidein'
-    storage_element = 'T3_US_FNALLPC' if not cornell else 'T3_US_Cornell'
-
     extra_name = ''
-    batch_root = 'crab/One2Two'
+    batch_root = 'crab3/One2Two'
     for x in sys.argv:
         if x.startswith(batch_root):
             extra_name = x.replace(batch_root + '_', '') + '_'
@@ -236,12 +228,12 @@ cd -
             unzip_files.append('gunzip %s' % fn)
     unzip_files = '\n'.join(unzip_files)
     tree_path = '/eos/uscms/store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
-    files_needed = ','.join(os.path.join(tree_path, f) for f in files_needed)
+    files_needed = ', '.join('"%s"' % os.path.join(tree_path, f) for f in files_needed)
 
-    open('runme.csh', 'wt').write(script_template % locals())
-    open('crab.cfg', 'wt').write(crab_cfg % locals())
-    os.system('crab -create -submit all')
-    os.system('rm -f runme.csh crab.cfg')
+    open('runme.sh', 'wt').write(script_template % locals())
+    open('crabConfig.py', 'wt').write(crab_cfg % locals())
+#    os.system('crab submit')
+ #   os.system('rm -f runme.sh crabConfig.py')
 
 ###
 
