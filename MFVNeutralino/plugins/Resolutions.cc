@@ -358,6 +358,17 @@ if (doing_h2xqq) {
   const double dvv = mag(v[0][0] - v[1][0],
                          v[0][1] - v[1][1]);
   h_gen_dvv->Fill(dvv);
+  if (dvv > 0.06) {
+    h_gen_dvv_gen600um->Fill(dvv);
+  }
+
+  edm::Handle<MFVVertexAuxCollection> vertices;
+  event.getByLabel(vertex_src, vertices);
+  if (int(vertices->size()) >= 2) {
+    if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
+      h_gen_dvv_rec600um->Fill(dvv);
+    }
+  }
 }
 
 if (doing_mfv3j) {
