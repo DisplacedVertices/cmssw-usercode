@@ -90,7 +90,7 @@ config.General.requestName = '%(batch_name)s'
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = '%(dummy_pset_fn)s'
 config.JobType.scriptExe = 'runme.sh'
-config.JobType.inputFiles = ['mfvo2t.exe', 'filtertee.py', %(files_needed)s]
+config.JobType.inputFiles = [%(files_needed)s]
 config.JobType.outputFiles = ['mfvo2t.root']
 
 config.Data.primaryDataset = '%(batch_name)s'
@@ -106,9 +106,16 @@ config.Data.publication = False
 maked = 'nomake' in sys.argv
 setuped = False
 
+crab_submit_dir = 'to_submit'
+if os.path.isdir(crab_submit_dir):
+    sys.exit('move to_submit out of the way')
+os.mkdir(crab_submit_dir)
+i_submit = 0
+
 def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, samples):
     global maked
     global setuped
+    global i_submit
 
     if not maked:
         if os.system('make clean; make -j 16') != 0:
@@ -127,6 +134,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
     dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
 
     files_needed = set()
+    files_needed.add(os.path.join(os.path.abspath('mfvo2t.exe')))
+    files_needed.add(os.path.join(os.path.abspath('filtertee.py')))
 
     if not setuped:
         os.system('mkdir -p %s' % batch_root)
@@ -230,10 +239,14 @@ cd -
     tree_path = '/eos/uscms/store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
     files_needed = ', '.join('"%s"' % os.path.join(tree_path, f) for f in files_needed)
 
-    open('runme.sh', 'wt').write(script_template % locals())
-    open('crabConfig.py', 'wt').write(crab_cfg % locals())
-#    os.system('crab submit')
- #   os.system('rm -f runme.sh crabConfig.py')
+
+    submit_dir = os.path.join(crab_submit_dir, '%05i' % i_submit)
+    os.mkdir(submit_dir)
+    os.symlink(os.readlink('crab3'), os.path.join(submit_dir, 'crab3'))
+    open(os.path.join(submit_dir, 'runme.sh'), 'wt').write(script_template % locals())
+    open(os.path.join(submit_dir, 'crabConfig.py'), 'wt').write(crab_cfg % locals())
+
+    i_submit += 1
 
 ###
 
@@ -246,7 +259,7 @@ if 1:
 
     strengths = (-1, -2, None, 1, 5)
 
-    signals = [-139]
+    signals = [-141]
     strengths = [-1,-2]
 
     batches = []
