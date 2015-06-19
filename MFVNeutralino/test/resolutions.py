@@ -1,6 +1,8 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
+h2xqq = False
+
 process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_10_1_cUZ.root
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_11_1_g7H.root
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_12_1_HZL.root
@@ -53,6 +55,59 @@ process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_9_1_YYJ.root'''.split('\n')
 
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_1_1_WwV.root']
+
+if h2xqq:
+    process.source.fileNames = '''/store/user/tucker/duh/ntuple_10_1_S8P.root
+/store/user/tucker/duh/ntuple_11_1_7sv.root
+/store/user/tucker/duh/ntuple_12_1_CBb.root
+/store/user/tucker/duh/ntuple_13_1_F8t.root
+/store/user/tucker/duh/ntuple_14_1_cPx.root
+/store/user/tucker/duh/ntuple_15_1_JLc.root
+/store/user/tucker/duh/ntuple_16_1_Pfi.root
+/store/user/tucker/duh/ntuple_17_1_3D8.root
+/store/user/tucker/duh/ntuple_18_1_bbt.root
+/store/user/tucker/duh/ntuple_19_1_FtH.root
+/store/user/tucker/duh/ntuple_1_1_e6b.root
+/store/user/tucker/duh/ntuple_20_1_u23.root
+/store/user/tucker/duh/ntuple_21_1_EYH.root
+/store/user/tucker/duh/ntuple_22_1_zBY.root
+/store/user/tucker/duh/ntuple_23_1_KBB.root
+/store/user/tucker/duh/ntuple_24_1_5Mf.root
+/store/user/tucker/duh/ntuple_25_1_eGB.root
+/store/user/tucker/duh/ntuple_26_1_701.root
+/store/user/tucker/duh/ntuple_27_1_mWU.root
+/store/user/tucker/duh/ntuple_28_1_bke.root
+/store/user/tucker/duh/ntuple_29_1_rGZ.root
+/store/user/tucker/duh/ntuple_2_1_IhR.root
+/store/user/tucker/duh/ntuple_30_1_u98.root
+/store/user/tucker/duh/ntuple_31_1_6cp.root
+/store/user/tucker/duh/ntuple_32_1_raJ.root
+/store/user/tucker/duh/ntuple_33_1_0V9.root
+/store/user/tucker/duh/ntuple_34_1_msr.root
+/store/user/tucker/duh/ntuple_35_1_loz.root
+/store/user/tucker/duh/ntuple_36_2_Ymf.root
+/store/user/tucker/duh/ntuple_37_1_d9W.root
+/store/user/tucker/duh/ntuple_38_1_lcv.root
+/store/user/tucker/duh/ntuple_39_1_6m7.root
+/store/user/tucker/duh/ntuple_3_1_vBh.root
+/store/user/tucker/duh/ntuple_40_1_68q.root
+/store/user/tucker/duh/ntuple_41_1_UVQ.root
+/store/user/tucker/duh/ntuple_42_1_G9w.root
+/store/user/tucker/duh/ntuple_43_1_7SF.root
+/store/user/tucker/duh/ntuple_44_1_w93.root
+/store/user/tucker/duh/ntuple_45_1_51p.root
+/store/user/tucker/duh/ntuple_46_1_05X.root
+/store/user/tucker/duh/ntuple_47_1_Xg6.root
+/store/user/tucker/duh/ntuple_48_1_HRp.root
+/store/user/tucker/duh/ntuple_49_1_W7t.root
+/store/user/tucker/duh/ntuple_4_1_wQn.root
+/store/user/tucker/duh/ntuple_50_1_zA4.root
+/store/user/tucker/duh/ntuple_5_1_zDT.root
+/store/user/tucker/duh/ntuple_6_1_CV7.root
+/store/user/tucker/duh/ntuple_7_1_0u3.root
+/store/user/tucker/duh/ntuple_8_1_kVE.root
+/store/user/tucker/duh/ntuple_9_1_pea.root'''.split('\n')
+
 process.TFileService.fileName = 'resolutions.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -69,6 +124,9 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 gen_src = cms.InputTag('genParticles'),
                                 gen_jet_src = cms.InputTag('ak5GenJets'),
                                 )
+if h2xqq:
+    process.mfvGenParticleFilter.mode = 'h2xqq'
+    mfvResolutions.mode = 'h2xqq'
 process.p = cms.Path(process.mfvSelectedVerticesTight)
 
 
@@ -286,6 +344,19 @@ process.pGenNquarks2Sumpt200 = cms.Path(process.mfvGenParticleFilterNquarks2Sump
 process.mfvGenParticleFilterNtracks2Nquarks1Sumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, max_drmax = 4, min_ntracks = 2, min_nquarks = 1, min_sumpt = 200)
 process.mfvGenNtracks2Nquarks1Sumpt200 = mfvResolutions.clone()
 process.pGenNtracks2Nquarks1Sumpt200 = cms.Path(process.mfvGenParticleFilterNtracks2Nquarks1Sumpt200 * process.mfvGenNtracks2Nquarks1Sumpt200)
+
+if h2xqq:
+    process.zzzfilt = cms.EDFilter('MFVEXO12038SampleFilter',
+                                   gen_particles_src = cms.InputTag('genParticles'),
+                                   mode = cms.string('h2x'),
+                                   h2x_num = cms.int32(1),
+                                   min_dbv = cms.double(0),
+                                   max_dbv = cms.double(1e9),
+                                   min_dvv = cms.double(0),
+                                   max_dvv = cms.double(1e9),
+                                   )
+    for n,p in process.paths.items():
+        p.insert(0, process.zzzfilt)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
