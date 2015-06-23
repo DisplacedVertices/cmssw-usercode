@@ -671,6 +671,13 @@ for sample in data_samples + ttbar_samples + qcd_samples + smaller_background_sa
 for sample, minus in [(mfv_neutralino_tau1000um_M0300, 2000)]:
     sample.reduce_total_events_by(minus)
 
+# Repack and repub; but if you need to two-file solution with
+# mfvntuple_v20, you have to reset these.
+mfv_neutralino_tau1000um_M0400.dataset = '/mfv_neutralino_tau1000um_M0400/tucker-repubmerge-782402162757f9765800c18b58805910/USER'
+mfv_neutralino_tau1000um_M0400.dbs_url_num = 3
+mfv_neutralino_tau0100um_M0400.dataset = '/mfv_neutralino_tau0100um_M0400/tucker-repubmerge-782402162757f9765800c18b58805910/USER'
+mfv_neutralino_tau0100um_M0400.dbs_url_num = 3
+
 # Overrides done.
 
 mfv_neutralino_tau0000um_M0200.ana_filter_eff = 4.7518e-01  #    47447 /    99850
