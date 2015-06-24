@@ -10,16 +10,16 @@ name2num = {}
 num2name = {}
 name2mass = {}
 name2fn = {}
+num2nevt = {}
 
-i = -100
+num = -100
 for tau0 in tau0s:
     for mass in masses:
-        i -= 1
+        num -= 1
         name = make_name(tau0, mass)
-        if name == 'mfv_neutralino_tau12000um_M0900':
-            continue
-        name2num[name] = i
-        num2name[i] = name
+
+        name2num[name] = num
+        num2name[num] = name
         name2mass[name] = mass
 
         path = 'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/'
@@ -28,7 +28,7 @@ for tau0 in tau0s:
         fn = path + name + '.root'
         name2fn[name] = fn
 
-print 'last i =', i
+print 'last num =', num
 
 def make_templates(out_fn):
     from base import ROOT, make_h
@@ -45,8 +45,13 @@ def make_templates(out_fn):
         hs.append(h)
         h.SetDirectory(f)
 
+        num2nevt[num] = int(h.GetEntries())
+
     f.Write()
     f.Close()
+
+    print
+    print 'num2nevt = %r' % num2nevt
 
 if __name__ == '__main__':
     if 'make' in sys.argv:
