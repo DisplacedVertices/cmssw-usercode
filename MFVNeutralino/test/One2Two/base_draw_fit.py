@@ -59,10 +59,16 @@ def do_detree():
 ################################################################################
 
 #               1       2       3       4       5       6       7       8       9       10      11      12      13      14      15      16      17      18      19      20      21      22       23       24
-sig_true = [0., 0.0245, 0.1102, 0.2085, 0.3064, 0.3293, 0.3279, 0.1531, 0.7707, 1.4223, 2.0397, 2.1889, 2.1456, 0.3920, 2.2956, 4.2842, 5.8373, 6.1553, 6.0429, 0.7841, 4.5308, 8.5589, 11.0880, 11.4206, 11.3452]
-sig_effs = [x / (ac.int_lumi / 1000 * ac.scale_factor) for x in sig_true]
-sig_eff = sig_effs[sig_tmpl_num]
-mu_sig_true_mean = sig_true[sig_num] * sig_scale
+xsec2nevt = ac.int_lumi / 1000 * ac.scale_factor
+if sig_tmpl_num > 100:
+    import bigsigscan
+    sig_eff = bigsigscan.num2eff(-sig_tmpl_num)
+    mu_sig_true_mean = sig_eff * xsec2nevt * sig_scale
+else:
+    sig_trues = [0., 0.0245, 0.1102, 0.2085, 0.3064, 0.3293, 0.3279, 0.1531, 0.7707, 1.4223, 2.0397, 2.1889, 2.1456, 0.3920, 2.2956, 4.2842, 5.8373, 6.1553, 6.0429, 0.7841, 4.5308, 8.5589, 11.0880, 11.4206, 11.3452]
+    sig_effs = [x / xsec2nevt for x in sig_trues]
+    sig_eff = sig_effs[sig_tmpl_num]
+    mu_sig_true_mean = sig_trues[sig_num] * sig_scale
 print 'sig_num', sig_num, 'mu_sig_true_mean', mu_sig_true_mean
 if sig_scale < 0:
     print '( this is data )'

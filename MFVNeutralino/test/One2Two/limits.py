@@ -192,8 +192,7 @@ if 1:
     n_all_limits = len(limits)
     limits = [x for x in limits if x > 0]
     print 'dropping %i neg limits' % (n_all_limits - len(limits))
-    scale = sig_eff * ac.int_lumi / 1000. * ac.scale_factor
-    limits_scaled = [limit / scale for limit in limits]
+    limits_scaled = [limit / (sig_eff * xsec2nevt) for limit in limits]
 
     stats(limits, 'mu_sig_limit')
     stats(limits_scaled, 'sigma_sig_limit')

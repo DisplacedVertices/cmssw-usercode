@@ -124,7 +124,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_pval_cls.Fill(pval_cls)
     sig_limits.append(sig_limit)
     h_sig_limit.Fill(sig_limit)
-    sig_limit_scaled = sig_limit / (sig_eff * ac.int_lumi / 1000. * ac.scale_factor)
+    sig_limit_scaled = sig_limit / (sig_eff * xsec2nevt)
     h_sig_limit_scaled.Fill(sig_limit_scaled)
     sig_limits_scaled.append(sig_limit_scaled)
     h_sig_limit_err.Fill(sig_limit_err)
