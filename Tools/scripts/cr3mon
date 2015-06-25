@@ -1,0 +1,526 @@
+#!/usr/bin/env python
+
+# author: J. Tucker
+
+import os, sys, time, datetime, optparse, pprint, threading, pdb
+from cStringIO import StringIO
+from JMTucker.Tools.CRAB3Tools import *
+
+parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
+parser.add_option('-s', '--status-only', action='store_true', default=False,
+                  help='Only perform crab -status, do not try to -get or -resubmit anything.')
+parser.add_option('-o', '--once', action='store_true', default=False,
+                  help='Only make one -status,-get,-resubmit pass, then exit.')
+parser.add_option('-w', '--wait-time', type='int', default=60*10,
+                  help='Time between passes, in seconds. Default is %default.')
+parser.add_option('-d', '--delay', action='store_true', default=False,
+                  help='Wait once before starting passes.')
+parser.add_option('--max-threads', type='int', default=1,
+                  help='Max number of status-checking threads to run at once.')
+parser.add_option('--no-status-until-none-done', action='store_false', dest='status_until_none_done', default=True,
+                  help='In each iteration, by default we loop over status->getoutput->status->... until none are in Done. I.e. we resolve all Done jobs to their Retrieved_X_Y status codes before trying to resubmit/displaying the status code table/etc. Supplying this option will return us to the previous behavior of only doing status->getoutput per iteration.')
+parser.add_option('--resub-any', action='store_true', default=False,
+                  help='Resubmit any job that has status Retrieved but with exit code non-zero.')
+parser.add_option('--resub-done-stuck', action='store_true', default=False,
+                  help='Resubmit any job that has status DoneStuck: Done, but whose output cannot be retrieved.')
+parser.add_option('--resub-created', action='store_true', default=False,
+                  help='(Re)submit any job that has status Created.')
+parser.add_option('--resub-all', action='store_true', default=False,
+                  help='Resubmit all jobs that need it (equivalent to --resub-any --resub-done-stuck --resub-created).')
+parser.add_option('--resub-none', action='store_true', default=False,
+                  help='Do not resubmit any jobs (i.e. allow getting output, but do not do anything with e.g. those that are Aborted).')
+parser.add_option('--resub-site-control', default='',
+                  help='Deprecated, use --resub-black-list.')
+parser.add_option('--resub-black-list', default='',
+                  help='Comma-separated list (no spaces!) of sites to blacklist when resubmitting.')
+parser.add_option('--resub-white-codes', default='',
+                  help='Comma-separated list (no spaces!) of codes that are allowed to resubmit -- all others not resubmitted.')
+parser.add_option('--resub-black-codes', default='',
+                  help='Comma-separated list (no spaces!) of codes that are not allowed to resubmit -- all others are resubmitted.')
+parser.add_option('--tee', type='str', metavar='FILE',
+                  help='Duplicate stdout to FILE.')
+parser.add_option('--fake-results', type='str', metavar='FILE',
+                  help='Read fake results dict from FILE.')
+parser.add_option('--no-dir-sort', action='store_false', dest='dir_sort', default=True,
+                  help='Do not resort the list of directories.')
+parser.add_option('-n', '--no-renew-proxies', action='store_false', dest='renew_proxies', default=True,
+                  help='Do not renew proxies first.')
+parser.add_option('--debug-output', action='store_true', default=False,
+                  help='Turn on extra debug output (just the full output of the -status command for now).')
+parser.add_option('--keep-exe-code', action='store_true', default=False,
+                  help='Keep the exe exit code in the statuses (e.g. "Retireved_143_50662" instead of just "Retrieved_50662").')
+parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_statuses', default=True,
+                  help='Do not shorten statuses in the status table.')
+parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_zeroes', default=True,
+                  help='Do not suppress zeroes in the status table.')
+parser.add_option('--use-debugger', action='store_true', default=False,
+                  help='Enter the debugger upon thrown exception.')
+parser.add_option('--run-in-debugger', action='store_true', default=False,
+                  help='Run the whole threadloop in the debugger.')
+parser.add_option('--post-process', type='str', metavar='FILE.PY',
+                  help='After each check_fcn call, call the function "post_process_fcn" defined in FILE.PY, which takes the directory name and results dict as its arguments.')
+options, args = parser.parse_args()
+#print options ; print args ; import sys ; print sys.argv ; raise 1
+
+################################################################################
+
+def print_header(s):
+    print '\033[1m%s\033[0m' % s
+def print_subheader(s):
+    print '\033[32m%s\033[0m' % s
+
+if options.resub_black_list:
+    if options.resub_site_control:
+        raise ValueError('Cannot use both --resub-black-list and --resub-site-control')
+    options.resub_site_control = '-GRID.se_black_list=' + options.resub_black_list
+
+if options.resub_white_codes and options.resub_black_codes:
+    raise ValueError('not smart enough to handle both --resub-white-codes and --resub-black-codes')
+
+if options.resub_white_codes:
+    options.resub_white_codes = ['.*%s' % x for x in options.resub_white_codes.split(',')]
+else:
+    options.resub_white_codes = []
+if options.resub_black_codes:
+    options.resub_black_codes = ['.*%s' % x for x in options.resub_black_codes.split(',')]
+else:
+    options.resub_black_codes = []
+
+if options.resub_all:
+    options.resub_any = options.resub_done_stuck = options.resub_created = True
+
+if options.status_only and not options.once:
+    print '--status-only implies --once, setting it.'
+    options.once = True
+
+if options.post_process:
+    #exec open(options.post_process).read()
+    if options.post_process.endswith('.py'):
+        options.post_process = options.post_process.replace('.py', '')
+    pp_dir, pp_fn = os.path.split(options.post_process)
+    sys.path.append(os.path.abspath(pp_dir))
+    try:
+        post_process_module = __import__(pp_fn)
+    except ImportError:
+        raise ImportError('--post-process: cannot find module %s' % options.post_process)
+    try:
+        post_process_fcn = post_process_module.post_process_fcn
+    except AttributeError:
+        raise AttributeError('--post-process: module %s does not define a "post_process_fcn" function' % options.post_process)
+
+if options.use_debugger:
+    def info(type, value, tb):
+        if hasattr(sys, 'ps1') or not sys.stderr.isatty():
+            sys.__excepthook__(type, value, tb)
+        else:
+            import traceback, pdb
+            traceback.print_exception(type, value, tb)
+            print
+            pdb.pm()
+    sys.excepthook = info
+
+class Tee(object):
+    def __init__(self, filename, mode='w'):
+        self.file = open(filename, mode)
+        self.stdout = sys.stdout
+        sys.stdout = self
+    def __del__(self):
+        sys.stdout = self.stdout
+        self.file.close()
+    def write(self, data):
+        self.file.write(data)
+        self.stdout.write(data)
+    def flush(self):
+        self.file.flush()
+        self.stdout.flush()
+
+backdoor_time = str(int(time.time()*1e6))
+
+def backdoor_file(filename):
+    fn = '/tmp/%s/crmon_%s_%s' % (os.environ['USER'], backdoor_time, filename)
+    return fn, open(fn, 'wt')
+
+def backdoor_print(filename, l):
+    ll = []
+    for a in l:
+        if a.endswith('\\'):
+            a = a.rsplit('\\')[0]
+        ll.append(a)
+    s = '\n'.join(ll) + '\n'
+    fn, f = backdoor_file(filename)
+    f.write(s)
+    print filename, 'is', fn
+    print s
+
+def check_fcn(crab_dir):
+    # options.debug_output
+    # options.resub_any
+    # options.resub_done_stuck
+    # options.resub_none
+    # options.resub_site_control
+    # options.status_until_none_done
+    # options.resub_created
+    # options.resub_white_codes
+    # options.resub_black_codes
+    old_stdout = sys.stdout
+    sys.stdout = buf = StringIO()
+    res = crabCommand('status', '--long', dir=crab_dir)
+    res['stdout'] = buf.getvalue()
+    jl = crab_job_lists_by_status(res)
+    if not jl:
+        jl = {'crmonerror': xrange(9999)}
+        res['jobsPerStatus'] = {'crmonerror': 9999}
+    res['jobListByStatus'] = jl
+    sys.stdout = old_stdout
+    #if not options.keep_exe_code:
+    #    res_final = {}
+    #    for k,v in res.iteritems():
+    #        if k.startswith('Retrieved') and k.count('_') == 2:
+    #            k = k.split('_')
+    #            k = k[0] + '_' + k[-1]
+    #        if res_final.has_key(k):
+    #            res_final[k].extend(v)
+    #        else:
+    #            res_final[k] = v
+    #    res = res_final
+    return res
+
+dirs = crab_dirs_from_argv()
+
+if not dirs:
+    print 'space-separated list of existing crab dirs required in argv (see --help)'
+    sys.exit(1)
+
+if options.dir_sort:
+    dirs.sort()
+dirs_done = []
+
+print 'crmon, called with options:'
+pprint.pprint(options.__dict__)
+if options.fake_results:
+    print 'using fake results dict from %s' % options.fake_results
+else:
+    print 'checking these %i dirs:' % len(dirs)
+    for d in dirs:
+        print d
+
+def check_proxies():
+    if options.renew_proxies:
+        print 'checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
+        crab_renew_proxy_if_needed()
+        #for d in dirs:
+        #    if crab_is_using_server(d):
+        #        print_run_cmd('crab -c %s -renewCredential' % d)
+
+check_proxies()
+
+if options.delay:
+    print 'delay requested: sleeping %i seconds before doing anything' % options.wait_time
+    time.sleep(options.wait_time)
+
+to_resub_done = {}
+
+if options.run_in_debugger:
+    print 'running in debugger'
+    pdb.set_trace()
+
+pass_count = 0
+pass_string = ''
+last_proxy_check = time.time()
+
+while 1:
+    the_time = time.time()
+    if (the_time - last_proxy_check)/3600. > 8:
+        check_proxies()
+        last_proxy_check = the_time
+
+    if options.tee:
+        tee = Tee(options.tee)
+
+    pass_string = str(int(time.time()))
+    print '\n*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\nmaking a pass (#%i string %s):\n' % (pass_count, pass_string)
+    if options.fake_results:
+        # Fake statuses for debugging the table printing below.
+        print 'fake_results dict:'
+        results = open(options.fake_results).read().strip()
+        #print results
+        results = eval(results)
+        dirs = sorted(results.keys())
+    else:
+        # Get the statuses of all the dirs. 
+        results = {}
+        threads = []
+        print 'launching threads...'
+        def threadable_check_fcn(d):
+            if options.run_in_debugger:
+                print 'running thread for %s in debugger' % d
+                pdb.set_trace()
+            print 'checking', d
+            results[d] = check_fcn(d)
+            if options.post_process:
+                post_process_fcn(d, results[d])
+        for d in dirs:
+            while threading.active_count() - 1 >= options.max_threads: # -1 because count includes this main thread
+                time.sleep(0.1)
+            thread = threading.Thread(target=threadable_check_fcn, args=(d,))
+            threads.append((d,thread))
+            thread.start()
+        sleep_count = 0
+        msg_interval = 600
+        while threading.active_count() > 1:
+            if sleep_count / msg_interval > 0 and sleep_count % msg_interval == 0 and not options.run_in_debugger:
+                msgs = []
+                for d,t in threads:
+                    if t.is_alive():
+                        prog = None # crab_get_output_progress(d)
+                        if prog is None:
+                            msgs.append(d)
+                        else:
+                            msgs.append('%s(%i/%i)' % (d, prog[0], prog[1]))
+                print 'waiting for these threads:', ' '.join(msgs)
+            sleep_count += 1
+            time.sleep(0.1)
+        print 'done waiting for threads!'
+        crab_cleanup()
+        os.system('mkdir -p /tmp/%s' % os.environ['USER'])
+        open('/tmp/%s/crmontmp' % os.environ['USER'], 'wt').write(repr(results))
+
+    # Print task statuses. I don't know what all these mean yet.
+    print
+    print_header('Task statuses:')
+    max_w = max(len(d) for d in dirs)
+    for d in dirs:
+        if not results.has_key(d):
+            continue
+        print '%s: %s' % (d.ljust(max_w + 1), results[d]['status'])
+
+    # Print a recap of all the status summaries.
+    print
+    print_header('Recap (everything, sorted by directory):')
+    for d in dirs:
+        if not results.has_key(d):
+            continue
+        print_subheader('%s:' % d)
+        job_lists = results[d]['jobListByStatus']
+        for status in sorted(job_lists.keys()):
+            print '%s: %s' % (status.ljust(25), crabify_list(job_lists[status], simple=False))
+
+    print
+    print_header('Recap (everything, sorted by status):')
+    statuses = defaultdict(list)
+    for d in dirs:
+        job_lists = results[d]['jobListByStatus']
+        for status in job_lists.keys():
+            statuses[status].append(d)
+    for status in sorted(statuses.keys()):
+        print_subheader('%s:' % status)
+        these_dirs = [d for d in statuses[status] if d in dirs]
+        these_dirs.sort()
+        max_w = max(len(d) for d in these_dirs)
+        for d in these_dirs:
+            job_lists = results[d]['jobListByStatus']
+            print '%s %s' % (d.ljust(max_w + 1), crabify_list(job_lists[status], simple=False))
+
+    #print
+    #print_header('Recap (skipping exit code 0 but  where X, Y != 0):')
+    to_resub = defaultdict(list)
+    to_resub.update(to_resub_done)
+    #for d in dirs:
+    #    statuses = results[d]
+    #    printed = False
+    #    for status in sorted(statuses.keys()):
+    #        if status == options.retrieved_0_str or 'Retrieved' not in status:
+    #            continue
+    #        if not printed:
+    #            print_subheader('%s:' % d)
+    #            printed = True
+    #        jobs = statuses[status]
+    #        if 'Retrieved' in status:
+    #            to_resub[d].extend(jobs)
+    #        print '%s: %s' % (status.ljust(25), crabify_list(jobs, simple=False))
+    #print
+    #
+    #resub_crlogs = []
+    #resub_crrejobs = []
+    #resub_crjobprobs = ['cat << EOF | crjobprobs']
+    #for d,jobs in to_resub.iteritems():
+    #    jobs = crabify_list(jobs, False)
+    #    resub_crlogs.append('crlog %s %s ; \\' % (d, jobs))
+    #    resub_crrejobs.append('crrejob %s %s doit ; \\' % (d, jobs))
+    #    resub_crjobprobs.append('%s %s' % (d, jobs))
+    #resub_crjobprobs.append('EOF')
+    #
+    #if not options.resub_any:
+    #    print_header('To view logs for resubmits:')
+    #    backdoor_print('crlogs', resub_crlogs)
+    #    print_header('To resubmit:')
+    #    backdoor_print('crrejobs', resub_crrejobs)
+    #print_header('To diagnose by site:')
+    #backdoor_print('crjobprobs', resub_crjobprobs)
+
+    # Now print a big summary table where the rows are directories and
+    # the columns are the statuses, with the entries being the number
+    # of jobs in the directory for each status.
+
+    # Figure out the header row for the status columns. Alphabetical
+    # by status, except put finished first. We'll also shorten
+    # the status codes, either displaying the short ones all the time,
+    # or perhaps only doing it when the table would be wider than the
+    # current terminal (not implemented yet).
+    status_columns = sorted(set(sum((res['jobsPerStatus'].keys() for res in results.itervalues()), [])))
+    if 'finished' in status_columns:
+        status_columns.remove('finished')
+        status_columns = ['finished'] + status_columns
+
+    status_columns_short = []
+    status_columns_xlate = {}
+    to_replace = [
+        ('trans', 'x'),
+        ]
+
+    if options.shorten_statuses:
+        for status in status_columns:
+            status_short = status
+            for a,b in to_replace:
+                status_short = status_short.replace(a,b)
+
+            #if '0_0' in status_short:
+            #    status_short = status_short.replace('0_0', '0')
+            #elif '_' in status_short and status_short.count('_') == 2:
+            #    a,b,c = status_short.split('_')
+            #    if b == '0':
+            #        status_short = status_short.replace('0_', '')
+            #    elif b == c:
+            #        status_short = a + '_' + b
+
+            status_columns_short.append(status_short)
+            status_columns_xlate[status_short] = status
+
+        status_columns = status_columns_short
+
+    status_column_format = ''.join('%' + str(len(status_column) + 2) + 's' for status_column in status_columns)
+
+    # The table format string: a left-justified column for the
+    # directory names, followed by columns for all of the statuses
+    # seen, with the width found above.
+    dir_column_width = max(len(d) for d in results.keys())
+    table_format = '%-' + str(dir_column_width) + 's'
+    table_format += '%8s' # for the totals column
+    table_format += status_column_format
+    #print repr(table_format)
+
+    # Header.
+    print
+    print_header('Summary:')
+    header = ['directory', 'total |'] + status_columns
+    print_header(table_format % tuple(header))
+
+    # Print out all the rows. Column order is as above.
+    sums = (len(status_columns)+1)*[0]
+    for d in dirs:
+        statuses = results[d]['jobsPerStatus']
+        row = []
+        for status in status_columns:
+            entry = statuses.get(status_columns_xlate.get(status, status), 0)
+            row.append((status, entry))
+        sub_row = tuple(x[1] for x in row)
+        row_total = sum(sub_row)
+        sums[0] += row_total
+        for i, x in enumerate(sub_row):
+            sums[i+1] += x
+        if options.suppress_zeroes:
+            sub_row = tuple('-' if x == 0 else x for x in sub_row)
+        row = (d, '%s |' % row_total) + sub_row
+        print table_format % row
+    sums[0] = '%s |' % sums[0]
+    sums = tuple(['Sums'] + sums)
+    sum_row = table_format % sums
+    print '-' * len(sum_row)
+    print sum_row
+
+    # Figure out which directories are done, and remove them from the
+    # list of dirs to check next time. Also print out a new crmon
+    # command for pasting that just resumes with the not-done dirs.
+
+    done_stats = set(''.split())
+    done_stats_info_text = repr(tuple(sorted(done_stats)))
+    done = []
+    notdone = []
+    for k,v in results.iteritems():
+        statuses_left = set(stat for stat in v['jobsPerStatus'].keys() if stat != 'finished')
+        statuses_left -= done_stats
+        (notdone if statuses_left else done).append(k)
+    done.sort(key=dirs.index)
+    notdone.sort(key=dirs.index)
+
+    done_msg = '\nThese are done as far as crmon is concerned (all jobs are "finished" or one of %s):' % done_stats_info_text 
+    if done:
+        print_header(done_msg)
+        for d in done:
+            print d
+        print_header('These are not:')
+        for d in notdone:
+            print d
+        print_header('Stopping monitoring of the former.')
+        for d in done:
+            if to_resub.has_key(d):
+                to_resub_done[d] = to_resub[d]
+            dirs.remove(d)
+            d_statuses = results[d]['jobsPerStatus'].keys()
+            if len(d_statuses) != 1 or d_statuses[0] != 'finished':
+                dirs_done.append((d,) + tuple(d_statuses))
+            else:
+                dirs_done.append(d)
+
+    if dirs_done:
+        print_header(done_msg)
+        for d in dirs_done:
+            print d
+
+    if notdone:
+        print
+        print_header('To resume with just the not-done dirs, do:')
+        s = 'cr3mon ' + ' '.join(notdone)
+        backdoor_print('resume', [s])
+
+    if not dirs:
+        print
+        print_header('All done!')
+        break
+
+    if options.once:
+        print
+        print_header('--once specified, quitting.')
+        break
+
+    # Might want to break but can't count on being in front of the
+    # terminal when a very long iteration finishes. Look for a special
+    # file in /tmp/$USER that signals we should break.
+
+    break_fn =  '/tmp/%s/break_crmon' % os.environ['USER']
+    if os.path.isfile(break_fn):
+        os.remove(break_fn)
+        print
+        print_header('break file spotted, quitting.')
+        break
+    
+    # Sleep for the specified time.
+    
+    now = datetime.datetime.now()
+    then = now + datetime.timedelta(seconds=options.wait_time)
+    print
+    print_header('That was pass #%i string %s\nGoing to sleep for %i seconds at' % (pass_count, pass_string, options.wait_time))
+    print '  ', now
+    print 'Will wake up at'
+    print '  ', then
+    print '(Hit Ctrl-C, then enter to immediately start the next iteration. Or, hit Ctrl-C, then Ctrl-C to quit.)'
+
+    if options.tee:
+        del tee
+
+    pass_count += 1
+
+    try:
+        time.sleep(options.wait_time)
+    except KeyboardInterrupt:
+        raw_input('quit?')
