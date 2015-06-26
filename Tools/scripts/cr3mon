@@ -134,7 +134,10 @@ class Tee(object):
         self.file.flush()
         self.stdout.flush()
 
-backdoor_time = str(int(time.time()*1e6))
+def timestamp():
+    return str(int(time.time()*1e6))
+
+backdoor_time = timestamp()
 
 def backdoor_file(filename):
     fn = '/tmp/%s/crmon_%s_%s' % (os.environ['USER'], backdoor_time, filename)
@@ -162,16 +165,41 @@ def check_fcn(crab_dir):
     # options.resub_created
     # options.resub_white_codes
     # options.resub_black_codes
-    old_stdout = sys.stdout
-    sys.stdout = buf = StringIO()
+
+    cachefile = '/tmp/crab3.%i.%s' % (os.getpid(), timestamp())
+    open(cachefile, 'wt').write('{"crab_project_directory": ""}')
+    os.environ['CRAB3_CACHE_FILE'] = cachefile
+
+    suppress_stdout = options.max_threads == 1
+    if suppress_stdout:
+        old_stdout = sys.stdout
+        sys.stdout = buf = StringIO()
+
     res = crabCommand('status', '--long', dir=crab_dir)
-    res['stdout'] = buf.getvalue()
+
+    if suppress_stdout:
+        res['stdout'] = buf.getvalue()
+        sys.stdout = old_stdout
+
     jl = crab_job_lists_by_status(res)
     if not jl:
         jl = {'crmonerror': xrange(9999)}
         res['jobsPerStatus'] = {'crmonerror': 9999}
     res['jobListByStatus'] = jl
-    sys.stdout = old_stdout
+
+    res['jobsPerStatusEx'] = d = dict(res['jobsPerStatus'])
+    if d.has_key('failed'):
+        del d['failed']
+        for job_num, job_info in res['jobs'].iteritems():
+            if job_info['State'] == 'failed':
+                state_ex = 'failed_%i' % job_info['Error'][0]
+                if d.has_key(state_ex):
+                    d[state_ex] += 1
+                else:
+                    d[state_ex] = 1
+
+    os.remove(cachefile)
+
     #if not options.keep_exe_code:
     #    res_final = {}
     #    for k,v in res.iteritems():
@@ -367,7 +395,7 @@ while 1:
     # the status codes, either displaying the short ones all the time,
     # or perhaps only doing it when the table would be wider than the
     # current terminal (not implemented yet).
-    status_columns = sorted(set(sum((res['jobsPerStatus'].keys() for res in results.itervalues()), [])))
+    status_columns = sorted(set(sum((res['jobsPerStatusEx'].keys() for res in results.itervalues()), [])))
     if 'finished' in status_columns:
         status_columns.remove('finished')
         status_columns = ['finished'] + status_columns
@@ -375,6 +403,9 @@ while 1:
     status_columns_short = []
     status_columns_xlate = {}
     to_replace = [
+        ('finished', 'fin'),
+        ('failed', 'fail'),
+        ('running', 'run'),
         ('trans', 'x'),
         ]
 
@@ -418,7 +449,7 @@ while 1:
     # Print out all the rows. Column order is as above.
     sums = (len(status_columns)+1)*[0]
     for d in dirs:
-        statuses = results[d]['jobsPerStatus']
+        statuses = results[d]['jobsPerStatusEx']
         row = []
         for status in status_columns:
             entry = statuses.get(status_columns_xlate.get(status, status), 0)
@@ -447,7 +478,7 @@ while 1:
     done = []
     notdone = []
     for k,v in results.iteritems():
-        statuses_left = set(stat for stat in v['jobsPerStatus'].keys() if stat != 'finished')
+        statuses_left = set(stat for stat in v['jobsPerStatusEx'].keys() if stat != 'finished')
         statuses_left -= done_stats
         (notdone if statuses_left else done).append(k)
     done.sort(key=dirs.index)
@@ -466,7 +497,7 @@ while 1:
             if to_resub.has_key(d):
                 to_resub_done[d] = to_resub[d]
             dirs.remove(d)
-            d_statuses = results[d]['jobsPerStatus'].keys()
+            d_statuses = results[d]['jobsPerStatusEx'].keys()
             if len(d_statuses) != 1 or d_statuses[0] != 'finished':
                 dirs_done.append((d,) + tuple(d_statuses))
             else:
