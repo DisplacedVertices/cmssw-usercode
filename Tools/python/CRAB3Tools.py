@@ -6,7 +6,7 @@ import glob, os, re, subprocess, sys, time, getpass, zlib
 import xml.etree.cElementTree
 from collections import defaultdict
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
-from JMTucker.Tools.general import popen
+from JMTucker.Tools.general import bool_from_argv, popen
 from JMTucker.Tools.hadd import hadd
 from CRABAPI.RawCommand import crabCommand
 
@@ -219,3 +219,10 @@ def crab_job_lists_by_status(result):
     for status, job in result['jobList']:
         d[status].append(job)
     return dict(d)
+
+def crab_output_files(working_dir, jobs=None):
+    if jobs is not None:
+        d = crabCommand('getoutput', '--xrootd', '--jobids=%s' % crabify_list(jobs, simple=True), dir=working_dir)
+    else:
+        d = crabCommand('getoutput', '--xrootd', dir=working_dir)
+    return d['xrootd']
