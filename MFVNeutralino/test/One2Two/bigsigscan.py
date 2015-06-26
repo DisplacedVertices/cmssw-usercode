@@ -1,4 +1,5 @@
 import sys
+from collections import defaultdict
 
 tau0s = [100*x for x in xrange(1,10)] + [1000*x for x in range(1,11) + range(12,31,2)]
 masses = range(300, 1501, 100)
@@ -15,6 +16,8 @@ num2npass = {-477: 52008, -476: 52175, -475: 52193, -474: 52603, -473: 52738, -4
 def num2eff(num):
     return num2npass[num] / float(num2nevt[num])
 
+tau2range = defaultdict(list)
+
 num = -100
 for tau0 in tau0s:
     print 'tau%05ium' % tau0, num-1, 'to',
@@ -25,6 +28,8 @@ for tau0 in tau0s:
         name2num[name] = num
         num2name[num] = name
         name2mass[name] = mass
+
+        tau2range[tau0].append(num)
 
         nevt = 100000
 
@@ -89,6 +94,8 @@ for tau0 in tau0s:
         fn = path + name + '.root'
         name2fn[name] = fn
     print num
+
+tau2range = dict(tau2range)
 
 print 'last num =', num
 
