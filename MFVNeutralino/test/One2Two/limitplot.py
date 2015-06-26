@@ -3,6 +3,7 @@
 from array import array
 from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
+
 set_style()
 ps = plot_saver('plots/mfvlimits_test', log=False, size=(600,600))
 
@@ -161,4 +162,22 @@ def old_plots():
 
         make_plot(d, tau0, tau0_nice, 50 if tau0 == '0300um' else (9 if tau0 == '1000um' else 4))
 
-old_plots()
+def new_plots():
+    import bigsigscan as bss
+
+    z = [
+        ('01000um', m,
+         'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+         'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)) for m,i in zip(bss.masses, bss.tau2range[1000])]
+
+    print z
+
+    d = defaultdict(list)
+
+    for x in z:
+        parse(d, *x)
+    make_plot(d, 'tau01000um', 'hello', 6)
+    
+#old_plots()
+
+new_plots()
