@@ -17,6 +17,7 @@ def num2eff(num):
 
 num = -100
 for tau0 in tau0s:
+    print 'tau%05ium' % tau0, num-1, 'to',
     for mass in masses:
         num -= 1
         name = make_name(tau0, mass)
@@ -87,6 +88,7 @@ for tau0 in tau0s:
             path = path.replace('tucker', 'jchu')
         fn = path + name + '.root'
         name2fn[name] = fn
+    print num
 
 print 'last num =', num
 
