@@ -2,7 +2,10 @@
 
 import os, sys, fnmatch, glob
 from pprint import pprint
-from JMTucker.Tools.CRABTools import *
+try:
+    from JMTucker.Tools.CRAB3Tools import *
+except ImportError:
+    print 'no crab'
 
 if 'lists' in sys.argv:
     clobber = bool_from_argv('clobber')
@@ -13,17 +16,17 @@ if 'lists' in sys.argv:
         lst_fn = os.path.basename(d).replace('crab_', '') + '.lst'
         if os.path.isfile(lst_fn):
             bad.append(lst_fn)
-        cmd = 'crtools -outputFromFJR %s noraise | grep root > %s' % (d, lst_fn)
-        to_do.append((lst_fn, cmd))
+        to_do.append((d, lst_fn))
 
     if bad and not clobber:
         print 'these already exist:'
         pprint(bad)
         raise RuntimeError('refusing to clobber')
 
-    for lst_fn, cmd in to_do:
-        print lst_fn
-        os.system(cmd)
+    for d, lst_fn in to_do:
+        print d, '->', lst_fn
+        files = ['/store' + x.split('/store')[1] for x in crab_output_files(d)]
+        open(lst_fn, 'wt').write('\n'.join(files) + '\n')
 
 elif 'manuallist' in sys.argv:
     try:
@@ -59,9 +62,19 @@ elif 'draws' in sys.argv:
     for arg in sys.argv:
         if arg.endswith('.lst') and os.path.isfile(arg):
             lst_fn = arg
-            out_fn = lst_fn.replace('.lst', '.out')
+            out_fn = lst_fn.replace('.lst', '.draw_fit.out')
             print lst_fn
             os.system('python draw_fit.py %s >& %s' % (lst_fn, out_fn))
+
+elif 'limits' in sys.argv:
+    for arg in sys.argv:
+        if arg.endswith('.lst') and os.path.isfile(arg):
+            lst_fn = arg
+            plot_dir = os.path.basename(lst_fn).replace('.lst', '')
+            out_fn = lst_fn.replace('.lst', '.limits.out')
+            print lst_fn
+            os.system('python limits.py %s >& %s' % (lst_fn, out_fn))
+            os.system('mv plots/xxxlimits plots/%s' % plot_dir)
 
 elif 'swapplots' in sys.argv:
     try:
