@@ -64,9 +64,7 @@ void MCInteractionTopsFromStops::SetFourVectors() {
   p4_stopstopbar = p4_stop + p4_stopbar;
   p4_neutralinosum = p4_neutralino_from_stop + p4_neutralino_from_stopbar;
     
-  MCInteractionTops::SetFourVectors(); // need to do this to set p4_W_neutrinosum and p4_dif_neutrinosum
-
-  p4_missingsum += p4_neutralinosum;
+  MCInteractionTops::SetFourVectors();
 }
 
 void MCInteractionTopsFromStops::Print(std::ostream& out) {

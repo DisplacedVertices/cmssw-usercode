@@ -196,15 +196,12 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
   event.getByLabel(gen_particles_src, gen_particles_barcodes);
   edm::Handle<reco::GenJetCollection> gen_jets;
   event.getByLabel("ak5GenJets", gen_jets);
-  edm::Handle<reco::GenMETCollection> gen_mets;
-  event.getByLabel("genMetTrue", gen_mets);
-  const reco::GenMET& gen_met = gen_mets->at(0);
 
   GenParticlePrinter gpp(*gen_particles);
   gpp.print_vertex = true;
 
   MCInteractionMFV3j mci;
-  mci.Init(*gen_particles, *gen_jets, gen_met);
+  mci.Init(*gen_particles);
   if (!mci.Valid()) {
     edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid!";
   }

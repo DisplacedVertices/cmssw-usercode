@@ -141,11 +141,6 @@ void MCInteractionMFV3j::Fill() {
 
     decay_type[i] = lepton_code(W_daughters[i][0]);
   }
-
-  for (int j = 0; j < 2; ++j)
-    for (int k = 0; k < 2; ++k)
-      if (is_neutrino(W_daughters[j][k]))
-	immediate_nus.push_back(dynamic_cast<const reco::Candidate*>(W_daughters[j][k]));
 }
 
 void MCInteractionMFV3j::SetFourVectors() {
@@ -165,10 +160,7 @@ void MCInteractionMFV3j::SetFourVectors() {
     if (decay_type[j] < 3)
       p4_W_neutrinosum += p4_W_daughters[j][1];
 
-  MCInteraction::SetFourVectors(); // sets p4_dif_neutrinosum
-
-  p4_neutrinosum += p4_W_neutrinosum;
-  p4_missingsum += p4_W_neutrinosum;
+  MCInteraction::SetFourVectors();
 }
 
 void MCInteractionMFV3j::Print(std::ostream& out) {
