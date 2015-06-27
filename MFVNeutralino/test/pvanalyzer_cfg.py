@@ -14,3 +14,14 @@ process.Analyzer = cms.EDAnalyzer('PVAnalyzer',primary_vertices_src = cms.InputT
                                   )
 process.TFileService = cms.Service("TFileService", fileName = cms.string('PVAnalyzer_histo.root'))
 process.p = cms.Path(process.Analyzer)
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    import JMTucker.Tools.Samples as Samples
+    samples = Samples.from_argv([Samples.qcdht1000, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau0100um_M0400])
+
+    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    cs = CRABSubmitter('PVAnalyzer',
+                       total_number_of_events = -1,
+                       events_per_job = 100000,
+                       )
+    cs.submit_all(samples)
