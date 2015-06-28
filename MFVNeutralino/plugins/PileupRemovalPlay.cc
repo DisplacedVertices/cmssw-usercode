@@ -257,9 +257,9 @@ void PileupRemovalPlay::analyze(const edm::Event& event, const edm::EventSetup&)
     }
 
     edm::Handle<reco::PFJetCollection> pfjets;
-    event.getByLabel("ak5PFJets", pfjets);
+    event.getByLabel("ak4PFJets", pfjets);
   
-    printf("\n\nak5PFJets\n");
+    printf("\n\nak4PFJets\n");
     int ijet = 0;
     for (const reco::PFJet& jet : *pfjets) {
       if (jet.pt() > 20 &&
@@ -268,7 +268,7 @@ void PileupRemovalPlay::analyze(const edm::Event& event, const edm::EventSetup&)
           jet.neutralHadronEnergyFraction() < 0.99 &&
           jet.neutralEmEnergyFraction() < 0.99 &&
           (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
-        printf("ak5PF jet #%i: pt %6.4f eta %6.4f phi %6.4f nconst %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), jet.nConstituents());
+        printf("ak4PF jet #%i: pt %6.4f eta %6.4f phi %6.4f nconst %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), jet.nConstituents());
         itrk = 0;
         for (const reco::TrackRef& tk : jet.getTrackRefs())
           printf("  track #%i: q: %i pt %6.4f eta %6.4f phi %6.4f\n", itrk++, tk->charge(), tk->pt(), tk->eta(), tk->phi());

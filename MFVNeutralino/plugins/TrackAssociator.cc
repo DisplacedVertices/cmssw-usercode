@@ -195,7 +195,7 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
   event.getByLabel(gen_particles_src, gen_particles);
   event.getByLabel(gen_particles_src, gen_particles_barcodes);
   edm::Handle<reco::GenJetCollection> gen_jets;
-  event.getByLabel("ak5GenJets", gen_jets);
+  event.getByLabel("ak4GenJets", gen_jets);
 
   GenParticlePrinter gpp(*gen_particles);
   gpp.print_vertex = true;
@@ -222,7 +222,7 @@ void MFVTrackAssociator::analyze(const edm::Event& event, const edm::EventSetup&
 
 #if 0
   edm::Handle<reco::PFJetCollection> jets;
-  event.getByLabel("ak5PFJets", jets);
+  event.getByLabel("ak4PFJets", jets);
 
   reco::PFJetCollection selected_jets;
   for (const reco::PFJet& jet : *jets) {

@@ -13,7 +13,7 @@ process.TFileService.fileName = 'pileup_play.root'
 add_analyzer('PileupRemovalPlay',
              pucands_src = cms.InputTag('pfPileUpPF'),
              nonpucands_src = cms.InputTag('pfNoPileUpPF'),
-             pf_jets_src = cms.InputTag('ak5PFJets'),
+             pf_jets_src = cms.InputTag('ak4PFJets'),
              pat_jets_src = cms.InputTag('selectedPatJetsPF'),
              pv_src = cms.InputTag('goodOfflinePrimaryVertices'),
              ltmm_src = cms.InputTag('mfvTrackMatches'),

@@ -66,7 +66,7 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 max_dr = cms.double(-1),
                                 max_dist = cms.double(0.012),
                                 gen_src = cms.InputTag('genParticles'),
-                                gen_jet_src = cms.InputTag('ak5GenJets'),
+                                gen_jet_src = cms.InputTag('ak4GenJets'),
                                 )
 
 process.p = cms.Path(process.mfvSelectedVertices * process.mfvSelectedVerticesSeq)

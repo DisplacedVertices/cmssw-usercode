@@ -47,7 +47,7 @@ for require_muon in (True, False):
                              muon_cut = jtupleParams.semilepMuonCut,
                              jets_src = cms.InputTag(src),
                              jet_sel_num = cms.int32(sel),
-                             genjets_src = cms.InputTag('ak5GenJets' if runOnMC else ''),
+                             genjets_src = cms.InputTag('ak4GenJets' if runOnMC else ''),
                              )
         den = num.clone(require_trigger = False)
 

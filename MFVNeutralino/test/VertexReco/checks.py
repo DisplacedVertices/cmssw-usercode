@@ -18,7 +18,7 @@ process.CheckGenParticleBarcodes = cms.EDAnalyzer('CheckGenParticleBarcodes',
 
 process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
                                          gen_src = cms.InputTag('genParticles'),
-                                         gen_jet_src = cms.InputTag('ak5GenJets'),
+                                         gen_jet_src = cms.InputTag('ak4GenJets'),
                                          gen_met_src = cms.InputTag('genMetTrue'),
                                          print_info = cms.bool(True),
                                          )

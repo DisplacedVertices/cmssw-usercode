@@ -26,7 +26,7 @@ process.source = cms.Source('PoolSource', fileNames = myfilelist)
 
 process.thrustNtuple = cms.EDAnalyzer('MFVThrustAnalysis',
                                       gen_particles_src = cms.InputTag('genParticles'),
-                                      gen_jets_src = cms.InputTag('ak5GenJets'),
+                                      gen_jets_src = cms.InputTag('ak4GenJets'),
                                       gen_met_src = cms.InputTag('genMetTrue'),
                                       met_src = cms.InputTag('patMETsPF'),
                                       jets_src = cms.InputTag('selectedPatJetsPF'),
