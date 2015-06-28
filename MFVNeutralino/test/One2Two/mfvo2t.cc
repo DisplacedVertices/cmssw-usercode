@@ -21,9 +21,12 @@ int main() {
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
   const std::string templates_kind = env.get_string_lower("templates_kind", "clearedjets");
+  const bool templates_save_plots = env.get_bool("templates_save_plots");
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
   const bool templates_simpleclear = templates_kind == "simpleclear";
+  const int sig_from_file_num = env.get_int("sig_from_file_num", 0);
+  const std::string sig_from_file_fn = env.get_string("sig_from_file_fn", "bigsigscan.root");
   const bool run_templater = env.get_bool("run_templater", true);
   const bool run_fit = env.get_bool("run_fit", true);
   const std::string data_fn = env.get_string("data_fn", "MultiJetPk2012.root");
@@ -37,6 +40,7 @@ int main() {
   printf("output to %s\n", out_fn.c_str());
   printf("seed: %i\n", seed);
   printf("ntoys: %i\n", ntoys);
+  printf("save plots in templater: %i\n", templates_save_plots);
   printf("template kind: %s (phishift? %i clearedjets? %i simpleclear? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets, templates_simpleclear);
   printf("template binning: (%i, %f, %f)\n", mfv::Template::nbins, mfv::Template::min_val, mfv::Template::max_val);
   printf("process data from %s? %s\n", data_fn.c_str(), (process_data ? "YES!" : "no"));
@@ -53,11 +57,40 @@ int main() {
     ter = new mfv::ClearedJetsTemplater("", out_f, rand);
   else if (templates_simpleclear)
     ter = new mfv::SimpleClearingTemplater("", out_f, rand);
-    
+  ter->save_plots = templates_save_plots;
+
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);
 
-  TH1D* h_sig = tt->signal_template("h_sig_template", "");
+  TH1D* h_sig = 0;
+
+  if (0) {
+    h_sig = mfv::Template::hist_with_binning("h_sig_template", "");
+    int ibin = 1;
+    for (double c : { 573.0, 1355.0, 2090.0, 2417.0, 2449.0, 15968.0 })
+      h_sig->SetBinContent(ibin++, c);
+  }
+  else if (sig_from_file_num == 0) {
+    h_sig = tt->signal_template("h_sig_template", "");
+  }
+  else {
+    TFile* f_sig = TFile::Open(sig_from_file_fn.c_str());
+    if (!f_sig || !f_sig->IsOpen())
+      jmt::vthrow("could not open %s\n", sig_from_file_fn.c_str());
+    TString h_name = TString::Format("sig%i", sig_from_file_num);
+    TH1D* h = (TH1D*)f_sig->Get(h_name);
+    if (!h)
+      jmt::vthrow("could not get %s from %s\n", h_name.Data(), sig_from_file_fn.c_str());
+    h_sig = (TH1D*)h->Clone("h_sig_template");
+    h_sig->SetDirectory(0);
+    f_sig->Close();
+  }
+
   h_sig->SetDirectory(out_f);
+
+  printf("h_sig: [ ");
+  for (int ibin = 1; ibin <= h_sig->GetNbinsX(); ++ibin)
+    printf("%.1f ", h_sig->GetBinContent(ibin));
+  printf("]  sum: %.1f\n", h_sig->Integral());
 
   for (int itoy = 0; itoy < ntoys; ++itoy) {
     tt->throw_toy();

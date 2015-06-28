@@ -3,6 +3,8 @@
 import os, sys, time
 from JMTucker.Tools.general import save_git_status
 
+no_save_plots = True
+
 sample_number_to_name = {}
 i = -1
 for t in [100, 300, 1000, 9900]:
@@ -12,10 +14,9 @@ for t in [100, 300, 1000, 9900]:
 #for i in xrange(-1, -25, -1):
 #    print i, sample_number_to_name[i]
 
-
 script_template = '''#!/bin/sh
 echo mfvo2t script starting on `date`
-echo mfvo2t script args: $argv
+echo mfvo2t script args: $*
 echo wd: `pwd`
 
 export JOB_NUM=$1
@@ -52,7 +53,7 @@ fi
 echo mfvo2t.exe done
 echo
 
-cat > $RUNTIME_AREA/crab_fjr_${JOB_NUM}.xml << EOF
+cat > FrameworkJobReport.xml << EOF
 <FrameworkJobReport>
 <PerformanceReport>
   <PerformanceSummary Metric="StorageStatistics">
@@ -78,39 +79,43 @@ process.source = cms.Source('EmptySource')
 '''
 
 crab_cfg = '''
-[CMSSW]
-events_per_job=1
-number_of_jobs=%(njobs)s
-pset=%(dummy_pset_fn)s
-datasetpath=None
-output_file=mfvo2t.root
+from CRABClient.UserUtilities import config as Config
+config = Config()
 
-[USER]
-script_exe=runme.csh
-ui_working_dir=%(batch_root)s/crab_%(batch_name)s
-ssh_control_persist=no
-additional_input_files=mfvo2t.exe,filtertee.py,%(files_needed)s
-copy_data=1
-publish_data_name=mfvo2t_%(batch_name)s
-publish_data=1
-dbs_url_for_publication=phys03
-storage_element=%(storage_element)s
-jmt_skip_input_files=lib/*,src/*
+config.General.transferLogs = True
+config.General.transferOutputs = True
+config.General.workArea = '%(batch_root)s'
+config.General.requestName = '%(batch_name)s'
 
-[CRAB]
-jobtype=cmssw
-scheduler=%(scheduler)s
+config.JobType.pluginName = 'PrivateMC'
+config.JobType.psetName = '%(dummy_pset_fn)s'
+config.JobType.scriptExe = 'runme.sh'
+config.JobType.inputFiles = [%(files_needed)s]
+config.JobType.outputFiles = ['mfvo2t.root']
 
-[GRID]
-#se_black_list=T2_US_Purdue,T2_CH_CERN,T3_UK_SGrid_Oxford,T3_RU_FIAN,T2_RU_JINR
+config.Data.primaryDataset = '%(batch_name)s'
+config.Site.storageSite = 'T3_US_FNALLPC'
+#config.Site.blacklist = ['T3_GR_IASA', 'T3_IT_Napoli']
+config.Data.splitting = 'EventBased'
+
+config.Data.unitsPerJob = 1
+config.Data.totalUnits = %(njobs)s
+config.Data.publication = False
 '''
 
 maked = 'nomake' in sys.argv
 setuped = False
 
+crab_submit_dir = 'to_submit'
+if os.path.isdir(crab_submit_dir):
+    sys.exit('move to_submit out of the way')
+os.mkdir(crab_submit_dir)
+i_submit = 0
+
 def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, samples):
     global maked
     global setuped
+    global i_submit
 
     if not maked:
         if os.system('make clean; make -j 16') != 0:
@@ -118,13 +123,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         raw_input('did the make go OK?')
         maked = True
 
-    cornell = 'cornell' in sys.argv
-    grid = 'condor' not in sys.argv
-    scheduler = 'condor' if not grid else 'remoteGlidein'
-    storage_element = 'T3_US_FNALLPC' if not cornell else 'T3_US_Cornell'
-
     extra_name = ''
-    batch_root = 'crab/One2Two'
+    batch_root = 'crab3/One2Two'
     for x in sys.argv:
         if x.startswith(batch_root):
             extra_name = x.replace(batch_root + '_', '') + '_'
@@ -134,6 +134,8 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
     dummy_pset_fn = os.path.join(batch_root, 'dummy_pset.py')
 
     files_needed = set()
+    files_needed.add(os.path.join(os.path.abspath('mfvo2t.exe')))
+    files_needed.add(os.path.join(os.path.abspath('filtertee.py')))
 
     if not setuped:
         os.system('mkdir -p %s' % batch_root)
@@ -148,9 +150,12 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
                                                             'no' if signal_sample is None else 'n%ix%i' % signal_sample,
                                                             samples)
 
-    files_needed.add('backgrounds.tgz')
     files_needed.add('MultiJetPk2012.root.gz')
-    files_needed.add(sample_number_to_name[template_signal] + '.root.gz')
+    if template_signal > -100:
+        files_needed.add('backgrounds.tgz')
+        files_needed.add(sample_number_to_name[template_signal] + '.root.gz')
+    else:
+        files_needed.add('bigsigscan.root.gz')
 
     extra_setup = ''
 
@@ -159,7 +164,17 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
         'toythrower_template_signal=%i' % template_signal,
         ]
 
-    if template_signal >= -12:
+    if no_save_plots:
+        env += [
+            'templates_save_plots=0',
+            'fitter_save_plots=0',
+            ]
+
+    if template_signal <= -101:
+        env.append('toythrower_use_only_data_sample=1')
+        env.append('sig_from_file_num=%i' % template_signal)
+
+    if template_signal >= -12 or (template_signal <= -101 and template_signal >= -126):
         env.append('fitter_sig_limit_step=1')
 
     if template_type == 'PS':
@@ -175,7 +190,10 @@ def submit(njobs, template_type, min_ntracks, signal_sample, template_signal, sa
     if signal_sample is not None:
         sig_samp, sig_scale = signal_sample
         assert sig_samp < 0
-        files_needed.add(sample_number_to_name[sig_samp] + '.root.gz')
+        if sig_samp > -100:
+            files_needed.add(sample_number_to_name[sig_samp] + '.root.gz')
+        else:
+            files_needed.add('bigsigscan.root.gz')
 
         if sig_scale < 0:
             env.append('ntoys=0')
@@ -218,13 +236,17 @@ cd -
         else:
             unzip_files.append('gunzip %s' % fn)
     unzip_files = '\n'.join(unzip_files)
-    tree_path = '/uscms_data/d2/tucker/mfvo2t_trees/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
-    files_needed = ','.join(os.path.join(tree_path, f) for f in files_needed)
+    tree_path = '/eos/uscms/store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
+    files_needed = ', '.join('"%s"' % os.path.join(tree_path, f) for f in files_needed)
 
-    open('runme.csh', 'wt').write(script_template % locals())
-    open('crab.cfg', 'wt').write(crab_cfg % locals())
-    os.system('crab -create -submit all')
-    os.system('rm -f runme.csh crab.cfg')
+
+    submit_dir = os.path.join(crab_submit_dir, '%05i' % i_submit)
+    os.mkdir(submit_dir)
+    os.symlink(os.readlink('crab3'), os.path.join(submit_dir, 'crab3'))
+    open(os.path.join(submit_dir, 'runme.sh'), 'wt').write(script_template % locals())
+    open(os.path.join(submit_dir, 'crabConfig.py'), 'wt').write(crab_cfg % locals())
+
+    i_submit += 1
 
 ###
 
@@ -237,6 +259,9 @@ if 1:
 
     strengths = (-1, -2, None, 1, 5)
 
+    signals = [-141]
+    strengths = [-1,-2]
+
     batches = []
     for strength in strengths:
         for signal in signals:
@@ -245,6 +270,7 @@ if 1:
             batches.append((njobs, template_type, min_ntracks, sg, signal, ''))
 
     for batch in batches:
+        #print batch
         submit(*batch)
 
 if 0:

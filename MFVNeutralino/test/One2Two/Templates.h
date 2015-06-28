@@ -33,6 +33,7 @@ namespace mfv {
     static const double bin_width;
 
     static std::vector<double> binning(const bool shorten_last=false);
+    static TH1D* shorten_hist(TH1D* h, bool save=false);
     static void deoverflow(TH1D* hh);
     static TH1D* hist_with_binning(const char* name, const char* title);
     static TH1D* finalize_binning(TH1D* h);

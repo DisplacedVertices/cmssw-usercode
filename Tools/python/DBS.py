@@ -81,12 +81,14 @@ def files_for_events(run_events, dataset, ana01=False, ana02=False, ana03=False)
     files = []
 
     json_str = das_query(ana01, ana02, ana03, json=True)('file,run,lumi dataset=%s' % dataset)
+    true = True # lol
+    false = False
     #open('json_str','wt').write(json_str)
     #json_str = open('json_str2').read()
     obj = eval(json_str) # json.loads doesn't work...
     #pprint(obj)
 
-    if type(obj) == dict and sorted(obj.keys()) == [u'apilist', u'ctime', u'das_server', u'data', u'incache', u'mongo_query', u'nresults', u'status', u'timestamp']:
+    if type(obj) == dict and sorted(obj.keys()) == ['apilist', 'ctime', 'data', 'incache', 'mongo_query', 'nresults', 'status', 'timestamp']:
         obj = obj['data']
 
     for x in obj:
@@ -123,6 +125,7 @@ if __name__ == '__main__':
     execfile('events_to_debug.txt')
     #pprint(files_for_events(duh, 'fuh'))
     #raise 1
-    from JMTucker.Tools.Samples import *
-    for s in data_samples[:5]:
-        pprint(files_for_events(duh, s.dataset))
+    pprint(files_for_events(duh, '/Cosmics/Commissioning2015-CosmicSP-CosmicsSP_07Feb2015-v2/RAW-RECO'))
+    #from JMTucker.Tools.Samples import *
+    #for s in data_samples[:5]:
+    #    pprint(files_for_events(duh, s.dataset))

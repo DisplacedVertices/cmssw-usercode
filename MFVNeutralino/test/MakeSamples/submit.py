@@ -57,7 +57,7 @@ ssh_control_persist = no
 RETURN_OR_COPY
 
 [GRID]
-se_black_list = T3_MX_Cinvestav,T2_RU_RRC_KI,T3_UK_London_QMUL,T3_UK_ScotGrid_GLA,T3_US_UCD,T3_US_UMiss,T2_RU_PNPI,T3_RU_FIAN,T2_US_Purdue
+se_white_list = T2_US_UCSD,T2_US_Vanderbilt,T2_FR_IPHC,T2_BR_SPRACE,T2_CH_CERN,T2_UK_SGrid_RALPP,T2_CN_Beijing,T3_FR_IPNL,T2_UK_London_Brunel,T2_DE_RWTH,T2_US_Caltech,T3_US_TAMU,T3_US_TTU,T2_HU_Budapest,T2_US_Wisconsin,T2_US_Nebraska,T2_US_MIT,T2_KR_KNU,T3_TW_NCU,T3_US_Colorado
 '''
 
 if return_data:
@@ -113,7 +113,7 @@ if _final:
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
 save_git_status(os.path.join(dir, 'gitstatus'))
 
-def submit(name, tau0=None, mass=None):
+def submit(name, tau0=None, mass=None, decay_ids=None):
     print name
     is_signal = tau0 is not None and mass is not None
     if not is_signal:
@@ -171,6 +171,8 @@ def submit(name, tau0=None, mass=None):
     elif 'neutralino' in name:
         new_py += '\nset_neutralino_tau0(process, %e)\n' % tau0
         set_masses(mass+5, mass)
+    #elif 'empirical' in name:
+    #    new_py += '\nset_empirical_decay(process, %r)\n' % 
     elif 'ttbar' in name:
         new_py += '\nttbar(process)\n'
     else:

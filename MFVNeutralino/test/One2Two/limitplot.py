@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
 from array import array
+from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
-set_style()
-ps = plot_saver('plots/mfvlimits', log=False, size=(600,600))
 
-which = 'BBv9'
-draw_gluglu = False
+set_style()
+ps = plot_saver('plots/mfvlimits_test', log=False, size=(600,600))
+
+which = 'v10p1'
+draw_gluglu = True
 
 def fmt(t, title, color):
     t.SetFillColor(color)
@@ -41,101 +43,63 @@ def tgae(x, y, exl, exh, eyl, eyh, title, color):
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, color)
 
-if draw_gluglu:
+def make_gluglu():
     gluglu = [eval(x.strip()) for x in open('/afs/fnal.gov/files/home/room3/tucker/gluglu.csv').readlines() if x.strip()]
-    gluglu = [(z[0],z[1]*1000,z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
-    g_gluglu = tge(gluglu, 'hi', 9)
-    g_gluglu.Draw('A3')
-    ps.save('gluglu', log=True)
+    gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
+    return tge(gluglu, 'hi', 9)
 
-taus = [
-    ('0100um', '#tau = 100 #mum'),
-    ('0300um', '#tau = 300 #mum'),
-    ('1000um', '#tau = 1 mm'),
-    ('9900um', '#tau = 10 mm'),
-    ]
+def parse(d, tau0, mass, observed_fn, expected_fn):
+    watches = [
+        'sigma_sig_limit:Observed Limit: r < ',
+        'sigma_sig_limit:Expected  2.5%: r < ',
+        'sigma_sig_limit:Expected 16.0%: r < ',
+        'sigma_sig_limit:Expected 50.0%: r < ',
+        'sigma_sig_limit:Expected 84.0%: r < ',
+        'sigma_sig_limit:Expected 97.5%: r < ',
+        ]
 
-watches = [
-    'sigma_sig_limit:Observed Limit: r < ',
-    'sigma_sig_limit:Expected  2.5%: r < ',
-    'sigma_sig_limit:Expected 16.0%: r < ',
-    'sigma_sig_limit:Expected 50.0%: r < ',
-    'sigma_sig_limit:Expected 84.0%: r < ',
-    'sigma_sig_limit:Expected 97.5%: r < ',
-    ]
+    vals = [None]*6
 
-nn = -1
-for tau, tau_nice in taus:
-    masses = [200, 300, 400, 600, 800, 1000]
-    if tau == '0100um': # or tau == '0300um':
-        print 'skip', tau
-        nn -= len(masses)
-        continue
-
-    observed = []
-    expect50 = []
-    expect68 = []
-    expect68lo = []
-    expect68hi = []
-    expect95 = []
-    expect95lo = []
-    expect95hi = []
-
-    for mass in masses:
-        if False:
-            print 'skip', tau, mass
-            nn -= 1
-            continue
-        fn  = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
-        fn2 = 'outs/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
-        print nn, fn, fn2
-        nn -= 1
-        vals = [None]*6
-
-        for line in open(fn):
-            for i, watch in enumerate(watches):
-                if line.startswith(watch):
-                    vals[i] = float(line.replace(watch, ''))
-        for line in open(fn2):
-            watch = watches[0]
+    for line in open(expected_fn):
+        for i, watch in enumerate(watches):
             if line.startswith(watch):
-                vals[0] = float(line.replace(watch, ''))
-        print vals
-        if any(v is None for v in vals):
-            print vals
-            raise 'crap'
+                vals[i] = float(line.replace(watch, ''))
+    for line in open(observed_fn):
+        watch = watches[0]
+        if line.startswith(watch):
+            vals[0] = float(line.replace(watch, ''))
+    print vals
+    if any(v is None for v in vals):
+        raise ValueError('crap')
 
-        obs, exp2p5, exp16, exp50, exp84, exp97p5 = vals
+    obs, exp2p5, exp16, exp50, exp84, exp97p5 = vals
+    exp68 = (exp84 + exp16)/2
+    exp95 = (exp97p5 + exp2p5)/2
+    d['tau0'].append(tau0)
+    d['mass'].append(mass)
+    d['observed'].append(obs)
+    d['expect50'].append(exp50)
+    d['expect68'].append(exp68)
+    d['expect95'].append(exp95)
+    d['expect68lo'].append(exp68 - exp16)
+    d['expect68hi'].append(exp84 - exp68)
+    d['expect95lo'].append(exp95 - exp2p5)
+    d['expect95hi'].append(exp97p5 - exp95)
 
-        observed.append(obs)
-        expect50.append(exp50)
-        exp68 = (exp84 + exp16)/2
-        expect68.append(exp68)
-        expect68lo.append(exp68 - exp16)
-        expect68hi.append(exp84 - exp68)
-        exp95 = (exp97p5 + exp2p5)/2
-        expect95.append(exp95)
-        expect95lo.append(exp95 - exp2p5)
-        expect95hi.append(exp97p5 - exp95)
-
-    for l in [masses, observed, expect50, expect68, expect68lo, expect68hi, expect95, expect95lo, expect95hi]:
-        #pass
-        l.pop(0)
-        #l.pop(0)
-        
-    g_observed = tgae(masses, observed, None, None, None, None, tau_nice, 1)
+def make_plot(d, name, title, y_range):
+    g_observed = tgae(d['mass'], d['observed'], None, None, None, None, title, 1)
     g_observed.SetMarkerStyle(20)
     g_observed.SetMarkerSize(1.2)
     g_observed.Draw('ALP')
-    g_observed.GetYaxis().SetRangeUser(0, 50 if tau == '0300um' else (9 if tau == '1000um' else 4))
+    g_observed.GetYaxis().SetRangeUser(0, y_range)
 
-    g_expect95 = tgae(masses, expect95, None, None, expect95lo, expect95hi, tau_nice, 5)
+    g_expect95 = tgae(d['mass'], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], title, 5)
     g_expect95.Draw('3')
 
-    g_expect68 = tgae(masses, expect68, None, None, expect68lo, expect68hi, tau_nice, 3)
+    g_expect68 = tgae(d['mass'], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], title, 3)
     g_expect68.Draw('3')
 
-    g_expect50 = tgae(masses, expect50, None, None, None, None, tau_nice, 1)
+    g_expect50 = tgae(d['mass'], d['expect50'], None, None, None, None, title, 1)
     g_expect50.SetLineStyle(2)
     g_expect50.Draw('L')
 
@@ -154,4 +118,66 @@ for tau, tau_nice in taus:
         leg.AddEntry(g_gluglu, 'NLO + NLL #tilde{g} #tilde{g} production', 'F')
     leg.Draw()
     
-    ps.save('tau%s' % tau)
+    ps.save(name)
+
+####
+
+if draw_gluglu:
+    g_gluglu = make_gluglu()
+    g_gluglu.Draw('A3')
+    ps.save('gluglu', log=True)
+
+def old_plots():
+    tau0s = [
+        ('0100um', '#tau = 100 #mum'),
+        ('0300um', '#tau = 300 #mum'),
+        ('1000um', '#tau = 1 mm'),
+        ('9900um', '#tau = 10 mm'),
+        ]
+
+    masses = [200, 300, 400, 600, 800, 1000]
+
+    nn = -1
+    for tau0, tau0_nice in tau0s:
+        if tau0 == '0100um': # or tau0 == '0300um':
+            print 'skip', tau0
+            nn -= len(masses)
+            continue
+
+        d = defaultdict(list)
+
+        for mass in masses:
+            if mass == 200:
+                print 'skip', tau0, mass
+                nn -= 1
+                continue
+            observed_fn = 'crab/One2Two_v10p1/lsts/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
+            expected_fn = 'crab/One2Two_v10p1/lsts/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
+            #observed_fn = 'combine/combine_n%ix-1.out' % nn
+            #expected_fn = 'combine/combine_n%ix-2.out' % nn
+            print nn, tau0, mass, observed_fn, expected_fn
+            nn -= 1
+
+            parse(d, tau0, mass, observed_fn, expected_fn)
+
+        make_plot(d, tau0, tau0_nice, 50 if tau0 == '0300um' else (9 if tau0 == '1000um' else 4))
+
+def new_plots():
+    import bigsigscan as bss
+
+    z = [
+        ('01000um', m,
+         'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+         'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)) for m,i in zip(bss.masses, bss.tau2range[1000])]
+
+    print z
+
+    d = defaultdict(list)
+
+    for x in z:
+        parse(d, *x)
+    make_plot(d, 'tau01000um', 'hello', 6)
+    
+#old_plots()
+
+new_plots()

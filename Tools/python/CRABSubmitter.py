@@ -80,6 +80,7 @@ class CRABSubmitter:
                  run_half_mc = False,
                  skip_common = False,
                  storage_catalog_override = None,
+                 allow_non_production_cmssw = True,
                  **kwargs):
 
         for arg in sys.argv:
@@ -103,7 +104,7 @@ class CRABSubmitter:
             print 'CRABSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
             crab_renew_proxy_if_needed()
             CRABSubmitter.get_proxy = False
-
+      
         self.username = os.environ['USER']
 
         self.git_status_dir = os.path.join(self.batch_dir, 'gitstatus')
@@ -238,6 +239,9 @@ class CRABSubmitter:
                 raise ValueError('storage_catalog_override can be None or one of %r' % self.storage_catalog.keys())
             self.storage_catalog_fn = self.batch_dir + '/psets/storage.xml' # JMTBAD
             open(self.storage_catalog_fn, 'wt').write(self.storage_catalog[self.storage_catalog_override])
+
+        if allow_non_production_cmssw:
+            cfg.set('CMSSW', 'allow_NonProductionCMSSW', 1)
 
         if len(other_cfg_lines) % 3 != 0:
             raise ValueError('other_cfg_lines must be flat sequence of (section, option, value, ...) triplets')

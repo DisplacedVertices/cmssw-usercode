@@ -27,6 +27,7 @@ private:
 
   const int min_npv;
   const int max_npv;
+  const int max_pv_ntracks;
   const double min_4th_calojet_pt;
   const double min_5th_calojet_pt;
   const double min_4th_jet_pt;
@@ -58,8 +59,14 @@ private:
   const double min_tksjetsntkmass01;
   const double min_absdeltaphi01;
   const double min_bs2ddist01;
+  const double min_bs2dsig01;
+  const double min_pv2ddist01;
+  const double min_pv3ddist01;
+  const double min_pv2dsig01;
+  const double min_pv3dsig01;
   const double min_svdist2d;
   const double max_svdist2d;
+  const double min_svdist3d;
   const int max_ntrackssharedwpv01;
   const int max_ntrackssharedwpvs01;
   const int max_fractrackssharedwpv01;
@@ -78,6 +85,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     invert_cleaning_filters(cfg.getParameter<bool>("invert_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
+    max_pv_ntracks(cfg.getParameter<int>("max_pv_ntracks")),
     min_4th_calojet_pt(cfg.getParameter<double>("min_4th_calojet_pt")),
     min_5th_calojet_pt(cfg.getParameter<double>("min_5th_calojet_pt")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
@@ -108,8 +116,14 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_tksjetsntkmass01(cfg.getParameter<double>("min_tksjetsntkmass01")),
     min_absdeltaphi01(cfg.getParameter<double>("min_absdeltaphi01")),
     min_bs2ddist01(cfg.getParameter<double>("min_bs2ddist01")),
+    min_bs2dsig01(cfg.getParameter<double>("min_bs2dsig01")),
+    min_pv2ddist01(cfg.getParameter<double>("min_pv2ddist01")),
+    min_pv3ddist01(cfg.getParameter<double>("min_pv3ddist01")),
+    min_pv2dsig01(cfg.getParameter<double>("min_pv2dsig01")),
+    min_pv3dsig01(cfg.getParameter<double>("min_pv3dsig01")),
     min_svdist2d(cfg.getParameter<double>("min_svdist2d")),
     max_svdist2d(cfg.getParameter<double>("max_svdist2d")),
+    min_svdist3d(cfg.getParameter<double>("min_svdist3d")),
     max_ntrackssharedwpv01(cfg.getParameter<int>("max_ntrackssharedwpv01")),
     max_ntrackssharedwpvs01(cfg.getParameter<int>("max_ntrackssharedwpvs01")),
     max_fractrackssharedwpv01(cfg.getParameter<double>("max_fractrackssharedwpv01")),
@@ -121,6 +135,11 @@ namespace {
   template <typename T>
   T mag(T x, T y) {
     return sqrt(x*x + y*y);
+  }
+
+  template <typename T>
+  T mag(T x, T y, T z) {
+    return sqrt(x*x + y*y + z*z);
   }
 }
 
@@ -153,6 +172,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
+      return false;
+
+    if (mevent->pv_ntracks > max_pv_ntracks)
       return false;
 
     if (mevent->nmu(0) < min_nmuons)
@@ -211,7 +233,31 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex || nsv > max_nvertex)
       return false;
 
-    if (min_ntracks01 > 0 || max_ntracks01 < 100000 || min_maxtrackpt01 > 0 || max_maxtrackpt01 < 1e6 || min_njetsntks01 > 0 || min_tkonlymass01 > 0 || min_jetsntkmass01 > 0 || min_tksjetsntkmass01 > 0 || min_absdeltaphi01 > 0 || min_bs2ddist01 > 0 || min_svdist2d > 0 || max_svdist2d < 1e6 || max_ntrackssharedwpv01 < 100000 || max_ntrackssharedwpvs01 < 100000 || max_fractrackssharedwpv01 < 1e6 || max_fractrackssharedwpvs01 < 1e6) {
+    const bool two_vertex_cuts_on =
+      min_ntracks01 > 0 ||
+      max_ntracks01 < 100000 || // for ints
+      min_maxtrackpt01 > 0 ||
+      max_maxtrackpt01 < 1e6 || // for floats
+      min_njetsntks01 > 0 ||
+      min_tkonlymass01 > 0 ||
+      min_jetsntkmass01 > 0 ||
+      min_tksjetsntkmass01 > 0 ||
+      min_absdeltaphi01 > 0 ||
+      min_bs2ddist01 > 0 ||
+      min_bs2dsig01 > 0 ||
+      min_pv2ddist01 > 0 ||
+      min_pv3ddist01 > 0 ||
+      min_pv2dsig01 > 0 ||
+      min_pv3dsig01 > 0 ||
+      min_svdist2d > 0 ||
+      max_svdist2d < 1e6 ||
+      min_svdist3d > 0 ||
+      max_ntrackssharedwpv01 < 100000 ||
+      max_ntrackssharedwpvs01 < 100000 ||
+      max_fractrackssharedwpv01 < 1e6 ||
+      max_fractrackssharedwpvs01 < 1e6;
+
+    if (two_vertex_cuts_on) {
       if (nsv < 2)
         return false;
 
@@ -244,7 +290,32 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
       if (v0.bs2ddist + v1.bs2ddist < min_bs2ddist01)
         return false;
-      if (mag(v0.x - v1.x, v0.y - v1.y) < min_svdist2d || mag(v0.x - v1.x, v0.y - v1.y) > max_svdist2d)
+
+      if (v0.bs2dsig() + v1.bs2dsig() < min_bs2dsig01)
+        return false;
+
+      if (v0.pv2ddist + v1.pv2ddist < min_pv2ddist01)
+        return false;
+
+      if (v0.pv3ddist + v1.pv3ddist < min_pv3ddist01)
+        return false;
+
+      if (v0.pv2dsig() + v1.pv2dsig() < min_pv2dsig01)
+        return false;
+
+      if (v0.pv3dsig() + v1.pv3dsig() < min_pv3dsig01)
+        return false;
+
+      const double svdist2d = mag(v0.x - v1.x,
+                                  v0.y - v1.y);
+      const double svdist3d = mag(v0.x - v1.x,
+                                  v0.y - v1.y,
+                                  v0.z - v1.z);
+
+      if (svdist2d < min_svdist2d || svdist2d > max_svdist2d)
+        return false;
+
+      if (svdist3d < min_svdist3d)
         return false;
 
       if (v0.ntrackssharedwpv()  + v1.ntrackssharedwpv()  > max_ntrackssharedwpv01)

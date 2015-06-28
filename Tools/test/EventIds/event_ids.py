@@ -1,8 +1,7 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-from JMTucker.Tools import SampleFiles
-SampleFiles.setup(process, 'MFVNtupleV18', 'mfv_neutralino_tau1000um_M0400', 500)
+file_event_from_argv(process)
 
 process.TFileService.fileName = cms.string('evids.root')
 

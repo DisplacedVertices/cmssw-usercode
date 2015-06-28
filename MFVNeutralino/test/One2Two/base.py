@@ -18,7 +18,7 @@ def get_f_t(x, min_ntracks=None):
         input_fn = 'crab/One2Two/%s.root' % sample.name
     elif type(x) == str:
         input_fn = x
-    f = ROOT.TFile(input_fn)
+    f = ROOT.TFile.Open(input_fn)
     t = f.Get('mfvMiniTree/t')
     t.SetAlias('svdist', 'sqrt((x0-x1)**2 + (y0-y1)**2)')
     t.SetAlias('svdphi', 'TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))')
@@ -33,4 +33,27 @@ sig_samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_ta
 class FitResult:
     def __init__(self, *args):
         self.fcn, self.fit = args
+
+binning = array('d', [0.02*i for i in xrange(5)] + [0.1, 5]) # JMTBAD keep in sync with Templates.cc
+short_binning = binning[:]
+short_binning[-1] = 0.15
+nbins = len(binning) - 1
+
+def make_raw_h(name, contents, use_short_binning=False):
+    assert contents is None or len(contents) == nbins
+    h = ROOT.TH1F(name, '', nbins, short_binning if use_short_binning else binning)
+    if contents is not None:
+        for i,c in enumerate(contents):
+            h.SetBinContent(i+1, c)
+    return h
+
+def make_h(fn, name):
+    f, t = get_f_t(fn, min_ntracks=5)
+    h = make_raw_h(name, None)
+    x = detree(t, 'svdist', 'nvtx >= 2 && min_ntracks_ok', lambda x: (float(x[0]),))
+    for (d,) in x:
+        if d > binning[-1]:
+            d = binning[-1] - 1e-4
+        h.Fill(d)
+    return h
 

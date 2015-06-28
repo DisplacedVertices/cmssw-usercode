@@ -30,6 +30,22 @@ namespace mfv {
     return bins;
   }
 
+  TH1D* Template::shorten_hist(TH1D* h, bool save) {
+    const std::vector<double> bins = binning(true);
+    TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
+    // Splitting the last bin puts its contents in the overflow -- move back into last bin.
+    const int n = h_short->GetNbinsX();
+    const double v = h_short->GetBinContent(n+1);
+    const double e = h_short->GetBinError(n+1);
+    h_short->SetBinContent(n+1, 0);
+    h_short->SetBinError  (n+1, 0);
+    h_short->SetBinContent(n, v);
+    h_short->SetBinError  (n, e);
+    if (!save)
+      h_short->SetDirectory(0);
+    return h_short;
+  }
+
   TH1D* Template::hist_with_binning(const char* name, const char* title) {
     std::vector<double> bins = binning();
     return new TH1D(name, title, bins.size()-1, &bins[0]);

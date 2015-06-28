@@ -159,6 +159,7 @@ private:
   const double min_track_vertex_sig_to_remove;
   const bool remove_one_track_at_a_time;
   const bool jumble_tracks;
+  const double remove_tracks_frac;
   const bool write_tracks;
   const bool histos;
   const bool track_histos_only;
@@ -266,6 +267,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     jumble_tracks(cfg.getParameter<bool>("jumble_tracks")),
+    remove_tracks_frac(cfg.getParameter<double>("remove_tracks_frac")),
     write_tracks(cfg.getParameter<bool>("write_tracks")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
@@ -276,8 +278,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
 
   edm::Service<edm::RandomNumberGenerator> rng;
-  if (jumble_tracks && !rng.isAvailable())
-    throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling tracks!\n";
+  if ((jumble_tracks || remove_tracks_frac > 0) && !rng.isAvailable())
+    throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling or removing tracks!\n";
 
   produces<reco::VertexCollection>();
 
@@ -505,6 +507,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const int nhits = tk->hitPattern().numberOfValidHits();
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
     bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
+
+    if (use && remove_tracks_frac > 0 && rng->getEngine().flat() < remove_tracks_frac)
+      use = false;
 
     if (use && (max_all_track_dxyerr > 0 || max_all_track_d3derr > 0)) {
       reco::TransientTrack ttk = tt_builder->build(tk);

@@ -37,7 +37,9 @@ for hn in hns:
         exec '%s = h' % h.GetName()
 
 exceptions = {
-    #'crab/MakeSamples_M1500/crab_mfv_neutralino_tau03000um_M1500': (34,),
+    }
+
+skip = {
     }
 
 for idir, dir in enumerate(dirs):
@@ -55,7 +57,14 @@ for idir, dir in enumerate(dirs):
         hs.append(h)
         exec 'h_%s = h' % hn
 
+    three = 0
     for job in xrange(1, njobs+1):
+        roots = glob.glob(os.path.join(dir, 'res/*_%i_*_???.root' % job))
+
+        if skip.has_key(dir) and job in skip[dir]:
+            assert not roots
+            continue
+
         stdout = os.path.join(dir, 'res/CMSSW_%i.stdout' % job)
         if not os.path.isfile(stdout):
             missing_stdouts.append(job)
@@ -76,7 +85,6 @@ for idir, dir in enumerate(dirs):
             for h,nev in zip(hs, nevs):
                 h.Fill(nev)
 
-        roots = glob.glob(os.path.join(dir, 'res/*_%i_*_???.root' % job))
         if len(roots) > 1:
             raise RuntimeError('more than one match for %s job %i: %r' % (dir, job, roots))
         elif len(roots) == 0:
@@ -92,9 +100,10 @@ for idir, dir in enumerate(dirs):
                 elif nvtx == 2:
                     two += 1
                 else:
-                    raise RuntimeError('bad nvtx for %s job %i: %i' % (dir, job, nvtx))
+                    three += 1
             h_one.Fill(one)
             h_two.Fill(two)
+    print '%s: %i events with more than two vertices' % (dir, three)
 
     for i,h in enumerate(hs):
         if i == 0:

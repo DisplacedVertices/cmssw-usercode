@@ -6,4 +6,6 @@ outs
 plots_asdf
 plots_crab
 hogg_data.h
-*.log
+*log*
+combine_new
+crab3

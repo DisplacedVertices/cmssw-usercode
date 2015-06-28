@@ -28,34 +28,38 @@ process.IsoMu24Eta2p1.andOr = True # = OR
 
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
-for require_muon in (True, False):
-    for kind in ('pf', 'cl', 0, 1, 2, 3):
-        if type(kind) == int:
-            sel = kind
-            kind = 'cl'
-        else:
-            sel = -1
+for require_4calo in (0, 50, 60):
+    for require_muon in (True, False):
+        for kind in ('pf', 'cl', 0, 1, 2, 3):
+            if type(kind) == int:
+                sel = kind
+                kind = 'cl'
+            else:
+                sel = -1
 
-        src = 'selectedPatJets'
-        if kind == 'pf':
-            src += 'PF'
+            src = 'selectedPatJets'
+            if kind == 'pf':
+                src += 'PF'
 
-        num = cms.EDAnalyzer('QuadJetTrigEff',
-                             require_trigger = cms.bool(True),
-                             require_muon = cms.bool(require_muon),
-                             muons_src = cms.InputTag('selectedPatMuonsPF'),
-                             muon_cut = jtupleParams.semilepMuonCut,
-                             jets_src = cms.InputTag(src),
-                             jet_sel_num = cms.int32(sel),
-                             genjets_src = cms.InputTag('ak4GenJets' if runOnMC else ''),
-                             )
-        den = num.clone(require_trigger = False)
+            num = cms.EDAnalyzer('QuadJetTrigEff',
+                                 require_trigger = cms.bool(True),
+                                 require_muon = cms.bool(require_muon),
+                                 muons_src = cms.InputTag('selectedPatMuonsPF'),
+                                 muon_cut = jtupleParams.semilepMuonCut,
+                                 require_4calo = cms.int32(require_4calo),
+                                 calojets_src = cms.InputTag('selectedPatJets'),
+                                 jets_src = cms.InputTag(src),
+                                 jet_sel_num = cms.int32(sel),
+                                 genjets_src = cms.InputTag('ak4GenJets' if runOnMC else ''),
+                                 )
+            den = num.clone(require_trigger = False)
 
-        name = 'Mu%i' % int(require_muon)
-        name += '%s%s' % (kind, '' if sel == -1 else sel)
-        setattr(process, name + 'num', num)
-        setattr(process, name + 'den', den)
-        setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
+            name = 'Mu%i' % int(require_muon)
+            name += '4C%i' % require_4calo
+            name += '%s%s' % (kind, '' if sel == -1 else sel)
+            setattr(process, name + 'num', num)
+            setattr(process, name + 'den', den)
+            setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
@@ -70,7 +74,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         to_add = []
         to_replace = []
 
-        if not sample.is_mc:
+        if sample.is_mc:
+            if sample.is_fastsim:
+                to_add.append('input_is_fastsim(process)')
+            if sample.is_pythia8:
+                to_add.append('input_is_pythia8(process)')
+            if sample.re_pat:
+                to_add.append('re_pat(process)')
+                to_add.append("process.SimpleTriggerEfficiency.trigger_results_src = cms.InputTag('TriggerResults', '', 'PAT2')")
+        else:
             magic = 'runOnMC = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'runOnMC = False', err))
@@ -85,7 +97,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        max_threads = 2,
                        )
 
-    mc_samples = [Samples.qcdmupt15] + Samples.ttbar_samples + Samples.leptonic_background_samples
+    mc_samples = [Samples.qcdmupt15] + Samples.ttbar_samples + Samples.leptonic_background_samples + Samples.mfv_signal_samples
 
     data_samples = Samples.auxiliary_data_samples[1:]
 

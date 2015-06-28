@@ -132,7 +132,7 @@ struct MFVEvent {
   float pvczz;
   uchar pv_ntracks;
   float pv_sumpt2;
-  float pv_rho() const { return mag(pvx - bsx, pvy - bsy); }
+  float pv_rho() const { return mag(pvx - bsx_at_z(pvz), pvy - bsy_at_z(pvz)); }
 
   std::vector<uchar> calojet_id;
   std::vector<float> calojet_pt;

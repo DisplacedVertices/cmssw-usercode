@@ -24,6 +24,7 @@ namespace mfv {
 
     jmt::ConfigFromEnv env;
     int print_level;
+    const bool save_plots;
     const int inject_in_last_bin;
     const bool bkg_gaussians;
     const bool barlow_beeston;
@@ -43,6 +44,8 @@ namespace mfv {
     const bool do_signif;
     const bool do_limit;
     const bool only_fit;
+    const int n_toy_cls;
+    const bool do_cls;
     const int i_limit_job;
     const int n_toy_limit;
     const double sig_limit_start;
@@ -121,6 +124,7 @@ namespace mfv {
     test_stat_t t_obs_0;
     fit_stat_t fit_stat;
     double pval_signif;
+    double pval_cls;
     std::vector<double> sig_limits;
     std::vector<double> pval_limits;
     std::vector<double> pval_limit_errs;
@@ -148,7 +152,6 @@ namespace mfv {
     void fit_globals_ok();
     void draw_likelihood(const test_stat_t& t, const char* ex=0);
     TH1D* make_h_bkg(const char* n, const std::vector<double>& nuis_pars, const std::vector<double>& A_bkg);
-    TH1D* shorten_hist(TH1D* h, bool save=true);
     void scan_template_chi2(const test_stat_t& t);
     fit_stat_t draw_fit(const test_stat_t& t);
     min_lik_t min_likelihood(double mu_sig_start, bool fix_mu_sig);

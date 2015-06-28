@@ -5,20 +5,39 @@ from JMTucker.Tools.Samples import *
 
 set_style()
 ROOT.gStyle.SetOptStat(0)
-ps = plot_saver('plots/QuadJetTrigEff', size=(600,600), log=False)
+ps = plot_saver('plots/QuadJetTrigEff_arc', size=(600,600), log=False)
 ROOT.TH1.AddDirectory(0)
 
-root_dir = 'crab/QuadJetTrigEff'
+save_more = False
+
+root_dir = 'crab/QuadJetTrigEff_arc'
 
 int_lumi = 17241.
-data_fn = os.path.join(root_dir, 'SingleMu2012BCD.partial.root')
+data_fn = os.path.join(root_dir, 'SingleMu2012.root')
 data_f = ROOT.TFile(data_fn)
 
-kinds = 'Mu0pf Mu0cl Mu0cl3'.split()
+bkg_samples = [ttbarsemilep, ttbardilep, wjetstolnu, dyjetstollM50, dyjetstollM10, ttbarhadronic, qcdmupt15]
+n_bkg_samples = len(bkg_samples)
+for sample in bkg_samples:
+    sample.fn = os.path.join(root_dir, sample.name + '.root')
+    sample.f = ROOT.TFile(sample.fn)
+
+sig_samples = mfv_signal_samples
+for sample in sig_samples:
+    sample.fn = os.path.join(root_dir, sample.name + '.root')
+    sample.f = ROOT.TFile(sample.fn)
+
+kinds = 'Mu04C0pf Mu04C0cl Mu04C0cl3'.split()
 ns = 'h_jet_pt_3 h_jet_pt_4 h_jet_pt_5 h_jet_eta_3 h_jet_eta_4 h_jet_eta_5'.split()
 
-kinds = ['Mu0pf', 'Mu0cl3', 'Mu1pf', 'Mu1cl3']
-ns = ['h_jet_pt_4', 'h_jet_pt_5'] #, 'h_jet_sumht']
+kinds = ['Mu04C0pf', 'Mu04C0cl3', 'Mu14C0pf', 'Mu14C0cl3']
+ns = ['h_jet_pt_4', 'h_jet_pt_5', 'h_jet_sumht']
+
+kinds = ['Mu1pf', 'Mu1cl3']
+ns = ['h_jet_pt_4', 'h_jet_pt_5', 'h_jet_sumht']
+
+kinds = ['Mu14C0pf', 'Mu14C0cl3', 'Mu14C60pf', 'Mu14C60cl3']
+ns = ['h_jet_pt_4', 'h_jet_sumht']
 
 #kinds = ['Mu1pf', 'Mu1cl3']
 #ns = ['h_jet_pt_4', 'h_jet_pt_5']
@@ -29,43 +48,67 @@ ns = ['h_jet_pt_4', 'h_jet_pt_5'] #, 'h_jet_sumht']
 #kinds = ['Mu1pf']
 #ns = ['h_jet_pt_4']
 
-def make_fcn(name):
-    fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', 20, 500)
-    fcn.SetParNames('floor', 'ceil', 'turnmu', 'turnsig')
-    fcn.SetParameters(0, 1, 48, 5)
-    fcn.SetParLimits(1, 0, 1)
+def limits(kind, n):
+    if 'sumht' in n:
+        return 300, 2000
+    else:
+        if 'pf' in kind:
+            if 'pt_4' in n:
+                return 85, 250
+            else:
+                return 75, 250
+        else:
+            return 60, 250
+
+def make_fcn(name, kind, n):
+    if '4C6' in kind or '4C5' in kind:
+        if 'sumht' in n:
+            limits = (500, 2000)
+        else:
+            limits = (60, 250)
+        fcn = ROOT.TF1(name, 'pol0', *limits)
+        fcn.SetParNames('eff')
+        fcn.SetParameter(0, 0.99)
+    else:
+        if 'sumht' in n:
+            limits = (50, 2000)
+        else:
+            limits = (20, 250)
+        fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *limits)
+        fcn.SetParNames('floor', 'ceil', 'turnmu', 'turnsig')
+        if 'sumht' in n:
+            fcn.SetParameters(0, 1, 500, 50)
+        else:
+            fcn.SetParameters(0, 1, 48, 5)
+        fcn.SetParLimits(1, 0, 1)
     fcn.SetLineWidth(1)
     return fcn
+
+def rebin_pt(h):
+    a = array('d', range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
+    return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
+
+def rebin_sumht(h):
+    a = array('d', range(0, 500, 20) + range(500, 1100, 60) + range(1100, 1500, 200) + range(1500, 3000, 500))
+    return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
+
+def get(f, kind, n):
+    def rebin(h):
+        return h
+    if 'pt' in n:
+        rebin = rebin_pt
+    elif 'sumht' in n:
+        rebin = rebin_sumht
+    return rebin(f.Get(kind + 'num/%s' % n)), rebin(f.Get(kind + 'den/%s' % n))
 
 for kind in kinds:
     for n in ns:
         print
+        print '============================================================================='
         print kind, n
+        print '-----------------------'
         subname = '%s_%s' % (kind, n)
 
-        def rebin_pt(h):
-            a = array('d', range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
-            return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
-
-        def rebin_sumht(h):
-            a = array('d', range(0, 500, 20) + range(500, 1100, 60) + range(1100, 1500, 100) + range(1500, 2000, 250) + [2000, 2500, 3000])
-            return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
-
-
-        def get(f,n):
-            def rebin(h):
-                return h
-            if 'pt' in n:
-                rebin = rebin_pt
-            elif 'sumht' in n:
-                rebin = rebin_sumht
-            return rebin(f.Get(kind + 'num/%s' % n)), rebin(f.Get(kind + 'den/%s' % n))
-
-        if 'gen' not in n:
-            data_num, data_den = get(data_f, n)
-
-        bkg_samples = [ttbarsemilep, ttbardilep, wjetstolnu, dyjetstollM50, dyjetstollM10, ttbarhadronic, qcdmupt15]
-        n_bkg_samples = len(bkg_samples)
         bkg_num, bkg_den = None, None
         sum_scaled_nums, sum_scaled_dens = 0., 0.
         sum_scaled_nums_var, sum_scaled_dens_var = 0., 0.
@@ -74,39 +117,41 @@ for kind in kinds:
         for sample in bkg_samples:
             subsubname = subname + '_' + sample.name
 
-            sample.fn = os.path.join(root_dir, sample.name + '.root')
-            sample.f = ROOT.TFile(sample.fn)
-            num, den = sample.num, sample.den = get(sample.f, n)
+            num, den = sample.num, sample.den = get(sample.f, kind, n)
 
-            den.Draw()
-            ps.save(subsubname + '_den')
+            if save_more:
+                den.Draw()
+                ps.save(subsubname + '_den')
 
-            rat = histogram_divide(num, den)
-            rat.Draw('AP')
-            if 'pt' in n:
-                rat.GetXaxis().SetLimits(0, 260)
-            elif 'sumht' in n:
-                rat.GetXaxis().SetLimits(0, 3000)
-            
-            fcn = make_fcn('f_' + subsubname)
-            res = rat.Fit(fcn, 'RQS')
-            reses.append(res)
-            
-            ps.save(subsubname)
+            if den.Integral():
+                rat = histogram_divide(num, den)
+                rat.Draw('AP')
+                if 'pt' in n:
+                    rat.GetXaxis().SetLimits(0, 260)
+                elif 'sumht' in n:
+                    rat.GetXaxis().SetLimits(0, 2000)
+
+                fcn = make_fcn('f_' + subsubname, kind, n)
+                res = rat.Fit(fcn, 'RQS')
+                reses.append(res)
+                if save_more:
+                    ps.save(subsubname)
+            else:
+                reses.append(None)
+
             sample.total_events = -1
             scale = sample.partial_weight * int_lumi
 
             print '%s (%f)' % (sample.name, scale)
-            if 'sumht' not in n:
-                ll = 60 if 'pf' not in kind else (85 if 'pt_4' in n else 75)
-                ib = num.FindBin(ll)
-                ni = num.Integral(ib, 1000)
-                di = den.Integral(ib, 1000)
-                sum_scaled_nums += ni*scale
-                sum_scaled_dens += di*scale
-                sum_scaled_nums_var += scale**2 * ni
-                sum_scaled_dens_var += scale**2 * di
-                print '   %10i %10i %10.2f %10.2f  %.6f [%.6f, %.6f]' % ((ni, di, ni*scale, di*scale) + clopper_pearson(ni, di))
+            ll = limits(kind, n)[0]
+            ib = num.FindBin(ll)
+            ni = num.Integral(ib, 10000)
+            di = den.Integral(ib, 10000)
+            sum_scaled_nums += ni*scale
+            sum_scaled_dens += di*scale
+            sum_scaled_nums_var += scale**2 * ni
+            sum_scaled_dens_var += scale**2 * di
+            print '   %10i %10i %10.2f %10.2f  %.6f [%.6f, %.6f]' % ((ni, di, ni*scale, di*scale) + clopper_pearson(ni, di))
             #res.Print()
 
             num.Scale(scale)
@@ -118,12 +163,14 @@ for kind in kinds:
                 bkg_num.Add(num)
                 bkg_den.Add(den)
 
-        for ipar, parname in enumerate('floor ceil turnmu turnsig'.split()):
+        pars = [reses[0].GetParameterName(i) for i in xrange(reses[0].NPar())]
+        for ipar, parname in enumerate(pars):
             subsubname = subname + '_' + parname
             hpar = ROOT.TH1F(parname, '', n_bkg_samples, 0, n_bkg_samples)
             for isam, sample in enumerate(bkg_samples):
                 if sample.name == 'qcdmupt15' and 'Mu1' in kind:
                     continue
+                #print isam, reses[isam].Parameter(ipar), reses[isam].ParError(ipar)
                 hpar.SetBinContent(isam+1, reses[isam].Parameter(ipar))
                 hpar.SetBinError  (isam+1, reses[isam].ParError (ipar))
                 hpar.GetXaxis().SetBinLabel(isam+1, sample.name)
@@ -153,10 +200,11 @@ for kind in kinds:
             continue
 
         print 'data' #, data_num.GetEntries(), data_den.GetEntries()
-        ll = 60 if 'pf' not in kind else (85 if 'pt_4' in n else 75)
+        data_num, data_den = get(data_f, kind, n)
+        ll = limits(kind, n)[0]
         ib = num.FindBin(ll)
-        ni = data_num.Integral(ib, 1000)
-        di = data_den.Integral(ib, 1000)
+        ni = data_num.Integral(ib, 10000)
+        di = data_den.Integral(ib, 10000)
         print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
         print '+- %10.2f %10.2f' % (ni**0.5, di**0.5)
         print 'data/mc:'
@@ -169,26 +217,27 @@ for kind in kinds:
         bkg_rat = histogram_divide(bkg_num, bkg_den)
 
         for r in (data_rat, bkg_rat):
-            i = int(n.split('_')[-1])
-            k = 'PF' if 'pf' in kind else 'calo'
-            r.SetTitle(';%ith %s jet p_{T} (GeV);efficiency' % (i, k))
             if 'pt' in n:
                 r.GetXaxis().SetLimits(0, 260)
+                i = int(n.split('_')[-1])
+                k = 'PF' if 'pf' in kind else 'calo'
+                r.SetTitle(';%ith %s jet p_{T} (GeV);efficiency' % (i, k))
             elif 'sumht' in n:
-                r.GetXaxis().SetLimits(0, 3000)
+                r.GetXaxis().SetLimits(0, 2000)
+                r.SetTitle(';%s #Sigma H_{T} (GeV);efficiency' % k)
             r.GetHistogram().SetMinimum(0)
             r.GetHistogram().SetMaximum(1.1)
 
         data_rat.Draw('AP')
         ROOT.gStyle.SetOptFit(1111)
-        data_fcn = make_fcn('f_data')
+        data_fcn = make_fcn('f_data', kind, n)
         data_res = data_rat.Fit(data_fcn, 'RQS')
-        bkg_fcn = make_fcn('f_bkg')
+        bkg_fcn = make_fcn('f_bkg', kind, n)
         bkg_fcn.SetLineColor(2)
         bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS')
-        print 'bkg:'
+        print '\nbkg:'
         bkg_res.Print()
-        print 'data:'
+        print '\ndata:'
         data_res.Print()
 
         bkg_rat.SetFillStyle(3001)
@@ -202,3 +251,13 @@ for kind in kinds:
         move_stat_box(data_rat, (0.518, 0.133, 0.866, 0.343))
 
         ps.save(subname)
+
+        print 'signals'
+        for sample in sig_samples:
+            sig_num, sig_den = get(sample.f, kind, n)
+            ll = limits(kind, n)[0]
+            ib = num.FindBin(ll)
+            ni = sig_num.Integral(ib, 10000)
+            di = sig_den.Integral(ib, 10000)
+            print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
+            print '+- %10.2f %10.2f' % (ni**0.5, di**0.5)

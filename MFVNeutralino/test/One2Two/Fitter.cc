@@ -40,7 +40,7 @@ namespace mfv {
 
     double n_sig_orig = -1;
     TH1D* h_sig = 0;
-    const double* a_sig = 0;
+    std::vector<double> a_sig;
     std::vector<double> A_sig;
 
     TH1D* h_data_real = 0;
@@ -59,6 +59,7 @@ namespace mfv {
       eta_bkg.resize(n+2, -1);
       a_bkg.resize(n+2, -1);
       A_bkg.resize(n+2, -1);
+      a_sig.resize(n+2, -1);
       A_sig.resize(n+2, -1);
     }
 
@@ -70,7 +71,8 @@ namespace mfv {
     void set_sig(TH1D* h) {
       check_n_bins(h);
       h_sig = h;
-      a_sig = h->GetArray();
+      for (int i = 1; i <= n_bins; ++i)
+        a_sig[i] = h->GetBinContent(i);
     }
 
     void set_data_no_check(TH1D* h) {
@@ -423,6 +425,7 @@ namespace mfv {
 
       env("mfvo2t_fitter" + uname),
       print_level(env.get_int("print_level", -1)),
+      save_plots(env.get_bool("save_plots", true)),
       inject_in_last_bin(env.get_int("inject_in_last_bin", 0)),
       bkg_gaussians(env.get_bool("bkg_gaussians", true)),
       barlow_beeston(env.get_bool("barlow_beeston", true)),
@@ -442,8 +445,10 @@ namespace mfv {
       do_signif(env.get_bool("do_signif", true)),
       do_limit(env.get_bool("do_limit", true)),
       only_fit(env.get_bool("only_fit", false)),
+      n_toy_cls(env.get_int("n_toy_cls", 10000)),
+      do_cls(env.get_bool("do_cls", true)),
       i_limit_job(env.get_int("i_limit_job", -1)),
-      n_toy_limit(env.get_int("n_toy_limit", 2000)),
+      n_toy_limit(env.get_int("n_toy_limit", 10000)),
       sig_limit_start(env.get_double("sig_limit_start", 0.01)),
       sig_limit_stop(env.get_double("sig_limit_stop", 250)),
       sig_limit_step(env.get_double("sig_limit_step", 0.25)),
@@ -475,6 +480,7 @@ namespace mfv {
     printf("do_signif? %i\n", do_signif);
     printf("do_limit? %i\n", do_limit);
     printf("only_fit? %i\n", only_fit);
+    printf("do_cls? %i  n_toy_cls: %i\n", do_cls, n_toy_cls);
     printf("i_limit_job: %i\n", i_limit_job);
     printf("n_toy_limit: %i (~%f uncert @ 0.05)\n", n_toy_limit, sqrt(0.05*0.95/n_toy_limit));
     printf("sig_limit_scan: %f-%f in %f steps\n", sig_limit_start, sig_limit_stop, sig_limit_step);
@@ -503,6 +509,8 @@ namespace mfv {
     t_config->Branch("fluctuate_toys_shapes", const_cast<bool*>(&fluctuate_toys_shapes));
     t_config->Branch("n_toy_signif", const_cast<int*>(&n_toy_signif));
     t_config->Branch("n_toy_limit", const_cast<int*>(&n_toy_limit));
+    t_config->Branch("n_toy_cls", const_cast<int*>(&n_toy_cls));
+    t_config->Branch("do_cls", const_cast<bool*>(&do_cls));
     t_config->Branch("sig_limit_start", const_cast<double*>(&sig_limit_start));
     t_config->Branch("sig_limit_step", const_cast<double*>(&sig_limit_step));
     t_config->Branch("sig_eff", const_cast<double*>(&sig_eff));
@@ -544,6 +552,7 @@ namespace mfv {
     t_fit_info->Branch("fs_prob", &fit_stat.prob);
     t_fit_info->Branch("fs_ks", &fit_stat.ks);
     t_fit_info->Branch("pval_signif", &pval_signif);
+    t_fit_info->Branch("pval_cls", &pval_signif);
     t_fit_info->Branch("sig_limits", &sig_limits);
     t_fit_info->Branch("pval_limits", &pval_limits);
     t_fit_info->Branch("pval_limit_errs", &pval_limit_errs);
@@ -687,29 +696,13 @@ namespace mfv {
     return h;
   }
 
-  TH1D* Fitter::shorten_hist(TH1D* h, bool save) {
-    std::vector<double> bins = Template::binning(true);
-    TH1D* h_short = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_shortened", h->GetName()), &bins[0]);
-    // Splitting the last bin puts its contents in the overflow -- move back into last bin.
-    int n = h_short->GetNbinsX();
-    double v = h_short->GetBinContent(n+1);
-    double e = h_short->GetBinError(n+1);
-    h_short->SetBinContent(n+1, 0);
-    h_short->SetBinError  (n+1, 0);
-    h_short->SetBinContent(n, v);
-    h_short->SetBinError  (n, e);
-    if (!save)
-      h_short->SetDirectory(0);
-    return h_short;
-  }
-
   void Fitter::scan_template_chi2(const test_stat_t& t) {
     TCanvas* c_scan_templates = new TCanvas("c_scan_templates");
 
     std::vector<TH1D*> hs;
 
     const int n_data = fit::h_data_real->Integral();
-    TH1D* h_data_shortened = shorten_hist(fit::h_data_real, false);
+    TH1D* h_data_shortened = Template::shorten_hist(fit::h_data_real, false);
     hs.push_back(h_data_shortened);
 
     TGraphAsymmErrors* tgae_data_shortened = jmt::poisson_intervalize(h_data_shortened);
@@ -722,7 +715,7 @@ namespace mfv {
 
     TH1D* h_bkg_fit = make_h_bkg("h_bkg_fit", t.h0.nuis_pars(), std::vector<double>());
     h_bkg_fit->SetDirectory(0);
-    TH1D* h_bkg_fit_shortened = shorten_hist(h_bkg_fit, false);
+    TH1D* h_bkg_fit_shortened = Template::shorten_hist(h_bkg_fit, false);
     hs.push_back(h_bkg_fit);
     hs.push_back(h_bkg_fit_shortened);
     h_bkg_fit_shortened->Scale(n_data / h_bkg_fit_shortened->Integral());
@@ -732,7 +725,7 @@ namespace mfv {
 
     TH1D* h_bkg_fit_bb = make_h_bkg("h_bkg_fit", t.h0.nuis_pars(), t.h0.A_bkg);
     h_bkg_fit_bb->SetDirectory(0);
-    TH1D* h_bkg_fit_bb_shortened = shorten_hist(h_bkg_fit_bb, false);
+    TH1D* h_bkg_fit_bb_shortened = Template::shorten_hist(h_bkg_fit_bb, false);
     hs.push_back(h_bkg_fit_bb);
     hs.push_back(h_bkg_fit_bb_shortened);
     h_bkg_fit_bb_shortened->Scale(n_data / h_bkg_fit_bb_shortened->Integral());
@@ -814,7 +807,7 @@ namespace mfv {
 
     for (int ibest = 0; ibest < Nbest; ++ibest) {
       Template* tmp = best_template[ibest];
-      TH1D* h = shorten_hist(tmp->h, false);
+      TH1D* h = Template::shorten_hist(tmp->h, false);
       hs.push_back(h);
       h->Scale(n_data / h->Integral());
       h->SetLineWidth(2);
@@ -854,9 +847,10 @@ namespace mfv {
           TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));
 
           for (TH1D** ph : {&h_bkg_fit, &h_sig_fit, &h_data_fit})
-            *ph = shorten_hist(*ph);
+            *ph = Template::shorten_hist(*ph, true);
 
           for (TH1D* h : {h_bkg_fit, h_sig_fit, h_data_fit}) {
+            if (!save_plots) h->SetDirectory(0);
             h->SetLineWidth(2);
             if (div)
               jmt::divide_by_bin_width(h);
@@ -873,6 +867,7 @@ namespace mfv {
           h_bkg_fit->Scale(ml.mu_bkg);
 
           TH1D* h_sum_fit = (TH1D*)h_sig_fit->Clone(TString::Format("h_sum_%s_fit_%s_%s_shortened", sb_or_b, bb_or_no, div_or_no));
+          if (!save_plots) h_sum_fit->SetDirectory(0);
           h_sum_fit->SetLineColor(kMagenta);
           h_sum_fit->Add(h_bkg_fit);
           for (TH1D* h : {h_sum_fit, h_data_fit})
@@ -891,7 +886,7 @@ namespace mfv {
           }
           h_sig_fit->Draw("same hist");
           h_bkg_fit->Draw("same hist");
-          c->Write();
+          if (save_plots) c->Write();
           delete c;
 
           for (TH1D* h : {h_sum_fit, h_data_fit, h_sig_fit, h_bkg_fit})
@@ -903,15 +898,17 @@ namespace mfv {
             h_sum_cumul->Scale(1/h_sum_cumul->Integral());
             h_data_cumul->Scale(1/h_data_cumul->Integral());
 
-            for (TH1D* h : {h_sum_cumul, h_data_cumul})
+            for (TH1D* h : {h_sum_cumul, h_data_cumul}) {
+              if (!save_plots) h->SetDirectory(0);
               jmt::cumulate(h, false);
+            }
 
             TCanvas* c2 = new TCanvas(TString::Format("c_%s_cumul_%s_%s", sb_or_b, bb_or_no, div_or_no));
             for (TH1D* h : {h_sum_cumul, h_data_cumul})
               h->SetStats(0);
             h_sum_cumul->Draw();
             h_data_cumul->Draw("same e");
-            c2->Write();
+            if (save_plots) c2->Write();
             delete c2;
             for (TH1D* h : {h_sum_cumul, h_data_cumul})
               h->SetStats(1);
@@ -928,6 +925,18 @@ namespace mfv {
                 ret.ks = ksd;
             }
             ret.prob = TMath::Prob(ret.chi2, ret.ndof);
+
+            if (!save_plots) {
+              delete h_sum_cumul;
+              delete h_data_cumul;
+            }
+          }
+
+          if (!save_plots) {
+            delete h_bkg_fit;
+            delete h_sig_fit;
+            delete h_data_fit;
+            delete h_sum_fit;
           }
         }
       }
@@ -1199,6 +1208,13 @@ namespace mfv {
     for (int i = 0; i < inject_in_last_bin; ++i)
       h_data_temp->Fill(2);
     fit::h_data_real = Template::finalize_binning(h_data_temp);
+    if (0) {
+      printf("duhing\n");
+      std::vector<double> duh = { 7, 215, 49, 0, 0, 0 };
+      assert(int(duh.size()) == fit::n_bins);
+      for (int i = 0; i < fit::n_bins; ++i)
+        fit::h_data_real->SetBinContent(i+1, duh[i]);
+    }
     fit::set_data_real();
     const int n_data = fit::h_data_real->Integral();
     printf("Fitter: data histogram: ");
@@ -1211,10 +1227,12 @@ namespace mfv {
 
     dtoy->mkdir("fit_results")->cd();
 
-    for (int i = 1; i <= fit::n_bins; ++i) {
-      const int nn(0.8*(n_data + sqrt(n_data) * 3));
-      h_signif_toy.push_back(new TH1F(TString::Format("h_signif_toys_bin_%i", i), "", nn, 0, nn));
-      h_limit_toy.push_back(new TH1F(TString::Format("h_limit_toys_bin_%i", i), "", nn, 0, nn));
+    if (save_plots) {
+      for (int i = 1; i <= fit::n_bins; ++i) {
+        const int nn(0.8*(n_data + sqrt(n_data) * 3));
+        h_signif_toy.push_back(new TH1F(TString::Format("h_signif_toys_bin_%i", i), "", nn, 0, nn));
+        h_limit_toy.push_back(new TH1F(TString::Format("h_limit_toys_bin_%i", i), "", nn, 0, nn));
+      }
     }
 
     printf("Fitter: toy: %i  n_sig_true: %.1f  n_bkg_true: %.1f  true_pars:", toy, true_pars[0], true_pars[1]);
@@ -1250,13 +1268,15 @@ namespace mfv {
     TH1D* h_bkg_obs_0 = make_h_bkg("h_bkg_obs_0", t_obs_0.h0.nuis_pars(), t_obs_0.h0.A_bkg);
 
     pval_signif = 1;
+    pval_cls = 1;
+    double pval_cls_err = 0;
 
     const int save_print_level = print_level;
     const int save_extra_prints = fit::extra_prints;
     print_level = -1;
     fit::extra_prints = 0;
 
-    draw_likelihood(t_obs_0);
+    if (save_plots) draw_likelihood(t_obs_0);
     //scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
 
@@ -1280,8 +1300,9 @@ namespace mfv {
         const int n_sig_signif = 0;
         const int n_bkg_signif = rand->Poisson(n_data);
         make_toy_data(i_toy_signif, -1, -1, n_sig_signif, n_bkg_signif, h_bkg_obs_0);
-        for (int i = 1; i <= fit::n_bins; ++i)
-          h_signif_toy[i-1]->Fill(fit::h_data->GetBinContent(i));
+        if (save_plots)
+          for (int i = 1; i <= fit::n_bins; ++i)
+            h_signif_toy[i-1]->Fill(fit::h_data->GetBinContent(i));
       
         const test_stat_t t = calc_test_stat(0);
         if (t.t >= t_obs_0.t)
@@ -1337,8 +1358,9 @@ namespace mfv {
           make_toy_data(-1, -1, i_limit_job, 0, rand->Poisson(n_data), h_bkg_obs_0);
           h_toy_expected = (TH1D*)fit::h_data_toy->Clone("h_toy_expected");
           h_toy_expected->SetDirectory(0);
-          for (int i = 1; i <= fit::n_bins; ++i)
-            h_limit_toy[i-1]->Fill(fit::h_data_toy->GetBinContent(i));
+          if (save_plots)
+            for (int i = 1; i <= fit::n_bins; ++i)
+              h_limit_toy[i-1]->Fill(fit::h_data_toy->GetBinContent(i));
           if (print_subtoys && i_toy_expected < i_limit_job) {
             printf("burning toy [ ");
             for (int i = 1; i <= fit::n_bins; ++i)
@@ -1368,6 +1390,63 @@ namespace mfv {
         draw_likelihood(t101, "1p01");
 
         sig_limit_scan = 1e99;
+      }
+
+      if (do_cls) {
+        fit::n_calls = 0;
+        TStopwatch tsw_cls;
+
+        if (i_limit_job < 0)
+          fit::set_data_real(); 
+        else
+          fit::set_data_no_check(h_toy_expected);
+
+        const test_stat_t t_obs_cls = calc_test_stat(0);
+        t_obs_cls.print("t_obs_cls");
+
+        printf("throwing %i toys for p_b for CLs:\n", n_toy_cls);
+        jmt::ProgressBar pb_cls(50, n_toy_cls);
+        if (!print_toys)
+          pb_cls.start();
+
+        int n_toy_cls_t_ge_obs = 0;
+        for (int i_toy_cls = 0; i_toy_cls < n_toy_cls; ++i_toy_cls) {
+          const int n_sig_cls = 0;
+          const int n_bkg_cls = rand->Poisson(n_data);
+          make_toy_data(i_toy_cls, -1, -1, n_sig_cls, n_bkg_cls, h_bkg_obs_0);
+
+          const test_stat_t t = calc_test_stat(0);
+          if (t.t >= t_obs_cls.t)
+            ++n_toy_cls_t_ge_obs;
+
+          if (print_toys) {
+            if (print_subtoys) {
+              printf("  cls toy %i nsig 0 nbkg %i n'data' %i [ ", i_toy_cls, n_bkg_cls, n_data);
+              for (int i = 1; i <= fit::n_bins; ++i)
+                printf("%i ", int(fit::h_data->GetBinContent(i)));
+              printf("] ");
+              t.print("t_cls", -1, "    ");
+            }
+            //t.print("t_cls toy", i_toy_cls);
+          }
+          else
+            ++pb_cls;
+
+          if (save_toys) {
+            jmt::vthrow("save cls toys not implemented");
+          }
+        }
+
+        assert(n_toy_cls_t_ge_obs > 5);
+
+        const double T = 1./n_toy_cls;
+        const double p_hat = 1 - double(n_toy_cls_t_ge_obs) / n_toy_cls;
+        pval_cls = (p_hat + T/2)/(1 + T);
+        pval_cls_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+        
+        printf("\npval_cls: %e +- %e\n", pval_cls, pval_cls_err); fflush(stdout);
+        printf("n_calls: %i time for cls: ", fit::n_calls); tsw_cls.Print();
+        printf("\n");
       }
 
       while (sig_limit_scan < sig_limit_hi) {
@@ -1436,8 +1515,8 @@ namespace mfv {
 
         const double T = 1./n_toy_limit;
         const double p_hat = double(n_toy_limit_t_ge_obs) / n_toy_limit;
-        const double pval_limit = (p_hat + T/2)/(1 + T);
-        const double pval_limit_err = sqrt(p_hat * (1 - p_hat) * T + T*T/4)/(1 + T);
+        const double pval_limit = (p_hat + T/2)/(1 + T) / pval_cls;
+        const double pval_limit_err = sqrt((p_hat * (1 - p_hat) * T + T*T/4)/(1 + T) / pow(pval_cls, 2) + pow(pval_cls_err, 2));
         const double pval_limit_sglo = pval_limit - n_sigma_away_lo * pval_limit_err;
         const double pval_limit_sghi = pval_limit + n_sigma_away_hi * pval_limit_err;
 
@@ -1492,7 +1571,10 @@ namespace mfv {
         sig_limit_fit_b_err = eb;
         sig_limit_fit_prob = res->Prob();
         g->SetName("g_limit_bracket_fit");
-        g->Write();
+        if (save_plots)
+          g->Write();
+        else
+          delete g;
 
         printf("  *** done bracketing (%lu points), y = %.2f at %f +- %f (prob: %f)\n", bracket_sig_limit.size(), limit_alpha, sig_limit, sig_limit_err, sig_limit_fit_prob);
       }
