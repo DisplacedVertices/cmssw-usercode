@@ -31,6 +31,8 @@ events_per = 200 if not events_per else events_per[0]
 
 return_data = 'return' in sys.argv
 
+keep_gen = 'keep_gen' in sys.argv
+
 ################################################################################
 
 crab_cfg = '''
@@ -65,7 +67,7 @@ if return_data:
 else:
     crab_cfg = crab_cfg.replace('RETURN_OR_COPY', '''
 copy_data = 1
-storage_element = T3_US_FNALLPC
+storage_element = T3_US_Cornell
 publish_data = 1
 publish_data_name = mfv_%(name)s_v20
 dbs_url_for_publication = phys03
@@ -109,11 +111,13 @@ if _final:
     _final.process.source.fileNames = ['file:reco.root']
     _final.process.maxEvents.input = -1
     _final.input_is_pythia8(_final.process)
+    if keep_gen:
+        _final.out.outputCommands += ['keep *_genParticles_*_*', 'keep *_ak5GenJets_*_*']
 
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
 save_git_status(os.path.join(dir, 'gitstatus'))
 
-def submit(name, tau0=None, mass=None, decay_ids=None):
+def submit(name, tau0=None, mass=None, decay_idses=None):
     print name
     is_signal = tau0 is not None and mass is not None
     if not is_signal:
@@ -171,8 +175,9 @@ def submit(name, tau0=None, mass=None, decay_ids=None):
     elif 'neutralino' in name:
         new_py += '\nset_neutralino_tau0(process, %e)\n' % tau0
         set_masses(mass+5, mass)
-    #elif 'empirical' in name:
-    #    new_py += '\nset_empirical_decay(process, %r)\n' % 
+    elif 'empirical' in name:
+        new_py += '\nset_neutralino_tau0(process, %e)\n' % tau0
+        set_empirical_decay(mass+5, mass, decay_idses)
     elif 'ttbar' in name:
         new_py += '\nttbar(process)\n'
     else:
