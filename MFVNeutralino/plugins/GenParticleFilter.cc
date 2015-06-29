@@ -175,8 +175,8 @@ if (doing_h2xqq) {
     mag(v[0][0], v[0][1]),
     mag(v[1][0], v[1][1])
   };
-  const double dvv = mag(v[0][0] - v[1][0],
-                         v[0][1] - v[1][1]);
+  //const double dvv = mag(v[0][0] - v[1][0],
+  //                       v[0][1] - v[1][1]);
   const double rho0 = dbv[0];
   const double rho1 = dbv[1];
 

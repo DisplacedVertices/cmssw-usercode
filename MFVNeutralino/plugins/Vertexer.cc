@@ -508,8 +508,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
     bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
 
-    if (use && remove_tracks_frac > 0 && rng->getEngine().flat() < remove_tracks_frac)
-      use = false;
+    if (use && remove_tracks_frac > 0) {
+      edm::Service<edm::RandomNumberGenerator> rng;
+      CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
+      if (rng_engine.flat() < remove_tracks_frac)
+        use = false;
+    }
 
     if (use && (max_all_track_dxyerr > 0 || max_all_track_d3derr > 0)) {
       reco::TransientTrack ttk = tt_builder->build(tk);
