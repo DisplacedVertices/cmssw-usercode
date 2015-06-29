@@ -4,6 +4,7 @@ debug = 'debug' in sys.argv
 
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root']
 process.TFileService.fileName = 'gen_histos.root'
+file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')
@@ -30,7 +31,6 @@ if debug:
                                        printVertex = cms.untracked.bool(True),
                                        )
     process.p.insert(0, process.printList)
-    file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
