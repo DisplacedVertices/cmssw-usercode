@@ -677,6 +677,8 @@ mfv_neutralino_tau1000um_M0400.dataset = '/mfv_neutralino_tau1000um_M0400/tucker
 mfv_neutralino_tau1000um_M0400.dbs_url_num = 3
 mfv_neutralino_tau0100um_M0400.dataset = '/mfv_neutralino_tau0100um_M0400/tucker-repubmerge-782402162757f9765800c18b58805910/USER'
 mfv_neutralino_tau0100um_M0400.dbs_url_num = 3
+mfv_neutralino_tau9900um_M0400.dataset = '/mfv_neutralino_tau9900um_M0400/tucker-repubmerge-782402162757f9765800c18b58805910/USER'
+mfv_neutralino_tau9900um_M0400.dbs_url_num = 3
 
 # Overrides done.
 
