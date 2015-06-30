@@ -112,7 +112,7 @@ if _final:
     _final.process.maxEvents.input = -1
     _final.input_is_pythia8(_final.process)
     if keep_gen:
-        _final.process.out.outputCommands += ['keep *_genParticles_*_*', 'keep *_ak5GenJets_*_*']
+        _final.process.out.outputCommands += ['keep *_genParticles_*_*', 'keep recoGenJets_ak5GenJets_*_*']
 
 os.system('mkdir -p ' + os.path.join(dir, 'psets'))
 save_git_status(os.path.join(dir, 'gitstatus'))
