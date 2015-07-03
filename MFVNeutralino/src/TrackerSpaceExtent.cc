@@ -12,6 +12,7 @@
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
 
+
 void TrackerSpaceExtents::fill(const edm::EventSetup& setup, const GlobalPoint& origin) {
   edm::ESHandle<GlobalTrackingGeometry> geometry;
   setup.get<GlobalTrackingGeometryRecord>().get(geometry);
@@ -76,7 +77,7 @@ NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp) con
   return ret;
 }
 
-SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp) const {
+SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, bool pixel_only) const {
   SpatialExtents ret;
 
   for (int ihit = 0, ie = hp.numberOfHits(); ihit < ie; ++ihit) {
@@ -96,10 +97,10 @@ SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp) co
     map_t::const_iterator it = map.find(std::make_pair(int(sub), int(subsub)));
     assert(it != map.end());
     const TrackerSpaceExtent& extent = it->second;
-    if (sub == PixelSubdetector::PixelBarrel || sub == StripSubdetector::TIB || sub == StripSubdetector::TOB) {
+    if (sub == PixelSubdetector::PixelBarrel || (!pixel_only && (sub == StripSubdetector::TIB || sub == StripSubdetector::TOB))) {
       ret.update_r(extent.avg_r);
     }
-    else if (sub == PixelSubdetector::PixelEndcap || sub == StripSubdetector::TID || sub == StripSubdetector::TEC) {
+    else if (sub == PixelSubdetector::PixelEndcap || (!pixel_only && (sub == StripSubdetector::TID || sub == StripSubdetector::TEC))) {
       ret.update_z(extent.avg_z);
     }
   }
