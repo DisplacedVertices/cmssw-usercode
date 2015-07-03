@@ -21,6 +21,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "JMTucker/MFVNeutralino/interface/TrackerSpaceExtent.h"
 
 namespace {
   template <typename T>
@@ -184,6 +185,11 @@ private:
   TH1F* h_seed_track_nhits;
   TH1F* h_seed_track_npxhits;
   TH1F* h_seed_track_nsthits;
+  TH1F* h_seed_track_npxlayers;
+  TH1F* h_seed_track_deltar2px;
+  TH1F* h_seed_track_deltaz2px;
+  TH1F* h_seed_track_deltar3px;
+  TH1F* h_seed_track_deltaz3px;
   TH2F* h_seed_pair_pt;
   TH2F* h_seed_pair_dxy;
   TH2F* h_seed_pair_nhits;
@@ -321,8 +327,13 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       for (int j = 0; j < 5; ++j)
         h_seed_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
     h_seed_track_nhits               = fs->make<TH1F>("h_seed_track_nhits",               "",  40,   0,     40);
-    h_seed_track_npxhits             = fs->make<TH1F>("h_seed_track_npxhits",              "",  12,   0,     12);
-    h_seed_track_nsthits             = fs->make<TH1F>("h_seed_track_nsthits",              "",  28,   0,     28);
+    h_seed_track_npxhits             = fs->make<TH1F>("h_seed_track_npxhits",             "",  12,   0,     12);
+    h_seed_track_nsthits             = fs->make<TH1F>("h_seed_track_nsthits",             "",  28,   0,     28);
+    h_seed_track_npxlayers           = fs->make<TH1F>("h_seed_track_npxlayers",           "",   6,   0,      6);
+    h_seed_track_deltar2px           = fs->make<TH1F>("h_seed_track_deltar2px",           "", 100,   0,     10);
+    h_seed_track_deltaz2px           = fs->make<TH1F>("h_seed_track_deltaz2px",           "", 100,   0,     20);
+    h_seed_track_deltar3px           = fs->make<TH1F>("h_seed_track_deltar3px",           "", 100,   0,     10);
+    h_seed_track_deltaz3px           = fs->make<TH1F>("h_seed_track_deltaz3px",           "", 100,   0,     20);
     h_seed_pair_pt                   = fs->make<TH2F>("h_seed_pair_pt",                   "",  50,   0,    500,    50,   0,    500);
     h_seed_pair_dxy                  = fs->make<TH2F>("h_seed_pair_dxy",                  "",  40,  -0.1,    0.1,  40,  -0.1,    0.1);
     h_seed_pair_nhits                = fs->make<TH2F>("h_seed_pair_nhits",                "",  15,   0,     45,    15,   0,     45);
@@ -416,11 +427,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   //////////////////////////////////////////////////////////////////////
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
+  TrackerSpaceExtents tracker_extents;
+
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
   std::vector<reco::TrackRef> all_tracks;
   std::vector<reco::TransientTrack> seed_tracks;
   std::map<reco::TrackRef, size_t> seed_track_ref_map;
+
+  tracker_extents.fill(setup, GlobalPoint(bs_x, bs_y, bs_z));
 
   if (use_tracks) {
     edm::Handle<reco::TrackCollection> tracks;
@@ -505,6 +520,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const int nhits = tk->hitPattern().numberOfValidHits();
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
     bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
+    SpatialExtents se = tracker_extents.extentInRAndZ(tk->hitPattern(),npxhits != 0);
 
     if (use && remove_tracks_frac > 0 && rng->getEngine().flat() < remove_tracks_frac)
       use = false;
@@ -565,6 +581,19 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         h_seed_track_nhits->Fill(nhits);
         h_seed_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
         h_seed_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
+	h_seed_track_npxlayers->Fill(tk->hitPattern().pixelLayersWithMeasurement());
+	if(tk->hitPattern().numberOfValidPixelHits()==2) {
+	  double deltaR = se.max_r - se.min_r;
+	  double deltaZ = se.max_z - se.min_z;
+	  h_seed_track_deltar2px->Fill(deltaR);
+	  h_seed_track_deltaz2px->Fill(deltaZ);
+	}
+	if(tk->hitPattern().numberOfValidPixelHits()==3) {
+	  double deltaR = se.max_r - se.min_r;
+	  double deltaZ = se.max_z - se.min_z;
+	  h_seed_track_deltar3px->Fill(deltaR);
+	  h_seed_track_deltaz3px->Fill(deltaZ);
+	}
       }
     }
   }
