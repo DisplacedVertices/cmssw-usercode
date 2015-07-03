@@ -225,4 +225,4 @@ def crab_output_files(working_dir, jobs=None):
         d = crabCommand('getoutput', '--xrootd', '--jobids=%s' % crabify_list(jobs, simple=True), dir=working_dir)
     else:
         d = crabCommand('getoutput', '--xrootd', dir=working_dir)
-    return d['xrootd']
+    return d.get('xrootd', [])
