@@ -2,7 +2,7 @@
 
 # author: J. Tucker
 
-import os, sys, time, datetime, optparse, pprint, threading, pdb
+import os, sys, time, datetime, optparse, pprint, pdb, ctypes, multiprocessing
 from cStringIO import StringIO
 from JMTucker.Tools.CRAB3Tools import *
 
@@ -15,8 +15,8 @@ parser.add_option('-w', '--wait-time', type='int', default=60*10,
                   help='Time between passes, in seconds. Default is %default.')
 parser.add_option('-d', '--delay', action='store_true', default=False,
                   help='Wait once before starting passes.')
-parser.add_option('--max-threads', type='int', default=1,
-                  help='Max number of status-checking threads to run at once.')
+parser.add_option('--max-processes', type='int', default=5,
+                  help='Max number of status-checking processes to run at once.')
 parser.add_option('--no-status-until-none-done', action='store_false', dest='status_until_none_done', default=True,
                   help='In each iteration, by default we loop over status->getoutput->status->... until none are in Done. I.e. we resolve all Done jobs to their Retrieved_X_Y status codes before trying to resubmit/displaying the status code table/etc. Supplying this option will return us to the previous behavior of only doing status->getoutput per iteration.')
 parser.add_option('--resub-any', action='store_true', default=False,
@@ -56,7 +56,7 @@ parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_z
 parser.add_option('--use-debugger', action='store_true', default=False,
                   help='Enter the debugger upon thrown exception.')
 parser.add_option('--run-in-debugger', action='store_true', default=False,
-                  help='Run the whole threadloop in the debugger.')
+                  help='Run the whole loop in the debugger.')
 parser.add_option('--post-process', type='str', metavar='FILE.PY',
                   help='After each check_fcn call, call the function "post_process_fcn" defined in FILE.PY, which takes the directory name and results dict as its arguments.')
 options, args = parser.parse_args()
@@ -170,12 +170,16 @@ def check_fcn(crab_dir):
     open(cachefile, 'wt').write('{"crab_project_directory": ""}')
     os.environ['CRAB3_CACHE_FILE'] = cachefile
 
-    suppress_stdout = options.max_threads == 1
+    suppress_stdout = True #options.max_processes == 1
     if suppress_stdout:
         old_stdout = sys.stdout
         sys.stdout = buf = StringIO()
 
-    res = crabCommand('status', '--long', dir=crab_dir)
+    try:
+        res = crabCommand('status', '--long', dir=crab_dir)
+    except httplib.HTTPException, e:
+        res['jobList'] = []
+        res['HTTPException'] = e
 
     if suppress_stdout:
         res['stdout'] = buf.getvalue()
@@ -277,38 +281,30 @@ while 1:
     else:
         # Get the statuses of all the dirs. 
         results = {}
-        threads = []
-        print 'launching threads...'
-        def threadable_check_fcn(d):
-            if options.run_in_debugger:
-                print 'running thread for %s in debugger' % d
-                pdb.set_trace()
+
+        def processable_check_fcn(d):
+            #if options.run_in_debugger:
+            #    print 'running process for %s in debugger' % d
+            #    pdb.set_trace()
             print 'checking', d
-            results[d] = check_fcn(d)
+            #results[d] = check_fcn(d)
+            ret = check_fcn(d)
             if options.post_process:
-                post_process_fcn(d, results[d])
-        for d in dirs:
-            while threading.active_count() - 1 >= options.max_threads: # -1 because count includes this main thread
-                time.sleep(0.1)
-            thread = threading.Thread(target=threadable_check_fcn, args=(d,))
-            threads.append((d,thread))
-            thread.start()
-        sleep_count = 0
-        msg_interval = 600
-        while threading.active_count() > 1:
-            if sleep_count / msg_interval > 0 and sleep_count % msg_interval == 0 and not options.run_in_debugger:
-                msgs = []
-                for d,t in threads:
-                    if t.is_alive():
-                        prog = None # crab_get_output_progress(d)
-                        if prog is None:
-                            msgs.append(d)
-                        else:
-                            msgs.append('%s(%i/%i)' % (d, prog[0], prog[1]))
-                print 'waiting for these threads:', ' '.join(msgs)
-            sleep_count += 1
-            time.sleep(0.1)
-        print 'done waiting for threads!'
+                post_process_fcn(d, ret)
+            return d, ret
+
+        if options.max_processes == 1:
+            results = [processable_check_fcn(d) for d in dirs]
+        else:
+            print 'launching processes...'
+            pool = multiprocessing.Pool(options.max_processes)
+            results = pool.map(processable_check_fcn, dirs)
+            pool.close()
+            pool.join()
+            print 'done waiting for processes!'
+
+        results = dict(results)
+
         crab_cleanup()
         os.system('mkdir -p /tmp/%s' % os.environ['USER'])
         open('/tmp/%s/crmontmp' % os.environ['USER'], 'wt').write(repr(results))
