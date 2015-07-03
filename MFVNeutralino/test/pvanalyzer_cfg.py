@@ -11,7 +11,10 @@ process.Analyzer = cms.EDAnalyzer('PVAnalyzer',primary_vertices_src = cms.InputT
                                   track_src = cms.InputTag('generalTracks'),
                                   beamspot_src = cms.InputTag('offlineBeamSpot'),
                                   use_only_pv_tracks = cms.bool(True),
-                                  use_only_pvs_tracks = cms.bool(True)
+                                  use_only_pvs_tracks = cms.bool(True),
+                                  maxNormChi2 = cms.double(20.0),
+                                  minPxLayer = cms.int32(2),
+                                  minSilLayer = cms.int32(5)
                                   )
 process.TFileService = cms.Service("TFileService", fileName = cms.string('PVAnalyzer_histo.root'))
 process.p = cms.Path(process.Analyzer)
