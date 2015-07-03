@@ -2,7 +2,7 @@
 
 # author: J. Tucker
 
-import os, sys, time, datetime, optparse, pprint, pdb, ctypes, multiprocessing
+import os, sys, time, datetime, optparse, pprint, pdb, ctypes, multiprocessing, httplib
 from cStringIO import StringIO
 from JMTucker.Tools.CRAB3Tools import *
 
@@ -178,8 +178,10 @@ def check_fcn(crab_dir):
     try:
         res = crabCommand('status', '--long', dir=crab_dir)
     except httplib.HTTPException, e:
+        res = {}
         res['jobList'] = []
         res['HTTPException'] = e
+        res['status'] = 'HTTPException'
 
     if suppress_stdout:
         res['stdout'] = buf.getvalue()
@@ -280,7 +282,6 @@ while 1:
         dirs = sorted(results.keys())
     else:
         # Get the statuses of all the dirs. 
-        results = {}
 
         def processable_check_fcn(d):
             #if options.run_in_debugger:
@@ -312,11 +313,13 @@ while 1:
     # Print task statuses. I don't know what all these mean yet.
     print
     print_header('Task statuses:')
-    max_w = max(len(d) for d in dirs)
+    tasks_by_status = defaultdict(list)
     for d in dirs:
-        if not results.has_key(d):
-            continue
-        print '%s: %s' % (d.ljust(max_w + 1), results[d]['status'])
+        tasks_by_status[results[d]['status']].append(d)
+    for k,v in tasks_by_status.iteritems():
+        print_subheader('%s:' % k)
+        for d in sorted(v):
+            print d
 
     # Print a recap of all the status summaries.
     print
