@@ -2,13 +2,15 @@
 
 # author: J. Tucker
 
-import glob, os, re, subprocess, sys, time, getpass, zlib
-import xml.etree.cElementTree
-from collections import defaultdict
+import getpass, glob, json, os, pycurl, sys, zlib
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
+from collections import defaultdict
+from cStringIO import StringIO
+from pprint import pprint
 from JMTucker.Tools.general import bool_from_argv, popen
 from JMTucker.Tools.hadd import hadd
 from CRABAPI.RawCommand import crabCommand
+from CRABClient.UserUtilities import getUsernameFromSiteDB
 
 username = getpass.getuser()
 mycrab_tmp_dir = '/tmp/%s/mycrab' % username
@@ -226,3 +228,69 @@ def crab_output_files(working_dir, jobs=None):
     else:
         d = crabCommand('getoutput', '--xrootd', dir=working_dir)
     return d.get('xrootd', [])
+
+class UserCacheHelper:
+   def __init__(self, proxy=None, user=None):
+      if proxy is None:
+         proxy = os.getenv('X509_USER_PROXY')
+         if not proxy or not os.path.isfile(proxy):
+            raise CRABToolsException('X509_USER_PROXY is %r, get grid proxy first' % proxy)
+      self.proxy = proxy
+
+      if user is None:
+         user = getUsernameFromSiteDB()
+         if not user:
+            raise CRABToolsException('could not get username from sitedb, returned %r' % user)
+      self.user = user
+
+   def _curl(self, url):
+      buf = StringIO()
+      c = pycurl.Curl()
+      c.setopt(pycurl.URL, str(url))
+      c.setopt(pycurl.WRITEFUNCTION, buf.write)
+      c.setopt(pycurl.SSL_VERIFYPEER, False)
+      c.setopt(pycurl.SSLKEY, self.proxy)
+      c.setopt(pycurl.SSLCERT, self.proxy)
+      c.perform()
+      j = buf.getvalue().replace('\n','')
+      try:
+         return json.loads(j)['result']
+      except ValueError:
+         raise CRABToolsException('json decoding problem: %r' % j)
+
+   def _only(self, l):
+      if len(l) != 1:
+         raise CRABToolsException('return value was supposed to have one element, but: %r' % l)
+      return l[0]
+
+   def listusers(self):
+      return self._curl('https://cmsweb.cern.ch/crabcache/info?subresource=listusers')
+
+   def userinfo(self):
+      return self._only(self._curl('https://cmsweb.cern.ch/crabcache/info?subresource=userinfo&username=' + self.user))
+
+   def quota(self):
+      return self._only(self.userinfo()['used_space'])
+
+   def filelist(self):
+      return self.userinfo()['file_list']
+
+   def fileinfo(self, hashkey):
+      return self._only(self._curl('https://cmsweb.cern.ch/crabcache/info?subresource=fileinfo&hashkey=' + hashkey))
+
+   def fileinfos(self):
+      return [self.fileinfo(x) for x in self.filelist() if '.log' not in x] # why doesn't it work for e.g. '150630_200330:tucker_crab_repubmerge_tau0300um_M0400_TaskWorker.log' (even after quoting the :)?
+
+   def fileremove(self, hashkey):
+      x = self._only(self._curl('https://cmsweb.cern.ch/crabcache/info?subresource=fileremove&hashkey=' + hashkey))
+      if x:
+         raise CRABToolsException('fileremove failed: %r' % x)
+
+if __name__ == '__main__':
+   h = UserCacheHelper()
+   if False:
+      for x in h.filelist():
+         if '.log' in x or x == '18420b98cfaa556dc2c94fe2acb83b451806144b5d284763eae5f0a354b3f34b':
+            continue
+         print 'remove', x
+         h.fileremove(x)
