@@ -166,17 +166,43 @@ def new_plots():
     import bigsigscan as bss
 
     z = [
-        ('01000um', m,
-         'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
-         'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)) for m,i in zip(bss.masses, bss.tau2range[1000])]
 
-    print z
+        ('00300um', '#tau = 300 #mum', 60, 
+         [
+          ('00300um', m,
+           'crab3/One2Two_tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+           'crab3/One2Two_tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
+           ) for m,i in zip(bss.masses, bss.tau2range[300])
+          ]
+         ),
+     
+        ('tau01000um', '#tau = 1 mm', 6,
+         [
+          ('01000um', m,
+           'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+           'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
+           ) for m,i in zip(bss.masses, bss.tau2range[1000])
+          ]
+         ),
 
-    d = defaultdict(list)
+        ('tau10000um', '#tau = 10 mm', 3,
+         [
+          ('10000um', m,
+           'crab3/One2Two_tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+           'crab3/One2Two_tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
+           ) for m,i in zip(bss.masses, bss.tau2range[10000])
+          ]
+         ),
 
-    for x in z:
-        parse(d, *x)
-    make_plot(d, 'tau01000um', 'hello', 6)
+        ]
+
+    #print z
+
+    for name, title, y_range, parse_args in z:
+        d = defaultdict(list)
+        for x in parse_args:
+            parse(d, *x)
+        make_plot(d, name, title, y_range)
     
 #old_plots()
 

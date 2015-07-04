@@ -76,7 +76,7 @@ public:
   void fill(const edm::EventSetup&, const GlobalPoint& origin);
   void print() const;
   NumExtents numExtentInRAndZ(const reco::HitPattern&) const;
-  SpatialExtents extentInRAndZ(const reco::HitPattern&) const;
+  SpatialExtents extentInRAndZ(const reco::HitPattern&, bool pixel_only) const;
   int numHitsBehind(const reco::HitPattern&, const double r, const double z) const;
 
 private:

@@ -199,7 +199,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
   if (use_match_to_vertices) {
     bool ok = false;
 
-    const size_t nmatch = match_to_vertices->size() % 3;
+    const size_t nmatch = match_to_vertices->size() / 3;
     for (size_t imatch = 0; imatch < nmatch; ++imatch) {
       const double d = mag(vtx.x - (*match_to_vertices)[imatch*3 + 0],
                            vtx.y - (*match_to_vertices)[imatch*3 + 1],

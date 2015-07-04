@@ -5,6 +5,7 @@ debug = 'debug' in sys.argv
 process.source.fileNames = ['root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_hltrun2_M0400/mfv_hltrun2_M0400/b0221db6bdc577a56c275739395c3940/gen_10_1_r4s.root']
 file_event_from_argv(process)
 process.TFileService.fileName = 'gen_histos.root'
+file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.load('JMTucker.MFVNeutralino.GenHistos_cff')

@@ -140,6 +140,7 @@ def find_limit(name, tree):
             zzz += '_FEWPTS'
         
         limits.append(x_lf)
+        print 'LIMIT USED FOR', j, ':', x_lf
         l = ROOT.TLine(0, -2.9957, 100, -2.9957)
         l.Draw()
         ps.save('%s_%i%s' % (name, j, zzz))
