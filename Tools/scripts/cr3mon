@@ -2,7 +2,7 @@
 
 # author: J. Tucker
 
-import os, sys, time, datetime, optparse, pprint, pdb, ctypes, multiprocessing, httplib
+import os, sys, time, datetime, optparse, pdb, ctypes, multiprocessing, httplib
 from cStringIO import StringIO
 from JMTucker.Tools.CRAB3Tools import *
 
@@ -230,7 +230,7 @@ if options.dir_sort:
 dirs_done = []
 
 print 'crmon, called with options:'
-pprint.pprint(options.__dict__)
+pprint(options.__dict__)
 if options.fake_results:
     print 'using fake results dict from %s' % options.fake_results
 else:
@@ -294,17 +294,23 @@ while 1:
                 post_process_fcn(d, ret)
             return d, ret
 
-        if options.max_processes == 1:
-            results = [processable_check_fcn(d) for d in dirs]
-        else:
-            print 'launching processes...'
-            pool = multiprocessing.Pool(options.max_processes)
-            results = pool.map(processable_check_fcn, dirs)
-            pool.close()
-            pool.join()
-            print 'done waiting for processes!'
+        def process_em(dirs):
+            if options.max_processes == 1:
+                results = [processable_check_fcn(d) for d in dirs]
+            else:
+                print 'launching processes...'
+                pool = multiprocessing.Pool(options.max_processes)
+                results = pool.map(processable_check_fcn, dirs)
+                pool.close()
+                pool.join()
+                print 'done waiting for processes!'
+            return results
 
-        results = dict(results)
+        results = dict(process_em(dirs))
+        to_redo = [d for d,res in results.iteritems() if res.has_key('HTTPException')]
+        print 'redo these that had HTTPExceptions:'
+        pprint(to_redo)
+        results.update(dict(process_em(to_redo)))
 
         crab_cleanup()
         os.system('mkdir -p /tmp/%s' % os.environ['USER'])
@@ -428,7 +434,7 @@ while 1:
 
         status_columns = status_columns_short
 
-    status_column_format = ''.join('%' + str(len(status_column) + 2) + 's' for status_column in status_columns)
+    status_column_format = ''.join('%' + str(min(len(status_column) + 2, 6)) + 's' for status_column in status_columns)
 
     # The table format string: a left-justified column for the
     # directory names, followed by columns for all of the statuses
