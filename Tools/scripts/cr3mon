@@ -308,9 +308,10 @@ while 1:
 
         results = dict(process_em(dirs))
         to_redo = [d for d,res in results.iteritems() if res.has_key('HTTPException')]
-        print 'redo these that had HTTPExceptions:'
-        pprint(to_redo)
-        results.update(dict(process_em(to_redo)))
+        if to_redo:
+            print 'redo these that had HTTPExceptions:'
+            pprint(to_redo)
+            results.update(dict(process_em(to_redo)))
 
         crab_cleanup()
         os.system('mkdir -p /tmp/%s' % os.environ['USER'])
@@ -434,7 +435,7 @@ while 1:
 
         status_columns = status_columns_short
 
-    status_column_format = ''.join('%' + str(min(len(status_column) + 2, 6)) + 's' for status_column in status_columns)
+    status_column_format = ''.join('%' + str(max(len(status_column) + 2, 6)) + 's' for status_column in status_columns)
 
     # The table format string: a left-justified column for the
     # directory names, followed by columns for all of the statuses
