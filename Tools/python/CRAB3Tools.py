@@ -2,7 +2,7 @@
 
 # author: J. Tucker
 
-import getpass, glob, json, os, pycurl, sys, zlib
+import cPickle, getpass, glob, json, os, pycurl, sys, zlib
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 from collections import defaultdict
 from cStringIO import StringIO
@@ -229,6 +229,9 @@ def crab_output_files(working_dir, jobs=None):
         d = crabCommand('getoutput', '--xrootd', dir=working_dir)
     return d.get('xrootd', [])
 
+def crab_requestcache(working_dir):
+   return cPickle.load(open(os.path.join(working_dir, '.requestcache'), 'rb'))
+
 class UserCacheHelper:
    def __init__(self, proxy=None, user=None):
       if proxy is None:
@@ -252,11 +255,20 @@ class UserCacheHelper:
       c.setopt(pycurl.SSLKEY, self.proxy)
       c.setopt(pycurl.SSLCERT, self.proxy)
       c.perform()
+
       j = buf.getvalue().replace('\n','')
       try:
-         return json.loads(j)['result']
+         j = json.loads(j)
       except ValueError:
          raise CRABToolsException('json decoding problem: %r' % j)
+      
+      k = sorted(j.keys())
+      if k == ['result']:
+         return j['result']
+      elif k == ['desc', 'result'] and j['desc'].keys() == ['columns']:
+         return dict(zip(j['desc']['columns'], j['result']))
+      else:
+         return j
 
    def _only(self, l):
       if len(l) != 1:
@@ -294,3 +306,10 @@ if __name__ == '__main__':
             continue
          print 'remove', x
          h.fileremove(x)
+   elif False:
+      dirs = crab_dirs_from_argv()
+      for d in dirs:
+         rq = crab_requestcache(d)
+         name = rq['RequestName']
+         wf = h._curl('https://cmsweb.cern.ch/crabserver/prod/task?subresource=search&workflow=' + name)
+         print d.ljust(60), name.rjust(75), wf['tm_schedd'].rjust(30)
