@@ -307,11 +307,22 @@ while 1:
             return results
 
         results = dict(process_em(dirs))
-        to_redo = [d for d,res in results.iteritems() if res.has_key('HTTPException')]
+
+        def redoable(res):
+            return res.has_key('HTTPException') or \
+                   'Timeout when waiting for remote host' in res.get('taskFailureMsg', '')
+
+        to_redo = [d for d, res in results.iteritems() if redoable(res)]
+
         if to_redo:
-            print 'redo these that had HTTPExceptions:'
+            print 'redo these that had possibly transient problems:'
             pprint(to_redo)
             results.update(dict(process_em(to_redo)))
+
+        for d,res in results.iteritems():
+            if res['jobsPerStatus'].keys() == ['crmonerror'] and not redoable(res):
+                print "for %s, no job list but not redoable either, here's the entire res" % d
+                print repr(res)
 
         crab_cleanup()
         os.system('mkdir -p /tmp/%s' % os.environ['USER'])
