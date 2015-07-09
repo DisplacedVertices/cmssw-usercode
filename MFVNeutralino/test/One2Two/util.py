@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, fnmatch, glob, httplib
+import os, sys, fnmatch, glob
 from pprint import pprint
 try:
     from JMTucker.Tools.CRAB3Tools import *
@@ -31,11 +31,8 @@ if 'lists' in sys.argv:
         try_count = 0
         while not files:
             if try_count > 0:
-                print 'retry'
-            try:
-                files = crab_output_files(d)
-            except httplib.HTTPException:
-                pass
+                print 'retry %i' % try_count
+            files = crab_output_files(d)
             try_count += 1
             if try_count == 4:
                 break
