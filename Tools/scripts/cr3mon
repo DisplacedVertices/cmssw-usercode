@@ -155,49 +155,6 @@ def backdoor_print(filename, l):
     print filename, 'is', fn
     print s
 
-def check_fcn(crab_dir):
-    # options.debug_output
-    # options.resub_any
-    # options.resub_done_stuck
-    # options.resub_none
-    # options.resub_site_control
-    # options.status_until_none_done
-    # options.resub_created
-    # options.resub_white_codes
-    # options.resub_black_codes
-
-    res = crab_command('status', '--long', dir=crab_dir)
-
-    jl = crab_job_lists_by_status(res)
-    if not jl:
-        jl = {'crmonerror': xrange(9999)}
-        res['jobsPerStatus'] = {'crmonerror': 9999}
-    res['jobListByStatus'] = jl
-
-    res['jobsPerStatusEx'] = d = dict(res['jobsPerStatus'])
-    if d.has_key('failed'):
-        del d['failed']
-        for job_num, job_info in res['jobs'].iteritems():
-            if job_info['State'] == 'failed':
-                state_ex = 'failed_%i' % job_info['Error'][0]
-                if d.has_key(state_ex):
-                    d[state_ex] += 1
-                else:
-                    d[state_ex] = 1
-
-    #if not options.keep_exe_code:
-    #    res_final = {}
-    #    for k,v in res.iteritems():
-    #        if k.startswith('Retrieved') and k.count('_') == 2:
-    #            k = k.split('_')
-    #            k = k[0] + '_' + k[-1]
-    #        if res_final.has_key(k):
-    #            res_final[k].extend(v)
-    #        else:
-    #            res_final[k] = v
-    #    res = res_final
-    return res
-
 dirs = crab_dirs_from_argv()
 
 if not dirs:
@@ -262,16 +219,58 @@ while 1:
     else:
         # Get the statuses of all the dirs. 
 
-        def processable_check_fcn(d):
+        def processable_check_fcn(crab_dir):
+            print 'checking', crab_dir
+
             #if options.run_in_debugger:
-            #    print 'running process for %s in debugger' % d
+            #    print 'running process for %s in debugger' % crab_dir
             #    pdb.set_trace()
-            print 'checking', d
-            #results[d] = check_fcn(d)
-            ret = check_fcn(d)
+
+            # options.debug_output
+            # options.resub_any
+            # options.resub_done_stuck
+            # options.resub_none
+            # options.resub_site_control
+            # options.status_until_none_done
+            # options.resub_created
+            # options.resub_white_codes
+            # options.resub_black_codes
+        
+            result = crab_command('status', '--long', dir=crab_dir)
+        
+            jl = crab_job_lists_by_status(result)
+            if not jl:
+                jl = {'crmonerror': xrange(9999)}
+                result['jobsPerStatus'] = {'crmonerror': 9999}
+            result['jobListByStatus'] = jl
+        
+            result['jobsPerStatusEx'] = d = dict(result['jobsPerStatus'])
+            if d.has_key('failed'):
+                del d['failed']
+                for job_num, job_info in result['jobs'].iteritems():
+                    if job_info['State'] == 'failed':
+                        state_ex = 'failed_%i' % job_info['Error'][0]
+                        if d.has_key(state_ex):
+                            d[state_ex] += 1
+                        else:
+                            d[state_ex] = 1
+        
+            #if not options.keep_exe_code:
+            #    result_final = {}
+            #    for k,v in result.iteritems():
+            #        if k.startswith('Retrieved') and k.count('_') == 2:
+            #            k = k.split('_')
+            #            k = k[0] + '_' + k[-1]
+            #        if result_final.has_key(k):
+            #            res_final[k].extend(v)
+            #        else:
+            #            res_final[k] = v
+            #    result = res_final
+
             if options.post_process:
-                post_process_fcn(d, ret)
-            return d, ret
+                post_process_fcn(crab_dir, result)
+
+            return crab_dir, result
 
         def process_em(dirs):
             print 'launching processes...'
