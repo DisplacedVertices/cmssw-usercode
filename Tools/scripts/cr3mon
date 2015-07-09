@@ -166,26 +166,7 @@ def check_fcn(crab_dir):
     # options.resub_white_codes
     # options.resub_black_codes
 
-    cachefile = '/tmp/crab3.%i.%s' % (os.getpid(), timestamp())
-    open(cachefile, 'wt').write('{"crab_project_directory": ""}')
-    os.environ['CRAB3_CACHE_FILE'] = cachefile
-
-    suppress_stdout = True #options.max_processes == 1
-    if suppress_stdout:
-        old_stdout = sys.stdout
-        sys.stdout = buf = StringIO()
-
-    try:
-        res = crabCommand('status', '--long', dir=crab_dir)
-    except httplib.HTTPException, e:
-        res = {}
-        res['jobList'] = []
-        res['HTTPException'] = e
-        res['status'] = 'HTTPException'
-
-    if suppress_stdout:
-        res['stdout'] = buf.getvalue()
-        sys.stdout = old_stdout
+    res = crab_command('status', '--long', dir=crab_dir)
 
     jl = crab_job_lists_by_status(res)
     if not jl:
@@ -203,8 +184,6 @@ def check_fcn(crab_dir):
                     d[state_ex] += 1
                 else:
                     d[state_ex] = 1
-
-    os.remove(cachefile)
 
     #if not options.keep_exe_code:
     #    res_final = {}
@@ -295,15 +274,9 @@ while 1:
             return d, ret
 
         def process_em(dirs):
-            if options.max_processes == 1:
-                results = [processable_check_fcn(d) for d in dirs]
-            else:
-                print 'launching processes...'
-                pool = multiprocessing.Pool(options.max_processes)
-                results = pool.map(processable_check_fcn, dirs)
-                pool.close()
-                pool.join()
-                print 'done waiting for processes!'
+            print 'launching processes...'
+            results = crab_multiprocess(processable_check_fcn, dirs, options.max_processes)
+            print 'done waiting for processes!'
             return results
 
         results = dict(process_em(dirs))
