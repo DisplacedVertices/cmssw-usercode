@@ -17,7 +17,7 @@ from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 from collections import defaultdict
 from cStringIO import StringIO
 from pprint import pprint
-from JMTucker.Tools.general import bool_from_argv, popen
+from JMTucker.Tools.general import bool_from_argv, typed_from_argv, popen
 from JMTucker.Tools.hadd import hadd
 from CRABAPI.RawCommand import crabCommand
 from CRABClient.UserUtilities import getUsernameFromSiteDB
@@ -273,6 +273,7 @@ def crab_command(*args, **kwargs):
     return result
 
 def crab_multiprocess(fcn, dirs, max_processes):
+    # fcn must return 2-tuple (dir, result)
     if max_processes == 1:
         results = [fcn(d) for d in dirs]
     else:
@@ -369,14 +370,30 @@ class UserCacheHelper:
          raise CRABToolsException('fileremove failed: %r' % x)
 
 if __name__ == '__main__':
-   h = UserCacheHelper()
-   if False:
+   dirs = crab_dirs_from_argv()
+   max_processes = typed_from_argv(int, 5, name='max_processes')
+
+   if 'resub' in sys.argv:
+      def fcn(d):
+         print d
+         return d, crab_command('resubmit', dir=d)
+      results = crab_multiprocess(fcn, dirs, max_processes)
+      failed = [(d, res) for d, res in results if res.get('status', '') != 'SUCCESS']
+      if failed:
+         print 'these failed to resubmit (may HTTPException if task in state FAILED, i.e. there were no jobs to resubmit):'
+         for d, res in failed:
+            print d
+            pprint(res)
+
+   elif 'clean_user_cache' in sys.argv:
+      skip = [x.split('=')[1] for x in sys.argv if x.startswith('skip=')]
+      h = UserCacheHelper()
       for x in h.filelist():
-         if '.log' in x: # or x == '18420b98cfaa556dc2c94fe2acb83b451806144b5d284763eae5f0a354b3f34b':
-            continue
-         print 'remove', x
-         h.fileremove(x)
-   elif False:
+         if '.log' not in x and x not in skip:
+            print 'remove', x
+            h.fileremove(x)
+
+   elif 'list_schedds':
       dirs = crab_dirs_from_argv()
       for d in dirs:
          rq = crab_requestcache(d)
