@@ -31,9 +31,14 @@ def to_pickle(obj, fn, proto=-1, comp=False):
         f = open(fn, 'wb')
     cPickle.dump(obj, f, proto)
 
-def typed_from_argv(type_, default_value=None, raise_on_multiple=False):
+def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=None):
     found = []
     for x in sys.argv:
+        if name:
+            name += '='
+            if not x.startswith(name):
+                continue
+            x = x.replace(name, '')
         try:
             z = type_(x)
             found.append(z)
