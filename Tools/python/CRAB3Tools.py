@@ -2,7 +2,17 @@
 
 # author: J. Tucker
 
-import cPickle, getpass, glob, json, os, pycurl, sys, zlib
+import cPickle
+import getpass
+import glob
+import httplib
+import multiprocessing
+import json
+import os
+import pycurl
+import sys
+import time
+import zlib
 from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 from collections import defaultdict
 from cStringIO import StringIO
@@ -222,11 +232,61 @@ def crab_job_lists_by_status(result):
         d[status].append(job)
     return dict(d)
 
+def crab_command(*args, **kwargs):
+    # Only call this once per process -- if you want to do tasks in
+    # parallel, use multiprocessing, not threads. See
+    # crab_multiprocess below.
+
+    def from_kwargs(key, default_):
+        if kwargs.has_key(key):
+            val = kwargs[key]
+            del kwargs[key]
+            return val
+        else:
+            return default_
+
+    cache_file = from_kwargs('cache_file', '/tmp/crab3.%i.%s' % (os.getpid(), str(int(time.time()*1e6))))
+    old_cache_file = os.environ.get('CRAB3_CACHE_FILE', '')
+    open(cache_file, 'wt').write('{"crab_project_directory": ""}')
+    os.environ['CRAB3_CACHE_FILE'] = cache_file
+
+    suppress_stdout = from_kwargs('suppress_stdout', True)
+    if suppress_stdout:
+        old_stdout = sys.stdout
+        sys.stdout = buf = StringIO()
+
+    try:
+        result = crabCommand(*args, **kwargs)
+    except httplib.HTTPException, e:
+        result = {}
+        result['jobList'] = []
+        result['HTTPException'] = e
+        result['status'] = 'HTTPException'
+
+    if suppress_stdout:
+        result['stdout'] = buf.getvalue()
+        sys.stdout = old_stdout
+
+    os.remove(cache_file)
+    os.environ['CRAB3_CACHE_FILE'] = old_cache_file
+
+    return result
+
+def crab_multiprocess(fcn, dirs, max_processes):
+    if max_processes == 1:
+        results = [fcn(d) for d in dirs]
+    else:
+        pool = multiprocessing.Pool(max_processes)
+        results = pool.map(fcn, dirs)
+        pool.close()
+        pool.join()
+    return results
+
 def crab_output_files(working_dir, jobs=None):
     if jobs is not None:
-        d = crabCommand('getoutput', '--xrootd', '--jobids=%s' % crabify_list(jobs, simple=True), dir=working_dir)
+        d = crab_command('getoutput', '--xrootd', '--jobids=%s' % crabify_list(jobs, simple=True), dir=working_dir)
     else:
-        d = crabCommand('getoutput', '--xrootd', dir=working_dir)
+        d = crab_command('getoutput', '--xrootd', dir=working_dir)
     return d.get('xrootd', [])
 
 def crab_requestcache(working_dir):
