@@ -207,11 +207,39 @@ def new_plots():
 
     #print z
 
+    outs = {-1: {}, -2: {}}
+    for line in open('crab3/One2Two/allouts'):
+        line = line.strip()
+        if line:
+            x = line.split('SigSamn')[1].split('_Sam')[0].split('x')
+            num, kind = int(x[0]), int(x[1])
+            outs[kind][num] = 'crab3/One2Two/' + line
+
+    z = []
+    for tau0 in sorted(bss.tau2range.keys()):
+        rng = bss.tau2range[tau0]
+        name = 'tau%05ium' % tau0
+        if tau0 / 1000 >= 1:
+            title = '#tau = %i mm' % (tau0 / 1000)
+        else:
+            title = '#tau = %i #mum' % tau0
+        y_range = None
+        outs_m1 = outs[-1].get(i, None)
+        outs_m2 = outs[-2].get(i, None)
+        these_outs = [(i, outs[-1].get(i, None), outs[-2].get(i, None)) for i in bss.tau2range[tau0]]
+        nones = [(i,x,y) for i,x,y in these_outs if x is None or y is None]
+        if nones:
+            print 'skipping %s, missing %r' % (name, nones)
+        else:
+            parse_args = [(name.replace('tau', ''), m, x, y) for m,(i,x,y) in zip(bss.masses, these_outs)]
+            z.append((name, title, y_range, parse_args))
+
     for name, title, y_range, parse_args in z:
+        print name
         d = defaultdict(list)
         for x in parse_args:
             parse(d, *x)
-        make_plot(d, name, title, None)
+        make_plot(d, name, title, y_range)
     
 #old_plots()
 
