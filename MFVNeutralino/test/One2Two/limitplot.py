@@ -5,7 +5,7 @@ from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
 
 set_style()
-ps = plot_saver('plots/mfvlimits_test', log=False, size=(600,600))
+ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test', log=False, size=(600,600))
 
 which = 'v10p1'
 draw_gluglu = True
@@ -87,6 +87,15 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
     d['expect95hi'].append(exp97p5 - exp95)
 
 def make_plot(d, name, title, y_range):
+    if y_range is None:
+        m = 0
+        for k,vs in d.iteritems():
+            if k == 'tau0' or k == 'mass':
+                continue
+            for v in vs:
+                m = max(m, v)
+        y_range = m * 2
+
     g_observed = tgae(d['mass'], d['observed'], None, None, None, None, title, 1)
     g_observed.SetMarkerStyle(20)
     g_observed.SetMarkerSize(1.2)
@@ -170,8 +179,8 @@ def new_plots():
         ('00300um', '#tau = 300 #mum', 60, 
          [
           ('00300um', m,
-           'crab3/One2Two_tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
-           'crab3/One2Two_tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
+           'crab3/One2Two/tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+           'crab3/One2Two/tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
            ) for m,i in zip(bss.masses, bss.tau2range[300])
           ]
          ),
@@ -179,8 +188,8 @@ def new_plots():
         ('tau01000um', '#tau = 1 mm', 6,
          [
           ('01000um', m,
-           'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
-           'crab3/One2Two_tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
+           'crab3/One2Two/tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+           'crab3/One2Two/tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
            ) for m,i in zip(bss.masses, bss.tau2range[1000])
           ]
          ),
@@ -188,8 +197,8 @@ def new_plots():
         ('tau10000um', '#tau = 10 mm', 3,
          [
           ('10000um', m,
-           'crab3/One2Two_tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
-           'crab3/One2Two_tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
+           'crab3/One2Two/tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
+           'crab3/One2Two/tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
            ) for m,i in zip(bss.masses, bss.tau2range[10000])
           ]
          ),
@@ -202,7 +211,7 @@ def new_plots():
         d = defaultdict(list)
         for x in parse_args:
             parse(d, *x)
-        make_plot(d, name, title, y_range)
+        make_plot(d, name, title, None)
     
 #old_plots()
 
