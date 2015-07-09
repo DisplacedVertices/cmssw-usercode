@@ -306,15 +306,25 @@ class UserCacheHelper:
             raise CRABToolsException('could not get username from sitedb, returned %r' % user)
       self.user = user
 
-   def _curl(self, url):
+   def _curl(self, url, debug=False, raw=False):
       buf = StringIO()
       c = pycurl.Curl()
       c.setopt(pycurl.URL, str(url))
       c.setopt(pycurl.WRITEFUNCTION, buf.write)
       c.setopt(pycurl.SSL_VERIFYPEER, False)
+#      c.setopt(pycurl.SSL_VERIFYHOST, False)
       c.setopt(pycurl.SSLKEY, self.proxy)
       c.setopt(pycurl.SSLCERT, self.proxy)
+      if debug:
+          def debug_callback(debug_type, msg):
+              print 'curl debug(%s): %s' % (debug_type, msg)
+          c.setopt(pycurl.VERBOSE, 1)
+          c.setopt(pycurl.DEBUGFUNCTION, debug_callback)
       c.perform()
+      c.close()
+
+      if raw:
+          return buf.getvalue()
 
       j = buf.getvalue().replace('\n','')
       try:
@@ -362,7 +372,7 @@ if __name__ == '__main__':
    h = UserCacheHelper()
    if False:
       for x in h.filelist():
-         if '.log' in x or x == '18420b98cfaa556dc2c94fe2acb83b451806144b5d284763eae5f0a354b3f34b':
+         if '.log' in x: # or x == '18420b98cfaa556dc2c94fe2acb83b451806144b5d284763eae5f0a354b3f34b':
             continue
          print 'remove', x
          h.fileremove(x)
