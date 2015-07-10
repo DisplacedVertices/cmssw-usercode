@@ -5,6 +5,7 @@ from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
 
 set_style()
+rainbow_palette()
 ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test', log=False, size=(600,600))
 
 which = 'v10p1'
@@ -60,31 +61,40 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
 
     vals = [None]*6
 
-    for line in open(expected_fn):
-        for i, watch in enumerate(watches):
+    do_obs = observed_fn is not None
+    do_exp = expected_fn is not None
+
+    if do_exp:
+        for line in open(expected_fn):
+            for i, watch in enumerate(watches):
+                if line.startswith(watch):
+                    vals[i] = float(line.replace(watch, ''))
+    if do_obs:
+        for line in open(observed_fn):
+            watch = watches[0]
             if line.startswith(watch):
-                vals[i] = float(line.replace(watch, ''))
-    for line in open(observed_fn):
-        watch = watches[0]
-        if line.startswith(watch):
-            vals[0] = float(line.replace(watch, ''))
+                vals[0] = float(line.replace(watch, ''))
+    else:
+        vals[0] = None # in case it was found in exp above
     print vals
-    if any(v is None for v in vals):
+    if (do_obs and vals[0] is None) or (do_exp and any(v is None for v in vals[1:])):
         raise ValueError('crap')
 
     obs, exp2p5, exp16, exp50, exp84, exp97p5 = vals
-    exp68 = (exp84 + exp16)/2
-    exp95 = (exp97p5 + exp2p5)/2
     d['tau0'].append(tau0)
     d['mass'].append(mass)
-    d['observed'].append(obs)
-    d['expect50'].append(exp50)
-    d['expect68'].append(exp68)
-    d['expect95'].append(exp95)
-    d['expect68lo'].append(exp68 - exp16)
-    d['expect68hi'].append(exp84 - exp68)
-    d['expect95lo'].append(exp95 - exp2p5)
-    d['expect95hi'].append(exp97p5 - exp95)
+    if do_obs:
+        d['observed'].append(obs)
+    if do_exp:
+        exp68 = (exp84 + exp16)/2
+        exp95 = (exp97p5 + exp2p5)/2
+        d['expect50'].append(exp50)
+        d['expect68'].append(exp68)
+        d['expect95'].append(exp95)
+        d['expect68lo'].append(exp68 - exp16)
+        d['expect68hi'].append(exp84 - exp68)
+        d['expect95lo'].append(exp95 - exp2p5)
+        d['expect95hi'].append(exp97p5 - exp95)
 
 def make_plot(d, name, title, y_range):
     if y_range is None:
@@ -175,7 +185,6 @@ def new_plots():
     import bigsigscan as bss
 
     z = [
-
         ('00300um', '#tau = 300 #mum', 60, 
          [
           ('00300um', m,
@@ -207,6 +216,8 @@ def new_plots():
 
     #print z
 
+    z = []
+
     outs = {-1: {}, -2: {}}
     for line in open('crab3/One2Two/allouts'):
         line = line.strip()
@@ -215,24 +226,45 @@ def new_plots():
             num, kind = int(x[0]), int(x[1])
             outs[kind][num] = 'crab3/One2Two/' + line
 
-    z = []
-    for tau0 in sorted(bss.tau2range.keys()):
-        rng = bss.tau2range[tau0]
-        name = 'tau%05ium' % tau0
-        if tau0 / 1000 >= 1:
-            title = '#tau = %i mm' % (tau0 / 1000)
-        else:
-            title = '#tau = %i #mum' % tau0
-        y_range = None
-        outs_m1 = outs[-1].get(i, None)
-        outs_m2 = outs[-2].get(i, None)
-        these_outs = [(i, outs[-1].get(i, None), outs[-2].get(i, None)) for i in bss.tau2range[tau0]]
-        nones = [(i,x,y) for i,x,y in these_outs if x is None or y is None]
-        if nones:
-            print 'skipping %s, missing %r' % (name, nones)
-        else:
-            parse_args = [(name.replace('tau', ''), m, x, y) for m,(i,x,y) in zip(bss.masses, these_outs)]
-            z.append((name, title, y_range, parse_args))
+    if False:
+        for tau0 in sorted(bss.tau2range.keys()):
+            rng = bss.tau2range[tau0]
+            name = 'tau%05ium' % tau0
+            if tau0 / 1000 >= 1:
+                title = '#tau = %i mm' % (tau0 / 1000)
+            else:
+                title = '#tau = %i #mum' % tau0
+            y_range = None
+            outs_m1 = outs[-1].get(i, None)
+            outs_m2 = outs[-2].get(i, None)
+            these_outs = [(i, outs[-1].get(i, None), outs[-2].get(i, None)) for i in bss.tau2range[tau0]]
+            nones = [(i,x,y) for i,x,y in these_outs if x is None or y is None]
+            if nones:
+                print 'skipping %s, missing %r' % (name, nones)
+            else:
+                parse_args = [(name.replace('tau', ''), m, x, y) for m,(i,x,y) in zip(bss.masses, these_outs)]
+                z.append((name, title, y_range, parse_args))
+    elif True:
+        def book(name, title):
+            h = ROOT.TH2F(name, title + ';neutralino mass (GeV);neutralino lifetime (#mum)', bss.nmasses, array('d', bss.masses + [1600]), bss.ntau0s, array('d', bss.tau0s + [32000]))
+            h.SetStats(0)
+            return h
+        
+        for kind in (-1, -2):
+            h = book('hm%i' % abs(kind), str(kind))
+
+            for num, out in outs[kind].iteritems():
+                tau0 = bss.num2tau[num]
+                mass = bss.num2mass[num]
+                d = defaultdict(list)
+                parse(d, tau0, mass,
+                      out if kind is -1 else None, 
+                      out if kind is -2 else None)
+                val = (d['observed'] if kind == -1 else d['expect50'])[0]
+                h.SetBinContent(h.FindBin(mass, tau0), val)
+
+            h.Draw('colz')
+            ps.save(h.GetName(), log=True, logz=True)
 
     for name, title, y_range, parse_args in z:
         print name
