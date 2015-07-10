@@ -4,9 +4,14 @@ from collections import defaultdict
 tau0s = [100*x for x in xrange(1,10)] + [1000*x for x in range(1,11) + range(12,31,2)]
 masses = range(300, 1501, 100)
 
+ntau0s = len(tau0s)
+nmasses = len(masses)
+
 def make_name(tau0, mass):
     return 'mfv_neutralino_tau%05ium_M%04i' % (tau0, mass)
 
+num2tau = {}
+num2mass = {}
 name2num = {}
 num2name = {}
 name2mass = {}
@@ -25,6 +30,8 @@ for tau0 in tau0s:
         num -= 1
         name = make_name(tau0, mass)
 
+        num2tau[num] = tau0
+        num2mass[num] = mass
         name2num[name] = num
         num2name[num] = name
         name2mass[name] = mass
