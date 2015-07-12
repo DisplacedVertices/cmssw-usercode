@@ -14,7 +14,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "TH1.h"
-
+#include <iostream>
 class PVAnalyzer : public edm::EDAnalyzer {
    public:
       explicit PVAnalyzer(const edm::ParameterSet&);
@@ -25,101 +25,34 @@ class PVAnalyzer : public edm::EDAnalyzer {
 
   TH1F* h_npv;
 
-  TH1F* h_all_pv_track_pt;
-  TH1F* h_all_pv_track_eta;
-  TH1F* h_all_pv_track_phi;
-  TH1F* h_all_pv_track_dxy;
-  TH1F* h_all_pv_track_dz;
+  TH1F* h_ntracks[4];
+  TH1F* h_track_pt[4];
+  TH1F* h_track_eta[4];
+  TH1F* h_track_phi[4];
+  TH1F* h_track_dxybs[4];
+  TH1F* h_track_dxypv[4];
+  TH1F* h_track_dzbs[4];
+  TH1F* h_track_dzpv[4];
 
-  TH1F* h_all_pv_track_pterr;
-  TH1F* h_all_pv_track_etaerr;
-  TH1F* h_all_pv_track_phierr;
-  TH1F* h_all_pv_track_dxyerr;
-  TH1F* h_all_pv_track_dzerr;
+  TH1F* h_track_pterr[4];
+  TH1F* h_track_etaerr[4];
+  TH1F* h_track_phierr[4];
+  TH1F* h_track_dxyerr[4];
+  TH1F* h_track_dzerr[4];
   
-  TH1F* h_all_pv_track_ptoversigma;
-  TH1F* h_all_pv_track_etaoversigma;
-  TH1F* h_all_pv_track_phioversigma;
-  TH1F* h_all_pv_track_dxyoversigma;
-  TH1F* h_all_pv_track_dzoversigma;
+  TH1F* h_track_sigmapt[4];
+  TH1F* h_track_sigmaeta[4];
+  TH1F* h_track_sigmaphi[4];
+  TH1F* h_track_sigmadxybs[4];
+  TH1F* h_track_sigmadxypv[4];
+  TH1F* h_track_sigmadzbs[4];
+  TH1F* h_track_sigmadzpv[4];
 
-  TH1F* h_all_pv_track_chi2dof;
-  TH1F* h_all_pv_track_npxhits;
-  TH1F* h_all_pv_track_nsthits;
-  TH1F* h_all_pv_track_npxlayers;
-  TH1F* h_all_pv_track_nstlayers;
-
-  TH1F* h_pv0_track_pt;
-  TH1F* h_pv0_track_eta;
-  TH1F* h_pv0_track_phi;
-  TH1F* h_pv0_track_dxy;
-  TH1F* h_pv0_track_dz;
-
-  TH1F* h_pv0_track_pterr;
-  TH1F* h_pv0_track_etaerr;
-  TH1F* h_pv0_track_phierr;
-  TH1F* h_pv0_track_dxyerr;
-  TH1F* h_pv0_track_dzerr;
-
-  TH1F* h_pv0_track_ptoversigma;
-  TH1F* h_pv0_track_etaoversigma;
-  TH1F* h_pv0_track_phioversigma;
-  TH1F* h_pv0_track_dxyoversigma;
-  TH1F* h_pv0_track_dzoversigma;
-
-  TH1F* h_pv0_track_chi2dof;
-  TH1F* h_pv0_track_npxhits;
-  TH1F* h_pv0_track_nsthits;
-  TH1F* h_pv0_track_npxlayers;
-  TH1F* h_pv0_track_nstlayers;
-
-  TH1F* h_other_pvs_track_pt;
-  TH1F* h_other_pvs_track_eta;
-  TH1F* h_other_pvs_track_phi;
-  TH1F* h_other_pvs_track_dxy;
-  TH1F* h_other_pvs_track_dz;
-
-  TH1F* h_other_pvs_track_pterr;
-  TH1F* h_other_pvs_track_etaerr;
-  TH1F* h_other_pvs_track_phierr;
-  TH1F* h_other_pvs_track_dxyerr;
-  TH1F* h_other_pvs_track_dzerr;
-
-  TH1F* h_other_pvs_track_ptoversigma;
-  TH1F* h_other_pvs_track_etaoversigma;
-  TH1F* h_other_pvs_track_phioversigma;
-  TH1F* h_other_pvs_track_dxyoversigma;
-  TH1F* h_other_pvs_track_dzoversigma;
-
-  TH1F* h_other_pvs_track_chi2dof;
-  TH1F* h_other_pvs_track_npxhits;
-  TH1F* h_other_pvs_track_nsthits;
-  TH1F* h_other_pvs_track_npxlayers;
-  TH1F* h_other_pvs_track_nstlayers;
-
-  TH1F* h_non_pv_track_pt;
-  TH1F* h_non_pv_track_eta;
-  TH1F* h_non_pv_track_phi;
-  TH1F* h_non_pv_track_dxy;
-  TH1F* h_non_pv_track_dz;
-
-  TH1F* h_non_pv_track_pterr;
-  TH1F* h_non_pv_track_etaerr;
-  TH1F* h_non_pv_track_phierr;
-  TH1F* h_non_pv_track_dxyerr;
-  TH1F* h_non_pv_track_dzerr;
-
-  TH1F* h_non_pv_track_ptoversigma;
-  TH1F* h_non_pv_track_etaoversigma;
-  TH1F* h_non_pv_track_phioversigma;
-  TH1F* h_non_pv_track_dxyoversigma;
-  TH1F* h_non_pv_track_dzoversigma;
-
-  TH1F* h_non_pv_track_chi2dof;
-  TH1F* h_non_pv_track_npxhits;
-  TH1F* h_non_pv_track_nsthits;
-  TH1F* h_non_pv_track_npxlayers;
-  TH1F* h_non_pv_track_nstlayers;
+  TH1F* h_track_chi2dof[4];
+  TH1F* h_track_npxhits[4];
+  TH1F* h_track_nsthits[4];
+  TH1F* h_track_npxlayers[4];
+  TH1F* h_track_nstlayers[4];
 
   const edm::InputTag primary_vertices_src;
   const edm::InputTag track_src;
@@ -143,103 +76,40 @@ PVAnalyzer::PVAnalyzer(const edm::ParameterSet& iConfig)
     minSilLayer(iConfig.getParameter<int>("minSilLayer"))
 {
   edm::Service<TFileService> fs;
+  const char* categories[4] = {"all_pv", "pv0", "other_pvs", "non_pv"};
 
   h_npv = fs->make<TH1F>("h_npv", ";# of primary vertices; arb. units", 50, 0, 50);
-  h_all_pv_track_pt  = fs->make<TH1F>("h_all_pv_track_pt", ";p_{T} of all tracks in all primary vertices (GeV); arb. units", 300, 0, 150);
-  h_all_pv_track_eta = fs->make<TH1F>("h_all_pv_track_eta", ";eta of all PV tracks; arb. units", 50, -4, 4);
-  h_all_pv_track_phi = fs->make<TH1F>("h_all_pv_track_phi", ";phi of all PV tracks; arb. units", 50, -3.15, 3.15);
-  h_all_pv_track_dxy = fs->make<TH1F>("h_all_pv_track_dxy", ";dxy of all PV tracks (cm); arb. units", 1000, -2, 2);
-  h_all_pv_track_dz  = fs->make<TH1F>("h_all_pv_track_dz", ";dz of all PV tracks (cm); arb. units", 1000, -25, 25);
 
-  h_all_pv_track_pterr  = fs->make<TH1F>("h_all_pv_track_pterr", ";error in p_{T} of all tracks in all primary vertices (GeV); arb. units", 50, 0, 0.25);
-  h_all_pv_track_etaerr = fs->make<TH1F>("h_all_pv_track_etaerr", ";eta error; arb. units", 50, 0, 0.1);
-  h_all_pv_track_phierr = fs->make<TH1F>("h_all_pv_track_phierr", ";phi error; arb. units", 50, 0, 0.1);
-  h_all_pv_track_dxyerr = fs->make<TH1F>("h_all_pv_track_dxyerr", ";dxy error; arb. units", 300, 0, 0.5);
-  h_all_pv_track_dzerr  = fs->make<TH1F>("h_all_pv_track_dzerr", ";dz error; arb. units", 300, 0, 1);
+  for (int i = 0; i < 4; ++i) {
+    h_ntracks[i] = fs->make<TH1F>(TString::Format("h_%s_ntracks", categories[i]), "ntracks; arb. units", 200, 0, 200);
+    h_track_pt[i]  = fs->make<TH1F>(TString::Format("h_%s_track_pt", categories[i]), ";p_{T} (GeV); arb. units", 300, 0, 150);
+    h_track_eta[i] = fs->make<TH1F>(TString::Format("h_%s_track_eta", categories[i]), ";eta; arb. units", 50, -4, 4);
+    h_track_phi[i] = fs->make<TH1F>(TString::Format("h_%s_track_phi", categories[i]), ";phi; arb. units", 50, -3.15, 3.15);
+    h_track_dxybs[i] = fs->make<TH1F>(TString::Format("h_%s_track_dxybs", categories[i]), ";dxy w.r.t. bs (cm); arb. units", 1000, -2, 2);
+    h_track_dxypv[i] = fs->make<TH1F>(TString::Format("h_%s_track_dxypv", categories[i]), ";dxy w.r.t. pv (cm); arb. units", 1000, -2, 2);
+    h_track_dzbs[i]  = fs->make<TH1F>(TString::Format("h_%s_track_dzbs", categories[i]), ";dz w.r.t. bs (cm); arb. units", 1000, -25, 25);
+    h_track_dzpv[i] = fs->make<TH1F>(TString::Format("h_%s_track_dzpv", categories[i]), ";dz w.r.t. pv (cm); arb. units", 1000, -25, 25);
 
-  h_all_pv_track_ptoversigma  = fs->make<TH1F>("h_all_pv_track_ptoversigma", ";pt/ptError; arb. units", 400, 0, 250);
-  h_all_pv_track_etaoversigma = fs->make<TH1F>("h_all_pv_track_etaoversigma", ";eta/etaError; arb. units", 1600, -800, 800);
-  h_all_pv_track_phioversigma = fs->make<TH1F>("h_all_pv_track_phioversigma", ";phi/phiError; arb. units", 1600, -800, 800);
-  h_all_pv_track_dxyoversigma = fs->make<TH1F>("h_all_pv_track_dxyoversigma", ";dxy/dxyError; arb. units", 300, -15, 15);
-  h_all_pv_track_dzoversigma  = fs->make<TH1F>("h_all_pv_track_dzoversigma", ";dz/dzError; arb. units", 1600, -800, 800);
+    h_track_pterr[i]  = fs->make<TH1F>(TString::Format("h_%s_track_pterr", categories[i]), ";error in p_{T} (GeV); arb. units", 50, 0, 0.25);
+    h_track_etaerr[i] = fs->make<TH1F>(TString::Format("h_%s_track_etaerr", categories[i]), ";eta error; arb. units", 50, 0, 0.1);
+    h_track_phierr[i] = fs->make<TH1F>(TString::Format("h_%s_track_phierr", categories[i]), ";phi error; arb. units", 50, 0, 0.1);
+    h_track_dxyerr[i] = fs->make<TH1F>(TString::Format("h_%s_track_dxyerr", categories[i]), ";dxy error; arb. units", 300, 0, 0.5);
+    h_track_dzerr[i]  = fs->make<TH1F>(TString::Format("h_%s_track_dzerr", categories[i]), ";dz error; arb. units", 300, 0, 1);
 
-  h_all_pv_track_chi2dof = fs->make<TH1F>("h_all_pv_track_chi2dof", ";#chi^2/dof; arb. units", 50, 0, 7);
-  h_all_pv_track_npxhits = fs->make<TH1F>("h_all_pv_track_npxhits", ";# of pixel hits for all PV tracks; arb. units", 15, 0, 15);
-  h_all_pv_track_nsthits = fs->make<TH1F>("h_all_pv_track_nsthits", ";# of strip hits for all PV tracks; arb. units", 45, 0, 45);
-  h_all_pv_track_npxlayers = fs->make<TH1F>("h_all_pv_track_npxlayers", ";# pixel layer hits; arb. units", 6, 0, 6);
-  h_all_pv_track_nstlayers = fs->make<TH1F>("h_all_pv_track_nstlayers", ";# strip layer hits; arb. units", 20, 0, 20);
+    h_track_sigmapt[i]  = fs->make<TH1F>(TString::Format("h_%s_track_sigmapt", categories[i]), ";pt/ptError; arb. units", 400, 0, 250);
+    h_track_sigmaeta[i] = fs->make<TH1F>(TString::Format("h_%s_track_sigmaeta", categories[i]), ";eta/etaError; arb. units", 1600, -800, 800);
+    h_track_sigmaphi[i] = fs->make<TH1F>(TString::Format("h_%s_track_sigmaphi", categories[i]), ";phi/phiError; arb. units", 1600, -800, 800);
+    h_track_sigmadxybs[i] = fs->make<TH1F>(TString::Format("h_%s_track_sigmadxybs", categories[i]), ";dxy/dxyError; arb. units", 300, -15, 15);
+    h_track_sigmadxypv[i] = fs->make<TH1F>(TString::Format("h_%s_track_sigmadxypv", categories[i]), ";dxy/dxyError; arb. units", 300, -15, 15);
+    h_track_sigmadzbs[i]  = fs->make<TH1F>(TString::Format("h_%s_track_sigmadzbs", categories[i]), ";dz/dzError; arb. units", 1600, -800, 800);
+    h_track_sigmadzpv[i] = fs->make<TH1F>(TString::Format("h_%s_track_sigmadzpv", categories[i]), ";dz/dzError; arb. units", 1600, -800, 800);
 
-  h_pv0_track_pt  = fs->make<TH1F>("h_pv0_track_pt", ";p_{T} of tracks in main PV (GeV); arb. units", 300, 0, 150);
-  h_pv0_track_eta = fs->make<TH1F>("h_pv0_track_eta", ";eta of tracks in main PV; arb. units", 50, -4, 4);
-  h_pv0_track_phi = fs->make<TH1F>("h_pv0_track_phi", ";phi of tracks in main PV; arb. units", 50, -3.15, 3.15);
-  h_pv0_track_dxy = fs->make<TH1F>("h_pv0_track_dxy", ";dxy of tracks in main PV (cm); arb. units", 1000, -2, 2);
-  h_pv0_track_dz  = fs->make<TH1F>("h_pv0_track_dz", ";dz of tracks in main PV (cm); arb. units", 1000, -25, 25);
-
-  h_pv0_track_pterr  = fs->make<TH1F>("h_pv0_track_pterr", ";error in p_{T} of tracks in main PV (GeV); arb. units", 50, 0, 0.25);
-  h_pv0_track_etaerr = fs->make<TH1F>("h_pv0_track_etaerr", ";eta error of tracks in main PV; arb. units", 50, 0, 0.1);
-  h_pv0_track_phierr = fs->make<TH1F>("h_pv0_track_phierr", ";phi error of tracks in main PV; arb. units", 50, 0, 0.1);
-  h_pv0_track_dxyerr = fs->make<TH1F>("h_pv0_track_dxyerr", ";dxy error of tracks in main PV; arb. units", 300, 0, 0.5);
-  h_pv0_track_dzerr  = fs->make<TH1F>("h_pv0_track_dzerr", ";dz error of tracks in main PV; arb. units", 300, 0, 1);
-
-  h_pv0_track_ptoversigma  = fs->make<TH1F>("h_pv0_track_ptoversigma", ";pt/ptError of tracks in main PV; arb. units", 400, 0, 250);
-  h_pv0_track_etaoversigma = fs->make<TH1F>("h_pv0_track_etaoversigma", ";eta/etaError of tracks in main PV; arb. units", 1600, -800, 800);
-  h_pv0_track_phioversigma = fs->make<TH1F>("h_pv0_track_phioversigma", ";phi/phiError of tracks in main PV; arb. units", 1600, -800, 800);
-  h_pv0_track_dxyoversigma = fs->make<TH1F>("h_pv0_track_dxyoversigma", ";dxy/dxyError of tracks in main PV; arb. units", 300, -15, 15);
-  h_pv0_track_dzoversigma  = fs->make<TH1F>("h_pv0_track_dzoversigma", ";dz/dzError of tracks in main PV; arb. units", 1600, -800, 800);
-
-  h_pv0_track_chi2dof = fs->make<TH1F>("h_pv0_track_chi2dof", ";#chi^2/dof of tracks in main PV; arb. units", 50, 0, 7);
-  h_pv0_track_npxhits = fs->make<TH1F>("h_pv0_track_npxhits", ";# of pixel hits for tracks in main PV; arb. units", 15, 0, 15);
-  h_pv0_track_nsthits = fs->make<TH1F>("h_pv0_track_nsthits", ";# of strip hits for tracks in main PV; arb. units", 45, 0, 45);
-  h_pv0_track_npxlayers = fs->make<TH1F>("h_pv0_track_npxlayers", ";# pixel layer hits of tracks in main PV; arb. units", 6, 0, 6);
-  h_pv0_track_nstlayers = fs->make<TH1F>("h_pv0_track_nstlayers", ";# strip layer hits of tracks in main PV; arb. untis", 20, 0, 20);
-
-  h_other_pvs_track_pt  = fs->make<TH1F>("h_other_pvs_track_pt", ";p_{T} of tracks in other primary vertices (GeV); arb. units", 300, 0, 150);
-  h_other_pvs_track_eta = fs->make<TH1F>("h_other_pvs_track_eta", ";eta of tracks in other primary vertices; arb. units", 50, -4, 4);
-  h_other_pvs_track_phi = fs->make<TH1F>("h_other_pvs_track_phi", ";phi of tracks in other primary vertices; arb. units", 50, -3.15, 3.15);
-  h_other_pvs_track_dxy = fs->make<TH1F>("h_other_pvs_track_dxy", ";dxy of tracks in other primary vertices (cm); arb. units", 1000, -2, 2);
-  h_other_pvs_track_dz  = fs->make<TH1F>("h_other_pvs_track_dz", ";dz of tracks in other primary vertices (cm); arb. units", 1000, -25, 25);
-
-  h_other_pvs_track_pterr  = fs->make<TH1F>("h_other_pvs_track_pterr", ";error in p_{T} of tracks in other primary vertices (GeV); arb. units", 50, 0, 0.25);
-  h_other_pvs_track_etaerr = fs->make<TH1F>("h_other_pvs_track_etaerr", ";eta error; arb. units", 50, 0, 0.1);
-  h_other_pvs_track_phierr = fs->make<TH1F>("h_other_pvs_track_phierr", ";phi error; arb. units", 50, 0, 0.1);
-  h_other_pvs_track_dxyerr = fs->make<TH1F>("h_other_pvs_track_dxyerr", ";dxy error; arb. units", 300, 0, 0.5);
-  h_other_pvs_track_dzerr  = fs->make<TH1F>("h_other_pvs_track_dzerr", ";dz error; arb. units", 300, 0, 1);
-
-  h_other_pvs_track_ptoversigma  = fs->make<TH1F>("h_other_pvs_track_ptoversigma", ";pt/ptError; arb. units", 400, 0, 250);
-  h_other_pvs_track_etaoversigma = fs->make<TH1F>("h_other_pvs_track_etaoversigma", ";eta/etaError; arb. units", 1600, -800, 800);
-  h_other_pvs_track_phioversigma = fs->make<TH1F>("h_other_pvs_track_phioversigma", ";phi/phiError; arb. units", 1600, -800, 800);
-  h_other_pvs_track_dxyoversigma = fs->make<TH1F>("h_other_pvs_track_dxyoversigma", ";dxy/dxyError; arb. units", 300, -15, 15);
-  h_other_pvs_track_dzoversigma  = fs->make<TH1F>("h_other_pvs_track_dzoversigma", ";dz/dzError; arb. units", 1600, -800, 800);
-
-  h_other_pvs_track_chi2dof = fs->make<TH1F>("h_other_pvs_track_chi2dof", ";#chi^2/dof; arb. units", 50, 0, 7);
-  h_other_pvs_track_npxhits = fs->make<TH1F>("h_other_pvs_track_npxhits", ";# of pixel hits of tracks in other PVs; arb. units", 15, 0, 15);
-  h_other_pvs_track_nsthits = fs->make<TH1F>("h_other_pvs_track_nsthits", ";# of strip hits of tracks in other PVs; arb. units", 45, 0, 45);
-  h_other_pvs_track_npxlayers = fs->make<TH1F>("h_other_pvs_track_npxlayers", ";# pixel layer hits of tracks in other PVs; arb. units", 6, 0, 6);
-  h_other_pvs_track_nstlayers = fs->make<TH1F>("h_other_pvs_track_nstlayers", ";# strip layer hits of tracks in other PVs; arb. untis", 20, 0, 20);
-
-  h_non_pv_track_pt  = fs->make<TH1F>("h_non_pv_track_pt", ";p_{T} of all tracks not in a primary vertex (GeV); arb. units", 300, 0, 150);
-  h_non_pv_track_eta = fs->make<TH1F>("h_non_pv_track_eta", ";eta of all tracks not in a primary vertex; arb. units", 50, -4, 4);
-  h_non_pv_track_phi = fs->make<TH1F>("h_non_pv_track_phi", ";phi of all tracks not in a primary vertex; arb. units", 50, -3.15, 3.15);
-  h_non_pv_track_dxy = fs->make<TH1F>("h_non_pv_track_dxy", ";dxy of all tracks not in a primary vertex (cm); arb. units", 1000, -2, 2);
-  h_non_pv_track_dz  = fs->make<TH1F>("h_non_pv_track_dz", ";dz of all tracks not in a primary vertex (cm); arb. units", 1000, -25, 25);
-
-  h_non_pv_track_pterr  = fs->make<TH1F>("h_non_pv_track_pterr", ";error in p_{T} of all tracks not in a primary vertex (GeV); arb. units", 50, 0, 0.25);
-  h_non_pv_track_etaerr = fs->make<TH1F>("h_non_pv_track_etaerr", ";eta error tracks not in a primary vertex; arb. units", 50, 0, 0.1);
-  h_non_pv_track_phierr = fs->make<TH1F>("h_non_pv_track_phierr", ";phi error tracks not in a primary vertex; arb. units", 50, 0, 0.1);
-  h_non_pv_track_dxyerr = fs->make<TH1F>("h_non_pv_track_dxyerr", ";dxy error tracks not in a primary vertex; arb. units", 300, 0, 0.5);
-  h_non_pv_track_dzerr  = fs->make<TH1F>("h_non_pv_track_dzerr", ";dz error tracks not in a primary vertex; arb. units", 300, 0, 1);
-
-  h_non_pv_track_ptoversigma  = fs->make<TH1F>("h_non_pv_track_ptoversigma", ";pt/ptError; arb. units", 400, 0, 250);
-  h_non_pv_track_etaoversigma = fs->make<TH1F>("h_non_pv_track_etaoversigma", ";eta/etaError; arb. units", 1600, -800, 800);
-  h_non_pv_track_phioversigma = fs->make<TH1F>("h_non_pv_track_phioversigma", ";phi/phiError; arb. units", 1600, -800, 800);
-  h_non_pv_track_dxyoversigma = fs->make<TH1F>("h_non_pv_track_dxyoversigma", ";dxy/dxyError; arb. units", 300, -15, 15);
-  h_non_pv_track_dzoversigma  = fs->make<TH1F>("h_non_pv_track_dzoversigma", ";dz/dzError; arb. units", 1600, -800, 800);
-
-  h_non_pv_track_chi2dof = fs->make<TH1F>("h_non_pv_track_chi2dof", ";#chi^2/dof; arb. units", 50, 0, 7);
-  h_non_pv_track_npxhits = fs->make<TH1F>("h_non_pv_track_npxhits", ";# of pixel hits for tracks not in a primary vertex; arb. units", 15, 0, 15);
-  h_non_pv_track_nsthits = fs->make<TH1F>("h_non_pv_track_nsthits", ";# of strip hits for tracks not in a primary vertex; arb. units", 45, 0, 45);
-  h_non_pv_track_npxlayers = fs->make<TH1F>("h_non_pv_track_npxlayers", ";# pixel layer hits; arb. units", 6, 0, 6);
-  h_non_pv_track_nstlayers = fs->make<TH1F>("h_non_pv_track_nstlayers", ";# strip layer hits; arb. units", 20, 0, 20);
+    h_track_chi2dof[i] = fs->make<TH1F>(TString::Format("h_%s_track_chi2dof", categories[i]), ";#chi^2/dof; arb. units", 50, 0, 7);
+    h_track_npxhits[i] = fs->make<TH1F>(TString::Format("h_%s_track_npxhits", categories[i]), ";# of pixel hits; arb. units", 15, 0, 15);
+    h_track_nsthits[i] = fs->make<TH1F>(TString::Format("h_%s_track_nsthits", categories[i]), ";# of strip hits; arb. units", 45, 0, 45);
+    h_track_npxlayers[i] = fs->make<TH1F>(TString::Format("h_%s_track_npxlayers", categories[i]), ";# pixel layer hits; arb. units", 6, 0, 6);
+    h_track_nstlayers[i] = fs->make<TH1F>(TString::Format("h_%s_track_nstlayers", categories[i]), ";# strip layer hits; arb. units", 20, 0, 20);
+  }
 }
 
 
@@ -254,7 +124,6 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
    Handle<reco::VertexCollection> primary_vertices;
    iEvent.getByLabel(primary_vertices_src, primary_vertices);
-   const reco::Vertex& primary_vertex = primary_vertices->at(0);
 
    Handle<reco::TrackCollection> tracks;
    iEvent.getByLabel(track_src, tracks);
@@ -279,6 +148,7 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        reco::TrackRef tk = it->castTo<reco::TrackRef>();
        tracks_in_pvs[tk].push_back(std::make_pair(i, w));
        positions[tk] = pv.position();
+       h_ntracks[0]->Fill(pv.tracksSize());
      }
 
      if(i == 0) {
@@ -287,17 +157,19 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	 reco::TrackRef tk = it->castTo<reco::TrackRef>();
 	 tracks_in_main_pv[tk].push_back(std::make_pair(i, w));
        }
+       h_ntracks[1]->Fill(pv.tracksSize());
      } else {
        for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
          float w = pv.trackWeight(*it);
 	 reco::TrackRef tk = it->castTo<reco::TrackRef>();
          tracks_in_other_pvs[tk].push_back(std::make_pair(i, w));
        }
+       h_ntracks[2]->Fill(pv.tracksSize());
      }
    }
    for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
       reco::TrackRef tkref(tracks, i);
-
+     
       bool ok_all = false;
       bool ok_main = false;
       bool ok_other = false;
@@ -332,12 +204,14 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
    for (size_t i = 0, ie = all_tracks.size(); i < ie; ++i) {
      const reco::TrackRef& tk = all_tracks[i];
-     
+
      const double pt = tk->pt();
      const double eta = tk->eta();
      const double phi = tk->phi();
-     const double dxy = tk->dxy(*beamspot);
-     const double dz = tk->dz(positions[tk]);
+     const double dxybs = tk->dxy(*beamspot);
+     const double dxypv = tk->dxy(positions[tk]);
+     const double dzbs = tk->dz(beamspot->position());
+     const double dzpv = tk->dz(positions[tk]);
      const double ptErr = tk->ptError();
      const double etaErr = tk->etaError();
      const double phiErr = tk->phiError();
@@ -352,26 +226,30 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      bool use = maxNormChi2 > chi2dof && npxlayers >= minPxLayer && nstlayers >= minSilLayer; 
      
      if(use) {
-       h_all_pv_track_pt->Fill(pt);
-       h_all_pv_track_eta->Fill(eta);
-       h_all_pv_track_phi->Fill(phi);
-       h_all_pv_track_dxy->Fill(dxy);
-       h_all_pv_track_dz->Fill(dz);
-       h_all_pv_track_pterr->Fill(ptErr);
-       h_all_pv_track_etaerr->Fill(etaErr);
-       h_all_pv_track_phierr->Fill(phiErr);
-       h_all_pv_track_dxyerr->Fill(dxyErr);
-       h_all_pv_track_dzerr->Fill(dzErr);
-       h_all_pv_track_ptoversigma->Fill(pt/ptErr);
-       h_all_pv_track_etaoversigma->Fill(eta/etaErr);
-       h_all_pv_track_phioversigma->Fill(phi/phiErr);
-       h_all_pv_track_dxyoversigma->Fill(dxy/dxyErr);
-       h_all_pv_track_dzoversigma->Fill(dz/dzErr);
-       h_all_pv_track_chi2dof->Fill(chi2dof);
-       h_all_pv_track_npxhits->Fill(npxhits);
-       h_all_pv_track_nsthits->Fill(nsthits);
-       h_all_pv_track_npxlayers->Fill(npxlayers);
-       h_all_pv_track_nstlayers->Fill(nstlayers);
+       h_track_pt[0]->Fill(pt);
+       h_track_eta[0]->Fill(eta);
+       h_track_phi[0]->Fill(phi);
+       h_track_dxybs[0]->Fill(dxybs);
+       h_track_dxypv[0]->Fill(dxypv);
+       h_track_dzbs[0]->Fill(dzbs);
+       h_track_dzpv[0]->Fill(dzpv);
+       h_track_pterr[0]->Fill(ptErr);
+       h_track_etaerr[0]->Fill(etaErr);
+       h_track_phierr[0]->Fill(phiErr);
+       h_track_dxyerr[0]->Fill(dxyErr);
+       h_track_dzerr[0]->Fill(dzErr);
+       h_track_sigmapt[0]->Fill(pt/ptErr);
+       h_track_sigmaeta[0]->Fill(eta/etaErr);
+       h_track_sigmaphi[0]->Fill(phi/phiErr);
+       h_track_sigmadxybs[0]->Fill(dxybs/dxyErr);
+       h_track_sigmadxypv[0]->Fill(dxypv/dxyErr);
+       h_track_sigmadzbs[0]->Fill(dzbs/dzErr);
+       h_track_sigmadzpv[0]->Fill(dzpv/dzErr);
+       h_track_chi2dof[0]->Fill(chi2dof);
+       h_track_npxhits[0]->Fill(npxhits);
+       h_track_nsthits[0]->Fill(nsthits);
+       h_track_npxlayers[0]->Fill(npxlayers);
+       h_track_nstlayers[0]->Fill(nstlayers);
      }
    }
 
@@ -380,8 +258,10 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      const double pt = tk->pt();
      const double eta = tk->eta();
      const double phi = tk->phi();
-     const double dxy = tk->dxy(*beamspot);
-     const double dz = tk->dz(positions[tk]);
+     const double dxybs = tk->dxy(*beamspot);
+     const double dxypv = tk->dxy(positions[tk]);
+     const double dzbs = tk->dz(beamspot->position());
+     const double dzpv = tk->dz(positions[tk]);
      const double ptErr = tk->ptError();
      const double etaErr = tk->etaError();
      const double phiErr = tk->phiError();
@@ -396,26 +276,30 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      bool use = maxNormChi2 > chi2dof && npxlayers >= minPxLayer && nstlayers >= minSilLayer;
 
      if(use) {
-       h_pv0_track_pt->Fill(pt);
-       h_pv0_track_eta->Fill(eta);
-       h_pv0_track_phi->Fill(phi);
-       h_pv0_track_dxy->Fill(dxy);
-       h_pv0_track_dz->Fill(dz);
-       h_pv0_track_pterr->Fill(ptErr);
-       h_pv0_track_etaerr->Fill(etaErr);
-       h_pv0_track_phierr->Fill(phiErr);
-       h_pv0_track_dxyerr->Fill(dxyErr);
-       h_pv0_track_dzerr->Fill(dzErr);
-       h_pv0_track_ptoversigma->Fill(pt/ptErr);
-       h_pv0_track_etaoversigma->Fill(eta/etaErr);
-       h_pv0_track_phioversigma->Fill(phi/phiErr);
-       h_pv0_track_dxyoversigma->Fill(dxy/dxyErr);
-       h_pv0_track_dzoversigma->Fill(dz/dzErr);
-       h_pv0_track_chi2dof->Fill(chi2dof);
-       h_pv0_track_npxhits->Fill(npxhits);
-       h_pv0_track_nsthits->Fill(nsthits);
-       h_pv0_track_npxlayers->Fill(npxlayers);
-       h_pv0_track_nstlayers->Fill(nstlayers);
+       h_track_pt[1]->Fill(pt);  
+       h_track_eta[1]->Fill(eta);
+       h_track_phi[1]->Fill(phi);
+       h_track_dxybs[1]->Fill(dxybs);
+       h_track_dxypv[1]->Fill(dxypv);
+       h_track_dzbs[1]->Fill(dzbs);
+       h_track_dzpv[1]->Fill(dzpv);
+       h_track_pterr[1]->Fill(ptErr);
+       h_track_etaerr[1]->Fill(etaErr);
+       h_track_phierr[1]->Fill(phiErr);
+       h_track_dxyerr[1]->Fill(dxyErr);
+       h_track_dzerr[1]->Fill(dzErr);
+       h_track_sigmapt[1]->Fill(pt/ptErr);
+       h_track_sigmaeta[1]->Fill(eta/etaErr);
+       h_track_sigmaphi[1]->Fill(phi/phiErr);
+       h_track_sigmadxybs[1]->Fill(dxybs/dxyErr);
+       h_track_sigmadxypv[1]->Fill(dxypv/dxyErr);
+       h_track_sigmadzbs[1]->Fill(dzbs/dzErr);
+       h_track_sigmadzpv[1]->Fill(dzpv/dzErr);
+       h_track_chi2dof[1]->Fill(chi2dof);
+       h_track_npxhits[1]->Fill(npxhits);
+       h_track_nsthits[1]->Fill(nsthits);
+       h_track_npxlayers[1]->Fill(npxlayers);
+       h_track_nstlayers[1]->Fill(nstlayers);
      }
    }
 
@@ -424,8 +308,10 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      const double pt = tk->pt();
      const double eta = tk->eta();
      const double phi = tk->phi();
-     const double dxy = tk->dxy(*beamspot);
-     const double dz = tk->dz(positions[tk]);
+     const double dxybs = tk->dxy(*beamspot);
+     const double dxypv = tk->dxy(positions[tk]);
+     const double dzbs = tk->dz(beamspot->position());
+     const double dzpv = tk->dz(positions[tk]);
      const double ptErr = tk->ptError();
      const double etaErr = tk->etaError();
      const double phiErr = tk->phiError();
@@ -440,26 +326,30 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      bool use = maxNormChi2 > chi2dof && npxlayers >= minPxLayer && nstlayers >= minSilLayer;
      
      if(use) {
-       h_other_pvs_track_pt->Fill(pt);
-       h_other_pvs_track_eta->Fill(eta);
-       h_other_pvs_track_phi->Fill(phi);
-       h_other_pvs_track_dxy->Fill(dxy);
-       h_other_pvs_track_dz->Fill(dz);
-       h_other_pvs_track_pterr->Fill(ptErr);
-       h_other_pvs_track_etaerr->Fill(etaErr);
-       h_other_pvs_track_phierr->Fill(phiErr);
-       h_other_pvs_track_dxyerr->Fill(dxyErr);
-       h_other_pvs_track_dzerr->Fill(dzErr);
-       h_other_pvs_track_ptoversigma->Fill(pt/ptErr);
-       h_other_pvs_track_etaoversigma->Fill(eta/etaErr);
-       h_other_pvs_track_phioversigma->Fill(phi/phiErr);
-       h_other_pvs_track_dxyoversigma->Fill(dxy/dxyErr);
-       h_other_pvs_track_dzoversigma->Fill(dz/dzErr);
-       h_other_pvs_track_chi2dof->Fill(chi2dof);
-       h_other_pvs_track_npxhits->Fill(npxhits);
-       h_other_pvs_track_nsthits->Fill(nsthits);
-       h_other_pvs_track_npxlayers->Fill(npxlayers);
-       h_other_pvs_track_nstlayers->Fill(nstlayers);
+       h_track_pt[2]->Fill(pt);
+       h_track_eta[2]->Fill(eta);
+       h_track_phi[2]->Fill(phi);
+       h_track_dxybs[2]->Fill(dxybs);
+       h_track_dxypv[2]->Fill(dxypv);
+       h_track_dzbs[2]->Fill(dzbs);
+       h_track_dzpv[2]->Fill(dzpv);
+       h_track_pterr[2]->Fill(ptErr);
+       h_track_etaerr[2]->Fill(etaErr);
+       h_track_phierr[2]->Fill(phiErr);
+       h_track_dxyerr[2]->Fill(dxyErr);
+       h_track_dzerr[2]->Fill(dzErr);
+       h_track_sigmapt[2]->Fill(pt/ptErr);
+       h_track_sigmaeta[2]->Fill(eta/etaErr);
+       h_track_sigmaphi[2]->Fill(phi/phiErr);
+       h_track_sigmadxybs[2]->Fill(dxybs/dxyErr);
+       h_track_sigmadxypv[2]->Fill(dxypv/dxyErr);
+       h_track_sigmadzbs[2]->Fill(dzbs/dzErr);
+       h_track_sigmadzpv[2]->Fill(dzpv/dzErr);
+       h_track_chi2dof[2]->Fill(chi2dof);
+       h_track_npxhits[2]->Fill(npxhits);
+       h_track_nsthits[2]->Fill(nsthits);
+       h_track_npxlayers[2]->Fill(npxlayers);
+       h_track_nstlayers[2]->Fill(nstlayers);
      }
    }
 
@@ -468,8 +358,12 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      const double pt = tk->pt();
      const double eta = tk->eta();
      const double phi = tk->phi();
-     const double dxy = tk->dxy(*beamspot);
-     const double dz = tk->dz(primary_vertex.position());
+     const double dxybs = tk->dxy(*beamspot);
+     const double dxypv = tk->dxy(positions[tk]);
+     const double dzbs = tk->dz(beamspot->position());
+     double dzpv = tk->dz(beamspot->position());
+     if(primary_vertices->size() != 0)
+       dzpv = tk->dz(primary_vertices->at(0).position());
      const double ptErr = tk->ptError();
      const double etaErr = tk->etaError();
      const double phiErr = tk->phiError();
@@ -484,29 +378,32 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      bool use = maxNormChi2 > chi2dof && npxlayers >= minPxLayer && nstlayers >= minSilLayer;
      
      if(use) {
-       h_non_pv_track_pt->Fill(pt);
-       h_non_pv_track_eta->Fill(eta);
-       h_non_pv_track_phi->Fill(phi);
-       h_non_pv_track_dxy->Fill(dxy);
-       h_non_pv_track_dz->Fill(dz);
-       h_non_pv_track_pterr->Fill(ptErr);
-       h_non_pv_track_etaerr->Fill(etaErr);
-       h_non_pv_track_phierr->Fill(phiErr);
-       h_non_pv_track_dxyerr->Fill(dxyErr);
-       h_non_pv_track_dzerr->Fill(dzErr);
-       h_non_pv_track_ptoversigma->Fill(pt/ptErr);
-       h_non_pv_track_etaoversigma->Fill(eta/etaErr);
-       h_non_pv_track_phioversigma->Fill(phi/phiErr);
-       h_non_pv_track_dxyoversigma->Fill(dxy/dxyErr);
-       h_non_pv_track_dzoversigma->Fill(dz/dzErr);
-       h_non_pv_track_chi2dof->Fill(chi2dof);
-       h_non_pv_track_npxhits->Fill(npxhits);
-       h_non_pv_track_nsthits->Fill(nsthits);
-       h_non_pv_track_npxlayers->Fill(npxlayers);
-       h_non_pv_track_nstlayers->Fill(nstlayers);
+       h_track_pt[3]->Fill(pt);
+       h_track_eta[3]->Fill(eta);
+       h_track_phi[3]->Fill(phi);
+       h_track_dxybs[3]->Fill(dxybs);
+       h_track_dxypv[3]->Fill(dxypv);
+       h_track_dzbs[3]->Fill(dzbs);
+       h_track_dzpv[3]->Fill(dzpv);
+       h_track_pterr[3]->Fill(ptErr);
+       h_track_etaerr[3]->Fill(etaErr);
+       h_track_phierr[3]->Fill(phiErr);
+       h_track_dxyerr[3]->Fill(dxyErr);
+       h_track_dzerr[3]->Fill(dzErr);
+       h_track_sigmapt[3]->Fill(pt/ptErr);
+       h_track_sigmaeta[3]->Fill(eta/etaErr);
+       h_track_sigmaphi[3]->Fill(phi/phiErr);
+       h_track_sigmadxybs[3]->Fill(dxybs/dxyErr);
+       h_track_sigmadxypv[3]->Fill(dxypv/dxyErr);
+       h_track_sigmadzbs[3]->Fill(dzbs/dzErr);
+       h_track_sigmadzpv[3]->Fill(dzpv/dzErr);
+       h_track_chi2dof[3]->Fill(chi2dof);
+       h_track_npxhits[3]->Fill(npxhits);
+       h_track_nsthits[3]->Fill(nsthits);
+       h_track_npxlayers[3]->Fill(npxlayers);
+       h_track_nstlayers[3]->Fill(nstlayers);
      }
    }
-
 
    /*
    LogInfo("Stuff0") << "# of PVs " << primary_vertices->size();
