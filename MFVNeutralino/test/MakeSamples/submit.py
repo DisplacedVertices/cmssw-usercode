@@ -56,6 +56,7 @@ script_exe = twostep.sh
 additional_input_files = %(additional_input_files)s
 ui_working_dir = %(ui_working_dir)s
 ssh_control_persist = no
+skip_servers = cern_vocms0117
 RETURN_OR_COPY
 
 [GRID]
@@ -170,6 +171,8 @@ def submit(name, tau0=None, mass=None, decay_idses=None):
         new_reco_py = ''
 
     if 'gluino' in name:
+        if 'viarhad' in name:
+            new_py += '\nset_rhadrons_on(process)\n'
         new_py += '\nset_gluino_tau0(process, %e)\n' % tau0       
         set_mass(mass)
     elif 'neutralino' in name:
@@ -253,9 +256,12 @@ def submit(name, tau0=None, mass=None, decay_idses=None):
     vd['events_per'] = events_per
     open('crab.cfg','wt').write(crab_cfg % vd)
     if not testing:
-        os.system('crab -create')
-        for i in xrange(int(math.ceil(float(nevents)/events_per/500))):
-            os.system('crab -c %s -submit 500' % ui_working_dir)
+        if nevents/float(events_per) > 500:
+            os.system('crab -create')
+            for i in xrange(int(math.ceil(float(nevents)/events_per/500))):
+                os.system('crab -c %s -submit 500' % ui_working_dir)
+        else:
+            os.system('crab -create -submit all')
         os.system('rm -f crab.cfg reco.pyc my_reco.py my_tkdqm.py pat.py ntuple.py minitree.py')
 
 ################################################################################
