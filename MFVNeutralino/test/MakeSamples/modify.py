@@ -16,6 +16,9 @@ def set_gluino_tau0(process, tau0):
 def set_neutralino_tau0(process, tau0):
     set_particle_tau0(process, 1000022, tau0)
 
+def set_rhadrons_on(process):
+    process.generator.PythiaParameters.processParameters.append('RHadrons:allow = on')
+
 def set_mass(m_gluino, fn='minSLHA.spc'):
     slha = '''
 BLOCK SPINFO  # Spectrum calculator information
@@ -30,7 +33,7 @@ BLOCK MASS  # Mass Spectrum
 # PDG code           mass       particle
   1000021     %(m_gluino)E       # ~g
 
-DECAY   1000021     0.01E+00   # gluino decays
+DECAY   1000021     0.0197E-11   # gluino decays
 #           BR         NDA      ID1       ID2       ID3
      0.5E+00          3            3          5           6   # BR(~g -> s b t)
      0.5E+00          3           -3         -5          -6   # BR(~g -> sbar bbar tbar)
