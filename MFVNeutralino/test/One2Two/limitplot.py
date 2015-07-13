@@ -6,7 +6,7 @@ from JMTucker.Tools.ROOTTools import *
 
 set_style()
 rainbow_palette()
-ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test', log=False, size=(600,600))
+ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test_3', log=False, size=(600,600))
 
 which = 'v10p1'
 draw_gluglu = True
@@ -44,10 +44,13 @@ def tgae(x, y, exl, exh, eyl, eyh, title, color):
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, color)
 
-def make_gluglu():
+def parse_gluglu():
     gluglu = [eval(x.strip()) for x in open('/afs/fnal.gov/files/home/room3/tucker/gluglu.csv').readlines() if x.strip()]
     gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
-    return tge(gluglu, 'hi', 9)
+    return gluglu
+
+def make_gluglu():
+    return tge(parse_gluglu(), 'hi', 9)
 
 def parse(d, tau0, mass, observed_fn, expected_fn):
     watches = [
@@ -245,13 +248,8 @@ def new_plots():
                 parse_args = [(name.replace('tau', ''), m, x, y) for m,(i,x,y) in zip(bss.masses, these_outs)]
                 z.append((name, title, y_range, parse_args))
     elif True:
-        def book(name, title):
-            h = ROOT.TH2F(name, title + ';neutralino mass (GeV);neutralino lifetime (#mum)', bss.nmasses, array('d', bss.masses + [1600]), bss.ntau0s, array('d', bss.tau0s + [32000]))
-            h.SetStats(0)
-            return h
-        
         for kind in (-1, -2):
-            h = book('hm%i' % abs(kind), str(kind))
+            h = bss.book('hm%i' % abs(kind), str(kind))
 
             for num, out in outs[kind].iteritems():
                 tau0 = bss.num2tau[num]
@@ -272,7 +270,93 @@ def new_plots():
         for x in parse_args:
             parse(d, *x)
         make_plot(d, name, title, y_range)
+
+def get_2d_plot(fn = '/uscms/home/tucker/asdf/plots/mfvlimits_test/hm1.root'):
+    f = ROOT.TFile(fn)
+    h = f.Get('c0').FindObject('hm1').Clone()
+    h.SetDirectory(0)
+    f.Close()
+    ps.c.cd()
+    return h
+
+def book_interp(name):
+    hint = ROOT.TH2F(name, '', 1200, 300, 1500, 319, 100, 32000)
+    hint.SetStats(0)
+    return hint
+
+def interpolate():
+    h = get_2d_plot()
+    hint = book_interp('hint')
+    xax = hint.GetXaxis()
+    yax = hint.GetYaxis()
+    for ix in xrange(1, hint.GetNbinsX()+1):
+        x = xax.GetBinLowEdge(ix)
+        for iy in xrange(1, hint.GetNbinsY()+1):
+            y = yax.GetBinLowEdge(iy)
+            hint.SetBinContent(ix, iy, h.Interpolate(x,y))
+    return hint
+
+def duh():
+    import bigsigscan as bss
+
+    gluglu = parse_gluglu()
+    hgluxsec = ROOT.TH1F('hgluxsec', '', 361, 200, 2005)
+    for m,s,se in gluglu:
+        bin = hgluxsec.FindBin(m)
+        hgluxsec.SetBinContent(bin, s)
+        hgluxsec.SetBinError(bin, se)
+
+    gluglu = dict((m, (s, es)) for m, s, es in gluglu)
+
+    h = interpolate() # get_2d_plot()
+    h.Draw('colz')
+    ps.save('hint')
+
+    hexc = book_interp('hexc')
+    hexc.SetStats(0)
+
+    for ix in xrange(1, h.GetNbinsX()+1):
+        mass = h.GetXaxis().GetBinLowEdge(ix)
+        for iy in xrange(1, h.GetNbinsY()+1):
+            tau0 = h.GetYaxis().GetBinLowEdge(iy)
+            lim = h.GetBinContent(ix, iy)
+
+            bin = hgluxsec.FindBin(mass)
+            s = hgluxsec.Interpolate(mass)
+            se = (hgluxsec.GetBinError(bin)**2 + hgluxsec.GetBinError(bin+1)**2)**0.5
+            #print tau0, mass, lim, s, se
+
+            bin = hexc.FindBin(mass, tau0)
+            if lim < s - se:
+                hexc.SetBinContent(bin, 1)
+            else:
+                hexc.SetBinContent(bin, 0)
+
+    hexc.Draw('cont2')
+    ps.save('hexc')
+
+#    img = ROOT.TImage.Open('Image.png')
+#    img.Draw('x')
+
+#    hexc.Draw('colz')
+#    ps.save('haha')
     
+#             //Create a transparent pad filling the full canvas
+#          TPad *p = new TPad("p","p",0,0,1,1)
+#          p->SetFillStyle(4000)
+#          p->SetFrameFillStyle(4000)
+#          p->Draw()
+#          p->cd()
+#          TH1F *h = new TH1F("h","test",100,-3,3)
+#          h->SetFillColor(kCyan)
+#          h->FillRandom("gaus",5000)
+#          h->Draw()
+#       }
+
+
 #old_plots()
 
-new_plots()
+#new_plots()
+
+#interpolate()
+duh()
