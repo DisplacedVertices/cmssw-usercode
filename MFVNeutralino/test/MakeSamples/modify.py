@@ -86,7 +86,25 @@ def set_empirical_decay(m_gluino, m_neutralino, decay_idses, fn='minSLHA.spc'):
     if abs(sum_br - 1) > 1e-4:
         raise ValueError('brs did not sum to 1')
 
-    slha = '''
+    if m_neutralino is None:
+        slha = '''
+BLOCK SPINFO  # Spectrum calculator information
+     1   Minimal    # spectrum calculator
+     2   1.0.0         # version number
+#
+BLOCK MODSEL  # Model selection
+     1     1   #
+#
+
+BLOCK MASS  # Mass Spectrum
+# PDG code           mass       particle
+  1000021     %(m_gluino)E       # ~g
+
+DECAY   1000021     0.01E+00   # gluino decays
+#          BR         NDA      ID1       ID2
+'''
+    else:
+        slha = '''
 BLOCK SPINFO  # Spectrum calculator information
      1   Minimal    # spectrum calculator
      2   1.0.0         # version number
