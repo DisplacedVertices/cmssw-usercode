@@ -1,4 +1,5 @@
 import sys
+from array import array
 from collections import defaultdict
 
 tau0s = [100*x for x in xrange(1,10)] + [1000*x for x in range(1,11) + range(12,31,2)]
@@ -23,11 +24,13 @@ def num2eff(num):
 
 tau2range = defaultdict(list)
 
+nums = []
 num = -100
 for tau0 in tau0s:
     print 'tau%05ium' % tau0, num-1, 'to',
     for mass in masses:
         num -= 1
+        nums.append(num)
         name = make_name(tau0, mass)
 
         num2tau[num] = tau0
@@ -131,6 +134,21 @@ def make_templates(out_fn):
     print
     print 'num2npass = %r' % num2npass
 
+def book(name, title):
+    import ROOT
+    h = ROOT.TH2F(name, title + ';neutralino mass (GeV);neutralino lifetime (#mum)', nmasses, array('d', masses + [1600]), ntau0s, array('d', tau0s + [32000]))
+    h.SetStats(0)
+    return h
+
+def make_h_eff():
+    h = book('h_eff', '')
+    for num in nums:
+        tau0 = num2tau[num]
+        mass = num2mass[num]
+        h.SetBinContent(h.FindBin(mass, tau0), num2eff(num))
+    return h
+
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make_templates('bigsigscan.root')
+
