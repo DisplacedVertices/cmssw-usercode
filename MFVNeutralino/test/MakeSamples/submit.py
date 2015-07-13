@@ -173,8 +173,11 @@ def submit(name, tau0=None, mass=None, decay_idses=None):
     if 'gluino' in name:
         if 'viarhad' in name:
             new_py += '\nset_rhadrons_on(process)\n'
-        new_py += '\nset_gluino_tau0(process, %e)\n' % tau0       
-        set_mass(mass)
+        new_py += '\nset_gluino_tau0(process, %e)\n' % tau0
+        if decay_idses:
+            set_empirical_decay(mass, None, decay_idses)
+        else:
+            set_mass(mass)
     elif 'neutralino' in name:
         new_py += '\nset_neutralino_tau0(process, %e)\n' % tau0
         set_masses(mass+5, mass)
