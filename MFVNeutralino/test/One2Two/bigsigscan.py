@@ -140,15 +140,31 @@ def book(name, title):
     h.SetStats(0)
     return h
 
-def make_h_eff():
-    h = book('h_eff', '')
+def all_points():
     for num in nums:
         tau0 = num2tau[num]
         mass = num2mass[num]
+        yield (num, tau0, mass)
+
+def make_h_eff():
+    h = book('h_eff', '')
+    for num, tau0, mass in all_points():
         h.SetBinContent(h.FindBin(mass, tau0), num2eff(num))
     return h
+
+def stat_errors():
+    from JMTucker.Tools.ROOTTools import ROOT
+    f = ROOT.TFile('bigsigscan.root')
+    mx = 0
+    for num, tau0, mass in all_points():
+        if tau0 < 300:
+            continue
+        h = f.Get('sig%i' % num)
+        nbins = h.GetNbinsX()
+        m = max(h.GetBinError(i) / h.GetBinContent(i) for i in xrange(1, nbins+1))
+        mx = max(m, mx)
+        print tau0, mass, m, mx
 
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make_templates('bigsigscan.root')
-
