@@ -1357,6 +1357,100 @@ def sort_histogram_pair(h1, h2, by=real_hist_max):
     else:
         return h2,h1
 
+def tdr_style():
+    s =  ROOT.TStyle("s","Style for P-TDR")
+    s.SetCanvasBorderMode(0)
+    s.SetCanvasColor(ROOT.kWhite)
+    s.SetCanvasDefH(600)
+    s.SetCanvasDefW(600)
+    s.SetCanvasDefX(0)
+    s.SetCanvasDefY(0)
+
+    s.SetPadBorderMode(0)
+    s.SetPadColor(ROOT.kWhite)
+    s.SetPadGridX(False)
+    s.SetPadGridY(False)
+    s.SetGridColor(0)
+    s.SetGridStyle(3)
+    s.SetGridWidth(1)
+
+    s.SetFrameBorderMode(0)
+    s.SetFrameBorderSize(1)
+    s.SetFrameFillColor(0)
+    s.SetFrameFillStyle(0)
+    s.SetFrameLineColor(1)
+    s.SetFrameLineStyle(1)
+    s.SetFrameLineWidth(1)
+  
+    s.SetHistLineColor(1)
+    s.SetHistLineStyle(0)
+    s.SetHistLineWidth(1)
+
+    s.SetEndErrorSize(2)
+  
+    s.SetMarkerStyle(20)
+  
+    s.SetOptFit(1)
+    s.SetFitFormat("5.4g")
+    s.SetFuncColor(2)
+    s.SetFuncStyle(1)
+    s.SetFuncWidth(1)
+
+    s.SetOptDate(0)
+
+    s.SetOptFile(0)
+    s.SetOptStat(0)
+    s.SetStatColor(ROOT.kWhite)
+    s.SetStatFont(42)
+    s.SetStatFontSize(0.025)
+    s.SetStatTextColor(1)
+    s.SetStatFormat("6.4g")
+    s.SetStatBorderSize(1)
+    s.SetStatH(0.1)
+    s.SetStatW(0.15)
+
+    s.SetPadTopMargin(0.05)
+    s.SetPadBottomMargin(0.13)
+    s.SetPadLeftMargin(0.16)
+    s.SetPadRightMargin(0.02)
+
+    s.SetOptTitle(0)
+    s.SetTitleFont(42)
+    s.SetTitleColor(1)
+    s.SetTitleTextColor(1)
+    s.SetTitleFillColor(10)
+    s.SetTitleFontSize(0.05)
+
+    s.SetTitleColor(1, "XYZ")
+    s.SetTitleFont(42, "XYZ")
+    s.SetTitleSize(0.06, "XYZ")
+    s.SetTitleXOffset(0.9)
+    s.SetTitleYOffset(1.25)
+
+    s.SetLabelColor(1, "XYZ")
+    s.SetLabelFont(42, "XYZ")
+    s.SetLabelOffset(0.007, "XYZ")
+    s.SetLabelSize(0.05, "XYZ")
+
+    s.SetAxisColor(1, "XYZ")
+    s.SetStripDecimals(True)
+    s.SetTickLength(0.03, "XYZ")
+    s.SetNdivisions(510, "XYZ")
+    s.SetPadTickX(1)
+    s.SetPadTickY(1)
+
+    s.SetOptLogx(0)
+    s.SetOptLogy(0)
+    s.SetOptLogz(0)
+
+    s.SetPaperSize(20.,20.)
+
+    s.SetHatchesLineWidth(5)
+    s.SetHatchesSpacing(0.05)
+
+    s.cd()
+    return s
+
 def ttree_iterator(tree, return_tree=False):
     for jentry in xrange(tree.GetEntriesFast()):
         if tree.LoadTree(jentry) < 0: break
@@ -1404,6 +1498,7 @@ __all__ = [
     'real_hist_min',
     'set_style',
     'sort_histogram_pair',
+    'tdr_style',
     'ttree_iterator',
     'ROOT',
     ]
