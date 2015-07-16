@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import bigsigscan as bss
 from array import array
 from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
@@ -52,7 +53,17 @@ def parse_gluglu():
 def make_gluglu():
     return tge(parse_gluglu(), 'hi', 9)
 
+def make_gluglu_hist():
+    gluglu = parse_gluglu()
+    hgluxsec = ROOT.TH1F('hgluxsec', '', 361, 200, 2005)
+    for m,s,se in gluglu:
+        bin = hgluxsec.FindBin(m)
+        hgluxsec.SetBinContent(bin, s)
+        hgluxsec.SetBinError(bin, se)
+    return gluglu, hgluxsec
+    
 def parse(d, tau0, mass, observed_fn, expected_fn):
+    print d, tau0, mass, observed_fn, expected_fn
     watches = [
         'sigma_sig_limit:Observed Limit: r < ',
         'sigma_sig_limit:Expected  2.5%: r < ',
@@ -91,9 +102,13 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
     if do_exp:
         exp68 = (exp84 + exp16)/2
         exp95 = (exp97p5 + exp2p5)/2
+        d['expect2p5'].append(exp2p5)
+        d['expect16'].append(exp16)
         d['expect50'].append(exp50)
         d['expect68'].append(exp68)
+        d['expect84'].append(exp84)
         d['expect95'].append(exp95)
+        d['expect97p5'].append(exp97p5)
         d['expect68lo'].append(exp68 - exp16)
         d['expect68hi'].append(exp84 - exp68)
         d['expect95lo'].append(exp95 - exp2p5)
@@ -184,9 +199,25 @@ def old_plots():
 
         make_plot(d, tau0, tau0_nice, 50 if tau0 == '0300um' else (9 if tau0 == '1000um' else 4))
 
-def new_plots():
-    import bigsigscan as bss
+def get_outs():
+    outs = {-1: {}, -2: {}}
+    for line in open('crab3/One2Two/allouts'):
+        line = line.strip()
+        if line:
+            x = line.split('SigSamn')[1].split('_Sam')[0].split('x')
+            num, kind = int(x[0]), int(x[1])
+            outs[kind][num] = 'crab3/One2Two/' + line
+    return outs
 
+def plot_em(z):
+    for name, title, y_range, parse_args in z:
+        print name
+        d = defaultdict(list)
+        for x in parse_args:
+            parse(d, *x)
+        make_plot(d, name, title, y_range)
+
+def test_new_1ds():
     z = [
         ('00300um', '#tau = 300 #mum', 60, 
          [
@@ -214,63 +245,51 @@ def new_plots():
            ) for m,i in zip(bss.masses, bss.tau2range[10000])
           ]
          ),
-
         ]
+    plot_em(z)
 
-    #print z
-
+def new_1ds():
     z = []
+    outs = get_outs()
+    for tau0 in sorted(bss.tau2range.keys()):
+        rng = bss.tau2range[tau0]
+        name = 'tau%05ium' % tau0
+        if tau0 / 1000 >= 1:
+            title = '#tau = %i mm' % (tau0 / 1000)
+        else:
+            title = '#tau = %i #mum' % tau0
+        y_range = None
+        outs_m1 = outs[-1].get(i, None)
+        outs_m2 = outs[-2].get(i, None)
+        these_outs = [(i, outs[-1].get(i, None), outs[-2].get(i, None)) for i in bss.tau2range[tau0]]
+        nones = [(i,x,y) for i,x,y in these_outs if x is None or y is None]
+        if nones:
+            print 'skipping %s, missing %r' % (name, nones)
+        else:
+            parse_args = [(name.replace('tau', ''), m, x, y) for m,(i,x,y) in zip(bss.masses, these_outs)]
+            z.append((name, title, y_range, parse_args))
+    plot_em(z)
 
-    outs = {-1: {}, -2: {}}
-    for line in open('crab3/One2Two/allouts'):
-        line = line.strip()
-        if line:
-            x = line.split('SigSamn')[1].split('_Sam')[0].split('x')
-            num, kind = int(x[0]), int(x[1])
-            outs[kind][num] = 'crab3/One2Two/' + line
+def new_2ds():
+    hs = []
+    outs = get_outs()
+    for ikind, kind in enumerate(['observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5']):
+        h = bss.book('hlim_%s' % kind, kind)
+        hs.append(h)
 
-    if False:
-        for tau0 in sorted(bss.tau2range.keys()):
-            rng = bss.tau2range[tau0]
-            name = 'tau%05ium' % tau0
-            if tau0 / 1000 >= 1:
-                title = '#tau = %i mm' % (tau0 / 1000)
-            else:
-                title = '#tau = %i #mum' % tau0
-            y_range = None
-            outs_m1 = outs[-1].get(i, None)
-            outs_m2 = outs[-2].get(i, None)
-            these_outs = [(i, outs[-1].get(i, None), outs[-2].get(i, None)) for i in bss.tau2range[tau0]]
-            nones = [(i,x,y) for i,x,y in these_outs if x is None or y is None]
-            if nones:
-                print 'skipping %s, missing %r' % (name, nones)
-            else:
-                parse_args = [(name.replace('tau', ''), m, x, y) for m,(i,x,y) in zip(bss.masses, these_outs)]
-                z.append((name, title, y_range, parse_args))
-    elif True:
-        for kind in (-1, -2):
-            h = bss.book('hm%i' % abs(kind), str(kind))
+        x = -2 if ikind > 0 else -1
 
-            for num, out in outs[kind].iteritems():
-                tau0 = bss.num2tau[num]
-                mass = bss.num2mass[num]
-                d = defaultdict(list)
-                parse(d, tau0, mass,
-                      out if kind is -1 else None, 
-                      out if kind is -2 else None)
-                val = (d['observed'] if kind == -1 else d['expect50'])[0]
-                h.SetBinContent(h.FindBin(mass, tau0), val)
-
-            h.Draw('colz')
-            ps.save(h.GetName(), log=True, logz=True)
-
-    for name, title, y_range, parse_args in z:
-        print name
-        d = defaultdict(list)
-        for x in parse_args:
-            parse(d, *x)
-        make_plot(d, name, title, y_range)
-
+        for num, out in outs[x].iteritems():
+            tau0 = bss.num2tau[num]
+            mass = bss.num2mass[num]
+            d = defaultdict(list)
+            parse(d, tau0, mass,
+                  out if x == -1 else None, 
+                  out if x == -2 else None)
+            val = d[kind][0]
+            h.SetBinContent(h.FindBin(mass, tau0), val)
+    return hs
+    
 def get_2d_plot(fn = '/uscms/home/tucker/asdf/plots/mfvlimits_test/hm1.root'):
     f = ROOT.TFile(fn)
     h = f.Get('c0').FindObject('hm1').Clone()
@@ -284,9 +303,8 @@ def book_interp(name):
     hint.SetStats(0)
     return hint
 
-def interpolate():
-    h = get_2d_plot()
-    hint = book_interp('hint')
+def interpolate(h):
+    hint = book_interp(h.GetName() + '_interp')
     xax = hint.GetXaxis()
     yax = hint.GetYaxis()
     for ix in xrange(1, hint.GetNbinsX()+1):
@@ -296,23 +314,13 @@ def interpolate():
             hint.SetBinContent(ix, iy, h.Interpolate(x,y))
     return hint
 
-def duh():
-    import bigsigscan as bss
-
-    gluglu = parse_gluglu()
-    hgluxsec = ROOT.TH1F('hgluxsec', '', 361, 200, 2005)
-    for m,s,se in gluglu:
-        bin = hgluxsec.FindBin(m)
-        hgluxsec.SetBinContent(bin, s)
-        hgluxsec.SetBinError(bin, se)
-
+def gluglu_exclude(h):
+    gluglu, hgluglu = make_gluglu_hist()
     gluglu = dict((m, (s, es)) for m, s, es in gluglu)
 
-    h = interpolate() # get_2d_plot()
-    h.Draw('colz')
-    ps.save('hint')
-
-    hexc = book_interp('hexc')
+    hexc = ROOT.TH2F(h.GetName() + '_exc', '',
+                     h.GetNbinsX(), h.GetXaxis().GetBinLowEdge(1), h.GetXaxis().GetBinLowEdge(h.GetNbinsX()+1),
+                     h.GetNbinsY(), h.GetYaxis().GetBinLowEdge(1), h.GetYaxis().GetBinLowEdge(h.GetNbinsY()+1))
     hexc.SetStats(0)
 
     for ix in xrange(1, h.GetNbinsX()+1):
@@ -321,42 +329,48 @@ def duh():
             tau0 = h.GetYaxis().GetBinLowEdge(iy)
             lim = h.GetBinContent(ix, iy)
 
-            bin = hgluxsec.FindBin(mass)
-            s = hgluxsec.Interpolate(mass)
-            se = (hgluxsec.GetBinError(bin)**2 + hgluxsec.GetBinError(bin+1)**2)**0.5
-            #print tau0, mass, lim, s, se
+            bin = hgluglu.FindBin(mass)
+            assert bin < hgluglu.GetNbinsX()
+            ma = hgluglu.GetBinLowEdge(bin)
+            mb = hgluglu.GetBinLowEdge(bin+1)
+            sa, esa = gluglu[ma]
+            sb, esb = gluglu[mb]
+
+            z = (mass - ma) / (mb - ma)
+            
+            s = sa + (sb - sa) * z
+            es = (z**2 * esb**2 + (1 - z)**2 * esa**2)**0.5
+            #print tau0, mass, lim, s, es
 
             bin = hexc.FindBin(mass, tau0)
-            if lim < s - se:
+            if lim < s - es:
                 hexc.SetBinContent(bin, 1)
             else:
                 hexc.SetBinContent(bin, 0)
+    return hexc
 
-    hexc.Draw('cont2')
-    ps.save('hexc')
+def export_plots(fn='newplots.root'):
+    fout = ROOT.TFile(fn, 'recreate')
+    hs = []
+    def sdw(h):
+        hs.append(h)
+        h.SetDirectory(fout)
+        h.Write()
+        return h
 
-#    img = ROOT.TImage.Open('Image.png')
-#    img.Draw('x')
-
-#    hexc.Draw('colz')
-#    ps.save('haha')
+    for k in (0, 600, 800):
+        heff = sdw(bss.make_h_eff(k))
+        heffint = sdw(interpolate(heff))
     
-#             //Create a transparent pad filling the full canvas
-#          TPad *p = new TPad("p","p",0,0,1,1)
-#          p->SetFillStyle(4000)
-#          p->SetFrameFillStyle(4000)
-#          p->Draw()
-#          p->cd()
-#          TH1F *h = new TH1F("h","test",100,-3,3)
-#          h->SetFillColor(kCyan)
-#          h->FillRandom("gaus",5000)
-#          h->Draw()
-#       }
+    hlims = new_2ds()
 
+    for hlim in hlims:
+        sdw(hlim)
+        sdw(gluglu_exclude(hlim))
+        hint = sdw(interpolate(hlim))
+        sdw(gluglu_exclude(hint))
 
-#old_plots()
+    fout.Close()
 
-#new_plots()
-
-#interpolate()
-duh()
+export_plots()
+#duh()
