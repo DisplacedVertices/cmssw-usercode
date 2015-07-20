@@ -292,36 +292,6 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   }
   std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
 
-  bool unmerged = true;
-  while (unmerged) {
-    bool merged = false;
-    for (int i = 0; i < int(parton_pt_eta_phi.size()); ++i) {
-      std::vector<float> p1 = parton_pt_eta_phi.at(i);
-      for (int j = i+1; j < int(parton_pt_eta_phi.size()); ++j) {
-        std::vector<float> p2 = parton_pt_eta_phi.at(j);
-        if (reco::deltaR(p1.at(1), p1.at(2), p2.at(1), p2.at(2)) < 0.6) {
-          std::vector<float> pt_eta_phi;
-          pt_eta_phi.push_back(p1.at(0) + p2.at(0));
-          pt_eta_phi.push_back((p1.at(0) * p1.at(1) + p2.at(0) * p2.at(1)) / (p1.at(0) + p2.at(0)));
-          pt_eta_phi.push_back((p1.at(0) * p1.at(2) + p2.at(0) * p2.at(2)) / (p1.at(0) + p2.at(0)));
-          parton_pt_eta_phi.erase(parton_pt_eta_phi.begin() + j);
-          parton_pt_eta_phi.erase(parton_pt_eta_phi.begin() + i);
-          parton_pt_eta_phi.push_back(pt_eta_phi);
-          std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
-          merged = true;
-          break;
-        }
-      }
-      if (merged) {
-        break;
-      }
-    }
-    if (merged) {
-      continue;
-    }
-    unmerged = false;
-  }
-
   if (min_npartons > 0 && (int(parton_pt_eta_phi.size()) >= min_npartons ? parton_pt_eta_phi.at(min_npartons-1).at(0) : 0.f) < min_parton_pt)
     return false;
   if (parton_sumht < min_parton_sumht)
