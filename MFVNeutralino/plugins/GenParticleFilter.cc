@@ -122,55 +122,118 @@ namespace {
 }
 
 bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
-if (doing_h2xqq) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
   const size_t ngen = gen_particles->size();
 
-  double xphi[2] = {0};
+  std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
-  std::vector<const reco::GenParticle*> partons;
+  double vphi[2] = {0};
 
-  for (size_t igen = 0; igen < ngen; ++igen) {
-    const reco::GenParticle& gen = gen_particles->at(igen);
-    if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
-      assert(gen.numberOfDaughters() >= 2);
-      for (size_t idau = 0; idau < 2; ++idau) {
-        const reco::Candidate* dau = gen.daughter(idau);
-        xphi[idau] = dau->phi();
-        int dauid = dau->pdgId();
-        // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
-        // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
-        assert(dauid/6000000 == 1);
-        dauid %= 6000000;
-        const int h2x = dauid / 1000;
-        assert(h2x == 1 || h2x == 2 || h2x == 3);
-        dauid %= h2x*1000;
-        assert(dauid/100 == 1);
-        dauid %= 100;
-        assert(dauid/10 == 1);
-        dauid %= 10;
-        assert(dauid == 3 || dauid == 4);
+  if (doing_h2xqq) {
+    for (size_t igen = 0; igen < ngen; ++igen) {
+      const reco::GenParticle& gen = gen_particles->at(igen);
+      if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
+        assert(gen.numberOfDaughters() >= 2);
+        for (size_t idau = 0; idau < 2; ++idau) {
+          const reco::Candidate* dau = gen.daughter(idau);
+          vphi[idau] = dau->phi();
+          int dauid = dau->pdgId();
+          // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
+          // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
+          assert(dauid/6000000 == 1);
+          dauid %= 6000000;
+          const int h2x = dauid / 1000;
+          assert(h2x == 1 || h2x == 2 || h2x == 3);
+          dauid %= h2x*1000;
+          assert(dauid/100 == 1);
+          dauid %= 100;
+          assert(dauid/10 == 1);
+          dauid %= 10;
+          assert(dauid == 3 || dauid == 4);
 
-        const size_t ngdau = dau->numberOfDaughters();
-        assert(ngdau >= 2);
-        for (size_t igdau = 0; igdau < 2; ++igdau) {
-          const reco::Candidate* gdau = dau->daughter(igdau);
-          const int id = gdau->pdgId();
-          assert(abs(id) >= 1 && abs(id) <= 5);
-          partons.push_back(dynamic_cast<const reco::GenParticle*>(gdau));
+          const size_t ngdau = dau->numberOfDaughters();
+          assert(ngdau >= 2);
+          for (size_t igdau = 0; igdau < 2; ++igdau) {
+            const reco::Candidate* gdau = dau->daughter(igdau);
+            const int id = gdau->pdgId();
+            assert(abs(id) >= 1 && abs(id) <= 5);
+            partons[idau].push_back(dynamic_cast<const reco::GenParticle*>(gdau));
+          }
         }
       }
     }
+
+    for (int i = 0; i < 2; ++i) {
+      assert(partons[i].size() == 2);
+      assert(partons[i][0]->numberOfDaughters() > 0);
+      v[i][0] = partons[i][0]->daughter(0)->vx();
+      v[i][1] = partons[i][0]->daughter(0)->vy();
+      v[i][2] = partons[i][0]->daughter(0)->vz();
+    }
   }
 
-  assert(partons.size() == 4);
-  for (int i = 0; i < 2; ++i) {
-    assert(partons[i*2]->numberOfDaughters() > 0);
-    v[i][0] = partons[i*2]->daughter(0)->vx(); // i*2 since first two partons are from first X, second two partons are from second X
-    v[i][1] = partons[i*2]->daughter(0)->vy();
-    v[i][2] = partons[i*2]->daughter(0)->vz();
+  if (doing_mfv3j) {
+    MCInteractionMFV3j mci;
+    mci.Init(*gen_particles);
+
+    if (print_info)
+      mci.Print(std::cout);
+
+    if (!mci.Valid()) {
+      if (!mci_warned)
+        edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
+      mci_warned = true;
+      return !cut_invalid;
+    }
+
+    for (int i = 0; i < 2; ++i) {
+      partons[i].push_back(mci.stranges[i]);
+      partons[i].push_back(mci.bottoms[i]);
+      partons[i].push_back(mci.bottoms_from_tops[i]);
+      partons[i].push_back(mci.W_daughters[i][0]);
+      partons[i].push_back(mci.W_daughters[i][1]);
+      v[i][0] = mci.stranges[i]->vx() - mci.lsps[i]->vx();
+      v[i][1] = mci.stranges[i]->vy() - mci.lsps[i]->vy();
+      v[i][2] = mci.stranges[i]->vz() - mci.lsps[i]->vz();
+      vphi[i] = atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx());
+    }
+
+    edm::Handle<reco::GenJetCollection> gen_jets;
+    event.getByLabel(gen_jet_src, gen_jets);
+
+    int njets_min_pt = 0;
+    double jet_sumht = 0;
+    for (const reco::GenJet& jet : *gen_jets) {
+      if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
+        ++njets_min_pt;
+      if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
+        jet_sumht += jet.pt();
+    }
+    if (njets_min_pt < min_njets)
+      return false;
+    if (jet_sumht < min_jet_sumht)
+      return false;
+
+    if (required_num_leptonic >= 0 && mci.num_leptonic != required_num_leptonic)
+      return false;
+
+    if (mci.num_leptonic == 1) {
+      if (cut_lepton(mci.W_daughters[mci.which_is_lepton][0]))
+        return false;
+    }
+    else if (mci.num_leptonic == 2) {
+      for (int i = 0; i < 2; ++i)
+        if (cut_lepton(mci.W_daughters[i][0]))
+          return false;
+    }
+
+    if (allowed_decay_types.size())
+      for (int i = 0; i < 2; ++i)
+        if (std::find(allowed_decay_types.begin(), allowed_decay_types.end(), mci.decay_type[i]) == allowed_decay_types.end())
+          return false;
   }
+
   const double dbv[2] = {
     mag(v[0][0], v[0][1]),
     mag(v[1][0], v[1][1])
@@ -179,154 +242,6 @@ if (doing_h2xqq) {
                          v[0][1] - v[1][1]);
   const double rho0 = dbv[0];
   const double rho1 = dbv[1];
-
-  if ((min_rho0 > 0 && rho0 < min_rho0) ||
-      (max_rho0 > 0 && rho0 > max_rho0) ||
-      (min_rho1 > 0 && rho1 < min_rho1) ||
-      (max_rho1 > 0 && rho1 > max_rho1))
-    return false;
-
-  std::vector<std::vector<float> > parton_pt_eta_phi;
-  float parton_sumht = 0;
-  for (const reco::GenParticle* p : partons) {
-    if (p->pt() > 20 && fabs(p->eta()) < 2.5) {
-      std::vector<float> pt_eta_phi;
-      pt_eta_phi.push_back(p->pt());
-      pt_eta_phi.push_back(p->eta());
-      pt_eta_phi.push_back(p->phi());
-      parton_pt_eta_phi.push_back(pt_eta_phi);
-      parton_sumht += p->pt();
-    }
-  }
-  std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
-
-  bool unmerged = true;
-  while (unmerged) {
-    bool merged = false;
-    for (int i = 0; i < int(parton_pt_eta_phi.size()); ++i) {
-      std::vector<float> p1 = parton_pt_eta_phi.at(i);
-      for (int j = i+1; j < int(parton_pt_eta_phi.size()); ++j) {
-        std::vector<float> p2 = parton_pt_eta_phi.at(j);
-        if (reco::deltaR(p1.at(1), p1.at(2), p2.at(1), p2.at(2)) < 0.6) {
-          std::vector<float> pt_eta_phi;
-          pt_eta_phi.push_back(p1.at(0) + p2.at(0));
-          pt_eta_phi.push_back((p1.at(0) * p1.at(1) + p2.at(0) * p2.at(1)) / (p1.at(0) + p2.at(0)));
-          pt_eta_phi.push_back((p1.at(0) * p1.at(2) + p2.at(0) * p2.at(2)) / (p1.at(0) + p2.at(0)));
-          parton_pt_eta_phi.erase(parton_pt_eta_phi.begin() + j);
-          parton_pt_eta_phi.erase(parton_pt_eta_phi.begin() + i);
-          parton_pt_eta_phi.push_back(pt_eta_phi);
-          std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
-          merged = true;
-          break;
-        }
-      }
-      if (merged) {
-        break;
-      }
-    }
-    if (merged) {
-      continue;
-    }
-    unmerged = false;
-  }
-
-  if (min_npartons > 0 && (int(parton_pt_eta_phi.size()) >= min_npartons ? parton_pt_eta_phi.at(min_npartons-1).at(0) : 0.f) < min_parton_pt)
-    return false;
-  if (parton_sumht < min_parton_sumht)
-    return false;
-
-  for (int i = 0; i < 2; ++i) {
-    const int ndau = 2;
-    const reco::GenParticle* daughters[ndau] = { partons[i*2], partons[i*2+1] };
-
-    int ntracks = 0;
-    int nquarks = 0;
-    float sumpt = 0;
-    float drmin = 1e6;
-    float drmax = 0;
-    for (int j = 0; j < ndau; ++j) {
-      if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(dbv[i] * sin(daughters[j]->phi() - xphi[i])) < 0.01) continue;
-      ++ntracks;
-      if (!is_lepton(daughters[j])) ++nquarks;
-      sumpt += daughters[j]->pt();
-      for (int k = j+1; k < ndau; ++k) {
-        if (is_neutrino(daughters[k]) || daughters[k]->pt() < 20 || fabs(daughters[k]->eta()) > 2.5 || fabs(daughters[j]->eta()) > 2.5 || fabs(dbv[i] * sin(daughters[k]->phi() - xphi[i])) < 0.01) continue;
-        float dr = reco::deltaR(*daughters[j], *daughters[k]);
-        if (dr < drmin)
-          drmin = dr;
-        if (dr > drmax)
-          drmax = dr;
-      }
-    }
-
-    if (ntracks < min_ntracks)
-      return false;
-    if (nquarks < min_nquarks)
-      return false;
-    if (sumpt < min_sumpt)
-      return false;
-    if (drmin > max_drmin)
-      return false;
-    if (drmax < min_drmax)
-      return false;
-    if (drmax > max_drmax)
-      return false;
-  }
-}
-
-if (doing_mfv3j) {
-  edm::Handle<reco::GenJetCollection> gen_jets;
-  event.getByLabel(gen_jet_src, gen_jets);
-
-  int njets_min_pt = 0;
-  double jet_sumht = 0;
-  for (const reco::GenJet& jet : *gen_jets) {
-    if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
-      ++njets_min_pt;
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-      jet_sumht += jet.pt();
-  }
-  if (njets_min_pt < min_njets)
-    return false;
-  if (jet_sumht < min_jet_sumht)
-    return false;
-
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
-
-  MCInteractionMFV3j mci;
-  mci.Init(*gen_particles);
-
-  if (print_info)
-    mci.Print(std::cout);
-
-  if (!mci.Valid()) {
-    if (!mci_warned)
-      edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
-    mci_warned = true;
-    return !cut_invalid;
-  }
-
-  if (required_num_leptonic >= 0 && mci.num_leptonic != required_num_leptonic) 
-    return false;
-
-  if (mci.num_leptonic == 1) {
-    if (cut_lepton(mci.W_daughters[mci.which_is_lepton][0]))
-      return false;
-  }
-  else if (mci.num_leptonic == 2) {
-    for (int i = 0; i < 2; ++i)
-      if (cut_lepton(mci.W_daughters[i][0]))
-        return false;
-  }
-
-  if (allowed_decay_types.size())
-    for (int i = 0; i < 2; ++i)
-      if (std::find(allowed_decay_types.begin(), allowed_decay_types.end(), mci.decay_type[i]) == allowed_decay_types.end())
-        return false;
-
-  const double rho0 = mag(mci.stranges[0]->vx() - mci.lsps[0]->vx(), mci.stranges[0]->vy() - mci.lsps[0]->vy());
-  const double rho1 = mag(mci.stranges[1]->vx() - mci.lsps[1]->vx(), mci.stranges[1]->vy() - mci.lsps[1]->vy());
 
   if ((min_rho0 > 0 && rho0 < min_rho0) ||
       (max_rho0 > 0 && rho0 > max_rho0) ||
@@ -343,8 +258,8 @@ if (doing_mfv3j) {
       (max_rhosmaller > 0 && rhosmaller > max_rhosmaller))
     return false;
 
-  const double r0 = mag(mci.stranges[0]->vx() - mci.lsps[0]->vx(), mci.stranges[0]->vy() - mci.lsps[0]->vy(), mci.stranges[0]->vz() - mci.lsps[0]->vz());
-  const double r1 = mag(mci.stranges[1]->vx() - mci.lsps[1]->vx(), mci.stranges[1]->vy() - mci.lsps[1]->vy(), mci.stranges[1]->vz() - mci.lsps[1]->vz());
+  const double r0 = mag(v[0][0], v[0][1], v[0][2]);
+  const double r1 = mag(v[1][0], v[1][1], v[1][2]);
 
   if ((min_r0 > 0 && r0 < min_r0) ||
       (max_r0 > 0 && r0 > max_r0) ||
@@ -361,27 +276,18 @@ if (doing_mfv3j) {
       (max_rsmaller > 0 && rsmaller > max_rsmaller))
     return false;
 
-  std::vector<const reco::GenParticle*> partons;
-  for (int i = 0; i < 2; ++i) {
-    partons.push_back(mci.stranges[i]);
-    partons.push_back(mci.bottoms[i]);
-    partons.push_back(mci.bottoms_from_tops[i]);
-    if (mci.decay_type[i] == 3) {
-      partons.push_back(mci.W_daughters[i][0]);
-      partons.push_back(mci.W_daughters[i][1]);
-    }
-  }
-
   std::vector<std::vector<float> > parton_pt_eta_phi;
   float parton_sumht = 0;
-  for (const reco::GenParticle* p : partons) {
-    if (p->pt() > 20 && fabs(p->eta()) < 2.5) {
-      std::vector<float> pt_eta_phi;
-      pt_eta_phi.push_back(p->pt());
-      pt_eta_phi.push_back(p->eta());
-      pt_eta_phi.push_back(p->phi());
-      parton_pt_eta_phi.push_back(pt_eta_phi);
-      parton_sumht += p->pt();
+  for (int i = 0; i < 2; ++i) {
+    for (const reco::GenParticle* p : partons[i]) {
+      if (p->pt() > 20 && fabs(p->eta()) < 2.5 && is_quark(p)) {
+        std::vector<float> pt_eta_phi;
+        pt_eta_phi.push_back(p->pt());
+        pt_eta_phi.push_back(p->eta());
+        pt_eta_phi.push_back(p->phi());
+        parton_pt_eta_phi.push_back(pt_eta_phi);
+        parton_sumht += p->pt();
+      }
     }
   }
   std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
@@ -422,8 +328,7 @@ if (doing_mfv3j) {
     return false;
 
   for (int i = 0; i < 2; ++i) {
-    const int ndau = 5;
-    const reco::GenParticle* daughters[ndau] = { mci.stranges[i], mci.bottoms[i], mci.bottoms_from_tops[i], mci.W_daughters[i][0], mci.W_daughters[i][1] };
+    const int ndau = int(partons[i].size());
 
     int ntracks = 0;
     int nquarks = 0;
@@ -431,13 +336,15 @@ if (doing_mfv3j) {
     float drmin = 1e6;
     float drmax = 0;
     for (int j = 0; j < ndau; ++j) {
-      if (is_neutrino(daughters[j]) || daughters[j]->pt() < 20 || fabs(daughters[j]->eta()) > 2.5 || fabs(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(daughters[j]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx()))) < 0.01) continue;
+      const reco::GenParticle* p1 = partons[i][j];
+      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[i] * sin(p1->phi() - vphi[i])) < 0.01) continue;
       ++ntracks;
-      if (!is_lepton(daughters[j])) ++nquarks;
-      sumpt += daughters[j]->pt();
+      if (!is_lepton(p1)) ++nquarks;
+      sumpt += p1->pt();
       for (int k = j+1; k < ndau; ++k) {
-        if (is_neutrino(daughters[k]) || daughters[k]->pt() < 20 || fabs(daughters[k]->eta()) > 2.5 || fabs(mag(mci.stranges[i]->vx() - mci.lsps[i]->vx(), mci.stranges[i]->vy() - mci.lsps[i]->vy()) * sin(daughters[k]->phi() - atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx()))) < 0.01) continue;
-        float dr = reco::deltaR(*daughters[j], *daughters[k]);
+        const reco::GenParticle* p2 = partons[i][k];
+        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[i] * sin(p2->phi() - vphi[i])) < 0.01) continue;
+        float dr = reco::deltaR(*p1, *p2);
         if (dr < drmin)
           drmin = dr;
         if (dr > drmax)
@@ -458,7 +365,6 @@ if (doing_mfv3j) {
     if (drmax > max_drmax)
       return false;
   }
-}
 
   return true;
 }
