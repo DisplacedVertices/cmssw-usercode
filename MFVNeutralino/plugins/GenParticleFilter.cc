@@ -276,25 +276,19 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       (max_rsmaller > 0 && rsmaller > max_rsmaller))
     return false;
 
-  std::vector<std::vector<float> > parton_pt_eta_phi;
-  float parton_sumht = 0;
+  std::vector<float> parton_pt;
   for (int i = 0; i < 2; ++i) {
     for (const reco::GenParticle* p : partons[i]) {
       if (p->pt() > 20 && fabs(p->eta()) < 2.5 && is_quark(p)) {
-        std::vector<float> pt_eta_phi;
-        pt_eta_phi.push_back(p->pt());
-        pt_eta_phi.push_back(p->eta());
-        pt_eta_phi.push_back(p->phi());
-        parton_pt_eta_phi.push_back(pt_eta_phi);
-        parton_sumht += p->pt();
+        parton_pt.push_back(p->pt());
       }
     }
   }
-  std::sort(parton_pt_eta_phi.begin(), parton_pt_eta_phi.end(), [](std::vector<float> p1, std::vector<float> p2) { return p1.at(0) > p2.at(0); } );
+  std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
 
-  if (min_npartons > 0 && (int(parton_pt_eta_phi.size()) >= min_npartons ? parton_pt_eta_phi.at(min_npartons-1).at(0) : 0.f) < min_parton_pt)
+  if (min_npartons > 0 && (int(parton_pt.size()) >= min_npartons ? parton_pt.at(min_npartons-1) : 0.f) < min_parton_pt)
     return false;
-  if (parton_sumht < min_parton_sumht)
+  if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f) < min_parton_sumht)
     return false;
 
   for (int i = 0; i < 2; ++i) {
