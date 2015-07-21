@@ -318,15 +318,14 @@ def gluglu_exclude(h):
     gluglu, hgluglu = make_gluglu_hist()
     gluglu = dict((m, (s, es)) for m, s, es in gluglu)
 
-    hexc = ROOT.TH2F(h.GetName() + '_exc', '',
-                     h.GetNbinsX(), h.GetXaxis().GetBinLowEdge(1), h.GetXaxis().GetBinLowEdge(h.GetNbinsX()+1),
-                     h.GetNbinsY(), h.GetYaxis().GetBinLowEdge(1), h.GetYaxis().GetBinLowEdge(h.GetNbinsY()+1))
+    hexc = h.Clone(h.GetName() +'_exc')
     hexc.SetStats(0)
 
     for ix in xrange(1, h.GetNbinsX()+1):
         mass = h.GetXaxis().GetBinLowEdge(ix)
         for iy in xrange(1, h.GetNbinsY()+1):
             tau0 = h.GetYaxis().GetBinLowEdge(iy)
+
             lim = h.GetBinContent(ix, iy)
 
             bin = hgluglu.FindBin(mass)
@@ -340,7 +339,7 @@ def gluglu_exclude(h):
             
             s = sa + (sb - sa) * z
             es = (z**2 * esb**2 + (1 - z)**2 * esa**2)**0.5
-            #print tau0, mass, lim, s, es
+            print tau0, mass, lim, ma, sa, esa, mb, sb, esb, s, es
 
             bin = hexc.FindBin(mass, tau0)
             if lim < s - es:
@@ -372,5 +371,50 @@ def export_plots(fn='newplots.root'):
 
     fout.Close()
 
-export_plots()
+def dbg_exclude():
+    f = ROOT.TFile('newplots.root')
+    h = f.Get('hlim_observed')
+    hi = gluglu_exclude(h)
+    c = ROOT.TCanvas('c', '', 800, 600)
+    hi.SetMarkerStyle(20)
+    hi.SetMarkerSize(1.5)
+    hi.Draw('colz text00')
+    c.SaveAs('/uscms/home/tucker/asdf/a.png')
+
+def exc_graph(h, color, style):
+    xax = h.GetXaxis()
+    yax = h.GetYaxis()
+    xs,ys = array('d'), array('d')
+    for iy in xrange(1, h.GetNbinsY()+1):
+        y = yax.GetBinLowEdge(iy)
+        for ix in xrange(h.GetNbinsX()+1, 0, -1):
+            x = xax.GetBinLowEdge(ix)
+            l = h.GetBinContent(ix, iy)
+            if l:
+                xs.append(x)
+                ys.append(y/1000)
+                break
+    g = ROOT.TGraph(len(xs), xs, ys)
+    g.SetTitle(';neutralino mass (GeV);neutralino lifetime (mm)')
+    g.SetLineWidth(2)
+    g.SetLineColor(color)
+    g.SetLineStyle(style)
+    g.GetHistogram().SetMaximum(30)
+    g.GetHistogram().SetMinimum(0.3)
+    return g
+
+def dbg_exclude():
+    f = ROOT.TFile('newplots.root')
+    gobs = exc_graph(f.Get('hlim_observed_interp_exc'), 2, 1)
+    gexp = exc_graph(f.Get('hlim_expect50_interp_exc'), 2, 2)
+
+    c = ROOT.TCanvas('c', '', 800, 600)
+    gobs.Draw('AL')
+    gexp.Draw('L')
+    
+    c.SaveAs('/uscms/home/tucker/asdf/a.png')
+
+dbg_exclude()
+
+#export_plots()
 #duh()
