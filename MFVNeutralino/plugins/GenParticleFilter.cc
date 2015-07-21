@@ -32,6 +32,7 @@ private:
   const std::vector<int> allowed_decay_types;
   const double min_lepton_pt;
   const double max_lepton_eta;
+  const double min_dvv;
   const double min_rho0;
   const double max_rho0;
   const double min_rho1;
@@ -82,6 +83,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     allowed_decay_types(cfg.getParameter<std::vector<int> >("allowed_decay_types")),
     min_lepton_pt(cfg.getParameter<double>("min_lepton_pt")),
     max_lepton_eta(cfg.getParameter<double>("max_lepton_eta")),
+    min_dvv(cfg.getParameter<double>("min_dvv")),
     min_rho0(cfg.getParameter<double>("min_rho0")),
     max_rho0(cfg.getParameter<double>("max_rho0")),
     min_rho1(cfg.getParameter<double>("min_rho1")),
@@ -251,6 +253,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
                          v[0][1] - v[1][1]);
   const double rho0 = dbv[0];
   const double rho1 = dbv[1];
+
+  if (min_dvv > 0 && dvv < min_dvv)
+    return false;
 
   if ((min_rho0 > 0 && rho0 < min_rho0) ||
       (max_rho0 > 0 && rho0 > max_rho0) ||
