@@ -1,9 +1,9 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
-#mode = '2Ntbs'
+mode = '2Ntbs'
 #mode = 'h2xqq'
-mode = '2Nuds' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.uds
+#mode = '2Nuds' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.uds
 #mode = '2gtbs'
 
 process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_10_1_cUZ.root
