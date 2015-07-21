@@ -6,6 +6,7 @@ mode = '2Ntbs'
 #mode = '2Nuds' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.uds
 #mode = '2gtbs'
 #mode = 'uddmu' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.udsomemu
+#mode = 'grhad' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.gluinoviarhad
 
 process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_10_1_cUZ.root
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_11_1_g7H.root
@@ -437,6 +438,27 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_empirical_udsomemu_tau01000um_M1000', '', '/mfv_empirical_udsomemu_tau01000um_M1000_v20/tucker-mfv_empirical_udsomemu_tau01000um_M1000_v20-a46e07a5f0b435aa04f023be1de0f5de/USER', 9400, 1, 1, 1),
             Samples.MCSample('mfv_empirical_udsomemu_tau10000um_M0400', '', '/mfv_empirical_udsomemu_tau10000um_M0400_v20/tucker-mfv_empirical_udsomemu_tau10000um_M0400_v20-8da33963cb76d17b0800bd5122a72eb9/USER', 10000, 1, 1, 1),
             Samples.MCSample('mfv_empirical_udsomemu_tau10000um_M1000', '', '/mfv_empirical_udsomemu_tau10000um_M1000_v20/tucker-mfv_empirical_udsomemu_tau10000um_M1000_v20-b3854c4454ac9ec83d73927a4f88e596/USER', 10000, 1, 1, 1),
+            ]
+
+        for sample in samples:
+            sample.dbs_url_num = 3
+            sample.ana_events_per = 10000
+
+        cs = CRABSubmitter('MFVResolutionsV20',
+                           total_number_of_events = -1,
+                           events_per_job = 5000,
+                           USER_skip_servers = 'cern_vocms0117',
+                           )
+        cs.submit_all(samples)
+
+    if mode == 'grhad':
+        samples = [
+            Samples.MCSample('mfv_gluinoviarhad_tau00300um_M0400', '', '/mfv_gluinoviarhad_tau00300um_M0400_v20/tucker-mfv_gluinoviarhad_tau00300um_M0400_v20-10a5d991f55ed195e7b024631815d13d/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_gluinoviarhad_tau00300um_M1000', '', '/mfv_gluinoviarhad_tau00300um_M1000_v20/tucker-mfv_gluinoviarhad_tau00300um_M1000_v20-707a361057e5f662f34d51ecf3b19468/USER', 9400, 1, 1, 1),
+            Samples.MCSample('mfv_gluinoviarhad_tau01000um_M0400', '', '/mfv_gluinoviarhad_tau01000um_M0400_v20/tucker-mfv_gluinoviarhad_tau01000um_M0400_v20-dd9ea635104e7b5d78ea01aa50e0ded4/USER', 9800, 1, 1, 1),
+            Samples.MCSample('mfv_gluinoviarhad_tau01000um_M1000', '', '/mfv_gluinoviarhad_tau01000um_M1000_v20/tucker-mfv_gluinoviarhad_tau01000um_M1000_v20-3a89d7dd91fe7de2f5294a3d90ac1e01/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_gluinoviarhad_tau10000um_M0400', '', '/mfv_gluinoviarhad_tau10000um_M0400_v20/tucker-mfv_gluinoviarhad_tau10000um_M0400_v20-f1b95736d593d3774dfdb47a5fc8b6b6/USER', 9800, 1, 1, 1),
+            Samples.MCSample('mfv_gluinoviarhad_tau10000um_M1000', '', '/mfv_gluinoviarhad_tau10000um_M1000_v20/tucker-mfv_gluinoviarhad_tau10000um_M1000_v20-3ee62d6fdd436b44de3b9782ac8f5cdc/USER', 8800, 1, 1, 1),
             ]
 
         for sample in samples:
