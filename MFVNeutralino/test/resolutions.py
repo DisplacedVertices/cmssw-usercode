@@ -4,6 +4,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 #mode = '2Ntbs'
 #mode = 'h2xqq'
 mode = '2Nuds' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.uds
+#mode = '2gtbs'
 
 process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_10_1_cUZ.root
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_11_1_g7H.root
@@ -393,6 +394,27 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_empirical_uds_tau01000um_M1000', '', '/mfv_empirical_uds_tau01000um_M1000_v20/tucker-mfv_empirical_uds_tau01000um_M1000_v20-c29d9665247fe6c44986e957c20ff6bb/USER',  9600, 1, 1, 1),
             Samples.MCSample('mfv_empirical_uds_tau10000um_M0400', '', '/mfv_empirical_uds_tau10000um_M0400_v20/tucker-mfv_empirical_uds_tau10000um_M0400_v20-3d23137db6ab1bc2c1410835a4edeb69/USER', 10000, 1, 1, 1),
             Samples.MCSample('mfv_empirical_uds_tau10000um_M1000', '', '/mfv_empirical_uds_tau10000um_M1000_v20/tucker-mfv_empirical_uds_tau10000um_M1000_v20-861bc848e7c1fea9780d8a0dd90523b4/USER', 10000, 1, 1, 1),
+            ]
+
+        for sample in samples:
+            sample.dbs_url_num = 3
+            sample.ana_events_per = 10000
+
+        cs = CRABSubmitter('MFVResolutionsV20',
+                           total_number_of_events = -1,
+                           events_per_job = 5000,
+                           USER_skip_servers = 'cern_vocms0117',
+                           )
+        cs.submit_all(samples)
+
+    if mode == '2gtbs':
+        samples = [
+            Samples.MCSample('mfv_gluino_tau00300um_M0400', '', '/mfv_gluino_tau00300um_M0400_v20/tucker-mfv_gluino_tau00300um_M0400_v20-75c9b58a3c665abf1f9032b8b28cb66b/USER', 9400, 1, 1, 1),
+            Samples.MCSample('mfv_gluino_tau00300um_M1000', '', '/mfv_gluino_tau00300um_M1000_v20/tucker-mfv_gluino_tau00300um_M1000_v20-e1c5e9534b3e4e286cf6ef3c8bd7b885/USER', 9400, 1, 1, 1),
+            Samples.MCSample('mfv_gluino_tau01000um_M0400', '', '/mfv_gluino_tau01000um_M0400_v20/tucker-mfv_gluino_tau01000um_M0400_v20-ef9541fa8d497223c6a4cf48ea6400ee/USER', 9800, 1, 1, 1),
+            Samples.MCSample('mfv_gluino_tau01000um_M1000', '', '/mfv_gluino_tau01000um_M1000_v20/tucker-mfv_gluino_tau01000um_M1000_v20-28d5ea9d8fb38d832cddcdf991010c7d/USER', 9800, 1, 1, 1),
+            Samples.MCSample('mfv_gluino_tau10000um_M0400', '', '/mfv_gluino_tau10000um_M0400_v20/tucker-mfv_gluino_tau10000um_M0400_v20-ebbe38be251cf7ea48c9051cf20b36e4/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_gluino_tau10000um_M1000', '', '/mfv_gluino_tau10000um_M1000_v20/tucker-mfv_gluino_tau10000um_M1000_v20-d95f435421318a23557226fbba182849/USER', 9600, 1, 1, 1),
             ]
 
         for sample in samples:
