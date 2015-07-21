@@ -18,6 +18,7 @@ private:
   const bool doing_2Ntbs;
   const bool doing_h2xqq;
   const bool doing_2Nuds;
+  const bool doing_r2gqq;
 
   const edm::InputTag gen_jet_src;
   const int min_njets;
@@ -69,6 +70,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     doing_2Ntbs(mode == "2Ntbs"),
     doing_h2xqq(mode == "h2xqq"),
     doing_2Nuds(mode == "2Nuds"),
+    doing_r2gqq(mode == "r2gqq"),
     gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
@@ -175,7 +177,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  if (doing_2Ntbs || doing_2Nuds) {
+  if (doing_2Ntbs || doing_2Nuds || doing_r2gqq) {
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
 
