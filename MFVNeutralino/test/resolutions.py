@@ -402,17 +402,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_empirical_uds_tau10000um_M1000', '', '/mfv_empirical_uds_tau10000um_M1000_v20/tucker-mfv_empirical_uds_tau10000um_M1000_v20-861bc848e7c1fea9780d8a0dd90523b4/USER', 10000, 1, 1, 1),
             ]
 
-        for sample in samples:
-            sample.dbs_url_num = 3
-            sample.ana_events_per = 10000
-
-        cs = CRABSubmitter('MFVResolutionsV20',
-                           total_number_of_events = -1,
-                           events_per_job = 5000,
-                           USER_skip_servers = 'cern_vocms0117',
-                           )
-        cs.submit_all(samples)
-
     if mode == '2gtbs':
         samples = [
             Samples.MCSample('mfv_gluino_tau00300um_M0400', '', '/mfv_gluino_tau00300um_M0400_v20/tucker-mfv_gluino_tau00300um_M0400_v20-75c9b58a3c665abf1f9032b8b28cb66b/USER', 9400, 1, 1, 1),
@@ -422,17 +411,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_gluino_tau10000um_M0400', '', '/mfv_gluino_tau10000um_M0400_v20/tucker-mfv_gluino_tau10000um_M0400_v20-ebbe38be251cf7ea48c9051cf20b36e4/USER', 10000, 1, 1, 1),
             Samples.MCSample('mfv_gluino_tau10000um_M1000', '', '/mfv_gluino_tau10000um_M1000_v20/tucker-mfv_gluino_tau10000um_M1000_v20-d95f435421318a23557226fbba182849/USER', 9600, 1, 1, 1),
             ]
-
-        for sample in samples:
-            sample.dbs_url_num = 3
-            sample.ana_events_per = 10000
-
-        cs = CRABSubmitter('MFVResolutionsV20',
-                           total_number_of_events = -1,
-                           events_per_job = 5000,
-                           USER_skip_servers = 'cern_vocms0117',
-                           )
-        cs.submit_all(samples)
 
     if mode == '2Nuddmu':
         samples = [
@@ -444,17 +422,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_empirical_udsomemu_tau10000um_M1000', '', '/mfv_empirical_udsomemu_tau10000um_M1000_v20/tucker-mfv_empirical_udsomemu_tau10000um_M1000_v20-b3854c4454ac9ec83d73927a4f88e596/USER', 10000, 1, 1, 1),
             ]
 
-        for sample in samples:
-            sample.dbs_url_num = 3
-            sample.ana_events_per = 10000
-
-        cs = CRABSubmitter('MFVResolutionsV20',
-                           total_number_of_events = -1,
-                           events_per_job = 5000,
-                           USER_skip_servers = 'cern_vocms0117',
-                           )
-        cs.submit_all(samples)
-
     if mode == '2gtbs_rhad':
         samples = [
             Samples.MCSample('mfv_gluinoviarhad_tau00300um_M0400', '', '/mfv_gluinoviarhad_tau00300um_M0400_v20/tucker-mfv_gluinoviarhad_tau00300um_M0400_v20-10a5d991f55ed195e7b024631815d13d/USER', 10000, 1, 1, 1),
@@ -464,17 +431,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_gluinoviarhad_tau10000um_M0400', '', '/mfv_gluinoviarhad_tau10000um_M0400_v20/tucker-mfv_gluinoviarhad_tau10000um_M0400_v20-f1b95736d593d3774dfdb47a5fc8b6b6/USER', 9800, 1, 1, 1),
             Samples.MCSample('mfv_gluinoviarhad_tau10000um_M1000', '', '/mfv_gluinoviarhad_tau10000um_M1000_v20/tucker-mfv_gluinoviarhad_tau10000um_M1000_v20-3ee62d6fdd436b44de3b9782ac8f5cdc/USER', 8800, 1, 1, 1),
             ]
-
-        for sample in samples:
-            sample.dbs_url_num = 3
-            sample.ana_events_per = 10000
-
-        cs = CRABSubmitter('MFVResolutionsV20',
-                           total_number_of_events = -1,
-                           events_per_job = 5000,
-                           USER_skip_servers = 'cern_vocms0117',
-                           )
-        cs.submit_all(samples)
 
     if mode == '2gddbar_rhad':
         samples = [
@@ -486,17 +442,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_gluinoviarhad_ddbar_tau10000um_M1000', '', '/mfv_gluinoviarhad_ddbar_tau10000um_M1000_v20/tucker-mfv_gluinoviarhad_ddbar_tau10000um_M1000_v20-5bb17ba259d1eabd1ccbf6d1e168a499/USER', 10000, 1, 1, 1),
             ]
 
-        for sample in samples:
-            sample.dbs_url_num = 3
-            sample.ana_events_per = 10000
-
-        cs = CRABSubmitter('MFVResolutionsV20',
-                           total_number_of_events = -1,
-                           events_per_job = 5000,
-                           USER_skip_servers = 'cern_vocms0117',
-                           )
-        cs.submit_all(samples)
-
     if mode == '2gbbbar_rhad':
         samples = [
             Samples.MCSample('mfv_gluinoviarhad_bbbar_tau00300um_M0400', '', '/mfv_gluinoviarhad_bbbar_tau00300um_M0400_v20/tucker-mfv_gluinoviarhad_bbbar_tau00300um_M0400_v20-9514ec45342d703141fa92d9386ef4c6/USER', 8800, 1, 1, 1),
@@ -507,6 +452,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_gluinoviarhad_bbbar_tau10000um_M1000', '', '/mfv_gluinoviarhad_bbbar_tau10000um_M1000_v20/tucker-mfv_gluinoviarhad_bbbar_tau10000um_M1000_v20-7c736aa425b7fa2de51eef72ecabe90d/USER', 9800, 1, 1, 1),
             ]
 
+    if mode == '2Nuds' or mode == '2gtbs' or mode == '2Nuddmu' or mode == '2gtbs_rhad' or mode == '2gddbar_rhad' or mode == '2gbbbar_rhad':
         for sample in samples:
             sample.dbs_url_num = 3
             sample.ana_events_per = 10000
