@@ -15,7 +15,7 @@
 double    mu_clear = 0.0320;
 double sigma_clear = 0.0110;
 
-const char* tree_path = "/uscms/home/tucker/crab_dirs/MiniTreeV20_fullhadded";
+const char* tree_path = "/uscms/home/dquach/private/mfv_5313/src/JMTucker/MFVNeutralino/test/crab/MiniTreeV20_sigma2.5";
 //const char* tree_path = "../crab/MiniTreeV20";
 
 const int nbkg = 5;
@@ -135,7 +135,7 @@ int main(int argc, const char* argv[]) {
         }
       }
 
-      if (nt.nvtx == 2) {
+      if (nt.nvtx >= 2) {
         double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
         h_2v_dbv->Fill(dbv0, w);
