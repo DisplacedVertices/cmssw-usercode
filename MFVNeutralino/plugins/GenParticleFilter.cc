@@ -15,8 +15,9 @@ private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   const std::string mode;
-  const bool doing_mfv3j;
+  const bool doing_2Ntbs;
   const bool doing_h2xqq;
+  const bool doing_2Nuds;
 
   const edm::InputTag gen_jet_src;
   const int min_njets;
@@ -65,8 +66,9 @@ private:
 
 MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg) 
   : mode(cfg.getParameter<std::string>("mode")),
-    doing_mfv3j(mode == "mfv3j"),
+    doing_2Ntbs(mode == "2Ntbs"),
     doing_h2xqq(mode == "h2xqq"),
+    doing_2Nuds(mode == "2Nuds"),
     gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
@@ -105,7 +107,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
 {
-  if (!(doing_mfv3j || doing_h2xqq))
+  if (!(doing_2Ntbs || doing_h2xqq || doing_2Nuds))
     throw cms::Exception("Configuration") << "mode must be either mfv3j or h2xqq, got " << mode;
 }
 
@@ -173,7 +175,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  if (doing_mfv3j) {
+  if (doing_2Ntbs || doing_2Nuds) {
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
 
@@ -190,9 +192,14 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     for (int i = 0; i < 2; ++i) {
       partons[i].push_back(mci.stranges[i]);
       partons[i].push_back(mci.bottoms[i]);
-      partons[i].push_back(mci.bottoms_from_tops[i]);
-      partons[i].push_back(mci.W_daughters[i][0]);
-      partons[i].push_back(mci.W_daughters[i][1]);
+      if (doing_2Ntbs) {
+        partons[i].push_back(mci.bottoms_from_tops[i]);
+        partons[i].push_back(mci.W_daughters[i][0]);
+        partons[i].push_back(mci.W_daughters[i][1]);
+      }
+      if (doing_2Nuds) {
+        partons[i].push_back(mci.tops[i]);
+      }
       v[i][0] = mci.stranges[i]->vx() - mci.lsps[i]->vx();
       v[i][1] = mci.stranges[i]->vy() - mci.lsps[i]->vy();
       v[i][2] = mci.stranges[i]->vz() - mci.lsps[i]->vz();

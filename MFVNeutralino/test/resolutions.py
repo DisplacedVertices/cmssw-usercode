@@ -1,7 +1,9 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
-h2xqq = False
+#mode = '2Ntbs'
+#mode = 'h2xqq'
+mode = '2Nuds' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.uds
 
 process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_10_1_cUZ.root
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_11_1_g7H.root
@@ -56,7 +58,7 @@ process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/
 
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_1_1_WwV.root']
 
-if h2xqq:
+if mode == 'h2xqq':
     process.source.fileNames = '''/store/user/tucker/duh/ntuple_10_1_S8P.root
 /store/user/tucker/duh/ntuple_11_1_7sv.root
 /store/user/tucker/duh/ntuple_12_1_CBb.root
@@ -114,6 +116,11 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
+if mode == 'h2xqq':
+    process.mfvGenParticleFilter.mode = 'h2xqq'
+if mode == '2Nuds':
+    process.mfvGenParticleFilter.mode = '2Nuds'
+
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 mode = cms.string('mfv3j'),
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
@@ -124,8 +131,7 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 gen_src = cms.InputTag('genParticles'),
                                 gen_jet_src = cms.InputTag('ak5GenJets'),
                                 )
-if h2xqq:
-    process.mfvGenParticleFilter.mode = 'h2xqq'
+if mode == 'h2xqq':
     mfvResolutions.mode = 'h2xqq'
 process.p = cms.Path(process.mfvSelectedVerticesTight)
 
@@ -326,7 +332,7 @@ process.mfvGenParticleFilterSumpt500 = process.mfvGenParticleFilter.clone(min_np
 process.mfvGenSumpt500 = mfvResolutions.clone()
 process.pGenSumpt500 = cms.Path(process.mfvGenParticleFilterSumpt500 * process.mfvGenSumpt500)
 
-if h2xqq:
+if mode == 'h2xqq':
     process.zzzfilt = cms.EDFilter('MFVEXO12038SampleFilter',
                                    gen_particles_src = cms.InputTag('genParticles'),
                                    mode = cms.string('h2x'),
@@ -343,37 +349,59 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
 
-    Samples.mfv_neutralino_tau0100um_M0200.ana_dataset_override = '/mfv_neutralino_tau0100um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0100um_M0300.ana_dataset_override = '/mfv_neutralino_tau0100um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0100um_M0600.ana_dataset_override = '/mfv_neutralino_tau0100um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0100um_M0800.ana_dataset_override = '/mfv_neutralino_tau0100um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0100um_M1000.ana_dataset_override = '/mfv_neutralino_tau0100um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0300um_M0200.ana_dataset_override = '/mfv_neutralino_tau0300um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0300um_M0300.ana_dataset_override = '/mfv_neutralino_tau0300um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0300um_M0400.ana_dataset_override = '/mfv_neutralino_tau0300um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0300um_M0600.ana_dataset_override = '/mfv_neutralino_tau0300um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0300um_M0800.ana_dataset_override = '/mfv_neutralino_tau0300um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau0300um_M1000.ana_dataset_override = '/mfv_neutralino_tau0300um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau1000um_M0200.ana_dataset_override = '/mfv_neutralino_tau1000um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau1000um_M0300.ana_dataset_override = '/mfv_neutralino_tau1000um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau1000um_M0600.ana_dataset_override = '/mfv_neutralino_tau1000um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau1000um_M0800.ana_dataset_override = '/mfv_neutralino_tau1000um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau9900um_M0200.ana_dataset_override = '/mfv_neutralino_tau9900um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau9900um_M0300.ana_dataset_override = '/mfv_neutralino_tau9900um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau9900um_M0600.ana_dataset_override = '/mfv_neutralino_tau9900um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau9900um_M0800.ana_dataset_override = '/mfv_neutralino_tau9900um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
-    Samples.mfv_neutralino_tau9900um_M1000.ana_dataset_override = '/mfv_neutralino_tau9900um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+    if mode == '2Ntbs':
+        Samples.mfv_neutralino_tau0100um_M0200.ana_dataset_override = '/mfv_neutralino_tau0100um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0100um_M0300.ana_dataset_override = '/mfv_neutralino_tau0100um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0100um_M0400.ana_dataset_override = '/mfv_neutralino_tau0100um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0100um_M0600.ana_dataset_override = '/mfv_neutralino_tau0100um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0100um_M0800.ana_dataset_override = '/mfv_neutralino_tau0100um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0100um_M1000.ana_dataset_override = '/mfv_neutralino_tau0100um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0300um_M0200.ana_dataset_override = '/mfv_neutralino_tau0300um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0300um_M0300.ana_dataset_override = '/mfv_neutralino_tau0300um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0300um_M0400.ana_dataset_override = '/mfv_neutralino_tau0300um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0300um_M0600.ana_dataset_override = '/mfv_neutralino_tau0300um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0300um_M0800.ana_dataset_override = '/mfv_neutralino_tau0300um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau0300um_M1000.ana_dataset_override = '/mfv_neutralino_tau0300um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau1000um_M0200.ana_dataset_override = '/mfv_neutralino_tau1000um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau1000um_M0300.ana_dataset_override = '/mfv_neutralino_tau1000um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau1000um_M0400.ana_dataset_override = '/mfv_neutralino_tau1000um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau1000um_M0600.ana_dataset_override = '/mfv_neutralino_tau1000um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau1000um_M0800.ana_dataset_override = '/mfv_neutralino_tau1000um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau1000um_M1000.ana_dataset_override = '/mfv_neutralino_tau1000um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau9900um_M0200.ana_dataset_override = '/mfv_neutralino_tau9900um_M0200/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau9900um_M0300.ana_dataset_override = '/mfv_neutralino_tau9900um_M0300/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau9900um_M0400.ana_dataset_override = '/mfv_neutralino_tau9900um_M0400/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau9900um_M0600.ana_dataset_override = '/mfv_neutralino_tau9900um_M0600/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau9900um_M0800.ana_dataset_override = '/mfv_neutralino_tau9900um_M0800/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
+        Samples.mfv_neutralino_tau9900um_M1000.ana_dataset_override = '/mfv_neutralino_tau9900um_M1000/tucker-mfvntuple_v20_wgen-4c67a9d5a51f11cf2da50127721f7362/USER'
 
-    for sample in Samples.mfv_signal_samples:
-      sample.ana_scheduler = 'remoteGlidein'
+        for sample in Samples.mfv_signal_samples:
+           sample.ana_scheduler = 'remoteGlidein'
 
-    cs = CRABSubmitter('MFVResolutionsV20',
-                       job_control_from_sample = True,
-                       use_ana_dataset = True,
-                       USER_skip_servers = 'cern_vocms0117',
-                       )
-    cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400])
+        cs = CRABSubmitter('MFVResolutionsV20',
+                           job_control_from_sample = True,
+                           use_ana_dataset = True,
+                           USER_skip_servers = 'cern_vocms0117',
+                           )
+        cs.submit_all(Samples.mfv_signal_samples)
+
+    if mode == '2Nuds':
+        samples = [
+            Samples.MCSample('mfv_empirical_uds_tau00300um_M0400', '', '/mfv_empirical_uds_tau00300um_M0400_v20/tucker-mfv_empirical_uds_tau00300um_M0400_v20-45fdd0992585ee3fb834d2c752ada0c5/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_uds_tau00300um_M1000', '', '/mfv_empirical_uds_tau00300um_M1000_v20/tucker-mfv_empirical_uds_tau00300um_M1000_v20-434d799605eed7a94bb60ec8768a1d2f/USER',  9800, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_uds_tau01000um_M0400', '', '/mfv_empirical_uds_tau01000um_M0400_v20/tucker-mfv_empirical_uds_tau01000um_M0400_v20-27821d5524f53a7bcce844d90d8d72ae/USER',  9800, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_uds_tau01000um_M1000', '', '/mfv_empirical_uds_tau01000um_M1000_v20/tucker-mfv_empirical_uds_tau01000um_M1000_v20-c29d9665247fe6c44986e957c20ff6bb/USER',  9600, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_uds_tau10000um_M0400', '', '/mfv_empirical_uds_tau10000um_M0400_v20/tucker-mfv_empirical_uds_tau10000um_M0400_v20-3d23137db6ab1bc2c1410835a4edeb69/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_uds_tau10000um_M1000', '', '/mfv_empirical_uds_tau10000um_M1000_v20/tucker-mfv_empirical_uds_tau10000um_M1000_v20-861bc848e7c1fea9780d8a0dd90523b4/USER', 10000, 1, 1, 1),
+            ]
+
+        for sample in samples:
+            sample.dbs_url_num = 3
+            sample.ana_events_per = 10000
+
+        cs = CRABSubmitter('MFVResolutionsV20',
+                           total_number_of_events = -1,
+                           events_per_job = 5000,
+                           USER_skip_servers = 'cern_vocms0117',
+                           )
+        cs.submit_all(samples)

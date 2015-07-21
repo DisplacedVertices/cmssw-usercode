@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvGenParticleFilter = cms.EDFilter('MFVGenParticleFilter',
-                                    mode = cms.string('mfv3j'),
+                                    mode = cms.string('2Ntbs'),
                                     gen_jet_src = cms.InputTag('ak5GenJets'),
                                     min_njets = cms.int32(0),
                                     min_jet_pt = cms.double(0),
