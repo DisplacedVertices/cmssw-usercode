@@ -374,5 +374,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('MFVResolutionsV20',
                        job_control_from_sample = True,
                        use_ana_dataset = True,
+                       USER_skip_servers = 'cern_vocms0117',
                        )
     cs.submit_all([Samples.mfv_neutralino_tau1000um_M0400])
