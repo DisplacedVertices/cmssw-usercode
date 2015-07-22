@@ -204,9 +204,11 @@ def make_templates(out_fn, in_fn):
     f.Close()
 
     print
-    print 'num2npass = %r' % num2npass
-    print 'num2npass600 = %r' % num2npass600
-    print 'num2npass800 = %r' % num2npass800
+    print 'num2npass = {'
+    print '    0: %r,' % num2npass
+    print '    600: %r,' % num2npass600
+    print '    800: %r,' % num2npass600
+    print '}'
 
 def book(name, title):
     import ROOT
