@@ -132,6 +132,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(gen_src, gen_particles);
   const size_t ngen = gen_particles->size();
 
+  const reco::GenParticle& for_vtx = gen_particles->at(2);
+  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
   double vphi[2] = {0};
@@ -173,9 +176,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     for (int i = 0; i < 2; ++i) {
       assert(partons[i].size() == 2);
       assert(partons[i][0]->numberOfDaughters() > 0);
-      v[i][0] = partons[i][0]->daughter(0)->vx();
-      v[i][1] = partons[i][0]->daughter(0)->vy();
-      v[i][2] = partons[i][0]->daughter(0)->vz();
+      v[i][0] = partons[i][0]->daughter(0)->vx() - x0;
+      v[i][1] = partons[i][0]->daughter(0)->vy() - y0;
+      v[i][2] = partons[i][0]->daughter(0)->vz() - z0;
     }
   }
 
