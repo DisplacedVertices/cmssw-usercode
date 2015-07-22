@@ -207,10 +207,10 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       if (doing_2Nuds) {
         partons[i].push_back(mci.tops[i]);
       }
-      v[i][0] = mci.stranges[i]->vx() - mci.lsps[i]->vx();
-      v[i][1] = mci.stranges[i]->vy() - mci.lsps[i]->vy();
-      v[i][2] = mci.stranges[i]->vz() - mci.lsps[i]->vz();
-      vphi[i] = atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx());
+      v[i][0] = mci.stranges[i]->vx() - x0;
+      v[i][1] = mci.stranges[i]->vy() - y0;
+      v[i][2] = mci.stranges[i]->vz() - z0;
+      vphi[i] = atan2(mci.stranges[i]->vy() - y0, mci.stranges[i]->vx() - x0);
     }
 
     edm::Handle<reco::GenJetCollection> gen_jets;
