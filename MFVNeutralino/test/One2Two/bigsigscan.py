@@ -100,6 +100,63 @@ for tau0 in tau0s:
             elif tau0 in (400, 800, 2000):
                 nevt -= 400
 
+        elif tau0 == 32000:
+            if mass in (600, 1400):
+                nevt -= 200
+            elif mass == 1300:
+                nevt -= 600
+        elif tau0 == 40000:
+            if mass == 1500:
+                nevt -= 1600
+            elif mass == 1300:
+                nevt -= 2800
+            elif mass in (1100, 1400):
+                nevt -= 2000
+            elif mass in (600, 900):
+                nevt -= 200
+            elif mass == 1000:
+                nevt -= 400
+            elif mass == 1200:
+                nevt -= 1000
+            elif mass == 800:
+                nevt -= 600
+        elif tau0 == 42000:
+            if mass in (700, 800, 900, 1000):
+                nevt -= 200
+            elif mass in (1100, 1200):
+                nevt -= 600
+            elif mass == 1400:
+                nevt -= 1000
+            elif mass == 1500:
+                nevt -= 400
+            elif mass == 1300:
+                nevt -= 2800
+        elif tau0 == 38000:
+            if mass in (500, 1000, 1100, 1200):
+                nevt -= 200
+            elif mass == 1300:
+                nevt -= 600
+            elif mass == 1500:
+                nevt -= 1200
+            elif mass == 1400:
+                nevt -= 1000
+        elif tau0 == 36000:
+            if mass == 600:
+                nevt -= 200
+            elif mass in (1000, 1200, 1400):
+                nevt -= 400
+            elif mass == 1300:
+                nevt -= 600
+            elif mass == 1500:
+                nevt -= 800
+        elif tau0 == 34000:
+            if mass in (700, 1400):
+                nevt -= 400
+            elif mass in (800, 1000, 1200):
+                nevt -= 200
+            elif mass == 1300:
+                nevt -= 800
+
         num2nevt[num] = nevt
 
         path = 'root://cmsxrootd.fnal.gov//store/user/tucker/mfv_sample_scan/'
@@ -113,22 +170,29 @@ tau2range = dict(tau2range)
 
 print 'last num =', num
 
-def make_templates(out_fn):
+def make_templates(out_fn, in_fn):
     from base import ROOT, make_h
 
     num2npass = {}
     num2npass600 = {}
     num2npass800 = {}
 
+    fin = ROOT.TFile(in_fn)
     f = ROOT.TFile(out_fn, 'recreate')
     hs = []
 
     for num in reversed(num2name.keys()):
+        hname = 'sig%i' % num
         name = num2name[num]
-        fn = name2fn[name]
-        print fn
+        hin = fin.Get(hname)
+        if hin:
+            print 'copy %i -> %s from %s:%s' % (num, name, in_fn, hname)
+            h = hin.Clone()
+        else:
+            fn = name2fn[name]
+            print fn
+            h = make_h(fn, 'sig%i' % num)
 
-        h = make_h(fn, 'sig%i' % num)
         hs.append(h)
         h.SetDirectory(f)
 
@@ -175,6 +239,33 @@ def stat_errors():
         mx = max(m, mx)
         print tau0, mass, m, mx
 
+def extract_nevt():
+    from JMTucker.Tools.ROOTTools import ROOT
+    f = ROOT.TFile('h_minitree_entries.root')
+    h = f.Get('h_minitree_entries')
+
+    l = defaultdict(lambda : defaultdict(list))
+    for ibin in xrange(1,h.GetNbinsX()+1):
+        nm = h.GetXaxis().GetBinLabel(ibin)
+        nj = h.GetBinContent(ibin)
+        miss = 200*(500 - int(float(nj)))
+        if miss:
+            t,m = nm[1:].split('M')
+            t = int(t)*100
+            m = int(m)*100
+            l[t][miss].append(m)
+
+    for t in l:
+        print 'elif tau0 == %i:' % t
+        for i, (miss, masses) in enumerate(l[t].iteritems()):
+            elly = 'el' if i > 0 else ''
+            if len(masses) > 1:
+                print '    %sif mass in %r:' % (elly, tuple(masses))
+                print '        nevt -= %i' % miss
+            else:
+                print '    %sif mass == %r:' % (elly, masses[0])
+                print '        nevt -= %i' % miss
+
 if __name__ == '__main__':
     if 'make' in sys.argv:
-        make_templates('bigsigscan.root')
+        make_templates('bigsigscan.root', 'bigsigscan.last.root')
