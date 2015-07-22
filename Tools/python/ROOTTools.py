@@ -1451,6 +1451,9 @@ def tdr_style():
     s.cd()
     return s
 
+def to_array(l):
+    return array('d', l)
+
 def ttree_iterator(tree, return_tree=False):
     for jentry in xrange(tree.GetEntriesFast()):
         if tree.LoadTree(jentry) < 0: break
@@ -1499,6 +1502,7 @@ __all__ = [
     'set_style',
     'sort_histogram_pair',
     'tdr_style',
+    'to_array',
     'ttree_iterator',
     'ROOT',
     ]
