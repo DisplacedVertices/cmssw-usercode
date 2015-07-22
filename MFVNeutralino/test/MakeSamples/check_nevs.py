@@ -6,7 +6,11 @@ from JMTucker.Tools.CRABTools import *
 
 set_style()
 ROOT.TH1.AddDirectory(0)
-ps = plot_saver('plots/MakeSamples_check_nevs', log=False, size=(500,300), canvas_margins=(0, 0.05, 0.05, 0))
+
+only_check_parsing = bool_from_argv('only_check_parsing')
+
+if not only_check_parsing:
+    ps = plot_saver('plots/MakeSamples_check_nevs', log=False, size=(500,300), canvas_margins=(0, 0.05, 0.05, 0))
 
 dirs = crab_dirs_from_argv()
 ndirs = len(dirs)
@@ -77,13 +81,25 @@ for idir, dir in enumerate(dirs):
                         nev = int(line.split()[-1])
                     except ValueError:
                         if not exceptions.has_key(dir) or job not in exceptions[dir]:
-                            raise RuntimeError('parsing problem for NEV for %s job %i: %r' % (dir, job, line))
+                            m = 'parsing problem for NEV for %s job %i: %r' % (dir, job, line)
+                            if only_check_parsing:
+                                print 'YIKES:', m
+                            else:
+                                raise RuntimeError(m)
                     nevs.append(nev)
             if len(nevs) != 4:
-                raise RuntimeError('did not find 4 NEV lines for %s job %i' % (dir, job))
+                m = 'did not find 4 NEV lines for %s job %i' % (dir, job)
+                if only_check_parsing:
+                    print 'YIKES:', m
+                else:
+                    raise RuntimeError(m)
 
-            for h,nev in zip(hs, nevs):
-                h.Fill(nev)
+            if not only_check_parsing:
+                for h,nev in zip(hs, nevs):
+                    h.Fill(nev)
+
+        if only_check_parsing:
+            continue
 
         if len(roots) > 1:
             raise RuntimeError('more than one match for %s job %i: %r' % (dir, job, roots))
@@ -103,32 +119,35 @@ for idir, dir in enumerate(dirs):
                     three += 1
             h_one.Fill(one)
             h_two.Fill(two)
-    print '%s: %i events with more than two vertices' % (dir, three)
 
-    for i,h in enumerate(hs):
-        if i == 0:
-            h.Draw('hist')
-        else:
-            h.Draw('hist sames')
-        ps.c.Update()
-        move = (3-i%3, i/3)
-        differentiate_stat_box(h, move, new_size=(0.27, 0.33), offset=(0.17, -0.03))
+    if not only_check_parsing:
+        print '%s: %i events with more than two vertices' % (dir, three)
 
-        hn = h.GetName()
-        stats = get_hist_stats(h, fit=False)
-        for statn in statns:
-            hstat = eval('h_%s_%s' % (hn, statn))
-            ve = stats[statn]
-            if type(ve) == tuple:
-                v,e = ve
+        for i,h in enumerate(hs):
+            if i == 0:
+                h.Draw('hist')
             else:
-                v,e = ve, 0.
-            hstat.SetBinContent(idir+1, v)
-            hstat.SetBinError  (idir+1, e)
+                h.Draw('hist sames')
+            ps.c.Update()
+            move = (3-i%3, i/3)
+            differentiate_stat_box(h, move, new_size=(0.27, 0.33), offset=(0.17, -0.03))
 
-    ps.save(nice(dir))
+            hn = h.GetName()
+            stats = get_hist_stats(h, fit=False)
+            for statn in statns:
+                hstat = eval('h_%s_%s' % (hn, statn))
+                ve = stats[statn]
+                if type(ve) == tuple:
+                    v,e = ve
+                else:
+                    v,e = ve, 0.
+                hstat.SetBinContent(idir+1, v)
+                hstat.SetBinError  (idir+1, e)
 
-for hstat in hstats:
-    hstat.Draw('text')
-    ps.save(hstat.GetName())
+        ps.save(nice(dir))
+
+if not only_check_parsing:
+    for hstat in hstats:
+        hstat.Draw('text')
+        ps.save(hstat.GetName())
 
