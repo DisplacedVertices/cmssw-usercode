@@ -111,8 +111,8 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
 {
-  if (!(doing_2Ntbs || doing_h2xqq || doing_2Nuds))
-    throw cms::Exception("Configuration") << "mode must be either mfv3j or h2xqq, got " << mode;
+  if (!(doing_2Ntbs || doing_h2xqq || doing_2Nuds || doing_r2gqq))
+    throw cms::Exception("Configuration") << "mode must be 2Ntbs, h2xqq, 2Nuds, or r2gqq, got " << mode;
 }
 
 namespace {
@@ -132,9 +132,11 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(gen_src, gen_particles);
   const size_t ngen = gen_particles->size();
 
+  const reco::GenParticle& for_vtx = gen_particles->at(2);
+  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
-  double vphi[2] = {0};
 
   if (doing_h2xqq) {
     for (size_t igen = 0; igen < ngen; ++igen) {
@@ -143,7 +145,6 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
         assert(gen.numberOfDaughters() >= 2);
         for (size_t idau = 0; idau < 2; ++idau) {
           const reco::Candidate* dau = gen.daughter(idau);
-          vphi[idau] = dau->phi();
           int dauid = dau->pdgId();
           // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
           // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
@@ -173,9 +174,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     for (int i = 0; i < 2; ++i) {
       assert(partons[i].size() == 2);
       assert(partons[i][0]->numberOfDaughters() > 0);
-      v[i][0] = partons[i][0]->daughter(0)->vx();
-      v[i][1] = partons[i][0]->daughter(0)->vy();
-      v[i][2] = partons[i][0]->daughter(0)->vz();
+      v[i][0] = partons[i][0]->daughter(0)->vx() - x0;
+      v[i][1] = partons[i][0]->daughter(0)->vy() - y0;
+      v[i][2] = partons[i][0]->daughter(0)->vz() - z0;
     }
   }
 
@@ -204,10 +205,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       if (doing_2Nuds) {
         partons[i].push_back(mci.tops[i]);
       }
-      v[i][0] = mci.stranges[i]->vx() - mci.lsps[i]->vx();
-      v[i][1] = mci.stranges[i]->vy() - mci.lsps[i]->vy();
-      v[i][2] = mci.stranges[i]->vz() - mci.lsps[i]->vz();
-      vphi[i] = atan2(mci.stranges[i]->vy() - mci.lsps[i]->vy(), mci.stranges[i]->vx() - mci.lsps[i]->vx());
+      v[i][0] = mci.stranges[i]->vx() - x0;
+      v[i][1] = mci.stranges[i]->vy() - y0;
+      v[i][2] = mci.stranges[i]->vz() - z0;
     }
 
     edm::Handle<reco::GenJetCollection> gen_jets;
@@ -315,13 +315,13 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     float drmax = 0;
     for (int j = 0; j < ndau; ++j) {
       const reco::GenParticle* p1 = partons[i][j];
-      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[i] * sin(p1->phi() - vphi[i])) < 0.01) continue;
+      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[i] * sin(p1->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
       ++ntracks;
       if (!is_lepton(p1)) ++nquarks;
       sumpt += p1->pt();
       for (int k = j+1; k < ndau; ++k) {
         const reco::GenParticle* p2 = partons[i][k];
-        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[i] * sin(p2->phi() - vphi[i])) < 0.01) continue;
+        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[i] * sin(p2->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
         float dr = reco::deltaR(*p1, *p2);
         if (dr < drmin)
           drmin = dr;
