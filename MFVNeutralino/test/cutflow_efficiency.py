@@ -58,7 +58,19 @@ mfv_gluinoviarhad_tau00300um_M1000
 mfv_gluinoviarhad_tau01000um_M0400
 mfv_gluinoviarhad_tau01000um_M1000
 mfv_gluinoviarhad_tau10000um_M0400
-mfv_gluinoviarhad_tau10000um_M1000'''.split('\n')
+mfv_gluinoviarhad_tau10000um_M1000
+mfv_gluinoviarhad_ddbar_tau00300um_M0400
+mfv_gluinoviarhad_ddbar_tau00300um_M1000
+mfv_gluinoviarhad_ddbar_tau01000um_M0400
+mfv_gluinoviarhad_ddbar_tau01000um_M1000
+mfv_gluinoviarhad_ddbar_tau10000um_M0400
+mfv_gluinoviarhad_ddbar_tau10000um_M1000
+mfv_gluinoviarhad_bbbar_tau00300um_M0400
+mfv_gluinoviarhad_bbbar_tau00300um_M1000
+mfv_gluinoviarhad_bbbar_tau01000um_M0400
+mfv_gluinoviarhad_bbbar_tau01000um_M1000
+mfv_gluinoviarhad_bbbar_tau10000um_M0400
+mfv_gluinoviarhad_bbbar_tau10000um_M1000'''.split('\n')
 
 matched = []
 not_matched = []
