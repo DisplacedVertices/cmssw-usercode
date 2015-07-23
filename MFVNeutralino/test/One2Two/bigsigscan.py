@@ -213,7 +213,7 @@ def make_templates(out_fn, in_fn):
 
 def book(name, title):
     import ROOT
-    h = ROOT.TH2F(name, title + ';neutralino mass (GeV);neutralino lifetime (#mum)', nmasses, array('d', masses + [1600]), ntau0s, array('d', tau0s + [32000]))
+    h = ROOT.TH2F(name, title + ';neutralino mass (GeV);neutralino lifetime (#mum)', nmasses, array('d', masses + [1600]), ntau0s, array('d', tau0s + [44000]))
     h.SetStats(0)
     return h
 
@@ -229,6 +229,16 @@ def make_h_eff(k):
         h.SetBinContent(h.FindBin(mass, tau0), num2eff(num, k))
     return h
 
+def draw_h_effs():
+    from JMTucker.Tools.ROOTTools import *
+    set_style()
+    rainbow_palette()
+    c = ROOT.TCanvas('c', '', 800, 800)
+    for k in (0, 600, 800):
+        h = make_h_eff(k)
+        h.Draw('colz')
+        c.SaveAs('/uscms/home/tucker/asdf/a_%i.png' % k)
+        
 def stat_errors():
     from JMTucker.Tools.ROOTTools import ROOT
     f = ROOT.TFile('bigsigscan.root')
