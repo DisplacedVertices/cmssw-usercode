@@ -111,8 +111,8 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
 {
-  if (!(doing_2Ntbs || doing_h2xqq || doing_2Nuds))
-    throw cms::Exception("Configuration") << "mode must be either mfv3j or h2xqq, got " << mode;
+  if (!(doing_2Ntbs || doing_h2xqq || doing_2Nuds || doing_r2gqq))
+    throw cms::Exception("Configuration") << "mode must be 2Ntbs, h2xqq, 2Nuds, or r2gqq, got " << mode;
 }
 
 namespace {
