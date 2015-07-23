@@ -72,9 +72,76 @@ mfv_gluinoviarhad_bbbar_tau01000um_M1000
 mfv_gluinoviarhad_bbbar_tau10000um_M0400
 mfv_gluinoviarhad_bbbar_tau10000um_M1000'''.split('\n')
 
+sampleNames = r'''$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M = 1000~\GeV$
+ $X^0 \rightarrow q\bar{q}$,      $\tau =  3.5~\cm$, $M =  350~\GeV$
+ $X^0 \rightarrow q\bar{q}$,      $\tau =   35~\cm$, $M =  350~\GeV$
+ $X^0 \rightarrow q\bar{q}$,      $\tau =  350~\cm$, $M =  350~\GeV$
+ $X^0 \rightarrow q\bar{q}$,      $\tau =    1~\cm$, $M =  150~\GeV$
+ $X^0 \rightarrow q\bar{q}$,      $\tau =   10~\cm$, $M =  150~\GeV$
+ $X^0 \rightarrow q\bar{q}$,      $\tau =  100~\cm$, $M =  150~\GeV$
+$\tilde{N} \rightarrow uds$,      $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow uds$,      $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow uds$,      $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow uds$,      $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow uds$,      $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow uds$,      $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M = 1000~\GeV$'''.split('\n')
+
 matched = []
 not_matched = []
-for sample in samples:
+for j,sample in enumerate(samples):
     print sample
     file = ROOT.TFile('crab/MFVResolutionsV20/%s.root'%sample)
     nevents = file.Get('mfvResolutionsNoCuts/h_gen_dvv').GetEntries()
@@ -91,6 +158,7 @@ for sample in samples:
             gen_rec_err = (gen_rec_div * ((rec_err/rec_eff)**2 + (gen_err/gen_eff)**2))**0.5 if rec_eff != 0 and gen_eff != 0 else 9999
             if generated[i] == 'Dvv600um':
                 print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, gen_eff, gen_rec_div, rec_err, gen_err, gen_rec_err)
+                print r'%s & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ \\' % (sampleNames[j], rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 if gen_eff >= 0.8*rec_eff and gen_eff <= 1.2*rec_eff:
                     matched.append(sample)
                 else:
