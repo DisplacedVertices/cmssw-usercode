@@ -3,6 +3,9 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
+gen_eff_cut = 15
+gen_rec_cut = 20
+
 reconstructed = ['NoCuts', 'TrigSel', 'CleaningFilters', 'OfflineJets', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxMindrmax', 'TwoVtxMaxdrmax', 'TwoVtxDrmin', 'TwoVtxNjetsntks', 'TwoVtxNtracksptgt3', 'TwoVtxDvv600um']
 generated = ['NoCuts', '', '', 'FourJets', 'SumHT', '', 'Geo2ddist', '', '', 'Mindrmax', 'Maxdrmax', '', 'Nquarks2', 'Sumpt200', 'Dvv600um']
 
@@ -202,7 +205,7 @@ for j,sample in enumerate(samples):
             if generated[i] == 'Dvv600um':
                 print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, gen_eff, gen_rec_div, rec_err, gen_err, gen_rec_err)
                 print r'%s & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ \\' % (sampleNames[j], rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
-                if gen_eff > 0.15:
+                if gen_eff > 0.01*gen_eff_cut:
                     x.append(int(sample.split('tau')[1].split('um')[0]))
                     y.append(gen_rec_div)
                     g = ROOT.TGraph(1, array('d', [int(sample.split('tau')[1].split('um')[0])]), array('d', [gen_rec_div]))
@@ -212,7 +215,7 @@ for j,sample in enumerate(samples):
                     label = sampleNames[j].split(',')[0] + sampleNames[j].split(',')[2]
                     label = label.replace('\\','#').replace('~#GeV',' GeV').replace('$','').replace(' M',', M')
                     l.AddEntry(g, label, 'P')
-                if gen_eff >= 0.8*rec_eff and gen_eff <= 1.2*rec_eff:
+                if gen_eff >= (1-0.01*gen_rec_cut)*rec_eff and gen_eff <= (1+0.01*gen_rec_cut)*rec_eff:
                     matched.append(sample)
                 else:
                     not_matched.append(sample)
@@ -221,11 +224,11 @@ for j,sample in enumerate(samples):
         else:
             print '%20s%6d' % (rec, rec_hist.GetEntries())
 
-print 'samples with gen eff within 20% of reco eff:'
+print 'samples with gen eff within %s%% of reco eff:' % gen_rec_cut
 for i in matched:
     print '\t', i
 print
-print 'samples with gen eff NOT within 20% of reco eff:'
+print 'samples with gen eff NOT within %s%% of reco eff:' % gen_rec_cut
 for i in not_matched:
     print '\t', i
 
