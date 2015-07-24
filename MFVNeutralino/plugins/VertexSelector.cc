@@ -31,7 +31,8 @@ private:
 
   const edm::InputTag match_to_vertices_src;
   const bool use_match_to_vertices;
-  const double match_distance;
+  const double max_match_distance;
+  const double min_match_distance;
   const std::vector<double>* match_to_vertices;
 
   const int min_ntracks;
@@ -106,7 +107,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     mva_cut(cfg.getParameter<double>("mva_cut")),
     match_to_vertices_src(cfg.getParameter<edm::InputTag>("match_to_vertices_src")),
     use_match_to_vertices(match_to_vertices_src.label() != ""),
-    match_distance(cfg.getParameter<double>("match_distance")),
+    max_match_distance(cfg.getParameter<double>("max_match_distance")),
+    min_match_distance(cfg.getParameter<double>("min_match_distance")),
     match_to_vertices(0),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_ntracks(cfg.getParameter<int>("max_ntracks")),
@@ -204,7 +206,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
       const double d = mag(vtx.x - (*match_to_vertices)[imatch*3 + 0],
                            vtx.y - (*match_to_vertices)[imatch*3 + 1],
                            vtx.z - (*match_to_vertices)[imatch*3 + 2]);
-      if (d < match_distance) {
+      if (d < max_match_distance && d > min_match_distance) {
         ok = true;
         break;
       }
