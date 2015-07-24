@@ -31,22 +31,43 @@ def apply_hist_commands(hist, hist_cmds=None):
             args = (args,)
         getattr(hist, fn)(*args)
 
-def bin_iterator(hist):
+def bin_iterator(hist, bin_values=False):
     """Loop over all bins of hist (which has whatever dimension) and
     yield the bin coordinates and the bin contents."""
 
+    xax = hist.GetXaxis()
+    yax = hist.GetYaxis()
+    zax = hist.GetZaxis()
     if issubclass(type(hist), ROOT.TH3):
+        axes = (xax, yax, zax)
         for ibin in xrange(0, hist.GetNbinsX()+2):
             for jbin in xrange(0, hist.GetNbinsY()+2):
                 for kbin in xrange(0, hist.GetNbinsZ()+2):
-                    yield (ibin, jbin, kbin), hist.GetBinContent(ibin, jbin, kbin)
+                    bin = (ibin, jbin, kbin)
+                    cnt = hist.GetBinContent(ibin, jbin, kbin)
+                    if bin_values:
+                        x = tuple(ax.GetBinLowEdge(b) for b,ax in zip(bin, axes))
+                        yield bin, x, cnt
+                    else:
+                        yield bin, cnt
     elif issubclass(type(hist), ROOT.TH2):
+        axes = (xax, yax)
         for ibin in xrange(0, hist.GetNbinsX()+2):
             for jbin in xrange(0, hist.GetNbinsY()+2):
-                yield (ibin, jbin), hist.GetBinContent(ibin, jbin)
+                bin = (ibin, jbin)
+                cnt = hist.GetBinContent(ibin, jbin)
+                if bin_values:
+                    x = tuple(ax.GetBinLowEdge(b) for b,ax in zip(bin, axes))
+                    yield bin, x, cnt
+                else:
+                    yield bin, cnt
     elif issubclass(type(hist), ROOT.TH1):
         for ibin in xrange(0, hist.GetNbinsX()+2):
-            yield (ibin,), hist.GetBinContent(ibin)
+            cnt = hist.GetBinContent(ibin)
+            if bin_values:
+                yield (ibin,), xax.GetBinLowEdge(ibin), cnt
+            else:
+                yield (ibin,), cnt
     else:
         raise TypeError('input is not a histogram')
 
