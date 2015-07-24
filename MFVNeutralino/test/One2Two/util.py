@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, fnmatch, glob
+import os, sys, fnmatch, glob, httplib
 from pprint import pprint
 try:
     from JMTucker.Tools.CRAB3Tools import *
@@ -23,10 +23,29 @@ if 'lists' in sys.argv:
         pprint(bad)
         raise RuntimeError('refusing to clobber')
 
+    empty = []
+
     for d, lst_fn in to_do:
         print d, '->', lst_fn
-        files = ['/store' + x.split('/store')[1] for x in crab_output_files(d)]
+        files = []
+        try_count = 0
+        while not files:
+            if try_count > 0:
+                print 'retry'
+            try:
+                files = crab_output_files(d)
+            except httplib.HTTPException:
+                pass
+            try_count += 1
+            if try_count == 4:
+                break
+        files = ['/store' + x.split('/store')[1] for x in files]
+        if len(files) == 0:
+            empty.append(d)
         open(lst_fn, 'wt').write('\n'.join(files) + '\n')
+
+    print 'these were empty'
+    pprint(empty)
 
 elif 'manuallist' in sys.argv:
     try:

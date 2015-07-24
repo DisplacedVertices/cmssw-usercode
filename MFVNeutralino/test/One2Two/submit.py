@@ -233,7 +233,7 @@ cd -
     for fn in files_needed:
         if fn.endswith('.tgz'):
             unzip_files.append('tar zxf %s' % fn)
-        else:
+        elif fn.endswith('.gz'):
             unzip_files.append('gunzip %s' % fn)
     unzip_files = '\n'.join(unzip_files)
     tree_path = '/eos/uscms/store/user/tucker/mfvo2t_all_trees_444de711cdc630ddfe7cb6cd8f64ec8b46d09990_plussomettbarsyst'
