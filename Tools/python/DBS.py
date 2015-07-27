@@ -1,23 +1,21 @@
 #!/usr/bin/env python
 
-import os
+import os, sys
 from collections import defaultdict
 from pprint import pprint
 
 # Could use DBSAPI or DASAPI or whatever, but I'm too lazy to learn it.
 
 class das_query:
-    def __init__(self, ana01=False, ana02=False, ana03=False, json=False):
-        if sum((ana01, ana02, ana03)) > 1:
-            raise ValueError('only one of ana0X options allowed')
-        self.ana01 = ana01
-        self.ana02 = ana02
-        self.ana03 = ana03
-        self.extra = 'instance=prod/phys01' if (ana01 or ana02 or ana03) else ''
-        if ana02:
-            self.extra = self.extra.replace('01', '02')
-        if ana03:
-            self.extra = self.extra.replace('01', '03')
+    def __init__(self, instance='global', json=False):
+        if type(instance) == int:
+            instance = 'phys0%i' % instance
+        else:
+            allowed = ['phys01', 'phys02', 'phys03', 'global']
+            if instance not in allowed:
+                raise ValueError('instance must be one of: %r' % allowed)
+        self.instance = instance
+        self.extra = 'instance=prod/%s' % self.instance
         self.cmd = "das_client.py --limit=0 --query '%s %%s'" % self.extra
         self.json = json
         if json:
@@ -39,20 +37,20 @@ class das_query:
             raise RuntimeError('query %r (ana01: %s ana02: %s ana03: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.ana01, self.ana02, self.ana03, full_cmd, ''.join(cmdout) if cmdout else cmdout))
         return ret
 
-def files_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
-    return das_query(ana01, ana02, ana03)('dataset=%s file' % dataset,
-                                          lambda s: s.endswith('.root'))
+def files_in_dataset(dataset, instance='global'):
+    return das_query(instance)('dataset=%s file' % dataset,
+                               lambda s: s.endswith('.root'))
 
-def numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
+def numevents_in_dataset(dataset, instance='global'):
     def xform(line):
         try:
             return int(line)
         except ValueError:
             return None
-    return das_query(ana01, ana02, ana03)('dataset=%s | grep dataset.nevents' % dataset,
-                                          line_xform=xform)[0]
+    return das_query(instance)('dataset=%s | grep dataset.nevents' % dataset,
+                               line_xform=xform)[0]
 
-def files_numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
+def files_numevents_in_dataset(dataset, instance='global'):
     def xform(line):
         line = line.split()
         if not len(line) == 2 or not line[0].endswith('.root'):
@@ -61,14 +59,14 @@ def files_numevents_in_dataset(dataset, ana01=False, ana02=False, ana03=False):
             return line[0], int(line[1])
         except ValueError:
             return None
-    return das_query(ana01, ana02, ana03)('dataset=%s file | grep file.name,file.nevents' % dataset,
-                                          line_xform=xform)
+    return das_query(instance)('dataset=%s file | grep file.name,file.nevents' % dataset,
+                               line_xform=xform)
 
-def sites_for_dataset(dataset, ana01=False, ana02=False, ana03=False):
-    return das_query(ana01, ana02, ana03)('dataset=%s site' % dataset,
-                                          line_filter=lambda s: s.startswith('T'))
+def sites_for_dataset(dataset, instance='global'):
+    return das_query(instance)('dataset=%s site' % dataset,
+                               line_filter=lambda s: s.startswith('T'))
 
-def files_for_events(run_events, dataset, ana01=False, ana02=False, ana03=False):
+def files_for_events(run_events, instance='global'):
     run_lumis = defaultdict(list)
     for x in run_events: # list of runs, or list of (run, event), or list of (run, lumi, event)
         if type(x) == int:
@@ -80,7 +78,7 @@ def files_for_events(run_events, dataset, ana01=False, ana02=False, ana03=False)
 
     files = []
 
-    json_str = das_query(ana01, ana02, ana03, json=True)('file,run,lumi dataset=%s' % dataset)
+    json_str = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
     true = True # lol
     false = False
     #open('json_str','wt').write(json_str)
