@@ -10,6 +10,8 @@ mode = '2Ntbs'
 #mode = '2gddbar_rhad' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.gluinoddbar
 #mode = '2gbbbar_rhad' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.gluinobbar
 #mode = '2Nudmu' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.udsomemu
+#mode = '2Nddbar' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.neuddbar
+#mode = '2Nbbbar' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.neubbbar
 
 process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_10_1_cUZ.root
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_11_1_g7H.root
@@ -126,7 +128,7 @@ if mode == 'h2xqq':
     process.mfvGenParticleFilter.mode = 'h2xqq'
 if mode == '2Nuds' or mode == '2Nuddmu' or mode == '2Nudmu':
     process.mfvGenParticleFilter.mode = '2Nuds'
-if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad':
+if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nddbar' or mode == '2Nbbbar':
     process.mfvGenParticleFilter.mode = 'r2gqq'
 
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
@@ -371,7 +373,27 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_empirical_udmu_tau10000um_M1000', '', '/mfv_empirical_udmu_tau10000um_M1000_v20/tucker-mfv_empirical_udmu_tau10000um_M1000_v20-dbaf324968af4e1b0f98b323daec2594/USER', 10000, 1, 1, 1),
             ]
 
-    if mode == '2Nuds' or mode == '2gtbs' or mode == '2Nuddmu' or mode == '2gtbs_rhad' or mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nudmu':
+    if mode == '2Nddbar':
+        samples = [
+            Samples.MCSample('mfv_empirical_ddbar_tau00300um_M0400', '', '/mfv_empirical_ddbar_tau00300um_M0400_v20/tucker-mfv_empirical_ddbar_tau00300um_M0400_v20-8f269885c5f598269780e89fa1d35ab1/USER', 9800, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_ddbar_tau00300um_M1000', '', '/mfv_empirical_ddbar_tau00300um_M1000_v20/tucker-mfv_empirical_ddbar_tau00300um_M1000_v20-1e11a90b398537d1386c181fb1038e7e/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_ddbar_tau01000um_M0400', '', '/mfv_empirical_ddbar_tau01000um_M0400_v20/tucker-mfv_empirical_ddbar_tau01000um_M0400_v20-e7c4843520734a8f89ed15bba6d111a9/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_ddbar_tau01000um_M1000', '', '/mfv_empirical_ddbar_tau01000um_M1000_v20/tucker-mfv_empirical_ddbar_tau01000um_M1000_v20-123e6eab405260e914c68e353160c704/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_ddbar_tau10000um_M0400', '', '/mfv_empirical_ddbar_tau10000um_M0400_v20/tucker-mfv_empirical_ddbar_tau10000um_M0400_v20-cd8bc8daee7f47dff91d492bddc659ec/USER', 9800, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_ddbar_tau10000um_M1000', '', '/mfv_empirical_ddbar_tau10000um_M1000_v20/tucker-mfv_empirical_ddbar_tau10000um_M1000_v20-26deda709e808630ec67e4894040ee04/USER', 10000, 1, 1, 1),
+            ]
+
+    if mode == '2Nbbbar':
+        samples = [
+            Samples.MCSample('mfv_empirical_bbbar_tau00300um_M0400', '', '/mfv_empirical_bbbar_tau00300um_M0400_v20/tucker-mfv_empirical_bbbar_tau00300um_M0400_v20-381f45b5d7d4fd7cab2b82d12f2d7cde/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_bbbar_tau00300um_M1000', '', '/mfv_empirical_bbbar_tau00300um_M1000_v20/tucker-mfv_empirical_bbbar_tau00300um_M1000_v20-6f761ba066c3bd29dd1e3fd15dcf4c07/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_bbbar_tau01000um_M0400', '', '/mfv_empirical_bbbar_tau01000um_M0400_v20/tucker-mfv_empirical_bbbar_tau01000um_M0400_v20-a0da4e7540b299be4a5b0a33626e9711/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_bbbar_tau01000um_M1000', '', '/mfv_empirical_bbbar_tau01000um_M1000_v20/tucker-mfv_empirical_bbbar_tau01000um_M1000_v20-41146e6f9af16fb4940491821b4eb162/USER', 9400, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_bbbar_tau10000um_M0400', '', '/mfv_empirical_bbbar_tau10000um_M0400_v20/tucker-mfv_empirical_bbbar_tau10000um_M0400_v20-5fa5d0ce7a16fc67202a8c41bffc547e/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_bbbar_tau10000um_M1000', '', '/mfv_empirical_bbbar_tau10000um_M1000_v20/tucker-mfv_empirical_bbbar_tau10000um_M1000_v20-14ca7b40635379545bbac3207181bec7/USER', 9400, 1, 1, 1),
+            ]
+
+    if mode != '2Ntbs' and mode != 'h2xqq':
         for sample in samples:
             sample.dbs_url_num = 3
             sample.ana_events_per = 10000
