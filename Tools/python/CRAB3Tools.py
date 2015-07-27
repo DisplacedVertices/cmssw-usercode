@@ -385,6 +385,10 @@ if __name__ == '__main__':
             print d
             pprint(res)
 
+   elif 'user_cache_quota' in sys.argv:
+       h = UserCacheHelper()
+       print h.quota()
+
    elif 'clean_user_cache' in sys.argv:
       skip = [x.split('=')[1] for x in sys.argv if x.startswith('skip=')]
       h = UserCacheHelper()
