@@ -9,6 +9,7 @@ mode = '2Ntbs'
 #mode = '2gtbs_rhad' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.gluinoviarhad
 #mode = '2gddbar_rhad' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.gluinoddbar
 #mode = '2gbbbar_rhad' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.gluinobbar
+#mode = '2Nudmu' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.udsomemu
 
 process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_10_1_cUZ.root
 /store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_11_1_g7H.root
@@ -123,7 +124,7 @@ process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
 if mode == 'h2xqq':
     process.mfvGenParticleFilter.mode = 'h2xqq'
-if mode == '2Nuds' or mode == '2Nuddmu':
+if mode == '2Nuds' or mode == '2Nuddmu' or mode == '2Nudmu':
     process.mfvGenParticleFilter.mode = '2Nuds'
 if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad':
     process.mfvGenParticleFilter.mode = 'r2gqq'
@@ -360,7 +361,17 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.MCSample('mfv_gluinoviarhad_bbbar_tau10000um_M1000', '', '/mfv_gluinoviarhad_bbbar_tau10000um_M1000_v20/tucker-mfv_gluinoviarhad_bbbar_tau10000um_M1000_v20-7c736aa425b7fa2de51eef72ecabe90d/USER', 9800, 1, 1, 1),
             ]
 
-    if mode == '2Nuds' or mode == '2gtbs' or mode == '2Nuddmu' or mode == '2gtbs_rhad' or mode == '2gddbar_rhad' or mode == '2gbbbar_rhad':
+    if mode == '2Nudmu':
+        samples = [
+            Samples.MCSample('mfv_empirical_udmu_tau00300um_M0400', '', '/mfv_empirical_udmu_tau00300um_M0400_v20/tucker-mfv_empirical_udmu_tau00300um_M0400_v20-1ba34c1d9bb0dfe6102b401d0f198af7/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_udmu_tau00300um_M1000', '', '/mfv_empirical_udmu_tau00300um_M1000_v20/tucker-mfv_empirical_udmu_tau00300um_M1000_v20-72015867697f752ee0774779262528f0/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_udmu_tau01000um_M0400', '', '/mfv_empirical_udmu_tau01000um_M0400_v20/tucker-mfv_empirical_udmu_tau01000um_M0400_v20-a6676caa9c66272cd026537ace81e416/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_udmu_tau01000um_M1000', '', '/mfv_empirical_udmu_tau01000um_M1000_v20/tucker-mfv_empirical_udmu_tau01000um_M1000_v20-535227cfa5111745f92c4eb5989a35f5/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_udmu_tau10000um_M0400', '', '/mfv_empirical_udmu_tau10000um_M0400_v20/tucker-mfv_empirical_udmu_tau10000um_M0400_v20-041af1e3363cd1a033b01dc9ea853d3e/USER', 10000, 1, 1, 1),
+            Samples.MCSample('mfv_empirical_udmu_tau10000um_M1000', '', '/mfv_empirical_udmu_tau10000um_M1000_v20/tucker-mfv_empirical_udmu_tau10000um_M1000_v20-dbaf324968af4e1b0f98b323daec2594/USER', 10000, 1, 1, 1),
+            ]
+
+    if mode == '2Nuds' or mode == '2gtbs' or mode == '2Nuddmu' or mode == '2gtbs_rhad' or mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nudmu':
         for sample in samples:
             sample.dbs_url_num = 3
             sample.ana_events_per = 10000
