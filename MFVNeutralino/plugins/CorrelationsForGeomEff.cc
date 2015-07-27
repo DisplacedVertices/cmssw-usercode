@@ -26,12 +26,6 @@ MFVCorrelationsForGeomEff::MFVCorrelationsForGeomEff(const edm::ParameterSet& cf
   h_betagamma = fs->make<TH2F>("h_betagamma", "", 40, 0, 10, 40, 0, 10);
 }
 
-namespace {
-  float mag(float x, float y, float z) {
-    return sqrt(x*x + y*y + z*z);
-  }
-}
-
 void MFVCorrelationsForGeomEff::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel("genParticles", gen_particles);

@@ -29,6 +29,10 @@ private:
   TH1F* h_tau;
 
   std::map<int, int> all_dau_ids;
+
+  float mag(float x, float y, float z) {
+    return sqrt(x*x + y*y + z*z);
+  }
 };
 
 MFVGenCheck::MFVGenCheck(const edm::ParameterSet& cfg)
@@ -52,12 +56,6 @@ MFVGenCheck::MFVGenCheck(const edm::ParameterSet& cfg)
   h_betagamma_orig = fs->make<TH1F>("h_betagamma_orig", "", 500, 0, 5);
   h_r3d = fs->make<TH1F>("h_r3d", "", 500, 0, 5);
   h_tau = fs->make<TH1F>("h_tau", "", 500, 0, 5);
-}
-
-namespace {
-  float mag(float x, float y, float z) {
-    return sqrt(x*x + y*y + z*z);
-  }
 }
 
 void MFVGenCheck::analyze(const edm::Event& event, const edm::EventSetup& setup) {
