@@ -18,6 +18,7 @@ process.load('IOMC.EventVertexGenerators.VtxSmearedNominalCollision2015_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
+process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5))
 process.source = cms.Source('EmptySource')
@@ -141,14 +142,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     masses = range(400, 1601, 400)
     tau0s = [100, 300, 1000, 10000] 
 
-    masses = [1000]
-    tau0s = [1000]
-
     outputs = {}
 
     for tau0 in tau0s:
         for mass in masses:
-            name = 'tau%04ium_M%04i' % (tau0, mass)
+            name = 'mfv_neu_tau%05ium_M%04i' % (tau0, mass)
             print name
 
             tau0_in_mm = tau0 / 1000.
