@@ -88,88 +88,100 @@ mfv_empirical_bbbar_tau00300um_M1000
 mfv_empirical_bbbar_tau01000um_M0400
 mfv_empirical_bbbar_tau01000um_M1000
 mfv_empirical_bbbar_tau10000um_M0400
-mfv_empirical_bbbar_tau10000um_M1000'''.split('\n')
+mfv_empirical_bbbar_tau10000um_M1000
+mfv_empirical_ddbarmumu_tau00300um_M0400
+mfv_empirical_ddbarmumu_tau00300um_M1000
+mfv_empirical_ddbarmumu_tau01000um_M0400
+mfv_empirical_ddbarmumu_tau01000um_M1000
+mfv_empirical_ddbarmumu_tau10000um_M0400
+mfv_empirical_ddbarmumu_tau10000um_M1000'''.split('\n')
 
-sampleNames = r'''$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  200~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  300~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  400~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  600~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  800~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  200~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  300~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  600~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  800~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  200~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  300~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  600~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  800~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  200~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  300~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  600~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M =  800~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =  9.9~\mm$, $M = 1000~\GeV$
- $X^0 \rightarrow q\bar{q}$,      $\tau =  3.5~\cm$, $M =  350~\GeV$
- $X^0 \rightarrow q\bar{q}$,      $\tau =   35~\cm$, $M =  350~\GeV$
- $X^0 \rightarrow q\bar{q}$,      $\tau =  350~\cm$, $M =  350~\GeV$
- $X^0 \rightarrow q\bar{q}$,      $\tau =    1~\cm$, $M =  150~\GeV$
- $X^0 \rightarrow q\bar{q}$,      $\tau =   10~\cm$, $M =  150~\GeV$
- $X^0 \rightarrow q\bar{q}$,      $\tau =  100~\cm$, $M =  150~\GeV$
-$\tilde{N} \rightarrow uds$,      $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{N} \rightarrow uds$,      $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow uds$,      $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow uds$,      $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow uds$,      $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow uds$,      $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{g} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{g} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =   10~\cm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow tbs$,      $\tau =   10~\cm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{N} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{N} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M = 1000~\GeV$'''.split('\n')
+sampleNames = r'''$\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =  9.9~\mm$, $M =  200~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =  9.9~\mm$, $M =  300~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =  9.9~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =  9.9~\mm$, $M =  600~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =  9.9~\mm$, $M =  800~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =  9.9~\mm$, $M = 1000~\GeV$
+ $X^0 \rightarrow q\bar{q}$,            $\tau =  3.5~\cm$, $M =  350~\GeV$
+ $X^0 \rightarrow q\bar{q}$,            $\tau =   35~\cm$, $M =  350~\GeV$
+ $X^0 \rightarrow q\bar{q}$,            $\tau =  350~\cm$, $M =  350~\GeV$
+ $X^0 \rightarrow q\bar{q}$,            $\tau =    1~\cm$, $M =  150~\GeV$
+ $X^0 \rightarrow q\bar{q}$,            $\tau =   10~\cm$, $M =  150~\GeV$
+ $X^0 \rightarrow q\bar{q}$,            $\tau =  100~\cm$, $M =  150~\GeV$
+$\tilde{N} \rightarrow uds$,            $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow uds$,            $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow uds$,            $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow uds$,            $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow uds$,            $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow uds$,            $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$ or $udd$, $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$ or $udd$, $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$ or $udd$, $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$ or $udd$, $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$ or $udd$, $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$ or $udd$, $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,            $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,            $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,            $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,            $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow tbs$,            $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow tbs$,            $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$,       $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$,       $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$,       $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$,       $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$,       $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow d\bar{d}$,       $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$,       $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$,       $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$,       $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$,       $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$,       $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{g} \rightarrow b\bar{b}$,       $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,          $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,          $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,          $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,          $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,          $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,          $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =   10~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =   10~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$,       $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$,       $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$,       $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$,       $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$,       $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$,       $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$,       $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$,       $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$,       $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$,       $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$,       $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$,       $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}\mu\mu$, $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}\mu\mu$, $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}\mu\mu$, $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}\mu\mu$, $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}\mu\mu$, $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}\mu\mu$, $\tau =    1~\cm$, $M = 1000~\GeV$'''.split('\n')
 
 def style(sample):
     model = sample.split('_tau')[0]
@@ -193,6 +205,8 @@ def style(sample):
         return 22
     if model == 'mfv_empirical_bbbar':
         return 23
+    if model == 'mfv_empirical_ddbarmumu':
+        return 31
 
 def color(sample):
     mass = sample.split('M')[1]
