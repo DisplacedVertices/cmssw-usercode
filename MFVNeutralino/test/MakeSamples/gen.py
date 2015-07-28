@@ -106,72 +106,65 @@ from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
 process = customisePostLS1(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    crab_cfg = '''
-[CRAB]
-jobtype = cmssw
-scheduler = remoteGlidein
-
-[CMSSW]
-datasetpath = None
-pset = gen.py
-get_edm_output = 1
-events_per_job = 4000
-total_number_of_events = 100000
-first_lumi = 1
-use_dbs3 = 1
-
-[USER]
-ssh_control_persist = no
-additional_input_files = minSLHA.spc
-ui_working_dir = %(ui_working_dir)s
-copy_data = 1
-storage_element = T3_US_Cornell
-publish_data = 1
-publish_data_name = mfv_hltrun2_%(name)s
-dbs_url_for_publication = phys03
-
-[GRID]
-#se_black_list =
-'''
-
-    slha = '''
-BLOCK SPINFO  # Spectrum calculator information
-     1   Minimal    # spectrum calculator
-     2   1.0.0         # version number
-#
-BLOCK MODSEL  # Model selection
-     1     1   #
-#
-
-BLOCK MASS  # Mass Spectrum
-# PDG code           mass       particle
-  1000021     %(m_gluino)E       # ~g
-  1000022     %(m_neutralino)E   # ~chi_10
-
-DECAY   1000021     0.01E+00   # gluino decays
-#          BR         NDA      ID1       ID2
-    1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
-
-DECAY   1000022     0.01E+00   # neutralino decays
-#           BR         NDA      ID1       ID2       ID3
-     0.5E+00          3            3          5           6   # BR(~chi_10 -> s b t)
-     0.5E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
-'''
+    from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
+    from JMTucker.Tools.general import save_git_status
 
     testing = 'testing' in sys.argv
-    dir_root = 'crab/HLTRun2/Gen'
-    os.system('mkdir -p %s' % dir_root)
+    work_area = crab_dirs_root('mfv_run2_gen')
+    if os.path.isdir(work_area):
+        sys.exit('work_area %s exists' % work_area)
+    os.makedirs(work_area)
+    save_git_status(os.path.join(work_area, 'gitstatus'))
 
-    masses = range(200, 1001, 100)
+    config = Config()
 
-    for m_neutralino in masses:
-        m_gluino = m_neutralino + 5
-        name = 'M%04i' % m_neutralino
+    config.General.transferLogs = True
+    config.General.transferOutputs = True
+    config.General.workArea = work_area
+    config.General.requestName = 'SETME'
 
-        ui_working_dir = os.path.join(dir_root, 'crab_' + name)
+    config.JobType.pluginName = 'PrivateMC'
+    config.JobType.psetName = 'forsubmit_gen.py'
+    config.JobType.inputFiles = ['my.slha']
 
-        open('minSLHA.spc', 'wt').write(slha % locals())
-        open('crab.cfg', 'wt').write(crab_cfg % locals())
-        if not testing:
-            os.system('crab -create -submit all')
-            os.system('rm minSLHA.spc crab.cfg')
+    config.Data.primaryDataset = 'SETME'
+    config.Data.splitting = 'EventBased'
+    config.Data.unitsPerJob = 2000
+    config.Data.totalUnits = 100000
+    config.Data.publication = True
+    config.Data.publishDataName = 'gen'
+
+    config.Site.storageSite = 'T3_US_Cornell'
+
+    masses = range(400, 1601, 400)
+    tau0s = [100, 300, 1000, 10000] 
+
+    masses = [1000]
+    tau0s = [1000]
+
+    outputs = {}
+
+    for tau0s in tau0s:
+        for mass in masses:
+            name = 'tau%04ium_M%04i' % (tau0, mass)
+            print name
+
+            tau0_in_mm = tau0 / 1000.
+            write_slha_mfv_neutralino(tau0_in_mm, mass)
+
+            new_py = open('gen.py').read()
+            new_py += dedent('''
+                             from modify import set_neutralino_tau0
+                             set_neutralino_tau0(process, %(tau0_in_mm)f)
+                             ''' % locals())
+
+            new_py_fn = config.JobType.psetName
+            open(new_py_fn, 'wt').write(new_py)
+
+            config.General.requestName = name
+            config.Data.primaryDataset = name
+
+            if not testing:
+                outputs[name] = crab_command('submit', config=config)
+                os.system('rm my.slha ' + config.JobType.psetName)
+                print
