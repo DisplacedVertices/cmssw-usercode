@@ -15,10 +15,11 @@ private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   const std::string mode;
-  const bool doing_2Ntbs;
   const bool doing_h2xqq;
-  const bool doing_2Nuds;
-  const bool doing_r2gqq;
+  const bool doing_mfv2j;
+  const bool doing_mfv3j;
+  const bool doing_mfv4j;
+  const bool doing_mfv5j;
 
   const edm::InputTag gen_jet_src;
   const int min_njets;
@@ -68,10 +69,11 @@ private:
 
 MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg) 
   : mode(cfg.getParameter<std::string>("mode")),
-    doing_2Ntbs(mode == "2Ntbs"),
     doing_h2xqq(mode == "h2xqq"),
-    doing_2Nuds(mode == "2Nuds"),
-    doing_r2gqq(mode == "r2gqq"),
+    doing_mfv2j(mode == "mfv2j"),
+    doing_mfv3j(mode == "mfv3j"),
+    doing_mfv4j(mode == "mfv4j"),
+    doing_mfv5j(mode == "mfv5j"),
     gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
@@ -111,8 +113,8 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
 {
-  if (!(doing_2Ntbs || doing_h2xqq || doing_2Nuds || doing_r2gqq))
-    throw cms::Exception("Configuration") << "mode must be 2Ntbs, h2xqq, 2Nuds, or r2gqq, got " << mode;
+  if (!(doing_h2xqq || doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j))
+    throw cms::Exception("Configuration") << "mode must be h2xqq, mfv2j, mfv3j, mfv4j, or mfv5j, got " << mode;
 }
 
 namespace {
@@ -180,7 +182,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  if (doing_2Ntbs || doing_2Nuds || doing_r2gqq) {
+  if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
 
@@ -197,13 +199,17 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     for (int i = 0; i < 2; ++i) {
       partons[i].push_back(mci.stranges[i]);
       partons[i].push_back(mci.bottoms[i]);
-      if (doing_2Ntbs) {
+      if (doing_mfv3j) {
+        partons[i].push_back(mci.tops[i]);
+      }
+      if (doing_mfv4j) {
+        partons[i].push_back(mci.tops[i]);
+        partons[i].push_back(mci.bottoms_from_tops[i]);
+      }
+      if (doing_mfv5j) {
         partons[i].push_back(mci.bottoms_from_tops[i]);
         partons[i].push_back(mci.W_daughters[i][0]);
         partons[i].push_back(mci.W_daughters[i][1]);
-      }
-      if (doing_2Nuds) {
-        partons[i].push_back(mci.tops[i]);
       }
       v[i][0] = mci.stranges[i]->vx() - x0;
       v[i][1] = mci.stranges[i]->vy() - y0;
