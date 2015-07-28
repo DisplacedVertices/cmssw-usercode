@@ -45,12 +45,6 @@ mfv_empirical_uds_tau01000um_M0400
 mfv_empirical_uds_tau01000um_M1000
 mfv_empirical_uds_tau10000um_M0400
 mfv_empirical_uds_tau10000um_M1000
-mfv_gluino_tau00300um_M0400
-mfv_gluino_tau00300um_M1000
-mfv_gluino_tau01000um_M0400
-mfv_gluino_tau01000um_M1000
-mfv_gluino_tau10000um_M0400
-mfv_gluino_tau10000um_M1000
 mfv_empirical_udsomemu_tau00300um_M0400
 mfv_empirical_udsomemu_tau00300um_M1000
 mfv_empirical_udsomemu_tau01000um_M0400
@@ -74,7 +68,27 @@ mfv_gluinoviarhad_bbbar_tau00300um_M1000
 mfv_gluinoviarhad_bbbar_tau01000um_M0400
 mfv_gluinoviarhad_bbbar_tau01000um_M1000
 mfv_gluinoviarhad_bbbar_tau10000um_M0400
-mfv_gluinoviarhad_bbbar_tau10000um_M1000'''.split('\n')
+mfv_gluinoviarhad_bbbar_tau10000um_M1000
+mfv_empirical_udmu_tau00300um_M0400
+mfv_empirical_udmu_tau00300um_M1000
+mfv_empirical_udmu_tau01000um_M0400
+mfv_empirical_udmu_tau01000um_M1000
+mfv_empirical_udmu_tau10000um_M0400
+mfv_empirical_udmu_tau10000um_M1000
+mfv_neutralino_tau100000um_M0400
+mfv_neutralino_tau100000um_M1000
+mfv_empirical_ddbar_tau00300um_M0400
+mfv_empirical_ddbar_tau00300um_M1000
+mfv_empirical_ddbar_tau01000um_M0400
+mfv_empirical_ddbar_tau01000um_M1000
+mfv_empirical_ddbar_tau10000um_M0400
+mfv_empirical_ddbar_tau10000um_M1000
+mfv_empirical_bbbar_tau00300um_M0400
+mfv_empirical_bbbar_tau00300um_M1000
+mfv_empirical_bbbar_tau01000um_M0400
+mfv_empirical_bbbar_tau01000um_M1000
+mfv_empirical_bbbar_tau10000um_M0400
+mfv_empirical_bbbar_tau10000um_M1000'''.split('\n')
 
 sampleNames = r'''$\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  200~\GeV$
 $\tilde{N} \rightarrow tbs$,      $\tau = 100~\mum$, $M =  300~\GeV$
@@ -112,12 +126,6 @@ $\tilde{N} \rightarrow uds$,      $\tau =    1~\mm$, $M =  400~\GeV$
 $\tilde{N} \rightarrow uds$,      $\tau =    1~\mm$, $M = 1000~\GeV$
 $\tilde{N} \rightarrow uds$,      $\tau =    1~\cm$, $M =  400~\GeV$
 $\tilde{N} \rightarrow uds$,      $\tau =    1~\cm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M =  400~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau = 300~\mum$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\mm$, $M = 1000~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow tbs$,      $\tau =    1~\cm$, $M = 1000~\GeV$
 $\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M =  400~\GeV$
 $\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M = 1000~\GeV$
 $\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M =  400~\GeV$
@@ -141,26 +149,50 @@ $\tilde{g} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M = 1000~\GeV$
 $\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M =  400~\GeV$
 $\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M = 1000~\GeV$
 $\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M =  400~\GeV$
-$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M = 1000~\GeV$'''.split('\n')
+$\tilde{g} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow ud\mu$,    $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =   10~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow tbs$,      $\tau =   10~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$, $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow d\bar{d}$, $\tau =    1~\cm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M =  400~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$, $\tau = 300~\mum$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\mm$, $M = 1000~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M =  400~\GeV$
+$\tilde{N} \rightarrow b\bar{b}$, $\tau =    1~\cm$, $M = 1000~\GeV$'''.split('\n')
 
 def style(sample):
     model = sample.split('_tau')[0]
     if model == 'mfv_neutralino':
         return 20
     if model == 'h2x_1000':
-        return 21
-    if model == 'mfv_empirical_uds':
-        return 22
-    if model == 'mfv_gluino':
-        return 23
-    if model == 'mfv_empirical_udsomemu':
-        return 24
-    if model == 'mfv_gluinoviarhad':
         return 29
-    if model == 'mfv_gluinoviarhad_ddbar':
-        return 33
-    if model == 'mfv_gluinoviarhad_bbbar':
+    if model == 'mfv_empirical_uds':
+        return 21
+    if model == 'mfv_empirical_udsomemu':
         return 34
+    if model == 'mfv_gluinoviarhad':
+        return 24
+    if model == 'mfv_gluinoviarhad_ddbar':
+        return 26
+    if model == 'mfv_gluinoviarhad_bbbar':
+        return 32
+    if model == 'mfv_empirical_udmu':
+        return 33
+    if model == 'mfv_empirical_ddbar':
+        return 22
+    if model == 'mfv_empirical_bbbar':
+        return 23
 
 def color(sample):
     mass = sample.split('M')[1]
