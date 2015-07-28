@@ -30,7 +30,9 @@ def set_neutralino_tau0(process, tau0):
 def set_rhadrons_on(process):
     process.generator.PythiaParameters.processParameters.append('RHadrons:allow = on')
 
-def write_slha(m_gluino, m_neutralino, tau0, decay_idses, fn='my.slha'):
+def write_slha(tau0, m_gluino, m_neutralino, decay_idses, fn='my.slha'):
+    width = 0.0197e-11 / tau0 # tau0 in mm
+
     n_decay_idses = len(decay_idses)
     sum_br = 0.
     decay_strs = []
@@ -49,8 +51,6 @@ def write_slha(m_gluino, m_neutralino, tau0, decay_idses, fn='my.slha'):
 
     if abs(sum_br - 1) > 1e-4:
         raise ValueError('brs did not sum to 1')
-
-    width = 0.0197e-11 / tau0 # tau0 in mm
 
     if m_neutralino is None:
         slha = '''
@@ -96,14 +96,14 @@ DECAY   1000022     %(width)E   # neutralino decays
 
     open(fn, 'wt').write(slha % locals())
 
-def write_slha_mfv(m_gluino, m_neutralino, tau0, fn='my.slha'):
-    write_slha(m_gluino, m_neutralino, tau0, [(0.5, (3,5,6)), (0.5, (-3,-5,-6))], fn)
+def write_slha_mfv(tau0, m_gluino, m_neutralino, fn='my.slha'):
+    write_slha(tau0, m_gluino, m_neutralino, [(0.5, (3,5,6)), (0.5, (-3,-5,-6))], fn)
 
-def write_slha_mfv_neutralino(m_neutralino, tau0, fn='my.slha'):
-    write_slha_mfv(m_neutralino+5, m_neutralino, tau0, fn)
+def write_slha_mfv_neutralino(tau0, m_neutralino, fn='my.slha'):
+    write_slha_mfv(tau0, m_neutralino+5, m_neutralino, fn)
 
-def write_slha_mfv_gluino(m_gluino, tau0, fn='my.slha'):
-    write_slha_mfv(m_gluino, None, tau0, fn)
+def write_slha_mfv_gluino(tau0, m_gluino, fn='my.slha'):
+    write_slha_mfv(tau0, m_gluino, None, fn)
 
 ########################################################################
 
