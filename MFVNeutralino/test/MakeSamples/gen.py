@@ -1,7 +1,5 @@
-# 7116patch2: cmsDriver.py NameOfFragment --mc --eventcontent RAWSIM --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --datatier GEN-SIM --conditions MCRUN2_71_V1::All --beamspot NominalCollision2015 --step GEN,SIM --magField 38T_PostLS1 --filein file:step-1.root --fileout file:step0.root --no_exec
 # 740pre6: cmsDriver.py TTbar_13TeV_TuneCUETP8M1_cfi --no_exec -n 10 --conditions MCRUN2_74_V7 --eventcontent RAWSIM -s GEN --beamspot NominalCollision2015 --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --magField 38T_PostLS1
 
-use_7116 = False
 debug = False
 
 import sys, os, FWCore.ParameterSet.Config as cms
@@ -18,10 +16,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedNominalCollision2015_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
-if use_7116:
-    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-else:
-    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5))
@@ -29,12 +24,8 @@ process.source = cms.Source('EmptySource')
 
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
-if use_7116:
-    from Configuration.AlCa.GlobalTag import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_71_V1::All', '')
-else:
-    from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V7', '')
+from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V7', '')
 
 process.generator = cms.EDFilter('Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
@@ -45,19 +36,18 @@ process.generator = cms.EDFilter('Pythia8GeneratorFilter',
     PythiaParameters = cms.PSet(
         parameterSets = cms.vstring(
             'pythia8CommonSettings', 
-            'pythia8CUEP8M1Settings', 
+            'tuneSettings', 
             'processParameters'
             ),
         processParameters = cms.vstring(
-            'SLHA:file = minSLHA.spc',
+            'SLHA:file = my.slha',
             'SUSY:gg2gluinogluino = on',
             'SUSY:qqbar2gluinogluino = on',
             'SUSY:idA = 1000021',
             'SUSY:idB = 1000021',
-            #'RHadrons:allow = on',
-            '1000022:tau0 = 1.',
             ),
-        pythia8CUEP8M1Settings = cms.vstring(
+        tuneSettings = cms.vstring(
+            # CUEP8M1
             'Tune:pp 14', 
             'Tune:ee 7', 
             'MultipartonInteractions:pT0Ref=2.4024', 
@@ -72,7 +62,7 @@ process.generator = cms.EDFilter('Pythia8GeneratorFilter',
             'SLHA:keepSM = on', 
             'SLHA:minMassSM = 1000.', 
             'ParticleDecays:limitTau0 = on', 
-            'ParticleDecays:tau0Max = 10', 
+            'ParticleDecays:tau0Max = 20', 
             'ParticleDecays:allowPhotonRadiation = on'
             ),
         ),
