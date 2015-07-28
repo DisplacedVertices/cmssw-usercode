@@ -1,10 +1,11 @@
-minSLHA.spc
+my.slha
 minbias_files.py
 pat.py
 *.root
 out.*.gz
 test
 ntuple.py
+my_gen.py
 my_reco.py
 my_tkdqm.py
 minitree.py
