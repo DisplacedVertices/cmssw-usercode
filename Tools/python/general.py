@@ -77,6 +77,7 @@ def save_git_status(path):
         os.system('mkdir -p %s' % path)
     os.system("git log --pretty=format:'%%H' -n 1 > %s" % os.path.join(path, 'hash'))
     os.system("git status --untracked-files=all --ignored | grep -v pyc > %s" % os.path.join(path, 'status'))
+    os.system('mkdir -p /tmp/%s' % os.environ['USER'])
     git_untracked_tmp_fn = '/tmp/%s/untracked.tgz' % os.environ['USER']
     git_untracked_file_list_cmd = "git status --porcelain | grep '^??' | sed 's/??//'"
     git_untracked_file_list = popen(git_untracked_file_list_cmd)
