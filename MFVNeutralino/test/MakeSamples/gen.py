@@ -144,7 +144,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     outputs = {}
 
-    for tau0s in tau0s:
+    for tau0 in tau0s:
         for mass in masses:
             name = 'tau%04ium_M%04i' % (tau0, mass)
             print name
