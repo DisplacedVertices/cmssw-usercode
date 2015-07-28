@@ -1,4 +1,8 @@
+# 7116patch2: cmsDriver.py NameOfFragment --mc --eventcontent RAWSIM --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --datatier GEN-SIM --conditions MCRUN2_71_V1::All --beamspot NominalCollision2015 --step GEN,SIM --magField 38T_PostLS1 --filein file:step-1.root --fileout file:step0.root --no_exec
 # 740pre6: cmsDriver.py TTbar_13TeV_TuneCUETP8M1_cfi --no_exec -n 10 --conditions MCRUN2_74_V7 --eventcontent RAWSIM -s GEN --beamspot NominalCollision2015 --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --magField 38T_PostLS1
+
+use_7116 = False
+debug = False
 
 import sys, os, FWCore.ParameterSet.Config as cms
 
@@ -14,7 +18,10 @@ process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedNominalCollision2015_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+if use_7116:
+    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+else:
+    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5))
@@ -22,8 +29,12 @@ process.source = cms.Source('EmptySource')
 
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V7', '')
+if use_7116:
+    from Configuration.AlCa.GlobalTag import GlobalTag
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_71_V1::All', '')
+else:
+    from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V7', '')
 
 process.generator = cms.EDFilter('Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
@@ -43,6 +54,7 @@ process.generator = cms.EDFilter('Pythia8GeneratorFilter',
             'SUSY:qqbar2gluinogluino = on',
             'SUSY:idA = 1000021',
             'SUSY:idB = 1000021',
+            #'RHadrons:allow = on',
             '1000022:tau0 = 1.',
             ),
         pythia8CUEP8M1Settings = cms.vstring(
@@ -79,7 +91,22 @@ process.RAWSIMoutput = cms.OutputModule('PoolOutputModule',
 
 process.RAWSIMoutput_step = cms.EndPath(process.RAWSIMoutput)
 
-process.schedule = cms.Schedule(process.generation_step, process.genfiltersummary_step, process.RAWSIMoutput_step)
+sched = [process.generation_step, process.genfiltersummary_step, process.RAWSIMoutput_step]
+
+if debug:
+    process.options.wantSummary = True
+    process.MessageLogger.cerr.FwkReport.reportEvery = 1
+    process.generator.maxEventsToPrint = 2
+    process.generator.pythiaPylistVerbosity = 13
+    process.generator.pythiaHepMCVerbosity = True
+    process.p = cms.EDAnalyzer('JMTParticleListDrawer',
+                               src = cms.InputTag('genParticles'),
+                               printVertex = cms.untracked.bool(True),
+                               )
+    process.pp = cms.Path(process.p)
+    sched.insert(-1, process.pp)
+
+process.schedule = cms.Schedule(*sched)
 
 process.ProductionFilterSequence = cms.Sequence(process.generator)
 for path in process.paths:
