@@ -78,7 +78,7 @@ def set_empirical_decay(m_gluino, m_neutralino, decay_idses, fn='minSLHA.spc'):
         sum_br += br
 
         n_decay_ids = len(decay_ids)
-        if n_decay_ids not in (2,3):
+        if n_decay_ids not in (2,3,4):
             raise ValueError('decay_ids must have len 2 or 3: %r' % decay_ids)
 
         decay_strs.append('\t%.2E\t%i\t' % (br, n_decay_ids) +  '\t'.join(str(x) for x in decay_ids))
