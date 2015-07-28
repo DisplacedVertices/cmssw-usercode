@@ -1,5 +1,15 @@
 import FWCore.ParameterSet.Config as cms
 
+def set_ttbar(process):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'Main:timesAllowErrors = 10000',
+        'Top:gg2ttbar = on',
+        'Top:qqbar2ttbar = on',
+        '24:onMode = off',
+        '24:onIfAny = 1 2 3 4 5',
+        'Tune:pp 5',
+        )
+
 def set_particle_tau0(process, id, tau0):
     params = [x for x in process.generator.PythiaParameters.processParameters.value() if ':tau0' not in x]
     process.generator.PythiaParameters.processParameters = params
@@ -9,10 +19,8 @@ def set_energy(process, energy):
     process.generator.comEnergy = energy
 
 def set_tune(process, tune):
-    params = [x for x in process.generator.PythiaParameters.processParameters.value() if 'Tune' not in x]
-    process.generator.PythiaParameters.processParameters = params
-    process.generator.PythiaParameters.processParameters.append('Tune:pp %i' % tune)
-    
+    process.generator.PythiaParameters.tuneSettings = cms.vstring('Tune:pp %i' % tune)
+
 def set_gluino_tau0(process, tau0):
     set_particle_tau0(process, 1000021, tau0)
 
@@ -22,54 +30,7 @@ def set_neutralino_tau0(process, tau0):
 def set_rhadrons_on(process):
     process.generator.PythiaParameters.processParameters.append('RHadrons:allow = on')
 
-def set_mass(m_gluino, fn='minSLHA.spc'):
-    slha = '''
-BLOCK SPINFO  # Spectrum calculator information
-     1   Minimal    # spectrum calculator
-     2   1.0.0         # version number
-#
-BLOCK MODSEL  # Model selection
-     1     1   #
-#
-
-BLOCK MASS  # Mass Spectrum
-# PDG code           mass       particle
-  1000021     %(m_gluino)E       # ~g
-
-DECAY   1000021     0.0197E-11   # gluino decays
-#           BR         NDA      ID1       ID2       ID3
-     0.5E+00          3            3          5           6   # BR(~g -> s b t)
-     0.5E+00          3           -3         -5          -6   # BR(~g -> sbar bbar tbar)
-'''
-    open(fn, 'wt').write(slha % locals())
-
-def set_masses(m_gluino, m_neutralino, fn='minSLHA.spc'):
-    slha = '''
-BLOCK SPINFO  # Spectrum calculator information
-     1   Minimal    # spectrum calculator
-     2   1.0.0         # version number
-#
-BLOCK MODSEL  # Model selection
-     1     1   #
-#
-
-BLOCK MASS  # Mass Spectrum
-# PDG code           mass       particle
-  1000021     %(m_gluino)E       # ~g
-  1000022     %(m_neutralino)E   # ~chi_10
-
-DECAY   1000021     0.01E+00   # gluino decays
-#          BR         NDA      ID1       ID2
-    1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
-
-DECAY   1000022     0.01E+00   # neutralino decays
-#           BR         NDA      ID1       ID2       ID3
-     0.5E+00          3            3          5           6   # BR(~chi_10 -> s b t)
-     0.5E+00          3           -3         -5          -6   # BR(~chi_10 -> sbar bbar tbar)
-'''
-    open(fn, 'wt').write(slha % locals())
-
-def set_empirical_decay(m_gluino, m_neutralino, decay_idses, fn='minSLHA.spc'):
+def write_slha(m_gluino, m_neutralino, tau0, decay_idses, fn='my.slha'):
     n_decay_idses = len(decay_idses)
     sum_br = 0.
     decay_strs = []
@@ -89,6 +50,8 @@ def set_empirical_decay(m_gluino, m_neutralino, decay_idses, fn='minSLHA.spc'):
     if abs(sum_br - 1) > 1e-4:
         raise ValueError('brs did not sum to 1')
 
+    width = 0.0197e-11 / tau0 # tau0 in mm
+
     if m_neutralino is None:
         slha = '''
 BLOCK SPINFO  # Spectrum calculator information
@@ -103,7 +66,7 @@ BLOCK MASS  # Mass Spectrum
 # PDG code           mass       particle
   1000021     %(m_gluino)E       # ~g
 
-DECAY   1000021     0.01E+00   # gluino decays
+DECAY   1000021     %(width)E   # gluino decays
 #          BR         NDA      ID1       ID2
 '''
     else:
@@ -125,13 +88,24 @@ DECAY   1000021     0.01E+00   # gluino decays
 #          BR         NDA      ID1       ID2
     1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
 
-DECAY   1000022     0.01E+00   # neutralino decays
+DECAY   1000022     %(width)E   # neutralino decays
 #           BR         NDA      ID1       ID2       ID3
 '''
 
     slha += '\n'.join(decay_strs) + '\n'
 
     open(fn, 'wt').write(slha % locals())
+
+def write_slha_mfv(m_gluino, m_neutralino, tau0, fn='my.slha'):
+    write_slha(m_gluino, m_neutralino, tau0, [(0.5, (3,5,6)), (0.5, (-3,-5,-6))], fn)
+
+def write_slha_mfv_neutralino(m_neutralino, tau0, fn='my.slha'):
+    write_slha_mfv(m_neutralino+5, m_neutralino, tau0, fn)
+
+def write_slha_mfv_gluino(m_gluino, tau0, fn='my.slha'):
+    write_slha_mfv(m_gluino, None, tau0, fn)
+
+########################################################################
 
 def prefer_it(process, name, connect, record, tag):
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
@@ -161,16 +135,6 @@ def center_bs(process):
 
 def nopu(process):
     process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-
-def ttbar(process):
-    process.generator.PythiaParameters.processParameters = cms.vstring(
-        'Main:timesAllowErrors = 10000',
-        'Top:gg2ttbar = on',
-        'Top:qqbar2ttbar = on',
-        '24:onMode = off',
-        '24:onIfAny = 1 2 3 4 5',
-        'Tune:pp 5',
-        )
 
 def tracker_alignment(process, tag):
     prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc' % tag.capitalize())
