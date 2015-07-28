@@ -106,8 +106,10 @@ from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
 process = customisePostLS1(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from textwrap import dedent
     from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
     from JMTucker.Tools.general import save_git_status
+    from modify import write_slha_mfv_neutralino
 
     testing = 'testing' in sys.argv
     work_area = crab_dirs_root('mfv_run2_gen')
@@ -124,7 +126,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     config.General.requestName = 'SETME'
 
     config.JobType.pluginName = 'PrivateMC'
-    config.JobType.psetName = 'forsubmit_gen.py'
+    config.JobType.psetName = 'my_gen.py'
     config.JobType.inputFiles = ['my.slha']
 
     config.Data.primaryDataset = 'SETME'
