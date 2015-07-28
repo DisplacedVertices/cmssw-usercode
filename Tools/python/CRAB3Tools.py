@@ -20,26 +20,38 @@ from pprint import pprint
 from JMTucker.Tools.general import bool_from_argv, typed_from_argv, popen
 from JMTucker.Tools.hadd import hadd
 from CRABAPI.RawCommand import crabCommand
+from CRABClient.UserUtilities import config as Config
 from CRABClient.UserUtilities import getUsernameFromSiteDB
-
-username = getpass.getuser()
-mycrab_tmp_dir = '/tmp/%s/mycrab' % username
-if not os.path.isdir(mycrab_tmp_dir):
-    os.mkdir(mycrab_tmp_dir)
-
-# JMTBAD improve global options
-allow_insecure_stupidity = False
-global_options_path = os.path.expanduser('~/.jmtct')
-if os.path.isfile(global_options_path):
-    global_options_cfg = ConfigParser()
-    global_options_cfg.read(global_options_path)
-    try:
-        allow_insecure_stupidity = global_options_cfg.get('Global', 'allow_insecure_stupidity')
-    except (NoSectionError, NoOptionError):
-        pass
 
 class CRABToolsException(Exception):
     pass
+
+class CRABToolsGlobalOptions:
+    def __init__(self, cfg_path=os.path.expanduser('~/.jmtct')):
+        self.cfg_path = cfg_path
+
+        if os.path.isfile(self.cfg_path):
+            self.cfg = ConfigParser()
+            self.cfg.read(self.cfg_path)
+
+            def get_default(section, name, default):
+                try:
+                    return self.cfg.get(section, name)
+                except (NoSectionError, NoOptionError):
+                    return default
+
+            self.allow_insecure_stupidity = get_default('Global', 'allow_insecure_stupidity', False)
+            self.crab_dirs_root = get_default('Global', 'crab_dirs_root', None)
+
+global_options = CRABToolsGlobalOptions()
+
+def crab_dirs_root(ex=''):
+    if not os.path.isdir(global_options.crab_dirs_root):
+        os.makedirs(global_options.crab_dirs_root)
+    if ex:
+        return os.path.join(global_options.crab_dirs_root, ex) # caller expected to mkdir ex as crab does for config.General.workArea
+    else:
+        return global_options.crab_dirs_root
 
 def crabify_list(l, simple=False):
     if simple:
@@ -155,7 +167,7 @@ def crab_cleanup(extra=[]):
             os.remove(f)
 
 def crab_get_and_save_grid_passphrase(path=None):
-    if not allow_insecure_stupidity:
+    if not global_options.allow_insecure_stupidity:
         raise ValueError('allow_insecure_stupidity is not set')
 
     if path is None:
@@ -185,7 +197,7 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
     return pp
 
 def crab_load_grid_passphrase(path=None):
-    if not allow_insecure_stupidity:
+    if not global_options.allow_insecure_stupidity:
         raise ValueError('allow_insecure_stupidity is not set')
 
     if path is None:
@@ -208,7 +220,7 @@ def crab_need_renew_proxy(min_hours=144):
 
 def crab_renew_proxy_if_needed(min_hours=144):
     if crab_need_renew_proxy(min_hours):
-        if allow_insecure_stupidity:
+        if global_options.allow_insecure_stupidity:
             try:
                 import pexpect
             except ImportError:
@@ -237,13 +249,13 @@ def crab_command(*args, **kwargs):
     # parallel, use multiprocessing, not threads. See
     # crab_multiprocess below.
 
-    def from_kwargs(key, default_):
+    def from_kwargs(key, default):
         if kwargs.has_key(key):
             val = kwargs[key]
             del kwargs[key]
             return val
         else:
-            return default_
+            return default
 
     cache_file = from_kwargs('cache_file', '/tmp/crab3.%i.%s' % (os.getpid(), str(int(time.time()*1e6))))
     old_cache_file = os.environ.get('CRAB3_CACHE_FILE', '')
