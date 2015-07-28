@@ -5,6 +5,9 @@ def set_particle_tau0(process, id, tau0):
     process.generator.PythiaParameters.processParameters = params
     process.generator.PythiaParameters.processParameters.append('%i:tau0 = %f' % (id, tau0)) # tau0 is in mm by pythia convention
 
+def set_energy(process, energy):
+    process.generator.comEnergy = energy
+
 def set_tune(process, tune):
     params = [x for x in process.generator.PythiaParameters.processParameters.value() if 'Tune' not in x]
     process.generator.PythiaParameters.processParameters = params
