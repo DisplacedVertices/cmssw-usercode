@@ -176,7 +176,7 @@ class SamplesRegistry:
     def add_list(self, name, l):
         self.d_lists[name] = l
 
-    def from_argv(self, default=None, sort_and_set=True):
+    def from_argv(self, default=[], sort_and_set=True):
         ready_only = 'fa_ready_only' in sys.argv
         check = 'fa_check' in sys.argv
         use_all = 'fa_all' in sys.argv
