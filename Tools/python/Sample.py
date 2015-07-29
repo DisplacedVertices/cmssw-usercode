@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys
+from collections import defaultdict
 from fnmatch import fnmatch
 import JMTucker.Tools.DBS as DBS
 from JMTucker.Tools.general import big_warn
@@ -15,9 +16,9 @@ class Dataset(object):
         self.dataset = dataset
         self.nevents = nevents
 
-        self.hlt_process_name = kwargs.get('hlt_name', self.HLT_NAME)
-        self.dbs_instance     = kwargs.get('dbs_inst', self.DBS_INST)
-        self.filenames        = kwargs.get('filenames', [])
+        self.hlt_name = kwargs.get('hlt_name', self.HLT_NAME)
+        self.dbs_inst = kwargs.get('dbs_inst', self.DBS_INST)
+        self.filenames = kwargs.get('filenames', [])
 
 ########################################################################
 
@@ -37,6 +38,11 @@ class Sample(object):
 
         self.ready = True
 
+    def set_curr_dataset(self, c):
+        if not self.datasets.has_key(c):
+            raise KeyError('no dataset with key %s registered in sample %s' % (c, self.name))
+        self.curr_dataset = c
+
     @property
     def dataset(self):
         return self.datasets[self.curr_dataset].dataset
@@ -46,15 +52,31 @@ class Sample(object):
         return self.datasets[self.curr_dataset].nevents
 
     @property
-    def primary_dataset(self):
-        return self.dataset.split('/')[1]
+    def hlt_name(self):
+        return self.datasets[self.curr_dataset].hlt_name
+
+    @hlt_name.setter
+    def hlt_name(self, val):
+        self.datasets[self.curr_dataset].hlt_name = val
+
+    @property
+    def dbs_inst(self):
+        return self.datasets[self.curr_dataset].dbs_inst
+
+    @dbs_inst.setter
+    def dbs_inst(self, val):
+        self.datasets[self.curr_dataset].dbs_inst = val
 
     @property
     def filenames(self):
-        if self.dataset.filenames:
-            return self.dataset.filenames
-        else:
-            return DBS.files_in_dataset(self.dataset, **self.dbs_inst_dict(self.dbs_url_num))
+        fns = self.datasets[self.curr_dataset].filenames
+        if not fns:
+            fns = self.datasets[self.curr_dataset].filenames = DBS.files_in_dataset(self.dataset, **self.dbs_inst_dict(self.dbs_url_num))
+        return fns
+
+    @property
+    def primary_dataset(self):
+        return self.dataset.split('/')[1]
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -66,6 +88,7 @@ class Sample(object):
 
 class MCSample(Sample):
     EVENTS_PER = 5000
+    TOTAL_EVENTS = -1
     
     def __init__(self, name, dataset, nevents, **kwargs):
         super(MCSample, self).__init__(name, dataset, nevents, **kwargs)
@@ -77,6 +100,7 @@ class MCSample(Sample):
         self.filter_eff = float(kwargs.get('filter_eff', -1))
 
         self.events_per = kwargs.get('events_per', self.EVENTS_PER)
+        self.total_events = kwargs.get('total_events', self.TOTAL_EVENTS)
 
         self.join_info = (False, self.nice, self.color)
 
@@ -91,7 +115,7 @@ class MCSample(Sample):
     def job_control(self, conf_obj):
         conf_obj.splitting = 'EventAwareLumiBased'
         conf_obj.unitsPerJob = self.events_per
-        conf_obj.totalUnits = self.nevents_ran
+        conf_obj.totalUnits = self.total_events
 
 ########################################################################
 
@@ -187,17 +211,28 @@ class SamplesRegistry:
 
 ########################################################################
 
-def anon_samples(txt):
+def anon_samples(txt, **kwargs):
     samples = []
     lines = [line.strip() for line in txt.split('\n') if line.strip()]
-    for i, line in enumerate(lines):
+    uniq = defaultdict(int)
+    for line in lines:
         line = line.split()
         if len(line) == 3:
             name, dataset, nevents = line
-        elif len(line) == 2:
-            dataset, nevents = line
-            name = 'anon%03i' % i
-        samples.append(MCSample(name, dataset, nevents))
+        else:
+            if len(line) == 2:
+                dataset, nevents = line
+            else:
+                dataset = line[0]
+                nevents = -1
+            name = dataset.split('/')[1]
+            uniq[name] += 1
+            if uniq[name] > 1:
+                name += str(uniq[name])
+        sample = MCSample(name, dataset, nevents)
+        for k,v in kwargs.iteritems():
+            setattr(sample, k, v)
+        samples.append(sample)
     return samples
 
 def nevents_from_file(sample, hist_path, fn_pattern='%(name)s.root', f=None, last_bin=False):
