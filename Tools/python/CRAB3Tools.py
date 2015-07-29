@@ -388,7 +388,13 @@ def crab_output_files(working_dir, jobs=None):
     return d.get('xrootd', [])
 
 def crab_requestcache(working_dir):
-   return cPickle.load(open(os.path.join(working_dir, '.requestcache'), 'rb'))
+    return cPickle.load(open(os.path.join(working_dir, '.requestcache'), 'rb'))
+
+def crab_results_by_task_status(results):
+    d = defaultdict(dict)
+    for working_dir, res in results.iteritems():
+        d[res['status']][working_dir] = dict(res)
+    return d
 
 class UserCacheHelper:
    def __init__(self, proxy=None, user=None):
@@ -470,7 +476,10 @@ if __name__ == '__main__':
    dirs = crab_dirs_from_argv()
    max_processes = typed_from_argv(int, 5, name='max_processes')
 
-   if 'resub' in sys.argv:
+   if 'rq' in sys.argv:
+       rq = dict((d, crab_requestcache(d)) for d in dirs)
+
+   elif 'resub' in sys.argv:
       def fcn(d):
          print d
          return d, crab_command('resubmit', dir=d)
@@ -494,10 +503,21 @@ if __name__ == '__main__':
             print 'remove', x
             h.fileremove(x)
 
-   elif 'list_schedds':
-      dirs = crab_dirs_from_argv()
+   elif 'list_schedds' in sys.argv:
       for d in dirs:
          rq = crab_requestcache(d)
          name = rq['RequestName']
          wf = h._curl('https://cmsweb.cern.ch/crabserver/prod/task?subresource=search&workflow=' + name)
          print d.ljust(60), name.rjust(75), wf['tm_schedd'].rjust(30)
+
+   elif 'datasets' in sys.argv:
+       results = crab_process_statuses_with_redo(dirs, max_processes)
+       results = crab_results_by_task_status(results)
+       for status, res in results.iteritems():
+           print status
+           for d, r in res.iteritems():
+               l = r['outdatasets']
+               if len(l) == 1:
+                   print l[0]
+               else:
+                   print l
