@@ -38,4 +38,18 @@ from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
 process = customisePostLS1(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    pass
+    from JMTucker.Tools.Sample import anon_samples
+
+    samples = anon_samples('''
+/mfv_neu_tau01000um_M0800/tucker-gen-80424ff51c64a4a42ab32d70ea13233c/USER
+''', dbs_inst='phys03')
+
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    cs = CRABSubmitter('mfv_run2_sim',
+                       splitting = 'EventAwareLumiBased',
+                       units_per_job = 200,
+                       total_units = 10000,
+                       aaa = True,
+                       publish_name='sim_10k',
+                       )
+    cs.submit_all(samples)
