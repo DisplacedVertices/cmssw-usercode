@@ -231,6 +231,8 @@ matched = []
 not_matched = []
 x = []
 y = []
+ex = []
+ey = []
 gs = []
 l = ROOT.TLegend(0.75,0.1,0.95,0.9)
 for j,sample in enumerate(samples):
@@ -252,9 +254,11 @@ for j,sample in enumerate(samples):
                 print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, gen_eff, gen_rec_div, rec_err, gen_err, gen_rec_err)
                 print r'%s & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ \\' % (sampleNames[j], rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 if gen_eff > 0.01*gen_eff_cut:
-                    x.append(int(sample.split('tau')[1].split('um')[0]))
-                    y.append(gen_rec_div)
-                    g = ROOT.TGraph(1, array('d', [int(sample.split('tau')[1].split('um')[0])]), array('d', [gen_rec_div]))
+                    x.append(rec_eff)
+                    y.append(gen_eff)
+                    ex.append(rec_err)
+                    ey.append(gen_err)
+                    g = ROOT.TGraphErrors(1, array('d', [rec_eff]), array('d', [gen_eff]), array('d', [rec_err]), array('d', [gen_err]))
                     g.SetMarkerStyle(style(sample))
                     g.SetMarkerColor(color(sample))
                     gs.append(g)
@@ -280,11 +284,17 @@ for i in not_matched:
 
 c = ROOT.TCanvas()
 c.SetRightMargin(0.3)
-g_all = ROOT.TGraph(len(x), array('d', x), array('d', y))
-g_all.SetTitle(';c#tau (#mum);gen. eff. / reco. eff.')
+g_all = ROOT.TGraphErrors(len(x), array('d', x), array('d', y), array('d', ex), array('d', ey))
+g_all.SetTitle(';reconstructed-level efficiency;generator-level efficiency')
+g_all.GetXaxis().SetLimits(0,1)
+g_all.GetHistogram().GetYaxis().SetRangeUser(0,1)
 g_all.Draw('AP')
 for g in gs:
     g.Draw('P')
 l.SetFillColor(0)
 l.Draw()
+l1 = ROOT.TLine(0,0,1,1-0.01*gen_rec_cut)
+l2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
+l1.Draw()
+l2.Draw()
 c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff.pdf')
