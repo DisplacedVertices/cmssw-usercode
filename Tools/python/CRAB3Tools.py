@@ -43,15 +43,15 @@ class CRABToolsGlobalOptions:
             self.allow_insecure_stupidity = get_default('Global', 'allow_insecure_stupidity', False)
             self.crab_dirs_root = get_default('Global', 'crab_dirs_root', None)
 
-global_options = CRABToolsGlobalOptions()
+crab_global_options = CRABToolsGlobalOptions()
 
 def crab_dirs_root(ex=''):
-    if not os.path.isdir(global_options.crab_dirs_root):
-        os.makedirs(global_options.crab_dirs_root)
+    if not os.path.isdir(crab_global_options.crab_dirs_root):
+        os.makedirs(crab_global_options.crab_dirs_root)
     if ex:
-        return os.path.join(global_options.crab_dirs_root, ex) # caller expected to mkdir ex as crab does for config.General.workArea
+        return os.path.join(crab_global_options.crab_dirs_root, ex) # caller expected to mkdir ex as crab does for config.General.workArea
     else:
-        return global_options.crab_dirs_root
+        return crab_global_options.crab_dirs_root
 
 def crabify_list(l, simple=False):
     if simple:
@@ -167,7 +167,7 @@ def crab_cleanup(extra=[]):
             os.remove(f)
 
 def crab_get_and_save_grid_passphrase(path=None):
-    if not global_options.allow_insecure_stupidity:
+    if not crab_global_options.allow_insecure_stupidity:
         raise ValueError('allow_insecure_stupidity is not set')
 
     if path is None:
@@ -197,7 +197,7 @@ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
     return pp
 
 def crab_load_grid_passphrase(path=None):
-    if not global_options.allow_insecure_stupidity:
+    if not crab_global_options.allow_insecure_stupidity:
         raise ValueError('allow_insecure_stupidity is not set')
 
     if path is None:
@@ -220,7 +220,7 @@ def crab_need_renew_proxy(min_hours=144):
 
 def crab_renew_proxy_if_needed(min_hours=144):
     if crab_need_renew_proxy(min_hours):
-        if global_options.allow_insecure_stupidity:
+        if crab_global_options.allow_insecure_stupidity:
             try:
                 import pexpect
             except ImportError:
