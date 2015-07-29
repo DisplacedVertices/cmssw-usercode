@@ -53,3 +53,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        publish_name='sim_10k',
                        )
     cs.submit_all(samples)
+
