@@ -285,7 +285,7 @@ def crab_command(*args, **kwargs):
     return result
 
 def crab_multiprocess(fcn, dirs, max_processes):
-    # fcn must return 2-tuple (dir, result)
+    # fcn must return 2-tuple (dir, result), and can't be a class instance method
     if max_processes == 1:
         results = [fcn(d) for d in dirs]
     else:
@@ -293,6 +293,91 @@ def crab_multiprocess(fcn, dirs, max_processes):
         results = pool.map(fcn, dirs)
         pool.close()
         pool.join()
+    return results
+
+def crab_status(working_dir, verbose=True):
+    if verbose:
+        print 'checking', working_dir
+
+    #if options.run_in_debugger:
+    #    print 'running process for %s in debugger' % working_dir
+    #    pdb.set_trace()
+
+    # options.debug_output
+    # options.resub_any
+    # options.resub_done_stuck
+    # options.resub_none
+    # options.resub_site_control
+    # options.status_until_none_done
+    # options.resub_created
+    # options.resub_white_codes
+    # options.resub_black_codes
+
+    result = crab_command('status', '--long', dir=working_dir)
+
+    jl = crab_job_lists_by_status(result)
+    if not jl:
+        jl = {'crmonerror': xrange(9999)}
+        result['jobsPerStatus'] = {'crmonerror': 9999}
+    result['jobListByStatus'] = jl
+
+    result['jobsPerStatusEx'] = d = dict(result['jobsPerStatus'])
+    if d.has_key('failed'):
+        del d['failed']
+        for job_num, job_info in result['jobs'].iteritems():
+            if job_info['State'] == 'failed':
+                state_ex = 'failed_%i' % job_info['Error'][0]
+                if d.has_key(state_ex):
+                    d[state_ex] += 1
+                else:
+                    d[state_ex] = 1
+
+    #if post_process_fcn is not None:
+    #    post_process_fcn(working_dir, result)
+
+    #if not options.keep_exe_code:
+    #    result_final = {}
+    #    for k,v in result.iteritems():
+    #        if k.startswith('Retrieved') and k.count('_') == 2:
+    #            k = k.split('_')
+    #            k = k[0] + '_' + k[-1]
+    #        if result_final.has_key(k):
+    #            res_final[k].extend(v)
+    #        else:
+    #            res_final[k] = v
+    #    result = res_final
+
+    return working_dir, result
+
+def crab_process_statuses(working_dirs, max_processes, verbose=True):
+    if verbose:
+        print 'launching processes...'
+    results = crab_multiprocess(crab_status, working_dirs, max_processes)
+    if verbose:
+        print 'done waiting for processes!'
+    return results
+
+def crab_process_statuses_with_redo(working_dirs, max_processes, verbose=True):
+    results = dict(crab_process_statuses(working_dirs, max_processes, verbose))
+
+    def redoable(res):
+        return res.has_key('HTTPException') or \
+               'Timeout when waiting for remote host' in res.get('taskFailureMsg', '')
+
+    to_redo = [d for d, res in results.iteritems() if redoable(res)]
+
+    if to_redo:
+        if verbose:
+            print 'redo these that had possibly transient problems:'
+            pprint(to_redo)
+        results.update(dict(crab_process_statuses(to_redo, max_processes, verbose)))
+
+    if verbose:
+        for d,res in results.iteritems():
+            if res['jobsPerStatus'].keys() == ['crmonerror'] and not redoable(res):
+                print "for %s, no job list but not redoable either, here's the entire res" % d
+                print repr(res)
+
     return results
 
 def crab_output_files(working_dir, jobs=None):
