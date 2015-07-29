@@ -21,7 +21,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, global_tag, 'MCRUN2_74_V9A')
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9A', '')
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True))
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
@@ -59,7 +59,27 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     process.patMuons.embedTrack = False
     process.patElectrons.embedTrack = False
 
+    print '''
+
+JMTBAD still missing:
+- jet/muon/electron id
+- PV rejiggering
+- particular trigger bits
+- event cleaning filters (these are done somewhere in the pat now, yes?)
+- extra IVF producers
+- stdout suppressor
+- final event content slimming
+- fast sim handling
+- pileup removal studies
+
+'''
     return process
+
+def keep_random_state(process):
+    process.out.outputCommands.append('keep *_randomEngineStateProducer_*_*')
+
+def keep_mixing_info(process):
+    process.out.outputCommands.append('keep CrossingFramePlaybackInfoExtended_*_*_*')
 
 if __name__ == '__main__':
     process = pat_tuple_process(None, True)

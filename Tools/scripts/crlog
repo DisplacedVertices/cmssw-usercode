@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 
 import sys, os
-from JMTucker.Tools.CRABTools import CrabError, crab_dir_from_argv, crab_jobs_from_argv, print_run_cmd
+from JMTucker.Tools.CRAB3Tools import CRABToolsException, crab_dir_from_argv, crab_jobs_from_argv
+
+def print_run_cmd(cmd):
+    print cmd
+    os.system(cmd)
 
 try:
     d = crab_dir_from_argv()
-except CrabError:
-    print 'usage: crlog <crab directory> [list of jobs]\n   if no list of jobs is supplied, will show the crab.log.'
-    sys.exit(1)
+except CRABToolsException:
+    sys.exit('usage: crlog <crab directory> [list of jobs]\n   if no list of jobs is supplied, will show the crab.log.')
 
 jobs = crab_jobs_from_argv()
+if jobs:
+    raise NotImplementedError('need to figure out how to get job logs then show')
 
 print d
 if len(jobs) == 0 or (len(jobs) == 1 and jobs[0] == 0):
-    print_run_cmd('less %s/log/crab.log' % d)
+    print_run_cmd('less %s/crab.log' % d)
 else:
     for job in jobs:
         if len(jobs) != 1:

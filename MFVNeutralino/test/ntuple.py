@@ -1,29 +1,42 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.CMSSWTools import set_events_to_process, set_events_to_process_by_filter
-from JMTucker.Tools.PATTuple_cfg import *
-tuple_version = version
+from JMTucker.Tools.CMSSWTools import cms, set_events_to_process, set_events_to_process_by_filter
+from JMTucker.Tools.MiniAOD_cfg import pat_tuple_process
 
-runOnMC = True # magic line, don't touch
+tuple_version = 'v1'
+
+is_mc = True # magic line, don't touch
 debug = False
 track_histos_only = False
 jumble_tracks = False
 remove_tracks = None
-require_pixel_hit = True
 track_used_req = None
 prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
 keep_gen = False
-trig_filter = True
-process, common_seq = pat_tuple_process(runOnMC)
-#set_events_to_process(process, [])
-#process.source.fileNames = ['/store/mc/Summer12_DR53X/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/AODSIM/PU_S10_START53_V7A-v1/00000/ACE17BB6-A20E-E211-819A-00266CF9B630.root']
+trig_filter = False
 
-no_skimming_cuts(process)
+def customize_before_unscheduled(process):
+    process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+    process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+    process.mfvEvent.skip_event_filter = ''
+    #process.mfvEvent.trigger_results_src = ''
+    process.mfvEvent.cleaning_results_src = ''
+    process.out.outputCommands += [
+        'keep MFVVertexAuxs_mfvVerticesAux_*_*',
+        'keep MFVEvent_mfvEvent__*',
+        'keep edmTriggerResults_TriggerResults__HLT'
+        ]
+    process.pmfv = cms.Path(process.mfvVertexSequence * process.mfvEvent)
 
+process = pat_tuple_process(customize_before_unscheduled, is_mc)
 process.out.fileName = 'ntuple.root'
+
+#process.source.fileNames = []
+#set_events_to_process(process, [])
+
 if keep_all:
     process.out.outputCommands = ['keep *']
     trig_filter = False
@@ -50,12 +63,6 @@ else:
     if keep_gen:
         process.out.outputCommands += ['keep recoGenParticles_genParticles__*']
 
-    process.out.dropMetaData = cms.untracked.string('ALL')
-
-process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
-process.p = cms.Path(common_seq * process.mfvVertexSequence)
-
 if jumble_tracks:
     process.mfvVertices.jumble_tracks = True
     process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219)))
@@ -63,9 +70,6 @@ if jumble_tracks:
 if remove_tracks:
     process.mfvVertices.remove_tracks_frac = remove_tracks[0]
     process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService', mfvVertices = cms.PSet(initialSeed = cms.untracked.uint32(1219 + remove_tracks[1])))
-
-if not require_pixel_hit:
-    process.mfvVertices.min_all_track_npxhits = 0
 
 if track_used_req == 'nopv':
     process.mfvVertices.use_tracks = False
@@ -77,19 +81,17 @@ elif track_used_req == 'nopvs':
 if keep_all:
     process.mfvSelectedVerticesTight.produce_vertices = True
     process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
+
 if trig_filter:
+    raise NotImplementedError('trigger')
     import JMTucker.MFVNeutralino.TriggerFilter
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 else:
     process.mfvEvent.skip_event_filter = ''
 
-del process.outp
-process.outp = cms.EndPath(process.mfvEvent * process.out)
-
-# We're not saving the PAT branches, but if the embedding is on then
-# we can't match leptons by track to vertices.
-process.patMuonsPF.embedTrack = False
-process.patElectronsPF.embedTrack = False
+print 'JMTBAD figure out storing cleaning filters'
+#del process.outp
+#process.outp = cms.EndPath(process.mfvEvent * process.out)
 
 if prepare_vis:
     process.mfvVertices.write_tracks = True
@@ -103,7 +105,7 @@ if prepare_vis:
     process.mfvVertexRefitsLargeErrDrop2 = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr', n_tracks_to_drop = 2)
     process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0 * process.mfvVertexRefitsLargeErr * process.mfvVertexRefitsLargeErrDrop2
 
-    if runOnMC:
+    if is_mc:
         process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
                                                  gen_src = cms.InputTag('genParticles'),
                                                  print_info = cms.bool(True),
@@ -122,23 +124,6 @@ if track_histos_only:
     del process.out
     del process.outp
 
-if 'test' in sys.argv:
-    process.source.fileNames = [
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_1_1_X2h.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_2_2_vbl.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_3_2_yEE.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_4_1_vkj.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_5_3_Tce.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_6_1_a0t.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_7_2_Qv8.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_8_1_3WZ.root',
-        '/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfv_neutralino_tau1000um_M0400/a6ab3419cb64660d6c68351b3cff9fb0/aodpat_9_1_ANl.root',
-    ]
-    process.maxEvents.input = 100
-    input_is_pythia8(process)
-    re_pat(process)
-    process.mfvEvent.cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT2')
-
 if debug:
     run_events_fn = 'events_to_debug.txt'
     set_events_to_process_by_filter(process, run_events_fn=run_events_fn)
@@ -147,9 +132,6 @@ if debug:
     process.mfvVertices.phitest = True
     process.TFileService = cms.Service('TFileService', fileName = cms.string('vertexer_debug.root'))
 
-if 'seo' in sys.argv:
-    import JMTucker.MFVNeutralino.SelectedEventsOnly as SEO
-    SEO.setup(process, sys.argv[sys.argv.index('seo')+1])
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
@@ -170,9 +152,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             if 'ttbarali' in sample.name:
                 to_add.append('dummy_beamspot(process, "%s")' % sample.name)
         else:
-            magic = 'runOnMC = True'
+            magic = 'is_mc = True'
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
-            to_replace.append((magic, 'runOnMC = False', err))
+            to_replace.append((magic, 'is_mc = False', err))
             if sample.name.startswith('MultiJetPk2012'):
                 for name_part, tag in [
                     ('2012B', 'FT_53_V6C_AN4'),
@@ -197,9 +179,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if remove_tracks:
         batch_name_extra += '_RemoveTks%i' % remove_tracks[1]
-
-    if not require_pixel_hit:
-        batch_name_extra += '_WOPixel'
 
     if track_used_req == 'nopv':
         batch_name_extra += '_NoPVTks'
