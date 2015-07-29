@@ -234,7 +234,8 @@ y = []
 ex = []
 ey = []
 gs = []
-l = ROOT.TLegend(0.75,0.1,0.95,0.9)
+l1 = ROOT.TLegend(0.75,0.1,0.95,0.5)
+l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for j,sample in enumerate(samples):
     print sample
     file = ROOT.TFile('crab/MFVResolutionsV20/%s.root'%sample)
@@ -264,7 +265,10 @@ for j,sample in enumerate(samples):
                     gs.append(g)
                     label = sampleNames[j].split(',')[0] + sampleNames[j].split(',')[2]
                     label = label.replace('\\','#').replace('~#GeV',' GeV').replace('$','').replace(' M',', M')
-                    l.AddEntry(g, label, 'P')
+                    if int(sample.split('tau')[1].split('um')[0]) == 1000 and style(sample) == 20:
+                        l1.AddEntry(g, label.split(', ')[1], 'P')
+                    if int(sample.split('tau')[1].split('um')[0]) == 1000 and color(sample) == 6:
+                        l2.AddEntry(g, label.split(', ')[0], 'P')
                 if gen_eff >= (1-0.01*gen_rec_cut)*rec_eff and gen_eff <= (1+0.01*gen_rec_cut)*rec_eff:
                     matched.append(sample)
                 else:
@@ -291,10 +295,12 @@ g_all.GetHistogram().GetYaxis().SetRangeUser(0,1)
 g_all.Draw('AP')
 for g in gs:
     g.Draw('P')
-l.SetFillColor(0)
-l.Draw()
-l1 = ROOT.TLine(0,0,1,1-0.01*gen_rec_cut)
-l2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
+l1.SetFillColor(0)
 l1.Draw()
+l2.SetFillColor(0)
 l2.Draw()
+line1 = ROOT.TLine(0,0,1,1-0.01*gen_rec_cut)
+line2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
+line1.Draw()
+line2.Draw()
 c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff.pdf')
