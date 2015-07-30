@@ -28,12 +28,14 @@ assert \
     process.looper is None and \
     not process._Process__modifiers and \
     not process._Process__partialschedules and \
-    process.schedule is None and \
     process.subProcess is None
 
 left = sorted(process_keys)
 should_be = ['PoolSource', '_Process__InExtendCall', '_Process__aliases', '_Process__analyzers', '_Process__endpaths', '_Process__esprefers', '_Process__esproducers', '_Process__essources', '_Process__filters', '_Process__findFirstSequenceUsingModule', '_Process__isStrict', '_Process__looper', '_Process__modifiers', '_Process__name', '_Process__outputmodules', '_Process__partialschedules', '_Process__paths', '_Process__producers', '_Process__psets', '_Process__schedule', '_Process__sequences', '_Process__services', '_Process__setObjectLabel', '_Process__source', '_Process__subProcess', '_Process__vpsets', '_cloneToObjectDict', '_dumpConfigESPrefers', '_dumpConfigNamedList', '_dumpConfigOptionallyNamedList', '_dumpConfigUnnamedList', '_dumpPython', '_dumpPythonList', '_findPreferred', '_insertInto', '_insertManyInto', '_insertOneInto', '_insertPaths', '_okToPlace', '_place', '_placeAlias', '_placeAnalyzer', '_placeESPrefer', '_placeESProducer', '_placeESSource', '_placeEndPath', '_placeFilter', '_placeLooper', '_placeOutputModule', '_placePSet', '_placePath', '_placeProducer', '_placeSequence', '_placeService', '_placeSource', '_placeSubProcess', '_placeVPSet', '_pruneModules', '_replaceInSequences', '_sequencesInDependencyOrder', '_validateSequence', 'add_', 'aliases', 'aliases_', 'analyzerNames', 'analyzers', 'analyzers_', 'dumpConfig', 'dumpPython', 'endpaths', 'endpaths_', 'es_prefers', 'es_prefers_', 'es_producers', 'es_producers_', 'es_sources', 'es_sources_', 'extend', 'fillProcessDesc', 'filterNames', 'filters', 'filters_', 'globalReplace', 'load', 'looper', 'looper_', 'name_', 'outputModules', 'outputModules_', 'pathNames', 'paths', 'paths_', 'prefer', 'process', 'producerNames', 'producers', 'producers_', 'prune', 'psets', 'psets_', 'schedule', 'schedule_', 'sequences', 'sequences_', 'services', 'services_', 'setLooper_', 'setName_', 'setPartialSchedule_', 'setSchedule_', 'setSource_', 'setStrict', 'setSubProcess_', 'source', 'source_', 'subProcess', 'subProcess_', 'validate', 'vpsets', 'vpsets_']
 assert left == should_be
+
+def print_seq(o):
+    pprint(repr(o).replace('+',',').replace('*',',').split(','))
 
 ####
 
@@ -44,8 +46,13 @@ for n in easy:
         print k
         o = getattr(process, k)
         if n in ('endpaths', 'paths', 'sequences'):
-            pprint(repr(o).split('+'))
+            print_seq(o)
         else:
             print o.dumpPython()
         print '========================================================='
     print
+
+if process.schedule is not None:
+    print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\nXXX schedule:'
+    print_seq(process.schedule)
+
