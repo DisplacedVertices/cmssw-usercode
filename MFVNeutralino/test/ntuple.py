@@ -41,11 +41,11 @@ if keep_all:
     process.out.outputCommands = ['keep *']
     trig_filter = False
 else:
-    process.out.outputCommands = [
-        'drop *',
-        'keep MFVEvent_mfvEvent__*',
-        'keep MFVVertexAuxs_mfvVerticesAux__*',
-        ]
+    #process.out.outputCommands = [
+    #    'drop *',
+    #    'keep MFVEvent_mfvEvent__*',
+    #    'keep MFVVertexAuxs_mfvVerticesAux__*',
+    #    ]
 
     if keep_extra:
         process.out.outputCommands += [
