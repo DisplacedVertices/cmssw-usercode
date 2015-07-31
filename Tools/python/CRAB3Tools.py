@@ -41,7 +41,9 @@ class CRABToolsGlobalOptions:
                     return default
 
             self.allow_insecure_stupidity = get_default('Global', 'allow_insecure_stupidity', False)
-            self.crab_dirs_root = get_default('Global', 'crab_dirs_root', None)
+            self.crab_dirs_root = get_default('Global', 'crab_dirs_root', '/dev/null')
+        else:
+            raise IOError('no such file %s' % cfg_path)
 
 crab_global_options = CRABToolsGlobalOptions()
 
