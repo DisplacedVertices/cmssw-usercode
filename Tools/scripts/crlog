@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os
-from JMTucker.Tools.CRAB3Tools import CRABToolsException, crab_dir_from_argv, crab_jobs_from_argv
+from JMTucker.Tools.CRAB3Tools import CRABToolsException, crab_dir_from_argv, crab_jobs_from_argv, crab_command
 
 def print_run_cmd(cmd):
     print cmd
@@ -13,30 +13,21 @@ except CRABToolsException:
     sys.exit('usage: crlog <crab directory> [list of jobs]\n   if no list of jobs is supplied, will show the crab.log.')
 
 jobs = crab_jobs_from_argv()
-if jobs:
-    raise NotImplementedError('need to figure out how to get job logs then show')
-
 print d
 if len(jobs) == 0 or (len(jobs) == 1 and jobs[0] == 0):
     print_run_cmd('less %s/crab.log' % d)
 else:
     for job in jobs:
         if len(jobs) != 1:
-            raw_input('\nlogs for job %i <hit enter to show>' % job)
+            raw_input('\nlogs for job %i <enter to continue>' % job)
 
-        stdout = '%s/res/CMSSW_%i.stdout' % (d, job)
-        if os.path.isfile(stdout):
-            print
-            print_run_cmd('less %s' % stdout)
-        else:
-            print '\nno stdout!'
-            
-        condor_log = '%s/share/.condor_temp/CMSSW_%i.log' % (d, job)
-        if os.path.isfile(condor_log):
-            print
-            print_run_cmd('less %s' % condor_log)
-        else:
-            print '\nno condor log!'
+        tar_fn = '%s/results/cmsRun_%i.log.tar.gz' % (d, job)
 
-        print '\noutput files:'
-        print_run_cmd('ls -l %s/res/*_%i.*' % (d, job))
+        if not os.path.isfile(tar_fn):
+            print 'retrieving log tarball %s' % tar_fn
+            crab_command('getlog', dir=d, jobids=str(job), suppress_stdout=False) # JMTBAD check success? and get multiple tars with one command? 
+
+        if not os.path.isfile(tar_fn):
+            sys.exit('could not get tarball %s' % tar_fn)
+
+        print_run_cmd('tar -xf %s --to-command=less' % tar_fn)
