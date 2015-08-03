@@ -40,7 +40,7 @@ class CRABToolsGlobalOptions:
                 except (NoSectionError, NoOptionError):
                     return default
 
-            self.allow_insecure_stupidity = get_default('Global', 'allow_insecure_stupidity', False)
+            self.allow_insecure_stupidity = get_default('Global', 'allow_insecure_stupidity', False) == 'True'
             self.crab_dirs_root = get_default('Global', 'crab_dirs_root', '/dev/null')
         else:
             raise IOError('no such file %s' % cfg_path)
@@ -223,6 +223,7 @@ def crab_need_renew_proxy(min_hours=144):
 def crab_renew_proxy_if_needed(min_hours=144):
     if crab_need_renew_proxy(min_hours):
         if crab_global_options.allow_insecure_stupidity:
+            print 'allow_insecure_stupidity is true'
             try:
                 import pexpect
             except ImportError:
@@ -237,6 +238,7 @@ def crab_renew_proxy_if_needed(min_hours=144):
             p.sendline(pp)
             p.interact()
         else:
+            print 'allow_insecure_stupidity is false'
             os.system('voms-proxy-init -voms cms -valid 192:00')
             os.system('myproxy-init -d -n -s myproxy.cern.ch')
 
