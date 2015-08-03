@@ -216,6 +216,8 @@ def anon_samples(txt, **kwargs):
     lines = [line.strip() for line in txt.split('\n') if line.strip()]
     uniq = defaultdict(int)
     for line in lines:
+        if line.startswith('#'):
+            continue
         line = line.split()
         if len(line) == 3:
             name, dataset, nevents = line
