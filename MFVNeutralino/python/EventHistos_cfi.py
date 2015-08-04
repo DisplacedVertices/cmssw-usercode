@@ -6,5 +6,4 @@ mfvEventHistos = cms.EDAnalyzer('MFVEventHistos',
                                 primary_vertex_src = cms.InputTag(''),
                                 jets_src = cms.InputTag(''),
                                 weight_src = cms.InputTag('mfvWeight'),
-                                re_trigger = cms.bool(False),
                                 )

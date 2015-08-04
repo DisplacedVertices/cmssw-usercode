@@ -25,7 +25,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   const edm::InputTag primary_vertex_src;
   const edm::InputTag jets_src;
   const edm::InputTag weight_src;
-  const bool re_trigger;
 
   TH1F* h_w;
 
@@ -205,8 +204,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
-    re_trigger(cfg.getParameter<bool>("re_trigger"))
+    weight_src(cfg.getParameter<edm::InputTag>("weight_src"))
 {
   if (force_bs.size() && force_bs.size() != 3)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
@@ -437,15 +435,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  bool pass_trigger[mfv::n_trigger_paths] = { 0 };
-
-  if (re_trigger) {
-    TriggerHelper trig_helper(event, edm::InputTag("TriggerResults", "", "HLT"));
-    mfv::trigger_decision(trig_helper, pass_trigger);
-  }
-
   for (int i = 0; i < mfv::n_trigger_paths; ++i)
-    h_pass_trigger[i]->Fill((re_trigger ? pass_trigger : mevent->pass_trigger)[i], w);
+    h_pass_trigger[i]->Fill(mevent->pass_trigger[i], w);
 
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i]->Fill(mevent->pass_clean[i], w);

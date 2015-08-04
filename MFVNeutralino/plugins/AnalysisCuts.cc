@@ -19,7 +19,6 @@ private:
   const bool use_mevent;
   const int l1_bit;
   const int trigger_bit;
-  const bool re_trigger;
   const int clean_bit;
   const bool invert_clean;
   const bool apply_cleaning_filters;
@@ -78,7 +77,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     use_mevent(mevent_src.label() != ""),
     l1_bit(cfg.getParameter<int>("l1_bit")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
-    re_trigger(cfg.getParameter<bool>("re_trigger")),
     clean_bit(cfg.getParameter<int>("clean_bit")),
     invert_clean(cfg.getParameter<bool>("invert_clean")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
@@ -149,19 +147,11 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (use_mevent) {
     event.getByLabel(mevent_src, mevent);
 
-    if (l1_bit >= 0 || trigger_bit >= 0) {
-      if (re_trigger) {
-        throw cms::Exception("AnalysisCuts", "L1 part of re_trigger not implemented");
-        bool pass_trigger[mfv::n_trigger_paths] = { 0 };
-        TriggerHelper trig_helper(event, edm::InputTag("TriggerResults", "", "HLT"));
-        mfv::trigger_decision(trig_helper, pass_trigger);
-        if (!pass_trigger[trigger_bit])
-          return false;
-      }
-      else if ((trigger_bit >= 0 && !mevent->pass_trigger[trigger_bit]) ||
-               (l1_bit      >= 0 && !mevent->l1_pass[l1_bit]))
-        return false;
-    }
+    if (l1_bit >= 0 && !mevent->l1_pass[l1_bit])
+      return false;
+
+    if (trigger_bit >= 0 && !mevent->pass_trigger[trigger_bit])
+      return false;
 
     if (clean_bit >= 0) {
       if (invert_clean == mevent->pass_clean[clean_bit])
