@@ -34,6 +34,26 @@ def customize_before_unscheduled(process):
 process = pat_tuple_process(customize_before_unscheduled, is_mc)
 process.out.fileName = 'ntuple.root'
 
+# We're not saving the PAT branches, but if the embedding is on then
+# we can't match leptons by track to vertices.
+process.patMuons.embedTrack = False
+process.patElectrons.embedTrack = False
+
+print '''
+
+JMTBAD still missing:
+- jet/muon/electron id
+- PV rejiggering
+- particular trigger bits
+- event cleaning filters (these are done somewhere in the pat now, yes?)
+- extra IVF producers
+- stdout suppressor
+- final event content slimming
+- fast sim handling
+- pileup removal studies
+
+'''
+
 #process.source.fileNames = []
 #set_events_to_process(process, [])
 

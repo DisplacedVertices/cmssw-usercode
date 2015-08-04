@@ -54,25 +54,6 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
         process.load('Configuration.StandardSequences.PAT_cff')
         process = miniAOD_customizeAllData(process)
 
-    # We're not saving the PAT branches, but if the embedding is on then
-    # we can't match leptons by track to vertices.
-    process.patMuons.embedTrack = False
-    process.patElectrons.embedTrack = False
-
-    print '''
-
-JMTBAD still missing:
-- jet/muon/electron id
-- PV rejiggering
-- particular trigger bits
-- event cleaning filters (these are done somewhere in the pat now, yes?)
-- extra IVF producers
-- stdout suppressor
-- final event content slimming
-- fast sim handling
-- pileup removal studies
-
-'''
     return process
 
 def keep_random_state(process):
