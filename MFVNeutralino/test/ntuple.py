@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+print 'JMTBAD not final! see "run 2 wishlist/todo" evernote'
+
 import sys
 from JMTucker.Tools.CMSSWTools import cms, set_events_to_process, set_events_to_process_by_filter
 from JMTucker.Tools.MiniAOD_cfg import pat_tuple_process
@@ -32,28 +34,13 @@ def customize_before_unscheduled(process):
     process.pmfv = cms.Path(process.mfvVertexSequence * process.mfvEvent)
 
 process = pat_tuple_process(customize_before_unscheduled, is_mc)
-process.out.fileName = 'ntuple.root'
 
 # We're not saving the PAT branches, but if the embedding is on then
 # we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
 
-print '''
-
-JMTBAD still missing:
-- jet/muon/electron id
-- PV rejiggering
-- particular trigger bits
-- event cleaning filters (these are done somewhere in the pat now, yes?)
-- extra IVF producers
-- stdout suppressor
-- final event content slimming
-- fast sim handling
-- pileup removal studies
-
-'''
-
+process.out.fileName = 'ntuple.root'
 #process.source.fileNames = []
 #set_events_to_process(process, [])
 
