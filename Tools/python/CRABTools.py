@@ -20,7 +20,7 @@ if os.path.isfile(global_options_path):
     global_options_cfg = ConfigParser()
     global_options_cfg.read(global_options_path)
     try:
-        allow_insecure_stupidity = global_options_cfg.get('Global', 'allow_insecure_stupidity')
+        allow_insecure_stupidity = global_options_cfg.get('Global', 'allow_insecure_stupidity') == 'True'
     except (NoSectionError, NoOptionError):
         pass
 
