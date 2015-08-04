@@ -2,13 +2,16 @@
 
 # author: J. Tucker
 
-import os, sys, time, datetime, optparse, pdb, ctypes, multiprocessing, httplib
-from cStringIO import StringIO
+import datetime
+import optparse
+import os
+import pdb
+import sys
+import time
+from collections import defaultdict
 from JMTucker.Tools.CRAB3Tools import *
 
 parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
-parser.add_option('-s', '--status-only', action='store_true', default=False,
-                  help='Only perform crab -status, do not try to -get or -resubmit anything.')
 parser.add_option('-o', '--once', action='store_true', default=False,
                   help='Only make one -status,-get,-resubmit pass, then exit.')
 parser.add_option('-w', '--wait-time', type='int', default=60*10,
@@ -17,7 +20,7 @@ parser.add_option('-d', '--delay', action='store_true', default=False,
                   help='Wait once before starting passes.')
 parser.add_option('--max-processes', type='int', default=5,
                   help='Max number of status-checking processes to run at once.')
-parser.add_option('--resub-failed', action='store_true', default=False,
+parser.add_option('-r', '--resub', action='store_true', default=False,
                   help='Send resubmit request to any batch that has failed jobs, obeying the white and black lists below.')
 parser.add_option('--resub-white-list', default='',
                   help='Comma-separated list (no spaces!) of sites to whitelist when resubmitting.')
@@ -55,9 +58,6 @@ def print_header(s):
 def print_subheader(s):
     print '\033[32m%s\033[0m' % s
 
-if options.resub_failed:
-    raise NotImplementedError('--resub-failed does nothing at the moment')
-
 if options.resub_white_list and options.resub_black_list:
     raise ValueError('cannot have both --resub-white-list and --resub-black-list')
 
@@ -67,8 +67,8 @@ if options.resub_white_codes and options.resub_black_codes:
 options.resub_white_codes = options.resub_white_codes.split(',')
 options.resub_black_codes = options.resub_black_codes.split(',')
 
-if options.status_only and not options.once:
-    print '--status-only implies --once, setting it.'
+if not options.once and options.fake_results:
+    print '--fake-results implies --once, setting it.'
     options.once = True
 
 if options.post_process:
@@ -138,9 +138,8 @@ def backdoor_print(filename, l):
 
 dirs = crab_dirs_from_argv()
 
-if not dirs:
-    print 'space-separated list of existing crab dirs required in argv (see --help)'
-    sys.exit(1)
+if not dirs and not options.fake_results:
+    sys.exit('space-separated list of existing crab dirs required in argv (see --help)')
 
 if options.dir_sort:
     dirs.sort()
@@ -203,6 +202,23 @@ while 1:
         crab_cleanup()
         os.system('mkdir -p /tmp/%s' % os.environ['USER'])
         open('/tmp/%s/crmontmp' % os.environ['USER'], 'wt').write(repr(results))
+
+        # Resubmit those allowed.
+        if options.resub:
+            to_resub = defaultdict(list)
+            for d, res in results.iteritems():
+                for job_num in res['jobListByStatus'].get('failed', []):
+                    job = res['jobs'][str(job_num)]
+                    err_code = job['Error'][0]
+                    if any((not options.resub_white_list and not options.resub_black_list,
+                            options.resub_white_list and err_code in options.resub_white_list,
+                            options.resub_black_list and err_code not in options.resub_black_list)):
+                        to_resub[d].append(job_num)
+
+            for d, jobs in to_resub.iteritems():
+                jobs = ','.join(str(j) for j in jobs)
+                print 'resubmit', d, jobs
+                crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
 
     # Print task statuses. I don't know what all these mean yet.
     print
