@@ -30,20 +30,25 @@ public:
 private:
   const edm::InputTag trigger_results_src;
   const edm::InputTag cleaning_results_src;
+
+  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
+  const edm::EDGetTokenT<edm::TriggerResults> cleaning_results_token;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
+  const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
+  const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
+  const edm::EDGetTokenT<pat::JetCollection> calojets_token;
+  const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const edm::EDGetTokenT<pat::METCollection> met_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  
   const std::string skip_event_filter;
   const double jet_pt_min;
-  const edm::InputTag beamspot_src;
-  const edm::InputTag primary_vertex_src;
-  const edm::InputTag gen_particles_src;
-  const edm::InputTag calojets_src;
-  const edm::InputTag jets_src;
-  const edm::InputTag met_src;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
-  const edm::InputTag muons_src;
   const StringCutObjectSelector<pat::Muon> muon_semilep_selector;
   const StringCutObjectSelector<pat::Muon> muon_dilep_selector;
-  const edm::InputTag electrons_src;
   const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
   bool warned_non_mfv;
@@ -57,22 +62,29 @@ private:
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
     cleaning_results_src(cfg.getParameter<edm::InputTag>("cleaning_results_src")),
+
+    trigger_results_token(consumes<edm::TriggerResults>(trigger_results_src)),
+    cleaning_results_token(consumes<edm::TriggerResults>(cleaning_results_src)),
+    
+    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
+    gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
+    pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
+    calojets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("calojets_src"))),
+    jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+
     skip_event_filter(cfg.getParameter<std::string>("skip_event_filter")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
-    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    gen_particles_src(cfg.getParameter<edm::InputTag>("gen_particles_src")),
-    calojets_src(cfg.getParameter<edm::InputTag>("calojets_src")),
-    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
-    met_src(cfg.getParameter<edm::InputTag>("met_src")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
     b_discriminator_mins(cfg.getParameter<std::vector<double> >("b_discriminator_mins")),
-    muons_src(cfg.getParameter<edm::InputTag>("muons_src")),
     muon_semilep_selector(cfg.getParameter<std::string>("muon_semilep_cut")),
     muon_dilep_selector(cfg.getParameter<std::string>("muon_dilep_cut")),
-    electrons_src(cfg.getParameter<edm::InputTag>("electrons_src")),
     electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
     electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
+
     warned_non_mfv(false)
 {
   for (int i = 0; i < 4; ++i)
@@ -90,13 +102,13 @@ void MFVEventProducer::beginRun(edm::Run& run, const edm::EventSetup& setup) {
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-  if (cleaning_results_src.label() != "" && skip_event_filter != "" && !TriggerHelper(event, cleaning_results_src).pass(skip_event_filter))
+  if (cleaning_results_src.label() != "" && skip_event_filter != "" && !TriggerHelper(event, cleaning_results_token).pass(skip_event_filter))
     return;
 
   std::auto_ptr<MFVEvent> mevent(new MFVEvent);
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel(beamspot_src, beamspot);
+  event.getByToken(beamspot_token, beamspot);
   mevent->bsx = beamspot->x0();
   mevent->bsy = beamspot->y0();
   mevent->bsz = beamspot->z0();
@@ -106,7 +118,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->bswidthy = beamspot->BeamWidthY();
 
   edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByLabel(primary_vertex_src, primary_vertices);
+  event.getByToken(primary_vertex_token, primary_vertices);
   const reco::Vertex* primary_vertex = 0;
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
@@ -117,7 +129,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   if (!event.isRealData()) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
-    event.getByLabel(gen_particles_src, gen_particles);
+    event.getByToken(gen_particles_token, gen_particles);
 
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
@@ -161,7 +173,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 
 #if 0  
-  TriggerHelper trig_helper(event, trigger_results_src);
+  TriggerHelper trig_helper(event, trigger_results_token);
   mfv::trigger_decision(trig_helper, mevent->pass_trigger);
 
   l1_cfg.getL1GtRunCache(event, setup, true, false);
@@ -247,7 +259,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       "toomanystripclus53X"
     };
 
-    TriggerHelper trig_helper_cleaning(event, cleaning_results_src);
+    TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
     for (int i = 0; i < mfv::n_clean_paths; ++i)
       mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
   }
@@ -259,7 +271,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   if (!event.isRealData()) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup;
-    event.getByLabel("addPileupInfo", pileup);
+    event.getByToken(pileup_summary_token, pileup);
 
     for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
       if (psi->getBunchCrossing() == 0)
@@ -292,7 +304,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 #if 0
   edm::Handle<pat::JetCollection> calojets;
-  event.getByLabel(calojets_src, calojets);
+  event.getByToken(calojets_token, calojets);
 
   for (const pat::Jet& jet : *calojets) {
     if (jet.pt() < jet_pt_min) // JMTBAD should also require |eta| < 2.5
@@ -314,10 +326,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<pat::JetCollection> jets;
-  event.getByLabel(jets_src, jets);
+  event.getByToken(jets_token, jets);
 
   edm::Handle<pat::METCollection> mets;
-  event.getByLabel(met_src, mets);
+  event.getByToken(met_token, mets);
   const pat::MET& met = mets->at(0);
 
   mevent->metx = met.px();
@@ -409,7 +421,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
 #if 0
   edm::Handle<pat::MuonCollection> muons;
-  event.getByLabel(muons_src, muons);
+  event.getByToken(muons_token, muons);
 
   for (const pat::Muon& muon : *muons) {
     uchar id =
@@ -432,7 +444,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   edm::Handle<pat::ElectronCollection> electrons;
-  event.getByLabel(electrons_src, electrons);
+  event.getByToken(electrons_token, electrons);
   
   for (const pat::Electron& electron : *electrons) {
     uchar id =
