@@ -41,11 +41,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pass_clean_all;
   TH1F* h_passoldskim;
 
-  TH1F* h_npfjets;
-  TH1F* h_pfjetpt4;
-  TH1F* h_pfjetpt5;
-  TH1F* h_pfjetpt6;
-
   TH1F* h_npu;
 
   TH1F* h_bsx;
@@ -238,11 +233,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_pass_clean[i] = fs->make<TH1F>(TString::Format("h_pass_clean_%i", i), TString::Format(";pass_clean[%i];events", i), 2, 0, 2);
   h_pass_clean_all = fs->make<TH1F>("h_pass_clean_all", ";pass_clean_all;events", 2, 0, 2);
   h_passoldskim = fs->make<TH1F>("h_passoldskim", ";pass old skim?;events", 2, 0, 2);
-
-  h_npfjets = fs->make<TH1F>("h_npfjets", ";# of PF jets;events", 30, 0, 30);
-  h_pfjetpt4 = fs->make<TH1F>("h_pfjetpt4", ";p_{T} of 4th PF jet (GeV);events/5 GeV", 100, 0, 500);
-  h_pfjetpt5 = fs->make<TH1F>("h_pfjetpt5", ";p_{T} of 5th PF jet (GeV);events/5 GeV", 100, 0, 500);
-  h_pfjetpt6 = fs->make<TH1F>("h_pfjetpt6", ";p_{T} of 6th PF jet (GeV);events/5 GeV", 100, 0, 500);
 
   h_npu = fs->make<TH1F>("h_npu", ";true nPU;events", 65, 0, 65);
 
@@ -467,11 +457,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pass_clean_all->Fill(pass_clean_all, w);
 
   //////////////////////////////////////////////////////////////////////////////
-
-  h_npfjets->Fill(mevent->npfjets, w);
-  h_pfjetpt4->Fill(mevent->pfjetpt4, w);
-  h_pfjetpt5->Fill(mevent->pfjetpt5, w);
-  h_pfjetpt6->Fill(mevent->pfjetpt6, w);
 
   h_npu->Fill(mevent->npu, w);
 

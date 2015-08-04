@@ -257,32 +257,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<reco::PFJetCollection> pfjets;
-  event.getByLabel(pfjets_src, pfjets);
-
-  mevent->npfjets = 0;
-
-  for (const reco::PFJet& jet : *pfjets) {
-    if (jet.pt() > jet_pt_min &&
-        fabs(jet.eta()) < 2.5 &&
-        jet.numberOfDaughters() > 1 &&
-        (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0)) &&
-        jet.neutralHadronEnergyFraction() < 0.90 &&
-        jet.neutralEmEnergyFraction() < 0.90) {
-
-      inc_uchar(mevent->npfjets);
-
-      if (mevent->npfjets == 4)
-        mevent->pfjetpt4 = jet.pt();
-      else if (mevent->npfjets == 5)
-        mevent->pfjetpt5 = jet.pt();
-      else if (mevent->npfjets == 6)
-        mevent->pfjetpt6 = jet.pt();
-    }
-  }
-
-  //////////////////////////////////////////////////////////////////////
-
   mevent->npu = -1;
 
   if (!event.isRealData()) {

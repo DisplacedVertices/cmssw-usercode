@@ -78,12 +78,6 @@ enabled = [x.strip() for x in '''
 #calojetpt3
 #calojetpt4
 #calojetpt5
-#npfjets
-#pfjetpt1
-#pfjetpt2
-#pfjetpt3
-#pfjetpt4
-#pfjetpt5
 #jetsumht
 #sv_best0_ntracks_nm1
 #sv_best0_ntracksptgt3_nm1
@@ -173,56 +167,6 @@ D('calojetpt4',
 D('calojetpt5',
   histogram_path = event_histo('h_calojetpt5'),
   x_title = 'calorimeter jet #5 p_{T} (GeV)',
-  y_title = 'events/20 GeV',
-  x_range = (0,250),
-  rebin = 4,
-  legend_pos = (0.47, 0.70, 0.87, 0.90),
-  )
-
-D('npfjets',
-  histogram_path = event_histo('h_njets'),
-  x_title = 'number of particle-flow jets',
-  y_title = 'events',
-  x_range = (3,16),
-  legend_pos = (0.47, 0.70, 0.87, 0.90),
-  )
-
-D('pfjetpt1',
-  histogram_path = event_histo('h_jetpt1'),
-  x_title = 'particle-flow jet #1 p_{T} (GeV)',
-  y_title = 'events/20 GeV',
-  rebin = 4,
-  legend_pos = (0.47, 0.70, 0.87, 0.90),
-  )
-
-D('pfjetpt2',
-  histogram_path = event_histo('h_jetpt2'),
-  x_title = 'particle-flow jet #2 p_{T} (GeV)',
-  y_title = 'events/20 GeV',
-  rebin = 4,
-  legend_pos = (0.47, 0.70, 0.87, 0.90),
-  )
-
-D('pfjetpt3',
-  histogram_path = event_histo('h_jetpt3'),
-  x_title = 'particle-flow jet #3 p_{T} (GeV)',
-  y_title = 'events/20 GeV',
-  rebin = 4,
-  legend_pos = (0.47, 0.70, 0.87, 0.90),
-  )
-
-D('pfjetpt4',
-  histogram_path = event_histo('h_jetpt4'),
-  x_title = 'particle-flow jet #4 p_{T} (GeV)',
-  y_title = 'events/20 GeV',
-  x_range = (0,250),
-  rebin = 4,
-  legend_pos = (0.47, 0.70, 0.87, 0.90),
-  )
-
-D('pfjetpt5',
-  histogram_path = event_histo('h_jetpt5'),
-  x_title = 'particle-flow jet #5 p_{T} (GeV)',
   y_title = 'events/20 GeV',
   x_range = (0,250),
   rebin = 4,
