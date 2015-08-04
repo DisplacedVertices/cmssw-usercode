@@ -15,14 +15,14 @@ public:
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
-  const edm::InputTag gen_src;
-  const edm::InputTag beamspot_src;
+  const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const bool debug;
 };
 
 MFVGenVertices::MFVGenVertices(const edm::ParameterSet& cfg) 
-  : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
+  : gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
+    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
   produces<std::vector<double> >();
@@ -30,10 +30,10 @@ MFVGenVertices::MFVGenVertices(const edm::ParameterSet& cfg)
 
 void MFVGenVertices::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
+  event.getByToken(gen_particles_token, gen_particles);
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel(beamspot_src, beamspot);
+  event.getByToken(beamspot_token, beamspot);
 
   std::auto_ptr<std::vector<double> > decay_vertices(new std::vector<double>);
 

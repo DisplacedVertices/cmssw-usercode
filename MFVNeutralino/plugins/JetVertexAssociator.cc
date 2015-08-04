@@ -22,8 +22,10 @@ public:
 private:
   typedef mfv::JetVertexAssociation Association;
 
-  const edm::InputTag jet_src;
-  const edm::InputTag vertex_src;
+  const edm::EDGetTokenT<pat::JetCollection> jet_token;
+  const edm::EDGetTokenT<reco::VertexRefVector> vertex_ref_token;
+  const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
+  
   const bool input_is_refs;
   const std::string tag_info_name;
   const double min_vertex_track_weight;
@@ -73,8 +75,9 @@ private:
 };
 
 MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
-  : jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+  : jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jet_src"))),
+    vertex_ref_token(consumes<reco::VertexRefVector>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     input_is_refs(cfg.getParameter<bool>("input_is_refs")),
     tag_info_name(cfg.getParameter<std::string>("tag_info_name")),
     min_vertex_track_weight(cfg.getParameter<double>("min_vertex_track_weight")),
@@ -134,19 +137,19 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
 
 void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<pat::JetCollection> jets;
-  event.getByLabel(jet_src, jets);
+  event.getByToken(jet_token, jets);
 
   std::vector<reco::VertexRef> vertices;
 
   if (input_is_refs) {
     edm::Handle<reco::VertexRefVector> h;
-    event.getByLabel(vertex_src, h);
+    event.getByToken(vertex_ref_token, h);
     for (const reco::VertexRef& ref : *h)
       vertices.push_back(ref);
   }
   else {
     edm::Handle<reco::VertexCollection> h;
-    event.getByLabel(vertex_src, h);
+    event.getByToken(vertex_token, h);
     for (size_t i = 0; i < h->size(); ++i)
       vertices.push_back(reco::VertexRef(h, i));
   }
