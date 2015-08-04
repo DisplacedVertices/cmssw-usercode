@@ -292,7 +292,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   //////////////////////////////////////////////////////////////////////
-
+#if 0
   edm::Handle<pat::JetCollection> calojets;
   event.getByLabel(calojets_src, calojets);
 
@@ -312,7 +312,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->calojet_phi.push_back(jet.phi());
     mevent->calojet_energy.push_back(jet.energy());
   }
-
+#endif
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<pat::JetCollection> jets;
@@ -360,12 +360,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (dphi < mevent->metdphimin)
         mevent->metdphimin = dphi;
     }
+
     const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
-    if (svtag) {
-      mevent->jet_svnvertices.push_back(svtag->nVertices());
-    } else {
-      mevent->jet_svnvertices.push_back(-1);
-    }
+    mevent->jet_svnvertices.push_back(svtag ? svtag->nVertices() : -1);
 
     if (svtag && svtag->nVertices() > 0) {
       const reco::Vertex &sv = svtag->secondaryVertex(0);
@@ -385,7 +382,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->jet_svcyy.push_back(sv.covariance(1,1));
       mevent->jet_svcyz.push_back(sv.covariance(1,2));
       mevent->jet_svczz.push_back(sv.covariance(2,2));
-    } else {
+    }
+    else {
       mevent->jet_svntracks.push_back(0);
       mevent->jet_svsumpt2.push_back(0);
       mevent->jet_svx.push_back(0);
