@@ -118,18 +118,18 @@ private:
     return v;
   }
 
-  const edm::InputTag beamspot_src;
-  const edm::InputTag primary_vertices_src;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const bool use_tracks;
-  const edm::InputTag track_src;
+  const edm::EDGetTokenT<reco::TrackCollection> track_token;
   const bool use_non_pv_tracks;
   const bool use_non_pvs_tracks;
   const bool use_pf_candidates;
-  const edm::InputTag pf_candidate_src;
+  const edm::EDGetTokenT<reco::PFCandidateCollection> pf_candidate_token;
   const bool use_pf_jets;
-  const edm::InputTag pf_jet_src;
+  const edm::EDGetTokenT<reco::PFJetCollection> pf_jet_token;
   const bool use_pat_jets;
-  const edm::InputTag pat_jet_src;
+  const edm::EDGetTokenT<pat::JetCollection> pat_jet_token;
   const double min_seed_jet_pt;
   const double min_all_track_pt;
   const double min_all_track_dxy;
@@ -233,18 +233,18 @@ private:
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     av_reco(new ConfigurableVertexReconstructor(cfg.getParameter<edm::ParameterSet>("avr_params"))),
-    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    primary_vertices_src(cfg.getParameter<edm::InputTag>("primary_vertices_src")),
+    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
-    track_src(cfg.getParameter<edm::InputTag>("track_src")),
+    track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
     use_non_pv_tracks(cfg.getParameter<bool>("use_non_pv_tracks")),
     use_non_pvs_tracks(cfg.getParameter<bool>("use_non_pvs_tracks")),
     use_pf_candidates(cfg.getParameter<bool>("use_pf_candidates")),
-    pf_candidate_src(cfg.getParameter<edm::InputTag>("pf_candidate_src")),
+    pf_candidate_token(consumes<reco::PFCandidateCollection>(cfg.getParameter<edm::InputTag>("pf_candidate_src"))),
     use_pf_jets(cfg.getParameter<bool>("use_pf_jets")),
-    pf_jet_src(cfg.getParameter<edm::InputTag>("pf_jet_src")),
+    pf_jet_token(consumes<reco::PFJetCollection>(cfg.getParameter<edm::InputTag>("pf_jet_src"))),
     use_pat_jets(cfg.getParameter<bool>("use_pat_jets")),
-    pat_jet_src(cfg.getParameter<edm::InputTag>("pat_jet_src")),
+    pat_jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("pat_jet_src"))),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
     min_all_track_pt(cfg.getParameter<double>("min_all_track_pt")),
     min_all_track_dxy(cfg.getParameter<double>("min_all_track_dxy")),
@@ -416,13 +416,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     h_phitest_nev->Fill(0);
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel(beamspot_src, beamspot);
+  event.getByToken(beamspot_token, beamspot);
   const double bs_x = beamspot->position().x();
   const double bs_y = beamspot->position().y();
   const double bs_z = beamspot->position().z();
 
   edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByLabel(primary_vertices_src, primary_vertices);
+  event.getByToken(primary_vertices_token, primary_vertices);
   const reco::Vertex& primary_vertex = primary_vertices->at(0);
 
   //////////////////////////////////////////////////////////////////////
@@ -443,7 +443,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   if (use_tracks) {
     edm::Handle<reco::TrackCollection> tracks;
-    event.getByLabel(track_src, tracks);
+    event.getByToken(track_token, tracks);
     for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
       all_tracks.push_back(reco::TrackRef(tracks, i));
   }
@@ -459,7 +459,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
 
     edm::Handle<reco::TrackCollection> tracks;
-    event.getByLabel(track_src, tracks);
+    event.getByToken(track_token, tracks);
     for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
       reco::TrackRef tkref(tracks, i);
       bool ok = true;
@@ -475,7 +475,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
   else if (use_pf_candidates) {
     edm::Handle<reco::PFCandidateCollection> pf_candidates;
-    event.getByLabel(pf_candidate_src, pf_candidates);
+    event.getByToken(pf_candidate_token, pf_candidates);
 
     for (const reco::PFCandidate& cand : *pf_candidates) {
       reco::TrackRef tkref = cand.trackRef();
@@ -485,7 +485,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
   else if (use_pf_jets) {
     edm::Handle<reco::PFJetCollection> jets;
-    event.getByLabel(pf_jet_src, jets);
+    event.getByToken(pf_jet_token, jets);
     for (const reco::PFJet& jet : *jets) {
       if (jet.pt() > min_seed_jet_pt &&
           fabs(jet.eta()) < 2.5 &&
@@ -500,7 +500,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
   else if (use_pat_jets) {
     edm::Handle<pat::JetCollection> jets;
-    event.getByLabel(pat_jet_src, jets);
+    event.getByToken(pat_jet_token, jets);
     for (const pat::Jet& jet : *jets) {
       if (jet.pt() > min_seed_jet_pt) { // assume rest of id above already applied at tuple time
         for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {

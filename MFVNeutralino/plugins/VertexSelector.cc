@@ -18,8 +18,8 @@ private:
 
   bool use_vertex(const MFVVertexAux& vtx) const;
 
-  const edm::InputTag vertex_src;
-  const edm::InputTag vertex_aux_src;
+  const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_aux_token;
   const bool produce_vertices;
   const bool produce_tracks;
   const bool produce_refs;
@@ -30,6 +30,7 @@ private:
   const double mva_cut;
 
   const edm::InputTag match_to_vertices_src;
+  const edm::EDGetTokenT<std::vector<double> > match_to_vertices_token;
   const bool use_match_to_vertices;
   const double max_match_distance;
   const double min_match_distance;
@@ -96,8 +97,8 @@ private:
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
-  : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
+  : vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    vertex_aux_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_aux_src"))),
     produce_vertices(cfg.getParameter<bool>("produce_vertices")),
     produce_tracks(cfg.getParameter<bool>("produce_tracks")),
     produce_refs(cfg.getParameter<bool>("produce_refs")),
@@ -106,6 +107,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     mva(use_mva ? new MFVVertexMVAWrap : 0),
     mva_cut(cfg.getParameter<double>("mva_cut")),
     match_to_vertices_src(cfg.getParameter<edm::InputTag>("match_to_vertices_src")),
+    match_to_vertices_token(consumes<std::vector<double> >(match_to_vertices_src)),
     use_match_to_vertices(match_to_vertices_src.label() != ""),
     max_match_distance(cfg.getParameter<double>("max_match_distance")),
     min_match_distance(cfg.getParameter<double>("min_match_distance")),
@@ -281,14 +283,14 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::VertexCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
+  event.getByToken(vertex_token, vertices);
 
   edm::Handle<MFVVertexAuxCollection> auxes;
-  event.getByLabel(vertex_aux_src, auxes);
+  event.getByToken(vertex_aux_token, auxes);
 
   if (use_match_to_vertices) {
     edm::Handle<std::vector<double> > match_to_vertices_h;
-    event.getByLabel(match_to_vertices_src, match_to_vertices_h);
+    event.getByToken(match_to_vertices_token, match_to_vertices_h);
     match_to_vertices = &*match_to_vertices_h;
     if (match_to_vertices->size() % 3 != 0)
       throw cms::Exception("bad length of match_to_vertices");

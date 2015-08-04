@@ -36,26 +36,31 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   void produce(edm::Event&, const edm::EventSetup&);
 
  private:
-  const edm::InputTag beamspot_src;
-  const edm::InputTag primary_vertex_src;
-  const edm::InputTag muons_src;
-  const edm::InputTag electrons_src;
-  const edm::InputTag gen_vertices_src;
-  const edm::InputTag vertex_src;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const edm::EDGetTokenT<std::vector<double> > gen_vertices_token;
+  const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
   const std::string sv_to_jets_src;
+  edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
   const MFVVertexAuxSorter sorter;
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
-  : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    muons_src(cfg.getParameter<edm::InputTag>("muons_src")),
-    electrons_src(cfg.getParameter<edm::InputTag>("electrons_src")),
-    gen_vertices_src(cfg.getParameter<edm::InputTag>("gen_vertices_src")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+  : beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    gen_vertices_token(consumes<std::vector<double> >(cfg.getParameter<edm::InputTag>("gen_vertices_src"))),
+    vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
+    //sv_to_jets_token(consumes<mfv::JetVertexAssociation>(edm::InputTag("sv_to_jets_src"))),
     sorter(cfg.getParameter<std::string>("sort_by"))
 {
+  for (int i = 0; i < mfv::NJetsByUse; ++i)
+    sv_to_jets_token[i] = consumes<mfv::JetVertexAssociation>(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i])); // JMTBAD yuck, rethink
+
   produces<std::vector<MFVVertexAux> >();
 }
 
@@ -64,7 +69,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel(beamspot_src, beamspot);
+  event.getByToken(beamspot_token, beamspot);
   const float bsx = beamspot->x0();
   const float bsy = beamspot->y0();
   const float bsz = beamspot->z0();
@@ -74,7 +79,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByLabel(primary_vertex_src, primary_vertices);
+  event.getByToken(primary_vertex_token, primary_vertices);
   const reco::Vertex* primary_vertex = 0;
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
@@ -92,10 +97,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<pat::MuonCollection> muons;
-  event.getByLabel(muons_src, muons);
+  event.getByToken(muons_token, muons);
 
   edm::Handle<pat::ElectronCollection> electrons;
-  event.getByLabel(electrons_src, electrons);
+  event.getByToken(electrons_token, electrons);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -105,19 +110,19 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<std::vector<double> > gen_vertices;
-  event.getByLabel(gen_vertices_src, gen_vertices);
+  event.getByToken(gen_vertices_token, gen_vertices);
 
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<reco::VertexCollection> secondary_vertices;
-  event.getByLabel(vertex_src, secondary_vertices);
+  event.getByToken(vertex_token, secondary_vertices);
   const int nsv = int(secondary_vertices->size());
 
   const bool use_sv_to_jets = sv_to_jets_src != "dummy";
   edm::Handle<mfv::JetVertexAssociation> sv_to_jets[mfv::NJetsByUse];
   if (use_sv_to_jets)
     for (int i = 0; i < mfv::NJetsByUse; ++i)
-      event.getByLabel(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i]), sv_to_jets[i]);
+      event.getByToken(sv_to_jets_token[i], sv_to_jets[i]);
 
   //////////////////////////////////////////////////////////////////////
 
