@@ -31,7 +31,6 @@ private:
   const edm::InputTag trigger_results_src;
   const edm::InputTag cleaning_results_src;
   const std::string skip_event_filter;
-  const edm::InputTag pfjets_src;
   const double jet_pt_min;
   const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertex_src;
@@ -59,7 +58,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
   : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
     cleaning_results_src(cfg.getParameter<edm::InputTag>("cleaning_results_src")),
     skip_event_filter(cfg.getParameter<std::string>("skip_event_filter")),
-    pfjets_src(cfg.getParameter<edm::InputTag>("pfjets_src")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
