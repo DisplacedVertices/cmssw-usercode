@@ -17,20 +17,10 @@ parser.add_option('-d', '--delay', action='store_true', default=False,
                   help='Wait once before starting passes.')
 parser.add_option('--max-processes', type='int', default=5,
                   help='Max number of status-checking processes to run at once.')
-parser.add_option('--no-status-until-none-done', action='store_false', dest='status_until_none_done', default=True,
-                  help='In each iteration, by default we loop over status->getoutput->status->... until none are in Done. I.e. we resolve all Done jobs to their Retrieved_X_Y status codes before trying to resubmit/displaying the status code table/etc. Supplying this option will return us to the previous behavior of only doing status->getoutput per iteration.')
-parser.add_option('--resub-any', action='store_true', default=False,
-                  help='Resubmit any job that has status Retrieved but with exit code non-zero.')
-parser.add_option('--resub-done-stuck', action='store_true', default=False,
-                  help='Resubmit any job that has status DoneStuck: Done, but whose output cannot be retrieved.')
-parser.add_option('--resub-created', action='store_true', default=False,
-                  help='(Re)submit any job that has status Created.')
-parser.add_option('--resub-all', action='store_true', default=False,
-                  help='Resubmit all jobs that need it (equivalent to --resub-any --resub-done-stuck --resub-created).')
-parser.add_option('--resub-none', action='store_true', default=False,
-                  help='Do not resubmit any jobs (i.e. allow getting output, but do not do anything with e.g. those that are Aborted).')
-parser.add_option('--resub-site-control', default='',
-                  help='Deprecated, use --resub-black-list.')
+parser.add_option('--resub-failed', action='store_true', default=False,
+                  help='Send resubmit request to any batch that has failed jobs, obeying the white and black lists below.')
+parser.add_option('--resub-white-list', default='',
+                  help='Comma-separated list (no spaces!) of sites to whitelist when resubmitting.')
 parser.add_option('--resub-black-list', default='',
                   help='Comma-separated list (no spaces!) of sites to blacklist when resubmitting.')
 parser.add_option('--resub-white-codes', default='',
@@ -45,10 +35,6 @@ parser.add_option('--no-dir-sort', action='store_false', dest='dir_sort', defaul
                   help='Do not resort the list of directories.')
 parser.add_option('-n', '--no-renew-proxies', action='store_false', dest='renew_proxies', default=True,
                   help='Do not renew proxies first.')
-parser.add_option('--debug-output', action='store_true', default=False,
-                  help='Turn on extra debug output (just the full output of the -status command for now).')
-parser.add_option('--keep-exe-code', action='store_true', default=False,
-                  help='Keep the exe exit code in the statuses (e.g. "Retireved_143_50662" instead of just "Retrieved_50662").')
 parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_statuses', default=True,
                   help='Do not shorten statuses in the status table.')
 parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_zeroes', default=True,
@@ -58,7 +44,7 @@ parser.add_option('--use-debugger', action='store_true', default=False,
 parser.add_option('--run-in-debugger', action='store_true', default=False,
                   help='Run the whole loop in the debugger.')
 parser.add_option('--post-process', type='str', metavar='FILE.PY',
-                  help='After each check_fcn call, call the function "post_process_fcn" defined in FILE.PY, which takes the directory name and results dict as its arguments.')
+                  help='Call the function "post_process_fcn" defined in FILE.PY, which takes the directory name and results dict as its arguments.')
 options, args = parser.parse_args()
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -69,32 +55,24 @@ def print_header(s):
 def print_subheader(s):
     print '\033[32m%s\033[0m' % s
 
-if options.resub_black_list:
-    if options.resub_site_control:
-        raise ValueError('Cannot use both --resub-black-list and --resub-site-control')
-    options.resub_site_control = '-GRID.se_black_list=' + options.resub_black_list
+if options.resub_failed:
+    raise NotImplementedError('--resub-failed does nothing at the moment')
+
+if options.resub_white_list and options.resub_black_list:
+    raise ValueError('cannot have both --resub-white-list and --resub-black-list')
 
 if options.resub_white_codes and options.resub_black_codes:
-    raise ValueError('not smart enough to handle both --resub-white-codes and --resub-black-codes')
+    raise ValueError('cannot have both --resub-white-codes and --resub-black-codes')
 
-if options.resub_white_codes:
-    options.resub_white_codes = ['.*%s' % x for x in options.resub_white_codes.split(',')]
-else:
-    options.resub_white_codes = []
-if options.resub_black_codes:
-    options.resub_black_codes = ['.*%s' % x for x in options.resub_black_codes.split(',')]
-else:
-    options.resub_black_codes = []
-
-if options.resub_all:
-    options.resub_any = options.resub_done_stuck = options.resub_created = True
+options.resub_white_codes = options.resub_white_codes.split(',')
+options.resub_black_codes = options.resub_black_codes.split(',')
 
 if options.status_only and not options.once:
     print '--status-only implies --once, setting it.'
     options.once = True
 
 if options.post_process:
-    raise NotImplementedError('post_process not implemented')
+    raise NotImplementedError('--post-process not implemented')
     #exec open(options.post_process).read()
     if options.post_process.endswith('.py'):
         options.post_process = options.post_process.replace('.py', '')
@@ -194,7 +172,7 @@ if options.delay:
 to_resub_done = {}
 
 if options.run_in_debugger:
-    print 'running in debugger'
+    print 'running in debugger (this does not work in the subprocesses though)'
     pdb.set_trace()
 
 pass_count = 0
