@@ -301,20 +301,6 @@ def crab_status(working_dir, verbose=True):
     if verbose:
         print 'checking', working_dir
 
-    #if options.run_in_debugger:
-    #    print 'running process for %s in debugger' % working_dir
-    #    pdb.set_trace()
-
-    # options.debug_output
-    # options.resub_any
-    # options.resub_done_stuck
-    # options.resub_none
-    # options.resub_site_control
-    # options.status_until_none_done
-    # options.resub_created
-    # options.resub_white_codes
-    # options.resub_black_codes
-
     result = crab_command('status', '--long', dir=working_dir)
 
     jl = crab_job_lists_by_status(result)
@@ -333,21 +319,6 @@ def crab_status(working_dir, verbose=True):
                     d[state_ex] += 1
                 else:
                     d[state_ex] = 1
-
-    #if post_process_fcn is not None:
-    #    post_process_fcn(working_dir, result)
-
-    #if not options.keep_exe_code:
-    #    result_final = {}
-    #    for k,v in result.iteritems():
-    #        if k.startswith('Retrieved') and k.count('_') == 2:
-    #            k = k.split('_')
-    #            k = k[0] + '_' + k[-1]
-    #        if result_final.has_key(k):
-    #            res_final[k].extend(v)
-    #        else:
-    #            res_final[k] = v
-    #    result = res_final
 
     return working_dir, result
 
