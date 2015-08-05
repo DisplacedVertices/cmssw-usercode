@@ -136,6 +136,7 @@ private:
   const double min_all_track_pt;
   const double min_all_track_dxy;
   const double min_all_track_sigmadxy;
+  const double min_all_track_sigmadxypv;
   const int min_all_track_nhits;
   const int min_all_track_npxhits;
   const double max_all_track_dxyerr;
@@ -143,6 +144,7 @@ private:
   const double min_seed_track_pt;
   const double min_seed_track_dxy;
   const double min_seed_track_sigmadxy;
+  const double min_seed_track_sigmadxypv;
   const int min_seed_track_nhits;
   const int min_seed_track_npxhits;
   const double max_seed_track_dxyerr;
@@ -251,6 +253,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_all_track_pt(cfg.getParameter<double>("min_all_track_pt")),
     min_all_track_dxy(cfg.getParameter<double>("min_all_track_dxy")),
     min_all_track_sigmadxy(cfg.getParameter<double>("min_all_track_sigmadxy")),
+    min_all_track_sigmadxypv(cfg.getParameter<double>("min_all_track_sigmadxypv")),
     min_all_track_nhits(cfg.getParameter<int>("min_all_track_nhits")),
     min_all_track_npxhits(cfg.getParameter<int>("min_all_track_npxhits")),
     max_all_track_dxyerr(cfg.getParameter<double>("max_all_track_dxyerr")),
@@ -258,6 +261,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_seed_track_pt(cfg.getParameter<double>("min_seed_track_pt")),
     min_seed_track_dxy(cfg.getParameter<double>("min_seed_track_dxy")),
     min_seed_track_sigmadxy(cfg.getParameter<double>("min_seed_track_sigmadxy")),
+    min_seed_track_sigmadxypv(cfg.getParameter<double>("min_seed_track_sigmadxypv")),
     min_seed_track_nhits(cfg.getParameter<int>("min_seed_track_nhits")),
     min_seed_track_npxhits(cfg.getParameter<int>("min_seed_track_npxhits")),
     max_seed_track_dxyerr(cfg.getParameter<double>("max_seed_track_dxyerr")),
@@ -522,9 +526,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const double pt = tk->pt();
     const double dxy = tk->dxy(*beamspot);
     const double sigmadxy = tk->dxy(*beamspot)/tk->dxyError();
+    const double sigmadxypv = tk->dxy(primary_vertex.position())/tk->dxyError();
     const int nhits = tk->hitPattern().numberOfValidHits();
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
-    bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && fabs(sigmadxy) > min_all_track_sigmadxy && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
+    bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && fabs(sigmadxy) > min_all_track_sigmadxy && fabs(sigmadxypv) > min_all_track_sigmadxypv && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
     SpatialExtents se = tracker_extents.extentInRAndZ(tk->hitPattern(),npxhits != 0);
 
     if (use && remove_tracks_frac > 0 && rng->getEngine().flat() < remove_tracks_frac)
@@ -636,9 +641,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     double itk_pt    = seed_tracks[itk].track().pt();
     double itk_dxy   = seed_tracks[itk].track().dxy(*beamspot);
     double itk_sigmadxy = seed_tracks[itk].track().dxy(*beamspot) / seed_tracks[itk].track().dxyError();
+    double itk_sigmadxypv = seed_tracks[itk].track().dxy(primary_vertex.position()) / seed_tracks[itk].track().dxyError();
     double itk_nhits = seed_tracks[itk].track().hitPattern().numberOfValidHits();
     double itk_npxhits = seed_tracks[itk].track().hitPattern().numberOfValidPixelHits();
-    bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && fabs(itk_sigmadxy) > min_seed_track_sigmadxy && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits;
+    bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && fabs(itk_sigmadxy) > min_seed_track_sigmadxy && fabs(itk_sigmadxypv) > min_seed_track_sigmadxypv  && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits;
 
     if (itk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
       if (max_seed_track_dxyerr > 0) {
@@ -655,9 +661,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       double jtk_pt    = seed_tracks[jtk].track().pt();
       double jtk_dxy   = seed_tracks[jtk].track().dxy(*beamspot);
       double jtk_sigmadxy = seed_tracks[jtk].track().dxy(*beamspot) / seed_tracks[jtk].track().dxyError();
+      double jtk_sigmadxypv = seed_tracks[jtk].track().dxy(primary_vertex.position()) / seed_tracks[jtk].track().dxyError();
       double jtk_nhits = seed_tracks[jtk].track().hitPattern().numberOfValidHits();
       double jtk_npxhits = seed_tracks[jtk].track().hitPattern().numberOfValidPixelHits();
-      bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && fabs(jtk_sigmadxy) > min_seed_track_sigmadxy && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits;
+      bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && fabs(jtk_sigmadxy) > min_seed_track_sigmadxy && fabs(jtk_sigmadxypv) > min_seed_track_sigmadxypv && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits;
 
       if (jtk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
         if (max_seed_track_dxyerr > 0) {
