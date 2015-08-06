@@ -21,11 +21,11 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9A', '')
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9', '')
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True))
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:/uscms_data/d2/tucker/F47E7F59-8A29-E511-8667-002590A52B4A.root')) # equal to /store/mc/RunIISpring15DR74/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/AODSIM/Asympt50ns_MCRUN2_74_V9A-v2/80000/F47E7F59-8A29-E511-8667-002590A52B4A.root'))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(''))
 
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string('file:pat.root'),
