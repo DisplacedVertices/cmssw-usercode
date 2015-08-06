@@ -168,9 +168,10 @@ class CRABSubmitter:
         pset_fn = self.pset_fn_pattern % sample
         pset_orig_fn = pset_fn.replace('.py', '_orig.py')
 
-        dumbo = "\nopen(%r, 'wt').write(process.dumpPython())" % pset_fn
+        dumbo = "\nopen(%r, 'wt').write(process.dumpPython())\n" % pset_fn
         open(pset_orig_fn, 'wt').write(pset + dumbo)
         out = popen('python %s' % pset_orig_fn)
+        open(pset_orig_fn, 'wt').write(pset)
 
         return pset_orig_fn, pset_fn, pset
 
