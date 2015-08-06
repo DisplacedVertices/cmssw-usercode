@@ -181,42 +181,43 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
             return to_add, to_replace
 
-        batch_name_extra = '25ns' if is_25ns else '50ns'
+        batch_name = 'Ntuple' + tuple_version.upper()
+        batch_name += '_25ns' if is_25ns else '_50ns'
 
-        batch_name_extra += 'DeleteMe_ForTiming'
+        batch_name += '_DeleteMe_ForTiming'
 
         if jumble_tracks:
-            batch_name_extra += '_JumbleTks'
+            batch_name += '_JumbleTks'
 
         if remove_tracks:
-            batch_name_extra += '_RemoveTks%i' % remove_tracks[1]
+            batch_name += '_RemoveTks%i' % remove_tracks[1]
 
         if track_used_req == 'nopv':
-            batch_name_extra += '_NoPVTks'
+            batch_name += '_NoPVTks'
         elif track_used_req == 'nopvs':
-            batch_name_extra += '_NoPVsTks'
+            batch_name += '_NoPVsTks'
 
         if keep_extra:
-            batch_name_extra += '_WExtra'
+            batch_name += '_WExtra'
         elif prepare_vis:
-            batch_name_extra += '_WVis'
+            batch_name += '_WVis'
         elif keep_all:
-            batch_name_extra += '_WAll'
+            batch_name += '_WAll'
 
         if track_histos_only:
-            batch_name_extra += '_TrackHistosOnly'
+            batch_name += '_TrackHistosOnly'
 
         if debug:
-            batch_name_extra += '_WDebug'
+            batch_name += '_WDebug'
 
 
-        cs = CRABSubmitter('Ntuple' + tuple_version.upper() + batch_name_extra,
+        cs = CRABSubmitter(batch_name,
                            pset_modifier = modify,
                            #job_control_from_sample = True,
                            splitting = 'EventAwareLumiBased',
                            units_per_job = 500,
                            total_units = 500,
-                           publish_name = 'ntuple_' + tuple_version + batch_name_extra.lower(),
+                           publish_name = batch_name.lower(),
                            )
 
 #        timing = { 'dyjetstollM10': 0.011203, 'dyjetstollM50': 0.019867, 'qcdbce020': 0.008660, 'qcdbce030': 0.007796, 'qcdbce080': 0.061260, 'qcdbce170': 0.328891, 'qcdbce250': 0.481813, 'qcdbce350': 0.519482, 'qcdem020': 0.010137, 'qcdem030': 0.01, 'qcdem080': 0.037925, 'qcdem170': 0.286123, 'qcdem250': 0.471398, 'qcdem350': 0.686303, 'qcdht0100': 0.008273, 'qcdht0250': 0.116181, 'qcdht0500': 0.738374, 'qcdht1000': 1.002745, 'qcdmu0020': 0.012301, 'qcdmu0030': 0.015762, 'qcdmu0050': 0.018178, 'qcdmu0080': 0.119300, 'qcdmu0120': 0.245562, 'qcdmu0170': 0.32, 'qcdmu0300': 0.419818, 'qcdmu0470': 0.584266, 'qcdmu0600': 0.455305, 'qcdmu0800': 0.879171, 'qcdmu1000': 1.075712, 'singletop_s': 0.093429, 'singletop_s_tbar': 0.146642, 'singletop_tW': 0.327386, 'singletop_tW_tbar': 0.184349, 'singletop_t': 0.092783, 'singletop_t_tbar': 0.060983, 'ttbarhadronic': 0.752852, 'ttbarsemilep': 0.419073, 'ttbardilep': 0.295437, 'ttgjets': 0.861987, 'ttwjets': 0.714156, 'ttzjets': 0.827464, 'wjetstolnu': 0.010842, 'ww': 0.046754, 'wz': 0.049839, 'zz': 0.059791, }
@@ -248,4 +249,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 #            else:
 #                sample.json = 'ana_all.json'
 
-    cs.submit_all(samples)
+        cs.submit_all(samples)
