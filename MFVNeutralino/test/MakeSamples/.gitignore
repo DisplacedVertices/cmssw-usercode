@@ -1,5 +1,6 @@
 my.slha
 minbias_files.py
+minbias_files.pkl
 pat.py
 *.root
 out.*.gz
