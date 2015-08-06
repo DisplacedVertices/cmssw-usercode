@@ -172,7 +172,7 @@ class CRABSubmitter:
         open(pset_orig_fn, 'wt').write(pset + dumbo)
         out = popen('python %s' % pset_orig_fn)
 
-        return pset_fn, pset
+        return pset_orig_fn, pset_fn, pset
 
     def submit(self, sample):
         print 'batch %s, submit sample %s' % (self.batch_name, sample.name)
@@ -180,7 +180,7 @@ class CRABSubmitter:
         cleanup = [] # not so much to clean up any more
 
         cfg_fn, cfg = self.cfg(sample)
-        pset_fn, pset = self.pset(sample)
+        pset_orig_fn, pset_fn, pset = self.pset(sample)
 
         assert pset_fn.endswith('.py')
         cleanup.append(pset_fn + 'c')
@@ -199,7 +199,7 @@ class CRABSubmitter:
                 os.system('rm -f %s' % ' '.join(cleanup))
         else:
             print 'in testing mode, not submitting anything.'
-            diff_out, diff_ret = popen('diff -uN %s %s' % (self.pset_template_fn, pset_fn), return_exit_code=True)
+            diff_out, diff_ret = popen('diff -uN %s %s' % (self.pset_template_fn, pset_orig_fn), return_exit_code=True)
             if diff_ret != 0:
                 print '.py diff:\n---------'
                 print diff_out
