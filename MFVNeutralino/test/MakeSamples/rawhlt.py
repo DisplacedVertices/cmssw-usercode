@@ -30,7 +30,7 @@ else:
 
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_neu_tau01000um_M0800/sim_10k/150729_201526/0000/sim_1.root'))
 
 process.RAWSIMoutput = cms.OutputModule('PoolOutputModule',
