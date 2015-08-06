@@ -29,6 +29,7 @@ def intable(x):
         return False
 
 query_infos = [
+    (('ds', 'dataset dataset=%s', 1), lambda s: s),
     (('file', 'file dataset=%s', 1), lambda s: s.endswith('.root')),
     (('run', 'run dataset=%s', 1), lambda s: intable(s)),
     ]
