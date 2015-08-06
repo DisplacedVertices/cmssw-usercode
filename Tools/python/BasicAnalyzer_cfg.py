@@ -10,8 +10,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.TFileService = cms.Service('TFileService', fileName = cms.string('tfileservice.root'))
 
 def geometry_etc(process, tag):
-    process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
-    process.load('Configuration.Geometry.GeometryIdeal_cff')
+    process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+    process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
     process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
