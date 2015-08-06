@@ -4,24 +4,30 @@ from JMTucker.Tools.Sample import *
 
 ########################################################################
 
-print 'JMTBAD need to update samples and cross sections for run 2'
-
-ttbar_xsec = 245.8 # for world-combination m_top = 173.3 GeV (252.9 at CMS-measured m_top = 172.5)
-ttbar_xsec_had = ttbar_xsec * 0.457
-
-# https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat8TeV or PREP for xsecs
-ttbar_samples = [
-    MCSample('ttbarhadronic',     '', 999, nice='t#bar{t}, hadronic',                                        color=  4, syst_frac=0.15, xsec=888.),
-    MCSample('ttbarsemilep',      '', 999, nice='t#bar{t}, semileptonic',                                    color=  4, syst_frac=0.15, xsec=888.),
-    MCSample('ttbardilep',        '', 999, nice='t#bar{t}, dileptonic',                                      color=  4, syst_frac=0.15, xsec=888.),
+qcd_ht_mg_25ns_samples = [
+    MCSample('qcd_ht_mg_25ns_0100', '/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   81719052, nice='QCD, 100 < H_{T} < 200 GeV',   color=801, syst_frac=0.20, xsec=-1.),
+    MCSample('qcd_ht_mg_25ns_0200', '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   18718905, nice='QCD, 200 < H_{T} < 300 GeV',   color=802, syst_frac=0.20, xsec=-1.),
+    MCSample('qcd_ht_mg_25ns_0300', '/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   20278243, nice='QCD, 300 < H_{T} < 500 GeV',   color=803, syst_frac=0.20, xsec=-1.),
+    MCSample('qcd_ht_mg_25ns_0500', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   19664159, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=-1.),
+    MCSample('qcd_ht_mg_25ns_0700', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  15356448, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=-1.),
+    MCSample('qcd_ht_mg_25ns_1000', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',  4963895, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=-1.),
+    MCSample('qcd_ht_mg_25ns_1500', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  3868886, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=-1.),
+    MCSample('qcd_ht_mg_25ns_2000', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   1961774, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=-1.),
     ]
 
-qcd_samples = [
-    MCSample('qcdht0100',         '', 999, nice='QCD, 100 < H_{T} < 250 GeV',                                color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdht0250',         '', 999, nice='QCD, 250 < H_{T} < 500 GeV',                                color=802, syst_frac=0.10, xsec=888.),
-    MCSample('qcdht0500',         '', 999, nice='QCD, 500 < H_{T} < 1000 GeV',                               color=803, syst_frac=0.10, xsec=888.),
-    MCSample('qcdht1000',         '', 999, nice='QCD, H_{T} > 1000 GeV',                                     color=804, syst_frac=0.10, xsec=888.),
+#/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM
+#/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM
+
+ttbar_mgnlo_25ns_samples = [
+    MCSample('ttbar_mgnlo_25ns', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 42784971, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
+
+ttbar_mgnlo_50ns_samples = [
+    MCSample('ttbar_mgnlo_50ns', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/AODSIM', 4995842, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+    ]
+
+'''
+These not updated for run2.
 
 leptonic_background_samples = [
     MCSample('wjetstolnu',        '', 999, nice='W + jets #rightarrow l#nu',                                 color=  9, syst_frac=0.10, xsec=888.),
@@ -93,6 +99,7 @@ auxiliary_background_samples = [
     MCSample('qcdbce350',         '', 999, nice='QCDbce, < #hat{p}_{T} < GeV',                               color=801, syst_frac=0.10, xsec=888.),
     MCSample('qcdb150',           '', 999, nice='QCDb, #hat{p}_{T} > 150 GeV',                               color=801, syst_frac=0.10, xsec=888.),
     ]
+'''
 
 ########################################################################
 
@@ -111,11 +118,13 @@ auxiliary_data_samples = [
 samples = SamplesRegistry()
 
 __all__ = [
-    'ttbar_samples',
-    'qcd_samples',
-    'leptonic_background_samples',
-    'ttbar_systematics_samples',
-    'auxiliary_background_samples',
+    'qcd_ht_mg_25ns_samples',
+#    'qcd_ht_mg_50ns_samples',
+    'ttbar_mgnlo_25ns_samples',
+    'ttbar_mgnlo_50ns_samples',
+#    'leptonic_background_samples',
+#    'ttbar_systematics_samples',
+#    'auxiliary_background_samples',
     'data_samples',
     'auxiliary_data_samples',
     'samples',
