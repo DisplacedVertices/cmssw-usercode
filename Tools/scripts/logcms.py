@@ -3,7 +3,7 @@
 import os, sys, subprocess, time, gzip, tempfile
 
 if len(sys.argv) < 2:
-    print 'usage: logcms.py [logfile=out...] [nogz] [nomove] [noshow] cfgfile [... rest of cmsRun arguments ...]'
+    print 'usage: logcms.py [logfile=out...] [nogz] [nomove] [noshow] [tails[o]] cfgfile [... rest of cmsRun arguments ...]'
     sys.exit(1)
 
 args = []
@@ -12,6 +12,8 @@ gz = True
 move = True
 show = True
 alshow = False
+tails = False
+tailso = False
 for a in sys.argv[1:]:
     if a.startswith('logfile='):
         log_fn = a.replace('logfile=', '')
@@ -23,6 +25,11 @@ for a in sys.argv[1:]:
         show = False
     elif a == 'alshow':
         alshow = True
+    elif a == 'tails':
+        tails = True
+    elif a == 'tailso':
+        tails = True
+        tailso = True
     else:
         args.append(a)
 
@@ -37,12 +44,21 @@ for arg in args:
 args = ' '.join(args)
 
 tmp_log_fn = tempfile.mktemp()
+uniq = tmp_log_fn[-4:]
 shell_line = 'cmsRun %s >& %s' % (args, tmp_log_fn)
 print shell_line
 start = time.time()
 print 'starting at', time.asctime()
-print 'tail -f %s' % tmp_log_fn
+tail_cmd = 'tail -f %s' % tmp_log_fn
+print tail_cmd
 print 'tail -f %s | grep Begin' % tmp_log_fn
+if tails:
+    screen_name = 'logcmstail_%s' % uniq
+    os.system('screen -S $STY -X screen -t %s' % screen_name)
+    os.system('screen -S $STY -X at %s\# stuff "%s\n"' % (screen_name, tail_cmd))
+    if tailso:
+        os.system('screen -S $STY -X other')
+
 exit_code = subprocess.call(shell_line, shell=True, executable='/bin/tcsh')
 print 'cmsRun exit code:', exit_code, 'elapsed time: %.2f' % (time.time() - start)
 
