@@ -183,7 +183,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         batch_name_extra = '25ns' if is_25ns else '50ns'
 
-        batch_name_extra = += 'DeleteMe_ForTiming'
+        batch_name_extra += 'DeleteMe_ForTiming'
 
         if jumble_tracks:
             batch_name_extra += '_JumbleTks'
