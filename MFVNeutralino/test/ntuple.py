@@ -184,7 +184,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         batch_name = 'Ntuple' + tuple_version.upper()
         batch_name += '_25ns' if is_25ns else '_50ns'
 
-        batch_name += '_DeleteMe_ForTiming'
+        #batch_name += '_DeleteMe_ForTiming'
 
         if jumble_tracks:
             batch_name += '_JumbleTks'
@@ -215,8 +215,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                            pset_modifier = modify,
                            #job_control_from_sample = True,
                            splitting = 'EventAwareLumiBased',
-                           units_per_job = 500,
-                           total_units = 500,
+                           units_per_job = 25000,
+                           total_units = -1,
                            publish_name = batch_name.lower(),
                            )
 
