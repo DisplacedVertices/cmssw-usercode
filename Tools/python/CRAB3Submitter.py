@@ -135,7 +135,7 @@ class CRABSubmitter:
         
         sample.set_curr_dataset(self.dataset) # JMTBAD should this be done in the loop instead?
 
-        cfg.General.requestName = self.working_dir_pattern % sample
+        cfg.General.requestName = self.batch_name + '_' + self.working_dir_pattern % sample
         cfg.JobType.psetName = self.pset_fn_pattern % sample
         cfg.Data.inputDataset = sample.dataset
         cfg.Data.inputDBS = sample.dbs_inst
