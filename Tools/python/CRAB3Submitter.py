@@ -163,7 +163,8 @@ class CRABSubmitter:
                 if pset.find(a) < 0:
                     raise ValueError(err)
                 pset = pset.replace(a,b)
-            pset += '\n' + '\n'.join(to_add) + '\n'
+            if to_add:
+                pset += '\n' + '\n'.join(to_add) + '\n'
 
         pset_fn = self.pset_fn_pattern % sample
         pset_orig_fn = pset_fn.replace('.py', '_orig.py')
