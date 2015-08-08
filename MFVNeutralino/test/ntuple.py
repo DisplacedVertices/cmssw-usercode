@@ -53,7 +53,6 @@ else:
         'keep MFVEvent_mfvEvent__*',
         'keep MFVVertexAuxs_mfvVerticesAux__*',
         'keep edmTriggerResults_TriggerResults__HLT',
-        'keep edmTriggerResults_TriggerResults__PAT',
         ]
 
     if keep_extra:
