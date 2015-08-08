@@ -181,10 +181,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-#if 0  
   TriggerHelper trig_helper(event, trigger_results_token);
   mfv::trigger_decision(trig_helper, mevent->pass_trigger);
 
+#if 0  
   l1_cfg.getL1GtRunCache(event, setup, true, false);
 
   const std::vector<std::string> all_l1_seeds = { "L1_QuadJetC32", "L1_QuadJetC36", "L1_QuadJetC40", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_DoubleJetC52", "L1_DoubleJetC56", "L1_DoubleJetC64" };
@@ -243,36 +243,29 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   if (l1_found != 3 && l1_found != 9)
     throw cms::Exception("BadAssumption") << "not the right L1 paths found: l1_found = " << l1_found;
+#endif
 
   if (cleaning_results_src.label() != "") {
-    const std::string cleaning_paths[mfv::n_clean_paths] = { // JMTBAD take from PATTupleSelection_cfg
-      "All",
-      "hltPhysicsDeclared",
-      "FilterOutScraping",
-      "goodOfflinePrimaryVertices",
-      "HBHENoiseFilter",
-      "CSCTightHaloFilter",
-      "hcalLaserEventFilter",
-      "EcalDeadCellTriggerPrimitiveFilter",
-      "trackingFailureFilter",
-      "eeBadScFilter",
-      "ecalLaserCorrFilter",
-      "tobtecfakesfilter",
-      "logErrorTooManyClusters",
-      "logErrorTooManySeeds",
-      "logErrorTooManySeedsDefault",
-      "logErrorTooManySeedsMainIterations",
-      "logErrorTooManyTripletsPairs",
-      "logErrorTooManyTripletsPairsMainIterations",
-      "manystripclus53X",
-      "toomanystripclus53X"
+    const std::string cleaning_paths[mfv::n_clean_paths] = {
+      "Flag_CSCTightHaloFilter",
+      "Flag_EcalDeadCellTriggerPrimitiveFilter",
+      "Flag_HBHENoiseFilter",
+      "Flag_METFilters",
+      "Flag_ecalLaserCorrFilter",
+      "Flag_eeBadScFilter",
+      "Flag_goodVertices",
+      "Flag_hcalLaserEventFilter",
+      "Flag_trackingFailureFilter",
+      "Flag_trkPOGFilters",
+      "Flag_trkPOG_logErrorTooManyClusters",
+      "Flag_trkPOG_manystripclus53X",
+      "Flag_trkPOG_toomanystripclus53X",
     };
 
     TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
     for (int i = 0; i < mfv::n_clean_paths; ++i)
       mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
   }
-#endif
 
   //////////////////////////////////////////////////////////////////////
 

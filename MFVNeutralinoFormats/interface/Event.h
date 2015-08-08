@@ -5,8 +5,8 @@
 #include "TLorentzVector.h"
 
 namespace mfv {
-  static const int n_trigger_paths = 5;
-  static const int n_clean_paths = 19+1;
+  static const int n_trigger_paths = 17;
+  static const int n_clean_paths = 13;
 }
 
 struct MFVEvent {
@@ -17,7 +17,7 @@ struct MFVEvent {
   MFVEvent() {
     gen_valid = 0;
     gen_partons_in_acc = npv = pv_ntracks = 0;
-    npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
+    gen_weight = gen_weightprod = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
