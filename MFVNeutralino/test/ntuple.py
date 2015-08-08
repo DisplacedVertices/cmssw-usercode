@@ -48,11 +48,13 @@ if keep_all:
     process.out.outputCommands = ['keep *']
     trig_filter = False
 else:
-    #process.out.outputCommands = [
-    #    'drop *',
-    #    'keep MFVEvent_mfvEvent__*',
-    #    'keep MFVVertexAuxs_mfvVerticesAux__*',
-    #    ]
+    process.out.outputCommands = [
+        'drop *',
+        'keep MFVEvent_mfvEvent__*',
+        'keep MFVVertexAuxs_mfvVerticesAux__*',
+        'keep edmTriggerResults_TriggerResults__HLT',
+        'keep edmTriggerResults_TriggerResults__PAT',
+        ]
 
     if keep_extra:
         process.out.outputCommands += [
