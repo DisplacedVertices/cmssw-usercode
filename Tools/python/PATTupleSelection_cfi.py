@@ -10,24 +10,27 @@ import FWCore.ParameterSet.Config as cms
 # later from provenance (should also be able to get them from the
 # modules' PSets).
 
-muonIso = '(chargedHadronIso + neutralHadronIso + photonIso - 0.5*puChargedHadronIso)/pt'
-electronIso = '(chargedHadronIso + max(0.,neutralHadronIso) + photonIso - 0.5*puChargedHadronIso)/et'
+iso = '(chargedHadronIso + max(0.,neutralHadronIso) + photonIso - 0.5*puChargedHadronIso)'
+muonIso = iso + '/pt'
+electronIso = iso + '/et'
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MultivariateElectronIdentification#Non_triggering_MVA
-electronMVA = ' '.join('''
-(
- (pt > 7 && pt < 10 &&
-  ((                                  abs(superCluster.eta) < 0.8   && electronID("mvaNonTrigV0") > 0.47 ) ||
-   (abs(superCluster.eta) >= 0.8   && abs(superCluster.eta) < 1.479 && electronID("mvaNonTrigV0") > 0.004) ||
-   (abs(superCluster.eta) >= 1.479 && abs(superCluster.eta) < 2.5   && electronID("mvaNonTrigV0") > 0.295))
- ) ||
- (pt >= 10 &&
-  ((                                  abs(superCluster.eta) < 0.8   && electronID("mvaNonTrigV0") > -0.34) ||
-   (abs(superCluster.eta) >= 0.8   && abs(superCluster.eta) < 1.479 && electronID("mvaNonTrigV0") > -0.65) ||
-   (abs(superCluster.eta) >= 1.479 && abs(superCluster.eta) < 2.5   && electronID("mvaNonTrigV0") >  0.6 ))
- )
-)
-'''.replace('\n','').split()) # ignore the weirdo behind the curtain
+#electronId = ' '.join('''
+#(
+# (pt > 7 && pt < 10 &&
+#  ((                                  abs(superCluster.eta) < 0.8   && electronID("mvaNonTrigV0") > 0.47 ) ||
+#   (abs(superCluster.eta) >= 0.8   && abs(superCluster.eta) < 1.479 && electronID("mvaNonTrigV0") > 0.004) ||
+#   (abs(superCluster.eta) >= 1.479 && abs(superCluster.eta) < 2.5   && electronID("mvaNonTrigV0") > 0.295))
+# ) ||
+# (pt >= 10 &&
+#  ((                                  abs(superCluster.eta) < 0.8   && electronID("mvaNonTrigV0") > -0.34) ||
+#   (abs(superCluster.eta) >= 0.8   && abs(superCluster.eta) < 1.479 && electronID("mvaNonTrigV0") > -0.65) ||
+#   (abs(superCluster.eta) >= 1.479 && abs(superCluster.eta) < 2.5   && electronID("mvaNonTrigV0") >  0.6 ))
+# )
+#)
+#'''.replace('\n','').split()) # ignore the weirdo behind the curtain
+
+electronId = 'electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-loose")'
 
 jtupleParams = cms.PSet(
     jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
@@ -59,18 +62,18 @@ jtupleParams = cms.PSet(
 
     electronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
                              '%s && ' \
-                             '%s < 0.2' % (electronMVA, electronIso)
+                             '%s < 0.2' % (electronId, electronIso)
                              ),
     
     semilepElectronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
                                     '%s && ' \
                                     '(abs(superCluster.eta) < 1.4442 || abs(superCluster.eta) > 1.5660) && ' \
-                                    '%s < 0.1' % (electronMVA, electronIso)
+                                    '%s < 0.1' % (electronId, electronIso)
                                     ),
     
     dilepElectronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
                                   '%s && ' \
-                                  '%s < 0.15' % (electronMVA, electronIso)
+                                  '%s < 0.15' % (electronId, electronIso)
                                   ),
     
     eventFilters = cms.vstring('hltPhysicsDeclared',
