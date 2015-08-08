@@ -6,7 +6,7 @@ import sys
 from JMTucker.Tools.CMSSWTools import cms, set_events_to_process, set_events_to_process_by_filter
 from JMTucker.Tools.MiniAOD_cfg import pat_tuple_process
 
-tuple_version = 'v1'
+version = 'v2'
 
 is_mc = True # magic line, don't touch
 debug = False
@@ -181,7 +181,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
             return to_add, to_replace
 
-        batch_name = 'Ntuple' + tuple_version.upper()
+        batch_name = 'Ntuple' + version.upper()
         batch_name += '_25ns' if is_25ns else '_50ns'
 
         #batch_name += '_DeleteMe_ForTiming'
