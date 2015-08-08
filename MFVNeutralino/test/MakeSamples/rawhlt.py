@@ -1,7 +1,4 @@
-# sim:
-# 740: cmsDriver.py step1 --no_exec -n 10 --conditions MCRUN2_74_V7 --eventcontent RAWSIM -s SIM --beamspot NominalCollision2015 --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --magField 38T_PostLS1
-# but looks same as that used in a QCD sample /QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIWinter15GS-MCRUN2_71_V1-v2/GEN-SIM in 7_1_16_patch2
-# raw and hlt from same qcd sample
+# from configs in dbs for /QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM
 
 is_25ns = True # False for 50 ns
 
