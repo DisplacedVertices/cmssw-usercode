@@ -4,6 +4,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     process = cms.Process('PAT')
 
     process.load('FWCore.MessageService.MessageLogger_cfi')
+    process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
     for x in ['GetManyWithoutRegistration', 'GetByLabelWithoutRegistration']:
         process.MessageLogger.categories.append(x)
         setattr(process.MessageLogger.cerr, x, cms.untracked.PSet(reportEvery = cms.untracked.int32(1),
@@ -25,7 +26,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True))
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(''))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:/uscms_data/d2/tucker/F47E7F59-8A29-E511-8667-002590A52B4A.root'))
 
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string('file:pat.root'),
@@ -53,6 +54,11 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     else:
         process.load('Configuration.StandardSequences.PAT_cff')
         process = miniAOD_customizeAllData(process)
+
+    process.load('JMTucker.Tools.PATTupleSelection_cfi')
+    process.selectedPatJets.cut = process.jtupleParams.jetCut
+    process.selectedPatMuons.cut = process.jtupleParams.muonCut
+    process.selectedPatElectrons.cut = process.jtupleParams.electronCut
 
     return process
 
