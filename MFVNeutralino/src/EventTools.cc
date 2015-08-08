@@ -3,14 +3,27 @@
 
 namespace mfv {
   void trigger_decision(const TriggerHelper& trig, bool* pass_trigger) {
-    pass_trigger[0] = trig.pass_any_version("HLT_QuadJet50_v");
-    pass_trigger[1] = trig.pass_any_version("HLT_IsoMu24_v");
-    pass_trigger[2] = trig.pass_any_version("HLT_HT750_v");
-    pass_trigger[3] = trig.pass_any_version("HLT_IsoMu24_eta2p1_v");
-    pass_trigger[4] = 
-      trig.pass_any_version("HLT_IsoMu20_eta2p1_TriCentralPFJet30_v", false) ||
-      trig.pass_any_version("HLT_IsoMu20_eta2p1_TriCentralPFNoPUJet30_v", false) ||
-      trig.pass_any_version("HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_v", false) ||
-      trig.pass_any_version("HLT_IsoMu17_eta2p1_TriCentralPFNoPUJet30_30_20_v", false);
+    std::vector<std::string> paths({
+        "HLT_PFHT650_v",
+        "HLT_PFHT550_4Jet_v",
+        "HLT_PFHT450_SixJet40_PFBTagCSV_v",
+        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
+        "HLT_PFHT450_SixJet40_v",
+        "HLT_PFHT400_SixJet30_v",
+        "HLT_QuadJet45_TripleCSV0p5_v",
+        "HLT_QuadJet45_DoubleCSV0p5_v",
+        "HLT_DoubleJet90_Double30_TripleCSV0p5_v",
+        "HLT_DoubleJet90_Double30_DoubleCSV0p5_v",
+        "HLT_HT650_DisplacedDijet80_Inclusive_v",
+        "HLT_HT750_DisplacedDijet80_Inclusive_v",
+        "HLT_HT500_DisplacedDijet40_Inclusive_v",
+        "HLT_HT550_DisplacedDijet40_Inclusive_v",
+        "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
+        "HLT_HT350_DisplacedDijet80_DisplacedTrack_v",
+        "HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v"
+        });
+    assert(paths.size() == 17);
+    for (size_t i = 0; i < 17; ++i)
+      pass_trigger[i] = trig.pass_any_version(paths[i]);
   }
 }
