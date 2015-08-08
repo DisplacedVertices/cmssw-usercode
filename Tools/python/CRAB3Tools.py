@@ -287,7 +287,7 @@ def crab_command(*args, **kwargs):
     return result
 
 def crab_multiprocess(fcn, dirs, max_processes):
-    # fcn must return 2-tuple (dir, result), and can't be a class instance method
+    # fcn must return 2-tuple (dir, result), and has to be a module-level method (?)
     if max_processes == 1:
         results = [fcn(d) for d in dirs]
     else:
@@ -295,6 +295,27 @@ def crab_multiprocess(fcn, dirs, max_processes):
         results = pool.map(fcn, dirs)
         pool.close()
         pool.join()
+    return results
+
+# This is used with crab_process_simple_cmd to have a function that
+# multiprocess can access.
+crab_multiprocess_simple_fcn_cmd = None
+def crab_multiprocess_simple_fcn(d):
+    if crab_multiprocess_simple_fcn_cmd is None:
+        raise ValueError('must set crab_multiprocess_simple_fcn_cmd before calling')
+    print d
+    return d, crab_command(crab_multiprocess_simple_fcn_cmd, dir=d)
+
+def crab_process_simple_cmd(cmd, dirs, max_processes):
+    global crab_multiprocess_simple_fcn_cmd
+    crab_multiprocess_simple_fcn_cmd = cmd
+    results = crab_multiprocess(crab_multiprocess_simple_fcn, dirs, max_processes)
+    failed = [(d, res) for d, res in results if res.get('status', '') != 'SUCCESS']
+    if failed:
+        print 'these failed to resubmit (may HTTPException if task in state FAILED, i.e. there were no jobs to %s):' % cmd
+        for d, res in failed:
+            print d
+            pprint(res)
     return results
 
 def crab_status(working_dir, verbose=True):
@@ -542,16 +563,10 @@ if __name__ == '__main__':
        rq = dict((d, crab_requestcache(d)) for d in dirs)
 
    elif 'resub' in sys.argv:
-      def fcn(d):
-         print d
-         return d, crab_command('resubmit', dir=d)
-      results = crab_multiprocess(fcn, dirs, max_processes)
-      failed = [(d, res) for d, res in results if res.get('status', '') != 'SUCCESS']
-      if failed:
-         print 'these failed to resubmit (may HTTPException if task in state FAILED, i.e. there were no jobs to resubmit):'
-         for d, res in failed:
-            print d
-            pprint(res)
+       crab_process_simple_cmd('resub', dirs, max_processes)
+
+   elif 'kill' in sys.argv:
+       crab_process_simple_cmd('kill', dirs, max_processes)
 
    elif 'user_cache_quota' in sys.argv:
        h = UserCacheHelper()
