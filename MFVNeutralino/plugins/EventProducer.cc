@@ -456,7 +456,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       | electron.closestCtfTrackRef().isNonnull() << 4;
 
     float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
-    float mva = electron.electronID("mvaNonTrigV0");
+    float mva = 1e99; //electron.electronID("mvaNonTrigV0");
 
     mevent->lep_id.push_back(id);
     mevent->lep_pt.push_back(electron.pt());
