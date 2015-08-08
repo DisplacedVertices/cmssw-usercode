@@ -56,7 +56,10 @@ struct MFVEvent {
     return sqrt(x*x + y*y + z*z);
   }
 
-  bool gen_valid;
+  float gen_weight;
+  float gen_weightprod;
+
+  bool gen_valid; // only refers to the next block, not the weights above
   float gen_lsp_pt[2];
   float gen_lsp_eta[2];
   float gen_lsp_phi[2];

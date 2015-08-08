@@ -14,6 +14,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
@@ -35,6 +36,7 @@ private:
   const edm::EDGetTokenT<edm::TriggerResults> cleaning_results_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
+  const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
   const edm::EDGetTokenT<pat::JetCollection> calojets_token;
@@ -68,6 +70,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
+    gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
     calojets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("calojets_src"))),
@@ -128,6 +131,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->gen_valid = false;
 
   if (!event.isRealData()) {
+    edm::Handle<GenEventInfoProduct> gen_info;
+    event.getByToken(gen_info_token, gen_info);
+
+    mevent->gen_weight = gen_info->weight();
+    mevent->gen_weightprod = gen_info->weightProduct();
+
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
 
@@ -419,7 +428,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->lep_iso.clear();
   mevent->lep_mva.clear();
 
-#if 0
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
 
@@ -466,7 +474,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }
-  #endif
+
   //////////////////////////////////////////////////////////////////////
 
   event.put(mevent);
