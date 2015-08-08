@@ -18,7 +18,7 @@ prepare_vis = False
 keep_extra = False
 keep_all = prepare_vis
 keep_gen = False
-trig_filter = False
+trig_filter = True
 
 def customize_before_unscheduled(process):
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
@@ -92,7 +92,6 @@ if keep_all:
     process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
 
 if trig_filter:
-    raise NotImplementedError('trigger')
     import JMTucker.MFVNeutralino.TriggerFilter
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 else:
