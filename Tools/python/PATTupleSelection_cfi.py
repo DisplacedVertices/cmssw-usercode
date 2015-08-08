@@ -75,25 +75,4 @@ jtupleParams = cms.PSet(
                                   '%s && ' \
                                   '%s < 0.15' % (electronId, electronIso)
                                   ),
-    
-    eventFilters = cms.vstring('hltPhysicsDeclared',
-                               'FilterOutScraping',
-                               'goodOfflinePrimaryVertices',
-                               'HBHENoiseFilter',
-                               'CSCTightHaloFilter',
-                               'hcalLaserEventFilter',
-                               'EcalDeadCellTriggerPrimitiveFilter',
-                               'trackingFailureFilter',
-                               'eeBadScFilter',
-                               'ecalLaserCorrFilter',
-                               '~tobtecfakesfilter',
-                               '~logErrorTooManyClusters',
-                               '~logErrorTooManySeeds',
-                               '~logErrorTooManySeedsDefault',
-                               '~logErrorTooManySeedsMainIterations',
-                               '~logErrorTooManyTripletsPairs',
-                               '~logErrorTooManyTripletsPairsMainIterations',
-                               '~manystripclus53X',
-                               '~toomanystripclus53X',
-                               ),
-    )
+)
