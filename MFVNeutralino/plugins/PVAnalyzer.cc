@@ -359,11 +359,13 @@ void PVAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      const double eta = tk->eta();
      const double phi = tk->phi();
      const double dxybs = tk->dxy(*beamspot);
-     const double dxypv = tk->dxy(positions[tk]);
+     double dxypv = tk->dxy(*beamspot);
      const double dzbs = tk->dz(beamspot->position());
      double dzpv = tk->dz(beamspot->position());
-     if(primary_vertices->size() != 0)
+     if(primary_vertices->size() != 0) {
        dzpv = tk->dz(primary_vertices->at(0).position());
+       dxypv = tk->dxy(primary_vertices->at(0).position());
+     }
      const double ptErr = tk->ptError();
      const double etaErr = tk->etaError();
      const double phiErr = tk->phiError();
