@@ -174,18 +174,22 @@ private:
   const bool phitest;
 
   TH1F* h_n_all_tracks;
-  TH1F* h_all_track_pars[5];
-  TH1F* h_all_track_errs[5];
-  TH2F* h_all_track_pars_v_pars[5][4];
-  TH2F* h_all_track_errs_v_pars[5][5];
+  TH1F* h_all_track_pars[6];
+  TH1F* h_all_track_errs[6];
+  TH2F* h_all_track_pars_v_pars[6][5];
+  TH2F* h_all_track_errs_v_pars[6][6];
+  TH1F* h_all_track_sigmadxybs;
+  TH1F* h_all_track_sigmadxypv;
   TH1F* h_all_track_nhits;
   TH1F* h_all_track_npxhits;
   TH1F* h_all_track_nsthits;
   TH1F* h_n_seed_tracks;
-  TH1F* h_seed_track_pars[5];
-  TH1F* h_seed_track_errs[5];
-  TH2F* h_seed_track_pars_v_pars[5][4];
-  TH2F* h_seed_track_errs_v_pars[5][5];
+  TH1F* h_seed_track_pars[6];
+  TH1F* h_seed_track_errs[6];
+  TH2F* h_seed_track_pars_v_pars[6][5];
+  TH2F* h_seed_track_errs_v_pars[6][6];
+  TH1F* h_seed_track_sigmadxybs;
+  TH1F* h_seed_track_sigmadxypv;
   TH1F* h_seed_track_nhits;
   TH1F* h_seed_track_npxhits;
   TH1F* h_seed_track_nsthits;
@@ -304,36 +308,40 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   if (histos) {
     edm::Service<TFileService> fs;
     h_n_all_tracks                   = fs->make<TH1F>("h_n_all_tracks",                   "", 200,   0,   2000);
-    const char* par_names[5] = {"pt", "eta", "phi", "dxy", "dz"};
-    const int par_nbins[5] = { 200, 200, 200, 200, 200 };
-    const double par_lo[5] = {   0, -2.6, -3.15, -0.2, -20 };
-    const double par_hi[5] = {  15,  2.6,  3.15,  0.2,  20 };
-    const double err_lo[5] = { 0 };
-    const double err_hi[5] = { 0.25, 0.1, 0.1, 0.5, 0.5 };
-    for (int i = 0; i < 5; ++i)
+    const char* par_names[6] = {"pt", "eta", "phi", "dxybs", "dxypv", "dz"};
+    const int par_nbins[6] = { 200, 200, 200, 200, 200, 200 };
+    const double par_lo[6] = {   0, -2.6, -3.15, -0.2, -0.2, -20 };
+    const double par_hi[6] = {  15,  2.6,  3.15,  0.2,  0.2,  20 };
+    const double err_lo[6] = { 0 };
+    const double err_hi[6] = { 0.25, 0.1, 0.1, 0.5, 0.5, 0.5 };
+    for (int i = 0; i < 6; ++i)
       h_all_track_pars[i] = fs->make<TH1F>(TString::Format("h_all_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 6; ++i)
       h_all_track_errs[i] = fs->make<TH1F>(TString::Format("h_all_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
-    for (int i = 0; i < 5; ++i)
-      for (int j = i+1; j < 5; ++j)
+    for (int i = 0; i < 6; ++i)
+      for (int j = i+1; j < 6; ++j)
         h_all_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
-    for (int i = 0; i < 5; ++i)
-      for (int j = 0; j < 5; ++j)
+    for (int i = 0; i < 6; ++i)
+      for (int j = 0; j < 6; ++j)
         h_all_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
+    h_all_track_sigmadxybs           = fs->make<TH1F>("h_all_track_sigmadxybs",           "", 300, -15,     15);
+    h_all_track_sigmadxypv           = fs->make<TH1F>("h_all-track_sigmadxypv",           "", 300, -15,     15);
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
     h_all_track_npxhits              = fs->make<TH1F>("h_all_track_npxhits",              "",  12,   0,     12);
     h_all_track_nsthits              = fs->make<TH1F>("h_all_track_nsthits",              "",  28,   0,     28);
     h_n_seed_tracks                  = fs->make<TH1F>("h_n_seed_tracks",                  "", 200,   0,    600);
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 6; ++i)
       h_seed_track_pars[i] = fs->make<TH1F>(TString::Format("h_seed_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 6; ++i)
       h_seed_track_errs[i] = fs->make<TH1F>(TString::Format("h_seed_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
-    for (int i = 0; i < 5; ++i)
-      for (int j = i+1; j < 5; ++j)
+    for (int i = 0; i < 6; ++i)
+      for (int j = i+1; j < 6; ++j)
         h_seed_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
-    for (int i = 0; i < 5; ++i)
-      for (int j = 0; j < 5; ++j)
+    for (int i = 0; i < 6; ++i)
+      for (int j = 0; j < 6; ++j)
         h_seed_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
+    h_seed_track_sigmadxybs          = fs->make<TH1F>("h_seed_track_sigmadxybs",          "", 300, -15,     15);
+    h_seed_track_sigmadxypv          = fs->make<TH1F>("h_seed_track_sigmadxypv",          "", 300, -15,     15);
     h_seed_track_nhits               = fs->make<TH1F>("h_seed_track_nhits",               "",  40,   0,     40);
     h_seed_track_npxhits             = fs->make<TH1F>("h_seed_track_npxhits",             "",  12,   0,     12);
     h_seed_track_nsthits             = fs->make<TH1F>("h_seed_track_nsthits",             "",  28,   0,     28);
@@ -524,12 +532,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   for (size_t i = 0, ie = all_tracks.size(); i < ie; ++i) {
     const reco::TrackRef& tk = all_tracks[i];
     const double pt = tk->pt();
-    const double dxy = tk->dxy(*beamspot);
-    const double sigmadxy = tk->dxy(*beamspot)/tk->dxyError();
-    const double sigmadxypv = tk->dxy(primary_vertex.position())/tk->dxyError();
+    const double dxybs = tk->dxy(*beamspot);
+    const double dxypv = tk->dxy(primary_vertex.position());
+    const double sigmadxybs = dxybs / tk->dxyError();
+    const double sigmadxypv = dxypv / tk->dxyError();
     const int nhits = tk->hitPattern().numberOfValidHits();
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
-    bool use = pt > min_all_track_pt && fabs(dxy) > min_all_track_dxy && fabs(sigmadxy) > min_all_track_sigmadxy && fabs(sigmadxypv) > min_all_track_sigmadxypv && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
+    bool use = pt > min_all_track_pt && fabs(dxybs) > min_all_track_dxy && fabs(sigmadxybs) > min_all_track_sigmadxy && fabs(sigmadxypv) > min_all_track_sigmadxypv && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
     SpatialExtents se = tracker_extents.extentInRAndZ(tk->hitPattern(),npxhits != 0);
 
     if (use && remove_tracks_frac > 0 && rng->getEngine().flat() < remove_tracks_frac)
@@ -553,41 +562,45 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
 
     if (verbose) {
-      printf("track %5lu: pt: %7.3f dxy: %7.3f nhits %3i ", i, pt, dxy, nhits);
+      printf("track %5lu: pt: %7.3f dxy: %7.3f nhits %3i ", i, pt, dxybs, nhits);
       if (use)
         printf(" selected for seed! (#%lu)", seed_tracks.size()-1);
       printf("\n");
     }        
 
     if (histos) {
-      const double pars[5] = {pt, tk->eta(), tk->phi(), dxy, tk->dz(beamspot->position()) };
-      const double errs[5] = { tk->ptError(), tk->etaError(), tk->phiError(), tk->dxyError(), tk->dzError() };
+      const double pars[6] = {pt, tk->eta(), tk->phi(), dxybs, dxypv, tk->dz(beamspot->position()) };
+      const double errs[6] = { tk->ptError(), tk->etaError(), tk->phiError(), tk->dxyError(), tk->dxyError(), tk->dzError() };
 
-      for (int i = 0; i < 5; ++i) {
+      for (int i = 0; i < 6; ++i) {
         h_all_track_pars[i]->Fill(pars[i]);
         h_all_track_errs[i]->Fill(errs[i]);
-        for (int j = 0; j < 5; ++j) {
+        for (int j = 0; j < 6; ++j) {
           if (j >= i+1)
             h_all_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
           h_all_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
         }
       }
-
+      
+      h_all_track_sigmadxybs->Fill(sigmadxybs);
+      h_all_track_sigmadxypv->Fill(sigmadxypv);
       h_all_track_nhits->Fill(nhits);
       h_all_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
       h_all_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
 
       if (use) {
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 6; ++i) {
           h_seed_track_pars[i]->Fill(pars[i]);
           h_seed_track_errs[i]->Fill(errs[i]);
-          for (int j = 0; j < 5; ++j) {
+          for (int j = 0; j < 6; ++j) {
             if (j >= i+1)
               h_seed_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
             h_seed_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
           }
         }
 
+	h_seed_track_sigmadxybs->Fill(sigmadxybs);
+	h_seed_track_sigmadxypv->Fill(sigmadxypv);
         h_seed_track_nhits->Fill(nhits);
         h_seed_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
         h_seed_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
