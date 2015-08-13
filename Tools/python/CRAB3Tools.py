@@ -592,9 +592,14 @@ if __name__ == '__main__':
        results = crab_results_by_task_status(results)
        for status, res in results.iteritems():
            print status
+           ds = []
            for d, r in res.iteritems():
                l = r['outdatasets']
                if len(l) == 1:
-                   print l[0]
+                   ds.append(l[0])
                else:
-                   print l
+                   ds.append(l)
+           ds.sort()
+           for d in ds:
+               print d
+
