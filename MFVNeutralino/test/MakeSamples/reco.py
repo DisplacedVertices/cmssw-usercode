@@ -62,4 +62,34 @@ else:
     process = customisePostLS1_50ns(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    pass
+    from JMTucker.Tools.Sample import anon_samples
+
+    samples = anon_samples('''
+/mfv_neu_tau00100um_M0400/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau00100um_M0800/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+#/mfv_neu_tau00100um_M1200/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau00100um_M1600/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau00300um_M0400/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau00300um_M0800/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau00300um_M1200/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+#/mfv_neu_tau00300um_M1600/tucker-rawhlt25ns_10k-0c96c096b8e8cb8bdfef9c65972d8618/USER
+/mfv_neu_tau01000um_M0400/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau01000um_M0800/tucker-rawhlt25ns_10k-0c96c096b8e8cb8bdfef9c65972d8618/USER
+/mfv_neu_tau01000um_M1200/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau01000um_M1600/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau10000um_M0400/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau10000um_M0800/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau10000um_M1200/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+/mfv_neu_tau10000um_M1600/tucker-rawhlt25ns_10k-746f00b17b114c4573d3b7477a0ee83e/USER
+''', dbs_inst='phys03')
+
+    ex = '25ns' if is_25ns else '50ns'
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    cs = CRABSubmitter('mfv_run2_reco%s' % ex,
+                       splitting = 'EventAwareLumiBased',
+                       units_per_job = 1000,
+                       total_units = -1,
+                       aaa = True,
+                       publish_name='reco%s_10k' % ex,
+                       )
+    cs.submit_all(samples)
