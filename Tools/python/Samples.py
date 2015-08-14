@@ -166,6 +166,16 @@ for x in __all__:
 
 # Extra datasets, filter efficiencies, other overrides go here.
 
+# from the trigger soup with 17 paths      # 68% CL interval
+qcd_ht_mg_25ns_0100.filter_eff = 0.000e+00 # [0.000e+00, 1.840e-05]
+qcd_ht_mg_25ns_0300.filter_eff = 1.977e-02 # [1.933e-02, 2.022e-02]
+qcd_ht_mg_25ns_0500.filter_eff = 2.517e-01 # [2.503e-01, 2.531e-01]
+qcd_ht_mg_25ns_0700.filter_eff = 9.044e-01 # [9.035e-01, 9.053e-01]
+qcd_ht_mg_25ns_1000.filter_eff = 9.996e-01 # [9.996e-01, 9.997e-01]
+qcd_ht_mg_25ns_1500.filter_eff = 1.000e+00 # [1.000e+00, 1.000e+00]
+qcd_ht_mg_25ns_2000.filter_eff = 1.000e+00 # [1.000e+00, 1.000e+00]
+ttbar_mgnlo_25ns   .filter_eff = 2.823e-01 # [2.808e-01, 2.837e-01]
+
 ########################################################################
 
 if __name__ == '__main__':
