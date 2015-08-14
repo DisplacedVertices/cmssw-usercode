@@ -60,7 +60,7 @@ process.mfvSampleInfo.num_events = %s
 process.mfvSampleInfo.cross_section = %g
 ''' % (sample.name,
        sample.nevents,
-       sample.cross_section)
+       sample.xsec)
                           )
 
         return to_add, to_replace

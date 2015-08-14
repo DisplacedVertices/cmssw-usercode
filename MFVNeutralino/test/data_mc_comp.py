@@ -47,7 +47,7 @@ for s in Samples.smaller_background_samples + Samples.leptonic_background_sample
 if verbose:
     print 'weights:'
     for sample in background_samples:
-        print (sample.name, sample.nevents, sample.nevents_orig, sample.cross_section, sample.partial_weight*ac.int_lumi)
+        print (sample.name, sample.nevents, sample.nevents_orig, sample.xsec, sample.partial_weight*ac.int_lumi)
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,

@@ -10,7 +10,7 @@ effs = [2.67e-5, 1.08e-4, 2.37e-3, 6.27e-3, 4.15e-3, 2.45e-3, 1.5e-3]
 effs += [2e-3]*(len(samples) - len(effs))
 
 for i,s in enumerate(samples):
-    nev = s.cross_section * ac.int_lumi
+    nev = s.xsec * ac.int_lumi
     nevtrig = nev * s.ana_filter_eff
     nevtrigvtx = nevtrig * effs[i]
     nevs.append(nev)

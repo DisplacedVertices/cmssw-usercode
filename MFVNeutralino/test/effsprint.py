@@ -40,7 +40,7 @@ def effs(fn):
     try:
         s = getattr(Samples, sname)
         ana_filter_eff = s.ana_filter_eff
-        weight = s.cross_section*ac.int_lumi/(den/ana_filter_eff)
+        weight = s.xsec*ac.int_lumi/(den/ana_filter_eff)
         weighted = True
     except AttributeError:
         weight = 1.
