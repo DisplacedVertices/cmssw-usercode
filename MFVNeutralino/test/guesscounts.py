@@ -11,7 +11,7 @@ effs += [2e-3]*(len(samples) - len(effs))
 
 for i,s in enumerate(samples):
     nev = s.xsec * ac.int_lumi
-    nevtrig = nev * s.ana_filter_eff
+    nevtrig = nev * s.filter_eff
     nevtrigvtx = nevtrig * effs[i]
     nevs.append(nev)
     nevtrigs.append(nevtrig)

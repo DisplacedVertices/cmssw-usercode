@@ -50,7 +50,7 @@ def cutplayMangle(filename):
     except AttributeError:
         sample = None
     h_ntot = ROOT.TH1F('ntot', '', 1, 0, 1)
-    scale = sample.ana_filter_eff if sample is not None else 1.
+    scale = sample.filter_eff if sample is not None else 1.
     h_ntot.SetBinContent(1, ntot[0] / scale)
     h_ntot.SetBinError  (1, ntot[1] / scale)
 

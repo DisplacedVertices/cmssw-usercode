@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+raise NotImplementedError('run2 sample arch')
 import sys, os
 from FWCore.PythonUtilities.LumiList import LumiList
 from JMTucker.Tools.ROOTTools import *

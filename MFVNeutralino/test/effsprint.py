@@ -39,16 +39,16 @@ def effs(fn):
     sname = os.path.basename(fn).replace('.root','')
     try:
         s = getattr(Samples, sname)
-        ana_filter_eff = s.ana_filter_eff
-        weight = s.xsec*ac.int_lumi/(den/ana_filter_eff)
+        filter_eff = s.filter_eff
+        weight = s.xsec*ac.int_lumi/(den/filter_eff)
         weighted = True
     except AttributeError:
         weight = 1.
         weighted = False
-        ana_filter_eff = -1
+        filter_eff = -1
     sum += numall * weight
     var += numall * weight**2
-    print '%s (w = %.3e): # ev: %10.1f (%10i)  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, den/ana_filter_eff, numall, float(numall)/den, numvtx, float(numvtx)/den)
+    print '%s (w = %.3e): # ev: %10.1f (%10i)  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, den/filter_eff, numall, float(numall)/den, numvtx, float(numvtx)/den)
     if weighted:
         print '  weighted to %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, numall*weight, numall**0.5 * weight)
     else:

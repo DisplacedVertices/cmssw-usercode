@@ -23,7 +23,7 @@ def curve(name, root_file_dir, num_path, den_path, color):
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
         den = hden.Integral(0, hden.GetNbinsX() + 2)
         eff = num/float(den)
-        eff *= sample.ana_filter_eff
+        eff *= sample.filter_eff
         heff.SetBinContent(i+1, eff)
         interval = clopper_pearson(num, den)
         error = (interval[2] - interval[1]) / 2

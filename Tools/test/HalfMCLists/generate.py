@@ -1,3 +1,4 @@
+raise NotImplementedError('run2 sample arch')
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 process.TFileService.fileName = cms.string('evids.root')

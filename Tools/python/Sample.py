@@ -284,7 +284,7 @@ def get_nevents_ran(samples):
     print
     for sample, y, x in diffs:
         eff = float(y)/x
-        if abs(eff - sample.ana_filter_eff) > 1e-4:
+        if abs(eff - sample.filter_eff) > 1e-4:
             print '%s.filter_eff = %9.4e  # %8i / %8i' % (sample.name, eff, y, x)
 
 def merge(samples, output='merge.root', norm_to=1, path_for_nevents='', last_bin=False):
