@@ -143,13 +143,13 @@ if debug:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     from JMTucker.Tools.Sample import anon_samples
-    from JMTucker.Tools.Samples import *
+    import JMTucker.Tools.Samples as Samples 
 
-    for is_25ns in (True, False):
+    for is_25ns in (True,):
         if is_25ns:
-            samples = ttbar_mgnlo_25ns_samples + qcd_ht_mg_25ns_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
+            samples = Samples.ttbar_mgnlo_25ns_samples + Samples.qcd_ht_mg_25ns_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
         else:
-            samples = ttbar_mgnlo_50ns_samples # + qcd_ht_mg_25ns_samples
+            samples = Samples.ttbar_mgnlo_50ns_samples # + qcd_ht_mg_25ns_samples
 
         def modify(sample):
             to_add = []
