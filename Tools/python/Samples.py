@@ -27,22 +27,22 @@ ttbar_mgnlo_50ns_samples = [
     ]
 
 mfv_signal_samples = [
-    MCSample('', '/mfv_neu_tau00100um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau00100um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau00100um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9800),
-    MCSample('', '/mfv_neu_tau00100um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau00300um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau00300um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau00300um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau00300um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9400),
-    MCSample('', '/mfv_neu_tau01000um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9800),
-    MCSample('', '/mfv_neu_tau01000um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau01000um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau01000um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau10000um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9600),
-    MCSample('', '/mfv_neu_tau10000um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
-    MCSample('', '/mfv_neu_tau10000um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9600),
-    MCSample('', '/mfv_neu_tau10000um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9600),
+    MCSample('mfv_neu_tau00100um_M0400', '/mfv_neu_tau00100um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau00100um_M0800', '/mfv_neu_tau00100um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau00100um_M1200', '/mfv_neu_tau00100um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9800),
+    MCSample('mfv_neu_tau00100um_M1600', '/mfv_neu_tau00100um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau00300um_M0400', '/mfv_neu_tau00300um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau00300um_M0800', '/mfv_neu_tau00300um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau00300um_M1200', '/mfv_neu_tau00300um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau00300um_M1600', '/mfv_neu_tau00300um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9400),
+    MCSample('mfv_neu_tau01000um_M0400', '/mfv_neu_tau01000um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9800),
+    MCSample('mfv_neu_tau01000um_M0800', '/mfv_neu_tau01000um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M1200', '/mfv_neu_tau01000um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M1600', '/mfv_neu_tau01000um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau10000um_M0400', '/mfv_neu_tau10000um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9600),
+    MCSample('mfv_neu_tau10000um_M0800', '/mfv_neu_tau10000um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
+    MCSample('mfv_neu_tau10000um_M1200', '/mfv_neu_tau10000um_M1200/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9600),
+    MCSample('mfv_neu_tau10000um_M1600', '/mfv_neu_tau10000um_M1600/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER',  9600),
     ]
 
 for s in mfv_signal_samples:
