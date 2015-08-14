@@ -29,6 +29,7 @@ def get_input_from_argv(process):
     files += ['file:%s' % x for x in sys.argv if not x.startswith('/store') and os.path.isfile(x) and x.endswith('.root')]
     name = [x for x in sys.argv if not os.path.isfile(x) and x.endswith('.root')]
     name = name[0] if name else 'merged.root'
+
     if not files:
         # Else, files from crab dir mode.
         from JMTucker.Tools.CRABTools import files_from_crab_dir
@@ -42,8 +43,19 @@ def get_input_from_argv(process):
     print 'Files to run over:', len(files)
     pprint(files)
     process.source.fileNames = files
+
     print 'Merging to', name
     process.out.fileName = name
+
+    from JMTucker.Tools.general import typed_from_argv
+    max_events = typed_from_argv(int, name='max_events')
+    if max_events is not None:
+        print 'Max events =', max_events
+        process.maxEvents.input = max_events
+    skip_events = typed_from_argv(int, name='skip_events')
+    if skip_events is not None:
+        print 'Skip events =', skip_events
+        process.source.skipEvents = cms.untracked.uint32(skip_events)
 
 __all__ = ['cms', 'process', 'get_input_from_argv']
 
