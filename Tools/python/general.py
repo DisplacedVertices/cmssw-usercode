@@ -33,9 +33,10 @@ def to_pickle(obj, fn, proto=-1, comp=False):
 
 def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=None):
     found = []
+    if name and not name.endswith('='):
+        name += '='
     for x in sys.argv:
         if name:
-            name += '='
             if not x.startswith(name):
                 continue
             x = x.replace(name, '')
