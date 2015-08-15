@@ -27,7 +27,7 @@ def get_input_from_argv(process):
     # Look for just a list of files in argv first.
     files = [x for x in sys.argv if x.startswith('/store') and x.endswith('.root')]
     files += ['file:%s' % x for x in sys.argv if not x.startswith('/store') and os.path.isfile(x) and x.endswith('.root')]
-    name = [x for x in sys.argv if not os.path.isfile(x) and x.endswith('.root')]
+    name = [x for x in sys.argv if not os.path.isfile(x) and not x.startswith('/store') and x.endswith('.root')]
     name = name[0] if name else 'merged.root'
 
     if not files:
