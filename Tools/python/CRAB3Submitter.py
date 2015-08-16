@@ -48,6 +48,7 @@ class CRABSubmitter:
                  storage_site = 'T3_US_Cornell',
                  publish_name = '',
                  aaa = False,
+                 modify_pset_hash = True,
                  **kwargs):
 
         for arg in sys.argv:
@@ -130,6 +131,10 @@ class CRABSubmitter:
             self.cfg_template.Data.ignoreLocality = True
             self.cfg_template.Site.whitelist = self.aaa_locations
 
+        self.modify_pset_hash = modify_pset_hash
+        if modify_pset_hash:
+            self.modify_pset_hash = str(time.time()) # to avoid multiple tasks publishing into the same dataset
+
     def cfg(self, sample):
         cfg = deepcopy(self.cfg_template) # JMTBAD needed?
         
@@ -169,8 +174,12 @@ class CRABSubmitter:
         pset_fn = self.pset_fn_pattern % sample
         pset_orig_fn = pset_fn.replace('.py', '_orig.py')
 
-        dumbo = "\nopen(%r, 'wt').write(process.dumpPython())\n" % pset_fn
-        open(pset_orig_fn, 'wt').write(pset + dumbo)
+        extra = ''
+        if self.modify_pset_hash:
+            extra += '\nprocess.dummyForPsetHash = cms.PSet(dummy = cms.string(%r))' % self.modify_pset_hash
+        extra += "\nopen(%r, 'wt').write(process.dumpPython())" % self.pset_fn
+        open(pset_orig_fn, 'wt').write(pset + extra)
+
         out = popen('python %s' % pset_orig_fn)
         open(pset_orig_fn, 'wt').write(pset)
 
