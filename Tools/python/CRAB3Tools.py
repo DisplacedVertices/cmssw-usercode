@@ -581,11 +581,12 @@ if __name__ == '__main__':
             h.fileremove(x)
 
    elif 'list_schedds' in sys.argv:
-      for d in dirs:
-         rq = crab_requestcache(d)
-         name = rq['RequestName']
-         wf = h._curl('https://cmsweb.cern.ch/crabserver/prod/task?subresource=search&workflow=' + name)
-         print d.ljust(60), name.rjust(75), wf['tm_schedd'].rjust(30)
+       h = UserCacheHelper()
+       for d in dirs:
+           rq = crab_requestcache(d)
+           name = rq['RequestName']
+           wf = h._curl('https://cmsweb.cern.ch/crabserver/prod/task?subresource=search&workflow=' + name)
+           print d.ljust(60), name.rjust(75), wf['tm_schedd'].rjust(30)
 
    elif 'datasets' in sys.argv:
        results = crab_process_statuses_with_redo(dirs, max_processes)
