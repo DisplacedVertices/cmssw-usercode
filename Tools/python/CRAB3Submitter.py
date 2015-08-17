@@ -177,7 +177,7 @@ class CRABSubmitter:
         extra = ''
         if self.modify_pset_hash:
             extra += '\nprocess.dummyForPsetHash = cms.PSet(dummy = cms.string(%r))' % self.modify_pset_hash
-        extra += "\nopen(%r, 'wt').write(process.dumpPython())" % self.pset_fn
+        extra += "\nopen(%r, 'wt').write(process.dumpPython())" % pset_fn
         open(pset_orig_fn, 'wt').write(pset + extra)
 
         out = popen('python %s' % pset_orig_fn)
