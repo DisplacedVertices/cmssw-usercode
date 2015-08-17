@@ -439,7 +439,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_eta.push_back(muon.eta());
     mevent->lep_phi.push_back(muon.phi());
     mevent->lep_dxy.push_back(muon.track()->dxy(beamspot->position()));
-    mevent->lep_dz.push_back(muon.track()->dz(primary_vertex->position()));
+    if (primary_vertex != 0)
+      mevent->lep_dz.push_back(muon.track()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }
@@ -463,7 +464,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_eta.push_back(electron.eta());
     mevent->lep_phi.push_back(electron.phi());
     mevent->lep_dxy.push_back(electron.gsfTrack()->dxy(beamspot->position()));
-    mevent->lep_dz.push_back(electron.gsfTrack()->dz(primary_vertex->position()));
+    if (primary_vertex != 0)
+      mevent->lep_dz.push_back(electron.gsfTrack()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }
