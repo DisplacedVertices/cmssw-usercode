@@ -168,15 +168,31 @@ for x in __all__:
 
 # Extra datasets, filter efficiencies, other overrides go here.
 
-# from the trigger soup with 17 paths      # 68% CL interval
-qcd_ht_mg_25ns_0100.filter_eff = 0.000e+00 # [0.000e+00, 1.840e-05]
-qcd_ht_mg_25ns_0300.filter_eff = 1.977e-02 # [1.933e-02, 2.022e-02]
-qcd_ht_mg_25ns_0500.filter_eff = 2.517e-01 # [2.503e-01, 2.531e-01]
-qcd_ht_mg_25ns_0700.filter_eff = 9.044e-01 # [9.035e-01, 9.053e-01]
-qcd_ht_mg_25ns_1000.filter_eff = 9.996e-01 # [9.996e-01, 9.997e-01]
-qcd_ht_mg_25ns_1500.filter_eff = 1.000e+00 # [1.000e+00, 1.000e+00]
-qcd_ht_mg_25ns_2000.filter_eff = 1.000e+00 # [1.000e+00, 1.000e+00]
-ttbar_mgnlo_25ns   .filter_eff = 2.823e-01 # [2.808e-01, 2.837e-01]
+# from the trigger soup with 17 paths            # 68% CL interval
+qcd_ht_mg_25ns_0100     .filter_eff = 0.000e+00  # [0.000e+00, 1.840e-05]
+qcd_ht_mg_25ns_0300     .filter_eff = 1.977e-02  # [1.933e-02, 2.022e-02]
+qcd_ht_mg_25ns_0500     .filter_eff = 2.517e-01  # [2.503e-01, 2.531e-01]
+qcd_ht_mg_25ns_0700     .filter_eff = 9.044e-01  # [9.035e-01, 9.053e-01]
+qcd_ht_mg_25ns_1000     .filter_eff = 9.996e-01  # [9.996e-01, 9.997e-01]
+qcd_ht_mg_25ns_1500     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
+qcd_ht_mg_25ns_2000     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
+ttbar_mgnlo_25ns        .filter_eff = 2.823e-01  # [2.808e-01, 2.837e-01]
+mfv_neu_tau00100um_M0400.filter_eff = 9.704e-01  # [9.686e-01, 9.721e-01]
+mfv_neu_tau00100um_M0800.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
+mfv_neu_tau00100um_M1200.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
+mfv_neu_tau00100um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
+mfv_neu_tau00300um_M0400.filter_eff = 9.768e-01  # [9.752e-01, 9.783e-01]
+mfv_neu_tau00300um_M0800.filter_eff = 9.997e-01  # [9.994e-01, 9.999e-01]
+mfv_neu_tau00300um_M1200.filter_eff = 9.999e-01  # [9.997e-01, 1.000e+00]
+mfv_neu_tau00300um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
+mfv_neu_tau01000um_M0400.filter_eff = 9.757e-01  # [9.741e-01, 9.773e-01]
+mfv_neu_tau01000um_M0800.filter_eff = 9.998e-01  # [9.995e-01, 9.999e-01]
+mfv_neu_tau01000um_M1200.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
+mfv_neu_tau01000um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
+mfv_neu_tau10000um_M0400.filter_eff = 9.653e-01  # [9.633e-01, 9.672e-01]
+mfv_neu_tau10000um_M0800.filter_eff = 9.997e-01  # [9.994e-01, 9.999e-01]
+mfv_neu_tau10000um_M1200.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
+mfv_neu_tau10000um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
 
 ########################################################################
 
