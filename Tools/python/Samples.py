@@ -47,6 +47,8 @@ mfv_signal_samples = [
 
 for s in mfv_signal_samples:
     s.dbs_inst = 'phys03'
+    s.xsec = 1e-3
+    s.filter_eff = 1.
 
 '''
 These not updated for run2.
