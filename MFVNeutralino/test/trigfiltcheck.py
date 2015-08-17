@@ -17,13 +17,13 @@ process.ep = cms.EndPath(process.SimpleTriggerEfficiency)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     from JMTucker.Tools.Sample import anon_samples
-    from JMTucker.Tools.Samples import *
+    import JMTucker.Tools.Samples as Samples
 
-    samples = ttbar_mgnlo_25ns_samples + qcd_ht_mg_25ns_samples + ttbar_mgnlo_50ns_samples
+    samples = Samples.ttbar_mgnlo_25ns_samples + Samples.qcd_ht_mg_25ns_samples + Samples.ttbar_mgnlo_50ns_samples + Samples.mfv_signal_samples
 
     cs = CRABSubmitter('TriggerFilterCheck',
                        splitting = 'EventAwareLumiBased',
-                       units_per_job = 100000,
-                       total_units = -1,
+                       units_per_job = 10000,
+                       total_units = 100000,
                        )
     cs.submit_all(samples)
