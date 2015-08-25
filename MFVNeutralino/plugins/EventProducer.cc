@@ -139,7 +139,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
-
+    
+    const reco::GenParticle& for_vtx = gen_particles->at(2);
+    const int for_vtx_id = abs(for_vtx.pdgId());
+    die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
+    float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+    
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
     if (!mci.Valid()) {
@@ -156,7 +161,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_lsp_eta [i] = mci.lsps[i]->eta();
         mevent->gen_lsp_phi [i] = mci.lsps[i]->phi();
         mevent->gen_lsp_mass[i] = mci.lsps[i]->mass();
-
+	
         mevent->gen_lsp_decay[i*3+0] = mci.stranges[i]->vx();
         mevent->gen_lsp_decay[i*3+1] = mci.stranges[i]->vy();
         mevent->gen_lsp_decay[i*3+2] = mci.stranges[i]->vz();
@@ -171,6 +176,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
           lsp_partons.push_back(mci.W_daughters[i][1]);
         }
       } 
+      
+      mevent->gen_pv[0] = x0;
+      mevent->gen_pv[1] = y0;
+      mevent->gen_pv[2] = z0;
 
       mevent->gen_partons_in_acc = 0;
       for (const reco::GenParticle* p : lsp_partons) 

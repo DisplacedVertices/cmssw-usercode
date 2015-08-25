@@ -24,6 +24,9 @@ struct MFVEvent {
       for (int j = 0; j < 3; ++j)
         gen_lsp_decay[i*3+j] = 0;
     }
+    for (int i = 0; i < 3; ++i) {
+      gen_pv[i] = 0;
+    }
     for (int i = 0; i < mfv::n_trigger_paths; ++i)
       pass_trigger[i] = 0;
     for (int i = 0; i < 9; ++i) {
@@ -65,6 +68,7 @@ struct MFVEvent {
   float gen_lsp_phi[2];
   float gen_lsp_mass[2];
   float gen_lsp_decay[2*3];
+  float gen_pv[3];
   uchar gen_decay_type[2];
   uchar gen_partons_in_acc;
 
