@@ -2,6 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
 mode = '2Ntbs'
+#mode = '2Ntbs_10cm'
 #mode = 'h2xqq_1000_350'
 #mode = 'h2xqq_1000_150'
 #mode = '2Nuds' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.uds
@@ -450,6 +451,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                            USER_skip_servers = 'cern_vocms0117',
                            )
         cs.submit_all(Samples.mfv_signal_samples)
+
+    if mode == '2Ntbs_10cm':
+        samples = [
+            Samples.MCSample('mfv_neutralino_tau100000um_M0400', '', '/mfv_neutralino_tau100000um_M0400_v20/tucker-mfv_neutralino_tau100000um_M0400_v20-41f61d1517f3504e7c20a4682af6a63e/USER',  9400, 1, 1, 1),
+            Samples.MCSample('mfv_neutralino_tau100000um_M1000', '', '/mfv_neutralino_tau100000um_M1000_v20/tucker-mfv_neutralino_tau100000um_M1000_v20-e6a38de40d3bdb0a16c53b057ff227bc/USER',  9200, 1, 1, 1),
+            ]
 
     if mode == '2Nuds':
         samples = [
