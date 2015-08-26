@@ -241,15 +241,15 @@ process.mfvGenParticleFilterMaxdrmax = process.mfvGenParticleFilter.clone(min_np
 process.mfvGenMaxdrmax = mfvResolutions.clone()
 process.pGenMaxdrmax = cms.Path(process.mfvGenParticleFilterMaxdrmax * process.mfvGenMaxdrmax)
 
-process.mfvGenParticleFilterNquarks2 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 2)
-process.mfvGenNquarks2 = mfvResolutions.clone()
-process.pGenNquarks2 = cms.Path(process.mfvGenParticleFilterNquarks2 * process.mfvGenNquarks2)
+process.mfvGenParticleFilterNquarks1 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1)
+process.mfvGenNquarks1 = mfvResolutions.clone()
+process.pGenNquarks1 = cms.Path(process.mfvGenParticleFilterNquarks1 * process.mfvGenNquarks1)
 
-process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 2, min_sumpt = 200)
+process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200)
 process.mfvGenSumpt200 = mfvResolutions.clone()
 process.pGenSumpt200 = cms.Path(process.mfvGenParticleFilterSumpt200 * process.mfvGenSumpt200)
 
-process.mfvGenParticleFilterDvv600um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 2, min_sumpt = 200, min_dvv = 0.06)
+process.mfvGenParticleFilterDvv600um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200, min_dvv = 0.06)
 process.mfvGenDvv600um = mfvResolutions.clone()
 process.pGenDvv600um = cms.Path(process.mfvGenParticleFilterDvv600um * process.mfvGenDvv600um)
 

@@ -7,7 +7,7 @@ gen_eff_cut = 0
 gen_rec_cut = 20
 
 reconstructed = ['NoCuts', 'TrigSel', 'CleaningFilters', 'OfflineJets', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxMindrmax', 'TwoVtxMaxdrmax', 'TwoVtxDrmin', 'TwoVtxNjetsntks', 'TwoVtxNtracksptgt3', 'TwoVtxDvv600um']
-generated = ['NoCuts', '', '', 'FourJets', 'SumHT', '', 'Geo2ddist', '', '', 'Mindrmax', 'Maxdrmax', '', 'Nquarks2', 'Sumpt200', 'Dvv600um']
+generated = ['NoCuts', '', '', 'FourJets', 'SumHT', '', 'Geo2ddist', '', '', 'Mindrmax', 'Maxdrmax', '', 'Nquarks1', 'Sumpt200', 'Dvv600um']
 
 samples = '''mfv_neutralino_tau0100um_M0200
 mfv_neutralino_tau0100um_M0300
