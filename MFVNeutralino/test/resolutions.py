@@ -2,7 +2,8 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
 mode = '2Ntbs'
-#mode = 'h2xqq'
+#mode = 'h2xqq_1000_350'
+#mode = 'h2xqq_1000_150'
 #mode = '2Nuds' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.uds
 #mode = '2gtbs'
 #mode = '2Nuddmu' #cd $CMSSW_BASE/src/JMTucker/MFVNeutralino; patch -p2 < patch.for.udsomemu
@@ -67,7 +68,7 @@ process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/
 
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_1_1_WwV.root']
 
-if mode == 'h2xqq':
+if mode == 'h2xqq_1000_350':
     process.source.fileNames = '''/store/user/tucker/duh/ntuple_10_1_S8P.root
 /store/user/tucker/duh/ntuple_11_1_7sv.root
 /store/user/tucker/duh/ntuple_12_1_CBb.root
@@ -119,13 +120,61 @@ if mode == 'h2xqq':
 /store/user/tucker/duh/ntuple_8_1_kVE.root
 /store/user/tucker/duh/ntuple_9_1_pea.root'''.split('\n')
 
+if mode == 'h2xqq_1000_150':
+    process.source.fileNames = '''root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_10_1_puI.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_11_1_Qic.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_12_1_qXf.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_13_1_MZO.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_14_1_PRN.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_15_1_Oov.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_16_1_sL7.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_17_1_H9m.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_18_1_gl1.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_19_1_wTb.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_1_1_qAs.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_20_1_Ix2.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_21_1_2f9.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_22_1_k2W.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_23_1_nyZ.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_24_1_CLO.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_25_1_DIw.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_26_1_9pX.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_27_1_wxE.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_28_1_Yd6.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_29_1_zET.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_2_1_gvw.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_30_1_89N.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_31_1_656.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_32_1_IJu.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_33_1_kWi.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_34_1_Bdt.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_35_1_FrK.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_36_1_EKV.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_37_1_mOR.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_38_1_sRr.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_39_1_V6W.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_3_1_WeG.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_40_1_DGa.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_41_1_Wp9.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_42_1_JOf.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_43_1_pZv.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_44_1_hsi.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_45_1_Tlh.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_46_1_Am1.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_4_1_UNn.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_5_1_ngA.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_6_1_RrR.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_7_1_iz8.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_8_1_y6j.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_9_1_fEM.root'''.split('\n')
+
 process.TFileService.fileName = 'resolutions.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
-if mode == 'h2xqq':
+if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':
     process.mfvGenParticleFilter.mode = 'h2xqq'
 if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nddbar' or mode == '2Nbbbar':
     process.mfvGenParticleFilter.mode = 'mfv2j'
@@ -144,7 +193,7 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 gen_src = cms.InputTag('genParticles'),
                                 gen_jet_src = cms.InputTag('ak5GenJets'),
                                 )
-if mode == 'h2xqq':
+if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':
     mfvResolutions.mode = 'h2xqq'
 process.p = cms.Path(process.mfvSelectedVerticesTight)
 
@@ -349,7 +398,7 @@ process.mfvGenParticleFilterDvv600um = process.mfvGenParticleFilter.clone(min_np
 process.mfvGenDvv600um = mfvResolutions.clone()
 process.pGenDvv600um = cms.Path(process.mfvGenParticleFilterDvv600um * process.mfvGenDvv600um)
 
-if mode == 'h2xqq':
+if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':
     process.zzzfilt = cms.EDFilter('MFVEXO12038SampleFilter',
                                    gen_particles_src = cms.InputTag('genParticles'),
                                    mode = cms.string('h2x'),
