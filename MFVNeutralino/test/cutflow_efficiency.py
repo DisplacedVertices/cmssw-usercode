@@ -265,10 +265,15 @@ for j,sample in enumerate(samples):
                     gs.append(g)
                     label = sampleNames[j].split(',')[0] + sampleNames[j].split(',')[2]
                     label = label.replace('\\','#').replace('~#GeV',' GeV').replace('$','').replace(' M',', M')
-                    if int(sample.split('tau')[1].split('um')[0]) == 1000 and style(sample) == 20:
+                    if int(sample.split('tau')[1].split('um')[0]) == 1000:
+                        if style(sample) == 20:
+                            l1.AddEntry(g, label.split(', ')[1], 'P')
+                        if color(sample) == 6:
+                            l2.AddEntry(g, label.split(', ')[0], 'P')
+                    if int(sample.split('tau')[1].split('um')[0]) == 35000 or int(sample.split('tau')[1].split('um')[0]) == 1000000:
                         l1.AddEntry(g, label.split(', ')[1], 'P')
-                    if int(sample.split('tau')[1].split('um')[0]) == 1000 and color(sample) == 6:
-                        l2.AddEntry(g, label.split(', ')[0], 'P')
+                        if color(sample) == 4:
+                            l2.AddEntry(g, label.split(', ')[0], 'P')
                 if gen_eff >= (1-0.01*gen_rec_cut)*rec_eff and gen_eff <= (1+0.01*gen_rec_cut)*rec_eff:
                     matched.append(sample)
                 else:
