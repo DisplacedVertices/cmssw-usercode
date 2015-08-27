@@ -5,6 +5,18 @@ from array import array
 
 gen_rec_cut = 20
 
+rec_den = 'NoCuts'
+gen_den = 'NoCuts'
+iden = 0
+
+#rec_den = 'PreSel'
+#gen_den = 'SumHT'
+#iden = 4
+
+#rec_den = 'TwoVtxGeo2ddist'
+#gen_den = 'Geo2ddist'
+#iden = 6
+
 reconstructed = ['NoCuts', 'TrigSel', 'CleaningFilters', 'OfflineJets', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxMindrmax', 'TwoVtxMaxdrmax', 'TwoVtxDrmin', 'TwoVtxNjetsntks', 'TwoVtxNtracksptgt3', 'TwoVtxDvv600um']
 generated = ['NoCuts', '', '', 'FourJets', 'SumHT', '', 'Geo2ddist', '', '', 'Mindrmax', 'Maxdrmax', '', 'Nquarks1', 'Sumpt200', 'Dvv600um']
 
@@ -238,16 +250,19 @@ l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for j,sample in enumerate(samples):
     print sample
     file = ROOT.TFile('crab/MFVResolutionsV20/%s.root'%sample)
-    nevents = file.Get('mfvResolutionsNoCuts/h_gen_dvv').GetEntries()
+    nrec = file.Get('mfvResolutions%s/h_gen_dvv'%rec_den).GetEntries()
+    ngen = file.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
     print '%26s%26s%10s%10s%10s' % ('reconstructed', 'generated', 'reco eff', 'gen eff', 'gen/reco')
     for i, rec in enumerate(reconstructed):
+        if i < iden:
+            continue
         rec_hist = file.Get('mfvResolutions%s/h_gen_dvv'%rec)
-        rec_eff = rec_hist.GetEntries()/nevents
-        rec_err = (rec_eff * (1-rec_eff) / nevents)**0.5
+        rec_eff = rec_hist.GetEntries()/nrec
+        rec_err = (rec_eff * (1-rec_eff) / nrec)**0.5
         if generated[i] != '':
             gen_hist = file.Get('mfvGen%s/h_gen_dvv'%generated[i])
-            gen_eff = gen_hist.GetEntries()/nevents
-            gen_err = (gen_eff * (1-gen_eff) / nevents)**0.5
+            gen_eff = gen_hist.GetEntries()/ngen
+            gen_err = (gen_eff * (1-gen_eff) / ngen)**0.5
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
             gen_rec_err = (gen_rec_div * ((rec_err/rec_eff)**2 + (gen_err/gen_eff)**2))**0.5 if rec_eff != 0 and gen_eff != 0 else 9999
             if generated[i] == 'Dvv600um':
@@ -306,4 +321,4 @@ line1 = ROOT.TLine(0,0,1,1-0.01*gen_rec_cut)
 line2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
 line1.Draw()
 line2.Draw()
-c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff.pdf')
+c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_wrt_%s.pdf'%rec_den)
