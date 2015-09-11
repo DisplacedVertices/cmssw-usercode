@@ -6,7 +6,7 @@ import sys
 from JMTucker.Tools.CMSSWTools import cms, set_events_to_process, set_events_to_process_by_filter
 from JMTucker.Tools.MiniAOD_cfg import pat_tuple_process
 
-version = 'v2'
+version = 'v3'
 
 is_mc = True # magic line, don't touch
 debug = False
@@ -35,13 +35,16 @@ def customize_before_unscheduled(process):
 
 process = pat_tuple_process(customize_before_unscheduled, is_mc)
 
+process.load('JMTucker.Tools.MCStatProducer_cff')
+
 # We're not saving the PAT branches, but if the embedding is on then
 # we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
 
 process.out.fileName = 'ntuple.root'
-#process.source.fileNames = []
+#process.source.fileNames = ['/store/mc/RunIISpring15DR74/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/AODSIM/Asympt25ns_MCRUN2_74_V9-v2/20000/02A00874-7327-E511-B735-0025905964C0.root']
+#process.source.fileNames = ['/store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/Asympt25ns_MCRUN2_74_V9-v1/10000/9A5CB505-0102-E511-95C8-3417EBE33927.root']
 #set_events_to_process(process, [])
 
 if keep_all:
@@ -50,6 +53,7 @@ if keep_all:
 else:
     process.out.outputCommands = [
         'drop *',
+        'keep *_mcStat_*_*',
         'keep MFVEvent_mfvEvent__*',
         'keep MFVVertexAuxs_mfvVerticesAux__*',
         'keep edmTriggerResults_TriggerResults__HLT',
@@ -96,7 +100,6 @@ if trig_filter:
 else:
     process.mfvEvent.skip_event_filter = ''
 
-print 'JMTBAD figure out storing cleaning filters'
 #del process.outp
 #process.outp = cms.EndPath(process.mfvEvent * process.out)
 

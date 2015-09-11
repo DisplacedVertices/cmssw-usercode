@@ -8,7 +8,8 @@
 class MFVWeightProducer : public edm::EDProducer {
 public:
   explicit MFVWeightProducer(const edm::ParameterSet&);
-  void produce(edm::Event&, const edm::EventSetup&);
+  virtual void beginLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&) override;
+  virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
 private:
   const edm::InputTag mevent_src;
@@ -16,11 +17,12 @@ private:
   const bool prints;
   const bool histos;
 
+  const bool weight_gen;
   const bool weight_pileup;
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
 
-  enum { sum_pileup_weight, sum_weight, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight_prod_total, sum_gen_weight, sum_gen_weight_prod, sum_pileup_weight, sum_weight, n_sums };
   TH1F* h_sums;
 };
 
@@ -29,6 +31,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
+    weight_gen(cfg.getParameter<bool>("weight_gen")),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
@@ -38,6 +41,26 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     edm::Service<TFileService> fs;
     TH1::SetDefaultSumw2();
     h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
+    int ibin = 1;
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight_prod_total", "sum_gen_weight", "sum_gen_weight_prod", "sum_pileup_weight", "sum_weight", "n_sums" })
+      h_sums->GetXaxis()->SetBinLabel(ibin++, x);
+  }
+}
+
+void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup&) {
+  edm::Handle<int> nEvents;
+  edm::Handle<float> sumWeight, sumWeightProd;
+  lumi.getByLabel(edm::InputTag("mcStat", "nEvents"), nEvents);
+  lumi.getByLabel(edm::InputTag("mcStat", "sumWeight"), sumWeight);
+  lumi.getByLabel(edm::InputTag("mcStat", "sumWeightProd"), sumWeightProd);
+
+  if (prints)
+    printf("MFVWeight::beginLuminosityBlock: nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", *nEvents, *sumWeight, *sumWeightProd);
+
+  if (histos) {
+    h_sums->Fill(sum_nevents_total, *nEvents);
+    h_sums->Fill(sum_gen_weight_total, *sumWeight);
+    h_sums->Fill(sum_gen_weight_prod_total, *sumWeightProd);
   }
 }
 
@@ -63,6 +86,13 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
   if (enable) {
     if (!event.isRealData()) {
+      if (weight_gen) {
+        assert((mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
+        if (prints)
+          printf("gen_weight: %g  weightprod: %g  ", mevent->gen_weight, mevent->gen_weightprod);
+        *weight *= mevent->gen_weight;
+      }
+
       if (weight_pileup) {
         const double pu_w = pileup_weight(mevent->npu);
         if (prints)
