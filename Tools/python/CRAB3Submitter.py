@@ -45,7 +45,7 @@ class CRABSubmitter:
                  transfer_outputs = True,
                  dataset = 'main',
                  job_control_from_sample = False,
-                 storage_site = 'T3_US_Cornell',
+                 storage_site = 'T3_US_FNALLPC',
                  publish_name = '',
                  aaa = False,
                  modify_pset_hash = True,
