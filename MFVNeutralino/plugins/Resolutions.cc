@@ -148,6 +148,8 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_gen_dbv;
 */
+  TH1F* h_gen_jetpt4;
+  TH1F* h_gen_sumht;
   TH1F* h_gen_dxy;
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
@@ -292,6 +294,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
+  h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted parton (GeV);events", 100, 0, 500);
+  h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted partons (GeV);events", 200, 0, 5000);
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy};LSP daughter particles", 400, -0.2, 0.2);
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};LSPs", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
@@ -778,6 +782,18 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       h_gen_dvv_rec600um->Fill(dvv);
     }
   }
+
+  std::vector<float> parton_pt;
+  for (int i = 0; i < 2; ++i) {
+    for (const reco::GenParticle* p : partons[i]) {
+      if (p->pt() > 20 && fabs(p->eta()) < 2.5 && is_quark(p)) {
+        parton_pt.push_back(p->pt());
+      }
+    }
+  }
+  std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
+  h_gen_jetpt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f);
+  h_gen_sumht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f));
 
 }
 
