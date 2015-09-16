@@ -148,6 +148,8 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_gen_dbv;
 */
+  TH1F* h_rec_dvv;
+
   TH1F* h_gen_jetpt4;
   TH1F* h_gen_sumht;
   TH1F* h_gen_dxy;
@@ -300,6 +302,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
+  h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV};events", 200, 0, 1);
+
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 100, 0, 500);
   h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 5000);
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 400, -0.2, 0.2);
@@ -790,6 +794,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     h_gen_dvv_gen600um->Fill(dvv);
   }
   if (int(vertices->size()) >= 2) {
+    h_rec_dvv->Fill(mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y));
     if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
       h_gen_dvv_rec600um->Fill(dvv);
     }
