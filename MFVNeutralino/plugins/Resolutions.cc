@@ -814,7 +814,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     int nquarks = 0;
     float sumpt = 0;
     float drmin = 1e6;
-    float drmax = 0;
+    float drmax = -1e6;
     for (int j = 0; j < ndau; ++j) {
       const reco::GenParticle* p1 = partons[i][j];
       if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[i] * sin(p1->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
