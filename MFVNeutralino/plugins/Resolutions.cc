@@ -145,6 +145,7 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_gen_dbv;
 */
+  TH1F* h_gen_dxy;
   TH1F* h_gen_dvv;
   TH1F* h_gen_dvv_gen600um;
   TH1F* h_gen_dvv_rec600um;
@@ -284,6 +285,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
+  h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy};LSP daughter particles", 400, -0.2, 0.2);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
   h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
   h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
@@ -312,6 +314,9 @@ if (doing_h2xqq) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
   const size_t ngen = gen_particles->size();
+
+  const reco::GenParticle& for_vtx = gen_particles->at(2);
+  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
 
   double v[2][3] = {{0}};
   std::vector<const reco::GenParticle*> partons;
@@ -351,9 +356,12 @@ if (doing_h2xqq) {
   assert(partons.size() == 4);
   for (int i = 0; i < 2; ++i) {
     assert(partons[i*2]->numberOfDaughters() > 0);
-    v[i][0] = partons[i*2]->daughter(0)->vx(); // i*2 since first two partons are from first X, second two partons are from second X
-    v[i][1] = partons[i*2]->daughter(0)->vy();
-    v[i][2] = partons[i*2]->daughter(0)->vz();
+    v[i][0] = partons[i*2]->daughter(0)->vx() - x0; // i*2 since first two partons are from first X, second two partons are from second X
+    v[i][1] = partons[i*2]->daughter(0)->vy() - y0;
+    v[i][2] = partons[i*2]->daughter(0)->vz() - z0;
+    h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i*2]->phi() - atan2(v[i][1], v[i][0])));
+    h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i*2+1]->phi() - atan2(v[i][1], v[i][0])));
+
   }
   const double dvv = mag(v[0][0] - v[1][0],
                          v[0][1] - v[1][1]);
@@ -666,6 +674,27 @@ if (doing_mfv3j) {
   h_gen_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
   if (mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]) > 0.06) {
     h_gen_dvv_gen600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
+  }
+
+  const reco::GenParticle& for_vtx = gen_particles->at(2);
+  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+  std::vector<const reco::GenParticle*> partons[2];
+  double v[2][3] = {{0}};
+  for (int i = 0; i < 2; ++i) {
+    partons[i].push_back(mci.stranges[i]);
+    partons[i].push_back(mci.bottoms[i]);
+    partons[i].push_back(mci.bottoms_from_tops[i]);
+    partons[i].push_back(mci.W_daughters[i][0]);
+    partons[i].push_back(mci.W_daughters[i][1]);
+    v[i][0] = mci.stranges[i]->vx() - x0;
+    v[i][1] = mci.stranges[i]->vy() - y0;
+    v[i][2] = mci.stranges[i]->vz() - z0;
+  }
+  for (int i = 0; i < 2; ++i) {
+    const int ndau = int(partons[i].size());
+    for (int j = 0; j < ndau; ++j) {
+      h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0])));
+    }
   }
 
 /*
