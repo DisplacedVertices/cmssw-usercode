@@ -21,8 +21,11 @@ class MFVResolutions : public edm::EDAnalyzer {
 
  private:
   const std::string mode;
-  const bool doing_mfv3j;
   const bool doing_h2xqq;
+  const bool doing_mfv2j;
+  const bool doing_mfv3j;
+  const bool doing_mfv4j;
+  const bool doing_mfv5j;
 
   const edm::InputTag vertex_src;
   const edm::InputTag mevent_src;
@@ -155,8 +158,11 @@ class MFVResolutions : public edm::EDAnalyzer {
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   : mode(cfg.getParameter<std::string>("mode")),
-    doing_mfv3j(mode == "mfv3j"),
     doing_h2xqq(mode == "h2xqq"),
+    doing_mfv2j(mode == "mfv2j"),
+    doing_mfv3j(mode == "mfv3j"),
+    doing_mfv4j(mode == "mfv4j"),
+    doing_mfv5j(mode == "mfv5j"),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     which_mom(cfg.getParameter<int>("which_mom")),
@@ -165,8 +171,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src"))
 {
-  if (!(doing_mfv3j || doing_h2xqq))
-    throw cms::Exception("Configuration") << "mode must be either mfv3j or h2xqq, got " << mode;
+  if (!(doing_h2xqq || doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j))
+    throw cms::Exception("Configuration") << "mode must be h2xqq, mfv2j, mfv3j, mfv4j, or mfv5j, got " << mode;
 
   die_if_not(which_mom >= 0 && which_mom < mfv::NMomenta, "invalid which_mom");
 
@@ -310,7 +316,6 @@ namespace {
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
-if (doing_h2xqq) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
   const size_t ngen = gen_particles->size();
@@ -318,51 +323,51 @@ if (doing_h2xqq) {
   const reco::GenParticle& for_vtx = gen_particles->at(2);
   float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
 
+  std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
-  std::vector<const reco::GenParticle*> partons;
 
-  for (size_t igen = 0; igen < ngen; ++igen) {
-    const reco::GenParticle& gen = gen_particles->at(igen);
-    if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
-      assert(gen.numberOfDaughters() >= 2);
-      for (size_t idau = 0; idau < 2; ++idau) {
-        const reco::Candidate* dau = gen.daughter(idau);
-        int dauid = dau->pdgId();
-        // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
-        // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
-        assert(dauid/6000000 == 1);
-        dauid %= 6000000;
-        const int h2x = dauid / 1000;
-        assert(h2x == 1 || h2x == 2 || h2x == 3);
-        dauid %= h2x*1000;
-        assert(dauid/100 == 1);
-        dauid %= 100;
-        assert(dauid/10 == 1);
-        dauid %= 10;
-        assert(dauid == 3 || dauid == 4);
 
-        const size_t ngdau = dau->numberOfDaughters();
-        assert(ngdau >= 2);
-        for (size_t igdau = 0; igdau < 2; ++igdau) {
-          const reco::Candidate* gdau = dau->daughter(igdau);
-          const int id = gdau->pdgId();
-          assert(abs(id) >= 1 && abs(id) <= 5);
-          partons.push_back(dynamic_cast<const reco::GenParticle*>(gdau));
+if (doing_h2xqq) {
+    for (size_t igen = 0; igen < ngen; ++igen) {
+      const reco::GenParticle& gen = gen_particles->at(igen);
+      if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
+        assert(gen.numberOfDaughters() >= 2);
+        for (size_t idau = 0; idau < 2; ++idau) {
+          const reco::Candidate* dau = gen.daughter(idau);
+          int dauid = dau->pdgId();
+          // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
+          // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
+          assert(dauid/6000000 == 1);
+          dauid %= 6000000;
+          const int h2x = dauid / 1000;
+          assert(h2x == 1 || h2x == 2 || h2x == 3);
+          dauid %= h2x*1000;
+          assert(dauid/100 == 1);
+          dauid %= 100;
+          assert(dauid/10 == 1);
+          dauid %= 10;
+          assert(dauid == 3 || dauid == 4);
+
+          const size_t ngdau = dau->numberOfDaughters();
+          assert(ngdau >= 2);
+          for (size_t igdau = 0; igdau < 2; ++igdau) {
+            const reco::Candidate* gdau = dau->daughter(igdau);
+            const int id = gdau->pdgId();
+            assert(abs(id) >= 1 && abs(id) <= 5);
+            partons[idau].push_back(dynamic_cast<const reco::GenParticle*>(gdau));
+          }
         }
       }
     }
-  }
 
-  assert(partons.size() == 4);
-  for (int i = 0; i < 2; ++i) {
-    assert(partons[i*2]->numberOfDaughters() > 0);
-    v[i][0] = partons[i*2]->daughter(0)->vx() - x0; // i*2 since first two partons are from first X, second two partons are from second X
-    v[i][1] = partons[i*2]->daughter(0)->vy() - y0;
-    v[i][2] = partons[i*2]->daughter(0)->vz() - z0;
-    h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i*2]->phi() - atan2(v[i][1], v[i][0])));
-    h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i*2+1]->phi() - atan2(v[i][1], v[i][0])));
+    for (int i = 0; i < 2; ++i) {
+      assert(partons[i].size() == 2);
+      assert(partons[i][0]->numberOfDaughters() > 0);
+      v[i][0] = partons[i][0]->daughter(0)->vx() - x0;
+      v[i][1] = partons[i][0]->daughter(0)->vy() - y0;
+      v[i][2] = partons[i][0]->daughter(0)->vz() - z0;
+    }
 
-  }
   const double dvv = mag(v[0][0] - v[1][0],
                          v[0][1] - v[1][1]);
   h_gen_dvv->Fill(dvv);
@@ -379,7 +384,7 @@ if (doing_h2xqq) {
   }
 }
 
-if (doing_mfv3j) {
+if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
@@ -387,9 +392,6 @@ if (doing_mfv3j) {
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByLabel(vertex_src, vertices);
-
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
@@ -676,26 +678,25 @@ if (doing_mfv3j) {
     h_gen_dvv_gen600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
   }
 
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
-  std::vector<const reco::GenParticle*> partons[2];
-  double v[2][3] = {{0}};
-  for (int i = 0; i < 2; ++i) {
-    partons[i].push_back(mci.stranges[i]);
-    partons[i].push_back(mci.bottoms[i]);
-    partons[i].push_back(mci.bottoms_from_tops[i]);
-    partons[i].push_back(mci.W_daughters[i][0]);
-    partons[i].push_back(mci.W_daughters[i][1]);
-    v[i][0] = mci.stranges[i]->vx() - x0;
-    v[i][1] = mci.stranges[i]->vy() - y0;
-    v[i][2] = mci.stranges[i]->vz() - z0;
-  }
-  for (int i = 0; i < 2; ++i) {
-    const int ndau = int(partons[i].size());
-    for (int j = 0; j < ndau; ++j) {
-      h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0])));
+    for (int i = 0; i < 2; ++i) {
+      partons[i].push_back(mci.stranges[i]);
+      partons[i].push_back(mci.bottoms[i]);
+      if (doing_mfv3j) {
+        partons[i].push_back(mci.tops[i]);
+      }
+      if (doing_mfv4j) {
+        partons[i].push_back(mci.tops[i]);
+        partons[i].push_back(mci.bottoms_from_tops[i]);
+      }
+      if (doing_mfv5j) {
+        partons[i].push_back(mci.bottoms_from_tops[i]);
+        partons[i].push_back(mci.W_daughters[i][0]);
+        partons[i].push_back(mci.W_daughters[i][1]);
+      }
+      v[i][0] = mci.stranges[i]->vx() - x0;
+      v[i][1] = mci.stranges[i]->vy() - y0;
+      v[i][2] = mci.stranges[i]->vz() - z0;
     }
-  }
 
 /*
   // histogram njets, ncalojets, calojetpt4, jetsumht vs. genJets
@@ -776,6 +777,14 @@ if (doing_mfv3j) {
   h_s_partons_jetsumht->Fill(parton_sumht, mevent->jet_sum_ht());
 */
 }
+
+  for (int i = 0; i < 2; ++i) {
+    const int ndau = int(partons[i].size());
+    for (int j = 0; j < ndau; ++j) {
+      h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0])));
+    }
+  }
+
 }
 
 DEFINE_FWK_MODULE(MFVResolutions);

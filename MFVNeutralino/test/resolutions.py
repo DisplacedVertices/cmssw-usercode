@@ -175,17 +175,8 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
-if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':
-    process.mfvGenParticleFilter.mode = 'h2xqq'
-if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nddbar' or mode == '2Nbbbar':
-    process.mfvGenParticleFilter.mode = 'mfv2j'
-if mode == '2Nuds' or mode == '2Nuddmu' or mode == '2Nudmu':
-    process.mfvGenParticleFilter.mode = 'mfv3j'
-if mode == '2Nddbarmumu':
-    process.mfvGenParticleFilter.mode = 'mfv4j'
-
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
-                                mode = cms.string('mfv3j'),
+                                mode = cms.string('mfv5j'),
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                 mevent_src = cms.InputTag('mfvEvent'),
                                 which_mom = cms.int32(0),
@@ -194,8 +185,20 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 gen_src = cms.InputTag('genParticles'),
                                 gen_jet_src = cms.InputTag('ak5GenJets'),
                                 )
+
 if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':
+    process.mfvGenParticleFilter.mode = 'h2xqq'
     mfvResolutions.mode = 'h2xqq'
+if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nddbar' or mode == '2Nbbbar':
+    process.mfvGenParticleFilter.mode = 'mfv2j'
+    mfvResolutions.mode = 'mfv2j'
+if mode == '2Nuds' or mode == '2Nuddmu' or mode == '2Nudmu':
+    process.mfvGenParticleFilter.mode = 'mfv3j'
+    mfvResolutions.mode = 'mfv3j'
+if mode == '2Nddbarmumu':
+    process.mfvGenParticleFilter.mode = 'mfv4j'
+    mfvResolutions.mode = 'mfv4j'
+
 process.p = cms.Path(process.mfvSelectedVerticesTight)
 
 
