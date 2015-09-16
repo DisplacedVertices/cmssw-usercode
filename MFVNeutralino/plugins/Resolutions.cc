@@ -151,6 +151,12 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_gen_jetpt4;
   TH1F* h_gen_sumht;
   TH1F* h_gen_dxy;
+  TH1F* h_gen_ntracks;
+  TH1F* h_gen_nquarks;
+  TH1F* h_gen_sumpt;
+  TH1F* h_gen_drmin;
+  TH1F* h_gen_drmax;
+
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
   TH1F* h_gen_dvv_gen600um;
@@ -294,9 +300,15 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
-  h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted parton (GeV);events", 100, 0, 500);
-  h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted partons (GeV);events", 200, 0, 5000);
-  h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy};LSP daughter particles", 400, -0.2, 0.2);
+  h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 100, 0, 500);
+  h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 5000);
+  h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 400, -0.2, 0.2);
+  h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted daughter particles;LSPs", 10, 0, 10);
+  h_gen_nquarks = fs->make<TH1F>("h_gen_nquarks", ";number of accepted quarks;LSPs", 10, 0, 10);
+  h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted daughter particles (GeV);LSPs", 100, 0, 1000);
+  h_gen_drmin = fs->make<TH1F>("h_gen_drmin", ";min #DeltaR between tracks;LSPs", 100, 0, 5);
+  h_gen_drmax = fs->make<TH1F>("h_gen_drmax", ";max #DeltaR between tracks;LSPs", 100, 0, 5);
+
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};LSPs", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
   h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
@@ -794,6 +806,38 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
   h_gen_jetpt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f);
   h_gen_sumht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f));
+
+  for (int i = 0; i < 2; ++i) {
+    const int ndau = int(partons[i].size());
+
+    int ntracks = 0;
+    int nquarks = 0;
+    float sumpt = 0;
+    float drmin = 1e6;
+    float drmax = 0;
+    for (int j = 0; j < ndau; ++j) {
+      const reco::GenParticle* p1 = partons[i][j];
+      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[i] * sin(p1->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
+      ++ntracks;
+      if (!is_lepton(p1)) ++nquarks;
+      sumpt += p1->pt();
+      for (int k = j+1; k < ndau; ++k) {
+        const reco::GenParticle* p2 = partons[i][k];
+        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[i] * sin(p2->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
+        float dr = reco::deltaR(*p1, *p2);
+        if (dr < drmin)
+          drmin = dr;
+        if (dr > drmax)
+          drmax = dr;
+      }
+    }
+
+    h_gen_ntracks->Fill(ntracks);
+    h_gen_nquarks->Fill(nquarks);
+    h_gen_sumpt->Fill(sumpt);
+    h_gen_drmin->Fill(drmin);
+    h_gen_drmax->Fill(drmax);
+  }
 
 }
 
