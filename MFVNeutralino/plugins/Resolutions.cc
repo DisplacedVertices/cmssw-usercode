@@ -316,6 +316,9 @@ namespace {
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
+  edm::Handle<MFVVertexAuxCollection> vertices;
+  event.getByLabel(vertex_src, vertices);
+
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
   const size_t ngen = gen_particles->size();
@@ -326,8 +329,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
 
-
-if (doing_h2xqq) {
+  if (doing_h2xqq) {
     for (size_t igen = 0; igen < ngen; ++igen) {
       const reco::GenParticle& gen = gen_particles->at(igen);
       if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
@@ -367,31 +369,13 @@ if (doing_h2xqq) {
       v[i][1] = partons[i][0]->daughter(0)->vy() - y0;
       v[i][2] = partons[i][0]->daughter(0)->vz() - z0;
     }
-
-  const double dvv = mag(v[0][0] - v[1][0],
-                         v[0][1] - v[1][1]);
-  h_gen_dvv->Fill(dvv);
-  if (dvv > 0.06) {
-    h_gen_dvv_gen600um->Fill(dvv);
   }
-
-  edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
-  if (int(vertices->size()) >= 2) {
-    if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
-      h_gen_dvv_rec600um->Fill(dvv);
-    }
-  }
-}
 
 if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
   die_if_not(mevent->gen_valid, "not running on signal sample");
-
-  edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
@@ -667,17 +651,6 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     }
   }
 
-  if (int(vertices->size()) >= 2) {
-    if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
-      h_gen_dvv_rec600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
-    }
-  }
-
-  h_gen_dvv->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
-  if (mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]) > 0.06) {
-    h_gen_dvv_gen600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
-  }
-
     for (int i = 0; i < 2; ++i) {
       partons[i].push_back(mci.stranges[i]);
       partons[i].push_back(mci.bottoms[i]);
@@ -782,6 +755,22 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     const int ndau = int(partons[i].size());
     for (int j = 0; j < ndau; ++j) {
       h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0])));
+    }
+  }
+
+  const double dbv[2] = {
+    mag(v[0][0], v[0][1]),
+    mag(v[1][0], v[1][1])
+  };
+  const double dvv = mag(v[0][0] - v[1][0],
+                         v[0][1] - v[1][1]);
+  h_gen_dvv->Fill(dvv);
+  if (dvv > 0.06) {
+    h_gen_dvv_gen600um->Fill(dvv);
+  }
+  if (int(vertices->size()) >= 2) {
+    if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
+      h_gen_dvv_rec600um->Fill(dvv);
     }
   }
 
