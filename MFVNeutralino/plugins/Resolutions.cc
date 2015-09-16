@@ -149,6 +149,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_gen_dbv;
 */
   TH1F* h_gen_dxy;
+  TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
   TH1F* h_gen_dvv_gen600um;
   TH1F* h_gen_dvv_rec600um;
@@ -292,6 +293,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy};LSP daughter particles", 400, -0.2, 0.2);
+  h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};LSPs", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV};events", 200, 0, 1);
   h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
   h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
@@ -762,6 +764,9 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     mag(v[0][0], v[0][1]),
     mag(v[1][0], v[1][1])
   };
+  h_gen_dbv->Fill(dbv[0]);
+  h_gen_dbv->Fill(dbv[1]);
+
   const double dvv = mag(v[0][0] - v[1][0],
                          v[0][1] - v[1][1]);
   h_gen_dvv->Fill(dvv);
