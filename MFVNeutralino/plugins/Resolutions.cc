@@ -310,25 +310,25 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
   h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks/vertex;vertices", 40, 0, 40);
-  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 100, 0, 0.005);
+  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 300, 0, 0.003);
   h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 100, 0, 0.5);
   h_rec_drmax = fs->make<TH1F>("h_rec_drmax", ";max{#Delta R{track i,j}};vertices", 100, 0, 5);
   h_rec_njetsntks = fs->make<TH1F>("h_rec_njetsntks", ";number of associated jets;vertices", 10, 0, 10);
   h_rec_ntracksptgt3 = fs->make<TH1F>("h_rec_ntracksptgt3", ";number of tracks with p_{T} > 3 GeV/vertex;vertices", 40, 0, 40);
-  h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 100, 0, 0.5);
-  h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 200, 0, 1);
+  h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
+  h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
 
-  h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 100, 0, 500);
-  h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 5000);
-  h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 400, -0.2, 0.2);
-  h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted daughter particles;LSPs", 10, 0, 10);
-  h_gen_nquarks = fs->make<TH1F>("h_gen_nquarks", ";number of accepted quarks;LSPs", 10, 0, 10);
-  h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted daughter particles (GeV);LSPs", 100, 0, 1000);
-  h_gen_drmin = fs->make<TH1F>("h_gen_drmin", ";min #DeltaR between tracks;LSPs", 100, 0, 5);
-  h_gen_drmax = fs->make<TH1F>("h_gen_drmax", ";max #DeltaR between tracks;LSPs", 100, 0, 5);
+  h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
+  h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 2000);
+  h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 500, -1, 1);
+  h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted displaced daughter particles;LSPs", 10, 0, 10);
+  h_gen_nquarks = fs->make<TH1F>("h_gen_nquarks", ";number of accepted displaced quarks;LSPs", 10, 0, 10);
+  h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 100, 0, 1000);
+  h_gen_drmin = fs->make<TH1F>("h_gen_drmin", ";min #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
+  h_gen_drmax = fs->make<TH1F>("h_gen_drmax", ";max #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
 
-  h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV} (cm);LSPs", 100, 0, 0.5);
-  h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV} (cm);events", 200, 0, 1);
+  h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV} (cm);LSPs", 250, 0, 2.5);
+  h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV} (cm);events", 500, 0, 5);
 //  h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
 //  h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
 //  h_gen_dvv_matched = fs->make<TH1F>("h_gen_dvv_matched", ";generated d_{VV};events with two matched vertices", 200, 0, 1);
