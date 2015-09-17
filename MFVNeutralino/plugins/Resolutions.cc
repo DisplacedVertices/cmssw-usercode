@@ -168,10 +168,10 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
-  TH1F* h_gen_dvv_gen600um;
-  TH1F* h_gen_dvv_rec600um;
-  TH1F* h_gen_dvv_matched;
-  TH1F* h_gen_dvv_matched_600um;
+//  TH1F* h_gen_dvv_gen600um;
+//  TH1F* h_gen_dvv_rec600um;
+//  TH1F* h_gen_dvv_matched;
+//  TH1F* h_gen_dvv_matched_600um;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -329,10 +329,10 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV} (cm);LSPs", 100, 0, 0.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV} (cm);events", 200, 0, 1);
-  h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
-  h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
-  h_gen_dvv_matched = fs->make<TH1F>("h_gen_dvv_matched", ";generated d_{VV};events with two matched vertices", 200, 0, 1);
-  h_gen_dvv_matched_600um = fs->make<TH1F>("h_gen_dvv_matched_600um", ";generated d_{VV};events with two matched vertices and d_{VV} > 600 #mum", 200, 0, 1);
+//  h_gen_dvv_gen600um = fs->make<TH1F>("h_gen_dvv_gen600um", ";generated d_{VV};events with generated d_{VV} > 600 #mum", 200, 0, 1);
+//  h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
+//  h_gen_dvv_matched = fs->make<TH1F>("h_gen_dvv_matched", ";generated d_{VV};events with two matched vertices", 200, 0, 1);
+//  h_gen_dvv_matched_600um = fs->make<TH1F>("h_gen_dvv_matched_600um", ";generated d_{VV};events with two matched vertices and d_{VV} > 600 #mum", 200, 0, 1);
 }
 
 namespace {
@@ -668,6 +668,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   }
 */
 
+/*
   int vtxmatch[2] = {-1, -1};
   for (int ilsp = 0; ilsp < 2; ++ilsp) {
     for (int ivtx = 0; ivtx < int(vertices->size()); ++ivtx) {
@@ -686,6 +687,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       h_gen_dvv_matched_600um->Fill(mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_lsp_decay[1*3+0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_lsp_decay[1*3+1]));
     }
   }
+*/
 
     for (int i = 0; i < 2; ++i) {
       partons[i].push_back(mci.stranges[i]);
@@ -804,14 +806,15 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   const double dvv = mag(v[0][0] - v[1][0],
                          v[0][1] - v[1][1]);
   h_gen_dvv->Fill(dvv);
-  if (dvv > 0.06) {
-    h_gen_dvv_gen600um->Fill(dvv);
-  }
+
+//  if (dvv > 0.06) {
+//    h_gen_dvv_gen600um->Fill(dvv);
+//  }
   if (int(vertices->size()) >= 2) {
     h_rec_dvv->Fill(mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y));
-    if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
-      h_gen_dvv_rec600um->Fill(dvv);
-    }
+//    if (mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y) > 0.06) {
+//      h_gen_dvv_rec600um->Fill(dvv);
+//    }
   }
 
   std::vector<float> parton_pt;
