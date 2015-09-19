@@ -862,20 +862,10 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   }
 
   for (const MFVVertexAux& vtx : *vertices) {
-    h_rec_ntracks->Fill(vtx.ntracks());
-    h_rec_bs2derr->Fill(vtx.bs2derr);
-    h_rec_drmin->Fill(vtx.drmin());
-    h_rec_drmax->Fill(vtx.drmax());
-    h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
-    h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
-    h_rec_dbv->Fill(vtx.bs2ddist);
-  }
-
-  for (const MFVVertexAux& vtx : *vertices) {
     double dist = 1e99;
     int ilsp = -1;
 
-//    if (max_dist > 0) {
+    if (max_dist > 0) {
       double dists[2] = {
         mag(v[0][0] - (vtx.x - x0),
             v[0][1] - (vtx.y - y0),
@@ -886,20 +876,28 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       };
 
       for (int i = 0; i < 2; ++i) {
-  //      if (dists[i] < max_dist) {
+        if (dists[i] < max_dist) {
           if (dists[i] < dist) {
             dist = dists[i];
             ilsp = i;
           }
-//        }
+        }
       }
-//    }
+    }
 
     if (ilsp < 0) {
       continue;
     }
 
     h_dist->Fill(dist);
+
+    h_rec_ntracks->Fill(vtx.ntracks());
+    h_rec_bs2derr->Fill(vtx.bs2derr);
+    h_rec_drmin->Fill(vtx.drmin());
+    h_rec_drmax->Fill(vtx.drmax());
+    h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
+    h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
+    h_rec_dbv->Fill(vtx.bs2ddist);
   }
 }
 
