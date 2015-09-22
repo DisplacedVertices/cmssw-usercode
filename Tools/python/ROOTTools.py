@@ -1163,7 +1163,7 @@ def poisson_means_divide(h1, h2, no_zeroes=False):
 class plot_saver:
     i = 0
     
-    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=None):
+    def __init__(self, plot_dir=None, html=True, log=True, root=True, root_log=False, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=None):
         self.c = ROOT.TCanvas('c%i' % plot_saver.i, '', *size)
         if canvas_margins is not None:
             if type(canvas_margins) == int or type(canvas_margins) == float:
@@ -1180,6 +1180,7 @@ class plot_saver:
         self.set_plot_dir(plot_dir)
         self.log = log
         self.root = root
+        self.root_log = root_log
         self.pdf = pdf
         self.pdf_log = pdf_log
         self.C = C
@@ -1234,7 +1235,7 @@ class plot_saver:
                 html.write('<a href="%s">%10i%32s%s</a>\n' % (save, i, 'change directory: ', save))
                 continue
 
-            fn, log, root, pdf, pdf_log, C, C_log = save
+            fn, log, root, root_log, pdf, pdf_log, C, C_log = save
 
             bn = os.path.basename(fn)
             html.write('<a href="#%s">%10i</a> ' % (self.anchor_name(fn), i))
@@ -1244,6 +1245,10 @@ class plot_saver:
                 html.write('    ')
             if root:
                 html.write(' <a href="%s">root</a>' % os.path.basename(root))
+            else:
+                html.write('     ')
+            if root_log:
+                html.write(' <a href="%s">root_log</a>' % os.path.basename(root_log))
             else:
                 html.write('     ')
             if pdf:
@@ -1268,7 +1273,7 @@ class plot_saver:
         for i, save in enumerate(saved):
             if type(save) == str:
                 continue # skip dir entries
-            fn, log, root, pdf, pdf_log, C, C_log = save
+            fn, log, root, root_log, pdf, pdf_log, C, C_log = save
             bn = os.path.basename(fn)
             rootlink = ', <a href="%s">root</a>' % os.path.basename(root) if root else ''
             html.write('<h4 id="%s"><a href="#%s">%s</a>%s</h4><br>\n' % (self.anchor_name(fn), self.anchor_name(fn), bn.replace('.png', ''), rootlink))
@@ -1294,7 +1299,7 @@ class plot_saver:
             raise ValueError('save_dir called before plot_dir set!')
         self.saved.append(n)
 
-    def save(self, n, log=None, root=None, pdf=None, pdf_log=None, C=None, C_log=None, logz=None, other_c=None):
+    def save(self, n, log=None, root=None, root_log=None, pdf=None, pdf_log=None, C=None, C_log=None, logz=None, other_c=None):
         can = self.c if other_c is None else other_c
 
         if logz:
@@ -1304,6 +1309,7 @@ class plot_saver:
 
         log = self.log if log is None else log
         root = self.root if root is None else root
+        root_log = self.root_log if root_log is None else root_log
         pdf = self.pdf if pdf is None else pdf
         pdf_log = self.pdf_log if pdf_log is None else pdf_log
         C = self.C if C is None else C
@@ -1317,6 +1323,11 @@ class plot_saver:
         if root:
             root = os.path.join(self.plot_dir, n + '.root')
             can.SaveAs(root)
+        if root_log:
+            logfcn(1)
+            root_log = os.path.join(self.plot_dir, n + '_log.root')
+            can.SaveAs(root_log)
+            logfcn(0)
         if log:
             logfcn(1)
             log = os.path.join(self.plot_dir, n + '_log.png')
@@ -1338,7 +1349,7 @@ class plot_saver:
             C_log = os.path.join(self.plot_dir, n + '_log.C')
             can.SaveAs(C_log)
             logfcn(0)
-        self.saved.append((fn, log, root, pdf, pdf_log, C, C_log))
+        self.saved.append((fn, log, root, root_log, pdf, pdf_log, C, C_log))
 
 def rainbow_palette(num_colors=500):
     """Make a rainbow palette with the specified number of
