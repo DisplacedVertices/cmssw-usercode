@@ -445,6 +445,7 @@ def data_mc_comparison(name,
                        res_y_title_offset = None,
                        res_y_label_size = 0.03,
                        res_draw_cmd = 'apez',
+                       res_fit = True,
                        legend_pos = None,
                        enable_legend = True,
                        verbose = False,
@@ -679,21 +680,22 @@ def data_mc_comparison(name,
         ln.SetLineColor(ROOT.kBlue+3)
         ln.Draw()
 
-        old_opt_fit = ROOT.gStyle.GetOptFit()
-        ROOT.gStyle.SetOptFit(0)
-        fit_opt = 's ex0'
-        fit_opt += ' q' if not verbose else ' v'
-        fit_res = res_g.Fit('pol0', fit_opt)
-        ratio_pad.Update()
-        fit_tpt = ROOT.TPaveText(0.12, 0.25, 0.4, 0.27, 'ndc')
-        fit_tpt.SetBorderSize(0)
-        fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
-        fit_tpt.Draw()
-        #fit_stat_box = res_g.GetListOfFunctions().FindObject('stats')
-        #fit_stat_box.SetX1NDC(0)
-        #fit_stat_box.SetX2NDC(0)
-        #fit_stat_box.SetY1NDC(0)
-        #fit_stat_box.SetY2NDC(0)
+        if res_fit:
+            old_opt_fit = ROOT.gStyle.GetOptFit()
+            ROOT.gStyle.SetOptFit(0)
+            fit_opt = 's ex0'
+            fit_opt += ' q' if not verbose else ' v'
+            fit_res = res_g.Fit('pol0', fit_opt)
+            ratio_pad.Update()
+            fit_tpt = ROOT.TPaveText(0.12, 0.25, 0.4, 0.27, 'ndc')
+            fit_tpt.SetBorderSize(0)
+            fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
+            fit_tpt.Draw()
+            #fit_stat_box = res_g.GetListOfFunctions().FindObject('stats')
+            #fit_stat_box.SetX1NDC(0)
+            #fit_stat_box.SetX2NDC(0)
+            #fit_stat_box.SetY1NDC(0)
+            #fit_stat_box.SetY2NDC(0)
 
     if plot_saver is not None:
         plot_saver.save(name)
