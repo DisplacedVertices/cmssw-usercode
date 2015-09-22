@@ -21,7 +21,7 @@ int main() {
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
   const std::string templates_kind = env.get_string_lower("templates_kind", "clearedjets");
-  const bool templates_save_plots = env.get_bool("templates_save_plots");
+  const bool templates_save_plots = env.get_bool("templates_save_plots", true);
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
   const bool templates_simpleclear = templates_kind == "simpleclear";
