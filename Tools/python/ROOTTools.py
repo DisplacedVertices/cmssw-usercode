@@ -1422,7 +1422,6 @@ def set_style(date_pages=False):
     ROOT.gStyle.SetMarkerSize(.1)
     ROOT.gStyle.SetMarkerStyle(8)
     ROOT.gStyle.SetGridStyle(3)
-    ROOT.gStyle.SetPaperSize(ROOT.TStyle.kA4)
     ROOT.gStyle.SetStatW(0.25)
     ROOT.gStyle.SetStatFormat('6.4g')
     ROOT.gStyle.SetPalette(1)
