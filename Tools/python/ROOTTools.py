@@ -452,50 +452,98 @@ def data_mc_comparison(name,
                        cut_line = None,
                        background_uncertainty = None,
                        ):
-    """JMTBAD.
+    """
+    Put the histograms for the background samples into a THStack, with
+    normalization, color, legend, and other 'join information' (which
+    samples are grouped with which) taken from the Sample objects.
 
-    If histogram_path and file_path are not supplied, all of the
-    sample objects must have a member object named 'hist' that has the
-    histogram preloaded.
+    Optionally, draw the same histogram for signal examples (not
+    stacked, but overlaid) and data samples. The signal normalization,
+    style, and color info are also taken from their Sample objects.
 
-    file_path is of the format
-    'path/to/root/files/filename_%(sample_name)s.root'.
+    If multiple data samples are supplied, the hists are simply added
+    together. If any data sample is supplied, a data/MC ratio plot is
+    drawn in a sub pad at the bottom of the canvas. Some of the
+    related parameters (e.g. canvas, margin sizes) are exposed, but
+    some are hardcoded for now, so fiddling with them may screw things
+    up, or not produce the expected behavior. JMTBAD
+    
+    If histogram_path, file_path, and int_lumi are not supplied, all
+    of the Sample objects must have a member object named 'hist' that
+    has the histogram preloaded. Otherwise:
 
-    histogram_path is the path to the histogram inside the ROOT
+    - file_path must be of the format
+    'filesystem/path/to/root/files/filename_%(name)s.root', with name
+    being taken from the Sample object.
+
+    - histogram_path is the path to the histogram inside the ROOT
     files, e.g. 'histos/RecoJets/njets'.
 
-    int_lumi is the integrated luminosity to scale the MC to, in
-    pb^-1.
+    - int_lumi is the integrated luminosity to scale the MC to, in
+    pb^-1. Then the overall scale factor is int_lumi *
+    Sample.partial_weight, which already must include number of
+    events, cross section, filter efficiencies, k-factors -- see the
+    Sample object for how that works.
+
+    - Any TFiles and hists constructed are cached in the Sample
+    objects.
+
+    The saving of output files is done by a plot_saver object (see
+    that class definition for more info), or directly with
+    canvas.SaveAs if output_fn is specified and plot_saver is
+    not. (Exactly one may be specified.) The plot_saver object's
+    canvas is replaced with one made internally here (to support the
+    sub pad for the data/MC ratio plot).
+
+    Other info for the rest of the parameters:
+
+    - name: used to name the TCanvas/ratio TPad, THStack, auxiliary
+    histogram for the ratio plot, and save name for the plot_saver.
     
+    - background_samples, signal_samples, and data_samples must be
+    lists of Sample objects. signal_samples and data_samples may be
+    empty lists.
+
+    JMTBAD finish documentation
     """
 
     all_samples = background_samples + signal_samples
-
     if data_samples:
          all_samples.extend(data_samples)
-    
+
+    # Sanity checks on the parameters.
     if output_fn is None and plot_saver is None:
         raise ValueError('at least one of output_fn, plot_saver must be supplied')
+    elif output_fn is not None and plot_saver is not None:
+        raise ValueError('only one of output_fn and plot_saver may be supplied')
 
     check_params = (file_path is None, histogram_path is None, int_lumi is None)
     if any(check_params) and not all(check_params):
         raise ValueError('must supply all of file_path, histogram_path, int_lumi or none of them')
 
     if file_path is None:
+        # Sanity check that all the samples have the hist preloaded.
         for sample in all_samples:
             if not hasattr(sample, 'hist') or not issubclass(type(sample.hist), ROOT.TH1):
                 raise ValueError('all sample objects must have hist preloaded if file_path is not supplied')
     else:
+        # Sanity check needed for the TFile caching below.
         previous_file_paths = list(set(vars(sample).get('file_path', None) for sample in all_samples))
         previous_file_paths_ok = len(previous_file_paths) == 1 and previous_file_paths[0] is not None
         for sample in all_samples:
             if not previous_file_paths_ok:
+                # Cache the TFile and do basic check on the sample
+                # that the number of events is correct (if
+                # hist_path_for_nevents_check specified).
                 sample._datamccomp_file_path = file_path
                 sample._datamccomp_filename = file_path % sample
                 sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
                 if sample not in data_samples and hist_path_for_nevents_check is not None:
                     if sample.nevents_from_file(hist_path_for_nevents_check, f=sample._datamccomp_file) != sample.nevents:
                         raise ValueError('wrong number of events for %s' % sample.name)
+
+            # Get the histogram, normalize, rebin, and move the
+            # overflow to the last bin.
             sample.hist = sample._datamccomp_file.Get(histogram_path)
             if not issubclass(type(sample.hist), ROOT.TH1):
                 raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
@@ -509,14 +557,16 @@ def data_mc_comparison(name,
                 else:
                     move_overflow_into_last_bin(sample.hist)
 
+    # Use the first data sample to cache the summed histogram for all
+    # the data.
     data_sample = None
     if len(data_samples) >= 1:
         print 'len data samples', len(data_samples)
         data_sample = data_samples[0]
-        print 'integ', data_sample.hist.Integral(0,1000000)
+        print 'integ', get_integral(data_sample.hist)[0]
         for ds in data_samples[1:]:
             data_sample.hist.Add(ds.hist)
-            print 'integ', data_sample.hist.Integral(0,1000000)
+            print 'integ', get_integral(data_sample.hist)[0]
 
     #####################
 
