@@ -270,6 +270,34 @@ process.mfvAnalysisCutsDvv600um = process.mfvAnalysisCuts.clone(min_svdist2d = 0
 process.mfvResolutionsTwoVtxDvv600um = mfvResolutions.clone()
 process.pTwoVtxDvv600um = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCutsDvv600um * process.mfvResolutionsTwoVtxDvv600um)
 
+process.mfvResolutionsVertices = mfvResolutions.clone(vertex_src = 'mfvSelectedVertices')
+process.pVertices = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVertices * process.mfvResolutionsVertices)
+
+process.mfvResolutionsGeo2ddist = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesGeo2ddist')
+process.pGeo2ddist = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesGeo2ddist * process.mfvResolutionsGeo2ddist)
+
+process.mfvResolutionsNtracks = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNtracks')
+process.pNtracks = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracks * process.mfvResolutionsNtracks)
+
+process.mfvResolutionsBs2derr = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesBs2derr')
+process.pBs2derr = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesBs2derr * process.mfvResolutionsBs2derr)
+
+process.mfvResolutionsMindrmax = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesMindrmax')
+process.pMindrmax = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesMindrmax * process.mfvResolutionsMindrmax)
+
+process.mfvResolutionsMaxdrmax = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesMaxdrmax')
+process.pMaxdrmax = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesMaxdrmax * process.mfvResolutionsMaxdrmax)
+
+process.mfvResolutionsDrmin = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesDrmin')
+process.pDrmin = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesDrmin * process.mfvResolutionsDrmin)
+
+process.mfvResolutionsNjetsntks = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNjetsntks')
+process.pNjetsntks = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNjetsntks * process.mfvResolutionsNjetsntks)
+
+process.mfvResolutionsNtracksptgt3 = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
+process.pNtracksptgt3 = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracksptgt3 * process.mfvResolutionsNtracksptgt3)
+
+
 #generated cutflow
 process.mfvGenNoCuts = mfvResolutions.clone()
 process.pGenNoCuts = cms.Path(process.mfvGenParticleFilter * process.mfvGenNoCuts)

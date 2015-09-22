@@ -37,10 +37,10 @@ class MFVResolutions : public edm::EDAnalyzer {
   bool mci_warned;
   const edm::InputTag gen_jet_src;
 
-/*
-  TH1F* h_dr;
+//  TH1F* h_dr;
   TH1F* h_dist;
 
+/*
   TH1F* h_lsp_nmatch[2];
   TH2F* h_lsp0nmatch_lsp1nmatch;
   TH2F* h_vtxmatch_vtxtotal;
@@ -196,10 +196,10 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
 
-/*
-  h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
+//  h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
 
+/*
   for (int i = 0; i < 2; ++i) {
     h_lsp_nmatch[i] = fs->make<TH1F>(TString::Format("h_lsp%d_nmatch", i), TString::Format(";number of vertices that match lsp%d;events", i), 15, 0, 15);
   }
@@ -862,6 +862,35 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   }
 
   for (const MFVVertexAux& vtx : *vertices) {
+    double dist = 1e99;
+    int ilsp = -1;
+
+    if (max_dist > 0) {
+      double dists[2] = {
+        mag(v[0][0] - (vtx.x - x0),
+            v[0][1] - (vtx.y - y0),
+            v[0][2] - (vtx.z - z0)),
+        mag(v[1][0] - (vtx.x - x0),
+            v[1][1] - (vtx.y - y0),
+            v[1][2] - (vtx.z - z0)),
+      };
+
+      for (int i = 0; i < 2; ++i) {
+        if (dists[i] < max_dist) {
+          if (dists[i] < dist) {
+            dist = dists[i];
+            ilsp = i;
+          }
+        }
+      }
+    }
+
+    if (ilsp < 0) {
+      continue;
+    }
+
+    h_dist->Fill(dist);
+
     h_rec_ntracks->Fill(vtx.ntracks());
     h_rec_bs2derr->Fill(vtx.bs2derr);
     h_rec_drmin->Fill(vtx.drmin());
