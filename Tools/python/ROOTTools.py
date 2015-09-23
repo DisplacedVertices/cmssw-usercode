@@ -451,6 +451,7 @@ def data_mc_comparison(name,
                        res_y_title = 'data/MC',
                        res_y_title_offset = None,
                        res_y_label_size = 0.03,
+                       res_y_range = (0., 3.),
                        res_draw_cmd = 'apez',
                        res_fit = True,
                        legend_pos = None,
@@ -712,14 +713,14 @@ def data_mc_comparison(name,
         legend_entries.reverse()
         legend = ROOT.TLegend(*legend_pos)
         legend.SetBorderSize(0)
+        if data_sample is not None:
+            legend.AddEntry(data_sample.hist, 'Data', 'LPE')
         for l in legend_entries:
             legend.AddEntry(*l)
         if background_uncertainty is not None:
             legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
             legend.AddEntry(sample.hist, sample.nice_name, 'L')
-        if data_sample is not None:
-            legend.AddEntry(data_sample.hist, 'data', 'LPE')
         legend.Draw()
     else:
         legend = None
@@ -767,7 +768,7 @@ def data_mc_comparison(name,
         res_g.GetXaxis().SetLimits(*x_range_dmc)
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
-        res_g.GetYaxis().SetRangeUser(0,3)
+        res_g.GetYaxis().SetRangeUser(*res_y_range)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)
         ln = ROOT.TLine(x_range_dmc[0], 1, x_range_dmc[1], 1)
