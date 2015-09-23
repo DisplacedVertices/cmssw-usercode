@@ -43,36 +43,29 @@ C = partial(data_mc_comparison,
 dbv_bins = [j*0.005 for j in range(8)] + [0.04, 0.05, 0.06, 0.07, 0.085, 0.1]
 
 C('dbv',
-#  output_fn = 'plots/paper_draft/duh.pdf',
   histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_bsbs2ddist',
   int_lumi = ac.int_lumi * ac.scale_factor * 181076.0 / 135591.837455,
   rebin = dbv_bins,
   bin_width_to = 0.005,
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
-  x_range = (0, 0.1),
   y_range = (0.5, 100000),
   y_title_offset = 1.19,
   res_y_range = (0,2.5),
   legend_pos = (0.425, 0.679, 0.864, 0.901),
   )
 
-if 0:
-    C('sv_all_bsbs2ddist',
-      histogram_path = 'mfvVertexHistosWAnaCuts/h_sv_all_bsbs2ddist',
-      int_lumi = ac.int_lumi * ac.scale_factor * 251.0 / 139.30171468,
-      x_title = 'd_{BV} (cm)',
-      y_title = 'vertices/50 #mum',
-      x_range = (0, 0.1),
-      y_range = (0.1, 100000),
-      )
+dvv_bins = [j*0.02 for j in range(6)] + [0.2]
 
-    C('sv_all_svdist2d',
-      histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
-      int_lumi = ac.int_lumi * ac.scale_factor * 251.0 / 139.30171468,
-      x_title = 'd_{VV} (cm)',
-      y_title = 'events/0.01 cm',
-      x_range = (0, 0.3),
-      y_range = (0.1, 200),
-      rebin = 10,
-      )
+C('sv_all_svdist2d',
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
+  int_lumi = ac.int_lumi * ac.scale_factor * 251.0 / 139.30171468,
+  x_title = 'd_{VV} (cm)',
+  y_title = 'events/0.02 cm',
+  rebin = dvv_bins,
+  bin_width_to = 0.02,
+  y_title_offset = 1.19,
+  res_y_range = (0, 10),
+  y_range = (0.1, 300),
+  legend_pos = (0.425, 0.679, 0.864, 0.901),
+  )
