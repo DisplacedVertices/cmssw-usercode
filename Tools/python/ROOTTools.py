@@ -432,6 +432,7 @@ def data_mc_comparison(name,
                        stack_draw_cmd = 'hist',
                        overflow_in_last = False,
                        rebin = None,
+                       bin_width_to = None,
                        poisson_intervals = False,
                        x_title = '',
                        y_title = 'arb. units',
@@ -536,6 +537,8 @@ def data_mc_comparison(name,
         # Sanity check needed for the TFile caching below.
         previous_file_paths = list(set(vars(sample).get('file_path', None) for sample in all_samples))
         previous_file_paths_ok = len(previous_file_paths) == 1 and previous_file_paths[0] is not None
+        first_binning = None
+        bin_width_to_scales = None
         for sample in all_samples:
             if not previous_file_paths_ok:
                 # Cache the TFile and do basic check on the sample
@@ -553,15 +556,51 @@ def data_mc_comparison(name,
             sample.hist = sample._datamccomp_file.Get(histogram_path)
             if not issubclass(type(sample.hist), ROOT.TH1):
                 raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
+
+            xax = sample.hist.GetXaxis()
+            if not first_binning:
+                first_binning = [None] # ibin starts at 1
+                for ibin in xrange(1, xax.GetNbins()+2):
+                    first_binning.append(xax.GetBinLowEdge(ibin))
+            else:
+                for ibin in xrange(1, xax.GetNbins()+2):
+                    if abs(first_binning[ibin] - xax.GetBinLowEdge(ibin)) > 1e-6:
+                        raise ValueError('inconsistent binning')
+            xax = None
+
             if sample not in data_samples:
                 sample.hist.Scale(sample.partial_weight * int_lumi)
+
             if rebin is not None:
-                sample.hist.Rebin(rebin)
+                sample.hist_before_rebin = sample.hist
+                rebin_name = sample.hist.GetName() + '_rebinned'
+                if type(rebin) in (list, tuple):
+                    rebin = array('d', rebin)
+                if type(rebin) == array:
+                    if rebin[-1] > sample.hist.GetXaxis().GetXmax():
+                        raise ValueError('rebin_last %f greater than axis max (ROOT will handle this arbitrarily)' % (rebin[-1], sample.hist.GetXaxis().GetXmax()))
+                    sample.hist = sample.hist.Rebin(len(rebin)-1, rebin_name, rebin)
+                else:
+                    sample.hist.Rebin(rebin, rebin_name)
+
             if overflow_in_last:
                 if x_range is not None:
                     move_above_into_bin(sample.hist, x_range[1])
                 else:
                     move_overflow_into_last_bin(sample.hist)
+
+            if bin_width_to:
+                if bin_width_to_scales is None:
+                    bin_width_to_scales = [None]
+                    for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                        bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
+                    
+                for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                    c = sample.hist.GetBinContent(ibin)
+                    e = sample.hist.GetBinError(ibin)
+                    sc = bin_width_to_scales[ibin]
+                    sample.hist.SetBinContent(ibin, c / sc)
+                    sample.hist.SetBinError  (ibin, e / sc)
 
     # Use the first data sample to cache the summed histogram for all
     # the data.
@@ -662,7 +701,7 @@ def data_mc_comparison(name,
         data_sample.hist.SetMarkerStyle(data_marker_style)
         data_sample.hist.SetMarkerSize(data_marker_size)
         if poisson_intervals:
-            data_sample.hist_poissoned = poisson_intervalize(data_sample.hist)
+            data_sample.hist_poissoned = poisson_intervalize(data_sample.hist, rescales=bin_width_to_scales)
             data_sample.hist_poissoned.SetMarkerStyle(data_marker_style)
             data_sample.hist_poissoned.SetMarkerSize(data_marker_size)
             data_sample.hist_poissoned.Draw(data_draw_cmd)
@@ -718,7 +757,7 @@ def data_mc_comparison(name,
         ratio_pad.Draw()
         ratio_pad.cd(0)
 
-        res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True)
+        res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True) # JMTBAD way underestimates uncert in sum_background with weights, scales...
         res_g.SetLineWidth(res_line_width)
         res_g.SetLineColor(res_line_color)
         if x_range is None:
