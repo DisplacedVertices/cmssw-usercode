@@ -11,7 +11,7 @@ namespace mfv {
     int_lumi = 17600.;
 
     const char*
-    int_lumi_nice = "17.6 fb^{-1}";
+    int_lumi_nice = "17.6 fb^{-1} (8 TeV)";
 
     const double
     scale_factor = 0.978;
