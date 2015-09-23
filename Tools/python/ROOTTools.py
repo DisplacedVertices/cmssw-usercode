@@ -712,6 +712,7 @@ def data_mc_comparison(name,
     if enable_legend and legend_pos is not None:
         legend_entries.reverse()
         legend = ROOT.TLegend(*legend_pos)
+        legend.SetTextFont(42)
         legend.SetBorderSize(0)
         if data_sample is not None:
             legend.AddEntry(data_sample.hist, 'Data', 'LPE')
@@ -734,12 +735,16 @@ def data_mc_comparison(name,
         cut_line.Draw()
 
     if int_lumi_nice is not None:
-        t = ROOT.TPaveLabel(0.214, 0.898, 0.875, 0.998, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
-        t.SetTextSize(0.25)
-        t.SetBorderSize(0)
-        t.SetFillColor(0)
-        t.SetFillStyle(0)
-        t.Draw()
+        def write(font, size, x, y, text):
+            w = ROOT.TLatex()
+            w.SetNDC()
+            w.SetTextFont(font)
+            w.SetTextSize(size)
+            w.DrawLatex(x, y, text)
+            return w
+        cms = write(61, 0.04, 0.10, 0.93, 'CMS')
+        pre = write(52, 0.035, 0.19, 0.93, 'Preliminary')
+        lum = write(42, 0.04,  0.636, 0.93, int_lumi_nice)
 
     if verbose:
         if data_sample is not None:
