@@ -57,7 +57,7 @@ C('dbv',
 
 dvv_bins = [j*0.02 for j in range(6)] + [0.2]
 
-C('sv_all_svdist2d',
+C('dvv',
   histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
   int_lumi = ac.int_lumi * ac.scale_factor * 251.0 / 139.30171468,
   x_title = 'd_{VV} (cm)',
