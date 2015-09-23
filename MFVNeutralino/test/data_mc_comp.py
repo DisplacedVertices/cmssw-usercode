@@ -16,7 +16,7 @@ data_samples = Samples.data_samples
 background_samples = Samples.smaller_background_samples + Samples.leptonic_background_samples + Samples.ttbar_samples + Samples.qcd_samples
 signal_sample = Samples.mfv_neutralino_tau1000um_M0400
 signal_sample.cross_section = 0.001
-signal_sample.nice_name = '#tau = 1 mm, M = 400 GeV, #sigma = 1 fb signal'
+signal_sample.nice_name = '#splitline{#tau = 1 mm, M = 400 GeV,}{#sigma = 1 fb signal}'
 signal_sample.color = 8
 
 for s in Samples.qcd_samples:
@@ -35,7 +35,7 @@ C = partial(data_mc_comparison,
             overflow_in_last = True,
             poisson_intervals = True,
             enable_legend = True,
-            legend_pos = (0.27, 0.70, 0.87, 0.90),
+            legend_pos = (0.418, 0.701, 0.858, 0.909),
             res_fit = False,
             verbose = True,
             )
@@ -52,7 +52,6 @@ C('dbv',
   y_range = (0.5, 100000),
   y_title_offset = 1.19,
   res_y_range = (0,2.5),
-  legend_pos = (0.425, 0.679, 0.864, 0.901),
   )
 
 dvv_bins = [j*0.2 for j in range(6)] + [2.]
@@ -67,5 +66,4 @@ C('dvv',
   y_title_offset = 1.19,
   res_y_range = (0, 10),
   y_range = (0.1, 300),
-  legend_pos = (0.425, 0.679, 0.864, 0.901),
   )
