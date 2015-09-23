@@ -107,7 +107,7 @@ def poisson_interval(nobs, alpha=(1-0.6827)/2, beta=(1-0.6827)/2):
     upper = 0.5 * ROOT.Math.chisquared_quantile_c(beta, 2*(nobs+1))
     return lower, upper
 
-def poisson_intervalize(h, zero_x=False, include_zero_bins=False):
+def poisson_intervalize(h, zero_x=False, include_zero_bins=False, rescales=None):
     bins = []
     for i in xrange(1, h.GetNbinsX()+1):
         y = h.GetBinContent(i)
@@ -121,7 +121,13 @@ def poisson_intervalize(h, zero_x=False, include_zero_bins=False):
         xh = h.GetBinLowEdge(ibin+1)
         x = (xl + xh)/2
         y = h.GetBinContent(ibin)
+        if rescales:
+            y *= rescales[ibin]
         yl, yh = poisson_interval(y)
+        if rescales:
+            y /= rescales[ibin]
+            yl /= rescales[ibin]
+            yh /= rescales[ibin]
         h2.SetPoint(np, x, y)
 
         if zero_x:
