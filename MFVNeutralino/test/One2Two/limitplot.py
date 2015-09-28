@@ -4,13 +4,7 @@ import bigsigscan as bss
 from array import array
 from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
-
-set_style()
-rainbow_palette()
-ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test_3', log=False, size=(600,600))
-
-which = 'v10p1'
-draw_gluglu = True
+from JMTucker.Tools.general import from_pickle
 
 def fmt(t, title, color):
     t.SetFillColor(color)
@@ -159,11 +153,6 @@ def make_plot(d, name, title, y_range):
 
 ####
 
-if draw_gluglu:
-    g_gluglu = make_gluglu()
-    g_gluglu.Draw('A3')
-    ps.save('gluglu', log=True)
-
 def old_plots():
     tau0s = [
         ('0100um', '#tau = 100 #mum'),
@@ -188,6 +177,7 @@ def old_plots():
                 print 'skip', tau0, mass
                 nn -= 1
                 continue
+            which = 'v10p1'
             observed_fn = 'crab/One2Two_v10p1/lsts/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
             expected_fn = 'crab/One2Two_v10p1/lsts/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
             #observed_fn = 'combine/combine_n%ix-1.out' % nn
@@ -339,7 +329,7 @@ def gluglu_exclude(h):
             
             s = sa + (sb - sa) * z
             es = (z**2 * esb**2 + (1 - z)**2 * esa**2)**0.5
-            print tau0, mass, lim, ma, sa, esa, mb, sb, esb, s, es
+            #print tau0, mass, lim, ma, sa, esa, mb, sb, esb, s, es
 
             bin = hexc.FindBin(mass, tau0)
             if lim < s - es:
@@ -381,19 +371,24 @@ def dbg_exclude():
     hi.Draw('colz text00')
     c.SaveAs('/uscms/home/tucker/asdf/a.png')
 
-def exc_graph(h, color, style):
+def exc_graph(h, color, style, duh):
     xax = h.GetXaxis()
     yax = h.GetYaxis()
     xs,ys = array('d'), array('d')
     for iy in xrange(1, h.GetNbinsY()+1):
         y = yax.GetBinLowEdge(iy)
-        for ix in xrange(h.GetNbinsX()+1, 0, -1):
+        for ix in xrange(h.GetNbinsX(), 0, -1):
             x = xax.GetBinLowEdge(ix)
             l = h.GetBinContent(ix, iy)
             if l:
                 xs.append(x)
-                ys.append(y/1000)
+                ys.append(y)
+                print x, y, l
                 break
+    if duh:
+        assert ys[-1] == 30000
+        ys.append(32000)
+        xs.append(xs[-1])
     g = ROOT.TGraph(len(xs), xs, ys)
     g.SetTitle(';neutralino mass (GeV);neutralino lifetime (mm)')
     g.SetLineWidth(2)
@@ -403,18 +398,154 @@ def exc_graph(h, color, style):
     g.GetHistogram().SetMinimum(0.3)
     return g
 
+def exc_graph_dumb(h, width, color, style, break_at):
+    xax = h.GetXaxis()
+    yax = h.GetYaxis()
+    axes = [yax, xax]
+    nbins = [h.GetNbinsY(), h.GetNbinsX()]
+    
+    gs = []
+
+    def make_g(x0, x1, y0, y1):
+        g = ROOT.TGraph(2, array('d', [x0, x1]), array('d', [y0, y1]))
+        g.SetTitle(';neutralino mass (GeV);neutralino lifetime (mm)')
+        g.SetLineWidth(width)
+        g.SetLineColor(color)
+        g.SetLineStyle(style)
+        g.GetHistogram().SetMaximum(30)
+        g.GetHistogram().SetMinimum(0.3)
+        gs.append(g)
+
+    for iy in xrange(1, h.GetNbinsY()+1):
+        y0 = yax.GetBinLowEdge(iy)
+        y1 = yax.GetBinLowEdge(iy+1)
+        for ix in xrange(h.GetNbinsX()-1, 0, -1):
+            l = h.GetBinContent(ix, iy)
+            lm1 = h.GetBinContent(ix+1, iy)
+            if l + lm1 == 1:
+                x0 = x1 = xax.GetBinUpEdge(ix)
+                make_g(x0, x1, y0, y1)
+
+    for ix in xrange(1, h.GetNbinsX()+1):
+        x0 = xax.GetBinLowEdge(ix)
+        x1 = xax.GetBinLowEdge(ix+1)
+        for iy in xrange(h.GetNbinsY()-1, 0, -1):
+            l = h.GetBinContent(ix, iy)
+            lm1 = h.GetBinContent(ix, iy+1)
+            if l + lm1 == 1:
+                y0 = y1 = yax.GetBinUpEdge(iy)
+                if y0 > break_at:
+                    make_g(x0, x1, y0, y1)
+
+    return gs
+
 def dbg_exclude():
     f = ROOT.TFile('newplots.root')
-    gobs = exc_graph(f.Get('hlim_observed_interp_exc'), 2, 1)
-    gexp = exc_graph(f.Get('hlim_expect50_interp_exc'), 2, 2)
 
-    c = ROOT.TCanvas('c', '', 800, 600)
-    gobs.Draw('AL')
-    gexp.Draw('L')
-    
-    c.SaveAs('/uscms/home/tucker/asdf/a.png')
+    for interp in ('', '_interp'):
+        c = ROOT.TCanvas('c', '', 1000, 800)
 
-dbg_exclude()
+        hlim = f.Get('hlim_observed%s' % interp)
+        for ix in xrange(0, hlim.GetNbinsX()+2):
+            for iy in xrange(0, hlim.GetNbinsY()+2):
+                hlim.SetBinContent(ix, iy, 0)
+                hlim.SetBinError  (ix, iy, 0)
+        hlim.Draw()
 
-#export_plots()
-#duh()
+        #hexc = 
+        #hexc.Draw('colz')
+
+        gs = exc_graph_dumb(f.Get('hlim_observed%s_exc' % interp), 2, ROOT.kBlack, 1, -1) + \
+             exc_graph_dumb(f.Get('hlim_expect50%s_exc' % interp), 2, ROOT.kBlue, 1, -1) + \
+             exc_graph_dumb(f.Get('hlim_expect16%s_exc' % interp), 2, ROOT.kRed, 1, -1) + \
+             exc_graph_dumb(f.Get('hlim_expect84%s_exc' % interp), 2, ROOT.kMagenta, 1, -1)
+
+        for g in gs:
+            g.Draw('L')
+
+        c.SaveAs('/uscms/home/tucker/asdf/a%s.png' % interp)
+        c.SaveAs('/uscms/home/tucker/asdf/a%s.root' % interp)
+
+def dump_csv(h):
+    f = open(h.GetName() + '.csv', 'wt')
+    f.write('x,y,z\n')
+    for ix in xrange(1, h.GetNbinsX()+1):
+        for iy in xrange(1, h.GetNbinsY()+1):
+            f.write('%.1f,%.1f,%.6f\n' % (h.GetXaxis().GetBinLowEdge(ix), h.GetYaxis().GetBinLowEdge(iy), h.GetBinContent(ix, iy)))
+    f.close()
+
+def to_r():
+    f = ROOT.TFile('newplots.root')
+    print 'library(akima)'
+    for x in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
+        dump_csv(f.Get('hlim_%s' % x))
+        print 'h<-read.table("c:/users/tucker/desktop/hlim_%s.csv", header=TRUE, sep=",")' % x
+        print 'i<-interp(x=h$x, y=h$y, z=h$z, xo=seq(300, 1500, by=1), yo=seq(100,30000,by=100))'
+        print 'write.csv(i$x, "c:/users/tucker/desktop/%s_x.csv")' % x
+        print 'write.csv(i$y, "c:/users/tucker/desktop/%s_y.csv")' % x
+        print 'write.csv(i$z, "c:/users/tucker/desktop/%s_z.csv")' % x
+        
+def one_from_r(ex, name, csvs=True):
+    if csvs:
+        def read_csv(fn):
+            lines = [x.strip() for x in open(fn).read().replace('"', '').split('\n') if x.strip()]
+            lines.pop(0)
+            vs = []
+            for line in lines:
+                ws = [float(x) for x in line.split(',')]
+                ws.pop(0)
+                if len(ws) == 1:
+                    ws = ws[0]
+                vs.append(ws)
+            return vs
+
+        x = read_csv('%s_x.csv' % ex)
+        y = read_csv('%s_y.csv' % ex)
+        z = read_csv('%s_z.csv' % ex)
+    else:
+        x,y,z = from_pickle('/uscms/home/tucker/afshome/%sxyz.gzpickle' % ex)
+
+    assert sorted(x) == x
+    assert sorted(y) == y
+    nx = len(x)
+    ny = len(y)
+    x.append(x[-1] + (x[-1] - x[-2]))
+    y.append(y[-1] + (y[-1] - y[-2]))
+    #print ex, nx, ny
+    x = array('d', x)
+    y = array('d', y)
+    h = ROOT.TH2F(name, '', len(x)-1, x, len(y)-1, y)
+    h.SetStats(0)
+    for ix in xrange(1, nx+1):
+        for iy in xrange(1, ny+1):
+            h.SetBinContent(ix, iy, z[ix-1][iy-1])
+    return h
+
+def from_r():
+    f = ROOT.TFile('newplots_fromr.root', 'recreate')
+    for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
+        n = 'hlim_%s_fromrinterp' % ex
+        h = one_from_r(ex, n)
+        hexc = gluglu_exclude(h)
+        g = exc_graph(hexc, 1, 1, duh=True)
+        g.SetName(n + '_exc_g')
+        h.Write()
+        hexc.Write()
+        g.Write()
+    f.Close()
+
+if __name__ == '__main__':
+    set_style()
+    rainbow_palette()
+
+    if 0:
+        ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test_3', log=False, size=(600,600))
+        g_gluglu = make_gluglu()
+        g_gluglu.Draw('A3')
+        ps.save('gluglu', log=True)
+
+    #export_plots()
+
+    #dbg_exclude()
+
+    from_r()
