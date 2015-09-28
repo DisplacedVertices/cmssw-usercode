@@ -10,3 +10,4 @@ hogg_data.h
 combine_new
 crab3
 debugs
+*.csv
