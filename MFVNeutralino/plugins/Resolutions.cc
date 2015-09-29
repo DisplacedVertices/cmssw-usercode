@@ -40,11 +40,12 @@ class MFVResolutions : public edm::EDAnalyzer {
 //  TH1F* h_dr;
   TH1F* h_dist;
 
-/*
+  TH1F* h_lspsnmatch;
   TH1F* h_lsp_nmatch[2];
   TH2F* h_lsp0nmatch_lsp1nmatch;
   TH2F* h_vtxmatch_vtxtotal;
 
+/*
   TH1F* h_dx;
   TH1F* h_dy;
   TH1F* h_dz;
@@ -199,13 +200,14 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 //  h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
 
-/*
+  h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
   for (int i = 0; i < 2; ++i) {
     h_lsp_nmatch[i] = fs->make<TH1F>(TString::Format("h_lsp%d_nmatch", i), TString::Format(";number of vertices that match lsp%d;events", i), 15, 0, 15);
   }
   h_lsp0nmatch_lsp1nmatch = fs->make<TH2F>("h_lsp0nmatch_lsp1nmatch", ";lsp1_nmatch;lsp0_nmatch", 15, 0, 15, 15, 0, 15);
   h_vtxmatch_vtxtotal = fs->make<TH2F>("h_vtxmatch_vtxtotal", ";total number of vertices in the event;number of vertices that match an lsp", 15, 0, 15, 15, 0, 15);
 
+/*
   h_dx = fs->make<TH1F>("h_dx", ";x resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dy = fs->make<TH1F>("h_dy", ";y resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dz = fs->make<TH1F>("h_dz", ";z resolution (cm);number of vertices", 200, -0.02, 0.02);
@@ -861,6 +863,10 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     h_gen_drmax->Fill(drmax);
   }
 
+
+  int lsp_nmatch[2] = {0,0};
+  int nvtx_match = 0;
+
   for (const MFVVertexAux& vtx : *vertices) {
     double dist = 1e99;
     int ilsp = -1;
@@ -877,6 +883,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
       for (int i = 0; i < 2; ++i) {
         if (dists[i] < max_dist) {
+          ++lsp_nmatch[i];
           if (dists[i] < dist) {
             dist = dists[i];
             ilsp = i;
@@ -889,6 +896,8 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       continue;
     }
 
+    ++nvtx_match;
+
     h_dist->Fill(dist);
 
     h_rec_ntracks->Fill(vtx.ntracks());
@@ -899,6 +908,17 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
     h_rec_dbv->Fill(vtx.bs2ddist);
   }
+
+  // histogram lsp_nmatch
+  for (int i = 0; i < 2; ++i) {
+    h_lspsnmatch->Fill(lsp_nmatch[i]);
+    h_lsp_nmatch[i]->Fill(lsp_nmatch[i]);
+  }
+  h_lsp0nmatch_lsp1nmatch->Fill(lsp_nmatch[1], lsp_nmatch[0]);
+
+  const int nsv = int(vertices->size());
+  h_vtxmatch_vtxtotal->Fill(nsv, nvtx_match);
+
 }
 
 DEFINE_FWK_MODULE(MFVResolutions);
