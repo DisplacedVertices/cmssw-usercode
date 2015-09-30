@@ -6,23 +6,23 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, tdr_style, plot_saver
 from functools import partial
 
-root_file_dir = 'HistosV20_rebin_for_paper' # '/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/HistosV20'
-plot_dir = 'plots/paper_draft_2'
+root_file_dir = 'HistosV3' # '/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/HistosV20'
+plot_dir = 'plots/HistosV3_data_mc_comp'
 
 set_style()
-ps = plot_saver(plot_dir, size=(1,1), root_log=True, pdf_log=True)
+ps = plot_saver(plot_dir)
 
 data_samples = Samples.data_samples
-background_samples = Samples.smaller_background_samples + Samples.leptonic_background_samples + Samples.ttbar_samples + Samples.qcd_samples
-signal_sample = Samples.mfv_neutralino_tau1000um_M0400
+background_samples = Samples.ttbar_samples + Samples.qcd_samples
+signal_sample = Samples.mfv_neutralino_tau1000um_M0800
 signal_sample.cross_section = 0.001
-signal_sample.nice_name = '#splitline{#tau = 1 mm, M = 400 GeV,}{#sigma = 1 fb signal}'
+signal_sample.nice_name = '#splitline{#tau = 1 mm, M = 800 GeV,}{#sigma = 1 fb signal}'
 signal_sample.color = 8
 
 for s in Samples.qcd_samples:
     s.join_info = True, 'Multi-jet events', ROOT.kBlue-9
-for s in Samples.ttbar_samples + Samples.smaller_background_samples + Samples.leptonic_background_samples:
-    s.join_info = True, 't#bar{t}, single t, V+jets, t#bar{t}+V, VV', ROOT.kBlue-7
+for s in Samples.ttbar_samples: # + Samples.smaller_background_samples + Samples.leptonic_background_samples:
+    s.join_info = True, 't#bar{t}', ROOT.kBlue-7 #, single t, V+jets, t#bar{t}+V, VV', ROOT.kBlue-7
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,
