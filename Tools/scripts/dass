@@ -32,6 +32,7 @@ query_infos = [
     (('ds', 'dataset dataset=%s', 1), lambda s: s),
     (('file', 'file dataset=%s', 1), lambda s: s.endswith('.root')),
     (('run', 'run dataset=%s', 1), lambda s: intable(s)),
+    (('lumi', 'lumi dataset=%s', 1), lambda s: intable(s)),
     ]
 
 found = False
