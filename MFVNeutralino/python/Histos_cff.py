@@ -34,4 +34,9 @@ pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnl
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts * mfvAbcdHistosSeq)
-#pFullSelEff = cms.Path( pFullSel * simpleTriggerEfficiency.clone())
+
+mfvAnalysisCutsSigReg = mfvAnalysisCuts.clone(min_svdist2d = 0.06)
+mfvEventHistosSigReg = mfvEventHistos.clone()
+mfvVertexHistosSigReg = mfvVertexHistos.clone()
+pSigReg = cms.Path(mfvCommon * mfvAnalysisCutsSigReg * mfvEventHistosSigReg * mfvVertexHistosSigReg)
+
