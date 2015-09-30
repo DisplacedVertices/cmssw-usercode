@@ -170,6 +170,7 @@ for x in __all__:
 
 # from the trigger soup with 17 paths            # 68% CL interval
 qcd_ht_mg_25ns_0100     .filter_eff = 0.000e+00  # [0.000e+00, 1.840e-05]
+qcd_ht_mg_25ns_0200     .filter_eff = 3.400e-04  
 qcd_ht_mg_25ns_0300     .filter_eff = 1.977e-02  # [1.933e-02, 2.022e-02]
 qcd_ht_mg_25ns_0500     .filter_eff = 2.517e-01  # [2.503e-01, 2.531e-01]
 qcd_ht_mg_25ns_0700     .filter_eff = 9.044e-01  # [9.035e-01, 9.053e-01]
