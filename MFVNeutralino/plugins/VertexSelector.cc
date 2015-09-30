@@ -220,7 +220,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
 
   int ntracks_sub = 0;
   for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
-    if (vtx.track_dxy[i] > max_trackdxy)
+    if (fabs(vtx.track_dxy[i]) > max_trackdxy)
       ++ntracks_sub;
 
   return 
