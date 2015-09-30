@@ -1,8 +1,9 @@
 import sys, FWCore.ParameterSet.Config as cms
-from JMTucker.Tools.CMSSWTools import file_event_from_argv, add_analyzer as _add_analyzer
+from JMTucker.Tools.CMSSWTools import files_from_file, file_event_from_argv, add_analyzer as _add_analyzer
 
 process = cms.Process('BasicAnalyzer')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:pat.root'))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
@@ -17,15 +18,16 @@ def geometry_etc(process, tag):
     process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
     process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
     
-def add_analyzer(name, **kwargs):
+def add_analyzer(process, name, **kwargs):
     return _add_analyzer(process, name, **kwargs)
 
-def report_every(i):
+def report_every(process, i):
     process.MessageLogger.cerr.FwkReport.reportEvery = i
 
 __all__ = [
     'cms',
     'process',
+    'files_from_file',
     'file_event_from_argv',
     'geometry_etc',
     'add_analyzer',
