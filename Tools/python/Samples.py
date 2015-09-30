@@ -139,7 +139,7 @@ auxiliary_data_samples = [
 
 ########################################################################
 
-samples = SamplesRegistry()
+registry = SamplesRegistry()
 
 __all__ = [
     'qcd_ht_mg_25ns_samples',
@@ -152,15 +152,15 @@ __all__ = [
 #    'auxiliary_background_samples',
     'data_samples',
     'auxiliary_data_samples',
-    'samples',
+    'registry',
     ]
 
 for x in __all__:
     o = eval(x)
     if type(o) == list:
-        samples.add_list(x,o)
+        registry.add_list(x,o)
         for sample in o:
-            samples.add(sample)
+            registry.add(sample)
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
 
@@ -198,4 +198,4 @@ mfv_neu_tau10000um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
 ########################################################################
 
 if __name__ == '__main__':
-    pass # JMTBAD
+    main(registry)
