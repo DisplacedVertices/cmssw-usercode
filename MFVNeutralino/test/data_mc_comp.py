@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = 'HistosV3'
+root_file_dir = '/uscms_data/d3/dquach/crab3dirs/HistosV3'
 plot_dir = 'plots/HistosV3_data_mc_comp'
 
 set_style()
@@ -15,8 +15,8 @@ ps = plot_saver(plot_dir)
 scale_factor = 1.
 
 data_samples = [] # Samples.data_samples
-background_samples = Samples.ttbar_samples + Samples.qcd_samples
-signal_sample = Samples.mfv_neutralino_tau1000um_M0800
+background_samples = Samples.ttbar_samples + Samples.qcd_samples[1:]
+signal_sample = Samples.mfv_neu_tau01000um_M0800
 signal_sample.cross_section = 0.001
 signal_sample.nice_name = '#splitline{#tau = 1 mm, M = 800 GeV,}{#sigma = 1 fb signal}'
 signal_sample.color = 8
@@ -49,8 +49,8 @@ dbv_bins = [j*0.05 for j in range(8)] + [0.4, 0.5, 0.6, 0.7, 0.85, 1.]
 C('dbv',
   histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_bsbs2ddist',
   int_lumi = ac.int_lumi * ac.scale_factor * 181076.0 / 135591.837455,
-  rebin = dbv_bins,
-  bin_width_to = 0.05,
+#  rebin = dbv_bins,
+#  bin_width_to = 0.05,
   x_title = 'd_{BV} (mm)',
   y_title = 'vertices/50 #mum',
   y_range = (0.5, 100000),
@@ -65,8 +65,8 @@ C('dvv',
   int_lumi = ac.int_lumi * ac.scale_factor * 251.0 / 139.30171468,
   x_title = 'd_{VV} (mm)',
   y_title = 'events/0.2 mm',
-  rebin = dvv_bins,
-  bin_width_to = 0.2,
+#  rebin = dvv_bins,
+#  bin_width_to = 0.2,
   y_title_offset = 1.19,
   res_y_range = (0, 10),
   y_range = (0.1, 300),
@@ -93,6 +93,9 @@ def is_enabled(s):
 def D(*args, **kwargs):
     if is_enabled(args[0]):
         C(*args, **kwargs)
+
+def event_histo(h):
+    return 'mfvEventHistos/' + h
 
 D('npv',
   histogram_path = event_histo('h_npv'),
@@ -261,7 +264,7 @@ D('sv_best0_njetsntks_nm1',
   )
 
 D('sv_best0_bsbs2ddist',
-  histogram_path = vertex_histo('h_sv_best0_bsbs2ddist'),
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_sv_best0_bsbs2ddist',
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.1),
@@ -278,7 +281,7 @@ D('sv_best0_bs2derr_nm1',
   )
 
 D('sv_best0_jets_deltaphi',
-  histogram_path = vertex_histo('h_sv_best0_jets_deltaphi'),
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_sv_best0_jets_deltaphi',
   x_title = '#Delta#phi_{JV}',
   y_title = 'jet-vertex pairs/0.252',
   y_range = (None,1e5),
@@ -336,7 +339,7 @@ D('sv_all_ntracksptgt3_nm1',
   )
 
 D('sv_all_tksjetsntkmass',
-  histogram_path = vertex_histo('h_sv_all_tksjetsntkmass'),
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_sv_all_tksjetsntkmass',
   rebin = 6,
   x_title = 'tracks + associated jets\' mass (GeV)',
   y_title = 'vertices/90 GeV',
@@ -379,7 +382,7 @@ D('sv_all_njetsntks_nm1',
   )
 
 D('sv_all_bsbs2ddist',
-  histogram_path = vertex_histo('h_sv_all_bsbs2ddist'),
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_sv_all_bsbs2ddist',
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.1),
@@ -396,7 +399,7 @@ D('sv_all_bs2derr_nm1',
   )
 
 D('sv_all_svdist2d',
-  histogram_path = vertex_histo('h_svdist2d'),
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
   x_title = 'd_{VV} (cm)',
   y_title = 'events/0.01 cm',
   x_range = (0,0.3),
