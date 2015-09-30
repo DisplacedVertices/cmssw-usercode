@@ -107,7 +107,7 @@ def poisson_interval(nobs, alpha=(1-0.6827)/2, beta=(1-0.6827)/2):
     upper = 0.5 * ROOT.Math.chisquared_quantile_c(beta, 2*(nobs+1))
     return lower, upper
 
-def poisson_intervalize(h, zero_x=False, include_zero_bins=False):
+def poisson_intervalize(h, zero_x=False, include_zero_bins=False, rescales=None):
     bins = []
     for i in xrange(1, h.GetNbinsX()+1):
         y = h.GetBinContent(i)
@@ -121,7 +121,13 @@ def poisson_intervalize(h, zero_x=False, include_zero_bins=False):
         xh = h.GetBinLowEdge(ibin+1)
         x = (xl + xh)/2
         y = h.GetBinContent(ibin)
+        if rescales:
+            y *= rescales[ibin]
         yl, yh = poisson_interval(y)
+        if rescales:
+            y /= rescales[ibin]
+            yl /= rescales[ibin]
+            yh /= rescales[ibin]
         h2.SetPoint(np, x, y)
 
         if zero_x:
@@ -426,6 +432,7 @@ def data_mc_comparison(name,
                        stack_draw_cmd = 'hist',
                        overflow_in_last = False,
                        rebin = None,
+                       bin_width_to = None,
                        poisson_intervals = False,
                        x_title = '',
                        y_title = 'arb. units',
@@ -444,78 +451,168 @@ def data_mc_comparison(name,
                        res_y_title = 'data/MC',
                        res_y_title_offset = None,
                        res_y_label_size = 0.03,
+                       res_y_range = (0., 3.),
                        res_draw_cmd = 'apez',
+                       res_fit = True,
                        legend_pos = None,
                        enable_legend = True,
                        verbose = False,
                        cut_line = None,
                        background_uncertainty = None,
                        ):
-    """JMTBAD.
+    """
+    Put the histograms for the background samples into a THStack, with
+    normalization, color, legend, and other 'join information' (which
+    samples are grouped with which) taken from the Sample objects.
 
-    If histogram_path and file_path are not supplied, all of the
-    sample objects must have a member object named 'hist' that has the
-    histogram preloaded.
+    Optionally, draw the same histogram for signal examples (not
+    stacked, but overlaid) and data samples. The signal normalization,
+    style, and color info are also taken from their Sample objects.
 
-    file_path is of the format
-    'path/to/root/files/filename_%(sample_name)s.root'.
+    If multiple data samples are supplied, the hists are simply added
+    together. If any data sample is supplied, a data/MC ratio plot is
+    drawn in a sub pad at the bottom of the canvas. Some of the
+    related parameters (e.g. canvas, margin sizes) are exposed, but
+    some are hardcoded for now, so fiddling with them may screw things
+    up, or not produce the expected behavior. JMTBAD
+    
+    If histogram_path, file_path, and int_lumi are not supplied, all
+    of the Sample objects must have a member object named 'hist' that
+    has the histogram preloaded. Otherwise:
 
-    histogram_path is the path to the histogram inside the ROOT
+    - file_path must be of the format
+    'filesystem/path/to/root/files/filename_%(name)s.root', with name
+    being taken from the Sample object.
+
+    - histogram_path is the path to the histogram inside the ROOT
     files, e.g. 'histos/RecoJets/njets'.
 
-    int_lumi is the integrated luminosity to scale the MC to, in
-    pb^-1.
+    - int_lumi is the integrated luminosity to scale the MC to, in
+    pb^-1. Then the overall scale factor is int_lumi *
+    Sample.partial_weight, which already must include number of
+    events, cross section, filter efficiencies, k-factors -- see the
+    Sample object for how that works.
+
+    - Any TFiles and hists constructed are cached in the Sample
+    objects.
+
+    The saving of output files is done by a plot_saver object (see
+    that class definition for more info), or directly with
+    canvas.SaveAs if output_fn is specified and plot_saver is
+    not. (Exactly one may be specified.) The plot_saver object's
+    canvas is replaced with one made internally here (to support the
+    sub pad for the data/MC ratio plot).
+
+    Other info for the rest of the parameters:
+
+    - name: used to name the TCanvas/ratio TPad, THStack, auxiliary
+    histogram for the ratio plot, and save name for the plot_saver.
     
+    - background_samples, signal_samples, and data_samples must be
+    lists of Sample objects. signal_samples and data_samples may be
+    empty lists.
+
+    JMTBAD finish documentation
     """
 
     all_samples = background_samples + signal_samples
-
     if data_samples:
          all_samples.extend(data_samples)
-    
+
+    # Sanity checks on the parameters.
     if output_fn is None and plot_saver is None:
         raise ValueError('at least one of output_fn, plot_saver must be supplied')
+    elif output_fn is not None and plot_saver is not None:
+        raise ValueError('only one of output_fn and plot_saver may be supplied')
 
     check_params = (file_path is None, histogram_path is None, int_lumi is None)
     if any(check_params) and not all(check_params):
         raise ValueError('must supply all of file_path, histogram_path, int_lumi or none of them')
 
     if file_path is None:
+        # Sanity check that all the samples have the hist preloaded.
         for sample in all_samples:
             if not hasattr(sample, 'hist') or not issubclass(type(sample.hist), ROOT.TH1):
                 raise ValueError('all sample objects must have hist preloaded if file_path is not supplied')
     else:
+        # Sanity check needed for the TFile caching below.
         previous_file_paths = list(set(vars(sample).get('file_path', None) for sample in all_samples))
         previous_file_paths_ok = len(previous_file_paths) == 1 and previous_file_paths[0] is not None
+        first_binning = None
+        bin_width_to_scales = None
         for sample in all_samples:
             if not previous_file_paths_ok:
+                # Cache the TFile and do basic check on the sample
+                # that the number of events is correct (if
+                # hist_path_for_nevents_check specified).
                 sample._datamccomp_file_path = file_path
                 sample._datamccomp_filename = file_path % sample
                 sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
                 if sample not in data_samples and hist_path_for_nevents_check is not None:
                     if sample.nevents_from_file(hist_path_for_nevents_check, f=sample._datamccomp_file) != sample.nevents:
                         raise ValueError('wrong number of events for %s' % sample.name)
+
+            # Get the histogram, normalize, rebin, and move the
+            # overflow to the last bin.
             sample.hist = sample._datamccomp_file.Get(histogram_path)
             if not issubclass(type(sample.hist), ROOT.TH1):
                 raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
+
+            xax = sample.hist.GetXaxis()
+            if not first_binning:
+                first_binning = [None] # ibin starts at 1
+                for ibin in xrange(1, xax.GetNbins()+2):
+                    first_binning.append(xax.GetBinLowEdge(ibin))
+            else:
+                for ibin in xrange(1, xax.GetNbins()+2):
+                    if abs(first_binning[ibin] - xax.GetBinLowEdge(ibin)) > 1e-6:
+                        raise ValueError('inconsistent binning')
+            xax = None
+
             if sample not in data_samples:
                 sample.hist.Scale(sample.partial_weight * int_lumi)
+
             if rebin is not None:
-                sample.hist.Rebin(rebin)
+                sample.hist_before_rebin = sample.hist
+                rebin_name = sample.hist.GetName() + '_rebinned'
+                if type(rebin) in (list, tuple):
+                    rebin = array('d', rebin)
+                if type(rebin) == array:
+                    if rebin[-1] > sample.hist.GetXaxis().GetXmax():
+                        raise ValueError('rebin_last %f greater than axis max (ROOT will handle this arbitrarily)' % (rebin[-1], sample.hist.GetXaxis().GetXmax()))
+                    sample.hist = sample.hist.Rebin(len(rebin)-1, rebin_name, rebin)
+                else:
+                    sample.hist.Rebin(rebin, rebin_name)
+
             if overflow_in_last:
                 if x_range is not None:
                     move_above_into_bin(sample.hist, x_range[1])
                 else:
                     move_overflow_into_last_bin(sample.hist)
 
+            if bin_width_to:
+                if bin_width_to_scales is None:
+                    bin_width_to_scales = [None]
+                    for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                        bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
+                    
+                for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                    c = sample.hist.GetBinContent(ibin)
+                    e = sample.hist.GetBinError(ibin)
+                    sc = bin_width_to_scales[ibin]
+                    sample.hist.SetBinContent(ibin, c / sc)
+                    sample.hist.SetBinError  (ibin, e / sc)
+
+    # Use the first data sample to cache the summed histogram for all
+    # the data.
     data_sample = None
     if len(data_samples) >= 1:
         print 'len data samples', len(data_samples)
         data_sample = data_samples[0]
-        print 'integ', data_sample.hist.Integral(0,1000000)
+        print 'integ', get_integral(data_sample.hist)[0]
         for ds in data_samples[1:]:
             data_sample.hist.Add(ds.hist)
-            print 'integ', data_sample.hist.Integral(0,1000000)
+            print 'integ', get_integral(data_sample.hist)[0]
 
     #####################
 
@@ -605,7 +702,7 @@ def data_mc_comparison(name,
         data_sample.hist.SetMarkerStyle(data_marker_style)
         data_sample.hist.SetMarkerSize(data_marker_size)
         if poisson_intervals:
-            data_sample.hist_poissoned = poisson_intervalize(data_sample.hist)
+            data_sample.hist_poissoned = poisson_intervalize(data_sample.hist, rescales=bin_width_to_scales)
             data_sample.hist_poissoned.SetMarkerStyle(data_marker_style)
             data_sample.hist_poissoned.SetMarkerSize(data_marker_size)
             data_sample.hist_poissoned.Draw(data_draw_cmd)
@@ -615,15 +712,16 @@ def data_mc_comparison(name,
     if enable_legend and legend_pos is not None:
         legend_entries.reverse()
         legend = ROOT.TLegend(*legend_pos)
+        legend.SetTextFont(42)
         legend.SetBorderSize(0)
+        if data_sample is not None:
+            legend.AddEntry(data_sample.hist, 'Data', 'LPE')
         for l in legend_entries:
             legend.AddEntry(*l)
         if background_uncertainty is not None:
             legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
             legend.AddEntry(sample.hist, sample.nice_name, 'L')
-        if data_sample is not None:
-            legend.AddEntry(data_sample.hist, 'data', 'LPE')
         legend.Draw()
     else:
         legend = None
@@ -637,12 +735,16 @@ def data_mc_comparison(name,
         cut_line.Draw()
 
     if int_lumi_nice is not None:
-        t = ROOT.TPaveLabel(0.214, 0.898, 0.875, 0.998, 'CMS 2012 preliminary   #sqrt{s} = 8 TeV    #int L dt = %s' % int_lumi_nice, 'brNDC')
-        t.SetTextSize(0.25)
-        t.SetBorderSize(0)
-        t.SetFillColor(0)
-        t.SetFillStyle(0)
-        t.Draw()
+        def write(font, size, x, y, text):
+            w = ROOT.TLatex()
+            w.SetNDC()
+            w.SetTextFont(font)
+            w.SetTextSize(size)
+            w.DrawLatex(x, y, text)
+            return w
+        cms = write(61, 0.04, 0.10, 0.93, 'CMS')
+        pre = write(52, 0.035, 0.19, 0.93, 'Preliminary')
+        lum = write(42, 0.04,  0.636, 0.93, int_lumi_nice)
 
     if verbose:
         if data_sample is not None:
@@ -661,7 +763,7 @@ def data_mc_comparison(name,
         ratio_pad.Draw()
         ratio_pad.cd(0)
 
-        res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True)
+        res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True) # JMTBAD way underestimates uncert in sum_background with weights, scales...
         res_g.SetLineWidth(res_line_width)
         res_g.SetLineColor(res_line_color)
         if x_range is None:
@@ -671,7 +773,7 @@ def data_mc_comparison(name,
         res_g.GetXaxis().SetLimits(*x_range_dmc)
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
-        res_g.GetYaxis().SetRangeUser(0,3)
+        res_g.GetYaxis().SetRangeUser(*res_y_range)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)
         ln = ROOT.TLine(x_range_dmc[0], 1, x_range_dmc[1], 1)
@@ -679,21 +781,22 @@ def data_mc_comparison(name,
         ln.SetLineColor(ROOT.kBlue+3)
         ln.Draw()
 
-        old_opt_fit = ROOT.gStyle.GetOptFit()
-        ROOT.gStyle.SetOptFit(0)
-        fit_opt = 's ex0'
-        fit_opt += ' q' if not verbose else ' v'
-        fit_res = res_g.Fit('pol0', fit_opt)
-        ratio_pad.Update()
-        fit_tpt = ROOT.TPaveText(0.12, 0.25, 0.4, 0.27, 'ndc')
-        fit_tpt.SetBorderSize(0)
-        fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
-        fit_tpt.Draw()
-        #fit_stat_box = res_g.GetListOfFunctions().FindObject('stats')
-        #fit_stat_box.SetX1NDC(0)
-        #fit_stat_box.SetX2NDC(0)
-        #fit_stat_box.SetY1NDC(0)
-        #fit_stat_box.SetY2NDC(0)
+        if res_fit:
+            old_opt_fit = ROOT.gStyle.GetOptFit()
+            ROOT.gStyle.SetOptFit(0)
+            fit_opt = 's ex0'
+            fit_opt += ' q' if not verbose else ' v'
+            fit_res = res_g.Fit('pol0', fit_opt)
+            ratio_pad.Update()
+            fit_tpt = ROOT.TPaveText(0.12, 0.25, 0.4, 0.27, 'ndc')
+            fit_tpt.SetBorderSize(0)
+            fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
+            fit_tpt.Draw()
+            #fit_stat_box = res_g.GetListOfFunctions().FindObject('stats')
+            #fit_stat_box.SetX1NDC(0)
+            #fit_stat_box.SetX2NDC(0)
+            #fit_stat_box.SetY1NDC(0)
+            #fit_stat_box.SetY2NDC(0)
 
     if plot_saver is not None:
         plot_saver.save(name)
@@ -1111,7 +1214,7 @@ def poisson_means_divide(h1, h2, no_zeroes=False):
 class plot_saver:
     i = 0
     
-    def __init__(self, plot_dir=None, html=True, log=True, root=True, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=None):
+    def __init__(self, plot_dir=None, html=True, log=True, root=True, root_log=False, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=None):
         self.c = ROOT.TCanvas('c%i' % plot_saver.i, '', *size)
         if canvas_margins is not None:
             if type(canvas_margins) == int or type(canvas_margins) == float:
@@ -1128,6 +1231,7 @@ class plot_saver:
         self.set_plot_dir(plot_dir)
         self.log = log
         self.root = root
+        self.root_log = root_log
         self.pdf = pdf
         self.pdf_log = pdf_log
         self.C = C
@@ -1182,7 +1286,7 @@ class plot_saver:
                 html.write('<a href="%s">%10i%32s%s</a>\n' % (save, i, 'change directory: ', save))
                 continue
 
-            fn, log, root, pdf, pdf_log, C, C_log = save
+            fn, log, root, root_log, pdf, pdf_log, C, C_log = save
 
             bn = os.path.basename(fn)
             html.write('<a href="#%s">%10i</a> ' % (self.anchor_name(fn), i))
@@ -1192,6 +1296,10 @@ class plot_saver:
                 html.write('    ')
             if root:
                 html.write(' <a href="%s">root</a>' % os.path.basename(root))
+            else:
+                html.write('     ')
+            if root_log:
+                html.write(' <a href="%s">root_log</a>' % os.path.basename(root_log))
             else:
                 html.write('     ')
             if pdf:
@@ -1216,7 +1324,7 @@ class plot_saver:
         for i, save in enumerate(saved):
             if type(save) == str:
                 continue # skip dir entries
-            fn, log, root, pdf, pdf_log, C, C_log = save
+            fn, log, root, root_log, pdf, pdf_log, C, C_log = save
             bn = os.path.basename(fn)
             rootlink = ', <a href="%s">root</a>' % os.path.basename(root) if root else ''
             html.write('<h4 id="%s"><a href="#%s">%s</a>%s</h4><br>\n' % (self.anchor_name(fn), self.anchor_name(fn), bn.replace('.png', ''), rootlink))
@@ -1242,7 +1350,7 @@ class plot_saver:
             raise ValueError('save_dir called before plot_dir set!')
         self.saved.append(n)
 
-    def save(self, n, log=None, root=None, pdf=None, pdf_log=None, C=None, C_log=None, logz=None, other_c=None):
+    def save(self, n, log=None, root=None, root_log=None, pdf=None, pdf_log=None, C=None, C_log=None, logz=None, other_c=None):
         can = self.c if other_c is None else other_c
 
         if logz:
@@ -1252,6 +1360,7 @@ class plot_saver:
 
         log = self.log if log is None else log
         root = self.root if root is None else root
+        root_log = self.root_log if root_log is None else root_log
         pdf = self.pdf if pdf is None else pdf
         pdf_log = self.pdf_log if pdf_log is None else pdf_log
         C = self.C if C is None else C
@@ -1265,6 +1374,11 @@ class plot_saver:
         if root:
             root = os.path.join(self.plot_dir, n + '.root')
             can.SaveAs(root)
+        if root_log:
+            logfcn(1)
+            root_log = os.path.join(self.plot_dir, n + '_log.root')
+            can.SaveAs(root_log)
+            logfcn(0)
         if log:
             logfcn(1)
             log = os.path.join(self.plot_dir, n + '_log.png')
@@ -1286,7 +1400,7 @@ class plot_saver:
             C_log = os.path.join(self.plot_dir, n + '_log.C')
             can.SaveAs(C_log)
             logfcn(0)
-        self.saved.append((fn, log, root, pdf, pdf_log, C, C_log))
+        self.saved.append((fn, log, root, root_log, pdf, pdf_log, C, C_log))
 
 def rainbow_palette(num_colors=500):
     """Make a rainbow palette with the specified number of
@@ -1359,7 +1473,6 @@ def set_style(date_pages=False):
     ROOT.gStyle.SetMarkerSize(.1)
     ROOT.gStyle.SetMarkerStyle(8)
     ROOT.gStyle.SetGridStyle(3)
-    ROOT.gStyle.SetPaperSize(ROOT.TStyle.kA4)
     ROOT.gStyle.SetStatW(0.25)
     ROOT.gStyle.SetStatFormat('6.4g')
     ROOT.gStyle.SetPalette(1)

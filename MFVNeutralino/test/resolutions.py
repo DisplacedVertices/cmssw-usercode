@@ -175,17 +175,8 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 
-if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':
-    process.mfvGenParticleFilter.mode = 'h2xqq'
-if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nddbar' or mode == '2Nbbbar':
-    process.mfvGenParticleFilter.mode = 'mfv2j'
-if mode == '2Nuds' or mode == '2Nuddmu' or mode == '2Nudmu':
-    process.mfvGenParticleFilter.mode = 'mfv3j'
-if mode == '2Nddbarmumu':
-    process.mfvGenParticleFilter.mode = 'mfv4j'
-
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
-                                mode = cms.string('mfv3j'),
+                                mode = cms.string('mfv5j'),
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                 mevent_src = cms.InputTag('mfvEvent'),
                                 which_mom = cms.int32(0),
@@ -194,8 +185,20 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 gen_src = cms.InputTag('genParticles'),
                                 gen_jet_src = cms.InputTag('ak4GenJets'),
                                 )
+
 if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':
+    process.mfvGenParticleFilter.mode = 'h2xqq'
     mfvResolutions.mode = 'h2xqq'
+if mode == '2gddbar_rhad' or mode == '2gbbbar_rhad' or mode == '2Nddbar' or mode == '2Nbbbar':
+    process.mfvGenParticleFilter.mode = 'mfv2j'
+    mfvResolutions.mode = 'mfv2j'
+if mode == '2Nuds' or mode == '2Nuddmu' or mode == '2Nudmu':
+    process.mfvGenParticleFilter.mode = 'mfv3j'
+    mfvResolutions.mode = 'mfv3j'
+if mode == '2Nddbarmumu':
+    process.mfvGenParticleFilter.mode = 'mfv4j'
+    mfvResolutions.mode = 'mfv4j'
+
 process.p = cms.Path(process.mfvSelectedVerticesTight)
 
 
@@ -267,6 +270,34 @@ process.mfvAnalysisCutsDvv600um = process.mfvAnalysisCuts.clone(min_svdist2d = 0
 process.mfvResolutionsTwoVtxDvv600um = mfvResolutions.clone()
 process.pTwoVtxDvv600um = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCutsDvv600um * process.mfvResolutionsTwoVtxDvv600um)
 
+process.mfvResolutionsVertices = mfvResolutions.clone(vertex_src = 'mfvSelectedVertices')
+process.pVertices = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVertices * process.mfvResolutionsVertices)
+
+process.mfvResolutionsGeo2ddist = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesGeo2ddist')
+process.pGeo2ddist = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesGeo2ddist * process.mfvResolutionsGeo2ddist)
+
+process.mfvResolutionsNtracks = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNtracks')
+process.pNtracks = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracks * process.mfvResolutionsNtracks)
+
+process.mfvResolutionsBs2derr = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesBs2derr')
+process.pBs2derr = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesBs2derr * process.mfvResolutionsBs2derr)
+
+process.mfvResolutionsMindrmax = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesMindrmax')
+process.pMindrmax = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesMindrmax * process.mfvResolutionsMindrmax)
+
+process.mfvResolutionsMaxdrmax = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesMaxdrmax')
+process.pMaxdrmax = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesMaxdrmax * process.mfvResolutionsMaxdrmax)
+
+process.mfvResolutionsDrmin = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesDrmin')
+process.pDrmin = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesDrmin * process.mfvResolutionsDrmin)
+
+process.mfvResolutionsNjetsntks = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNjetsntks')
+process.pNjetsntks = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNjetsntks * process.mfvResolutionsNjetsntks)
+
+process.mfvResolutionsNtracksptgt3 = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
+process.pNtracksptgt3 = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracksptgt3 * process.mfvResolutionsNtracksptgt3)
+
+
 #generated cutflow
 process.mfvGenNoCuts = mfvResolutions.clone()
 process.pGenNoCuts = cms.Path(process.mfvGenParticleFilter * process.mfvGenNoCuts)
@@ -283,119 +314,27 @@ process.mfvGenParticleFilterGeo2ddist = process.mfvGenParticleFilter.clone(min_n
 process.mfvGenGeo2ddist = mfvResolutions.clone()
 process.pGenGeo2ddist = cms.Path(process.mfvGenParticleFilterGeo2ddist * process.mfvGenGeo2ddist)
 
-process.mfvGenParticleFilterMindrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2)
+process.mfvGenParticleFilterNtracks2 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2)
+process.mfvGenNtracks2 = mfvResolutions.clone()
+process.pGenNtracks2 = cms.Path(process.mfvGenParticleFilterNtracks2 * process.mfvGenNtracks2)
+
+process.mfvGenParticleFilterMindrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2)
 process.mfvGenMindrmax = mfvResolutions.clone()
 process.pGenMindrmax = cms.Path(process.mfvGenParticleFilterMindrmax * process.mfvGenMindrmax)
 
-process.mfvGenParticleFilterMaxdrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4)
+process.mfvGenParticleFilterMaxdrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4)
 process.mfvGenMaxdrmax = mfvResolutions.clone()
 process.pGenMaxdrmax = cms.Path(process.mfvGenParticleFilterMaxdrmax * process.mfvGenMaxdrmax)
 
-process.mfvGenParticleFilterNquarks1 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1)
+process.mfvGenParticleFilterNquarks1 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1)
 process.mfvGenNquarks1 = mfvResolutions.clone()
 process.pGenNquarks1 = cms.Path(process.mfvGenParticleFilterNquarks1 * process.mfvGenNquarks1)
 
-process.mfvGenParticleFilterSumpt20 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 20)
-process.mfvGenSumpt20 = mfvResolutions.clone()
-process.pGenSumpt20 = cms.Path(process.mfvGenParticleFilterSumpt20 * process.mfvGenSumpt20)
-
-process.mfvGenParticleFilterSumpt30 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 30)
-process.mfvGenSumpt30 = mfvResolutions.clone()
-process.pGenSumpt30 = cms.Path(process.mfvGenParticleFilterSumpt30 * process.mfvGenSumpt30)
-
-process.mfvGenParticleFilterSumpt40 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 40)
-process.mfvGenSumpt40 = mfvResolutions.clone()
-process.pGenSumpt40 = cms.Path(process.mfvGenParticleFilterSumpt40 * process.mfvGenSumpt40)
-
-process.mfvGenParticleFilterSumpt50 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 50)
-process.mfvGenSumpt50 = mfvResolutions.clone()
-process.pGenSumpt50 = cms.Path(process.mfvGenParticleFilterSumpt50 * process.mfvGenSumpt50)
-
-process.mfvGenParticleFilterSumpt60 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 60)
-process.mfvGenSumpt60 = mfvResolutions.clone()
-process.pGenSumpt60 = cms.Path(process.mfvGenParticleFilterSumpt60 * process.mfvGenSumpt60)
-
-process.mfvGenParticleFilterSumpt70 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 70)
-process.mfvGenSumpt70 = mfvResolutions.clone()
-process.pGenSumpt70 = cms.Path(process.mfvGenParticleFilterSumpt70 * process.mfvGenSumpt70)
-
-process.mfvGenParticleFilterSumpt80 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 80)
-process.mfvGenSumpt80 = mfvResolutions.clone()
-process.pGenSumpt80 = cms.Path(process.mfvGenParticleFilterSumpt80 * process.mfvGenSumpt80)
-
-process.mfvGenParticleFilterSumpt90 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 90)
-process.mfvGenSumpt90 = mfvResolutions.clone()
-process.pGenSumpt90 = cms.Path(process.mfvGenParticleFilterSumpt90 * process.mfvGenSumpt90)
-
-process.mfvGenParticleFilterSumpt100 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 100)
-process.mfvGenSumpt100 = mfvResolutions.clone()
-process.pGenSumpt100 = cms.Path(process.mfvGenParticleFilterSumpt100 * process.mfvGenSumpt100)
-
-process.mfvGenParticleFilterSumpt110 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 110)
-process.mfvGenSumpt110 = mfvResolutions.clone()
-process.pGenSumpt110 = cms.Path(process.mfvGenParticleFilterSumpt110 * process.mfvGenSumpt110)
-
-process.mfvGenParticleFilterSumpt120 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 120)
-process.mfvGenSumpt120 = mfvResolutions.clone()
-process.pGenSumpt120 = cms.Path(process.mfvGenParticleFilterSumpt120 * process.mfvGenSumpt120)
-
-process.mfvGenParticleFilterSumpt130 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 130)
-process.mfvGenSumpt130 = mfvResolutions.clone()
-process.pGenSumpt130 = cms.Path(process.mfvGenParticleFilterSumpt130 * process.mfvGenSumpt130)
-
-process.mfvGenParticleFilterSumpt140 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 140)
-process.mfvGenSumpt140 = mfvResolutions.clone()
-process.pGenSumpt140 = cms.Path(process.mfvGenParticleFilterSumpt140 * process.mfvGenSumpt140)
-
-process.mfvGenParticleFilterSumpt150 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 150)
-process.mfvGenSumpt150 = mfvResolutions.clone()
-process.pGenSumpt150 = cms.Path(process.mfvGenParticleFilterSumpt150 * process.mfvGenSumpt150)
-
-process.mfvGenParticleFilterSumpt160 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 160)
-process.mfvGenSumpt160 = mfvResolutions.clone()
-process.pGenSumpt160 = cms.Path(process.mfvGenParticleFilterSumpt160 * process.mfvGenSumpt160)
-
-process.mfvGenParticleFilterSumpt170 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 170)
-process.mfvGenSumpt170 = mfvResolutions.clone()
-process.pGenSumpt170 = cms.Path(process.mfvGenParticleFilterSumpt170 * process.mfvGenSumpt170)
-
-process.mfvGenParticleFilterSumpt180 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 180)
-process.mfvGenSumpt180 = mfvResolutions.clone()
-process.pGenSumpt180 = cms.Path(process.mfvGenParticleFilterSumpt180 * process.mfvGenSumpt180)
-
-process.mfvGenParticleFilterSumpt190 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 190)
-process.mfvGenSumpt190 = mfvResolutions.clone()
-process.pGenSumpt190 = cms.Path(process.mfvGenParticleFilterSumpt190 * process.mfvGenSumpt190)
-
-process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200)
+process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200)
 process.mfvGenSumpt200 = mfvResolutions.clone()
 process.pGenSumpt200 = cms.Path(process.mfvGenParticleFilterSumpt200 * process.mfvGenSumpt200)
 
-process.mfvGenParticleFilterSumpt250 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 250)
-process.mfvGenSumpt250 = mfvResolutions.clone()
-process.pGenSumpt250 = cms.Path(process.mfvGenParticleFilterSumpt250 * process.mfvGenSumpt250)
-
-process.mfvGenParticleFilterSumpt300 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 300)
-process.mfvGenSumpt300 = mfvResolutions.clone()
-process.pGenSumpt300 = cms.Path(process.mfvGenParticleFilterSumpt300 * process.mfvGenSumpt300)
-
-process.mfvGenParticleFilterSumpt350 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 350)
-process.mfvGenSumpt350 = mfvResolutions.clone()
-process.pGenSumpt350 = cms.Path(process.mfvGenParticleFilterSumpt350 * process.mfvGenSumpt350)
-
-process.mfvGenParticleFilterSumpt400 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 400)
-process.mfvGenSumpt400 = mfvResolutions.clone()
-process.pGenSumpt400 = cms.Path(process.mfvGenParticleFilterSumpt400 * process.mfvGenSumpt400)
-
-process.mfvGenParticleFilterSumpt450 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 450)
-process.mfvGenSumpt450 = mfvResolutions.clone()
-process.pGenSumpt450 = cms.Path(process.mfvGenParticleFilterSumpt450 * process.mfvGenSumpt450)
-
-process.mfvGenParticleFilterSumpt500 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 500)
-process.mfvGenSumpt500 = mfvResolutions.clone()
-process.pGenSumpt500 = cms.Path(process.mfvGenParticleFilterSumpt500 * process.mfvGenSumpt500)
-
-process.mfvGenParticleFilterDvv600um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200, min_dvv = 0.06)
+process.mfvGenParticleFilterDvv600um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_sumht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200, min_dvv = 0.06)
 process.mfvGenDvv600um = mfvResolutions.clone()
 process.pGenDvv600um = cms.Path(process.mfvGenParticleFilterDvv600um * process.mfvGenDvv600um)
 
