@@ -4,7 +4,7 @@ import os, sys
 from collections import defaultdict
 from fnmatch import fnmatch
 import JMTucker.Tools.DBS as DBS
-from JMTucker.Tools.general import big_warn
+from JMTucker.Tools.general import big_warn, typed_from_argv
 
 ########################################################################
 
@@ -176,20 +176,25 @@ class SamplesRegistry:
     def add_list(self, name, l):
         self.d_lists[name] = l
 
-    def from_argv(self, default=[], sort_and_set=True):
+    def from_argv(self, default=[], sort_and_set=True, from_root_fns=False):
         ready_only = 'fa_ready_only' in sys.argv
         check = 'fa_check' in sys.argv
         use_all = 'fa_all' in sys.argv
 
+        fns = []
         samples = []
 
         if use_all:
             samples = self.all()
         else:
             for arg in sys.argv:
+                if from_root_fns:
+                    orig_arg = arg
+                    arg = os.path.basename(arg).replace('.root', '')
                 by_match = any(c in arg for c in '[]*?!')
                 for sample in self.d_samples.values():
                     if arg == sample.name or (by_match and fnmatch(sample.name, arg)):
+                        sample.fn = orig_arg
                         samples.append(sample)
                 for name, l in self.d_lists.iteritems():
                     if arg == name:
@@ -287,39 +292,39 @@ def get_nevents_ran(samples):
         if abs(eff - sample.filter_eff) > 1e-4:
             print '%s.filter_eff = %9.4e  # %8i / %8i' % (sample.name, eff, y, x)
 
-def merge(samples, output='merge.root', norm_to=1, path_for_nevents='', last_bin=False):
+def merge(samples, output='merge.root', norm_to=1.):
     if norm_to > 0:
         print 'norm sum of weights to', norm_to
     else:
         print 'multiply every weight by', -norm_to
 
-    if not path_for_nevents:
-        if last_bin:
-            raise ValueError('cannot last_bin if no path_for_nevents')
-        print 'taking nevents from samples'
-    else:
-        print 'taking nevents from file with path %s%s' % (path_for_nevents, (' using last bin contents' if last_bin else ''))
+    print 'taking nevents from samples'
 
     weights = []
-    for fn in files:
-        sname = os.path.splitext(os.path.basename(fn))[0]
-        sample = samples_by_name[sname]
-        if path_for_nevents:
-            sample.nevents = nevents_from_file(sample, path_for_nevents, fn, last_bin=last_bin)
+    for sample in samples:
         weights.append(sample.partial_weight)
 
     if norm_to > 0:
         norm_to /= sum(weights)
     else:
-        norm_to *= -1
+        norm_to *= -1.
 
     weights = [w*norm_to for w in weights]
-
     weights = ','.join('%f' % w for w in weights)
-    cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, ' '.join(files), output)
+
+    files = [s.fn for s in samples]
+    files = ' '.join(files)
+
+    cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, files, output)
     print cmd
     os.system(cmd)
 
+def main(samples_registry):
+    import sys
+    if 'merge' in sys.argv:
+        samples = samples_registry.from_argv(from_root_fns=True)
+        merge(samples, norm_to=typed_from_argv(float, default_value=1.))
+    
 __all__ = [
     'Dataset',
     'Sample',
@@ -330,5 +335,6 @@ __all__ = [
     'nevents_from_file',
     'check_nevents_from_files',
     'get_nevents_ran',
-    'merge'
+    'merge',
+    'main',
     ]
