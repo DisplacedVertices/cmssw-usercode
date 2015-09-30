@@ -26,6 +26,9 @@ ttbar_mgnlo_50ns_samples = [
     MCSample('ttbar_mgnlo_50ns', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/AODSIM', 4995842, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
+qcd_samples = qcd_ht_mg_25ns_samples
+ttbar_samples = ttbar_mgnlo_25ns_samples
+
 mfv_signal_samples = [
     MCSample('mfv_neu_tau00100um_M0400', '/mfv_neu_tau00100um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
     MCSample('mfv_neu_tau00100um_M0800', '/mfv_neu_tau00100um_M0800/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
@@ -146,6 +149,8 @@ __all__ = [
 #    'qcd_ht_mg_50ns_samples',
     'ttbar_mgnlo_25ns_samples',
     'ttbar_mgnlo_50ns_samples',
+    'qcd_samples',
+    'ttbar_samples',
     'mfv_signal_samples',
 #    'leptonic_background_samples',
 #    'ttbar_systematics_samples',
