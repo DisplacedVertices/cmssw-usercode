@@ -464,23 +464,23 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
     if (j < 2) {
       for (int i = 0; i < 3; ++i) {
-        float l = i == 2 ? 25 : 20;
+        float l = i == 2 ? 25 : 4;
         h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
         h_sv_pos_bs1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_bs1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
       }
-      h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -20, 20, 100, -20, 20);
-      h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
-      h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
-      h_sv_pos_rz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_rz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
-      h_sv_pos_phi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_phi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 50, -3.15, 3.15);
-      h_sv_pos_phi_2pi[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_2pi_%i", j), TString::Format(";%s SV phi from 0 to 2#pi;arb. units", exc), 50, 0, 6.30);
-      h_sv_pos_phi_pv[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_pv_%i", j), TString::Format(";%s SV phi w.r.t. PV;arb. units", exc), 50, -3.15, 3.15);
+      h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -4, 4, 100, -4, 4);
+      h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
+      h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
+      h_sv_pos_rz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_rz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
+      h_sv_pos_phi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_phi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 25, -3.15, 3.15);
+      h_sv_pos_phi_2pi[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_2pi_%i", j), TString::Format(";%s SV phi from 0 to 2#pi;arb. units", exc), 25, 0, 6.30);
+      h_sv_pos_phi_pv[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_pv_%i", j), TString::Format(";%s SV phi w.r.t. PV;arb. units", exc), 25, -3.15, 3.15);
 
-      h_sv_pos_bs2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -20, 20, 100, -20, 20);
-      h_sv_pos_bs2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
-      h_sv_pos_bs2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
-      h_sv_pos_bsrz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_bsrz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -20, 20, 100, -25, 25);
-      h_sv_pos_bsphi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_bsphi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 50, -3.15, 3.15);
+      h_sv_pos_bs2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -4, 4, 100, -4, 4);
+      h_sv_pos_bs2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
+      h_sv_pos_bs2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
+      h_sv_pos_bsrz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_bsrz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
+      h_sv_pos_bsphi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_bsphi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 25, -3.15, 3.15);
     }
 
     h_sv[j].Init("h_sv_" + std::string(exc), hs, true, do_scatterplots);
