@@ -18,6 +18,9 @@ def add_analyzer(process, name, **kwargs):
     else:
         setattr(process, path_name, cms.Path(obj))
 
+def files_from_file(process, fn):
+    process.source.fileNames = cms.untracked.vstring(*[line.strip() for line in open(fn).read().split('\n') if line.strip().endswith('.root')])
+
 def file_event_from_argv(process, warn=True):
     '''Set the filename and event to run on from argv.'''
     files = []
