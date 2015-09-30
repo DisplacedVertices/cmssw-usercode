@@ -32,6 +32,7 @@ if simple:
     del process.pOnlyOneVtx
     del process.pPreSel
     del process.pTrigSel
+    del process.pSigReg
 
     process.p = cms.Path(process.mfvSelectedVerticesLoose +
                          process.mfvSelectedVerticesTight +
