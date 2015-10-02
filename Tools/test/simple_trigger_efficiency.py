@@ -1,3 +1,4 @@
+import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, file_event_from_argv
 
 file_event_from_argv(process)
