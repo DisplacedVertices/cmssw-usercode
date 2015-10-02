@@ -9,9 +9,9 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
-class QuadJetTrigPrescales : public edm::EDAnalyzer {
+class TriggerPrescales : public edm::EDAnalyzer {
 public:
-  explicit QuadJetTrigPrescales(const edm::ParameterSet&);
+  explicit TriggerPrescales(const edm::ParameterSet&);
 
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
@@ -53,7 +53,7 @@ private:
   tree_t nt;
 };
 
-QuadJetTrigPrescales::QuadJetTrigPrescales(const edm::ParameterSet& cfg) {
+TriggerPrescales::TriggerPrescales(const edm::ParameterSet& cfg) {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
@@ -69,13 +69,13 @@ QuadJetTrigPrescales::QuadJetTrigPrescales(const edm::ParameterSet& cfg) {
   tree->Branch("pass_hlt", &nt.pass_hlt);
 }
 
-void QuadJetTrigPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
+void TriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
   bool changed = true;
   if (!hlt_cfg.init(run, setup, "HLT", changed))
-    throw cms::Exception("QuadJetTrigPrescales", "HLTConfigProvider::init failed with process name HLT");
+    throw cms::Exception("TriggerPrescales", "HLTConfigProvider::init failed with process name HLT");
 }
 
-void QuadJetTrigPrescales::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void TriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   nt.clear();
   nt.run  = event.id().run();
   nt.lumi = event.luminosityBlock();
@@ -162,4 +162,4 @@ void QuadJetTrigPrescales::analyze(const edm::Event& event, const edm::EventSetu
   tree->Fill();
 }
 
-DEFINE_FWK_MODULE(QuadJetTrigPrescales);
+DEFINE_FWK_MODULE(TriggerPrescales);
