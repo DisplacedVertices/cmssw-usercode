@@ -9,9 +9,9 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
-class TriggerPrescales : public edm::EDAnalyzer {
+class MFVTriggerPrescales : public edm::EDAnalyzer {
 public:
-  explicit TriggerPrescales(const edm::ParameterSet&);
+  explicit MFVTriggerPrescales(const edm::ParameterSet&);
 
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
@@ -53,7 +53,7 @@ private:
   tree_t nt;
 };
 
-TriggerPrescales::TriggerPrescales(const edm::ParameterSet& cfg) {
+MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg) {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
@@ -69,13 +69,27 @@ TriggerPrescales::TriggerPrescales(const edm::ParameterSet& cfg) {
   tree->Branch("pass_hlt", &nt.pass_hlt);
 }
 
-void TriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
+void MFVTriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
   bool changed = true;
   if (!hlt_cfg.init(run, setup, "HLT", changed))
-    throw cms::Exception("TriggerPrescales", "HLTConfigProvider::init failed with process name HLT");
+    throw cms::Exception("MFVTriggerPrescales", "HLTConfigProvider::init failed with process name HLT");
+#if 0
+  hlt_cfg.dump("ProcessPSet");
+  hlt_cfg.dump("ProcessName");
+  hlt_cfg.dump("GlobalTag");
+  hlt_cfg.dump("TableName");
+  hlt_cfg.dump("Triggers");
+  hlt_cfg.dump("TriggerSeeds");
+  hlt_cfg.dump("Modules");
+  hlt_cfg.dump("StreamNames");
+  hlt_cfg.dump("Streams");
+  hlt_cfg.dump("DatasetNames");
+  hlt_cfg.dump("Datasets");
+  hlt_cfg.dump("PrescaleTable");
+#endif
 }
 
-void TriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   nt.clear();
   nt.run  = event.id().run();
   nt.lumi = event.luminosityBlock();
@@ -162,4 +176,4 @@ void TriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup& s
   tree->Fill();
 }
 
-DEFINE_FWK_MODULE(TriggerPrescales);
+DEFINE_FWK_MODULE(MFVTriggerPrescales);
