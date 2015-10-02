@@ -341,10 +341,6 @@ namespace {
   float mag(float x, float y) {
     return sqrt(x*x + y*y);
   }
-  
-  float mag(float x, float y, float z) {
-    return sqrt(x*x + y*y + z*z);
-  }
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
