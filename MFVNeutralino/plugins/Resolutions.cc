@@ -149,6 +149,7 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_gen_dbv;
 */
+  TH1F* h_rec_dxy;
   TH1F* h_rec_ntracks;
   TH1F* h_rec_bs2derr;
   TH1F* h_rec_drmin;
@@ -311,6 +312,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
+  h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 500, -1, 1);
   h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks/vertex;vertices", 40, 0, 40);
   h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 300, 0, 0.003);
   h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 100, 0, 0.5);
@@ -899,6 +901,9 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     ++nvtx_match;
 
     h_dist->Fill(dist);
+
+    for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
+      h_rec_dxy->Fill(vtx.track_dxy[i]);
 
     h_rec_ntracks->Fill(vtx.ntracks());
     h_rec_bs2derr->Fill(vtx.bs2derr);
