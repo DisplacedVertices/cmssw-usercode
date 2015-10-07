@@ -41,11 +41,11 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_dist;
 
   TH1F* h_lspsnmatch;
+/*
   TH1F* h_lsp_nmatch[2];
   TH2F* h_lsp0nmatch_lsp1nmatch;
   TH2F* h_vtxmatch_vtxtotal;
 
-/*
   TH1F* h_dx;
   TH1F* h_dy;
   TH1F* h_dz;
@@ -202,13 +202,13 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
 
   h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
+/*
   for (int i = 0; i < 2; ++i) {
     h_lsp_nmatch[i] = fs->make<TH1F>(TString::Format("h_lsp%d_nmatch", i), TString::Format(";number of vertices that match lsp%d;events", i), 15, 0, 15);
   }
   h_lsp0nmatch_lsp1nmatch = fs->make<TH2F>("h_lsp0nmatch_lsp1nmatch", ";lsp1_nmatch;lsp0_nmatch", 15, 0, 15, 15, 0, 15);
   h_vtxmatch_vtxtotal = fs->make<TH2F>("h_vtxmatch_vtxtotal", ";total number of vertices in the event;number of vertices that match an lsp", 15, 0, 15, 15, 0, 15);
 
-/*
   h_dx = fs->make<TH1F>("h_dx", ";x resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dy = fs->make<TH1F>("h_dy", ";y resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dz = fs->make<TH1F>("h_dz", ";z resolution (cm);number of vertices", 200, -0.02, 0.02);
@@ -312,7 +312,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV};generated LSPs with a reconstructed vertex within 120 #mum", 100, 0, 0.5);
 */
-  h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 500, -1, 1);
+  h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
   h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks/vertex;vertices", 40, 0, 40);
   h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 300, 0, 0.003);
   h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 100, 0, 0.5);
@@ -324,7 +324,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
   h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 2000);
-  h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 500, -1, 1);
+  h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 100, 0, 1);
   h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted displaced daughter particles;LSPs", 10, 0, 10);
   h_gen_nquarks = fs->make<TH1F>("h_gen_nquarks", ";number of accepted displaced quarks;LSPs", 10, 0, 10);
   h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 100, 0, 1000);
@@ -793,19 +793,10 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 */
 }
 
-  for (int i = 0; i < 2; ++i) {
-    const int ndau = int(partons[i].size());
-    for (int j = 0; j < ndau; ++j) {
-      h_gen_dxy->Fill(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0])));
-    }
-  }
-
   const double dbv[2] = {
     mag(v[0][0], v[0][1]),
     mag(v[1][0], v[1][1])
   };
-  h_gen_dbv->Fill(dbv[0]);
-  h_gen_dbv->Fill(dbv[1]);
 
   const double dvv = mag(v[0][0] - v[1][0],
                          v[0][1] - v[1][1]);
@@ -858,11 +849,16 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       }
     }
 
-    h_gen_ntracks->Fill(ntracks);
-    h_gen_nquarks->Fill(nquarks);
-    h_gen_sumpt->Fill(sumpt);
-    h_gen_drmin->Fill(drmin);
-    h_gen_drmax->Fill(drmax);
+    if (dbv[i] > 0.20 && dbv[i] < 0.30) {
+      for (int j = 0; j < ndau; ++j)
+        h_gen_dxy->Fill(fabs(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0]))));
+      h_gen_dbv->Fill(dbv[i]);
+      h_gen_ntracks->Fill(ntracks);
+      h_gen_drmin->Fill(drmin);
+      h_gen_drmax->Fill(drmax);
+      h_gen_nquarks->Fill(nquarks);
+      h_gen_sumpt->Fill(sumpt);
+    }
   }
 
 
@@ -900,29 +896,29 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
     ++nvtx_match;
 
-    h_dist->Fill(dist);
-
-    for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
-      h_rec_dxy->Fill(vtx.track_dxy[i]);
-
-    h_rec_ntracks->Fill(vtx.ntracks());
-    h_rec_bs2derr->Fill(vtx.bs2derr);
-    h_rec_drmin->Fill(vtx.drmin());
-    h_rec_drmax->Fill(vtx.drmax());
-    h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
-    h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
-    h_rec_dbv->Fill(vtx.bs2ddist);
+    if (dbv[ilsp] > 0.20 && dbv[ilsp] < 0.30) {
+      h_dist->Fill(dist);
+      for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
+        h_rec_dxy->Fill(vtx.track_dxy[i]);
+      h_rec_ntracks->Fill(vtx.ntracks());
+      h_rec_bs2derr->Fill(vtx.bs2derr);
+      h_rec_drmin->Fill(vtx.drmin());
+      h_rec_drmax->Fill(vtx.drmax());
+      h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
+      h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
+      h_rec_dbv->Fill(vtx.bs2ddist);
+    }
   }
 
   // histogram lsp_nmatch
   for (int i = 0; i < 2; ++i) {
-    h_lspsnmatch->Fill(lsp_nmatch[i]);
-    h_lsp_nmatch[i]->Fill(lsp_nmatch[i]);
+    if (dbv[i] > 0.20 && dbv[i] < 0.30) h_lspsnmatch->Fill(lsp_nmatch[i]);
+//    h_lsp_nmatch[i]->Fill(lsp_nmatch[i]);
   }
-  h_lsp0nmatch_lsp1nmatch->Fill(lsp_nmatch[1], lsp_nmatch[0]);
+//  h_lsp0nmatch_lsp1nmatch->Fill(lsp_nmatch[1], lsp_nmatch[0]);
 
-  const int nsv = int(vertices->size());
-  h_vtxmatch_vtxtotal->Fill(nsv, nvtx_match);
+//  const int nsv = int(vertices->size());
+//  h_vtxmatch_vtxtotal->Fill(nsv, nvtx_match);
 
 }
 
