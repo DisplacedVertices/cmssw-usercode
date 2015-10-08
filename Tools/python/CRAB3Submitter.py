@@ -39,11 +39,13 @@ class CRABSubmitter:
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  max_threads = 5,
                  cfg_modifier = None,
+                 cfg_modifier_strings = [],
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
                  transfer_logs = True,
                  transfer_outputs = True,
                  dataset = 'main',
+                 lumi_mask = None,
                  job_control_from_sample = False,
                  storage_site = 'T3_US_FNALLPC',
                  publish_name = '',
@@ -81,6 +83,10 @@ class CRABSubmitter:
         self.max_threads = max_threads  # JMTBAD rename -> processes
 
         self.cfg_modifier = cfg_modifier
+        self.cfg_modifier_strings = cfg_modifier_strings
+        for k,v in kwargs.iteritems():
+            if k.startswith('crab_cfg_'):
+                self.cfg_modifier_strings.append((k.replace('crab_', '').replace('__', 'UNDERSCORE').replace('_', '.').replace('UNDERSCORE', '_'), v))
 
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
@@ -116,6 +122,8 @@ class CRABSubmitter:
             self.cfg_template.Data.splitting   = _get('splitting')
             self.cfg_template.Data.unitsPerJob = _get('units_per_job')
             self.cfg_template.Data.totalUnits  = _get('total_units')
+            if lumi_mask:
+                self.cfg_template.Data.lumi_mask = lumi_mask
 
         if storage_site.lower() == 'cornell':
             self.cfg_template.Site.storageSite = 'T3_US_Cornell'
@@ -150,6 +158,9 @@ class CRABSubmitter:
 
         if self.cfg_modifier is not None:
             self.cfg_modifier(cfg, sample)
+
+        for evl, val in self.cfg_modifier_strings:
+            exec '%s = val' % evl
 
         cfg_fn = self.cfg_fn_pattern % sample
         open(cfg_fn, 'wt').write(cfg.pythonise_()) # JMTBAD this file is just for debugging
