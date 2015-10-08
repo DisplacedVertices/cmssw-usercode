@@ -10,12 +10,15 @@ process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 process.TFileService = cms.Service('TFileService', fileName = cms.string('tfileservice.root'))
 
-def geometry_etc(process, tag):
-    process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-    process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+def global_tag(process, tag):
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
     process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
+
+def geometry_etc(process, tag):
+    global_tag(process, tag)
+    process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+    process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
     process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
     
 def add_analyzer(process, name, **kwargs):
@@ -30,6 +33,7 @@ __all__ = [
     'files_from_file',
     'file_event_from_argv',
     'geometry_etc',
+    'global_tag',
     'add_analyzer',
     'report_every'
     ]
