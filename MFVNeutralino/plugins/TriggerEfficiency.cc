@@ -26,6 +26,7 @@ private:
   const edm::InputTag muons_src;
   const StringCutObjectSelector<pat::Muon> muon_selector;
   const edm::InputTag jets_src;
+  const StringCutObjectSelector<pat::Jet> jet_selector;
   const edm::InputTag genjets_src;
   const bool use_genjets;
 
@@ -62,6 +63,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     muons_src(cfg.getParameter<edm::InputTag>("muons_src")),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
+    jet_selector(cfg.getParameter<std::string>("jet_cut")),
     genjets_src(cfg.getParameter<edm::InputTag>("genjets_src")),
     use_genjets(genjets_src.label() != "")
 {
@@ -118,6 +120,28 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
 
   bool found = false;
   bool pass = false;
+
+#if 0
+  std::vector<std::string> paths({
+        "HLT_PFHT650_v",
+        "HLT_PFHT550_4Jet_v",
+//        "HLT_PFHT450_SixJet40_PFBTagCSV_v",
+//        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
+        "HLT_PFHT450_SixJet40_v",
+        "HLT_PFHT400_SixJet30_v",
+//        "HLT_QuadJet45_TripleCSV0p5_v",
+//        "HLT_QuadJet45_DoubleCSV0p5_v",
+//        "HLT_DoubleJet90_Double30_TripleCSV0p5_v",
+//        "HLT_DoubleJet90_Double30_DoubleCSV0p5_v",
+//        "HLT_HT650_DisplacedDijet80_Inclusive_v",
+//        "HLT_HT750_DisplacedDijet80_Inclusive_v",
+//        "HLT_HT500_DisplacedDijet40_Inclusive_v",
+//        "HLT_HT550_DisplacedDijet40_Inclusive_v",
+//        "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
+//        "HLT_HT350_DisplacedDijet80_DisplacedTrack_v",
+//        "HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v"
+        });
+#endif
 
   for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
     char path[1024];
@@ -182,7 +206,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   int njet = 0;
   double jet_ht = 0;
   for (const pat::Jet& jet : *jets) {
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5) {
+    if (jet_selector(jet)) {
       ++njet;
       jet_ht += jet.pt();
       if (njet == 10)

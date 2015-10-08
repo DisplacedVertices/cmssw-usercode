@@ -28,6 +28,7 @@ process.num = cms.EDAnalyzer('MFVTriggerEfficiency',
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 24'),
                              jets_src = cms.InputTag('slimmedJets'),
+                             jet_cut = jtupleParams.jetCut,
                              genjets_src = cms.InputTag('ak4GenJets' if is_mc else ''),
                              )
 process.den = process.num.clone(require_trigger = False)
