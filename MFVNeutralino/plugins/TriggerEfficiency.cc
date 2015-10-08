@@ -13,9 +13,9 @@
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 
-class QuadJetTrigEff : public edm::EDAnalyzer {
+class MFVTriggerEfficiency : public edm::EDAnalyzer {
 public:
-  explicit QuadJetTrigEff(const edm::ParameterSet&);
+  explicit MFVTriggerEfficiency(const edm::ParameterSet&);
 
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
@@ -25,11 +25,7 @@ private:
   const bool require_muon;
   const edm::InputTag muons_src;
   const StringCutObjectSelector<pat::Muon> muon_selector;
-  const int require_4calo;
-  const edm::InputTag calojets_src;
   const edm::InputTag jets_src;
-  const int jet_sel_num;
-  JetIDSelectionFunctor calojet_sel;
   const edm::InputTag genjets_src;
   const bool use_genjets;
 
@@ -49,27 +45,23 @@ private:
   TH1F* h_jet_pt[10];
   TH1F* h_jet_eta[10];
   TH1F* h_jet_phi[10];
-  TH1F* h_jet_sumht;
-  TH2F* h_njets_v_sumht;
+  TH1F* h_jet_ht;
+  TH2F* h_njets_v_ht;
 
   TH1F* h_ngenjets;
   TH1F* h_genjet_e[10];
   TH1F* h_genjet_pt[10];
   TH1F* h_genjet_eta[10];
   TH1F* h_genjet_phi[10];
-  TH1F* h_genjet_sumht;
+  TH1F* h_genjet_ht;
 };
 
-QuadJetTrigEff::QuadJetTrigEff(const edm::ParameterSet& cfg)
+MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   : require_trigger(cfg.getParameter<bool>("require_trigger")),
     require_muon(cfg.getParameter<bool>("require_muon")),
     muons_src(cfg.getParameter<edm::InputTag>("muons_src")),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
-    require_4calo(cfg.getParameter<int>("require_4calo")),
-    calojets_src(cfg.getParameter<edm::InputTag>("calojets_src")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
-    jet_sel_num(cfg.getParameter<int>("jet_sel_num")),
-    calojet_sel(JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::Quality_t(jet_sel_num)),
     genjets_src(cfg.getParameter<edm::InputTag>("genjets_src")),
     use_genjets(genjets_src.label() != "")
 {
@@ -95,8 +87,8 @@ QuadJetTrigEff::QuadJetTrigEff(const edm::ParameterSet& cfg)
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i), "", 100, -6, 6);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%i", i), "", 100, -M_PI, M_PI);
   }
-  h_jet_sumht = fs->make<TH1F>("h_jet_sumht", "", 250, 0, 5000);
-  h_njets_v_sumht = fs->make<TH2F>("h_njets_v_sumht", "", 50, 0, 2000, 25, 0, 25);
+  h_jet_ht = fs->make<TH1F>("h_jet_ht", "", 250, 0, 5000);
+  h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", "", 50, 0, 2000, 25, 0, 25);
 
   if (use_genjets) {
     h_ngenjets = fs->make<TH1F>("h_ngenjets", "", 30, 0, 30);
@@ -106,17 +98,17 @@ QuadJetTrigEff::QuadJetTrigEff(const edm::ParameterSet& cfg)
       h_genjet_eta[i] = fs->make<TH1F>(TString::Format("h_genjet_eta_%i", i), "", 100, -6, 6);
       h_genjet_phi[i] = fs->make<TH1F>(TString::Format("h_genjet_phi_%i", i), "", 100, -M_PI, M_PI);
     }
-    h_genjet_sumht = fs->make<TH1F>("h_genjet_sumht", "", 250, 0, 5000);
+    h_genjet_ht = fs->make<TH1F>("h_genjet_ht", "", 250, 0, 5000);
   }
 }
 
-void QuadJetTrigEff::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
+void MFVTriggerEfficiency::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
   bool changed = true;
   if (!hlt_cfg.init(run, setup, "HLT", changed))
     throw cms::Exception("CheckPrescale", "HLTConfigProvider::init failed with process name HLT");
 }
 
-void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   l1_cfg.getL1GtRunCache(event, setup, true, false);
 
   edm::Handle<edm::TriggerResults> hlt_results;
@@ -127,30 +119,31 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
   bool found = false;
   bool pass = false;
 
-  for (int hlt_version : {1, 2, 3, 5} ) {
+  for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
     char path[1024];
-    snprintf(path, 1024, "HLT_QuadJet50_v%i", hlt_version);
+    snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
     if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
       continue;
 
     found = true;
 
-    int l1err;
-    const bool l1_pass = l1_cfg.decision(event, "L1_QuadJetC40", l1err);
-    if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_QuadJetC40: " << l1err;
+    //int l1err;
+    //const bool l1_pass = l1_cfg.decision(event, "L1_QuadJetC40", l1err);
+    //if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_QuadJetC40: " << l1err;
 
     const size_t ipath = hlt_names.triggerIndex(path);
     if (!(ipath < npaths))
       throw cms::Exception("BadAssumption") << "hlt_cfg and triggerNames don't agree on " << path;
     const bool hlt_pass = hlt_results->accept(ipath);
 
-    pass = l1_pass && hlt_pass;
+    //pass = l1_pass && hlt_pass;
+    pass = hlt_pass;
 
     break;
   }
 
   if (!found)
-    throw cms::Exception("BadAssumption", "one of HLT_QuadJet50_v{1,2,3,5} not found");
+    throw cms::Exception("BadAssumption", "one of HLT_PFHT800_v{1..9} not found");
 
   if (require_trigger && !pass)
     return;
@@ -161,9 +154,6 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
 
     int nmuons[2] = {0};
     for (const pat::Muon& muon : *muons) {
-      if (muon.pt() < 28)
-        continue;
-
       for (int i = 0; i < 2; ++i) {
         if (i == 0 || muon_selector(muon)) {
           ++nmuons[i];
@@ -183,39 +173,18 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
       return;
   }
 
-  if (require_4calo > 0) {
-    // JMTBAD always get calojets...
-    edm::Handle<pat::JetCollection> calojets;
-    event.getByLabel(calojets_src, calojets);
-
-    JetIDSelectionFunctor calojet_sel_best(JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::Quality_t(3));
-    pat::strbitset ret = calojet_sel.getBitTemplate();
-
-    std::vector<double> calojet_pts;
-    for (const pat::Jet& jet : *calojets) {
-      ret.set(false);
-      if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && calojet_sel_best(jet, ret))
-        calojet_pts.push_back(jet.pt());
-    }
-
-    if (calojet_pts.size() < 4 || calojet_pts[3] < require_4calo)
-      return;
-  }
 
   edm::Handle<pat::JetCollection> jets;
   event.getByLabel(jets_src, jets);
 
   h_nnoseljets->Fill(jets->size());
 
-  pat::strbitset ret = calojet_sel.getBitTemplate();
-
   int njet = 0;
-  double jet_sumht = 0;
+  double jet_ht = 0;
   for (const pat::Jet& jet : *jets) {
-    ret.set(false);
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && (jet_sel_num < 0 || calojet_sel(jet, ret))) {
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5) {
       ++njet;
-      jet_sumht += jet.pt();
+      jet_ht += jet.pt();
       if (njet == 10)
         break;
       int is[2] = {0, njet};
@@ -229,19 +198,19 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
   }
 
   h_njets->Fill(njet);
-  h_jet_sumht->Fill(jet_sumht);
-  h_njets_v_sumht->Fill(jet_sumht, njet);
+  h_jet_ht->Fill(jet_ht);
+  h_njets_v_ht->Fill(jet_ht, njet);
 
   if (use_genjets) {
     edm::Handle<reco::GenJetCollection> genjets;
     event.getByLabel(genjets_src, genjets);
 
     int ngenjet = 0;
-    double genjet_sumht = 0;
+    double genjet_ht = 0;
     for (const reco::GenJet& genjet : *genjets) {
       if (genjet.pt() > 20 && fabs(genjet.eta()) < 2.5) {
         ++ngenjet;
-        genjet_sumht += genjet.pt();
+        genjet_ht += genjet.pt();
         if (ngenjet == 10)
           break;
         int is[2] = {0, ngenjet};
@@ -255,8 +224,8 @@ void QuadJetTrigEff::analyze(const edm::Event& event, const edm::EventSetup& set
     }
 
     h_ngenjets->Fill(ngenjet);
-    h_genjet_sumht->Fill(genjet_sumht);
+    h_genjet_ht->Fill(genjet_ht);
   }
 }
 
-DEFINE_FWK_MODULE(QuadJetTrigEff);
+DEFINE_FWK_MODULE(MFVTriggerEfficiency);

@@ -1,65 +1,38 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.PATTuple_cfg import *
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-runOnMC = True # magic line, don't touch
-process, common_seq = pat_tuple_process(runOnMC)
-for name, path in process.paths.items():
-    delattr(process, name)
+is_mc = False
 
-process.source.fileNames = ['/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph/AODSIM/PU_S10_START53_V7A_ext-v1/00000/FEDD73E4-5424-E211-8271-001E67398142.root' if runOnMC else '/store/data/Run2012D/SingleMu/AOD/22Jan2013-v1/10000/0015EC7D-EAA7-E211-A9B9-E0CB4E5536A7.root']
-
-del process.out
-del process.outp
-
-process.TFileService = cms.Service('TFileService', fileName = cms.string('eff.root'))
-
-process.patJetCorrFactors.primaryVertices = 'goodOfflinePrimaryVertices'
-for attr in 'embedGenJetMatch addGenJetMatch embedGenPartonMatch addGenPartonMatch getJetMCFlavour addJetCharge'.split():
-    setattr(process.patJets, attr, False)
-process.selectedPatJets.cut = ''
-common_seq *= process.patJetCorrFactors * process.patJets * process.selectedPatJets
+global_tag(process, '74X_dataRun2_Prompt_v2')
+process.maxEvents.input = 100
+process.source.fileNames = ['/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/630/00000/BCD78EF7-2B5F-E511-A3A3-02163E0170B5.root']
+process.TFileService.fileName = 'eff.root'
+from FWCore.PythonUtilities.LumiList import LumiList
+process.source.lumisToProcess = LumiList('../Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON.txt').getVLuminosityBlockRange()
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-process.IsoMu24Eta2p1 = hltHighLevel.clone()
-process.IsoMu24Eta2p1.HLTPaths = ['HLT_IsoMu24_eta2p1_v*']
-process.IsoMu24Eta2p1.andOr = True # = OR
+process.mutrig = hltHighLevel.clone()
+process.mutrig.HLTPaths = ['HLT_IsoMu18_v*']
+process.mutrig.andOr = True # = OR
 
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
-for require_4calo in (0, 50, 60):
-    for require_muon in (True, False):
-        for kind in ('pf', 'cl', 0, 1, 2, 3):
-            if type(kind) == int:
-                sel = kind
-                kind = 'cl'
-            else:
-                sel = -1
+process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
+process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1219))
 
-            src = 'selectedPatJets'
-            if kind == 'pf':
-                src += 'PF'
+process.num = cms.EDAnalyzer('MFVTriggerEfficiency',
+                             require_trigger = cms.bool(True),
+                             require_muon = cms.bool(True),
+                             muons_src = cms.InputTag('slimmedMuons'),
+                             muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 24'),
+                             jets_src = cms.InputTag('slimmedJets'),
+                             genjets_src = cms.InputTag('ak4GenJets' if is_mc else ''),
+                             )
+process.den = process.num.clone(require_trigger = False)
 
-            num = cms.EDAnalyzer('QuadJetTrigEff',
-                                 require_trigger = cms.bool(True),
-                                 require_muon = cms.bool(require_muon),
-                                 muons_src = cms.InputTag('selectedPatMuonsPF'),
-                                 muon_cut = jtupleParams.semilepMuonCut,
-                                 require_4calo = cms.int32(require_4calo),
-                                 calojets_src = cms.InputTag('selectedPatJets'),
-                                 jets_src = cms.InputTag(src),
-                                 jet_sel_num = cms.int32(sel),
-                                 genjets_src = cms.InputTag('ak4GenJets' if runOnMC else ''),
-                                 )
-            den = num.clone(require_trigger = False)
-
-            name = 'Mu%i' % int(require_muon)
-            name += '4C%i' % require_4calo
-            name += '%s%s' % (kind, '' if sel == -1 else sel)
-            setattr(process, name + 'num', num)
-            setattr(process, name + 'den', den)
-            setattr(process, 'p' + name, cms.Path(process.IsoMu24Eta2p1 * common_seq * num * den))
+process.p = cms.Path(process.mutrig * process.den * process.num)
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
@@ -67,46 +40,16 @@ SimpleTriggerEfficiency.setup_endpath(process)
 #process.options.wantSummary = True
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    import JMTucker.Tools.Samples as Samples
+    from JMTucker.Tools.Sample import anon_samples
+    samples = anon_samples('''
+/SingleMuon/Run2015D-PromptReco-v3/MINIAOD
+''')
 
-    def modify(sample):
-        to_add = []
-        to_replace = []
-
-        if sample.is_mc:
-            if sample.is_fastsim:
-                to_add.append('input_is_fastsim(process)')
-            if sample.is_pythia8:
-                to_add.append('input_is_pythia8(process)')
-            if sample.re_pat:
-                to_add.append('re_pat(process)')
-                to_add.append("process.SimpleTriggerEfficiency.trigger_results_src = cms.InputTag('TriggerResults', '', 'PAT2')")
-        else:
-            magic = 'runOnMC = True'
-            err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
-            to_replace.append((magic, 'runOnMC = False', err))
-            to_add.append('process.dummyToMakeDiffHash = cms.PSet(sampleName = cms.string("%s"))' % sample.name)
-            to_add.append('process.patJetCorrFactors.levels.append("L2L3Residual")')
-
-        return to_add, to_replace
-
-    cs = CRABSubmitter('QuadJetTrigEff',
-                       pset_modifier = modify,
-                       job_control_from_sample = True,
-                       max_threads = 2,
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    cs = CRABSubmitter('TrigEff_v0',
+                       splitting = 'EventAwareLumiBased',
+                       units_per_job = 100000,
+                       total_units = -1,
+                       crab_cfg_Data_lumiMask = '../Cert_246908-257599_13TeV_PromptReco_Collisions15_25ns_JSON.txt',
                        )
-
-    mc_samples = [Samples.qcdmupt15] + Samples.ttbar_samples + Samples.leptonic_background_samples + Samples.mfv_signal_samples
-
-    data_samples = Samples.auxiliary_data_samples[1:]
-
-    for sample in mc_samples:
-        sample.events_per = 25000
-    for sample in data_samples:
-        sample.lumis_per = 75
-        sample.json = '../ana_all.json'
-
-    samples = Samples.from_argv(mc_samples + data_samples)
-
     cs.submit_all(samples)
