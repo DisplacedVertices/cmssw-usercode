@@ -137,10 +137,14 @@ class DataSample(Sample):
         self.lumis_per = kwargs.get('lumis_per', self.LUMIS_PER)
         self.total_lumis = kwargs.get('total_lumis', self.TOTAL_LUMIS)
 
+    def add_dataset(self, c, *args, **kwargs):
+        assert len(args) == 1 and type(args[0]) == str # JMTBAD
+        self.datasets[c] = Dataset(*args, -1, **kwargs)
+
     def lumi_mask(self):
         # JMTBAD run_range checking
-        if type(self.json) == str:
-            return 'lumi_mask', self.json
+        if type(self.json) == str and os.path.isfile(self.json):
+            return self.json
         elif self.json is None:
             return ''
         else: # implement LumiList object -> tmp.json
