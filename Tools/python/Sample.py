@@ -139,7 +139,7 @@ class DataSample(Sample):
 
     def add_dataset(self, c, *args, **kwargs):
         assert len(args) == 1 and type(args[0]) == str # JMTBAD
-        self.datasets[c] = Dataset(*args, -1, **kwargs)
+        self.datasets[c] = Dataset(args[0], -1, **kwargs)
 
     def lumi_mask(self):
         # JMTBAD run_range checking
