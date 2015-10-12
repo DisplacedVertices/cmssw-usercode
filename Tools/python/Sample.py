@@ -43,6 +43,9 @@ class Sample(object):
             raise KeyError('no dataset with key %s registered in sample %s' % (c, self.name))
         self.curr_dataset = c
 
+    def add_dataset(self, c, *args, **kwargs):
+        self.datasets[c] = Dataset(*args, **kwargs)
+
     @property
     def dataset(self):
         return self.datasets[self.curr_dataset].dataset
