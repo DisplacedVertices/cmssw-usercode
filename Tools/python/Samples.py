@@ -4,30 +4,27 @@ from JMTucker.Tools.Sample import *
 
 ########################################################################
 
-qcd_ht_mg_25ns_samples = [
-    MCSample('qcd_ht_mg_25ns_0100', '/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   81719052, nice='QCD, 100 < H_{T} < 200 GeV',   color=801, syst_frac=0.20, xsec=0.),
-    MCSample('qcd_ht_mg_25ns_0200', '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   18718905, nice='QCD, 200 < H_{T} < 300 GeV',   color=802, syst_frac=0.20, xsec=1.735e6),
-    MCSample('qcd_ht_mg_25ns_0300', '/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   20278243, nice='QCD, 300 < H_{T} < 500 GeV',   color=803, syst_frac=0.20, xsec=3.67e5),
-    MCSample('qcd_ht_mg_25ns_0500', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   19664159, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=2.94e4),
-    MCSample('qcd_ht_mg_25ns_0700', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  15356448, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.524e3),
-    MCSample('qcd_ht_mg_25ns_1000', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',  4963895, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.064e3),
-    MCSample('qcd_ht_mg_25ns_1500', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  3868886, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=121.5),
-    MCSample('qcd_ht_mg_25ns_2000', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   1961774, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=25.42),
+qcd_samples = [
+    MCSample('qcdht0100', '/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   81719052, nice='QCD, 100 < H_{T} < 200 GeV',   color=801, syst_frac=0.20, xsec=2.75e7),
+    MCSample('qcdht0200', '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   18718905, nice='QCD, 200 < H_{T} < 300 GeV',   color=802, syst_frac=0.20, xsec=1.74e6),
+    MCSample('qcdht0300', '/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   20278243, nice='QCD, 300 < H_{T} < 500 GeV',   color=803, syst_frac=0.20, xsec=3.67e5),
+    MCSample('qcdht0500', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   19664159, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=2.94e4),
+    MCSample('qcdht0700', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  15356448, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.52e3),
+    MCSample('qcdht1000', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',  4963895, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.06e3),
+    MCSample('qcdht1500', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  3868886, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=122),
+    MCSample('qcdht2000', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   1961774, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=25.4),
     ]
 
-#/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM
-#/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v2/AODSIM
-
-ttbar_mgnlo_25ns_samples = [
-    MCSample('ttbar_mgnlo_25ns', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 42784971, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+ttbar_samples = [
+    MCSample('ttbar', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 42784971, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
-ttbar_mgnlo_50ns_samples = [
-    MCSample('ttbar_mgnlo_50ns', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt50ns_MCRUN2_74_V9A-v1/AODSIM', 4995842, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+leptonic_background_samples = [
+    MCSample('wjetstolnu',     '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',          24184766, nice='W + jets #rightarrow l#nu',                  color=  9, syst_frac=0.10, xsec=6.03e4),
+    MCSample('dyjetstollM10',  '/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 30663441, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV',  color= 29, syst_frac=0.10, xsec=1.86e4),
+    MCSample('dyjetstollM50',  '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/AODSIM',     28827486, nice='DY + jets #rightarrow ll, M > 50 GeV',       color= 32, syst_frac=0.10, xsec=6.10e3),
+    MCSample('qcdmupt15',      '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',    13247363, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=7.21e8 * 4.2e-4),
     ]
-
-qcd_samples = qcd_ht_mg_25ns_samples
-ttbar_samples = ttbar_mgnlo_25ns_samples
 
 mfv_signal_samples = [
     MCSample('mfv_neu_tau00100um_M0400', '/mfv_neu_tau00100um_M0400/tucker-reco25ns_10k-affbb539eabf650318e2abc876f6a96a/USER', 10000),
@@ -56,12 +53,6 @@ for s in mfv_signal_samples:
 '''
 These not updated for run2.
 
-leptonic_background_samples = [
-    MCSample('wjetstolnu',        '', 999, nice='W + jets #rightarrow l#nu',                                 color=  9, syst_frac=0.10, xsec=888.),
-    MCSample('dyjetstollM10',     '', 999, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV',                 color= 29, syst_frac=0.10, xsec=888.),
-    MCSample('dyjetstollM50',     '', 999, nice='DY + jets #rightarrow ll, M > 50 GeV',                      color= 32, syst_frac=0.10, xsec=888.),
-    ]
-
 ttbar_systematics_samples = [
     MCSample('ttbarsystMSDecays', '', 999, nice='t#bar{t} (MSDecays)',                                       color=  4, syst_frac=0.15, xsec=888.),
     MCSample('ttbarsystM166p5',   '', 999, nice='t#bar{t} (M=166.5 GeV)',                                    color=  4, syst_frac=0.15, xsec=888.),
@@ -74,7 +65,6 @@ ttbar_systematics_samples = [
 
 auxiliary_background_samples = [
     MCSample('ttbarincl',         '', 999, nice='t#bar{t}',                                                  color=  4, syst_frac=0.15, xsec=888.),
-    MCSample('qcdmupt15',         '', 999, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV',             color=801, syst_frac=0.10, xsec=888.),
     MCSample('tttt',              '', 999, nice='t#bar{t}t#bar{t}',                                          color= -1, syst_frac=0.20, xsec=888.),
     MCSample('tthbb',             '', 999, nice='ttH, H #rightarrow bb',                                     color= -1, syst_frac=0.13, xsec=888.),
     MCSample('zjetstonunuHT050',  '', 999, nice='Z #rightarrow #nu#nu + jets, 50 < H_{T} < 100 GeV',         color= -1, syst_frac=0.10, xsec=888.),
@@ -138,6 +128,7 @@ data_samples = [
 auxiliary_data_samples = [
     DataSample('SingleMuon2015A', '/SingleMuon/Run2015A-PromptReco-v1/AOD'),
     DataSample('SingleMuon2015B', '/SingleMuon/Run2015B-PromptReco-v1/AOD'),
+    DataSample('SingleMuon2015D', '/SingleMuon/Run2015D-PromptReco-v3/AOD'),
     ]
 
 ########################################################################
@@ -145,14 +136,10 @@ auxiliary_data_samples = [
 registry = SamplesRegistry()
 
 __all__ = [
-    'qcd_ht_mg_25ns_samples',
-#    'qcd_ht_mg_50ns_samples',
-    'ttbar_mgnlo_25ns_samples',
-    'ttbar_mgnlo_50ns_samples',
     'qcd_samples',
     'ttbar_samples',
     'mfv_signal_samples',
-#    'leptonic_background_samples',
+    'smaller_background_samples',
 #    'ttbar_systematics_samples',
 #    'auxiliary_background_samples',
     'data_samples',
@@ -173,16 +160,33 @@ for x in __all__:
 
 # Extra datasets, filter efficiencies, other overrides go here.
 
+for sample in data_samples + auxiliary_data_samples:
+    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
+
+qcdht0100.add_dataset('miniaod', '/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',   80093092)
+qcdht0200.add_dataset('miniaod', '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',   18717349)
+qcdht0300.add_dataset('miniaod', '/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',   20086103)
+qcdht0500.add_dataset('miniaod', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',   19542847)
+qcdht0700.add_dataset('miniaod', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',  15011016)
+qcdht1000.add_dataset('miniaod', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',  4963895)
+qcdht1500.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',  3848411)
+qcdht2000.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',   1961774)
+
+ttbar        .add_dataset('miniaod', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',              42730273)
+wjetstolnu   .add_dataset('miniaod', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',          24151270)
+dyjetstollM10.add_dataset('miniaod', '/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM', 30535559)
+dyjetstollM50.add_dataset('miniaod', '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM',     28825132)
+
 # from the trigger soup with 17 paths            # 68% CL interval
-qcd_ht_mg_25ns_0100     .filter_eff = 0.000e+00  # [0.000e+00, 1.840e-05]
-qcd_ht_mg_25ns_0200     .filter_eff = 3.400e-04  
-qcd_ht_mg_25ns_0300     .filter_eff = 1.977e-02  # [1.933e-02, 2.022e-02]
-qcd_ht_mg_25ns_0500     .filter_eff = 2.517e-01  # [2.503e-01, 2.531e-01]
-qcd_ht_mg_25ns_0700     .filter_eff = 9.044e-01  # [9.035e-01, 9.053e-01]
-qcd_ht_mg_25ns_1000     .filter_eff = 9.996e-01  # [9.996e-01, 9.997e-01]
-qcd_ht_mg_25ns_1500     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
-qcd_ht_mg_25ns_2000     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
-ttbar_mgnlo_25ns        .filter_eff = 2.823e-01  # [2.808e-01, 2.837e-01]
+qcdht0100     .filter_eff = 0.000e+00  # [0.000e+00, 1.840e-05]
+qcdht0200     .filter_eff = 3.400e-04  
+qcdht0300     .filter_eff = 1.977e-02  # [1.933e-02, 2.022e-02]
+qcdht0500     .filter_eff = 2.517e-01  # [2.503e-01, 2.531e-01]
+qcdht0700     .filter_eff = 9.044e-01  # [9.035e-01, 9.053e-01]
+qcdht1000     .filter_eff = 9.996e-01  # [9.996e-01, 9.997e-01]
+qcdht1500     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
+qcdht2000     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
+ttbar         .filter_eff = 2.823e-01  # [2.808e-01, 2.837e-01]
 mfv_neu_tau00100um_M0400.filter_eff = 9.704e-01  # [9.686e-01, 9.721e-01]
 mfv_neu_tau00100um_M0800.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
 mfv_neu_tau00100um_M1200.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
@@ -204,3 +208,10 @@ mfv_neu_tau10000um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
 
 if __name__ == '__main__':
     main(registry)
+
+    if 0:
+        from DBS import *
+        for x in qcd_samples + ttbar_samples + smaller_background_samples:
+            ds = x.datasets['miniaod'].dataset
+            print ds
+            print numevents_in_dataset(ds)
