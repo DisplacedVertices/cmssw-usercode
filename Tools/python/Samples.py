@@ -121,13 +121,11 @@ auxiliary_background_samples = [
 ########################################################################
 
 data_samples = [
-    DataSample('JetHT2015A', '/JetHT/Run2015A-PromptReco-v1/AOD'),
-    DataSample('JetHT2015B', '/JetHT/Run2015B-PromptReco-v1/AOD'),
+    #DataSample('JetHT2015A', '/JetHT/Run2015A-PromptReco-v1/AOD'),
+    #DataSample('JetHT2015B', '/JetHT/Run2015B-PromptReco-v1/AOD'),
     ]
 
 auxiliary_data_samples = [
-    DataSample('SingleMuon2015A', '/SingleMuon/Run2015A-PromptReco-v1/AOD'),
-    DataSample('SingleMuon2015B', '/SingleMuon/Run2015B-PromptReco-v1/AOD'),
     DataSample('SingleMuon2015D', '/SingleMuon/Run2015D-PromptReco-v3/AOD'),
     ]
 
@@ -139,7 +137,7 @@ __all__ = [
     'qcd_samples',
     'ttbar_samples',
     'mfv_signal_samples',
-    'smaller_background_samples',
+    'leptonic_background_samples',
 #    'ttbar_systematics_samples',
 #    'auxiliary_background_samples',
     'data_samples',
@@ -173,9 +171,11 @@ qcdht1500.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphM
 qcdht2000.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',   1961774)
 
 ttbar        .add_dataset('miniaod', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',              42730273)
+
 wjetstolnu   .add_dataset('miniaod', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',          24151270)
 dyjetstollM10.add_dataset('miniaod', '/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM', 30535559)
 dyjetstollM50.add_dataset('miniaod', '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM',     28825132)
+qcdmupt15    .add_dataset('miniaod', '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',    13201693)
 
 # from the trigger soup with 17 paths            # 68% CL interval
 qcdht0100     .filter_eff = 0.000e+00  # [0.000e+00, 1.840e-05]
