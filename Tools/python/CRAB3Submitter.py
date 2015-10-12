@@ -123,7 +123,7 @@ class CRABSubmitter:
             self.cfg_template.Data.unitsPerJob = _get('units_per_job')
             self.cfg_template.Data.totalUnits  = _get('total_units')
             if lumi_mask:
-                self.cfg_template.Data.lumi_mask = lumi_mask
+                self.cfg_template.Data.lumiMask = lumi_mask
 
         if storage_site.lower() == 'cornell':
             self.cfg_template.Site.storageSite = 'T3_US_Cornell'
