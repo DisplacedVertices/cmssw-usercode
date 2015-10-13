@@ -70,6 +70,20 @@ struct TriggerHelper {
       throw cms::Exception("TriggerHelper") << "no trigger for " << trigger << " found";
     return false;
   }
+
+  std::pair<bool, bool> pass_and_found_any_version(const std::string& trigger) const {
+    bool pass = false;
+    bool found = false;
+    for (size_t ipath = 0, ipathe = trigger_names.size(); ipath < ipathe; ++ipath) {
+      const std::string path = trigger_names.triggerName(ipath);
+      if (path.substr(0, trigger.size()) == trigger) {
+        pass = trigger_results.accept(ipath);
+        found = true;
+        break;
+      }
+    }
+    return std::make_pair(pass, found);
+  }
 };
 
 #endif
