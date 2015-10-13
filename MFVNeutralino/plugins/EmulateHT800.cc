@@ -1,26 +1,30 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 
-class MFVEmulateHT800 : public edm::EDAnalyzer {
+class MFVEmulateHT800 : public edm::EDFilter {
 public:
   explicit MFVEmulateHT800(const edm::ParameterSet&);
 
 private:
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+  virtual bool filter(edm::Event&, const edm::EventSetup&) override;
 
   edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
   const bool throw_not_found;
   const bool prints;
 
+  L1GtUtils l1_cfg;
+
   TH1F* h_not_found_but_pass350;
   TH1F* h_ht;
+  TH1F* h_ht4mc;
   TH1F* h_agree[2];
 };
 
@@ -33,11 +37,14 @@ MFVEmulateHT800::MFVEmulateHT800(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
   h_not_found_but_pass350 = fs->make<TH1F>("h_not_found_but_pass350", "", 2, 0, 2);
   h_ht = fs->make<TH1F>("h_ht", "", 2000, 0, 10000);
+  h_ht4mc = fs->make<TH1F>("h_ht4mc", "", 2000, 0, 10000);
   h_agree[0] = fs->make<TH1F>("h_agree_800", "", 2, 0, 2);
   h_agree[1] = fs->make<TH1F>("h_agree_900", "", 2, 0, 2);
 }
 
-void MFVEmulateHT800::analyze(const edm::Event& event, const edm::EventSetup&) {
+bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
+  l1_cfg.getL1GtRunCache(event, setup, true, false);
+
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
@@ -83,6 +90,14 @@ void MFVEmulateHT800::analyze(const edm::Event& event, const edm::EventSetup&) {
     std::cout << std::endl;
   }
 
+  // HT800 and 900 seeds are is "L1_HTT150 OR L1_HTT175"
+  int l1err = 0;
+  const bool l1_pass_150 = l1_cfg.decision(event, "L1_HTT150", l1err);
+  if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_HTT150: " << l1err;
+  const bool l1_pass_175 = l1_cfg.decision(event, "L1_HTT175", l1err);
+  if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_HTT175: " << l1err;
+  const bool l1_pass = l1_pass_150 || l1_pass_175;
+
   // only objects that pass at least one path are saved. check 350
   std::pair<bool, bool> pass_and_found_350 = helper.pass_and_found_any_version("HLT_PFHT350_v");
   if (!pass_and_found_350.second)
@@ -90,11 +105,20 @@ void MFVEmulateHT800::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   float ht = -1;
   bool found_ht = false;
-  for (pat::TriggerObjectStandAlone obj : *trigger_objects)
-    if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89 && obj.collection() == "hltPFHT::HLT") {
-      ht = obj.pt();
-      found_ht = true;
+  float ht4mc = -1;
+  bool found_ht4mc = false;
+  for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
+    if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
+      if (obj.collection() == "hltPFHT::HLT") {
+        ht = obj.pt();
+        found_ht = true;
+      }
+      else if (obj.collection() == "hltHtMhtForMC::HLT") {
+        ht4mc = obj.pt();
+        found_ht4mc = true;
+      }
     }
+  }
 
   h_ht->Fill(ht);
   h_not_found_but_pass350->Fill(!found_ht && pass_and_found_350.first);
@@ -106,26 +130,35 @@ void MFVEmulateHT800::analyze(const edm::Event& event, const edm::EventSetup&) {
       if (throw_not_found)
         throw cms::Exception("EmulateHT800", "couldn't find HT in trigger objects");
     }
-    return;
+    return true; // JMTBAD
   }
 
   const char* paths[2] = {"HLT_PFHT800_v", "HLT_PFHT900_v"};
   const int thresh[2] = {800, 900};
+  bool pass [2] = {false, false};
+  bool found[2] = {false, false};
   bool one_found = false;
   for (int i : {0,1} ) {
     std::pair<bool, bool> pass_and_found = helper.pass_and_found_any_version(paths[i]);
+    found[i] = pass_and_found.second;
     if (pass_and_found.second) {
+      pass[i] = pass_and_found.first;
       one_found = true;
-      const bool agree = (ht > thresh[i]) == pass_and_found.first;
+
+      const bool emulated_pass = l1_pass && ht >= thresh[i];
+      const bool agree = emulated_pass == pass_and_found.first;
       if (!agree) {
         std::cout << "event: (" << event.id().run() << ", " << event.luminosityBlock() << ", " << event.id().event() << "): ";
-        printf("DISAGREEMENT: ht = %f and HLT_PFHT%i = %i\n", ht, thresh[i], pass_and_found.first);
+        printf("DISAGREEMENT: ht = %f and HLT_PFHT%i = %i; ht4mc (found? %i) = %f\n", ht, thresh[i], pass_and_found.first, found_ht4mc, ht4mc);
+        h_ht4mc->Fill(ht4mc);
       }
       h_agree[i]->Fill(agree);
     }
   }
   if (!one_found)
     throw cms::Exception("EmulateHT800", "didn't find at least one of HLT_PFHT800 or 900");
+
+  return true || pass[0] || pass[1] || found[0] || found[1]; // asdgasdgadgakdgljkasjklg
 }
 
 DEFINE_FWK_MODULE(MFVEmulateHT800);
