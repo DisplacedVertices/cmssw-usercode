@@ -100,7 +100,8 @@ def crab_status(working_dir, verbose=True):
         del d['failed']
         for job_num, job_info in result['jobs'].iteritems():
             if job_info['State'] == 'failed':
-                state_ex = 'failed_%i' % job_info['Error'][0]
+                err = job_info.get('Error', ['Unk'])[0]
+                state_ex = 'failed_%s' % err
                 if d.has_key(state_ex):
                     d[state_ex] += 1
                 else:
@@ -111,6 +112,7 @@ def crab_status(working_dir, verbose=True):
 def crab_process_statuses(working_dirs, max_processes, verbose=True):
     if verbose:
         print 'launching processes...'
+    #results = {working_dirs[0]: crab_status(working_dirs[0])}
     results = crab_multiprocess(crab_status, working_dirs, max_processes)
     if verbose:
         print 'done waiting for processes!'
