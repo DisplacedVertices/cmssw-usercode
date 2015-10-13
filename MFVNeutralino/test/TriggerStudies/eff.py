@@ -3,11 +3,13 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-is_mc = False
+is_mc = True
 
 global_tag(process, 'MCRUN2_74_V9' if is_mc else '74X_dataRun2_Prompt_v2')
-process.maxEvents.input = 100
+process.maxEvents.input = 1000
 process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/80000/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root' if is_mc else '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/630/00000/BCD78EF7-2B5F-E511-A3A3-02163E0170B5.root']
+#process.source.fileNames = ['/store/mc/RunIISpring15DR74/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/0270C6BA-AE17-E511-9D04-549F358EB755.root']
+#process.source.fileNames = ['/store/mc/RunIISpring15DR74/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/00F9B1F1-3B18-E511-B17D-A0369F30FFD2.root']
 process.TFileService.fileName = 'eff.root'
 if not is_mc:
     from JMTucker.Tools.Sample import DataSample
@@ -24,6 +26,13 @@ from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
 process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1219))
 
+process.emu = cms.EDAnalyzer('MFVEmulateHT800',
+                             trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
+                             trigger_objects_src = cms.InputTag('selectedPatTrigger'),
+                             throw_not_found = cms.bool(False),
+                             prints = cms.untracked.bool(False),
+                             )
+
 process.num = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_trigger = cms.bool(True),
                              require_muon = cms.bool(True),
@@ -35,7 +44,7 @@ process.num = cms.EDAnalyzer('MFVTriggerEfficiency',
                              )
 process.den = process.num.clone(require_trigger = False)
 
-process.p = cms.Path(process.mutrig * process.den * process.num)
+process.p = cms.Path(process.emu) # * process.mutrig * process.den * process.num)
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
@@ -52,7 +61,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         else:
             sample.lumis_per = 30 # ?
 
-    def cfg_modifier(cfg, sample):
+    def pset_modifier(sample):
         to_add = []
         to_replace = []
 
@@ -64,9 +73,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('TrigEff_v2',
-                       cfg_modifier = cfg_modifier,
+    cs = CRABSubmitter('TestEmu800',
+                       pset_modifier = pset_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',
                        )
     cs.submit_all(samples)
+ 
