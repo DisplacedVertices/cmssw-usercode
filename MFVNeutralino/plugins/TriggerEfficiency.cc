@@ -143,34 +143,36 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
         });
 #endif
 
-  for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
-    char path[1024];
-    snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
-    if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
-      continue;
+  if (require_trigger) {
+    for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
+      char path[1024];
+      snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
+      if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
+        continue;
 
-    found = true;
+      found = true;
 
-    //int l1err;
-    //const bool l1_pass = l1_cfg.decision(event, "L1_QuadJetC40", l1err);
-    //if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_QuadJetC40: " << l1err;
+      //int l1err;
+      //const bool l1_pass = l1_cfg.decision(event, "L1_QuadJetC40", l1err);
+      //if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_QuadJetC40: " << l1err;
 
-    const size_t ipath = hlt_names.triggerIndex(path);
-    if (!(ipath < npaths))
-      throw cms::Exception("BadAssumption") << "hlt_cfg and triggerNames don't agree on " << path;
-    const bool hlt_pass = hlt_results->accept(ipath);
+      const size_t ipath = hlt_names.triggerIndex(path);
+      if (!(ipath < npaths))
+        throw cms::Exception("BadAssumption") << "hlt_cfg and triggerNames don't agree on " << path;
+      const bool hlt_pass = hlt_results->accept(ipath);
 
-    //pass = l1_pass && hlt_pass;
-    pass = hlt_pass;
+      //pass = l1_pass && hlt_pass;
+      pass = hlt_pass;
 
-    break;
+      break;
+    }
+
+    if (!found)
+      throw cms::Exception("BadAssumption", "one of HLT_PFHT800_v{1..9} not found");
+
+    if (!pass)
+      return;
   }
-
-  if (!found)
-    throw cms::Exception("BadAssumption", "one of HLT_PFHT800_v{1..9} not found");
-
-  if (require_trigger && !pass)
-    return;
 
   if (require_muon) {
     edm::Handle<pat::MuonCollection> muons;

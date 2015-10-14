@@ -6,6 +6,8 @@ from JMTucker.Tools.CMSSWTools import *
 
 is_mc = True
 
+process.options.wantSummary = True
+
 global_tag(process, 'MCRUN2_74_V9' if is_mc else '74X_dataRun2_Prompt_v2')
 process.maxEvents.input = 1000
 process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/80000/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root' if is_mc else '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/630/00000/BCD78EF7-2B5F-E511-A3A3-02163E0170B5.root']
@@ -30,24 +32,26 @@ process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService
 process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1219))
 
 process.emu = cms.EDFilter('MFVEmulateHT800',
-                             trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
-                             trigger_objects_src = cms.InputTag('selectedPatTrigger'),
-                             throw_not_found = cms.bool(False),
-                             prints = cms.untracked.bool(False),
-                             )
+                           trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
+                           trigger_objects_src = cms.InputTag('selectedPatTrigger'),
+                           throw_not_found = cms.bool(False),
+                           return_actual = cms.bool(True),
+                           prints = cms.untracked.bool(False),
+                           histos = cms.untracked.bool(False),
+                           )
 
 process.num = cms.EDAnalyzer('MFVTriggerEfficiency',
-                             require_trigger = cms.bool(True),
+                             require_trigger = cms.bool(False), # just from EmulateHT800 filter, need to split out
                              require_muon = cms.bool(True),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 24'),
                              jets_src = cms.InputTag('slimmedJets'),
                              jet_cut = jtupleParams.jetCut,
-                             genjets_src = cms.InputTag('ak4GenJets' if is_mc else ''),
+                             genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
 process.den = process.num.clone(require_trigger = False)
 
-process.p = cms.Path(process.emu) # * process.mutrig * process.den * process.num)
+process.p = cms.Path(process.mutrig * process.den * process.emu * process.num)
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
