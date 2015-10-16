@@ -32,7 +32,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
-        new_name = os.path.basename(working_dir).replace('crab_','')
+        new_name = os.path.basename(working_dir).split('_')[-1]
     if not new_name.endswith('.root'):
         new_name += '.root'
     if new_dir is not None:
@@ -60,7 +60,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
             print '\033[36;7m', msg, '\033[m'
     elif l == 1:
         print working_dir, ': just one file found, copying'
-        cmd = 'cp %s %s' % (files[0], new_name)
+        cmd = 'xrdcp %s %s' % (files[0], new_name)
         os.system(cmd)
         os.chmod(new_name, 0644)
     else:
