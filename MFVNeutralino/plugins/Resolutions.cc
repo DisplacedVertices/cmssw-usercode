@@ -174,6 +174,8 @@ class MFVResolutions : public edm::EDAnalyzer {
 //  TH1F* h_gen_dvv_rec600um;
 //  TH1F* h_gen_dvv_matched;
 //  TH1F* h_gen_dvv_matched_600um;
+
+  TH2F* h_lsp_ntracks0_ntracks1;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -337,6 +339,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 //  h_gen_dvv_rec600um = fs->make<TH1F>("h_gen_dvv_rec600um", ";generated d_{VV};events with reconstructed d_{VV} > 600 #mum", 200, 0, 1);
 //  h_gen_dvv_matched = fs->make<TH1F>("h_gen_dvv_matched", ";generated d_{VV};events with two matched vertices", 200, 0, 1);
 //  h_gen_dvv_matched_600um = fs->make<TH1F>("h_gen_dvv_matched_600um", ";generated d_{VV};events with two matched vertices and d_{VV} > 600 #mum", 200, 0, 1);
+
+  h_lsp_ntracks0_ntracks1 = fs->make<TH2F>("h_lsp_ntracks0_ntracks1", ";ntracks of vtx0 matched to LSP;ntracks of vtx1 matched to LSP", 40, 0, 40, 40, 0, 40);
 }
 
 namespace {
@@ -864,6 +868,8 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
   int lsp_nmatch[2] = {0,0};
   int nvtx_match = 0;
+  std::vector<int> lsp0_ntracks;
+  std::vector<int> lsp1_ntracks;
 
   for (const MFVVertexAux& vtx : *vertices) {
     double dist = 1e99;
@@ -882,6 +888,8 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       for (int i = 0; i < 2; ++i) {
         if (dists[i] < max_dist) {
           ++lsp_nmatch[i];
+          if (i == 0) lsp0_ntracks.push_back(vtx.ntracks());
+          if (i == 1) lsp1_ntracks.push_back(vtx.ntracks());
           if (dists[i] < dist) {
             dist = dists[i];
             ilsp = i;
@@ -896,7 +904,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
     ++nvtx_match;
 
-    if (dbv[ilsp] > 0.20 && dbv[ilsp] < 0.30) {
+    if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > 0.20 && dbv[ilsp] < 0.30) {
       h_dist->Fill(dist);
       for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
         h_rec_dxy->Fill(vtx.track_dxy[i]);
@@ -912,7 +920,13 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
   // histogram lsp_nmatch
   for (int i = 0; i < 2; ++i) {
-    if (dbv[i] > 0.20 && dbv[i] < 0.30) h_lspsnmatch->Fill(lsp_nmatch[i]);
+    if (dbv[i] > 0.20 && dbv[i] < 0.30) {
+      h_lspsnmatch->Fill(lsp_nmatch[i]);
+      if (lsp_nmatch[i] > 1) {
+        if (i == 0) h_lsp_ntracks0_ntracks1->Fill(lsp0_ntracks.at(0), lsp0_ntracks.at(1));
+        if (i == 1) h_lsp_ntracks0_ntracks1->Fill(lsp1_ntracks.at(0), lsp1_ntracks.at(1));
+      }
+    }
 //    h_lsp_nmatch[i]->Fill(lsp_nmatch[i]);
   }
 //  h_lsp0nmatch_lsp1nmatch->Fill(lsp_nmatch[1], lsp_nmatch[0]);
