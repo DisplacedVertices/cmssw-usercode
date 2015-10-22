@@ -157,6 +157,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_rec_njetsntks;
   TH1F* h_rec_ntracksptgt3;
   TH1F* h_rec_dbv;
+  TH1F* h_rec_betagamma;
+  TH1F* h_rec_drrms;
   TH1F* h_rec_dvv;
 
   TH1F* h_gen_jetpt4;
@@ -316,12 +318,14 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 */
   h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
   h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks/vertex;vertices", 40, 0, 40);
-  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 300, 0, 0.003);
+  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 30, 0, 0.003);
   h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 100, 0, 0.5);
   h_rec_drmax = fs->make<TH1F>("h_rec_drmax", ";max{#Delta R{track i,j}};vertices", 100, 0, 5);
   h_rec_njetsntks = fs->make<TH1F>("h_rec_njetsntks", ";number of associated jets;vertices", 10, 0, 10);
   h_rec_ntracksptgt3 = fs->make<TH1F>("h_rec_ntracksptgt3", ";number of tracks with p_{T} > 3 GeV/vertex;vertices", 40, 0, 40);
   h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
+  h_rec_betagamma = fs->make<TH1F>("h_rec_betagamma", ";reconstructed #beta#gamma;vertices", 20, 0, 10);
+  h_rec_drrms = fs->make<TH1F>("h_rec_drrms", ";rms{#Delta R{track i,j}};vertices", 100, 0, 5);
   h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
 
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
@@ -915,6 +919,8 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
       h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
       h_rec_dbv->Fill(vtx.bs2ddist);
+      h_rec_betagamma->Fill(vtx.p4(which_mom).Beta()*vtx.p4(which_mom).Gamma());
+      h_rec_drrms->Fill(vtx.drrms());
     }
   }
 
