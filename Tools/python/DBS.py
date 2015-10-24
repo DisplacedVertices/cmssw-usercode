@@ -66,7 +66,7 @@ def sites_for_dataset(dataset, instance='global'):
     return das_query(instance)('dataset=%s site' % dataset,
                                line_filter=lambda s: s.startswith('T'))
 
-def files_for_events(run_events, instance='global'):
+def files_for_events(run_events, dataset, instance='global'):
     run_lumis = defaultdict(list)
     for x in run_events: # list of runs, or list of (run, event), or list of (run, lumi, event)
         if type(x) == int:
