@@ -170,6 +170,8 @@ root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo
 root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_9_1_fEM.root'''.split('\n')
 
 process.TFileService.fileName = 'resolutions.root'
+if mode == 'h2xqq_1000_350':
+    process.TFileService.fileName = 'h2x_1000_tau0035000um_M0350.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
