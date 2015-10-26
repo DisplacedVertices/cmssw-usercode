@@ -159,6 +159,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_rec_dbv;
   TH1F* h_rec_betagamma;
   TH1F* h_rec_drrms;
+  TH2F* h_rec_drrms_ntracks;
+  TH1F* h_rec_dirrms;
   TH1F* h_rec_dvv;
 
   TH1F* h_gen_jetpt4;
@@ -326,6 +328,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
   h_rec_betagamma = fs->make<TH1F>("h_rec_betagamma", ";reconstructed #beta#gamma;vertices", 20, 0, 10);
   h_rec_drrms = fs->make<TH1F>("h_rec_drrms", ";rms{#Delta R{track i,j}};vertices", 100, 0, 5);
+  h_rec_drrms_ntracks = fs->make<TH2F>("h_rec_drrms_ntracks", ";ntracks;drrms", 40, 0, 40, 100, 0, 5);
+  h_rec_dirrms = fs->make<TH1F>("h_rec_dirrms", ";rms{direction{track i}} w.r.t. direction of net momentum by tracks only;vertices", 100, 0, 5);
   h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
 
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
@@ -875,6 +879,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   std::vector<int> lsp0_ntracks;
   std::vector<int> lsp1_ntracks;
 
+  //printf("run = %u, luminosity block = %u, event = %u\n", event.id().run(), event.luminosityBlock(), event.id().event());
   for (const MFVVertexAux& vtx : *vertices) {
     double dist = 1e99;
     int ilsp = -1;
@@ -910,8 +915,21 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
     if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > 0.20 && dbv[ilsp] < 0.30) {
       h_dist->Fill(dist);
-      for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
+      double sum = 0;
+      //printf("vertex %d: ntracks = %d, njetsntks = %d, bs2derr = %6.4f, drrms = %5.3f\n", nvtx_match, vtx.ntracks(), vtx.njets[mfv::JByNtracks], vtx.bs2derr, vtx.drrms());
+      for (size_t i = 0, n = vtx.ntracks(); i < n; ++i) {
         h_rec_dxy->Fill(vtx.track_dxy[i]);
+        sum += (vtx.track_eta[i]-vtx.eta[mfv::PTracksOnly])*(vtx.track_eta[i]-vtx.eta[mfv::PTracksOnly])
+             + (vtx.track_phi[i]-vtx.phi[mfv::PTracksOnly])*(vtx.track_phi[i]-vtx.phi[mfv::PTracksOnly]);
+        //printf("\ttrack %2d: qpt = %7.3f, eta = %6.3f, phi = %6.3f, dxy = %5.3f, drs = %5.3f\n", int(i), vtx.track_qpt[i], vtx.track_eta[i], vtx.track_phi[i], vtx.track_dxy[i],
+        //       (vtx.track_eta[i]-vtx.eta[mfv::PTracksOnly])*(vtx.track_eta[i]-vtx.eta[mfv::PTracksOnly])
+        //     + (vtx.track_phi[i]-vtx.phi[mfv::PTracksOnly])*(vtx.track_phi[i]-vtx.phi[mfv::PTracksOnly]));
+        //printf("\t");
+        //for (size_t j = i+1; j < n; ++j) {
+        //  printf("\t%5.3f", sqrt((vtx.track_eta[i]-vtx.track_eta[j])*(vtx.track_eta[i]-vtx.track_eta[j]) + (vtx.track_phi[i]-vtx.track_phi[j])*(vtx.track_phi[i]-vtx.track_phi[j])));
+        //}
+        //printf("\n");
+      }
       h_rec_ntracks->Fill(vtx.ntracks());
       h_rec_bs2derr->Fill(vtx.bs2derr);
       h_rec_drmin->Fill(vtx.drmin());
@@ -921,6 +939,8 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       h_rec_dbv->Fill(vtx.bs2ddist);
       h_rec_betagamma->Fill(vtx.p4(which_mom).Beta()*vtx.p4(which_mom).Gamma());
       h_rec_drrms->Fill(vtx.drrms());
+      h_rec_drrms_ntracks->Fill(vtx.ntracks(), vtx.drrms());
+      h_rec_dirrms->Fill(sqrt(1/(vtx.ntracks()-1.0) * sum));
     }
   }
 
