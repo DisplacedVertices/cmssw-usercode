@@ -154,13 +154,22 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_rec_bs2derr;
   TH1F* h_rec_drmin;
   TH1F* h_rec_drmax;
+  TH1F* h_rec_dravg;
+  TH1F* h_rec_drrms;
   TH1F* h_rec_njetsntks;
   TH1F* h_rec_ntracksptgt3;
   TH1F* h_rec_dbv;
   TH1F* h_rec_betagamma;
-  TH1F* h_rec_drrms;
   TH2F* h_rec_drrms_ntracks;
   TH1F* h_rec_dirrms;
+  TH1F* h_rec_tracks_eta;
+  TH1F* h_rec_tracks_phi;
+  TH1F* h_rec_trackpair_deta;
+  TH1F* h_rec_trackpair_dphi;
+  TH1F* h_rec_trackpair_dr;
+  TH1F* h_rec_tracks_deta;
+  TH1F* h_rec_tracks_dphi;
+  TH1F* h_rec_tracks_dr;
   TH1F* h_rec_dvv;
 
   TH1F* h_gen_jetpt4;
@@ -323,13 +332,22 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 30, 0, 0.003);
   h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 100, 0, 0.5);
   h_rec_drmax = fs->make<TH1F>("h_rec_drmax", ";max{#Delta R{track i,j}};vertices", 100, 0, 5);
+  h_rec_dravg = fs->make<TH1F>("h_rec_dravg", ";avg{#Delta R{track i,j}};vertices", 100, 0, 5);
+  h_rec_drrms = fs->make<TH1F>("h_rec_drrms", ";rms{#Delta R{track i,j}};vertices", 100, 0, 5);
   h_rec_njetsntks = fs->make<TH1F>("h_rec_njetsntks", ";number of associated jets;vertices", 10, 0, 10);
   h_rec_ntracksptgt3 = fs->make<TH1F>("h_rec_ntracksptgt3", ";number of tracks with p_{T} > 3 GeV/vertex;vertices", 40, 0, 40);
   h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
   h_rec_betagamma = fs->make<TH1F>("h_rec_betagamma", ";reconstructed #beta#gamma;vertices", 20, 0, 10);
-  h_rec_drrms = fs->make<TH1F>("h_rec_drrms", ";rms{#Delta R{track i,j}};vertices", 100, 0, 5);
   h_rec_drrms_ntracks = fs->make<TH2F>("h_rec_drrms_ntracks", ";ntracks;drrms", 40, 0, 40, 100, 0, 5);
   h_rec_dirrms = fs->make<TH1F>("h_rec_dirrms", ";rms{direction{track i}} w.r.t. direction of net momentum by tracks only;vertices", 100, 0, 5);
+  h_rec_tracks_eta = fs->make<TH1F>("h_rec_tracks_eta", ";reconstructed track #eta;tracks", 50, -4, 4);
+  h_rec_tracks_phi = fs->make<TH1F>("h_rec_tracks_phi", ";reconstructed track #phi;tracks", 50, -3.15, 3.15);
+  h_rec_trackpair_deta = fs->make<TH1F>("h_rec_trackpair_deta", ";reconstructed track pair #Delta#eta;track pairs", 100, 0, 5);
+  h_rec_trackpair_dphi = fs->make<TH1F>("h_rec_trackpair_dphi", ";reconstructed track pair #Delta#phi;track pairs", 100, 0, 6.3);
+  h_rec_trackpair_dr = fs->make<TH1F>("h_rec_trackpair_dr", ";reconstructed track pair #DeltaR;track pairs", 100, 0, 10);
+  h_rec_tracks_deta = fs->make<TH1F>("h_rec_tracks_deta", ";reconstructed track #Delta#eta w.r.t. direction of net momentum by tracks only;tracks", 100, 0, 5);
+  h_rec_tracks_dphi = fs->make<TH1F>("h_rec_tracks_dphi", ";reconstructed track #Delta#phi w.r.t. direction of net momentum by tracks only;tracks", 100, 0, 6.3);
+  h_rec_tracks_dr = fs->make<TH1F>("h_rec_tracks_dr", ";reconstructed track #DeltaR w.r.t. direction of net momentum by tracks only;tracks", 100, 0, 10);
   h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
 
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
@@ -925,20 +943,33 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
         //       (vtx.track_eta[i]-vtx.eta[mfv::PTracksOnly])*(vtx.track_eta[i]-vtx.eta[mfv::PTracksOnly])
         //     + (vtx.track_phi[i]-vtx.phi[mfv::PTracksOnly])*(vtx.track_phi[i]-vtx.phi[mfv::PTracksOnly]));
         //printf("\t");
-        //for (size_t j = i+1; j < n; ++j) {
+        for (size_t j = i+1; j < n; ++j) {
         //  printf("\t%5.3f", sqrt((vtx.track_eta[i]-vtx.track_eta[j])*(vtx.track_eta[i]-vtx.track_eta[j]) + (vtx.track_phi[i]-vtx.track_phi[j])*(vtx.track_phi[i]-vtx.track_phi[j])));
-        //}
+          h_rec_trackpair_deta->Fill(fabs(vtx.track_eta[i] - vtx.track_eta[j]));
+          h_rec_trackpair_dphi->Fill(fabs(vtx.track_phi[i] - vtx.track_phi[j]));
+          h_rec_trackpair_dr->Fill(sqrt((vtx.track_eta[i] - vtx.track_eta[j]) * (vtx.track_eta[i] - vtx.track_eta[j])
+                                      + (vtx.track_phi[i] - vtx.track_phi[j]) * (vtx.track_phi[i] - vtx.track_phi[j])));
+        }
         //printf("\n");
+
+        h_rec_tracks_eta->Fill(vtx.track_eta[i]);
+        h_rec_tracks_phi->Fill(vtx.track_phi[i]);
+        h_rec_tracks_deta->Fill(fabs(vtx.track_eta[i] - vtx.eta[mfv::PTracksOnly]));
+        h_rec_tracks_dphi->Fill(fabs(vtx.track_phi[i] - vtx.phi[mfv::PTracksOnly]));
+        h_rec_tracks_dr->Fill(sqrt((vtx.track_eta[i] - vtx.eta[mfv::PTracksOnly]) * (vtx.track_eta[i] - vtx.eta[mfv::PTracksOnly])
+                                  +(vtx.track_phi[i] - vtx.phi[mfv::PTracksOnly]) * (vtx.track_phi[i] - vtx.phi[mfv::PTracksOnly])));
+
       }
       h_rec_ntracks->Fill(vtx.ntracks());
       h_rec_bs2derr->Fill(vtx.bs2derr);
       h_rec_drmin->Fill(vtx.drmin());
       h_rec_drmax->Fill(vtx.drmax());
+      h_rec_dravg->Fill(vtx.dravg());
+      h_rec_drrms->Fill(vtx.drrms());
       h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
       h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
       h_rec_dbv->Fill(vtx.bs2ddist);
       h_rec_betagamma->Fill(vtx.p4(which_mom).Beta()*vtx.p4(which_mom).Gamma());
-      h_rec_drrms->Fill(vtx.drrms());
       h_rec_drrms_ntracks->Fill(vtx.ntracks(), vtx.drrms());
       h_rec_dirrms->Fill(sqrt(1/(vtx.ntracks()-1.0) * sum));
     }
