@@ -182,6 +182,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_gen_sumpt;
   TH1F* h_gen_drmin;
   TH1F* h_gen_drmax;
+  TH1F* h_gen_betagamma;
 
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
@@ -362,6 +363,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 100, 0, 1000);
   h_gen_drmin = fs->make<TH1F>("h_gen_drmin", ";min #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
   h_gen_drmax = fs->make<TH1F>("h_gen_drmax", ";max #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
+  h_gen_betagamma = fs->make<TH1F>("h_gen_betagamma", ";generated #beta#gamma;LSPs", 20, 0, 10);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV} (cm);LSPs", 250, 0, 2.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV} (cm);events", 500, 0, 5);
@@ -402,6 +404,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
+  TLorentzVector p4[2];
 
   if (doing_h2xqq) {
     for (size_t igen = 0; igen < ngen; ++igen) {
@@ -424,6 +427,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
           dauid %= 10;
           assert(dauid == 3 || dauid == 4);
 
+          TLorentzVector v;
+          v.SetPtEtaPhiM(dau->pt(), dau->eta(), dau->phi(), dau->mass());
+          p4[idau] = v;
           const size_t ngdau = dau->numberOfDaughters();
           assert(ngdau >= 2);
           for (size_t igdau = 0; igdau < 2; ++igdau) {
@@ -745,6 +751,9 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       v[i][0] = mci.stranges[i]->vx() - x0;
       v[i][1] = mci.stranges[i]->vy() - y0;
       v[i][2] = mci.stranges[i]->vz() - z0;
+      TLorentzVector v;
+      v.SetPtEtaPhiM(mci.lsps[i]->pt(), mci.lsps[i]->eta(), mci.lsps[i]->phi(), mci.lsps[i]->mass());
+      p4[i] = v;
     }
 
 /*
@@ -892,6 +901,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       h_gen_drmax->Fill(drmax);
       h_gen_nquarks->Fill(nquarks);
       h_gen_sumpt->Fill(sumpt);
+      h_gen_betagamma->Fill(p4[i].Beta() * p4[i].Gamma());
     }
   }
 
