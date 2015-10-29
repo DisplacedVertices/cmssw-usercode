@@ -37,7 +37,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   bool mci_warned;
   const edm::InputTag gen_jet_src;
 
-//  TH1F* h_dr;
+  TH1F* h_dr;
   TH1F* h_dist;
 
   TH1F* h_lspsnmatch;
@@ -216,7 +216,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
 
-//  h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
+  h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
 
   h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
@@ -404,7 +404,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
-  TLorentzVector p4[2];
+  TLorentzVector lsp_p4s[2];
 
   if (doing_h2xqq) {
     for (size_t igen = 0; igen < ngen; ++igen) {
@@ -429,7 +429,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
           TLorentzVector v;
           v.SetPtEtaPhiM(dau->pt(), dau->eta(), dau->phi(), dau->mass());
-          p4[idau] = v;
+          lsp_p4s[idau] = v;
           const size_t ngdau = dau->numberOfDaughters();
           assert(ngdau >= 2);
           for (size_t igdau = 0; igdau < 2; ++igdau) {
@@ -753,7 +753,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       v[i][2] = mci.stranges[i]->vz() - z0;
       TLorentzVector v;
       v.SetPtEtaPhiM(mci.lsps[i]->pt(), mci.lsps[i]->eta(), mci.lsps[i]->phi(), mci.lsps[i]->mass());
-      p4[i] = v;
+      lsp_p4s[i] = v;
     }
 
 /*
@@ -901,7 +901,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       h_gen_drmax->Fill(drmax);
       h_gen_nquarks->Fill(nquarks);
       h_gen_sumpt->Fill(sumpt);
-      h_gen_betagamma->Fill(p4[i].Beta() * p4[i].Gamma());
+      h_gen_betagamma->Fill(lsp_p4s[i].Beta() * lsp_p4s[i].Gamma());
     }
   }
 
@@ -913,10 +913,26 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
   //printf("run = %u, luminosity block = %u, event = %u\n", event.id().run(), event.luminosityBlock(), event.id().event());
   for (const MFVVertexAux& vtx : *vertices) {
-    double dist = 1e99;
+    double dr = 1e99, dist = 1e99;
     int ilsp = -1;
 
-    if (max_dist > 0) {
+    if (max_dr > 0) {
+      double drs[2] = {
+        reco::deltaR(lsp_p4s[0].Eta(), lsp_p4s[0].Phi(), vtx.eta[which_mom], vtx.phi[which_mom]),
+        reco::deltaR(lsp_p4s[1].Eta(), lsp_p4s[1].Phi(), vtx.eta[which_mom], vtx.phi[which_mom])
+      };
+
+      for (int i = 0; i < 2; ++i) {
+        if (drs[i] < max_dr) {
+          ++lsp_nmatch[i];
+          if (drs[i] < dr) {
+            dr = drs[i];
+            ilsp = i;
+          }
+        }
+      }
+    }
+    else if (max_dist > 0) {
       double dists[2] = {
         mag(v[0][0] - (vtx.x - x0),
             v[0][1] - (vtx.y - y0),
@@ -944,8 +960,11 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     }
 
     ++nvtx_match;
+    //const TLorentzVector& lsp_p4 = lsp_p4s[ilsp];
+    //const TLorentzVector& vtx_p4 = vtx.p4(which_mom);
 
     if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > 0.20 && dbv[ilsp] < 0.30) {
+      h_dr->Fill(dr);
       h_dist->Fill(dist);
       double sum = 0;
       //printf("vertex %d: ntracks = %d, njetsntks = %d, bs2derr = %6.4f, drrms = %5.3f\n", nvtx_match, vtx.ntracks(), vtx.njets[mfv::JByNtracks], vtx.bs2derr, vtx.drrms());
