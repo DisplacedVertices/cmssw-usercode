@@ -332,7 +332,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 */
   h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
   h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks/vertex;vertices", 40, 0, 40);
-  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 30, 0, 0.003);
+  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 25, 0, 0.0025);
   h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 100, 0, 0.5);
   h_rec_drmax = fs->make<TH1F>("h_rec_drmax", ";max{#Delta R{track i,j}};vertices", 100, 0, 5);
   h_rec_dravg = fs->make<TH1F>("h_rec_dravg", ";avg{#Delta R{track i,j}};vertices", 100, 0, 5);
