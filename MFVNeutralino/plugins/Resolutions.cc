@@ -41,6 +41,7 @@ class MFVResolutions : public edm::EDAnalyzer {
 
   TH1F* h_lspsnmatch;
 
+  TH1F* h_rec_jet_pt;
   TH1F* h_rec_dxy;
   TH1F* h_rec_ntracks;
   TH1F* h_rec_bs2derr;
@@ -123,6 +124,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
 
   h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
 
+  h_rec_jet_pt = fs->make<TH1F>("h_rec_jet_pt", ";reconstructed jet p_{T} (GeV);jets", 100, 0, 500);
   h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
   h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks/vertex;vertices", 40, 0, 40);
   h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 25, 0, 0.0025);
@@ -196,6 +198,9 @@ namespace {
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
+  edm::Handle<MFVEvent> mevent;
+  event.getByLabel(mevent_src, mevent);
+
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByLabel(vertex_src, vertices);
 
@@ -256,9 +261,6 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
 if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
-  edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mevent_src, mevent);
-
   die_if_not(mevent->gen_valid, "not running on signal sample");
 
   MCInteractionMFV3j mci;
@@ -294,6 +296,10 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     }
 
 }
+
+   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+     h_rec_jet_pt->Fill(mevent->jet_pt[ijet]);
+   }
 
   const double dbv[2] = {
     mag(v[0][0], v[0][1]),
