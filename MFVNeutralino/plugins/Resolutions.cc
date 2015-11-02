@@ -53,6 +53,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_rec_dbv;
   TH1F* h_rec_betagamma;
   TH1F* h_rec_dirrms;
+  TH1F* h_rec_tracks_qpt;
   TH1F* h_rec_tracks_eta;
   TH1F* h_rec_tracks_phi;
   TH1F* h_rec_trackpair_deta;
@@ -134,6 +135,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
   h_rec_betagamma = fs->make<TH1F>("h_rec_betagamma", ";reconstructed #beta#gamma;vertices", 20, 0, 10);
   h_rec_dirrms = fs->make<TH1F>("h_rec_dirrms", ";rms{direction{track i}} w.r.t. direction of net momentum by tracks only;vertices", 50, 0, 5);
+  h_rec_tracks_qpt = fs->make<TH1F>("h_rec_tracks_qpt", ";reconstructed track q*p_{T} (GeV);tracks", 100, -150, 150);
   h_rec_tracks_eta = fs->make<TH1F>("h_rec_tracks_eta", ";reconstructed track #eta;tracks", 50, -4, 4);
   h_rec_tracks_phi = fs->make<TH1F>("h_rec_tracks_phi", ";reconstructed track #phi;tracks", 50, -3.15, 3.15);
   h_rec_trackpair_deta = fs->make<TH1F>("h_rec_trackpair_deta", ";reconstructed track pair #Delta#eta;track pairs", 50, 0, 5);
@@ -433,6 +435,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
         }
         //printf("\n");
 
+        h_rec_tracks_qpt->Fill(vtx.track_qpt[i]);
         h_rec_tracks_eta->Fill(vtx.track_eta[i]);
         h_rec_tracks_phi->Fill(vtx.track_phi[i]);
         h_rec_tracks_deta->Fill(fabs(vtx.track_eta[i] - vtx.eta[mfv::PTracksOnly]));
