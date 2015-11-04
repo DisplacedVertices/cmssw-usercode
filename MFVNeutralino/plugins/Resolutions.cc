@@ -313,7 +313,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
   const double dvv = mag(v[0][0] - v[1][0],
                          v[0][1] - v[1][1]);
-  h_gen_dvv->Fill(dvv);
+  if (dbv[0] > min_dbv && dbv[0] < max_dbv && dbv[1] > min_dbv && dbv[1] < max_dbv) h_gen_dvv->Fill(dvv);
 
   if (int(vertices->size()) >= 2) {
     h_rec_dvv->Fill(mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y));
