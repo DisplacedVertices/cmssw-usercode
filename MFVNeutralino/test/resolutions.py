@@ -186,6 +186,8 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 max_dist = cms.double(0.012),
                                 gen_src = cms.InputTag('genParticles'),
                                 gen_jet_src = cms.InputTag('ak5GenJets'),
+                                min_dbv = cms.double(0.2),
+                                max_dbv = cms.double(0.3),
                                 )
 
 if mode == 'h2xqq_1000_350' or mode == 'h2xqq_1000_150':

@@ -37,6 +37,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   bool mci_warned;
   const edm::InputTag gen_jet_src;
 
+  const double min_dbv;
+  const double max_dbv;
+
   TH1F* h_dist;
 
   TH1F* h_lspsnmatch;
@@ -111,7 +114,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
     max_dr(cfg.getParameter<double>("max_dr")),
     max_dist(cfg.getParameter<double>("max_dist")),
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src"))
+    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
+    min_dbv(cfg.getParameter<double>("min_dbv")),
+    max_dbv(cfg.getParameter<double>("max_dbv"))
 {
   if (!(doing_h2xqq || doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j))
     throw cms::Exception("Configuration") << "mode must be h2xqq, mfv2j, mfv3j, mfv4j, or mfv5j, got " << mode;
@@ -351,7 +356,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       }
     }
 
-    if (dbv[i] > 0.20 && dbv[i] < 0.30) {
+    if (dbv[i] > min_dbv && dbv[i] < max_dbv) {
       for (int j = 0; j < ndau; ++j)
         h_gen_dxy->Fill(fabs(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0]))));
       h_gen_dbv->Fill(dbv[i]);
@@ -420,7 +425,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
     ++nvtx_match;
 
-    if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > 0.20 && dbv[ilsp] < 0.30) {
+    if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > min_dbv && dbv[ilsp] < max_dbv) {
       h_dist->Fill(dist);
 
       double sum = 0;
@@ -484,7 +489,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
   // histogram lsp_nmatch
   for (int i = 0; i < 2; ++i) {
-    if (dbv[i] > 0.20 && dbv[i] < 0.30) {
+    if (dbv[i] > min_dbv && dbv[i] < max_dbv) {
       h_lspsnmatch->Fill(lsp_nmatch[i]);
       if (lsp_nmatch[i] > 1) {
         if (i == 0) h_lsp_ntracks0_ntracks1->Fill(lsp0_ntracks.at(0), lsp0_ntracks.at(1));
