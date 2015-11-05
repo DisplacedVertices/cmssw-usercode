@@ -18,7 +18,7 @@ iden = 0
 #iden = 6
 
 reconstructed = ['NoCuts', 'TrigSel', 'CleaningFilters', 'OfflineJets', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxMindrmax', 'TwoVtxMaxdrmax', 'TwoVtxDrmin', 'TwoVtxNjetsntks', 'TwoVtxNtracksptgt3', 'TwoVtxDvv600um']
-generated = ['NoCuts', '', '', 'FourJets', 'SumHT', '', 'Geo2ddist', '', 'Ntracks2', 'Mindrmax', 'Maxdrmax', '', 'Nquarks1', 'Sumpt200', 'Dvv600um']
+generated = ['NoCuts', '', '', 'FourJets', 'SumHT', '', 'Geo2ddist', '', '', 'Mindrmax', 'Maxdrmax', '', 'Nquarks1', 'Sumpt200', 'Dvv600um']
 
 samples = '''mfv_neutralino_tau0100um_M0200
 mfv_neutralino_tau0100um_M0300
@@ -249,10 +249,10 @@ l1 = ROOT.TLegend(0.75,0.1,0.95,0.5)
 l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for j,sample in enumerate(samples):
     print sample
-    file = ROOT.TFile('crab/MFVResolutionsV20/%s.root'%sample)
+    file = ROOT.TFile('crab/MFVResolutionsV20_20/%s.root'%sample)
     nrec = file.Get('mfvResolutions%s/h_gen_dvv'%rec_den).GetEntries()
     ngen = file.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
-    print '%26s%26s%10s%10s%10s' % ('reconstructed', 'generated', 'reco eff', 'gen eff', 'gen/reco')
+    print '%26s%26s%20s%20s%20s' % ('reconstructed', 'generated', 'reco eff +/- error', 'gen eff +/- error', 'gen/reco +/- error')
     for i, rec in enumerate(reconstructed):
         if i < iden:
             continue
@@ -266,7 +266,7 @@ for j,sample in enumerate(samples):
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
             gen_rec_err = (gen_rec_div * ((rec_err/rec_eff)**2 + (gen_err/gen_eff)**2))**0.5 if rec_eff != 0 and gen_eff != 0 else 9999
             if generated[i] == 'Dvv600um':
-                print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, gen_eff, gen_rec_div, rec_err, gen_err, gen_rec_err)
+                print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 print r'%s & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ \\' % (sampleNames[j], rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 x.append(rec_eff)
                 y.append(gen_eff)
@@ -292,7 +292,7 @@ for j,sample in enumerate(samples):
                 else:
                     not_matched.append(sample)
             else:
-                print '%20s%6d%20s%6d%10.3f%10.3f%10.3f' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, gen_eff, gen_rec_div)
+                print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
         else:
             print '%20s%6d' % (rec, rec_hist.GetEntries())
 
@@ -321,4 +321,4 @@ line1 = ROOT.TLine(0,0,1,1-0.01*gen_rec_cut)
 line2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
 line1.Draw()
 line2.Draw()
-c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_wrt_%s.pdf'%rec_den)
+#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_wrt_%s.pdf'%rec_den)
