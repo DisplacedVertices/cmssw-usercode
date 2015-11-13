@@ -111,39 +111,39 @@ void MFVTriggerEfficiency::beginRun(const edm::Run& run, const edm::EventSetup& 
 }
 
 void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  l1_cfg.getL1GtRunCache(event, setup, true, false);
+  if (require_trigger) {
+    l1_cfg.getL1GtRunCache(event, setup, true, false);
 
-  edm::Handle<edm::TriggerResults> hlt_results;
-  event.getByLabel(edm::InputTag("TriggerResults", "", "HLT"), hlt_results);
-  const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
-  const size_t npaths = hlt_names.size();
+    edm::Handle<edm::TriggerResults> hlt_results;
+    event.getByLabel(edm::InputTag("TriggerResults", "", "HLT"), hlt_results);
+    const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
+    const size_t npaths = hlt_names.size();
 
-  bool found = false;
-  bool pass = false;
+    bool found = false;
+    bool pass = false;
 
 #if 0
-  std::vector<std::string> paths({
+    std::vector<std::string> paths({
         "HLT_PFHT650_v",
-        "HLT_PFHT550_4Jet_v",
-//        "HLT_PFHT450_SixJet40_PFBTagCSV_v",
-//        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
-        "HLT_PFHT450_SixJet40_v",
-        "HLT_PFHT400_SixJet30_v",
-//        "HLT_QuadJet45_TripleCSV0p5_v",
-//        "HLT_QuadJet45_DoubleCSV0p5_v",
-//        "HLT_DoubleJet90_Double30_TripleCSV0p5_v",
-//        "HLT_DoubleJet90_Double30_DoubleCSV0p5_v",
-//        "HLT_HT650_DisplacedDijet80_Inclusive_v",
-//        "HLT_HT750_DisplacedDijet80_Inclusive_v",
-//        "HLT_HT500_DisplacedDijet40_Inclusive_v",
-//        "HLT_HT550_DisplacedDijet40_Inclusive_v",
-//        "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
-//        "HLT_HT350_DisplacedDijet80_DisplacedTrack_v",
-//        "HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v"
-        });
+          "HLT_PFHT550_4Jet_v",
+          //        "HLT_PFHT450_SixJet40_PFBTagCSV_v",
+          //        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
+          "HLT_PFHT450_SixJet40_v",
+          "HLT_PFHT400_SixJet30_v",
+          //        "HLT_QuadJet45_TripleCSV0p5_v",
+          //        "HLT_QuadJet45_DoubleCSV0p5_v",
+          //        "HLT_DoubleJet90_Double30_TripleCSV0p5_v",
+          //        "HLT_DoubleJet90_Double30_DoubleCSV0p5_v",
+          //        "HLT_HT650_DisplacedDijet80_Inclusive_v",
+          //        "HLT_HT750_DisplacedDijet80_Inclusive_v",
+          //        "HLT_HT500_DisplacedDijet40_Inclusive_v",
+          //        "HLT_HT550_DisplacedDijet40_Inclusive_v",
+          //        "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
+          //        "HLT_HT350_DisplacedDijet80_DisplacedTrack_v",
+          //        "HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v"
+          });
 #endif
 
-  if (require_trigger) {
     for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
       char path[1024];
       snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
