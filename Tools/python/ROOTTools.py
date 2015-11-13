@@ -571,7 +571,6 @@ def data_mc_comparison(name,
 
             if sample not in data_samples:
                 sample.hist.Scale(sample.partial_weight * int_lumi)
-
             if rebin is not None:
                 sample.hist_before_rebin = sample.hist
                 rebin_name = sample.hist.GetName() + '_rebinned'
@@ -582,8 +581,8 @@ def data_mc_comparison(name,
                         raise ValueError('rebin_last %f greater than axis max (ROOT will handle this arbitrarily)' % (rebin[-1], sample.hist.GetXaxis().GetXmax()))
                     sample.hist = sample.hist.Rebin(len(rebin)-1, rebin_name, rebin)
                 else:
-                    sample.hist.Rebin(rebin, rebin_name)
-
+                    sample.hist = sample.hist.Rebin(rebin, rebin_name)
+            
             if overflow_in_last:
                 if x_range is not None:
                     move_above_into_bin(sample.hist, x_range[1])

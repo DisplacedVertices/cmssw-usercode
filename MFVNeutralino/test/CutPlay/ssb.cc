@@ -43,8 +43,8 @@ struct option_driver {
       saveplots(0),
       plot_path("plots/SSB"),
       int_lumi(mfv::AnalysisConstants::int_lumi / 1000. * mfv::AnalysisConstants::scale_factor),
-      signal_name("mfv_neutralino_tau1000um_M0400"),
-      signal_xsec(20.),
+      signal_name("mfv_neu_tau01000um_M0800"),
+      signal_xsec(1.),
       bigw(true),
       syst_frac(-1),
       min_scan_events(5)
@@ -296,13 +296,14 @@ struct z_calculator {
       html(0)
   {
     samples.push_back(sample(options.signal_name, options.signal_xsec, kRed,       vars));
-    samples.push_back(sample("ttbarhadronic",     245.8e3 * 0.457,     kBlue,      vars));
-    samples.push_back(sample("ttbarsemilep",      245.8e3 * 0.438,     kBlue + 1,  vars));
-    samples.push_back(sample("ttbardilep",        245.8e3 * 0.105,     kBlue + 2,  vars));
-    samples.push_back(sample("qcdht0100",         1.04e10,             kGreen,     vars));
-    samples.push_back(sample("qcdht0250",         2.76e8,              kGreen + 1, vars));
-    samples.push_back(sample("qcdht0500",         8.43e6,              kGreen + 2, vars));
-    samples.push_back(sample("qcdht1000",         2.04e5,              kGreen + 3, vars));
+    samples.push_back(sample("ttbar_mgnlo_25ns",            832e3,     kBlue,      vars));
+    samples.push_back(sample("qcd_ht_mg_25ns_0200",       1.735e9,     kGreen + 6, vars));
+    samples.push_back(sample("qcd_ht_mg_25ns_0300",        3.67e8,     kGreen + 5, vars));
+    samples.push_back(sample("qcd_ht_mg_25ns_0500",        2.94e7,     kGreen + 4, vars));
+    samples.push_back(sample("qcd_ht_mg_25ns_0700",       6.524e6,     kGreen + 3, vars));
+    samples.push_back(sample("qcd_ht_mg_25ns_1000",       1.064e6,     kGreen + 2, vars));
+    samples.push_back(sample("qcd_ht_mg_25ns_1500",       121.5e3,     kGreen + 1, vars));
+    samples.push_back(sample("qcd_ht_mg_25ns_2000",       25.42e3,     kGreen,     vars));
 
     for (std::vector<sample>::iterator s = samples.begin(); s != samples.end(); ) {
       if (!s->use())

@@ -80,12 +80,9 @@ mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_ntracks = 5,
     max_drmin = 0.4,
-    min_drmax = 1.2,
-    max_drmax = 4,
     max_geo2ddist = 2.1,
     max_bs2derr = 0.0025,
     min_njetsntks = 1,
-    min_ntracksptgt3 = 3,
     max_sumnhitsbehind = 0,
     )
 

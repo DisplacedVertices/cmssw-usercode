@@ -35,7 +35,7 @@ mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistosNoCuts.clone()
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
 pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts * mfvAbcdHistosSeq)
 
-mfvAnalysisCutsSigReg = mfvAnalysisCuts.clone(min_svdist2d = 0.06)
+mfvAnalysisCutsSigReg = mfvAnalysisCuts.clone(min_svdist2d = 0.04)
 mfvEventHistosSigReg = mfvEventHistos.clone()
 mfvVertexHistosSigReg = mfvVertexHistos.clone()
 pSigReg = cms.Path(mfvCommon * mfvAnalysisCutsSigReg * mfvEventHistosSigReg * mfvVertexHistosSigReg)
