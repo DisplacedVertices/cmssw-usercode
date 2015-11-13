@@ -20,6 +20,7 @@ namespace mfv {
     TH1D* h;
 
     Template(int i_, TH1D* h_) : i(i_), h(h_) {}
+    virtual ~Template() {}
     virtual double chi2() const { return 0; }
     virtual std::string name() const { return std::string("NoName"); }
     virtual std::string title() const { return std::string("NoTitle"); }

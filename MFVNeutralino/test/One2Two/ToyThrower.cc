@@ -21,13 +21,13 @@ namespace mfv {
       scale_2v(env.get_double("scale_2v", 1.)),
       allow_cap(env.get_bool("allow_cap", false)),
       poisson_means(env.get_bool("poisson_means", true)),
-      use_qcd500(env.get_bool("use_qcd500", false)),
+      use_qcd700(env.get_bool("use_qcd700", false)),
       use_bkgsyst(env.get_bool("use_bkgsyst", false)),
       use_only_data_sample(env.get_bool("use_only_data_sample", false)),
       sample_only(env.get_int("sample_only", 0)),
       injected_signal(env.get_int("injected_signal", 0)),
       injected_signal_scale(env.get_double("injected_signal_scale", 1.)),
-      template_signal(env.get_int("template_signal", -15)),
+      template_signal(env.get_int("template_signal", -10)),
 
       ntoys(-1),
 
@@ -43,7 +43,7 @@ namespace mfv {
     printf("int_lumi: %f\n", int_lumi);
     printf("scale: %f 1v  %f 2v\n", scale_1v, scale_2v);
     printf("poisson_means: %i\n", poisson_means);
-    printf("use_qcd500: %i\n", use_qcd500);
+    printf("use_qcd700: %i\n", use_qcd700);
     printf("use_only_data_sample: %i\n", use_only_data_sample);
     printf("sample_only: %i (%s)\n", sample_only, samples.get(sample_only).name.c_str());
     printf("injected_signal: %i (%s)\n", injected_signal, samples.get(injected_signal).name.c_str());
@@ -145,7 +145,7 @@ namespace mfv {
     else {
       for (const Sample& sample : samples.samples)
         //if (sample.name != "qcdht0100" && sample.name != "qcdht0250" && 
-        if ((!sample.is_sig() || sample.key == injected_signal || sample.key == template_signal) && (use_qcd500 || sample.name != "qcdht0500") && (use_bkgsyst || sample.name != "bkgsyst"))
+        if ((!sample.is_sig() || sample.key == injected_signal || sample.key == template_signal) && (use_qcd700 || sample.name != "qcdht0700") && (use_bkgsyst || sample.name != "bkgsyst"))
           fcn(sample);
     }
   }
@@ -189,7 +189,7 @@ namespace mfv {
     t_config->Branch("scale_1v", const_cast<double*>(&scale_1v), "scale_1v/D");
     t_config->Branch("scale_2v", const_cast<double*>(&scale_2v), "scale_2v/D");
     t_config->Branch("poisson_means", const_cast<bool*>(&poisson_means), "poisson_means/O");
-    t_config->Branch("use_qcd500", const_cast<bool*>(&use_qcd500), "use_qcd500/O");
+    t_config->Branch("use_qcd700", const_cast<bool*>(&use_qcd700), "use_qcd700/O");
     t_config->Branch("sample_only", const_cast<int*>(&sample_only), "sample_only/I");
     t_config->Branch("injected_signal", const_cast<int*>(&injected_signal), "injected_signal/I");
     t_config->Branch("injected_signal_scale", const_cast<double*>(&injected_signal_scale), "injected_signal_scale/D");

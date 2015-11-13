@@ -23,31 +23,33 @@ namespace mfv {
 
     Samples()
       : samples({
-          {0, "MultiJetPk2012", -1, -1},
+          //{0, "MultiJetPk2012", -1, -1},
 
-          //{1, "qcdht0100", 1.04e7, 50129518},
-          //{2, "qcdht0250", 2.76e5, 27062078},
-          {3, "qcdht0500", 8.43e3, 30599292},
-          {4, "qcdht1000", 2.04e2, 13843863},
+          //{1, "qcdht0100", 2.75e7, 81719052},
+          //{2, "qcdht0200", 1.74e6, 18718905},
+          //{3, "qcdht0300", 3.67e5, 20278243},
+          //{4, "qcdht0500", 2.94e4, 19664159},
+          {5, "qcdht0700", 6.52e3, 15356448},
+          {6, "qcdht1000", 1.06e3,  4963895},
+          {7, "qcdht1500", 122,     3868886},
+          {8, "qcdht2000", 25.4,    1961774},
 
-          {5, "ttbarhadronic", 245.8 * 0.457, 10537444},
-          {6, "ttbarsemilep",  245.8 * 0.438, 25424818},
-          {7, "ttbardilep",    245.8 * 0.105, 12119013},
+          {9, "ttbar", 832., 42784971},
 
           {99, "bkgsyst", 245.8 * 0.457, 5000000},
         })
     {
       int i = -1;
-      const std::vector<int> masses = { 200, 300, 400, 600, 800, 1000 };
-      const std::vector<int> taus = { 100, 300, 1000, 9900 };
+      const std::vector<int> masses = { 400, 800, 1200, 1600 };
+      const std::vector<int> taus = { 100, 300, 1000, 10000 };
       char buf[128];
       for (int t : taus)
         for (int m : masses) {
-          snprintf(buf, 128, "mfv_neutralino_tau%04ium_M%04i", t, m);
-          samples.push_back({i--, std::string(buf), 1e-3, 100000});
+          snprintf(buf, 128, "mfv_neu_tau%05ium_M%04i", t, m);
+          samples.push_back({i--, std::string(buf), 1e-3, 10000});
         }
       i = -99;
-      samples.push_back({i, "sigsyst", 1e-3, 100000});
+      samples.push_back({i, "sigsyst", 1e-3, 10000});
 
       printf("Samples():\n");
       for (const Sample& s : samples)
