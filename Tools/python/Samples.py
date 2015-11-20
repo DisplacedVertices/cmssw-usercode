@@ -50,6 +50,14 @@ for s in mfv_signal_samples:
     s.xsec = 1e-3
     s.filter_eff = 1.
 
+xx4j_samples = [
+    MCSample('xx4j_tau01000um_M0700', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 10000),
+    MCSample('xx4j_tau10000um_M0700', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 10000),
+    ]
+
+for s in xx4j_samples:
+    s.xsec = 1e-3
+    s.filter_eff = 1.
 '''
 These not updated for run2.
 
