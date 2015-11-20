@@ -5,7 +5,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -13,12 +13,12 @@
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 
-class MFVTriggerEfficiency : public edm::EDAnalyzer {
+class MFVTriggerEfficiency : public edm::EDFilter {
 public:
   explicit MFVTriggerEfficiency(const edm::ParameterSet&);
 
 private:
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
 
   const bool require_trigger;
@@ -27,6 +27,7 @@ private:
   const StringCutObjectSelector<pat::Muon> muon_selector;
   const edm::InputTag jets_src;
   const StringCutObjectSelector<pat::Jet> jet_selector;
+  const double jet_ht_cut;
   const edm::InputTag genjets_src;
   const bool use_genjets;
 
@@ -64,6 +65,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
     jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
+    jet_ht_cut(cfg.getParameter<double>("jet_ht_cut")),
     genjets_src(cfg.getParameter<edm::InputTag>("genjets_src")),
     use_genjets(genjets_src.label() != "")
 {
@@ -110,7 +112,7 @@ void MFVTriggerEfficiency::beginRun(const edm::Run& run, const edm::EventSetup& 
     throw cms::Exception("CheckPrescale", "HLTConfigProvider::init failed with process name HLT");
 }
 
-void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (require_trigger) {
     l1_cfg.getL1GtRunCache(event, setup, true, false);
 
@@ -171,7 +173,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       throw cms::Exception("BadAssumption", "one of HLT_PFHT800_v{1..9} not found");
 
     if (!pass)
-      return;
+      return false;
   }
 
   if (require_muon) {
@@ -196,7 +198,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     h_nmuons->Fill(nmuons[1]);
 
     if (nmuons[1] < 1)
-      return;
+      return false;
   }
 
 
@@ -252,6 +254,8 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     h_ngenjets->Fill(ngenjet);
     h_genjet_ht->Fill(genjet_ht);
   }
+
+  return jet_ht >= jet_ht_cut;
 }
 
 DEFINE_FWK_MODULE(MFVTriggerEfficiency);
