@@ -5,12 +5,14 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 
 is_mc = True
+htskim = False
 
 process.options.wantSummary = True
 
 global_tag(process, 'MCRUN2_74_V9' if is_mc else '74X_dataRun2_Prompt_v2')
 process.maxEvents.input = 1000
 process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/80000/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root' if is_mc else '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/630/00000/BCD78EF7-2B5F-E511-A3A3-02163E0170B5.root']
+process.source.fileNames = ['file:/uscms/home/tucker/jen/scratch/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root']
 #process.source.fileNames = ['/store/mc/RunIISpring15DR74/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/0270C6BA-AE17-E511-9D04-549F358EB755.root']
 #process.source.fileNames = ['/store/mc/RunIISpring15DR74/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/00F9B1F1-3B18-E511-B17D-A0369F30FFD2.root']
 #process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/70000/AAC7A1D1-F6FB-E411-AFC9-E0CB4E1A114B.root']
@@ -40,23 +42,41 @@ process.emu = cms.EDFilter('MFVEmulateHT800',
                            histos = cms.untracked.bool(False),
                            )
 
-process.num = cms.EDAnalyzer('MFVTriggerEfficiency',
+process.num = cms.EDFilter('MFVTriggerEfficiency',
                              require_trigger = cms.bool(False), # just from EmulateHT800 filter, need to split out
                              require_muon = cms.bool(True),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 24'),
                              jets_src = cms.InputTag('slimmedJets'),
                              jet_cut = jtupleParams.jetCut,
+                             jet_ht_cut = cms.double(0),
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
 process.den = process.num.clone(require_trigger = False)
 
-process.p = cms.Path(process.mutrig * process.den * process.emu * process.num)
+process.p = cms.Path(process.mutrig * process.den * process.emu * cms.ignore(process.num))
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
 
 #process.options.wantSummary = True
+
+if htskim:
+    process.htskim = process.den.clone(jet_ht_cut = 800)
+    process.phtskim = cms.Path(process.mutrig * process.htskim)
+    process.load('Configuration.EventContent.EventContent_cff')
+    process.out = cms.OutputModule('PoolOutputModule',
+                                   fileName = cms.untracked.string('htskim.root'),
+                                   compressionLevel = cms.untracked.int32(4),
+                                   compressionAlgorithm = cms.untracked.string('LZMA'),
+                                   eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
+                                   outputCommands = process.MINIAODSIMEventContent.outputCommands,
+                                   dropMetaData = cms.untracked.string('ALL'),
+                                   fastCloning = cms.untracked.bool(False),
+                                   overrideInputFileSplitLevels = cms.untracked.bool(True),
+                                   SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('phtskim')),
+                                   )
+    process.outp = cms.EndPath(process.out)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
