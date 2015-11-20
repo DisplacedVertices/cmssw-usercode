@@ -5,7 +5,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 
 is_mc = True
-htskim = False
+htskim = True
 
 process.options.wantSummary = True
 
@@ -54,7 +54,7 @@ process.num = cms.EDFilter('MFVTriggerEfficiency',
                              )
 process.den = process.num.clone(require_trigger = False)
 
-process.p = cms.Path(process.mutrig * process.den * process.emu * cms.ignore(process.num))
+process.p = cms.Path(process.mutrig * cms.ignore(process.den) * process.emu * cms.ignore(process.num))
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
@@ -100,10 +100,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('TestEmu800v2',
+    version = 'v5'
+    cs = CRABSubmitter('TrigEff' + version,
                        pset_modifier = pset_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',
+                       publish_name = 'trigeff_htskim_' + version  # if htskim False, then crab will just complain?
                        )
     cs.submit_all(samples)
  
