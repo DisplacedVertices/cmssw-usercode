@@ -12,15 +12,18 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-double    mu_clear = 0.0320;
-double sigma_clear = 0.0110;
+double    mu_clear = 0.029337;
+double sigma_clear = 0.011499;
 
-const char* tree_path = "/uscms/home/dquach/private/mfv_5313/src/JMTucker/MFVNeutralino/test/crab/MiniTreeV20_sigma2.5";
-//const char* tree_path = "../crab/MiniTreeV20";
+const char* tree_path = "crab/MiniTreeV20_redux";
 
-const int nbkg = 5;
-const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
-float weights[nbkg] = {4.849, 0.259, 0.037, 0.188, 0.075};
+//const int nbkg = 5;
+//const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
+//float weights[nbkg] = {4.849, 0.259, 0.037, 0.188, 0.075};
+
+const int nbkg = 4;
+const char* samples[nbkg] = {"qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
+float weights[nbkg] = {0.2536, 0.0367, 0.184, 0.0729};
 
 /*
 const int nbkg = 3;
