@@ -133,7 +133,7 @@ class CRABSubmitter:
             self.cfg_template.Site.storageSite = storage_site
 
         self.cfg_template.Data.publication = bool(publish_name)
-        self.cfg_template.Data.publishDataName = publish_name
+        self.cfg_template.Data.outputDatasetTag = publish_name
 
         if aaa:
             self.cfg_template.Data.ignoreLocality = True
