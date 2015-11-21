@@ -20,6 +20,7 @@
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
+#include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVEventProducer : public edm::EDProducer {
@@ -145,6 +146,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
     float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
     
+    mevent->flavor_code = 0;
+    bool saw_c = false;
+    for (const reco::GenParticle& gen : *gen_particles) {
+      if (is_bhadron(&gen)) {
+	mevent->flavor_code = 2;
+	break;
+      }
+      if (is_chadron(&gen))
+	saw_c = true;
+    }
+    if (saw_c && mevent->flavor_code == 0)
+      mevent->flavor_code = 1;
+
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
     if (!mci.Valid()) {
@@ -176,7 +190,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
           lsp_partons.push_back(mci.W_daughters[i][1]);
         }
       } 
-      
+
       mevent->gen_pv[0] = x0;
       mevent->gen_pv[1] = y0;
       mevent->gen_pv[2] = z0;

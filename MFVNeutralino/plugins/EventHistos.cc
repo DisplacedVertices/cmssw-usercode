@@ -61,6 +61,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvphi;
   TH1F* h_pvntracks;
   TH1F* h_pvsumpt2;
+  TH1F* h_flavor_code;
 
   TH1F* h_njets;
   TH1F* h_njetsnopu[3];
@@ -253,7 +254,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvphi = fs->make<TH1F>("h_pv_phi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_pvntracks = fs->make<TH1F>("h_pv_ntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
   h_pvsumpt2 = fs->make<TH1F>("h_pv_sumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
-
+  h_flavor_code = fs->make<TH1F>("h_flavor_code", ";quark flavor composition;events", 3, 0, 3);
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
@@ -470,6 +471,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pvntracks->Fill(mevent->pv_ntracks, w);
   h_pvsumpt2->Fill(mevent->pv_sumpt2, w);
   h_pvrho->Fill(mevent->pv_rho(), w);
+  h_flavor_code->Fill(mevent->flavor_code, w);
 
   h_njets->Fill(mevent->njets(), w);
   for (int i = 0; i < 3; ++i)
