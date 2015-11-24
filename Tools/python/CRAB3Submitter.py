@@ -140,14 +140,10 @@ class CRABSubmitter:
             self.cfg_template.Site.whitelist = self.aaa_locations
 
         self.modify_pset_hash = modify_pset_hash
-        if modify_pset_hash:
-            self.modify_pset_hash = str(time.time()) # to avoid multiple tasks publishing into the same dataset
 
     def cfg(self, sample):
         cfg = deepcopy(self.cfg_template) # JMTBAD needed?
         
-        sample.set_curr_dataset(self.dataset) # JMTBAD should this be done in the loop instead?
-
         cfg.General.requestName = self.batch_name + '_' + self.working_dir_pattern % sample
         cfg.JobType.psetName = self.pset_fn_pattern % sample
         cfg.Data.inputDataset = sample.dataset
@@ -187,7 +183,7 @@ class CRABSubmitter:
 
         extra = ''
         if self.modify_pset_hash:
-            extra += '\nprocess.dummyForPsetHash = cms.PSet(dummy = cms.string(%r))' % self.modify_pset_hash
+            extra += '\nprocess.dummyForPsetHash = cms.PSet(dummy = cms.string(%r))' % (str(time.time()) + sample.dataset)
         extra += "\nopen(%r, 'wt').write(process.dumpPython())" % pset_fn
         open(pset_orig_fn, 'wt').write(pset + extra)
 
@@ -200,6 +196,8 @@ class CRABSubmitter:
         print 'batch %s, submit sample %s' % (self.batch_name, sample.name)
 
         cleanup = [] # not so much to clean up any more
+
+        sample.set_curr_dataset(self.dataset)
 
         cfg_fn, cfg = self.cfg(sample)
         pset_orig_fn, pset_fn, pset = self.pset(sample)
