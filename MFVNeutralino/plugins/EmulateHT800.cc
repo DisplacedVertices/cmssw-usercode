@@ -14,6 +14,7 @@ public:
 
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&) override;
+  void put_ht(edm::Event&, float) const;
 
   edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
@@ -46,6 +47,13 @@ MFVEmulateHT800::MFVEmulateHT800(const edm::ParameterSet& cfg)
     h_agree[0] = fs->make<TH1F>("h_agree_800", "", 2, 0, 2);
     h_agree[1] = fs->make<TH1F>("h_agree_900", "", 2, 0, 2);
   }
+
+  produces<float>();
+}
+
+void MFVEmulateHT800::put_ht(edm::Event& event, float ht_) const {
+  std::auto_ptr<float> ht(new float(ht_));
+  event.put(ht);
 }
 
 bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
@@ -111,8 +119,10 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (int(found[0]) + int(found[1]) != 1)
     throw cms::Exception("EmulateHT800", "didn't find exactly one of HLT_PFHT800 or 900");
 
-  if (return_actual && found[0])
+  if (return_actual && found[0]) {
+    put_ht(event, -1);
     return pass[0];
+  }
 
   // HT800 and 900 seeds are is "L1_HTT150 OR L1_HTT175"
   int l1err = 0;
@@ -156,6 +166,7 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
       if (throw_not_found)
         throw cms::Exception("EmulateHT800", "couldn't find HT in trigger objects");
     }
+    put_ht(event, -1);
     return false; // 350 didn't pass...
   }
 
@@ -173,7 +184,8 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
       }
     }
   }
-  
+
+  put_ht(event, ht);
   return emulated_pass[0];
 }
 
