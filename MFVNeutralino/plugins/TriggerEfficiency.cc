@@ -43,18 +43,22 @@ private:
 
   TH1F* h_nnoseljets;
   TH1F* h_njets;
-  TH1F* h_jet_e[10];
-  TH1F* h_jet_pt[10];
-  TH1F* h_jet_eta[10];
-  TH1F* h_jet_phi[10];
+  TH1F* h_jet_e[6];
+  TH1F* h_jet_pt[6];
+  TH1F* h_jet_eta[6];
+  TH1F* h_jet_phi[6];
+  TH1F* h_jet_frac_mu[6];
   TH1F* h_jet_ht;
+  TH1F* h_jet_ht_no_mu;
+  TH1F* h_jet_ht_m_hlt_ht;
+  TH1F* h_jet_ht_no_mu_m_hlt_ht;
   TH2F* h_njets_v_ht;
 
   TH1F* h_ngenjets;
-  TH1F* h_genjet_e[10];
-  TH1F* h_genjet_pt[10];
-  TH1F* h_genjet_eta[10];
-  TH1F* h_genjet_phi[10];
+  TH1F* h_genjet_e[6];
+  TH1F* h_genjet_pt[6];
+  TH1F* h_genjet_eta[6];
+  TH1F* h_genjet_phi[6];
   TH1F* h_genjet_ht;
 };
 
@@ -77,30 +81,34 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     h_nmuons = fs->make<TH1F>("h_nmuons", "", 3, 0, 3);
     for (int i = 0; i < 2; ++i) {
       h_muon_pt [i] = fs->make<TH1F>(TString::Format("h_muon_pt_%i" , i), "", 200, 0, 1000);
-      h_muon_eta[i] = fs->make<TH1F>(TString::Format("h_muon_eta_%i", i), "", 100, -3, 3);
-      h_muon_phi[i] = fs->make<TH1F>(TString::Format("h_muon_phi_%i", i), "", 100, -M_PI, M_PI);
-      h_muon_iso[i] = fs->make<TH1F>(TString::Format("h_muon_iso_%i", i), "", 100, 0, 2);
+      h_muon_eta[i] = fs->make<TH1F>(TString::Format("h_muon_eta_%i", i), "", 50, -3, 3);
+      h_muon_phi[i] = fs->make<TH1F>(TString::Format("h_muon_phi_%i", i), "", 50, -M_PI, M_PI);
+      h_muon_iso[i] = fs->make<TH1F>(TString::Format("h_muon_iso_%i", i), "", 50, 0, 2);
     }
   }
 
   h_nnoseljets = fs->make<TH1F>("h_nnoseljets", "", 30, 0, 30);
   h_njets = fs->make<TH1F>("h_njets", "", 30, 0, 30);
-  for (int i = 0; i < 10; ++i) {
-    h_jet_e[i]   = fs->make<TH1F>(TString::Format("h_jet_e_%i",   i), "", 1000, 0, 1000);
-    h_jet_pt[i]  = fs->make<TH1F>(TString::Format("h_jet_pt_%i",  i), "", 1000, 0, 1000);
-    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i), "", 100, -6, 6);
-    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%i", i), "", 100, -M_PI, M_PI);
+  for (int i = 0; i < 6; ++i) {
+    h_jet_e[i]   = fs->make<TH1F>(TString::Format("h_jet_e_%i",   i), "", 200, 0, 1000);
+    h_jet_pt[i]  = fs->make<TH1F>(TString::Format("h_jet_pt_%i",  i), "", 200, 0, 1000);
+    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i), "", 50, -6, 6);
+    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%i", i), "", 50, -M_PI, M_PI);
+    h_jet_frac_mu[i] = fs->make<TH1F>(TString::Format("h_jet_frac_mu_%i", i), "", 11, 0, 1.1);
   }
   h_jet_ht = fs->make<TH1F>("h_jet_ht", "", 250, 0, 5000);
-  h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", "", 50, 0, 2000, 25, 0, 25);
+  h_jet_ht_no_mu = fs->make<TH1F>("h_jet_ht_no_mu", "", 250, 0, 5000);
+  h_jet_ht_m_hlt_ht = fs->make<TH1F>("h_jet_ht_m_hlt_ht", "", 100, -500, 500);
+  h_jet_ht_no_mu_m_hlt_ht = fs->make<TH1F>("h_jet_ht_no_mu_m_hlt_ht", "", 100, -500, 500);
+  h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", "", 50, 0, 2000, 15, 0, 15);
 
   if (use_genjets) {
     h_ngenjets = fs->make<TH1F>("h_ngenjets", "", 30, 0, 30);
-    for (int i = 0; i < 10; ++i) {
-      h_genjet_e[i]   = fs->make<TH1F>(TString::Format("h_genjet_e_%i",   i), "", 1000, 0, 1000);
-      h_genjet_pt[i]  = fs->make<TH1F>(TString::Format("h_genjet_pt_%i",  i), "", 1000, 0, 1000);
-      h_genjet_eta[i] = fs->make<TH1F>(TString::Format("h_genjet_eta_%i", i), "", 100, -6, 6);
-      h_genjet_phi[i] = fs->make<TH1F>(TString::Format("h_genjet_phi_%i", i), "", 100, -M_PI, M_PI);
+    for (int i = 0; i < 6; ++i) {
+      h_genjet_e[i]   = fs->make<TH1F>(TString::Format("h_genjet_e_%i",   i), "", 200, 0, 1000);
+      h_genjet_pt[i]  = fs->make<TH1F>(TString::Format("h_genjet_pt_%i",  i), "", 200, 0, 1000);
+      h_genjet_eta[i] = fs->make<TH1F>(TString::Format("h_genjet_eta_%i", i), "", 50, -6, 6);
+      h_genjet_phi[i] = fs->make<TH1F>(TString::Format("h_genjet_phi_%i", i), "", 50, -M_PI, M_PI);
     }
     h_genjet_ht = fs->make<TH1F>("h_genjet_ht", "", 250, 0, 5000);
   }
@@ -209,25 +217,42 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
 
   int njet = 0;
   double jet_ht = 0;
+  double jet_ht_no_mu = 0;
   for (const pat::Jet& jet : *jets) {
     if (jet_selector(jet)) {
       ++njet;
       jet_ht += jet.pt();
-      if (njet == 10)
-        break;
-      int is[2] = {0, njet};
-      for (int i : is) {
-        h_jet_e[i]->Fill(jet.energy());
-        h_jet_pt[i]->Fill(jet.pt());
-        h_jet_eta[i]->Fill(jet.eta());
-        h_jet_phi[i]->Fill(jet.phi());
+
+      double tot_frac_mu = 0;
+      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
+        if (abs(pfcand->pdgId()) == 13) {
+          const double frac_mu = pfcand->energy() / jet.energy();
+          tot_frac_mu += frac_mu;
+        }
+      if (tot_frac_mu > 0.2)
+        jet_ht_no_mu += jet.pt();
+
+      for (int i : {0, njet}) {
+        if (i == 0 || njet < 6) {
+          h_jet_e[i]->Fill(jet.energy());
+          h_jet_pt[i]->Fill(jet.pt());
+          h_jet_eta[i]->Fill(jet.eta());
+          h_jet_phi[i]->Fill(jet.phi());
+          h_jet_frac_mu[i]->Fill(tot_frac_mu);
+        }
       }
     }
   }
 
   h_njets->Fill(njet);
   h_jet_ht->Fill(jet_ht);
+  h_jet_ht_no_mu->Fill(jet_ht_no_mu);
   h_njets_v_ht->Fill(jet_ht, njet);
+
+  edm::Handle<float> hlt_ht;
+  event.getByLabel("emu", hlt_ht);
+  h_jet_ht_m_hlt_ht->Fill(jet_ht - *hlt_ht); 
+  h_jet_ht_no_mu_m_hlt_ht->Fill(jet_ht_no_mu - *hlt_ht); 
 
   if (use_genjets) {
     edm::Handle<reco::GenJetCollection> genjets;
@@ -239,14 +264,14 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
       if (genjet.pt() > 20 && fabs(genjet.eta()) < 2.5) {
         ++ngenjet;
         genjet_ht += genjet.pt();
-        if (ngenjet == 10)
-          break;
-        int is[2] = {0, ngenjet};
-        for (int i : is) {
-          h_genjet_e[i]->Fill(genjet.energy());
-          h_genjet_pt[i]->Fill(genjet.pt());
-          h_genjet_eta[i]->Fill(genjet.eta());
-          h_genjet_phi[i]->Fill(genjet.phi());
+
+        for (int i : {0, ngenjet}) {
+          if (i == 0 || ngenjet < 6) {
+            h_genjet_e[i]->Fill(genjet.energy());
+            h_genjet_pt[i]->Fill(genjet.pt());
+            h_genjet_eta[i]->Fill(genjet.eta());
+            h_genjet_phi[i]->Fill(genjet.phi());
+          }
         }
       }
     }
