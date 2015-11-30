@@ -301,6 +301,9 @@ process.pNjetsntks = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelecte
 process.mfvResolutionsNtracksptgt3 = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
 process.pNtracksptgt3 = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracksptgt3 * process.mfvResolutionsNtracksptgt3)
 
+process.mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3 = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_njetsntks = 1)
+process.mfvResolutionsNoNtracksBs2derrNtracksptgt3 = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3')
+process.pNoNtracksBs2derrNtracksptgt3 = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3 * process.mfvResolutionsNoNtracksBs2derrNtracksptgt3)
 
 #generated cutflow
 process.mfvGenNoCuts = mfvResolutions.clone()
