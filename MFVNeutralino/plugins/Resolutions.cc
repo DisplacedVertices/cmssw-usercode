@@ -85,6 +85,14 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_rec_bs2derr_betagamma2p75to3p00;
   TH2F* h_rec_bs2derr_gen_betagamma;
 
+  TH1F* h_vtx_dbv;
+  TH1F* h_vtx_ntracks;
+  TH1F* h_vtx_nquarks;
+  TH1F* h_vtx_sumpt;
+  TH1F* h_vtx_drmin;
+  TH1F* h_vtx_drmax;
+  TH1F* h_vtx_betagamma;
+
   TH1F* h_gen_jetpt4;
   TH1F* h_gen_sumht;
   TH1F* h_gen_dxy;
@@ -169,6 +177,14 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_rec_bs2derr_betagamma2p50to2p75 = fs->make<TH1F>("h_rec_bs2derr_betagamma2p50to2p75", "2.50 < generated #beta#gamma < 2.75;reconstructed bs2derr;vertices", 25, 0, 0.0025);
   h_rec_bs2derr_betagamma2p75to3p00 = fs->make<TH1F>("h_rec_bs2derr_betagamma2p75to3p00", "2.75 < generated #beta#gamma < 3.00;reconstructed bs2derr;vertices", 25, 0, 0.0025);
   h_rec_bs2derr_gen_betagamma = fs->make<TH2F>("h_rec_bs2derr_gen_betagamma", ";generated #beta#gamma;reconstructed bs2derr", 20, 0, 10, 25, 0, 0.0025);
+
+  h_vtx_dbv = fs->make<TH1F>("h_vtx_dbv", ";generated d_{BV} (cm);vertices", 250, 0, 2.5);
+  h_vtx_ntracks = fs->make<TH1F>("h_vtx_ntracks", ";number of accepted displaced daughter particles;vertices", 10, 0, 10);
+  h_vtx_nquarks = fs->make<TH1F>("h_vtx_nquarks", ";number of accepted displaced quarks;vertices", 10, 0, 10);
+  h_vtx_sumpt = fs->make<TH1F>("h_vtx_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);vertices", 100, 0, 1000);
+  h_vtx_drmin = fs->make<TH1F>("h_vtx_drmin", ";min #DeltaR between accepted displaced daughter particles;vertices", 100, 0, 5);
+  h_vtx_drmax = fs->make<TH1F>("h_vtx_drmax", ";max #DeltaR between accepted displaced daughter particles;vertices", 100, 0, 5);
+  h_vtx_betagamma = fs->make<TH1F>("h_vtx_betagamma", ";generated #beta#gamma;vertices", 20, 0, 10);
 
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
   h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 2000);
@@ -424,6 +440,37 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
     }
 
     ++nvtx_match;
+
+    int ntracks = 0;
+    int nquarks = 0;
+    float sumpt = 0;
+    float drmin = 1e6;
+    float drmax = -1e6;
+    const int ndau = int(partons[ilsp].size());
+    for (int j = 0; j < ndau; ++j) {
+      const reco::GenParticle* p1 = partons[ilsp][j];
+      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[ilsp] * sin(p1->phi() - atan2(v[ilsp][1], v[ilsp][0]))) < 0.01) continue;
+      ++ntracks;
+      if (!is_lepton(p1)) ++nquarks;
+      sumpt += p1->pt();
+      for (int k = j+1; k < ndau; ++k) {
+        const reco::GenParticle* p2 = partons[ilsp][k];
+        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[ilsp] * sin(p2->phi() - atan2(v[ilsp][1], v[ilsp][0]))) < 0.01) continue;
+        float dr = reco::deltaR(*p1, *p2);
+        if (dr < drmin)
+          drmin = dr;
+        if (dr > drmax)
+          drmax = dr;
+      }
+    }
+
+    h_vtx_dbv->Fill(dbv[ilsp]);
+    h_vtx_ntracks->Fill(ntracks);
+    h_vtx_drmin->Fill(drmin);
+    h_vtx_drmax->Fill(drmax);
+    h_vtx_nquarks->Fill(nquarks);
+    h_vtx_sumpt->Fill(sumpt);
+    h_vtx_betagamma->Fill(lsp_p4s[ilsp].Beta() * lsp_p4s[ilsp].Gamma());
 
     if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > min_dbv && dbv[ilsp] < max_dbv) {
       h_dist->Fill(dist);
