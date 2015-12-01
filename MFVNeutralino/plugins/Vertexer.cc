@@ -174,7 +174,7 @@ private:
   TH1F* h_n_all_tracks;
   TH1F* h_all_track_pars[6];
   TH1F* h_all_track_errs[6];
-  TH2F* h_all_track_pars_v_pars[6][5];
+  TH2F* h_all_track_pars_v_pars[6][6];
   TH2F* h_all_track_errs_v_pars[6][6];
   TH1F* h_all_track_sigmadxybs;
   TH1F* h_all_track_sigmadxypv;
@@ -184,7 +184,7 @@ private:
   TH1F* h_n_seed_tracks;
   TH1F* h_seed_track_pars[6];
   TH1F* h_seed_track_errs[6];
-  TH2F* h_seed_track_pars_v_pars[6][5];
+  TH2F* h_seed_track_pars_v_pars[6][6];
   TH2F* h_seed_track_errs_v_pars[6][6];
   TH1F* h_seed_track_sigmadxybs;
   TH1F* h_seed_track_sigmadxypv;
