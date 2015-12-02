@@ -30,7 +30,7 @@ electronIso = iso + '/et'
 #)
 #'''.replace('\n','').split()) # ignore the weirdo behind the curtain
 
-electronId = 'electronID("cutBasedElectronID_CSA14_PU20bx25_V0_standalone_loose")'
+electronId = '1' # electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose")'
 
 jtupleParams = cms.PSet(
     jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
