@@ -287,7 +287,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
     for (int i = 0; i < mfv::n_clean_paths; ++i)
-      mevent->pass_clean[i] = trig_helper_cleaning.pass("eventCleaning" + cleaning_paths[i]);
+      mevent->pass_clean[i] = trig_helper_cleaning.pass(cleaning_paths[i]);
   }
 
   //////////////////////////////////////////////////////////////////////
