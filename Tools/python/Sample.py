@@ -90,7 +90,7 @@ class Sample(object):
 ########################################################################
 
 class MCSample(Sample):
-    EVENTS_PER = 5000
+    EVENTS_PER = 25000
     TOTAL_EVENTS = -1
     
     def __init__(self, name, dataset, nevents, **kwargs):
