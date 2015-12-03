@@ -2,7 +2,9 @@ from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
 from JMTucker.Tools.Sample import anon_samples
 import JMTucker.Tools.Samples as Samples 
 
-from version import version
+version = 'v5'
+batch_name = 'Ntuple' + version.upper()
+#batch_name += '_ChangeMeIfNotDefault'
 
 samples = Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 
@@ -20,9 +22,6 @@ def modify(sample):
         # JMTBAD different globaltags?
 
     return to_add, to_replace
-
-batch_name = 'Ntuple' + version.upper()
-#batch_name += '_ChangeMeIfNotDefault'
 
 cs = CRABSubmitter(batch_name,
                    pset_modifier = modify,
