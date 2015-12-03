@@ -18,6 +18,14 @@ def add_analyzer(process, name, **kwargs):
     else:
         setattr(process, path_name, cms.Path(obj))
 
+def basic_process(name):
+    process = cms.Process(name)
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+    process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
+    process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:input.root'))
+    return process
+
 def files_from_file(process, fn):
     process.source.fileNames = cms.untracked.vstring(*[line.strip() for line in open(fn).read().split('\n') if line.strip().endswith('.root')])
 
@@ -57,6 +65,17 @@ def file_event_from_argv(process, warn=True):
     elif warn:
         print 'file_event_from_argv warning: did not understand event number'
 
+def geometry_etc(process, tag):
+    global_tag(process, tag)
+    process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+    process.load('Configuration.StandardSequences.MagneticField_cff')
+    process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
+    
+def global_tag(process, tag):
+    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+    from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+    process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
+
 def glob_store(pattern):
     if not pattern.startswith('/store'):
         raise ValueError('pattern must start with /store')
@@ -64,7 +83,30 @@ def glob_store(pattern):
     if not os.path.isdir(magic):
         raise ValueError('not at fermilab?')
     return [x.replace(magic, '/store') for x in glob.glob(pattern.replace('/store', magic))]
+
+def output_file(process, filename, output_commands):
+    process.out = cms.OutputModule('PoolOutputModule',
+                                   fileName = cms.untracked.string(filename),
+                                   compressionLevel = cms.untracked.int32(4),
+                                   compressionAlgorithm = cms.untracked.string('LZMA'),
+                                   eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
+                                   outputCommands = cms.untracked.vstring(*output_commands),
+                                   dropMetaData = cms.untracked.string('ALL'),
+                                   fastCloning = cms.untracked.bool(False),
+                                   overrideInputFileSplitLevels = cms.untracked.bool(True)
+                                   )
+    process.outp = cms.EndPath(process.out)
     
+def registration_warnings(process):
+    if not hasattr(process, 'MessageLogger'):
+        process.load('FWCore.MessageService.MessageLogger_cfi')
+    for x in ['GetManyWithoutRegistration', 'GetByLabelWithoutRegistration']:
+        process.MessageLogger.categories.append(x)
+        setattr(process.MessageLogger.cerr, x, cms.untracked.PSet(reportEvery = cms.untracked.int32(1),
+                                                                  optionalPSet = cms.untracked.bool(True),
+                                                                  limit = cms.untracked.int32(10000000)
+                                                                  ))
+
 def replay_event(process, filename, rle, new_process_name='REPLAY'):
     '''Set the process up to replay the given event (rle is a 2- or
     3-tuple specifying it) using the random engine state saved in the
@@ -79,6 +121,11 @@ def replay_event(process, filename, rle, new_process_name='REPLAY'):
         set_events_to_process(process, [rle])
     process.RandomNumberGeneratorService.restoreStateLabel = cms.untracked.string('randomEngineStateProducer')
     process.setName_(new_process_name)
+
+def report_every(process, i):
+    if not hasattr(process, 'MessageLogger'):
+        process.load('FWCore.MessageLogger.MessageLogger_cfi')
+    process.MessageLogger.cerr.FwkReport.reportEvery = i
 
 def set_events_to_process_ex(run_events, run=None):
     if run is not None:
@@ -168,8 +215,13 @@ def set_seeds(process, seed=12191982, size=2**24):
 def silence_messages(process, categories):
     '''Make MessageLogger shut up about the categories listed.'''
 
+    if not hasattr(process, 'MessageLogger'):
+        process.load('FWCore.MessageLogger.MessageLogger_cfi')
     if not hasattr(categories, '__iter__'):
         categories = (categories,)
     for category in categories:
         process.MessageLogger.categories.append(category)
         setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
+
+def tfileservice(process, filename='tfileservice.root'):
+    process.TFileService = cms.Service('TFileService', fileName = cms.string(filename))
