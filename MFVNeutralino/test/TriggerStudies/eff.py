@@ -2,22 +2,18 @@
 
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.CMSSWTools import *
 
 is_mc = True
 htskim = True
-
-process.options.wantSummary = True
+version = 'v6'
 
 global_tag(process, 'MCRUN2_74_V9' if is_mc else '74X_dataRun2_Prompt_v2')
 process.maxEvents.input = 1000
 process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/80000/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root' if is_mc else '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/630/00000/BCD78EF7-2B5F-E511-A3A3-02163E0170B5.root']
-process.source.fileNames = ['file:/uscms/home/tucker/jen/scratch/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root']
-#process.source.fileNames = ['/store/mc/RunIISpring15DR74/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/0270C6BA-AE17-E511-9D04-549F358EB755.root']
-#process.source.fileNames = ['/store/mc/RunIISpring15DR74/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/00F9B1F1-3B18-E511-B17D-A0369F30FFD2.root']
-#process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/70000/AAC7A1D1-F6FB-E411-AFC9-E0CB4E1A114B.root']
-#set_events_to_process(process, [(1, 205534, 50556064)])
+#process.source.fileNames = ['/store/user/tucker/SingleMuon/trigeff_htskim_v5/151120_145239/0000/htskim_7.root']
+#process.options.wantSummary = True
 process.TFileService.fileName = 'eff.root'
+
 if not is_mc:
     from JMTucker.Tools.Sample import DataSample
     from FWCore.PythonUtilities.LumiList import LumiList
@@ -54,14 +50,10 @@ process.num = cms.EDFilter('MFVTriggerEfficiency',
                              )
 process.den = process.num.clone(require_trigger = False)
 
-process.p = cms.Path(process.mutrig * cms.ignore(process.den) * process.emu * cms.ignore(process.num))
-
-import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
-SimpleTriggerEfficiency.setup_endpath(process)
-
-#process.options.wantSummary = True
+process.p = cms.Path(process.mutrig * cms.ignore(process.emu) * cms.ignore(process.den) * process.emu * cms.ignore(process.num))
 
 if htskim:
+    process.setName_('EffHtSkim')
     process.htskim = process.den.clone(jet_ht_cut = 800)
     process.phtskim = cms.Path(process.mutrig * process.htskim)
     process.load('Configuration.EventContent.EventContent_cff')
@@ -78,6 +70,10 @@ if htskim:
                                    )
     process.outp = cms.EndPath(process.out)
 
+import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+SimpleTriggerEfficiency.setup_endpath(process)
+
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
     from JMTucker.Tools.Sample import anon_samples
@@ -93,14 +89,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         to_replace = []
 
         if not sample.is_mc:
-            magic = 'is_mc = True'
+            magic = 'is_mcX=XTrue'.replace('X', ' ')
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'is_mc = False', err))
 
         return to_add, to_replace
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    version = 'v5'
     cs = CRABSubmitter('TrigEff' + version,
                        pset_modifier = pset_modifier,
                        job_control_from_sample = True,
