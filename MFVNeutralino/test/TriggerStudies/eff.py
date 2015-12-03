@@ -24,11 +24,6 @@ process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu20_v*']
 process.mutrig.andOr = True # = OR
 
-from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
-
-process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
-process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1219))
-
 process.emu = cms.EDFilter('MFVEmulateHT800',
                            trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
                            trigger_objects_src = cms.InputTag('selectedPatTrigger'),
@@ -37,6 +32,8 @@ process.emu = cms.EDFilter('MFVEmulateHT800',
                            prints = cms.untracked.bool(False),
                            histos = cms.untracked.bool(False),
                            )
+
+from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
 process.num = cms.EDFilter('MFVTriggerEfficiency',
                              require_trigger = cms.bool(False), # just from EmulateHT800 filter, need to split out
@@ -72,6 +69,7 @@ if htskim:
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
+random_service(process, {'SimpleTriggerEfficiency': 1222})
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
