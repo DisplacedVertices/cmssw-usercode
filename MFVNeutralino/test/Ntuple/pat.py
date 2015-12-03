@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process, report_every
+from JMTucker.Tools.CMSSWTools import file_event_from_argv
 
 is_mc = not bool_from_argv('is_data')
 keep_all = bool_from_argv('keep_all')
@@ -11,7 +12,7 @@ trig_filter = not keep_all
 def customize_before_unscheduled(process):
     process.load('JMTucker.Tools.MCStatProducer_cff')
 
-    process.out.outputCommands = [
+    process.out.outputCommands = output_commands = [
             'drop *',
             'keep *_mcStat_*_*',
             'keep edmTriggerResults_TriggerResults__HLT',
@@ -36,14 +37,18 @@ def customize_before_unscheduled(process):
             ]
 
     if keep_all:
+        def dedrop(l):
+            return [x for x in l if not x.strip().startswith('drop')]
         if is_mc:
             process.out.outputCommands += \
                 process.AODSIMEventContent.outputCommands + \
-                process.MINIAODSIMEventContent.outputCommands
+                dedrop(process.MINIAODSIMEventContent.outputCommands) + \
+                dedrop(output_commands)
         else:
             process.out.outputCommands += \
                 process.AODEventContent.outputCommands + \
-                process.MINIAODEventContent.outputCommands
+                dedrop(process.MINIAODEventContent.outputCommands) + \
+                dedrop(output_commands)
 
 process = pat_tuple_process(customize_before_unscheduled, is_mc)
 
@@ -59,5 +64,5 @@ if trig_filter:
     import JMTucker.MFVNeutralino.TriggerFilter
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 
-#process.maxEvents.input = 10
 #process.options.wantSummary = True
+file_event_from_argv(process)
