@@ -182,7 +182,10 @@ struct MFVEvent {
   }
 
   std::vector<uchar> jet_id;
+  std::vector<float> jet_pudisc; // to be removed and put into _id when working points defined
   std::vector<float> jet_pt;
+  std::vector<float> jet_raw_pt;
+  std::vector<float> jet_calo_pt;
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
   std::vector<float> jet_energy;
