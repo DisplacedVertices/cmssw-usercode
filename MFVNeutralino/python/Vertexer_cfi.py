@@ -15,7 +15,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                                  smoothing = cms.bool(True)
                                  ),
                              beamspot_src = cms.InputTag('offlineBeamSpot'),
-                             primary_vertices_src = cms.InputTag('offlinePrimaryVertices'),
+                             primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                              use_tracks = cms.bool(True),
                              track_src = cms.InputTag('generalTracks'),
                              use_non_pv_tracks = cms.bool(False),
