@@ -129,12 +129,13 @@ auxiliary_background_samples = [
 ########################################################################
 
 data_samples = [
-    #DataSample('JetHT2015A', '/JetHT/Run2015A-PromptReco-v1/AOD'),
-    #DataSample('JetHT2015B', '/JetHT/Run2015B-PromptReco-v1/AOD'),
+    DataSample('JetHT2015Dv3', '/JetHT/Run2015D-PromptReco-v3/AOD'), # 256584-258158
+    DataSample('JetHT2015Dv4', '/JetHT/Run2015D-PromptReco-v4/AOD'), # 258159-260727
     ]
 
 auxiliary_data_samples = [
-    DataSample('SingleMuon2015D', '/SingleMuon/Run2015D-PromptReco-v3/AOD'),
+    DataSample('SingleMuon2015Dv3', '/SingleMuon/Run2015D-PromptReco-v3/AOD'),
+    DataSample('SingleMuon2015Dv4', '/SingleMuon/Run2015D-PromptReco-v4/AOD'),
     ]
 
 ########################################################################
