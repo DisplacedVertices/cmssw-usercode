@@ -22,7 +22,6 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    tag = '74X_mcRun2_asymptotic_v4' if is_mc else '74X_dataRun2_v5'
     process.GlobalTag = GlobalTag(process.GlobalTag, global_tag(is_mc), '')
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True),
