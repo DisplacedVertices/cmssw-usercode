@@ -50,6 +50,7 @@ private:
   TH1F* h_jet_frac_mu[6];
   TH1F* h_jet_muef[6];
   TH1F* h_jet_ht;
+  TH1F* h_jet_ht_no_mu_fromcand;
   TH1F* h_jet_ht_no_mu;
   TH1F* h_jet_ht_m_hlt_ht;
   TH1F* h_jet_ht_no_mu_m_hlt_ht;
@@ -99,6 +100,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     h_jet_muef[i] = fs->make<TH1F>(TString::Format("h_jet_muef_%i", i), "", 11, 0, 1.1);
   }
   h_jet_ht = fs->make<TH1F>("h_jet_ht", "", 250, 0, 5000);
+  h_jet_ht_no_mu_fromcand = fs->make<TH1F>("h_jet_ht_no_mu_fromcand", "", 250, 0, 5000);
   h_jet_ht_no_mu = fs->make<TH1F>("h_jet_ht_no_mu", "", 250, 0, 5000);
   h_jet_ht_m_hlt_ht = fs->make<TH1F>("h_jet_ht_m_hlt_ht", "", 100, -500, 500);
   h_jet_ht_no_mu_m_hlt_ht = fs->make<TH1F>("h_jet_ht_no_mu_m_hlt_ht", "", 100, -500, 500);
@@ -220,19 +222,24 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
   int njet = 0;
   double jet_ht = 0;
   double jet_ht_no_mu = 0;
+  double jet_ht_no_mu_fromcand = 0;
   for (const pat::Jet& jet : *jets) {
     if (jet_selector(jet)) {
       ++njet;
       jet_ht += jet.pt();
+      if (jet.muonEnergyFraction() < 0.8)
+        jet_ht_no_mu += jet.pt();
 
       double tot_frac_mu = 0;
-      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
-        if (abs(pfcand->pdgId()) == 13) {
-          const double frac_mu = pfcand->energy() / jet.energy();
+      for (size_t idau = 0, idaue = jet.numberOfDaughters(); idau < idaue; ++idau) {
+        const reco::Candidate* dau = jet.daughter(idau);
+        if (abs(dau->pdgId()) == 13) {
+          const double frac_mu = dau->energy() / jet.energy();
           tot_frac_mu += frac_mu;
         }
-      if (tot_frac_mu > 0.2)
-        jet_ht_no_mu += jet.pt();
+      }
+      if (tot_frac_mu < 0.8)
+        jet_ht_no_mu_fromcand += jet.pt();
 
       for (int i : {0, njet}) {
         if (i == 0 || njet < 6) {
@@ -249,6 +256,7 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
 
   h_njets->Fill(njet);
   h_jet_ht->Fill(jet_ht);
+  h_jet_ht_no_mu_fromcand->Fill(jet_ht_no_mu_fromcand);
   h_jet_ht_no_mu->Fill(jet_ht_no_mu);
   h_njets_v_ht->Fill(jet_ht, njet);
 
