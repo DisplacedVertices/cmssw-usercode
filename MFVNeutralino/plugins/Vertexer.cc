@@ -167,6 +167,7 @@ private:
   const double remove_tracks_frac;
   const bool write_tracks;
   const bool histos;
+  const bool scatterplots;
   const bool track_histos_only;
   const bool verbose;
   const bool phitest;
@@ -288,6 +289,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     remove_tracks_frac(cfg.getParameter<double>("remove_tracks_frac")),
     write_tracks(cfg.getParameter<bool>("write_tracks")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
+    scatterplots(cfg.getUntrackedParameter<bool>("scatterplots", false)),
     track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     phitest(cfg.getUntrackedParameter<bool>("phitest", false))
@@ -306,80 +308,94 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
   if (histos) {
     edm::Service<TFileService> fs;
-    h_n_all_tracks                   = fs->make<TH1F>("h_n_all_tracks",                   "", 200,   0,   2000);
+
+    h_n_all_tracks  = fs->make<TH1F>("h_n_all_tracks",  "", 40, 0, 2000);
+    h_n_seed_tracks = fs->make<TH1F>("h_n_seed_tracks", "", 50, 0,  200);
+
     const char* par_names[6] = {"pt", "eta", "phi", "dxybs", "dxypv", "dz"};
-    const int par_nbins[6] = { 200, 200, 200, 200, 200, 200 };
-    const double par_lo[6] = {   0, -2.6, -3.15, -0.2, -0.2, -20 };
-    const double par_hi[6] = {  15,  2.6,  3.15,  0.2,  0.2,  20 };
+    const int par_nbins[6] = {  50, 50, 50, 100, 100, 80 };
+    const double par_lo[6] = {   0, -2.5, -3.15, -0.2, -0.2, -20 };
+    const double par_hi[6] = {  10,  2.5,  3.15,  0.2,  0.2,  20 };
     const double err_lo[6] = { 0 };
-    const double err_hi[6] = { 0.25, 0.1, 0.1, 0.5, 0.5, 0.5 };
+    const double err_hi[6] = { 0.15, 0.01, 0.01, 0.2, 0.2, 0.4 };
     for (int i = 0; i < 6; ++i)
       h_all_track_pars[i] = fs->make<TH1F>(TString::Format("h_all_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
     for (int i = 0; i < 6; ++i)
       h_all_track_errs[i] = fs->make<TH1F>(TString::Format("h_all_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
-    for (int i = 0; i < 6; ++i)
-      for (int j = i+1; j < 6; ++j)
-        h_all_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
-    for (int i = 0; i < 6; ++i)
-      for (int j = 0; j < 6; ++j)
-        h_all_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
-    h_all_track_sigmadxybs           = fs->make<TH1F>("h_all_track_sigmadxybs",           "", 300, -15,     15);
-    h_all_track_sigmadxypv           = fs->make<TH1F>("h_all-track_sigmadxypv",           "", 300, -15,     15);
+    if (scatterplots) {
+      for (int i = 0; i < 6; ++i)
+        for (int j = i+1; j < 6; ++j)
+          h_all_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
+      for (int i = 0; i < 6; ++i)
+        for (int j = 0; j < 6; ++j)
+          h_all_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_all_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
+    }
+
+    h_all_track_sigmadxybs           = fs->make<TH1F>("h_all_track_sigmadxybs",           "", 40, -10,     10);
+    h_all_track_sigmadxypv           = fs->make<TH1F>("h_all-track_sigmadxypv",           "", 40, -10,     10);
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
     h_all_track_npxhits              = fs->make<TH1F>("h_all_track_npxhits",              "",  12,   0,     12);
     h_all_track_nsthits              = fs->make<TH1F>("h_all_track_nsthits",              "",  28,   0,     28);
-    h_n_seed_tracks                  = fs->make<TH1F>("h_n_seed_tracks",                  "", 200,   0,    600);
+
     for (int i = 0; i < 6; ++i)
       h_seed_track_pars[i] = fs->make<TH1F>(TString::Format("h_seed_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
     for (int i = 0; i < 6; ++i)
       h_seed_track_errs[i] = fs->make<TH1F>(TString::Format("h_seed_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
-    for (int i = 0; i < 6; ++i)
-      for (int j = i+1; j < 6; ++j)
-        h_seed_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
-    for (int i = 0; i < 6; ++i)
-      for (int j = 0; j < 6; ++j)
-        h_seed_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
-    h_seed_track_sigmadxybs          = fs->make<TH1F>("h_seed_track_sigmadxybs",          "", 300, -15,     15);
-    h_seed_track_sigmadxypv          = fs->make<TH1F>("h_seed_track_sigmadxypv",          "", 300, -15,     15);
-    h_seed_track_nhits               = fs->make<TH1F>("h_seed_track_nhits",               "",  40,   0,     40);
-    h_seed_track_npxhits             = fs->make<TH1F>("h_seed_track_npxhits",             "",  12,   0,     12);
-    h_seed_track_nsthits             = fs->make<TH1F>("h_seed_track_nsthits",             "",  28,   0,     28);
-    h_seed_track_npxlayers           = fs->make<TH1F>("h_seed_track_npxlayers",           "",   6,   0,      6);
-    h_seed_track_deltar2px           = fs->make<TH1F>("h_seed_track_deltar2px",           "", 100,   0,     10);
-    h_seed_track_deltaz2px           = fs->make<TH1F>("h_seed_track_deltaz2px",           "", 100,   0,     20);
-    h_seed_track_deltar3px           = fs->make<TH1F>("h_seed_track_deltar3px",           "", 100,   0,     10);
-    h_seed_track_deltaz3px           = fs->make<TH1F>("h_seed_track_deltaz3px",           "", 100,   0,     20);
-    h_seed_pair_pt                   = fs->make<TH2F>("h_seed_pair_pt",                   "",  50,   0,    500,    50,   0,    500);
-    h_seed_pair_dxy                  = fs->make<TH2F>("h_seed_pair_dxy",                  "",  40,  -0.1,    0.1,  40,  -0.1,    0.1);
-    h_seed_pair_nhits                = fs->make<TH2F>("h_seed_pair_nhits",                "",  15,   0,     45,    15,   0,     45);
-    h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "", 200,   0,    400);
-    h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  64,   0,      1);
-    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               "", 100,   0, max_seed_vertex_chi2);
-    h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               "", 100,   0,     20);
-    h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  "", 200,  -1,      1);
-    h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  "", 200,  -1,      1);
-    h_seed_vertex_rho                = fs->make<TH1F>("h_seed_vertex_rho",                "", 200,   0,      2);
-    h_seed_vertex_phi                = fs->make<TH1F>("h_seed_vertex_phi",                "", 200,  -3.15,   3.15);
-    h_seed_vertex_z                  = fs->make<TH1F>("h_seed_vertex_z",                  "", 200, -20,     20);
-    h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  "", 200,   0,      2);
+    if (scatterplots) {
+      for (int i = 0; i < 6; ++i)
+        for (int j = i+1; j < 6; ++j)
+          h_seed_track_pars_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
+      for (int i = 0; i < 6; ++i)
+        for (int j = 0; j < 6; ++j)
+          h_seed_track_errs_v_pars[i][j] = fs->make<TH2F>(TString::Format("h_seed_track_err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], err_lo[j], err_hi[j]);
+    }
+
+    h_seed_track_sigmadxybs = fs->make<TH1F>("h_seed_track_sigmadxybs", "", 40, -10, 10);
+    h_seed_track_sigmadxypv = fs->make<TH1F>("h_seed_track_sigmadxypv", "", 40, -10, 10);
+    h_seed_track_nhits      = fs->make<TH1F>("h_seed_track_nhits",      "", 40,   0, 40);
+    h_seed_track_npxhits    = fs->make<TH1F>("h_seed_track_npxhits",    "", 12,   0, 12);
+    h_seed_track_nsthits    = fs->make<TH1F>("h_seed_track_nsthits",    "", 28,   0, 28);
+    h_seed_track_npxlayers  = fs->make<TH1F>("h_seed_track_npxlayers",  "",  6,   0,  6);
+
+    h_seed_track_deltar2px = fs->make<TH1F>("h_seed_track_deltar2px", "", 20, 0, 10);
+    h_seed_track_deltaz2px = fs->make<TH1F>("h_seed_track_deltaz2px", "", 20, 0, 20);
+    h_seed_track_deltar3px = fs->make<TH1F>("h_seed_track_deltar3px", "", 20, 0, 10);
+    h_seed_track_deltaz3px = fs->make<TH1F>("h_seed_track_deltaz3px", "", 20, 0, 20);
+
+    h_seed_pair_pt    = fs->make<TH2F>("h_seed_pair_pt",    "",  10, 0, 10, 10, 0, 10);
+    h_seed_pair_dxy   = fs->make<TH2F>("h_seed_pair_dxy",   "",  40, -0.1, 0.1,  40, -0.1,    0.1);
+    h_seed_pair_nhits = fs->make<TH2F>("h_seed_pair_nhits", "",  10, 0, 40, 10, 0, 40);
+
+    h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "",  50,   0,    200);
+    h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  21,   0,      1.05);
+    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               "",  20,   0, max_seed_vertex_chi2);
+    h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               "",  10,   0,     20);
+    h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  "", 100,  -1,      1);
+    h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  "", 100,  -1,      1);
+    h_seed_vertex_rho                = fs->make<TH1F>("h_seed_vertex_rho",                "", 100,   0,      2);
+    h_seed_vertex_phi                = fs->make<TH1F>("h_seed_vertex_phi",                "",  50,  -3.15,   3.15);
+    h_seed_vertex_z                  = fs->make<TH1F>("h_seed_vertex_z",                  "",  40, -20,     20);
+    h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  "", 100,   0,      2);
     h_seed_track_multiplicity        = fs->make<TH1F>("h_seed_track_multiplicity",        "",  40,   0,     40);
     h_max_seed_track_multiplicity    = fs->make<TH1F>("h_max_seed_track_multiplicity",    "",  40,   0,     40);
-    h_n_resets                       = fs->make<TH1F>("h_n_resets",                       "", 100,   0,   5000);
-    h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "",  20,   0,     20);
-    h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             "", 200,   0,    200);
-    h_noshare_vertex_ntracks         = fs->make<TH1F>("h_noshare_vertex_ntracks",         "",  50, 0, 50);
-    h_noshare_vertex_track_weights   = fs->make<TH1F>("h_noshare_vertex_track_weights",   "",  64,   0,      1);
-    h_noshare_vertex_chi2            = fs->make<TH1F>("h_noshare_vertex_chi2",            "", 100,   0, max_seed_vertex_chi2);
-    h_noshare_vertex_ndof            = fs->make<TH1F>("h_noshare_vertex_ndof",            "", 100,   0,     20);
-    h_noshare_vertex_x               = fs->make<TH1F>("h_noshare_vertex_x",               "", 200,  -1,      1);
-    h_noshare_vertex_y               = fs->make<TH1F>("h_noshare_vertex_y",               "", 200,  -1,      1);
-    h_noshare_vertex_rho             = fs->make<TH1F>("h_noshare_vertex_rho",             "", 200,   0,      2);
-    h_noshare_vertex_phi             = fs->make<TH1F>("h_noshare_vertex_phi",             "", 200,  -3.15,   3.15);
-    h_noshare_vertex_z               = fs->make<TH1F>("h_noshare_vertex_z",               "", 200, -20,     20);
-    h_noshare_vertex_r               = fs->make<TH1F>("h_noshare_vertex_r",               "", 200,   0,      2);
+
+    h_n_resets                       = fs->make<TH1F>("h_n_resets",                       "", 50,   0,   500);
+    h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "",  5,   0,     5);
+
+    h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             "", 50,   0,    50);
+    h_noshare_vertex_ntracks         = fs->make<TH1F>("h_noshare_vertex_ntracks",         "",  30, 0, 30);
+    h_noshare_vertex_track_weights   = fs->make<TH1F>("h_noshare_vertex_track_weights",   "",  21,   0,      1.05);
+    h_noshare_vertex_chi2            = fs->make<TH1F>("h_noshare_vertex_chi2",            "", 20,   0, max_seed_vertex_chi2);
+    h_noshare_vertex_ndof            = fs->make<TH1F>("h_noshare_vertex_ndof",            "", 10,   0,     20);
+    h_noshare_vertex_x               = fs->make<TH1F>("h_noshare_vertex_x",               "", 100,  -1,      1);
+    h_noshare_vertex_y               = fs->make<TH1F>("h_noshare_vertex_y",               "", 100,  -1,      1);
+    h_noshare_vertex_rho             = fs->make<TH1F>("h_noshare_vertex_rho",             "", 100,   0,      2);
+    h_noshare_vertex_phi             = fs->make<TH1F>("h_noshare_vertex_phi",             "", 50,  -3.15,   3.15);
+    h_noshare_vertex_z               = fs->make<TH1F>("h_noshare_vertex_z",               "", 40, -20,     20);
+    h_noshare_vertex_r               = fs->make<TH1F>("h_noshare_vertex_r",               "", 100,   0,      2);
     h_noshare_track_multiplicity     = fs->make<TH1F>("h_noshare_track_multiplicity",     "",  40,   0,     40);
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
-    h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 200,   0,    200);
+    h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
     if (phitest) {
       h_phitest_nev = fs->make<TH1F>("h_phitest_nev", "", 1, 0, 1);
@@ -581,10 +597,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       for (int i = 0; i < 6; ++i) {
         h_all_track_pars[i]->Fill(pars[i]);
         h_all_track_errs[i]->Fill(errs[i]);
-        for (int j = 0; j < 6; ++j) {
-          if (j >= i+1)
-            h_all_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
-          h_all_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+        if (scatterplots) {
+          for (int j = 0; j < 6; ++j) {
+            if (j >= i+1)
+              h_all_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
+            h_all_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+          }
         }
       }
       
@@ -598,10 +616,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         for (int i = 0; i < 6; ++i) {
           h_seed_track_pars[i]->Fill(pars[i]);
           h_seed_track_errs[i]->Fill(errs[i]);
-          for (int j = 0; j < 6; ++j) {
-            if (j >= i+1)
-              h_seed_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
-            h_seed_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+          if (scatterplots) {
+            for (int j = 0; j < 6; ++j) {
+              if (j >= i+1)
+                h_seed_track_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
+              h_seed_track_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+            }
           }
         }
 
