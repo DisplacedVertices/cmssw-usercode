@@ -96,6 +96,11 @@ def output_file(process, filename, output_commands):
                                    overrideInputFileSplitLevels = cms.untracked.bool(True)
                                    )
     process.outp = cms.EndPath(process.out)
+
+def random_service(process, seeds):
+    r = process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
+    for k,v in seeds.iteritems():
+        setattr(r, k, cms.PSet(initialSeed = cms.untracked.uint32(v)))
     
 def registration_warnings(process):
     if not hasattr(process, 'MessageLogger'):
