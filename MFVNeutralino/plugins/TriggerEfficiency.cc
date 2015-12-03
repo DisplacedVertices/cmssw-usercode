@@ -48,6 +48,7 @@ private:
   TH1F* h_jet_eta[6];
   TH1F* h_jet_phi[6];
   TH1F* h_jet_frac_mu[6];
+  TH1F* h_jet_muef[6];
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_no_mu;
   TH1F* h_jet_ht_m_hlt_ht;
@@ -95,6 +96,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i), "", 50, -6, 6);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%i", i), "", 50, -M_PI, M_PI);
     h_jet_frac_mu[i] = fs->make<TH1F>(TString::Format("h_jet_frac_mu_%i", i), "", 11, 0, 1.1);
+    h_jet_muef[i] = fs->make<TH1F>(TString::Format("h_jet_muef_%i", i), "", 11, 0, 1.1);
   }
   h_jet_ht = fs->make<TH1F>("h_jet_ht", "", 250, 0, 5000);
   h_jet_ht_no_mu = fs->make<TH1F>("h_jet_ht_no_mu", "", 250, 0, 5000);
@@ -239,6 +241,7 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
           h_jet_eta[i]->Fill(jet.eta());
           h_jet_phi[i]->Fill(jet.phi());
           h_jet_frac_mu[i]->Fill(tot_frac_mu);
+          h_jet_muef[i]->Fill(jet.muonEnergyFraction());
         }
       }
     }
