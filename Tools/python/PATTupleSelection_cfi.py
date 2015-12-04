@@ -35,9 +35,10 @@ electronId = '1' # electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-lo
 jtupleParams = cms.PSet(
     jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
                         'numberOfDaughters > 1 && ' \
-                        'neutralHadronEnergyFraction < 0.99 && ' \
-                        'neutralEmEnergyFraction < 0.99 && ' \
-                        '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.99 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))'
+                        'neutralHadronEnergyFraction < 0.90 && ' \
+                        'neutralEmEnergyFraction < 0.90 && ' \
+                        'muonEnergyFraction < 0.8 && ' \
+                        '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.90 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))'
                         ),
 
     muonCut = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && ' \
