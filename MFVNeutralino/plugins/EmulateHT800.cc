@@ -119,7 +119,10 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (int(found[0]) + int(found[1]) != 1)
     throw cms::Exception("EmulateHT800", "didn't find exactly one of HLT_PFHT800 or 900");
 
+  if (prints) printf("found 800? %i pass? %i   found 900? %i pass? %i\n", found[0], pass[0], found[1], pass[1]);
+
   if (return_actual && found[0]) {
+    if (prints) printf("return actual = %i\n", pass[0]);
     put_ht(event, -1);
     return pass[0];
   }
@@ -154,6 +157,9 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
+  if (prints)
+    printf("ht? %i %f  ht4mc? %i %f\n", found_ht, ht, found_ht4mc, ht4mc);
+
   if (histos) {
     h_ht->Fill(ht);
     h_not_found_but_pass350->Fill(!found_ht && pass_and_found_350.first);
@@ -167,14 +173,16 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
         throw cms::Exception("EmulateHT800", "couldn't find HT in trigger objects");
     }
     put_ht(event, -1);
+    if (prints) printf("350 didn't pass, return false\n");
     return false; // 350 didn't pass...
   }
 
   bool emulated_pass[2] = {false, false};
 
   for (int i : {0,1} ) {
+    emulated_pass[i] = l1_pass && ht >= thresh[i];
+    printf("emulated pass %i: l1_pass %i  ht %f -> %i\n", i, l1_pass, ht, emulated_pass[i]);
     if (found[i]) {
-      emulated_pass[i] = l1_pass && ht >= thresh[i];
       const bool agree = emulated_pass[i] == pass[i];
       if (histos) h_agree[i]->Fill(agree);
       if (!agree) {
@@ -185,6 +193,7 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
+  if (prints) printf("put ht = %f in event and return %i\n", ht, emulated_pass[0]);
   put_ht(event, ht);
   return emulated_pass[0];
 }
