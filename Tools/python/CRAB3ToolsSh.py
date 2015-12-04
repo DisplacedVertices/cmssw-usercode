@@ -28,7 +28,7 @@ def crab_status(working_dir, verbose=False):
 def crab_get_njobs(working_dir):
     return len(crab_status(working_dir))
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900):
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
@@ -42,6 +42,11 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     files = [x.strip() for x in crab_command('out', '--xrootd', dir=working_dir).split('\n') if x.strip()]
+    if pattern:
+        if '/' not in pattern:
+            pattern = '*/' + pattern
+        files = fnmatch.filter(files, pattern)
+
     jobs = [int(f.split('_')[-1].split('.root')[0]) for f in files]
     jobs.sort()
     expected = range(1, expected+1)

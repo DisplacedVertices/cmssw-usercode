@@ -3,6 +3,7 @@
 # author: J. Tucker
 
 import cPickle
+import fnmatch
 import getpass
 import glob
 import os

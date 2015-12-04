@@ -13,6 +13,8 @@ parser.add_argument('positional', nargs='*', help='The crab directories.')
 
 parser.add_argument('--chunk-size', default=900, type=int,
                     help='The maximum number files hadded at once.')
+parser.add_argument('--pattern',
+                    help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
 
 options = parser.parse_args()
 
@@ -30,13 +32,13 @@ ok = False
 for x in crab_dirs:
     if is_crab_working_dir(x):
         ok = True
-        crab_hadd(x, chunk_size=options.chunk_size)
+        crab_hadd(x, chunk_size=options.chunk_size, pattern=options.pattern)
     elif os.path.isdir(x):
         # if we have a dir of crab dirs, crab_hadd all the directories in it.
         sub_dirs = [d for d in glob.glob(os.path.join(x, '*')) if is_crab_working_dir(d)]
         for y in sub_dirs:
             ok = True
-            crab_hadd(y, new_dir=x, chunk_size=options.chunk_size)
+            crab_hadd(y, new_dir=x, chunk_size=options.chunk_size, pattern=options.pattern)
 
 if not ok:
     raise ValueError('no crab dirs found in argv')
