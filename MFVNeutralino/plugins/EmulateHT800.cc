@@ -181,7 +181,7 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   for (int i : {0,1} ) {
     emulated_pass[i] = l1_pass && ht >= thresh[i];
-    printf("emulated pass %i: l1_pass %i  ht %f -> %i\n", i, l1_pass, ht, emulated_pass[i]);
+    if (prints) printf("emulated pass %i: l1_pass %i  ht %f -> %i\n", i, l1_pass, ht, emulated_pass[i]);
     if (found[i]) {
       const bool agree = emulated_pass[i] == pass[i];
       if (histos) h_agree[i]->Fill(agree);
