@@ -7,6 +7,7 @@
 namespace mfv {
   static const int n_trigger_paths = 17;
   static const int n_clean_paths = 13;
+  static const int n_vertex_seed_pt_quantiles = 7;
 }
 
 struct MFVEvent {
@@ -37,6 +38,8 @@ struct MFVEvent {
     hlt_prescale = 0;
     for (int i = 0; i < mfv::n_clean_paths; ++i)
       pass_clean[i] = 0;
+    for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
+      vertex_seed_pt_quantiles[i] = 0;
   }
 
   static TLorentzVector p4(float pt, float eta, float phi, float mass) {
@@ -300,6 +303,8 @@ struct MFVEvent {
   int nmu(int which) const { return nlep(0, which); }
   int nel(int which) const { return nlep(1, which); }
   int nlep(int which) const { return nmu(which) + nel(which); }
+
+  float vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
 };
 
 #endif

@@ -45,6 +45,7 @@ private:
   const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const edm::EDGetTokenT<std::vector<float>> vertex_seed_pt_quantiles_token;
   
   const std::string skip_event_filter;
   const double jet_pt_min;
@@ -79,6 +80,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    vertex_seed_pt_quantiles_token(consumes<std::vector<float>>(cfg.getParameter<edm::InputTag>("vertex_seed_pt_quantiles_src"))),
 
     skip_event_filter(cfg.getParameter<std::string>("skip_event_filter")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
@@ -495,6 +497,14 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(mva);
   }
+
+  //////////////////////////////////////////////////////////////////////
+
+  edm::Handle<std::vector<float>> vertex_seed_pt_quantiles;
+  event.getByToken(vertex_seed_pt_quantiles_token, vertex_seed_pt_quantiles);
+  assert(vertex_seed_pt_quantiles->size() == mfv::n_vertex_seed_pt_quantiles);
+  for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
+    mevent->vertex_seed_pt_quantiles[i] = (*vertex_seed_pt_quantiles)[i];
 
   //////////////////////////////////////////////////////////////////////
 
