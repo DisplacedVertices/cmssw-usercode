@@ -3,7 +3,7 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
-v = 'v7'
+v = 'v8'
 root_dir = '/eos/uscms/store/user/tucker/crab_dirs/TrigEff' + v
 plot_dir = 'plots/TrigEff_' + v
 
@@ -46,13 +46,13 @@ def limits(kind, n):
 
 def make_fcn(name, kind, n):
     if 'ht' in n:
-        limits = (50, 2000)
+        limits = (300, 1500)
     else:
         limits = (20, 250)
     fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *limits)
     fcn.SetParNames('floor', 'ceil', 'turnmu', 'turnsig')
     if 'ht' in n:
-        fcn.SetParameters(0, 1, 500, 50)
+        fcn.SetParameters(0, 1, 700, 100)
     else:
         fcn.SetParameters(0, 1, 48, 5)
     fcn.SetParLimits(1, 0, 1)
@@ -204,7 +204,7 @@ for kind in kinds:
             elif 'ht' in n:
                 r.GetXaxis().SetLimits(0, 2000)
                 k = ''
-                r.SetTitle(';%s #Sigma H_{T} (GeV);efficiency' % k)
+                r.SetTitle(';%s H_{T} (GeV);efficiency' % k)
             r.GetHistogram().SetMinimum(0)
             r.GetHistogram().SetMaximum(1.1)
 
