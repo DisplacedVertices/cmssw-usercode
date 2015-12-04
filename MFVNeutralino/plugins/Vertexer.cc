@@ -41,7 +41,7 @@ public:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
 private:
-  void finish(edm::Event&, std::auto_ptr<reco::VertexCollection>);
+  void finish(edm::Event&, std::auto_ptr<reco::VertexCollection>, std::auto_ptr<std::vector<float>>);
 
   typedef std::set<reco::TrackRef> track_set;
 
@@ -302,6 +302,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling or removing tracks!\n";
 
   produces<reco::VertexCollection>();
+  produces<std::vector<float>>();
 
   if (write_tracks)
     produces<reco::TrackCollection>();
@@ -411,7 +412,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   }
 }
 
-void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection> vertices) {
+  void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection> vertices, std::auto_ptr<std::vector<float>> pt_quantiles) {
   if (write_tracks) {
     std::auto_ptr<reco::TrackCollection> tracks(new reco::TrackCollection);
 
@@ -430,6 +431,7 @@ void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection
     h_n_output_vertices->Fill(vertices->size());
 
   event.put(vertices);
+  event.put(pt_quantiles);
 }
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -547,6 +549,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     std::random_shuffle(all_tracks.begin(), all_tracks.end(), random_converter);
   }
 
+  const int max_n_seed_pts = 1000;
+  double seed_tracks_pt[max_n_seed_pts] = {0};
+
   for (size_t i = 0, ie = all_tracks.size(); i < ie; ++i) {
     const reco::TrackRef& tk = all_tracks[i];
     const double pt = tk->pt();
@@ -580,6 +585,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     
     if (use) {
       seed_tracks.push_back(tt_builder->build(tk));
+      if (seed_tracks.size() <= max_n_seed_pts)
+        seed_tracks_pt[seed_tracks.size()-1] = tk->pt();
       seed_track_ref_map[tk] = seed_tracks.size() - 1;
     }
 
@@ -662,6 +669,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   //////////////////////////////////////////////////////////////////////
 
   std::auto_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
+  std::auto_ptr<std::vector<float> > pt_quantiles(new std::vector<float>(7));
   std::vector<std::vector<std::pair<int, int> > > track_use(ntk);
 
   if (ntk == 0 || track_histos_only) {
@@ -672,9 +680,20 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         printf("track histos only");
       printf(" -> putting empty vertex collection into event\n");
     }
-    finish(event, vertices);
+    finish(event, vertices, pt_quantiles);
     return;
   }
+
+  const int n_seed_pts = std::min(int(seed_tracks.size()), max_n_seed_pts);
+  std::sort(seed_tracks_pt, seed_tracks_pt + n_seed_pts);
+  double pt_quantiles_temp[7] = {0};
+  double pt_prob[7] = { 0.05, 0.1, 0.25, 0.5, 0.75, 0.90, 0.95 };
+  TMath::Quantiles(n_seed_pts, 7, seed_tracks_pt, pt_quantiles_temp, pt_prob);
+  for (int i = 0; i < 7; ++i) {
+    (*pt_quantiles)[i] = pt_quantiles_temp[i];
+    if (verbose) printf("pt seed quantile i=%i prob %f pt %f\n", i, pt_prob[i], (*pt_quantiles)[i]);
+  }
+
 
   for (size_t itk = 0; itk < ntk-1; ++itk) {
     double itk_pt    = seed_tracks[itk].track().pt();
@@ -1196,7 +1215,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // Put the output.
   //////////////////////////////////////////////////////////////////////
 
-  finish(event, vertices);
+  finish(event, vertices, pt_quantiles);
 }
 
 DEFINE_FWK_MODULE(MFVVertexer);
