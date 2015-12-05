@@ -8,6 +8,8 @@ SimpleTriggerEfficiency = cms.EDAnalyzer('SimpleTriggerEfficiency',
 def setup_endpath(process, weight_src = ''):
     process.SimpleTriggerEfficiency = SimpleTriggerEfficiency.clone(weight_src = weight_src)
     process.SimpleTriggerEfficiency.trigger_results_src = cms.InputTag('TriggerResults', '', process.name_())
+    process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
+    process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1220))
     if type(weight_src) == cms.InputTag:
         weight_src = weight_src.moduleLabel
     if weight_src:
