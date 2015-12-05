@@ -69,7 +69,6 @@ if htskim:
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
-random_service(process, {'SimpleTriggerEfficiency': 1222})
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
