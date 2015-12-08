@@ -7,7 +7,7 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, tdr_st
 from functools import partial
 
 root_file_dir = 'HistosV20_rebin_for_paper' # '/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/HistosV20'
-plot_dir = 'plots/paper_draft_2'
+plot_dir = 'plots/paper_draft_3'
 
 set_style()
 ps = plot_saver(plot_dir, size=(1,1), root_log=True, pdf_log=True)
@@ -38,6 +38,7 @@ C = partial(data_mc_comparison,
             legend_pos = (0.418, 0.701, 0.858, 0.909),
             res_fit = False,
             verbose = True,
+            background_uncertainty = ('MC stat. uncert.', 0, 1, 3002),
             )
 
 dbv_bins = [j*0.05 for j in range(8)] + [0.4, 0.5, 0.6, 0.7, 0.85, 1.]
@@ -64,6 +65,14 @@ C('dvv',
   rebin = dvv_bins,
   bin_width_to = 0.2,
   y_title_offset = 1.19,
-  res_y_range = (0, 10),
-  y_range = (0.1, 300),
+  res_y_range = (0, 15),
+  y_range = (0.05, 300),
   )
+
+# NEED TO PUT THIS IN ROOTTOOLS TO ZERO THE LAST BIN IN RATIO
+#
+#        ddd = data_sample.hist.Clone('ddd')
+#        if ddd.GetNbinsX() == 6:
+#            ddd.SetBinContent(6, 0)
+#            ddd.SetBinError(6, 0)
+
