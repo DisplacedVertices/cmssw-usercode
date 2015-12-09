@@ -99,10 +99,11 @@ g_cons = ROOT.TGraphAsymmErrors(nbins, arr(x), arr(y), arr(exl), arr(exh), arr(e
 g_cons.SetTitle(';d_{VV} (mm);events')
 
 h_mctoy.SetLineColor(ROOT.kBlue)
+h_mctoy.SetLineWidth(3)
 g_cons.SetLineColor(ROOT.kRed)
 g_cons.SetFillColor(ROOT.kRed)
-g_cons.SetFillStyle(3002)
-g_cons.SetLineWidth(2)
+g_cons.SetFillStyle(3444)
+g_cons.SetLineWidth(1)
 
 c = ROOT.TCanvas('c', '', 800, 800)
 c.SetTopMargin(0.08)
