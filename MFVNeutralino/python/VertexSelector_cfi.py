@@ -90,7 +90,7 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     )
 
 mfvSelectedVerticesTightLargeErr = mfvSelectedVerticesTight.clone(
-    min_bs2derr = 0.008,
+    min_bs2derr = 0.0025,
     max_bs2derr = 1e9,
     )
 
