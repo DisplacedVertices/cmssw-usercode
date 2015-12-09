@@ -764,7 +764,7 @@ def data_mc_comparison(name,
         ratio_pad.cd(0)
 
         #res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True) # JMTBAD way underestimates uncert in sum_background with weights, scales...
-        res_g = ROOT.TGraphAsymmErrors(ddd, sum_background, 'b(1,1) mode pois')
+        res_g = ROOT.TGraphAsymmErrors(data_sample.hist, sum_background, 'b(1,1) mode pois')
         res_g.SetMarkerStyle(20)
         res_g.SetMarkerSize(0)
         res_g.SetLineWidth(res_line_width)
