@@ -5,6 +5,8 @@ def setup_trigger_filter(process, path_name='pevtsel'):
     process.triggerFilter = hltHighLevel.clone()
     process.triggerFilter.HLTPaths = [
         'HLT_PFHT650_v*',
+        'HLT_PFHT800_v*',
+        'HLT_PFHT900_v*',
         'HLT_PFHT550_4Jet_v*',
         'HLT_PFHT450_SixJet40_PFBTagCSV_v*',
         'HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v*',
@@ -23,6 +25,7 @@ def setup_trigger_filter(process, path_name='pevtsel'):
         'HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v*',
         ]
     process.triggerFilter.andOr = True # = OR
+    process.triggerFilter.throw = False # = HT800 not in MC
     setattr(process, path_name, cms.Path(process.triggerFilter))
     if hasattr(process, 'out'):
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(path_name))
