@@ -14,6 +14,7 @@
 
 int main() {
   jmt::set_root_style();
+  TH1::SetDefaultSumw2();
 
   jmt::ConfigFromEnv env("mfvo2t");
   const std::string tree_path = env.get_string("tree_path", "trees");
