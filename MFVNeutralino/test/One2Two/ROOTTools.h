@@ -5,6 +5,8 @@ class TH1D;
 class TGraphAsymmErrors;
 
 namespace jmt {
+  void deoverflow(TH1D* h);
+  void deunderflow(TH1D* h);
   void divide_by_bin_width(TH1D* h);
   void cumulate(TH1D* h, const bool do_overflow);
   void set_root_style();

@@ -9,6 +9,29 @@
 #include "Prob.h"
 
 namespace jmt {
+  void deoverflow(TH1D* h) {
+    const int nb = h->GetNbinsX();
+    const double l  = h->GetBinContent(nb);
+    const double le = h->GetBinError  (nb);
+    const double o  = h->GetBinContent(nb+1);
+    const double oe = h->GetBinError  (nb+1);
+    h->SetBinContent(nb, l + o);
+    h->SetBinError  (nb, sqrt(le*le + oe*oe));
+    h->SetBinContent(nb+1, 0);
+    h->SetBinError  (nb+1, 0);
+  }
+
+  void deunderflow(TH1D* h) {
+    const double f  = h->GetBinContent(1);
+    const double fe = h->GetBinError  (1);
+    const double u  = h->GetBinContent(0);
+    const double ue = h->GetBinError  (0);
+    h->SetBinContent(1, f + u);
+    h->SetBinError  (1, sqrt(fe*fe + ue*ue));
+    h->SetBinContent(0, 0);
+    h->SetBinError  (0, 0);
+  }
+
   void divide_by_bin_width(TH1D* h) {
     const int nbins = h->GetNbinsX();
     for (int ibin = 1; ibin <= nbins; ++ibin) {
@@ -34,7 +57,6 @@ namespace jmt {
   }
 
   void set_root_style() {
-    gROOT->SetStyle("Plain");
     gStyle->SetPalette(1);
     gStyle->SetFillColor(0);
     gStyle->SetOptDate(0);
