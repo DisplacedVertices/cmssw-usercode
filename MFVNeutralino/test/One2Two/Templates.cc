@@ -1,3 +1,4 @@
+#include "ROOTTools.h"
 #include "Templates.h"
 
 #include <cmath>
@@ -51,22 +52,10 @@ namespace mfv {
     return new TH1D(name, title, bins.size()-1, &bins[0]);
   }
 
-  void Template::deoverflow(TH1D* hh) {
-    const int nb = hh->GetNbinsX();
-    const double l  = hh->GetBinContent(nb);
-    const double le = hh->GetBinError  (nb);
-    const double o  = hh->GetBinContent(nb+1);
-    const double oe = hh->GetBinError  (nb+1);
-    hh->SetBinContent(nb, l + o);
-    hh->SetBinError  (nb, sqrt(le*le + oe*oe));
-    hh->SetBinContent(nb+1, 0);
-    hh->SetBinError  (nb+1, 0);
-  }
-
   TH1D* Template::finalize_binning(TH1D* h) {
     std::vector<double> bins = binning();
     TH1D* hh = (TH1D*)h->Rebin(bins.size()-1, TString::Format("%s_rebinned", h->GetName()), &bins[0]);
-    deoverflow(hh);
+    jmt::deoverflow(hh);
     return hh;
   }
 
@@ -77,7 +66,7 @@ namespace mfv {
   }
 
   void Template::finalize_template_in_place(TH1D* h) {
-    deoverflow(h);
+    jmt::deoverflow(h);
     h->Scale(1./h->Integral());
   }
 
