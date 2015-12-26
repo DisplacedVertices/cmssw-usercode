@@ -1,3 +1,4 @@
+#include <cassert>
 #include <memory>
 template <typename T> using uptr = std::unique_ptr<T>;
 #include "TCanvas.h"
@@ -10,7 +11,7 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "TRandom3.h"
 #include "TStyle.h"
 #include "TVector2.h"
-//#include "OptionParser.h"
+#include "ConfigFromEnv.h"
 #include "ROOTTools.h"
 #include "Utility.h"
 
@@ -18,7 +19,8 @@ int inst;
 int seed;
 double n1v;
 double n2v;
-int ntrue;
+long ntrue_1v;
+long ntrue_2v;
 double phi_a;
 double phi_b;
 double clear_mu;
@@ -86,7 +88,7 @@ struct VertexPair {
   double sig() const { return first.sig(second); }
 };
 
-double func_rho(double* x, double* p) {
+double func_rho(double* x, double*) {
   const long double rho(fabs(x[0]));
   long double f;
   if (rho < 0.012)
@@ -98,7 +100,7 @@ double func_rho(double* x, double* p) {
   return double(f);
 }
 
-double func_dphi(double* x, double* p) {
+double func_dphi(double* x, double*) {
   return phi_a * pow(fabs(x[0]), phi_b);
 }
 
@@ -140,18 +142,19 @@ TH1D* book_2v(const char* name) {
   return new TH1D(name, "", nbins_2v, bins_2v);
 }
 
-int main(int argc, char** argv) {
-  inst = 0;
-  seed = 12919135 + inst;
-  n1v = 181076;
-  n2v = 251;
-  ntrue = 10000000;
-  
-  phi_a = 1;
-  phi_b = 4;
+int main(int, char**) {
+  jmt::ConfigFromEnv env("sm");
 
-  clear_mu  = 0.0295;
-  clear_sig = 0.0110;
+  inst = env.get_int("inst", 0);
+  seed = env.get_int("seed", 12919135 + inst);
+  n1v = env.get_double("n1v", 181076);
+  n2v = env.get_double("n2v", 251);
+  ntrue_1v = env.get_long("ntrue_1v", 10000000000L);
+  ntrue_2v = env.get_long("ntrue_2v", 100000000L);
+  phi_a = env.get_double("phi_a", 1);
+  phi_b = env.get_double("phi_b", 4);
+  clear_mu  = env.get_double("clear_mu",  0.0295);
+  clear_sig = env.get_double("clear_sig", 0.0110);
 
   /////////////////////////////////////////////
 
@@ -179,11 +182,12 @@ int main(int argc, char** argv) {
   /////
   
   uptr<TCanvas> c(new TCanvas("c", "", 1972, 1000));
+  TVirtualPad* pd = 0;
   c->Print("statmodel.pdf[");
   auto p    = [&c] () { c->cd(); c->Print("statmodel.pdf"); };
-  auto lp   = [&c] () { c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogy(0); };
-  auto lxp  = [&c] () { c->SetLogx(1); c->Print("statmodel.pdf"); c->SetLogx(0); };
-  auto lxyp = [&c] () { c->SetLogx(1); c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogx(0); c->SetLogy(0); };
+  //auto lp   = [&c] () { c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogy(0); };
+  //auto lxp  = [&c] () { c->SetLogx(1); c->Print("statmodel.pdf"); c->SetLogx(0); };
+  //auto lxyp = [&c] () { c->SetLogx(1); c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogx(0); c->SetLogy(0); };
 
   ////
 
@@ -210,21 +214,21 @@ int main(int argc, char** argv) {
   uptr<TH1D> h_true_2v_dphi(new TH1D("h_true_2v_dphi", "", 10, 0, M_PI));
 
   printf("1v true: ");
-  for (int i = 0; i < ntrue; ++i) {
-    if (i % (ntrue/5) == 0) {
-      printf("%i ", i);
+  for (long i = 0; i < ntrue_1v; ++i) {
+    if (i % (ntrue_1v/10) == 0) {
+      printf(".");
       fflush(stdout);
     }
     Vertex v = throw_1v();
     h_true_1v_rho->Fill(v.rho());
     h_true_1v_phi->Fill(v.phi());
   }
-  printf("%i\n", ntrue);
+  printf(" %li\n", ntrue_1v);
 
   printf("2v true: ");
-  for (int i = 0; i < ntrue; ++i) {
-    if (i % (ntrue/5) == 0) {
-      printf("%i ", i);
+  for (long i = 0; i < ntrue_2v; ++i) {
+    if (i % (ntrue_2v/10) == 0) {
+      printf(".");
       fflush(stdout);
     }
     VertexPair vp = throw_2v();
@@ -235,15 +239,18 @@ int main(int argc, char** argv) {
     h_true_2v_dvv->Fill(vp.rho());
     h_true_2v_dphi->Fill(fabs(vp.phi()));
   }
-  printf("%i\n", ntrue);
+  printf(" %li\n", ntrue_2v);
 
-  jmt::deoverflow(h_true_1v_rho.get());
+  assert(h_true_1v_rho->GetBinContent(h_true_1v_rho->GetNbinsX()+1) < 1e-12);
+  //jmt::deoverflow(h_true_1v_rho.get());
   jmt::deoverflow(h_true_2v_dvv.get());
 
   uptr<TH1D> h_true_1v_rho_unzoom    ((TH1D*)h_true_1v_rho->Clone("h_true_1v_rho_unzoom"));
   uptr<TH1D> h_true_1v_rho_norm      ((TH1D*)h_true_1v_rho->Clone("h_true_1v_rho_norm"));
+  uptr<TH1D> h_true_1v_rho_norm_one  ((TH1D*)h_true_1v_rho->Clone("h_true_1v_rho_norm_one"));
   uptr<TH1D> h_true_1v_rho_norm_width((TH1D*)h_true_1v_rho->Clone("h_true_1v_rho_norm_width"));
   h_true_1v_rho_norm      ->Scale(n1v/h_true_1v_rho->Integral());
+  h_true_1v_rho_norm_one  ->Scale( 1./h_true_1v_rho->Integral());
   h_true_1v_rho_norm_width->Scale(n1v/h_true_1v_rho->Integral(), "width");
 
   printf("1v err/bin check:\n");
@@ -272,6 +279,32 @@ int main(int argc, char** argv) {
   h_true_1v_rho_norm_width->SetTitle(TString::Format("true 1v, scaled to %.1f events, bin width;#rho (cm);events/cm", n1v));
   h_true_1v_rho_norm_width->GetXaxis()->SetRangeUser(0,0.4);
   h_true_1v_rho_norm_width->Draw("histe");
+  p();
+  c->Clear();
+
+  uptr<TH1D> h_true_1v_rho_integ     (book_1v("h_true_1v_rho_integ"));
+  uptr<TH1D> h_true_1v_rho_integ_diff(book_1v("h_true_1v_rho_integ_diff"));
+
+  h_true_1v_rho_integ->SetTitle("integral of fcn;#rho (cm);fraction");
+  h_true_1v_rho_integ_diff->SetTitle("difference in integral and thrown hist;#rho (cm);abs. fraction");
+  
+  for (int i = 0; i < nbins_1v; ++i)
+    h_true_1v_rho_integ->SetBinContent(i+1, f_func_rho->Integral(bins_1v[i], bins_1v[i+1]));
+  h_true_1v_rho_integ->Scale(1./h_true_1v_rho_integ->Integral());
+
+  for (int ibin = 1; ibin <= nbins_1v; ++ibin) {
+    const double integ = h_true_1v_rho_integ   ->GetBinContent(ibin);
+    const double hist  = h_true_1v_rho_norm_one->GetBinContent(ibin);
+    const double histe = h_true_1v_rho_norm_one->GetBinError  (ibin);
+    h_true_1v_rho_integ_diff->SetBinContent(ibin, hist - integ);
+    h_true_1v_rho_integ_diff->SetBinError  (ibin, histe);
+  }
+
+  c->Divide(2,1);
+  pd = c->cd(1); pd->SetLogx(); pd->SetLogy();
+  h_true_1v_rho_integ->Draw("hist");
+  c->cd(2)->SetLogx();
+  h_true_1v_rho_integ_diff->Draw("histe");
   p();
   c->Clear();
 
