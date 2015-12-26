@@ -143,13 +143,13 @@ TH1D* book_2v(const char* name) {
 }
 
 int main(int, char**) {
-  jmt::ConfigFromEnv env("sm");
+  jmt::ConfigFromEnv env("sm", true);
 
   inst = env.get_int("inst", 0);
   seed = env.get_int("seed", 12919135 + inst);
   n1v = env.get_double("n1v", 181076);
   n2v = env.get_double("n2v", 251);
-  ntrue_1v = env.get_long("ntrue_1v", 10000000000L);
+  ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
   ntrue_2v = env.get_long("ntrue_2v", 100000000L);
   phi_a = env.get_double("phi_a", 1);
   phi_b = env.get_double("phi_b", 4);
@@ -216,7 +216,7 @@ int main(int, char**) {
   printf("1v true: ");
   for (long i = 0; i < ntrue_1v; ++i) {
     if (i % (ntrue_1v/10) == 0) {
-      printf(".");
+      printf("%i", i/(ntrue_1v/10));
       fflush(stdout);
     }
     Vertex v = throw_1v();
@@ -228,7 +228,7 @@ int main(int, char**) {
   printf("2v true: ");
   for (long i = 0; i < ntrue_2v; ++i) {
     if (i % (ntrue_2v/10) == 0) {
-      printf(".");
+      printf("%i", i/(ntrue_2v/10));
       fflush(stdout);
     }
     VertexPair vp = throw_2v();
@@ -254,7 +254,7 @@ int main(int, char**) {
   h_true_1v_rho_norm_width->Scale(n1v/h_true_1v_rho->Integral(), "width");
 
   printf("1v err/bin check:\n");
-  for (auto* h : {h_true_1v_rho.get(), h_true_1v_rho_norm.get(), h_true_1v_rho_norm_width.get()})
+  for (auto* h : {h_true_1v_rho.get(), h_true_1v_rho_norm.get(), h_true_1v_rho_norm_one.get(), h_true_1v_rho_norm_width.get()})
     printf("%40s: %10.4f/%10.4f = %0.3f\n", h->GetName(), h->GetBinError(nbins_1v), h->GetBinContent(nbins_1v), h->GetBinError(nbins_1v)/h->GetBinContent(nbins_1v));
 
   uptr<TH1D> h_true_2v_rho_unzoom    ((TH1D*)h_true_2v_rho->Clone("h_true_2v_rho_unzoom"));
@@ -286,7 +286,7 @@ int main(int, char**) {
   uptr<TH1D> h_true_1v_rho_integ_diff(book_1v("h_true_1v_rho_integ_diff"));
 
   h_true_1v_rho_integ->SetTitle("integral of fcn;#rho (cm);fraction");
-  h_true_1v_rho_integ_diff->SetTitle("difference in integral and thrown hist;#rho (cm);abs. fraction");
+  h_true_1v_rho_integ_diff->SetTitle("abs. diff. in integral and thrown hist;#rho (cm)");
   
   for (int i = 0; i < nbins_1v; ++i)
     h_true_1v_rho_integ->SetBinContent(i+1, f_func_rho->Integral(bins_1v[i], bins_1v[i+1]));
