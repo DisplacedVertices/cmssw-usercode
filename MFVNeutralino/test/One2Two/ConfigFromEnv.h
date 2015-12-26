@@ -2,6 +2,7 @@
 #define JMTucker_MFVNeutralino_One2Two_ConfigFromEnv
 
 #include <algorithm>
+#include <iostream>
 #include <vector>
 #include <string>
 #include "Utility.h"
@@ -10,10 +11,13 @@
 namespace jmt {
   class ConfigFromEnv {
   public:
-    ConfigFromEnv() : prefix("") {}
-    ConfigFromEnv(const std::string& prefix_) : prefix(prefix_ + "_") {}
+    ConfigFromEnv() : verbose(false), prefix("") {}
+    ConfigFromEnv(const bool verbose_) : verbose(verbose_), prefix("") {}
+    ConfigFromEnv(const std::string& prefix_) : verbose(false), prefix(prefix_ + "_") {}
+    ConfigFromEnv(const std::string& prefix_, const bool verbose_) : verbose(verbose_), prefix(prefix_ + "_") {}
 
   private:
+    const bool verbose;
     const std::string prefix;
 
     std::vector<std::string> tokenize(const std::string& s) const {
@@ -69,6 +73,8 @@ namespace jmt {
       T v;
       if (!__get(s, v))
         vthrow("bad conversion %s%s=%s\n", prefix.c_str(), name, s);
+      if (verbose)
+        std::cout << prefix << name << " = " << v << std::endl;
       return v;
     }
 
@@ -78,6 +84,12 @@ namespace jmt {
       const char* s = env_get(name);
       if (s != 0)
         __get(s, v);
+      if (verbose) {
+        if (v == def)
+          std::cout << prefix << name << " = " << v << " (the default)" << std::endl;
+        else
+          std::cout << prefix << name << " = " << v << " (default = " << def << ")" << std::endl;
+      }
       return v;
     }
 
