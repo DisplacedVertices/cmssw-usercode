@@ -3,7 +3,7 @@ INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
 ROOTLIBS      = $(shell root-config --nonew --glibs)
-CFLAGS        = $(ROOTCFLAGS) -I$(CMSSW_BASE)/src -std=c++0x -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -g
+CFLAGS        = $(ROOTCFLAGS) -I../../../.. -I$(CMSSW_BASE)/src -std=c++0x -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -g
 LIBS          = $(ROOTLIBS) -lMinuit
 
 all: mfvo2t.exe
