@@ -9,6 +9,10 @@ namespace jmt {
     return sscanf(s, "%i", &v) == 1;
   }
 
+  bool parse_long(const char* s, long& v) {
+    return sscanf(s, "%li", &v) == 1;
+  }
+
   bool parse_unsigned(const char* s, unsigned& v) {
     return sscanf(s, "%u", &v) == 1;
   }

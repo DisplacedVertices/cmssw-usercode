@@ -15,6 +15,7 @@ namespace jmt {
   }
 
   bool parse_int(const char* s, int& v);
+  bool parse_long(const char* s, long& v);
   bool parse_unsigned(const char* s, unsigned& v);
   bool parse_bool(const char* s, bool& v);
   bool parse_double(const char* s, double& v);

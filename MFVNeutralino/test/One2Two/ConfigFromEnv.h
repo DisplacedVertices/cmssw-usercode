@@ -85,6 +85,9 @@ namespace jmt {
     int get_int(const char* name)          const { return _get(name, parse_int);      }
     int get_int(const char* name, int def) const { return _get(name, parse_int, def); }
 
+    long get_long(const char* name)           const { return _get(name, parse_long);      }
+    long get_long(const char* name, long def) const { return _get(name, parse_long, def); }
+
     unsigned get_unsigned(const char* name)               const { return _get(name, parse_unsigned);      }
     unsigned get_unsigned(const char* name, unsigned def) const { return _get(name, parse_unsigned, def); }
 
