@@ -5,12 +5,16 @@ class TRandom;
 
 namespace jmt {
   struct interval {
+    interval(double l, double u) : lower(l), upper(u) {}
+    interval(double v, double l, double u) : value(v), lower(l), upper(u) {}
     bool success;
     double value;
     double lower;
     double upper;
     double error() const { return (upper - lower)/2; }
     double in(double v) const { return v >= lower && v <= upper; }
+    void set(double l, double u) { lower = l; upper = u; }
+    void set(double v, double l, double u) { value = v; lower = l; upper = u; }
   };
 
   interval garwood_poisson(const double n, const double alpha=(1-0.6827)/2, const double beta=(1-0.6827)/2);
