@@ -7,6 +7,7 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "TFile.h"
 #include "TGraph.h"
 #include "TH1.h"
+#include "TLatex.h"
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TStyle.h"
@@ -15,12 +16,6 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "ROOTTools.h"
 #include "Utility.h"
 
-int inst;
-int seed;
-double n1v;
-double n2v;
-long ntrue_1v;
-long ntrue_2v;
 double phi_a;
 double phi_b;
 double clear_mu;
@@ -145,12 +140,13 @@ TH1D* book_2v(const char* name) {
 int main(int, char**) {
   jmt::ConfigFromEnv env("sm", true);
 
-  inst = env.get_int("inst", 0);
-  seed = env.get_int("seed", 12919135 + inst);
-  n1v = env.get_double("n1v", 181076);
-  n2v = env.get_double("n2v", 251);
-  ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
-  ntrue_2v = env.get_long("ntrue_2v", 100000000L);
+  const int inst = env.get_int("inst", 0);
+  const int seed = env.get_int("seed", 12919135 + inst);
+  const int ntoys = env.get_int("ntoys", 100);
+  const double n1v = env.get_double("n1v", 181076);
+  const double n2v = env.get_double("n2v", 251);
+  const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
+  const long ntrue_2v = env.get_long("ntrue_2v", 100000000L);
   phi_a = env.get_double("phi_a", 1);
   phi_b = env.get_double("phi_b", 4);
   clear_mu  = env.get_double("clear_mu",  0.0295);
@@ -216,7 +212,7 @@ int main(int, char**) {
   printf("1v true: ");
   for (long i = 0; i < ntrue_1v; ++i) {
     if (i % (ntrue_1v/10) == 0) {
-      printf("%i", i/(ntrue_1v/10));
+      printf("%li", i/(ntrue_1v/10));
       fflush(stdout);
     }
     Vertex v = throw_1v();
@@ -228,7 +224,7 @@ int main(int, char**) {
   printf("2v true: ");
   for (long i = 0; i < ntrue_2v; ++i) {
     if (i % (ntrue_2v/10) == 0) {
-      printf("%i", i/(ntrue_2v/10));
+      printf("%li", i/(ntrue_2v/10));
       fflush(stdout);
     }
     VertexPair vp = throw_2v();
@@ -304,7 +300,8 @@ int main(int, char**) {
   pd = c->cd(1); pd->SetLogx(); pd->SetLogy();
   h_true_1v_rho_integ->Draw("hist");
   c->cd(2)->SetLogx();
-  h_true_1v_rho_integ_diff->Draw("histe");
+  h_true_1v_rho_integ_diff->SetStats(0);
+  h_true_1v_rho_integ_diff->Draw("e");
   p();
   c->Clear();
 
@@ -378,6 +375,139 @@ int main(int, char**) {
   p();
   c->Clear();
 
+  std::vector<uptr<TH1D>> h_1v_rho_bins;
+  std::vector<uptr<TH1D>> h_2v_dvv_bins;
+
+  for (int ibin = 1; ibin <= nbins_1v; ++ibin) {
+    const double tru = h_true_1v_rho_norm->GetBinContent(ibin);
+    double lo = 0, hi = 100;
+    if (tru > 50) {
+      const double fivesig = 5*sqrt(tru);
+      lo = tru - fivesig;
+      hi = tru + fivesig;
+    }
+
+    h_1v_rho_bins.emplace_back(new TH1D(TString::Format("h_1v_rho_bins_%i", ibin), TString::Format("#rho bin %i", ibin), 50, lo, hi));
+  }
+
+  for (int ibin = 1; ibin <= nbins_2v; ++ibin) {
+    const double tru = h_true_2v_dvv_norm->GetBinContent(ibin);
+    double lo = 0, hi = 100;
+    if (tru > 50) {
+      const double fivesig = 5*sqrt(tru);
+      lo = tru - fivesig;
+      hi = tru + fivesig;
+    }
+
+    h_2v_dvv_bins.emplace_back(new TH1D(TString::Format("h_2v_dvv_bins_%i", ibin), TString::Format("d_{VV} bin %i", ibin), 50, lo, hi));
+  }
+
+  printf("toys: ");
+  for (int itoy = 0; itoy < ntoys; ++itoy) {
+
+    uptr<TH1D> h_1v_rho(book_1v("h_1v_rho"));
+    uptr<TH1D> h_1v_phi(new TH1D("h_1v_phi", "", 20, -M_PI, M_PI));
+    uptr<TH1D> h_2v_dvv(book_2v("h_2v_dvv"));
+    uptr<TH1D> h_2v_dphi(new TH1D("h_2v_dphi", "", 10, 0, M_PI));
+
+    const int i1v = gRandom->Poisson(n1v);
+    const int i2v = gRandom->Poisson(n2v);
+
+    for (int i = 0; i < i1v; ++i) {
+      Vertex v = throw_1v();
+      h_1v_rho->Fill(v.rho());
+      h_1v_phi->Fill(v.phi());
+    }
+
+    for (int i = 0; i < i2v; ++i) {
+      VertexPair vp = throw_2v();
+      h_2v_dvv->Fill(vp.rho());
+      h_2v_dphi->Fill(fabs(vp.phi()));
+    }
+
+    for (int ibin = 1; ibin <= nbins_1v; ++ibin)
+      h_1v_rho_bins[ibin-1]->Fill(h_1v_rho->GetBinContent(ibin));
+
+    for (int ibin = 1; ibin <= nbins_2v; ++ibin)
+      h_2v_dvv_bins[ibin-1]->Fill(h_2v_dvv->GetBinContent(ibin));
+
+    if (itoy % (ntoys/10) == 0) {
+      printf("%i", itoy/(ntoys/10));
+      fflush(stdout);
+    }
+  }
+  printf(" %i\n", ntoys);
+
+  TLatex tl;
+  tl.SetTextFont(42);
+
+  uptr<TH1D> h_1v_rho_bins_diffs(book_1v("h_1v_rho_bins_diffs"));
+  uptr<TH1D> h_2v_dvv_bins_diffs(book_2v("h_2v_dvv_bins_diffs"));
+
+  printf("1v bins means:\n");
+  printf("%3s %28s  %28s  %28s\n", "bin", "bin mean", "scaled true", "diff");
+  for (int i_base = 0; i_base < nbins_1v; i_base += 4) {
+    c->Divide(2,2);
+    for (int i = i_base; i < std::min(i_base + 4, nbins_1v); ++i) {
+      c->cd(i%4+1);
+      h_1v_rho_bins[i]->Draw("hist");
+      const double b  = h_1v_rho_bins[i]->GetMean();
+      const double be = h_1v_rho_bins[i]->GetMeanError();
+      const double t  = h_true_1v_rho_norm->GetBinContent(i+1);
+      const double te = h_true_1v_rho_norm->GetBinError  (i+1);
+      const double d  = b - t;
+      const double de = sqrt(be*be + te*te);
+      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, d, de);
+      if (d > 1.5*de)
+        tl.SetTextColor(kRed);
+      else
+        tl.SetTextColor(kBlack);
+      tl.DrawLatexNDC(0.6, 0.4, TString::Format("#splitline{true: %.3f #pm %.3f}{diff: %.3f #pm %.3f}", t, te, d, de));
+      h_1v_rho_bins_diffs->SetBinContent(i+1, d);
+      h_1v_rho_bins_diffs->SetBinError  (i+1, de);
+    }
+    p();
+    c->Clear();
+  }
+
+  printf("2v bins means:\n");
+  printf("%3s %28s %28s\n", "bin", "bin mean", "scaled true");
+  for (int i_base = 0; i_base < nbins_2v; i_base += 4) {
+    c->Divide(2,2);
+    for (int i = i_base; i < std::min(i_base + 4, nbins_2v); ++i) {
+      c->cd(i%4+1);
+      h_2v_dvv_bins[i]->Draw("hist");
+      const double b  = h_2v_dvv_bins[i]->GetMean();
+      const double be = h_2v_dvv_bins[i]->GetMeanError();
+      const double t  = h_true_2v_dvv_norm->GetBinContent(i+1);
+      const double te = h_true_2v_dvv_norm->GetBinError  (i+1);
+      const double d  = b - t;
+      const double de = sqrt(be*be + te*te);
+      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, b-t, sqrt(be*be + te*te));
+      if (d > 1.5*de)
+        tl.SetTextColor(kRed);
+      else
+        tl.SetTextColor(kBlack);
+      tl.DrawLatexNDC(0.6, 0.4, TString::Format("#splitline{true: %.3f #pm %.3f}{diff: %.3f #pm %.3f}", t, te, d, de));
+      h_2v_dvv_bins_diffs->SetBinContent(i+1, d);
+      h_2v_dvv_bins_diffs->SetBinError  (i+1, de);
+    }
+    p();
+    c->Clear();
+  }
+
+  c->Divide(2,1);
+  c->cd(1)->SetLogx();
+  h_1v_rho_bins_diffs->SetStats(0);
+  h_1v_rho_bins_diffs->SetTitle("1v bin-by-bin mean - true;#rho (cm)");
+  h_1v_rho_bins_diffs->Draw("e");
+  c->cd(2);
+  h_2v_dvv_bins_diffs->SetStats(0);
+  h_2v_dvv_bins_diffs->SetTitle("2v bin-by-bin mean - true;d_{VV} (cm)");
+  h_2v_dvv_bins_diffs->Draw("e");
+  p();
+  c->Clear();
+  
   c->Print("statmodel.pdf]");
 
   // making these unique_ptrs causes segfault at end?
