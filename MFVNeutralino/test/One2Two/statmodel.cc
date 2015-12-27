@@ -8,11 +8,13 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "TGraph.h"
 #include "TH1.h"
 #include "TLatex.h"
+#include "TLine.h"
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TStyle.h"
 #include "TVector2.h"
 #include "ConfigFromEnv.h"
+#include "Prob.h"
 #include "ROOTTools.h"
 #include "Utility.h"
 
@@ -99,27 +101,32 @@ double func_dphi(double* x, double*) {
   return phi_a * pow(fabs(x[0]), phi_b);
 }
 
-double get_rho() {
+double throw_rho() {
 #ifdef USE_H_DBV
   return h_func_rho->GetRandom();
 #else
   return f_func_rho->GetRandom();
 #endif
 }
-  
+
+double throw_dphi() {
+  double dphi = f_func_dphi->GetRandom();
+  if (gRandom->Rndm() > 0.5) dphi *= -1;
+  return dphi;
+}
+
 Vertex throw_1v(const double phi=-1e99) {
   if (phi < -1e98)
-    return Vertex(get_rho(), gRandom->Rndm()*2*M_PI - M_PI);
+    return Vertex(throw_rho(), gRandom->Rndm()*2*M_PI - M_PI);
   else
-    return Vertex(get_rho(), phi);
+    return Vertex(throw_rho(), phi);
 }
 
 VertexPair throw_2v() {
   VertexPair p;
   while (1) {
     p.first = throw_1v();
-    double dphi = f_func_dphi->GetRandom();
-    if (gRandom->Rndm() > 0.5) dphi *= -1;
+    const double dphi = throw_dphi();
     p.second = throw_1v(TVector2::Phi_mpi_pi(p.first.phi() + dphi));
     const double pb = 0.5 * TMath::Erf((p.rho() - clear_mu)/clear_sig) + 0.5;
     const double u = gRandom->Rndm();
@@ -142,11 +149,12 @@ int main(int, char**) {
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
-  const int ntoys = env.get_int("ntoys", 100);
+  const int ntoys = env.get_int("ntoys", 500);
   const double n1v = env.get_double("n1v", 181076);
   const double n2v = env.get_double("n2v", 251);
   const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 100000000L);
+  const double oversample = env.get_double("oversample", 1);
   phi_a = env.get_double("phi_a", 1);
   phi_b = env.get_double("phi_b", 4);
   clear_mu  = env.get_double("clear_mu",  0.0295);
@@ -375,61 +383,59 @@ int main(int, char**) {
   p();
   c->Clear();
 
+  uptr<TH1D> h_n1v(new TH1D("h_n1v", "", 20, n1v - 5*sqrt(n1v), n1v + 5*sqrt(n1v)));
   std::vector<uptr<TH1D>> h_1v_rho_bins;
-  std::vector<uptr<TH1D>> h_2v_dvv_bins;
+  std::vector<uptr<TH1D>> h_2v_dvvc_bins;
 
   for (int ibin = 1; ibin <= nbins_1v; ++ibin) {
     const double tru = h_true_1v_rho_norm->GetBinContent(ibin);
-    double lo = 0, hi = 100;
-    if (tru > 50) {
-      const double fivesig = 5*sqrt(tru);
-      lo = tru - fivesig;
-      hi = tru + fivesig;
-    }
-
-    h_1v_rho_bins.emplace_back(new TH1D(TString::Format("h_1v_rho_bins_%i", ibin), TString::Format("#rho bin %i", ibin), 50, lo, hi));
+    const double pb = 2.87e-7;
+    jmt::interval iv = jmt::garwood_poisson(tru, pb, pb);
+    if (iv.lower < 1) iv.lower = 0;
+    h_1v_rho_bins.emplace_back(new TH1D(TString::Format("h_1v_rho_bins_%i", ibin), TString::Format("#rho bin %i", ibin), 25, iv.lower, iv.upper));
   }
 
   for (int ibin = 1; ibin <= nbins_2v; ++ibin) {
     const double tru = h_true_2v_dvv_norm->GetBinContent(ibin);
-    double lo = 0, hi = 100;
-    if (tru > 50) {
-      const double fivesig = 5*sqrt(tru);
-      lo = tru - fivesig;
-      hi = tru + fivesig;
-    }
-
-    h_2v_dvv_bins.emplace_back(new TH1D(TString::Format("h_2v_dvv_bins_%i", ibin), TString::Format("d_{VV} bin %i", ibin), 50, lo, hi));
+    const double pb = 1.35e-3;
+    jmt::interval iv = jmt::garwood_poisson(tru, pb, pb);
+    if (iv.lower < 1) iv.lower = 0;
+    h_2v_dvvc_bins.emplace_back(new TH1D(TString::Format("h_2v_dvvc_bins_%i", ibin), TString::Format("d_{VV}^{C} bin %i", ibin), 200, iv.lower, iv.upper));
   }
-
+    
   printf("toys: ");
   for (int itoy = 0; itoy < ntoys; ++itoy) {
-
+    // make the toy dataset
     uptr<TH1D> h_1v_rho(book_1v("h_1v_rho"));
-    uptr<TH1D> h_1v_phi(new TH1D("h_1v_phi", "", 20, -M_PI, M_PI));
-    uptr<TH1D> h_2v_dvv(book_2v("h_2v_dvv"));
-    uptr<TH1D> h_2v_dphi(new TH1D("h_2v_dphi", "", 10, 0, M_PI));
-
     const int i1v = gRandom->Poisson(n1v);
-    const int i2v = gRandom->Poisson(n2v);
+    h_n1v->Fill(i1v);
 
     for (int i = 0; i < i1v; ++i) {
       Vertex v = throw_1v();
       h_1v_rho->Fill(v.rho());
-      h_1v_phi->Fill(v.phi());
-    }
-
-    for (int i = 0; i < i2v; ++i) {
-      VertexPair vp = throw_2v();
-      h_2v_dvv->Fill(vp.rho());
-      h_2v_dphi->Fill(fabs(vp.phi()));
     }
 
     for (int ibin = 1; ibin <= nbins_1v; ++ibin)
       h_1v_rho_bins[ibin-1]->Fill(h_1v_rho->GetBinContent(ibin));
 
+    // construct dvvc from it
+    uptr<TH1D> h_2v_dvvc(book_2v("h_2v_dvvc"));
+
+    for (int i = 0, ie = int(i1v * oversample); i < ie; ++i) {
+      const double rho0 = h_1v_rho->GetRandom();
+      const double rho1 = h_1v_rho->GetRandom();
+      const double dphi = throw_dphi();
+      const double dvvc = sqrt(rho0*rho0 + rho1*rho1 - 2*rho0*rho1*cos(dphi));
+
+      const double w = std::max(1e-12, 0.5*TMath::Erf((dvvc - clear_mu)/clear_sig) + 0.5);
+      h_2v_dvvc->Fill(dvvc, w);
+    }
+
+    jmt::deoverflow(h_2v_dvvc.get());
+    h_2v_dvvc->Scale(n2v/h_2v_dvvc->Integral());
+    
     for (int ibin = 1; ibin <= nbins_2v; ++ibin)
-      h_2v_dvv_bins[ibin-1]->Fill(h_2v_dvv->GetBinContent(ibin));
+      h_2v_dvvc_bins[ibin-1]->Fill(h_2v_dvvc->GetBinContent(ibin));
 
     if (itoy % (ntoys/10) == 0) {
       printf("%i", itoy/(ntoys/10));
@@ -438,11 +444,22 @@ int main(int, char**) {
   }
   printf(" %i\n", ntoys);
 
+  h_n1v->Draw("hist");
+  p();
+  c->Clear();
+
   TLatex tl;
   tl.SetTextFont(42);
 
-  uptr<TH1D> h_1v_rho_bins_diffs(book_1v("h_1v_rho_bins_diffs"));
-  uptr<TH1D> h_2v_dvv_bins_diffs(book_2v("h_2v_dvv_bins_diffs"));
+  uptr<TH1D> h_1v_rho_bins_means      (book_1v("h_1v_rho_bins_means"));
+  uptr<TH1D> h_1v_rho_bins_rmses      (book_1v("h_1v_rho_bins_rmses"));
+  uptr<TH1D> h_1v_rho_bins_diffs      (book_1v("h_1v_rho_bins_diffs"));
+  uptr<TH1D> h_1v_rho_bins_diffs_norm (book_1v("h_1v_rho_bins_diffs_norm"));
+
+  uptr<TH1D> h_2v_dvvc_bins_means     (book_2v("h_2v_dvvc_bins_means"));
+  uptr<TH1D> h_2v_dvvc_bins_rmses     (book_2v("h_2v_dvvc_bins_rmses"));
+  uptr<TH1D> h_2v_dvvc_bins_diffs     (book_2v("h_2v_dvvc_bins_diffs"));
+  uptr<TH1D> h_2v_dvvc_bins_diffs_norm(book_2v("h_2v_dvvc_bins_diffs_norm"));
 
   printf("1v bins means:\n");
   printf("%3s %28s  %28s  %28s\n", "bin", "bin mean", "scaled true", "diff");
@@ -453,61 +470,123 @@ int main(int, char**) {
       h_1v_rho_bins[i]->Draw("hist");
       const double b  = h_1v_rho_bins[i]->GetMean();
       const double be = h_1v_rho_bins[i]->GetMeanError();
+      const double r  = h_1v_rho_bins[i]->GetRMS();
+      const double re = h_1v_rho_bins[i]->GetRMSError();
       const double t  = h_true_1v_rho_norm->GetBinContent(i+1);
       const double te = h_true_1v_rho_norm->GetBinError  (i+1);
       const double d  = b - t;
       const double de = sqrt(be*be + te*te);
       printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, d, de);
-      if (d > 1.5*de)
+      if (d > 2*de)
         tl.SetTextColor(kRed);
+      else if (d > de)
+        tl.SetTextColor(kOrange+2);
       else
         tl.SetTextColor(kBlack);
       tl.DrawLatexNDC(0.6, 0.4, TString::Format("#splitline{true: %.3f #pm %.3f}{diff: %.3f #pm %.3f}", t, te, d, de));
+
+      h_1v_rho_bins_means->SetBinContent(i+1, b);
+      h_1v_rho_bins_means->SetBinError  (i+1, be);
+
+      h_1v_rho_bins_rmses->SetBinContent(i+1, r);
+      h_1v_rho_bins_rmses->SetBinError  (i+1, re);
+
       h_1v_rho_bins_diffs->SetBinContent(i+1, d);
       h_1v_rho_bins_diffs->SetBinError  (i+1, de);
+
+      h_1v_rho_bins_diffs_norm->SetBinContent(i+1, d/t);
+      h_1v_rho_bins_diffs_norm->SetBinError  (i+1, sqrt(be*be/b/b + te*te/t/t)); // JMTBAD
     }
     p();
     c->Clear();
   }
 
   printf("2v bins means:\n");
-  printf("%3s %28s %28s\n", "bin", "bin mean", "scaled true");
+  printf("%3s %28s  %28s  %28s  %28s\n", "bin", "bin mean", "scaled true", "diff", "rms");
   for (int i_base = 0; i_base < nbins_2v; i_base += 4) {
     c->Divide(2,2);
     for (int i = i_base; i < std::min(i_base + 4, nbins_2v); ++i) {
       c->cd(i%4+1);
-      h_2v_dvv_bins[i]->Draw("hist");
-      const double b  = h_2v_dvv_bins[i]->GetMean();
-      const double be = h_2v_dvv_bins[i]->GetMeanError();
+      h_2v_dvvc_bins[i]->Draw("hist");
+      const double b  = h_2v_dvvc_bins[i]->GetMean();
+      const double be = h_2v_dvvc_bins[i]->GetMeanError();
+      const double r  = h_2v_dvvc_bins[i]->GetRMS();
+      const double re = h_2v_dvvc_bins[i]->GetRMSError();
       const double t  = h_true_2v_dvv_norm->GetBinContent(i+1);
       const double te = h_true_2v_dvv_norm->GetBinError  (i+1);
       const double d  = b - t;
       const double de = sqrt(be*be + te*te);
-      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, b-t, sqrt(be*be + te*te));
-      if (d > 1.5*de)
+      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, b-t, sqrt(be*be + te*te), r, re);
+      if (d > 2*de)
         tl.SetTextColor(kRed);
+      else if (d > de)
+        tl.SetTextColor(kOrange+2);
       else
         tl.SetTextColor(kBlack);
       tl.DrawLatexNDC(0.6, 0.4, TString::Format("#splitline{true: %.3f #pm %.3f}{diff: %.3f #pm %.3f}", t, te, d, de));
-      h_2v_dvv_bins_diffs->SetBinContent(i+1, d);
-      h_2v_dvv_bins_diffs->SetBinError  (i+1, de);
+
+      h_2v_dvvc_bins_means->SetBinContent(i+1, b);
+      h_2v_dvvc_bins_means->SetBinError  (i+1, be);
+
+      h_2v_dvvc_bins_rmses->SetBinContent(i+1, r);
+      h_2v_dvvc_bins_rmses->SetBinError  (i+1, re);
+
+      h_2v_dvvc_bins_diffs->SetBinContent(i+1, d);
+      h_2v_dvvc_bins_diffs->SetBinError  (i+1, de);
+
+      h_2v_dvvc_bins_diffs_norm->SetBinContent(i+1, d/t);
+      h_2v_dvvc_bins_diffs_norm->SetBinError  (i+1, sqrt(be*be/b/b + te*te/t/t)); // JMTBAD
     }
     p();
     c->Clear();
   }
 
+  TLine l1;
+  l1.SetLineStyle(2);
+
   c->Divide(2,1);
-  c->cd(1)->SetLogx();
+  pd = c->cd(1); pd->SetLogx(); pd->SetLogy();
+  h_1v_rho_bins_means->SetStats(0);
+  h_1v_rho_bins_means->SetTitle("1v bin-by-bin mean;#rho (cm)");
+  h_1v_rho_bins_means->Draw("histe");
+  c->cd(2)->SetLogx();
+  //h_1v_rho_bins_rmses->SetStats(0);
+  //h_1v_rho_bins_rmses->SetTitle("1v bin-by-bin rms;#rho (cm)");
+  //h_1v_rho_bins_rmses->Draw("histe");
   h_1v_rho_bins_diffs->SetStats(0);
-  h_1v_rho_bins_diffs->SetTitle("1v bin-by-bin mean - true;#rho (cm)");
+  h_1v_rho_bins_diffs->SetTitle("1v bin-by-bin mean/true - 1;#rho (cm)");
   h_1v_rho_bins_diffs->Draw("e");
-  c->cd(2);
-  h_2v_dvv_bins_diffs->SetStats(0);
-  h_2v_dvv_bins_diffs->SetTitle("2v bin-by-bin mean - true;d_{VV} (cm)");
-  h_2v_dvv_bins_diffs->Draw("e");
+  l1.DrawLine(0,0,2.5,0);
   p();
   c->Clear();
-  
+
+  c->Divide(2,1);
+  c->cd(1)->SetLogy();
+  h_2v_dvvc_bins_means->SetStats(0);
+  h_2v_dvvc_bins_means->SetTitle("2v bin-by-bin mean;d_{VV}^{C} (cm)");
+  h_2v_dvvc_bins_means->Draw("histe");
+  c->cd(2);
+  //h_2v_dvvc_bins_rmses->GetYaxis()->SetRangeUser(0,0.6);
+  h_2v_dvvc_bins_rmses->SetStats(0);
+  h_2v_dvvc_bins_rmses->SetTitle("2v bin-by-bin rms;d_{VV}^{C} (cm)");
+  h_2v_dvvc_bins_rmses->Draw("histe");
+  p();
+  c->Clear();
+
+  c->Divide(2,1);
+  c->cd(1);
+  h_2v_dvvc_bins_diffs->SetStats(0);
+  h_2v_dvvc_bins_diffs->SetTitle("2v bin-by-bin mean - true;d_{VV} (cm)");
+  h_2v_dvvc_bins_diffs->Draw("e");
+  l1.DrawLine(0,0,0.2,0);
+  c->cd(2);
+  h_2v_dvvc_bins_diffs_norm->SetStats(0);
+  h_2v_dvvc_bins_diffs_norm->SetTitle("2v bin-by-bin mean/true - 1;d_{VV} (cm)");
+  h_2v_dvvc_bins_diffs_norm->Draw("e");
+  l1.DrawLine(0,0,0.2,0);
+  p();
+  c->Clear();
+
   c->Print("statmodel.pdf]");
 
   // making these unique_ptrs causes segfault at end?
