@@ -150,8 +150,11 @@ int main(int, char**) {
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
   const int ntoys = env.get_int("ntoys", 500);
+  const std::string out_fn = env.get_string("out_fn", "statmodel.root");
   const double n1v = env.get_double("n1v", 181076);
   const double n2v = env.get_double("n2v", 251);
+  const std::string true_fn = env.get_string("true_fn", "");
+  const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 100000000L);
   const double oversample = env.get_double("oversample", 1);
@@ -164,8 +167,11 @@ int main(int, char**) {
 
   jmt::set_root_style();
   TH1::SetDefaultSumw2();
+  TH1::AddDirectory(0);
 
   gRandom->SetSeed(seed);
+
+  uptr<TFile> out_f(new TFile(out_fn.c_str(), "recreate"));
 
 #ifdef USE_H_DBV
   uptr<TFile> fh(new TFile("h.root"));
@@ -217,33 +223,50 @@ int main(int, char**) {
   uptr<TH1D> h_true_2v_dvv(book_2v("h_true_2v_dvv"));
   uptr<TH1D> h_true_2v_dphi(new TH1D("h_true_2v_dphi", "", 10, 0, M_PI));
 
-  printf("1v true: ");
-  for (long i = 0; i < ntrue_1v; ++i) {
-    if (i % (ntrue_1v/10) == 0) {
-      printf("%li", i/(ntrue_1v/10));
-      fflush(stdout);
-    }
-    Vertex v = throw_1v();
-    h_true_1v_rho->Fill(v.rho());
-    h_true_1v_phi->Fill(v.phi());
-  }
-  printf(" %li\n", ntrue_1v);
+  if (true_from_file) {
+    gRandom->ReadRandom(true_fn.c_str());
 
-  printf("2v true: ");
-  for (long i = 0; i < ntrue_2v; ++i) {
-    if (i % (ntrue_2v/10) == 0) {
-      printf("%li", i/(ntrue_2v/10));
-      fflush(stdout);
+    printf("reading 1 and 2v true hists from file\n");
+    uptr<TFile> true_f(new TFile(true_fn.c_str()));
+    if (!true_f->IsOpen()) {
+      fprintf(stderr, "can't open %s\n", true_fn.c_str());
+      return 1;
     }
-    VertexPair vp = throw_2v();
-    h_true_2v_rho->Fill(vp.first .rho());
-    h_true_2v_rho->Fill(vp.second.rho());
-    h_true_2v_phi->Fill(vp.first .phi());
-    h_true_2v_phi->Fill(vp.second.phi());
-    h_true_2v_dvv->Fill(vp.rho());
-    h_true_2v_dphi->Fill(fabs(vp.phi()));
+
+    for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dphi.get()})
+      h->Add((TH1D*)true_f->Get(h->GetName()));
   }
-  printf(" %li\n", ntrue_2v);
+  else {
+    printf("1v true: ");
+    for (long i = 0; i < ntrue_1v; ++i) {
+      if (i % (ntrue_1v/10) == 0) {
+        printf("%li", i/(ntrue_1v/10));
+        fflush(stdout);
+      }
+      Vertex v = throw_1v();
+      h_true_1v_rho->Fill(v.rho());
+      h_true_1v_phi->Fill(v.phi());
+    }
+    printf(" %li\n", ntrue_1v);
+
+    printf("2v true: ");
+    for (long i = 0; i < ntrue_2v; ++i) {
+      if (i % (ntrue_2v/10) == 0) {
+        printf("%li", i/(ntrue_2v/10));
+        fflush(stdout);
+      }
+      VertexPair vp = throw_2v();
+      h_true_2v_rho->Fill(vp.first .rho());
+      h_true_2v_rho->Fill(vp.second.rho());
+      h_true_2v_phi->Fill(vp.first .phi());
+      h_true_2v_phi->Fill(vp.second.phi());
+      h_true_2v_dvv->Fill(vp.rho());
+      h_true_2v_dphi->Fill(fabs(vp.phi()));
+    }
+    printf(" %li\n", ntrue_2v);
+
+    gRandom->Write();
+  }
 
   assert(h_true_1v_rho->GetBinContent(h_true_1v_rho->GetNbinsX()+1) < 1e-12);
   //jmt::deoverflow(h_true_1v_rho.get());
@@ -588,6 +611,10 @@ int main(int, char**) {
   c->Clear();
 
   c->Print("statmodel.pdf]");
+
+  out_f->cd();
+  for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dphi.get()})
+    h->Write();
 
   // making these unique_ptrs causes segfault at end?
   delete h_func_rho;
