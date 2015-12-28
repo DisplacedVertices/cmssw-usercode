@@ -460,7 +460,7 @@ int main(int, char**) {
     for (int ibin = 1; ibin <= nbins_2v; ++ibin)
       h_2v_dvvc_bins[ibin-1]->Fill(h_2v_dvvc->GetBinContent(ibin));
 
-    if (itoy % (ntoys/10) == 0) {
+    if (ntoys > 10 && itoy % (ntoys/10) == 0) {
       printf("%i", itoy/(ntoys/10));
       fflush(stdout);
     }
