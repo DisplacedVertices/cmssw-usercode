@@ -476,11 +476,13 @@ int main(int, char**) {
 
   uptr<TH1D> h_1v_rho_bins_means      (book_1v("h_1v_rho_bins_means"));
   uptr<TH1D> h_1v_rho_bins_rmses      (book_1v("h_1v_rho_bins_rmses"));
+  uptr<TH1D> h_1v_rho_bins_rmses_norm (book_1v("h_1v_rho_bins_rmses_norm"));
   uptr<TH1D> h_1v_rho_bins_diffs      (book_1v("h_1v_rho_bins_diffs"));
   uptr<TH1D> h_1v_rho_bins_diffs_norm (book_1v("h_1v_rho_bins_diffs_norm"));
 
   uptr<TH1D> h_2v_dvvc_bins_means     (book_2v("h_2v_dvvc_bins_means"));
   uptr<TH1D> h_2v_dvvc_bins_rmses     (book_2v("h_2v_dvvc_bins_rmses"));
+  uptr<TH1D> h_2v_dvvc_bins_rmses_norm(book_2v("h_2v_dvvc_bins_rmses_norm"));
   uptr<TH1D> h_2v_dvvc_bins_diffs     (book_2v("h_2v_dvvc_bins_diffs"));
   uptr<TH1D> h_2v_dvvc_bins_diffs_norm(book_2v("h_2v_dvvc_bins_diffs_norm"));
 
@@ -513,6 +515,9 @@ int main(int, char**) {
 
       h_1v_rho_bins_rmses->SetBinContent(i+1, r);
       h_1v_rho_bins_rmses->SetBinError  (i+1, re);
+
+      h_1v_rho_bins_rmses_norm->SetBinContent(i+1, r/t);
+      h_1v_rho_bins_rmses_norm->SetBinError  (i+1, sqrt(re*re/r/r + te*te/t/t)); // JMTBAD
 
       h_1v_rho_bins_diffs->SetBinContent(i+1, d);
       h_1v_rho_bins_diffs->SetBinError  (i+1, de);
@@ -554,6 +559,9 @@ int main(int, char**) {
       h_2v_dvvc_bins_rmses->SetBinContent(i+1, r);
       h_2v_dvvc_bins_rmses->SetBinError  (i+1, re);
 
+      h_2v_dvvc_bins_rmses_norm->SetBinContent(i+1, r/t);
+      h_2v_dvvc_bins_rmses_norm->SetBinError  (i+1, sqrt(re*re/r/r + te*te/t/t)); // JMTBAD
+
       h_2v_dvvc_bins_diffs->SetBinContent(i+1, d);
       h_2v_dvvc_bins_diffs->SetBinError  (i+1, de);
 
@@ -573,9 +581,6 @@ int main(int, char**) {
   h_1v_rho_bins_means->SetTitle("1v bin-by-bin mean;#rho (cm)");
   h_1v_rho_bins_means->Draw("histe");
   c->cd(2)->SetLogx();
-  //h_1v_rho_bins_rmses->SetStats(0);
-  //h_1v_rho_bins_rmses->SetTitle("1v bin-by-bin rms;#rho (cm)");
-  //h_1v_rho_bins_rmses->Draw("histe");
   h_1v_rho_bins_diffs->SetStats(0);
   h_1v_rho_bins_diffs->SetTitle("1v bin-by-bin mean/true - 1;#rho (cm)");
   h_1v_rho_bins_diffs->Draw("e");
@@ -593,6 +598,18 @@ int main(int, char**) {
   h_2v_dvvc_bins_rmses->SetStats(0);
   h_2v_dvvc_bins_rmses->SetTitle("2v bin-by-bin rms;d_{VV}^{C} (cm)");
   h_2v_dvvc_bins_rmses->Draw("histe");
+  p();
+  c->Clear();
+
+  c->Divide(2,1);
+  c->cd(1);
+  h_2v_dvvc_bins_rmses->SetStats(0);
+  h_2v_dvvc_bins_rmses->SetTitle("2v bin-by-bin rms;d_{VV}^{C} (cm)");
+  h_2v_dvvc_bins_rmses->Draw("histe");
+  c->cd(2);
+  h_2v_dvvc_bins_rmses_norm->SetStats(0);
+  h_2v_dvvc_bins_rmses_norm->SetTitle("2v bin-by-bin rms/true;d_{VV}^{C} (cm)");
+  h_2v_dvvc_bins_rmses_norm->Draw("histe");
   p();
   c->Clear();
 
