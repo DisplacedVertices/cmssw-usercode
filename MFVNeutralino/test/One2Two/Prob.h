@@ -5,6 +5,7 @@ class TRandom;
 
 namespace jmt {
   struct interval {
+    interval() {}
     interval(double l, double u) : lower(l), upper(u) {}
     interval(double v, double l, double u) : value(v), lower(l), upper(u) {}
     bool success;
