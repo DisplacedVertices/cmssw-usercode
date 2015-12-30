@@ -208,7 +208,7 @@ struct MFVVertexAux {
     assert(npx >= 0 && nst >= 0 && nbehind >= 0 && nlost >= 0);
     if (npx > 7) npx = 7;
     if (nst > 31) nst = 31;
-    if (nbehind > 15) nbehind = 7;
+    if (nbehind > 15) nbehind = 15;
     if (nlost > 15) nlost = 15;
     return (nlost << 12) | (nbehind << 8) | (nst << 3) | npx;
   }
