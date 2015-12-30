@@ -12,8 +12,8 @@ struct MFVVertexAux {
   typedef unsigned int uint;
 
   MFVVertexAux() {
-    which = ndof_ = 0;
-    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2ddist = bs2derr = pv2ddist = pv2derr = pv3ddist = pv3derr = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
+    which = ndof_ = jetpairdrmin_ = jetpairdrmax_ = jetpairdravg_ = jetpairdrrms_ = costhtkmomvtxdispmin_ = costhtkmomvtxdispmax_ = costhtkmomvtxdispavg_ = costhtkmomvtxdisprms_ = costhjetmomvtxdispmin_ = costhjetmomvtxdispmax_ = costhjetmomvtxdispavg_ = costhjetmomvtxdisprms_ = 0;
+    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2ddist = bs2derr = pv2ddist = pv2derr = pv3ddist = pv3derr = 0;
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i)
@@ -57,25 +57,78 @@ struct MFVVertexAux {
     return v.Beta() * v.Gamma();
   }
 
-  float jetpairdetamin;
-  float jetpairdetamax;
-  float jetpairdetaavg;
-  float jetpairdetarms;
+  uchar jetpairdetamin_;
+  uchar jetpairdetamax_;
+  uchar jetpairdetaavg_;
+  uchar jetpairdetarms_;
 
-  float jetpairdrmin;
-  float jetpairdrmax;
-  float jetpairdravg;
-  float jetpairdrrms;
+  uchar jetpairdrmin_;
+  uchar jetpairdrmax_;
+  uchar jetpairdravg_;
+  uchar jetpairdrrms_;
 
-  float costhtkmomvtxdispmin;
-  float costhtkmomvtxdispmax;
-  float costhtkmomvtxdispavg;
-  float costhtkmomvtxdisprms;
+  uchar costhtkmomvtxdispmin_;
+  uchar costhtkmomvtxdispmax_;
+  uchar costhtkmomvtxdispavg_;
+  uchar costhtkmomvtxdisprms_;
 
-  float costhjetmomvtxdispmin;
-  float costhjetmomvtxdispmax;
-  float costhjetmomvtxdispavg;
-  float costhjetmomvtxdisprms;
+  uchar costhjetmomvtxdispmin_;
+  uchar costhjetmomvtxdispmax_;
+  uchar costhjetmomvtxdispavg_;
+  uchar costhjetmomvtxdisprms_;
+
+  static uchar bin(float x, float min, float max) {
+    if (x <= min)
+      return 0;
+    else if (x >= max)
+      return 255;
+    const float r = (x - min)/(max - min);
+    if (r >= 1)
+      return 255;
+    return r * 255;
+  }
+
+  static float unbin(uchar x, float min, float max) {
+    return x/255.f * (max - min) + min;
+  }
+
+  // max deta ~= 5, max dr = sqrt(5**2 + pi**2) ~= 6 -> precision on deta/dr = 6/255 = 0.024
+  float jetpairdetamin() const { return unbin(jetpairdetamin_, 0, 6); }
+  float jetpairdetamax() const { return unbin(jetpairdetamax_, 0, 6); }
+  float jetpairdetaavg() const { return unbin(jetpairdetaavg_, 0, 6); }
+  float jetpairdetarms() const { return unbin(jetpairdetarms_, 0, 6); }
+  void jetpairdetamin(float jetpairdetamin) { jetpairdetamin_ = bin(jetpairdetamin, 0, 6); }
+  void jetpairdetamax(float jetpairdetamax) { jetpairdetamax_ = bin(jetpairdetamax, 0, 6); }
+  void jetpairdetaavg(float jetpairdetaavg) { jetpairdetaavg_ = bin(jetpairdetaavg, 0, 6); }
+  void jetpairdetarms(float jetpairdetarms) { jetpairdetarms_ = bin(jetpairdetarms, 0, 6); }
+
+  float jetpairdrmin() const { return unbin(jetpairdrmin_, 0, 6); }
+  float jetpairdrmax() const { return unbin(jetpairdrmax_, 0, 6); }
+  float jetpairdravg() const { return unbin(jetpairdravg_, 0, 6); }
+  float jetpairdrrms() const { return unbin(jetpairdrrms_, 0, 6); }
+  void jetpairdrmin(float jetpairdrmin) { jetpairdrmin_ = bin(jetpairdrmin, 0, 6); }
+  void jetpairdrmax(float jetpairdrmax) { jetpairdrmax_ = bin(jetpairdrmax, 0, 6); }
+  void jetpairdravg(float jetpairdravg) { jetpairdravg_ = bin(jetpairdravg, 0, 6); }
+  void jetpairdrrms(float jetpairdrrms) { jetpairdrrms_ = bin(jetpairdrrms, 0, 6); }
+
+  // precision on costh = 2/256 = 0.0078
+  float costhtkmomvtxdispmin() const { return unbin(costhtkmomvtxdispmin_, -1, 1); }
+  float costhtkmomvtxdispmax() const { return unbin(costhtkmomvtxdispmax_, -1, 1); }
+  float costhtkmomvtxdispavg() const { return unbin(costhtkmomvtxdispavg_, -1, 1); }
+  float costhtkmomvtxdisprms() const { return unbin(costhtkmomvtxdisprms_, -1, 1); }
+  void costhtkmomvtxdispmin(float costhtkmomvtxdispmin) { costhtkmomvtxdispmin_ = bin(costhtkmomvtxdispmin, -1, 1); }
+  void costhtkmomvtxdispmax(float costhtkmomvtxdispmax) { costhtkmomvtxdispmax_ = bin(costhtkmomvtxdispmax, -1, 1); }
+  void costhtkmomvtxdispavg(float costhtkmomvtxdispavg) { costhtkmomvtxdispavg_ = bin(costhtkmomvtxdispavg, -1, 1); }
+  void costhtkmomvtxdisprms(float costhtkmomvtxdisprms) { costhtkmomvtxdisprms_ = bin(costhtkmomvtxdisprms, -1, 1); }
+
+  float costhjetmomvtxdispmin() const { return unbin(costhjetmomvtxdispmin_, -1, 1); }
+  float costhjetmomvtxdispmax() const { return unbin(costhjetmomvtxdispmax_, -1, 1); }
+  float costhjetmomvtxdispavg() const { return unbin(costhjetmomvtxdispavg_, -1, 1); }
+  float costhjetmomvtxdisprms() const { return unbin(costhjetmomvtxdisprms_, -1, 1); }
+  void costhjetmomvtxdispmin(float costhjetmomvtxdispmin) { costhjetmomvtxdispmin_ = bin(costhjetmomvtxdispmin, -1, 1); }
+  void costhjetmomvtxdispmax(float costhjetmomvtxdispmax) { costhjetmomvtxdispmax_ = bin(costhjetmomvtxdispmax, -1, 1); }
+  void costhjetmomvtxdispavg(float costhjetmomvtxdispavg) { costhjetmomvtxdispavg_ = bin(costhjetmomvtxdispavg, -1, 1); }
+  void costhjetmomvtxdisprms(float costhjetmomvtxdisprms) { costhjetmomvtxdisprms_ = bin(costhjetmomvtxdisprms, -1, 1); }
 
   float sig(float val, float err) const {
     return err <= 0 ? 0 : val/err;

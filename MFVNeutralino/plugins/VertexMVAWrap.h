@@ -21,7 +21,7 @@ public:
       vtx.trackdxyerrmin(),
       vtx.trackdzerrmin(),
       vtx.trackquadmassmin(),
-      vtx.costhtkmomvtxdispavg,
+      vtx.costhtkmomvtxdispavg(),
       vtx.mass[2],
       vtx.maxtrackpt(),
       vtx.drmin(),

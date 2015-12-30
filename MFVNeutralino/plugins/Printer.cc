@@ -221,10 +221,10 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("trackpairmass      min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.trackpairmassmin(), v.trackpairmassmax(), v.trackpairmassavg(), v.trackpairmassrms());
       printf("tracktripmass      min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.tracktripmassmin(), v.tracktripmassmax(), v.tracktripmassavg(), v.tracktripmassrms());
       printf("trackquadmass      min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.trackquadmassmin(), v.trackquadmassmax(), v.trackquadmassavg(), v.trackquadmassrms());
-      printf("jetpairdeta        min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.jetpairdetamin, v.jetpairdetamax, v.jetpairdetaavg, v.jetpairdetarms);
-      printf("jetpairdr          min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.jetpairdrmin, v.jetpairdrmax, v.jetpairdravg, v.jetpairdrrms);
-      printf("costhtkmomvtxdisp  min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhtkmomvtxdispmin, v.costhtkmomvtxdispmax, v.costhtkmomvtxdispavg, v.costhtkmomvtxdisprms);
-      printf("costhjetmomvtxdisp min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhjetmomvtxdispmin, v.costhjetmomvtxdispmax, v.costhjetmomvtxdispavg, v.costhjetmomvtxdisprms);
+      printf("jetpairdeta        min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.jetpairdetamin(), v.jetpairdetamax(), v.jetpairdetaavg(), v.jetpairdetarms());
+      printf("jetpairdr          min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.jetpairdrmin(), v.jetpairdrmax(), v.jetpairdravg(), v.jetpairdrrms());
+      printf("costhtkmomvtxdisp  min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhtkmomvtxdispmin(), v.costhtkmomvtxdispmax(), v.costhtkmomvtxdispavg(), v.costhtkmomvtxdisprms());
+      printf("costhjetmomvtxdisp min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhjetmomvtxdispmin(), v.costhjetmomvtxdispmax(), v.costhjetmomvtxdispavg(), v.costhjetmomvtxdisprms());
       printf("gen2d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen2ddist, v.gen2derr, v.gen2dsig());
       printf("gen3d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen3ddist, v.gen3derr, v.gen3dsig());
       printf("bs2d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.bs2ddist, v.bs2derr, v.bs2dsig());

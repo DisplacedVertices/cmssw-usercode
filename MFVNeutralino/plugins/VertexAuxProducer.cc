@@ -208,26 +208,30 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
 
       distrib_calculator jetpairdeta(jetpairdetas[mfv::JByNtracks], std::vector<double>());
-      aux.jetpairdetamin = jetpairdeta.min;
-      aux.jetpairdetamax = jetpairdeta.max;
-      aux.jetpairdetaavg = jetpairdeta.avg;
-      aux.jetpairdetarms = jetpairdeta.rms;
+      aux.jetpairdetamin(jetpairdeta.min);
+      aux.jetpairdetamax(jetpairdeta.max);
+      aux.jetpairdetaavg(jetpairdeta.avg);
+      aux.jetpairdetarms(jetpairdeta.rms);
 
       distrib_calculator jetpairdr(jetpairdrs[mfv::JByNtracks], std::vector<double>());
-      aux.jetpairdrmin = jetpairdr.min;
-      aux.jetpairdrmax = jetpairdr.max;
-      aux.jetpairdravg = jetpairdr.avg;
-      aux.jetpairdrrms = jetpairdr.rms;
+      aux.jetpairdrmin(jetpairdr.min);
+      aux.jetpairdrmax(jetpairdr.max);
+      aux.jetpairdravg(jetpairdr.avg);
+      aux.jetpairdrrms(jetpairdr.rms);
 
       if (aux.njets[mfv::JByNtracks] > 0) {
         distrib_calculator costhjetmomvtxdisp(costhjetmomvtxdisps[mfv::JByNtracks], std::vector<double>());
-        aux.costhjetmomvtxdispmin = costhjetmomvtxdisp.min;
-        aux.costhjetmomvtxdispmax = costhjetmomvtxdisp.max;
-        aux.costhjetmomvtxdispavg = costhjetmomvtxdisp.avg;
-        aux.costhjetmomvtxdisprms = costhjetmomvtxdisp.rms;
+        aux.costhjetmomvtxdispmin(costhjetmomvtxdisp.min);
+        aux.costhjetmomvtxdispmax(costhjetmomvtxdisp.max);
+        aux.costhjetmomvtxdispavg(costhjetmomvtxdisp.avg);
+        aux.costhjetmomvtxdisprms(costhjetmomvtxdisp.rms);
       }
-      else
-        aux.costhjetmomvtxdispmin = aux.costhjetmomvtxdispmax = aux.costhjetmomvtxdispavg = aux.costhjetmomvtxdisprms = -2;
+      else {
+        aux.costhjetmomvtxdispmin(-2);
+        aux.costhjetmomvtxdispmax(-2);
+        aux.costhjetmomvtxdispavg(-2);
+        aux.costhjetmomvtxdisprms(-2);
+      }
     }
 
     for (int i = 0; i < mfv::NMomenta; ++i) {
@@ -310,10 +314,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
 
     distrib_calculator costhtkmomvtxdisp(costhtkmomvtxdisps, std::vector<double>());
-    aux.costhtkmomvtxdispmin = costhtkmomvtxdisp.min;
-    aux.costhtkmomvtxdispmax = costhtkmomvtxdisp.max;
-    aux.costhtkmomvtxdispavg = costhtkmomvtxdisp.avg;
-    aux.costhtkmomvtxdisprms = costhtkmomvtxdisp.rms;
+    aux.costhtkmomvtxdispmin(costhtkmomvtxdisp.min);
+    aux.costhtkmomvtxdispmax(costhtkmomvtxdisp.max);
+    aux.costhtkmomvtxdispavg(costhtkmomvtxdisp.avg);
+    aux.costhtkmomvtxdisprms(costhtkmomvtxdisp.rms);
 
     aux.gen2ddist       = vtx_distances.gen2ddist.value();
     aux.gen2derr        = vtx_distances.gen2ddist.error();
