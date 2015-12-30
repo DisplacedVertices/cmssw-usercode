@@ -74,7 +74,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("covariance matrix: %11.3g %11.3g %11.3g\n", v.covariance(0,0), v.covariance(0,1), v.covariance(0,2));
       printf("                   %11s %11.3g %11.3g\n", "", v.covariance(1,1), v.covariance(1,2));
       printf("                   %11s %11s %11.3g\n", "", "", v.covariance(2,2));
-      printf("chi2/ndf: %11.3g / %11.3g\n", v.chi2(), v.ndof());
+      printf("chi2/ndf: %11.3g = %11.3g / %11.3g\n", v.normalizedChi2(), v.chi2(), v.ndof());
       printf("p4: (%11.3g, %11.3g, %11.3g, %11.3g)\n", v.p4().pt(), v.p4().eta(), v.p4().phi(), v.p4().mass());
       printf("ntracks: %u\n", v.nTracks());
       int itk = 0;
@@ -189,7 +189,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("covariance matrix: %11.3g %11.3g %11.3g\n", v.cxx, v.cxy, v.cxz);
       printf("                   %11s %11.3g %11.3g\n", "", v.cyy, v.cyz);
       printf("                   %11s %11s %11.3g\n", "", "", v.czz);
-      printf("chi2/ndf: %11.3g / %11.3g\n", v.chi2, v.ndof);
+      printf("chi2/ndf: %11.3g = %11.3g / %11.3g\n", v.chi2dof(), v.chi2, v.ndof());
       printf("nlep associated: %lu\n", v.which_lep.size());
       if (v.which_lep.size()) {
         printf("which:\n");
@@ -227,9 +227,9 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("costhjetmomvtxdisp min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhjetmomvtxdispmin, v.costhjetmomvtxdispmax, v.costhjetmomvtxdispavg, v.costhjetmomvtxdisprms);
       printf("gen2d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen2ddist, v.gen2derr, v.gen2dsig());
       printf("gen3d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen3ddist, v.gen3derr, v.gen3dsig());
-      printf("bs2d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.bs2dcompatscss, v.bs2dcompat, v.bs2ddist, v.bs2derr, v.bs2dsig());
-      printf("pv2d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.pv2dcompatscss, v.pv2dcompat, v.pv2ddist, v.pv2derr, v.pv2dsig());
-      printf("pv3d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.pv3dcompatscss, v.pv3dcompat, v.pv3ddist, v.pv3derr, v.pv3dsig());
+      printf("bs2d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.bs2ddist, v.bs2derr, v.bs2dsig());
+      printf("pv2d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.pv2ddist, v.pv2derr, v.pv2dsig());
+      printf("pv3d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.pv3ddist, v.pv3derr, v.pv3dsig());
       printf("pvdz: %11.3g +/- %11.3g (%11.3g sig)\n", v.pvdz(), v.pvdzerr(), v.pvdzsig());
       printf("costh, missdists for %i momenta:\n", mfv::NMomenta);
       for (int i = 0; i < mfv::NMomenta; ++i)

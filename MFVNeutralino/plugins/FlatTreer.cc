@@ -112,7 +112,7 @@ void MFVFlatTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.vtx_cyz.push_back(v.cyz);
     nt.vtx_czz.push_back(v.czz);
     nt.vtx_chi2.push_back(v.chi2);
-    nt.vtx_ndof.push_back(v.ndof);
+    nt.vtx_ndof.push_back(v.ndof());
     nt.vtx_njets.push_back(v.njets[0]);
     nt.vtx_tks_pt.push_back(v.pt[0]);
     nt.vtx_tks_eta.push_back(v.eta[0]);

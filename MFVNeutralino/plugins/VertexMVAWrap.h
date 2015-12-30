@@ -15,7 +15,7 @@ public:
     std::vector<double> input = {
       double(vtx.ntracks()),
       double(vtx.ntracksptgt(3)),
-      TMath::Prob(vtx.chi2,vtx.ndof),
+      TMath::Prob(vtx.chi2,vtx.ndof()),
       vtx.eta[0],
       vtx.costhmompv3d[2],
       vtx.trackdxyerrmin(),

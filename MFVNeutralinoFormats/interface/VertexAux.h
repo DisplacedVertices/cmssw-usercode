@@ -12,8 +12,8 @@ struct MFVVertexAux {
   typedef unsigned int uint;
 
   MFVVertexAux() {
-    which = bs2dcompatscss = pv2dcompatscss = pv3dcompatscss = 0;
-    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = ndof = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2dcompat = bs2ddist = bs2derr = pv2dcompat = pv2ddist = pv2derr = pv3dcompat = pv3ddist = pv3derr = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
+    which = ndof_ = 0;
+    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2ddist = bs2derr = pv2ddist = pv2derr = pv3ddist = pv3derr = jetpairdrmin = jetpairdrmax = jetpairdravg = jetpairdrrms = costhtkmomvtxdispmin = costhtkmomvtxdispmax = costhtkmomvtxdispavg = costhtkmomvtxdisprms = costhjetmomvtxdispmin = costhjetmomvtxdispmax = costhjetmomvtxdispavg = costhjetmomvtxdisprms = 0;
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i)
@@ -35,7 +35,9 @@ struct MFVVertexAux {
   float czz;
 
   float chi2;
-  float ndof;
+  uchar ndof_; // may not be = ntracks - 3 if weights used in vtx fit
+  float ndof() const { return float(ndof_); }
+  float chi2dof() const { return chi2 * ndof(); }
 
   uchar njets[mfv::NJetsByUse];
 
@@ -90,22 +92,16 @@ struct MFVVertexAux {
   float gen3derr;
   float gen3dsig() const { return sig(gen3ddist, gen3derr); }
 
-  uchar bs2dcompatscss;
-  float bs2dcompat;
   float bs2ddist;
   float bs2derr;
   float bs2dsig() const { return sig(bs2ddist, bs2derr); }
   float bs2dctau() const { return bs2ddist / betagamma(); }
 
-  uchar pv2dcompatscss;
-  float pv2dcompat;
   float pv2ddist;
   float pv2derr;
   float pv2dsig() const { return sig(pv2ddist, pv2derr); }
   float pv2dctau() const { return pv2ddist / betagamma(); }
 
-  uchar pv3dcompatscss;
-  float pv3dcompat;
   float pv3ddist;
   float pv3derr;
   float pv3dsig() const { return sig(pv3ddist, pv3derr); }

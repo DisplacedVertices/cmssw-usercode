@@ -231,7 +231,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     (vtx.ntracksptgt(10) - ntracks_sub) >= min_ntracksptgt10 &&
     vtx.njets[mfv::JByNtracks] >= min_njetsntks &&
     vtx.njets[mfv::JByNtracks] <= max_njetsntks &&
-    vtx.chi2/vtx.ndof < max_chi2dof &&
+    vtx.chi2dof() < max_chi2dof &&
     vtx.pt[mfv::PTracksOnly] >= min_tkonlypt &&
     fabs(vtx.eta[mfv::PTracksOnly]) < max_abstkonlyeta &&
     vtx.mass[mfv::PTracksOnly] >= min_tkonlymass &&

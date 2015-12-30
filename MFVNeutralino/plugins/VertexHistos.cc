@@ -97,13 +97,9 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_fractrackssharedwpv01;
   TH1F* h_fractrackssharedwpvs01;
 
-  TH1F* h_pair2dcompatscss;
-  TH1F* h_pair2dcompat;
   TH1F* h_pair2ddist;
   TH1F* h_pair2derr;
   TH1F* h_pair2dsig;
-  TH1F* h_pair3dcompatscss;
-  TH1F* h_pair3dcompat;
   TH1F* h_pair3ddist;
   TH1F* h_pair3derr;
   TH1F* h_pair3dsig;
@@ -422,19 +418,13 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("gen3ddist",                     "dist3d(SV, closest gen vtx) (cm)",                                            200,    0,       0.2);
   hs.add("gen3derr",                      "#sigma(dist3d(SV, closest gen vtx)) (cm)",                                    200,    0,       0.2);
   hs.add("gen3dsig",                      "N#sigma(dist3d(SV, closest gen vtx)) (cm)",                                   200,    0,     100);
-  hs.add("bs2dcompatscss",                "compat2d(SV, beamspot) success",                                                2,    0,       2);
-  hs.add("bs2dcompat",                    "compat2d(SV, beamspot)",                                                      100,    0,    1000);
   hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
   hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
   hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           100,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
-  hs.add("pv2dcompatscss",                "compat2d(SV, PV) success",                                                      2,    0,       2);
-  hs.add("pv2dcompat",                    "compat2d(SV, PV)",                                                            100,    0,    1000);
   hs.add("pv2ddist",                      "dist2d(SV, PV) (cm)",                                                         100,    0,       0.5);
   hs.add("pv2derr",                       "#sigma(dist2d(SV, PV)) (cm)",                                                 100,    0,       0.05);
   hs.add("pv2dsig",                       "N#sigma(dist2d(SV, PV))",                                                     100,    0,     100);
-  hs.add("pv3dcompatscss",                "compat3d(SV, PV) success",                                                      2,    0,       2);
-  hs.add("pv3dcompat",                    "compat3d(SV, PV)",                                                            100,    0,    1000);
   hs.add("pv3ddist",                      "dist3d(SV, PV) (cm)",                                                         100,    0,       0.5);
   hs.add("pv3derr",                       "#sigma(dist3d(SV, PV)) (cm)",                                                 100,    0,       0.1);
   hs.add("pv3dsig",                       "N#sigma(dist3d(SV, PV))",                                                     100,    0,     100);
@@ -590,13 +580,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_fractrackssharedwpvs01 = fs->make<TH1F>("h_fractrackssharedwpvs01", ";fraction of sv #0 and sv #1 tracks shared with any PV;arb. units", 41, 0, 1.025);
   h_pvmosttracksshared = fs->make<TH2F>("h_pvmosttracksshared", ";index of pv most-shared to sv #0; index of pv most-shared to sv #1", 71, -1, 70, 71, -1, 70);
 
-  h_pair2dcompatscss = fs->make<TH1F>("h_pair2dcompatscss", ";pair compat2d success;arb. units",       2,    0,     2);
-  h_pair2dcompat     = fs->make<TH1F>("h_pair2dcompat",     ";pair compat2d;arb. units",             100,    0,  1000);
   h_pair2ddist       = fs->make<TH1F>("h_pair2ddist",       ";pair dist2d (cm);arb. units",          150,    0,     0.3);
   h_pair2derr        = fs->make<TH1F>("h_pair2derr",        ";pair #sigma(dist2d) (cm);arb. units",  100,    0,     0.05);
   h_pair2dsig        = fs->make<TH1F>("h_pair2dsig",        ";pair N#sigma(dist2d);arb. units",      100,    0,   100);
-  h_pair3dcompatscss = fs->make<TH1F>("h_pair3dcompatscss", ";pair compat3d success;arb. units",       2,    0,     2);
-  h_pair3dcompat     = fs->make<TH1F>("h_pair3dcompat",     ";pair compat3d;arb. units",             100,    0,  1000);
   h_pair3ddist       = fs->make<TH1F>("h_pair3ddist",       ";pair dist3d (cm);arb. units",          100,    0,     0.5);
   h_pair3derr        = fs->make<TH1F>("h_pair3derr",        ";pair #sigma(dist3d) (cm);arb. units",  100,    0,     0.07);
   h_pair3dsig        = fs->make<TH1F>("h_pair3dsig",        ";pair N#sigma(dist3d);arb. units",      100,    0,   100);
@@ -695,8 +681,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"trackminnhits",           aux.trackminnhits()},
         {"trackmaxnhits",           aux.trackmaxnhits()},
         {"njetsntks",               aux.njets[mfv::JByNtracks]},
-        {"chi2dof",                 aux.chi2/aux.ndof},
-        {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof)},
+        {"chi2dof",                 aux.chi2dof()},
+        {"chi2dofprob",             TMath::Prob(aux.chi2, aux.ndof())},
 
         {"msptm",                   sqrt(aux.mass[mfv::PTracksOnly] * aux.mass[mfv::PTracksOnly] + aux.pt[mfv::PTracksOnly] * aux.pt[mfv::PTracksOnly]) + fabs(aux.pt[mfv::PTracksOnly])},
 
@@ -839,19 +825,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"gen3ddist",               aux.gen3ddist},
         {"gen3derr",                aux.gen3derr},
         {"gen3dsig",                aux.gen3dsig()},
-        {"bs2dcompatscss",          aux.bs2dcompatscss},
-        {"bs2dcompat",              aux.bs2dcompat},
         {"bs2ddist",                aux.bs2ddist},
         {"bsbs2ddist",              mevent->bs2ddist(aux)},
         {"bs2derr",                 aux.bs2derr},
         {"bs2dsig",                 aux.bs2dsig()},
-        {"pv2dcompatscss",          aux.pv2dcompatscss},
-        {"pv2dcompat",              aux.pv2dcompat},
         {"pv2ddist",                aux.pv2ddist},
         {"pv2derr",                 aux.pv2derr},
         {"pv2dsig",                 aux.pv2dsig()},
-        {"pv3dcompatscss",          aux.pv3dcompatscss},
-        {"pv3dcompat",              aux.pv3dcompat},
         {"pv3ddist",                aux.pv3ddist},
         {"pv3derr",                 aux.pv3derr},
         {"pv3dsig",                 aux.pv3dsig()},
@@ -1283,16 +1263,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       Measurement1D pair2ddist = distcalc_2d.distance(vtxi, vtxj);
       Measurement1D pair3ddist = distcalc_3d.distance(vtxi, vtxj);
 
-      std::pair<bool, float> pair2dcompat = mfv::compatibility(vtxi, vtxj, false);
-      std::pair<bool, float> pair3dcompat = mfv::compatibility(vtxi, vtxj, true);
-
-      h_pair2dcompatscss->Fill(pair2dcompat.first, w);
-      h_pair2dcompat->Fill(pair2dcompat.second, w);
       h_pair2ddist->Fill(pair2ddist.value(), w);
       h_pair2derr->Fill(pair2ddist.error(), w);
       h_pair2dsig->Fill(pair2ddist.significance(), w);
-      h_pair3dcompatscss->Fill(pair3dcompat.first, w);
-      h_pair3dcompat->Fill(pair3dcompat.second, w);
       h_pair3ddist->Fill(pair3ddist.value(), w);
       h_pair3derr->Fill(pair3ddist.error(), w);
       h_pair3dsig->Fill(pair3ddist.significance(), w);

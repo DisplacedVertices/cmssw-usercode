@@ -148,7 +148,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.czz = sv.covariance(2,2);
 
     aux.chi2 = sv.chi2();
-    aux.ndof = sv.ndof();
+    aux.ndof_ = int2uchar_clamp(int(sv.ndof()));
 
     math::XYZVector pv2sv;
     if (primary_vertex != 0)
@@ -319,16 +319,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.gen2derr        = vtx_distances.gen2ddist.error();
     aux.gen3ddist       = vtx_distances.gen3ddist.value();
     aux.gen3derr        = vtx_distances.gen3ddist.error();
-    aux.bs2dcompatscss  = vtx_distances.bs2dcompat.first;
-    aux.bs2dcompat      = vtx_distances.bs2dcompat.second;
     aux.bs2ddist        = vtx_distances.bs2ddist.value();
     aux.bs2derr         = vtx_distances.bs2ddist.error();
-    aux.pv2dcompatscss  = vtx_distances.pv2dcompat.first;
-    aux.pv2dcompat      = vtx_distances.pv2dcompat.second;
     aux.pv2ddist        = vtx_distances.pv2ddist_val;
     aux.pv2derr         = vtx_distances.pv2ddist_err;
-    aux.pv3dcompatscss  = vtx_distances.pv3dcompat.first;
-    aux.pv3dcompat      = vtx_distances.pv3dcompat.second;
     aux.pv3ddist        = vtx_distances.pv3ddist_val;
     aux.pv3derr         = vtx_distances.pv3ddist_err;
 
