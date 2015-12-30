@@ -87,7 +87,6 @@ private:
   const double min_bs2derr;
   const double max_bs2derr;
   const double min_bs2dsig;
-  const double min_bs3ddist;
   const double min_geo2ddist;
   const double max_geo2ddist;
   const int max_sumnhitsbehind;
@@ -164,7 +163,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_bs2derr(cfg.getParameter<double>("min_bs2derr")),
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
     min_bs2dsig(cfg.getParameter<double>("min_bs2dsig")),
-    min_bs3ddist(cfg.getParameter<double>("min_bs3ddist")),
     min_geo2ddist(cfg.getParameter<double>("min_geo2ddist")),
     max_geo2ddist(cfg.getParameter<double>("max_geo2ddist")),
     max_sumnhitsbehind(cfg.getParameter<int>("max_sumnhitsbehind")),
@@ -276,7 +274,6 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.bs2derr >= min_bs2derr &&
     vtx.bs2derr < max_bs2derr &&
     vtx.bs2dsig() >= min_bs2dsig &&
-    vtx.bs3ddist >= min_bs3ddist &&
     vtx.geo2ddist() >= min_geo2ddist &&
     vtx.geo2ddist() < max_geo2ddist &&
     vtx.sumnhitsbehind() <= max_sumnhitsbehind &&

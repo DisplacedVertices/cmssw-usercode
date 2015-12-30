@@ -227,7 +227,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("costhjetmomvtxdisp min: %11.3g   max: %11.3g   avg: %11.3g   rms: %11.3g\n", v.costhjetmomvtxdispmin, v.costhjetmomvtxdispmax, v.costhjetmomvtxdispavg, v.costhjetmomvtxdisprms);
       printf("gen2d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen2ddist, v.gen2derr, v.gen2dsig());
       printf("gen3d dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.gen3ddist, v.gen3derr, v.gen3dsig());
-      printf("bs2d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)   bs3ddist: %11.3g\n", v.bs2dcompatscss, v.bs2dcompat, v.bs2ddist, v.bs2derr, v.bs2dsig(), v.bs3ddist);
+      printf("bs2d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.bs2dcompatscss, v.bs2dcompat, v.bs2ddist, v.bs2derr, v.bs2dsig());
       printf("pv2d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.pv2dcompatscss, v.pv2dcompat, v.pv2ddist, v.pv2derr, v.pv2dsig());
       printf("pv3d compatscss: %u   compat: %11.3g   dist: %11.3g +/- %11.3g (%11.3g sig)\n", v.pv3dcompatscss, v.pv3dcompat, v.pv3ddist, v.pv3derr, v.pv3dsig());
       printf("pvdz: %11.3g +/- %11.3g (%11.3g sig)\n", v.pvdz(), v.pvdzerr(), v.pvdzsig());

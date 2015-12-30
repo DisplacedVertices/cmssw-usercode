@@ -126,7 +126,6 @@ namespace mfv {
     bs2dcompat = compatibility(sv, fake_bs_vtx, false);
     bs2ddist = distcalc_2d.distance(sv, fake_bs_vtx);
     const math::XYZVector bs2sv = sv.position() - beamspot.position();
-    bs3ddist = mag(bs2sv.x(), bs2sv.y()) * sin(sv.p4().theta());
 
     pv2dcompat = pv3dcompat = std::make_pair(false, -1.f);
     pv2ddist_val = pv3ddist_val = pv2ddist_err = pv3ddist_err = pv2ddist_sig = pv3ddist_sig = -1;

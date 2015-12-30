@@ -323,7 +323,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.bs2dcompat      = vtx_distances.bs2dcompat.second;
     aux.bs2ddist        = vtx_distances.bs2ddist.value();
     aux.bs2derr         = vtx_distances.bs2ddist.error();
-    aux.bs3ddist        = vtx_distances.bs3ddist;
     aux.pv2dcompatscss  = vtx_distances.pv2dcompat.first;
     aux.pv2dcompat      = vtx_distances.pv2dcompat.second;
     aux.pv2ddist        = vtx_distances.pv2ddist_val;

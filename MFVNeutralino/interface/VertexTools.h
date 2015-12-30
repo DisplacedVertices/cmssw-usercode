@@ -19,7 +19,6 @@ namespace mfv {
   struct vertex_distances {
     std::pair<bool,float> bs2dcompat, pv2dcompat, pv3dcompat;
     Measurement1D gen2ddist, gen3ddist, bs2ddist;
-    float bs3ddist;
     float pv2ddist_val, pv3ddist_val;
     float pv2ddist_err, pv3ddist_err;
     float pv2ddist_sig, pv3ddist_sig;

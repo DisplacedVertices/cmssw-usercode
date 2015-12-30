@@ -428,7 +428,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
   hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           100,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
-  hs.add("bs3ddist",                      "dist2d(SV, beamspot) * sin(SV theta) (cm)",                                   100,    0,       0.5);
   hs.add("pv2dcompatscss",                "compat2d(SV, PV) success",                                                      2,    0,       2);
   hs.add("pv2dcompat",                    "compat2d(SV, PV)",                                                            100,    0,    1000);
   hs.add("pv2ddist",                      "dist2d(SV, PV) (cm)",                                                         100,    0,       0.5);
@@ -846,7 +845,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"bsbs2ddist",              mevent->bs2ddist(aux)},
         {"bs2derr",                 aux.bs2derr},
         {"bs2dsig",                 aux.bs2dsig()},
-        {"bs3ddist",                aux.bs3ddist},
         {"pv2dcompatscss",          aux.pv2dcompatscss},
         {"pv2dcompat",              aux.pv2dcompat},
         {"pv2ddist",                aux.pv2ddist},
