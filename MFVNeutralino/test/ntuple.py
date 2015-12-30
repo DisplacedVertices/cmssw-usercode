@@ -98,8 +98,8 @@ if trig_filter:
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 
 process.options.wantSummary = True
-file_event_from_argv(process)
 process.maxEvents.input = 100
+file_event_from_argv(process)
 
 #process.mfvVertices.jumble_tracks = True
 #process.mfvVertices.remove_tracks_frac = 0.1
