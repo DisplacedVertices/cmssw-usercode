@@ -27,7 +27,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True),
                                          wantSummary = cms.untracked.bool(False),
                                          )
-    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
     process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/F47E7F59-8A29-E511-8667-002590A52B4A.root'))
 
     output_file(process, 'pat.root', process.MINIAODSIMEventContent.outputCommands)
