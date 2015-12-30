@@ -707,17 +707,17 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"tksjetsntkphi",           aux.phi[mfv::PTracksPlusJetsByNtracks]},
         {"tksjetsntkmass",          aux.mass[mfv::PTracksPlusJetsByNtracks]},
 
-        {"costhtkonlymombs",         aux.costhmombs  [mfv::PTracksOnly]},
-        {"costhtkonlymompv2d",       aux.costhmompv2d[mfv::PTracksOnly]},
-        {"costhtkonlymompv3d",       aux.costhmompv3d[mfv::PTracksOnly]},
+        {"costhtkonlymombs",         aux.costhmombs  (mfv::PTracksOnly)},
+        {"costhtkonlymompv2d",       aux.costhmompv2d(mfv::PTracksOnly)},
+        {"costhtkonlymompv3d",       aux.costhmompv3d(mfv::PTracksOnly)},
 
-        {"costhjetsntkmombs",        aux.costhmombs  [mfv::PJetsByNtracks]},
-        {"costhjetsntkmompv2d",      aux.costhmompv2d[mfv::PJetsByNtracks]},
-        {"costhjetsntkmompv3d",      aux.costhmompv3d[mfv::PJetsByNtracks]},
+        {"costhjetsntkmombs",        aux.costhmombs  (mfv::PJetsByNtracks)},
+        {"costhjetsntkmompv2d",      aux.costhmompv2d(mfv::PJetsByNtracks)},
+        {"costhjetsntkmompv3d",      aux.costhmompv3d(mfv::PJetsByNtracks)},
 
-        {"costhtksjetsntkmombs",     aux.costhmombs  [mfv::PTracksPlusJetsByNtracks]},
-        {"costhtksjetsntkmompv2d",   aux.costhmompv2d[mfv::PTracksPlusJetsByNtracks]},
-        {"costhtksjetsntkmompv3d",   aux.costhmompv3d[mfv::PTracksPlusJetsByNtracks]},
+        {"costhtksjetsntkmombs",     aux.costhmombs  (mfv::PTracksPlusJetsByNtracks)},
+        {"costhtksjetsntkmompv2d",   aux.costhmompv2d(mfv::PTracksPlusJetsByNtracks)},
+        {"costhtksjetsntkmompv3d",   aux.costhmompv3d(mfv::PTracksPlusJetsByNtracks)},
 
         {"missdisttkonlypv",        aux.missdistpv   [mfv::PTracksOnly]},
         {"missdisttkonlypverr",     aux.missdistpverr[mfv::PTracksOnly]},

@@ -233,7 +233,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("pvdz: %11.3g +/- %11.3g (%11.3g sig)\n", v.pvdz(), v.pvdzerr(), v.pvdzsig());
       printf("costh, missdists for %i momenta:\n", mfv::NMomenta);
       for (int i = 0; i < mfv::NMomenta; ++i)
-        printf("mom %i: costhmombs: %11.4f   costhmompv2d: %11.4f   costhmompv3d: %11.4f   missdistpv: %11.3g +/- %11.3g (%11.3g sig)\n", i, v.costhmombs[i], v.costhmompv2d[i], v.costhmompv3d[i], v.missdistpv[i], v.missdistpverr[i], v.missdistpvsig(i));
+        printf("mom %i: costhmombs: %11.4f   costhmompv2d: %11.4f   costhmompv3d: %11.4f   missdistpv: %11.3g +/- %11.3g (%11.3g sig)\n", i, v.costhmombs(i), v.costhmompv2d(i), v.costhmompv3d(i), v.missdistpv[i], v.missdistpverr[i], v.missdistpvsig(i));
 
       printf("\n");
     }

@@ -331,9 +331,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.pv3derr         = vtx_distances.pv3ddist_err;
 
     for (int i = 0; i < mfv::NMomenta; ++i) {
-      aux.costhmombs  [i] = vtx_distances.costhmombs[i];
-      aux.costhmompv2d[i] = vtx_distances.costhmompv2d[i];
-      aux.costhmompv3d[i] = vtx_distances.costhmompv3d[i];
+      aux.costhmombs  (i, vtx_distances.costhmombs  [i]);
+      aux.costhmompv2d(i, vtx_distances.costhmompv2d[i]);
+      aux.costhmompv3d(i, vtx_distances.costhmompv3d[i]);
 
       aux.missdistpv   [i] = vtx_distances.missdistpv[i].value();
       aux.missdistpverr[i] = vtx_distances.missdistpv[i].error();

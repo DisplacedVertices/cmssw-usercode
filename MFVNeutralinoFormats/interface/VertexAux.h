@@ -16,8 +16,10 @@ struct MFVVertexAux {
     x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2ddist = bs2derr = pv2ddist = pv2derr = pv3ddist = pv3derr = 0;
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       njets[i] = 0;
-    for (int i = 0; i < mfv::NMomenta; ++i)
-      pt[i] = eta[i] = phi[i] = mass[i] = costhmombs[i] = costhmompv2d[i] = costhmompv3d[i] = missdistpv[i] = missdistpverr[i] = 0;
+    for (int i = 0; i < mfv::NMomenta; ++i) {
+      costhmombs_[i] = costhmompv2d_[i] = costhmompv3d_[i] = 0;
+      pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = 0;
+    }
   }
 
   uchar which;
@@ -170,9 +172,15 @@ struct MFVVertexAux {
   }
   float pvdzsig() const { return sig(pvdz(), pvdzerr()); }
 
-  float costhmombs  [mfv::NMomenta];
-  float costhmompv2d[mfv::NMomenta];
-  float costhmompv3d[mfv::NMomenta];
+  uchar costhmombs_  [mfv::NMomenta];
+  uchar costhmompv2d_[mfv::NMomenta];
+  uchar costhmompv3d_[mfv::NMomenta];
+  float costhmombs  (size_t i) const { return unbin(costhmombs_  [i], -1, 1); }
+  float costhmompv2d(size_t i) const { return unbin(costhmompv2d_[i], -1, 1); }
+  float costhmompv3d(size_t i) const { return unbin(costhmompv3d_[i], -1, 1); }
+  void costhmombs  (size_t i, float x) { costhmombs_  [i] = bin(x, -1, 1); }
+  void costhmompv2d(size_t i, float x) { costhmompv2d_[i] = bin(x, -1, 1); }
+  void costhmompv3d(size_t i, float x) { costhmompv3d_[i] = bin(x, -1, 1); }
 
   float missdistpv   [mfv::NMomenta];
   float missdistpverr[mfv::NMomenta];
