@@ -202,7 +202,7 @@ struct MFVVertexAux {
   std::vector<float> track_phi_err;
   std::vector<float> track_dxy_err;
   std::vector<float> track_dz_err;
-  std::vector<float> track_chi2dof;
+  std::vector<uchar> track_chi2dof_;
   std::vector<ushort> track_hitpattern;
   static ushort make_track_hitpattern(int npx, int nst, int nbehind, int nlost) {
     assert(npx >= 0 && nst >= 0 && nbehind >= 0 && nlost >= 0);
@@ -220,6 +220,14 @@ struct MFVVertexAux {
   std::vector<bool> track_injet;
   std::vector<short> track_inpv;
 
+  static void _set(std::vector<uchar>& v, int i, uchar x) {
+    if (i == -1) v.push_back(x);
+    else         v[i] = x;
+  }
+
+  void  track_chi2dof(int i, float x) {         _set(track_chi2dof_, i , bin(x, 0, 10)); }
+  float track_chi2dof(int i) const    { return unbin(track_chi2dof_ [i],        0, 10); }
+
   void insert_track() {
     track_w.push_back(0);
     track_qpt.push_back(0);
@@ -232,7 +240,7 @@ struct MFVVertexAux {
     track_phi_err.push_back(0);
     track_dxy_err.push_back(0);
     track_dz_err.push_back(0);
-    track_chi2dof.push_back(0);
+    track_chi2dof_.push_back(0);
     track_hitpattern.push_back(0);
     track_injet.push_back(0);
     track_inpv.push_back(0);
@@ -252,7 +260,7 @@ struct MFVVertexAux {
       n == track_phi_err.size() &&
       n == track_dxy_err.size() &&
       n == track_dz_err.size() &&
-      n == track_chi2dof.size() &&
+      n == track_chi2dof_.size() &&
       n == track_hitpattern.size() &&
       n == track_injet.size() &&
       n == track_inpv.size();
