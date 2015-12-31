@@ -20,6 +20,7 @@ private:
   edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
   const bool throw_not_found;
   const bool return_actual;
+  const bool return_ht900;
   const bool prints;
   const bool histos;
 
@@ -36,6 +37,7 @@ MFVEmulateHT800::MFVEmulateHT800(const edm::ParameterSet& cfg)
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     throw_not_found(cfg.getParameter<bool>("throw_not_found")),
     return_actual(cfg.getParameter<bool>("return_actual")),
+    return_ht900(cfg.getParameter<bool>("return_ht900")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", false))
 {
@@ -195,7 +197,7 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   if (prints) printf("put ht = %f in event and return %i\n", ht, emulated_pass[0]);
   put_ht(event, ht);
-  return emulated_pass[0];
+  return emulated_pass[return_ht900];
 }
 
 DEFINE_FWK_MODULE(MFVEmulateHT800);
