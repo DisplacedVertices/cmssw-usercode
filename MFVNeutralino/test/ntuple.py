@@ -8,8 +8,8 @@ is_mc = True
 prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
-version = 'v5'
-batch_name = 'Ntuple' + version.upper()
+version = 'V5befslim'
+batch_name = 'Ntuple' + version
 
 ####
 
@@ -107,6 +107,11 @@ file_event_from_argv(process)
 #process.mfvVertices.use_non_pv_tracks = True
 #process.mfvVertices.use_non_pvs_tracks = True
 #batch_name += '_ChangeMeIfNotDefault'
+#process.mfvVertices.min_all_track_dxy = cms.double(0.01)
+#process.mfvVertices.min_all_track_sigmadxy = cms.double(0.)
+#process.mfvVertices.min_seed_track_dxy = cms.double(0.01)
+#process.mfvVertices.min_seed_track_sigmadxy = cms.double(0.)
+#batch_name += '_AbsDxy'
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
