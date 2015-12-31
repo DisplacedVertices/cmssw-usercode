@@ -85,7 +85,9 @@ struct MFVVertexAux {
     else if (x >= max)
       return 255;
     const float r = (x - min)/(max - min);
-    if (r >= 1)
+    if (r <= 0)
+      return 0;
+    else if (r >= 1)
       return 255;
     return r * 255;
   }
