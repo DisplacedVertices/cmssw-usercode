@@ -1,6 +1,7 @@
 #ifndef JMTucker_MFVNeutralinoFormats_interface_Event_h
 #define JMTucker_MFVNeutralinoFormats_interface_Event_h
 
+#include <cassert>
 #include <numeric>
 #include "TLorentzVector.h"
 
