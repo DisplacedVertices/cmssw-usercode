@@ -1,14 +1,24 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, file_event_from_argv
+from JMTucker.Tools.MiniAOD_cfg import global_tag
+from JMTucker.Tools.CMSSWTools import global_tag as set_global_tag
 
 file_event_from_argv(process)
 process.TFileService.fileName = 'trigeff.root'
+set_global_tag(process, global_tag(True)) # needed for emulator that checks L1 bits
 
-from JMTucker.MFVNeutralino.TriggerFilter import setup_trigger_filter
-setup_trigger_filter(process, 'pmfvfilt')
-setup_trigger_filter(process, 'ponlyhtpt', 'tfonlyhtpt')
-setup_trigger_filter(process, 'ponlyht', 'tfonlyht')
-setup_trigger_filter(process, 'ponlyht8', 'tfonlyht8')
+from JMTucker.MFVNeutralino.TriggerFilter import *
+setup_trigger_filter_soup(process, 'pmfvfilt')
+setup_trigger_filter_soup(process, 'ponlyhtpt', 'tfonlyhtpt')
+setup_trigger_filter_soup(process, 'ponlyht', 'tfonlyht')
+setup_trigger_filter_soup(process, 'ponlyht9', 'tfonlyht9')
+setup_trigger_filter(process, 'pemuht8',             need_pat=True)
+setup_trigger_filter(process, 'pemuht9', 'emuht900', need_pat=True)
+
+process.emuht900.return_actual = False
+process.emuht900.return_ht900 = True
+
+process.options.wantSummary = True
 
 process.tfonlyhtpt.HLTPaths = [
     'HLT_PFHT650_v*',
@@ -25,8 +35,8 @@ process.tfonlyht.HLTPaths = [
     'HLT_PFHT900_v*',
     ]
 
-process.tfonlyht8.HLTPaths = [
-    'HLT_PFHT800_v*',
+process.tfonlyht9.HLTPaths = [
+    'HLT_PFHT800_v*', # does not exist in MC
     'HLT_PFHT900_v*',
     ]
 
@@ -41,9 +51,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.xx4j_samples + Samples.mfv_signal_samples
 
-    cs = CRABSubmitter('TriggerFilterCheckv2',
-                       splitting = 'EventAwareLumiBased',
-                       units_per_job = 50000,
+    cs = CRABSubmitter('TriggerFilterCheckv3',
+                       splitting = 'FileBased',
+                       units_per_job = 20,
                        total_units = -1,
                        aaa = True,
                        )
