@@ -11,6 +11,8 @@ parser.add_option('--dir2',
                   help='The second directory name (if applicable, e.g. in --compare).')
 parser.add_option('--table', action='store_true', default=False,
                   help='Print a table of the paths and efficiencies.')
+parser.add_option('--table-nevents', action='store_true', default=False,
+                  help='In the table, also print number of events instead of just the efficiencies.')
 parser.add_option('--table-conf-level', type=float, default=0.6827,
                   help='Confidence level for the intervals displayed (default is %default).')
 parser.add_option('--table-apply-prescales', action='store_true', default=False,
@@ -34,7 +36,8 @@ if options.twod:
     raise NotImplementedError('twod')
 
 if not any((options.table, options.compare, options.twod)):
-    raise ValueError('must run one of --table, --compare, --twod')
+    print 'none of --table, --compare, --twod specified, defaulting to --table'
+    options.table = True
 
 options.input_fn = args[0]
 options.will_plot = options.compare or options.twod
@@ -49,6 +52,7 @@ if options.table_apply_prescales_in_sort:
 
 ################################################################################
 
+from math import log10
 from JMTucker.Tools.ROOTTools import *
 
 input_f = ROOT.TFile(options.input_fn)
@@ -70,6 +74,7 @@ if options.table:
     
     width = 0
     content = []
+    mx = 0
     for i in xrange(1, hden.GetNbinsX() + 1):
         path = hden.GetXaxis().GetBinLabel(i)
         width = max(width, len(path))
@@ -92,12 +97,20 @@ if options.table:
         else:
             l1, hlt, overall = -1, -1, -1
 
-        c = (i-1, path, eff, lo, hi)
+        mx = max(mx, num, hi*den)
+        if options.table_nevents:
+            c = (i-1, path, num, int(round(lo*den)), int(round(hi*den)))
+        else:
+            c = (i-1, path, eff, lo, hi)
         if options.table_apply_prescales:
             c += (l1, hlt, overall, prescaled_eff)
         content.append(c)
 
-    fmt = '(%3i) %' + str(width + 2) + 's %.3e  68%% CL: [%.3e, %.3e]'
+    if options.table_nevents:
+        num_width = '%' + str(int(round(log10(mx))) + 2) + 'i'
+        fmt = '(%3i) %' + str(width + 2) + 's ' + num_width + '  68%% CL: [' + num_width + ', ' + num_width + ']'
+    else:
+        fmt = '(%3i) %' + str(width + 2) + 's %.3e  68%% CL: [%.3e, %.3e]'
     if options.table_apply_prescales:
         fmt += '   after prescales: (%10i * %10i = %10i):  %.4f'
 
