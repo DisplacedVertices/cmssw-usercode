@@ -45,5 +45,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        splitting = 'EventAwareLumiBased',
                        units_per_job = 50000,
                        total_units = -1,
+                       aaa = True,
                        )
     cs.submit_all(samples)
