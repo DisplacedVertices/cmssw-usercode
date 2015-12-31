@@ -24,15 +24,7 @@ process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu20_v*']
 process.mutrig.andOr = True # = OR
 
-process.emu = cms.EDFilter('MFVEmulateHT800',
-                           trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
-                           trigger_objects_src = cms.InputTag('selectedPatTrigger'),
-                           throw_not_found = cms.bool(False),
-                           return_actual = cms.bool(True),
-                           prints = cms.untracked.bool(False),
-                           histos = cms.untracked.bool(False),
-                           )
-
+process.load('JMTucker.MFVNeutralino.EmulateHT800_cfi')
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
 process.num = cms.EDFilter('MFVTriggerEfficiency',
