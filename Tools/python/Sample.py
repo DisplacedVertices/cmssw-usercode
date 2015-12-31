@@ -330,8 +330,12 @@ def main(samples_registry):
     import sys
     if 'merge' in sys.argv:
         samples = samples_registry.from_argv(from_root_fns=True)
-        merge(samples, norm_to=typed_from_argv(float, default_value=1.))
-    
+        out_fn = [x for x in sys.argv if x.endswith('.root') and not os.path.isfile(x)]
+        if out_fn:
+            merge(samples, output=out_fn[0], norm_to=typed_from_argv(float, default_value=1.))
+        else:
+            merge(samples, norm_to=typed_from_argv(float, default_value=1.))
+
 __all__ = [
     'Dataset',
     'Sample',
