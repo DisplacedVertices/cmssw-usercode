@@ -65,7 +65,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
             print '\033[36;7m', msg, '\033[m'
     elif l == 1:
         print working_dir, ': just one file found, copying'
-        cmd = 'xrdcp %s %s' % (files[0], new_name)
+        cmd = 'xrdcp -s %s %s' % (files[0], new_name)
         os.system(cmd)
         os.chmod(new_name, 0644)
     else:
