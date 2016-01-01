@@ -40,7 +40,6 @@ private:
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
-  const edm::EDGetTokenT<pat::JetCollection> calojets_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
@@ -59,8 +58,6 @@ private:
 
   L1GtUtils l1_cfg;
   HLTConfigProvider hlt_cfg;
-
-  std::vector<JetIDSelectionFunctor> calojet_selectors;
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
@@ -75,7 +72,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
-    calojets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("calojets_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
@@ -93,9 +89,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
 
     warned_non_mfv(false)
 {
-  for (int i = 0; i < 4; ++i)
-    calojet_selectors.push_back(JetIDSelectionFunctor(JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::Quality_t(i)));
-
   produces<MFVEvent>();
 }
 
@@ -328,28 +321,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
   }
 
-  //////////////////////////////////////////////////////////////////////
-#if 0
-  edm::Handle<pat::JetCollection> calojets;
-  event.getByToken(calojets_token, calojets);
-
-  for (const pat::Jet& jet : *calojets) {
-    if (jet.pt() < jet_pt_min) // JMTBAD should also require |eta| < 2.5
-      continue;
-
-    uchar id = 0;
-    for (int i = 0; i < 4; ++i) {
-      pat::strbitset ret = calojet_selectors[i].getBitTemplate();
-      id = id | (calojet_selectors[i](jet, ret) << i);
-    }
-
-    mevent->calojet_id.push_back(id);
-    mevent->calojet_pt.push_back(jet.pt());
-    mevent->calojet_eta.push_back(jet.eta());
-    mevent->calojet_phi.push_back(jet.phi());
-    mevent->calojet_energy.push_back(jet.energy());
-  }
-#endif
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<pat::JetCollection> jets;

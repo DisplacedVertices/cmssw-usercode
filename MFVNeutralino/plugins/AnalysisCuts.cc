@@ -27,8 +27,6 @@ private:
   const int min_npv;
   const int max_npv;
   const int max_pv_ntracks;
-  const double min_4th_calojet_pt;
-  const double min_5th_calojet_pt;
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
   const int min_njets;
@@ -84,8 +82,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     max_pv_ntracks(cfg.getParameter<int>("max_pv_ntracks")),
-    min_4th_calojet_pt(cfg.getParameter<double>("min_4th_calojet_pt")),
-    min_5th_calojet_pt(cfg.getParameter<double>("min_5th_calojet_pt")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
     min_njets(cfg.getParameter<int>("min_njets")),
@@ -180,10 +176,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (mevent->njets() < min_njets || mevent->njets() > max_njets)
-      return false;
-
-    if ((min_4th_calojet_pt > 0 && mevent->calojetpt4() < min_4th_calojet_pt) ||
-        (min_5th_calojet_pt > 0 && mevent->calojetpt5() < min_5th_calojet_pt))
       return false;
 
     if ((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||

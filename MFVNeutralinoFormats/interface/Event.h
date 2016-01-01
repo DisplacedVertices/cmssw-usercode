@@ -142,49 +142,6 @@ struct MFVEvent {
   float pv_sumpt2;
   float pv_rho() const { return mag(pvx - bsx_at_z(pvz), pvy - bsy_at_z(pvz)); }
 
-  std::vector<uchar> calojet_id;
-  std::vector<float> calojet_pt;
-  std::vector<float> calojet_eta;
-  std::vector<float> calojet_phi;
-  std::vector<float> calojet_energy;
-
-  bool calojet_pass_id(int w, int level) const {
-    if (fabs(calojet_eta[w]) > 2.5)
-      return false;
-    return (calojet_id[w] >> level) & 1;
-  }
-
-  int ncalojets(const int level=3) const {
-    int c = 0;
-    for (size_t i = 0, ie = calojet_id.size(); i < ie; ++i)
-      if (calojet_pass_id(i, level))
-        ++c;
-    return c;
-  }
-
-  float calojetpt(const int n, const int level=3) const {
-    int c = -1;
-    for (size_t i = 0, ie = calojet_id.size(); i < ie; ++i)
-      if (calojet_pass_id(i, level)) {
-        ++c;
-        if (c == n)
-          return calojet_pt[i];
-      }
-    return 0;
-  }
-
-  float calojetpt4(const int level=3) const { return calojetpt(3, level); }
-  float calojetpt5(const int level=3) const { return calojetpt(4, level); }
-  float calojetpt6(const int level=3) const { return calojetpt(5, level); }
-
-  float calojet_sum_ht(const int level=3) const {
-    float s = 0;
-    for (size_t i = 0, ie = calojet_id.size(); i < ie; ++i)
-      if (calojet_pass_id(i, level))
-        s += calojet_pt[i];
-    return s;
-  }
-
   std::vector<uchar> jet_id;
   std::vector<float> jet_pudisc; // to be removed and put into _id when working points defined
   std::vector<float> jet_pt;

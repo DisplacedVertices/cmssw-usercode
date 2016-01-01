@@ -145,7 +145,6 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     printf("beamspot: (%11.3g, %11.3g, %11.3g)  dxdz: %11.3g  dydz: %11.3g  widthx: %11.3g  widthy: %11.3g\n", mevent->bsx, mevent->bsy, mevent->bsz, mevent->bsdxdz, mevent->bsdydz, mevent->bswidthx, mevent->bswidthy);
     printf("npv: %u\n", mevent->npv);
     printf("pv: ntracks: %u   sumpt2: %11.3g   coords: (%11.3g, %11.3g, %11.3g)   rho: %11.3g\n", mevent->pv_ntracks, mevent->pv_sumpt2, mevent->pvx, mevent->pvy, mevent->pvz, mevent->pv_rho());
-    printf("ncalojets: %u   calojet_sum_ht: %11.3g   pt of calojet #4: %11.3g   pt of calojet #5: %11.3g   pt of calojet #6: %11.3g\n", mevent->ncalojets(), mevent->calojet_sum_ht(), mevent->calojetpt4(), mevent->calojetpt5(), mevent->calojetpt6());
     printf("njets: %u  (no pu l: %u  m: %u  t: %u)  jet_sum_ht: %11.3g   pt of jet #4: %11.3g   pt of jet #5: %11.3g   pt of jet #6: %11.3g\n", mevent->njets(), mevent->njetsnopu(0), mevent->njetsnopu(1), mevent->njetsnopu(2), mevent->jet_sum_ht(), mevent->jetpt4(), mevent->jetpt5(), mevent->jetpt6());
     printf("met: %11.3g   phi: %11.3g\n", mevent->met(), mevent->metphi());
     printf("nbtags (l,m,t): ");
