@@ -109,12 +109,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_svdist_bs2ddist1;
   TH2F* h_bs2ddist1_bs2ddist0;
 
-  TH1F* h_metx;
-  TH1F* h_mety;
-  TH1F* h_metsig;
   TH1F* h_met;
   TH1F* h_metphi;
-  TH1F* h_metdphimin;
 
   TH1F* h_nbtags[3];
   TH1F* h_nmuons[3];
@@ -303,12 +299,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_svdist_bs2ddist1 = fs->make<TH2F>("h_svdist_bs2ddist1", ";bs2ddist1;svdist2d", 500, 0, 1, 1000, 0, 2);
   h_bs2ddist1_bs2ddist0 = fs->make<TH2F>("h_bs2ddist1_bs2ddist0", ";bs2ddist0;bs2ddist1", 500, 0, 1, 500, 0, 1);
 
-  h_metx = fs->make<TH1F>("h_metx", ";MET x (GeV);events/5 GeV", 100, -250, 250);
-  h_mety = fs->make<TH1F>("h_mety", ";MET y (GeV);events/5 GeV", 100, -250, 250);
-  h_metsig = fs->make<TH1F>("h_metsig", ";MET significance;events/0.5", 100, 0, 50);
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
-  h_metdphimin = fs->make<TH1F>("h_metdphimin", ";#Delta #hat{#phi}_{min} (rad);events/0.1", 100, 0, 10);
 
   const char* lep_ex[3] = {"veto", "semilep", "dilep"};
   const char* bjets_pt[2] = {"20", "50"};
@@ -579,12 +571,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  h_metx->Fill(mevent->metx);
-  h_mety->Fill(mevent->mety);
-  h_metsig->Fill(mevent->metsig);
   h_met->Fill(mevent->met());
   h_metphi->Fill(mevent->metphi());
-  h_metdphimin->Fill(mevent->metdphimin);
 
   std::vector<double> bjets_eta[3][2];
   std::vector<double> bjets_phi[3][2];

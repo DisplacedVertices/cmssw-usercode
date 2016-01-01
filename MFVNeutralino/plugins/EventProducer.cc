@@ -358,14 +358,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<pat::METCollection> mets;
   event.getByToken(met_token, mets);
   const pat::MET& met = mets->at(0);
-
   mevent->metx = met.px();
   mevent->mety = met.py();
-  if (met.getSignificanceMatrix()(0,0) < 1e10 && met.getSignificanceMatrix()(1,1) < 1e10)
-    mevent->metsig = met.significance();
-  else
-    mevent->metsig = -999;
-  mevent->metdphimin = 1e99;
 
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
@@ -386,20 +380,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         bdisc_level = i+1;
 
     mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level));
-
-    if (jjet < 4) {
-      double deltatsum = 0;
-      for (int ijet = 0, ijete = int(jets->size()); ijet < ijete; ++ijet) {
-        if (ijet == jjet)
-          continue;
-        const pat::Jet& jeti = jets->at(ijet);
-        deltatsum += pow(jet.px() * jeti.py() - jet.py() * jeti.px(), 2);
-      }
-      const double deltat = 0.1 * sqrt(deltatsum) / jet.pt();
-      const double dphi = fabs(reco::deltaPhi(jet, met)/asin(deltat/met.pt()));
-      if (dphi < mevent->metdphimin)
-        mevent->metdphimin = dphi;
-    }
 
     const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
     mevent->jet_svnvertices.push_back(svtag ? svtag->nVertices() : -1);

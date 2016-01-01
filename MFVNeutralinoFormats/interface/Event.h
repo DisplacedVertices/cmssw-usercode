@@ -20,7 +20,7 @@ struct MFVEvent {
     gen_valid = 0;
     gen_partons_in_acc = npv = pv_ntracks = 0;
     flavor_code = 0;
-    gen_weight = gen_weightprod = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = metsig = metdphimin = 0;
+    gen_weight = gen_weightprod = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -273,10 +273,8 @@ struct MFVEvent {
 
   float metx;
   float mety;
-  float metsig;
   float met() const { return mag(metx, mety); }
   float metphi() const { return atan2(mety, metx); }
-  float metdphimin;
 
   std::vector<uchar> lep_id; // bit field: bit 0 (lsb) = mu, 1 = el, bit 1 = loosest (veto) id (always 1 for now), bit 2 = semilep id, bit 3 = dilep id, bit4 = 1 if electron and closestCtfTrack is not null
   std::vector<float> lep_pt;
