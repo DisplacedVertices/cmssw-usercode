@@ -412,7 +412,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   }
 }
 
-  void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection> vertices, std::auto_ptr<std::vector<float>> pt_quantiles) {
+void MFVVertexer::finish(edm::Event& event, std::auto_ptr<reco::VertexCollection> vertices, std::auto_ptr<std::vector<float>> pt_quantiles) {
   if (write_tracks) {
     std::auto_ptr<reco::TrackCollection> tracks(new reco::TrackCollection);
 
