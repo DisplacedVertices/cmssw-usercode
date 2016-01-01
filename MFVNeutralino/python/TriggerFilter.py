@@ -40,7 +40,7 @@ def setup_trigger_filter(process, path_name='pevtsel', filt_name='emuht800', nee
 
     if need_pat:
         process.load('PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cfi')
-        process.load('PhysicsTools.PatAlgos.slimming/selectedPatTrigger_cfi')
+        process.load('PhysicsTools.PatAlgos.slimming.selectedPatTrigger_cfi')
         path.insert(0, process.patTrigger * process.selectedPatTrigger)
 
     if hasattr(process, 'out'):
