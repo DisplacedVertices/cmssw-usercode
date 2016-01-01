@@ -283,7 +283,6 @@ struct MFVEvent {
   std::vector<float> lep_dxy;
   std::vector<float> lep_dz;
   std::vector<float> lep_iso;
-  std::vector<float> lep_mva; // only filled for electrons
 
   TLorentzVector lep_p4(int w) const {
     float mass = (lep_id[w] & 1) ? 0.000511 : 0.106;

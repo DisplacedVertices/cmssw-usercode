@@ -427,20 +427,18 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->lep_dxy.clear();
   mevent->lep_dz.clear();
   mevent->lep_iso.clear();
-  mevent->lep_mva.clear();
 
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
 
   for (const pat::Muon& muon : *muons) {
-    uchar id =
+    const uchar id =
       0
       | 1 << 1  // if it's in the collection it passes veto selection
       | muon_semilep_selector(muon) << 2
       | muon_dilep_selector(muon) << 3;
 
-    float iso = (muon.chargedHadronIso() + muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
-    float mva = 1e99;
+    const float iso = (muon.chargedHadronIso() + muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
 
     mevent->lep_id.push_back(id);
     mevent->lep_pt.push_back(muon.pt());
@@ -450,22 +448,20 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (primary_vertex != 0)
       mevent->lep_dz.push_back(muon.track()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
-    mevent->lep_mva.push_back(mva);
   }
 
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByToken(electrons_token, electrons);
   
   for (const pat::Electron& electron : *electrons) {
-    uchar id =
+    const uchar id =
       1
       | 1 << 1  // if it's in the collection it passes veto selection
       | electron_semilep_selector(electron) << 2
       | electron_dilep_selector(electron) << 3
       | electron.closestCtfTrackRef().isNonnull() << 4;
 
-    float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
-    float mva = 1e99; //electron.electronID("mvaNonTrigV0");
+    const float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
 
     mevent->lep_id.push_back(id);
     mevent->lep_pt.push_back(electron.pt());
@@ -475,7 +471,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (primary_vertex != 0)
       mevent->lep_dz.push_back(electron.gsfTrack()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
-    mevent->lep_mva.push_back(mva);
   }
 
   //////////////////////////////////////////////////////////////////////
