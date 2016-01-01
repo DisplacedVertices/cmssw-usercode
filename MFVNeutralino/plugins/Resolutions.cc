@@ -422,26 +422,26 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       //printf("vertex %d: ntracks = %d, njetsntks = %d, bs2derr = %6.4f, drrms = %5.3f\n", nvtx_match, vtx.ntracks(), vtx.njets[mfv::JByNtracks], vtx.bs2derr, vtx.drrms());
       for (size_t i = 0, n = vtx.ntracks(); i < n; ++i) {
         h_rec_dxy->Fill(vtx.track_dxy[i]);
-        sum += reco::deltaR(vtx.track_eta[i], vtx.track_phi[i], vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly])
-             * reco::deltaR(vtx.track_eta[i], vtx.track_phi[i], vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]);
-        //printf("\ttrack %2d: qpt = %7.3f, eta = %6.3f, phi = %6.3f, dxy = %5.3f, drs = %5.3f\n", int(i), vtx.track_qpt[i], vtx.track_eta[i], vtx.track_phi[i], vtx.track_dxy[i],
-        //       reco::deltaR(vtx.track_eta[i], vtx.track_phi[i], vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly])
-        //     * reco::deltaR(vtx.track_eta[i], vtx.track_phi[i], vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]));
+        sum += reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly])
+             * reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]);
+        //printf("\ttrack %2d: qpt = %7.3f, eta = %6.3f, phi = %6.3f, dxy = %5.3f, drs = %5.3f\n", int(i), vtx.track_qpt[i], vtx.track_eta(i), vtx.track_phi(i), vtx.track_dxy[i],
+        //       reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly])
+        //     * reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]));
         //printf("\t");
         for (size_t j = i+1; j < n; ++j) {
-        //  printf("\t%5.3f", sqrt((vtx.track_eta[i]-vtx.track_eta[j])*(vtx.track_eta[i]-vtx.track_eta[j]) + (vtx.track_phi[i]-vtx.track_phi[j])*(vtx.track_phi[i]-vtx.track_phi[j])));
-          h_rec_trackpair_deta->Fill(fabs(vtx.track_eta[i] - vtx.track_eta[j]));
-          h_rec_trackpair_dphi->Fill(fabs(reco::deltaPhi(vtx.track_phi[i], vtx.track_phi[j])));
-          h_rec_trackpair_dr->Fill(reco::deltaR(vtx.track_eta[i], vtx.track_phi[i], vtx.track_eta[j], vtx.track_phi[j]));
+        //  printf("\t%5.3f", sqrt((vtx.track_eta(i)-vtx.track_eta(j))*(vtx.track_eta(i)-vtx.track_eta(j)) + (vtx.track_phi(i)-vtx.track_phi(j))*(vtx.track_phi(i)-vtx.track_phi(j))));
+          h_rec_trackpair_deta->Fill(fabs(vtx.track_eta(i) - vtx.track_eta(j)));
+          h_rec_trackpair_dphi->Fill(fabs(reco::deltaPhi(vtx.track_phi(i), vtx.track_phi(j))));
+          h_rec_trackpair_dr->Fill(reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.track_eta(j), vtx.track_phi(j)));
         }
         //printf("\n");
 
         h_rec_tracks_qpt->Fill(vtx.track_qpt[i]);
-        h_rec_tracks_eta->Fill(vtx.track_eta[i]);
-        h_rec_tracks_phi->Fill(vtx.track_phi[i]);
-        h_rec_tracks_deta->Fill(fabs(vtx.track_eta[i] - vtx.eta[mfv::PTracksOnly]));
-        h_rec_tracks_dphi->Fill(fabs(reco::deltaPhi(vtx.track_phi[i], vtx.phi[mfv::PTracksOnly])));
-        h_rec_tracks_dr->Fill(reco::deltaR(vtx.track_eta[i], vtx.track_phi[i], vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]));
+        h_rec_tracks_eta->Fill(vtx.track_eta(i));
+        h_rec_tracks_phi->Fill(vtx.track_phi(i));
+        h_rec_tracks_deta->Fill(fabs(vtx.track_eta(i) - vtx.eta[mfv::PTracksOnly]));
+        h_rec_tracks_dphi->Fill(fabs(reco::deltaPhi(vtx.track_phi(i), vtx.phi[mfv::PTracksOnly])));
+        h_rec_tracks_dr->Fill(reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]));
 
       }
       h_rec_ntracks->Fill(vtx.ntracks());
