@@ -2,19 +2,15 @@
 
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 
 process.TFileService.fileName = 'prescales.root'
+global_tag(process, which_global_tag(is_mc=False))
 
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v2', '')
-
-process.source.fileNames = [
-    '/store/data/Run2015D/SingleMuon/AOD/PromptReco-v3/000/256/729/00000/0283F591-A25F-E511-93AB-02163E011BBE.root'
-    ]
+process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/PromptReco-v4/000/260/627/00000/78D8E6A7-6484-E511-89B4-02163E0134F6.root']
 
 add_analyzer(process, 'MFVTriggerPrescales')
-process.maxEvents.input = 100
+process.maxEvents.input = -1
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples

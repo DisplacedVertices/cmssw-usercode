@@ -62,7 +62,7 @@ PRESCALES::PRESCALES(TTree *tree) : fChain(0)
       if (!f || !f->IsOpen()) {
          f = new TFile("all.root");
       }
-      TDirectory * dir = (TDirectory*)f->Get("all.root:/QuadJetTrigPrescales");
+      TDirectory * dir = (TDirectory*)f->Get("all.root:/MFVTriggerPrescales");
       dir->GetObject("t",tree);
 
    }
@@ -160,15 +160,21 @@ void PRESCALES::Loop() {
   }
   fclose(f);
   printf("%lu %f\n", lls.size(), lumtot/1e9);
-  assert(lls.size() == 199161);
-  assert(fabs(lumtot - 18204593068.9) < 1);
+  for (int i = 0; i < 10; ++i)
+    printf("***************** should've been 40520 ***************\n");
+  assert(lls.size() == 40504);
+  assert(fabs(lumtot - 2630245431.953) < 1);
 
   std::map<std::pair<unsigned, unsigned>, bool> seen;
   std::map<std::pair<unsigned, unsigned>, bool> nolumi;
 
-  std::set<std::pair<unsigned, unsigned> > json[9][7];
-  std::map<std::pair<int, int>, double> intlumi[7];
-  const char* names[7] = {
+  const int NL1 = 4;
+  const int NHLT = 2;
+  const int NCAT = 7;
+
+  std::set<std::pair<unsigned, unsigned> > json[NL1][NCAT];
+  std::map<std::pair<int, int>, double> intlumi[NCAT];
+  const char* names[NCAT] = {
     "all ls",
     "ls with tot. presc. != 0",
     "ls with tot. presc. != 0, scaled",
@@ -178,11 +184,11 @@ void PRESCALES::Loop() {
     "ls where bit mask == 0, tot. presc. == 1"
   };
 
-  const char* l1s[9] = {"L1_QuadJetC32", "L1_QuadJetC36", "L1_QuadJetC40", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_DoubleJetC52", "L1_DoubleJetC56", "L1_DoubleJetC64"};
-  const int hlt_vers[4] = {1,2,3,5};
+  const char* l1s[NL1] = {"L1_HTT100", "L1_HTT125", "L1_HTT150", "L1_HTT175"};
+  const int hlt_vers[NHLT] = {1,2};
 
-  int check_pass_l1[9][2][2] = {{{0}}};
-  int check_l1_mask[9][2][2] = {{{0}}};
+  int check_pass_l1[NL1][2][2] = {{{0}}};
+  int check_l1_mask[NL1][2][2] = {{{0}}};
 
   int i_run_ls = 0;
 
@@ -195,14 +201,14 @@ void PRESCALES::Loop() {
       fflush(stdout);
     }
 
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < NL1; ++i) {
       ++check_pass_l1[i][pass_l1_premask->at(i)][pass_l1->at(i)];
       ++check_l1_mask[i][l1_mask->at(i)][pass_l1->at(i)];
     }
 
     {
       const int c = std::accumulate(l1_was_seed->begin(), l1_was_seed->end(), 0);
-      assert(c == 3 || c == 9);
+      assert(c == 2 || c == NL1); // only two l1 bits 150,175 were seeds for HLT_v1
     }
 
     std::pair<unsigned, unsigned> run_ls = {run, lumi};
@@ -215,8 +221,8 @@ void PRESCALES::Loop() {
       continue;
     }
 
-    for (int l1 = 0; l1 < 9; ++l1) {
-      for (int hlt = 0; hlt < 4; ++hlt) {
+    for (int l1 = 0; l1 < NL1; ++l1) {
+      for (int hlt = 0; hlt < NHLT; ++hlt) {
         std::pair<int, int> l1_hlt = {l1, hlt};
 
         double il = lls[run_ls] / 1e9;
@@ -260,27 +266,27 @@ void PRESCALES::Loop() {
   }
 
   printf("check_l1_mask:\n");
-  for (int l1 = 0; l1 < 9; ++l1)
+  for (int l1 = 0; l1 < NL1; ++l1)
     printf("%25s: %20i %20i %20i %20i\n", l1s[l1], check_l1_mask[l1][0][0],check_l1_mask[l1][0][1],check_l1_mask[l1][1][0],check_l1_mask[l1][1][1]);
   printf("check_pass_l1:\n");
-  for (int l1 = 0; l1 < 9; ++l1)
+  for (int l1 = 0; l1 < NL1; ++l1)
     printf("%25s: %20i %20i %20i %20i\n", l1s[l1], check_pass_l1[l1][0][0],check_pass_l1[l1][0][1],check_pass_l1[l1][1][0],check_pass_l1[l1][1][1]);
 
   system("mkdir -p jsons");
 
-  for (int w = 0; w < 7; ++w) {
+  for (int w = 0; w < NCAT; ++w) {
     printf("========================================================================\nw = %i: %s\n", w, names[w]);
-    for (int l1 = 0; l1 < 9; ++l1) {
+    for (int l1 = 0; l1 < NL1; ++l1) {
       double sum = 0;
 
-      for (int hlt = 0; hlt < 4; ++hlt) {
+      for (int hlt = 0; hlt < NHLT; ++hlt) {
         std::pair<int, int> l1_hlt = {l1, hlt};
         double il = intlumi[w][l1_hlt];
         sum += il;
-        printf("%25s  HLT_QuadJet50_v%i   %f\n", l1s[l1], hlt_vers[hlt], il);
+        printf("%25s  HLT_PFHT800_v%i   %f\n", l1s[l1], hlt_vers[hlt], il);
       }
 
-      printf("\n%25s  HLT_QuadJet50 tot  %f   %lu LS in json\n--------------------------------------------------------------------\n", l1s[l1], sum, json[l1][w].size());
+      printf("\n%25s  HLT_PFHT800 tot  %f   %lu LS in json\n--------------------------------------------------------------------\n", l1s[l1], sum, json[l1][w].size());
       char json_fn[1024];
       snprintf(json_fn, 1024, "jsons/%s--%s.json", l1s[l1], names[w]);
       write_json(json_fn, json[l1][w]);
