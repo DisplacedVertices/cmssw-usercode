@@ -99,7 +99,7 @@ void MFVTriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& s
 void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   // Not clear how to use L1GtUtils in beginLumi so just do the below once per lumisec
   auto ls = std::make_pair(event.id().run(), event.luminosityBlock());
-  if (ls_seen[ls] == true)
+  if (ls_seen[ls])
     return;
   ls_seen[ls] = true;
 
