@@ -12,10 +12,14 @@
 class MFVTriggerPrescales : public edm::EDAnalyzer {
 public:
   explicit MFVTriggerPrescales(const edm::ParameterSet&);
+  static const int NL1;
+  static const int NHLT;
 
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+
+  std::map<std::pair<unsigned, unsigned>, bool> ls_seen;
 
   L1GtUtils l1_cfg;
   HLTConfigProvider hlt_cfg;
@@ -38,20 +42,23 @@ private:
     void clear() { 
       run = lumi = 0;
       event = 0;
-      l1_was_seed.assign(9, 0);
-      l1_prescale.assign(9, 0);
-      l1_mask.assign(9, 0);
-      pass_l1_premask.assign(9, 0);
-      pass_l1.assign(9, 0);
-      hlt_found.assign(4, 0);
-      hlt_prescale.assign(4, 0);
-      pass_hlt.assign(4, 0);
+      l1_was_seed.assign(NL1, 0);
+      l1_prescale.assign(NL1, 0);
+      l1_mask.assign(NL1, 0);
+      pass_l1_premask.assign(NL1, 0);
+      pass_l1.assign(NL1, 0);
+      hlt_found.assign(NHLT, 0);
+      hlt_prescale.assign(NHLT, 0);
+      pass_hlt.assign(NHLT, 0);
     }
   };
 
   TTree* tree;
   tree_t nt;
 };
+
+const int MFVTriggerPrescales::NL1 = 4;
+const int MFVTriggerPrescales::NHLT = 2;
 
 MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg) {
   edm::Service<TFileService> fs;
@@ -90,6 +97,12 @@ void MFVTriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& s
 }
 
 void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  // Not clear how to use L1GtUtils in beginLumi so just do the below once per lumisec
+  auto ls = std::make_pair(event.id().run(), event.luminosityBlock());
+  if (ls_seen[ls] == true)
+    return;
+  ls_seen[ls] = true;
+
   nt.clear();
   nt.run  = event.id().run();
   nt.lumi = event.luminosityBlock();
@@ -102,15 +115,15 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
   const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
   const size_t npaths = hlt_names.size();
 
-  const std::vector<std::string> all_l1_seeds = { "L1_QuadJetC32", "L1_QuadJetC36", "L1_QuadJetC40", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_DoubleJetC52", "L1_DoubleJetC56", "L1_DoubleJetC64" };
-  //const size_t nl1 = all_l1_seeds.size();
-  const std::vector<int> hlt_versions = {1,2,3,5};
-  const size_t nhlt = hlt_versions.size();
+  const std::vector<std::string> all_l1_seeds = { "L1_HTT100", "L1_HTT125", "L1_HTT150", "L1_HTT175" };
+  const std::vector<int> hlt_versions = {1,2};
+  assert(all_l1_seeds.size() == NL1);
+  assert(hlt_versions.size() == NHLT);
 
-  for (size_t ihlt = 0; ihlt < nhlt; ++ihlt) {
+  for (size_t ihlt = 0; ihlt < NHLT; ++ihlt) {
     const int hlt_version = hlt_versions[ihlt];
     char path[1024];
-    snprintf(path, 1024, "HLT_QuadJet50_v%i", hlt_version);
+    snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
     bool found = false;
     if ((found = nt.hlt_found[ihlt] = hlt_cfg.triggerIndex(path) != hlt_cfg.size()))
       nt.hlt_prescale[ihlt] = hlt_cfg.prescaleValue(event, setup, path);
