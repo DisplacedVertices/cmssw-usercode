@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages
 
-def global_tag(is_mc):
+def which_global_tag(is_mc):
     return '74X_mcRun2_asymptotic_v4' if is_mc else '74X_dataRun2_v5'
 
 def pat_tuple_process(customize_before_unscheduled, is_mc):
@@ -22,7 +22,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, global_tag(is_mc), '')
+    process.GlobalTag = GlobalTag(process.GlobalTag, which_global_tag(is_mc), '')
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True),
                                          wantSummary = cms.untracked.bool(False),
