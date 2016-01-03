@@ -152,6 +152,7 @@ __all__ = [
     'qcd_samples',
     'ttbar_samples',
     'mfv_signal_samples',
+    'xx4j_samples',
     'leptonic_background_samples',
 #    'ttbar_systematics_samples',
 #    'auxiliary_background_samples',
