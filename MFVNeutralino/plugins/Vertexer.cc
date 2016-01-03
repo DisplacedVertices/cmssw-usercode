@@ -559,7 +559,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const double dxypv = tk->dxy(primary_vertex.position());
     const double sigmadxybs = dxybs / tk->dxyError();
     const double sigmadxypv = dxypv / tk->dxyError();
-    const int nhits = tk->hitPattern().numberOfValidHits();
+    const int nhits = tk->hitPattern().numberOfValidHits(); // JMTBAD this is supposed to be strip hits...
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
     bool use = pt > min_all_track_pt && fabs(dxybs) > min_all_track_dxy && fabs(sigmadxybs) > min_all_track_sigmadxy && fabs(sigmadxypv) > min_all_track_sigmadxypv && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
     SpatialExtents se = tracker_extents.extentInRAndZ(tk->hitPattern(),npxhits != 0);
