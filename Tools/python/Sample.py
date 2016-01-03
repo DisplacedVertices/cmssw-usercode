@@ -11,6 +11,7 @@ from JMTucker.Tools.general import big_warn, typed_from_argv
 class Dataset(object):
     HLT_NAME = 'HLT'
     DBS_INST = 'global'
+    AAA = []
 
     def __init__(self, dataset, nevents, **kwargs):
         self.dataset = dataset
@@ -18,6 +19,7 @@ class Dataset(object):
 
         self.hlt_name = kwargs.get('hlt_name', self.HLT_NAME)
         self.dbs_inst = kwargs.get('dbs_inst', self.DBS_INST)
+        self.aaa = kwargs.get('aaa', self.AAA)
         self.filenames = kwargs.get('filenames', [])
 
 ########################################################################
@@ -69,6 +71,14 @@ class Sample(object):
     @dbs_inst.setter
     def dbs_inst(self, val):
         self.datasets[self.curr_dataset].dbs_inst = val
+
+    @property
+    def aaa(self):
+        return self.datasets[self.curr_dataset].aaa
+
+    @aaa.setter
+    def aaa(self, val):
+        self.datasets[self.curr_dataset].aaa = val
 
     @property
     def filenames(self):

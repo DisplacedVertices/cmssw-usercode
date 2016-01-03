@@ -52,6 +52,7 @@ for s in mfv_signal_samples:
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.filter_eff = 1.
+    s.aaa = ['T2_US_Caltech', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
 
 xx4j_samples = [
     MCSample('xx4j_tau01000um_M0700', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 10000),
