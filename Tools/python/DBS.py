@@ -3,6 +3,7 @@
 import os, sys
 from collections import defaultdict
 from pprint import pprint
+from FWCore.PythonUtilities.LumiList import LumiList
 
 # Could use DBSAPI or DASAPI or whatever, but I'm too lazy to learn it.
 
@@ -66,6 +67,41 @@ def sites_for_dataset(dataset, instance='global'):
     return das_query(instance)('dataset=%s site' % dataset,
                                line_filter=lambda s: s.startswith('T'))
 
+def _file_run_lumi_obj(dataset, instance='global'):
+    json_str = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
+    true = True # lol
+    false = False
+    #open('json_str','wt').write(json_str)
+    #json_str = open('json_str2').read()
+    obj = eval(json_str) # json.loads doesn't work...
+    #pprint(obj)
+
+    assert type(obj) == dict and sorted(obj.keys()) == ['apilist', 'ctime', 'data', 'incache', 'mongo_query', 'nresults', 'status', 'timestamp']
+    obj = obj['data']
+    return obj
+
+def ll_for_dataset(dataset, instance='global'):
+    obj = _file_run_lumi_obj(dataset, instance)
+    compact_list = defaultdict(list)
+    for x in obj:
+        lumis = x['lumi']
+        assert len(lumis) == 1
+        lumis = lumis[0]['number']
+        assert type(lumis) == list
+        for rng in lumis:
+            assert type(rng) == list and len(rng) == 2
+        run = x['run']
+        assert len(run) == 1
+        run = x['run'][0]['run_number']
+        assert type(run) == int
+
+        compact_list[run].extend(lumis)
+
+    return LumiList(compactList=compact_list)
+
+def json_for_dataset(json_fn, dataset, instance='global'):
+    ll_for_dataset(dataset, instance).writeJSON(json_fn)
+
 def files_for_events(run_events, dataset, instance='global'):
     run_lumis = defaultdict(list)
     for x in run_events: # list of runs, or list of (run, event), or list of (run, lumi, event)
@@ -78,16 +114,7 @@ def files_for_events(run_events, dataset, instance='global'):
 
     files = []
 
-    json_str = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
-    true = True # lol
-    false = False
-    #open('json_str','wt').write(json_str)
-    #json_str = open('json_str2').read()
-    obj = eval(json_str) # json.loads doesn't work...
-    #pprint(obj)
-
-    if type(obj) == dict and sorted(obj.keys()) == ['apilist', 'ctime', 'data', 'incache', 'mongo_query', 'nresults', 'status', 'timestamp']:
-        obj = obj['data']
+    obj = _file_run_lumi_obj(dataset, instance)
 
     for x in obj:
         #assert len(x['run']) == len(x['lumi'])
@@ -120,10 +147,13 @@ def files_for_events(run_events, dataset, instance='global'):
     return files
 
 if __name__ == '__main__':
-    execfile('events_to_debug.txt')
+    pass
+
+    #execfile('events_to_debug.txt')
     #pprint(files_for_events(duh, 'fuh'))
-    #raise 1
-    pprint(files_for_events(duh, '/Cosmics/Commissioning2015-CosmicSP-CosmicsSP_07Feb2015-v2/RAW-RECO'))
+    #pprint(files_for_events(duh, '/Cosmics/Commissioning2015-CosmicSP-CosmicsSP_07Feb2015-v2/RAW-RECO'))
     #from JMTucker.Tools.Samples import *
     #for s in data_samples[:5]:
     #    pprint(files_for_events(duh, s.dataset))
+
+    #json_for_dataset('jethtv4.json', '/JetHT/Run2015D-PromptReco-v4/AOD')
