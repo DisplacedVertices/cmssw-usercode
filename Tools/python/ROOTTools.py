@@ -1469,8 +1469,6 @@ def set_style(date_pages=False):
     ROOT.gStyle.SetOptFit(2222)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
-    ROOT.gStyle.SetMarkerSize(.1)
-    ROOT.gStyle.SetMarkerStyle(8)
     ROOT.gStyle.SetGridStyle(3)
     ROOT.gStyle.SetStatW(0.25)
     ROOT.gStyle.SetStatFormat('6.4g')
