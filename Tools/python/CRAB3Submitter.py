@@ -135,7 +135,8 @@ class CRABSubmitter:
         self.cfg_template.Data.publication = bool(publish_name)
         self.cfg_template.Data.outputDatasetTag = publish_name
 
-        if aaa:
+        self.aaa = aaa
+        if self.aaa:
             self.cfg_template.Data.ignoreLocality = True
             self.cfg_template.Site.whitelist = self.aaa_locations
 
@@ -151,6 +152,10 @@ class CRABSubmitter:
 
         if self.job_control_from_sample:
             sample.job_control(cfg.Data)
+
+        if sample.aaa:
+            self.cfg_template.Data.ignoreLocality = True
+            self.cfg_template.Site.whitelist = sample.aaa
 
         if self.cfg_modifier is not None:
             self.cfg_modifier(cfg, sample)
