@@ -50,10 +50,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.xx4j_samples + Samples.mfv_signal_samples
 
-    cs = CRABSubmitter('TriggerFilterCheckv3',
+    cs = CRABSubmitter('TrigFiltChkV3',
                        splitting = 'FileBased',
-                       units_per_job = 20,
+                       units_per_job = 10,
                        total_units = -1,
-                       aaa = True,
                        )
     cs.submit_all(samples)

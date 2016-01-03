@@ -142,7 +142,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        publish_name = batch_name.lower(),
-                       aaa = True,
                        )
 
     cs.submit_all(samples)
