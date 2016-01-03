@@ -5,3 +5,4 @@ crab.cfg
 plots
 events_to_debug
 temp
+*.haddlog
