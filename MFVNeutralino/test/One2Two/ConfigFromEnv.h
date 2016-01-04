@@ -109,6 +109,9 @@ namespace jmt {
     double get_double(const char* name)             const { return _get(name, parse_double);      }
     double get_double(const char* name, double def) const { return _get(name, parse_double, def); }
 
+    long double get_long_double(const char* name)                  const { return _get(name, parse_long_double);      }
+    long double get_long_double(const char* name, long double def) const { return _get(name, parse_long_double, def); }
+
     float get_float(const char* name)             const { return _get(name, parse_float);      }
     float get_float(const char* name, float def)  const { return _get(name, parse_float, def); }
 

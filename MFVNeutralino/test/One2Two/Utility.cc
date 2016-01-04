@@ -35,6 +35,10 @@ namespace jmt {
     return sscanf(s, "%lf", &v) == 1;
   }
 
+  bool parse_long_double(const char* s, long double& v) {
+    return sscanf(s, "%Lf", &v) == 1;
+  }
+
   bool parse_float(const char* s, float& v) {
     return sscanf(s, "%f", &v) == 1;
   }
