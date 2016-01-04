@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, cPickle
 from collections import defaultdict
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
@@ -80,21 +80,31 @@ def _file_run_lumi_obj(dataset, instance='global'):
     obj = obj['data']
     return obj
 
+def _file_from_json(x):
+    file = o['file']
+    assert len(file) == 1
+    file = file[0]['name']
+    assert file.startswith('/store')
+    return file
+
+def _run_lumis_from_json(x):
+    lumis = x['lumi']
+    assert len(lumis) == 1
+    lumis = lumis[0]['number']
+    assert type(lumis) == list
+    for rng in lumis:
+        assert type(rng) == list and len(rng) == 2
+    run = x['run']
+    assert len(run) == 1
+    run = x['run'][0]['run_number']
+    assert type(run) == int
+    return run, lumis
+
 def ll_for_dataset(dataset, instance='global'):
     obj = _file_run_lumi_obj(dataset, instance)
     compact_list = defaultdict(list)
     for x in obj:
-        lumis = x['lumi']
-        assert len(lumis) == 1
-        lumis = lumis[0]['number']
-        assert type(lumis) == list
-        for rng in lumis:
-            assert type(rng) == list and len(rng) == 2
-        run = x['run']
-        assert len(run) == 1
-        run = x['run'][0]['run_number']
-        assert type(run) == int
-
+        run, lumis = _run_lumis_from_json(x)
         compact_list[run].extend(lumis)
 
     return LumiList(compactList=compact_list)
@@ -156,4 +166,31 @@ if __name__ == '__main__':
     #for s in data_samples[:5]:
     #    pprint(files_for_events(duh, s.dataset))
 
-    #json_for_dataset('jethtv4.json', '/JetHT/Run2015D-PromptReco-v4/AOD')
+    ##obj = _file_run_lumi_obj('/JetHT/Run2015D-PromptReco-v4/AOD')
+    ##cPickle.dump(obj, open('obj','wb'), -1)
+    #obj = cPickle.load(open('obj','rb'))
+    #d = []
+    #for o in obj:
+    #    file = _file_from_json(o)
+    #    run, lumis = _run_lumis_from_json(o)
+    #    d.append((LumiList(compactList={run: lumis}), file))
+    #
+    ##n = len(d)
+    ##for ix in xrange(n):
+    ##    print ix
+    ##    for iy in xrange(ix+1, n):
+    ##        assert not (d[ix][0] & d[iy][0])
+    #
+    #files = []
+    #ll = LumiList('todo.leftaftercomplete2partial.json')
+    #for r,l in ll.getLumis():
+    #    found = False
+    #    for tll, file in d:
+    #        if tll.contains(r,l):
+    #            #print r,l,file
+    #            found = True
+    #            files.append(file)
+    #    if not found:
+    #        print 'did not find for', r, l
+
+                
