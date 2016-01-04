@@ -18,6 +18,8 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "ROOTTools.h"
 #include "Utility.h"
 
+long double rho_tail_norm;
+long double rho_tail_slope;
 double phi_a;
 double phi_b;
 double clear_mu;
@@ -93,7 +95,7 @@ double func_rho(double* x, double*) {
   else if (rho >= 0.012 && rho < 0.016)
     f = 1.83632e7L;
   else
-    f = 1.64602e8L * expl(-214.258L * rho) + 3e10L * expl(-63.2355L * powl(rho, 0.5L)) + 3e8L * expl(-20.6511L * powl(rho, 0.15L));
+    f = 1.64602e8L * expl(-214.258L * rho) + 3e10L * expl(-63.2355L * powl(rho, 0.5L)) + rho_tail_norm * expl(rho_tail_slope * powl(rho, 0.15L));
   return double(f);
 }
 
@@ -158,6 +160,8 @@ int main(int, char**) {
   const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 100000000L);
   const double oversample = env.get_double("oversample", 1);
+  rho_tail_norm = env.get_long_double("rho_tail_norm", 3e8L);
+  rho_tail_slope = env.get_long_double("rho_tail_slope", -20.6511L);
   phi_a = env.get_double("phi_a", 1);
   phi_b = env.get_double("phi_b", 4);
   clear_mu  = env.get_double("clear_mu",  0.0295);
