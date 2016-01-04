@@ -19,6 +19,7 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
 
+  const bool prints;
   std::map<std::pair<unsigned, unsigned>, bool> ls_seen;
 
   L1GtUtils l1_cfg;
@@ -60,7 +61,9 @@ private:
 const int MFVTriggerPrescales::NL1 = 4;
 const int MFVTriggerPrescales::NHLT = 2;
 
-MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg) {
+MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
+  : prints(cfg.getUntrackedParameter<bool>("prints", false))
+{
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
@@ -80,27 +83,32 @@ void MFVTriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& s
   bool changed = true;
   if (!hlt_cfg.init(run, setup, "HLT", changed))
     throw cms::Exception("MFVTriggerPrescales", "HLTConfigProvider::init failed with process name HLT");
-#if 0
-  hlt_cfg.dump("ProcessPSet");
-  hlt_cfg.dump("ProcessName");
-  hlt_cfg.dump("GlobalTag");
-  hlt_cfg.dump("TableName");
-  hlt_cfg.dump("Triggers");
-  hlt_cfg.dump("TriggerSeeds");
-  hlt_cfg.dump("Modules");
-  hlt_cfg.dump("StreamNames");
-  hlt_cfg.dump("Streams");
-  hlt_cfg.dump("DatasetNames");
-  hlt_cfg.dump("Datasets");
-  hlt_cfg.dump("PrescaleTable");
-#endif
+
+  if (prints) {
+    hlt_cfg.dump("ProcessPSet");
+    hlt_cfg.dump("ProcessName");
+    hlt_cfg.dump("GlobalTag");
+    hlt_cfg.dump("TableName");
+    hlt_cfg.dump("Triggers");
+    hlt_cfg.dump("TriggerSeeds");
+    hlt_cfg.dump("Modules");
+    hlt_cfg.dump("StreamNames");
+    hlt_cfg.dump("Streams");
+    hlt_cfg.dump("DatasetNames");
+    hlt_cfg.dump("Datasets");
+    hlt_cfg.dump("PrescaleTable");
+  }
 }
 
 void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  if (prints) printf("MFVTriggerPrescales r %u l %u e %llu\n", event.id().run(), event.luminosityBlock(), event.id().event());
+
   // Not clear how to use L1GtUtils in beginLumi so just do the below once per lumisec
   auto ls = std::make_pair(event.id().run(), event.luminosityBlock());
-  if (ls_seen[ls])
+  if (ls_seen[ls]) {
+    if (prints) printf("already seen, skipping\n");
     return;
+  }
   ls_seen[ls] = true;
 
   nt.clear();
@@ -134,6 +142,8 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
 
     nt.pass_hlt[ihlt] = found ? hlt_results->accept(ipath) : false;
 
+    if (prints) printf("ihlt %lu path %s found? %i pass? %i prescale %i\n", ihlt, path, int(found), int(nt.pass_hlt[ihlt]), nt.hlt_prescale[ihlt]);
+
     if (!found)
       continue;
 
@@ -142,6 +152,7 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
       throw cms::Exception("BadAssumption") << "more than one seed returned: " << v.size();
 
     std::string s = v[0].second;
+    if (prints) printf("L1 seed %s\n", s.c_str());
     const std::string delim = " OR ";
     while (s.size()) {
       const size_t pos = s.find(delim);
@@ -170,7 +181,9 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
       nt.pass_l1[il1] = l1_cfg.decisionAfterMask(event, l1_path, l1_err);
       if (l1_err != 0)
         throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting decision";
-      
+
+      if (prints) printf("%s: prescale %i mask %i pass premask? %i pass? %i\n", l1_path.c_str(), nt.l1_prescale[il1], nt.l1_mask[il1], int(nt.pass_l1_premask[il1]), int(nt.pass_l1[il1]));
+
       if (pos == std::string::npos)
         break;
       else
