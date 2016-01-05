@@ -6,7 +6,8 @@
 #include "TLorentzVector.h"
 
 namespace mfv {
-  static const int n_trigger_paths = 17;
+  static const int n_hlt_paths = 19;
+  static const int n_l1_paths = 5;
   static const int n_clean_paths = 13;
   static const int n_vertex_seed_pt_quantiles = 7;
 }
@@ -15,6 +16,9 @@ struct MFVEvent {
   typedef unsigned char uchar;
   typedef unsigned short ushort;
   typedef unsigned int uint;
+
+  static bool test_bit(uint64_t v, size_t i) { return bool((v >> i) & 1); }
+  static void set_bit(uint64_t& v, size_t i, bool x) { v ^= (-int(x) ^ v) & (1 << i); }
 
   MFVEvent() {
     gen_valid = 0;
@@ -30,15 +34,7 @@ struct MFVEvent {
     for (int i = 0; i < 3; ++i) {
       gen_pv[i] = 0;
     }
-    for (int i = 0; i < mfv::n_trigger_paths; ++i)
-      pass_trigger[i] = 0;
-    for (int i = 0; i < 9; ++i) {
-      l1_prescale[i] = 0;
-      l1_pass[i] = 0;
-    }
-    hlt_prescale = 0;
-    for (int i = 0; i < mfv::n_clean_paths; ++i)
-      pass_clean[i] = 0;
+    pass_ = 0;
     for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
       vertex_seed_pt_quantiles[i] = 0;
   }
@@ -98,18 +94,24 @@ struct MFVEvent {
                gen_lsp_decay[0*3+2] - gen_lsp_decay[1*3+2]);
   }
 
-  bool pass_trigger[mfv::n_trigger_paths];
-  ushort l1_prescale[9];
-  bool l1_pass[9];
-  ushort hlt_prescale;
-  bool pass_clean[mfv::n_clean_paths]; // JMTBAD
+  uint64_t pass_;
+  bool pass_hlt(size_t i)           const { assert(i  < mfv::n_hlt_paths);                                                                                                                                       return test_bit(pass_, i   ); }
+  void pass_hlt(size_t i, bool x)         { assert(i  < mfv::n_hlt_paths);                                                                                                                                               set_bit(pass_, i, x); }
+  bool found_hlt(size_t i)          const { assert(i >= mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths); i -= mfv::n_hlt_paths;                                                                                      return test_bit(pass_, i   ); }
+  void found_hlt(size_t i, bool x)        { assert(i >= mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths); i -= mfv::n_hlt_paths;                                                                                              set_bit(pass_, i, x); }
+  bool pass_l1(size_t i)            const { assert(i >= 2*mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths + mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths;                                                                return test_bit(pass_, i   ); }
+  void pass_l1(size_t i, bool x)          { assert(i >= 2*mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths + mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths;                                                                        set_bit(pass_, i, x); }
+  bool found_l1(size_t i)           const { assert(i >= 2*mfv::n_hlt_paths + mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths + mfv::n_l1_paths;                          return test_bit(pass_, i   ); }
+  void found_l1(size_t i, bool x)         { assert(i >= 2*mfv::n_hlt_paths + mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths + mfv::n_l1_paths;                                  set_bit(pass_, i, x); }
+  bool pass_clean(size_t i)         const { assert(i >= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths + mfv::n_clean_paths); i -= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths; return test_bit(pass_, i   ); }
+  void pass_clean(size_t i, bool x)       { assert(i >= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths + mfv::n_clean_paths); i -= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths;         set_bit(pass_, i, x); }
 
   bool pass_clean_all() const {
     bool pass = true;
     const int N_all = 13;
     const int clean_all[N_all] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
     for (int i = 0; i < N_all; ++i)
-      pass = pass && pass_clean[clean_all[i]];
+      pass = pass && pass_clean(clean_all[i]);
     return pass;
   }
 

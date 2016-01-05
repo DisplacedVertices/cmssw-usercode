@@ -12,7 +12,7 @@
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
@@ -27,7 +27,6 @@ class MFVEventProducer : public edm::EDProducer {
 public:
   explicit MFVEventProducer(const edm::ParameterSet&);
   void produce(edm::Event&, const edm::EventSetup&);
-  virtual void beginRun(edm::Run&, const edm::EventSetup&);
 
 private:
   const edm::InputTag trigger_results_src;
@@ -57,7 +56,6 @@ private:
   bool warned_non_mfv;
 
   L1GtUtils l1_cfg;
-  HLTConfigProvider hlt_cfg;
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
@@ -90,14 +88,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     warned_non_mfv(false)
 {
   produces<MFVEvent>();
-}
-
-void MFVEventProducer::beginRun(edm::Run& run, const edm::EventSetup& setup) {
-  bool changed = true;
-  if (!hlt_cfg.init(run, setup, trigger_results_src.process(), changed))
-    throw cms::Exception("MFVEventProducer") << "HLTConfigProvider::init failed with process name " << trigger_results_src;
-  //if (changed)
-  //  hlt_cfg.dump("PrescaleTable");
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -200,68 +190,52 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 
   TriggerHelper trig_helper(event, trigger_results_token);
-  mfv::trigger_decision(trig_helper, mevent->pass_trigger);
 
-#if 0  
+  const std::string hlt_paths[mfv::n_hlt_paths] = {
+    "HLT_PFHT650_v",
+    "HLT_PFHT800_v",
+    "HLT_PFHT900_v",
+    "HLT_PFHT550_4Jet_v",
+    "HLT_PFHT450_SixJet40_PFBTagCSV_v",
+    "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
+    "HLT_PFHT450_SixJet40_v",
+    "HLT_PFHT400_SixJet30_v",
+    "HLT_QuadJet45_TripleCSV0p5_v",
+    "HLT_QuadJet45_DoubleCSV0p5_v",
+    "HLT_DoubleJet90_Double30_TripleCSV0p5_v",
+    "HLT_DoubleJet90_Double30_DoubleCSV0p5_v",
+    "HLT_HT650_DisplacedDijet80_Inclusive_v",
+    "HLT_HT750_DisplacedDijet80_Inclusive_v",
+    "HLT_HT500_DisplacedDijet40_Inclusive_v",
+    "HLT_HT550_DisplacedDijet40_Inclusive_v",
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
+    "HLT_HT350_DisplacedDijet80_DisplacedTrack_v",
+    "HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v"
+  };
+  
+  for (size_t i = 0; i < mfv::n_hlt_paths; ++i) {
+    auto pass_and_found = trig_helper.pass_and_found_any_version(hlt_paths[i]);
+    mevent-> pass_hlt(i, pass_and_found.first);
+    mevent->found_hlt(i, pass_and_found.second);
+  }
+
+
   l1_cfg.getL1GtRunCache(event, setup, true, false);
 
-  const std::vector<std::string> all_l1_seeds = { "L1_QuadJetC32", "L1_QuadJetC36", "L1_QuadJetC40", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_DoubleJetC52", "L1_DoubleJetC56", "L1_DoubleJetC64" };
-  //const size_t nl1 = all_l1_seeds.size();
-  const std::vector<int> hlt_versions = {1,2,3,5};
-  const size_t nhlt = hlt_versions.size();
-
-  int l1_found = 0;
-  int hlt_found = 0;
-  for (size_t ihlt = 0; ihlt < nhlt; ++ihlt) {
-    const int hlt_version = hlt_versions[ihlt];
-    char path[1024];
-    snprintf(path, 1024, "HLT_QuadJet50_v%i", hlt_version);
-    if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
-      continue;
-
-    const int hlt_prescale = hlt_cfg.prescaleValue(event, setup, path);
-    mevent->hlt_prescale = hlt_prescale > 65535 ? 65535 : hlt_prescale;
-
-    if (++hlt_found > 1)
-      throw cms::Exception("BadAssumption") << "more than one QuadJet50";
-
-    const auto& v = hlt_cfg.hltL1GTSeeds(path);
-    if (v.size() != 1)
-      throw cms::Exception("BadAssumption") << "more than one seed returned: " << v.size();
-
-    std::string s = v[0].second;
-    const std::string delim = " OR ";
-    while (s.size()) {
-      const size_t pos = s.find(delim);
-      const std::string l1_path = s.substr(0, pos);
-      const auto& itl1 = std::find(all_l1_seeds.begin(), all_l1_seeds.end(), l1_path);
-      if (itl1 == all_l1_seeds.end())
-        throw cms::Exception("BadAssumption") << "L1 seed " << l1_path << " not expected";
-      const size_t il1 = itl1 - all_l1_seeds.begin();
-
-      ++l1_found;
-
-      int l1_err;
-
-      const int l1_prescale = l1_cfg.prescaleFactor(event, l1_path, l1_err);
-      if (l1_err != 0)
-        throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting prescale";
-      mevent->l1_prescale[il1] = l1_prescale > 65535 ? 65535 : l1_prescale;
-
-      mevent->l1_pass[il1] = l1_cfg.decision(event, l1_path, l1_err);
-      if (l1_err != 0)
-        throw cms::Exception("L1Error") << "error code " << l1_err << " for path " << l1_path << " when getting decision";
-
-      if (pos == std::string::npos)
-        break;
-      else
-        s.erase(0, pos + delim.length());
+  const std::string l1_paths[mfv::n_l1_paths] = { "L1_HTT100", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_HTT200" };
+  for (size_t i = 0; i < mfv::n_l1_paths; ++i) {
+    int l1_err = 0;
+    bool pass = l1_cfg.decision(event, l1_paths[i], l1_err);
+    if (l1_err != 0) {
+      mevent-> pass_l1(i, false);
+      mevent->found_l1(i, false);
+    }
+    else {
+      mevent-> pass_l1(i, pass);
+      mevent->found_l1(i, true);
     }
   }
 
-  if (l1_found != 3 && l1_found != 9)
-    throw cms::Exception("BadAssumption") << "not the right L1 paths found: l1_found = " << l1_found;
-#endif
 
   if (cleaning_results_src.label() != "") {
     const std::string cleaning_paths[mfv::n_clean_paths] = {
@@ -281,8 +255,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     };
 
     TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
-    for (int i = 0; i < mfv::n_clean_paths; ++i)
-      mevent->pass_clean[i] = trig_helper_cleaning.pass(cleaning_paths[i]);
+
+    for (size_t i = 0; i < mfv::n_clean_paths; ++i)
+      mevent->pass_clean(i, trig_helper_cleaning.pass(cleaning_paths[i]));
   }
 
   //////////////////////////////////////////////////////////////////////

@@ -143,14 +143,14 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (use_mevent) {
     event.getByLabel(mevent_src, mevent);
 
-    if (l1_bit >= 0 && !mevent->l1_pass[l1_bit])
+    if (l1_bit >= 0 && !mevent->pass_l1(l1_bit))
       return false;
 
-    if (trigger_bit >= 0 && !mevent->pass_trigger[trigger_bit])
+    if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
       return false;
 
     if (clean_bit >= 0) {
-      if (invert_clean == mevent->pass_clean[clean_bit])
+      if (invert_clean == mevent->pass_clean(clean_bit))
         return false;
     }
 

@@ -133,13 +133,13 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     printf("          vx, vy, vz, vt    : (%11.3g, %11.3g, %11.3g, %11.3g)   (%11.3g, %11.3g, %11.3g, %11.3g)\n", mevent->gen_lsp_decay[0], mevent->gen_lsp_decay[1], mevent->gen_lsp_decay[2], gen_lsp_d3[0]/gen_lsp_p4[0].Beta(), mevent->gen_lsp_decay[3], mevent->gen_lsp_decay[4], mevent->gen_lsp_decay[5], gen_lsp_d3[1]/gen_lsp_p4[1].Beta());
     printf("          minlspdist2d: %11.3g   lspdist2d: %11.3g   lspdist3d: %11.3g\n", mevent->minlspdist2d(), mevent->lspdist2d(), mevent->lspdist3d());
     printf("          decay types:   %u   %u   partons_in_acc: %u\n", mevent->gen_decay_type[0], mevent->gen_decay_type[1], mevent->gen_partons_in_acc);
-    printf("pass triggers (n_trigger_paths = %i):\n", mfv::n_trigger_paths);
-    for (int i : mevent->pass_trigger)
-      printf("%i ", i);
+    printf("pass hlt (n_hlt_paths = %i):\n", mfv::n_hlt_paths);
+    for (int i = 0; i < mfv::n_hlt_paths; ++i)
+      printf("%i ", mevent->pass_hlt(i));
     printf("\n");
     printf("pass clean (n_clean_paths = %i):\n", mfv::n_clean_paths);
-    for (int i : mevent->pass_clean)
-      printf("%i ", i);
+    for (int i = 0; i < mfv::n_clean_paths; ++i)
+      printf("%i ", mevent->pass_clean(i));
     printf("\n");
     printf("npu: %f\n", mevent->npu);
     printf("beamspot: (%11.3g, %11.3g, %11.3g)  dxdz: %11.3g  dydz: %11.3g  widthx: %11.3g  widthy: %11.3g\n", mevent->bsx, mevent->bsy, mevent->bsz, mevent->bsdxdz, mevent->bsdydz, mevent->bswidthx, mevent->bswidthy);

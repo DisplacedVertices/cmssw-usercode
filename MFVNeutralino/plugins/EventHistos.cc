@@ -35,7 +35,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
 
-  TH1F* h_pass_trigger[mfv::n_trigger_paths];
+  TH1F* h_pass_hlt[mfv::n_hlt_paths];
   TH1F* h_pass_clean[mfv::n_clean_paths];
   TH1F* h_pass_clean_all;
   TH1F* h_passoldskim;
@@ -208,8 +208,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
 
-  for (int i = 0; i < mfv::n_trigger_paths; ++i)
-    h_pass_trigger[i] = fs->make<TH1F>(TString::Format("h_pass_trigger_%i", i), TString::Format(";pass_trigger[%i];events", i), 2, 0, 2);
+  for (int i = 0; i < mfv::n_hlt_paths; ++i)
+    h_pass_hlt[i] = fs->make<TH1F>(TString::Format("h_pass_hlt_%i", i), TString::Format(";pass_hlt[%i];events", i), 2, 0, 2);
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i] = fs->make<TH1F>(TString::Format("h_pass_clean_%i", i), TString::Format(";pass_clean[%i];events", i), 2, 0, 2);
   h_pass_clean_all = fs->make<TH1F>("h_pass_clean_all", ";pass_clean_all;events", 2, 0, 2);
@@ -400,17 +400,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  for (int i = 0; i < mfv::n_trigger_paths; ++i)
-    h_pass_trigger[i]->Fill(mevent->pass_trigger[i], w);
+  for (int i = 0; i < mfv::n_hlt_paths; ++i)
+    h_pass_hlt[i]->Fill(mevent->pass_hlt(i), w);
 
   for (int i = 0; i < mfv::n_clean_paths; ++i)
-    h_pass_clean[i]->Fill(mevent->pass_clean[i], w);
+    h_pass_clean[i]->Fill(mevent->pass_clean(i), w);
 
-  bool pass_clean_all = true;
-  const int clean_all[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
-  for (int c : clean_all)
-    pass_clean_all = pass_clean_all && mevent->pass_clean[c];
-  h_pass_clean_all->Fill(pass_clean_all, w);
+  h_pass_clean_all->Fill(mevent->pass_clean_all(), w);
 
   //////////////////////////////////////////////////////////////////////////////
 
