@@ -95,16 +95,16 @@ struct MFVEvent {
   }
 
   uint64_t pass_;
-  bool pass_hlt(size_t i)           const { assert(i  < mfv::n_hlt_paths);                                                                                                                                       return test_bit(pass_, i   ); }
-  void pass_hlt(size_t i, bool x)         { assert(i  < mfv::n_hlt_paths);                                                                                                                                               set_bit(pass_, i, x); }
-  bool found_hlt(size_t i)          const { assert(i >= mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths); i -= mfv::n_hlt_paths;                                                                                      return test_bit(pass_, i   ); }
-  void found_hlt(size_t i, bool x)        { assert(i >= mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths); i -= mfv::n_hlt_paths;                                                                                              set_bit(pass_, i, x); }
-  bool pass_l1(size_t i)            const { assert(i >= 2*mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths + mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths;                                                                return test_bit(pass_, i   ); }
-  void pass_l1(size_t i, bool x)          { assert(i >= 2*mfv::n_hlt_paths && i < 2*mfv::n_hlt_paths + mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths;                                                                        set_bit(pass_, i, x); }
-  bool found_l1(size_t i)           const { assert(i >= 2*mfv::n_hlt_paths + mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths + mfv::n_l1_paths;                          return test_bit(pass_, i   ); }
-  void found_l1(size_t i, bool x)         { assert(i >= 2*mfv::n_hlt_paths + mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths); i -= 2*mfv::n_hlt_paths + mfv::n_l1_paths;                                  set_bit(pass_, i, x); }
-  bool pass_clean(size_t i)         const { assert(i >= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths + mfv::n_clean_paths); i -= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths; return test_bit(pass_, i   ); }
-  void pass_clean(size_t i, bool x)       { assert(i >= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths && i < 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths + mfv::n_clean_paths); i -= 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths;         set_bit(pass_, i, x); }
+  bool pass_hlt(size_t i)           const { assert(i < mfv::n_hlt_paths);                                                return test_bit(pass_, i   ); }
+  void pass_hlt(size_t i, bool x)         { assert(i < mfv::n_hlt_paths);                                                        set_bit(pass_, i, x); }
+  bool found_hlt(size_t i)          const { assert(i < mfv::n_hlt_paths);   i += mfv::n_hlt_paths;                       return test_bit(pass_, i   ); }
+  void found_hlt(size_t i, bool x)        { assert(i < mfv::n_hlt_paths);   i += mfv::n_hlt_paths;                               set_bit(pass_, i, x); }
+  bool pass_l1(size_t i)            const { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths;                     return test_bit(pass_, i   ); }
+  void pass_l1(size_t i, bool x)          { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths;                             set_bit(pass_, i, x); }
+  bool found_l1(size_t i)           const { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;   return test_bit(pass_, i   ); }
+  void found_l1(size_t i, bool x)         { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;           set_bit(pass_, i, x); }
+  bool pass_clean(size_t i)         const { assert(i < mfv::n_clean_paths); i += 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths; return test_bit(pass_, i   ); }
+  void pass_clean(size_t i, bool x)       { assert(i < mfv::n_clean_paths); i += 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths;         set_bit(pass_, i, x); }
 
   bool pass_clean_all() const {
     bool pass = true;
