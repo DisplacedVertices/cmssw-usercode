@@ -7,7 +7,6 @@
 #include "DataFormats/JetReco/interface/GenJet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
-#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
