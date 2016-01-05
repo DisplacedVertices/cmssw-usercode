@@ -185,12 +185,12 @@ dyjetstollM10.add_dataset('miniaod', '/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-am
 dyjetstollM50.add_dataset('miniaod', '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM',     28825132)
 qcdmupt15    .add_dataset('miniaod', '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',    13201693)
 
-s = qcdht0500; s.add_dataset('ntuplev4', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev4_25ns-41695858013904e16284c0e9b310879f/USER', s.nevents)
-s = qcdht0700; s.add_dataset('ntuplev4', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents)
-s = qcdht1000; s.add_dataset('ntuplev4', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev4_25ns-eadcf2d3623c9773e435a99726f5d5e1/USER', s.nevents)
-s = qcdht1500; s.add_dataset('ntuplev4', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents)
-s = qcdht2000; s.add_dataset('ntuplev4', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents)
-s = ttbar; s.add_dataset('ntuplev4', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents)
+s = qcdht0500; s.add_dataset('ntuplev4', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev4_25ns-41695858013904e16284c0e9b310879f/USER', s.nevents, dbs_inst='phys03')
+s = qcdht0700; s.add_dataset('ntuplev4', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
+s = qcdht1000; s.add_dataset('ntuplev4', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev4_25ns-eadcf2d3623c9773e435a99726f5d5e1/USER', s.nevents, dbs_inst='phys03')
+s = qcdht1500; s.add_dataset('ntuplev4', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
+s = qcdht2000; s.add_dataset('ntuplev4', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
+s = ttbar; s.add_dataset('ntuplev4', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
 
 # from the trigger soup with 17 paths            # 68% CL interval
 qcdht0100     .filter_eff = 0.000e+00  # [0.000e+00, 1.840e-05]
