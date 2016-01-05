@@ -131,18 +131,18 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
     float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
     
-    mevent->flavor_code = 0;
+    mevent->gen_flavor_code = 0;
     bool saw_c = false;
     for (const reco::GenParticle& gen : *gen_particles) {
       if (is_bhadron(&gen)) {
-	mevent->flavor_code = 2;
+	mevent->gen_flavor_code = 2;
 	break;
       }
       if (is_chadron(&gen))
 	saw_c = true;
     }
-    if (saw_c && mevent->flavor_code == 0)
-      mevent->flavor_code = 1;
+    if (saw_c && mevent->gen_flavor_code == 0)
+      mevent->gen_flavor_code = 1;
 
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);

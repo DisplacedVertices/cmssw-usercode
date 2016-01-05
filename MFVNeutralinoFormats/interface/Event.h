@@ -23,7 +23,7 @@ struct MFVEvent {
   MFVEvent() {
     gen_valid = 0;
     gen_partons_in_acc = npv = pv_ntracks = 0;
-    flavor_code = 0;
+    gen_flavor_code = 0;
     gen_weight = gen_weightprod = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -72,7 +72,7 @@ struct MFVEvent {
   float gen_pv[3];
   uchar gen_decay_type[2];
   uchar gen_partons_in_acc;
-  uchar flavor_code;
+  uchar gen_flavor_code;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
