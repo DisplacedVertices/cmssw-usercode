@@ -95,6 +95,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_svdist_bs2ddist1;
   TH2F* h_bs2ddist1_bs2ddist0;
 
+  TH1F* h_vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
+
   TH1F* h_met;
   TH1F* h_metphi;
 
@@ -270,6 +272,9 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_svdist_bs2ddist0 = fs->make<TH2F>("h_svdist_bs2ddist0", ";bs2ddist0;svdist2d", 500, 0, 1, 1000, 0, 2);
   h_svdist_bs2ddist1 = fs->make<TH2F>("h_svdist_bs2ddist1", ";bs2ddist1;svdist2d", 500, 0, 1, 1000, 0, 2);
   h_bs2ddist1_bs2ddist0 = fs->make<TH2F>("h_bs2ddist1_bs2ddist0", ";bs2ddist0;bs2ddist1", 500, 0, 1, 500, 0, 1);
+
+  for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
+    h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, 50);
 
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
@@ -520,6 +525,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_svpairdist_cut->Fill(svdist);
     }
   }
+
+  for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
+    h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);
 
   h_met->Fill(mevent->met());
   h_metphi->Fill(mevent->metphi());
