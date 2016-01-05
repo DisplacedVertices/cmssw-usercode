@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 class MFVTriggerPrescales : public edm::EDAnalyzer {
