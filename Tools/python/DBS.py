@@ -81,7 +81,7 @@ def _file_run_lumi_obj(dataset, instance='global'):
     return obj
 
 def _file_from_json(x):
-    file = o['file']
+    file = x['file']
     assert len(file) == 1
     file = file[0]['name']
     assert file.startswith('/store')
