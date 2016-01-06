@@ -83,7 +83,7 @@ nosort = 'nosort' in sys.argv
 fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
 if not fns:
     dir = [x for x in sys.argv[1:] if os.path.isdir(x)][0]
-    fns = [os.path.join(dir, fn) for fn in 'qcdht0100.root qcdht0250.root qcdht0500.root qcdht1000.root ttbarhadronic.root ttbarsemilep.root ttbardilep.root'.split()]
+    fns = [os.path.join(dir, fn) for fn in 'qcdht0200.root qcdht0300.root qcdht0500.root qcdht0700.root qcdht1000.root qcdht1500.root qcdht2000.root ttbar.root'.split()]
     nosort = True
 if not nosort:
     fns.sort()
