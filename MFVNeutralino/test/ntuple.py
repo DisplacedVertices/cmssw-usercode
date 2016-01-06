@@ -15,6 +15,8 @@ batch_name = 'Ntuple' + version.upper()
 
 def customize_before_unscheduled(process):
     process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.mcStat.histos = True
+
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
