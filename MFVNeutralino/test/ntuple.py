@@ -16,9 +16,6 @@ batch_name = 'Ntuple' + version.upper()
 ####
 
 def customize_before_unscheduled(process):
-    process.load('JMTucker.Tools.MCStatProducer_cff')
-    process.mcStat.histos = True
-
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
@@ -91,6 +88,9 @@ process.out.outputCommands += [
     'drop patMETs_patCaloMet__PAT',
     'drop patMETs_patMETPuppi__PAT',
     ]
+
+if is_mc:
+    process.mcStat.histos = True
 
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
