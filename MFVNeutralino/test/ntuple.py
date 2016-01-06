@@ -31,7 +31,6 @@ def customize_before_unscheduled(process):
         'keep *_mcStat_*_*',
         'keep MFVVertexAuxs_mfvVerticesAux_*_*',
         'keep MFVEvent_mfvEvent__*',
-        'keep edmTriggerResults_TriggerResults__HLT',
         ]
 
     if prepare_vis:
@@ -104,6 +103,7 @@ if event_filter:
     process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
     process.mfvAnalysisCuts.min_nvertex = 1
     process.mfvAnalysisCuts.vertex_src = 'mfvSelectedVerticesSkim'
+    process.mfvAnalysisCuts.mevent_src = ''
     process.pevtsel *= process.mfvSelectedVerticesSkim * process.mfvAnalysisCuts
 
 process.options.wantSummary = True
