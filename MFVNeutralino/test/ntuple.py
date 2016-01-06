@@ -8,6 +8,7 @@ is_mc = True
 prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
+event_filter = not keep_all
 version = 'v5'
 batch_name = 'Ntuple' + version.upper()
 
@@ -98,6 +99,12 @@ process.patElectrons.embedTrack = False
 if trig_filter:
     import JMTucker.MFVNeutralino.TriggerFilter
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
+
+if event_filter:
+    process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+    process.mfvAnalysisCuts.min_nvertex = 1
+    process.mfvAnalysisCuts.vertex_src = 'mfvSelectedVerticesSkim'
+    process.pevtsel *= process.mfvSelectedVerticesSkim * process.mfvAnalysisCuts
 
 process.options.wantSummary = True
 process.maxEvents.input = 100
