@@ -19,17 +19,19 @@ process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      )
 
 process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
-        
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.from_argv(Samples.mfv_signal_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.data_samples)
 
-    for s in Samples.data_samples:
-        s.json = 'ana_all.json'
+    samples = Samples.ttbar_samples + Samples.qcd_samples[3:]
 
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('MiniTreeV20',
-                       job_control_from_sample = True,
-                       use_ana_dataset = True,
+    cs = CRABSubmitter('MinitreeV4',
+                       dataset = 'ntuplev4',
+                       splitting = 'FileBased',
+                       units_per_job = 5,
+                       total_units = -1,
+                       aaa = True,
                        )
+
     cs.submit_all(samples)
