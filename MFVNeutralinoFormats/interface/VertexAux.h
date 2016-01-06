@@ -551,6 +551,16 @@ struct MFVVertexAux {
   float trackpterravg() const { return _avg(track_pt_errs()); }
   float trackpterrrms() const { return _rms(track_pt_errs()); }
 
+  float tracketaerrmin() const { return _min(track_eta_errs()); }
+  float tracketaerrmax() const { return _max(track_eta_errs()); }
+  float tracketaerravg() const { return _avg(track_eta_errs()); }
+  float tracketaerrrms() const { return _rms(track_eta_errs()); }
+
+  float trackphierrmin() const { return _min(track_phi_errs()); }
+  float trackphierrmax() const { return _max(track_phi_errs()); }
+  float trackphierravg() const { return _avg(track_phi_errs()); }
+  float trackphierrrms() const { return _rms(track_phi_errs()); }
+
   float trackdxyerrmin() const { return _min(track_dxy_errs()); }
   float trackdxyerrmax() const { return _max(track_dxy_errs()); }
   float trackdxyerravg() const { return _avg(track_dxy_errs()); }

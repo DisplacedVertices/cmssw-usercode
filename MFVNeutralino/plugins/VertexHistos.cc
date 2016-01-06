@@ -353,6 +353,16 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackpterravg", "SV avg{frac. #sigma trk_{i} p_{T}}", 50, 0, 1);
   hs.add("trackpterrrms", "SV rms{frac. #sigma trk_{i} p_{T}}", 50, 0, 2);
 
+  hs.add("tracketaerrmin", "SV min{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
+  hs.add("tracketaerrmax", "SV max{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
+  hs.add("tracketaerravg", "SV avg{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
+  hs.add("tracketaerrrms", "SV rms{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
+
+  hs.add("trackphierrmin", "SV min{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
+  hs.add("trackphierrmax", "SV max{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
+  hs.add("trackphierravg", "SV avg{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
+  hs.add("trackphierrrms", "SV rms{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
+
   hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.01);
   hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.5);
   hs.add("trackdxyerravg", "SV avg{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.1);
@@ -763,6 +773,16 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"trackpterrmax", aux.trackpterrmax()},
         {"trackpterravg", aux.trackpterravg()},
         {"trackpterrrms", aux.trackpterrrms()},
+
+        {"tracketaerrmin", aux.tracketaerrmin()},
+        {"tracketaerrmax", aux.tracketaerrmax()},
+        {"tracketaerravg", aux.tracketaerravg()},
+        {"tracketaerrrms", aux.tracketaerrrms()},
+
+        {"trackphierrmin", aux.trackphierrmin()},
+        {"trackphierrmax", aux.trackphierrmax()},
+        {"trackphierravg", aux.trackphierravg()},
+        {"trackphierrrms", aux.trackphierrrms()},
 
         {"trackdxyerrmin", aux.trackdxyerrmin()},
         {"trackdxyerrmax", aux.trackdxyerrmax()},
