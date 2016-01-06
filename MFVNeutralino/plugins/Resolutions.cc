@@ -50,40 +50,17 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_rec_bs2derr;
   TH1F* h_rec_drmin;
   TH1F* h_rec_drmax;
-  TH1F* h_rec_dravg;
-  TH1F* h_rec_drrms;
   TH1F* h_rec_njetsntks;
   TH1F* h_rec_ntracksptgt3;
   TH1F* h_rec_dbv;
-  TH1F* h_rec_betagamma;
-  TH1F* h_rec_dirrms;
-  TH1F* h_rec_tracks_qpt;
-  TH1F* h_rec_tracks_eta;
-  TH1F* h_rec_tracks_phi;
-  TH1F* h_rec_trackpair_deta;
-  TH1F* h_rec_trackpair_dphi;
-  TH1F* h_rec_trackpair_dr;
-  TH1F* h_rec_tracks_deta;
-  TH1F* h_rec_tracks_dphi;
-  TH1F* h_rec_tracks_dr;
-  TH2F* h_rec_drrms_ntracks;
-  TH2F* h_rec_drrms_dravg;
-  TH2F* h_rec_dirrms_dravg;
   TH1F* h_rec_dvv;
 
-  TH1F* h_rec_bs2derr_betagamma0p00to0p25;
-  TH1F* h_rec_bs2derr_betagamma0p25to0p50;
-  TH1F* h_rec_bs2derr_betagamma0p50to0p75;
-  TH1F* h_rec_bs2derr_betagamma0p75to1p00;
-  TH1F* h_rec_bs2derr_betagamma1p00to1p25;
-  TH1F* h_rec_bs2derr_betagamma1p25to1p50;
-  TH1F* h_rec_bs2derr_betagamma1p50to1p75;
-  TH1F* h_rec_bs2derr_betagamma1p75to2p00;
-  TH1F* h_rec_bs2derr_betagamma2p00to2p25;
-  TH1F* h_rec_bs2derr_betagamma2p25to2p50;
-  TH1F* h_rec_bs2derr_betagamma2p50to2p75;
-  TH1F* h_rec_bs2derr_betagamma2p75to3p00;
-  TH2F* h_rec_bs2derr_gen_betagamma;
+  TH1F* h_vtx_dbv;
+  TH1F* h_vtx_ntracks;
+  TH1F* h_vtx_nquarks;
+  TH1F* h_vtx_sumpt;
+  TH1F* h_vtx_drmin;
+  TH1F* h_vtx_drmax;
 
   TH1F* h_gen_jetpt4;
   TH1F* h_gen_sumht;
@@ -93,7 +70,6 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_gen_sumpt;
   TH1F* h_gen_drmin;
   TH1F* h_gen_drmax;
-  TH1F* h_gen_betagamma;
 
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
@@ -135,40 +111,17 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 25, 0, 0.0025);
   h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 50, 0, 0.5);
   h_rec_drmax = fs->make<TH1F>("h_rec_drmax", ";max{#Delta R{track i,j}};vertices", 50, 0, 5);
-  h_rec_dravg = fs->make<TH1F>("h_rec_dravg", ";avg{#Delta R{track i,j}};vertices", 50, 0, 5);
-  h_rec_drrms = fs->make<TH1F>("h_rec_drrms", ";rms{#Delta R{track i,j}};vertices", 50, 0, 5);
   h_rec_njetsntks = fs->make<TH1F>("h_rec_njetsntks", ";number of associated jets;vertices", 10, 0, 10);
   h_rec_ntracksptgt3 = fs->make<TH1F>("h_rec_ntracksptgt3", ";number of tracks with p_{T} > 3 GeV/vertex;vertices", 40, 0, 40);
   h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
-  h_rec_betagamma = fs->make<TH1F>("h_rec_betagamma", ";reconstructed #beta#gamma;vertices", 20, 0, 10);
-  h_rec_dirrms = fs->make<TH1F>("h_rec_dirrms", ";rms{direction{track i}} w.r.t. direction of net momentum by tracks only;vertices", 50, 0, 5);
-  h_rec_tracks_qpt = fs->make<TH1F>("h_rec_tracks_qpt", ";reconstructed track q*p_{T} (GeV);tracks", 100, -150, 150);
-  h_rec_tracks_eta = fs->make<TH1F>("h_rec_tracks_eta", ";reconstructed track #eta;tracks", 50, -4, 4);
-  h_rec_tracks_phi = fs->make<TH1F>("h_rec_tracks_phi", ";reconstructed track #phi;tracks", 50, -3.15, 3.15);
-  h_rec_trackpair_deta = fs->make<TH1F>("h_rec_trackpair_deta", ";reconstructed track pair #Delta#eta;track pairs", 50, 0, 5);
-  h_rec_trackpair_dphi = fs->make<TH1F>("h_rec_trackpair_dphi", ";reconstructed track pair #Delta#phi;track pairs", 32, 0, 3.2);
-  h_rec_trackpair_dr = fs->make<TH1F>("h_rec_trackpair_dr", ";reconstructed track pair #DeltaR;track pairs", 50, 0, 5);
-  h_rec_tracks_deta = fs->make<TH1F>("h_rec_tracks_deta", ";reconstructed track #Delta#eta w.r.t. direction of net momentum by tracks only;tracks", 50, 0, 5);
-  h_rec_tracks_dphi = fs->make<TH1F>("h_rec_tracks_dphi", ";reconstructed track #Delta#phi w.r.t. direction of net momentum by tracks only;tracks", 32, 0, 3.2);
-  h_rec_tracks_dr = fs->make<TH1F>("h_rec_tracks_dr", ";reconstructed track #DeltaR w.r.t. direction of net momentum by tracks only;tracks", 50, 0, 5);
-  h_rec_drrms_ntracks = fs->make<TH2F>("h_rec_drrms_ntracks", ";ntracks;drrms", 40, 0, 40, 50, 0, 5);
-  h_rec_drrms_dravg = fs->make<TH2F>("h_rec_drrms_dravg", ";dravg;drrms", 50, 0, 5, 50, 0, 5);
-  h_rec_dirrms_dravg = fs->make<TH2F>("h_rec_dirrms_dravg", ";dravg;dirrms", 50, 0, 5, 50, 0, 5);
   h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
 
-  h_rec_bs2derr_betagamma0p00to0p25 = fs->make<TH1F>("h_rec_bs2derr_betagamma0p00to0p25", "0.00 < generated #beta#gamma < 0.25;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma0p25to0p50 = fs->make<TH1F>("h_rec_bs2derr_betagamma0p25to0p50", "0.25 < generated #beta#gamma < 0.50;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma0p50to0p75 = fs->make<TH1F>("h_rec_bs2derr_betagamma0p50to0p75", "0.50 < generated #beta#gamma < 0.75;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma0p75to1p00 = fs->make<TH1F>("h_rec_bs2derr_betagamma0p75to1p00", "0.75 < generated #beta#gamma < 1.00;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma1p00to1p25 = fs->make<TH1F>("h_rec_bs2derr_betagamma1p00to1p25", "1.00 < generated #beta#gamma < 1.25;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma1p25to1p50 = fs->make<TH1F>("h_rec_bs2derr_betagamma1p25to1p50", "1.25 < generated #beta#gamma < 1.50;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma1p50to1p75 = fs->make<TH1F>("h_rec_bs2derr_betagamma1p50to1p75", "1.50 < generated #beta#gamma < 1.75;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma1p75to2p00 = fs->make<TH1F>("h_rec_bs2derr_betagamma1p75to2p00", "1.75 < generated #beta#gamma < 2.00;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma2p00to2p25 = fs->make<TH1F>("h_rec_bs2derr_betagamma2p00to2p25", "2.00 < generated #beta#gamma < 2.25;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma2p25to2p50 = fs->make<TH1F>("h_rec_bs2derr_betagamma2p25to2p50", "2.25 < generated #beta#gamma < 2.50;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma2p50to2p75 = fs->make<TH1F>("h_rec_bs2derr_betagamma2p50to2p75", "2.50 < generated #beta#gamma < 2.75;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_betagamma2p75to3p00 = fs->make<TH1F>("h_rec_bs2derr_betagamma2p75to3p00", "2.75 < generated #beta#gamma < 3.00;reconstructed bs2derr;vertices", 25, 0, 0.0025);
-  h_rec_bs2derr_gen_betagamma = fs->make<TH2F>("h_rec_bs2derr_gen_betagamma", ";generated #beta#gamma;reconstructed bs2derr", 20, 0, 10, 25, 0, 0.0025);
+  h_vtx_dbv = fs->make<TH1F>("h_vtx_dbv", ";generated d_{BV} (cm);vertices", 250, 0, 2.5);
+  h_vtx_ntracks = fs->make<TH1F>("h_vtx_ntracks", ";number of accepted displaced daughter particles;vertices", 10, 0, 10);
+  h_vtx_nquarks = fs->make<TH1F>("h_vtx_nquarks", ";number of accepted displaced quarks;vertices", 10, 0, 10);
+  h_vtx_sumpt = fs->make<TH1F>("h_vtx_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);vertices", 100, 0, 1000);
+  h_vtx_drmin = fs->make<TH1F>("h_vtx_drmin", ";min #DeltaR between accepted displaced daughter particles;vertices", 100, 0, 5);
+  h_vtx_drmax = fs->make<TH1F>("h_vtx_drmax", ";max #DeltaR between accepted displaced daughter particles;vertices", 100, 0, 5);
 
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
   h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 2000);
@@ -178,7 +131,6 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 100, 0, 1000);
   h_gen_drmin = fs->make<TH1F>("h_gen_drmin", ";min #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
   h_gen_drmax = fs->make<TH1F>("h_gen_drmax", ";max #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
-  h_gen_betagamma = fs->make<TH1F>("h_gen_betagamma", ";generated #beta#gamma;LSPs", 20, 0, 10);
 
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV} (cm);LSPs", 250, 0, 2.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV} (cm);events", 500, 0, 5);
@@ -355,7 +307,6 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       h_gen_drmax->Fill(drmax);
       h_gen_nquarks->Fill(nquarks);
       h_gen_sumpt->Fill(sumpt);
-      h_gen_betagamma->Fill(lsp_p4s[i].Beta() * lsp_p4s[i].Gamma());
     }
   }
 
@@ -365,7 +316,6 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   std::vector<int> lsp0_ntracks;
   std::vector<int> lsp1_ntracks;
 
-  //printf("run = %u, luminosity block = %u, event = %u\n", event.id().run(), event.luminosityBlock(), event.id().event());
   for (const MFVVertexAux& vtx : *vertices) {
     double dr = 1e99, dist = 1e99;
     int ilsp = -1;
@@ -415,13 +365,42 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
 
     ++nvtx_match;
 
+    int ntracks = 0;
+    int nquarks = 0;
+    float sumpt = 0;
+    float drmin = 1e6;
+    float drmax = -1e6;
+    const int ndau = int(partons[ilsp].size());
+    for (int j = 0; j < ndau; ++j) {
+      const reco::GenParticle* p1 = partons[ilsp][j];
+      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[ilsp] * sin(p1->phi() - atan2(v[ilsp][1], v[ilsp][0]))) < 0.01) continue;
+      ++ntracks;
+      if (!is_lepton(p1)) ++nquarks;
+      sumpt += p1->pt();
+      for (int k = j+1; k < ndau; ++k) {
+        const reco::GenParticle* p2 = partons[ilsp][k];
+        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[ilsp] * sin(p2->phi() - atan2(v[ilsp][1], v[ilsp][0]))) < 0.01) continue;
+        float dr = reco::deltaR(*p1, *p2);
+        if (dr < drmin)
+          drmin = dr;
+        if (dr > drmax)
+          drmax = dr;
+      }
+    }
+
+    h_vtx_dbv->Fill(dbv[ilsp]);
+    h_vtx_ntracks->Fill(ntracks);
+    h_vtx_drmin->Fill(drmin);
+    h_vtx_drmax->Fill(drmax);
+    h_vtx_nquarks->Fill(nquarks);
+    h_vtx_sumpt->Fill(sumpt);
+
     if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > min_dbv && dbv[ilsp] < max_dbv) {
       h_dist->Fill(dist);
 
-      double sum = 0;
-      //printf("vertex %d: ntracks = %d, njetsntks = %d, bs2derr = %6.4f, drrms = %5.3f\n", nvtx_match, vtx.ntracks(), vtx.njets[mfv::JByNtracks], vtx.bs2derr, vtx.drrms());
       for (size_t i = 0, n = vtx.ntracks(); i < n; ++i) {
         h_rec_dxy->Fill(vtx.track_dxy[i]);
+
         sum += reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly])
              * reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]);
         //printf("\ttrack %2d: qpt = %7.3f, eta = %6.3f, phi = %6.3f, dxy = %5.3f, drs = %5.3f\n", int(i), vtx.track_qpt[i], vtx.track_eta(i), vtx.track_phi(i), vtx.track_dxy[i],
@@ -442,39 +421,17 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
         h_rec_tracks_deta->Fill(fabs(vtx.track_eta(i) - vtx.eta[mfv::PTracksOnly]));
         h_rec_tracks_dphi->Fill(fabs(reco::deltaPhi(vtx.track_phi(i), vtx.phi[mfv::PTracksOnly])));
         h_rec_tracks_dr->Fill(reco::deltaR(vtx.track_eta(i), vtx.track_phi(i), vtx.eta[mfv::PTracksOnly], vtx.phi[mfv::PTracksOnly]));
-
       }
+
       h_rec_ntracks->Fill(vtx.ntracks());
       h_rec_bs2derr->Fill(vtx.bs2derr);
       h_rec_drmin->Fill(vtx.drmin());
       h_rec_drmax->Fill(vtx.drmax());
-      h_rec_dravg->Fill(vtx.dravg());
-      h_rec_drrms->Fill(vtx.drrms());
       h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
       h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
       h_rec_dbv->Fill(vtx.bs2ddist);
-      h_rec_betagamma->Fill(vtx.p4(which_mom).Beta()*vtx.p4(which_mom).Gamma());
-      h_rec_dirrms->Fill(sqrt(1/(vtx.ntracks()-1.0) * sum));
-      h_rec_drrms_ntracks->Fill(vtx.ntracks(), vtx.drrms());
-      h_rec_drrms_dravg->Fill(vtx.dravg(), vtx.drrms());
-      h_rec_dirrms_dravg->Fill(vtx.dravg(), sqrt(1/(vtx.ntracks()-1.0) * sum));
-
-      double betagamma = lsp_p4s[ilsp].Beta() * lsp_p4s[ilsp].Gamma();
-      if (betagamma < 0.25) h_rec_bs2derr_betagamma0p00to0p25->Fill(vtx.bs2derr);
-      else if (betagamma < 0.50) h_rec_bs2derr_betagamma0p25to0p50->Fill(vtx.bs2derr);
-      else if (betagamma < 0.75) h_rec_bs2derr_betagamma0p50to0p75->Fill(vtx.bs2derr);
-      else if (betagamma < 1.00) h_rec_bs2derr_betagamma0p75to1p00->Fill(vtx.bs2derr);
-      else if (betagamma < 1.25) h_rec_bs2derr_betagamma1p00to1p25->Fill(vtx.bs2derr);
-      else if (betagamma < 1.50) h_rec_bs2derr_betagamma1p25to1p50->Fill(vtx.bs2derr);
-      else if (betagamma < 1.75) h_rec_bs2derr_betagamma1p50to1p75->Fill(vtx.bs2derr);
-      else if (betagamma < 2.00) h_rec_bs2derr_betagamma1p75to2p00->Fill(vtx.bs2derr);
-      else if (betagamma < 2.25) h_rec_bs2derr_betagamma2p00to2p25->Fill(vtx.bs2derr);
-      else if (betagamma < 2.50) h_rec_bs2derr_betagamma2p25to2p50->Fill(vtx.bs2derr);
-      else if (betagamma < 2.75) h_rec_bs2derr_betagamma2p50to2p75->Fill(vtx.bs2derr);
-      else if (betagamma < 3.00) h_rec_bs2derr_betagamma2p75to3p00->Fill(vtx.bs2derr);
-      h_rec_bs2derr_gen_betagamma->Fill(betagamma, vtx.bs2derr);
-
     }
+
   }
 
   // histogram lsp_nmatch

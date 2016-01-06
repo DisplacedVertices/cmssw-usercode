@@ -304,11 +304,11 @@ def interpolate(h):
             hint.SetBinContent(ix, iy, h.Interpolate(x,y))
     return hint
 
-def gluglu_exclude(h):
+def gluglu_exclude(h, opt):
     gluglu, hgluglu = make_gluglu_hist()
     gluglu = dict((m, (s, es)) for m, s, es in gluglu)
 
-    hexc = h.Clone(h.GetName() +'_exc')
+    hexc = h.Clone(h.GetName() +'_exc_%s' % opt)
     hexc.SetStats(0)
 
     for ix in xrange(1, h.GetNbinsX()+1):
@@ -332,7 +332,12 @@ def gluglu_exclude(h):
             #print tau0, mass, lim, ma, sa, esa, mb, sb, esb, s, es
 
             bin = hexc.FindBin(mass, tau0)
-            if lim < s - es:
+            s2 = s
+            if opt.lower() == 'up':
+                s2 += es
+            elif opt.lower() == 'dn':
+                s2 -= es
+            if lim < s2:
                 hexc.SetBinContent(bin, 1)
             else:
                 hexc.SetBinContent(bin, 0)
@@ -383,7 +388,7 @@ def exc_graph(h, color, style, duh):
             if l:
                 xs.append(x)
                 ys.append(y)
-                print x, y, l
+                #print x, y, l
                 break
     if duh:
         assert ys[-1] == 30000
@@ -523,15 +528,17 @@ def one_from_r(ex, name, csvs=True):
 
 def from_r():
     f = ROOT.TFile('newplots_fromr.root', 'recreate')
-    for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
-        n = 'hlim_%s_fromrinterp' % ex
-        h = one_from_r(ex, n)
-        hexc = gluglu_exclude(h)
-        g = exc_graph(hexc, 1, 1, duh=True)
-        g.SetName(n + '_exc_g')
-        h.Write()
-        hexc.Write()
-        g.Write()
+    for opt in ('nm', 'up', 'dn'):
+        #for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
+        for ex in 'observed expect50'.split():
+            n = 'hlim_%s_fromrinterp' % ex
+            h = one_from_r(ex, n)
+            hexc = gluglu_exclude(h, opt)
+            g = exc_graph(hexc, 1, 1, duh=True)
+            g.SetName(n + '_%s_exc_g' % opt)
+            h.Write()
+            hexc.Write()
+            g.Write()
     f.Close()
 
 if __name__ == '__main__':

@@ -46,6 +46,7 @@ C = partial(data_mc_comparison,
             legend_pos = (0.350, 0.635, 0.869, 0.843),
             res_fit = True,
             verbose = True,
+            background_uncertainty = ('MC stat. uncert.', 0, 1, 3002),
             )
 
 C('nsv',

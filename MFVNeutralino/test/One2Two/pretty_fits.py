@@ -50,18 +50,32 @@ d = list(detree(t, 't_obs_0__h1_mu_sig:t_obs_0__h1_mu_bkg:t_obs_0__h0_mu_bkg', x
 assert len(d) == 1
 sb_sig, sb_bkg, b_bkg = d[0]
 
+sb_sig_unc = 1.9
+def bkg_uncert(h):
+    bkg_syst = [0,0,0,3.8,1.4,0.1,0.1]
+    assert h.GetNbinsX() == 6
+    for ibin in xrange(1, 7):
+        #print ibin, h.GetBinError(ibin)
+        h.SetBinError(ibin, bkg_syst[ibin])
+    
 h_sb_bkg = rebook(f.Get('Fitter/seed00_toy-1/fit_results/h_bkg_sb_fit_bb_nodiv'))
 h_sb_sig = rebook(f.Get('Fitter/seed00_toy-1/fit_results/h_sig_sb_fit_bb_nodiv'))
 h_sb_bkg.Scale(sb_bkg)
 h_sb_sig.Scale(sb_sig)
+#bkg_uncert(h_sb_bkg)
+
 h_sb_sum = h_sb_bkg.Clone('h_sb_sum')
 h_sb_sum.Add(h_sb_sig)
 h_sb_sum.SetLineColor(ROOT.kRed)
 h_sb_sum.SetLineStyle(2)
+#h_sb_sum.SetFillStyle(3002)
 h_sb_sum.GetYaxis().SetRangeUser(0.1, 300)
 
 h_b_sum = rebook(f.Get('Fitter/seed00_toy-1/fit_results/h_bkg_b_fit_bb_nodiv'))
 h_b_sum.Scale(b_bkg)
+#bkg_uncert(h_b_sum)
+#h_b_sum.SetFillStyle(3002)
+#h_b_sum.SetFillColor(ROOT.kBlue)
 h_b_sum.SetLineColor(ROOT.kBlue)
 h_b_sum.SetLineStyle(3)
 
@@ -90,4 +104,5 @@ pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
 sim = write(42, 0.050, 0.631, 0.933, ac.int_lumi_nice)
 name = '/uscms/home/tucker/afshome/fit'
 c.SaveAs(name + '.pdf')
+c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')

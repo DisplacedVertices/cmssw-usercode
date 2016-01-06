@@ -70,56 +70,56 @@ process.source.fileNames = '''/store/user/tucker/mfv_neutralino_tau1000um_M0400/
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20_wgen/4c67a9d5a51f11cf2da50127721f7362/ntuple_1_1_WwV.root']
 
 if mode == 'h2xqq_1000_350':
-    process.source.fileNames = '''/store/user/tucker/duh/ntuple_10_1_S8P.root
-/store/user/tucker/duh/ntuple_11_1_7sv.root
-/store/user/tucker/duh/ntuple_12_1_CBb.root
-/store/user/tucker/duh/ntuple_13_1_F8t.root
-/store/user/tucker/duh/ntuple_14_1_cPx.root
-/store/user/tucker/duh/ntuple_15_1_JLc.root
-/store/user/tucker/duh/ntuple_16_1_Pfi.root
-/store/user/tucker/duh/ntuple_17_1_3D8.root
-/store/user/tucker/duh/ntuple_18_1_bbt.root
-/store/user/tucker/duh/ntuple_19_1_FtH.root
-/store/user/tucker/duh/ntuple_1_1_e6b.root
-/store/user/tucker/duh/ntuple_20_1_u23.root
-/store/user/tucker/duh/ntuple_21_1_EYH.root
-/store/user/tucker/duh/ntuple_22_1_zBY.root
-/store/user/tucker/duh/ntuple_23_1_KBB.root
-/store/user/tucker/duh/ntuple_24_1_5Mf.root
-/store/user/tucker/duh/ntuple_25_1_eGB.root
-/store/user/tucker/duh/ntuple_26_1_701.root
-/store/user/tucker/duh/ntuple_27_1_mWU.root
-/store/user/tucker/duh/ntuple_28_1_bke.root
-/store/user/tucker/duh/ntuple_29_1_rGZ.root
-/store/user/tucker/duh/ntuple_2_1_IhR.root
-/store/user/tucker/duh/ntuple_30_1_u98.root
-/store/user/tucker/duh/ntuple_31_1_6cp.root
-/store/user/tucker/duh/ntuple_32_1_raJ.root
-/store/user/tucker/duh/ntuple_33_1_0V9.root
-/store/user/tucker/duh/ntuple_34_1_msr.root
-/store/user/tucker/duh/ntuple_35_1_loz.root
-/store/user/tucker/duh/ntuple_36_2_Ymf.root
-/store/user/tucker/duh/ntuple_37_1_d9W.root
-/store/user/tucker/duh/ntuple_38_1_lcv.root
-/store/user/tucker/duh/ntuple_39_1_6m7.root
-/store/user/tucker/duh/ntuple_3_1_vBh.root
-/store/user/tucker/duh/ntuple_40_1_68q.root
-/store/user/tucker/duh/ntuple_41_1_UVQ.root
-/store/user/tucker/duh/ntuple_42_1_G9w.root
-/store/user/tucker/duh/ntuple_43_1_7SF.root
-/store/user/tucker/duh/ntuple_44_1_w93.root
-/store/user/tucker/duh/ntuple_45_1_51p.root
-/store/user/tucker/duh/ntuple_46_1_05X.root
-/store/user/tucker/duh/ntuple_47_1_Xg6.root
-/store/user/tucker/duh/ntuple_48_1_HRp.root
-/store/user/tucker/duh/ntuple_49_1_W7t.root
-/store/user/tucker/duh/ntuple_4_1_wQn.root
-/store/user/tucker/duh/ntuple_50_1_zA4.root
-/store/user/tucker/duh/ntuple_5_1_zDT.root
-/store/user/tucker/duh/ntuple_6_1_CV7.root
-/store/user/tucker/duh/ntuple_7_1_0u3.root
-/store/user/tucker/duh/ntuple_8_1_kVE.root
-/store/user/tucker/duh/ntuple_9_1_pea.root'''.split('\n')
+    process.source.fileNames = '''root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_10_1_S8P.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_11_1_7sv.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_12_1_CBb.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_13_1_F8t.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_14_1_cPx.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_15_1_JLc.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_16_1_Pfi.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_17_1_3D8.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_18_1_bbt.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_19_1_FtH.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_1_1_e6b.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_20_1_u23.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_21_1_EYH.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_22_1_zBY.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_23_1_KBB.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_24_1_5Mf.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_25_1_eGB.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_26_1_701.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_27_1_mWU.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_28_1_bke.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_29_1_rGZ.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_2_1_IhR.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_30_1_u98.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_31_1_6cp.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_32_1_raJ.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_33_1_0V9.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_34_1_msr.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_35_1_loz.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_36_2_Ymf.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_37_1_d9W.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_38_1_lcv.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_39_1_6m7.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_3_1_vBh.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_40_1_68q.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_41_1_UVQ.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_42_1_G9w.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_43_1_7SF.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_44_1_w93.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_45_1_51p.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_46_1_05X.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_47_1_Xg6.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_48_1_HRp.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_49_1_W7t.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_4_1_wQn.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_50_1_zA4.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_5_1_zDT.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_6_1_CV7.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_7_1_0u3.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_8_1_kVE.root
+root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-350_CTau35To3500_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8//ntuple_9_1_pea.root'''.split('\n')
 
 if mode == 'h2xqq_1000_150':
     process.source.fileNames = '''root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/HTo2LongLivedTo4F_MH-1000_MFF-150_CTau10To1000_8TeV-pythia6/mfvntuple_v20/34ecdb1fcc3dc1cba39058734246ffc8/ntuple_10_1_puI.root
@@ -301,6 +301,9 @@ process.pNjetsntks = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelecte
 process.mfvResolutionsNtracksptgt3 = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
 process.pNtracksptgt3 = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracksptgt3 * process.mfvResolutionsNtracksptgt3)
 
+process.mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3 = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_njetsntks = 1)
+process.mfvResolutionsNoNtracksBs2derrNtracksptgt3 = mfvResolutions.clone(vertex_src = 'mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3')
+process.pNoNtracksBs2derrNtracksptgt3 = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3 * process.mfvResolutionsNoNtracksBs2derrNtracksptgt3)
 
 #generated cutflow
 process.mfvGenNoCuts = mfvResolutions.clone()
