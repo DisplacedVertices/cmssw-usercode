@@ -453,7 +453,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertices_token, primary_vertices);
-  const reco::Vertex& primary_vertex = primary_vertices->at(0);
+  const reco::Vertex* primary_vertex = 0;
+  if (primary_vertices->size())
+    primary_vertex = &primary_vertices->at(0);
 
   //////////////////////////////////////////////////////////////////////
   // The tracks to be used. Will be filled from a track collection or
@@ -556,7 +558,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const reco::TrackRef& tk = all_tracks[i];
     const double pt = tk->pt();
     const double dxybs = tk->dxy(*beamspot);
-    const double dxypv = tk->dxy(primary_vertex.position());
+    const double dxypv = primary_vertex ? tk->dxy(primary_vertex->position()) : 1e99;
     const double sigmadxybs = dxybs / tk->dxyError();
     const double sigmadxypv = dxypv / tk->dxyError();
     const int nhits = tk->hitPattern().numberOfValidHits(); // JMTBAD this is supposed to be strip hits...
@@ -573,12 +575,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     if (use && (max_all_track_dxyerr > 0 || max_all_track_d3derr > 0)) {
       reco::TransientTrack ttk = tt_builder->build(tk);
-      if (max_all_track_dxyerr > 0) {
-        auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, primary_vertex);
+      if (max_all_track_dxyerr > 0 && primary_vertex) {
+        auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, *primary_vertex);
         use = use && dxy_ipv.first && dxy_ipv.second.error() < max_all_track_dxyerr;
       }
-      if (max_all_track_d3derr > 0) {
-        auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, primary_vertex);
+      if (max_all_track_d3derr > 0 && primary_vertex) {
+        auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, *primary_vertex);
         use = use && d3d_ipv.first && d3d_ipv.second.error() < max_all_track_d3derr;
       }
     }
@@ -699,18 +701,18 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     double itk_pt    = seed_tracks[itk].track().pt();
     double itk_dxy   = seed_tracks[itk].track().dxy(*beamspot);
     double itk_sigmadxy = seed_tracks[itk].track().dxy(*beamspot) / seed_tracks[itk].track().dxyError();
-    double itk_sigmadxypv = seed_tracks[itk].track().dxy(primary_vertex.position()) / seed_tracks[itk].track().dxyError();
+    double itk_sigmadxypv = primary_vertex ? seed_tracks[itk].track().dxy(primary_vertex->position()) / seed_tracks[itk].track().dxyError() : 1e99;
     double itk_nhits = seed_tracks[itk].track().hitPattern().numberOfValidHits();
     double itk_npxhits = seed_tracks[itk].track().hitPattern().numberOfValidPixelHits();
     bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && fabs(itk_sigmadxy) > min_seed_track_sigmadxy && fabs(itk_sigmadxypv) > min_seed_track_sigmadxypv  && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits;
 
     if (itk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
-      if (max_seed_track_dxyerr > 0) {
-        auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[itk], primary_vertex);
+      if (max_seed_track_dxyerr > 0 && primary_vertex) {
+        auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[itk], *primary_vertex);
         itk_use = itk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyerr;
       }
-      if (max_seed_track_d3derr > 0) {
-        auto d3d_ipv = IPTools::absoluteImpactParameter3D(seed_tracks[itk], primary_vertex);
+      if (max_seed_track_d3derr > 0 && primary_vertex) {
+        auto d3d_ipv = IPTools::absoluteImpactParameter3D(seed_tracks[itk], *primary_vertex);
         itk_use = itk_use && d3d_ipv.first && d3d_ipv.second.error() < max_seed_track_d3derr;
       }
     }
@@ -719,18 +721,18 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       double jtk_pt    = seed_tracks[jtk].track().pt();
       double jtk_dxy   = seed_tracks[jtk].track().dxy(*beamspot);
       double jtk_sigmadxy = seed_tracks[jtk].track().dxy(*beamspot) / seed_tracks[jtk].track().dxyError();
-      double jtk_sigmadxypv = seed_tracks[jtk].track().dxy(primary_vertex.position()) / seed_tracks[jtk].track().dxyError();
+      double jtk_sigmadxypv = primary_vertex ? seed_tracks[jtk].track().dxy(primary_vertex->position()) / seed_tracks[jtk].track().dxyError() : 1e99;
       double jtk_nhits = seed_tracks[jtk].track().hitPattern().numberOfValidHits();
       double jtk_npxhits = seed_tracks[jtk].track().hitPattern().numberOfValidPixelHits();
       bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && fabs(jtk_sigmadxy) > min_seed_track_sigmadxy && fabs(jtk_sigmadxypv) > min_seed_track_sigmadxypv && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits;
 
       if (jtk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
-        if (max_seed_track_dxyerr > 0) {
-          auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[jtk], primary_vertex);
+        if (max_seed_track_dxyerr > 0 && primary_vertex) {
+          auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[jtk], *primary_vertex);
           jtk_use = jtk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyerr;
         }
-        if (max_seed_track_d3derr > 0) {
-          auto d3d_ipv = IPTools::absoluteImpactParameter3D(seed_tracks[jtk], primary_vertex);
+        if (max_seed_track_d3derr > 0 && primary_vertex) {
+          auto d3d_ipv = IPTools::absoluteImpactParameter3D(seed_tracks[jtk], *primary_vertex);
           jtk_use = jtk_use && d3d_ipv.first && d3d_ipv.second.error() < max_seed_track_d3derr;
         }
       }
