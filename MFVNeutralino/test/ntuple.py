@@ -11,6 +11,7 @@ trig_filter = not keep_all
 event_filter = not keep_all
 version = 'v5'
 batch_name = 'Ntuple' + version.upper()
+#batch_name += '_ChangeMeIfSettingsNotDefault'
 
 ####
 
@@ -106,16 +107,9 @@ if event_filter:
     process.mfvAnalysisCuts.mevent_src = ''
     process.pevtsel *= process.mfvSelectedVerticesSkim * process.mfvAnalysisCuts
 
-process.options.wantSummary = True
+#process.options.wantSummary = True
 process.maxEvents.input = 100
 file_event_from_argv(process)
-
-#process.mfvVertices.jumble_tracks = True
-#process.mfvVertices.remove_tracks_frac = 0.1
-#process.mfvVertices.use_tracks = False
-#process.mfvVertices.use_non_pv_tracks = True
-#process.mfvVertices.use_non_pvs_tracks = True
-#batch_name += '_ChangeMeIfNotDefault'
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
