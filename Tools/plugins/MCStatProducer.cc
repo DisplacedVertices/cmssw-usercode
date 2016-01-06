@@ -1,8 +1,11 @@
+#include "TH1.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Framework/interface/one/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/Run.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 class MCStatProducer : public edm::one::EDProducer<edm::EndLuminosityBlockProducer> {
@@ -14,14 +17,19 @@ private:
   virtual void endLuminosityBlockProduce(edm::LuminosityBlock&, const edm::EventSetup&) override;
 
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
+  const bool histos;
 
   int nevents;
   float sumweight;
   float sumweightprod;
+
+  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight_prod_total, n_sums };
+  TH1F* h_sums;
 };
 
 MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
   : gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
+    histos(cfg.getUntrackedParameter<bool>("histos", false)),
     nevents(0),
     sumweight(0),
     sumweightprod(0)
@@ -29,6 +37,15 @@ MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
   produces<int,   edm::InLumi>("nEvents");
   produces<float, edm::InLumi>("sumWeight");
   produces<float, edm::InLumi>("sumWeightProd");
+
+  if (histos) {
+    edm::Service<TFileService> fs;
+    TH1::SetDefaultSumw2();
+    h_sums = fs->make<TH1F>("h_sums", "", n_sums, 0, n_sums);
+    int ibin = 1;
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight_prod_total" })
+      h_sums->GetXaxis()->SetBinLabel(ibin++, x);
+  }
 }
 
 void MCStatProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -41,6 +58,12 @@ void MCStatProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
 }
 
 void MCStatProducer::endLuminosityBlockProduce(edm::LuminosityBlock& lumi, const edm::EventSetup&) {
+  if (histos) {
+    h_sums->Fill(sum_nevents_total, nevents);
+    h_sums->Fill(sum_gen_weight_total, sumweight);
+    h_sums->Fill(sum_gen_weight_prod_total, sumweightprod);
+  }
+
   std::unique_ptr<int> pnevents(new int(nevents));
   lumi.put(std::move(pnevents), "nEvents");
 
