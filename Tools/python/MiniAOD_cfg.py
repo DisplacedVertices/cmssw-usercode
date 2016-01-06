@@ -9,8 +9,8 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     report_every(process, 1000000)
     registration_warnings(process)
-    print 'suppressing MatchedJetsFarApart, HLTConfigData warnings'
-    silence_messages(process, ['MatchedJetsFarApart', 'HLTConfigData'])
+    print 'suppressing MatchedJetsFarApart, HLTConfigData, NoModule warnings'
+    silence_messages(process, ['MatchedJetsFarApart', 'HLTConfigData', 'NoModule'])
 
     process.load('Configuration.StandardSequences.Services_cff')
     process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
