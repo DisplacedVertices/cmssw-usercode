@@ -8,6 +8,7 @@ namespace mfv {
     unsigned run;
     unsigned lumi;
     unsigned long long event;
+    unsigned char flavor_code;
     unsigned short npv;
     float pvx;
     float pvy;
