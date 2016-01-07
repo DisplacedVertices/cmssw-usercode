@@ -37,6 +37,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_lspdist3d;
 
   TH1F* h_pass_hlt[mfv::n_hlt_paths];
+  TH1F* h_pass_l1[mfv::n_l1_paths];
   TH1F* h_pass_clean[mfv::n_clean_paths];
   TH1F* h_pass_clean_all;
   TH1F* h_passoldskim;
@@ -213,6 +214,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   for (int i = 0; i < mfv::n_hlt_paths; ++i)
     h_pass_hlt[i] = fs->make<TH1F>(TString::Format("h_pass_hlt_%i", i), TString::Format(";pass_hlt[%i];events", i), 2, 0, 2);
+  for (int i = 0; i < mfv::n_l1_paths; ++i)
+    h_pass_l1[i] = fs->make<TH1F>(TString::Format("h_pass_l1_%i", i), TString::Format(";pass_l1[%i];events", i), 2, 0, 2);
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i] = fs->make<TH1F>(TString::Format("h_pass_clean_%i", i), TString::Format(";pass_clean[%i];events", i), 2, 0, 2);
   h_pass_clean_all = fs->make<TH1F>("h_pass_clean_all", ";pass_clean_all;events", 2, 0, 2);
@@ -408,6 +411,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int i = 0; i < mfv::n_hlt_paths; ++i)
     h_pass_hlt[i]->Fill(mevent->pass_hlt(i), w);
+
+  for (int i = 0; i < mfv::n_l1_paths; ++i)
+    h_pass_l1[i]->Fill(mevent->pass_l1(i), w);
 
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i]->Fill(mevent->pass_clean(i), w);
