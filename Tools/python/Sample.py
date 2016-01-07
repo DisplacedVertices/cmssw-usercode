@@ -193,6 +193,13 @@ class SamplesRegistry:
     def add_list(self, name, l):
         self.d_lists[name] = l
 
+    def by_primary_dataset(self, pd):
+        x = []
+        for s in self.all():
+            if s.primary_dataset == pd:
+                x.append(s)
+        return x
+
     def from_argv(self, default=[], sort_and_set=True, from_root_fns=False):
         ready_only = 'fa_ready_only' in sys.argv
         check = 'fa_check' in sys.argv
