@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if (( $# != 1 )); then
+    echo Usage: evszall filename.root
+    exit 1
+fi
+
+ls -l $1
+for x in MetaData ParameterSets LuminosityBlocks Runs Events; do
+    edmEventSize -vn $x $1
+done
