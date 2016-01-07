@@ -108,11 +108,12 @@ struct MFVEvent {
 
   bool pass_clean_all() const {
     bool pass = true;
-    const int N_all = 13;
-    const int clean_all[N_all] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
-    for (int i = 0; i < N_all; ++i)
-      pass = pass && pass_clean(clean_all[i]);
     return pass;
+    //const int N_all = 13;
+    //const int clean_all[N_all] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
+    //for (int i = 0; i < N_all; ++i)
+    //  pass = pass && pass_clean(clean_all[i]);
+    //return pass;
   }
 
   float npu;
