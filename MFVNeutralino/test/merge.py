@@ -4,18 +4,22 @@ import sys
 from JMTucker.Tools.Merge_cfg import cms, process
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
-    samples = Samples.from_argv(Samples.mfv_signal_samples + [Samples.qcdht0100])
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    import JMTucker.Tools.Samples as Samples 
 
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('MergeNtupleV18_2',
-                       use_ana_dataset = True,
-                       total_number_of_events = -1,
-                       events_per_job = 50000,
-                       get_edm_output = True,
-                       data_retrieval = 'fnal',
-                       max_threads = 3,
-                       publish_data_name = 'mfvmergentuple_v18',
+    samples = Samples.data_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        Samples.xx4j_samples
+
+    samples = [Samples.qcdht2000]
+
+    cs = CRABSubmitter('MergeNtupleV5',
+                       dataset = 'ntuplev5',
+                       splitting = 'EventAwareLumiBased',
+                       units_per_job = 20000,
+                       total_units = -1,
+                       aaa = True,
+                       publish_name = 'mergentuplev5',
                        )
-
     cs.submit_all(samples)
