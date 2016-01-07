@@ -110,7 +110,6 @@ class MCSample(Sample):
         self.color = kwargs.get('color', -1)
         self.syst_frac = float(kwargs.get('syst_frac', -1))
         self.xsec = float(kwargs.get('xsec', -1)) # assumed pb
-        self.filter_eff = float(kwargs.get('filter_eff', -1))
 
         self.events_per = kwargs.get('events_per', self.EVENTS_PER)
         self.total_events = kwargs.get('total_events', self.TOTAL_EVENTS)
@@ -259,61 +258,20 @@ def anon_samples(txt, **kwargs):
         samples.append(sample)
     return samples
 
-def nevents_from_file(sample, hist_path, fn_pattern='%(name)s.root', f=None, last_bin=False):
+def norm_from_file(fn):
     from JMTucker.Tools.ROOTTools import ROOT
-    if f is None:
-        fn = fn_pattern % sample
-        if not os.path.isfile(fn):
-            return -999
-        f = ROOT.TFile(fn)
-    h = f.Get(hist_path)
-    if last_bin:
-        return h.GetBinContent(h.GetNbinsX())
-    else:
-        return h.GetEntries()
-
-def check_nevents_from_files(samples, hist_path, fn_pattern='%(name)s.root'):
-    disagreements = []
-    nofiles = []
-    ok = []
-    for sample in samples:
-        n = nevents_from_file(sample, hist_path, fn_pattern)
-        #print sample.name, n
-        if n == -999:
-            nofiles.append(sample.name)
-            continue
-        if n != sample.nevents:
-            disagreements.append('%s.nevents = %i' % (sample.name, n))
-        else:
-            ok.append(sample.name)
-    print 'these are OK: %s' % ' '.join(ok)
-    print '(no files found for %s)' % ' '.join(nofiles)
-    if disagreements:
-        print '\n'.join(disagreements)
-        raise ValueError('different numbers of events')
-
-def get_nevents_ran(samples):
-    diffs = []
-    for sample in samples:
-        x,y = sample.nevents, DBS.numevents_in_dataset(sample.dataset, sample.dbs_instance)
-        print '%30s %14i %14i %14i %s' % (sample.name, x, y, x == y)
-        if x != y:
-            diffs.append((sample.name, y, x))
-    print '\nsuggested change:'
-    print
-    for sample, y, x in diffs:
-        print '%s.nevents_ran = %i' % diff
-    print
-    for sample, y, x in diffs:
-        eff = float(y)/x
-        if abs(eff - sample.filter_eff) > 1e-4:
-            print '%s.filter_eff = %9.4e  # %8i / %8i' % (sample.name, eff, y, x)
+    f = ROOT.TFile(fn)
+    h = f.Get('mfvWeight/h_sums')
+    assert h.GetXaxis().GetBinLabel(1) == 'sum_nevents_total'
+    return h.GetBinContent(1)
 
 def merge(samples, output='merge.root', norm_to=1.):
     if norm_to > 0:
         print 'norm sum of weights to', norm_to
     else:
         print 'multiply every weight by', -norm_to
+
+    raise "don't use until can take from histo"
 
     print 'taking nevents from samples'
 
@@ -353,9 +311,7 @@ __all__ = [
     'DataSample',
     'SamplesRegistry',
     'anon_samples',
-    'nevents_from_file',
-    'check_nevents_from_files',
-    'get_nevents_ran',
+    'norm_from_file',
     'merge',
     'main',
     ]

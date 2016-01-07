@@ -51,7 +51,6 @@ mfv_signal_samples = [
 for s in mfv_signal_samples:
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
-    s.filter_eff = 1.
     s.aaa = ['T2_US_Caltech', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
 
 xx4j_samples = [
@@ -61,7 +60,6 @@ xx4j_samples = [
 
 for s in xx4j_samples:
     s.xsec = 1e-3
-    s.filter_eff = 1.
 
 '''
 These not updated for run2.
@@ -199,33 +197,6 @@ s = qcdht1000; s.add_dataset('ntuplev4', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-m
 s = qcdht1500; s.add_dataset('ntuplev4', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
 s = qcdht2000; s.add_dataset('ntuplev4', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
 s = ttbar; s.add_dataset('ntuplev4', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
-
-# from the trigger soup with 17 paths            # 68% CL interval
-qcdht0100     .filter_eff = 0.000e+00  # [0.000e+00, 1.840e-05]
-qcdht0200     .filter_eff = 3.400e-04  
-qcdht0300     .filter_eff = 1.977e-02  # [1.933e-02, 2.022e-02]
-qcdht0500     .filter_eff = 2.517e-01  # [2.503e-01, 2.531e-01]
-qcdht0700     .filter_eff = 9.044e-01  # [9.035e-01, 9.053e-01]
-qcdht1000     .filter_eff = 9.996e-01  # [9.996e-01, 9.997e-01]
-qcdht1500     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
-qcdht2000     .filter_eff = 1.000e+00  # [1.000e+00, 1.000e+00]
-ttbar         .filter_eff = 2.823e-01  # [2.808e-01, 2.837e-01]
-mfv_neu_tau00100um_M0400.filter_eff = 9.704e-01  # [9.686e-01, 9.721e-01]
-mfv_neu_tau00100um_M0800.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
-mfv_neu_tau00100um_M1200.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
-mfv_neu_tau00100um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
-mfv_neu_tau00300um_M0400.filter_eff = 9.768e-01  # [9.752e-01, 9.783e-01]
-mfv_neu_tau00300um_M0800.filter_eff = 9.997e-01  # [9.994e-01, 9.999e-01]
-mfv_neu_tau00300um_M1200.filter_eff = 9.999e-01  # [9.997e-01, 1.000e+00]
-mfv_neu_tau00300um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
-mfv_neu_tau01000um_M0400.filter_eff = 9.757e-01  # [9.741e-01, 9.773e-01]
-mfv_neu_tau01000um_M0800.filter_eff = 9.998e-01  # [9.995e-01, 9.999e-01]
-mfv_neu_tau01000um_M1200.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
-mfv_neu_tau01000um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
-mfv_neu_tau10000um_M0400.filter_eff = 9.653e-01  # [9.633e-01, 9.672e-01]
-mfv_neu_tau10000um_M0800.filter_eff = 9.997e-01  # [9.994e-01, 9.999e-01]
-mfv_neu_tau10000um_M1200.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
-mfv_neu_tau10000um_M1600.filter_eff = 1.000e+00  # [9.998e-01, 1.000e+00]
 
 ########################################################################
 
