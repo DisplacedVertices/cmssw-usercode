@@ -117,13 +117,12 @@ class MCSample(Sample):
         self.join_info = (False, self.nice, self.color)
 
     @property
-    def partial_weight(self):
-        raise "don't use this"
+    def partial_weight_orig(self):
         return self.xsec / float(self.nevents_orig) # total weight = partial_weight * integrated_luminosity in 1/pb
 
     @property
-    def int_lumi(self):
-        return 1./self.partial_weight # units of 1/pb
+    def int_lumi_orig(self):
+        return 1./self.partial_weight_orig # units of 1/pb
 
     def job_control(self, conf_obj):
         conf_obj.splitting = 'EventAwareLumiBased'
