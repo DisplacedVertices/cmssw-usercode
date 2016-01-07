@@ -198,6 +198,8 @@ s = qcdht1500; s.add_dataset('ntuplev4', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-m
 s = qcdht2000; s.add_dataset('ntuplev4', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
 s = ttbar; s.add_dataset('ntuplev4', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev3_25ns-fe42ed09a127dd40dc7346de47efa4ce/USER', s.nevents, dbs_inst='phys03')
 
+qcdht2000.add_dataset('ntuplev5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-f255d1905ae5ab5e7f8225d5fd33347e/USER', 156091, dbs_inst='phys03')
+
 ########################################################################
 
 if __name__ == '__main__':
