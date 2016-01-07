@@ -218,7 +218,8 @@ class SamplesRegistry:
                 by_match = any(c in arg for c in '[]*?!')
                 for sample in self.d_samples.values():
                     if arg == sample.name or (by_match and fnmatch(sample.name, arg)):
-                        sample.fn = orig_arg
+                        if from_root_fns:
+                            sample.fn = orig_arg
                         samples.append(sample)
                 for name, l in self.d_lists.iteritems():
                     if arg == name:
