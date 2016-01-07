@@ -419,7 +419,7 @@ def data_mc_comparison(name,
                        plot_saver = None,
                        histogram_path = None,
                        file_path = None,
-                       hist_path_for_nevents_check = None,
+                       fcn_for_nevents_check = None,
                        int_lumi = None,
                        int_lumi_nice = None,
                        canvas_title = '',
@@ -544,12 +544,12 @@ def data_mc_comparison(name,
             if not previous_file_paths_ok:
                 # Cache the TFile and do basic check on the sample
                 # that the number of events is correct (if
-                # hist_path_for_nevents_check specified).
+                # fcn_for_nevents_check specified).
                 sample._datamccomp_file_path = file_path
                 sample._datamccomp_filename = file_path % sample
                 sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
-                if sample not in data_samples and hist_path_for_nevents_check is not None:
-                    if sample.nevents_from_file(hist_path_for_nevents_check, f=sample._datamccomp_file) != sample.nevents:
+                if sample not in data_samples and fcn_for_nevents_check is not None:
+                    if fcn_for_nevents_check(sample, sample._datamccomp_file) != sample.nevents:
                         raise ValueError('wrong number of events for %s' % sample.name)
 
             # Get the histogram, normalize, rebin, and move the
