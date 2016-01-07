@@ -13,9 +13,9 @@ class Dataset(object):
     DBS_INST = 'global'
     AAA = []
 
-    def __init__(self, dataset, nevents, **kwargs):
+    def __init__(self, dataset, nevents_orig, **kwargs):
         self.dataset = dataset
-        self.nevents = nevents
+        self.nevents_orig = nevents_orig
 
         self.hlt_name = kwargs.get('hlt_name', self.HLT_NAME)
         self.dbs_inst = kwargs.get('dbs_inst', self.DBS_INST)
@@ -29,10 +29,10 @@ class Sample(object):
     IS_FASTSIM = False
     GENERATOR = 'pythia8'
 
-    def __init__(self, name, dataset, nevents, **kwargs):
+    def __init__(self, name, dataset, nevents_orig, **kwargs):
         self.name = name
         self.curr_dataset = 'main'
-        self.datasets = {'main': Dataset(dataset, nevents, **kwargs)}
+        self.datasets = {'main': Dataset(dataset, nevents_orig, **kwargs)}
         
         self.is_mc      = kwargs.get('is_mc',      self.IS_MC)
         self.is_fastsim = kwargs.get('is_fastsim', self.IS_FASTSIM)
@@ -53,8 +53,8 @@ class Sample(object):
         return self.datasets[self.curr_dataset].dataset
 
     @property
-    def nevents(self):
-        return self.datasets[self.curr_dataset].nevents
+    def nevents_orig(self):
+        return self.datasets[self.curr_dataset].nevents_orig
 
     @property
     def hlt_name(self):
@@ -103,8 +103,8 @@ class MCSample(Sample):
     EVENTS_PER = 25000
     TOTAL_EVENTS = -1
     
-    def __init__(self, name, dataset, nevents, **kwargs):
-        super(MCSample, self).__init__(name, dataset, nevents, **kwargs)
+    def __init__(self, name, dataset, nevents_orig, **kwargs):
+        super(MCSample, self).__init__(name, dataset, nevents_orig, **kwargs)
 
         self.nice = kwargs.get('nice', '')
         self.color = kwargs.get('color', -1)
@@ -118,7 +118,8 @@ class MCSample(Sample):
 
     @property
     def partial_weight(self):
-        return self.xsec / float(self.nevents) # total weight = partial_weight * integrated_luminosity in 1/pb
+        raise "don't use this"
+        return self.xsec / float(self.nevents_orig) # total weight = partial_weight * integrated_luminosity in 1/pb
 
     @property
     def int_lumi(self):
@@ -241,18 +242,18 @@ def anon_samples(txt, **kwargs):
             continue
         line = line.split()
         if len(line) == 3:
-            name, dataset, nevents = line
+            name, dataset, nevents_orig = line
         else:
             if len(line) == 2:
-                dataset, nevents = line
+                dataset, nevents_orig = line
             else:
                 dataset = line[0]
-                nevents = -1
+                nevents_orig = -1
             name = dataset.split('/')[1]
             uniq[name] += 1
             if uniq[name] > 1:
                 name += str(uniq[name])
-        sample = MCSample(name, dataset, nevents)
+        sample = MCSample(name, dataset, nevents_orig)
         for k,v in kwargs.iteritems():
             setattr(sample, k, v)
         samples.append(sample)
