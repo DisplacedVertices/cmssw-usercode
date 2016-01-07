@@ -8,7 +8,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:pat.root'))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 50000
+process.MessageLogger.cerr.FwkReport.reportEvery = 500
 
 process.out = cms.OutputModule('PoolOutputModule', fileName = cms.untracked.string('merge.root'))
 process.outp = cms.EndPath(process.out)
@@ -24,30 +24,31 @@ process.out.outputCommands = cms.untracked.vstring('keep *', 'drop LumiDetails_l
 process.out.dropMetaData = cms.untracked.string('ALL')
 
 def get_input_from_argv(process):
+    from JMTucker.Tools.general import typed_from_argv
+
     # Look for just a list of files in argv first.
-    files = [x for x in sys.argv if x.startswith('/store') and x.endswith('.root')]
-    files += ['file:%s' % x for x in sys.argv if not x.startswith('/store') and os.path.isfile(x) and x.endswith('.root')]
-    name = [x for x in sys.argv if not os.path.isfile(x) and not x.startswith('/store') and x.endswith('.root')]
-    name = name[0] if name else 'merged.root'
+    def leave_alone(x):
+        return x.startswith('/store') or x.startswith('root://')
+    files = [x for x in sys.argv if leave_alone(x) and x.endswith('.root')]
+    files += ['file:%s' % x for x in sys.argv if not leave_alone(x) and os.path.isfile(x) and x.endswith('.root')]
 
     if not files:
-        # Else, files from crab dir mode.
-        from JMTucker.Tools.CRABTools import files_from_crab_dir
-        try:
-            crab_dir = [x for x in sys.argv if os.path.isdir(x)][0]
-        except IndexError:
-            raise RuntimeError('need either a list of files or a crab directory in argv!')
-        files = files_from_crab_dir(crab_dir)
-        name = os.path.join(crab_dir, 'res', 'merged.root')
+        # else, files from txt file
+        list_fn = os.path.expanduser(typed_from_argv(str, name='list'))
+        if list_fn is None:
+            raise ValueError('no files to run on')
+        files = [x.strip() for x in open(list_fn).read().split() if x.strip()]
     
     print 'Files to run over:', len(files)
     pprint(files)
     process.source.fileNames = files
 
-    print 'Merging to', name
-    process.out.fileName = name
+    process.out.fileName = 'merged.root'
+    out = typed_from_argv(str, name='out')
+    if out is not None:
+        process.out.fileName = os.path.expanduser(out)
+    print 'Merging to', process.out.fileName.value()
 
-    from JMTucker.Tools.general import typed_from_argv
     max_events = typed_from_argv(int, name='max_events')
     if max_events is not None:
         print 'Max events =', max_events
