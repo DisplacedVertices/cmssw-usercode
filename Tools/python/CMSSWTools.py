@@ -230,3 +230,6 @@ def silence_messages(process, categories):
 
 def tfileservice(process, filename='tfileservice.root'):
     process.TFileService = cms.Service('TFileService', fileName = cms.string(filename))
+
+def tracer(process):
+    process.Tracer = cms.Service('Tracer')
