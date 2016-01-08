@@ -212,6 +212,7 @@ _adbp3('ntuplev5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucke
 _adbp3('ntuplev5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-e8b651745d4ad004f6212ea64808b55e/USER', 242956)
 _adbp3('ntuplev5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-f255d1905ae5ab5e7f8225d5fd33347e/USER',  156091)
 _adbp3('ntuplev5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev5-865013272748526966cf501a48a930c5/USER',          181145)
+_adbp3('ntuplev5', '/mfv_neu_tau00100um_M0800/tucker-ntuplev5-e95b53ac10e314a1c23b8f6bd769105a/USER',                                  5479)
 _adbp3('ntuplev5', '/mfv_neu_tau00300um_M0800/tucker-ntuplev5-8f83f112f3ab7411e44d3d49b945c276/USER',                                  8064)
 _adbp3('ntuplev5', '/mfv_neu_tau01000um_M0800/tucker-ntuplev5-5e8fc450c573586178f258b85d94a0e3/USER',                                  9452)
 _adbp3('ntuplev5', '/mfv_neu_tau10000um_M0800/tucker-ntuplev5-8734c1a46e9ff969cef40e567e4f7ff9/USER',                                  9823)
