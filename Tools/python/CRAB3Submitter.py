@@ -154,8 +154,8 @@ class CRABSubmitter:
             sample.job_control(cfg.Data)
 
         if sample.aaa:
-            self.cfg_template.Data.ignoreLocality = True
-            self.cfg_template.Site.whitelist = sample.aaa
+            cfg.Data.ignoreLocality = True
+            cfg.Site.whitelist = sample.aaa
 
         if self.cfg_modifier is not None:
             self.cfg_modifier(cfg, sample)
