@@ -55,7 +55,7 @@ void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, c
   lumi.getByLabel(edm::InputTag("mcStat", "sumWeightProd"), sumWeightProd);
 
   if (prints)
-    printf("MFVWeight::beginLuminosityBlock: nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", *nEvents, *sumWeight, *sumWeightProd);
+    printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), *nEvents, *sumWeight, *sumWeightProd);
 
   if (histos) {
     h_sums->Fill(sum_nevents_total, *nEvents);
