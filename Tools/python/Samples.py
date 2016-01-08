@@ -180,6 +180,8 @@ for sample in data_samples + auxiliary_data_samples:
 JetHT2015Dv3.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
 JetHT2015Dv3.add_dataset('mergev5',  '/JetHT/tucker-mergentuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
 
+JetHT2015Dv4.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-a43ce49cdf92a8b591fb7f3e283b5747/USER', dbs_inst='phys03')
+
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
     if len(x) != 1:
@@ -204,13 +206,15 @@ _adbp('miniaod', '/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/R
 _adbp('miniaod', '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v3/MINIAODSIM',     28825132)
 _adbp('miniaod', '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',    13201693)
 
-_adbp3('ntuplev5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-cd64d4d38dd6409d4ca234e4609d3c77/USER',    2232)
-_adbp3('ntuplev5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-f255d1905ae5ab5e7f8225d5fd33347e/USER', 156091)
-_adbp3('ntuplev5', '/mfv_neu_tau00300um_M0800/tucker-ntuplev5-8f83f112f3ab7411e44d3d49b945c276/USER',                                 8064)
-_adbp3('ntuplev5', '/mfv_neu_tau01000um_M0800/tucker-ntuplev5-5e8fc450c573586178f258b85d94a0e3/USER',                                 9452)
-_adbp3('ntuplev5', '/mfv_neu_tau10000um_M0800/tucker-ntuplev5-8734c1a46e9ff969cef40e567e4f7ff9/USER',                                 9823)
-_adbp3('ntuplev5', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev5-1078893a9eadd8996cf0ad6bf4759d4d/USER',         9578)
-_adbp3('ntuplev5', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev5-ad44f2874d508bc75b868fe9a50955b6/USER',        9779)
+_adbp3('ntuplev5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-cd64d4d38dd6409d4ca234e4609d3c77/USER',     2232)
+_adbp3('ntuplev5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-e8b651745d4ad004f6212ea64808b55e/USER', 242956)
+_adbp3('ntuplev5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-f255d1905ae5ab5e7f8225d5fd33347e/USER',  156091)
+_adbp3('ntuplev5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev5-865013272748526966cf501a48a930c5/USER',          181145)
+_adbp3('ntuplev5', '/mfv_neu_tau00300um_M0800/tucker-ntuplev5-8f83f112f3ab7411e44d3d49b945c276/USER',                                  8064)
+_adbp3('ntuplev5', '/mfv_neu_tau01000um_M0800/tucker-ntuplev5-5e8fc450c573586178f258b85d94a0e3/USER',                                  9452)
+_adbp3('ntuplev5', '/mfv_neu_tau10000um_M0800/tucker-ntuplev5-8734c1a46e9ff969cef40e567e4f7ff9/USER',                                  9823)
+_adbp3('ntuplev5', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev5-1078893a9eadd8996cf0ad6bf4759d4d/USER',          9578)
+_adbp3('ntuplev5', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev5-ad44f2874d508bc75b868fe9a50955b6/USER',         9779)
 
 _adbp3('mergev5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-mergentuplev5-cd64d4d38dd6409d4ca234e4609d3c77/USER',    2232)
 _adbp3('mergev5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-mergentuplev5-f255d1905ae5ab5e7f8225d5fd33347e/USER', 156091)
