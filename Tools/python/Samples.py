@@ -180,9 +180,9 @@ for sample in data_samples + auxiliary_data_samples:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
 JetHT2015Dv3.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
-JetHT2015Dv3.add_dataset('mergev5',  '/JetHT/tucker-mergentuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
-
 JetHT2015Dv4.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-a43ce49cdf92a8b591fb7f3e283b5747/USER', dbs_inst='phys03')
+
+JetHT2015Dv3.add_dataset('mergev5',  '/JetHT/tucker-mergentuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
 
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
@@ -209,6 +209,8 @@ _adbp('miniaod', '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunII
 _adbp('miniaod', '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',    13201693)
 
 _adbp3('ntuplev5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-cd64d4d38dd6409d4ca234e4609d3c77/USER',     2232)
+_adbp3('ntuplev5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-93677ca5776b654c8963938d330eb240/USER',  167601)
+_adbp3('ntuplev5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-73708112df0cc5590c697e9b2eae9a19/USER', 217664)
 _adbp3('ntuplev5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-e8b651745d4ad004f6212ea64808b55e/USER', 242956)
 _adbp3('ntuplev5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev5-f255d1905ae5ab5e7f8225d5fd33347e/USER',  156091)
 _adbp3('ntuplev5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev5-865013272748526966cf501a48a930c5/USER',          181145)
