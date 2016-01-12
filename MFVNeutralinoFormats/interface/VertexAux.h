@@ -39,7 +39,7 @@ struct MFVVertexAux {
   float chi2;
   uchar ndof_; // may not be = ntracks - 3 if weights used in vtx fit
   float ndof() const { return float(ndof_); }
-  float chi2dof() const { return chi2 * ndof(); }
+  float chi2dof() const { return chi2 / ndof(); }
 
   uchar njets[mfv::NJetsByUse];
 
