@@ -124,6 +124,15 @@ class MCSample(Sample):
     def int_lumi_orig(self):
         return 1./self.partial_weight_orig # units of 1/pb
 
+    def nevents(self, f_or_fn):
+        return norm_from_file(f_or_fn)
+
+    def partial_weight(self, f_or_fn):
+        return self.xsec / self.nevents(f_or_fn)
+
+    def int_lumi(self, f_or_fn):
+        return 1./self.partial_weight(f_or_fn)
+            
     def job_control(self, conf_obj):
         conf_obj.splitting = 'EventAwareLumiBased'
         conf_obj.unitsPerJob = self.events_per
@@ -266,9 +275,12 @@ def anon_samples(txt, **kwargs):
         samples.append(sample)
     return samples
 
-def norm_from_file(fn):
-    from JMTucker.Tools.ROOTTools import ROOT
-    f = ROOT.TFile(fn)
+def norm_from_file(f_or_fn):
+    if type(f_or_fn) == str:
+        from JMTucker.Tools.ROOTTools import ROOT
+        f = ROOT.TFile(f_or_fn)
+    else:
+        f = f_or_fn
     h = f.Get('mfvWeight/h_sums')
     assert h.GetXaxis().GetBinLabel(1) == 'sum_nevents_total'
     return h.GetBinContent(1)
@@ -279,13 +291,9 @@ def merge(samples, output='merge.root', norm_to=1.):
     else:
         print 'multiply every weight by', -norm_to
 
-    raise "don't use until can take from histo"
-
-    print 'taking nevents from samples'
-
     weights = []
     for sample in samples:
-        weights.append(sample.partial_weight)
+        weights.append(sample.partial_weight(sample.fn))
 
     if norm_to > 0:
         norm_to /= sum(weights)
@@ -307,10 +315,11 @@ def main(samples_registry):
     if 'merge' in sys.argv:
         samples = samples_registry.from_argv(from_root_fns=True)
         out_fn = [x for x in sys.argv if x.endswith('.root') and not os.path.isfile(x)]
+        norm_to = typed_from_argv(float, default_value=1.)
         if out_fn:
-            merge(samples, output=out_fn[0], norm_to=typed_from_argv(float, default_value=1.))
+            merge(samples, output=out_fn[0], norm_to=norm_to)
         else:
-            merge(samples, norm_to=typed_from_argv(float, default_value=1.))
+            merge(samples, norm_to=norm_to)
 
 __all__ = [
     'Dataset',
