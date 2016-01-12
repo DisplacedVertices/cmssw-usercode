@@ -570,7 +570,7 @@ def data_mc_comparison(name,
             xax = None
 
             if sample not in data_samples:
-                sample.hist.Scale(sample.partial_weight * int_lumi)
+                sample.hist.Scale(sample.partial_weight(sample._datamccomp_file) * int_lumi)
             if rebin is not None:
                 sample.hist_before_rebin = sample.hist
                 rebin_name = sample.hist.GetName() + '_rebinned'
@@ -651,7 +651,7 @@ def data_mc_comparison(name,
         if verbose:
             integ = get_integral(sample.hist, 0)
             if integ[0] == 0:
-                print sample.name, '<', 3 * sample.partial_weight * int_lumi, '@95%CL'
+                print sample.name, '<', 3 * sample.partial_weight(sample._datamccomp_file) * int_lumi, '@95%CL'
             else:
                 print sample.name, integ
 
@@ -693,7 +693,7 @@ def data_mc_comparison(name,
         if verbose:
             integ = get_integral(sample.hist, 0)
             if integ[0] == 0:
-                print sample.name, '<', 3 * sample.partial_weight * int_lumi, '@95%CL'
+                print sample.name, '<', 3 * sample.partial_weight(sample._datamccomp_file) * int_lumi, '@95%CL'
             else:
                 print sample.name, integ
 
