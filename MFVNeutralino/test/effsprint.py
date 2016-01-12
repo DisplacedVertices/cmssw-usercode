@@ -88,4 +88,4 @@ if not nosort:
     fns.sort()
 for fn in fns:
     effs(fn)
-print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, sum, var**0.5)
+print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
