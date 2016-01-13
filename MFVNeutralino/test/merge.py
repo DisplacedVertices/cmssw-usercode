@@ -14,10 +14,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.xx4j_samples
         )
 
-    cs = CRABSubmitter('MergeNtupleV5',
+    samples = [Samples.qcdht0500]
+
+    cs = CRABSubmitter('MergeNtupleV5_smaller',
                        dataset = 'ntuplev5',
-                       splitting = 'EventAwareLumiBased',
-                       units_per_job = 20000,
+                       splitting = 'FileBased',
+                       units_per_job = 50,
                        total_units = -1,
                        aaa = True,
                        publish_name = 'mergentuplev5',
