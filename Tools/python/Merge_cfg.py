@@ -16,7 +16,6 @@ process.outp = cms.EndPath(process.out)
 # Keeping Run/LumiSummary causes these sparse skims to be majorly
 # bloated; not using them right now, so drop them. Also drop
 # MEtoEDMConverter junk.
-process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
 process.source.inputCommands = cms.untracked.vstring('keep *', 'drop *_MEtoEDMConverter_*_*')
 process.out.outputCommands = cms.untracked.vstring('keep *', 'drop LumiDetails_lumiProducer_*_*', 'drop LumiSummary_lumiProducer_*_*', 'drop RunSummary_lumiProducer_*_*')
 
