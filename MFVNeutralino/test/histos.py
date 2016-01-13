@@ -83,12 +83,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     for sample in Samples.data_samples:
         sample.json = 'ana_10pc.json'
+        sample.lumis_per = 200
 
     cs = CRABSubmitter('HistosV5',
                        dataset = 'ntuplev5',
-                       splitting = 'EventAwareLumiBased',
-                       units_per_job = 20000,
-                       total_units = -1,
+                       job_control_from_sample = True,
                        aaa = True, # stored at FNAL, easy to run on T2_USes
                        )
     cs.submit_all(samples)
