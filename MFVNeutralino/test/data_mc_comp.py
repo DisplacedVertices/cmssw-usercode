@@ -6,8 +6,8 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d3/dquach/crab3dirs/HistosV3_newcuts_sigmadxy3p0'
-plot_dir = 'plots/HistosV3_sigmadxy3p0_pretty_data_mc_comp'
+root_file_dir = '/uscms_data/d3/dquach/crab3dirs/HistosV5'
+plot_dir = 'plots/HistosV5'
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -15,7 +15,7 @@ ps = plot_saver(plot_dir)
 scale_factor = 1.
 
 data_samples = [] # Samples.data_samples
-background_samples = Samples.ttbar_samples + Samples.qcd_samples[3:]
+background_samples = Samples.ttbar_samples + Samples.qcd_samples
 signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 y= ['100 #mum, #sigma = 100 fb', '300 #mum, #sigma = 5 fb', '1 mm, #sigma = 1 fb', '10 mm, #sigma = 1 fb']
 c=[2,4,6,8]
