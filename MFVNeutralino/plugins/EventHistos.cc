@@ -40,7 +40,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pass_l1[mfv::n_l1_paths];
   TH1F* h_pass_clean[mfv::n_clean_paths];
   TH1F* h_pass_clean_all;
-  TH1F* h_passoldskim;
 
   TH1F* h_npu;
 
@@ -219,7 +218,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   for (int i = 0; i < mfv::n_clean_paths; ++i)
     h_pass_clean[i] = fs->make<TH1F>(TString::Format("h_pass_clean_%i", i), TString::Format(";pass_clean[%i];events", i), 2, 0, 2);
   h_pass_clean_all = fs->make<TH1F>("h_pass_clean_all", ";pass_clean_all;events", 2, 0, 2);
-  h_passoldskim = fs->make<TH1F>("h_passoldskim", ";pass old skim?;events", 2, 0, 2);
 
   h_npu = fs->make<TH1F>("h_npu", ";true nPU;events", 65, 0, 65);
 
@@ -247,8 +245,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
   for (int i = 0; i < 3; ++i)
     h_njetsnopu[i] = fs->make<TH1F>(TString::Format("h_njetsnopu_%s", lmt_ex[i]), TString::Format(";# of jets (%s PU id);events", lmt_ex[i]), 20, 0, 20);
-  h_jetpt1 = fs->make<TH1F>("h_jetpt1", ";p_{T} of 1st jet (GeV);events/5 GeV", 100, 0, 500);
-  h_jetpt2 = fs->make<TH1F>("h_jetpt2", ";p_{T} of 2nd jet (GeV);events/5 GeV", 100, 0, 500);
+  h_jetpt1 = fs->make<TH1F>("h_jetpt1", ";p_{T} of 1st jet (GeV);events/5 GeV", 100, 0, 1000);
+  h_jetpt2 = fs->make<TH1F>("h_jetpt2", ";p_{T} of 2nd jet (GeV);events/5 GeV", 100, 0, 1000);
   h_jetpt3 = fs->make<TH1F>("h_jetpt3", ";p_{T} of 3rd jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th jet (GeV);events/5 GeV", 100, 0, 500);
@@ -277,7 +275,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bs2ddist1_bs2ddist0 = fs->make<TH2F>("h_bs2ddist1_bs2ddist0", ";bs2ddist0;bs2ddist1", 500, 0, 1, 500, 0, 1);
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
-    h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, 50);
+    h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, i < 4 ? 50 : 100);
 
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
