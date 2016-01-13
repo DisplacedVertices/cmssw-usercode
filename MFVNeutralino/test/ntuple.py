@@ -9,7 +9,7 @@ prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
 event_filter = not keep_all
-version = 'v5'
+version = 'v6'
 batch_name = 'Ntuple' + version.upper()
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
