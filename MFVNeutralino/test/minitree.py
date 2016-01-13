@@ -24,12 +24,17 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples[3:]
+    samples = Samples.registry.from_argv(
+        Samples.data_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        Samples.xx4j_samples
+        )
 
-    cs = CRABSubmitter('MinitreeV4',
-                       dataset = 'ntuplev4',
+    cs = CRABSubmitter('MinitreeV5',
+                       dataset = 'ntuplev5',
                        splitting = 'FileBased',
-                       units_per_job = 5,
+                       units_per_job = 25,
                        total_units = -1,
                        aaa = True,
                        )
