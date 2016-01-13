@@ -87,7 +87,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CRABSubmitter('HistosV5',
                        dataset = 'ntuplev5',
                        splitting = 'EventAwareLumiBased',
-                       units_per_job = 50000,
+                       units_per_job = 20000,
                        total_units = -1,
                        aaa = True, # stored at FNAL, easy to run on T2_USes
                        )
