@@ -57,7 +57,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(event_src, mevent);
 
-  nt.flavor_code = mevent->flavor_code;
+  nt.gen_flavor_code = mevent->gen_flavor_code;
   nt.npv = mevent->npv;
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);

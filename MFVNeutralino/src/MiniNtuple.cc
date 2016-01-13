@@ -5,7 +5,7 @@ namespace mfv {
     tree->Branch("run", &nt.run, "run/i");
     tree->Branch("lumi", &nt.lumi, "lumi/i");
     tree->Branch("event", &nt.event);
-    tree->Branch("flavor_code", &nt.flavor_code, "flavor_code/b");
+    tree->Branch("gen_flavor_code", &nt.gen_flavor_code, "gen_flavor_code/b");
     tree->Branch("npv", &nt.npv, "npv/s");
     tree->Branch("pvx", &nt.pvx, "pvx/F");
     tree->Branch("pvy", &nt.pvy, "pvy/F");
@@ -54,7 +54,7 @@ namespace mfv {
     tree->SetBranchAddress("run", &nt.run);
     tree->SetBranchAddress("lumi", &nt.lumi);
     tree->SetBranchAddress("event", &nt.event);
-    tree->SetBranchAddress("flavor_code", &nt.flavor_code);
+    tree->SetBranchAddress("gen_flavor_code", &nt.gen_flavor_code);
     tree->SetBranchAddress("npv", &nt.npv);
     tree->SetBranchAddress("pvx", &nt.pvx);
     tree->SetBranchAddress("pvy", &nt.pvy);
