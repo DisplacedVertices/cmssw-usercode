@@ -173,7 +173,9 @@ for x in __all__:
 
 # Extra datasets and other overrides go here.
 
-qcdht1000.aaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Estonia', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3'] # until copied to FNAL
+euroaaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Estonia', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3']
+qcdht0500.aaa = euroaaa
+qcdht1000.aaa = euroaaa # until copied to FNAL
 
 # Can't add data datasets by primary (many have the same primary).
 for sample in data_samples + auxiliary_data_samples:
