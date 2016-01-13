@@ -78,7 +78,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_pos_bsphi[2];
 
   PairwiseHistos h_sv[sv_num_indices];
-  PairwiseHistos h_sv_sumtop2;
 
   TH1F* h_sv_jets_deltaphi[4][sv_num_indices];
   TH2F* h_sv_ntracksanypv_ntracksthepv[sv_num_indices];
@@ -276,38 +275,38 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
   hs.add("msptm",                         "SV p_{T}-corrected mass (GeV)",                                               100,    0,    1500);
 
-  hs.add("tkonlyp",                       "SV tracks-only p (GeV)",                                                      100,    0,     300);
-  hs.add("tkonlypt",                      "SV tracks-only p_{T} (GeV)",                                                  100,    0,     300);
+  hs.add("tkonlyp",                       "SV tracks-only p (GeV)",                                                       50,    0,     500);
+  hs.add("tkonlypt",                      "SV tracks-only p_{T} (GeV)",                                                   50,    0,     400);
   hs.add("tkonlyeta",                     "SV tracks-only #eta",                                                          50,   -4,       4);
   hs.add("tkonlyrapidity",                "SV tracks-only rapidity",                                                      50,   -4,       4);
   hs.add("tkonlyphi",                     "SV tracks-only #phi",                                                          50,   -3.15,    3.15);
-  hs.add("tkonlymass",                    "SV tracks-only mass (GeV)",                                                   100,    0,     250);
+  hs.add("tkonlymass",                    "SV tracks-only mass (GeV)",                                                    50,    0,     500);
 
-  hs.add("jetsntkp",                      "SV jets-by-ntracks -only p (GeV)",                                            100,    0,     300);
-  hs.add("jetsntkpt",                     "SV jets-by-ntracks -only p_{T} (GeV)",                                        100,    0,     300);
+  hs.add("jetsntkp",                      "SV jets-by-ntracks -only p (GeV)",                                             50,    0,    1000);
+  hs.add("jetsntkpt",                     "SV jets-by-ntracks -only p_{T} (GeV)",                                         50,    0,    1000);
   hs.add("jetsntketa",                    "SV jets-by-ntracks -only #eta",                                                50,   -4,       4);
   hs.add("jetsntkrapidity",               "SV jets-by-ntracks -only rapidity",                                            50,   -4,       4);
   hs.add("jetsntkphi",                    "SV jets-by-ntracks -only #phi",                                                50,   -3.15,    3.15);
-  hs.add("jetsntkmass",                   "SV jets-by-ntracks -only mass (GeV)",                                         100,    0,    1500);
+  hs.add("jetsntkmass",                   "SV jets-by-ntracks -only mass (GeV)",                                          50,    0,    2000);
 
-  hs.add("tksjetsntkp",                   "SV tracks-plus-jets-by-ntracks p (GeV)",                                      100,    0,     300);
-  hs.add("tksjetsntkpt",                  "SV tracks-plus-jets-by-ntracks p_{T} (GeV)",                                  100,    0,     300);
+  hs.add("tksjetsntkp",                   "SV tracks-plus-jets-by-ntracks p (GeV)",                                       50,    0,    1000);
+  hs.add("tksjetsntkpt",                  "SV tracks-plus-jets-by-ntracks p_{T} (GeV)",                                   50,    0,    1000);
   hs.add("tksjetsntketa",                 "SV tracks-plus-jets-by-ntracks #eta",                                          50,   -4,       4);
   hs.add("tksjetsntkrapidity",            "SV tracks-plus-jets-by-ntracks rapidity",                                      50,   -4,       4);
   hs.add("tksjetsntkphi",                 "SV tracks-plus-jets-by-ntracks #phi",                                          50,   -3.15,    3.15);
-  hs.add("tksjetsntkmass",                "SV tracks-plus-jets-by-ntracks mass (GeV)",                                   100,    0,    1500);
+  hs.add("tksjetsntkmass",                "SV tracks-plus-jets-by-ntracks mass (GeV)",                                    50,    0,    2000);
 				        
-  hs.add("costhtkonlymombs",              "cos(angle(2-momentum (tracks-only), 2-dist to BS))",                          101,   -1,       1.02);
-  hs.add("costhtkonlymompv2d",            "cos(angle(2-momentum (tracks-only), 2-dist to PV))",                          101,   -1,       1.02);
-  hs.add("costhtkonlymompv3d",            "cos(angle(3-momentum (tracks-only), 3-dist to PV))",                          101,   -1,       1.02);
+  hs.add("costhtkonlymombs",              "cos(angle(2-momentum (tracks-only), 2-dist to BS))",                           21,   -1,       1.1);
+  hs.add("costhtkonlymompv2d",            "cos(angle(2-momentum (tracks-only), 2-dist to PV))",                           21,   -1,       1.1);
+  hs.add("costhtkonlymompv3d",            "cos(angle(3-momentum (tracks-only), 3-dist to PV))",                           21,   -1,       1.1);
 
-  hs.add("costhjetsntkmombs",             "cos(angle(2-momentum (jets-by-ntracks -only), 2-dist to BS))",                101,   -1,       1.02);
-  hs.add("costhjetsntkmompv2d",           "cos(angle(2-momentum (jets-by-ntracks -only), 2-dist to PV))",                101,   -1,       1.02);
-  hs.add("costhjetsntkmompv3d",           "cos(angle(3-momentum (jets-by-ntracks -only), 3-dist to PV))",                101,   -1,       1.02);
+  hs.add("costhjetsntkmombs",             "cos(angle(2-momentum (jets-by-ntracks -only), 2-dist to BS))",                21,   -1,       1.1);
+  hs.add("costhjetsntkmompv2d",           "cos(angle(2-momentum (jets-by-ntracks -only), 2-dist to PV))",                21,   -1,       1.1);
+  hs.add("costhjetsntkmompv3d",           "cos(angle(3-momentum (jets-by-ntracks -only), 3-dist to PV))",                21,   -1,       1.1);
 
-  hs.add("costhtksjetsntkmombs",          "cos(angle(2-momentum (tracks-plus-jets-by-ntracks), 2-dist to BS))",          101,   -1,       1.02);
-  hs.add("costhtksjetsntkmompv2d",        "cos(angle(2-momentum (tracks-plus-jets-by-ntracks), 2-dist to PV))",          101,   -1,       1.02);
-  hs.add("costhtksjetsntkmompv3d",        "cos(angle(3-momentum (tracks-plus-jets-by-ntracks), 3-dist to PV))",          101,   -1,       1.02);
+  hs.add("costhtksjetsntkmombs",          "cos(angle(2-momentum (tracks-plus-jets-by-ntracks), 2-dist to BS))",          21,   -1,       1.1);
+  hs.add("costhtksjetsntkmompv2d",        "cos(angle(2-momentum (tracks-plus-jets-by-ntracks), 2-dist to PV))",          21,   -1,       1.1);
+  hs.add("costhtksjetsntkmompv3d",        "cos(angle(3-momentum (tracks-plus-jets-by-ntracks), 3-dist to PV))",          21,   -1,       1.1);
 
   hs.add("missdisttkonlypv",              "miss dist. (tracks-only) of SV to PV (cm)",                                   100,    0,       2);
   hs.add("missdisttkonlypverr",           "#sigma(miss dist. (tracks-only) of SV to PV) (cm)",                           100,    0,       0.05);
@@ -321,22 +320,22 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("missdisttksjetsntkpverr",       "#sigma(miss dist. (tracks-plus-jets-by-ntracks) of SV to PV) (cm)",           100,    0,       0.05);
   hs.add("missdisttksjetsntkpvsig",       "N#sigma(miss dist. (tracks-plus-jets-by-ntracks) of SV to PV) (cm)",          100,    0,     100);
 					  
-  hs.add("sumpt2",                        "SV #Sigma p_{T}^{2} (GeV^2)",                                                 300,    0,    6000);
-  hs.add("maxnhitsbehind",                "max number of hits behind SV",                                                 15,    0,      15);
-  hs.add("sumnhitsbehind",                "sum number of hits behind SV",                                                100,    0,     100);
+  hs.add("sumpt2",                        "SV #Sigma p_{T}^{2} (GeV^2)",                                                  50,    0,    10000);
+  hs.add("maxnhitsbehind",                "max number of hits behind SV",                                                 5,    0,      5);
+  hs.add("sumnhitsbehind",                "sum number of hits behind SV",                                                 5,    0,     5);
 
-  hs.add("ntrackssharedwpv",  "number of tracks shared with the PV", 40, 0, 40);
-  hs.add("ntrackssharedwpvs", "number of tracks shared with any PV", 40, 0, 40);
+  hs.add("ntrackssharedwpv",  "number of tracks shared with the PV", 30, 0, 30);
+  hs.add("ntrackssharedwpvs", "number of tracks shared with any PV", 30, 0, 30);
   hs.add("fractrackssharedwpv",  "fraction of tracks shared with the PV", 41, 0, 1.025);
   hs.add("fractrackssharedwpvs", "fraction of tracks shared with any PV", 41, 0, 1.025);
-  hs.add("npvswtracksshared", "number of PVs having tracks shared",  40, 0, 40);
+  hs.add("npvswtracksshared", "number of PVs having tracks shared",  30, 0, 30);
   
-  hs.add("mintrackpt",                    "SV min{trk_{i} p_{T}} (GeV)",                                                  50,    0,      10);
-  hs.add("maxtrackpt",                    "SV max{trk_{i} p_{T}} (GeV)",                                                 100,    0,     150);
-  hs.add("maxm1trackpt",                  "SV max-1{trk_{i} p_{T}} (GeV)",                                               100,    0,     150);
-  hs.add("maxm2trackpt",                  "SV max-2{trk_{i} p_{T}} (GeV)",                                               100,    0,     150);
-  hs.add("trackptavg",                    "SV avg{trk_{i} p_{T}} (GeV)",                                                  50,    0,      50);
-  hs.add("trackptrms",                    "SV rms{trk_{i} p_{T}} (GeV)",                                                  50,    0,      20);
+  hs.add("mintrackpt",                    "SV min{trk_{i} p_{T}} (GeV)",                                                  50,    0,      50);
+  hs.add("maxtrackpt",                    "SV max{trk_{i} p_{T}} (GeV)",                                                  50,    0,     200);
+  hs.add("maxm1trackpt",                  "SV max-1{trk_{i} p_{T}} (GeV)",                                                50,    0,     150);
+  hs.add("maxm2trackpt",                  "SV max-2{trk_{i} p_{T}} (GeV)",                                                50,    0,     150);
+  hs.add("trackptavg",                    "SV avg{trk_{i} p_{T}} (GeV)",                                                  50,    0,     100);
+  hs.add("trackptrms",                    "SV rms{trk_{i} p_{T}} (GeV)",                                                  50,    0,      50);
 
   hs.add("trackdxymin", "SV min{trk_{i} dxy(BS)} (cm)", 50, 0, 0.2);
   hs.add("trackdxymax", "SV max{trk_{i} dxy(BS)} (cm)", 50, 0, 2);
@@ -348,30 +347,30 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackdzavg", "SV avg{trk_{i} dz(PV)} (cm)", 50, 0, 1);
   hs.add("trackdzrms", "SV rms{trk_{i} dz(PV)} (cm)", 50, 0, 0.5);
 
-  hs.add("trackpterrmin", "SV min{frac. #sigma trk_{i} p_{T}}", 50, 0, 0.1);
-  hs.add("trackpterrmax", "SV max{frac. #sigma trk_{i} p_{T}}", 50, 0, 2);
-  hs.add("trackpterravg", "SV avg{frac. #sigma trk_{i} p_{T}}", 50, 0, 1);
-  hs.add("trackpterrrms", "SV rms{frac. #sigma trk_{i} p_{T}}", 50, 0, 2);
+  hs.add("trackpterrmin", "SV min{frac. #sigma trk_{i} p_{T}}", 32, 0, 2);
+  hs.add("trackpterrmax", "SV max{frac. #sigma trk_{i} p_{T}}", 32, 0, 2);
+  hs.add("trackpterravg", "SV avg{frac. #sigma trk_{i} p_{T}}", 32, 0, 2);
+  hs.add("trackpterrrms", "SV rms{frac. #sigma trk_{i} p_{T}}", 32, 0, 2);
 
-  hs.add("tracketaerrmin", "SV min{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
-  hs.add("tracketaerrmax", "SV max{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
-  hs.add("tracketaerravg", "SV avg{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
-  hs.add("tracketaerrrms", "SV rms{frac. #sigma trk_{i} #eta}", 50, 0, 0.01);
+  hs.add("tracketaerrmin", "SV min{frac. #sigma trk_{i} #eta}", 32, 0, 0.002);
+  hs.add("tracketaerrmax", "SV max{frac. #sigma trk_{i} #eta}", 32, 0, 0.005);
+  hs.add("tracketaerravg", "SV avg{frac. #sigma trk_{i} #eta}", 32, 0, 0.002);
+  hs.add("tracketaerrrms", "SV rms{frac. #sigma trk_{i} #eta}", 32, 0, 0.002);
 
-  hs.add("trackphierrmin", "SV min{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
-  hs.add("trackphierrmax", "SV max{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
-  hs.add("trackphierravg", "SV avg{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
-  hs.add("trackphierrrms", "SV rms{frac. #sigma trk_{i} #phi}", 50, 0, 0.01);
+  hs.add("trackphierrmin", "SV min{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
+  hs.add("trackphierrmax", "SV max{frac. #sigma trk_{i} #phi}", 32, 0, 0.005);
+  hs.add("trackphierravg", "SV avg{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
+  hs.add("trackphierrrms", "SV rms{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
 
-  hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.01);
-  hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.5);
-  hs.add("trackdxyerravg", "SV avg{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.1);
-  hs.add("trackdxyerrrms", "SV rms{#sigma trk_{i} dxy(BS)} (cm)", 50, 0, 0.1);
+  hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.004);
+  hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
+  hs.add("trackdxyerravg", "SV avg{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
+  hs.add("trackdxyerrrms", "SV rms{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
 
-  hs.add("trackdzerrmin", "SV min{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 0.01);
-  hs.add("trackdzerrmax", "SV max{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 2);
-  hs.add("trackdzerravg", "SV avg{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 1);
-  hs.add("trackdzerrrms", "SV rms{#sigma trk_{i} dz(PV)} (cm)", 50, 0, 0.4);
+  hs.add("trackdzerrmin", "SV min{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.01);
+  hs.add("trackdzerrmax", "SV max{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.1);
+  hs.add("trackdzerravg", "SV avg{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.1);
+  hs.add("trackdzerrrms", "SV rms{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.1);
 
   hs.add("trackpairmassmin", "SV min{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 2);
   hs.add("trackpairmassmax", "SV max{mass(trk_{i}, trk_{j})} (GeV)", 50, 0, 100);
@@ -574,8 +573,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       h_sv_jets_maxDist[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_maxDist", exc), TString::Format("h_sv_%s_jets_maxDist", exc), 20, 0, 1);
     }
   }
-
-  h_sv_sumtop2.Init("h_sv_sumtop2", hs, true, do_scatterplots, 2);
 
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 1);
@@ -1234,8 +1231,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     }
 
     fill_multi(h_sv, isv, v, w);
-
-    h_sv_sumtop2.Fill(v, isv, w);
   }
 
   for (int i = 0; i < 2; ++i) {
