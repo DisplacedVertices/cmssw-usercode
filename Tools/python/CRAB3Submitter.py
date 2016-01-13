@@ -4,6 +4,7 @@ import os
 import sys
 import time
 from copy import deepcopy
+from datetime import datetime
 from pprint import pprint
 from StringIO import StringIO
 from CRAB3Tools import Config, crab_global_options, crab_dirs_root, crab_renew_proxy_if_needed, crab_command
@@ -188,7 +189,7 @@ class CRABSubmitter:
 
         extra = ''
         if self.modify_pset_hash:
-            extra += '\nprocess.dummyForPsetHash = cms.PSet(dummy = cms.string(%r))' % (str(time.time()) + sample.dataset)
+            extra += '\nprocess.dummyForPsetHash = cms.PSet(dummy = cms.string(%r))' % (str(datetime.now()) + sample.dataset)
         extra += "\nopen(%r, 'wt').write(process.dumpPython())" % pset_fn
         open(pset_orig_fn, 'wt').write(pset + extra)
 
