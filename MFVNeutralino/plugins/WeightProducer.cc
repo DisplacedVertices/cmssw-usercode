@@ -48,19 +48,21 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 }
 
 void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup&) {
-  edm::Handle<int> nEvents;
-  edm::Handle<float> sumWeight, sumWeightProd;
-  lumi.getByLabel(edm::InputTag("mcStat", "nEvents"), nEvents);
-  lumi.getByLabel(edm::InputTag("mcStat", "sumWeight"), sumWeight);
-  lumi.getByLabel(edm::InputTag("mcStat", "sumWeightProd"), sumWeightProd);
+  if (lumi.run() == 1) { // no lumi.isRealData()
+    edm::Handle<int> nEvents;
+    edm::Handle<float> sumWeight, sumWeightProd;
+    lumi.getByLabel(edm::InputTag("mcStat", "nEvents"), nEvents);
+    lumi.getByLabel(edm::InputTag("mcStat", "sumWeight"), sumWeight);
+    lumi.getByLabel(edm::InputTag("mcStat", "sumWeightProd"), sumWeightProd);
 
-  if (prints)
-    printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), *nEvents, *sumWeight, *sumWeightProd);
+    if (prints)
+      printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), *nEvents, *sumWeight, *sumWeightProd);
 
-  if (histos) {
-    h_sums->Fill(sum_nevents_total, *nEvents);
-    h_sums->Fill(sum_gen_weight_total, *sumWeight);
-    h_sums->Fill(sum_gen_weight_prod_total, *sumWeightProd);
+    if (histos) {
+      h_sums->Fill(sum_nevents_total, *nEvents);
+      h_sums->Fill(sum_gen_weight_total, *sumWeight);
+      h_sums->Fill(sum_gen_weight_prod_total, *sumWeightProd);
+    }
   }
 }
 
@@ -72,6 +74,9 @@ double MFVWeightProducer::pileup_weight(int mc_npu) const {
 }
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
+  if (event.isRealData() != (event.id().run() != 1))
+    throw cms::Exception("BadAssumption") << "isRealData = " << event.isRealData() << " and run = " << event.id().run();
+
   if (histos)
     h_sums->Fill(n_sums);
 
