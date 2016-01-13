@@ -1,31 +1,130 @@
-from ROOT import *
-TH1.AddDirectory(0)
+#!/usr/bin/env python
 
-f = TFile('bkgestsyst_default.root')
-h_mix = f.Get('h_1v_dbv')
+from JMTucker.Tools.ROOTTools import *
+import JMTucker.Tools.Samples as Samples
+import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
-c = TCanvas('c1','c1',700,700)
-h_mix.GetXaxis().SetRangeUser(0,0.1)
-h_mix.GetYaxis().SetTitle('arb. units')
-h_mix.SetStats(0)
-h_mix.SetLineColor(kBlack)
-h_mix.SetLineWidth(3)
-h_mix.DrawNormalized()
+set_style()
+ps = plot_saver('plots/bkgest/MinitreeV4/dbv', root=False)
 
-l = TLegend(0.3,0.6,0.9,0.9)
-l.AddEntry(h_mix, 'mix: mean d_{BV} = %4.1f +/- %2.1f #mum'%(10000*h_mix.GetMean(),10000*h_mix.GetRMS()/sqrt(h_mix.GetEntries())))
+def book_dbv(n):
+    return ROOT.TH1F(n, '', 20, 0, 0.1)
 
-samples = ['qcdht0500_0b','qcdht1000_0b','qcdht0500_2b','qcdht1000_2b','ttbarhadronic','ttbarsemilep','ttbardilep']
-names = ['QCD, 500 < H_{T} < 1000 GeV, 0 bquarks', 'QCD, H_{T} > 1000 GeV, 0 bquarks', 'QCD, 500 < H_{T} < 1000 GeV, #geq 2 bquarks', 'QCD, H_{T} > 1000 GeV, #geq 2 bquarks', 't#bar{t}, hadronic', 't#bar{t}, semileptonic', 't#bar{t}, dileptonic']
-colors = [kBlue, kBlue+1, kPink, kPink+1, kPink+2, kPink+3, kPink+4]
-for i, sample in enumerate(samples):
-  f = TFile('bkgestsyst_%s.root' % sample)
-  h = f.Get('h_1v_dbv')
-  h.SetStats(0)
-  h.SetLineColor(colors[i])
-  h.SetLineWidth(3)
-  h.DrawNormalized('sames')
-  l.AddEntry(h, '%s: mean d_{BV} = %4.1f +/- %2.1f #mum' % (names[i], 10000*h.GetMean(), 10000*h.GetRMS()/sqrt(h.GetEntries())))
+sc = ac.int_lumi * ac.scale_factor
+
+h_dbv_sum = book_dbv('dbv_sum')
+h_dbv_nob = book_dbv('dbv_nob')
+h_dbv_b = book_dbv('dbv_b')
+h_dbv_qcdb = book_dbv('dbv_qcdb')
+
+hs_nob = []
+for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
+    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV4/%s.root' % sn)
+    t = f.Get('mfvMiniTree/t')
+    s = getattr(Samples, sn)
+
+    n = sn + ', no b quarks'
+    h_dbv = book_dbv(n)
+    t.Draw('dist0>>%s' % n, 'nvtx == 1 && flavor_code != 2')
+    h_dbv_sum.Add(h_dbv, sc * s.partial_weight)
+    h_dbv_nob.Add(h_dbv, sc * s.partial_weight)
+    ps.save(n)
+
+    h = h_dbv.Clone()
+    h.SetDirectory(0)
+    hs_nob.append(h)
+
+hs_b = []
+for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
+    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV4/%s.root' % sn)
+    t = f.Get('mfvMiniTree/t')
+    s = getattr(Samples, sn)
+
+    if sn != 'ttbar':
+        n = sn + ', b quarks'
+    else:
+        n = sn
+    h_dbv = book_dbv(n)
+    t.Draw('dist0>>%s' % n, 'nvtx == 1 && flavor_code == 2')
+    h_dbv_sum.Add(h_dbv, sc * s.partial_weight)
+    h_dbv_b.Add(h_dbv, sc * s.partial_weight)
+    if sn != 'ttbar':
+        h_dbv_qcdb.Add(h_dbv, sc * s.partial_weight)
+    ps.save(n)
+
+    h = h_dbv.Clone()
+    h.SetDirectory(0)
+    hs_b.append(h)
+
+h_dbv_sum.Draw()
+ps.save('dbv_sum')
+
+
+h_dbv_sum.SetTitle('only-one-vertex events;d_{BV} (cm);arb. units')
+h_dbv_sum.SetStats(0)
+h_dbv_sum.SetLineColor(ROOT.kBlack)
+h_dbv_sum.SetLineWidth(3)
+h_dbv_sum.Scale(1./h_dbv_sum.Integral())
+h_dbv_sum.SetMaximum(1)
+h_dbv_sum.Draw()
+
+l = ROOT.TLegend(0.3,0.6,0.9,0.9)
+l.AddEntry(h_dbv_sum, 'total background: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_sum.GetMean(), 10000*h_dbv_sum.GetRMS()/h_dbv_sum.GetEntries()**0.5))
+
+for i,h in enumerate(hs_nob):
+    h.SetStats(0)
+    h.SetLineColor(ROOT.kBlue + i)
+    h.SetLineWidth(3)
+    if h.GetEntries() != 0:
+        h.DrawNormalized('sames')
+        l.AddEntry(h, '%s: mean d_{BV} = %4.1f +/- %2.1f #mum' % (h.GetName(), 10000*h.GetMean(), 10000*h.GetRMS()/h.GetEntries()**0.5))
+
+for i,h in enumerate(hs_b):
+    h.SetStats(0)
+    h.SetLineColor(ROOT.kPink + i)
+    h.SetLineWidth(3)
+    if h.GetEntries() != 0:
+        h.DrawNormalized('sames')
+        l.AddEntry(h, '%s: mean d_{BV} = %4.1f +/- %2.1f #mum' % (h.GetName(), 10000*h.GetMean(), 10000*h.GetRMS()/h.GetEntries()**0.5))
 
 l.SetFillColor(0)
 l.Draw()
+ps.save('dbv')
+
+
+h_dbv_sum.Draw()
+l = ROOT.TLegend(0.3,0.78,0.9,0.9)
+l.AddEntry(h_dbv_sum, 'total background: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_sum.GetMean(), 10000*h_dbv_sum.GetRMS()/h_dbv_sum.GetEntries()**0.5))
+h_dbv_nob.SetStats(0)
+h_dbv_nob.SetLineColor(ROOT.kBlue)
+h_dbv_nob.SetLineWidth(3)
+h_dbv_nob.DrawNormalized('sames')
+l.AddEntry(h_dbv_nob, 'qcd, no b quarks: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_nob.GetMean(), 10000*h_dbv_nob.GetRMS()/h_dbv_nob.GetEntries()**0.5))
+h_dbv_qcdb.SetStats(0)
+h_dbv_qcdb.SetLineColor(ROOT.kPink)
+h_dbv_qcdb.SetLineWidth(3)
+h_dbv_qcdb.DrawNormalized('sames')
+l.AddEntry(h_dbv_qcdb, 'qcd, b quarks: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_qcdb.GetMean(), 10000*h_dbv_qcdb.GetRMS()/h_dbv_qcdb.GetEntries()**0.5))
+hs_b[4].DrawNormalized('sames')
+l.AddEntry(hs_b[4], 'ttbar: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*hs_b[4].GetMean(), 10000*hs_b[4].GetRMS()/hs_b[4].GetEntries()**0.5))
+l.SetFillColor(0)
+l.Draw()
+ps.save('dbv_qcdb')
+
+
+h_dbv_sum.Draw()
+l = ROOT.TLegend(0.3,0.81,0.9,0.9)
+l.AddEntry(h_dbv_sum, 'total background: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_sum.GetMean(), 10000*h_dbv_sum.GetRMS()/h_dbv_sum.GetEntries()**0.5))
+h_dbv_nob.SetStats(0)
+h_dbv_nob.SetLineColor(ROOT.kBlue)
+h_dbv_nob.SetLineWidth(3)
+h_dbv_nob.DrawNormalized('sames')
+l.AddEntry(h_dbv_nob, 'background, no b quarks: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_nob.GetMean(), 10000*h_dbv_nob.GetRMS()/h_dbv_nob.GetEntries()**0.5))
+h_dbv_b.SetStats(0)
+h_dbv_b.SetLineColor(ROOT.kPink)
+h_dbv_b.SetLineWidth(3)
+h_dbv_b.DrawNormalized('sames')
+l.AddEntry(h_dbv_b, 'background, b quarks: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_b.GetMean(), 10000*h_dbv_b.GetRMS()/h_dbv_b.GetEntries()**0.5))
+l.SetFillColor(0)
+l.Draw()
+ps.save('dbv_b')
