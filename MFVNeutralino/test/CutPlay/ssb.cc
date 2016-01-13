@@ -150,7 +150,7 @@ struct option_driver {
       fprintf(stderr, "  -s                      turn on saving of plots (default: off)\n");
       fprintf(stderr, "  -z plot_path            path to save plots to (implies -s, default: plots/SSB/signal_name/)\n");
       fprintf(stderr, "  -l int_lumi             integrated luminosity to scale to, in fb^-1 (default: %f)\n", int_lumi);
-      fprintf(stderr, "  -n signal_name          signal name (default: mfv_neutralino_tau1000um_M0400)\n");
+      fprintf(stderr, "  -n signal_name          signal name (default: mfv_neu_tau01000um_M0800)\n");
       fprintf(stderr, "  -x signal_xsec          signal cross section, in fb (default: 20)\n");
       fprintf(stderr, "  -b                      do not use big-weights samples (default: on)\n");
       fprintf(stderr, "  -f syst_frac            fraction systematic uncertainty to use in PL calculation (default: -1)\n");
@@ -296,14 +296,14 @@ struct z_calculator {
       html(0)
   {
     samples.push_back(sample(options.signal_name, options.signal_xsec, kRed,       vars));
-    samples.push_back(sample("ttbar_mgnlo_25ns",            832e3,     kBlue,      vars));
-    samples.push_back(sample("qcd_ht_mg_25ns_0200",       1.735e9,     kGreen + 6, vars));
-    samples.push_back(sample("qcd_ht_mg_25ns_0300",        3.67e8,     kGreen + 5, vars));
-    samples.push_back(sample("qcd_ht_mg_25ns_0500",        2.94e7,     kGreen + 4, vars));
-    samples.push_back(sample("qcd_ht_mg_25ns_0700",       6.524e6,     kGreen + 3, vars));
-    samples.push_back(sample("qcd_ht_mg_25ns_1000",       1.064e6,     kGreen + 2, vars));
-    samples.push_back(sample("qcd_ht_mg_25ns_1500",       121.5e3,     kGreen + 1, vars));
-    samples.push_back(sample("qcd_ht_mg_25ns_2000",       25.42e3,     kGreen,     vars));
+    samples.push_back(sample("ttbar",            832e3,     kBlue,      vars));
+    samples.push_back(sample("qcdht0200",       1.735e9,     kGreen + 6, vars));
+    samples.push_back(sample("qcdht0300",        3.67e8,     kGreen + 5, vars));
+    samples.push_back(sample("qcdht0500",        2.94e7,     kGreen + 4, vars));
+    samples.push_back(sample("qcdht0700",       6.524e6,     kGreen + 3, vars));
+    samples.push_back(sample("qcdht1000",       1.064e6,     kGreen + 2, vars));
+    samples.push_back(sample("qcdht1500",       121.5e3,     kGreen + 1, vars));
+    samples.push_back(sample("qcdht2000",       25.42e3,     kGreen,     vars));
 
     for (std::vector<sample>::iterator s = samples.begin(); s != samples.end(); ) {
       if (!s->use())
