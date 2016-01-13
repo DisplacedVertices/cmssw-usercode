@@ -8,7 +8,7 @@ for i, fn in enumerate(sys.argv[1:]):
     f = ROOT.TFile(fn)
     h = f.Get('mfvWeight/h_sums')
 
-    sn = fn.replace('.root', '')
+    sn = os.path.basename(fn).replace('.root', '')
     print sn
     s = getattr(Samples, sn)
     print 'sample nevents_orig:', s.nevents_orig
