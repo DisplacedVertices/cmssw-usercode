@@ -7,7 +7,7 @@ is_mc = True
 htskim = True
 version = 'v8'
 
-global_tag(process, 'MCRUN2_74_V9' if is_mc else '74X_dataRun2_Prompt_v2')
+global_tag(process, '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15')
 process.maxEvents.input = 1000
 process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/80000/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root' if is_mc else '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/630/00000/BCD78EF7-2B5F-E511-A3A3-02163E0170B5.root']
 #process.source.fileNames = ['/store/user/tucker/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/trigeff_htskim_v7/151203_184423/0000/htskim_1.root']
