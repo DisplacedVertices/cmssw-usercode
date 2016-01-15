@@ -85,7 +85,9 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
     electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
 
-    warned_non_mfv(false)
+    warned_non_mfv(false),
+
+    l1_cfg(cfg, consumesCollector(), false)
 {
   produces<MFVEvent>();
 }

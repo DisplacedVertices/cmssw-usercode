@@ -9,7 +9,9 @@ global_tag(process, which_global_tag(is_mc=False))
 
 process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/PromptReco-v4/000/260/627/00000/78D8E6A7-6484-E511-89B4-02163E0134F6.root']
 
-add_analyzer(process, 'MFVTriggerPrescales')
+from JMTucker.Tools.L1GtUtils_cff import l1GtUtilsTags
+add_analyzer(process, 'MFVTriggerPrescales', l1GtUtilsTags)
+
 process.maxEvents.input = -1
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

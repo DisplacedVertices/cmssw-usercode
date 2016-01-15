@@ -25,18 +25,20 @@ process.mutrig.HLTPaths = ['HLT_IsoMu20_v*']
 process.mutrig.andOr = True # = OR
 
 process.load('JMTucker.MFVNeutralino.EmulateHT800_cfi')
+from JMTucker.Tools.L1GtUtils_cff import l1GtUtilsTags
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
 process.num = cms.EDFilter('MFVTriggerEfficiency',
-                             require_trigger = cms.bool(False), # just from EmulateHT800 filter, need to split out
-                             require_muon = cms.bool(True),
-                             muons_src = cms.InputTag('slimmedMuons'),
-                             muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 24'),
-                             jets_src = cms.InputTag('slimmedJets'),
-                             jet_cut = jtupleParams.jetCut,
-                             jet_ht_cut = cms.double(0),
-                             genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
-                             )
+                           l1GtUtilsTags,
+                           require_trigger = cms.bool(False), # just from EmulateHT800 filter, need to split out
+                           require_muon = cms.bool(True),
+                           muons_src = cms.InputTag('slimmedMuons'),
+                           muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 24'),
+                           jets_src = cms.InputTag('slimmedJets'),
+                           jet_cut = jtupleParams.jetCut,
+                           jet_ht_cut = cms.double(0),
+                           genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
+                           )
 process.den = process.num.clone(require_trigger = False)
 
 process.p = cms.Path(process.mutrig * cms.ignore(process.emu) * cms.ignore(process.den) * process.emu * cms.ignore(process.num))

@@ -8,6 +8,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
+#include "HLTrigger/HLTcore/interface/HLTPrescaleProvider.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
 class MFVTriggerPrescales : public edm::EDAnalyzer {
@@ -23,8 +24,7 @@ private:
   const bool prints;
   std::map<std::pair<unsigned, unsigned>, bool> ls_seen;
 
-  L1GtUtils l1_cfg;
-  HLTConfigProvider hlt_cfg;
+  HLTPrescaleProvider trig_cfg;
 
   struct tree_t {
     unsigned run;
@@ -63,7 +63,8 @@ const int MFVTriggerPrescales::NL1 = 4;
 const int MFVTriggerPrescales::NHLT = 2;
 
 MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
-  : prints(cfg.getUntrackedParameter<bool>("prints", false))
+  : prints(cfg.getUntrackedParameter<bool>("prints", false)),
+    trig_cfg(cfg, consumesCollector(), *this)
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
@@ -82,10 +83,11 @@ MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
 
 void MFVTriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
   bool changed = true;
-  if (!hlt_cfg.init(run, setup, "HLT", changed))
+  if (!trig_cfg.init(run, setup, "HLT", changed))
     throw cms::Exception("MFVTriggerPrescales", "HLTConfigProvider::init failed with process name HLT");
 
   if (prints) {
+    const HLTConfigProvider& hlt_cfg = trig_cfg.hltConfigProvider();
     hlt_cfg.dump("ProcessPSet");
     hlt_cfg.dump("ProcessName");
     hlt_cfg.dump("GlobalTag");
@@ -117,7 +119,8 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
   nt.lumi = event.luminosityBlock();
   nt.event  = event.id().event();
 
-  l1_cfg.getL1GtRunCache(event, setup, true, false);
+  const L1GtUtils& l1_cfg = trig_cfg.l1GtUtils();
+  const HLTConfigProvider& hlt_cfg = trig_cfg.hltConfigProvider();
 
   edm::Handle<edm::TriggerResults> hlt_results;
   event.getByLabel(edm::InputTag("TriggerResults", "", "HLT"), hlt_results);
@@ -135,7 +138,7 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
     snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
     bool found = false;
     if ((found = nt.hlt_found[ihlt] = hlt_cfg.triggerIndex(path) != hlt_cfg.size()))
-      nt.hlt_prescale[ihlt] = hlt_cfg.prescaleValue(event, setup, path);
+      nt.hlt_prescale[ihlt] = trig_cfg.prescaleValue(event, setup, path);
 
     const size_t ipath = hlt_names.triggerIndex(path);
     if ((ipath < npaths) != found)

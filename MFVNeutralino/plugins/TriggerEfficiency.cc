@@ -10,6 +10,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 
@@ -73,7 +74,8 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     jet_ht_cut(cfg.getParameter<double>("jet_ht_cut")),
     genjets_src(cfg.getParameter<edm::InputTag>("genjets_src")),
-    use_genjets(genjets_src.label() != "")
+    use_genjets(genjets_src.label() != ""),
+    l1_cfg(cfg, consumesCollector(), false)
 {
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();

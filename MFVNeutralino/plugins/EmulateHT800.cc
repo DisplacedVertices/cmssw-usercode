@@ -39,7 +39,8 @@ MFVEmulateHT800::MFVEmulateHT800(const edm::ParameterSet& cfg)
     return_actual(cfg.getParameter<bool>("return_actual")),
     return_ht900(cfg.getParameter<bool>("return_ht900")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
-    histos(cfg.getUntrackedParameter<bool>("histos", false))
+    histos(cfg.getUntrackedParameter<bool>("histos", false)),
+    l1_cfg(cfg, consumesCollector(), false)
 {
   if (histos) {
     edm::Service<TFileService> fs;
