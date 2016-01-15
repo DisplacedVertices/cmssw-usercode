@@ -5,7 +5,7 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 set_style()
-ps = plot_saver('plots/bkgest/MinitreeV4/dbv', root=False)
+ps = plot_saver('plots/bkgest/MinitreeV5/dbv', root=False)
 
 def book_dbv(n):
     return ROOT.TH1F(n, '', 20, 0, 0.1)
@@ -19,15 +19,15 @@ h_dbv_qcdb = book_dbv('dbv_qcdb')
 
 hs_nob = []
 for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
-    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV4/%s.root' % sn)
+    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV5_fixnormandcode/%s.root' % sn)
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
 
     n = sn + ', no b quarks'
     h_dbv = book_dbv(n)
-    t.Draw('dist0>>%s' % n, 'nvtx == 1 && flavor_code != 2')
-    h_dbv_sum.Add(h_dbv, sc * s.partial_weight)
-    h_dbv_nob.Add(h_dbv, sc * s.partial_weight)
+    t.Draw('dist0>>%s' % n, 'nvtx == 1 && gen_flavor_code != 2')
+    h_dbv_sum.Add(h_dbv, sc * s.partial_weight_orig)
+    h_dbv_nob.Add(h_dbv, sc * s.partial_weight_orig)
     ps.save(n)
 
     h = h_dbv.Clone()
@@ -36,7 +36,7 @@ for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
 
 hs_b = []
 for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
-    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV4/%s.root' % sn)
+    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV5_fixnormandcode/%s.root' % sn)
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
 
@@ -45,11 +45,11 @@ for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
     else:
         n = sn
     h_dbv = book_dbv(n)
-    t.Draw('dist0>>%s' % n, 'nvtx == 1 && flavor_code == 2')
-    h_dbv_sum.Add(h_dbv, sc * s.partial_weight)
-    h_dbv_b.Add(h_dbv, sc * s.partial_weight)
+    t.Draw('dist0>>%s' % n, 'nvtx == 1 && gen_flavor_code == 2')
+    h_dbv_sum.Add(h_dbv, sc * s.partial_weight_orig)
+    h_dbv_b.Add(h_dbv, sc * s.partial_weight_orig)
     if sn != 'ttbar':
-        h_dbv_qcdb.Add(h_dbv, sc * s.partial_weight)
+        h_dbv_qcdb.Add(h_dbv, sc * s.partial_weight_orig)
     ps.save(n)
 
     h = h_dbv.Clone()

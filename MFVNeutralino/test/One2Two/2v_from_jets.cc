@@ -15,11 +15,11 @@
 double    mu_clear = 0.0000;
 double sigma_clear = 0.0000;
 
-const char* tree_path = "/eos/uscms/store/user/tucker/crab_dirs/MinitreeV4";
+const char* tree_path = "/eos/uscms/store/user/tucker/crab_dirs/MinitreeV5_fixnormandcode";
 
 const int nbkg = 5;
 const char* samples[nbkg] = {"qcdht0700", "qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
-float weights[nbkg] = {1.272, 0.6406, 0.09460, 0.03884, 0.05869};
+float weights[nbkg] = {1.115, 0.5596, 0.08199, 0.03366, 0.05056};
 
 float sumht(int njets, float* jet_pt) {
   double sum = 0;
