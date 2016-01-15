@@ -343,7 +343,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
 
   std::auto_ptr<Association> assoc[mfv::NJetsBy];
   for (int i = 0; i < mfv::NJetsBy; ++i)
-    assoc[i].reset(new Association);
+    assoc[i].reset(new Association(&event.productGetter()));
 
   int n_matchedvertices[mfv::NJetsBy] = {0};
   int n_matchedjets[mfv::NJetsBy] = {0};
