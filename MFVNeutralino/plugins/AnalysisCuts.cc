@@ -16,6 +16,9 @@ private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   const edm::InputTag mevent_src;
+  const edm::EDGetTokenT<MFVEvent> mevent_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
+
   const bool use_mevent;
   const int l1_bit;
   const int trigger_bit;
@@ -43,7 +46,6 @@ private:
   const int min_nsemileptons;
 
   const bool apply_vertex_cuts;
-  const edm::InputTag vertex_src;
   const int min_nvertex;
   const int max_nvertex;
   const int min_ntracks01;
@@ -72,6 +74,8 @@ private:
 
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
+    mevent_token(consumes<MFVEvent>(mevent_src)),
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     use_mevent(mevent_src.label() != ""),
     l1_bit(cfg.getParameter<int>("l1_bit")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
@@ -97,7 +101,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
     min_nsemileptons(cfg.getParameter<int>("min_nsemileptons")),
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
     max_nvertex(cfg.getParameter<int>("max_nvertex")),
     min_ntracks01(cfg.getParameter<int>("min_ntracks01")),
@@ -141,7 +144,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
 
   if (use_mevent) {
-    event.getByLabel(mevent_src, mevent);
+    event.getByToken(mevent_token, mevent);
 
     if (l1_bit >= 0 && !mevent->pass_l1(l1_bit))
       return false;
@@ -209,7 +212,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
   if (apply_vertex_cuts) {
     edm::Handle<MFVVertexAuxCollection> vertices;
-    event.getByLabel(vertex_src, vertices);
+    event.getByToken(vertex_token, vertices);
 
     const int nsv = int(vertices->size());
     if (nsv < min_nvertex || nsv > max_nvertex)
