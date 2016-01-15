@@ -2,7 +2,7 @@ import os, sys, glob, FWCore.ParameterSet.Config as cms
 
 #process.source.firstLuminosityBlock = cms.untracked.uint32(2)
 
-def add_analyzer(process, name, **kwargs):
+def add_analyzer(process, name, *args, **kwargs):
     '''Add a simple EDAnalyzer with its own separate path.'''
     
     if kwargs.has_key('_path'):
@@ -10,7 +10,7 @@ def add_analyzer(process, name, **kwargs):
         del kwargs['_path']
     else:
         path_name = 'p' + name
-    obj = cms.EDAnalyzer(name, **kwargs)
+    obj = cms.EDAnalyzer(name, *args, **kwargs)
     setattr(process, name, obj)
     if hasattr(process, path_name):
         pobj = getattr(process, path_name)

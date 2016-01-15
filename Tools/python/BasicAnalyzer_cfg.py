@@ -8,5 +8,5 @@ report_every(process, 1000000)
 tfileservice(process)
 
 _add_analyzer = add_analyzer 
-def add_analyzer(process, name, **kwargs):
-    return _add_analyzer(process, name, **kwargs)
+def add_analyzer(process, name, *args, **kwargs):
+    return _add_analyzer(process, name, *args, **kwargs)
