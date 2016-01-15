@@ -2,10 +2,14 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages
 
 def which_global_tag(is_mc):
-    return '74X_mcRun2_asymptotic_v4' if is_mc else '74X_dataRun2_v5'
+    return '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15'
 
 def pat_tuple_process(customize_before_unscheduled, is_mc):
-    process = cms.Process('PAT')
+    if is_mc:
+        from Configuration.StandardSequences.Eras import eras
+        process = cms.Process('PAT', eras.Run2_25ns)
+    else:
+        process = cms.Process('PAT')
 
     report_every(process, 1000000)
     registration_warnings(process)
@@ -34,10 +38,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     output_file(process, 'pat.root', process.MINIAODSIMEventContent.outputCommands)
 
-    if is_mc:
-        from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
-        process = customisePostLS1(process)
-    else:
+    if not is_mc: # is_mc taken care of by Eras in cms.Process definition?
         from Configuration.DataProcessing.RecoTLR import customiseDataRun2Common_25ns
         process = customiseDataRun2Common_25ns(process)
 
