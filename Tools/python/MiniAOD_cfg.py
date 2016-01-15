@@ -13,8 +13,9 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
 
     report_every(process, 1000000)
     registration_warnings(process)
-    print 'suppressing MatchedJetsFarApart, HLTConfigData, NoModule warnings'
-    silence_messages(process, ['MatchedJetsFarApart', 'HLTConfigData', 'NoModule'])
+    print 'suppressing HLTConfigData warnings'
+    #silence_messages(process, ['MatchedJetsFarApart', 'HLTConfigData', 'NoModule'])
+    silence_messages(process, ['HLTConfigData'])
 
     process.load('Configuration.StandardSequences.Services_cff')
     process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -39,7 +40,55 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     output_file(process, 'pat.root', process.MINIAODSIMEventContent.outputCommands)
 
     if not is_mc: # is_mc taken care of by Eras in cms.Process definition?
-        from Configuration.DataProcessing.RecoTLR import customiseDataRun2Common_25ns
+        # This next business extracted from Configuration.DataProcessing.RecoTLR because it doesn't work when not running RECO in the same job
+
+        def customiseDataRun2Common(process):
+            from SLHCUpgradeSimulations.Configuration.muonCustoms import unganged_me1a_geometry,customise_csc_LocalReco
+            process = unganged_me1a_geometry(process)
+            if hasattr(process, 'csc2DRecHits'):
+                process = customise_csc_LocalReco(process)
+
+            if hasattr(process,'valCscTriggerPrimitiveDigis'):
+                #this is not doing anything at the moment
+                process.valCscTriggerPrimitiveDigis.commonParam.gangedME1a = cms.bool(False)
+            if hasattr(process,'valCsctfTrackDigis'):
+                process.valCsctfTrackDigis.gangedME1a = cms.untracked.bool(False)
+
+            from SLHCUpgradeSimulations.Configuration.postLS1Customs import customise_Reco,customise_RawToDigi,customise_DQM
+            if hasattr(process,'RawToDigi'):
+                process=customise_RawToDigi(process)
+            if hasattr(process,'reconstruction'):
+                process=customise_Reco(process)
+            if hasattr(process,'dqmoffline_step'):
+                process=customise_DQM(process)
+
+            return process
+
+        # add stage1
+        def customiseDataRun2Common_withStage1(process):
+            process = customiseDataRun2Common(process)
+
+            from L1Trigger.L1TCommon.customsPostLS1 import customiseL1RecoForStage1
+            process=customiseL1RecoForStage1(process)
+
+            return process 
+
+        ##############################################################################
+        # common+ "25ns" Use this for data daking starting from runs in 2015C (>= 253256 )
+        def customiseDataRun2Common_25ns(process):
+            process = customiseDataRun2Common_withStage1(process)
+
+            if hasattr(process, 'HcalRemoveAddSevLevel'):
+                import RecoLocalCalo.HcalRecAlgos.RemoveAddSevLevel as HcalRemoveAddSevLevel
+                HcalRemoveAddSevLevel.AddFlag(process.hcalRecAlgos,"HFDigiTime",8)
+                HcalRemoveAddSevLevel.AddFlag(process.hcalRecAlgos,"HBHEFlatNoise",8)
+
+            if hasattr(process,'dqmoffline_step'):
+                from SLHCUpgradeSimulations.Configuration.postLS1Customs import customise_DQM_25ns
+                process=customise_DQM_25ns(process)
+            return process
+
+        #from Configuration.DataProcessing.RecoTLR import customiseDataRun2Common_25ns
         process = customiseDataRun2Common_25ns(process)
 
     if customize_before_unscheduled is not None:
