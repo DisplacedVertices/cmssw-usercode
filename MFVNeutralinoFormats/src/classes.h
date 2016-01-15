@@ -6,16 +6,11 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/LightTrackMatch.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 namespace JMTucker_MFVNeutralinoFormats {
   struct dictionary {
-    edm::Wrapper<LightTrackMatch> ltm;
-    std::map<int, LightTrackMatch> dummymiltm;
-    edm::Wrapper<std::map<int, LightTrackMatch> > dummyWmiltm;
-
     edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Jet>, unsigned int > > dummyAMrVpJ;
     edm::Wrapper<edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Jet>, unsigned int > > > dummyWAMrVpJ;
 

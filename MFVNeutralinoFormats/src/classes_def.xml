@@ -1,9 +1,4 @@
 <lcgdict>
-  <class name="LightTrackMatch"/>
-  <class name="edm::Wrapper<LightTrackMatch>"/>
-  <class name="std::map<int, LightTrackMatch>"/>
-  <class name="edm::Wrapper<std::map<int, LightTrackMatch> >"/>
-
   <class name="edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Jet>, unsigned int > >"/>
   <class name="edm::Wrapper<edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Jet>, unsigned int > > >"/>
   <class name="edm::helpers::KeyVal<edm::Ref<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> >,edm::RefVector<std::vector<pat::Jet>,pat::Jet,edm::refhelper::FindUsingAdvance<std::vector<pat::Jet>,pat::Jet> > >"/>
