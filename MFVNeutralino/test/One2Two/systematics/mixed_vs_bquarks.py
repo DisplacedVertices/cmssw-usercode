@@ -4,16 +4,16 @@ TH1.AddDirectory(0)
 f = TFile('../2v_from_jets_all.root')
 h_mix = f.Get('h_c1v_dvv')
 
-f2 = TFile('../2v_from_jets_b.root')
-h_sum = f2.Get('h_c1v_dvv')
+#f2 = TFile('../2v_from_jets_b.root')
+#h_sum = f2.Get('h_c1v_dvv')
 
-#h_sum = TH1F('h_sum', ';d_{VV}^{C};events', 6, 0, 0.12)
-#samples = ['nob','b']
-#n2v = [79., 64.]
-#for i, sample in enumerate(samples):
-#  f = TFile('../2v_from_jets_%s.root' % sample)
-#  h = f.Get('h_c1v_dvv')
-#  h_sum.Add(h, 251./h.Integral() * n2v[i]/143)
+h_sum = TH1F('h_sum', ';d_{VV}^{C};events', 6, 0, 0.12)
+samples = ['nob','b']
+n2v = [0.560, 0.827]
+for i, sample in enumerate(samples):
+  f = TFile('../2v_from_jets_%s.root' % sample)
+  h = f.Get('h_c1v_dvv')
+  h_sum.Add(h, 1./h.Integral() * n2v[i]/1.387)
 
 c1 = TCanvas('c1','c1',700,700)
 c1.SetTickx()
