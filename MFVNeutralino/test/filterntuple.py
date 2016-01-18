@@ -34,7 +34,6 @@ process.out = cms.OutputModule('PoolOutputModule',
                                )
 process.outp = cms.EndPath(process.out)
 
-process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
 process.source.inputCommands = cms.untracked.vstring('keep *', 'drop *_MEtoEDMConverter_*_*')
 process.out.outputCommands += ['drop LumiDetails_lumiProducer_*_*', 'drop LumiSummary_lumiProducer_*_*', 'drop RunSummary_lumiProducer_*_*']
 process.out.dropMetaData = cms.untracked.string('ALL')

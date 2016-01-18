@@ -1,10 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-process.options.emptyRunLumiMode = cms.untracked.string('doNotHandleEmptyRunsAndLumis')
-process.source.fileNames = ['/store/user/tucker/QCD_HT-1000ToInf_TuneZ2star_8TeV-madgraph-pythia6/mfvntuple_v20/056b2878a0d6f7000123ce289fafc9bf/ntuple_1_1_yQy.root']
-process.source.noEventSort = cms.untracked.bool(True)
-process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+process.source.fileNames = ['/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev4_25ns/151127_020830/0000/ntuple_1.root']
 process.TFileService.fileName = 'minitree.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
