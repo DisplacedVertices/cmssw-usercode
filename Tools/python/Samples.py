@@ -12,11 +12,11 @@ qcd_samples_not_used = [
     ]
 
 qcd_samples = [
-    MCSample('qcdht0500', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   19664159, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=2.94e4),
+    MCSample('qcdht0500', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 19701790, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=2.94e4),
     MCSample('qcdht0700', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  15356448, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.52e3),
     MCSample('qcdht1000', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',  4963895, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.06e3),
     MCSample('qcdht1500', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',  3868886, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=122),
-    MCSample('qcdht2000', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM',   1961774, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=25.4),
+    MCSample('qcdht2000', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   1981228, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=25.4),
     ]
 
 ttbar_samples = [
@@ -133,8 +133,7 @@ auxiliary_background_samples = [
 ########################################################################
 
 data_samples = [
-    DataSample('JetHT2015Dv3', '/JetHT/Run2015D-PromptReco-v3/AOD'), # 256584-258158
-    DataSample('JetHT2015Dv4', '/JetHT/Run2015D-PromptReco-v4/AOD'), # 258159-260727
+    DataSample('JetHT2015D', '/JetHT/Run2015D-16Dec2015-v1/AOD'), # 256630 - 260727
     ]
 
 auxiliary_data_samples = [
@@ -180,11 +179,6 @@ qcdht1000.aaa = euroaaa # until copied to FNAL
 # Can't add data datasets by primary (many have the same primary).
 for sample in data_samples + auxiliary_data_samples:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
-
-JetHT2015Dv3.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
-JetHT2015Dv4.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-a43ce49cdf92a8b591fb7f3e283b5747/USER', dbs_inst='phys03')
-
-JetHT2015Dv3.add_dataset('mergev5',  '/JetHT/tucker-mergentuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
 
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
