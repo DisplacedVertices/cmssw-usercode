@@ -1,6 +1,8 @@
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -9,18 +11,21 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
-class BeamSpotTreer : public edm::EDAnalyzer {
+class TrackingTreer : public edm::EDAnalyzer {
 public:
-  explicit BeamSpotTreer(const edm::ParameterSet&);
+  explicit TrackingTreer(const edm::ParameterSet&);
 
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   const edm::InputTag beamspot_src;
   const edm::InputTag primary_vertex_src;
+  const edm::InputTag tracks_src;
   const bool assert_diag_cov;
 
   struct tree_t {
+    typedef unsigned char uchar;
+
     unsigned run;
     unsigned lumi;
     unsigned long long event;
@@ -56,6 +61,25 @@ private:
     std::vector<float> pv_cyz;
     std::vector<float> pv_czz;
 
+    std::vector<float> tk_chi2dof;
+    std::vector<float> tk_qpt;
+    std::vector<float> tk_eta;
+    std::vector<float> tk_phi;
+    std::vector<float> tk_dxy;
+    std::vector<float> tk_dxybs;
+    std::vector<float> tk_dxypv;
+    std::vector<float> tk_dz;
+    std::vector<float> tk_dzpv;
+    std::vector<float> tk_err_qpt;
+    std::vector<float> tk_err_eta;
+    std::vector<float> tk_err_phi;
+    std::vector<float> tk_err_dxy;
+    std::vector<float> tk_err_dz;
+    std::vector<uchar> tk_nsthit;
+    std::vector<uchar> tk_npxhit;
+    std::vector<uchar> tk_nstlay;
+    std::vector<uchar> tk_npxlay;
+
     tree_t() { clear(); }
 
     void clear() {
@@ -78,6 +102,25 @@ private:
       pv_cyy.clear();
       pv_cyz.clear();
       pv_czz.clear();
+
+      tk_chi2dof.clear();
+      tk_qpt.clear();
+      tk_eta.clear();
+      tk_phi.clear();
+      tk_dxy.clear();
+      tk_dxybs.clear();
+      tk_dxypv.clear();
+      tk_dz.clear();
+      tk_dzpv.clear();
+      tk_err_qpt.clear();
+      tk_err_eta.clear();
+      tk_err_phi.clear();
+      tk_err_dxy.clear();
+      tk_err_dz.clear();
+      tk_nsthit.clear();
+      tk_npxhit.clear();
+      tk_nstlay.clear();
+      tk_npxlay.clear();
     }
   };
 
@@ -85,9 +128,10 @@ private:
   tree_t nt;
 };
 
-BeamSpotTreer::BeamSpotTreer(const edm::ParameterSet& cfg)
+TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
   : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
+    tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
     assert_diag_cov(cfg.getParameter<bool>("assert_diag_cov"))
 {
   edm::Service<TFileService> fs;
@@ -123,9 +167,27 @@ BeamSpotTreer::BeamSpotTreer(const edm::ParameterSet& cfg)
   tree->Branch("pv_cyy", &nt.pv_cyy);
   tree->Branch("pv_cyz", &nt.pv_cyz);
   tree->Branch("pv_czz", &nt.pv_czz);
+  tree->Branch("tk_chi2dof", &nt.tk_chi2dof);
+  tree->Branch("tk_qpt", &nt.tk_qpt);
+  tree->Branch("tk_eta", &nt.tk_eta);
+  tree->Branch("tk_phi", &nt.tk_phi);
+  tree->Branch("tk_dxy", &nt.tk_dxy);
+  tree->Branch("tk_dxybs", &nt.tk_dxybs);
+  tree->Branch("tk_dxypv", &nt.tk_dxypv);
+  tree->Branch("tk_dz", &nt.tk_dz);
+  tree->Branch("tk_dzpv", &nt.tk_dzpv);
+  tree->Branch("tk_err_qpt", &nt.tk_err_qpt);
+  tree->Branch("tk_err_eta", &nt.tk_err_eta);
+  tree->Branch("tk_err_phi", &nt.tk_err_phi);
+  tree->Branch("tk_err_dxy", &nt.tk_err_dxy);
+  tree->Branch("tk_err_dz", &nt.tk_err_dz);
+  tree->Branch("tk_nsthit", &nt.tk_nsthit);
+  tree->Branch("tk_npxhit", &nt.tk_npxhit);
+  tree->Branch("tk_nstlay", &nt.tk_nstlay);
+  tree->Branch("tk_npxlay", &nt.tk_npxlay);
 }
 
-void BeamSpotTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
+void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.clear();
   nt.run = event.id().run();
   nt.lumi = event.luminosityBlock();
@@ -159,13 +221,23 @@ void BeamSpotTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.bs_err_dydz = beamspot->dydzError();
   nt.bs_err_width = beamspot->BeamWidthXError();
 
-  if (assert_diag_cov)
+  if (assert_diag_cov) {
+    bool ok = true;
     for (int i = 0; i < 7; ++i)
       for (int j = i+1; j < 7; ++j)
-        assert(beamspot->covariance(i,j) == 0);
+        if (beamspot->covariance(i,j) > 1e-8)
+          ok = false;
+    if (!ok) {
+      for (int i = 0; i < 7; ++i)
+        for (int j = i+1; j < 7; ++j)
+          std::cout << "beamspot cov(" << i << "," << j << ") = " << beamspot->covariance(i,j) << std::endl;
+      throw cms::Exception("BadAssumption", "non-zero cov matrix");
+    }
+  }
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByLabel(primary_vertex_src, primary_vertices);
+  const reco::Vertex* the_pv = primary_vertices->size() ? &(*primary_vertices)[0] : 0;
 
   for (const reco::Vertex& pv : *primary_vertices) {
     nt.pv_x.push_back(pv.x());
@@ -188,7 +260,37 @@ void BeamSpotTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.pv_czz.push_back(pv.covariance(2,2));
   }
 
+  edm::Handle<reco::TrackCollection> tracks;
+  event.getByLabel(tracks_src, tracks);
+
+  for (const reco::Track& tk : *tracks) {
+    nt.tk_chi2dof.push_back(tk.normalizedChi2());
+    nt.tk_qpt.push_back(tk.charge() * tk.pt());
+    nt.tk_eta.push_back(tk.eta());
+    nt.tk_phi.push_back(tk.phi());
+    nt.tk_dxy.push_back(tk.dxy());
+    nt.tk_dxybs.push_back(tk.dxy(*beamspot));
+    if (the_pv) {
+      nt.tk_dxypv.push_back(tk.dxy(the_pv->position()));
+      nt.tk_dzpv.push_back(tk.dz(the_pv->position()));
+    }
+    else {
+      nt.tk_dxypv.push_back(1e99);
+      nt.tk_dzpv.push_back(1e99);
+    }
+    nt.tk_dz.push_back(tk.dz());
+    nt.tk_err_qpt.push_back(tk.ptError());
+    nt.tk_err_eta.push_back(tk.etaError());
+    nt.tk_err_phi.push_back(tk.phiError());
+    nt.tk_err_dxy.push_back(tk.dxyError());
+    nt.tk_err_dz.push_back(tk.dzError());
+    nt.tk_nsthit.push_back(tk.hitPattern().numberOfValidStripHits());
+    nt.tk_npxhit.push_back(tk.hitPattern().numberOfValidPixelHits());
+    nt.tk_nstlay.push_back(tk.hitPattern().stripLayersWithMeasurement());
+    nt.tk_npxlay.push_back(tk.hitPattern().pixelLayersWithMeasurement());
+  }
+
   tree->Fill();
 }
 
-DEFINE_FWK_MODULE(BeamSpotTreer);
+DEFINE_FWK_MODULE(TrackingTreer);
