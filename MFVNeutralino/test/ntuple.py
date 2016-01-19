@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.general import bool_from_argv
-from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process, report_every
+from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
 from JMTucker.Tools.CMSSWTools import *
 
 is_mc = True
@@ -114,7 +113,6 @@ file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    from JMTucker.Tools.Sample import anon_samples
     import JMTucker.Tools.Samples as Samples 
 
     samples = Samples.registry.from_argv(
