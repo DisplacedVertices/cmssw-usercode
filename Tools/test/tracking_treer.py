@@ -40,10 +40,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
 
-    samples = Samples.from_argv(Samples.data_samples + Samples.qcd_samples)
+    samples = Samples.registry.from_argv(Samples.data_samples + Samples.qcd_samples)
 
     for s in Samples.data_samples:
-        s.json = '/uscms/home/tucker/private/mfv_7415p1/src/JMTucker/MFVNeutralino/ana_1pc.json'
+        s.json = '/uscms/home/tucker/private/mfv_7415p1/src/JMTucker/MFVNeutralino/test/ana_1pc.json'
         s.lumis_per = 1
         s.total_lumis = -1
 
