@@ -184,7 +184,7 @@ for sample in data_samples + auxiliary_data_samples:
 JetHT2015Dv3.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
 JetHT2015Dv4.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-a43ce49cdf92a8b591fb7f3e283b5747/USER', dbs_inst='phys03')
 
-JetHT2015Dv3.add_dataset('mergev5',  '/JetHT/tucker-mergentuplev5-77b89976378048ac64891f2e506e498f/USER', dbs_inst='phys03')
+JetHT2015Dv3.add_dataset('ntuplev6p1', '/JetHT/tucker-ntuplev6p1-d25c0abed1a78f992654e25a5f177c58/USER', dbs_inst='phys03')
 
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
@@ -223,8 +223,16 @@ _adbp3('ntuplev5', '/mfv_neu_tau10000um_M0800/tucker-ntuplev5-8734c1a46e9ff969ce
 _adbp3('ntuplev5', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev5-1078893a9eadd8996cf0ad6bf4759d4d/USER',          9578)
 _adbp3('ntuplev5', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev5-ad44f2874d508bc75b868fe9a50955b6/USER',         9779)
 
-_adbp3('mergev5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-mergentuplev5-cd64d4d38dd6409d4ca234e4609d3c77/USER',    2232)
-# this is screwed up _adbp3('mergev5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-mergentuplev5-f255d1905ae5ab5e7f8225d5fd33347e/USER', 156091)
+_adbp3('ntuplev6p1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-67e3d7f98974d11c1564bb7c2db00e1e/USER',     57153)
+_adbp3('ntuplev6p1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-c9a10c18be0a73e5a52a3cdba00902d1/USER',  4959219)
+_adbp3('ntuplev6p1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-e1c240be688be7cab34a2542584578d3/USER', 4936847)
+_adbp3('ntuplev6p1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-6fb96be24b04736bc637c8fc2ee98e12/USER', 3868877)
+_adbp3('ntuplev6p1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-7a16a7a644097b240677f9ca8ee3dee8/USER',  1961774)
+_adbp3('ntuplev6p1', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1-e00e92510b9a3019aac785fe26a5ec0a/USER',          1543009)
+_adbp3('ntuplev6p1', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1-cdf92c2c6785dbea85f17c3463e50253/USER',           9920)
+_adbp3('ntuplev6p1', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1-69285a53bb344009125bfec0704acd1b/USER',          9875)
+
+# for x in $(cat a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
 ########################################################################
 
