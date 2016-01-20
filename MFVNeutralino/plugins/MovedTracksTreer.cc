@@ -159,8 +159,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
 
   if (apply_presel) {
     if ((!for_mctruth && (nt.npreseljets < njets_req || nt.npreselbjets < nbjets_req)) ||
-        nt.jetsumht < 500 ||
-        nt.jetpt4 < 60)
+        nt.jetsumht < 1000)
     return;
   }
 

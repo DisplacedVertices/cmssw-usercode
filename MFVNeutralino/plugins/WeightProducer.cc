@@ -55,13 +55,25 @@ void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, c
     lumi.getByLabel(edm::InputTag("mcStat", "sumWeight"), sumWeight);
     lumi.getByLabel(edm::InputTag("mcStat", "sumWeightProd"), sumWeightProd);
 
-    if (prints)
-      printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), *nEvents, *sumWeight, *sumWeightProd);
-
-    if (histos) {
-      h_sums->Fill(sum_nevents_total, *nEvents);
-      h_sums->Fill(sum_gen_weight_total, *sumWeight);
-      h_sums->Fill(sum_gen_weight_prod_total, *sumWeightProd);
+    if (nEvents.isValid() && sumWeight.isValid() && sumWeightProd.isValid()) {
+      if (prints)
+        printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), *nEvents, *sumWeight, *sumWeightProd);
+      
+      if (histos) {
+        h_sums->Fill(sum_nevents_total, *nEvents);
+        h_sums->Fill(sum_gen_weight_total, *sumWeight);
+        h_sums->Fill(sum_gen_weight_prod_total, *sumWeightProd);
+      }
+    }
+    else {
+      if (prints)
+        printf("MFVWeight::beginLuminosityBlock r: %u l: %u  mcStat branch products not found!\n", lumi.run(), lumi.luminosityBlock());
+      
+      if (histos) {
+        h_sums->Fill(sum_nevents_total, -1e6);
+        h_sums->Fill(sum_gen_weight_total, -1e6);
+        h_sums->Fill(sum_gen_weight_prod_total, -1e6);
+      }
     }
   }
 }

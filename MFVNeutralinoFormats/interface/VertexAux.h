@@ -195,10 +195,10 @@ struct MFVVertexAux {
   std::vector<float> track_qpt;
   float track_q(int i) const { return track_qpt[i] > 0 ? 1 : -1; }
   float track_pt(int i) const { return fabs(track_qpt[i]); }
+  std::vector<float> track_eta;
+  std::vector<float> track_phi;
   std::vector<float> track_dxy;
   std::vector<float> track_dz;
-  std::vector<uchar> track_eta_;
-  std::vector<uchar> track_phi_;
   std::vector<uchar> track_pt_err_; // relative to pt, rest are absolute values
   std::vector<uchar> track_eta_err_;
   std::vector<uchar> track_phi_err_;
@@ -227,12 +227,6 @@ struct MFVVertexAux {
     else       v[i] = x;
   }
 
-  void  track_eta(int i, float x) {         _set(track_eta_, i , bin(x, -2.6, 2.6)); }
-  float track_eta(int i) const    { return unbin(track_eta_ [i],        -2.6, 2.6); }
-
-  void  track_phi(int i, float x) {         _set(track_phi_, i , bin(x, -3.141593, 3.141593)); }
-  float track_phi(int i) const    { return unbin(track_phi_ [i],        -3.141593, 3.141593); }
-
   void  track_pt_err(int i, float x) {         _set(track_pt_err_, i , bin(x, 0, 2)); }
   float track_pt_err(int i) const    { return unbin(track_pt_err_ [i],        0, 2); }
 
@@ -254,10 +248,10 @@ struct MFVVertexAux {
   void insert_track() {
     track_w.push_back(0);
     track_qpt.push_back(0);
+    track_eta.push_back(0);
+    track_phi.push_back(0);
     track_dxy.push_back(0);
     track_dz.push_back(0);
-    track_eta_.push_back(0);
-    track_phi_.push_back(0);
     track_pt_err_.push_back(0);
     track_eta_err_.push_back(0);
     track_phi_err_.push_back(0);
@@ -274,10 +268,10 @@ struct MFVVertexAux {
     return
       n == track_w.size() &&
       n == track_qpt.size() &&
+      n == track_eta.size() &&
+      n == track_phi.size() &&
       n == track_dxy.size() &&
       n == track_dz.size() &&
-      n == track_eta_.size() &&
-      n == track_phi_.size() &&
       n == track_pt_err_.size() &&
       n == track_eta_err_.size() &&
       n == track_phi_err_.size() &&
@@ -291,7 +285,7 @@ struct MFVVertexAux {
 
   TLorentzVector track_p4(int i, float mass=0) const {
     TLorentzVector v;
-    v.SetPtEtaPhiM(track_pt(i), track_eta(i), track_phi(i), mass);
+    v.SetPtEtaPhiM(track_pt(i), track_eta[i], track_phi[i], mass);
     return v;
   }
 
@@ -465,22 +459,6 @@ struct MFVVertexAux {
     return v;
   }
 
-  std::vector<float> track_etas() const {
-    std::vector<float> v;
-    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if (use_track(i))
-        v.push_back(track_eta(i));
-    return v;
-  }
-
-  std::vector<float> track_phis() const {
-    std::vector<float> v;
-    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
-      if (use_track(i))
-        v.push_back(track_phi(i));
-    return v;
-  }
-
   std::vector<float> track_pt_errs() const {
     std::vector<float> v;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
@@ -579,7 +557,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(fabs(track_eta(i) - track_eta(j)));
+              v.push_back(fabs(track_eta[i] - track_eta[j]));
     return v;
   }
 
@@ -596,7 +574,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaPhi(track_phi(i), track_phi(j)));
+              v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
     return v;
   }
 
@@ -613,8 +591,8 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaR(track_eta(i), track_phi(i),
-                                       track_eta(j), track_phi(j)));
+              v.push_back(reco::deltaR(track_eta[i], track_phi[i],
+                                       track_eta[j], track_phi[j]));
     return v;
   }
 

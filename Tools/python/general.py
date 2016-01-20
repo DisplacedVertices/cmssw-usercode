@@ -31,7 +31,7 @@ def to_pickle(obj, fn, proto=-1, comp=False):
         f = open(fn, 'wb')
     cPickle.dump(obj, f, proto)
 
-def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=None):
+def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=None, return_multiple=False):
     found = []
     if name and not name.endswith('='):
         name += '='
@@ -48,7 +48,10 @@ def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=Non
     if raise_on_multiple and len(found) > 1:
         raise ValueError('multiple values found in argv')
     if found:
-        return found[0]
+        if return_multiple:
+            return found
+        else:
+            return found[0]
     else:
         return default_value
 

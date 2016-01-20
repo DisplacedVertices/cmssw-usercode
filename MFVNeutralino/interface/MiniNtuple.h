@@ -9,19 +9,21 @@ namespace mfv {
     unsigned lumi;
     unsigned long long event;
     unsigned char gen_flavor_code;
-    unsigned short npv;
+    unsigned char npv;
     float pvx;
     float pvy;
     float pvz;
-    unsigned short npu;
+    unsigned char npu;
     float weight;
-    unsigned short njets;
+    unsigned char njets;
     float jet_pt[50];
     float jet_eta[50];
     float jet_phi[50];
     float jet_energy[50];
-    unsigned short nvtx;
-    unsigned short ntk0;
+    unsigned char jet_id[50];
+
+    unsigned char nvtx;
+    unsigned char ntk0;
     float x0;
     float y0;
     float z0;
@@ -31,7 +33,7 @@ namespace mfv {
     float cyy0;
     float cyz0;
     float czz0;
-    unsigned short ntk1;
+    unsigned char ntk1;
     float x1;
     float y1;
     float z1;
