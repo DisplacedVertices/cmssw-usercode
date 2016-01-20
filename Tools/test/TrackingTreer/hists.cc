@@ -31,6 +31,8 @@ int main(int argc, char** argv) {
 
   TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
   TH1F* h_npu = new TH1F("h_npu", "", 50, 0, 50);
+  TH1F* h_tk_dxybs = new TH1F("h_tk_dxybs", "", 1000, -1, 1);
+  TH1F* h_tk_sigmadxybs = new TH1F("h_tk_sigmadxybs", "", 1000, -10, 10);
 
   for (const std::string& fn : fns) {
     std::cout << fn << std::endl;
@@ -39,19 +41,24 @@ int main(int argc, char** argv) {
 
     h_norm->Fill(0.5, ((TH1F*)fat.f->Get("mcStat/h_sums"))->GetBinContent(1));
 
-    long j = 0, je = fat.t->GetEntries();
-    for (; j < je; ++j) {
-      if (fat.t->LoadTree(j) < 0) break;
-      if (fat.t->GetEntry(j) <= 0) continue;
-      if (j % 2000 == 0) {
-        printf("\r%li/%li", j, je);
+    long jj = 0, jje = fat.t->GetEntries();
+    for (; jj < jje; ++jj) {
+      if (fat.t->LoadTree(jj) < 0) break;
+      if (fat.t->GetEntry(jj) <= 0) continue;
+      if (jj % 2000 == 0) {
+        printf("\r%li/%li", jj, jje);
         fflush(stdout);
       }
 
       h_npu->Fill(nt.npu);
+
+      for (int itk = 0, itke = nt.ntks(); itk < itke; ++itk) {
+        h_tk_dxybs->Fill(nt.p_tk_dxybs->at(itk));
+        h_tk_sigmadxybs->Fill(nt.p_tk_dxybs->at(itk) / nt.p_tk_err_dxy->at(itk));
+      }
     }
 
-    printf("\r%li/%li\n", j, je);
+    printf("\r%li/%li\n", jj, jje);
   }
 
   f_out->Write();
