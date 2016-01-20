@@ -124,12 +124,12 @@ int main(int argc, char** argv) {
 	  }
 	}
        
-	h_n_all_tracks->Fill(nt.ntks());
 	h_all_track_nhits->Fill(nhits);
         h_tk_dxybs->Fill(nt.p_tk_dxybs->at(itk));
         h_tk_sigmadxybs->Fill(nt.p_tk_dxybs->at(itk) / nt.p_tk_err_dxy->at(itk));
       }
 
+      h_n_all_tracks->Fill(nt.ntks());
       h_n_seed_tracks->Fill(n_seed_tracks);
       h_n_seed_nosigcut_tracks->Fill(n_seed_nosigcut_tracks);
     }
