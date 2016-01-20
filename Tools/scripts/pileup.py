@@ -108,12 +108,14 @@ if options.plots:
 
     draw_in_order([(data_h_orig, 'e'), (mc_h_orig, 'e')], sames=True)
     ps.c.Update()
-    differentiate_stat_box(mc_h_orig)
+    differentiate_stat_box(data_h_orig, 0, new_size=(0.3, 0.2))
+    differentiate_stat_box(mc_h_orig,   1, new_size=(0.3, 0.2))
     ps.save('dists')
 
     draw_in_order([(data_h, 'e'), (mc_h, 'e')], sames=True)
     ps.c.Update()
-    differentiate_stat_box(mc_h)
+    differentiate_stat_box(data_h, 0, new_size=(0.3, 0.2))
+    differentiate_stat_box(mc_h,   1, new_size=(0.3, 0.2))
     ps.save('dists_normalized')
 
     h_w = ROOT.TH1F('h_w', ';;weight', ndata, data_h.GetXaxis().GetXmin(), data_h.GetXaxis().GetXmax())
