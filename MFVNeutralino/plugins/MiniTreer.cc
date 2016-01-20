@@ -8,6 +8,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVMiniTreer : public edm::EDAnalyzer {
 public:
@@ -58,17 +59,17 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByLabel(event_src, mevent);
 
   nt.gen_flavor_code = mevent->gen_flavor_code;
-  nt.npv = mevent->npv;
+  nt.npv = int2uchar(mevent->npv);
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);
   nt.pvz = mevent->pvz - mevent->bsz;
-  nt.npu = int(mevent->npu);
+  nt.npu = int2uchar(mevent->npu);
 
   edm::Handle<double> weight;
   event.getByLabel(weight_src, weight);
   nt.weight = *weight;
 
-  nt.njets = mevent->njets();
+  nt.njets = int2uchar(mevent->njets());
   if (nt.njets > 50)
     throw cms::Exception("CheckYourPremises") << "too many jets in event: " << nt.njets;
 
@@ -77,6 +78,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_eta[i] = mevent->jet_eta[i];
     nt.jet_phi[i] = mevent->jet_phi[i];
     nt.jet_energy[i] = mevent->jet_energy[i];
+    nt.jet_id[i] = mevent->jet_id[i];
   }
 
   edm::Handle<MFVVertexAuxCollection> input_vertices;
@@ -93,7 +95,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   if (vertices.size() == 1) {
     const MFVVertexAux& v0 = vertices[0];
     nt.nvtx = 1;
-    nt.ntk0 = v0.ntracks();
+    nt.ntk0 = int2uchar(v0.ntracks());
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
@@ -108,9 +110,9 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
     const MFVVertexAux& v1 = vertices[1];
-    nt.nvtx = vertices.size();
-    nt.ntk0 = v0.ntracks();
-    nt.ntk1 = v1.ntracks();
+    nt.nvtx = int2uchar(int(vertices.size()));
+    nt.ntk0 = int2uchar(v0.ntracks());
+    nt.ntk1 = int2uchar(v1.ntracks());
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z; nt.cxx0 = v0.cxx; nt.cxy0 = v0.cxy; nt.cxz0 = v0.cxz; nt.cyy0 = v0.cyy; nt.cyz0 = v0.cyz; nt.czz0 = v0.czz;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z; nt.cxx1 = v1.cxx; nt.cxy1 = v1.cxy; nt.cxz1 = v1.cxz; nt.cyy1 = v1.cyy; nt.cyz1 = v1.cyz; nt.czz1 = v1.czz;
   }
