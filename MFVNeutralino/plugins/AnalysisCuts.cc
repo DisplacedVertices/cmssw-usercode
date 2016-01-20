@@ -26,8 +26,8 @@ private:
 
   const int min_npv;
   const int max_npv;
-  const int min_npu;
-  const int max_npu;
+  const double min_npu;
+  const double max_npu;
   const int max_pv_ntracks;
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
