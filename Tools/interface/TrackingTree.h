@@ -66,6 +66,8 @@ struct TrackingTree {
   void clear();
   void write_to_tree(TTree* tree);
   void read_from_tree(TTree* tree);
+  int npvs() { return int(p_pv_x->size()); }
+  int ntks() { return int(p_tk_qpt->size()); }
 
   // ugh
   std::vector<float>* p_pv_x;
