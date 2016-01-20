@@ -26,6 +26,8 @@ private:
 
   const int min_npv;
   const int max_npv;
+  const int min_npu;
+  const int max_npu;
   const int max_pv_ntracks;
   const double min_4th_jet_pt;
   const double min_5th_jet_pt;
@@ -81,6 +83,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     invert_cleaning_filters(cfg.getParameter<bool>("invert_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
+    min_npu(cfg.getParameter<int>("min_npu")),
+    max_npu(cfg.getParameter<int>("max_npu")),
     max_pv_ntracks(cfg.getParameter<int>("max_pv_ntracks")),
     min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
     min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
@@ -158,6 +162,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
+      return false;
+
+    if (mevent->npu < min_npu || mevent ->npu > max_npu)
       return false;
 
     if (mevent->pv_ntracks > max_pv_ntracks)
