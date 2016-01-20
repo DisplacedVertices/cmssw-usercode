@@ -7,13 +7,13 @@ parser = argparse.ArgumentParser(description = 'pileup.py: use analysis JSONs to
 
 parser.add_argument('--ana-json',
                     help='The JSON file produced from crab -report (or multiple crab reports, added together with mergeJSON.py).')
-parser.add_argument('--lumi-json', default='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/pileup_latest.txt',
+parser.add_argument('--lumi-json', default='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt',
                     help='The centrally produced lumi-weighted pileup JSON (default %(default)s).')
-parser.add_argument('--max-npu', type=int, default=100,
+parser.add_argument('--max-npu', type=int, default=52,
                     help='The maximum pileup bin (default %(default)s).')
 parser.add_argument('--pileupcalc-mode', default='true',
                     help='The mode for pileupCalc.py: "true" or "observed" (default %(default)s).')
-parser.add_argument('--pileupcalc-mbxsec', default=69400, type=int,
+parser.add_argument('--pileupcalc-mbxsec', default=69000, type=int,
                     help='The minbias cross section for pileupCalc.py, in microbarn (default %(default)s).')
 parser.add_argument('--data-fn', default='pileup.root',
                     help='The output filename for pileupCalc.py (default %(default)s).')
@@ -104,16 +104,18 @@ print '};'
 if options.plots:
     from JMTucker.Tools.ROOTTools import *
     set_style()
-    ps = plot_saver('plots/pileup', size=(600,600))
+    ps = plot_saver('plots/pileup_r2', size=(600,600))
 
     draw_in_order([(data_h_orig, 'e'), (mc_h_orig, 'e')], sames=True)
     ps.c.Update()
-    differentiate_stat_box(mc_h_orig)
+    differentiate_stat_box(data_h_orig, 0, new_size=(0.3, 0.2))
+    differentiate_stat_box(mc_h_orig,   1, new_size=(0.3, 0.2))
     ps.save('dists')
 
     draw_in_order([(data_h, 'e'), (mc_h, 'e')], sames=True)
     ps.c.Update()
-    differentiate_stat_box(mc_h)
+    differentiate_stat_box(data_h, 0, new_size=(0.3, 0.2))
+    differentiate_stat_box(mc_h,   1, new_size=(0.3, 0.2))
     ps.save('dists_normalized')
 
     h_w = ROOT.TH1F('h_w', ';;weight', ndata, data_h.GetXaxis().GetXmin(), data_h.GetXaxis().GetXmax())
