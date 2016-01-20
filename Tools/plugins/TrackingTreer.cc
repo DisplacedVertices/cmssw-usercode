@@ -10,6 +10,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "JMTucker/Tools/interface/TrackingTree.h"
 
 class TrackingTreer : public edm::EDAnalyzer {
 public:
@@ -23,109 +24,8 @@ private:
   const edm::InputTag tracks_src;
   const bool assert_diag_cov;
 
-  struct tree_t {
-    typedef unsigned char uchar;
-
-    unsigned run;
-    unsigned lumi;
-    unsigned long long event;
-    unsigned short npu;
-
-    float bs_x;
-    float bs_y;
-    float bs_z;
-    float bs_sigmaz;
-    float bs_dxdz;
-    float bs_dydz;
-    float bs_width;
-
-    float bs_err_x;
-    float bs_err_y;
-    float bs_err_z;
-    float bs_err_sigmaz;
-    float bs_err_dxdz;
-    float bs_err_dydz;
-    float bs_err_width;
-
-    std::vector<float> pv_x;
-    std::vector<float> pv_y;
-    std::vector<float> pv_z;
-    std::vector<float> pv_sumpt2;
-    std::vector<float> pv_ntracks;
-    std::vector<float> pv_chi2;
-    std::vector<float> pv_ndof;
-    std::vector<float> pv_cxx;
-    std::vector<float> pv_cxy;
-    std::vector<float> pv_cxz;
-    std::vector<float> pv_cyy;
-    std::vector<float> pv_cyz;
-    std::vector<float> pv_czz;
-
-    std::vector<float> tk_chi2dof;
-    std::vector<float> tk_qpt;
-    std::vector<float> tk_eta;
-    std::vector<float> tk_phi;
-    std::vector<float> tk_dxy;
-    std::vector<float> tk_dxybs;
-    std::vector<float> tk_dxypv;
-    std::vector<float> tk_dz;
-    std::vector<float> tk_dzpv;
-    std::vector<float> tk_err_qpt;
-    std::vector<float> tk_err_eta;
-    std::vector<float> tk_err_phi;
-    std::vector<float> tk_err_dxy;
-    std::vector<float> tk_err_dz;
-    std::vector<uchar> tk_nsthit;
-    std::vector<uchar> tk_npxhit;
-    std::vector<uchar> tk_nstlay;
-    std::vector<uchar> tk_npxlay;
-
-    tree_t() { clear(); }
-
-    void clear() {
-      run = lumi = 0;
-      event = 0;
-      npu = 0;
-      bs_x = bs_y = bs_z = bs_sigmaz = bs_dxdz = bs_dydz = bs_width = 0;
-      bs_err_x = bs_err_y = bs_err_z = bs_err_sigmaz = bs_err_dxdz = bs_err_dydz = bs_err_width = 0;
-
-      pv_x.clear();
-      pv_y.clear();
-      pv_z.clear();
-      pv_sumpt2.clear();
-      pv_ntracks.clear();
-      pv_chi2.clear();
-      pv_ndof.clear();
-      pv_cxx.clear();
-      pv_cxy.clear();
-      pv_cxz.clear();
-      pv_cyy.clear();
-      pv_cyz.clear();
-      pv_czz.clear();
-
-      tk_chi2dof.clear();
-      tk_qpt.clear();
-      tk_eta.clear();
-      tk_phi.clear();
-      tk_dxy.clear();
-      tk_dxybs.clear();
-      tk_dxypv.clear();
-      tk_dz.clear();
-      tk_dzpv.clear();
-      tk_err_qpt.clear();
-      tk_err_eta.clear();
-      tk_err_phi.clear();
-      tk_err_dxy.clear();
-      tk_err_dz.clear();
-      tk_nsthit.clear();
-      tk_npxhit.clear();
-      tk_nstlay.clear();
-      tk_npxlay.clear();
-    }
-  };
-
   TTree* tree;
-  tree_t nt;
+  TrackingTree nt;
 };
 
 TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
@@ -136,55 +36,7 @@ TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
-  tree->Branch("run", &nt.run, "run/i");
-  tree->Branch("lumi", &nt.lumi, "lumi/i");
-  tree->Branch("event", &nt.event);
-  tree->Branch("npu", &nt.npu);
-  tree->Branch("bs_x", &nt.bs_x, "bs_x/F");
-  tree->Branch("bs_y", &nt.bs_y, "bs_y/F");
-  tree->Branch("bs_z", &nt.bs_z, "bs_z/F");
-  tree->Branch("bs_sigmaz", &nt.bs_sigmaz, "bs_sigmaz/F");
-  tree->Branch("bs_dxdz", &nt.bs_dxdz, "bs_dxdz/F");
-  tree->Branch("bs_dydz", &nt.bs_dydz, "bs_dydz/F");
-  tree->Branch("bs_width", &nt.bs_width, "bs_width/F");
-  tree->Branch("bs_err_x", &nt.bs_err_x, "bs_err_x/F");
-  tree->Branch("bs_err_y", &nt.bs_err_y, "bs_err_y/F");
-  tree->Branch("bs_err_z", &nt.bs_err_z, "bs_err_z/F");
-  tree->Branch("bs_err_sigmaz", &nt.bs_err_sigmaz, "bs_err_sigmaz/F");
-  tree->Branch("bs_err_dxdz", &nt.bs_err_dxdz, "bs_err_dxdz/F");
-  tree->Branch("bs_err_dydz", &nt.bs_err_dydz, "bs_err_dydz/F");
-  tree->Branch("bs_err_width", &nt.bs_err_width, "bs_err_width/F");
-  tree->Branch("pv_x", &nt.pv_x);
-  tree->Branch("pv_y", &nt.pv_y);
-  tree->Branch("pv_z", &nt.pv_z);
-  tree->Branch("pv_sumpt2", &nt.pv_sumpt2);
-  tree->Branch("pv_ntracks", &nt.pv_ntracks);
-  tree->Branch("pv_chi2", &nt.pv_chi2);
-  tree->Branch("pv_ndof", &nt.pv_ndof);
-  tree->Branch("pv_cxx", &nt.pv_cxx);
-  tree->Branch("pv_cxy", &nt.pv_cxy);
-  tree->Branch("pv_cxz", &nt.pv_cxz);
-  tree->Branch("pv_cyy", &nt.pv_cyy);
-  tree->Branch("pv_cyz", &nt.pv_cyz);
-  tree->Branch("pv_czz", &nt.pv_czz);
-  tree->Branch("tk_chi2dof", &nt.tk_chi2dof);
-  tree->Branch("tk_qpt", &nt.tk_qpt);
-  tree->Branch("tk_eta", &nt.tk_eta);
-  tree->Branch("tk_phi", &nt.tk_phi);
-  tree->Branch("tk_dxy", &nt.tk_dxy);
-  tree->Branch("tk_dxybs", &nt.tk_dxybs);
-  tree->Branch("tk_dxypv", &nt.tk_dxypv);
-  tree->Branch("tk_dz", &nt.tk_dz);
-  tree->Branch("tk_dzpv", &nt.tk_dzpv);
-  tree->Branch("tk_err_qpt", &nt.tk_err_qpt);
-  tree->Branch("tk_err_eta", &nt.tk_err_eta);
-  tree->Branch("tk_err_phi", &nt.tk_err_phi);
-  tree->Branch("tk_err_dxy", &nt.tk_err_dxy);
-  tree->Branch("tk_err_dz", &nt.tk_err_dz);
-  tree->Branch("tk_nsthit", &nt.tk_nsthit);
-  tree->Branch("tk_npxhit", &nt.tk_npxhit);
-  tree->Branch("tk_nstlay", &nt.tk_nstlay);
-  tree->Branch("tk_npxlay", &nt.tk_npxlay);
+  nt.write_to_tree(tree);
 }
 
 void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
