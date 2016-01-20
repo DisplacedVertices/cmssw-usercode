@@ -869,7 +869,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
   h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
   h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts);
-  h_nbquarks->Fill(nbquarksstatus3);
+  h_nbquarks->Fill(nbquarks);
   for (int i = 0; i < 2; ++i) {
     if (ids[i].size() == 2) {
       double dphi = reco::deltaPhi(phi[i][0], phi[i][1]);
