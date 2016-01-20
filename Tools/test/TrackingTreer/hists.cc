@@ -102,10 +102,15 @@ int main(int argc, char** argv) {
 	const double pars[6] = {pt, nt.p_tk_eta->at(itk), nt.p_tk_phi->at(itk), nt.p_tk_dxybs->at(itk), nt.p_tk_dxypv->at(itk), nt.p_tk_dz->at(itk)};
 	const double errs[6] = {nt.p_tk_err_qpt->at(itk), nt.p_tk_err_eta->at(itk), nt.p_tk_err_phi->at(itk), nt.p_tk_err_dxy->at(itk), nt.p_tk_err_dxy->at(itk), nt.p_tk_err_dz->at(itk)};
 
-	if (use) 
+	if (use) {
 	  ++n_seed_tracks;
-	if (use_nosigcut)
+	  h_seed_track_nhits->Fill(nhits);
+	}
+
+	if (use_nosigcut) {
 	  ++n_seed_nosigcut_tracks;
+	  h_seed_nosigcut_track_nhits->Fill(nhits);
+	}
 
 	for (int i = 0; i < 6; ++i) {
 	  h_all_track_pars[i]->Fill(pars[i]);
@@ -114,13 +119,11 @@ int main(int argc, char** argv) {
 	  if (use) {
 	    h_seed_track_pars[i]->Fill(pars[i]);
 	    h_seed_track_errs[i]->Fill(errs[i]);
-	    h_seed_track_nhits->Fill(nhits);
 	  }
 
 	  if(use_nosigcut) {
 	    h_seed_nosigcut_track_pars[i]->Fill(pars[i]);
 	    h_seed_nosigcut_track_errs[i]->Fill(errs[i]); 
-	    h_seed_nosigcut_track_nhits->Fill(nhits);
 	  }
 	}
        
