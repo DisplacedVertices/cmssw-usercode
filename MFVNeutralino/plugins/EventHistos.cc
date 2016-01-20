@@ -89,6 +89,12 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_nelectrons[3];
   TH1F* h_nleptons[3];
 
+  TH1F* h_bjet_pt[3];
+  TH1F* h_bjet_phi[3];
+  TH1F* h_bjet_eta[3];
+  TH1F* h_bjet_pairdphi[3];
+  TH1F* h_bjet_pairdr[3];
+
   TH1F* h_bjets_absdphi[3][2];
   TH1F* h_bjets_dphi[3][2];
   TH1F* h_bjets_deta[3][2];
@@ -251,6 +257,12 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_nmuons[i] = fs->make<TH1F>(TString::Format("h_nmuons_%s", lep_ex[i]), TString::Format(";# of %s muons;events", lep_ex[i]), 5, 0, 5);
     h_nelectrons[i] = fs->make<TH1F>(TString::Format("h_nelectrons_%s", lep_ex[i]), TString::Format(";# of %s electrons;events", lep_ex[i]), 5, 0, 5);
     h_nleptons[i] = fs->make<TH1F>(TString::Format("h_nleptons_%s", lep_ex[i]), TString::Format(";# of %s leptons;events", lep_ex[i]), 5, 0, 5);
+
+    h_bjet_pt[i] = fs->make<TH1F>(TString::Format("h_bjet_%s_pt", lmt_ex[i]), TString::Format(";%s bjets p_{T} (GeV);bjets/10 GeV", lmt_ex[i]), 100, 0, 1000);
+    h_bjet_phi[i] = fs->make<TH1F>(TString::Format("h_bjet_%s_phi", lmt_ex[i]), TString::Format(";%s bjets #phi (rad);bjets/.063", lmt_ex[i]), 100, -3.1416, 3.1416);
+    h_bjet_eta[i] = fs->make<TH1F>(TString::Format("h_bjet_%s_eta", lmt_ex[i]), TString::Format(";%s bjets #eta (rad);bjets/.08", lmt_ex[i]), 100, -4, 4);
+    h_bjet_pairdphi[i] = fs->make<TH1F>(TString::Format("h_bjet_%s_pairdphi", lmt_ex[i]), TString::Format(";%s bjet pair #Delta#phi (rad);bjet pairs/.063", lmt_ex[i]), 100, -3.1416, 3.1416);
+    h_bjet_pairdr[i] = fs->make<TH1F>(TString::Format("h_bjet_%s_pairdr", lmt_ex[i]), TString::Format(";%s bjet pair #DeltaR (rad);bjet pairs/.047", lmt_ex[i]), 150, 0, 7);
 
     for (int j = 0; j < 2; ++j) {
       h_bjets_absdphi[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s_ptgt%s_absdphi", lmt_ex[i], bjets_pt[j]), TString::Format("events with two %s GeV %s bjets;|#Delta#phi| (rad);events/0.126", bjets_pt[j], lmt_ex[i]), 25, 0, 3.15);
@@ -445,6 +457,16 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
       if (((mevent->jet_id[ijet] >> 2) & 3) >= i + 1) {
+        h_bjet_pt[i]->Fill(mevent->jet_pt[ijet]);
+        h_bjet_phi[i]->Fill(mevent->jet_phi[ijet]);
+        h_bjet_eta[i]->Fill(mevent->jet_eta[ijet]);
+        for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
+          if (((mevent->jet_id[jjet] >> 2) & 3) >= i + 1) {
+            h_bjet_pairdphi[i]->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
+            h_bjet_pairdr[i]->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]));
+          }
+        }
+
         for (int j = 0; j < 2; ++j) {
           if (j==1 && mevent->jet_pt[ijet] < 50) continue;
           bjets_eta[i][j].push_back(mevent->jet_eta[ijet]);
