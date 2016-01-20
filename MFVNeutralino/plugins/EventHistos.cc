@@ -73,6 +73,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetpt6;
   TH1F* h_jet_sum_ht;
 
+  TH1F* h_jetpt;
   TH1F* h_jetphi;
   TH1F* h_jeteta;
   TH1F* h_jetpairdphi;
@@ -245,14 +246,15 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
   for (int i = 0; i < 3; ++i)
     h_njetsnopu[i] = fs->make<TH1F>(TString::Format("h_njetsnopu_%s", lmt_ex[i]), TString::Format(";# of jets (%s PU id);events", lmt_ex[i]), 20, 0, 20);
-  h_jetpt1 = fs->make<TH1F>("h_jetpt1", ";p_{T} of 1st jet (GeV);events/5 GeV", 100, 0, 1000);
-  h_jetpt2 = fs->make<TH1F>("h_jetpt2", ";p_{T} of 2nd jet (GeV);events/5 GeV", 100, 0, 1000);
+  h_jetpt1 = fs->make<TH1F>("h_jetpt1", ";p_{T} of 1st jet (GeV);events/10 GeV", 100, 0, 1000);
+  h_jetpt2 = fs->make<TH1F>("h_jetpt2", ";p_{T} of 2nd jet (GeV);events/10 GeV", 100, 0, 1000);
   h_jetpt3 = fs->make<TH1F>("h_jetpt3", ";p_{T} of 3rd jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt6 = fs->make<TH1F>("h_jetpt6", ";p_{T} of 6th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jet_sum_ht = fs->make<TH1F>("h_jet_sum_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
 
+  h_jetpt = fs->make<TH1F>("h_jetpt", ";jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
   h_jetphi = fs->make<TH1F>("h_jetphi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
   h_jeteta = fs->make<TH1F>("h_jeteta", ";jets #eta (rad);jets/.08", 100, -4, 4);
   h_jetpairdphi = fs->make<TH1F>("h_jetpairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
@@ -454,6 +456,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    h_jetpt->Fill(mevent->jet_pt[ijet]);
     h_jetphi->Fill(mevent->jet_phi[ijet]);
     h_jeteta->Fill(mevent->jet_eta[ijet]);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
