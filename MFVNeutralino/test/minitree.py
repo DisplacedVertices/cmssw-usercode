@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-process.source.fileNames = ['/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev4_25ns/151127_020830/0000/ntuple_1.root']
+process.source.fileNames = ['/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev6p1/160118_211014/0000/ntuple_1.root']
 process.TFileService.fileName = 'minitree.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -22,14 +22,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
     samples = Samples.registry.from_argv(
-        Samples.data_samples + \
+        #Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + \
-        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        #[Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         Samples.xx4j_samples
         )
 
-    cs = CRABSubmitter('MinitreeV5',
-                       dataset = 'ntuplev5',
+    cs = CRABSubmitter('MinitreeV6',
+                       dataset = 'ntuplev6p1',
                        splitting = 'FileBased',
                        units_per_job = 25,
                        total_units = -1,
