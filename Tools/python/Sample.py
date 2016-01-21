@@ -116,6 +116,8 @@ class MCSample(Sample):
 
         self.join_info = (False, self.nice, self.color)
 
+        self.norm_path = None
+
     @property
     def partial_weight_orig(self):
         return self.xsec / float(self.nevents_orig) # total weight = partial_weight * integrated_luminosity in 1/pb
@@ -125,7 +127,7 @@ class MCSample(Sample):
         return 1./self.partial_weight_orig # units of 1/pb
 
     def nevents(self, f_or_fn):
-        return norm_from_file(f_or_fn)
+        return norm_from_file(f_or_fn, self.norm_path)
 
     def partial_weight(self, f_or_fn):
         return self.xsec / self.nevents(f_or_fn)
@@ -275,17 +277,20 @@ def anon_samples(txt, **kwargs):
         samples.append(sample)
     return samples
 
-def norm_from_file(f_or_fn):
+def norm_from_file(f_or_fn, path=None):
     if type(f_or_fn) == str:
         from JMTucker.Tools.ROOTTools import ROOT
         f = ROOT.TFile(f_or_fn)
     else:
         f = f_or_fn
-    h = f.Get('mfvWeight/h_sums')
-    assert h.GetXaxis().GetBinLabel(1) == 'sum_nevents_total'
+    if path:
+        h = f.Get(path)
+    else:
+        h = f.Get('mfvWeight/h_sums')
+        assert h.GetXaxis().GetBinLabel(1) == 'sum_nevents_total'
     return h.GetBinContent(1)
 
-def merge(samples, output='merge.root', norm_to=1.):
+def merge(samples, output='merge.root', norm_to=1., norm_path=''):
     if norm_to > 0:
         print 'norm sum of weights to', norm_to
     else:
@@ -293,6 +298,8 @@ def merge(samples, output='merge.root', norm_to=1.):
 
     weights = []
     for sample in samples:
+        if norm_path:
+            sample.norm_path = norm_path
         weights.append(sample.partial_weight(sample.fn))
 
     if norm_to > 0:
@@ -315,11 +322,10 @@ def main(samples_registry):
     if 'merge' in sys.argv:
         samples = samples_registry.from_argv(from_root_fns=True)
         out_fn = [x for x in sys.argv if x.endswith('.root') and not os.path.isfile(x)]
+        out_fn = out_fn[0] if out_fn else 'merge.root'
         norm_to = typed_from_argv(float, default_value=1.)
-        if out_fn:
-            merge(samples, output=out_fn[0], norm_to=norm_to)
-        else:
-            merge(samples, norm_to=norm_to)
+        norm_path = typed_from_argv(str, default_value='', name='norm_path')
+        merge(samples, output=out_fn, norm_to=norm_to, norm_path=norm_path)
 
 __all__ = [
     'Dataset',
