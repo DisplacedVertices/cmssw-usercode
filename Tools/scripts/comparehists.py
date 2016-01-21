@@ -88,10 +88,13 @@ for i,f in enumerate(files):
     if not f.IsOpen():
         raise ValueError('file %s not readable' % options.files[i])
 
-dirs = [file.Get(options.dir_path) for file in files]
-for i,d in enumerate(dirs):
-    if not issubclass(type(d), ROOT.TDirectory):
-        raise ValueError('dir %s not found in file %s' % (options.dir_path, options.files[i]))
+if options.dir_path == '' or options.dir_path == '/':
+    dirs = [file for file in files]
+else:
+    dirs = [file.Get(options.dir_path) for file in files]
+    for i,d in enumerate(dirs):
+        if not issubclass(type(d), ROOT.TDirectory):
+            raise ValueError('dir %s not found in file %s' % (options.dir_path, options.files[i]))
 
 compare_all_hists(ps,
                   samples = zip(options.nice, dirs, options.colors),
