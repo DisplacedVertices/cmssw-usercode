@@ -4,7 +4,7 @@
 
 TrackingTree::TrackingTree() {
   clear();
-  p_pv_x = p_pv_y = p_pv_z = p_pv_sumpt2 = p_pv_ntracks = p_pv_chi2 = p_pv_ndof = p_pv_cxx = p_pv_cxy = p_pv_cxz = p_pv_cyy = p_pv_cyz = p_pv_czz = p_tk_chi2dof = p_tk_qpt = p_tk_eta = p_tk_phi = p_tk_dxy = p_tk_dxybs = p_tk_dxypv = p_tk_dz = p_tk_dzpv = p_tk_err_qpt = p_tk_err_eta = p_tk_err_phi = p_tk_err_dxy = p_tk_err_dz = 0;
+  p_pv_x = p_pv_y = p_pv_z = p_pv_sumpt2 = p_pv_ntracks = p_pv_chi2dof = p_pv_cxx = p_pv_cxy = p_pv_cxz = p_pv_cyy = p_pv_cyz = p_pv_czz = p_tk_chi2dof = p_tk_qpt = p_tk_eta = p_tk_phi = p_tk_dxy = p_tk_dxybs = p_tk_dxypv = p_tk_dz = p_tk_dzpv = p_tk_vx = p_tk_vy = p_tk_vz = p_tk_err_qpt = p_tk_err_eta = p_tk_err_phi = p_tk_err_dxy = p_tk_err_dz = 0;
   p_tk_nsthit = p_tk_npxhit = p_tk_nstlay = p_tk_npxlay = 0;
 }
 
@@ -20,8 +20,7 @@ void TrackingTree::clear() {
   pv_z.clear();
   pv_sumpt2.clear();
   pv_ntracks.clear();
-  pv_chi2.clear();
-  pv_ndof.clear();
+  pv_chi2dof.clear();
   pv_cxx.clear();
   pv_cxy.clear();
   pv_cxz.clear();
@@ -38,6 +37,9 @@ void TrackingTree::clear() {
   tk_dxypv.clear();
   tk_dz.clear();
   tk_dzpv.clear();
+  tk_vx.clear();
+  tk_vy.clear();
+  tk_vz.clear();
   tk_err_qpt.clear();
   tk_err_eta.clear();
   tk_err_phi.clear();
@@ -76,8 +78,7 @@ void TrackingTree::write_to_tree(TTree* tree) {
   tree->Branch("pv_z", &pv_z);
   tree->Branch("pv_sumpt2", &pv_sumpt2);
   tree->Branch("pv_ntracks", &pv_ntracks);
-  tree->Branch("pv_chi2", &pv_chi2);
-  tree->Branch("pv_ndof", &pv_ndof);
+  tree->Branch("pv_chi2dof", &pv_chi2dof);
   tree->Branch("pv_cxx", &pv_cxx);
   tree->Branch("pv_cxy", &pv_cxy);
   tree->Branch("pv_cxz", &pv_cxz);
@@ -93,6 +94,9 @@ void TrackingTree::write_to_tree(TTree* tree) {
   tree->Branch("tk_dxypv", &tk_dxypv);
   tree->Branch("tk_dz", &tk_dz);
   tree->Branch("tk_dzpv", &tk_dzpv);
+  tree->Branch("tk_vx", &tk_vx);
+  tree->Branch("tk_vy", &tk_vy);
+  tree->Branch("tk_vz", &tk_vz);
   tree->Branch("tk_err_qpt", &tk_err_qpt);
   tree->Branch("tk_err_eta", &tk_err_eta);
   tree->Branch("tk_err_phi", &tk_err_phi);
@@ -128,8 +132,7 @@ void TrackingTree::read_from_tree(TTree* tree) {
   tree->SetBranchAddress("pv_z", &p_pv_z);
   tree->SetBranchAddress("pv_sumpt2", &p_pv_sumpt2);
   tree->SetBranchAddress("pv_ntracks", &p_pv_ntracks);
-  tree->SetBranchAddress("pv_chi2", &p_pv_chi2);
-  tree->SetBranchAddress("pv_ndof", &p_pv_ndof);
+  tree->SetBranchAddress("pv_chi2dof", &p_pv_chi2dof);
   tree->SetBranchAddress("pv_cxx", &p_pv_cxx);
   tree->SetBranchAddress("pv_cxy", &p_pv_cxy);
   tree->SetBranchAddress("pv_cxz", &p_pv_cxz);
@@ -145,6 +148,9 @@ void TrackingTree::read_from_tree(TTree* tree) {
   tree->SetBranchAddress("tk_dxypv", &p_tk_dxypv);
   tree->SetBranchAddress("tk_dz", &p_tk_dz);
   tree->SetBranchAddress("tk_dzpv", &p_tk_dzpv);
+  tree->SetBranchAddress("tk_vx", &p_tk_vx);
+  tree->SetBranchAddress("tk_vy", &p_tk_vy);
+  tree->SetBranchAddress("tk_vz", &p_tk_vz);
   tree->SetBranchAddress("tk_err_qpt", &p_tk_err_qpt);
   tree->SetBranchAddress("tk_err_eta", &p_tk_err_eta);
   tree->SetBranchAddress("tk_err_phi", &p_tk_err_phi);

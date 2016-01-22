@@ -34,8 +34,7 @@ struct TrackingTree {
   std::vector<float> pv_z;
   std::vector<float> pv_sumpt2;
   std::vector<float> pv_ntracks;
-  std::vector<float> pv_chi2;
-  std::vector<float> pv_ndof;
+  std::vector<float> pv_chi2dof;
   std::vector<float> pv_cxx;
   std::vector<float> pv_cxy;
   std::vector<float> pv_cxz;
@@ -52,6 +51,9 @@ struct TrackingTree {
   std::vector<float> tk_dxypv;
   std::vector<float> tk_dz;
   std::vector<float> tk_dzpv;
+  std::vector<float> tk_vx;
+  std::vector<float> tk_vy;
+  std::vector<float> tk_vz;
   std::vector<float> tk_err_qpt;
   std::vector<float> tk_err_eta;
   std::vector<float> tk_err_phi;
@@ -75,8 +77,7 @@ struct TrackingTree {
   std::vector<float>* p_pv_z;
   std::vector<float>* p_pv_sumpt2;
   std::vector<float>* p_pv_ntracks;
-  std::vector<float>* p_pv_chi2;
-  std::vector<float>* p_pv_ndof;
+  std::vector<float>* p_pv_chi2dof;
   std::vector<float>* p_pv_cxx;
   std::vector<float>* p_pv_cxy;
   std::vector<float>* p_pv_cxz;
@@ -92,6 +93,9 @@ struct TrackingTree {
   std::vector<float>* p_tk_dxypv;
   std::vector<float>* p_tk_dz;
   std::vector<float>* p_tk_dzpv;
+  std::vector<float>* p_tk_vx;
+  std::vector<float>* p_tk_vy;
+  std::vector<float>* p_tk_vz;
   std::vector<float>* p_tk_err_qpt;
   std::vector<float>* p_tk_err_eta;
   std::vector<float>* p_tk_err_phi;
