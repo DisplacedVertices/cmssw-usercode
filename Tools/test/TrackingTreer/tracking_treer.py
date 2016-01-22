@@ -4,14 +4,14 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True
 
 silence_messages(process, ['HLTConfigData'])
-geometry_etc(process, '74X_mcRun2_asymptotic_v4' if is_mc else '74X_dataRun2_v5')
+geometry_etc(process, '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15')
 #report_every(process, 1)
 #process.options.wantSummary = True
 #process.maxEvents.input = 1000
 
 process.source.fileNames = ['/store/user/tucker/F47E7F59-8A29-E511-8667-002590A52B4A.root']
 if not is_mc:
-    process.source.fileNames = ['/store/user/tucker/Run2015D_JetHT_AOD_PromptReco-v4_000_260_627_00000_78D8E6A7-6484-E511-89B4-02163E0134F6.root']
+    process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/16Dec2015-v1/00000/0A2C6696-AEAF-E511-8551-0026189438EB.root']
 
 process.TFileService.fileName = 'tracking_tree.root'
 
@@ -27,7 +27,7 @@ process.goodVertices = cms.EDFilter('VertexSelector',
 
 process.tt = cms.EDAnalyzer('TrackingTreer',
                            beamspot_src = cms.InputTag('offlineBeamSpot'),
-                           primary_vertex_src = cms.InputTag('goodVertices'),
+                           primary_vertices_src = cms.InputTag('goodVertices'),
                            tracks_src = cms.InputTag('generalTracks'),
                            assert_diag_cov = cms.bool(True),
                            )
@@ -41,15 +41,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
     samples = Samples.registry.from_argv(Samples.data_samples + Samples.qcd_samples)
+    samples = Samples.data_samples
 
-    for s in Samples.data_samples:
-        s.json = '/uscms/home/tucker/private/mfv_7415p1/src/JMTucker/MFVNeutralino/test/ana_1pc.json'
-        s.lumis_per = 1
-        s.total_lumis = -1
-
-    for s in Samples.data_samples:
-        s.events_per = 50000
-        s.total_events = s.nevents_orig/10
+    for s in samples:
+        if s.is_mc:
+            s.events_per = 50000
+            s.total_events = s.nevents_orig/10
+        else:
+            s.json = '/uscms/home/tucker/work/mfv_763p2/src/JMTucker/MFVNeutralino/test/ana_10pc.json'
+            s.lumis_per = 1
+            s.total_lumis = -1
 
     def modify(sample):
         to_add = []
@@ -63,7 +64,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    cs = CRABSubmitter('TrackTreeV0',
+    cs = CRABSubmitter('TrackTreeV1_76x',
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        )
