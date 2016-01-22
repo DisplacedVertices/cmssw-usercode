@@ -20,7 +20,7 @@ qcd_samples = [
     ]
 
 ttbar_samples = [
-    MCSample('ttbar', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 42784971, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+    MCSample('ttbar', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-scaledown-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 41097914, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
 leptonic_background_samples = [
