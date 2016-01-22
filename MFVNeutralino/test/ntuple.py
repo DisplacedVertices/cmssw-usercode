@@ -136,12 +136,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    #for s in samples:
-        #if not sample.is_mc:
+    filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'ttbar': 3.6064e-02, }
+    for s in samples:
+        if s.is_mc:
+            if filter_eff.has_key(s.name):
+                s.events_per = min(int(25000/filter_eff[s.name]), 200000)
+            print s.name, s.events_per
+        #else:
         #    sample.json = 'ana_all.json'
-        # this won't work until 76x
-        #s.events_per = min(int(3000/s.filter_eff), 200000)
-        #print s.name, s.events_per
 
     cs = CRABSubmitter(batch_name,
                        pset_modifier = modify,
