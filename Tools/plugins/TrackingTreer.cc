@@ -19,9 +19,10 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
-  const edm::InputTag beamspot_src;
-  const edm::InputTag primary_vertex_src;
-  const edm::InputTag tracks_src;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
+  const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+
   const bool assert_diag_cov;
 
   TTree* tree;
@@ -29,9 +30,9 @@ private:
 };
 
 TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
-  : beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
+  : beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
+    tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     assert_diag_cov(cfg.getParameter<bool>("assert_diag_cov"))
 {
   edm::Service<TFileService> fs;
@@ -55,7 +56,7 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel(beamspot_src, beamspot);
+  event.getByToken(beamspot_token, beamspot);
 
   nt.bs_x = beamspot->x0();
   nt.bs_y = beamspot->y0();
@@ -88,7 +89,7 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByLabel(primary_vertex_src, primary_vertices);
+  event.getByToken(primary_vertices_token, primary_vertices);
   const reco::Vertex* the_pv = primary_vertices->size() ? &(*primary_vertices)[0] : 0;
 
   for (const reco::Vertex& pv : *primary_vertices) {
@@ -102,8 +103,7 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.pv_sumpt2.push_back(sumpt2);
 
     nt.pv_ntracks.push_back(pv.nTracks());
-    nt.pv_chi2.push_back(pv.chi2());
-    nt.pv_ndof.push_back(pv.ndof());
+    nt.pv_chi2dof.push_back(pv.normalizedChi2());
     nt.pv_cxx.push_back(pv.covariance(0,0));
     nt.pv_cxy.push_back(pv.covariance(0,1));
     nt.pv_cxz.push_back(pv.covariance(0,2));
@@ -113,7 +113,7 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   edm::Handle<reco::TrackCollection> tracks;
-  event.getByLabel(tracks_src, tracks);
+  event.getByToken(tracks_token, tracks);
 
   for (const reco::Track& tk : *tracks) {
     nt.tk_chi2dof.push_back(tk.normalizedChi2());
@@ -131,6 +131,9 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
       nt.tk_dzpv.push_back(1e99);
     }
     nt.tk_dz.push_back(tk.dz());
+    nt.tk_vx.push_back(tk.vx());
+    nt.tk_vy.push_back(tk.vy());
+    nt.tk_vz.push_back(tk.vz());
     nt.tk_err_qpt.push_back(tk.ptError());
     nt.tk_err_eta.push_back(tk.etaError());
     nt.tk_err_phi.push_back(tk.phiError());
