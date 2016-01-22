@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
 
   TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
   TH1F* h_npu = new TH1F("h_npu", "", 50, 0, 50);
+  TH1F* h_npv = new TH1F("h_npv", "", 50, 0, 50);
 
   TH1F* h_n_all_tracks = new TH1F("h_n_all_tracks",  "", 40, 0, 2000);
   TH1F* h_all_track_pars[6];
@@ -96,7 +97,8 @@ int main(int argc, char** argv) {
       }
       
       h_npu->Fill(nt.npu);
-      
+      h_npv->Fill(nt.npvs());
+
       int inpu = int(nt.npu);
       assert(inpu >= 0);
 
