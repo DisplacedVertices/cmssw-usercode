@@ -62,6 +62,16 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
         process.load('Configuration.StandardSequences.PAT_cff')
         customize = miniAOD_customizeAllData
 
+    # Don't use the CombinedMVAV2 jet tags, they crash on the data from memory leak (can remove after next (?) patch of 763)
+    process.patJets.discriminatorSources = cms.VInputTag(cms.InputTag("pfJetBProbabilityBJetTags"),
+                                                         cms.InputTag("pfJetProbabilityBJetTags"),
+                                                         cms.InputTag("pfTrackCountingHighPurBJetTags"),
+                                                         cms.InputTag("pfTrackCountingHighEffBJetTags"),
+                                                         cms.InputTag("pfSimpleSecondaryVertexHighEffBJetTags"),
+                                                         cms.InputTag("pfSimpleSecondaryVertexHighPurBJetTags"),
+                                                         cms.InputTag("pfCombinedSecondaryVertexV2BJetTags"),
+                                                         cms.InputTag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))
+
     process = cleanUnscheduled(process)
     process = customize(process)
 
