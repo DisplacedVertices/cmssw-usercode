@@ -185,6 +185,7 @@ JetHT2015Dv3.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-77b89976378048ac648
 JetHT2015Dv4.add_dataset('ntuplev5', '/JetHT/tucker-ntuplev5-a43ce49cdf92a8b591fb7f3e283b5747/USER', dbs_inst='phys03')
 
 JetHT2015Dv3.add_dataset('ntuplev6p1', '/JetHT/tucker-ntuplev6p1-d25c0abed1a78f992654e25a5f177c58/USER', dbs_inst='phys03')
+JetHT2015Dv4.add_dataset('ntuplev6p1', '/JetHT/tucker-ntuplev6p1-96d392bb474bf0763c3141f66527b228/USER', dbs_inst='phys03')
 
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
