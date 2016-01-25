@@ -230,6 +230,10 @@ _adbp3('ntuplev6p1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/t
 _adbp3('ntuplev6p1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-6fb96be24b04736bc637c8fc2ee98e12/USER', 3868877)
 _adbp3('ntuplev6p1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-7a16a7a644097b240677f9ca8ee3dee8/USER',  1961774)
 _adbp3('ntuplev6p1', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1-e00e92510b9a3019aac785fe26a5ec0a/USER',          1543009)
+_adbp3('ntuplev6p1', '/mfv_neu_tau00100um_M0800/tucker-ntuplev6p1-39cdb84772bce34cf067b2373733078c/USER',                                   9890)
+_adbp3('ntuplev6p1', '/mfv_neu_tau00300um_M0800/tucker-ntuplev6p1-352074efc31c1f68ad0131463d6ad96a/USER',                                   9891)
+_adbp3('ntuplev6p1', '/mfv_neu_tau01000um_M0800/tucker-ntuplev6p1-db76f9f06698e0f8a17b0324599153f4/USER',                                   9898)
+_adbp3('ntuplev6p1', '/mfv_neu_tau10000um_M0800/tucker-ntuplev6p1-c6109cb67442c3d45ff9280b602a28af/USER',                                   9850)
 _adbp3('ntuplev6p1', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1-cdf92c2c6785dbea85f17c3463e50253/USER',           9920)
 _adbp3('ntuplev6p1', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1-69285a53bb344009125bfec0704acd1b/USER',          9875)
 
@@ -246,3 +250,7 @@ if __name__ == '__main__':
             ds = x.datasets['miniaod'].dataset
             print ds
             print numevents_in_dataset(ds)
+
+    if 0:
+        for sample in qcd_samples + ttbar_samples:
+            print "'%s': %.4e," % (sample.name, sample.datasets['ntuplev6p1'].nevents_orig / float(sample.nevents_orig))
