@@ -6,8 +6,8 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d3/dquach/crab3dirs/HistosV5'
-plot_dir = 'plots/data_mc_comp/HistosV5'
+root_file_dir = '~/crabdirs/HistosV6p1'
+plot_dir = 'plots/HistosV6p1/datamccomp'
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -16,7 +16,7 @@ scale_factor = 1. #56.0/298.0
 
 data_samples = [] #Samples.data_samples
 background_samples = Samples.ttbar_samples + Samples.qcd_samples
-signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
+signal_samples = [] #[Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 y= ['100 #mum, #sigma = 100 fb', '300 #mum, #sigma = 5 fb', '1 mm, #sigma = 1 fb', '10 mm, #sigma = 1 fb']
 c=[7,4,6,8]
 s=[0.1,0.005,0.001, 0.001]
@@ -54,8 +54,8 @@ C('nsv',
   x_title = 'number of vertices',
   y_title = 'events',
   x_range = (0,5),
-  y_range = (1, 2e5),
-  cut_line = ((2, 0, 2, 2e5), 2, 5, 1),
+  y_range = (1, 1e7),
+  cut_line = ((2, 0, 2, 1e7), 2, 5, 1),
   )
 
 dbv_bins = [j*0.005 for j in range(8)] + [0.04, 0.05, 0.06, 0.07, 0.085, 0.1]
@@ -378,9 +378,9 @@ D('nsv',
   x_title = 'number of vertices',
   y_title = 'events',
   x_range = (0,5),
-  y_range = (1, 2e5),
+  y_range = (1, 1e7),
   legend_pos = (0.47, 0.67, 0.87, 0.87),
-  cut_line = ((2, 0, 2, 2e5), 2, 5, 1),
+  cut_line = ((2, 0, 2, 2e7), 2, 5, 1),
   )
 
 D('sv_all_ntracks_nm1',
