@@ -17,6 +17,9 @@ private:
 
   const edm::InputTag mevent_src;
   const bool use_mevent;
+
+  const bool require_bquarks;
+
   const int l1_bit;
   const int trigger_bit;
   const int clean_bit;
@@ -75,6 +78,7 @@ private:
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
   : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
     use_mevent(mevent_src.label() != ""),
+    require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(cfg.getParameter<int>("l1_bit")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
     clean_bit(cfg.getParameter<int>("clean_bit")),
@@ -146,6 +150,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
   if (use_mevent) {
     event.getByLabel(mevent_src, mevent);
+
+    if (require_bquarks && mevent->gen_flavor_code != 2) {
+      return false;
+    }
 
     if (l1_bit >= 0 && !mevent->pass_l1(l1_bit))
       return false;
