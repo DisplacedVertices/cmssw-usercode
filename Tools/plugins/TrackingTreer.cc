@@ -19,6 +19,7 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
+  const edm::EDGetTokenT<std::vector<PileupSummaryInfo>> pileup_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
@@ -30,7 +31,8 @@ private:
 };
 
 TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
-  : beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+  : pileup_token(consumes<std::vector<PileupSummaryInfo>>(edm::InputTag("addPileupInfo"))),
+    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     assert_diag_cov(cfg.getParameter<bool>("assert_diag_cov"))
@@ -48,7 +50,7 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   if (!event.isRealData()) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup;
-    event.getByLabel("addPileupInfo", pileup);
+    event.getByToken(pileup_token, pileup);
 
     for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
       if (psi->getBunchCrossing() == 0)
