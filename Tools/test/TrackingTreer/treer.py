@@ -63,7 +63,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    cs = CRABSubmitter('TrackTreeV0',
+    cs = CRABSubmitter('TrackTreeV2',
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        )

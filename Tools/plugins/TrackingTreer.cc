@@ -11,6 +11,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/Tools/interface/TrackingTree.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 class TrackingTreer : public edm::EDAnalyzer {
 public:
@@ -115,6 +116,8 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::TrackCollection> tracks;
   event.getByLabel(tracks_src, tracks);
 
+  TrackerSpaceExtents tracker_extents;
+
   for (const reco::Track& tk : *tracks) {
     nt.tk_chi2dof.push_back(tk.normalizedChi2());
     nt.tk_qpt.push_back(tk.charge() * tk.pt());
@@ -140,6 +143,10 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.tk_npxhit.push_back(tk.hitPattern().numberOfValidPixelHits());
     nt.tk_nstlay.push_back(tk.hitPattern().stripLayersWithMeasurement());
     nt.tk_npxlay.push_back(tk.hitPattern().pixelLayersWithMeasurement());
+
+    NumExtents ex = tracker_extents.numExtentInRAndZ(tk.hitPattern());
+    nt.tk_minhit(ex.min_r < 2e9 ? ex.min_r : 0,
+                 ex.min_z < 2e9 ? ex.min_z : 0);
   }
 
   tree->Fill();
