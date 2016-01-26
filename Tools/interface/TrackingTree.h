@@ -63,6 +63,10 @@ struct TrackingTree {
   std::vector<uchar> tk_npxhit;
   std::vector<uchar> tk_nstlay;
   std::vector<uchar> tk_npxlay;
+  std::vector<uchar> tk_minhit_;
+  void tk_minhit(int min_r, int min_z);
+  int tk_min_r(int i);
+  int tk_min_z(int i);
 
   TrackingTree();
   void clear();

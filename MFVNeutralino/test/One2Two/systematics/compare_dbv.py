@@ -5,7 +5,8 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 set_style()
-ps = plot_saver('plots/bkgest/MinitreeV5/dbv', root=False)
+ps = plot_saver('plots/bkgest/MinitreeV6/dbv', root=False)
+trees = '~tucker/nobackup/crab_dirs/MinitreeV6'
 
 def book_dbv(n):
     return ROOT.TH1F(n, '', 20, 0, 0.1)
@@ -19,7 +20,7 @@ h_dbv_qcdb = book_dbv('dbv_qcdb')
 
 hs_nob = []
 for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
-    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV5_fixnormandcode/%s.root' % sn)
+    f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
 
@@ -36,7 +37,7 @@ for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
 
 hs_b = []
 for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
-    f = ROOT.TFile('/eos/uscms/store/user/tucker/crab_dirs/MinitreeV5_fixnormandcode/%s.root' % sn)
+    f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
 
