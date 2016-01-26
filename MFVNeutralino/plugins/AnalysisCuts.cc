@@ -20,6 +20,9 @@ private:
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
   const bool use_mevent;
+
+  const bool require_bquarks;
+
   const int l1_bit;
   const int trigger_bit;
   const int clean_bit;
@@ -79,6 +82,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     mevent_token(consumes<MFVEvent>(mevent_src)),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     use_mevent(mevent_src.label() != ""),
+    require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(cfg.getParameter<int>("l1_bit")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
     clean_bit(cfg.getParameter<int>("clean_bit")),
@@ -149,6 +153,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
   if (use_mevent) {
     event.getByToken(mevent_token, mevent);
+
+    if (require_bquarks && mevent->gen_flavor_code != 2) {
+      return false;
+    }
 
     if (l1_bit >= 0 && !mevent->pass_l1(l1_bit))
       return false;
