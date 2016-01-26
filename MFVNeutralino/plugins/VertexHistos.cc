@@ -17,7 +17,7 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
-#include "JMTucker/MFVNeutralino/interface/TrackerSpaceExtent.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 

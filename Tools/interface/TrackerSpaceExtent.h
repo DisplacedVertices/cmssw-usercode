@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_TrackerSpaceExtent_h
-#define JMTucker_MFVNeutralino_TrackerSpaceExtent_h
+#ifndef JMTucker_Tools_TrackerSpaceExtent_h
+#define JMTucker_Tools_TrackerSpaceExtent_h
 
 //#include <map>
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
