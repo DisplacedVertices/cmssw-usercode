@@ -70,6 +70,7 @@ typedef Extents<int> NumExtents;
 
 class TrackerSpaceExtents {
 public:
+  TrackerSpaceExtents() : filled(false) {}
   typedef std::map<std::pair<int, int>, TrackerSpaceExtent> map_t;
   map_t map;
 
@@ -80,6 +81,8 @@ public:
   int numHitsBehind(const reco::HitPattern&, const double r, const double z) const;
 
 private:
+  bool filled;
+
   template <typename Id, typename SubFunc>
   void fill_subdet(map_t& extents, const TrackingGeometry::DetContainer& dets, SubFunc substructure, const GlobalPoint& origin) {
     for (const GeomDet* geom : dets) {
