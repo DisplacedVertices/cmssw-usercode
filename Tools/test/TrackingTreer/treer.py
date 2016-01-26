@@ -41,7 +41,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
     samples = Samples.registry.from_argv(Samples.data_samples + Samples.qcd_samples)
-    samples = Samples.data_samples
+    samples = Samples.data_samples + [Samples.qcdht2000]
 
     for s in samples:
         if s.is_mc:
