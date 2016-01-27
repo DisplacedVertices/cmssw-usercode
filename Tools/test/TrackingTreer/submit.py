@@ -1,9 +1,9 @@
 import os, sys
 
 jdl = '''universe = vanilla
-Executable = submit.sh
+Executable = ../submit.sh
 arguments = %(batch)s $(Process) %(eos_output_dir)s
-transfer_input_files = hists.exe,%(txt)s
+transfer_input_files = ../hists.exe,%(txt)s
 Output = %(batch)s_$(Process).stdout
 Error = %(batch)s_$(Process).stderr
 Log = %(batch)s_$(Process).log
