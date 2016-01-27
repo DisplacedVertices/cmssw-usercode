@@ -1,5 +1,5 @@
 #include "JMTucker/Tools/interface/TrackingTree.h"
-
+#include <cassert>
 #include "TTree.h"
 
 TrackingTree::TrackingTree() {
@@ -47,6 +47,20 @@ void TrackingTree::clear() {
   tk_npxhit.clear();
   tk_nstlay.clear();
   tk_npxlay.clear();
+}
+
+void TrackingTree::tk_minhit(int min_r, int min_z) {
+  assert(min_r >= 0 && min_r <= 15);
+  assert(min_z >= 0 && min_z <= 15);
+  tk_minhit_.push_back((uchar(min_z) << 4) | uchar(min_r));
+}
+
+int TrackingTree::tk_min_r(int i) {
+  return tk_minhit_[i] & 0xF;
+}
+
+int TrackingTree::tk_min_z(int i) {
+  return tk_minhit_[i] >> 4;
 }
 
 void TrackingTree::write_to_tree(TTree* tree) {

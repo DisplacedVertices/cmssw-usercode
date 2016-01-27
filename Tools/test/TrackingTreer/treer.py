@@ -42,14 +42,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.registry.from_argv(Samples.data_samples + Samples.qcd_samples)
 
-    for s in Samples.data_samples:
-        s.json = '/uscms/home/tucker/private/mfv_7415p1/src/JMTucker/MFVNeutralino/test/ana_1pc.json'
-        s.lumis_per = 1
-        s.total_lumis = -1
-
-    for s in Samples.data_samples:
-        s.events_per = 50000
-        s.total_events = s.nevents_orig/10
+    for s in samples:
+        if s.is_mc:
+            s.events_per = 50000
+            s.total_events = s.nevents_orig/10
+        else:
+            s.json = '/uscms/home/tucker/work/mfv_763p2/src/JMTucker/MFVNeutralino/test/ana_10pc.json'
+            s.lumis_per = 15
+            s.total_lumis = -1
 
     def modify(sample):
         to_add = []
@@ -63,7 +63,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    cs = CRABSubmitter('TrackTreeV0',
+    cs = CRABSubmitter('TrackTreeV2',
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        )

@@ -1,4 +1,4 @@
-#include "JMTucker/MFVNeutralino/interface/TrackerSpaceExtent.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
@@ -29,6 +29,7 @@ void TrackerSpaceExtents::fill(const edm::EventSetup& setup, const GlobalPoint& 
   fill_subdet<TIDDetId>(map, tktg->detsTID(), [](const TIDDetId& id) { return id.wheel(); }, origin); 
   fill_subdet<TOBDetId>(map, tktg->detsTOB(), [](const TOBDetId& id) { return id.layer(); }, origin); 
   fill_subdet<TECDetId>(map, tktg->detsTEC(), [](const TECDetId& id) { return id.wheel(); }, origin); 
+  filled = true;
 }
 
 void TrackerSpaceExtents::print() const {
@@ -78,6 +79,8 @@ NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp) con
 }
 
 SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, bool pixel_only) const {
+  if (!filled) throw cms::Exception("CantEven", "must set up map with fill() before calling extentInRAndZ");
+
   SpatialExtents ret;
 
   for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
@@ -109,6 +112,8 @@ SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, bo
 }
 
 int TrackerSpaceExtents::numHitsBehind(const reco::HitPattern& hp, const double r, const double z) const {
+  if (!filled) throw cms::Exception("CantEven", "must set up map with fill() before calling numHitsBehind");
+
   int nhitsbehind = 0;
 
   for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {

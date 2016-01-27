@@ -21,7 +21,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "JMTucker/MFVNeutralino/interface/TrackerSpaceExtent.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 namespace {
   template <typename T>

@@ -14,7 +14,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
-#include "JMTucker/MFVNeutralino/interface/TrackerSpaceExtent.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
