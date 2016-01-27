@@ -19,7 +19,7 @@ h_dbv_b = book_dbv('dbv_b')
 h_dbv_qcdb = book_dbv('dbv_qcdb')
 
 hs_nob = []
-for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
+for sn in 'qcdht0500 qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
@@ -36,7 +36,7 @@ for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
     hs_nob.append(h)
 
 hs_b = []
-for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
+for sn in 'qcdht0500 qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
@@ -106,8 +106,8 @@ h_dbv_qcdb.SetLineColor(ROOT.kPink)
 h_dbv_qcdb.SetLineWidth(3)
 h_dbv_qcdb.DrawNormalized('sames')
 l.AddEntry(h_dbv_qcdb, 'qcd, b quarks: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*h_dbv_qcdb.GetMean(), 10000*h_dbv_qcdb.GetRMS()/h_dbv_qcdb.GetEntries()**0.5))
-hs_b[4].DrawNormalized('sames')
-l.AddEntry(hs_b[4], 'ttbar: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*hs_b[4].GetMean(), 10000*hs_b[4].GetRMS()/hs_b[4].GetEntries()**0.5))
+hs_b[5].DrawNormalized('sames')
+l.AddEntry(hs_b[5], 'ttbar: mean d_{BV} = %4.1f +/- %2.1f #mum' % (10000*hs_b[5].GetMean(), 10000*hs_b[5].GetRMS()/hs_b[5].GetEntries()**0.5))
 l.SetFillColor(0)
 l.Draw()
 ps.save('dbv_qcdb')

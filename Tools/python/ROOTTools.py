@@ -343,7 +343,7 @@ def compare_all_hists(ps, samples, **kwargs):
         for hist in hists:
             hist.SetLineWidth(2)
 
-            if not is2d and hist.cah_integral > 0:
+            if not is2d and hist.cah_scaling is not None and hist.cah_integral > 0:
                 hist.Scale(hist.cah_scaling/hist.cah_integral)
             if nostat:
                 hist.SetStats(0)
