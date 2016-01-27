@@ -216,9 +216,9 @@ int main(int argc, char** argv) {
       for (int itk = 0, itke = nt.ntks(); itk < itke; ++itk) {
 	const double pt = fabs(nt.p_tk_qpt->at(itk));
 	const double sigmadxy = nt.p_tk_dxybs->at(itk) / nt.p_tk_err_dxy->at(itk);
-	const int nhits = nt.p_tk_nsthit->at(itk);
 	const int npxhits = nt.p_tk_npxhit->at(itk);
 	const int nsthits = nt.p_tk_nsthit->at(itk);
+	const int nhits = npxhits + nsthits;
 	const int npxlays = nt.p_tk_npxlay->at(itk);
 	const int nstlays = nt.p_tk_nstlay->at(itk);
 	const double dz = nt.p_tk_dz->at(itk);
