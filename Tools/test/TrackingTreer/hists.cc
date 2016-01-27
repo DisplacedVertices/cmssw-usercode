@@ -53,14 +53,14 @@ int main(int argc, char** argv) {
   TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
   TH1F* h_npu = new TH1F("h_npu", ";true npu", 50, 0, 50);
   TH1F* h_npv = new TH1F("h_npv", ";number of primary vertices", 50, 0, 50);
-  TH1F* h_bsx = new TH1F("h_bsx", ";beamspot x", 4000, -1, 1);
-  TH1F* h_bsy = new TH1F("h_bsy", ";beamspot y", 4000, -1, 1);
-  TH1F* h_bsz = new TH1F("h_bsz", ";beamspot z", 800, -20, 20);
-  TH1F* h_bsdxdz = new TH1F("h_bsdxdz", ";beamspot dx/dz", 100, -1e-4, 1e-4);
+  TH1F* h_bsx = new TH1F("h_bsx", ";beamspot x", 400, -0.15, 0.15);
+  TH1F* h_bsy = new TH1F("h_bsy", ";beamspot y", 400, -0.15, 0.15);
+  TH1F* h_bsz = new TH1F("h_bsz", ";beamspot z", 800, -5, 5);
+  TH1F* h_bsdxdz = new TH1F("h_bsdxdz", ";beamspot dx/dz", 100, -1e-4, 5e-4);
   TH1F* h_bsdydz = new TH1F("h_bsdydz", ";beamspot dy/dz", 100, -1e-4, 1e-4);
-  TH1F* h_pvbsx = new TH1F("h_pvbsx", ";pvx - bsx", 800, -0.2, 0.2);
-  TH1F* h_pvbsy = new TH1F("h_pvbsy", ";pvy - bsy", 800, -0.2, 0.2); 
-  TH1F* h_pvbsz = new TH1F("h_pvbsz", ";pvz - bsz", 2000, -10, 10);
+  TH1F* h_pvbsx = new TH1F("h_pvbsx", ";pvx - bsx", 400, -0.05, 0.05);
+  TH1F* h_pvbsy = new TH1F("h_pvbsy", ";pvy - bsy", 400, -0.05, 0.05); 
+  TH1F* h_pvbsz = new TH1F("h_pvbsz", ";pvz - bsz", 500, -15, 15);
   TH2F* h_bsy_v_bsx = new TH2F("h_bsy_v_bsx", ";beamspot x;beamspot y", 4000, -1, 1, 4000, -1, 1);
   TH2F* h_pvy_v_pvx = new TH2F("h_pvy_v_pvx", ";pvx;pvy", 4000, -1, 1, 4000, -1, 1);
 
@@ -82,78 +82,78 @@ int main(int argc, char** argv) {
   TH2F* h_all_track_dxybs_v_pars[1][8];
   TH2F* h_all_track_dxyerr_v_pars[1][8];
   for (int i = 0; i < 8; ++i)
-    h_all_track_pars[i] = new TH1F(TString::Format("h_all_track_%s", par_names[i]), TString::Format(";%s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
+    h_all_track_pars[i] = new TH1F(TString::Format("h_all_track_%s", par_names[i]), TString::Format(";all track %s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
   for (int i = 0; i < 5; ++i) 
-    h_all_track_errs[i] = new TH1F(TString::Format("h_all_track_err%s", err_names[i]), TString::Format(";err%s", err_names[i]), err_nbins[i], err_lo[i], err_hi[i]);
+    h_all_track_errs[i] = new TH1F(TString::Format("h_all_track_err%s", err_names[i]), TString::Format(";all track err%s", err_names[i]), err_nbins[i], err_lo[i], err_hi[i]);
   for (int i = 0; i < 8; ++i) { 
     if (i == 2)
-      h_all_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_all_track_dxybs_v_%s", par_names[i]), TString::Format(";%s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], 4000, par_lo[3], par_hi[3]);
+      h_all_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_all_track_dxybs_v_%s", par_names[i]), TString::Format(";all track %s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], 4000, par_lo[3], par_hi[3]);
     else 
-      h_all_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_all_track_dxybs_v_%s", par_names[i]), TString::Format(";%s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], par_nbins[3], par_lo[3], par_hi[3]);
+      h_all_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_all_track_dxybs_v_%s", par_names[i]), TString::Format(";all track %s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], par_nbins[3], par_lo[3], par_hi[3]);
   }
   for (int i = 0; i < 8; ++i) 
-    h_all_track_dxyerr_v_pars[0][i] = new TH2F(TString::Format("h_all_track_dxyerr_v_%s", par_names[i]), TString::Format(";%s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
+    h_all_track_dxyerr_v_pars[0][i] = new TH2F(TString::Format("h_all_track_dxyerr_v_%s", par_names[i]), TString::Format(";all track %s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
   TH2F* h_all_track_eta_v_phi[1][1];
-  h_all_track_eta_v_phi[0][0] = new TH2F("h_all_track_eta_v_phi", ";phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
-  TH1F* h_all_track_nhits = new TH1F("h_all_track_nhits", ";number of hits",  40, 0, 40);
-  TH1F* h_all_track_npxhits = new TH1F("h_all_track_npxhits", ";number pixel hits",  12, 0, 12);
-  TH1F* h_all_track_nsthits = new TH1F("h_all_track_nsthits", ";number strip hits", 28, 0, 28);
-  TH1F* h_all_track_npxlays = new TH1F("h_all_track_npxlays", ";number pixel layers", 6, 0, 6);
-  TH1F* h_all_track_nstlays = new TH1F("h_all_track_nstlays", ";number strip layers", 20, 0, 20);
-  TH1F* h_all_track_sigmadxybs = new TH1F("h_all_track_sigmadxybs", ";sigmadxybs", 1000, -10, 10);
-  TH1F* h_all_track_charge = new TH1F("h_all_track_charge", ";charge", 4, -2, 2);
+  h_all_track_eta_v_phi[0][0] = new TH2F("h_all_track_eta_v_phi", ";all track phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
+  TH1F* h_all_track_nhits = new TH1F("h_all_track_nhits", ";all track number of hits",  40, 0, 40);
+  TH1F* h_all_track_npxhits = new TH1F("h_all_track_npxhits", ";all track number pixel hits",  12, 0, 12);
+  TH1F* h_all_track_nsthits = new TH1F("h_all_track_nsthits", ";all track number strip hits", 28, 0, 28);
+  TH1F* h_all_track_npxlays = new TH1F("h_all_track_npxlays", ";all track number pixel layers", 6, 0, 6);
+  TH1F* h_all_track_nstlays = new TH1F("h_all_track_nstlays", ";all track number strip layers", 20, 0, 20);
+  TH1F* h_all_track_sigmadxybs = new TH1F("h_all_track_sigmadxybs", ";all track sigmadxybs", 1000, -10, 10);
+  TH1F* h_all_track_charge = new TH1F("h_all_track_charge", ";all track charge", 4, -2, 2);
 
   TH1F* h_seed_track_pars[8];
   TH1F* h_seed_track_errs[5];
   TH2F* h_seed_track_dxybs_v_pars[1][8];
   TH2F* h_seed_track_dxyerr_v_pars[1][8];
   for (int i = 0; i < 8; ++i)
-    h_seed_track_pars[i] = new TH1F(TString::Format("h_seed_track_%s", par_names[i]), TString::Format(";%s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
+    h_seed_track_pars[i] = new TH1F(TString::Format("h_seed_track_%s", par_names[i]), TString::Format(";seed track %s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
   for (int i = 0; i < 5; ++i) 
-    h_seed_track_errs[i] = new TH1F(TString::Format("h_seed_track_err%s", err_names[i]), TString::Format(";err%s", par_names[i]), err_nbins[i], err_lo[i], err_hi[i]);
+    h_seed_track_errs[i] = new TH1F(TString::Format("h_seed_track_err%s", err_names[i]), TString::Format(";seed track err%s", par_names[i]), err_nbins[i], err_lo[i], err_hi[i]);
   for (int i = 0; i < 8; ++i) {
     if (i == 2)
-      h_seed_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_track_dxybs_v_%s", par_names[i]), TString::Format(";%s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], 4000, par_lo[3], par_hi[3]);
+      h_seed_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_track_dxybs_v_%s", par_names[i]), TString::Format(";seed track %s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], 4000, par_lo[3], par_hi[3]);
     else
-      h_seed_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_track_dxybs_v_%s", par_names[i]), TString::Format(";%s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], par_nbins[3], par_lo[3], par_hi[3]);
+      h_seed_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_track_dxybs_v_%s", par_names[i]), TString::Format(";seed track %s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], par_nbins[3], par_lo[3], par_hi[3]);
   }
   for (int i = 0; i < 8; ++i) 
-    h_seed_track_dxyerr_v_pars[0][i] = new TH2F(TString::Format("h_seed_track_dxyerr_v_%s", par_names[i]), TString::Format(";%s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
+    h_seed_track_dxyerr_v_pars[0][i] = new TH2F(TString::Format("h_seed_track_dxyerr_v_%s", par_names[i]), TString::Format(";seed track %s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
   TH2F* h_seed_track_eta_v_phi[1][1];
-  h_seed_track_eta_v_phi[0][0] = new TH2F("h_seed_track_eta_v_phi", ";phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
-  TH1F* h_seed_track_nhits = new TH1F("h_seed_track_nhits", ";number of hits", 40, 0, 40);
-  TH1F* h_seed_track_npxhits = new TH1F("h_seed_track_npxhits", ";number pixel hits",  12, 0, 12);
-  TH1F* h_seed_track_nsthits = new TH1F("h_seed_track_nsthits", ";number strip hits", 28, 0, 28);
-  TH1F* h_seed_track_npxlays = new TH1F("h_seed_track_npxlays", ";number pixel layers", 6, 0, 6);
-  TH1F* h_seed_track_nstlays = new TH1F("h_seed_track_nstlays", ";number strip layers", 20, 0, 20);
-  TH1F* h_seed_track_sigmadxybs = new TH1F("h_seed_track_sigmadxybs", ";sigmadxybs", 200, -10, 10);
-  TH1F* h_seed_track_charge = new TH1F("h_seed_track_charge", ";charge", 4, -2, 2);
+  h_seed_track_eta_v_phi[0][0] = new TH2F("h_seed_track_eta_v_phi", ";seed track phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
+  TH1F* h_seed_track_nhits = new TH1F("h_seed_track_nhits", ";seed track number of hits", 40, 0, 40);
+  TH1F* h_seed_track_npxhits = new TH1F("h_seed_track_npxhits", ";seed track number pixel hits",  12, 0, 12);
+  TH1F* h_seed_track_nsthits = new TH1F("h_seed_track_nsthits", ";seed track number strip hits", 28, 0, 28);
+  TH1F* h_seed_track_npxlays = new TH1F("h_seed_track_npxlays", ";seed track number pixel layers", 6, 0, 6);
+  TH1F* h_seed_track_nstlays = new TH1F("h_seed_track_nstlays", ";seed track number strip layers", 20, 0, 20);
+  TH1F* h_seed_track_sigmadxybs = new TH1F("h_seed_track_sigmadxybs", ";seed track sigmadxybs", 200, -10, 10);
+  TH1F* h_seed_track_charge = new TH1F("h_seed_track_charge", ";seed track charge", 4, -2, 2);
 
   TH1F* h_seed_nosigcut_track_pars[8];
   TH1F* h_seed_nosigcut_track_errs[8];
   TH2F* h_seed_nosigcut_track_dxybs_v_pars[1][8];
   TH2F* h_seed_nosigcut_track_dxyerr_v_pars[1][8];
   for (int i = 0; i < 8; ++i) 
-    h_seed_nosigcut_track_pars[i] = new TH1F(TString::Format("h_seed_nosigcut_track_%s", par_names[i]), TString::Format(";%s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
+    h_seed_nosigcut_track_pars[i] = new TH1F(TString::Format("h_seed_nosigcut_track_%s", par_names[i]), TString::Format(";seed track nosig %s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
   for (int i = 0; i < 5; ++i) 
-    h_seed_nosigcut_track_errs[i] = new TH1F(TString::Format("h_seed_nosigcut_track_err%s", err_names[i]), TString::Format(";err%s", par_names[i]), err_nbins[i], err_lo[i], err_hi[i]); 
+    h_seed_nosigcut_track_errs[i] = new TH1F(TString::Format("h_seed_nosigcut_track_err%s", err_names[i]), TString::Format(";seed track nosig err%s", par_names[i]), err_nbins[i], err_lo[i], err_hi[i]); 
   for (int i = 0; i < 8; ++i) {
     if (i == 2) 
-      h_seed_nosigcut_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_nosigcut_track_dxybs_v_%s", par_names[i]), TString::Format(";%s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], 4000, par_lo[3], par_hi[3]);
+      h_seed_nosigcut_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_nosigcut_track_dxybs_v_%s", par_names[i]), TString::Format(";seed track nosig %s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], 4000, par_lo[3], par_hi[3]);
     else 
-      h_seed_nosigcut_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_nosigcut_track_dxybs_v_%s", par_names[i]), TString::Format(";%s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], par_nbins[3], par_lo[3], par_hi[3]);
+      h_seed_nosigcut_track_dxybs_v_pars[0][i] = new TH2F(TString::Format("h_seed_nosigcut_track_dxybs_v_%s", par_names[i]), TString::Format(";seed track nosig %s;dxybs", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], par_nbins[3], par_lo[3], par_hi[3]);
   }
   for (int i = 0; i < 8; ++i) 
-    h_seed_nosigcut_track_dxyerr_v_pars[0][i] = new TH2F(TString::Format("h_seed_nosigcut_track_dxyerr_v_%s", par_names[i]), TString::Format(";%s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
+    h_seed_nosigcut_track_dxyerr_v_pars[0][i] = new TH2F(TString::Format("h_seed_nosigcut_track_dxyerr_v_%s", par_names[i]), TString::Format(";seed track nosig %s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
   TH2F* h_seed_nosigcut_track_eta_v_phi[1][1];
-  h_seed_nosigcut_track_eta_v_phi[0][0] = new TH2F("h_seed_nosigcut_track_eta_v_phi", ";phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
-  TH1F* h_seed_nosigcut_track_nhits = new TH1F("h_seed_nosigcut_track_nhits", ";number of hits", 40, 0, 40);
-  TH1F* h_seed_nosigcut_track_npxhits = new TH1F("h_seed_nosigcut_track_npxhits", ";number pixel hits",  12, 0, 12);
-  TH1F* h_seed_nosigcut_track_nsthits = new TH1F("h_seed_nosigcut_track_nsthits", ";number strip hits", 28, 0, 28);
-  TH1F* h_seed_nosigcut_track_npxlays = new TH1F("h_seed_nosigcut_track_npxlays", ";number pixel layers", 6, 0, 6);
-  TH1F* h_seed_nosigcut_track_nstlays = new TH1F("h_seed_nosigcut_track_nstlays", ";number strip layers", 20, 0, 20);
-  TH1F* h_seed_nosigcut_track_sigmadxybs = new TH1F("h_seed_nosigcut_track_sigmadxybs", "sigmadxybs", 1000, -10, 10);
-  TH1F* h_seed_nosigcut_track_charge = new TH1F("h_seed_nosigcut_track_charge", "charge", 4, -2, 2);
+  h_seed_nosigcut_track_eta_v_phi[0][0] = new TH2F("h_seed_nosigcut_track_eta_v_phi", ";seed track nosig phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
+  TH1F* h_seed_nosigcut_track_nhits = new TH1F("h_seed_nosigcut_track_nhits", ";seed track nosig number of hits", 40, 0, 40);
+  TH1F* h_seed_nosigcut_track_npxhits = new TH1F("h_seed_nosigcut_track_npxhits", ";seed track nosig number pixel hits",  12, 0, 12);
+  TH1F* h_seed_nosigcut_track_nsthits = new TH1F("h_seed_nosigcut_track_nsthits", ";seed track nosig number strip hits", 28, 0, 28);
+  TH1F* h_seed_nosigcut_track_npxlays = new TH1F("h_seed_nosigcut_track_npxlays", ";seed track nosig number pixel layers", 6, 0, 6);
+  TH1F* h_seed_nosigcut_track_nstlays = new TH1F("h_seed_nosigcut_track_nstlays", ";seed track nosig number strip layers", 20, 0, 20);
+  TH1F* h_seed_nosigcut_track_sigmadxybs = new TH1F("h_seed_nosigcut_track_sigmadxybs", ";seed track nosig sigmadxybs", 1000, -10, 10);
+  TH1F* h_seed_nosigcut_track_charge = new TH1F("h_seed_nosigcut_track_charge", ";seed track nosig charge", 4, -2, 2);
 
   for (const std::string& fn : fns) {
     std::cout << fn << std::endl;
