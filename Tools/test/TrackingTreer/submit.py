@@ -18,6 +18,10 @@ Queue %(njobs)i
 user = os.environ['USER']
 output_dir = raw_input('output dir? ')
 assert '/' not in output_dir
+if os.system('mkdir %s' % output_dir) != 0:
+    raise IOError('directory already existed')
+os.chdir(output_dir)
+
 eos_output_dir = '/store/user/%s/%s' % (user, output_dir)
 if os.system('mkdir %s' % output_dir) != 0 or os.system('eos root://cmseos.fnal.gov mkdir %s' % eos_output_dir) != 0:
     raise IOError('directory already existed')
