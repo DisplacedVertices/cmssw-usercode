@@ -99,13 +99,14 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
-    nt.cxx0 = v0.cxx;
-    nt.cxy0 = v0.cxy;
-    nt.cxz0 = v0.cxz;
-    nt.cyy0 = v0.cyy;
-    nt.cyz0 = v0.cyz;
-    nt.czz0 = v0.czz;
-    nt.x1 = nt.y1 = nt.z1 = nt.cxx1 = nt.cxy1 = nt.cxz1 = nt.cyy1 = nt.cyz1 = nt.czz1 = 0;
+    nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));
+    nt.drmin0 = v0.drmin();
+    nt.drmax0 = v0.drmax();
+    nt.njetsntks0 = int2uchar(v0.njets[mfv::JByNtracks]);
+    nt.bs2derr0 = v0.bs2derr;
+    nt.geo2ddist0 = v0.geo2ddist();
+    nt.x1 = nt.y1 = nt.z1 = nt.drmin1 = nt.drmax1 = nt.bs2derr1 = nt.geo2ddist1 = 0;
+    nt.ntracksptgt31 = nt.njetsntks1 = 0;
   }
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
@@ -113,8 +114,20 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.nvtx = int2uchar(int(vertices.size()));
     nt.ntk0 = int2uchar(v0.ntracks());
     nt.ntk1 = int2uchar(v1.ntracks());
-    nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z; nt.cxx0 = v0.cxx; nt.cxy0 = v0.cxy; nt.cxz0 = v0.cxz; nt.cyy0 = v0.cyy; nt.cyz0 = v0.cyz; nt.czz0 = v0.czz;
-    nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z; nt.cxx1 = v1.cxx; nt.cxy1 = v1.cxy; nt.cxz1 = v1.cxz; nt.cyy1 = v1.cyy; nt.cyz1 = v1.cyz; nt.czz1 = v1.czz;
+    nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
+    nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
+    nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));
+    nt.drmin0 = v0.drmin();
+    nt.drmax0 = v0.drmax();
+    nt.njetsntks0 = int2uchar(v0.njets[mfv::JByNtracks]);
+    nt.bs2derr0 = v0.bs2derr;
+    nt.geo2ddist0 = v0.geo2ddist();
+    nt.ntracksptgt31 = int2uchar(v1.ntracksptgt(3));
+    nt.drmin1 = v1.drmin();
+    nt.drmax1 = v1.drmax();
+    nt.njetsntks1 = int2uchar(v1.njets[mfv::JByNtracks]);
+    nt.bs2derr1 = v1.bs2derr;
+    nt.geo2ddist1 = v1.geo2ddist();
   }
   else
     return;
