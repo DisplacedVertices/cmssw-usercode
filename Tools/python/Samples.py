@@ -173,8 +173,8 @@ for x in __all__:
 
 # Extra datasets and other overrides go here.
 
-qcdht0500.aaa = euro_aaa
-qcdht1000.aaa = us_aaa + euro_aaa 
+qcdht0500.aaa = eu_aaa
+qcdht1000.aaa = us_aaa + eu_aaa 
 
 # Can't add data datasets by primary (many have the same primary).
 for sample in data_samples + auxiliary_data_samples:
