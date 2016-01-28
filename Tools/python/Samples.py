@@ -52,7 +52,7 @@ mfv_signal_samples = [
 for s in mfv_signal_samples:
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
-    s.aaa = ['T2_US_Caltech', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
+    s.aaa = us_aaa
 
 xx4j_samples = [
     MCSample('xx4j_tau01000um_M0700', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/AODSIM', 10000),
@@ -173,9 +173,8 @@ for x in __all__:
 
 # Extra datasets and other overrides go here.
 
-euroaaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Estonia', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3']
-qcdht0500.aaa = euroaaa
-qcdht1000.aaa = euroaaa # until copied to FNAL
+qcdht0500.aaa = euro_aaa
+qcdht1000.aaa = us_aaa + euro_aaa 
 
 # Can't add data datasets by primary (many have the same primary).
 for sample in data_samples + auxiliary_data_samples:
