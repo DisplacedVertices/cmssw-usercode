@@ -16,6 +16,10 @@ cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Geo2d', 'Bs2derr', '
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
 nvtx = 1 if 'one' in sys.argv else 2
+sigreg = 'sigreg' in sys.argv
+if sigreg and nvtx != 2:
+    raise ValueError("can't sigreg and 1vtx at same time")
+
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
@@ -38,8 +42,15 @@ def effs(fn):
         weight = 1.
         weighted = False
 
-    namenumall = 'mfvEventHistos%s' % ('OnlyOneVtx' if nvtx == 1 else '')
-    namenumvtx = 'mfvVertexHistos%s/h_nsv' % ('OnlyOneVtx' if nvtx == 1 else '')
+    if sigreg:
+        namenumall = 'mfvEventHistosSigReg'
+        namenumvtx = 'mfvVertexHistosSigReg/h_nsv'
+    elif nvtx == 1:
+        namenumall = 'mfvEventHistosOnlyOneVtx'
+        namenumvtx = 'mfvVertexHistosOnlyOneVtx/h_nsv'
+    else:
+        namenumall = 'mfvEventHistos'
+        namenumvtx = 'mfvVertexHistos/h_nsv'
 
     numall = get_n(namenumall)
     h = f.Get(namenumvtx)
@@ -80,12 +91,15 @@ def effs(fn):
 
 nosort = 'nosort' in sys.argv
 fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
+print_sum = False
 if not fns:
     dir = [x for x in sys.argv[1:] if os.path.isdir(x)][0]
     fns = [os.path.join(dir, fn) for fn in 'qcdht0500.root qcdht0700.root qcdht1000.root qcdht1500.root qcdht2000.root ttbar.root'.split()]
     nosort = True
+    print_sum = True
 if not nosort:
     fns.sort()
 for fn in fns:
     effs(fn)
-print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
+if print_sum:
+    print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
