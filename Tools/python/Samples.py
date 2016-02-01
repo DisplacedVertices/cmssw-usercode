@@ -243,6 +243,45 @@ _adbp3('ntuplev6p1_run1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pyth
 _adbp3('ntuplev6p1_run1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev6p1_run1-19ffa5ef5f7969e7589737cb186f585e/USER',  1961774)
 _adbp3('ntuplev6p1_run1', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/jchu-ntuplev6p1_run1-cb52242aabfec8a312dae8e5c4a58f6d/USER',          1543009)
 
+_adbp3('ntuplev6p1_2px8st', '/mfv_neu_tau00100um_M0800/tucker-ntuplev6p1_2px8st-5419a85b9694f5b9766e31273ae03ac0/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_2px8st', '/mfv_neu_tau00300um_M0800/tucker-ntuplev6p1_2px8st-104721a7c3d49e8958e075bbc0f82dd8/USER', 9891) # 1 files
+_adbp3('ntuplev6p1_2px8st', '/mfv_neu_tau01000um_M0800/tucker-ntuplev6p1_2px8st-7b2462f75901743b51dc5a156a1c1414/USER', 9898) # 1 files
+_adbp3('ntuplev6p1_2px8st', '/mfv_neu_tau10000um_M0800/tucker-ntuplev6p1_2px8st-d6dc678113d4eacc05ef859334d7b279/USER', 9850) # 1 files
+_adbp3('ntuplev6p1_2px8st', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2px8st-44c98668603f41acd8df2c97baceffb7/USER', 57153) # 792 files
+_adbp3('ntuplev6p1_2px8st', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2px8st-2ced5f0f460ad76282aafbd2182447d9/USER', 4959219) # 612 files
+_adbp3('ntuplev6p1_2px8st', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2px8st-2e5decf9946cdcbd4ec398e85a130d13/USER', 4936847) # 202 files
+_adbp3('ntuplev6p1_2px8st', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2px8st-e5a8decd62588e659854cf98be63711f/USER', 3868877) # 157 files
+_adbp3('ntuplev6p1_2px8st', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2px8st-1754936f7ba29ae78387b8974936e161/USER', 1862060) # 75 files
+_adbp3('ntuplev6p1_2px8st', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1_2px8st-34fa38c4d69f3aa7f301268841ddb427/USER', 1543009) # 1715 files
+_adbp3('ntuplev6p1_2px8st', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_2px8st-60455ee0f977ebc42c383fe60feb788e/USER', 9920) # 1 files
+_adbp3('ntuplev6p1_2px8st', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_2px8st-0cc6776f247803d487299598023b7949/USER', 9875) # 1 files
+
+_adbp3('ntuplev6p1_2pxlay8st', '/mfv_neu_tau00100um_M0800/tucker-ntuplev6p1_2pxlay8st-9fd9c122b88d8afef63ada254da69e5f/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_2pxlay8st', '/mfv_neu_tau00300um_M0800/tucker-ntuplev6p1_2pxlay8st-004d1154c69761bf41acb77e9423bc38/USER', 9891) # 1 files
+_adbp3('ntuplev6p1_2pxlay8st', '/mfv_neu_tau01000um_M0800/tucker-ntuplev6p1_2pxlay8st-8c1ed6ff65fae801e8160064765c19f1/USER', 9898) # 1 files
+_adbp3('ntuplev6p1_2pxlay8st', '/mfv_neu_tau10000um_M0800/tucker-ntuplev6p1_2pxlay8st-3ec6c7523c4504968f5798f366d9e27f/USER', 9850) # 1 files
+_adbp3('ntuplev6p1_2pxlay8st', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2pxlay8st-bcee0a156a80f338d2fbdf2bfcd5c2ef/USER', 57153) # 792 files
+_adbp3('ntuplev6p1_2pxlay8st', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2pxlay8st-1ab04998e62ade352be18fe1954e0c9e/USER', 4959219) # 612 files
+_adbp3('ntuplev6p1_2pxlay8st', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2pxlay8st-4f614163bc3145d8d326daa626913706/USER', 4936847) # 202 files
+_adbp3('ntuplev6p1_2pxlay8st', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2pxlay8st-3bc3c5e190ea0e1e5000aafb3363ffc1/USER', 3868877) # 157 files
+_adbp3('ntuplev6p1_2pxlay8st', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_2pxlay8st-afbf0bab212797f67b9d5bb5632eb527/USER', 1837210) # 74 files
+_adbp3('ntuplev6p1_2pxlay8st', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1_2pxlay8st-7a314667465b3c3e11c665c7c4a07498/USER', 1543009) # 1715 files
+_adbp3('ntuplev6p1_2pxlay8st', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_2pxlay8st-1804ca703e1d317d74776ac8d22c80aa/USER', 9920) # 1 files
+_adbp3('ntuplev6p1_2pxlay8st', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_2pxlay8st-d12cd34a24143f49dd45fa243f099d7d/USER', 9875) # 1 files
+
+_adbp3('ntuplev6p1_3pxlay8st', '/mfv_neu_tau00100um_M0800/tucker-ntuplev6p1_3pxlay8st-a56e705e161ca1cc546ec2de5e4bc7e5/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_3pxlay8st', '/mfv_neu_tau00300um_M0800/tucker-ntuplev6p1_3pxlay8st-741265543f05120d7c547a8af4788fb3/USER', 9891) # 1 files
+_adbp3('ntuplev6p1_3pxlay8st', '/mfv_neu_tau01000um_M0800/tucker-ntuplev6p1_3pxlay8st-757a9076a1c9e191ae43e4cb96a326c8/USER', 9898) # 1 files
+_adbp3('ntuplev6p1_3pxlay8st', '/mfv_neu_tau10000um_M0800/tucker-ntuplev6p1_3pxlay8st-5f2475e5cdc6facc72fcea85fddf018f/USER', 9850) # 1 files
+_adbp3('ntuplev6p1_3pxlay8st', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_3pxlay8st-4f787a160a581bd6d7422172e58ea3e5/USER', 57153) # 792 files
+_adbp3('ntuplev6p1_3pxlay8st', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_3pxlay8st-9a5a7853a08bab6dfbe4ef22f0afccce/USER', 4748341) # 586 files
+_adbp3('ntuplev6p1_3pxlay8st', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_3pxlay8st-76040ca59d66c6a8aa3ae6438d442230/USER', 4936847) # 202 files
+_adbp3('ntuplev6p1_3pxlay8st', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_3pxlay8st-a34d8084dca7f6d3e0d333a5434eda9f/USER', 3868877) # 157 files
+_adbp3('ntuplev6p1_3pxlay8st', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_3pxlay8st-8bb627af6096343168e2713a0769d18e/USER', 1862215) # 75 files
+_adbp3('ntuplev6p1_3pxlay8st', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1_3pxlay8st-fa6ff58078da3dea631e63ec4f8caea6/USER', 1543009) # 1715 files
+_adbp3('ntuplev6p1_3pxlay8st', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_3pxlay8st-25bdaac843819e947987b6d291f40452/USER', 9920) # 1 files
+_adbp3('ntuplev6p1_3pxlay8st', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_3pxlay8st-fe8fa09e436a54e0adb1006ba96aae74/USER', 9875) # 1 files
+
 # for x in $(cat a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
 ########################################################################
