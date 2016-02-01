@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+
+# py $tmain/effsprint.py one . > effsprint.one.txt ; py $tmain/effsprint.py . > effsprint.txt ; py $tmain/effsprint.py . sigreg > effsprint.sigreg.txt ; py $tmain/effsprint.py mfv*root xx4*root sigreg > effsprint.sigreg.sigs.txt ;   py $tmain/effsprint.py mfv*root xx4*root  > effsprint.sigs.txt
+# py $tmain/effsprint.py csv one . > effsprint.one.csv ; py $tmain/effsprint.py csv . > effsprint.csv ; py $tmain/effsprint.py csv . sigreg > effsprint.sigreg.csv ; py $tmain/effsprint.py csv mfv*root xx4*root sigreg > effsprint.sigreg.sigs.csv ;   py $tmain/effsprint.py csv mfv*root xx4*root  > effsprint.sigs.csv
+
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Sample import norm_from_file
@@ -109,6 +114,6 @@ for fn in fns:
     effs(fn)
 if print_sum:
     if csv:
-        print 'sum for %f/fb,%f,%f' % (ac.int_lumi, tot_sum, tot_var**0.5)
+        print 'sum for %f/pb,,,,,%f,%f' % (ac.int_lumi, tot_sum, tot_var**0.5)
     else:
-        print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
+        print 'sum for %.1f/pb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
