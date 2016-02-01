@@ -6,7 +6,7 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 set_style()
 ps = plot_saver('plots/bkgest/MinitreeV6/dbv', root=False)
-trees = '~tucker/nobackup/crab_dirs/MinitreeV6'
+trees = '~/crabdirs/MinitreeV6'
 
 def book_dbv(n):
     return ROOT.TH1F(n, '', 20, 0, 0.1)

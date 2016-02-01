@@ -11,7 +11,7 @@ def simple_cmd(cmd_fmt):
         cmd = cmd_fmt % d
         verbose = True
         if verbose:
-            print cmd
+            print '\\e[1;37m' + cmd
         code = os.system(cmd)
         if verbose:
             print 'exit code:', code

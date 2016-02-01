@@ -159,6 +159,9 @@ int main(int argc, char** argv) {
     std::cout << fn << std::endl;
     file_and_tree fat(fn.c_str());
     TrackingTree& nt = fat.nt;
+    
+    TH1F* h_sums = ((TH1F*)fat.f->Get("mcStat/h_sums"));
+    is_mc = h_sums != 0;
 
     if (is_mc)
       h_norm->Fill(0.5, ((TH1F*)fat.f->Get("mcStat/h_sums"))->GetBinContent(1));

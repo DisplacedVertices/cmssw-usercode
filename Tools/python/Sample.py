@@ -9,7 +9,7 @@ from JMTucker.Tools.general import big_warn, typed_from_argv
 ########################################################################
 
 us_aaa = [ 'T2_US_Caltech', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin' ]  # T2_US_Purdue,T2_US_Florida,T3_US_Brown,T3_US_Colorado,T3_US_NotreDame,T3_US_UMiss
-euro_aaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Estonia', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3']
+eu_aaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Estonia', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3']
 
 ########################################################################
 
@@ -333,6 +333,8 @@ def main(samples_registry):
         merge(samples, output=out_fn, norm_to=norm_to, norm_path=norm_path)
 
 __all__ = [
+    'us_aaa',
+    'eu_aaa',
     'Dataset',
     'Sample',
     'MCSample',
