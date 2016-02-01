@@ -4,6 +4,7 @@ from JMTucker.Tools.Sample import norm_from_file
 import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
+csv = 'csv' in sys.argv
 plots = 'plots' in sys.argv
 if plots:
     set_style()
@@ -58,36 +59,39 @@ def effs(fn):
 
     tot_sum += numall * weight
     tot_var += numall * weight**2
-    print '%s (w = %.3e): # ev: %10.1f  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numvtx, float(numvtx)/den)
-    if weighted:
-        print '  weighted to %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, numall*weight, numall**0.5 * weight)
+    if csv:
+        print '%s,%e,%f,%f,%f,%f,%f' % (sname, weight, den, numall, float(numall)/den, numall*weight, numall**0.5 * weight)
     else:
-        print '  number of events: %5.2f +/- %5.2f' % (numall*weight, numall**0.5 * weight)
-    if cuts:
-        nm1s_name = 'h_nm1_%s' % sname
-        h_nm1_abs = ROOT.TH1F(nm1s_name + '_abs', ';cut;abs. eff. w/o cut', len(cuts)+1, 0, len(cuts)+1)
-        h_nm1_rel = ROOT.TH1F(nm1s_name + '_rel', ';cut;n-1 eff.', len(cuts), 0, len(cuts))
-        for icut, cut in enumerate(cuts):
-            h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
-            h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-            nm1 = get_n('evtHst%sVNo%s' % (nvtx, cut))
-            nm1_abs = float(nm1)/den
-            nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
-            h_nm1_abs.SetBinContent(icut+1, nm1_abs)
-            h_nm1_rel.SetBinContent(icut+1, nm1_rel)
-            print '    remove %s cut: %5i -> %5.3e (n-1: %5.3e)' % (cut.ljust(max_cut_name_len), nm1, nm1_abs, nm1_rel)
-        h_nm1_abs.GetXaxis().SetBinLabel(len(cuts)+1, 'all')
-        h_nm1_abs.SetBinContent(len(cuts)+1, float(numall)/den)
-        def draw(h):
-            if not plots:
-                return
-            h.SetStats(0)
-            h.GetYaxis().SetRangeUser(0,1.05)
-            h.SetMarkerSize(2)
-            h.Draw('hist text')
-            ps.save(h.GetName())
-        draw(h_nm1_abs)
-        draw(h_nm1_rel)
+        print '%s (w = %.3e): # ev: %10.1f  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numvtx, float(numvtx)/den)
+        if weighted:
+            print '  weighted to %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, numall*weight, numall**0.5 * weight)
+        else:
+            print '  number of events: %5.2f +/- %5.2f' % (numall*weight, numall**0.5 * weight)
+        if cuts:
+            nm1s_name = 'h_nm1_%s' % sname
+            h_nm1_abs = ROOT.TH1F(nm1s_name + '_abs', ';cut;abs. eff. w/o cut', len(cuts)+1, 0, len(cuts)+1)
+            h_nm1_rel = ROOT.TH1F(nm1s_name + '_rel', ';cut;n-1 eff.', len(cuts), 0, len(cuts))
+            for icut, cut in enumerate(cuts):
+                h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
+                h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
+                nm1 = get_n('evtHst%sVNo%s' % (nvtx, cut))
+                nm1_abs = float(nm1)/den
+                nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
+                h_nm1_abs.SetBinContent(icut+1, nm1_abs)
+                h_nm1_rel.SetBinContent(icut+1, nm1_rel)
+                print '    remove %s cut: %5i -> %5.3e (n-1: %5.3e)' % (cut.ljust(max_cut_name_len), nm1, nm1_abs, nm1_rel)
+            h_nm1_abs.GetXaxis().SetBinLabel(len(cuts)+1, 'all')
+            h_nm1_abs.SetBinContent(len(cuts)+1, float(numall)/den)
+            def draw(h):
+                if not plots:
+                    return
+                h.SetStats(0)
+                h.GetYaxis().SetRangeUser(0,1.05)
+                h.SetMarkerSize(2)
+                h.Draw('hist text')
+                ps.save(h.GetName())
+            draw(h_nm1_abs)
+            draw(h_nm1_rel)
 
 nosort = 'nosort' in sys.argv
 fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
@@ -99,7 +103,12 @@ if not fns:
     print_sum = True
 if not nosort:
     fns.sort()
+if csv:
+    print 'sample,weight,den,num,eff,weighted,err_weighted'
 for fn in fns:
     effs(fn)
 if print_sum:
-    print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
+    if csv:
+        print 'sum for %f/fb,%f,%f' % (ac.int_lumi, tot_sum, tot_var**0.5)
+    else:
+        print 'sum for %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
