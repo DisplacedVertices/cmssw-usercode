@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import string
 import sys
 import time
 from copy import deepcopy
@@ -59,8 +60,10 @@ class CRABSubmitter:
                 batch_name = arg.replace('cs_name=', '')
                 break
 
-        if '/' in batch_name:
-            raise ValueError('/ not allowed in batch name')
+        allowed = string.ascii_letters + string.digits + '_'
+        if not set(allowed).issuperset(set(batch_name)):
+            raise ValueError('illegal batch name %s, allowed characters are letters, numbers, and _' % batch_name)
+
         self.batch_name = batch_name
         self.batch_dir = crab_dirs_root(batch_name) # JMTBAD rename -- what crab3 calls workArea
         self.existed = False
