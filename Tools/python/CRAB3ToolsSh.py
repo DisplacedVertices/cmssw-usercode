@@ -54,7 +54,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     if jobs != expected:
         print '\033[36;7m %i files found %s not what expected \033[m' % (len(jobs), crabify_list(jobs))
         missing = sorted(set(expected) - set(jobs))
-        print '\033[36;7m    %i missing: %r \033[m' % (len(missing), ' '.join(missing))
+        print '\033[36;7m    %i missing: %r \033[m' % (len(missing), ' '.join(str(j) for j in missing))
 
     l = len(files)
     if l == 0:
