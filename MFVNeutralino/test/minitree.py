@@ -22,17 +22,22 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
     samples = Samples.registry.from_argv(
-        #Samples.data_samples + \
+        Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + \
-        #[Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         Samples.xx4j_samples
         )
 
+    for sample in samples:
+        if sample.is_mc:
+            sample.events_per = 250000
+        else:
+            sample.json = 'ana_10pc.json'
+            sample.lumis_per = 200
+
     cs = CRABSubmitter('MinitreeV6',
                        dataset = 'ntuplev6p1',
-                       splitting = 'FileBased',
-                       units_per_job = 25,
-                       total_units = -1,
+                       job_control_from_sample = True,
                        aaa = True,
                        )
 
