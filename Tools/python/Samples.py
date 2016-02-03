@@ -62,6 +62,10 @@ xx4j_samples = [
 for s in xx4j_samples:
     s.xsec = 1e-3
 
+auxiliary_background_samples = [
+    MCSample('ttbaraux', '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM', 11344206, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+    ]
+
 '''
 These not updated for run2.
 
@@ -154,7 +158,7 @@ __all__ = [
     'xx4j_samples',
     'leptonic_background_samples',
 #    'ttbar_systematics_samples',
-#    'auxiliary_background_samples',
+    'auxiliary_background_samples',
     'data_samples',
     'auxiliary_data_samples',
     'registry',
