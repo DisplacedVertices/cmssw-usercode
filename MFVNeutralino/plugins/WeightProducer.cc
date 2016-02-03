@@ -22,7 +22,7 @@ private:
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
 
-  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight_prod_total, sum_gen_weight, sum_gen_weight_prod, sum_pileup_weight, sum_weight, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weightprod_total, sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_weight, n_sums };
   TH1F* h_sums;
 };
 
@@ -42,7 +42,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     TH1::SetDefaultSumw2();
     h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight_prod_total", "sum_gen_weight", "sum_gen_weight_prod", "sum_pileup_weight", "sum_weight", "n_sums" })
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weightprod_total", "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_weight", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
   }
 }
@@ -62,7 +62,7 @@ void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, c
       if (histos) {
         h_sums->Fill(sum_nevents_total, *nEvents);
         h_sums->Fill(sum_gen_weight_total, *sumWeight);
-        h_sums->Fill(sum_gen_weight_prod_total, *sumWeightProd);
+        h_sums->Fill(sum_gen_weightprod_total, *sumWeightProd);
       }
     }
     else {
@@ -72,7 +72,7 @@ void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, c
       if (histos) {
         h_sums->Fill(sum_nevents_total, -1e6);
         h_sums->Fill(sum_gen_weight_total, -1e6);
-        h_sums->Fill(sum_gen_weight_prod_total, -1e6);
+        h_sums->Fill(sum_gen_weightprod_total, -1e6);
       }
     }
   }
@@ -109,7 +109,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           printf("gen_weight: %g  weightprod: %g  ", mevent->gen_weight, mevent->gen_weightprod);
         if (histos) {
           h_sums->Fill(sum_gen_weight, mevent->gen_weight);
-          h_sums->Fill(sum_gen_weightprod, mevent->gen_weight_prod);
+          h_sums->Fill(sum_gen_weightprod, mevent->gen_weightprod);
         }
         *weight *= mevent->gen_weight;
       }
