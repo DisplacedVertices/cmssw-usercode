@@ -107,6 +107,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         assert((mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
         if (prints)
           printf("gen_weight: %g  weightprod: %g  ", mevent->gen_weight, mevent->gen_weightprod);
+        if (histos) {
+          h_sums->Fill(sum_gen_weight, mevent->gen_weight);
+          h_sums->Fill(sum_gen_weightprod, mevent->gen_weight_prod);
+        }
         *weight *= mevent->gen_weight;
       }
 
