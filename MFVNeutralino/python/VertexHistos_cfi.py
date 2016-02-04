@@ -8,4 +8,5 @@ mfvVertexHistos = cms.EDAnalyzer('MFVVertexHistos',
                                  vertex_to_jets_src = cms.InputTag(''),
                                  weight_src = cms.InputTag('mfvWeight'),
                                  do_scatterplots = cms.bool(False),
+                                 do_only_1v = cms.bool(False),
                                  )
