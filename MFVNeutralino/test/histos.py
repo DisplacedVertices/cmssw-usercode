@@ -6,7 +6,6 @@ simple = False
 process.source.fileNames = ['root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_hltrun2_M0400/patpu40/150626_223437/0000/pat_1.root']
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
-report_every(process, 1000)
 file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.Histos_cff')
