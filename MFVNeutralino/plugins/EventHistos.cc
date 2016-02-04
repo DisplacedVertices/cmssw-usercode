@@ -20,11 +20,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
-  const edm::InputTag mfv_event_src;
+  const edm::EDGetTokenT<MFVEvent> mevent_token;
+  const edm::EDGetTokenT<double> weight_token;
   const std::vector<double> force_bs;
   const edm::InputTag primary_vertex_src;
   const edm::InputTag jets_src;
-  const edm::InputTag weight_src;
 
   TH1F* h_w;
 
@@ -177,11 +177,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
 };
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
-  : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+  : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src"))
+    jets_src(cfg.getParameter<edm::InputTag>("jets_src"))
 {
   if (force_bs.size() && force_bs.size() != 3)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
@@ -364,10 +364,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
 void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mfv_event_src, mevent);
+  event.getByToken(mevent_token, mevent);
 
   edm::Handle<double> weight;
-  event.getByLabel(weight_src, weight);
+  event.getByToken(weight_token, weight);
   const double w = *weight;
   h_w->Fill(w);
 

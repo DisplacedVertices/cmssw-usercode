@@ -12,7 +12,10 @@ public:
   virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
 private:
-  const edm::InputTag mevent_src;
+  const edm::EDGetTokenT<int> nevents_token;
+  const edm::EDGetTokenT<float> sumweight_token;
+  const edm::EDGetTokenT<float> sumweightprod_token;
+  const edm::EDGetTokenT<MFVEvent> mevent_token;
   const bool enable;
   const bool prints;
   const bool histos;
@@ -27,7 +30,10 @@ private:
 };
 
 MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
-  : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
+  : nevents_token(consumes<int, edm::InLumi>(edm::InputTag("mcStat", "nEvents"))),
+    sumweight_token(consumes<float, edm::InLumi>(edm::InputTag("mcStat", "sumWeight"))),
+    sumweightprod_token(consumes<float, edm::InLumi>(edm::InputTag("mcStat", "sumWeightProd"))),
+    mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
@@ -51,9 +57,9 @@ void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, c
   if (lumi.run() == 1) { // no lumi.isRealData()
     edm::Handle<int> nEvents;
     edm::Handle<float> sumWeight, sumWeightProd;
-    lumi.getByLabel(edm::InputTag("mcStat", "nEvents"), nEvents);
-    lumi.getByLabel(edm::InputTag("mcStat", "sumWeight"), sumWeight);
-    lumi.getByLabel(edm::InputTag("mcStat", "sumWeightProd"), sumWeightProd);
+    lumi.getByToken(nevents_token, nEvents);
+    lumi.getByToken(sumweight_token, sumWeight);
+    lumi.getByToken(sumweightprod_token, sumWeightProd);
 
     if (nEvents.isValid() && sumWeight.isValid() && sumWeightProd.isValid()) {
       if (prints)
@@ -96,7 +102,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     printf("MFVWeight: r,l,e: %u, %u, %llu  ", event.id().run(), event.luminosityBlock(), event.id().event());
 
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mevent_src, mevent);
+  event.getByToken(mevent_token, mevent);
 
   std::auto_ptr<double> weight(new double);
   *weight = 1;

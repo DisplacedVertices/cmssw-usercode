@@ -27,12 +27,12 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
-  const edm::InputTag mfv_event_src;
+  const edm::EDGetTokenT<MFVEvent> mevent_token;
+  const edm::EDGetTokenT<double> weight_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_aux_token;
   const std::vector<double> force_bs;
-  const edm::InputTag vertex_aux_src;
   const edm::InputTag vertex_src;
   const edm::InputTag vertex_to_jets_src;
-  const edm::InputTag weight_src;
   const bool do_scatterplots;
   const bool do_only_1v;
 
@@ -183,12 +183,12 @@ const int MFVVertexHistos::max_ntracks = 5;
 const char* MFVVertexHistos::sv_tracks_index_names[2][MFVVertexHistos::sv_tracks_num_indices] = { { "all", "jet", "track" }, {"all", "jet", "vertex" } };
 
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
-  : mfv_event_src(cfg.getParameter<edm::InputTag>("mfv_event_src")),
+  : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    vertex_aux_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_aux_src"))),
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
-    vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     vertex_to_jets_src(cfg.getParameter<edm::InputTag>("vertex_to_jets_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     do_only_1v(cfg.getParameter<bool>("do_only_1v"))
 {
@@ -630,10 +630,10 @@ void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int isv, const Pairwi
 
 void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mfv_event_src, mevent);
+  event.getByToken(mevent_token, mevent);
 
   edm::Handle<double> weight;
-  event.getByLabel(weight_src, weight);
+  event.getByToken(weight_token, weight);
   const double w = *weight;
   h_w->Fill(w);
 
@@ -644,7 +644,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
 
   edm::Handle<MFVVertexAuxCollection> auxes;
-  event.getByLabel(vertex_aux_src, auxes);
+  event.getByToken(vertex_aux_token, auxes);
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   edm::Handle<reco::VertexCollection> vertices;

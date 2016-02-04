@@ -16,8 +16,8 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   std::string branch_name(const std::string& path_name) const;
 
-  const edm::InputTag trigger_results_src;
-  const edm::InputTag weight_src;
+  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
+  const edm::EDGetTokenT<double> weight_token;
   const bool use_weight;
   const bool deversion;
 
@@ -34,9 +34,9 @@ private:
 };
 
 SimpleTriggerResults::SimpleTriggerResults(const edm::ParameterSet& cfg) 
-  : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
-    use_weight(weight_src.label() != ""),
+  : trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    use_weight(cfg.getParameter<edm::InputTag>("weight_src").label() != ""),
     deversion(cfg.getParameter<bool>("deversion"))
 {
   edm::Service<TFileService> fs;
@@ -65,12 +65,12 @@ void SimpleTriggerResults::analyze(const edm::Event& event, const edm::EventSetu
 
   if (use_weight) {
     edm::Handle<double> weight_h;
-    event.getByLabel(weight_src, weight_h);
+    event.getByToken(weight_token, weight_h);
     weight = *weight_h;
   }
 
   edm::Handle<edm::TriggerResults> trigger_results;
-  event.getByLabel(trigger_results_src, trigger_results);
+  event.getByToken(trigger_results_token, trigger_results);
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
   const size_t npaths = trigger_names.size();
   assert(npaths <= MAX_NPATHS);
