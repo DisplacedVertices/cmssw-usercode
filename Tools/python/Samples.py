@@ -183,6 +183,8 @@ qcdht1000.aaa = us_aaa + eu_aaa
 for sample in data_samples + auxiliary_data_samples:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
+JetHT2015D.add_dataset('ntuplev6p1_76x', '/JetHT/tucker-ntuplev6p1_76x-1c7d7cc72ce161506ace63027d8999cf/USER', 7607820) # 1312 files
+
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
     if len(x) != 1:
@@ -192,6 +194,9 @@ def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
 
 _adbp = add_dataset_by_primary
 _adbp3 = partial(_adbp, dbs_inst='phys03')
+
+_adbp3('ntuplev6p1_76x', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x-94e89177941e8a89c5cdccd7b741b65c/USER', 3952153) # 160 files
+_adbp3('ntuplev6p1_76x', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x-4b20a26f36e3365f106971e9e5d3e060/USER', 1981228) # 94 files
 
 # for x in $(cat a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
