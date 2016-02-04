@@ -239,6 +239,7 @@ _adbp3('ntuplev6p1', '/mfv_neu_tau01000um_M0800/tucker-ntuplev6p1-db76f9f06698e0
 _adbp3('ntuplev6p1', '/mfv_neu_tau10000um_M0800/tucker-ntuplev6p1-c6109cb67442c3d45ff9280b602a28af/USER',                                   9850)
 _adbp3('ntuplev6p1', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1-cdf92c2c6785dbea85f17c3463e50253/USER',           9920)
 _adbp3('ntuplev6p1', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1-69285a53bb344009125bfec0704acd1b/USER',          9875)
+_adbp3('ntuplev6p1', '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1-6eb618d4409c5615fc3f959c7355e9ed/USER',            307966) # 458 files
 
 _adbp3('ntuplev6p1_run1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev6p1_run1-fe2bf0e03312d6d703f8bf44ce679fd1/USER',     57153)
 _adbp3('ntuplev6p1_run1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev6p1_run1-b1cd4b4740c8ca6524d11dc967bac4dc/USER',  4959219)
