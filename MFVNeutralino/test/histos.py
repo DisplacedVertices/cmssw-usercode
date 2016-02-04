@@ -59,6 +59,8 @@ for name, cut in nm1s:
         evt_hst_name = 'evtHst%iVNo' % nv + name
 
         vtx_hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
+        if nv == 1:
+            vtx_hst.do_only_1v = True
         vtx_hst_name = 'vtxHst%iVNo' % nv + name
 
         setattr(process, vtx_name, vtx)
