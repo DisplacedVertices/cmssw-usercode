@@ -411,7 +411,7 @@ D('sv_all_ntracksptgt3',
   )
 
 D('sv_all_ntracksptgt3_1vtx',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_ntracksptgt3',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_ntracksptgt3',
   x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
   y_title = 'vertices',
   x_range = (0, 20),
@@ -428,7 +428,7 @@ D('sv_all_tksjetsntkmass',
   )
 
 D('sv_all_tksjetsntkmass_1vtx',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_tksjetsntkmass',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_tksjetsntkmass',
   rebin = 5,
   x_title = 'tracks + associated jets\' mass (GeV)',
   y_title = 'vertices/90 GeV',
@@ -466,7 +466,7 @@ D('sv_all_maxdrmax',
   )
 
 D('sv_all_maxdrmax_1vtx',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_drmax',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_drmax',
   rebin = 6,
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
@@ -484,7 +484,7 @@ D('sv_all_mindrmax',
   )
 
 D('sv_all_mindrmax_1vtx',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_drmax',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_drmax',
   rebin = 6,
   x_title = 'max{#Delta R{track i,j}}',
   y_title = 'vertices/0.28',
@@ -524,7 +524,7 @@ D('sv_all_bsbs2ddist',
   )
 
 D('sv_all_bsbs2ddist_1vtx',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_bsbs2ddist',
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
   x_range = (0, 0.3),
@@ -571,7 +571,7 @@ D('sv_all_tkonlymass',
   )
 
 D('sv_all_tkonlymass_1vtx',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_tkonlymass',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_tkonlymass',
   x_title = 'SV tracks-only mass (GeV)',
   y_title = 'vertices/?? GeV',
   x_range = (0,250),

@@ -22,7 +22,7 @@ pPreSel = cms.Path(mfvCommon * mfvAnalysisCutsPreSel * mfvEventHistosPreSel * mf
 
 mfvAnalysisCutsOnlyOneVtx = mfvAnalysisCuts.clone(min_nvertex = 1, max_nvertex = 1)
 mfvEventHistosOnlyOneVtx = mfvEventHistos.clone()
-mfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone()
+mfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone(do_only_1v = True)
 pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnlyOneVtx * mfvVertexHistosOnlyOneVtx)
 
 mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesLoose')

@@ -34,6 +34,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   const edm::InputTag vertex_to_jets_src;
   const edm::InputTag weight_src;
   const bool do_scatterplots;
+  const bool do_only_1v;
 
   MFVVertexMVAWrap mva;
 
@@ -188,7 +189,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
     vertex_to_jets_src(cfg.getParameter<edm::InputTag>("vertex_to_jets_src")),
     weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
-    do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
+    do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
+    do_only_1v(cfg.getParameter<bool>("do_only_1v"))
 {
   if (force_bs.size() && force_bs.size() != 3)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
@@ -458,6 +460,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   }
 
   for (int j = 0; j < sv_num_indices; ++j) {
+    if (j > 0 && do_only_1v)
+      break;
+
     const char* exc = sv_index_names[j];
 
     if (j < 2) {
@@ -597,21 +602,30 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
 // JMTBAD ugh
 void MFVVertexHistos::fill_multi(TH1F** hs, const int isv, const double val, const double weight) const {
+  if (do_only_1v && isv > 0)
+    return;
   if (isv < sv_all)
     hs[isv]->Fill(val, weight);
-  hs[sv_all]->Fill(val, weight);
+  if (!do_only_1v)
+    hs[sv_all]->Fill(val, weight);
 }
 
 void MFVVertexHistos::fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const {
+  if (do_only_1v && isv > 0)
+    return;
   if (isv < sv_all)
     hs[isv]->Fill(val, val2, weight);
-  hs[sv_all]->Fill(val, val2, weight);
+  if (!do_only_1v)
+    hs[sv_all]->Fill(val, val2, weight);
 }
 
 void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const {
+  if (do_only_1v && isv > 0)
+    return;
   if (isv < sv_all)
     hs[isv].Fill(val, -1, weight);
-  hs[sv_all].Fill(val, -1, weight);
+  if (!do_only_1v)
+    hs[sv_all].Fill(val, -1, weight);
 }
 
 void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
