@@ -165,7 +165,7 @@ _adbp3('ntuplev6p1_76x', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8
 _adbp3('ntuplev6p1_76x', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x-0647f73cce69e58d0aef5913afbb0f3c/USER', 5022354) # 212 files, 213 expected
 _adbp3('ntuplev6p1_76x', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x-94e89177941e8a89c5cdccd7b741b65c/USER', 3952153) # 160 files
 _adbp3('ntuplev6p1_76x', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x-4b20a26f36e3365f106971e9e5d3e060/USER',  1981228) # 94 files
-_adbp3('ntuplev6p1_76x', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1_76x-b4b7f8e9859e632440c4bc9123183328/USER',          1319314) # 197 files, 201 expected
+_adbp3('ntuplev6p1_76x', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1_76x-b4b7f8e9859e632440c4bc9123183328/USER',          1340337) # 200 files, 201 expected
 
 # for x in $(cat a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
