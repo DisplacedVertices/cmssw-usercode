@@ -18,8 +18,8 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
-  edm::InputTag trigger_results_src;
-  const edm::InputTag weight_src;
+  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
+  const edm::EDGetTokenT<double> weight_token;
   const bool use_weight;
   std::map<std::string, unsigned> prescales;
 
@@ -32,9 +32,9 @@ private:
 };
 
 SimpleTriggerEfficiency::SimpleTriggerEfficiency(const edm::ParameterSet& cfg) 
-  : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
-    use_weight(weight_src.label() != ""),
+  : trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    use_weight(cfg.getParameter<edm::InputTag>("weight_src").label() != ""),
     triggers_pass_num(0),
     triggers_pass_den(0),
     triggers2d_pass_num(0),
@@ -75,7 +75,7 @@ bool SimpleTriggerEfficiency::pass_prescale(std::string path, double rand) const
 
 void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<edm::TriggerResults> trigger_results;
-  event.getByLabel(trigger_results_src, trigger_results);
+  event.getByToken(trigger_results_token, trigger_results);
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
   const size_t npaths = trigger_names.size();
 
@@ -118,7 +118,7 @@ void SimpleTriggerEfficiency::analyze(const edm::Event& event, const edm::EventS
   double weight = 1;
   if (use_weight) {
     edm::Handle<double> weight_h;
-    event.getByLabel(weight_src, weight_h);
+    event.getByToken(weight_token, weight_h);
     weight = *weight_h;
   }
 
