@@ -63,7 +63,17 @@ for s in xx4j_samples:
     s.xsec = 1e-3
 
 auxiliary_background_samples = [
-    MCSample('ttbaraux', '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM', 11344206, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+    MCSample('ttbaraux',  '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM', 11344206, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+    MCSample('qcdpt0170', '/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   -1, nice='QCD, 170 < #hat{p}_{T} < 300 GeV',   color=808, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt0300', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   -1, nice='QCD, 300 < #hat{p}_{T} < 470 GeV',   color=809, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt0470', '/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   -1, nice='QCD, 470 < #hat{p}_{T} < 600 GeV',   color=810, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt0600', '/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   -1, nice='QCD, 600 < #hat{p}_{T} < 800 GeV',   color=811, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt0800', '/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  -1, nice='QCD, 800 < #hat{p}_{T} < 1000 GeV',  color=812, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt1000', '/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', -1, nice='QCD, 1000 < #hat{p}_{T} < 1400 GeV', color=813, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt1400', '/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', -1, nice='QCD, 1400 < #hat{p}_{T} < 1800 GeV', color=814, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt1800', '/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', -1, nice='QCD, 1800 < #hat{p}_{T} < 2400 GeV', color=815, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt2400', '/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', -1, nice='QCD, 2400 < #hat{p}_{T} < 3200 GeV', color=815, syst_frac=0.10, xsec=888.),
+    MCSample('qcdpt3200', '/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  -1, nice='QCD, #hat{p}_{T} > 3200 GeV',        color=815, syst_frac=0.10, xsec=888.),
     ]
 
 '''
@@ -77,60 +87,6 @@ ttbar_systematics_samples = [
     MCSample('ttbarsystMatchUp',  '', 999, nice='t#bar{t} (match up)',                                       color=  4, syst_frac=0.15, xsec=888.),
     MCSample('ttbarsystScaleDn',  '', 999, nice='t#bar{t} (Q^2 down)',                                       color=  4, syst_frac=0.15, xsec=888.),
     MCSample('ttbarsystScaleUp',  '', 999, nice='t#bar{t} (Q^2 up)',                                         color=  4, syst_frac=0.15, xsec=888.),
-    ]
-
-auxiliary_background_samples = [
-    MCSample('ttbarincl',         '', 999, nice='t#bar{t}',                                                  color=  4, syst_frac=0.15, xsec=888.),
-    MCSample('tttt',              '', 999, nice='t#bar{t}t#bar{t}',                                          color= -1, syst_frac=0.20, xsec=888.),
-    MCSample('tthbb',             '', 999, nice='ttH, H #rightarrow bb',                                     color= -1, syst_frac=0.13, xsec=888.),
-    MCSample('zjetstonunuHT050',  '', 999, nice='Z #rightarrow #nu#nu + jets, 50 < H_{T} < 100 GeV',         color= -1, syst_frac=0.10, xsec=888.),
-    MCSample('zjetstonunuHT100',  '', 999, nice='Z #rightarrow #nu#nu + jets, 100 < H_{T} < 200 GeV',        color= -1, syst_frac=0.10, xsec=888.),
-    MCSample('zjetstonunuHT200',  '', 999, nice='Z #rightarrow #nu#nu + jets, 200 < H_{T} < 400 GeV',        color= -1, syst_frac=0.10, xsec=888.),
-    MCSample('zjetstonunuHT400',  '', 999, nice='Z #rightarrow #nu#nu + jets, H_{T} > 400 GeV',              color= -1, syst_frac=0.10, xsec=888.),
-    MCSample('bjetsht0100',       '', 999, nice='b jets, 100 < H_{T} < 250 GeV',                             color=801, syst_frac=0.10, xsec=888.),
-    MCSample('bjetsht0250',       '', 999, nice='b jets, 250 < H_{T} < 500 GeV',                             color=802, syst_frac=0.10, xsec=888.),
-    MCSample('bjetsht0500',       '', 999, nice='b jets, 500 < H_{T} < 1000 GeV',                            color=803, syst_frac=0.10, xsec=888.),
-    MCSample('bjetsht1000',       '', 999, nice='b jets, H_{T} > 1000 GeV',                                  color=804, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0000',         '', 999, nice='QCD, #hat{p}_{T} < 5 GeV',                                  color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0005',         '', 999, nice='QCD, 5 < #hat{p}_{T} < 15 GeV',                             color=802, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0015',         '', 999, nice='QCD, 15 < #hat{p}_{T} < 30 GeV',                            color=803, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0030',         '', 999, nice='QCD, 30 < #hat{p}_{T} < 50 GeV',                            color=804, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0050',         '', 999, nice='QCD, 50 < #hat{p}_{T} < 80 GeV',                            color=805, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0080',         '', 999, nice='QCD, 80 < #hat{p}_{T} < 120 GeV',                           color=806, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0120',         '', 999, nice='QCD, 120 < #hat{p}_{T} < 170 GeV',                          color=807, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0170',         '', 999, nice='QCD, 170 < #hat{p}_{T} < 300 GeV',                          color=808, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0300',         '', 999, nice='QCD, 300 < #hat{p}_{T} < 470 GeV',                          color=809, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0470',         '', 999, nice='QCD, 470 < #hat{p}_{T} < 600 GeV',                          color=810, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0600',         '', 999, nice='QCD, 600 < #hat{p}_{T} < 800 GeV',                          color=811, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt0800',         '', 999, nice='QCD, 800 < #hat{p}_{T} < 1000 GeV',                         color=812, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt1000',         '', 999, nice='QCD, 1000 < #hat{p}_{T} < 1400 GeV',                        color=813, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt1400',         '', 999, nice='QCD, 1400 < #hat{p}_{T} < 1800 GeV',                        color=814, syst_frac=0.10, xsec=888.),
-    MCSample('qcdpt1800',         '', 999, nice='QCD, #hat{p}_{T} > 1800 GeV',                               color=815, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0015',         '', 999, nice='QCDmu5, 15 < #hat{p}_{T} < 20 GeV',                         color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0020',         '', 999, nice='QCDmu5, 20 < #hat{p}_{T} < 30 GeV',                         color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0030',         '', 999, nice='QCDmu5, 30 < #hat{p}_{T} < 50 GeV',                         color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0050',         '', 999, nice='QCDmu5, 50 < #hat{p}_{T} < 80 GeV',                         color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0080',         '', 999, nice='QCDmu5, 80 < #hat{p}_{T} < 120 GeV',                        color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0120',         '', 999, nice='QCDmu5, 120 < #hat{p}_{T} < 170 GeV',                       color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0170',         '', 999, nice='QCDmu5, 170 < #hat{p}_{T} < 300 GeV',                       color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0300',         '', 999, nice='QCDmu5, 300 < #hat{p}_{T} < 470 GeV',                       color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0470',         '', 999, nice='QCDmu5, 470 < #hat{p}_{T} < 600 GeV',                       color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0600',         '', 999, nice='QCDmu5, 600 < #hat{p}_{T} < 800 GeV',                       color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu0800',         '', 999, nice='QCDmu5, 800 < #hat{p}_{T} < 1000 GeV',                      color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdmu1000',         '', 999, nice='QCDmu5, #hat{p}_{T} > 1000 GeV',                            color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdem020',          '', 999, nice='QCDem, < #hat{p}_{T} < GeV',                                color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdem030',          '', 999, nice='QCDem, < #hat{p}_{T} < GeV',                                color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdem080',          '', 999, nice='QCDem, < #hat{p}_{T} < GeV',                                color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdem170',          '', 999, nice='QCDem, < #hat{p}_{T} < GeV',                                color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdem250',          '', 999, nice='QCDem, < #hat{p}_{T} < GeV',                                color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdem350',          '', 999, nice='QCDem, < #hat{p}_{T} < GeV',                                color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdbce020',         '', 999, nice='QCDbce, < #hat{p}_{T} < GeV',                               color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdbce030',         '', 999, nice='QCDbce, < #hat{p}_{T} < GeV',                               color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdbce080',         '', 999, nice='QCDbce, < #hat{p}_{T} < GeV',                               color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdbce170',         '', 999, nice='QCDbce, < #hat{p}_{T} < GeV',                               color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdbce250',         '', 999, nice='QCDbce, < #hat{p}_{T} < GeV',                               color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdbce350',         '', 999, nice='QCDbce, < #hat{p}_{T} < GeV',                               color=801, syst_frac=0.10, xsec=888.),
-    MCSample('qcdb150',           '', 999, nice='QCDb, #hat{p}_{T} > 150 GeV',                               color=801, syst_frac=0.10, xsec=888.),
     ]
 '''
 
@@ -186,7 +142,7 @@ qcdht1000.aaa = us_aaa + eu_aaa
 for sample in data_samples + auxiliary_data_samples:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
-JetHT2015D.add_dataset('ntuplev6p1_76x', '/JetHT/tucker-ntuplev6p1_76x-1c7d7cc72ce161506ace63027d8999cf/USER') #, 7607820) # 1312 files
+JetHT2015D.add_dataset('ntuplev6p1_76x', '/JetHT/tucker-ntuplev6p1_76x-1c7d7cc72ce161506ace63027d8999cf/USER', dbs_inst='phys03') #, 7607820) # 1312 files
 
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
