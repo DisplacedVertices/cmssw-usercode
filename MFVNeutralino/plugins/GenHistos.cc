@@ -95,14 +95,14 @@ private:
   TH1F* h_bquarks_phi;
   TH1F* h_bquarks_energy;
 
-  TH1F* h_bquarks_absdphi[2];
-  TH1F* h_bquarks_dphi[2];
-  TH1F* h_bquarks_deta[2];
-  TH2F* h_bquarks_deta_dphi[2];
-  TH1F* h_bquarks_avgeta[2];
-  TH2F* h_bquarks_avgeta_dphi[2];
-  TH1F* h_bquarks_dR[2];
-  TH2F* h_bquarks_dR_dphi[2];
+  TH1F* h_bquarks_absdphi;
+  TH1F* h_bquarks_dphi;
+  TH1F* h_bquarks_deta;
+  TH2F* h_bquarks_deta_dphi;
+  TH1F* h_bquarks_avgeta;
+  TH2F* h_bquarks_avgeta_dphi;
+  TH1F* h_bquarks_dR;
+  TH2F* h_bquarks_dR_dphi;
 
   TH1F* h_npartons_in_acc;
 
@@ -394,16 +394,14 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_bquarks_phi = fs->make<TH1F>("h_bquarks_phi", ";b quarks #phi;arb. units", 50, -3.15, 3.15);
   h_bquarks_energy = fs->make<TH1F>("h_bquarks_energy", ";b quarks energy (GeV);arb. units", 200, 0, 2000);
 
-  for (int i = 0; i < 2; ++i) {
-    h_bquarks_absdphi[i] = fs->make<TH1F>(TString::Format("h_bquarks_status%d_absdphi", i+2), TString::Format("events with two status%d bquarks;|#Delta#phi|;Events/0.126", i+2), 25, 0, 3.15);
-    h_bquarks_dphi[i] = fs->make<TH1F>(TString::Format("h_bquarks_status%d_dphi", i+2), TString::Format("events with two status%d bquarks;#Delta#phi;Events/0.126", i+2), 50, -3.15, 3.15);
-    h_bquarks_deta[i] = fs->make<TH1F>(TString::Format("h_bquarks_status%d_deta", i+2), TString::Format("events with two status%d bquarks;#Delta#eta;Events/0.16", i+2), 50, -4, 4);
-    h_bquarks_deta_dphi[i] = fs->make<TH2F>(TString::Format("h_bquarks_status%d_deta_dphi", i+2), TString::Format("events with two status%d bquarks;#Delta#phi;#Delta#eta", i+2), 50, -3.15, 3.15, 50, -4, 4);
-    h_bquarks_avgeta[i] = fs->make<TH1F>(TString::Format("h_bquarks_status%d_avgeta", i+2), TString::Format("events with two status%d bquarks;avg #eta;Events/0.16", i+2), 50, -4, 4);
-    h_bquarks_avgeta_dphi[i] = fs->make<TH2F>(TString::Format("h_bquarks_status%d_avgeta_dphi", i+2), TString::Format("events with two status%d bquarks;#Delta#phi;avg #eta", i+2), 50, -3.15, 3.15, 50, -4, 4);
-    h_bquarks_dR[i] = fs->make<TH1F>(TString::Format("h_bquarks_status%d_dR", i+2), TString::Format("events with two status%d bquarks;#Delta R;Events/0.14", i+2), 50, 0, 7);
-    h_bquarks_dR_dphi[i] = fs->make<TH2F>(TString::Format("h_bquarks_status%d_dR_dphi", i+2), TString::Format("events with two status%d bquarks;#Delta#phi;#Delta R", i+2), 50, -3.15, 3.15, 50, 0, 7);
-  }
+  h_bquarks_absdphi = fs->make<TH1F>("h_bquarks_absdphi", "events with two bquarks;|#Delta#phi|;Events/0.126", 25, 0, 3.15);
+  h_bquarks_dphi = fs->make<TH1F>("h_bquarks_dphi", "events with two bquarks;#Delta#phi;Events/0.126", 50, -3.15, 3.15);
+  h_bquarks_deta = fs->make<TH1F>("h_bquarks_deta", "events with two bquarks;#Delta#eta;Events/0.16", 50, -4, 4);
+  h_bquarks_deta_dphi = fs->make<TH2F>("h_bquarks_deta_dphi", "events with two bquarks;#Delta#phi;#Delta#eta", 50, -3.15, 3.15, 50, -4, 4);
+  h_bquarks_avgeta = fs->make<TH1F>("h_bquarks_avgeta", "events with two bquarks;avg #eta;Events/0.16", 50, -4, 4);
+  h_bquarks_avgeta_dphi = fs->make<TH2F>("h_bquarks_avgeta_dphi", "events with two bquarks;#Delta#phi;avg #eta", 50, -3.15, 3.15, 50, -4, 4);
+  h_bquarks_dR = fs->make<TH1F>("h_bquarks_dR", "events with two bquarks;#Delta R;Events/0.14", 50, 0, 7);
+  h_bquarks_dR_dphi = fs->make<TH2F>("h_bquarks_dR_dphi", "events with two bquarks;#Delta#phi;#Delta R", 50, -3.15, 3.15, 50, 0, 7);
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
   h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 11, 0, 11);
@@ -815,38 +813,30 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int nbhadrons = 0;
   int nbquarks_wcuts = 0;
   int nbhadrons_wcuts = 0;
-  std::vector<int> ids[2];
-  std::vector<double> eta[2];
-  std::vector<double> phi[2];
-  int nbquarksstatus3 = 0;
+  std::vector<int> bquarks_ids;
+  std::vector<double> bquarks_eta;
+  std::vector<double> bquarks_phi;
   for (const reco::GenParticle& gen : *gen_particles) {
     if (abs(gen.pdgId()) == 5) {
-      bool has_b_mom = false;
-      for (size_t i = 0, ie = gen.numberOfMothers(); i < ie; ++i) {
-        if (abs(gen.mother(i)->pdgId()) == 5) {
-          has_b_mom = true;
+      bool has_b_dau = false;
+      for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
+        if (abs(gen.daughter(i)->pdgId()) == 5) {
+          has_b_dau = true;
           break;
         }
       }
-      if (!has_b_mom) {
+      if (!has_b_dau) {
         ++nbquarks;
-        if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta) {
-          ++nbquarks_wcuts;
-        }
-      }
-      for (int i = 0; i < 2; ++i) {
-        if (gen.status() == i+2) {
-          ids[i].push_back(gen.pdgId());
-          eta[i].push_back(gen.eta());
-          phi[i].push_back(gen.phi());
-        }
-      }
-      if (gen.status() == 3) {
-        ++nbquarksstatus3;
         h_bquarks_pt->Fill(gen.pt());
         h_bquarks_eta->Fill(gen.eta());
         h_bquarks_phi->Fill(gen.phi());
         h_bquarks_energy->Fill(gen.energy());
+        bquarks_ids.push_back(gen.pdgId());
+        bquarks_eta.push_back(gen.eta());
+        bquarks_phi.push_back(gen.phi());
+        if (gen.pt() > min_b_pt && fabs(gen.eta()) < max_b_eta) {
+          ++nbquarks_wcuts;
+        }
       }
     }
 
@@ -870,21 +860,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
   h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts);
   h_nbquarks->Fill(nbquarks);
-  for (int i = 0; i < 2; ++i) {
-    if (ids[i].size() == 2) {
-      double dphi = reco::deltaPhi(phi[i][0], phi[i][1]);
-      double deta = eta[i][0] - eta[i][1];
-      double avgeta = (eta[i][0] + eta[i][1]) / 2;
-      double dR = reco::deltaR(eta[i][0], phi[i][0], eta[i][1], phi[i][1]);
-      h_bquarks_absdphi[i]->Fill(fabs(dphi));
-      h_bquarks_dphi[i]->Fill(dphi);
-      h_bquarks_deta[i]->Fill(deta);
-      h_bquarks_deta_dphi[i]->Fill(dphi, deta);
-      h_bquarks_avgeta[i]->Fill(avgeta);
-      h_bquarks_avgeta_dphi[i]->Fill(dphi, avgeta);
-      h_bquarks_dR[i]->Fill(dR);
-      h_bquarks_dR_dphi[i]->Fill(dphi, dR);
-    }
+  if (bquarks_ids.size() == 2) {
+    double dphi = reco::deltaPhi(bquarks_phi[0], bquarks_phi[1]);
+    double deta = bquarks_eta[0] - bquarks_eta[1];
+    double avgeta = (bquarks_eta[0] + bquarks_eta[1]) / 2;
+    double dR = reco::deltaR(bquarks_eta[0], bquarks_phi[0], bquarks_eta[1], bquarks_phi[1]);
+    h_bquarks_absdphi->Fill(fabs(dphi));
+    h_bquarks_dphi->Fill(dphi);
+    h_bquarks_deta->Fill(deta);
+    h_bquarks_deta_dphi->Fill(dphi, deta);
+    h_bquarks_avgeta->Fill(avgeta);
+    h_bquarks_avgeta_dphi->Fill(dphi, avgeta);
+    h_bquarks_dR->Fill(dR);
+    h_bquarks_dR_dphi->Fill(dphi, dR);
   }
 
 
