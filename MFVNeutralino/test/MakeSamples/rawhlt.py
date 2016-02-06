@@ -80,6 +80,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        units_per_job = 1000,
                        total_units = -1,
                        aaa = True,
-                       publish_name='76rawhlt_10k' % ex,
+                       publish_name='76rawhlt_10k',
                        )
     cs.submit_all(samples)
