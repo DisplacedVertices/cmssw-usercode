@@ -27,7 +27,7 @@ parser.add_argument('--mc-path', default='pileup',
                     help='The name of the input MC histogram in the file given by --mc-fn (default %(default)s).')
 parser.add_argument('--tol', type=float, default=1e-9,
                     help='The tolerance for the data npu value when the MC npu value is == 0 (default %(default)g).')
-parser.add_argument('--plots', action='store_true',
+parser.add_argument('--plots', default='',
                     help='Whether to make an overlay plot of the input histograms and the derived weights.')
 
 options = parser.parse_args()
@@ -104,7 +104,7 @@ print '};'
 if options.plots:
     from JMTucker.Tools.ROOTTools import *
     set_style()
-    ps = plot_saver('plots/pileup_r2', size=(600,600))
+    ps = plot_saver(options.plots, size=(600,600))
 
     draw_in_order([(data_h_orig, 'e'), (mc_h_orig, 'e')], sames=True)
     ps.c.Update()
