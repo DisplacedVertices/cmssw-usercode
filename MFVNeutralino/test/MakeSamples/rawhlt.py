@@ -1,50 +1,43 @@
-# from configs in dbs for /QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM
-
-is_25ns = True # False for 50 ns
-
-########################################################################
+# from configs in dbs for /QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM
 
 import sys, FWCore.ParameterSet.Config as cms
+from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('HLT')
+process = cms.Process('HLT', eras.Run2_25ns)
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
 process.load('Configuration.StandardSequences.DigiToRaw_cff')
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-if is_25ns:
-    process.load('SimGeneral.MixingModule.mix_2015_25ns_Startup_PoissonOOTPU_cfi')
-    process.load('HLTrigger.Configuration.HLT_25ns14e33_v1_cff')
-else:
-    process.load('SimGeneral.MixingModule.mix_2015_50ns_Startup_PoissonOOTPU_cfi')
-    process.load('HLTrigger.Configuration.HLT_50ns_5e33_v1_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.load('SimGeneral.MixingModule.mix_2015_25ns_FallMC_matchData_PoissonOOTPU_cfi')
+process.load('HLTrigger.Configuration.HLT_25ns14e33_v4_cff')
 
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('root://cmseos.fnal.gov//store/user/tucker/mfv_neu_tau01000um_M0800/sim_10k/150729_201526/0000/sim_1.root'))
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
-process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_neu_tau01000um_M0800/sim_10k/150729_201526/0000/sim_1.root'))
+if not 'debug' in sys.argv:
+    process.options.wantSummary = False
+    process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 
 process.RAWSIMoutput = cms.OutputModule('PoolOutputModule',
-    fileName = cms.untracked.string('hlt.root'),
-    outputCommands = process.RAWSIMEventContent.outputCommands,
-    eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    splitLevel = cms.untracked.int32(0),
-)
+                                        fileName = cms.untracked.string('hlt.root'),
+                                        outputCommands = process.RAWSIMEventContent.outputCommands,
+                                        eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
+                                        splitLevel = cms.untracked.int32(0),
+                                        )
 
 import minbias
 process.mix.input.fileNames = minbias.files
 
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-tag = 'MCRUN2_74_V9'
-if not is_25ns:
-    tag += 'A'
-process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_v12', '')
 
 process.digitisation_step = cms.Path(process.pdigi)
 process.L1simulation_step = cms.Path(process.SimL1Emulator)
@@ -55,15 +48,9 @@ process.schedule = cms.Schedule(process.digitisation_step,process.L1simulation_s
 process.schedule.extend(process.HLTSchedule)
 process.schedule.extend([process.RAWSIMoutput_step])
 
-if is_25ns:
-    from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1 
-    process = customisePostLS1(process)
-else:
-    from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1_50ns
-    process = customisePostLS1_50ns(process)
+from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim 
+process = customizeHLTforFullSim(process)
 
-from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforMC 
-process = customizeHLTforMC(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Sample import anon_samples
@@ -87,13 +74,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 /mfv_neu_tau10000um_M1600/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER
 ''', dbs_inst='phys03')
 
-    ex = '25ns' if is_25ns else '50ns'
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('mfv_run2_rawhlt%s' % ex,
+    cs = CRABSubmitter('mfv_run2_76x_rawhlt',
                        splitting = 'EventAwareLumiBased',
                        units_per_job = 1000,
                        total_units = -1,
                        aaa = True,
-                       publish_name='rawhlt%s_10k' % ex,
+                       publish_name='76rawhlt_10k' % ex,
                        )
     cs.submit_all(samples)
