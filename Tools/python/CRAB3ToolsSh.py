@@ -41,11 +41,16 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     expected = crab_get_njobs(working_dir)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
-    files = [x.strip() for x in crab_command('out', '--xrootd', dir=working_dir).split('\n') if x.strip()]
-    if pattern:
-        if '/' not in pattern:
-            pattern = '*/' + pattern
-        files = fnmatch.filter(files, pattern)
+    res = crab_command('out', '--xrootd', dir=working_dir)
+
+    if 'No files to retrieve.' in res:
+        files = []
+    else:
+        files = [x.strip() for x in res.split('\n') if x.strip()]
+        if pattern:
+            if '/' not in pattern:
+                pattern = '*/' + pattern
+            files = fnmatch.filter(files, pattern)
 
     jobs = [int(f.split('_')[-1].split('.root')[0]) for f in files]
     jobs.sort()
