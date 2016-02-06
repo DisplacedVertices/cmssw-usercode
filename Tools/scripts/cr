@@ -11,10 +11,10 @@ def simple_cmd(cmd_fmt):
         cmd = cmd_fmt % d
         verbose = True
         if verbose:
-            print '\\e[1;37m' + cmd
+            print '\033[1;37m%s\033[m' % cmd
         code = os.system(cmd)
         if verbose:
-            print 'exit code:', code
+            print '\033[1;37mexit code: %s\033[m' % code
             print
 
 if 'st' in argv or 'stat' in argv:
