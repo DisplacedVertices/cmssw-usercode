@@ -30,5 +30,7 @@ elif 'res' in argv:
     simple_cmd('crab resubmit -d %s')
 elif 'rep' in argv:
     simple_cmd('crab report -d %s')
+elif 'hl' in argv:
+    os.system('mkdir haddlogs ; mv *.haddlog haddlogs/')
 else:
     raise ValueError("didn't understand command, argv was %r", argv)
