@@ -14,7 +14,8 @@ def simple_cmd(cmd_fmt):
             print '\033[1;37m%s\033[m' % cmd
         code = os.system(cmd)
         if verbose:
-            print '\033[1;37mexit code: %s\033[m' % code
+            color = 91 if code != 0 else 92
+            print '\033[1;%smexit code: %s\033[m' % (color, code)
             print
 
 if 'st' in argv or 'stat' in argv:
