@@ -100,7 +100,7 @@ def effs(fn):
 
 nosort = 'nosort' in sys.argv
 fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
-print_sum = False
+print_sum = 'sum' in sys.argv
 if not fns:
     dir = [x for x in sys.argv[1:] if os.path.isdir(x)][0]
     fns = [os.path.join(dir, fn) for fn in 'qcdht0500.root qcdht0700.root qcdht1000.root qcdht1500.root qcdht2000.root ttbar.root'.split()]
