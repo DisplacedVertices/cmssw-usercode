@@ -117,6 +117,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = Samples.registry.from_argv(
         Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + \
+        Samples.auxiliary_background_samples[:1] + \
+        Samples.qcdpt_samples + \
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         Samples.xx4j_samples
         )
