@@ -229,15 +229,19 @@ class CRABSubmitter:
 
         cleanup = [] # not so much to clean up any more
 
-        sample.set_curr_dataset(self.dataset)
+        result = {'stdout': 'Not run'}
+
+        try:
+            sample.set_curr_dataset(self.dataset)
+        except KeyError:
+            print "\033[1m warning: \033[0m sample %s not submitted, doesn't have dataset %s" % (sample.name, self.dataset)
+            return result
 
         cfg_fn, cfg = self.cfg(sample)
         pset_orig_fn, pset_fn, pset = self.pset(sample)
 
         assert pset_fn.endswith('.py')
         cleanup.append(pset_fn + 'c')
-
-        result = {'stdout': 'Not run'}
 
         if not self.testing:
             working_dir = os.path.join(cfg.General.workArea, 'crab_' + cfg.General.requestName)
