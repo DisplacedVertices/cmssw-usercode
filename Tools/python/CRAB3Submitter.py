@@ -44,6 +44,10 @@ class CRABSubmitter:
                  cfg_modifier_strings = [],
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
+                 input_files = None,
+                 script_exe = None,
+                 output_files = None,
+                 extra_output_files = None,
                  transfer_logs = True,
                  transfer_outputs = True,
                  dataset = 'main',
@@ -99,8 +103,27 @@ class CRABSubmitter:
         self.cfg_template.General.transferLogs = transfer_logs
         self.cfg_template.General.transferOutputs = transfer_outputs
         self.cfg_template.General.workArea = self.batch_dir
-        self.cfg_template.JobType.pluginName = 'Analysis'
-        # JMTBAD PrivateMC -- also needs cfg.Data.primaryDataset, splitting EventBased, unitsPerJob, totalUnits
+        self.cfg_template.JobType.pluginName = 'Analysis' # JMTBAD PrivateMC -- also needs cfg.Data.primaryDataset, splitting EventBased, unitsPerJob, totalUnits
+
+        if input_files:
+            if type(input_files) == str:
+                input_files = [input_files]
+            self.cfg_template.JobType.inputFiles = input_files
+
+        if script_exe:
+            self.cfg_template.JobType.scriptExe = script_exe
+
+        if output_files and extra_output_files:
+            raise ValueError("can't have output_files and extra_output_files at the same time")
+        elif output_files:
+            if type(output_files) == str:
+                output_files = [output_files]
+            self.cfg_template.JobType.disableAutomaticOutputCollection = True
+            self.cfg_template.JobType.outputFiles = output_files
+        elif extra_output_files:
+            if type(extra_output_files) == str:
+                extra_output_files = [extra_output_files]
+            self.cfg_template.JobType.outputFiles = extra_output_files
 
         self.dataset = dataset
         self.cfg_template.Data.inputDataset = 'SETLATER'
