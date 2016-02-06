@@ -73,6 +73,10 @@ struct MFVEvent {
   uchar gen_decay_type[2];
   uchar gen_partons_in_acc;
   uchar gen_flavor_code;
+  std::vector<float> gen_bquark_pt;
+  std::vector<float> gen_bquark_eta;
+  std::vector<float> gen_bquark_phi;
+  std::vector<float> gen_bquark_energy;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);

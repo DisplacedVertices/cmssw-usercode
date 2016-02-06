@@ -8,7 +8,7 @@ prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
 event_filter = False # not keep_all
-version = 'v6p1'
+version = 'v7'
 batch_name = 'Ntuple' + version.upper()
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
@@ -150,4 +150,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        publish_name = batch_name.lower(),
                        )
 
-    cs.submit_all(samples)
+    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800])
