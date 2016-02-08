@@ -446,6 +446,7 @@ def data_mc_comparison(name,
                        data_marker_style = 20,
                        data_marker_size = 1.3,
                        data_draw_cmd = 'pe',
+                       res_divide_opt = 'n pois',
                        res_line_width = 2,
                        res_line_color = ROOT.kBlue+3,
                        res_y_title = 'data/MC',
@@ -727,6 +728,9 @@ def data_mc_comparison(name,
 
     if cut_line is not None:
         cut_line_coords, cut_line_color, cut_line_width, cut_line_style = cut_line
+        if type(cut_line_coords) in (float, int):
+            cut_line_coords = (cut_line_coords, stack.GetMinimum(),
+                               cut_line_coords, stack.GetMaximum())
         cut_line = ROOT.TLine(*cut_line_coords)
         cut_line.SetLineColor(cut_line_color)
         cut_line.SetLineWidth(cut_line_width)
@@ -763,7 +767,7 @@ def data_mc_comparison(name,
         ratio_pad.cd(0)
 
         #res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True) # JMTBAD way underestimates uncert in sum_background with weights, scales...
-        res_g = ROOT.TGraphAsymmErrors(data_sample.hist, sum_background, 'b(1,1) mode pois')
+        res_g = ROOT.TGraphAsymmErrors(data_sample.hist, sum_background, res_divide_opt)
         res_g.SetMarkerStyle(20)
         res_g.SetMarkerSize(0)
         res_g.SetLineWidth(res_line_width)
@@ -787,7 +791,7 @@ def data_mc_comparison(name,
             old_opt_fit = ROOT.gStyle.GetOptFit()
             ROOT.gStyle.SetOptFit(0)
             fit_opt = 's ex0'
-            fit_opt += ' q' if not verbose else ' v'
+            fit_opt += ' v' if 'fit' in verbose else ' q'
             fit_res = res_g.Fit('pol0', fit_opt)
             ratio_pad.Update()
             fit_tpt = ROOT.TPaveText(0.12, 0.25, 0.4, 0.27, 'ndc')
