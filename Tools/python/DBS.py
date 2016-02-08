@@ -35,7 +35,7 @@ class das_query:
                 if x is not None:
                     ret.append(x)
         if not ret:
-            raise RuntimeError('query %r (ana01: %s ana02: %s ana03: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.ana01, self.ana02, self.ana03, full_cmd, ''.join(cmdout) if cmdout else cmdout))
+            raise RuntimeError('query %r (instance: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.instance, full_cmd, ''.join(cmdout) if cmdout else cmdout))
         return ret
 
 def files_in_dataset(dataset, instance='global'):
