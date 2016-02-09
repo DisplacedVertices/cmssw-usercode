@@ -149,11 +149,14 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.tk_nstlay.push_back(tk.hitPattern().stripLayersWithMeasurement());
     nt.tk_npxlay.push_back(tk.hitPattern().pixelLayersWithMeasurement());
 
-    NumExtents ex = tracker_extents.numExtentInRAndZ(tk.hitPattern());
+    NumExtents ex    = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false);
+    NumExtents ex_px = tracker_extents.numExtentInRAndZ(tk.hitPattern(), true);
     nt.tk_minhit(ex.min_r < 2e9 ? ex.min_r : 0,
                  ex.min_z < 2e9 ? ex.min_z : 0);
     nt.tk_maxhit(ex.max_r > -2e9 ? ex.max_r : 0,
                  ex.max_z > -2e9 ? ex.max_z : 0);
+    nt.tk_maxpxhit(ex_px.max_r > -2e9 ? ex_px.max_r : 0,
+                   ex_px.max_z > -2e9 ? ex_px.max_z : 0);
   }
 
   tree->Fill();

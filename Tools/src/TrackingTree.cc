@@ -5,7 +5,7 @@
 TrackingTree::TrackingTree() {
   clear();
   p_pv_x = p_pv_y = p_pv_z = p_pv_sumpt2 = p_pv_ntracks = p_pv_chi2dof = p_pv_cxx = p_pv_cxy = p_pv_cxz = p_pv_cyy = p_pv_cyz = p_pv_czz = p_tk_chi2dof = p_tk_qpt = p_tk_eta = p_tk_phi = p_tk_dxy = p_tk_dxybs = p_tk_dxypv = p_tk_dz = p_tk_dzpv = p_tk_vx = p_tk_vy = p_tk_vz = p_tk_err_qpt = p_tk_err_eta = p_tk_err_phi = p_tk_err_dxy = p_tk_err_dz = 0;
-  p_tk_nsthit = p_tk_npxhit = p_tk_nstlay = p_tk_npxlay = p_tk_minhit_ = p_tk_maxhit_ = 0;
+  p_tk_nsthit = p_tk_npxhit = p_tk_nstlay = p_tk_npxlay = p_tk_minhit_ = p_tk_maxhit_ = p_tk_maxpxhit_ = 0;
 }
 
 void TrackingTree::clear() {
@@ -50,6 +50,8 @@ void TrackingTree::clear() {
   tk_nstlay.clear();
   tk_npxlay.clear();
   tk_minhit_.clear();
+  tk_maxhit_.clear();
+  tk_maxpxhit_.clear();
 }
 
 void TrackingTree::tk_minhit(int min_r, int min_z) {
@@ -78,6 +80,20 @@ int TrackingTree::tk_max_r(int i) {
 
 int TrackingTree::tk_max_z(int i) {
   return (*p_tk_maxhit_)[i] >> 4;
+}
+
+void TrackingTree::tk_maxpxhit(int max_r, int max_z) {
+  assert(max_r >= 0 && max_r <= 15);
+  assert(max_z >= 0 && max_z <= 15);
+  tk_maxpxhit_.push_back((uchar(max_z) << 4) | uchar(max_r));
+}
+
+int TrackingTree::tk_maxpx_r(int i) {
+  return (*p_tk_maxpxhit_)[i] & 0xF;
+}
+
+int TrackingTree::tk_maxpx_z(int i) {
+  return (*p_tk_maxpxhit_)[i] >> 4;
 }
 
 void TrackingTree::write_to_tree(TTree* tree) {
@@ -137,6 +153,7 @@ void TrackingTree::write_to_tree(TTree* tree) {
   tree->Branch("tk_npxlay", &tk_npxlay);
   tree->Branch("tk_minhit", &tk_minhit_);
   tree->Branch("tk_maxhit", &tk_maxhit_);
+  tree->Branch("tk_maxpxhit", &tk_maxpxhit_);
 }
 
 void TrackingTree::read_from_tree(TTree* tree) {
@@ -193,4 +210,5 @@ void TrackingTree::read_from_tree(TTree* tree) {
   tree->SetBranchAddress("tk_npxlay", &p_tk_npxlay);
   tree->SetBranchAddress("tk_minhit", &p_tk_minhit_);
   tree->SetBranchAddress("tk_maxhit", &p_tk_maxhit_);
+  tree->SetBranchAddress("tk_maxpxhit", &p_tk_maxpxhit_);
 }
