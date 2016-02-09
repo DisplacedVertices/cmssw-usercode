@@ -1041,7 +1041,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, thepv);
         auto d3d_isv = IPTools::absoluteImpactParameter3D(ttk, rv);
 
-        NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern());
+        NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern(), false);
 	SpatialExtents se2 = tracker_extents.extentInRAndZ(tracks[itk].hitPattern(),tracks[itk].hitPattern().numberOfValidPixelHits() != 0);
 
         double trackjetdr = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
@@ -1231,7 +1231,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
                 auto dxy_isv = IPTools::absoluteTransverseImpactParameter(ttk, rv);
                 auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, thepv);
                 auto d3d_isv = IPTools::absoluteImpactParameter3D(ttk, rv);
-                NumExtents se = tracker_extents.numExtentInRAndZ(tk->hitPattern());
+                NumExtents se = tracker_extents.numExtentInRAndZ(tk->hitPattern(), false);
 		SpatialExtents se2 = tracker_extents.extentInRAndZ(tk->hitPattern(),tk->hitPattern().numberOfValidPixelHits() != 0);
 
                 for (int i = 0; i < sv_jet_tracks_num_indices; ++i) {
