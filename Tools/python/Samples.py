@@ -244,8 +244,9 @@ _adbp3('ntuplev6p1_76x', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythi
 _adbp3('ntuplev6p1_76x', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x-4b20a26f36e3365f106971e9e5d3e060/USER',  1981228) # 94 files
 _adbp3('ntuplev6p1_76x', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev6p1_76x-b4b7f8e9859e632440c4bc9123183328/USER',          1340337) # 200 files, 201 expected
 
+_adbp3('ntuplev6p1_76x', '/QCD_Pt_120to170_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-bf3f6923c6a1e33e227a5c6a07647fcf/USER',       204) # 35 files
 _adbp3('ntuplev6p1_76x', '/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-b6026869a1234f510d99821d8da7b55b/USER',     53610) # 279 files
-_adbp3('ntuplev6p1_76x', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-585b6d260795956202de6e6d98e8f50f/USER',   1742101) # 240 files
+_adbp3('ntuplev6p1_76x', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-d894803de72f343a392766f8f329a33b/USER',   1742101) # 70 files
 _adbp3('ntuplev6p1_76x', '/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-b284078fe3d600f740a3bb6af56f20dc/USER',   3927467) # 160 files
 _adbp3('ntuplev6p1_76x', '/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-588c92d893fa2fa28d749325ab76bcc6/USER',   3977145) # 161 files
 _adbp3('ntuplev6p1_76x', '/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-8658e6346d529fdf34bd17605838b711/USER',  3923304) # 158 files, 160 expected
@@ -254,6 +255,7 @@ _adbp3('ntuplev6p1_76x', '/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/tucker-n
 _adbp3('ntuplev6p1_76x', '/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-e1e737c071adad39805cb3f163d11d80/USER',  393760) # 16 files
 _adbp3('ntuplev6p1_76x', '/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-0cc79cc1e23b35a8c9c6b6251a8a2faa/USER',  398452) # 16 files
 _adbp3('ntuplev6p1_76x', '/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-ae2b65845f48e117e8b46ae58aaf58f7/USER',   391108) # 16 files
+_adbp3('ntuplev6p1_76x', '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x-0b35bc583e60a30fc1c2ec30c0581edb/USER', 268572) # 52 files
 
 _adbp3('ntuplev6p1_76x', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-f9b4097bb7a54c8103604b804ce7cdb7/USER',         92) # 6 files
 _adbp3('ntuplev6p1_76x', '/XXTo4J_M-50_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_76x-c90e1465c2b623fea09aecc3af07704a/USER',        85) # 2 files
