@@ -140,7 +140,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
       if (is_chadron(&gen))
 	saw_c = true;
+    }
+    if (saw_c && mevent->gen_flavor_code == 0)
+      mevent->gen_flavor_code = 1;
 
+    for (const reco::GenParticle& gen : *gen_particles) {
       if (abs(gen.pdgId()) == 5) {
         bool has_b_dau = false;
         for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
@@ -157,8 +161,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         }
       }
     }
-    if (saw_c && mevent->gen_flavor_code == 0)
-      mevent->gen_flavor_code = 1;
 
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
