@@ -42,7 +42,7 @@ void TrackerSpaceExtents::print() const {
 
 // JMTBAD reduce code duplication
 
-NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp) const {
+NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp, bool pixel_only) const {
   NumExtents ret;
 
   for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
@@ -58,21 +58,24 @@ NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp) con
 
     uint32_t sub    = reco::HitPattern::getSubStructure   (hit);
     uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
-        
+    
+    if (sub != PixelSubdetector::PixelBarrel && sub != PixelSubdetector::PixelEndcap && sub != StripSubdetector::TIB && sub != StripSubdetector::TOB && sub != StripSubdetector::TID && sub != StripSubdetector::TEC)
+      throw cms::Exception("TrackerSpaceExtents") << "unknown sub " << sub << " with subsub " << subsub;
+
     if (sub == PixelSubdetector::PixelBarrel)
       ret.update_r(subsub);
-    else if (sub == StripSubdetector::TIB)
-      ret.update_r(3 + subsub);
-    else if (sub == StripSubdetector::TOB)
-      ret.update_r(7 + subsub);
     else if (sub == PixelSubdetector::PixelEndcap)
       ret.update_z(subsub);
-    else if (sub == StripSubdetector::TID)
-      ret.update_z(2 + subsub);
-    else if (sub == StripSubdetector::TEC)
-      ret.update_z(5 + subsub);
-    else
-      throw cms::Exception("TrackerSpaceExtents") << "unknown sub " << sub << " with subsub " << subsub;
+    else if (!pixel_only) {
+      if (sub == StripSubdetector::TIB)
+        ret.update_r(3 + subsub);
+      else if (sub == StripSubdetector::TOB)
+        ret.update_r(7 + subsub);
+      else if (sub == StripSubdetector::TID)
+        ret.update_z(2 + subsub);
+      else if (sub == StripSubdetector::TEC)
+        ret.update_z(5 + subsub);
+    }
   }
 
   return ret;
