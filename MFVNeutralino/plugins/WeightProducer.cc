@@ -21,6 +21,7 @@ private:
   const bool histos;
 
   const bool weight_gen;
+  const bool weight_gen_sign_only;
   const bool weight_pileup;
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
@@ -38,6 +39,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
     weight_gen(cfg.getParameter<bool>("weight_gen")),
+    weight_gen_sign_only(cfg.getParameter<bool>("weight_gen_sign_only")),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
@@ -117,7 +119,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           h_sums->Fill(sum_gen_weight, mevent->gen_weight);
           h_sums->Fill(sum_gen_weightprod, mevent->gen_weightprod);
         }
-        *weight *= mevent->gen_weight;
+        if (weight_gen_sign_only && mevent->gen_weight < 0)
+          *weight *= -1;
+        else
+          *weight *= mevent->gen_weight;
       }
 
       if (weight_pileup) {
