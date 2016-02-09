@@ -152,6 +152,8 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     NumExtents ex = tracker_extents.numExtentInRAndZ(tk.hitPattern());
     nt.tk_minhit(ex.min_r < 2e9 ? ex.min_r : 0,
                  ex.min_z < 2e9 ? ex.min_z : 0);
+    nt.tk_maxhit(ex.max_r > -2e9 ? ex.max_r : 0,
+                 ex.max_z > -2e9 ? ex.max_z : 0);
   }
 
   tree->Fill();

@@ -7,9 +7,9 @@ silence_messages(process, ['HLTConfigData'])
 geometry_etc(process, '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15')
 #report_every(process, 1)
 #process.options.wantSummary = True
-#process.maxEvents.input = 1000
+process.maxEvents.input = 100
 
-process.source.fileNames = ['/store/user/tucker/F47E7F59-8A29-E511-8667-002590A52B4A.root']
+process.source.fileNames = ['/store/mc/RunIIFall15DR76/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/AODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/40000/0874DD13-DDA0-E511-AC76-001E67A3FD26.root']
 if not is_mc:
     process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/16Dec2015-v1/00000/0A2C6696-AEAF-E511-8551-0026189438EB.root']
 
@@ -40,8 +40,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
 
-    samples = Samples.registry.from_argv(Samples.data_samples + Samples.qcd_samples)
-    samples = Samples.data_samples + [Samples.qcdht2000]
+    samples = Samples.registry.from_argv(Samples.data_samples + Samples.qcdpt_samples)
 
     for s in samples:
         if s.is_mc:
@@ -64,7 +63,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    cs = CRABSubmitter('TrackTreeV2_76x',
+    cs = CRABSubmitter('TrackTreeV3',
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        )
