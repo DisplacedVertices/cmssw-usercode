@@ -1,4 +1,5 @@
 #include "TH1.h"
+#include "TFile.h"
 #include "TTree.h"
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
@@ -21,6 +22,13 @@ int main(int argc, char** argv) {
   file_and_tree fat(in_fn, out_fn);
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
+
+  TH1F* h_sums = ((TH1F*)fat.f->Get("mcStat/h_sums"));
+  bool is_mc = h_sums != 0;
+
+  TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
+  if (is_mc)
+    h_norm->Fill(0.5, ((TH1F*)fat.f->Get("mcStat/h_sums"))->GetBinContent(1));
 
   TH1F* h_weight = new TH1F("h_weight", ";weight;events/0.01", 200, 0, 2);
   TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
@@ -168,10 +176,10 @@ int main(int argc, char** argv) {
         continue;
 
       const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
-      const bool pass_ntracksptgt3 = nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
+      const bool pass_ntracksptgt3 = true; // nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
       const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
-      const bool pass_drmax        = nt.p_vtxs_drmax       ->at(ivtx) < 4;
-      const bool pass_mindrmax     = nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
+      const bool pass_drmax        = true; // nt.p_vtxs_drmax       ->at(ivtx) < 4;
+      const bool pass_mindrmax     = true; // nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
       const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
       const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
 
