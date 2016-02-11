@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
   TH1F* h_seed_track_nstlays = new TH1F("h_seed_track_nstlays", ";seed track number strip layers", 20, 0, 20);
   TH1F* h_seed_track_sigmadxybs = new TH1F("h_seed_track_sigmadxybs", ";seed track sigmadxybs", 200, -10, 10);
   TH1F* h_seed_track_charge = new TH1F("h_seed_track_charge", ";seed track charge", 4, -2, 2);
-  TH1F* h_seed_track_min_r = new TH1F("h_seed_track_min_r", ";seed track min r", 16, 0, 20);
+  TH1F* h_seed_track_min_r = new TH1F("h_seed_track_min_r", ";seed track min r", 16, 0, 16);
   TH1F* h_seed_track_min_z = new TH1F("h_seed_track_min_z", ";seed track min z", 16, 0, 16);
   TH1F* h_seed_track_max_r = new TH1F("h_seed_track_max_r", ";seed track max r", 16, 0, 16);
   TH1F* h_seed_track_max_z = new TH1F("h_seed_track_max_z", ";seed track max z", 16, 0, 16);
@@ -160,7 +160,7 @@ int main(int argc, char** argv) {
   TH1F* h_seed_nosigcut_track_nstlays = new TH1F("h_seed_nosigcut_track_nstlays", ";seed nosig track number strip layers", 20, 0, 20);
   TH1F* h_seed_nosigcut_track_sigmadxybs = new TH1F("h_seed_nosigcut_track_sigmadxybs", ";seed nosig track sigmadxybs", 1000, -10, 10);
   TH1F* h_seed_nosigcut_track_charge = new TH1F("h_seed_nosigcut_track_charge", ";seed nosig track charge", 4, -2, 2);
-  TH1F* h_seed_nosigcut_track_min_r = new TH1F("h_seed_nosigcut_track_min_r", ";seed nosig track min r", 16, 0, 20);
+  TH1F* h_seed_nosigcut_track_min_r = new TH1F("h_seed_nosigcut_track_min_r", ";seed nosig track min r", 16, 0, 16);
   TH1F* h_seed_nosigcut_track_min_z = new TH1F("h_seed_nosigcut_track_min_z", ";seed nosig track min z", 16, 0, 16);
   TH1F* h_seed_nosigcut_track_max_r = new TH1F("h_seed_nosigcut_track_max_r", ";seed nosig track max r", 16, 0, 16);
   TH1F* h_seed_nosigcut_track_max_z = new TH1F("h_seed_nosigcut_track_max_z", ";seed nosig track max z", 16, 0, 16);
