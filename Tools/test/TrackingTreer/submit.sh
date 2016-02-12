@@ -11,8 +11,8 @@ out_dir=$3
 echo batch $batch job $job
 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-cmsrel CMSSW_7_4_15_patch1 2>&1 > /dev/null
-cd CMSSW_7_4_15_patch1/src
+cmsrel CMSSW_7_6_3_patch2 2>&1 > /dev/null
+cd CMSSW_7_6_3_patch2/src
 cmsenv
 cd $wd
 
