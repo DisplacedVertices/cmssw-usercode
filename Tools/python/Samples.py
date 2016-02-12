@@ -287,12 +287,16 @@ _adbp3('ntuplev6p1_3pxlay8st', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/
 _adbp3('ntuplev6p1_3pxlay8st', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_3pxlay8st-25bdaac843819e947987b6d291f40452/USER', 9920) # 1 files
 _adbp3('ntuplev6p1_3pxlay8st', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev6p1_3pxlay8st-fe8fa09e436a54e0adb1006ba96aae74/USER', 9875) # 1 files
 
-_adbp3('ntuplev7', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-3c3bee86039cbc8b1ecbed8a744a42ed/USER',     57153)
-_adbp3('ntuplev7', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-5232feb2fa1e0dc58b3d7d2f2bd59f1d/USER',  4959219)
-_adbp3('ntuplev7', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-6b0a04f94e15ac4b154b0fa40d267d5c/USER', 4936847)
-_adbp3('ntuplev7', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-8289c789038b1f74635931dfce372d50/USER', 3868877)
-_adbp3('ntuplev7', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-da9ac120f808549e453f1c640a826524/USER',  1961774)
-_adbp3('ntuplev7', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/jchu-ntuplev7-45e9cd18d15f50bfe91e1a096e90e611/USER',          1543009)
+_adbp3('ntuplev7', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-08c3f417aa44215ab82788132073bbc0/USER',     57153)
+_adbp3('ntuplev7', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-11997be4a5973d0d7791fffb20720812/USER',  4951126) # 611 files
+_adbp3('ntuplev7', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-3f3aad2663e6c051195ef2430a762d39/USER', 4936847)
+_adbp3('ntuplev7', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-a731819af177df4b8e8e48cda220af27/USER', 3868877)
+_adbp3('ntuplev7', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7-7858d5eda20f1a335c76c03b4096474b/USER',  1961774)
+_adbp3('ntuplev7', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/jchu-ntuplev7-6a2d50ff39f5d524bcdde7c6d873d299/USER',          1543009)
+_adbp3('ntuplev7', '/mfv_neu_tau00100um_M0800/jchu-ntuplev7-a733782357daa08edff23d6f047c4200/USER',                                   9890)
+_adbp3('ntuplev7', '/mfv_neu_tau00300um_M0800/jchu-ntuplev7-c51a97e56a1ee2948428b9b05d1f5f49/USER',                                   9891)
+_adbp3('ntuplev7', '/mfv_neu_tau01000um_M0800/jchu-ntuplev7-e0d273e70cc86dcddf33d635f67a685e/USER',                                   9898)
+_adbp3('ntuplev7', '/mfv_neu_tau10000um_M0800/jchu-ntuplev7-085ed528a7ee0b7689b93e2b68861a7b/USER',                                   9850)
 
 # for x in $(cat a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 

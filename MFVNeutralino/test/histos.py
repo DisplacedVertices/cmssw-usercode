@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 simple = False
 
-process.source.fileNames = ['root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_hltrun2_M0400/patpu40/150626_223437/0000/pat_1.root']
+process.source.fileNames = ['/store/user/jchu/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev7/160209_224719/0000/ntuple_1.root']
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
@@ -92,9 +92,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             sample.json = 'ana_10pc.json'
             sample.lumis_per = 200
 
-    cs = CRABSubmitter('HistosV6p1',
-                       dataset = 'ntuplev6p1',
+    cs = CRABSubmitter('HistosV7',
+                       dataset = 'ntuplev7',
                        job_control_from_sample = True,
                        aaa = True, # stored at FNAL, easy to run on T2_USes
                        )
-    cs.submit_all(samples)
+    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800])
