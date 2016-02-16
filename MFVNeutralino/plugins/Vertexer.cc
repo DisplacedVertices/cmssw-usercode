@@ -139,7 +139,8 @@ private:
   const int min_all_track_npxhits;
   const int min_all_track_npxlayers;
   const double max_all_track_dxyerr;
-  const double max_all_track_d3derr;
+  const double max_all_track_dxyipverr;
+  const double max_all_track_d3dipverr;
   const double min_seed_track_pt;
   const double min_seed_track_dxy;
   const double min_seed_track_sigmadxy;
@@ -148,7 +149,8 @@ private:
   const int min_seed_track_npxhits;
   const int min_seed_track_npxlayers;
   const double max_seed_track_dxyerr;
-  const double max_seed_track_d3derr;
+  const double max_seed_track_dxyipverr;
+  const double max_seed_track_d3dipverr;
   const bool seed_by_sums;
   const double min_seed_sum_pt;
   const double min_seed_sum_dxy;
@@ -263,7 +265,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_all_track_npxhits(cfg.getParameter<int>("min_all_track_npxhits")),
     min_all_track_npxlayers(cfg.getParameter<int>("min_all_track_npxlayers")),
     max_all_track_dxyerr(cfg.getParameter<double>("max_all_track_dxyerr")),
-    max_all_track_d3derr(cfg.getParameter<double>("max_all_track_d3derr")),
+    max_all_track_dxyipverr(cfg.getParameter<double>("max_all_track_dxyipverr")),
+    max_all_track_d3dipverr(cfg.getParameter<double>("max_all_track_d3dipverr")),
     min_seed_track_pt(cfg.getParameter<double>("min_seed_track_pt")),
     min_seed_track_dxy(cfg.getParameter<double>("min_seed_track_dxy")),
     min_seed_track_sigmadxy(cfg.getParameter<double>("min_seed_track_sigmadxy")),
@@ -272,7 +275,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     min_seed_track_npxhits(cfg.getParameter<int>("min_seed_track_npxhits")),
     min_seed_track_npxlayers(cfg.getParameter<int>("min_seed_track_npxlayers")),
     max_seed_track_dxyerr(cfg.getParameter<double>("max_seed_track_dxyerr")),
-    max_seed_track_d3derr(cfg.getParameter<double>("max_seed_track_d3derr")),
+    max_seed_track_dxyipverr(cfg.getParameter<double>("max_seed_track_dxyipverr")),
+    max_seed_track_d3dipverr(cfg.getParameter<double>("max_seed_track_d3dipverr")),
     seed_by_sums(cfg.getParameter<bool>("seed_by_sums")),
     min_seed_sum_pt(cfg.getParameter<double>("min_seed_sum_pt")),
     min_seed_sum_dxy(cfg.getParameter<double>("min_seed_sum_dxy")),
@@ -563,12 +567,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const double pt = tk->pt();
     const double dxybs = tk->dxy(*beamspot);
     const double dxypv = primary_vertex ? tk->dxy(primary_vertex->position()) : 1e99;
-    const double sigmadxybs = dxybs / tk->dxyError();
-    const double sigmadxypv = dxypv / tk->dxyError();
+    const double dxyerr = tk->dxyError();
+    const double sigmadxybs = dxybs / dxyerr;
+    const double sigmadxypv = dxypv / dxyerr;
     const int nhits = tk->hitPattern().numberOfValidHits(); // JMTBAD this is supposed to be strip hits...
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
     const int npxlayers = tk->hitPattern().pixelLayersWithMeasurement();
-    bool use = pt > min_all_track_pt && fabs(dxybs) > min_all_track_dxy && fabs(sigmadxybs) > min_all_track_sigmadxy && fabs(sigmadxypv) > min_all_track_sigmadxypv && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits && npxlayers >= min_all_track_npxlayers;
+    bool use = pt > min_all_track_pt && fabs(dxybs) > min_all_track_dxy && fabs(sigmadxybs) > min_all_track_sigmadxy && fabs(sigmadxypv) > min_all_track_sigmadxypv && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits && npxlayers >= min_all_track_npxlayers && dxyerr < max_all_track_dxyerr;
     SpatialExtents se = tracker_extents.extentInRAndZ(tk->hitPattern(),npxhits != 0);
 
     if (use && remove_tracks_frac > 0) {
@@ -578,15 +583,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         use = false;
     }
 
-    if (use && (max_all_track_dxyerr > 0 || max_all_track_d3derr > 0)) {
+    if (use && (max_all_track_dxyipverr > 0 || max_all_track_d3dipverr > 0)) {
       reco::TransientTrack ttk = tt_builder->build(tk);
-      if (max_all_track_dxyerr > 0 && primary_vertex) {
+      if (max_all_track_dxyipverr > 0 && primary_vertex) {
         auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, *primary_vertex);
-        use = use && dxy_ipv.first && dxy_ipv.second.error() < max_all_track_dxyerr;
+        use = use && dxy_ipv.first && dxy_ipv.second.error() < max_all_track_dxyipverr;
       }
-      if (max_all_track_d3derr > 0 && primary_vertex) {
+      if (max_all_track_d3dipverr > 0 && primary_vertex) {
         auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, *primary_vertex);
-        use = use && d3d_ipv.first && d3d_ipv.second.error() < max_all_track_d3derr;
+        use = use && d3d_ipv.first && d3d_ipv.second.error() < max_all_track_d3dipverr;
       }
     }
     
@@ -705,42 +710,44 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   for (size_t itk = 0; itk < ntk-1; ++itk) {
     double itk_pt    = seed_tracks[itk].track().pt();
     double itk_dxy   = seed_tracks[itk].track().dxy(*beamspot);
-    double itk_sigmadxy = seed_tracks[itk].track().dxy(*beamspot) / seed_tracks[itk].track().dxyError();
+    double itk_dxyerr = seed_tracks[itk].track().dxyError();
+    double itk_sigmadxy = itk_dxy / itk_dxyerr;
     double itk_sigmadxypv = primary_vertex ? seed_tracks[itk].track().dxy(primary_vertex->position()) / seed_tracks[itk].track().dxyError() : 1e99;
     double itk_nhits = seed_tracks[itk].track().hitPattern().numberOfValidHits();
     double itk_npxhits = seed_tracks[itk].track().hitPattern().numberOfValidPixelHits();
     double itk_npxlayers = seed_tracks[itk].track().hitPattern().pixelLayersWithMeasurement();
-    bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && fabs(itk_sigmadxy) > min_seed_track_sigmadxy && fabs(itk_sigmadxypv) > min_seed_track_sigmadxypv  && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits && itk_npxlayers >= min_seed_track_npxlayers;
+    bool itk_use = itk_pt > min_seed_track_pt && fabs(itk_dxy) > min_seed_track_dxy && fabs(itk_sigmadxy) > min_seed_track_sigmadxy && fabs(itk_sigmadxypv) > min_seed_track_sigmadxypv  && itk_nhits >= min_seed_track_nhits && itk_npxhits >= min_seed_track_npxhits && itk_npxlayers >= min_seed_track_npxlayers && itk_dxyerr < max_seed_track_dxyerr;
 
-    if (itk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
-      if (max_seed_track_dxyerr > 0 && primary_vertex) {
+    if (itk_use && (max_seed_track_dxyipverr > 0 || max_seed_track_d3dipverr > 0)) {
+      if (max_seed_track_dxyipverr > 0 && primary_vertex) {
         auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[itk], *primary_vertex);
-        itk_use = itk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyerr;
+        itk_use = itk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyipverr;
       }
-      if (max_seed_track_d3derr > 0 && primary_vertex) {
+      if (max_seed_track_d3dipverr > 0 && primary_vertex) {
         auto d3d_ipv = IPTools::absoluteImpactParameter3D(seed_tracks[itk], *primary_vertex);
-        itk_use = itk_use && d3d_ipv.first && d3d_ipv.second.error() < max_seed_track_d3derr;
+        itk_use = itk_use && d3d_ipv.first && d3d_ipv.second.error() < max_seed_track_d3dipverr;
       }
     }
 
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
       double jtk_pt    = seed_tracks[jtk].track().pt();
       double jtk_dxy   = seed_tracks[jtk].track().dxy(*beamspot);
-      double jtk_sigmadxy = seed_tracks[jtk].track().dxy(*beamspot) / seed_tracks[jtk].track().dxyError();
+      double jtk_dxyerr = seed_tracks[jtk].track().dxyError();
+      double jtk_sigmadxy = jtk_dxy / jtk_dxyerr;
       double jtk_sigmadxypv = primary_vertex ? seed_tracks[jtk].track().dxy(primary_vertex->position()) / seed_tracks[jtk].track().dxyError() : 1e99;
       double jtk_nhits = seed_tracks[jtk].track().hitPattern().numberOfValidHits();
       double jtk_npxhits = seed_tracks[jtk].track().hitPattern().numberOfValidPixelHits();
       double jtk_npxlayers = seed_tracks[jtk].track().hitPattern().pixelLayersWithMeasurement();
-      bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && fabs(jtk_sigmadxy) > min_seed_track_sigmadxy && fabs(jtk_sigmadxypv) > min_seed_track_sigmadxypv && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits && jtk_npxlayers >= min_seed_track_npxlayers;
+      bool jtk_use = jtk_pt > min_seed_track_pt && fabs(jtk_dxy) > min_seed_track_dxy && fabs(jtk_sigmadxy) > min_seed_track_sigmadxy && fabs(jtk_sigmadxypv) > min_seed_track_sigmadxypv && jtk_nhits >= min_seed_track_nhits && jtk_npxhits >= min_seed_track_npxhits && jtk_npxlayers >= min_seed_track_npxlayers && jtk_dxyerr < max_seed_track_dxyerr;
 
-      if (jtk_use && (max_seed_track_dxyerr > 0 || max_seed_track_d3derr > 0)) {
-        if (max_seed_track_dxyerr > 0 && primary_vertex) {
+      if (jtk_use && (max_seed_track_dxyipverr > 0 || max_seed_track_d3dipverr > 0)) {
+        if (max_seed_track_dxyipverr > 0 && primary_vertex) {
           auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(seed_tracks[jtk], *primary_vertex);
-          jtk_use = jtk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyerr;
+          jtk_use = jtk_use && dxy_ipv.first && dxy_ipv.second.error() < max_seed_track_dxyipverr;
         }
-        if (max_seed_track_d3derr > 0 && primary_vertex) {
+        if (max_seed_track_d3dipverr > 0 && primary_vertex) {
           auto d3d_ipv = IPTools::absoluteImpactParameter3D(seed_tracks[jtk], *primary_vertex);
-          jtk_use = jtk_use && d3d_ipv.first && d3d_ipv.second.error() < max_seed_track_d3derr;
+          jtk_use = jtk_use && d3d_ipv.first && d3d_ipv.second.error() < max_seed_track_d3dipverr;
         }
       }
 
