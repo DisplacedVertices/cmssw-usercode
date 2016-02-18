@@ -48,7 +48,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             s.total_events = s.nevents_orig/10
         else:
             s.json = '/uscms/home/tucker/work/mfv_763p2/src/JMTucker/MFVNeutralino/test/ana_10pc.json'
-            s.lumis_per = 15
+            s.lumis_per = 150
             s.total_lumis = -1
 
     def modify(sample):
