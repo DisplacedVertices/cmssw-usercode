@@ -24,10 +24,12 @@ if [ $exit_code -ne 0 ]; then
   exit $exit_code
 fi
 
+echo
 echo NEV `edmEventSize -v hlt.root | grep Events | head -1`
+echo
 
 echo
-echo done with gensimhlt step at $(date), starting reco step
+echo done with rawhlt step at $(date), starting reco step
 echo
 cmsRun -j last_fjr.xml reco.py
 exit_code=$?
@@ -38,9 +40,13 @@ if [ $exit_code -ne 0 ]; then
   exit $exit_code
 fi
 
+echo
 echo NEV `edmEventSize -v reco.root | grep Events | head -1`
+echo
 
-echo Merging FJRs
+echo
+echo done with rawhlt step at $(date), merging FJRs
+echo
 python merge_fjrs.py
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -50,5 +56,5 @@ if [ $exit_code -ne 0 ]; then
 fi
 
 echo
-echo done at $(date)
+echo done with everything at $(date)
 echo TWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEPTWOSTEP
