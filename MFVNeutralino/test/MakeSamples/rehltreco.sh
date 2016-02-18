@@ -15,7 +15,7 @@ echo
 echo start rawhlt step at $(date)
 echo
 
-cmsRun PSet.py
+cmsRun -j first_fjr.xml PSet.py
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -29,7 +29,7 @@ echo NEV `edmEventSize -v hlt.root | grep Events | head -1`
 echo
 echo done with gensimhlt step at $(date), starting reco step
 echo
-cmsRun -j FrameworkJobReport.xml reco.py
+cmsRun -j last_fjr.xml reco.py
 exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -39,6 +39,15 @@ if [ $exit_code -ne 0 ]; then
 fi
 
 echo NEV `edmEventSize -v reco.root | grep Events | head -1`
+
+echo Merging FJRs
+python merge_fjrs.py
+if [ $exit_code -ne 0 ]; then
+  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  echo @@@@ merge_fjrs.py exited with error code $exit_code
+  echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  exit $exit_code
+fi
 
 echo
 echo done at $(date)
