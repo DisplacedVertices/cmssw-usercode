@@ -386,6 +386,82 @@ _adbp3('ntuplev6p1_76x_errdxy100um', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_
 _adbp3('ntuplev6p1_76x_errdxy100um', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um-564b64cea90c301317a73c7145eae454/USER', 9867)
 _adbp3('ntuplev6p1_76x_errdxy100um', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um-b4539c7d764d188e92ecc291fd6cbf99/USER', 9836)
 
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_errdxy40um_proper-0decc501db2e77a586e0fbc0a12e7257/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_errdxy40um_proper-321a336061b5e64cd76814b3fe95caf4/USER', 9891) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_errdxy40um_proper-9b3605bbf72585751655b11b9d4d3d28/USER', 9898) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_errdxy40um_proper-53ff186630063bb26ac3f741910844de/USER', 9850) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-edc858263040b10ce95600e555818ed7/USER', 53610) # 35 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-80dda0a6729819143fc9034dd6045823/USER', 1742101) # 70 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-c374a4e078e3d4a45c73f28b867d2646/USER', 3927467) # 160 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-c08ac263747c8069d9afd097d4bd82fb/USER', 3977145) # 161 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-8a756470e7761f8906a44fdc9e2f35f2/USER', 3972910) # 160 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-71f488b55d48ef7ad8494b9ada29ba83/USER', 2967901) # 120 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-8982d468e3bd1a3f83dcc210b4c9f84a/USER', 395724) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-c95894e84fb5c7f2dfb8a5575877de1f/USER', 393760) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-f58f9ee9e40610eb6f8c1d0a04ac4e47/USER', 398452) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-676f099424ed5d83644a72ba23705aa6/USER', 391108) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-18de3319a1579a77cdc7f1dac0518f07/USER', 1326361) # 198 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-6f08d734d4fbdbdf7113e838a6b38064/USER', 9898) # 3 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-22599c40f3c8862439cc39e5b7f53157/USER', 9867) # 2 files
+_adbp3('ntuplev6p1_76x_errdxy40um_proper', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy40um_proper-7ed8bc8fcb7bbf47cea1609196e5d0fe/USER', 9836) # 2 files
+
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_errdxy60um_proper-b5f5ce816284d1787c8e4ad6d3cb211f/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_errdxy60um_proper-8f07806f381d49ceeb9c93c2f9f06c7c/USER', 9891) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_errdxy60um_proper-67f817415870bf7a76d8be60619bbdb4/USER', 9898) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_errdxy60um_proper-f629d72524a4b251297a1a6b6085db4f/USER', 9850) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-7660137cf3b4e5645338660284b28e93/USER', 53610) # 35 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-67d8ab125f3e7bc80da6c063905135c5/USER', 1742101) # 70 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-bb9afe14d0e193b3294fcdbb355abd98/USER', 3927467) # 160 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-5343538b8d0f3b3189f904c52d44a61f/USER', 3977145) # 161 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-cdfbc377e00303507d0aef17b1058c8f/USER', 3972910) # 160 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-6c87ad2c36e2ee74d6c556954fe79523/USER', 2967901) # 120 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-50a011639b7df66d8a447039f19d2a6c/USER', 395724) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-8a15271f6fd5d83a9163d03e38700c28/USER', 393760) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-956513bf6fd18075e58929b11bab6646/USER', 398452) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-36404945e9fdcd4e01a0d68ed0d35ff1/USER', 391108) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-87f75ebe2f261f222a82b6cc490ee43f/USER', 1333333) # 199 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-6723686611ecd30409f950c2c82c1ce1/USER', 9898) # 3 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-a2d9a1a86e45ba72b7975cd5876475a1/USER', 9867) # 2 files
+_adbp3('ntuplev6p1_76x_errdxy60um_proper', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy60um_proper-7da9fdbaaa35b702e395d9e376036ef2/USER', 9836) # 2 files
+
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_errdxy80um_proper-7ef0a311e6cbe3a0e8813a06fac0915a/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_errdxy80um_proper-cff508e043703f8130da0527c08328de/USER', 9891) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_errdxy80um_proper-e278cb48f51cf8dc8ee912659b38eacd/USER', 9898) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_errdxy80um_proper-86536b94a8d6582ef736e0f0d51b06ec/USER', 9850) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-a7400371ba4b32ff9df3ad6b37b55363/USER', 53610) # 35 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-8a4e352646afaccef878443943d57a6f/USER', 1742101) # 70 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-221c745a952e7b311710c311332b048a/USER', 3927467) # 160 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-24cbdb57a2e902401fb25c60ff3f4889/USER', 3977145) # 161 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-3a17d63913f6245d24d994f71ca94ac6/USER', 3972910) # 160 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-043c9531bf71b3555c0178a1678af761/USER', 2967901) # 120 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-7e0b0ca69d70747da5830b67385afff7/USER', 395724) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-2b4d1099870d7ded24617046450450e7/USER', 393760) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-640d5263ec5d454dfb77a4e1cc9d549d/USER', 398452) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-fc3a649af00c608e4ad8c79d32e90e6f/USER', 391108) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-0d14501f0546f3f164f83ce305d81b02/USER', 1340337) # 200 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-ada280b92f7d2c985570874b9f5d998b/USER', 9898) # 3 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-9d7a1298762d61ea09a9d72d7604cbde/USER', 9867) # 2 files
+_adbp3('ntuplev6p1_76x_errdxy80um_proper', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy80um_proper-4f6a5b99ce1c329cd863cc9e35eeed3d/USER', 9836) # 2 files
+
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_errdxy100um_proper-339b743a7d4e449f2a89a60ecf3d434a/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_errdxy100um_proper-bccd9140586fd9c4bbdcbd0282328ef2/USER', 9891) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_errdxy100um_proper-51bd122b062c619278fba3c9929f929c/USER', 9898) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_errdxy100um_proper-14b05958df35a07512ba92a983eb61c0/USER', 9850) # 1 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-e4104f7ce6004c4e80970be71a26fe8e/USER', 52102) # 34 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-4de38b7ff89099d946f42f40fd839fa4/USER', 1742101) # 70 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-103b69602f7dfe64e5cfdd0931b8724f/USER', 3927467) # 160 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-12c8ac1ef64b93a9b239217c157f20b6/USER', 3977145) # 161 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-39802c13093753a72c6e24530964c4e9/USER', 3948171) # 159 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-4fd35c49e581e83f224e1d765f359632/USER', 2967901) # 120 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-5382babf5a7907e0ddacc057ee032cc6/USER', 395724) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-d7a223b64cb9d0a4e69c9378468ba466/USER', 393760) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-ea560e2e2e392efe769d8df9302c7d83/USER', 398452) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-e176e120dd6da700e19a56e1b823f1a3/USER', 391108) # 16 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-a6ba819eda59db5ec3b8f19113a572b4/USER', 1340337) # 200 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-2a1dbcdbfeee766db766c135626bdf8a/USER', 9898) # 3 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-663808ed8c1f198645b079407ff5e785/USER', 9867) # 2 files
+_adbp3('ntuplev6p1_76x_errdxy100um_proper', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-82b2174ee58f4471e1daeedc3f016c43/USER', 9836) # 2 files
+
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
 ########################################################################
