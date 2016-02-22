@@ -66,6 +66,8 @@ private:
   TH1F* h_r2d[9];
   TH1F* h_r3d[9];
   TH1F* h_t;
+  TH1F* h_ct;
+  TH1F* h_ctau;
   TH2F* h_r3d_bhadron_v_bquark;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
@@ -355,6 +357,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   }
 
   h_t = fs->make<TH1F>("h_t", ";time to LSP decay (ns);Events/0.1 ns", 100, 0, 10);
+  h_ct = fs->make<TH1F>("h_ct", ";ct to LSP decay (#mum);Events/10 #mum", 2000, 0, 20000);
+  h_ctau = fs->make<TH1F>("h_ctau", ";c#tau to LSP decay (#mum);Events/10 #mum", 1000, 0, 10000);
   h_r3d_bhadron_v_bquark = fs->make<TH2F>("h_r3d_bhadron_v_bquark", ";b quark 3D distance (cm);b hadron 3D distance (cm)", 100, 0, 2, 100, 0, 2);
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
   h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
@@ -561,7 +565,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	  h_r3d[j]->Fill(r3d[j]);
 	}
       
-	h_t->Fill(r3d[0]/lspbeta/30);
+	h_t->Fill(r3d[1]/lspbeta/30);
+        h_ct->Fill(r3d[1]/lspbeta*10000);
+        h_ctau->Fill(r3d[1]/lspbetagamma*10000);
 	h_r3d_bhadron_v_bquark->Fill(r3d[2], r3d[3]);
 	if (fabs(r3d[2] - r3d[3]) > 0.001) // 10 micron
           std::cout << "difference between bquark and bhadron r3ds is " << fabs(r3d[2] - r3d[3]) << " for run,lumi,event " << event.id().run() << ", " << event.luminosityBlock() << ", " << event.id().event() << "\n";
