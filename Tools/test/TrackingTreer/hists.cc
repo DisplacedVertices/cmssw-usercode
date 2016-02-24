@@ -83,10 +83,10 @@ int main(int argc, char** argv) {
   const double err_lo[5] = { 0 };
   const double err_hi[5] = { 0.15, 0.01, 0.01, 0.1, 0.4 };
 
-  const char* hitpar_names[11] = {"nhits", "npxhits", "npxlays", "nsthits", "nstlays", "min_r", "max_r", "maxpx_r", "min_z", "max_z", "maxpx_z"};
-  const int hitpar_nbins[11] = {40, 12, 6, 28, 20, 16, 16, 16, 16, 16, 16};
-  const int hitpar_lo[11] = { 0 };
-  const int hitpar_hi[11] = {40, 12, 6, 28, 20, 16, 16, 16, 16, 16, 16};
+  const char* hitpar_names[12] = {"nhits", "npxhits", "npxlays", "nsthits", "nstlays", "min_r", "max_r", "maxpx_r", "min_z", "max_z", "maxpx_z", "deltarpx"};
+  const int hitpar_nbins[12] = {40, 12, 6, 28, 20, 16, 16, 16, 16, 16, 16, 16};
+  const int hitpar_lo[12] = { 0 };
+  const int hitpar_hi[12] = {40, 12, 6, 28, 20, 16, 16, 16, 16, 16, 16, 16};
 
   TH1D* h_all_track_pars[9];
   TH1D* h_all_track_errs[5];
@@ -96,9 +96,9 @@ int main(int argc, char** argv) {
     h_all_track_pars[i] = new TH1D(TString::Format("h_all_track_%s", par_names[i]), TString::Format(";all track %s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
   for (int i = 0; i < 5; ++i) 
     h_all_track_errs[i] = new TH1D(TString::Format("h_all_track_err%s", err_names[i]), TString::Format(";all track err%s", err_names[i]), err_nbins[i], err_lo[i], err_hi[i]);
-  TH1D* h_all_track_hitpars[11];
-  TH2D* h_all_track_dxyerr_v_hitpars[1][11];
-  for (int i = 0; i < 11; ++i)
+  TH1D* h_all_track_hitpars[12];
+  TH2D* h_all_track_dxyerr_v_hitpars[1][12];
+  for (int i = 0; i < 12; ++i)
     h_all_track_hitpars[i] = new TH1D(TString::Format("h_all_track_%s", hitpar_names[i]), TString::Format(";all track %s", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i]);
   TH1D* h_all_track_sigmadxybs = new TH1D("h_all_track_sigmadxybs", ";all track sigmadxybs", 1000, -10, 10);
   TH1D* h_all_track_charge = new TH1D("h_all_track_charge", ";all track charge", 4, -2, 2);
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   }
   for (int i = 0; i < 9; ++i) 
     h_all_track_dxyerr_v_pars[0][i] = new TH2D(TString::Format("h_all_track_dxyerr_v_%s", par_names[i]), TString::Format(";all track %s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
-  for (int i = 0; i < 11; ++i)
+  for (int i = 0; i < 12; ++i)
     h_all_track_dxyerr_v_hitpars[0][i] = new TH2D(TString::Format("h_all_track_dxyerr_v_%s", hitpar_names[i]), TString::Format(";all track %s;dxyerr", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
   TH2D* h_all_track_eta_v_phi[1][1];
   h_all_track_eta_v_phi[0][0] = new TH2D("h_all_track_eta_v_phi", ";all track phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
@@ -123,9 +123,9 @@ int main(int argc, char** argv) {
     h_seed_track_pars[i] = new TH1D(TString::Format("h_seed_track_%s", par_names[i]), TString::Format(";seed track %s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
   for (int i = 0; i < 5; ++i) 
     h_seed_track_errs[i] = new TH1D(TString::Format("h_seed_track_err%s", err_names[i]), TString::Format(";seed track err%s", par_names[i]), err_nbins[i], err_lo[i], err_hi[i]);
-  TH1D* h_seed_track_hitpars[11];
-  TH2D* h_seed_track_dxyerr_v_hitpars[1][11];
-  for (int i = 0; i < 11; ++i)
+  TH1D* h_seed_track_hitpars[12];
+  TH2D* h_seed_track_dxyerr_v_hitpars[1][12];
+  for (int i = 0; i < 12; ++i)
     h_seed_track_hitpars[i] = new TH1D(TString::Format("h_seed_track_%s", hitpar_names[i]), TString::Format(";seed track %s", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i]);
   TH1D* h_seed_track_sigmadxybs = new TH1D("h_seed_track_sigmadxybs", ";seed track sigmadxybs", 200, -10, 10);
   TH1D* h_seed_track_charge = new TH1D("h_seed_track_charge", ";seed track charge", 4, -2, 2);
@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
   }
   for (int i = 0; i < 9; ++i) 
     h_seed_track_dxyerr_v_pars[0][i] = new TH2D(TString::Format("h_seed_track_dxyerr_v_%s", par_names[i]), TString::Format(";seed track %s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
-  for (int i = 0; i < 11; ++i)
+  for (int i = 0; i < 12; ++i)
     h_seed_track_dxyerr_v_hitpars[0][i] = new TH2D(TString::Format("h_seed_track_dxyerr_v_%s", hitpar_names[i]), TString::Format(";seed track %s;dxyerr", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
   TH2D* h_seed_track_eta_v_phi[1][1];
   h_seed_track_eta_v_phi[0][0] = new TH2D("h_seed_track_eta_v_phi", ";seed track phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
@@ -150,9 +150,9 @@ int main(int argc, char** argv) {
     h_seed_nosigcut_track_pars[i] = new TH1D(TString::Format("h_seed_nosigcut_track_%s", par_names[i]), TString::Format(";seed nosig track %s", par_names[i]), par_nbins[i], par_lo[i], par_hi[i]);
   for (int i = 0; i < 5; ++i) 
     h_seed_nosigcut_track_errs[i] = new TH1D(TString::Format("h_seed_nosigcut_track_err%s", err_names[i]), TString::Format(";seed nosig track err%s", par_names[i]), err_nbins[i], err_lo[i], err_hi[i]); 
-  TH1D* h_seed_nosigcut_track_hitpars[11];
-  TH2D* h_seed_nosigcut_track_dxyerr_v_hitpars[1][11];
-  for (int i = 0; i < 11; ++i)
+  TH1D* h_seed_nosigcut_track_hitpars[12];
+  TH2D* h_seed_nosigcut_track_dxyerr_v_hitpars[1][12];
+  for (int i = 0; i < 12; ++i)
     h_seed_nosigcut_track_hitpars[i] = new TH1D(TString::Format("h_seed_nosigcut_track_%s", hitpar_names[i]), TString::Format(";all track %s", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i]);
   TH1D* h_seed_nosigcut_track_sigmadxybs = new TH1D("h_seed_nosigcut_track_sigmadxybs", ";seed nosig track sigmadxybs", 1000, -10, 10);
   TH1D* h_seed_nosigcut_track_charge = new TH1D("h_seed_nosigcut_track_charge", ";seed nosig track charge", 4, -2, 2);
@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
   }
   for (int i = 0; i < 9; ++i) 
     h_seed_nosigcut_track_dxyerr_v_pars[0][i] = new TH2D(TString::Format("h_seed_nosigcut_track_dxyerr_v_%s", par_names[i]), TString::Format(";seed nosig track %s;dxyerr", par_names[i]), par_nbins[i], par_lo[i], par_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
-  for (int i = 0; i < 11; ++i)
+  for (int i = 0; i < 12; ++i)
     h_seed_nosigcut_track_dxyerr_v_hitpars[0][i] = new TH2D(TString::Format("h_seed_nosigcut_track_dxyerr_v_%s", hitpar_names[i]), TString::Format(";seed nosig track %s;dxyerr", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i], err_nbins[3], err_lo[3], err_hi[3]);
   TH2D* h_seed_nosigcut_track_eta_v_phi[1][1];
   h_seed_nosigcut_track_eta_v_phi[0][0] = new TH2D("h_seed_nosigcut_track_eta_v_phi", ";seed nosig track phi;eta", par_nbins[2], par_lo[2], par_hi[2], par_nbins[1], par_lo[1], par_hi[1]);
@@ -246,6 +246,7 @@ int main(int argc, char** argv) {
 	const int max_z = nt.tk_max_z(itk);
 	const int maxpx_r = nt.tk_maxpx_r(itk);
 	const int maxpx_z = nt.tk_maxpx_z(itk);
+	const int deltarpx = maxpx_r - min_r;
 	const double eta = fabs(nt.p_tk_eta->at(itk));
 
 	int charge;
@@ -276,7 +277,7 @@ int main(int argc, char** argv) {
 
 	const double pars[9] = {pt, nt.p_tk_eta->at(itk), nt.p_tk_phi->at(itk), nt.p_tk_dxybs->at(itk), nt.p_tk_dxypv->at(itk), nt.p_tk_dxy->at(itk), dz, dzpv, dzpv};
 	const double errs[5] = {nt.p_tk_err_qpt->at(itk), nt.p_tk_err_eta->at(itk), nt.p_tk_err_phi->at(itk), nt.p_tk_err_dxy->at(itk), nt.p_tk_err_dz->at(itk)};
-	const int hitpars[11] = {nhits, npxhits, npxlays, nsthits, nstlays, min_r, max_r, maxpx_r, min_z, max_z, maxpx_z};
+	const int hitpars[12] = {nhits, npxhits, npxlays, nsthits, nstlays, min_r, max_r, maxpx_r, min_z, max_z, maxpx_z, deltarpx};
 	if (z_slice_use && nhits_slice_use && pt_slice_use && eta_slice_use) {
 	  ++n_all_tracks;
 
@@ -285,7 +286,7 @@ int main(int argc, char** argv) {
 	    h_seed_track_eta_v_phi[0][0]->Fill(pars[2], pars[1], w);
 	    h_seed_track_sigmadxybs->Fill(sigmadxy, w);
 	    h_seed_track_charge->Fill(charge);
-	    for (int i = 0; i < 11; ++i) {
+	    for (int i = 0; i < 12; ++i) {
 	      h_seed_track_hitpars[i]->Fill(hitpars[i], w);
 	      h_seed_track_dxyerr_v_hitpars[0][i]->Fill(hitpars[i], errs[3], w);
 	    }
@@ -296,7 +297,7 @@ int main(int argc, char** argv) {
 	    h_seed_nosigcut_track_eta_v_phi[0][0]->Fill(pars[2], pars[1], w);
 	    h_seed_nosigcut_track_sigmadxybs->Fill(sigmadxy, w);
 	    h_seed_nosigcut_track_charge->Fill(charge);
-            for (int i = 0; i < 11; ++i) {
+            for (int i = 0; i < 12; ++i) {
               h_seed_nosigcut_track_hitpars[i]->Fill(hitpars[i], w);
 	      h_seed_nosigcut_track_dxyerr_v_hitpars[0][i]->Fill(hitpars[i], errs[3], w);
 	    }
@@ -329,7 +330,7 @@ int main(int argc, char** argv) {
 	  h_all_track_eta_v_phi[0][0]->Fill(pars[2], pars[1], w);
 	  h_all_track_sigmadxybs->Fill(sigmadxy, w);
 	  h_all_track_charge->Fill(charge);
-	  for (int i = 0; i < 11; ++i) {
+	  for (int i = 0; i < 12; ++i) {
 	    h_all_track_hitpars[i]->Fill(hitpars[i], w);
 	    h_all_track_dxyerr_v_hitpars[0][i]->Fill(hitpars[i], errs[3], w);
 	  }
