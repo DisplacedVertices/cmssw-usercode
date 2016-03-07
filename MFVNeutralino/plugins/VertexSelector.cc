@@ -72,6 +72,7 @@ private:
   const double max_trackdzerrmax;
   const double max_trackdzerravg;
   const double max_trackdzerrrms;
+  const double min_trackpairdphimax;
   const double min_drmin;
   const double max_drmin;
   const double min_drmax;
@@ -148,6 +149,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_trackdzerrmax(cfg.getParameter<double>("max_trackdzerrmax")),
     max_trackdzerravg(cfg.getParameter<double>("max_trackdzerravg")),
     max_trackdzerrrms(cfg.getParameter<double>("max_trackdzerrrms")),
+    min_trackpairdphimax(cfg.getParameter<double>("min_trackpairdphimax")),
     min_drmin(cfg.getParameter<double>("min_drmin")),
     max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
@@ -223,6 +225,14 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     if (fabs(vtx.track_dxy[i]) > max_trackdxy)
       ++ntracks_sub;
 
+  std::vector<float> trackpairdphis = vtx.trackpairdphis();
+  int npairs = trackpairdphis.size();
+  for (int i = 0; i < npairs; ++i) {
+    trackpairdphis[i] = fabs(trackpairdphis[i]);
+  }
+  std::sort(trackpairdphis.begin(), trackpairdphis.end());
+  float trackpairdphimax = 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0];
+
   return 
     (vtx.ntracks() - ntracks_sub) >= min_ntracks &&
     (vtx.ntracks() - ntracks_sub) <= max_ntracks &&
@@ -259,6 +269,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.trackdzerrmax() < max_trackdzerrmax &&
     vtx.trackdzerravg() < max_trackdzerravg &&
     vtx.trackdzerrrms() < max_trackdzerrrms &&
+    trackpairdphimax > min_trackpairdphimax &&
     vtx.drmin() >= min_drmin &&
     vtx.drmin() <  max_drmin &&
     vtx.drmax() >= min_drmax &&

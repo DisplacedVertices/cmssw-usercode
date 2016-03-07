@@ -5,7 +5,7 @@ use_weights = True
 do_nominal = True
 do_distances = False
 
-process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20/aaaa7d7d2dcfa08aa71c1469df6ebf05/ntuple_1_1_NQ9.root']
+process.source.fileNames = ['/store/user/jchu/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev7/160209_224719/0000/ntuple_1.root']
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -21,8 +21,8 @@ changes = []
 changes.append(('nm1', '', ''))
 
 if do_nominal:
-    for i in xrange(40, 200, 5):
-        changes.append(('calojetpt4X%i' % i, '', 'min_4th_calojet_pt = %i' % i))
+    for i in xrange(0,10):
+        changes.append(('njetsX%i'%i, '', 'min_njets = %i'%i))
     for i in xrange(250,1001,50):
         changes.append(('sumhtX%i'%i, '', 'min_sumht = %i'%i))
     for i in xrange(0,15):
@@ -31,6 +31,8 @@ if do_nominal:
         changes.append(('ntracksptgt3X%i'%i, 'min_ntracksptgt3 = %i'%i, ''))
     for i in xrange(0,6):
         changes.append(('njetsntksX%i'%i, 'min_njetsntks = %i'%i, ''))
+    for i in xrange(0,20):
+        changes.append(('mintrackpairdphimaxX%s'%pize(0.1*i,1), 'min_trackpairdphimax = %f'%(0.1*i), ''))
     for i in xrange(0,20):
         changes.append(('drminX%s'%pize(0.05*i,2), 'max_drmin = %f'%(0.05*i), ''))
     for i in xrange(0,20):
@@ -84,15 +86,26 @@ SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_wei
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
-                                 Samples.mfv_neutralino_tau1000um_M0400,
-                                 Samples.mfv_neutralino_tau0300um_M0400,
-                                 Samples.mfv_neutralino_tau9900um_M0400] + Samples.ttbar_samples + Samples.qcd_samples + Samples.data_samples)
 
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('CutPlayV20',
+    samples = Samples.registry.from_argv(
+        Samples.data_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        Samples.xx4j_samples
+        )
+
+    for sample in samples:
+        if sample.is_mc:
+            sample.events_per = 250000
+        else:
+            sample.json = 'ana_10pc.json'
+            sample.lumis_per = 200
+
+    cs = CRABSubmitter('CutPlayV7',
+                       dataset = 'ntuplev7',
                        job_control_from_sample = True,
-                       use_ana_dataset = True,
+                       aaa = True, # stored at FNAL, easy to run on T2_USes
                        )
-    cs.submit_all(samples)
+    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + Samples.xx4j_samples)
