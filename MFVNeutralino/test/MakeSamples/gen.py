@@ -1,8 +1,8 @@
 # 740pre6: cmsDriver.py TTbar_13TeV_TuneCUETP8M1_cfi --no_exec -n 10 --conditions MCRUN2_74_V7 --eventcontent RAWSIM -s GEN --beamspot NominalCollision2015 --customise SLHCUpgradeSimulations/Configuration/postLS1Customs.customisePostLS1 --magField 38T_PostLS1
 
-debug = False
-
 import sys, os, FWCore.ParameterSet.Config as cms
+
+debug = 'debug' in sys.argv
 
 process = cms.Process('GEN')
 
