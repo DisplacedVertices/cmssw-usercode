@@ -61,7 +61,6 @@ private:
   const double min_sumpt2;
   const double min_maxtrackpt;
   const double min_maxm1trackpt;
-  const double min_maxm2trackpt;
   const double max_trackdxy;
   const double max_trackdxyerrmin;
   const double max_trackdxyerrmax;
@@ -137,7 +136,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_sumpt2(cfg.getParameter<double>("min_sumpt2")),
     min_maxtrackpt(cfg.getParameter<double>("min_maxtrackpt")),
     min_maxm1trackpt(cfg.getParameter<double>("min_maxm1trackpt")),
-    min_maxm2trackpt(cfg.getParameter<double>("min_maxm2trackpt")),
     max_trackdxy(cfg.getParameter<double>("max_trackdxy")),
     max_trackdxyerrmin(cfg.getParameter<double>("max_trackdxyerrmin")),
     max_trackdxyerrmax(cfg.getParameter<double>("max_trackdxyerrmax")),
@@ -250,7 +248,6 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.sumpt2() >= min_sumpt2 &&
     vtx.maxtrackpt() >= min_maxtrackpt &&
     vtx.maxmntrackpt(1) >= min_maxm1trackpt &&
-    vtx.maxmntrackpt(2) >= min_maxm2trackpt &&
     vtx.trackdxyerrmin() < max_trackdxyerrmin &&
     vtx.trackdxyerrmax() < max_trackdxyerrmax &&
     vtx.trackdxyerravg() < max_trackdxyerravg &&
