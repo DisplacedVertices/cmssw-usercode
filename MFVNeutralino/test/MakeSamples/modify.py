@@ -10,6 +10,21 @@ def set_ttbar(process):
         'Tune:pp 5',
         )
 
+def set_leptoquark(process, mass, lifetime, generation):
+    params = [
+        'LeptoQuark:gg2LQLQbar = on',
+        'LeptoQuark:qqbar2LQLQbar = on',
+        '42:m0 = %s' % mass,
+        '42:tau0 = %s' % lifetime,
+        ]
+
+    if generation == 2:
+        params.append('42:0:products = 4 -13')
+    elif generation != 1:
+        raise ValueError('generation can be 1 or 2')
+
+    process.generator.PythiaParameters.processParameters = cms.vstring(*params)
+
 def set_particle_tau0(process, id, tau0):
     params = [x for x in process.generator.PythiaParameters.processParameters.value() if ':tau0' not in x]
     process.generator.PythiaParameters.processParameters = params
