@@ -14,16 +14,16 @@ public:
 
 private:
   const edm::InputTag src;
+  const edm::EDGetTokenT<reco::GenParticleCollection> token;
   int maxEventsToPrint;
-  const bool printOnlyHardInteraction;
   const bool printVertex;
   const bool useMessageLogger;
 };
 
 JMTParticleListDrawer::JMTParticleListDrawer(const edm::ParameterSet& cfg)
   : src(cfg.getParameter<edm::InputTag>("src")),
+    token(consumes<reco::GenParticleCollection>(src)),
     maxEventsToPrint(cfg.getUntrackedParameter<int>("maxEventsToPrint", -1)),
-    printOnlyHardInteraction(cfg.getUntrackedParameter<bool>("printOnlyHardInteraction", false)),
     printVertex(cfg.getUntrackedParameter<bool>("printVertex", false)),
     useMessageLogger(cfg.getUntrackedParameter<bool>("useMessageLogger", false))
 {
@@ -31,14 +31,15 @@ JMTParticleListDrawer::JMTParticleListDrawer(const edm::ParameterSet& cfg)
 
 void JMTParticleListDrawer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<reco::GenParticleCollection> particles;
-  event.getByLabel(src, particles);
+  event.getByToken(token, particles);
 
   edm::ESHandle<ParticleDataTable> pdt;
   setup.getData(pdt);
 
   if (maxEventsToPrint == 0)
     return;
-  --maxEventsToPrint;
+  else if (maxEventsToPrint > 0)
+    --maxEventsToPrint;
 
   std::ostringstream out;
   char buf[512];
@@ -57,9 +58,6 @@ void JMTParticleListDrawer::analyze(const edm::Event& event, const edm::EventSet
 
   int idx = 0;
   for (reco::GenParticleCollection::const_iterator p = particles->begin(), pe = particles->end(); p != pe; ++p, ++idx) {
-    if (printOnlyHardInteraction && p->status() != 3)
-      continue;
-
     const int id = p->pdgId();
     const ParticleData* pd = pdt->particle(id);
     std::string particleName;
