@@ -300,6 +300,45 @@ _adbp3('ntuplev7', '/mfv_neu_tau10000um_M0800/jchu-ntuplev7-085ed528a7ee0b7689b9
 _adbp3('ntuplev7', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7-d68099878d3546792009802bc8ad8431/USER',           9920)
 _adbp3('ntuplev7', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7-d3bf0fbb54a52d2eaee4334b5ea26c38/USER',          9875)
 
+_adbp3('ntuplev7_jetsntks1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks1-4ad3eb04604c84855816143eae9bdfbb/USER',     57153)
+_adbp3('ntuplev7_jetsntks1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks1-439315a3d6f10135f843f7c4474bdc56/USER',  4942990) # 610 files
+_adbp3('ntuplev7_jetsntks1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks1-adcee578d0910ab37e6ff2737b1e3481/USER', 4936847)
+_adbp3('ntuplev7_jetsntks1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks1-55a70a3f1fcf93598223ef9ad8ed487a/USER', 3868877)
+_adbp3('ntuplev7_jetsntks1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks1-f33a6a44d7baa577889f259f965d1b19/USER',  1961774)
+_adbp3('ntuplev7_jetsntks1', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/jchu-ntuplev7_jetsntks1-5181b282166e1e1a682c2f74e2700a4d/USER',          1537614) # 1709 files
+_adbp3('ntuplev7_jetsntks1', '/mfv_neu_tau00100um_M0800/jchu-ntuplev7_jetsntks1-636bdb658507a4b209ac08ad8c9f4b76/USER',                                   9890)
+_adbp3('ntuplev7_jetsntks1', '/mfv_neu_tau00300um_M0800/jchu-ntuplev7_jetsntks1-1c0f5559cb92ebcfbc287746e44822a8/USER',                                   9891)
+_adbp3('ntuplev7_jetsntks1', '/mfv_neu_tau01000um_M0800/jchu-ntuplev7_jetsntks1-bfb76b917b191f1f10ec249dfe67cbd9/USER',                                   9898)
+_adbp3('ntuplev7_jetsntks1', '/mfv_neu_tau10000um_M0800/jchu-ntuplev7_jetsntks1-dc44c2cfcf6b9414aaead418e5ec50d7/USER',                                   9850)
+_adbp3('ntuplev7_jetsntks1', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7_jetsntks1-32d10caad5641df9cb3c39e81a007ff1/USER',           9920)
+_adbp3('ntuplev7_jetsntks1', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7_jetsntks1-9b724cf085785b412e898ab8c804bb58/USER',          9875)
+
+_adbp3('ntuplev7_jetsntks2', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks2-f8f4d389dde95f28821d1d1d1a13b999/USER',     57153)
+_adbp3('ntuplev7_jetsntks2', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks2-7ca73429997ee53233519b9da325c838/USER',  4951070) # 611 files
+_adbp3('ntuplev7_jetsntks2', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks2-1ec74c0d6ac98f8a5b225a1de78000b2/USER', 4936847)
+_adbp3('ntuplev7_jetsntks2', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks2-0383a953d794f1c090843b2d1602f6d7/USER', 3868877)
+_adbp3('ntuplev7_jetsntks2', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks2-faefa274612f1ed29763ee9b4442190d/USER',  1961774)
+_adbp3('ntuplev7_jetsntks2', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/jchu-ntuplev7_jetsntks2-747bec82c3abe90ee5cf4ca483041930/USER',          1509416) # 1678 files
+_adbp3('ntuplev7_jetsntks2', '/mfv_neu_tau00100um_M0800/jchu-ntuplev7_jetsntks2-155cd27c9ab2aa292b4cd2529d467bbc/USER',                                   9890)
+_adbp3('ntuplev7_jetsntks2', '/mfv_neu_tau00300um_M0800/jchu-ntuplev7_jetsntks2-73ba8ad53ff42c78e259b94cd4631db1/USER',                                   9891)
+_adbp3('ntuplev7_jetsntks2', '/mfv_neu_tau01000um_M0800/jchu-ntuplev7_jetsntks2-a4250305506524723a881a303b8e87d6/USER',                                   9898)
+_adbp3('ntuplev7_jetsntks2', '/mfv_neu_tau10000um_M0800/jchu-ntuplev7_jetsntks2-01d5b4c150b4f749f91bef5dca5c2163/USER',                                   9850)
+_adbp3('ntuplev7_jetsntks2', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7_jetsntks2-d5b8b99ba8944f039ad91ab3d7ccf506/USER',           9920)
+_adbp3('ntuplev7_jetsntks2', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7_jetsntks2-2a8b0a67e51b3a772bf8b2e4b8e676d1/USER',          9875)
+
+_adbp3('ntuplev7_jetsntks3', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks3-a00c3156d3bf35f00497bee293e52a39/USER',     57153)
+_adbp3('ntuplev7_jetsntks3', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks3-c0c499d16c50c2c903d06e7bb3891126/USER',  4951070) # 611 files
+_adbp3('ntuplev7_jetsntks3', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks3-4eb6765ef0490f7135b505c0af467630/USER', 4912190) # 201 files
+_adbp3('ntuplev7_jetsntks3', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks3-68259ec9462b3dd14b1ad48ad65b39ac/USER', 3868877)
+_adbp3('ntuplev7_jetsntks3', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/jchu-ntuplev7_jetsntks3-6d83d26c87d62f07fa69eac845cbd8a6/USER',  1961774)
+_adbp3('ntuplev7_jetsntks3', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/jchu-ntuplev7_jetsntks3-3a3ed17a4611c953fb2e246c712dfc2b/USER',          1409614) # 1567 files
+_adbp3('ntuplev7_jetsntks3', '/mfv_neu_tau00100um_M0800/jchu-ntuplev7_jetsntks3-b7353cfa44edf947d0b8eddb90fde718/USER',                                   9890)
+_adbp3('ntuplev7_jetsntks3', '/mfv_neu_tau00300um_M0800/jchu-ntuplev7_jetsntks3-5d07a43cefbe3d472b74f1a1d510232f/USER',                                   9891)
+_adbp3('ntuplev7_jetsntks3', '/mfv_neu_tau01000um_M0800/jchu-ntuplev7_jetsntks3-0b7e75dfc6d9ec2d176eb4b036c0a18f/USER',                                   9898)
+_adbp3('ntuplev7_jetsntks3', '/mfv_neu_tau10000um_M0800/jchu-ntuplev7_jetsntks3-46041fb9fe992e68f486b7829da73aac/USER',                                   9850)
+_adbp3('ntuplev7_jetsntks3', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7_jetsntks3-d7764204c32ce910bae89c1a4facb956/USER',           9920)
+_adbp3('ntuplev7_jetsntks3', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/jchu-ntuplev7_jetsntks3-2f29c75c6edc64698baa1ae278bb107c/USER',          9875)
+
 # for x in $(cat a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
 ########################################################################
