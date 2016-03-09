@@ -7,7 +7,7 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, tdr_st
 from functools import partial
 
 root_file_dir = 'HistosV20_rebin_for_paper' # '/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/HistosV20'
-plot_dir = 'plots/paper_draft_3'
+plot_dir = 'plots/paper_draft_4'
 
 set_style()
 ps = plot_saver(plot_dir, size=(1,1), root_log=True, pdf_log=True)
@@ -20,7 +20,7 @@ signal_sample.nice_name = '#splitline{#tau = 1 mm, M = 400 GeV,}{#sigma = 1 fb s
 signal_sample.color = 8
 
 for s in Samples.qcd_samples:
-    s.join_info = True, 'Multi-jet events', ROOT.kBlue-9
+    s.join_info = True, 'multijet events', ROOT.kBlue-9
 for s in Samples.ttbar_samples + Samples.smaller_background_samples + Samples.leptonic_background_samples:
     s.join_info = True, 't#bar{t}, single t, V+jets, t#bar{t}+V, VV', ROOT.kBlue-7
 
