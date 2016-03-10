@@ -3,6 +3,8 @@
 import sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 
+randomize = 'norandomize' not in sys.argv
+
 process = cms.Process('HLT', eras.Run2_25ns)
 
 process.load('Configuration.StandardSequences.Services_cff')
@@ -18,9 +20,9 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('SimGeneral.MixingModule.mix_2015_25ns_FallMC_matchData_PoissonOOTPU_cfi')
 process.load('HLTrigger.Configuration.HLT_25ns14e33_v4_cff')
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('root://cmseos.fnal.gov//store/user/tucker/mfv_neu_tau01000um_M0800/sim_10k/150729_201526/0000/sim_1.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:gensim.root'))
 
 if not 'debug' in sys.argv:
     process.options.wantSummary = False
@@ -51,20 +53,6 @@ process.schedule.extend([process.RAWSIMoutput_step])
 from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim 
 process = customizeHLTforFullSim(process)
 
-
-if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Samples import mfv_signal_samples
-
-    samples = mfv_signal_samples[-1:]
-
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('mfv_run2_76x_rawhlt',
-                       dataset = 'sim',
-                       splitting = 'EventAwareLumiBased',
-                       units_per_job = 1000,
-                       total_units = -1,
-                       aaa = True,
-                       publish_name='76rawhlt_10k',
-                       storage_site='T3_US_Cornell',
-                       )
-    cs.submit_all(samples)
+if randomize: # for minbias
+    from modify import randomize_seeds
+    randomize_seeds(process)
