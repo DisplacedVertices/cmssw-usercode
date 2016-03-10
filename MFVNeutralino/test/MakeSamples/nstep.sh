@@ -38,7 +38,11 @@ for x in gensim.py modify.py; do
 done
 
 echo cmsRun
-cmsRun gensim.py maxevents=${MAXEVENTS} todo=${TODO} 2>&1 | gzip > ${WORKDIR}/log_GENSIM_${JOBNUM}.gz
+cmsRun gensim.py \
+    jobnum=${JOBNUM} \
+    maxevents=${MAXEVENTS} \
+    todo=${TODO} \
+    2>&1 | gzip > ${WORKDIR}/log_GENSIM_${JOBNUM}.gz
 
 EXITCODE=$?
 if [ $EXITCODE -eq 0 ]; then

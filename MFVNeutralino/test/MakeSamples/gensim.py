@@ -4,12 +4,15 @@ genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
 randomize = 'norandomize' not in sys.argv
 maxevents = 1
+jobnum = 1
 todo = 'mfv_neutralino'
 todo_args = (1, 800)
 
 for arg in sys.argv:
     if arg.startswith('maxevents='):
         maxevents = int(arg.replace('maxevents=',''))
+    elif arg.startswith('jobnum='):
+        jobnum = int(arg.replace('jobnum=',''))
     elif arg.startswith('todo='):
         arg = arg.replace('todo=', '')
         todo, todo_args = arg.split(',', 1)
@@ -36,7 +39,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxevents))
-process.source = cms.Source('EmptySource')
+process.source = cms.Source('EmptySource', firstLuminosityBlock = cms.untracked.uint32(jobnum))
 
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
