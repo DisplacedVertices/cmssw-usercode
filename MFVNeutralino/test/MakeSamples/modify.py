@@ -372,3 +372,11 @@ def hlt_filter(process, hlt_path):
     process.ptriggerFilter = cms.Path(process.triggerFilter)
     if hasattr(process, 'schedule'):
         process.schedule.insert(0, process.ptriggerFilter)
+
+def randomize_seeds(process, save_fn='RandomEngineState.xml'):
+    from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper
+    randHelper =  RandomNumberServiceHelper(process.RandomNumberGeneratorService)
+    randHelper.populate()
+    if save_fn:
+        process.RandomNumberGeneratorService.saveFileName =  cms.untracked.string(save_fn)
+
