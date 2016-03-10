@@ -12,11 +12,12 @@ stream_error  = false
 notification  = never
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
++LENGTH="SHORT"
 Queue %(njobs)s
 '''
 
 if os.system('voms-proxy-info -exists -valid 100:0') != 0:
-    if os.system('voms-proxy-init -voms cms -valid 192:00') != 0:
+    if os.system('voms-proxy-init -rfc -voms cms -valid 192:00') != 0:
         sys.exit(1)
 
 executable = 'nstep.sh'
@@ -29,14 +30,14 @@ for fn in input_files.split() + [executable]:
 
 user = os.environ['USER']
 
-events_per = 200
-njobs = 50
+events_per = 30
+njobs = 333
 
 if 1:
     taus = [100, 300, 1000, 10000]
     masses = [300, 400, 800, 1200, 1600]
 
-    taus = [100]
+    taus = [1000]
     masses = [800]
 
     for tau in taus:
