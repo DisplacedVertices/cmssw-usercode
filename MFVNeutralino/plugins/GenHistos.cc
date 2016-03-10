@@ -24,8 +24,8 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
-  const edm::InputTag gen_src;
-  const edm::InputTag gen_jet_src;
+  const edm::EDGetTokenT<reco::GenParticleCollection> gen_token;
+  const edm::EDGetTokenT<reco::GenJetCollection> gen_jet_token;
   const bool check_all_gen_particles;
   bool mci_warned;
   enum mci_mode_t { mci_invalid, mci_mfv3j, mci_xx4j, mci_ttbar };
@@ -138,8 +138,8 @@ private:
 };
 
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
-  : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
+  : gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src"))),
+    gen_jet_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jet_src"))),
     check_all_gen_particles(cfg.getParameter<bool>("check_all_gen_particles")),
     mci_warned(false),
     mci_mode_str(cfg.getParameter<std::string>("mci_mode"))
@@ -475,10 +475,10 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   setup.getData(pdt);
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
+  event.getByToken(gen_token, gen_particles);
 
   edm::Handle<reco::GenJetCollection> gen_jets;
-  event.getByLabel(gen_jet_src, gen_jets);
+  event.getByToken(gen_jet_token, gen_jets);
 
   const reco::GenParticle& for_vtx = gen_particles->at(2);
   const int for_vtx_id = abs(for_vtx.pdgId());
