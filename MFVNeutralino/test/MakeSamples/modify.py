@@ -2,7 +2,6 @@ import FWCore.ParameterSet.Config as cms
 
 def set_ttbar(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
-        'Main:timesAllowErrors = 10000',
         'Top:gg2ttbar = on',
         'Top:qqbar2ttbar = on',
         '24:onMode = off',
@@ -45,7 +44,7 @@ def set_neutralino_tau0(process, tau0):
 def set_rhadrons_on(process):
     process.generator.PythiaParameters.processParameters.append('RHadrons:allow = on')
 
-def write_slha(tau0, m_gluino, m_neutralino, decay_idses, fn='my.slha'):
+def slha(tau0, m_gluino, m_neutralino, decay_idses, fn=None):
     width = 0.0197e-11 / tau0 # tau0 in mm
 
     n_decay_idses = len(decay_idses)
@@ -108,18 +107,48 @@ DECAY   1000022     %(width)E   # neutralino decays
 '''
 
     slha += '\n'.join(decay_strs) + '\n'
+    slha = slha % locals()
+    if fn:
+        open(fn, 'wt').write(slha)
 
-    open(fn, 'wt').write(slha % locals())
+    return slha
 
-def write_slha_mfv(tau0, m_gluino, m_neutralino, fn='my.slha'):
-    write_slha(tau0, m_gluino, m_neutralino, [(0.5, (3,5,6)), (0.5, (-3,-5,-6))], fn)
+def slha_mfv(tau0, m_gluino, m_neutralino, fn=None):
+    return slha(tau0, m_gluino, m_neutralino, [(0.5, (3,5,6)), (0.5, (-3,-5,-6))], fn)
 
-def write_slha_mfv_neutralino(tau0, m_neutralino, fn='my.slha'):
-    write_slha_mfv(tau0, m_neutralino+5, m_neutralino, fn)
+def slha_mfv_neutralino(tau0, m_neutralino, fn=None):
+    return slha_mfv(tau0, m_neutralino+5, m_neutralino, fn)
 
-def write_slha_mfv_gluino(tau0, m_gluino, fn='my.slha'):
-    write_slha_mfv(tau0, m_gluino, None, fn)
+def slha_mfv_gluino(tau0, m_gluino, fn=None):
+    return slha_mfv(tau0, m_gluino, None, fn)
 
+def set_mfv_neutralino(process, tau0, m_neutralino):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'SUSY:gg2gluinogluino = on',
+        'SUSY:qqbar2gluinogluino = on',
+        'SUSY:idA = 1000021',
+        'SUSY:idB = 1000021',
+        )
+
+    set_neutralino_tau0(process, tau0)
+
+    slha = slha_mfv_neutralino(tau0, m_neutralino)
+    process.generator.SLHATableForPythia8 = cms.string(slha)
+
+def set_mfv_gluino(process, tau0, m_gluino):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'SUSY:gg2gluinogluino = on',
+        'SUSY:qqbar2gluinogluino = on',
+        'SUSY:idA = 1000021',
+        'SUSY:idB = 1000021',
+        )
+
+    set_gluino_tau0(process, tau0)
+    set_rhadrons_on(process)
+
+    slha = slha_mfv_gluino(tau0, m_gluino)
+    process.generator.SLHATableForPythia8 = cms.string(slha)
+    
 ########################################################################
 
 def prefer_it(process, name, connect, record, tag):
