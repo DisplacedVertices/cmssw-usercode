@@ -49,10 +49,9 @@ if [ $EXITCODE -eq 0 ]; then
     gzip RandomEngineState.xml
     mv RandomEngineState.xml.gz ${WORKDIR}/RandomEngineState_GENSIM_${JOBNUM}.xml.gz
     mv gensim.root $TMPDIR
+    echo TMPDIR:
+    ls -l ${TMPDIR}/*root
 fi
-
-echo TMPDIR:
-ls -l ${TMPDIR}
 
 exit $EXITCODE
 )
@@ -88,10 +87,9 @@ if [ $EXITCODE -eq 0 ]; then
     gzip RandomEngineState.xml
     mv RandomEngineState.xml.gz ${WORKDIR}/RandomEngineState_RAWHLT_${JOBNUM}.xml.gz
     mv hlt.root $TMPDIR
+    echo TMPDIR:
+    ls -l ${TMPDIR}/*root
 fi
-
-echo TMPDIR:
-ls -l ${TMPDIR}
 
 exit $EXITCODE
 )
@@ -125,10 +123,9 @@ cmsRun reco.py 2>&1 | gzip > ${WORKDIR}/log_RECO_${JOBNUM}.gz
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
     mv reco.root $TMPDIR
+    echo TMPDIR:
+    ls -l ${TMPDIR}/*root
 fi
-
-echo TMPDIR:
-ls -l ${TMPDIR}
 
 exit $EXITCODE
 )
@@ -146,8 +143,11 @@ echo END RECO
 ################################################################################
 
 echo COPY using $(which xrdcp)
-
+echo
+echo proxy: $X509_USER_PROXY
+voms-proxy-info
+echo
 echo xrdcp -Nfvd 3 -t 5 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
 xrdcp -Nfvd 3 -t 5 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
-
+echo
 echo COPY done with exit code $?
