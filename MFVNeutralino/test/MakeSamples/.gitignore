@@ -1,12 +1,5 @@
-my.slha
 minbias_files.py
 minbias_files.pkl
-pat.py
 *.root
 out.*.gz
-test
-ntuple.py
-my_gen.py
-my_reco.py
-my_tkdqm.py
-minitree.py
+workdirs
