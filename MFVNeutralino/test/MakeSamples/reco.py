@@ -50,22 +50,3 @@ process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,proces
 
 from FWCore.ParameterSet.Utilities import convertToUnscheduled, cleanUnscheduled
 process = cleanUnscheduled(convertToUnscheduled(process))
-
-from datetime import datetime
-process.dummyForPsetHash = cms.PSet(dummy = cms.string(str(datetime.now())))
-
-if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Sample import anon_samples
-
-    samples = anon_samples('''
-''', dbs_inst='phys03')
-
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('mfv_run2_76x_reco',
-                       splitting = 'EventAwareLumiBased',
-                       units_per_job = 1000,
-                       total_units = -1,
-                       aaa = True,
-                       publish_name='76reco_10k',
-                       )
-    cs.submit_all(samples)
