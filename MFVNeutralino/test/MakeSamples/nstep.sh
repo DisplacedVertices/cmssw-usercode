@@ -44,7 +44,7 @@ cmsRun gensim.py \
     todo=${TODO} \
     2>&1 | gzip > ${WORKDIR}/log_GENSIM_${JOBNUM}.gz
 
-EXITCODE=$?
+EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
     gzip RandomEngineState.xml
     mv RandomEngineState.xml.gz ${WORKDIR}/RandomEngineState_GENSIM_${JOBNUM}.xml.gz
@@ -83,7 +83,7 @@ done
 echo cmsRun
 cmsRun rawhlt.py 2>&1 | gzip > ${WORKDIR}/log_RAWHLT_${JOBNUM}.gz
 
-EXITCODE=$?
+EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
     gzip RandomEngineState.xml
     mv RandomEngineState.xml.gz ${WORKDIR}/RandomEngineState_RAWHLT_${JOBNUM}.xml.gz
@@ -122,7 +122,7 @@ done
 echo cmsRun
 cmsRun reco.py 2>&1 | gzip > ${WORKDIR}/log_RECO_${JOBNUM}.gz
 
-EXITCODE=$?
+EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
     mv reco.root $TMPDIR
 fi
@@ -145,8 +145,9 @@ echo END RECO
 
 ################################################################################
 
-echo COPY:
-echo xrdcp ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
-xrdcp -fNd 3 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
+echo COPY using $(which xrdcp)
 
-echo DONE
+echo xrdcp -Nfvd 3 -t 5 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
+xrdcp -Nfvd 3 -t 5 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
+
+echo COPY done with exit code $?
