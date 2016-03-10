@@ -225,13 +225,12 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     if (fabs(vtx.track_dxy[i]) > max_trackdxy)
       ++ntracks_sub;
 
-  std::vector<float> trackpairdphis = vtx.trackpairdphis();
-  int npairs = trackpairdphis.size();
-  for (int i = 0; i < npairs; ++i) {
-    trackpairdphis[i] = fabs(trackpairdphis[i]);
+  float trackpairdphimax = -1;
+  for (int i = 0; i < int(vtx.trackpairdphis().size()); ++i) {
+    if (fabs(vtx.trackpairdphis()[i]) > trackpairdphimax) {
+      trackpairdphimax = fabs(vtx.trackpairdphis()[i]);
+    }
   }
-  std::sort(trackpairdphis.begin(), trackpairdphis.end());
-  float trackpairdphimax = 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0];
 
   return 
     (vtx.ntracks() - ntracks_sub) >= min_ntracks &&
