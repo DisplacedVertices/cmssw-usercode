@@ -119,7 +119,7 @@ for x in /reco.py modify.py hlt.root; do
     ln -s ${TMPDIR}/$x
 done
 
-echo RECO cmsRun
+echo cmsRun
 cmsRun reco.py 2>&1 | gzip > ${WORKDIR}/log_RECO_${JOBNUM}.gz
 
 EXITCODE=$?
@@ -147,6 +147,6 @@ echo END RECO
 
 echo COPY:
 echo xrdcp ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
-xrdcp ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
+xrdcp -fNd 3 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
 
 echo DONE
