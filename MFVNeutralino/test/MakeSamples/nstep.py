@@ -36,7 +36,7 @@ if 1:
     taus = [100, 300, 1000, 10000]
     masses = [300, 400, 800, 1200, 1600]
 
-    taus = [10000]
+    taus = [100]
     masses = [800]
 
     for tau in taus:
@@ -59,3 +59,7 @@ if 1:
             shutil.copy2(executable, os.path.join(workdir, executable))
 
             open(os.path.join(workdir, 'jdl'), 'wt').write(jdl % locals())
+
+            pubinfo = open(os.path.join(workdir, 'pubinfo'), 'wt')
+            pubinfo.write(nice + '\n')
+            pubinfo.write('\n'.join(os.path.join(outdir, 'reco_%i.root' % i) for i in xrange(njobs)))
