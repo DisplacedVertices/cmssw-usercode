@@ -3,25 +3,17 @@
 #exec 2>&1
 
 JOBNUM=$1
-MAXEVENTS=$2
-TODO=$3
-OUTDIR=$4
+TODO=$2
+MAXEVENTS=$3
 
-WORKDIR=$(pwd)
-TMPDIR=${WORKDIR}/tmp
-mkdir $TMPDIR
-tar -xf input.tgz -C ${TMPDIR}
+INDIR=$(pwd)
+OUTDIR=$(pwd)
 
-source /cvmfs/cms.cern.ch/cmsset_default.sh
+eval $(scram unsetenv -sh)
 
-echo WORKDIR: ${WORKDIR}
-echo TMPDIR: ${TMPDIR}
 echo JOBNUM: ${JOBNUM}
-echo MAXEVENTS: ${MAXEVENTS}
 echo TODO: ${TODO}
-echo OUTDIR: ${OUTDIR}
-echo ls -l
-ls -l $WORKDIR $TMPDIR
+echo MAXEVENTS: ${MAXEVENTS}
 
 ################################################################################
 
@@ -32,25 +24,21 @@ echo START GENSIM
 scram project -n GENSIM CMSSW CMSSW_7_1_21_patch2
 cd GENSIM/src
 eval $(scram runtime -sh)
-
-for x in gensim.py modify.py; do
-    ln -s ${TMPDIR}/$x
-done
+cd ../..
 
 echo cmsRun
 cmsRun gensim.py \
     jobnum=${JOBNUM} \
-    maxevents=${MAXEVENTS} \
-    todo=${TODO} \
-    2>&1 | gzip > ${WORKDIR}/log_GENSIM_${JOBNUM}.gz
+    ${MAXEVENTS} \
+    ${TODO} \
+    2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
     gzip RandomEngineState.xml
-    mv RandomEngineState.xml.gz ${WORKDIR}/RandomEngineState_GENSIM_${JOBNUM}.xml.gz
-    mv gensim.root $TMPDIR
-    echo TMPDIR:
-    ls -l ${TMPDIR}/*root
+    mv RandomEngineState.xml.gz RandomEngineState_GENSIM.xml.gz
+    echo GENSIM ls -l
+    ls -l
 fi
 
 exit $EXITCODE
@@ -74,21 +62,17 @@ echo START RAWHLT
 scram project -n RAWHLT CMSSW CMSSW_7_6_1
 cd RAWHLT/src
 eval $(scram runtime -sh)
-
-for x in rawhlt.py modify.py minbias.py minbias_files.py minbias_files.pkl gensim.root; do
-    ln -s ${TMPDIR}/$x
-done
+cd ../..
 
 echo cmsRun
-cmsRun rawhlt.py 2>&1 | gzip > ${WORKDIR}/log_RAWHLT_${JOBNUM}.gz
+cmsRun rawhlt.py 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
     gzip RandomEngineState.xml
-    mv RandomEngineState.xml.gz ${WORKDIR}/RandomEngineState_RAWHLT_${JOBNUM}.xml.gz
-    mv hlt.root $TMPDIR
-    echo TMPDIR:
-    ls -l ${TMPDIR}/*root
+    mv RandomEngineState.xml.gz RandomEngineState_RAWHLT.xml.gz
+    echo RAWHLT ls -l
+    ls -l
 fi
 
 exit $EXITCODE
@@ -112,19 +96,15 @@ echo START RECO
 scram project -n RECO CMSSW CMSSW_7_6_1
 cd RECO/src
 eval $(scram runtime -sh)
-
-for x in /reco.py modify.py hlt.root; do
-    ln -s ${TMPDIR}/$x
-done
+cd ../..
 
 echo cmsRun
-cmsRun reco.py 2>&1 | gzip > ${WORKDIR}/log_RECO_${JOBNUM}.gz
+cmsRun -j FrameworkJobReport.xml reco.py 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
-    mv reco.root $TMPDIR
-    echo TMPDIR:
-    ls -l ${TMPDIR}/*root
+    echo RECO ls -l
+    ls -l
 fi
 
 exit $EXITCODE
@@ -139,15 +119,3 @@ if [ $EXITCODE -ne 0 ]; then
 fi
 
 echo END RECO
-
-################################################################################
-
-echo COPY using $(which xrdcp)
-echo
-echo proxy: $X509_USER_PROXY
-voms-proxy-info
-echo
-echo xrdcp -Nfvd 3 -t 5 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
-xrdcp -Nfvd 3 -t 5 ${TMPDIR}/reco.root ${OUTDIR}/reco_${JOBNUM}.root
-echo
-echo COPY done with exit code $?
