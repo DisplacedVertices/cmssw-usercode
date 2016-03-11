@@ -42,6 +42,15 @@ def files_in_dataset(dataset, instance='global'):
     return das_query(instance)('dataset=%s file' % dataset,
                                lambda s: s.endswith('.root'))
 
+def numevents_in_file(fn, instance='global'):
+    def xform(line):
+        try:
+            return int(line)
+        except ValueError:
+            return None
+    return das_query(instance)('file=%s | grep file.nevents' % fn,
+                               line_xform=xform)[0]
+
 def numevents_in_dataset(dataset, instance='global'):
     def xform(line):
         try:
