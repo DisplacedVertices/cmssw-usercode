@@ -42,7 +42,7 @@ xax.SetBinLabel(xax.FindBin(1000), '1000')
 xax.SetBinLabel(xax.FindBin(1200), '1200')
 xax.SetBinLabel(xax.FindBin(1400), '1400')
 yax = h.GetYaxis()
-yax.SetTitle('neutralino/gluino lifetime #tau')
+yax.SetTitle('neutralino/gluino lifetime')
 yax.SetTitleOffset(1.25)
 yax.SetRangeUser(300, 32000)
 yax.SetBinLabel(yax.FindBin(300), '300 #mum')
@@ -90,9 +90,9 @@ for xxx in ('small', 'big'):
     xax.SetBinLabel(xax.FindBin(1400), '1400')
     yax = h.GetYaxis()
     if xxx == 'small':
-        yax.SetTitle('neutralino/gluino lifetime #tau (#mum)')
+        yax.SetTitle('neutralino/gluino lifetime (mm)')
     else:
-        yax.SetTitle('neutralino/gluino lifetime #tau (mm)')
+        yax.SetTitle('neutralino/gluino lifetime (mm)')
     yax.SetTitleOffset(1.25)
     yax.SetLabelSize(0.055)
     if xxx == 'small':
@@ -101,7 +101,7 @@ for xxx in ('small', 'big'):
         yax.SetRangeUser(1000, 32000)
     if xxx == 'small':
         for tau in range(400, 801, 200):
-            yax.SetBinLabel(yax.FindBin(tau), '%i' % tau)
+            yax.SetBinLabel(yax.FindBin(tau), '%.1f' % (tau/1000.))
     else:
         yax.SetBinLabel(yax.FindBin(1000), '1')
         yax.SetBinLabel(yax.FindBin(5000), '5')
@@ -111,7 +111,7 @@ for xxx in ('small', 'big'):
     zax = h.GetZaxis()
     zax.SetTitleOffset(1.2)
     #zax.SetBinLabel(zax.FindBin(30), '30')
-    h.SetZTitle('95% CL upper limit on #sigma #times BR (fb)')
+    h.SetZTitle('95% CL upper limit on #sigma B (fb)')
     h.Draw('colz')
     if xxx == 'big':
         h.SetMinimum(0.4)

@@ -16,7 +16,7 @@ data_samples = Samples.data_samples
 background_samples = Samples.smaller_background_samples + Samples.leptonic_background_samples + Samples.ttbar_samples + Samples.qcd_samples
 signal_sample = Samples.mfv_neutralino_tau1000um_M0400
 signal_sample.cross_section = 0.001
-signal_sample.nice_name = '#splitline{#tau = 1 mm, M = 400 GeV,}{#sigma = 1 fb signal}'
+signal_sample.nice_name = '#splitline{#it{c#tau} = 1 mm, M = 400 GeV,}{#sigma = 1 fb signal}'
 signal_sample.color = 8
 
 for s in Samples.qcd_samples:
