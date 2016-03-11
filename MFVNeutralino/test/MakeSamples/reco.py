@@ -50,3 +50,6 @@ process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,proces
 
 from FWCore.ParameterSet.Utilities import convertToUnscheduled, cleanUnscheduled
 process = cleanUnscheduled(convertToUnscheduled(process))
+
+from datetime import datetime
+process.dummyForPsetHash = cms.PSet(dummy = cms.string(str(datetime.now())))
