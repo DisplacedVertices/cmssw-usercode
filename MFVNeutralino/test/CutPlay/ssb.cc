@@ -297,13 +297,11 @@ struct z_calculator {
   {
     samples.push_back(sample(options.signal_name, options.signal_xsec, kRed,       vars));
     samples.push_back(sample("ttbar",            832e3,     kBlue,      vars));
-    samples.push_back(sample("qcdht0200",       1.735e9,     kGreen + 6, vars));
-    samples.push_back(sample("qcdht0300",        3.67e8,     kGreen + 5, vars));
-    samples.push_back(sample("qcdht0500",        2.94e7,     kGreen + 4, vars));
-    samples.push_back(sample("qcdht0700",       6.524e6,     kGreen + 3, vars));
-    samples.push_back(sample("qcdht1000",       1.064e6,     kGreen + 2, vars));
-    samples.push_back(sample("qcdht1500",       121.5e3,     kGreen + 1, vars));
-    samples.push_back(sample("qcdht2000",       25.42e3,     kGreen,     vars));
+    samples.push_back(sample("qcdht0500",       3.163e7,     kGreen + 4, vars));
+    samples.push_back(sample("qcdht0700",       6.802e6,     kGreen + 3, vars));
+    samples.push_back(sample("qcdht1000",       1.206e6,     kGreen + 2, vars));
+    samples.push_back(sample("qcdht1500",         120e3,     kGreen + 1, vars));
+    samples.push_back(sample("qcdht2000",        25.3e3,     kGreen,     vars));
 
     for (std::vector<sample>::iterator s = samples.begin(); s != samples.end(); ) {
       if (!s->use())
