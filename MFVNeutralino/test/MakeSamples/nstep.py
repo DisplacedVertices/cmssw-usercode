@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-nevents = 2
-events_per = 1
+nevents = 10000
+events_per = 200
 
 meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 meta, taus, masses = 'neu', [1000], [800]
@@ -44,7 +44,7 @@ config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
 config.Data.publication = True
 config.Data.outputPrimaryDataset = 'SETME'
-config.Data.outputDatasetTag = 'nstep' # 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+config.Data.outputDatasetTag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
 
 config.Site.storageSite = 'T3_US_FNALLPC'
 config.Site.whitelist = '''T1_US_FNAL
