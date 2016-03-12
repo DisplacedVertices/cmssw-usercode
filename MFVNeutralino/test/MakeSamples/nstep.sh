@@ -3,8 +3,9 @@
 #exec 2>&1
 
 JOBNUM=$1
-TODO=$2
-MAXEVENTS=$3
+MAXEVENTS=$2
+export DUMMYFORHASH=$3
+TODO=$4
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
