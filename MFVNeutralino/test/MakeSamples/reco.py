@@ -1,6 +1,6 @@
 # from configs in dbs for /QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM
 
-import sys, FWCore.ParameterSet.Config as cms
+import os, sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 
 process = cms.Process('RECO', eras.Run2_25ns)
@@ -51,5 +51,4 @@ process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,proces
 from FWCore.ParameterSet.Utilities import convertToUnscheduled, cleanUnscheduled
 process = cleanUnscheduled(convertToUnscheduled(process))
 
-from datetime import datetime
-process.dummyForPsetHash = cms.PSet(dummy = cms.string(str(datetime.now())))
+process.dummyForPsetHash = cms.PSet(dummy = cms.string(os.environ.get('DUMMYFORHASH', '')))
