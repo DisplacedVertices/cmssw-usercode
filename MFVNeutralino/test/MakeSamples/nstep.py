@@ -1,66 +1,84 @@
-import sys, os, shutil
+#!/usr/bin/env python
 
-jdl = '''universe = vanilla
-Executable = %(executable)s
-arguments = $(Process) %(events_per)s %(todo)s %(outdir)s
-transfer_input_files = %(tar_fn_base)s
-x509userproxy = $ENV(X509_USER_PROXY)
-Output = stdout_$(Process).txt
-Log = condor_$(Process).log
-stream_output = false
-stream_error  = false
-notification  = never
-should_transfer_files   = YES
-when_to_transfer_output = ON_EXIT
-+LENGTH="SHORT"
-Queue %(njobs)s
-'''
+nevents = 2
+events_per = 1
 
-if os.system('voms-proxy-info -exists -valid 100:0') != 0:
-    if os.system('voms-proxy-init -rfc -voms cms -valid 192:00') != 0:
-        sys.exit(1)
+meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+meta, taus, masses = 'neu', [1000], [800]
 
-executable = 'nstep.sh'
-input_files = 'gensim.py modify.py rawhlt.py minbias.py minbias_files.py minbias_files.pkl reco.py'
-tar_fn_base = 'input.tgz'
+################################################################################
 
-for fn in input_files.split() + [executable]:
-    if not os.path.isfile(fn):
-        raise IOError('missing %s' % fn)
+from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
+from JMTucker.Tools.general import save_git_status
 
-user = os.environ['USER']
+testing = 'testing' in sys.argv
+work_area = crab_dirs_root('mfv_run2_nstep_%s' % meta)
+if os.path.isdir(work_area):
+    sys.exit('work_area %s exists' % work_area)
+os.makedirs(work_area)
+save_git_status(os.path.join(work_area, 'gitstatus'))
 
-events_per = 30
-njobs = 333
+from datetime import datetime
+dummy_for_hash = str(datetime.now())))
 
-if 1:
-    taus = [100, 300, 1000, 10000]
-    masses = [300, 400, 800, 1200, 1600]
+config = Config()
 
-    taus = [1000]
-    masses = [800]
+config.General.transferLogs = True
+config.General.transferOutputs = True
+config.General.workArea = work_area
+config.General.requestName = 'SETME'
 
+config.JobType.pluginName = 'PrivateMC'
+config.JobType.psetName = 'dummy.py'
+config.JobType.inputFiles = ['gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py']
+config.JobType.scriptExe = 'nstep.sh'
+config.JobType.scriptArgs = ['maxevents=%i' % events_per, dummy_for_hash, 'todo=mfv_neutralino,1,800']
+config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz', 'RandomEngineState_RAWHLT.xml.gz', 'reco.root']
+
+config.Data.splitting = 'EventBased'
+config.Data.unitsPerJob = events_per
+config.Data.totalUnits = nevents
+config.Data.publication = True
+config.Data.outputPrimaryDataset = 'SETME'
+config.Data.outputDatasetTag = 'nstep' # 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+
+config.Site.storageSite = 'T3_US_FNALLPC'
+config.Site.whitelist = '''T1_US_FNAL
+T2_BE_IIHE
+T2_CH_CERN
+T2_DE_DESY
+T2_DE_RWTH
+T2_EE_Estonia
+T2_ES_CIEMAT
+T2_FR_CCIN2P3
+T2_IT_Bari
+T2_IT_Legnaro
+T2_IT_Pisa
+T2_IT_Rome
+T2_PL_Swierk
+T2_UK_London_IC
+T2_UK_SGrid_RALPP
+T2_US_Caltech
+T2_US_Florida
+T2_US_MIT
+T2_US_Nebraska
+T2_US_UCSD
+T2_US_Vanderbilt
+T2_US_Wisconsin
+T2_UK_London_Brunel'''.split('\n')
+
+outputs = {}
+
+if meta == 'neu':
     for tau in taus:
         for mass in masses:
             todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
-            nice = 'mfv_neutralino_tau%05ium_M%04i' % (tau, mass)
-            outdirb = '/store/user/%s/nstep/%s' % (user, nice)
-            loutdir = '/eos/uscms' + outdirb
-            outdir = 'root://cmseos.fnal.gov/' + outdirb
-            workdir = 'workdirs/' + nice
-            if os.path.isdir(loutdir) or os.path.isdir(workdir):
-                raise IOError('%s or %s already exists' % (loutdir, workdir))
+            name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
 
-            os.system('mkdir -p ' + loutdir)
-            os.system('mkdir -p ' + workdir)
+            config.JobType.scriptArgs[-1] = todo
 
-            tar_fn = os.path.join(workdir, tar_fn_base)
-            os.system('tar czf %s %s' % (tar_fn, input_files))
-            
-            shutil.copy2(executable, os.path.join(workdir, executable))
+            config.General.workArea = name
+            config.Data.outputPrimaryDataset = name
 
-            open(os.path.join(workdir, 'jdl'), 'wt').write(jdl % locals())
-
-            pubinfo = open(os.path.join(workdir, 'pubinfo'), 'wt')
-            pubinfo.write(nice + '\n')
-            pubinfo.write('\n'.join(os.path.join(outdir, 'reco_%i.root' % i) for i in xrange(njobs)))
+            if not testing:
+                outputs[name] = crab_command('submit', config=config)
