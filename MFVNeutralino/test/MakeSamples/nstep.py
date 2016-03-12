@@ -11,9 +11,10 @@ ex = ''
 ################################################################################
 
 import sys, os
-from datetime import datetime
+from time import time
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
 from JMTucker.Tools.general import save_git_status
+import JMTucker.Tools.colors as colors
 
 testing = 'testing' in sys.argv
 work_area = crab_dirs_root('mfv_run2_nstep_%s%s' % (meta, ex))
@@ -22,7 +23,7 @@ if os.path.isdir(work_area):
 os.makedirs(work_area)
 save_git_status(os.path.join(work_area, 'gitstatus'))
 
-dummy_for_hash = str(datetime.now())
+dummy_for_hash = int(time()*1e6)
 
 config = Config()
 
@@ -35,7 +36,7 @@ config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'dummy.py'
 config.JobType.inputFiles = ['gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py']
 config.JobType.scriptExe = 'nstep.sh'
-config.JobType.scriptArgs = ['maxevents=%i' % events_per, dummy_for_hash, 'todo=mfv_neutralino,1,800']
+config.JobType.scriptArgs = ['maxevents=%i' % events_per, 'dummyforhash=%i' % dummy_for_hash, 'todo=SETME'] # stupid crab requires a =
 config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz', 'RandomEngineState_RAWHLT.xml.gz', 'reco.root']
 
 config.Data.splitting = 'EventBased'
@@ -75,7 +76,7 @@ outputs = {}
 if meta == 'neu':
     for tau in taus:
         for mass in masses:
-            todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
+            todo = 'todo=mfv_neutralino,%.1f,%i' % (tau/1000., mass)
             name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
 
             config.JobType.scriptArgs[-1] = todo
@@ -85,3 +86,11 @@ if meta == 'neu':
 
             if not testing:
                 outputs[name] = crab_command('submit', config=config)
+                print colors.boldwhite(name)
+                for x in sorted(outputs[name]):
+                    print colors.boldcyan(x + ':')
+                    print outputs[name][x].strip()
+                print
+            else:
+                print config
+

@@ -4,7 +4,7 @@
 
 JOBNUM=$1
 MAXEVENTS=$2
-export DUMMYFORHASH=$3
+export DUMMYFORHASH=$(echo $3 | cut -d = -f 2) # crab scriptArgs requires a =
 TODO=$4
 
 INDIR=$(pwd)
