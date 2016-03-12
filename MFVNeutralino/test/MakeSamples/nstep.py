@@ -6,20 +6,23 @@ events_per = 1
 meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 meta, taus, masses = 'neu', [1000], [800]
 
+ex = ''
+
 ################################################################################
 
+import sys, os
+from datetime import datetime
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
 from JMTucker.Tools.general import save_git_status
 
 testing = 'testing' in sys.argv
-work_area = crab_dirs_root('mfv_run2_nstep_%s' % meta)
+work_area = crab_dirs_root('mfv_run2_nstep_%s%s' % (meta, ex))
 if os.path.isdir(work_area):
     sys.exit('work_area %s exists' % work_area)
 os.makedirs(work_area)
 save_git_status(os.path.join(work_area, 'gitstatus'))
 
-from datetime import datetime
-dummy_for_hash = str(datetime.now())))
+dummy_for_hash = str(datetime.now())
 
 config = Config()
 
@@ -77,7 +80,7 @@ if meta == 'neu':
 
             config.JobType.scriptArgs[-1] = todo
 
-            config.General.workArea = name
+            config.General.requestName = name
             config.Data.outputPrimaryDataset = name
 
             if not testing:
