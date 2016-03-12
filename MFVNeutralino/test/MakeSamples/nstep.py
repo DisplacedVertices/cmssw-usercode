@@ -4,7 +4,7 @@ nevents = 10000
 events_per = 200
 
 meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-meta, taus, masses = 'neu', [1000], [800]
+#meta, taus, masses = 'neu', [1000], [800]
 
 ex = ''
 
@@ -73,24 +73,31 @@ T2_UK_London_Brunel'''.split('\n')
 
 outputs = {}
 
+def submit(config, name, todo):
+    config.General.requestName = name
+    config.Data.outputPrimaryDataset = name
+    config.JobType.scriptArgs[-1] = todo
+
+    if not testing:
+        outputs[name] = crab_command('submit', config=config)
+        print colors.boldwhite(name)
+        for x in sorted(outputs[name]):
+            print colors.boldcyan(x + ':')
+            print outputs[name][x].strip()
+        print
+    else:
+        print config
+
 if meta == 'neu':
     for tau in taus:
         for mass in masses:
-            todo = 'todo=mfv_neutralino,%.1f,%i' % (tau/1000., mass)
             name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
+            todo = 'todo=mfv_neutralino,%.1f,%i' % (tau/1000., mass)
+            submit(config, name, todo)
 
-            config.JobType.scriptArgs[-1] = todo
-
-            config.General.requestName = name
-            config.Data.outputPrimaryDataset = name
-
-            if not testing:
-                outputs[name] = crab_command('submit', config=config)
-                print colors.boldwhite(name)
-                for x in sorted(outputs[name]):
-                    print colors.boldcyan(x + ':')
-                    print outputs[name][x].strip()
-                print
-            else:
-                print config
-
+elif meta == 'lq2':
+    for tau in taus:
+        for mass in masses:
+            name = 'mfv_lq2_tau%05ium_M%04i' % (tau, mass)
+            todo = 'todo=leptoquark,%.1f,%i,2' % (tau/1000., mass)
+            submit(config, name, todo)
