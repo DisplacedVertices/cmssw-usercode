@@ -9,7 +9,7 @@ def set_ttbar(process):
         'Tune:pp 5',
         )
 
-def set_leptoquark(process, mass, lifetime, generation):
+def set_leptoquark(process, lifetime, mass, generation):
     params = [
         'LeptoQuark:gg2LQLQbar = on',
         'LeptoQuark:qqbar2LQLQbar = on',
@@ -379,4 +379,3 @@ def randomize_seeds(process, save_fn='RandomEngineState.xml'):
     randHelper.populate()
     if save_fn:
         process.RandomNumberGeneratorService.saveFileName =  cms.untracked.string(save_fn)
-
