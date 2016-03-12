@@ -100,7 +100,8 @@ eval $(scram runtime -sh)
 cd ../..
 
 echo cmsRun
-cmsRun -j FrameworkJobReport.xml reco.py 2>&1
+cmsRun -j tempfjr.xml reco.py 2>&1
+python fixfjr.py
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then

@@ -34,7 +34,7 @@ config.General.requestName = 'SETME'
 
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'dummy.py'
-config.JobType.inputFiles = ['gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py']
+config.JobType.inputFiles = ['gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py']
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.scriptArgs = ['maxevents=%i' % events_per, 'dummyforhash=%i' % dummy_for_hash, 'todo=SETME'] # stupid crab requires a =
 config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz', 'RandomEngineState_RAWHLT.xml.gz', 'reco.root']
