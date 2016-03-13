@@ -6,6 +6,10 @@ events_per = 200
 meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 #meta, taus, masses = 'neu', [1000], [800]
 
+meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+meta, taus, masses = 'gluddbar', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+
 ex = ''
 
 ################################################################################
@@ -93,6 +97,20 @@ if meta == 'neu':
         for mass in masses:
             name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
             todo = 'todo=mfv_neutralino,%.1f,%i' % (tau/1000., mass)
+            submit(config, name, todo)
+
+elif meta == 'glu':
+    for tau in taus:
+        for mass in masses:
+            name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
+            todo = 'todo=mfv_gluino,%.1f,%i' % (tau/1000., mass)
+            submit(config, name, todo)
+
+elif meta == 'gluddbar':
+    for tau in taus:
+        for mass in masses:
+            name = 'mfv_gluddbar_tau%05ium_M%04i' % (tau, mass)
+            todo = 'todo=gluino_ddbar,%.1f,%i' % (tau/1000., mass)
             submit(config, name, todo)
 
 elif meta == 'lq2':
