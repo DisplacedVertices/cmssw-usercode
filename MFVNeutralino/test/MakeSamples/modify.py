@@ -149,6 +149,20 @@ def set_mfv_gluino(process, tau0, m_gluino):
     slha = slha_mfv_gluino(tau0, m_gluino)
     process.generator.SLHATableForPythia8 = cms.string(slha)
     
+def set_gluino_ddbar(process, tau0, m_gluino):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'SUSY:gg2gluinogluino = on',
+        'SUSY:qqbar2gluinogluino = on',
+        'SUSY:idA = 1000021',
+        'SUSY:idB = 1000021',
+        )
+
+    set_gluino_tau0(process, tau0)
+    set_rhadrons_on(process)
+
+    slhaf = slha(tau0, m_gluino, None, [(1., (1,-1))])
+    process.generator.SLHATableForPythia8 = cms.string(slhaf)
+    
 ########################################################################
 
 def prefer_it(process, name, connect, record, tag):
