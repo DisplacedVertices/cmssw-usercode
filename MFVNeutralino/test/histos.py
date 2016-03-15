@@ -19,6 +19,8 @@ nm1s = [
     ('Geo2d',   'max_geo2ddist = 1e9'),
     ('Bs2derr', 'max_bs2derr = 1e9'),
     ('Njets',   'min_njetsntks = 0'),
+    ('NoDrmax', 'min_drmax = 1.2'),
+    ('NoDrmaxBs2derr', 'min_drmax = 1.2, max_bs2derr = 1e9'),
     ]
 
 if simple:
@@ -51,7 +53,8 @@ for name, cut in nm1s:
     for nv in (1,2):
         ana = eval('process.mfvAnalysisCuts.clone(%s)' % evt_cut)
         ana.vertex_src = vtx_name
-        ana.max_nvertex = nv
+        if nv == 1:
+            ana.max_nvertex = nv
         ana.min_nvertex = nv
         ana_name = 'ana%iVNo' % nv + name
 
