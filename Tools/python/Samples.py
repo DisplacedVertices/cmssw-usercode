@@ -543,6 +543,7 @@ _adbp3('ntuplev6p1_76x_newdefault', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_p
 _adbp3('ntuplev6p1_76x_newdefault', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_newdefault_try2-f5a0d1fdce51e33aaae9026f7c82b093/USER', 9867) # 2 files
 _adbp3('ntuplev6p1_76x_newdefault', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_newdefault_try2-981747c563e0def594e6a7b573470b29/USER', 9836) # 1 files
 _adbp3('ntuplev6p1_76x_newdefault', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_newdefault_try2-69619f9f3ead8619bb138c3148be2fd4/USER', 9703) # 1 files
+_adbp3('ntuplev6p1_76x_newdefault', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_newdefault_try2-65a5c7db1dc79d34ee08a5d451f8b3e4/USER', 9877) # 1 files
 _adbp3('ntuplev6p1_76x_newdefault', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_newdefault_try2-3f7b002f3fcb02908759046481bfcc0b/USER', 9883) # 1 files
 
 _adbp3('ntuplev6p1_76x_nstlays3', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-0563a6174ccfef7445b47a1adf52e04e/USER', 4408678) # 204 files
@@ -554,6 +555,7 @@ _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_py
 _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-ce3da775da3c8fa8b287f0e82d2fe17c/USER', 9836) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_nstlays3_try2-7ae9495b0be7532a9ad37380b27f5556/USER', 9703) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_nstlays3_try2-03104c0e9eec564d64a1121d775777ff/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_nstlays3_try2-c9742dec426e9ca7fa0300d223dfc51d/USER', 9883) # 1 files
 
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-b2d6e71246d10cf2d9a34b76ac72d20e/USER', 4408678) # 204 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-a414da26c478bd22f48fb7ea24274bfa/USER', 5039738) # 206 files
@@ -575,6 +577,7 @@ _adbp3('ntuplev6p1_76x_nstlays7', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pyt
 _adbp3('ntuplev6p1_76x_nstlays7', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-54886466d3f7a6aa074c6781192b6419/USER', 9867) # 2 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-d9f2640cbd7293ad1c88adba803b9fd0/USER', 9836) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_nstlays7_try2-61cbf31e3173ec8794fbc8381783c30c/USER', 9703) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays7', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_nstlays7_try2-5233ccb1615ab5c8223aa56336565e24/USER', 9877) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_nstlays7_try2-487857b1fe09ddd3374a4bdd88564d99/USER', 9883) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_nstlays7_try2-8b687cf372331ff6c19dbdafb544fd75/USER', 9595) # 1 files
 
