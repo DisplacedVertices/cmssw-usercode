@@ -80,7 +80,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdr;
 
-  TH1F* h_jet_H2T;
+  TH1F* h_jet_Fox_Wolfram[11];
 
   TH1F* h_vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
 
@@ -249,7 +249,9 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_jet_pairdr = fs->make<TH1F>("h_jet_pairdr", ";jet pair #DeltaR (rad);jet pairs/.047", 150, 0, 7);
 
-  h_jet_H2T = fs->make<TH1F>("h_jet_H2T", ";jets transverse Fox-Wolfram moment H_{2}^{T};events", 101, 0, 1.01);
+  for (int i = 0; i < 11; ++i) {
+    h_jet_Fox_Wolfram[i] = fs->make<TH1F>(TString::Format("h_jet_H%dT",i), TString::Format(";jets transverse Fox-Wolfram moment H_{%d}^{T};events",i), 101, 0, 1.01);
+  }
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, i < 4 ? 50 : 100);
@@ -448,16 +450,29 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  double H2T = 0;
+  double Fox_Wolfram[11] = {0};
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     double theta_i = 2 * atan(exp(-mevent->jet_eta[ijet]));
     for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
       double theta_j = 2 * atan(exp(-mevent->jet_eta[jjet]));
+      double WT_ij = mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_sum_ht() * mevent->jet_sum_ht());
       double x = cos(theta_i) * cos(theta_j) + sin(theta_i) * sin(theta_j) * cos(mevent->jet_phi[ijet] - mevent->jet_phi[jjet]);
-      H2T += mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_sum_ht() * mevent->jet_sum_ht()) * 0.5 * (3*x*x - 1);
+      Fox_Wolfram[0] += WT_ij * 1;
+      Fox_Wolfram[1] += WT_ij * x;
+      Fox_Wolfram[2] += WT_ij * 1./2. * (3*pow(x,2) - 1);
+      Fox_Wolfram[3] += WT_ij * 1./2. * (5*pow(x,3) - 3*x);
+      Fox_Wolfram[4] += WT_ij * 1./8. * (35*pow(x,4) - 30*pow(x,2) + 3);
+      Fox_Wolfram[5] += WT_ij * 1./8. * (63*pow(x,5) - 70*pow(x,3) + 15*x);
+      Fox_Wolfram[6] += WT_ij * 1./16. * (231*pow(x,6) - 315*pow(x,4) + 105*pow(x,2) - 5);
+      Fox_Wolfram[7] += WT_ij * 1./16. * (429*pow(x,7) - 693*pow(x,5) + 315*pow(x,3) - 35*x);
+      Fox_Wolfram[8] += WT_ij * 1./128. * (6435*pow(x,8) - 12012*pow(x,6) + 6930*pow(x,4) - 1260*pow(x,2) + 35);
+      Fox_Wolfram[9] += WT_ij * 1./128. * (12155*pow(x,9) - 25740*pow(x,7) + 18018*pow(x,5) - 4620*pow(x,3) + 315*x);
+      Fox_Wolfram[10] += WT_ij * 1./256. * (46189*pow(x,10) - 109395*pow(x,8) + 90090*pow(x,6) - 30030*pow(x,4) + 3465*pow(x,2) - 63);
     }
   }
-  h_jet_H2T->Fill(H2T);
+  for (int i = 0; i < 11; ++i) {
+    h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
+  }
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);
