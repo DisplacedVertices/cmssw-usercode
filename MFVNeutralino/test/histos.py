@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 simple = False
 
-process.source.fileNames = ['/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/ntuplev6p1_76x/160203_173407/0000/ntuple_1.root']
+process.source.fileNames = ['/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev6p1_76x_nstlays3_try2/160309_203757/0000/ntuple_1.root']
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
@@ -85,7 +85,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + \
         Samples.qcdpt_samples + \
-#        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         Samples.xx4j_samples
         )
 
@@ -96,9 +96,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             sample.json = 'ana_10pc.json'
             sample.lumis_per = 200
 
-    cs = CRABSubmitter('HistosV6p1_76x_puw',
-                       dataset = 'ntuplev6p1_76x',
+    cs = CRABSubmitter('HistosV6p1_76x_nstlays3',
+                       dataset = 'ntuplev6p1_76x_nstlays3',
                        job_control_from_sample = True,
                        aaa = True, # stored at FNAL, easy to run on T2_USes
                        )
-    cs.submit_all(samples)
+    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + [Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700, Samples.xx4j_tau00030mm_M0700])
