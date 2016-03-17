@@ -80,6 +80,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdr;
 
+  TH1F* h_jet_H2T;
+
   TH1F* h_vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
 
   TH1F* h_met;
@@ -246,6 +248,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 100, 0, 1000);
   h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_jet_pairdr = fs->make<TH1F>("h_jet_pairdr", ";jet pair #DeltaR (rad);jet pairs/.047", 150, 0, 7);
+
+  h_jet_H2T = fs->make<TH1F>("h_jet_H2T", ";jets transverse Fox-Wolfram moment H_{2}^{T};events", 101, 0, 1.01);
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, i < 4 ? 50 : 100);
@@ -443,6 +447,17 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]));
     }
   }
+
+  double H2T = 0;
+  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    double theta_i = 2 * atan(exp(-mevent->jet_eta[ijet]));
+    for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
+      double theta_j = 2 * atan(exp(-mevent->jet_eta[jjet]));
+      double x = cos(theta_i) * cos(theta_j) + sin(theta_i) * sin(theta_j) * cos(mevent->jet_phi[ijet] - mevent->jet_phi[jjet]);
+      H2T += mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_sum_ht() * mevent->jet_sum_ht()) * 0.5 * (3*x*x - 1);
+    }
+  }
+  h_jet_H2T->Fill(H2T);
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);
