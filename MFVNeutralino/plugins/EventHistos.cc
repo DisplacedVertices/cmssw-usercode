@@ -81,6 +81,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_pairdr;
 
   TH1F* h_jet_Fox_Wolfram[11];
+  TH1F* h_jet_ST;
 
   TH1F* h_vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
 
@@ -252,6 +253,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   for (int i = 0; i < 11; ++i) {
     h_jet_Fox_Wolfram[i] = fs->make<TH1F>(TString::Format("h_jet_H%dT",i), TString::Format(";jets transverse Fox-Wolfram moment H_{%d}^{T};events",i), 101, 0, 1.01);
   }
+  h_jet_ST = fs->make<TH1F>("h_jet_ST", ";jets transverse sphericity S_{T};events", 101, 0, 1.01);
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, i < 4 ? 50 : 100);
@@ -451,10 +453,16 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   double Fox_Wolfram[11] = {0};
+  double sum = 0;
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     double theta_i = 2 * atan(exp(-mevent->jet_eta[ijet]));
+    double px_i = mevent->jet_pt[ijet] * cos(mevent->jet_phi[ijet]);
+    double py_i = mevent->jet_pt[ijet] * sin(mevent->jet_phi[ijet]);
     for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
       double theta_j = 2 * atan(exp(-mevent->jet_eta[jjet]));
+      double px_j = mevent->jet_pt[jjet] * cos(mevent->jet_phi[jjet]);
+      double py_j = mevent->jet_pt[jjet] * sin(mevent->jet_phi[jjet]);
+
       double WT_ij = mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_sum_ht() * mevent->jet_sum_ht());
       double x = cos(theta_i) * cos(theta_j) + sin(theta_i) * sin(theta_j) * cos(mevent->jet_phi[ijet] - mevent->jet_phi[jjet]);
       Fox_Wolfram[0] += WT_ij * 1;
@@ -468,11 +476,14 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       Fox_Wolfram[8] += WT_ij * 1./128. * (6435*pow(x,8) - 12012*pow(x,6) + 6930*pow(x,4) - 1260*pow(x,2) + 35);
       Fox_Wolfram[9] += WT_ij * 1./128. * (12155*pow(x,9) - 25740*pow(x,7) + 18018*pow(x,5) - 4620*pow(x,3) + 315*x);
       Fox_Wolfram[10] += WT_ij * 1./256. * (46189*pow(x,10) - 109395*pow(x,8) + 90090*pow(x,6) - 30030*pow(x,4) + 3465*pow(x,2) - 63);
+
+      sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (mevent->jet_pt[ijet] * mevent->jet_pt[jjet]);
     }
   }
   for (int i = 0; i < 11; ++i) {
     h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
   }
+  h_jet_ST->Fill(1 - sqrt(1 - 4/(mevent->jet_sum_ht() * mevent->jet_sum_ht()) * sum));
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);
