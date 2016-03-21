@@ -46,7 +46,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     if 'No files to retrieve.' in res:
         files = []
     else:
-        files = [x.strip() for x in res.split('\n') if x.strip()]
+        files = [x.strip() for x in res.split('\n') if x.strip() and '.root' in x]
         if pattern:
             if '/' not in pattern:
                 pattern = '*/' + pattern
