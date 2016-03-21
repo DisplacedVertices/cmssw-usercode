@@ -63,7 +63,7 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_vtx_drmax;
 
   TH1F* h_gen_jetpt4;
-  TH1F* h_gen_sumht;
+  TH1F* h_gen_ht;
   TH1F* h_gen_dxy;
   TH1F* h_gen_ntracks;
   TH1F* h_gen_nquarks;
@@ -124,7 +124,7 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_vtx_drmax = fs->make<TH1F>("h_vtx_drmax", ";max #DeltaR between accepted displaced daughter particles;vertices", 100, 0, 5);
 
   h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
-  h_gen_sumht = fs->make<TH1F>("h_gen_sumht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 2000);
+  h_gen_ht = fs->make<TH1F>("h_gen_ht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 2000);
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 100, 0, 1);
   h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted displaced daughter particles;LSPs", 10, 0, 10);
   h_gen_nquarks = fs->make<TH1F>("h_gen_nquarks", ";number of accepted displaced quarks;LSPs", 10, 0, 10);
@@ -271,7 +271,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
   }
   std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
   h_gen_jetpt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f);
-  h_gen_sumht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f));
+  h_gen_ht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f));
 
   for (int i = 0; i < 2; ++i) {
     const int ndau = int(partons[i].size());

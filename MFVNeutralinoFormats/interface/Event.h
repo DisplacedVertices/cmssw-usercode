@@ -176,7 +176,7 @@ struct MFVEvent {
   float jetpt4() const { return njets() >= 4 ? jet_pt[3] : 0.f; }
   float jetpt5() const { return njets() >= 5 ? jet_pt[4] : 0.f; }
   float jetpt6() const { return njets() >= 6 ? jet_pt[5] : 0.f; }
-  float jet_sum_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
+  float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
 
   static uchar encode_jet_id(int pu_level, int bdisc_level) {

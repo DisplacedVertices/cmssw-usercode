@@ -33,7 +33,7 @@ namespace mfv {
     float pvz;
     ushort pvntracks;
     float pvsumpt2;
-    float jetsumht;
+    float jetht;
     float jetpt4;
     float met;
     uchar nlep;

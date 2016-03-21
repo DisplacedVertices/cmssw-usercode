@@ -103,7 +103,7 @@ void HadronicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
   int nbtags = 0;
   int nbtags_nocuts = 0;
   bool pass_njets = false;
-  double sum_ht = 0;
+  double ht = 0;
   for (int i = 0; i < int(jets->size()); ++i) {
     const pat::Jet& jet = jets->at(i);
     h_jet_pt->Fill(jet.pt());
@@ -116,7 +116,7 @@ void HadronicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
     if (i == 0 && jet.pt() > min_1st_jet_pt) pass_njets = true;
     if (jet.pt() > min_jet_pt) {
       ++njets;
-      sum_ht += jet.pt();
+      ht += jet.pt();
       if (bdisc > bdisc_min) {
         ++nbtags;
       }
@@ -136,7 +136,7 @@ void HadronicNBAnalysis::analyze(const edm::Event& event, const edm::EventSetup&
     h_njets_cut->Fill(njets);
     h_nbtags_cut->Fill(nbtags);
 
-    if (sum_ht > 1750) { 
+    if (ht > 1750) { 
     if (njets == 6) h_6jets->Fill(nbtags);
     if (njets == 7) h_7jets->Fill(nbtags);
     if (njets >= 8) h_8jets->Fill(nbtags);

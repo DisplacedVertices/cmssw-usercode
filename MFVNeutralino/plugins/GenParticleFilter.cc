@@ -24,7 +24,7 @@ private:
   const edm::InputTag gen_jet_src;
   const int min_njets;
   const double min_jet_pt;
-  const double min_jet_sumht;
+  const double min_jet_ht;
 
   const edm::InputTag gen_src;
   const bool print_info;
@@ -58,7 +58,7 @@ private:
 
   const int min_npartons;
   const double min_parton_pt;
-  const double min_parton_sumht;
+  const double min_parton_ht;
   const int min_ntracks;
   const int min_nquarks;
   const double min_sumpt;
@@ -77,7 +77,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
-    min_jet_sumht(cfg.getParameter<double>("min_jet_sumht")),
+    min_jet_ht(cfg.getParameter<double>("min_jet_ht")),
     gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
     print_info(cfg.getParameter<bool>("print_info")),
     cut_invalid(cfg.getParameter<bool>("cut_invalid")),
@@ -105,7 +105,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     mci_warned(false),
     min_npartons(cfg.getParameter<int>("min_npartons")),
     min_parton_pt(cfg.getParameter<double>("min_parton_pt")),
-    min_parton_sumht(cfg.getParameter<double>("min_parton_sumht")),
+    min_parton_ht(cfg.getParameter<double>("min_parton_ht")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     min_nquarks(cfg.getParameter<int>("min_nquarks")),
     min_sumpt(cfg.getParameter<double>("min_sumpt")),
@@ -220,16 +220,16 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     event.getByLabel(gen_jet_src, gen_jets);
 
     int njets_min_pt = 0;
-    double jet_sumht = 0;
+    double jet_ht = 0;
     for (const reco::GenJet& jet : *gen_jets) {
       if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
         ++njets_min_pt;
       if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-        jet_sumht += jet.pt();
+        jet_ht += jet.pt();
     }
     if (njets_min_pt < min_njets)
       return false;
-    if (jet_sumht < min_jet_sumht)
+    if (jet_ht < min_jet_ht)
       return false;
 
     if (required_num_leptonic >= 0 && mci.num_leptonic != required_num_leptonic)
@@ -308,7 +308,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
   if (min_npartons > 0 && (int(parton_pt.size()) >= min_npartons ? parton_pt.at(min_npartons-1) : 0.f) < min_parton_pt)
     return false;
-  if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f) < min_parton_sumht)
+  if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f) < min_parton_ht)
     return false;
 
   for (int i = 0; i < 2; ++i) {

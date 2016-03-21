@@ -71,7 +71,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetpt4;
   TH1F* h_jetpt5;
   TH1F* h_jetpt6;
-  TH1F* h_jet_sum_ht;
+  TH1F* h_jet_ht;
 
   TH1F* h_jet_pt;
   TH1F* h_jet_eta;
@@ -241,7 +241,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt6 = fs->make<TH1F>("h_jetpt6", ";p_{T} of 6th jet (GeV);events/5 GeV", 100, 0, 500);
-  h_jet_sum_ht = fs->make<TH1F>("h_jet_sum_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht = fs->make<TH1F>("h_jet_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
 
   h_jet_pt = fs->make<TH1F>("h_jet_pt", ";jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
   h_jet_eta = fs->make<TH1F>("h_jet_eta", ";jets #eta (rad);jets/.08", 100, -4, 4);
@@ -439,7 +439,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jetpt4->Fill(mevent->jetpt4(), w);
   h_jetpt5->Fill(mevent->jetpt5(), w);
   h_jetpt6->Fill(mevent->jetpt6(), w);
-  h_jet_sum_ht->Fill(mevent->jet_sum_ht(), w);
+  h_jet_ht->Fill(mevent->jet_ht(), w);
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_jet_pt->Fill(mevent->jet_pt[ijet]);
@@ -463,7 +463,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       double px_j = mevent->jet_pt[jjet] * cos(mevent->jet_phi[jjet]);
       double py_j = mevent->jet_pt[jjet] * sin(mevent->jet_phi[jjet]);
 
-      double WT_ij = mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_sum_ht() * mevent->jet_sum_ht());
+      double WT_ij = mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_ht() * mevent->jet_ht());
       double x = cos(theta_i) * cos(theta_j) + sin(theta_i) * sin(theta_j) * cos(mevent->jet_phi[ijet] - mevent->jet_phi[jjet]);
       Fox_Wolfram[0] += WT_ij * 1;
       Fox_Wolfram[1] += WT_ij * x;
@@ -483,7 +483,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < 11; ++i) {
     h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
   }
-  h_jet_ST->Fill(1 - sqrt(1 - 4/(mevent->jet_sum_ht() * mevent->jet_sum_ht()) * sum));
+  h_jet_ST->Fill(1 - sqrt(1 - 4/(mevent->jet_ht() * mevent->jet_ht()) * sum));
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);

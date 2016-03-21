@@ -83,7 +83,7 @@ C('npv_1vtx',
   )
 
 C('jetht_presel',
-  histogram_path = 'mfvEventHistosPreSel/h_jet_sum_ht',
+  histogram_path = 'mfvEventHistosPreSel/h_jet_ht',
   rebin = 5,
   x_title = 'particle-flow jet H_{T} (GeV)',
   y_title = 'events/100 GeV',
@@ -93,7 +93,7 @@ C('jetht_presel',
   )
 
 C('jetht_1vtx',
-  histogram_path = 'mfvEventHistosOnlyOneVtx/h_jet_sum_ht',
+  histogram_path = 'mfvEventHistosOnlyOneVtx/h_jet_ht',
   rebin = 5,
   x_title = 'particle-flow jet H_{T} (GeV)',
   y_title = 'events/100 GeV',

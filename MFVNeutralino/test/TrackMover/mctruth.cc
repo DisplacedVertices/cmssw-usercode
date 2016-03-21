@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     nd.book("pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
     nd.book("pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book("pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
-    nd.book("sumht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
+    nd.book("ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
   }
 
   double den = 0;
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
       fflush(stdout);
     }
 
-    if (nt.jetsumht < 500 || nt.jetpt4 < 60)
+    if (nt.jetht < 500 || nt.jetpt4 < 60)
       continue;
 
     const double w = apply_weight ? nt.weight : 1.;
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
         Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
         Fill(nd("pvntracks")    .den, nt.pvntracks);
         Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
-        Fill(nd("sumht")        .den, nt.jetsumht);
+        Fill(nd("ht")        .den, nt.jetht);
       }
 
       den += w;
@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
           Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
           Fill(nd("pvntracks")    .num, nt.pvntracks);
           Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
-          Fill(nd("sumht")        .num, nt.jetsumht);
+          Fill(nd("ht")        .num, nt.jetht);
         }
       }
     }

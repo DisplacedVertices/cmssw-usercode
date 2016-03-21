@@ -17,7 +17,7 @@ for sig in sigs:
     sig.f = ROOT.TFile(sig.fn)
 
 def get(name, f):
-    h = f.Get('Mu14C0pfnum/h_njets_v_sumht').Clone(name)
+    h = f.Get('Mu14C0pfnum/h_njets_v_ht').Clone(name)
     h.RebinX(2)
     p = h.ProfileX(name + '_prof') #, 1, -1, 's')
     p.SetLineWidth(2)

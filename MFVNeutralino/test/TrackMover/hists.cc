@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
     nd.book("pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
     nd.book("pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book("pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
-    nd.book("sumht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
+    nd.book("ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
     nd.book("met", ";MET (GeV);events/20 GeV", 25, 0, 500);
     nd.book("nlep", ";# leptons;events", 5, 0, 5);
     nd.book("ntracks", ";# tracks;events/10", 200, 0, 2000);
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
     
     if (nt.npreseljets < njets_req || 
         nt.npreselbjets < nbjets_req ||
-        nt.jetsumht < 1000 ||
+        nt.jetht < 1000 ||
         movedist2 < 0.03 ||
         movedist2 > 2.5)
       continue;
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
       Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
       Fill(nd("pvntracks")    .den, nt.pvntracks);
       Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
-      Fill(nd("sumht")        .den, nt.jetsumht);
+      Fill(nd("ht")        .den, nt.jetht);
       Fill(nd("met")          .den, nt.met);
       Fill(nd("nlep")         .den, nt.nlep);
       Fill(nd("ntracks")      .den, nt.ntracks);
@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
         Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
         Fill(nd("pvntracks")    .num, nt.pvntracks);
         Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
-        Fill(nd("sumht")        .num, nt.jetsumht);
+        Fill(nd("ht")        .num, nt.jetht);
         Fill(nd("met")          .num, nt.met);
         Fill(nd("nlep")         .num, nt.nlep);
         Fill(nd("ntracks")      .num, nt.ntracks);

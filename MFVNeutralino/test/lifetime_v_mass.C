@@ -320,19 +320,19 @@ void ntracks() {
 */
 }
 
-void sumht() {
+void ht() {
   xcut = 600;
   ycut = 0.1;
-//  plot_all_samples("h_bs2ddist01_sumht");
-//  plot_all_samples("h_pv2ddist01_sumht");
-//  plot_all_samples("h_pv3ddist01_sumht");
-//  plot_all_samples("h_pv3dctau01_sumht");
-  plot_all_samples("h_svdist2d_sumht");
-  plot_all_samples("h_svdist3d_sumht");
-//  plot_all_samples("h_svdist2dcmz_sumht");
-  plot_all_samples("h_svdist3dcmz_sumht");
-  plot_all_samples("h_svctau2dcmz_sumht");
-  plot_all_samples("h_svctau3dcmz_sumht");
+//  plot_all_samples("h_bs2ddist01_ht");
+//  plot_all_samples("h_pv2ddist01_ht");
+//  plot_all_samples("h_pv3ddist01_ht");
+//  plot_all_samples("h_pv3dctau01_ht");
+  plot_all_samples("h_svdist2d_ht");
+  plot_all_samples("h_svdist3d_ht");
+//  plot_all_samples("h_svdist2dcmz_ht");
+  plot_all_samples("h_svdist3dcmz_ht");
+  plot_all_samples("h_svctau2dcmz_ht");
+  plot_all_samples("h_svctau3dcmz_ht");
 }
 
 void njets() {
@@ -353,7 +353,7 @@ void njets() {
 void lifetime_v_mass() {
 //  mass();
 //  ntracks();
-//  sumht();
+//  ht();
 //  njets();
 //  ycut = 0.1;
 //  xcut = 40;  plot_all_samples("h_svctau3dcmz_maxtrackpt01");

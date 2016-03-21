@@ -23,18 +23,18 @@ changes.append(('nm1', '', ''))
 changes.append(('tightX3', '', 'max_npv = 5'))
 changes.append(('ABCDX3', 'min_ntracks = 5, min_maxtrackpt = 0', 'min_ntracks01 = 0, min_maxtrackpt01 = 0, max_npv = 5'))
 changes.append(('triggerX3', '', 'apply_vertex_cuts = False, max_npv = 5'))
-changes.append(('nocutsX3', '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, max_npv = 5, min_sumht = 0'))
+changes.append(('nocutsX3', '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, max_npv = 5, min_ht = 0'))
 
 for i in xrange(6,30,3):
     changes.append(('tightX%i'%i, '', 'min_npv = %i, max_npv = %i+2'%(i,i)))
     changes.append(('ABCDX%i'%i, 'min_ntracks = 5, min_maxtrackpt = 0', 'min_ntracks01 = 0, min_maxtrackpt01 = 0, min_npv = %i, max_npv = %i+2'%(i,i)))
     changes.append(('triggerX%i'%i, '', 'apply_vertex_cuts = False, min_npv = %i, max_npv = %i+2'%(i,i)))
-    changes.append(('nocutsX%i'%i, '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = %i, max_npv = %i+2, min_sumht = 0'%(i,i)))
+    changes.append(('nocutsX%i'%i, '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = %i, max_npv = %i+2, min_ht = 0'%(i,i)))
 
 changes.append(('tightX30', '', 'min_npv = 30'))
 changes.append(('ABCDX30', 'min_ntracks = 5, min_maxtrackpt = 0', 'min_ntracks01 = 0, min_maxtrackpt01 = 0, min_npv = 30'))
 changes.append(('triggerX30', '', 'apply_vertex_cuts = False, min_npv = 30'))
-changes.append(('nocutsX30', '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = 30, min_sumht = 0'))
+changes.append(('nocutsX30', '', 'min_4th_jet_pt = 0, min_njets = 0, apply_vertex_cuts = False, min_npv = 30, min_ht = 0'))
 
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name

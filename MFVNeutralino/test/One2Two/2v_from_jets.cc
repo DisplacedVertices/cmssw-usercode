@@ -21,7 +21,7 @@ const int nbkg = 5;
 const char* samples[nbkg] = {"qcdht0700", "qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
 float weights[nbkg] = {1.115, 0.5596, 0.08199, 0.03366, 0.05056};
 
-float sumht(int njets, float* jet_pt) {
+float ht(int njets, float* jet_pt) {
   double sum = 0;
   for (int i = 0; i < njets; ++i) {
     sum += jet_pt[i];
@@ -35,7 +35,7 @@ float throw_phi(int njets, float* jet_pt, float* jet_phi) {
   double sumpt = 0;
   for (int j = 0; j < njets; ++j) {
     sumpt += jet_pt[j];
-    if (rand < sumpt/sumht(njets, jet_pt)) {
+    if (rand < sumpt/ht(njets, jet_pt)) {
       rjetphi = jet_phi[j];
       break;
     }
@@ -67,7 +67,7 @@ int main(int argc, const char* argv[]) {
   TH1D* h_1v_dbv = new TH1D("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
-  TH1F* h_1v_sumht = new TH1F("h_1v_sumht", "only-one-vertex events;#Sigma H_{T} of jets (GeV);events", 200, 0, 5000);
+  TH1F* h_1v_ht = new TH1F("h_1v_ht", "only-one-vertex events;#Sigma H_{T} of jets (GeV);events", 200, 0, 5000);
   TH1F* h_1v_phij = new TH1F("h_1v_phij", "only-one-vertex events;jets #phi;jets", 50, -3.15, 3.15);
   TH1F* h_1v_dphijj = new TH1F("h_1v_dphijj", "only-one-vertex events;jet pair #Delta#phi;jet pairs", 50, -3.15, 3.15);
   TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
@@ -94,7 +94,7 @@ int main(int argc, const char* argv[]) {
         h_1v_dbv->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
         h_1v_njets->Fill(nt.njets, w);
-        h_1v_sumht->Fill(sumht(nt.njets, nt.jet_pt), w);
+        h_1v_ht->Fill(ht(nt.njets, nt.jet_pt), w);
         for (int k = 0; k < nt.njets; ++k) {
           h_1v_phij->Fill(nt.jet_phi[k], w);
           h_1v_dphijv->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]), w);
@@ -183,7 +183,7 @@ int main(int argc, const char* argv[]) {
   h_1v_dbv->Write();
   h_1v_phiv->Write();
   h_1v_njets->Write();
-  h_1v_sumht->Write();
+  h_1v_ht->Write();
   h_1v_phij->Write();
   h_1v_dphijj->Write();
   h_1v_dphijv->Write();

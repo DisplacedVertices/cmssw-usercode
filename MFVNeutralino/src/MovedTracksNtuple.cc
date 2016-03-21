@@ -12,7 +12,7 @@ namespace mfv {
   void MovedTracksNtuple::clear() {
     run = lumi = 0;
     event = 0;
-    weight = pvx = pvy = pvz = pvsumpt2 = jetsumht = jetpt4 = met = move_x = move_y = move_z = 0;
+    weight = pvx = pvy = pvz = pvsumpt2 = jetht = jetpt4 = met = move_x = move_y = move_z = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -63,7 +63,7 @@ namespace mfv {
     tree->Branch("pvz", &pvz);
     tree->Branch("pvntracks", &pvntracks);
     tree->Branch("pvsumpt2", &pvsumpt2);
-    tree->Branch("jetsumht", &jetsumht);
+    tree->Branch("jetht", &jetht);
     tree->Branch("jetpt4", &jetpt4);
     tree->Branch("met", &met);
     tree->Branch("nlep", &nlep);
@@ -114,7 +114,7 @@ namespace mfv {
     tree->SetBranchAddress("pvz", &pvz);
     tree->SetBranchAddress("pvntracks", &pvntracks);
     tree->SetBranchAddress("pvsumpt2", &pvsumpt2);
-    tree->SetBranchAddress("jetsumht", &jetsumht);
+    tree->SetBranchAddress("jetht", &jetht);
     tree->SetBranchAddress("jetpt4", &jetpt4);
     tree->SetBranchAddress("met", &met);
     tree->SetBranchAddress("nlep", &nlep);

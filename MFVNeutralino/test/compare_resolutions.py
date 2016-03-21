@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 #samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
 #histNames = ['h_lsp0nmatch_lsp1nmatch', 'h_vtxmatch_vtxtotal', 'h_dx', 'h_dy', 'h_dz', 'h_dist2d', 'h_dist3d', 'h_pull_dz', 'h_pull_dist2d', 'h_rp_rmass', 'h_fp_fmass', 'h_s_p_mass', 'h_rp_renergy', 'h_fp_fenergy', 'h_s_p_energy', 'h_r_p', 'h_f_p', 'h_s_p', 'h_r_pt', 'h_f_pt', 'h_s_pt', 'h_r_eta', 'h_s_eta', 'h_r_phi', 'h_s_phi', 'h_r_mass', 'h_f_mass', 'h_s_mass', 'h_r_msptm', 'h_f_msptm', 'h_s_msptm', 'h_r_msptm_mass', 'h_f_msptm_mass', 'h_s_msptm_mass', 'h_r_energy', 'h_f_energy', 'h_s_energy', 'h_r_px', 'h_s_px', 'h_r_py', 'h_s_py', 'h_r_pz', 'h_s_pz', 'h_r_rapidity', 'h_s_rapidity', 'h_r_theta', 'h_s_theta', 'h_r_betagamma', 'h_s_betagamma', 'h_r_avgbetagammalab', 'h_s_avgbetagammalab', 'h_r_avgbetagammacmz', 'h_s_avgbetagammacmz']
 samples = [Samples.mfv_neutralino_tau1000um_M0400]
-histNames = ['h_s_genjets_njets', 'h_s_genjets_ncalojets', 'h_s_genjets_calojetpt4', 'h_s_genjets_jetsumht', 'h_s_partons_njets', 'h_s_partons_ncalojets', 'h_s_partons_calojetpt4', 'h_s_partons_jetsumht', 'h_s_drmin', 'h_s_drmax', 'h_s_dbv', 'h_s_dvv']
+histNames = ['h_s_genjets_njets', 'h_s_genjets_ncalojets', 'h_s_genjets_calojetpt4', 'h_s_genjets_jetht', 'h_s_partons_njets', 'h_s_partons_ncalojets', 'h_s_partons_calojetpt4', 'h_s_partons_jetht', 'h_s_drmin', 'h_s_drmax', 'h_s_dbv', 'h_s_dvv']
 
 for sample in samples:
     ps = plot_saver('plots/MFVResolutionsV20/genParticlesFullSelByDistCut/%s' % sample.name, size=(700,700), root=False)

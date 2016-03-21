@@ -82,7 +82,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.pvz = mevent->pvz;
   nt.pvntracks = mevent->pv_ntracks;
   nt.pvsumpt2 = mevent->pv_sumpt2;
-  nt.jetsumht = mevent->jet_sum_ht();
+  nt.jetht = mevent->jet_ht();
   nt.jetpt4 = mevent->jetpt4();
   nt.met = mevent->met();
   nt.nlep = mevent->nlep(2);
@@ -159,7 +159,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
 
   if (apply_presel) {
     if ((!for_mctruth && (nt.npreseljets < njets_req || nt.npreselbjets < nbjets_req)) ||
-        nt.jetsumht < 1000)
+        nt.jetht < 1000)
     return;
   }
 

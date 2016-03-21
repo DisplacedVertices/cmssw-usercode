@@ -37,7 +37,7 @@ def get_em(fn, alpha=1-0.6827):
         if 'jetdravg' == name or \
            'jetdrmax' == name or \
            'npv' == name or \
-           'sumht' == name:
+           'ht' == name:
             obj.Rebin(2)
         elif 'jetsume' == name or \
              'movedist2' == name or \

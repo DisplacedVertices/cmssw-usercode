@@ -24,7 +24,7 @@ if do_nominal:
     for i in xrange(40, 200, 5):
         changes.append(('calojetpt4X%i' % i, '', 'min_4th_calojet_pt = %i' % i))
     for i in xrange(250,1001,50):
-        changes.append(('sumhtX%i'%i, '', 'min_sumht = %i'%i))
+        changes.append(('htX%i'%i, '', 'min_ht = %i'%i))
     for i in xrange(0,15):
         changes.append(('ntracksX%i'%i, 'min_ntracks = %i, min_njetsntks = 0'%i, ''))
     for i in xrange(0,10):
