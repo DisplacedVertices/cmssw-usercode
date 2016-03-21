@@ -274,7 +274,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
         miss_dist = Measurement1D(miss_dist_value, miss_dist_err);
       }
 
-      if (ntracks_ptmin >= min_tracks_shared && ntracks > best_ntracks[ijet]) {
+      if (ntracks >= min_tracks_shared && ntracks > best_ntracks[ijet]) {
         second_best_ntracks[ijet] = best_ntracks[ijet];
         best_ntracks[ijet] = ntracks;
         index_by_ntracks[ijet] = ivtx;
