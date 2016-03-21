@@ -209,7 +209,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->jet_ht() < min_ht)
       return false;
 
-    if (mevent->jet_ht() > max_ht)
+    if (mevent->jet_ht(40) > max_ht)
       return false;
 
     double sum = 0;
