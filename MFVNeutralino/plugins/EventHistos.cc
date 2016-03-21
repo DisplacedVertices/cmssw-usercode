@@ -72,6 +72,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jetpt5;
   TH1F* h_jetpt6;
   TH1F* h_jet_ht;
+  TH1F* h_jet_ht_40;
 
   TH1F* h_jet_pt;
   TH1F* h_jet_eta;
@@ -241,7 +242,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jetpt4 = fs->make<TH1F>("h_jetpt4", ";p_{T} of 4th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt5 = fs->make<TH1F>("h_jetpt5", ";p_{T} of 5th jet (GeV);events/5 GeV", 100, 0, 500);
   h_jetpt6 = fs->make<TH1F>("h_jetpt6", ";p_{T} of 6th jet (GeV);events/5 GeV", 100, 0, 500);
-  h_jet_ht = fs->make<TH1F>("h_jet_ht", ";#Sigma H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
 
   h_jet_pt = fs->make<TH1F>("h_jet_pt", ";jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
   h_jet_eta = fs->make<TH1F>("h_jet_eta", ";jets #eta (rad);jets/.08", 100, -4, 4);
@@ -440,6 +442,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jetpt5->Fill(mevent->jetpt5(), w);
   h_jetpt6->Fill(mevent->jetpt6(), w);
   h_jet_ht->Fill(mevent->jet_ht(), w);
+  h_jet_ht_40->Fill(mevent->jet_ht(40), w);
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_jet_pt->Fill(mevent->jet_pt[ijet]);
