@@ -35,18 +35,21 @@ int main(int argc, char** argv) {
 
   bool z_slice = false;
   bool nhits_slice = false;
-  bool pt_slice = false;
-  bool eta_slice = false;
+  bool pt_slice = true;
+  bool eta_slice = true;
 
   const double z_slice_bounds[2] = { -7.5, -2.5 };
   const double nhits_slice_bounds[2] = { 0, 3 };
-  const double pt_slice_bounds[2] = { 4, 5 };
-  const double eta_slice_bounds[2] = { 0, 1 };
+  const double pt_slice_bounds[2] = { 5, 1e9 };
+  const double eta_slice_bounds[2] = { 1.9, 2.5 };
 
   const double min_all_track_pt = 1;
   const double min_all_track_sigmadxy = 4;
-  const int min_all_track_nhits = 8;
-  const int min_all_track_npxhits = 2;
+  //  const int min_all_track_nhits = 8;
+  //  const int min_all_track_npxhits = 2;
+  const int min_all_track_min_r = 1;
+  const int min_all_track_npxlays = 2;
+  const int min_all_track_nstlays = 4;
 
   //  const double pileup_weights[40] = { 99.15056679507543, 172.99847243562277, 121.89056539480684, 36.648532815731905, 15.130284226820047, 3.388892702882986, 1.986252356518944, 2.553598893553273, 3.391463356559057, 3.329138633709162, 3.078061196234216, 2.7655190007638786, 2.183863508534957, 1.4521096234256572, 0.8040188219328743, 0.3713065789043111, 0.15067662959667333, 0.061442166758053925, 0.029481930242311164, 0.015649765632974884, 0.007675085464470436, 0.003212647741405869, 0.0011654706818925956, 0.0003947719988503597, 0.00013783918071098118, 5.240303150410027e-05, 2.121092370685294e-05, 8.720595168624445e-06, 3.5144188113130866e-06, 1.3327213104566867e-06, 4.428988947779108e-07, 1.1797413268628033e-07, 2.422301652608736e-08, 3.9984662880098295e-09, 5.655318026602206e-10, 7.135693975440923e-11, 8.180332652856529e-12, 8.590503460873983e-13, 8.181362972336421e-14, 7.046437100909094e-15 };
 
@@ -153,7 +156,7 @@ int main(int argc, char** argv) {
   TH1D* h_seed_nosigcut_track_hitpars[12];
   TH2D* h_seed_nosigcut_track_dxyerr_v_hitpars[1][12];
   for (int i = 0; i < 12; ++i)
-    h_seed_nosigcut_track_hitpars[i] = new TH1D(TString::Format("h_seed_nosigcut_track_%s", hitpar_names[i]), TString::Format(";all track %s", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i]);
+    h_seed_nosigcut_track_hitpars[i] = new TH1D(TString::Format("h_seed_nosigcut_track_%s", hitpar_names[i]), TString::Format(";seed nosig track %s", hitpar_names[i]), hitpar_nbins[i], hitpar_lo[i], hitpar_hi[i]);
   TH1D* h_seed_nosigcut_track_sigmadxybs = new TH1D("h_seed_nosigcut_track_sigmadxybs", ";seed nosig track sigmadxybs", 1000, -10, 10);
   TH1D* h_seed_nosigcut_track_charge = new TH1D("h_seed_nosigcut_track_charge", ";seed nosig track charge", 4, -2, 2);
   for (int i = 0; i < 9; ++i) {
@@ -255,9 +258,12 @@ int main(int argc, char** argv) {
 	else
 	  charge = -1;
 
-	const bool use = pt > min_all_track_pt && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits && fabs(sigmadxy) > min_all_track_sigmadxy;
-	const bool use_nosigcut = pt > min_all_track_pt && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits;
+	//	const bool use = pt > min_all_track_pt && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits && fabs(sigmadxy) > min_all_track_sigmadxy && min_r == min_all_track_min_r;
+	//	const bool use_nosigcut = pt > min_all_track_pt && nhits >= min_all_track_nhits && npxhits >= min_all_track_npxhits && min_r == min_all_track_min_r;
+	const bool use = pt > min_all_track_pt && npxlays >= min_all_track_npxlays && nstlays >= min_all_track_nstlays && fabs(sigmadxy) > min_all_track_sigmadxy && min_r == min_all_track_min_r;
+	const bool use_nosigcut = pt > min_all_track_pt && npxlays >= min_all_track_npxlays && nstlays >= min_all_track_nstlays && min_r == min_all_track_min_r;
 	
+
 	bool z_slice_use = dz > z_slice_bounds[0] && dz < z_slice_bounds[1];
 	bool nhits_slice_use = nhits > nhits_slice_bounds[0] && nhits < nhits_slice_bounds[1];
 	bool pt_slice_use = pt > pt_slice_bounds[0] && pt < pt_slice_bounds[1];
