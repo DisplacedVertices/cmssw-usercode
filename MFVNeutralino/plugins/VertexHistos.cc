@@ -87,6 +87,9 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_trackpairdphimax_bs2derr[sv_num_indices];
   TH2F* h_sv_tkonlymass_bs2derr[sv_num_indices];
   TH2F* h_sv_tksjetsntkmass_bs2derr[sv_num_indices];
+  TH2F* h_sv_jetST_bs2derr[sv_num_indices];
+  TH2F* h_sv_jetST_drmax[sv_num_indices];
+  TH2F* h_sv_jetST_bsbs2ddist[sv_num_indices];
 
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
@@ -523,6 +526,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_trackpairdphimax_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_trackpairdphimax_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);SV max{|#Delta #phi(i,j)|}", exc), 100, 0, 0.05, 100, 0, 3.15);
     h_sv_tkonlymass_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_tkonlymass_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);SV tracks-only mass (GeV)", exc), 100, 0, 0.05, 50, 0, 500);
     h_sv_tksjetsntkmass_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_tksjetsntkmass_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);SV tracks-plus-jets-by-ntracks mass (GeV)", exc), 100, 0, 0.05, 50, 0, 2000);
+    h_sv_jetST_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);jets transverse sphericity S_{T}", exc), 100, 0, 0.05, 101, 0, 1.01);
+    h_sv_jetST_drmax[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_drmax", exc), TString::Format("%s SV;SV max{#Delta R(i,j)};jets transverse sphericity S_{T}", exc), 150, 0, 7, 101, 0, 1.01);
+    h_sv_jetST_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);jets transverse sphericity S_{T}", exc), 500, 0, 2.5, 101, 0, 1.01);
 
     h_sv_track_weight[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_weight", exc), TString::Format(";%s SV tracks weight;arb. units", exc), 21, 0, 1.05);
     h_sv_track_q[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_q", exc), TString::Format(";%s SV tracks charge;arb. units.", exc), 4, -2, 2);
@@ -989,6 +995,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         }
       }
     }
+
     int ntracksthepv = 0;
     int ntracksanypv = 0;
     int ntracksnopv = 0;
@@ -999,10 +1006,26 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     }
     fill_multi(h_sv_ntracksanypv_ntracksthepv, isv, ntracksthepv, ntracksanypv, w);
     fill_multi(h_sv_ntracksnopv_ntracksanypv, isv, ntracksanypv, ntracksnopv, w);
+
     fill_multi(h_sv_drmax_bs2derr, isv, aux.bs2derr, aux.drmax(), w);
     fill_multi(h_sv_trackpairdphimax_bs2derr, isv, aux.bs2derr, 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0], w);
     fill_multi(h_sv_tkonlymass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksOnly], w);
     fill_multi(h_sv_tksjetsntkmass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksPlusJetsByNtracks], w);
+
+    double sum = 0;
+    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      double px_i = mevent->jet_pt[ijet] * cos(mevent->jet_phi[ijet]);
+      double py_i = mevent->jet_pt[ijet] * sin(mevent->jet_phi[ijet]);
+      for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
+	double px_j = mevent->jet_pt[jjet] * cos(mevent->jet_phi[jjet]);
+	double py_j = mevent->jet_pt[jjet] * sin(mevent->jet_phi[jjet]);
+	sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (mevent->jet_pt[ijet] * mevent->jet_pt[jjet]);
+      }
+    }
+    double jetST = 1 - sqrt(1 - 4/(mevent->jet_ht() * mevent->jet_ht()) * sum);
+    fill_multi(h_sv_jetST_bs2derr, isv, aux.bs2derr, jetST, w);
+    fill_multi(h_sv_jetST_drmax, isv, aux.drmax(), jetST, w);
+    fill_multi(h_sv_jetST_bsbs2ddist, isv, mevent->bs2ddist(aux), jetST, w);
 
     for (int i = 0; i < int(aux.ntracks()); ++i) {
       fill_multi(h_sv_track_weight, isv, aux.track_weight(i), w);
