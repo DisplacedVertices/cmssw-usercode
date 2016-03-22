@@ -84,6 +84,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_Fox_Wolfram[11];
   TH1F* h_jet_ST;
 
+  TH2F* h_jet_ST_njets;
+  TH2F* h_jet_ST_ht;
+  TH2F* h_jet_ST_ht40;
+
   TH1F* h_vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
 
   TH1F* h_met;
@@ -256,6 +260,9 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_jet_Fox_Wolfram[i] = fs->make<TH1F>(TString::Format("h_jet_H%dT",i), TString::Format(";jets transverse Fox-Wolfram moment H_{%d}^{T};events",i), 101, 0, 1.01);
   }
   h_jet_ST = fs->make<TH1F>("h_jet_ST", ";jets transverse sphericity S_{T};events", 101, 0, 1.01);
+  h_jet_ST_njets = fs->make<TH2F>("h_jet_ST_njets", ";number of jets;jets transverse sphericity S_{T}", 20, 0, 20, 101, 0, 1.01);
+  h_jet_ST_ht = fs->make<TH2F>("h_jet_ST_ht", ";H_{T} of jets (GeV);jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
+  h_jet_ST_ht40 = fs->make<TH2F>("h_jet_ST_ht40", ";H_{T} of jets with p_{T} > 40 GeV;jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, i < 4 ? 50 : 100);
@@ -486,7 +493,11 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < 11; ++i) {
     h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
   }
-  h_jet_ST->Fill(1 - sqrt(1 - 4/(mevent->jet_ht() * mevent->jet_ht()) * sum));
+  double jet_ST = 1 - sqrt(1 - 4/(mevent->jet_ht() * mevent->jet_ht()) * sum);
+  h_jet_ST->Fill(jet_ST);
+  h_jet_ST_njets->Fill(mevent->njets(), jet_ST);
+  h_jet_ST_ht->Fill(mevent->jet_ht(), jet_ST);
+  h_jet_ST_ht40->Fill(mevent->jet_ht(40), jet_ST);
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);
