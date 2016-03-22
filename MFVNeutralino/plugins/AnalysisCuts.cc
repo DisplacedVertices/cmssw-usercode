@@ -206,7 +206,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (mevent->nbtags(i) < min_nbtags[i] || mevent->nbtags(i) > max_nbtags[i])
         return false;
 
-    if (mevent->jet_ht() < min_ht)
+    if (mevent->jet_ht(40) < min_ht)
       return false;
 
     if (mevent->jet_ht(40) > max_ht)
