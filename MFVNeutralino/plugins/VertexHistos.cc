@@ -1012,20 +1012,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     fill_multi(h_sv_tkonlymass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksOnly], w);
     fill_multi(h_sv_tksjetsntkmass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksPlusJetsByNtracks], w);
 
-    double sum = 0;
-    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-      double px_i = mevent->jet_pt[ijet] * cos(mevent->jet_phi[ijet]);
-      double py_i = mevent->jet_pt[ijet] * sin(mevent->jet_phi[ijet]);
-      for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
-	double px_j = mevent->jet_pt[jjet] * cos(mevent->jet_phi[jjet]);
-	double py_j = mevent->jet_pt[jjet] * sin(mevent->jet_phi[jjet]);
-	sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (mevent->jet_pt[ijet] * mevent->jet_pt[jjet]);
-      }
-    }
-    double jetST = 1 - sqrt(1 - 4/(mevent->jet_ht() * mevent->jet_ht()) * sum);
-    fill_multi(h_sv_jetST_bs2derr, isv, aux.bs2derr, jetST, w);
-    fill_multi(h_sv_jetST_drmax, isv, aux.drmax(), jetST, w);
-    fill_multi(h_sv_jetST_bsbs2ddist, isv, mevent->bs2ddist(aux), jetST, w);
+    fill_multi(h_sv_jetST_bs2derr, isv, aux.bs2derr, mevent->jet_ST(), w);
+    fill_multi(h_sv_jetST_drmax, isv, aux.drmax(), mevent->jet_ST(), w);
+    fill_multi(h_sv_jetST_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->jet_ST(), w);
 
     for (int i = 0; i < int(aux.ntracks()); ++i) {
       fill_multi(h_sv_track_weight, isv, aux.track_weight(i), w);

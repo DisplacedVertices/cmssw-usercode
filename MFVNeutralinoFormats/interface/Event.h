@@ -178,6 +178,19 @@ struct MFVEvent {
   float jetpt6() const { return njets() >= 6 ? jet_pt[5] : 0.f; }
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
+  float jet_ST() const {
+    double sum = 0;
+    for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
+      double px_i = jet_pt[ijet] * cos(jet_phi[ijet]);
+      double py_i = jet_pt[ijet] * sin(jet_phi[ijet]);
+      for (size_t jjet = 0; jjet < jet_id.size(); ++jjet) {
+        double px_j = jet_pt[jjet] * cos(jet_phi[jjet]);
+        double py_j = jet_pt[jjet] * sin(jet_phi[jjet]);
+        sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (jet_pt[ijet] * jet_pt[jjet]);
+      }
+    }
+    return 1 - sqrt(1 - 4/(jet_ht() * jet_ht()) * sum);
+  }
 
   static uchar encode_jet_id(int pu_level, int bdisc_level) {
     assert(pu_level == 0);

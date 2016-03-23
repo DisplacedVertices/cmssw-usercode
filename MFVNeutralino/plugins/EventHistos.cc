@@ -463,16 +463,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   double Fox_Wolfram[11] = {0};
-  double sum = 0;
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     double theta_i = 2 * atan(exp(-mevent->jet_eta[ijet]));
-    double px_i = mevent->jet_pt[ijet] * cos(mevent->jet_phi[ijet]);
-    double py_i = mevent->jet_pt[ijet] * sin(mevent->jet_phi[ijet]);
     for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
       double theta_j = 2 * atan(exp(-mevent->jet_eta[jjet]));
-      double px_j = mevent->jet_pt[jjet] * cos(mevent->jet_phi[jjet]);
-      double py_j = mevent->jet_pt[jjet] * sin(mevent->jet_phi[jjet]);
-
       double WT_ij = mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_ht() * mevent->jet_ht());
       double x = cos(theta_i) * cos(theta_j) + sin(theta_i) * sin(theta_j) * cos(mevent->jet_phi[ijet] - mevent->jet_phi[jjet]);
       Fox_Wolfram[0] += WT_ij * 1;
@@ -486,18 +480,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       Fox_Wolfram[8] += WT_ij * 1./128. * (6435*pow(x,8) - 12012*pow(x,6) + 6930*pow(x,4) - 1260*pow(x,2) + 35);
       Fox_Wolfram[9] += WT_ij * 1./128. * (12155*pow(x,9) - 25740*pow(x,7) + 18018*pow(x,5) - 4620*pow(x,3) + 315*x);
       Fox_Wolfram[10] += WT_ij * 1./256. * (46189*pow(x,10) - 109395*pow(x,8) + 90090*pow(x,6) - 30030*pow(x,4) + 3465*pow(x,2) - 63);
-
-      sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (mevent->jet_pt[ijet] * mevent->jet_pt[jjet]);
     }
   }
   for (int i = 0; i < 11; ++i) {
     h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
   }
-  double jet_ST = 1 - sqrt(1 - 4/(mevent->jet_ht() * mevent->jet_ht()) * sum);
-  h_jet_ST->Fill(jet_ST);
-  h_jet_ST_njets->Fill(mevent->njets(), jet_ST);
-  h_jet_ST_ht->Fill(mevent->jet_ht(), jet_ST);
-  h_jet_ST_ht40->Fill(mevent->jet_ht(40), jet_ST);
+  h_jet_ST->Fill(mevent->jet_ST());
+  h_jet_ST_njets->Fill(mevent->njets(), mevent->jet_ST());
+  h_jet_ST_ht->Fill(mevent->jet_ht(), mevent->jet_ST());
+  h_jet_ST_ht40->Fill(mevent->jet_ht(40), mevent->jet_ST());
 
   for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
     h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);
