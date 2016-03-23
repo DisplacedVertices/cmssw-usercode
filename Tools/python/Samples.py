@@ -251,6 +251,9 @@ __all__ = [
     'qcd_samples',
     'ttbar_samples',
     'mfv_signal_samples',
+    'mfv_signal_samples_glu',
+    'mfv_signal_samples_gluddbar',
+    'mfv_signal_samples_lq2',
     'xx4j_samples',
     'leptonic_background_samples',
 #    'ttbar_systematics_samples',
@@ -566,6 +569,13 @@ _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pyth
 _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-100_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-f9fdb240138288e752f8c9263be528c6/USER', 681) # 2 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-fef163ae8f4dfab65a01043078f3dedb/USER', 4058) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-1500_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-e801807342421d24a3e95bb1f7ad0d7d/USER', 9908) # 3 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00300um_M0800/dquach-ntuplev6p1_76x_signal-ecaace5a5ef9336c4a8771c449f4a4c9/USER', 7854) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0300/dquach-ntuplev6p1_76x_signal-f045e74d4f029a0914a1d366274a8fe1/USER', 1043) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0400/dquach-ntuplev6p1_76x_signal-d314a48458c661ff344a01a0151813d6/USER', 2180) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0800/dquach-ntuplev6p1_76x_signal-dfd5ed58a9ce35293af9677f058a103f/USER', 7830) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M1200/dquach-ntuplev6p1_76x_signal-12da3101816b464335eea917398e3e4a/USER', 9501) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M1600/dquach-ntuplev6p1_76x_signal-8da6225b3e6f3241b59cbb041365e294/USER', 9864) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau10000um_M0800/dquach-ntuplev6p1_76x_signal-4d089d5b983498a0ce4791aae351195c/USER', 7718) # 1 files
 
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-b2d6e71246d10cf2d9a34b76ac72d20e/USER', 4408678) # 204 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-a414da26c478bd22f48fb7ea24274bfa/USER', 5039738) # 206 files
