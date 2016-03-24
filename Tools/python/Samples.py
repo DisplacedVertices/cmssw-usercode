@@ -569,6 +569,7 @@ _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pyth
 _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-100_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-f9fdb240138288e752f8c9263be528c6/USER', 681) # 2 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-fef163ae8f4dfab65a01043078f3dedb/USER', 4058) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-1500_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-e801807342421d24a3e95bb1f7ad0d7d/USER', 9908) # 3 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00100um_M0800/dquach-ntuplev6p1_76x_signal-a494c952c9dd420ed62fad1ffa279357/USER', 7770) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00300um_M0800/dquach-ntuplev6p1_76x_signal-ecaace5a5ef9336c4a8771c449f4a4c9/USER', 7854) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0300/dquach-ntuplev6p1_76x_signal-f045e74d4f029a0914a1d366274a8fe1/USER', 1043) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0400/dquach-ntuplev6p1_76x_signal-d314a48458c661ff344a01a0151813d6/USER', 2180) # 1 files
