@@ -83,6 +83,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_jet_Fox_Wolfram[11];
   TH1F* h_jet_ST;
+  TH1F* h_jetlep_ST;
 
   TH2F* h_jet_ST_njets;
   TH2F* h_jet_ST_ht;
@@ -260,6 +261,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_jet_Fox_Wolfram[i] = fs->make<TH1F>(TString::Format("h_jet_H%dT",i), TString::Format(";jets transverse Fox-Wolfram moment H_{%d}^{T};events",i), 101, 0, 1.01);
   }
   h_jet_ST = fs->make<TH1F>("h_jet_ST", ";jets transverse sphericity S_{T};events", 101, 0, 1.01);
+  h_jetlep_ST = fs->make<TH1F>("h_jetlep_ST", ";jets+leptons transverse sphericity S_{T};events", 101, 0, 1.01);
   h_jet_ST_njets = fs->make<TH2F>("h_jet_ST_njets", ";number of jets;jets transverse sphericity S_{T}", 20, 0, 20, 101, 0, 1.01);
   h_jet_ST_ht = fs->make<TH2F>("h_jet_ST_ht", ";H_{T} of jets (GeV);jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
   h_jet_ST_ht40 = fs->make<TH2F>("h_jet_ST_ht40", ";H_{T} of jets with p_{T} > 40 GeV;jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
@@ -486,6 +488,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
   }
   h_jet_ST->Fill(mevent->jet_ST());
+  h_jetlep_ST->Fill(mevent->jetlep_ST());
   h_jet_ST_njets->Fill(mevent->njets(), mevent->jet_ST());
   h_jet_ST_ht->Fill(mevent->jet_ht(), mevent->jet_ST());
   h_jet_ST_ht40->Fill(mevent->jet_ht(40), mevent->jet_ST());

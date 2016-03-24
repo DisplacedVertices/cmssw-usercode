@@ -276,6 +276,31 @@ struct MFVEvent {
   int nel(int which) const { return nlep(1, which); }
   int nlep(int which) const { return nmu(which) + nel(which); }
 
+  float lep_sumpt(float min_lep_pt=0.f) const { return std::accumulate(lep_pt.begin(), lep_pt.end(), 0.f,
+                                                                    [min_lep_pt](float init, float b) { if (b > min_lep_pt) init += b; return init; }); }
+  float jetlep_ST() const {
+    double sum = 0;
+    for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
+      double px_i = jet_pt[ijet] * cos(jet_phi[ijet]);
+      double py_i = jet_pt[ijet] * sin(jet_phi[ijet]);
+      for (size_t jjet = 0; jjet < jet_id.size(); ++jjet) {
+        double px_j = jet_pt[jjet] * cos(jet_phi[jjet]);
+        double py_j = jet_pt[jjet] * sin(jet_phi[jjet]);
+        sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (jet_pt[ijet] * jet_pt[jjet]);
+      }
+    }
+    for (size_t ilep = 0; ilep < lep_id.size(); ++ilep) {
+      double px_i = lep_pt[ilep] * cos(lep_phi[ilep]);
+      double py_i = lep_pt[ilep] * sin(lep_phi[ilep]);
+      for (size_t jlep = 0; jlep < lep_id.size(); ++jlep) {
+        double px_j = lep_pt[jlep] * cos(lep_phi[jlep]);
+        double py_j = lep_pt[jlep] * sin(lep_phi[jlep]);
+        sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (lep_pt[ilep] * lep_pt[jlep]);
+      }
+    }
+    return 1 - sqrt(1 - 4/((jet_ht()+lep_sumpt()) * (jet_ht()+lep_sumpt())) * sum);
+  }
+
   float vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
 };
 
