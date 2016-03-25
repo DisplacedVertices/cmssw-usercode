@@ -17,9 +17,9 @@ public:
 
   MFVVertexAux xform_vertex(const MFVEvent&, const MFVVertexAux&) const;
 
-  const edm::InputTag event_src;
-  const edm::InputTag vertex_src;
-  const edm::InputTag weight_src;
+  const edm::EDGetTokenT<MFVEvent> event_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
+  const edm::EDGetTokenT<double> weight_token;
 
   TH1F* h_nsv;
   TH1F* h_nsvsel;
@@ -29,9 +29,9 @@ public:
 };
 
 MFVMiniTreer::MFVMiniTreer(const edm::ParameterSet& cfg)
-  : event_src(cfg.getParameter<edm::InputTag>("event_src")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src"))
+  : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
 {
   edm::Service<TFileService> fs;
 
@@ -56,7 +56,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.event = event.id().event();
 
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(event_src, mevent);
+  event.getByToken(event_token, mevent);
 
   nt.gen_flavor_code = mevent->gen_flavor_code;
   nt.npv = int2uchar(mevent->npv);
@@ -66,7 +66,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.npu = int2uchar(mevent->npu);
 
   edm::Handle<double> weight;
-  event.getByLabel(weight_src, weight);
+  event.getByToken(weight_token, weight);
   nt.weight = *weight;
 
   nt.njets = int2uchar(mevent->njets());
@@ -82,7 +82,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   edm::Handle<MFVVertexAuxCollection> input_vertices;
-  event.getByLabel(vertex_src, input_vertices);
+  event.getByToken(vertex_token, input_vertices);
 
   MFVVertexAuxCollection vertices;
 
