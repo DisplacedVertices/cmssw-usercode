@@ -21,9 +21,9 @@ public:
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
-  const edm::InputTag tracks_src;
-  const edm::InputTag primary_vertices_src;
-  const edm::InputTag jets_src;
+  const edm::EDGetTokenT<reco::TrackCollection> track_token;
+  const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
+  const edm::EDGetTokenT<pat::JetCollection> pat_jet_token;
   const double min_jet_pt;
   const unsigned min_jet_ntracks;
   const std::string b_discriminator;
@@ -38,9 +38,9 @@ private:
 };
 
 MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg) 
-  : tracks_src(cfg.getParameter<edm::InputTag>("tracks_src")),
-    primary_vertices_src(cfg.getParameter<edm::InputTag>("primary_vertices_src")),
-    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
+  : track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
+    pat_jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
     min_jet_ntracks(cfg.getParameter<unsigned>("min_jet_ntracks")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
@@ -94,11 +94,11 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
   std::auto_ptr<std::vector<double> > move_vertex(new std::vector<double>(3, 0.));
 
   edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByLabel(primary_vertices_src, primary_vertices);
+  event.getByToken(primary_vertices_token, primary_vertices);
 
   if (!primary_vertices->empty() && primary_vertices->at(0).tracks_end() - primary_vertices->at(0).tracks_begin() > 0) {
     edm::Handle<pat::JetCollection> jets;
-    event.getByLabel(jets_src, jets);
+    event.getByToken(pat_jet_token, jets);
 
     CLHEP::RandExponential rexp(rng_engine);
     CLHEP::RandGauss rgau(rng_engine);
@@ -173,7 +173,7 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     // reference points to the move vertex.
 
     edm::Handle<reco::TrackCollection> tracks;
-    event.getByLabel(tracks_src, tracks);
+    event.getByToken(track_token, tracks);
 
     for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
       reco::TrackRef tk(tracks, i);

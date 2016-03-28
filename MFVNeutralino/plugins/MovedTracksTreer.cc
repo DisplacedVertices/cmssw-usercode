@@ -14,10 +14,17 @@ public:
   explicit MFVMovedTracksTreer(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
-  const edm::InputTag event_src;
-  const edm::InputTag vertices_src;
-  const edm::InputTag weight_src;
+  const edm::EDGetTokenT<MFVEvent> event_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
+  const edm::EDGetTokenT<double> weight_token;
   const std::string mover_src;
+  const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+  const edm::EDGetTokenT<reco::TrackCollection> moved_tracks_token;
+  const edm::EDGetTokenT<int> npreseljets_token;
+  const edm::EDGetTokenT<int> npreselbjets_token;
+  const edm::EDGetTokenT<pat::JetCollection> jets_used_token;
+  const edm::EDGetTokenT<pat::JetCollection> bjets_used_token;
+  const edm::EDGetTokenT<std::vector<double> > move_vertex_token;
   const double max_dist2move;
   const bool apply_presel;
   const unsigned njets_req;
@@ -29,10 +36,17 @@ public:
 };
 
 MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
-  : event_src(cfg.getParameter<edm::InputTag>("event_src")),
-    vertices_src(cfg.getParameter<edm::InputTag>("vertices_src")),
-    weight_src(cfg.getParameter<edm::InputTag>("weight_src")),
+  : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
+    vertices_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertices_src"))),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     mover_src(cfg.getParameter<std::string>("mover_src")),
+    tracks_token(consumes<reco::TrackCollection>(edm::InputTag(mover_src))),
+    moved_tracks_token(consumes<reco::TrackCollection>(edm::InputTag(mover_src, "moved"))),
+    npreseljets_token(consumes<int>(edm::InputTag(mover_src, "npreseljets"))),
+    npreselbjets_token(consumes<int>(edm::InputTag(mover_src, "npreselbjets"))),
+    jets_used_token(consumes<pat::JetCollection>(edm::InputTag(mover_src, "jetsUsed"))),
+    bjets_used_token(consumes<pat::JetCollection>(edm::InputTag(mover_src, "bjetsUsed"))),
+    move_vertex_token(consumes<std::vector<double> >(edm::InputTag(mover_src, "moveVertex"))),
     max_dist2move(cfg.getParameter<double>("max_dist2move")),
     apply_presel(cfg.getParameter<bool>("apply_presel")),
     njets_req(cfg.getParameter<unsigned>("njets_req")),
@@ -53,11 +67,11 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.event = event.id().event();
 
   edm::Handle<double> weight;
-  event.getByLabel(weight_src, weight);
+  event.getByToken(weight_token, weight);
   nt.weight = *weight;
 
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(event_src, mevent);
+  event.getByToken(event_token, mevent);
 
   if (for_mctruth && (nt.gen_valid = mevent->gen_valid)) {
     for (int i = 0; i < 2; ++i) {
@@ -93,13 +107,13 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     edm::Handle<int> npreseljets, npreselbjets;
     edm::Handle<pat::JetCollection> jets_used, bjets_used;
     edm::Handle<std::vector<double> > move_vertex;
-    event.getByLabel(edm::InputTag(mover_src),                 tracks);
-    event.getByLabel(edm::InputTag(mover_src, "moved"),        moved_tracks);
-    event.getByLabel(edm::InputTag(mover_src, "npreseljets"),  npreseljets); 
-    event.getByLabel(edm::InputTag(mover_src, "npreselbjets"), npreselbjets); 
-    event.getByLabel(edm::InputTag(mover_src, "jetsUsed"),     jets_used);
-    event.getByLabel(edm::InputTag(mover_src, "bjetsUsed"),    bjets_used);
-    event.getByLabel(edm::InputTag(mover_src, "moveVertex"),   move_vertex);
+    event.getByToken(tracks_token,       tracks);
+    event.getByToken(moved_tracks_token, moved_tracks);
+    event.getByToken(npreseljets_token,  npreseljets);
+    event.getByToken(npreselbjets_token, npreselbjets);
+    event.getByToken(jets_used_token,    jets_used);
+    event.getByToken(bjets_used_token,   bjets_used);
+    event.getByToken(move_vertex_token,  move_vertex);
 
     nt.ntracks = tracks->size();
     nt.nseltracks = moved_tracks->size();
@@ -130,7 +144,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   }
 
   edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByLabel(vertices_src, vertices);
+  event.getByToken(vertices_token, vertices);
 
   for (const MFVVertexAux& v : *vertices) {
     const double vx = v.x - mevent->bsx_at_z(v.z);
