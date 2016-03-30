@@ -1,6 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import ROOT
 import JMTucker.Tools.Samples as Samples
+from JMTucker.Tools.Sample import norm_from_file
 
 def depize(s):
     return float(s.replace('p','.').replace('n','-'))
@@ -12,6 +13,7 @@ def cutplayMangle(filename):
     if not file.IsOpen():
         raise RuntimeError('could not open %s' % filename)
 
+    norm = norm_from_file(filename)
     x = file.Get('SimpleTriggerEfficiency/triggers_pass_num')
 
     cutscans = {}
@@ -50,7 +52,7 @@ def cutplayMangle(filename):
     except AttributeError:
         sample = None
     h_ntot = ROOT.TH1F('ntot', '', 1, 0, 1)
-    scale = sample.filter_eff if sample is not None else 1.
+    scale = ntot[0] / norm if sample is not None else 1.
     h_ntot.SetBinContent(1, ntot[0] / scale)
     h_ntot.SetBinError  (1, ntot[1] / scale)
 

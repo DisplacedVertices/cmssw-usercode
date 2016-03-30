@@ -146,6 +146,24 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (saw_c && mevent->gen_flavor_code == 0)
       mevent->gen_flavor_code = 1;
 
+    for (const reco::GenParticle& gen : *gen_particles) {
+      if (abs(gen.pdgId()) == 5) {
+        bool has_b_dau = false;
+        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
+          if (abs(gen.daughter(i)->pdgId()) == 5) {
+            has_b_dau = true;
+            break;
+          }
+        }
+        if (!has_b_dau) {
+          mevent->gen_bquark_pt.push_back(gen.pt());
+          mevent->gen_bquark_eta.push_back(gen.eta());
+          mevent->gen_bquark_phi.push_back(gen.phi());
+          mevent->gen_bquark_energy.push_back(gen.energy());
+        }
+      }
+    }
+
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
     if (!mci.Valid()) {
