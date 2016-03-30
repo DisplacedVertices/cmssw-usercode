@@ -87,6 +87,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_trackpairdphimax_bs2derr[sv_num_indices];
   TH2F* h_sv_tkonlymass_bs2derr[sv_num_indices];
   TH2F* h_sv_tksjetsntkmass_bs2derr[sv_num_indices];
+  TH2F* h_sv_jetht_bsbs2ddist[sv_num_indices];
+  TH2F* h_sv_jetht40_bsbs2ddist[sv_num_indices];
   TH2F* h_sv_jetST_bs2derr[sv_num_indices];
   TH2F* h_sv_jetST_drmax[sv_num_indices];
   TH2F* h_sv_jetST_bsbs2ddist[sv_num_indices];
@@ -526,6 +528,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_trackpairdphimax_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_trackpairdphimax_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);SV max{|#Delta #phi(i,j)|}", exc), 100, 0, 0.05, 100, 0, 3.15);
     h_sv_tkonlymass_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_tkonlymass_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);SV tracks-only mass (GeV)", exc), 100, 0, 0.05, 50, 0, 500);
     h_sv_tksjetsntkmass_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_tksjetsntkmass_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);SV tracks-plus-jets-by-ntracks mass (GeV)", exc), 100, 0, 0.05, 50, 0, 2000);
+    h_sv_jetht_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetht_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);H_{T} of jets (GeV)", exc), 500, 0, 2.5, 200, 0, 5000);
+    h_sv_jetht40_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetht40_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);H_{T} of jets with p_{T} > 40 GeV", exc), 500, 0, 2.5, 200, 0, 5000);
     h_sv_jetST_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);jets transverse sphericity S_{T}", exc), 100, 0, 0.05, 101, 0, 1.01);
     h_sv_jetST_drmax[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_drmax", exc), TString::Format("%s SV;SV max{#Delta R(i,j)};jets transverse sphericity S_{T}", exc), 150, 0, 7, 101, 0, 1.01);
     h_sv_jetST_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);jets transverse sphericity S_{T}", exc), 500, 0, 2.5, 101, 0, 1.01);
@@ -1012,6 +1016,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     fill_multi(h_sv_tkonlymass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksOnly], w);
     fill_multi(h_sv_tksjetsntkmass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksPlusJetsByNtracks], w);
 
+    fill_multi(h_sv_jetht_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->jet_ht(), w);
+    fill_multi(h_sv_jetht40_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->jet_ht(40), w);
     fill_multi(h_sv_jetST_bs2derr, isv, aux.bs2derr, mevent->jet_ST(), w);
     fill_multi(h_sv_jetST_drmax, isv, aux.drmax(), mevent->jet_ST(), w);
     fill_multi(h_sv_jetST_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->jet_ST(), w);
