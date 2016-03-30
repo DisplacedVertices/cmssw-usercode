@@ -398,15 +398,14 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(muons_token, muons);
 
   for (const pat::Muon& muon : *muons) {
-    const uchar id =
-      0
-      | 1 << 1  // if it's in the collection it passes veto selection
-      | muon_semilep_selector(muon) << 2
-      | muon_dilep_selector(muon) << 3;
+    uchar sel = 0;
+    if (1)                           sel |= MFVEvent::mu_veto;
+    if (muon_semilep_selector(muon)) sel |= MFVEvent::mu_semilep;
+    if (muon_dilep_selector  (muon)) sel |= MFVEvent::mu_dilep;
 
-    const float iso = (muon.chargedHadronIso() + muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
+    const float iso = (muon.chargedHadronIso() + std::max(0.f,muon.neutralHadronIso()) + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
 
-    mevent->lep_id.push_back(id);
+    mevent->lep_id.push_back(MFVEvent::encode_mu_id(sel));
     mevent->lep_pt.push_back(muon.pt());
     mevent->lep_eta.push_back(muon.eta());
     mevent->lep_phi.push_back(muon.phi());
@@ -420,16 +419,15 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(electrons_token, electrons);
   
   for (const pat::Electron& electron : *electrons) {
-    const uchar id =
-      1
-      | 1 << 1  // if it's in the collection it passes veto selection
-      | electron_semilep_selector(electron) << 2
-      | electron_dilep_selector(electron) << 3
-      | electron.closestCtfTrackRef().isNonnull() << 4;
+    uchar sel = 0;
+    if (1)                                         sel |= MFVEvent::el_veto;
+    if (electron_semilep_selector(electron))       sel |= MFVEvent::el_semilep;
+    if (electron_dilep_selector  (electron))       sel |= MFVEvent::el_dilep;
+    if (electron.closestCtfTrackRef().isNonnull()) sel |= MFVEvent::el_ctf;
 
     const float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
 
-    mevent->lep_id.push_back(id);
+    mevent->lep_id.push_back(MFVEvent::encode_el_id(sel));
     mevent->lep_pt.push_back(electron.pt());
     mevent->lep_eta.push_back(electron.eta());
     mevent->lep_phi.push_back(electron.phi());

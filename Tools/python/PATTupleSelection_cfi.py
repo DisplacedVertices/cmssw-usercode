@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 # Cuts for muons and electrons, including relative isolation with
 # delta beta corrections. First set (no "signal" or "semilep"/"dilep")
 # is for loose cuts (e.g. for vetos), and "semilep"/"dilep" are the
-# reference cuts for those channels from TWikiTopRefEventSel. // JMTBAD were those cuts
+# reference cuts for those channels from TWikiTopRefEventSel. // JMTBAD were those cuts anyway...
 # Can/should re-do cuts in ntupler starting from loose selection,
 # including impact parameter cuts that aren't included here. We store
 # these strings in a process-level PSet so they can be easily gotten

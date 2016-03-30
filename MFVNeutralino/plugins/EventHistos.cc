@@ -546,7 +546,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
   }
   h_jet_ST->Fill(mevent->jet_ST());
-  h_jetlep_ST->Fill(mevent->jetlep_ST());
+  h_jetlep_ST->Fill(mevent->jetlep_ST(0, MFVEvent::mu_dilep));
   h_jet_ST_njets->Fill(mevent->njets(), mevent->jet_ST());
   h_jet_ST_ht->Fill(mevent->jet_ht(), mevent->jet_ST());
   h_jet_ST_ht40->Fill(mevent->jet_ht(40), mevent->jet_ST());
