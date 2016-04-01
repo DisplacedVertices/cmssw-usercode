@@ -261,7 +261,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_jet_Fox_Wolfram[i] = fs->make<TH1F>(TString::Format("h_jet_H%dT",i), TString::Format(";jets transverse Fox-Wolfram moment H_{%d}^{T};events",i), 101, 0, 1.01);
   }
   h_jet_ST = fs->make<TH1F>("h_jet_ST", ";jets transverse sphericity S_{T};events", 101, 0, 1.01);
-  h_jetlep_ST = fs->make<TH1F>("h_jetlep_ST", ";jets+leptons transverse sphericity S_{T};events", 101, 0, 1.01);
+  h_jetlep_ST = fs->make<TH1F>("h_jetlep_ST", ";jets + dilep muons transverse sphericity S_{T};events", 101, 0, 1.01);
   h_jet_ST_njets = fs->make<TH2F>("h_jet_ST_njets", ";number of jets;jets transverse sphericity S_{T}", 20, 0, 20, 101, 0, 1.01);
   h_jet_ST_ht = fs->make<TH2F>("h_jet_ST_ht", ";H_{T} of jets (GeV);jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
   h_jet_ST_ht40 = fs->make<TH2F>("h_jet_ST_ht40", ";H_{T} of jets with p_{T} > 40 GeV;jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
@@ -501,8 +501,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   std::vector<double> bjets_eta[3][2];
   std::vector<double> bjets_phi[3][2];
-  std::vector<double> muons_eta[3];
-  std::vector<double> muons_phi[3];
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
     h_nmuons[i]->Fill(mevent->nmu(i), w);
@@ -529,6 +527,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
       }
     }
+
     for (int j = 0; j < 2; ++j) {
       if (bjets_phi[i][j].size() == 2) {
         double dphi = reco::deltaPhi(bjets_phi[i][j][0], bjets_phi[i][j][1]);
@@ -544,27 +543,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_bjets_dR[i][j]->Fill(dR);
         h_bjets_dR_dphi[i][j]->Fill(dphi, dR);
       }
-    }
-
-    for (size_t ilep = 0; ilep < mevent->lep_id.size(); ++ilep) {
-      if ((mevent->lep_id[ilep] & 1) == 0 && (mevent->lep_id[ilep] & (1 << (i+1)))) {
-        muons_eta[i].push_back(mevent->lep_eta[ilep]);
-        muons_phi[i].push_back(mevent->lep_phi[ilep]);
-      }
-    }
-    if (muons_phi[i].size() == 2) {
-      double dphi = reco::deltaPhi(muons_phi[i][0], muons_phi[i][1]);
-      double deta = muons_eta[i][0] - muons_eta[i][1];
-      double avgeta = (muons_eta[i][0] + muons_eta[i][1]) / 2;
-      double dR = reco::deltaR(muons_eta[i][0], muons_phi[i][0], muons_eta[i][1], muons_phi[i][1]);
-      h_muons_absdphi[i]->Fill(fabs(dphi));
-      h_muons_dphi[i]->Fill(dphi);
-      h_muons_deta[i]->Fill(deta);
-      h_muons_deta_dphi[i]->Fill(dphi, deta);
-      h_muons_avgeta[i]->Fill(avgeta);
-      h_muons_avgeta_dphi[i]->Fill(dphi, avgeta);
-      h_muons_dR[i]->Fill(dR);
-      h_muons_dR_dphi[i]->Fill(dphi, dR);
     }
   }
 

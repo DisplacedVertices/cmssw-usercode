@@ -276,8 +276,15 @@ struct MFVEvent {
   int nel(int which) const { return nlep(1, which); }
   int nlep(int which) const { return nmu(which) + nel(which); }
 
-  float lep_sumpt(float min_lep_pt=0.f) const { return std::accumulate(lep_pt.begin(), lep_pt.end(), 0.f,
-                                                                    [min_lep_pt](float init, float b) { if (b > min_lep_pt) init += b; return init; }); }
+  float lep_sumpt(float min_lep_pt=0.f) const {
+    float sumpt = 0;
+    for (size_t ilep = 0; ilep < lep_id.size(); ++ilep) {
+      if (!((lep_id[ilep] & 1) == 0 &&
+            (lep_id[ilep] & (1 << (2+1))))) continue;
+      if (lep_pt[ilep] > min_lep_pt) sumpt += lep_pt[ilep];
+    }
+    return sumpt;
+  }
   float jetlep_ST() const {
     double sum = 0;
     for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
@@ -290,6 +297,8 @@ struct MFVEvent {
       }
     }
     for (size_t ilep = 0; ilep < lep_id.size(); ++ilep) {
+      if (!((lep_id[ilep] & 1) == 0 &&
+            (lep_id[ilep] & (1 << (2+1))))) continue;
       double px_i = lep_pt[ilep] * cos(lep_phi[ilep]);
       double py_i = lep_pt[ilep] * sin(lep_phi[ilep]);
       for (size_t jlep = 0; jlep < lep_id.size(); ++jlep) {
