@@ -100,7 +100,7 @@ leg.AddEntry(h_b_sum, 'Background-only fit', 'L')
 leg.Draw()
 #leg.SetF
 cms = write(61, 0.050, 0.099, 0.931, 'CMS')
-pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
+#pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
 sim = write(42, 0.050, 0.631, 0.933, ac.int_lumi_nice)
 name = '/uscms/home/tucker/afshome/fit'
 c.SaveAs(name + '.pdf')

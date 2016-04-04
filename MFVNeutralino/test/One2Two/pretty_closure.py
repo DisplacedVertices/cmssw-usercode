@@ -128,7 +128,7 @@ leg.AddEntry(g_cons, 'Best-fit construction', 'F')
 leg.Draw()
 
 cms = write(61, 0.050, 0.099, 0.931, 'CMS')
-pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
+#pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
 sim = write(42, 0.050, 0.741, 0.933, 'Simulation')
 c.SaveAs('/uscms/home/tucker/afshome/closure.pdf')
 c.SaveAs('/uscms/home/tucker/afshome/closure.png')
