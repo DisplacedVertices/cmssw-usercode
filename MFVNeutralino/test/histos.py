@@ -86,6 +86,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.ttbar_samples + Samples.qcd_samples + \
         #Samples.qcdpt_samples + \
         Samples.mfv_signal_samples + \
+        Samples.mfv_signal_samples_glu + \
+        Samples.mfv_signal_samples_gluddbar + \
         Samples.mfv_signal_samples_lq2 + \
         Samples.xx4j_samples
         )
