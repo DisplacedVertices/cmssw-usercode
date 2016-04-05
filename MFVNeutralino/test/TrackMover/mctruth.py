@@ -23,13 +23,13 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
 process.p *= process.mfvMovedTree
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
 
-    cs = CRABSubmitter('TrackMoverMCTruth',
+    cs = CRABSubmitter('TrackMoverMCTruthV6p1_76X',
                        job_control_from_sample = True,
                        max_threads = 3,
                        )
 
-    samples = Samples.from_argv(Samples.mfv_signal_samples)
+    samples = Samples.registry.from_argv(Samples.mfv_signal_samples)
     cs.submit_all(samples)
