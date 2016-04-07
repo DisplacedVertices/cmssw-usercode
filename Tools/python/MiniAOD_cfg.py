@@ -33,7 +33,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
                                          wantSummary = cms.untracked.bool(False),
                                          )
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/F47E7F59-8A29-E511-8667-002590A52B4A.root'))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1_0078199A-3FC1-E511-86E1-001E6739801B.root'))
     if not is_mc:
         process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/16Dec2015-v1/00000/0A2C6696-AEAF-E511-8551-0026189438EB.root']
 
