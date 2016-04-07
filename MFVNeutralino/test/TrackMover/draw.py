@@ -6,7 +6,7 @@ hadd.py data.root MultiJetPk2012*root
 py ~/cmswork/Tools/python/Samples.py merge qcdht0500.root qcdht1000.root ttbar*root -3629.809 ; mv merge.root mc.root
 '''
 
-extra_factor = 17600/3629.809
+extra_factor = 1. #17600/3629.809
 
 from array import array
 from JMTucker.Tools.ROOTTools import *
@@ -135,7 +135,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
     print ex
     if ex:
         ex = '_' + ex
-    ps = plot_saver('plots/trackmover' + ex, size=(600,600), log=False)
+    ps = plot_saver('/publicweb/d/dquach/plots/TrackMover/V6p1_76x' + ex, size=(600,600), log=False)
 
     print 'is_data_mc:', is_data_mc
     print 'fn1:', fn1
@@ -153,7 +153,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
        cutset_2, eff_2, eeff_2 = c_2[i]
        assert cutset == cutset_2
        print '%40s %.2f +- %.2f' % (cutset, eff_2 - eff_1, (eeff_2**2 + eeff_1**2)**0.5)
-        
+
     for name in l:
         data = d_1[name]
         mc   = d_2  [name]
@@ -167,12 +167,44 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
 
             mc.SetFillStyle(3001)
             mc.SetFillColor(2)
-            mc.Draw('E2 same')
+            mc.Draw('PE2 same')
 
             for g in both:
                 g.GetYaxis().SetRangeUser(0., 1.05)
 
             ps.save(name)
+
+            x = []
+            y = []
+            exl = []
+            exh = []
+            eyl = []
+            eyh = []
+            for i in xrange(0, data.GetN()):
+                xdat = ROOT.Double(0)
+                ydat = ROOT.Double(0)
+                xmc  = ROOT.Double(0)
+                ymc  = ROOT.Double(0)
+                data.GetPoint(i, xdat, ydat)
+                mc.GetPoint(i, xmc, ymc)
+                if ymc == 0 or xmc == 0 or xdat == 0 or ydat == 0:
+                    continue
+                else:
+                    y.append(ydat / ymc)
+                    x.append(xdat)
+                    errxlow = ((xdat / xmc)**2 * ((data.GetErrorXlow(i)/xdat)**2 + (mc.GetErrorXlow(i)/xmc)**2))**0.5
+                    errxhigh = ((xdat / xmc)**2 * ((data.GetErrorXhigh(i)/xdat)**2 + (mc.GetErrorXhigh(i)/xmc)**2))**0.5
+                    errylow = ((ydat / ymc)**2 * ((data.GetErrorYlow(i)/ydat)**2 + (mc.GetErrorYlow(i)/ymc)**2))**0.5
+                    erryhigh = ((ydat / ymc)**2 * ((data.GetErrorYhigh(i)/ydat)**2 + (mc.GetErrorYhigh(i)/ymc)**2))**0.5
+                    exl.append(errxlow)
+                    exh.append(errxhigh)
+                    eyl.append(errylow)
+                    eyh.append(erryhigh)
+            h_ratio = ROOT.TGraphAsymmErrors(len(x), *[array('d', obj) for obj in (x, y, exl, exh, eyl, eyh)])
+            h_ratio.SetLineWidth(2)
+            h_ratio.SetLineColor(ROOT.kGreen+2)
+            h_ratio.Draw('AP')
+            ps.save(name + '_hratio')
 
         elif not name.endswith('_num') and not name.endswith('_den'):
             mc.SetLineColor(ROOT.kRed)
@@ -208,4 +240,5 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
 #comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
 #comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
 
-comp('mctruth', 'a.root', 'a.root')
+comp('21', 'TrackMoverV6p1_76x_21/data.root', 'TrackMoverV6p1_76x_21/merge.root')
+#comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
