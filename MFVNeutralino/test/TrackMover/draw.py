@@ -201,9 +201,12 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
                     eyl.append(errylow)
                     eyh.append(erryhigh)
             h_ratio = ROOT.TGraphAsymmErrors(len(x), *[array('d', obj) for obj in (x, y, exl, exh, eyl, eyh)])
+            h_ratio.SetTitle()
+            h_ratio.GetXaxis().SetTitle('%s' % data.GetXaxis().GetTitle())
             h_ratio.SetLineWidth(2)
             h_ratio.SetLineColor(ROOT.kGreen+2)
             h_ratio.Draw('AP')
+            h_ratio.GetYaxis().SetRangeUser(0, 1.2)
             ps.save(name + '_hratio')
 
         elif not name.endswith('_num') and not name.endswith('_den'):
@@ -240,5 +243,5 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
 #comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
 #comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
 
-comp('21', 'TrackMoverV6p1_76x_21/data.root', 'TrackMoverV6p1_76x_21/merge.root')
-#comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
+#comp('21', 'TrackMoverV6p1_76x_21/data.root', 'TrackMoverV6p1_76x_21/merge.root')
+comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
