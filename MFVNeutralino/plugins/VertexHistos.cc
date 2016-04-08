@@ -433,6 +433,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("dravg",                         "SV avg{#Delta R(i,j)}",                                                       150,    0,       5);
   hs.add("drrms",                         "SV rms{#Delta R(i,j)}",                                                       150,    0,       3);
 
+  hs.add("trackST", "SV tracks transverse sphericity S_{T}", 101, 0, 1.01);
+
   hs.add("jetpairdetamin", "SV min{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 5);
   hs.add("jetpairdetamax", "SV max{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 7);
   hs.add("jetpairdetaavg", "SV avg{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 5);
@@ -889,6 +891,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"drmax",  aux.drmax()},
         {"dravg",  aux.dravg()},
         {"drrms",  aux.drrms()},
+
+        {"trackST", aux.trackST()},
 
         {"jetpairdetamin", aux.jetpairdetamin()},
         {"jetpairdetamax", aux.jetpairdetamax()},
