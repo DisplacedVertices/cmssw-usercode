@@ -92,6 +92,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_jetST_bs2derr[sv_num_indices];
   TH2F* h_sv_jetST_drmax[sv_num_indices];
   TH2F* h_sv_jetST_bsbs2ddist[sv_num_indices];
+  TH2F* h_sv_trackST_bsbs2ddist[sv_num_indices];
 
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
@@ -535,6 +536,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_jetST_bs2derr[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_bs2derr", exc), TString::Format("%s SV;#sigma(dist2d(SV, beamspot)) (cm);jets transverse sphericity S_{T}", exc), 100, 0, 0.05, 101, 0, 1.01);
     h_sv_jetST_drmax[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_drmax", exc), TString::Format("%s SV;SV max{#Delta R(i,j)};jets transverse sphericity S_{T}", exc), 150, 0, 7, 101, 0, 1.01);
     h_sv_jetST_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_jetST_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);jets transverse sphericity S_{T}", exc), 500, 0, 2.5, 101, 0, 1.01);
+    h_sv_trackST_bsbs2ddist[j] = fs->make<TH2F>(TString::Format("h_sv_%s_trackST_bsbs2ddist", exc), TString::Format("%s SV;dist2d(SV, beamspot) (cm);SV tracks transverse sphericity S_{T}", exc), 500, 0, 2.5, 101, 0, 1.01);
 
     h_sv_track_weight[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_weight", exc), TString::Format(";%s SV tracks weight;arb. units", exc), 21, 0, 1.05);
     h_sv_track_q[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_q", exc), TString::Format(";%s SV tracks charge;arb. units.", exc), 4, -2, 2);
@@ -1025,6 +1027,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     fill_multi(h_sv_jetST_bs2derr, isv, aux.bs2derr, mevent->jet_ST(), w);
     fill_multi(h_sv_jetST_drmax, isv, aux.drmax(), mevent->jet_ST(), w);
     fill_multi(h_sv_jetST_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->jet_ST(), w);
+    fill_multi(h_sv_trackST_bsbs2ddist, isv, mevent->bs2ddist(aux), aux.trackST(), w);
 
     for (int i = 0; i < int(aux.ntracks()); ++i) {
       fill_multi(h_sv_track_weight, isv, aux.track_weight(i), w);
