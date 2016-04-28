@@ -1177,8 +1177,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
 	  h_noshare_vertex_track_weights->Fill(v.trackWeight(*it));
 
-	  edm::ESHandle<TransientTrackBuilder> tt_builder;
-	  setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 	  reco::TransientTrack seed_track;
 	  seed_track = tt_builder->build(*it.operator*());
 	  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v);
