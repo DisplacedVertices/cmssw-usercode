@@ -21,6 +21,8 @@ const int nbkg = 6;
 const char* samples[nbkg] = {"qcdht0500", "qcdht0700", "qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
 float weights[nbkg] = {4.182, 1.137, 0.6175, 0.07894, 0.03320, 0.05652};
 
+double n2v = 0.17;
+
 float ht(int njets, float* jet_pt) {
   double sum = 0;
   for (int i = 0; i < njets; ++i) {
@@ -208,13 +210,13 @@ int main(int argc, const char* argv[]) {
   h_2v_dvv->SetTitle(";d_{VV} (cm);events");
   h_2v_dvv->SetLineColor(kBlue);
   h_2v_dvv->SetLineWidth(3);
-  h_2v_dvv->Scale(0.17/h_2v_dvv->Integral());
+  h_2v_dvv->Scale(n2v/h_2v_dvv->Integral());
   h_2v_dvv->SetStats(0);
   h_2v_dvv->Draw();
   l_dvv->AddEntry(h_2v_dvv, "two-vertex events");
   h_c1v_dvv->SetLineColor(kRed);
   h_c1v_dvv->SetLineWidth(3);
-  h_c1v_dvv->Scale(0.17/h_c1v_dvv->Integral());
+  h_c1v_dvv->Scale(n2v/h_c1v_dvv->Integral());
   h_c1v_dvv->SetStats(0);
   h_c1v_dvv->Draw("sames");
   l_dvv->AddEntry(h_c1v_dvv, "constructed from only-one-vertex events");
@@ -229,13 +231,13 @@ int main(int argc, const char* argv[]) {
   h_2v_absdphivv->SetTitle(";|#Delta#phi_{VV}|;events");
   h_2v_absdphivv->SetLineColor(kBlue);
   h_2v_absdphivv->SetLineWidth(3);
-  h_2v_absdphivv->Scale(0.17/h_2v_absdphivv->Integral());
+  h_2v_absdphivv->Scale(n2v/h_2v_absdphivv->Integral());
   h_2v_absdphivv->SetStats(0);
   h_2v_absdphivv->Draw();
   l_absdphivv->AddEntry(h_2v_absdphivv, "two-vertex events");
   h_c1v_absdphivv->SetLineColor(kRed);
   h_c1v_absdphivv->SetLineWidth(3);
-  h_c1v_absdphivv->Scale(0.17/h_c1v_absdphivv->Integral());
+  h_c1v_absdphivv->Scale(n2v/h_c1v_absdphivv->Integral());
   h_c1v_absdphivv->SetStats(0);
   h_c1v_absdphivv->Draw("sames");
   l_absdphivv->AddEntry(h_c1v_absdphivv, "constructed from only-one-vertex events");
