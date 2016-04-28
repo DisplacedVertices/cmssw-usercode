@@ -718,24 +718,24 @@ _adbp3('ntuplev6p1_76x_sigmadxy6p0', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgr
 _adbp3('ntuplev6p1_76x_sigmadxy6p0', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-3d8d1a9a03aa5ce39d0c9513c9d7d1f1/USER', 1981228) # 81 files
 _adbp3('ntuplev6p1_76x_sigmadxy6p0', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-29d380fbf5d8f958f39f8d3a598e0a1e/USER', 1340689) # 194 files
 
-_adbp3('', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0ff7a273bbffee33929f6e403f897315/USER', 9900) # 1 files
-_adbp3('', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-bbad0f0f564ab180789ffed5a764aa44/USER', 9877) # 1 files
-_adbp3('', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0398983b02255d8468ae0a690c0f3fd7/USER', 9883) # 1 files
-_adbp3('', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0ced0a663528aba14594b17d32bb5c48/USER', 9794) # 1 files
-_adbp3('', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b5af5f0f553a2b35b5bbf95e8948b15c/USER', 44378) # 97 files, 100 expected
-_adbp3('', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b343ec0eb57fa5030e7fd61cca6f5633/USER', 4081480) # 188 files, 203 expected
-_adbp3('', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b992294bcc20cc03a30142c11a625c4a/USER', 5014769) # 204 files, 205 expected
-_adbp3('', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a2cd32550fabed1170cffac11dc793b1/USER', 3952153) # 159 files
-_adbp3('', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a15429db443b513da40dc610685d10ad/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0ff7a273bbffee33929f6e403f897315/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-bbad0f0f564ab180789ffed5a764aa44/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0398983b02255d8468ae0a690c0f3fd7/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0ced0a663528aba14594b17d32bb5c48/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b5af5f0f553a2b35b5bbf95e8948b15c/USER', 44378) # 97 files, 100 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b343ec0eb57fa5030e7fd61cca6f5633/USER', 4081480) # 188 files, 203 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b992294bcc20cc03a30142c11a625c4a/USER', 5014769) # 204 files, 205 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a2cd32550fabed1170cffac11dc793b1/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a15429db443b513da40dc610685d10ad/USER', 1981228) # 81 files
 
-_adbp3('', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-5be3a09d518b962ea7026cfefd9c921c/USER', 9900) # 1 files
-_adbp3('', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-01bab092877501216504c7f6bdc7f33f/USER', 9877) # 1 files
-_adbp3('', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-fa0c561620873379d59a1b2f3ab2680c/USER', 9883) # 1 files
-_adbp3('', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-731e50660a14201f8ce47b235f2c771a/USER', 9794) # 1 files
-_adbp3('', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-1f44e77d5a076d547ba40bf4f57c1538/USER', 45715) # 100 files
-_adbp3('', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-58315f394a7b6ec28ab2de80e99f2d14/USER', 4891686) # 199 files, 205 expected
-_adbp3('', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-185e784b67c51986451a7c92289ed656/USER', 3952153) # 159 files
-_adbp3('', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-c7ac60ee55f04cf185cd68671a5797c5/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-5be3a09d518b962ea7026cfefd9c921c/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-01bab092877501216504c7f6bdc7f33f/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-fa0c561620873379d59a1b2f3ab2680c/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-731e50660a14201f8ce47b235f2c771a/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-1f44e77d5a076d547ba40bf4f57c1538/USER', 45715) # 100 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-58315f394a7b6ec28ab2de80e99f2d14/USER', 4891686) # 199 files, 205 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-185e784b67c51986451a7c92289ed656/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-c7ac60ee55f04cf185cd68671a5797c5/USER', 1981228) # 81 files
 
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
