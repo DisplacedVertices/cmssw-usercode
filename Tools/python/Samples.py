@@ -817,7 +817,8 @@ _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-fa0c561620873379d59a1b2f3ab2680c/USER', 9883) # 1 files
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-731e50660a14201f8ce47b235f2c771a/USER', 9794) # 1 files
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-1f44e77d5a076d547ba40bf4f57c1538/USER', 45715) # 100 files
-_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-58315f394a7b6ec28ab2de80e99f2d14/USER', 4891686) # 199 files, 205 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-0a985665094344292637c3941bdb37d6/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-58315f394a7b6ec28ab2de80e99f2d14/USER', 4916226) # 200 files, 205 expected
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-185e784b67c51986451a7c92289ed656/USER', 3952153) # 159 files
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-c7ac60ee55f04cf185cd68671a5797c5/USER', 1981228) # 81 files
 
@@ -829,6 +830,7 @@ _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1_13T
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-dd94c4d73c6a5bfe617aca03b685ab1c/USER', 20000) # 1 files
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-4e955e0f802e093f52095723f50d4b01/USER', 20000) # 1 files
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-c5a45f6810638cf97bb18ebad3bafabf/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-44684c1d502b60cb71418bfebb01993e/USER', 20000) # 1 files
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-7a56d43e76817b318e79a8da4dd7a9c0/USER', 19800) # 1 files
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-68c50f7ee6a78e6e20416b886b6744e4/USER', 20000) # 1 files
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-b55bd113cbbe198a743e4a857f7c7351/USER', 19800) # 1 files
