@@ -187,6 +187,85 @@ xx4j_samples = [
 for s in xx4j_samples:
     s.xsec = 1e-3
 
+wh_samples_4Tau = [
+    MCSample('wh_4Tau_tau0000mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_4Tau_tau1000mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('wh_4Tau_tau0100mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
+    MCSample('wh_4Tau_tau0010mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_4Tau_tau0001mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19700),
+    MCSample('wh_4Tau_tau0000mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
+    MCSample('wh_4Tau_tau1000mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
+    MCSample('wh_4Tau_tau0100mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_4Tau_tau0010mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('wh_4Tau_tau0001mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_4Tau_tau0000mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_4Tau_tau1000mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
+    MCSample('wh_4Tau_tau0100mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
+    MCSample('wh_4Tau_tau0010mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_4Tau_tau0001mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+wh_samples_bbbb = [
+    MCSample('wh_bbbb_tau0000mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_bbbb_tau1000mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('wh_bbbb_tau0100mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_bbbb_tau0010mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_bbbb_tau0001mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_bbbb_tau0000mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('wh_bbbb_tau1000mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
+    MCSample('wh_bbbb_tau0100mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_bbbb_tau0010mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_bbbb_tau0001mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_bbbb_tau0000mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('wh_bbbb_tau1000mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('wh_bbbb_tau0100mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_bbbb_tau0010mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('wh_bbbb_tau0001mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+zh_samples_4Tau = [
+    MCSample('zh_4Tau_tau0000mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
+    MCSample('zh_4Tau_tau1000mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_4Tau_tau0100mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
+    MCSample('zh_4Tau_tau0010mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_4Tau_tau0001mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
+    MCSample('zh_4Tau_tau0000mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19600),
+    MCSample('zh_4Tau_tau0100mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_4Tau_tau0010mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('zh_4Tau_tau0001mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_4Tau_tau0000mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_4Tau_tau1000mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19700),
+    MCSample('zh_4Tau_tau0100mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_4Tau_tau0010mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('zh_4Tau_tau0001mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+zh_samples_bbbb = [
+    MCSample('zh_bbbb_tau0000mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('zh_bbbb_tau1000mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_bbbb_tau0100mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_bbbb_tau0010mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_bbbb_tau0001mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_bbbb_tau0000mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_bbbb_tau1000mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_bbbb_tau0100mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19900),
+    MCSample('zh_bbbb_tau0010mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_bbbb_tau0001mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('zh_bbbb_tau0000mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_bbbb_tau1000mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_bbbb_tau0100mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_bbbb_tau0010mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_bbbb_tau0001mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+zh_samples_dddd = [
+    MCSample('zh_dddd_tau0010mm_M25', '/ZH_HToSSTodddd_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000)
+]
+
+for s in wh_samples_4Tau + wh_samples_bbbb + zh_samples_4Tau + zh_samples_bbbb + zh_samples_dddd:
+    s.dbs_inst = 'phys03'
+    s.xsec = 1e-3
+
 auxiliary_background_samples = [
     MCSample('ttbaraux',  '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 10235840, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
@@ -255,6 +334,11 @@ __all__ = [
     'mfv_signal_samples_gluddbar',
     'mfv_signal_samples_lq2',
     'xx4j_samples',
+    'wh_samples_4Tau',
+    'wh_samples_bbbb',
+    'zh_samples_4Tau',
+    'zh_samples_bbbb',
+    'zh_samples_dddd',
     'leptonic_background_samples',
 #    'ttbar_systematics_samples',
     'auxiliary_background_samples',
@@ -736,6 +820,66 @@ _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgrap
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-58315f394a7b6ec28ab2de80e99f2d14/USER', 4891686) # 199 files, 205 expected
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-185e784b67c51986451a7c92289ed656/USER', 3952153) # 159 files
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-c7ac60ee55f04cf185cd68671a5797c5/USER', 1981228) # 81 files
+
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-bcf8ded315b0fedbdf15d8b32ca4854e/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-c0b80577abaf3564b6f3de4a9d4d206f/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-a941a9e117a0acef0ab5c1b947154d21/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-061f562478115ee74dd32be67570815a/USER', 19700) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-629d44c4a60022d8677a4ba764c5ef80/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-dd94c4d73c6a5bfe617aca03b685ab1c/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-4e955e0f802e093f52095723f50d4b01/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-c5a45f6810638cf97bb18ebad3bafabf/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-7a56d43e76817b318e79a8da4dd7a9c0/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-68c50f7ee6a78e6e20416b886b6744e4/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-b55bd113cbbe198a743e4a857f7c7351/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-22daaa7a2caadc3d52ab2bf9348d4dec/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-9c3db343711a1bc34b9c47a974c74dfc/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-1c99fce9e80f4c045be5d9cb9dced187/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-cf9ef9decc433d8a0c98cd5b81b3f71e/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-38d50a614c6e03e608b3189804498839/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-095c28eb0033668538a3ab4b63e6ad39/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-7e092f513a8c2e1a63ae3daffbbdce55/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-14f61be67c05f3d555e6811dbdde1063/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-7f08d69cb3f792495e8f0255acf4a917/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-fc0a31f43117197bc1bcbc3bada80a90/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-650c9d6998bdcdfc824dd05275e43baa/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-b817cb579bbce4d26a048080f717ead8/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-971ca812a48a7582078e56f2e29ed61f/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-3753d58abba231af4c69b7b61092e107/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-6b25ffbafa9171ac4e40a50db945405d/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-e21414eff0639682a83c8949542debe9/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-3d31334f773b43267fde4d6ff372564f/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-108b9d845d445646c4816f33e481986b/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-c7fe59165f3bfc33b9f177dd16997466/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-12fa09e799a4ed73e2ac3db0d460bdb9/USER', 19600) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-72d1ada0f057f2e9ea4c5805c51c51fd/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-a2eca74967803b9c4c661a1aa73f1be9/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-e105b0d5b2bd0d41329af908a4a057f1/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-7d4212264b523b71d435ebbcbd1f77b7/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-5ee36aa75bb2746f7c9a85e01958a2cc/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-d6eced0f3749e8d656e52e047d7df95f/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-60b92833aad67c2970b869e8ae482220/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-8b4b054a5bdde6acb910f8f40bba45eb/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-602694b3a390acfebb6471d1559d8f57/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-c323c888b6e0cf8ed90d6b3a72b5b290/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-fd14a21ab58a3369d9154579bafcb3ee/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-d48d551b66c5837823aa782c0dffc985/USER', 19700) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-c31ecc75c28c85bab1fb6f128808b57b/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-8407f8755721fe760027e571022c6652/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-920bb7608d833e6158245b7c53bceeb9/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-6a22a91e36d9ca7dee4e537c35267df1/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-67ce97591371bd33d7c66e31925d6aca/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-ece40cafc9294ba7e14fcbde833fd4ce/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-042d055c63c4bfdf02be452b6fa2b3c1/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-9488662a1de0ed5c7e83ec53f50af6f4/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-aa560bb907d9f919241fac92e49a5ca6/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-a3cfe6b31d8560a2c35c72c82e5c70a7/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-65570594bea6fe8de7c12888a36ff110/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-862584d2e0fa96c666c528f081c60855/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-7cb39e753f3b150656cfa2f713c1993a/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-bb89b11e1337222d2a106e3b125a8f98/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-fd4e2dc18e2f4905a81df2133ea2aa63/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTodddd_ZToLL_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-85b73314abb662b111476805ca223124/USER', 20000) # 1 files
 
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
