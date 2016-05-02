@@ -811,6 +811,7 @@ _adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgra
 _adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b992294bcc20cc03a30142c11a625c4a/USER', 5014769) # 204 files, 205 expected
 _adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a2cd32550fabed1170cffac11dc793b1/USER', 3952153) # 159 files
 _adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a15429db443b513da40dc610685d10ad/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-4cfb9e8bc3dca4e99418097c8728846a/USER', 1333705) # 192 files, 193 expected
 
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-5be3a09d518b962ea7026cfefd9c921c/USER', 9900) # 1 files
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-01bab092877501216504c7f6bdc7f33f/USER', 9877) # 1 files
@@ -821,6 +822,7 @@ _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgra
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-58315f394a7b6ec28ab2de80e99f2d14/USER', 4916226) # 200 files, 205 expected
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-185e784b67c51986451a7c92289ed656/USER', 3952153) # 159 files
 _adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-c7ac60ee55f04cf185cd68671a5797c5/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-02c3b343d037e6c2105d0581ab00ca80/USER', 1326633) # 191 files, 193 expected
 
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-bcf8ded315b0fedbdf15d8b32ca4854e/USER', 20000) # 1 files
 _adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-c0b80577abaf3564b6f3de4a9d4d206f/USER', 19900) # 1 files
