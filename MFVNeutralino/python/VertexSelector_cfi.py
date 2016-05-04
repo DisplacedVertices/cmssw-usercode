@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
+                                     mevent_src = cms.InputTag('mfvEvent'),
                                      vertex_src = cms.InputTag('mfvVertices'),
                                      vertex_aux_src = cms.InputTag('mfvVerticesAux'),
                                      produce_vertices = cms.bool(False),
@@ -59,6 +60,8 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_gen3dsig         = cms.double(1e6),
                                      min_bs2ddist         = cms.double(0),
                                      max_bs2ddist         = cms.double(1e9),
+                                     min_bsbs2ddist       = cms.double(0),
+                                     max_bsbs2ddist       = cms.double(1e9),
                                      min_bs2derr          = cms.double(0),
                                      max_bs2derr          = cms.double(1e9),
                                      min_bs2dsig          = cms.double(0),
