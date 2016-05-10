@@ -14,13 +14,14 @@ import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
 SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 nm1s = [
-    ('Njets',     ('', 'min_njets = 0')),
-    ('Ht',        ('', 'min_ht = 0')),
-    ('Ntracks',   'min_ntracks = 0, min_njetsntks = 0'),
-    ('Drmin',     'max_drmin = 1e9'),
-    ('Geo2ddist', 'max_geo2ddist = 1e9'),
-    ('Bs2derr',   'max_bs2derr = 1e9'),
-    ('Njetsntks', 'min_njetsntks = 0'),
+    ('Njets',      ('', 'min_njets = 0')),
+    ('Ht',         ('', 'min_ht = 0')),
+    ('Ntracks',    'min_ntracks = 0, min_njetsntks = 0'),
+    ('Drmin',      'max_drmin = 1e9'),
+    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
+    ('Geo2ddist',  'max_geo2ddist = 1e9'),
+    ('Bs2derr',    'max_bs2derr = 1e9'),
+    ('Njetsntks',  'min_njetsntks = 0'),
     ]
 
 if simple:
