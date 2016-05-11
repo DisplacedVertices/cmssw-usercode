@@ -885,6 +885,17 @@ _adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1000_1
 _adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-fd4e2dc18e2f4905a81df2133ea2aa63/USER', 20000) # 1 files
 _adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTodddd_ZToLL_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-85b73314abb662b111476805ca223124/USER', 20000) # 1 files
 
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_pt2-a03d604b9512d59c1f1f23e5af409999/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_pt2-1c8519e45c92b63ccd7e11a9ddad1dbf/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_pt2-7802c444819ccf3451f956a760406059/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_pt2-d4f68551e43a6b31d6a002d0698e65b4/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-07974af66972550fde7ba34aab18a200/USER', 44783) # 98 files, 100 expected
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-3c94eb869cd23dfa43d2d97921f69a34/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-41437e9bec3d5b8d94127e54e153e6fb/USER', 5039738) # 205 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-3e21d253cf5bee09bfed8ecd0be3b926/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-03a6465388bdb76efc518a7fdf1888ae/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_pt2', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_pt2-65cd75367dd1a0f370f4fd4a53929229/USER', 1340689) # 193 files
+
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
 ########################################################################
