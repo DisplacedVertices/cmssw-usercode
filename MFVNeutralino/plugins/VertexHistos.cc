@@ -310,6 +310,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
   hs.add("nbadtracks",                    "# of 'bad' tracks/SV",                                                         40,    0,      40);
+  hs.add("ntracksptgt2",                  "# of tracks/SV w/ p_{T} > 2 GeV",                                              40,    0,      40);
   hs.add("ntracksptgt3",                  "# of tracks/SV w/ p_{T} > 3 GeV",                                              40,    0,      40);
   hs.add("ntracksptgt5",                  "# of tracks/SV w/ p_{T} > 5 GeV",                                              40,    0,      40);
   hs.add("ntracksptgt10",                 "# of tracks/SV w/ p_{T} > 10 GeV",                                             40,    0,      40);
@@ -786,6 +787,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 aux.ntracks()},
         {"nbadtracks",              aux.nbadtracks()},
+        {"ntracksptgt2",            aux.ntracksptgt(2)},
         {"ntracksptgt3",            aux.ntracksptgt(3)},
         {"ntracksptgt5",            aux.ntracksptgt(5)},
         {"ntracksptgt10",           aux.ntracksptgt(10)},
