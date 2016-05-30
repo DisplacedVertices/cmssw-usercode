@@ -43,6 +43,7 @@ private:
 
   const int min_ntracks;
   const int max_ntracks;
+  const int min_ntracksptgt2;
   const int min_ntracksptgt3;
   const int min_ntracksptgt5;
   const int min_ntracksptgt10;
@@ -124,6 +125,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     match_to_vertices(0),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_ntracks(cfg.getParameter<int>("max_ntracks")),
+    min_ntracksptgt2(cfg.getParameter<int>("min_ntracksptgt2")),
     min_ntracksptgt3(cfg.getParameter<int>("min_ntracksptgt3")),
     min_ntracksptgt5(cfg.getParameter<int>("min_ntracksptgt5")),
     min_ntracksptgt10(cfg.getParameter<int>("min_ntracksptgt10")),
@@ -238,6 +240,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
   return 
     (vtx.ntracks() - ntracks_sub) >= min_ntracks &&
     (vtx.ntracks() - ntracks_sub) <= max_ntracks &&
+    (vtx.ntracksptgt(2)  - ntracks_sub) >= min_ntracksptgt2 &&
     (vtx.ntracksptgt(3)  - ntracks_sub) >= min_ntracksptgt3 &&
     (vtx.ntracksptgt(5)  - ntracks_sub) >= min_ntracksptgt5 &&
     (vtx.ntracksptgt(10) - ntracks_sub) >= min_ntracksptgt10 &&
