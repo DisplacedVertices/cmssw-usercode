@@ -896,6 +896,7 @@ _adbp3('ntuplev6p1_76x_pt2', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-p
 _adbp3('ntuplev6p1_76x_pt2', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-03a6465388bdb76efc518a7fdf1888ae/USER', 1981228) # 81 files
 _adbp3('ntuplev6p1_76x_pt2', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_pt2-65cd75367dd1a0f370f4fd4a53929229/USER', 1340689) # 193 files
 
+_adbp3('ntuplev6p1_76x_data', '/JetHT/dquach-ntuplev6p1_76x_data-1a10619cdc6042d141a5a3a54b840554/USER', 7607820) # 1311 files
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
 ########################################################################
