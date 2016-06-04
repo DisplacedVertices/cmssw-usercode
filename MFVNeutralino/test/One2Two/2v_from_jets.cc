@@ -15,7 +15,7 @@
 double    mu_clear = 0.029337;
 double sigma_clear = 0.011499;
 
-const char* tree_path = "crab/MiniTreeV20_redux";
+const char* tree_path = "trees";
 
 //const int nbkg = 5;
 //const char* samples[nbkg] = {"qcdht0500", "qcdht1000", "ttbardilep", "ttbarhadronic", "ttbarsemilep"};
