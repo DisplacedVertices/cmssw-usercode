@@ -87,8 +87,8 @@ if 1:
             return '%f +- %f' % (self.val, self.err)
 
     nbins = 6
-    times = 10
-    fns = sys.argv[1:]
+    times = int(sys.argv[1])
+    fns = sys.argv[2:]
 
     for fn in fns:
         print fn
@@ -97,7 +97,8 @@ if 1:
             line = line.split()
             if len(line) == nbins+1:
                 ibin = int(line.pop(0))
-                d[ibin].append(datum(line))
+                if len(d[ibin]) < times:
+                    d[ibin].append(datum(line))
 
         d = dict(d)
         assert len(d) == nbins
@@ -113,12 +114,12 @@ if 1:
             print '%4i %10.6f %10.6f %10.6f %10.6f %10.6f' % (ibin, mean(vals), rms(vals), mean(errs), min(vals), max(vals))
 
     if 1:
-        ps = plot_saver('plots/systtables_statspread', size=(600,600))
+        ps = plot_saver('plots/systtables_statspread_cwr', size=(600,600))
 
         binning = [0.02*i for i in xrange(5)] + [0.1, .15] # JMTBAD keep in sync with Templates.cc
         hs = [ROOT.TH1D('h%i' % i, ';d_{VV}^{C} (cm);events', len(binning)-1, array('d', binning)) for i in xrange(times)]
 
-        colors = range(1, 10) + [46]
+        colors = [1] * times #range(1, ) + [46]
         assert len(colors) == times
 
         for h,c in zip(hs, colors):
