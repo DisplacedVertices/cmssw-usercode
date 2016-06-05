@@ -3,6 +3,8 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 from limitplot import exc_graph_dumb
 
+path = 'plots/pretty'
+
 ts = tdr_style()
 rainbow_palette()
 #ROOT.gStyle.SetPalette(1)
@@ -42,7 +44,7 @@ xax.SetBinLabel(xax.FindBin(1000), '1000')
 xax.SetBinLabel(xax.FindBin(1200), '1200')
 xax.SetBinLabel(xax.FindBin(1400), '1400')
 yax = h.GetYaxis()
-yax.SetTitle('neutralino/gluino #it{c#tau}')
+yax.SetTitle('neutralino/gluino c#tau')
 yax.SetTitleOffset(1.25)
 yax.SetRangeUser(300, 32000)
 yax.SetBinLabel(yax.FindBin(300), '300 #mum')
@@ -57,9 +59,9 @@ h.Draw('colz')
 cms = write(61, 0.050, 0.10, 0.92, 'CMS')
 #pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
 sim = write(42, 0.050, 0.68, 0.92, 'Simulation')
-c.SaveAs('/uscms/home/tucker/afshome/scan_eff.pdf')
-c.SaveAs('/uscms/home/tucker/afshome/scan_eff.png')
-c.SaveAs('/uscms/home/tucker/afshome/scan_eff.root')
+c.SaveAs(os.path.join(path, 'scan_eff.pdf'))
+c.SaveAs(os.path.join(path, 'scan_eff.png'))
+c.SaveAs(os.path.join(path, 'scan_eff.root'))
 del c
 
 for xxx in ('small', 'big'):
@@ -89,10 +91,7 @@ for xxx in ('small', 'big'):
     xax.SetBinLabel(xax.FindBin(1200), '1200')
     xax.SetBinLabel(xax.FindBin(1400), '1400')
     yax = h.GetYaxis()
-    if xxx == 'small':
-        yax.SetTitle('neutralino/gluino #it{c#tau} (mm)')
-    else:
-        yax.SetTitle('neutralino/gluino #it{c#tau} (mm)')
+    yax.SetTitle('neutralino/gluino c#tau (mm)')
     yax.SetTitleOffset(1.25)
     yax.SetLabelSize(0.055)
     if xxx == 'small':
@@ -156,7 +155,7 @@ for xxx in ('small', 'big'):
     cms = write(61, 0.050, 0.10, 0.92, 'CMS')
     #pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
     lum = write(42, 0.050, 0.60, 0.92, '17.6 fb^{-1} (8 TeV)')
-    fn = '/uscms/home/tucker/afshome/scan_lim_obs_%s' % xxx
+    fn = os.path.join(path, 'scan_lim_obs_%s' % xxx)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
