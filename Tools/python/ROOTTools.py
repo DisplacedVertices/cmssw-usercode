@@ -655,6 +655,8 @@ def data_mc_comparison(name,
                 print sample.name, '<', 3 * sample.partial_weight * int_lumi, '@95%CL'
             else:
                 print sample.name, integ
+                for ibin in xrange(0, sample.hist.GetNbinsX()+2):
+                    print '   %6i %15.6f +- %15.6f' % (ibin, sample.hist.GetBinContent(ibin), sample.hist.GetBinError(ibin))
 
     stack.Draw(stack_draw_cmd)
     stack.SetTitle(';%s;%s' % (x_title, y_title))
@@ -721,7 +723,15 @@ def data_mc_comparison(name,
         if background_uncertainty is not None:
             legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
-            legend.AddEntry(sample.hist, sample.nice_name, 'L')
+            entry = legend.AddEntry(sample.hist, sample.nice_name, 'L')
+            # JMTBAD take out this hack
+            #entry = legend.AddEntry(0, '  c#tau = 1 mm, M = 400 GeV', '')
+            entryt = ROOT.TLatex(.712,.670, 'c#tau = 1 mm, M = 400 GeV')
+            entryt.SetNDC()
+            entryt.SetTextAlign(22)
+            entryt.SetTextFont(43)
+            entryt.SetTextSize(20)
+            entryt.Draw()
         legend.Draw()
     else:
         legend = None
@@ -743,7 +753,7 @@ def data_mc_comparison(name,
             w.DrawLatex(x, y, text)
             return w
         cms = write(61, 0.04, 0.10, 0.93, 'CMS')
-        pre = write(52, 0.035, 0.19, 0.93, 'Preliminary')
+#        pre = write(52, 0.035, 0.19, 0.93, 'Preliminary')
         lum = write(42, 0.04,  0.636, 0.93, int_lumi_nice)
 
     if verbose:
@@ -768,10 +778,15 @@ def data_mc_comparison(name,
         # JMTBAD this hack for run1 paper, please take out
         ddd = data_sample.hist.Clone('ddd')
         if ddd.GetNbinsX() == 6 and abs(ddd.GetBinContent(6) - 0.2) < 1e-4:
+            print 'hi from the hack!'
             ddd.SetBinContent(6, 0)
             ddd.SetBinError(6, 0)
-
         res_g = ROOT.TGraphAsymmErrors(ddd, sum_background, 'b(1,1) mode pois')
+        # JMTBAD this hack for run1 paper, please take out
+        if res_g.GetN() == 5 and abs(res_g.GetY()[3] - 6.11046924755) < 1e-4:
+            print 'hi from the hack!'
+            res_g.SetPointEYlow(3, 4.22)
+            res_g.SetPointEYhigh(3, 17.3)
         res_g.SetMarkerStyle(20)
         res_g.SetMarkerSize(0)
         res_g.SetLineWidth(res_line_width)
