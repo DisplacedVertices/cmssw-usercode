@@ -7,7 +7,7 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, tdr_st
 from functools import partial
 
 root_file_dir = 'HistosV20_rebin_for_paper' # '/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/HistosV20'
-plot_dir = 'plots/paper_draft_4'
+plot_dir = 'plots/paper_draft_6'
 
 set_style()
 ps = plot_saver(plot_dir, size=(1,1), root_log=True, pdf_log=True)
@@ -16,7 +16,7 @@ data_samples = Samples.data_samples
 background_samples = Samples.smaller_background_samples + Samples.leptonic_background_samples + Samples.ttbar_samples + Samples.qcd_samples
 signal_sample = Samples.mfv_neutralino_tau1000um_M0400
 signal_sample.cross_section = 0.001
-signal_sample.nice_name = '#splitline{#it{c#tau} = 1 mm, M = 400 GeV,}{#sigma = 1 fb signal}'
+signal_sample.nice_name = 'signal: #sigma = 1 fb,'
 signal_sample.color = 8
 
 for s in Samples.qcd_samples:
@@ -35,7 +35,7 @@ C = partial(data_mc_comparison,
             overflow_in_last = True,
             poisson_intervals = True,
             enable_legend = True,
-            legend_pos = (0.418, 0.701, 0.858, 0.909),
+            legend_pos = (0.428, 0.681, 0.865, 0.909),
             res_fit = False,
             verbose = True,
             background_uncertainty = ('MC stat. uncert.', 0, 1, 3002),
@@ -49,7 +49,7 @@ C('dbv',
   rebin = dbv_bins,
   bin_width_to = 0.05,
   x_title = 'd_{BV} (mm)',
-  y_title = 'vertices/50 #mum',
+  y_title = 'events/50 #mum',
   y_range = (0.5, 100000),
   y_title_offset = 1.19,
   res_y_range = (0,2.5),
@@ -65,7 +65,7 @@ C('dvv',
   rebin = dvv_bins,
   bin_width_to = 0.2,
   y_title_offset = 1.19,
-  res_y_range = (0, 15),
+  res_y_range = (0, 6.5),
   y_range = (0.05, 300),
   )
 
@@ -75,4 +75,10 @@ C('dvv',
 #        if ddd.GetNbinsX() == 6:
 #            ddd.SetBinContent(6, 0)
 #            ddd.SetBinError(6, 0)
-
+#
+# AND THIS FOR THE "WRONG" ERROR BAR
+#
+#        if res_g.GetN() == 5 and abs(res_g.GetY()[3] - 6.11046924755) < 1e-4:
+#            print 'hi from the hack!'
+#            res_g.SetPointEYlow(3, 4.22)
+#            res_g.SetPointEYhigh(3, 17.3)
