@@ -6,25 +6,25 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '~/nobackup/crab_dirs/HistosV6p1_76x_puw'
-plot_dir = 'plots/HistosV6p1_76x_puw_datamccomp'
+root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_21/'
+plot_dir = '~/plots/data_mc_comp/HistosV6p1_76x_datamccomp'
 
 set_style()
 ps = plot_saver(plot_dir)
 
-ac.int_lumi *= 0.1
+ac.int_lumi *= 0.01
 ac.int_lumi_nice = '260 pb^{-1} (13 TeV)'
-scale_factor = 1. #56.0/298.0
+scale_factor = 245750.0 / 264843.3427511 #56.0/298.0
 
 data_samples = Samples.data_samples
-if 0:
-    Samples.qcd_samples.pop(1)
-    background_samples = Samples.ttbar_samples + Samples.qcd_samples
-else:
-    background_samples = Samples.ttbar_samples + Samples.qcdpt_samples
-    scale_factor = 299554.0 / 366268.314515 #* 328.0 / 315.886929274
+#if 0:
+#Samples.qcd_samples.pop(1)
+background_samples = Samples.ttbar_samples + Samples.qcd_samples
+#else:
+#    background_samples = Samples.ttbar_samples + Samples.qcdpt_samples
+#    scale_factor = 299554.0 / 366268.314515 #* 328.0 / 315.886929274
 
-signal_samples = [] #[Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
+signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 y= ['100 #mum, #sigma = 100 fb', '300 #mum, #sigma = 5 fb', '1 mm, #sigma = 1 fb', '10 mm, #sigma = 1 fb']
 c=[7,4,6,8]
 s=[0.1,0.005,0.001, 0.001]
@@ -52,8 +52,8 @@ C = partial(data_mc_comparison,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
             poisson_intervals = True,
-            enable_legend = False,
-            #legend_pos = (0.67, 0.67, 0.90, 0.90),
+            enable_legend = True,
+            legend_pos = (0.67, 0.67, 0.90, 0.90),
             res_fit = True,
             verbose = True,
             background_uncertainty = ('MC stat. uncert.', 0, 1, 3002),
@@ -83,7 +83,7 @@ C('npv_1vtx',
   )
 
 C('jetht_presel',
-  histogram_path = 'mfvEventHistosPreSel/h_jet_ht',
+  histogram_path = 'mfvEventHistosPreSel/h_jet_ht_40',
   rebin = 5,
   x_title = 'particle-flow jet H_{T} (GeV)',
   y_title = 'events/100 GeV',
@@ -93,12 +93,12 @@ C('jetht_presel',
   )
 
 C('jetht_1vtx',
-  histogram_path = 'mfvEventHistosOnlyOneVtx/h_jet_ht',
+  histogram_path = 'mfvEventHistosOnlyOneVtx/h_jet_ht_40',
   rebin = 5,
   x_title = 'particle-flow jet H_{T} (GeV)',
   y_title = 'events/100 GeV',
   x_range = (900, 3500),
-  y_range = (0.3, 120),
+  y_range = (0.3, 20),
   #legend_pos = (0.67, 0.67, 0.90, 0.90),
   )
 
@@ -188,7 +188,7 @@ C('sv_best0_bsbs2ddist',
   bin_width_to = 0.005,
   x_title = 'd_{BV} (cm)',
   y_title = 'vertices/50 #mum',
-  y_range = (0.3, 300),
+  y_range = (0.3, 30),
 
   overflow_in_last = False,
   #legend_pos = (0.47, 0.70, 0.87, 0.90),

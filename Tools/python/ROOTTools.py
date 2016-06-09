@@ -791,7 +791,7 @@ def data_mc_comparison(name,
             old_opt_fit = ROOT.gStyle.GetOptFit()
             ROOT.gStyle.SetOptFit(0)
             fit_opt = 's ex0'
-            fit_opt += ' v' if 'fit' in verbose else ' q'
+            fit_opt += ' v' if type(verbose) == str and 'fit' in verbose else ' q'
             fit_res = res_g.Fit('pol0', fit_opt)
             ratio_pad.Update()
             fit_tpt = ROOT.TPaveText(0.12, 0.25, 0.4, 0.27, 'ndc')
