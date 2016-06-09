@@ -18,8 +18,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
-  const edm::InputTag vertex_src;
-  const edm::InputTag mevent_src;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
+  const edm::EDGetTokenT<MFVEvent> event_token;
   const int which_mom;
   const double max_dr;
   const double max_dist;
@@ -91,8 +91,8 @@ class MFVResolutions : public edm::EDAnalyzer {
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
-  : vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
+  : vertices_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     which_mom(cfg.getParameter<int>("which_mom")),
     max_dr(cfg.getParameter<double>("max_dr")),
     max_dist(cfg.getParameter<double>("max_dist"))
@@ -178,21 +178,21 @@ namespace {
     return sqrt(x*x + y*y + z*z);
   }
   
-  float signed_mag(float x, float y) {
-    float m = mag(x,y);
-    if (y < 0) return -m;
-    return m;
-  }
+  //  float signed_mag(float x, float y) {
+  //    float m = mag(x,y);
+  //    if (y < 0) return -m;
+  //    return m;
+  //}
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mevent_src, mevent);
+  event.getByToken(event_token, mevent);
 
   die_if_not(mevent->gen_valid, "not running on signal sample");
 
   edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
+  event.getByToken(vertices_token, vertices);
 
   TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
   int lsp_nmatch[2] = {0,0};
