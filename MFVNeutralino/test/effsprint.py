@@ -18,7 +18,7 @@ if plots:
 
 tot_sum = 0.
 tot_var = 0.
-cuts = () if 'nonm1' in sys.argv else ('Ntracks', 'Drmin', 'Geo2d', 'Bs2derr', 'Njets')
+cuts = () if 'nonm1' in sys.argv else ('Njets', 'Ht', 'Ntracks', 'Drmin', 'Bsbs2ddist', 'Geo2ddist', 'Bs2derr')
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
 nvtx = 1 if 'one' in sys.argv else 2
