@@ -12,7 +12,6 @@ namespace jmt {
   class ConfigFromEnv {
   public:
     ConfigFromEnv() : verbose(false), prefix("") {}
-    ConfigFromEnv(const bool verbose_) : verbose(verbose_), prefix("") {}
     ConfigFromEnv(const std::string& prefix_) : verbose(false), prefix(prefix_ + "_") {}
     ConfigFromEnv(const std::string& prefix_, const bool verbose_) : verbose(verbose_), prefix(prefix_ + "_") {}
 
