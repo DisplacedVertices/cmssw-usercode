@@ -23,9 +23,9 @@ namespace mfv {
         x(which == 0 ? nt.x0 : nt.x1),
         y(which == 0 ? nt.y0 : nt.y1),
         z(which == 0 ? nt.z0 : nt.z1),
-        cxx(which == 0 ? nt.cxx0 : nt.cxx1),
-        cxy(which == 0 ? nt.cxy0 : nt.cxy1),
-        cyy(which == 0 ? nt.cyy0 : nt.cyy1)
+        cxx(0),
+        cxy(0),
+        cyy(0)
     {
       if (which != 0 && which != 1)
         jmt::vthrow("can't make a VertexSimple out of MiniNtuple for which = %i", which);
