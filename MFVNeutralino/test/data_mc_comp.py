@@ -6,15 +6,15 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_21'
-plot_dir = 'plots/data_mc_comp/HistosV6p1_76x_nstlays3_21'
+root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_25'
+plot_dir = 'plots/data_mc_comp/HistosV6p1_76x_nstlays3_25'
 
 set_style()
 ps = plot_saver(plot_dir)
 
 ac.int_lumi *= 0.01
 ac.int_lumi_nice = '260 pb^{-1} (13 TeV)'
-scale_factor = 245750.0 / 264843.342751
+scale_factor = 245750.0 / 264843.327106
 
 data_samples = Samples.data_samples
 background_samples = Samples.ttbar_samples + Samples.qcd_samples
@@ -66,13 +66,20 @@ C('ht40_nocuts',
   cut_line = (1000, 2, 5, 1),
   )
 
+C('npv_presel',
+  histogram_path = 'mfvEventHistosPreSel/h_npv',
+  x_title = 'number of PV',
+  y_title = 'events',
+  x_range = (0, 32),
+  )
+
 C('nsv_presel',
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
   overflow_in_last = False,
   x_title = 'number of vertices',
   y_title = 'events',
   x_range = (0, 2),
-  y_range = (1, 1e7),
+  y_range = (1, 1e6),
   cut_line = (2, 2, 5, 1),
   )
 
@@ -106,6 +113,13 @@ C('bs2derr_onevtx_zoomin',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.01),
   cut_line = (0.0025, 2, 5, 1),
+  )
+
+C('tksjetsntkmass_onevtx',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_tksjetsntkmass',
+  rebin = 4,
+  x_title = 'tracks + jets mass (GeV)',
+  y_title = 'vertices/200 GeV',
   )
 
 dbv_bins = [j*0.005 for j in range(8)] + [0.04]
