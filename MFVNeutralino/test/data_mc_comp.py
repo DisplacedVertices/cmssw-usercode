@@ -91,12 +91,31 @@ C('ntracks_onevtx',
   cut_line = (5, 2, 5, 1),
   )
 
+C('ntracksptgt3_onevtx',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_ntracksptgt3',
+  x_title = 'number of tracks with p_{T} > 3 GeV/vertex',
+  y_title = 'vertices',
+  )
+
 C('drmin_onevtx',
   histogram_path = 'vtxHst1VNoDrmin/h_sv_best0_drmin',
   rebin = 10,
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.1',
   cut_line = (0.4, 2, 5, 1),
+  )
+
+C('drmax_onevtx',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_drmax',
+  rebin = 6,
+  x_title = 'max{#Delta R{track i,j}}',
+  y_title = 'vertices/0.28',
+  )
+
+C('njetsntks_onevtx',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_njetsntks',
+  x_title = 'number of associated jets',
+  y_title = 'vertices',
   )
 
 C('bs2derr_onevtx',
@@ -107,12 +126,18 @@ C('bs2derr_onevtx',
   cut_line = (0.0025, 2, 5, 1),
   )
 
-C('bs2derr_onevtx_zoomin',
+C('bs2derr_onevtx_zoom',
   histogram_path = 'vtxHst1VNoBs2derr/h_sv_best0_bs2derr',
   x_title = '#sigma(d_{BV}) (cm)',
   y_title = 'vertices/5 #mum',
   x_range = (0, 0.01),
   cut_line = (0.0025, 2, 5, 1),
+  )
+
+C('sumnhitsbehind_onevtx',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_sumnhitsbehind',
+  x_title = 'sum number of hits behind SV',
+  y_title = 'vertices',
   )
 
 C('tksjetsntkmass_onevtx',
