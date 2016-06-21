@@ -489,6 +489,8 @@ namespace mfv {
 
     fflush(stdout);
 
+    fit::set_n_bins(Template::binning().size()-1);
+
     book_trees();
   }
 
@@ -1155,8 +1157,6 @@ namespace mfv {
 
     if (!fit::extra_prints && print_level > 1)
       fit::extra_prints = 1;
-
-    fit::set_n_bins(Template::binning().size()-1);
 
     fit::n_sig_orig = sig_template->Integral(1,100000);
     printf("n_sig_orig: %.1f\n", fit::n_sig_orig);
