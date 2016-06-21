@@ -89,7 +89,6 @@ mfvSelectedVerticesLoose = mfvSelectedVertices.clone( # touching this affects th
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_ntracks = 5,
-    max_drmin = 0.4,
     min_bsbs2ddist = 0.01,
     max_geo2ddist = 2.0,
     max_bs2derr = 0.0025,
