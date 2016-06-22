@@ -17,9 +17,10 @@ class TrackerMapper : public edm::EDAnalyzer {
   void analyze(const edm::Event&, const edm::EventSetup&);
  
  private:
-  const edm::InputTag track_src;
-  const edm::InputTag beamspot_src;
-  const edm::InputTag primary_vertex_src;
+  const edm::EDGetTokenT<reco::TrackCollection> track_token;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
+  const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_token;
 
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
@@ -48,9 +49,10 @@ class TrackerMapper : public edm::EDAnalyzer {
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
-  : track_src(cfg.getParameter<edm::InputTag>("track_src")),
-    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
+  : track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
+    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
+    pileup_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
 {
   edm::Service<TFileService> fs;
@@ -97,7 +99,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   int npu = -1;
   if (!event.isRealData()) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup;
-    event.getByLabel("addPileupInfo", pileup);
+    event.getByToken(pileup_token, pileup);
 
     for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
       if (psi->getBunchCrossing() == 0)
@@ -108,7 +110,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   }
 
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel(beamspot_src, beamspot);
+  event.getByToken(beamspot_token, beamspot);
 
   const float bsx = beamspot->x0();
   const float bsy = beamspot->y0();
@@ -119,11 +121,11 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   h_bsz->Fill(bsz);
 
   edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByLabel(primary_vertex_src, primary_vertices);
+  event.getByToken(primary_vertex_token, primary_vertices);
   h_npv->Fill(int(primary_vertices->size()), *weight);
 
   edm::Handle<reco::TrackCollection> tracks;
-  event.getByLabel(track_src, tracks);
+  event.getByToken(track_token, tracks);
 
   int ntracks[3] = {0};
   for (const reco::Track& tk : *tracks) {
