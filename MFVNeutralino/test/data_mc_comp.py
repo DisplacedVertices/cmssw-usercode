@@ -6,15 +6,15 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_25'
-plot_dir = 'plots/data_mc_comp/HistosV6p1_76x_nstlays3_25'
+root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_27'
+plot_dir = 'plots/data_mc_comp/HistosV6p1_76x_nstlays3_27'
 
 set_style()
 ps = plot_saver(plot_dir)
 
 ac.int_lumi *= 0.01
 ac.int_lumi_nice = '260 pb^{-1} (13 TeV)'
-scale_factor = 245750.0 / 264843.327106
+scale_factor = 245750.0 / 264843.310478
 
 data_samples = Samples.data_samples
 background_samples = Samples.ttbar_samples + Samples.qcd_samples
@@ -98,11 +98,10 @@ C('ntracksptgt3_onevtx',
   )
 
 C('drmin_onevtx',
-  histogram_path = 'vtxHst1VNoDrmin/h_sv_best0_drmin',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_drmin',
   rebin = 10,
   x_title = 'min{#Delta R{track i,j}}',
   y_title = 'vertices/0.1',
-  cut_line = (0.4, 2, 5, 1),
   )
 
 C('drmax_onevtx',
