@@ -1,9 +1,13 @@
-import sys
+import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 from limitplot import exc_graph_dumb
 
-path = 'plots/pretty'
+preliminary = True
+if preliminary:
+    path = 'plots/prelim'
+else:
+    path = 'plots/not_prelim'
 
 ts = tdr_style()
 rainbow_palette()
@@ -44,21 +48,25 @@ xax.SetBinLabel(xax.FindBin(1000), '1000')
 xax.SetBinLabel(xax.FindBin(1200), '1200')
 xax.SetBinLabel(xax.FindBin(1400), '1400')
 yax = h.GetYaxis()
-yax.SetTitle('neutralino/gluino c#tau')
-yax.SetTitleOffset(1.25)
+yax.SetTitle('neutralino/gluino c#tau (mm)')
+yax.SetTitleOffset(1)
+yax.SetLabelSize(0.055)
 yax.SetRangeUser(300, 32000)
-yax.SetBinLabel(yax.FindBin(300), '300 #mum')
-yax.SetBinLabel(yax.FindBin(1000), '1 mm')
-yax.SetBinLabel(yax.FindBin(5000), '5 mm')
-yax.SetBinLabel(yax.FindBin(10000), '1 cm')
-yax.SetBinLabel(yax.FindBin(20000), '2 cm')
-yax.SetBinLabel(yax.FindBin(30000), '3 cm')
+yax.SetBinLabel(yax.FindBin(300), '0.3')
+yax.SetBinLabel(yax.FindBin(1000), '1')
+yax.SetBinLabel(yax.FindBin(5000), '5')
+yax.SetBinLabel(yax.FindBin(10000), '10')
+yax.SetBinLabel(yax.FindBin(20000), '20')
+yax.SetBinLabel(yax.FindBin(30000), '30')
 h.GetZaxis().SetTitleOffset(1.2)
 h.SetZTitle('efficiency for d_{VV} > 600 #mum')
 h.Draw('colz')
 cms = write(61, 0.050, 0.10, 0.92, 'CMS')
-#pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
-sim = write(42, 0.050, 0.68, 0.92, 'Simulation')
+if preliminary:
+    sim = write(52, 0.040, 0.19, 0.92, 'Simulation Preliminary')
+else:
+    sim = write(52, 0.040, 0.19, 0.92, 'Simulation')
+lum = write(42, 0.050, 0.735, 0.92, '(8 TeV)')
 c.SaveAs(os.path.join(path, 'scan_eff.pdf'))
 c.SaveAs(os.path.join(path, 'scan_eff.png'))
 c.SaveAs(os.path.join(path, 'scan_eff.root'))
@@ -110,7 +118,7 @@ for xxx in ('small', 'big'):
     zax = h.GetZaxis()
     zax.SetTitleOffset(1.2)
     #zax.SetBinLabel(zax.FindBin(30), '30')
-    h.SetZTitle('95% CL upper limit on #sigma B (fb)')
+    h.SetZTitle('95% CL upper limit on #sigma B^{2} (fb)')
     h.Draw('colz')
     if xxx == 'big':
         h.SetMinimum(0.4)
@@ -153,7 +161,8 @@ for xxx in ('small', 'big'):
     l1.Draw()
     l2.Draw()
     cms = write(61, 0.050, 0.10, 0.92, 'CMS')
-    #pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
+    if preliminary:
+        pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
     lum = write(42, 0.050, 0.60, 0.92, '17.6 fb^{-1} (8 TeV)')
     fn = os.path.join(path, 'scan_lim_obs_%s' % xxx)
     c.SaveAs(fn + '.pdf')

@@ -3,6 +3,8 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
+prelim = True
+
 set_style()
 rainbow_palette()
 
@@ -128,9 +130,14 @@ leg.AddEntry(g_cons, 'Best fit construction', 'F')
 leg.Draw()
 
 cms = write(61, 0.050, 0.099, 0.931, 'CMS')
-#pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
-sim = write(42, 0.050, 0.741, 0.933, 'Simulation')
-name = 'closure'
+if prelim:
+    name = 'plots/prelim/closure'
+    sim_str = 'Simulation Preliminary'
+else:
+    name = 'plots/not_prelim/closure'
+    sim_str = 'Simulation'
+sim = write(52, 0.040, 0.207, 0.931, sim_str)
+lum = write(42, 0.050, 0.630, 0.931, '17.6 fb^{-1} (8 TeV)')
 c.SaveAs(name + '.pdf')
 c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')

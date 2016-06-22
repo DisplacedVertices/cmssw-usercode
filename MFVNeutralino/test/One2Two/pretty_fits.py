@@ -81,6 +81,8 @@ h_b_sum.SetLineStyle(3)
 
 h_data = poisson_intervalize(rebook(f.Get('Fitter/seed00_toy-1/fit_results/h_data_b_fit_bb_nodiv')))
 h_data.SetLineWidth(2)
+h_data.SetMarkerStyle(20)
+h_data.SetMarkerSize(1.5)
 
 c = ROOT.TCanvas('c', '', 800, 800)
 c.SetTopMargin(0.08)
@@ -102,7 +104,7 @@ leg.Draw()
 cms = write(61, 0.050, 0.099, 0.931, 'CMS')
 #pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
 sim = write(42, 0.050, 0.631, 0.933, ac.int_lumi_nice)
-name = '/uscms/home/tucker/afshome/fit'
+name = 'plots/not_prelim/fit'
 c.SaveAs(name + '.pdf')
 c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')
