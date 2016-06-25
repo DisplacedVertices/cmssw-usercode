@@ -10,6 +10,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 class TrackerMapper : public edm::EDAnalyzer {
  public:
@@ -46,6 +47,11 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_tracks_nhits[3];
   TH1F* h_tracks_npxhits[3];
   TH1F* h_tracks_nsthits[3];
+
+  TH1F* h_tracks_min_r[3];
+  TH1F* h_tracks_npxlayers[3];
+  TH1F* h_tracks_nstlayers[3];
+  TH1F* h_tracks_sigmadxy[3];
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -82,6 +88,11 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_nhits[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_nhits", ex[i]), TString::Format("%s tracks;tracks nhits;arb. units", ex[i]), 40, 0, 40);
     h_tracks_npxhits[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_npxhits", ex[i]), TString::Format("%s tracks;tracks npxhits;arb. units", ex[i]), 40, 0, 40);
     h_tracks_nsthits[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_nsthits", ex[i]), TString::Format("%s tracks;tracks nsthits;arb. units", ex[i]), 40, 0, 40);
+
+    h_tracks_min_r[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_min_r", ex[i]), TString::Format("%s tracks;tracks min_r;arb. units", ex[i]), 20, 0, 20);
+    h_tracks_npxlayers[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;arb. units", ex[i]), 20, 0, 20);
+    h_tracks_nstlayers[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
+    h_tracks_sigmadxy[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_sigmadxy", ex[i]), TString::Format("%s tracks;tracks sigmadxy;arb. units", ex[i]), 200, 0, 20);
   }
 }
 
@@ -129,8 +140,16 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
   int ntracks[3] = {0};
   for (const reco::Track& tk : *tracks) {
-    const bool sel = tk.pt() > 1 && tk.hitPattern().numberOfValidHits() >= 8 && tk.hitPattern().numberOfValidPixelHits() >= 1;
-    const bool seed = sel && fabs(tk.dxy(*beamspot)) > 0.01;
+    TrackerSpaceExtents tracker_extents;
+    double pt = tk.pt();
+    double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false).min_r;
+    double npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
+    double nstlayers = tk.hitPattern().stripLayersWithMeasurement();
+    double sigmadxybs = fabs(tk.dxy(*beamspot) / tk.dxyError());
+
+    const bool sel = pt > 1 && min_r <= 1 && npxlayers >= 2 && nstlayers >= 3;
+    const bool seed = sel && sigmadxybs > 4;
+
     for (int i = 0; i < 3; ++i) {
       if (i==1 && !sel) continue;
       if (i==2 && !seed) continue;
@@ -159,6 +178,11 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       if (z>0 && z<2)   h_tracks_dxy_zslices[i][3]->Fill(dxy, *weight);
       if (z>2 && z<5)   h_tracks_dxy_zslices[i][4]->Fill(dxy, *weight);
       if (z>5)          h_tracks_dxy_zslices[i][5]->Fill(dxy, *weight);
+
+      h_tracks_min_r[i]->Fill(min_r, *weight);
+      h_tracks_npxlayers[i]->Fill(npxlayers, *weight);
+      h_tracks_nstlayers[i]->Fill(nstlayers, *weight);
+      h_tracks_sigmadxy[i]->Fill(sigmadxybs, *weight);
     }
   }
 
