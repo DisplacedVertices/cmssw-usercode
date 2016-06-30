@@ -52,6 +52,9 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_tracks_npxlayers[3];
   TH1F* h_tracks_nstlayers[3];
   TH1F* h_tracks_sigmadxy[3];
+  TH1F* h_tracks_absdxy[3];
+  TH1F* h_tracks_sigmadxy_dxyslices[3][6];
+  TH1F* h_ntracks_dxyslices[3][6];
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -93,6 +96,11 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_npxlayers[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nstlayers[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_sigmadxy[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_sigmadxy", ex[i]), TString::Format("%s tracks;tracks sigmadxy;arb. units", ex[i]), 200, 0, 20);
+    h_tracks_absdxy[i] = fs->make<TH1F>(TString::Format("h_%s_tracks_absdxy", ex[i]), TString::Format("%s tracks;tracks |dxy| to beamspot;arb. units", ex[i]), 200, 0, 0.2);
+    for (int j = 0; j < 6; ++j) {
+      h_tracks_sigmadxy_dxyslices[i][j] = fs->make<TH1F>(TString::Format("h_%s_tracks_sigmadxy_dxy%d", ex[i], j), TString::Format("%s tracks with %.2f <= |dxy| < %.2f;tracks sigmadxy;arb. units", ex[i], 0.01*j, 0.01*(j+1)), 200, 0, 20);
+      h_ntracks_dxyslices[i][j] = fs->make<TH1F>(TString::Format("h_%s_ntracks_dxy%d", ex[i], j), TString::Format(";number of %s tracks with %.2f <= |dxy| < %.2f;events", ex[i], 0.01*j, 0.01*(j+1)), 500, 0, 500);
+    }
   }
 }
 
@@ -139,6 +147,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   event.getByToken(track_token, tracks);
 
   int ntracks[3] = {0};
+  int ntracks_dxyslices[3][6] = {{0}, {0}, {0}};
   for (const reco::Track& tk : *tracks) {
     TrackerSpaceExtents tracker_extents;
     double pt = tk.pt();
@@ -183,11 +192,24 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_npxlayers[i]->Fill(npxlayers, *weight);
       h_tracks_nstlayers[i]->Fill(nstlayers, *weight);
       h_tracks_sigmadxy[i]->Fill(sigmadxybs, *weight);
+
+      double absdxy = fabs(dxy);
+      h_tracks_absdxy[i]->Fill(absdxy, *weight);
+      for (int j = 0; j < 6; ++j) {
+        if (absdxy >= 0.01*j && absdxy < 0.01*(j+1)) {
+          ++ntracks_dxyslices[i][j];
+          h_tracks_sigmadxy_dxyslices[i][j]->Fill(sigmadxybs, *weight);
+        }
+      }
     }
   }
 
   for (int i = 0; i < 3; ++i) {
     h_ntracks[i]->Fill(ntracks[i], *weight);
+
+    for (int j = 0; j < 6; ++j) {
+      h_ntracks_dxyslices[i][j]->Fill(ntracks_dxyslices[i][j], *weight);
+    }
   }
 }
 
