@@ -1,10 +1,45 @@
 #!/usr/bin/env python
 
-from base_draw_fit import *
+from JMTucker.Tools.ROOTTools import *
+set_style()
+
+fn = '~/scratch/mfvo2t.root'
+plot_dir = '../plots/o2t_fit/MinitreeV6p1_76x_nstlays3_4'
+mu_sig_true_mean = 0
+mu_bkg_true_mean = 89.97
+
+f = ROOT.TFile(fn)
+t = f.Get('Fitter/t_fit_info')
+
+t.SetMarkerStyle(20)
+t.SetMarkerSize(1.)
+
+tree_vars = 'seed toy true_pars[0] true_pars[1] true_pars[2] true_pars[3]'
+for y in 'h1 h0'.split():
+    for x in 'istat maxtwolnL mu_sig err_mu_sig mu_bkg err_mu_bkg nuis0 err_nuis0 nuis1 err_nuis1'.split():
+        tree_vars += ' t_obs_0__%s_%s' % (y,x)
+tree_vars += ' pval_signif pval_cls sig_limit sig_limit_err sig_limit_fit_n sig_limit_fit_a sig_limit_fit_b sig_limit_fit_a_err sig_limit_fit_b_err sig_limit_fit_prob'
+i_pval_signif = -9
+
+def tree_xform(x):
+    z = []
+    for y in x:
+        y = y.strip()
+        if not y:
+            z.append(0)
+        else:
+            z.append(float(y))
+    return tuple(z)
+
+def do_detree():
+    return list(detree(t, tree_vars.replace(' ', ':'), xform=tree_xform))
+
+sig_scale = 0
+def skip(h0_istat, h1_istat, sig_limit_fit_n):
+    return h1_istat == 0 or (sig_scale < 0 and sig_limit_fit_n <= 3) #h0_istat <= 1 or h1_istat <= 1 or sig_limit_fit_n < 4
 
 d = do_detree()
 
-plot_dir = os.path.join('plots/o2t_fit', batch_name)
 ps = plot_saver(plot_dir, size=(600,600))
 
 h = ROOT.TH1D
@@ -124,9 +159,9 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_pval_cls.Fill(pval_cls)
     sig_limits.append(sig_limit)
     h_sig_limit.Fill(sig_limit)
-    sig_limit_scaled = sig_limit / (sig_eff * xsec2nevt)
-    h_sig_limit_scaled.Fill(sig_limit_scaled)
-    sig_limits_scaled.append(sig_limit_scaled)
+    #sig_limit_scaled = sig_limit / (sig_eff * xsec2nevt)
+    #h_sig_limit_scaled.Fill(sig_limit_scaled)
+    #sig_limits_scaled.append(sig_limit_scaled)
     h_sig_limit_err.Fill(sig_limit_err)
     h_sig_limit_fit_n.Fill(sig_limit_fit_n)
     h_sig_limit_fit_a.Fill(sig_limit_fit_a)
@@ -164,9 +199,8 @@ ns = [0,1] + [int(i*len(d)/3.) for i in xrange(1,3)] + [-2,-1]
 for n in ns:
     x = d[n]
     seed, toy = int(x[0]), int(x[1])
-    assert toy == 0 or toy == -1
+    #assert toy == 0 or toy == -1
     snip = '/mfvo2t_%i_' % seed
-    fn = [fn for fn in batch_fns if snip in fn][0]
     f = ROOT.TFile(fn)
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
     for t in 'sb b'.split():
