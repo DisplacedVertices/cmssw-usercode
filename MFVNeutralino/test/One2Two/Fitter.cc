@@ -672,6 +672,62 @@ namespace mfv {
         }
       }
 
+      TH2F* h3 = new TH2F(TString::Format("h_likelihood_%s%s_scan_mubkg_nuis0", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;nuis. par 0;#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
+                          nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
+                          mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
+                          );
+
+      for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
+        const double nuispar0 = nuis_scan[0].v(i0);
+        for (int i1 = 1; i1 < mu_scan[1].n; ++i1) {
+          const double mu_bkg = mu_scan[1].v(i1);
+          h3->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, nuispar0, ml.nuis1));
+        }
+      }
+
+      TH2F* h4 = new TH2F(TString::Format("h_likelihood_%s%s_scan_mubkg_nuis1", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;nuis. par 1;#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
+                          nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max,
+                          mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
+                          );
+
+      for (int i0 = 1; i0 < nuis_scan[1].n; ++i0) {
+        const double nuispar1 = nuis_scan[1].v(i0);
+        for (int i1 = 1; i1 < mu_scan[1].n; ++i1) {
+          const double mu_bkg = mu_scan[1].v(i1);
+          h4->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, ml.nuis0, nuispar1));
+        }
+      }
+
+      TH2F* h5 = new TH2F(TString::Format("h_likelihood_%s%s_scan_musig_nuis0", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;nuis. par 0;#mu_{sig}", sb_or_b_nice, ml.title().c_str()),
+                          nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
+                          mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
+                          );
+
+      for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
+        const double nuispar0 = nuis_scan[0].v(i0);
+        for (int i1 = 1; i1 < mu_scan[0].n; ++i1) {
+          const double mu_sig = mu_scan[0].v(i1);
+          h5->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
+        }
+      }
+
+      TH2F* h6 = new TH2F(TString::Format("h_likelihood_%s%s_scan_musig_nuis1", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;nuis. par 1;#mu_{sig}", sb_or_b_nice, ml.title().c_str()),
+                          nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max,
+                          mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
+                          );
+
+      for (int i0 = 1; i0 < nuis_scan[1].n; ++i0) {
+        const double nuispar1 = nuis_scan[1].v(i0);
+        for (int i1 = 1; i1 < mu_scan[0].n; ++i1) {
+          const double mu_sig = mu_scan[0].v(i1);
+          h6->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
+        }
+      }
+
       printf("\n");
     }
   }
