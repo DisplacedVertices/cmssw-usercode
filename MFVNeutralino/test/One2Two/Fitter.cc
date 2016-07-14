@@ -728,6 +728,46 @@ namespace mfv {
         }
       }
 
+      TH1F* h7 = new TH1F(TString::Format("h_likelihood_%s%s_scan_mubkg", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;#mu_{bkg};twolnL", sb_or_b_nice, ml.title().c_str()),
+                          mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
+                          );
+
+      for (int i0 = 1; i0 < mu_scan[1].n; ++i0) {
+        const double mu_bkg = mu_scan[1].v(i0);
+        h7->SetBinContent(i0, fit::twolnL(ml.mu_sig, mu_bkg, ml.nuis0, ml.nuis1));
+      }
+
+      TH1F* h8 = new TH1F(TString::Format("h_likelihood_%s%s_scan_musig", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;#mu_{sig};twolnL", sb_or_b_nice, ml.title().c_str()),
+                          mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
+                          );
+
+      for (int i0 = 1; i0 < mu_scan[0].n; ++i0) {
+        const double mu_sig = mu_scan[0].v(i0);
+        h8->SetBinContent(i0, fit::twolnL(mu_sig, ml.mu_bkg, ml.nuis0, ml.nuis1));
+      }
+
+      TH1F* h9 = new TH1F(TString::Format("h_likelihood_%s%s_scan_nuis0", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;nuis. par 0;twolnL", sb_or_b_nice, ml.title().c_str()),
+                          nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max
+                          );
+
+      for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
+        const double nuispar0 = nuis_scan[0].v(i0);
+        h9->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
+      }
+
+      TH1F* h10 = new TH1F(TString::Format("h_likelihood_%s%s_scan_nuis1", ex_.Data(), sb_or_b),
+                          TString::Format("Best %s fit: %s;nuis. par 1;twolnL", sb_or_b_nice, ml.title().c_str()),
+                          nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
+                          );
+
+      for (int i0 = 1; i0 < nuis_scan[1].n; ++i0) {
+        const double nuispar1 = nuis_scan[1].v(i0);
+        h10->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
+      }
+
       printf("\n");
     }
   }

@@ -279,6 +279,16 @@ for n in ns:
             m.Draw()
             ps.save(nm + '_scanmus_2sg')
 
+        for par in ['mubkg_nuis0', 'mubkg_nuis1', 'musig_nuis0', 'musig_nuis1', 'mubkg', 'musig', 'nuis0', 'nuis1']:
+            h = dr.Get('h_likelihood_%s_scan_%s' % (t,par))
+            h.Draw('colz')
+            h.SetStats(0)
+            ps.save(nm + '_scan_%s'%par)
+
+            h.SetMinimum(h.GetMaximum() - 4)
+            h.Draw('colz')
+            ps.save(nm + '_scan_%s_2sg'%par)
+
     g = dr.Get('g_limit_bracket_fit')
     if g:
         g.Draw('ALP')
