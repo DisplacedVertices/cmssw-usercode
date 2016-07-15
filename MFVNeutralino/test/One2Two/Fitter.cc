@@ -1012,7 +1012,7 @@ namespace mfv {
               h->SetStats(1);
 
             ret.chi2 = 0;
-            ret.ndof = h_data_fit->GetNbinsX() - 2;
+            ret.ndof = h_data_fit->GetNbinsX() - (sb ? 2 : 1) - (fix_nuis1 ? 1 : 2);
             ret.ks = 0;
             for (int ibin = 1; ibin <= h_data_fit->GetNbinsX(); ++ibin) {
               if (h_sum_fit->GetBinContent(ibin) > 0)
