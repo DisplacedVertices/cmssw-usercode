@@ -528,26 +528,42 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h1_maxtwolnL", &t_obs_0.h1.maxtwolnL, "t_obs_0__h1_maxtwolnL/D");
     t_fit_info->Branch("t_obs_0__h1_mu_sig", &t_obs_0.h1.mu_sig, "t_obs_0__h1_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h1_err_mu_sig", &t_obs_0.h1.err_mu_sig, "t_obs_0__h1_err_mu_sig/D");
+    t_fit_info->Branch("t_obs_0__h1_eplus_mu_sig", &t_obs_0.h1.eplus_mu_sig, "t_obs_0__h1_eplus_mu_sig/D");
+    t_fit_info->Branch("t_obs_0__h1_eminus_mu_sig", &t_obs_0.h1.eminus_mu_sig, "t_obs_0__h1_eminus_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h1_A_sig_sum", &t_obs_0.h1.A_sig_sum);
     t_fit_info->Branch("t_obs_0__h1_mu_bkg", &t_obs_0.h1.mu_bkg, "t_obs_0__h1_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h1_err_mu_bkg", &t_obs_0.h1.err_mu_bkg, "t_obs_0__h1_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h1_eplus_mu_bkg", &t_obs_0.h1.eplus_mu_bkg, "t_obs_0__h1_eplus_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h1_eminus_mu_bkg", &t_obs_0.h1.eminus_mu_bkg, "t_obs_0__h1_eminus_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h1_A_bkg_sum", &t_obs_0.h1.A_bkg_sum);
     t_fit_info->Branch("t_obs_0__h1_nuis0", &t_obs_0.h1.nuis0, "t_obs_0__h1_nuis0/D");
     t_fit_info->Branch("t_obs_0__h1_err_nuis0", &t_obs_0.h1.err_nuis0, "t_obs_0__h1_err_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h1_eplus_nuis0", &t_obs_0.h1.eplus_nuis0, "t_obs_0__h1_eplus_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h1_eminus_nuis0", &t_obs_0.h1.eminus_nuis0, "t_obs_0__h1_eminus_nuis0/D");
     t_fit_info->Branch("t_obs_0__h1_nuis1", &t_obs_0.h1.nuis1, "t_obs_0__h1_nuis1/D");
     t_fit_info->Branch("t_obs_0__h1_err_nuis1", &t_obs_0.h1.err_nuis1, "t_obs_0__h1_err_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h1_eplus_nuis1", &t_obs_0.h1.eplus_nuis1, "t_obs_0__h1_eplus_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h1_eminus_nuis1", &t_obs_0.h1.eminus_nuis1, "t_obs_0__h1_eminus_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_istat", &t_obs_0.h0.istat, "t_obs_0__h0_istat/I");
     t_fit_info->Branch("t_obs_0__h0_maxtwolnL", &t_obs_0.h0.maxtwolnL, "t_obs_0__h0_maxtwolnL/D");
     t_fit_info->Branch("t_obs_0__h0_mu_sig", &t_obs_0.h0.mu_sig, "t_obs_0__h0_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h0_err_mu_sig", &t_obs_0.h0.err_mu_sig, "t_obs_0__h0_err_mu_sig/D");
+    t_fit_info->Branch("t_obs_0__h0_eplus_mu_sig", &t_obs_0.h0.eplus_mu_sig, "t_obs_0__h0_eplus_mu_sig/D");
+    t_fit_info->Branch("t_obs_0__h0_eminus_mu_sig", &t_obs_0.h0.eminus_mu_sig, "t_obs_0__h0_eminus_mu_sig/D");
     t_fit_info->Branch("t_obs_0__h0_A_sig_sum", &t_obs_0.h0.A_sig_sum);
     t_fit_info->Branch("t_obs_0__h0_mu_bkg", &t_obs_0.h0.mu_bkg, "t_obs_0__h0_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h0_err_mu_bkg", &t_obs_0.h0.err_mu_bkg, "t_obs_0__h0_err_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h0_eplus_mu_bkg", &t_obs_0.h0.eplus_mu_bkg, "t_obs_0__h0_eplus_mu_bkg/D");
+    t_fit_info->Branch("t_obs_0__h0_eminus_mu_bkg", &t_obs_0.h0.eminus_mu_bkg, "t_obs_0__h0_eminus_mu_bkg/D");
     t_fit_info->Branch("t_obs_0__h0_A_bkg_sum", &t_obs_0.h0.A_bkg_sum);
     t_fit_info->Branch("t_obs_0__h0_nuis0", &t_obs_0.h0.nuis0, "t_obs_0__h0_nuis0/D");
     t_fit_info->Branch("t_obs_0__h0_err_nuis0", &t_obs_0.h0.err_nuis0, "t_obs_0__h0_err_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h0_eplus_nuis0", &t_obs_0.h0.eplus_nuis0, "t_obs_0__h0_eplus_nuis0/D");
+    t_fit_info->Branch("t_obs_0__h0_eminus_nuis0", &t_obs_0.h0.eminus_nuis0, "t_obs_0__h0_eminus_nuis0/D");
     t_fit_info->Branch("t_obs_0__h0_nuis1", &t_obs_0.h0.nuis1, "t_obs_0__h0_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_err_nuis1", &t_obs_0.h0.err_nuis1, "t_obs_0__h0_err_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h0_eplus_nuis1", &t_obs_0.h0.eplus_nuis1, "t_obs_0__h0_eplus_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h0_eminus_nuis1", &t_obs_0.h0.eminus_nuis1, "t_obs_0__h0_eminus_nuis1/D");
     t_fit_info->Branch("t_obs_0__t", &t_obs_0.t, "t_obs_0__t/D");
     t_fit_info->Branch("fs_chi2", &fit_stat.chi2);
     t_fit_info->Branch("fs_ndof", &fit_stat.ndof);
@@ -1115,6 +1131,12 @@ namespace mfv {
     m->GetParameter(3, ret.nuis1, ret.err_nuis1);
     ret.ok = istat == 3;
     ret.istat = istat;
+
+    double eparab, gcc;
+    m->mnerrs(0, ret.eplus_mu_sig, ret.eminus_mu_sig, eparab, gcc);
+    m->mnerrs(1, ret.eplus_mu_bkg, ret.eminus_mu_bkg, eparab, gcc);
+    m->mnerrs(2, ret.eplus_nuis0, ret.eminus_nuis0, eparab, gcc);
+    m->mnerrs(3, ret.eplus_nuis1, ret.eminus_nuis1, eparab, gcc);
 
     if (print_level > 0)
       printf("calling twolnL at last minimum so A_sig/bkg are updated\n");
