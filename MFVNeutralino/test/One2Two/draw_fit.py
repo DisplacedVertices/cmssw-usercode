@@ -238,7 +238,7 @@ ns = [0,1] + [int(i*len(d)/3.) for i in xrange(1,3)] + [-2,-1]
 for n in ns:
     x = d[n]
     seed, toy = int(x[0]), int(x[1])
-    #assert toy == 0 or toy == -1
+    assert toy == 0 or toy == -1
     snip = '/mfvo2t_%i_' % seed
     f = ROOT.TFile(fn)
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
