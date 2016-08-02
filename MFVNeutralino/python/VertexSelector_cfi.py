@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
+                                     mevent_src = cms.InputTag('mfvEvent'),
                                      vertex_src = cms.InputTag('mfvVertices'),
                                      vertex_aux_src = cms.InputTag('mfvVerticesAux'),
                                      produce_vertices = cms.bool(False),
@@ -13,6 +14,7 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      min_match_distance = cms.double(0),
                                      min_ntracks          = cms.int32(0),
                                      max_ntracks          = cms.int32(1000000),
+                                     min_ntracksptgt2     = cms.int32(0),
                                      min_ntracksptgt3     = cms.int32(0),
                                      min_ntracksptgt5     = cms.int32(0),
                                      min_ntracksptgt10    = cms.int32(0),
@@ -59,6 +61,8 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_gen3dsig         = cms.double(1e6),
                                      min_bs2ddist         = cms.double(0),
                                      max_bs2ddist         = cms.double(1e9),
+                                     min_bsbs2ddist       = cms.double(0),
+                                     max_bsbs2ddist       = cms.double(1e9),
                                      min_bs2derr          = cms.double(0),
                                      max_bs2derr          = cms.double(1e9),
                                      min_bs2dsig          = cms.double(0),
@@ -85,11 +89,9 @@ mfvSelectedVerticesLoose = mfvSelectedVertices.clone( # touching this affects th
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     min_ntracks = 5,
-    max_drmin = 0.4,
+    min_bsbs2ddist = 0.01,
     max_geo2ddist = 2.0,
     max_bs2derr = 0.0025,
-    min_njetsntks = 1,
-    max_sumnhitsbehind = 0,
     )
 
 mfvSelectedVerticesTightLargeErr = mfvSelectedVerticesTight.clone(

@@ -5,12 +5,12 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
 set_style()
-ps = plot_saver('plots/mfvsigeff_v20', size=(600,600))
+ps = plot_saver('~/plots/mfvlq2sigeff_V6p1_76X', size=(600,600))
 
-samples = mfv_signal_samples
+samples = mfv_signal_samples_lq2
 samples.sort(key=lambda s: s.name)
 
-per_div = 6
+per_div = 5
 y_range = 1.
 
 def curve(name, root_file_dir, num_path, den_path, color):
@@ -23,7 +23,7 @@ def curve(name, root_file_dir, num_path, den_path, color):
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
         den = hden.Integral(0, hden.GetNbinsX() + 2)
         eff = num/float(den)
-        eff *= sample.filter_eff
+#        eff *= sample.filter_eff
         heff.SetBinContent(i+1, eff)
         interval = clopper_pearson(num, den)
         error = (interval[2] - interval[1]) / 2
@@ -44,17 +44,22 @@ def curve(name, root_file_dir, num_path, den_path, color):
     heff.SetStats(0)
     return heff
 
-two = curve('two', 'crab/HistosV20', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
-one = curve('one', 'crab/HistosV20', 'mfvEventHistosOnlyOneVtx/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
+two = curve('two', '/uscms_data/d1/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_13', 'mfvEventHistos/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kRed)
+one = curve('one', '/uscms_data/d1/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_13/', 'mfvEventHistosOnlyOneVtx/h_bsx', 'mfvEventHistosNoCuts/h_bsx', ROOT.kBlue)
+oneormore = two.Clone('oneormore')
+oneormore.Add(one)
+oneormore.SetLineColor(ROOT.kViolet)
 
 two.Draw('hist e')
 one.Draw('hist e same')
+oneormore.Draw('hist e same')
 
 hmax = two.GetYaxis().GetXmax()
 print hmax
 
 taus = ['100 #mum', '300 #mum', '1 mm', '10 mm']
-ymin = [0.745, 0.745, 0.75, 0.75]
+#ymin = [0.745, 0.745, 0.75, 0.75]
+ymin = [1.00, 1.00, 1.005, 1.005]
 lines = []
 paves = []
 for i in xrange(0, len(samples), per_div):
@@ -81,18 +86,24 @@ for i in xrange(0, len(samples), per_div):
     lines.append(l)
 
 
-leg = ROOT.TLegend(0.1,0.8,0.7,0.9)
+leg = ROOT.TLegend(0.1,0.72,0.5,0.80)
 leg.AddEntry(two, 'two-or-more-vertex events', 'L')
 leg.AddEntry(one, 'exactly-one-vertex events', 'L')
+leg.AddEntry(oneormore, 'one-or-more-vertex events', 'L')
 leg.Draw()
 
-lifetime = ROOT.TPaveText(1,0.65,3,0.74)
-lifetime.AddText('#tau_{#chi^{0}}')
+decay = ROOT.TPaveText(0.7,0.88,4.5,0.96)
+decay.AddText('LQ #rightarrow #muc')
+decay.SetBorderSize(0)
+decay.Draw()
+
+lifetime = ROOT.TPaveText(-3,1.01,-0.01,1.11)
+lifetime.AddText('#tau_{LQ}')
 lifetime.SetBorderSize(0)
 lifetime.Draw()
 
 mass = ROOT.TPaveText(-3,-0.1,-0.01,-0.01)
-mass.AddText('M_{#chi^{0}}')
+mass.AddText('M_{LQ}')
 mass.SetBorderSize(0)
 mass.Draw()
 

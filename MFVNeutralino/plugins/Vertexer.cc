@@ -216,6 +216,9 @@ private:
   TH1F* h_max_seed_track_multiplicity;
   TH1F* h_n_resets;
   TH1F* h_n_onetracks;
+  TH1F* h_noshare_vertex_tkvtxdist;
+  TH1F* h_noshare_vertex_tkvtxdisterr;
+  TH1F* h_noshare_vertex_tkvtxdistsig;
   TH1F* h_n_noshare_vertices;
   TH1F* h_noshare_vertex_ntracks;
   TH1F* h_noshare_vertex_track_weights;
@@ -434,7 +437,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     }
 
     h_all_track_sigmadxybs           = fs->make<TH1F>("h_all_track_sigmadxybs",           "", 40, -10,     10);
-    h_all_track_sigmadxypv           = fs->make<TH1F>("h_all-track_sigmadxypv",           "", 40, -10,     10);
+    h_all_track_sigmadxypv           = fs->make<TH1F>("h_all_track_sigmadxypv",           "", 40, -10,     10);
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
     h_all_track_npxhits              = fs->make<TH1F>("h_all_track_npxhits",              "",  12,   0,     12);
     h_all_track_nsthits              = fs->make<TH1F>("h_all_track_nsthits",              "",  28,   0,     28);
@@ -481,7 +484,10 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "",  5,   0,     5);
 
     h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             "", 50,   0,    50);
-    h_noshare_vertex_ntracks         = fs->make<TH1F>("h_noshare_vertex_ntracks",         "",  30, 0, 30);
+    h_noshare_vertex_tkvtxdist       = fs->make<TH1F>("h_noshare_vertex_tkvtxdist",       "", 100,  0,   0.1);
+    h_noshare_vertex_tkvtxdisterr    = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr",    "", 100,  0,   0.1);
+    h_noshare_vertex_tkvtxdistsig    = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig",    "", 100,  0,     6);
+    h_noshare_vertex_ntracks         = fs->make<TH1F>("h_noshare_vertex_ntracks",         "",  30,  0, 30);
     h_noshare_vertex_track_weights   = fs->make<TH1F>("h_noshare_vertex_track_weights",   "",  21,   0,      1.05);
     h_noshare_vertex_chi2            = fs->make<TH1F>("h_noshare_vertex_chi2",            "", 20,   0, max_seed_vertex_chi2);
     h_noshare_vertex_ndof            = fs->make<TH1F>("h_noshare_vertex_ndof",            "", 10,   0,     20);
@@ -1168,8 +1174,16 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
       if (histos) {
         h_noshare_vertex_ntracks->Fill(ntracks);
-        for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it)
-          h_noshare_vertex_track_weights->Fill(v.trackWeight(*it));
+        for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+	  h_noshare_vertex_track_weights->Fill(v.trackWeight(*it));
+
+	  reco::TransientTrack seed_track;
+	  seed_track = tt_builder->build(*it.operator*());
+	  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v);
+	  h_noshare_vertex_tkvtxdist->Fill(tk_vtx_dist.second.value());
+	  h_noshare_vertex_tkvtxdisterr->Fill(tk_vtx_dist.second.error());
+	  h_noshare_vertex_tkvtxdistsig->Fill(tk_vtx_dist.second.significance());
+	}
         h_noshare_vertex_chi2->Fill(vchi2);
         h_noshare_vertex_ndof->Fill(vndof);
         h_noshare_vertex_x->Fill(vx);

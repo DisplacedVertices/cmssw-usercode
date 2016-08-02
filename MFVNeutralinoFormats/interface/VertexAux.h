@@ -662,6 +662,32 @@ struct MFVVertexAux {
   float trackquadmassmax() const { return stats(this, trackquadmasses()).max; }
   float trackquadmassavg() const { return stats(this, trackquadmasses()).avg; }
   float trackquadmassrms() const { return stats(this, trackquadmasses()).rms; }
+
+  float sumpt() const {
+    float sum = 0;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      if (use_track(i))
+        sum += track_pt(i);
+    return sum;
+  }
+
+  float trackST() const {
+    float sum = 0;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i) {
+      if (use_track(i)) {
+        float px_i = track_pt(i) * cos(track_phi[i]);
+        float py_i = track_pt(i) * sin(track_phi[i]);
+        for (size_t j = 0, je = ntracks(); j < je; ++j) {
+          if (use_track(j)) {
+            float px_j = track_pt(j) * cos(track_phi[j]);
+            float py_j = track_pt(j) * sin(track_phi[j]);
+            sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (track_pt(i) * track_pt(j));
+          }
+        }
+      }
+    }
+    return 1 - sqrt(1 - 4/(sumpt() * sumpt()) * sum);
+  }
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;

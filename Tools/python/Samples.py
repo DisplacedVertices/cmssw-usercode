@@ -187,6 +187,85 @@ xx4j_samples = [
 for s in xx4j_samples:
     s.xsec = 1e-3
 
+wh_samples_4Tau = [
+    MCSample('wh_4Tau_tau0000mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_4Tau_tau1000mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('wh_4Tau_tau0100mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
+    MCSample('wh_4Tau_tau0010mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_4Tau_tau0001mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19700),
+    MCSample('wh_4Tau_tau0000mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
+    MCSample('wh_4Tau_tau1000mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
+    MCSample('wh_4Tau_tau0100mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_4Tau_tau0010mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('wh_4Tau_tau0001mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_4Tau_tau0000mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_4Tau_tau1000mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
+    MCSample('wh_4Tau_tau0100mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
+    MCSample('wh_4Tau_tau0010mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_4Tau_tau0001mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+wh_samples_bbbb = [
+    MCSample('wh_bbbb_tau0000mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_bbbb_tau1000mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('wh_bbbb_tau0100mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_bbbb_tau0010mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_bbbb_tau0001mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_bbbb_tau0000mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('wh_bbbb_tau1000mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
+    MCSample('wh_bbbb_tau0100mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_bbbb_tau0010mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('wh_bbbb_tau0001mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('wh_bbbb_tau0000mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('wh_bbbb_tau1000mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('wh_bbbb_tau0100mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('wh_bbbb_tau0010mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('wh_bbbb_tau0001mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+zh_samples_4Tau = [
+    MCSample('zh_4Tau_tau0000mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
+    MCSample('zh_4Tau_tau1000mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_4Tau_tau0100mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
+    MCSample('zh_4Tau_tau0010mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_4Tau_tau0001mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
+    MCSample('zh_4Tau_tau0000mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19600),
+    MCSample('zh_4Tau_tau0100mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_4Tau_tau0010mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('zh_4Tau_tau0001mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_4Tau_tau0000mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_4Tau_tau1000mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19700),
+    MCSample('zh_4Tau_tau0100mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_4Tau_tau0010mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
+    MCSample('zh_4Tau_tau0001mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+zh_samples_bbbb = [
+    MCSample('zh_bbbb_tau0000mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('zh_bbbb_tau1000mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_bbbb_tau0100mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_bbbb_tau0010mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_bbbb_tau0001mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_bbbb_tau0000mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_bbbb_tau1000mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_bbbb_tau0100mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19900),
+    MCSample('zh_bbbb_tau0010mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_bbbb_tau0001mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
+    MCSample('zh_bbbb_tau0000mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
+    MCSample('zh_bbbb_tau1000mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
+    MCSample('zh_bbbb_tau0100mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
+    MCSample('zh_bbbb_tau0010mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
+    MCSample('zh_bbbb_tau0001mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
+]
+
+zh_samples_dddd = [
+    MCSample('zh_dddd_tau0010mm_M25', '/ZH_HToSSTodddd_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000)
+]
+
+for s in wh_samples_4Tau + wh_samples_bbbb + zh_samples_4Tau + zh_samples_bbbb + zh_samples_dddd:
+    s.dbs_inst = 'phys03'
+    s.xsec = 1e-3
+
 auxiliary_background_samples = [
     MCSample('ttbaraux',  '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 10235840, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
@@ -255,6 +334,11 @@ __all__ = [
     'mfv_signal_samples_gluddbar',
     'mfv_signal_samples_lq2',
     'xx4j_samples',
+    'wh_samples_4Tau',
+    'wh_samples_bbbb',
+    'zh_samples_4Tau',
+    'zh_samples_bbbb',
+    'zh_samples_dddd',
     'leptonic_background_samples',
 #    'ttbar_systematics_samples',
     'auxiliary_background_samples',
@@ -286,6 +370,7 @@ for sample in data_samples + auxiliary_data_samples:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
 JetHT2015D.add_dataset('ntuplev6p1_76x', '/JetHT/tucker-ntuplev6p1_76x-1c7d7cc72ce161506ace63027d8999cf/USER', dbs_inst='phys03') #, 7607820) # 1312 files
+JetHT2015D.add_dataset('ntuplev6p1_76x_nstlays3', '/JetHT/dquach-ntuplev6p1_76x_data-1a10619cdc6042d141a5a3a54b840554/USER', dbs_inst='phys03') #, 7607820) # 1311 files
 
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])
@@ -538,10 +623,12 @@ _adbp3('ntuplev6p1_76x_errdxy100um_proper', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1
 _adbp3('ntuplev6p1_76x_errdxy100um_proper', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-663808ed8c1f198645b079407ff5e785/USER', 9867) # 2 files
 _adbp3('ntuplev6p1_76x_errdxy100um_proper', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_errdxy100um_proper-82b2174ee58f4471e1daeedc3f016c43/USER', 9836) # 2 files
 
+_adbp3('ntuplev6p1_76x_newdefault', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_newdefault_try3-f57fbe18bb48393eb92a9556b1eb7f0f/USER', 45715) # 100 files
 _adbp3('ntuplev6p1_76x_newdefault', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_newdefault_try2-9c95ee86a30ef40901122e3c85f06b39/USER', 4408678) # 204 files
 _adbp3('ntuplev6p1_76x_newdefault', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_newdefault_try2-1ac163ad622d6b6b00921aa191f56b92/USER', 5039738) # 206 files
 _adbp3('ntuplev6p1_76x_newdefault', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_newdefault_try2-0c1cffb7fce277f47c95d0beb6cb247b/USER', 3952153) # 160 files
 _adbp3('ntuplev6p1_76x_newdefault', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_newdefault_try2-3ec21486764ebbc8f73d7009341683a4/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_newdefault', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_newdefault_try3-013174007ed9e0b2c0a39e05f12786c8/USER', 1326754) # 192 files
 _adbp3('ntuplev6p1_76x_newdefault', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_newdefault_try2-ae05a31b64deaa01f1eb1fa8dcb3a2f7/USER', 9898) # 3 files
 _adbp3('ntuplev6p1_76x_newdefault', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_newdefault_try2-f5a0d1fdce51e33aaae9026f7c82b093/USER', 9867) # 2 files
 _adbp3('ntuplev6p1_76x_newdefault', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_newdefault_try2-981747c563e0def594e6a7b573470b29/USER', 9836) # 1 files
@@ -550,38 +637,106 @@ _adbp3('ntuplev6p1_76x_newdefault', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1
 _adbp3('ntuplev6p1_76x_newdefault', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_newdefault_try2-3f7b002f3fcb02908759046481bfcc0b/USER', 9883) # 1 files
 _adbp3('ntuplev6p1_76x_newdefault', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_newdefault_try2-bc5e8ed1e5b2ee0b40191817ba7374d4/USER', 9794) # 1 files
 
+_adbp3('ntuplev6p1_76x_nstlays3', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try3-0fbadeb0e2a98a2143c6c3d63c2148cf/USER', 45715) # 100 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-0563a6174ccfef7445b47a1adf52e04e/USER', 4408678) # 204 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-9c87ea2e204738f8e66398eae2e1ceea/USER', 5039738) # 206 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-0e21961f02f2bbcb31e97c1d56ed84b9/USER', 3952153) # 160 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-d07a09819adfc59c1cee757ffeb6279f/USER', 1981228) # 81 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-e1f22acb7f159b559521cda099d97246/USER', 9898) # 3 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-1417969c55c0055e05ba27e9c016eaa8/USER', 9867) # 2 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-ce3da775da3c8fa8b287f0e82d2fe17c/USER', 9836) # 1 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_nstlays3_try2-7ae9495b0be7532a9ad37380b27f5556/USER', 9703) # 1 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_nstlays3_try2-03104c0e9eec564d64a1121d775777ff/USER', 9877) # 1 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_nstlays3_try2-c9742dec426e9ca7fa0300d223dfc51d/USER', 9883) # 1 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_nstlays3_try2-9d680d61eab0a536677ab255e00cb0a2/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_nstlays3_try3-a058b539af07e93a090902e6078c0efe/USER', 1333601) # 193 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M0300/dquach-ntuplev6p1_76x_signal-1caceb02a3d5bd67eebd50c7af8df8ef/USER', 1498) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M0400/dquach-ntuplev6p1_76x_signal-e5d3e1bd9d3a61a647fe70f1a1ca6c3a/USER', 3802) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_signal-b329d925cd4c8251bb3cb039b346ca77/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M1200/dquach-ntuplev6p1_76x_signal-5aa39285cbad602533211a7d6df1b80f/USER', 9996) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M1600/dquach-ntuplev6p1_76x_signal-0599f3e6321ef9d5a2d84a03640adba2/USER', 10000) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00300um_M0300/dquach-ntuplev6p1_76x_signal-e33ddfec4e1fd18a3bfc6a82773bc924/USER', 1492) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00300um_M0400/dquach-ntuplev6p1_76x_signal-9a9865053faa67854dc4a664150b6f6d/USER', 3672) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_signal-9d427f650437d32c08db085488094ddd/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00300um_M1200/dquach-ntuplev6p1_76x_signal-f522d03f9ec6059281e0035501845b6d/USER', 9995) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00300um_M1600/dquach-ntuplev6p1_76x_signal-001f599dfdcb3b68990363c74df28915/USER', 10000) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau01000um_M0300/dquach-ntuplev6p1_76x_signal-ca77c05e10ef66beabf854ad2b028093/USER', 1463) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau01000um_M0400/dquach-ntuplev6p1_76x_signal-cbf664a5aaf421e5d79d10014555cb3a/USER', 3635) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_signal-3149177ec8fbf6168b030c8a999b7d3e/USER', 9883) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau01000um_M1200/dquach-ntuplev6p1_76x_signal-e85a28b0bcf63447a9168a6e9f8db6d9/USER', 9997) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau01000um_M1600/dquach-ntuplev6p1_76x_signal-681c54d8e6d93272dcf80b3406bf2fb8/USER', 10000) # 1 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-d74b051ffbfbc2f624612d79e0c38289/USER', 92) # 2 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-100_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-f9fdb240138288e752f8c9263be528c6/USER', 681) # 2 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-fef163ae8f4dfab65a01043078f3dedb/USER', 4058) # 1 files
-_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-1500_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-e801807342421d24a3e95bb1f7ad0d7d/USER', 9908) # 3 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau10000um_M0300/dquach-ntuplev6p1_76x_signal-718936e91338fb279377dfd1442dbae9/USER', 1175) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau10000um_M0400/dquach-ntuplev6p1_76x_signal-2016d8d097c2c236eef9b2b8fb56b2ef/USER', 2980) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_signal-e8c19f7c227f1fc4127d581cabe8fd48/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau10000um_M1200/dquach-ntuplev6p1_76x_signal-415a49ef6dbc56dac8323b114f277dc4/USER', 9992) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau10000um_M1600/dquach-ntuplev6p1_76x_signal-6ec162923e0141b77281b147224d5aae/USER', 10000) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00100um_M0300/dquach-ntuplev6p1_76x_signal-9dc542067e5b0622e19ec15eb57fc3fb/USER', 1475) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00100um_M0400/dquach-ntuplev6p1_76x_signal-ddeb95b46eb7cdd4c61ab23f4a9cd780/USER', 3760) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00100um_M0800/dquach-ntuplev6p1_76x_signal-1af329077aeaa553bd124dde75099247/USER', 9885) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00100um_M1200/dquach-ntuplev6p1_76x_signal-64b9754f9a3b0bb17815926089141019/USER', 9988) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00100um_M1600/dquach-ntuplev6p1_76x_signal-c8bff750800916e474a1dc19020367b8/USER', 9992) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00300um_M0300/dquach-ntuplev6p1_76x_signal-abd9f61e188d7ac92868b2417a2142c9/USER', 1435) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00300um_M0400/dquach-ntuplev6p1_76x_signal-93fa0c249f3b49c8dce0fed7e9d5c2f5/USER', 3721) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00300um_M0800/dquach-ntuplev6p1_76x_signal-e27f3400a041816e538ff9423cffbbd6/USER', 9870) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00300um_M1200/dquach-ntuplev6p1_76x_signal-7e1d38694734dfa6678795cb899a1d9e/USER', 9995) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau00300um_M1600/dquach-ntuplev6p1_76x_signal-45e5b234fb6136a620bf959943ea327e/USER', 9995) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau01000um_M0300/dquach-ntuplev6p1_76x_signal-8f27909919a6f4594e5a1460945220be/USER', 1377) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau01000um_M0400/dquach-ntuplev6p1_76x_signal-55edba3f75d79be0e885c36145ff572c/USER', 3550) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau01000um_M0800/dquach-ntuplev6p1_76x_signal-744d399656e7e20911d54b80e008da7d/USER', 9867) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau01000um_M1200/dquach-ntuplev6p1_76x_signal-2fe2edfa78ceed33e0d8ab9d18573948/USER', 9995) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau01000um_M1600/dquach-ntuplev6p1_76x_signal-a53c281ab3d0a8cfcbc153232b8c764b/USER', 9995) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau10000um_M0300/dquach-ntuplev6p1_76x_signal-9ea8d1d34f8ca9859cce06791d460c70/USER', 1107) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau10000um_M0400/dquach-ntuplev6p1_76x_signal-d9f78561fa591a992a568e21d189cea3/USER', 2875) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau10000um_M0800/dquach-ntuplev6p1_76x_signal-53851d69c5566a20775234a6710cd33a/USER', 9753) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau10000um_M1200/dquach-ntuplev6p1_76x_signal-c747e31529dce08f453e15888bdf70dc/USER', 9981) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_glu_tau10000um_M1600/dquach-ntuplev6p1_76x_signal-fa9fa26f6facf759c161b03916dce97d/USER', 9998) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00100um_M0300/dquach-ntuplev6p1_76x_signal-e66bb9168428415fb263fca3b5fb0733/USER', 2371) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00100um_M0400/dquach-ntuplev6p1_76x_signal-1f57dfe3d763bfea6fc428b86641f264/USER', 5652) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00100um_M0800/dquach-ntuplev6p1_76x_signal-88fc60676aba9793b8c2566a68c27d97/USER', 9902) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00100um_M1200/dquach-ntuplev6p1_76x_signal-6f40d8bc0992416238c33251ada4f169/USER', 9989) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00100um_M1600/dquach-ntuplev6p1_76x_signal-df54990a9905b5521b9ee6d73302ff52/USER', 9995) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00300um_M0300/dquach-ntuplev6p1_76x_signal-4d6298891bb43ad02b39c5ad15b5bcfe/USER', 2434) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00300um_M0400/dquach-ntuplev6p1_76x_signal-fc08315fe7e36c83b2e1e9cc1b7150d7/USER', 5657) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00300um_M0800/dquach-ntuplev6p1_76x_signal-dec85a8f6278ca357910c7d3df5059fa/USER', 9873) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00300um_M1200/dquach-ntuplev6p1_76x_signal-7ce1d1bb80c0c507565df96e84118be4/USER', 9982) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau00300um_M1600/dquach-ntuplev6p1_76x_signal-37d935e03ac74d8cdaf48015d63975cf/USER', 9994) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau01000um_M0300/dquach-ntuplev6p1_76x_signal-3691658cfedeccd5f77f48989979db66/USER', 2301) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau01000um_M0400/dquach-ntuplev6p1_76x_signal-6afa5e6959a6556a4321f14d8ee9450c/USER', 5594) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau01000um_M0800/dquach-ntuplev6p1_76x_signal-186921026f83a74458d21849238da6ce/USER', 9890) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau01000um_M1200/dquach-ntuplev6p1_76x_signal-4be75f5c89af6ed93d81a76240f3fa72/USER', 9984) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau01000um_M1600/dquach-ntuplev6p1_76x_signal-bfbf86e25879769749f195b150576ae0/USER', 9991) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau10000um_M0300/dquach-ntuplev6p1_76x_signal-be63a0c4ea244b54d7056636656f7da5/USER', 1971) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau10000um_M0400/dquach-ntuplev6p1_76x_signal-6bf18d339333514e3cffd2447538b19f/USER', 4884) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau10000um_M0800/dquach-ntuplev6p1_76x_signal-c656d084133c2b54f8f31d0f6e7716cb/USER', 9871) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau10000um_M1200/dquach-ntuplev6p1_76x_signal-8769f088e8c10378c65d231b8f8048f0/USER', 9985) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_gluddbar_tau10000um_M1600/dquach-ntuplev6p1_76x_signal-139a0a8554afc40d3b5792ab909aa5f9/USER', 9995) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00100um_M0300/dquach-ntuplev6p1_76x_signal-b03b5e1ecd80a295e5a4087026a83e4e/USER', 1043) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00100um_M0400/dquach-ntuplev6p1_76x_signal-5d0848a4672e2f89bc7f84e2fa13e382/USER', 2243) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00100um_M0800/dquach-ntuplev6p1_76x_signal-a494c952c9dd420ed62fad1ffa279357/USER', 7770) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00100um_M1200/dquach-ntuplev6p1_76x_signal-6722aa3dbeda52784d90e35f690acdb6/USER', 9528) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00100um_M1600/dquach-ntuplev6p1_76x_signal-cf57228c96840a239792e727215742fd/USER', 9863) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00300um_M0300/dquach-ntuplev6p1_76x_signal-93b7c4c93a8163f5fa24f3bec52e5e48/USER', 1004) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00300um_M0400/dquach-ntuplev6p1_76x_signal-f8cea61c9492606df578edb2789488fd/USER', 2232) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00300um_M0800/dquach-ntuplev6p1_76x_signal-ecaace5a5ef9336c4a8771c449f4a4c9/USER', 7854) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00300um_M1200/dquach-ntuplev6p1_76x_signal-dda29fbb337c516058f3261440324faa/USER', 9541) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau00300um_M1600/dquach-ntuplev6p1_76x_signal-3369d62f82751ffc681c2408dc617565/USER', 9875) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0300/dquach-ntuplev6p1_76x_signal-f045e74d4f029a0914a1d366274a8fe1/USER', 1043) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0400/dquach-ntuplev6p1_76x_signal-d314a48458c661ff344a01a0151813d6/USER', 2180) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M0800/dquach-ntuplev6p1_76x_signal-dfd5ed58a9ce35293af9677f058a103f/USER', 7830) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M1200/dquach-ntuplev6p1_76x_signal-12da3101816b464335eea917398e3e4a/USER', 9501) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau01000um_M1600/dquach-ntuplev6p1_76x_signal-8da6225b3e6f3241b59cbb041365e294/USER', 9864) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau10000um_M0300/dquach-ntuplev6p1_76x_signal-1e04979f18261f39fabee222e00edfa3/USER', 1001) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau10000um_M0400/dquach-ntuplev6p1_76x_signal-58350a6def6efdee4c5d265867a6aecd/USER', 2052) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau10000um_M0800/dquach-ntuplev6p1_76x_signal-4d089d5b983498a0ce4791aae351195c/USER', 7718) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau10000um_M1200/dquach-ntuplev6p1_76x_signal-8788be2db4c55c09cdf534113476d28d/USER', 9466) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/mfv_lq2_tau10000um_M1600/dquach-ntuplev6p1_76x_signal-80a70aac7c29b2644f0554dfb5633277/USER', 9866) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-e1f22acb7f159b559521cda099d97246/USER', 9898) # 3 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-1417969c55c0055e05ba27e9c016eaa8/USER', 9867) # 2 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-ce3da775da3c8fa8b287f0e82d2fe17c/USER', 9836) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-d74b051ffbfbc2f624612d79e0c38289/USER', 92) # 2 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-100_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-f9fdb240138288e752f8c9263be528c6/USER', 681) # 2 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-fef163ae8f4dfab65a01043078f3dedb/USER', 4058) # 1 files
+_adbp3('ntuplev6p1_76x_nstlays3', '/XXTo4J_M-1500_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_signal-e801807342421d24a3e95bb1f7ad0d7d/USER', 9908) # 3 files
 
+_adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try3-fc69479ff54aa8f40a57cfff60ae1957/USER', 42963) # 94 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-b2d6e71246d10cf2d9a34b76ac72d20e/USER', 4408678) # 204 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-a414da26c478bd22f48fb7ea24274bfa/USER', 5039738) # 206 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-57613a87a9b6ca71e70258f9f80999e7/USER', 3952153) # 160 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-0ccecfe2435f0e217beb69589329de50/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_nstlays5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_nstlays5_try3-ef257043d0c68fd06957c669e3bccb36/USER', 1326870) # 192 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-9592f9f0b4b5457705991c4aac0527ae/USER', 9898) # 3 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-1e537943487f75b4a68c40bd0b9d7d65/USER', 9867) # 2 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays5_try2-5d89a407d61f8d4e9557e986bb7d4e95/USER', 9836) # 1 files
@@ -590,10 +745,12 @@ _adbp3('ntuplev6p1_76x_nstlays5', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_7
 _adbp3('ntuplev6p1_76x_nstlays5', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_nstlays5_try2-4850c47ad0b6a2c56500280effb4c14f/USER', 9883) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays5', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_nstlays5_try2-28ee4c253d04e253d1d68c7273fd6455/USER', 9595) # 1 files
 
+_adbp3('ntuplev6p1_76x_nstlays7', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays7_try3-852c9126e408c550fe996afe7662a697/USER', 45715) # 100 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-d2dae149bfe8db5d2981859b747ae467/USER', 4408678) # 204 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-ce1edb8fbbef1596af75829e518cc34b/USER', 5039738) # 206 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-18b620fa64e1757a590aeb5e410ab46c/USER', 3952153) # 160 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-0b99d407cc65df155fd6148801259210/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_nstlays7', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_nstlays7_try3-c11038cd38c60a1f4d09c187e0ad25c3/USER', 1326627) # 192 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-b2c0b59d100a9f01d5d30651990b3cd3/USER', 9898) # 3 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-54886466d3f7a6aa074c6781192b6419/USER', 9867) # 2 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/dquach-ntuplev6p1_76x_nstlays7_try2-d9f2640cbd7293ad1c88adba803b9fd0/USER', 9836) # 1 files
@@ -602,6 +759,143 @@ _adbp3('ntuplev6p1_76x_nstlays7', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_7
 _adbp3('ntuplev6p1_76x_nstlays7', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_nstlays7_try2-487857b1fe09ddd3374a4bdd88564d99/USER', 9883) # 1 files
 _adbp3('ntuplev6p1_76x_nstlays7', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_nstlays7_try2-8b687cf372331ff6c19dbdafb544fd75/USER', 9595) # 1 files
 
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy4p5-cff5a32f99837408c68ed7e9fdf95d6c/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy4p5-666beb8aad96e34e2e9e5cae71cab434/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy4p5-5522f8965ad653ef1481c1c13fbb11e0/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy4p5-17c6cd3d88e0d88a1607960d43839a5c/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy4p5-9b526e4f48cfeab98cff832b649cf3b9/USER', 45715) # 100 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy4p5-6ede2873bffbfa6ee5daf8b2ed3cd14d/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy4p5-2f857a92806000ab2f21d3263c6b8c1b/USER', 5015081) # 205 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy4p5-3cfbc4d0fded005cf3d451a83f2aad04/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy4p5-ae02df1fb674eff7a741f6bc06afdcc6/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy4p5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy4p5-063d41fb7f2ab96bac07526f05f1be9e/USER', 1340689) # 194 files
+
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p0-4b4c5c711f448eb9e097d74de4cc32f3/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p0-ae898a30ebafa9bbbfcbd46417e4fa3a/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p0-6d26d33d39fe1f5b054017a294b80970/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p0-74b2855f481a213992904303a906cd0e/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p0-02ad895ee71849e42ceb021c6bfcc7d0/USER', 45715) # 100 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p0-a98d15a8e1bef73268b3b746968e3002/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p0-524a04218683709a447a004e6b103133/USER', 5039738) # 206 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p0-74cc015e466e4fc975a0c4e742a46e32/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p0-40d2fc956d7dd5709675bc1dce7f943c/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p0', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p0-f78557b697da8d2ad01502701feaee9a/USER', 1340689) # 194 files
+
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p5-3467eb42baf06d91e82d010b5e1bda3a/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p5-ecda37466da6a5387c64a9eb489c9373/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p5-eb8b228a68f6f94988f41db8487851ca/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy5p5-8c4619ed2115296809fb6c9397810f97/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p5-f0556c73c3b86318ab1ae5c36545316c/USER', 42434) # 93 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p5-9be4b16fe0d8b7648a9b4bb8ac230dee/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p5-87b7e5b20f4b19c77bbe89be855231d0/USER', 4940829) # 202 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p5-a4cbb52a4385a52e33914da800616f85/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p5-b02d6dc3a57d01c10b84328bb89bf8ca/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy5p5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy5p5-6369a4cf89382f5ca511dd6b8cf91fbc/USER', 1340689) # 194 files
+
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy6p0-6c7252ca820b2311fe0d68e534fbb24b/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy6p0-6f1d867de106eaac7fa908471e9111d2/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy6p0-0dbce8d68ec674a09a568d2283e8a160/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy6p0-7ae7755bbee9dfc0857da6a8614ee85c/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-724ba9fdcc32acfa1731aec443be3091/USER', 43835) # 96 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-e0cd44b9829188ac41cf505582525cf3/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-725fd98480e446ec75d285e43a61c8ad/USER', 5039738) # 206 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-52ab03cbfb74cd4b579178aa5f03cb4e/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-3d8d1a9a03aa5ce39d0c9513c9d7d1f1/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy6p0', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy6p0-29d380fbf5d8f958f39f8d3a598e0a1e/USER', 1340689) # 194 files
+
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0ff7a273bbffee33929f6e403f897315/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-bbad0f0f564ab180789ffed5a764aa44/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0398983b02255d8468ae0a690c0f3fd7/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p0-0ced0a663528aba14594b17d32bb5c48/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b5af5f0f553a2b35b5bbf95e8948b15c/USER', 44378) # 97 files, 100 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b343ec0eb57fa5030e7fd61cca6f5633/USER', 4081480) # 188 files, 203 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-b992294bcc20cc03a30142c11a625c4a/USER', 5014769) # 204 files, 205 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a2cd32550fabed1170cffac11dc793b1/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-a15429db443b513da40dc610685d10ad/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p0', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p0-4cfb9e8bc3dca4e99418097c8728846a/USER', 1333705) # 192 files, 193 expected
+
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-5be3a09d518b962ea7026cfefd9c921c/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-01bab092877501216504c7f6bdc7f33f/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-fa0c561620873379d59a1b2f3ab2680c/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_sigmadxy3p5-731e50660a14201f8ce47b235f2c771a/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-1f44e77d5a076d547ba40bf4f57c1538/USER', 45715) # 100 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-0a985665094344292637c3941bdb37d6/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-58315f394a7b6ec28ab2de80e99f2d14/USER', 4916226) # 200 files, 205 expected
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-185e784b67c51986451a7c92289ed656/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-c7ac60ee55f04cf185cd68671a5797c5/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_sigmadxy3p5', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_sigmadxy3p5-02c3b343d037e6c2105d0581ab00ca80/USER', 1326633) # 191 files, 193 expected
+
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-bcf8ded315b0fedbdf15d8b32ca4854e/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-c0b80577abaf3564b6f3de4a9d4d206f/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-a941a9e117a0acef0ab5c1b947154d21/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-061f562478115ee74dd32be67570815a/USER', 19700) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-629d44c4a60022d8677a4ba764c5ef80/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-dd94c4d73c6a5bfe617aca03b685ab1c/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-4e955e0f802e093f52095723f50d4b01/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-c5a45f6810638cf97bb18ebad3bafabf/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-44684c1d502b60cb71418bfebb01993e/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-7a56d43e76817b318e79a8da4dd7a9c0/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-68c50f7ee6a78e6e20416b886b6744e4/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-b55bd113cbbe198a743e4a857f7c7351/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-22daaa7a2caadc3d52ab2bf9348d4dec/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-9c3db343711a1bc34b9c47a974c74dfc/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-1c99fce9e80f4c045be5d9cb9dced187/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-cf9ef9decc433d8a0c98cd5b81b3f71e/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-38d50a614c6e03e608b3189804498839/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-095c28eb0033668538a3ab4b63e6ad39/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-7e092f513a8c2e1a63ae3daffbbdce55/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-14f61be67c05f3d555e6811dbdde1063/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-7f08d69cb3f792495e8f0255acf4a917/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-fc0a31f43117197bc1bcbc3bada80a90/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-650c9d6998bdcdfc824dd05275e43baa/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-b817cb579bbce4d26a048080f717ead8/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-971ca812a48a7582078e56f2e29ed61f/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-3753d58abba231af4c69b7b61092e107/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-6b25ffbafa9171ac4e40a50db945405d/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-e21414eff0639682a83c8949542debe9/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-3d31334f773b43267fde4d6ff372564f/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-108b9d845d445646c4816f33e481986b/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-c7fe59165f3bfc33b9f177dd16997466/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-12fa09e799a4ed73e2ac3db0d460bdb9/USER', 19600) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-72d1ada0f057f2e9ea4c5805c51c51fd/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-a2eca74967803b9c4c661a1aa73f1be9/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-e105b0d5b2bd0d41329af908a4a057f1/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-7d4212264b523b71d435ebbcbd1f77b7/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-5ee36aa75bb2746f7c9a85e01958a2cc/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-d6eced0f3749e8d656e52e047d7df95f/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-60b92833aad67c2970b869e8ae482220/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-8b4b054a5bdde6acb910f8f40bba45eb/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-602694b3a390acfebb6471d1559d8f57/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-c323c888b6e0cf8ed90d6b3a72b5b290/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-fd14a21ab58a3369d9154579bafcb3ee/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-d48d551b66c5837823aa782c0dffc985/USER', 19700) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-c31ecc75c28c85bab1fb6f128808b57b/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-8407f8755721fe760027e571022c6652/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS0_13TeV/dquach-ntuplev6p1_76x_vhsamples-920bb7608d833e6158245b7c53bceeb9/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-6a22a91e36d9ca7dee4e537c35267df1/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-67ce97591371bd33d7c66e31925d6aca/USER', 19800) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1_13TeV/dquach-ntuplev6p1_76x_vhsamples-ece40cafc9294ba7e14fcbde833fd4ce/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-042d055c63c4bfdf02be452b6fa2b3c1/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-9488662a1de0ed5c7e83ec53f50af6f4/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-aa560bb907d9f919241fac92e49a5ca6/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-a3cfe6b31d8560a2c35c72c82e5c70a7/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-65570594bea6fe8de7c12888a36ff110/USER', 19900) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS100_13TeV/dquach-ntuplev6p1_76x_vhsamples-862584d2e0fa96c666c528f081c60855/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-7cb39e753f3b150656cfa2f713c1993a/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-bb89b11e1337222d2a106e3b125a8f98/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1000_13TeV/dquach-ntuplev6p1_76x_vhsamples-fd4e2dc18e2f4905a81df2133ea2aa63/USER', 20000) # 1 files
+_adbp3('ntuplev6p1_76x_vhsamples', '/ZH_HToSSTodddd_ZToLL_MH125_MS25_ctauS10_13TeV/dquach-ntuplev6p1_76x_vhsamples-85b73314abb662b111476805ca223124/USER', 20000) # 1 files
+
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau00100um_M0800/dquach-ntuplev6p1_76x_pt2-a03d604b9512d59c1f1f23e5af409999/USER', 9900) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau00300um_M0800/dquach-ntuplev6p1_76x_pt2-1c8519e45c92b63ccd7e11a9ddad1dbf/USER', 9877) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau01000um_M0800/dquach-ntuplev6p1_76x_pt2-7802c444819ccf3451f956a760406059/USER', 9883) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/mfv_neu_tau10000um_M0800/dquach-ntuplev6p1_76x_pt2-d4f68551e43a6b31d6a002d0698e65b4/USER', 9794) # 1 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-07974af66972550fde7ba34aab18a200/USER', 44783) # 98 files, 100 expected
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-3c94eb869cd23dfa43d2d97921f69a34/USER', 4408678) # 203 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-41437e9bec3d5b8d94127e54e153e6fb/USER', 5039738) # 205 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-3e21d253cf5bee09bfed8ecd0be3b926/USER', 3952153) # 159 files
+_adbp3('ntuplev6p1_76x_pt2', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_pt2-03a6465388bdb76efc518a7fdf1888ae/USER', 1981228) # 81 files
+_adbp3('ntuplev6p1_76x_pt2', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_pt2-65cd75367dd1a0f370f4fd4a53929229/USER', 1340689) # 193 files
 
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 

@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
@@ -15,6 +16,10 @@ public:
 
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
+
+  const edm::InputTag mevent_src;
+  const edm::EDGetTokenT<MFVEvent> mevent_token;
+  const bool use_mevent;
 
   bool use_vertex(const MFVVertexAux& vtx) const;
 
@@ -38,6 +43,7 @@ private:
 
   const int min_ntracks;
   const int max_ntracks;
+  const int min_ntracksptgt2;
   const int min_ntracksptgt3;
   const int min_ntracksptgt5;
   const int min_ntracksptgt10;
@@ -84,6 +90,8 @@ private:
   const double max_gen3dsig;
   const double min_bs2ddist;
   const double max_bs2ddist;
+  const double min_bsbs2ddist;
+  const double max_bsbs2ddist;
   const double min_bs2derr;
   const double max_bs2derr;
   const double min_bs2dsig;
@@ -97,7 +105,10 @@ private:
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
-  : vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+  : mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
+    mevent_token(consumes<MFVEvent>(mevent_src)),
+    use_mevent(mevent_src.label() != ""),
+    vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     vertex_aux_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_aux_src"))),
     produce_vertices(cfg.getParameter<bool>("produce_vertices")),
     produce_tracks(cfg.getParameter<bool>("produce_tracks")),
@@ -114,6 +125,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     match_to_vertices(0),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_ntracks(cfg.getParameter<int>("max_ntracks")),
+    min_ntracksptgt2(cfg.getParameter<int>("min_ntracksptgt2")),
     min_ntracksptgt3(cfg.getParameter<int>("min_ntracksptgt3")),
     min_ntracksptgt5(cfg.getParameter<int>("min_ntracksptgt5")),
     min_ntracksptgt10(cfg.getParameter<int>("min_ntracksptgt10")),
@@ -160,6 +172,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_gen3dsig(cfg.getParameter<double>("max_gen3dsig")),
     min_bs2ddist(cfg.getParameter<double>("min_bs2ddist")),
     max_bs2ddist(cfg.getParameter<double>("max_bs2ddist")),
+    min_bsbs2ddist(cfg.getParameter<double>("min_bsbs2ddist")),
+    max_bsbs2ddist(cfg.getParameter<double>("max_bsbs2ddist")),
     min_bs2derr(cfg.getParameter<double>("min_bs2derr")),
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
     min_bs2dsig(cfg.getParameter<double>("min_bs2dsig")),
@@ -233,6 +247,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
   return 
     (vtx.ntracks() - ntracks_sub) >= min_ntracks &&
     (vtx.ntracks() - ntracks_sub) <= max_ntracks &&
+    (vtx.ntracksptgt(2)  - ntracks_sub) >= min_ntracksptgt2 &&
     (vtx.ntracksptgt(3)  - ntracks_sub) >= min_ntracksptgt3 &&
     (vtx.ntracksptgt(5)  - ntracks_sub) >= min_ntracksptgt5 &&
     (vtx.ntracksptgt(10) - ntracks_sub) >= min_ntracksptgt10 &&
@@ -293,6 +308,11 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
 }
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
+  edm::Handle<MFVEvent> mevent;
+  if (use_mevent) {
+    event.getByToken(mevent_token, mevent);
+  }
+
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertex_token, vertices);
 
@@ -309,9 +329,14 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
   std::auto_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
 
-  for (const MFVVertexAux& aux : *auxes)
-    if (use_vertex(aux))
+  for (const MFVVertexAux& aux : *auxes) {
+    bool pass_bsbs2ddist = true;
+    if (use_mevent)
+      pass_bsbs2ddist = mevent->bs2ddist(aux) >= min_bsbs2ddist && mevent->bs2ddist(aux) < max_bsbs2ddist;
+
+    if (use_vertex(aux) && pass_bsbs2ddist)
       selected->push_back(aux);
+  }
 
   sorter.sort(*selected);
 

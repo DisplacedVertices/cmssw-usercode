@@ -14,13 +14,12 @@ import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
 SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 nm1s = [
-    ('Ntracks', 'min_ntracks = 0, min_njetsntks = 0'),
-    ('Drmin',   'max_drmin = 1e9'),
-    ('Geo2d',   'max_geo2ddist = 1e9'),
-    ('Bs2derr', 'max_bs2derr = 1e9'),
-    ('Njets',   'min_njetsntks = 0'),
-    ('NoDrmax', 'min_drmax = 1.2'),
-    ('NoDrmaxBs2derr', 'min_drmax = 1.2, max_bs2derr = 1e9'),
+    ('Njets',      ('', 'min_njets = 0')),
+    ('Ht',         ('', 'min_ht = 0')),
+    ('Ntracks',    'min_ntracks = 0'),
+    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
+    ('Geo2ddist',  'max_geo2ddist = 1e9'),
+    ('Bs2derr',    'max_bs2derr = 1e9'),
     ]
 
 if simple:
@@ -86,6 +85,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.ttbar_samples + Samples.qcd_samples + \
         #Samples.qcdpt_samples + \
         Samples.mfv_signal_samples + \
+        Samples.mfv_signal_samples_glu + \
+        Samples.mfv_signal_samples_gluddbar + \
         Samples.mfv_signal_samples_lq2 + \
         Samples.xx4j_samples
         )
@@ -102,4 +103,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        job_control_from_sample = True,
                        aaa = True, # stored at FNAL, easy to run on T2_USes
                        )
-    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + Samples.xx4j_samples)
+    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800])

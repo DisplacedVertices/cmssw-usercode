@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import sys
+from JMTucker.Tools.general import typed_from_argv
+from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
 process.TFileService.fileName = 'mctruth.root'
@@ -21,15 +23,17 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                       )
 
 process.p *= process.mfvMovedTree
+file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples
 
-    cs = CRABSubmitter('TrackMoverMCTruth',
+    cs = CRABSubmitter('TrackMoverMCTruthV6p1_76X',
+                       dataset = 'ntuplev6p1_76x_nstlays3',
                        job_control_from_sample = True,
                        max_threads = 3,
                        )
 
-    samples = Samples.from_argv(Samples.mfv_signal_samples)
+    samples = Samples.registry.from_argv(Samples.mfv_signal_samples)
     cs.submit_all(samples)

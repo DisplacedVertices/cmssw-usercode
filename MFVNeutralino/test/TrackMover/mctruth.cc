@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv) {
   if (argc < 4) {
-    fprintf(stderr, "usage: hists.exe in.root out.root\n");
+    fprintf(stderr, "usage: mctruth.exe in.root out.root min_lspdist3\n");
     return 1;
   }
 
@@ -129,10 +129,10 @@ int main(int argc, char** argv) {
           continue;
 
         const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
-        const bool pass_ntracksptgt3 = nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
+        const bool pass_ntracksptgt3 = true; // nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
         const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
-        const bool pass_drmax        = nt.p_vtxs_drmax       ->at(ivtx) < 4;
-        const bool pass_mindrmax     = nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
+        const bool pass_drmax        = true; // nt.p_vtxs_drmax       ->at(ivtx) < 4;
+        const bool pass_mindrmax     = true; // nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
         const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
         const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
 
