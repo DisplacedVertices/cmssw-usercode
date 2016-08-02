@@ -214,6 +214,8 @@ namespace mfv {
     }
 
     TH1D* h_bsd2d_use = h_bsd2d[vt_1vsingle];
+    TH1D* h_bsd2d0_use = h_bsd2d0[vt_1vsingle];
+    TH1D* h_bsd2d1_use = h_bsd2d1[vt_1vsingle];
     if (throw_h_bsd2d) {
       h_bsd2d_use = (TH1D*)h_bsd2d_use->Clone("h_bsd2d_use");
       h_bsd2d_use->SetDirectory(0);
@@ -229,8 +231,8 @@ namespace mfv {
       }
 
       if (ev.njets > 0) {
-        const double bsd2d0 = h_bsd2d_use->GetRandom();
-        const double bsd2d1 = h_bsd2d_use->GetRandom();
+        const double bsd2d0 = h_bsd2d0_use->GetRandom();
+        const double bsd2d1 = h_bsd2d1_use->GetRandom();
 
         double dphi = 0;
         if (throw_dphi_from_2v)

@@ -16,6 +16,10 @@ namespace mfv {
 
       env("mfvo2t_toythrower" + uname),
       min_ntracks(env.get_int("min_ntracks", 5)),
+      min_ntracks0(env.get_int("min_ntracks0", 0)),
+      max_ntracks0(env.get_int("max_ntracks0", 1000000)),
+      min_ntracks1(env.get_int("min_ntracks1", 0)),
+      max_ntracks1(env.get_int("max_ntracks1", 1000000)),
       int_lumi(env.get_double("int_lumi", mfv::AnalysisConstants::int_lumi * mfv::AnalysisConstants::scale_factor)),
       scale_1v(env.get_double("scale_1v", 1.)),
       scale_2v(env.get_double("scale_2v", 1.)),
@@ -40,6 +44,10 @@ namespace mfv {
     printf("(read ntuples from %s)\n", path.c_str());
     printf("seed: %i\n", seed);
     printf("min_ntracks: %i\n", min_ntracks);
+    printf("min_ntracks0: %i\n", min_ntracks0);
+    printf("max_ntracks0: %i\n", max_ntracks0);
+    printf("min_ntracks1: %i\n", min_ntracks1);
+    printf("max_ntracks1: %i\n", max_ntracks1);
     printf("int_lumi: %f\n", int_lumi);
     printf("scale: %f 1v  %f 2v\n", scale_1v, scale_2v);
     printf("poisson_means: %i\n", poisson_means);
@@ -114,8 +122,10 @@ namespace mfv {
         const bool sel0 = sel_vertex(v0);
         const bool sel1 = sel_vertex(v1);
         if (sel0 && sel1) {
-          all_2v[sample.key].push_back(VertexPair(v0, v1));
-          e.nvtx_sel = 2;
+          if (v0.ntracks >= min_ntracks0 && v0.ntracks <= max_ntracks0 && v1.ntracks >= min_ntracks1 && v1.ntracks <= max_ntracks1) {
+            all_2v[sample.key].push_back(VertexPair(v0, v1));
+            e.nvtx_sel = 2;
+          }
         }
         else if (sel0 || sel1) {
           all_1v[sample.key].push_back(sel0 ? v0 : v1);

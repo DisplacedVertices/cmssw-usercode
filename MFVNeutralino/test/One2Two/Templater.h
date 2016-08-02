@@ -1,6 +1,7 @@
 #ifndef JMTucker_MFVNeutralino_One2Two_Templater_h
 #define JMTucker_MFVNeutralino_One2Two_Templater_h
 
+#include "ConfigFromEnv.h"
 #include "SimpleObjects.h"
 #include "Templates.h"
 
@@ -14,6 +15,12 @@ namespace mfv {
     const std::string dname;
     const std::string name;
     const std::string uname;
+
+    jmt::ConfigFromEnv env;
+    const int min_ntracks0;
+    const int max_ntracks0;
+    const int min_ntracks1;
+    const int max_ntracks1;
 
     TFile* fout;
     TDirectory* dout;
@@ -40,6 +47,8 @@ namespace mfv {
     TH1D* h_issig_1[n_vt];
     TH2D* h_xy[n_vt];
     TH1D* h_bsd2d[n_vt];
+    TH1D* h_bsd2d0[n_vt];
+    TH1D* h_bsd2d1[n_vt];
     TH2D* h_bsd2d_v_bsdz[n_vt];
     TH1D* h_bsdz[n_vt];
     TH1D* h_bsd2d_0[n_vt];

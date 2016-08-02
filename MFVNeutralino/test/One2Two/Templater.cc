@@ -20,6 +20,12 @@ namespace mfv {
       name (name_.size() ? " " + name_ : ""),
       uname(name_.size() ? "_" + name_ : ""),
 
+      env("mfvo2t_templater" + uname),
+      min_ntracks0(env.get_int("min_ntracks0", 0)),
+      max_ntracks0(env.get_int("max_ntracks0", 1000000)),
+      min_ntracks1(env.get_int("min_ntracks1", 0)),
+      max_ntracks1(env.get_int("max_ntracks1", 1000000)),
+
       fout(f),
       dout(f->mkdir(TString::Format("%sTemplater%s", dname.c_str(), uname.c_str()))),
       dtoy(0),
@@ -27,6 +33,13 @@ namespace mfv {
       seed(r->GetSeed() - jmt::seed_base),
       save_plots(true)
   {
+    printf("Templater%s config:\n", name.c_str());
+    printf("min_ntracks0: %i\n", min_ntracks0);
+    printf("max_ntracks0: %i\n", max_ntracks0);
+    printf("min_ntracks1: %i\n", min_ntracks1);
+    printf("max_ntracks1: %i\n", max_ntracks1);
+
+    fflush(stdout);
   }
 
   Templater::~Templater() {
@@ -39,6 +52,8 @@ namespace mfv {
         delete h_issig_1[i];
         delete h_xy[i];
         delete h_bsd2d[i];
+        delete h_bsd2d0[i];
+        delete h_bsd2d1[i];
         delete h_bsd2d_v_bsdz[i];
         delete h_bsdz[i];
         delete h_bsd2d_0[i];
@@ -82,10 +97,15 @@ namespace mfv {
         //printf("Templater: bsd2d bins: "); for (double b : bins) printf("%.3f ", b); printf("\n");
 
         h_bsd2d[i] = new TH1D("h_bsd2d", "", bins.size()-1, &bins[0]);
+        h_bsd2d0[i] = new TH1D("h_bsd2d0", "", bins.size()-1, &bins[0]);
+        h_bsd2d1[i] = new TH1D("h_bsd2d1", "", bins.size()-1, &bins[0]);
       }
-      else
+      else {
         h_bsd2d[i] = new TH1D("h_bsd2d", "", 1250, 0, 2.5);
       //h_bsd2d[i] = new TH1D("h_bsd2d", "", 100, 0, 0.1);
+        h_bsd2d0[i] = new TH1D("h_bsd2d0", "", 1250, 0, 2.5);
+        h_bsd2d1[i] = new TH1D("h_bsd2d1", "", 1250, 0, 2.5);
+      }
 
       h_xy             [i] = new TH2D("h_xy"             , "", 100, -0.05, 0.05, 100, 0.05, 0.05);
       h_bsd2d_v_bsdz   [i] = new TH2D("h_bsd2d_v_bsdz"   , "", 200, -20, 20, 100, 0, 0.1);
@@ -115,6 +135,8 @@ namespace mfv {
         h_issig_1[i]->SetDirectory(0);
         h_xy[i]->SetDirectory(0);
         h_bsd2d[i]->SetDirectory(0);
+        h_bsd2d0[i]->SetDirectory(0);
+        h_bsd2d1[i]->SetDirectory(0);
         h_bsd2d_v_bsdz[i]->SetDirectory(0);
         h_bsdz[i]->SetDirectory(0);
         h_bsd2d_0[i]->SetDirectory(0);
@@ -152,6 +174,10 @@ namespace mfv {
     h_issig_0[ih]->Fill(v0.is_sig, w);
     h_xy[ih]->Fill(v0.x, v0.y, w);
     h_bsd2d[ih]->Fill(v0.d2d(), w);
+    if (v0.ntracks >= min_ntracks0 && v0.ntracks <= max_ntracks0)
+      h_bsd2d0[ih]->Fill(v0.d2d(), w);
+    if (v0.ntracks >= min_ntracks1 && v0.ntracks <= max_ntracks1)
+      h_bsd2d1[ih]->Fill(v0.d2d(), w);
     h_bsd2d_0[ih]->Fill(v0.d2d(), w);
     h_bsd2d_v_bsdz[ih]->Fill(v0.z, v0.d2d(), w);
     h_bsd2d_v_bsdz_0[ih]->Fill(v0.z, v0.d2d(), w);

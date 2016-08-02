@@ -19,6 +19,10 @@ namespace mfv {
 
     jmt::ConfigFromEnv env;
     const int min_ntracks;
+    const int min_ntracks0;
+    const int max_ntracks0;
+    const int min_ntracks1;
+    const int max_ntracks1;
     const double int_lumi;
     const double scale_1v;
     const double scale_2v;
