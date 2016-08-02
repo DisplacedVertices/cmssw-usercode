@@ -140,45 +140,59 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h1_maxtwolnL.Fill(h1_maxtwolnL)
     h_h1_mu_sig.Fill(h1_mu_sig)
     h_h1_mu_sig_err.Fill(h1_err_mu_sig)
-    h_h1_mu_sig_eplus.Fill(h1_eplus_mu_sig)
-    h_h1_mu_sig_eminus.Fill(h1_eminus_mu_sig)
+    if h1_eplus_mu_sig != 0:
+        h_h1_mu_sig_eplus.Fill(h1_eplus_mu_sig)
+    if h1_eminus_mu_sig != 0:
+        h_h1_mu_sig_eminus.Fill(h1_eminus_mu_sig)
     h_h1_mu_sig_err_v_sig.Fill(h1_mu_sig, h1_err_mu_sig)
     h_h1_mu_sig_v_true.Fill(true_pars_0, h1_mu_sig)
     h_h1_mu_sig_pull.Fill((h1_mu_sig - mu_sig_true_mean)/h1_err_mu_sig)
     h_h1_mu_bkg.Fill(h1_mu_bkg)
     h_h1_mu_bkg_err.Fill(h1_err_mu_bkg)
-    h_h1_mu_bkg_eplus.Fill(h1_eplus_mu_bkg)
-    h_h1_mu_bkg_eminus.Fill(h1_eminus_mu_bkg)
+    if h1_eplus_mu_bkg != 0:
+        h_h1_mu_bkg_eplus.Fill(h1_eplus_mu_bkg)
+    if h1_eminus_mu_bkg != 0:
+        h_h1_mu_bkg_eminus.Fill(h1_eminus_mu_bkg)
     h_h1_mu_bkg_err_v_bkg.Fill(h1_mu_bkg, h1_err_mu_bkg)
     h_h1_mu_bkg_v_true.Fill(true_pars_1, h1_mu_bkg)
     h_h1_mu_bkg_pull.Fill((h1_mu_bkg - mu_bkg_true_mean)/h1_err_mu_bkg)
     h_h1_nuis0.Fill(h1_nuis0)
     h_h1_nuis0_err.Fill(h1_err_nuis0)
-    h_h1_nuis0_eplus.Fill(h1_eplus_nuis0)
-    h_h1_nuis0_eminus.Fill(h1_eminus_nuis0)
+    if h1_eplus_nuis0 != 0:
+        h_h1_nuis0_eplus.Fill(h1_eplus_nuis0)
+    if h1_eminus_nuis0 != 0:
+        h_h1_nuis0_eminus.Fill(h1_eminus_nuis0)
     h_h1_nuis0_pull.Fill((h1_nuis0 - nuis0_true_mean)/h1_err_nuis0)
     h_h1_nuis1.Fill(h1_nuis1)
     h_h1_nuis1_err.Fill(h1_err_nuis1)
-    h_h1_nuis1_eplus.Fill(h1_eplus_nuis1)
-    h_h1_nuis1_eminus.Fill(h1_eminus_nuis1)
+    if h1_eplus_nuis1 != 0:
+        h_h1_nuis1_eplus.Fill(h1_eplus_nuis1)
+    if h1_eminus_nuis1 != 0:
+        h_h1_nuis1_eminus.Fill(h1_eminus_nuis1)
     h_h1_nuis1_pull.Fill((h1_nuis1 - nuis1_true_mean)/h1_err_nuis1)
     h_h0_maxtwolnL.Fill(h0_maxtwolnL)
     h_h0_mu_bkg.Fill(h0_mu_bkg)
     h_h0_mu_bkg_err.Fill(h0_err_mu_bkg)
-    h_h0_mu_bkg_eplus.Fill(h0_eplus_mu_bkg)
-    h_h0_mu_bkg_eminus.Fill(h0_eminus_mu_bkg)
+    if h0_eplus_mu_bkg != 0:
+        h_h0_mu_bkg_eplus.Fill(h0_eplus_mu_bkg)
+    if h0_eminus_mu_bkg != 0:
+        h_h0_mu_bkg_eminus.Fill(h0_eminus_mu_bkg)
     h_h0_mu_bkg_err_v_bkg.Fill(h0_mu_bkg, h0_err_mu_bkg)
     h_h0_mu_bkg_v_true.Fill(true_pars_1, h0_mu_bkg)
     h_h0_mu_bkg_pull.Fill((h0_mu_bkg - mu_bkg_true_mean)/h0_err_mu_bkg)
     h_h0_nuis0.Fill(h0_nuis0)
     h_h0_nuis0_err.Fill(h0_err_nuis0)
-    h_h0_nuis0_eplus.Fill(h0_eplus_nuis0)
-    h_h0_nuis0_eminus.Fill(h0_eminus_nuis0)
+    if h0_eplus_nuis0 != 0:
+        h_h0_nuis0_eplus.Fill(h0_eplus_nuis0)
+    if h0_eminus_nuis0 != 0:
+        h_h0_nuis0_eminus.Fill(h0_eminus_nuis0)
     h_h0_nuis0_pull.Fill((h0_nuis0 - nuis0_true_mean)/h0_err_nuis0)
     h_h0_nuis1.Fill(h0_nuis1)
     h_h0_nuis1_err.Fill(h0_err_nuis1)
-    h_h0_nuis1_eplus.Fill(h0_eplus_nuis1)
-    h_h0_nuis1_eminus.Fill(h0_eminus_nuis1)
+    if h0_eplus_nuis1 != 0:
+        h_h0_nuis1_eplus.Fill(h0_eplus_nuis1)
+    if h0_eminus_nuis1 != 0:
+        h_h0_nuis1_eminus.Fill(h0_eminus_nuis1)
     h_h0_nuis1_pull.Fill((h0_nuis1 - nuis1_true_mean)/h0_err_nuis1)
     h_t.Fill(h1_maxtwolnL - h0_maxtwolnL)
     h_chi2.Fill(chi2)
