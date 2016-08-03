@@ -15,6 +15,11 @@
 double    mu_clear = 0.0000;
 double sigma_clear = 0.0000;
 
+int min_ntracks0 = 0;
+int max_ntracks0 = 1000000;
+int min_ntracks1 = 0;
+int max_ntracks1 = 1000000;
+
 const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_4";
 
 const int nbkg = 6;
@@ -67,6 +72,8 @@ int main(int argc, const char* argv[]) {
   for (int j = 0; j < 12; ++j)
     bins.push_back(b[j]);
   TH1D* h_1v_dbv = new TH1D("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
+  TH1D* h_1v_dbv0 = new TH1D("h_1v_dbv0", "only-one-vertex events;d_{BV}^{0} (cm);events", bins.size()-1, &bins[0]);
+  TH1D* h_1v_dbv1 = new TH1D("h_1v_dbv1", "only-one-vertex events;d_{BV}^{1} (cm);events", bins.size()-1, &bins[0]);
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
   TH1F* h_1v_ht = new TH1F("h_1v_ht", "only-one-vertex events;#Sigma H_{T} of jets (GeV);events", 200, 0, 5000);
@@ -94,6 +101,8 @@ int main(int argc, const char* argv[]) {
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1) {
         h_1v_dbv->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
+        if (nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0) h_1v_dbv0->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
+        if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) h_1v_dbv1->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
         h_1v_njets->Fill(nt.njets, w);
         h_1v_ht->Fill(ht(nt.njets, nt.jet_pt), w);
@@ -106,7 +115,7 @@ int main(int argc, const char* argv[]) {
         }
       }
 
-      if (nt.nvtx >= 2) {
+      if (nt.nvtx >= 2 && nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0 && nt.ntk1 >= min_ntracks1 && nt.ntk1 <= max_ntracks1) {
         double dbv0 = sqrt(nt.x0*nt.x0 + nt.y0*nt.y0);
         double dbv1 = sqrt(nt.x1*nt.x1 + nt.y1*nt.y1);
         h_2v_dbv->Fill(dbv0, w);
@@ -149,8 +158,8 @@ int main(int argc, const char* argv[]) {
 
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1 && nt.njets > 0) {
-        double dbv0 = h_1v_dbv->GetRandom();
-        double dbv1 = h_1v_dbv->GetRandom();
+        double dbv0 = h_1v_dbv0->GetRandom();
+        double dbv1 = h_1v_dbv1->GetRandom();
         h_c1v_dbv->Fill(dbv0, w);
         h_c1v_dbv->Fill(dbv1, w);
 
@@ -181,6 +190,8 @@ int main(int argc, const char* argv[]) {
   TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
 
   h_1v_dbv->Write();
+  h_1v_dbv0->Write();
+  h_1v_dbv1->Write();
   h_1v_phiv->Write();
   h_1v_njets->Write();
   h_1v_ht->Write();
