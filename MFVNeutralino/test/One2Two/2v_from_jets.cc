@@ -15,13 +15,13 @@
 double    mu_clear = 0.0000;
 double sigma_clear = 0.0000;
 
-const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_0";
+const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_4";
 
 const int nbkg = 6;
 const char* samples[nbkg] = {"qcdht0500", "qcdht0700", "qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
-float weights[nbkg] = {4.182, 1.137, 0.6175, 0.07894, 0.03320, 0.05652};
+float weights[nbkg] = {4.174, 1.137, 0.6166, 0.07894, 0.03320, 0.05620};
 
-double n2v = 0.17;
+double n2v = 112.1;
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
