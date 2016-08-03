@@ -149,34 +149,31 @@ int main(int argc, const char* argv[]) {
 
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1 && nt.njets > 0) {
-        for (int k = 0; k < 10; ++k) {
-          double dbv0 = h_1v_dbv->GetRandom();
-          double dbv1 = h_1v_dbv->GetRandom();
-          h_c1v_dbv->Fill(dbv0, w);
-          h_c1v_dbv->Fill(dbv1, w);
+        double dbv0 = h_1v_dbv->GetRandom();
+        double dbv1 = h_1v_dbv->GetRandom();
+        h_c1v_dbv->Fill(dbv0, w);
+        h_c1v_dbv->Fill(dbv1, w);
 
-          double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
-          double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
-          double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
+        double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
+        double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
+        double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
+        h_c1v_phiv->Fill(phi0, w);
+        h_c1v_phiv->Fill(phi1, w);
 
-          h_c1v_phiv->Fill(phi0, w);
-          h_c1v_phiv->Fill(phi1, w);
-
-          for (int k = 0; k < nt.njets; ++k) {
-            h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi0 - nt.jet_phi[k]), w);
-            h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi1 - nt.jet_phi[k]), w);
-          }
-
-          double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
-
-          double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
-          if (dvvc > 0.11) dvvc = 0.11;
-          h_c1v_dvv->Fill(dvvc, w * p);
-          h_c1v_absdphivv->Fill(fabs(dphi), w * p);
-          h_c1v_dbv0->Fill(dbv0, w * p);
-          h_c1v_dbv1->Fill(dbv1, w * p);
-          h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, w * p);
+        for (int k = 0; k < nt.njets; ++k) {
+          h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi0 - nt.jet_phi[k]), w);
+          h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi1 - nt.jet_phi[k]), w);
         }
+
+        double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
+
+        double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
+        if (dvvc > 0.11) dvvc = 0.11;
+        h_c1v_dvv->Fill(dvvc, w * p);
+        h_c1v_absdphivv->Fill(fabs(dphi), w * p);
+        h_c1v_dbv0->Fill(dbv0, w * p);
+        h_c1v_dbv1->Fill(dbv1, w * p);
+        h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, w * p);
       }
     }
   }
