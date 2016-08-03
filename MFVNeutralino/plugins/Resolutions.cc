@@ -23,6 +23,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   const int which_mom;
   const double max_dr;
   const double max_dist;
+  const double max_dist_2d;
+  const double max_dist_2d_square; // half length of side
 
   TH1F* h_dr;
   TH1F* h_dist;
@@ -36,6 +38,9 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH1F* h_dz;
   TH1F* h_dist2d;
   TH1F* h_dist3d;
+  TH2F* h_s_dx_dy;
+  TH2F* h_s_dx_dz;
+  TH2F* h_s_dy_dz;
 
   TH1F* h_pull_dz;
   TH1F* h_pull_dist2d;
@@ -95,7 +100,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
     event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     which_mom(cfg.getParameter<int>("which_mom")),
     max_dr(cfg.getParameter<double>("max_dr")),
-    max_dist(cfg.getParameter<double>("max_dist"))
+    max_dist(cfg.getParameter<double>("max_dist")),
+    max_dist_2d(cfg.getParameter<double>("max_dist_2d")),
+    max_dist_2d_square(cfg.getParameter<double>("max_dist_2d_square"))
 {
   die_if_not(which_mom >= 0 && which_mom < mfv::NMomenta, "invalid which_mom");
 
@@ -115,6 +122,9 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_dz = fs->make<TH1F>("h_dz", ";z resolution (cm);number of vertices", 200, -0.02, 0.02);
   h_dist2d = fs->make<TH1F>("h_dist2d", ";dist2d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
   h_dist3d = fs->make<TH1F>("h_dist3d", ";dist3d(lsp,vtx) (cm);number of vertices", 100, 0, 0.02);
+  h_s_dx_dy = fs->make<TH2F>("h_s_dx_dy", ";y resolution (cm);x resolution (cm)", 200, -0.02, 0.02, 200, -0.02, 0.02);
+  h_s_dx_dz = fs->make<TH2F>("h_s_dx_dz", ";z resolution (cm);x resolution (cm)", 200, -0.02, 0.02, 200, -0.02, 0.02);
+  h_s_dy_dz = fs->make<TH2F>("h_s_dy_dz", ";z resolution (cm);y resolution (cm)", 200, -0.02, 0.02, 200, -0.02, 0.02);
 
   h_pull_dz = fs->make<TH1F>("h_pull_dz", ";pull on z resolution;number of vertices", 100, -5, 5);
   h_pull_dist2d = fs->make<TH1F>("h_pull_dist2d", ";pull on dist2d resolution;number of vertices", 100, 0, 5);
@@ -218,7 +228,7 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
       }
     }
-    else if (max_dist > 0) {
+    else if (max_dist > 0 && max_dist_2d > 0 && max_dist_2d_square > 0) {
       double dists[2] = {
         mag(mevent->gen_lsp_decay[0*3+0] - vtx.x,
             mevent->gen_lsp_decay[0*3+1] - vtx.y,
@@ -227,9 +237,27 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
             mevent->gen_lsp_decay[1*3+1] - vtx.y,
             mevent->gen_lsp_decay[1*3+2] - vtx.z),
       };
+      
+      double dist2d[2] = {
+        mag(mevent->gen_lsp_decay[0*3+0] - vtx.x,
+            mevent->gen_lsp_decay[0*3+1] - vtx.y),
+        mag(mevent->gen_lsp_decay[1*3+0] - vtx.x,
+            mevent->gen_lsp_decay[1*3+1] - vtx.y),
+      };
+
+      double dist2d_square_x[2] = {
+        fabs(mevent->gen_lsp_decay[0*3+0] - vtx.x),
+        fabs(mevent->gen_lsp_decay[1*3+0] - vtx.x)
+      };
+
+      double dist2d_square_y[2] = {
+        fabs(mevent->gen_lsp_decay[0*3+1] - vtx.y),
+	fabs(mevent->gen_lsp_decay[1*3+1] - vtx.y)
+      };
+      
 
       for (int i = 0; i < 2; ++i) {
-        if (dists[i] < max_dist) {
+        if (dists[i] < max_dist && dist2d[i] < max_dist_2d && dist2d_square_x[i] < max_dist_2d_square && dist2d_square_y[i] < max_dist_2d_square) {
           ++lsp_nmatch[i];
           if (dists[i] < dist) {
             dist = dists[i];
@@ -259,6 +287,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_dist3d->Fill(mag(mevent->gen_lsp_decay[ilsp*3+0] - vtx.x,
                        mevent->gen_lsp_decay[ilsp*3+1] - vtx.y,
                        mevent->gen_lsp_decay[ilsp*3+2] - vtx.z));
+    h_s_dx_dy->Fill(vtx.y - mevent->gen_lsp_decay[ilsp*3+1], vtx.x - mevent->gen_lsp_decay[ilsp*3+0]);
+    h_s_dx_dz->Fill(vtx.z - mevent->gen_lsp_decay[ilsp*3+2], vtx.x - mevent->gen_lsp_decay[ilsp*3+0]);
+    h_s_dy_dz->Fill(vtx.z - mevent->gen_lsp_decay[ilsp*3+2], vtx.y - mevent->gen_lsp_decay[ilsp*3+1]);
 
     // histogram space pulls: z, dist2d
     h_pull_dz->Fill((vtx.z - mevent->gen_lsp_decay[ilsp*3+2]) / sqrt(vtx.czz));

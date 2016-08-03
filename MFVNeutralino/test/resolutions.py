@@ -12,7 +12,9 @@ mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 mevent_src = cms.InputTag('mfvEvent'),
                                 which_mom = cms.int32(0),
                                 max_dr = cms.double(-1),
-                                max_dist = cms.double(0.005),
+                                max_dist = cms.double(0.0084),
+                                max_dist_2d = cms.double(1e9),
+                                max_dist_2d_square = cms.double(1e9)
                                 )
 
 process.p = cms.Path(process.mfvSelectedVerticesSeq)
