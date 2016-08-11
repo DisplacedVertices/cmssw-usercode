@@ -65,6 +65,9 @@ namespace mfv {
     Dataset toy_dataset;
 
     Dataset data;
+
+    TH1D* h_dbv;
+    TH1D* h_dvv;
     
     ////////////////////////////////////////////////////////////////////////////
 
@@ -89,6 +92,7 @@ namespace mfv {
 
     ToyThrower(const std::string& name_, const std::string& path_, TFile* f, TRandom* r);
 
+    void book_hists();
     bool sel_vertex(const VertexSimple& v) const;
     void read_sample(const Sample& sample);
     void loop_over_samples(std::function<void(const Sample&)> fcn);

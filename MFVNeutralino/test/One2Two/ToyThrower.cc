@@ -65,6 +65,7 @@ namespace mfv {
     toy_dataset.one_vertices = &toy_1v;
     toy_dataset.two_vertices = &toy_2v;
 
+    book_hists();
     read_samples();
 
     const TString directory_name = TString::Format("ToyThrower%s", uname.c_str());
@@ -75,6 +76,17 @@ namespace mfv {
       jmt::vthrow("only one ToyThrower per file allowed");
 
     book_and_fill_some_trees();
+  }
+
+  void ToyThrower::book_hists() {
+    std::vector<double> bins;
+    for (int j = 0; j < 20; ++j)
+      bins.push_back(j*0.002);
+    for (double b : {0.04, 0.0425, 0.045, 0.05, 0.055, 0.06, 0.07, 0.085, 0.1, 0.2, 0.4, 2.5})
+      bins.push_back(b);
+    h_dbv = new TH1D("h_dbv", "", bins.size()-1, &bins[0]);
+
+    h_dvv = new TH1D("h_dvv", "", Template::nbins, Template::min_val, Template::max_val);
   }
 
   bool ToyThrower::sel_vertex(const VertexSimple& v) const {
@@ -109,11 +121,13 @@ namespace mfv {
       e.sample = sample.key;
       e.nvtx_sel = 0;
 
+      const double w = sample.weight(int_lumi);
       if (nt.nvtx == 1) {
         VertexSimple v0(nt, 0, sample.is_sig());
         if (sel_vertex(v0)) {
           all_1v[sample.key].push_back(v0);
           e.nvtx_sel = 1;
+          if (!sample.is_sig()) h_dbv->Fill(v0.d2d(), w);
         }
       }
       else if (nt.nvtx == 2) {
@@ -125,11 +139,13 @@ namespace mfv {
           if (v0.ntracks >= min_ntracks0 && v0.ntracks <= max_ntracks0 && v1.ntracks >= min_ntracks1 && v1.ntracks <= max_ntracks1) {
             all_2v[sample.key].push_back(VertexPair(v0, v1));
             e.nvtx_sel = 2;
+            if (!sample.is_sig()) h_dvv->Fill(v0.d2d(v1), w);
           }
         }
         else if (sel0 || sel1) {
           all_1v[sample.key].push_back(sel0 ? v0 : v1);
           e.nvtx_sel = 1;
+          if (!sample.is_sig()) h_dbv->Fill(sel0 ? v0.d2d() : v1.d2d(), w);
         }
       }
 
