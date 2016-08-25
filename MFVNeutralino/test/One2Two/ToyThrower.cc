@@ -336,7 +336,7 @@ namespace mfv {
     loop_over_samples(f);
 
     if (throw_2v_from_histogram) {
-      b_sum_bkg_2v = n2v_from_histogram > 0 ? n2v_from_histogram : b_sum_2v;
+      b_sum_bkg_2v = n2v_from_histogram > 0 ? n2v_from_histogram : b_sum_bkg_2v;
       toy_2v.clear();
       for (int i = 0; i < b_sum_bkg_2v; ++i) {
         toy_2v.push_back(VertexPair(VertexSimple(0, 0), VertexSimple(h_dvv->GetRandom(), 0)));
