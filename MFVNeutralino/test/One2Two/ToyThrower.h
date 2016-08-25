@@ -28,6 +28,7 @@ namespace mfv {
     const double scale_2v;
     const bool allow_cap;
     const bool poisson_means;
+    const bool throw_from_histograms;
     const bool use_qcd700;
     const bool use_bkgsyst;
     const bool use_only_data_sample;

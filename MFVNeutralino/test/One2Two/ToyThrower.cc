@@ -25,6 +25,7 @@ namespace mfv {
       scale_2v(env.get_double("scale_2v", 1.)),
       allow_cap(env.get_bool("allow_cap", false)),
       poisson_means(env.get_bool("poisson_means", true)),
+      throw_from_histograms(env.get_bool("throw_from_histograms", false)),
       use_qcd700(env.get_bool("use_qcd700", false)),
       use_bkgsyst(env.get_bool("use_bkgsyst", false)),
       use_only_data_sample(env.get_bool("use_only_data_sample", false)),
@@ -51,6 +52,7 @@ namespace mfv {
     printf("int_lumi: %f\n", int_lumi);
     printf("scale: %f 1v  %f 2v\n", scale_1v, scale_2v);
     printf("poisson_means: %i\n", poisson_means);
+    printf("throw_from_histograms: %i\n", throw_from_histograms);
     printf("use_qcd700: %i\n", use_qcd700);
     printf("use_only_data_sample: %i\n", use_only_data_sample);
     printf("sample_only: %i (%s)\n", sample_only, samples.get(sample_only).name.c_str());
@@ -330,6 +332,13 @@ namespace mfv {
     };
 
     loop_over_samples(f);
+
+    if (throw_from_histograms) {
+      toy_2v.clear();
+      for (int i = 0; i < b_sum_2v; ++i) {
+        toy_2v.push_back(VertexPair(VertexSimple(0, 0), VertexSimple(h_dvv->GetRandom(), 0)));
+      }
+    }
 
     b_sum_1v = toy_1v.size();
     b_sum_2v = toy_2v.size();
