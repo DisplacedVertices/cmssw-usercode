@@ -36,7 +36,7 @@ def do_detree():
 
 sig_scale = 0
 def skip(h0_istat, h1_istat, sig_limit_fit_n):
-    return h1_istat == 0 or (sig_scale < 0 and sig_limit_fit_n <= 3) #h0_istat <= 1 or h1_istat <= 1 or sig_limit_fit_n < 4
+    return h0_istat <= 1
 
 d = do_detree()
 
