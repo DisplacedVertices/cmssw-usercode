@@ -1102,6 +1102,8 @@ namespace mfv {
       m->FixParameter(3);
 
     m->Command("SET STRATEGY 2");
+    if (print_level > 0)
+      m->Command("SET DEBUG -1");
 
     if (run_mnseek) {
       if (print_level > 0)
@@ -1114,6 +1116,38 @@ namespace mfv {
       printf("call migrad\n");
     m->Migrad();
 
+    m->GetParameter(0, ret.mu_sig, ret.err_mu_sig);
+    m->GetParameter(1, ret.mu_bkg, ret.err_mu_bkg);
+    m->GetParameter(2, ret.nuis0, ret.err_nuis0);
+    m->GetParameter(3, ret.nuis1, ret.err_nuis1);
+
+    // remove limits before redoing covariance matrix calculation and minos below
+    m->mnparm(0, "mu_sig", ret.mu_sig, ret.err_mu_sig, 0,0, ierr);
+    m->mnparm(1, "mu_bkg", ret.mu_bkg, ret.err_mu_bkg, 0,0, ierr);
+    double nuis[2] = {ret.nuis0, ret.nuis1};
+    double err_nuis[2] = {ret.err_nuis0, ret.err_nuis1};
+    for (size_t ipar = 0; ipar < npars; ++ipar)
+      m->mnparm(2+ipar, nuis_par_names[ipar], nuis[ipar], err_nuis[ipar], 0,0, ierr);
+
+    m->mnhess();
+
+    if (print_level > 0) {
+      TMatrixDSym cov(npars+2);
+      m->mnemat(cov.GetMatrixArray(), npars+2);
+
+      printf("external covariance matrix:\n");
+      for (int ipar = 0; ipar < int(npars+2); ++ipar) {
+        for (int jpar = 0; jpar < int(npars+2); ++jpar) {
+          if (jpar < ipar)
+            printf("%12s", "");
+          else
+            printf("%12.4e ", cov(ipar,jpar));
+        }
+        printf("\n");
+      }
+      if (fix_mu_sig) printf("nuis correlation coeff: %f\n", cov(1,2)/sqrt(cov(1,1) * cov(2,2)));
+    }
+
     if (run_minos) {
       if (print_level > 0)
         printf("call minos\n");
@@ -1123,12 +1157,7 @@ namespace mfv {
     double fmin, fedm, errdef;
     int npari, nparx, istat;
     m->mnstat(fmin, fedm, errdef, npari, nparx, istat);
-
     ret.maxtwolnL = -fmin;
-    m->GetParameter(0, ret.mu_sig, ret.err_mu_sig);
-    m->GetParameter(1, ret.mu_bkg, ret.err_mu_bkg);
-    m->GetParameter(2, ret.nuis0, ret.err_nuis0);
-    m->GetParameter(3, ret.nuis1, ret.err_nuis1);
     ret.ok = istat == 3;
     ret.istat = istat;
 
