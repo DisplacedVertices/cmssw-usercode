@@ -1158,6 +1158,10 @@ namespace mfv {
     int npari, nparx, istat;
     m->mnstat(fmin, fedm, errdef, npari, nparx, istat);
     ret.maxtwolnL = -fmin;
+    m->GetParameter(0, ret.mu_sig, ret.err_mu_sig);
+    m->GetParameter(1, ret.mu_bkg, ret.err_mu_bkg);
+    m->GetParameter(2, ret.nuis0, ret.err_nuis0);
+    m->GetParameter(3, ret.nuis1, ret.err_nuis1);
     ret.ok = istat == 3;
     ret.istat = istat;
 
