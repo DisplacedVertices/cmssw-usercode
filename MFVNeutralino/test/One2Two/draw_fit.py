@@ -4,7 +4,7 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 
 fn = '~/scratch/mfvo2t.root'
-plot_dir = '../plots/o2t_fit/MinitreeV6p1_76x_nstlays3_4/clearedjets_nscale4'
+plot_dir = '../plots/o2t_fit/h0_istat/3or4track'
 mu_sig_true_mean = 0
 mu_bkg_true_mean = 89.97
 
@@ -16,7 +16,7 @@ t.SetMarkerSize(1.)
 
 tree_vars = 'seed toy true_pars[0] true_pars[1] true_pars[2] true_pars[3]'
 for y in 'h1 h0'.split():
-    for x in 'istat maxtwolnL mu_sig err_mu_sig eplus_mu_sig eminus_mu_sig mu_bkg err_mu_bkg eplus_mu_bkg eminus_mu_bkg nuis0 err_nuis0 eplus_nuis0 eminus_nuis0 nuis1 err_nuis1 eplus_nuis1 eminus_nuis1'.split():
+    for x in 'istat maxtwolnL mu_sig err_mu_sig eplus_mu_sig eminus_mu_sig mu_bkg err_mu_bkg eplus_mu_bkg eminus_mu_bkg nuis0 err_nuis0 eplus_nuis0 eminus_nuis0 nuis1 err_nuis1 eplus_nuis1 eminus_nuis1 correlation_nuis'.split():
         tree_vars += ' t_obs_0__%s_%s' % (y,x)
 tree_vars += ' fs_chi2 fs_ndof fs_prob pval_signif pval_cls sig_limit sig_limit_err sig_limit_fit_n sig_limit_fit_a sig_limit_fit_b sig_limit_fit_a_err sig_limit_fit_b_err sig_limit_fit_prob'
 i_pval_signif = -9
@@ -76,6 +76,7 @@ h_h1_nuis1_eplus = h('h_h1_nuis1_eplus', '', 80, -0.1, 0.1)
 h_h1_nuis1_eminus = h('h_h1_nuis1_eminus', '', 80, -0.1, 0.1)
 h_h1_nuis1_pull = h('h_h1_nuis1_pull', '', 40, -10, 10)
 h_h1_nuis1_nuis0 = h2('h_h1_nuis1_nuis0', '', 40, 0, 0.2, 40, 0, 0.1)
+h_h1_nuis_correlation = h('h_h1_nuis_correlation', '', 40, -2, 2)
 h_h0_maxtwolnL = h('h_h0_maxtwolnL', '', 100, -300, 2000)
 h_h0_mu_bkg = h('h_h0_mu_bkg', '', 100, 0, 400)
 h_h0_mu_bkg_err = h('h_h0_mu_bkg_err', '', 40, 0, 40)
@@ -95,6 +96,7 @@ h_h0_nuis1_eplus = h('h_h0_nuis1_eplus', '', 80, -0.1, 0.1)
 h_h0_nuis1_eminus = h('h_h0_nuis1_eminus', '', 80, -0.1, 0.1)
 h_h0_nuis1_pull = h('h_h0_nuis1_pull', '', 40, -10, 10)
 h_h0_nuis1_nuis0 = h2('h_h0_nuis1_nuis0', '', 40, 0, 0.2, 40, 0, 0.1)
+h_h0_nuis_correlation = h('h_h0_nuis_correlation', '', 40, -2, 2)
 h_t = h('h_t', '', 40, -5, 100)
 h_chi2 = h('h_chi2', '', 40, 0, 40)
 h_ndof = h('h_ndof', '', 10, 0, 10)
@@ -118,7 +120,7 @@ h_sig_limit_fit_prob = h('h_sig_limit_fit_prob', '', 50, 0, 1)
 
 nuis0_true_mean = 0
 nuis1_true_mean = 0
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
+for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h1_correlation_nuis,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,h0_correlation_nuis,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
     if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
     nuis0_true_mean += true_pars_2
@@ -130,7 +132,7 @@ nuis1_true_mean /= n
 pval_signifs = []
 sig_limits = []
 sig_limits_scaled = []
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
+for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h1_correlation_nuis,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,h0_correlation_nuis,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
     if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
     h_seed.Fill(seed)
@@ -165,6 +167,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     if h1_eminus_nuis0 != 0:
         h_h1_nuis0_eminus.Fill(h1_eminus_nuis0)
     h_h1_nuis0_pull.Fill((h1_nuis0 - nuis0_true_mean)/h1_err_nuis0)
+    h_h1_nuis_correlation.Fill(h1_correlation_nuis)
     h_h1_nuis1.Fill(h1_nuis1)
     h_h1_nuis1_err.Fill(h1_err_nuis1)
     if h1_eplus_nuis1 != 0:
@@ -198,6 +201,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
         h_h0_nuis1_eminus.Fill(h0_eminus_nuis1)
     h_h0_nuis1_pull.Fill((h0_nuis1 - nuis1_true_mean)/h0_err_nuis1)
     h_h0_nuis1_nuis0.Fill(h0_nuis0, h0_nuis1)
+    h_h0_nuis_correlation.Fill(h0_correlation_nuis)
     h_t.Fill(h1_maxtwolnL - h0_maxtwolnL)
     h_chi2.Fill(chi2)
     h_ndof.Fill(ndof)
@@ -224,7 +228,7 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_sig_limit_fit_b_err.Fill(sig_limit_fit_b_err)
     h_sig_limit_fit_prob.Fill(sig_limit_fit_prob)
 
-for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_eplus h_h1_mu_sig_eminus h_h1_mu_sig_err_v_sig h_h1_mu_sig_v_true h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_eplus h_h1_mu_bkg_eminus h_h1_mu_bkg_err_v_bkg h_h1_mu_bkg_v_true h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_eplus h_h1_nuis0_eminus h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_eplus h_h1_nuis1_eminus h_h1_nuis1_pull h_h1_nuis1_nuis0 h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_eplus h_h0_mu_bkg_eminus h_h0_mu_bkg_err_v_bkg h_h0_mu_bkg_v_true h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_eplus h_h0_nuis0_eminus h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_eplus h_h0_nuis1_eminus h_h0_nuis1_pull h_h0_nuis1_nuis0 h_t h_chi2 h_ndof h_chi2ndof h_prob h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_pval_cls h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
+for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_eplus h_h1_mu_sig_eminus h_h1_mu_sig_err_v_sig h_h1_mu_sig_v_true h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_eplus h_h1_mu_bkg_eminus h_h1_mu_bkg_err_v_bkg h_h1_mu_bkg_v_true h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_eplus h_h1_nuis0_eminus h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_eplus h_h1_nuis1_eminus h_h1_nuis1_pull h_h1_nuis1_nuis0 h_h1_nuis_correlation h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_eplus h_h0_mu_bkg_eminus h_h0_mu_bkg_err_v_bkg h_h0_mu_bkg_v_true h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_eplus h_h0_nuis0_eminus h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_eplus h_h0_nuis1_eminus h_h0_nuis1_pull h_h0_nuis1_nuis0 h_h0_nuis_correlation h_t h_chi2 h_ndof h_chi2ndof h_prob h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_pval_cls h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
     print x
     h = eval(x)
     log = False

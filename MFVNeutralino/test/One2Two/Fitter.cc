@@ -544,6 +544,7 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h1_err_nuis1", &t_obs_0.h1.err_nuis1, "t_obs_0__h1_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__h1_eplus_nuis1", &t_obs_0.h1.eplus_nuis1, "t_obs_0__h1_eplus_nuis1/D");
     t_fit_info->Branch("t_obs_0__h1_eminus_nuis1", &t_obs_0.h1.eminus_nuis1, "t_obs_0__h1_eminus_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h1_correlation_nuis", &t_obs_0.h1.correlation_nuis, "t_obs_0__h1_correlation_nuis/D");
     t_fit_info->Branch("t_obs_0__h0_istat", &t_obs_0.h0.istat, "t_obs_0__h0_istat/I");
     t_fit_info->Branch("t_obs_0__h0_maxtwolnL", &t_obs_0.h0.maxtwolnL, "t_obs_0__h0_maxtwolnL/D");
     t_fit_info->Branch("t_obs_0__h0_mu_sig", &t_obs_0.h0.mu_sig, "t_obs_0__h0_mu_sig/D");
@@ -564,6 +565,7 @@ namespace mfv {
     t_fit_info->Branch("t_obs_0__h0_err_nuis1", &t_obs_0.h0.err_nuis1, "t_obs_0__h0_err_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_eplus_nuis1", &t_obs_0.h0.eplus_nuis1, "t_obs_0__h0_eplus_nuis1/D");
     t_fit_info->Branch("t_obs_0__h0_eminus_nuis1", &t_obs_0.h0.eminus_nuis1, "t_obs_0__h0_eminus_nuis1/D");
+    t_fit_info->Branch("t_obs_0__h0_correlation_nuis", &t_obs_0.h0.correlation_nuis, "t_obs_0__h0_correlation_nuis/D");
     t_fit_info->Branch("t_obs_0__t", &t_obs_0.t, "t_obs_0__t/D");
     t_fit_info->Branch("fs_chi2", &fit_stat.chi2);
     t_fit_info->Branch("fs_ndof", &fit_stat.ndof);
@@ -1131,10 +1133,11 @@ namespace mfv {
 
     m->mnhess();
 
-    if (print_level > 0) {
-      TMatrixDSym cov(npars+2);
-      m->mnemat(cov.GetMatrixArray(), npars+2);
+    TMatrixDSym cov(npars+2);
+    m->mnemat(cov.GetMatrixArray(), npars+2);
+    ret.correlation_nuis = cov(1,2)/sqrt(cov(1,1) * cov(2,2));
 
+    if (print_level > 0) {
       printf("external covariance matrix:\n");
       for (int ipar = 0; ipar < int(npars+2); ++ipar) {
         for (int jpar = 0; jpar < int(npars+2); ++jpar) {
@@ -1145,7 +1148,7 @@ namespace mfv {
         }
         printf("\n");
       }
-      if (fix_mu_sig) printf("nuis correlation coeff: %f\n", cov(1,2)/sqrt(cov(1,1) * cov(2,2)));
+      if (fix_mu_sig) printf("nuis correlation coeff: %f\n", ret.correlation_nuis);
     }
 
     if (run_minos) {

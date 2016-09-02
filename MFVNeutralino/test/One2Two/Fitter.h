@@ -86,6 +86,7 @@ namespace mfv {
       double err_nuis1;
       double eplus_nuis1;
       double eminus_nuis1;
+      double correlation_nuis;
       std::vector<double> A_sig;
       std::vector<double> A_bkg;
       std::vector<double> A_sig_rel;
