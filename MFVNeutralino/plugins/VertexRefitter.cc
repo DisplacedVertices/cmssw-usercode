@@ -30,8 +30,8 @@ private:
     return std::string(buf);
   }
 
-  const edm::InputTag beamspot_src;
-  const edm::InputTag vertex_src;
+  const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
   const unsigned n_tracks_to_drop;
   const bool histos;
   const bool verbose;
@@ -59,8 +59,8 @@ const int MFVVertexRefitter::max_n_input_vertices = 5;
 
 MFVVertexRefitter::MFVVertexRefitter(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
-    beamspot_src(cfg.getParameter<edm::InputTag>("beamspot_src")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     n_tracks_to_drop(cfg.getParameter<unsigned>("n_tracks_to_drop")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
@@ -112,7 +112,7 @@ void MFVVertexRefitter::produce(edm::Event& event, const edm::EventSetup& setup)
 
 #if 0
   edm::Handle<reco::BeamSpot> beamspot;
-  event.getByLabel(beamspot_src, beamspot);
+  event.getByToken(beamspot_token, beamspot);
   const double bs_x = beamspot->position().x();
   const double bs_y = beamspot->position().y();
   const double bs_z = beamspot->position().z();
@@ -122,7 +122,7 @@ void MFVVertexRefitter::produce(edm::Event& event, const edm::EventSetup& setup)
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
   edm::Handle<reco::VertexCollection> input_vertices;
-  event.getByLabel(vertex_src, input_vertices);
+  event.getByToken(vertex_token, input_vertices);
 
   int iiv = -1;
   for (const reco::Vertex& iv : *input_vertices) {

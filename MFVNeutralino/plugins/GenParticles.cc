@@ -13,12 +13,12 @@ public:
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
-  const edm::InputTag gen_src;
+  const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const bool print_info;
 };
 
 MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg) 
-  : gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
+  : gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     print_info(cfg.getParameter<bool>("print_info"))
 {
   produces<reco::GenParticleCollection>("All");
@@ -37,7 +37,7 @@ namespace {
 
 void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
+  event.getByToken(gen_particles_token, gen_particles);
 
   MCInteractionMFV3j mci;
   mci.Init(*gen_particles);
