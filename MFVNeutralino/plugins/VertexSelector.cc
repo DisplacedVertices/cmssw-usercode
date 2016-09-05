@@ -86,6 +86,8 @@ private:
   const double max_jetpairdrmax;
   const double max_err2d;
   const double max_err3d;
+  const double min_gen3ddist;
+  const double max_gen3ddist;
   const double min_gen3dsig;
   const double max_gen3dsig;
   const double min_bs2ddist;
@@ -168,6 +170,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_jetpairdrmax(cfg.getParameter<double>("max_jetpairdrmax")),
     max_err2d(cfg.getParameter<double>("max_err2d")),
     max_err3d(cfg.getParameter<double>("max_err3d")),
+    min_gen3ddist(cfg.getParameter<double>("min_gen3ddist")),
+    max_gen3ddist(cfg.getParameter<double>("max_gen3ddist")),    
     min_gen3dsig(cfg.getParameter<double>("min_gen3dsig")),
     max_gen3dsig(cfg.getParameter<double>("max_gen3dsig")),
     min_bs2ddist(cfg.getParameter<double>("min_bs2ddist")),
@@ -282,6 +286,8 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     vtx.jetpairdrmax() < max_jetpairdrmax &&
     vtx.gen2derr < max_err2d &&
     vtx.gen3derr < max_err3d &&
+    vtx.gen3ddist >= min_gen3ddist &&
+    vtx.gen3ddist <  max_gen3ddist &&
     vtx.gen3dsig() >= min_gen3dsig &&
     vtx.gen3dsig() <  max_gen3dsig &&
     vtx.bs2ddist >= min_bs2ddist &&

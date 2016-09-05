@@ -57,6 +57,8 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_jetpairdrmax     = cms.double(1e9),
                                      max_err2d            = cms.double(1e9),
                                      max_err3d            = cms.double(1e9),
+                                     min_gen3ddist        = cms.double(0),
+                                     max_gen3ddist        = cms.double(1e9),
                                      min_gen3dsig         = cms.double(0),
                                      max_gen3dsig         = cms.double(1e6),
                                      min_bs2ddist         = cms.double(0),
@@ -84,7 +86,8 @@ mfvSelectedVerticesSkim =  mfvSelectedVertices.clone(
     )
 
 mfvSelectedVerticesLoose = mfvSelectedVertices.clone( # touching this affects the vertices associated to jets
-    min_ntracks = 5
+    min_ntracks = 3,
+    max_gen3ddist = 0.012,
     )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
