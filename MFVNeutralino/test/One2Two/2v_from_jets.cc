@@ -24,11 +24,11 @@ int max_ntracks1 = 1000000;
 
 const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_4";
 
-const int nbkg = 6;
-const char* samples[nbkg] = {"qcdht0500", "qcdht0700", "qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
-float weights[nbkg] = {4.174, 1.137, 0.6166, 0.07894, 0.03320, 0.05620};
+const int nbkg = 4;
+const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
+float weights[nbkg] = {6.166, 0.7894, 0.3320, 0.5620};
 
-double n2v = 112.1;
+double n2v = 1121.;
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
