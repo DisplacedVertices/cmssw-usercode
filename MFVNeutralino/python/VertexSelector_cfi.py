@@ -86,8 +86,7 @@ mfvSelectedVerticesSkim =  mfvSelectedVertices.clone(
     )
 
 mfvSelectedVerticesLoose = mfvSelectedVertices.clone( # touching this affects the vertices associated to jets
-    min_ntracks = 3,
-    max_gen3ddist = 0.012,
+    min_ntracks = 5,
     )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
