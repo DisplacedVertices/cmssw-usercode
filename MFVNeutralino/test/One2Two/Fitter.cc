@@ -1123,6 +1123,18 @@ namespace mfv {
     m->GetParameter(2, ret.nuis0, ret.err_nuis0);
     m->GetParameter(3, ret.nuis1, ret.err_nuis1);
 
+    if (run_minos) {
+      if (print_level > 0)
+        printf("call minos\n");
+      m->mnmnos();
+    }
+
+    double eparab, gcc;
+    m->mnerrs(0, ret.eplus_mu_sig, ret.eminus_mu_sig, eparab, gcc);
+    m->mnerrs(1, ret.eplus_mu_bkg, ret.eminus_mu_bkg, eparab, gcc);
+    m->mnerrs(2, ret.eplus_nuis0, ret.eminus_nuis0, eparab, gcc);
+    m->mnerrs(3, ret.eplus_nuis1, ret.eminus_nuis1, eparab, gcc);
+
     // remove limits before redoing covariance matrix calculation and minos below
     m->mnparm(0, "mu_sig", ret.mu_sig, ret.err_mu_sig, 0,0, ierr);
     m->mnparm(1, "mu_bkg", ret.mu_bkg, ret.err_mu_bkg, 0,0, ierr);
@@ -1155,12 +1167,6 @@ namespace mfv {
       if (fix_mu_sig) printf("nuis correlation coeff: %f\n", ret.correlation_nuis);
     }
 
-    if (run_minos) {
-      if (print_level > 0)
-        printf("call minos\n");
-      m->mnmnos();
-    }
-
     double fmin, fedm, errdef;
     int npari, nparx, istat;
     m->mnstat(fmin, fedm, errdef, npari, nparx, istat);
@@ -1171,12 +1177,6 @@ namespace mfv {
     m->GetParameter(3, ret.nuis1, ret.err_nuis1);
     ret.ok = istat == 3;
     ret.istat = istat;
-
-    double eparab, gcc;
-    m->mnerrs(0, ret.eplus_mu_sig, ret.eminus_mu_sig, eparab, gcc);
-    m->mnerrs(1, ret.eplus_mu_bkg, ret.eminus_mu_bkg, eparab, gcc);
-    m->mnerrs(2, ret.eplus_nuis0, ret.eminus_nuis0, eparab, gcc);
-    m->mnerrs(3, ret.eplus_nuis1, ret.eminus_nuis1, eparab, gcc);
 
     if (print_level > 0)
       printf("calling twolnL at last minimum so A_sig/bkg are updated\n");
