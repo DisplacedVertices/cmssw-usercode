@@ -652,13 +652,13 @@ namespace mfv {
                           nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
                           );
 
-      for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
+      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
         const double nuispar0 = nuis_scan[0].v(i0);
 
         if (draw_bkg_templates)
           subdir->mkdir(TString::Format("nuis0_%03i", i0))->cd();
 
-        for (int i1 = 1; i1 < nuis_scan[1].n; ++i1) {
+        for (int i1 = 1; i1 <= nuis_scan[1].n; ++i1) {
           //fit::extra_prints = i0 == 186 && i1 == 1;
           //fit::interp->extra_prints = i0 == 186 && i1 == 1;
 
@@ -682,9 +682,9 @@ namespace mfv {
                           mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
                           );
 
-      for (int i0 = 1; i0 < mu_scan[0].n; ++i0) {
+      for (int i0 = 1; i0 <= mu_scan[0].n; ++i0) {
         const double mu_sig = mu_scan[0].v(i0);
-        for (int i1 = 1; i1 < mu_scan[1].n; ++i1) {
+        for (int i1 = 1; i1 <= mu_scan[1].n; ++i1) {
           const double mu_bkg = mu_scan[1].v(i1);
           h2->SetBinContent(i0, i1, fit::twolnL(mu_sig, mu_bkg, ml.nuis0, ml.nuis1));
         }
@@ -696,9 +696,9 @@ namespace mfv {
                           mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
                           );
 
-      for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
+      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
         const double nuispar0 = nuis_scan[0].v(i0);
-        for (int i1 = 1; i1 < mu_scan[1].n; ++i1) {
+        for (int i1 = 1; i1 <= mu_scan[1].n; ++i1) {
           const double mu_bkg = mu_scan[1].v(i1);
           h3->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, nuispar0, ml.nuis1));
         }
@@ -710,9 +710,9 @@ namespace mfv {
                           mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
                           );
 
-      for (int i0 = 1; i0 < nuis_scan[1].n; ++i0) {
+      for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
         const double nuispar1 = nuis_scan[1].v(i0);
-        for (int i1 = 1; i1 < mu_scan[1].n; ++i1) {
+        for (int i1 = 1; i1 <= mu_scan[1].n; ++i1) {
           const double mu_bkg = mu_scan[1].v(i1);
           h4->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, ml.nuis0, nuispar1));
         }
@@ -724,9 +724,9 @@ namespace mfv {
                           mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
                           );
 
-      for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
+      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
         const double nuispar0 = nuis_scan[0].v(i0);
-        for (int i1 = 1; i1 < mu_scan[0].n; ++i1) {
+        for (int i1 = 1; i1 <= mu_scan[0].n; ++i1) {
           const double mu_sig = mu_scan[0].v(i1);
           h5->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
         }
@@ -738,9 +738,9 @@ namespace mfv {
                           mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
                           );
 
-      for (int i0 = 1; i0 < nuis_scan[1].n; ++i0) {
+      for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
         const double nuispar1 = nuis_scan[1].v(i0);
-        for (int i1 = 1; i1 < mu_scan[0].n; ++i1) {
+        for (int i1 = 1; i1 <= mu_scan[0].n; ++i1) {
           const double mu_sig = mu_scan[0].v(i1);
           h6->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
         }
@@ -751,7 +751,7 @@ namespace mfv {
                           mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
                           );
 
-      for (int i0 = 1; i0 < mu_scan[1].n; ++i0) {
+      for (int i0 = 1; i0 <= mu_scan[1].n; ++i0) {
         const double mu_bkg = mu_scan[1].v(i0);
         h7->SetBinContent(i0, fit::twolnL(ml.mu_sig, mu_bkg, ml.nuis0, ml.nuis1));
       }
@@ -761,7 +761,7 @@ namespace mfv {
                           mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
                           );
 
-      for (int i0 = 1; i0 < mu_scan[0].n; ++i0) {
+      for (int i0 = 1; i0 <= mu_scan[0].n; ++i0) {
         const double mu_sig = mu_scan[0].v(i0);
         h8->SetBinContent(i0, fit::twolnL(mu_sig, ml.mu_bkg, ml.nuis0, ml.nuis1));
       }
@@ -771,7 +771,7 @@ namespace mfv {
                           nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max
                           );
 
-      for (int i0 = 1; i0 < nuis_scan[0].n; ++i0) {
+      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
         const double nuispar0 = nuis_scan[0].v(i0);
         h9->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
       }
@@ -781,7 +781,7 @@ namespace mfv {
                           nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
                           );
 
-      for (int i0 = 1; i0 < nuis_scan[1].n; ++i0) {
+      for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
         const double nuispar1 = nuis_scan[1].v(i0);
         h10->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
       }
