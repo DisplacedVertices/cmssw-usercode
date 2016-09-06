@@ -15,9 +15,8 @@ namespace mfv {
 
   std::vector<double> Template::binning(const bool shorten_last) {
     std::vector<double> bins;
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 6; ++i)
       bins.push_back(i * 0.02);
-    bins.push_back(0.1);
     if (fine_binning) {
       if (shorten_last)
         jmt::vthrow("cannot shorten_last when doing fine_binning");
