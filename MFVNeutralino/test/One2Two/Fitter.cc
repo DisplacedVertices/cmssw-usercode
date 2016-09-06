@@ -1333,8 +1333,11 @@ namespace mfv {
       fit::eta_bkg = { -1, 1e-3, 1e-3, 3.8, 1.4, 0.1, 0.1, -1 };
       //fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
       //fit::eta_bkg = { -1, 1, 1, 1, 3, 1, 1, -1 };
-    else
-      fit::eta_bkg = { -1, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, -1 };
+    else {
+      fit::eta_bkg.assign(fit::n_bins+2, 1e-3);
+      fit::eta_bkg.front() = -1;
+      fit::eta_bkg.back() = -1;
+    }
 
     if (int(fit::eta_bkg.size()) != fit::n_bins+2)
       jmt::vthrow("eta_bkg wrong size");
