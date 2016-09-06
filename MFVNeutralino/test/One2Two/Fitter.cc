@@ -1147,11 +1147,10 @@ namespace mfv {
 
     TMatrixDSym cov(npars+2);
     m->mnemat(cov.GetMatrixArray(), npars+2);
-    if (fix_mu_sig) {
-      ret.correlation_nuis = cov(2,3)/sqrt(cov(2,2) * cov(3,3));
-    } else {
+    if (fix_mu_sig)
       ret.correlation_nuis = cov(1,2)/sqrt(cov(1,1) * cov(2,2));
-    }
+    else
+      ret.correlation_nuis = cov(2,3)/sqrt(cov(2,2) * cov(3,3));
 
     if (print_level > 0) {
       printf("external covariance matrix:\n");
