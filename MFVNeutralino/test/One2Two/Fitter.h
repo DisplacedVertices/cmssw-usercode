@@ -33,6 +33,7 @@ namespace mfv {
     const bool run_mnseek;
     const bool run_minos;
     const bool draw_bkg_templates;
+    const bool fix_nuis0;
     const bool fix_nuis1;
     const double start_nuis0;
     const double start_nuis1;

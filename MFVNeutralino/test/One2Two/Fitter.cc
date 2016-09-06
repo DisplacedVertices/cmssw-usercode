@@ -434,6 +434,7 @@ namespace mfv {
       run_mnseek(env.get_bool("run_mnseek", true)),
       run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
+      fix_nuis0(env.get_bool("fix_nuis0", 0)),
       fix_nuis1(env.get_bool("fix_nuis1", 0)),
       start_nuis0(env.get_double("start_nuis0", 0.025)),
       start_nuis1(env.get_double("start_nuis1", 0.008)),
@@ -471,7 +472,7 @@ namespace mfv {
     printf("run_mnseek: %i\n", run_mnseek);
     printf("run_minos: %i\n", run_minos);
     printf("draw_bkg_templates: %i\n", draw_bkg_templates);
-    printf("fix_nuis1: %i\n", fix_nuis1);
+    printf("fix_nuis 0: %i  1: %i\n", fix_nuis0, fix_nuis1);
     printf("start_nuis: %f, %f\n", start_nuis0, start_nuis1);
     printf("fluctuate_toys_shapes: %i\n", fluctuate_toys_shapes);
     printf("n_toy_signif: %i\n", n_toy_signif);
@@ -505,6 +506,7 @@ namespace mfv {
     t_config->Branch("allow_negative_mu_sig", const_cast<bool*>(&allow_negative_mu_sig));
     t_config->Branch("run_mnseek", const_cast<bool*>(&run_mnseek));
     t_config->Branch("run_minos", const_cast<bool*>(&run_minos));
+    t_config->Branch("fix_nuis0", const_cast<bool*>(&fix_nuis0));
     t_config->Branch("fix_nuis1", const_cast<bool*>(&fix_nuis1));
     t_config->Branch("start_nuis0", const_cast<double*>(&start_nuis0));
     t_config->Branch("start_nuis1", const_cast<double*>(&start_nuis1));
@@ -1030,7 +1032,11 @@ namespace mfv {
               h->SetStats(1);
 
             ret.chi2 = 0;
-            ret.ndof = h_data_fit->GetNbinsX() - (sb ? 2 : 1) - (fix_nuis1 ? 1 : 2);
+            ret.ndof = h_data_fit->GetNbinsX() - (sb ? 2 : 1);
+            if (!fix_nuis0)
+              ret.ndof -= 1;
+            if (!fix_nuis1)
+              ret.ndof -= 1;
             ret.ks = 0;
             for (int ibin = 1; ibin <= h_data_fit->GetNbinsX(); ++ibin) {
               if (h_sum_fit->GetBinContent(ibin) > 0)
@@ -1099,6 +1105,9 @@ namespace mfv {
 
     if (fix_mu_sig)
       m->FixParameter(0);
+
+    if (fix_nuis0)
+      m->FixParameter(2);
 
     if (fix_nuis1)
       m->FixParameter(3);
