@@ -389,7 +389,7 @@ namespace mfv {
 
 
   void Fitter::min_lik_t::print(const char* header, const char* indent) const {
-    printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f    mu_bkg = %7.3f +- %7.3f  nuis0 = %7.3f +- %7.3f [%7.3f, %7.3f]  nuis1 = %7.3f +- %7.3f [%7.3f, %7.3f]\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, nuis0, err_nuis0, nuis0 + eminus_nuis0, nuis0 + eplus_nuis0, nuis1, err_nuis1, nuis1 + eminus_nuis1, nuis1 + eplus_nuis1);
+    printf("%s%s  istat = %i  maxtwolnL = %10.4e  mu_sig = %7.3f +- %7.3f    mu_bkg = %7.3f +- %7.3f  nuis0 = %7.3f +- %7.3f [%7.3f, %7.3f]  nuis1 = %7.3f +- %7.3f [%7.3f, %7.3f]  corr %7.3f\n", indent, header, istat, maxtwolnL, mu_sig, err_mu_sig, mu_bkg, err_mu_bkg, nuis0, err_nuis0, nuis0 + eminus_nuis0, nuis0 + eplus_nuis0, nuis1, err_nuis1, nuis1 + eminus_nuis1, nuis1 + eplus_nuis1, correlation_nuis);
     printf("%s    A_sig ", indent);
     const int ie = fit::n_bins; // JMTBAD
     for (int i = 1; i <= ie; ++i) printf("%6.4f (%4.2f) ", A_sig[i], A_sig_rel[i]);
