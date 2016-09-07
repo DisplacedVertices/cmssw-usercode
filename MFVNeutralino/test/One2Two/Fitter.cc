@@ -431,7 +431,7 @@ namespace mfv {
       barlow_beeston(env.get_bool("barlow_beeston", true)),
       bend_bkg(env.get_bool("bend_bkg", false)),
       allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
-      run_mnseek(env.get_bool("run_mnseek", true)),
+      run_mnseek(env.get_bool("run_mnseek", false)),
       run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
       fix_nuis0(env.get_bool("fix_nuis0", 0)),
@@ -1075,6 +1075,9 @@ namespace mfv {
     TMinuit* m = new TMinuit(4);
     m->SetPrintLevel(print_level);
     m->SetFCN(fit::minfcn);
+    double three = 3;
+    int thisseed = 20000 + seed + toy;
+    m->mnrn15(three, thisseed);
     int ierr;
     double mu_sig_lo = 0, mu_sig_hi = 500;
     if (mu_sig_start > 0)
