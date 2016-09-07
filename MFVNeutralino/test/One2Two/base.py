@@ -12,10 +12,10 @@ ROOT.TH1.AddDirectory(0)
 def arrit(l):
     return array('d', l)
 
-def get_f_t(x, min_ntracks=None):
+def get_f_t(x, min_ntracks=None, tree_path='trees'):
     if issubclass(type(x), Samples.Sample):
         sample = x
-        input_fn = 'crab/One2Two/%s.root' % sample.name
+        input_fn = os.path.join(tree_path, '%s.root' % sample.name)
     elif type(x) == str:
         input_fn = x
     f = ROOT.TFile.Open(input_fn)
@@ -28,7 +28,7 @@ def get_f_t(x, min_ntracks=None):
     return f, t
 
 bkg_samples = Samples.ttbar_samples + Samples.qcd_samples
-sig_samples = [Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau0300um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400]
+sig_samples = [Samples.mfv_neu_tau00100um_M0400, Samples.mfv_neu_tau00300um_M0400, Samples.mfv_neu_tau01000um_M0400, Samples.mfv_neu_tau10000um_M0400]
 
 class FitResult:
     def __init__(self, *args):
