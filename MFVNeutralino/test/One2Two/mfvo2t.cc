@@ -32,6 +32,8 @@ int main() {
   const bool run_fit = env.get_bool("run_fit", true);
   const std::string data_fn = env.get_string("data_fn", "MultiJetPk2012.root");
   const bool process_data = env.get_bool("process_data", false);
+  const int restore_state_num = env.get_int("restore_state_num", -1);
+  const std::string restore_state_fn = env.get_string("restore_state_fn", "none");
 
   if (!(templates_phishift || templates_clearedjets || templates_simpleclear))
     jmt::vthrow("templates config must be one of \"phishift\", \"clearedjets\", \"simpleclear\"");
@@ -47,7 +49,24 @@ int main() {
   printf("process data from %s? %s\n", data_fn.c_str(), (process_data ? "YES!" : "no"));
 
   TFile* out_f = new TFile(out_fn.c_str(), "recreate");
-  TRandom3* rand = new TRandom3(jmt::seed_base + seed);
+  TDirectory* rand_dir = out_f->mkdir("RandomStates");
+  TRandom3* rand = 0;
+  if (restore_state_num < 0)
+    rand = new TRandom3(jmt::seed_base + seed);
+  else {
+    printf("restore state num: %i  from fn: %s\n", restore_state_num, restore_state_fn.c_str());
+    TFile* rand_state_f = new TFile(restore_state_fn.c_str());
+    if (!rand_state_f || !rand_state_f->IsOpen())
+      jmt::vthrow("couldn't open random state file");
+    TDirectory* rand_state_d = (TDirectory*)rand_state_f->Get("RandomStates");
+    if (!rand_state_d)
+      jmt::vthrow("no directory RandomStates in file");
+    TString rand_state_s = TString::Format("toy%04i", restore_state_num);
+    rand = (TRandom3*)rand_state_d->Get(rand_state_s);
+    if (!rand)
+      jmt::vthrow("no object %s in file", rand_state_s.Data());
+  }
+  gRandom = rand; // JMTBAD why didn't I just do this in the first place instead of passing in rand everywhere
 
   mfv::ToyThrower* tt = new mfv::ToyThrower("", tree_path, out_f, rand);
 
@@ -94,6 +113,10 @@ int main() {
   printf("]  sum: %.1f\n", h_sig->Integral());
 
   for (int itoy = 0; itoy < ntoys; ++itoy) {
+    rand_dir->cd();
+    rand->Write(TString::Format("toy%04i", itoy));
+    out_f->cd();
+
     tt->throw_toy();
 
     std::vector<double> true_pars = { double(tt->b_sum_sig_2v), double(tt->b_sum_bkg_2v) };
