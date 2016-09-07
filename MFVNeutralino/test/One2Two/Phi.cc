@@ -4,7 +4,7 @@
 #include <cmath>
 
 namespace mfv {
-  const bool Phi::use_abs = true;
+  const bool Phi::use_abs = false;
   const int Phi::nbins = 8;
   const double Phi::min = Phi::use_abs ? 0 : -M_PI;
   const double Phi::max = M_PI;

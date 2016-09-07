@@ -960,6 +960,11 @@ namespace mfv {
           const min_lik_t& ml = sb ? t.h1 : t.h0;
           TCanvas* c = new TCanvas(TString::Format("c_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));
 
+          if (div == 0) {
+            TH1D* h_phi = (TH1D*)fit::interp->get_Q(ml.nuis_pars())->h_phi->Clone(TString::Format("h_phi_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));
+            h_phi->SetLineWidth(2);
+          }
+
           TH1D* h_bkg_fit = make_h_bkg(TString::Format("h_bkg_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no), ml.nuis_pars(), bb ? ml.A_bkg : std::vector<double>());
           TH1D* h_sig_fit  = (TH1D*)fit::h_sig ->Clone(TString::Format("h_sig_%s_fit_%s_%s",  sb_or_b, bb_or_no, div_or_no));
           TH1D* h_data_fit = (TH1D*)fit::h_data->Clone(TString::Format("h_data_%s_fit_%s_%s", sb_or_b, bb_or_no, div_or_no));

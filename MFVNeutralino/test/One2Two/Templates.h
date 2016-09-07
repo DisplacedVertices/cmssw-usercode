@@ -18,9 +18,11 @@ namespace mfv {
   struct Template {
     int i;
     TH1D* h;
+    TH1D* h_phi;
 
-    Template(int i_, TH1D* h_) : i(i_), h(h_) {}
+    Template(int i_, TH1D* h_) : i(i_), h(h_) { set_h_phi(); }
     virtual ~Template() {}
+    virtual void set_h_phi();
     virtual double chi2() const { return 0; }
     virtual std::string name() const { return std::string("NoName"); }
     virtual std::string title() const { return std::string("NoTitle"); }
@@ -39,6 +41,7 @@ namespace mfv {
     static TH1D* finalize_binning(TH1D* h);
     static TH1D* finalize_template(TH1D* h);
     static void finalize_template_in_place(TH1D* h);
+    TH1D* make_phi_hist(const char* name, const char* title);
 
     static const int max_npars;
     std::vector<double> pars;

@@ -1,7 +1,9 @@
+#include "Phi.h"
 #include "ROOTTools.h"
 #include "Templates.h"
 
 #include <cmath>
+#include "TString.h"
 #include "TH1D.h"
 #include "VAException.h"
 
@@ -12,6 +14,10 @@ namespace mfv {
   const double Template::max_val = 10;
   const double Template::bin_width = (Template::max_val - Template::min_val) / Template::nbins;
   const int Template::max_npars = 3;
+
+  void Template::set_h_phi() {
+    h_phi = Phi::new_1d_hist(TString::Format("%s_phi", h->GetName()), h->GetTitle());
+  }
 
   std::vector<double> Template::binning(const bool shorten_last) {
     std::vector<double> bins;
