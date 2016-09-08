@@ -60,12 +60,30 @@ jtupleParams = cms.PSet(
                               'pt > 7. && abs(eta) < 2.4 && ' \
                               '%s < 0.2' % muonIso
                               ),
-
-    electronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
-                             '%s && ' \
-                             '%s < 0.2' % (electronId, electronIso)
-                             ),
     
+#    electronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
+#                             '%s && ' \
+#                             '%s < 0.2' % (electronId, electronIso)
+#                             ),
+
+    electronCut = cms.string('(isEB && ' \
+                             'gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 2 && ' \
+                             'abs(deltaEtaSuperClusterTrackAtVtx) < 0.00926 && ' \
+                             'abs(deltaPhiSuperClusterTrackAtVtx) < 0.0336 && ' \
+                             'full5x5_sigmaIetaIeta < 0.0101 && ' \
+                             'hadronicOverEm < 0.0597 && ' \
+                             'abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.012 && ' \
+                             'passConversionVeto) || ' \
+                             '(isEE && ' \
+                             'gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 1 && ' \
+                             'abs(deltaEtaSuperClusterTrackAtVtx) < 0.00724 && ' \
+                             'abs(deltaPhiSuperClusterTrackAtVtx) < 0.0918 && ' \
+                             'full5x5_sigmaIetaIeta < 0.0279 && ' \
+                             'hadronicOverEm < 0.0615 && ' \
+                             'abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.00999 && ' \
+                             'passConversionVeto)'
+                             ),
+
     semilepElectronCut = cms.string('pt > 7. && abs(eta) < 2.5 && ' \
                                     '%s && ' \
                                     '(abs(superCluster.eta) < 1.4442 || abs(superCluster.eta) > 1.5660) && ' \
