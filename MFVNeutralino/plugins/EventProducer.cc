@@ -436,7 +436,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (primary_vertex != 0)
       mevent->lep_dz.push_back(electron.gsfTrack()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
-    mevent->lep_mva.push_back(electron.userFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"));
+    mevent->lep_mva.push_back(1e99);
   }
 
   //////////////////////////////////////////////////////////////////////
