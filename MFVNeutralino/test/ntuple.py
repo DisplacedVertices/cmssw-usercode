@@ -116,7 +116,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.registry.from_argv(
         Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         Samples.auxiliary_background_samples[:1] + \
         Samples.qcdpt_samples + \
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
@@ -138,7 +138,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'ttbar': 3.6064e-02, 'ttbaraux': 3.6064e-02, 'qcdpt0120': 3.500e-05, 'qcdpt0170': 7.856e-03, 'qcdpt0300': 2.918e-01 }
+    filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'qcdht0500ext': 2.9065e-03, 'qcdht0700ext': 3.2294e-01, 'ttbar': 3.6064e-02, 'ttbaraux': 3.6064e-02, 'qcdpt0120': 3.500e-05, 'qcdpt0170': 7.856e-03, 'qcdpt0300': 2.918e-01 }
     for s in samples:
         if s.is_mc:
             if filter_eff.has_key(s.name):
