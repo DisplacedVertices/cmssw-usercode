@@ -437,6 +437,28 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->lep_dz.push_back(electron.gsfTrack()->dz(primary_vertex->position()));
     mevent->lep_iso.push_back(iso);
     mevent->lep_mva.push_back(1e99);
+
+    if (MFVEvent::encode_el_id(sel) & MFVEvent::el_veto) {
+      mevent->electron_pt[0].push_back(electron.pt());
+      mevent->electron_eta[0].push_back(electron.eta());
+      mevent->electron_phi[0].push_back(electron.phi());
+      mevent->electron_dxy[0].push_back(electron.gsfTrack()->dxy(beamspot->position()));
+      if (primary_vertex != 0)
+	mevent->electron_dz[0].push_back(electron.gsfTrack()->dz(primary_vertex->position()));    }
+    if (MFVEvent::encode_el_id(sel) & MFVEvent::el_semilep) {
+      mevent->electron_pt[1].push_back(electron.pt());
+      mevent->electron_eta[1].push_back(electron.eta());
+      mevent->electron_phi[1].push_back(electron.phi());
+      mevent->electron_dxy[1].push_back(electron.gsfTrack()->dxy(beamspot->position()));
+      if (primary_vertex != 0)
+	mevent->electron_dz[1].push_back(electron.gsfTrack()->dz(primary_vertex->position()));    }
+    if (MFVEvent::encode_el_id(sel) & MFVEvent::el_dilep) {
+      mevent->electron_pt[2].push_back(electron.pt());
+      mevent->electron_eta[2].push_back(electron.eta());
+      mevent->electron_phi[2].push_back(electron.phi());
+      mevent->electron_dxy[2].push_back(electron.gsfTrack()->dxy(beamspot->position()));
+      if (primary_vertex != 0)
+	mevent->electron_dz[2].push_back(electron.gsfTrack()->dz(primary_vertex->position()));    }
   }
 
   //////////////////////////////////////////////////////////////////////
