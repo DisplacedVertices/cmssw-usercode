@@ -82,7 +82,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.registry.from_argv(
         #Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_ext_samples + \
         #Samples.qcdpt_samples + \
         Samples.mfv_signal_samples + \
         Samples.mfv_signal_samples_glu + \
@@ -90,6 +90,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.mfv_signal_samples_lq2 + \
         Samples.xx4j_samples
         )
+
+    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_ext_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 
     for sample in samples:
         if sample.is_mc:
@@ -103,4 +105,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        job_control_from_sample = True,
                        aaa = True, # stored at FNAL, easy to run on T2_USes
                        )
-    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800])
+    cs.submit_all(samples)
