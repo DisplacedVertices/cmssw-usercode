@@ -1,5 +1,6 @@
 #include "ClearedJetsTemplater.h"
 #include "TFile.h"
+#include "TF1.h"
 #include "TH1.h"
 #include "TKey.h"
 #include "TMath.h"
@@ -32,16 +33,24 @@ namespace mfv {
       flat_phis(env.get_bool("flat_phis", false)),
       phi_from_jet_mu(env.get_double("phi_from_jet_mu", M_PI_2)),
       phi_from_jet_sigma(env.get_double("phi_from_jet_sigma", 0.4)),
+      dphi_from_pdf(env.get_bool("dphi_from_pdf", false)),
+      dphi_pdf_c(env.get_double("dphi_pdf_c", 0.)),
+      dphi_pdf_e(env.get_double("dphi_pdf_e", 0.)),
+      dphi_pdf_a(env.get_double("dphi_pdf_a", 0.)),
       n_scale(env.get_int("n_scale", 1)),
+      fixed_clearing(env.get_bool("fixed_clearing", false)),
       clearing_mu_start(env.get_double("clearing_mu_start", 0.)),
       d_clearing_mu(env.get_double("d_clearing_mu", 0.0005 * n_scale)),
-      n_clearing_mu(env.get_int("n_clearing_mu", 180 / n_scale)),
+      n_clearing_mu(env.get_int("n_clearing_mu", fixed_clearing ? 2 : 180 / n_scale)),
       clearing_sigma_start(env.get_double("clearing_sigma_start", 0.0005)),
       d_clearing_sigma(env.get_double("d_clearing_sigma", 0.0005 * n_scale)),
-      n_clearing_sigma(env.get_int("n_clearing_sigma", 100 / n_scale)),
+      n_clearing_sigma(env.get_int("n_clearing_sigma", fixed_clearing ? 2 : 100 / n_scale)),
 
       clearing_mu_fit(0.028),
-      clearing_sigma_fit(0.005)
+      clearing_sigma_fit(0.005),
+
+      t_fit_info(0),
+      f_dphi(0)
   {
     printf("ClearedJetsTemplater%s config:\n", name.c_str());
     if (load_from_file)
@@ -49,9 +58,13 @@ namespace mfv {
     else {
       printf("d2d_cut: %f\n", d2d_cut);
       printf("sample_count: %i\n", sample_count);
-      if (throw_dphi_from_2v) {
+      if (int(throw_dphi_from_2v) + int(flat_phis) + int(dphi_from_pdf) > 1)
+        jmt::vthrow("can only pick one phi throwing method");
+
+      if (dphi_from_pdf)
+        printf("dphi from pdf: c: %f e: %f a: %f\n", dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+      else if (throw_dphi_from_2v)
         printf("dphi thrown from 2v hist\n");
-      }
       else {
         if (flat_phis)
           printf("phis thrown flat\n");
@@ -59,12 +72,25 @@ namespace mfv {
           printf("phi_from_jet ~ Gaus(%f, %f)\n", phi_from_jet_mu, phi_from_jet_sigma);
       }
     }
-    printf("clearing_mu: %i increments of %f starting from %f\n", n_clearing_mu, d_clearing_mu, clearing_mu_start);
-    printf("clearing_sigma: %i increments of %f starting from %f\n", n_clearing_sigma, d_clearing_sigma, clearing_sigma_start);
+
+    if (fixed_clearing)
+      printf("clearing pars fixed around clearing_mu %f and clearing_sigma %f\n", clearing_mu_start, clearing_sigma_start);
+    else {
+      printf("clearing_mu: %i increments of %f starting from %f\n", n_clearing_mu, d_clearing_mu, clearing_mu_start);
+      printf("clearing_sigma: %i increments of %f starting from %f\n", n_clearing_sigma, d_clearing_sigma, clearing_sigma_start);
+    }
 
     fflush(stdout);
 
     book_trees();
+
+    if (dphi_from_pdf) {
+      f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", -M_PI, M_PI);
+      f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+
+      TH1F* h_dphi_test = new TH1F("h_dphi_test", "", 20, -M_PI, M_PI);
+      h_dphi_test->FillRandom("f_dphi", 10000);
+    }
   }
 
   void ClearedJetsTemplater::book_trees() {
@@ -206,10 +232,11 @@ namespace mfv {
         TH1D* h = Template::hist_with_binning(TString::Format("h_template_imu%03i_isig%03i", imu, isig),
                                               TString::Format("clearing pars: #mu = %f  #sigma = %f", clearing_mu, clearing_sigma));
 
-        if (!save_templates)
-          h->SetDirectory(0);
-
         templates.push_back(new ClearedJetsTemplate(iglb++, h, clearing_mu, clearing_sigma));
+        if (!save_templates) {
+          h->SetDirectory(0);
+          templates.back()->h_phi->SetDirectory(0);
+        }
       }
     }
 
@@ -235,7 +262,9 @@ namespace mfv {
         const double bsd2d1 = h_bsd2d1_use->GetRandom();
 
         double dphi = 0;
-        if (throw_dphi_from_2v)
+        if (dphi_from_pdf)
+          dphi = f_dphi->GetRandom();
+        else if (throw_dphi_from_2v)
           dphi = h_phi[vt_2v]->GetRandom();
         else {
           const double phi0 = throw_phi(ev);

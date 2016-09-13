@@ -28,7 +28,12 @@ namespace mfv {
     const bool flat_phis;
     const double phi_from_jet_mu;
     const double phi_from_jet_sigma;
+    const bool dphi_from_pdf;
+    const double dphi_pdf_c;
+    const double dphi_pdf_e;
+    const double dphi_pdf_a;
     const int n_scale;
+    const bool fixed_clearing;
     const double clearing_mu_start;
     const double d_clearing_mu;
     const int n_clearing_mu;
@@ -46,7 +51,9 @@ namespace mfv {
     ////////////////////////////////////////////////////////////////////////////
 
     TTree* t_fit_info;
-    
+
+    TF1* f_dphi;
+
     ////////////////////////////////////////////////////////////////////////////
 
     ClearedJetsTemplater(const std::string& name_, TFile* f, TRandom* r);
