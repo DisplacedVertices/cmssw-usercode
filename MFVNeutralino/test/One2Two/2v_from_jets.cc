@@ -12,7 +12,8 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-int nbins = 6;
+int dvv_nbins = 6;
+double dvv_bin_width = 0.02;
 
 double    mu_clear = 0.0000;
 double sigma_clear = 0.0000;
@@ -84,7 +85,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 500, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 20, 0, 0.1, 20, 0, 0.1);
-  TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", nbins, 0, nbins * 0.02);
+  TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
 
   for (int i = 0; i < nbkg; ++i) {
@@ -124,7 +125,7 @@ int main(int argc, const char* argv[]) {
         h_2v_dbv->Fill(dbv1, w);
         h_2v_dbv1_dbv0->Fill(dbv0, dbv1, w);
         double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
-        if (dvv > nbins * 0.02 - 0.01) dvv = nbins * 0.02 - 0.01;
+        if (dvv > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvv = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_2v_dvv->Fill(dvv, w);
         double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
         h_2v_absdphivv->Fill(fabs(dphi), w);
@@ -136,7 +137,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 500, 0, 2.5);
   TH1F* h_c1v_phiv = new TH1F("h_c1v_phiv", "constructed from only-one-vertex events;vertex #phi;vertices", 50, -3.15, 3.15);
   TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
-  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", nbins, 0, nbins * 0.02);
+  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 500, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 500, 0, 2.5);
@@ -179,7 +180,7 @@ int main(int argc, const char* argv[]) {
         double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
 
         double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
-        if (dvvc > nbins * 0.02 - 0.01) dvvc = nbins * 0.02 - 0.01;
+        if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_c1v_dvv->Fill(dvvc, w * p);
         h_c1v_absdphivv->Fill(fabs(dphi), w * p);
         h_c1v_dbv0->Fill(dbv0, w * p);
