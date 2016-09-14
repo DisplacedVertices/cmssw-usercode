@@ -13,13 +13,13 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-bool dphi_from_pdf = false;
+bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
 double dphi_pdf_e = 2;
 double dphi_pdf_a = 4.3;
 
-int dvv_nbins = 6;
-double dvv_bin_width = 0.02;
+int dvv_nbins = 40;
+double dvv_bin_width = 0.01;
 
 double    mu_clear = 0.0000;
 double sigma_clear = 0.0000;
@@ -29,7 +29,7 @@ int max_ntracks0 = 1000000;
 int min_ntracks1 = 0;
 int max_ntracks1 = 1000000;
 
-const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_4";
+const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
 
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
