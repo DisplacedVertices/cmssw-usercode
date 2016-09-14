@@ -82,7 +82,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.registry.from_argv(
         #Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_ext_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         #Samples.qcdpt_samples + \
         Samples.mfv_signal_samples + \
         Samples.mfv_signal_samples_glu + \
@@ -91,7 +91,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.xx4j_samples
         )
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_ext_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
+    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 
     for sample in samples:
         if sample.is_mc:
