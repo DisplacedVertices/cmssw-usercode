@@ -410,17 +410,17 @@ _adbp3('sim', '/mfv_neu_tau10000um_M1200/tucker-sim_10k-c66f4a7649a68ea5b6afdf05
 _adbp3('sim', '/mfv_neu_tau10000um_M1600/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9600) # 48 files
 
 # can't use _adbp3 because of the -ext datasets that have same primary
-qcdht0500.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try3-0fbadeb0e2a98a2143c6c3d63c2148cf/USER',     45715) # 100 files
-qcdht0700.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-0563a6174ccfef7445b47a1adf52e04e/USER',  4408678) # 204 files
-qcdht1000.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-9c87ea2e204738f8e66398eae2e1ceea/USER', 5039738) # 206 files
-qcdht1500.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-0e21961f02f2bbcb31e97c1d56ed84b9/USER', 3952153) # 160 files
-qcdht2000.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-d07a09819adfc59c1cee757ffeb6279f/USER',  1981228) # 81 files
+qcdht0500.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try3-0fbadeb0e2a98a2143c6c3d63c2148cf/USER',     45715, dbs_inst='phys03') # 100 files
+qcdht0700.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-0563a6174ccfef7445b47a1adf52e04e/USER',  4408678, dbs_inst='phys03') # 204 files
+qcdht1000.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-9c87ea2e204738f8e66398eae2e1ceea/USER', 5039738, dbs_inst='phys03') # 206 files
+qcdht1500.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-0e21961f02f2bbcb31e97c1d56ed84b9/USER', 3952153, dbs_inst='phys03') # 160 files
+qcdht2000.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/dquach-ntuplev6p1_76x_nstlays3_try2-d07a09819adfc59c1cee757ffeb6279f/USER',  1981228, dbs_inst='phys03') # 81 files
 
-qcdht0500ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-0ee12982ea4f5ebd53ac9113cc4fbda0/USER',     101204) # 217 files
-qcdht0700ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-ca53bcb3ba6c3937f72df4c9f74f193e/USER',   8360131) # 383 files
-qcdht1000ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-23018aaecaf30ca660692e990a9e8d4f/USER', 10120307) # 410 files
-qcdht1500ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-d939cda19a16a98609232812b4a92823/USER',  7815041) # 314 files
-qcdht2000ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-aa46c12d1009d51917f1a1516ac35751/USER',   4016331) # 162 files
+qcdht0500ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-0ee12982ea4f5ebd53ac9113cc4fbda0/USER',     101204, dbs_inst='phys03') # 217 files
+qcdht0700ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-ca53bcb3ba6c3937f72df4c9f74f193e/USER',   8360131, dbs_inst='phys03') # 383 files
+qcdht1000ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-23018aaecaf30ca660692e990a9e8d4f/USER', 10120307, dbs_inst='phys03') # 410 files
+qcdht1500ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-d939cda19a16a98609232812b4a92823/USER',  7815041, dbs_inst='phys03') # 314 files
+qcdht2000ext.add_dataset('ntuplev6p1_76x_nstlays3', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev6p1_76x_nstlays3-aa46c12d1009d51917f1a1516ac35751/USER',   4016331, dbs_inst='phys03') # 162 files
 
 _adbp3('ntuplev6p1_76x_nstlays3', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/dquach-ntuplev6p1_76x_nstlays3_try3-a058b539af07e93a090902e6078c0efe/USER', 1333601) # 193 files
 _adbp3('ntuplev6p1_76x_nstlays3', '/mfv_neu_tau00100um_M0300/dquach-ntuplev6p1_76x_signal-1caceb02a3d5bd67eebd50c7af8df8ef/USER', 1498) # 1 files
