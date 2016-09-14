@@ -56,8 +56,12 @@ class CRABSubmitter:
                  storage_site = 'T3_US_FNALLPC',
                  publish_name = '',
                  aaa = False,
+                 fnallpc = False,
                  modify_pset_hash = True,
                  **kwargs):
+
+        if aaa and fnallpc:
+            raise ValueError('cannot do both aaa and fnallpc options')
 
         for arg in sys.argv:
             if arg.startswith('cs_name='):
@@ -166,6 +170,10 @@ class CRABSubmitter:
         if self.aaa:
             self.cfg_template.Data.ignoreLocality = True
             self.cfg_template.Site.whitelist = self.aaa_locations
+
+        if fnallpc:
+            self.cfg_template.Site.whitelist = ['T3_US_FNALLPC']
+            self.cfg_template.Site.ignoreGlobalBlacklist = True
 
         self.modify_pset_hash = modify_pset_hash
 
