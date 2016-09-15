@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <math.h>
 #include "TCanvas.h"
+#include "TF1.h"
 #include "TFile.h"
 #include "TH2F.h"
 #include "TLegend.h"
@@ -12,8 +13,13 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-int dvv_nbins = 6;
-double dvv_bin_width = 0.02;
+bool dphi_from_pdf = true;
+double dphi_pdf_c = 0;
+double dphi_pdf_e = 2;
+double dphi_pdf_a = 4.3;
+
+int dvv_nbins = 40;
+double dvv_bin_width = 0.01;
 
 double    mu_clear = 0.0000;
 double sigma_clear = 0.0000;
@@ -23,7 +29,7 @@ int max_ntracks0 = 1000000;
 int min_ntracks1 = 0;
 int max_ntracks1 = 1000000;
 
-const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_4";
+const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
 
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
@@ -146,6 +152,9 @@ int main(int argc, const char* argv[]) {
   TH1D* h_r1v_dbv = new TH1D("h_r1v_dbv", "random from only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
   h_r1v_dbv->FillRandom(h_1v_dbv, (int)h_1v_dbv->Integral());
 
+  TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", -M_PI, M_PI);
+  f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
     TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, samples[i]));
@@ -168,13 +177,16 @@ int main(int argc, const char* argv[]) {
 
         double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
         double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
-        double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
         h_c1v_phiv->Fill(phi0, w);
         h_c1v_phiv->Fill(phi1, w);
-
         for (int k = 0; k < nt.njets; ++k) {
           h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi0 - nt.jet_phi[k]), w);
           h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi1 - nt.jet_phi[k]), w);
+        }
+
+        double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
+        if (dphi_from_pdf) {
+          dphi = f_dphi->GetRandom();
         }
 
         double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
