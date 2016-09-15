@@ -7,7 +7,7 @@ from JMTucker.Tools.CRAB3ToolsBase import *
 def crab_command(*args, **kwargs):
     if kwargs and kwargs.keys() != ['dir']:
         raise ValueError('crab_command popen version: kwargs not used other than dir')
-    cmd = '/cvmfs/cms.cern.ch/crab3/crab-env-bootstrap.sh ' + ' '.join(args)
+    cmd = 'crab ' + ' '.join(args)
     cmd += ' -d ' + kwargs['dir']
     return popen(cmd)
     
