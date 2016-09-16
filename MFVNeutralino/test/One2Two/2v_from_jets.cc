@@ -29,11 +29,11 @@ int max_ntracks0 = 1000000;
 int min_ntracks1 = 0;
 int max_ntracks1 = 1000000;
 
-const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
+const char* tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV6p1_76x_nstlays3_tks3only";
 
 const int nbkg = 4;
-const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
-float weights[nbkg] = {6.166, 0.7894, 0.3320, 0.5620};
+const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
+float weights[nbkg] = {2.045, 0.265, 0.110, 0.5620};
 
 double n2v = 1121.;
 
