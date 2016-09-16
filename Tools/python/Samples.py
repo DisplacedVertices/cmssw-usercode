@@ -27,6 +27,11 @@ qcd_samples_ext = [
     MCSample('qcdht2000ext', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/AODSIM',   4016332, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=25.3),
     ]
 
+# JMTBAD so the scripts downstream have an easy time
+qcd_samples_sum = [ MCSample(x.name + 'sum', '/None/', x.nevents_orig + y.nevents_orig, nice=x.nice, color=x.color, syst_frac=x.syst_frac, xsec=x.xsec) for x,y in zip(qcd_samples, qcd_samples_ext) ]
+
+# for x in 0500 0700 1000 1500 2000; hadd.py qcdht${x}sum.root qcdht${x}ext.root /uscms/home/tucker/jen/crab/HistosV6p1_76x_nstlays3_26/qcdht${x}.root
+
 ttbar_samples = [
     MCSample('ttbar', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 38493485, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
@@ -337,6 +342,7 @@ __all__ = [
     'qcd_samples_not_used',
     'qcd_samples',
     'qcd_samples_ext',
+    'qcd_samples_sum',
     'ttbar_samples',
     'mfv_signal_samples',
     'mfv_signal_samples_glu',
