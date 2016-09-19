@@ -19,6 +19,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
+#include "JMTucker/Tools/interface/MCInteractionTops.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -168,8 +169,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mci.Init(*gen_particles);
     if (!mci.Valid()) {
       if (!warned_non_mfv) {
-        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file";
+        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file, will try ttbar";
         warned_non_mfv = true;
+      }
+      MCInteractionTops mci_tt;
+      mci_tt.Init(*gen_particles);
+      if (mci_tt.Valid()) {
+        for (int i = 0; i < 2; ++i) {
+          mevent->gen_lsp_pt  [i] = mci_tt.tops[i]->pt();
+          mevent->gen_lsp_eta [i] = mci_tt.tops[i]->eta();
+          mevent->gen_lsp_phi [i] = mci_tt.tops[i]->phi();
+          mevent->gen_lsp_mass[i] = mci_tt.tops[i]->mass();
+          mevent->gen_decay_type[i] = mci_tt.decay_type[i];
+        }
       }
     }
     else {
