@@ -29,8 +29,15 @@ def rebook(in_h):
         h.SetBinContent(ibin, in_h.GetBinContent(ibin))
         h.SetBinError  (ibin, in_h.GetBinError  (ibin))
 
+    xax = h.GetXaxis()
+    xax.SetTitleSize(0.05)
+    xax.SetLabelSize(0.04)
+    xax.SetTitleOffset(0.91)
+
     yax = h.GetYaxis()
-    yax.SetTitleOffset(1.15)
+    yax.SetTitleOffset(1.)
+    yax.SetTitleSize(0.05)
+    yax.SetLabelSize(0.04)
     yax.SetRangeUser(0.1, 300)
 
     return h
@@ -104,7 +111,7 @@ leg.Draw()
 cms = write(61, 0.050, 0.099, 0.931, 'CMS')
 #pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
 sim = write(42, 0.050, 0.631, 0.933, ac.int_lumi_nice)
-name = 'plots/not_prelim/fit'
+name = 'plots/finalreading/fit'
 c.SaveAs(name + '.pdf')
 c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')

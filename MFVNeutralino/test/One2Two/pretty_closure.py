@@ -3,7 +3,7 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
-prelim = True
+prelim = False
 
 set_style()
 rainbow_palette()
@@ -50,8 +50,15 @@ def rebook(in_h):
         h.SetBinContent(ibin, c)
         h.SetBinError  (ibin, e)
 
+    xax = h.GetXaxis()
+    xax.SetTitleSize(0.05)
+    xax.SetLabelSize(0.04)
+    xax.SetTitleOffset(0.91)
+
     yax = h.GetYaxis()
-    yax.SetTitleOffset(1.15)
+    yax.SetTitleOffset(1.)
+    yax.SetTitleSize(0.05)
+    yax.SetLabelSize(0.04)
     yax.SetRangeUser(0.1, 300)
 
     return h
@@ -134,7 +141,7 @@ if prelim:
     name = 'plots/prelim/closure'
     sim_str = 'Simulation Preliminary'
 else:
-    name = 'plots/not_prelim/closure'
+    name = 'plots/finalreading/closure'
     sim_str = 'Simulation'
 sim = write(52, 0.040, 0.207, 0.931, sim_str)
 lum = write(42, 0.050, 0.630, 0.931, '17.6 fb^{-1} (8 TeV)')

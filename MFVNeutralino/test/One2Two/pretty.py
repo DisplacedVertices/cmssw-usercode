@@ -3,11 +3,12 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 from limitplot import exc_graph_dumb
 
-preliminary = True
+preliminary = False
 if preliminary:
     path = 'plots/prelim'
 else:
-    path = 'plots/not_prelim'
+    #path = 'plots/not_prelim'
+    path = 'plots/finalreading'
 
 ts = tdr_style()
 rainbow_palette()
@@ -40,17 +41,21 @@ xax.SetTitle('neutralino/gluino mass (GeV)')
 xax.CenterLabels()
 xax.SetTitle('neutralino/gluino mass (GeV)')
 xax.SetNdivisions(1300, 0)
-xax.SetLabelSize(0.055)
 xax.SetBinLabel(xax.FindBin(400), '400')
 xax.SetBinLabel(xax.FindBin(600), '600')
 xax.SetBinLabel(xax.FindBin(800), '800')
 xax.SetBinLabel(xax.FindBin(1000), '1000')
 xax.SetBinLabel(xax.FindBin(1200), '1200')
 xax.SetBinLabel(xax.FindBin(1400), '1400')
+xax.SetLabelSize(0.065)
+xax.SetTitleSize(0.05)
+xax.SetTitleOffset(0.95)
+xax.LabelsOption('h')
 yax = h.GetYaxis()
 yax.SetTitle('neutralino/gluino c#tau (mm)')
-yax.SetTitleOffset(1)
-yax.SetLabelSize(0.055)
+yax.SetTitleOffset(0.95)
+yax.SetTitleSize(0.05)
+yax.SetLabelSize(0.065)
 yax.SetRangeUser(300, 32000)
 yax.SetBinLabel(yax.FindBin(300), '0.3')
 yax.SetBinLabel(yax.FindBin(1000), '1')
@@ -58,8 +63,12 @@ yax.SetBinLabel(yax.FindBin(5000), '5')
 yax.SetBinLabel(yax.FindBin(10000), '10')
 yax.SetBinLabel(yax.FindBin(20000), '20')
 yax.SetBinLabel(yax.FindBin(30000), '30')
-h.GetZaxis().SetTitleOffset(1.2)
-h.SetZTitle('efficiency for d_{VV} > 600 #mum')
+zax = h.GetZaxis()
+zax.SetLabelSize(0.045)
+zax.SetTitle('efficiency for d_{VV} > 600 #mum')
+zax.SetTitleSize(0.05)
+zax.SetTitleOffset(0.97)
+#zax.SetTitleSize()
 h.Draw('colz')
 cms = write(61, 0.050, 0.10, 0.92, 'CMS')
 if preliminary:
@@ -91,17 +100,17 @@ for xxx in ('small', 'big'):
     xax.CenterLabels()
     xax.SetTitle('neutralino/gluino mass (GeV)')
     xax.SetNdivisions(1300, 0)
-    xax.SetLabelSize(0.055)
     xax.SetBinLabel(xax.FindBin(400), '400')
     xax.SetBinLabel(xax.FindBin(600), '600')
     xax.SetBinLabel(xax.FindBin(800), '800')
     xax.SetBinLabel(xax.FindBin(1000), '1000')
     xax.SetBinLabel(xax.FindBin(1200), '1200')
     xax.SetBinLabel(xax.FindBin(1400), '1400')
+    xax.SetLabelSize(0.065)
+    xax.SetTitleSize(0.05)
+    xax.SetTitleOffset(0.95)
+    xax.LabelsOption('h')
     yax = h.GetYaxis()
-    yax.SetTitle('neutralino/gluino c#tau (mm)')
-    yax.SetTitleOffset(1.25)
-    yax.SetLabelSize(0.055)
     if xxx == 'small':
         yax.SetRangeUser(300, 999)
     else:
@@ -115,10 +124,17 @@ for xxx in ('small', 'big'):
         yax.SetBinLabel(yax.FindBin(10000), '10')
         yax.SetBinLabel(yax.FindBin(20000), '20')
         yax.SetBinLabel(yax.FindBin(30000), '30')
+    yax.SetTitle('neutralino/gluino c#tau (mm)')
+    yax.SetTitleOffset(0.95)
+    yax.SetTitleSize(0.05)
+    yax.SetLabelSize(0.065)
     zax = h.GetZaxis()
     zax.SetTitleOffset(1.2)
     #zax.SetBinLabel(zax.FindBin(30), '30')
-    h.SetZTitle('95% CL upper limit on #sigma B^{2} (fb)')
+    zax.SetTitle('95% CL upper limit on #sigma B^{2} (fb)')
+    zax.SetTitleSize(0.05)
+    zax.SetTitleOffset(0.97)
+    zax.SetLabelSize(0.045)
     h.Draw('colz')
     if xxx == 'big':
         h.SetMinimum(0.4)
