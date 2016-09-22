@@ -421,13 +421,14 @@ def data_mc_comparison(name,
                        file_path = None,
                        hist_path_for_nevents_check = None,
                        int_lumi = None,
+                       int_lumi_bkg_scale = None,
                        int_lumi_nice = None,
                        canvas_title = '',
                        canvas_size = (700, 840),
                        canvas_top_margin = 0.01,
                        canvas_bottom_margin = 0.3,
-                       canvas_left_margin = 0.1,
-                       canvas_right_margin = 0.1,
+                       canvas_left_margin = 0.12,
+                       canvas_right_margin = 0.08,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
                        overflow_in_last = False,
@@ -436,7 +437,10 @@ def data_mc_comparison(name,
                        poisson_intervals = False,
                        x_title = '',
                        y_title = 'arb. units',
+                       x_title_offset = 1.,
                        y_title_offset = 1.3,
+                       x_title_size = 0.04,
+                       y_title_size = 0.04,
                        y_label_size = 0.035,
                        x_range = None,
                        y_range = (None, None),
@@ -448,9 +452,13 @@ def data_mc_comparison(name,
                        data_draw_cmd = 'pe',
                        res_line_width = 2,
                        res_line_color = ROOT.kBlue+3,
+                       res_x_title_size = 0.04,
+                       res_x_title_offset = 1.,
                        res_y_title = 'data/MC',
                        res_y_title_offset = None,
-                       res_y_label_size = 0.03,
+                       res_y_title_size = None,
+                       res_x_label_size = 0.035,
+                       res_y_label_size = 0.035,
                        res_y_range = (0., 3.),
                        res_draw_cmd = 'apez',
                        res_fit = True,
@@ -459,6 +467,8 @@ def data_mc_comparison(name,
                        verbose = False,
                        cut_line = None,
                        background_uncertainty = None,
+                       preliminary = False,
+                       simulation = False,
                        ):
     """
     Put the histograms for the background samples into a THStack, with
@@ -571,6 +581,8 @@ def data_mc_comparison(name,
 
             if sample not in data_samples:
                 sample.hist.Scale(sample.partial_weight * int_lumi)
+                if int_lumi_bkg_scale is not None and sample not in signal_samples:
+                    sample.hist.Scale(int_lumi_bkg_scale)
 
             if rebin is not None:
                 sample.hist_before_rebin = sample.hist
@@ -595,13 +607,17 @@ def data_mc_comparison(name,
                     bin_width_to_scales = [None]
                     for ibin in xrange(1, sample.hist.GetNbinsX()+1):
                         bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
-                    
+
+                print sample.name, get_integral(sample.hist, 0)
                 for ibin in xrange(1, sample.hist.GetNbinsX()+1):
                     c = sample.hist.GetBinContent(ibin)
                     e = sample.hist.GetBinError(ibin)
                     sc = bin_width_to_scales[ibin]
+                    print 'hello', ibin, c, e, sc
                     sample.hist.SetBinContent(ibin, c / sc)
                     sample.hist.SetBinError  (ibin, e / sc)
+                print 'hello 0', sample.hist.GetBinContent(0)
+                print 'hello -1', sample.hist.GetBinContent(sample.hist.GetNbinsX()+1)
 
     # Use the first data sample to cache the summed histogram for all
     # the data.
@@ -663,6 +679,9 @@ def data_mc_comparison(name,
 
     if data_sample is not None:
         stack.GetXaxis().SetLabelSize(0) # the data/MC ratio part will show the labels
+    stack.GetXaxis().SetTitleSize(x_title_size)
+    stack.GetYaxis().SetTitleSize(y_title_size)
+    stack.GetXaxis().SetTitleOffset(x_title_offset)
     stack.GetYaxis().SetTitleOffset(y_title_offset)
     stack.GetYaxis().SetLabelSize(y_label_size)
 
@@ -725,8 +744,11 @@ def data_mc_comparison(name,
         for sample in signal_samples:
             entry = legend.AddEntry(sample.hist, sample.nice_name, 'L')
             # JMTBAD take out this hack
-            #entry = legend.AddEntry(0, '  c#tau = 1 mm, M = 400 GeV', '')
-            entryt = ROOT.TLatex(.712,.670, 'c#tau = 1 mm, M = 400 GeV')
+            if sum_background.GetNbinsX() == 6:
+                subtr = 0.042
+            else:
+                subtr = 0
+            entryt = ROOT.TLatex(.712+0.02,.670 - subtr, 'c#tau = 1 mm, M = 400 GeV')
             entryt.SetNDC()
             entryt.SetTextAlign(22)
             entryt.SetTextFont(43)
@@ -752,9 +774,25 @@ def data_mc_comparison(name,
             w.SetTextSize(size)
             w.DrawLatex(x, y, text)
             return w
-        cms = write(61, 0.04, 0.10, 0.93, 'CMS')
-#        pre = write(52, 0.035, 0.19, 0.93, 'Preliminary')
-        lum = write(42, 0.04,  0.636, 0.93, int_lumi_nice)
+        # JMTBAD this hack too
+        if sum_background.GetNbinsX() == 6:
+            subtr = 0.0176
+            lum_pos = 0.589
+            stupid = 0.
+        else:
+            subtr = 0.
+            lum_pos = 0.575
+            stupid = 0.02
+        lum = write(42, 0.05, lum_pos+stupid, 0.930-subtr, int_lumi_nice)
+        cms = write(61, 0.05, 0.098+stupid, 0.930-subtr, 'CMS')
+        if simulation and preliminary:
+            exlab_str = 'Simulation Preliminary'
+        elif preliminary:
+            exlab_str = 'Preliminary'
+        elif simulation:
+            exlab_str = 'Simulation'
+        if simulation or preliminary:
+            exlab = write(52, 0.04, 0.210, 0.930-subtr, exlab_str)
 
     if verbose:
         if data_sample is not None:
@@ -796,8 +834,12 @@ def data_mc_comparison(name,
         else:
             x_range_dmc = x_range[0], x_range[1]
         res_g.GetXaxis().SetLimits(*x_range_dmc)
+        res_g.GetXaxis().SetTitleSize(res_x_title_size)
+        res_g.GetXaxis().SetTitleOffset(res_x_title_offset)
+        res_g.GetXaxis().SetLabelSize(res_x_label_size)
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
+        res_g.GetYaxis().SetTitleSize(res_y_title_size if res_y_title_size is not None else y_title_size)
         res_g.GetYaxis().SetRangeUser(*res_y_range)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)
