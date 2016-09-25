@@ -139,6 +139,34 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_leptons_dz[2][3];
   TH1F* h_leptons_iso[2][3];
 
+  TH1F* h_leptons_iso_0e0mu[2][3];
+  TH1F* h_leptons_iso_1e0mu[2][3];
+  TH1F* h_leptons_iso_0e1mu[2][3];
+  TH1F* h_leptons_iso_1e1mu[2][3];
+  TH1F* h_leptons_iso_2e0mu[2][3];
+  TH1F* h_leptons_iso_0e2mu[2][3];
+
+  TH1F* h_leptons_iso_0e0mu_neargenel[2][3];
+  TH1F* h_leptons_iso_1e0mu_neargenel[2][3];
+  TH1F* h_leptons_iso_0e1mu_neargenel[2][3];
+  TH1F* h_leptons_iso_1e1mu_neargenel[2][3];
+  TH1F* h_leptons_iso_2e0mu_neargenel[2][3];
+  TH1F* h_leptons_iso_0e2mu_neargenel[2][3];
+
+  TH1F* h_leptons_iso_0e0mu_neargenmu[2][3];
+  TH1F* h_leptons_iso_1e0mu_neargenmu[2][3];
+  TH1F* h_leptons_iso_0e1mu_neargenmu[2][3];
+  TH1F* h_leptons_iso_1e1mu_neargenmu[2][3];
+  TH1F* h_leptons_iso_2e0mu_neargenmu[2][3];
+  TH1F* h_leptons_iso_0e2mu_neargenmu[2][3];
+
+  TH1F* h_leptons_iso_0e0mu_neargenb[2][3];
+  TH1F* h_leptons_iso_1e0mu_neargenb[2][3];
+  TH1F* h_leptons_iso_0e1mu_neargenb[2][3];
+  TH1F* h_leptons_iso_1e1mu_neargenb[2][3];
+  TH1F* h_leptons_iso_2e0mu_neargenb[2][3];
+  TH1F* h_leptons_iso_0e2mu_neargenb[2][3];
+
   TH1F* h_muons_absdphi[3];
   TH1F* h_muons_dphi[3];
   TH1F* h_muons_deta[3];
@@ -312,7 +340,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
 
-  const char* lep_kind[2] = {"muons", "electrons"};
+  const char* lep_kind[2] = {"muon", "electron"};
   const char* lep_ex[3] = {"veto", "semilep", "dilep"};
   const char* bjets_pt[2] = {"20", "50"};
   for (int i = 0; i < 3; ++i) {
@@ -347,6 +375,34 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
       h_leptons_dxybs[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_dxybs", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss dxy(BS) (cm);%ss/50 #mum", lep_ex[i], lep_kind[j], lep_kind[j]), 200, -0.5, 0.5);
       h_leptons_dz   [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_dz",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss dz (cm);%ss/50 #mum",       lep_ex[i], lep_kind[j], lep_kind[j]), 200, -0.5, 0.5);
       h_leptons_iso  [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%ss/.04",       lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+
+    h_leptons_iso_0e0mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e0mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e1mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e1mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_2e0mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e2mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+
+    h_leptons_iso_0e0mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e0mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e1mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e1mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_2e0mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e2mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+
+    h_leptons_iso_0e0mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e0mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e1mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e1mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_2e0mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e2mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+
+    h_leptons_iso_0e0mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e0mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e1mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_1e1mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_2e0mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
+    h_leptons_iso_0e2mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
     }
 
     h_muons_absdphi[i] = fs->make<TH1F>(TString::Format("h_muons_%s_absdphi", lep_ex[i]), TString::Format("events with two %s muons;|#Delta#phi| (rad);events/0.126", lep_ex[i]), 25, 0, 3.15);
@@ -541,6 +597,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
+  uchar lep0 = mevent->gen_decay_type[0];
+  uchar lep1 = mevent->gen_decay_type[1];
   for (size_t ilep = 0; ilep < mevent->lep_id.size(); ++ilep) {
     const size_t j = mevent->is_electron(ilep);
     for (size_t i = 0; i < 3; ++i)
@@ -552,6 +610,86 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_leptons_dxybs[j][i]->Fill(mevent->lep_dxybs[ilep]);
         h_leptons_dz[j][i]->Fill(mevent->lep_dz[ilep]);
         h_leptons_iso[j][i]->Fill(mevent->lep_iso[ilep]);
+
+	bool near_b = false;
+	bool near_el = false;
+	bool near_mu = false;
+	for (size_t ibquark = 0; ibquark < mevent->gen_bquark_pt.size(); ++ibquark) {
+	  double dR = reco::deltaR(mevent->gen_bquark_eta[ibquark], mevent->gen_bquark_phi[ibquark], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
+	  if (dR < 0.5) {
+	    near_b = true;
+	    break;
+	  }
+	}
+	for (size_t ielec = 0; ielec < mevent->gen_electron_eta.size(); ++ielec) {
+	  double dR = reco::deltaR(mevent->gen_electron_eta[ielec], mevent->gen_electron_phi[ielec], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
+	  if (dR < 0.1) {
+	    near_el = true;
+	    break;
+	  }
+	}
+	for (size_t imuon = 0; imuon < mevent->gen_muon_eta.size(); ++imuon) {
+	  double dR = reco::deltaR(mevent->gen_muon_eta[imuon], mevent->gen_muon_phi[imuon], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
+	  if (dR < 0.1) {
+	    near_mu = true;
+	    break;
+	  }
+	}
+
+	if (lep0 == 0) {
+	  if (lep1 == 0) {
+	    h_leptons_iso_2e0mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_2e0mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_2e0mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_2e0mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	  else if (lep1 == 1) {
+	    h_leptons_iso_1e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_1e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_1e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_1e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	  else {
+	    h_leptons_iso_1e0mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_1e0mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_1e0mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_1e0mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	}
+	else if (lep0 == 1) {
+	  if (lep1 == 0) {
+	    h_leptons_iso_1e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_1e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_1e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_1e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	  else if (lep1 ==1) {
+	    h_leptons_iso_0e2mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_0e2mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_0e2mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_0e2mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	  else {
+	    h_leptons_iso_0e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_0e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_0e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_0e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	}
+	else {
+	  if (lep1 == 0) {
+	    h_leptons_iso_1e0mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_1e0mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_1e0mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_1e0mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	  else if (lep1 == 1) {
+	    h_leptons_iso_0e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_b) h_leptons_iso_0e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_el) h_leptons_iso_0e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
+	    if (near_mu) h_leptons_iso_0e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
+	  }
+	}
       }
   }
 

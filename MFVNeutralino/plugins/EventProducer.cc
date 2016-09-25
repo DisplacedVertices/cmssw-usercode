@@ -148,6 +148,14 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->gen_flavor_code = 1;
 
     for (const reco::GenParticle& gen : *gen_particles) {
+      if (abs(gen.pdgId()) == 11) {
+	mevent->gen_electron_eta.push_back(gen.eta());
+	mevent->gen_electron_phi.push_back(gen.phi());
+      }
+      if (abs(gen.pdgId()) == 13) {
+	mevent->gen_muon_eta.push_back(gen.eta());
+	mevent->gen_muon_phi.push_back(gen.phi());
+      }
       if (abs(gen.pdgId()) == 5) {
         bool has_b_dau = false;
         for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
