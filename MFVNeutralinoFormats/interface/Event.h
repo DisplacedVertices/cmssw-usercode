@@ -77,10 +77,10 @@ struct MFVEvent {
   std::vector<float> gen_bquark_eta;
   std::vector<float> gen_bquark_phi;
   std::vector<float> gen_bquark_energy;
-  std::vector<float> gen_electron_eta;
-  std::vector<float> gen_electron_phi;
-  std::vector<float> gen_muon_eta;
-  std::vector<float> gen_muon_phi;
+  std::vector<uchar> gen_lepton_id;
+  std::vector<float> gen_lepton_pt;
+  std::vector<float> gen_lepton_eta;
+  std::vector<float> gen_lepton_phi;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);

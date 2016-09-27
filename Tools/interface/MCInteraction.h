@@ -15,7 +15,6 @@ struct MCInteraction {
   bool FromHardInteraction(const reco::Candidate*) const;
 
   virtual void Init(const reco::GenParticleCollection&);
-
   virtual void Clear() { gen_particles = 0; }
   virtual bool Valid() { return true; }
   virtual void Fill() {}

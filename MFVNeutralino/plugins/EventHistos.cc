@@ -621,17 +621,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	    break;
 	  }
 	}
-	for (size_t ielec = 0; ielec < mevent->gen_electron_eta.size(); ++ielec) {
-	  double dR = reco::deltaR(mevent->gen_electron_eta[ielec], mevent->gen_electron_phi[ielec], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
+	for (size_t igenlep = 0; igenlep < mevent->gen_lepton_id.size(); ++igenlep) {
+	  double dR = reco::deltaR(mevent->gen_lepton_eta[igenlep], mevent->gen_lepton_phi[igenlep], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
 	  if (dR < 0.1) {
-	    near_el = true;
-	    break;
-	  }
-	}
-	for (size_t imuon = 0; imuon < mevent->gen_muon_eta.size(); ++imuon) {
-	  double dR = reco::deltaR(mevent->gen_muon_eta[imuon], mevent->gen_muon_phi[imuon], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
-	  if (dR < 0.1) {
-	    near_mu = true;
+            if (mevent->gen_lepton_id[igenlep] & 1)
+              near_el = true;
+            else
+              near_mu = true;
 	    break;
 	  }
 	}

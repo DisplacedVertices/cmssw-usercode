@@ -99,6 +99,8 @@ struct MCInteractionTops : public MCInteraction {
   virtual void Fill();
   virtual void SetFourVectors();
   virtual void Print(std::ostream&);
+
+  std::vector<const reco::GenParticle*> ElsOrMus();
 };
 
 #endif

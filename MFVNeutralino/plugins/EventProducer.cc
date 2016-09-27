@@ -147,32 +147,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (saw_c && mevent->gen_flavor_code == 0)
       mevent->gen_flavor_code = 1;
 
-    for (const reco::GenParticle& gen : *gen_particles) {
-      if (abs(gen.pdgId()) == 11) {
-	mevent->gen_electron_eta.push_back(gen.eta());
-	mevent->gen_electron_phi.push_back(gen.phi());
-      }
-      if (abs(gen.pdgId()) == 13) {
-	mevent->gen_muon_eta.push_back(gen.eta());
-	mevent->gen_muon_phi.push_back(gen.phi());
-      }
-      if (abs(gen.pdgId()) == 5) {
-        bool has_b_dau = false;
-        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
-          if (abs(gen.daughter(i)->pdgId()) == 5) {
-            has_b_dau = true;
-            break;
-          }
-        }
-        if (!has_b_dau) {
-          mevent->gen_bquark_pt.push_back(gen.pt());
-          mevent->gen_bquark_eta.push_back(gen.eta());
-          mevent->gen_bquark_phi.push_back(gen.phi());
-          mevent->gen_bquark_energy.push_back(gen.energy());
-        }
-      }
-    }
-
+    std::vector<const reco::GenParticle*> lep_from_hardint;
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
     if (!mci.Valid()) {
@@ -180,9 +155,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file, will try ttbar";
         warned_non_mfv = true;
       }
+
       MCInteractionTops mci_tt;
       mci_tt.Init(*gen_particles);
       if (mci_tt.Valid()) {
+        lep_from_hardint = mci_tt.ElsOrMus();
         for (int i = 0; i < 2; ++i) {
           mevent->gen_lsp_pt  [i] = mci_tt.tops[i]->pt();
           mevent->gen_lsp_eta [i] = mci_tt.tops[i]->eta();
@@ -193,6 +170,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
     }
     else {
+      lep_from_hardint = mci.ElsOrMus();
       mevent->gen_valid = true;
       std::vector<const reco::GenParticle*> lsp_partons;
       for (int i = 0; i < 2; ++i) {
@@ -224,6 +202,42 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       for (const reco::GenParticle* p : lsp_partons) 
         if (p->pt() > jet_pt_min && fabs(p->eta()) < 2.5)
           inc_uchar(mevent->gen_partons_in_acc);
+    }
+
+    for (const reco::GenParticle& gen : *gen_particles) {
+      int id = abs(gen.pdgId());
+
+      if (id == 5) {
+        bool has_b_dau = false;
+        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
+          if (abs(gen.daughter(i)->pdgId()) == 5) {
+            has_b_dau = true;
+            break;
+          }
+        }
+
+        if (!has_b_dau) {
+          mevent->gen_bquark_pt.push_back(gen.pt());
+          mevent->gen_bquark_eta.push_back(gen.eta());
+          mevent->gen_bquark_phi.push_back(gen.phi());
+          mevent->gen_bquark_energy.push_back(gen.energy());
+        }
+      }
+      else if (gen.pt() > 1 &&
+               (id == 11 || id == 13) &&
+               (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29))) {
+        uchar gen_lep_id = id == 11; // same convention as on reco lep_id below el = 1 mu = 0
+        for (size_t ihi = 0, ihie = lep_from_hardint.size(); ihi < ihie; ++ihi)
+          if (reco::deltaR(*lep_from_hardint[ihi], gen) < 0.05) {
+            gen_lep_id |= 0x80;
+            break;
+          }
+
+        mevent->gen_lepton_id.push_back(gen_lep_id);
+        mevent->gen_lepton_pt.push_back(gen.pt());
+	mevent->gen_lepton_eta.push_back(gen.eta());
+	mevent->gen_lepton_phi.push_back(gen.phi());
+      }
     }
   }
 
