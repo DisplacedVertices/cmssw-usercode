@@ -101,6 +101,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 500, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 20, 0, 0.1, 20, 0, 0.1);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
 
   for (int i = 0; i < nbkg; ++i) {
@@ -143,6 +144,7 @@ int main(int argc, const char* argv[]) {
         if (dvv > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvv = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_2v_dvv->Fill(dvv, w);
         double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
+        h_2v_dphivv->Fill(dphi, w);
         h_2v_absdphivv->Fill(fabs(dphi), w);
       }
     }
@@ -153,6 +155,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_c1v_phiv = new TH1F("h_c1v_phiv", "constructed from only-one-vertex events;vertex #phi;vertices", 50, -3.15, 3.15);
   TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_dphivv = new TH1F("h_c1v_dphivv", "constructed from only-one-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 500, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 500, 0, 2.5);
@@ -203,6 +206,7 @@ int main(int argc, const char* argv[]) {
         double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
         if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_c1v_dvv->Fill(dvvc, w * p);
+        h_c1v_dphivv->Fill(dphi, w * p);
         h_c1v_absdphivv->Fill(fabs(dphi), w * p);
         h_c1v_dbv0->Fill(dbv0, w * p);
         h_c1v_dbv1->Fill(dbv1, w * p);
@@ -225,6 +229,7 @@ int main(int argc, const char* argv[]) {
   h_2v_dbv->Write();
   h_2v_dbv1_dbv0->Write();
   h_2v_dvv->Write();
+  h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
 
   h_r1v_dbv->Write();
@@ -232,6 +237,7 @@ int main(int argc, const char* argv[]) {
   h_c1v_phiv->Write();
   h_c1v_dphijv->Write();
   h_c1v_dvv->Write();
+  h_c1v_dphivv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
   h_c1v_dbv1->Write();
@@ -257,6 +263,27 @@ int main(int argc, const char* argv[]) {
   c_dvv->SetTickx();
   c_dvv->SetTicky();
   c_dvv->Write();
+
+  TCanvas* c_dphivv = new TCanvas("c_phivv", "c_phivv", 700, 700);
+  TLegend* l_dphivv = new TLegend(0.25,0.75,0.75,0.85);
+  h_2v_dphivv->SetTitle(";#Delta#phi_{VV};events");
+  h_2v_dphivv->SetLineColor(kBlue);
+  h_2v_dphivv->SetLineWidth(3);
+  h_2v_dphivv->Scale(n2v/h_2v_dphivv->Integral());
+  h_2v_dphivv->SetStats(0);
+  h_2v_dphivv->Draw();
+  l_dphivv->AddEntry(h_2v_dphivv, "two-vertex events");
+  h_c1v_dphivv->SetLineColor(kRed);
+  h_c1v_dphivv->SetLineWidth(3);
+  h_c1v_dphivv->Scale(n2v/h_c1v_dphivv->Integral());
+  h_c1v_dphivv->SetStats(0);
+  h_c1v_dphivv->Draw("sames");
+  l_dphivv->AddEntry(h_c1v_dphivv, "constructed from only-one-vertex events");
+  l_dphivv->SetFillColor(0);
+  l_dphivv->Draw();
+  c_dphivv->SetTickx();
+  c_dphivv->SetTicky();
+  c_dphivv->Write();
 
   TCanvas* c_absdphivv = new TCanvas("c_absdphivv", "c_absdphivv", 700, 700);
   TLegend* l_absdphivv = new TLegend(0.25,0.75,0.75,0.85);
