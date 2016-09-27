@@ -70,6 +70,15 @@ float throw_phi(int njets, float* jet_pt, float* jet_phi) {
 }
 
 int main(int argc, const char* argv[]) {
+  if (argc == 6) {
+    mu_clear = atof(argv[1]);
+    sigma_clear = atof(argv[2]);
+    dphi_pdf_c = atof(argv[3]);
+    dphi_pdf_e = atof(argv[4]);
+    dphi_pdf_a = atof(argv[5]);
+  }
+  printf("mu_clear = %f, sigma_clear = %f, dphi_pdf_c = %f, dphi_pdf_e = %f, dphi_pdf_a = %f\n", mu_clear, sigma_clear, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(12191982);
 
