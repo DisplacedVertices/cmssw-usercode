@@ -13,6 +13,8 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+bool dphi_from_hist = false;
+
 bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
 double dphi_pdf_e = 2;
@@ -167,6 +169,13 @@ int main(int argc, const char* argv[]) {
   TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", -M_PI, M_PI);
   f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
 
+  TH1F* h_dphi = new TH1F("h_dphi", "input to construction;|#Delta#phi_{VV}|;probability", 5, 0, 3.15);
+  h_dphi->SetBinContent(1, 0.218923598528);
+  h_dphi->SetBinContent(2, 0.142106637359);
+  h_dphi->SetBinContent(3, 0.148108497262);
+  h_dphi->SetBinContent(4, 0.215287595987);
+  h_dphi->SetBinContent(5, 0.275573670864);
+
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
     TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, samples[i]));
@@ -199,6 +208,9 @@ int main(int argc, const char* argv[]) {
         double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
         if (dphi_from_pdf) {
           dphi = f_dphi->GetRandom();
+        }
+        if (dphi_from_hist) {
+          dphi = h_dphi->GetRandom();
         }
 
         double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
@@ -264,7 +276,7 @@ int main(int argc, const char* argv[]) {
   c_dvv->SetTicky();
   c_dvv->Write();
 
-  TCanvas* c_dphivv = new TCanvas("c_phivv", "c_phivv", 700, 700);
+  TCanvas* c_dphivv = new TCanvas("c_dphivv", "c_dphivv", 700, 700);
   TLegend* l_dphivv = new TLegend(0.25,0.75,0.75,0.85);
   h_2v_dphivv->SetTitle(";#Delta#phi_{VV};events");
   h_2v_dphivv->SetLineColor(kBlue);
