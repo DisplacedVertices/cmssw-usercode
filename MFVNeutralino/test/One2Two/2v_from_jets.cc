@@ -166,15 +166,15 @@ int main(int argc, const char* argv[]) {
   TH1D* h_r1v_dbv = new TH1D("h_r1v_dbv", "random from only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
   h_r1v_dbv->FillRandom(h_1v_dbv, (int)h_1v_dbv->Integral());
 
-  TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", -M_PI, M_PI);
+  TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", 0, M_PI);
   f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
 
   TH1F* h_dphi = new TH1F("h_dphi", "input to construction;|#Delta#phi_{VV}|;probability", 5, 0, 3.15);
-  h_dphi->SetBinContent(1, 0.218923598528);
-  h_dphi->SetBinContent(2, 0.142106637359);
-  h_dphi->SetBinContent(3, 0.148108497262);
-  h_dphi->SetBinContent(4, 0.215287595987);
-  h_dphi->SetBinContent(5, 0.275573670864);
+  h_dphi->SetBinContent(1, 0.217011258006);
+  h_dphi->SetBinContent(2, 0.142219424248);
+  h_dphi->SetBinContent(3, 0.149300679564);
+  h_dphi->SetBinContent(4, 0.214419648051);
+  h_dphi->SetBinContent(5, 0.277049005032);
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
