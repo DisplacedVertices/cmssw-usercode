@@ -21,7 +21,7 @@ def rebook(in_h):
 
     bins = [j*0.2 for j in range(6)] + [2.]
     bins = array('d', bins)
-    h = ROOT.TH1D(in_h.GetName(), ';d_{VV} (mm);events', len(bins)-1, bins)
+    h = ROOT.TH1D(in_h.GetName(), ';d_{VV} (mm);Events', len(bins)-1, bins)
     h.Sumw2()
     h.SetStats(0)
     h.SetLineWidth(2)
@@ -97,6 +97,7 @@ c.SetRightMargin(0.05)
 c.SetLogy()
 
 h_sb_sum.Draw('hist')
+xax = h_sb_sum.GetXaxis()
 h_b_sum.Draw('hist same')
 h_data.Draw('P')
 
@@ -111,7 +112,46 @@ leg.Draw()
 cms = write(61, 0.050, 0.099, 0.931, 'CMS')
 #pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
 sim = write(42, 0.050, 0.631, 0.933, ac.int_lumi_nice)
-name = 'plots/finalreading/fit'
+
+
+# do a broken x axis. thanks root (throot)
+
+boxcenter = 1.8
+boxwidth = 0.02
+boxy1 = 0.065
+boxy2 = 0.14
+box1 = ROOT.TBox(boxcenter-boxwidth, boxy1, boxcenter+boxwidth, 2)
+box1.SetLineColor(ROOT.kWhite)
+box1.SetFillColor(ROOT.kWhite)
+box1.Draw()
+
+box2 = ROOT.TBox(1.74, 0.065, 2.1, 0.095)
+box2.SetLineColor(ROOT.kWhite)
+box2.SetFillColor(ROOT.kWhite)
+box2.Draw()
+
+#lab1 = ROOT.TText(1.714, 0.06989, '49.8')
+#lab1.SetTextFont(xax.GetLabelFont())
+#lab1.SetTextSize(xax.GetLabelSize())
+#lab1.Draw()
+
+lab2 = ROOT.TText(1.914, 0.06989, '50.0')
+lab2.SetTextFont(xax.GetLabelFont())
+lab2.SetTextSize(xax.GetLabelSize())
+lab2.Draw()
+
+lineslantdx = 0.009
+lineybackoff = 0.01
+
+line1 = ROOT.TLine(boxcenter-boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter-boxwidth+lineslantdx, boxy2-lineybackoff)
+line1.SetLineWidth(2)
+line1.Draw()
+
+line2 = ROOT.TLine(boxcenter+boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter+boxwidth+lineslantdx, boxy2-lineybackoff)
+line2.SetLineWidth(2)
+line2.Draw()
+
+name = 'plots/after_finalreading/fit'
 c.SaveAs(name + '.pdf')
 c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')

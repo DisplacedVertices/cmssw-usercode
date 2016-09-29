@@ -454,7 +454,7 @@ def data_mc_comparison(name,
                        res_line_color = ROOT.kBlue+3,
                        res_x_title_size = 0.04,
                        res_x_title_offset = 1.,
-                       res_y_title = 'data/MC',
+                       res_y_title = 'Data/MC',
                        res_y_title_offset = None,
                        res_y_title_size = None,
                        res_x_label_size = 0.035,
@@ -748,7 +748,7 @@ def data_mc_comparison(name,
                 subtr = 0.042
             else:
                 subtr = 0
-            entryt = ROOT.TLatex(.712+0.02,.670 - subtr, 'c#tau = 1 mm, M = 400 GeV')
+            entryt = ROOT.TLatex(.700,.660 - subtr, 'c#tau = 1 mm, M = 400 GeV')
             entryt.SetNDC()
             entryt.SetTextAlign(22)
             entryt.SetTextFont(43)
