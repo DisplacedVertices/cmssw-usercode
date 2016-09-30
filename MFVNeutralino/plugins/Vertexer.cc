@@ -212,6 +212,8 @@ private:
   TH1F* h_seed_vertex_phi;
   TH1F* h_seed_vertex_z;
   TH1F* h_seed_vertex_r;
+  TH1F* h_seed_vertex_paird2d;
+  TH1F* h_seed_vertex_pairdphi;
   TH1F* h_seed_track_multiplicity;
   TH1F* h_max_seed_track_multiplicity;
   TH1F* h_n_resets;
@@ -230,9 +232,16 @@ private:
   TH1F* h_noshare_vertex_phi;
   TH1F* h_noshare_vertex_z;
   TH1F* h_noshare_vertex_r;
+  TH1F* h_noshare_vertex_paird2d;
+  TH1F* h_noshare_vertex_pairdphi;
   TH1F* h_noshare_track_multiplicity;
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
+
+  TH2F* h_merge_d2d[6]; // only using 3,4,5
+  TH2F* h_merge_dphi[6];
+  TH2F* h_refit_d2d[6]; // only using 3,4,5
+  TH2F* h_refit_dphi[6];
 
   TH1F* h_phitest_nev;
   TH1F* h_phitest_nvtx;
@@ -477,6 +486,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_seed_vertex_phi                = fs->make<TH1F>("h_seed_vertex_phi",                "",  50,  -3.15,   3.15);
     h_seed_vertex_z                  = fs->make<TH1F>("h_seed_vertex_z",                  "",  40, -20,     20);
     h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  "", 100,   0,      2);
+    h_seed_vertex_paird2d            = fs->make<TH1F>("h_seed_vertex_paird2d",            "", 100,   0,      0.2);
+    h_seed_vertex_pairdphi           = fs->make<TH1F>("h_seed_vertex_pairdphi",           "", 100,  -3.14,   3.14);
     h_seed_track_multiplicity        = fs->make<TH1F>("h_seed_track_multiplicity",        "",  40,   0,     40);
     h_max_seed_track_multiplicity    = fs->make<TH1F>("h_max_seed_track_multiplicity",    "",  40,   0,     40);
 
@@ -497,9 +508,18 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_noshare_vertex_phi             = fs->make<TH1F>("h_noshare_vertex_phi",             "", 50,  -3.15,   3.15);
     h_noshare_vertex_z               = fs->make<TH1F>("h_noshare_vertex_z",               "", 40, -20,     20);
     h_noshare_vertex_r               = fs->make<TH1F>("h_noshare_vertex_r",               "", 100,   0,      2);
+    h_noshare_vertex_paird2d         = fs->make<TH1F>("h_noshare_vertex_paird2d",            "", 100,   0,      0.2);
+    h_noshare_vertex_pairdphi        = fs->make<TH1F>("h_noshare_vertex_pairdphi",           "", 100,  -3.15,   3.15);
     h_noshare_track_multiplicity     = fs->make<TH1F>("h_noshare_track_multiplicity",     "",  40,   0,     40);
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
+
+    for (int i = 3; i <= 5; ++i) {
+      h_merge_d2d [i] = fs->make<TH2F>(TString::Format("h_merge_d2d_mintk%i" , i), "", 3, 3, 6, 100, 0, 0.1);
+      h_merge_dphi[i] = fs->make<TH2F>(TString::Format("h_merge_dphi_mintk%i", i), "", 3, 3, 6, 100, -3.15, 3.15);
+      h_refit_d2d [i] = fs->make<TH2F>(TString::Format("h_refit_d2d_mintk%i" , i), "", 3, 3, 6, 100, 0, 0.1);
+      h_refit_dphi[i] = fs->make<TH2F>(TString::Format("h_refit_dphi_mintk%i", i), "", 3, 3, 6, 100, -3.15, 3.15);
+    }
 
     if (phitest) {
       h_phitest_nev = fs->make<TH1F>("h_phitest_nev", "", 1, 0, 1);
@@ -838,6 +858,21 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
+  if (histos) {
+    for (std::vector<reco::Vertex>::const_iterator v0 = vertices->begin(); v0 != vertices->end(); ++v0) {
+      const double v0x = v0->position().x() - bs_x;
+      const double v0y = v0->position().y() - bs_y;
+      const double phi0 = atan2(v0y, v0x);
+      for (std::vector<reco::Vertex>::const_iterator v1 = v0 + 1; v1 != vertices->end(); ++v1) {
+        const double v1x = v1->position().x() - bs_x;
+        const double v1y = v1->position().y() - bs_y;
+        const double phi1 = atan2(v1y, v1x);
+        h_seed_vertex_paird2d ->Fill(mag(v0x - v1x, v0y - v1y));
+        h_seed_vertex_pairdphi->Fill(reco::deltaPhi(phi0, phi1));
+      }
+    }
+  }
+
   if (verbose)
     printf("n_seed_vertices: %lu\n", vertices->size());
   if (histos)
@@ -1054,6 +1089,17 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       else if (new_vertices.size() == 1 && vertex_track_set(new_vertices[0], 0) == tracks_to_fit) {
         if (verbose)
           printf("   merge worked!\n");   
+        if (histos) {
+          const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
+          const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
+          if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
+          if (ntk_min >= 3) {
+            h_merge_d2d [ntk_min]->Fill(ntk_max, mag(v[0]->x() - v[1]->x(),
+                                                     v[0]->y() - v[1]->y()));
+            h_merge_dphi[ntk_min]->Fill(ntk_max, reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
+                                                                atan2(v[1]->y() - bs_y, v[1]->x() - bs_x)));
+          }
+        }
         vertices->erase(v[1]);
         *v[0] = reco::Vertex(new_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
       }
@@ -1069,6 +1115,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     if (refit) {
       bool erase[2] = { false };
+      reco::Vertex vsave[2] = { *v[0], *v[1] };
+
       for (int i = 0; i < 2; ++i) {
         if (tracks_to_remove_in_refit[i].empty())
           continue;
@@ -1104,7 +1152,18 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         else
           erase[i] = true;
       }
-      
+
+      if (histos && (erase[0] || erase[1])) {
+        const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
+        if (ntk_min >= 3) {
+          const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
+          h_merge_d2d [ntk_min]->Fill(ntk_max, mag(vsave[0].x() - vsave[1].x(),
+                                                   vsave[0].y() - vsave[1].y()));
+          h_merge_dphi[ntk_min]->Fill(ntk_max, reco::deltaPhi(atan2(vsave[0].y() - bs_y, vsave[0].x() - bs_x),
+                                                              atan2(vsave[1].y() - bs_y, vsave[1].x() - bs_x)));
+        }
+      }
+
       if (erase[1]) vertices->erase(v[1]);
       if (erase[0]) vertices->erase(v[0]);
 
@@ -1192,6 +1251,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         h_noshare_vertex_phi->Fill(phi);
         h_noshare_vertex_z->Fill(vz);
         h_noshare_vertex_r->Fill(r);
+
+        for (size_t j = i+1, je = vertices->size(); j < je; ++j) {
+          const reco::Vertex& vj = vertices->at(j);
+          const double vjx = vj.position().x() - bs_x;
+          const double vjy = vj.position().y() - bs_y;
+          const double phij = atan2(vjy, vjx);
+          h_noshare_vertex_paird2d->Fill(mag(vx - vjx, vy - vjy));
+          h_noshare_vertex_pairdphi->Fill(reco::deltaPhi(phi, phij));
+        }
       }
     }
     
