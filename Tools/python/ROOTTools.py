@@ -525,6 +525,9 @@ def data_mc_comparison(name,
     JMTBAD finish documentation
     """
 
+    for i in xrange(100):
+        print 'this is full of hacks for the run1 paper plz fix'
+
     all_samples = background_samples + signal_samples
     if data_samples:
          all_samples.extend(data_samples)
@@ -800,6 +803,46 @@ def data_mc_comparison(name,
         print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
         print
     
+    if name == 'dvv':
+        print 'another hack, take me out'
+        # do a broken x axis. thanks root (throot)
+        boxcenter = 1.8
+        boxwidth = 0.02
+        boxy1 = 0.010
+        box1 = ROOT.TBox(boxcenter-boxwidth, boxy1, boxcenter+boxwidth, 2)
+        box1.SetLineColor(ROOT.kWhite)
+        box1.SetFillColor(ROOT.kWhite)
+        box1.Draw()
+
+        box2 = ROOT.TBox(1.74, 0.01, 2.1, 0.017)
+        box2.SetLineColor(ROOT.kWhite)
+        box2.SetFillColor(ROOT.kWhite)
+        box2.Draw()
+
+        xax = stack.GetXaxis()
+
+        #lab1 = ROOT.TText(1.714, 0.06989, '49.8')
+        #lab1.SetTextFont(xax.GetLabelFont())
+        #lab1.SetTextSize(xax.GetLabelSize())
+        #lab1.Draw()
+
+        lab2 = ROOT.TText(1.914, 0.0108, '50.0')
+        lab2.SetTextFont(xax.GetLabelFont())
+        lab2.SetTextSize(xax.GetLabelSize())
+        lab2.Draw()
+
+        lineslantdx = 0.009
+        liney1 = 0.012
+        liney2 = 0.0233
+
+        line1 = ROOT.TLine(boxcenter-boxwidth-lineslantdx, liney1, boxcenter-boxwidth+lineslantdx, liney2)
+        line1.SetLineWidth(2)
+        line1.Draw()
+
+        line2 = ROOT.TLine(boxcenter+boxwidth-lineslantdx, liney1, boxcenter+boxwidth+lineslantdx, liney2)
+        line2.SetLineWidth(2)
+        line2.Draw()
+
     ratio_pad, res_g, old_opt_fit = None, None, None
     if data_sample is not None:
         ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
