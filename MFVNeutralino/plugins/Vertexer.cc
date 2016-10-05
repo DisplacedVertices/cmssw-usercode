@@ -1157,9 +1157,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
         if (ntk_min >= 3) {
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-          h_merge_d2d [ntk_min]->Fill(ntk_max, mag(vsave[0].x() - vsave[1].x(),
+          h_refit_d2d [ntk_min]->Fill(ntk_max, mag(vsave[0].x() - vsave[1].x(),
                                                    vsave[0].y() - vsave[1].y()));
-          h_merge_dphi[ntk_min]->Fill(ntk_max, reco::deltaPhi(atan2(vsave[0].y() - bs_y, vsave[0].x() - bs_x),
+          h_refit_dphi[ntk_min]->Fill(ntk_max, reco::deltaPhi(atan2(vsave[0].y() - bs_y, vsave[0].x() - bs_x),
                                                               atan2(vsave[1].y() - bs_y, vsave[1].x() - bs_x)));
         }
       }
