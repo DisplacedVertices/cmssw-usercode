@@ -515,10 +515,10 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
     for (int i = 2; i <= 5; ++i) {
-      h_merge_d2d [i] = fs->make<TH2F>(TString::Format("h_merge_d2d_mintk%i" , i), "", 4, 2, 6, 100, 0, 0.1);
-      h_merge_dphi[i] = fs->make<TH2F>(TString::Format("h_merge_dphi_mintk%i", i), "", 4, 2, 6, 100, -3.15, 3.15);
-      h_refit_d2d [i] = fs->make<TH2F>(TString::Format("h_refit_d2d_mintk%i" , i), "", 4, 2, 6, 100, 0, 0.1);
-      h_refit_dphi[i] = fs->make<TH2F>(TString::Format("h_refit_dphi_mintk%i", i), "", 4, 2, 6, 100, -3.15, 3.15);
+      h_merge_d2d [i] = fs->make<TH2F>(TString::Format("h_merge_d2d_maxtk%i" , i), "", 4, 2, 6, 100, 0, 0.1);
+      h_merge_dphi[i] = fs->make<TH2F>(TString::Format("h_merge_dphi_maxtk%i", i), "", 4, 2, 6, 100, -3.15, 3.15);
+      h_refit_d2d [i] = fs->make<TH2F>(TString::Format("h_refit_d2d_maxtk%i" , i), "", 4, 2, 6, 100, 0, 0.1);
+      h_refit_dphi[i] = fs->make<TH2F>(TString::Format("h_refit_dphi_maxtk%i", i), "", 4, 2, 6, 100, -3.15, 3.15);
     }
 
     if (phitest) {
@@ -1093,10 +1093,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
           if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
-          if (ntk_min >= 2) {
-            h_merge_d2d [ntk_min]->Fill(ntk_max, mag(v[0]->x() - v[1]->x(),
+          if (ntk_max >= 2) {
+            h_merge_d2d [ntk_max]->Fill(ntk_min, mag(v[0]->x() - v[1]->x(),
                                                      v[0]->y() - v[1]->y()));
-            h_merge_dphi[ntk_min]->Fill(ntk_max, reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
+            h_merge_dphi[ntk_max]->Fill(ntk_min, reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
                                                                 atan2(v[1]->y() - bs_y, v[1]->x() - bs_x)));
           }
         }
@@ -1154,12 +1154,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
 
       if (histos && (erase[0] || erase[1])) {
-        const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
-        if (ntk_min >= 2) {
-          const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-          h_refit_d2d [ntk_min]->Fill(ntk_max, mag(vsave[0].x() - vsave[1].x(),
+        const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
+        if (ntk_max >= 2) {
+          const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
+          h_refit_d2d [ntk_max]->Fill(ntk_min, mag(vsave[0].x() - vsave[1].x(),
                                                    vsave[0].y() - vsave[1].y()));
-          h_refit_dphi[ntk_min]->Fill(ntk_max, reco::deltaPhi(atan2(vsave[0].y() - bs_y, vsave[0].x() - bs_x),
+          h_refit_dphi[ntk_max]->Fill(ntk_min, reco::deltaPhi(atan2(vsave[0].y() - bs_y, vsave[0].x() - bs_x),
                                                               atan2(vsave[1].y() - bs_y, vsave[1].x() - bs_x)));
         }
       }
