@@ -238,6 +238,8 @@ private:
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
 
+  TH1F* h_share_d2d[6]; // only using 0,2,3,4,5
+  TH1F* h_share_dphi[6];
   TH1F* h_merge_d2d[6]; // only using 0,2,3,4,5
   TH1F* h_merge_dphi[6];
   TH1F* h_refit_d2d[6]; // only using 0,2,3,4,5
@@ -514,11 +516,15 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
+    h_share_d2d [0] = fs->make<TH1F>(TString::Format("h_share_d2d" ), "", 100, 0, 0.1);
+    h_share_dphi[0] = fs->make<TH1F>(TString::Format("h_share_dphi"), "", 100, -3.15, 3.15);
     h_merge_d2d [0] = fs->make<TH1F>(TString::Format("h_merge_d2d" ), "", 100, 0, 0.1);
     h_merge_dphi[0] = fs->make<TH1F>(TString::Format("h_merge_dphi"), "", 100, -3.15, 3.15);
     h_refit_d2d [0] = fs->make<TH1F>(TString::Format("h_refit_d2d" ), "", 100, 0, 0.1);
     h_refit_dphi[0] = fs->make<TH1F>(TString::Format("h_refit_dphi"), "", 100, -3.15, 3.15);
     for (int i = 2; i <= 5; ++i) {
+      h_share_d2d [i] = fs->make<TH1F>(TString::Format("h_share_d2d_maxtk%i" , i), "", 100, 0, 0.1);
+      h_share_dphi[i] = fs->make<TH1F>(TString::Format("h_share_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
       h_merge_d2d [i] = fs->make<TH1F>(TString::Format("h_merge_d2d_maxtk%i" , i), "", 100, 0, 0.1);
       h_merge_dphi[i] = fs->make<TH1F>(TString::Format("h_merge_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
       h_refit_d2d [i] = fs->make<TH1F>(TString::Format("h_refit_d2d_maxtk%i" , i), "", 100, 0, 0.1);
@@ -986,6 +992,21 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         Measurement1D v_dist = vertex_dist(*v[0], *v[1]);
         if (verbose)
           printf("   vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, v_dist.value(), v_dist.significance());
+        if (histos) {
+          const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
+          const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
+          if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
+          h_share_d2d [0]->Fill(mag(v[0]->x() - v[1]->x(),
+                                    v[0]->y() - v[1]->y()));
+          h_share_dphi[0]->Fill(reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
+                                               atan2(v[1]->y() - bs_y, v[1]->x() - bs_x)));
+          if (ntk_max >= 2) {
+            h_share_d2d [ntk_max]->Fill(mag(v[0]->x() - v[1]->x(),
+                                            v[0]->y() - v[1]->y()));
+            h_share_dphi[ntk_max]->Fill(reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
+                                                       atan2(v[1]->y() - bs_y, v[1]->x() - bs_x)));
+          }
+        }
 
         if (v_dist.value() < merge_shared_dist || v_dist.significance() < merge_shared_sig) {
           if (verbose) printf("          dist < %7.3f || sig < %7.3f, will try using merge result first before arbitration\n", merge_shared_dist, merge_shared_sig);
@@ -1094,9 +1115,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose)
           printf("   merge worked!\n");   
         if (histos) {
-          const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-          if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
           h_merge_d2d [0]->Fill(mag(v[0]->x() - v[1]->x(),
                                     v[0]->y() - v[1]->y()));
           h_merge_dphi[0]->Fill(reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
