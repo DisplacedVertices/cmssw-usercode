@@ -980,7 +980,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
 
       if (histos) {
+        const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
         const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
+        if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
         h_pairs_d2d [0]->Fill(mag(v[0]->x() - v[1]->x(),
                                   v[0]->y() - v[1]->y()));
         h_pairs_dphi[0]->Fill(reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
@@ -1013,9 +1015,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose)
           printf("   vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, v_dist.value(), v_dist.significance());
         if (histos) {
-          const int ntk_min = std::min(5, int(std::min(tracks[0].size(), tracks[1].size())));
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-          if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
           h_share_d2d [0]->Fill(mag(v[0]->x() - v[1]->x(),
                                     v[0]->y() - v[1]->y()));
           h_share_dphi[0]->Fill(reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
