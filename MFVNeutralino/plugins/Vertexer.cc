@@ -518,22 +518,22 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
-    h_pairs_d2d [0] = fs->make<TH1F>(TString::Format("h_pairs_d2d" ), "", 100, 0, 0.1);
+    h_pairs_d2d [0] = fs->make<TH1F>(TString::Format("h_pairs_d2d" ), "", 1000, 0, 1);
     h_pairs_dphi[0] = fs->make<TH1F>(TString::Format("h_pairs_dphi"), "", 100, -3.15, 3.15);
-    h_share_d2d [0] = fs->make<TH1F>(TString::Format("h_share_d2d" ), "", 100, 0, 0.1);
+    h_share_d2d [0] = fs->make<TH1F>(TString::Format("h_share_d2d" ), "", 1000, 0, 1);
     h_share_dphi[0] = fs->make<TH1F>(TString::Format("h_share_dphi"), "", 100, -3.15, 3.15);
-    h_merge_d2d [0] = fs->make<TH1F>(TString::Format("h_merge_d2d" ), "", 100, 0, 0.1);
+    h_merge_d2d [0] = fs->make<TH1F>(TString::Format("h_merge_d2d" ), "", 1000, 0, 1);
     h_merge_dphi[0] = fs->make<TH1F>(TString::Format("h_merge_dphi"), "", 100, -3.15, 3.15);
-    h_erase_d2d [0] = fs->make<TH1F>(TString::Format("h_erase_d2d" ), "", 100, 0, 0.1);
+    h_erase_d2d [0] = fs->make<TH1F>(TString::Format("h_erase_d2d" ), "", 1000, 0, 1);
     h_erase_dphi[0] = fs->make<TH1F>(TString::Format("h_erase_dphi"), "", 100, -3.15, 3.15);
     for (int i = 2; i <= 5; ++i) {
-      h_pairs_d2d [i] = fs->make<TH1F>(TString::Format("h_pairs_d2d_maxtk%i" , i), "", 100, 0, 0.1);
+      h_pairs_d2d [i] = fs->make<TH1F>(TString::Format("h_pairs_d2d_maxtk%i" , i), "", 1000, 0, 1);
       h_pairs_dphi[i] = fs->make<TH1F>(TString::Format("h_pairs_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
-      h_share_d2d [i] = fs->make<TH1F>(TString::Format("h_share_d2d_maxtk%i" , i), "", 100, 0, 0.1);
+      h_share_d2d [i] = fs->make<TH1F>(TString::Format("h_share_d2d_maxtk%i" , i), "", 1000, 0, 1);
       h_share_dphi[i] = fs->make<TH1F>(TString::Format("h_share_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
-      h_merge_d2d [i] = fs->make<TH1F>(TString::Format("h_merge_d2d_maxtk%i" , i), "", 100, 0, 0.1);
+      h_merge_d2d [i] = fs->make<TH1F>(TString::Format("h_merge_d2d_maxtk%i" , i), "", 1000, 0, 1);
       h_merge_dphi[i] = fs->make<TH1F>(TString::Format("h_merge_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
-      h_erase_d2d [i] = fs->make<TH1F>(TString::Format("h_erase_d2d_maxtk%i" , i), "", 100, 0, 0.1);
+      h_erase_d2d [i] = fs->make<TH1F>(TString::Format("h_erase_d2d_maxtk%i" , i), "", 1000, 0, 1);
       h_erase_dphi[i] = fs->make<TH1F>(TString::Format("h_erase_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
     }
 
