@@ -1044,6 +1044,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
     }
     fill_multi(h_sv_ntracksanypv_ntracksthepv, isv, ntracksthepv, ntracksanypv, w);
     fill_multi(h_sv_ntracksnopv_ntracksanypv, isv, ntracksanypv, ntracksnopv, w);
+    fill_multi(h_sv_drmax_bs2derr, isv, aux.bs2derr, aux.drmax(), w);
+    fill_multi(h_sv_trackpairdphimax_bs2derr, isv, aux.bs2derr, 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0], w);
+    fill_multi(h_sv_tkonlymass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksOnly], w);
+    fill_multi(h_sv_tksjetsntkmass_bs2derr, isv, aux.bs2derr, aux.mass[mfv::PTracksPlusJetsByNtracks], w);
 
     fill_multi(h_sv_drmax_bs2derr, isv, aux.bs2derr, aux.drmax(), w);
     fill_multi(h_sv_trackpairdphimax_bs2derr, isv, aux.bs2derr, 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0], w);
