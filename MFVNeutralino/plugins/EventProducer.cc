@@ -19,6 +19,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
+#include "JMTucker/Tools/interface/MCInteractionTops.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -146,33 +147,30 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (saw_c && mevent->gen_flavor_code == 0)
       mevent->gen_flavor_code = 1;
 
-    for (const reco::GenParticle& gen : *gen_particles) {
-      if (abs(gen.pdgId()) == 5) {
-        bool has_b_dau = false;
-        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
-          if (abs(gen.daughter(i)->pdgId()) == 5) {
-            has_b_dau = true;
-            break;
-          }
-        }
-        if (!has_b_dau) {
-          mevent->gen_bquark_pt.push_back(gen.pt());
-          mevent->gen_bquark_eta.push_back(gen.eta());
-          mevent->gen_bquark_phi.push_back(gen.phi());
-          mevent->gen_bquark_energy.push_back(gen.energy());
-        }
-      }
-    }
-
+    std::vector<const reco::GenParticle*> lep_from_hardint;
     MCInteractionMFV3j mci;
     mci.Init(*gen_particles);
     if (!mci.Valid()) {
       if (!warned_non_mfv) {
-        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file";
+        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file, will try ttbar";
         warned_non_mfv = true;
+      }
+
+      MCInteractionTops mci_tt;
+      mci_tt.Init(*gen_particles);
+      if (mci_tt.Valid()) {
+        lep_from_hardint = mci_tt.ElsOrMus();
+        for (int i = 0; i < 2; ++i) {
+          mevent->gen_lsp_pt  [i] = mci_tt.tops[i]->pt();
+          mevent->gen_lsp_eta [i] = mci_tt.tops[i]->eta();
+          mevent->gen_lsp_phi [i] = mci_tt.tops[i]->phi();
+          mevent->gen_lsp_mass[i] = mci_tt.tops[i]->mass();
+          mevent->gen_decay_type[i] = mci_tt.decay_type[i];
+        }
       }
     }
     else {
+      lep_from_hardint = mci.ElsOrMus();
       mevent->gen_valid = true;
       std::vector<const reco::GenParticle*> lsp_partons;
       for (int i = 0; i < 2; ++i) {
@@ -204,6 +202,42 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       for (const reco::GenParticle* p : lsp_partons) 
         if (p->pt() > jet_pt_min && fabs(p->eta()) < 2.5)
           inc_uchar(mevent->gen_partons_in_acc);
+    }
+
+    for (const reco::GenParticle& gen : *gen_particles) {
+      int id = abs(gen.pdgId());
+
+      if (id == 5) {
+        bool has_b_dau = false;
+        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
+          if (abs(gen.daughter(i)->pdgId()) == 5) {
+            has_b_dau = true;
+            break;
+          }
+        }
+
+        if (!has_b_dau) {
+          mevent->gen_bquark_pt.push_back(gen.pt());
+          mevent->gen_bquark_eta.push_back(gen.eta());
+          mevent->gen_bquark_phi.push_back(gen.phi());
+          mevent->gen_bquark_energy.push_back(gen.energy());
+        }
+      }
+      else if (gen.pt() > 1 &&
+               (id == 11 || id == 13) &&
+               (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29))) {
+        uchar gen_lep_id = id == 11; // same convention as on reco lep_id below el = 1 mu = 0
+        for (size_t ihi = 0, ihie = lep_from_hardint.size(); ihi < ihie; ++ihi)
+          if (reco::deltaR(*lep_from_hardint[ihi], gen) < 0.05) {
+            gen_lep_id |= 0x80;
+            break;
+          }
+
+        mevent->gen_lepton_id.push_back(gen_lep_id);
+        mevent->gen_lepton_pt.push_back(gen.pt());
+	mevent->gen_lepton_eta.push_back(gen.eta());
+	mevent->gen_lepton_phi.push_back(gen.phi());
+      }
     }
   }
 
@@ -398,21 +432,27 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(muons_token, muons);
 
   for (const pat::Muon& muon : *muons) {
-    const uchar id =
-      0
-      | 1 << 1  // if it's in the collection it passes veto selection
-      | muon_semilep_selector(muon) << 2
-      | muon_dilep_selector(muon) << 3;
+    uchar sel = 0;
+    if (1)                           sel |= MFVEvent::mu_veto;
+    if (muon_semilep_selector(muon)) sel |= MFVEvent::mu_semilep;
+    if (muon_dilep_selector  (muon)) sel |= MFVEvent::mu_dilep;
 
-    const float iso = (muon.chargedHadronIso() + muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
+    const float iso = (muon.chargedHadronIso() + std::max(0.f,muon.neutralHadronIso()) + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
 
-    mevent->lep_id.push_back(id);
+    mevent->lep_id.push_back(MFVEvent::encode_mu_id(sel));
     mevent->lep_pt.push_back(muon.pt());
     mevent->lep_eta.push_back(muon.eta());
     mevent->lep_phi.push_back(muon.phi());
-    mevent->lep_dxy.push_back(muon.track()->dxy(beamspot->position()));
-    if (primary_vertex != 0)
-      mevent->lep_dz.push_back(muon.track()->dz(primary_vertex->position()));
+    if (primary_vertex != 0) {
+      const auto& pvpos = primary_vertex->position();
+      mevent->lep_dxy.push_back(muon.track()->dxy(pvpos));
+      mevent->lep_dz.push_back(muon.track()->dz(pvpos));
+    }
+    else {
+      mevent->lep_dxy.push_back(muon.track()->dxy());
+      mevent->lep_dz.push_back(muon.track()->dz());
+    }
+    mevent->lep_dxybs.push_back(muon.track()->dxy(beamspot->position()));
     mevent->lep_iso.push_back(iso);
   }
 
@@ -420,22 +460,28 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(electrons_token, electrons);
   
   for (const pat::Electron& electron : *electrons) {
-    const uchar id =
-      1
-      | 1 << 1  // if it's in the collection it passes veto selection
-      | electron_semilep_selector(electron) << 2
-      | electron_dilep_selector(electron) << 3
-      | electron.closestCtfTrackRef().isNonnull() << 4;
+    uchar sel = 0;
+    if (1)                                         sel |= MFVEvent::el_veto;
+    if (electron_semilep_selector(electron))       sel |= MFVEvent::el_semilep;
+    if (electron_dilep_selector  (electron))       sel |= MFVEvent::el_dilep;
+    if (electron.closestCtfTrackRef().isNonnull()) sel |= MFVEvent::el_ctf;
 
     const float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
 
-    mevent->lep_id.push_back(id);
+    mevent->lep_id.push_back(MFVEvent::encode_el_id(sel));
     mevent->lep_pt.push_back(electron.pt());
     mevent->lep_eta.push_back(electron.eta());
     mevent->lep_phi.push_back(electron.phi());
-    mevent->lep_dxy.push_back(electron.gsfTrack()->dxy(beamspot->position()));
-    if (primary_vertex != 0)
-      mevent->lep_dz.push_back(electron.gsfTrack()->dz(primary_vertex->position()));
+    if (primary_vertex != 0) {
+      const auto& pvpos = primary_vertex->position();
+      mevent->lep_dxy.push_back(electron.gsfTrack()->dxy(pvpos));
+      mevent->lep_dz.push_back(electron.gsfTrack()->dz(pvpos));
+    }
+    else {
+      mevent->lep_dxy.push_back(electron.gsfTrack()->dxy());
+      mevent->lep_dz.push_back(electron.gsfTrack()->dz());
+    }
+    mevent->lep_dxybs.push_back(electron.gsfTrack()->dxy(beamspot->position()));
     mevent->lep_iso.push_back(iso);
   }
 

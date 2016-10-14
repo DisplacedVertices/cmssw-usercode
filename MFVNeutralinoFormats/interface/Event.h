@@ -77,6 +77,10 @@ struct MFVEvent {
   std::vector<float> gen_bquark_eta;
   std::vector<float> gen_bquark_phi;
   std::vector<float> gen_bquark_energy;
+  std::vector<uchar> gen_lepton_id;
+  std::vector<float> gen_lepton_pt;
+  std::vector<float> gen_lepton_eta;
+  std::vector<float> gen_lepton_phi;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
@@ -182,18 +186,23 @@ struct MFVEvent {
   float jetpt6() const { return njets() >= 6 ? jet_pt[5] : 0.f; }
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
-  float jet_ST() const {
+
+  float jet_ST_sum() const {
     double sum = 0;
     for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
-      double px_i = jet_pt[ijet] * cos(jet_phi[ijet]);
-      double py_i = jet_pt[ijet] * sin(jet_phi[ijet]);
+      const double px_i = jet_pt[ijet] * cos(jet_phi[ijet]);
+      const double py_i = jet_pt[ijet] * sin(jet_phi[ijet]);
       for (size_t jjet = 0; jjet < jet_id.size(); ++jjet) {
-        double px_j = jet_pt[jjet] * cos(jet_phi[jjet]);
-        double py_j = jet_pt[jjet] * sin(jet_phi[jjet]);
+        const double px_j = jet_pt[jjet] * cos(jet_phi[jjet]);
+        const double py_j = jet_pt[jjet] * sin(jet_phi[jjet]);
         sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (jet_pt[ijet] * jet_pt[jjet]);
       }
     }
-    return 1 - sqrt(1 - 4/(jet_ht() * jet_ht()) * sum);
+    return sum;
+  }
+
+  float jet_ST() const {
+    return 1 - sqrt(1 - 4 * jet_ST_sum() / pow(jet_ht(), 2));
   }
 
   static uchar encode_jet_id(int pu_level, int bdisc_level) {
@@ -254,64 +263,75 @@ struct MFVEvent {
   float met() const { return mag(metx, mety); }
   float metphi() const { return atan2(mety, metx); }
 
-  std::vector<uchar> lep_id; // bit field: bit 0 (lsb) = mu, 1 = el, bit 1 = loosest (veto) id (always 1 for now), bit 2 = semilep id, bit 3 = dilep id, bit4 = 1 if electron and closestCtfTrack is not null
+  enum { lep_mu, lep_el };
+  enum { mu_veto = 1, mu_semilep = 2, mu_dilep = 4, max_mu_sel = 8 };
+  enum { el_veto = 1, el_semilep = 2, el_dilep = 4, el_ctf = 8, max_el_sel = 16 };
+  std::vector<uchar> lep_id; // bit field: bit 7 (msb): 0 = mu, 1 = el, remaining seven bits are el or mu id in order from lsb to msb according to the enums above
   std::vector<float> lep_pt;
   std::vector<float> lep_eta;
   std::vector<float> lep_phi;
   std::vector<float> lep_dxy;
+  std::vector<float> lep_dxybs;
   std::vector<float> lep_dz;
   std::vector<float> lep_iso;
 
-  TLorentzVector lep_p4(int w) const {
-    float mass = (lep_id[w] & 1) ? 0.000511 : 0.106;
+  size_t nlep() const { return lep_id.size(); }
+
+  static uchar encode_mu_id(uchar sel) {
+    assert(sel < max_mu_sel);
+    return sel;
+  }
+
+  static uchar encode_el_id(uchar sel) {
+    assert(sel < max_el_sel);
+    return sel | 0x80;
+  }
+
+  bool is_electron(size_t w) const { return lep_id[w] & 0x80; }
+  bool is_muon    (size_t w) const { return !is_electron(w); }
+  bool pass_lep_sel_bit(size_t w, uchar sel) const { return lep_id[w] & sel; }
+  bool pass_lep_sel(size_t w, uchar el_sel, uchar mu_sel) const { 
+    return
+      (is_electron(w) && (lep_id[w] & el_sel)) || 
+      (is_muon    (w) && (lep_id[w] & mu_sel));
+  }
+
+  TLorentzVector lep_p4(size_t w) const {
+    const float mass = is_electron(w) ? 0.000511 : 0.106;
     return p4(lep_pt[w], lep_eta[w], lep_phi[w], mass);
   }
 
-  int nlep(int type, int id) const {
+  int nlep(int type, uchar sel) const {
     int n = 0;
-    for (size_t i = 0, ie = lep_id.size(); i < ie; ++i)
-      if ((lep_id[i] & 1) == type &&
-          (lep_id[i] & (1 << (id+1))))
+    for (size_t i = 0, ie = nlep(); i < ie; ++i)
+      if (((lep_id[i] & 0x80) >> 7) == type && (lep_id[i] & sel))
         ++n;
     return n;
   }
 
-  int nmu(int which) const { return nlep(0, which); }
-  int nel(int which) const { return nlep(1, which); }
-  int nlep(int which) const { return nmu(which) + nel(which); }
+  int nmu (uchar sel) const { return nlep(lep_mu, sel); }
+  int nel (uchar sel) const { return nlep(lep_el, sel); }
+  int nlep(uchar sel) const { return nmu(sel) + nel(sel); }
 
-  float lep_sumpt(float min_lep_pt=0.f) const {
-    float sumpt = 0;
-    for (size_t ilep = 0; ilep < lep_id.size(); ++ilep) {
-      if (!((lep_id[ilep] & 1) == 0 &&
-            (lep_id[ilep] & (1 << (2+1))))) continue;
-      if (lep_pt[ilep] > min_lep_pt) sumpt += lep_pt[ilep];
-    }
-    return sumpt;
-  }
-  float jetlep_ST() const {
-    double sum = 0;
-    for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
-      double px_i = jet_pt[ijet] * cos(jet_phi[ijet]);
-      double py_i = jet_pt[ijet] * sin(jet_phi[ijet]);
-      for (size_t jjet = 0; jjet < jet_id.size(); ++jjet) {
-        double px_j = jet_pt[jjet] * cos(jet_phi[jjet]);
-        double py_j = jet_pt[jjet] * sin(jet_phi[jjet]);
-        sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (jet_pt[ijet] * jet_pt[jjet]);
+  float jetlep_ST(uchar el_sel, uchar mu_sel) const {
+    double sum = jet_ST_sum();
+    double sum_lep_pt = 0;
+
+    for (size_t ilep = 0; ilep < nlep(); ++ilep) {
+      if (pass_lep_sel(ilep, el_sel, mu_sel)) {
+        sum_lep_pt += lep_pt[ilep];
+
+        const double px_i = lep_pt[ilep] * cos(lep_phi[ilep]);
+        const double py_i = lep_pt[ilep] * sin(lep_phi[ilep]);
+        for (size_t jlep = 0; jlep < nlep(); ++jlep) {
+          const double px_j = lep_pt[jlep] * cos(lep_phi[jlep]);
+          const double py_j = lep_pt[jlep] * sin(lep_phi[jlep]);
+          sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (lep_pt[ilep] * lep_pt[jlep]);
+        }
       }
     }
-    for (size_t ilep = 0; ilep < lep_id.size(); ++ilep) {
-      if (!((lep_id[ilep] & 1) == 0 &&
-            (lep_id[ilep] & (1 << (2+1))))) continue;
-      double px_i = lep_pt[ilep] * cos(lep_phi[ilep]);
-      double py_i = lep_pt[ilep] * sin(lep_phi[ilep]);
-      for (size_t jlep = 0; jlep < lep_id.size(); ++jlep) {
-        double px_j = lep_pt[jlep] * cos(lep_phi[jlep]);
-        double py_j = lep_pt[jlep] * sin(lep_phi[jlep]);
-        sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (lep_pt[ilep] * lep_pt[jlep]);
-      }
-    }
-    return 1 - sqrt(1 - 4/((jet_ht()+lep_sumpt()) * (jet_ht()+lep_sumpt())) * sum);
+
+    return 1 - sqrt(1 - 4 * sum / pow(jet_ht() + sum_lep_pt, 2));
   }
 
   float vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];

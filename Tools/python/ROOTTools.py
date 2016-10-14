@@ -170,7 +170,7 @@ def clopper_pearson_poisson_means(x, y, alpha=1-0.6827):
 
 def cmssw_setup():
     ROOT.gSystem.Load('libFWCoreFWLite')
-    ROOT.AutoLibraryLoader.enable()
+    ROOT.FWLiteEnabler.enable()
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
     
