@@ -3,6 +3,8 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
+prelim = False
+
 set_style()
 rainbow_palette()
 
@@ -35,7 +37,7 @@ def rebook(in_h):
 
     bins = [j*0.2 for j in range(6)] + [2.]
     bins = arr(bins)
-    h = ROOT.TH1D(in_h.GetName() + '_rebook', ';d_{VV} (mm);events', len(bins)-1, bins)
+    h = ROOT.TH1D(in_h.GetName() + '_rebook', ';d_{VV} (mm);Events', len(bins)-1, bins)
     hs.append(h)
     h.Sumw2()
     h.SetStats(0)
@@ -48,8 +50,15 @@ def rebook(in_h):
         h.SetBinContent(ibin, c)
         h.SetBinError  (ibin, e)
 
+    xax = h.GetXaxis()
+    xax.SetTitleSize(0.05)
+    xax.SetLabelSize(0.04)
+    xax.SetTitleOffset(0.91)
+
     yax = h.GetYaxis()
-    yax.SetTitleOffset(1.15)
+    yax.SetTitleOffset(1.)
+    yax.SetTitleSize(0.05)
+    yax.SetLabelSize(0.04)
     yax.SetRangeUser(0.1, 300)
 
     return h
@@ -92,14 +101,18 @@ for ibin in xrange(1, nbins+1):
     eyl.append(quad(h_down.GetBinContent(ibin) - c, e/2))
     eyh.append(quad(h_up  .GetBinContent(ibin) - c, e/2))
 
-for l in (x, y, exl, exh, eyl, eyh):
-    print l
+    h_central.SetBinError(ibin, 0.00001) # for drawing later
+
+for l in 'x y exl exh eyl eyh'.split():
+    print l, eval(l)
 
 g_cons = ROOT.TGraphAsymmErrors(nbins, arr(x), arr(y), arr(exl), arr(exh), arr(eyl), arr(eyh))
-g_cons.SetTitle(';d_{VV} (mm);events')
+g_cons.SetTitle(';d_{VV} (mm);Events')
 
 h_mctoy.SetLineColor(ROOT.kBlue)
 h_mctoy.SetLineWidth(3)
+h_central.SetLineColor(ROOT.kRed)
+h_central.SetLineWidth(3)
 g_cons.SetLineColor(ROOT.kRed)
 g_cons.SetFillColor(ROOT.kRed)
 g_cons.SetFillStyle(3444)
@@ -111,6 +124,7 @@ c.SetRightMargin(0.05)
 c.SetLogy()
 
 h_mctoy.Draw()
+h_central.Draw('same')
 g_cons.Draw('e2')
 #g_cons.Draw('p')
 h_mctoy.GetYaxis().SetRangeUser(0.1, 400)
@@ -123,14 +137,63 @@ leg.SetBorderSize(0)
 print leg.AddEntry(h_mctoy, 'Simulated events', 'LPE').GetTextSize()
 g_cons.SetLineWidth(0)
 g_cons.SetLineColor(ROOT.kWhite)
-leg.AddEntry(g_cons, 'Best-fit construction', 'F')
+leg.AddEntry(g_cons, 'd_{VV}^{C}', 'F')
 #leg.AddEntry(g_cons, 'Range', 'F')
 leg.Draw()
 
+lin = ROOT.TLine(1.1535,79.0418,1.29205,79.0418)
+lin.SetLineColor(ROOT.kRed)
+lin.SetLineWidth(3)
+lin.Draw()
+
 cms = write(61, 0.050, 0.099, 0.931, 'CMS')
-pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
-sim = write(42, 0.050, 0.741, 0.933, 'Simulation')
-c.SaveAs('/uscms/home/tucker/afshome/closure.pdf')
-c.SaveAs('/uscms/home/tucker/afshome/closure.png')
-c.SaveAs('/uscms/home/tucker/afshome/closure.root')
+if prelim:
+    name = 'plots/prelim/closure'
+    sim_str = 'Simulation Preliminary'
+else:
+    name = 'plots/after_finalreading/closure'
+    sim_str = 'Simulation'
+sim = write(52, 0.040, 0.207, 0.931, sim_str)
+lum = write(42, 0.050, 0.630, 0.931, '17.6 fb^{-1} (8 TeV)')
+
+# do a broken x axis. thanks root (throot)
+
+boxcenter = 1.8
+boxwidth = 0.02
+boxy1 = 0.065
+boxy2 = 0.14
+box1 = ROOT.TBox(boxcenter-boxwidth, boxy1, boxcenter+boxwidth, 2)
+box1.SetLineColor(ROOT.kWhite)
+box1.SetFillColor(ROOT.kWhite)
+box1.Draw()
+
+box2 = ROOT.TBox(1.74, 0.065, 2.1, 0.095)
+box2.SetLineColor(ROOT.kWhite)
+box2.SetFillColor(ROOT.kWhite)
+box2.Draw()
+
+#lab1 = ROOT.TText(1.714, 0.06989, '49.8')
+#lab1.SetTextFont(xax.GetLabelFont())
+#lab1.SetTextSize(xax.GetLabelSize())
+#lab1.Draw()
+
+lab2 = ROOT.TText(1.914, 0.06989, '50.0')
+lab2.SetTextFont(xax.GetLabelFont())
+lab2.SetTextSize(xax.GetLabelSize())
+lab2.Draw()
+
+lineslantdx = 0.009
+lineybackoff = 0.01
+
+line1 = ROOT.TLine(boxcenter-boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter-boxwidth+lineslantdx, boxy2-lineybackoff)
+line1.SetLineWidth(2)
+line1.Draw()
+
+line2 = ROOT.TLine(boxcenter+boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter+boxwidth+lineslantdx, boxy2-lineybackoff)
+line2.SetLineWidth(2)
+line2.Draw()
+
+c.SaveAs(name + '.pdf')
+c.SaveAs(name + '.png')
+c.SaveAs(name + '.root')
 del c

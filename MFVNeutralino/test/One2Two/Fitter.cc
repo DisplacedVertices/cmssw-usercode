@@ -428,6 +428,7 @@ namespace mfv {
       save_plots(env.get_bool("save_plots", true)),
       inject_in_last_bin(env.get_int("inject_in_last_bin", 0)),
       bkg_gaussians(env.get_bool("bkg_gaussians", true)),
+      bkg_gaussians_all(env.get_bool("bkg_gaussians_all", false)),
       barlow_beeston(env.get_bool("barlow_beeston", true)),
       bend_bkg(env.get_bool("bend_bkg", false)),
       allow_negative_mu_sig(env.get_bool("allow_negative_mu_sig", false)),
@@ -466,6 +467,7 @@ namespace mfv {
     printf("Fitter%s config:\n", name.c_str());
     printf("print_level: %i\n", print_level);
     printf("bkg_gaussians: %i\n", bkg_gaussians);
+    printf("bkg_gaussians_all: %i\n", bkg_gaussians_all);
     printf("barlow_beeston: %i\n", barlow_beeston);
     printf("bend_bkg: %i\n", bend_bkg);
     printf("allow_negative_mu_sig: %i\n", allow_negative_mu_sig);
@@ -501,6 +503,7 @@ namespace mfv {
     TTree* t_config = new TTree("t_config", "");
     t_config->Branch("seed", const_cast<int*>(&seed), "seed/I");
     t_config->Branch("bkg_gaussians", const_cast<bool*>(&bkg_gaussians));
+    t_config->Branch("bkg_gaussians_all", const_cast<bool*>(&bkg_gaussians_all));
     t_config->Branch("barlow_beeston", const_cast<bool*>(&barlow_beeston));
     t_config->Branch("bend_bkg", const_cast<bool*>(&bend_bkg));
     t_config->Branch("allow_negative_mu_sig", const_cast<bool*>(&allow_negative_mu_sig));
@@ -1341,7 +1344,9 @@ namespace mfv {
     fit::set_sig(Template::finalize_template(sig_template));
     fit::calc_lnL_offset();
 
-    if (bkg_gaussians)
+    if (bkg_gaussians_all)
+      fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
+    else if (bkg_gaussians) 
       fit::eta_bkg = { -1, 1e-3, 1e-3, 3.8, 1.4, 0.1, 0.1, -1 };
       //fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
       //fit::eta_bkg = { -1, 1, 1, 1, 3, 1, 1, -1 };
@@ -1350,6 +1355,8 @@ namespace mfv {
       fit::eta_bkg.front() = -1;
       fit::eta_bkg.back() = -1;
     }
+
+    //fit::eta_bkg = { -1, 1, 1, 1, 3, 1, 1, -1 };
 
     if (int(fit::eta_bkg.size()) != fit::n_bins+2)
       jmt::vthrow("eta_bkg wrong size");

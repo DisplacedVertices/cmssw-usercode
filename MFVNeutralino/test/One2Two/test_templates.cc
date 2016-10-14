@@ -15,9 +15,9 @@
 int main() {
   jmt::set_root_style();
 
-  for (int seed = 0; seed < 1; ++seed) {
-    TCanvas c("c", "", 800, 800);
-    bool first = false;
+  for (int seed = 0; seed < 100; ++seed) {
+    //TCanvas c("c", "", 800, 800);
+    //bool first = false;
 
     TFile* out_f = new TFile("test_templates.root", "recreate");
     TRandom3* rand = new TRandom3(jmt::seed_base + seed);
@@ -26,6 +26,7 @@ int main() {
 
     ter->process(tt->data);
 
+    /*
     mfv::Templates* ts = ter->get_templates();
 
     TH2F* hin = new TH2F("hin", "1=r12ok, 2=r32ok, 3=both;#mu_{clear};#sigma_{clear}", 100, 0, 0.1, 100, 0, 0.05);
@@ -62,8 +63,8 @@ int main() {
     hin->Draw("colz");
     c.SaveAs("~/asdf/b.png");
     c.SaveAs("~/asdf/b.root");
+    */
 
-    /*
     std::vector<double> a_bkg(6+2,0.);
     mfv::TemplateInterpolator* interp = new mfv::TemplateInterpolator(ter->get_templates(), mfv::Template::binning().size()-1, ter->par_info(), a_bkg);
 
@@ -76,7 +77,6 @@ int main() {
       double e = t->h->GetBinError(i);
       printf("%4i %12.6e %12.6e %12.6e %12.6e %12.6e %12.6e\n", i, c, e, c*251, e*251, c*c/e/e, e/c);
     }
-    */
 
     out_f->Write();
     out_f->Close();

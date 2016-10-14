@@ -421,13 +421,14 @@ def data_mc_comparison(name,
                        file_path = None,
                        fcn_for_nevents_check = None,
                        int_lumi = None,
+                       int_lumi_bkg_scale = None,
                        int_lumi_nice = None,
                        canvas_title = '',
                        canvas_size = (700, 840),
                        canvas_top_margin = 0.01,
                        canvas_bottom_margin = 0.3,
-                       canvas_left_margin = 0.1,
-                       canvas_right_margin = 0.1,
+                       canvas_left_margin = 0.12,
+                       canvas_right_margin = 0.08,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
                        overflow_in_last = False,
@@ -436,7 +437,10 @@ def data_mc_comparison(name,
                        poisson_intervals = False,
                        x_title = '',
                        y_title = 'arb. units',
+                       x_title_offset = 1.,
                        y_title_offset = 1.3,
+                       x_title_size = 0.04,
+                       y_title_size = 0.04,
                        y_label_size = 0.035,
                        x_range = None,
                        y_range = (None, None),
@@ -449,9 +453,13 @@ def data_mc_comparison(name,
                        res_divide_opt = 'n pois',
                        res_line_width = 2,
                        res_line_color = ROOT.kBlue+3,
-                       res_y_title = 'data/MC',
+                       res_x_title_size = 0.04,
+                       res_x_title_offset = 1.,
+                       res_y_title = 'Data/MC',
                        res_y_title_offset = None,
-                       res_y_label_size = 0.03,
+                       res_y_title_size = None,
+                       res_x_label_size = 0.035,
+                       res_y_label_size = 0.035,
                        res_y_range = (0., 3.),
                        res_draw_cmd = 'apez',
                        res_fit = True,
@@ -460,6 +468,8 @@ def data_mc_comparison(name,
                        verbose = False,
                        cut_line = None,
                        background_uncertainty = None,
+                       preliminary = False,
+                       simulation = False,
                        ):
     """
     Put the histograms for the background samples into a THStack, with
@@ -571,7 +581,10 @@ def data_mc_comparison(name,
             xax = None
 
             if sample not in data_samples:
-                sample.hist.Scale(sample.partial_weight(sample._datamccomp_file) * int_lumi)
+                sample.hist.Scale(sample.partial_weight * int_lumi)
+                if int_lumi_bkg_scale is not None and sample not in signal_samples:
+                    sample.hist.Scale(int_lumi_bkg_scale)
+
             if rebin is not None:
                 sample.hist_before_rebin = sample.hist
                 rebin_name = sample.hist.GetName() + '_rebinned'
@@ -595,7 +608,7 @@ def data_mc_comparison(name,
                     bin_width_to_scales = [None]
                     for ibin in xrange(1, sample.hist.GetNbinsX()+1):
                         bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
-                    
+
                 for ibin in xrange(1, sample.hist.GetNbinsX()+1):
                     c = sample.hist.GetBinContent(ibin)
                     e = sample.hist.GetBinError(ibin)
@@ -655,12 +668,17 @@ def data_mc_comparison(name,
                 print sample.name, '<', 3 * sample.partial_weight(sample._datamccomp_file) * int_lumi, '@95%CL'
             else:
                 print sample.name, integ
+                for ibin in xrange(0, sample.hist.GetNbinsX()+2):
+                    print '   %6i %15.6f +- %15.6f' % (ibin, sample.hist.GetBinContent(ibin), sample.hist.GetBinError(ibin))
 
     stack.Draw(stack_draw_cmd)
     stack.SetTitle(';%s;%s' % (x_title, y_title))
 
     if data_sample is not None:
         stack.GetXaxis().SetLabelSize(0) # the data/MC ratio part will show the labels
+    stack.GetXaxis().SetTitleSize(x_title_size)
+    stack.GetYaxis().SetTitleSize(y_title_size)
+    stack.GetXaxis().SetTitleOffset(x_title_offset)
     stack.GetYaxis().SetTitleOffset(y_title_offset)
     stack.GetYaxis().SetLabelSize(y_label_size)
 
@@ -721,7 +739,7 @@ def data_mc_comparison(name,
         if background_uncertainty is not None:
             legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
-            legend.AddEntry(sample.hist, sample.nice_name, 'L')
+            entry = legend.AddEntry(sample.hist, sample.nice_name, 'L')
         legend.Draw()
     else:
         legend = None
@@ -745,16 +763,26 @@ def data_mc_comparison(name,
             w.SetTextSize(size)
             w.DrawLatex(x, y, text)
             return w
-        cms = write(61, 0.04, 0.10, 0.93, 'CMS')
-        pre = write(52, 0.035, 0.19, 0.93, 'Preliminary')
-        lum = write(42, 0.04,  0.636, 0.93, int_lumi_nice)
+        subtr = 0.
+        lum_pos = 0.575
+        stupid = 0.02
+        lum = write(42, 0.05, lum_pos+stupid, 0.930-subtr, int_lumi_nice)
+        cms = write(61, 0.05, 0.098+stupid, 0.930-subtr, 'CMS')
+        if simulation and preliminary:
+            exlab_str = 'Simulation Preliminary'
+        elif preliminary:
+            exlab_str = 'Preliminary'
+        elif simulation:
+            exlab_str = 'Simulation'
+        if simulation or preliminary:
+            exlab = write(52, 0.04, 0.210, 0.930-subtr, exlab_str)
 
     if verbose:
         if data_sample is not None:
             print 'data integral:', data_sample.hist.Integral(0, data_sample.hist.GetNbinsX()+1)
         print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
         print
-    
+
     ratio_pad, res_g, old_opt_fit = None, None, None
     if data_sample is not None:
         ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
@@ -766,7 +794,6 @@ def data_mc_comparison(name,
         ratio_pad.Draw()
         ratio_pad.cd(0)
 
-        #res_g = poisson_means_divide(data_sample.hist, sum_background, no_zeroes=True) # JMTBAD way underestimates uncert in sum_background with weights, scales...
         res_g = ROOT.TGraphAsymmErrors(data_sample.hist, sum_background, res_divide_opt)
         res_g.SetMarkerStyle(20)
         res_g.SetMarkerSize(0)
@@ -777,8 +804,12 @@ def data_mc_comparison(name,
         else:
             x_range_dmc = x_range[0], x_range[1]
         res_g.GetXaxis().SetLimits(*x_range_dmc)
+        res_g.GetXaxis().SetTitleSize(res_x_title_size)
+        res_g.GetXaxis().SetTitleOffset(res_x_title_offset)
+        res_g.GetXaxis().SetLabelSize(res_x_label_size)
         res_g.GetYaxis().SetLabelSize(res_y_label_size)
         res_g.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
+        res_g.GetYaxis().SetTitleSize(res_y_title_size if res_y_title_size is not None else y_title_size)
         res_g.GetYaxis().SetRangeUser(*res_y_range)
         res_g.SetTitle(';%s;%s' % (x_title, res_y_title))
         res_g.Draw(res_draw_cmd)

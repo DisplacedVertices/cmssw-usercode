@@ -1,7 +1,14 @@
-import sys
+import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 from limitplot import exc_graph_dumb
+
+preliminary = False
+if preliminary:
+    path = 'plots/prelim'
+else:
+    #path = 'plots/not_prelim'
+    path = 'plots/after_finalreading'
 
 ts = tdr_style()
 rainbow_palette()
@@ -19,7 +26,7 @@ def write(font, size, x, y, text):
 #ROOT.gStyle.SetNumberContours(500)
 
 ts.SetPadTopMargin(0.1)
-ts.SetPadBottomMargin(0.1)
+ts.SetPadBottomMargin(0.12)
 ts.SetPadLeftMargin(0.1)
 ts.SetPadRightMargin(0.15)
 
@@ -27,39 +34,50 @@ ts.SetPadRightMargin(0.15)
 f = ROOT.TFile('newplots.root')
 f2 = ROOT.TFile('newplots_fromr.root')
 
-c = ROOT.TCanvas('c', '', 1000, 800)
+c = ROOT.TCanvas('c', '', 1000, 860)
 h = f.Get('h_eff_600')
 xax = h.GetXaxis()
-xax.SetTitle('neutralino/gluino mass (GeV)')
+xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
 xax.CenterLabels()
-xax.SetTitle('neutralino/gluino mass (GeV)')
 xax.SetNdivisions(1300, 0)
-xax.SetLabelSize(0.055)
 xax.SetBinLabel(xax.FindBin(400), '400')
 xax.SetBinLabel(xax.FindBin(600), '600')
 xax.SetBinLabel(xax.FindBin(800), '800')
 xax.SetBinLabel(xax.FindBin(1000), '1000')
 xax.SetBinLabel(xax.FindBin(1200), '1200')
 xax.SetBinLabel(xax.FindBin(1400), '1400')
+xax.SetLabelSize(0.065)
+xax.SetTitleSize(0.05)
+xax.SetTitleOffset(1.05)
+xax.LabelsOption('h')
 yax = h.GetYaxis()
-yax.SetTitle('neutralino/gluino lifetime')
-yax.SetTitleOffset(1.25)
+yax.SetTitle('c#tau (mm)')
+yax.SetTitleOffset(0.95)
+yax.SetTitleSize(0.05)
+yax.SetLabelSize(0.065)
 yax.SetRangeUser(300, 32000)
-yax.SetBinLabel(yax.FindBin(300), '300 #mum')
-yax.SetBinLabel(yax.FindBin(1000), '1 mm')
-yax.SetBinLabel(yax.FindBin(5000), '5 mm')
-yax.SetBinLabel(yax.FindBin(10000), '1 cm')
-yax.SetBinLabel(yax.FindBin(20000), '2 cm')
-yax.SetBinLabel(yax.FindBin(30000), '3 cm')
-h.GetZaxis().SetTitleOffset(1.2)
-h.SetZTitle('efficiency for d_{VV} > 600 #mum')
+yax.SetBinLabel(yax.FindBin(300), '0.3')
+yax.SetBinLabel(yax.FindBin(1000), '1')
+yax.SetBinLabel(yax.FindBin(5000), '5')
+yax.SetBinLabel(yax.FindBin(10000), '10')
+yax.SetBinLabel(yax.FindBin(20000), '20')
+yax.SetBinLabel(yax.FindBin(30000), '30')
+zax = h.GetZaxis()
+zax.SetLabelSize(0.045)
+zax.SetTitle('Efficiency for d_{VV} > 600 #mum')
+zax.SetTitleSize(0.05)
+zax.SetTitleOffset(0.97)
+#zax.SetTitleSize()
 h.Draw('colz')
 cms = write(61, 0.050, 0.10, 0.92, 'CMS')
-pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
-sim = write(42, 0.050, 0.68, 0.92, 'Simulation')
-c.SaveAs('/uscms/home/tucker/afshome/scan_eff.pdf')
-c.SaveAs('/uscms/home/tucker/afshome/scan_eff.png')
-c.SaveAs('/uscms/home/tucker/afshome/scan_eff.root')
+if preliminary:
+    sim = write(52, 0.040, 0.19, 0.92, 'Simulation Preliminary')
+else:
+    sim = write(52, 0.040, 0.19, 0.92, 'Simulation')
+lum = write(42, 0.050, 0.735, 0.92, '(8 TeV)')
+c.SaveAs(os.path.join(path, 'scan_eff.pdf'))
+c.SaveAs(os.path.join(path, 'scan_eff.png'))
+c.SaveAs(os.path.join(path, 'scan_eff.root'))
 del c
 
 for xxx in ('small', 'big'):
@@ -79,22 +97,19 @@ for xxx in ('small', 'big'):
     h = f.Get('hlim_observed')
     xax = h.GetXaxis()
     xax.CenterLabels()
-    xax.SetTitle('neutralino/gluino mass (GeV)')
+    xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
     xax.SetNdivisions(1300, 0)
-    xax.SetLabelSize(0.055)
     xax.SetBinLabel(xax.FindBin(400), '400')
     xax.SetBinLabel(xax.FindBin(600), '600')
     xax.SetBinLabel(xax.FindBin(800), '800')
     xax.SetBinLabel(xax.FindBin(1000), '1000')
     xax.SetBinLabel(xax.FindBin(1200), '1200')
     xax.SetBinLabel(xax.FindBin(1400), '1400')
+    xax.SetLabelSize(0.065)
+    xax.SetTitleSize(0.05)
+    xax.SetTitleOffset(1.05)
+    xax.LabelsOption('h')
     yax = h.GetYaxis()
-    if xxx == 'small':
-        yax.SetTitle('neutralino/gluino lifetime (mm)')
-    else:
-        yax.SetTitle('neutralino/gluino lifetime (mm)')
-    yax.SetTitleOffset(1.25)
-    yax.SetLabelSize(0.055)
     if xxx == 'small':
         yax.SetRangeUser(300, 999)
     else:
@@ -108,10 +123,17 @@ for xxx in ('small', 'big'):
         yax.SetBinLabel(yax.FindBin(10000), '10')
         yax.SetBinLabel(yax.FindBin(20000), '20')
         yax.SetBinLabel(yax.FindBin(30000), '30')
+    yax.SetTitle('c#tau (mm)')
+    yax.SetTitleOffset(0.95)
+    yax.SetTitleSize(0.05)
+    yax.SetLabelSize(0.065)
     zax = h.GetZaxis()
     zax.SetTitleOffset(1.2)
     #zax.SetBinLabel(zax.FindBin(30), '30')
-    h.SetZTitle('95% CL upper limit on #sigma B (fb)')
+    zax.SetTitle('95% CL upper limit on #sigma B^{2} (fb)')
+    zax.SetTitleSize(0.05)
+    zax.SetTitleOffset(0.97)
+    zax.SetLabelSize(0.045)
     h.Draw('colz')
     if xxx == 'big':
         h.SetMinimum(0.4)
@@ -154,9 +176,10 @@ for xxx in ('small', 'big'):
     l1.Draw()
     l2.Draw()
     cms = write(61, 0.050, 0.10, 0.92, 'CMS')
-    pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
+    if preliminary:
+        pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
     lum = write(42, 0.050, 0.60, 0.92, '17.6 fb^{-1} (8 TeV)')
-    fn = '/uscms/home/tucker/afshome/scan_lim_obs_%s' % xxx
+    fn = os.path.join(path, 'scan_lim_obs_%s' % xxx)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')

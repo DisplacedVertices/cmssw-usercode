@@ -47,7 +47,7 @@ C = partial(data_mc_comparison,
             enable_legend = True,
             res_fit = True,
             verbose = True,
-            background_uncertainty = ('MC stat. uncert.', 0, 1, 3002),
+            background_uncertainty = ('MC stat. uncertainty', 0, 1, 3002),
             )
 
 C('njets_nocuts',

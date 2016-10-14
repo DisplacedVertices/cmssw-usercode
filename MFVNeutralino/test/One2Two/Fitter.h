@@ -27,6 +27,7 @@ namespace mfv {
     const bool save_plots;
     const int inject_in_last_bin;
     const bool bkg_gaussians;
+    const bool bkg_gaussians_all;
     const bool barlow_beeston;
     const bool bend_bkg;
     const bool allow_negative_mu_sig;
