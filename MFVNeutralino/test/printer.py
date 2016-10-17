@@ -7,7 +7,7 @@ process.source.fileNames = ['file:ntuple.root']
 process.source.noEventSort = cms.untracked.bool(True)
 file_event_from_argv(process)
 
-geometry_etc(process, 'MCRUN2_74_V9A')
+geometry_etc(process, '76X_mcRun2_asymptotic_v12')
 del process.TFileService
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
