@@ -221,6 +221,15 @@ struct MFVVertexAux {
   int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
   std::vector<bool> track_injet;
   std::vector<short> track_inpv;
+  std::vector<double> track_vx;
+  std::vector<double> track_vy;
+  std::vector<double> track_vz;
+  std::vector<double> track_px;
+  std::vector<double> track_py;
+  std::vector<double> track_pz;
+  std::vector<double> track_chi2;
+  std::vector<double> track_ndof;
+  std::vector<double> track_cov;
 
   static void _set(std::vector<uchar>& v, int i, uchar x) {
     if (i < 0) v.push_back(x);

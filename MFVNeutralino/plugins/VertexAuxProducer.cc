@@ -309,6 +309,19 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_hitpattern.push_back(MFVVertexAux::make_track_hitpattern(tri->hitPattern().numberOfValidPixelHits(), tri->hitPattern().numberOfValidStripHits(), nhitsbehind, tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS))); // JMTBAD could add missing inner, outer
       aux.track_injet.push_back(jets_tracks[0].count(trref)); // JMTBAD
       aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
+
+      aux.track_vx.push_back(tri->vx());
+      aux.track_vy.push_back(tri->vy());
+      aux.track_vz.push_back(tri->vz());
+      aux.track_px.push_back(tri->px());
+      aux.track_py.push_back(tri->py());
+      aux.track_pz.push_back(tri->pz());
+      aux.track_chi2.push_back(tri->chi2());
+      aux.track_ndof.push_back(tri->ndof());
+
+      aux.track_cov.resize(reco::TrackBase::covarianceSize);
+      reco::TrackBase::CovarianceMatrix m = tri->covariance();
+      m.SetElements(aux.track_cov.begin(), aux.track_cov.end());
     }
 
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
