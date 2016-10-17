@@ -21,9 +21,9 @@ class MFVPrinter : public edm::EDAnalyzer {
   const bool print_vertex;
   const bool print_event;
   const bool print_vertex_aux;
-  const edm::InputTag vertex_src;
-  const edm::InputTag event_src;
-  const edm::InputTag vertex_aux_src;
+  const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
+  const edm::EDGetTokenT<MFVEvent> event_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_aux_token;
   const std::string name;
 };
 
@@ -31,16 +31,16 @@ MFVPrinter::MFVPrinter(const edm::ParameterSet& cfg)
   : print_vertex(cfg.getParameter<bool>("print_vertex")),
     print_event(cfg.getParameter<bool>("print_event")),
     print_vertex_aux(cfg.getParameter<bool>("print_vertex_aux")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    event_src(cfg.getParameter<edm::InputTag>("event_src")),
-    vertex_aux_src(cfg.getParameter<edm::InputTag>("vertex_aux_src")),
+    vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
+    vertex_aux_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_aux_src"))),
     name(cfg.getParameter<std::string>("@module_label"))
 {
 }
 
 void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(event_src, mevent);
+  event.getByToken(event_token, mevent);
 
   const math::XYZPoint bs(mevent->bsx, mevent->bsy, mevent->bsz);
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
@@ -59,7 +59,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     const reco::Vertex& thepv = primary_vertices->at(0);
     
     edm::Handle<reco::VertexCollection> vertices;
-    event.getByLabel(vertex_src, vertices);
+    event.getByToken(vertex_token, vertices);
 
     printf("------- recoVertices: -------\n");
 
@@ -120,7 +120,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
 
   if (print_event) {
     edm::Handle<MFVEvent> mevent;
-    event.getByLabel(event_src, mevent);
+    event.getByToken(event_token, mevent);
 
     printf("------- MFVEvent: -------\n");
     const TLorentzVector gen_lsp_p4[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
@@ -173,7 +173,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
 
   if (print_vertex_aux) {
     edm::Handle<MFVVertexAuxCollection> vertices;
-    event.getByLabel(vertex_aux_src, vertices);
+    event.getByToken(vertex_aux_token, vertices);
 
     printf("------- MFVVertexAuxes: -------\n");
 
@@ -233,6 +233,19 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("costh, missdists for %i momenta:\n", mfv::NMomenta);
       for (int i = 0; i < mfv::NMomenta; ++i)
         printf("mom %i: costhmombs: %11.4f   costhmompv2d: %11.4f   costhmompv3d: %11.4f   missdistpv: %11.3g +/- %11.3g (%11.3g sig)\n", i, v.costhmombs(i), v.costhmompv2d(i), v.costhmompv3d(i), v.missdistpv[i], v.missdistpverr[i], v.missdistpvsig(i));
+      printf("tracks:\n");
+      for (int i = 0; i < v.ntracks(); ++i) {
+        printf("#%i:  chi2: %11.3g ndof: %11.3g  q*pt: %11.3g eta: %11.3g phi: %11.3g dxy: %11.3g dz: %11.3g\n", i, v.track_chi2[i], v.track_ndof[i], v.track_qpt[i], v.track_eta[i], v.track_phi[i], v.track_dxy[i], v.track_dz[i]);
+        printf("vx: %11.3g vy: %11.3g vz: %11.3g  px: %11.3g py: %11.3g pz: %11.3g\n", v.track_vx[i], v.track_vy[i], v.track_vz[i], v.track_px[i], v.track_py[i], v.track_pz[i]);
+        printf("cov:\n");
+        for (int j = 0; j < 5; ++j) {
+          for (int k = 0; k < j; ++k)
+            printf("%11s", "");
+          for (int k = j; k < 5; ++k)
+            printf("%11.3g", v.track_cov[i](j,k));
+          printf("\n");
+        }
+      }
 
       printf("\n");
     }
