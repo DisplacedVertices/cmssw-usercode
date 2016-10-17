@@ -4,6 +4,7 @@
 #include <vector>
 #include "TLorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/TrackReco/interface/TrackBase.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
 
 struct MFVVertexAux {
@@ -229,7 +230,7 @@ struct MFVVertexAux {
   std::vector<double> track_pz;
   std::vector<double> track_chi2;
   std::vector<double> track_ndof;
-  std::vector<double> track_cov;
+  std::vector<reco::TrackBase::CovarianceMatrix> track_cov;
 
   static void _set(std::vector<uchar>& v, int i, uchar x) {
     if (i < 0) v.push_back(x);
@@ -270,6 +271,15 @@ struct MFVVertexAux {
     track_hitpattern.push_back(0);
     track_injet.push_back(0);
     track_inpv.push_back(0);
+    track_vx.push_back(0);
+    track_vy.push_back(0);
+    track_vz.push_back(0);
+    track_px.push_back(0);
+    track_py.push_back(0);
+    track_pz.push_back(0);
+    track_chi2.push_back(0);
+    track_ndof.push_back(0);
+    track_cov.push_back(reco::TrackBase::CovarianceMatrix());
   }
 
   bool tracks_ok() const {
@@ -289,7 +299,16 @@ struct MFVVertexAux {
       n == track_chi2dof_.size() &&
       n == track_hitpattern.size() &&
       n == track_injet.size() &&
-      n == track_inpv.size();
+      n == track_inpv.size() &&
+      n == track_vx.size() &&
+      n == track_vy.size() &&
+      n == track_vz.size() &&
+      n == track_px.size() &&
+      n == track_py.size() &&
+      n == track_pz.size() &&
+      n == track_chi2.size() &&
+      n == track_ndof.size() &&
+      n == track_cov.size();
   }
 
   TLorentzVector track_p4(int i, float mass=0) const {

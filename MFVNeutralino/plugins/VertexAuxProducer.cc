@@ -318,10 +318,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_pz.push_back(tri->pz());
       aux.track_chi2.push_back(tri->chi2());
       aux.track_ndof.push_back(tri->ndof());
-
-      aux.track_cov.resize(reco::TrackBase::covarianceSize);
-      reco::TrackBase::CovarianceMatrix m = tri->covariance();
-      m.SetElements(aux.track_cov.begin(), aux.track_cov.end());
+      aux.track_cov.push_back(tri->covariance());
     }
 
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
