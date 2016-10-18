@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-process.source.fileNames = ['/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev6p1_76x_nstlays3_try2/160309_203757/0000/ntuple_1.root']
+process.source.fileNames = ['file:ntuple.root']
 process.TFileService.fileName = 'minitree.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -13,6 +13,7 @@ process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      event_src = cms.InputTag('mfvEvent'),
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                      weight_src = cms.InputTag('mfvWeight'),
+                                     save_tracks = cms.bool(False)
                                      )
 
 process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)

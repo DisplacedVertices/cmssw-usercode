@@ -21,6 +21,8 @@ public:
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   const edm::EDGetTokenT<double> weight_token;
 
+  const bool save_tracks;
+
   TH1F* h_nsv;
   TH1F* h_nsvsel;
 
@@ -31,7 +33,8 @@ public:
 MFVMiniTreer::MFVMiniTreer(const edm::ParameterSet& cfg)
   : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
-    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    save_tracks(cfg.getParameter<bool>("save_tracks"))
 {
   edm::Service<TFileService> fs;
 
@@ -96,6 +99,18 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     const MFVVertexAux& v0 = vertices[0];
     nt.nvtx = 1;
     nt.ntk0 = int2uchar(v0.ntracks());
+    if (save_tracks)
+      for (int i = 0, ie = v0.ntracks(); i < ie; ++i) {
+        nt.tk0_chi2.push_back(v0.track_chi2[i]);
+        nt.tk0_ndof.push_back(v0.track_ndof[i]);
+        nt.tk0_vx.push_back(v0.track_vx[i]);
+        nt.tk0_vy.push_back(v0.track_vy[i]);
+        nt.tk0_vz.push_back(v0.track_vz[i]);
+        nt.tk0_px.push_back(v0.track_px[i]);
+        nt.tk0_py.push_back(v0.track_py[i]);
+        nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_cov.push_back(v0.track_cov[i]);
+      }      
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
@@ -114,6 +129,30 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.nvtx = int2uchar(int(vertices.size()));
     nt.ntk0 = int2uchar(v0.ntracks());
     nt.ntk1 = int2uchar(v1.ntracks());
+    if (save_tracks) {
+      for (int i = 0, ie = v0.ntracks(); i < ie; ++i) {
+        nt.tk0_chi2.push_back(v0.track_chi2[i]);
+        nt.tk0_ndof.push_back(v0.track_ndof[i]);
+        nt.tk0_vx.push_back(v0.track_vx[i]);
+        nt.tk0_vy.push_back(v0.track_vy[i]);
+        nt.tk0_vz.push_back(v0.track_vz[i]);
+        nt.tk0_px.push_back(v0.track_px[i]);
+        nt.tk0_py.push_back(v0.track_py[i]);
+        nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_cov.push_back(v0.track_cov[i]);
+      }      
+      for (int i = 0, ie = v1.ntracks(); i < ie; ++i) {
+        nt.tk1_chi2.push_back(v1.track_chi2[i]);
+        nt.tk1_ndof.push_back(v1.track_ndof[i]);
+        nt.tk1_vx.push_back(v1.track_vx[i]);
+        nt.tk1_vy.push_back(v1.track_vy[i]);
+        nt.tk1_vz.push_back(v1.track_vz[i]);
+        nt.tk1_px.push_back(v1.track_px[i]);
+        nt.tk1_py.push_back(v1.track_py[i]);
+        nt.tk1_pz.push_back(v1.track_pz[i]);
+        nt.tk1_cov.push_back(v1.track_cov[i]);
+      }      
+    }
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
     nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));
