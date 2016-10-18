@@ -8,6 +8,9 @@ namespace mfv {
   typedef ROOT::Math::SMatrix<double, 5, 5, ROOT::Math::MatRepSym<double, 5> >  TrackCovarianceMatrix;
 
   struct MiniNtuple {
+    MiniNtuple();
+    void clear();
+
     unsigned run;
     unsigned lumi;
     unsigned long long event;
@@ -27,7 +30,7 @@ namespace mfv {
 
     unsigned char nvtx;
     unsigned char ntk0;
-    std::vector<double> tk0_chi2;
+    std::vector<double> tk0_qchi2;
     std::vector<double> tk0_ndof;
     std::vector<double> tk0_vx;
     std::vector<double> tk0_vy;
@@ -36,7 +39,7 @@ namespace mfv {
     std::vector<double> tk0_py;
     std::vector<double> tk0_pz;
     std::vector<TrackCovarianceMatrix> tk0_cov;
-    std::vector<double>* p_tk0_chi2;
+    std::vector<double>* p_tk0_qchi2;
     std::vector<double>* p_tk0_ndof;
     std::vector<double>* p_tk0_vx;
     std::vector<double>* p_tk0_vy;
@@ -56,7 +59,7 @@ namespace mfv {
     float geo2ddist0;
 
     unsigned char ntk1;
-    std::vector<double> tk1_chi2;
+    std::vector<double> tk1_qchi2;
     std::vector<double> tk1_ndof;
     std::vector<double> tk1_vx;
     std::vector<double> tk1_vy;
@@ -65,7 +68,7 @@ namespace mfv {
     std::vector<double> tk1_py;
     std::vector<double> tk1_pz;
     std::vector<TrackCovarianceMatrix> tk1_cov;
-    std::vector<double>* p_tk1_chi2;
+    std::vector<double>* p_tk1_qchi2;
     std::vector<double>* p_tk1_ndof;
     std::vector<double>* p_tk1_vx;
     std::vector<double>* p_tk1_vy;
@@ -87,6 +90,7 @@ namespace mfv {
 
   void write_to_tree(TTree* tree, MiniNtuple& nt);
   void read_from_tree(TTree* tree, MiniNtuple& nt);
+  MiniNtuple* clone(const MiniNtuple& nt);
 }
 
 #endif

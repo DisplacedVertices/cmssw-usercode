@@ -1,6 +1,41 @@
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 namespace mfv {
+  MiniNtuple::MiniNtuple() {
+    clear();
+    p_tk0_qchi2 = p_tk0_ndof = p_tk0_vx = p_tk0_vy = p_tk0_vz = p_tk0_px = p_tk0_py = p_tk0_pz = p_tk1_qchi2 = p_tk1_ndof = p_tk1_vx = p_tk1_vy = p_tk1_vz = p_tk1_px = p_tk1_py = p_tk1_pz = 0;
+    p_tk0_cov = p_tk1_cov = 0;
+  }
+
+  void MiniNtuple::clear() {
+    run = lumi = 0;
+    event = 0;
+    gen_flavor_code = npv = npu = njets = nvtx = ntk0 = ntracksptgt30 = njetsntks0 = ntk1 = ntracksptgt31 = njetsntks1 = 0;
+    pvx = pvy = pvz = weight = x0 = y0 = z0 = drmin0 = drmax0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = drmin1 = drmax1 = bs2derr1 = geo2ddist1 = 0;
+    for (int i = 0; i < 50; ++i) {
+      jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = 0;
+      jet_id[i] = 0;
+    }
+    tk0_qchi2.clear();
+    tk0_ndof.clear();
+    tk0_vx.clear();
+    tk0_vy.clear();
+    tk0_vz.clear();
+    tk0_px.clear();
+    tk0_py.clear();
+    tk0_pz.clear();
+    tk0_cov.clear();
+    tk1_qchi2.clear();
+    tk1_ndof.clear();
+    tk1_vx.clear();
+    tk1_vy.clear();
+    tk1_vz.clear();
+    tk1_px.clear();
+    tk1_py.clear();
+    tk1_pz.clear();
+    tk1_cov.clear();
+  }
+
   void write_to_tree(TTree* tree, MiniNtuple& nt) {
     tree->Branch("run", &nt.run);
     tree->Branch("lumi", &nt.lumi);
@@ -22,7 +57,7 @@ namespace mfv {
 
     tree->Branch("nvtx", &nt.nvtx);
     tree->Branch("ntk0", &nt.ntk0);
-    tree->Branch("tk0_chi2", &nt.tk0_chi2);
+    tree->Branch("tk0_qchi2", &nt.tk0_qchi2);
     tree->Branch("tk0_ndof", &nt.tk0_ndof);
     tree->Branch("tk0_vx", &nt.tk0_vx);
     tree->Branch("tk0_vy", &nt.tk0_vy);
@@ -42,7 +77,7 @@ namespace mfv {
     tree->Branch("geo2ddist0", &nt.geo2ddist0);
 
     tree->Branch("ntk1", &nt.ntk1);
-    tree->Branch("tk1_chi2", &nt.tk1_chi2);
+    tree->Branch("tk1_qchi2", &nt.tk1_qchi2);
     tree->Branch("tk1_ndof", &nt.tk1_ndof);
     tree->Branch("tk1_vx", &nt.tk1_vx);
     tree->Branch("tk1_vy", &nt.tk1_vy);
@@ -71,9 +106,6 @@ namespace mfv {
   }
 
   void read_from_tree(TTree* tree, MiniNtuple& nt) {
-    nt.p_tk0_chi2 = nt.p_tk0_ndof = nt.p_tk0_vx = nt.p_tk0_vy = nt.p_tk0_vz = nt.p_tk0_px = nt.p_tk0_py = nt.p_tk0_pz = nt.p_tk1_chi2 = nt.p_tk1_ndof = nt.p_tk1_vx = nt.p_tk1_vy = nt.p_tk1_vz = nt.p_tk1_px = nt.p_tk1_py = nt.p_tk1_pz = 0;
-    nt.p_tk0_cov = nt.p_tk1_cov = 0;
-
     tree->SetBranchAddress("run", &nt.run);
     tree->SetBranchAddress("lumi", &nt.lumi);
     tree->SetBranchAddress("event", &nt.event);
@@ -92,7 +124,7 @@ namespace mfv {
     tree->SetBranchAddress("jet_id", nt.jet_id);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
     tree->SetBranchAddress("ntk0", &nt.ntk0);
-    tree->SetBranchAddress("tk0_chi2", &nt.p_tk0_chi2);
+    tree->SetBranchAddress("tk0_qchi2", &nt.p_tk0_qchi2);
     tree->SetBranchAddress("tk0_ndof", &nt.p_tk0_ndof);
     tree->SetBranchAddress("tk0_vx", &nt.p_tk0_vx);
     tree->SetBranchAddress("tk0_vy", &nt.p_tk0_vy);
@@ -111,7 +143,7 @@ namespace mfv {
     tree->SetBranchAddress("bs2derr0", &nt.bs2derr0);
     tree->SetBranchAddress("geo2ddist0", &nt.geo2ddist0);
     tree->SetBranchAddress("ntk1", &nt.ntk1);
-    tree->SetBranchAddress("tk1_chi2", &nt.p_tk1_chi2);
+    tree->SetBranchAddress("tk1_qchi2", &nt.p_tk1_qchi2);
     tree->SetBranchAddress("tk1_ndof", &nt.p_tk1_ndof);
     tree->SetBranchAddress("tk1_vx", &nt.p_tk1_vx);
     tree->SetBranchAddress("tk1_vy", &nt.p_tk1_vy);
@@ -129,5 +161,34 @@ namespace mfv {
     tree->SetBranchAddress("njetsntks1", &nt.njetsntks1);
     tree->SetBranchAddress("bs2derr1", &nt.bs2derr1);
     tree->SetBranchAddress("geo2ddist1", &nt.geo2ddist1);
+  }
+
+  MiniNtuple* clone(const MiniNtuple& nt) {
+    MiniNtuple* nnt = new MiniNtuple(nt);
+
+    if (nt.p_tk0_qchi2) nnt->tk0_qchi2 = *nt.p_tk0_qchi2;
+    if (nt.p_tk0_ndof ) nnt->tk0_ndof  = *nt.p_tk0_ndof;
+    if (nt.p_tk0_vx   ) nnt->tk0_vx    = *nt.p_tk0_vx;
+    if (nt.p_tk0_vy   ) nnt->tk0_vy    = *nt.p_tk0_vy;
+    if (nt.p_tk0_vz   ) nnt->tk0_vz    = *nt.p_tk0_vz;
+    if (nt.p_tk0_px   ) nnt->tk0_px    = *nt.p_tk0_px;
+    if (nt.p_tk0_py   ) nnt->tk0_py    = *nt.p_tk0_py;
+    if (nt.p_tk0_pz   ) nnt->tk0_pz    = *nt.p_tk0_pz;
+    if (nt.p_tk0_cov  ) nnt->tk0_cov   = *nt.p_tk0_cov;
+
+    if (nt.p_tk1_qchi2) nnt->tk1_qchi2 = *nt.p_tk1_qchi2;
+    if (nt.p_tk1_ndof ) nnt->tk1_ndof  = *nt.p_tk1_ndof;
+    if (nt.p_tk1_vx   ) nnt->tk1_vx    = *nt.p_tk1_vx;
+    if (nt.p_tk1_vy   ) nnt->tk1_vy    = *nt.p_tk1_vy;
+    if (nt.p_tk1_vz   ) nnt->tk1_vz    = *nt.p_tk1_vz;
+    if (nt.p_tk1_px   ) nnt->tk1_px    = *nt.p_tk1_px;
+    if (nt.p_tk1_py   ) nnt->tk1_py    = *nt.p_tk1_py;
+    if (nt.p_tk1_pz   ) nnt->tk1_pz    = *nt.p_tk1_pz;
+    if (nt.p_tk1_cov  ) nnt->tk1_cov   = *nt.p_tk1_cov;
+
+    nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = 0;
+    nnt->p_tk0_cov = nnt->p_tk1_cov = 0;
+
+    return nnt;
   }
 }

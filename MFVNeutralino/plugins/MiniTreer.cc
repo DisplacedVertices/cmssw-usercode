@@ -54,6 +54,7 @@ MFVVertexAux MFVMiniTreer::xform_vertex(const MFVEvent& mevent, const MFVVertexA
 }
 
 void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
+  nt.clear();
   nt.run   = event.id().run();
   nt.lumi  = event.luminosityBlock();
   nt.event = event.id().event();
@@ -101,7 +102,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.ntk0 = int2uchar(v0.ntracks());
     if (save_tracks)
       for (int i = 0, ie = v0.ntracks(); i < ie; ++i) {
-        nt.tk0_chi2.push_back(v0.track_chi2[i]);
+        nt.tk0_qchi2.push_back(v0.track_q(i) * v0.track_chi2[i]);
         nt.tk0_ndof.push_back(v0.track_ndof[i]);
         nt.tk0_vx.push_back(v0.track_vx[i]);
         nt.tk0_vy.push_back(v0.track_vy[i]);
@@ -131,7 +132,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.ntk1 = int2uchar(v1.ntracks());
     if (save_tracks) {
       for (int i = 0, ie = v0.ntracks(); i < ie; ++i) {
-        nt.tk0_chi2.push_back(v0.track_chi2[i]);
+        nt.tk0_qchi2.push_back(v0.track_q(i) * v0.track_chi2[i]);
         nt.tk0_ndof.push_back(v0.track_ndof[i]);
         nt.tk0_vx.push_back(v0.track_vx[i]);
         nt.tk0_vy.push_back(v0.track_vy[i]);
@@ -142,7 +143,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
       for (int i = 0, ie = v1.ntracks(); i < ie; ++i) {
-        nt.tk1_chi2.push_back(v1.track_chi2[i]);
+        nt.tk1_qchi2.push_back(v1.track_q(i) * v1.track_chi2[i]);
         nt.tk1_ndof.push_back(v1.track_ndof[i]);
         nt.tk1_vx.push_back(v1.track_vx[i]);
         nt.tk1_vy.push_back(v1.track_vy[i]);
