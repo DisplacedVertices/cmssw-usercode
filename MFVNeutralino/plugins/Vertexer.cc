@@ -122,6 +122,7 @@ private:
 
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
+  const bool disregard_event;
   const bool use_tracks;
   const edm::EDGetTokenT<reco::TrackCollection> track_token;
   const bool use_non_pv_tracks;
@@ -132,6 +133,9 @@ private:
   const edm::EDGetTokenT<reco::PFJetCollection> pf_jet_token;
   const bool use_pat_jets;
   const edm::EDGetTokenT<pat::JetCollection> pat_jet_token;
+  const bool use_second_tracks;
+  const edm::EDGetTokenT<reco::TrackCollection> second_track_token;
+  const bool no_track_cuts;
   const double min_seed_jet_pt;
   const double min_all_track_pt;
   const double min_all_track_dxy;
@@ -356,6 +360,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     av_reco(new ConfigurableVertexReconstructor(cfg.getParameter<edm::ParameterSet>("avr_params"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
+    disregard_event(cfg.getParameter<bool>("disregard_event")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
     use_non_pv_tracks(cfg.getParameter<bool>("use_non_pv_tracks")),
@@ -366,6 +371,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     pf_jet_token(consumes<reco::PFJetCollection>(cfg.getParameter<edm::InputTag>("pf_jet_src"))),
     use_pat_jets(cfg.getParameter<bool>("use_pat_jets")),
     pat_jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("pat_jet_src"))),
+    use_second_tracks(cfg.getParameter<bool>("use_second_tracks")),
+    second_track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("second_track_src"))),
+    no_track_cuts(cfg.getParameter<bool>("no_track_cuts")),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
     min_all_track_pt(cfg.getParameter<double>("min_all_track_pt")),
     min_all_track_dxy(cfg.getParameter<double>("min_all_track_dxy")),
@@ -597,83 +605,97 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   std::vector<reco::TrackRef> all_tracks;
   std::vector<reco::TransientTrack> seed_tracks;
+  std::vector<bool> seed_track_is_second;
   std::map<reco::TrackRef, size_t> seed_track_ref_map;
 
   if (!tracker_extents.filled())
     tracker_extents.fill(setup, GlobalPoint(bs_x, bs_y, bs_z));
 
-  if (use_tracks) {
-    edm::Handle<reco::TrackCollection> tracks;
-    event.getByToken(track_token, tracks);
-    for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
-      all_tracks.push_back(reco::TrackRef(tracks, i));
-  }
-  else if (use_non_pv_tracks || use_non_pvs_tracks) {
-    std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
-    for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
-      const reco::Vertex& pv = primary_vertices->at(i);
-      for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
-        float w = pv.trackWeight(*it);
-        reco::TrackRef tk = it->castTo<reco::TrackRef>();
-        tracks_in_pvs[tk].push_back(std::make_pair(i, w));
-      }
+  if (!disregard_event) {
+    if (use_tracks) {
+      edm::Handle<reco::TrackCollection> tracks;
+      event.getByToken(track_token, tracks);
+      for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
+        all_tracks.push_back(reco::TrackRef(tracks, i));
     }
-
-    edm::Handle<reco::TrackCollection> tracks;
-    event.getByToken(track_token, tracks);
-    for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
-      reco::TrackRef tkref(tracks, i);
-      bool ok = true;
-      for (const auto& pv_use : tracks_in_pvs[tkref])
-        if (use_non_pvs_tracks || (use_non_pv_tracks && pv_use.first == 0)) {
-          ok = false;
-          break;
+    else if (use_non_pv_tracks || use_non_pvs_tracks) {
+      std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
+      for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
+        const reco::Vertex& pv = primary_vertices->at(i);
+        for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
+          float w = pv.trackWeight(*it);
+          reco::TrackRef tk = it->castTo<reco::TrackRef>();
+          tracks_in_pvs[tk].push_back(std::make_pair(i, w));
         }
+      }
 
-      if (ok)
-        all_tracks.push_back(tkref);
-    }
-  }
-  else if (use_pf_candidates) {
-    edm::Handle<reco::PFCandidateCollection> pf_candidates;
-    event.getByToken(pf_candidate_token, pf_candidates);
+      edm::Handle<reco::TrackCollection> tracks;
+      event.getByToken(track_token, tracks);
+      for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
+        reco::TrackRef tkref(tracks, i);
+        bool ok = true;
+        for (const auto& pv_use : tracks_in_pvs[tkref])
+          if (use_non_pvs_tracks || (use_non_pv_tracks && pv_use.first == 0)) {
+            ok = false;
+            break;
+          }
 
-    for (const reco::PFCandidate& cand : *pf_candidates) {
-      reco::TrackRef tkref = cand.trackRef();
-      if (tkref.isNonnull())
-        all_tracks.push_back(tkref);
-    }
-  }
-  else if (use_pf_jets) {
-    edm::Handle<reco::PFJetCollection> jets;
-    event.getByToken(pf_jet_token, jets);
-    for (const reco::PFJet& jet : *jets) {
-      if (jet.pt() > min_seed_jet_pt &&
-          fabs(jet.eta()) < 2.5 &&
-          jet.numberOfDaughters() > 1 &&
-          jet.neutralHadronEnergyFraction() < 0.99 &&
-          jet.neutralEmEnergyFraction() < 0.99 &&
-          (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
-        for (const reco::TrackRef& tk : jet.getTrackRefs())
-          all_tracks.push_back(tk);
+        if (ok)
+          all_tracks.push_back(tkref);
       }
     }
-  }
-  else if (use_pat_jets) {
-    edm::Handle<pat::JetCollection> jets;
-    event.getByToken(pat_jet_token, jets);
-    for (const pat::Jet& jet : *jets) {
-      if (jet.pt() > min_seed_jet_pt) { // assume rest of id above already applied at tuple time
-        for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
-          const reco::TrackRef& tk = pfcand->trackRef();
-          if (tk.isNonnull())
+    else if (use_pf_candidates) {
+      edm::Handle<reco::PFCandidateCollection> pf_candidates;
+      event.getByToken(pf_candidate_token, pf_candidates);
+
+      for (const reco::PFCandidate& cand : *pf_candidates) {
+        reco::TrackRef tkref = cand.trackRef();
+        if (tkref.isNonnull())
+          all_tracks.push_back(tkref);
+      }
+    }
+    else if (use_pf_jets) {
+      edm::Handle<reco::PFJetCollection> jets;
+      event.getByToken(pf_jet_token, jets);
+      for (const reco::PFJet& jet : *jets) {
+        if (jet.pt() > min_seed_jet_pt &&
+            fabs(jet.eta()) < 2.5 &&
+            jet.numberOfDaughters() > 1 &&
+            jet.neutralHadronEnergyFraction() < 0.99 &&
+            jet.neutralEmEnergyFraction() < 0.99 &&
+            (fabs(jet.eta()) >= 2.4 || (jet.chargedEmEnergyFraction() < 0.99 && jet.chargedHadronEnergyFraction() > 0. && jet.chargedMultiplicity() > 0))) {
+          for (const reco::TrackRef& tk : jet.getTrackRefs())
             all_tracks.push_back(tk);
         }
       }
     }
+    else if (use_pat_jets) {
+      edm::Handle<pat::JetCollection> jets;
+      event.getByToken(pat_jet_token, jets);
+      for (const pat::Jet& jet : *jets) {
+        if (jet.pt() > min_seed_jet_pt) { // assume rest of id above already applied at tuple time
+          for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
+            const reco::TrackRef& tk = pfcand->trackRef();
+            if (tk.isNonnull())
+              all_tracks.push_back(tk);
+          }
+        }
+      }
+    }
+  }
+
+  const size_t second_tracks_start_at = all_tracks.size(); // no cuts are applied to second_tracks since the hits cuts are hard to do without having hit info stored
+  
+  if (use_second_tracks) {
+    edm::Handle<reco::TrackCollection> tracks;
+    event.getByToken(second_track_token, tracks);
+    if (verbose) printf("second tracks start at %lu and there are %lu of them\n", second_tracks_start_at, tracks->size());
+    for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
+      all_tracks.push_back(reco::TrackRef(tracks, i));
   }
 
   if (jumble_tracks) {
+    assert(!use_second_tracks); // would break second_tracks_start_at cut skipping logic
     edm::Service<edm::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
     auto random_converter = [&](size_t n) { return size_t(rng_engine.flat() * n); };
@@ -686,7 +708,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   for (size_t i = 0, ie = all_tracks.size(); i < ie; ++i) {
     const reco::TrackRef& tk = all_tracks[i];
     const track_cuts tc(this, *tk, *beamspot, primary_vertex, *tt_builder);
-    bool use = tc.use(false);
+    const bool is_second_track = i >= second_tracks_start_at;
+    bool use = no_track_cuts || is_second_track || tc.use(false);
 
     if (use && remove_tracks_frac > 0) {
       edm::Service<edm::RandomNumberGenerator> rng;
@@ -697,6 +720,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     if (use) {
       seed_tracks.push_back(tt_builder->build(tk));
+      seed_track_is_second.push_back(is_second_track);
       if (seed_tracks.size() <= max_n_seed_pts)
         seed_tracks_pt[seed_tracks.size()-1] = tk->pt();
       seed_track_ref_map[tk] = seed_tracks.size() - 1;
@@ -813,7 +837,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   std::vector<bool> seed_use(ntk, 0);
   for (size_t itk = 0; itk < ntk; ++itk) {
     const track_cuts itk_tc(this, seed_tracks[itk].track(), *beamspot, primary_vertex, *tt_builder);
-    seed_use[itk] = itk_tc.use(true);
+    seed_use[itk] = no_track_cuts || seed_track_is_second[itk] || itk_tc.use(true);
   }
 
   for (size_t itk = 0; itk < ntk-1; ++itk) {
