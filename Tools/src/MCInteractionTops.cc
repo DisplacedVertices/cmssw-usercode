@@ -29,6 +29,10 @@ void MCInteractionTops::Fill() {
       tops[1] = &gen;
     }
   }
+
+  if (!Valid())
+    return;
+
     // Find the Ws and bs from top decay, and any gluons off the
     // tops. Bottom or bottombar might not be there, since |Vtb| isn't
     // exactly 1.
