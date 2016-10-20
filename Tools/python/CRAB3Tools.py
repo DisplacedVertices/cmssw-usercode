@@ -41,6 +41,11 @@ def crab_command(*args, **kwargs):
         result['jobList'] = []
         result['HTTPException'] = e
         result['status'] = 'HTTPException'
+    except pycurl.error, e:
+        result = {}
+        result['jobList'] = []
+        result['pycurlError'] = e
+        result['status'] = 'pycurlError'
 
     if suppress_stdout:
         result['stdout'] = buf.getvalue()
@@ -122,8 +127,10 @@ def crab_process_statuses_with_redo(working_dirs, max_processes, verbose=True):
     results = dict(crab_process_statuses(working_dirs, max_processes, verbose))
 
     def redoable(res):
-        return res.has_key('HTTPException') or \
-               'Timeout when waiting for remote host' in res.get('taskFailureMsg', '')
+        return \
+            res.has_key('HTTPException') or \
+            res.has_key('pycurlError') or \
+            'Timeout when waiting for remote host' in res.get('taskFailureMsg', '')
 
     to_redo = [d for d, res in results.iteritems() if redoable(res)]
 
