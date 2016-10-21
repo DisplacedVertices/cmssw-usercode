@@ -1499,23 +1499,23 @@ def real_hist_min(h, return_bin=False, user_range=None):
         return m
 
 def set_style(date_pages=False):
-    ROOT.gROOT.SetStyle('Plain')
+#    ROOT.gROOT.SetStyle('Plain')
+    ROOT.gStyle.SetPadTickX(1)
+    ROOT.gStyle.SetPadTickY(1)
+    ROOT.gStyle.SetOptStat(1222222)
+    ROOT.gStyle.SetOptFit(2222)
+    ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
+    return
     ROOT.gStyle.SetFillColor(0)
     if date_pages:
         ROOT.gStyle.SetOptDate()
-    ROOT.gStyle.SetOptStat(1222222)
-    ROOT.gStyle.SetOptFit(2222)
-    ROOT.gStyle.SetPadTickX(1)
-    ROOT.gStyle.SetPadTickY(1)
     ROOT.gStyle.SetGridStyle(3)
-    ROOT.gStyle.SetStatW(0.25)
     ROOT.gStyle.SetStatFormat('6.4g')
     ROOT.gStyle.SetPalette(1)
     ROOT.gStyle.SetTitleFont(42, 'XYZ')
     ROOT.gStyle.SetLabelFont(42, 'XYZ')
     ROOT.gStyle.SetStatFont(42)
     ROOT.gStyle.SetLegendFont(42)
-    ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 def sort_histogram_pair(h1, h2, by=real_hist_max):
     """Return the pair ordered by e.g. real_hist_max to know which to
