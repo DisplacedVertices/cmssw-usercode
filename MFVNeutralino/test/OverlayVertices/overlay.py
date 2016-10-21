@@ -7,7 +7,7 @@ which_event = 2
 rest_of_event = True
 min_ntracks = 3
 
-out_fn = 'overlay%s_%i' % ('_wevent' if rest_of_event else '', which_event)
+out_fn = 'overlay%s_%i.root' % ('_wevent' if rest_of_event else '', which_event)
 
 process = basic_process('Overlay')
 geometry_etc(process, which_global_tag(is_mc))
