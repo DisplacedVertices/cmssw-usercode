@@ -420,7 +420,7 @@ while 1:
     if notdone:
         print
         print_header('To resume with just the not-done dirs, do:')
-        s = 'cr3mon ' + ' '.join(notdone)
+        s = 'crmon ' + ' '.join(notdone)
         backdoor_print('resume', [s])
 
     if not dirs:
