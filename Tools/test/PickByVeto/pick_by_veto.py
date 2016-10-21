@@ -41,7 +41,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     def pset_modifier(sample):
         assert sample.name == 'ttbar'  # fix this 
-        return ['process.veto.list_fn = "vetolist.ttbar.gz"'], []
+        return ['process.veto.list_fn = "vetolist.%s.gz"' % sample.name], []
 
     def cfg_modifier(cfg, sample):
         assert sample.name == 'ttbar'  # fix this 
@@ -51,7 +51,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = pset_modifier,
                        cfg_modifier = cfg_modifier,
                        splitting = 'FileBased',
-                       units_per_job = 50,
+                       units_per_job = 100,
                        total_units = -1,
                        publish_name = 'pick1vtx',
                        )
