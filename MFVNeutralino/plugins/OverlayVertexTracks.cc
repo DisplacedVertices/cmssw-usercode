@@ -82,7 +82,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
   }
 
   produces<reco::TrackCollection>();
-  produces<double>("dVVtrue");
+  produces<std::vector<double>>();
 }
 
 MFVOverlayVertexTracks::~MFVOverlayVertexTracks() {
@@ -91,11 +91,6 @@ MFVOverlayVertexTracks::~MFVOverlayVertexTracks() {
 }
 
 namespace {
-  template <typename T>
-  T mag(T x, T y) {
-    return sqrt(x*x + y*y);
-  }
-
   template <typename T>
   int sgn(T val) {
     return (T(0) < val) - (val < T(0));
@@ -118,7 +113,7 @@ reco::Track MFVOverlayVertexTracks::copy_track(int i, mfv::MiniNtuple* nt) {
 
 void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) {
   std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
-  std::auto_ptr<double> dvv_true(new double(-1));
+  std::auto_ptr<std::vector<double>> truth(new std::vector<double>(11)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0
 
   RLE rle(event.id().run(), event.luminosityBlock(), event.id().event());
   const int index = event_index[rle];
@@ -134,20 +129,29 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
   for (int i = 0; i < nt1_0->ntk0; ++i)
     nt1_0->tk0_vz[i] += deltaz;
 
-  *dvv_true = mag(nt0->x0 - nt1_0->x0, 
-                  nt0->y0 - nt1_0->y0);
-
-  for (int i = 0; i < nt1_0->ntk0; ++i)
-    output_tracks->push_back(copy_track(i, nt1_0));
+  (*truth)[0]  = nt0->ntk0;
+  (*truth)[1]  = nt0->x0;
+  (*truth)[2]  = nt0->y0;
+  (*truth)[3]  = nt0->z0;
+  (*truth)[4]  = nt1->ntk1;
+  (*truth)[5]  = nt1->x0;
+  (*truth)[6]  = nt1->y0;
+  (*truth)[7]  = nt1->z0;
+  (*truth)[8]  = nt1_0->x0;
+  (*truth)[9]  = nt1_0->y0;
+  (*truth)[10] = nt1_0->z0;
 
   if (!only_other_tracks)
     for (int i = 0; i < nt0->ntk0; ++i)
       output_tracks->push_back(copy_track(i, nt0));
 
+  for (int i = 0; i < nt1_0->ntk0; ++i)
+    output_tracks->push_back(copy_track(i, nt1_0));
+
   delete nt1_0;
 
   event.put(output_tracks);
-  event.put(dvv_true, "dVVtrue");
+  event.put(truth);
 }
 
 DEFINE_FWK_MODULE(MFVOverlayVertexTracks);
