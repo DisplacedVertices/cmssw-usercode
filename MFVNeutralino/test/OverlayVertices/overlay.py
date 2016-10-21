@@ -7,7 +7,7 @@ which_event = 2
 rest_of_event = True
 min_ntracks = 3
 found_dist = 0.005
-z_model = 'none'
+z_model = 'deltapv'
 
 out_fn = 'overlay%s_Z%s_dist%s_%i.root' % ('_wevent' if rest_of_event else '',
                                            z_model,
@@ -43,7 +43,7 @@ process.veto = cms.EDFilter('EventIdVeto',
 process.mfvOverlayTracks = cms.EDProducer('MFVOverlayVertexTracks',
                                           minitree_fn = cms.string('minitree.root'),
                                           which_event = cms.int32(which_event),
-                                          z_model = cms.string("none"),
+                                          z_model = cms.string(z_model),
                                           only_other_tracks = cms.bool(rest_of_event),
                                           verbose = cms.bool(debug),
                                           )
