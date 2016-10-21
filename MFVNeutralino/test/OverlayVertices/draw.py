@@ -1,12 +1,12 @@
 from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
-ps = plot_saver('plots/overlay')
+ps = plot_saver('plots/overlay_2')
 
-f = ROOT.TFile('overlay.root')
+f = ROOT.TFile('overlay_2.root')
 
 def rebin(h):
-    a = array('d', [x*0.01 for x in xrange(11)])
+    a = array('d', [x*0.005 for x in xrange(21)])
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
     
 def get_h(n):
@@ -23,8 +23,9 @@ n_nums = [
     'h_dvv_pass_foundv0andv1samentk',
 ]
 
-fcn = ROOT.TF1('fcn', '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', 0, 0.05)
+fcn = ROOT.TF1('fcn', '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', 0, 0.1)
 fcn.SetParameters(0., 1., 0.02, 0.01)
+fcn.FixParameter(0, 0.)
 
 for n_num in n_nums:
     h_num = get_h(n_num)
