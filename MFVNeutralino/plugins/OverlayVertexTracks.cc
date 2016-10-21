@@ -112,6 +112,8 @@ reco::Track MFVOverlayVertexTracks::copy_track(int i, mfv::MiniNtuple* nt) {
 }
 
 void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) {
+  assert(!event.isRealData()); // JMTBAD lots of reasons this dosen't work on data yet
+
   std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
   std::auto_ptr<std::vector<double>> truth(new std::vector<double>(11)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0
 
@@ -129,11 +131,15 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
   for (int i = 0; i < nt1_0->ntk0; ++i)
     nt1_0->tk0_vz[i] += deltaz;
 
+  if (verbose) std::cout << "ntk0 " << std::setw(2) << +nt0->ntk0 << " v0 " << nt0->x0 << ", " << nt0->y0 << ", " << nt0->z0 << "\n"
+                         << "ntk1 " << std::setw(2) << +nt1->ntk0 << " v1 " << nt1->x0 << ", " << nt1->y0 << ", " << nt1->z0 << "\n"
+                         << "       " << " v1_0 " << nt1_0->x0 << ", " << nt1_0->y0 << ", " << nt1_0->z0 << std::endl;
+
   (*truth)[0]  = nt0->ntk0;
   (*truth)[1]  = nt0->x0;
   (*truth)[2]  = nt0->y0;
   (*truth)[3]  = nt0->z0;
-  (*truth)[4]  = nt1->ntk1;
+  (*truth)[4]  = nt1->ntk0;
   (*truth)[5]  = nt1->x0;
   (*truth)[6]  = nt1->y0;
   (*truth)[7]  = nt1->z0;
