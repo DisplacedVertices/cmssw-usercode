@@ -51,7 +51,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = pset_modifier,
                        cfg_modifier = cfg_modifier,
                        splitting = 'FileBased',
-                       units_per_job = 100,
+                       units_per_job = 30,
                        total_units = -1,
                        publish_name = 'pick1vtx',
                        )
