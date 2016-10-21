@@ -19,15 +19,15 @@ class MFVOverlayVertexHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<reco::VertexCollection> vertices_token;
 
   const int min_ntracks;
+  const double found_dist;
   const bool debug;
 
   TH1F* h_dvv_true;
   TH1F* h_dvv_pass_anytwo;
   TH1F* h_dvv_pass_twominntk;
-  TH1F* h_dvv_pass_foundv0;
-  TH1F* h_dvv_pass_foundv0samentk;
   TH1F* h_dvv_pass_foundv0andv1;
   TH1F* h_dvv_pass_foundv0andv1samentk;
+  TH1F* h_dvv_pass_foundv0andv1asmanyntk;
 };
 
 MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
@@ -35,17 +35,17 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertices_src"))),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
+    found_dist(cfg.getParameter<double>("found_dist")),
     debug(cfg.getParameter<bool>("debug"))
 {
   edm::Service<TFileService> fs;
 
-  h_dvv_true                     = fs->make<TH1F>("h_dvv_true",                     "", 100, 0, 0.1);
-  h_dvv_pass_anytwo              = fs->make<TH1F>("h_dvv_pass_anytwo",              "", 100, 0, 0.1);
-  h_dvv_pass_twominntk           = fs->make<TH1F>("h_dvv_pass_twominntk",           "", 100, 0, 0.1);
-  h_dvv_pass_foundv0             = fs->make<TH1F>("h_dvv_pass_foundv0",             "", 100, 0, 0.1);
-  h_dvv_pass_foundv0samentk      = fs->make<TH1F>("h_dvv_pass_foundv0samentk",      "", 100, 0, 0.1);
-  h_dvv_pass_foundv0andv1        = fs->make<TH1F>("h_dvv_pass_foundv0andv1",        "", 100, 0, 0.1);
-  h_dvv_pass_foundv0andv1samentk = fs->make<TH1F>("h_dvv_pass_foundv0andv1samentk", "", 100, 0, 0.1);
+  h_dvv_true                       = fs->make<TH1F>("h_dvv_true",                       "", 100, 0, 0.1);
+  h_dvv_pass_anytwo                = fs->make<TH1F>("h_dvv_pass_anytwo",                "", 100, 0, 0.1);
+  h_dvv_pass_twominntk             = fs->make<TH1F>("h_dvv_pass_twominntk",             "", 100, 0, 0.1);
+  h_dvv_pass_foundv0andv1          = fs->make<TH1F>("h_dvv_pass_foundv0andv1",          "", 100, 0, 0.1);
+  h_dvv_pass_foundv0andv1samentk   = fs->make<TH1F>("h_dvv_pass_foundv0andv1samentk",   "", 100, 0, 0.1);
+  h_dvv_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_dvv_pass_foundv0andv1asmanyntk", "", 100, 0, 0.1);
 }
 
 namespace {
@@ -93,7 +93,6 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
   int nvtx_minntk = 0;
   bool found[2] = {0};
   int found_ntk[2] = {0};
-  const double found_dist = 0.012;
 
   if (debug) printf("%i reco vertices:\n", nvtx);
 
@@ -126,12 +125,11 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
 
   auto fillit = [&dvv_true](TH1F* h, bool cond) { if (cond) h->Fill(dvv_true); };
 
-  fillit(h_dvv_pass_anytwo,              nvtx >= 2);
-  fillit(h_dvv_pass_twominntk,           nvtx_minntk >= 2);
-  fillit(h_dvv_pass_foundv0,             nvtx >= 2 && found[0]);
-  fillit(h_dvv_pass_foundv0samentk,      nvtx >= 2 && found[0] && found_ntk[0] >= ntk0);
-  fillit(h_dvv_pass_foundv0andv1,        nvtx >= 2 && found[0] && found[1]);
-  fillit(h_dvv_pass_foundv0andv1samentk, nvtx >= 2 && found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] >= ntk1);
+  fillit(h_dvv_pass_anytwo,                nvtx >= 2);
+  fillit(h_dvv_pass_twominntk,             nvtx_minntk >= 2);
+  fillit(h_dvv_pass_foundv0andv1,          nvtx >= 2 && found[0] && found[1]);
+  fillit(h_dvv_pass_foundv0andv1samentk,   nvtx >= 2 && found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1);
+  fillit(h_dvv_pass_foundv0andv1asmanyntk, nvtx >= 2 && found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1);
 }
 
 DEFINE_FWK_MODULE(MFVOverlayVertexHistos);
