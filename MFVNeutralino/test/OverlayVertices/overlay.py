@@ -6,8 +6,13 @@ is_mc = True
 which_event = 2
 rest_of_event = True
 min_ntracks = 3
+found_dist = 0.005
+z_model = 'none'
 
-out_fn = 'overlay%s_%i.root' % ('_wevent' if rest_of_event else '', which_event)
+out_fn = 'overlay%s_Z%s_dist%s_%i.root' % ('_wevent' if rest_of_event else '',
+                                           z_model,
+                                           ('%.3f' % found_dist).replace('.', 'p'),
+                                           which_event)
 
 process = basic_process('Overlay')
 geometry_etc(process, which_global_tag(is_mc))
@@ -38,6 +43,7 @@ process.veto = cms.EDFilter('EventIdVeto',
 process.mfvOverlayTracks = cms.EDProducer('MFVOverlayVertexTracks',
                                           minitree_fn = cms.string('minitree.root'),
                                           which_event = cms.int32(which_event),
+                                          z_model = cms.string("none"),
                                           only_other_tracks = cms.bool(rest_of_event),
                                           verbose = cms.bool(debug),
                                           )
@@ -47,6 +53,7 @@ process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
                                           beamspot_src = cms.InputTag('offlineBeamSpot'),
                                           vertices_src = cms.InputTag('mfvVertices'),
                                           min_ntracks = cms.int32(min_ntracks),
+                                          found_dist = cms.double(found_dist),
                                           debug = cms.bool(debug),
                                           )
 
