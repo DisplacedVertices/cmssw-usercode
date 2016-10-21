@@ -22,8 +22,12 @@ private:
 
   const std::string minitree_fn;
   const int which_event;
+  const std::string z_model_str;
+  const int z_model;
   const bool only_other_tracks;
   const bool verbose;
+
+  enum { z_none, z_deltapv };
 
   std::vector<mfv::MiniNtuple*> minitree_events;
   std::map<RLE, int> event_index;
@@ -39,9 +43,16 @@ namespace {
 MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg) 
   : minitree_fn(cfg.getParameter<std::string>("minitree_fn")),
     which_event(cfg.getParameter<int>("which_event")),
+    z_model_str(cfg.getParameter<std::string>("z_model")),
+    z_model(z_model_str == "none"    ? z_none    :
+            z_model_str == "deltapv" ? z_deltapv :
+            -1),
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
     verbose(cfg.getParameter<bool>("verbose"))
 {
+  if (z_model == -1)
+    throw cms::Exception("MFVOverlayVertexTracks", "bad z_model: ") << z_model_str;
+
   TFile* f = TFile::Open(minitree_fn.c_str());
   if (!f || !f->IsOpen())
     throw cms::Exception("MFVOverlayVertexTracks", "bad minitree file: ") << minitree_fn;
@@ -126,10 +137,12 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
   mfv::MiniNtuple* nt1 = minitree_events[which_event_offset];
   mfv::MiniNtuple* nt1_0 = mfv::clone(*nt1); // nt1 transformed into the "frame" of nt0
 
-  const double deltaz = nt0->pvz - nt1->pvz;
-  nt1_0->z0 += deltaz;
-  for (int i = 0; i < nt1_0->ntk0; ++i)
-    nt1_0->tk0_vz[i] += deltaz;
+  if (z_model == z_deltapv) {
+    const double deltaz = nt0->pvz - nt1->pvz;
+    nt1_0->z0 += deltaz;
+    for (int i = 0; i < nt1_0->ntk0; ++i)
+      nt1_0->tk0_vz[i] += deltaz;
+  }
 
   if (verbose) std::cout << "ntk0 " << std::setw(2) << +nt0->ntk0 << " v0 " << nt0->x0 << ", " << nt0->y0 << ", " << nt0->z0 << "\n"
                          << "ntk1 " << std::setw(2) << +nt1->ntk0 << " v1 " << nt1->x0 << ", " << nt1->y0 << ", " << nt1->z0 << "\n"
