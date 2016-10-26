@@ -1,13 +1,14 @@
+import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.gStyle.SetStatW(0.15)
 ROOT.gStyle.SetStatH(0.1)
 
-fn = 'overlay_wevent_dist0p005_2'
+fn = sys.argv[1]
 
-ps = plot_saver('plots/%s' % fn, size=(600,600), log=False)
-f = ROOT.TFile('%s.root' % fn)
+ps = plot_saver('plots/%s' % os.path.basename(fn).replace('.root', ''), size=(600,600), log=False)
+f = ROOT.TFile(fn)
 
 def rebin(h):
     a = array('d', [x*0.005 for x in xrange(21)])
@@ -28,10 +29,14 @@ n_nums = [
     'h_dvv_pass_foundv0andv1',
     'h_dvv_pass_foundv0andv1samentk',
     'h_dvv_pass_foundv0andv1asmanyntk',
+    'h_dvv_pass_foundv0andv1bytracks',
 ]
 
-fcn = ROOT.TF1('fcn', '[0]*(0.5 + 0.5 * TMath::Erf((x - [1])/[2]))', 0, 0.1)
-fcn.SetParameters(1., 0.02, 0.01)
+fcn = ROOT.TF1('fcn', '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', 0., 0.1)
+fcn.SetParNames('floor', 'ceiling', 'threshold', 'width')
+fcn.SetParameters(0., 1., 0.02, 0.01)
+fcn.SetParLimits(0, 0., 1.)
+fcn.SetParLimits(1, 0., 1.)
 
 for n_num in n_nums:
     h_num = get_h(n_num)
