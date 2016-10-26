@@ -2,7 +2,7 @@
 #include "TTree.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -10,13 +10,13 @@
 
 typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
 
-class MFVOverlayVertexTracks : public edm::EDProducer {
+class MFVOverlayVertexTracks : public edm::EDFilter {
 public:
   explicit MFVOverlayVertexTracks(const edm::ParameterSet&);
   ~MFVOverlayVertexTracks();
 
 private:
-  virtual void produce(edm::Event&, const edm::EventSetup&);
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   reco::Track copy_track(int i, mfv::MiniNtuple* nt);
 
@@ -123,7 +123,7 @@ reco::Track MFVOverlayVertexTracks::copy_track(int i, mfv::MiniNtuple* nt) {
                      reco::TrackBase::TrackAlgorithm(0));
 }
 
-void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) {
+bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
   assert(!event.isRealData()); // JMTBAD lots of reasons this dosen't work on data yet
 
   std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
@@ -131,12 +131,17 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
   // rest of truth is (ntk0 + ntk1) * 3 : px, py, pz, ... original untransformed tracks for v1
 
   RLE rle(event.id().run(), event.luminosityBlock(), event.id().event());
+  if (event_index.find(rle) == event_index.end())
+    return false;
+
   const int index = event_index[rle];
-  const int which_event_offset = index <= which_event ? which_event+1 : which_event;
-  if (verbose) std::cout << "OverlayTracks " << rle << " : index = " << index << " which_event " << which_event << " which_event_offset " << which_event_offset << "\n";
+  if (index == which_event)
+    return false;
+
+  if (verbose) std::cout << "OverlayTracks " << rle << " : index = " << index << " which_event " << which_event << "\n";
     
   mfv::MiniNtuple* nt0 = minitree_events[index];
-  mfv::MiniNtuple* nt1 = minitree_events[which_event_offset];
+  mfv::MiniNtuple* nt1 = minitree_events[which_event];
   mfv::MiniNtuple* nt1_0 = mfv::clone(*nt1); // nt1 transformed into the "frame" of nt0
 
   if (z_model == z_deltasv || z_model == z_deltapv) {
@@ -187,6 +192,8 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
 
   event.put(output_tracks);
   event.put(truth);
+
+  return true;
 }
 
 DEFINE_FWK_MODULE(MFVOverlayVertexTracks);

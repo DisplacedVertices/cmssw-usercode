@@ -1,13 +1,20 @@
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.Tools.CMSSWTools import *
+from JMTucker.Tools.general import typed_from_argv
 
 debug = False
 is_mc = True
-which_event = 2
-rest_of_event = True
+which_event = None
+rest_of_event = False
 min_ntracks = 3
-found_dist = 0.005
+found_dist = 0.008
 z_model = 'deltapv'
+
+if which_event is None:
+    which_event = typed_from_argv(int)
+    if which_event is None:
+        raise ValueError('which_event from argv but no int found')
+    print 'which_event from argv:', which_event
 
 out_fn = 'overlay%s_Z%s_dist%s_%i.root' % ('_wevent' if rest_of_event else '',
                                            z_model,
@@ -34,19 +41,13 @@ process.mfvVertices.second_track_src = 'mfvOverlayTracks'
 if not rest_of_event:
     process.mfvVertices.disregard_event = True
 
-process.veto = cms.EDFilter('EventIdVeto',
-                            use_run = cms.bool(False),
-                            list_fn = cms.string('veto.gz'),
-                            debug = cms.untracked.bool(False),
-                            )
-
-process.mfvOverlayTracks = cms.EDProducer('MFVOverlayVertexTracks',
-                                          minitree_fn = cms.string('minitree.root'),
-                                          which_event = cms.int32(which_event),
-                                          z_model = cms.string(z_model),
-                                          only_other_tracks = cms.bool(rest_of_event),
-                                          verbose = cms.bool(debug),
-                                          )
+process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
+                                        minitree_fn = cms.string('minitree.root'),
+                                        which_event = cms.int32(which_event),
+                                        z_model = cms.string(z_model),
+                                        only_other_tracks = cms.bool(rest_of_event),
+                                        verbose = cms.bool(True),
+                                        )
 
 process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
                                           truth_src = cms.InputTag('mfvOverlayTracks'),
@@ -57,10 +58,9 @@ process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
                                           debug = cms.bool(debug),
                                           )
 
-process.p = cms.Path(~process.veto * process.goodOfflinePrimaryVertices * process.mfvOverlayTracks * process.mfvVertices * process.mfvOverlayHistos)
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvOverlayTracks * process.mfvVertices * process.mfvOverlayHistos)
 
 process.mfvOverlayTracks.minitree_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV9_temp/ttbar.root'
-process.veto.list_fn = 'veto_ttbar_temp'
 process.maxEvents.input = -1
 process.source.fileNames = ['/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/pick1vtx/161020_194226/0000/' + x.strip() for x in \
 '''
