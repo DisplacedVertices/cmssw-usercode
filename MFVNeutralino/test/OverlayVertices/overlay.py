@@ -46,7 +46,7 @@ process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         which_event = cms.int32(which_event),
                                         z_model = cms.string(z_model),
                                         only_other_tracks = cms.bool(rest_of_event),
-                                        verbose = cms.bool(True),
+                                        verbose = cms.bool(debug),
                                         )
 
 process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
