@@ -27,7 +27,7 @@ private:
   const bool only_other_tracks;
   const bool verbose;
 
-  enum { z_none, z_deltapv };
+  enum { z_none, z_deltasv, z_deltapv };
 
   std::vector<mfv::MiniNtuple*> minitree_events;
   std::map<RLE, int> event_index;
@@ -45,6 +45,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     which_event(cfg.getParameter<int>("which_event")),
     z_model_str(cfg.getParameter<std::string>("z_model")),
     z_model(z_model_str == "none"    ? z_none    :
+            z_model_str == "deltasv" ? z_deltasv :
             z_model_str == "deltapv" ? z_deltapv :
             -1),
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
@@ -127,6 +128,7 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
 
   std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
   std::auto_ptr<std::vector<double>> truth(new std::vector<double>(11)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0
+  // rest of truth is (ntk0 + ntk1) * 3 : px, py, pz, ... original untransformed tracks for v1
 
   RLE rle(event.id().run(), event.luminosityBlock(), event.id().event());
   const int index = event_index[rle];
@@ -137,8 +139,8 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
   mfv::MiniNtuple* nt1 = minitree_events[which_event_offset];
   mfv::MiniNtuple* nt1_0 = mfv::clone(*nt1); // nt1 transformed into the "frame" of nt0
 
-  if (z_model == z_deltapv) {
-    const double deltaz = nt0->pvz - nt1->pvz;
+  if (z_model == z_deltasv || z_model == z_deltapv) {
+    const double deltaz = z_model == z_deltapv ? nt0->pvz - nt1->pvz : nt0->z0 - nt1->z0;
     nt1_0->z0 += deltaz;
     for (int i = 0; i < nt1_0->ntk0; ++i)
       nt1_0->tk0_vz[i] += deltaz;
@@ -146,7 +148,7 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
 
   if (verbose) std::cout << "ntk0 " << std::setw(2) << +nt0->ntk0 << " v0 " << nt0->x0 << ", " << nt0->y0 << ", " << nt0->z0 << "\n"
                          << "ntk1 " << std::setw(2) << +nt1->ntk0 << " v1 " << nt1->x0 << ", " << nt1->y0 << ", " << nt1->z0 << "\n"
-                         << "       " << " v1_0 " << nt1_0->x0 << ", " << nt1_0->y0 << ", " << nt1_0->z0 << std::endl;
+                         << "       " << " v1_0 " << nt1_0->x0 << ", " << nt1_0->y0 << ", " << nt1_0->z0 << "\n";
 
   (*truth)[0]  = nt0->ntk0;
   (*truth)[1]  = nt0->x0;
@@ -159,6 +161,20 @@ void MFVOverlayVertexTracks::produce(edm::Event& event, const edm::EventSetup&) 
   (*truth)[8]  = nt1_0->x0;
   (*truth)[9]  = nt1_0->y0;
   (*truth)[10] = nt1_0->z0;
+
+  for (int i = 0; i < nt0->ntk0; ++i) {
+    if (verbose) std::cout << "v0 tk" << i << ": " << nt0->tk0_px[i] << ", " << nt0->tk0_py[i] << ", " << nt0->tk0_pz[i] << "\n";
+    truth->push_back(nt0->tk0_px[i]);
+    truth->push_back(nt0->tk0_py[i]);
+    truth->push_back(nt0->tk0_pz[i]);
+  }
+
+  for (int i = 0; i < nt1->ntk0; ++i) {
+    if (verbose) std::cout << "v1 tk" << i << ": " << nt1->tk0_px[i] << ", " << nt1->tk0_py[i] << ", " << nt1->tk0_pz[i] << "\n";
+    truth->push_back(nt1->tk0_px[i]);
+    truth->push_back(nt1->tk0_py[i]);
+    truth->push_back(nt1->tk0_pz[i]);
+  }
 
   if (!only_other_tracks)
     for (int i = 0; i < nt0->ntk0; ++i)
