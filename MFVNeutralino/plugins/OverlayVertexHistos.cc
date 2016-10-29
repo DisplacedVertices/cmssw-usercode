@@ -165,7 +165,7 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
             const double dist = tracks[j][i].dist(*it);
             if (debug) printf("truth v%i track %i  %f, %f, %f, p %f  dist %f\n", j, i, tracks[j][i].px, tracks[j][i].py, tracks[j][i].pz, tracks[j][i].p, dist);
 
-            if (dist < 1) {
+            if (dist < 0.01) {
               if (debug) printf("  found!\n");
               track_found[i] = true;
             }
