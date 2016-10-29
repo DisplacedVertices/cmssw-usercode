@@ -146,14 +146,14 @@ lin.SetLineColor(ROOT.kRed)
 lin.SetLineWidth(3)
 lin.Draw()
 
-cms = write(61, 0.050, 0.099, 0.931, 'CMS')
+cms = write(61, 0.050, 0.099, 0.933, 'CMS')
 if prelim:
     name = 'plots/prelim/closure'
     sim_str = 'Simulation Preliminary'
 else:
     name = 'plots/after_referee/closure'
     sim_str = 'Simulation'
-sim = write(52, 0.040, 0.207, 0.931, sim_str)
+sim = write(52, 0.040, 0.207, 0.932, sim_str)
 lum = write(42, 0.050, 0.631, 0.933, '17.6 fb^{-1} (8 TeV)')
 
 # do a broken x axis. thanks root (throot)

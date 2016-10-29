@@ -109,9 +109,9 @@ leg.AddEntry(h_sb_sum, 'Signal + background fit', 'L')
 leg.AddEntry(h_b_sum, 'Background-only fit', 'L')
 leg.Draw()
 #leg.SetF
-cms = write(61, 0.050, 0.099, 0.931, 'CMS')
+cms = write(61, 0.050, 0.099, 0.933, 'CMS')
 #pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
-sim = write(42, 0.050, 0.631, 0.933, ac.int_lumi_nice)
+lum = write(42, 0.050, 0.631, 0.933, '17.6 fb^{-1} (8 TeV)')
 
 
 # do a broken x axis. thanks root (throot)
@@ -151,7 +151,7 @@ line2 = ROOT.TLine(boxcenter+boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter
 line2.SetLineWidth(2)
 line2.Draw()
 
-name = 'plots/after_finalreading/fit'
+name = 'plots/after_referee/fit'
 c.SaveAs(name + '.pdf')
 c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')
