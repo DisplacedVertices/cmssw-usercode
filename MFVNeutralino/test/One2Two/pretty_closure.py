@@ -127,12 +127,12 @@ h_mctoy.Draw()
 h_central.Draw('same')
 g_cons.Draw('e2')
 #g_cons.Draw('p')
-h_mctoy.GetYaxis().SetRangeUser(0.1, 400)
+h_mctoy.GetYaxis().SetRangeUser(0.1, 300)
 
-leg = ROOT.TLegend(0.576, 0.710, 0.931, 0.903)
-#leg = ROOT.TLegend(0.549, 0.732, 0.925, 0.885)
+#leg = ROOT.TLegend(0.576, 0.710, 0.931, 0.903)
+leg = ROOT.TLegend(0.461, 0.689, 0.931, 0.902)
 leg.SetTextFont(43)
-leg.SetTextSize(23)
+leg.SetTextSize(29)
 leg.SetBorderSize(0)
 print leg.AddEntry(h_mctoy, 'Simulated events', 'LPE').GetTextSize()
 g_cons.SetLineWidth(0)
@@ -141,7 +141,7 @@ leg.AddEntry(g_cons, 'd_{VV}^{C}', 'F')
 #leg.AddEntry(g_cons, 'Range', 'F')
 leg.Draw()
 
-lin = ROOT.TLine(1.1535,79.0418,1.29205,79.0418)
+lin = ROOT.TLine(0.89105, 52.2401, 1.08271, 52.2401)
 lin.SetLineColor(ROOT.kRed)
 lin.SetLineWidth(3)
 lin.Draw()
@@ -151,10 +151,10 @@ if prelim:
     name = 'plots/prelim/closure'
     sim_str = 'Simulation Preliminary'
 else:
-    name = 'plots/after_finalreading/closure'
+    name = 'plots/after_referee/closure'
     sim_str = 'Simulation'
 sim = write(52, 0.040, 0.207, 0.931, sim_str)
-lum = write(42, 0.050, 0.630, 0.931, '17.6 fb^{-1} (8 TeV)')
+lum = write(42, 0.050, 0.631, 0.933, '17.6 fb^{-1} (8 TeV)')
 
 # do a broken x axis. thanks root (throot)
 
