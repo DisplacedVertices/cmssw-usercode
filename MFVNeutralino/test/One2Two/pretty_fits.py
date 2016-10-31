@@ -92,8 +92,6 @@ h_data.SetMarkerStyle(20)
 h_data.SetMarkerSize(1.5)
 
 c = ROOT.TCanvas('c', '', 800, 800)
-c.SetTopMargin(0.08)
-c.SetRightMargin(0.05)
 c.SetLogy()
 
 h_sb_sum.Draw('hist')
@@ -101,7 +99,7 @@ xax = h_sb_sum.GetXaxis()
 h_b_sum.Draw('hist same')
 h_data.Draw('P')
 
-leg = ROOT.TLegend(0.431, 0.659, 0.931, 0.902)
+leg = ROOT.TLegend(0.381, 0.639, 0.871, 0.882)
 leg.SetTextFont(42)
 leg.SetBorderSize(0)
 leg.AddEntry(h_data, 'Data', 'LPE')
@@ -109,9 +107,9 @@ leg.AddEntry(h_sb_sum, 'Signal + background fit', 'L')
 leg.AddEntry(h_b_sum, 'Background-only fit', 'L')
 leg.Draw()
 #leg.SetF
-cms = write(61, 0.050, 0.099, 0.933, 'CMS')
+cms = write(61, 0.050, 0.099, 0.913, 'CMS')
 #pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
-lum = write(42, 0.050, 0.631, 0.933, '17.6 fb^{-1} (8 TeV)')
+lum = write(42, 0.050, 0.581, 0.913, '17.6 fb^{-1} (8 TeV)')
 
 
 # do a broken x axis. thanks root (throot)
