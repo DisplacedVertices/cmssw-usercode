@@ -144,13 +144,7 @@ lin.SetLineWidth(3)
 lin.Draw()
 
 cms = write(61, 0.050, 0.099, 0.913, 'CMS')
-if prelim:
-    name = 'plots/prelim/closure'
-    sim_str = 'Simulation Preliminary'
-else:
-    name = 'plots/after_referee/closure'
-    sim_str = 'Simulation'
-sim = write(52, 0.040, 0.207, 0.912, sim_str)
+sim = write(52, 0.040, 0.212, 0.912, 'Simulation')
 lum = write(42, 0.050, 0.586, 0.913, '17.6 fb^{-1} (8 TeV)')
 
 # do a broken x axis. thanks root (throot)
@@ -190,6 +184,7 @@ line2 = ROOT.TLine(boxcenter+boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter
 line2.SetLineWidth(2)
 line2.Draw()
 
+name = 'plots/after_referee/closure'
 c.SaveAs(name + '.pdf')
 c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')
