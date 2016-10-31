@@ -109,7 +109,7 @@ leg.Draw()
 #leg.SetF
 cms = write(61, 0.050, 0.099, 0.913, 'CMS')
 #pre = write(52, 0.040, 0.211, 0.931, 'Preliminary')
-lum = write(42, 0.050, 0.581, 0.913, '17.6 fb^{-1} (8 TeV)')
+lum = write(42, 0.050, 0.586, 0.913, '17.6 fb^{-1} (8 TeV)')
 
 
 # do a broken x axis. thanks root (throot)
