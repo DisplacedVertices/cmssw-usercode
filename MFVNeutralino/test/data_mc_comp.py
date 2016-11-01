@@ -7,7 +7,7 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, tdr_st
 from functools import partial
 
 root_file_dir = 'HistosV20_rebin_for_paper' # '/uscms/home/jchu/nobackup/crab_dirs/mfv_5313/HistosV20'
-plot_dir = 'plots/after_finalreading_dmc'
+plot_dir = 'plots/after_referee_dmc'
 
 set_style()
 ps = plot_saver(plot_dir, size=(1,1), root_log=True, pdf_log=True)
@@ -72,16 +72,16 @@ C('dvv',
   int_lumi = ac.int_lumi * ac.scale_factor,
   int_lumi_bkg_scale = 251.0 / 139.30171468,
   x_title = 'd_{VV} (mm)',
-  y_title = 'Events/0.2 mm',
+  y_title = 'Events',
   rebin = dvv_bins,
-  bin_width_to = 0.2,
+#  bin_width_to = 0.2,
   y_title_offset = 1.,
   x_title_offset = 0.92,
   x_title_size = 0.05,
   y_title_size = 0.05,
   y_label_size = 0.04,
 #  res_y_range = (0, 6.5),
-  y_range = (0.05, 300),
+  y_range = (0.2, 300),
   legend_pos = (0.438, 0.641, 0.875, 0.869),
   simulation = True,
   )

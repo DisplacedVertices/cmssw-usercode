@@ -809,7 +809,7 @@ def data_mc_comparison(name,
         boxcenter = 1.8
         boxwidth = 0.02
         boxy1 = 0.010
-        box1 = ROOT.TBox(boxcenter-boxwidth, boxy1, boxcenter+boxwidth, 2)
+        box1 = ROOT.TBox(boxcenter-boxwidth, boxy1, boxcenter+boxwidth, 3)
         box1.SetLineColor(ROOT.kWhite)
         box1.SetFillColor(ROOT.kWhite)
         box1.Draw()
