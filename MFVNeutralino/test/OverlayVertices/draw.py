@@ -8,7 +8,7 @@ ROOT.gStyle.SetStatH(0.1)
 fn = sys.argv[1]
 print fn
 
-ps = plot_saver('plots/%s' % os.path.basename(fn).replace('.root', ''), size=(600,600), log=False)
+ps = plot_saver('plots/overlay/%s' % os.path.basename(fn).replace('.root', ''), size=(600,600), log=False)
 f = ROOT.TFile(fn)
 
 def rebin(h):
@@ -19,30 +19,19 @@ def rebin(h):
 def get_h(n):
     h = rebin(f.Get('mfvOverlayHistos/%s' % n))
     h.SetLineWidth(2)
-    h.GetXaxis().SetTitle('d_{VV} (cm)')
+    s = 'VV' if 'dvv' in n else '3D'
+    h.GetXaxis().SetTitle('d_{%s} (cm)' % s)
     h.GetYaxis().SetTitle('efficiency')
     return h
 
 def get_h_eff(h_num, h_den):
-    h_eff = ROOT.TGraphAsymmErrors(h_num, h_den, 'midp')
+    h_eff = ROOT.TGraphAsymmErrors(h_num, h_den)
     h_eff.SetLineWidth(2)
-    h_eff.GetXaxis().SetTitle('d_{VV} (cm)')
+    s = 'VV' if 'dvv' in h_num.GetName() else '3D'
+    h_eff.GetXaxis().SetTitle('d_{%s} (cm)' % s)
     h_eff.GetYaxis().SetTitle('efficiency')
     h_eff.GetYaxis().SetRangeUser(0, 1.4)
     return h_eff
-
-h_den = get_h('h_dvv_true')
-
-n_nums = [
-    'h_dvv_pass_anytwo',
-    'h_dvv_pass_twominntk',
-    'h_dvv_pass_foundv0andv1',
-    'h_dvv_pass_foundv0andv1samentk',
-    'h_dvv_pass_foundv0andv1asmanyntk',
-    'h_dvv_pass_foundv0andv1bytracks',
-]
-
-pars = ('floor', 'ceiling', 'threshold', 'width')
 
 def do_fit(h_eff):
     fcn = ROOT.TF1('fcn', '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', 0., 0.1)
@@ -57,14 +46,53 @@ def do_fit(h_eff):
     print
     return fcn
 
-print '%35s' % '',
-print '%20s %20s %20s %20s' % pars
+dens = [
+    'h_dvv',
+    'h_d3d',
+    ]
 
-for n_num in n_nums:
-    h_num = get_h(n_num)
-    #print n_num, h_num
-    h_eff = get_h_eff(h_num, h_den)
-    h_eff.Draw('AP')
-    print '%35s' % n_num,
-    fcn = do_fit(h_eff)
-    ps.save(n_num)
+def print_h(h):
+    if False:
+        print h
+        nbins = h.GetNbinsX()
+        xax = h.GetXaxis()
+        print 'nbinsx', nbins, 'xmin', xax.GetXmin(), 'xmax', xax.GetXmax()
+        for ibin in xrange(nbins+2):
+            print '  ', ibin, xax.GetBinLowEdge(ibin), h.GetBinContent(ibin)
+
+def check(h_num, h_den):
+    for ibin in xrange(h_num.GetNbinsX()+2):
+        n = h_num.GetBinContent(ibin)
+        d = h_den.GetBinContent(ibin)
+        if n > d:
+            print 'prob', ibin, h_num, n, h_den, d
+
+for den in dens:
+    h_den = get_h('%s_true'  % den)
+    print_h(h_den)
+
+    n_nums = [
+        'pass_anytwo',
+        'pass_twominntk',
+        'pass_foundv0andv1',
+        'pass_foundv0andv1samentk',
+        'pass_foundv0andv1asmanyntk',
+        'pass_foundv0andv1bytracks',
+    ]
+
+    pars = ('floor', 'ceiling', 'threshold', 'width')
+
+    print den
+    print '%35s' % '',
+    print '%20s %20s %20s %20s' % pars
+
+    for n_num in n_nums:
+        n_num = den + '_' + n_num
+        h_num = get_h(n_num)
+        print_h(h_num)
+        check(h_num, h_den)
+        h_eff = get_h_eff(h_num, h_den)
+        h_eff.Draw('AP')
+        print '%35s' % n_num,
+        fcn = do_fit(h_eff)
+        ps.save(n_num)
