@@ -63,39 +63,3 @@ C('dbv',
   res_y_range = (0,2.5),
   legend_pos = (0.438, 0.671, 0.875, 0.899),
   )
-
-dvv_bins = [j*0.2 for j in range(6)] + [2.]
-
-C('dvv',
-  histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
-  data_samples = [],
-  int_lumi = ac.int_lumi * ac.scale_factor,
-  int_lumi_bkg_scale = 251.0 / 139.30171468,
-  x_title = 'd_{VV} (mm)',
-  y_title = 'Events',
-  rebin = dvv_bins,
-#  bin_width_to = 0.2,
-  y_title_offset = 1.,
-  x_title_offset = 0.92,
-  x_title_size = 0.05,
-  y_title_size = 0.05,
-  y_label_size = 0.04,
-#  res_y_range = (0, 6.5),
-  y_range = (0.2, 300),
-  legend_pos = (0.438, 0.641, 0.875, 0.869),
-  simulation = True,
-  )
-
-# NEED TO PUT THIS IN ROOTTOOLS TO ZERO THE LAST BIN IN RATIO
-#
-#        ddd = data_sample.hist.Clone('ddd')
-#        if ddd.GetNbinsX() == 6:
-#            ddd.SetBinContent(6, 0)
-#            ddd.SetBinError(6, 0)
-#
-# AND THIS FOR THE "WRONG" ERROR BAR
-#
-#        if res_g.GetN() == 5 and abs(res_g.GetY()[3] - 6.11046924755) < 1e-4:
-#            print 'hi from the hack!'
-#            res_g.SetPointEYlow(3, 4.22)
-#            res_g.SetPointEYhigh(3, 17.3)
