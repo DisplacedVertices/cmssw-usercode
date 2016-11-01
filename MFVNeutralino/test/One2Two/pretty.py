@@ -3,12 +3,7 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 from limitplot import exc_graph_dumb
 
-preliminary = False
-if preliminary:
-    path = 'plots/prelim'
-else:
-    #path = 'plots/not_prelim'
-    path = 'plots/after_finalreading'
+path = 'plots/after_referee'
 
 ts = tdr_style()
 rainbow_palette()
@@ -25,16 +20,14 @@ def write(font, size, x, y, text):
 #ROOT.gStyle.SetPalette(53)
 #ROOT.gStyle.SetNumberContours(500)
 
-ts.SetPadTopMargin(0.1)
-ts.SetPadBottomMargin(0.12)
-ts.SetPadLeftMargin(0.1)
-ts.SetPadRightMargin(0.165)
-
-
 f = ROOT.TFile('newplots.root')
 f2 = ROOT.TFile('newplots_fromr.root')
 
-c = ROOT.TCanvas('c', '', 1050, 860)
+c = ROOT.TCanvas('c', '', 800, 800)
+c.SetTopMargin(0.1)
+c.SetBottomMargin(0.12)
+c.SetLeftMargin(0.11)
+c.SetRightMargin(0.18)
 h = f.Get('h_eff_600')
 xax = h.GetXaxis()
 xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
@@ -52,7 +45,7 @@ xax.SetTitleOffset(1.05)
 xax.LabelsOption('h')
 yax = h.GetYaxis()
 yax.SetTitle('c#tau (mm)')
-yax.SetTitleOffset(0.95)
+yax.SetTitleOffset(1.0)
 yax.SetTitleSize(0.05)
 yax.SetLabelSize(0.065)
 yax.SetRangeUser(300, 32000)
@@ -66,15 +59,12 @@ zax = h.GetZaxis()
 zax.SetLabelSize(0.045)
 zax.SetTitle('Efficiency for d_{VV} > 600 #mum')
 zax.SetTitleSize(0.05)
-zax.SetTitleOffset(1.08)
+zax.SetTitleOffset(1.24)
 #zax.SetTitleSize()
 h.Draw('colz')
-cms = write(61, 0.050, 0.10, 0.92, 'CMS')
-if preliminary:
-    sim = write(52, 0.040, 0.19, 0.92, 'Simulation Preliminary')
-else:
-    sim = write(52, 0.040, 0.19, 0.92, 'Simulation')
-lum = write(42, 0.050, 0.735, 0.92, '(8 TeV)')
+cms = write(61, 0.050, 0.109, 0.913, 'CMS')
+sim = write(52, 0.040, 0.222, 0.912, 'Simulation')
+lum = write(42, 0.050, 0.676, 0.913, '(8 TeV)')
 c.SaveAs(os.path.join(path, 'scan_eff.pdf'))
 c.SaveAs(os.path.join(path, 'scan_eff.png'))
 c.SaveAs(os.path.join(path, 'scan_eff.root'))
@@ -92,7 +82,11 @@ for xxx in ('small', 'big'):
         ROOT.TColor.CreateGradientColorTable(n, stops, r, g, b, num_colors)
         ROOT.gStyle.SetNumberContours(num_colors)
 
-    c = ROOT.TCanvas('c', '', 1000, 800)
+    c = ROOT.TCanvas('c', '', 800, 800)
+    c.SetTopMargin(0.1)
+    c.SetBottomMargin(0.12)
+    c.SetLeftMargin(0.11)
+    c.SetRightMargin(0.16)
     #c.SetLogz()
     h = f.Get('hlim_observed')
     xax = h.GetXaxis()
@@ -124,7 +118,7 @@ for xxx in ('small', 'big'):
         yax.SetBinLabel(yax.FindBin(20000), '20')
         yax.SetBinLabel(yax.FindBin(30000), '30')
     yax.SetTitle('c#tau (mm)')
-    yax.SetTitleOffset(0.95)
+    yax.SetTitleOffset(1.05)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.065)
     zax = h.GetZaxis()
@@ -132,7 +126,7 @@ for xxx in ('small', 'big'):
     #zax.SetBinLabel(zax.FindBin(30), '30')
     zax.SetTitle('95% CL upper limit on #sigma B^{2} (fb)')
     zax.SetTitleSize(0.05)
-    zax.SetTitleOffset(0.97)
+    zax.SetTitleOffset(1.06)
     zax.SetLabelSize(0.045)
     h.Draw('colz')
     if xxx == 'big':
@@ -175,10 +169,8 @@ for xxx in ('small', 'big'):
         l2 = ROOT.TLine(627.13, 559.5, 713.15, 559.5)
     l1.Draw()
     l2.Draw()
-    cms = write(61, 0.050, 0.10, 0.92, 'CMS')
-    if preliminary:
-        pre = write(52, 0.040, 0.19, 0.92, 'Preliminary')
-    lum = write(42, 0.050, 0.60, 0.92, '17.6 fb^{-1} (8 TeV)')
+    cms = write(61, 0.050, 0.109, 0.913, 'CMS')
+    lum = write(42, 0.050, 0.699, 0.913, '(8 TeV)')
     fn = os.path.join(path, 'scan_lim_obs_%s' % xxx)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')

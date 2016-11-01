@@ -92,6 +92,7 @@ h_data.SetMarkerStyle(20)
 h_data.SetMarkerSize(1.5)
 
 c = ROOT.TCanvas('c', '', 800, 800)
+c.SetBottomMargin(0.12)
 c.SetLogy()
 
 h_sb_sum.Draw('hist')
