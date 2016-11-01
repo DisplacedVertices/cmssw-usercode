@@ -846,7 +846,7 @@ def data_mc_comparison(name,
     ratio_pad, res_g, old_opt_fit = None, None, None
     if data_sample is not None:
         ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
-        ratio_pad.SetTopMargin(0.71)
+        ratio_pad.SetTopMargin(1-canvas_bottom_margin + 0.015)
         ratio_pad.SetLeftMargin(canvas_left_margin)
         ratio_pad.SetRightMargin(canvas_right_margin)
         ratio_pad.SetFillColor(0)
