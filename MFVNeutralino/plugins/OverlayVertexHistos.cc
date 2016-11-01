@@ -34,6 +34,14 @@ class MFVOverlayVertexHistos : public edm::EDAnalyzer {
   TH1F* h_dvv_pass_foundv0andv1asmanyntk;
   TH1F* h_dvv_pass_foundv0andv1bytracks;
 
+  TH1F* h_d3d_true;
+  TH1F* h_d3d_pass_anytwo;
+  TH1F* h_d3d_pass_twominntk;
+  TH1F* h_d3d_pass_foundv0andv1;
+  TH1F* h_d3d_pass_foundv0andv1samentk;
+  TH1F* h_d3d_pass_foundv0andv1asmanyntk;
+  TH1F* h_d3d_pass_foundv0andv1bytracks;
+
   struct _track {
     _track() {}
     _track(double x, double y, double z) : px(x), py(y), pz(z), p(mag(x,y,z)) {}
@@ -63,6 +71,14 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
   h_dvv_pass_foundv0andv1samentk   = fs->make<TH1F>("h_dvv_pass_foundv0andv1samentk",   "", 100, 0, 0.1);
   h_dvv_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_dvv_pass_foundv0andv1asmanyntk", "", 100, 0, 0.1);
   h_dvv_pass_foundv0andv1bytracks  = fs->make<TH1F>("h_dvv_pass_foundv0andv1bytracks",  "", 100, 0, 0.1);
+
+  h_d3d_true                       = fs->make<TH1F>("h_d3d_true",                       "", 100, 0, 0.1);
+  h_d3d_pass_anytwo                = fs->make<TH1F>("h_d3d_pass_anytwo",                "", 100, 0, 0.1);
+  h_d3d_pass_twominntk             = fs->make<TH1F>("h_d3d_pass_twominntk",             "", 100, 0, 0.1);
+  h_d3d_pass_foundv0andv1          = fs->make<TH1F>("h_d3d_pass_foundv0andv1",          "", 100, 0, 0.1);
+  h_d3d_pass_foundv0andv1samentk   = fs->make<TH1F>("h_d3d_pass_foundv0andv1samentk",   "", 100, 0, 0.1);
+  h_d3d_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_d3d_pass_foundv0andv1asmanyntk", "", 100, 0, 0.1);
+  h_d3d_pass_foundv0andv1bytracks  = fs->make<TH1F>("h_d3d_pass_foundv0andv1bytracks",  "", 100, 0, 0.1);
 }
 
 void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -84,7 +100,9 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
   const double z1_0 = truth->at(10);
 
   const double dvv_true = mag(x0 - x1_0, y0 - y1_0);
+  const double d3d_true = mag(x0 - x1_0, y0 - y1_0, z0 - z1_0);
   h_dvv_true->Fill(dvv_true);
+  h_d3d_true->Fill(d3d_true);
 
   assert(int(truth->size()) - 11 == (ntk0 + ntk1) * 3);
 
@@ -99,8 +117,8 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
   }
     
   if (debug) {
-    printf("OverlayVertexHistos: truth: ntk0 %i v0 %f, %f, %f ntk1 %i v1 %f, %f, %f v1_0 %f, %f, %f -> dvv_true %f\n",
-           ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, dvv_true);
+    printf("OverlayVertexHistos: truth: ntk0 %i v0 %f, %f, %f ntk1 %i v1 %f, %f, %f v1_0 %f, %f, %f -> dvv_true %f, d3d_true %f\n",
+           ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, dvv_true, d3d_true);
     for (int j = 0; j < 2; ++j)
       for (int i = 0; i < ntks[j]; ++i)
         printf("v%i tk%i  %f, %f, %f  p = %f\n", j, i, tracks[j][i].px, tracks[j][i].py, tracks[j][i].pz, tracks[j][i].p);
@@ -187,17 +205,24 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
 
   if (debug) printf("decisions:\n");
 
-  auto fillit = [&](TH1F* h, bool cond) {
+  auto fillit = [&](double v, TH1F* h, bool cond) {
     if (debug) printf("%s: %i\n", h->GetName(), cond);
-    if (cond) h->Fill(dvv_true);
+    if (cond) h->Fill(v);
   };
 
-  fillit(h_dvv_pass_anytwo,                1);
-  fillit(h_dvv_pass_twominntk,             nvtx_minntk >= 2);
-  fillit(h_dvv_pass_foundv0andv1,          found[0] && found[1]);
-  fillit(h_dvv_pass_foundv0andv1samentk,   found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1);
-  fillit(h_dvv_pass_foundv0andv1asmanyntk, found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1);
-  fillit(h_dvv_pass_foundv0andv1bytracks,  found_by_tracks[0] && found_by_tracks[1]);
+  fillit(dvv_true, h_dvv_pass_anytwo,                1);
+  fillit(dvv_true, h_dvv_pass_twominntk,             nvtx_minntk >= 2);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1,          found[0] && found[1]);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1samentk,   found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1asmanyntk, found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1bytracks,  found_by_tracks[0] && found_by_tracks[1]);
+
+  fillit(d3d_true, h_d3d_pass_anytwo,                1);
+  fillit(d3d_true, h_d3d_pass_twominntk,             nvtx_minntk >= 2);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1,          found[0] && found[1]);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1samentk,   found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1asmanyntk, found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1bytracks,  found_by_tracks[0] && found_by_tracks[1]);
 }
 
 DEFINE_FWK_MODULE(MFVOverlayVertexHistos);
