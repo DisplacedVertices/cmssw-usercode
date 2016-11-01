@@ -1,11 +1,15 @@
 #include "TFile.h"
 #include "TTree.h"
+#include "CLHEP/Random/RandomEngine.h"
+#include "CLHEP/Random/RandGauss.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
@@ -27,7 +31,7 @@ private:
   const bool only_other_tracks;
   const bool verbose;
 
-  enum { z_none, z_deltasv, z_deltapv };
+  enum { z_none, z_deltasv, z_deltapv, z_deltasvgaus };
 
   std::vector<mfv::MiniNtuple*> minitree_events;
   std::map<RLE, int> event_index;
@@ -47,10 +51,15 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     z_model(z_model_str == "none"    ? z_none    :
             z_model_str == "deltasv" ? z_deltasv :
             z_model_str == "deltapv" ? z_deltapv :
+            z_model_str == "deltasvgaus" ? z_deltasvgaus :
             -1),
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
     verbose(cfg.getParameter<bool>("verbose"))
 {
+  edm::Service<edm::RandomNumberGenerator> rng;
+  if (z_model == z_deltasvgaus && !rng.isAvailable())
+    throw cms::Exception("MFVOverlayVertexTracks", "RandomNumberGeneratorService not available");
+
   if (z_model == -1)
     throw cms::Exception("MFVOverlayVertexTracks", "bad z_model: ") << z_model_str;
 
@@ -144,12 +153,19 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
   mfv::MiniNtuple* nt1 = minitree_events[which_event];
   mfv::MiniNtuple* nt1_0 = mfv::clone(*nt1); // nt1 transformed into the "frame" of nt0
 
-  if (z_model == z_deltasv || z_model == z_deltapv) {
-    const double deltaz = z_model == z_deltapv ? nt0->pvz - nt1->pvz : nt0->z0 - nt1->z0;
-    nt1_0->z0 += deltaz;
-    for (int i = 0; i < nt1_0->ntk0; ++i)
-      nt1_0->tk0_vz[i] += deltaz;
+  double deltaz = 0;
+  if (z_model == z_deltapv)
+    deltaz = nt0->pvz - nt1->pvz;
+  else if (z_model == z_deltasv)
+    deltaz = nt0->z0 - nt1->z0;
+  else if (z_model == z_deltasvgaus) {
+    edm::Service<edm::RandomNumberGenerator> rng;
+    deltaz = CLHEP::RandGauss(rng->getEngine(event.streamID())).fire(0., 0.03738);
   }
+
+  nt1_0->z0 += deltaz;
+  for (int i = 0; i < nt1_0->ntk0; ++i)
+    nt1_0->tk0_vz[i] += deltaz;
 
   if (verbose) std::cout << "ntk0 " << std::setw(2) << +nt0->ntk0 << " v0 " << nt0->x0 << ", " << nt0->y0 << ", " << nt0->z0 << "\n"
                          << "ntk1 " << std::setw(2) << +nt1->ntk0 << " v1 " << nt1->x0 << ", " << nt1->y0 << ", " << nt1->z0 << "\n"
