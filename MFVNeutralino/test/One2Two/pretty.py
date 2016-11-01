@@ -161,12 +161,13 @@ for xxx in ('small', 'big'):
     leg.AddEntry(g_obs, 'Observed #pm 1 #sigma_{th} ', 'L')
     leg.AddEntry(g_exp, 'Expected', 'L')
     leg.Draw()
+    x1, x2 = 620, 708
     if xxx == 'big':
-        l1 = ROOT.TLine(627.13, 13046.8, 713.15, 13046.8)
-        l2 = ROOT.TLine(627.13, 12484.6, 713.15, 12484.6)
+        y1, y2 = 11970, 12610.9
     else:
-        l1 = ROOT.TLine(627.13, 572.9, 713.15, 572.9)
-        l2 = ROOT.TLine(627.13, 559.5, 713.15, 559.5)
+        y1, y2 = 547.1, 562.2
+    l1 = ROOT.TLine(x1, y1, x2, y1)
+    l2 = ROOT.TLine(x1, y2, x2, y2)
     l1.Draw()
     l2.Draw()
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
