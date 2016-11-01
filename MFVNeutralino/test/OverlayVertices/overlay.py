@@ -8,7 +8,7 @@ which_event = None
 rest_of_event = False
 min_ntracks = 3
 found_dist = 0.008
-z_model = 'deltapv'
+z_model = 'deltasvgaus'
 
 if which_event is None:
     which_event = typed_from_argv(int)
@@ -24,7 +24,7 @@ out_fn = 'overlay%s_Z%s_dist%s_%i.root' % ('_wevent' if rest_of_event else '',
 process = basic_process('Overlay')
 geometry_etc(process, which_global_tag(is_mc))
 tfileservice(process, out_fn)
-random_service(process, {'mfvVertices': 12179})
+random_service(process, {'mfvVertices': 12179, 'mfvOverlayTracks': 12180})
 
 if is_mc:
     process.load('JMTucker.Tools.MCStatProducer_cff')
