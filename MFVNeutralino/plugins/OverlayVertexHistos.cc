@@ -26,6 +26,8 @@ class MFVOverlayVertexHistos : public edm::EDAnalyzer {
   const double found_dist;
   const bool debug;
 
+  TH1F* h_dz_true;
+
   TH1F* h_dvv_true;
   TH1F* h_dvv_pass_anytwo;
   TH1F* h_dvv_pass_twominntk;
@@ -63,6 +65,8 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
     debug(cfg.getParameter<bool>("debug"))
 {
   edm::Service<TFileService> fs;
+
+  h_dz_true = fs->make<TH1F>("h_dz_true", "", 100, -0.1, 0.1);
 
   h_dvv_true                       = fs->make<TH1F>("h_dvv_true",                       "", 100, 0, 0.1);
   h_dvv_pass_anytwo                = fs->make<TH1F>("h_dvv_pass_anytwo",                "", 100, 0, 0.1);
@@ -103,6 +107,7 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
   const double d3d_true = mag(x0 - x1_0, y0 - y1_0, z0 - z1_0);
   h_dvv_true->Fill(dvv_true);
   h_d3d_true->Fill(d3d_true);
+  h_dz_true->Fill(z0 - z1_0);
 
   assert(int(truth->size()) - 11 == (ntk0 + ntk1) * 3);
 
