@@ -160,7 +160,7 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
     deltaz = nt0->z0 - nt1->z0;
   else if (z_model == z_deltasvgaus) {
     edm::Service<edm::RandomNumberGenerator> rng;
-    deltaz = CLHEP::RandGauss(rng->getEngine(event.streamID())).fire(0., 0.03738);
+    deltaz = nt0->z0 - nt1->z0 + CLHEP::RandGauss(rng->getEngine(event.streamID())).fire(0., 0.03738);
   }
 
   nt1_0->z0 += deltaz;
