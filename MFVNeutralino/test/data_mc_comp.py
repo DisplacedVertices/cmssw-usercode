@@ -62,4 +62,5 @@ C('dbv',
   res_y_title_size = 0.05,
   res_y_range = (0,2.5),
   legend_pos = (0.438, 0.671, 0.875, 0.899),
+  canvas_bottom_margin = 0.268,
   )
