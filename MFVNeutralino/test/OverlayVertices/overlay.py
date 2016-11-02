@@ -6,6 +6,7 @@ debug = False
 is_mc = True
 which_event = None
 rest_of_event = False
+dz_true_max = 1e9
 min_ntracks = 3
 found_dist = 0.008
 z_model = 'deltasvgaus'
@@ -19,7 +20,7 @@ if which_event is None:
 
 out_fn = 'overlay%s_Z%s%s_dist%s_%i.root' % ('_wevent' if rest_of_event else '',
                                              z_model,
-                                             ('%.3f' % z_width).replace('.', 'p'),
+                                             ('%.3f' % z_width).replace('.', 'p') if 'gaus' in z_model else '',
                                              ('%.3f' % found_dist).replace('.', 'p'),
                                              which_event)
 
@@ -56,6 +57,7 @@ process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
                                           truth_src = cms.InputTag('mfvOverlayTracks'),
                                           beamspot_src = cms.InputTag('offlineBeamSpot'),
                                           vertices_src = cms.InputTag('mfvVertices'),
+                                          dz_true_max = cms.double(dz_true_max),
                                           min_ntracks = cms.int32(min_ntracks),
                                           found_dist = cms.double(found_dist),
                                           debug = cms.bool(debug),

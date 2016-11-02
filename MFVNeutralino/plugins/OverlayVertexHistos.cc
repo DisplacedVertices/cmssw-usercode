@@ -22,6 +22,7 @@ class MFVOverlayVertexHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertices_token;
 
+  const double dz_true_max;
   const int min_ntracks;
   const double found_dist;
   const bool debug;
@@ -60,6 +61,7 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
   : truth_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("truth_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertices_src"))),
+    dz_true_max(cfg.getParameter<double>("dz_true_max")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     found_dist(cfg.getParameter<double>("found_dist")),
     debug(cfg.getParameter<bool>("debug"))
@@ -105,9 +107,13 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
 
   const double dvv_true = mag(x0 - x1_0, y0 - y1_0);
   const double d3d_true = mag(x0 - x1_0, y0 - y1_0, z0 - z1_0);
+  const double dz_true = z0 - z1_0;
   h_dvv_true->Fill(dvv_true);
   h_d3d_true->Fill(d3d_true);
-  h_dz_true->Fill(z0 - z1_0);
+  h_dz_true->Fill(dz_true);
+
+  if (fabs(dz_true) > dz_true_max)
+    return;
 
   assert(int(truth->size()) - 11 == (ntk0 + ntk1) * 3);
 
