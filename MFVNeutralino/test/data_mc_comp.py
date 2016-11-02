@@ -38,7 +38,7 @@ C = partial(data_mc_comparison,
             legend_pos = (0.428, 0.681, 0.865, 0.909),
             res_fit = False,
             verbose = True,
-            background_uncertainty = ('MC stat. uncertainty', 0, 1, 3002),
+            background_uncertainty = ('MC stat. uncertainty', 0, 1, 3254),
             )
 
 dbv_bins = [j*0.05 for j in range(8)] + [0.4, 0.5, 0.6, 0.7, 0.85, 1.]

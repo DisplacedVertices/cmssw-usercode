@@ -697,7 +697,7 @@ def data_mc_comparison(name,
                 e = sum_background_uncert.GetBinError(i)
                 e = (e**2 + (extra_bkg_uncert_frac*v)**2)**0.5
                 sum_background_uncert.SetBinError(i, e)
-        sum_background_uncert.SetLineColor(bkg_uncert_color)
+        sum_background_uncert.SetLineColor(0)
         sum_background_uncert.SetFillColor(bkg_uncert_color)
         sum_background_uncert.SetFillStyle(bkg_uncert_style)
         sum_background_uncert.Draw('E2 same')
