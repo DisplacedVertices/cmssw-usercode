@@ -89,6 +89,15 @@ h_rest.Scale(scale)
 h_qcdplusrest = h_qcd.Clone('h_qcdplusrest')
 h_qcdplusrest.Add(h_rest)
 
+for h in (h_qcd, h_rest, h_qcdplusrest):
+    print h.GetName()
+    s, v = 0., 0.
+    for ibin in xrange(0, h.GetNbinsX()+2):
+        s += h.GetBinContent(ibin)
+        v += h.GetBinError(ibin)**2
+        print ibin, h.GetBinContent(ibin), h.GetBinError(ibin)
+    print s, '+-', v**0.5
+
 s, v = 0., 0.
 for ibin in xrange(0, h_qcdplusrest.GetNbinsX()+2):
     s += h_qcdplusrest.GetBinContent(ibin)
@@ -102,16 +111,20 @@ c.SetLogy()
 
 h_qcdplusrest.Draw('hist')
 h_rest.Draw('hist same')
-h_qcdplusrest.Draw('axis same')
 
 xax = h_qcdplusrest.GetXaxis()
 yax = h_qcdplusrest.GetYaxis()
 yax.SetRangeUser(0.1, 300)
 
 h_uncert = h_qcdplusrest.Clone('h_uncert')
-h_uncert.SetLineColor(1)
+last_ul = 1.15 * (0.22 * (0.26 * (121 / 21.)) + 0.78 * 0.4)
+h_uncert.SetBinContent(6, last_ul/2)
+h_uncert.SetBinError  (6, last_ul/2)
+h_uncert.SetLineColor(0)
 h_uncert.SetFillColor(1)
-h_uncert.SetFillStyle(3002)
+h_uncert.SetMarkerStyle(8)
+h_uncert.SetMarkerSize(0)
+h_uncert.SetFillStyle(3254)
 h_uncert.Draw('E2 same')
 
 h_signal = signal_sample.h
@@ -119,8 +132,11 @@ h_signal.SetLineWidth(2)
 h_signal.SetLineColor(8)
 h_signal.Draw('same hist')
 
+h_qcdplusrest.Draw('axis same')
+
 # this gets rid of the stupid color on the stupid x-axis
 h_dummy = h_uncert.Clone()
+h_dummy.SetLineColor(1)
 for i in xrange(1, h_dummy.GetNbinsX()+1):
     h_dummy.SetBinContent(i, 0)
     h_dummy.SetBinError(i, 0)
