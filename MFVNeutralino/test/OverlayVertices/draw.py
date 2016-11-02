@@ -11,6 +11,10 @@ print fn
 ps = plot_saver('plots/overlay/%s' % os.path.basename(fn).replace('.root', ''), size=(600,600), log=False)
 f = ROOT.TFile(fn)
 
+h = f.Get('mfvOverlayHistos/h_dz_true')
+h.Draw()
+ps.save('h_dz_true')
+
 def rebin(h):
     #return h
     a = array('d', [x*0.002 for x in xrange(26)] + [0.05 + x*0.01 for x in range(6)])
@@ -73,10 +77,10 @@ for den in dens:
 
     n_nums = [
         'pass_anytwo',
-        'pass_twominntk',
-        'pass_foundv0andv1',
-        'pass_foundv0andv1samentk',
-        'pass_foundv0andv1asmanyntk',
+        #'pass_twominntk',
+        #'pass_foundv0andv1',
+        #'pass_foundv0andv1samentk',
+        #'pass_foundv0andv1asmanyntk',
         'pass_foundv0andv1bytracks',
     ]
 
