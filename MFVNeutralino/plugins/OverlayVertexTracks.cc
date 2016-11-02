@@ -28,6 +28,7 @@ private:
   const int which_event;
   const std::string z_model_str;
   const int z_model;
+  const double z_width;
   const bool only_other_tracks;
   const bool verbose;
 
@@ -53,6 +54,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
             z_model_str == "deltapv" ? z_deltapv :
             z_model_str == "deltasvgaus" ? z_deltasvgaus :
             -1),
+    z_width(cfg.getParameter<double>("z_width")),
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
     verbose(cfg.getParameter<bool>("verbose"))
 {
@@ -160,7 +162,7 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
     deltaz = nt0->z0 - nt1->z0;
   else if (z_model == z_deltasvgaus) {
     edm::Service<edm::RandomNumberGenerator> rng;
-    deltaz = nt0->z0 - nt1->z0 + CLHEP::RandGauss(rng->getEngine(event.streamID())).fire(0., 0.03738);
+    deltaz = nt0->z0 - nt1->z0 + CLHEP::RandGauss(rng->getEngine(event.streamID())).fire(0., z_width);
   }
 
   nt1_0->z0 += deltaz;

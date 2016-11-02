@@ -9,6 +9,7 @@ rest_of_event = False
 min_ntracks = 3
 found_dist = 0.008
 z_model = 'deltasvgaus'
+z_width = 0.021
 
 if which_event is None:
     which_event = typed_from_argv(int)
@@ -16,10 +17,11 @@ if which_event is None:
         raise ValueError('which_event from argv but no int found')
     print 'which_event from argv:', which_event
 
-out_fn = 'overlay%s_Z%s_dist%s_%i.root' % ('_wevent' if rest_of_event else '',
-                                           z_model,
-                                           ('%.3f' % found_dist).replace('.', 'p'),
-                                           which_event)
+out_fn = 'overlay%s_Z%s%s_dist%s_%i.root' % ('_wevent' if rest_of_event else '',
+                                             z_model,
+                                             ('%.3f' % z_width).replace('.', 'p'),
+                                             ('%.3f' % found_dist).replace('.', 'p'),
+                                             which_event)
 
 process = basic_process('Overlay')
 geometry_etc(process, which_global_tag(is_mc))
@@ -45,6 +47,7 @@ process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         minitree_fn = cms.string('minitree.root'),
                                         which_event = cms.int32(which_event),
                                         z_model = cms.string(z_model),
+                                        z_width = cms.string(z_width),
                                         only_other_tracks = cms.bool(rest_of_event),
                                         verbose = cms.bool(debug),
                                         )
