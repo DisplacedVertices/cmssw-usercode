@@ -9,7 +9,7 @@ rest_of_event = False
 min_ntracks = 3
 found_dist = 0.008
 z_model = 'deltasvgaus'
-z_width = 0.021
+z_width = 0.02
 
 if which_event is None:
     which_event = typed_from_argv(int)
@@ -47,7 +47,7 @@ process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         minitree_fn = cms.string('minitree.root'),
                                         which_event = cms.int32(which_event),
                                         z_model = cms.string(z_model),
-                                        z_width = cms.string(z_width),
+                                        z_width = cms.double(z_width),
                                         only_other_tracks = cms.bool(rest_of_event),
                                         verbose = cms.bool(debug),
                                         )
