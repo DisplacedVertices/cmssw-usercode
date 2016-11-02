@@ -84,6 +84,55 @@ def glob_store(pattern):
         raise ValueError('not at fermilab?')
     return [x.replace(magic, '/store') for x in glob.glob(pattern.replace('/store', magic))]
 
+def make_tarball(fn, include_bin=True, include_python=False, include_interface=False, verbose=False):
+    '''Make a tarball for the current work area. Paths in the tarball
+    are relative to $CMSSW_BASE.
+    '''
+    scram_arch = os.environ['SCRAM_ARCH']
+    base = os.path.normpath(os.environ['CMSSW_BASE'])
+    src = os.path.join(base, 'src')
+
+    to_add = [
+        os.path.join(base, 'lib/' + scram_arch),
+        os.path.join(base, 'biglib/' + scram_arch),
+        ]
+
+    if include_bin:
+        to_add.append(os.path.join(base, 'bin/' + scram_arch))
+
+    for x in to_add:
+        if not os.path.isdir(x):
+            raise FileNotFoundError("didn't find " + x)
+
+    extras = []
+    if include_python:
+        extras.append('python')
+    elif include_interface:
+        extras.append('interface')
+
+    if extras:
+        for root, dirs, files in os.walk(src, topdown=True):
+            rel_root = os.path.relpath(root, base)
+            if rel_root.count('/') != 2:
+                dirs = []
+            for x in ['.git', '.svn', 'CVS']:
+                if x in dirs:
+                    dirs.remove(x)
+            for d in dirs:
+                if d in extras:
+                    to_add.append(os.path.join(root, d))
+
+    if verbose:
+        print 'adding to tarball:'
+
+    import tarfile
+    with tarfile.open(fn, "w:gz") as tar:
+        for abs_d in to_add:
+            rel_d = os.path.relpath(abs_d, base)
+            if verbose:
+                print abs_d, rel_d
+            tar.add(abs_d, arcname=rel_d)
+
 def output_file(process, filename, output_commands):
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string(filename),
