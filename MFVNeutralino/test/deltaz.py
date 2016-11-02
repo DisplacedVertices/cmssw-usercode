@@ -30,6 +30,7 @@ for sample in bkg_samples:
 h_pvsvdz.Draw()
 ps.save('pvsvdz')
 
-h_svdz.Fit('gaus')
+fcn = ROOT.TF1('fcn', 'gaus', -0.07, -0.07)
+h_svdz.Fit(fcn, 'QR')
 ps.save('svdz')
 
