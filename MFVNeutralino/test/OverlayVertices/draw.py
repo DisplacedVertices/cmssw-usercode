@@ -16,7 +16,7 @@ h.Draw()
 ps.save('h_dz_true')
 
 def rebin(h):
-    #return h
+    return h
     a = array('d', [x*0.002 for x in xrange(26)] + [0.05 + x*0.01 for x in range(6)])
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
     
@@ -51,8 +51,8 @@ def do_fit(h_eff):
     return fcn
 
 dens = [
-    'h_dvv',
     'h_d3d',
+    'h_dvv',
     ]
 
 def print_h(h):
@@ -77,10 +77,10 @@ for den in dens:
 
     n_nums = [
         'pass_anytwo',
-        #'pass_twominntk',
-        #'pass_foundv0andv1',
-        #'pass_foundv0andv1samentk',
-        #'pass_foundv0andv1asmanyntk',
+        'pass_twominntk',
+        'pass_foundv0andv1',
+        'pass_foundv0andv1samentk',
+        'pass_foundv0andv1asmanyntk',
         'pass_foundv0andv1bytracks',
     ]
 
