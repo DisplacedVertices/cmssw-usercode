@@ -461,7 +461,7 @@ if __name__ == '__main__':
             print ds
             print x.name, numevents_in_dataset(ds)
 
-    if 1:
+    if 0:
         for x,y in zip(qcd_samples, qcd_samples_ext):
             print x.name, x.int_lumi_orig/1000, '->', (x.int_lumi_orig + y.int_lumi_orig)/1000
 
