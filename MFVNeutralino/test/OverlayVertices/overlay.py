@@ -8,7 +8,7 @@ rest_of_event = False
 dz_true_max = 1e9
 min_ntracks = 3
 found_dist = 0.008
-z_model = 'deltasv'
+z_model = 'deltasvgaus'
 z_width = 0.02
 sample = 'ttbar'
 minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV9_temp'
@@ -51,6 +51,7 @@ if is_mc:
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('JMTucker.MFVNeutralino.Vertexer_cfi')
 
+process.mfvVertices.histos = False
 process.mfvVertices.verbose = debug
 process.mfvVertices.use_second_tracks = True
 process.mfvVertices.second_track_src = 'mfvOverlayTracks'
