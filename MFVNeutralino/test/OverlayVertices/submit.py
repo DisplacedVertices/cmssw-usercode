@@ -2,12 +2,14 @@
 
 import sys, os, shutil
 from JMTucker.Tools.CMSSWTools import make_tarball
+from JMTucker.Tools.general import save_git_status
 
 pwd = os.getcwd()
 
 cmssw_py = 'overlay.py'
 
 working_dir = os.path.abspath('/uscms_data/d2/tucker/overlay/ttbar_wevent')
+save_git_status(os.path.join(working_dir, 'gitstatus'))
 
 inputs_dir = os.path.join(working_dir, 'inputs')
 outputs_dir = os.path.join(working_dir, 'outputs')
