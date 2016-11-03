@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, shutil
 from JMTucker.Tools.CMSSWTools import make_tarball
 
 pwd = os.getcwd()
 
-working_dir = os.path.abspath('/uscms_data/d2/tucker/overlay/ttbar_temp')
+cmssw_py = 'overlay.py'
+
+working_dir = os.path.abspath('/uscms_data/d2/tucker/overlay/ttbar_wevent')
 
 inputs_dir = os.path.join(working_dir, 'inputs')
 outputs_dir = os.path.join(working_dir, 'outputs')
@@ -15,6 +17,9 @@ os.makedirs(outputs_dir)
 tarball_fn_base = 'input.tgz'
 tarball_fn = os.path.join(inputs_dir, tarball_fn_base)
 make_tarball(tarball_fn, include_python=True)
+
+cmssw_py_fn = os.path.join(inputs_dir, cmssw_py)
+shutil.copy2(cmssw_py, cmssw_py_fn)
 
 sh_fn = os.path.join(inputs_dir, 'run.sh')
 jdl_fn = os.path.join(inputs_dir, 'submit.jdl')
@@ -42,7 +47,7 @@ cd src
 eval `scram ru -sh`
 scram b -j 2
 
-cmsRun ${workdir}/overlay.py $job 2>&1
+cmsRun ${workdir}/%(cmssw_py)s $job 2>&1
 mv overlay*.root $workdir
 
 ''' % locals()
@@ -62,7 +67,7 @@ stream_error  = false
 notification  = never
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = %(tarball_fn)s,%(pwd)s/overlay.py
+transfer_input_files = %(tarball_fn)s,%(cmssw_py_fn)s
 Queue 1000
 ''' % locals()
 
