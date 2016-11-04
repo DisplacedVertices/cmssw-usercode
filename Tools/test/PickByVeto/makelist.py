@@ -27,9 +27,10 @@ def dosamples():
         '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_5/',
     ]
 
-    samples = ['ttbar']
+    samples = ['qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbar']
 
     for sample in samples:
-        writelist(sum(getlist(os.path.join(p, '%s.root' % sample)) for p in ps), 'vetolist.%s' % sample, True)
+        writelist(sum([getlist(os.path.join(p, '%s.root' % sample)) for p in ps], []), 'vetolist.%s' % sample, True)
 
-makelist('/uscms_data/d2/tucker/crab_dirs/MinitreeV9_temp/ttbar.root', 'veto_ttbar_temp', False)
+#makelist('/uscms_data/d2/tucker/crab_dirs/MinitreeV9_temp/ttbar.root', 'veto_ttbar_temp', False)
+dosamples()
