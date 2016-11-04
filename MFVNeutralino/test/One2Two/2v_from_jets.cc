@@ -13,6 +13,8 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+bool clearing_from_eff = false;
+
 bool dphi_from_hist = false;
 
 bool dphi_from_pdf = true;
@@ -31,11 +33,11 @@ int max_ntracks0 = 1000000;
 int min_ntracks1 = 0;
 int max_ntracks1 = 1000000;
 
-const char* tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV6p1_76x_nstlays3_tks3only";
+const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
 
 const int nbkg = 4;
-const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
-float weights[nbkg] = {2.045, 0.265, 0.110, 0.5620};
+const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
+float weights[nbkg] = {6.166, 0.7894, 0.3320, 0.5620};
 
 double n2v = 1121.;
 
@@ -176,6 +178,49 @@ int main(int argc, const char* argv[]) {
   h_dphi->SetBinContent(4, 0.214419648051);
   h_dphi->SetBinContent(5, 0.277049005032);
 
+  TH1F* h_eff = new TH1F("h_eff", "input to construction;d_{VV} (cm);probability", 40, 0, 0.4);
+  h_eff->SetBinContent(1, 0.0887200832367);
+  h_eff->SetBinContent(2, 0.26492780447);
+  h_eff->SetBinContent(3, 0.424160420895);
+  h_eff->SetBinContent(4, 0.540564835072);
+  h_eff->SetBinContent(5, 0.612435728312);
+  h_eff->SetBinContent(6, 0.666476875544);
+  h_eff->SetBinContent(7, 0.700767636299);
+  h_eff->SetBinContent(8, 0.716090559959);
+  h_eff->SetBinContent(9, 0.736099332571);
+  h_eff->SetBinContent(10, 0.748791098595);
+  h_eff->SetBinContent(11, 0.760122552514);
+  h_eff->SetBinContent(12, 0.771965146065);
+  h_eff->SetBinContent(13, 0.770971775055);
+  h_eff->SetBinContent(14, 0.781980112195);
+  h_eff->SetBinContent(15, 0.781406506896);
+  h_eff->SetBinContent(16, 0.78949610889);
+  h_eff->SetBinContent(17, 0.790535360575);
+  h_eff->SetBinContent(18, 0.790518730879);
+  h_eff->SetBinContent(19, 0.797075837851);
+  h_eff->SetBinContent(20, 0.791352599859);
+  h_eff->SetBinContent(21, 0.80023662746);
+  h_eff->SetBinContent(22, 0.807722091675);
+  h_eff->SetBinContent(23, 0.806445986032);
+  h_eff->SetBinContent(24, 0.804875582457);
+  h_eff->SetBinContent(25, 0.807317301631);
+  h_eff->SetBinContent(26, 0.816252231598);
+  h_eff->SetBinContent(27, 0.812310308218);
+  h_eff->SetBinContent(28, 0.819209486246);
+  h_eff->SetBinContent(29, 0.818562537432);
+  h_eff->SetBinContent(30, 0.822052836418);
+  h_eff->SetBinContent(31, 0.823742762208);
+  h_eff->SetBinContent(32, 0.824828445911);
+  h_eff->SetBinContent(33, 0.833424195647);
+  h_eff->SetBinContent(34, 0.828828051686);
+  h_eff->SetBinContent(35, 0.830597683787);
+  h_eff->SetBinContent(36, 0.829892545938);
+  h_eff->SetBinContent(37, 0.837587982416);
+  h_eff->SetBinContent(38, 0.835536271334);
+  h_eff->SetBinContent(39, 0.8477845788);
+  h_eff->SetBinContent(40, 0.850240528584);
+  h_eff->SetBinContent(41, 0.840228512883);
+
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
     TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, samples[i]));
@@ -216,6 +261,10 @@ int main(int argc, const char* argv[]) {
         double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
 
         double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
+        if (clearing_from_eff) {
+          p = h_eff->GetBinContent(h_eff->FindBin(dvvc));
+        }
+
         if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_c1v_dvv->Fill(dvvc, w * p);
         h_c1v_dphivv->Fill(dphi, w * p);
