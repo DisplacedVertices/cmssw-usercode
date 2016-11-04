@@ -8,8 +8,10 @@ rest_of_event = False
 dz_true_max = 1e9
 min_ntracks = 3
 found_dist = 0.008
-z_model = 'deltasvgaus'
+z_model = 'deltasv'
 z_width = 0.02
+rotate_x = False
+rotate_p = False
 sample = 'ttbar'
 minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV9_temp'
 
@@ -30,8 +32,15 @@ if which_event is None:
 rest_of_event_s = '_wevent' if rest_of_event else ''
 z_width_s = ('%.3f' % z_width).replace('.', 'p') if 'gaus' in z_model else ''
 found_dist_s = ('%.3f' % found_dist).replace('.', 'p')
+rotate_s = ''
+if rotate_x and rotate_p:
+    rotate_s = '_rotateXP'
+elif rotate_x:
+    rotate_s = '_rotateX'
+elif rotate_p:
+    rotate_s = '_rotateP'
 
-out_fn = 'overlay%(rest_of_event_s)s_%(sample)s_Z%(z_model)s%(z_width_s)s_dist%(found_dist_s)s_%(which_event)i.root' % locals()
+out_fn = 'overlay%(rest_of_event_s)s_%(sample)s_Z%(z_model)s%(z_width_s)s_dist%(found_dist_s)s%(rotate_s)s_%(which_event)i.root' % locals()
 
 minitree_fn = '%s/%s.root' % (minitree_path, sample)
 
@@ -61,8 +70,8 @@ if not rest_of_event:
 process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         minitree_fn = cms.string(minitree_fn),
                                         which_event = cms.int32(which_event),
-                                        rotate_x = cms.bool(False),
-                                        rotate_p = cms.bool(False),
+                                        rotate_x = cms.bool(rotate_x),
+                                        rotate_p = cms.bool(rotate_p),
                                         z_model = cms.string(z_model),
                                         z_width = cms.double(z_width),
                                         only_other_tracks = cms.bool(rest_of_event),
