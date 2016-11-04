@@ -175,22 +175,33 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
     nt1_0->tk0_vz[i] += deltaz;
 
   if (rotate_x || rotate_p) {
-    assert(!rotate_x);
-
     edm::Service<edm::RandomNumberGenerator> rng;
     const double rot_angle = rng->getEngine(event.streamID()).flat() * 2 * M_PI;
+
     AlgebraicMatrix33 rot3;
     rot3(0,0) = rot3(1,1) = cos(rot_angle);
     rot3(0,1) = -sin(rot_angle);
     rot3(1,0) = sin(rot_angle);
     rot3(2,2) = 1;
-    AlgebraicMatrix66 rot; // x y z px py pz
-    rot(0,0) = rot(1,1) = rot(2,2) = 1;
-    rot.Place_at(rot3, 3,3);
+
+    if (rotate_x) {
+      AlgebraicVector3 v1_0(nt1_0->x0, nt1_0->y0, nt1_0->z0);
+      AlgebraicVector3 rot_v1_0 = rot3 * v1_0;
+      nt1_0->x0 = rot_v1_0(0);
+      nt1_0->y0 = rot_v1_0(1);
+      nt1_0->z0 = rot_v1_0(2);
+    }
+
+    AlgebraicMatrix66 rot = ROOT::Math::SMatrixIdentity(); // x y z px py pz
+    if (rotate_x) rot.Place_at(rot3, 0,0);
+    if (rotate_p) rot.Place_at(rot3, 3,3);
 
     for (int i = 0; i < nt1_0->ntk0; ++i) {
+      AlgebraicVector3 pos(nt1_0->tk0_vx[i], nt1_0->tk0_vy[i], nt1_0->tk0_vz[i]);
+      AlgebraicVector3 rot_pos = rotate_x ? rot3 * pos : pos;
+
       AlgebraicVector3 mom(nt1_0->tk0_px[i], nt1_0->tk0_py[i], nt1_0->tk0_pz[i]);
-      AlgebraicVector3 rot_mom = rot3 * mom;
+      AlgebraicVector3 rot_mom = rotate_p ? rot3 * mom : mom;
 
       GlobalVector mom_v(mom(0), mom(1), mom(2));
       AlgebraicMatrix65 jac_curv2cart = jacobianCurvilinearToCartesian(mom_v, sgn(nt1_0->tk0_qchi2[i]));
@@ -201,6 +212,9 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
       AlgebraicMatrix56 jac_cart2curv = jacobianCartesianToCurvilinear(rot_mom_v, sgn(nt1_0->tk0_qchi2[i]));
       AlgebraicSymMatrix55 rot_cov = ROOT::Math::Similarity(jac_cart2curv, rot_cart_cov);
 
+      nt1_0->tk0_vx[i] = rot_pos(0);
+      nt1_0->tk0_vy[i] = rot_pos(1);
+      nt1_0->tk0_vz[i] = rot_pos(2);
       nt1_0->tk0_px[i] = rot_mom(0);
       nt1_0->tk0_py[i] = rot_mom(1);
       nt1_0->tk0_pz[i] = rot_mom(2);
