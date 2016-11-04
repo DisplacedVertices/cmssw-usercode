@@ -61,6 +61,8 @@ if not rest_of_event:
 process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         minitree_fn = cms.string(minitree_fn),
                                         which_event = cms.int32(which_event),
+                                        rotate_x = cms.bool(False),
+                                        rotate_p = cms.bool(False),
                                         z_model = cms.string(z_model),
                                         z_width = cms.double(z_width),
                                         only_other_tracks = cms.bool(rest_of_event),
