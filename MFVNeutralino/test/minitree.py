@@ -39,8 +39,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             sample.json = 'ana_10pc.json'
             sample.lumis_per = 200
 
-    cs = CRABSubmitter('MinitreeV6p1_76x_nstlays3',
-                       dataset = 'ntuplev6p1_76x_nstlays3',
+    cs = CRABSubmitter('MinitreeV9',
+                       dataset = 'ntuplev9',
                        job_control_from_sample = True,
                        aaa = True,
                        )
