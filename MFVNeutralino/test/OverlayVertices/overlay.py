@@ -13,7 +13,7 @@ z_width = 0.02
 rotate_x = False
 rotate_p = False
 sample = 'ttbar'
-minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV9_temp'
+minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV9/ntk%i' % min_ntracks
 
 ####
 
@@ -54,7 +54,7 @@ elif sample == 'qcdht1500':
 else:
     raise ValueError('bad sample %s' % sample)
 
-in_fns = [os.path.join(file_base,'/pick_%i.root' % i) for i in files]
+in_fns = [os.path.join(file_base, 'pick_%i.root' % i) for i in file_nums]
 
 ####
 
