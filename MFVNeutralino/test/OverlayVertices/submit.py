@@ -6,9 +6,12 @@ from JMTucker.Tools.general import save_git_status
 
 pwd = os.getcwd()
 
+batch_name = ''
+njobs = 1000
+
 cmssw_py = 'overlay.py'
 
-working_dir = os.path.abspath('/uscms_data/d2/tucker/overlay/ttbar_wevent')
+working_dir = os.path.abspath('/uscms_data/d2/tucker/overlay/' + batch_name)
 save_git_status(os.path.join(working_dir, 'gitstatus'))
 
 inputs_dir = os.path.join(working_dir, 'inputs')
@@ -70,7 +73,7 @@ notification  = never
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = %(tarball_fn)s,%(cmssw_py_fn)s
-Queue 1000
+Queue %(njobs)s
 ''' % locals()
 
 open(jdl_fn, 'wt').write(jdl)
