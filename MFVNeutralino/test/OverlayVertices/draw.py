@@ -97,6 +97,7 @@ for den in dens:
         check(h_num, h_den)
         h_eff = get_h_eff(h_num, h_den)
         h_eff.Draw('AP')
+        h_eff.GetXaxis().SetRangeUser(0, 0.3)
         print '%35s' % n_num,
         fcn = do_fit(h_eff)
         ps.save(n_num)

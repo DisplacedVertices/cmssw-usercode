@@ -234,7 +234,7 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
   fillit(d3d_true, h_d3d_pass_foundv0andv1,          found[0] && found[1]);
   fillit(d3d_true, h_d3d_pass_foundv0andv1samentk,   found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1);
   fillit(d3d_true, h_d3d_pass_foundv0andv1asmanyntk, found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1);
-  fillit(dvv_true, h_d3d_pass_foundv0andv1bytracks,  found_by_tracks[0] != -1 && found_by_tracks[1] != -1 && found_by_tracks[0] != found_by_tracks[1]);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1bytracks,  found_by_tracks[0] != -1 && found_by_tracks[1] != -1 && found_by_tracks[0] != found_by_tracks[1]);
 }
 
 DEFINE_FWK_MODULE(MFVOverlayVertexHistos);

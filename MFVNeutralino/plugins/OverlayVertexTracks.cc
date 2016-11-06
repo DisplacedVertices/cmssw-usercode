@@ -2,6 +2,7 @@
 #include "TTree.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGauss.h"
+#include "DataFormats/GeometryVector/interface/TrackingJacobians.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
@@ -26,6 +27,8 @@ private:
 
   const std::string minitree_fn;
   const int which_event;
+  const bool rotate_x;
+  const bool rotate_p;
   const std::string z_model_str;
   const int z_model;
   const double z_width;
@@ -48,6 +51,8 @@ namespace {
 MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg) 
   : minitree_fn(cfg.getParameter<std::string>("minitree_fn")),
     which_event(cfg.getParameter<int>("which_event")),
+    rotate_x(cfg.getParameter<bool>("rotate_x")),
+    rotate_p(cfg.getParameter<bool>("rotate_p")),
     z_model_str(cfg.getParameter<std::string>("z_model")),
     z_model(z_model_str == "none"    ? z_none    :
             z_model_str == "deltasv" ? z_deltasv :
@@ -169,6 +174,54 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < nt1_0->ntk0; ++i)
     nt1_0->tk0_vz[i] += deltaz;
 
+  if (rotate_x || rotate_p) {
+    edm::Service<edm::RandomNumberGenerator> rng;
+    const double rot_angle = rng->getEngine(event.streamID()).flat() * 2 * M_PI;
+
+    AlgebraicMatrix33 rot3;
+    rot3(0,0) = rot3(1,1) = cos(rot_angle);
+    rot3(0,1) = -sin(rot_angle);
+    rot3(1,0) = sin(rot_angle);
+    rot3(2,2) = 1;
+
+    if (rotate_x) {
+      AlgebraicVector3 v1_0(nt1_0->x0, nt1_0->y0, nt1_0->z0);
+      AlgebraicVector3 rot_v1_0 = rot3 * v1_0;
+      nt1_0->x0 = rot_v1_0(0);
+      nt1_0->y0 = rot_v1_0(1);
+      nt1_0->z0 = rot_v1_0(2);
+    }
+
+    AlgebraicMatrix66 rot = ROOT::Math::SMatrixIdentity(); // x y z px py pz
+    if (rotate_x) rot.Place_at(rot3, 0,0);
+    if (rotate_p) rot.Place_at(rot3, 3,3);
+
+    for (int i = 0; i < nt1_0->ntk0; ++i) {
+      AlgebraicVector3 pos(nt1_0->tk0_vx[i], nt1_0->tk0_vy[i], nt1_0->tk0_vz[i]);
+      AlgebraicVector3 rot_pos = rotate_x ? rot3 * pos : pos;
+
+      AlgebraicVector3 mom(nt1_0->tk0_px[i], nt1_0->tk0_py[i], nt1_0->tk0_pz[i]);
+      AlgebraicVector3 rot_mom = rotate_p ? rot3 * mom : mom;
+
+      GlobalVector mom_v(mom(0), mom(1), mom(2));
+      AlgebraicMatrix65 jac_curv2cart = jacobianCurvilinearToCartesian(mom_v, sgn(nt1_0->tk0_qchi2[i]));
+      AlgebraicSymMatrix66 cart_cov = ROOT::Math::Similarity(jac_curv2cart, nt1_0->tk0_cov[i]);
+      AlgebraicSymMatrix66 rot_cart_cov = ROOT::Math::Similarity(rot, cart_cov);
+
+      GlobalVector rot_mom_v(rot_mom(0), rot_mom(1), rot_mom(2));
+      AlgebraicMatrix56 jac_cart2curv = jacobianCartesianToCurvilinear(rot_mom_v, sgn(nt1_0->tk0_qchi2[i]));
+      AlgebraicSymMatrix55 rot_cov = ROOT::Math::Similarity(jac_cart2curv, rot_cart_cov);
+
+      nt1_0->tk0_vx[i] = rot_pos(0);
+      nt1_0->tk0_vy[i] = rot_pos(1);
+      nt1_0->tk0_vz[i] = rot_pos(2);
+      nt1_0->tk0_px[i] = rot_mom(0);
+      nt1_0->tk0_py[i] = rot_mom(1);
+      nt1_0->tk0_pz[i] = rot_mom(2);
+      nt1_0->tk0_cov[i] = rot_cov;
+    }
+  }
+
   if (verbose) std::cout << "ntk0 " << std::setw(2) << +nt0->ntk0 << " v0 " << nt0->x0 << ", " << nt0->y0 << ", " << nt0->z0 << "\n"
                          << "ntk1 " << std::setw(2) << +nt1->ntk0 << " v1 " << nt1->x0 << ", " << nt1->y0 << ", " << nt1->z0 << "\n"
                          << "       " << " v1_0 " << nt1_0->x0 << ", " << nt1_0->y0 << ", " << nt1_0->z0 << "\n";
@@ -193,10 +246,10 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
   }
 
   for (int i = 0; i < nt1->ntk0; ++i) {
-    if (verbose) std::cout << "v1 tk" << i << ": " << nt1->tk0_px[i] << ", " << nt1->tk0_py[i] << ", " << nt1->tk0_pz[i] << "\n";
-    truth->push_back(nt1->tk0_px[i]);
-    truth->push_back(nt1->tk0_py[i]);
-    truth->push_back(nt1->tk0_pz[i]);
+    if (verbose) std::cout << "v1 tk" << i << ": " << nt1_0->tk0_px[i] << ", " << nt1_0->tk0_py[i] << ", " << nt1_0->tk0_pz[i] << "\n";
+    truth->push_back(nt1_0->tk0_px[i]);
+    truth->push_back(nt1_0->tk0_py[i]);
+    truth->push_back(nt1_0->tk0_pz[i]);
   }
 
   if (!only_other_tracks)

@@ -8,8 +8,10 @@ rest_of_event = False
 dz_true_max = 1e9
 min_ntracks = 3
 found_dist = 0.008
-z_model = 'deltasvgaus'
+z_model = 'deltasv'
 z_width = 0.02
+rotate_x = False
+rotate_p = False
 sample = 'ttbar'
 minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV9_temp'
 
@@ -30,14 +32,34 @@ if which_event is None:
 rest_of_event_s = '_wevent' if rest_of_event else ''
 z_width_s = ('%.3f' % z_width).replace('.', 'p') if 'gaus' in z_model else ''
 found_dist_s = ('%.3f' % found_dist).replace('.', 'p')
+rotate_s = ''
+if rotate_x and rotate_p:
+    rotate_s = '_rotateXP'
+elif rotate_x:
+    rotate_s = '_rotateX'
+elif rotate_p:
+    rotate_s = '_rotateP'
 
-out_fn = 'overlay%(rest_of_event_s)s_%(sample)s_Z%(z_model)s%(z_width_s)s_dist%(found_dist_s)s_%(which_event)i.root' % locals()
+out_fn = 'overlay%(rest_of_event_s)s_%(sample)s_Z%(z_model)s%(z_width_s)s_dist%(found_dist_s)s%(rotate_s)s_%(which_event)i.root' % locals()
 
 minitree_fn = '%s/%s.root' % (minitree_path, sample)
+
+if sample == 'ttbar':
+    file_base = '/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/pick1vtx/161104_153826/0000'
+    file_nums = range(1,94)
+elif sample == 'qcdht1500':
+    file_base = '/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/pick1vtx/161104_153718/0000'
+    file_nums = range(1,15)
+    file_nums.remove(9)
+else:
+    raise ValueError('bad sample %s' % sample)
+
+in_fns = [os.path.join(file_base,'/pick_%i.root' % i) for i in files]
 
 ####
 
 process = basic_process('Overlay')
+process.source.fileNames = in_fns
 process.maxEvents.input = max_events
 report_every(process, 1000000 if batch else 100)
 geometry_etc(process, which_global_tag(is_mc))
@@ -61,6 +83,8 @@ if not rest_of_event:
 process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         minitree_fn = cms.string(minitree_fn),
                                         which_event = cms.int32(which_event),
+                                        rotate_x = cms.bool(rotate_x),
+                                        rotate_p = cms.bool(rotate_p),
                                         z_model = cms.string(z_model),
                                         z_width = cms.double(z_width),
                                         only_other_tracks = cms.bool(rest_of_event),
@@ -78,26 +102,3 @@ process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
                                           )
 
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvOverlayTracks * process.mfvVertices * process.mfvOverlayHistos)
-
-if sample == 'ttbar':
-    process.source.fileNames = ['/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/pick1vtx/161020_194226/0000/' + x.strip() for x in \
-'''
-pick_1.root
-pick_2.root
-pick_3.root
-pick_4.root
-pick_5.root
-pick_7.root
-pick_8.root
-pick_10.root
-pick_14.root
-pick_16.root
-pick_17.root
-pick_18.root
-pick_23.root
-pick_25.root
-pick_26.root
-pick_27.root
-'''.split('\n') if x.strip()]
-else:
-    raise ValueError('bad sample %s' % sample)

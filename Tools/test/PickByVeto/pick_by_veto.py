@@ -37,15 +37,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.xx4j_samples
         )
 
-    samples = Samples.ttbar_samples
+    samples = [Samples.qcdht1000, Samples.qcdht1500, Samples.qcdht2000] + Samples.ttbar_samples
+
+    def vetolist_fn(sample):
+        fn = 'vetolist.%s.gz' % sample.name
+        assert os.path.isfile(fn)
+        return fn
 
     def pset_modifier(sample):
-        assert sample.name == 'ttbar'  # fix this 
-        return ['process.veto.list_fn = "vetolist.%s.gz"' % sample.name], []
+        return ['process.veto.list_fn = "%s"' % vetolist_fn(sample)], []
 
     def cfg_modifier(cfg, sample):
-        assert sample.name == 'ttbar'  # fix this 
-        cfg.JobType.inputFiles = ['vetolist.%s.gz' % sample.name]
+        cfg.JobType.inputFiles = [vetolist_fn(sample)]
 
     cs = CRABSubmitter('Pick1Vtx',
                        pset_modifier = pset_modifier,
@@ -57,7 +60,3 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        )
 
     cs.submit_all(samples)
-
-'''
-ttbar 38475776 events in 2762 files
-'''
