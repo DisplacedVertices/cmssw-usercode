@@ -44,9 +44,22 @@ out_fn = 'overlay%(rest_of_event_s)s_%(sample)s_Z%(z_model)s%(z_width_s)s_dist%(
 
 minitree_fn = '%s/%s.root' % (minitree_path, sample)
 
+if sample == 'ttbar':
+    file_base = '/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/pick1vtx/161104_153826/0000'
+    file_nums = range(1,94)
+elif sample == 'qcdht1500':
+    file_base = '/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/pick1vtx/161104_153718/0000'
+    file_nums = range(1,15)
+    file_nums.remove(9)
+else:
+    raise ValueError('bad sample %s' % sample)
+
+in_fns = [os.path.join(file_base,'/pick_%i.root' % i) for i in files]
+
 ####
 
 process = basic_process('Overlay')
+process.source.fileNames = in_fns
 process.maxEvents.input = max_events
 report_every(process, 1000000 if batch else 100)
 geometry_etc(process, which_global_tag(is_mc))
@@ -89,26 +102,3 @@ process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
                                           )
 
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvOverlayTracks * process.mfvVertices * process.mfvOverlayHistos)
-
-if sample == 'ttbar':
-    process.source.fileNames = ['/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/pick1vtx/161020_194226/0000/' + x.strip() for x in \
-'''
-pick_1.root
-pick_2.root
-pick_3.root
-pick_4.root
-pick_5.root
-pick_7.root
-pick_8.root
-pick_10.root
-pick_14.root
-pick_16.root
-pick_17.root
-pick_18.root
-pick_23.root
-pick_25.root
-pick_26.root
-pick_27.root
-'''.split('\n') if x.strip()]
-else:
-    raise ValueError('bad sample %s' % sample)
