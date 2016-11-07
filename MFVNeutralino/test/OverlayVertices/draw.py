@@ -6,9 +6,10 @@ ROOT.gStyle.SetStatW(0.15)
 ROOT.gStyle.SetStatH(0.1)
 
 fn = sys.argv[1]
+out_name = sys.argv[2]
 print fn
 
-ps = plot_saver('plots/overlay/%s' % os.path.basename(fn).replace('.root', ''), size=(600,600), log=False)
+ps = plot_saver('plots/overlay/%s' % out_name, size=(600,600), log=False)
 f = ROOT.TFile(fn)
 
 h = f.Get('mfvOverlayHistos/h_dz_true')
