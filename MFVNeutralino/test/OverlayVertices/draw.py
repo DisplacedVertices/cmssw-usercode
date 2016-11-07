@@ -16,8 +16,9 @@ h.Draw()
 ps.save('h_dz_true')
 
 def rebin(h):
-    return h
-    a = array('d', [x*0.002 for x in xrange(26)] + [0.05 + x*0.01 for x in range(6)])
+#    return h
+    a = array('d', [x*0.001 for x in xrange(51)] + [0.05 + x*0.005 for x in range(11)])
+    #a = array('d', [x*0.01 for x in xrange(41)])
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
     
 def get_h(n):
