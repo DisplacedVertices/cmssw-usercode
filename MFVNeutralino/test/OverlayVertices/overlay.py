@@ -54,7 +54,8 @@ process.maxEvents.input = args.max_events
 report_every(process, 1000000 if args.batch else 100)
 geometry_etc(process, which_global_tag(not args.is_data))
 tfileservice(process, args.out_fn)
-random_service(process, {'mfvVertices': 12179, 'mfvOverlayTracks': 12180})
+random_service(process, {'mfvVertices':      12179 + args.which_event,
+                         'mfvOverlayTracks': 12180 + args.which_event})
 
 if not args.is_data:
     process.load('JMTucker.Tools.MCStatProducer_cff')
