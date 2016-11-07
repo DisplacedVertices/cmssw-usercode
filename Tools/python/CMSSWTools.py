@@ -65,6 +65,24 @@ def file_event_from_argv(process, warn=True):
     elif warn:
         print 'file_event_from_argv warning: did not understand event number'
 
+def friendly_argparse(**kwargs):
+    '''Set up an ArgumentParser that doesn't conflict with cmsRun arg
+    parsing: use + as prefix for options, and consume all positional
+    arguments away. Also return a printer function for the args.'''
+
+    import argparse
+    parser = argparse.ArgumentParser(prefix_chars='+', **kwargs) # prefix + to not clash with cmsRun
+    parser.add_argument('cmsrunargs', nargs='*') # let cmsRun have positionals
+    def printer(name, args):
+        to_print = [x for x in dir(args) if not x.startswith('_') and x != 'cmsrunargs']
+        maxl = max(len(x) for x in to_print)
+        print name + ' BEGIN'
+        for x in dir(args):
+            if not x.startswith('_') and x != 'cmsrunargs':
+                print x.ljust(maxl + 5), getattr(args,x)
+        print name + ' END'
+    return parser, printer
+
 def geometry_etc(process, tag):
     global_tag(process, tag)
     process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
