@@ -14,7 +14,7 @@ parser.add_argument('+dz-true-max', type=float, help='max dz allowed for z model
 parser.add_argument('+found-dist', type=float, help='3D distance for matching by position (cm)', default=0.008)
 parser.add_argument('+rotate-x', action='store_true', help='azimuthally rotate x of tracks (around beam line)')
 parser.add_argument('+rotate-p', action='store_true', help='azimuthally rotate p of tracks')
-parser.add_argument('+is-mc', action='store_true', help='whether input is MC / data')
+parser.add_argument('+is-data', action='store_true', help='whether input is data / MC')
 parser.add_argument('+batch', action='store_true', help='run in batch mode')
 parser.add_argument('+debug', action='store_true', help='turn on debug prints')
 parser.add_argument('+out-fn', help='override output fn')
@@ -52,11 +52,11 @@ process = basic_process('Overlay')
 process.source.fileNames = in_fns
 process.maxEvents.input = args.max_events
 report_every(process, 1000000 if args.batch else 100)
-geometry_etc(process, which_global_tag(args.is_mc))
+geometry_etc(process, which_global_tag(not args.is_data))
 tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices': 12179, 'mfvOverlayTracks': 12180})
 
-if args.is_mc:
+if not args.is_data:
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.mcStat.histos = True
 
