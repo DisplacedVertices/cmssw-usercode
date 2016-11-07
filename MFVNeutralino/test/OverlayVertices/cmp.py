@@ -6,20 +6,20 @@ set_style()
 class F:
     def __init__(self, fn):
         self.fn = fn
-        self.x = x = fn.split('/')[2].split('_')[1:3]
-        self.n = n = '_'.join(x)
-        self.sample = x[0]
-        self.ntracks = int(x[1][-1])
+        self.n = n = fn.split('/')[2]
+        samples = ['qcdht1500', 'ttbar']
+        self.sample = [s for s in samples if s in fn][0]
+        self.ntracks = int(fn.split('ntk')[1].split('_')[0])
         self.f = f = ROOT.TFile(fn)
         self.g = g = f.Get('c0').FindObject('divide_h_dvv_pass_foundv0andv1bytracks_rebin_by_h_dvv_true_rebin').Clone(n)
         color = {
-            'ttbar_ntk3': ROOT.kRed,
-            'ttbar_ntk4': ROOT.kRed-7,
-            'ttbar_ntk5': ROOT.kRed-9,
-            'qcdht1500_ntk3': ROOT.kBlue,
-            'qcdht1500_ntk4': ROOT.kBlue-7,
-            'qcdht1500_ntk5': ROOT.kBlue-9,
-            }[n]
+            ('ttbar', 3): ROOT.kRed,
+            ('ttbar', 4): ROOT.kRed-7,
+            ('ttbar', 5): ROOT.kRed-9,
+            ('qcdht1500', 3): ROOT.kBlue,
+            ('qcdht1500', 4): ROOT.kBlue-7,
+            ('qcdht1500', 5): ROOT.kBlue-9,
+            }[(self.sample, self.ntracks)]
         #print n
         #for i in xrange(41):
         #    x,y = ROOT.Double(), ROOT.Double()
@@ -30,16 +30,27 @@ class F:
         x = g.GetListOfFunctions()[1]
         x.SetLineColor(0), x.SetTextColor(0), x.SetX1NDC(1), x.SetY1NDC(1), x.SetX2NDC(1), x.SetY2NDC(1) # grr
 
-files = '''plots/overlay/overlay_qcdht1500_ntk3_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
+files = '''
+plots/overlay/overlay_qcdht1500_ntk3_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
 plots/overlay/overlay_qcdht1500_ntk4_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
 plots/overlay/overlay_qcdht1500_ntk5_Zdeltasv_dist0p008_first454/h_dvv_pass_foundv0andv1bytracks.root
 plots/overlay/overlay_ttbar_ntk3_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
 plots/overlay/overlay_ttbar_ntk4_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/overlay_ttbar_ntk5_Zdeltasv_dist0p008_first194/h_dvv_pass_foundv0andv1bytracks.root'''.split('\n')
+plots/overlay/overlay_ttbar_ntk5_Zdeltasv_dist0p008_first194/h_dvv_pass_foundv0andv1bytracks.root
+'''
 
-fs = [F(fn) for fn in files]
+files = '''
+plots/overlay/qcdht1500_ntk3_deltasvgaus/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/qcdht1500_ntk4_deltasvgaus/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/qcdht1500_ntk5_deltasvgaus/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ttbar_ntk3_deltasvgaus/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ttbar_ntk4_deltasvgaus/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ttbar_ntk5_deltasvgaus/h_dvv_pass_foundv0andv1bytracks.root
+'''
 
-ps = plot_saver('plots/overlay/compare', log=False)
+fs = [F(fn.strip()) for fn in files.split('\n') if fn.strip()]
+
+ps = plot_saver('plots/overlay/compare_deltasvgaus', log=False)
 
 scales = [
     0.791, 0.659, 0.486,
