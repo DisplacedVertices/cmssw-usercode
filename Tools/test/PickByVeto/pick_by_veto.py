@@ -4,10 +4,10 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 del process.TFileService
 
 process.veto = cms.EDFilter('EventIdVeto',
-                         use_run = cms.bool(False),
-                         list_fn = cms.string('veto.gz'),
-                         debug = cms.untracked.bool(False),
-                         )
+                            use_run = cms.bool(False),
+                            list_fn = cms.string('veto.gz'),
+                            debug = cms.untracked.bool(False),
+                            )
 
 process.p = cms.Path(~process.veto)
 
@@ -18,11 +18,48 @@ process.out = cms.OutputModule('PoolOutputModule',
 
 process.outp = cms.EndPath(process.out)
 
-file_event_from_argv(process)
-
 if 'debug' in sys.argv:
     process.options.wantSummary = True
     process.veto.debug = True
+
+####
+
+parser, args_printer = friendly_argparse()
+parser.add_argument('+job', type=int, help='which job')
+parser.add_argument('+per', type=int, help='how many files per job')
+parser.add_argument('+sample', help='which sample to use', choices=['qcdht1000', 'qcdht1500', 'qcdht2000'])
+args = parser.parse_args()
+
+x = [y is not None for y in (args.job, args.per, args.sample)]
+if any(x):
+    if not all(x):
+        raise ValueError('if supplying any of +job, +per, +sample, must supply all')
+
+    args.event_list_fn = 'vetolist.%s.gz' % args.sample
+    args.file_list_fn = 'filelist.%s.gz' % args.sample
+    args_printer('args', args)
+
+    if args.job < 0:
+        raise ValueError('job must be non-negative')
+    if args.per <= 0:
+        raise ValueError('per must be positive')
+
+    for x in (args.event_list_fn, args.file_list_fn):
+        if not os.path.isfile(x):
+            raise IOError('file not found: %s' % x)
+
+    process.veto.list_fn = args.event_list_fn
+
+    import gzip
+    files = [x.strip() for x in gzip.open(args.file_list_fn) if x.strip()]
+    files = files[args.job*args.per:(args.job+1)*args.per]
+    if not files:
+        raise ValueError('out of files')
+    process.source.fileNames = files
+else:
+    file_event_from_argv(process)
+
+####
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
