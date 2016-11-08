@@ -1620,6 +1620,13 @@ def tdr_style():
     s.cd()
     return s
 
+def tgraph_getpoint(g, i):
+    x,y = ROOT.Double(), ROOT.Double()
+    if i < 0:
+        i += g.GetN()
+    g.GetPoint(i,x,y)
+    return x,y
+
 def to_array(l):
     return array('d', l)
 
@@ -1671,6 +1678,7 @@ __all__ = [
     'set_style',
     'sort_histogram_pair',
     'tdr_style',
+    'tgraph_getpoint',
     'to_array',
     'ttree_iterator',
     'ROOT',
