@@ -74,12 +74,26 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
     cd src
     eval `scram ru -sh`
     scram b -j 2
-    
-    cmsRun ${workdir}/%(cmssw_py)s +which-event $job +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
-    mv overlay*.root $workdir
-    
+
+    set -x
+    for i in {0..9}; do
+        cmsRun ${workdir}/%(cmssw_py)s +which-event $((job*10+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+        cmsexit=$?
+        if [[ $cmsexit -ne 0 ]]; then
+            echo cmsRun exited with code $cmsexit
+            exit $cmsexit
+        fi
+    done
+    set +x
+    hadd overlay.root overlay_*.root 2>&1
+    haddexit=$?
+    if [[ $cmsexit -ne 0 ]]; then
+        echo hadd exited with code $haddexit
+        exit $haddexit
+    fi
+    mv overlay.root $workdir/overlay_${job}.root
     ''' % locals())
-    
+
     open(sh_fn, 'wt').write(sh)
     os.chmod(sh_fn, 0755)
     
@@ -112,4 +126,7 @@ for sample in ['qcdht1500', 'ttbar']:
         overlay_args = '+rest-of-event +z-model deltasvgaus'
         overlay_args = '+z-model deltasvgaus'
         overlay_args = ''
-        submit(sample, ntracks, overlay_args, njobs=100000, batch_name_ex='_allevents')
+
+submit('qcdht1500', 3, overlay_args, njobs=2017, batch_name_ex='_allevents')
+submit('ttbar', 3, overlay_args, njobs=1363, batch_name_ex='_allevents')
+submit('ttbar', 4, overlay_args, njobs=182, batch_name_ex='_allevents')
