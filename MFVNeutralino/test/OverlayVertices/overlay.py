@@ -5,7 +5,7 @@ from JMTucker.Tools.CMSSWTools import *
 
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
-parser.add_argument('+sample', help='which sample to use', choices=['ttbar', 'qcdht1500'], default='ttbar')
+parser.add_argument('+sample', help='which sample to use', choices=['ttbar', 'qcdht1000', 'qcdht1500', 'qcdht2000'], default='ttbar')
 parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3)
 parser.add_argument('+rest-of-event', action='store_true', help='whether to use the rest of the tracks in the edm event')
 parser.add_argument('+z-model', help='z model', choices=['deltasv', 'deltasvgaus', 'deltapv', 'none'], default='deltasv')
@@ -41,6 +41,12 @@ elif args.sample == 'qcdht1500':
     file_base = '/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/pick1vtx/161104_153718/0000'
     file_nums = range(1,15)
     file_nums.remove(9)
+elif args.sample == 'qcdht1000':
+    file_base = '/store/user/tucker/pick1vtx/qcdht1000'
+    file_nums = range(50)
+elif args.sample == 'qcdht2000':
+    file_base = '/store/user/tucker/pick1vtx/qcdht2000'
+    file_nums = range(23)
 else:
     raise ValueError('bad sample %s' % args.sample)
 
