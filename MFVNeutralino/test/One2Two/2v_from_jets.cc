@@ -21,8 +21,8 @@ bool dphi_from_hist = false;
 
 bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
-double dphi_pdf_e = 2;
-double dphi_pdf_a = 4.3;
+double dphi_pdf_e = 0;
+double dphi_pdf_a = 0;
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
