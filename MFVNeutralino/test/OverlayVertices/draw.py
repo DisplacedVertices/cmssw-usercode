@@ -18,9 +18,11 @@ ps.save('h_dz_true')
 
 def rebin(h):
 #    return h
-    a = array('d', [x*0.001 for x in xrange(51)] + [0.05 + x*0.005 for x in range(11)])
-    #a = array('d', [x*0.01 for x in xrange(41)])
-    return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
+    if 'ntk5' in out_name:
+        bins = [x*0.005 for x in xrange(11)] + [0.05 + x*0.01 for x in range(6)]
+    else:
+        bins = [x*0.001 for x in xrange(51)] + [0.05 + x*0.005 for x in range(11)]
+    return h.Rebin(len(bins)-1, h.GetName() + '_rebin', array('d', bins))
     
 def get_h(n):
     h = rebin(f.Get('mfvOverlayHistos/%s' % n))
