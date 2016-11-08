@@ -9,7 +9,7 @@ class F:
         self.n = n = fn.split('/')[2]
         samples = ['qcdht1500', 'ttbar']
         self.sample = [s for s in samples if s in fn][0]
-        self.ntracks = int(fn.split('ntk')[1].split('_')[0])
+        self.ntracks = int(n.split('ntk')[1].split('_')[0])
         self.f = f = ROOT.TFile(fn)
         self.g = g = f.Get('c0').FindObject('divide_h_dvv_pass_foundv0andv1bytracks_rebin_by_h_dvv_true_rebin').Clone(n)
         color = {
@@ -73,17 +73,9 @@ class F:
             sg.SetPointEYlow(i, eyl)
             sg.SetPointEYhigh(i, eyh)
 
-files = '''
-plots/overlay/overlay_qcdht1500_ntk3_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/overlay_qcdht1500_ntk4_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/overlay_qcdht1500_ntk5_Zdeltasv_dist0p008_first454/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/overlay_ttbar_ntk3_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/overlay_ttbar_ntk4_Zdeltasv_dist0p008_first1000/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/overlay_ttbar_ntk5_Zdeltasv_dist0p008_first194/h_dvv_pass_foundv0andv1bytracks.root
-'''
-
 ex = '_deltasvgaus'
 ex = '_wevent'
+ex = ''
 
 files = '''
 plots/overlay/qcdht1500_ntk3%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
