@@ -7,14 +7,20 @@ from JMTucker.Tools.general import save_git_status
 
 pwd = os.getcwd()
 
-max_njobs = {
-    ('qcdht1500', 3): 20170,
-    ('qcdht1500', 4): 2939,
-    ('qcdht1500', 5): 454,
-    ('ttbar', 3): 13621,
-    ('ttbar', 4): 1814,
-    ('ttbar', 5): 194,
-    }
+def int_ceil(x,y):
+    return (x+y-1)/y
+
+max_njobs = dict([(x, int_ceil(y, 10)) for x,y in [
+            (('qcdht1000', 3), 13452),
+            (('qcdht1000', 4), 1841),
+            (('qcdht1000', 5), 237),
+            (('qcdht1500', 3), 20170),
+            (('qcdht1500', 4), 2939),
+            (('qcdht1500', 5), 454),
+            (('qcdht2000', 3), 13775),
+            (('qcdht2000', 4), 2314),
+            (('qcdht2000', 5), 335),
+            ]])
 
 def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_ex=''):
     njobs = min(max_njobs[(sample, ntracks)], njobs)
@@ -120,13 +126,10 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
         os.system('condor_submit < ' + jdl_fn)
         os.chdir(pwd)
 
-for sample in ['qcdht1500', 'ttbar']:
+for sample in ['qcdht1000', 'qcdht2000']: #'qcdht1500', 'ttbar']:
     for ntracks in [3,4,5]:
         overlay_args = '+rest-of-event'
         overlay_args = '+rest-of-event +z-model deltasvgaus'
         overlay_args = '+z-model deltasvgaus'
         overlay_args = ''
-
-submit('qcdht1500', 3, overlay_args, njobs=2017, batch_name_ex='_allevents')
-submit('ttbar', 3, overlay_args, njobs=1363, batch_name_ex='_allevents')
-submit('ttbar', 4, overlay_args, njobs=182, batch_name_ex='_allevents')
+        submit(sample, ntracks, overlay_args, njobs=3000, batch_name_ex='_allevents')
