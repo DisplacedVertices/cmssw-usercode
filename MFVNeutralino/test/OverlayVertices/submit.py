@@ -16,7 +16,7 @@ max_njobs = {
     ('ttbar', 5): 194,
     }
 
-def submit(sample, ntracks, overlay_args, njobs=1000, testing=False):
+def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_ex=''):
     njobs = min(max_njobs[(sample, ntracks)], njobs)
 
     batch_name = '%s_ntk%i' % (sample, ntracks)
@@ -24,9 +24,11 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False):
         batch_name += '_deltasvgaus'
     if 'rest-of-event' in overlay_args:
         batch_name += '_wevent'
-
+    batch_name += batch_name_ex
     if testing:
         batch_name += '_TEST'
+
+    print batch_name
 
     cmssw_py = 'overlay.py'
     
@@ -106,7 +108,8 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False):
 
 for sample in ['qcdht1500', 'ttbar']:
     for ntracks in [3,4,5]:
+        overlay_args = '+rest-of-event'
+        overlay_args = '+rest-of-event +z-model deltasvgaus'
         overlay_args = '+z-model deltasvgaus'
-        #overlay_args = '+rest-of-event'
-        submit(sample, ntracks, overlay_args, testing=True)
-
+        overlay_args = ''
+        submit(sample, ntracks, overlay_args, njobs=100000, batch_name_ex='_allevents')
