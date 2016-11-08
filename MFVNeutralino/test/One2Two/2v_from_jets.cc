@@ -331,5 +331,16 @@ int main(int argc, const char* argv[]) {
   c_absdphivv->SetTicky();
   c_absdphivv->Write();
 
+  if (dphi_from_pdf) {
+    f_dphi->Write();
+  }
+  if (dphi_from_hist) {
+    h_dphi->Write();
+  }
+  if (clearing_from_eff) {
+    h_eff->SetName("h_eff");
+    h_eff->Write();
+  }
+
   fh->Close();
 }
