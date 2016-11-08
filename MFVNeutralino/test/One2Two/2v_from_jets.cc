@@ -14,9 +14,8 @@
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 bool clearing_from_eff = false;
-const int eff_nbins = 40;
-double eff_bin_width = 0.01;
-double eff[eff_nbins+1] = {0.0887200832367, 0.26492780447, 0.424160420895, 0.540564835072, 0.612435728312, 0.666476875544, 0.700767636299, 0.716090559959, 0.736099332571, 0.748791098595, 0.760122552514, 0.771965146065, 0.770971775055, 0.781980112195, 0.781406506896, 0.78949610889, 0.790535360575, 0.790518730879, 0.797075837851, 0.791352599859, 0.80023662746, 0.807722091675, 0.806445986032, 0.804875582457, 0.807317301631, 0.816252231598, 0.812310308218, 0.819209486246, 0.818562537432, 0.822052836418, 0.823742762208, 0.824828445911, 0.833424195647, 0.828828051686, 0.830597683787, 0.829892545938, 0.837587982416, 0.835536271334, 0.8477845788, 0.850240528584, 0.840228512883};
+const char* eff_file = "eff.root";
+const char* eff_hist = "h_eff_background_maxtk3_add";
 
 bool dphi_from_hist = false;
 
@@ -181,9 +180,9 @@ int main(int argc, const char* argv[]) {
   h_dphi->SetBinContent(4, 0.214419648051);
   h_dphi->SetBinContent(5, 0.277049005032);
 
-  TH1F* h_eff = new TH1F("h_eff", "input to construction;d_{VV} (cm);probability", eff_nbins, 0, eff_nbins * eff_bin_width);
-  for (int i = 0; i <= eff_nbins; ++i) {
-    h_eff->SetBinContent(i+1, eff[i]);
+  TH1F* h_eff;
+  if (clearing_from_eff) {
+    h_eff = (TH1F*)TFile::Open(eff_file)->Get(eff_hist);
   }
 
   for (int i = 0; i < nbkg; ++i) {
