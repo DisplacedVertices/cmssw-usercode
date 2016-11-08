@@ -17,8 +17,6 @@ bool clearing_from_eff = false;
 const char* eff_file = "eff.root";
 const char* eff_hist = "h_eff_background_maxtk3_add";
 
-bool dphi_from_hist = false;
-
 bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
 double dphi_pdf_e = 0;
@@ -173,13 +171,6 @@ int main(int argc, const char* argv[]) {
   TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", 0, M_PI);
   f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
 
-  TH1F* h_dphi = new TH1F("h_dphi", "input to construction;|#Delta#phi_{VV}|;probability", 5, 0, 3.15);
-  h_dphi->SetBinContent(1, 0.217011258006);
-  h_dphi->SetBinContent(2, 0.142219424248);
-  h_dphi->SetBinContent(3, 0.149300679564);
-  h_dphi->SetBinContent(4, 0.214419648051);
-  h_dphi->SetBinContent(5, 0.277049005032);
-
   TH1F* h_eff;
   if (clearing_from_eff) {
     h_eff = (TH1F*)TFile::Open(eff_file)->Get(eff_hist);
@@ -217,9 +208,6 @@ int main(int argc, const char* argv[]) {
         double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
         if (dphi_from_pdf) {
           dphi = f_dphi->GetRandom();
-        }
-        if (dphi_from_hist) {
-          dphi = h_dphi->GetRandom();
         }
 
         double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
@@ -333,9 +321,6 @@ int main(int argc, const char* argv[]) {
 
   if (dphi_from_pdf) {
     f_dphi->Write();
-  }
-  if (dphi_from_hist) {
-    h_dphi->Write();
   }
   if (clearing_from_eff) {
     h_eff->SetName("h_eff");
