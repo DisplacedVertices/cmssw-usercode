@@ -160,7 +160,7 @@ void MFVOverlayVertexTracks::update_min_track_vertex_dist(const TransientTrackBu
     x.second = Measurement1D(1e9, 1e-9);
   if (x.second.value() < min_d.value())
     min_d = x.second;
-  if (x.second.significance() < min_d.significance())
+  if (x.second.significance() < min_d_sig.significance())
     min_d_sig = x.second;
 }
 
