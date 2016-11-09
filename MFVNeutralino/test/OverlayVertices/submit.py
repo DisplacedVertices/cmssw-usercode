@@ -88,7 +88,10 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
     for i in {0..9}; do
         cmsRun ${workdir}/%(cmssw_py)s +which-event $((job*10+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
         cmsexit=$?
-        if [[ $cmsexit -ne 0 ]]; then
+        if [[ $cmsexit -eq 65 ]]; then
+            echo looks like we are out of events
+            break
+        elif [[ $cmsexit -ne 0 ]]; then
             echo cmsRun exited with code $cmsexit
             exit $cmsexit
         fi
