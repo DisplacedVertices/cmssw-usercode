@@ -19,6 +19,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
+#include "JMTucker/MFVNeutralino/interface/MCInteractionLQ.h"
 #include "JMTucker/Tools/interface/MCInteractionTops.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
@@ -152,7 +153,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mci.Init(*gen_particles);
     if (!mci.Valid()) {
       if (!warned_non_mfv) {
-        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file, will try ttbar";
+        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file, will try ttbar or lq2 signal";
         warned_non_mfv = true;
       }
 
@@ -168,6 +169,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
           mevent->gen_decay_type[i] = mci_tt.decay_type[i];
         }
       }
+
+//      MCInteractionLQ mci_lq2;
+//      mci_lq2.Init(*gen_particles);
+//      if(mci_lq2.Valid()) {
+//	lep_from_hardint = mci_lq2.ElsOrMus();
+//	for (int i = 0; i < 2; ++i) {
+//	  mevent->gen_lsp_pt  [i] = mci_lq2.lqs[i]->pt();
+//          mevent->gen_lsp_eta [i] = mci_lq2.lqs[i]->eta();
+//          mevent->gen_lsp_phi [i] = mci_lq2.lqs[i]->phi();
+//          mevent->gen_lsp_mass[i] = mci_lq2.lqs[i]->mass();
+//          mevent->gen_decay_type[i] = mci_lq2.decay_id[i];
+//	}
+//      }
     }
     else {
       lep_from_hardint = mci.ElsOrMus();
@@ -427,6 +441,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->lep_dxy.clear();
   mevent->lep_dz.clear();
   mevent->lep_iso.clear();
+  mevent->lep_iso_det.clear();
+  mevent->lep_iso_det_tkonly.clear();
 
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
@@ -438,6 +454,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (muon_dilep_selector  (muon)) sel |= MFVEvent::mu_dilep;
 
     const float iso = (muon.chargedHadronIso() + std::max(0.f,muon.neutralHadronIso()) + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
+    const float iso_det = muon.isolationR03().sumPt + muon.isolationR03().emEt + muon.isolationR03().hadEt + muon.isolationR03().hoEt;
+    const float iso_det_tkonly =  muon.isolationR03().sumPt;
 
     mevent->lep_id.push_back(MFVEvent::encode_mu_id(sel));
     mevent->lep_pt.push_back(muon.pt());
@@ -454,6 +472,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
     mevent->lep_dxybs.push_back(muon.track()->dxy(beamspot->position()));
     mevent->lep_iso.push_back(iso);
+    mevent->lep_iso_det.push_back(iso_det);
+    mevent->lep_iso_det_tkonly.push_back(iso_det_tkonly);
   }
 
   edm::Handle<pat::ElectronCollection> electrons;
