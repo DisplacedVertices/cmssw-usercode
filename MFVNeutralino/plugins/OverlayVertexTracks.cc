@@ -5,12 +5,18 @@
 #include "DataFormats/GeometryVector/interface/TrackingJacobians.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
@@ -24,6 +30,9 @@ private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
   reco::Track copy_track(int i, mfv::MiniNtuple* nt);
+  reco::Vertex copy_vertex(mfv::MiniNtuple* nt);
+  void update_min_track_vertex_dist(const TransientTrackBuilder& tt_builder, const reco::Track& tk, const reco::Vertex& v,
+                                    Measurement1D& min_d, Measurement1D& min_d_sig);
 
   const std::string minitree_fn;
   const int which_event;
@@ -139,12 +148,28 @@ reco::Track MFVOverlayVertexTracks::copy_track(int i, mfv::MiniNtuple* nt) {
                      reco::TrackBase::TrackAlgorithm(0));
 }
 
-bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
+reco::Vertex MFVOverlayVertexTracks::copy_vertex(mfv::MiniNtuple* nt) {
+  return reco::Vertex(reco::Vertex::Point(nt->x0, nt->y0, nt->z0), reco::Vertex::Error()); // JMTBAD need cov matrix back in minitree
+}
+
+void MFVOverlayVertexTracks::update_min_track_vertex_dist(const TransientTrackBuilder& tt_builder, const reco::Track& tk, const reco::Vertex& v,
+                                                          Measurement1D& min_d, Measurement1D& min_d_sig) {
+  reco::TransientTrack ttk = tt_builder.build(tk);
+  std::pair<bool, Measurement1D> x = IPTools::absoluteImpactParameter3D(ttk, v);
+  if (!x.first)
+    x.second = Measurement1D(1e9, 1e-9);
+  if (x.second.value() < min_d.value())
+    min_d = x.second;
+  if (x.second.significance() < min_d.significance())
+    min_d_sig = x.second;
+}
+
+bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   assert(!event.isRealData()); // JMTBAD lots of reasons this dosen't work on data yet
 
   std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
-  std::auto_ptr<std::vector<double>> truth(new std::vector<double>(11)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0
-  // rest of truth is (ntk0 + ntk1) * 3 : px, py, pz, ... original untransformed tracks for v1
+  std::auto_ptr<std::vector<double>> truth(new std::vector<double>(13)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, min_track_vertex_dist, min_track_vertex_sig
+  // rest of truth is (ntk0 + ntk1) * 3 : px, py, pz, ... tracks for v1_0
 
   RLE rle(event.id().run(), event.luminosityBlock(), event.id().event());
   if (event_index.find(rle) == event_index.end())
@@ -187,6 +212,7 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
     if (rotate_x) {
       AlgebraicVector3 v1_0(nt1_0->x0, nt1_0->y0, nt1_0->z0);
       AlgebraicVector3 rot_v1_0 = rot3 * v1_0;
+      assert(0); // vertex covariance for the track-vertex sig stuff
       nt1_0->x0 = rot_v1_0(0);
       nt1_0->y0 = rot_v1_0(1);
       nt1_0->z0 = rot_v1_0(2);
@@ -252,12 +278,28 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup&) {
     truth->push_back(nt1_0->tk0_pz[i]);
   }
 
-  if (!only_other_tracks)
-    for (int i = 0; i < nt0->ntk0; ++i)
-      output_tracks->push_back(copy_track(i, nt0));
+  reco::Vertex v0 = copy_vertex(nt0);
+  //reco::Vertex v1 = copy_vertex(nt1);
+  reco::Vertex v1_0 = copy_vertex(nt1_0);
 
-  for (int i = 0; i < nt1_0->ntk0; ++i)
+  edm::ESHandle<TransientTrackBuilder> tt_builder;
+  setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
+
+  Measurement1D min_d(1e9, 1e-9), min_d_sig(1e9, 1e-9);
+
+  if (!only_other_tracks)
+    for (int i = 0; i < nt0->ntk0; ++i) {
+      output_tracks->push_back(copy_track(i, nt0));
+      update_min_track_vertex_dist(*tt_builder, output_tracks->back(), v1_0, min_d, min_d_sig);
+    }
+
+  for (int i = 0; i < nt1_0->ntk0; ++i) {
     output_tracks->push_back(copy_track(i, nt1_0));
+    update_min_track_vertex_dist(*tt_builder, output_tracks->back(), v0, min_d, min_d_sig);
+  }
+
+  (*truth)[11] = min_d.value();
+  (*truth)[12] = min_d_sig.significance();
 
   delete nt1_0;
 
