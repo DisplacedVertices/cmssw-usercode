@@ -35,27 +35,21 @@ args_printer('overlay args', args)
 ####
 
 if args.sample == 'ttbar':
-    file_base = '/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/pick1vtx/161104_153826/0000'
-    file_nums = range(1,94)
-elif args.sample == 'qcdht1500':
-    file_base = '/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/pick1vtx/161104_153718/0000'
-    file_nums = range(1,15)
-    file_nums.remove(9)
+    files = ['/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/pick1vtx/161104_153826/0000/pick_%i.root' % i for i in range(1,94)]
 elif args.sample == 'qcdht1000':
-    file_base = '/store/user/tucker/pick1vtx/qcdht1000'
-    file_nums = range(50)
+    files = ['/store/user/tucker/pick1vtx/qcdht1000/pick_%i.root' % i for i in range(50)]
+elif args.sample == 'qcdht1500':
+    files = ['/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/pick1vtx/161104_153718/0000/pick_%i.root' % i for i in range(1,15) if i != 9]
+    files += ['/eos/uscms/store/user/tucker/pick1vtx/qcdht1500/qcdht1500_%i.root' % i for i in (0,1,2)]
 elif args.sample == 'qcdht2000':
-    file_base = '/store/user/tucker/pick1vtx/qcdht2000'
-    file_nums = range(23)
+    files = ['/store/user/tucker/pick1vtx/qcdht2000/pick_%i.root' % i for i in range(23)]
 else:
     raise ValueError('bad sample %s' % args.sample)
-
-in_fns = [os.path.join(file_base, 'pick_%i.root' % i) for i in file_nums]
 
 ####
 
 process = basic_process('Overlay')
-process.source.fileNames = in_fns
+process.source.fileNames = files
 process.maxEvents.input = args.max_events
 report_every(process, 1000000 if args.batch else 100)
 geometry_etc(process, which_global_tag(not args.is_data))
