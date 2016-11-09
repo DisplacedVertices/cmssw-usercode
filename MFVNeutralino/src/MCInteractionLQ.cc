@@ -70,3 +70,14 @@ void MCInteractionLQ::Print(std::ostream& out) {
   print_gen_and_daus(daus[1][1], "daus[1][1]", *gen_particles, true, true);
   MCInteraction::Print(out);
 }
+
+std::vector<const reco::GenParticle*> MCInteractionLQ::ElsOrMus() {
+  std::vector<const reco::GenParticle*> v;
+  for (int i = 0; i < 2; ++i)
+    for (int j = 0; j < 2; ++j) {
+      int id = abs(daus[i][j]->pdgId());
+      if (id == 11 || id == 13)
+	v.push_back(daus[i][j]);
+    }
+  return v;
+}
