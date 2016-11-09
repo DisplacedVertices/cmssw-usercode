@@ -11,15 +11,18 @@ def int_ceil(x,y):
     return (x+y-1)/y
 
 max_njobs = dict([(x, int_ceil(y, 10)) for x,y in [
-            (('qcdht1000', 3), 13452),
+            (('qcdht1000', 3), 13371),
             (('qcdht1000', 4), 1841),
             (('qcdht1000', 5), 237),
-            (('qcdht1500', 3), 20170),
-            (('qcdht1500', 4), 2939),
+            (('qcdht1500', 3), 20009),
+            (('qcdht1500', 4), 2936),
             (('qcdht1500', 5), 454),
-            (('qcdht2000', 3), 13775),
-            (('qcdht2000', 4), 2314),
+            (('qcdht2000', 3), 13656),
+            (('qcdht2000', 4), 2310),
             (('qcdht2000', 5), 335),
+            (('ttbar', 3), 13398),
+            (('ttbar', 4), 1811),
+            (('ttbar', 5), 194),
             ]])
 
 def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_ex=''):
