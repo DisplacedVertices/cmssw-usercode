@@ -91,7 +91,7 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
 
   for (int i = 0; i < 2; ++i) {
     h_min_track_vertex_dist[i] = fs->make<TH1F>(TString::Format("h_min_track_vertex_dist_%i", i), "", 1000, 0, 1);
-    h_min_track_vertex_sig[i] = fs->make<TH1F>(TString::Format("h_min_track_vertex_sig_%i", i), "", 1000, 0, 1000);
+    h_min_track_vertex_sig[i] = fs->make<TH1F>(TString::Format("h_min_track_vertex_sig_%i", i), "", 1000, 0, 100);
   }
 }
 
