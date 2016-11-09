@@ -90,9 +90,9 @@ for den in dens:
 
     pars = ('floor', 'ceiling', 'threshold', 'width')
 
-    print den
-    print '%35s' % '',
-    print '%20s %20s %20s %20s' % pars
+    #print den
+    #print '%35s' % '',
+    #print '%20s %20s %20s %20s' % pars
 
     for n_num in n_nums:
         n_num = den + '_' + n_num
@@ -103,5 +103,5 @@ for den in dens:
         h_eff.Draw('AP')
         h_eff.GetXaxis().SetRangeUser(0, 0.3)
         print '%35s' % n_num,
-        fcn = do_fit(h_eff)
+        #fcn = do_fit(h_eff)
         ps.save(n_num)
