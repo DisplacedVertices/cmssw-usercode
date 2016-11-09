@@ -45,6 +45,9 @@ class MFVOverlayVertexHistos : public edm::EDAnalyzer {
   TH1F* h_d3d_pass_foundv0andv1asmanyntk;
   TH1F* h_d3d_pass_foundv0andv1bytracks;
 
+  TH1F* h_min_track_vertex_dist[2];
+  TH1F* h_min_track_vertex_sig[2];
+
   struct _track {
     _track() {}
     _track(double x, double y, double z) : px(x), py(y), pz(z), p(mag(x,y,z)) {}
@@ -85,6 +88,11 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
   h_d3d_pass_foundv0andv1samentk   = fs->make<TH1F>("h_d3d_pass_foundv0andv1samentk",   "", 1000, 0, 1);
   h_d3d_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_d3d_pass_foundv0andv1asmanyntk", "", 1000, 0, 1);
   h_d3d_pass_foundv0andv1bytracks  = fs->make<TH1F>("h_d3d_pass_foundv0andv1bytracks",  "", 1000, 0, 1);
+
+  for (int i = 0; i < 2; ++i) {
+    h_min_track_vertex_dist[i] = fs->make<TH1F>(TString::Format("h_min_track_vertex_dist_%i", i), "", 1000, 0, 1);
+    h_min_track_vertex_sig[i] = fs->make<TH1F>(TString::Format("h_min_track_vertex_sig_%i", i), "", 1000, 0, 1000);
+  }
 }
 
 void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -105,6 +113,9 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
   const double y1_0 = truth->at(9);
   const double z1_0 = truth->at(10);
 
+  const double min_track_vertex_dist = truth->at(11);
+  const double min_track_vertex_sig = truth->at(12);
+
   const double dvv_true = mag(x0 - x1_0, y0 - y1_0);
   const double d3d_true = mag(x0 - x1_0, y0 - y1_0, z0 - z1_0);
   const double dz_true = z0 - z1_0;
@@ -115,21 +126,21 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
   if (fabs(dz_true) > dz_true_max)
     return;
 
-  assert(int(truth->size()) - 11 == (ntk0 + ntk1) * 3);
+  assert(int(truth->size()) - 13 == (ntk0 + ntk1) * 3);
 
   const int ntks[2] = { ntk0, ntk1 };
   std::vector<_track> tracks[2];
   for (int j = 0; j < 2; ++j) {
     tracks[j].resize(ntks[j]);
 
-    const int offset = 11 + j*3*ntks[0];
+    const int offset = 13 + j*3*ntks[0];
     for (int i = 0; i < ntks[j]; ++i)
       tracks[j][i] = _track(truth->at(offset + 3*i), truth->at(offset + 3*i+1), truth->at(offset + 3*i+2));
   }
     
   if (debug) {
-    printf("OverlayVertexHistos: truth: ntk0 %i v0 %f, %f, %f ntk1 %i v1 %f, %f, %f v1_0 %f, %f, %f -> dvv_true %f, d3d_true %f\n",
-           ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, dvv_true, d3d_true);
+    printf("OverlayVertexHistos: truth: ntk0 %i v0 %f, %f, %f ntk1 %i v1 %f, %f, %f v1_0 %f, %f, %f -> dvv_true %f, d3d_true %f | min tk-v dist %f sig %f\n",
+           ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, dvv_true, d3d_true, min_track_vertex_dist, min_track_vertex_sig);
     for (int j = 0; j < 2; ++j)
       for (int i = 0; i < ntks[j]; ++i)
         printf("v%i tk%i  %f, %f, %f  p = %f\n", j, i, tracks[j][i].px, tracks[j][i].py, tracks[j][i].pz, tracks[j][i].p);
@@ -148,9 +159,6 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
 
   int nvtx = int(vertices->size());
   if (debug) printf("%i reco vertices:\n", nvtx);
-
-  if (nvtx < 2)
-    return;
 
   int nvtx_minntk = 0;
   bool found[2] = {0};
@@ -222,19 +230,31 @@ void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSe
     if (cond) h->Fill(v);
   };
 
-  fillit(dvv_true, h_dvv_pass_anytwo,                1);
-  fillit(dvv_true, h_dvv_pass_twominntk,             nvtx_minntk >= 2);
-  fillit(dvv_true, h_dvv_pass_foundv0andv1,          found[0] && found[1]);
-  fillit(dvv_true, h_dvv_pass_foundv0andv1samentk,   found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1);
-  fillit(dvv_true, h_dvv_pass_foundv0andv1asmanyntk, found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1);
-  fillit(dvv_true, h_dvv_pass_foundv0andv1bytracks,  found_by_tracks[0] != -1 && found_by_tracks[1] != -1 && found_by_tracks[0] != found_by_tracks[1]);
+  const bool pass_anytwo                = nvtx >= 2;
+  const bool pass_twominntk             = nvtx >= 2 && nvtx_minntk >= 2;
+  const bool pass_foundv0andv1          = nvtx >= 2 && found[0] && found[1];
+  const bool pass_foundv0andv1samentk   = nvtx >= 2 && found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1;
+  const bool pass_foundv0andv1asmanyntk = nvtx >= 2 && found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1;
+  const bool pass_foundv0andv1bytracks  = nvtx >= 2 && found_by_tracks[0] != -1 && found_by_tracks[1] != -1 && found_by_tracks[0] != found_by_tracks[1];
 
-  fillit(d3d_true, h_d3d_pass_anytwo,                1);
-  fillit(d3d_true, h_d3d_pass_twominntk,             nvtx_minntk >= 2);
-  fillit(d3d_true, h_d3d_pass_foundv0andv1,          found[0] && found[1]);
-  fillit(d3d_true, h_d3d_pass_foundv0andv1samentk,   found[0] && found[1] && found_ntk[0] == ntk0 && found_ntk[1] == ntk1);
-  fillit(d3d_true, h_d3d_pass_foundv0andv1asmanyntk, found[0] && found[1] && found_ntk[0] >= ntk0 && found_ntk[1] >= ntk1);
-  fillit(d3d_true, h_d3d_pass_foundv0andv1bytracks,  found_by_tracks[0] != -1 && found_by_tracks[1] != -1 && found_by_tracks[0] != found_by_tracks[1]);
+  fillit(dvv_true, h_dvv_pass_anytwo,                 pass_anytwo);
+  fillit(dvv_true, h_dvv_pass_twominntk,              pass_twominntk);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1,           pass_foundv0andv1);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1samentk,    pass_foundv0andv1samentk);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1asmanyntk,  pass_foundv0andv1asmanyntk);
+  fillit(dvv_true, h_dvv_pass_foundv0andv1bytracks,   pass_foundv0andv1bytracks);
+
+  fillit(d3d_true, h_d3d_pass_anytwo,                 pass_anytwo);
+  fillit(d3d_true, h_d3d_pass_twominntk,              pass_twominntk);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1,           pass_foundv0andv1);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1samentk,    pass_foundv0andv1samentk);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1asmanyntk,  pass_foundv0andv1asmanyntk);
+  fillit(d3d_true, h_d3d_pass_foundv0andv1bytracks,   pass_foundv0andv1bytracks);
+
+  if (dvv_true > 0.1) {
+    h_min_track_vertex_dist[pass_foundv0andv1bytracks]->Fill(min_track_vertex_dist);
+    h_min_track_vertex_sig [pass_foundv0andv1bytracks]->Fill(min_track_vertex_sig);
+  }
 }
 
 DEFINE_FWK_MODULE(MFVOverlayVertexHistos);
