@@ -22,12 +22,15 @@ if 'debug' in sys.argv:
     process.options.wantSummary = True
     process.veto.debug = True
 
+report_every(process, 500)
+
 ####
 
 parser, args_printer = friendly_argparse()
 parser.add_argument('+job', type=int, help='which job')
 parser.add_argument('+per', type=int, help='how many files per job')
 parser.add_argument('+sample', help='which sample to use', choices=['qcdht1000', 'qcdht1500', 'qcdht2000'])
+parser.add_argument('+out-fn', help='output filename')
 args = parser.parse_args()
 
 x = [y is not None for y in (args.job, args.per, args.sample)]
@@ -35,7 +38,7 @@ if any(x):
     if not all(x):
         raise ValueError('if supplying any of +job, +per, +sample, must supply all')
 
-    args.event_list_fn = 'vetolist.%s.gz' % args.sample
+    args.event_list_fn = 'vetolist.%s' % args.sample
     args.file_list_fn = 'filelist.%s.gz' % args.sample
     args_printer('args', args)
 
@@ -56,6 +59,9 @@ if any(x):
     if not files:
         raise ValueError('out of files')
     process.source.fileNames = files
+
+    if args.out_fn is not None:
+        process.out.fileName = args.out_fn
 else:
     file_event_from_argv(process)
 
