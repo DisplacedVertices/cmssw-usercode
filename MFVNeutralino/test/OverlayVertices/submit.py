@@ -28,7 +28,7 @@ max_njobs = dict([(x, int_ceil(y, 10)) for x,y in [
 def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_ex=''):
     njobs = min(max_njobs[(sample, ntracks)], njobs)
 
-    batch_name = '%s_ntk%i' % (sample, ntracks)
+    batch_name = 'ntk%i' % ntracks
     if 'deltasvgaus' in overlay_args:
         batch_name += '_deltasvgaus'
     if 'rest-of-event' in overlay_args:
@@ -37,12 +37,11 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
     if testing:
         batch_name += '_TEST'
 
-    print batch_name
+    print batch_name, sample
 
     cmssw_py = 'overlay.py'
     
-    batch_root = '/uscms_data/d2/tucker/overlay'
-    batch_dir = os.path.abspath(os.path.join(batch_root, batch_name))
+    batch_dir = '/uscms_data/d2/tucker/overlay/%s/%s' % (batch_name, sample)
     
     inputs_dir = os.path.join(batch_dir, 'inputs')
     outputs_dir = os.path.join(batch_dir, 'outputs')
@@ -99,7 +98,7 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
     set +x
     hadd overlay.root overlay_*.root 2>&1
     haddexit=$?
-    if [[ $cmsexit -ne 0 ]]; then
+    if [[ $haddexit -ne 0 ]]; then
         echo hadd exited with code $haddexit
         exit $haddexit
     fi
@@ -132,10 +131,10 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
         os.system('condor_submit < ' + jdl_fn)
         os.chdir(pwd)
 
-for sample in ['qcdht1000', 'qcdht2000']: #'qcdht1500', 'ttbar']:
+for sample in ['qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbar']:
     for ntracks in [3,4,5]:
         overlay_args = '+rest-of-event'
         overlay_args = '+rest-of-event +z-model deltasvgaus'
         overlay_args = '+z-model deltasvgaus'
         overlay_args = ''
-        submit(sample, ntracks, overlay_args, njobs=3000, batch_name_ex='_allevents')
+        submit(sample, ntracks, overlay_args, njobs=3000)
