@@ -40,7 +40,7 @@ elif args.sample == 'qcdht1000':
     files = ['/store/user/tucker/pick1vtx/qcdht1000/pick_%i.root' % i for i in range(50)]
 elif args.sample == 'qcdht1500':
     files = ['/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/pick1vtx/161104_153718/0000/pick_%i.root' % i for i in range(1,15) if i != 9]
-    files += ['/eos/uscms/store/user/tucker/pick1vtx/qcdht1500/qcdht1500_%i.root' % i for i in (0,1,2)]
+    files += ['/store/user/tucker/pick1vtx/qcdht1500/qcdht1500_%i.root' % i for i in (0,1,2)]
 elif args.sample == 'qcdht2000':
     files = ['/store/user/tucker/pick1vtx/qcdht2000/pick_%i.root' % i for i in range(23)]
 else:
