@@ -57,10 +57,6 @@ tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices':      12179 + args.which_event,
                          'mfvOverlayTracks': 12180 + args.which_event})
 
-if not args.is_data:
-    process.load('JMTucker.Tools.MCStatProducer_cff')
-    process.mcStat.histos = True
-
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('JMTucker.MFVNeutralino.Vertexer_cfi')
 
