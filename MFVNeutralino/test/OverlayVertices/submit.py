@@ -10,7 +10,8 @@ pwd = os.getcwd()
 def int_ceil(x,y):
     return (x+y-1)/y
 
-max_njobs = dict([(x, int_ceil(y, 10)) for x,y in [
+per = 10
+max_njobs = dict([(x, (int_ceil(y, per), y % per)) for x,y in [
             (('qcdht1000', 3), 13371),
             (('qcdht1000', 4), 1841),
             (('qcdht1000', 5), 237),
@@ -25,8 +26,12 @@ max_njobs = dict([(x, int_ceil(y, 10)) for x,y in [
             (('ttbar', 5), 194),
             ]])
 
-def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_ex=''):
-    njobs = min(max_njobs[(sample, ntracks)], njobs)
+def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=''):
+    if njobs <= 0:
+        njobs, per_last = max_njobs[(sample, ntracks)]
+    else:
+        per_last = per
+    per_last_m1 = per_last - 1
 
     batch_name = 'ntk%i' % ntracks
     if 'deltasvgaus' in overlay_args:
@@ -84,13 +89,10 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
     scram b -j 2
 
     set -x
-    for i in {0..9}; do
+    for i in {0..%(per_last_m1)i}; do
         cmsRun ${workdir}/%(cmssw_py)s +which-event $((job*10+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
         cmsexit=$?
-        if [[ $cmsexit -eq 65 ]]; then
-            echo looks like we are out of events
-            break
-        elif [[ $cmsexit -ne 0 ]]; then
+        if [[ $cmsexit -ne 0 ]]; then
             echo cmsRun exited with code $cmsexit
             exit $cmsexit
         fi
@@ -131,10 +133,9 @@ def submit(sample, ntracks, overlay_args, njobs=1000, testing=False, batch_name_
         os.system('condor_submit < ' + jdl_fn)
         os.chdir(pwd)
 
-for sample in ['qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbar']:
-    for ntracks in [3,4,5]:
-        overlay_args = '+rest-of-event'
-        overlay_args = '+rest-of-event +z-model deltasvgaus'
-        overlay_args = '+z-model deltasvgaus'
-        overlay_args = ''
-        submit(sample, ntracks, overlay_args, njobs=3000)
+overlay_argses = ['', '+z-model deltasvgaus', '+rest-of-event', '+rest-of-event +z-model deltasvgaus']
+for overlay_args in overlay_argses:
+    for sample in ['qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbar']:
+        for ntracks in [3,4,5]:
+            submit(sample, ntracks, overlay_args)
+            print
