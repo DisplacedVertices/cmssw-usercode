@@ -3,32 +3,30 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
 
+ROOT.gStyle.SetOptFit(0)
+
 class F:
     def __init__(self, fn):
         self.fn = fn
         self.n = n = fn.split('/')[2]
-        samples = ['qcdht1500', 'ttbar']
-        self.sample = [s for s in samples if s in fn][0]
         self.ntracks = int(n.split('ntk')[1].split('_')[0])
         self.f = f = ROOT.TFile(fn)
         self.g = g = f.Get('c0').FindObject('divide_h_dvv_pass_foundv0andv1bytracks_rebin_by_h_dvv_true_rebin').Clone(n)
         color = {
-            ('ttbar', 3): ROOT.kRed,
-            ('ttbar', 4): ROOT.kRed-7,
-            ('ttbar', 5): ROOT.kRed-9,
-            ('qcdht1500', 3): ROOT.kBlue,
-            ('qcdht1500', 4): ROOT.kBlue-7,
-            ('qcdht1500', 5): ROOT.kBlue-9,
-            }[(self.sample, self.ntracks)]
+            3: ROOT.kRed,
+            4: ROOT.kBlue,
+            5: ROOT.kGreen+2,
+            }[self.ntracks]
         #print n
         #for i in xrange(41):
         #x,y = tgraph_getpoint(g, i)
         #    g.GetPoint(i if i <= 10 else 10, x,y)
         #    print 'h_eff->SetBinContent(%i, %f);' % (i+1, y)
         g.SetLineColor(color)
-        g.GetListOfFunctions()[0].SetBit(ROOT.TF1.kNotDraw)
-        s = g.GetListOfFunctions()[1]
-        s.SetLineColor(0), s.SetTextColor(0), s.SetX1NDC(1), s.SetY1NDC(1), s.SetX2NDC(1), s.SetY2NDC(1) # grr
+        print list(g.GetListOfFunctions())
+#        g.GetListOfFunctions()[0].SetBit(ROOT.TF1.kNotDraw)
+#        s = g.GetListOfFunctions()[1]
+#        s.SetLineColor(0), s.SetTextColor(0), s.SetX1NDC(1), s.SetY1NDC(1), s.SetX2NDC(1), s.SetY2NDC(1) # grr
 
         end = 0.1
         self.fcns = [None, None]
@@ -78,12 +76,9 @@ ex = '_wevent'
 ex = ''
 
 files = '''
-plots/overlay/qcdht1500_ntk3%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/qcdht1500_ntk4%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/qcdht1500_ntk5%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/ttbar_ntk3%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/ttbar_ntk4%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
-plots/overlay/ttbar_ntk5%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ntk3%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ntk4%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ntk5%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
 ''' % locals()
 
 fs = [F(fn.strip()) for fn in files.split('\n') if fn.strip()]
@@ -101,12 +96,12 @@ for scaled in (0,1):
         if not scaled:
             f.fcns[0].Draw('same')
 
-    leg = ROOT.TLegend(0.131, 0.810, 0.525, 0.863)
-    leg.SetNColumns(2)
-    leg.SetBorderSize(0)
-    leg.AddEntry(fs[0].g, 'qcdht1500', 'L')
-    leg.AddEntry(fs[3].g, 'ttbar', 'L')
-    leg.Draw()
+#    leg = ROOT.TLegend(0.131, 0.810, 0.525, 0.863)
+#    leg.SetNColumns(2)
+#    leg.SetBorderSize(0)
+#    leg.AddEntry(fs[0].g, 'qcdht1500', 'L')
+#    leg.AddEntry(fs[3].g, 'ttbar', 'L')
+#    leg.Draw()
 
     if not scaled:
         txt = ROOT.TLatex()
