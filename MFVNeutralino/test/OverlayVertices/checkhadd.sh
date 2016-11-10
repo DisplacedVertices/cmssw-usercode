@@ -12,7 +12,7 @@ echo found $nlogs log files
 
 grep return\ value $d/outputs/*log | grep -v 'return value 0'
 if [ $? -ne 1 ]; then
-    echo problem with one or more log files
+    echo '\033[36;7m problem with one or more log files \033[m'
     exit 1
 else
     echo all logs ok
@@ -21,7 +21,7 @@ fi
 roots=( $(ls -1v $d/outputs/*root) )
 nroots=${#roots[@]}
 if [ $nroots -ne $nlogs ]; then
-    echo number of root files $nroots ne nlogs
+    echo '\033[36;7m number of root files ne nlogs \033[m' $nroots
     exit 1
 else
     echo found $nroots root files
@@ -30,11 +30,11 @@ fi
 last=${roots[$((nroots-1))]}
 lastnum=$(echo $last | sed -e 's/.*_//' -e 's/.root//')
 if [ $lastnum -ne $((nroots-1)) ]; then
-    echo problem root files
+    echo '\033[36;7m problem root files \033[m'
     exit 1
 else
     echo root numbers ok
 fi
 
-newfn=$(echo $last | sed -e 's/[0-9]\+.root//')first${nroots}.root
+newfn=$d/outputs/overlay.root
 hadd.py $newfn ${roots[@]}
