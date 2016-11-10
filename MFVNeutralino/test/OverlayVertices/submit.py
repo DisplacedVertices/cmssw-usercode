@@ -11,7 +11,6 @@ def int_ceil(x,y):
     return (x+y-1)/y
 
 per = 10
-per_m1 = per - 1
 max_njobs = dict([(x, (int_ceil(y, per), y % per)) for x,y in [
             (('qcdht1000', 3), 13371),
             (('qcdht1000', 4), 1841),
@@ -33,6 +32,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     else:
         per_last = per
     njobs_m1 = njobs - 1
+    per_m1 = per - 1
     per_last_m1 = per_last - 1
 
     batch_name = 'ntk%i' % ntracks
@@ -97,7 +97,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     fi
 
     set -x
-    for i in {0..${nev}}; do
+    for i in $(seq 0 $nev); do
         cmsRun ${workdir}/%(cmssw_py)s +which-event $((job*10+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
         cmsexit=$?
         if [[ $cmsexit -ne 0 ]]; then
