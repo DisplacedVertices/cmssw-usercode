@@ -17,9 +17,9 @@ h.Draw()
 ps.save('h_dz_true')
 
 def rebin(h):
-#    return h
+    #return h
     if 'ntk5' in out_name:
-        bins = [x*0.005 for x in xrange(11)] + [0.05 + x*0.01 for x in range(6)]
+        bins = [x*0.0025 for x in xrange(21)] + [0.05 + x*0.01 for x in range(6)]
     else:
         bins = [x*0.001 for x in xrange(51)] + [0.05 + x*0.005 for x in range(11)]
     return h.Rebin(len(bins)-1, h.GetName() + '_rebin', array('d', bins))
@@ -33,7 +33,7 @@ def get_h(n):
     return h
 
 def get_h_eff(h_num, h_den):
-    h_eff = ROOT.TGraphAsymmErrors(h_num, h_den)
+    h_eff = ROOT.TGraphAsymmErrors(h_num, h_den, 'b(1,1)')
     h_eff.SetLineWidth(2)
     s = 'VV' if 'dvv' in h_num.GetName() else '3D'
     h_eff.GetXaxis().SetTitle('d_{%s} (cm)' % s)
