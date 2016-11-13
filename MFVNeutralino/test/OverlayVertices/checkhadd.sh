@@ -10,6 +10,9 @@ fi
 d=$1
 echo using dir $d
 d=$d/outputs
+if [[ ! -d $d ]]; then
+    pexit $d is not a directory
+fi
 
 prefix=$(basename $(ls -1 $d/*_*_*.* | head -1) | cut -d _ -f 1-2)
 bname=$(echo $prefix | cut -d _ -f 1)
