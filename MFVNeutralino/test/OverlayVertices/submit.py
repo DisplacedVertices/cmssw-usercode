@@ -11,7 +11,7 @@ def int_ceil(x,y):
     return (x+y-1)/y
 
 per = 10
-max_njobs = dict([(x, (int_ceil(y, per), y % per)) for x,y in [
+max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y in [
             (('qcdht1000', 3), 13371),
             (('qcdht1000', 4), 1841),
             (('qcdht1000', 5), 237),
@@ -83,12 +83,18 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     export SCRAM_ARCH=%(scram_arch)s
     source /cvmfs/cms.cern.ch/cmsset_default.sh
     
-    scram project CMSSW %(cmssw_version)s 2>&1
+    scram project CMSSW %(cmssw_version)s 2>&1 > /dev/null
+    scramexit=$?
+    if [[ $scramexit -ne 0 ]]; then
+        echo scram exited with code $scramexit
+        exit $scramexit
+    fi
+
     cd %(cmssw_version)s
-    tar xvf ${workdir}/%(tarball_fn_base)s
+    tar xf ${workdir}/%(tarball_fn_base)s
     cd src
     eval `scram ru -sh`
-    scram b -j 2
+    scram b -j 2 2>&1 > /dev/null
 
     if [[ $job -eq %(njobs_m1)i ]]; then
         nev=%(per_last_m1)i
@@ -98,7 +104,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
 
     set -x
     for i in $(seq 0 $nev); do
-        cmsRun ${workdir}/%(cmssw_py)s +which-event $((job*10+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+        cmsRun ${workdir}/%(cmssw_py)s +batch +which-event $((job*10+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
         cmsexit=$?
         if [[ $cmsexit -ne 0 ]]; then
             echo cmsRun exited with code $cmsexit
@@ -106,6 +112,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
         fi
     done
     set +x
+
     hadd overlay.root overlay_*.root 2>&1
     haddexit=$?
     if [[ $haddexit -ne 0 ]]; then
