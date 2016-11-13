@@ -74,6 +74,7 @@ process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         rotate_p = cms.bool(args.rotate_p),
                                         z_model = cms.string(args.z_model),
                                         z_width = cms.double(args.z_width),
+                                        rest_of_event = cms.bool(args.rest_of_event),
                                         only_other_tracks = cms.bool(args.rest_of_event),
                                         verbose = cms.bool(args.debug),
                                         )

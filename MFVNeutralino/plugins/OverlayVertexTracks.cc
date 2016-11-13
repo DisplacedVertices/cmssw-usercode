@@ -41,6 +41,7 @@ private:
   const std::string z_model_str;
   const int z_model;
   const double z_width;
+  const bool rest_of_event;
   const bool only_other_tracks;
   const bool verbose;
 
@@ -69,6 +70,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
             z_model_str == "deltasvgaus" ? z_deltasvgaus :
             -1),
     z_width(cfg.getParameter<double>("z_width")),
+    rest_of_event(cfg.getParameter<bool>("rest_of_event")),
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
     verbose(cfg.getParameter<bool>("verbose"))
 {
@@ -90,7 +92,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
 
   mfv::read_from_tree(t, nt);
 
-  if (which_event < 0 || which_event >= t->GetEntries() - 1) // -1 because we skip the event corresponding to the current event
+  if (which_event < 0 || which_event >= t->GetEntries())
     throw cms::Exception("MFVOverlayVertexTracks", "bad event: ") << which_event << " tree has " << t->GetEntries();
 
   if (t->LoadTree(which_event) < 0 || t->GetEntry(which_event) <= 0)
@@ -98,7 +100,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
 
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
     if (t->LoadTree(j) < 0 || t->GetEntry(j) <= 0)
-      throw cms::Exception("MFVOverlayVertexTracks", "problem with tree");
+      throw cms::Exception("MFVOverlayVertexTracks", "problem with tree entry") << j;
 
     if (nt.nvtx == 1) { // don't include 2-vertex events for now
       mfv::MiniNtuple* clnt = mfv::clone(nt);
@@ -176,7 +178,8 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
     return false;
 
   const int index = event_index[rle];
-  if (index == which_event)
+  if (index == which_event ||
+      (!rest_of_event && index > which_event)) // don't double count e.g. (3,2) and (2,3) when not using the rest of e0
     return false;
 
   if (verbose) std::cout << "OverlayTracks " << rle << " : index = " << index << " which_event " << which_event << "\n";
