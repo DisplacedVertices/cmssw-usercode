@@ -1,40 +1,67 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]; then
-    echo No arguments supplied
+function pwarn() { echo -e '\033[36;7m' $@ '\033[m'; }
+function pexit() { pwarn $@; echo; exit 1; }
+
+if [[ $# -ne 1 ]]; then
+    pexit need dir in argv[1]
 fi
 
 d=$1
 echo using dir $d
+d=$d/outputs
 
-nlogs=$(ls -1 $d/outputs/*.log | wc -l)
-echo found $nlogs log files
+prefix=$(basename $(ls -1 $d/*_*_*.* | head -1) | cut -d _ -f 1-2)
+bname=$(echo $prefix | cut -d _ -f 1)
 
-grep return\ value $d/outputs/*log | grep -v 'return value 0'
-if [ $? -ne 1 ]; then
-    echo '\033[36;7m problem with one or more log files \033[m'
-    exit 1
+nlogs=$(ls -1 $d/*.log | wc -l)
+if [[ $nlogs -eq 0 ]]; then
+    pexit found no log files
+else
+    echo found $nlogs log files
+fi
+
+logsok=1
+numsok=()
+for i in $(seq 0 $((nlogs-1))); do
+    fn=$d/${prefix}_${i}.log
+    if [[ ! -e $fn ]]; then
+        echo log $i is missing
+        logsok=0
+        continue
+    fi
+    grep return\ value $fn > /dev/null
+    if [[ $? -ne 0 ]]; then
+        echo return value not found in log $i
+        grep -i remove $fn
+        logsok=0
+        continue
+    fi
+    grep -H return\ value $fn | grep -v 'return value 0'
+    if [[ $? -ne 1 ]]; then
+        logsok=0
+        continue
+    fi
+    numsok+=($i)
+done
+if [[ $logsok -ne 1 ]]; then
+    pwarn one or more logs missing/bad, expect ${#numsok[@]} root files
 else
     echo all logs ok
 fi
 
-roots=( $(ls -1v $d/outputs/*root) )
-nroots=${#roots[@]}
-if [ $nroots -ne $nlogs ]; then
-    echo '\033[36;7m number of root files ne nlogs \033[m' $nroots
-    exit 1
-else
-    echo found $nroots root files
-fi
+roots=()
+for i in ${numsok[@]}; do
+    fn=$d/${bname}_${i}.root
+    if [[ ! -e $fn ]]; then
+        pwarn root file $i missing
+    else
+        roots+=($fn)
+    fi
+done
 
-last=${roots[$((nroots-1))]}
-lastnum=$(echo $last | sed -e 's/.*_//' -e 's/.root//')
-if [ $lastnum -ne $((nroots-1)) ]; then
-    echo '\033[36;7m problem root files \033[m'
-    exit 1
-else
-    echo root numbers ok
-fi
-
-newfn=$d/outputs/overlay.root
-hadd.py $newfn ${roots[@]}
+echo got ${#roots[@]} root files
+haddlog=$d/overlay.root.haddlog
+hadd $d/overlay.root ${roots[@]} 2>&1 > $haddlog
+echo hadd saw $(grep Source\ file $haddlog | tail -1 | cut -d ' ' -f 4 | tr -d :) files
+echo
