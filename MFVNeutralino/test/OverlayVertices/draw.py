@@ -1,5 +1,4 @@
 import sys, os
-from array import array
 from JMTucker.Tools.ROOTTools import *
 from binning import binning
 
@@ -18,7 +17,7 @@ ps.save('h_dz_true')
 def rebin(h):
     #return h
     bins = binning()
-    return h.Rebin(len(bins)-1, h.GetName() + '_rebin', array('d', bins))
+    return h.Rebin(len(bins)-1, h.GetName() + '_rebin', bins)
     
 def get_h(n):
     h = rebin(f.Get('mfvOverlayHistos/%s' % n))
