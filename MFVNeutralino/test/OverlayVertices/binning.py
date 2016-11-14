@@ -46,4 +46,4 @@ def binning(out_name):
     return array('d', bins)
 
 if __name__ == '__main__':
-    find_binning()
+    find_binning(sys.argv[1])
