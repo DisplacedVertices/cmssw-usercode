@@ -1,3 +1,5 @@
+# for x in $nobackup/overlay/ntk* ; py draw.py $x/merge.root $(basename $x)
+
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 from binning import binning
@@ -14,9 +16,10 @@ h = f.Get('mfvOverlayHistos/h_dz_true')
 h.Draw()
 ps.save('h_dz_true')
 
+bins, avgs = binning(out_name)
+
 def rebin(h):
     #return h
-    bins = binning()
     return h.Rebin(len(bins)-1, h.GetName() + '_rebin', bins)
     
 def get_h(n):
@@ -30,6 +33,17 @@ def get_h(n):
 def get_h_eff(h_num, h_den):
     h_eff = ROOT.TGraphAsymmErrors(h_num, h_den, 'b(1,1)')
     h_eff.SetLineWidth(2)
+    nbins = h_eff.GetN()
+    assert nbins == len(avgs)
+    for i, x in enumerate(avgs):
+        oldx, y = tgraph_getpoint(h_eff, i)
+        exl = h_eff.GetErrorXlow(i)
+        exh = h_eff.GetErrorXlow(i)
+        xl = oldx-exl
+        xh = oldx+exh
+        h_eff.SetPoint(i, x, y)
+        h_eff.SetPointEXlow(i, x-xl)
+        h_eff.SetPointEXhigh(i, xh-x)
     s = 'VV' if 'dvv' in h_num.GetName() else '3D'
     h_eff.GetXaxis().SetTitle('d_{%s} (cm)' % s)
     h_eff.GetYaxis().SetTitle('efficiency')
@@ -76,10 +90,10 @@ for den in dens:
 
     n_nums = [
         'pass_anytwo',
-        'pass_twominntk',
-        'pass_foundv0andv1',
-        'pass_foundv0andv1samentk',
-        'pass_foundv0andv1asmanyntk',
+        #'pass_twominntk',
+        #'pass_foundv0andv1',
+        #'pass_foundv0andv1samentk',
+        #'pass_foundv0andv1asmanyntk',
         'pass_foundv0andv1bytracks',
     ]
 
