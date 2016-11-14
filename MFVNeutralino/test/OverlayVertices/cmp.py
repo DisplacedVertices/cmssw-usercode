@@ -31,16 +31,11 @@ class F:
             else:
                 color = ROOT.kRed
 
-        #print n
-        #for i in xrange(41):
-        #x,y = tgraph_getpoint(g, i)
-        #    g.GetPoint(i if i <= 10 else 10, x,y)
-        #    print 'h_eff->SetBinContent(%i, %f);' % (i+1, y)
         g.SetLineColor(color)
-        print list(g.GetListOfFunctions())
-#        g.GetListOfFunctions()[0].SetBit(ROOT.TF1.kNotDraw)
-#        s = g.GetListOfFunctions()[1]
-#        s.SetLineColor(0), s.SetTextColor(0), s.SetX1NDC(1), s.SetY1NDC(1), s.SetX2NDC(1), s.SetY2NDC(1) # grr
+        #print list(g.GetListOfFunctions())
+        #g.GetListOfFunctions()[0].SetBit(ROOT.TF1.kNotDraw)
+        #s = g.GetListOfFunctions()[1]
+        #s.SetLineColor(0), s.SetTextColor(0), s.SetX1NDC(1), s.SetY1NDC(1), s.SetX2NDC(1), s.SetY2NDC(1) # grr
 
         end = 0.1
         self.fcns = [None, None]
@@ -90,6 +85,11 @@ class F:
             sg.SetPointEYlow(i, eyl)
             sg.SetPointEYhigh(i, eyh)
 
+        print 'h_eff = book("%s")' % n
+        for i in xrange(self.scaled_g.GetN()):
+            x,y = tgraph_getpoint(self.scaled_g, i)
+            print 'h_eff.SetBinContent(%i, %f)' % (i+1, y)
+
 if by_ntracks:
     ex = '_deltasvgaus'
     ex = ''
@@ -102,7 +102,7 @@ plots/overlay/ntk4%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
 plots/overlay/ntk5%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
 ''' % locals()
 else:
-    ntk = 3
+    ntk = 5
     ex = '_ntk%i' % ntk
     files = '''
 plots/overlay/ntk%(ntk)i/h_dvv_pass_foundv0andv1bytracks.root
