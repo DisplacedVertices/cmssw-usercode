@@ -5,6 +5,8 @@ set_style()
 
 ROOT.gStyle.SetOptFit(0)
 
+by_ntracks = False
+
 class F:
     def __init__(self, fn):
         self.fn = fn
@@ -12,11 +14,23 @@ class F:
         self.ntracks = int(n.split('ntk')[1].split('_')[0])
         self.f = f = ROOT.TFile(fn)
         self.g = g = f.Get('c0').FindObject('divide_h_dvv_pass_foundv0andv1bytracks_rebin_by_h_dvv_true_rebin').Clone(n)
-        color = {
-            3: ROOT.kRed,
-            4: ROOT.kBlue,
-            5: ROOT.kGreen+2,
-            }[self.ntracks]
+
+        if by_ntracks:
+            color = {
+                3: ROOT.kRed,
+                4: ROOT.kGreen+2,
+                5: ROOT.kBlue,
+                }[self.ntracks]
+        else:
+            if n.endswith('_deltasvgaus_wevent'):
+                color = ROOT.kBlue
+            elif n.endswith('_deltasvgaus'):
+                color = ROOT.kGreen+2
+            elif n.endswith('_wevent'):
+                color = ROOT.kMagenta
+            else:
+                color = ROOT.kRed
+
         #print n
         #for i in xrange(41):
         #x,y = tgraph_getpoint(g, i)
@@ -32,8 +46,13 @@ class F:
         self.fcns = [None, None]
         self.fits = [None, None]
         for ifcn, rng in enumerate(((0, 0.0175), (0.05, end))):
-            pw = 3 if 'wevent' in ex else 2
-            fcn = '[0] + [1]*x**%i' % pw if ifcn == 0 else 'pol1'
+            if ifcn == 0:
+                if 'wevent' in ex:
+                    fcn = '[0]*exp([1]*x) - 1'
+                else:
+                    fcn = '[0] + [1]*x**2'
+            else:
+                fcn = 'pol1'
             fcn = self.fcns[ifcn] = ROOT.TF1(n + '_fcn%i' % ifcn, fcn, *rng)
             fcn.SetLineColor(1)
             fcn.SetLineWidth(1)
@@ -71,14 +90,25 @@ class F:
             sg.SetPointEYlow(i, eyl)
             sg.SetPointEYhigh(i, eyh)
 
-ex = '_deltasvgaus'
-ex = '_wevent'
-ex = ''
+if by_ntracks:
+    ex = '_deltasvgaus'
+    ex = ''
+    ex = '_wevent'
+    ex = '_deltasvgaus_wevent'
 
-files = '''
+    files = '''
 plots/overlay/ntk3%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
 plots/overlay/ntk4%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
 plots/overlay/ntk5%(ex)s/h_dvv_pass_foundv0andv1bytracks.root
+''' % locals()
+else:
+    ntk = 3
+    ex = '_ntk%i' % ntk
+    files = '''
+plots/overlay/ntk%(ntk)i/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ntk%(ntk)i_wevent/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ntk%(ntk)i_deltasvgaus/h_dvv_pass_foundv0andv1bytracks.root
+plots/overlay/ntk%(ntk)i_deltasvgaus_wevent/h_dvv_pass_foundv0andv1bytracks.root
 ''' % locals()
 
 fs = [F(fn.strip()) for fn in files.split('\n') if fn.strip()]
@@ -90,20 +120,22 @@ for scaled in (0,1):
     for i,f in enumerate(fs):
         g = f.scaled_g if scaled else f.g
         print i, f.n, g, g.GetN()
-        g.GetXaxis().SetLimits(0, 0.115)
+        g.GetXaxis().SetLimits(0, 0.115 if by_ntracks else 0.105)
         g.GetYaxis().SetRangeUser(-0.05 if scaled else 0, 1.2)
         g.Draw('AP' if i == 0 else 'P same')
         if not scaled:
             f.fcns[0].Draw('same')
 
-#    leg = ROOT.TLegend(0.131, 0.810, 0.525, 0.863)
-#    leg.SetNColumns(2)
-#    leg.SetBorderSize(0)
-#    leg.AddEntry(fs[0].g, 'qcdht1500', 'L')
-#    leg.AddEntry(fs[3].g, 'ttbar', 'L')
-#    leg.Draw()
+    leg = ROOT.TLegend(0.131, 0.810, 0.725, 0.863)
+    leg.SetNColumns(4)
+    leg.SetBorderSize(0)
+    leg.AddEntry(fs[0].g, 'simple', 'L')
+    leg.AddEntry(fs[1].g, 'w. event', 'L')
+    leg.AddEntry(fs[2].g, 'Gaus(#Deltaz)', 'L')
+    leg.AddEntry(fs[3].g, 'Gaus(#Deltaz), w. event', 'L')
+    leg.Draw()
 
-    if not scaled:
+    if not scaled and by_ntracks:
         txt = ROOT.TLatex()
         txt.SetTextSize(0.04)
         txt.SetTextFont(42)
