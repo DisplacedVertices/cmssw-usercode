@@ -1641,6 +1641,7 @@ def ttree_iterator(tree, return_tree=False):
             
 __all__ = [
     'apply_hist_commands',
+    'array',
     'bin_iterator',
     'check_consistency',
     'histogram_divide',
