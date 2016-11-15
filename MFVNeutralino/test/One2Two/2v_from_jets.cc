@@ -15,7 +15,7 @@
 
 bool clearing_from_eff = false;
 const char* eff_file = "eff.root";
-const char* eff_hist = "h_eff_background_maxtk3_add";
+const char* eff_hist = "maxtk3";
 
 bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
@@ -175,6 +175,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_eff;
   if (clearing_from_eff) {
     h_eff = (TH1F*)TFile::Open(eff_file)->Get(eff_hist);
+    h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
 
   for (int i = 0; i < nbkg; ++i) {
