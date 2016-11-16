@@ -5,8 +5,16 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 set_style()
-ps = plot_saver('../../plots/bkgest/MinitreeV6p1_76x_nstlays3/dbv/dBV100um', root=False)
-trees = '~/crabdirs/MinitreeV6p1_76x_nstlays3_0'
+
+ntk = 5
+path = 'MinitreeV6p1_76x_nstlays3_5'
+if ntk == 3:
+    path = 'MinitreeV6p1_76x_nstlays3_8'
+if ntk == 4:
+    path = 'MinitreeV6p1_76x_nstlays3_7'
+
+ps = plot_saver('../../plots/bkgest/%s' % path, size=(600,600), root=False)
+trees = '~/crabdirs/%s' % path
 
 def book_dbv(n):
     return ROOT.TH1F(n, '', 40, 0, 0.2)
@@ -26,7 +34,7 @@ for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
 
     n = sn + ', no b quarks'
     h_dbv = book_dbv(n)
-    t.Draw('dist0>>%s' % n, 'nvtx == 1 && dist0 >= 0.01 && gen_flavor_code != 2')
+    t.Draw('dist0>>%s' % n, 'nvtx == 1 && gen_flavor_code != 2')
     h_dbv_sum.Add(h_dbv, sc * s.partial_weight_orig)
     h_dbv_nob.Add(h_dbv, sc * s.partial_weight_orig)
     ps.save(n)
@@ -46,7 +54,7 @@ for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
     else:
         n = sn
     h_dbv = book_dbv(n)
-    t.Draw('dist0>>%s' % n, 'nvtx == 1 && dist0 >= 0.01 && gen_flavor_code == 2')
+    t.Draw('dist0>>%s' % n, 'nvtx == 1 && gen_flavor_code == 2')
     h_dbv_sum.Add(h_dbv, sc * s.partial_weight_orig)
     h_dbv_b.Add(h_dbv, sc * s.partial_weight_orig)
     if sn != 'ttbar':
@@ -61,12 +69,12 @@ h_dbv_sum.Draw()
 ps.save('dbv_sum')
 
 
-h_dbv_sum.SetTitle('only-one-vertex events;d_{BV} (cm);arb. units')
+h_dbv_sum.SetTitle('%s-track one-vertex events;d_{BV} (cm);arb. units' % ntk)
 h_dbv_sum.SetStats(0)
 h_dbv_sum.SetLineColor(ROOT.kBlack)
 h_dbv_sum.SetLineWidth(3)
 h_dbv_sum.Scale(1./h_dbv_sum.Integral())
-h_dbv_sum.SetMaximum(1)
+h_dbv_sum.GetYaxis().SetRangeUser(1e-5,1)
 h_dbv_sum.Draw()
 
 l = ROOT.TLegend(0.3,0.6,0.9,0.9)
