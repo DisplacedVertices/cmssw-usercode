@@ -1526,6 +1526,19 @@ def sort_histogram_pair(h1, h2, by=real_hist_max):
     else:
         return h2,h1
 
+def tdirectory_walk(root):
+    keys = [k.ReadObj() for k in root.GetListOfKeys()]
+    dirs, files = [], []
+    for k in keys:
+        if type(k) == ROOT.TDirectoryFile:
+            dirs.append(k)
+        else:
+            files.append(k)
+    yield root, dirs, files
+    for d in dirs:
+        for x in tdirectory_walk(d):
+            yield x
+
 def tdr_style():
     s =  ROOT.TStyle("s","Style for P-TDR")
     s.SetCanvasBorderMode(0)
@@ -1677,6 +1690,7 @@ __all__ = [
     'real_hist_min',
     'set_style',
     'sort_histogram_pair',
+    'tdirectory_walk',
     'tdr_style',
     'tgraph_getpoint',
     'to_array',
