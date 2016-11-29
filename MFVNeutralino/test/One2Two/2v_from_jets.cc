@@ -15,7 +15,7 @@
 
 bool clearing_from_eff = false;
 const char* eff_file = "eff.root";
-const char* eff_hist = "h_eff_background_maxtk3_add";
+const char* eff_hist = "maxtk3";
 
 bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
@@ -75,13 +75,14 @@ float throw_phi(int njets, float* jet_pt, float* jet_phi) {
 
 int main(int argc, const char* argv[]) {
   if (argc == 6) {
-    mu_clear = atof(argv[1]);
-    sigma_clear = atof(argv[2]);
+    clearing_from_eff = true;
+    eff_file = argv[1];
+    eff_hist = argv[2];
     dphi_pdf_c = atof(argv[3]);
     dphi_pdf_e = atof(argv[4]);
     dphi_pdf_a = atof(argv[5]);
   }
-  printf("mu_clear = %f, sigma_clear = %f, dphi_pdf_c = %f, dphi_pdf_e = %f, dphi_pdf_a = %f\n", mu_clear, sigma_clear, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+  printf("eff_file = %s, eff_hist = %s, dphi_pdf_c = %f, dphi_pdf_e = %f, dphi_pdf_a = %f\n", eff_file, eff_hist, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
 
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(12191982);
@@ -174,6 +175,7 @@ int main(int argc, const char* argv[]) {
   TH1F* h_eff;
   if (clearing_from_eff) {
     h_eff = (TH1F*)TFile::Open(eff_file)->Get(eff_hist);
+    h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
 
   for (int i = 0; i < nbkg; ++i) {
