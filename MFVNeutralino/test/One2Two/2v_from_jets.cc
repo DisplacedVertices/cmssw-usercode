@@ -13,9 +13,9 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-bool clearing_from_eff = false;
-const char* eff_file = "eff.root";
-const char* eff_hist = "maxtk3";
+bool clearing_from_eff = true;
+const char* eff_file = "eff_avg.root";
+const char* eff_hist = "average3";
 
 bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
