@@ -2,10 +2,14 @@ from JMTucker.Tools.ROOTTools import *
 from array import array
 ROOT.TH1.AddDirectory(0)
 
-set_style()
-ps = plot_saver('../plots/bkgest/compare_dvvc', size=(600,600), root=False, log=False)
+mode = 'vary_eff'
+#mode = 'vary_dphi'
 
-fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
+set_style()
+ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(600,600), root=False, log=False)
+
+if mode == 'vary_eff':
+    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
 2v_from_jets_3track_maxtk3_c1p3_e2p0_a2p9.root
 2v_from_jets_3track_maxtk3_merge_c1p2_e2p0_a2p8.root
 2v_from_jets_3track_ntk3_c1p4_e2p0_a2p2.root
@@ -13,7 +17,7 @@ fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
 2v_from_jets_3track_ntk3_deltasvgaus_c1p4_e2p0_a2p3.root
 2v_from_jets_3track_ntk3_deltasvgaus_wevent_c1p4_e2p0_a2p4.root'''.split('\n')
 
-fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
+    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
 2v_from_jets_4track_maxtk4_c1p3_e2p0_a2p9.root
 2v_from_jets_4track_maxtk4_merge_c1p2_e2p0_a2p8.root
 2v_from_jets_4track_ntk4_c1p4_e2p0_a2p2.root
@@ -21,7 +25,7 @@ fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
 2v_from_jets_4track_ntk4_deltasvgaus_c1p4_e2p0_a2p3.root
 2v_from_jets_4track_ntk4_deltasvgaus_wevent_c1p4_e2p0_a2p4.root'''.split('\n')
 
-fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
+    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
 2v_from_jets_5track_maxtk5_c1p3_e2p0_a2p9.root
 2v_from_jets_5track_maxtk5_merge_c1p2_e2p0_a2p8.root
 2v_from_jets_5track_ntk5_c1p4_e2p0_a2p2.root
@@ -29,17 +33,50 @@ fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
 2v_from_jets_5track_ntk5_deltasvgaus_c1p4_e2p0_a2p3.root
 2v_from_jets_5track_ntk5_deltasvgaus_wevent_c1p4_e2p0_a2p4.root'''.split('\n')
 
-fns = [fn1, fn2, fn3]
-ntk = ['3-track', '4-track', '5-track']
-n2v = [832., 17., 1.]
-
-ls = '''average efficiency; |#Delta#phi - 1.3|^{2} + 2.6
+    ls = '''average efficiency; |#Delta#phi - 1.3|^{2} + 2.6
 maxtk efficiency; |#Delta#phi - 1.3|^{2} + 2.9
 maxtk_merge efficiency; |#Delta#phi - 1.2|^{2} + 2.8
 ntk efficiency; |#Delta#phi - 1.4|^{2} + 2.2
 ntk_wevent efficiency; |#Delta#phi - 1.4|^{2} + 2.3
 ntk_deltasvgaus efficiency; |#Delta#phi - 1.4|^{2} + 2.3
 ntk_deltasvgaus_wevent efficiency; |#Delta#phi - 1.4|^{2} + 2.4'''.split('\n')
+
+    lsh = 'avg    maxtk    merge    ntk    wevent    dzgaus    both  '
+
+if mode == 'vary_dphi':
+    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
+2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_average3_c1p1_e2p0_a2p6.root
+2v_from_jets_3track_average3_c1p5_e2p0_a2p6.root
+2v_from_jets_3track_average3_c1p3_e2p0_a1p2.root
+2v_from_jets_3track_average3_c1p3_e2p0_a4p0.root'''.split('\n')
+
+    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
+2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_average4_c1p1_e2p0_a2p6.root
+2v_from_jets_4track_average4_c1p5_e2p0_a2p6.root
+2v_from_jets_4track_average4_c1p3_e2p0_a1p2.root
+2v_from_jets_4track_average4_c1p3_e2p0_a4p0.root'''.split('\n')
+
+    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
+2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_average5_c1p1_e2p0_a2p6.root
+2v_from_jets_5track_average5_c1p5_e2p0_a2p6.root
+2v_from_jets_5track_average5_c1p3_e2p0_a1p2.root
+2v_from_jets_5track_average5_c1p3_e2p0_a4p0.root'''.split('\n')
+
+    ls = '''average efficiency; |#Delta#phi - 1.3|^{2} + 2.6
+average efficiency; flat |#Delta#phi|
+average efficiency; |#Delta#phi - 1.1|^{2} + 2.6
+average efficiency; |#Delta#phi - 1.5|^{2} + 2.6
+average efficiency; |#Delta#phi - 1.3|^{2} + 1.2
+average efficiency; |#Delta#phi - 1.3|^{2} + 4.0'''.split('\n')
+
+    lsh = '|#Delta#phi-c|^{2}+a       flat       c-1#sigma       c+1#sigma       a-1#sigma       a+1#sigma     '
+
+fns = [fn1, fn2, fn3]
+ntk = ['3-track', '4-track', '5-track']
+n2v = [832., 17., 1.]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
@@ -160,8 +197,7 @@ for i,g in enumerate(g1s):
     g.SetMarkerColor(colors[i])
     g.SetLineColor(colors[i])
     if i == 0:
-        g.SetTitle('d_{VV}^{C}(n) / d_{VV}^{C}(1) (>400 #mum);input distributions;')
-        g.GetXaxis().SetTitle('avg    maxtk    merge    ntk    wevent    dzgaus    both  ')
+        g.SetTitle('d_{VV}^{C}(n) / d_{VV}^{C}(1) (>400 #mum);%s;' % lsh)
         g.GetYaxis().SetRangeUser(0.6,1.4)
         g.Draw('AP')
     else:
