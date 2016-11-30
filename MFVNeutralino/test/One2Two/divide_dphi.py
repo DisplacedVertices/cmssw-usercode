@@ -38,7 +38,7 @@ for maxtk in ['maxtk3', 'maxtk3_merge', 'ntk3', 'ntk3_wevent', 'ntk3_deltasvgaus
 
   l2 = ROOT.TLegend(0.2,0.75,0.8,0.85)
   l2.AddEntry(h3, 'two-vertex / constructed from one-vertex')
-  l2.AddEntry(f_dphi, '|#Delta#phi - %.1f|^{2} + %.1f' % (f_dphi.GetParameter(0), f_dphi.GetParameter(2)))
+  l2.AddEntry(f_dphi, '|#Delta#phi - c|^{2} + a: c = %.1f #pm %.1f, a = %.1f #pm %.1f' % (f_dphi.GetParameter(0), f_dphi.GetParError(0), f_dphi.GetParameter(2), f_dphi.GetParError(2)))
   l2.SetFillColor(0)
   l2.Draw()
   ps.save('%s_dphi_2v_divide_c1v' % maxtk)
