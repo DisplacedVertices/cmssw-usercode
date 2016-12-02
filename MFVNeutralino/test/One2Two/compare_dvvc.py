@@ -76,20 +76,20 @@ average efficiency; |#Delta#phi - 1.3|^{2} + 4.0'''.split('\n')
     lsh = '|#Delta#phi-c|^{2}+a       flat       c-1#sigma       c+1#sigma       a-1#sigma       a+1#sigma     '
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
-2v_from_jets_3track_average3_c1p3_e2p0_a2p6_b.root
-2v_from_jets_3track_average3_c1p3_e2p0_a2p6_nob.root
-2v_from_jets_3track_average3_c1p3_e2p0_a2p6_sum.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000.root
+2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000_b.root
+2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000_nob.root
+2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000_sum.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
-2v_from_jets_4track_average4_c1p3_e2p0_a2p6_b.root
-2v_from_jets_4track_average4_c1p3_e2p0_a2p6_nob.root
-2v_from_jets_4track_average4_c1p3_e2p0_a2p6_sum.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000.root
+2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000_b.root
+2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000_nob.root
+2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000_sum.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
-2v_from_jets_5track_average5_c1p3_e2p0_a2p6_b.root
-2v_from_jets_5track_average5_c1p3_e2p0_a2p6_nob.root
-2v_from_jets_5track_average5_c1p3_e2p0_a2p6_sum.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000.root
+2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000_b.root
+2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000_nob.root
+2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000_sum.root'''.split('\n')
 
     ls = '''default
 b quarks
@@ -222,7 +222,7 @@ for i,g in enumerate(g1s):
     g.SetLineColor(colors[i])
     if i == 0:
         g.SetTitle('d_{VV}^{C}(n) / d_{VV}^{C}(1) (>400 #mum);%s;' % lsh)
-        g.GetYaxis().SetRangeUser(0,2)
+        g.GetYaxis().SetRangeUser(0.6,1.4)
         g.Draw('AP')
     else:
         g.Draw('P')
