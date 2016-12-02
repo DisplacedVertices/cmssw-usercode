@@ -3,7 +3,7 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 from limitplot import exc_graph_dumb
 
-path = 'plots/after_referee'
+path = 'plots/after_proofs'
 
 ts = tdr_style()
 rainbow_palette()
@@ -171,7 +171,7 @@ for xxx in ('small', 'big'):
     l1.Draw()
     l2.Draw()
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
-    lum = write(42, 0.050, 0.699, 0.913, '(8 TeV)')
+    lum = write(42, 0.050, 0.528, 0.913, '17.6 fb^{-1} (8 TeV)')
     fn = os.path.join(path, 'scan_lim_obs_%s' % xxx)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
