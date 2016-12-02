@@ -627,8 +627,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	double iso_det_tkonly = 0;
 
 	if (mevent->is_muon(ilep)) {
-	  iso_det = mevent->lep_iso_det[ilep];
-	  iso_det_tkonly = mevent->lep_iso_det_tkonly[ilep];
+	  iso_det = mevent->lep_iso_det[ilep] / pt; 
+	  iso_det_tkonly = mevent->lep_iso_det_tkonly[ilep] / pt;
 	}
 
         h_leptons_pt[j][i]->Fill(pt);
@@ -656,7 +656,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	}
 	for (size_t igenlep = 0; igenlep < mevent->gen_lepton_id.size(); ++igenlep) {
 	  double dR = reco::deltaR(mevent->gen_lepton_eta[igenlep], mevent->gen_lepton_phi[igenlep], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
-	  if (dR < 0.1) {
+	  if (dR < 0.03) {
 	    if (mevent->gen_lepton_id[igenlep] & 0x80) 
 	      hard_int = true;
             if (mevent->gen_lepton_id[igenlep] & 1)
