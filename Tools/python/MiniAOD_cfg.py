@@ -2,12 +2,9 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages
 
 def which_global_tag(is_mc):
-    assert not is_mc
-    return '' if is_mc else '80X_dataRun2_2016SeptRepro_v3'
+    return '80X_mcRun2_asymptotic_2016_miniAODv2_v1' if is_mc else '80X_dataRun2_2016SeptRepro_v4'
 
 def pat_tuple_process(customize_before_unscheduled, is_mc):
-    assert not is_mc
-
     from Configuration.StandardSequences.Eras import eras
     process = cms.Process('PAT', eras.Run2_25ns if is_mc else eras.Run2_2016)
 
@@ -33,9 +30,9 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
                                          wantSummary = cms.untracked.bool(False),
                                          )
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/RunIIFall15DR76/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0039E642-58BD-E511-B773-002590DE7230.root'))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/RunIISpring16DR80/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/AODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/30000/00E624D5-F6FA-E511-B7EF-0CC47A4C8E56.root'))
     if not is_mc:
-        process.source.fileNames = ['file:0006CE1E-9986-E611-8DFB-6C3BE5B5C0B0.root']
+        process.source.fileNames = ['/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/100000/0006CE1E-9986-E611-8DFB-6C3BE5B5C0B0.root']
 
     output_file(process, 'pat.root', process.MINIAODSIMEventContent.outputCommands)
 
