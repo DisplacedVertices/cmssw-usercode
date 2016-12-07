@@ -581,7 +581,7 @@ def data_mc_comparison(name,
             xax = None
 
             if sample not in data_samples:
-                sample.hist.Scale(sample.partial_weight * int_lumi)
+                sample.hist.Scale(sample.partial_weight_orig * int_lumi)
                 if int_lumi_bkg_scale is not None and sample not in signal_samples:
                     sample.hist.Scale(int_lumi_bkg_scale)
 
@@ -763,11 +763,11 @@ def data_mc_comparison(name,
             w.SetTextSize(size)
             w.DrawLatex(x, y, text)
             return w
-        subtr = 0.
-        lum_pos = 0.575
-        stupid = 0.02
-        lum = write(42, 0.05, lum_pos+stupid, 0.930-subtr, int_lumi_nice)
-        cms = write(61, 0.05, 0.098+stupid, 0.930-subtr, 'CMS')
+        subtr = 0.02
+        lum_pos = 0.625
+        stupid = 0
+        lum = write(42, 0.04, lum_pos+stupid, 0.930-subtr, int_lumi_nice)
+        cms = write(61, 0.04, 0.098+stupid, 0.930-subtr, 'CMS')
         if simulation and preliminary:
             exlab_str = 'Simulation Preliminary'
         elif preliminary:
@@ -775,7 +775,7 @@ def data_mc_comparison(name,
         elif simulation:
             exlab_str = 'Simulation'
         if simulation or preliminary:
-            exlab = write(52, 0.04, 0.210, 0.930-subtr, exlab_str)
+            exlab = write(52, 0.035, 0.185, 0.930-subtr, exlab_str)
 
     if verbose:
         if data_sample is not None:
