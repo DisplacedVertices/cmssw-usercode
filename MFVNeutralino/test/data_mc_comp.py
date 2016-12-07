@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_27'
+root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_26'
 plot_dir = 'plots/AN-16-394/data_mc_comp'
 
 set_style()
@@ -112,4 +112,30 @@ C('dbv',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 0.4),
   y_range = (1, 1e6),
+  )
+
+C('nsv_3track',
+  file_path = os.path.join('/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_30', '%(name)s.root'),
+  histogram_path = 'mfvVertexHistosPreSel/h_nsv',
+  x_title = 'Number of 3-track vertices',
+  y_title = 'Events',
+  x_range = (0, 8),
+  y_range = (1, 1e8),
+  )
+
+C('nsv_4track',
+  file_path = os.path.join('/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_29', '%(name)s.root'),
+  histogram_path = 'mfvVertexHistosPreSel/h_nsv',
+  x_title = 'Number of 4-track vertices',
+  y_title = 'Events',
+  x_range = (0, 8),
+  y_range = (1, 1e8),
+  )
+
+C('nsv_5track',
+  histogram_path = 'mfvVertexHistosPreSel/h_nsv',
+  x_title = 'Number of 5-or-more-track vertices',
+  y_title = 'Events',
+  x_range = (0, 8),
+  y_range = (1, 1e8),
   )
