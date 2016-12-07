@@ -10,86 +10,86 @@ set_style()
 ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(600,600), root=False, log=False)
 
 if mode == 'vary_eff':
-    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
-2v_from_jets_3track_maxtk3_c1p3_e2p0_a2p9.root
-2v_from_jets_3track_maxtk3_merge_c1p2_e2p0_a2p8.root
-2v_from_jets_3track_ntk3_c1p4_e2p0_a2p2.root
-2v_from_jets_3track_ntk3_wevent_c1p4_e2p0_a2p3.root
-2v_from_jets_3track_ntk3_deltasvgaus_c1p4_e2p0_a2p3.root
-2v_from_jets_3track_ntk3_deltasvgaus_wevent_c1p4_e2p0_a2p4.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_maxtk3_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_maxtk3_merge_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_ntk3_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_ntk3_wevent_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_ntk3_deltasvgaus_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_ntk3_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
-2v_from_jets_4track_maxtk4_c1p3_e2p0_a2p9.root
-2v_from_jets_4track_maxtk4_merge_c1p2_e2p0_a2p8.root
-2v_from_jets_4track_ntk4_c1p4_e2p0_a2p2.root
-2v_from_jets_4track_ntk4_wevent_c1p4_e2p0_a2p3.root
-2v_from_jets_4track_ntk4_deltasvgaus_c1p4_e2p0_a2p3.root
-2v_from_jets_4track_ntk4_deltasvgaus_wevent_c1p4_e2p0_a2p4.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_maxtk4_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_maxtk4_merge_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_ntk4_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_ntk4_wevent_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_ntk4_deltasvgaus_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_ntk4_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
-2v_from_jets_5track_maxtk5_c1p3_e2p0_a2p9.root
-2v_from_jets_5track_maxtk5_merge_c1p2_e2p0_a2p8.root
-2v_from_jets_5track_ntk5_c1p4_e2p0_a2p2.root
-2v_from_jets_5track_ntk5_wevent_c1p4_e2p0_a2p3.root
-2v_from_jets_5track_ntk5_deltasvgaus_c1p4_e2p0_a2p3.root
-2v_from_jets_5track_ntk5_deltasvgaus_wevent_c1p4_e2p0_a2p4.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_maxtk5_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_maxtk5_merge_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_ntk5_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_ntk5_wevent_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_ntk5_deltasvgaus_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_ntk5_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    ls = '''average efficiency; |#Delta#phi - 1.3|^{2} + 2.6
-maxtk efficiency; |#Delta#phi - 1.3|^{2} + 2.9
-maxtk_merge efficiency; |#Delta#phi - 1.2|^{2} + 2.8
-ntk efficiency; |#Delta#phi - 1.4|^{2} + 2.2
-ntk_wevent efficiency; |#Delta#phi - 1.4|^{2} + 2.3
-ntk_deltasvgaus efficiency; |#Delta#phi - 1.4|^{2} + 2.3
-ntk_deltasvgaus_wevent efficiency; |#Delta#phi - 1.4|^{2} + 2.4'''.split('\n')
+    ls = '''average efficiency
+maxtk efficiency
+maxtk_merge efficiency
+ntk efficiency
+ntk_wevent efficiency
+ntk_deltasvgaus efficiency
+ntk_deltasvgaus_wevent efficiency'''.split('\n')
 
     lsh = 'avg    maxtk    merge    ntk    wevent    dzgaus    both  '
 
 if mode == 'vary_dphi':
-    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
-2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
+    fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
+2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
 2v_from_jets_3track_average3_c1p1_e2p0_a2p6.root
 2v_from_jets_3track_average3_c1p5_e2p0_a2p6.root
 2v_from_jets_3track_average3_c1p3_e2p0_a1p2.root
 2v_from_jets_3track_average3_c1p3_e2p0_a4p0.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
-2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root
+    fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root
+2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
 2v_from_jets_4track_average4_c1p1_e2p0_a2p6.root
 2v_from_jets_4track_average4_c1p5_e2p0_a2p6.root
 2v_from_jets_4track_average4_c1p3_e2p0_a1p2.root
 2v_from_jets_4track_average4_c1p3_e2p0_a4p0.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
-2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root
+    fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root
+2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
 2v_from_jets_5track_average5_c1p1_e2p0_a2p6.root
 2v_from_jets_5track_average5_c1p5_e2p0_a2p6.root
 2v_from_jets_5track_average5_c1p3_e2p0_a1p2.root
 2v_from_jets_5track_average5_c1p3_e2p0_a4p0.root'''.split('\n')
 
-    ls = '''average efficiency; |#Delta#phi - 1.3|^{2} + 2.6
-average efficiency; flat |#Delta#phi|
-average efficiency; |#Delta#phi - 1.1|^{2} + 2.6
-average efficiency; |#Delta#phi - 1.5|^{2} + 2.6
-average efficiency; |#Delta#phi - 1.3|^{2} + 1.2
-average efficiency; |#Delta#phi - 1.3|^{2} + 4.0'''.split('\n')
+    ls = '''|#Delta#phi| flat
+|#Delta#phi - 1.3|^{2} + 2.6
+|#Delta#phi - 1.1|^{2} + 2.6
+|#Delta#phi - 1.5|^{2} + 2.6
+|#Delta#phi - 1.3|^{2} + 1.2
+|#Delta#phi - 1.3|^{2} + 4.0'''.split('\n')
 
-    lsh = '|#Delta#phi-c|^{2}+a       flat       c-1#sigma       c+1#sigma       a-1#sigma       a+1#sigma     '
+    lsh = 'flat       |#Delta#phi-c|^{2}+a       c-1#sigma       c+1#sigma       a-1#sigma       a+1#sigma     '
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000.root
-2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000_b.root
-2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000_nob.root
-2v_from_jets_3track_average3_c1p3_e2p0_a2p6_noqcdht1000_sum.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000.root
+2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000_b.root
+2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000_nob.root
+2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000.root
-2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000_b.root
-2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000_nob.root
-2v_from_jets_4track_average4_c1p3_e2p0_a2p6_noqcdht1000_sum.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000.root
+2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000_b.root
+2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000_nob.root
+2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000.root
-2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000_b.root
-2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000_nob.root
-2v_from_jets_5track_average5_c1p3_e2p0_a2p6_noqcdht1000_sum.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000.root
+2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000_b.root
+2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000_nob.root
+2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
 
     ls = '''default
 b quarks
