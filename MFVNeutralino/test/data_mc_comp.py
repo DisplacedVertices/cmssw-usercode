@@ -114,6 +114,14 @@ C('dbv',
   y_range = (1, 1e6),
   )
 
+C('dvv',
+  histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
+  rebin = 10,
+  x_title = 'd_{VV} (cm)',
+  y_title = 'Events/200 #mum',
+  y_range = (1e-2, 10),
+  )
+
 C('nsv_3track',
   file_path = os.path.join('/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_30', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
