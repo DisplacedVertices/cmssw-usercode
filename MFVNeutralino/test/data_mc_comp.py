@@ -105,3 +105,11 @@ C('dbv_onevtx',
   y_range = (1, 1e6),
   cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
   )
+
+C('dbv',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e6),
+  )
