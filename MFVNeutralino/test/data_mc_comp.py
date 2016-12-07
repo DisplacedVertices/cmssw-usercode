@@ -23,8 +23,8 @@ signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M
 y = ['100 #mum', '300 #mum', '1 mm', '10 mm']
 c = [7, 4, 6, 8]
 for i, signal_sample in enumerate(signal_samples):
-    signal_sample.xsec = 1.0
-    signal_sample.nice_name = 'Signal: #sigma = 1 pb, c#tau = %s, M = 800 GeV' % y[i]
+    signal_sample.xsec = 0.001
+    signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = %s, M = 800 GeV' % y[i]
     signal_sample.color = c[i]
 Samples.mfv_neu_tau01000um_M0800.color = 8
 signal_samples = [Samples.mfv_neu_tau01000um_M0800]
