@@ -431,7 +431,7 @@ add_dataset_phys03(qcdht1000ext, 'ntuplev9', '/QCD_HT1000to1500_TuneCUETP8M1_13T
 add_dataset_phys03(qcdht1500ext, 'ntuplev9', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-4cc30f68e9767f0e3fcb8982620dbe6a/USER',  7815041)  # 314 files
 add_dataset_phys03(qcdht2000ext, 'ntuplev9', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-fea534cd4515e61314fe849606ff4938/USER',   4016331)  # 162 files
 
-_adbp3('ntuplev9', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev9-166a600604c520a45fa2652c4ab0486a/USER', 100)
+_adbp3('ntuplev9', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev9-166a600604c520a45fa2652c4ab0486a/USER', 1340689) # 193 files
 
 _adbp3('ntuplev9', '/mfv_neu_tau00100um_M0800/tucker-ntuplev9-18313a78d966c2ede551c26bbb7cd6a6/USER', 9900) # 1 files
 _adbp3('ntuplev9', '/mfv_neu_tau00300um_M0800/tucker-ntuplev9-f5ac07842dbce4d3f4503c75620a983b/USER', 9877) # 1 files
