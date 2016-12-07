@@ -691,7 +691,7 @@ def data_mc_comparison(name,
                 e = sum_background_uncert.GetBinError(i)
                 e = (e**2 + (extra_bkg_uncert_frac*v)**2)**0.5
                 sum_background_uncert.SetBinError(i, e)
-        sum_background_uncert.SetLineColor(bkg_uncert_color)
+        sum_background_uncert.SetLineColor(0)
         sum_background_uncert.SetFillColor(bkg_uncert_color)
         sum_background_uncert.SetFillStyle(bkg_uncert_style)
         sum_background_uncert.Draw('E2 same')
@@ -786,7 +786,7 @@ def data_mc_comparison(name,
     ratio_pad, res_g, old_opt_fit = None, None, None
     if data_sample is not None:
         ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
-        ratio_pad.SetTopMargin(0.71)
+        ratio_pad.SetTopMargin(1-canvas_bottom_margin + 0.015)
         ratio_pad.SetLeftMargin(canvas_left_margin)
         ratio_pad.SetRightMargin(canvas_right_margin)
         ratio_pad.SetFillColor(0)

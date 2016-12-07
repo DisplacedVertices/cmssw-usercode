@@ -110,29 +110,28 @@ g_cons = ROOT.TGraphAsymmErrors(nbins, arr(x), arr(y), arr(exl), arr(exh), arr(e
 g_cons.SetTitle(';d_{VV} (mm);Events')
 
 h_mctoy.SetLineColor(ROOT.kBlue)
-h_mctoy.SetLineWidth(3)
+h_mctoy.SetLineWidth(2)
 h_central.SetLineColor(ROOT.kRed)
-h_central.SetLineWidth(3)
+h_central.SetLineWidth(2)
 g_cons.SetLineColor(ROOT.kRed)
 g_cons.SetFillColor(ROOT.kRed)
 g_cons.SetFillStyle(3444)
 g_cons.SetLineWidth(1)
 
 c = ROOT.TCanvas('c', '', 800, 800)
-c.SetTopMargin(0.08)
-c.SetRightMargin(0.05)
+c.SetBottomMargin(0.12)
 c.SetLogy()
 
 h_mctoy.Draw()
-h_central.Draw('same')
+h_central.Draw('hist same')
 g_cons.Draw('e2')
 #g_cons.Draw('p')
-h_mctoy.GetYaxis().SetRangeUser(0.1, 400)
+h_mctoy.GetYaxis().SetRangeUser(0.1, 300)
+h_mctoy.Draw('same')
 
-leg = ROOT.TLegend(0.576, 0.710, 0.931, 0.903)
-#leg = ROOT.TLegend(0.549, 0.732, 0.925, 0.885)
+leg = ROOT.TLegend(0.461, 0.669, 0.871, 0.882)
 leg.SetTextFont(43)
-leg.SetTextSize(23)
+leg.SetTextSize(29)
 leg.SetBorderSize(0)
 print leg.AddEntry(h_mctoy, 'Simulated events', 'LPE').GetTextSize()
 g_cons.SetLineWidth(0)
@@ -141,20 +140,14 @@ leg.AddEntry(g_cons, 'd_{VV}^{C}', 'F')
 #leg.AddEntry(g_cons, 'Range', 'F')
 leg.Draw()
 
-lin = ROOT.TLine(1.1535,79.0418,1.29205,79.0418)
+lin = ROOT.TLine(0.943609, 48.3743, 1.11905, 48.3743)
 lin.SetLineColor(ROOT.kRed)
 lin.SetLineWidth(3)
 lin.Draw()
 
-cms = write(61, 0.050, 0.099, 0.931, 'CMS')
-if prelim:
-    name = 'plots/prelim/closure'
-    sim_str = 'Simulation Preliminary'
-else:
-    name = 'plots/after_finalreading/closure'
-    sim_str = 'Simulation'
-sim = write(52, 0.040, 0.207, 0.931, sim_str)
-lum = write(42, 0.050, 0.630, 0.931, '17.6 fb^{-1} (8 TeV)')
+cms = write(61, 0.050, 0.099, 0.913, 'CMS')
+sim = write(52, 0.040, 0.212, 0.912, 'Simulation')
+lum = write(42, 0.050, 0.586, 0.913, '17.6 fb^{-1} (8 TeV)')
 
 # do a broken x axis. thanks root (throot)
 
@@ -193,6 +186,7 @@ line2 = ROOT.TLine(boxcenter+boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter
 line2.SetLineWidth(2)
 line2.Draw()
 
+name = 'plots/after_referee/closure'
 c.SaveAs(name + '.pdf')
 c.SaveAs(name + '.png')
 c.SaveAs(name + '.root')
