@@ -56,7 +56,7 @@ def customize_before_unscheduled(process):
 
         if is_mc:
             process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
-                                                     gen_src = cms.InputTag('genParticles'),
+                                                     gen_particles_src = cms.InputTag('genParticles'),
                                                      print_info = cms.bool(True),
                                                      )
             process.p *= process.mfvGenParticles
