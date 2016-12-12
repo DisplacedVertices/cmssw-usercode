@@ -1,3 +1,5 @@
+#include "TFile.h"
+#include "TTree.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 namespace mfv {
@@ -190,5 +192,22 @@ namespace mfv {
     nnt->p_tk0_cov = nnt->p_tk1_cov = 0;
 
     return nnt;
+  }
+
+  void loop(const char* fn, const char* tree_path, bool (*fcn)(int, int, const mfv::MiniNtuple&)) {
+    TFile* f = TFile::Open(fn);
+    assert(f);
+
+    TTree* tree = (TTree*)f->Get(tree_path);
+    assert(tree);
+
+    mfv::MiniNtuple nt;
+    mfv::read_from_tree(tree, nt);
+
+    for (int j = 0, je = tree->GetEntries(); j < je; ++j) {
+      if (tree->LoadTree(j) < 0) break;
+      if (tree->GetEntry(j) <= 0) continue;
+      if (!fcn(j, je, nt)) break;
+    }
   }
 }
