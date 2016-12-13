@@ -13,7 +13,7 @@ process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      event_src = cms.InputTag('mfvEvent'),
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                      weight_src = cms.InputTag('mfvWeight'),
-                                     save_tracks = cms.bool(False)
+                                     save_tracks = cms.bool(True)
                                      )
 
 process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
@@ -30,7 +30,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.xx4j_samples
         )
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
+    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
 
     for sample in samples:
         if sample.is_mc:
