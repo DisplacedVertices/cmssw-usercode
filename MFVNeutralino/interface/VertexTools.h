@@ -27,6 +27,23 @@ namespace mfv {
 
     vertex_distances(const reco::Vertex& sv, const std::vector<double>& gen_vertices, const reco::BeamSpot& beamspot, const reco::Vertex* primary_vertex, const std::vector<math::XYZTLorentzVector>& momenta);
   };
+
+  struct track_cluster {
+    TLorentzVector p4;
+    std::vector<size_t> tracks;
+  };
+
+  struct track_clusters {
+    double track_mass;
+    double R;
+    int algo;
+    int recomb_scheme;
+    std::vector<track_cluster> clusters_;
+    size_t size() const { return clusters_.size(); }
+    track_cluster& operator[](size_t i) { return clusters_[i]; }
+    const track_cluster& operator[](size_t i) const { return clusters_[i]; }
+    void resize(size_t i) { clusters_.resize(i); }
+  };
 }
 
 // JMTBAD mfv::

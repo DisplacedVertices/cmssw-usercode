@@ -1,4 +1,5 @@
 #include "TVector3.h"
+#include "fastjet/ClusterSequence.hh"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
@@ -14,6 +15,11 @@ namespace {
   template <typename T>
   T mag(T x, T y, T z) {
     return sqrt(x*x + y*y + z*z);
+  }
+
+  template <typename T>
+  T mag(T x, T y, T z, T t) {
+    return sqrt(x*x + y*y + z*z + t*t);
   }
 
   template <typename T, typename T2>
@@ -38,17 +44,6 @@ namespace {
 }
 
 namespace mfv {
-  reco::Vertex aux_to_reco(const MFVVertexAux& aux) {
-    reco::Vertex::Error e;
-    e(0,0) = aux.cxx;
-    e(0,1) = aux.cxy;
-    e(0,2) = aux.cxz;
-    e(1,1) = aux.cyy;
-    e(1,2) = aux.cyz;
-    e(2,2) = aux.czz;
-    return reco::Vertex(reco::Vertex::Point(aux.x, aux.y, aux.z), e, aux.chi2, aux.ndof(), aux.ntracks());
-  }
-
   float abs_error(const reco::Vertex& sv, bool use3d) {
     const double x = sv.x();
     const double y = sv.y();
@@ -169,5 +164,60 @@ namespace mfv {
         missdistpv.push_back(Measurement1D(1e9,-1));
       }
     }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+
+  reco::Vertex aux_to_reco(const MFVVertexAux& aux) {
+    reco::Vertex::Error e;
+    e(0,0) = aux.cxx;
+    e(0,1) = aux.cxy;
+    e(0,2) = aux.cxz;
+    e(1,1) = aux.cyy;
+    e(1,2) = aux.cyz;
+    e(2,2) = aux.czz;
+    return reco::Vertex(reco::Vertex::Point(aux.x, aux.y, aux.z), e, aux.chi2, aux.ndof(), aux.ntracks());
+  }
+
+  track_clusters cluster_tracks(const MFVVertexAux& v,
+                                double track_mass = 0.14,
+                                double R = 0.4,
+                                fastjet::JetAlgorithm algo=fastjet::antikt_algorithm,
+                                fastjet::RecombinationScheme recomb_scheme=fastjet::E_scheme) {
+
+    std::vector<fastjet::PseudoJet> particles;
+    for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
+      particles.push_back(fastjet::PseudoJet(v.track_px[i],
+                                             v.track_py[i],
+                                             v.track_pz[i],
+                                             mag(v.track_px[i],
+                                                 v.track_py[i],
+                                                 v.track_pz[i],
+                                                 track_mass)));
+      particles.back().set_user_index(i);
+    }
+
+    fastjet::ClusterSequence cs(particles, fastjet::JetDefinition(algo, R, recomb_scheme));
+    std::vector<fastjet::PseudoJet> clusters = fastjet::sorted_by_pt(cs.inclusive_jets());
+
+    // have to repack because can't keep the fastjet PseudoJets around
+    // without the ClusterSequence, and it doesn't seem to work to
+    // pass the latter back too...
+    track_clusters ret;
+    ret.track_mass = track_mass;
+    ret.R = R;
+    ret.algo = algo;
+    ret.recomb_scheme = recomb_scheme;
+
+    const size_t nc = clusters.size();
+    ret.resize(nc);
+    for (size_t i = 0; i < nc; ++i) {
+      const fastjet::PseudoJet& c = clusters[i];
+      ret[i].p4.SetPtEtaPhiM(c.pt(), c.eta(), c.phi_std(), c.m());
+      for (const fastjet::PseudoJet& d : c.constituents())
+        ret[i].tracks.push_back(d.user_index());
+    }
+
+    return ret;
   }
 }
