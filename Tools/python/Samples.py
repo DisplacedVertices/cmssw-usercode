@@ -438,6 +438,11 @@ _adbp3('ntuplev9', '/mfv_neu_tau00300um_M0800/tucker-ntuplev9-f5ac07842dbce4d3f4
 _adbp3('ntuplev9', '/mfv_neu_tau01000um_M0800/tucker-ntuplev9-0e5ba3624103221ccee5b192546f6f35/USER', 9883) # 1 files
 _adbp3('ntuplev9', '/mfv_neu_tau10000um_M0800/tucker-ntuplev9-2ca30ad984fbc6013509895bd6706a2d/USER', 9794) # 1 files
 
+_adbp3('ntuplev9', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev9-c16034de6b15be76e79af64a452ab07a/USER',  4058) # 1 files
+_adbp3('ntuplev9', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev9-0e24c0b7b0b6333f43188f45863b063d/USER',  9898) # 1 files
+_adbp3('ntuplev9', '/XXTo4J_M-300_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev9-e87edf2dccd6167bb5544ad4ec39008e/USER', 3518) # 1 files
+_adbp3('ntuplev9', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-ntuplev9-e74553e8198c5ee291c2806df7144d3e/USER', 9867) # 1 files
+
 ########################################################################
 
 if __name__ == '__main__':
