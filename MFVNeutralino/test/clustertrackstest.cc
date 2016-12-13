@@ -1,4 +1,4 @@
-// ZZZ_SZ=0.4; g++ -O3 -I$CMSSW_BASE/src -std=c++14 clustertrackstest.cc -o clustertrackstest.exe $(/cvmfs/cms.cern.ch/slc6_amd64_gcc493/external/fastjet/3.1.0/bin/fastjet-config --cxxflags --libs --plugins) $(root-config --cflags --libs) $CMSSW_BASE/src/JMTucker/MFVNeutralino/src/MiniNtuple.cc && ./clustertrackstest.exe $fxrd/store/user/tucker/mfv_neu_tau01000um_M0800/crab_MinitreeV9_wtk_mfv_mfv_neu_tau01000um_M0800/161209_191028/0000/minitree_1.root mfv1mm.root $ZZZ_SZ && ./clustertrackstest.exe $crd/MinitreeV9_ntk5/qcdht2000ext.root qcdht2000ext.root $ZZZ_SZ && comparehists.py qcdht2000ext.root mfv1mm.root / $asdf/plots/clustertracks --nice qcdht2000ext mfv1mm --scaling '{"qcdht2000ext": 25400*36/4016332., "mfv1mm": 36/10000.}[curr]*curr.cah_integral'
+// ZZZ_SZ=0.4; make clustertrackstest.exe && ./clustertrackstest.exe $fxrd/store/user/tucker/mfv_neu_tau01000um_M0800/crab_MinitreeV9_wtk_mfv_mfv_neu_tau01000um_M0800/161209_191028/0000/minitree_1.root mfv1mm.root $ZZZ_SZ && ./clustertrackstest.exe $crd/MinitreeV9_ntk5/qcdht2000ext.root qcdht2000ext.root $ZZZ_SZ && comparehists.py qcdht2000ext.root mfv1mm.root / $asdf/plots/clustertracks --nice qcdht2000ext mfv1mm --scaling '{"qcdht2000ext": 25400*36/4016332., "mfv1mm": 36/10000.}[curr]*curr.cah_integral'
 
 #include <iostream>
 #include "TCanvas.h"
@@ -34,12 +34,15 @@ bool analyze(int j, int je, const mfv::MiniNtuple& nt) {
 
   //if (nt.nvtx == 1) {
   //if (sqrt(nt.x0*nt.x0 + nt.y0*nt.y0) > 0.02) {
-  if (sqrt(nt.x0*nt.x0 + nt.y0*nt.y0) > 0.05) {
-    //{
+  //if (sqrt(nt.x0*nt.x0 + nt.y0*nt.y0) > 0.05) {
+  {
 
     std::vector<fastjet::PseudoJet> particles;
-    for (size_t k = 0; k < nt.ntk0; ++k) 
-      particles.push_back(track_to_particle((*nt.p_tk0_px)[k], (*nt.p_tk0_py)[k], (*nt.p_tk0_pz)[k]));
+    for (size_t k = 0; k < nt.ntk0; ++k)  {
+      fastjet::PseudoJet p = track_to_particle((*nt.p_tk0_px)[k], (*nt.p_tk0_py)[k], (*nt.p_tk0_pz)[k]);
+      p.set_user_index(k);
+      particles.push_back(p);
+    }
 
     fastjet::ClusterSequence cs(particles, fastjet::JetDefinition(jet_algo, jet_R, jet_recomb_scheme));
     std::vector<fastjet::PseudoJet> jets = fastjet::sorted_by_pt(cs.inclusive_jets());
@@ -76,9 +79,12 @@ bool analyze(int j, int je, const mfv::MiniNtuple& nt) {
 
     if (prints) {
       for (size_t i = 0; i < jets.size(); i++) {
-        std::cout << "jet " << i << ": "<< jets[i].pt() << " " << jets[i].rap() << " " << jets[i].phi() << "\n";
-        for (size_t j = 0; j < jets[i].constituents().size(); j++)
-          std::cout << "    constituent " << j << "'s pt: " << jets[i].constituents()[j].pt() << "\n";
+        const fastjet::PseudoJet& jet = jets[i];
+        std::cout << "jet " << i << ": "<< jet.pt() << " " << jet.rap() << " " << jet.phi() << "\n";
+        for (size_t j = 0; j < jet.constituents().size(); j++) {
+          const fastjet::PseudoJet& c = jet.constituents()[j];
+          std::cout << "    constituent " << j << " (user " << c.user_index() << ") 's pt: " << c.pt() << "\n";
+        }
       }
 
       std::cout << std::endl;
@@ -94,7 +100,7 @@ double frac_above(TH1* h, double x) {
 }
 
 int main(int argc, char** argv) {
-  assert(argc > 2);
+  assert(argc > 3);
 
   const char* fn = argv[1];
   const char* out_fn = argv[2];
@@ -116,7 +122,7 @@ int main(int argc, char** argv) {
   mfv::loop(fn, "mfvMiniTree/t", analyze);
 
   const double denom = h_nclusters->Integral(0,h_nclusters->GetNbinsX()+1);
-  std::cout << out_fn;
+  std::cout << out_fn << "\n";
   std::cout << "frac nclusters >= 2: " << frac_above(h_nclusters, 2) << "\n";
   std::cout << "frac nclusters >= 3: " << frac_above(h_nclusters, 3) << "\n";
   std::cout << "frac fsingle < 0.5: " << 1-frac_above(h_fsingleclusters, 0.5) << "\n";
