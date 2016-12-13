@@ -1,6 +1,7 @@
 #ifndef JMTucker_MFVNeutralino_VertexTools_h
 #define JMTucker_MFVNeutralino_VertexTools_h
 
+#include "fastjet/ClusterSequence.hh"
 #include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
@@ -34,16 +35,24 @@ namespace mfv {
   };
 
   struct track_clusters {
-    double track_mass;
-    double R;
-    int algo;
-    int recomb_scheme;
-    std::vector<track_cluster> clusters_;
-    size_t size() const { return clusters_.size(); }
-    track_cluster& operator[](size_t i) { return clusters_[i]; }
-    const track_cluster& operator[](size_t i) const { return clusters_[i]; }
-    void resize(size_t i) { clusters_.resize(i); }
+    track_clusters(const MFVVertexAux& v,
+                   double R_ = 0.4,
+                   fastjet::JetAlgorithm algo_ = fastjet::antikt_algorithm,
+                   fastjet::RecombinationScheme recomb_scheme_ = fastjet::E_scheme,
+                   double track_mass_ = 0.14);
+
+    const double R;
+    const fastjet::JetAlgorithm algo;
+    const fastjet::RecombinationScheme recomb_scheme;
+    const double track_mass;
+
+    std::vector<track_cluster> clusters;
+
+    size_t size() const { return clusters.size(); }
+    size_t nsingle() const;
+    double avgnconst() const;
   };
+
 }
 
 // JMTBAD mfv::
