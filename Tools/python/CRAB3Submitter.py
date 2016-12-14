@@ -9,12 +9,7 @@ from datetime import datetime
 from pprint import pprint
 from StringIO import StringIO
 from CRAB3Tools import Config, crab_global_options, crab_dirs_root, crab_renew_proxy_if_needed, crab_command
-from general import popen, save_git_status
-
-def mkdirs_if_needed(path):
-    dn = os.path.dirname(path)
-    if dn:
-        os.system('mkdir -p %s' % dn)
+from general import mkdirs_if_needed, popen, save_git_status
 
 class CRABSubmitter:
     get_proxy = True
