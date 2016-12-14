@@ -89,7 +89,19 @@ class Sample(object):
     def filenames(self):
         fns = self.datasets[self.curr_dataset].filenames
         if not fns:
-            fns = self.datasets[self.curr_dataset].filenames = DBS.files_in_dataset(self.dataset, **self.dbs_inst_dict(self.dbs_url_num))
+            try:
+                import JMTucker.Tools.SampleFiles as sfns
+                x = sfns.get(self.name, self.curr_dataset)
+                if x is not None:
+                    nfns, fns = x
+                    if len(fns) != nfns:
+                        raise ValueError('problem with JMTucker.Tools.SampleFiles')
+            except ImportError:
+                pass
+
+            if not fns:
+                print 'hitting DBS for filenames for', self.name, self.curr_dataset, self.dataset
+                fns = self.datasets[self.curr_dataset].filenames = DBS.files_in_dataset(self.dataset, self.dbs_inst)
         return fns
 
     @property

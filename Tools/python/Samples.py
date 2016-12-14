@@ -470,3 +470,16 @@ if __name__ == '__main__':
         for x,y in zip(qcd_samples, qcd_samples_ext):
             print x.name, x.int_lumi_orig/1000, '->', (x.int_lumi_orig + y.int_lumi_orig)/1000
 
+    if 0:
+        f = open('a.txt', 'wt')
+        for x in qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
+            if x.name in ('qcdht1000', 'qcdht1500'):
+                continue
+            for y in ('ntuplev9',):
+                try:
+                    x.set_curr_dataset(y)
+                except KeyError:
+                    continue
+                fns = x.filenames
+                print len(fns)
+                f.write('(%r, %r): (%i, %r),\n' % (x.name, y, len(fns), fns))
