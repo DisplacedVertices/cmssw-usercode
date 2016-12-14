@@ -798,10 +798,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
     const mfv::track_clusters clustersR04(aux);
     const size_t clustersR04nsingle = clustersR04.nsingle();
-    const size_t clustersR04avgnconst = clustersR04.avgnconst();
+    const double clustersR04avgnconst = clustersR04.avgnconst();
     const mfv::track_clusters clustersR10(aux, 1.0);
     const size_t clustersR10nsingle = clustersR10.nsingle();
-    const size_t clustersR10avgnconst = clustersR10.avgnconst();
+    const double clustersR10avgnconst = clustersR10.avgnconst();
 
     PairwiseHistos::ValueMap v = {
         {"mva",                     mva.value(aux)},
