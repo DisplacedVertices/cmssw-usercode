@@ -220,8 +220,11 @@ namespace mfv {
     return std::count_if(clusters.begin(), clusters.end(), [](const track_cluster& c) { return c.tracks.size() == 1; });
   }
 
+  size_t track_clusters::ndouble() const {
+    return std::count_if(clusters.begin(), clusters.end(), [](const track_cluster& c) { return c.tracks.size() == 2; });
+  }
+
   double track_clusters::avgnconst() const {
     return std::accumulate(clusters.begin(), clusters.end(), 0., [](const double& sum, const track_cluster& c) { return sum + c.tracks.size(); }) / clusters.size();
   }
-
 }

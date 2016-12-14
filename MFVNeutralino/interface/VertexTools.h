@@ -50,6 +50,7 @@ namespace mfv {
 
     size_t size() const { return clusters.size(); }
     size_t nsingle() const;
+    size_t ndouble() const;
     double avgnconst() const;
   };
 
