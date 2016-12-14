@@ -190,6 +190,7 @@ process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1)
 
         working_dir = os.path.join(self.batch_dir, 'condor_%s' % sample.name)
         os.mkdir(working_dir)
+        open(os.path.join(working_dir, 'cs_dir'), 'wt')
 
         njobs = self.filelist(sample, working_dir)
         pset_fn = self.pset(sample, working_dir)
@@ -211,6 +212,7 @@ process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1)
                         try:
                             njobs_sub = int(line[0])
                             cluster = int(line[-1][:-1])
+                            open(os.path.join(working_dir, 'njobs'), 'wt').write(str(njobs_sub))
                             open(os.path.join(working_dir, 'cluster'), 'wt').write(str(cluster))
                             if njobs_sub != njobs:
                                 ok = False
