@@ -1,4 +1,4 @@
-// ZZZ_SZ=0.4; make clustertrackstest.exe && ./clustertrackstest.exe $fxrd/store/user/tucker/mfv_neu_tau01000um_M0800/crab_MinitreeV9_wtk_mfv_mfv_neu_tau01000um_M0800/161209_191028/0000/minitree_1.root mfv1mm.root $ZZZ_SZ && ./clustertrackstest.exe $crd/MinitreeV9_ntk5/qcdht2000ext.root qcdht2000ext.root $ZZZ_SZ && comparehists.py qcdht2000ext.root mfv1mm.root / $asdf/plots/clustertracks --nice qcdht2000ext mfv1mm --scaling '{"qcdht2000ext": 25400*36/4016332., "mfv1mm": 36/10000.}[curr]*curr.cah_integral'
+// ZZZ_SZ=0.4; make clustertrackstest.exe && ./clustertrackstest.exe $fxrd/store/user/tucker/mfv_neu_tau01000um_M0800/crab_MinitreeV9_wtk_mfv_mfv_neu_tau01000um_M0800/161209_191028/0000/minitree_1.root mfv1mm.root $ZZZ_SZ && ./clustertrackstest.exe $crd/MinitreeV9_ntk5/qcdht2000ext.root qcdht2000ext.root $ZZZ_SZ && comparehists.py qcdht2000ext.root mfv1mm.root / $asdf/plots/clustertracks --nice qcdht2000ext mfv1mm --scaling '-{"qcdht2000ext": 25400*36/4016332., "mfv1mm": 36/10000.}[curr]'
 
 #include <iostream>
 #include "TCanvas.h"
