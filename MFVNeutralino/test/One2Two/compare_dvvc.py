@@ -77,26 +77,18 @@ if mode == 'vary_dphi':
 
 if mode == 'vary_dbv':
     fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000.root
-2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000_b.root
-2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000_nob.root
 2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
 
     fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000.root
-2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000_b.root
-2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000_nob.root
 2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
 
     fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000.root
-2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000_b.root
-2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000_nob.root
 2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
 
     ls = '''default
-b quarks
-no b quarks
-sum'''.split('\n')
+sort by b quarks'''.split('\n')
 
-    lsh = 'default            b quarks            no b quarks            sum  '
+    lsh = 'default                          sort by b quarks      '
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
@@ -202,6 +194,7 @@ for i,g in enumerate(gs):
     g.SetLineColor(colors[i])
     if i == 0:
         g.SetTitle('d_{VV}^{C} / d_{VV} (>400 #mum);input distributions;')
+        g.GetXaxis().SetLimits(0.4,len(x)+0.8)
         g.GetYaxis().SetRangeUser(0,4)
         g.Draw('AP')
     else:
@@ -209,7 +202,7 @@ for i,g in enumerate(gs):
     l.AddEntry(g, ntk[i], 'lep')
 l.SetFillColor(0)
 l.Draw()
-line = ROOT.TLine(0,1,8,1)
+line = ROOT.TLine(0.4,1,len(x)+0.8,1)
 line.SetLineStyle(2)
 line.SetLineWidth(2)
 line.Draw()
@@ -222,6 +215,7 @@ for i,g in enumerate(g1s):
     g.SetLineColor(colors[i])
     if i == 0:
         g.SetTitle('d_{VV}^{C}(n) / d_{VV}^{C}(1) (>400 #mum);%s;' % lsh)
+        g.GetXaxis().SetLimits(0.4,len(x)+0.8)
         g.GetYaxis().SetRangeUser(0.6,1.4)
         g.Draw('AP')
     else:
@@ -229,7 +223,7 @@ for i,g in enumerate(g1s):
     l.AddEntry(g, ntk[i], 'lep')
 l.SetFillColor(0)
 l.Draw()
-line = ROOT.TLine(0,1,8,1)
+line = ROOT.TLine(0.4,1,len(x)+0.8,1)
 line.SetLineStyle(2)
 line.SetLineWidth(2)
 line.Draw()
