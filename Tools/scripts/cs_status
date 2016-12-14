@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+import sys
+from JMTucker.Tools.CondorTools import *
+
+if len(sys.argv) < 2:
+    print 'usage: cs_status wd [wd2 ...]'
+    sys.exit(1)
+
+wds = cs_dirs_from_argv()
+for wd in wds:
+    rets = cs_rets(wd)
+    print wd.ljust(40), set(rets)
