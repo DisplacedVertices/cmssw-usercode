@@ -8,6 +8,42 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 wds = cs_dirs_from_argv()
+ml = max(len(wd) for wd in wds) + 3
+fmt = '%' + str(ml) + 's %10s | %10s %10s %10s'
+
+def z(n):
+    return '-' if n == 0 else str(n)
+
+print '\x1b[97m' + fmt % ('dir'.ljust(ml), 'njobs', 'done', 'run/miss', 'problem') + '\x1b[0m'
+
+sums = [0]*4
+
 for wd in wds:
     rets = cs_rets(wd)
-    print wd.ljust(40), set(rets)
+    srets = set(rets)
+
+    njobs = len(rets)
+    ndone = sum(1 for r in rets if r == 0)
+    nrunmiss = sum(1 for r in rets if r == -1)
+    nprobs = sum(1 for r in rets if r not in (0, -1))
+
+    sums[0] += njobs
+    sums[1] += ndone
+    sums[2] += nrunmiss
+    sums[3] += nprobs
+
+    if nprobs:
+        sys.stdout.write('\x1b[91m')
+    elif ndone == njobs:
+        sys.stdout.write('\x1b[92m')
+    
+    print fmt % (wd.ljust(ml), z(njobs), z(ndone), z(nrunmiss), z(nprobs)),
+    if nprobs:
+        print ' :',
+        for i,r in enumerate(rets):
+            if r not in (0,-1):
+                print i,
+
+    sys.stdout.write('\x1b[0m\n')
+
+print '\x1b[97m' + fmt % (('totals'.ljust(ml),) + tuple(sums)) + '\x1b[0m'
