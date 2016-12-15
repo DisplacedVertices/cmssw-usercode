@@ -76,7 +76,7 @@ cs_job = int(open('cs_job').read())
 assert cs_job >= 0
 
 import cs_filelist
-process.source.fileNames = ['root://cmseos.fnal.gov/' + x for x in cs_filelist.get(cs_job)]
+process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -97,6 +97,7 @@ if os.stat('cs.json').st_size > 0:
                  pset_modifier = None,
                  input_files = None,
                  output_files = None,
+                 pfn_prefix = 'root://cmseos.fnal.gov/',
                  dataset = 'main',
                  **kwargs):
 
@@ -139,6 +140,9 @@ if os.stat('cs.json').st_size > 0:
         self.jdl_template = self.jdl_template \
             .replace('__TARBALL_FN__', tarball_fn) \
             .replace('__SH_FN__',      sh_fn) \
+
+        self.pset_end_template = self.pset_end_template \
+            .replace('__PFN_PREFIX__', repr(pfn_prefix))
 
         self.testing = testing
 
