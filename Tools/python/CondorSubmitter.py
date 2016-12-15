@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import sys, os, string, base64, zlib, cPickle as pickle
+import sys, os, string, shutil, base64, zlib, cPickle as pickle
 from JMTucker.Tools.CMSSWTools import make_tarball
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
-from JMTucker.Tools.general import mkdirs_if_needed, popen, save_git_status, int_ceil
+from JMTucker.Tools.general import mkdirs_if_needed, popen, save_git_status, int_ceil, touch
 
 if not os.environ.has_key('SCRAM_ARCH') or not os.environ.has_key('CMSSW_VERSION'):
     raise EnvironmentError('CMSSW environment not set?')
@@ -33,7 +33,7 @@ eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
 echo cmsRun start at $(date)
-cp $workdir/cs_filelist.py .
+cp $workdir/{cs.json,cs_filelist.py} .
 echo $job > cs_job
 cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py 2>&1
 cmsexit=$?
@@ -62,13 +62,14 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = __TARBALL_FN__,cs_pset.py,cs_filelist.py
+transfer_input_files = __TARBALL_FN__,cs_pset.py,cs_filelist.py,cs.json
 Queue __NJOBS__
 '''
 
     pset_end_template = '''
 ####
 
+import os
 from JMTucker.Tools.general import typed_from_argv
 
 cs_job = int(open('cs_job').read())
@@ -79,6 +80,10 @@ process.source.fileNames = ['root://cmseos.fnal.gov/' + x for x in cs_filelist.g
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
+
+if os.stat('cs.json').st_size > 0:
+    from FWCore.PythonUtilities.LumiList import LumiList
+    process.source.lumisToProcess = LumiList('cs.json').getVLuminosityBlockRange()
 '''
 
     get_proxy = True
@@ -147,6 +152,12 @@ process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1)
         self.pset_modifier = pset_modifier
 
     def filelist(self, sample, working_dir):
+        # JMTBAD are there performance problems by not matching the json to the files per job?
+        json_fn = os.path.join(working_dir, 'cs.json')
+        if hasattr(sample, 'json'):
+            shutil.copy2(sample.json, json_fn)
+        else:
+            touch(json_fn)
         per = sample.files_per
         nfns = len(sample.filenames)
         njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(nfns, per)
@@ -192,7 +203,7 @@ process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1)
 
         working_dir = os.path.join(self.batch_dir, 'condor_%s' % sample.name)
         os.mkdir(working_dir)
-        open(os.path.join(working_dir, 'cs_dir'), 'wt')
+        touch(os.path.join(working_dir, 'cs_dir'))
 
         njobs = self.filelist(sample, working_dir)
         pset_fn = self.pset(sample, working_dir)
