@@ -67,6 +67,16 @@ def file_event_from_argv(process, warn=True):
     elif warn:
         print 'file_event_from_argv warning: did not understand event number'
 
+def find_output_files(process):
+    '''Get the TFileService and PoolOutputModule filenames if these
+    services exist in process.'''
+
+    d = {}
+    if hasattr(process, 'TFileService'):
+        d['TFileService'] = [process.TFileService.fileName.value()]
+    d['PoolOutputModule'] = [v.fileName.value() for v in process.outputModules.itervalues()]
+    return d
+
 def friendly_argparse(**kwargs):
     '''Set up an ArgumentParser that doesn't conflict with cmsRun arg
     parsing: use + as prefix for options, and consume all positional
