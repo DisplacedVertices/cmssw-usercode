@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, string, shutil, base64, zlib, imp, cPickle as pickle
+from datetime import datetime
 from JMTucker.Tools.CMSSWTools import make_tarball, find_output_files
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
 from JMTucker.Tools.general import mkdirs_if_needed, popen, save_git_status, int_ceil, touch
@@ -33,7 +34,7 @@ eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
 echo cmsRun start at $(date)
-cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args__INPUT_BNS__} .
+cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds__INPUT_BNS__} .
 echo $job > cs_job
 cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
 cmsexit=$?
@@ -43,14 +44,42 @@ if [[ $cmsexit -ne 0 ]]; then
     exit $cmsexit
 fi
 
-for x in __OUTPUT_BNS__; do
-    xext="${x##*.}"
-    xname="${x%.*}"
-    mv $x ${workdir}/${xname}_${job}.${xext}
-done
+__OUTPUT_SNIPPET__
 ''' \
 .replace('__SCRAM_ARCH__',    os.environ['SCRAM_ARCH']) \
 .replace('__CMSSW_VERSION__', os.environ['CMSSW_VERSION'])
+
+    output_template = '''
+for x in __OUTPUT_BNS__; do
+    xext="${x##*.}"
+    xname="${x%.*}"
+    xwjob=${xname}_${job}.${xext}
+    mv $x ${workdir}/${xwjob}
+done
+'''
+    stageout_template = '''
+xrdcp_problem=0
+touch publish
+for x in __STAGEOUT_BNS__; do
+    xext="${x##*.}"
+    xname="${x%.*}"
+    xwjob=${xname}_${job}.${xext}
+    dest=__STAGEOUT_PATH__/${xwjob}
+    xrdcp -s $x $dest
+    if [[ $? -ne 0 ]]; then
+        echo xrdcp problem with ${xwjob}
+        xrdcp_problem=1
+    else
+        echo $dest >> publish
+    fi
+done
+
+mv publish ${workdir}/publish.${job}
+
+if [[ $xrdcp_problem -ne 0 ]]; then
+    exit 60307
+fi
+''' # 60307 will show up as unix code 147
 
     jdl_template = '''
 universe = vanilla
@@ -64,7 +93,7 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = __TARBALL_FN__,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args__INPUT_FNS__
+transfer_input_files = __TARBALL_FN__,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds__INPUT_FNS__
 Queue __NJOBS__
 '''
 
@@ -97,10 +126,12 @@ if os.stat('cs.json').st_size > 0:
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
+                 pfn_prefix = 'root://cmseos.fnal.gov/',
                  input_files = [],
                  output_files = [],
                  skip_output_files = [],
-                 pfn_prefix = 'root://cmseos.fnal.gov/',
+                 stageout_files = [], # can be "all" or "pool"
+                 stageout_path = '', # if / in it, does not try to generate
                  dataset = 'main',
                  ):
 
@@ -127,8 +158,9 @@ if os.stat('cs.json').st_size > 0:
             crab_renew_proxy_if_needed()
             self.get_proxy = False
 
-        #self.username = os.environ['USER']
-        #os.system('mkdir -p /tmp/%s' % self.username)
+        username = os.environ['USER']
+        timestamp = datetime.now().strftime('%y%m%d_%H%M%S')
+        #os.system('mkdir -p /tmp/%s' % username)
 
         print 'CondorSubmitter init: saving git status'
         save_git_status(os.path.join(self.batch_dir, 'gitstatus'))
@@ -156,17 +188,50 @@ if os.stat('cs.json').st_size > 0:
         # JMTBAD if pset_modifier or cmsrun_args modifies the output filenames, we won't catch them
         print 'CondorSubmitter init: importing pset_template fn %s to get output filenames' % pset_template_fn
         module = imp.load_source('dummy', pset_template_fn)
-        for l in find_output_files(module.process).itervalues():
+        module_output_files = find_output_files(module.process)
+        for l in module_output_files.itervalues():
             for x in l:
                 if x not in skip_output_files:
                     output_files.append(x)
-        assert all(os.path.basename(x) == x for x in output_files)
+
+        if type(stageout_files) == str:
+            stageout_which = stageout_files
+            if stageout_which == 'all':
+                stageout_files = output_files
+            elif stageout_which == 'pool':
+                stageout_files = [x for x in module_output_files['PoolOutputModule'] if x not in skip_output_files]
+            else:
+                raise ValueError("don't understand stageout_files = %s" % stageout_which)
+            output_files = [x for x in output_files if x not in stageout_files]
+
+        assert all(os.path.basename(x) == x for x in output_files + stageout_files)
         output_files = ' '.join(output_files)
-        print 'CondorSubmitter init: output files are', output_files
+        stageout_files = ' '.join(stageout_files)
+
+        output_snippet = ''
+
+        if output_files:
+            print 'CondorSubmitter init: output files are', output_files
+            output_snippet += self.output_template.replace('__OUTPUT_BNS__', output_files)
+
+        if stageout_files:
+            if '/' not in stageout_path:
+                stageout_user = username # JMTBAD use getUsernameFromSiteDB?
+                if stageout_path:
+                    stageout_path = '/' + stageout_path
+                stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
+                stageout_path += '/$(<cs_primaryds)/%s/%s/0000' % (batch_name, timestamp)  # JMTBAD 0001...
+
+            print 'CondorSubmitter init: stageout files are', stageout_files
+            print 'CondorSubmitter init: stageout path is', stageout_path
+
+            output_snippet += self.stageout_template \
+                .replace('__STAGEOUT_BNS__',  stageout_files) \
+                .replace('__STAGEOUT_PATH__', stageout_path)
 
         self.sh_template = self.sh_template \
             .replace('__INPUT_BNS__',  input_bns) \
-            .replace('__OUTPUT_BNS__', output_files)
+            .replace('__OUTPUT_SNIPPET__', output_snippet)
 
         self.jdl_template = self.jdl_template \
             .replace('__SH_FN__',      sh_fn) \
@@ -180,6 +245,9 @@ if os.stat('cs.json').st_size > 0:
 
 
     def filelist(self, sample, working_dir):
+        primaryds_fn = os.path.join(working_dir, 'cs_primaryds')
+        open(primaryds_fn, 'wt').write(sample.primary_dataset)
+
         # JMTBAD are there performance problems by not matching the json to the files per job?
         json_fn = os.path.join(working_dir, 'cs.json')
         if hasattr(sample, 'json'):
