@@ -33,9 +33,9 @@ eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
 echo cmsRun start at $(date)
-cp $workdir/{cs.json,cs_filelist.py} .
+cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args} .
 echo $job > cs_job
-cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py 2>&1
+cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
 cmsexit=$?
 echo cmsRun end at $(date)
 echo cmsRun exited with code $cmsexit
@@ -62,7 +62,7 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = __TARBALL_FN__,cs_pset.py,cs_filelist.py,cs.json
+transfer_input_files = __TARBALL_FN__,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args
 Queue __NJOBS__
 '''
 
@@ -176,6 +176,12 @@ if os.stat('cs.json').st_size > 0:
         return njobs
 
     def pset(self, sample, working_dir):
+        cmsrun_args_fn = os.path.join(working_dir, 'cs_cmsrun_args')
+        cmsrun_args = sample.cmsrun_args if hasattr(sample, 'cmsrun_args') else ''
+        if type(cmsrun_args) == list:
+            cmsrun_args = ' '.join(cmsrun_args)
+        open(cmsrun_args_fn, 'wt').write(cmsrun_args)
+
         pset = open(self.pset_template_fn).read()
         if self.pset_modifier is not None:
             ret = self.pset_modifier(sample)
