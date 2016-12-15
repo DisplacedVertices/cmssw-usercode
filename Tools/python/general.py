@@ -140,6 +140,10 @@ def reverse_readline(filename, buf_size=8192):
                 yield lines[index]
         yield segment
 
+def touch(path):
+    with open(path, 'a'):
+        os.utime(path, None)
+
 __all__ = [
     'bool_from_argv',
     'big_warn',
@@ -152,4 +156,5 @@ __all__ = [
     'popen',
     'reverse_readline',
     'save_git_status',
+    'touch',
     ]
