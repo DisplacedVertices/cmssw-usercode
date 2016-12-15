@@ -34,9 +34,9 @@ scram b -j 2 2>&1 > /dev/null
 
 echo cmsRun start at $(date)
 cp $workdir/cs_filelist.py .
-cmsRun ${workdir}/cs_pset.py cs_job=$job 2>&1
+echo $job > cs_job
+cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py 2>&1
 cmsexit=$?
-rm cs_filelist.py
 echo cmsRun end at $(date)
 echo cmsRun exited with code $cmsexit
 if [[ $cmsexit -ne 0 ]]; then
@@ -71,8 +71,8 @@ Queue __NJOBS__
 
 from JMTucker.Tools.general import typed_from_argv
 
-cs_job = typed_from_argv(int, name='cs_job')
-assert cs_job is not None
+cs_job = int(open('cs_job').read())
+assert cs_job >= 0
 
 import cs_filelist
 process.source.fileNames = ['root://cmseos.fnal.gov/' + x for x in cs_filelist.get(cs_job)]
@@ -149,8 +149,10 @@ process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1)
     def filelist(self, sample, working_dir):
         per = sample.files_per
         nfns = len(sample.filenames)
-        njobs = int_ceil(nfns, per)
+        njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(nfns, per)
         fn_groups = [sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)]
+        fn_groups = [x for x in fn_groups if x]
+        njobs = len(fn_groups)
         xxx = base64.b64encode(zlib.compress(pickle.dumps(fn_groups, -1)))
         with open(os.path.join(working_dir, 'cs_filelist.py'), 'wt') as f:
             f.write('import zlib, base64, cPickle as pickle\n')
