@@ -134,7 +134,7 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
         if not os.path.isdir(x):
             raise FileNotFoundError("didn't find " + x)
 
-    extras = []
+    extras = ['data']
     if include_python:
         extras.append('python')
     elif include_interface:
