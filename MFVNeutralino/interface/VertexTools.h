@@ -32,6 +32,7 @@ namespace mfv {
   struct track_cluster {
     TLorentzVector p4;
     std::vector<size_t> tracks;
+    size_t size() const { return tracks.size(); }
   };
 
   struct track_clusters {
@@ -47,6 +48,10 @@ namespace mfv {
     const double track_mass;
 
     std::vector<track_cluster> clusters;
+    std::vector<track_cluster>::iterator begin() { return clusters.begin(); }
+    std::vector<track_cluster>::iterator end() { return clusters.end(); }
+    std::vector<track_cluster>::const_iterator begin() const { return clusters.begin(); }
+    std::vector<track_cluster>::const_iterator end() const { return clusters.end(); }
 
     size_t size() const { return clusters.size(); }
     size_t nsingle() const;
