@@ -11,13 +11,18 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvAnalysisCuts.min_nvertex = 1
 
-process.mfvClusterTracks = cms.EDAnalyzer('MFVClusterTracksHistos',
-                                          event_src = cms.InputTag('mfvEvent'),
-                                          vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
-                                          weight_src = cms.InputTag('mfvWeight'),
-                                          )
+process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts)
 
-process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvClusterTracks)
+for min_dbv in [0., 0.02, 0.05, 0.1]:
+    ana = cms.EDAnalyzer('MFVClusterTracksHistos',
+                         event_src = cms.InputTag('mfvEvent'),
+                         vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
+                         weight_src = cms.InputTag('mfvWeight'),
+                         min_dbv = cms.double(min_dbv),
+                         )
+    name = 'mfvClusterTracksMindBV0p%02i' % int(min_dbv*100)
+    setattr(process, name, ana)
+    process.p *= ana
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
@@ -31,7 +36,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sample.files_per = 50
         if not sample.is_mc:
             sample.json = 'ana_10pc.json'
-            raise NotImplementedError('need to implement json use in CondorSubmitter')
 
     cs = CondorSubmitter('ClusterTracks', dataset='ntuplev9')
     cs.submit_all(samples)
