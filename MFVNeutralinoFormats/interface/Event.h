@@ -69,10 +69,11 @@ struct MFVEvent {
   float gen_lsp_phi[2];
   float gen_lsp_mass[2];
   float gen_lsp_decay[2*3];
-  float gen_pv[3];
   uchar gen_decay_type[2];
   uchar gen_partons_in_acc;
   uchar gen_flavor_code;
+
+  float gen_pv[3];
   std::vector<float> gen_bquark_pt;
   std::vector<float> gen_bquark_eta;
   std::vector<float> gen_bquark_phi;
