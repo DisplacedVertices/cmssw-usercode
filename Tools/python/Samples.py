@@ -473,9 +473,7 @@ if __name__ == '__main__':
     if 0:
         f = open('a.txt', 'wt')
         for x in qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
-            if x.name in ('qcdht1000', 'qcdht1500'):
-                continue
-            for y in ('ntuplev9',):
+            for y in ('main', 'ntuplev9'):
                 try:
                     x.set_curr_dataset(y)
                 except KeyError:
