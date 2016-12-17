@@ -1,5 +1,6 @@
 import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 
 simple = False
 
@@ -7,7 +8,7 @@ process.source.fileNames = ['file:ntuple.root']
 process.source.noEventSort = cms.untracked.bool(True)
 file_event_from_argv(process)
 
-geometry_etc(process, '76X_mcRun2_asymptotic_v12')
+geometry_etc(process, which_global_tag(True))
 del process.TFileService
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
