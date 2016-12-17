@@ -18,6 +18,8 @@ class MFVClusterTracksHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
+  const double min_dbv;
+
   TH1F* h_w;
   TH1F* h_nsv;
   TH1F* h_ntracks;
@@ -33,12 +35,16 @@ class MFVClusterTracksHistos : public edm::EDAnalyzer {
   TH2F* h_avgnconstituents_v_ntk;
   TH1F* h_nconstle2clusters;
   TH2F* h_nconstle2clusters_v_ntk;
+  TH1F* h_singleclustersdotfd;
+  TH1F* h_nsingleclusterspb;
+  TH2F* h_nsingleclusterspb_v_ntk;
 };
 
 MFVClusterTracksHistos::MFVClusterTracksHistos(const edm::ParameterSet& cfg)
   : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src")))
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    min_dbv(cfg.getParameter<double>("min_dbv"))
 {
   edm::Service<TFileService> fs;
 
@@ -57,6 +63,10 @@ MFVClusterTracksHistos::MFVClusterTracksHistos(const edm::ParameterSet& cfg)
   h_avgnconstituents_v_ntk  = fs->make<TH2F>("h_avgnconstituents_v_ntk",   ";# tracks;avg # constituents / cluster",                       20, 0, 20, 20, 0, 20);
   h_nconstle2clusters       = fs->make<TH1F>("h_nconstle2clusters",        ";# clusters w. <= 2 constituents",                             20, 0, 20);
   h_nconstle2clusters_v_ntk = fs->make<TH2F>("h_nconstle2clusters_v_ntk",  ";# tracks;# clusters w. <= 2 constituents",                    20, 0, 20, 20, 0, 20);
+  h_nsingleclusterspb       = fs->make<TH1F>("h_nsingleclusterspb",        ";# clusters w. 1 constituent that point back",                 20, 0, 20);
+  h_nsingleclusterspb_v_ntk = fs->make<TH2F>("h_nsingleclusterspb_v_ntk",  ";# tracks;# clusters w. 1 constituent that point back",        20, 0, 20, 20, 0, 20);
+
+  h_singleclustersdotfd = fs->make<TH1F>("h_singleclustersdotfd", ";clusters w. 1 constituent dot flight dir", 41, -1, 1.05);
 }
 
 void MFVClusterTracksHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -75,18 +85,32 @@ void MFVClusterTracksHistos::analyze(const edm::Event& event, const edm::EventSe
 
   for (int ivtx = 0; ivtx < nsv; ++ivtx) {
     const MFVVertexAux& v = vertices->at(ivtx);
+    const TVector2 flight_dir = TVector2(v.x - mevent->bsx, v.y - mevent->bsy).Unit();
 
     const size_t ntracks = v.ntracks();
     const double dbv = mevent->bs2ddist(v);
-    h_ntracks->Fill(ntracks);
-    h_dbv->Fill(dbv);
+    h_ntracks->Fill(ntracks, w);
+    h_dbv->Fill(dbv, w);
 
-    if (dbv > 0.05) {
+    if (dbv > min_dbv) {
       const mfv::track_clusters clusters(v);
       const size_t nclusters = clusters.size();
       const size_t nsingle = clusters.nsingle();
       const size_t nconstle2 = nsingle + clusters.ndouble();
       const double avgnconst = clusters.avgnconst();
+
+      size_t nsinglepb = 0;
+      for (const mfv::track_cluster& c : clusters) {
+        if (c.size() == 1) {
+          for (size_t ti : c.tracks) {
+            const TVector2 track_dir = TVector2(v.track_px[ti], v.track_py[ti]).Unit();
+            const double dot = track_dir * flight_dir;
+            h_singleclustersdotfd->Fill(dot);
+            if (dot < -0.5)
+              ++nsinglepb;
+          }
+        }
+      }
 
       h_nclusters->Fill(nclusters, w);
       h_nclusters_v_ntk->Fill(ntracks, nclusters, w);
@@ -98,6 +122,8 @@ void MFVClusterTracksHistos::analyze(const edm::Event& event, const edm::EventSe
       h_avgnconstituents_v_ntk->Fill(ntracks, avgnconst, w);
       h_nconstle2clusters->Fill(nconstle2, w);
       h_nconstle2clusters_v_ntk->Fill(ntracks, nconstle2, w);
+      h_nsingleclusterspb->Fill(nsinglepb, w);
+      h_nsingleclusterspb_v_ntk->Fill(ntracks, nsinglepb, w);
     }
   }
 }
