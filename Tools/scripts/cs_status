@@ -18,6 +18,8 @@ print '\x1b[97m' + fmt % ('dir'.ljust(ml), 'njobs', 'done', 'run/miss', 'problem
 
 sums = [0]*4
 
+done = []
+
 for wd in wds:
     rets = cs_rets(wd)
     srets = set(rets)
@@ -35,6 +37,7 @@ for wd in wds:
     if nprobs:
         sys.stdout.write('\x1b[91m')
     elif ndone == njobs:
+        done.append(wd)
         sys.stdout.write('\x1b[92m')
     
     print fmt % (wd.ljust(ml), z(njobs), z(ndone), z(nrunmiss), z(nprobs)),
@@ -47,3 +50,8 @@ for wd in wds:
     sys.stdout.write('\x1b[0m\n')
 
 print '\x1b[97m' + fmt % (('totals'.ljust(ml),) + tuple(sums)) + '\x1b[0m'
+
+if done:
+    print '\nthese are done:', ' '.join(done)
+if len(done) == len(wds):
+    print '\nAll done!'
