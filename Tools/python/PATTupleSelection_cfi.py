@@ -1,3 +1,4 @@
+from textwrap import dedent
 import FWCore.ParameterSet.Config as cms
 
 # Cuts for muons and electrons, including relative isolation with
@@ -14,44 +15,77 @@ iso = '(chargedHadronIso + max(0.,neutralHadronIso) + photonIso - 0.5*puChargedH
 muonIso = iso + '/pt'
 electronIso = iso + '/et'
 
-electronId = \
-    '(isEB && ' \
-    'gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 2 && ' \
-    'abs(deltaEtaSuperClusterTrackAtVtx) < 0.00926 && ' \
-    'abs(deltaPhiSuperClusterTrackAtVtx) < 0.0336 && ' \
-    'full5x5_sigmaIetaIeta < 0.0101 && ' \
-    'hadronicOverEm < 0.0597 && ' \
-    'abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.012 && ' \
-    'passConversionVeto) || ' \
-    '(isEE && ' \
-    'gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 1 && ' \
-    'abs(deltaEtaSuperClusterTrackAtVtx) < 0.00724 && ' \
-    'abs(deltaPhiSuperClusterTrackAtVtx) < 0.0918 && ' \
-    'full5x5_sigmaIetaIeta < 0.0279 && ' \
-    'hadronicOverEm < 0.0615 && ' \
-    'abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.00999 && ' \
-    'passConversionVeto)'
+def denewline(s):
+    return dedent(s).replace('\n', ' ')
+
+electronId = denewline('''
+(
+ isEB &&
+ gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 2 &&
+ abs(deltaEtaSuperClusterTrackAtVtx) < 0.00926 &&
+ abs(deltaPhiSuperClusterTrackAtVtx) < 0.0336 &&
+ full5x5_sigmaIetaIeta < 0.0101 &&
+ hadronicOverEm < 0.0597 &&
+ abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.012 &&
+ passConversionVeto
+ ) ||
+(
+ isEE &&
+ gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 1 &&
+ abs(deltaEtaSuperClusterTrackAtVtx) < 0.00724 &&
+ abs(deltaPhiSuperClusterTrackAtVtx) < 0.0918 &&
+ full5x5_sigmaIetaIeta < 0.0279 &&
+ hadronicOverEm < 0.0615 &&
+ abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.00999 &&
+ passConversionVeto
+ )
+''')
+
+jetPresel = denewline('''
+(
+ abs(eta) <= 2.7 &&
+ numberOfDaughters > 1 &&
+ neutralHadronEnergyFraction < 0.90 &&
+ neutralEmEnergyFraction < 0.90 &&
+ muonEnergyFraction < 0.8 &&
+ (abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.90 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))
+ ) ||
+(
+ abs(eta) > 2.7 && abs(eta) <= 3.0 &&
+ neutralEmEnergyFraction < 0.90 &&
+ neutralMultiplicity > 2
+ ) ||
+(
+ abs(eta) > 3.0 &&
+ neutralEmEnergyFraction < 0.90 &&
+ neutralMultiplicity > 10
+ )
+''')
 
 jtupleParams = cms.PSet(
-    jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && ' \
-                        'numberOfDaughters > 1 && ' \
-                        'neutralHadronEnergyFraction < 0.90 && ' \
-                        'neutralEmEnergyFraction < 0.90 && ' \
-                        'muonEnergyFraction < 0.8 && ' \
-                        '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.90 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))'
-                        ),
+    jetPresel = cms.string(jetPresel),
+    #jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && (%s)' % jetPresel),
+    jetCut = cms.string(denewline('''
+                        pt > 20. && abs(eta) < 2.5 &&
+                        numberOfDaughters > 1 &&
+                        neutralHadronEnergyFraction < 0.90 &&
+                        neutralEmEnergyFraction < 0.90 &&
+                        muonEnergyFraction < 0.8 &&
+                        (abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.90 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))
+                        ''')),
 
     muonCut      = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && abs(eta) < 2.4'),
     dilepMuonCut = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && abs(eta) < 2.4'),
-    semilepMuonCut = cms.string('isPFMuon && isGlobalMuon && ' \
-                                'pt > 7. && abs(eta) < 2.4 && ' \
-                                'globalTrack.normalizedChi2 < 10. && ' \
-                                'track.hitPattern.trackerLayersWithMeasurement > 5 && ' \
-                                'globalTrack.hitPattern.numberOfValidMuonHits > 0 && ' \
-                                'innerTrack.hitPattern.numberOfValidPixelHits > 0 && ' \
-                                'numberOfMatchedStations > 1'
-                                ),
-    
+    semilepMuonCut = cms.string(denewline('''
+                                isPFMuon && isGlobalMuon &&
+                                pt > 7. && abs(eta) < 2.4 &&
+                                globalTrack.normalizedChi2 < 10. &&
+                                track.hitPattern.trackerLayersWithMeasurement > 5 &&
+                                globalTrack.hitPattern.numberOfValidMuonHits > 0 &&
+                                innerTrack.hitPattern.numberOfValidPixelHits > 0 &&
+                                numberOfMatchedStations > 1
+                                ''')),
+
     electronCut = cms.string(electronId),
     dilepElectronCut = cms.string('1'),
     semilepElectronCut = cms.string('1'),
