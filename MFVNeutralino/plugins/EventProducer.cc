@@ -6,6 +6,8 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -44,7 +46,7 @@ private:
   const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
-  const edm::EDGetTokenT<std::vector<float>> vertex_seed_pt_quantiles_token;
+  const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
   
   const std::string skip_event_filter;
   const double jet_pt_min;
@@ -75,7 +77,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
-    vertex_seed_pt_quantiles_token(consumes<std::vector<float>>(cfg.getParameter<edm::InputTag>("vertex_seed_pt_quantiles_src"))),
+    vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))),
 
     skip_event_filter(cfg.getParameter<std::string>("skip_event_filter")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
@@ -487,11 +489,18 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<std::vector<float>> vertex_seed_pt_quantiles;
-  event.getByToken(vertex_seed_pt_quantiles_token, vertex_seed_pt_quantiles);
-  assert(vertex_seed_pt_quantiles->size() == mfv::n_vertex_seed_pt_quantiles);
-  for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
-    mevent->vertex_seed_pt_quantiles[i] = (*vertex_seed_pt_quantiles)[i];
+  edm::Handle<reco::TrackCollection> vertex_seed_tracks;
+  event.getByToken(vertex_seed_tracks_token, vertex_seed_tracks);
+  for (const reco::Track& tk : *vertex_seed_tracks) {
+    assert(abs(tk.charge()) == 1);
+    mevent->vertex_seed_track_chi2dof.push_back(tk.normalizedChi2());
+    mevent->vertex_seed_track_qpt.push_back(tk.charge() * tk.pt());
+    mevent->vertex_seed_track_eta.push_back(tk.eta());
+    mevent->vertex_seed_track_phi.push_back(tk.phi());
+    mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
+    mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
+    mevent->vertex_seed_track_hp_.push_back(MFVEvent::make_track_hitpattern(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement()));
+  }
 
   //////////////////////////////////////////////////////////////////////
 

@@ -31,7 +31,6 @@ def customize_before_unscheduled(process):
         ]
 
     if prepare_vis:
-        process.mfvVertices.write_tracks = True
         process.mfvSelectedVerticesTight.produce_vertices = True
         process.mfvSelectedVerticesTight.produce_tracks = True
         process.mfvSelectedVerticesTightLargeErr.produce_vertices = True

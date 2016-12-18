@@ -9,7 +9,6 @@ namespace mfv {
   static const int n_hlt_paths = 19;
   static const int n_l1_paths = 5;
   static const int n_clean_paths = 13;
-  static const int n_vertex_seed_pt_quantiles = 7;
 }
 
 struct MFVEvent {
@@ -35,8 +34,6 @@ struct MFVEvent {
       gen_pv[i] = 0;
     }
     pass_ = 0;
-    for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
-      vertex_seed_pt_quantiles[i] = 0;
   }
 
   static TLorentzVector p4(float pt, float eta, float phi, float mass) {
@@ -335,7 +332,30 @@ struct MFVEvent {
     return 1 - sqrt(1 - 4 * sum / pow(jet_ht() + sum_lep_pt, 2));
   }
 
-  float vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
+  std::vector<float> vertex_seed_track_chi2dof;
+  std::vector<float> vertex_seed_track_qpt;
+  int vertex_seed_track_q(int i) const { return vertex_seed_track_qpt[i] > 0 ? 1 : -1; }
+  float vertex_seed_track_pt(int i) const { return fabs(vertex_seed_track_qpt[i]); }
+  std::vector<float> vertex_seed_track_eta;
+  std::vector<float> vertex_seed_track_phi;
+  std::vector<float> vertex_seed_track_dxy;
+  std::vector<float> vertex_seed_track_dz;
+  std::vector<ushort> vertex_seed_track_hp_;
+  size_t n_vertex_seed_tracks() const { return vertex_seed_track_chi2dof.size(); }
+  static ushort make_track_hitpattern(int npxh, int nsth, int npxl, int nstl) {
+    assert(npxh >= 0 && nsth >= 0 && npxl >= 0 && nstl >= 0);
+    if (npxh > 7) npxh = 7;
+    if (nsth > 31) nsth = 31;
+    if (npxl > 7) npxl = 7;
+    if (nstl > 31) nstl = 31;
+    return (nstl << 11) | (npxl << 8) | (nsth << 3) | npxh;
+  }
+  int vertex_seed_track_npxhits(int i) const { return vertex_seed_track_hp_[i] & 0x7; }
+  int vertex_seed_track_nsthits(int i) const { return (vertex_seed_track_hp_[i] >> 3) & 0x1F; }
+  int vertex_seed_track_nhits(int i) const { return vertex_seed_track_npxhits(i) + vertex_seed_track_nsthits(i); }
+  int vertex_seed_track_npxlayers(int i) const { return (vertex_seed_track_hp_[i] >> 8) & 0x7; }
+  int vertex_seed_track_nstlayers(int i) const { return (vertex_seed_track_hp_[i] >> 11) & 0x1F; }
+  int vertex_seed_track_nlayers(int i) const { return vertex_seed_track_npxlayers(i) + vertex_seed_track_nstlayers(i); }
 };
 
 #endif
