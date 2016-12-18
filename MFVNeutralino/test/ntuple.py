@@ -8,7 +8,7 @@ prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
 event_filter = False # not keep_all
-version = 'v9'
+version = 'v10'
 batch_name = 'Ntuple' + version.upper()
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
@@ -110,7 +110,7 @@ process.maxEvents.input = 100
 file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples 
 
     samples = Samples.registry.from_argv(
@@ -119,6 +119,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
         )
+
+    samples = Samples.ttbar_samples + Samples.qcd_samples + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
 
     def modify(sample):
         to_add = []
@@ -137,6 +141,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'qcdht0500ext': 2.9065e-03, 'qcdht0700ext': 3.2294e-01, 'ttbar': 3.6064e-02, 'ttbaraux': 3.6064e-02, 'qcdpt0120': 3.500e-05, 'qcdpt0170': 7.856e-03, 'qcdpt0300': 2.918e-01 }
     for s in samples:
+        s.files_per = 30
         if s.is_mc:
             if filter_eff.has_key(s.name):
                 s.events_per = min(int(25000/filter_eff[s.name]), 200000)
@@ -144,10 +149,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         #else:
         #    sample.json = 'ana_all.json'
 
-    cs = CRABSubmitter(batch_name,
-                       pset_modifier = modify,
-                       job_control_from_sample = True,
-                       publish_name = batch_name.lower(),
-                       )
+    cs = CondorSubmitter(batch_name,
+                         pfn_prefix = '',
+                         stageout_files = 'all',
+                         )
 
     cs.submit_all(samples)
