@@ -263,18 +263,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
 
-      if (tri->ptError() / tri->pt() > 0.5) {
-        // For really bad tracks, only store the track weight and the
-        // pt(error). insert_track makes a placeholder so the vectors
-        // don't get out of sync JMTBAD.
-        aux.insert_track();
-        aux.track_w.back() = sv.trackWeight(tri);
-        aux.track_pt_err(-1, tri->ptError());
-        aux.track_qpt.back() = tri->charge() * tri->pt();
-        continue;
-      }
-
-
       assert(muons->size() <= 128);
       assert(electrons->size() <= 128);
       for (size_t i = 0, ie = muons->size(); i < ie; ++i)
@@ -285,7 +273,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           if (electrons->at(i).closestCtfTrackRef() == trref)
             aux.which_lep.push_back(i | (1<<7));
 
-
       costhtkmomvtxdisps.push_back(costh3(tri->momentum(), pv2sv));
 
       const uchar nhitsbehind = int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
@@ -294,22 +281,14 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (pv_for_track.size() > 1)
         throw cms::Exception("VertexAuxProducer") << "multiple PV for a track";
 
-      aux.track_w.push_back(MFVVertexAux::make_track_weight(sv.trackWeight(tri)));
-      aux.track_qpt.push_back(tri->charge() * tri->pt());
-      aux.track_eta.push_back(tri->eta());
-      aux.track_phi.push_back(tri->phi());
-      aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
-      aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV
-      aux.track_pt_err(-1, tri->ptError());
-      aux.track_eta_err(-1, tri->etaError());
-      aux.track_phi_err(-1, tri->phiError());
-      aux.track_dxy_err(-1, tri->dxyError());
-      aux.track_dz_err(-1, tri->dzError());
-      aux.track_chi2dof(-1, tri->normalizedChi2());
-      aux.track_hitpattern.push_back(MFVVertexAux::make_track_hitpattern(tri->hitPattern().numberOfValidPixelHits(), tri->hitPattern().numberOfValidStripHits(), nhitsbehind, tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS))); // JMTBAD could add missing inner, outer
+      aux.track_weight(-1, sv.trackWeight(tri));
+      aux.track_q(-1, tri->charge());
+      aux.track_hitpattern(-1, tri->hitPattern().numberOfValidPixelHits(), tri->hitPattern().numberOfValidStripHits(), nhitsbehind, tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS)); // JMTBAD could add missing inner, outer
+
       aux.track_injet.push_back(jets_tracks[0].count(trref)); // JMTBAD
       aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
-
+      aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
+      aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV
       aux.track_vx.push_back(tri->vx());
       aux.track_vy.push_back(tri->vy());
       aux.track_vz.push_back(tri->vz());

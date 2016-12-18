@@ -1113,8 +1113,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       fill_multi(h_sv_track_weight, isv, aux.track_weight(i), w);
       fill_multi(h_sv_track_q, isv, aux.track_q(i), w);
       fill_multi(h_sv_track_pt, isv, aux.track_pt(i), w);
-      fill_multi(h_sv_track_eta, isv, aux.track_eta[i], w);
-      fill_multi(h_sv_track_phi, isv, aux.track_phi[i], w);
+      fill_multi(h_sv_track_eta, isv, aux.track_eta(i), w);
+      fill_multi(h_sv_track_phi, isv, aux.track_phi(i), w);
       fill_multi(h_sv_track_dxy, isv, aux.track_dxy[i], w);
       fill_multi(h_sv_track_dz, isv, aux.track_dz[i], w);
       fill_multi(h_sv_track_pt_err, isv, aux.track_pt_err(i), w);
