@@ -175,7 +175,7 @@ if os.stat('cs.json').st_size > 0:
 
         tarball_fn = os.path.join(self.inputs_dir, 'input.tgz')
         print 'CondorSubmitter init: making cmssw tarball'
-        make_tarball(tarball_fn, include_python=True)
+        make_tarball(tarball_fn, include_python=True, include_interface=True)
 
         sh_fn = os.path.join(self.inputs_dir, 'run.sh')
 
