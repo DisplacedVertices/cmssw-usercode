@@ -2,6 +2,7 @@
 
 import sys
 from JMTucker.Tools.CondorTools import *
+from JMTucker.Tools.colors import bold, red, green, blue
 
 if len(sys.argv) < 2:
     print 'usage: cs_status wd [wd2 ...]'
@@ -14,7 +15,8 @@ fmt = '%' + str(ml) + 's %10s | %10s %10s %10s'
 def z(n):
     return '-' if n == 0 else str(n)
 
-print '\x1b[97m' + fmt % ('dir'.ljust(ml), 'njobs', 'done', 'run/miss', 'problem') + '\x1b[0m'
+
+print bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'run/miss', 'problem'))
 
 sums = [0]*4
 
@@ -34,22 +36,22 @@ for wd in wds:
     sums[2] += nrunmiss
     sums[3] += nprobs
 
+    color = blue
     if nprobs:
-        sys.stdout.write('\x1b[91m')
+        color = red
     elif ndone == njobs:
         done.append(wd)
-        sys.stdout.write('\x1b[92m')
+        color = green
     
-    print fmt % (wd.ljust(ml), z(njobs), z(ndone), z(nrunmiss), z(nprobs)),
+    print color(fmt % (wd.ljust(ml), z(njobs), z(ndone), z(nrunmiss), z(nprobs))), 
     if nprobs:
         print ' :',
         for i,r in enumerate(rets):
             if r not in (0,-1):
                 print i,
+    print
 
-    sys.stdout.write('\x1b[0m\n')
-
-print '\x1b[97m' + fmt % (('totals'.ljust(ml),) + tuple(sums)) + '\x1b[0m'
+print bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
 
 if done:
     print '\nthese are done:', ' '.join(done)
