@@ -401,7 +401,7 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
     if (use_mevent)
       pass_bsbs2ddist = mevent->bs2ddist(aux) >= min_bsbs2ddist && mevent->bs2ddist(aux) < max_bsbs2ddist;
 
-    if (use_vertex(aux) && pass_bsbs2ddist)
+    if (use_vertex(aux, use_mevent ? &*mevent : 0) && pass_bsbs2ddist)
       selected->push_back(aux);
   }
 
