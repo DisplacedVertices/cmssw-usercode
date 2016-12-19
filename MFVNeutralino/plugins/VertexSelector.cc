@@ -21,7 +21,7 @@ private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const bool use_mevent;
 
-  bool use_vertex(const MFVVertexAux& vtx) const;
+  bool use_vertex(const MFVVertexAux& vtx, const MFVEvent* evt=0) const;
 
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_aux_token;
@@ -104,6 +104,16 @@ private:
   const int max_ntrackssharedwpv;
   const int max_ntrackssharedwpvs;
   const int max_npvswtracksshared;
+
+  const bool use_cluster_cuts;
+  const int min_nclusters;
+  const int max_nsingleclusters;
+  const double max_fsingleclusters;
+  const double min_nclusterspertk;
+  const double max_nsingleclusterspertk;
+  const int max_nsingleclusterspb025;
+  const int max_nsingleclusterspb050;
+  const double min_avgnconstituents;
 };
 
 MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg) 
@@ -187,8 +197,19 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     bs_hemisphere(cfg.getParameter<int>("bs_hemisphere")),
     max_ntrackssharedwpv(cfg.getParameter<int>("max_ntrackssharedwpv")),
     max_ntrackssharedwpvs(cfg.getParameter<int>("max_ntrackssharedwpvs")),
-    max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared"))
+    max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared")),
+    use_cluster_cuts(cfg.getParameter<bool>("use_cluster_cuts")),
+    min_nclusters(cfg.getParameter<int>("min_nclusters")),
+    max_nsingleclusters(cfg.getParameter<int>("max_nsingleclusters")),
+    max_fsingleclusters(cfg.getParameter<double>("max_fsingleclusters")),
+    min_nclusterspertk(cfg.getParameter<double>("min_nclusterspertk")),
+    max_nsingleclusterspertk(cfg.getParameter<double>("max_nsingleclusterspertk")),
+    max_nsingleclusterspb025(cfg.getParameter<int>("max_nsingleclusterspb025")),
+    max_nsingleclusterspb050(cfg.getParameter<int>("max_nsingleclusterspb050")),
+    min_avgnconstituents(cfg.getParameter<double>("min_avgnconstituents"))
 {
+  assert(use_mevent); // JMTBAD why not always?
+
   if (produce_refs)
     produces<reco::VertexRefVector>();
   else
@@ -210,7 +231,7 @@ namespace {
   }
 }
 
-bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
+bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* evt) const {
   if (use_mva) {
     if (vtx.ntracks() < 5)
       return false;
@@ -233,6 +254,46 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx) const {
     }
 
     if (!ok)
+      return false;
+  }
+
+  if (use_cluster_cuts) {
+    assert(evt);
+
+    const mfv::track_clusters clusters(vtx);
+
+    const size_t nclusters = clusters.size();
+    if (int(nclusters) < min_nclusters ||
+        double(nclusters) / vtx.ntracks() < min_nclusterspertk)
+      return false;
+
+    const size_t nsingle = clusters.nsingle();
+    if (int(nsingle) > max_nsingleclusters ||
+        double(nsingle) / nclusters > max_fsingleclusters ||
+        double(nsingle) / vtx.ntracks() > max_nsingleclusterspertk)
+      return false;
+
+    if (clusters.avgnconst() < min_avgnconstituents)
+      return false;
+
+    const TVector2 flight_dir = TVector2(vtx.x - evt->bsx, vtx.y - evt->bsy).Unit();
+    int nsinglepb025 = 0;
+    int nsinglepb050 = 0;
+    for (const mfv::track_cluster& c : clusters) {
+      if (c.size() == 1) {
+        for (size_t ti : c.tracks) {
+          const TVector2 track_dir = TVector2(vtx.track_px[ti], vtx.track_py[ti]).Unit();
+          const double dot = track_dir * flight_dir;
+          if (dot < 0.25)
+            ++nsinglepb025;
+          if (dot < 0.5)
+            ++nsinglepb050;
+        }
+      }
+    }
+
+    if (nsinglepb025 > max_nsingleclusterspb025 ||
+        nsinglepb050 > max_nsingleclusterspb050)
       return false;
   }
 
