@@ -122,21 +122,16 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
     base = os.path.normpath(os.environ['CMSSW_BASE'])
     src = os.path.join(base, 'src')
 
-    to_add = [
-        os.path.join(base, 'lib/' + scram_arch),
-        os.path.join(base, 'biglib/' + scram_arch),
-        ]
-
+    # https://github.com/dmwm/CRABClient/blob/376f2962bceb5eb68a243d83b394b35c73b03220/src/python/CRABClient/JobType/UserTarball.py
+    to_add = ['lib', 'biglib', 'module', 'external']
+    if include_python:
+        to_add += ['python', 'cfipython']
     if include_bin:
-        to_add.append(os.path.join(base, 'bin/' + scram_arch))
-
-    for x in to_add:
-        if not os.path.isdir(x):
-            raise FileNotFoundError("didn't find " + x)
+        to_add += ['bin']
+    to_add = [os.path.join(base, x + '/' + scram_arch) for x in to_add]
+    to_add = [x for x in to_add if os.path.exists(x)]
 
     extras = ['data']
-    if include_python:
-        extras.append('python')
     if include_interface:
         extras.append('interface')
 
