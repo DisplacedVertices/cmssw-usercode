@@ -4,8 +4,9 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 use_weights = True
 do_nominal = True
 do_distances = False
+do_clusters = False
 
-process.source.fileNames = ['/store/user/jchu/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev7/160209_224719/0000/ntuple_1.root']
+process.source.fileNames = ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev9/161019_211934/0000/ntuple_1.root']
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -62,6 +63,27 @@ if do_distances:
     for i in xrange(20):
         changes.append(('pv3dsig01X%s'%pize(1.5*i,1), '', 'min_pv3dsig01 = %f'%(1.5*i)))
 
+if do_clusters:
+    ana_sel.min_nvertex = 1
+    #vtx_sel.min_bsbs2ddist = 0.05
+    vtx_sel.use_cluster_cuts = True
+    for i in xrange(7):
+        changes.append(('nclustersX%i' % i, 'min_nclusters = %i'%i, ''))
+    for i in xrange(7):
+        changes.append(('nsingleclustersX%i' % i, 'max_nsingleclusters = %i'%i, ''))
+    for i in xrange(20):
+        changes.append(('fsingleclustersX%s'%pize(0.05*i,2), 'max_fsingleclusters = %f'%(0.05*i), ''))
+    for i in xrange(20):
+        changes.append(('nclusterspertkX%s'%pize(0.05*i,2), 'min_nclusterspertk = %f'%(0.05*i), ''))
+    for i in xrange(20):
+        changes.append(('nsingleclusterspertkX%s'%pize(0.05*i,2), 'max_nsingleclusterspertk = %f'%(0.05*i), ''))
+    for i in xrange(7):
+        changes.append(('nsingleclusterspb025X%i' % i, 'max_nsingleclusterspb025 = %i'%i, ''))
+    for i in xrange(7):
+        changes.append(('nsingleclusterspb050X%i' % i, 'max_nsingleclusterspb050 = %i'%i, ''))
+    for i in xrange(20):
+        changes.append(('avgnconstituentsX%s'%pize(0.25*i,2), 'min_avgnconstituents = %f'%(0.25*i), ''))
+
 for name, vtx_change, ana_change in changes:
     vtx_name = 'Sel' + name
     ana_name = 'Ana' + name
@@ -86,26 +108,20 @@ SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_wei
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples
 
     samples = Samples.registry.from_argv(
         Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
-        Samples.xx4j_samples
+        [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
         )
 
     for sample in samples:
-        if sample.is_mc:
-            sample.events_per = 250000
-        else:
+        sample.files_per = 50
+        if not sample.is_mc:
             sample.json = 'ana_10pc.json'
-            sample.lumis_per = 200
 
-    cs = CRABSubmitter('CutPlayV7',
-                       dataset = 'ntuplev7',
-                       job_control_from_sample = True,
-                       aaa = True, # stored at FNAL, easy to run on T2_USes
-                       )
-    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + Samples.xx4j_samples)
+    cs = CondorSubmitter('CutPlayV9', dataset='ntuplev9')
+    cs.submit_all(samples)
