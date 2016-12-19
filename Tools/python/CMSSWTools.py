@@ -134,6 +134,8 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
     to_add = [x for x in to_add if os.path.exists(x)]
 
     extras = ['data']
+    if include_python:
+        extras.append('python')
     if include_interface:
         extras.append('interface')
 
