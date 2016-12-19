@@ -133,6 +133,7 @@ if os.stat('cs.json').st_size > 0:
                  skip_output_files = [],
                  stageout_files = [], # can be "all" or "pool"
                  stageout_path = '', # if / in it, does not try to generate
+                 publish_name = '',
                  dataset = 'main',
                  ):
 
@@ -221,7 +222,9 @@ if os.stat('cs.json').st_size > 0:
                 if stageout_path:
                     stageout_path = '/' + stageout_path
                 stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
-                stageout_path += '/$(<cs_primaryds)/%s/%s/0000' % (batch_name, timestamp)  # JMTBAD 0001...
+                if not publish_name:
+                    publish_name = batch_name
+                stageout_path += '/$(<cs_primaryds)/%s/%s/0000' % (publish_name, timestamp)  # JMTBAD 0001...
 
             print 'CondorSubmitter init: stageout files are', stageout_files
             print 'CondorSubmitter init: stageout path is', stageout_path
