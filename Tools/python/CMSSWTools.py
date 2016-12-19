@@ -125,10 +125,12 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
     # https://github.com/dmwm/CRABClient/blob/376f2962bceb5eb68a243d83b394b35c73b03220/src/python/CRABClient/JobType/UserTarball.py
     to_add = ['lib', 'biglib', 'module', 'external']
     if include_python:
-        to_add += ['python', 'cfipython']
+        to_add += ['cfipython']
     if include_bin:
         to_add += ['bin']
     to_add = [os.path.join(base, x + '/' + scram_arch) for x in to_add]
+    if include_python:
+        to_add += [os.path.join(base, 'python')]
     to_add = [x for x in to_add if os.path.exists(x)]
 
     extras = ['data']
