@@ -119,7 +119,7 @@ if os.stat('cs.json').st_size > 0:
 '''
 
     get_proxy = True
-
+    links_dir = os.path.abspath(crab_dirs_root('cs_links'))
     batch_name_allowed = string.ascii_letters + string.digits + '_'
 
     def __init__(self,
@@ -154,6 +154,9 @@ if os.stat('cs.json').st_size > 0:
         self.batch_dir = os.path.abspath(crab_dirs_root(batch_name))
         if os.path.exists(self.batch_dir):
             raise ValueError('batch_dir %s already exists, refusing to clobber' % self.batch_dir)
+
+        if not os.path.isdir(self.links_dir):
+            os.mkdir(self.links_dir)
 
         if not testing and self.get_proxy:
             print 'CondorSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
@@ -342,6 +345,11 @@ if os.stat('cs.json').st_size > 0:
                     print submit_out
                 else:
                     print 'success! cluster', cluster
+                    cluster_link = os.path.join(self.links_dir, str(cluster))
+                    if os.path.islink(cluster_link):
+                        print 'warning: clobbering old link:', os.readlink(cluster_link)
+                        os.unlink(cluster_link)
+                    os.symlink(working_dir, cluster_link)
             finally:
                 os.chdir(cwd)
         else:

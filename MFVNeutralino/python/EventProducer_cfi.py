@@ -24,5 +24,5 @@ mfvEvent = cms.EDProducer('MFVEventProducer',
                           electrons_src = cms.InputTag('selectedPatElectrons'),
                           electron_semilep_cut = jtupleParams.semilepElectronCut,
                           electron_dilep_cut = jtupleParams.dilepElectronCut,
-                          vertex_seed_pt_quantiles_src = cms.InputTag('mfvVertices'),
+                          vertex_seed_tracks_src = cms.InputTag('mfvVertices', 'seed'),
                           )
