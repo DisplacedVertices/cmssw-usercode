@@ -44,7 +44,7 @@ for wd in wds:
                 raise IOError('no publish file %s' % publish_fn)
         else:
             for fn in open(publish_fn):
-                fn = fn.strip()
+                fn = fn.strip()[fn.find('/store'):]
                 if options.pattern is None or fnmatch.fnmatch(os.path.basename(fn), options.pattern):
                     files.append(fn)
     publish[(sample, options.dataset)] = (len(files), files)
