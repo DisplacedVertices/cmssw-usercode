@@ -28,6 +28,7 @@ if not wds:
     sys.exit(1)
 
 publish = {}
+samples = []
 for wd in wds:
     bd = os.path.basename(wd)
     assert bd.startswith('condor_')
@@ -47,11 +48,15 @@ for wd in wds:
                 fn = fn.strip()[fn.find('/store'):]
                 if options.pattern is None or fnmatch.fnmatch(os.path.basename(fn), options.pattern):
                     files.append(fn)
+    samples.append(sample)
     publish[(sample, options.dataset)] = (len(files), files)
 
 print 'new entries:'
 pprint(publish)
-print 'line for SampleFiles:'
 encoded = _enc(publish)
+print '\nline for SampleFiles (len(repr(publish)) = %i, len(encoded) = %i):' % (len(repr(publish)), len(encoded))
 print "_add('%s')" % encoded
-print 'len(repr(publish)) = %i, len(encoded) = %i' % (len(repr(publish)), len(encoded))
+print '\nlines for Samples:'
+print 'for x in (%s):' % ', '.join(samples)
+print "    x.add_dataset('%s', " % options.dataset + "'/%s/None/None' % x.primary_dataset, 0)"
+
