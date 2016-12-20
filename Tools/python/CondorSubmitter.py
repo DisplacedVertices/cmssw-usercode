@@ -308,7 +308,7 @@ if os.stat('cs.json').st_size > 0:
             sample.set_curr_dataset(self.dataset)
         except KeyError:
             print "\033[1m warning: \033[0m sample %s not submitted, doesn't have dataset %s" % (sample.name, self.dataset)
-            return result
+            return
 
         working_dir = os.path.join(self.batch_dir, 'condor_%s' % sample.name)
         os.mkdir(working_dir)
