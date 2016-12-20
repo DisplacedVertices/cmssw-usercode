@@ -13,13 +13,13 @@ process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      event_src = cms.InputTag('mfvEvent'),
                                      vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                      weight_src = cms.InputTag('mfvWeight'),
-                                     save_tracks = cms.bool(False)
+                                     save_tracks = cms.bool(True)
                                      )
 
 process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples
 
     samples = Samples.registry.from_argv(
@@ -30,19 +30,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.xx4j_samples
         )
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
+    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
+        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
+        [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
 
     for sample in samples:
-        if sample.is_mc:
-            sample.events_per = 250000
-        else:
+        sample.files_per = 50
+        if not sample.is_mc:
             sample.json = 'ana_10pc.json'
-            sample.lumis_per = 200
+            raise NotImplementedError('need to implement json use in CondorSubmitter')
 
-    cs = CRABSubmitter('MinitreeV9',
-                       dataset = 'ntuplev9',
-                       job_control_from_sample = True,
-                       aaa = True,
-                       )
-
+    cs = CondorSubmitter('MinitreeV10', dataset = 'ntuplev10')
     cs.submit_all(samples)

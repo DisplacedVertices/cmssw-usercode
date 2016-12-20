@@ -27,7 +27,9 @@ def basic_process(name):
     return process
 
 def files_from_file(process, fn):
-    process.source.fileNames = cms.untracked.vstring(*[line.strip() for line in open(fn).read().split('\n') if line.strip().endswith('.root')])
+    fns = [line.strip() for line in open(fn).read().split('\n') if line.strip().endswith('.root')]
+    process.source.fileNames = cms.untracked.vstring(*fns)
+    return fns
 
 def file_event_from_argv(process, warn=True):
     '''Set the filename and event to run on from argv.'''
@@ -64,6 +66,16 @@ def file_event_from_argv(process, warn=True):
         set_events_to_process(process, [nums])
     elif warn:
         print 'file_event_from_argv warning: did not understand event number'
+
+def find_output_files(process):
+    '''Get the TFileService and PoolOutputModule filenames if these
+    services exist in process.'''
+
+    d = {}
+    if hasattr(process, 'TFileService'):
+        d['TFileService'] = [process.TFileService.fileName.value()]
+    d['PoolOutputModule'] = [v.fileName.value() for v in process.outputModules.itervalues()]
+    return d
 
 def friendly_argparse(**kwargs):
     '''Set up an ArgumentParser that doesn't conflict with cmsRun arg
@@ -110,22 +122,21 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
     base = os.path.normpath(os.environ['CMSSW_BASE'])
     src = os.path.join(base, 'src')
 
-    to_add = [
-        os.path.join(base, 'lib/' + scram_arch),
-        os.path.join(base, 'biglib/' + scram_arch),
-        ]
-
+    # https://github.com/dmwm/CRABClient/blob/376f2962bceb5eb68a243d83b394b35c73b03220/src/python/CRABClient/JobType/UserTarball.py
+    to_add = ['lib', 'biglib', 'module', 'external']
+    if include_python:
+        to_add += ['cfipython']
     if include_bin:
-        to_add.append(os.path.join(base, 'bin/' + scram_arch))
+        to_add += ['bin']
+    to_add = [os.path.join(base, x + '/' + scram_arch) for x in to_add]
+    if include_python:
+        to_add += [os.path.join(base, 'python')] # doesn't have scram_arch subdir
+    to_add = [x for x in to_add if os.path.exists(x)]
 
-    for x in to_add:
-        if not os.path.isdir(x):
-            raise FileNotFoundError("didn't find " + x)
-
-    extras = []
+    extras = ['data']
     if include_python:
         extras.append('python')
-    elif include_interface:
+    if include_interface:
         extras.append('interface')
 
     if extras:

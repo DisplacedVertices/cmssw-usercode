@@ -343,8 +343,11 @@ def compare_all_hists(ps, samples, **kwargs):
         for hist in hists:
             hist.SetLineWidth(2)
 
-            if not is2d and hist.cah_scaling is not None and hist.cah_integral > 0:
-                hist.Scale(hist.cah_scaling/hist.cah_integral)
+            if not is2d and hist.cah_scaling is not None:
+                if hist.cah_scaling > 0 and hist.cah_integral > 0:
+                    hist.Scale(hist.cah_scaling/hist.cah_integral)
+                else:
+                    hist.Scale(abs(hist.cah_scaling))
             if nostat:
                 hist.SetStats(0)
             hist.SetLineColor(hist.cah_color)
@@ -581,7 +584,7 @@ def data_mc_comparison(name,
             xax = None
 
             if sample not in data_samples:
-                sample.hist.Scale(sample.partial_weight * int_lumi)
+                sample.hist.Scale(sample.partial_weight_orig * int_lumi)
                 if int_lumi_bkg_scale is not None and sample not in signal_samples:
                     sample.hist.Scale(int_lumi_bkg_scale)
 
@@ -691,7 +694,7 @@ def data_mc_comparison(name,
                 e = sum_background_uncert.GetBinError(i)
                 e = (e**2 + (extra_bkg_uncert_frac*v)**2)**0.5
                 sum_background_uncert.SetBinError(i, e)
-        sum_background_uncert.SetLineColor(bkg_uncert_color)
+        sum_background_uncert.SetLineColor(0)
         sum_background_uncert.SetFillColor(bkg_uncert_color)
         sum_background_uncert.SetFillStyle(bkg_uncert_style)
         sum_background_uncert.Draw('E2 same')
@@ -763,11 +766,11 @@ def data_mc_comparison(name,
             w.SetTextSize(size)
             w.DrawLatex(x, y, text)
             return w
-        subtr = 0.
-        lum_pos = 0.575
-        stupid = 0.02
-        lum = write(42, 0.05, lum_pos+stupid, 0.930-subtr, int_lumi_nice)
-        cms = write(61, 0.05, 0.098+stupid, 0.930-subtr, 'CMS')
+        subtr = 0.02
+        lum_pos = 0.625
+        stupid = 0
+        lum = write(42, 0.04, lum_pos+stupid, 0.930-subtr, int_lumi_nice)
+        cms = write(61, 0.04, 0.098+stupid, 0.930-subtr, 'CMS')
         if simulation and preliminary:
             exlab_str = 'Simulation Preliminary'
         elif preliminary:
@@ -775,7 +778,7 @@ def data_mc_comparison(name,
         elif simulation:
             exlab_str = 'Simulation'
         if simulation or preliminary:
-            exlab = write(52, 0.04, 0.210, 0.930-subtr, exlab_str)
+            exlab = write(52, 0.035, 0.185, 0.930-subtr, exlab_str)
 
     if verbose:
         if data_sample is not None:
@@ -786,7 +789,7 @@ def data_mc_comparison(name,
     ratio_pad, res_g, old_opt_fit = None, None, None
     if data_sample is not None:
         ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
-        ratio_pad.SetTopMargin(0.71)
+        ratio_pad.SetTopMargin(1-canvas_bottom_margin + 0.015)
         ratio_pad.SetLeftMargin(canvas_left_margin)
         ratio_pad.SetRightMargin(canvas_right_margin)
         ratio_pad.SetFillColor(0)

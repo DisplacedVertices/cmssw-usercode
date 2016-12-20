@@ -55,6 +55,17 @@ def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=Non
     else:
         return default_value
 
+def from_argv(*args, **kwargs):
+    return typed_from_argv(str, *args, **kwargs)
+
+def int_ceil(x,y):
+    return (x+y-1)/y
+
+def mkdirs_if_needed(path):
+    dn = os.path.dirname(path)
+    if dn:
+        os.system('mkdir -p %s' % dn)
+
 def popen(cmd, return_exit_code=False, print_output=False):
     child = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     output = []
@@ -129,13 +140,21 @@ def reverse_readline(filename, buf_size=8192):
                 yield lines[index]
         yield segment
 
+def touch(path):
+    with open(path, 'a'):
+        os.utime(path, None)
+
 __all__ = [
     'bool_from_argv',
     'big_warn',
     'from_pickle',
     'to_pickle',
     'typed_from_argv',
+    'from_argv',
+    'int_ceil',
+    'mkdirs_if_needed',
     'popen',
     'reverse_readline',
     'save_git_status',
+    'touch',
     ]

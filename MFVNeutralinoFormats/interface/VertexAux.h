@@ -12,6 +12,37 @@ struct MFVVertexAux {
   typedef unsigned short ushort;
   typedef unsigned int uint;
 
+  template <typename T>
+  static void _set(std::vector<T>& v, int i, T x) {
+    if (i < 0)
+      v.push_back(x);
+    else
+      v[i] = x;
+  }
+
+  static uchar bin(float x, float min, float max) {
+    if (x <= min)
+      return 0;
+    else if (x >= max)
+      return 255;
+    const float r = (x - min)/(max - min);
+    if (r <= 0)
+      return 0;
+    else if (r >= 1)
+      return 255;
+    return r * 255;
+  }
+
+  static float unbin(uchar x, float min, float max) {
+    return x/255.f * (max - min) + min;
+  }
+
+  template <typename T> static T sig(T val, T err) { return err <= 0 ? 0 : val/err; }
+  template <typename T> static T mag(T x, T y)      { return sqrt(x*x + y*y); }
+  template <typename T> static T mag(T x, T y, T z) { return sqrt(x*x + y*y + z*z); }
+
+  ////
+
   MFVVertexAux() {
     which = ndof_ = jetpairdrmin_ = jetpairdrmax_ = jetpairdravg_ = jetpairdrrms_ = costhtkmomvtxdispmin_ = costhtkmomvtxdispmax_ = costhtkmomvtxdispavg_ = costhtkmomvtxdisprms_ = costhjetmomvtxdispmin_ = costhjetmomvtxdispmax_ = costhjetmomvtxdispavg_ = costhjetmomvtxdisprms_ = 0;
     x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2ddist = bs2derr = pv2ddist = pv2derr = pv3ddist = pv3derr = 0;
@@ -80,23 +111,6 @@ struct MFVVertexAux {
   uchar costhjetmomvtxdispavg_;
   uchar costhjetmomvtxdisprms_;
 
-  static uchar bin(float x, float min, float max) {
-    if (x <= min)
-      return 0;
-    else if (x >= max)
-      return 255;
-    const float r = (x - min)/(max - min);
-    if (r <= 0)
-      return 0;
-    else if (r >= 1)
-      return 255;
-    return r * 255;
-  }
-
-  static float unbin(uchar x, float min, float max) {
-    return x/255.f * (max - min) + min;
-  }
-
   // max deta ~= 5, max dr = sqrt(5**2 + pi**2) ~= 6 -> precision on deta/dr = 6/255 = 0.024
   float jetpairdetamin() const { return unbin(jetpairdetamin_, 0, 6); }
   float jetpairdetamax() const { return unbin(jetpairdetamax_, 0, 6); }
@@ -135,12 +149,9 @@ struct MFVVertexAux {
   void costhjetmomvtxdispavg(float costhjetmomvtxdispavg) { costhjetmomvtxdispavg_ = bin(costhjetmomvtxdispavg, -1, 1); }
   void costhjetmomvtxdisprms(float costhjetmomvtxdisprms) { costhjetmomvtxdisprms_ = bin(costhjetmomvtxdisprms, -1, 1); }
 
-  float sig(float val, float err) const {
-    return err <= 0 ? 0 : val/err;
-  }
 
-  float geo2ddist() const { return sqrt(x*x + y*y); }
-  float geo3ddist() const { return sqrt(x*x + y*y + z*z); }
+  float geo2ddist() const { return mag(x,y); }
+  float geo3ddist() const { return mag(x,y,z); }
 
   float gen2ddist;
   float gen2derr;
@@ -189,39 +200,13 @@ struct MFVVertexAux {
   float missdistpverr[mfv::NMomenta];
   float missdistpvsig(int w) const { return sig(missdistpv[w], missdistpverr[w]); }
 
-
-  std::vector<uchar> track_w;
-  static uchar make_track_weight(float weight) { assert(weight >= 0 && weight <= 1); return uchar(weight*255); }
-  float track_weight(int i) const { return float(track_w[i])/255.f; }
-  std::vector<float> track_qpt;
-  float track_q(int i) const { return track_qpt[i] > 0 ? 1 : -1; }
-  float track_pt(int i) const { return fabs(track_qpt[i]); }
-  std::vector<float> track_eta;
-  std::vector<float> track_phi;
-  std::vector<float> track_dxy;
-  std::vector<float> track_dz;
-  std::vector<uchar> track_pt_err_; // relative to pt, rest are absolute values
-  std::vector<uchar> track_eta_err_;
-  std::vector<uchar> track_phi_err_;
-  std::vector<uchar> track_dxy_err_;
-  std::vector<uchar> track_dz_err_;
-  std::vector<uchar> track_chi2dof_;
-  std::vector<ushort> track_hitpattern;
-  static ushort make_track_hitpattern(int npx, int nst, int nbehind, int nlost) {
-    assert(npx >= 0 && nst >= 0 && nbehind >= 0 && nlost >= 0);
-    if (npx > 7) npx = 7;
-    if (nst > 31) nst = 31;
-    if (nbehind > 15) nbehind = 15;
-    if (nlost > 15) nlost = 15;
-    return (nlost << 12) | (nbehind << 8) | (nst << 3) | npx;
-  }
-  int track_npxhits(int i) const { return track_hitpattern[i] & 0x7; }
-  int track_nsthits(int i) const { return (track_hitpattern[i] >> 3) & 0x1F; }
-  int track_nhitsbehind(int i) const { return (track_hitpattern[i] >> 8) & 0xF; }
-  int track_nhitslost(int i) const { return (track_hitpattern[i] >> 12) & 0xF; }
-  int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
+  std::vector<uchar> track_w_;
+  std::vector<bool> track_q_;
+  std::vector<ushort> track_hp_;
   std::vector<bool> track_injet;
   std::vector<short> track_inpv;
+  std::vector<float> track_dxy;
+  std::vector<float> track_dz;
   std::vector<double> track_vx;
   std::vector<double> track_vy;
   std::vector<double> track_vz;
@@ -232,45 +217,60 @@ struct MFVVertexAux {
   std::vector<double> track_ndof;
   std::vector<reco::TrackBase::CovarianceMatrix> track_cov;
 
-  static void _set(std::vector<uchar>& v, int i, uchar x) {
-    if (i < 0) v.push_back(x);
-    else       v[i] = x;
+  void  track_weight(int i, float w) { assert(w >= 0 && w <= 1); _set(track_w_, i, uchar(w*255)); }
+  float track_weight(int i) const { return float(track_w_[i])/255.f; }
+
+  void  track_q(int i, float q) { assert(q == 1 || q == -1); _set(track_q_, i, q > 0); }
+  float track_q(int i) const { return track_q_[i] ? 1.f : -1.f; }
+
+  void track_hitpattern(int i, int npx, int nst, int nbehind, int nlost) {
+    assert(npx >= 0 && nst >= 0 && nbehind >= 0 && nlost >= 0);
+    if (npx > 7) npx = 7;
+    if (nst > 31) nst = 31;
+    if (nbehind > 15) nbehind = 15;
+    if (nlost > 15) nlost = 15;
+    const ushort hp = (nlost << 12) | (nbehind << 8) | (nst << 3) | npx;
+    _set(track_hp_, i, hp);
   }
+  int track_npxhits(int i) const { return track_hp_[i] & 0x7; }
+  int track_nsthits(int i) const { return (track_hp_[i] >> 3) & 0x1F; }
+  int track_nhitsbehind(int i) const { return (track_hp_[i] >> 8) & 0xF; }
+  int track_nhitslost(int i) const { return (track_hp_[i] >> 12) & 0xF; }
+  int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
 
-  void  track_pt_err(int i, float x) {         _set(track_pt_err_, i , bin(x, 0, 2)); }
-  float track_pt_err(int i) const    { return unbin(track_pt_err_ [i],        0, 2); }
+  double track_p(int i) const { return mag(track_px[i], track_py[i], track_pz[i]); }
+  double track_pt(int i) const { return mag(track_px[i], track_py[i]); }
+  double track_pt_err(int i) const {
+    const int charge = track_q(i);
+    const double pt = track_pt(i);
+    const double p = track_p(i);
+    const double pz = track_pz[i];
+    const reco::TrackBase::CovarianceMatrix& covariance = track_cov[i];
+    return sqrt(pt * pt * p * p / charge / charge * covariance(reco::TrackBase::i_qoverp, reco::TrackBase::i_qoverp)
+                + 2 * pt * p / charge * pz * covariance(reco::TrackBase::i_qoverp, reco::TrackBase::i_lambda)
+                + pz * pz * covariance(reco::TrackBase::i_lambda, reco::TrackBase::i_lambda));
+  }
+  double track_eta(int i) const {
+    const double p = track_p(i);
+    return 0.5 * log((p + track_pz[i]) / (p - track_pz[i]));
+  }
+  double track_err(int i, int j) const { return sqrt(track_cov[i](j,j)); }
+  double track_eta_err(int i) const { return track_err(i, reco::TrackBase::i_lambda) * track_p(i) / track_pt(i); }
+  double track_phi(int i) const { return atan2(track_py[i], track_px[i]); }
+  double track_phi_err(int i) const { return track_err(i, reco::TrackBase::i_phi); }
+  double track_dxy_err(int i) const { return track_err(i, reco::TrackBase::i_dxy); }
+  double track_dz_err(int i) const { return track_err(i, reco::TrackBase::i_dsz) * track_p(i) / track_pt(i); }
 
-  void  track_eta_err(int i, float x) {         _set(track_eta_err_, i , bin(x, 0, 0.02)); }
-  float track_eta_err(int i) const    { return unbin(track_eta_err_ [i],        0, 0.02); }
-
-  void  track_phi_err(int i, float x) {         _set(track_phi_err_, i , bin(x, 0, 0.02)); }
-  float track_phi_err(int i) const    { return unbin(track_phi_err_ [i],        0, 0.02); }
-
-  void  track_dxy_err(int i, float x) {         _set(track_dxy_err_, i , bin(x, 0, 0.1)); }
-  float track_dxy_err(int i) const    { return unbin(track_dxy_err_ [i],        0, 0.1); }
-
-  void  track_dz_err(int i, float x) {         _set(track_dz_err_, i , bin(x, 0, 0.1)); }
-  float track_dz_err(int i) const    { return unbin(track_dz_err_ [i],        0, 0.1); }
-
-  void  track_chi2dof(int i, float x) {         _set(track_chi2dof_, i , bin(x, 0, 10)); }
-  float track_chi2dof(int i) const    { return unbin(track_chi2dof_ [i],        0, 10); }
+  double track_chi2dof(int i) const { return track_chi2[i] / track_ndof[i]; }
 
   void insert_track() {
-    track_w.push_back(0);
-    track_qpt.push_back(0);
-    track_eta.push_back(0);
-    track_phi.push_back(0);
-    track_dxy.push_back(0);
-    track_dz.push_back(0);
-    track_pt_err_.push_back(0);
-    track_eta_err_.push_back(0);
-    track_phi_err_.push_back(0);
-    track_dxy_err_.push_back(0);
-    track_dz_err_.push_back(0);
-    track_chi2dof_.push_back(0);
-    track_hitpattern.push_back(0);
+    track_w_.push_back(0);
+    track_q_.push_back(0);
+    track_hp_.push_back(0);
     track_injet.push_back(0);
     track_inpv.push_back(0);
+    track_dxy.push_back(0);
+    track_dz.push_back(0);
     track_vx.push_back(0);
     track_vy.push_back(0);
     track_vz.push_back(0);
@@ -285,21 +285,13 @@ struct MFVVertexAux {
   bool tracks_ok() const {
     const size_t n = ntracks();
     return
-      n == track_w.size() &&
-      n == track_qpt.size() &&
-      n == track_eta.size() &&
-      n == track_phi.size() &&
-      n == track_dxy.size() &&
-      n == track_dz.size() &&
-      n == track_pt_err_.size() &&
-      n == track_eta_err_.size() &&
-      n == track_phi_err_.size() &&
-      n == track_dxy_err_.size() &&
-      n == track_dz_err_.size() &&
-      n == track_chi2dof_.size() &&
-      n == track_hitpattern.size() &&
+      n == track_w_.size() &&
+      n == track_q_.size() &&
+      n == track_hp_.size() &&
       n == track_injet.size() &&
       n == track_inpv.size() &&
+      n == track_dxy.size() &&
+      n == track_dz.size() &&
       n == track_vx.size() &&
       n == track_vy.size() &&
       n == track_vz.size() &&
@@ -313,12 +305,12 @@ struct MFVVertexAux {
 
   TLorentzVector track_p4(int i, float mass=0) const {
     TLorentzVector v;
-    v.SetPtEtaPhiM(track_pt(i), track_eta[i], track_phi[i], mass);
+    v.SetXYZM(track_px[i], track_py[i], track_pz[i], mass);
     return v;
   }
 
   int ntracks() const {
-    return int(track_w.size());
+    return int(track_w_.size());
   }
 
   bool use_track(size_t i) const {
@@ -478,7 +470,6 @@ struct MFVVertexAux {
     {}
   };
 
-
   std::vector<float> track_pts() const {
     std::vector<float> v;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
@@ -585,7 +576,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(fabs(track_eta[i] - track_eta[j]));
+              v.push_back(fabs(track_eta(i) - track_eta(j)));
     return v;
   }
 
@@ -602,7 +593,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
+              v.push_back(reco::deltaPhi(track_phi(i), track_phi(j)));
     return v;
   }
 
@@ -619,8 +610,8 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaR(track_eta[i], track_phi[i],
-                                       track_eta[j], track_phi[j]));
+              v.push_back(reco::deltaR(track_eta(i), track_phi(i),
+                                       track_eta(j), track_phi(j)));
     return v;
   }
 
@@ -703,12 +694,12 @@ struct MFVVertexAux {
     float sum = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i) {
       if (use_track(i)) {
-        float px_i = track_pt(i) * cos(track_phi[i]);
-        float py_i = track_pt(i) * sin(track_phi[i]);
+        float px_i = track_pt(i) * cos(track_phi(i));
+        float py_i = track_pt(i) * sin(track_phi(i));
         for (size_t j = 0, je = ntracks(); j < je; ++j) {
           if (use_track(j)) {
-            float px_j = track_pt(j) * cos(track_phi[j]);
-            float py_j = track_pt(j) * sin(track_phi[j]);
+            float px_j = track_pt(j) * cos(track_phi(j));
+            float py_j = track_pt(j) * sin(track_phi(j));
             sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (track_pt(i) * track_pt(j));
           }
         }

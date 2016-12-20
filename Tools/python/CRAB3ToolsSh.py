@@ -3,6 +3,7 @@
 # author: J. Tucker
 
 from JMTucker.Tools.CRAB3ToolsBase import *
+from JMTucker.Tools.hadd import hadd
 
 def crab_command(*args, **kwargs):
     if kwargs and kwargs.keys() != ['dir']:

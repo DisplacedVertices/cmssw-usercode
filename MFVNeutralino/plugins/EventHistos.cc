@@ -105,8 +105,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_jet_ST_ht;
   TH2F* h_jet_ST_ht40;
 
-  TH1F* h_vertex_seed_pt_quantiles[mfv::n_vertex_seed_pt_quantiles];
-
   TH1F* h_met;
   TH1F* h_metphi;
 
@@ -260,6 +258,21 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bjets_pt[NBDISC][3];
   TH1F* h_bjets_eta[NBDISC][3];
   TH1F* h_bjets_phi[NBDISC][3];
+
+  TH1F* h_n_vertex_seed_tracks;
+  TH1F* h_vertex_seed_track_chi2dof;
+  TH1F* h_vertex_seed_track_q;
+  TH1F* h_vertex_seed_track_pt;
+  TH1F* h_vertex_seed_track_eta;
+  TH1F* h_vertex_seed_track_phi;
+  TH1F* h_vertex_seed_track_dxy;
+  TH1F* h_vertex_seed_track_dz;
+  TH1F* h_vertex_seed_track_npxhits;
+  TH1F* h_vertex_seed_track_nsthits;
+  TH1F* h_vertex_seed_track_nhits;
+  TH1F* h_vertex_seed_track_npxlayers;
+  TH1F* h_vertex_seed_track_nstlayers;
+  TH1F* h_vertex_seed_track_nlayers;
 };
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
@@ -358,9 +371,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_ST_njets = fs->make<TH2F>("h_jet_ST_njets", ";number of jets;jets transverse sphericity S_{T}", 20, 0, 20, 101, 0, 1.01);
   h_jet_ST_ht = fs->make<TH2F>("h_jet_ST_ht", ";H_{T} of jets (GeV);jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
   h_jet_ST_ht40 = fs->make<TH2F>("h_jet_ST_ht40", ";H_{T} of jets with p_{T} > 40 GeV;jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
-
-  for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
-    h_vertex_seed_pt_quantiles[i] = fs->make<TH1F>(TString::Format("h_vertex_seed_pt_quantiles_%i", i), "", 100, 0, i < 4 ? 50 : 100);
 
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
@@ -537,6 +547,21 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
       }
     }
   }
+
+  h_n_vertex_seed_tracks = fs->make<TH1F>("h_n_vertex_seed_tracks", ";# vertex seed tracks;events", 100, 0, 100);
+  h_vertex_seed_track_chi2dof = fs->make<TH1F>("h_vertex_seed_track_chi2dof", ";vertex seed track #chi^{2}/dof;tracks/1", 10, 0, 10);
+  h_vertex_seed_track_q = fs->make<TH1F>("h_vertex_seed_track_q", ";vertex seed track charge;tracks", 3, -1, 2);
+  h_vertex_seed_track_pt = fs->make<TH1F>("h_vertex_seed_track_pt", ";vertex seed track p_{T} (GeV);tracks/GeV", 300, 0, 300);
+  h_vertex_seed_track_eta = fs->make<TH1F>("h_vertex_seed_track_eta", ";vertex seed track #eta;tracks/0.052", 100, -2.6, 2.6);
+  h_vertex_seed_track_phi = fs->make<TH1F>("h_vertex_seed_track_phi", ";vertex seed track #phi;tracks/0.063", 100, -3.15, 3.15);
+  h_vertex_seed_track_dxy = fs->make<TH1F>("h_vertex_seed_track_dxy", ";vertex seed track dxy (cm);tracks/10 #mum", 200, -0.1, 0.1);
+  h_vertex_seed_track_dz = fs->make<TH1F>("h_vertex_seed_track_dz", ";vertex seed track dz (cm);tracks/10 #mum", 200, -0.1, 0.1);
+  h_vertex_seed_track_npxhits = fs->make<TH1F>("h_vertex_seed_track_npxhits", ";vertex seed track # pixel hits;tracks", 10, 0, 10);
+  h_vertex_seed_track_nsthits = fs->make<TH1F>("h_vertex_seed_track_nsthits", ";vertex seed track # strip hits;tracks", 50, 0, 50);
+  h_vertex_seed_track_nhits = fs->make<TH1F>("h_vertex_seed_track_nhits", ";vertex seed track # hits;tracks", 60, 0, 60);
+  h_vertex_seed_track_npxlayers = fs->make<TH1F>("h_vertex_seed_track_npxlayers", ";vertex seed track # pixel layers;tracks", 10, 0, 10);
+  h_vertex_seed_track_nstlayers = fs->make<TH1F>("h_vertex_seed_track_nstlayers", ";vertex seed track # strip layers;tracks", 20, 0, 20);
+  h_vertex_seed_track_nlayers = fs->make<TH1F>("h_vertex_seed_track_nlayers", ";vertex seed track # layers;tracks", 30, 0, 30);
 }
 
 void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -872,9 +897,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jet_ST_ht->Fill(mevent->jet_ht(), mevent->jet_ST());
   h_jet_ST_ht40->Fill(mevent->jet_ht(40), mevent->jet_ST());
 
-  for (int i = 0; i < mfv::n_vertex_seed_pt_quantiles; ++i)
-    h_vertex_seed_pt_quantiles[i]->Fill(mevent->vertex_seed_pt_quantiles[i]);
-
   h_met->Fill(mevent->met());
   h_metphi->Fill(mevent->metphi());
 
@@ -1129,6 +1151,26 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_bjets_n[j][k]->Fill(nbjets[j][k], w);
       }
     }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
+  h_n_vertex_seed_tracks->Fill(n_vertex_seed_tracks);
+  for (size_t i = 0; i < n_vertex_seed_tracks; ++i) {
+    h_vertex_seed_track_chi2dof->Fill(mevent->vertex_seed_track_chi2dof[i], w);
+    h_vertex_seed_track_q->Fill(mevent->vertex_seed_track_q(i), w);
+    h_vertex_seed_track_pt->Fill(mevent->vertex_seed_track_pt(i), w);
+    h_vertex_seed_track_eta->Fill(mevent->vertex_seed_track_eta[i], w);
+    h_vertex_seed_track_phi->Fill(mevent->vertex_seed_track_phi[i], w);
+    h_vertex_seed_track_dxy->Fill(mevent->vertex_seed_track_dxy[i], w);
+    h_vertex_seed_track_dz->Fill(mevent->vertex_seed_track_dz[i], w);
+    h_vertex_seed_track_npxhits->Fill(mevent->vertex_seed_track_npxhits(i), w);
+    h_vertex_seed_track_nsthits->Fill(mevent->vertex_seed_track_nsthits(i), w);
+    h_vertex_seed_track_nhits->Fill(mevent->vertex_seed_track_nhits(i), w);
+    h_vertex_seed_track_npxlayers->Fill(mevent->vertex_seed_track_npxlayers(i), w);
+    h_vertex_seed_track_nstlayers->Fill(mevent->vertex_seed_track_nstlayers(i), w);
+    h_vertex_seed_track_nlayers->Fill(mevent->vertex_seed_track_nlayers(i), w);
   }
 }
 

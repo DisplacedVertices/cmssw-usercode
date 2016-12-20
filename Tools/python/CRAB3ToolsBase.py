@@ -16,7 +16,6 @@ from collections import defaultdict
 from cStringIO import StringIO
 from pprint import pprint
 from JMTucker.Tools.general import bool_from_argv, typed_from_argv, popen
-from JMTucker.Tools.hadd import hadd
 
 class CRABToolsException(Exception):
     pass

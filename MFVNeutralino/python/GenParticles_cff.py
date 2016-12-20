@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvGenParticles = cms.EDProducer('MFVGenParticles',
-                                 gen_src = cms.InputTag('genParticles'),
+                                 gen_particles_src = cms.InputTag('genParticles'),
                                  print_info = cms.bool(False),
                                  )
 

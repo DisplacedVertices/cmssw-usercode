@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+import sys
+from JMTucker.Tools.CRAB3ToolsBase import crabify_list
+from JMTucker.Tools.CondorTools import *
+from JMTucker.Tools.colors import bold, red, green, cyan
+
+if len(sys.argv) < 2:
+    print 'usage: cs_status wd [wd2 ...]'
+    sys.exit(1)
+
+wds = cs_dirs_from_argv()
+ml = max(len(wd) for wd in wds) + 3
+fmt = '%' + str(ml) + 's %10s | %10s %10s %10s'
+
+def z(n):
+    return '-' if n == 0 else str(n)
+
+
+print bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'run/miss', 'problem'))
+
+sums = [0]*4
+
+done = []
+
+for wd in wds:
+    rets = cs_rets(wd)
+    srets = set(rets)
+
+    njobs = len(rets)
+    ndone = sum(1 for r in rets if r == 0)
+    nrunmiss = sum(1 for r in rets if r == -1)
+    nprobs = sum(1 for r in rets if r not in (0, -1))
+
+    sums[0] += njobs
+    sums[1] += ndone
+    sums[2] += nrunmiss
+    sums[3] += nprobs
+
+    color = cyan
+    if nprobs:
+        color = red
+    elif ndone == njobs:
+        done.append(wd)
+        color = green
+    
+    print color(fmt % (wd.ljust(ml), z(njobs), z(ndone), z(nrunmiss), z(nprobs))), 
+    if nprobs:
+        print ' :', crabify_list([i for i,r in enumerate(rets) if r not in (0,-1)])
+    print
+
+print bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
+
+if done:
+    print '\nthese are done:', ' '.join(done)
+if len(done) == len(wds):
+    print '\nAll done!'

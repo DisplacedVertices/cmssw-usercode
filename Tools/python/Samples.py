@@ -393,11 +393,12 @@ def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     sample = x[0]
     sample.add_dataset(ds_name, dataset, nevents_orig, **kwargs)
 
-def add_dataset_phys03(sample, ds_name, dataset, nevents_orig, **kwargs):
-    sample.add_dataset(ds_name, dataset, nevents_orig, dbs_inst='phys03', **kwargs)
-
 _adbp = add_dataset_by_primary
 _adbp3 = partial(_adbp, dbs_inst='phys03')
+
+# can't use _adbp* on qcds because of the -ext datasets that have same primary
+def add_dataset_phys03(sample, ds_name, dataset, nevents_orig, **kwargs):
+    sample.add_dataset(ds_name, dataset, nevents_orig, dbs_inst='phys03', **kwargs)
 
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
@@ -418,25 +419,10 @@ _adbp3('sim', '/mfv_neu_tau10000um_M0800/tucker-sim_10k-c66f4a7649a68ea5b6afdf05
 _adbp3('sim', '/mfv_neu_tau10000um_M1200/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9600) # 48 files
 _adbp3('sim', '/mfv_neu_tau10000um_M1600/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9600) # 48 files
 
-# can't use _adbp3 on qcds because of the -ext datasets that have same primary
-add_dataset_phys03(qcdht0500,    'ntuplev9', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-4b0c72a3fdc564adcdc2c154c01482f7/USER',      45715)  # 100 files
-add_dataset_phys03(qcdht0700,    'ntuplev9', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-4b2e4c70e8958e8fd45a5c679a1199a3/USER',   4408678)  # 203 files
-add_dataset_phys03(qcdht1000,    'ntuplev9', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-3e1ea67c23fb08856e57091c1c5aaeba/USER',  5039738)  # 204 files
-add_dataset_phys03(qcdht1500,    'ntuplev9', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-21ccd0dbba5eb6576ae41f31b2cc9c9c/USER',  3952153)  # 159 files
-add_dataset_phys03(qcdht2000,    'ntuplev9', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-040ab1057163835875baffa48b2fa1a7/USER',   1981228)  # 80 files 
-
-add_dataset_phys03(qcdht0500ext, 'ntuplev9', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-c0dbf8f7d74fe38621329d40c5876f3a/USER',     101204)  # 217 files
-add_dataset_phys03(qcdht0700ext, 'ntuplev9', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-fc1016e3099c99941c2146b8ca65968c/USER',   8360131)  # 383 files
-add_dataset_phys03(qcdht1000ext, 'ntuplev9', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-3bceaa54cb03c9d1a6573e168429e56a/USER', 10144907)  # 411 files
-add_dataset_phys03(qcdht1500ext, 'ntuplev9', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-4cc30f68e9767f0e3fcb8982620dbe6a/USER',  7815041)  # 314 files
-add_dataset_phys03(qcdht2000ext, 'ntuplev9', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-ntuplev9-fea534cd4515e61314fe849606ff4938/USER',   4016331)  # 162 files
-
-_adbp3('ntuplev9', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-ntuplev9-166a600604c520a45fa2652c4ab0486a/USER', 100)
-
-_adbp3('ntuplev9', '/mfv_neu_tau00100um_M0800/tucker-ntuplev9-18313a78d966c2ede551c26bbb7cd6a6/USER', 9900) # 1 files
-_adbp3('ntuplev9', '/mfv_neu_tau00300um_M0800/tucker-ntuplev9-f5ac07842dbce4d3f4503c75620a983b/USER', 9877) # 1 files
-_adbp3('ntuplev9', '/mfv_neu_tau01000um_M0800/tucker-ntuplev9-0e5ba3624103221ccee5b192546f6f35/USER', 9883) # 1 files
-_adbp3('ntuplev9', '/mfv_neu_tau10000um_M0800/tucker-ntuplev9-2ca30ad984fbc6013509895bd6706a2d/USER', 9794) # 1 files
+for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
+          mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
+          xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700):
+    x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
 
 ########################################################################
 
@@ -465,3 +451,14 @@ if __name__ == '__main__':
         for x,y in zip(qcd_samples, qcd_samples_ext):
             print x.name, x.int_lumi_orig/1000, '->', (x.int_lumi_orig + y.int_lumi_orig)/1000
 
+    if 0:
+        f = open('a.txt', 'wt')
+        for x in qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
+            for y in ('main', 'ntuplev9'):
+                try:
+                    x.set_curr_dataset(y)
+                except KeyError:
+                    continue
+                fns = x.filenames
+                print len(fns)
+                f.write('(%r, %r): (%i, %r),\n' % (x.name, y, len(fns), fns))

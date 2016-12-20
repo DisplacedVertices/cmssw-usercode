@@ -448,6 +448,20 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("dravg",                         "SV avg{#Delta R(i,j)}",                                                       150,    0,       5);
   hs.add("drrms",                         "SV rms{#Delta R(i,j)}",                                                       150,    0,       3);
 
+  hs.add("clustersR04n",       "# of clusters (R=0.4)",        10, 0, 10);
+  hs.add("clustersR04nsingle", "# of single clusters (R=0.4)", 10, 0, 10);
+  hs.add("clustersR04fsingle", "frac. single clusters (R=0.4)", 21, 0, 1.05);
+  hs.add("clustersR04nsinglepertk", "# of single clusters (R=0.4) / # of tracks", 21, 0, 1.05);
+  hs.add("clustersR04avgnconst", "avg. # of constituents of clusters (R=0.4)", 20, 0, 10);
+  hs.add("clustersR04avgnconstpertk", "avg. # of constituents of clusters (R=0.4) / # of tracks", 21, 0, 1.05);
+
+  hs.add("clustersR10n",       "# of clusters (R=1.0)",        10, 0, 10);
+  hs.add("clustersR10nsingle", "# of single clusters (R=1.0)", 10, 0, 10);
+  hs.add("clustersR10fsingle", "frac. single clusters (R=1.0)", 21, 0, 1.05);
+  hs.add("clustersR10nsinglepertk", "# of single clusters (R=1.0) / # of tracks", 21, 0, 1.05);
+  hs.add("clustersR10avgnconst", "avg. # of constituents of clusters (R=1.0)", 20, 0, 10);
+  hs.add("clustersR10avgnconstpertk", "avg. # of constituents of clusters (R=1.0) / # of tracks", 21, 0, 1.05);
+
   hs.add("trackST", "SV tracks transverse sphericity S_{T}", 101, 0, 1.01);
 
   hs.add("jetpairdetamin", "SV min{#Delta #eta(jet_{i}, jet_{j})}", 50, 0, 5);
@@ -782,6 +796,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       h_sv_pos_bsphi[isv]->Fill(pos_bsphi, w);
     }
 
+    const mfv::track_clusters clustersR04(aux);
+    const size_t clustersR04nsingle = clustersR04.nsingle();
+    const double clustersR04avgnconst = clustersR04.avgnconst();
+    const mfv::track_clusters clustersR10(aux, 1.0);
+    const size_t clustersR10nsingle = clustersR10.nsingle();
+    const double clustersR10avgnconst = clustersR10.avgnconst();
+
     PairwiseHistos::ValueMap v = {
         {"mva",                     mva.value(aux)},
         {"nlep",                    aux.which_lep.size()},
@@ -921,6 +942,20 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
         {"drmax",  aux.drmax()},
         {"dravg",  aux.dravg()},
         {"drrms",  aux.drrms()},
+
+        {"clustersR04n",               clustersR04.size()},
+        {"clustersR04nsingle",         clustersR04nsingle},
+        {"clustersR04fsingle",         clustersR04nsingle / double(clustersR04.size())},
+        {"clustersR04nsinglepertk",    clustersR04nsingle / double(aux.ntracks())},
+        {"clustersR04avgnconst",       clustersR04avgnconst},
+        {"clustersR04avgnconstpertk",  clustersR04avgnconst / double(aux.ntracks())},
+
+        {"clustersR10n",               clustersR10.size()},
+        {"clustersR10nsingle",         clustersR10nsingle},
+        {"clustersR10fsingle",         clustersR10nsingle / double(clustersR10.size())},
+        {"clustersR10nsinglepertk",    clustersR10nsingle / double(aux.ntracks())},
+        {"clustersR10avgnconst",       clustersR10avgnconst},
+        {"clustersR10avgnconstpertk",  clustersR10avgnconst / double(aux.ntracks())},
 
         {"trackST", aux.trackST()},
 
@@ -1078,8 +1113,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       fill_multi(h_sv_track_weight, isv, aux.track_weight(i), w);
       fill_multi(h_sv_track_q, isv, aux.track_q(i), w);
       fill_multi(h_sv_track_pt, isv, aux.track_pt(i), w);
-      fill_multi(h_sv_track_eta, isv, aux.track_eta[i], w);
-      fill_multi(h_sv_track_phi, isv, aux.track_phi[i], w);
+      fill_multi(h_sv_track_eta, isv, aux.track_eta(i), w);
+      fill_multi(h_sv_track_phi, isv, aux.track_phi(i), w);
       fill_multi(h_sv_track_dxy, isv, aux.track_dxy[i], w);
       fill_multi(h_sv_track_dz, isv, aux.track_dz[i], w);
       fill_multi(h_sv_track_pt_err, isv, aux.track_pt_err(i), w);

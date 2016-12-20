@@ -34,6 +34,7 @@ query_infos = [
     (('run', 'run dataset=%s', 1), lambda s: intable(s)),
     (('lumi', 'lumi dataset=%s', 1), lambda s: intable(s)),
     (('nevents', 'dataset=%s | grep dataset.nevents', 1), lambda s: intable(s)),
+    (('site', 'site dataset=%s', 1), lambda s: s),
     ]
 
 found = False

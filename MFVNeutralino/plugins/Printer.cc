@@ -133,6 +133,10 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     printf("          vx, vy, vz, vt    : (%11.3g, %11.3g, %11.3g, %11.3g)   (%11.3g, %11.3g, %11.3g, %11.3g)\n", mevent->gen_lsp_decay[0], mevent->gen_lsp_decay[1], mevent->gen_lsp_decay[2], gen_lsp_d3[0]/gen_lsp_p4[0].Beta(), mevent->gen_lsp_decay[3], mevent->gen_lsp_decay[4], mevent->gen_lsp_decay[5], gen_lsp_d3[1]/gen_lsp_p4[1].Beta());
     printf("          minlspdist2d: %11.3g   lspdist2d: %11.3g   lspdist3d: %11.3g\n", mevent->minlspdist2d(), mevent->lspdist2d(), mevent->lspdist3d());
     printf("          decay types:   %u   %u   partons_in_acc: %u\n", mevent->gen_decay_type[0], mevent->gen_decay_type[1], mevent->gen_partons_in_acc);
+    printf("found hlt (n_hlt_paths = %i):\n", mfv::n_hlt_paths);
+    for (int i = 0; i < mfv::n_hlt_paths; ++i)
+      printf("%i ", mevent->found_hlt(i));
+    printf("\n");
     printf("pass hlt (n_hlt_paths = %i):\n", mfv::n_hlt_paths);
     for (int i = 0; i < mfv::n_hlt_paths; ++i)
       printf("%i ", mevent->pass_hlt(i));
@@ -235,7 +239,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
         printf("mom %i: costhmombs: %11.4f   costhmompv2d: %11.4f   costhmompv3d: %11.4f   missdistpv: %11.3g +/- %11.3g (%11.3g sig)\n", i, v.costhmombs(i), v.costhmompv2d(i), v.costhmompv3d(i), v.missdistpv[i], v.missdistpverr[i], v.missdistpvsig(i));
       printf("tracks:\n");
       for (int i = 0; i < v.ntracks(); ++i) {
-        printf("#%i:  chi2: %11.3g ndof: %11.3g  q*pt: %11.3g eta: %11.3g phi: %11.3g dxy: %11.3g dz: %11.3g\n", i, v.track_chi2[i], v.track_ndof[i], v.track_qpt[i], v.track_eta[i], v.track_phi[i], v.track_dxy[i], v.track_dz[i]);
+        printf("#%i:  chi2: %11.3g ndof: %11.3g  q*pt: %11.3g +- %11.3g eta: %11.3g +- %11.3g phi: %11.3g +- %11.3g dxy: %11.3g +- %11.3g dz: %11.3g +- %11.3g\n", i, v.track_chi2[i], v.track_ndof[i], v.track_q(i) * v.track_pt(i), v.track_pt_err(i), v.track_eta(i), v.track_eta_err(i), v.track_phi(i), v.track_phi_err(i), v.track_dxy[i], v.track_dxy_err(i), v.track_dz[i], v.track_dz_err(i));
         printf("vx: %11.3g vy: %11.3g vz: %11.3g  px: %11.3g py: %11.3g pz: %11.3g\n", v.track_vx[i], v.track_vy[i], v.track_vz[i], v.track_px[i], v.track_py[i], v.track_pz[i]);
         printf("cov:\n");
         for (int j = 0; j < 5; ++j) {

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+   echo usage: cs_q working_dir
+   exit 1
+fi
+
+wd=$1
+condor_q $(cat $wd/cluster)
