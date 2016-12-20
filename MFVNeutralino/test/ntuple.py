@@ -147,7 +147,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         #    sample.json = 'ana_all.json'
 
     cs = CondorSubmitter(batch_name,
-#                         pfn_prefix = '',
+                         pfn_prefix = '',
                          stageout_files = 'all',
                          publish_name = batch_name,
                          )
