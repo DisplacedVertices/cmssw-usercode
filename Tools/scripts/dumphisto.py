@@ -23,4 +23,4 @@ else:
         nbins = x.GetNbinsX()
         print 'nbins:', nbins
         for i in xrange(0, nbins+2):
-            print '%4i %6.1f %6.1f' % (i, x.GetBinLowEdge(i), x.GetBinContent(i))
+            print '%7i %10.1f %10.1f %10.1f' % (i, x.GetBinLowEdge(i), x.GetBinContent(i), x.GetBinError(i))
