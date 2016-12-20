@@ -147,7 +147,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         #    sample.json = 'ana_all.json'
 
     cs = CondorSubmitter(batch_name,
-                         pfn_prefix = '',
+                         #pfn_prefix = 'root://cmseos.fnal.gov/', # if the files are at FNAL not just accessible by xrootd
                          stageout_files = 'all',
                          publish_name = batch_name,
                          )

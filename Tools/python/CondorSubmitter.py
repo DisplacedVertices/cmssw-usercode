@@ -127,7 +127,7 @@ if os.stat('cs.json').st_size > 0:
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
-                 pfn_prefix = 'root://cmseos.fnal.gov/',
+                 pfn_prefix = '', # can set to 'root://cmseos.fnal.gov/' if the files are at FNAL not just accessible by xrootd
                  input_files = [],
                  output_files = [],
                  skip_output_files = [],
