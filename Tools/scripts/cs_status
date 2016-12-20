@@ -3,7 +3,7 @@
 import sys
 from JMTucker.Tools.CRAB3ToolsBase import crabify_list
 from JMTucker.Tools.CondorTools import *
-from JMTucker.Tools.colors import bold, red, green, blue
+from JMTucker.Tools.colors import bold, red, green, cyan
 
 if len(sys.argv) < 2:
     print 'usage: cs_status wd [wd2 ...]'
@@ -37,7 +37,7 @@ for wd in wds:
     sums[2] += nrunmiss
     sums[3] += nprobs
 
-    color = blue
+    color = cyan
     if nprobs:
         color = red
     elif ndone == njobs:
