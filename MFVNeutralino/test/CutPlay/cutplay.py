@@ -123,5 +123,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             sample.json = 'ana_10pc.json'
 
-    cs = CondorSubmitter('CutPlayV9', dataset='ntuplev9')
+    cs = CondorSubmitter('CutPlayV10', dataset='ntuplev10')
     cs.submit_all(samples)

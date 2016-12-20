@@ -40,5 +40,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             sample.json = 'ana_10pc.json'
             raise NotImplementedError('need to implement json use in CondorSubmitter')
 
-    cs = CondorSubmitter('MinitreeV9', dataset = 'ntuplev9')
+    cs = CondorSubmitter('MinitreeV10', dataset = 'ntuplev10')
     cs.submit_all(samples)

@@ -37,5 +37,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             sample.json = 'ana_10pc.json'
 
-    cs = CondorSubmitter('ClusterTracks', dataset='ntuplev9')
+    cs = CondorSubmitter('ClusterTracksV10', dataset='ntuplev10')
     cs.submit_all(samples)
