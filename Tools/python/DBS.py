@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
-import os, sys, cPickle
+import os, sys, json, cPickle as pickle
 from collections import defaultdict
+from itertools import izip
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
 
-# Could use DBSAPI or DASAPI or whatever, but I'm too lazy to learn it.
+# could use DBSAPI or DASAPI or whatever, but I'm lazy
 
 class das_query:
+    json_keys_expected = ['apilist', 'ctime', 'data', 'incache', 'mongo_query', 'nresults', 'status', 'timestamp']
+
     def __init__(self, instance='global', json=False):
         if type(instance) == int:
             instance = 'phys0%i' % instance
@@ -26,17 +29,20 @@ class das_query:
         full_cmd = self.cmd % query
         cmdout = os.popen(full_cmd).readlines()
         if self.json:
-            return cmdout[0]
-        ret = []
-        for line in cmdout:
-            line = line.strip()
-            if line_filter(line):
-                x = line_xform(line)
-                if x is not None:
-                    ret.append(x)
-        if not ret:
-            raise RuntimeError('query %r (instance: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.instance, full_cmd, ''.join(cmdout) if cmdout else cmdout))
-        return ret
+            json_obj = json.loads(cmdout[0])
+            assert type(json_obj) == dict and sorted(json_obj.keys()) == das_query.json_keys_expected
+            return json_obj
+        else:
+            ret = []
+            for line in cmdout:
+                line = line.strip()
+                if line_filter(line):
+                    x = line_xform(line)
+                    if x is not None:
+                        ret.append(x)
+            if not ret:
+                raise RuntimeError('query %r (instance: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.instance, full_cmd, ''.join(cmdout) if cmdout else cmdout))
+            return ret
 
 def files_in_dataset(dataset, instance='global'):
     return das_query(instance)('dataset=%s file' % dataset,
@@ -76,97 +82,105 @@ def sites_for_dataset(dataset, instance='global'):
     return das_query(instance)('dataset=%s site' % dataset,
                                line_filter=lambda s: s.startswith('T'))
 
-def _file_run_lumi_obj(dataset, instance='global'):
-    json_str = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
-    true = True # lol
-    false = False
-    #open('json_str','wt').write(json_str)
-    #json_str = open('json_str2').read()
-    obj = eval(json_str) # json.loads doesn't work...
-    #pprint(obj)
+def file_details_run_lumis(dataset, instance='global'):
+    obj = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
+    #obj = json.load(open('json_str'))
+    raw = defaultdict(lambda: defaultdict(list))
 
-    assert type(obj) == dict and sorted(obj.keys()) == ['apilist', 'ctime', 'data', 'incache', 'mongo_query', 'nresults', 'status', 'timestamp']
-    obj = obj['data']
-    return obj
+    for o in obj['data']:
+        assert type(o) == dict and sorted(o.keys()) == ['_id', 'cache_id', 'das', 'das_id', 'file', 'lumi', 'qhash', 'run']
+        files, runs, lumis = o['file'], o['run'], o['lumi']
+        assert len(files) == len(runs) and len(runs) == len(lumis)
+        for f,r,l in izip(files, runs, lumis):
+            assert type(f) == dict and f.keys() == ['name'] and type(f['name']) == unicode
+            assert type(r) == dict and r.keys() == ['run_number'] and type(r['run_number']) == int
+            assert type(l) == dict and l.keys() == ['number'] and type(l['number']) == list
+            f,r,l = str(f['name']), r['run_number'], l['number']
+            for x in l:
+                assert len(x) == 2 and type(x[0]) == int and type(x[1]) == int
+            raw[f][r] += l
 
-def _file_from_json(x):
-    file = x['file']
-    assert len(file) == 1
-    file = file[0]['name']
-    assert file.startswith('/store')
-    return file
+    ret = {}
+    for k,d in raw.iteritems():
+        d2 = {}
+        for k2,l in d.iteritems():
+            d2[k2] = sorted(l)
+        ret[k] = d2
+    return ret
 
-def _run_lumis_from_json(x):
-    lumis = x['lumi']
-    assert len(lumis) == 1
-    lumis = lumis[0]['number']
-    assert type(lumis) == list
-    for rng in lumis:
-        assert type(rng) == list and len(rng) == 2
-    run = x['run']
-    assert len(run) == 1
-    run = x['run'][0]['run_number']
-    assert type(run) == int
-    return run, lumis
+def file_details_nevents(dataset, instance='global', check=False):
+    obj = das_query(instance, json=True)('file dataset=%s | grep file.name,file.nevents' % dataset)
+    #obj = json.load(open('json_str2'))
+
+    ret = {}
+    for o in obj['data']:
+        assert type(o) == dict and sorted(o.keys()) == ['_id', 'cache_id', 'das', 'das_id', 'file', 'qhash']
+        o = sorted(o['file'])
+        assert len(o) == 2 and sorted(o[1].keys()) == ['name', 'nevents'] and o[0].keys() == ['name']
+        f, nevents = str(o[1]['name']), o[1]['nevents']
+        assert f == o[0]['name'] and type(nevents) == int
+        assert not ret.has_key(f)
+        ret[f] = nevents
+
+    if check:
+        assert sum(ret.itervalues()) == int(das_query(instance)('dataset=%s | grep dataset.nevents' % dataset)[0])
+
+    return ret
+
+def ll_from_file_details(details):
+    compact_list = defaultdict(list)
+    for run_lumis in details.itervalues():
+        for run, lumi_ranges in run_lumis.iteritems():
+            compact_list[run].extend(lumi_ranges)
+    return LumiList(compactList=compact_list)
 
 def ll_for_dataset(dataset, instance='global'):
-    obj = _file_run_lumi_obj(dataset, instance)
-    compact_list = defaultdict(list)
-    for x in obj:
-        run, lumis = _run_lumis_from_json(x)
-        compact_list[run].extend(lumis)
-
-    return LumiList(compactList=compact_list)
+    return ll_from_file_details(file_details_run_lumis(dataset, instance))
 
 def json_for_dataset(json_fn, dataset, instance='global'):
     ll_for_dataset(dataset, instance).writeJSON(json_fn)
 
 def files_for_events(run_events, dataset, instance='global'):
-    run_lumis = defaultdict(list)
+    wanted_run_lumis = []
     for x in run_events: # list of runs, or list of (run, event), or list of (run, lumi, event)
         if type(x) == int:
-            run_lumis[x] = None
+            wanted_run_lumis.append((x, None))
         elif len(x) == 2:
-            run_lumis[x[0]] = None
+            wanted_run_lumis.append((x[0], None))
         else:
-            run_lumis[x[0]].append(x[1])
+            wanted_run_lumis.append(x[:2])
 
-    files = []
-
-    obj = _file_run_lumi_obj(dataset, instance)
-
-    for x in obj:
-        #assert len(x['run']) == len(x['lumi'])
-        assert len(set(y['name'] for y in x['file'])) == 1
-
-        keep = False
-        class StopIt(Exception):
-            pass
-
-        try:
-            for run_d in x['run']:
-                run = run_d['run_number']
-                allowed = run_lumis[run]
-                if allowed is None:
-                    keep = True
-                    raise StopIt()
-
-                for lumi_d in x['lumi']:
-                    for lumi_lo, lumi_hi in lumi_d['number']:
-                        for lumi in allowed:
-                            if lumi >= lumi_lo and lumi <= lumi_hi:
-                                keep = True
-                                raise StopIt()
-        except StopIt:
-            pass
-
-        if keep:
-            files.append(str(x['file'][0]['name']))
-
-    return files
+    files = set()
+    for file, run_lumis in file_details_run_lumis(dataset, instance).iteritems():
+        ll = LumiList(compactList=run_lumis)
+        for x in wanted_run_lumis:
+            if ll.contains(*x):
+                files.add(file)
+    return sorted(files)
 
 if __name__ == '__main__':
     pass
+
+    #print ll_for_dataset('duh')
+    #print files_for_events([(272818, 519, 103103)], 'duh')
+
+    #for name, dataset in [
+    #    ('JetHT2016B1', '/JetHT/Run2016B-23Sep2016-v1/AOD'),
+    #    ('JetHT2016B3', '/JetHT/Run2016B-23Sep2016-v3/AOD'),
+    #    ('JetHT2016C', '/JetHT/Run2016C-23Sep2016-v1/AOD'),
+    #    ('JetHT2016D', '/JetHT/Run2016D-23Sep2016-v1/AOD'),
+    #    ('JetHT2016E', '/JetHT/Run2016E-23Sep2016-v1/AOD'),
+    #    ('JetHT2016F', '/JetHT/Run2016F-23Sep2016-v1/AOD'),
+    #    ('JetHT2016G', '/JetHT/Run2016G-23Sep2016-v1/AOD'),
+    #    ('JetHT2016H1', '/JetHT/Run2016H-PromptReco-v1/AOD'),
+    #    ('JetHT2016H2', '/JetHT/Run2016H-PromptReco-v2/AOD'),
+    #    ('JetHT2016H3', '/JetHT/Run2016H-PromptReco-v3/AOD'),
+    #    ]:
+    #    print name
+    #    x = file_details_run_lumis(dataset)
+    #    open(name + '.neventsdict', 'wt').write(repr(file_details_nevents(dataset)))
+    #    open(name + '.runlumisdict', 'wt').write(repr(x))
+    #    ll_for_dataset_from_details(x).writeJSON(name + '.json')
 
     #execfile('events_to_debug.txt')
     #pprint(files_for_events(duh, 'fuh'))
@@ -201,5 +215,3 @@ if __name__ == '__main__':
     #            files.append(file)
     #    if not found:
     #        print 'did not find for', r, l
-
-                
