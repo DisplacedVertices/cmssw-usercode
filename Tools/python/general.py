@@ -74,7 +74,7 @@ def sub_popen(cmd):
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
 
 def popen(cmd, return_exit_code=False, print_output=False):
-    child = sub_popen
+    child = sub_popen(cmd)
     output = []
     for line in child.stdout:
         if print_output:
