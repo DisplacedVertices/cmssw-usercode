@@ -66,8 +66,11 @@ def mkdirs_if_needed(path):
     if dn:
         os.system('mkdir -p %s' % dn)
 
+def sub_popen(cmd):
+    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+
 def popen(cmd, return_exit_code=False, print_output=False):
-    child = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    child = sub_popen
     output = []
     for line in child.stdout:
         if print_output:
@@ -153,6 +156,7 @@ __all__ = [
     'from_argv',
     'int_ceil',
     'mkdirs_if_needed',
+    'sub_popen',
     'popen',
     'reverse_readline',
     'save_git_status',
