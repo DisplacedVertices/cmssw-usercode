@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import sys, os, re, fnmatch
+from datetime import datetime
 from glob import glob
-from JMTucker.Tools.general import popen
+from JMTucker.Tools.general import sub_popen
 from JMTucker.Tools.hadd import hadd
 
 class CSHelpersException(Exception):
@@ -25,7 +26,15 @@ def cs_logs(d):
 
 def cs_job_from_log(fn):
     return int(os.path.basename(fn).replace('log.', ''))
-    
+
+def cs_jobs_running(d):
+    jobs = []
+    cluster = str(cs_cluster(d))
+    for line in sub_popen('condor_q -wide %s' % cluster).stdout:
+        if line.startswith(cluster):
+            jobs.append(int(line.split()[0].split('.')[1]))
+    return jobs
+
 def cs_rets(d, _re=re.compile(r'return value (\d+)')):
     njobs = cs_njobs(d)
     rets = [-1]*njobs
@@ -39,6 +48,9 @@ def cs_rets(d, _re=re.compile(r'return value (\d+)')):
                 rets[job] = ret
 
     return rets
+
+def cs_timestamp():
+    return datetime.now().strftime('%y%m%d_%H%M%S')
 
 def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
     if working_dir.endswith('/'):
