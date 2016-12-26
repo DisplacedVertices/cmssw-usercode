@@ -176,10 +176,17 @@ def output_file(process, filename, output_commands):
     process.outp = cms.EndPath(process.out)
 
 def random_service(process, seeds):
+    '''Set up the RandomNumberGeneratorService. seeds is a dict taking
+    labels of modules to the random number seed for that module. If
+    the seed is <0, then a random seed is generated.'''
+
     r = process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
     for k,v in seeds.iteritems():
+        if v < 0:
+            from random import SystemRandom
+            v = SystemRandom().randint(1, 900000000)
         setattr(r, k, cms.PSet(initialSeed = cms.untracked.uint32(v)))
-    
+
 def registration_warnings(process):
     if not hasattr(process, 'MessageLogger'):
         process.load('FWCore.MessageService.MessageLogger_cfi')
