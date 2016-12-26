@@ -61,6 +61,10 @@ def from_argv(*args, **kwargs):
 def int_ceil(x,y):
     return (x+y-1)/y
 
+def mkdirp(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
 def mkdirs_if_needed(path):
     dn = os.path.dirname(path)
     if dn:
@@ -155,6 +159,7 @@ __all__ = [
     'typed_from_argv',
     'from_argv',
     'int_ceil',
+    'mkdirp',
     'mkdirs_if_needed',
     'sub_popen',
     'popen',
