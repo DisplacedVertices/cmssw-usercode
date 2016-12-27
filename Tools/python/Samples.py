@@ -323,12 +323,34 @@ ttbar_systematics_samples = [
 ########################################################################
 
 data_samples = [
-    DataSample('JetHT2015D', '/JetHT/Run2015D-16Dec2015-v1/AOD'), # 256630 - 260727
+    #DataSample('JetHT2015D', '/JetHT/Run2015D-16Dec2015-v1/AOD'), # 256630 - 260727
+
+    DataSample('JetHT2016B1', '/JetHT/Run2016B-23Sep2016-v1/AOD'),
+    DataSample('JetHT2016B3', '/JetHT/Run2016B-23Sep2016-v3/AOD'),
+    DataSample('JetHT2016C', '/JetHT/Run2016C-23Sep2016-v1/AOD'),
+    DataSample('JetHT2016D', '/JetHT/Run2016D-23Sep2016-v1/AOD'),
+    DataSample('JetHT2016E', '/JetHT/Run2016E-23Sep2016-v1/AOD'),
+    DataSample('JetHT2016F', '/JetHT/Run2016F-23Sep2016-v1/AOD'),
+    DataSample('JetHT2016G', '/JetHT/Run2016G-23Sep2016-v1/AOD'),
+    DataSample('JetHT2016H1', '/JetHT/Run2016H-PromptReco-v1/AOD'),
+    DataSample('JetHT2016H2', '/JetHT/Run2016H-PromptReco-v2/AOD'),
+    DataSample('JetHT2016H3', '/JetHT/Run2016H-PromptReco-v3/AOD'),
     ]
 
 auxiliary_data_samples = [
     #DataSample('SingleMuon2015Dv3', '/SingleMuon/Run2015D-PromptReco-v3/AOD'),
     #DataSample('SingleMuon2015Dv4', '/SingleMuon/Run2015D-PromptReco-v4/AOD'),
+
+    DataSample('SingleMuon2016B1', '/SingleMuon/Run2016B-23Sep2016-v1/AOD'),
+    DataSample('SingleMuon2016B3', '/SingleMuon/Run2016B-23Sep2016-v3/AOD'),
+    DataSample('SingleMuon2016C', '/SingleMuon/Run2016C-23Sep2016-v1/AOD'),
+    DataSample('SingleMuon2016D', '/SingleMuon/Run2016D-23Sep2016-v1/AOD'),
+    DataSample('SingleMuon2016E', '/SingleMuon/Run2016E-23Sep2016-v1/AOD'),
+    DataSample('SingleMuon2016F', '/SingleMuon/Run2016F-23Sep2016-v1/AOD'),
+    DataSample('SingleMuon2016G', '/SingleMuon/Run2016G-23Sep2016-v1/AOD'),
+    DataSample('SingleMuon2016H1', '/SingleMuon/Run2016H-PromptReco-v1/AOD'),
+    DataSample('SingleMuon2016H2', '/SingleMuon/Run2016H-PromptReco-v2/AOD'),
+    DataSample('SingleMuon2016H3', '/SingleMuon/Run2016H-PromptReco-v3/AOD'),
     ]
 
 for s in data_samples + auxiliary_data_samples:
