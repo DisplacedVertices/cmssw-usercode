@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+import os, sys
+join = os.path.join
+from glob import glob
+from JMTucker.Tools.CRAB3ToolsBase import crabify_list, crab_jobs_from_argv
+from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from JMTucker.Tools.CondorTools import *
+from JMTucker.Tools.general import mkdirp
+
+if len(sys.argv) < 3:
+    print 'usage: cs_resubmit condor_dir jobs_list'
+    print '    jobs_list can be space separated, or can handle a string like 1,3,5-7'
+    sys.exit(1)
+
+wd = sys.argv[1]
+if not is_cs_dir(wd):
+    raise ValueError('first arg must be a CondorSubmitter dir')
+
+jobs = crab_jobs_from_argv()
+if not jobs:
+    raise ValueError('expect a list of jobs in argv')
+
+print wd, 'resubmit jobs', crabify_list(jobs)
+
+norigjobs = cs_njobs(wd)
+running_jobs = cs_jobs_running(wd)
+
+for job in jobs:
+    if job >= norigjobs:
+        raise ValueError('supplied job number %i >= norigjobs %i' % (job, norigjobs))
+    if job in running_jobs:
+        raise RuntimeError('refuse to resubmit job %i, still running' % job)
+    if not all(os.path.isfile(join(wd, '%s.%i' % (x,job))) for x in ('log', 'stdout', 'stderr')):
+        raise RuntimeError("was job %i ever run? one of stdout, stderr, log file doesn't exist for it" % job)
+
+i, rd = 1, None
+while 1:
+    rd = join(wd, 'resub' + str(i))
+    if not os.path.exists(rd):
+        break
+    i += 1
+    if i == 20:
+        raise RuntimeError('way too many resubmissions')
+os.mkdir(rd)
+def rd_f(fn):
+    return open(join(rd, fn), 'wt')
+    
+rd_f('cs_jobmap').write('\n'.join(str(i) for i in jobs) + '\n')
+
+jdl = open(join(wd, 'cs_submit.jdl')).readlines()
+assert jdl[-1].startswith('Queue ')
+jdl[-1] = 'Queue %i\n' % len(jobs)
+rd_f('cs_submit.jdl').write(''.join(jdl))
+
+for bn in ('cs.json', 'cs_filelist.py', 'cs_cmsrun_args', 'cs_primaryds', 'cs_pset.py'):
+    os.symlink(join(wd, bn), join(rd, bn))
+
+rd_f('cs_timestamp').write(cs_timestamp())
+
+orig_d = join(wd, 'originals')
+mkdirp(orig_d)
+
+had_outputfiles   = os.stat(join(wd, 'cs_outputfiles'))  .st_size > 0
+had_stageoutfiles = os.stat(join(wd, 'cs_stageoutfiles')).st_size > 0
+
+output_bns = [('fjr', '.xml')]
+if had_stageoutfiles:
+    output_bns.append(('publish', '.txt'))
+if had_outputfiles:
+    output_bns += [os.path.splitext(bn) for bn in open(join(wd, 'cs_outputfiles')).read().split()]
+
+for ijob, job in enumerate(jobs):
+    djob = '.%i' % job
+    ujob = '_%i' % job
+    condor_fns = [join(wd, x + djob) for x in ('log', 'stderr', 'stdout')]
+    output_fns = [join(wd, b + ujob + ext) for b, ext in output_bns]
+    for fn in condor_fns + output_fns:
+        bn = os.path.basename(fn)
+
+        if os.path.islink(fn): # don't keep track of previously resubmitted job files
+            os.remove(fn)
+        elif os.path.isfile(fn):
+            os.rename(fn, join(orig_d, bn))
+
+        if fn in condor_fns:
+            target = join(rd, bn.replace(djob, '.%i' % ijob))
+        elif fn in output_fns:
+            target = join(rd, bn)
+        link = join(wd, bn)
+        os.symlink(target, link)
+
+if 'testing' not in sys.argv:
+    CondorSubmitter._submit(rd, len(jobs))
