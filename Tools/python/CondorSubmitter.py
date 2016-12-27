@@ -4,6 +4,7 @@ import sys, os, string, shutil, base64, zlib, imp, cPickle as pickle
 from datetime import datetime
 from JMTucker.Tools.CMSSWTools import make_tarball, find_output_files
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
+from JMTucker.Tools.CondorTools import cs_timestamp
 from JMTucker.Tools.general import mkdirs_if_needed, popen, save_git_status, int_ceil, touch
 
 if not os.environ.has_key('SCRAM_ARCH') or not os.environ.has_key('CMSSW_VERSION'):
@@ -13,9 +14,11 @@ class CondorSubmitter:
     sh_template = '''#!/bin/bash
 
 workdir=$(pwd)
-job=$1
+realjob=$1
+mapfile -t jobmap < cs_jobmap
+job=${jobmap[$realjob]}
 
-echo job $job start at $(date)
+echo realjob $realjob job $job start at $(date)
 
 export SCRAM_ARCH=__SCRAM_ARCH__
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -34,7 +37,7 @@ eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
 echo cmsRun start at $(date)
-cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds__INPUT_BNS__} .
+cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_timestamp__INPUT_BNS__} .
 echo $job > cs_job
 cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
 cmsexit=$?
@@ -74,7 +77,7 @@ for x in __STAGEOUT_BNS__; do
     fi
 done
 
-mv publish ${workdir}/publish.${job}
+mv publish ${workdir}/publish_${job}.txt
 
 if [[ $xrdcp_problem -ne 0 ]]; then
     exit 60307
@@ -93,7 +96,7 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = __TARBALL_FN__,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds__INPUT_FNS__
+transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_timestamp__INPUT_FNS__
 x509userproxy = $ENV(X509_USER_PROXY)
 Queue __NJOBS__
 '''
@@ -107,15 +110,24 @@ from JMTucker.Tools.general import typed_from_argv
 cs_job = int(open('cs_job').read())
 assert cs_job >= 0
 
+cs_fail = __FAIL_LIST__
+assert cs_job not in cs_fail
+
 import cs_filelist
 process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__))
 process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 if os.stat('cs.json').st_size > 0:
     from FWCore.PythonUtilities.LumiList import LumiList
     process.source.lumisToProcess = LumiList('cs.json').getVLuminosityBlockRange()
+'''
+
+    filelist_py_template = '''
+import zlib, base64, cPickle as pickle
+_l = pickle.loads(zlib.decompress(base64.b64decode('__FILELIST__')))
+def get(i): return _l[i]
 '''
 
     get_proxy = True
@@ -135,12 +147,16 @@ if os.stat('cs.json').st_size > 0:
                  stageout_path = '', # if / in it, does not try to generate
                  publish_name = '',
                  dataset = 'main',
+                 _events = -1,
+                 _njobs = None,
+                 _fail = [],
                  ):
 
         self.testing = testing
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
         self.dataset = dataset
+        self._njobs = _njobs
 
         for arg in sys.argv:
             if arg.startswith('cs_name='):
@@ -164,7 +180,7 @@ if os.stat('cs.json').st_size > 0:
             self.get_proxy = False
 
         username = os.environ['USER']
-        timestamp = datetime.now().strftime('%y%m%d_%H%M%S')
+        self.timestamp = cs_timestamp()
         #os.system('mkdir -p /tmp/%s' % username)
 
         print 'CondorSubmitter init: saving git status'
@@ -210,8 +226,8 @@ if os.stat('cs.json').st_size > 0:
             output_files = [x for x in output_files if x not in stageout_files]
 
         assert all(os.path.basename(x) == x for x in output_files + stageout_files)
-        output_files = ' '.join(output_files)
-        stageout_files = ' '.join(stageout_files)
+        self.output_files   = output_files   = ' '.join(output_files)
+        self.stageout_files = stageout_files = ' '.join(stageout_files)
 
         output_snippet = ''
 
@@ -227,7 +243,7 @@ if os.stat('cs.json').st_size > 0:
                 stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name
-                stageout_path += '/$(<cs_primaryds)/%s/%s/0000' % (publish_name, timestamp)  # JMTBAD 0001...
+                stageout_path += '/$(<cs_primaryds)/%s/$(<cs_timestamp)/0000' % publish_name  # JMTBAD 0001...
 
             print 'CondorSubmitter init: stageout files are', stageout_files
             print 'CondorSubmitter init: stageout path is', stageout_path
@@ -246,32 +262,41 @@ if os.stat('cs.json').st_size > 0:
             .replace('__INPUT_FNS__',  input_fns)
 
         self.pset_end_template = self.pset_end_template \
-            .replace('__PFN_PREFIX__', repr(pfn_prefix))
+            .replace('__PFN_PREFIX__', repr(pfn_prefix)) \
+            .replace('__MAX_EVENTS__', str(_events)) \
+            .replace('__FAIL_LIST__', repr(_fail))
 
         open(sh_fn, 'wt').write(self.sh_template)
 
-
     def filelist(self, sample, working_dir):
-        primaryds_fn = os.path.join(working_dir, 'cs_primaryds')
-        open(primaryds_fn, 'wt').write(sample.primary_dataset)
-
         # JMTBAD are there performance problems by not matching the json to the files per job?
         json_fn = os.path.join(working_dir, 'cs.json')
         if hasattr(sample, 'json'):
             shutil.copy2(sample.json, json_fn)
         else:
             touch(json_fn)
+
         per = sample.files_per
-        nfns = len(sample.filenames)
-        njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(nfns, per)
-        fn_groups = [sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)]
-        fn_groups = [x for x in fn_groups if x]
-        njobs = len(fn_groups)
-        xxx = base64.b64encode(zlib.compress(pickle.dumps(fn_groups, -1)))
-        with open(os.path.join(working_dir, 'cs_filelist.py'), 'wt') as f:
-            f.write('import zlib, base64, cPickle as pickle\n')
-            f.write('_l = pickle.loads(zlib.decompress(base64.b64decode(%r)))\n' % xxx)
-            f.write('def get(i):\n    return _l[i]\n\n')
+        njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(len(sample.filenames), per)
+        fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
+        njobs = len(fn_groups) # let it fail downward
+        if self._njobs is not None:
+            assert self._njobs <= njobs
+            njobs = self._njobs
+
+        encoded_filelist = base64.b64encode(zlib.compress(pickle.dumps(fn_groups, -1)))
+
+        files_to_write = [
+            ('cs_outputfiles',   self.output_files),
+            ('cs_stageoutfiles', self.stageout_files),
+            ('cs_filelist.py',   self.filelist_py_template.replace('__FILELIST__', encoded_filelist)),
+            ('cs_jobmap',        '\n'.join(str(i) for i in xrange(njobs)) + '\n'), # will be more complicated for resubmits
+            ('cs_primaryds',     sample.primary_dataset),
+            ('cs_timestamp',     self.timestamp),
+            ]
+        for fn, content in files_to_write:
+            open(os.path.join(working_dir, fn), 'wt').write(content)
+
         return njobs
 
     def pset(self, sample, working_dir):
@@ -301,6 +326,39 @@ if os.stat('cs.json').st_size > 0:
         open(pset_fn, 'wt').write(pset)
         return pset_fn
 
+    @classmethod
+    def _submit(cls, working_dir, njobs):
+        cwd = os.getcwd()
+        os.chdir(working_dir)
+        try:
+            submit_out, submit_ret = popen('condor_submit < cs_submit.jdl', return_exit_code=True)
+            ok = False
+            for line in submit_out.split('\n'):
+                if 'job(s) submitted to cluster' in line:
+                    ok = True
+                    line = line.split()
+                    try:
+                        njobs_sub = int(line[0])
+                        cluster = int(line[-1][:-1])
+                        open(os.path.join(working_dir, 'njobs'), 'wt').write(str(njobs_sub))
+                        open(os.path.join(working_dir, 'cluster'), 'wt').write(str(cluster))
+                        if njobs_sub != njobs:
+                            ok = False
+                    except ValueError:
+                        ok = False
+            if not ok:
+                print '\033[1m problem! \033[0m'
+                print submit_out
+            else:
+                print 'success! cluster', cluster
+                cluster_link = os.path.join(cls.links_dir, str(cluster))
+                if os.path.islink(cluster_link):
+                    print 'warning: clobbering old link:', os.readlink(cluster_link)
+                    os.unlink(cluster_link)
+                os.symlink(working_dir, cluster_link)
+        finally:
+            os.chdir(cwd)
+
     def submit(self, sample):
         print 'batch', self.batch_name, 'sample', sample.name, 
 
@@ -320,38 +378,8 @@ if os.stat('cs.json').st_size > 0:
         jdl_fn = os.path.join(working_dir, 'cs_submit.jdl')
         open(jdl_fn, 'wt').write(self.jdl_template.replace('__NJOBS__', str(njobs)))
 
-        cwd = os.getcwd()
-        
         if not self.testing:
-            os.chdir(working_dir)
-            try:
-                submit_out, submit_ret = popen('condor_submit < cs_submit.jdl', return_exit_code=True)
-                ok = False
-                for line in submit_out.split('\n'):
-                    if 'job(s) submitted to cluster' in line:
-                        ok = True
-                        line = line.split()
-                        try:
-                            njobs_sub = int(line[0])
-                            cluster = int(line[-1][:-1])
-                            open(os.path.join(working_dir, 'njobs'), 'wt').write(str(njobs_sub))
-                            open(os.path.join(working_dir, 'cluster'), 'wt').write(str(cluster))
-                            if njobs_sub != njobs:
-                                ok = False
-                        except ValueError:
-                            ok = False
-                if not ok:
-                    print '\033[1m problem! \033[0m'
-                    print submit_out
-                else:
-                    print 'success! cluster', cluster
-                    cluster_link = os.path.join(self.links_dir, str(cluster))
-                    if os.path.islink(cluster_link):
-                        print 'warning: clobbering old link:', os.readlink(cluster_link)
-                        os.unlink(cluster_link)
-                    os.symlink(working_dir, cluster_link)
-            finally:
-                os.chdir(cwd)
+            self._submit(working_dir, njobs)
         else:
             print 'in testing mode, not submitting anything.'
             diff_out, diff_ret = popen('diff -uN %s %s' % (self.pset_template_fn, pset_fn), return_exit_code=True)
