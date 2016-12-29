@@ -21,6 +21,7 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void beginRun(const edm::Run&, const edm::EventSetup&);
 
+  const edm::EDGetTokenT<edm::TriggerResults> hlt_token;
   const bool prints;
   std::map<std::pair<unsigned, unsigned>, bool> ls_seen;
 
@@ -29,7 +30,6 @@ private:
   struct tree_t {
     unsigned run;
     unsigned lumi;
-    unsigned long long event;
     std::vector<bool> l1_was_seed;
     std::vector<int> l1_prescale;
     std::vector<int> l1_mask;
@@ -43,7 +43,6 @@ private:
 
     void clear() { 
       run = lumi = 0;
-      event = 0;
       l1_was_seed.assign(NL1, 0);
       l1_prescale.assign(NL1, 0);
       l1_mask.assign(NL1, 0);
@@ -59,18 +58,18 @@ private:
   tree_t nt;
 };
 
-const int MFVTriggerPrescales::NL1 = 4;
-const int MFVTriggerPrescales::NHLT = 2;
+const int MFVTriggerPrescales::NL1 = 9;
+const int MFVTriggerPrescales::NHLT = 5;
 
 MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
-  : prints(cfg.getUntrackedParameter<bool>("prints", false)),
+  : hlt_token(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"))),
+    prints(cfg.getUntrackedParameter<bool>("prints", false)),
     trig_cfg(cfg, consumesCollector(), *this)
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
   tree->Branch("run", &nt.run, "run/i");
   tree->Branch("lumi", &nt.lumi, "lumi/i");
-  tree->Branch("event", &nt.event);
   tree->Branch("l1_was_seed", &nt.l1_was_seed);
   tree->Branch("l1_prescale", &nt.l1_prescale);
   tree->Branch("l1_mask", &nt.l1_mask);
@@ -117,25 +116,24 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
   nt.clear();
   nt.run  = event.id().run();
   nt.lumi = event.luminosityBlock();
-  nt.event  = event.id().event();
 
   const L1GtUtils& l1_cfg = trig_cfg.l1GtUtils();
   const HLTConfigProvider& hlt_cfg = trig_cfg.hltConfigProvider();
 
   edm::Handle<edm::TriggerResults> hlt_results;
-  event.getByLabel(edm::InputTag("TriggerResults", "", "HLT"), hlt_results);
+  event.getByToken(hlt_token, hlt_results);
   const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
   const size_t npaths = hlt_names.size();
 
-  const std::vector<std::string> all_l1_seeds = { "L1_HTT100", "L1_HTT125", "L1_HTT150", "L1_HTT175" };
-  const std::vector<int> hlt_versions = {1,2};
+  const std::vector<std::string> all_l1_seeds = { "L1_HTT160", "L1_HTT200", "L1_HTT220", "L1_HTT240", "L1_HTT255", "L1_HTT270", "L1_HTT280", "L1_HTT300", "L1_HTT320" };
+  const std::vector<int> hlt_versions = {1,2,3,4,6};
   assert(all_l1_seeds.size() == NL1);
   assert(hlt_versions.size() == NHLT);
 
   for (size_t ihlt = 0; ihlt < NHLT; ++ihlt) {
     const int hlt_version = hlt_versions[ihlt];
     char path[1024];
-    snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
+    snprintf(path, 1024, "HLT_PFHT900_v%i", hlt_version);
     bool found = false;
     if ((found = nt.hlt_found[ihlt] = hlt_cfg.triggerIndex(path) != hlt_cfg.size()))
       nt.hlt_prescale[ihlt] = trig_cfg.prescaleValue(event, setup, path);
