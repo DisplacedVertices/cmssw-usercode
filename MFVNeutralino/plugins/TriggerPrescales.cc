@@ -25,6 +25,7 @@ private:
   const bool prints;
   std::map<std::pair<unsigned, unsigned>, bool> ls_seen;
 
+  L1GtUtils l1_cfg;
   HLTPrescaleProvider trig_cfg;
 
   struct tree_t {
@@ -64,6 +65,7 @@ const int MFVTriggerPrescales::NHLT = 5;
 MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
   : hlt_token(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"))),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
+    l1_cfg(cfg, consumesCollector(), true, *this),
     trig_cfg(cfg, consumesCollector(), *this)
 {
   edm::Service<TFileService> fs;
@@ -81,6 +83,8 @@ MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
 }
 
 void MFVTriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
+  l1_cfg.getL1GtRunCache(run, setup, true, true);
+
   bool changed = true;
   if (!trig_cfg.init(run, setup, "HLT", changed))
     throw cms::Exception("MFVTriggerPrescales", "HLTConfigProvider::init failed with process name HLT");
@@ -117,7 +121,6 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
   nt.run  = event.id().run();
   nt.lumi = event.luminosityBlock();
 
-  const L1GtUtils& l1_cfg = trig_cfg.l1GtUtils();
   const HLTConfigProvider& hlt_cfg = trig_cfg.hltConfigProvider();
 
   edm::Handle<edm::TriggerResults> hlt_results;
@@ -149,11 +152,11 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
     if (!found)
       continue;
 
-    const auto& v = hlt_cfg.hltL1GTSeeds(path);
+    const auto& v = hlt_cfg.hltL1TSeeds(path);
     if (v.size() != 1)
       throw cms::Exception("BadAssumption") << "more than one seed returned: " << v.size();
 
-    std::string s = v[0].second;
+    std::string s = v[0];
     if (prints) printf("L1 seed %s\n", s.c_str());
     const std::string delim = " OR ";
     while (s.size()) {
