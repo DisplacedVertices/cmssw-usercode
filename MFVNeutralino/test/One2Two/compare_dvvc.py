@@ -7,7 +7,7 @@ mode = 'vary_eff'
 #mode = 'vary_dbv'
 
 set_style()
-ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(600,600), root=False, log=False)
+ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
 
 if mode == 'vary_eff':
     fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
@@ -98,6 +98,7 @@ colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROO
 
 gs = []
 g1s = []
+g2s = []
 for i in range(3):
     l1 = ROOT.TLegend(0.35,0.60,0.85,0.85)
     hh = ROOT.TFile(fns[i][0]).Get('h_2v_dvv')
@@ -124,6 +125,29 @@ for i in range(3):
     l1.SetFillColor(0)
     l1.Draw()
     ps.save(ntk[i])
+
+    if i == 2:
+        hs = []
+        l1 = ROOT.TLegend(0.50,0.75,0.85,0.85)
+        for j in range(len(ls)):
+            h = ROOT.TFile(fns[i][j]).Get('h_c1v_dvv')
+            h.SetStats(0)
+            h.SetLineColor(colors[j])
+            h.SetLineWidth(2)
+            h.Scale(n2v[i]/h.Integral())
+            if j == 0:
+                h.SetTitle(';d_{VV}^{C} (cm);Events')
+                h.GetYaxis().SetRangeUser(0,0.4)
+                h.Draw('hist e')
+            elif j == 1:
+                h.Draw('hist e sames')
+            hs.append(h)
+            if j > 1:
+                continue
+            l1.AddEntry(h, ls[j])
+        l1.SetFillColor(0)
+        l1.Draw()
+        ps.save('compare_dvvc_%s' % mode)
 
     l2 = ROOT.TLegend(0.15,0.60,0.65,0.85)
     h2 = ROOT.TFile(fns[i][0]).Get('h_2v_absdphivv')
@@ -174,7 +198,7 @@ for i in range(3):
         er = (c/sim) * ((e/c)**2 + (err/sim)**2)**0.5
         r1 = c/c1
         er1 = (c/c1) * ((e/c)**2 + (e1/c1)**2)**0.5
-        print '%33s = %4.2f +/- %4.2f (%4.2f +/- %4.2f x)' % (ls[j], c, e, r, er)
+        print '%33s = %6.2f +/- %4.2f (%4.2f +/- %4.2f x simulated) (%4.2f +/- %4.2f x dVVC1)' % (ls[j], c, e, r, er, r1, er1)
         x.append(j+1+0.1*i)
         y.append(r)
         y1.append(r1)
@@ -185,6 +209,26 @@ for i in range(3):
     gs.append(g)
     g1 = ROOT.TGraphErrors(len(x), array('d',x), array('d',y1), array('d',ex), array('d',ey1))
     g1s.append(g1)
+
+    x2 = []
+    y2 = []
+    ex2 = []
+    ey2 = []
+    for j,h in enumerate(hs):
+        if j == 0:
+            continue
+        if j > 1:
+            continue
+        e = ROOT.Double(0)
+        c = h.IntegralAndError(5,40,e)
+        r1 = c/c1
+        er1 = (c/c1) * ((e/c)**2 + (e1/c1)**2)**0.5
+        x2.append(j+i)
+        y2.append(r1)
+        ex2.append(0)
+        ey2.append(er1)
+    g2 = ROOT.TGraphErrors(len(x2), array('d',x2), array('d',y2), array('d',ex2), array('d',ey2))
+    g2s.append(g2)
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta]
 l = ROOT.TLegend(0.67,0.72,0.87,0.87)
@@ -228,3 +272,20 @@ line.SetLineStyle(2)
 line.SetLineWidth(2)
 line.Draw()
 ps.save('ratio_dvvc1')
+
+for i,g in enumerate(g2s):
+    g.SetMarkerStyle(21)
+    if i == 0:
+        g.SetTitle('variation / default (d_{VV}^{C} > 400 #mum);3-track%12s4-track%12s5-or-more-track%2s' % ('','',''))
+        g.GetXaxis().SetLimits(0,4)
+        g.GetXaxis().SetLabelSize(0)
+        g.GetXaxis().SetTitleOffset(0.5)
+        g.GetYaxis().SetRangeUser(0.6,1.4)
+        g.Draw('AP')
+    else:
+        g.Draw('P')
+line = ROOT.TLine(0,1,4,1)
+line.SetLineStyle(2)
+line.SetLineWidth(2)
+line.Draw()
+ps.save('ratio_%s' % mode)
