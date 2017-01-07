@@ -45,35 +45,19 @@ ntk_deltasvgaus_wevent efficiency'''.split('\n')
     lsh = 'avg    maxtk    merge    ntk    wevent    dzgaus    both  '
 
 if mode == 'vary_dphi':
-    fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
-2v_from_jets_3track_average3_c1p3_e2p0_a2p6.root
-2v_from_jets_3track_average3_c1p1_e2p0_a2p6.root
-2v_from_jets_3track_average3_c1p5_e2p0_a2p6.root
-2v_from_jets_3track_average3_c1p3_e2p0_a1p2.root
-2v_from_jets_3track_average3_c1p3_e2p0_a4p0.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a3p7.root
+2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root
-2v_from_jets_4track_average4_c1p3_e2p0_a2p6.root
-2v_from_jets_4track_average4_c1p1_e2p0_a2p6.root
-2v_from_jets_4track_average4_c1p5_e2p0_a2p6.root
-2v_from_jets_4track_average4_c1p3_e2p0_a1p2.root
-2v_from_jets_4track_average4_c1p3_e2p0_a4p0.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a3p8.root
+2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root
-2v_from_jets_5track_average5_c1p3_e2p0_a2p6.root
-2v_from_jets_5track_average5_c1p1_e2p0_a2p6.root
-2v_from_jets_5track_average5_c1p5_e2p0_a2p6.root
-2v_from_jets_5track_average5_c1p3_e2p0_a1p2.root
-2v_from_jets_5track_average5_c1p3_e2p0_a4p0.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p5_e2p0_a2p7.root
+2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    ls = '''|#Delta#phi| flat
-|#Delta#phi - 1.3|^{2} + 2.6
-|#Delta#phi - 1.1|^{2} + 2.6
-|#Delta#phi - 1.5|^{2} + 2.6
-|#Delta#phi - 1.3|^{2} + 1.2
-|#Delta#phi - 1.3|^{2} + 4.0'''.split('\n')
+    ls = '''|#Delta#phi| from jets
+|#Delta#phi| flat'''.split('\n')
 
-    lsh = 'flat       |#Delta#phi-c|^{2}+a       c-1#sigma       c+1#sigma       a-1#sigma       a+1#sigma     '
+    lsh = 'jets                                flat                       '
 
 if mode == 'vary_dbv':
     fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000.root
@@ -100,7 +84,7 @@ gs = []
 g1s = []
 g2s = []
 for i in range(3):
-    l1 = ROOT.TLegend(0.35,0.60,0.85,0.85)
+    l1 = ROOT.TLegend(0.50,0.70,0.85,0.85)
     hh = ROOT.TFile(fns[i][0]).Get('h_2v_dvv')
     hh.SetTitle('%s;d_{VV} (cm);events' % ntk[i])
     hh.SetStats(0)
@@ -149,7 +133,7 @@ for i in range(3):
         l1.Draw()
         ps.save('compare_dvvc_%s' % mode)
 
-    l2 = ROOT.TLegend(0.15,0.60,0.65,0.85)
+    l2 = ROOT.TLegend(0.15,0.70,0.50,0.85)
     h2 = ROOT.TFile(fns[i][0]).Get('h_2v_absdphivv')
     h2.SetTitle('%s;|#Delta#phi_{VV}|;events' % ntk[i])
     h2.SetStats(0)
