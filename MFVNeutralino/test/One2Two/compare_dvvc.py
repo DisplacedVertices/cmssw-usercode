@@ -42,7 +42,7 @@ ntk_wevent efficiency
 ntk_deltasvgaus efficiency
 ntk_deltasvgaus_wevent efficiency'''.split('\n')
 
-    lsh = 'avg    maxtk    merge    ntk    wevent    dzgaus    both  '
+    lsh = 'maxtk      merge      ntk      wevent      dzgaus      both   '
 
 if mode == 'vary_dphi':
     fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a3p7.root
@@ -57,7 +57,7 @@ if mode == 'vary_dphi':
     ls = '''|#Delta#phi| from jets
 |#Delta#phi| flat'''.split('\n')
 
-    lsh = 'jets                                flat                       '
+    lsh = 'flat%40s' % ''
 
 if mode == 'vary_dbv':
     fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000.root
@@ -72,7 +72,7 @@ if mode == 'vary_dbv':
     ls = '''default
 sort by b quarks'''.split('\n')
 
-    lsh = 'default                          sort by b quarks      '
+    lsh = 'sort by b quarks%30s' % ''
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
@@ -171,10 +171,16 @@ for i in range(3):
 
     x = []
     y = []
-    y1 = []
     ex = []
     ey = []
+    x1 = []
+    y1 = []
+    ex1 = []
     ey1 = []
+    x2 = []
+    y2 = []
+    ex2 = []
+    ey2 = []
     for j,h in enumerate(hs):
         e = ROOT.Double(0)
         c = h.IntegralAndError(5,40,e)
@@ -184,33 +190,25 @@ for i in range(3):
         er1 = (c/c1) * ((e/c)**2 + (e1/c1)**2)**0.5
         print '%33s = %6.2f +/- %4.2f (%4.2f +/- %4.2f x simulated) (%4.2f +/- %4.2f x dVVC1)' % (ls[j], c, e, r, er, r1, er1)
         x.append(j+1+0.1*i)
-        y.append(r)
-        y1.append(r1)
         ex.append(0)
+        y.append(r)
         ey.append(er)
-        ey1.append(er1)
-    g = ROOT.TGraphErrors(len(x), array('d',x), array('d',y), array('d',ex), array('d',ey))
-    gs.append(g)
-    g1 = ROOT.TGraphErrors(len(x), array('d',x), array('d',y1), array('d',ex), array('d',ey1))
-    g1s.append(g1)
-
-    x2 = []
-    y2 = []
-    ex2 = []
-    ey2 = []
-    for j,h in enumerate(hs):
         if j == 0:
             continue
+        x1.append(j+0.1*i)
+        ex1.append(0)
+        y1.append(r1)
+        ey1.append(er1)
         if j > 1:
             continue
-        e = ROOT.Double(0)
-        c = h.IntegralAndError(5,40,e)
-        r1 = c/c1
-        er1 = (c/c1) * ((e/c)**2 + (e1/c1)**2)**0.5
-        x2.append(j+i)
-        y2.append(r1)
+        x2.append(i+1)
         ex2.append(0)
+        y2.append(r1)
         ey2.append(er1)
+    g = ROOT.TGraphErrors(len(x), array('d',x), array('d',y), array('d',ex), array('d',ey))
+    gs.append(g)
+    g1 = ROOT.TGraphErrors(len(x1), array('d',x1), array('d',y1), array('d',ex1), array('d',ey1))
+    g1s.append(g1)
     g2 = ROOT.TGraphErrors(len(x2), array('d',x2), array('d',y2), array('d',ex2), array('d',ey2))
     g2s.append(g2)
 
@@ -242,8 +240,10 @@ for i,g in enumerate(g1s):
     g.SetMarkerColor(colors[i])
     g.SetLineColor(colors[i])
     if i == 0:
-        g.SetTitle('d_{VV}^{C}(n) / d_{VV}^{C}(1) (>400 #mum);%s;' % lsh)
-        g.GetXaxis().SetLimits(0.4,len(x)+0.8)
+        g.SetTitle('variation / default (d_{VV}^{C} > 400 #mum);%s;' % lsh)
+        g.GetXaxis().SetLimits(0.4,len(x1)+0.8)
+        g.GetXaxis().SetLabelSize(0)
+        g.GetXaxis().SetTitleOffset(0.5)
         g.GetYaxis().SetRangeUser(0.6,1.4)
         g.Draw('AP')
     else:
@@ -251,7 +251,7 @@ for i,g in enumerate(g1s):
     l.AddEntry(g, ntk[i], 'lep')
 l.SetFillColor(0)
 l.Draw()
-line = ROOT.TLine(0.4,1,len(x)+0.8,1)
+line = ROOT.TLine(0.4,1,len(x1)+0.8,1)
 line.SetLineStyle(2)
 line.SetLineWidth(2)
 line.Draw()
