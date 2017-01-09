@@ -12,37 +12,38 @@ ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=F
 if mode == 'vary_eff':
     fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
 2v_from_jets_3track_maxtk3_c0p0_e0p0_a0p0.root
-2v_from_jets_3track_maxtk3_merge_c0p0_e0p0_a0p0.root
-2v_from_jets_3track_ntk3_c0p0_e0p0_a0p0.root
-2v_from_jets_3track_ntk3_wevent_c0p0_e0p0_a0p0.root
-2v_from_jets_3track_ntk3_deltasvgaus_c0p0_e0p0_a0p0.root
 2v_from_jets_3track_ntk3_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
+#2v_from_jets_3track_maxtk3_merge_c0p0_e0p0_a0p0.root
+#2v_from_jets_3track_ntk3_c0p0_e0p0_a0p0.root
+#2v_from_jets_3track_ntk3_wevent_c0p0_e0p0_a0p0.root
+#2v_from_jets_3track_ntk3_deltasvgaus_c0p0_e0p0_a0p0.root
 
     fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root
 2v_from_jets_4track_maxtk4_c0p0_e0p0_a0p0.root
-2v_from_jets_4track_maxtk4_merge_c0p0_e0p0_a0p0.root
-2v_from_jets_4track_ntk4_c0p0_e0p0_a0p0.root
-2v_from_jets_4track_ntk4_wevent_c0p0_e0p0_a0p0.root
-2v_from_jets_4track_ntk4_deltasvgaus_c0p0_e0p0_a0p0.root
 2v_from_jets_4track_ntk4_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
+#2v_from_jets_4track_maxtk4_merge_c0p0_e0p0_a0p0.root
+#2v_from_jets_4track_ntk4_c0p0_e0p0_a0p0.root
+#2v_from_jets_4track_ntk4_wevent_c0p0_e0p0_a0p0.root
+#2v_from_jets_4track_ntk4_deltasvgaus_c0p0_e0p0_a0p0.root
 
     fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root
 2v_from_jets_5track_maxtk5_c0p0_e0p0_a0p0.root
-2v_from_jets_5track_maxtk5_merge_c0p0_e0p0_a0p0.root
-2v_from_jets_5track_ntk5_c0p0_e0p0_a0p0.root
-2v_from_jets_5track_ntk5_wevent_c0p0_e0p0_a0p0.root
-2v_from_jets_5track_ntk5_deltasvgaus_c0p0_e0p0_a0p0.root
 2v_from_jets_5track_ntk5_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
+#2v_from_jets_5track_maxtk5_merge_c0p0_e0p0_a0p0.root
+#2v_from_jets_5track_ntk5_c0p0_e0p0_a0p0.root
+#2v_from_jets_5track_ntk5_wevent_c0p0_e0p0_a0p0.root
+#2v_from_jets_5track_ntk5_deltasvgaus_c0p0_e0p0_a0p0.root
 
     ls = '''average efficiency
 maxtk efficiency
-maxtk_merge efficiency
-ntk efficiency
-ntk_wevent efficiency
-ntk_deltasvgaus efficiency
 ntk_deltasvgaus_wevent efficiency'''.split('\n')
+#maxtk_merge efficiency
+#ntk efficiency
+#ntk_wevent efficiency
+#ntk_deltasvgaus efficiency
 
-    lsh = 'maxtk      merge      ntk      wevent      dzgaus      both   '
+    lsh = 'vertexer method%10soverlay method%10s' % ('', '')
+#    lsh = 'maxtk      merge      ntk      wevent      dzgaus      both   '
 
 if mode == 'vary_dphi':
     fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a3p7.root
