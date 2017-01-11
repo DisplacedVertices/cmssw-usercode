@@ -49,10 +49,10 @@ if mode == 'vary_dphi':
     fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a3p7.root
 2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a3p8.root
+    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a3p7.root
 2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p5_e2p0_a2p7.root
+    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a3p7.root
 2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root'''.split('\n')
 
     ls = '''|#Delta#phi| from jets
