@@ -164,7 +164,14 @@ for i in range(3):
     sim = hh.IntegralAndError(5,40,err)
     if sim == 0:
         sim = 1
-    print '%s: simulated events = %4.2f +/- %4.2f' % (ntk[i], sim, err)
+
+    err_tot = ROOT.Double(0)
+    sim_tot = hh.IntegralAndError(1,40,err_tot)
+    if sim_tot == 0:
+        sim_tot = 1
+    r_tot = sim/sim_tot
+    er_tot = sim/sim_tot * ((err/sim)**2 + (err_tot/sim_tot)**2)**0.5
+    print '%s: simulated events = %4.2f +/- %4.2f (%4.2f +/- %4.2f x dVV)' % (ntk[i], sim, err, r_tot, er_tot)
 
     e1 = ROOT.Double(0)
     c1 = hs[0].IntegralAndError(5,40,e1)
@@ -189,7 +196,13 @@ for i in range(3):
         er = (c/sim) * ((e/c)**2 + (err/sim)**2)**0.5
         r1 = c/c1
         er1 = (c/c1) * ((e/c)**2 + (e1/c1)**2)**0.5
-        print '%33s = %6.2f +/- %4.2f (%4.2f +/- %4.2f x simulated) (%4.2f +/- %4.2f x dVVC1)' % (ls[j], c, e, r, er, r1, er1)
+
+        e2 = ROOT.Double(0)
+        c2 = h.IntegralAndError(1,40,e2)
+        r2 = c/c2
+        er2 = (c/c2) * ((e/c)**2 + (e2/c2)**2)**0.5
+
+        print '%33s = %6.2f +/- %4.2f (%4.2f +/- %4.2f x simulated) (%4.2f +/- %4.2f x dVVC1) (%4.2f +/- %4.2f x dVVC)' % (ls[j], c, e, r, er, r1, er1, r2, er2)
         x.append(j+1+0.1*i)
         ex.append(0)
         y.append(r)
