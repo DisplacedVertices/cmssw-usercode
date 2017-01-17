@@ -180,7 +180,7 @@ if __name__ == '__main__':
     #    x = file_details_run_lumis(dataset)
     #    open(name + '.neventsdict', 'wt').write(repr(file_details_nevents(dataset)))
     #    open(name + '.runlumisdict', 'wt').write(repr(x))
-    #    ll_from_file_details(x).writeJSON(name + '.json')
+    #    ll_for_dataset_from_details(x).writeJSON(name + '.json')
 
     #execfile('events_to_debug.txt')
     #pprint(files_for_events(duh, 'fuh'))
