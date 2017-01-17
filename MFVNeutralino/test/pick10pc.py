@@ -1,15 +1,38 @@
-import random, sys
+import random, sys, gzip
 from FWCore.PythonUtilities.LumiList import LumiList
 
 random.seed(8675309)
 
-in_ll = LumiList('TriggerStudies/jsons/L1_HTT175--ls where bit mask == 0, tot. presc. == 1.json').getLumis()
+ll_fn = 'ana_2016.json'
+lumi_fn = '2016.byls.csv.gz'
+check_intlumi_sum = 36.814e9 # byls file expected to be in /ub # brilcalc lumi --normtag=normtag_2016.json -i 2016.json --byls -o 2016.byls.csv
+goal = 0.01 * check_intlumi_sum
+out_fn = 'ana_2016_1pc.json'
 
-intlumis = [x.strip().split() for x in open('TriggerStudies/prescales_intlumi.txt') if x.strip()]
-intlumis = dict(((int(r),int(l)), float(i)) for r,l,i in intlumis)
+in_ll = LumiList(ll_fn).getLumis()
 
+intlumis = {}
+intlumi_sum = 0.
+with gzip.open(lumi_fn) as lumi_f:
+    first = True
+    for line in lumi_f:
+        line = line.strip()
+        if first:
+            assert line == '#run:fill,ls,time,beamstatus,E(GeV),delivered(/ub),recorded(/ub),avgpu,source'
+            first = False
+        else:
+            line = line.split(',')
+            run = int(line[0].split(':')[0])
+            ls0,ls1 = line[1].split(':')
+            assert ls0 == ls1 or (ls0 != '0' and ls1 == '0')
+            ls = int(ls0)
+            intlumi = float(line[-3])
+            intlumis[(run, ls)] = intlumi
+            intlumi_sum += intlumi
+
+assert abs(intlumi_sum - check_intlumi_sum) < 1e6
+   
 tot = 0.
-goal = 0.1 * 2.6 * 1e9 # 1e9 bc input file has it in /ub
 out_ll = []
 
 while tot < goal:
@@ -21,4 +44,5 @@ while tot < goal:
     out_ll.append(rl)
 
 print 'tot = %f, picked %i lumis' % (tot, len(out_ll))
-LumiList(lumis=out_ll).writeJSON('ana_10pc.json')
+LumiList(lumis=out_ll).writeJSON(out_fn)
+
