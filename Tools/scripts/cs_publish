@@ -37,7 +37,7 @@ for wd in wds:
     njobs = cs_njobs(wd)
     files = []
     for job in xrange(njobs):
-        publish_fn = os.path.join(wd, 'publish.' + str(job))
+        publish_fn = os.path.join(wd, 'publish_%i.txt' % job)
         if not os.path.isfile(publish_fn):
             if options.partial:
                 print 'warning: missing', fn
