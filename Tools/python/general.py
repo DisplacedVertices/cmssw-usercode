@@ -151,9 +151,36 @@ def touch(path):
     with open(path, 'a'):
         os.utime(path, None)
 
+def intlumi_from_brilcalc_csv(fn, has_hlt):
+    intlumis = {}
+    intlumi_sum = 0.
+    with gzip.open(fn) as lumi_f:
+        intlumi_column = None
+        for line in lumi_f:
+            line = line.strip()
+            if line.startswith('#'):
+                if intlumi_column is None and line.startswith('#run:fill'):
+                    if has_hlt:
+                        assert line == '#run:fill,ls,time,hltpath,delivered(/ub),recorded(/ub),source'
+                        intlumi_column = -2
+                    else:
+                        assert line == '#run:fill,ls,time,beamstatus,E(GeV),delivered(/ub),recorded(/ub),avgpu,source'
+                        intlumi_column = -3
+            else:
+                line = line.split(',')
+                run = int(line[0].split(':')[0])
+                ls0,ls1 = line[1].split(':')
+                assert ls0 == ls1 or (ls0 != '0' and ls1 == '0')
+                ls = int(ls0)
+                intlumi = float(line[intlumi_column])
+                intlumis[(run, ls)] = intlumi
+                intlumi_sum += intlumi
+    return intlumis, intlumi_sum
+
 __all__ = [
     'bool_from_argv',
     'big_warn',
+    'intlumi_from_brilcalc_csv',
     'from_pickle',
     'to_pickle',
     'typed_from_argv',
