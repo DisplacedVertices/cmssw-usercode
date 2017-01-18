@@ -443,7 +443,8 @@ _adbp3('sim', '/mfv_neu_tau10000um_M1600/tucker-sim_10k-c66f4a7649a68ea5b6afdf05
 
 for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
           mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
-          xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700):
+          xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700,
+          qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
     x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
 
 ########################################################################

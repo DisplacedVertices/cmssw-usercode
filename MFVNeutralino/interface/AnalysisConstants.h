@@ -8,10 +8,16 @@
 namespace mfv {
   namespace AnalysisConstants {
     const double
-    int_lumi = 36460.;
+    int_lumi_2015 = 2691.;
+
+    const double
+    int_lumi_2016 = 36810.;
+
+    const double
+    int_lumi = 39501.;
 
     const char*
-    int_lumi_nice = "36 fb^{-1} (13 TeV)";
+    int_lumi_nice = "39.5 fb^{-1} (13 TeV)";
 
     const double
     scale_factor = 1.;
