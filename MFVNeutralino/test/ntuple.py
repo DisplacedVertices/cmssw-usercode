@@ -110,7 +110,6 @@ process.maxEvents.input = 100
 file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples 
 
     samples = Samples.registry.from_argv(
@@ -123,16 +122,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def modify(sample):
         to_add = []
         to_replace = []
-
         if sample.is_mc:
-            if sample.is_fastsim:
-                raise NotImplementedError('zzzzzzz')
+            assert not sample.is_fastsim
         else:
             magic = 'is_mcX=XTrue'.replace('X', ' ')
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'is_mc = False', err))
             # JMTBAD different globaltags?
-
         return to_add, to_replace
 
     # JMTBAD make CondorSubmitter use events_per?
@@ -143,13 +139,27 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             if filter_eff.has_key(s.name):
                 s.events_per = min(int(25000/filter_eff[s.name]), 200000)
             print s.name, s.events_per
-        #else:
-        #    sample.json = 'ana_all.json'
 
-    cs = CondorSubmitter(batch_name,
-                         #pfn_prefix = 'root://cmseos.fnal.gov/', # if the files are at FNAL not just accessible by xrootd
-                         stageout_files = 'all',
-                         publish_name = batch_name,
-                         )
+    ### 
 
-    cs.submit_all(samples)
+    crab_samples = Samples.data_samples # not because condorsubmitter has a problem with data but they're just not at fnal
+    condor_samples = [s for s in samples if s not in crab_samples]
+
+    if crab_samples:
+        from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+        cs = CRABSubmitter(batch_name,
+                           pset_modifier = modify,
+                           job_control_from_sample = True,
+                           publish_name = batch_name,
+                           )
+        cs.submit_all(crab_samples)
+
+    if condor_samples:
+        from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+        cs = CondorSubmitter(batch_name,
+                             pfn_prefix = 'root://cmseos.fnal.gov/', # if the files are at FNAL not just accessible by xrootd
+                             pset_modifier = modify,
+                             stageout_files = 'all',
+                             publish_name = batch_name,
+                             )
+        cs.submit_all(condor_samples)
