@@ -36,9 +36,9 @@ const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76
 
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
-float weights[nbkg] = {6.166, 0.7894, 0.3320, 0.5620};
+float weights[nbkg] = {8.585, 1.099, 0.4623, 0.7824};
 
-double n2v = 1121.;
+double n2v = 1179.;
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
