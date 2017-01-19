@@ -150,7 +150,7 @@ int main(int argc, const char* argv[]) {
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
 
-  for (int i = 0; i < int(h_1v_dbv->GetEntries()); ++i) {
+  for (int i = 0; i < int(h_1v_dbv->Integral()); ++i) {
     double dbv0 = h_1v_dbv0->GetRandom();
     double dbv1 = h_1v_dbv1->GetRandom();
     h_c1v_dbv->Fill(dbv0);
