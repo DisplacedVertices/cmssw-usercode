@@ -13,9 +13,10 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+int ntracks = 3;
+
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
-const char* eff_hist = "average3";
 
 double dphi_pdf_c = 0;
 double dphi_pdf_e = 0;
@@ -32,13 +33,9 @@ int max_ntracks0 = 1000000;
 int min_ntracks1 = 0;
 int max_ntracks1 = 1000000;
 
-const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
-
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
 float weights[nbkg] = {8.585, 1.099, 0.4623, 0.7824};
-
-double n2v = 1179.;
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
@@ -49,6 +46,30 @@ float ht(int njets, float* jet_pt) {
 }
 
 int main(int argc, const char* argv[]) {
+  const char* tree_path;
+  const char* eff_hist;
+  double n1v;
+  double n2v;
+  if (ntracks == 3) {
+    tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
+    eff_hist = "average3";
+    n1v = 178700.;
+    n2v = 1179.;
+  } else if (ntracks == 4) {
+    tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_7";
+    eff_hist = "average4";
+    n1v = 24900.;
+    n2v = 23.;
+  } else if (ntracks == 5) {
+    tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_5";
+    eff_hist = "average5";
+    n1v = 3960.;
+    n2v = 1.;
+  } else {
+    fprintf(stderr, "bad ntracks"); exit(1);
+  }
+  printf("tree_path = %s, eff_hist = %s, n1v = %d, n2v = %d\n", tree_path, eff_hist, int(n1v), int(n2v));
+
   if (argc == 6) {
     clearing_from_eff = true;
     eff_file = argv[1];
@@ -150,7 +171,7 @@ int main(int argc, const char* argv[]) {
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
 
-  for (int i = 0; i < int(h_1v_dbv->Integral()); ++i) {
+  for (int i = 0; i < int(n1v); ++i) {
     double dbv0 = h_1v_dbv0->GetRandom();
     double dbv1 = h_1v_dbv1->GetRandom();
     h_c1v_dbv->Fill(dbv0);
