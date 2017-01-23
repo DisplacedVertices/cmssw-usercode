@@ -51,17 +51,17 @@ int main(int argc, const char* argv[]) {
   double n1v;
   double n2v;
   if (ntracks == 3) {
-    tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
+    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3";
     eff_hist = "average3";
     n1v = 178700.;
     n2v = 1179.;
   } else if (ntracks == 4) {
-    tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_7";
+    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk4";
     eff_hist = "average4";
     n1v = 24900.;
     n2v = 23.;
   } else if (ntracks == 5) {
-    tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_5";
+    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10";
     eff_hist = "average5";
     n1v = 3960.;
     n2v = 1.;
