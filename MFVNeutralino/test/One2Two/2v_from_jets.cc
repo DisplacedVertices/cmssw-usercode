@@ -13,11 +13,11 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+int ntracks = 3;
+
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
-const char* eff_hist = "average3";
 
-bool dphi_from_pdf = true;
 double dphi_pdf_c = 0;
 double dphi_pdf_e = 0;
 double dphi_pdf_a = 0;
@@ -33,13 +33,9 @@ int max_ntracks0 = 1000000;
 int min_ntracks1 = 0;
 int max_ntracks1 = 1000000;
 
-const char* tree_path = "/uscms_data/d3/jchu/crab_dirs/mfv_763p2/MinitreeV6p1_76x_nstlays3_8";
-
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000", "qcdht1500", "qcdht2000", "ttbar"};
-float weights[nbkg] = {6.166, 0.7894, 0.3320, 0.5620};
-
-double n2v = 1121.;
+float weights[nbkg] = {8.585, 1.099, 0.4623, 0.7824};
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
@@ -49,31 +45,31 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-float throw_phi(int njets, float* jet_pt, float* jet_phi) {
-  double rjetphi = 0;
-  double rand = gRandom->Rndm();
-  double sumpt = 0;
-  for (int j = 0; j < njets; ++j) {
-    sumpt += jet_pt[j];
-    if (rand < sumpt/ht(njets, jet_pt)) {
-      rjetphi = jet_phi[j];
-      break;
-    }
-  }
-
-  double rdphi = gRandom->Gaus(1.57, 0.4);
-
-  double vtx_phi = 0;
-  if (gRandom->Rndm() < 0.5) {
-    vtx_phi = rjetphi - rdphi;
-  } else {
-    vtx_phi = rjetphi + rdphi;
-  }
-
-  return TVector2::Phi_mpi_pi(vtx_phi);
-}
-
 int main(int argc, const char* argv[]) {
+  const char* tree_path;
+  const char* eff_hist;
+  double n1v;
+  double n2v;
+  if (ntracks == 3) {
+    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3";
+    eff_hist = "average3";
+    n1v = 178700.;
+    n2v = 1179.;
+  } else if (ntracks == 4) {
+    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk4";
+    eff_hist = "average4";
+    n1v = 24900.;
+    n2v = 23.;
+  } else if (ntracks == 5) {
+    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10";
+    eff_hist = "average5";
+    n1v = 3960.;
+    n2v = 1.;
+  } else {
+    fprintf(stderr, "bad ntracks"); exit(1);
+  }
+  printf("tree_path = %s, eff_hist = %s, n1v = %d, n2v = %d\n", tree_path, eff_hist, int(n1v), int(n2v));
+
   if (argc == 6) {
     clearing_from_eff = true;
     eff_file = argv[1];
@@ -155,19 +151,13 @@ int main(int argc, const char* argv[]) {
     }
   }
 
-  //construct dvvc from only-one-vertex events
+  //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 500, 0, 2.5);
-  TH1F* h_c1v_phiv = new TH1F("h_c1v_phiv", "constructed from only-one-vertex events;vertex #phi;vertices", 50, -3.15, 3.15);
-  TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_c1v_dphivv = new TH1F("h_c1v_dphivv", "constructed from only-one-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 500, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 500, 0, 2.5);
   TH2F* h_c1v_dbv1_dbv0 = new TH2F("h_c1v_dbv1_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 20, 0, 0.1, 20, 0, 0.1);
-
-  TH1D* h_r1v_dbv = new TH1D("h_r1v_dbv", "random from only-one-vertex events;d_{BV} (cm);events", bins.size()-1, &bins[0]);
-  h_r1v_dbv->FillRandom(h_1v_dbv, (int)h_1v_dbv->Integral());
 
   TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", 0, M_PI);
   f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
@@ -178,56 +168,27 @@ int main(int argc, const char* argv[]) {
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
 
-  for (int i = 0; i < nbkg; ++i) {
-    mfv::MiniNtuple nt;
-    TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, samples[i]));
-    if (!f || !f->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
+  for (int i = 0; i < int(n1v); ++i) {
+    double dbv0 = h_1v_dbv0->GetRandom();
+    double dbv1 = h_1v_dbv1->GetRandom();
+    h_c1v_dbv->Fill(dbv0);
+    h_c1v_dbv->Fill(dbv1);
 
-    TTree* t = (TTree*)f->Get("mfvMiniTree/t");
-    if (!t) { fprintf(stderr, "bad tree"); exit(1); }
+    double dphi = f_dphi->GetRandom();
 
-    mfv::read_from_tree(t, nt);
-    for (int j = 0, je = t->GetEntries(); j < je; ++j) {
-      if (t->LoadTree(j) < 0) break;
-      if (t->GetEntry(j) <= 0) continue;
+    double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
 
-      const float w = weights[i] * nt.weight;
-      if (nt.nvtx == 1 && nt.njets > 0) {
-        double dbv0 = h_1v_dbv0->GetRandom();
-        double dbv1 = h_1v_dbv1->GetRandom();
-        h_c1v_dbv->Fill(dbv0, w);
-        h_c1v_dbv->Fill(dbv1, w);
-
-        double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
-        double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi);
-        h_c1v_phiv->Fill(phi0, w);
-        h_c1v_phiv->Fill(phi1, w);
-        for (int k = 0; k < nt.njets; ++k) {
-          h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi0 - nt.jet_phi[k]), w);
-          h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi1 - nt.jet_phi[k]), w);
-        }
-
-        double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
-        if (dphi_from_pdf) {
-          dphi = f_dphi->GetRandom();
-        }
-
-        double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
-
-        double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
-        if (clearing_from_eff) {
-          p = h_eff->GetBinContent(h_eff->FindBin(dvvc));
-        }
-
-        if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
-        h_c1v_dvv->Fill(dvvc, w * p);
-        h_c1v_dphivv->Fill(dphi, w * p);
-        h_c1v_absdphivv->Fill(fabs(dphi), w * p);
-        h_c1v_dbv0->Fill(dbv0, w * p);
-        h_c1v_dbv1->Fill(dbv1, w * p);
-        h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, w * p);
-      }
+    double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
+    if (clearing_from_eff) {
+      p = h_eff->GetBinContent(h_eff->FindBin(dvvc));
     }
+
+    if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
+    h_c1v_dvv->Fill(dvvc, p);
+    h_c1v_absdphivv->Fill(fabs(dphi), p);
+    h_c1v_dbv0->Fill(dbv0, p);
+    h_c1v_dbv1->Fill(dbv1, p);
+    h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, p);
   }
 
   TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
@@ -247,12 +208,8 @@ int main(int argc, const char* argv[]) {
   h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
 
-  h_r1v_dbv->Write();
   h_c1v_dbv->Write();
-  h_c1v_phiv->Write();
-  h_c1v_dphijv->Write();
   h_c1v_dvv->Write();
-  h_c1v_dphivv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
   h_c1v_dbv1->Write();
@@ -279,27 +236,6 @@ int main(int argc, const char* argv[]) {
   c_dvv->SetTicky();
   c_dvv->Write();
 
-  TCanvas* c_dphivv = new TCanvas("c_dphivv", "c_dphivv", 700, 700);
-  TLegend* l_dphivv = new TLegend(0.25,0.75,0.75,0.85);
-  h_2v_dphivv->SetTitle(";#Delta#phi_{VV};events");
-  h_2v_dphivv->SetLineColor(kBlue);
-  h_2v_dphivv->SetLineWidth(3);
-  h_2v_dphivv->Scale(n2v/h_2v_dphivv->Integral());
-  h_2v_dphivv->SetStats(0);
-  h_2v_dphivv->Draw();
-  l_dphivv->AddEntry(h_2v_dphivv, "two-vertex events");
-  h_c1v_dphivv->SetLineColor(kRed);
-  h_c1v_dphivv->SetLineWidth(3);
-  h_c1v_dphivv->Scale(n2v/h_c1v_dphivv->Integral());
-  h_c1v_dphivv->SetStats(0);
-  h_c1v_dphivv->Draw("sames");
-  l_dphivv->AddEntry(h_c1v_dphivv, "constructed from only-one-vertex events");
-  l_dphivv->SetFillColor(0);
-  l_dphivv->Draw();
-  c_dphivv->SetTickx();
-  c_dphivv->SetTicky();
-  c_dphivv->Write();
-
   TCanvas* c_absdphivv = new TCanvas("c_absdphivv", "c_absdphivv", 700, 700);
   TLegend* l_absdphivv = new TLegend(0.25,0.75,0.75,0.85);
   h_2v_absdphivv->SetTitle(";|#Delta#phi_{VV}|;events");
@@ -321,9 +257,7 @@ int main(int argc, const char* argv[]) {
   c_absdphivv->SetTicky();
   c_absdphivv->Write();
 
-  if (dphi_from_pdf) {
-    f_dphi->Write();
-  }
+  f_dphi->Write();
   if (clearing_from_eff) {
     h_eff->SetName("h_eff");
     h_eff->Write();

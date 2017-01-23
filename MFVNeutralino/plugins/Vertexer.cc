@@ -21,6 +21,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "JMTucker/Tools/interface/ByRunTH1.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 namespace {
@@ -241,26 +242,9 @@ private:
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
 
-  TH1F* h_pairs_d2d[6]; // only using 0,2,3,4,5
-  TH2F* h_pairs_d2d_nseedtracks[6];
-  TH2F* h_pairs_d2d_d2derr[6];
-  TH2F* h_pairs_d2d_maxtrackdxyerr[6];
-  TH1F* h_pairs_dphi[6];
-  TH1F* h_share_d2d[6]; // only using 0,2,3,4,5
-  TH2F* h_share_d2d_nseedtracks[6];
-  TH2F* h_share_d2d_d2derr[6];
-  TH2F* h_share_d2d_maxtrackdxyerr[6];
-  TH1F* h_share_dphi[6];
-  TH1F* h_merge_d2d[6]; // only using 0,2,3,4,5
-  TH2F* h_merge_d2d_nseedtracks[6];
-  TH2F* h_merge_d2d_d2derr[6];
-  TH2F* h_merge_d2d_maxtrackdxyerr[6];
-  TH1F* h_merge_dphi[6];
-  TH1F* h_erase_d2d[6]; // only using 0,2,3,4,5
-  TH2F* h_erase_d2d_nseedtracks[6];
-  TH2F* h_erase_d2d_d2derr[6];
-  TH2F* h_erase_d2d_maxtrackdxyerr[6];
-  TH1F* h_erase_dphi[6];
+  ByRunTH1<TH1F> h_pairs_d2d[6]; // only using 0,2,3,4,5   <- XXX 3,4,5
+  ByRunTH1<TH1F> h_merge_d2d[6]; // only using 0,2,3,4,5  <- XXX 3,4,5
+  ByRunTH1<TH1F> h_erase_d2d[6]; // only using 0,2,3,4,5  <- XXX 3,4,5
 
   TH1F* h_phitest_nev;
   TH1F* h_phitest_nvtx;
@@ -535,47 +519,10 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
-    h_pairs_d2d [0] = fs->make<TH1F>(TString::Format("h_pairs_d2d" ), "", 1000, 0, 1);
-    h_pairs_d2d_nseedtracks[0] = fs->make<TH2F>(TString::Format("h_pairs_d2d_nseedtracks" ), "", 100, 0, 100, 1000, 0, 1);
-    h_pairs_d2d_d2derr[0] = fs->make<TH2F>(TString::Format("h_pairs_d2d_d2derr" ), "", 1000, 0, 1, 1000, 0, 1);
-    h_pairs_d2d_maxtrackdxyerr[0] = fs->make<TH2F>(TString::Format("h_pairs_d2d_maxtrackdxyerr" ), "", 100, 0, 0.1, 1000, 0, 1);
-    h_pairs_dphi[0] = fs->make<TH1F>(TString::Format("h_pairs_dphi"), "", 100, -3.15, 3.15);
-    h_share_d2d [0] = fs->make<TH1F>(TString::Format("h_share_d2d" ), "", 1000, 0, 1);
-    h_share_d2d_nseedtracks[0] = fs->make<TH2F>(TString::Format("h_share_d2d_nseedtracks" ), "", 100, 0, 100, 1000, 0, 1);
-    h_share_d2d_d2derr[0] = fs->make<TH2F>(TString::Format("h_share_d2d_d2derr" ), "", 1000, 0, 1, 1000, 0, 1);
-    h_share_d2d_maxtrackdxyerr[0] = fs->make<TH2F>(TString::Format("h_share_d2d_maxtrackdxyerr" ), "", 100, 0, 0.1, 1000, 0, 1);
-    h_share_dphi[0] = fs->make<TH1F>(TString::Format("h_share_dphi"), "", 100, -3.15, 3.15);
-    h_merge_d2d [0] = fs->make<TH1F>(TString::Format("h_merge_d2d" ), "", 1000, 0, 1);
-    h_merge_d2d_nseedtracks[0] = fs->make<TH2F>(TString::Format("h_merge_d2d_nseedtracks" ), "", 100, 0, 100, 1000, 0, 1);
-    h_merge_d2d_d2derr[0] = fs->make<TH2F>(TString::Format("h_merge_d2d_d2derr" ), "", 1000, 0, 1, 1000, 0, 1);
-    h_merge_d2d_maxtrackdxyerr[0] = fs->make<TH2F>(TString::Format("h_merge_d2d_maxtrackdxyerr" ), "", 100, 0, 0.1, 1000, 0, 1);
-    h_merge_dphi[0] = fs->make<TH1F>(TString::Format("h_merge_dphi"), "", 100, -3.15, 3.15);
-    h_erase_d2d [0] = fs->make<TH1F>(TString::Format("h_erase_d2d" ), "", 1000, 0, 1);
-    h_erase_d2d_nseedtracks[0] = fs->make<TH2F>(TString::Format("h_erase_d2d_nseedtracks" ), "", 100, 0, 100, 1000, 0, 1);
-    h_erase_d2d_d2derr[0] = fs->make<TH2F>(TString::Format("h_erase_d2d_d2derr" ), "", 1000, 0, 1, 1000, 0, 1);
-    h_erase_d2d_maxtrackdxyerr[0] = fs->make<TH2F>(TString::Format("h_erase_d2d_maxtrackdxyerr" ), "", 100, 0, 0.1, 1000, 0, 1);
-    h_erase_dphi[0] = fs->make<TH1F>(TString::Format("h_erase_dphi"), "", 100, -3.15, 3.15);
     for (int i = 2; i <= 5; ++i) {
-      h_pairs_d2d [i] = fs->make<TH1F>(TString::Format("h_pairs_d2d_maxtk%i" , i), "", 1000, 0, 1);
-      h_pairs_d2d_nseedtracks[i] = fs->make<TH2F>(TString::Format("h_pairs_d2d_nseedtracks_maxtk%i" , i), "", 100, 0, 100, 1000, 0, 1);
-      h_pairs_d2d_d2derr[i] = fs->make<TH2F>(TString::Format("h_pairs_d2d_d2derr_maxtk%i" , i), "", 1000, 0, 1, 1000, 0, 1);
-      h_pairs_d2d_maxtrackdxyerr[i] = fs->make<TH2F>(TString::Format("h_pairs_d2d_maxtrackdxyerr_maxtk%i" , i), "", 100, 0, 0.1, 1000, 0, 1);
-      h_pairs_dphi[i] = fs->make<TH1F>(TString::Format("h_pairs_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
-      h_share_d2d [i] = fs->make<TH1F>(TString::Format("h_share_d2d_maxtk%i" , i), "", 1000, 0, 1);
-      h_share_d2d_nseedtracks[i] = fs->make<TH2F>(TString::Format("h_share_d2d_nseedtracks_maxtk%i" , i), "", 100, 0, 100, 1000, 0, 1);
-      h_share_d2d_d2derr[i] = fs->make<TH2F>(TString::Format("h_share_d2d_d2derr_maxtk%i" , i), "", 1000, 0, 1, 1000, 0, 1);
-      h_share_d2d_maxtrackdxyerr[i] = fs->make<TH2F>(TString::Format("h_share_d2d_maxtrackdxyerr_maxtk%i" , i), "", 100, 0, 0.1, 1000, 0, 1);
-      h_share_dphi[i] = fs->make<TH1F>(TString::Format("h_share_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
-      h_merge_d2d [i] = fs->make<TH1F>(TString::Format("h_merge_d2d_maxtk%i" , i), "", 1000, 0, 1);
-      h_merge_d2d_nseedtracks[i] = fs->make<TH2F>(TString::Format("h_merge_d2d_nseedtracks_maxtk%i" , i), "", 100, 0, 100, 1000, 0, 1);
-      h_merge_d2d_d2derr[i] = fs->make<TH2F>(TString::Format("h_merge_d2d_d2derr_maxtk%i" , i), "", 1000, 0, 1, 1000, 0, 1);
-      h_merge_d2d_maxtrackdxyerr[i] = fs->make<TH2F>(TString::Format("h_merge_d2d_maxtrackdxyerr_maxtk%i" , i), "", 100, 0, 0.1, 1000, 0, 1);
-      h_merge_dphi[i] = fs->make<TH1F>(TString::Format("h_merge_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
-      h_erase_d2d [i] = fs->make<TH1F>(TString::Format("h_erase_d2d_maxtk%i" , i), "", 1000, 0, 1);
-      h_erase_d2d_nseedtracks[i] = fs->make<TH2F>(TString::Format("h_erase_d2d_nseedtracks_maxtk%i" , i), "", 100, 0, 100, 1000, 0, 1);
-      h_erase_d2d_d2derr[i] = fs->make<TH2F>(TString::Format("h_erase_d2d_d2derr_maxtk%i" , i), "", 1000, 0, 1, 1000, 0, 1);
-      h_erase_d2d_maxtrackdxyerr[i] = fs->make<TH2F>(TString::Format("h_erase_d2d_maxtrackdxyerr_maxtk%i" , i), "", 100, 0, 0.1, 1000, 0, 1);
-      h_erase_dphi[i] = fs->make<TH1F>(TString::Format("h_erase_dphi_maxtk%i", i), "", 100, -3.15, 3.15);
+      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 1000, 0, 1);
+      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 1000, 0, 1);
+      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 1000, 0, 1);
     }
 
     if (phitest) {
@@ -616,9 +563,16 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 }
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
+  const unsigned run = event.id().run();
+  for (int i = 2; i <= 5; ++i) {
+    h_pairs_d2d[i].book(run);
+    h_merge_d2d[i].book(run);
+    h_erase_d2d[i].book(run);
+  }
+
   if (verbose) {
     printf("------------------------------------------------------------------------\n");
-    printf("MFVVertexer::produce: run %u, lumi %u, event ", event.id().run(), event.luminosityBlock());
+    printf("MFVVertexer::produce: run %u, lumi %u, event ", run, event.luminosityBlock());
     std::cout << event.id().event() << "\n";
   }
 
@@ -1027,9 +981,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
         const double d2d = mag(v[0]->x() - v[1]->x(),
                                v[0]->y() - v[1]->y());
-        const double dphi = reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
-                                           atan2(v[1]->y() - bs_y, v[1]->x() - bs_x));
-        const double d2derr = vertex_dist_2d.distance(*v[0], *v[1]).error();
         double maxtrackdxyerr = 0;
         for (auto tk : tracks[0])
           if (tk->dxyError() > maxtrackdxyerr)
@@ -1038,18 +989,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           if (tk->dxyError() > maxtrackdxyerr)
             maxtrackdxyerr = tk->dxyError();
 
-        h_pairs_d2d [0]->Fill(d2d);
-        h_pairs_d2d_nseedtracks[0]->Fill(ntk, d2d);
-        h_pairs_d2d_d2derr[0]->Fill(d2derr, d2d);
-        h_pairs_d2d_maxtrackdxyerr[0]->Fill(maxtrackdxyerr, d2d);
-        h_pairs_dphi[0]->Fill(dphi);
-        if (ntk_max >= 2) {
-          h_pairs_d2d [ntk_max]->Fill(d2d);
-          h_pairs_d2d_nseedtracks[ntk_max]->Fill(ntk, d2d);
-          h_pairs_d2d_d2derr[ntk_max]->Fill(d2derr, d2d);
-          h_pairs_d2d_maxtrackdxyerr[ntk_max]->Fill(maxtrackdxyerr, d2d);
-          h_pairs_dphi[ntk_max]->Fill(dphi);
-        }
+        if (ntk_max >= 2)
+          h_pairs_d2d[ntk_max][run]->Fill(d2d);
       }
       
       reco::TrackRefVector shared_tracks;
@@ -1072,12 +1013,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose)
           printf("   vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, v_dist.value(), v_dist.significance());
         if (histos) {
-          const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-          const double d2d = mag(v[0]->x() - v[1]->x(),
-                                 v[0]->y() - v[1]->y());
-          const double dphi = reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
-                                             atan2(v[1]->y() - bs_y, v[1]->x() - bs_x));
-          const double d2derr = vertex_dist_2d.distance(*v[0], *v[1]).error();
           double maxtrackdxyerr = 0;
           for (auto tk : tracks[0])
             if (tk->dxyError() > maxtrackdxyerr)
@@ -1085,19 +1020,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           for (auto tk : tracks[1])
             if (tk->dxyError() > maxtrackdxyerr)
               maxtrackdxyerr = tk->dxyError();
-
-          h_share_d2d [0]->Fill(d2d);
-          h_share_d2d_nseedtracks[0]->Fill(ntk, d2d);
-          h_share_d2d_d2derr[0]->Fill(d2derr, d2d);
-          h_share_d2d_maxtrackdxyerr[0]->Fill(maxtrackdxyerr, d2d);
-          h_share_dphi[0]->Fill(dphi);
-          if (ntk_max >= 2) {
-            h_share_d2d [ntk_max]->Fill(d2d);
-            h_share_d2d_nseedtracks[ntk_max]->Fill(ntk, d2d);
-            h_share_d2d_d2derr[ntk_max]->Fill(d2derr, d2d);
-            h_share_d2d_maxtrackdxyerr[ntk_max]->Fill(maxtrackdxyerr, d2d);
-            h_share_dphi[ntk_max]->Fill(dphi);
-          }
         }
 
         if (v_dist.value() < merge_shared_dist || v_dist.significance() < merge_shared_sig) {
@@ -1210,9 +1132,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
           const double d2d = mag(v[0]->x() - v[1]->x(),
                                  v[0]->y() - v[1]->y());
-          const double dphi = reco::deltaPhi(atan2(v[0]->y() - bs_y, v[0]->x() - bs_x),
-                                             atan2(v[1]->y() - bs_y, v[1]->x() - bs_x));
-          const double d2derr = vertex_dist_2d.distance(*v[0], *v[1]).error();
           double maxtrackdxyerr = 0;
           for (auto tk : tracks[0])
             if (tk->dxyError() > maxtrackdxyerr)
@@ -1221,18 +1140,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
             if (tk->dxyError() > maxtrackdxyerr)
               maxtrackdxyerr = tk->dxyError();
 
-          h_merge_d2d [0]->Fill(d2d);
-          h_merge_d2d_nseedtracks[0]->Fill(ntk, d2d);
-          h_merge_d2d_d2derr[0]->Fill(d2derr, d2d);
-          h_merge_d2d_maxtrackdxyerr[0]->Fill(maxtrackdxyerr, d2d);
-          h_merge_dphi[0]->Fill(dphi);
-          if (ntk_max >= 2) {
-            h_merge_d2d [ntk_max]->Fill(d2d);
-            h_merge_d2d_nseedtracks[ntk_max]->Fill(ntk, d2d);
-            h_merge_d2d_d2derr[ntk_max]->Fill(d2derr, d2d);
-            h_merge_d2d_maxtrackdxyerr[ntk_max]->Fill(maxtrackdxyerr, d2d);
-            h_merge_dphi[ntk_max]->Fill(dphi);
-          }
+          if (ntk_max >= 2)
+            h_merge_d2d[ntk_max][run]->Fill(d2d);
         }
         vertices->erase(v[1]);
         *v[0] = reco::Vertex(new_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
@@ -1291,9 +1200,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
         const double d2d = mag(vsave[0].x() - vsave[1].x(),
                                vsave[0].y() - vsave[1].y());
-        const double dphi = reco::deltaPhi(atan2(vsave[0].y() - bs_y, vsave[0].x() - bs_x),
-                                           atan2(vsave[1].y() - bs_y, vsave[1].x() - bs_x));
-        const double d2derr = vertex_dist_2d.distance(vsave[0], vsave[1]).error();
         double maxtrackdxyerr = 0;
         for (auto tk : vertex_track_set(vsave[0]))
           if (tk->dxyError() > maxtrackdxyerr)
@@ -1302,18 +1208,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           if (tk->dxyError() > maxtrackdxyerr)
             maxtrackdxyerr = tk->dxyError();
 
-        h_erase_d2d [0]->Fill(d2d);
-        h_erase_d2d_nseedtracks[0]->Fill(ntk, d2d);
-        h_erase_d2d_d2derr[0]->Fill(d2derr, d2d);
-        h_erase_d2d_maxtrackdxyerr[0]->Fill(maxtrackdxyerr, d2d);
-        h_erase_dphi[0]->Fill(dphi);
-        if (ntk_max >= 2) {
-          h_erase_d2d [ntk_max]->Fill(d2d);
-          h_erase_d2d_nseedtracks[ntk_max]->Fill(ntk, d2d);
-          h_erase_d2d_d2derr[ntk_max]->Fill(d2derr, d2d);
-          h_erase_d2d_maxtrackdxyerr[ntk_max]->Fill(maxtrackdxyerr, d2d);
-          h_erase_dphi[ntk_max]->Fill(dphi);
-        }
+        if (ntk_max >= 2)
+          h_erase_d2d[ntk_max][run]->Fill(d2d);
       }
 
       if (erase[1]) vertices->erase(v[1]);
