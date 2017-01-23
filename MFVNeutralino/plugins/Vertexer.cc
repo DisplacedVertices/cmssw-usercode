@@ -520,9 +520,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
     for (int i = 2; i <= 5; ++i) {
-      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 1000, 0, 1);
-      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 1000, 0, 1);
-      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 1000, 0, 1);
+      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 2500, 0, 2.5);
+      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 2500, 0, 2.5);
+      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 2500, 0, 2.5);
     }
 
     if (phitest) {
