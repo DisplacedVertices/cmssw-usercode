@@ -325,14 +325,12 @@ ttbar_systematics_samples = [
 data_samples = [
     #DataSample('JetHT2015D', '/JetHT/Run2015D-16Dec2015-v1/AOD'), # 256630 - 260727
 
-    DataSample('JetHT2016B1', '/JetHT/Run2016B-23Sep2016-v1/AOD'),
     DataSample('JetHT2016B3', '/JetHT/Run2016B-23Sep2016-v3/AOD'),
     DataSample('JetHT2016C', '/JetHT/Run2016C-23Sep2016-v1/AOD'),
     DataSample('JetHT2016D', '/JetHT/Run2016D-23Sep2016-v1/AOD'),
     DataSample('JetHT2016E', '/JetHT/Run2016E-23Sep2016-v1/AOD'),
     DataSample('JetHT2016F', '/JetHT/Run2016F-23Sep2016-v1/AOD'),
     DataSample('JetHT2016G', '/JetHT/Run2016G-23Sep2016-v1/AOD'),
-    DataSample('JetHT2016H1', '/JetHT/Run2016H-PromptReco-v1/AOD'),
     DataSample('JetHT2016H2', '/JetHT/Run2016H-PromptReco-v2/AOD'),
     DataSample('JetHT2016H3', '/JetHT/Run2016H-PromptReco-v3/AOD'),
     ]
