@@ -1662,6 +1662,54 @@ def ttree_iterator(tree, return_tree=False):
 
 zbi = ROOT.RooStats.NumberCountingUtils.BinomialWithTauObsZ
 
+def zgammatau(x,y,tau,tau_uncert,_l=[0]):
+    '''For the on-off problem [arXiv:physics/0702156] when the
+    uncertainty in tau is not negligible. Assume a Gaussian prior for
+    tau with some sigma given by tau_uncert. The x,y,tau are as in zbi
+    above: x is the observation in the signal ("on") region, y is the
+    observation in the sideband region ("off"), and tau is the ratio
+    of the sizes of the regions off / on.
+
+    JMTBAD this should be optimized. The _l crap is so you don't run
+    into having the same symbols in the same namespace with repeated
+    calls. Probably should just do without workspace/factory. And it
+    doesn't seem to work for too-small values of tau_uncert...
+    '''
+
+    ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
+    w = ROOT.RooWorkspace('w' + str(_l[0]), True)
+    def factory(w,s):
+        #print s
+        w.factory(s)
+    _l[0] += 1
+    factory(w, "Poisson::px(x[%f,0,500],sum::splusb(s[0,0,100],b[%f,0,300]))" % (x, y/tau))
+    factory(w, "Poisson::py(y[%f,0,500],prod::taub(tau[%f,0,1.5],b))" % (y,tau))
+    factory(w, "Uniform::prior_b(b)")
+    factory(w, "Gaussian::prior_tau(tau,%f,%f)" % (tau,tau_uncert))
+    factory(w, "PROJ::avgModel2(PROJ::averagedModel(PROD::foo(px|b,py,prior_b,prior_tau),b),tau)") 
+    w.var("x").setVal(x)
+    w.var("y").setVal(y)
+    cdf = w.pdf("avgModel2").createCdf(ROOT.RooArgSet(w.var("x")))
+    #print "Hybrid p-value = ", cdf.getVal(), "Z_Gamma Significance  = ", ROOT.RooStats.PValueToSignificance(1-cdf.getVal())
+    return ROOT.RooStats.PValueToSignificance(1-cdf.getVal())
+
+def zgammatauwrong(x,y,tau,tau_uncert):
+    '''See zgammatau for the model, but here do the wrong thing and
+    average over some range of taus given by tau +- 2*tau_uncert.
+    '''
+
+    n = 100
+    a = max(tau - 2*tau_uncert, 0.)
+    b = tau + 2*tau_uncert
+    dt = (b-a)/n
+    z, nz = 0., 0.
+    for i in xrange(n):
+        t = a + i*dt
+        p = ROOT.Math.normal_pdf(t, tau_uncert, tau) * dt
+        nz += p
+        z += zbi(x,y,t) * p
+    return z / nz
+
 __all__ = [
     'apply_hist_commands',
     'array',
@@ -1707,5 +1755,7 @@ __all__ = [
     'to_array',
     'ttree_iterator',
     'zbi',
+    'zgammatau',
+    'zgammatauwrong',
     'ROOT',
     ]
