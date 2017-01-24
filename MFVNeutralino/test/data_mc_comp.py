@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_26'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV10'
 plot_dir = 'plots/AN-16-394/data_mc_comp'
 
 set_style()
@@ -123,7 +123,7 @@ C('dvv',
   )
 
 C('nsv_3track',
-  file_path = os.path.join('/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_30', '%(name)s.root'),
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk3', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 3-track vertices',
   y_title = 'Events',
@@ -132,7 +132,7 @@ C('nsv_3track',
   )
 
 C('nsv_4track',
-  file_path = os.path.join('/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_29', '%(name)s.root'),
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk4', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 4-track vertices',
   y_title = 'Events',
