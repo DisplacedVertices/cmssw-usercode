@@ -1,6 +1,0 @@
-#!/usr/bin/env python
-
-from JMTucker.Tools.CRABTools import *
-
-for d in crab_dirs_from_argv():
-    crab_submit_in_batches(d, print_output=True)
