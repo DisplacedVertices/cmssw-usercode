@@ -402,10 +402,15 @@ def cumulative_histogram(h, type='ge'):
     else:
         raise ValueError('type %s not recognized' % type)
     for i in xrange(first, last, step):
-        prev = 0 if i == first else hc.GetBinContent(i-step)
+        if i == first:
+            prev, eprev = 0., 0.
+        else:
+            prev  = hc.GetBinContent(i-step)
+            eprev = hc.GetBinError(i-step)
         c = h.GetBinContent(i) + prev
+        ce = (h.GetBinError(i)**2 + eprev**2)**0.5
         hc.SetBinContent(i, c)
-        hc.SetBinError(i, c**0.5)
+        hc.SetBinError(i, ce)
     return hc
 
 def cut(*cuts):
@@ -1654,7 +1659,9 @@ def ttree_iterator(tree, return_tree=False):
             yield jentry, tree
         else:
             yield jentry
-            
+
+zbi = ROOT.RooStats.NumberCountingUtils.BinomialWithTauObsZ
+
 __all__ = [
     'apply_hist_commands',
     'array',
@@ -1699,5 +1706,6 @@ __all__ = [
     'tgraph_getpoint',
     'to_array',
     'ttree_iterator',
+    'zbi',
     'ROOT',
     ]
