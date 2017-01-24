@@ -143,7 +143,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ### 
 
     crab_samples = Samples.data_samples # not because condorsubmitter has a problem with data but they're just not at fnal
-    condor_samples = [s for s in samples if s not in crab_samples]
+    condor_samples = [] # [s for s in samples if s not in crab_samples]
 
     if crab_samples:
         from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
