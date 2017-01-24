@@ -12,8 +12,6 @@ plot_dir = 'plots/AN-16-394/data_mc_comp'
 set_style()
 ps = plot_saver(plot_dir)
 
-ac.int_lumi = 36200.
-ac.int_lumi_nice = '36.2 fb^{-1} (13 TeV)'
 scale_factor = 1. #245750.0 / 264843.310478
 
 data_samples = [] #Samples.data_samples
