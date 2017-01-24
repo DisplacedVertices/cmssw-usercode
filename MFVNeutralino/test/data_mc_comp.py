@@ -15,7 +15,7 @@ ps = plot_saver(plot_dir)
 scale_factor = 1. #245750.0 / 264843.310478
 
 data_samples = [] #Samples.data_samples
-background_samples = Samples.ttbar_samples + Samples.qcd_samples
+background_samples = Samples.ttbar_samples + Samples.qcd_samples_sum
 
 signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 y = ['100 #mum', '300 #mum', '1 mm', '10 mm']
@@ -27,7 +27,7 @@ for i, signal_sample in enumerate(signal_samples):
 Samples.mfv_neu_tau01000um_M0800.color = 8
 signal_samples = [Samples.mfv_neu_tau01000um_M0800]
 
-for s in Samples.qcd_samples:
+for s in Samples.qcd_samples_sum:
     s.join_info = True, 'Multijet events', ROOT.kBlue-9
 for s in Samples.ttbar_samples:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7
