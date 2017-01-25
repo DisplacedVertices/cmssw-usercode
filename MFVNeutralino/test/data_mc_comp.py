@@ -6,18 +6,16 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_26'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV10'
 plot_dir = 'plots/AN-16-394/data_mc_comp'
 
 set_style()
 ps = plot_saver(plot_dir)
 
-ac.int_lumi = 36200.
-ac.int_lumi_nice = '36.2 fb^{-1} (13 TeV)'
 scale_factor = 1. #245750.0 / 264843.310478
 
 data_samples = [] #Samples.data_samples
-background_samples = Samples.ttbar_samples + Samples.qcd_samples
+background_samples = Samples.ttbar_samples + Samples.qcd_samples_sum
 
 signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 y = ['100 #mum', '300 #mum', '1 mm', '10 mm']
@@ -29,7 +27,7 @@ for i, signal_sample in enumerate(signal_samples):
 Samples.mfv_neu_tau01000um_M0800.color = 8
 signal_samples = [Samples.mfv_neu_tau01000um_M0800]
 
-for s in Samples.qcd_samples:
+for s in Samples.qcd_samples_sum:
     s.join_info = True, 'Multijet events', ROOT.kBlue-9
 for s in Samples.ttbar_samples:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7
@@ -123,7 +121,7 @@ C('dvv',
   )
 
 C('nsv_3track',
-  file_path = os.path.join('/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_30', '%(name)s.root'),
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk3', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 3-track vertices',
   y_title = 'Events',
@@ -132,7 +130,7 @@ C('nsv_3track',
   )
 
 C('nsv_4track',
-  file_path = os.path.join('/uscms_data/d3/jchu/crab_dirs/mfv_763p2/HistosV6p1_76x_nstlays3_29', '%(name)s.root'),
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk4', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 4-track vertices',
   y_title = 'Events',

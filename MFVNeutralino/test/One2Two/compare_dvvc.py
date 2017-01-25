@@ -10,50 +10,33 @@ set_style()
 ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
 
 if mode == 'vary_eff':
-    fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root
-2v_from_jets_3track_maxtk3_c0p0_e0p0_a0p0.root
-2v_from_jets_3track_ntk3_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
-#2v_from_jets_3track_maxtk3_merge_c0p0_e0p0_a0p0.root
-#2v_from_jets_3track_ntk3_c0p0_e0p0_a0p0.root
-#2v_from_jets_3track_ntk3_wevent_c0p0_e0p0_a0p0.root
-#2v_from_jets_3track_ntk3_deltasvgaus_c0p0_e0p0_a0p0.root
+    fn1 = '''2v_from_jets_3track_average3_c0p00_e0_a0p00.root
+2v_from_jets_3track_maxtk3_c0p00_e0_a0p00.root
+2v_from_jets_3track_ntk3_deltasvgaus_wevent_c0p00_e0_a0p00.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root
-2v_from_jets_4track_maxtk4_c0p0_e0p0_a0p0.root
-2v_from_jets_4track_ntk4_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
-#2v_from_jets_4track_maxtk4_merge_c0p0_e0p0_a0p0.root
-#2v_from_jets_4track_ntk4_c0p0_e0p0_a0p0.root
-#2v_from_jets_4track_ntk4_wevent_c0p0_e0p0_a0p0.root
-#2v_from_jets_4track_ntk4_deltasvgaus_c0p0_e0p0_a0p0.root
+    fn2 = '''2v_from_jets_4track_average4_c0p00_e0_a0p00.root
+2v_from_jets_4track_maxtk4_c0p00_e0_a0p00.root
+2v_from_jets_4track_ntk4_deltasvgaus_wevent_c0p00_e0_a0p00.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root
-2v_from_jets_5track_maxtk5_c0p0_e0p0_a0p0.root
-2v_from_jets_5track_ntk5_deltasvgaus_wevent_c0p0_e0p0_a0p0.root'''.split('\n')
-#2v_from_jets_5track_maxtk5_merge_c0p0_e0p0_a0p0.root
-#2v_from_jets_5track_ntk5_c0p0_e0p0_a0p0.root
-#2v_from_jets_5track_ntk5_wevent_c0p0_e0p0_a0p0.root
-#2v_from_jets_5track_ntk5_deltasvgaus_c0p0_e0p0_a0p0.root
+    fn3 = '''2v_from_jets_5track_average5_c0p00_e0_a0p00.root
+2v_from_jets_5track_maxtk5_c0p00_e0_a0p00.root
+2v_from_jets_5track_ntk5_deltasvgaus_wevent_c0p00_e0_a0p00.root'''.split('\n')
 
     ls = '''average efficiency
 maxtk efficiency
 ntk_deltasvgaus_wevent efficiency'''.split('\n')
-#maxtk_merge efficiency
-#ntk efficiency
-#ntk_wevent efficiency
-#ntk_deltasvgaus efficiency
 
     lsh = 'vertexer method%10soverlay method%10s' % ('', '')
-#    lsh = 'maxtk      merge      ntk      wevent      dzgaus      both   '
 
 if mode == 'vary_dphi':
-    fn1 = '''2v_from_jets_3track_average3_c1p3_e2p0_a3p7.root
-2v_from_jets_3track_average3_c0p0_e0p0_a0p0.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
+2v_from_jets_3track_average3_c0p00_e0_a0p00.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p3_e2p0_a3p7.root
-2v_from_jets_4track_average4_c0p0_e0p0_a0p0.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66.root
+2v_from_jets_4track_average4_c0p00_e0_a0p00.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p3_e2p0_a3p7.root
-2v_from_jets_5track_average5_c0p0_e0p0_a0p0.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66.root
+2v_from_jets_5track_average5_c0p00_e0_a0p00.root'''.split('\n')
 
     ls = '''|#Delta#phi| from jets
 |#Delta#phi| flat'''.split('\n')
@@ -61,14 +44,14 @@ if mode == 'vary_dphi':
     lsh = 'flat%40s' % ''
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000.root
-2v_from_jets_3track_average3_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c0p00_e0_a0p00_noqcdht1000.root
+2v_from_jets_3track_average3_c0p00_e0_a0p00_noqcdht1000_sum.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000.root
-2v_from_jets_4track_average4_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c0p00_e0_a0p00_noqcdht1000.root
+2v_from_jets_4track_average4_c0p00_e0_a0p00_noqcdht1000_sum.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000.root
-2v_from_jets_5track_average5_c0p0_e0p0_a0p0_noqcdht1000_sum.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c0p00_e0_a0p00_noqcdht1000.root
+2v_from_jets_5track_average5_c0p00_e0_a0p00_noqcdht1000_sum.root'''.split('\n')
 
     ls = '''default
 sort by b quarks'''.split('\n')
@@ -77,7 +60,7 @@ sort by b quarks'''.split('\n')
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
-n2v = [832., 17., 1.]
+n2v = [1323., 22., 1.]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
