@@ -18,7 +18,7 @@ hsig.Scale(xsec * 39.5 / 10000)
 print sigfn, 'xsec', xsec, 'eff', eff, 'integral', hsig.Integral(1,1000)
 hsig = cumulative_histogram(hsig)
 
-f = ROOT.TFile('2v_from_jets.root')
+f = ROOT.TFile('2v_from_jets_5track_average5_c1p35_e2_a3p66.root')
 h = f.Get('h_c1v_dvv')
 
 norm = 0.45
