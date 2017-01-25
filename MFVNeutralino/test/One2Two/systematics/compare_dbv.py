@@ -13,7 +13,7 @@ if ntk == 3:
 if ntk == 4:
     path = 'MinitreeV10_ntk4'
 
-ps = plot_saver('../../plots/bkgest/%s' % path, size=(600,600), root=False)
+ps = plot_saver('../../plots/bkgest/%s' % path, size=(700,700), root=False)
 trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 
 def book_dbv(n):
