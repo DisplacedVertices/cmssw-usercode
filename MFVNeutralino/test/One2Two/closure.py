@@ -4,9 +4,9 @@ ROOT.TH1.AddDirectory(0)
 set_style()
 ps = plot_saver('../plots/bkgest/closure', size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets_3track_average3_c1p3_e2p0_a3p7.root', '2v_from_jets_4track3track_average3_c1p3_e2p0_a3p7.root', '2v_from_jets_4track_average4_c1p3_e2p0_a3p7.root', '2v_from_jets_5track_average5_c1p3_e2p0_a3p7.root']
+fns = ['2v_from_jets_3track_average3_c1p35_e2_a3p66.root', '2v_from_jets_4track3track_average3_c1p35_e2_a3p66.root', '2v_from_jets_4track_average4_c1p35_e2_a3p66.root', '2v_from_jets_5track_average5_c1p35_e2_a3p66.root']
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
-n2v = [1179., 326., 23., 1.]
+n2v = [1323., 335., 22., 1.]
 
 for i in range(4):
     hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
