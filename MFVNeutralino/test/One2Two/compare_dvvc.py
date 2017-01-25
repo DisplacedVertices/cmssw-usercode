@@ -44,14 +44,14 @@ if mode == 'vary_dphi':
     lsh = 'flat%40s' % ''
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c0p00_e0_a0p00_noqcdht1000.root
-2v_from_jets_3track_average3_c0p00_e0_a0p00_noqcdht1000_sum.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c0p00_e0_a0p00.root
+2v_from_jets_3track_average3_c0p00_e0_a0p00_sum.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c0p00_e0_a0p00_noqcdht1000.root
-2v_from_jets_4track_average4_c0p00_e0_a0p00_noqcdht1000_sum.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c0p00_e0_a0p00.root
+2v_from_jets_4track_average4_c0p00_e0_a0p00_sum.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c0p00_e0_a0p00_noqcdht1000.root
-2v_from_jets_5track_average5_c0p00_e0_a0p00_noqcdht1000_sum.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c0p00_e0_a0p00.root
+2v_from_jets_5track_average5_c0p00_e0_a0p00_sum.root'''.split('\n')
 
     ls = '''default
 sort by b quarks'''.split('\n')
