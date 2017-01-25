@@ -28,11 +28,6 @@ double dvv_bin_width = 0.01;
 double    mu_clear = 0.0000;
 double sigma_clear = 0.0000;
 
-int min_ntracks0 = 0;
-int max_ntracks0 = 1000000;
-int min_ntracks1 = 0;
-int max_ntracks1 = 1000000;
-
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
 float weights[nbkg] = {3.10725, 0.40282, 0.16663, 0.85378};
@@ -50,6 +45,11 @@ int main(int argc, const char* argv[]) {
   const char* eff_hist;
   double n1v;
   double n2v;
+  int min_ntracks0 = 0;
+  int max_ntracks0 = 1000000;
+  int min_ntracks1 = 0;
+  int max_ntracks1 = 1000000;
+
   if (ntracks == 3) {
     tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3";
     eff_hist = "average3";
@@ -65,6 +65,15 @@ int main(int argc, const char* argv[]) {
     eff_hist = "average5";
     n1v = 4404.;
     n2v = 1.;
+  } else if (ntracks == 7) {
+    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3or4";
+    eff_hist = "average3";
+    n1v = 221892.;
+    n2v = 335.;
+    min_ntracks0 = 4;
+    max_ntracks0 = 4;
+    min_ntracks1 = 3;
+    max_ntracks1 = 3;
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
   }
