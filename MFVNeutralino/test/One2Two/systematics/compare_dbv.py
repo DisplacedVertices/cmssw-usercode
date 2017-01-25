@@ -7,14 +7,14 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 set_style()
 
 ntk = 5
-path = 'MinitreeV6p1_76x_nstlays3_5'
+path = 'MinitreeV10'
 if ntk == 3:
-    path = 'MinitreeV6p1_76x_nstlays3_8'
+    path = 'MinitreeV10_ntk3'
 if ntk == 4:
-    path = 'MinitreeV6p1_76x_nstlays3_7'
+    path = 'MinitreeV10_ntk4'
 
 ps = plot_saver('../../plots/bkgest/%s' % path, size=(600,600), root=False)
-trees = '~/crabdirs/%s' % path
+trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 
 def book_dbv(n):
     return ROOT.TH1F(n, '', 40, 0, 0.2)
@@ -27,7 +27,7 @@ h_dbv_b = book_dbv('dbv_b')
 h_dbv_qcdb = book_dbv('dbv_qcdb')
 
 hs_nob = []
-for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
+for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
@@ -44,7 +44,7 @@ for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
     hs_nob.append(h)
 
 hs_b = []
-for sn in 'qcdht0700 qcdht1000 qcdht1500 qcdht2000 ttbar'.split():
+for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get('mfvMiniTree/t')
     s = getattr(Samples, sn)
