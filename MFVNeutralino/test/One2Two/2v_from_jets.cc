@@ -25,9 +25,6 @@ double dphi_pdf_a = 0;
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
 
-double    mu_clear = 0.0000;
-double sigma_clear = 0.0000;
-
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
 float weights[nbkg] = {3.10725, 0.40282, 0.16663, 0.85378};
@@ -185,9 +182,9 @@ int main(int argc, const char* argv[]) {
 
     double dphi = f_dphi->GetRandom();
 
-    double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(fabs(dphi)));
+    double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
 
-    double p = 0.5 * TMath::Erf((dvvc - mu_clear)/sigma_clear) + 0.5;
+    double p = 1;
     if (clearing_from_eff) {
       p = h_eff->GetBinContent(h_eff->FindBin(dvvc));
     }
