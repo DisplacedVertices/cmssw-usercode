@@ -21,7 +21,7 @@ hsig = cumulative_histogram(hsig)
 f = ROOT.TFile('2v_from_jets_5track_average5_c1p35_e2_a3p66.root')
 h = f.Get('h_c1v_dvv')
 
-norm = 0.45
+norm = 1.
 h.Scale(norm/h.Integral())
 
 h = cumulative_histogram(h)
@@ -44,6 +44,6 @@ for (ibin,), dvv_cut, b in bin_iterator(h, True):
         print '%5.2f %5.2f  %5.2f %5.2f  %5.2f %5.2f' % (tau, tau_uncert, zbi(s,0,tau), zbi(s,1,tau), zgt(s,0,tau,tau_uncert), zgt(s,1,tau,tau_uncert))
     else:
         print '*'
-    if dvv_cut > 0.1:
+    if dvv_cut > 0.4:
         break
 
