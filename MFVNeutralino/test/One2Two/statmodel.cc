@@ -21,18 +21,19 @@ template <typename T> using uptr = std::unique_ptr<T>;
 // Helper classes for vertices and pairs of vertices (simplified version of those used in the fitter)
 
 struct Vertex {
-  int ntracks;
+  double r, p;
   double x, y;
 
-  Vertex() : ntracks(-1), x(0), y(0) {}
+  Vertex() : r(0), p(0), x(0), y(0) {}
   Vertex(double rho_, double phi_)
-    : ntracks(-1),
+    : r(rho_),
+      p(phi_),
       x(rho_ * cos(phi_)),
       y(rho_ * sin(phi_))
     {}
 
-  double rho() const { return jmt::mag(x, y); }
-  double phi() const { return atan2(y, x); }
+  double rho() const { return r; }
+  double phi() const { return p; }
 
   double rho(const Vertex& o) const { return jmt::mag(x - o.x, y - o.y);          }
   double phi(const Vertex& o) const { return TVector2::Phi_mpi_pi(phi() - o.phi()); }
@@ -79,23 +80,13 @@ double func_rho(double* x, double*) {
   const long double rho(fabs(x[0]));
   long double f = 1e-6;
   const long double p[3][10] = {
-    { 8.97609e+01L, 4.45117e+01L, 1.57536e+02L, 7.42437e+01L, 5.61388e+01L, 4.96783e+01L, 2.92400e+00L, 2.15042e+01L, 1.11733e+02L, 2.92153e+01L },
-    { 1.78518e+02L, 8.28729e+01L, 1.87898e+02L, 8.20766e+01L, 7.82531e+01L, 6.23319e+01L, 8.04052e-01L, 1.82806e+01L, 2.86692e+02L, 4.68937e+01L },
-    { 1.43681e+03L, 2.17650e+02L, 2.04762e+02L, 9.79598e+01L, 5.19114e+01L, 6.75324e+01L, 1.84114e-01L, 1.22583e+01L, 3.10763e+02L, 5.21971e+01L }
+    { 2.87190e-04L, 3.35391e-08L, 3.56126e+02L, 6.74967e+02L, 2.19970e+01L, 1.07814e+06L, 5.97512e+01L },
+    { 6.72207e-10L, 8.71486e-03L, 2.50698e+00L, 1.30699e+03L, 2.63253e+01L, 2.84286e+04L, 3.09081e+01L },
+    { 8.91883e-04L, 2.12659e-01L, 1.32012e+01L, 5.11276e+03L, 3.63974e+01L, 3.30855e+06L, 4.13659e+02L }
   };
 
   const size_t i = ntracks - 3;
-
-  if (rho >= 0.01 && rho < 0.02)
-    f = p[i][0] * expl(-fabs(p[i][1])*rho);
-  else if (rho >= 0.02 && rho < 0.04)
-    f = p[i][2] * expl(-fabs(p[i][3])*rho);
-  else if (rho >= 0.04 && rho < 0.1)
-    f = p[i][4] * expl(-fabs(p[i][5])*rho);
-  else if (rho >= 0.1 && rho < 0.5)
-    f = p[i][6] * expl(-fabs(p[i][7])*rho);
-  else if (rho >= 0.5)
-    f = p[i][8] * expl(-fabs(p[i][9])*pow(rho,0.5));
+  f = p[i][0] + p[i][1] * expl(-p[i][2] * rho) + p[i][3] * expl(-p[i][4] * powl(rho, 0.5L)) + rho_tail_norm * p[i][5] * expl(-p[i][6] * rho_tail_slope * powl(rho, 0.15L));
 
   return double(f);
 }
@@ -175,8 +166,8 @@ int main(int, char**) {
   const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 100000000L);
   const double oversample = env.get_double("oversample", 1);
-  rho_tail_norm = env.get_long_double("rho_tail_norm", 3e8L);
-  rho_tail_slope = env.get_long_double("rho_tail_slope", -20.6511L);
+  rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
+  rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
   phi_c = env.get_double("phi_c", 1.35);
   phi_e = env.get_double("phi_e", 2);
   phi_a = env.get_double("phi_a", 3.66);
