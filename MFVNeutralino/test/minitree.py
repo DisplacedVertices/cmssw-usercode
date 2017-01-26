@@ -1,4 +1,13 @@
 import sys
+
+ntracks = None
+for arg in sys.argv:
+    if arg.startswith('ntracks='):
+        ntracks = arg.split('ntracks=')[1]
+        break
+
+####
+
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 process.source.fileNames = ['file:ntuple.root']
@@ -17,6 +26,21 @@ process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                                      )
 
 process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
+
+if ntracks == '3':
+    process.mfvSelectedVerticesTight.min_ntracks = 3
+    process.mfvSelectedVerticesTight.max_ntracks = 3
+    process.TFileService.fileName = 'minitree.ntk3.root'
+elif ntracks == '4':
+    process.mfvSelectedVerticesTight.min_ntracks = 4
+    process.mfvSelectedVerticesTight.max_ntracks = 4
+    process.TFileService.fileName = 'minitree.ntk4.root'
+elif ntracks == '3or4':
+    process.mfvSelectedVerticesTight.min_ntracks = 3
+    process.mfvSelectedVerticesTight.max_ntracks = 4
+    process.TFileService.fileName = 'minitree.ntk3or4.root'
+elif ntracks is not None:
+    raise ValueError("don't understand ntracks=%r" % ntracks)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
