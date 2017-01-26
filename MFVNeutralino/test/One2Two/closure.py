@@ -35,14 +35,42 @@ for i in range(4):
     l1.Draw()
     ps.save(ntk[i])
 
-    err = ROOT.Double(0)
-    sim = hh.IntegralAndError(5,40,err)
-    if sim == 0:
-        sim = 1
-    print '%s: simulated events = %4.2f +/- %4.2f' % (ntk[i], sim, err)
+    es = ROOT.Double(0)
+    s = hh.IntegralAndError(1,40,es)
+    if s == 0:
+        s = 1
+    es1 = ROOT.Double(0)
+    s1 = hh.IntegralAndError(1,4,es1)
+    if s1 == 0:
+        s1 = 1
+    es2 = ROOT.Double(0)
+    s2 = hh.IntegralAndError(5,7,es2)
+    if s2 == 0:
+        s2 = 1
+    es3 = ROOT.Double(0)
+    s3 = hh.IntegralAndError(8,40,es3)
+    if s3 == 0:
+        s3 = 1
 
-    e = ROOT.Double(0)
-    c = h.IntegralAndError(5,40,e)
-    r = c/sim
-    er = (c/sim) * ((e/c)**2 + (err/sim)**2)**0.5
-    print '%s: dVVC1 events = %4.2f +/- %4.2f (%4.2f +/- %4.2f x)' % (ntk[i], c, e, r, er)
+    ec = ROOT.Double(0)
+    c = h.IntegralAndError(1,40,ec)
+    ec1 = ROOT.Double(0)
+    c1 = h.IntegralAndError(1,4,ec1)
+    ec2 = ROOT.Double(0)
+    c2 = h.IntegralAndError(5,7,ec2)
+    ec3 = ROOT.Double(0)
+    c3 = h.IntegralAndError(8,40,ec3)
+
+    r = c/s
+    er = (c/s) * ((ec/c)**2 + (es/s)**2)**0.5
+    r1 = c1/s1
+    er1 = (c1/s1) * ((ec1/c1)**2 + (es1/s1)**2)**0.5
+    r2 = c2/s2
+    er2 = (c2/s2) * ((ec2/c2)**2 + (es2/s2)**2)**0.5
+    r3 = c3/s3
+    er3 = (c3/s3) * ((ec3/c3)**2 + (es3/s3)**2)**0.5
+
+    print ntk[i]
+    print '   simulated events: %7.2f +/- %5.2f, 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s, es, s1, es1, s2, es2, s3, es3)
+    print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
+    print '   ratio dVVC / dVV: %7.2f +/- %5.2f, 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r, er, r1, er1, r2, er2, r3, er3)
