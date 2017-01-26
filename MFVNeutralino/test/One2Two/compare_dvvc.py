@@ -125,6 +125,7 @@ for i in range(3):
     h2.SetLineWidth(5)
     if h2.Integral() > 0:
         h2.Scale(n2v[i]/h2.Integral())
+    h2.SetMinimum(0)
     h2.Draw()
     l2.AddEntry(hh, 'simulated events')
 
