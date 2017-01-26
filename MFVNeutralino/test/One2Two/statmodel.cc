@@ -18,12 +18,45 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "ROOTTools.h"
 #include "Utility.h"
 
+// Helper classes for vertices and pairs of vertices (simplified version of those used in the fitter)
+
+struct Vertex {
+  int ntracks;
+  double x, y;
+
+  Vertex() : ntracks(-1), x(0), y(0) {}
+  Vertex(double rho_, double phi_)
+    : ntracks(-1),
+      x(rho_ * cos(phi_)),
+      y(rho_ * sin(phi_))
+    {}
+
+  double rho() const { return jmt::mag(x, y); }
+  double phi() const { return atan2(y, x); }
+
+  double rho(const Vertex& o) const { return jmt::mag(x - o.x, y - o.y);          }
+  double phi(const Vertex& o) const { return TVector2::Phi_mpi_pi(phi() - o.phi()); }
+ };
+
+struct VertexPair {
+  Vertex first;
+  Vertex second;
+
+  VertexPair() {}
+  VertexPair(const Vertex& f, const Vertex& s) : first(f), second(s) {}
+    
+  double rho() const { return first.rho(second); }
+  double phi() const { return first.phi(second); }
+};
+
+// Globals: parameters for the throwing fcns and the fcns themselves, and the binning for 1v/2v hists
+
+int ntracks;
 long double rho_tail_norm;
 long double rho_tail_slope;
+double phi_c;
+double phi_e;
 double phi_a;
-double phi_b;
-double clear_mu;
-double clear_sig;
 
 const int nbins_1v = 31;
 const double bins_1v[nbins_1v+1] = { 
@@ -31,76 +64,42 @@ const double bins_1v[nbins_1v+1] = {
   0.04, 0.0425, 0.045, 0.05, 0.055, 0.06, 0.07, 0.085, 0.1, 0.2, 0.4, 2.5
 };
 
-const int nbins_2v = 6;
-const double bins_2v[nbins_2v+1] = { 0., 0.02, 0.04, 0.06, 0.08, 0.1, 0.2 };
+const int nbins_2v = 3;
+const double bins_2v[nbins_2v+1] = { 0., 0.04, 0.07, 0.1 };
 
 //#define USE_H_DBV
 TH1D* h_func_rho = 0;
 TF1* f_func_rho = 0;
 TF1* f_func_dphi = 0;
-
-struct Vertex {
-  int ntracks;
-  double x, y, z;
-  double cxx, cxy, cyy;
-
-  Vertex() : ntracks(-1), x(0), y(0), z(0), cxx(0), cxy(0), cyy(0) {}
-  Vertex(double x_, double y_, double z_) : ntracks(-1), x(x_), y(y_), z(z_), cxx(0), cxy(0), cyy(0) {}
-  Vertex(double rho_, double phi_)
-    : ntracks(-1),
-      x(rho_ * cos(phi_)),
-      y(rho_ * sin(phi_)),
-      z(0),
-      cxx(0),
-      cxy(0),
-      cyy(0)
-    {}
-
-  double rho() const { return jmt::mag(x, y); }
-  double d3d() const { return jmt::mag(x, y, z); }
-  double dz () const { return fabs(z); }
-  double phi() const { return atan2(y, x); }
-
-  double rho(const Vertex& o) const { return jmt::mag(x - o.x, y - o.y);          }
-  double d3d(const Vertex& o) const { return jmt::mag(x - o.x, y - o.y, z - o.z); }
-  double dz (const Vertex& o) const { return z - o.z; }
-  double phi(const Vertex& o) const { return TVector2::Phi_mpi_pi(phi() - o.phi()); }
-
-  double dxd(const Vertex& o) const { return (x - o.x) / rho(o); }
-  double dyd(const Vertex& o) const { return (y - o.y) / rho(o); }
-  double sig(const Vertex& o) const { return sqrt((cxx + o.cxx)*dxd(o)*dxd(o) + (cyy + o.cyy)*dyd(o)*dyd(o) + 2*(cxy + o.cxy)*dxd(o)*dyd(o)); }
- };
-
-struct VertexPair {
-  Vertex first;
-  Vertex second;
-  double weight;
-
-  VertexPair() {}
-  VertexPair(const Vertex& f, const Vertex& s, const double weight_=1.) : first(f), second(s), weight(weight_) {}
-    
-  double rho() const { return first.rho(second); }
-  double d3d() const { return first.d3d(second); }
-  double dz () const { return first.dz (second); }
-  double phi() const { return first.phi(second); }
-
-  double sig() const { return first.sig(second); }
-};
+TH1F* h_eff = 0;
 
 double func_rho(double* x, double*) {
   const long double rho(fabs(x[0]));
-  long double f;
-  if (rho < 0.012)
-    f = 1.29326e5L * expl(400 * rho);
-  else if (rho >= 0.012 && rho < 0.016)
-    f = 1.83632e7L;
-  else
-    f = 1.64602e8L * expl(-214.258L * rho) + 3e10L * expl(-63.2355L * powl(rho, 0.5L)) + rho_tail_norm * expl(rho_tail_slope * powl(rho, 0.15L));
+  long double f = 1e-6;
+  const long double p[3][10] = {
+    { 8.97609e+01L, 4.45117e+01L, 1.57536e+02L, 7.42437e+01L, 5.61388e+01L, 4.96783e+01L, 2.92400e+00L, 2.15042e+01L, 1.11733e+02L, 2.92153e+01L },
+    { 1.78518e+02L, 8.28729e+01L, 1.87898e+02L, 8.20766e+01L, 7.82531e+01L, 6.23319e+01L, 8.04052e-01L, 1.82806e+01L, 2.86692e+02L, 4.68937e+01L },
+    { 1.43681e+03L, 2.17650e+02L, 2.04762e+02L, 9.79598e+01L, 5.19114e+01L, 6.75324e+01L, 1.84114e-01L, 1.22583e+01L, 3.10763e+02L, 5.21971e+01L }
+  };
+
+  const size_t i = ntracks - 3;
+
+  if (rho >= 0.01 && rho < 0.02)
+    f = p[i][0] * expl(-fabs(p[i][1])*rho);
+  else if (rho >= 0.02 && rho < 0.04)
+    f = p[i][2] * expl(-fabs(p[i][3])*rho);
+  else if (rho >= 0.04 && rho < 0.1)
+    f = p[i][4] * expl(-fabs(p[i][5])*rho);
+  else if (rho >= 0.1 && rho < 0.5)
+    f = p[i][6] * expl(-fabs(p[i][7])*rho);
+  else if (rho >= 0.5)
+    f = p[i][8] * expl(-fabs(p[i][9])*pow(rho,0.5));
+
   return double(f);
 }
 
 double func_dphi(double* x, double*) {
-  return phi_a * pow(fabs(x[0]), phi_b);
+  return pow(x[0] - phi_c, phi_e) + phi_a;
 }
 
 double throw_rho() {
@@ -124,37 +123,43 @@ Vertex throw_1v(const double phi=-1e99) {
     return Vertex(throw_rho(), phi);
 }
 
+double get_eff(double rho) {
+  return h_eff->GetBinContent(h_eff->FindBin(rho));
+}
+
 VertexPair throw_2v() {
   VertexPair p;
   while (1) {
     p.first = throw_1v();
     const double dphi = throw_dphi();
     p.second = throw_1v(TVector2::Phi_mpi_pi(p.first.phi() + dphi));
-    const double pb = 0.5 * TMath::Erf((p.rho() - clear_mu)/clear_sig) + 0.5;
+    const double eff = get_eff(p.rho());
     const double u = gRandom->Rndm();
-    if (u < pb)
+    if (u < eff)
       break;
   }
   return p;
 }
 
-TH1D* book_1v(const char* name) {
-  return new TH1D(name, "", nbins_1v, bins_1v);
-}
-
-TH1D* book_2v(const char* name) {
-  return new TH1D(name, "", nbins_2v, bins_2v);
-}
+TH1D* book_1v(const char* name) { return new TH1D(name, "", nbins_1v, bins_1v); }
+TH1D* book_2v(const char* name) { return new TH1D(name, "", nbins_2v, bins_2v); }
 
 int main(int, char**) {
+  // Defaults and command-line configurables.
+
   jmt::ConfigFromEnv env("sm", true);
+
+  const double default_n1v[6] = { -1, -1, -1, 195827, 26746, 4404 };
+  const double default_n2v[6] = { -1, -1, -1,   1323,    22,    1 };
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
-  const int ntoys = env.get_int("ntoys", 500);
+  const int ntoys = env.get_int("ntoys", 10000);
   const std::string out_fn = env.get_string("out_fn", "statmodel.root");
-  const double n1v = env.get_double("n1v", 181076);
-  const double n2v = env.get_double("n2v", 251);
+  ntracks = env.get_int("ntracks", 3);
+  assert(ntracks >= 3 && ntracks <= 5);
+  const double n1v = env.get_double("n1v", default_n1v[ntracks]);
+  const double n2v = env.get_double("n2v", default_n2v[ntracks]);
   const std::string true_fn = env.get_string("true_fn", "");
   const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
@@ -162,12 +167,15 @@ int main(int, char**) {
   const double oversample = env.get_double("oversample", 1);
   rho_tail_norm = env.get_long_double("rho_tail_norm", 3e8L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", -20.6511L);
-  phi_a = env.get_double("phi_a", 1);
-  phi_b = env.get_double("phi_b", 4);
-  clear_mu  = env.get_double("clear_mu",  0.0295);
-  clear_sig = env.get_double("clear_sig", 0.0110);
+  phi_c = env.get_double("phi_c", 1.35);
+  phi_e = env.get_double("phi_e", 2);
+  phi_a = env.get_double("phi_a", 3.66);
+  const std::string eff_fn = env.get_string("eff_fn", "eff_avg.root");
+  const std::string eff_path = env.get_string("eff_path", TString::Format("average%i", ntracks).Data());
 
   /////////////////////////////////////////////
+
+  // Set up ROOT and globals (mainly the fcns from which we throw)
 
   jmt::set_root_style();
   TH1::SetDefaultSumw2();
@@ -186,24 +194,28 @@ int main(int, char**) {
 #endif
 
   const double rho_min = 0;
-  const double rho_max = 2.5;
+  const double rho_max = 2.;
   f_func_rho = new TF1("func_rho", func_rho, 0, rho_max);
-  f_func_rho->SetNpx(25000);
+  f_func_rho->SetNpx(25000); // need lots of points when you want to sample a fcn with such a big y range
 
   f_func_dphi = new TF1("func_dphi", func_dphi, 0, M_PI);
   f_func_dphi->SetNpx(1000);
 
-  /////
-  
+  uptr<TFile> eff_f(new TFile(eff_fn.c_str()));
+  h_eff = (TH1F*)eff_f->Get(eff_path.c_str())->Clone("h_eff");
+  eff_f->Close();
+
   uptr<TCanvas> c(new TCanvas("c", "", 1972, 1000));
   TVirtualPad* pd = 0;
   c->Print("statmodel.pdf[");
-  auto p    = [&c] () { c->cd(); c->Print("statmodel.pdf"); };
+  auto p = [&c] () { c->cd(); c->Print("statmodel.pdf"); };
   //auto lp   = [&c] () { c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogy(0); };
   //auto lxp  = [&c] () { c->SetLogx(1); c->Print("statmodel.pdf"); c->SetLogx(0); };
   //auto lxyp = [&c] () { c->SetLogx(1); c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogx(0); c->SetLogy(0); };
 
-  ////
+  /////////////////////////////////////////////
+
+  // 1st page of output: show the rho fcn itself lin/log
 
   const double func_rho_max   = f_func_rho->GetMaximum();
   const double func_rho_max_x = f_func_rho->GetMaximumX();
@@ -217,6 +229,10 @@ int main(int, char**) {
   f_func_rho->Draw();
   p();
   c->Clear();
+
+  // Generate the true 1v & 2v distributions from func_rho and
+  // func_dphi. Takes a while, so if true_fn is set on cmd line, will
+  // take these + the rng state from that file.
 
   uptr<TH1D> h_true_1v_rho(book_1v("h_true_1v_rho"));
   uptr<TH1D> h_true_1v_phi(new TH1D("h_true_1v_phi", "", 20, -M_PI, M_PI));
@@ -275,6 +291,9 @@ int main(int, char**) {
   assert(h_true_1v_rho->GetBinContent(h_true_1v_rho->GetNbinsX()+1) < 1e-12);
   //jmt::deoverflow(h_true_1v_rho.get());
   jmt::deoverflow(h_true_2v_dvv.get());
+
+  // 2nd-7th pages of output: the true_1v histogram + comparison to
+  // fcn (for debugging),
 
   uptr<TH1D> h_true_1v_rho_unzoom    ((TH1D*)h_true_1v_rho->Clone("h_true_1v_rho_unzoom"));
   uptr<TH1D> h_true_1v_rho_norm      ((TH1D*)h_true_1v_rho->Clone("h_true_1v_rho_norm"));
@@ -410,6 +429,12 @@ int main(int, char**) {
   p();
   c->Clear();
 
+  /////////////////////////////////////////////
+
+  // Output pg 8-XX: distribution in toys of total n1v, n1v in each
+  // dbv bin, and n2v in each dvv bin, each compared to truth from
+  // fcn.
+
   uptr<TH1D> h_n1v(new TH1D("h_n1v", "", 20, n1v - 5*sqrt(n1v), n1v + 5*sqrt(n1v)));
   std::vector<uptr<TH1D>> h_1v_rho_bins;
   std::vector<uptr<TH1D>> h_2v_dvvc_bins;
@@ -429,7 +454,11 @@ int main(int, char**) {
     if (iv.lower < 1) iv.lower = 0;
     h_2v_dvvc_bins.emplace_back(new TH1D(TString::Format("h_2v_dvvc_bins_%i", ibin), TString::Format("d_{VV}^{C} bin %i", ibin), 200, iv.lower, iv.upper));
   }
-    
+
+  // Throw the toys and fill the above hists.
+  // First throw the one vertex sample, then construct dvvc from it.
+  // The toy is saved in the h_1v/2v*bins vectors.
+
   printf("toys: ");
   for (int itoy = 0; itoy < ntoys; ++itoy) {
     // make the toy dataset
@@ -445,7 +474,7 @@ int main(int, char**) {
     for (int ibin = 1; ibin <= nbins_1v; ++ibin)
       h_1v_rho_bins[ibin-1]->Fill(h_1v_rho->GetBinContent(ibin));
 
-    // construct dvvc from it
+    // The construction
     uptr<TH1D> h_2v_dvvc(book_2v("h_2v_dvvc"));
 
     for (int i = 0, ie = int(i1v * oversample); i < ie; ++i) {
@@ -453,8 +482,7 @@ int main(int, char**) {
       const double rho1 = h_1v_rho->GetRandom();
       const double dphi = throw_dphi();
       const double dvvc = sqrt(rho0*rho0 + rho1*rho1 - 2*rho0*rho1*cos(dphi));
-
-      const double w = std::max(1e-12, 0.5*TMath::Erf((dvvc - clear_mu)/clear_sig) + 0.5);
+      const double w = get_eff(dvvc);
       h_2v_dvvc->Fill(dvvc, w);
     }
 
@@ -477,6 +505,14 @@ int main(int, char**) {
 
   TLatex tl;
   tl.SetTextFont(42);
+
+  /////////////////////////////////////////////
+
+  // Output pg XX: display and compare the mean and rms to the true
+  // distributions. The right plot on output pg-1, "2v bin-by-bin
+  // rms/true" gives the fractional uncertainties in each bin due to
+  // the statistics of the 1v distribution, and the last page shows
+  // the closure of the construction procedure.
 
   uptr<TH1D> h_1v_rho_bins_means      (book_1v("h_1v_rho_bins_means"));
   uptr<TH1D> h_1v_rho_bins_rmses      (book_1v("h_1v_rho_bins_rmses"));
@@ -641,4 +677,5 @@ int main(int, char**) {
   delete h_func_rho;
   delete f_func_rho;
   delete f_func_dphi;
+  delete h_eff;
 }
