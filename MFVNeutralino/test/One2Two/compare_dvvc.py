@@ -10,17 +10,17 @@ set_style()
 ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
 
 if mode == 'vary_eff':
-    fn1 = '''2v_from_jets_3track_average3_c0p00_e0_a0p00.root
-2v_from_jets_3track_maxtk3_c0p00_e0_a0p00.root
-2v_from_jets_3track_ntk3_deltasvgaus_wevent_c0p00_e0_a0p00.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
+2v_from_jets_3track_maxtk3_c1p35_e2_a3p66.root
+2v_from_jets_3track_ntk3_deltasvgaus_wevent_c1p35_e2_a3p66.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c0p00_e0_a0p00.root
-2v_from_jets_4track_maxtk4_c0p00_e0_a0p00.root
-2v_from_jets_4track_ntk4_deltasvgaus_wevent_c0p00_e0_a0p00.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66.root
+2v_from_jets_4track_maxtk4_c1p35_e2_a3p66.root
+2v_from_jets_4track_ntk4_deltasvgaus_wevent_c1p35_e2_a3p66.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c0p00_e0_a0p00.root
-2v_from_jets_5track_maxtk5_c0p00_e0_a0p00.root
-2v_from_jets_5track_ntk5_deltasvgaus_wevent_c0p00_e0_a0p00.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66.root
+2v_from_jets_5track_maxtk5_c1p35_e2_a3p66.root
+2v_from_jets_5track_ntk5_deltasvgaus_wevent_c1p35_e2_a3p66.root'''.split('\n')
 
     ls = '''average efficiency
 maxtk efficiency
@@ -44,14 +44,14 @@ if mode == 'vary_dphi':
     lsh = 'flat%40s' % ''
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c0p00_e0_a0p00.root
-2v_from_jets_3track_average3_c0p00_e0_a0p00_sum.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
+2v_from_jets_3track_average3_c1p35_e2_a3p66_sum.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c0p00_e0_a0p00.root
-2v_from_jets_4track_average4_c0p00_e0_a0p00_sum.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66.root
+2v_from_jets_4track_average4_c1p35_e2_a3p66_sum.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c0p00_e0_a0p00.root
-2v_from_jets_5track_average5_c0p00_e0_a0p00_sum.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66.root
+2v_from_jets_5track_average5_c1p35_e2_a3p66_sum.root'''.split('\n')
 
     ls = '''default
 sort by b quarks'''.split('\n')
