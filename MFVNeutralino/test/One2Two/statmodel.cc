@@ -165,7 +165,7 @@ int main(int, char**) {
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
   const int ntoys = env.get_int("ntoys", 10000);
-  const std::string out_fn = env.get_string("out_fn", "statmodel.root");
+  const std::string out_fn = env.get_string("out_fn", "statmodel");
   ntracks = env.get_int("ntracks", 3);
   assert(ntracks >= 3 && ntracks <= 5);
   const double n1v = env.get_double("n1v", default_n1v[ntracks]);
@@ -193,7 +193,7 @@ int main(int, char**) {
 
   gRandom->SetSeed(seed);
 
-  uptr<TFile> out_f(new TFile(out_fn.c_str(), "recreate"));
+  uptr<TFile> out_f(new TFile((out_fn + ".root").c_str(), "recreate"));
 
 #ifdef USE_H_DBV
   uptr<TFile> fh(new TFile("h.root"));
@@ -219,11 +219,12 @@ int main(int, char**) {
 
   uptr<TCanvas> c(new TCanvas("c", "", 1972, 1000));
   TVirtualPad* pd = 0;
-  c->Print("statmodel.pdf[");
-  auto p = [&c] () { c->cd(); c->Print("statmodel.pdf"); };
-  //auto lp   = [&c] () { c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogy(0); };
-  //auto lxp  = [&c] () { c->SetLogx(1); c->Print("statmodel.pdf"); c->SetLogx(0); };
-  //auto lxyp = [&c] () { c->SetLogx(1); c->SetLogy(1); c->Print("statmodel.pdf"); c->SetLogx(0); c->SetLogy(0); };
+  TString pdf_fn = (out_fn + ".pdf").c_str();
+  c->Print(pdf_fn + "[");
+  auto p = [&] () { c->cd(); c->Print(pdf_fn); };
+  //auto lp   = [&] () { c->SetLogy(1); c->Print(pdf_fn); c->SetLogy(0); };
+  //auto lxp  = [&] () { c->SetLogx(1); c->Print(pdf_fn); c->SetLogx(0); };
+  //auto lxyp = [&] () { c->SetLogx(1); c->SetLogy(1); c->Print(pdf_fn); c->SetLogx(0); c->SetLogy(0); };
 
   /////////////////////////////////////////////
 
@@ -679,7 +680,7 @@ int main(int, char**) {
   p();
   c->Clear();
 
-  c->Print("statmodel.pdf]");
+  c->Print(pdf_fn + "]");
 
   out_f->cd();
   for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dphi.get()})
