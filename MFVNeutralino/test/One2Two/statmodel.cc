@@ -155,7 +155,7 @@ int main(int, char**) {
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
-  const int ntoys = env.get_int("ntoys", 10000);
+  const int ntoys = env.get_int("ntoys", 100000);
   const std::string out_fn = env.get_string("out_fn", "statmodel");
   ntracks = env.get_int("ntracks", 3);
   assert(ntracks >= 3 && ntracks <= 5);
