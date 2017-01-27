@@ -35,6 +35,12 @@ dummy_for_hash = int(time()*1e6)
 
 config = Config()
 
+to_rm = []
+
+for x in ['ntuple.py', 'minitree.py']:
+    to_rm.append(x)
+    os.system('cmsDumpPython.py ../%s > %s' % (x,x))
+
 config.General.transferLogs = True
 config.General.transferOutputs = True
 config.General.workArea = work_area
@@ -42,7 +48,7 @@ config.General.requestName = 'SETME'
 
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'dummy.py'
-config.JobType.inputFiles = ['todoify.sh', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py', '../ntuple.py', '../minitree.py']
+config.JobType.inputFiles = ['todoify.sh', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py', 'ntuple.py', 'minitree.py']
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.sendPythonFolder = True
 config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz', 'RandomEngineState_RAWHLT.xml.gz', 'reco.root']
@@ -165,3 +171,7 @@ elif meta == 'ttbar':
         else:
             todo2 = None
         submit(config, name, todo, todo2)
+
+if not testing:
+    for x in to_rm:
+        os.remove(x)
