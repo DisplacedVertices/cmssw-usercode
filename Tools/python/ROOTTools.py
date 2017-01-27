@@ -1259,9 +1259,11 @@ def poisson_means_divide(h1, h2, no_zeroes=False):
 def plot_dir(x=''):
     hostname = os.environ['HOSTNAME']
     username = os.environ['USER']
+    d = None
     if 'fnal.gov' in hostname and username == 'tucker':
         d = '/publicweb/t/tucker/asdf/plots'
-    return os.path.join(d,x)
+    if d:
+        return os.path.join(d,x)
     raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
 
 class plot_saver:
