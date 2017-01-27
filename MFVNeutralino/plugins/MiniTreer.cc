@@ -54,6 +54,8 @@ MFVVertexAux MFVMiniTreer::xform_vertex(const MFVEvent& mevent, const MFVVertexA
 }
 
 void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
+  const bool is_mc = !event.isRealData();
+
   nt.clear();
   nt.run   = event.id().run();
   nt.lumi  = event.luminosityBlock();
@@ -67,7 +69,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);
   nt.pvz = mevent->pvz - mevent->bsz;
-  nt.npu = int2uchar(mevent->npu);
+  nt.npu = is_mc ? int2uchar(mevent->npu) : 0;
 
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
