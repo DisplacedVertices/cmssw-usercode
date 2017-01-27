@@ -213,7 +213,7 @@ def keep_tracker_extras(process):
         ]
 
 class DummyBeamSpots():
-    myttbarBowing = cms.PSet(
+    bowing = cms.PSet(
             X0 = cms.double(0.246344),
             Y0 = cms.double(0.389749),
             Z0 = cms.double(0.402745),
@@ -228,7 +228,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarCurl = cms.PSet(
+    curl = cms.PSet(
             X0 = cms.double(0.246597),
             Y0 = cms.double(0.38699),
             Z0 = cms.double(0.314451),
@@ -243,7 +243,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarElliptical = cms.PSet(
+    elliptical = cms.PSet(
             X0 = cms.double(0.246156),
             Y0 = cms.double(0.389613),
             Z0 = cms.double(0.288198),
@@ -258,7 +258,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarRadial = cms.PSet(
+    radial = cms.PSet(
             X0 = cms.double(0.246322),
             Y0 = cms.double(0.389811),
             Z0 = cms.double(0.327943),
@@ -273,7 +273,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarSagitta = cms.PSet(
+    sagitta = cms.PSet(
             X0 = cms.double(0.235756),
             Y0 = cms.double(0.389839),
             Z0 = cms.double(0.451828),
@@ -288,7 +288,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarSkew = cms.PSet(
+    skew = cms.PSet(
             X0 = cms.double(0.246258),
             Y0 = cms.double(0.389962),
             Z0 = cms.double(0.386416),
@@ -303,7 +303,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarTelescope = cms.PSet(
+    telescope = cms.PSet(
             X0 = cms.double(0.245667),
             Y0 = cms.double(0.386495),
             Z0 = cms.double(0.425672),
@@ -318,7 +318,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarTwist = cms.PSet(
+    twist = cms.PSet(
             X0 = cms.double(0.246196),
             Y0 = cms.double(0.389666),
             Z0 = cms.double(0.293139),
@@ -333,7 +333,7 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
 
-    myttbarZexpansion = cms.PSet(
+    zexpansion = cms.PSet(
             X0 = cms.double(0.246214),
             Y0 = cms.double(0.389698),
             Z0 = cms.double(0.394112),
@@ -348,13 +348,14 @@ class DummyBeamSpots():
             BetaStar = cms.double(0),
         )
     
-def dummy_beamspot(process, params):
-    params = getattr(DummyBeamSpots, params)
+def dummy_beamspot(process, tag):
+    params = getattr(DummyBeamSpots, tag)
 
     process.myBeamSpot = cms.EDProducer('DummyBeamSpotProducer', params)
 
     for name, path in process.paths.items():
-        path.insert(0, process.myBeamSpot)
+        if path._seq is not None:
+            path.insert(0, process.myBeamSpot)
 
     for name, out in process.outputModules.items():
         new_cmds = []
@@ -367,6 +368,10 @@ def dummy_beamspot(process, params):
     from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
     for path_name, path in itertools.chain(process.paths.iteritems(), process.endpaths.iteritems()):
         massSearchReplaceAnyInputTag(path, cms.InputTag('offlineBeamSpot'), cms.InputTag('myBeamSpot'), verbose=True)
+
+def set_weakmode(process, weakmode):
+    tracker_alignment(process, weakmode)
+    dummy_beamspot(process, weakmode)
 
 def hlt_filter(process, hlt_path):
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
