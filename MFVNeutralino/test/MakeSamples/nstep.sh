@@ -2,6 +2,13 @@
 
 #exec 2>&1
 
+for fn in gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
+    if [[ -e $fn ]]; then
+        ./todoify.sh $fn > temp
+        mv temp $fn
+    fi
+done
+
 JOBNUM=$1
 MAXEVENTS=$2
 export DUMMYFORHASH=$(echo $3 | cut -d = -f 2) # crab scriptArgs requires a =
