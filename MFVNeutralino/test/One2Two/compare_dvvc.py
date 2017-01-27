@@ -26,8 +26,6 @@ if mode == 'vary_eff':
 maxtk efficiency
 ntk_deltasvgaus_wevent efficiency'''.split('\n')
 
-    lsh = 'vertexer method%10soverlay method%10s' % ('', '')
-
 if mode == 'vary_dphi':
     fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
 2v_from_jets_3track_average3_c0p00_e0_a0p00.root'''.split('\n')
@@ -40,8 +38,6 @@ if mode == 'vary_dphi':
 
     ls = '''|#Delta#phi| from jets
 |#Delta#phi| flat'''.split('\n')
-
-    lsh = 'flat%40s' % ''
 
 if mode == 'vary_dbv':
     fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
@@ -56,16 +52,12 @@ if mode == 'vary_dbv':
     ls = '''default
 sort by b quarks'''.split('\n')
 
-    lsh = 'sort by b quarks%30s' % ''
-
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 n2v = [1323., 22., 1.]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
-gs = []
-g1s = []
 g2s = []
 for i in range(3):
     l1 = ROOT.TLegend(0.50,0.70,0.85,0.85)
@@ -161,14 +153,6 @@ for i in range(3):
     c1 = hs[0].IntegralAndError(5,40,e1)
     print '%s: dVVC1 events = %4.2f +/- %4.2f' % (ntk[i], c1, e1)
 
-    x = []
-    y = []
-    ex = []
-    ey = []
-    x1 = []
-    y1 = []
-    ex1 = []
-    ey1 = []
     x2 = []
     y2 = []
     ex2 = []
@@ -187,73 +171,16 @@ for i in range(3):
         er2 = (c/c2) * ((e/c)**2 + (e2/c2)**2)**0.5
 
         print '%33s = %6.2f +/- %4.2f (%4.2f +/- %4.2f x simulated) (%4.2f +/- %4.2f x dVVC1) (%4.2f +/- %4.2f x dVVC)' % (ls[j], c, e, r, er, r1, er1, r2, er2)
-        x.append(j+1+0.1*i)
-        ex.append(0)
-        y.append(r)
-        ey.append(er)
         if j == 0:
             continue
-        x1.append(j+0.1*i)
-        ex1.append(0)
-        y1.append(r1)
-        ey1.append(er1)
         if j > 1:
             continue
         x2.append(i+1)
         ex2.append(0)
         y2.append(r1)
         ey2.append(er1)
-    g = ROOT.TGraphErrors(len(x), array('d',x), array('d',y), array('d',ex), array('d',ey))
-    gs.append(g)
-    g1 = ROOT.TGraphErrors(len(x1), array('d',x1), array('d',y1), array('d',ex1), array('d',ey1))
-    g1s.append(g1)
     g2 = ROOT.TGraphErrors(len(x2), array('d',x2), array('d',y2), array('d',ex2), array('d',ey2))
     g2s.append(g2)
-
-colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta]
-l = ROOT.TLegend(0.67,0.72,0.87,0.87)
-for i,g in enumerate(gs):
-    g.SetMarkerStyle(21)
-    g.SetMarkerColor(colors[i])
-    g.SetLineColor(colors[i])
-    if i == 0:
-        g.SetTitle('d_{VV}^{C} / d_{VV} (>400 #mum);input distributions;')
-        g.GetXaxis().SetLimits(0.4,len(x)+0.8)
-        g.GetYaxis().SetRangeUser(0,4)
-        g.Draw('AP')
-    else:
-        g.Draw('P')
-    l.AddEntry(g, ntk[i], 'lep')
-l.SetFillColor(0)
-l.Draw()
-line = ROOT.TLine(0.4,1,len(x)+0.8,1)
-line.SetLineStyle(2)
-line.SetLineWidth(2)
-line.Draw()
-ps.save('ratio_simulated')
-
-l = ROOT.TLegend(0.67,0.72,0.87,0.87)
-for i,g in enumerate(g1s):
-    g.SetMarkerStyle(21)
-    g.SetMarkerColor(colors[i])
-    g.SetLineColor(colors[i])
-    if i == 0:
-        g.SetTitle('variation / default (d_{VV}^{C} > 400 #mum);%s;' % lsh)
-        g.GetXaxis().SetLimits(0.4,len(x1)+0.8)
-        g.GetXaxis().SetLabelSize(0)
-        g.GetXaxis().SetTitleOffset(0.5)
-        g.GetYaxis().SetRangeUser(0.6,1.4)
-        g.Draw('AP')
-    else:
-        g.Draw('P')
-    l.AddEntry(g, ntk[i], 'lep')
-l.SetFillColor(0)
-l.Draw()
-line = ROOT.TLine(0.4,1,len(x1)+0.8,1)
-line.SetLineStyle(2)
-line.SetLineWidth(2)
-line.Draw()
-ps.save('ratio_dvvc1')
 
 for i,g in enumerate(g2s):
     g.SetMarkerStyle(21)
