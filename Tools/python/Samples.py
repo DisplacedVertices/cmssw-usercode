@@ -398,8 +398,6 @@ _adbp3 = partial(_adbp, dbs_inst='phys03')
 def add_dataset_phys03(sample, ds_name, dataset, nevents_orig, **kwargs):
     sample.add_dataset(ds_name, dataset, nevents_orig, dbs_inst='phys03', **kwargs)
 
-add_dataset_phys03(JetHT2015D, 'ntuplev10', '/JetHT/tucker-NtupleV10-6970a7d559855cd9d6b4079c6dd16e62/USER', 7607589) # 1311 files
-
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
 _adbp3('sim', '/mfv_neu_tau00100um_M0400/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
@@ -418,6 +416,8 @@ _adbp3('sim', '/mfv_neu_tau10000um_M0400/tucker-sim_10k-c66f4a7649a68ea5b6afdf05
 _adbp3('sim', '/mfv_neu_tau10000um_M0800/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
 _adbp3('sim', '/mfv_neu_tau10000um_M1200/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9600) # 48 files
 _adbp3('sim', '/mfv_neu_tau10000um_M1600/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9600) # 48 files
+
+JetHT2015D.add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-6970a7d559855cd9d6b4079c6dd16e62/USER', dbs_inst='phys03') # 7607589 events, 1311 files
 
 # condor-run ntuples
 for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
