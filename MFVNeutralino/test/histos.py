@@ -81,7 +81,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
 
     samples = Samples.registry.from_argv(
-        #Samples.data_samples + \
+        Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         #Samples.qcdpt_samples + \
         Samples.mfv_signal_samples + \
@@ -91,15 +91,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         Samples.xx4j_samples
         )
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
+    samples = Samples.data_samples + \
+        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
 
     for sample in samples:
         sample.files_per = 50
         if not sample.is_mc:
-            sample.json = 'ana_10pc.json'
-            raise NotImplementedError('need to implement json use in CondorSubmitter')
+            sample.json = 'ana_2015.json'
 
     cs = CondorSubmitter('HistosV10', dataset='ntuplev10')
     cs.submit_all(samples)
