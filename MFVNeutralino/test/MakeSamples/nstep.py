@@ -18,6 +18,7 @@ ex = ''
 ################################################################################
 
 import sys, os
+from pprint import pprint
 from time import time
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
 from JMTucker.Tools.general import save_git_status
@@ -51,7 +52,7 @@ if output_minitree:
 config.JobType.scriptArgs = [
     'maxevents=%i' % events_per,
     'dummyforhash=%i' % dummy_for_hash,  # stupid crab requires a =
-    'output_minitree=%i' % int(output_minitree)
+    'output_minitree=%i' % int(output_minitree),
     'todo=SETME',
     'todo2=placeholder' # yes this gets replaced with todo= below
     ]
@@ -59,7 +60,7 @@ config.JobType.scriptArgs = [
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
-config.Data.publication = not minitrees
+config.Data.publication = not output_minitree
 config.Data.outputPrimaryDataset = 'SETME'
 config.Data.outputDatasetTag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
 
@@ -114,15 +115,13 @@ def submit(config, name, todo, todo2=None):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
     config.JobType.scriptArgs[3] = todo
-    if todo2:
+    if todo2 is not None:
         config.JobType.scriptArgs[4] = todo2
 
     if not testing:
-        outputs[name] = crab_command('submit', config=config)
+        output = crab_command('submit', config=config)
         print colors.boldwhite(name)
-        for x in sorted(outputs[name]):
-            print colors.boldcyan(x + ':')
-            print outputs[name][x].strip()
+        pprint(output)
         print
     else:
         print config
@@ -163,4 +162,6 @@ elif meta == 'ttbar':
         todo = 'todo=ttbar'
         if todo2 != 'nominal':
             todo2 = 'todo=weakmode,' + todo2
+        else:
+            todo2 = None
         submit(config, name, todo, todo2)
