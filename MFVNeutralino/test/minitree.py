@@ -18,6 +18,20 @@ process.mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
 
 process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts * process.mfvMiniTree)
 
+for mn,mx in (3,3), (3,4), (4,4):
+    vtx_name = 'vtx%i%i' % (mn,mx)
+    ana_name = 'ana%i%i' % (mn,mx)
+    tre_name = 'tre%i%i' % (mn,mx)
+    pth_name = 'pth%i%i' % (mn,mx)
+    vtx = process.mfvSelectedVerticesTight.clone(min_ntracks = mn, max_ntracks = mx)
+    ana = process.mfvAnalysisCuts.clone(vertex_src = vtx_name)
+    tre = process.mfvMiniTree.clone(vertex_src = vtx_name)
+    pth = cms.Path(process.mfvWeight * vtx * ana * tre)
+    setattr(process, vtx_name, vtx)
+    setattr(process, ana_name, ana)
+    setattr(process, tre_name, tre)
+    setattr(process, pth_name, pth)
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples

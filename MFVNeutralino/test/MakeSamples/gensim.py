@@ -5,18 +5,12 @@ debug = 'debug' in sys.argv
 randomize = 'norandomize' not in sys.argv
 maxevents = 1
 jobnum = 1
-todo = 'mfv_neutralino'
-todo_args = (1, 800)
 
 for arg in sys.argv:
     if arg.startswith('maxevents='):
         maxevents = int(arg.replace('maxevents=',''))
     elif arg.startswith('jobnum='):
         jobnum = int(arg.replace('jobnum=',''))
-    elif arg.startswith('todo='):
-        arg = arg.replace('todo=', '')
-        todo, todo_args = arg.split(',', 1)
-        todo_args = [eval(x) for x in todo_args.split(',')]
 
 ################################################################################
 
@@ -125,8 +119,3 @@ process = customisePostLS1(process)
 if randomize:
     from modify import randomize_seeds
     randomize_seeds(process)
-
-################################################################################
-
-import modify
-getattr(modify, 'set_' + todo)(process, *todo_args)

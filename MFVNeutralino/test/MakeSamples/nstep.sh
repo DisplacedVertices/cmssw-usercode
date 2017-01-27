@@ -2,10 +2,19 @@
 
 #exec 2>&1
 
+for fn in gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
+    if [[ -e $fn ]]; then
+        ./todoify.sh $fn > temp
+        mv temp $fn
+    fi
+done
+
 JOBNUM=$1
 MAXEVENTS=$2
 export DUMMYFORHASH=$(echo $3 | cut -d = -f 2) # crab scriptArgs requires a =
-TODO=$4
+MINITREES=$(echo $4 | cut -d = -f 2)
+TODO=$5
+TODO2=$6
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
@@ -13,8 +22,11 @@ OUTDIR=$(pwd)
 eval $(scram unsetenv -sh)
 
 echo JOBNUM: ${JOBNUM}
-echo TODO: ${TODO}
 echo MAXEVENTS: ${MAXEVENTS}
+echo DUMMYFORHASH: ${DUMMYFORHASH}
+echo MINITREES: ${MINITREES}
+echo TODO: ${TODO}
+echo TODO2: ${TODO2}
 
 ################################################################################
 
@@ -66,7 +78,7 @@ eval $(scram runtime -sh)
 cd ../..
 
 echo cmsRun
-cmsRun rawhlt.py 2>&1
+cmsRun rawhlt.py ${TODO2} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
@@ -100,7 +112,7 @@ eval $(scram runtime -sh)
 cd ../..
 
 echo cmsRun
-cmsRun -j tempfjr.xml reco.py 2>&1
+cmsRun -j tempfjr.xml reco.py ${TODO2} 2>&1
 python fixfjr.py
 
 EXITCODE=${PIPESTATUS[0]}
@@ -121,3 +133,50 @@ if [ $EXITCODE -ne 0 ]; then
 fi
 
 echo END RECO
+
+################################################################################
+
+if [[ $MINITREES -eq 1 ]]; then
+    echo START NTUPLE+MINITREE
+
+    (
+    scram project -n NTUPLE CMSSW CMSSW_7_6_3_patch2
+    cd NTUPLE/src
+    eval $(scram runtime -sh)
+    cd ../..
+
+    echo "process.source.fileNames = ['file:reco.root']" >> ntuple.py
+    echo "process.maxEvents.input = -1" >> ntuple.py
+    echo cmsRun ntuple.py
+    cmsRun ntuple.py ${TODO2} 2>&1
+
+    EXITCODE=${PIPESTATUS[0]}
+    if [ $EXITCODE -eq 0 ]; then
+        echo NTUPLE ls -l
+        ls -l
+
+        echo "process.source.fileNames = ['file:ntuple.root']" >> minitree.py
+        echo "process.maxEvents.input = -1" >> minitree.py
+        echo cmsRun minitree.py
+        cmsRun -j tempfjr.py minitree.py ${TODO2} 2>&1
+        python fixfjr.py
+        EXITCODE=${PIPESTATUS[0]}
+        if [ $EXITCODE -eq 0 ]; then
+            echo MINITREE ls -l
+            ls -l
+        fi
+    fi
+
+    exit $EXITCODE
+    )
+
+    EXITCODE=$?
+    if [ $EXITCODE -ne 0 ]; then
+      echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      echo @@@@ cmsRun exited NTUPLE+MINITREE step with error code $EXITCODE
+      echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      exit $EXITCODE
+    fi
+
+    echo END NTUPLE+MINITREE
+fi
