@@ -14,8 +14,6 @@ ps = plot_saver(plot_dir(plot_path), size=(1200,600), log=False, pdf=True)
 lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle')
 
 runs = lls.runs(year)
-print runs[:15]
-raise 1
 nvtx = defaultdict(int)
 
 for fn in fns:
