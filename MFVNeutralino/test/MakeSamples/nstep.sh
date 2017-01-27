@@ -104,16 +104,12 @@ echo END RAWHLT
 ################################################################################
 
 echo START RECO
-
-(
-scram project -n RECO CMSSW CMSSW_7_6_1
-cd RECO/src
+cd src
 eval $(scram runtime -sh)
-cd ../..
+cd ..
 
 echo cmsRun
 cmsRun -j tempfjr.xml reco.py ${TODO2} 2>&1
-python fixfjr.py
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
@@ -121,10 +117,8 @@ if [ $EXITCODE -eq 0 ]; then
     ls -l
 fi
 
-exit $EXITCODE
-)
+python fixfjr.py
 
-EXITCODE=$?
 if [ $EXITCODE -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   echo @@@@ cmsRun exited RECO step with error code $EXITCODE
@@ -139,12 +133,6 @@ echo END RECO
 if [[ $MINITREES -eq 1 ]]; then
     echo START NTUPLE+MINITREE
 
-    (
-    scram project -n NTUPLE CMSSW CMSSW_7_6_3_patch2
-    cd NTUPLE/src
-    eval $(scram runtime -sh)
-    cd ../..
-
     echo "process.source.fileNames = ['file:reco.root']" >> ntuple.py
     echo "process.maxEvents.input = -1" >> ntuple.py
     echo cmsRun ntuple.py
@@ -158,19 +146,15 @@ if [[ $MINITREES -eq 1 ]]; then
         echo "process.source.fileNames = ['file:ntuple.root']" >> minitree.py
         echo "process.maxEvents.input = -1" >> minitree.py
         echo cmsRun minitree.py
-        cmsRun -j tempfjr.py minitree.py ${TODO2} 2>&1
-        python fixfjr.py
+        cmsRun -j tempfjr.xml minitree.py ${TODO2} 2>&1
         EXITCODE=${PIPESTATUS[0]}
+        python fixfjr.py
         if [ $EXITCODE -eq 0 ]; then
             echo MINITREE ls -l
             ls -l
         fi
     fi
 
-    exit $EXITCODE
-    )
-
-    EXITCODE=$?
     if [ $EXITCODE -ne 0 ]; then
       echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
       echo @@@@ cmsRun exited NTUPLE+MINITREE step with error code $EXITCODE
