@@ -8,19 +8,18 @@ fi
 
 cat <<EOF
 import sys
-todo, todo_args = None, None
+todo, todo_args = None, []
 for arg in sys.argv:
     if arg.startswith('todo='):
-        arg = arg.replace('todo=', '')
-        todo, todo_args = arg.split(',', 1)
-        y = []
-        for x in todo_args.split(','):
-            try:
-                x = eval(x)
-            except NameError:
-                pass
-            y.append(x)
-        todo_args = y
+        todo = arg.replace('todo=', '')
+        if ',' in todo:
+            todo, todo_args_ex = todo.split(',', 1)
+            for x in todo_args_ex.split(','):
+                try:
+                    x = eval(x)
+                except NameError:
+                    pass
+                todo_args.append(x)
 
 ################################################################################
 EOF
