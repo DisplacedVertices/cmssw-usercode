@@ -369,9 +369,10 @@ def dummy_beamspot(process, tag):
     for path_name, path in itertools.chain(process.paths.iteritems(), process.endpaths.iteritems()):
         massSearchReplaceAnyInputTag(path, cms.InputTag('offlineBeamSpot'), cms.InputTag('myBeamSpot'), verbose=True)
 
-def set_weakmode(process, weakmode):
+def set_weakmode(process, weakmode, ):
     tracker_alignment(process, weakmode)
-    dummy_beamspot(process, weakmode)
+    if process.name_() != 'HLT':
+        dummy_beamspot(process, weakmode)
 
 def hlt_filter(process, hlt_path):
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel

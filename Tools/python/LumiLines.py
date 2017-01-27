@@ -1,6 +1,6 @@
 # should merge this with general.intlumi_from_brilcalc_csv
 
-import time
+import gzip, time
 from collections import defaultdict
 from JMTucker.Tools.general import from_pickle, to_pickle
 
@@ -10,30 +10,41 @@ class LumiLine:
         'ADJUST': 1,
         'SQUEEZE': 2,
         }
+    sources = {
+        'DT': 0,
+        'PXL': 1,
+        'PLTZERO': 2,
+        'HFOC': 3,
+        }
 
 class LumiLines:
     @classmethod
     def load_csv(cls, fn):
-        header = 'Run:Fill,LS,UTCTime,Beam Status,E(GeV),Delivered(/ub),Recorded(/ub),avgPU'
+        header = '#run:fill,ls,time,beamstatus,E(GeV),delivered(/ub),recorded(/ub),avgpu,source'
+        seen_header = False
 
         lls = []
 
-        for line in open(fn):
+        open_ = gzip.open if fn.endswith('.gz') else open
+            
+        for line in open_(fn):
             line = line.strip()
             if not line:
                 continue
-
-            try:
+            if line.startswith('#'):
+                if line == header:
+                    seen_header = True
+            else:
                 ll = LumiLine()
 
-                run_fill, ls, utctime, beam_status, energy, delivered, recorded, avg_pu = line.split(',')
+                run_fill, ls, utctime, beam_status, energy, delivered, recorded, avg_pu, source = line.split(',')
 
                 run, fill = run_fill.split(':')
                 ll.run = int(run)
                 ll.fill = int(fill)
 
                 ls = ls.split(':')
-                assert ls[0] == ls[1]
+                assert ls[0] == ls[1] or ls[0] != '0' and ls[1] == '0'
                 ll.ls = int(ls[0])
 
                 ll.time = time.mktime(time.strptime(utctime, '%m/%d/%y %H:%M:%S'))
@@ -44,17 +55,15 @@ class LumiLines:
                 ll.delivered = float(delivered)
                 ll.recorded = float(recorded)
                 ll.avg_pu = float(avg_pu)
+                ll.source = LumiLine.sources[source]
 
                 lls.append(ll)
-
-            except ValueError:
-                assert line == header
-
+        assert seen_header
         return lls
 
     @classmethod
     def load(cls, fn, is_csv=False):
-        if is_csv or fn.endswith('.csv'):
+        if is_csv or fn.endswith('.csv') or fn.endswith('.csv.gz'):
             return cls.load_csv(fn)
         return from_pickle(fn, comp=True)
 
@@ -71,6 +80,16 @@ class LumiLines:
         for ll in self.lls:
             self.by_run[ll.run].append(ll)
             self.by_run_ls[(ll.run, ll.ls)] = ll
+        self.by_run = dict(self.by_run)
+
+    def runs(self, year=None):
+        runs = sorted(self.by_run.keys())
+        rb = 260627
+        if year == 2015:
+            runs = [r for r in runs if r <= rb]
+        elif year == 2016:
+            runs = [r for r in runs if r > rb]
+        return runs
 
     def recorded(self, run):
         return sum(ll.recorded for ll in self.by_run[run])

@@ -1256,6 +1256,14 @@ def move_stat_box(s, ndc_coords):
 def poisson_means_divide(h1, h2, no_zeroes=False):
     return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
 
+def plot_dir(x=''):
+    hostname = os.environ['HOSTNAME']
+    username = os.environ['USER']
+    if 'fnal.gov' in hostname and username == 'tucker':
+        d = '/publicweb/t/tucker/asdf/plots'
+    return os.path.join(d,x)
+    raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
+
 class plot_saver:
     i = 0
     
@@ -1740,6 +1748,7 @@ __all__ = [
     'move_above_into_bin',
     'move_overflow_into_last_bin',
     'move_stat_box',
+    'plot_dir',
     'plot_saver',
     'poisson_interval',
     'poisson_intervalize',
