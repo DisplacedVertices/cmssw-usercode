@@ -1,8 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-import JMTucker.Tools.SampleFiles as sf
-process.source.fileNames = sf.get('qcdht2000', 'ntuplev10')[1][:1]
+process.source.fileNames = ['file:ntuple.root']
 process.TFileService.fileName = 'minitree.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
