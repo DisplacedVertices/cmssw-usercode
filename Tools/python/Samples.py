@@ -323,8 +323,8 @@ ttbar_systematics_samples = [
 ########################################################################
 
 data_samples = [
-    DataSample('JetHT2015C', '/JetHT/Run2015D-16Dec2015-v1/AOD'), # 254227 - 255031
-    DataSample('JetHT2015D', '/JetHT/Run2015D-16Dec2015-v1/AOD'), # 256630 - 260727
+    DataSample('JetHT2015C', '/JetHT/Run2015C_25ns-16Dec2015-v1/AOD'), # 254227 - 255031
+    DataSample('JetHT2015D', '/JetHT/Run2015D-16Dec2015-v1/AOD'),      # 256630 - 260727
     ]
 
 auxiliary_data_samples = [
