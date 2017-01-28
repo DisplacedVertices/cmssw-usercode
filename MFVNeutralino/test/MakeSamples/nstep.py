@@ -11,7 +11,7 @@ meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 meta, taus, masses = 'gluddbar', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 
-meta, nevents, events_per, output_minitree = 'ttbar', 5000000, 1000, True
+meta, nevents, events_per, output_minitree = 'ttbar', 4000000, 800, True
 
 ex = ''
 
