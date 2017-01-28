@@ -104,9 +104,9 @@ echo END RAWHLT
 ################################################################################
 
 echo START RECO
-cd src
+cd CMSSW_7_6_3_patch2/src
 eval $(scram runtime -sh)
-cd ..
+cd ../..
 
 echo cmsRun
 cmsRun -j tempfjr.xml reco.py ${TODO2} 2>&1
@@ -140,6 +140,7 @@ if [[ $MINITREES -eq 1 ]]; then
 
     EXITCODE=${PIPESTATUS[0]}
     if [ $EXITCODE -eq 0 ]; then
+        echo NTUPLE nevents $(edmEventSize -v ntuple.root | grep Events)
         echo NTUPLE ls -l
         ls -l
 
@@ -150,6 +151,7 @@ if [[ $MINITREES -eq 1 ]]; then
         EXITCODE=${PIPESTATUS[0]}
         python fixfjr.py
         if [ $EXITCODE -eq 0 ]; then
+            echo MINITREE nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('tre33/t').GetEntries(), f.Get('tre44/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
             echo MINITREE ls -l
             ls -l
         fi
