@@ -104,9 +104,9 @@ echo END RAWHLT
 ################################################################################
 
 echo START RECO
-cd src
+cd CMSSW_7_6_3_patch2/src
 eval $(scram runtime -sh)
-cd ..
+cd ../..
 
 echo cmsRun
 cmsRun -j tempfjr.xml reco.py ${TODO2} 2>&1
