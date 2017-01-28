@@ -46,7 +46,7 @@ process.p = cms.Path(process.mutrig * cms.ignore(process.emu) * cms.ignore(proce
 
 if htskim:
     process.setName_('EffHtSkim')
-    process.htskim = process.den.clone(jet_ht_cut = 800)
+    process.htskim = process.den.clone(jet_ht_cut = 900)
     process.phtskim = cms.Path(process.mutrig * process.htskim)
     process.load('Configuration.EventContent.EventContent_cff')
     process.out = cms.OutputModule('PoolOutputModule',
