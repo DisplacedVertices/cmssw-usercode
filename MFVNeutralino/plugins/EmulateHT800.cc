@@ -119,29 +119,13 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
+  // JMTBAD force it in 2016
+  found[0] = false;
+
   if (int(found[0]) + int(found[1]) != 1)
     throw cms::Exception("EmulateHT800", "didn't find exactly one of HLT_PFHT800 or 900");
 
   if (prints) printf("found 800? %i pass? %i   found 900? %i pass? %i\n", found[0], pass[0], found[1], pass[1]);
-
-  if (return_actual && found[0]) {
-    if (prints) printf("return actual = %i\n", pass[0]);
-    put_ht(event, -1);
-    return pass[0];
-  }
-
-  // HT800 and 900 seeds are is "L1_HTT150 OR L1_HTT175"
-  int l1err = 0;
-  const bool l1_pass_150 = l1_cfg.decision(event, "L1_HTT150", l1err);
-  if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_HTT150: " << l1err;
-  const bool l1_pass_175 = l1_cfg.decision(event, "L1_HTT175", l1err);
-  if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_HTT175: " << l1err;
-  const bool l1_pass = l1_pass_150 || l1_pass_175;
-
-  // only objects that pass at least one path are saved. check 350
-  std::pair<bool, bool> pass_and_found_350 = helper.pass_and_found_any_version("HLT_PFHT350_v");
-  if (!pass_and_found_350.second)
-    throw cms::Exception("EmulateHT800", "didn't find HLT_PFHT350");
 
   float ht = -1;
   bool found_ht = false;
@@ -159,6 +143,25 @@ bool MFVEmulateHT800::filter(edm::Event& event, const edm::EventSetup& setup) {
       }
     }
   }
+
+  if (return_actual && found[return_ht900]) {
+    if (prints) printf("return actual = %i\n", pass[return_ht900]);
+    put_ht(event, ht);
+    return pass[return_ht900];
+  }
+
+  // HT800 and 900 seeds are is "L1_HTT150 OR L1_HTT175"
+  int l1err = 0;
+  const bool l1_pass_150 = l1_cfg.decision(event, "L1_HTT150", l1err);
+  if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_HTT150: " << l1err;
+  const bool l1_pass_175 = l1_cfg.decision(event, "L1_HTT175", l1err);
+  if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_HTT175: " << l1err;
+  const bool l1_pass = l1_pass_150 || l1_pass_175;
+
+  // only objects that pass at least one path are saved. check 350
+  std::pair<bool, bool> pass_and_found_350 = helper.pass_and_found_any_version("HLT_PFHT350_v");
+  if (!pass_and_found_350.second)
+    throw cms::Exception("EmulateHT800", "didn't find HLT_PFHT350");
 
   if (prints)
     printf("ht? %i %f  ht4mc? %i %f\n", found_ht, ht, found_ht4mc, ht4mc);
