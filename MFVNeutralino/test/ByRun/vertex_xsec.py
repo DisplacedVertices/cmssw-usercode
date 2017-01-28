@@ -24,7 +24,7 @@ for fn in fns:
 
 excludes = [
     ('all', []),
-    ('exclude_small_lumi', [9] if year == 2015 else []),
+#    ('exclude_small_lumi', [9,43] if year == 2015 else []),
 #    ('exclude_one_small_lumi_run', [1]),
 #    ('exclude_obvious', range(19) + [142,143,144]),
 #    ('only_low', range(19, 500)),
@@ -95,19 +95,26 @@ for exclude_name, exclude in excludes:
 
     print 'lumi sum:', lsum/1e3, '/fb'
 
-    for g in (xsec, xsec_per_pu):
+    fit_range = (0, nruns-1)
+    if year == 2015 and len(fns) == 1:
+        fit_range = (8,nruns-1)
+    fcn = ROOT.TF1('fcn', 'pol0', *fit_range)
+
+    for i,g in enumerate((xsec, xsec_per_pu)):
         g.SetTitle('%s events  # runs: %i;i_{run};#sigma (pb)' % (title, runs_used))
         g.SetMarkerStyle(20)
         g.SetMarkerSize(0.5)
-
-    xsec.Draw('AP')
-    xsec.Fit('pol0')
-    ps.save(exclude_name + '_xsec')
-
-    xsec_per_pu.GetYaxis().SetTitle('#sigma / PU (pb)')
-    xsec_per_pu.Draw('AP')
-    xsec_per_pu.Fit('pol0')
-    ps.save(exclude_name + '_xsec_per_pu')
+        g.SetFillColor(38)
+        g.SetFillStyle(3001)
+        if i == 1:
+            g.GetYaxis().SetTitle('#sigma / PU (pb)')
+        g.Draw('A2')
+        g.Draw('P')
+        g.Fit(fcn, 'QR')
+        name = exclude_name + ('_xsec' if i == 0 else '_xsec_per_pu')
+        ps.save(name)
+        g.GetYaxis().SetRangeUser(0, 6 * fcn.GetParameter(0))
+        ps.save(name + '_zoom')
 
     print '\n'
 
