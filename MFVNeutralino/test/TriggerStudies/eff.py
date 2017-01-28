@@ -68,7 +68,7 @@ SimpleTriggerEfficiency.setup_endpath(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-    samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
+    samples = Samples.auxiliary_data_samples # + Samples.leptonic_background_samples + Samples.ttbar_samples
     for sample in samples:
         if sample.is_mc:
             sample.events_per = 100000
