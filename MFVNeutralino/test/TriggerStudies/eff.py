@@ -4,7 +4,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 
-is_mc = False
+is_mc = True
 htskim = True
 version = '2016v1'
 json = '../ana_2016.json'
