@@ -4,10 +4,7 @@ def setup_trigger_filter(process, path_name='pevtsel', filt_name='triggerFilter'
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
     triggerFilter = hltHighLevel.clone()
     setattr(process, filt_name, triggerFilter)
-    triggerFilter.HLTPaths = [
-        'HLT_PFHT800_v*',
-        'HLT_PFHT900_v*',
-        ]
+    triggerFilter.HLTPaths = [ 'HLT_PFHT900_v*' ]
     triggerFilter.andOr = True # = OR
     #triggerFilter.throw = False # = HT800 not in MC
     setattr(process, path_name, cms.Path(triggerFilter))
