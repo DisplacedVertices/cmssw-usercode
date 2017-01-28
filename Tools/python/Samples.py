@@ -349,13 +349,13 @@ data_samples = [
     #DataSample('JetHT2015C', '/JetHT/Run2015C_25ns-16Dec2015-v1/AOD'), # 254227 - 255031
     #DataSample('JetHT2015D', '/JetHT/Run2015D-16Dec2015-v1/AOD'),      # 256630 - 260727
 
-    DataSample('JetHT2016B3', '/JetHT/Run2016B-23Sep2016-v3/AOD'),
-    DataSample('JetHT2016C', '/JetHT/Run2016C-23Sep2016-v1/AOD'),
-    DataSample('JetHT2016D', '/JetHT/Run2016D-23Sep2016-v1/AOD'),
-    DataSample('JetHT2016E', '/JetHT/Run2016E-23Sep2016-v1/AOD'),
-    DataSample('JetHT2016F', '/JetHT/Run2016F-23Sep2016-v1/AOD'),
-    DataSample('JetHT2016G', '/JetHT/Run2016G-23Sep2016-v1/AOD'),
-    DataSample('JetHT2016H2', '/JetHT/Run2016H-PromptReco-v2/AOD'),
+    DataSample('JetHT2016B3', '/JetHT/Run2016B-23Sep2016-v3/AOD'),  # 272007 - 275376
+    DataSample('JetHT2016C', '/JetHT/Run2016C-23Sep2016-v1/AOD'),   # 275657 - 276283
+    DataSample('JetHT2016D', '/JetHT/Run2016D-23Sep2016-v1/AOD'),   # 276315 - 276811
+    DataSample('JetHT2016E', '/JetHT/Run2016E-23Sep2016-v1/AOD'),   # 276831 - 277420
+    DataSample('JetHT2016F', '/JetHT/Run2016F-23Sep2016-v1/AOD'),   # 277772 - 278808
+    DataSample('JetHT2016G', '/JetHT/Run2016G-23Sep2016-v1/AOD'),   # 278820 - 280385
+    DataSample('JetHT2016H2', '/JetHT/Run2016H-PromptReco-v2/AOD'), # 280919 - 284044
     DataSample('JetHT2016H3', '/JetHT/Run2016H-PromptReco-v3/AOD'),
     ]
 
