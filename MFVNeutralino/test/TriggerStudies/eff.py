@@ -2,12 +2,14 @@
 
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 
 is_mc = True
 htskim = True
-version = 'v8'
+version = '2015v1'
+json = '../ana_2015.json'
 
-global_tag(process, '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15')
+global_tag(process, which_global_tag(is_mc))
 process.maxEvents.input = 1000
 process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/80000/CA0ABB76-43FC-E411-A207-1CC1DE1CEDB2.root' if is_mc else '/store/data/Run2015D/SingleMuon/MINIAOD/PromptReco-v3/000/256/630/00000/BCD78EF7-2B5F-E511-A3A3-02163E0170B5.root']
 #process.source.fileNames = ['/store/user/tucker/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/trigeff_htskim_v7/151203_184423/0000/htskim_1.root']
@@ -15,14 +17,14 @@ process.source.fileNames = ['/store/mc/RunIISpring15DR74/WJetsToLNu_TuneCUETP8M1
 process.TFileService.fileName = 'eff.root'
 
 if not is_mc:
-    from JMTucker.Tools.Sample import DataSample
     from FWCore.PythonUtilities.LumiList import LumiList
-    process.source.lumisToProcess = LumiList(DataSample.JSON).getVLuminosityBlockRange()
+    process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.mutrig = hltHighLevel.clone()
-process.mutrig.HLTPaths = ['HLT_IsoMu20_v*']
+process.mutrig.HLTPaths = ['HLT_IsoMu20_v*', 'HLT_IsoMu24_v*']
 process.mutrig.andOr = True # = OR
+process.mutrig.throw = False
 
 process.load('JMTucker.MFVNeutralino.EmulateHT800_cfi')
 from JMTucker.Tools.L1GtUtils_cff import l1GtUtilsTags
@@ -32,8 +34,10 @@ process.num = cms.EDFilter('MFVTriggerEfficiency',
                            l1GtUtilsTags,
                            require_trigger = cms.bool(False), # just from EmulateHT800 filter, need to split out
                            require_muon = cms.bool(True),
+                           require_4jets = cms.bool(True),
+                           hlt_process_name = cms.string('HLT'),
                            muons_src = cms.InputTag('slimmedMuons'),
-                           muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 24'),
+                           muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 27'),
                            jets_src = cms.InputTag('slimmedJets'),
                            jet_cut = jtupleParams.jetCut,
                            jet_ht_cut = cms.double(0),
