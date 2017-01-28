@@ -70,13 +70,13 @@ SimpleTriggerEfficiency.setup_endpath(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-    from JMTucker.Tools.Sample import anon_samples
     samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
     for sample in samples:
         if sample.is_mc:
             sample.events_per = 100000
         else:
-            sample.lumis_per = 30 # ?
+            sample.lumis_per = 50
+            sample.json = json
 
     def pset_modifier(sample):
         to_add = []
@@ -97,4 +97,3 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        publish_name = 'trigeff_htskim_' + version  # if htskim False, then crab will just complain?
                        )
     cs.submit_all(samples)
-
