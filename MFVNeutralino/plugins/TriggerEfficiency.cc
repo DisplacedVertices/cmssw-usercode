@@ -24,12 +24,15 @@ private:
 
   const bool require_trigger;
   const bool require_muon;
-  const edm::InputTag muons_src;
+  const bool require_4jets;
+  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
-  const edm::InputTag jets_src;
+  const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
   const double jet_ht_cut;
-  const edm::InputTag genjets_src;
+  const edm::EDGetTokenT<float> hlt_ht_token; // "emu"
+  const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
 
   L1GtUtils l1_cfg;
@@ -68,13 +71,16 @@ private:
 MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   : require_trigger(cfg.getParameter<bool>("require_trigger")),
     require_muon(cfg.getParameter<bool>("require_muon")),
-    muons_src(cfg.getParameter<edm::InputTag>("muons_src")),
+    require_4jets(cfg.getParameter<bool>("require_4jets")),
+    trigger_results_token(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", cfg.getParameter<std::string>("hlt_process_name")))),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
-    jets_src(cfg.getParameter<edm::InputTag>("jets_src")),
+    jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     jet_ht_cut(cfg.getParameter<double>("jet_ht_cut")),
-    genjets_src(cfg.getParameter<edm::InputTag>("genjets_src")),
-    use_genjets(genjets_src.label() != ""),
+    hlt_ht_token(consumes<float>(edm::InputTag("emu"))),
+    genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
+    use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != ""),
     l1_cfg(cfg, consumesCollector(), false)
 {
   edm::Service<TFileService> fs;
@@ -131,34 +137,12 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
     l1_cfg.getL1GtRunCache(event, setup, true, false);
 
     edm::Handle<edm::TriggerResults> hlt_results;
-    event.getByLabel(edm::InputTag("TriggerResults", "", "HLT"), hlt_results);
+    event.getByToken(trigger_results_token, hlt_results);
     const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
     const size_t npaths = hlt_names.size();
 
     bool found = false;
     bool pass = false;
-
-#if 0
-    std::vector<std::string> paths({
-        "HLT_PFHT650_v",
-          "HLT_PFHT550_4Jet_v",
-          //        "HLT_PFHT450_SixJet40_PFBTagCSV_v",
-          //        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
-          "HLT_PFHT450_SixJet40_v",
-          "HLT_PFHT400_SixJet30_v",
-          //        "HLT_QuadJet45_TripleCSV0p5_v",
-          //        "HLT_QuadJet45_DoubleCSV0p5_v",
-          //        "HLT_DoubleJet90_Double30_TripleCSV0p5_v",
-          //        "HLT_DoubleJet90_Double30_DoubleCSV0p5_v",
-          //        "HLT_HT650_DisplacedDijet80_Inclusive_v",
-          //        "HLT_HT750_DisplacedDijet80_Inclusive_v",
-          //        "HLT_HT500_DisplacedDijet40_Inclusive_v",
-          //        "HLT_HT550_DisplacedDijet40_Inclusive_v",
-          //        "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
-          //        "HLT_HT350_DisplacedDijet80_DisplacedTrack_v",
-          //        "HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v"
-          });
-#endif
 
     for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
       char path[1024];
@@ -192,7 +176,7 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
 
   if (require_muon) {
     edm::Handle<pat::MuonCollection> muons;
-    event.getByLabel(muons_src, muons);
+    event.getByToken(muons_token, muons);
 
     int nmuons[2] = {0};
     for (const pat::Muon& muon : *muons) {
@@ -215,9 +199,17 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
       return false;
   }
 
-
   edm::Handle<pat::JetCollection> jets;
-  event.getByLabel(jets_src, jets);
+  event.getByToken(jets_token, jets);
+
+  if (require_4jets) {
+    int njets = 0;
+    for (const pat::Jet& jet : *jets)
+      if (jet_selector(jet))
+        ++njets;
+    if (njets < 4)
+      return false;
+  }
 
   h_nnoseljets->Fill(jets->size());
 
@@ -263,13 +255,13 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
   h_njets_v_ht->Fill(jet_ht, njet);
 
   edm::Handle<float> hlt_ht;
-  event.getByLabel("emu", hlt_ht);
+  event.getByToken(hlt_ht_token, hlt_ht);
   h_jet_ht_m_hlt_ht->Fill(jet_ht - *hlt_ht); 
   h_jet_ht_no_mu_m_hlt_ht->Fill(jet_ht_no_mu - *hlt_ht); 
 
   if (use_genjets) {
     edm::Handle<reco::GenJetCollection> genjets;
-    event.getByLabel(genjets_src, genjets);
+    event.getByToken(genjets_token, genjets);
 
     int ngenjet = 0;
     double genjet_ht = 0;
