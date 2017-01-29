@@ -1,10 +1,12 @@
 from base import *
 ROOT.gStyle.SetOptStat(2211)
-ps = plot_saver(plot_dir('pileup_run2'), size=(600,600),pdf=True)
 
 int_lumi = 39501.
-min_ntracks = 3
-tree_path = '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3'
+min_ntracks, tree_path = 3, '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3'
+min_ntracks, tree_path = 4, '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk4'
+min_ntracks, tree_path = 5, '/uscms_data/d2/tucker/crab_dirs/MinitreeV10'
+
+ps = plot_saver(plot_dir('pileupdbvdvv_run2_ntk%i' % min_ntracks), size=(600,600),pdf=True)
 
 f,t = get_f_t(bkg_samples[0], min_ntracks, tree_path)
 t.Draw('npu>>h_npu_1v(38,0,38)', 'nvtx==1')
@@ -33,9 +35,14 @@ for q in ['dbv', 'dvv']:
     if q == 'dbv':
         hs = [ROOT.TH1F('h_dbv_%i_%i' % ab, ';d_{BV} (cm);events/0.01 cm', 100, 0, 1) for ab in npu_bins]
     else:
+        if min_ntracks == 5:
+            continue
         hs = [ROOT.TH1F('h_dvv_%i_%i' % ab, ';d_{VV} (cm);events/0.01 cm', 30, 0, 0.3) for ab in npu_bins]
 
     for sample in bkg_samples:
+        if min_ntracks == 5 and sample.name in ['qcdht0500sum']:
+            continue
+
         f,t = get_f_t(sample, min_ntracks, tree_path)
         weight = sample.partial_weight_orig * int_lumi
         for i,(a,b) in enumerate(npu_bins):
