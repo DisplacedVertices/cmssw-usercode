@@ -86,16 +86,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = Samples.registry.from_argv(
         Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + \
-        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
-        Samples.xx4j_samples
+        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
         )
 
     def modify(sample):
         to_add = []
         to_replace = []
 
-        to_replace.append(('njetsX= 2\nnbjets = 1'.replace('X', ' '),
+        to_replace.append(('njetsX= 2\nnbjets = 0'.replace('X', ' '),
                            'njets = %i\nnbjets = %i' % (njets, nbjets),
                            'could not find the magic string for njets/nbjets'))
 
@@ -110,16 +108,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
         return to_add, to_replace
 
-    #for s in samples:
-        #if not sample.is_mc:
-        #    sample.json = 'ana_all.json'
-        # this won't work until 76x
-        #s.events_per = min(int(3000/s.filter_eff), 200000)
-        #print s.name, s.events_per
+    for s in samples:
+        if not s.is_mc:
+            s.json = '../ana_2015.json'
 
     ex = '%i%i' % (njets, nbjets)
 
-    cs = CRABSubmitter('TrackMover' + ex,
+    cs = CRABSubmitter('TrackMover2015_' + ex,
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        )
