@@ -1,66 +1,40 @@
-#!/usr/bin/env python
+from JMTucker.Tools.ROOTTools import *
+ROOT.TH1.AddDirectory(0)
+set_style()
 
-from JMTucker.Tools.ROOTTools import ROOT, histogram_divide
+ps = plot_saver(plot_dir('pileup_efficiency_run2'), size=(600,600), pdf=True)
 
-samples = ["mfv_neutralino_tau1000um_M0400", "ttbarhadronic", "ttbarsemilep", "ttbardilep", "qcdht0100", "qcdht0250", "qcdht0500", "qcdht1000"]
-for sample in samples:
-    file = ROOT.TFile("~/nobackup/crab/PileupV15/Mangle/%s_mangled.root" % sample)
-    max1 = 0
-    for i in range(file.ABCD.GetNbinsX()):
-        if (file.trigger.GetBinContent(i+1) == 0):
-            continue
-        if (file.ABCD.GetBinContent(i+1)/file.trigger.GetBinContent(i+1)):
-            max1 = file.ABCD.GetBinContent(i+1)/file.trigger.GetBinContent(i+1)
-    max2 = 0
-    for i in range(file.tight.GetNbinsX()):
-        if (file.trigger.GetBinContent(i+1) == 0):
-            continue
-        if (file.tight.GetBinContent(i+1)/file.trigger.GetBinContent(i+1)):
-            max2 = file.tight.GetBinContent(i+1)/file.trigger.GetBinContent(i+1)
-    c1 = ROOT.TCanvas()
-    c1.Divide(2,2)
-    c1.cd(1)
-    file.ABCD.Rebin(2)
-    file.nocuts.Rebin(2)
-    file.tight.Rebin(2)
-    file.trigger.Rebin(2)
-    eff1 = histogram_divide(file.ABCD, file.nocuts)
-    eff1.SetTitle("ABCD_nocuts:")
-#    max = 0
-#    for i in range(file.ABCD.GetNbinsX()):
-#        if (file.nocuts.GetBinContent(i+1) == 0):
-#            continue
-#        if (file.ABCD.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)):
-#            max = file.ABCD.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)
-    eff1.SetMaximum(max1)
-    eff1.SetMinimum(0)
-    eff1.Draw("AP")
-    c1.cd(2)
-    eff2 = histogram_divide(file.ABCD, file.trigger)
-    eff2.SetTitle("ABCD_trigger")
-    eff2.SetMaximum(max1)
-    eff2.SetMinimum(0)
-    eff2.Draw("AP")
-    c1.cd(3)
-    eff3 = histogram_divide(file.tight, file.nocuts)
-    eff3.SetTitle("tight_nocuts")
-#    for i in range(file.ABCD.GetNbinsX()):
-#        if (file.nocuts.GetBinContent(i+1) == 0):
-#            continue
-#        if (file.tight.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)):
-#            max = file.tight.GetBinContent(i+1)/file.nocuts.GetBinContent(i+1)
-    eff3.SetMaximum(max2)
-    eff3.SetMinimum(0)
-    eff3.Draw("AP")
-    c1.cd(4)
-    eff4 = histogram_divide(file.tight, file.trigger)
-    eff4.SetTitle("tight_trigger;Number of pileup interaction;efficiency")
-#    for i in range(file.ABCD.GetNbinsX()):
-#        if (file.trigger.GetBinContent(i+1) == 0):
-#            continue
-#        if (file.tight.GetBinContent(i+1)/file.trigger.GetBinContent(i+1)):
-#            max = file.tight.GetBinContent(i+1)/file.trigger.GetBinContent(i+1)
-    eff4.SetMaximum(max2)
-    eff4.Draw("AP")
-    eff4.SetMinimum(0)
-    c1.SaveAs("plots/PileupEfficiency/%s.pdf" % sample)
+bins = to_array([0,10,13,15,65])
+nbins = len(bins)-1
+
+hists = [
+    ('presel', 'mfvEventHistosPreSel'),
+    ('onevtx', 'mfvEventHistosOnlyOneVtx'),
+    ('twovtx', 'mfvEventHistos'),
+    ('sigreg', 'mfvEventHistosSigReg')
+    ]
+
+xxx = [
+    (3, '/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk3/background.root'),
+    (4, '/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk4/background.root'),
+    (5, '/uscms_data/d2/tucker/crab_dirs/HistosV10/background.root'),
+]
+
+for ntk, fn in xxx:
+    print fn
+    f = ROOT.TFile(fn)
+    geth = lambda s: f.Get(s + '/h_npu')
+    #hs = [(n, geth(s).Rebin(nbins, n, bins)) for n,s in hists]
+    hs = [(n, geth(s).Clone(n)) for n,s in hists]
+
+    for n, h in hs:
+        exec n+'=h'
+        if n != 'presel':
+            h = ROOT.TGraphAsymmErrors(h, presel, 'n pois')
+            h.Draw('AP')
+        else:
+            h.Draw()
+        h.GetXaxis().SetRangeUser(0,40)
+        if ntk == 4 and n == 'onevtx':
+            h.GetYaxis().SetRangeUser(0,0.005)
+        ps.save(n + '_ntk%i' % ntk, log=False)
