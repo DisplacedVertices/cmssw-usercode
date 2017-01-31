@@ -334,6 +334,11 @@ def merge(samples, output='merge.root', norm_to=1., norm_path=''):
     print cmd
     os.system(cmd)
 
+def sample_from_end_string(namespace, d):
+    for x in vars(namespace).itervalues():
+        if issubclass(type(x), Sample) and d.endswith(x.name):
+            return x
+
 def main(samples_registry):
     import sys
     if 'merge' in sys.argv:
@@ -355,5 +360,6 @@ __all__ = [
     'anon_samples',
     'norm_from_file',
     'merge',
+    'sample_from_end_string',
     'main',
     ]
