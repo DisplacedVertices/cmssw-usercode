@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import os, sys, json, cPickle as pickle
+import os, re, sys, json, cPickle as pickle
 from collections import defaultdict
 from itertools import izip
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
+from JMTucker.Tools.general import popen
 
 # could use DBSAPI or DASAPI or whatever, but I'm lazy
 
@@ -157,6 +158,23 @@ def files_for_events(run_events, dataset, instance='global'):
             if ll.contains(*x):
                 files.add(file)
     return sorted(files)
+
+#####
+
+# these use dasgoclient
+
+def dasgo_ll_for_dataset(dataset, instance='global', line_re = re.compile(r'^(/store.*root) (\d+) (\[.*\])$')):
+    assert instance == 'global'
+    d = defaultdict(set) 
+    for line in popen('dasgoclient_linux -query "file,run,lumi dataset=%s"' % dataset).split('\n'):
+        mo = line_re.match(line.strip())
+        if mo:
+            _, run, lumis = mo.groups()
+            d[int(run)] |= set(eval(lumis))
+    return LumiList(runsAndLumis=d)
+
+def dasgo_json_for_dataset(json_fn, dataset, instance='global'):
+    dasgo_ll_for_dataset(dataset, instance).writeJSON(json_fn)
 
 if __name__ == '__main__':
     pass
