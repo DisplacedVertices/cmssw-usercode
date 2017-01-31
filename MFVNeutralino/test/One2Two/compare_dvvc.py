@@ -58,7 +58,12 @@ n2v = [1323., 22., 1.]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
-g2s = []
+x = []
+ex = []
+y2 = []
+ey2 = []
+y3 = []
+ey3 = []
 for i in range(3):
     l1 = ROOT.TLegend(0.50,0.70,0.85,0.85)
     hh = ROOT.TFile(fns[i][0]).Get('h_2v_dvv')
@@ -136,65 +141,65 @@ for i in range(3):
     l2.Draw()
     ps.save('%s_dphi'%ntk[i])
 
-    err = ROOT.Double(0)
-    sim = hh.IntegralAndError(5,40,err)
-    if sim == 0:
-        sim = 1
 
-    err_tot = ROOT.Double(0)
-    sim_tot = hh.IntegralAndError(1,40,err_tot)
-    if sim_tot == 0:
-        sim_tot = 1
-    r_tot = sim/sim_tot
-    er_tot = sim/sim_tot * ((err/sim)**2 + (err_tot/sim_tot)**2)**0.5
-    print '%s: simulated events = %4.2f +/- %4.2f (%4.2f +/- %4.2f x dVV)' % (ntk[i], sim, err, r_tot, er_tot)
+    ec = ROOT.Double(0)
+    c = hs[0].IntegralAndError(1,40,ec)
+    ec1 = ROOT.Double(0)
+    c1 = hs[0].IntegralAndError(1,4,ec1)
+    ec2 = ROOT.Double(0)
+    c2 = hs[0].IntegralAndError(5,7,ec2)
+    ec3 = ROOT.Double(0)
+    c3 = hs[0].IntegralAndError(8,40,ec3)
 
-    e1 = ROOT.Double(0)
-    c1 = hs[0].IntegralAndError(5,40,e1)
-    print '%s: dVVC1 events = %4.2f +/- %4.2f' % (ntk[i], c1, e1)
+    ev = ROOT.Double(0)
+    v = hs[1].IntegralAndError(1,40,ev)
+    ev1 = ROOT.Double(0)
+    v1 = hs[1].IntegralAndError(1,4,ev1)
+    ev2 = ROOT.Double(0)
+    v2 = hs[1].IntegralAndError(5,7,ev2)
+    ev3 = ROOT.Double(0)
+    v3 = hs[1].IntegralAndError(8,40,ev3)
 
-    x2 = []
-    y2 = []
-    ex2 = []
-    ey2 = []
-    for j,h in enumerate(hs):
-        e = ROOT.Double(0)
-        c = h.IntegralAndError(5,40,e)
-        r = c/sim
-        er = (c/sim) * ((e/c)**2 + (err/sim)**2)**0.5
-        r1 = c/c1
-        er1 = (c/c1) * ((e/c)**2 + (e1/c1)**2)**0.5
+    r = v/c
+    er = (v/c) * ((ev/v)**2 + (ec/c)**2)**0.5
+    r1 = v1/c1
+    er1 = (v1/c1) * ((ev1/v1)**2 + (ec1/c1)**2)**0.5
+    r2 = v2/c2
+    er2 = (v2/c2) * ((ev2/v2)**2 + (ec2/c2)**2)**0.5
+    r3 = v3/c3
+    er3 = (v3/c3) * ((ev3/v3)**2 + (ec3/c3)**2)**0.5
 
-        e2 = ROOT.Double(0)
-        c2 = h.IntegralAndError(1,40,e2)
-        r2 = c/c2
-        er2 = (c/c2) * ((e/c)**2 + (e2/c2)**2)**0.5
+    x.append(i+1)
+    ex.append(0)
+    y2.append(r2)
+    ey2.append(er2)
+    y3.append(r3)
+    ey3.append(er3)
 
-        print '%33s = %6.2f +/- %4.2f (%4.2f +/- %4.2f x simulated) (%4.2f +/- %4.2f x dVVC1) (%4.2f +/- %4.2f x dVVC)' % (ls[j], c, e, r, er, r1, er1, r2, er2)
-        if j == 0:
-            continue
-        if j > 1:
-            continue
-        x2.append(i+1)
-        ex2.append(0)
-        y2.append(r1)
-        ey2.append(er1)
-    g2 = ROOT.TGraphErrors(len(x2), array('d',x2), array('d',y2), array('d',ex2), array('d',ey2))
-    g2s.append(g2)
-
-for i,g in enumerate(g2s):
-    g.SetMarkerStyle(21)
-    if i == 0:
-        g.SetTitle('variation / default (d_{VV}^{C} > 400 #mum);3-track%12s4-track%12s5-or-more-track%2s' % ('','',''))
-        g.GetXaxis().SetLimits(0,4)
-        g.GetXaxis().SetLabelSize(0)
-        g.GetXaxis().SetTitleOffset(0.5)
-        g.GetYaxis().SetRangeUser(0.6,1.4)
-        g.Draw('AP')
-    else:
-        g.Draw('P')
+g2 = ROOT.TGraphErrors(len(x), array('d',x), array('d',y2), array('d',ex), array('d',ey2))
+g2.SetMarkerStyle(21)
+g2.SetTitle('variation / default (400 #mum < d_{VV}^{C} < 700 #mum);3-track%12s4-track%12s5-or-more-track%2s' % ('','',''))
+g2.GetXaxis().SetLimits(0,4)
+g2.GetXaxis().SetLabelSize(0)
+g2.GetXaxis().SetTitleOffset(0.5)
+g2.GetYaxis().SetRangeUser(0.6,1.4)
+g2.Draw('AP')
 line = ROOT.TLine(0,1,4,1)
 line.SetLineStyle(2)
 line.SetLineWidth(2)
 line.Draw()
-ps.save('ratio_%s' % mode)
+ps.save('ratio_bin2_%s' % mode)
+
+g3 = ROOT.TGraphErrors(len(x), array('d',x), array('d',y3), array('d',ex), array('d',ey3))
+g3.SetMarkerStyle(21)
+g3.SetTitle('variation / default (d_{VV}^{C} > 700 #mum);3-track%12s4-track%12s5-or-more-track%2s' % ('','',''))
+g3.GetXaxis().SetLimits(0,4)
+g3.GetXaxis().SetLabelSize(0)
+g3.GetXaxis().SetTitleOffset(0.5)
+g3.GetYaxis().SetRangeUser(0.6,1.4)
+g3.Draw('AP')
+line = ROOT.TLine(0,1,4,1)
+line.SetLineStyle(2)
+line.SetLineWidth(2)
+line.Draw()
+ps.save('ratio_bin3_%s' % mode)
