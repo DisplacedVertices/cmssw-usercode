@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+import os, sys
+from glob import glob
+from JMTucker.Tools.general import bool_from_argv
+from JMTucker.Tools.CondorTools import cs_dirs_from_argv
+
+if len(sys.argv) < 2:
+    print 'usage: cs_tidy wd [wd2 ...]'
+    sys.exit(1)
+
+rm_root_files = bool_from_argv('rm_root_files')
+
+cmds = [x.strip() for x in '''
+touch cs_tidied
+touch cs_tidied_started
+tar --remove-files -czf stdouterrlogxmlpublish.tgz stdout.* stderr.* log.* fjr*xml publish*txt
+touch cs_tidied_finished
+'''.split('\n') if x.strip()]
+
+if rm_root_files:
+    cmds.append('rm -r *.root')
+
+prev_wd = os.getcwd()
+
+for wd in cs_dirs_from_argv():
+    if os.path.isfile(os.path.join(wd, 'cs_tidied')):
+        continue
+    print wd    
+    os.chdir(wd)
+    for cmd in cmds:
+        print cmd
+        os.system(cmd)
+    print
+    os.chdir(prev_wd)
