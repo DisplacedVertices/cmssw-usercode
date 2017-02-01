@@ -1,0 +1,13 @@
+universe = vanilla
+Executable = statmodel.sh
+arguments = $(Process)
+Output = sm_$(Cluster)_$(Process).stdout
+Error = sm_$(Cluster)_$(Process).stderr
+Log = sm_$(Cluster)_$(Process).log
+stream_output = false
+stream_error  = false
+notification  = never
+should_transfer_files   = YES
+transfer_input_files = statmodel.exe,eff_avg.root
+when_to_transfer_output = ON_EXIT
+Queue 15
