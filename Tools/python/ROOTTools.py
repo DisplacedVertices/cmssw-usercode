@@ -921,6 +921,8 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, colo
     s.SetY1NDC(y1 - (y2-y1)*n + oy)
     s.SetY2NDC(y2 - (y2-y1)*n + oy)
 
+    return s
+
 def draw_in_order(hists_and_cmds, sames=False):
     if type(hists_and_cmds[1]) == str:
         cmd = hists_and_cmds[1]
