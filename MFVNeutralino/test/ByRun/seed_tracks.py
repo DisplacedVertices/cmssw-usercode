@@ -38,6 +38,3 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     cs = CondorSubmitter('ByRunSeedTracks_2015', dataset='ntuplev10')
     cs.submit_all(Samples.data_samples[1:])
-
-elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
-    from JMTucker.Tools.ROOTTools import *

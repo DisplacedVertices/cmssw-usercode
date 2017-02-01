@@ -18,6 +18,8 @@ class LumiLine:
         }
 
 class LumiLines:
+    run_boundary_15_16 = 260627
+
     @classmethod
     def load_csv(cls, fn):
         header = '#run:fill,ls,time,beamstatus,E(GeV),delivered(/ub),recorded(/ub),avgpu,source'
@@ -84,11 +86,13 @@ class LumiLines:
 
     def runs(self, year=None):
         runs = sorted(self.by_run.keys())
-        rb = 260627
+        rb = self.run_boundary_15_16
         if year == 2015:
             runs = [r for r in runs if r <= rb]
         elif year == 2016:
             runs = [r for r in runs if r > rb]
+        else:
+            assert year is None
         return runs
 
     def recorded(self, run):
