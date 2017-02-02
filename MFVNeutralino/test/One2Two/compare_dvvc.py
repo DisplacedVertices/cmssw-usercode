@@ -29,16 +29,16 @@ ntk_deltasvgaus_wevent efficiency'''.split('\n')
 
 if mode == 'vary_dphi':
     fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
-2v_from_jets_3track_average3_c0p00_e0_a0p00.root'''.split('\n')
+2v_from_jets_3track_average3_c1p35_e2_a7p32.root'''.split('\n')
 
     fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66.root
-2v_from_jets_4track_average4_c0p00_e0_a0p00.root'''.split('\n')
+2v_from_jets_4track_average4_c1p35_e2_a7p32.root'''.split('\n')
 
     fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66.root
-2v_from_jets_5track_average5_c0p00_e0_a0p00.root'''.split('\n')
+2v_from_jets_5track_average5_c1p35_e2_a7p32.root'''.split('\n')
 
     ls = '''|#Delta#phi| from jets
-|#Delta#phi| flat'''.split('\n')
+|#Delta#phi| between jets and flat'''.split('\n')
 
 if mode == 'vary_dbv':
     fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
