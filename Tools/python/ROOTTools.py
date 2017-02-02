@@ -174,7 +174,7 @@ def cmssw_setup():
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
     
-def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes=False, confint_params=()):
+def histogram_divide(h1, h2, confint=clopper_pearson, use_effective=False, force_lt_1=True, no_zeroes=False, confint_params=()):
     nbins = h1.GetNbinsX()
     xax = h1.GetXaxis()
     if h2.GetNbinsX() != nbins: # or xax2.GetBinLowEdge(1) != xax.GetBinLowEdge(1) or xax2.GetBinLowEdge(nbins) != xax.GetBinLowEdge(nbins):
@@ -187,11 +187,17 @@ def histogram_divide(h1, h2, confint=clopper_pearson, force_lt_1=True, no_zeroes
     eyh = []
     xax = h1.GetXaxis()
     for ibin in xrange(1, nbins+1):
-        s,t = h1.GetBinContent(ibin), h2.GetBinContent(ibin)
+        sold,told=s,t = h1.GetBinContent(ibin), h2.GetBinContent(ibin)
         if t == 0:
             continue
         if s == 0 and no_zeroes:
             continue
+        if use_effective:
+            assert confint == clopper_pearson
+            effective_t = t**2 / h2.GetBinError(ibin)**2
+            s = s/t * effective_t
+            t = effective_t
+            #print ibin,sold,told,s,t
 
         p_hat = float(s)/t
         if s > t and force_lt_1:

@@ -36,7 +36,7 @@ ttbar_samples = [
     MCSample('ttbar', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 38493485, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
-leptonic_background_samples = [
+x = leptonic_background_samples = [
     MCSample('wjetstolnu1', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',       24156124, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
     MCSample('wjetstolnu2', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext2-v1/AODSIM', 240721767, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
     MCSample('wjetstolnu3', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext4-v1/AODSIM', 199037280, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
@@ -48,6 +48,13 @@ leptonic_background_samples = [
     MCSample('dyjetstollM503', '/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext4-v1/AODSIM', 121231446, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=6.025e3),
     MCSample('qcdmupt15', '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 21966678, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=7.21e8 * 4.2e-4),
     ]
+
+leptonic_background_samples_sum = [
+    MCSample('wjetstolnu_sum',    '/None/', sum(y.nevents_orig for y in x[:3] ), nice=x[0].nice, color=x[0].color, syst_frac=x[0].syst_frac, xsec=x[0].xsec),
+    MCSample('dyjetstollM10_sum', '/None/', sum(y.nevents_orig for y in x[3:6]), nice=x[3].nice, color=x[3].color, syst_frac=x[3].syst_frac, xsec=x[3].xsec),
+    MCSample('dyjetstollM50_sum', '/None/', sum(y.nevents_orig for y in x[6:9]), nice=x[6].nice, color=x[6].color, syst_frac=x[6].syst_frac, xsec=x[6].xsec),
+    ]
+del x
 
 mfv_signal_samples = [
     MCSample('mfv_neu_tau00100um_M0300', '/mfv_neu_tau00100um_M0300/tucker-RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-05e8cfd69022b6357c491ecab3cf47fb/USER', 10000),
@@ -206,112 +213,6 @@ xx4j_samples = [
 for s in xx4j_samples:
     s.xsec = 1e-3
 
-wh_samples_4Tau = [
-    MCSample('wh_4Tau_tau0000mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('wh_4Tau_tau1000mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
-    MCSample('wh_4Tau_tau0100mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
-    MCSample('wh_4Tau_tau0010mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('wh_4Tau_tau0001mm_M10', '/WH_HToSSTo4Tau_WToLNu_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19700),
-    MCSample('wh_4Tau_tau0000mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
-    MCSample('wh_4Tau_tau1000mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
-    MCSample('wh_4Tau_tau0100mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('wh_4Tau_tau0010mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
-    MCSample('wh_4Tau_tau0001mm_M25', '/WH_HToSSTo4Tau_WToLNu_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('wh_4Tau_tau0000mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('wh_4Tau_tau1000mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
-    MCSample('wh_4Tau_tau0100mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
-    MCSample('wh_4Tau_tau0010mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('wh_4Tau_tau0001mm_M40', '/WH_HToSSTo4Tau_WToLNu_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
-]
-
-wh_samples_bbbb = [
-    MCSample('wh_bbbb_tau0000mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('wh_bbbb_tau1000mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
-    MCSample('wh_bbbb_tau0100mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('wh_bbbb_tau0010mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('wh_bbbb_tau0001mm_M10', '/WH_HToSSTobbbb_WToLNu_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('wh_bbbb_tau0000mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
-    MCSample('wh_bbbb_tau1000mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19900),
-    MCSample('wh_bbbb_tau0100mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('wh_bbbb_tau0010mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('wh_bbbb_tau0001mm_M25', '/WH_HToSSTobbbb_WToLNu_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('wh_bbbb_tau0000mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
-    MCSample('wh_bbbb_tau1000mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
-    MCSample('wh_bbbb_tau0100mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('wh_bbbb_tau0010mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
-    MCSample('wh_bbbb_tau0001mm_M40', '/WH_HToSSTobbbb_WToLNu_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
-]
-
-zh_samples_4Tau = [
-    MCSample('zh_4Tau_tau0000mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
-    MCSample('zh_4Tau_tau1000mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
-    MCSample('zh_4Tau_tau0100mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19800),
-    MCSample('zh_4Tau_tau0010mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('zh_4Tau_tau0001mm_M10', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19900),
-    MCSample('zh_4Tau_tau0000mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19600),
-    MCSample('zh_4Tau_tau0100mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('zh_4Tau_tau0010mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
-    MCSample('zh_4Tau_tau0001mm_M25', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('zh_4Tau_tau0000mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('zh_4Tau_tau1000mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 19700),
-    MCSample('zh_4Tau_tau0100mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('zh_4Tau_tau0010mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   19900),
-    MCSample('zh_4Tau_tau0001mm_M40', '/ZH_HToSSTo4Tau_ZToLL_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
-]
-
-zh_samples_bbbb = [
-    MCSample('zh_bbbb_tau0000mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
-    MCSample('zh_bbbb_tau1000mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
-    MCSample('zh_bbbb_tau0100mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('zh_bbbb_tau0010mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('zh_bbbb_tau0001mm_M10', '/ZH_HToSSTobbbb_ZToLL_MH125_MS10_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('zh_bbbb_tau0000mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('zh_bbbb_tau1000mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
-    MCSample('zh_bbbb_tau0100mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  19900),
-    MCSample('zh_bbbb_tau0010mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('zh_bbbb_tau0001mm_M25', '/ZH_HToSSTobbbb_ZToLL_MH125_MS25_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    19800),
-    MCSample('zh_bbbb_tau0000mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS0_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000),
-    MCSample('zh_bbbb_tau1000mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1000_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000),
-    MCSample('zh_bbbb_tau0100mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS100_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',  20000),
-    MCSample('zh_bbbb_tau0010mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',   20000),
-    MCSample('zh_bbbb_tau0001mm_M40', '/ZH_HToSSTobbbb_ZToLL_MH125_MS40_ctauS1_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER',    20000)
-]
-
-zh_samples_dddd = [
-    MCSample('zh_dddd_tau0010mm_M25', '/ZH_HToSSTodddd_ZToLL_MH125_MS25_ctauS10_13TeV/kreis-group-space-DIGI-RECO-2-413386f6eddb08329706f28eff10fb19/USER', 20000)
-]
-
-for s in wh_samples_4Tau + wh_samples_bbbb + zh_samples_4Tau + zh_samples_bbbb + zh_samples_dddd:
-    s.dbs_inst = 'phys03'
-    s.xsec = 1e-3
-
-auxiliary_background_samples = [
-    MCSample('ttbaraux',  '/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 10235840, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
-    ]
-
-qcdpt_samples_not_used =[
-    MCSample('qcdpt0005', '/QCD_Pt_5to10_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',      6991536, nice='QCD, 5 < #hat{p}_{T} < 10 GeV',      color=808, syst_frac=0.10, xsec=6.102e+10),
-    MCSample('qcdpt0010', '/QCD_Pt_10to15_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v2/AODSIM',     6842800, nice='QCD, 10 < #hat{p}_{T} < 15 GeV',     color=808, syst_frac=0.10, xsec=5.888e+09),
-    MCSample('qcdpt0015', '/QCD_Pt_15to30_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',    38425945, nice='QCD, 15 < #hat{p}_{T} < 30 GeV',     color=808, syst_frac=0.10, xsec=1.837e+09),
-    MCSample('qcdpt0030', '/QCD_Pt_30to50_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',     9808025, nice='QCD, 30 < #hat{p}_{T} < 50 GeV',     color=808, syst_frac=0.10, xsec=1.409e+08),
-    MCSample('qcdpt0050', '/QCD_Pt_50to80_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',     9775360, nice='QCD, 50 < #hat{p}_{T} < 80 GeV',     color=808, syst_frac=0.10, xsec=1.920e+07),
-    MCSample('qcdpt0080', '/QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',    6953590, nice='QCD, 80 < #hat{p}_{T} < 120 GeV',    color=808, syst_frac=0.10, xsec=2.763e+06),
-    MCSample('qcdpt0120', '/QCD_Pt_120to170_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   6848223, nice='QCD, 120 < #hat{p}_{T} < 300 GeV',   color=808, syst_frac=0.10, xsec=4.711e+05),
-    ]
-
-qcdpt_samples = [
-    MCSample('qcdpt0170', '/QCD_Pt_170to300_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   6918748, nice='QCD, 170 < #hat{p}_{T} < 300 GeV',   color=800, syst_frac=0.10, xsec=1.173e+05),
-    MCSample('qcdpt0300', '/QCD_Pt_300to470_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   5968960, nice='QCD, 300 < #hat{p}_{T} < 470 GeV',   color=801, syst_frac=0.10, xsec=7.823e+03),
-    MCSample('qcdpt0470', '/QCD_Pt_470to600_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   3977770, nice='QCD, 470 < #hat{p}_{T} < 600 GeV',   color=802, syst_frac=0.10, xsec=6.482e+02),
-    MCSample('qcdpt0600', '/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   3979884, nice='QCD, 600 < #hat{p}_{T} < 800 GeV',   color=803, syst_frac=0.10, xsec=1.869e+02),
-    MCSample('qcdpt0800', '/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  3973224, nice='QCD, 800 < #hat{p}_{T} < 1000 GeV',  color=804, syst_frac=0.10, xsec=3.229e+01),
-    MCSample('qcdpt1000', '/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 2967947, nice='QCD, 1000 < #hat{p}_{T} < 1400 GeV', color=805, syst_frac=0.10, xsec=9.418e+00),
-    MCSample('qcdpt1400', '/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  395725, nice='QCD, 1400 < #hat{p}_{T} < 1800 GeV', color=806, syst_frac=0.10, xsec=8.427e-01),
-    MCSample('qcdpt1800', '/QCD_Pt_1800to2400_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  393760, nice='QCD, 1800 < #hat{p}_{T} < 2400 GeV', color=807, syst_frac=0.10, xsec=1.149e-01),
-    MCSample('qcdpt2400', '/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  398452, nice='QCD, 2400 < #hat{p}_{T} < 3200 GeV', color=808, syst_frac=0.10, xsec=6.830e-03),
-    MCSample('qcdpt3200', '/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   391108, nice='QCD, #hat{p}_{T} > 3200 GeV',        color=809, syst_frac=0.10, xsec=1.654e-04),
-    ]
-
 ########################################################################
 
 data_samples = [
@@ -342,16 +243,8 @@ __all__ = [
     'mfv_signal_samples_gluddbar',
     'mfv_signal_samples_lq2',
     'xx4j_samples',
-    'wh_samples_4Tau',
-    'wh_samples_bbbb',
-    'zh_samples_4Tau',
-    'zh_samples_bbbb',
-    'zh_samples_dddd',
     'leptonic_background_samples',
-#    'ttbar_systematics_samples',
-    'auxiliary_background_samples',
-    'qcdpt_samples_not_used',
-    'qcdpt_samples',
+    'leptonic_background_samples_sum',
     'data_samples',
     'auxiliary_data_samples',
     'registry',
