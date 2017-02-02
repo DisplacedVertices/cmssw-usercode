@@ -18,9 +18,9 @@ int ntracks = 3;
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
 
-double dphi_pdf_c = 0;
-double dphi_pdf_e = 0;
-double dphi_pdf_a = 0;
+double dphi_pdf_c = 1.35;
+double dphi_pdf_e = 2;
+double dphi_pdf_a = 3.66;
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
