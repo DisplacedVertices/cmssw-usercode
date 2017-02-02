@@ -73,3 +73,17 @@ if len(wds) > 1:
     if not overlaps:
         print colors.green('none!')
 
+ll_total_fn = 'dataok.json'
+if os.path.isfile(ll_total_fn):
+    print colors.red('not overwriting %s' % ll_total_fn)
+else:
+    ll_total = None
+    for wd in wds:
+        ll = LumiList(os.path.join(wd, 'results/processedLumis.json'))
+        if ll_total is None:
+            ll_total = ll
+        else:
+            ll_total |= ll
+    ll_total.writeJSON(ll_total_fn)
+    print colors.green('%i total lumis written to %s' % (len(ll_total.getLumis()), ll_total_fn))
+
