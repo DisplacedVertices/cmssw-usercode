@@ -174,27 +174,29 @@ int main(int argc, const char* argv[]) {
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
 
-  for (int i = 0; i < int(h_1v_dbv->GetEntries()); ++i) {
-    double dbv0 = h_1v_dbv0->GetRandom();
-    double dbv1 = h_1v_dbv1->GetRandom();
-    h_c1v_dbv->Fill(dbv0);
-    h_c1v_dbv->Fill(dbv1);
+  for (int i = 0; i < 20; ++i) {
+    for (int j = 0; j < int(h_1v_dbv->GetEntries()); ++j) {
+      double dbv0 = h_1v_dbv0->GetRandom();
+      double dbv1 = h_1v_dbv1->GetRandom();
+      h_c1v_dbv->Fill(dbv0);
+      h_c1v_dbv->Fill(dbv1);
 
-    double dphi = f_dphi->GetRandom();
+      double dphi = f_dphi->GetRandom();
 
-    double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
+      double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
 
-    double p = 1;
-    if (clearing_from_eff) {
-      p = h_eff->GetBinContent(h_eff->FindBin(dvvc));
+      double p = 1;
+      if (clearing_from_eff) {
+        p = h_eff->GetBinContent(h_eff->FindBin(dvvc));
+      }
+
+      if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
+      h_c1v_dvv->Fill(dvvc, p);
+      h_c1v_absdphivv->Fill(fabs(dphi), p);
+      h_c1v_dbv0->Fill(dbv0, p);
+      h_c1v_dbv1->Fill(dbv1, p);
+      h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, p);
     }
-
-    if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
-    h_c1v_dvv->Fill(dvvc, p);
-    h_c1v_absdphivv->Fill(fabs(dphi), p);
-    h_c1v_dbv0->Fill(dbv0, p);
-    h_c1v_dbv1->Fill(dbv1, p);
-    h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, p);
   }
 
   TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
