@@ -57,6 +57,10 @@ fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 n2v = [1323., 22., 1.]
 
+ebin1 = [0.0025, 0.0063, 0.0110]
+ebin2 = [0.0021, 0.0068, 0.0280]
+ebin3 = [0.0056, 0.0200, 0.0910]
+
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
 x = []
@@ -143,26 +147,20 @@ for i in range(3):
     ps.save('%s_dphi'%ntk[i])
 
 
-    ec = ROOT.Double(0)
-    c = hs[0].IntegralAndError(1,40,ec)
-    ec1 = ROOT.Double(0)
-    c1 = hs[0].IntegralAndError(1,4,ec1)
-    ec2 = ROOT.Double(0)
-    c2 = hs[0].IntegralAndError(5,7,ec2)
-    ec3 = ROOT.Double(0)
-    c3 = hs[0].IntegralAndError(8,40,ec3)
+    c1 = hs[0].Integral(1,4)
+    ec1 = ebin1[i] * c1
+    c2 = hs[0].Integral(5,7)
+    ec2 = ebin2[i] * c2
+    c3 = hs[0].Integral(8,40)
+    ec3 = ebin3[i] * c3
 
-    ev = ROOT.Double(0)
-    v = hs[1].IntegralAndError(1,40,ev)
-    ev1 = ROOT.Double(0)
-    v1 = hs[1].IntegralAndError(1,4,ev1)
-    ev2 = ROOT.Double(0)
-    v2 = hs[1].IntegralAndError(5,7,ev2)
-    ev3 = ROOT.Double(0)
-    v3 = hs[1].IntegralAndError(8,40,ev3)
+    v1 = hs[1].Integral(1,4)
+    ev1 = ebin1[i] * v1
+    v2 = hs[1].Integral(5,7)
+    ev2 = ebin2[i] * v2
+    v3 = hs[1].Integral(8,40)
+    ev3 = ebin3[i] * v3
 
-    r = v/c
-    er = (v/c) * ((ev/v)**2 + (ec/c)**2)**0.5
     r1 = v1/c1
     er1 = (v1/c1) * ((ev1/v1)**2 + (ec1/c1)**2)**0.5
     r2 = v2/c2
