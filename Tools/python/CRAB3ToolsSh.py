@@ -2,6 +2,7 @@
 
 # author: J. Tucker
 
+import re
 from JMTucker.Tools.CRAB3ToolsBase import *
 from JMTucker.Tools.hadd import hadd
 
@@ -19,17 +20,33 @@ def crab_status(working_dir, verbose=False):
     if verbose:
         print output
     result = None
+    stdout = []
     for line in output.split('\n'):
         if line.startswith('{') and line.endswith('}'):
             result = json.loads(line)
+        else:
+            stdout.append(line.strip())
     if result is None:
+        print output
         raise CRABToolsException('could not get json object from status output')
+    result = {'jobs': result, 'stdout': stdout}
     return result
 
 def crab_get_njobs(working_dir):
-    return len(crab_status(working_dir))
+    return len(crab_status(working_dir)['jobs'])
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
+def crab_get_njobs_from_log(working_dir, jobs_re=re.compile(r'\([\d ]+/([\d ]+)\)')):
+    # find njobs using a line printed as result of crab status that looks like ( 76/788)
+    # check that it's a constant, too
+    njobs = set()
+    for line in open(os.path.join(working_dir, 'crab.log')):
+        mo = jobs_re.search(line)
+        if mo:
+            njobs.add(mo.groups())
+    assert len(njobs) == 1
+    return int(njobs.pop()[0])
+
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
@@ -39,19 +56,34 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     if new_dir is not None:
         new_name = os.path.join(new_dir, new_name)
 
-    expected = crab_get_njobs(working_dir)
+    if lpc_shortcut:
+        username = os.environ['USER']
+        expected = crab_get_njobs_from_log(working_dir)
+        rq = crab_requestcache(working_dir)
+        timestamp = rq['RequestName'].split(':')[0]
+        primary_dataset = rq['OriginalConfig'].Data.inputDataset.split('/')[1]
+        publish_name = rq['OriginalConfig'].Data.outputDatasetTag
+        path = '/eos/uscms/store/user/%(username)s/%(primary_dataset)s/%(publish_name)s/%(timestamp)s' % locals()
+        zero_dirs = [x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s' % path).split('\n') if x.strip()]
+        files = []
+        dbase = path.replace('/eos/uscms', 'root://cmseos.fnal.gov/') + '/'
+        for zd in zero_dirs:
+            d = dbase + zd + '/'
+            files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s/%s' % (path, zd)).split() if x.strip().endswith('.root')]
+    else:
+        expected = crab_get_njobs(working_dir)
+        res = crab_command('out', '--xrootd', dir=working_dir)
+        if 'No files to retrieve.' in res:
+            files = []
+        else:
+            files = [x.strip() for x in res.split('\n') if x.strip() and '.root' in x]
+
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
-    res = crab_command('out', '--xrootd', dir=working_dir)
-
-    if 'No files to retrieve.' in res:
-        files = []
-    else:
-        files = [x.strip() for x in res.split('\n') if x.strip() and '.root' in x]
-        if pattern:
-            if '/' not in pattern:
-                pattern = '*/' + pattern
-            files = fnmatch.filter(files, pattern)
+    if pattern:
+        if '/' not in pattern:
+            pattern = '*/' + pattern
+        files = fnmatch.filter(files, pattern)
 
     jobs = [int(f.split('_')[-1].split('.root')[0]) for f in files]
     jobs.sort()
