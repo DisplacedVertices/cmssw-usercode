@@ -1,10 +1,28 @@
 import sys, os
 from array import array
+from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
-v = '2015v1'
+which = typed_from_argv(int, 0)
+data_period, int_lumi = [
+    ('',  36802.),
+    ('BthruG', 27945.),
+    ('H', 8857.),
+    ('B3', 5929.),
+    ('C',  2638.),
+    ('D',  4353.),
+    ('E',  4117.),
+    ('F',  3186.),
+    ('G',  7721.),
+    ('H2', 8636.),
+    ('H3',  221.),
+    ][which]
+
+v = '2016v1'
 root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff' + v
+if data_period:
+    v += '_' + data_period
 plot_path = 'TrigEff_' + v
 
 set_style()
@@ -14,12 +32,11 @@ ROOT.TH1.AddDirectory(0)
 
 save_more = True
 
-int_lumi = 2689.
-data_fn = os.path.join(root_dir, 'SingleMuon2015.root')
+data_fn = os.path.join(root_dir, 'SingleMuon2016%s.root' % data_period)
 data_f = ROOT.TFile(data_fn)
 
-bkg_samples = [ttbar, wjetstolnu_sum, dyjetstollM50_sum, dyjetstollM10_sum] #, qcdmupt15]
-bkg_samples = [ttbar, wjetstolnu1, dyjetstollM501, dyjetstollM101] #, qcdmupt15]
+bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10] #, qcdmupt15]
+bkg_samples = [wjetstolnu, dyjetstollM50, dyjetstollM10] #, qcdmupt15]
 n_bkg_samples = len(bkg_samples)
 for sample in bkg_samples:
     sample.fn = os.path.join(root_dir, sample.name + '.root')
@@ -35,7 +52,7 @@ ns = ['h_jet_ht']
 
 def limits(kind, n):
     if 'ht' in n:
-        return 500, 2500
+        return 500, 5000
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -61,7 +78,7 @@ def rebin_pt(h):
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_ht(h):
-    a = to_array(range(0, 500, 20) + range(500, 1100, 60) + range(1100, 1500, 100) + range(1500, 2501, 250))
+    a = to_array(range(0, 500, 20) + range(500, 1100, 60) + range(1100, 1500, 100) + range(1500, 5001, 250))
     hnew = h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
     move_overflow_into_last_bin(hnew)
     return hnew
