@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+raise 'add the mcstatproducer before you rerun'
+
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
