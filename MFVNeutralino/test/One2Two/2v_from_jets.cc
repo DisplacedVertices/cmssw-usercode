@@ -15,6 +15,8 @@
 
 int ntracks = 3;
 
+int bquarks = -1;
+
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
 
@@ -123,6 +125,8 @@ int main(int argc, const char* argv[]) {
     for (int j = 0, je = t->GetEntries(); j < je; ++j) {
       if (t->LoadTree(j) < 0) break;
       if (t->GetEntry(j) <= 0) continue;
+
+      if ((bquarks == 0 && nt.gen_flavor_code == 2) || (bquarks == 1 && nt.gen_flavor_code != 2)) continue;
 
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1) {
