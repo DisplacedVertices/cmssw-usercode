@@ -47,6 +47,17 @@ _add('eJyNmsGOGLcNhu/7IvFlYomiJPIoURLaXtN7EbQ+BG0aI9m8fzn2jsQFtgDtg20Y/q2R+JE/KX
 _add({('JetHT2015C', 'ntuplev10'): (13, ['/store/user/tucker/JetHT/NtupleV10/170131_122719/0000/ntuple_%i.root' % i for i in xrange(13)])})
 _add({('JetHT2015D', 'ntuplev10'): (1311, ['/store/user/tucker/JetHT/NtupleV10/170124_025219/000%i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1312)])})
 
+_add({
+('JetHT2016B3', 'ntuplev10partial'): (1750, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1759) if i not in [1, 2, 3, 4, 5, 1376, 1516, 1666]]),
+('JetHT2016C',  'ntuplev10partial'): ( 580, ['/store/user/tucker/JetHT/NtupleV10/170124_035750' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,581)]),
+('JetHT2016D',  'ntuplev10partial'): ( 969, ['/store/user/tucker/JetHT/NtupleV10/170124_035827' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,973) if i not in [54, 55, 64]]),
+('JetHT2016E',  'ntuplev10partial'): ( 824, ['/store/user/tucker/JetHT/NtupleV10/170124_035858' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,827) if i not in [335, 734]]),
+('JetHT2016F',  'ntuplev10partial'): ( 603, ['/store/user/tucker/JetHT/NtupleV10/170124_035931' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,604)]),
+('JetHT2016G',  'ntuplev10partial'): (  28, ['/store/user/tucker/JetHT/NtupleV10/170124_025401' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,37) if i not in [1, 2, 3, 4, 5, 21, 27, 34]]),
+('JetHT2016H2', 'ntuplev10partial'): ( 757, ['/store/user/tucker/JetHT/NtupleV10/170128_191149' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,800) if i not in [1, 2, 3, 4, 5, 21, 102, 183, 264, 345, 426, 487, 507, 586, 638, 647, 658, 662, 664, 666, 669, 670, 677, 681, 682, 685, 687, 704, 723, 724, 729, 743, 745, 748, 751, 755, 757, 765, 767, 780, 783, 797]]),
+('JetHT2016H3', 'ntuplev10partial'): (  41, ['/store/user/tucker/JetHT/NtupleV10/170128_191217' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,42)]),
+})
+
 __all__ = [
     'dump',
     'get',
