@@ -327,6 +327,15 @@ def add_dataset_phys03(sample, ds_name, dataset, nevents_orig, **kwargs):
 
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
+JetHT2016B3.add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-b44b2dc0c74d308599546039483df1a1/USER', dbs_inst='phys03')
+JetHT2016C .add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-dc9fb82ba19c081492e300fc8ad78296/USER', dbs_inst='phys03')
+JetHT2016D .add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-ba65951c6ef94426244485cf2908f522/USER', dbs_inst='phys03')
+JetHT2016E .add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-11b8d017c930e5ab1e3b183e96c5de3a/USER', dbs_inst='phys03')
+JetHT2016F .add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-41f6c9cf70c3640987817e506b64520e/USER', dbs_inst='phys03')
+JetHT2016G .add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-75ce487817b98903df0c5ef4f749dc11/USER', dbs_inst='phys03')
+JetHT2016H2.add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-393ecc52cd7e274c5943ddcc850a501c/USER', dbs_inst='phys03')
+JetHT2016H3.add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-b13b682f8bc21430a7a8696975aff225/USER', dbs_inst='phys03')
+
 _adbp3('sim', '/mfv_neu_tau00100um_M0400/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
 _adbp3('sim', '/mfv_neu_tau00100um_M0800/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
 _adbp3('sim', '/mfv_neu_tau00100um_M1200/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9800) # 49 files
@@ -431,12 +440,22 @@ if __name__ == '__main__':
 
     if 0:
         f = open('a.txt', 'wt')
-        for x in qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
-            for y in ('main', 'ntuplev9'):
+        for x in data_samples: # qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
+            for y in ('ntuplev10',):
                 try:
                     x.set_curr_dataset(y)
                 except KeyError:
                     continue
                 fns = x.filenames
-                print len(fns)
-                f.write('(%r, %r): (%i, %r),\n' % (x.name, y, len(fns), fns))
+                base = [fn.rsplit('/', 2)[0] for fn in fns]
+                assert len(set(base)) == 1
+                base = base[0]
+                nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in fns]
+                mx = max(nums)
+                code = "[%r + '/%%04i/ntuple_%%i.root' %% (i/1000,i) for i in xrange(1,%i)]" % (base, mx+1)
+                missing = sorted(set(range(1,mx+1)) - set(nums))
+                if missing:
+                    code = code.replace(']', ' if i not in %r]' % missing)
+                l = eval(code)
+                assert set(l) == set(fns)
+                f.write('(%r, %r): (%i, %s),\n' % (x.name, y, len(fns), code))
