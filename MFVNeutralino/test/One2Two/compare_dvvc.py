@@ -11,44 +11,44 @@ ROOT.gStyle.SetOptFit(0)
 ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
 
 if mode == 'vary_eff':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
-2v_from_jets_3track_maxtk3_c1p35_e2_a3p66.root
-2v_from_jets_3track_ntk3_deltasvgaus_wevent_c1p35_e2_a3p66.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20x.root
+2v_from_jets_3track_maxtk3_c1p35_e2_a3p66_20x.root
+2v_from_jets_3track_ntk3_deltasvgaus_wevent_c1p35_e2_a3p66_20x.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66.root
-2v_from_jets_4track_maxtk4_c1p35_e2_a3p66.root
-2v_from_jets_4track_ntk4_deltasvgaus_wevent_c1p35_e2_a3p66.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20x.root
+2v_from_jets_4track_maxtk4_c1p35_e2_a3p66_20x.root
+2v_from_jets_4track_ntk4_deltasvgaus_wevent_c1p35_e2_a3p66_20x.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66.root
-2v_from_jets_5track_maxtk5_c1p35_e2_a3p66.root
-2v_from_jets_5track_ntk5_deltasvgaus_wevent_c1p35_e2_a3p66.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20x.root
+2v_from_jets_5track_maxtk5_c1p35_e2_a3p66_20x.root
+2v_from_jets_5track_ntk5_deltasvgaus_wevent_c1p35_e2_a3p66_20x.root'''.split('\n')
 
     ls = '''average efficiency
 maxtk efficiency
 ntk_deltasvgaus_wevent efficiency'''.split('\n')
 
 if mode == 'vary_dphi':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
-2v_from_jets_3track_average3_c1p35_e2_a7p32.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20x.root
+2v_from_jets_3track_average3_c1p35_e2_a7p32_20x.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66.root
-2v_from_jets_4track_average4_c1p35_e2_a7p32.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20x.root
+2v_from_jets_4track_average4_c1p35_e2_a7p32_20x.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66.root
-2v_from_jets_5track_average5_c1p35_e2_a7p32.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20x.root
+2v_from_jets_5track_average5_c1p35_e2_a7p32_20x.root'''.split('\n')
 
     ls = '''|#Delta#phi| from jets
 |#Delta#phi| between jets and flat'''.split('\n')
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66.root
-2v_from_jets_3track_average3_c1p35_e2_a3p66_sum.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20x.root
+2v_from_jets_3track_average3_c1p35_e2_a3p66_20x_sum.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66.root
-2v_from_jets_4track_average4_c1p35_e2_a3p66_sum.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20x.root
+2v_from_jets_4track_average4_c1p35_e2_a3p66_20x_sum.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66.root
-2v_from_jets_5track_average5_c1p35_e2_a3p66_sum.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20x.root
+2v_from_jets_5track_average5_c1p35_e2_a3p66_20x_sum.root'''.split('\n')
 
     ls = '''default
 sort by b quarks'''.split('\n')
@@ -56,6 +56,10 @@ sort by b quarks'''.split('\n')
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 n2v = [1323., 22., 1.]
+
+ebin1 = [0.0025, 0.0063, 0.0110]
+ebin2 = [0.0021, 0.0068, 0.0280]
+ebin3 = [0.0056, 0.0200, 0.0910]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
@@ -143,26 +147,20 @@ for i in range(3):
     ps.save('%s_dphi'%ntk[i])
 
 
-    ec = ROOT.Double(0)
-    c = hs[0].IntegralAndError(1,40,ec)
-    ec1 = ROOT.Double(0)
-    c1 = hs[0].IntegralAndError(1,4,ec1)
-    ec2 = ROOT.Double(0)
-    c2 = hs[0].IntegralAndError(5,7,ec2)
-    ec3 = ROOT.Double(0)
-    c3 = hs[0].IntegralAndError(8,40,ec3)
+    c1 = hs[0].Integral(1,4)
+    ec1 = ebin1[i] * c1
+    c2 = hs[0].Integral(5,7)
+    ec2 = ebin2[i] * c2
+    c3 = hs[0].Integral(8,40)
+    ec3 = ebin3[i] * c3
 
-    ev = ROOT.Double(0)
-    v = hs[1].IntegralAndError(1,40,ev)
-    ev1 = ROOT.Double(0)
-    v1 = hs[1].IntegralAndError(1,4,ev1)
-    ev2 = ROOT.Double(0)
-    v2 = hs[1].IntegralAndError(5,7,ev2)
-    ev3 = ROOT.Double(0)
-    v3 = hs[1].IntegralAndError(8,40,ev3)
+    v1 = hs[1].Integral(1,4)
+    ev1 = ebin1[i] * v1
+    v2 = hs[1].Integral(5,7)
+    ev2 = ebin2[i] * v2
+    v3 = hs[1].Integral(8,40)
+    ev3 = ebin3[i] * v3
 
-    r = v/c
-    er = (v/c) * ((ev/v)**2 + (ec/c)**2)**0.5
     r1 = v1/c1
     er1 = (v1/c1) * ((ev1/v1)**2 + (ec1/c1)**2)**0.5
     r2 = v2/c2
