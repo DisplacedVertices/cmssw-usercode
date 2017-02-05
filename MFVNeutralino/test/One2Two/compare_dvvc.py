@@ -168,6 +168,20 @@ for i in range(3):
     r3 = v3/c3
     er3 = (v3/c3) * ((ev3/v3)**2 + (ec3/c3)**2)**0.5
 
+    if mode == 'vary_dphi':
+        if i == 0:
+            er2 *= 0.689340
+            er3 *= 0.544070
+        if i == 1:
+            er2 *= 0.687093
+            er3 *= 0.579951
+        if i == 2:
+            er2 *= 0.681035
+            er3 *= 0.524693
+    if mode == 'vary_eff':
+        er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
+        er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5
+
     x.append(i-2)
     ex.append(0)
     y2.append(r2)

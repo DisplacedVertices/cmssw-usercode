@@ -16,6 +16,7 @@
 int ntracks = 3;
 
 int bquarks = -1;
+bool vary_dphi = false;
 
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
@@ -172,11 +173,21 @@ int main(int argc, const char* argv[]) {
   TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", 0, M_PI);
   f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
 
+  TF1* f_dphi2 = new TF1("f_dphi2", "abs(x - [0])**[1] + [2]", 0, M_PI);
+  f_dphi2->SetParameters(dphi_pdf_c, dphi_pdf_e, 2*dphi_pdf_a);
+
   TH1F* h_eff;
   if (clearing_from_eff) {
     h_eff = (TH1F*)TFile::Open(eff_file)->Get(eff_hist);
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
+
+  int bin2 = 0;
+  int bin3 = 0;
+  int intobin2 = 0;
+  int intobin3 = 0;
+  int outofbin2 = 0;
+  int outofbin3 = 0;
 
   for (int i = 0; i < 20; ++i) {
     for (int j = 0; j < int(h_1v_dbv->GetEntries()); ++j) {
@@ -188,6 +199,17 @@ int main(int argc, const char* argv[]) {
       double dphi = f_dphi->GetRandom();
 
       double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
+
+      if (vary_dphi) {
+        double dphi2 = f_dphi2->GetRandom();
+        double dvvc2 = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi2));
+        if (dvvc >= 0.04 && dvvc < 0.07) ++bin2;
+        if (dvvc >= 0.07) ++bin3;
+        if (!(dvvc >= 0.04 && dvvc < 0.07) && (dvvc2 >= 0.04 && dvvc2 < 0.07)) ++intobin2;
+        if (!(dvvc >= 0.07) && (dvvc2 >= 0.07)) ++intobin3;
+        if ((dvvc >= 0.04 && dvvc < 0.07) && !(dvvc2 >= 0.04 && dvvc2 < 0.07)) ++outofbin2;
+        if ((dvvc >= 0.07) && !(dvvc2 >= 0.07)) ++outofbin3;
+      }
 
       double p = 1;
       if (clearing_from_eff) {
@@ -201,6 +223,16 @@ int main(int argc, const char* argv[]) {
       h_c1v_dbv1->Fill(dbv1, p);
       h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, p);
     }
+  }
+
+  if (vary_dphi) {
+    printf("bin2 = %d, bin3 = %d, intobin2 = %d, intobin3 = %d, outofbin2 = %d, outofbin3 = %d\n", bin2, bin3, intobin2, intobin3, outofbin2, outofbin3);
+    printf("uncorrelated variation / default (bin 2): %f +/- %f\n", 1 + (intobin2 - outofbin2) / (1.*bin2), sqrt(bin2 + bin2 + intobin2 - outofbin2) / bin2);
+    printf("  correlated variation / default (bin 2): %f +/- %f\n", 1 + (intobin2 - outofbin2) / (1.*bin2), sqrt(intobin2 + outofbin2) / bin2);
+    printf("uncertainty correlated / uncorrelated (bin 2): %f\n", sqrt(intobin2 + outofbin2) / sqrt(bin2 + bin2 + intobin2 - outofbin2));
+    printf("uncorrelated variation / default (bin 3): %f +/- %f\n", 1 + (intobin3 - outofbin3) / (1.*bin3), sqrt(bin3 + bin3 + intobin3 - outofbin3) / bin3);
+    printf("  correlated variation / default (bin 3): %f +/- %f\n", 1 + (intobin3 - outofbin3) / (1.*bin3), sqrt(intobin3 + outofbin3) / bin3);
+    printf("uncertainty correlated / uncorrelated (bin 3): %f\n", sqrt(intobin3 + outofbin3) / sqrt(bin3 + bin3 + intobin3 - outofbin3));
   }
 
   TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
