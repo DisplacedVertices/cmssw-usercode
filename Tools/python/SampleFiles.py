@@ -18,6 +18,7 @@ def _add(d, allow_overwrite=False):
         for k in d:
             if _d.has_key(k):
                 raise ValueError('already have key %r' % k)
+            assert len(d[k][1]) == d[k][0]
     _d.update(d)
 
 def dump():
@@ -47,8 +48,9 @@ _add('eJyNmsGOGLcNhu/7IvFlYomiJPIoURLaXtN7EbQ+BG0aI9m8fzn2jsQFtgDtg20Y/q2R+JE/KX
 _add({('JetHT2015C', 'ntuplev10'): (13, ['/store/user/tucker/JetHT/NtupleV10/170131_122719/0000/ntuple_%i.root' % i for i in xrange(13)])})
 _add({('JetHT2015D', 'ntuplev10'): (1311, ['/store/user/tucker/JetHT/NtupleV10/170124_025219/000%i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1312)])})
 
+# ntuplev10 B3 has bad files 1073, 1099, 1291, 1356, 1460 so keep those int he exceptions
 _add({
-('JetHT2016B3', 'ntuplev10partial'): (1750, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1759) if i not in [1, 2, 3, 4, 5, 1376, 1516, 1666]]),
+('JetHT2016B3', 'ntuplev10partial'): (1745, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1759) if i not in [1, 2, 3, 4, 5, 1376, 1516, 1666, 1073, 1099, 1291, 1356, 1460]]),
 ('JetHT2016C',  'ntuplev10partial'): ( 580, ['/store/user/tucker/JetHT/NtupleV10/170124_035750' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,581)]),
 ('JetHT2016D',  'ntuplev10partial'): ( 969, ['/store/user/tucker/JetHT/NtupleV10/170124_035827' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,973) if i not in [54, 55, 64]]),
 ('JetHT2016E',  'ntuplev10partial'): ( 824, ['/store/user/tucker/JetHT/NtupleV10/170124_035858' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,827) if i not in [335, 734]]),
