@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+
+import os, sys
+from itertools import combinations
+from glob import glob
+import JMTucker.Tools.colors as colors
+from JMTucker.Tools.LumiJSONTools import LumiList, fjr2ll
+from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_njobs
+
+wds = cs_dirs_from_argv()
+if not wds:
+    sys.exit(colors.red('No condor dirs in argv'))
+
+ll_alls = []
+
+for wd in wds:
+    print colors.bold(wd)
+
+    njobs = cs_njobs(wd)
+    lls = []
+
+    for i in xrange(njobs):
+        fjr_fn = os.path.join(wd, 'fjr_%i.xml' % i)
+        try:
+            lls.append(fjr2ll(fjr_fn))
+        except:
+            print colors.red('problem with fjr for job %i' % i)
+
+    if len(lls) != njobs:
+        continue
+
+    if any(lla & llb for lla,llb in combinations(lls,2)):
+        print colors.red('overlap found')
+        continue
+
+    ll_all = lls.pop()
+    for ll in lls:
+        ll_all |= ll
+    ll_all.writeJSON(os.path.join(wd, 'processedLumis.json'))
+    ll_alls.append(ll_all)
+
+if any(lla & llb for lla,llb in combinations(ll_alls,2)):
+    print colors.red('globally overlap found')
+else:
+    print colors.green('no overlap!')
+    ll_all = ll_alls.pop()
+    for ll in ll_alls:
+        ll_all |= ll
+    print ll_all
+
