@@ -3,6 +3,7 @@
 import gzip, time
 from collections import defaultdict
 from JMTucker.Tools.general import from_pickle, to_pickle
+from FWCore.PythonUtilities.LumiList import LumiList
 
 class LumiLine:
     beam_statuses = {
@@ -75,13 +76,15 @@ class LumiLines:
         to_pickle(lls, fn, comp=True)
         return lls
 
-    def __init__(self, fn):
+    def __init__(self, fn, mask_fn=None):
+        self.mask = LumiList(mask_fn) if mask_fn else None
         self.lls = LumiLines.load(fn)
         self.by_run = defaultdict(list)
         self.by_run_ls = {}
         for ll in self.lls:
-            self.by_run[ll.run].append(ll)
-            self.by_run_ls[(ll.run, ll.ls)] = ll
+            if not self.mask or (ll.run, ll.ls) in self.mask:
+                self.by_run[ll.run].append(ll)
+                self.by_run_ls[(ll.run, ll.ls)] = ll
         self.by_run = dict(self.by_run)
 
     def runs(self, year=None):
