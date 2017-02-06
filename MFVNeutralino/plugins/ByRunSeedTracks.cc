@@ -25,12 +25,17 @@ class MFVByRunSeedTracks : public edm::EDAnalyzer {
   ByRunTH1<TH1F> h_vertex_seed_track_phi[4];
   ByRunTH1<TH1F> h_vertex_seed_track_dxy[4];
   ByRunTH1<TH1F> h_vertex_seed_track_dz[4];
+  ByRunTH1<TH1F> h_vertex_seed_track_adxy[4];
+  ByRunTH1<TH1F> h_vertex_seed_track_adz[4];
   ByRunTH1<TH1F> h_vertex_seed_track_npxhits[4];
   ByRunTH1<TH1F> h_vertex_seed_track_nsthits[4];
   ByRunTH1<TH1F> h_vertex_seed_track_nhits[4];
   ByRunTH1<TH1F> h_vertex_seed_track_npxlayers[4];
   ByRunTH1<TH1F> h_vertex_seed_track_nstlayers[4];
   ByRunTH1<TH1F> h_vertex_seed_track_nlayers[4];
+
+  ByRunTH1<TH1F> h_vertex_dbv;
+  ByRunTH1<TH1F> h_vertex_bs2derr;
 };
 
 MFVByRunSeedTracks::MFVByRunSeedTracks(const edm::ParameterSet& cfg)
@@ -48,6 +53,8 @@ MFVByRunSeedTracks::MFVByRunSeedTracks(const edm::ParameterSet& cfg)
     h_vertex_seed_track_phi[i].set(&fs, TString::Format("h_vertex_seed_track_phi_%i", i), ";vertex seed track #phi;tracks/0.063", 100, -3.15, 3.15);
     h_vertex_seed_track_dxy[i].set(&fs, TString::Format("h_vertex_seed_track_dxy_%i", i), ";vertex seed track dxy (cm);tracks/10 #mum", 1000, -1, 1);
     h_vertex_seed_track_dz[i].set(&fs, TString::Format("h_vertex_seed_track_dz_%i", i), ";vertex seed track dz (cm);tracks/10 #mum", 1000, -1, 1);
+    h_vertex_seed_track_adxy[i].set(&fs, TString::Format("h_vertex_seed_track_adxy_%i", i), ";vertex seed track |dxy| (cm);tracks/10 #mum", 1000, -1, 1);
+    h_vertex_seed_track_adz[i].set(&fs, TString::Format("h_vertex_seed_track_adz_%i", i), ";vertex seed track |dz| (cm);tracks/10 #mum", 1000, -1, 1);
     h_vertex_seed_track_npxhits[i].set(&fs, TString::Format("h_vertex_seed_track_npxhits_%i", i), ";vertex seed track # pixel hits;tracks", 10, 0, 10);
     h_vertex_seed_track_nsthits[i].set(&fs, TString::Format("h_vertex_seed_track_nsthits_%i", i), ";vertex seed track # strip hits;tracks", 50, 0, 50);
     h_vertex_seed_track_nhits[i].set(&fs, TString::Format("h_vertex_seed_track_nhits_%i", i), ";vertex seed track # hits;tracks", 60, 0, 60);
@@ -55,6 +62,9 @@ MFVByRunSeedTracks::MFVByRunSeedTracks(const edm::ParameterSet& cfg)
     h_vertex_seed_track_nstlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nstlayers_%i", i), ";vertex seed track # strip layers;tracks", 20, 0, 20);
     h_vertex_seed_track_nlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nlayers_%i", i), ";vertex seed track # layers;tracks", 30, 0, 30);
   }
+
+  h_vertex_dbv.set(&fs, "h_vertex_dbv", ";vertex d_{BV} (cm);events/0.01 cm", 250, 0, 2.5);
+  h_vertex_bs2derr.set(&fs, "h_vertex_bs2derr", ";#sigma(vertex d_{BV}) (cm);events/2.5 #mum", 10, 0, 0.0025);
 }
 
 void MFVByRunSeedTracks::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -79,6 +89,8 @@ void MFVByRunSeedTracks::analyze(const edm::Event& event, const edm::EventSetup&
       h_vertex_seed_track_phi[isv[j]][run]->Fill(mevent->vertex_seed_track_phi[i]);
       h_vertex_seed_track_dxy[isv[j]][run]->Fill(mevent->vertex_seed_track_dxy[i]);
       h_vertex_seed_track_dz[isv[j]][run]->Fill(mevent->vertex_seed_track_dz[i]);
+      h_vertex_seed_track_adxy[isv[j]][run]->Fill(fabs(mevent->vertex_seed_track_dxy[i]));
+      h_vertex_seed_track_adz[isv[j]][run]->Fill(fabs(mevent->vertex_seed_track_dz[i]));
       h_vertex_seed_track_npxhits[isv[j]][run]->Fill(mevent->vertex_seed_track_npxhits(i));
       h_vertex_seed_track_nsthits[isv[j]][run]->Fill(mevent->vertex_seed_track_nsthits(i));
       h_vertex_seed_track_nhits[isv[j]][run]->Fill(mevent->vertex_seed_track_nhits(i));
@@ -86,6 +98,12 @@ void MFVByRunSeedTracks::analyze(const edm::Event& event, const edm::EventSetup&
       h_vertex_seed_track_nstlayers[isv[j]][run]->Fill(mevent->vertex_seed_track_nstlayers(i));
       h_vertex_seed_track_nlayers[isv[j]][run]->Fill(mevent->vertex_seed_track_nlayers(i));
     }
+  }
+
+  if (nsv == 1) {
+    const MFVVertexAux& v = vertices->at(0);
+    h_vertex_dbv[run]->Fill(mevent->bs2ddist(v));
+    h_vertex_bs2derr[run]->Fill(v.bs2derr);
   }
 }
 
