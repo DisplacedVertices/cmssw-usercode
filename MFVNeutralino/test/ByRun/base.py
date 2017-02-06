@@ -97,7 +97,7 @@ class ByRunPlotter:
         t = ROOT.TLatex()
         t.SetTextFont(42)
 
-        r.g.SetTitle('%s  # runs: %i;i_{run};%s' % (title, r.runs_used, y_title))
+        r.g.SetTitle('%s  # runs: %i;run index;%s' % (title, r.runs_used, y_title))
         r.g.Draw('AP')
 
         a = tgraph_getpoint(r.g,  0)[0] - 100
@@ -141,6 +141,8 @@ class ByRunPlotter:
         t.DrawLatexNDC(0.12, 0.76, '#color[418]{%s}' % s1)
         t.DrawLatexNDC(0.12, 0.70, '#color[600]{# missing runs: %i}' % r.g_na.GetN())
         t.DrawLatexNDC(0.12, 0.64, '#color[802]{%i / %i = %.2f points miss pol0 fit}' % (len(miss), r.g.GetN(), float(len(miss))/r.g.GetN()))
+
+        r.g.GetXaxis().SetRangeUser(-2, r.nruns+2)
 
         self.ps.save(name)
 
