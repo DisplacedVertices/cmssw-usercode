@@ -8,14 +8,11 @@ tree_path = 'tre%i%i/t' % (ntracks, ntracks) if ntracks < 5 else 'mfvMiniTree/t'
 plot_path = 'vertex_xsec_%i_%itrk_%iV' % (year, ntracks, oneortwo)
 title = '%i, %i-track %i-vtx events' % (year, ntracks, oneortwo)
 if year == 2015:
-    fns = [
-        '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_sidebanddata2015/JetHT2015C.root',
-        '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_sidebanddata2015/JetHT2015D.root',
-        ]
+    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV10_sidebanddata2015/JetHT2015%s.root' % s for s in 'CD']
     mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_sidebanddata2015/lumiSummary.json'
 else:
-    fns = []
-    mask_fn = None
+    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV10_2016_data_partial_notrigbit/JetHT2016%s.root' % s for s in 'B3 C D E F G H2 H3'.split()]
+    mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_2016_data_partial_notrigbit/processedLumis.json'
 
 ####
 
