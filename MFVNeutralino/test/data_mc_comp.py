@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV10'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk5'
 plot_dir = 'plots/AN-16-394/data_mc_comp'
 
 set_style()
@@ -52,7 +52,7 @@ C = partial(data_mc_comparison,
             simulation = True,
             )
 
-C('njets_nocuts',
+C('nocuts_njets',
   histogram_path = 'mfvEventHistosNoCuts/h_njets',
   x_title = 'Number of jets',
   y_title = 'Events',
@@ -60,7 +60,7 @@ C('njets_nocuts',
   cut_line = ((4, 0, 4, 2.5e8), 2, 5, 1),
   )
 
-C('ht40_nocuts',
+C('nocuts_ht40',
   histogram_path = 'mfvEventHistosNoCuts/h_jet_ht_40',
   rebin = 4,
   x_title = 'Jet H_{T} (GeV)',
@@ -79,7 +79,7 @@ C('nsv_presel',
   cut_line = ((2, 0, 2, 2.5e8), 2, 5, 1),
   )
 
-C('ntracks_onevtx',
+C('onevtx_ntracks',
   histogram_path = 'vtxHst1VNoNtracks/h_sv_best0_ntracks',
   x_title = 'Number of tracks per vertex',
   y_title = 'Vertices',
@@ -87,7 +87,7 @@ C('ntracks_onevtx',
   cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
   )
 
-C('bs2derr_onevtx',
+C('onevtx_bs2derr',
   histogram_path = 'vtxHst1VNoBs2derr/h_sv_best0_bs2derr',
   x_title = 'Uncertainty in d_{BV} (cm)',
   y_title = 'Vertices/5 #mum',
@@ -95,7 +95,7 @@ C('bs2derr_onevtx',
   cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
   )
 
-C('dbv_onevtx',
+C('onevtx_dbv',
   histogram_path = 'vtxHst1VNoBsbs2ddist/h_sv_best0_bsbs2ddist',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
@@ -109,7 +109,7 @@ C('dbv',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 0.4),
-  y_range = (1, 1e6),
+  y_range = (1, 1e4),
   )
 
 C('dvv',
@@ -121,7 +121,7 @@ C('dvv',
   )
 
 C('nsv_3track',
-  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk3', '%(name)s.root'),
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk3', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 3-track vertices',
   y_title = 'Events',
@@ -130,7 +130,7 @@ C('nsv_3track',
   )
 
 C('nsv_4track',
-  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk4', '%(name)s.root'),
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk4', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 4-track vertices',
   y_title = 'Events',
