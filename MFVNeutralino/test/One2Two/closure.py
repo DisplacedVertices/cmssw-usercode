@@ -4,9 +4,13 @@ ROOT.TH1.AddDirectory(0)
 set_style()
 ps = plot_saver('../plots/bkgest/closure', size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets_3track_average3_c1p35_e2_a3p66.root', '2v_from_jets_4track3track_average3_c1p35_e2_a3p66.root', '2v_from_jets_4track_average4_c1p35_e2_a3p66.root', '2v_from_jets_5track_average5_c1p35_e2_a3p66.root']
+fns = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_20x.root', '2v_from_jets_4track3track_average3_c1p35_e2_a3p66_20x.root', '2v_from_jets_4track_average4_c1p35_e2_a3p66_20x.root', '2v_from_jets_5track_average5_c1p35_e2_a3p66_20x.root']
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 n2v = [1323., 335., 22., 1.]
+
+ebin1 = [0.0025, 0.0063, 0.0063, 0.0110]
+ebin2 = [0.0021, 0.0068, 0.0068, 0.0280]
+ebin3 = [0.0056, 0.0200, 0.0200, 0.0910]
 
 for i in range(4):
     hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
@@ -54,12 +58,12 @@ for i in range(4):
 
     ec = ROOT.Double(0)
     c = h.IntegralAndError(1,40,ec)
-    ec1 = ROOT.Double(0)
-    c1 = h.IntegralAndError(1,4,ec1)
-    ec2 = ROOT.Double(0)
-    c2 = h.IntegralAndError(5,7,ec2)
-    ec3 = ROOT.Double(0)
-    c3 = h.IntegralAndError(8,40,ec3)
+    c1 = h.Integral(1,4)
+    ec1 = ebin1[i] * c1
+    c2 = h.Integral(5,7)
+    ec2 = ebin2[i] * c2
+    c3 = h.Integral(8,40)
+    ec3 = ebin3[i] * c3
 
     r = c/s
     er = (c/s) * ((ec/c)**2 + (es/s)**2)**0.5
