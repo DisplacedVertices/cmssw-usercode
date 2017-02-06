@@ -2,12 +2,17 @@ from base import *
 
 ROOT.gStyle.SetOptFit(0)
 
-year, ntracks = 2015, 3
+year, ntracks = 2016, 3
 
+path = 'byrunseedtracks%i%i' % (ntracks, ntracks) if ntracks < 5 else None
 plot_path = 'by_run_seed_tracks_%i_%itrk' % (year, ntracks)
 title = '%i, %i-track events' % (year, ntracks)
-fns = ['/uscms_data/d2/tucker/crab_dirs/ByRunSeedTracks_2015/JetHT2015D.root'] if year == 2015 else []
-path = 'byrunseedtracks%i%i' % (ntracks, ntracks) if ntracks < 5 else None
+if year == 2015:
+    fns = ['/uscms_data/d2/tucker/crab_dirs/ByRunSeedTracks_2015/JetHT2015%s.root' % s for s in 'CD']
+    mask_fn = 'fixme'
+else:
+    fns = ['/uscms_data/d2/tucker/crab_dirs/ByRunSeedTracks_2016partial/JetHT2016%s.root' % s for s in 'B3 C D E F G H2 H3'.split()]
+    mask_fn = '/uscms_data/d2/tucker/crab_dirs/ByRunSeedTracks_2016partial/processedLumis.json'
 
 def book():
     def b():
@@ -16,8 +21,13 @@ def book():
 
 dns = [
     'h_n_vertex_seed_tracks',
+    'h_vertex_seed_track_chi2dof',
     'h_vertex_seed_track_pt',
     'h_vertex_seed_track_dxy',
+    'h_vertex_seed_track_dz',
+    'h_vertex_seed_track_npxhits',
+    'h_vertex_seed_track_npxlayers',
+    'h_vertex_seed_track_nsthits',
     'h_vertex_seed_track_nstlayers',
     ]
 ds = dict((dn, book()) for dn in dns)
@@ -38,7 +48,7 @@ for fn in fns:
             ds[hname][nvtx]['rms' ][run] = (h.GetRMS(),  h.GetRMSError())
 
 ps = plot_saver(plot_dir(plot_path), size=(1000,400), log=False, pdf=True)
-plotter = ByRunPlotter(ps)
+plotter = ByRunPlotter(ps, mask_fn)
 
 excludes = [
     ('all', []),
