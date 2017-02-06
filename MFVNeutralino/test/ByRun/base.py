@@ -8,9 +8,9 @@ class ByRunPlotter:
     class result:
         pass
 
-    def __init__(self, plot_saver):
+    def __init__(self, plot_saver, mask_fn=None):
         self.ps = plot_saver
-        self.lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle')
+        self.lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle', mask_fn)
 
     def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False):
         r = ByRunPlotter.result()
@@ -24,7 +24,7 @@ class ByRunPlotter:
         g, na = [], []
         for i, run in enumerate(r.runs):
             x = i
-            n = d.get(run, None)
+            n = d.get(run, 0)
 
             if verbose:
                 print '(%3i) %i: %r' % (i,run,n)
