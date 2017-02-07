@@ -2,7 +2,7 @@ from base import *
 
 ROOT.gStyle.SetOptFit(0)
 
-year, ntracks, oneortwo = 2015, 3, 1
+year, ntracks, oneortwo = 2016, 3, 1
 
 tree_path = 'tre%i%i/t' % (ntracks, ntracks) if ntracks < 5 else 'mfvMiniTree/t'
 plot_path = 'vertex_xsec_%i_%itrk_%iV' % (year, ntracks, oneortwo)
@@ -16,7 +16,7 @@ else:
 
 ####
 
-ps = plot_saver(plot_dir(plot_path), size=(1000,400), log=False, pdf=True)
+ps = plot_saver(plot_dir(plot_path), size=(2000,600), log=False, pdf=True)
 
 nvtx = defaultdict(int)
 for fn in fns:
