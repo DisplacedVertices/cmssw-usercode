@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, math
 from collections import defaultdict
 from JMTucker.Tools.LumiLines import *
 from JMTucker.Tools.ROOTTools import *
@@ -10,7 +10,7 @@ class ByRunPlotter:
 
     def __init__(self, plot_saver, mask_fn=None):
         self.ps = plot_saver
-        self.lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle', mask_fn)
+        self.lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped.gzpickle', mask_fn)
 
     def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False):
         r = ByRunPlotter.result()
@@ -22,9 +22,13 @@ class ByRunPlotter:
         r.zero_lumis = []
 
         g, na = [], []
+        fill_boundaries = []
         for i, run in enumerate(r.runs):
             x = i
             n = d.get(run, 0)
+
+            if run in self.lls.fills.values():
+                fill_boundaries.append(i)
 
             if verbose:
                 print '(%3i) %i: %r' % (i,run,n)
@@ -110,6 +114,17 @@ class ByRunPlotter:
         fr0 = r.g.Fit(r.fcn0, 'QRS')
         fr1 = r.g.Fit(r.fcn1, 'QRS')
         r.fcn0.Draw('same')
+
+        hh = r.g.GetHistogram()
+        ymin, ymax = hh.GetMinimum(), hh.GetMaximum()
+
+        fill_lines = []
+        for i in fill_boundaries:
+            l = ROOT.TLine(i-0.5, ymin, i-0.5, ymax)
+            fill_lines.append(l)
+            l.SetLineStyle(2)
+            l.SetLineWidth(1)
+            l.Draw()
 
         miss = []
         fy = r.fcn0.GetParameter(0)
