@@ -10,6 +10,14 @@ from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_njobs
 wds = cs_dirs_from_argv()
 if not wds:
     sys.exit(colors.red('No condor dirs in argv'))
+global_json_fn = [x for x in sys.argv if x.endswith('json')]
+if global_json_fn:
+    global_json_fn = global_json_fn[0]
+else:
+    global_json_fn = 'processedLumis.json'
+if os.path.isfile(global_json_fn):
+    print colors.red('output file %s already exists' % global_json_fn)
+    sys.exit(1)
 
 ll_alls = []
 
@@ -42,9 +50,10 @@ for wd in wds:
 if any(lla & llb for lla,llb in combinations(ll_alls,2)):
     print colors.red('globally overlap found')
 else:
-    print colors.green('no overlap!')
+    print colors.green('no overlap, writing to %s' % global_json_fn)
     ll_all = ll_alls.pop()
     for ll in ll_alls:
         ll_all |= ll
-    print ll_all
+    ll_all.writeJSON(global_json_fn)
+
 
