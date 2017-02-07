@@ -42,6 +42,11 @@ class MFVByRunSeedTracks : public edm::EDAnalyzer {
   ByRunTH1<TH1F> h_ht40[2];
   ByRunTH1<TH1F> h_ht[2];
 
+  ByRunTH1<TH1F> h_trig[2];
+  ByRunTH1<TH1F> h_ananjets[2];
+  ByRunTH1<TH1F> h_anaht[2];
+  ByRunTH1<TH1F> h_ana[2];
+
   ByRunTH1<TH1F> h_vertex_x[2];
   ByRunTH1<TH1F> h_vertex_y[2];
   ByRunTH1<TH1F> h_vertex_dbv[2];
@@ -79,6 +84,11 @@ MFVByRunSeedTracks::MFVByRunSeedTracks(const edm::ParameterSet& cfg)
     h_jetpt4[i].set(&fs, TString::Format("h_jetpt4_%i", i), ";jet #4 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
     h_ht40[i].set(&fs, TString::Format("h_ht40_%i", i), ";jet 40 H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
     h_ht[i].set(&fs, TString::Format("h_ht_%i", i), ";jet H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
+
+    h_trig[i].set(&fs, TString::Format("h_trig_%i", i), "", 1, 0, 1);
+    h_ananjets[i].set(&fs, TString::Format("h_ananjets_%i", i), "", 2, 0, 2);
+    h_anaht[i].set(&fs, TString::Format("h_anaht_%i", i), "", 2, 0, 2);
+    h_ana[i].set(&fs, TString::Format("h_ana_%i", i), "", 2, 0, 2);
   }
 
   h_vertex_x[1].set(&fs, "h_vertex_x_1", ";vertex x (cm);events/10 #mum", 2000, -1, 1);
@@ -106,6 +116,11 @@ void MFVByRunSeedTracks::analyze(const edm::Event& event, const edm::EventSetup&
   h_jetpt4[nsv][run]->Fill(mevent->jetpt4());
   h_ht40[nsv][run]->Fill(mevent->jet_ht(40));
   h_ht[nsv][run]->Fill(mevent->jet_ht());
+
+  h_trig[nsv][run]->Fill(0);
+  h_ananjets[nsv][run]->Fill(mevent->njets() >= 4);
+  h_anaht[nsv][run]->Fill(mevent->jet_ht(40) >= 1000);
+  h_ana[nsv][run]->Fill(mevent->njets() >= 4 && mevent->jet_ht(40) >= 1000);
 
   const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
   h_n_vertex_seed_tracks[nsv][run]->Fill(n_vertex_seed_tracks);
