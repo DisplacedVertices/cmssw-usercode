@@ -34,6 +34,14 @@ class MFVByRunSeedTracks : public edm::EDAnalyzer {
   ByRunTH1<TH1F> h_vertex_seed_track_nstlayers[2];
   ByRunTH1<TH1F> h_vertex_seed_track_nlayers[2];
 
+  ByRunTH1<TH1F> h_njets[2];
+  ByRunTH1<TH1F> h_jetpt1[2];
+  ByRunTH1<TH1F> h_jetpt2[2];
+  ByRunTH1<TH1F> h_jetpt3[2];
+  ByRunTH1<TH1F> h_jetpt4[2];
+  ByRunTH1<TH1F> h_ht40[2];
+  ByRunTH1<TH1F> h_ht[2];
+
   ByRunTH1<TH1F> h_vertex_x[2];
   ByRunTH1<TH1F> h_vertex_y[2];
   ByRunTH1<TH1F> h_vertex_dbv[2];
@@ -63,6 +71,14 @@ MFVByRunSeedTracks::MFVByRunSeedTracks(const edm::ParameterSet& cfg)
     h_vertex_seed_track_npxlayers[i].set(&fs, TString::Format("h_vertex_seed_track_npxlayers_%i", i), ";vertex seed track # pixel layers;tracks", 10, 0, 10);
     h_vertex_seed_track_nstlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nstlayers_%i", i), ";vertex seed track # strip layers;tracks", 20, 0, 20);
     h_vertex_seed_track_nlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nlayers_%i", i), ";vertex seed track # layers;tracks", 30, 0, 30);
+
+    h_njets[i].set(&fs, TString::Format("h_njets_%i", i), ";number of jets;events", 20, 0, 20);
+    h_jetpt1[i].set(&fs, TString::Format("h_jetpt1_%i", i), ";jet #1 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
+    h_jetpt2[i].set(&fs, TString::Format("h_jetpt2_%i", i), ";jet #2 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
+    h_jetpt3[i].set(&fs, TString::Format("h_jetpt3_%i", i), ";jet #3 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
+    h_jetpt4[i].set(&fs, TString::Format("h_jetpt4_%i", i), ";jet #4 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
+    h_ht40[i].set(&fs, TString::Format("h_ht40_%i", i), ";jet 40 H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
+    h_ht[i].set(&fs, TString::Format("h_ht_%i", i), ";jet H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
   }
 
   h_vertex_x[1].set(&fs, "h_vertex_x_1", ";vertex x (cm);events/10 #mum", 2000, -1, 1);
@@ -82,6 +98,14 @@ void MFVByRunSeedTracks::analyze(const edm::Event& event, const edm::EventSetup&
   const size_t nsv = vertices->size();
   if (nsv >= 2)
     return;
+
+  h_njets[nsv][run]->Fill(mevent->njets());
+  h_jetpt1[nsv][run]->Fill(mevent->njets() >= 1 ? mevent->jet_pt[0] : 0.f);
+  h_jetpt2[nsv][run]->Fill(mevent->njets() >= 2 ? mevent->jet_pt[1] : 0.f);
+  h_jetpt3[nsv][run]->Fill(mevent->njets() >= 3 ? mevent->jet_pt[2] : 0.f);
+  h_jetpt4[nsv][run]->Fill(mevent->jetpt4());
+  h_ht40[nsv][run]->Fill(mevent->jet_ht(40));
+  h_ht[nsv][run]->Fill(mevent->jet_ht());
 
   const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
   h_n_vertex_seed_tracks[nsv][run]->Fill(n_vertex_seed_tracks);
