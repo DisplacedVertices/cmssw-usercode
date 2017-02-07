@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, tempfile
+import math, sys, os, tempfile
 from array import array
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
@@ -1040,7 +1040,7 @@ def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin
         wsq += hist.GetBinError(i)**2
     return integral, wsq**0.5
 
-def get_hist_quantiles(hist, probs, options=''):
+def get_hist_quantiles(hist, probs, options='list'):
     """Get the quantiles for the histogram corresponding to the listed
     probs (e.g. probs = [0.1, 0.5, 0.9] to find the first decile, the
     mean, and the last decile."""
@@ -1054,6 +1054,10 @@ def get_hist_quantiles(hist, probs, options=''):
     hist.GetQuantiles(len(probs), quantiles, probs)
     if 'list' in options:
         quantiles = list(quantiles)
+    if 'error' in options:
+        n = hist.GetEntries()
+        unc = hist.GetMeanError() * (math.pi * (2*n + 1) / 4 / n)**0.5 # JMTBAD this is the formula for the median given normal distribution
+        quantiles = [(q, unc) for q in quantiles]
     if 'probs' in options:
         return quantiles, probs
     return quantiles
