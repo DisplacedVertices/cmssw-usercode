@@ -5,7 +5,7 @@ set_style()
 ps = plot_saver('../plots/bkgest/fit_jetpairdphi', size=(700,700), log=False, root=False)
 
 ntk = ['presel', '3-track', '3-or-4-track', '4-track', '5-or-more-track']
-fns = ['/uscms_data/d2/tucker/crab_dirs/HistosV10/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk3/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk3or4/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk4/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10/background.root']
+fns = ['/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk5/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk3/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk3or4/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk4/background.root', '/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk5/background.root']
 
 for i,n in enumerate(ntk):
   f1 = ROOT.TFile(fns[i])
@@ -30,3 +30,26 @@ for i,n in enumerate(ntk):
   l1.SetFillColor(0)
   l1.Draw()
   ps.save('%s_jetpairdphi' % n)
+
+ROOT.TH1.AddDirectory(0)
+l1 = ROOT.TLegend(0.15,0.75,0.85,0.85)
+colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kViolet]
+for i,n in enumerate(ntk):
+  f1 = ROOT.TFile(fns[i])
+  h1 = f1.Get('mfvEventHistosOnlyOneVtx/h_jet_pairdphi')
+  if n == 'presel':
+    h1 = f1.Get('mfvEventHistosPreSel/h_jet_pairdphi')
+  h1.SetStats(0)
+  h1.SetLineColor(colors[i])
+  h1.SetLineWidth(3)
+  h1.Scale(1./h1.Integral())
+  h1.GetYaxis().SetRangeUser(0,0.02)
+  h1.SetTitle(';#Delta#phi;')
+  if i == 0:
+    h1.Draw()
+  else:
+    h1.Draw('sames')
+  l1.AddEntry(h1, '#Delta#phi_{JJ}, %s one-vertex events' % n, 'LE')
+l1.SetFillColor(0)
+l1.Draw()
+ps.save('jetpairdphi')
