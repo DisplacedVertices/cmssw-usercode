@@ -1,6 +1,7 @@
-import base64, zlib, cPickle as pickle
+import os, base64, zlib, cPickle as pickle
 from collections import defaultdict
 from pprint import pprint
+from JMTucker.Tools.CRAB3ToolsBase import decrabify_list
 
 _d = {}
 
@@ -48,16 +49,15 @@ _add('eJyNmsGOGLcNhu/7IvFlYomiJPIoURLaXtN7EbQ+BG0aI9m8fzn2jsQFtgDtg20Y/q2R+JE/KX
 _add({('JetHT2015C', 'ntuplev10'): (13, ['/store/user/tucker/JetHT/NtupleV10/170131_122719/0000/ntuple_%i.root' % i for i in xrange(13)])})
 _add({('JetHT2015D', 'ntuplev10'): (1311, ['/store/user/tucker/JetHT/NtupleV10/170124_025219/000%i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1312)])})
 
-# ntuplev10 B3 has bad files 1073, 1099, 1291, 1356, 1460 so keep those int he exceptions
 _add({
-('JetHT2016B3', 'ntuplev10partial'): (1745, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1759) if i not in [1, 2, 3, 4, 5, 1376, 1516, 1666, 1073, 1099, 1291, 1356, 1460]]),
-('JetHT2016C',  'ntuplev10partial'): ( 580, ['/store/user/tucker/JetHT/NtupleV10/170124_035750' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,581)]),
-('JetHT2016D',  'ntuplev10partial'): ( 969, ['/store/user/tucker/JetHT/NtupleV10/170124_035827' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,973) if i not in [54, 55, 64]]),
-('JetHT2016E',  'ntuplev10partial'): ( 824, ['/store/user/tucker/JetHT/NtupleV10/170124_035858' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,827) if i not in [335, 734]]),
-('JetHT2016F',  'ntuplev10partial'): ( 603, ['/store/user/tucker/JetHT/NtupleV10/170124_035931' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,604)]),
-('JetHT2016G',  'ntuplev10partial'): (  28, ['/store/user/tucker/JetHT/NtupleV10/170124_025401' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,37) if i not in [1, 2, 3, 4, 5, 21, 27, 34]]),
-('JetHT2016H2', 'ntuplev10partial'): ( 757, ['/store/user/tucker/JetHT/NtupleV10/170128_191149' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,800) if i not in [1, 2, 3, 4, 5, 21, 102, 183, 264, 345, 426, 487, 507, 586, 638, 647, 658, 662, 664, 666, 669, 670, 677, 681, 682, 685, 687, 704, 723, 724, 729, 743, 745, 748, 751, 755, 757, 765, 767, 780, 783, 797]]),
-('JetHT2016H3', 'ntuplev10partial'): (  41, ['/store/user/tucker/JetHT/NtupleV10/170128_191217' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,42)]),
+('JetHT2016B3', 'ntuplev10partial2'): (1757, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in range(1,1099) + range(1100,1759)]),
+('JetHT2016C',  'ntuplev10partial2'): ( 580, ['/store/user/tucker/JetHT/NtupleV10/170124_035750' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,581)]),
+('JetHT2016D',  'ntuplev10partial2'): ( 969, ['/store/user/tucker/JetHT/NtupleV10/170124_035827' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,973) if i not in [54, 55, 64]]),
+('JetHT2016E',  'ntuplev10partial2'): ( 825, ['/store/user/tucker/JetHT/NtupleV10/170124_035858' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in range(1,335) + range(336,827)]),
+('JetHT2016F',  'ntuplev10partial2'): ( 603, ['/store/user/tucker/JetHT/NtupleV10/170124_035931' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,604)]),
+('JetHT2016G',  'ntuplev10partial2'): ( 518, ['/store/user/tucker/JetHT/NtupleV10/170124_025401' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in decrabify_list('6-20,22-26,28-47,49-83,85-89,91-130,132-164,166-172,174-202,204-213,215-232,234-245,247-255,257-287,289-292,294-297,299-339,341-358,360-381,383-422,426-464,466-467,469-478,484,493,497-498,500-502,508-509,515-517,520,522-523,526-528,565,573,576,580,583,586-588,590,593,597,599-628,630-635,655,667,670,678')]),
+('JetHT2016H2', 'ntuplev10partial2'): (1536, ['/store/user/tucker/JetHT/NtupleV10/170128_191149' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in decrabify_list('1-728,730-849,851-904,907-908,910-1541')]),
+('JetHT2016H3', 'ntuplev10partial2'): (  41, ['/store/user/tucker/JetHT/NtupleV10/170128_191217' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,42)]),
 })
 
 __all__ = [
@@ -76,5 +76,13 @@ if __name__ == '__main__':
         n = len(fns)
         print '# %s, %s, %i files' % (sample, dataset, n)
         print '_add(%r)' % _enc({(sample,dataset):(n,fns)})
+    elif 'testfiles' in sys.argv:
+        sample = sys.argv[sys.argv.index('testfiles')+1]
+        dataset = sys.argv[sys.argv.index('testfiles')+2]
+        from JMTucker.Tools.ROOTTools import ROOT
+        print sample, dataset
+        for fn in get(sample, dataset)[1]:
+            f = ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn)
+            print os.path.basename(fn), f, f.Get('Events')
     else:
         summary()
