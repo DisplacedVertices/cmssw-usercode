@@ -327,14 +327,14 @@ def add_dataset_phys03(sample, ds_name, dataset, nevents_orig, **kwargs):
 
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
-JetHT2016B3.add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-b44b2dc0c74d308599546039483df1a1/USER', dbs_inst='phys03')
-JetHT2016C .add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-dc9fb82ba19c081492e300fc8ad78296/USER', dbs_inst='phys03')
-JetHT2016D .add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-ba65951c6ef94426244485cf2908f522/USER', dbs_inst='phys03')
-JetHT2016E .add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-11b8d017c930e5ab1e3b183e96c5de3a/USER', dbs_inst='phys03')
-JetHT2016F .add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-41f6c9cf70c3640987817e506b64520e/USER', dbs_inst='phys03')
-JetHT2016G .add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-75ce487817b98903df0c5ef4f749dc11/USER', dbs_inst='phys03')
-JetHT2016H2.add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-393ecc52cd7e274c5943ddcc850a501c/USER', dbs_inst='phys03')
-JetHT2016H3.add_dataset('ntuplev10partial', '/JetHT/tucker-NtupleV10-b13b682f8bc21430a7a8696975aff225/USER', dbs_inst='phys03')
+JetHT2016B3.add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-b44b2dc0c74d308599546039483df1a1/USER', dbs_inst='phys03')
+JetHT2016C .add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-dc9fb82ba19c081492e300fc8ad78296/USER', dbs_inst='phys03')
+JetHT2016D .add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-ba65951c6ef94426244485cf2908f522/USER', dbs_inst='phys03')
+JetHT2016E .add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-11b8d017c930e5ab1e3b183e96c5de3a/USER', dbs_inst='phys03')
+JetHT2016F .add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-41f6c9cf70c3640987817e506b64520e/USER', dbs_inst='phys03')
+JetHT2016G .add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-75ce487817b98903df0c5ef4f749dc11/USER', dbs_inst='phys03')
+JetHT2016H2.add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-393ecc52cd7e274c5943ddcc850a501c/USER', dbs_inst='phys03')
+JetHT2016H3.add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-b13b682f8bc21430a7a8696975aff225/USER', dbs_inst='phys03')
 
 _adbp3('sim', '/mfv_neu_tau00100um_M0400/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
 _adbp3('sim', '/mfv_neu_tau00100um_M0800/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
