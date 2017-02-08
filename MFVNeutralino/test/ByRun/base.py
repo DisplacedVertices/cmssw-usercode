@@ -23,12 +23,21 @@ class ByRunPlotter:
 
         g, na = [], []
         fill_boundaries = []
+        era_boundaries = []
         for i, run in enumerate(r.runs):
             x = i
             n = d.get(run, 0)
 
-            if run in self.lls.fills.values():
-                fill_boundaries.append(i)
+            if i > 0:
+                prevrun = r.runs[i-1]
+                for fr in self.lls.fill_boundaries:
+                    if prevrun < fr and run >= fr:
+                        fill_boundaries.append(i)
+                        break
+                for fr in self.lls.era_boundaries:
+                    if prevrun < fr and run >= fr:
+                        era_boundaries.append(i)
+                        break
 
             if verbose:
                 print '(%3i) %i: %r' % (i,run,n)
@@ -119,11 +128,13 @@ class ByRunPlotter:
         ymin, ymax = hh.GetMinimum(), hh.GetMaximum()
 
         fill_lines = []
-        for i in fill_boundaries:
+        for i in fill_boundaries + era_boundaries:
             l = ROOT.TLine(i-0.5, ymin, i-0.5, ymax)
             fill_lines.append(l)
-            l.SetLineStyle(2)
-            l.SetLineWidth(1)
+            if i not in era_boundaries:
+                l.SetLineStyle(2)
+            else:
+                l.SetLineWidth(2)
             l.Draw()
 
         miss = []
