@@ -1,8 +1,6 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-simple = False
-
 process.source.fileNames = ['file:ntuple.root'] #/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev9/161019_211934/0000/ntuple_1.root']
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
@@ -22,24 +20,7 @@ nm1s = [
     ('Bs2derr',    'max_bs2derr = 1e9'),
     ]
 
-if simple:
-    nm1s = []
-
-    del process.pFullSel
-    del process.pOnlyOneVtx
-    del process.pPreSel
-    del process.pSkimSel
-    del process.pSigReg
-
-    process.p = cms.Path(process.mfvSelectedVerticesLoose +
-                         process.mfvSelectedVerticesTight +
-                         process.mfvWeight +
-                         process.mfvEventHistosNoCuts +
-                         process.mfvVertexHistosNoCuts +
-                         process.mfvVertexHistos +
-                         process.mfvAnalysisCuts +
-                         process.mfvEventHistos +
-                         process.mfvVertexHistosWAnaCuts)
+#nm1s = []
 
 for name, cut in nm1s:
     evt_cut = ''

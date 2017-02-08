@@ -56,11 +56,13 @@ def effs(fn):
         namenumvtx = 'mfvVertexHistosOnlyOneVtx/h_nsv'
     else:
         namenumall = 'mfvEventHistos'
-        namenumvtx = 'mfvVertexHistos/h_nsv'
+        namenumvtx = None
 
     numall = get_n(namenumall)
-    h = f.Get(namenumvtx)
-    numvtx = h.Integral(h.FindBin(nvtx), 1000000)
+    if namenumvtx is not None:
+        numvtx = f.Get(namenumvtx).Integral(h.FindBin(nvtx), 1000000)
+    else:
+        numvtx = -1
 
     tot_sum += numall * weight
     tot_var += numall * weight**2
