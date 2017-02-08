@@ -54,5 +54,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             sample.json = 'ana_2016.json'
 
-    cs = CondorSubmitter('MinitreeV10_2016_data_partial_notrigbit', dataset = 'ntuplev10partial')
+    cs = CondorSubmitter('MinitreeV10_data2016partial2', dataset='ntuplev10partial2')
     cs.submit_all(samples)
