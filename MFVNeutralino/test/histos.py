@@ -80,7 +80,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in samples:
         sample.files_per = 50
         if not sample.is_mc:
-            sample.json = 'ana_2015.json'
+            sample.json = 'ana_2016.json'
 
-    cs = CondorSubmitter('HistosV10', dataset='ntuplev10')
+    cs = CondorSubmitter('HistosV10_data2016partial2_aftersimple', dataset='ntuplev10partial2')
     cs.submit_all(samples)
