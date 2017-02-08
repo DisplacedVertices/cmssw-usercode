@@ -88,12 +88,6 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      sort_by = cms.string('ntracks_then_mass'),
                                      )
 
-mfvSelectedVerticesSkim =  mfvSelectedVertices.clone(
-    max_geo2ddist = 3,
-    max_bs2derr = 0.01,
-    min_ntracks = 3,
-    )
-
 mfvSelectedVerticesLoose = mfvSelectedVertices.clone( # touching this affects the vertices associated to jets
     min_ntracks = 5,
     )
@@ -105,9 +99,4 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_bs2derr = 0.0025,
     )
 
-mfvSelectedVerticesTightLargeErr = mfvSelectedVerticesTight.clone(
-    min_bs2derr = 0.0025,
-    max_bs2derr = 1e9,
-    )
-
-mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesSkim * mfvSelectedVerticesLoose * mfvSelectedVerticesTight * mfvSelectedVerticesTightLargeErr)
+mfvSelectedVerticesSeq = cms.Sequence(mfvSelectedVerticesLoose * mfvSelectedVerticesTight)

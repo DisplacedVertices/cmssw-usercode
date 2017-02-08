@@ -34,9 +34,8 @@ else:
     process.printEventSel = printer.clone(print_event = True)
     process.printVertexAll = printer.clone(print_vertex_aux = True)
     process.printVertexSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
-    process.printVertexSelLargeErr = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTightLargeErr')
     process.printVertexSelEvtSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
-    process.p = cms.Path(process.printEventAll * process.printVertexAll * process.mfvSelectedVerticesSeq * process.printVertexSel * process.printVertexSelLargeErr * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
+    process.p = cms.Path(process.printEventAll * process.printVertexAll * process.mfvSelectedVerticesSeq * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
 
 if __name__ == '__main__' and 'splitlog' in sys.argv:
     log_fn = sys.argv[sys.argv.index('splitlog')+1]
