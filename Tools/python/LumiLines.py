@@ -20,6 +20,7 @@ class LumiLine:
 
 class LumiLines:
     run_boundary_15_16 = 260627
+    era_boundaries = [254227, 256630, 272007, 275657, 276315, 276831, 277772, 278820, 280919]
 
     @classmethod
     def load_csv(cls, fn):
@@ -97,6 +98,7 @@ class LumiLines:
                 self.by_run[ll.run].append(ll)
                 self.by_run_ls[(ll.run, ll.ls)] = ll
                 self.fills[ll.fill] = min(self.fills[ll.fill], ll.run)
+        self.fill_boundaries = sorted(self.fills.values())
         self.by_run = dict(self.by_run)
 
     def runs(self, year=None):
