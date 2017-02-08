@@ -16,6 +16,8 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     print 'suppressing HLTConfigData warnings'
     #silence_messages(process, ['MatchedJetsFarApart', 'HLTConfigData', 'NoModule'])
     silence_messages(process, ['HLTConfigData'])
+    print 'suppressing EcalLaserCorrFilter warnings'
+    silence_messages(process, ['EcalLaserDbService'])
 
     process.load('Configuration.StandardSequences.Services_cff')
     process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
