@@ -12,8 +12,7 @@ from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 from JMTucker.Tools.SimpleTriggerEfficiency_cfi import *
 
 mfvEventHistosNoCuts = mfvEventHistos.clone()
-mfvVertexHistosNoCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesLoose')
-pSkimSel = cms.Path(mfvCommon * mfvEventHistosNoCuts * mfvVertexHistos * mfvVertexHistosNoCuts)
+pSkimSel = cms.Path(mfvCommon * mfvEventHistosNoCuts) # just trigger for now
 
 mfvAnalysisCutsPreSel = mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 mfvEventHistosPreSel = mfvEventHistos.clone()
@@ -25,9 +24,8 @@ mfvEventHistosOnlyOneVtx = mfvEventHistos.clone()
 mfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone(do_only_1v = True)
 pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnlyOneVtx * mfvVertexHistosOnlyOneVtx)
 
-mfvVertexHistosNoCutsWAnaCuts = mfvVertexHistos.clone(vertex_aux_src = 'mfvSelectedVerticesLoose')
 mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
-pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosNoCutsWAnaCuts * mfvVertexHistosWAnaCuts)
+pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosWAnaCuts)
 
 mfvAnalysisCutsSigReg = mfvAnalysisCuts.clone(min_svdist2d = 0.04)
 mfvEventHistosSigReg = mfvEventHistos.clone()

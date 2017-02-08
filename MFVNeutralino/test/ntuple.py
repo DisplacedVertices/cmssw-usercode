@@ -7,7 +7,6 @@ is_mc = True
 prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
-event_filter = False # not keep_all
 version = 'v10'
 batch_name = 'Ntuple' + version.upper()
 #batch_name += '_ChangeMeIfSettingsNotDefault'
@@ -33,15 +32,11 @@ def customize_before_unscheduled(process):
     if prepare_vis:
         process.mfvSelectedVerticesTight.produce_vertices = True
         process.mfvSelectedVerticesTight.produce_tracks = True
-        process.mfvSelectedVerticesTightLargeErr.produce_vertices = True
-        process.mfvSelectedVerticesTightLargeErr.produce_tracks = True
 
         process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
         process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
         process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
-        process.mfvVertexRefitsLargeErr = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr')
-        process.mfvVertexRefitsLargeErrDrop2 = process.mfvVertexRefits.clone(vertex_src = 'mfvSelectedVerticesTightLargeErr', n_tracks_to_drop = 2)
-        process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0 * process.mfvVertexRefitsLargeErr * process.mfvVertexRefitsLargeErrDrop2
+        process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0
 
         output_commands += [
             'keep *_mfvVertices_*_*',
@@ -49,8 +44,6 @@ def customize_before_unscheduled(process):
             'keep *_mfvVertexRefits_*_*',
             'keep *_mfvVertexRefitsDrop2_*_*',
             'keep *_mfvVertexRefitsDrop0_*_*',
-            'keep *_mfvVertexRefitsLargeErr_*_*',
-            'keep *_mfvVertexRefitsLargeErrDrop2_*_*',
             ]
 
         if is_mc:
@@ -97,13 +90,6 @@ process.patElectrons.embedTrack = False
 if trig_filter:
     import JMTucker.MFVNeutralino.TriggerFilter
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
-
-if event_filter:
-    process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-    process.mfvAnalysisCuts.min_nvertex = 1
-    process.mfvAnalysisCuts.vertex_src = 'mfvSelectedVerticesSkim'
-    process.mfvAnalysisCuts.mevent_src = ''
-    process.pevtsel *= process.mfvSelectedVerticesSkim * process.mfvAnalysisCuts
 
 #process.options.wantSummary = True
 process.maxEvents.input = 100
