@@ -61,6 +61,7 @@ _add({
 })
 
 _add({('JetHT2016H2', 'fortest'): (1, ['/store/user/tucker/JetHT2016H2.8AAACEA3-B786-E611-953E-02163E013547.root'])})
+_add({('JetHT2016H2', 'miniaodskimtestv1'): (24, ['/store/user/tucker/JetHT/MiniAODSkimTestv1/170209_105600/0000/miniaod_%i.root' % i for i in xrange(24)])})
 
 __all__ = [
     'dump',
