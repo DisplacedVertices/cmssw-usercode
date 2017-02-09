@@ -105,7 +105,6 @@ Queue __NJOBS__
 ####
 
 import os
-from JMTucker.Tools.general import typed_from_argv
 
 cs_job = int(open('cs_job').read())
 assert cs_job >= 0
@@ -114,9 +113,14 @@ cs_fail = __FAIL_LIST__
 assert cs_job not in cs_fail
 
 import cs_filelist
-process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
+if __EVENTS_PER__:
+    process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(0)]
+    process.source.skipEvents = cms.untracked.uint32(cs_job * __EVENTS_PER__)
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__EVENTS_PER__))
+else:
+    process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__))
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__))
 process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 if os.stat('cs.json').st_size > 0:
@@ -147,6 +151,7 @@ def get(i): return _l[i]
                  stageout_path = '', # if / in it, does not try to generate
                  publish_name = '',
                  dataset = 'main',
+                 events_per = None,
                  _events = -1,
                  _njobs = None,
                  _fail = [],
@@ -156,6 +161,9 @@ def get(i): return _l[i]
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
         self.dataset = dataset
+        if events_per is not None:
+            assert events_per > 0
+        self.events_per = events_per
         self._njobs = _njobs
 
         for arg in sys.argv:
@@ -264,7 +272,8 @@ def get(i): return _l[i]
         self.pset_end_template = self.pset_end_template \
             .replace('__PFN_PREFIX__', repr(pfn_prefix)) \
             .replace('__MAX_EVENTS__', str(_events)) \
-            .replace('__FAIL_LIST__', repr(_fail))
+            .replace('__FAIL_LIST__', repr(_fail)) \
+            .replace('__EVENTS_PER__', str(self.events_per))
 
         open(sh_fn, 'wt').write(self.sh_template)
 
@@ -276,13 +285,18 @@ def get(i): return _l[i]
         else:
             touch(json_fn)
 
-        per = sample.files_per
-        njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(len(sample.filenames), per)
-        fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
-        njobs = len(fn_groups) # let it fail downward
-        if self._njobs is not None:
-            assert self._njobs <= njobs
-            njobs = self._njobs
+        if self.events_per:
+            per = self.events_per
+            njobs = int_ceil(sample.nevents_orig, per)
+            fn_groups = [sample.filenames]
+        else:
+            per = sample.files_per
+            njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(len(sample.filenames), per)
+            fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
+            njobs = len(fn_groups) # let it fail downward
+            if self._njobs is not None:
+                assert self._njobs <= njobs
+                njobs = self._njobs
 
         encoded_filelist = base64.b64encode(zlib.compress(pickle.dumps(fn_groups, -1)))
 
