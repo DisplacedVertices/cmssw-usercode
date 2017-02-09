@@ -60,7 +60,8 @@ def effs(fn):
 
     numall = get_n(namenumall)
     if namenumvtx is not None:
-        numvtx = f.Get(namenumvtx).Integral(h.FindBin(nvtx), 1000000)
+        h = f.Get(namenumvtx)
+        numvtx = h.Integral(h.FindBin(nvtx), 1000000)
     else:
         numvtx = -1
 
