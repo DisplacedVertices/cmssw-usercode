@@ -60,6 +60,8 @@ _add({
 ('JetHT2016H3', 'ntuplev10partial2'): (  41, ['/store/user/tucker/JetHT/NtupleV10/170128_191217' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,42)]),
 })
 
+_add({('JetHT2016H2', 'fortest'): (1, ['/store/user/tucker/JetHT2016H2.8AAACEA3-B786-E611-953E-02163E013547.root'])})
+
 __all__ = [
     'dump',
     'get',
