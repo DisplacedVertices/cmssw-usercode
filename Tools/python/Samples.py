@@ -338,8 +338,13 @@ JetHT2016H3.add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-b13b682f8b
 
 JetHT2016H2.add_dataset('fortest', '/JetHT/None/None')
 JetHT2016H2.add_dataset('miniaodskimtestv1', '/JetHT/None/None')
+JetHT2016H2.add_dataset('miniaodfortest', '/JetHT/None/None')
+JetHT2016H2.add_dataset('ntuplev10fromminiaodtestv2', '/JetHT/None/None')
+JetHT2016H2.add_dataset('ntuplev10correspondingsubset', '/JetHT/None/None')
 JetHT2016H2.datasets['fortest'].nevents_orig = 11707
 JetHT2016H2.datasets['miniaodskimtestv1'].nevents_orig = 1652
+JetHT2016H2.datasets['miniaodfortest'].nevents_orig = 64381
+JetHT2016H2.datasets['ntuplev10fromminiaodtestv2'].nevents_orig = 9171
 
 _adbp3('sim', '/mfv_neu_tau00100um_M0400/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
 _adbp3('sim', '/mfv_neu_tau00100um_M0800/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files

@@ -63,6 +63,10 @@ _add({
 _add({('JetHT2016H2', 'fortest'): (1, ['/store/user/tucker/JetHT2016H2.8AAACEA3-B786-E611-953E-02163E013547.root'])})
 _add({('JetHT2016H2', 'miniaodskimtestv1'): (24, ['/store/user/tucker/JetHT/MiniAODSkimTestv1/170209_105600/0000/miniaod_%i.root' % i for i in xrange(24)])})
 
+_add({('JetHT2016H2', 'miniaodfortest'): (1, ['/store/user/tucker/JetHT2016H2.MiniAOD.9C0A2FFD-B886-E611-BEA7-02163E011B30.root'])})
+_add({('JetHT2016H2', 'ntuplev10fromminiaodtestv2'): (33, ['/store/user/tucker/JetHT/NtupleV10FromMiniAODTestv2/170209_171229/0000/ntuple_%i.root' % i for i in xrange(33)])})
+_add({('JetHT2016H2', 'ntuplev10correspondingsubset'): (4, ['/store/user/tucker/JetHT/NtupleV10/170128_191149/0000/ntuple_%i.root' % i for i in [45,46,47,49]])})
+
 __all__ = [
     'dump',
     'get',
