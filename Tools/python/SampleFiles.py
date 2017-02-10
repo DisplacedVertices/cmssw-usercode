@@ -61,6 +61,26 @@ _add({
 ('official_mfv_neu_tau00300um_M1600', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025148/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
 })
 
+_add({
+('official_mfv_neu_tau10000um_M0800', 'miniaod'): (16, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2_PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/' + x for x in [
+                    '08FBE8E9-BEDC-E611-AA3F-0025901AC3EE.root',
+                    'FAC3790B-52DC-E611-BB40-001E67E5A39A.root',
+                    'F08DE058-BFDC-E611-812C-008CFA11134C.root',
+                    '0A708315-82DC-E611-9BB8-D067E5F914D3.root',
+                    'A04BA2B6-BEDC-E611-909B-0090FAA57FC4.root',
+                    'CA2D8F12-7EDC-E611-99F4-A4BF01013D80.root',
+                    'DA564E95-80DC-E611-999A-0025905B85DA.root',
+                    'E4C81247-C0DC-E611-927C-0025905B85FE.root',
+                    'DE7ADA27-80DC-E611-90B1-0CC47AD98C8C.root',
+                    '02A485AE-6FDC-E611-8432-24BE05CEFB41.root',
+                    '185994B2-BEDC-E611-83B7-5065F3819241.root',
+                    '200E5FD6-4FDC-E611-8FC2-0025901FB438.root',
+                    '02EA9183-C0DC-E611-A512-02163E0140E6.root',
+                    '3C1F7655-50DC-E611-AFFC-001E67586A2F.root',
+                    '84A0F5B5-51DC-E611-A4DF-0025905A6118.root',
+                    'DC37A0A8-51DC-E611-A4A4-0CC47A78A456.root'
+                    ]])})
+
 _add({('JetHT2015C', 'ntuplev10'): (13, ['/store/user/tucker/JetHT/NtupleV10/170131_122719/0000/ntuple_%i.root' % i for i in xrange(13)])})
 _add({('JetHT2015D', 'ntuplev10'): (1311, ['/store/user/tucker/JetHT/NtupleV10/170124_025219/000%i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1312)])})
 
