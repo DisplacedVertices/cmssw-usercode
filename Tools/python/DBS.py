@@ -21,10 +21,10 @@ class das_query:
                 raise ValueError('instance must be one of: %r' % allowed)
         self.instance = instance
         self.extra = 'instance=prod/%s' % self.instance
-        self.cmd = "das_client.py --limit=0 --query '%s %%s'" % self.extra
+        self.cmd = "dasgoclient_linux -query '%s %%s'" % self.extra
         self.json = json
         if json:
-            self.cmd += ' --format=json'
+            self.cmd += ' -json'
         
     def __call__(self, query, line_filter=lambda s: True, line_xform=lambda s: s):
         full_cmd = self.cmd % query
