@@ -50,6 +50,8 @@ else:
 
 h.Draw()
 
+ROOT.c1.SaveAs('pipe2hist.root')
+
 while ROOT.c1:
     ROOT.gSystem.ProcessEvents()
     time.sleep(0.01)
