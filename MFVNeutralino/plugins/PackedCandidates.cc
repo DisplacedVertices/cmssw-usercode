@@ -12,9 +12,9 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
-class MFVPackedPFCandidates : public edm::EDAnalyzer {
+class MFVPackedCandidates : public edm::EDAnalyzer {
 public:
-  explicit MFVPackedPFCandidates(const edm::ParameterSet&);
+  explicit MFVPackedCandidates(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
@@ -39,7 +39,7 @@ private:
   TH1F* h_nomatch_minr;
 };
 
-MFVPackedPFCandidates::MFVPackedPFCandidates(const edm::ParameterSet& cfg)
+MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   : beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
     tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks"))),
     packed_candidate_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates")))
@@ -67,7 +67,7 @@ MFVPackedPFCandidates::MFVPackedPFCandidates(const edm::ParameterSet& cfg)
   h_delta_minr = fs->make<TH1F>("h_delta_minr", "", 100, -50, 50);
 }
 
-void MFVPackedPFCandidates::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   const bool prints = true;
 
   edm::Handle<reco::BeamSpot> beamspot;
@@ -181,4 +181,4 @@ void MFVPackedPFCandidates::analyze(const edm::Event& event, const edm::EventSet
   if (prints) printf("# general passing: %i  # with match: %i\n", npass, nmatch);
 }
 
-DEFINE_FWK_MODULE(MFVPackedPFCandidates);
+DEFINE_FWK_MODULE(MFVPackedCandidates);
