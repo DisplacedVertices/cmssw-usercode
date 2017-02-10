@@ -73,7 +73,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
-    pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
+    pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
