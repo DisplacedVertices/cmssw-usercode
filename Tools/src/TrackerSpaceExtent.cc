@@ -101,7 +101,10 @@ SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, bo
     uint32_t subsub = reco::HitPattern::getSubSubStructure(hit);
         
     map_t::const_iterator it = map.find(std::make_pair(int(sub), int(subsub)));
-    assert(it != map.end());
+    if (it == map.end()) {
+      printf("hit %x sub %x subsub %x not found!\n", hit, sub, subsub);
+      assert(0);
+    }
     const TrackerSpaceExtent& extent = it->second;
     if (sub == PixelSubdetector::PixelBarrel || (!pixel_only && (sub == StripSubdetector::TIB || sub == StripSubdetector::TOB))) {
       ret.update_r(extent.avg_r);
