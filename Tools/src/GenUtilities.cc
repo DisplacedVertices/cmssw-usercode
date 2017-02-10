@@ -163,9 +163,11 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
 }
 
 std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::Candidate* c, int allowed_others) {
-  // Handle PYTHIA8 particle record copying. allowed_others can be 1
-  // for a gluon, 2 for a photon, 3 for both, or 0 for no other
-  // allowed ids. JMTBAD magic numbers
+  // Handle PYTHIA8 particle record copying. allowed_others can be -1
+  // for don't care if there are other daughters as long as the same
+  // particle is there, 1 means allow gluons, 2 means allow photons, 3
+  // for allow both photons and gluons, or 0 to be strict and allow no
+  // other particles. JMTBAD magic numbers
 
   std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > result;
   result.first = 0;
@@ -190,7 +192,7 @@ std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_ca
 	int id = c->daughter(i)->pdgId();
 	if (id == c->pdgId())
 	  the = i;
-	else if ((id != 21 && id != 22) || (id == 21 && !(allowed_others & 1)) || (id == 22 && !(allowed_others & 2))) {
+	else if (allowed_others != -1 && ((id != 21 && id != 22) || (id == 21 && !(allowed_others & 1)) || (id == 22 && !(allowed_others & 2)))) {
 	  wrong_others = true;
 	  break;
 	}
