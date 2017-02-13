@@ -17,7 +17,7 @@ private:
   const bool check_gen_particles;
   unsigned run;
   unsigned lumi;
-  unsigned evt;
+  unsigned long long evt;
   float first_parton_pz;
   TTree* tree;
 };
@@ -30,7 +30,7 @@ EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg)
   tree = fs->make<TTree>("event_ids", "");
   tree->Branch("run",   &run,   "run/i");
   tree->Branch("lumi",  &lumi,  "lumi/i");
-  tree->Branch("event", &evt,   "event/i");
+  tree->Branch("event", &evt,   "event/l");
 
   if (check_gen_particles)
     tree->Branch("first_parton_pz", &first_parton_pz, "first_parton_pz/F");
