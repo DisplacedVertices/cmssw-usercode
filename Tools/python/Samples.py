@@ -399,6 +399,11 @@ if __name__ == '__main__':
     main(registry)
 
     if 0:
+        from DBS import *
+        for s in data_samples:
+            print s.name.ljust(15), '%20i %20i' % (numevents_in_dataset(s.datasets['main'].dataset), numevents_in_dataset(s.datasets['miniaod'].dataset))
+
+    if 0:
         from JMTucker.Tools.general import popen
         for s in qcd_samples + qcd_samples_17 + qcd_samples_ext + qcd_samples_ext_17 + ttbar_samples + leptonic_background_samples:
             print s.name, popen('dasgoclient_linux -query "site dataset=%s" | sort | uniq' % s.dataset).replace('\n', ' ')

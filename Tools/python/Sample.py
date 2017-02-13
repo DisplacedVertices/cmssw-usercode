@@ -303,7 +303,12 @@ def norm_from_file(f_or_fn, path=None):
     if path:
         h = f.Get(path)
     else:
-        h = f.Get('mfvWeight/h_sums')
+        if hasattr(f, 'mfvWeight'):
+            h = f.Get('mfvWeight/h_sums')
+        elif hasattr(f, 'mcStat'):
+            h = f.Get('mcStat/h_sums')
+        else:
+            raise ValueError('duh')
         assert h.GetXaxis().GetBinLabel(1) == 'sum_nevents_total'
     return h.GetBinContent(1)
 
