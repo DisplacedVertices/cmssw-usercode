@@ -137,9 +137,9 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
       if (obj.collection() == "hltPFHT::HLT")
-        *ht = obj.pt();
+        t.ht = *ht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT")
-        *ht4mc = obj.pt();
+        t.ht4mc = *ht4mc = obj.pt();
     }
   }
 
