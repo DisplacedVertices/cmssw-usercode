@@ -9,17 +9,18 @@ process.source.fileNames = ['/store/data/Run2015C_25ns/JetHT/MINIAOD/16Dec2015-v
 process.source.fileNames = ['/store/data/Run2015D/JetHT/MINIAOD/16Dec2015-v1/50001/9E62C986-A9AA-E511-BB43-0CC47A4D9A10.root']
 process.source.fileNames = ['/store/mc/RunIIFall15MiniAODv2/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/10000/C6CD95B8-45B9-E511-A12B-141877411FED.root']
 
+process.source.fileNames = ['/store/data/Run2016H/JetHT/MINIAOD/PromptReco-v3/000/284/044/00000/BE5F4C22-D29F-E611-AEAA-02163E011C32.root']
+
 process.maxEvents.input = 100
 process.TFileService.fileName = 'triggerfloats.root'
 
 global_tag(process, which_global_tag(is_mc))
 
-from JMTucker.Tools.L1GtUtils_cff import l1GtUtilsTags
 process.mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
-                                          l1GtUtilsTags,
+                                          l1_results_src = cms.InputTag('gtStage2Digis'),
                                           trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
                                           trigger_objects_src = cms.InputTag('selectedPatTrigger'),
-                                          prints = cms.untracked.bool(False),
+                                          prints = cms.untracked.bool(True),
                                           tree = cms.untracked.bool(True),
                                           )
 process.p = cms.Path(process.mfvTriggerFloats)
