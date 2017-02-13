@@ -18,7 +18,7 @@ class CheckMinRCalc : public edm::EDAnalyzer {
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   TrackerSpaceExtents tracker_extents;
-  TH2F* ok;
+  TH2D* ok;
 };
 
 CheckMinRCalc::CheckMinRCalc(const edm::ParameterSet&)
@@ -26,7 +26,7 @@ CheckMinRCalc::CheckMinRCalc(const edm::ParameterSet&)
     tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks")))
 {
   edm::Service<TFileService> fs;
-  ok = fs->make<TH2F>("ok", "", 2, 0, 2, 2, 0, 2);
+  ok = fs->make<TH2D>("ok", "", 2, 0, 2, 2, 0, 2);
 }
 
 void CheckMinRCalc::analyze(const edm::Event& event, const edm::EventSetup& setup) {

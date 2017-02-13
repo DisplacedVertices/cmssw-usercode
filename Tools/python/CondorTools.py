@@ -13,7 +13,15 @@ def is_cs_dir(d):
     return os.path.isdir(d) and os.path.isfile(os.path.join(d, 'cs_dir'))
 
 def cs_dirs_from_argv():
-    return [arg for arg in sys.argv if is_cs_dir(arg)]
+    dirs = []
+    for arg in sys.argv:
+        if is_cs_dir(arg):
+            dirs.append(arg)
+        elif os.path.isdir(arg):
+            for sub in glob(os.path.join(arg, '*')):
+                if is_cs_dir(sub):
+                    dirs.append(sub)
+    return dirs
 
 def cs_njobs(d):
     return int(open(os.path.join(d, 'njobs')).read())
