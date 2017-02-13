@@ -20,7 +20,7 @@ process.mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                           l1_results_src = cms.InputTag('gtStage2Digis'),
                                           trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
                                           trigger_objects_src = cms.InputTag('selectedPatTrigger'),
-                                          prints = cms.untracked.bool(True),
+                                          prints = cms.untracked.bool(False),
                                           tree = cms.untracked.bool(True),
                                           )
 process.p = cms.Path(process.mfvTriggerFloats)
@@ -44,7 +44,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('TriggerFloats',
+    cs = CRABSubmitter('TriggerFloats_16',
                        pset_modifier = pset_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',
