@@ -99,8 +99,14 @@ if __name__ == '__main__':
         dataset = sys.argv[sys.argv.index('testfiles')+2]
         from JMTucker.Tools.ROOTTools import ROOT
         print sample, dataset
+        def n(f,p):
+            try:
+                n = f.Get(p).GetEntries()
+            except ReferenceError:
+                pass
         for fn in get(sample, dataset)[1]:
-            f = ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn)
-            print os.path.basename(fn), f, f.Get('Events')
+            n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn), 'Events')
+            if dataset.startswith('ntuple'):
+                n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos')), 'mfvVertices/h_n_all_tracks')
     else:
         summary()
