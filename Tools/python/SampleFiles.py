@@ -105,6 +105,8 @@ _add({('JetHT2016H2', 'miniaodfortest'): (1, ['/store/user/tucker/JetHT2016H2.Mi
 _add({('JetHT2016H2', 'ntuplev10fromminiaodtestv2'): (33, ['/store/user/tucker/JetHT/NtupleV10FromMiniAODTestv2/170209_171229/0000/ntuple_%i.root' % i for i in xrange(33)])})
 _add({('JetHT2016H2', 'ntuplev10correspondingsubset'): (4, ['/store/user/tucker/JetHT/NtupleV10/170128_191149/0000/ntuple_%i.root' % i for i in [45,46,47,49]])})
 
+_add({('official_mfv_neu_tau10000um_M0800', 'ntuplev10fromminiaodtestv2'): (16, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10FromMiniAODTestv2_signal/170210_135908/0000/ntuple_%i.root' % i for i in xrange(16)])})
+
 __all__ = [
     'dump',
     'get',

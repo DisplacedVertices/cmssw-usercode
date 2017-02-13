@@ -390,6 +390,9 @@ for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
           qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
     x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
 
+for x in (official_mfv_neu_tau10000um_M0800,):
+    x.add_dataset('ntuplev10fromminiaodtestv2', '/%s/None/None' % x.primary_dataset, 0)
+
 ########################################################################
 
 if __name__ == '__main__':
