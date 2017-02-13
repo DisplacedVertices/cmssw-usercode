@@ -20,14 +20,19 @@ class das_query:
             if instance not in allowed:
                 raise ValueError('instance must be one of: %r' % allowed)
         self.instance = instance
-        self.extra = 'instance=prod/%s' % self.instance
-        self.cmd = "dasgoclient_linux -query '%s %%s'" % self.extra
+        self.instance_cmd = 'instance=prod/%s' % self.instance
+        self.cmd = "dasgoclient_linux -query '%s'"
         self.json = json
         if json:
-            self.cmd += ' -json'
+            self.cmd = self.cmd.replace('-query', '-json -query')
         
     def __call__(self, query, line_filter=lambda s: True, line_xform=lambda s: s):
         full_cmd = self.cmd % query
+        if self.instance != 'global':
+            if '|' in query:
+                full_cmd = full_cmd.replace('|', self.instance_cmd + ' |')
+            else:
+                full_cmd += ' ' + self.instance_cmd
         cmdout = os.popen(full_cmd).readlines()
         if self.json:
             json_obj = json.loads(cmdout[0])
@@ -52,7 +57,7 @@ def files_in_dataset(dataset, instance='global'):
 def numevents_in_file(fn, instance='global'):
     def xform(line):
         try:
-            return int(line)
+            return int(float(line))
         except ValueError:
             return None
     return das_query(instance)('file=%s | grep file.nevents' % fn,
@@ -61,10 +66,10 @@ def numevents_in_file(fn, instance='global'):
 def numevents_in_dataset(dataset, instance='global'):
     def xform(line):
         try:
-            return int(line)
+            return int(float(line))
         except ValueError:
             return None
-    return das_query(instance)('dataset=%s | grep dataset.nevents' % dataset,
+    return das_query(instance)('dataset dataset=%s | grep dataset.nevents' % dataset,
                                line_xform=xform)[0]
 
 def files_numevents_in_dataset(dataset, instance='global'):
