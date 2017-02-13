@@ -1,12 +1,16 @@
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
+#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 
 class MFVTriggerFloats : public edm::EDProducer {
@@ -14,17 +18,17 @@ public:
   explicit MFVTriggerFloats(const edm::ParameterSet&);
 
 private:
-  virtual void produce(edm::Event&, const edm::EventSetup&) override;
-
-  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
-  const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
-  const bool prints;
-
-  L1GtUtils l1_cfg;
-
   enum { NL1bits = 17, NHLTbits = 5 };
   static const char* L1bits[NL1bits];
   static const char* HLTbits[NHLTbits];
+
+  virtual void produce(edm::Event&, const edm::EventSetup&) override;
+
+  const bool prints;
+
+  const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1_results_token;
+  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
+  const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
 
   TTree* tree;
   struct tree_t {
@@ -47,10 +51,10 @@ const char* MFVTriggerFloats::HLTbits[MFVTriggerFloats::NHLTbits] =
   { "HLT_PFHT350_v", "HLT_PFHT800_v", "HLT_PFHT900_v", "HLT_PFJet450_v", "HLT_AK8PFJet450_v" };
 
 MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
-  : trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
+  : prints(cfg.getUntrackedParameter<bool>("prints", false)),
+    l1_results_token(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag>("l1_results_src"))),
+    trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
-    prints(cfg.getUntrackedParameter<bool>("prints", false)),
-    l1_cfg(cfg, consumesCollector(), false),
     tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
 {
   produces<float>("ht");
@@ -82,7 +86,12 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     t.pass  = 0;
   }
 
-  l1_cfg.getL1GtRunCache(event, setup, true, false);
+  edm::Handle<GlobalAlgBlkBxCollection> l1_results_all;
+  event.getByToken(l1_results_token, l1_results_all);
+  const std::vector<bool>& l1_results = l1_results_all->at(0, 0).getAlgoDecisionFinal();
+
+  edm::ESHandle<L1TUtmTriggerMenu> l1_menu;
+  setup.get<L1TUtmTriggerMenuRcd>().get(l1_menu);
 
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
@@ -137,9 +146,9 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
       if (obj.collection() == "hltPFHT::HLT")
-        *ht = obj.pt();
+        t.ht = *ht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT")
-        *ht4mc = obj.pt();
+        t.ht4mc = *ht4mc = obj.pt();
     }
   }
 
@@ -147,9 +156,11 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     printf("TriggerFloats: ht = %f  ht4mc = %f\n", *ht, *ht4mc);
 
   for (int i = 0; i < NL1bits; ++i) {
-    int l1err = 0;
-    const bool pass = l1_cfg.decision(event, L1bits[i], l1err);
-    const bool found = l1err == 0;
+    const auto& m = l1_menu->getAlgorithmMap();
+    const auto& e = m.find(L1bits[i]);
+    const bool found = e != m.end();
+    const bool pass = found ? l1_results[e->second.getIndex()] : false;
+
     if (found) (*L1decisions)[i] = pass;
 
     if (prints)
@@ -165,7 +176,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   for (int i = 0; i < NHLTbits; ++i) {
-    std::pair<bool, bool> paf = helper.pass_and_found_any_version(HLTbits[i]);
+    const std::pair<bool, bool> paf = helper.pass_and_found_any_version(HLTbits[i]);
     if (paf.second)
       (*HLTdecisions)[i] = paf.first;
 
