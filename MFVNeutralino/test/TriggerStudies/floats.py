@@ -43,7 +43,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('TriggerFloats',
+    cs = CRABSubmitter('TriggerFloats_15',
                        pset_modifier = pset_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',
