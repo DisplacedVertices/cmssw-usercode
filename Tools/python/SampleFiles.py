@@ -68,18 +68,15 @@ _add({('JetHT2015C', 'ntuplev10'): (13, ['/store/user/tucker/JetHT/NtupleV10/170
 _add({('JetHT2015D', 'ntuplev10'): (1311, ['/store/user/tucker/JetHT/NtupleV10/170124_025219/000%i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1312)])})
 
 _add({
-('JetHT2016B3', 'ntuplev10partial2'): (1757, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in range(1,1099) + range(1100,1759)]),
-('JetHT2016C',  'ntuplev10partial2'): ( 580, ['/store/user/tucker/JetHT/NtupleV10/170124_035750' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,581)]),
-('JetHT2016D',  'ntuplev10partial2'): ( 969, ['/store/user/tucker/JetHT/NtupleV10/170124_035827' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,973) if i not in [54, 55, 64]]),
-('JetHT2016E',  'ntuplev10partial2'): ( 825, ['/store/user/tucker/JetHT/NtupleV10/170124_035858' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in range(1,335) + range(336,827)]),
-('JetHT2016F',  'ntuplev10partial2'): ( 603, ['/store/user/tucker/JetHT/NtupleV10/170124_035931' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,604)]),
-('JetHT2016G',  'ntuplev10partial2'): ( 518, ['/store/user/tucker/JetHT/NtupleV10/170124_025401' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in decrabify_list('6-20,22-26,28-47,49-83,85-89,91-130,132-164,166-172,174-202,204-213,215-232,234-245,247-255,257-287,289-292,294-297,299-339,341-358,360-381,383-422,426-464,466-467,469-478,484,493,497-498,500-502,508-509,515-517,520,522-523,526-528,565,573,576,580,583,586-588,590,593,597,599-628,630-635,655,667,670,678')]),
-('JetHT2016H2', 'ntuplev10partial2'): (1536, ['/store/user/tucker/JetHT/NtupleV10/170128_191149' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in decrabify_list('1-728,730-849,851-904,907-908,910-1541')]),
-('JetHT2016H3', 'ntuplev10partial2'): (  41, ['/store/user/tucker/JetHT/NtupleV10/170128_191217' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,42)]),
+('JetHT2016B3', 'ntuplev10partial3'): (1758, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1759)]),
+('JetHT2016C',  'ntuplev10partial3'): ( 580, ['/store/user/tucker/JetHT/NtupleV10/170124_035750' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,581)]),
+('JetHT2016D',  'ntuplev10partial3'): ( 971, ['/store/user/tucker/JetHT/NtupleV10/170124_035827' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,973) if i != 64]),
+('JetHT2016E',  'ntuplev10partial3'): ( 825, ['/store/user/tucker/JetHT/NtupleV10/170124_035858' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,827) if i != 335]),
+('JetHT2016F',  'ntuplev10partial3'): ( 603, ['/store/user/tucker/JetHT/NtupleV10/170124_035931' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,604)]),
+('JetHT2016G',  'ntuplev10partial3'): ( 731, ['/store/user/tucker/JetHT/NtupleV10/170124_025401' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in decrabify_list('6-20,22-26,28-47,49-83,85-89,91-130,132-164,166-172,174-213,215-232,234-255,257-292,294-297,299-339,341-358,360-381,383-422,424,426-464,466-502,504-511,513-536,538-552,554-578,580-594,596-639,641-655,657-681,683-709,711-723,725-742,746,748-750,752-757,760-764,766-767,779,801-802,804,819-820,827')]),
+('JetHT2016H2', 'ntuplev10partial3'): (1541, ['/store/user/tucker/JetHT/NtupleV10/170128_191149' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1542)]),
+('JetHT2016H3', 'ntuplev10partial3'): (  41, ['/store/user/tucker/JetHT/NtupleV10/170128_191217' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,42)]),
 })
-
-_add({('JetHT2016H2', 'fortest'): (1, ['/store/user/tucker/JetHT2016H2.8AAACEA3-B786-E611-953E-02163E013547.root'])})
-_add({('JetHT2016H2', 'miniaodskimtestv1'): (24, ['/store/user/tucker/JetHT/MiniAODSkimTestv1/170209_105600/0000/miniaod_%i.root' % i for i in xrange(24)])})
 
 __all__ = [
     'dump',
