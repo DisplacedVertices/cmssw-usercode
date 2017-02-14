@@ -14,7 +14,7 @@ public:
     unsigned run;
     unsigned lumi;
     unsigned long long event;
-    void print() const { printf("(%u,%u,%llu)", run, lumi, event); }
+    void print(FILE* f) const { fprintf(f, "(%u,%u,%llu)", run, lumi, event); }
   };
 
   bool prints;
