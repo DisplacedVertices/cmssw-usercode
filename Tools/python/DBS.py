@@ -32,7 +32,8 @@ class das_query:
             if '|' in query:
                 full_cmd = full_cmd.replace('|', self.instance_cmd + ' |')
             else:
-                full_cmd += ' ' + self.instance_cmd
+                assert self.cmd[-1] == "'"
+                full_cmd = full_cmd[:-1] + ' ' + self.instance_cmd + "'"
         cmdout = os.popen(full_cmd).readlines()
         if self.json:
             json_obj = json.loads(cmdout[0])
