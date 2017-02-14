@@ -33,7 +33,7 @@ query_infos = [
     (('file', 'file dataset=%s', 1), lambda s: s.endswith('.root')),
     (('run', 'run dataset=%s', 1), lambda s: intable(s)),
     (('lumi', 'lumi dataset=%s', 1), lambda s: intable(s)),
-    (('nevents', 'dataset=%s | grep dataset.nevents', 1), lambda s: intable(s)),
+    (('nevents', 'dataset dataset=%s | grep dataset.nevents', 1), lambda s: intable(s)),
     (('site', 'site dataset=%s', 1), lambda s: s),
     ]
 
