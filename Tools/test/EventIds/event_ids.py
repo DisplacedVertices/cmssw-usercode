@@ -21,5 +21,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             sample.json = 'ana_2015p6.json'
 
-    cs = CondorSubmitter('EventIds_NtupleV10_15', dataset='ntuplev10')
+    cs = CondorSubmitter('EventIds_NtupleV10_16', dataset='ntuplev10partial3')
     cs.submit_all(samples)
