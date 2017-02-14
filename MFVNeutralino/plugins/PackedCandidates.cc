@@ -8,6 +8,7 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "RecoParticleFlow/PFTracking/interface/PFTrackAlgoTools.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
@@ -17,10 +18,14 @@ public:
   explicit MFVPackedCandidates(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 private:
+  bool goodPtResolution(const reco::Track&) const;
+
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidate_token;
+
+  const bool prints;
 
   TrackerSpaceExtents tracker_extents;
 
@@ -37,12 +42,70 @@ private:
   TH1F* h_nomatch_pxl;
   TH1F* h_nomatch_stl;
   TH1F* h_nomatch_minr;
+  TH1F* h_nomatch_highpurity;
+  TH1F* h_nomatch_losthits;
+  TH1F* h_nomatch_lostlayers;
+  TH1F* h_nomatch_p;
+  TH1F* h_nomatch_dptopt;
+  TH1F* h_nomatch_goodptrel;
 };
+
+// from RecoParticleFlow/PFProducer/plugins/importers/GeneralTracksImporter.cc
+bool MFVPackedCandidates::goodPtResolution(const reco::Track& tk) const {
+  //recheck that the track is high purity!
+  if (!tk.quality(reco::TrackBase::highPurity))
+    return false;
+ 
+  const std::vector<double> _DPtovPtCut = {10.0, 10.0, 10.0, 10.0, 10.0, 5.0};
+  const std::vector<unsigned> _NHitCut = { 3, 3, 3, 3, 3, 3 };
+  const bool _useIterTracking = true;
+
+
+  const bool _debug = false;
+
+  const double P = tk.p();
+  const double Pt = tk.pt();
+  const double DPt = tk.ptError();
+  const unsigned int NHit = 
+    tk.hitPattern().trackerLayersWithMeasurement();
+  const unsigned int NLostHit = 
+    tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS);
+  const unsigned int LostHits = tk.numberOfLostHits();
+  const double sigmaHad = sqrt(1.20*1.20/P+0.06*0.06) / (1.+LostHits);
+
+  // Protection against 0 momentum tracks
+  if ( P < 0.05 ) return false;
+ 
+  if (_debug) std::cout << " PFBlockAlgo: PFrecTrack->Track Pt= "
+		   << Pt << " DPt = " << DPt << std::endl;
+
+
+  double dptCut = PFTrackAlgoTools::dPtCut(tk.algo(),_DPtovPtCut,_useIterTracking);
+  unsigned int nhitCut    = PFTrackAlgoTools::nHitCut(tk.algo(),_NHitCut,_useIterTracking);
+
+  if ( ( dptCut > 0. && 
+	 DPt/Pt > dptCut*sigmaHad ) || 
+       NHit < nhitCut ) { 
+    if (_debug) std::cout << " PFBlockAlgo: skip badly measured track"
+		     << ", P = " << P 
+		     << ", Pt = " << Pt 
+		     << " DPt = " << DPt 
+		     << ", N(hits) = " << NHit << " (Lost : " << LostHits << "/" << NLostHit << ")"
+			  << ", Algo = " << tk.algo()
+		     << std::endl;
+    if (_debug) std::cout << " cut is DPt/Pt < " << dptCut * sigmaHad << std::endl;
+    if (_debug) std::cout << " cut is NHit >= " << nhitCut << std::endl;
+    return false;
+  }
+
+  return true;
+}
 
 MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   : beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
     tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks"))),
-    packed_candidate_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates")))
+    packed_candidate_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"))),
+    prints(cfg.getParameter<bool>("prints"))
 {
   edm::Service<TFileService> fs;
   h_nmatch_v_nseed = fs->make<TH2F>("h_nmatch_v_nseed", "", 200, 0, 200, 200, 0, 200);
@@ -56,6 +119,12 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   h_nomatch_pxl = fs->make<TH1F>("h_nomatch_pxl", "", 10, 0, 10);
   h_nomatch_stl = fs->make<TH1F>("h_nomatch_stl", "", 20, 0, 20);
   h_nomatch_minr = fs->make<TH1F>("h_nomatch_minr", "", 10, 0, 10);
+  h_nomatch_highpurity = fs->make<TH1F>("h_nomatch_highpurity", "", 2, 0, 2);
+  h_nomatch_losthits = fs->make<TH1F>("h_nomatch_losthits", "", 50, 0, 50);
+  h_nomatch_lostlayers = fs->make<TH1F>("h_nomatch_lostlayers", "", 50, 0, 50);
+  h_nomatch_p = fs->make<TH1F>("h_nomatch_p", "", 20, 0, 1);
+  h_nomatch_dptopt = fs->make<TH1F>("h_nomatch_dptopt", "", 100, 0, 5);
+  h_nomatch_goodptrel = fs->make<TH1F>("h_nomatch_goodptrel", "", 2, 0, 2);
   for (int i = 0; i < 5; ++i) {
     h_fracdelta_par[i] = fs->make<TH1F>(TString::Format("h_fracdelta_par_%i", i), "", 10000, -1, 1);
     for (int j = i; j < 5; ++j)
@@ -68,8 +137,6 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
 }
 
 void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  const bool prints = true;
-
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
   const double bs_x = beamspot->position().x();
@@ -163,7 +230,6 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         }
       }
       else {
-        if (prints) printf("  NO CD MATCH\n");
         h_nomatch_par[0]->Fill(tk.pt() );
         h_nomatch_par[1]->Fill(tk.eta());
         h_nomatch_par[2]->Fill(tk.phi());
@@ -173,6 +239,17 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         h_nomatch_pxl->Fill(tk.hitPattern().pixelLayersWithMeasurement());
         h_nomatch_stl->Fill(tk.hitPattern().stripLayersWithMeasurement());
         h_nomatch_minr->Fill(ne.min_r);
+        const bool highpurity = tk.quality(reco::TrackBase::highPurity);
+        const bool goodptrel = goodPtResolution(tk);
+        h_nomatch_highpurity->Fill(highpurity);
+        if (prints) printf("  NO CD MATCH highpurity %i goodptrel %i\n", highpurity, goodptrel);
+        if (highpurity) {
+          h_nomatch_losthits->Fill(tk.numberOfLostHits());
+          h_nomatch_lostlayers->Fill(tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS));
+          h_nomatch_p->Fill(tk.p());
+          h_nomatch_dptopt->Fill(tk.pt() > 0 ? tk.ptError()/tk.pt() : 999);
+          h_nomatch_goodptrel->Fill(goodptrel);
+        }
       }
     }
   }
