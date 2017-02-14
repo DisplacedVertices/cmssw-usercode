@@ -199,10 +199,6 @@ private:
   TH1F* h_seed_track_npxhits;
   TH1F* h_seed_track_nsthits;
   TH1F* h_seed_track_npxlayers;
-  TH1F* h_seed_track_deltar2px;
-  TH1F* h_seed_track_deltaz2px;
-  TH1F* h_seed_track_deltar3px;
-  TH1F* h_seed_track_deltaz3px;
   TH1F* h_n_seed_vertices;
   TH1F* h_seed_vertex_track_weights;
   TH1F* h_seed_vertex_chi2;
@@ -411,6 +407,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     phitest(cfg.getUntrackedParameter<bool>("phitest", false))
 {
+  if ((min_all_track_hit_r != 1 && min_all_track_hit_r != 999) || (min_seed_track_hit_r != 1 && min_seed_track_hit_r != 999))
+    throw cms::Exception("MFVVertexer") << "hit_r cuts may only be 1";
+
   if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
 
@@ -473,11 +472,6 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_seed_track_npxhits    = fs->make<TH1F>("h_seed_track_npxhits",    "", 12,   0, 12);
     h_seed_track_nsthits    = fs->make<TH1F>("h_seed_track_nsthits",    "", 28,   0, 28);
     h_seed_track_npxlayers  = fs->make<TH1F>("h_seed_track_npxlayers",  "",  6,   0,  6);
-
-    h_seed_track_deltar2px = fs->make<TH1F>("h_seed_track_deltar2px", "", 20, 0, 10);
-    h_seed_track_deltaz2px = fs->make<TH1F>("h_seed_track_deltaz2px", "", 20, 0, 20);
-    h_seed_track_deltar3px = fs->make<TH1F>("h_seed_track_deltar3px", "", 20, 0, 10);
-    h_seed_track_deltaz3px = fs->make<TH1F>("h_seed_track_deltaz3px", "", 20, 0, 20);
 
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "",  50,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  21,   0,      1.05);
