@@ -1,64 +1,16 @@
-// rootg++ -std=c++0x -Wall -Werror common.cc -o common
-
-#include <set>
-#include <map>
-#include <tuple>
-#include "TFile.h"
-#include "TTree.h"
-
-const char* path = 0;
-
-typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
-std::map<RLE, std::set<int> > m;
-
-void process_file(const char* fn, int fileno) {
-  fprintf(stderr, "reading %s:%s (fileno %i)\n", fn, path, fileno);
-  TFile* f = TFile::Open(fn);
-  if (!f->IsOpen()) {
-    fprintf(stderr, "could not open file!\n");
-    exit(1);
-  }
-  TTree* t = (TTree*)f->Get(path);
-  if (!t) {
-    fprintf(stderr, "could not read tree!\n");
-    exit(1);
-  }
-
-  unsigned run;
-  unsigned lumi;
-  unsigned long long event;
-  t->SetBranchAddress("run", &run);
-  t->SetBranchAddress("lumi", &lumi);
-  t->SetBranchAddress("event", &event);
-
-  for (long i = 0, ie = t->GetEntries(); i < ie; ++i) {
-    if (t->LoadTree(i) < 0) break;
-    if (t->GetEntry(i) <= 0) continue;
-    if (i % 500000 == 0) {
-      fprintf(stderr, "\r%li/%li", i, ie);
-      fflush(stderr);
-    }
-    
-    RLE rle(run, lumi, event);
-    if (m.find(rle) == m.end())
-      m[rle] = std::set<int>({fileno});
-    else
-      m[rle].insert(fileno);
-  }
-  fprintf(stderr, "\r                                     \r");
-  fflush(stderr);
-
-  delete f;
-}
+#include "EventIdsReader.h"
 
 int main(int argc, char** argv) {
-  if (argc < 4) {
-    fprintf(stderr, "usage: common path_to_tree filelist1.txt filelist2.txt\n");
+  if (argc < 5) {
+    fprintf(stderr, "usage: common path1 filelist1.txt path2 filelist2.txt\n");
     return 1;
   }
 
-  path = argv[1];
-  const char* filelist[2] = { argv[2], argv[3] };
+  EventIdsReader reader;
+  //reader.prints = true;
+
+  const char* paths[2] = { argv[1], argv[3] };
+  const char* filelist[2] = { argv[2], argv[4] };
   for (int i = 0; i < 2; ++i) {
     FILE* flist = fopen(filelist[i], "rt");
     if (!flist) {
@@ -70,35 +22,48 @@ int main(int argc, char** argv) {
       char* pos = 0;
       if ((pos = strchr(line, '\n')) != 0)
         *pos = '\0';
-      process_file(line, i);
+
+      try {
+        reader.process_file(line, paths[i], i);
+      }
+      catch (const std::exception& e) {
+        fprintf(stderr, "exception caught: %s\n", e.what());
+        return 1;
+      }
     }
+
     fclose(flist);
   }
 
   int common = 0, only1 = 0, only2 = 0;
 
+#if 0
   printf("common = [\n");
-  for (auto p : m) {
+  for (auto p : reader.m) {
     if (p.second.size() > 1) {
-      printf("(%u,%u,%llu),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      p.first.print();
+      printf(",\n");
       ++common;
     }
   }
   printf("]\n\n");
+#endif
 
   printf("only1 = [\n");
-  for (auto p : m) {
+  for (auto p : reader.m) {
     if (p.second.size() == 1 && p.second.find(0) != p.second.end()) {
-      printf("(%u,%u,%llu),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      p.first.print();
+      printf(",\n");
       ++only1;
     }
   }
   printf("]\n\n");
 
   printf("only2 = [\n");
-  for (auto p : m) {
+  for (auto p : reader.m) {
     if (p.second.size() == 1 && p.second.find(1) != p.second.end()) {
-      printf("(%u,%u,%llu),\n", std::get<0>(p.first), std::get<1>(p.first), std::get<2>(p.first));
+      p.first.print();
+      printf(",\n");
       ++only2;
     }
   }
