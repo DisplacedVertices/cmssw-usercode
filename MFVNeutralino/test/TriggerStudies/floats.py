@@ -23,7 +23,13 @@ process.mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                           prints = cms.untracked.bool(False),
                                           tree = cms.untracked.bool(True),
                                           )
-process.p = cms.Path(process.mfvTriggerFloats)
+
+process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
+process.hltHighLevel.HLTPaths = [ 'HLT_PFHT800_v*', 'HLT_PFHT900_v*' ]
+process.hltHighLevel.andOr = True # = OR
+process.hltHighLevel.throw = False
+
+process.p = cms.Path(process.hltHighLevel * process.mfvTriggerFloats)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
@@ -44,7 +50,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('TriggerFloats_16',
+    cs = CRABSubmitter('TriggerFloats_16_trigfilt',
                        pset_modifier = pset_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',

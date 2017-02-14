@@ -12,12 +12,14 @@ process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.from_argv(Samples.ttbar_samples + Samples.qcd_samples + Samples.mfv_signal_samples)
+    samples = Samples.data_samples
 
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('EventIdsV18',
-                       total_number_of_events = -1,
-                       events_per_job = 1000000,
-                       use_ana_dataset = True,
-                       )
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+
+    for sample in samples:
+        sample.files_per = 50
+        if not sample.is_mc:
+            sample.json = 'ana_2015p6.json'
+
+    cs = CondorSubmitter('EventIds_NtupleV10_15', dataset='ntuplev10')
     cs.submit_all(samples)
