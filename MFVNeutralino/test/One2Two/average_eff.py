@@ -46,12 +46,12 @@ for i in [3,4,5]:
     hh.SetBinContent(hh.GetNbinsX()+1, hh.GetBinContent(hh.GetNbinsX()))
     h2 = ROOT.TH1F(hh.GetName(), ';d_{VV} (cm);Efficiency', 100, 0, 1)
     h2.SetStats(0)
-    for j in range(1, h2.GetNbinsX()+1):
+    for j in range(1, h2.GetNbinsX()+2):
         h2.SetBinContent(j, hh.GetBinContent(j))
     h = ROOT.TH1F('average%i'%i, 'average (%s, %s);d_{VV} (cm);efficiency' % (h1.GetName(), h2.GetName()), 100, 0, 1)
     h.SetStats(0)
     h.GetYaxis().SetRangeUser(0,1.05)
-    for j in range(1, h.GetNbinsX()+1):
+    for j in range(1, h.GetNbinsX()+2):
         h.SetBinContent(j, 0.5 * (h1.GetBinContent(j) + h2.GetBinContent(j)))
     h1.SetLineColor(ROOT.kRed)
     h2.SetLineColor(ROOT.kBlue)
