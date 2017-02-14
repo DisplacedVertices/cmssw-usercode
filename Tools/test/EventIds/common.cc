@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
   }
   printf("]\n\n");
 
-  fprintf(stderr, "# common: %i   # only in 1: %i   # only in 2: %i\n", common, only1, only2);
+  printf("# common: %i   # only in 1: %i   # only in 2: %i\n", common, only1, only2);
 }
 
 /*
