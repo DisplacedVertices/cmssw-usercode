@@ -236,8 +236,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     }
 
       
-    const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
-    const double sv_z = fabs(sv.position().z() - bsz);
+    //const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
+    //const double sv_z = fabs(sv.position().z() - bsz);
 
     auto trkb = sv.tracks_begin();
     auto trke = sv.tracks_end();
