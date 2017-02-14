@@ -97,16 +97,11 @@ double func_dphi(double* x, double*) {
 
 double throw_rho() {
   //return gRandom->Rndm();
-  double rho = 0;
-  do {
 #ifdef USE_H_DBV
-    rho = h_func_rho->GetRandom();
+  return h_func_rho->GetRandom();
 #else
-    rho = f_func_rho->GetRandom();
+  return f_func_rho->GetRandom();
 #endif
-  }
-  while (rho < 0.01);
-  return rho;
 }
 
 double throw_dphi() {
@@ -194,9 +189,9 @@ int main(int, char**) {
   printf("entries in h: %f\n", h_func_rho->GetEntries());
 #endif
 
-  const double rho_min = 0;
+  const double rho_min = 0.01;
   const double rho_max = 2.;
-  f_func_rho = new TF1("func_rho", func_rho, 0, rho_max);
+  f_func_rho = new TF1("func_rho", func_rho, rho_min, rho_max);
   f_func_rho->SetNpx(25000); // need lots of points when you want to sample a fcn with such a big y range
 
   f_func_dphi = new TF1("func_dphi", func_dphi, 0, M_PI);
