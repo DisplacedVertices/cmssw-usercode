@@ -60,9 +60,9 @@ double phi_e;
 double phi_a;
 
 const int nbins_1v = 26;
-const double bins_1v[nbins_1v+1] = { 
+const double bins_1v[nbins_1v+1] = {
   0.010, 0.012, 0.014, 0.016, 0.018, 0.020, 0.022, 0.024, 0.026, 0.028, 0.030, 0.032, 0.034, 0.036, 0.038,
-  0.04, 0.0425, 0.045, 0.05, 0.055, 0.06, 0.07, 0.085, 0.1, 0.2, 0.4, 2.5
+  0.04, 0.0425, 0.045, 0.05, 0.055, 0.06, 0.07, 0.085, 0.1, 0.2, 0.4, 2.0
 };
 
 //const int nbins_2v = 11;
@@ -623,7 +623,7 @@ int main(int, char**) {
   h_1v_rho_bins_diffs->SetStats(0);
   h_1v_rho_bins_diffs->SetTitle("1v bin-by-bin mean/true - 1;#rho (cm)");
   h_1v_rho_bins_diffs->Draw("e");
-  l1.DrawLine(0,0,2.5,0);
+  l1.DrawLine(0,0,2.0,0);
   p();
   c->Clear();
 
