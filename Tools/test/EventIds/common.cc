@@ -2,12 +2,21 @@
 
 int main(int argc, char** argv) {
   if (argc < 5) {
-    fprintf(stderr, "usage: common path1 filelist1.txt path2 filelist2.txt\n");
+    fprintf(stderr, "usage: common path1 filelist1.txt path2 filelist2.txt [detailsfn]\n");
+    return 1;
+  }
+
+  FILE* out = stdout;
+  if (argc >= 6)
+    out = fopen(argv[5], "wt");
+  if (!out) {
+    fprintf(stderr, "couldn't open output file\n");
     return 1;
   }
 
   EventIdsReader reader;
-  //reader.prints = true;
+  if (getenv("EVENTIDSREADER_PRINTS"))
+    reader.prints = true;
 
   const char* paths[2] = { argv[1], argv[3] };
   const char* filelist[2] = { argv[2], argv[4] };
@@ -37,39 +46,37 @@ int main(int argc, char** argv) {
 
   int common = 0, only1 = 0, only2 = 0;
 
-#if 0
-  printf("common = [\n");
+  //fprintf(out, "common = [\n");
   for (auto p : reader.m) {
     if (p.second.size() > 1) {
-      p.first.print();
-      printf(",\n");
+      //p.first.print(out);
+      //fprintf(out, ",\n");
       ++common;
     }
   }
-  printf("]\n\n");
-#endif
+  //printf("]\n\n");
 
-  printf("only1 = [\n");
+  fprintf(out, "only1 = [\n");
   for (auto p : reader.m) {
     if (p.second.size() == 1 && p.second.find(0) != p.second.end()) {
-      p.first.print();
-      printf(",\n");
+      p.first.print(out);
+      fprintf(out, ",\n");
       ++only1;
     }
   }
-  printf("]\n\n");
+  fprintf(out, "]\n\n");
 
-  printf("only2 = [\n");
+  fprintf(out, "only2 = [\n");
   for (auto p : reader.m) {
     if (p.second.size() == 1 && p.second.find(1) != p.second.end()) {
-      p.first.print();
-      printf(",\n");
+      p.first.print(out);
+      fprintf(out, ",\n");
       ++only2;
     }
   }
-  printf("]\n\n");
+  fprintf(out, "]\n\n");
 
-  printf("# common: %i   # only in 1: %i   # only in 2: %i\n", common, only1, only2);
+  fprintf(out, "# common: %i   # only in 1: %i   # only in 2: %i\n", common, only1, only2);
 }
 
 /*
