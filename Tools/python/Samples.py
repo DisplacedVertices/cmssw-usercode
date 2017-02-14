@@ -338,8 +338,13 @@ JetHT2016H3.add_dataset('ntuplev10partial2', '/JetHT/tucker-NtupleV10-b13b682f8b
 
 JetHT2016H2.add_dataset('fortest', '/JetHT/None/None')
 JetHT2016H2.add_dataset('miniaodskimtestv1', '/JetHT/None/None')
+JetHT2016H2.add_dataset('miniaodfortest', '/JetHT/None/None')
+JetHT2016H2.add_dataset('ntuplev10fromminiaodtestv2', '/JetHT/None/None')
+JetHT2016H2.add_dataset('ntuplev10correspondingsubset', '/JetHT/None/None')
 JetHT2016H2.datasets['fortest'].nevents_orig = 11707
 JetHT2016H2.datasets['miniaodskimtestv1'].nevents_orig = 1652
+JetHT2016H2.datasets['miniaodfortest'].nevents_orig = 64381
+JetHT2016H2.datasets['ntuplev10fromminiaodtestv2'].nevents_orig = 9171
 
 _adbp3('sim', '/mfv_neu_tau00100um_M0400/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
 _adbp3('sim', '/mfv_neu_tau00100um_M0800/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER', 10000) # 50 files
@@ -377,11 +382,16 @@ _adbp3('ntuplev10', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm
 _adbp3('ntuplev10', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV10-f23428b08cdacd8e976199f325eec201/USER',   34040) # 4 files
 _adbp3('ntuplev10', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV10-0ff3f91a98c3d63f934e27865ae9c739/USER',   98620) # 5 files
 
+_adbp3('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', 100000)
+
 for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
           mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
           xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700,
           qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
     x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
+
+for x in (official_mfv_neu_tau10000um_M0800,):
+    x.add_dataset('ntuplev10fromminiaodtestv2', '/%s/None/None' % x.primary_dataset, 0)
 
 ########################################################################
 

@@ -22,7 +22,6 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/ByRunTH1.h"
-#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 namespace {
   template <typename T>
@@ -118,8 +117,6 @@ private:
       return std::vector<TransientVertex>();
     return v;
   }
-
-  TrackerSpaceExtents tracker_extents;
 
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
@@ -270,7 +267,7 @@ private:
     int npxhits;
     int npxlayers;
     int nstlayers;
-    NumExtents ne;
+    int min_r;
     
     track_cuts(const MFVVertexer* mv_, const reco::Track& tk_, const reco::BeamSpot& bs_, const reco::Vertex* pv_, const TransientTrackBuilder& tt)
       : mv(*mv_), tk(tk_), bs(bs_), pv(pv_), tt_builder(tt)
@@ -285,7 +282,7 @@ private:
       npxhits = tk.hitPattern().numberOfValidPixelHits();
       npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
       nstlayers = tk.hitPattern().stripLayersWithMeasurement();
-      ne = mv.tracker_extents.numExtentInRAndZ(tk.hitPattern(), false);
+      min_r = tk.hitPattern().hasValidHitInFirstPixelBarrel() ? 1 : 2000000000;
     }
 
     // these are cheap
@@ -294,7 +291,7 @@ private:
         return 
           npxlayers >= mv.min_seed_track_npxlayers && 
           nstlayers >= mv.min_seed_track_nstlayers && 
-          (mv.min_seed_track_hit_r == 999 || ne.min_r <= mv.min_seed_track_hit_r) &&
+          (mv.min_seed_track_hit_r == 999 || min_r <= mv.min_seed_track_hit_r) &&
           pt > mv.min_seed_track_pt &&
           fabs(sigmadxybs) > mv.min_seed_track_sigmadxy &&
           fabs(dxybs) > mv.min_seed_track_dxy &&
@@ -307,7 +304,7 @@ private:
         return 
           npxlayers >= mv.min_all_track_npxlayers && 
           nstlayers >= mv.min_all_track_nstlayers && 
-          (mv.min_all_track_hit_r == 999 || ne.min_r <= mv.min_all_track_hit_r) &&
+          (mv.min_all_track_hit_r == 999 || min_r <= mv.min_all_track_hit_r) &&
           pt > mv.min_all_track_pt &&
           fabs(sigmadxybs) > mv.min_all_track_sigmadxy &&
           fabs(dxybs) > mv.min_all_track_dxy &&
@@ -606,9 +603,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   std::vector<bool> seed_track_is_second;
   std::map<reco::TrackRef, size_t> seed_track_ref_map;
 
-  if (!tracker_extents.filled())
-    tracker_extents.fill(setup, GlobalPoint(bs_x, bs_y, bs_z));
-
   if (!disregard_event) {
     if (use_tracks) {
       edm::Handle<reco::TrackCollection> tracks;
@@ -767,22 +761,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         h_seed_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
         h_seed_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
 	h_seed_track_npxlayers->Fill(tk->hitPattern().pixelLayersWithMeasurement());
-
-        if (tk->hitPattern().numberOfValidPixelHits() >= 2) {
-          const SpatialExtents se = tracker_extents.extentInRAndZ(tk->hitPattern(), tc.npxhits != 0);
-          if (tk->hitPattern().numberOfValidPixelHits()==2) {
-            double deltaR = se.max_r - se.min_r;
-            double deltaZ = se.max_z - se.min_z;
-            h_seed_track_deltar2px->Fill(deltaR);
-            h_seed_track_deltaz2px->Fill(deltaZ);
-          }
-          else if (tk->hitPattern().numberOfValidPixelHits()==3) {
-            double deltaR = se.max_r - se.min_r;
-            double deltaZ = se.max_z - se.min_z;
-            h_seed_track_deltar3px->Fill(deltaR);
-            h_seed_track_deltaz3px->Fill(deltaZ);
-          }
-        }
       }
     }
   }

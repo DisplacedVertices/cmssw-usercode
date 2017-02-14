@@ -76,7 +76,7 @@ void MCInteractionMFV3j::Fill() {
     die_if_not(stranges[which] && bottoms[which] && tops[which],
 	       "LSP[%i] did not have strange+bottom+top daughters:  strange: %p bottom: %p top: %p", which, stranges[which], bottoms[which], tops[which]);
 
-    const reco::Candidate* last_top = final_candidate(tops[which], 3); // the 3 means allow gluons or photons
+    const reco::Candidate* last_top = final_candidate(tops[which], -1); // used to be 3 for allowing radiated gluons or photons but with official sample pythia got a top that had protons and pions 42/-6 111/21 112/21 113/21 121/2212 122/2212 123/2212 124/2212 157/310 158/310
     last_tops[which] = dynamic_cast<const reco::GenParticle*>(last_top);
 
     die_if_not(last_top, "can't find final candidate for top[%i]", which);

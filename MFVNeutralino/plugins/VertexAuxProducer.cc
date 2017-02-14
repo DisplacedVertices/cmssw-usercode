@@ -14,7 +14,6 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
-#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -102,11 +101,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByToken(electrons_token, electrons);
 
-  //////////////////////////////////////////////////////////////////////
-
-  TrackerSpaceExtents tracker_extents;
-  tracker_extents.fill(setup, origin);
-  
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<std::vector<double> > gen_vertices;
@@ -275,7 +269,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
       costhtkmomvtxdisps.push_back(costh3(tri->momentum(), pv2sv));
 
-      const uchar nhitsbehind = int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
+      const uchar nhitsbehind = 0; //int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
 
       const std::vector<std::pair<int, float> >& pv_for_track = tracks_in_pvs[trref];
       if (pv_for_track.size() > 1)
