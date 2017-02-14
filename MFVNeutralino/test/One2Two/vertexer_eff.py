@@ -1,8 +1,8 @@
 from JMTucker.Tools.ROOTTools import *
 set_style()
-ps = plot_saver('../plots/bkgest/vertexer_eff', size=(600,600), log=False, root=False)
+ps = plot_saver('../plots/bkgest/vertexer_eff', size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('~/crabdirs/NtupleV9_1/background.root')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV10/background.root')
 fh = ROOT.TFile('eff.root', 'recreate')
 
 for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
