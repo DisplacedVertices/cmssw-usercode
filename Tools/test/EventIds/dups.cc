@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     if (p.second.size() > 1) {
       if (dup_count == 0)
         printf("duplicates:\n");
-      p.first.print();
+      p.first.print(stdout);
       printf(" : [");
       for (int fno : p.second)
         printf("%i, ", fno);
