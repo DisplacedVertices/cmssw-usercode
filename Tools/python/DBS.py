@@ -52,7 +52,7 @@ class das_query:
             return ret
 
 def files_in_dataset(dataset, instance='global'):
-    return das_query(instance)('dataset=%s file' % dataset,
+    return das_query(instance)('file dataset=%s' % dataset,
                                lambda s: s.endswith('.root'))
 
 def numevents_in_file(fn, instance='global'):

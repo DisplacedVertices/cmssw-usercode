@@ -46,6 +46,17 @@ def crab_get_njobs_from_log(working_dir, jobs_re=re.compile(r'\([\d ]+/([\d ]+)\
     assert len(njobs) == 1
     return int(njobs.pop()[0])
 
+def crab_get_output_dataset_from_log(working_dir):
+    datasets = set()
+    for line in open(os.path.join(working_dir, 'crab.log')):
+        line = line.strip()
+        if line.startswith('Output dataset:'):
+            dataset = line.split()[-1]
+            assert dataset.endswith('/USER')
+            datasets.add(dataset)
+    assert len(datasets) <= 1
+    return datasets.pop() if datasets else None
+
 def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
