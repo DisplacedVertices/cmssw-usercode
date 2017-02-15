@@ -23,6 +23,8 @@ class CRABToolsException(Exception):
 class CRABToolsGlobalOptions:
     def __init__(self, cfg_path=os.path.expanduser('~/.jmtct')):
         self.cfg_path = cfg_path
+        self.allow_insecure_stupidity = False
+        self.crab_dirs_root = '/dev/null'
 
         if os.path.isfile(self.cfg_path):
             self.cfg = ConfigParser()
@@ -36,8 +38,6 @@ class CRABToolsGlobalOptions:
 
             self.allow_insecure_stupidity = get_default('Global', 'allow_insecure_stupidity', False) == 'True'
             self.crab_dirs_root = get_default('Global', 'crab_dirs_root', '/dev/null')
-        else:
-            raise IOError('no such file %s' % cfg_path)
 
 crab_global_options = CRABToolsGlobalOptions()
 
