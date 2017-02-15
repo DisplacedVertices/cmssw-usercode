@@ -1,7 +1,9 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-process.source.fileNames = ['file:ntuple.root'] #/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev9/161019_211934/0000/ntuple_1.root']
+import JMTucker.Tools.SampleFiles as sf
+sf.set_process(process, 'qcdht2000', 'ntuplev10', 10)
+
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
