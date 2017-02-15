@@ -22,6 +22,23 @@ def _add(d, allow_overwrite=False):
             assert len(d[k][1]) == d[k][0]
     _d.update(d)
 
+def _add_ds(ds, d, allow_overwrite=False):
+    d2 = {}
+    for k in d:
+        d2[(k,ds)] = d[k]
+    _add(d2, allow_overwrite)
+
+def _fromnumlist(path, numlist, but=[], fnbase='ntuple'):
+    return [path + '/%04i/%s_%i.root' % (i/1000, fnbase, i) for i in numlist if i not in but]
+
+def _fromnum1(path, n, but=[], fnbase='ntuple'): # crab starts job numbering at 1
+    l = _fromnumlist(path, xrange(1,n+1), but, fnbase)
+    return (len(l), l)
+
+def _fromnum0(path, n, but=[], fnbase='ntuple'): # condorsubmitter starts at 0
+    l = _fromnumlist(path, xrange(n), but, fnbase)
+    return (len(l), l)
+
 def dump():
     pprint(_d)
 
@@ -49,19 +66,35 @@ _add('eJzF3UGPXMd1xfH9fBHNxua791a9ml47BkIgChJI8ZYQJEYywohjcRQ43z49Ilj/zsJzF/aZsx
 # JetHT2015C, main, 127 files
 _add('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')
 
-_add({
-('official_mfv_neu_tau00100um_M0300', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024549/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau00300um_M0300', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024617/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau10000um_M0300', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024651/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau00100um_M0400', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024721/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau01000um_M0400', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024752/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau10000um_M0400', 'ntuplev10'): (4, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024821/0000/ntuple_%i.root' % i for i in xrange(1,5)]),
-('official_mfv_neu_tau00100um_M0800', 'ntuplev10'): (4, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024850/0000/ntuple_%i.root' % i for i in xrange(1,5)]),
-('official_mfv_neu_tau10000um_M0800', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024949/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau00300um_M1200', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025019/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau01000um_M1200', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025049/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau00100um_M1600', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025119/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
-('official_mfv_neu_tau00300um_M1600', 'ntuplev10'): (5, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025148/0000/ntuple_%i.root' % i for i in xrange(1,6)]),
+_add_ds('ntuplev10', {
+
+'qcdht0500_17':    _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_025922',    762, but=[16, 37]),
+'qcdht0700_17':    _fromnum1('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_025950',   628),
+'qcdht1000_17':    _fromnum1('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030019',  195),
+'qcdht1500_17':    _fromnum1('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030045',  160, but=[2,4,13,19,20,22,24,71,73,78,79]),
+'qcdht2000_17':    _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030115',    80),
+'qcdht0500ext_17': _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030402',   1770),
+'qcdht0700ext_17': _fromnum1('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030430',  1198),
+'qcdht1000ext_17': _fromnum1('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030458',  417),
+'qcdht1500ext_17': _fromnum1('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030525',  316, but=[13]),
+'qcdht2000ext_17': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_030553',   163),
+
+'official_mfv_neu_tau00100um_M0300': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024549',  5),
+'official_mfv_neu_tau00300um_M0300': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024617',  5),
+'official_mfv_neu_tau10000um_M0300': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024651',   5),
+'official_mfv_neu_tau00100um_M0400': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024721',  5),
+'official_mfv_neu_tau01000um_M0400': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024752',    5),
+'official_mfv_neu_tau10000um_M0400': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024821',   4),
+'official_mfv_neu_tau00100um_M0800': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024850',  4),
+'official_mfv_neu_tau10000um_M0800': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_024949',   5),
+'official_mfv_neu_tau00300um_M1200': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025019', 5),
+'official_mfv_neu_tau01000um_M1200': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025049',   5),
+'official_mfv_neu_tau00100um_M1600': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025119', 5),
+'official_mfv_neu_tau00300um_M1600': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025148', 5),
+
+'JetHT2015C': _fromnum0('/store/user/tucker/JetHT/NtupleV10/170131_122719', 13),
+'JetHT2015D': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_025219/000%i/ntuple_%i.root', 1311),
+
 })
 
 _add({
@@ -84,18 +117,15 @@ _add({
                     'DC37A0A8-51DC-E611-A4A4-0CC47A78A456.root'
                     ]])})
 
-_add({('JetHT2015C', 'ntuplev10'): (13, ['/store/user/tucker/JetHT/NtupleV10/170131_122719/0000/ntuple_%i.root' % i for i in xrange(13)])})
-_add({('JetHT2015D', 'ntuplev10'): (1311, ['/store/user/tucker/JetHT/NtupleV10/170124_025219/000%i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1312)])})
-
-_add({
-('JetHT2016B3', 'ntuplev10partial3'): (1758, ['/store/user/tucker/JetHT/NtupleV10/170124_035716' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1759)]),
-('JetHT2016C',  'ntuplev10partial3'): ( 580, ['/store/user/tucker/JetHT/NtupleV10/170124_035750' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,581)]),
-('JetHT2016D',  'ntuplev10partial3'): ( 971, ['/store/user/tucker/JetHT/NtupleV10/170124_035827' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,973) if i != 64]),
-('JetHT2016E',  'ntuplev10partial3'): ( 825, ['/store/user/tucker/JetHT/NtupleV10/170124_035858' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,827) if i != 335]),
-('JetHT2016F',  'ntuplev10partial3'): ( 603, ['/store/user/tucker/JetHT/NtupleV10/170124_035931' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,604)]),
-('JetHT2016G',  'ntuplev10partial3'): ( 731, ['/store/user/tucker/JetHT/NtupleV10/170124_025401' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in decrabify_list('6-20,22-26,28-47,49-83,85-89,91-130,132-164,166-172,174-213,215-232,234-255,257-292,294-297,299-339,341-358,360-381,383-422,424,426-464,466-502,504-511,513-536,538-552,554-578,580-594,596-639,641-655,657-681,683-709,711-723,725-742,746,748-750,752-757,760-764,766-767,779,801-802,804,819-820,827')]),
-('JetHT2016H2', 'ntuplev10partial3'): (1541, ['/store/user/tucker/JetHT/NtupleV10/170128_191149' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,1542)]),
-('JetHT2016H3', 'ntuplev10partial3'): (  41, ['/store/user/tucker/JetHT/NtupleV10/170128_191217' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in xrange(1,42)]),
+_add_ds('ntuplev10partial3', {
+'JetHT2016B3': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035716', 1758),
+'JetHT2016C' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035750', 580), 
+'JetHT2016D' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035827', 972, but=[64]),
+'JetHT2016E' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035858', 826, but=[335]),
+'JetHT2016F' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035931', 603),
+'JetHT2016G' : ( 731, _fromnumlist('/store/user/tucker/JetHT/NtupleV10/170124_025401', decrabify_list('6-20,22-26,28-47,49-83,85-89,91-130,132-164,166-172,174-213,215-232,234-255,257-292,294-297,299-339,341-358,360-381,383-422,424,426-464,466-502,504-511,513-536,538-552,554-578,580-594,596-639,641-655,657-681,683-709,711-723,725-742,746,748-750,752-757,760-764,766-767,779,801-802,804,819-820,827'))),
+'JetHT2016H2': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170128_191149', 1541),
+'JetHT2016H3': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170128_191217', 41),
 })
 
 _add({('JetHT2016H2', 'fortest'): (1, ['/store/user/tucker/JetHT2016H2.8AAACEA3-B786-E611-953E-02163E013547.root'])})
