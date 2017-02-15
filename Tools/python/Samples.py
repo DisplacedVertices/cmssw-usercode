@@ -399,10 +399,11 @@ _adbp3('ntuplev10', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100
 _adbp3('ntuplev10', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV10-8b38292c5b8bb33a99eba28cc8240b1d/USER', 99997) # 5 files
 _adbp3('ntuplev10', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV10-f1befffedecb9827e412b3d4999a2238/USER',  100000) # 5 files
 
-for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
+for x in (qcdht0500_17, qcdht0700_17, qcdht1000_17, qcdht1500_17, qcdht2000_17,
+          qcdht0500ext_17, qcdht0700ext_17, qcdht1000ext_17, qcdht1500ext_17, qcdht2000ext_17, # they were run with crab but the publications got trashed
+          #ttbar,
           mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
-          xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700,
-          qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
+          xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700,):
     x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
 
 for x in (official_mfv_neu_tau10000um_M0800,):
