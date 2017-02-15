@@ -1,7 +1,9 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-process.source.fileNames = ['file:ntuple.root'] #/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev9/161019_211934/0000/ntuple_1.root']
+import JMTucker.Tools.SampleFiles as sf
+sf.set_process(process, 'qcdht2000', 'ntuplev10', 10)
+
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
@@ -41,7 +43,7 @@ for name, cut in nm1s:
         evt_hst = process.mfvEventHistos.clone()
         evt_hst_name = 'evtHst%iVNo' % nv + name
 
-        vtx_hst = process.mfvVertexHistos.clone(vertex_aux_src = vtx_name)
+        vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name)
         if nv == 1:
             vtx_hst.do_only_1v = True
         vtx_hst_name = 'vtxHst%iVNo' % nv + name
@@ -58,19 +60,7 @@ def force_bs(process, bs):
             ana.force_bs = bs
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples 
-
-    samples = Samples.registry.from_argv(
-        Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        #Samples.qcdpt_samples + \
-        Samples.mfv_signal_samples + \
-        Samples.mfv_signal_samples_glu + \
-        Samples.mfv_signal_samples_gluddbar + \
-        Samples.mfv_signal_samples_lq2 + \
-        Samples.xx4j_samples
-        )
 
     samples = Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
@@ -80,7 +70,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in samples:
         sample.files_per = 50
         if not sample.is_mc:
-            sample.json = 'ana_2016.json'
+            sample.json = 'ana_2015p6.json'
 
-    cs = CondorSubmitter('HistosV10_data2016partial2_aftersimple', dataset='ntuplev10partial2')
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    cs = CondorSubmitter('HistosV10_16', dataset='ntuplev10')
     cs.submit_all(samples)
