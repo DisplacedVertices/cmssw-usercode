@@ -9,25 +9,37 @@ from JMTucker.MFVNeutralino.VertexHistos_cfi import *
 from JMTucker.MFVNeutralino.EventHistos_cfi import *
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 
-from JMTucker.Tools.SimpleTriggerEfficiency_cfi import *
-
 mfvEventHistosNoCuts = mfvEventHistos.clone()
 pSkimSel = cms.Path(mfvCommon * mfvEventHistosNoCuts) # just trigger for now
 
-mfvAnalysisCutsPreSel = mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-mfvEventHistosPreSel = mfvEventHistos.clone()
-mfvVertexHistosPreSel = mfvVertexHistos.clone()
-pPreSel = cms.Path(mfvCommon * mfvAnalysisCutsPreSel * mfvEventHistosPreSel * mfvVertexHistosPreSel)
+for ntk in (5,3,4,7):
+    if ntk == 5:
+        EX = EX2 = ''
+    elif ntk == 7:
+        EX = 'Ntk3or4'
+    else:
+        EX = 'Ntk%i' % ntk
+    if EX:
+        EX2 = "vertex_src = 'mfvSelectedVerticesTight%s', " % EX
 
-mfvAnalysisCutsOnlyOneVtx = mfvAnalysisCuts.clone(min_nvertex = 1, max_nvertex = 1)
-mfvEventHistosOnlyOneVtx = mfvEventHistos.clone()
-mfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone(do_only_1v = True)
-pOnlyOneVtx = cms.Path(mfvCommon * mfvAnalysisCutsOnlyOneVtx * mfvEventHistosOnlyOneVtx * mfvVertexHistosOnlyOneVtx)
+    exec '''
+%(EX)smfvAnalysisCutsPreSel     = mfvAnalysisCuts.clone(%(EX2)sapply_vertex_cuts = False)
+%(EX)smfvAnalysisCutsOnlyOneVtx = mfvAnalysisCuts.clone(%(EX2)smin_nvertex = 1, max_nvertex = 1)
+%(EX)smfvAnalysisCutsFullSel    = mfvAnalysisCuts.clone(%(EX2)s)
+%(EX)smfvAnalysisCutsSigReg     = mfvAnalysisCuts.clone(%(EX2)smin_svdist2d = 0.04)
 
-mfvVertexHistosWAnaCuts = mfvVertexHistos.clone()
-pFullSel = cms.Path(mfvCommon * mfvAnalysisCuts * mfvEventHistos * mfvVertexHistosWAnaCuts)
+%(EX)smfvEventHistosPreSel     = mfvEventHistos.clone()
+%(EX)smfvEventHistosOnlyOneVtx = mfvEventHistos.clone()
+%(EX)smfvEventHistosFullSel    = mfvEventHistos.clone()
+%(EX)smfvEventHistosSigReg     = mfvEventHistos.clone()
 
-mfvAnalysisCutsSigReg = mfvAnalysisCuts.clone(min_svdist2d = 0.04)
-mfvEventHistosSigReg = mfvEventHistos.clone()
-mfvVertexHistosSigReg = mfvVertexHistos.clone()
-pSigReg = cms.Path(mfvCommon * mfvAnalysisCutsSigReg * mfvEventHistosSigReg * mfvVertexHistosSigReg)
+%(EX)smfvVertexHistosPreSel     = mfvVertexHistos.clone(%(EX2)s)
+%(EX)smfvVertexHistosOnlyOneVtx = mfvVertexHistos.clone(%(EX2)sdo_only_1v = True)
+%(EX)smfvVertexHistosFullSel    = mfvVertexHistos.clone(%(EX2)s)
+%(EX)smfvVertexHistosSigReg     = mfvVertexHistos.clone(%(EX2)s)
+
+%(EX)spPreSel     = cms.Path(mfvCommon * %(EX)smfvAnalysisCutsPreSel     * %(EX)smfvEventHistosPreSel     * %(EX)smfvVertexHistosPreSel)
+%(EX)spOnlyOneVtx = cms.Path(mfvCommon * %(EX)smfvAnalysisCutsOnlyOneVtx * %(EX)smfvEventHistosOnlyOneVtx * %(EX)smfvVertexHistosOnlyOneVtx)
+%(EX)spFullSel    = cms.Path(mfvCommon * %(EX)smfvAnalysisCutsFullSel    * %(EX)smfvEventHistosFullSel    * %(EX)smfvVertexHistosFullSel)
+%(EX)spSigReg     = cms.Path(mfvCommon * %(EX)smfvAnalysisCutsSigReg     * %(EX)smfvEventHistosSigReg     * %(EX)smfvVertexHistosSigReg)
+''' % locals()
