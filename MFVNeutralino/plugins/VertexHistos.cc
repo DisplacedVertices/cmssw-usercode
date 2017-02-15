@@ -29,9 +29,9 @@ class MFVVertexHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
-  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_aux_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   const std::vector<double> force_bs;
-  const edm::InputTag vertex_src;
+  const edm::InputTag reco_vertex_src;
   const edm::InputTag vertex_to_jets_src;
   const bool do_scatterplots;
   const bool do_only_1v;
@@ -229,9 +229,9 @@ const char* MFVVertexHistos::sv_tracks_index_names[2][MFVVertexHistos::sv_tracks
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    vertex_aux_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_aux_src"))),
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
+    reco_vertex_src(cfg.getParameter<edm::InputTag>("reco_vertex_src")),
     vertex_to_jets_src(cfg.getParameter<edm::InputTag>("vertex_to_jets_src")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     do_only_1v(cfg.getParameter<bool>("do_only_1v"))
@@ -250,7 +250,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
   PairwiseHistos::HistoDefs hs;
 
-  if (vertex_src.label() != "") {
+  if (reco_vertex_src.label() != "") {
     for (int itk = 0; itk < max_ntracks; ++itk) {
       hs.add(TString::Format("track%i_pt",        itk).Data(), TString::Format("track%i p_{T} (GeV)",                    itk).Data(), 100,   0,     150);
       hs.add(TString::Format("track%i_eta",       itk).Data(), TString::Format("track%i #eta",                           itk).Data(),  50,  -4,       4);
@@ -600,7 +600,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_injet[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_injet", exc), TString::Format(";%s SV tracks in-jet?", exc), 2, 0, 2);
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
 
-    if (vertex_src.label() != "") {
+    if (reco_vertex_src.label() != "") {
       assert(int(sv_tracks_num_indices) == int(sv_jet_tracks_num_indices));
       for (int k = 0; k < 2; ++k) {
         for (int i = 0; i < sv_tracks_num_indices; ++i) {
@@ -749,7 +749,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
 
   edm::Handle<MFVVertexAuxCollection> auxes;
-  event.getByToken(vertex_aux_token, auxes);
+  event.getByToken(vertex_token, auxes);
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   edm::Handle<reco::VertexCollection> vertices;
@@ -757,9 +757,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   TrackerSpaceExtents tracker_extents;
   
-  if (vertex_src.label() != "") { 
+  if (reco_vertex_src.label() != "") { 
     event.getByLabel("offlinePrimaryVertices", primary_vertices);
-    event.getByLabel(vertex_src, vertices);
+    event.getByLabel(reco_vertex_src, vertices);
     setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
     tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
     if (vertex_to_jets_src.label() != "")
@@ -1132,7 +1132,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       fill_multi(h_sv_track_inpv, isv, aux.track_inpv[i], w);
     }
 
-    if (vertex_src.label() != "") {
+    if (reco_vertex_src.label() != "") {
       const reco::Vertex& thepv = primary_vertices->at(0);
       const reco::Vertex& rv = vertices->at(aux.which);
 
