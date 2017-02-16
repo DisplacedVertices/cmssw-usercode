@@ -66,6 +66,7 @@ ey2 = []
 y3 = []
 ey3 = []
 for i in range(3):
+    print ntk[i]
     l1 = ROOT.TLegend(0.50,0.70,0.85,0.85)
     hh = ROOT.TFile(fns[i][0]).Get('h_2v_dvv')
     hh.SetTitle('%s;d_{VV} (cm);events' % ntk[i])
@@ -125,7 +126,7 @@ for i in range(3):
         h2.Scale(n2v[i]/h2.Integral())
     h2.SetMinimum(0)
     h2.Draw()
-    l2.AddEntry(hh, 'simulated events')
+    l2.AddEntry(h2, 'simulated events')
 
     h2s = []
     for j in range(len(ls)):
@@ -138,10 +139,22 @@ for i in range(3):
         h2s.append(h)
         l2.AddEntry(h, ls[j])
 
+        chi2 = 0
+        for k in range(1,h.GetNbinsX()+1):
+            if (h2.GetBinError(k) > 0):
+                chi2 += (h.GetBinContent(k)-h2.GetBinContent(k))**2 / h2.GetBinError(k)**2
+        print '%35s: deltaphi chi2/ndf = %f' % (ls[j], chi2/(h.GetNbinsX()-1))
+
     l2.SetFillColor(0)
     l2.Draw()
     ps.save('%s_dphi'%ntk[i])
 
+    es1 = ROOT.Double(0)
+    s1 = hh.IntegralAndError(1,4,es1)
+    es2 = ROOT.Double(0)
+    s2 = hh.IntegralAndError(5,7,es2)
+    es3 = ROOT.Double(0)
+    s3 = hh.IntegralAndError(8,40,es3)
 
     c1 = hs[0].Integral(1,4)
     ec1 = ebin1[i] * c1
@@ -163,6 +176,14 @@ for i in range(3):
     er2 = (v2/c2) * ((ev2/v2)**2 + (ec2/c2)**2)**0.5
     r3 = v3/c3
     er3 = (v3/c3) * ((ev3/v3)**2 + (ec3/c3)**2)**0.5
+
+    print
+    print '    simulated events: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s1, es1, s2, es2, s3, es3)
+    print 'default construction: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c1, ec1, c2, ec2, c3, ec3)
+    print '           variation: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (v1, ev1, v2, ev2, v3, ev3)
+    print ' variation / default: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r1, er1, r2, er2, r3, er3)
+    print
+    print
 
     if mode == 'vary_dphi':
         if i == 0:
