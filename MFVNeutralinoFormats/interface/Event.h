@@ -21,13 +21,13 @@ struct MFVEvent {
   typedef unsigned int uint;
 
   static bool test_bit(uint64_t v, size_t i) { return bool((v >> i) & 1); }
-  static void set_bit(uint64_t& v, size_t i, bool x) { v ^= (-int(x) ^ v) & (1 << i); }
+  static void set_bit(uint64_t& v, size_t i, bool x) { v ^= (-uint64_t(x) ^ v) & (1ULL << i); }
 
   MFVEvent() {
     gen_valid = 0;
     gen_partons_in_acc = npv = pv_ntracks = 0;
     gen_flavor_code = 0;
-    gen_weight = gen_weightprod = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
+    gen_weight = gen_weightprod = hlt_ht = hlt_ht4mc = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -103,6 +103,9 @@ struct MFVEvent {
                gen_lsp_decay[0*3+1] - gen_lsp_decay[1*3+1],
                gen_lsp_decay[0*3+2] - gen_lsp_decay[1*3+2]);
   }
+
+  float hlt_ht;
+  float hlt_ht4mc;
 
   uint64_t pass_;
   bool pass_hlt(size_t i)           const { assert(i < mfv::n_hlt_paths);                                                return test_bit(pass_, i   ); }
