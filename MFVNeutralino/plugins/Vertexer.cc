@@ -242,9 +242,10 @@ private:
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
 
-  ByRunTH1<TH1F> h_pairs_d2d[6]; // only using 0,2,3,4,5   <- XXX 3,4,5
-  ByRunTH1<TH1F> h_merge_d2d[6]; // only using 0,2,3,4,5  <- XXX 3,4,5
-  ByRunTH1<TH1F> h_erase_d2d[6]; // only using 0,2,3,4,5  <- XXX 3,4,5
+  // not using 1 in these 3
+  ByRunTH1<TH1F> h_pairs_d2d[6];
+  ByRunTH1<TH1F> h_merge_d2d[6];
+  ByRunTH1<TH1F> h_erase_d2d[6];
 
   TH1F* h_phitest_nev;
   TH1F* h_phitest_nvtx;
@@ -519,10 +520,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
-    for (int i = 2; i <= 5; ++i) {
-      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 2500, 0, 2.5);
-      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 2500, 0, 2.5);
-      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 2500, 0, 2.5);
+    for (int i = 0; i <= 5; ++i) {
+      if (i == 1) continue;
+      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 4000, 0, 4);
+      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 4000, 0, 4);
+      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 4000, 0, 4);
     }
 
     if (phitest) {
@@ -564,7 +566,8 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const unsigned run = event.id().run();
-  for (int i = 2; i <= 5; ++i) {
+  for (int i = 0; i <= 5; ++i) {
+    if (i == 1) continue;
     h_pairs_d2d[i].book(run);
     h_merge_d2d[i].book(run);
     h_erase_d2d[i].book(run);
@@ -981,16 +984,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
         const double d2d = mag(v[0]->x() - v[1]->x(),
                                v[0]->y() - v[1]->y());
-        double maxtrackdxyerr = 0;
-        for (auto tk : tracks[0])
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-        for (auto tk : tracks[1])
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-
         if (ntk_max >= 2)
           h_pairs_d2d[ntk_max][run]->Fill(d2d);
+        h_pairs_d2d[0][run]->Fill(d2d);
       }
       
       reco::TrackRefVector shared_tracks;
@@ -1132,16 +1128,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
           const double d2d = mag(v[0]->x() - v[1]->x(),
                                  v[0]->y() - v[1]->y());
-          double maxtrackdxyerr = 0;
-          for (auto tk : tracks[0])
-            if (tk->dxyError() > maxtrackdxyerr)
-              maxtrackdxyerr = tk->dxyError();
-          for (auto tk : tracks[1])
-            if (tk->dxyError() > maxtrackdxyerr)
-              maxtrackdxyerr = tk->dxyError();
-
           if (ntk_max >= 2)
             h_merge_d2d[ntk_max][run]->Fill(d2d);
+          h_merge_d2d[0][run]->Fill(d2d);
         }
         vertices->erase(v[1]);
         *v[0] = reco::Vertex(new_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
@@ -1200,16 +1189,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
         const double d2d = mag(vsave[0].x() - vsave[1].x(),
                                vsave[0].y() - vsave[1].y());
-        double maxtrackdxyerr = 0;
-        for (auto tk : vertex_track_set(vsave[0]))
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-        for (auto tk : vertex_track_set(vsave[1]))
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-
         if (ntk_max >= 2)
           h_erase_d2d[ntk_max][run]->Fill(d2d);
+        h_erase_d2d[ntk_max][run]->Fill(d2d);
       }
 
       if (erase[1]) vertices->erase(v[1]);
