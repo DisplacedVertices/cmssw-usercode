@@ -22,6 +22,13 @@ cuts = () if 'nonm1' in sys.argv else ('Njets', 'Ht', 'Ntracks', 'Bsbs2ddist', '
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
 nvtx = 1 if 'one' in sys.argv else 2
+ntk = ''
+if 'ntk3' in sys.argv:
+    ntk = 'Ntk3'
+elif 'ntk4' in sys.argv:
+    ntk = 'Ntk4'
+elif 'ntk3or4' in sys.argv:
+    ntk = 'Ntk3or4'
 sigreg = 'sigreg' in sys.argv
 if sigreg and nvtx != 2:
     raise ValueError("can't sigreg and 1vtx at same time")
@@ -55,8 +62,12 @@ def effs(fn):
         namenumall = 'mfvEventHistosOnlyOneVtx'
         namenumvtx = 'mfvVertexHistosOnlyOneVtx/h_nsv'
     else:
-        namenumall = 'mfvEventHistos'
+        namenumall = 'mfvEventHistosFullSel'
         namenumvtx = None
+
+    namenumall = ntk + namenumall
+    if namenumvtx:
+        namenumvtx = ntk + namenumvtx
 
     numall = get_n(namenumall)
     if namenumvtx is not None:
@@ -106,7 +117,7 @@ fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
 print_sum = 'sum' in sys.argv
 if not fns:
     dir = [x for x in sys.argv[1:] if os.path.isdir(x)][0]
-    fns = [os.path.join(dir, fn) for fn in 'qcdht0500.root qcdht0700.root qcdht1000.root qcdht1500.root qcdht2000.root ttbar.root'.split()]
+    fns = [os.path.join(dir, fn) for fn in 'qcdht0500sum.root qcdht0700sum.root qcdht1000sum.root qcdht1500sum.root qcdht2000sum.root ttbar.root'.split()]
     nosort = True
     print_sum = True
 if not nosort:

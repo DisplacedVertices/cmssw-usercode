@@ -23,7 +23,7 @@ def form_query(cmd, query_fmt, nargs):
 
 def intable(x):
     try:
-        int(x)
+        int(float(x))
         return True
     except ValueError:
         return False
