@@ -44,4 +44,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                              pfn_prefix = 'root://cmseos.fnal.gov/', # if the files are at FNAL not just accessible by xrootd
                              events_per = 200000,
                              )
-        cs.submit_all(condor_samples)
+        cs.submit_all(samples)
