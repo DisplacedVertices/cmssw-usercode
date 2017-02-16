@@ -4,8 +4,11 @@ ROOT.gStyle.SetOptFit(0)
 
 year, ntracks, oneortwo = 2016, 3, 1
 
+event_filter_fn = None #'/uscms_data/d2/tucker/eventids_temp/HT900_L1300.bin'
 tree_path = 'tre%i%i/t' % (ntracks, ntracks) if ntracks < 5 else 'mfvMiniTree/t'
 plot_path = 'vertex_xsec_%i_%itrk_%iV' % (year, ntracks, oneortwo)
+if event_filter_fn:
+    plot_path += '_' + os.path.basename(event_filter_fn).replace('.bin', '')
 title = '%i, %i-track %i-vtx events' % (year, ntracks, oneortwo)
 if year == 2015:
     fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV10_sidebanddata2015/JetHT2015%s.root' % s for s in 'CD']
@@ -18,12 +21,15 @@ else:
 
 ps = plot_saver(plot_dir(plot_path), size=(2000,600), log=False, pdf=True)
 
+event_filter = EventFilter(event_filter_fn) if event_filter_fn else None
+
 nvtx = defaultdict(int)
 for fn in fns:
     f = ROOT.TFile(fn)
     t = f.Get(tree_path)
-    for (run,) in detree(t, 'run', 'nvtx==%i' % oneortwo):
-        nvtx[run] += 1
+    for rle in detree(t, 'run:lumi:event', 'nvtx==%i' % oneortwo):
+        if event_filter is None or rle in event_filter:
+            nvtx[rle[0]] += 1
 
 excludes = [
     ('all', []),

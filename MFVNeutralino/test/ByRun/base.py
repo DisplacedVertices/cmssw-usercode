@@ -1,4 +1,4 @@
-import os, sys, math
+import os, sys, math, struct
 from collections import defaultdict
 from JMTucker.Tools.LumiLines import *
 from JMTucker.Tools.ROOTTools import *
@@ -176,3 +176,24 @@ class ByRunPlotter:
         self.ps.save(name + '_zoom')
 
         return r
+
+class EventFilter:
+    def __init__(self, fn):
+        self.s = set()
+        f = open(fn, 'rb')
+        evsize = struct.calcsize('=HHQ')
+        assert evsize == 12
+        block_size = evsize * 10240
+        while 1:
+            x = f.read(block_size)
+            if not x:
+                break
+            assert len(x) % evsize == 0
+            for i in xrange(len(x) / evsize):
+                y = struct.unpack_from('=HHQ', x, i*evsize)
+                self.s.add(y)
+
+    def __contains__(self, rle):
+        r,l,e = rle
+        r -= 254231
+        return (r,l,e) in self.s
