@@ -188,6 +188,8 @@ private:
   TH1F* h_all_track_nhits;
   TH1F* h_all_track_npxhits;
   TH1F* h_all_track_nsthits;
+  TH1F* h_all_track_npxlayers;
+  TH1F* h_all_track_nstlayers;
   TH1F* h_n_seed_tracks;
   TH1F* h_seed_track_pars[6];
   TH1F* h_seed_track_errs[6];
@@ -199,6 +201,7 @@ private:
   TH1F* h_seed_track_npxhits;
   TH1F* h_seed_track_nsthits;
   TH1F* h_seed_track_npxlayers;
+  TH1F* h_seed_track_nstlayers;
   TH1F* h_n_seed_vertices;
   TH1F* h_seed_vertex_track_weights;
   TH1F* h_seed_vertex_chi2;
@@ -452,6 +455,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
     h_all_track_npxhits              = fs->make<TH1F>("h_all_track_npxhits",              "",  12,   0,     12);
     h_all_track_nsthits              = fs->make<TH1F>("h_all_track_nsthits",              "",  28,   0,     28);
+    h_all_track_npxlayers            = fs->make<TH1F>("h_all_track_npxlayers",            "",   6,   0,      6);
+    h_all_track_nstlayers            = fs->make<TH1F>("h_all_track_nstlayers",            "",  25,   0,     25);
 
     for (int i = 0; i < 6; ++i)
       h_seed_track_pars[i] = fs->make<TH1F>(TString::Format("h_seed_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
@@ -472,6 +477,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_seed_track_npxhits    = fs->make<TH1F>("h_seed_track_npxhits",    "", 12,   0, 12);
     h_seed_track_nsthits    = fs->make<TH1F>("h_seed_track_nsthits",    "", 28,   0, 28);
     h_seed_track_npxlayers  = fs->make<TH1F>("h_seed_track_npxlayers",  "",  6,   0,  6);
+    h_seed_track_nstlayers  = fs->make<TH1F>("h_seed_track_nstlayers",  "", 25,   0, 25);
 
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "",  50,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  21,   0,      1.05);
@@ -738,6 +744,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       h_all_track_nhits->Fill(tc.nhits);
       h_all_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
       h_all_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
+      h_all_track_npxlayers->Fill(tk->hitPattern().pixelLayersWithMeasurement());
+      h_all_track_nstlayers->Fill(tk->hitPattern().stripLayersWithMeasurement());
 
       if (use) {
         for (int i = 0; i < 6; ++i) {
@@ -758,6 +766,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         h_seed_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
         h_seed_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
 	h_seed_track_npxlayers->Fill(tk->hitPattern().pixelLayersWithMeasurement());
+	h_seed_track_nstlayers->Fill(tk->hitPattern().stripLayersWithMeasurement());
       }
     }
   }
