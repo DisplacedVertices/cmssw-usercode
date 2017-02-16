@@ -272,8 +272,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   if (cleaning_results_src.label() != "") {
     TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
-    for (size_t i = 0; i < mfv::n_clean_paths; ++i)
-      mevent->pass_clean(i, trig_helper_cleaning.pass(mfv::clean_paths[i]));
+    for (size_t i = 0; i < mfv::n_clean_paths; ++i) {
+      const auto& paf = trig_helper_cleaning.pass_and_found_any_version(mfv::clean_paths[i]);
+      if (!paf.second)
+        assert(i>=5); // the 2016/2015 versions come after that
+      mevent->pass_clean(i, !paf.second || paf.first); // if not found, it passes
+    }
   }
 
   //////////////////////////////////////////////////////////////////////
