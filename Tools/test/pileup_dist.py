@@ -40,7 +40,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                    Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau01000um_M1600]
 
         from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-        cs = CondorSubmitter('PileupDist_15_aod_right',
+        cs = CondorSubmitter('PileupDist_15_aod',
                              pfn_prefix = 'root://cmseos.fnal.gov/', # if the files are at FNAL not just accessible by xrootd
                              events_per = 200000,
                              )
