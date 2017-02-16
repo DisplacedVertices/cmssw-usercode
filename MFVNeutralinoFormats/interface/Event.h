@@ -6,9 +6,13 @@
 #include "TLorentzVector.h"
 
 namespace mfv {
-  static const int n_hlt_paths = 19;
-  static const int n_l1_paths = 5;
-  static const int n_clean_paths = 13;
+  static const int n_hlt_paths = 5;
+  static const int n_l1_paths = 17;
+  static const int n_clean_paths = 7;
+
+  extern const char* hlt_paths[n_hlt_paths];
+  extern const char* l1_paths[n_l1_paths];
+  extern const char* clean_paths[n_clean_paths];
 }
 
 struct MFVEvent {
