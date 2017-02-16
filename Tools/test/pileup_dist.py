@@ -24,23 +24,23 @@ process.p = cms.Path(process.MCPileupDist * process.hltHighLevel * process.MCPil
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
 
-    if not from_miniaod:
-        samples = [Samples.qcdht0500, Samples.qcdht0500ext, Samples.qcdht2000, Samples.qcdht2000ext,
-                   Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau01000um_M1600]
+    if from_miniaod:
+        samples = [Samples.qcdht0500, Samples.qcdht0500ext, Samples.qcdht2000, Samples.qcdht2000ext]
 
         from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-        cs = CRABSubmitter('PileupDist_15_aod',
+        cs = CRABSubmitter('PileupDist_15_miniaod',
+                           dataset = 'miniaod',
                            splitting = 'EventAwareLumiBased',
                            units_per_job = 200000,
                            total_units = -1,
                            )
         cs.submit_all(samples)
     else:
-        samples = [Samples.qcdht0500, Samples.qcdht0500ext, Samples.qcdht2000, Samples.qcdht2000ext]
+        samples = [Samples.qcdht0500, Samples.qcdht0500ext, Samples.qcdht2000, Samples.qcdht2000ext,
+                   Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau01000um_M1600]
 
         from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-        cs = CondorSubmitter('PileupDist_15_miniaod',
-                             dataset = 'miniaod',
+        cs = CondorSubmitter('PileupDist_15_aod_right',
                              pfn_prefix = 'root://cmseos.fnal.gov/', # if the files are at FNAL not just accessible by xrootd
                              events_per = 200000,
                              )
