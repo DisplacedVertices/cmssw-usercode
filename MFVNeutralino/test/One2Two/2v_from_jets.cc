@@ -173,10 +173,16 @@ int main(int argc, const char* argv[]) {
   TF1* f_dphi = new TF1("f_dphi", "abs(x - [0])**[1] + [2]", 0, M_PI);
   f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
 
-  TF1* f_dphi2 = new TF1("f_dphi2", "abs(x - [0])**[1] + [2]", 0, M_PI);
-  f_dphi2->SetParameters(dphi_pdf_c, dphi_pdf_e, 2*dphi_pdf_a);
+  TF1* i_dphi = 0;
+  TF1* i_dphi2 = 0;
+  if (vary_dphi) {
+    i_dphi = new TF1("i_dphi", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
+    i_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+    i_dphi2 = new TF1("i_dphi2", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
+    i_dphi2->SetParameters(dphi_pdf_c, dphi_pdf_e, 2*dphi_pdf_a);
+  }
 
-  TH1F* h_eff;
+  TH1F* h_eff = 0;
   if (clearing_from_eff) {
     h_eff = (TH1F*)TFile::Open(eff_file)->Get(eff_hist);
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
@@ -201,7 +207,7 @@ int main(int argc, const char* argv[]) {
       double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
 
       if (vary_dphi) {
-        double dphi2 = f_dphi2->GetRandom();
+        double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);
         double dvvc2 = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi2));
         if (dvvc >= 0.04 && dvvc < 0.07) ++bin2;
         if (dvvc >= 0.07) ++bin3;
@@ -305,6 +311,10 @@ int main(int argc, const char* argv[]) {
   if (clearing_from_eff) {
     h_eff->SetName("h_eff");
     h_eff->Write();
+  }
+  if (vary_dphi) {
+    i_dphi->Write();
+    i_dphi2->Write();
   }
 
   fh->Close();
