@@ -7,7 +7,7 @@ is_mc = True
 prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
-version = 'v10'
+version = 'v11'
 batch_name = 'Ntuple' + version.upper()
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
@@ -15,9 +15,10 @@ batch_name = 'Ntuple' + version.upper()
 
 def customize_before_unscheduled(process):
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+    process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-    process.p = cms.Path(process.mfvVertexSequence * process.mfvEvent)
+    process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
 
     tfileservice(process, 'vertex_histos.root')
     random_service(process, {'mfvVertices': 1222})
