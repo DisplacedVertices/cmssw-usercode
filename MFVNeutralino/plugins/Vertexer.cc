@@ -202,6 +202,10 @@ private:
   TH1F* h_seed_track_nsthits;
   TH1F* h_seed_track_npxlayers;
   TH1F* h_seed_track_nstlayers;
+  TH1F* h_seed_nm1_pt;
+  TH1F* h_seed_nm1_npxlayers;
+  TH1F* h_seed_nm1_nstlayers;
+  TH1F* h_seed_nm1_sigmadxybs;
   TH1F* h_n_seed_vertices;
   TH1F* h_seed_vertex_track_weights;
   TH1F* h_seed_vertex_chi2;
@@ -455,8 +459,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
     h_all_track_npxhits              = fs->make<TH1F>("h_all_track_npxhits",              "",  12,   0,     12);
     h_all_track_nsthits              = fs->make<TH1F>("h_all_track_nsthits",              "",  28,   0,     28);
-    h_all_track_npxlayers            = fs->make<TH1F>("h_all_track_npxlayers",            "",   6,   0,      6);
-    h_all_track_nstlayers            = fs->make<TH1F>("h_all_track_nstlayers",            "",  25,   0,     25);
+    h_all_track_npxlayers            = fs->make<TH1F>("h_all_track_npxlayers",            "",  10,   0,     10);
+    h_all_track_nstlayers            = fs->make<TH1F>("h_all_track_nstlayers",            "",  30,   0,     30);
 
     for (int i = 0; i < 6; ++i)
       h_seed_track_pars[i] = fs->make<TH1F>(TString::Format("h_seed_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
@@ -476,8 +480,13 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_seed_track_nhits      = fs->make<TH1F>("h_seed_track_nhits",      "", 40,   0, 40);
     h_seed_track_npxhits    = fs->make<TH1F>("h_seed_track_npxhits",    "", 12,   0, 12);
     h_seed_track_nsthits    = fs->make<TH1F>("h_seed_track_nsthits",    "", 28,   0, 28);
-    h_seed_track_npxlayers  = fs->make<TH1F>("h_seed_track_npxlayers",  "",  6,   0,  6);
-    h_seed_track_nstlayers  = fs->make<TH1F>("h_seed_track_nstlayers",  "", 25,   0, 25);
+    h_seed_track_npxlayers  = fs->make<TH1F>("h_seed_track_npxlayers",  "", 10,   0, 10);
+    h_seed_track_nstlayers  = fs->make<TH1F>("h_seed_track_nstlayers",  "", 30,   0, 30);
+
+    h_seed_nm1_pt = fs->make<TH1F>("h_seed_nm1_pt", "", 50, 0, 10);
+    h_seed_nm1_npxlayers = fs->make<TH1F>("h_seed_nm1_npxlayers", "", 10, 0, 10);
+    h_seed_nm1_nstlayers = fs->make<TH1F>("h_seed_nm1_nstlayers", "", 30, 0, 30);
+    h_seed_nm1_sigmadxybs = fs->make<TH1F>("h_seed_nm1_sigmadxybs", "", 40, -10, 10);
 
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "",  50,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  21,   0,      1.05);
@@ -746,6 +755,18 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       h_all_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
       h_all_track_npxlayers->Fill(tk->hitPattern().pixelLayersWithMeasurement());
       h_all_track_nstlayers->Fill(tk->hitPattern().stripLayersWithMeasurement());
+
+      const bool nm1[4] = {
+        tc.pt > min_all_track_pt,
+        tc.npxlayers >= min_all_track_npxlayers,
+        tc.nstlayers >= min_all_track_nstlayers,
+        fabs(tc.sigmadxybs) > min_seed_track_sigmadxy
+      };
+
+      if (nm1[1] && nm1[2] && nm1[3]) h_seed_nm1_pt->Fill(tc.pt);
+      if (nm1[0] && nm1[2] && nm1[3]) h_seed_nm1_npxlayers->Fill(tc.npxlayers);
+      if (nm1[0] && nm1[1] && nm1[3]) h_seed_nm1_nstlayers->Fill(tc.nstlayers);
+      if (nm1[0] && nm1[1] && nm1[2]) h_seed_nm1_sigmadxybs->Fill(tc.sigmadxybs);
 
       if (use) {
         for (int i = 0; i < 6; ++i) {
