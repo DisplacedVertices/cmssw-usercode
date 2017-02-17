@@ -7,7 +7,7 @@ is_mc = True
 prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
-version = 'v10'
+version = 'v11'
 batch_name = 'Ntuple' + version.upper()
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
@@ -15,9 +15,10 @@ batch_name = 'Ntuple' + version.upper()
 
 def customize_before_unscheduled(process):
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+    process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-    process.p = cms.Path(process.mfvVertexSequence * process.mfvEvent)
+    process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
 
     tfileservice(process, 'vertex_histos.root')
     random_service(process, {'mfvVertices': 1222})
@@ -97,7 +98,6 @@ file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-
     samples = Samples.registry.from_argv(
         Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
@@ -105,47 +105,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
         )
 
-    def modify(sample):
-        to_add = []
-        to_replace = []
-        if sample.is_mc:
-            assert not sample.is_fastsim
-        else:
-            magic = 'is_mcX=XTrue'.replace('X', ' ')
-            err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
-            to_replace.append((magic, 'is_mc = False', err))
-            # JMTBAD different globaltags?
-        return to_add, to_replace
-
-    # JMTBAD make CondorSubmitter use events_per?
     filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'qcdht0500ext': 2.9065e-03, 'qcdht0700ext': 3.2294e-01, 'ttbar': 3.6064e-02, 'ttbaraux': 3.6064e-02, 'qcdpt0120': 3.500e-05, 'qcdpt0170': 7.856e-03, 'qcdpt0300': 2.918e-01 }
     for s in samples:
-        s.files_per = 10
-        if s.is_mc:
-            if filter_eff.has_key(s.name):
-                s.events_per = min(int(25000/filter_eff[s.name]), 200000)
-            print s.name, s.events_per
+        s.files_per = 20
+        if s.is_mc and filter_eff.has_key(s.name):
+            s.events_per = min(int(25000/filter_eff[s.name]), 200000)
 
-    ### 
-
-    crab_samples = Samples.data_samples + Samples.official_mfv_signal_samples # not because condorsubmitter has a problem with data but they're just not at fnal
-    condor_samples = [] # [s for s in samples if s not in crab_samples]
-
-    if crab_samples:
-        from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-        cs = CRABSubmitter(batch_name,
-                           pset_modifier = modify,
-                           job_control_from_sample = True,
-                           publish_name = batch_name,
-                           )
-        cs.submit_all(crab_samples)
-
-    if condor_samples:
-        from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-        cs = CondorSubmitter(batch_name,
-                             pfn_prefix = 'root://cmseos.fnal.gov/', # if the files are at FNAL not just accessible by xrootd
-                             pset_modifier = modify,
-                             stageout_files = 'all',
-                             publish_name = batch_name,
-                             )
-        cs.submit_all(condor_samples)
+    from JMTucker.Tools.MetaSubmitter import MetaSubmitter, is_mc_pset_modifier
+    ms = MetaSubmitter(batch_name)
+    ms.common.pset_modifier = is_mc_pset_modifier
+    ms.common.publish_name = batch_name
+    ms.crab.job_control_from_sample = True
+    ms.condor.stageout_files = 'all'
+    ms.submit(samples)

@@ -30,6 +30,9 @@ ttbar_samples = [
     MCSample('ttbar', '/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/RunIISummer16DR80Premix-PUMoriond17_backup_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM', 43662343, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
+for s in ttbar_samples + qcd_samples + qcd_samples_ext:
+    s.condor = True
+
 leptonic_background_samples = [
     MCSample('wjetstolnu',    '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',                24120319, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
     MCSample('dyjetstollM10', '/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/AODSIM',  40509291, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV', color= 29, syst_frac=0.10, xsec=1.861e4),
@@ -156,6 +159,7 @@ for s in mfv_signal_samples + mfv_signal_samples_glu + mfv_signal_samples_gluddb
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.aaa = us_aaa
+    s.condor = True
 
 xx4j_samples = [
     MCSample('xx4j_tau00001mm_M0050', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',      30000),
@@ -248,6 +252,7 @@ auxiliary_data_samples = [
     ]
 
 for s in data_samples + auxiliary_data_samples:
+    s.condor = True
     s.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt' # includes PromptReco for H
 
 ########################################################################
@@ -284,12 +289,9 @@ for x in __all__:
 
 # Extra datasets and other overrides go here.
 
-qcdht0500.aaa = eu_aaa
-qcdht1000.aaa = us_aaa + eu_aaa 
-
 # Can't add data datasets by primary (many have the same primary).
 for sample in data_samples + auxiliary_data_samples:
-    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
+    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'), condor=True)
 
 def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
     x = registry.by_primary_dataset(dataset.split('/')[1])

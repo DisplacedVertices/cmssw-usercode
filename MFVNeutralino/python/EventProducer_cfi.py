@@ -1,11 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
-from JMTucker.Tools.L1GtUtils_cff import l1GtUtilsTags
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
 mfvEvent = cms.EDProducer('MFVEventProducer',
-                          l1GtUtilsTags,
-                          trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
+                          triggerfloats_src = cms.string('mfvTriggerFloats'),
                           cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT'),
                           skip_event_filter = cms.string('pevtsel'),
                           jet_pt_min = cms.double(20),

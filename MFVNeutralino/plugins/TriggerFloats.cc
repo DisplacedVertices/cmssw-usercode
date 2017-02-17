@@ -12,16 +12,13 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 class MFVTriggerFloats : public edm::EDProducer {
 public:
   explicit MFVTriggerFloats(const edm::ParameterSet&);
 
 private:
-  enum { NL1bits = 17, NHLTbits = 5 };
-  static const char* L1bits[NL1bits];
-  static const char* HLTbits[NHLTbits];
-
   virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
   const bool prints;
@@ -42,13 +39,6 @@ private:
   };
   tree_t t;
 };
-
-const char* MFVTriggerFloats::L1bits[MFVTriggerFloats::NL1bits] =
-  { "L1_HTT100", "L1_HTT125", "L1_HTT150", "L1_HTT175",
-    "L1_HTT160", "L1_HTT200", "L1_HTT220", "L1_HTT240", "L1_HTT255", "L1_HTT270", "L1_HTT280", "L1_HTT300", "L1_HTT320",
-    "L1_SingleJet128", "L1_SingleJet170", "L1_SingleJet180", "L1_SingleJet200" };
-const char* MFVTriggerFloats::HLTbits[MFVTriggerFloats::NHLTbits] = 
-  { "HLT_PFHT350_v", "HLT_PFHT800_v", "HLT_PFHT900_v", "HLT_PFJet450_v", "HLT_AK8PFJet450_v" };
 
 MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
   : prints(cfg.getUntrackedParameter<bool>("prints", false)),
@@ -140,8 +130,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   std::auto_ptr<float> ht(new float(-1));
   std::auto_ptr<float> ht4mc(new float(-1));
-  std::auto_ptr<std::vector<int>> L1decisions(new std::vector<int>(NL1bits, -1));
-  std::auto_ptr<std::vector<int>> HLTdecisions(new std::vector<int>(NHLTbits, -1));
+  std::auto_ptr<std::vector<int>> L1decisions(new std::vector<int>(mfv::n_l1_paths, -1));
+  std::auto_ptr<std::vector<int>> HLTdecisions(new std::vector<int>(mfv::n_hlt_paths, -1));
 
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
@@ -155,16 +145,16 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (prints)
     printf("TriggerFloats: ht = %f  ht4mc = %f\n", *ht, *ht4mc);
 
-  for (int i = 0; i < NL1bits; ++i) {
+  for (int i = 0; i < mfv::n_l1_paths; ++i) {
     const auto& m = l1_menu->getAlgorithmMap();
-    const auto& e = m.find(L1bits[i]);
+    const auto& e = m.find(mfv::l1_paths[i]);
     const bool found = e != m.end();
     const bool pass = found ? l1_results[e->second.getIndex()] : false;
 
     if (found) (*L1decisions)[i] = pass;
 
     if (prints)
-      printf("L1 bit %2i %30s: %2i\n", i, L1bits[i], (*L1decisions)[i]);
+      printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], (*L1decisions)[i]);
 
     if (tree) {
       if (found) {
@@ -175,13 +165,13 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
   }
 
-  for (int i = 0; i < NHLTbits; ++i) {
-    const std::pair<bool, bool> paf = helper.pass_and_found_any_version(HLTbits[i]);
+  for (int i = 0; i < mfv::n_hlt_paths; ++i) {
+    const std::pair<bool, bool> paf = helper.pass_and_found_any_version(hlt_paths[i]);
     if (paf.second)
       (*HLTdecisions)[i] = paf.first;
 
     if (prints)
-      printf("HLT bit %2i %30s: %2i\n", i, HLTbits[i], (*HLTdecisions)[i]);
+      printf("HLT bit %2i %30s: %2i\n", i, mfv::hlt_paths[i], (*HLTdecisions)[i]);
 
     if (tree) {
       if (paf.second) {
