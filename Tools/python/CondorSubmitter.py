@@ -37,7 +37,7 @@ eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
 echo cmsRun start at $(date)
-cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_timestamp__INPUT_BNS__} .
+cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
 echo $job > cs_job
 cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
 cmsexit=$?
@@ -96,7 +96,7 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_timestamp__INPUT_FNS__
+transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
 x509userproxy = $ENV(X509_USER_PROXY)
 Queue __NJOBS__
 '''
