@@ -143,7 +143,6 @@ def get(i): return _l[i]
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
-                 pfn_prefix = '', # can set to 'root://cmseos.fnal.gov/' if the files are at FNAL not just accessible by xrootd
                  input_files = [],
                  output_files = [],
                  skip_output_files = [],
@@ -270,7 +269,6 @@ def get(i): return _l[i]
             .replace('__INPUT_FNS__',  input_fns)
 
         self.pset_end_template = self.pset_end_template \
-            .replace('__PFN_PREFIX__', repr(pfn_prefix)) \
             .replace('__MAX_EVENTS__', str(_events)) \
             .replace('__FAIL_LIST__', repr(_fail)) \
             .replace('__SPLIT_BY_EVENTS__', str(self.split_by == 'events'))
@@ -335,9 +333,10 @@ def get(i): return _l[i]
             if to_add:
                 pset += '\n' + '\n'.join(to_add) + '\n'
 
-        pset_end_template = self.pset_end_template
-        if self.split_by == 'events':
-            pset_end_template = pset_end_template.replace('__EVENTS_PER__', str(sample.events_per))
+        pset_end_template = self.pset_end_template \
+            .replace('__PFN_PREFIX__', repr(sample.xrootd_url))
+            .replace('__EVENTS_PER__', str(sample.events_per))
+
         pset += pset_end_template
         pset_fn = os.path.join(working_dir, 'cs_pset.py')
         open(pset_fn, 'wt').write(pset)
