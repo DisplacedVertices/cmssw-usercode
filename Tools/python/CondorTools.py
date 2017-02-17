@@ -43,19 +43,64 @@ def cs_jobs_running(d):
             jobs.append(int(line.split()[0].split('.')[1]))
     return jobs
 
-def cs_rets(d, _re=re.compile(r'return value (\d+)')):
-    njobs = cs_njobs(d)
-    rets = [-1]*njobs
+def cs_analyze(d, 
+            _re=re.compile(r'return value (\d+)'),
+            _cmsRun_re=re.compile(r"cmsRun exited with code (\d+)"),
+            _exception_re=re.compile(r"An exception of category '(.*)' occurred while")):
+    class cs_analyze_result:
+        pass
+    result = cs_analyze_result()
+    result.working_dir = d
+    result.njobs = cs_njobs(d)
+    result.returns = [-1] * result.njobs # -1 means idle, -2 means still running
+    result.cmsRun_returns = {}
+    result.exceptions = {}
+
+    ns = [0]*5
 
     for log_fn in cs_logs(d):
         job = cs_job_from_log(log_fn)
-        for line in open(log_fn):
-            mo = _re.search(line)
-            if mo:
-                ret = int(mo.group(1))
-                rets[job] = ret
 
-    return rets
+        ret = -1
+        for line in open(log_fn):
+            if 'Image size of job updated' in line:
+                ret = -2
+            elif 'Job was evicted' in line:
+                ret = -3
+            elif 'Job was aborted by the user' in line:
+                ret = -4
+            else:
+                mo = _re.search(line)
+                if mo:
+                    ret = int(mo.group(1))
+
+        if ret == 0:
+            ns[0] += 1
+        elif ret == -1:
+            ns[1] += 1
+        elif ret == -2:
+            ns[2] += 1
+        elif ret == -3 or ret == -4:
+            ns[3] += 1
+        else:
+            ns[4] += 1
+
+        result.returns[job] = ret
+
+        if ret > 0:
+            stdout_fn = os.path.join(d, 'stdout.%i' % job)
+            for line in open(stdout_fn):
+                mo = _cmsRun_re.search(line)
+                if mo:
+                    result.cmsRun_returns[job] = int(mo.group(1))
+                mo = _exception_re.search(line)
+                if mo:
+                    result.exceptions[job] = mo.group(1)
+
+    result.ndone, result.nidle, result.nrun, result.nkilled, result.nprobs = ns
+    result.ns = [result.njobs] + ns
+
+    return result
 
 def cs_timestamp():
     return datetime.now().strftime('%y%m%d_%H%M%S')
