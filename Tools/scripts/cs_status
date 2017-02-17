@@ -1,55 +1,73 @@
 #!/usr/bin/env python
 
 import sys
+from collections import defaultdict
 from JMTucker.Tools.CRAB3ToolsBase import crabify_list
 from JMTucker.Tools.CondorTools import *
-from JMTucker.Tools.colors import bold, red, green, cyan
+from JMTucker.Tools import colors
 
 if len(sys.argv) < 2:
     print 'usage: cs_status wd [wd2 ...]'
     sys.exit(1)
 
+verbose = '-v' in sys.argv
 wds = cs_dirs_from_argv()
 ml = max(len(wd) for wd in wds) + 3
-fmt = '%' + str(ml) + 's %10s | %10s %10s %10s'
+fmt = '%' + str(ml) + 's %10s | %10s %10s %10s %10s %10s'
+
+def return_code(r):
+    if r == 147:
+        return 'xrdcp problem'
+    else:
+        return 'Exit %i' % r
 
 def z(n):
     return '-' if n == 0 else str(n)
 
+print colors.bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'idle', 'run', 'killed', 'problem'))
 
-print bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'run/miss', 'problem'))
-
-sums = [0]*4
-
+sums = [0]*6
 done = []
 
 for wd in wds:
-    rets = cs_rets(wd)
-    srets = set(rets)
+    ana = cs_analyze(wd)
 
-    njobs = len(rets)
-    ndone = sum(1 for r in rets if r == 0)
-    nrunmiss = sum(1 for r in rets if r == -1)
-    nprobs = sum(1 for r in rets if r not in (0, -1))
+    for i in xrange(6):
+        sums[i] += ana.ns[i]
 
-    sums[0] += njobs
-    sums[1] += ndone
-    sums[2] += nrunmiss
-    sums[3] += nprobs
-
-    color = cyan
-    if nprobs:
-        color = red
-    elif ndone == njobs:
+    color = colors.cyan
+    if ana.nprobs:
+        color = colors.red
+    elif ana.nkilled:
+        color = colors.yellow
+    elif ana.ndone == ana.njobs:
         done.append(wd)
-        color = green
+        color = colors.green
     
-    print color(fmt % (wd.ljust(ml), z(njobs), z(ndone), z(nrunmiss), z(nprobs))), 
-    if nprobs:
-        print ' :', crabify_list([i for i,r in enumerate(rets) if r not in (0,-1)])
+    print color(fmt % (wd.ljust(ml), z(ana.njobs), z(ana.ndone), z(ana.nidle), z(ana.nrun), z(ana.nkilled), z(ana.nprobs))), 
+    if ana.nprobs:
+        print ' :', crabify_list([i for i,r in enumerate(ana.returns) if r > 0]),
+        if verbose:
+            print
+            by_exit = defaultdict(list)
+            for i, r in enumerate(ana.returns):
+                if r > 0:
+                    assert ana.cmsRun_returns[i] == (0 if r == 147 else r)
+                    by_exit[r].append(i)
+
+            by_exception = defaultdict(list)
+            for i, e in ana.exceptions.iteritems():
+                by_exception[e].append(i)
+
+            for r, l in by_exit.iteritems():
+                print '  %s:' % return_code(r), crabify_list(l)
+            for e, l in by_exception.iteritems():
+                print '  %s:' % e, crabify_list(l)
+    elif verbose:
+        print
     print
 
-print bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
+print colors.bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
 
 if done:
     print '\nthese are done:', ' '.join(done)
