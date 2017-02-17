@@ -334,7 +334,7 @@ def get(i): return _l[i]
                 pset += '\n' + '\n'.join(to_add) + '\n'
 
         pset_end_template = self.pset_end_template \
-            .replace('__PFN_PREFIX__', repr(sample.xrootd_url))
+            .replace('__PFN_PREFIX__', repr(sample.xrootd_url)) \
             .replace('__EVENTS_PER__', str(sample.events_per))
 
         pset += pset_end_template
