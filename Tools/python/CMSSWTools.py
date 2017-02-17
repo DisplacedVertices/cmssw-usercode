@@ -18,12 +18,12 @@ def add_analyzer(process, name, *args, **kwargs):
     else:
         setattr(process, path_name, cms.Path(obj))
 
-def basic_process(name):
+def basic_process(name, filenames=['file:input.root']):
     process = cms.Process(name)
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
     process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
     process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
-    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:input.root'))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(*filenames))
     return process
 
 def files_from_file(process, fn):
@@ -295,6 +295,12 @@ def set_events_to_process_by_filter(process, run_events=None, run=None, run_even
             delattr(process.source, x)
 
     return run_events_fn
+
+def set_lumis_to_process_from_json(process, json):
+    '''What CRAB does when you use lumi_mask.'''
+
+    from FWCore.PythonUtilities.LumiList import LumiList
+    process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
 
 def set_seeds(process, seed=12191982, size=2**24):
     '''Set all the seeds for the RandomNumberGeneratorService in a
