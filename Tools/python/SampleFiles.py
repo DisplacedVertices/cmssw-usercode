@@ -20,6 +20,23 @@ def _add(d, allow_overwrite=False):
                 raise ValueError('already have key %r' % k)
     _d.update(d)
 
+def _add_ds(ds, d, allow_overwrite=False):
+    d2 = {}
+    for k in d:
+        d2[(k,ds)] = d[k]
+    _add(d2, allow_overwrite)
+
+def _fromnumlist(path, numlist, but=[], fnbase='ntuple'):
+    return [path + '/%04i/%s_%i.root' % (i/1000, fnbase, i) for i in numlist if i not in but]
+
+def _fromnum1(path, n, but=[], fnbase='ntuple'): # crab starts job numbering at 1
+    l = _fromnumlist(path, xrange(1,n+1), but, fnbase)
+    return (len(l), l)
+
+def _fromnum0(path, n, but=[], fnbase='ntuple'): # condorsubmitter starts at 0
+    l = _fromnumlist(path, xrange(n), but, fnbase)
+    return (len(l), l)
+
 def dump():
     pprint(_d)
 
