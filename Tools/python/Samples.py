@@ -213,6 +213,15 @@ for x in (JetHT2016B3,
 if __name__ == '__main__':
     main(registry)
 
+    from JMTucker.Tools import DBS
+    from JMTucker.Tools.general import popen
+
+    if 0:
+        for s in qcd_samples + qcd_samples_ext + ttbar_samples + leptonic_background_samples + data_samples + auxiliary_data_samples:
+            #s.set_curr_dataset('miniaod')
+            sites = [x for x in DBS.sites_for_dataset(s.dataset) if not x.endswith('_Buffer') and not x.endswith('_MSS')]
+            print s.name.ljust(30), ' '.join(sites)
+
     if 0:
         from DBS import *
         for s in official_mfv_signal_samples:
