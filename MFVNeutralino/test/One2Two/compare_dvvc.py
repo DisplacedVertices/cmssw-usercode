@@ -25,13 +25,13 @@ maxtk efficiency'''.split('\n')
 
 if mode == 'vary_dphi':
     fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_3track_average3_c1p35_e2_a7p32_20umbins.root'''.split('\n')
+2v_from_jets_3track_average3_c1p35_e2_a6p09_20umbins.root'''.split('\n')
 
     fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_4track_average4_c1p35_e2_a7p32_20umbins.root'''.split('\n')
+2v_from_jets_4track_average4_c1p35_e2_a6p09_20umbins.root'''.split('\n')
 
     fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_5track_average5_c1p35_e2_a7p32_20umbins.root'''.split('\n')
+2v_from_jets_5track_average5_c1p35_e2_a6p09_20umbins.root'''.split('\n')
 
     ls = '''|#Delta#phi| from jets
 |#Delta#phi| between jets and flat'''.split('\n')
@@ -187,14 +187,14 @@ for i in range(3):
 
     if mode == 'vary_dphi':
         if i == 0:
-            er2 *= 0.140712
-            er3 *= 0.110258
+            er2 *= 0.124194
+            er3 *= 0.097202
         if i == 1:
-            er2 *= 0.141256
-            er3 *= 0.120174
+            er2 *= 0.125128
+            er3 *= 0.107277
         if i == 2:
-            er2 *= 0.145707
-            er3 *= 0.111386
+            er2 *= 0.129385
+            er3 *= 0.096314
     if mode == 'vary_eff':
         er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
         er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5

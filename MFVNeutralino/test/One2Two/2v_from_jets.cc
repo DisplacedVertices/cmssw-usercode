@@ -24,6 +24,7 @@ const char* eff_file = "eff_avg.root";
 double dphi_pdf_c = 1.35;
 double dphi_pdf_e = 2;
 double dphi_pdf_a = 3.66;
+double dphi_pdf_a2 = 6.09;
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
@@ -173,7 +174,7 @@ int main(int argc, const char* argv[]) {
     i_dphi = new TF1("i_dphi", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
     i_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
     i_dphi2 = new TF1("i_dphi2", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
-    i_dphi2->SetParameters(dphi_pdf_c, dphi_pdf_e, 2*dphi_pdf_a);
+    i_dphi2->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a2);
   }
 
   TH1F* h_eff = 0;
