@@ -26,6 +26,7 @@ class Dataset(object):
         self.dbs_inst = kwargs.get('dbs_inst', self.DBS_INST)
         self.aaa = kwargs.get('aaa', self.AAA)
         self.condor = kwargs.get('condor', False)
+        self.xrootd_url = kwargs.get('xrootd_url', '')
         self.filenames = kwargs.get('filenames', [])
 
 ########################################################################
@@ -93,6 +94,14 @@ class Sample(object):
     @condor.setter
     def condor(self, val):
         self.datasets[self.curr_dataset].condor = val
+
+    @property
+    def xrootd_url(self):
+        return self.datasets[self.curr_dataset].xrootd_url
+
+    @xrootd_url.setter
+    def xrootd_url(self, val):
+        self.datasets[self.curr_dataset].xrootd_url = val
 
     @property
     def filenames(self):
