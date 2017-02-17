@@ -36,6 +36,9 @@ ttbar_samples = [
     MCSample('ttbar', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 38493485, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
+for s in ttbar_samples + qcd_samples + qcd_samples_ext:
+    s.condor = True
+
 x = leptonic_background_samples = [
     MCSample('wjetstolnu1', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',       24156124, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
     MCSample('wjetstolnu2', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext2-v1/AODSIM', 240721767, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
@@ -152,6 +155,7 @@ for s in mfv_signal_samples + mfv_signal_samples_glu + mfv_signal_samples_gluddb
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.aaa = us_aaa
+    s.condor = True
 
 xx4j_samples = [
     MCSample('xx4j_tau00001mm_M0050', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',      30000),
@@ -226,6 +230,7 @@ auxiliary_data_samples = [
     ]
 
 for s in data_samples + auxiliary_data_samples:
+    s.condor = True
     s.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt'
 
 ########################################################################
@@ -263,12 +268,9 @@ for x in __all__:
 
 # Extra datasets and other overrides go here.
 
-qcdht0500.aaa = eu_aaa
-qcdht1000.aaa = us_aaa + eu_aaa 
-
 # Can't add data datasets by primary (many have the same primary).
 for sample in data_samples + auxiliary_data_samples:
-    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
+    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'), condor=True)
 
 JetHT2015D.add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-6970a7d559855cd9d6b4079c6dd16e62/USER', dbs_inst='phys03') # 7607589 events, 1311 files
 
