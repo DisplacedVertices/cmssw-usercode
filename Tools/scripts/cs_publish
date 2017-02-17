@@ -60,13 +60,12 @@ for wd in wds:
     if missing:
         code = code.replace(']', ' if i not in %r]' % missing)
     l = eval(code)
-    import pdb
-    pdb.set_trace()
     assert set(l) == set(files)
     publish[(sample, options.dataset)] = (len(files), code)
 
 print 'new entries:'
-pprint(publish)
+for k, (n,c) in publish.iteritems():
+    print k, ': (', n, ',', c, ')'
 encoded = _enc(publish)
 print '\nline for SampleFiles (len(repr(publish)) = %i, len(encoded) = %i):' % (len(repr(publish)), len(encoded))
 print "_add('%s')" % encoded
