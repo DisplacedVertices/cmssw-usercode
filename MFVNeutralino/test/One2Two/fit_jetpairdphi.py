@@ -33,8 +33,10 @@ for i,n in enumerate(ntk):
 
 ROOT.TH1.AddDirectory(0)
 l1 = ROOT.TLegend(0.15,0.75,0.85,0.85)
-colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kViolet]
+colors = [1, ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kViolet]
 for i,n in enumerate(ntk):
+  if i == 0 or i == 2:
+    continue
   f1 = ROOT.TFile(fns[i])
   h1 = f1.Get('mfvEventHistosOnlyOneVtx/h_jet_pairdphi')
   if n == 'presel':
@@ -45,7 +47,7 @@ for i,n in enumerate(ntk):
   h1.Scale(1./h1.Integral())
   h1.GetYaxis().SetRangeUser(0,0.02)
   h1.SetTitle(';#Delta#phi;')
-  if i == 0:
+  if i == 1:
     h1.Draw()
   else:
     h1.Draw('sames')
