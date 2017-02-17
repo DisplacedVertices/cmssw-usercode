@@ -166,7 +166,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
-    const std::pair<bool, bool> paf = helper.pass_and_found_any_version(hlt_paths[i]);
+    const std::pair<bool, bool> paf = helper.pass_and_found_any_version(mfv::hlt_paths[i]);
     if (paf.second)
       (*HLTdecisions)[i] = paf.first;
 
