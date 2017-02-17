@@ -250,7 +250,7 @@ def get(i): return _l[i]
                 stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name
-                stageout_path += '/$(<cs_primaryds)/%s/$(<cs_timestamp)/0000' % publish_name  # JMTBAD 0001...
+                stageout_path += '/$(<cs_primaryds)/%s_$(<cs_samplename)/$(<cs_timestamp)/0000' % publish_name  # JMTBAD 0001...
 
             print 'CondorSubmitter init: stageout files are', stageout_files
             print 'CondorSubmitter init: stageout path is', stageout_path
@@ -304,6 +304,7 @@ def get(i): return _l[i]
             ('cs_filelist.py',   self.filelist_py_template.replace('__FILELIST__', encoded_filelist)),
             ('cs_jobmap',        '\n'.join(str(i) for i in xrange(njobs)) + '\n'), # will be more complicated for resubmits
             ('cs_primaryds',     sample.primary_dataset),
+            ('cs_samplename',    sample.name),
             ('cs_timestamp',     self.timestamp),
             ]
         for fn, content in files_to_write:
@@ -335,7 +336,7 @@ def get(i): return _l[i]
 
         pset_end_template = self.pset_end_template \
             .replace('__PFN_PREFIX__', repr(sample.xrootd_url)) \
-            .replace('__EVENTS_PER__', str(sample.events_per))
+            .replace('__EVENTS_PER__', str(sample.events_per if sample.is_mc else 0))
 
         pset += pset_end_template
         pset_fn = os.path.join(working_dir, 'cs_pset.py')
@@ -382,6 +383,10 @@ def get(i): return _l[i]
             sample.set_curr_dataset(self.dataset)
         except KeyError:
             print "\033[1m warning: \033[0m sample %s not submitted, doesn't have dataset %s" % (sample.name, self.dataset)
+            return
+
+        if self.split_by == 'events' and not sample.is_mc:
+            print "\033[1m warning: \033[0m sample %s not submitted because can't split by events on data sample"
             return
 
         working_dir = os.path.join(self.batch_dir, 'condor_%s' % sample.name)
