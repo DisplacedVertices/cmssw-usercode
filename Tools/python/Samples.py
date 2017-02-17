@@ -36,9 +36,6 @@ ttbar_samples = [
     MCSample('ttbar', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 38493485, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
-for s in ttbar_samples + qcd_samples + qcd_samples_ext:
-    s.condor = True
-
 x = leptonic_background_samples = [
     MCSample('wjetstolnu1', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',       24156124, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
     MCSample('wjetstolnu2', '/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext2-v1/AODSIM', 240721767, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=6.153e4), 
@@ -155,7 +152,6 @@ for s in mfv_signal_samples + mfv_signal_samples_glu + mfv_signal_samples_gluddb
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.aaa = us_aaa
-    s.condor = True
 
 xx4j_samples = [
     MCSample('xx4j_tau00001mm_M0050', '/XXTo4J_M-50_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',      30000),
@@ -230,7 +226,6 @@ auxiliary_data_samples = [
     ]
 
 for s in data_samples + auxiliary_data_samples:
-    s.condor = True
     s.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt'
 
 ########################################################################
@@ -270,7 +265,7 @@ for x in __all__:
 
 # Can't add data datasets by primary (many have the same primary).
 for sample in data_samples + auxiliary_data_samples:
-    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'), condor=True)
+    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
 JetHT2015D.add_dataset('ntuplev10', '/JetHT/tucker-NtupleV10-6970a7d559855cd9d6b4079c6dd16e62/USER', dbs_inst='phys03') # 7607589 events, 1311 files
 
@@ -339,10 +334,61 @@ for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
           qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
     x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
 
+for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000,
+          qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext,
+          ttbar):
+    x.condor = True
+    x.xrootd_url = 'root://cmseos.fnal.gov/'
+
+JetHT2015C.condor = True
+JetHT2015C.xrootd_url = 'root://se01.indiacms.res.in/' # will this work? need to comment out the file list in SampleFiles that points to my copy
+
+JetHT2015D.condor = True
+JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
+
+for x in qcd_samples:
+    x.datasets['miniaod'].condor = True
+    x.datasets['miniaod'].xrootd_url = 'root://cmseos.fnal.gov/'
+
+ttbar.datasets['miniaod'].condor = True
+ttbar.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
+
+# for miniaod
+'''
+qcdht0500ext                   T1_UK_RAL_Disk T2_IT_Rome
+qcdht0700ext                   T1_RU_JINR_Disk T2_FR_GRIF_IRFU
+qcdht1000ext                   T0_CH_CERN_Export T2_FR_IPHC T2_UK_SGrid_Bristol T3_US_FIU
+qcdht1500ext                   T2_CH_CERN T2_DE_RWTH
+qcdht2000ext                   T2_IN_TIFR T2_IT_Rome
+wjetstolnu1                    T2_BE_IIHE T2_BE_UCL T2_CH_CERN T2_DE_DESY T2_US_Purdue T2_US_Wisconsin T3_US_FNALLPC
+wjetstolnu2                    T0_CH_CERN_Export T1_UK_RAL_Disk T2_BE_IIHE T2_BE_UCL T2_DE_DESY T2_RU_SINP T2_US_Caltech
+wjetstolnu3                    T0_CH_CERN_Export T2_CH_CERN T2_DE_DESY T2_FR_IPHC
+dyjetstollM101                 T2_BE_IIHE T2_BE_UCL T2_CH_CERN T2_DE_DESY T2_RU_IHEP
+dyjetstollM102                 T2_BE_IIHE T2_BE_UCL T2_CH_CERN T2_DE_DESY T2_US_Purdue
+dyjetstollM103                 T2_BE_IIHE T2_BE_UCL T2_CH_CERN T2_IT_Legnaro T3_US_Colorado T3_US_FNALLPC
+dyjetstollM501                 T2_BE_IIHE T2_BE_UCL T2_CH_CERN T2_PT_NCG_Lisbon T3_KR_KISTI T3_US_Colorado
+dyjetstollM502                 T2_BR_UERJ T2_PT_NCG_Lisbon
+dyjetstollM503                 T0_CH_CERN_Export T2_BE_IIHE T2_BE_UCL T2_CH_CERN T2_UK_SGrid_RALPP T3_US_Colorado T3_US_FNALLPC
+qcdmupt15                      T0_CH_CERN_Export T2_BE_IIHE T2_CH_CERN T2_DE_DESY T2_FR_GRIF_IRFU
+JetHT2015C                     T2_CH_CERN T2_CH_CSCS T2_DE_DESY T2_US_Nebraska T3_CH_PSI
+JetHT2015D                     T2_CH_CERN T2_CH_CSCS T2_DE_DESY T2_US_Nebraska T3_CH_PSI T3_US_Baylor
+SingleMuon2015C                T2_BE_IIHE T2_BE_UCL T2_BR_SPRACE T2_CH_CSCS T2_DE_DESY T2_IT_Legnaro T2_IT_Rome T2_US_Vanderbilt T3_CH_PSI T3_US_FNALLPC
+SingleMuon2015D                T2_BE_IIHE T2_BR_SPRACE T2_CH_CERN T2_CH_CSCS T2_DE_DESY T2_IT_Legnaro T2_IT_Pisa T2_TH_CUNSTDA T2_US_Florida T3_US_Colorado T3_US_FNALLPC T3_US_PuertoRico
+'''
+
 ########################################################################
 
 if __name__ == '__main__':
     main(registry)
+
+    from JMTucker.Tools import DBS
+    from JMTucker.Tools.general import popen
+
+    if 0:
+        for s in qcd_samples + qcd_samples_ext + ttbar_samples + leptonic_background_samples + data_samples + auxiliary_data_samples:
+            #s.set_curr_dataset('miniaod')
+            sites = [x for x in DBS.sites_for_dataset(s.dataset) if not x.endswith('_Buffer') and not x.endswith('_MSS')]
+            print s.name.ljust(30), ' '.join(sites)
 
     if 0:
         from DBS import *
@@ -368,12 +414,22 @@ if __name__ == '__main__':
 
     if 0:
         f = open('a.txt', 'wt')
-        for x in qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
-            for y in ('main', 'ntuplev9'):
+        for x in data_samples: # qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
+            for y in ('ntuplev10',):
                 try:
                     x.set_curr_dataset(y)
                 except KeyError:
                     continue
                 fns = x.filenames
-                print len(fns)
-                f.write('(%r, %r): (%i, %r),\n' % (x.name, y, len(fns), fns))
+                base = [fn.rsplit('/', 2)[0] for fn in fns]
+                assert len(set(base)) == 1
+                base = base[0]
+                nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in fns]
+                mx = max(nums)
+                code = "[%r + '/%%04i/ntuple_%%i.root' %% (i/1000,i) for i in xrange(1,%i)]" % (base, mx+1)
+                missing = sorted(set(range(1,mx+1)) - set(nums))
+                if missing:
+                    code = code.replace(']', ' if i not in %r]' % missing)
+                l = eval(code)
+                assert set(l) == set(fns)
+                f.write('(%r, %r): (%i, %s),\n' % (x.name, y, len(fns), code))
