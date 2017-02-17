@@ -60,8 +60,6 @@ def set_process(process, name, ds, num=-1):
         fns = fns[:num]
     process.source.fileNames = fns
 
-# JetHT2015C, main, 127 files
-
 _add_ds('ntuplev10', {
 
 'qcdht0500':    _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_025922',    762, but=[16, 37]),
@@ -88,10 +86,19 @@ _add_ds('ntuplev10', {
 'official_mfv_neu_tau00100um_M1600': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025119', 5),
 'official_mfv_neu_tau00300um_M1600': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV10/170127_025148', 5),
 
+'JetHT2016B3': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035716', 1758),
+'JetHT2016C' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035750', 580), 
+'JetHT2016D' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035827', 972, but=[64]),
+'JetHT2016E' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035858', 826, but=[335]),
+'JetHT2016F' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035931', 603),
+'JetHT2016G' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_025401', 1423, but=[790,1063,1267,1298,1339]),
+'JetHT2016H2': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170128_191149', 1541),
+'JetHT2016H3': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170128_191217', 41),
 })
 
-_add({
-('official_mfv_neu_tau10000um_M0800', 'miniaod'): (16, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2_PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/' + x for x in [
+if 0:
+    _add({
+            ('official_mfv_neu_tau10000um_M0800', 'miniaod'): (16, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2_PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/' + x for x in [
                     '08FBE8E9-BEDC-E611-AA3F-0025901AC3EE.root',
                     'FAC3790B-52DC-E611-BB40-001E67E5A39A.root',
                     'F08DE058-BFDC-E611-812C-008CFA11134C.root',
@@ -109,17 +116,6 @@ _add({
                     '84A0F5B5-51DC-E611-A4DF-0025905A6118.root',
                     'DC37A0A8-51DC-E611-A4A4-0CC47A78A456.root'
                     ]])})
-
-_add_ds('ntuplev10partial3', {
-'JetHT2016B3': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035716', 1758),
-'JetHT2016C' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035750', 580), 
-'JetHT2016D' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035827', 972, but=[64]),
-'JetHT2016E' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035858', 826, but=[335]),
-'JetHT2016F' : _fromnum1('/store/user/tucker/JetHT/NtupleV10/170124_035931', 603),
-'JetHT2016G' : ( 731, _fromnumlist('/store/user/tucker/JetHT/NtupleV10/170124_025401', decrabify_list('6-20,22-26,28-47,49-83,85-89,91-130,132-164,166-172,174-213,215-232,234-255,257-292,294-297,299-339,341-358,360-381,383-422,424,426-464,466-502,504-511,513-536,538-552,554-578,580-594,596-639,641-655,657-681,683-709,711-723,725-742,746,748-750,752-757,760-764,766-767,779,801-802,804,819-820,827'))),
-'JetHT2016H2': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170128_191149', 1541),
-'JetHT2016H3': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170128_191217', 41),
-})
 
 _add({('JetHT2016H2', 'fortest'): (1, ['/store/user/tucker/JetHT2016H2.8AAACEA3-B786-E611-953E-02163E013547.root'])})
 _add({('JetHT2016H2', 'miniaodskimtestv1'): (24, ['/store/user/tucker/JetHT/MiniAODSkimTestv1/170209_105600/0000/miniaod_%i.root' % i for i in xrange(24)])})
