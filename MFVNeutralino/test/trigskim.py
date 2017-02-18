@@ -1,6 +1,6 @@
 from JMTucker.Tools.CMSSWTools import *
 
-process = basic_process('BasicAnalyzer', ['/store/user/tucker/JetHT2015C_temp/DC3BB52C-14B5-E511-9D95-0CC47A4D767E.root'])
+process = basic_process('TrigSkim')
 report_every(process, 1000000)
 output_file(process, 'trigskim.root', ['keep *'])
 
@@ -16,12 +16,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     Samples.JetHT2015C.xrootd_url = 'root://cmseos.fnal.gov/'
     Samples.JetHT2015C.json = 'ana_2015.json'
     samples = [Samples.JetHT2015C]
-    
-    for s in samples:
-        s.files_per = 20
+    Samples.JetHT2015C.condor = False
+    Samples.JetHT2015C.files_per = 5
 
     from JMTucker.Tools.MetaSubmitter import MetaSubmitter
-    ms = MetaSubmitter('TrigSkim')
+    ms = MetaSubmitter('TrigSkim_try2')
     ms.common.publish_name = 'TrigSkim'
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
