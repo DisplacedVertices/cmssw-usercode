@@ -26,8 +26,15 @@ def cs_dirs_from_argv():
 def cs_njobs(d):
     return int(open(os.path.join(d, 'njobs')).read())
 
-def cs_cluster(d):
-    return int(open(os.path.join(d, 'cluster')).read())
+def cs_resubs(d):
+    return glob(os.path.join(d, 'resub*'))
+
+def cs_clusters(d):
+    return [int(open(os.path.join(p, 'cluster')).read()) for p in [d] + cs_resubs(d)]
+    
+def cs_kill(d):
+    for c in cs_clusters(d):
+        os.system('condor_rm %s' % c)
 
 def cs_logs(d):
     return glob(os.path.join(d, 'log.*'))
@@ -37,11 +44,15 @@ def cs_job_from_log(fn):
 
 def cs_jobs_running(d):
     jobs = []
-    cluster = str(cs_cluster(d))
-    for line in sub_popen('condor_q -wide %s' % cluster).stdout:
-        if line.startswith(cluster):
-            jobs.append(int(line.split()[0].split('.')[1]))
+    for cluster in cs_clusters(d):
+        cluster = str(cluster)
+        for line in sub_popen('condor_q -wide %s' % cluster).stdout:
+            if line.startswith(cluster):
+                jobs.append(int(line.split()[0].split('.')[1]))
     return jobs
+
+def cs_published(d):
+    return [line.strip() for fn in glob(os.path.join(d, 'publish_*.txt')) if os.path.isfile(fn) for line in open(fn) if line.strip()]
 
 def cs_analyze(d, 
             _re=re.compile(r'return value (\d+)'),

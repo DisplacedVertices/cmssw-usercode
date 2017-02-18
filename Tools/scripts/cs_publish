@@ -50,12 +50,13 @@ for wd in wds:
                     files.append(fn)
     samples.append(sample)
 
+    bn = os.path.basename(files[0]).split('_')[0]
     base = [fn.rsplit('/', 2)[0] for fn in files]
     assert len(set(base)) == 1
     base = base[0]
     nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
     mx = max(nums)
-    code = "[%r + '/%%04i/ntuple_%%i.root' %% (i/1000,i) for i in xrange(%i)]" % (base, mx+1)
+    code = "[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in xrange(%i)]" % (base, bn, mx+1)
     missing = sorted(set(range(1,mx+1)) - set(nums))
     if missing:
         code = code.replace(']', ' if i not in %r]' % missing)

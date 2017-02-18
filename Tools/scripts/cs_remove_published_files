@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+from JMTucker.Tools.CondorTools import *
+
+for wd in cs_dirs_from_argv():
+    for fn in cs_published(wd):
+        assert fn.startswith('root://cmseos.fnal.gov/')
+        fn = fn.replace('root://cmseos.fnal.gov/', '')
+        os.system('eos root://cmseos.fnal.gov rm %s' % fn)
+
+    
