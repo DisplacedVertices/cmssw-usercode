@@ -334,14 +334,16 @@ for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
           qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
     x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
 
+for x in (ttbar,):
+    x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
+
 for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000,
           qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext,
           ttbar):
     x.condor = True
     x.xrootd_url = 'root://cmseos.fnal.gov/'
 
-JetHT2015C.condor = True
-JetHT2015C.xrootd_url = 'root://se01.indiacms.res.in/' # will this work? need to comment out the file list in SampleFiles that points to my copy
+#JetHT2015C.condor = True
 
 JetHT2015D.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
