@@ -111,9 +111,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if s.is_mc and filter_eff.has_key(s.name):
             s.events_per = min(int(25000/filter_eff[s.name]), 200000)
 
-    from JMTucker.Tools.MetaSubmitter import MetaSubmitter, is_mc_pset_modifier
+    from JMTucker.Tools.MetaSubmitter import *
+    skips = {
+        'qcdht0700ext': {'lumis': '135728', 'events': '401297681'},
+        'qcdht1000ext': {'lumis': '32328',  'events': '108237235'},
+        }
+    modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips))
     ms = MetaSubmitter(batch_name)
-    ms.common.pset_modifier = is_mc_pset_modifier
+    ms.common.pset_modifier = modify
     ms.common.publish_name = batch_name
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
