@@ -14,7 +14,7 @@ class event_veto_modifier:
     def __init__(self, d):
         self.d = d
     def __call__(self, sample):
-        to_replace = []
+        to_add, to_replace = [], []
         if self.d.has_key(sample.name):
             d2 = self.d[sample.name]
             if d2.has_key('runs'):
