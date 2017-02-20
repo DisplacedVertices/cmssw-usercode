@@ -26,14 +26,14 @@ def _add_ds(ds, d, allow_overwrite=False):
         d2[(k,ds)] = d[k]
     _add(d2, allow_overwrite)
 
-def _fromnumlist(path, numlist, but=[], fnbase='ntuple'):
-    return [path + '/%04i/%s_%i.root' % (i/1000, fnbase, i) for i in numlist if i not in but]
+def _fromnumlist(path, numlist, but=[], fnbase='ntuple', add=[]):
+    return add + [path + '/%04i/%s_%i.root' % (i/1000, fnbase, i) for i in numlist if i not in but]
 
-def _fromnum1(path, n, but=[], fnbase='ntuple'): # crab starts job numbering at 1
-    l = _fromnumlist(path, xrange(1,n+1), but, fnbase)
+def _fromnum1(path, n, but=[], fnbase='ntuple', add=[]): # crab starts job numbering at 1
+    l = _fromnumlist(path, xrange(1,n+1), but, fnbase, add)
     return (len(l), l)
 
-def _fromnum0(path, n, but=[], fnbase='ntuple'): # condorsubmitter starts at 0
+def _fromnum0(path, n, but=[], fnbase='ntuple', add=[]): # condorsubmitter starts at 0
     l = _fromnumlist(path, xrange(n), but, fnbase)
     return (len(l), l)
 
@@ -96,7 +96,30 @@ _add_ds('ntuplev10', {
 
 # ntuplev11
 _add_ds('ntuplev11', {
+
+'xx4j_tau00001mm_M0300': (1, ['/store/user/tucker/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV11/170217_035609/0000/ntuple_1.root']),
+'xx4j_tau00001mm_M0700': (1, ['/store/user/tucker/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV11/170217_035706/0000/ntuple_1.root']),
+'xx4j_tau00010mm_M0300': (1, ['/store/user/tucker/XXTo4J_M-300_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/NtupleV11/170217_035637/0000/ntuple_1.root']),
+'xx4j_tau00010mm_M0700': (1, ['/store/user/tucker/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/NtupleV11/170217_035733/0000/ntuple_1.root']),
+
+'mfv_neu_tau00100um_M0800': _fromnum0('/store/user/tucker/mfv_neu_tau00100um_M0800/NtupleV11/170216_215734', 3),
+'mfv_neu_tau00300um_M0800': _fromnum0('/store/user/tucker/mfv_neu_tau00300um_M0800/NtupleV11/170216_215734', 3),
+'mfv_neu_tau01000um_M0800': _fromnum0('/store/user/tucker/mfv_neu_tau01000um_M0800/NtupleV11/170216_215734', 3),
+'mfv_neu_tau10000um_M0800': _fromnum0('/store/user/tucker/mfv_neu_tau10000um_M0800/NtupleV11/170216_215734', 3),
+
+'qcdht0500': _fromnum0('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht0500/170217_145716', 69),
+'qcdht0700': _fromnum0('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht0700/170217_145716', 67),
+'qcdht1000': _fromnum0('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht1000/170217_145716', 25),
+'qcdht1500': _fromnum0('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht1500/170217_145716', 20),
+'qcdht2000': _fromnum0('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht2000/170217_145716', 12),
+'qcdht0500ext': _fromnum0('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht0500ext/170217_145716', 165),
+'qcdht0700ext': _fromnum0('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht0700ext/170217_145716', 118, but=[28], add=['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht0700ext/170219_133443/0000/ntuple_28.root']),
+'qcdht1000ext': _fromnum0('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht1000ext/170217_145716', 51, but=[24], add=['/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht1000ext/170219_134011/0000/ntuple_24.root']),
+'qcdht1500ext': _fromnum0('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht1500ext/170217_145716', 32),
+'qcdht2000ext': _fromnum0('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_qcdht2000ext/170217_145716', 21),
 'ttbar': _fromnum0('/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV11/170216_215734', 139),
+
+'JetHT2015C': _fromnum0('/store/user/tucker/JetHT/NtupleV11/170216_215734', 7),
 })
 
 ################################################################################
