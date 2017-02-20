@@ -193,8 +193,7 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   100000)
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   99004)
 
-for x in (JetHT2016B3, JetHT2016G,
-          SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
+for x in (SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
           qcdht0500, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau00100um_M0800,
