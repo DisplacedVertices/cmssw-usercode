@@ -325,18 +325,6 @@ _adbp3('sim', '/mfv_neu_tau10000um_M0800/tucker-sim_10k-c66f4a7649a68ea5b6afdf05
 _adbp3('sim', '/mfv_neu_tau10000um_M1200/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9600) # 48 files
 _adbp3('sim', '/mfv_neu_tau10000um_M1600/tucker-sim_10k-c66f4a7649a68ea5b6afdf05975ce9cf/USER',  9600) # 48 files
 
-# condor-run ntuples
-JetHT2015C.add_dataset('ntuplev10', '/JetHT/None/None')
-
-for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
-          mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
-          xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700,
-          qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
-    x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
-
-for x in (ttbar,):
-    x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
-
 for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000,
           qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext,
           ttbar):
@@ -377,6 +365,28 @@ JetHT2015D                     T2_CH_CERN T2_CH_CSCS T2_DE_DESY T2_US_Nebraska T
 SingleMuon2015C                T2_BE_IIHE T2_BE_UCL T2_BR_SPRACE T2_CH_CSCS T2_DE_DESY T2_IT_Legnaro T2_IT_Rome T2_US_Vanderbilt T3_CH_PSI T3_US_FNALLPC
 SingleMuon2015D                T2_BE_IIHE T2_BR_SPRACE T2_CH_CERN T2_CH_CSCS T2_DE_DESY T2_IT_Legnaro T2_IT_Pisa T2_TH_CUNSTDA T2_US_Florida T3_US_Colorado T3_US_FNALLPC T3_US_PuertoRico
 '''
+
+# ntuples
+
+# crab-run
+_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-47b4d92ab7c9e362250fb90d61403b2e/USER',  4059) # 1 files
+_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-4dbc3d9997f1942245d06c2c0975b498/USER',  9899) # 1 files
+_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-ccc57cf4f7777cad4fc82c378fe4034c/USER', 3523) # 1 files
+_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-c5f8067ba76a07bc0223df2865ed288d/USER', 9868) # 1 files
+
+# condor-run
+JetHT2015C.add_dataset('ntuplev10', '/JetHT/None/None')
+JetHT2015C.add_dataset('ntuplev11', '/JetHT/None/None')
+
+for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
+          mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
+          xx4j_tau00001mm_M0300, xx4j_tau00001mm_M0700, xx4j_tau00010mm_M0300, xx4j_tau00010mm_M0700,
+          qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000ext):
+    x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
+
+for x in (mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
+          ttbar, qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext):
+    x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
 
 ########################################################################
 
