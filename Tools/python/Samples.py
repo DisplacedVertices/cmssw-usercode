@@ -194,7 +194,7 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_Tu
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   99004)
 
 for x in (SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
-          qcdht0500, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext,
+          qcdht0500, qcdht1500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500ext,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau00100um_M0800,
           official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600):
@@ -206,6 +206,15 @@ for x in (JetHT2016B3,
           official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau01000um_M0400, official_mfv_neu_tau00100um_M0800,
           official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600):
     x.datasets['miniaod'].condor = True
+
+for x in (official_mfv_neu_tau00100um_M0800, qcdht0500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext):
+    x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
+
+official_mfv_neu_tau00300um_M0800.add_dataset('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-f8accded35148baf419dc8a8895faecd/USER', 99349)
+official_mfv_neu_tau10000um_M0800.add_dataset('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-6f9590d29f299702b0303bba964b9b86/USER', 98639)
+qcdht1000.add_dataset('ntuplev11', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-2d5962ffa78f8ab85f960c7fe846404b/USER', 4838788)
+qcdht2000.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-df8522cc708057e6d4d7bdca37f1ad35/USER', 1991645)
+qcdht2000ext.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-b2cadb9c972c89c96ec11f8287fd9a9f/USER', 4047360)
 
 ########################################################################
 

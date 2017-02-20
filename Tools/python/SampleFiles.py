@@ -96,6 +96,26 @@ _add_ds('ntuplev10', {
 'JetHT2016H3': _fromnum1('/store/user/tucker/JetHT/NtupleV10/170128_191217', 41),
 })
 
+_add_ds('ntuplev11', {
+
+'official_mfv_neu_tau00100um_M0800': _fromnum0('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV11_2016/170216_225918', 2),
+'official_mfv_neu_tau00300um_M0800': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV11_2016/170217_045836', 5),
+'official_mfv_neu_tau10000um_M0800': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV11_2016/170217_050124', 5),
+
+'qcdht0500': _fromnum0('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_qcdht0500/170217_151519', 115),
+
+'qcdht1000': _fromnum1('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016/170217_045658', 195),
+'qcdht1500': _fromnum0('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_qcdht1500/170217_151519', 34),
+'qcdht2000': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016/170217_045736', 80),
+
+'qcdht0500ext': _fromnum0('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_qcdht0500ext/170217_151519', 269),
+'qcdht0700ext': _fromnum0('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_qcdht0700ext/170217_151519', 176),
+'qcdht1000ext': _fromnum0('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_qcdht1000ext/170217_151519', 73),
+'qcdht1500ext': _fromnum0('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_qcdht1500ext/170217_151519', 64),
+'qcdht2000ext': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016/170217_045806', 163),
+
+})
+
 if 0:
     _add({
             ('official_mfv_neu_tau10000um_M0800', 'miniaod'): (16, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2_PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/' + x for x in [
