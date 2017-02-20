@@ -34,7 +34,7 @@ def _fromnum1(path, n, but=[], fnbase='ntuple', add=[]): # crab starts job numbe
     return (len(l), l)
 
 def _fromnum0(path, n, but=[], fnbase='ntuple', add=[]): # condorsubmitter starts at 0
-    l = _fromnumlist(path, xrange(n), but, fnbase)
+    l = _fromnumlist(path, xrange(n), but, fnbase, add)
     return (len(l), l)
 
 def dump():
