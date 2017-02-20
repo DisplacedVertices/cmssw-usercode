@@ -2,13 +2,53 @@ import sys
 from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 
-def is_mc_pset_modifier(sample):
+def is_mc_modifier(sample):
     to_replace = []
     if not sample.is_mc:
         magic = 'is_mcX=XTrue'.replace('X', ' ')
         err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
         to_replace.append((magic, 'is_mc = False', err))
     return [], to_replace
+
+class event_veto_modifier:
+    def __init__(self, d):
+        self.d = d
+    def __call__(self, sample):
+        to_add, to_replace = [], []
+        if self.d.has_key(sample.name):
+            d2 = self.d[sample.name]
+            if d2.has_key('runs'):
+                x = '''
+process.eventVeto = cms.EDFilter('EventIdVeto',
+                                 list_fn = cms.string(''),
+                                 use_run = cms.bool(True),
+                                 runs = cms.vuint32(%(runs)s),
+                                 lumis = cms.vuint32(%(lumis)s),
+                                 events = cms.vuint64(%(events)s))
+process.pevtsel.insert(0, process.eventVeto)
+'''
+            else:
+                x = '''
+process.eventVeto = cms.EDFilter('EventIdVeto',
+                                 list_fn = cms.string(''),
+                                 use_run = cms.bool(False),
+                                 lumis = cms.vuint32(%(lumis)s),
+                                 events = cms.vuint64(%(events)s))
+process.pevtsel.insert(0, process.eventVeto)
+'''
+            to_add = [x % d2]
+        return to_add, to_replace
+
+class chain_modifiers:
+    def __init__(self, *modifiers):
+        self.modifiers = modifiers
+    def __call__(self, sample):
+        to_add, to_replace = [], []
+        for m in self.modifiers:
+            a,b = m(sample)
+            to_add.extend(a)
+            to_replace.extend(b)
+        return to_add, to_replace
 
 class MetaSubmitter:
     class args:

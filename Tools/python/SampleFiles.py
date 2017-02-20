@@ -28,15 +28,15 @@ def _add_ds(ds, d, allow_overwrite=False):
         d2[(k,ds)] = d[k]
     _add(d2, allow_overwrite)
 
-def _fromnumlist(path, numlist, but=[], fnbase='ntuple'):
-    return [path + '/%04i/%s_%i.root' % (i/1000, fnbase, i) for i in numlist if i not in but]
+def _fromnumlist(path, numlist, but=[], fnbase='ntuple', add=[]):
+    return add + [path + '/%04i/%s_%i.root' % (i/1000, fnbase, i) for i in numlist if i not in but]
 
-def _fromnum1(path, n, but=[], fnbase='ntuple'): # crab starts job numbering at 1
-    l = _fromnumlist(path, xrange(1,n+1), but, fnbase)
+def _fromnum1(path, n, but=[], fnbase='ntuple', add=[]): # crab starts job numbering at 1
+    l = _fromnumlist(path, xrange(1,n+1), but, fnbase, add)
     return (len(l), l)
 
-def _fromnum0(path, n, but=[], fnbase='ntuple'): # condorsubmitter starts at 0
-    l = _fromnumlist(path, xrange(n), but, fnbase)
+def _fromnum0(path, n, but=[], fnbase='ntuple', add=[]): # condorsubmitter starts at 0
+    l = _fromnumlist(path, xrange(n), but, fnbase, add)
     return (len(l), l)
 
 def dump():

@@ -52,21 +52,27 @@ for wd in wds:
 
     bn = os.path.basename(files[0]).split('_')[0]
     base = [fn.rsplit('/', 2)[0] for fn in files]
-    assert len(set(base)) == 1
-    base = base[0]
-    nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
-    mx = max(nums)
-    code = "[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in xrange(%i)]" % (base, bn, mx+1)
-    missing = sorted(set(range(1,mx+1)) - set(nums))
-    if missing:
-        code = code.replace(']', ' if i not in %r]' % missing)
-    l = eval(code)
-    assert set(l) == set(files)
-    publish[(sample, options.dataset)] = (len(files), code)
+    if len(set(base)) == 1:
+        base = base[0]
+        nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
+        mx = max(nums)
+        code = "[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in xrange(%i)]" % (base, bn, mx+1)
+        missing = sorted(set(range(1,mx+1)) - set(nums))
+        if missing:
+            code = code.replace(']', ' if i not in %r]' % missing)
+        l = eval(code)
+        assert set(l) == set(files)
+        publish[(sample, options.dataset)] = (len(files), code)
+    else:
+        publish[(sample, options.dataset)] = (len(files), files)
 
 print 'new entries:'
-for k, (n,c) in publish.iteritems():
-    print k, ': (', n, ',', c, ')'
+for k in sorted(publish.keys()):
+    n,c = publish[k]
+    if type(c) == str:
+        print k, ': (', n, ',', c, ')'
+    else:
+        pprint((k,(n,c)))
 encoded = _enc(publish)
 print '\nline for SampleFiles (len(repr(publish)) = %i, len(encoded) = %i):' % (len(repr(publish)), len(encoded))
 print "_add('%s')" % encoded

@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+import os
+from glob import glob
+from JMTucker.Tools.CondorTools import *
+from JMTucker.Tools import colors
+
+for wd in cs_dirs_from_argv():
+    wd = os.path.abspath(wd)
+    print colors.bold(wd)
+    for fn in glob(os.path.join(wd, '*.*')):
+        if os.path.islink(fn):
+            ln = os.readlink(fn)
+            if '/resub' in ln:
+                ln2 = wd + '/resub' + ln.split('/resub')[1]
+                print fn, '->', ln, '=>', ln2
+                os.remove(fn)
+                os.symlink(ln2, fn)
