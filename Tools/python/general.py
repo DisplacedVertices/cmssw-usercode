@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys, gzip, cPickle, subprocess, glob, time
+from pprint import pprint
 
 def big_warn(s):
     x = '#' * 80
@@ -16,6 +17,27 @@ def bool_from_argv(s, remove=True, return_pos=False):
     if val and remove:
         sys.argv.remove(s)
     return ret
+
+def coderep_files(files, nstart):
+    assert nstart in (0,1)
+    bn = os.path.basename(files[0]).split('_')[0]
+    base = [fn.rsplit('/', 2)[0] for fn in files]
+    if len(set(base)) == 1:
+        base = base[0]
+        nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
+        mx = max(nums)
+        range_code = 'xrange(%i)' if nstart == 0 else 'xrange(1,%i)' 
+        code = ("[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in " + range_code + "]") % (base, bn, mx+1)
+        missing = sorted(set(range(nstart,mx+nstart)) - set(nums))
+        if missing:
+            code = code.replace(']', ' if i not in %r]' % missing)
+        l = eval(code)
+        if set(l) != set(files):
+            x = set(l); y = set(files); print 'x-y'; pprint(x-y); print 'y-x'; pprint(y-x)
+            assert 0
+        return code
+    else:
+        return None
 
 def from_pickle(fn, comp=False):
     if comp or '.gzpickle' in fn:

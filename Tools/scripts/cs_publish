@@ -4,6 +4,7 @@ import os, sys, fnmatch, argparse
 from pprint import pprint
 from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_njobs
 from JMTucker.Tools.SampleFiles import _enc
+from JMTucker.Tools.general import coderep_files
 
 parser = argparse.ArgumentParser(description = 'cs_publish: get the staged-out files from condor directories and print out lines for SampleFiles.py',
                                  usage = '%(prog)s [options] condor_dirs')
@@ -50,21 +51,8 @@ for wd in wds:
                     files.append(fn)
     samples.append(sample)
 
-    bn = os.path.basename(files[0]).split('_')[0]
-    base = [fn.rsplit('/', 2)[0] for fn in files]
-    if len(set(base)) == 1:
-        base = base[0]
-        nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
-        mx = max(nums)
-        code = "[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in xrange(%i)]" % (base, bn, mx+1)
-        missing = sorted(set(range(1,mx+1)) - set(nums))
-        if missing:
-            code = code.replace(']', ' if i not in %r]' % missing)
-        l = eval(code)
-        assert set(l) == set(files)
-        publish[(sample, options.dataset)] = (len(files), code)
-    else:
-        publish[(sample, options.dataset)] = (len(files), files)
+    code = coderep_files(files)
+    publish[(sample, options.dataset)] = (len(files), code if code is not None else files)
 
 print 'new entries:'
 for k in sorted(publish.keys()):
