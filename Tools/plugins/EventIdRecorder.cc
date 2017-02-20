@@ -14,6 +14,8 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
+  edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
+
   const bool check_gen_particles;
   unsigned run;
   unsigned lumi;
@@ -25,6 +27,9 @@ private:
 EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg) 
   : check_gen_particles(cfg.existsAs<bool>("check_gen_particles") && cfg.getParameter<bool>("check_gen_particles"))
 {
+  if (check_gen_particles)
+    gen_particles_token = consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
+
   edm::Service<TFileService> fs;
 
   tree = fs->make<TTree>("event_ids", "");
@@ -46,7 +51,7 @@ void EventIdRecorder::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   if (check_gen_particles) {
     edm::Handle<reco::GenParticleCollection> gens;
-    event.getByLabel("genParticles", gens);
+    event.getByToken(gen_particles_token, gens);
     first_parton_pz = gens->at(2).pz();
   }
 
