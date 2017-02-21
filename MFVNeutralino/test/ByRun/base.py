@@ -58,6 +58,8 @@ class ByRunPlotter:
                 if type(n) == int:
                     y = n
                     yl, yh = poisson_interval(n)
+                elif type(n) == float:
+                    y = yl = yh = n
                 elif type(n) == tuple:
                     if len(n) == 2:
                         y = n[0]
