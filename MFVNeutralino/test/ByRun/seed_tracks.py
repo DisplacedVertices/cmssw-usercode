@@ -17,9 +17,10 @@ for mn,mx in (3,3), (3,4), (4,4):
 
     vtx = process.mfvSelectedVerticesTight.clone(min_ntracks = mn, max_ntracks = mx)
 
-    obj = cms.EDAnalyzer('MFVByRunStuff',
+    obj = cms.EDAnalyzer('MFVByX',
                          event_src = cms.InputTag('mfvEvent'),
                          vertex_src = cms.InputTag(vtx_name),
+                         by_run = cms.bool(True),
                          )
 
     pth = cms.Path(process.mfvAnalysisCuts * vtx * obj)
