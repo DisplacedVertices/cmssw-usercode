@@ -40,5 +40,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sample.files_per = 10
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('ByNpuV11_15', dataset='ntuplev11')
+    cs = CondorSubmitter('ByNpuV11_16', dataset='ntuplev11')
     cs.submit_all(samples)
