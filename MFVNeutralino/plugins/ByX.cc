@@ -8,14 +8,17 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
-class MFVByRunSeedTracks : public edm::EDAnalyzer {
+class MFVByX : public edm::EDAnalyzer {
  public:
-  explicit MFVByRunSeedTracks(const edm::ParameterSet&);
+  explicit MFVByX(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
  private:
   const edm::EDGetTokenT<MFVEvent> event_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
+
+  const bool by_run;
+  const bool by_npu;
 
   ByRunTH1<TH1F> h_n_vertex_seed_tracks[2];
   ByRunTH1<TH1F> h_vertex_seed_track_chi2dof[2];
@@ -53,10 +56,15 @@ class MFVByRunSeedTracks : public edm::EDAnalyzer {
   ByRunTH1<TH1F> h_vertex_bs2derr[2];
 };
 
-MFVByRunSeedTracks::MFVByRunSeedTracks(const edm::ParameterSet& cfg)
+MFVByX::MFVByX(const edm::ParameterSet& cfg)
   : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
-    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src")))
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    by_run(cfg.existsAs<bool>("by_run") && cfg.getParameter<bool>("by_run")),
+    by_npu(cfg.existsAs<bool>("by_npu") && cfg.getParameter<bool>("by_npu"))
 {
+  if (by_run + by_npu != 1)
+    throw cms::Exception("exactly one of the by_ parameters must be 1");
+
   edm::Service<TFileService> fs;
 
   for (int i = 0; i < 2; ++i) {
@@ -97,11 +105,14 @@ MFVByRunSeedTracks::MFVByRunSeedTracks(const edm::ParameterSet& cfg)
   h_vertex_bs2derr[1].set(&fs, "h_vertex_bs2derr_1", ";#sigma(vertex d_{BV}) (cm);events/0.25 #mum", 100, 0, 0.0025);
 }
 
-void MFVByRunSeedTracks::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  const unsigned run = event.id().run();
-
+void MFVByX::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<MFVEvent> mevent;
   event.getByToken(event_token, mevent);
+
+  const unsigned by =
+      by_run ? event.id().run() 
+    : by_npu ? unsigned(mevent->npu)
+    : 1;
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByToken(vertex_token, vertices);
@@ -109,46 +120,46 @@ void MFVByRunSeedTracks::analyze(const edm::Event& event, const edm::EventSetup&
   if (nsv >= 2)
     return;
 
-  h_njets[nsv][run]->Fill(mevent->njets());
-  h_jetpt1[nsv][run]->Fill(mevent->njets() >= 1 ? mevent->jet_pt[0] : 0.f);
-  h_jetpt2[nsv][run]->Fill(mevent->njets() >= 2 ? mevent->jet_pt[1] : 0.f);
-  h_jetpt3[nsv][run]->Fill(mevent->njets() >= 3 ? mevent->jet_pt[2] : 0.f);
-  h_jetpt4[nsv][run]->Fill(mevent->jetpt4());
-  h_ht40[nsv][run]->Fill(mevent->jet_ht(40));
-  h_ht[nsv][run]->Fill(mevent->jet_ht());
+  h_njets[nsv][by]->Fill(mevent->njets());
+  h_jetpt1[nsv][by]->Fill(mevent->njets() >= 1 ? mevent->jet_pt[0] : 0.f);
+  h_jetpt2[nsv][by]->Fill(mevent->njets() >= 2 ? mevent->jet_pt[1] : 0.f);
+  h_jetpt3[nsv][by]->Fill(mevent->njets() >= 3 ? mevent->jet_pt[2] : 0.f);
+  h_jetpt4[nsv][by]->Fill(mevent->jetpt4());
+  h_ht40[nsv][by]->Fill(mevent->jet_ht(40));
+  h_ht[nsv][by]->Fill(mevent->jet_ht());
 
-  h_trig[nsv][run]->Fill(0);
-  h_ananjets[nsv][run]->Fill(mevent->njets() >= 4);
-  h_anaht[nsv][run]->Fill(mevent->jet_ht(40) >= 1000);
-  h_ana[nsv][run]->Fill(mevent->njets() >= 4 && mevent->jet_ht(40) >= 1000);
+  h_trig[nsv][by]->Fill(0);
+  h_ananjets[nsv][by]->Fill(mevent->njets() >= 4);
+  h_anaht[nsv][by]->Fill(mevent->jet_ht(40) >= 1000);
+  h_ana[nsv][by]->Fill(mevent->njets() >= 4 && mevent->jet_ht(40) >= 1000);
 
   const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
-  h_n_vertex_seed_tracks[nsv][run]->Fill(n_vertex_seed_tracks);
+  h_n_vertex_seed_tracks[nsv][by]->Fill(n_vertex_seed_tracks);
   for (size_t i = 0; i < n_vertex_seed_tracks; ++i) {
-    h_vertex_seed_track_chi2dof  [nsv][run]->Fill(mevent->vertex_seed_track_chi2dof[i]);
-    h_vertex_seed_track_q        [nsv][run]->Fill(mevent->vertex_seed_track_q(i));
-    h_vertex_seed_track_pt       [nsv][run]->Fill(mevent->vertex_seed_track_pt(i));
-    h_vertex_seed_track_eta      [nsv][run]->Fill(mevent->vertex_seed_track_eta[i]);
-    h_vertex_seed_track_phi      [nsv][run]->Fill(mevent->vertex_seed_track_phi[i]);
-    h_vertex_seed_track_dxy      [nsv][run]->Fill(mevent->vertex_seed_track_dxy[i]);
-    h_vertex_seed_track_dz       [nsv][run]->Fill(mevent->vertex_seed_track_dz[i]);
-    h_vertex_seed_track_adxy     [nsv][run]->Fill(fabs(mevent->vertex_seed_track_dxy[i]));
-    h_vertex_seed_track_adz      [nsv][run]->Fill(fabs(mevent->vertex_seed_track_dz[i]));
-    h_vertex_seed_track_npxhits  [nsv][run]->Fill(mevent->vertex_seed_track_npxhits(i));
-    h_vertex_seed_track_nsthits  [nsv][run]->Fill(mevent->vertex_seed_track_nsthits(i));
-    h_vertex_seed_track_nhits    [nsv][run]->Fill(mevent->vertex_seed_track_nhits(i));
-    h_vertex_seed_track_npxlayers[nsv][run]->Fill(mevent->vertex_seed_track_npxlayers(i));
-    h_vertex_seed_track_nstlayers[nsv][run]->Fill(mevent->vertex_seed_track_nstlayers(i));
-    h_vertex_seed_track_nlayers  [nsv][run]->Fill(mevent->vertex_seed_track_nlayers(i));
+    h_vertex_seed_track_chi2dof  [nsv][by]->Fill(mevent->vertex_seed_track_chi2dof[i]);
+    h_vertex_seed_track_q        [nsv][by]->Fill(mevent->vertex_seed_track_q(i));
+    h_vertex_seed_track_pt       [nsv][by]->Fill(mevent->vertex_seed_track_pt(i));
+    h_vertex_seed_track_eta      [nsv][by]->Fill(mevent->vertex_seed_track_eta[i]);
+    h_vertex_seed_track_phi      [nsv][by]->Fill(mevent->vertex_seed_track_phi[i]);
+    h_vertex_seed_track_dxy      [nsv][by]->Fill(mevent->vertex_seed_track_dxy[i]);
+    h_vertex_seed_track_dz       [nsv][by]->Fill(mevent->vertex_seed_track_dz[i]);
+    h_vertex_seed_track_adxy     [nsv][by]->Fill(fabs(mevent->vertex_seed_track_dxy[i]));
+    h_vertex_seed_track_adz      [nsv][by]->Fill(fabs(mevent->vertex_seed_track_dz[i]));
+    h_vertex_seed_track_npxhits  [nsv][by]->Fill(mevent->vertex_seed_track_npxhits(i));
+    h_vertex_seed_track_nsthits  [nsv][by]->Fill(mevent->vertex_seed_track_nsthits(i));
+    h_vertex_seed_track_nhits    [nsv][by]->Fill(mevent->vertex_seed_track_nhits(i));
+    h_vertex_seed_track_npxlayers[nsv][by]->Fill(mevent->vertex_seed_track_npxlayers(i));
+    h_vertex_seed_track_nstlayers[nsv][by]->Fill(mevent->vertex_seed_track_nstlayers(i));
+    h_vertex_seed_track_nlayers  [nsv][by]->Fill(mevent->vertex_seed_track_nlayers(i));
   }
 
   if (nsv == 1) {
     const MFVVertexAux& v = vertices->at(0);
-    h_vertex_x[1][run]->Fill(v.x - mevent->bsx_at_z(v.z));
-    h_vertex_y[1][run]->Fill(v.y - mevent->bsy_at_z(v.z));
-    h_vertex_dbv[1][run]->Fill(mevent->bs2ddist(v));
-    h_vertex_bs2derr[1][run]->Fill(v.bs2derr);
+    h_vertex_x[1][by]->Fill(v.x - mevent->bsx_at_z(v.z));
+    h_vertex_y[1][by]->Fill(v.y - mevent->bsy_at_z(v.z));
+    h_vertex_dbv[1][by]->Fill(mevent->bs2ddist(v));
+    h_vertex_bs2derr[1][by]->Fill(v.bs2derr);
   }
 }
 
-DEFINE_FWK_MODULE(MFVByRunSeedTracks);
+DEFINE_FWK_MODULE(MFVByX);
