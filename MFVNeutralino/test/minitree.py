@@ -33,26 +33,26 @@ for mn,mx in (3,3), (3,4), (4,4):
     setattr(process, pth_name, pth)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples
-
-    samples = Samples.registry.from_argv(
-        Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        Samples.mfv_signal_samples + \
-        Samples.mfv_signal_samples_lq2 + \
-        Samples.xx4j_samples
-        )
-
     samples = Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
 
     for sample in samples:
-        sample.files_per = 50
+        sample.files_per = 20
         if not sample.is_mc:
-            sample.json = 'ana_2015.json'
+            sample.json = 'ana_2015p6.json'
 
-    cs = CondorSubmitter('MinitreeV10', dataset = 'ntuplev10')
+    def modify(sample):
+        to_add, to_replace = [], []
+        if not sample.is_mc:
+            to_add.append('del process.p')
+        return to_add, to_replace
+
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    cs = CondorSubmitter('MinitreeV11_15',
+                         dataset = 'ntuplev11',
+                         pset_modifier = modify
+                         )
     cs.submit_all(samples)
