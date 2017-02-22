@@ -1010,15 +1010,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         Measurement1D v_dist = vertex_dist(*v[0], *v[1]);
         if (verbose)
           printf("   vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, v_dist.value(), v_dist.significance());
-        if (histos) {
-          double maxtrackdxyerr = 0;
-          for (auto tk : tracks[0])
-            if (tk->dxyError() > maxtrackdxyerr)
-              maxtrackdxyerr = tk->dxyError();
-          for (auto tk : tracks[1])
-            if (tk->dxyError() > maxtrackdxyerr)
-              maxtrackdxyerr = tk->dxyError();
-        }
 
         if (v_dist.value() < merge_shared_dist || v_dist.significance() < merge_shared_sig) {
           if (verbose) printf("          dist < %7.3f || sig < %7.3f, will try using merge result first before arbitration\n", merge_shared_dist, merge_shared_sig);
@@ -1193,7 +1184,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                                vsave[0].y() - vsave[1].y());
         if (ntk_max >= 2)
           h_erase_d2d[ntk_max][run]->Fill(d2d);
-        h_erase_d2d[ntk_max][run]->Fill(d2d);
+        h_erase_d2d[0][run]->Fill(d2d);
       }
 
       if (erase[1]) vertices->erase(v[1]);
