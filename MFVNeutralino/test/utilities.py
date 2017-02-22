@@ -36,6 +36,18 @@ def cmd_merge_background():
     print cmd
     os.system(cmd)
 
+def cmd_effsprint():
+    for which, which_files in [('background', '.'), ('signals', 'mfv*root xx4j*root')]:
+        for ntk in (3,4,'3or4',5):
+            for vtx in (1,2):
+                out = 'effsprint_%s_ntk%s_%iv' % (which, ntk, vtx)
+                cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/MFVNeutralino/test/effsprint.py'
+                cmd += ' ntk%s' % ntk
+                if vtx == 1:
+                    cmd += ' one'
+                print cmd
+                os.system('%s %s | tee %s' % (cmd, which_files, out))
+                print
 ####
 
 cmd = sys.argv[1] if len(sys.argv) > 1 else ''
