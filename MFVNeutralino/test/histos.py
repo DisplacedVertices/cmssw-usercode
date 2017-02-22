@@ -68,10 +68,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
 
     for sample in samples:
-        sample.files_per = 50
+        sample.files_per = 20
         if not sample.is_mc:
             sample.json = 'ana_2015p6.json'
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV10_16', dataset='ntuplev10')
+    cs = CondorSubmitter('HistosV11_16', dataset='ntuplev11')
     cs.submit_all(samples)
