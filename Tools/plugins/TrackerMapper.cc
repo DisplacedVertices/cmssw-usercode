@@ -55,6 +55,10 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1F* h_tracks_absdxy[3];
   TH1F* h_tracks_sigmadxy_dxyslices[3][6];
   TH1F* h_ntracks_dxyslices[3][6];
+
+  TH2F* h_dxyerr_v_ptcut[2];
+  TH2F* h_dxyerr_v_npxlayerscut[2];
+  TH2F* h_dxyerr_v_nstlayerscut[2];
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -101,6 +105,13 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
       h_tracks_sigmadxy_dxyslices[i][j] = fs->make<TH1F>(TString::Format("h_%s_tracks_sigmadxy_dxy%d", ex[i], j), TString::Format("%s tracks with %.2f <= |dxy| < %.2f;tracks sigmadxy;arb. units", ex[i], 0.01*j, 0.01*(j+1)), 200, 0, 20);
       h_ntracks_dxyslices[i][j] = fs->make<TH1F>(TString::Format("h_%s_ntracks_dxy%d", ex[i], j), TString::Format(";number of %s tracks with %.2f <= |dxy| < %.2f;events", ex[i], 0.01*j, 0.01*(j+1)), 500, 0, 500);
     }
+  }
+
+  const char* ex2[2] = {"all", "nm1"};
+  for (int i = 0; i < 2; ++i) {
+    h_dxyerr_v_ptcut[i] = fs->make<TH2F>(TString::Format("h_%s_dxyerr_v_ptcut", ex2[i]), "", 40, 0, 20, 100, 0, 0.2);
+    h_dxyerr_v_npxlayerscut[i] = fs->make<TH2F>(TString::Format("h_%s_dxyerr_v_npxlayerscut", ex2[i]), "", 5, 0, 5, 100, 0, 0.2);
+    h_dxyerr_v_nstlayerscut[i] = fs->make<TH2F>(TString::Format("h_%s_dxyerr_v_nstlayerscut", ex2[i]), "", 15, 0, 15, 100, 0, 0.2);
   }
 }
 
@@ -150,14 +161,33 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   int ntracks_dxyslices[3][6] = {{0}, {0}, {0}};
   for (const reco::Track& tk : *tracks) {
     TrackerSpaceExtents tracker_extents;
-    double pt = tk.pt();
-    double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false).min_r;
-    double npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
-    double nstlayers = tk.hitPattern().stripLayersWithMeasurement();
-    double sigmadxybs = fabs(tk.dxy(*beamspot) / tk.dxyError());
+    const double pt = tk.pt();
+    const double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false).min_r;
+    const double npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
+    const double nstlayers = tk.hitPattern().stripLayersWithMeasurement();
+    const double sigmadxybs = fabs(tk.dxy(*beamspot) / tk.dxyError());
 
     const bool sel = pt > 1 && min_r <= 1 && npxlayers >= 2 && nstlayers >= 3;
     const bool seed = sel && sigmadxybs > 4;
+
+    const bool nm1_sel[3] = {
+      min_r <= 1 && npxlayers >= 2 && nstlayers >= 3,
+      min_r <= 1 && pt > 1 && nstlayers >= 3,
+      min_r <= 1 && pt > 1 && npxlayers >= 2
+    };
+    const double nm1_v[3] = { pt, npxlayers, nstlayers };
+
+    for (int i = 0; i < 2; ++i) {
+      TH2F* nm1_h[3] = { h_dxyerr_v_ptcut[i], h_dxyerr_v_npxlayerscut[i], h_dxyerr_v_nstlayerscut[i] };
+      for (int j = 0; j < 3; ++j) {
+        if (i == 0 || (i == 1 && nm1_sel[j])) {
+          for (int ibin = 1; ibin <= nm1_h[j]->GetNbinsX(); ++ibin) {
+            const double cut = nm1_h[j]->GetXaxis()->GetBinLowEdge(ibin);
+            if (nm1_v[j] >= cut) nm1_h[j]->Fill(cut, tk.dxyError(), *weight);
+          }
+        }
+      }
+    }
 
     for (int i = 0; i < 3; ++i) {
       if (i==1 && !sel) continue;

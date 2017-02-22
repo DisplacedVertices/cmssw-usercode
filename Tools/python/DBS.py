@@ -86,8 +86,9 @@ def files_numevents_in_dataset(dataset, instance='global'):
                                line_xform=xform)
 
 def sites_for_dataset(dataset, instance='global'):
-    return das_query(instance)('dataset=%s site' % dataset,
-                               line_filter=lambda s: s.startswith('T'))
+    l = das_query(instance)('site dataset=%s' % dataset,
+                            line_filter=lambda s: s.startswith('T'))
+    return sorted(set(l)) # dasgo gives same lines to you many times
 
 def file_details_run_lumis(dataset, instance='global'):
     obj = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)

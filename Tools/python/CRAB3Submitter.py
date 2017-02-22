@@ -70,7 +70,10 @@ class CRABSubmitter:
         self.batch_name = batch_name
         self.batch_dir = crab_dirs_root(batch_name) # JMTBAD rename -- what crab3 calls workArea
         self.existed = False
-        if os.path.exists(self.batch_dir):
+
+        self.psets_dir = os.path.join(self.batch_dir, 'psets')
+
+        if os.path.exists(self.psets_dir):  # check psets_dir instead of batch_dir since we might be from metasubmitter
             if 'cs_append' not in sys.argv:
                 raise ValueError('batch_dir %s already exists, refusing to clobber ("cs_append" in argv to override)' % self.batch_dir)
             self.existed = True
@@ -131,10 +134,10 @@ class CRABSubmitter:
         self.working_dir_pattern = '%(name)s'
         self.cfg_template.General.requestName = 'SETLATER'
 
-        self.cfg_fn_pattern = os.path.join(self.batch_dir, 'psets/crabConfig.%(name)s.py')
+        self.cfg_fn_pattern = os.path.join(self.psets_dir, 'crabConfig.%(name)s.py')
         mkdirs_if_needed(self.cfg_fn_pattern)
 
-        self.pset_fn_pattern = os.path.join(self.batch_dir, 'psets/%(name)s.py')
+        self.pset_fn_pattern = os.path.join(self.psets_dir, '%(name)s.py')
         mkdirs_if_needed(self.pset_fn_pattern)
         self.cfg_template.JobType.psetName = 'SETLATER'
 

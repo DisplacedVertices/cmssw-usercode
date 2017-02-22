@@ -22,7 +22,6 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/ByRunTH1.h"
-#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 namespace {
   template <typename T>
@@ -119,8 +118,6 @@ private:
     return v;
   }
 
-  TrackerSpaceExtents tracker_extents;
-
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const bool disregard_event;
@@ -191,6 +188,8 @@ private:
   TH1F* h_all_track_nhits;
   TH1F* h_all_track_npxhits;
   TH1F* h_all_track_nsthits;
+  TH1F* h_all_track_npxlayers;
+  TH1F* h_all_track_nstlayers;
   TH1F* h_n_seed_tracks;
   TH1F* h_seed_track_pars[6];
   TH1F* h_seed_track_errs[6];
@@ -202,10 +201,11 @@ private:
   TH1F* h_seed_track_npxhits;
   TH1F* h_seed_track_nsthits;
   TH1F* h_seed_track_npxlayers;
-  TH1F* h_seed_track_deltar2px;
-  TH1F* h_seed_track_deltaz2px;
-  TH1F* h_seed_track_deltar3px;
-  TH1F* h_seed_track_deltaz3px;
+  TH1F* h_seed_track_nstlayers;
+  TH1F* h_seed_nm1_pt;
+  TH1F* h_seed_nm1_npxlayers;
+  TH1F* h_seed_nm1_nstlayers;
+  TH1F* h_seed_nm1_sigmadxybs;
   TH1F* h_n_seed_vertices;
   TH1F* h_seed_vertex_track_weights;
   TH1F* h_seed_vertex_chi2;
@@ -242,9 +242,10 @@ private:
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
 
-  ByRunTH1<TH1F> h_pairs_d2d[6]; // only using 0,2,3,4,5   <- XXX 3,4,5
-  ByRunTH1<TH1F> h_merge_d2d[6]; // only using 0,2,3,4,5  <- XXX 3,4,5
-  ByRunTH1<TH1F> h_erase_d2d[6]; // only using 0,2,3,4,5  <- XXX 3,4,5
+  // not using 1 in these 3
+  ByRunTH1<TH1F> h_pairs_d2d[6];
+  ByRunTH1<TH1F> h_merge_d2d[6];
+  ByRunTH1<TH1F> h_erase_d2d[6];
 
   TH1F* h_phitest_nev;
   TH1F* h_phitest_nvtx;
@@ -270,7 +271,7 @@ private:
     int npxhits;
     int npxlayers;
     int nstlayers;
-    NumExtents ne;
+    int min_r;
     
     track_cuts(const MFVVertexer* mv_, const reco::Track& tk_, const reco::BeamSpot& bs_, const reco::Vertex* pv_, const TransientTrackBuilder& tt)
       : mv(*mv_), tk(tk_), bs(bs_), pv(pv_), tt_builder(tt)
@@ -285,7 +286,7 @@ private:
       npxhits = tk.hitPattern().numberOfValidPixelHits();
       npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
       nstlayers = tk.hitPattern().stripLayersWithMeasurement();
-      ne = mv.tracker_extents.numExtentInRAndZ(tk.hitPattern(), false);
+      min_r = tk.hitPattern().hasValidHitInFirstPixelBarrel() ? 1 : 2000000000;
     }
 
     // these are cheap
@@ -294,7 +295,7 @@ private:
         return 
           npxlayers >= mv.min_seed_track_npxlayers && 
           nstlayers >= mv.min_seed_track_nstlayers && 
-          (mv.min_seed_track_hit_r == 999 || ne.min_r <= mv.min_seed_track_hit_r) &&
+          (mv.min_seed_track_hit_r == 999 || min_r <= mv.min_seed_track_hit_r) &&
           pt > mv.min_seed_track_pt &&
           fabs(sigmadxybs) > mv.min_seed_track_sigmadxy &&
           fabs(dxybs) > mv.min_seed_track_dxy &&
@@ -307,7 +308,7 @@ private:
         return 
           npxlayers >= mv.min_all_track_npxlayers && 
           nstlayers >= mv.min_all_track_nstlayers && 
-          (mv.min_all_track_hit_r == 999 || ne.min_r <= mv.min_all_track_hit_r) &&
+          (mv.min_all_track_hit_r == 999 || min_r <= mv.min_all_track_hit_r) &&
           pt > mv.min_all_track_pt &&
           fabs(sigmadxybs) > mv.min_all_track_sigmadxy &&
           fabs(dxybs) > mv.min_all_track_dxy &&
@@ -413,6 +414,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     phitest(cfg.getUntrackedParameter<bool>("phitest", false))
 {
+  if ((min_all_track_hit_r != 1 && min_all_track_hit_r != 999) || (min_seed_track_hit_r != 1 && min_seed_track_hit_r != 999))
+    throw cms::Exception("MFVVertexer") << "hit_r cuts may only be 1";
+
   if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
 
@@ -455,6 +459,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_all_track_nhits                = fs->make<TH1F>("h_all_track_nhits",                "",  40,   0,     40);
     h_all_track_npxhits              = fs->make<TH1F>("h_all_track_npxhits",              "",  12,   0,     12);
     h_all_track_nsthits              = fs->make<TH1F>("h_all_track_nsthits",              "",  28,   0,     28);
+    h_all_track_npxlayers            = fs->make<TH1F>("h_all_track_npxlayers",            "",  10,   0,     10);
+    h_all_track_nstlayers            = fs->make<TH1F>("h_all_track_nstlayers",            "",  30,   0,     30);
 
     for (int i = 0; i < 6; ++i)
       h_seed_track_pars[i] = fs->make<TH1F>(TString::Format("h_seed_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
@@ -474,12 +480,13 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_seed_track_nhits      = fs->make<TH1F>("h_seed_track_nhits",      "", 40,   0, 40);
     h_seed_track_npxhits    = fs->make<TH1F>("h_seed_track_npxhits",    "", 12,   0, 12);
     h_seed_track_nsthits    = fs->make<TH1F>("h_seed_track_nsthits",    "", 28,   0, 28);
-    h_seed_track_npxlayers  = fs->make<TH1F>("h_seed_track_npxlayers",  "",  6,   0,  6);
+    h_seed_track_npxlayers  = fs->make<TH1F>("h_seed_track_npxlayers",  "", 10,   0, 10);
+    h_seed_track_nstlayers  = fs->make<TH1F>("h_seed_track_nstlayers",  "", 30,   0, 30);
 
-    h_seed_track_deltar2px = fs->make<TH1F>("h_seed_track_deltar2px", "", 20, 0, 10);
-    h_seed_track_deltaz2px = fs->make<TH1F>("h_seed_track_deltaz2px", "", 20, 0, 20);
-    h_seed_track_deltar3px = fs->make<TH1F>("h_seed_track_deltar3px", "", 20, 0, 10);
-    h_seed_track_deltaz3px = fs->make<TH1F>("h_seed_track_deltaz3px", "", 20, 0, 20);
+    h_seed_nm1_pt = fs->make<TH1F>("h_seed_nm1_pt", "", 50, 0, 10);
+    h_seed_nm1_npxlayers = fs->make<TH1F>("h_seed_nm1_npxlayers", "", 10, 0, 10);
+    h_seed_nm1_nstlayers = fs->make<TH1F>("h_seed_nm1_nstlayers", "", 30, 0, 30);
+    h_seed_nm1_sigmadxybs = fs->make<TH1F>("h_seed_nm1_sigmadxybs", "", 40, -10, 10);
 
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "",  50,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  21,   0,      1.05);
@@ -519,10 +526,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
-    for (int i = 2; i <= 5; ++i) {
-      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 2500, 0, 2.5);
-      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 2500, 0, 2.5);
-      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 2500, 0, 2.5);
+    for (int i = 0; i <= 5; ++i) {
+      if (i == 1) continue;
+      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 4000, 0, 4);
+      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 4000, 0, 4);
+      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 4000, 0, 4);
     }
 
     if (phitest) {
@@ -564,7 +572,8 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const unsigned run = event.id().run();
-  for (int i = 2; i <= 5; ++i) {
+  for (int i = 0; i <= 5; ++i) {
+    if (i == 1) continue;
     h_pairs_d2d[i].book(run);
     h_merge_d2d[i].book(run);
     h_erase_d2d[i].book(run);
@@ -605,9 +614,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   std::vector<reco::TransientTrack> seed_tracks;
   std::vector<bool> seed_track_is_second;
   std::map<reco::TrackRef, size_t> seed_track_ref_map;
-
-  if (!tracker_extents.filled())
-    tracker_extents.fill(setup, GlobalPoint(bs_x, bs_y, bs_z));
 
   if (!disregard_event) {
     if (use_tracks) {
@@ -747,6 +753,20 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       h_all_track_nhits->Fill(tc.nhits);
       h_all_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
       h_all_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
+      h_all_track_npxlayers->Fill(tk->hitPattern().pixelLayersWithMeasurement());
+      h_all_track_nstlayers->Fill(tk->hitPattern().stripLayersWithMeasurement());
+
+      const bool nm1[4] = {
+        tc.pt > min_all_track_pt,
+        tc.npxlayers >= min_all_track_npxlayers,
+        tc.nstlayers >= min_all_track_nstlayers,
+        fabs(tc.sigmadxybs) > min_seed_track_sigmadxy
+      };
+
+      if (nm1[1] && nm1[2] && nm1[3]) h_seed_nm1_pt->Fill(tc.pt);
+      if (nm1[0] && nm1[2] && nm1[3]) h_seed_nm1_npxlayers->Fill(tc.npxlayers);
+      if (nm1[0] && nm1[1] && nm1[3]) h_seed_nm1_nstlayers->Fill(tc.nstlayers);
+      if (nm1[0] && nm1[1] && nm1[2]) h_seed_nm1_sigmadxybs->Fill(tc.sigmadxybs);
 
       if (use) {
         for (int i = 0; i < 6; ++i) {
@@ -767,22 +787,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         h_seed_track_npxhits->Fill(tk->hitPattern().numberOfValidPixelHits());
         h_seed_track_nsthits->Fill(tk->hitPattern().numberOfValidStripHits());
 	h_seed_track_npxlayers->Fill(tk->hitPattern().pixelLayersWithMeasurement());
-
-        if (tk->hitPattern().numberOfValidPixelHits() >= 2) {
-          const SpatialExtents se = tracker_extents.extentInRAndZ(tk->hitPattern(), tc.npxhits != 0);
-          if (tk->hitPattern().numberOfValidPixelHits()==2) {
-            double deltaR = se.max_r - se.min_r;
-            double deltaZ = se.max_z - se.min_z;
-            h_seed_track_deltar2px->Fill(deltaR);
-            h_seed_track_deltaz2px->Fill(deltaZ);
-          }
-          else if (tk->hitPattern().numberOfValidPixelHits()==3) {
-            double deltaR = se.max_r - se.min_r;
-            double deltaZ = se.max_z - se.min_z;
-            h_seed_track_deltar3px->Fill(deltaR);
-            h_seed_track_deltaz3px->Fill(deltaZ);
-          }
-        }
+	h_seed_track_nstlayers->Fill(tk->hitPattern().stripLayersWithMeasurement());
       }
     }
   }
@@ -981,16 +986,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
         const double d2d = mag(v[0]->x() - v[1]->x(),
                                v[0]->y() - v[1]->y());
-        double maxtrackdxyerr = 0;
-        for (auto tk : tracks[0])
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-        for (auto tk : tracks[1])
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-
         if (ntk_max >= 2)
           h_pairs_d2d[ntk_max][run]->Fill(d2d);
+        h_pairs_d2d[0][run]->Fill(d2d);
       }
       
       reco::TrackRefVector shared_tracks;
@@ -1132,16 +1130,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
           const double d2d = mag(v[0]->x() - v[1]->x(),
                                  v[0]->y() - v[1]->y());
-          double maxtrackdxyerr = 0;
-          for (auto tk : tracks[0])
-            if (tk->dxyError() > maxtrackdxyerr)
-              maxtrackdxyerr = tk->dxyError();
-          for (auto tk : tracks[1])
-            if (tk->dxyError() > maxtrackdxyerr)
-              maxtrackdxyerr = tk->dxyError();
-
           if (ntk_max >= 2)
             h_merge_d2d[ntk_max][run]->Fill(d2d);
+          h_merge_d2d[0][run]->Fill(d2d);
         }
         vertices->erase(v[1]);
         *v[0] = reco::Vertex(new_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
@@ -1200,16 +1191,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
         const double d2d = mag(vsave[0].x() - vsave[1].x(),
                                vsave[0].y() - vsave[1].y());
-        double maxtrackdxyerr = 0;
-        for (auto tk : vertex_track_set(vsave[0]))
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-        for (auto tk : vertex_track_set(vsave[1]))
-          if (tk->dxyError() > maxtrackdxyerr)
-            maxtrackdxyerr = tk->dxyError();
-
         if (ntk_max >= 2)
           h_erase_d2d[ntk_max][run]->Fill(d2d);
+        h_erase_d2d[ntk_max][run]->Fill(d2d);
       }
 
       if (erase[1]) vertices->erase(v[1]);

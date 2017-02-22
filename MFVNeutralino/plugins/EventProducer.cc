@@ -14,7 +14,6 @@
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
@@ -32,10 +31,12 @@ public:
   void produce(edm::Event&, const edm::EventSetup&);
 
 private:
-  const edm::InputTag trigger_results_src;
-  const edm::InputTag cleaning_results_src;
+  const edm::EDGetTokenT<float> triggerfloats_ht_token;
+  const edm::EDGetTokenT<float> triggerfloats_ht4mc_token;
+  const edm::EDGetTokenT<std::vector<int>> triggerfloats_l1_token;
+  const edm::EDGetTokenT<std::vector<int>> triggerfloats_hlt_token;
 
-  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
+  const edm::InputTag cleaning_results_src;
   const edm::EDGetTokenT<edm::TriggerResults> cleaning_results_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
@@ -57,15 +58,15 @@ private:
   const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
   bool warned_non_mfv;
-
-  L1GtUtils l1_cfg;
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
-  : trigger_results_src(cfg.getParameter<edm::InputTag>("trigger_results_src")),
-    cleaning_results_src(cfg.getParameter<edm::InputTag>("cleaning_results_src")),
+  : triggerfloats_ht_token(consumes<float>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "ht"))),
+    triggerfloats_ht4mc_token(consumes<float>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "ht4mc"))),
+    triggerfloats_l1_token(consumes<std::vector<int>>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "L1decisions"))),
+    triggerfloats_hlt_token(consumes<std::vector<int>>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "HLTdecisions"))),
 
-    trigger_results_token(consumes<edm::TriggerResults>(trigger_results_src)),
+    cleaning_results_src(cfg.getParameter<edm::InputTag>("cleaning_results_src")),
     cleaning_results_token(consumes<edm::TriggerResults>(cleaning_results_src)),
     
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
@@ -88,9 +89,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
     electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
 
-    warned_non_mfv(false),
-
-    l1_cfg(cfg, consumesCollector(), false)
+    warned_non_mfv(false)
 {
   produces<MFVEvent>();
 }
@@ -245,75 +244,40 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  TriggerHelper trig_helper(event, trigger_results_token);
+  edm::Handle<float> triggerfloats_ht;
+  edm::Handle<float> triggerfloats_ht4mc;
+  edm::Handle<std::vector<int>> triggerfloats_l1;
+  edm::Handle<std::vector<int>> triggerfloats_hlt;
+  event.getByToken(triggerfloats_ht_token, triggerfloats_ht);
+  event.getByToken(triggerfloats_ht4mc_token, triggerfloats_ht4mc);
+  event.getByToken(triggerfloats_l1_token, triggerfloats_l1);
+  event.getByToken(triggerfloats_hlt_token, triggerfloats_hlt);
 
-  const std::string hlt_paths[mfv::n_hlt_paths] = {
-    "HLT_PFHT650_v",
-    "HLT_PFHT800_v",
-    "HLT_PFHT900_v",
-    "HLT_PFHT550_4Jet_v",
-    "HLT_PFHT450_SixJet40_PFBTagCSV_v",
-    "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v",
-    "HLT_PFHT450_SixJet40_v",
-    "HLT_PFHT400_SixJet30_v",
-    "HLT_QuadJet45_TripleCSV0p5_v",
-    "HLT_QuadJet45_DoubleCSV0p5_v",
-    "HLT_DoubleJet90_Double30_TripleCSV0p5_v",
-    "HLT_DoubleJet90_Double30_DoubleCSV0p5_v",
-    "HLT_HT650_DisplacedDijet80_Inclusive_v",
-    "HLT_HT750_DisplacedDijet80_Inclusive_v",
-    "HLT_HT500_DisplacedDijet40_Inclusive_v",
-    "HLT_HT550_DisplacedDijet40_Inclusive_v",
-    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
-    "HLT_HT350_DisplacedDijet80_DisplacedTrack_v",
-    "HLT_HT350_DisplacedDijet80_Tight_DisplacedTrack_v"
-  };
-  
-  for (size_t i = 0; i < mfv::n_hlt_paths; ++i) {
-    auto pass_and_found = trig_helper.pass_and_found_any_version(hlt_paths[i]);
-    mevent-> pass_hlt(i, pass_and_found.first);
-    mevent->found_hlt(i, pass_and_found.second);
-  }
+  mevent->hlt_ht = *triggerfloats_ht;
+  mevent->hlt_ht4mc = *triggerfloats_ht4mc;
 
-
-  l1_cfg.getL1GtRunCache(event, setup, true, false);
-
-  const std::string l1_paths[mfv::n_l1_paths] = { "L1_HTT100", "L1_HTT125", "L1_HTT150", "L1_HTT175", "L1_HTT200" };
+  assert(triggerfloats_l1->size() == mfv::n_l1_paths);
   for (size_t i = 0; i < mfv::n_l1_paths; ++i) {
-    int l1_err = 0;
-    bool pass = l1_cfg.decision(event, l1_paths[i], l1_err);
-    if (l1_err != 0) {
-      mevent-> pass_l1(i, false);
-      mevent->found_l1(i, false);
-    }
-    else {
-      mevent-> pass_l1(i, pass);
-      mevent->found_l1(i, true);
-    }
+    const bool found = (*triggerfloats_l1)[i] != -1;
+    mevent->found_l1(i, found);
+    mevent-> pass_l1(i, found && (*triggerfloats_l1)[i]);
   }
 
+  assert(triggerfloats_hlt->size() == mfv::n_hlt_paths);
+  for (size_t i = 0; i < mfv::n_hlt_paths; ++i) {
+    const bool found = (*triggerfloats_hlt)[i] != -1;
+    mevent->found_hlt(i, found);
+    mevent-> pass_hlt(i, found && (*triggerfloats_hlt)[i]);
+  }
 
   if (cleaning_results_src.label() != "") {
-    const std::string cleaning_paths[mfv::n_clean_paths] = {
-      "Flag_CSCTightHaloFilter",
-      "Flag_EcalDeadCellTriggerPrimitiveFilter",
-      "Flag_HBHENoiseFilter",
-      "Flag_METFilters",
-      "Flag_ecalLaserCorrFilter",
-      "Flag_eeBadScFilter",
-      "Flag_goodVertices",
-      "Flag_hcalLaserEventFilter",
-      "Flag_trackingFailureFilter",
-      "Flag_trkPOGFilters",
-      "Flag_trkPOG_logErrorTooManyClusters",
-      "Flag_trkPOG_manystripclus53X",
-      "Flag_trkPOG_toomanystripclus53X",
-    };
-
     TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
-
-    for (size_t i = 0; i < mfv::n_clean_paths; ++i)
-      mevent->pass_clean(i, trig_helper_cleaning.pass(cleaning_paths[i]));
+    for (size_t i = 0; i < mfv::n_clean_paths; ++i) {
+      const auto& paf = trig_helper_cleaning.pass_and_found_any_version(mfv::clean_paths[i]);
+      if (!paf.second)
+        assert(i>=5); // the 2016/2015 versions come after that
+      mevent->pass_clean(i, !paf.second || paf.first); // if not found, it passes
+    }
   }
 
   //////////////////////////////////////////////////////////////////////

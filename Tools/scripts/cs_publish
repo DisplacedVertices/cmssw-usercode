@@ -4,6 +4,7 @@ import os, sys, fnmatch, argparse
 from pprint import pprint
 from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_njobs
 from JMTucker.Tools.SampleFiles import _enc
+from JMTucker.Tools.general import coderep_files
 
 parser = argparse.ArgumentParser(description = 'cs_publish: get the staged-out files from condor directories and print out lines for SampleFiles.py',
                                  usage = '%(prog)s [options] condor_dirs')
@@ -49,10 +50,17 @@ for wd in wds:
                 if options.pattern is None or fnmatch.fnmatch(os.path.basename(fn), options.pattern):
                     files.append(fn)
     samples.append(sample)
-    publish[(sample, options.dataset)] = (len(files), files)
+
+    code = coderep_files(files)
+    publish[(sample, options.dataset)] = (len(files), code if code is not None else files)
 
 print 'new entries:'
-pprint(publish)
+for k in sorted(publish.keys()):
+    n,c = publish[k]
+    if type(c) == str:
+        print k, ': (', n, ',', c, ')'
+    else:
+        pprint((k,(n,c)))
 encoded = _enc(publish)
 print '\nline for SampleFiles (len(repr(publish)) = %i, len(encoded) = %i):' % (len(repr(publish)), len(encoded))
 print "_add('%s')" % encoded

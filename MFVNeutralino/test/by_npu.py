@@ -1,8 +1,8 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'JetHT2015D', 'ntuplev10')
-process.TFileService.fileName = 'byrunseedtracks.root'
+sample_files(process, 'qcdht2000', 'ntuplev11')
+process.TFileService.fileName = 'by_npu.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
 
@@ -20,7 +20,7 @@ for mn,mx in (3,3), (3,4), (4,4):
     obj = cms.EDAnalyzer('MFVByX',
                          event_src = cms.InputTag('mfvEvent'),
                          vertex_src = cms.InputTag(vtx_name),
-                         by_run = cms.bool(True),
+                         by_npu = cms.bool(True),
                          )
 
     pth = cms.Path(process.mfvAnalysisCuts * vtx * obj)
@@ -34,15 +34,11 @@ for mn,mx in (3,3), (3,4), (4,4):
     setattr(process, pth_name + 'noana', pth_noana)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples 
-
-    samples = Samples.data_samples
-
+    samples = [Samples.qcdht1500, Samples.qcdht1500ext, Samples.qcdht2000, Samples.qcdht2000ext]
     for sample in samples:
-        sample.files_per = 50
-        if not sample.is_mc:
-            sample.json = '../ana_2015.json'
+        sample.files_per = 10
 
-    cs = CondorSubmitter('ByRunStuff_2015_v5', dataset='ntuplev10')
-    cs.submit_all(Samples.data_samples)
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    cs = CondorSubmitter('ByNpuV11_15', dataset='ntuplev11')
+    cs.submit_all(samples)

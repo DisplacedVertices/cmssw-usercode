@@ -14,14 +14,8 @@ process.TFileService.fileName = 'triggerfloats.root'
 
 global_tag(process, which_global_tag(is_mc))
 
-from JMTucker.Tools.L1GtUtils_cff import l1GtUtilsTags
-process.mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
-                                          l1GtUtilsTags,
-                                          trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
-                                          trigger_objects_src = cms.InputTag('selectedPatTrigger'),
-                                          prints = cms.untracked.bool(False),
-                                          tree = cms.untracked.bool(True),
-                                          )
+process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+process.mfvTriggerFloats.tree = True
 
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 process.hltHighLevel.HLTPaths = [ 'HLT_PFHT800_v*', 'HLT_PFHT900_v*' ]

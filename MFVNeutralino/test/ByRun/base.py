@@ -8,14 +8,22 @@ class ByRunPlotter:
     class result:
         pass
 
-    def __init__(self, plot_saver, mask_fn=None):
+    def __init__(self, plot_saver, mask_fn=None, runs=[]):
         self.ps = plot_saver
-        self.lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped.gzpickle', mask_fn)
+        self.runs = sorted(runs)
+        self.mask_fn = mask_fn
+        self._lls = None
 
-    def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False):
+    @property
+    def lls(self):
+        if not self._lls:
+            self._lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped.gzpickle', self.mask_fn)
+        return self._lls
+
+    def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False, draw_boundaries=True, use_index=True):
         r = ByRunPlotter.result()
 
-        r.runs = self.lls.runs(year) # already sorted
+        r.runs = self.runs if self.runs else self.lls.runs(year) # already sorted
         r.nruns = len(r.runs)
         r.runs_used = 0
         r.lumi_sum = 0.
@@ -25,10 +33,10 @@ class ByRunPlotter:
         fill_boundaries = []
         era_boundaries = []
         for i, run in enumerate(r.runs):
-            x = i
+            x = i if use_index else run
             n = d.get(run, 0)
 
-            if i > 0:
+            if draw_boundaries and i > 0:
                 prevrun = r.runs[i-1]
                 for fr in self.lls.fill_boundaries:
                     if prevrun < fr and run >= fr:
@@ -58,6 +66,8 @@ class ByRunPlotter:
                 if type(n) == int:
                     y = n
                     yl, yh = poisson_interval(n)
+                elif type(n) == float:
+                    y = yl = yh = n
                 elif type(n) == tuple:
                     if len(n) == 2:
                         y = n[0]

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import os, sys, gzip, cPickle, subprocess, glob, time
+from itertools import chain
+from pprint import pprint
 
 def big_warn(s):
     x = '#' * 80
@@ -16,6 +18,61 @@ def bool_from_argv(s, remove=True, return_pos=False):
     if val and remove:
         sys.argv.remove(s)
     return ret
+
+def coderep_compactify_list(l):
+    a = b = None
+    xranges = []
+    singles = []
+    def sforab(a,b):
+        if a == b:
+            singles.append(a)
+        elif a == 0:
+            xranges.append('xrange(%i)' % (b+1))
+        else:
+            xranges.append('xrange(%i,%i)' % (a, b+1))
+    for x in sorted(l):
+        if a is None:
+            a = x
+            b = x
+        elif x == b+1:
+            b = x
+        else:
+            sforab(a,b)
+            a = b = x
+    sforab(a,b)
+    singles.sort()
+    if xranges:
+        if singles:
+            return 'chain(%s, %r)' % (', '.join(xranges), singles)
+        else:
+            return 'chain(%s)' % ', '.join(xranges)
+    else:
+        return repr(singles)
+
+def coderep_files(files):
+    bn = os.path.basename(files[0]).split('_')[0]
+    bases = set(fn.rsplit('/', 2)[0] for fn in files)
+    codes = []
+    check = []
+    for base in bases:
+        nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files if fn.startswith(base)]
+        cnums = coderep_compactify_list(nums)
+        mn,mx = min(nums), max(nums)
+        if mn/1000 != mx/1000:
+            code = "[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in %s]" % (base, bn, cnums)
+        else:
+            code = "['%s/%04i/%s_%%i.root' %% i for i in %s]" % (base, mn/1000, bn, cnums)
+        codes.append(code)
+        check += eval(code)
+    #pprint(codes)
+    check.sort()
+    if sorted(set(check)) != check:
+        raise ValueError('I made the same file twice somehow')
+    if set(check) != set(files):
+        x = set(l); y = set(files); print 'x-y'; pprint(x-y); print 'y-x'; pprint(y-x)
+        raise ValueError('I am dumb')
+    code = ' + '.join(codes)
+    return code
 
 def from_pickle(fn, comp=False):
     if comp or '.gzpickle' in fn:

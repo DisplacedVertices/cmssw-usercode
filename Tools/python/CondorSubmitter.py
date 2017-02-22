@@ -37,7 +37,7 @@ eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
 echo cmsRun start at $(date)
-cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_timestamp__INPUT_BNS__} .
+cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
 echo $job > cs_job
 cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
 cmsexit=$?
@@ -96,7 +96,7 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_timestamp__INPUT_FNS__
+transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
 x509userproxy = $ENV(X509_USER_PROXY)
 Queue __NJOBS__
 '''
@@ -113,7 +113,7 @@ cs_fail = __FAIL_LIST__
 assert cs_job not in cs_fail
 
 import cs_filelist
-if __EVENTS_PER__:
+if __SPLIT_BY_EVENTS__:
     process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(0)]
     process.source.skipEvents = cms.untracked.uint32(cs_job * __EVENTS_PER__)
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__EVENTS_PER__))
@@ -143,7 +143,6 @@ def get(i): return _l[i]
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
-                 pfn_prefix = '', # can set to 'root://cmseos.fnal.gov/' if the files are at FNAL not just accessible by xrootd
                  input_files = [],
                  output_files = [],
                  skip_output_files = [],
@@ -151,7 +150,7 @@ def get(i): return _l[i]
                  stageout_path = '', # if / in it, does not try to generate
                  publish_name = '',
                  dataset = 'main',
-                 events_per = None,
+                 split_by = 'file',
                  _events = -1,
                  _njobs = None,
                  _fail = [],
@@ -161,9 +160,9 @@ def get(i): return _l[i]
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
         self.dataset = dataset
-        if events_per is not None:
-            assert events_per > 0
-        self.events_per = events_per
+        if split_by not in ('file', 'events'):
+            raise ValueError('split_by must be either "file" or "events"')
+        self.split_by = split_by
         self._njobs = _njobs
 
         for arg in sys.argv:
@@ -176,7 +175,8 @@ def get(i): return _l[i]
 
         self.batch_name = batch_name
         self.batch_dir = os.path.abspath(crab_dirs_root(batch_name))
-        if os.path.exists(self.batch_dir):
+        self.inputs_dir = os.path.join(self.batch_dir, 'inputs')
+        if os.path.exists(self.inputs_dir): # check inputs_dir instead of batch_dir since we might be from metasubmitter
             raise ValueError('batch_dir %s already exists, refusing to clobber' % self.batch_dir)
 
         if not os.path.isdir(self.links_dir):
@@ -194,7 +194,6 @@ def get(i): return _l[i]
         print 'CondorSubmitter init: saving git status'
         save_git_status(os.path.join(self.batch_dir, 'gitstatus'))
 
-        self.inputs_dir = os.path.join(self.batch_dir, 'inputs')
         os.mkdir(self.inputs_dir)
 
         self.filelist_fn_pattern = os.path.join(self.inputs_dir, '%(name)s.sh')
@@ -251,7 +250,7 @@ def get(i): return _l[i]
                 stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name
-                stageout_path += '/$(<cs_primaryds)/%s/$(<cs_timestamp)/0000' % publish_name  # JMTBAD 0001...
+                stageout_path += '/$(<cs_primaryds)/' + publish_name + '_$(<cs_samplename)/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
 
             print 'CondorSubmitter init: stageout files are', stageout_files
             print 'CondorSubmitter init: stageout path is', stageout_path
@@ -270,10 +269,9 @@ def get(i): return _l[i]
             .replace('__INPUT_FNS__',  input_fns)
 
         self.pset_end_template = self.pset_end_template \
-            .replace('__PFN_PREFIX__', repr(pfn_prefix)) \
             .replace('__MAX_EVENTS__', str(_events)) \
             .replace('__FAIL_LIST__', repr(_fail)) \
-            .replace('__EVENTS_PER__', str(self.events_per))
+            .replace('__SPLIT_BY_EVENTS__', str(self.split_by == 'events'))
 
         open(sh_fn, 'wt').write(self.sh_template)
 
@@ -285,8 +283,8 @@ def get(i): return _l[i]
         else:
             touch(json_fn)
 
-        if self.events_per:
-            per = self.events_per
+        if self.split_by == 'events':
+            per = sample.events_per
             njobs = int_ceil(sample.nevents_orig, per)
             fn_groups = [sample.filenames]
         else:
@@ -306,6 +304,7 @@ def get(i): return _l[i]
             ('cs_filelist.py',   self.filelist_py_template.replace('__FILELIST__', encoded_filelist)),
             ('cs_jobmap',        '\n'.join(str(i) for i in xrange(njobs)) + '\n'), # will be more complicated for resubmits
             ('cs_primaryds',     sample.primary_dataset),
+            ('cs_samplename',    sample.name),
             ('cs_timestamp',     self.timestamp),
             ]
         for fn, content in files_to_write:
@@ -335,7 +334,11 @@ def get(i): return _l[i]
             if to_add:
                 pset += '\n' + '\n'.join(to_add) + '\n'
 
-        pset += self.pset_end_template
+        pset_end_template = self.pset_end_template \
+            .replace('__PFN_PREFIX__', repr(sample.xrootd_url)) \
+            .replace('__EVENTS_PER__', str(sample.events_per if sample.is_mc else 0))
+
+        pset += pset_end_template
         pset_fn = os.path.join(working_dir, 'cs_pset.py')
         open(pset_fn, 'wt').write(pset)
         return pset_fn
@@ -380,6 +383,10 @@ def get(i): return _l[i]
             sample.set_curr_dataset(self.dataset)
         except KeyError:
             print "\033[1m warning: \033[0m sample %s not submitted, doesn't have dataset %s" % (sample.name, self.dataset)
+            return
+
+        if self.split_by == 'events' and not sample.is_mc:
+            print "\033[1m warning: \033[0m sample %s not submitted because can't split by events on data sample"
             return
 
         working_dir = os.path.join(self.batch_dir, 'condor_%s' % sample.name)

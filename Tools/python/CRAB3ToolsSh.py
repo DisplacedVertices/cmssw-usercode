@@ -43,7 +43,8 @@ def crab_get_njobs_from_log(working_dir, jobs_re=re.compile(r'\([\d ]+/([\d ]+)\
         mo = jobs_re.search(line)
         if mo:
             njobs.add(mo.groups())
-    assert len(njobs) == 1
+    if len(njobs) != 1:
+        raise ValueError('problem parsing wd=%s for njobs %r' % (working_dir, njobs))
     return int(njobs.pop()[0])
 
 def crab_get_output_dataset_from_log(working_dir):
@@ -74,6 +75,9 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         timestamp = rq['RequestName'].split(':')[0]
         primary_dataset = rq['OriginalConfig'].Data.inputDataset.split('/')[1]
         publish_name = rq['OriginalConfig'].Data.outputDatasetTag
+        if not publish_name:
+            assert not rq['OriginalConfig'].Data.publication
+            publish_name = rq['RequestName'].split(username + '_')[1]
         path = '/eos/uscms/store/user/%(username)s/%(primary_dataset)s/%(publish_name)s/%(timestamp)s' % locals()
         zero_dirs = [x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s' % path).split('\n') if x.strip()]
         files = []

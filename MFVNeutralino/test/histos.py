@@ -61,17 +61,25 @@ def force_bs(process, bs):
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-
     samples = Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
         [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
 
     for sample in samples:
-        sample.files_per = 50
+        sample.files_per = 20
         if not sample.is_mc:
             sample.json = 'ana_2015p6.json'
 
+    def modify(sample):
+        to_add, to_replace = [], []
+        if not sample.is_mc:
+            to_add.append('del process.pFullSel', 'del process.pSigReg')
+        return to_add, to_replace
+
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV10_15_afterreorg', dataset='ntuplev10')
+    cs = CondorSubmitter('HistosV11_15',
+                         dataset = 'ntuplev11',
+                         pset_modifier = modify
+                         )
     cs.submit_all(samples)

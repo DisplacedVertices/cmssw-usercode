@@ -7,7 +7,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
@@ -52,10 +51,9 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
 
-  TH1F* h_pass_hlt[mfv::n_hlt_paths];
-  TH1F* h_pass_l1[mfv::n_l1_paths];
-  TH1F* h_pass_clean[mfv::n_clean_paths];
-  TH1F* h_pass_clean_all;
+  TH1F* h_hlt_bits;
+  TH1F* h_l1_bits;
+  TH1F* h_pass_clean;
 
   TH1F* h_npu;
 
@@ -313,13 +311,24 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
 
-  for (int i = 0; i < mfv::n_hlt_paths; ++i)
-    h_pass_hlt[i] = fs->make<TH1F>(TString::Format("h_pass_hlt_%i", i), TString::Format(";pass_hlt[%i];events", i), 2, 0, 2);
-  for (int i = 0; i < mfv::n_l1_paths; ++i)
-    h_pass_l1[i] = fs->make<TH1F>(TString::Format("h_pass_l1_%i", i), TString::Format(";pass_l1[%i];events", i), 2, 0, 2);
+  h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
+  h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
+  h_pass_clean = fs->make<TH1F>("h_pass_clean", ";;events", mfv::n_clean_paths+2, 0, mfv::n_clean_paths+2);
+
+  h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
+  for (int i = 0; i < mfv::n_hlt_paths; ++i) {
+    h_hlt_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::hlt_paths[i]));
+    h_hlt_bits->GetXaxis()->SetBinLabel(1+2*i+2, TString::Format(" pass %s", mfv::hlt_paths[i]));
+  }
+  h_l1_bits->GetXaxis()->SetBinLabel(1, "nevents");
+  for (int i = 0; i < mfv::n_l1_paths; ++i) {
+    h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::l1_paths[i]));
+    h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+2, TString::Format(" pass %s", mfv::l1_paths[i]));
+  }
+  h_pass_clean->GetXaxis()->SetBinLabel(1, "nevents");
+  h_pass_clean->GetXaxis()->SetBinLabel(2, "pass all");
   for (int i = 0; i < mfv::n_clean_paths; ++i)
-    h_pass_clean[i] = fs->make<TH1F>(TString::Format("h_pass_clean_%i", i), TString::Format(";pass_clean[%i];events", i), 2, 0, 2);
-  h_pass_clean_all = fs->make<TH1F>("h_pass_clean_all", ";pass_clean_all;events", 2, 0, 2);
+    h_pass_clean->GetXaxis()->SetBinLabel(3+i, TString::Format("pass %s", mfv::clean_paths[i]));
 
   h_npu = fs->make<TH1F>("h_npu", ";true nPU;events", 65, 0, 65);
 
@@ -615,16 +624,23 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  for (int i = 0; i < mfv::n_hlt_paths; ++i)
-    h_pass_hlt[i]->Fill(mevent->pass_hlt(i), w);
+  h_hlt_bits->Fill(0., w);
+  h_l1_bits->Fill(0., w);
+  for (int i = 0; i < mfv::n_hlt_paths; ++i) {
+    if (mevent->found_hlt(i)) h_hlt_bits->Fill(1+2*i,   w);
+    if (mevent->pass_hlt (i)) h_hlt_bits->Fill(1+2*i+1, w);
+  }
+  for (int i = 0; i < mfv::n_l1_paths; ++i) {
+    if (mevent->found_l1(i)) h_l1_bits->Fill(1+2*i,   w);
+    if (mevent->pass_l1 (i)) h_l1_bits->Fill(1+2*i+1, w);
+  }
 
-  for (int i = 0; i < mfv::n_l1_paths; ++i)
-    h_pass_l1[i]->Fill(mevent->pass_l1(i), w);
-
+  h_pass_clean->Fill(0., w);
+  if (mevent->pass_clean_all())
+    h_pass_clean->Fill(1, w);
   for (int i = 0; i < mfv::n_clean_paths; ++i)
-    h_pass_clean[i]->Fill(mevent->pass_clean(i), w);
-
-  h_pass_clean_all->Fill(mevent->pass_clean_all(), w);
+    if (mevent->pass_clean(i))
+      h_pass_clean->Fill(2+i, w);
 
   //////////////////////////////////////////////////////////////////////////////
 
