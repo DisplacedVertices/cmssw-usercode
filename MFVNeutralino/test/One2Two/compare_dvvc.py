@@ -11,44 +11,40 @@ ROOT.gStyle.SetOptFit(0)
 ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
 
 if mode == 'vary_eff':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20x.root
-2v_from_jets_3track_maxtk3_c1p35_e2_a3p66_20x.root
-2v_from_jets_3track_ntk3_deltasvgaus_wevent_c1p35_e2_a3p66_20x.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_3track_maxtk3_c1p35_e2_a3p66_20umbins.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20x.root
-2v_from_jets_4track_maxtk4_c1p35_e2_a3p66_20x.root
-2v_from_jets_4track_ntk4_deltasvgaus_wevent_c1p35_e2_a3p66_20x.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_4track_maxtk4_c1p35_e2_a3p66_20umbins.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20x.root
-2v_from_jets_5track_maxtk5_c1p35_e2_a3p66_20x.root
-2v_from_jets_5track_ntk5_deltasvgaus_wevent_c1p35_e2_a3p66_20x.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_5track_maxtk5_c1p35_e2_a3p66_20umbins.root'''.split('\n')
 
     ls = '''average efficiency
-maxtk efficiency
-ntk_deltasvgaus_wevent efficiency'''.split('\n')
+maxtk efficiency'''.split('\n')
 
 if mode == 'vary_dphi':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20x.root
-2v_from_jets_3track_average3_c1p35_e2_a7p32_20x.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_3track_average3_c1p35_e2_a6p09_20umbins.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20x.root
-2v_from_jets_4track_average4_c1p35_e2_a7p32_20x.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_4track_average4_c1p35_e2_a6p09_20umbins.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20x.root
-2v_from_jets_5track_average5_c1p35_e2_a7p32_20x.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_5track_average5_c1p35_e2_a6p09_20umbins.root'''.split('\n')
 
     ls = '''|#Delta#phi| from jets
 |#Delta#phi| between jets and flat'''.split('\n')
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20x.root
-2v_from_jets_3track_average3_c1p35_e2_a3p66_20x_sum.root'''.split('\n')
+    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins_sum.root'''.split('\n')
 
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20x.root
-2v_from_jets_4track_average4_c1p35_e2_a3p66_20x_sum.root'''.split('\n')
+    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins_sum.root'''.split('\n')
 
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20x.root
-2v_from_jets_5track_average5_c1p35_e2_a3p66_20x_sum.root'''.split('\n')
+    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root
+2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins_sum.root'''.split('\n')
 
     ls = '''default
 sort by b quarks'''.split('\n')
@@ -70,6 +66,7 @@ ey2 = []
 y3 = []
 ey3 = []
 for i in range(3):
+    print ntk[i]
     l1 = ROOT.TLegend(0.50,0.70,0.85,0.85)
     hh = ROOT.TFile(fns[i][0]).Get('h_2v_dvv')
     hh.SetTitle('%s;d_{VV} (cm);events' % ntk[i])
@@ -129,7 +126,7 @@ for i in range(3):
         h2.Scale(n2v[i]/h2.Integral())
     h2.SetMinimum(0)
     h2.Draw()
-    l2.AddEntry(hh, 'simulated events')
+    l2.AddEntry(h2, 'simulated events')
 
     h2s = []
     for j in range(len(ls)):
@@ -142,10 +139,22 @@ for i in range(3):
         h2s.append(h)
         l2.AddEntry(h, ls[j])
 
+        chi2 = 0
+        for k in range(1,h.GetNbinsX()+1):
+            if (h2.GetBinError(k) > 0):
+                chi2 += (h.GetBinContent(k)-h2.GetBinContent(k))**2 / h2.GetBinError(k)**2
+        print '%35s: deltaphi chi2/ndf = %f' % (ls[j], chi2/(h.GetNbinsX()-1))
+
     l2.SetFillColor(0)
     l2.Draw()
     ps.save('%s_dphi'%ntk[i])
 
+    es1 = ROOT.Double(0)
+    s1 = hh.IntegralAndError(1,4,es1)
+    es2 = ROOT.Double(0)
+    s2 = hh.IntegralAndError(5,7,es2)
+    es3 = ROOT.Double(0)
+    s3 = hh.IntegralAndError(8,40,es3)
 
     c1 = hs[0].Integral(1,4)
     ec1 = ebin1[i] * c1
@@ -168,16 +177,24 @@ for i in range(3):
     r3 = v3/c3
     er3 = (v3/c3) * ((ev3/v3)**2 + (ec3/c3)**2)**0.5
 
+    print
+    print '    simulated events: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s1, es1, s2, es2, s3, es3)
+    print 'default construction: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c1, ec1, c2, ec2, c3, ec3)
+    print '           variation: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (v1, ev1, v2, ev2, v3, ev3)
+    print ' variation / default: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r1, er1, r2, er2, r3, er3)
+    print
+    print
+
     if mode == 'vary_dphi':
         if i == 0:
-            er2 *= 0.140851
-            er3 *= 0.109249
+            er2 *= 0.124194
+            er3 *= 0.097202
         if i == 1:
-            er2 *= 0.141817
-            er3 *= 0.120692
+            er2 *= 0.125128
+            er3 *= 0.107277
         if i == 2:
-            er2 *= 0.146182
-            er3 *= 0.115826
+            er2 *= 0.129385
+            er3 *= 0.096314
     if mode == 'vary_eff':
         er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
         er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5

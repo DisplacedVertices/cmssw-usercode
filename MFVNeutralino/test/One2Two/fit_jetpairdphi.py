@@ -32,24 +32,45 @@ for i,n in enumerate(ntk):
   ps.save('%s_jetpairdphi' % n)
 
 ROOT.TH1.AddDirectory(0)
-l1 = ROOT.TLegend(0.15,0.75,0.85,0.85)
-colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kViolet]
-for i,n in enumerate(ntk):
-  f1 = ROOT.TFile(fns[i])
-  h1 = f1.Get('mfvEventHistosOnlyOneVtx/h_jet_pairdphi')
-  if n == 'presel':
-    h1 = f1.Get('mfvEventHistosPreSel/h_jet_pairdphi')
-  h1.SetStats(0)
-  h1.SetLineColor(colors[i])
-  h1.SetLineWidth(3)
-  h1.Scale(1./h1.Integral())
-  h1.GetYaxis().SetRangeUser(0,0.02)
-  h1.SetTitle(';#Delta#phi;')
-  if i == 0:
-    h1.Draw()
-  else:
-    h1.Draw('sames')
-  l1.AddEntry(h1, '#Delta#phi_{JJ}, %s one-vertex events' % n, 'LE')
-l1.SetFillColor(0)
-l1.Draw()
-ps.save('jetpairdphi')
+for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/h_sv_best0_jets_deltaphi']:
+  colors = [1, ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kViolet]
+  l = ROOT.TLegend(0.15,0.75,0.85,0.85)
+  h2s = []
+  for i in [1,3,4]:
+    f = ROOT.TFile(fns[i])
+    h = f.Get(n)
+    h.SetStats(0)
+    h.SetLineColor(colors[i])
+    h.SetLineWidth(3)
+    h.Scale(1./h.Integral())
+    if 'best0' in n:
+      h.Rebin(5)
+    h.GetYaxis().SetRangeUser(0,2./h.GetNbinsX())
+    h.SetTitle(';#Delta#phi_{%s};' % ('JV' if 'best0' in n else 'JJ'))
+    if i == 1:
+      h.Draw()
+    else:
+      h.Draw('sames')
+    l.AddEntry(h, '%s one-vertex events' % ntk[i], 'LE')
+    h2 = ROOT.TH1F(h.GetName(), ';|#Delta#phi_{%s}|' % ('JV' if 'best0' in n else 'JJ'), h.GetNbinsX()/2, 0, 3.1416)
+    for j in range(1, h2.GetNbinsX()+1):
+      h2.SetBinContent(j, h.GetBinContent(h.GetNbinsX()/2-j+1) + h.GetBinContent(h.GetNbinsX()/2+j))
+      h2.SetBinError(j, (h.GetBinError(h.GetNbinsX()/2-j+1)**2 + h.GetBinError(h.GetNbinsX()/2+j)**2)**0.5)
+    h2s.append(h2)
+  l.SetFillColor(0)
+  l.Draw()
+  ps.save(n.split('/')[1])
+
+  colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kViolet]
+  for i,h2 in enumerate(h2s):
+    h2.SetStats(0)
+    h2.SetLineColor(colors[i])
+    h2.SetLineWidth(3)
+    h2.Scale(1./h2.Integral())
+    h2.GetYaxis().SetRangeUser(0,2./h2.GetNbinsX())
+    if i == 0:
+      h2.Draw()
+    else:
+      h2.Draw('sames')
+  l.Draw()
+  ps.save('abs_%s'%n.split('/')[1])

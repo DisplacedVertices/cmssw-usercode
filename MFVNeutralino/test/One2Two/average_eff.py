@@ -92,18 +92,55 @@ for i in [3,4,5]:
 fh.Close()
 
 f = ROOT.TFile('eff_avg.root')
-for n in ['']:
-    l = ROOT.TLegend(0.50,0.15,0.85,0.30)
-    for i in [3,4,5]:
-        h = f.Get('average%i%s' % (i,n))
-        h.SetStats(0)
-        h.SetLineColor(colors[i])
-        if i == 3:
-            h.SetTitle('average%s;d_{VV} (cm);efficiency' % n)
-            h.Draw()
-        else:
-            h.Draw('sames')
-        l.AddEntry(h, h.GetName())
+l = ROOT.TLegend(0.50,0.15,0.85,0.30)
+for i in [3,4,5]:
+    h = f.Get('average%i'%i)
+    h.SetStats(0)
+    h.SetLineWidth(3)
+    h.SetLineColor(colors[i])
+    if i == 3:
+        h.SetTitle(';d_{VV} (cm);Efficiency')
+        h.GetXaxis().SetRangeUser(0,0.4)
+        h.Draw()
+    else:
+        h.Draw('sames')
+    l.AddEntry(h, '%i-track'%i)
+l.SetFillColor(0)
+l.Draw()
+ps.save('average')
+
+
+ROOT.TH1.AddDirectory(0)
+
+fn1 = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root', '2v_from_jets_3track_noclearing_c1p35_e2_a3p66_20umbins.root']
+fn2 = ['2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root', '2v_from_jets_4track_noclearing_c1p35_e2_a3p66_20umbins.root']
+fn3 = ['2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root', '2v_from_jets_5track_noclearing_c1p35_e2_a3p66_20umbins.root']
+
+fns = [fn1, fn2, fn3]
+ntk = ['3-track', '4-track', '5-track']
+n2v = [1323., 22., 1.]
+
+for i in range(3):
+    h0 = ROOT.TFile(fns[i][0]).Get('h_c1v_dvv')
+    h0.SetTitle(';d_{VV}^{C} (cm);Events')
+    h0.SetStats(0)
+    h0.SetLineColor(ROOT.kRed)
+    h0.SetLineWidth(2)
+    h0.Scale(n2v[i]/h0.Integral())
+    if i == 2:
+        h0.GetYaxis().SetRangeUser(0,0.4)
+    h0.Draw('hist e')
+
+    h1 = ROOT.TFile(fns[i][1]).Get('h_c1v_dvv')
+    h1.SetStats(0)
+    h1.SetLineColor(ROOT.kBlack)
+    h1.SetLineWidth(2)
+    h1.Scale(n2v[i]/h1.Integral())
+    h1.Draw('hist e sames')
+
+    l = ROOT.TLegend(0.35,0.75,0.85,0.85)
+    l.AddEntry(h1, 'without efficiency correction')
+    l.AddEntry(h0, 'with efficiency correction')
     l.SetFillColor(0)
     l.Draw()
-    ps.save('average%s' % n)
+    ps.save(ntk[i])
