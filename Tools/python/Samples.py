@@ -216,8 +216,7 @@ qcdht1000.add_dataset('ntuplev11', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgrap
 qcdht2000.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-df8522cc708057e6d4d7bdca37f1ad35/USER', 1991645)
 qcdht2000ext.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-b2cadb9c972c89c96ec11f8287fd9a9f/USER', 4047360)
 
-for x in (mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
-          ttbar, qcdht0500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext):
+for x in (qcdht0500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext):
     x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
 
 ########################################################################
