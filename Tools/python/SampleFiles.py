@@ -1,5 +1,6 @@
 import os, base64, zlib, cPickle as pickle
 from collections import defaultdict
+from itertools import chain
 from pprint import pprint
 from JMTucker.Tools.CRAB3ToolsBase import decrabify_list
 
