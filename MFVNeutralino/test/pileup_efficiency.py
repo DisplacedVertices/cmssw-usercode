@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 set_style()
 
-ps = plot_saver(plot_dir('pileup_efficiency_run2'), size=(600,600), pdf=True)
+ps = plot_saver(plot_dir('pileup_efficiency_run2_15_redo'), size=(600,600), pdf=True)
 
 bins = to_array([0,10,13,15,65])
 nbins = len(bins)-1
@@ -10,31 +10,43 @@ nbins = len(bins)-1
 hists = [
     ('presel', 'mfvEventHistosPreSel'),
     ('onevtx', 'mfvEventHistosOnlyOneVtx'),
-    ('twovtx', 'mfvEventHistos'),
+    ('twovtx', 'mfvEventHistosFullSel'),
     ('sigreg', 'mfvEventHistosSigReg')
     ]
 
 xxx = [
-    (3, '/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk3/background.root'),
-    (4, '/uscms_data/d2/tucker/crab_dirs/HistosV10_ntk4/background.root'),
-    (5, '/uscms_data/d2/tucker/crab_dirs/HistosV10/background.root'),
+    (3, '/uscms_data/d2/tucker/crab_dirs/HistosV10_16_qcd/qcd.root', 'Ntk3'),
+    (4, '/uscms_data/d2/tucker/crab_dirs/HistosV10_16_qcd/qcd.root', 'Ntk4'),
+    (5, '/uscms_data/d2/tucker/crab_dirs/HistosV10_16_qcd/qcd.root', ''),
 ]
 
-for ntk, fn in xxx:
-    print fn
+xxx = [
+    (3, '/uscms_data/d2/tucker/crab_dirs/HistosV10_15_afterreorg/background.root', 'Ntk3'),
+    (4, '/uscms_data/d2/tucker/crab_dirs/HistosV10_15_afterreorg/background.root', 'Ntk4'),
+    (5, '/uscms_data/d2/tucker/crab_dirs/HistosV10_15_afterreorg/background.root', ''),
+]
+
+for ntk, fn, s2 in xxx:
+    print fn, ntk
     f = ROOT.TFile(fn)
-    geth = lambda s: f.Get(s + '/h_npu')
+    geth = lambda s, s2: f.Get(s2 + s + '/h_npu')
     #hs = [(n, geth(s).Rebin(nbins, n, bins)) for n,s in hists]
-    hs = [(n, geth(s).Clone(n)) for n,s in hists]
+    hs = [(n, geth(s,s2).Clone(n)) for n,s in hists]
 
     for n, h in hs:
+        h.Rebin(5)
         exec n+'=h'
         if n != 'presel':
-            h = ROOT.TGraphAsymmErrors(h, presel, 'n pois')
-            h.Draw('AP')
+            g = histogram_divide(h, presel, use_effective=True)
+            g.Draw('AP')
+            fcn = ROOT.TF1('fcn', 'pol1', 10, 50)
+            g.Fit(fcn, 'QR')
+            g.GetYaxis().SetRangeUser(0, fcn.GetParameter(0)*5)
+            if fcn.GetParameter(0) > 0:
+                print n, fcn.GetParameter(1) / fcn.GetParameter(0) * 4
         else:
             h.Draw()
-        h.GetXaxis().SetRangeUser(0,40)
+        h.GetXaxis().SetRangeUser(0,70)
         if ntk == 4 and n == 'onevtx':
             h.GetYaxis().SetRangeUser(0,0.005)
         ps.save(n + '_ntk%i' % ntk, log=False)
