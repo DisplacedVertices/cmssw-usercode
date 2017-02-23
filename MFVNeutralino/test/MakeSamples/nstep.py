@@ -20,12 +20,12 @@ elif 0:
     output_level = 'minitree'
 elif 1:
     meta = 'qcdht2000_gensim'
-    nevents, events_per = 50, 50
+    nevents, events_per = 99000, 1500
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 
-ex = '_test'
+ex = ''
 
 ################################################################################
 
