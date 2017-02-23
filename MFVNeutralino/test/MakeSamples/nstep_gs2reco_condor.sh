@@ -83,6 +83,9 @@ if [ $EXITCODE -eq 0 ]; then
     fi
 fi
 
+exit $EXITCODE
+)
+
 if [ $EXITCODE -ne 0 ]; then
   echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   echo @@@@ cmsRun exited RECO step with error code $EXITCODE
