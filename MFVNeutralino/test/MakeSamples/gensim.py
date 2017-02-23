@@ -1,21 +1,23 @@
 import sys, FWCore.ParameterSet.Config as cms
 
-fromlhe = 'fromlhe' in sys.argv
 genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
 randomize = 'norandomize' not in sys.argv
+fromlhe = False
 maxevents = 1
 jobnum = 1
 
-if fromlhe:
-    print 'fromlhe: wiping out todo, todo_args, maxevents, jobnum'
-    todo, todo_args = None, []
-else:
-    for arg in sys.argv:
-        if arg.startswith('maxevents='):
-            maxevents = int(arg.replace('maxevents=',''))
-        elif arg.startswith('jobnum='):
-            jobnum = int(arg.replace('jobnum=',''))
+for arg in sys.argv:
+    if arg == 'fromlhe=1':
+        print 'fromlhe: wiping out todo, todo_args, maxevents, jobnum'
+        todo, todo_args = None, []
+        fromlhe = True
+        break
+
+    if arg.startswith('maxevents='):
+        maxevents = int(arg.replace('maxevents=',''))
+    elif arg.startswith('jobnum='):
+        jobnum = int(arg.replace('jobnum=',''))
 
 ################################################################################
 
