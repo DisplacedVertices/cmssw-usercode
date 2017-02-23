@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-which = 'qcdht2000_76'
+which = 'qcdht2000_76_noPU'
 output_dir = which
 inputfns_fn = 'inputfns.txt'
 todos = [
     'fns,%s,$(Process)' % inputfns_fn,
+    'nopu',
     ]
 njobs = None
 
