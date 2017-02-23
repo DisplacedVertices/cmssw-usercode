@@ -9,8 +9,8 @@ jobnum = 1
 
 for arg in sys.argv:
     if arg == 'fromlhe=1':
-        print 'fromlhe: wiping out todo, todo_args, maxevents, jobnum'
-        todo, todo_args = None, []
+        print 'fromlhe: wiping out todos, maxevents, jobnum'
+        todos = []
         fromlhe = True
         break
 
