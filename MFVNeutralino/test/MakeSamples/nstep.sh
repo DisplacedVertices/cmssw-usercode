@@ -2,7 +2,7 @@
 
 #exec 2>&1
 
-for fn in gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
+for fn in lhe.py gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
     if [[ -e $fn ]]; then
         ./todoify.sh $fn > temp
         mv temp $fn
@@ -11,10 +11,11 @@ done
 
 JOBNUM=$1
 MAXEVENTS=$2
-export DUMMYFORHASH=$(echo $3 | cut -d = -f 2) # crab scriptArgs requires a =
-MINITREES=$(echo $4 | cut -d = -f 2)
-TODO=$5
-TODO2=$6
+FROMLHE=$(echo $3 | cut -d = -f 2)
+export DUMMYFORHASH=$(echo $4 | cut -d = -f 2) # crab scriptArgs requires a =
+OUTPUTLEVEL=$(echo $5 | cut -d = -f 2)
+TODO=$6
+TODO2=$7
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
@@ -23,10 +24,52 @@ eval $(scram unsetenv -sh)
 
 echo JOBNUM: ${JOBNUM}
 echo MAXEVENTS: ${MAXEVENTS}
+echo FROMLHE: ${FROMLHE}
 echo DUMMYFORHASH: ${DUMMYFORHASH}
-echo MINITREES: ${MINITREES}
+echo OUTPUTLEVEL: ${OUTPUTLEVEL}
 echo TODO: ${TODO}
 echo TODO2: ${TODO2}
+
+################################################################################
+
+if [[ $FROMLHE -eq 1 ]]; then
+    echo
+    echo START LHE
+
+    (
+    scram project -n LHE CMSSW CMSSW_7_1_16_patch1
+    cd LHE/src
+    eval $(scram runtime -sh)
+    cd ../..
+
+    echo cmsRun
+    cmsRun lhe.py \
+        jobnum=${JOBNUM} \
+        ${MAXEVENTS} \
+        ${TODO} \
+        2>&1
+
+    EXITCODE=${PIPESTATUS[0]}
+    if [ $EXITCODE -eq 0 ]; then
+        gzip RandomEngineState.xml
+        mv RandomEngineState.xml.gz RandomEngineState_LHE.xml.gz
+        echo LHE ls -l
+        ls -l
+    fi
+
+    exit $EXITCODE
+    )
+
+    EXITCODE=$?
+    if [ $EXITCODE -ne 0 ]; then
+      echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      echo @@@@ cmsRun exited LHE step with error code $EXITCODE
+      echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      exit $EXITCODE
+    fi
+
+    echo END LHE
+fi
 
 ################################################################################
 
@@ -40,7 +83,8 @@ eval $(scram runtime -sh)
 cd ../..
 
 echo cmsRun
-cmsRun gensim.py \
+cmsRun -j tempfjr.xml gensim.py \
+    fromlhe=${FROMLHE} \
     jobnum=${JOBNUM} \
     ${MAXEVENTS} \
     ${TODO} \
@@ -54,6 +98,8 @@ if [ $EXITCODE -eq 0 ]; then
     ls -l
 fi
 
+python fixfjr.py
+
 exit $EXITCODE
 )
 
@@ -66,6 +112,11 @@ if [ $EXITCODE -ne 0 ]; then
 fi
 
 echo END GENSIM
+
+if [[ $OUTPUTLEVEL -eq "gensim" ]]; then
+    echo OUTPUTLEVEL told me to exit
+    exit 0
+fi
 
 ################################################################################
 
@@ -130,7 +181,7 @@ echo END RECO
 
 ################################################################################
 
-if [[ $MINITREES -eq 1 ]]; then
+if [[ $OUTPUTLEVEL -eq "minitree" ]]; then
     echo START NTUPLE+MINITREE
 
     echo "process.source.fileNames = ['file:reco.root']" >> ntuple.py

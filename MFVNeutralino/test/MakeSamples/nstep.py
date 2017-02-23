@@ -2,20 +2,35 @@
 
 nevents = 10000
 events_per = 200
-output_minitree = False
+from_lhe = False
+output_level = 'reco'
+output_dataset_tag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
 
-meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-#meta, taus, masses = 'neu', [1000], [800]
+if 0:
+    meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+elif 0:
+    meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+elif 0:
+    meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+elif 0:
+    meta, taus, masses = 'gluddbar', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+elif 0:
+    meta = 'ttbar'
+    nevents, events_per
+    output_level = 'minitree'
+elif 1:
+    meta = 'qcdht2000_gensim'
+    nevents, events_per = 50, 50
+    from_lhe = True
+    output_level = 'gensim'
+    output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 
-meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-meta, taus, masses = 'gluddbar', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-
-meta, nevents, events_per, output_minitree = 'ttbar', 4000000, 800, True
-
-ex = ''
+ex = 'test'
 
 ################################################################################
+
+if output_level not in ('reco', 'minitree', 'gensim'):
+    raise ValueError('output_level %s not supported' % output_level)
 
 import sys, os
 from pprint import pprint
@@ -48,27 +63,37 @@ config.General.requestName = 'SETME'
 
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'dummy.py'
-config.JobType.inputFiles = ['todoify.sh', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py', 'ntuple.py', 'minitree.py']
+config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py', 'ntuple.py', 'minitree.py']
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.sendPythonFolder = True
-config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz', 'RandomEngineState_RAWHLT.xml.gz', 'reco.root']
-if output_minitree:
-    config.JobType.outputFiles[-1:] = ['minitree.root', 'vertex_histos.root']
+
+config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz']
+if fromlhe:
+    config.JobType.outputFiles += ['RandomEngineState_LHE.xml.gz']
+
+if output_level == 'reco':
+    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.xml.gz', 'reco.root']
+elif output_level == 'gensim':
+    config.JobType.outputFiles += ['gensim.root']
+elif output_level == 'minitree':
+    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.xml.gz', 'minitree.root', 'vertex_histos.root']
+
 
 config.JobType.scriptArgs = [
     'maxevents=%i' % events_per,
+    'fromlhe=%i' % from_lhe,
     'dummyforhash=%i' % dummy_for_hash,  # stupid crab requires a =
-    'output_minitree=%i' % int(output_minitree),
+    'outputlevel=%s' % output_level,
     'todo=SETME',
-    'todo2=placeholder' # yes this gets replaced with todo= below
+    'todo2=placeholder', # yes this gets replaced with todo= below
     ]
 
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
-config.Data.publication = not output_minitree
+config.Data.publication = output_level != 'minitree'
 config.Data.outputPrimaryDataset = 'SETME'
-config.Data.outputDatasetTag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'
 config.Site.whitelist = '''T1_US_FNAL
@@ -120,9 +145,9 @@ outputs = {}
 def submit(config, name, todo, todo2=None):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
-    config.JobType.scriptArgs[3] = todo
+    config.JobType.scriptArgs[4] = todo
     if todo2 is not None:
-        config.JobType.scriptArgs[4] = todo2
+        config.JobType.scriptArgs[5] = todo2
 
     if not testing:
         output = crab_command('submit', config=config)
@@ -171,6 +196,11 @@ elif meta == 'ttbar':
         else:
             todo2 = None
         submit(config, name, todo, todo2)
+
+elif meta == 'qcdht2000_gensim':
+    name = meta
+    todo = 'todo=qcdht2000'
+    submit(config, name, todo)
 
 if not testing:
     for x in to_rm:

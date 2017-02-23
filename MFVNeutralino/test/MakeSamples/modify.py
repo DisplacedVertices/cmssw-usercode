@@ -1,5 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
+def set_qcdht2000(process):
+    process.externalLHEProducer.args = ['/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT2000toInf/v1/QCD_HT2000toInf_tarball.tar.xz']
+
 def set_ttbar(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
         'Top:gg2ttbar = on',
@@ -30,7 +33,7 @@ def set_particle_tau0(process, id, tau0):
     process.generator.PythiaParameters.processParameters.append('%i:tau0 = %f' % (id, tau0)) # tau0 is in mm by pythia convention
 
 def set_energy(process, energy):
-    process.generator.comEnergy = energy
+    process.generator.comEnergy = energy # JMTBAD does nothing if LHE gridpacks being used
 
 def set_tune(process, tune):
     process.generator.PythiaParameters.tuneSettings = cms.vstring('Tune:pp %i' % tune)
