@@ -67,7 +67,7 @@ cp $WD/{reco.py,modify.py} .
 mv $WD/hlt.root .
 
 echo cmsRun
-cmsRun -j fjr.xml reco.py ${TODOS} 2>&1
+cmsRun -j fjr.xml reco.py 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
