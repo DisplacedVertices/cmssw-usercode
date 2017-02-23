@@ -4,3 +4,4 @@ out.*.gz
 workdirs
 copy4pub_tmp.py
 copy4pub_crab.py
+inputfns.txt

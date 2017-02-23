@@ -168,6 +168,17 @@ def set_gluino_ddbar(process, tau0, m_gluino):
     
 ########################################################################
 
+def set_fns(process, list_fn, jobnum):
+    fns = [fn.strip() for fn in open(list_fn).readlines() if fn.strip()]
+    if jobnum >= 0:
+        if jobnum >= len(fns):
+            raise ValueError('jobnum %i too big for %i list' % (jobnum, len(fns)))
+        fns = [fns[jobnum]]
+    process.source.fileNames = fns
+
+def set_nopu(process):
+    process.load('SimGeneral.MixingModule.mixNoPU_cfi')
+
 def prefer_it(process, name, connect, record, tag):
     from CondCore.DBCommon.CondDBSetup_cfi import CondDBSetup
     es_source = cms.ESSource('PoolDBESSource', CondDBSetup, connect = cms.string(connect), toGet = cms.VPSet(cms.PSet(record = cms.string(record), tag = cms.string(tag))))
@@ -193,9 +204,6 @@ def center_bs(process):
     process.VtxSmeared.X0 = 0
     process.VtxSmeared.Y0 = 0
     process.VtxSmeared.Y0 = 0
-
-def nopu(process):
-    process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 
 def tracker_alignment(process, tag):
     prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc' % tag.capitalize())
