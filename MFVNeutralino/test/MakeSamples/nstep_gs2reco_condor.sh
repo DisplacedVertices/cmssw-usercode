@@ -39,7 +39,7 @@ if [ $EXITCODE -eq 0 ]; then
     mv RandomEngineState.xml.gz $WD/RandomEngineState_RAWHLT_${JOBNUM}.xml.gz
     gzip fjr.xml
     mv fjr.xml.gz $WD/fjr_RAWHLT_${JOBNUM}.xml.gz
-    mv rawhlt.root $WD/
+    mv hlt.root $WD/
 fi
 
 exit $EXITCODE
@@ -64,7 +64,7 @@ scram project -n RECO CMSSW CMSSW_7_6_3_patch2
 cd RECO/src
 eval $(scram runtime -sh)
 cp $WD/{reco.py,modify.py} .
-mv $WD/rawhlt.root .
+mv $WD/hlt.root .
 
 echo cmsRun
 cmsRun -j fjr.xml reco.py ${TODOS} 2>&1
