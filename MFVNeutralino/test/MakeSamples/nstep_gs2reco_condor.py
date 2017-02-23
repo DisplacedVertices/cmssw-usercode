@@ -6,6 +6,7 @@ inputfns_fn = 'inputfns.txt'
 todos = [
     'fns,%s,$(Process)' % inputfns_fn,
     ]
+njobs = None
 
 ####
 
@@ -41,7 +42,8 @@ save_git_status(os.path.join(work_area, 'gitstatus'))
 sh_fn = os.path.abspath('nstep_gs2reco_condor.sh')
 todos = ' '.join('todo=' + x for x in todos)
 input_files = ','.join([os.path.abspath(x) for x in 'todoify.sh rawhlt.py reco.py modify.py inputfns.txt minbias.py minbias_files.py minbias_files.pkl'.split()])
-njobs = str(ninputfns)
+if njobs is None:
+    njobs = str(ninputfns)
 
 jdl_template = '''universe = vanilla
 Executable = %(sh_fn)s
