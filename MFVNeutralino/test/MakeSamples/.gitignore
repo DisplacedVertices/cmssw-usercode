@@ -1,4 +1,3 @@
-minbias_files.py
 minbias_files.pkl
 *.root
 out.*.gz
