@@ -1,16 +1,21 @@
 import sys, FWCore.ParameterSet.Config as cms
 
+fromlhe = 'fromlhe' in sys.argv
 genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
 randomize = 'norandomize' not in sys.argv
 maxevents = 1
 jobnum = 1
 
-for arg in sys.argv:
-    if arg.startswith('maxevents='):
-        maxevents = int(arg.replace('maxevents=',''))
-    elif arg.startswith('jobnum='):
-        jobnum = int(arg.replace('jobnum=',''))
+if fromlhe:
+    print 'fromlhe: wiping out todo, todo_args, maxevents, jobnum'
+    todo, todo_args = None, []
+else:
+    for arg in sys.argv:
+        if arg.startswith('maxevents='):
+            maxevents = int(arg.replace('maxevents=',''))
+        elif arg.startswith('jobnum='):
+            jobnum = int(arg.replace('jobnum=',''))
 
 ################################################################################
 
@@ -25,22 +30,31 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.Geometry.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
-process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
+process.load('IOMC.EventVertexGenerators.VtxSmearedNominalCollision2015_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.SimIdeal_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxevents))
-process.source = cms.Source('EmptySource', firstLuminosityBlock = cms.untracked.uint32(jobnum))
+
+if fromlhe:
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+    process.source = cms.Source('PoolSource',
+                                fileNames = cms.untracked.vstring('file:lhe.root'),
+                                inputCommands = cms.untracked.vstring('keep *', 'drop LHEXMLStringProduct_*_*_*'),
+                                dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
+                                )
+else:
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxevents))
+    process.source = cms.Source('EmptySource', firstLuminosityBlock = cms.untracked.uint32(jobnum))
 
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_71_V1::All', '')
 
-process.generator = cms.EDFilter('Pythia8GeneratorFilter',
+process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
     filterEfficiency = cms.untracked.double(1.0),
     maxEventsToPrint = cms.untracked.int32(0),
@@ -74,6 +88,21 @@ process.generator = cms.EDFilter('Pythia8GeneratorFilter',
             ),
         ),
     )
+
+if fromlhe:
+    process.generator.PythiaParameters.processParameters = [
+        'JetMatching:setMad = off',
+        'JetMatching:scheme = 1',
+        'JetMatching:merge = on',
+        'JetMatching:jetAlgorithm = 2',
+        'JetMatching:etaJetMax = 5.',
+        'JetMatching:coneRadius = 1.',
+        'JetMatching:slowJetPower = 1',
+        'JetMatching:qCut = 14.',
+        'JetMatching:nQmatch = 5',
+        'JetMatching:nJetMax = 4',
+        'JetMatching:doShowerKt = off',
+        ]
 
 process.generation_step = cms.Path(process.pgen)
 process.simulation_step = cms.Path(process.psim)
