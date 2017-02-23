@@ -25,7 +25,7 @@ elif 1:
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 
-ex = 'test'
+ex = '_test'
 
 ################################################################################
 
@@ -52,9 +52,10 @@ config = Config()
 
 to_rm = []
 
-for x in ['ntuple.py', 'minitree.py']:
-    to_rm.append(x)
-    os.system('cmsDumpPython.py ../%s > %s' % (x,x))
+if output_level == 'minitree':
+    for x in ['ntuple.py', 'minitree.py']:
+        to_rm.append(x)
+        os.system('cmsDumpPython.py ../%s > %s' % (x,x))
 
 config.General.transferLogs = True
 config.General.transferOutputs = True
@@ -63,12 +64,15 @@ config.General.requestName = 'SETME'
 
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'dummy.py'
-config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py', 'ntuple.py', 'minitree.py']
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.sendPythonFolder = True
 
+config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py']
+if output_level == 'minitree':
+    config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
+
 config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz']
-if fromlhe:
+if from_lhe:
     config.JobType.outputFiles += ['RandomEngineState_LHE.xml.gz']
 
 if output_level == 'reco':
