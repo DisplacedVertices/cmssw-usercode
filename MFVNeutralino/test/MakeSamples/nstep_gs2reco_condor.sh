@@ -16,7 +16,7 @@ TODOS=$3 $4 $5 $6 $7 $8 $9
 
 echo WD: $WD
 echo JOBNUM: $JOBNUM
-echo TODO: $TODO
+echo TODOS: $TODOS
 
 ################################################################################
 
