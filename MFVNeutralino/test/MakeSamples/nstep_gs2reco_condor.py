@@ -34,7 +34,7 @@ from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools import colors
 
 testing = 'testing' in sys.argv
-work_area = crab_dirs_root('mfv_run2_nstep_gs2reco_condor_%s' % which)
+work_area = crab_dirs_root('nstep_gs2reco_condor_%s' % which)
 if os.path.isdir(work_area):
     sys.exit('work_area %s exists' % work_area)
 os.makedirs(work_area)
