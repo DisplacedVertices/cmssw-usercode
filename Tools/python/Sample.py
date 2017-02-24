@@ -47,10 +47,19 @@ class Sample(object):
 
         self.ready = True
 
+    def has_dataset(self, c):
+        return self.datasets.has_key(c)
+
     def set_curr_dataset(self, c):
         if not self.datasets.has_key(c):
             raise KeyError('no dataset with key %s registered in sample %s' % (c, self.name))
         self.curr_dataset = c
+
+    def try_curr_dataset(self, c):
+        if not self.has_dataset(c):
+            return False
+        self.curr_dataset = c
+        return True
 
     def add_dataset(self, c, *args, **kwargs):
         self.datasets[c] = Dataset(*args, **kwargs)
