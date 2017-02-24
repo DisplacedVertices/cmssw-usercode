@@ -4,8 +4,8 @@ import sys
 from pprint import pprint
 import JMTucker.Tools.argparse as argparse
 
-parser = argparse.ArgumentParser(description = 'comparehists: compare all histograms in multiple files',
-                                 usage = '%(prog)s [options] file1.root [file2.root ... fileN.root] dir_path plot_path')
+parser = argparse.ArgumentParser(description = 'comparehists: compare all histograms in multiple files or multiple directories',
+                                 usage = '%(prog)s [options] file1.root [file2.root ... fileN.root] dir1_path [dir2_path ... dirN_path] plot_path')
 
 parser.add_argument('positional', nargs='*')
 
@@ -45,9 +45,15 @@ if len(options.positional) < 3:
 
 from JMTucker.Tools.ROOTTools import *
 
-options.files = options.positional[:-2]
-options.dir_path, options.plot_path = options.positional[-2:]
-nfiles = len(options.files)
+options.files = []
+options.dir_paths = []
+for x in options.positional[:-1]:
+    if '.root' in x:
+        options.files.append(x)
+    else:
+        options.dir_paths.append(x)
+options.plot_path = options.positional[-1]
+nfiles = len(options.files) * len(options.dir_paths)
 
 options.nice = options.nice[:nfiles]
 while len(options.nice) < nfiles:
@@ -88,13 +94,15 @@ for i,f in enumerate(files):
     if not f.IsOpen():
         raise ValueError('file %s not readable' % options.files[i])
 
-if options.dir_path == '' or options.dir_path == '/':
-    dirs = [file for file in files]
-else:
-    dirs = [file.Get(options.dir_path) for file in files]
-    for i,d in enumerate(dirs):
-        if not issubclass(type(d), ROOT.TDirectory):
-            raise ValueError('dir %s not found in file %s' % (options.dir_path, options.files[i]))
+dirs = []
+for dir_path in options.dir_paths:
+    if dir_path == '' or dir_path == '/':
+        dirs += [file for file in files]
+    else:
+        dirs += [file.Get(dir_path) for file in files]
+        for i,d in enumerate(dirs):
+            if not issubclass(type(d), ROOT.TDirectory):
+                raise ValueError('dir %s not found in file %s' % (dir_path, options.files[i]))
 
 compare_all_hists(ps,
                   samples = zip(options.nice, dirs, options.colors),
