@@ -46,7 +46,7 @@ for wd in wds:
             files.append(fn)
     samples.append((sample, ds, numevents_in_dataset(ds, 3)))
 
-    code = coderep_files(files, 1)
+    code = coderep_files(files)
     publish[(sample, options.dataset)] = (len(files), code if code is not None else files)
 
 print 'new entries:'
