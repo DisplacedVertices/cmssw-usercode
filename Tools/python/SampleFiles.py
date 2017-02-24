@@ -67,6 +67,11 @@ _add('eJzMvVuPtMlt53nfX8S+ebbjHOQl4wRoMNod2PLAc9XolbVez+oEuWWMv/0ysiqDTCvfQhsYJV
 # my JetHT2015C trigger-skim (HT800 || PFJet450) copy
 _add({('JetHT2015C', 'main'): (7, ['/store/user/tucker/JetHT/TrigSkim_JetHT2015C/170217_161741/0000/trigskim_%i.root' % i for i in xrange(7)])})
 
+_add_ds('main', {
+'testqcdht2000':      (85, ['/store/user/tucker/qcdht2000_76/reco_%i.root'      % i for i in xrange(91) if i not in [5,19,74,77,84,85]]),
+'testqcdht2000_noPU': (85, ['/store/user/tucker/qcdht2000_76_noPU/reco_%i.root' % i for i in xrange(91) if i not in [5,19,74,77,84,85]]),
+})
+
 # ntuplev10
 _add_ds('ntuplev10', {
 'xx4j_tau00001mm_M0300': (1, ['/store/user/tucker/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV10/161219_134716/0000/ntuple_0.root']),
