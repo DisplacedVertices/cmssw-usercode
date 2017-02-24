@@ -222,14 +222,14 @@ qcdht1000.add_dataset('ntuplev11', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgrap
 qcdht2000.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-df8522cc708057e6d4d7bdca37f1ad35/USER', 1991645)
 qcdht2000ext.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-b2cadb9c972c89c96ec11f8287fd9a9f/USER', 4047360)
 
-JetHT2016B3.add_dataset('ntuplev11', '/JetHT/None/None', 20666266) # tucker-NtupleV11_2016-f4f1c3ebc1857c56bf5b53ded980e564/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016C.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-b7a6d1e5bc74f8dee0cc92b3a32034fc/USER', 9152824)
-JetHT2016D.add_dataset('ntuplev11', '/JetHT/None/None', 14912402) # tucker-NtupleV11_2016-74ca04a1e5273d587b1c0f3812b6a5c1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016E.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-8029c8407d97a41fd70a9822d86c3dc1/USER', 13887152)
-JetHT2016F.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-d7d515d43b5340461c48f19cc210d335/USER', 10923951)
-JetHT2016G.add_dataset('ntuplev11', '/JetHT/None/None', 27953964) # tucker-NtupleV11_2016-d30725605bf98b582e3488fe5d5b0b8f/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016H2.add_dataset('ntuplev11', '/JetHT/None/None', 17969588) # tucker-NtupleV11_2016-5dd8af2237d539cec6557fcf17bbf6b1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016H3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-718c77125c164f4c9d22a32b3c9a9364/USER', 458208)
+JetHT2016B3.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-f4f1c3ebc1857c56bf5b53ded980e564/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016C.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-b7a6d1e5bc74f8dee0cc92b3a32034fc/USER')
+JetHT2016D.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-74ca04a1e5273d587b1c0f3812b6a5c1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016E.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-8029c8407d97a41fd70a9822d86c3dc1/USER')
+JetHT2016F.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-d7d515d43b5340461c48f19cc210d335/USER')
+JetHT2016G.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-d30725605bf98b582e3488fe5d5b0b8f/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016H2.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-5dd8af2237d539cec6557fcf17bbf6b1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016H3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-718c77125c164f4c9d22a32b3c9a9364/USER')
 #datarecovery_JetHT2016B3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-4ae165e321bb24427141878bd9f852cc/USER', 74729)
 #datarecovery_JetHT2016D.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-72c66019e84e46e773e97b19976668a0/USER', 43674)
 #datarecovery_JetHT2016G.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-78315d1c78a5a95900ec00a9cb927c5d/USER', 145561)
