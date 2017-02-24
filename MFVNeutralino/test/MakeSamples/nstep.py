@@ -20,7 +20,7 @@ elif 0:
     output_level = 'minitree'
 elif 1:
     meta = 'qcdht2000_gensim'
-    nevents, events_per = 99000, 3000
+    nevents, events_per = 99000, 1500
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
@@ -40,7 +40,7 @@ from JMTucker.Tools.general import save_git_status
 import JMTucker.Tools.colors as colors
 
 testing = 'testing' in sys.argv
-work_area = crab_dirs_root('mfv_run2_nstep_%s%s' % (meta, ex))
+work_area = crab_dirs_root('nstep_%s%s' % (meta, ex))
 if os.path.isdir(work_area):
     sys.exit('work_area %s exists' % work_area)
 os.makedirs(work_area)

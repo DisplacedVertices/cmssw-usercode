@@ -22,7 +22,7 @@ def cmd_hadd_qcd_sum():
         if not os.path.isfile(a) or not os.path.isfile(b):
             print 'skipping', x, 'because at least one input file missing'
         else:
-            hadd(base + 'sum.root', a, b)
+            hadd(base + 'sum.root', [a, b])
 
 def cmd_merge_background():
     files = ['ttbar.root']
