@@ -19,8 +19,8 @@ elif 0:
     nevents, events_per
     output_level = 'minitree'
 elif 1:
-    meta = 'qcdht2000_gensim'
-    nevents, events_per = 99000, 1500
+    meta = 'qcdht2000_gensim_ext1'
+    nevents, events_per = 396000, 1500
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
@@ -201,7 +201,7 @@ elif meta == 'ttbar':
             todo2 = None
         submit(config, name, todo, todo2)
 
-elif meta == 'qcdht2000_gensim':
+elif meta.startswith('qcdht2000_gensim'):
     name = meta
     todo = 'todo=qcdht2000'
     submit(config, name, todo)
