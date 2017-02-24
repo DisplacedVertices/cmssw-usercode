@@ -314,23 +314,27 @@ if __name__ == '__main__':
             print x.name, x.int_lumi_orig/1000, '->', (x.int_lumi_orig + y.int_lumi_orig)/1000
 
     if 0:
+        from JMTucker.Tools.general import coderep_files
         f = open('a.txt', 'wt')
-        for x in data_samples: # qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples + leptonic_background_samples + auxiliary_background_samples + mfv_signal_samples_gluddbar + xx4j_samples:
-            for y in ('ntuplev10',):
-                try:
-                    x.set_curr_dataset(y)
-                except KeyError:
+        for x in qcd_samples + qcd_samples_ext + ttbar_samples + data_samples:
+            for y in ('ntuplev11',):
+                print x.name, y
+                if not x.try_curr_dataset(y):
                     continue
-                fns = x.filenames
-                base = [fn.rsplit('/', 2)[0] for fn in fns]
-                assert len(set(base)) == 1
-                base = base[0]
-                nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in fns]
-                mx = max(nums)
-                code = "[%r + '/%%04i/ntuple_%%i.root' %% (i/1000,i) for i in xrange(1,%i)]" % (base, mx+1)
-                missing = sorted(set(range(1,mx+1)) - set(nums))
-                if missing:
-                    code = code.replace(']', ' if i not in %r]' % missing)
-                l = eval(code)
-                assert set(l) == set(fns)
-                f.write('(%r, %r): (%i, %s),\n' % (x.name, y, len(fns), code))
+                code = coderep_files(x.filenames)
+                f.write('(%r, %r): (%i, %s),\n' % (x.name, y, len(x.filenames), code))
+
+    if 0:
+        import os
+        from JMTucker.Tools.general import coderep_files
+        f = open('a.txt', 'wt')
+        for s in qcd_samples + qcd_samples_ext + ttbar_samples + data_samples:
+            print s.name
+            fns = s.filenames
+            base = os.path.commonprefix(fns)
+            bns = [x.replace(base, '') for x in fns]
+            code = "[%r + x for x in '''\n" % base
+            for bn in bns:
+                code += bn + '\n'
+            code += "'''.split('\n')]"
+            f.write('(%r, %r): (%i, %s),\n' % (s.name, y, len(fns), code))
