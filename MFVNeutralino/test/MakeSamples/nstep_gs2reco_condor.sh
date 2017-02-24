@@ -12,10 +12,11 @@ done
 WD=$(pwd)
 JOBNUM=$1
 OUTPUTDIR=$2
-TODOS=$3 $4 $5 $6 $7 $8 $9
+TODOS="$3 $4 $5 $6 $7 $8 $9"
 
 echo WD: $WD
 echo JOBNUM: $JOBNUM
+echo OUTPUTDIR: $OUTPUTDIR
 echo TODOS: $TODOS
 
 ################################################################################
