@@ -12,10 +12,11 @@ done
 WD=$(pwd)
 JOBNUM=$1
 OUTPUTDIR=$2
-TODOS=$3 $4 $5 $6 $7 $8 $9
+TODOS="$3 $4 $5 $6 $7 $8 $9"
 
 echo WD: $WD
 echo JOBNUM: $JOBNUM
+echo OUTPUTDIR: $OUTPUTDIR
 echo TODOS: $TODOS
 
 ################################################################################
@@ -23,7 +24,7 @@ echo TODOS: $TODOS
 echo START RAWHLT
 
 (
-scram project -n RAWHLT CMSSW CMSSW_7_6_1
+scram project -n RAWHLT CMSSW CMSSW_8_0_21
 cd RAWHLT/src
 eval $(scram runtime -sh)
 cp $WD/{inputfns.txt,*.py,*.pkl} .
@@ -60,7 +61,7 @@ echo END RAWHLT
 echo START RECO
 
 (
-scram project -n RECO CMSSW CMSSW_7_6_3_patch2
+scram project -n RECO CMSSW CMSSW_8_0_21
 cd RECO/src
 eval $(scram runtime -sh)
 cp $WD/{reco.py,modify.py} .
