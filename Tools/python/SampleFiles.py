@@ -126,6 +126,27 @@ _add_ds('ntuplev11', {
 'qcdht1500ext': _fromnum0('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_qcdht1500ext/170217_151519', 64),
 'qcdht2000ext': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016/170217_045806', 163),
 
+'JetHT2016B3': (1752 + 93,
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170218_180953' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in chain(xrange(1,280), xrange(281,585), xrange(586,628), xrange(629,1473), xrange(1474,1525), xrange(1526,1724), xrange(1725,1759))] +
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170222_205536/0000/ntuple_%i.root' % i for i in xrange(1,94)]
+                ),
+'JetHT2016C':  (580, ['/store/user/tucker/JetHT/NtupleV11_2016/170217_044934/0000/ntuple_%i.root' % i for i in xrange(1,581)]),
+'JetHT2016D':  (969 + 37,
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170217_045150/0000/ntuple_%i.root' % i for i in chain(xrange(1,54), xrange(56,64), xrange(65,973))] +
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170222_205605/0000/ntuple_%i.root' % i for i in chain(xrange(1,14), xrange(19,38), xrange(41,46))]
+                ),
+'JetHT2016E':  (826, ['/store/user/tucker/JetHT/NtupleV11_2016/170217_045229/0000/ntuple_%i.root' % i for i in xrange(1,827)]),
+'JetHT2016F':  (603, ['/store/user/tucker/JetHT/NtupleV11_2016/170217_045346/0000/ntuple_%i.root' % i for i in xrange(1,604)]),
+'JetHT2016G':  (1419 + 85,
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170218_181024' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in chain(xrange(1,696), xrange(697,857), xrange(858,1149), xrange(1150,1300), xrange(1301,1424))] +
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170222_205637/0000/ntuple_%i.root' % i for i in xrange(1,86)]
+                ),
+'JetHT2016H2': (1533 + 120,
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170217_045421' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in chain(xrange(1,659), [660], xrange(662,908), xrange(910,976), xrange(977,1062), xrange(1063,1065), xrange(1066,1405), xrange(1406,1542))] +
+                ['/store/user/tucker/JetHT/NtupleV11_2016/170222_205707/0000/ntuple_%i.root' % i for i in xrange(1,121)]
+                ),
+'JetHT2016H3': (41 , ['/store/user/tucker/JetHT/NtupleV11_2016/170217_045451/0000/ntuple_%i.root' % i for i in xrange(1,42)]),
+
 })
 
 if 0:
