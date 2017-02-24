@@ -514,10 +514,10 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     hs.add(TString::Format("%sjetsvdphidphi", ex).Data(), TString::Format("|#Delta#phi| to closest %sjet vtx (by |#Delta#phi|)", ex).Data(),  25, 0,   3.15);
   }
 
-  const char* lmt_ex[3] = {"loose", "medium", "tight"};
-  for (int i = 0; i < 3; ++i) {
-    hs.add(TString::Format("bjet%d_deltaphi0", i).Data(), TString::Format("|#Delta#phi| to closest %s bjet", lmt_ex[i]).Data(),               25, 0,   3.15);
-    hs.add(TString::Format("bjet%d_deltaphi1", i).Data(), TString::Format("|#Delta#phi| to next closest %s bjet", lmt_ex[i]).Data(),          25, 0,   3.15);
+  const char* lmt_ex[4] = {"", "loose_b", "medium_b", "tight_b"};
+  for (int i = 0; i < 4; ++i) {
+    hs.add(TString::Format("jet%d_deltaphi0", i).Data(), TString::Format("|#Delta#phi| to closest %sjet", lmt_ex[i]).Data(),               25, 0,   3.15);
+    hs.add(TString::Format("jet%d_deltaphi1", i).Data(), TString::Format("|#Delta#phi| to next closest %sjet", lmt_ex[i]).Data(),          25, 0,   3.15);
   }
 
   for (int j = 0; j < sv_num_indices; ++j) {
@@ -549,7 +549,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
 
     h_sv[j].Init("h_sv_" + std::string(exc), hs, true, do_scatterplots);
 
-    const char* lmt_ex[4] = {"", "loose_b", "medium_b", "tight_b"};
     for (int i = 0; i < 4; ++i) {
       h_sv_jets_deltaphi[i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%sjets_deltaphi", exc, lmt_ex[i]), TString::Format(";%s SV #Delta#phi to %sjets;arb. units", exc, lmt_ex[i]), 50, -3.15, 3.15);
     }
@@ -1047,26 +1046,19 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
       v[TString::Format("%sjetsvdphidphi", ex).Data()] = jetsvdphidphi;
     }
 
-    std::vector<double> bjetdeltaphis;
-    for (int i = 0; i < 3; ++i) {
-      bjetdeltaphis.clear();
-      for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-        if (((mevent->jet_id[ijet] >> 2) & 3) >= i + 1) {
-          bjetdeltaphis.push_back(fabs(reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet])));
-        }
-      }
-      std::sort(bjetdeltaphis.begin(), bjetdeltaphis.end());
-      int nbtags = bjetdeltaphis.size();
-      v[TString::Format("bjet%d_deltaphi0", i).Data()] = 0 > nbtags - 1 ? -1 : bjetdeltaphis[0];
-      v[TString::Format("bjet%d_deltaphi1", i).Data()] = 1 > nbtags - 1 ? -1 : bjetdeltaphis[1];
-    }
-
+    std::vector<double> jetdeltaphis;
     for (int i = 0; i < 4; ++i) {
+      jetdeltaphis.clear();
       for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
         if (((mevent->jet_id[ijet] >> 2) & 3) >= i) {
           fill_multi(h_sv_jets_deltaphi[i], isv, reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet]), w);
+          jetdeltaphis.push_back(fabs(reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet])));
         }
       }
+      std::sort(jetdeltaphis.begin(), jetdeltaphis.end());
+      int njets = jetdeltaphis.size();
+      v[TString::Format("jet%d_deltaphi0", i).Data()] = 0 > njets - 1 ? -1 : jetdeltaphis[0];
+      v[TString::Format("jet%d_deltaphi1", i).Data()] = 1 > njets - 1 ? -1 : jetdeltaphis[1];
     }
 
     int ntracksthepv = 0;
