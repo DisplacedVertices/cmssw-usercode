@@ -61,6 +61,13 @@ def set_process(process, name, ds, num=-1):
         fns = fns[:num]
     process.source.fileNames = fns
 
+################################################################################
+
+_add_ds('main', {
+'testqcdht2000':      (85, ['/store/user/tucker/qcdht2000_80/reco_%i.root'      % i for i in xrange(91) if i not in [5,19,74,77,84,85]]),
+'testqcdht2000_noPU': (85, ['/store/user/tucker/qcdht2000_80_noPU/reco_%i.root' % i for i in xrange(91) if i not in [5,19,74,77,84,85]]),
+})
+
 _add_ds('ntuplev10', {
 
 'qcdht0500':    _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV10/170129_025922',    762, but=[16, 37]),
