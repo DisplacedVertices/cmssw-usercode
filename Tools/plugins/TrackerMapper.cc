@@ -26,6 +26,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
 
+  TH1F* h_npu;
+
   TH1F* h_bsx;
   TH1F* h_bsy;
   TH1F* h_bsz;
@@ -70,11 +72,13 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
 {
   edm::Service<TFileService> fs;
 
+  h_npu = fs->make<TH1F>("h_npu", ";number of pileup interactions;events", 100, 0, 100);
+
   h_bsx = fs->make<TH1F>("h_bsx", ";beamspot x (cm);events", 200, -1, 1);
   h_bsy = fs->make<TH1F>("h_bsy", ";beamspot y (cm);events", 200, -1, 1);
   h_bsz = fs->make<TH1F>("h_bsz", ";beamspot z (cm);events", 200, -1, 1);
 
-  h_npv = fs->make<TH1F>("h_npv", ";number of primary vertices;events", 65, 0, 65);
+  h_npv = fs->make<TH1F>("h_npv", ";number of primary vertices;events", 100, 0, 100);
 
   const char* ex[3] = {"all", "sel", "seed"};
   for (int i = 0; i < 3; ++i) {
@@ -134,6 +138,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
       if (psi->getBunchCrossing() == 0)
         npu = psi->getTrueNumInteractions();
+
+    h_npu->Fill(npu);
 
     const double pu_w = pileup_weight(npu);
     *weight *= pu_w;
