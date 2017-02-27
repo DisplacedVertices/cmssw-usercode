@@ -222,6 +222,7 @@ official_mfv_neu_tau10000um_M0800.add_dataset('ntuplev11', '/GluinoGluinoToNeutr
 qcdht1000.add_dataset('ntuplev11', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-2d5962ffa78f8ab85f960c7fe846404b/USER', 4838788)
 qcdht2000.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-df8522cc708057e6d4d7bdca37f1ad35/USER', 1991645)
 qcdht2000ext.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-b2cadb9c972c89c96ec11f8287fd9a9f/USER', 4047360)
+ttbar.add_dataset('ntuplev11', '/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/tucker-NtupleV11_2016-103966dbf38b40ab2f1836aa20e01d52/USER', 1836993)
 
 JetHT2016B3.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-f4f1c3ebc1857c56bf5b53ded980e564/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
 JetHT2016C.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-b7a6d1e5bc74f8dee0cc92b3a32034fc/USER')
