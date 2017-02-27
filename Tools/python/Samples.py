@@ -6,8 +6,8 @@ from JMTucker.Tools.Sample import *
 ########################################################################
 
 my_qcd_test_samples = [
-    MCSample('testqcdht2000',      '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  11688),
-    MCSample('testqcdht2000_noPU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  11688),
+    MCSample('testqcdht2000',      '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  -1),
+    MCSample('testqcdht2000_noPU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  -1),
     ]
 
 qcd_samples = [
@@ -238,7 +238,10 @@ JetHT2016H3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-718c77125c164
 
 for x in (testqcdht2000, testqcdht2000_noPU):
     x.condor = True
-testqcdht2000.datasets['gensim'].condor = True
+
+# /qcdht2000_gensim/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
+# /qcdht2000_gensim_ext1/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
+testqcdht2000.add_dataset('gensim', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer15GS-MCRUN2_71_V1/GEN-SIM', 33377, dbs_inst='phys03', condor=True)
 
 for s in registry.all():
     for ds in 'ntuplev10', 'ntuplev11':
