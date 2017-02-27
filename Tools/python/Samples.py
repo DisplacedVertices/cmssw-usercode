@@ -113,6 +113,7 @@ for s in data_samples + auxiliary_data_samples:
 registry = SamplesRegistry()
 
 __all__ = [
+    'my_qcd_test_samples',
     'qcd_samples',
     'qcd_samples_ext',
     'qcd_samples_sum',
@@ -234,6 +235,15 @@ JetHT2016H3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-718c77125c164
 #datarecovery_JetHT2016D.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-72c66019e84e46e773e97b19976668a0/USER', 43674)
 #datarecovery_JetHT2016G.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-78315d1c78a5a95900ec00a9cb927c5d/USER', 145561)
 #datarecovery_JetHT2016H2.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-21eedbb3cc9247d80637006fd6d24378/USER', 144483)
+
+for x in (testqcdht2000, testqcdht2000_noPU):
+    x.condor = True
+testqcdht2000.datasets['gensim'].condor = True
+
+for s in registry.all():
+    for ds in 'ntuplev10', 'ntuplev11':
+        if s.has_dataset(ds):
+            s.datasets[ds].condor = True
 
 ########################################################################
 

@@ -63,9 +63,14 @@ def set_process(process, name, ds, num=-1):
 
 ################################################################################
 
+_add({('testqcdht2000', 'gensim') : (60 + 263,
+                                     ['/store/user/tucker/qcdht2000_gensim/RunIISummer15GS-MCRUN2_71_V1/170224_171809/0000/gensim_%i.root' % i for i in chain(xrange(1,5), xrange(6,8), xrange(11,16), xrange(17,40), xrange(41,67))] +
+                                     ['/store/user/tucker/qcdht2000_gensim_ext1/RunIISummer15GS-MCRUN2_71_V1/170224_210305/0000/gensim_%i.root' % i for i in chain(xrange(1,255), xrange(256,265))]
+                                     )})
+
 _add_ds('main', {
-'testqcdht2000':      (85, ['/store/user/tucker/qcdht2000_80/reco_%i.root'      % i for i in xrange(91) if i not in [5,19,74,77,84,85]]),
-'testqcdht2000_noPU': (85, ['/store/user/tucker/qcdht2000_80_noPU/reco_%i.root' % i for i in xrange(91) if i not in [5,19,74,77,84,85]]),
+'testqcdht2000':      _fromnum0('/store/user/tucker/qcdht2000_80',      323, fnbase='reco'),
+'testqcdht2000_noPU': _fromnum0('/store/user/tucker/qcdht2000_80_noPU', 323, fnbase='reco'),
 })
 
 _add_ds('ntuplev10', {
