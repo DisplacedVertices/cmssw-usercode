@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 
 import JMTucker.Tools.SampleFiles as sf
-sf.set_process(process, 'qcdht2000', 'main', 1)
+sf.set_process(process, 'qcdht2000', 'main', 4)
 process.TFileService.fileName = 'tracker_mapper.root'
 
 import JMTucker.MFVNeutralino.TriggerFilter
@@ -20,13 +20,10 @@ process.p = cms.Path(process.triggerFilter * process.TrackerMapper)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
-    for s in Samples.ttbar_samples + Samples.qcd_samples:
-        s.events_per = 500000
-    for s in Samples.data_samples:
-        s.json = '../../MFVNeutralino/test/ana_all.json'
+    samples = [Samples.qcdht2000] + Samples.my_qcd_test_samples
+    for s in samples:
+        s.events_per = 5000
 
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    cs = CRABSubmitter('TrackerMapper',
-                       job_control_from_sample = True,
-                       )
-    cs.submit_all(Samples.ttbar_samples + Samples.qcd_samples + Samples.data_samples)
+    from JMTucker.Tools.MetaSubmitter import *
+    ms = MetaSubmitter('TrackerMapper_testqcdht2000_15')
+    ms.submit(samples)
