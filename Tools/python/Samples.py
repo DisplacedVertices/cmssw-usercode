@@ -238,6 +238,7 @@ for s in data_samples + auxiliary_data_samples:
 registry = SamplesRegistry()
 
 __all__ = [
+    'my_qcd_test_samples',
     'qcd_samples_not_used',
     'qcd_samples',
     'qcd_samples_ext',
@@ -393,6 +394,15 @@ for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
 for x in (mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
           ttbar, qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext):
     x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
+
+for x in (testqcdht2000, testqcdht2000_noPU):
+    x.condor = True
+testqcdht2000.datasets['gensim'].condor = True
+
+for s in registry.all():
+    for ds in 'ntuplev10', 'ntuplev11':
+        if s.has_dataset(ds):
+            s.datasets[ds].condor = True
 
 ########################################################################
 
