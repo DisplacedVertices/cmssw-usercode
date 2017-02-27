@@ -6,14 +6,8 @@ from JMTucker.Tools.Sample import *
 ########################################################################
 
 my_qcd_test_samples = [
-    MCSample('testqcdht2000',      '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  11688),
-    MCSample('testqcdht2000_noPU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-NoPU_76X_mcRun2_asymptotic_v12-v1/AODSIM',              11688),
-    ]
-
-qcd_samples_not_used = [
-    MCSample('qcdht0100', '/QCD_HT100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   81719052, nice='QCD, 100 < H_{T} < 200 GeV',   color=801, syst_frac=0.20, xsec=2.785e7),
-    MCSample('qcdht0200', '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   18718905, nice='QCD, 200 < H_{T} < 300 GeV',   color=802, syst_frac=0.20, xsec=1.717e6),
-    MCSample('qcdht0300', '/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/AODSIM',   20278243, nice='QCD, 300 < H_{T} < 500 GeV',   color=803, syst_frac=0.20, xsec=3.513e5),
+    MCSample('testqcdht2000',      '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  -1),
+    MCSample('testqcdht2000_noPU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-NoPU_76X_mcRun2_asymptotic_v12-v1/AODSIM',              -1),
     ]
 
 qcd_samples = [
@@ -239,7 +233,6 @@ registry = SamplesRegistry()
 
 __all__ = [
     'my_qcd_test_samples',
-    'qcd_samples_not_used',
     'qcd_samples',
     'qcd_samples_ext',
     'qcd_samples_sum',
@@ -397,7 +390,10 @@ for x in (mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um
 
 for x in (testqcdht2000, testqcdht2000_noPU):
     x.condor = True
-testqcdht2000.datasets['gensim'].condor = True
+
+# /qcdht2000_gensim/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
+# /qcdht2000_gensim_ext1/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
+testqcdht2000.add_dataset('gensim', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer15GS-MCRUN2_71_V1/GEN-SIM', 33377, dbs_inst='phys03', condor=True)
 
 for s in registry.all():
     for ds in 'ntuplev10', 'ntuplev11':
