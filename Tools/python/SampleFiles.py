@@ -27,15 +27,15 @@ def _add_ds(ds, d, allow_overwrite=False):
         d2[(k,ds)] = d[k]
     _add(d2, allow_overwrite)
 
-def _fromnumlist(path, numlist, but=[], fnbase='ntuple', add=[]):
-    return add + [path + '/%04i/%s_%i.root' % (i/1000, fnbase, i) for i in numlist if i not in but]
+def _fromnumlist(path, numlist, but=[], fnbase='ntuple', add=[], numbereddirs=True):
+    return add + [path + ('/%04i' % (i/1000) if numbereddirs else '') + '/%s_%i.root' % (fnbase, i) for i in numlist if i not in but]
 
-def _fromnum1(path, n, but=[], fnbase='ntuple', add=[]): # crab starts job numbering at 1
-    l = _fromnumlist(path, xrange(1,n+1), but, fnbase, add)
+def _fromnum1(path, n, but=[], fnbase='ntuple', add=[], numbereddirs=True): # crab starts job numbering at 1
+    l = _fromnumlist(path, xrange(1,n+1), but, fnbase, add, numbereddirs)
     return (len(l), l)
 
-def _fromnum0(path, n, but=[], fnbase='ntuple', add=[]): # condorsubmitter starts at 0
-    l = _fromnumlist(path, xrange(n), but, fnbase, add)
+def _fromnum0(path, n, but=[], fnbase='ntuple', add=[], numbereddirs=True): # condorsubmitter starts at 0
+    l = _fromnumlist(path, xrange(n), but, fnbase, add, numbereddirs)
     return (len(l), l)
 
 def dump():
@@ -73,8 +73,8 @@ _add({('testqcdht2000', 'gensim') : (60 + 263,
                                      )})
 
 _add_ds('main', {
-'testqcdht2000':      _fromnum0('/store/user/tucker/qcdht2000_76',      323, fnbase='reco'),
-'testqcdht2000_noPU': _fromnum0('/store/user/tucker/qcdht2000_76_noPU', 323, fnbase='reco'),
+'testqcdht2000':      _fromnum0('/store/user/tucker/qcdht2000_76',      323, fnbase='reco', numbereddirs=False),
+'testqcdht2000_noPU': _fromnum0('/store/user/tucker/qcdht2000_76_noPU', 323, fnbase='reco', numbereddirs=False),
 })
 
 # ntuplev10
