@@ -4,7 +4,7 @@ from JMTucker.Tools.ROOTTools import *
 import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
-for ntk in ['', '_ntk3', '_ntk3or4', '_ntk4']:
+for ntk in ['mfvMiniTree', 'tre33', 'tre34', 'tre44']:
     print ntk
 
     raw_n1v = 0
@@ -15,11 +15,11 @@ for ntk in ['', '_ntk3', '_ntk3or4', '_ntk4']:
     var_n2v = 0
     for sample in Samples.qcd_samples_sum + Samples.ttbar_samples:
         w = ac.int_lumi * sample.xsec / sample.nevents_orig
-        f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/MinitreeV10%s/%s.root' % (ntk, sample.name))
-        t = f.Get('mfvMiniTree/t')
+        f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/MinitreeV11_15/%s.root' % sample.name)
+        t = f.Get('%s/t' % ntk)
         n1v = t.Draw('dist0', 'nvtx==1')
         n2v = t.Draw('dist0', 'nvtx==2')
-        if ntk == '_ntk3or4':
+        if ntk == 'tre34':
             n2v = t.Draw('dist0', 'nvtx==2 && ntk0==4 && ntk1==3')
         print '%24s %d %9.3f %8d %8.5f raw n1v = %6d +/- %3d, weighted n1v = %9.2f +/- %7.2f, raw n2v = %4d +/- %2d, weighted n2v = %7.2f +/- %5.2f' % (sample.name, ac.int_lumi, sample.xsec, sample.nevents_orig, w, n1v, n1v**0.5, w*n1v, w*n1v**0.5, n2v, n2v**0.5, w*n2v, w*n2v**0.5)
         raw_n1v += n1v
@@ -33,11 +33,11 @@ for ntk in ['', '_ntk3', '_ntk3or4', '_ntk4']:
 
     for sample in [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]:
         w = ac.int_lumi * sample.xsec / sample.nevents_orig
-        f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/MinitreeV10%s/%s.root' % (ntk, sample.name))
-        t = f.Get('mfvMiniTree/t')
+        f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/MinitreeV11_15/%s.root' % sample.name)
+        t = f.Get('%s/t' % ntk)
         n1v = t.Draw('dist0', 'nvtx==1')
         n2v = t.Draw('dist0', 'nvtx==2')
-        if ntk == '_ntk3or4':
+        if ntk == 'tre34':
             n2v = t.Draw('dist0', 'nvtx==2 && ntk0==4 && ntk1==3')
         print '%24s %d %9.3f %8d %8.5f raw n1v = %6d +/- %3d, weighted n1v = %9.2f +/- %7.2f, raw n2v = %4d +/- %2d, weighted n2v = %7.2f +/- %5.2f' % (sample.name, ac.int_lumi, sample.xsec, sample.nevents_orig, w, n1v, n1v**0.5, w*n1v, w*n1v**0.5, n2v, n2v**0.5, w*n2v, w*n2v**0.5)
     print

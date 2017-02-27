@@ -29,6 +29,8 @@ double dphi_pdf_a2 = 6.09;
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
 
+const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV11_15";
+
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
 float weights[nbkg] = {3.10725, 0.40282, 0.16663, 0.85378};
@@ -52,22 +54,22 @@ int main(int argc, const char* argv[]) {
   int max_ntracks1 = 1000000;
 
   if (ntracks == 3) {
-    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3";
+    tree_path = "tre33/t";
     eff_hist = "average3";
     n1v = 195827.;
     n2v = 1323.;
   } else if (ntracks == 4) {
-    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk4";
+    tree_path = "tre44/t";
     eff_hist = "average4";
     n1v = 26746.;
     n2v = 22.;
   } else if (ntracks == 5) {
-    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10";
+    tree_path = "mfvMiniTree/t";
     eff_hist = "average5";
     n1v = 4404.;
     n2v = 1.;
   } else if (ntracks == 7) {
-    tree_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntk3or4";
+    tree_path = "tre34/t";
     eff_hist = "average3";
     n1v = 221892.;
     n2v = 335.;
@@ -111,10 +113,10 @@ int main(int argc, const char* argv[]) {
 
   for (int i = 0; i < nbkg; ++i) {
     mfv::MiniNtuple nt;
-    TFile* f = TFile::Open(TString::Format("%s/%s.root", tree_path, samples[i]));
+    TFile* f = TFile::Open(TString::Format("%s/%s.root", file_path, samples[i]));
     if (!f || !f->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
 
-    TTree* t = (TTree*)f->Get("mfvMiniTree/t");
+    TTree* t = (TTree*)f->Get(tree_path);
     if (!t) { fprintf(stderr, "bad tree"); exit(1); }
 
     mfv::read_from_tree(t, nt);
