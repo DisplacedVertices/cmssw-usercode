@@ -342,6 +342,8 @@ def compare_all_hists(ps, samples, **kwargs):
             continue
 
         for hist in hists:
+            if hist.GetSumw2N() == 0:
+                hist.Sumw2() # for correct error bars post scaling
             hist.cah_integral = hist.Integral(0, hist.GetNbinsX()+1) if not is2d else 0.
             hist.cah_scaling = scaling(name, hist_list, hist.cah_sample_name)
 
