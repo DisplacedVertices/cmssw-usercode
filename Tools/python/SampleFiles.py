@@ -111,6 +111,9 @@ _add_ds('ntuplev10', {
 
 _add_ds('ntuplev11', {
 
+'testqcdht2000': ( 64 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_testqcdht2000/170228_142416/0000/ntuple_%i.root' % i for i in chain(xrange(64))] ),
+'testqcdht2000_noPU': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_2016_testqcdht2000_noPU/170228_142416/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+
 'official_mfv_neu_tau00100um_M0800': _fromnum0('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV11_2016/170216_225918', 2),
 'official_mfv_neu_tau00300um_M0800': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV11_2016/170217_045836', 5),
 'official_mfv_neu_tau10000um_M0800': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV11_2016/170217_050124', 5),

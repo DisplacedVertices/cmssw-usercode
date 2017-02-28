@@ -216,7 +216,8 @@ for x in (JetHT2016B3,
     x.datasets['miniaod'].condor = True
 
 for x in (official_mfv_neu_tau00100um_M0800,
-          qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext):
+          qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext,
+          testqcdht2000, testqcdht2000_noPU):
     x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
 
 official_mfv_neu_tau00300um_M0800.add_dataset('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-f8accded35148baf419dc8a8895faecd/USER', 99349)
