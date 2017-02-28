@@ -385,7 +385,8 @@ for x in (qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, ttbar,
     x.add_dataset('ntuplev10', '/%s/None/None' % x.primary_dataset, 0)
 
 for x in (mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800,
-          ttbar, qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext):
+          ttbar, qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext,
+          testqcdht2000, testqcdht2000_noPU):
     x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
 
 for x in (testqcdht2000, testqcdht2000_noPU):

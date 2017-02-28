@@ -108,6 +108,9 @@ _add_ds('ntuplev10', {
 # ntuplev11
 _add_ds('ntuplev11', {
 
+'testqcdht2000': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000/170228_142052/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+'testqcdht2000_noPU': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_noPU/170228_142052/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+
 'xx4j_tau00001mm_M0300': (1, ['/store/user/tucker/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV11/170217_035609/0000/ntuple_1.root']),
 'xx4j_tau00001mm_M0700': (1, ['/store/user/tucker/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV11/170217_035706/0000/ntuple_1.root']),
 'xx4j_tau00010mm_M0300': (1, ['/store/user/tucker/XXTo4J_M-300_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/NtupleV11/170217_035637/0000/ntuple_1.root']),
