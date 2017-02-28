@@ -69,7 +69,7 @@ _add({('testqcdht2000', 'gensim') : (60 + 263,
                                      )})
 
 _add_ds('main', {
-'testqcdht2000':      _fromnum0('/store/user/tucker/qcdht2000_80',      323, fnbase='reco', numbereddirs=False),
+'testqcdht2000':      _fromnum0('/store/user/tucker/qcdht2000_80',      323, fnbase='reco', but=[142,144,200,318,59,6,86], numbereddirs=False),
 'testqcdht2000_noPU': _fromnum0('/store/user/tucker/qcdht2000_80_noPU', 323, fnbase='reco', numbereddirs=False),
 })
 
