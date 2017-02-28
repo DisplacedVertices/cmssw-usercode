@@ -25,5 +25,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.files_per = 3
 
     from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('TrackerMapper_testqcdht2000_15')
+    ms = MetaSubmitter('TrackerMapper_testqcdht2000_16')
     ms.submit(samples)
