@@ -200,11 +200,13 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_Tu
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   99004)
 
 for x in (SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
-          qcdht0500, qcdht1500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500ext,
+          qcdht0500, qcdht1500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau00100um_M0800,
           official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600):
     x.condor = True
+
+qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
 
 for x in (JetHT2016B3,
           SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E,
