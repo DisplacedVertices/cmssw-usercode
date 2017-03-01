@@ -75,6 +75,8 @@ _add({('testqcdht2000', 'gensim') : (60 + 263,
 _add_ds('main', {
 'testqcdht2000':      _fromnum0('/store/user/tucker/qcdht2000_76',      323, fnbase='reco', numbereddirs=False),
 'testqcdht2000_noPU': _fromnum0('/store/user/tucker/qcdht2000_76_noPU', 323, fnbase='reco', numbereddirs=False),
+'testqcdht2000_16PU': _fromnum0('/store/user/tucker/qcdht2000_76_16PU', 323, fnbase='reco', numbereddirs=False),
+'testqcdht2000_16PU_tksim16': _fromnum0('/store/user/tucker/qcdht2000_76_16PU_tksim16', 323, fnbase='reco', numbereddirs=False),
 })
 
 # ntuplev10

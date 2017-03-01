@@ -8,6 +8,8 @@ from JMTucker.Tools.Sample import *
 my_qcd_test_samples = [
     MCSample('testqcdht2000',      '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  -1),
     MCSample('testqcdht2000_noPU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-NoPU_76X_mcRun2_asymptotic_v12-v1/AODSIM',              -1),
+    MCSample('testqcdht2000_16PU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-PUMoriond17_76X_mcRun2_asymptotic_v12-v1/AODSIM',       -1),
+    MCSample('testqcdht2000_16PU_tksim16', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIIFall15DR76-PUMoriond17_76X_mcRun2_asymptotic_v12_tksim16-v1/AODSIM', -1),
     ]
 
 qcd_samples = [
@@ -389,7 +391,7 @@ for x in (mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um
           testqcdht2000, testqcdht2000_noPU):
     x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
 
-for x in (testqcdht2000, testqcdht2000_noPU):
+for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_16PU, testqcdht2000_16PU_tksim16):
     x.condor = True
 
 # /qcdht2000_gensim/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
