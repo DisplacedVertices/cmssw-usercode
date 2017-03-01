@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-which = 'qcdht2000_76_noPU'
+which = 'qcdht2000_76_16PU'
 output_dir = which
 inputfns_fn = 'inputfns.txt'
 todos = [
     'fns,%s,$(Process)' % inputfns_fn,
-    'nopu',
+    'pu16',
     ]
 njobs = None
 
@@ -17,7 +17,7 @@ if len(todos) > 2:
     print 'while reco will get'
     print todos[2:]
 
-import os, sys
+import os, sys, shutil
 
 if not os.path.isfile(inputfns_fn):
     sys.exit('no file %s' % inputfns_fn)
@@ -46,9 +46,19 @@ if os.path.isdir(work_area):
 os.makedirs(work_area)
 save_git_status(os.path.join(work_area, 'gitstatus'))
 
-sh_fn = os.path.abspath('nstep_gs2reco_condor.sh')
+inputs_dir = os.path.join(work_area, 'inputs')
+os.mkdir(inputs_dir)
+
+sh_fn = 'nstep_gs2reco_condor.sh'
+input_files = 'todoify.sh rawhlt.py reco.py modify.py inputfns.txt minbias.py minbias_files.py minbias_files.pkl'.split()
+for fn in [sh_fn] + input_files:
+    shutil.copy2(fn, inputs_dir)
+
+sh_fn = os.path.join(inputs_dir, sh_fn)
+input_files = ','.join([os.path.join(inputs_dir, x) for x in input_files])
+
 todos = ' '.join('todo=' + x for x in todos)
-input_files = ','.join([os.path.abspath(x) for x in 'todoify.sh rawhlt.py reco.py modify.py inputfns.txt minbias.py minbias_files.py minbias_files.pkl'.split()])
+
 if njobs is None:
     njobs = str(ninputfns)
 
