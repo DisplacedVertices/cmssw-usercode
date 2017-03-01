@@ -91,6 +91,8 @@ process.patElectrons.embedTrack = False
 if trig_filter:
     import JMTucker.MFVNeutralino.TriggerFilter
     JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
+else:
+    process.mfvEvent.skip_event_filter = ''
 
 #process.options.wantSummary = True
 process.maxEvents.input = 100
