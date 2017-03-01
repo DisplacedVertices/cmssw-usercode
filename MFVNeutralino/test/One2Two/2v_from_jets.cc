@@ -17,6 +17,7 @@ int ntracks = 3;
 
 int bquarks = -1;
 bool vary_dphi = false;
+bool dphi_from_jets = false;
 
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
@@ -41,6 +42,28 @@ float ht(int njets, float* jet_pt) {
     sum += jet_pt[i];
   }
   return sum;
+}
+
+float throw_phi(int njets, float* jet_pt, float* jet_phi, double rdphi) {
+  double rjetphi = 0;
+  double rand = gRandom->Rndm();
+  double sumpt = 0;
+  for (int j = 0; j < njets; ++j) {
+    sumpt += jet_pt[j];
+    if (rand < sumpt/ht(njets, jet_pt)) {
+      rjetphi = jet_phi[j];
+      break;
+    }
+  }
+
+  double vtx_phi = 0;
+  if (gRandom->Rndm() < 0.5) {
+    vtx_phi = rjetphi - rdphi;
+  } else {
+    vtx_phi = rjetphi + rdphi;
+  }
+
+  return TVector2::Phi_mpi_pi(vtx_phi);
 }
 
 int main(int argc, const char* argv[]) {
@@ -103,8 +126,9 @@ int main(int argc, const char* argv[]) {
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
   TH1F* h_1v_ht = new TH1F("h_1v_ht", "only-one-vertex events;#Sigma H_{T} of jets (GeV);events", 200, 0, 5000);
   TH1F* h_1v_phij = new TH1F("h_1v_phij", "only-one-vertex events;jets #phi;jets", 50, -3.15, 3.15);
-  TH1F* h_1v_dphijj = new TH1F("h_1v_dphijj", "only-one-vertex events;jet pair #Delta#phi;jet pairs", 50, -3.15, 3.15);
-  TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi(vertex position, jet momentum);jet-vertex pairs", 50, -3.15, 3.15);
+  TH1F* h_1v_dphijj = new TH1F("h_1v_dphijj", "only-one-vertex events;#Delta#phi_{JJ};jet pairs", 100, -3.1416, 3.1416);
+  TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi_{JV};jet-vertex pairs", 100, -3.1416, 3.1416);
+  TH1F* h_1v_dphijvmin = new TH1F("h_1v_dphijvmin", "only-one-vertex events;#Delta#phi_{JV}^{min};events", 50, 0, 3.1416);
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
@@ -134,13 +158,16 @@ int main(int argc, const char* argv[]) {
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
         h_1v_njets->Fill(nt.njets, w);
         h_1v_ht->Fill(ht(nt.njets, nt.jet_pt), w);
+        double dphijvmin = M_PI;
         for (int k = 0; k < nt.njets; ++k) {
           h_1v_phij->Fill(nt.jet_phi[k], w);
           h_1v_dphijv->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]), w);
+          if (fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k])) < dphijvmin) dphijvmin = fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]));
           for (int l = k+1; l < nt.njets; ++l) {
             h_1v_dphijj->Fill(TVector2::Phi_mpi_pi(nt.jet_phi[k] - nt.jet_phi[l]), w);
           }
         }
+        h_1v_dphijvmin->Fill(dphijvmin, w);
       }
 
       if (nt.nvtx >= 2 && nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0 && nt.ntk1 >= min_ntracks1 && nt.ntk1 <= max_ntracks1) {
@@ -155,6 +182,56 @@ int main(int argc, const char* argv[]) {
         double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
         h_2v_dphivv->Fill(dphi, w);
         h_2v_absdphivv->Fill(fabs(dphi), w);
+      }
+    }
+  }
+
+  TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi_{JV} from uniform #phi_{V};jet-vertex pairs", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_dphijvmin = new TH1F("h_c1v_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{JV}^{min} from uniform #phi_{V};events", 50, 0, 3.1416);
+  TH1F* h_c1v_dphijj = new TH1F("h_c1v_dphijj", "constructed from only-one-vertex events;#Delta#phi_{JJ} from p_{T}-weighted jets;events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_dphivv_dphijv = new TH1F("h_c1v_dphivv_dphijv", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV};events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_dphivv_dphijvmin = new TH1F("h_c1v_dphivv_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV}^{min};events", 100, -3.1416, 3.1416);
+  if (dphi_from_jets) {
+    for (int i = 0; i < nbkg; ++i) {
+      mfv::MiniNtuple nt;
+      TFile* f = TFile::Open(TString::Format("%s/%s.root", file_path, samples[i]));
+      if (!f || !f->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
+
+      TTree* t = (TTree*)f->Get(tree_path);
+      if (!t) { fprintf(stderr, "bad tree"); exit(1); }
+
+      mfv::read_from_tree(t, nt);
+      for (int j = 0, je = t->GetEntries(); j < je; ++j) {
+        if (t->LoadTree(j) < 0) break;
+        if (t->GetEntry(j) <= 0) continue;
+
+        if ((bquarks == 0 && nt.gen_flavor_code == 2) || (bquarks == 1 && nt.gen_flavor_code != 2)) continue;
+
+        const float w = weights[i] * nt.weight;
+        if (nt.nvtx == 1) {
+          double phi = gRandom->Uniform(-M_PI, M_PI);
+          double dphijvmin = M_PI;
+          for (int k = 0; k < nt.njets; ++k) {
+            h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k]), w);
+            if (fabs(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k])) < dphijvmin) dphijvmin = fabs(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k]));
+
+            double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, 0);
+            double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, 0);
+            double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
+            h_c1v_dphijj->Fill(dphi, w);
+
+            phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom());
+            phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom());
+            dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
+            h_c1v_dphivv_dphijv->Fill(dphi, w);
+
+            phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom());
+            phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom());
+            dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
+            h_c1v_dphivv_dphijvmin->Fill(dphi, w);
+          }
+          h_c1v_dphijvmin->Fill(dphijvmin, w);
+        }
       }
     }
   }
@@ -249,11 +326,20 @@ int main(int argc, const char* argv[]) {
   h_1v_phij->Write();
   h_1v_dphijj->Write();
   h_1v_dphijv->Write();
+  h_1v_dphijvmin->Write();
   h_2v_dbv->Write();
   h_2v_dbv1_dbv0->Write();
   h_2v_dvv->Write();
   h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
+
+  if (dphi_from_jets) {
+    h_c1v_dphijv->Write();
+    h_c1v_dphijvmin->Write();
+    h_c1v_dphijj->Write();
+    h_c1v_dphivv_dphijv->Write();
+    h_c1v_dphivv_dphijvmin->Write();
+  }
 
   h_c1v_dbv->Write();
   h_c1v_dvv->Write();
