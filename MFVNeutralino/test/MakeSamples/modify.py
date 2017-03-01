@@ -210,7 +210,7 @@ def center_bs(process):
     process.VtxSmeared.Y0 = 0
 
 def tracker_alignment(process, tag):
-    prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc' % tag.capitalize())
+    prefer_it(process, 'tkAlign', 'frontier://FrontierProd/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_2010RealisticPlus%s_mc' % tag.capitalize())
 
 def keep_random_info(process):
     process.output.outputCommands += [
@@ -416,9 +416,9 @@ def randomize_seeds(process, save_fn='RandomEngineState.xml'):
         process.RandomNumberGeneratorService.saveFileName =  cms.untracked.string(save_fn)
 
 def set_trackersim16(process):
-    prefer_it(process, 'tk16pixdyneff', 'frontier://FrontierPrep/CMS_COND_PIXEL', 'SiPixelDynamicInefficiencyRcd', 'SiPixelDynamicInefficiency_13TeV_v3_mc')
-    prefer_it(process, 'tk16pixqual',   'frontier://FrontierPrep/CMS_COND_PIXEL', 'SiPixelQualityFromDbRcd',       'SiPixelQuality_v36_mc')
-    prefer_it(process, 'tk16strqual',   'frontier://FrontierPrep/CMS_COND_STRIP', 'SiStripBadChannelRcd',          'SiStripBadComponents_realisticMC_for2016_v1_mc')
+    prefer_it(process, 'tk16pixdyneff', 'frontier://FrontierProd/CMS_CONDITIONS', 'SiPixelDynamicInefficiencyRcd', 'SiPixelDynamicInefficiency_13TeV_v3_mc')
+    prefer_it(process, 'tk16pixqual',   'frontier://FrontierProd/CMS_CONDITIONS', 'SiPixelQualityFromDbRcd',       'SiPixelQuality_v36_mc')
+    prefer_it(process, 'tk16strqual',   'frontier://FrontierProd/CMS_CONDITIONS', 'SiStripBadChannelRcd',          'SiStripBadComponents_realisticMC_for2016_v1_mc')
 
 def set_trackerali16(process):
-    prefer_it(process, 'tkAlign', 'frontier://FrontierPrep/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_Asymptotic_Run2016_v2_mc')
+    prefer_it(process, 'tkAlign', 'frontier://FrontierProd/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_Asymptotic_Run2016_v2_mc')
