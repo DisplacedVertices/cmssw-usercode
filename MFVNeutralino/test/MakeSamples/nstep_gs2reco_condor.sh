@@ -13,18 +13,20 @@ WD=$(pwd)
 JOBNUM=$1
 OUTPUTDIR=$2
 TODOS="$3 $4 $5 $6 $7 $8 $9"
+TODOS2="$5 $6 $7 $8 $9"
 
 echo WD: $WD
 echo JOBNUM: $JOBNUM
 echo OUTPUTDIR: $OUTPUTDIR
 echo TODOS: $TODOS
+echo TODOS2: $TODOS2
 
 ################################################################################
 
 echo START RAWHLT
 
 (
-scram project -n RAWHLT CMSSW CMSSW_8_0_21
+scram project -n RAWHLT CMSSW CMSSW_8_0_21 2>&1
 cd RAWHLT/src
 eval $(scram runtime -sh)
 cp $WD/{inputfns.txt,*.py,*.pkl} .
@@ -61,14 +63,14 @@ echo END RAWHLT
 echo START RECO
 
 (
-scram project -n RECO CMSSW CMSSW_8_0_21
+scram project -n RECO CMSSW CMSSW_8_0_21 2>&1
 cd RECO/src
 eval $(scram runtime -sh)
 cp $WD/{reco.py,modify.py} .
 mv $WD/hlt.root .
 
 echo cmsRun
-cmsRun -j fjr.xml reco.py 2>&1
+cmsRun -j fjr.xml reco.py ${TODOS2} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
