@@ -44,17 +44,20 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-float throw_phi(int njets, float* jet_pt, float* jet_phi, double rdphi) {
-  double rjetphi = 0;
+int throw_jet(int njets, float* jet_pt) {
   double rand = gRandom->Rndm();
   double sumpt = 0;
   for (int j = 0; j < njets; ++j) {
     sumpt += jet_pt[j];
     if (rand < sumpt/ht(njets, jet_pt)) {
-      rjetphi = jet_phi[j];
-      break;
+      return j;
     }
   }
+  return 0;
+}
+
+float throw_phi(int ijet, float* jet_phi, double rdphi) {
+  double rjetphi = jet_phi[ijet];
 
   double vtx_phi = 0;
   if (gRandom->Rndm() < 0.5) {
@@ -64,6 +67,21 @@ float throw_phi(int njets, float* jet_pt, float* jet_phi, double rdphi) {
   }
 
   return TVector2::Phi_mpi_pi(vtx_phi);
+}
+
+float throw_dphi(int njets, float* jet_pt, float* jet_phi, double rdphi0, double rdphi1, bool with_replacement) {
+  int ijet0 = throw_jet(njets, jet_pt);
+  int ijet1 = throw_jet(njets, jet_pt);
+
+  if (!with_replacement && njets > 1) {
+    while (ijet1 == ijet0) {
+      ijet1 = throw_jet(njets, jet_pt);
+    }
+  }
+
+  float phi0 = throw_phi(ijet0, jet_phi, rdphi0);
+  float phi1 = throw_phi(ijet1, jet_phi, rdphi1);
+  return TVector2::Phi_mpi_pi(phi0 - phi1);
 }
 
 int main(int argc, const char* argv[]) {
@@ -188,9 +206,12 @@ int main(int argc, const char* argv[]) {
 
   TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi_{JV} from uniform #phi_{V};jet-vertex pairs", 100, -3.1416, 3.1416);
   TH1F* h_c1v_dphijvmin = new TH1F("h_c1v_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{JV}^{min} from uniform #phi_{V};events", 50, 0, 3.1416);
-  TH1F* h_c1v_dphijj = new TH1F("h_c1v_dphijj", "constructed from only-one-vertex events;#Delta#phi_{JJ} from p_{T}-weighted jets;events", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_dphivv_dphijv = new TH1F("h_c1v_dphivv_dphijv", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV};events", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_dphivv_dphijvmin = new TH1F("h_c1v_dphivv_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV}^{min};events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_jetswr1_dphijj = new TH1F("h_c1v_jetswr1_dphijj", "constructed from only-one-vertex events;#Delta#phi_{JJ} from p_{T}-weighted jets with replacement;events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_jetswr1_dphivv_dphijv = new TH1F("h_c1v_jetswr1_dphivv_dphijv", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV} with replacement;events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_jetswr1_dphivv_dphijvmin = new TH1F("h_c1v_jetswr1_dphivv_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV}^{min} with replacement;events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_jetswr0_dphijj = new TH1F("h_c1v_jetswr0_dphijj", "constructed from only-one-vertex events;#Delta#phi_{JJ} from p_{T}-weighted jets without replacement;events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_jetswr0_dphivv_dphijv = new TH1F("h_c1v_jetswr0_dphivv_dphijv", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV} without replacement;events", 100, -3.1416, 3.1416);
+  TH1F* h_c1v_jetswr0_dphivv_dphijvmin = new TH1F("h_c1v_jetswr0_dphivv_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV}^{min} without replacement;events", 100, -3.1416, 3.1416);
   if (dphi_from_jets) {
     for (int i = 0; i < nbkg; ++i) {
       mfv::MiniNtuple nt;
@@ -215,20 +236,23 @@ int main(int argc, const char* argv[]) {
             h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k]), w);
             if (fabs(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k])) < dphijvmin) dphijvmin = fabs(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k]));
 
-            double phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, 0);
-            double phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, 0);
-            double dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
-            h_c1v_dphijj->Fill(dphi, w);
+            double dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, 0, 0, true);
+            h_c1v_jetswr1_dphijj->Fill(dphi, w);
 
-            phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom());
-            phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom());
-            dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
-            h_c1v_dphivv_dphijv->Fill(dphi, w);
+            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom(), h_1v_dphijv->GetRandom(), true);
+            h_c1v_jetswr1_dphivv_dphijv->Fill(dphi, w);
 
-            phi0 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom());
-            phi1 = throw_phi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom());
-            dphi = TVector2::Phi_mpi_pi(phi0 - phi1);
-            h_c1v_dphivv_dphijvmin->Fill(dphi, w);
+            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom(), h_1v_dphijvmin->GetRandom(), true);
+            h_c1v_jetswr1_dphivv_dphijvmin->Fill(dphi, w);
+
+            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, 0, 0, false);
+            h_c1v_jetswr0_dphijj->Fill(dphi, w);
+
+            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom(), h_1v_dphijv->GetRandom(), false);
+            h_c1v_jetswr0_dphivv_dphijv->Fill(dphi, w);
+
+            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom(), h_1v_dphijvmin->GetRandom(), false);
+            h_c1v_jetswr0_dphivv_dphijvmin->Fill(dphi, w);
           }
           h_c1v_dphijvmin->Fill(dphijvmin, w);
         }
@@ -336,9 +360,12 @@ int main(int argc, const char* argv[]) {
   if (dphi_from_jets) {
     h_c1v_dphijv->Write();
     h_c1v_dphijvmin->Write();
-    h_c1v_dphijj->Write();
-    h_c1v_dphivv_dphijv->Write();
-    h_c1v_dphivv_dphijvmin->Write();
+    h_c1v_jetswr1_dphijj->Write();
+    h_c1v_jetswr1_dphivv_dphijv->Write();
+    h_c1v_jetswr1_dphivv_dphijvmin->Write();
+    h_c1v_jetswr0_dphijj->Write();
+    h_c1v_jetswr0_dphivv_dphijv->Write();
+    h_c1v_jetswr0_dphivv_dphijvmin->Write();
   }
 
   h_c1v_dbv->Write();

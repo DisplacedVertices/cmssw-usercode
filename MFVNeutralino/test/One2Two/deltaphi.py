@@ -7,13 +7,13 @@ ps = plot_saver('../plots/bkgest/deltaphi', size=(700,700), log=False, root=Fals
 ROOT.TH1.AddDirectory(0)
 colors = [1, 1, 1, ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
 
-n1s = ['dphijv', 'dphijvmin', 'dphijj', 'dphijj', 'dphijj']
-n2s = ['dphijv', 'dphijvmin', 'dphijj', 'dphivv_dphijv', 'dphivv_dphijvmin']
+n1s = ['dphijv', 'dphijvmin', 'dphijj', 'dphijj', 'dphijj', 'dphijj', 'dphijj', 'dphijj']
+n2s = ['dphijv', 'dphijvmin', 'jetswr1_dphijj', 'jetswr1_dphivv_dphijv', 'jetswr1_dphivv_dphijvmin', 'jetswr0_dphijj', 'jetswr0_dphivv_dphijv', 'jetswr0_dphivv_dphijvmin']
 
 for j in range(len(n1s)):
   h1s = []
   h2s = []
-  l = ROOT.TLegend(0.50,0.65,0.85,0.85)
+  l = ROOT.TLegend(0.50,0.65,0.85,0.85) if j==0 or j==1 else ROOT.TLegend(0.15,0.65,0.85,0.85)
   for i in [3,4,5]:
     f = ROOT.TFile('2v_from_jets_deltaphi_%itrack.root' % i)
     h1 = f.Get('h_1v_%s' % n1s[j])
@@ -30,7 +30,7 @@ for j in range(len(n1s)):
     if i == 3:
       h1.SetTitle(';#Delta#phi;')
       h1.Scale(1./h1.Integral())
-      h1.GetYaxis().SetRangeUser(0, 1 if j==1 else 0.2)
+      h1.GetYaxis().SetRangeUser(0, 1 if j==1 else 0.3)
       h1.Draw()
     else:
       h1.DrawNormalized('sames')
