@@ -145,6 +145,13 @@ _add_ds('ntuplev11', {
 
 })
 
+_add_ds('ntuplev11_notrigfilt', {
+'testqcdht2000': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000/170301_124815/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+'testqcdht2000_16PU': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU/170301_124815/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+'testqcdht2000_16PU_tksim16': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU_tksim16/170301_124815/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+'testqcdht2000_noPU': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_noPU/170301_124815/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+})
+
 ################################################################################
 
 __all__ = [
