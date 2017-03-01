@@ -11,6 +11,12 @@ njobs = None
 
 ####
 
+if len(todos) > 2:
+    print 'fyi: rawhlt will get todos'
+    print todos
+    print 'while reco will get'
+    print todos[2:]
+
 import os, sys
 
 if not os.path.isfile(inputfns_fn):
