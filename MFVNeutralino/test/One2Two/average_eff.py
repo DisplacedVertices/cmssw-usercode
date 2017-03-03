@@ -112,9 +112,9 @@ ps.save('average')
 
 ROOT.TH1.AddDirectory(0)
 
-fn1 = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root', '2v_from_jets_3track_noclearing_c1p35_e2_a3p66_20umbins.root']
-fn2 = ['2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root', '2v_from_jets_4track_noclearing_c1p35_e2_a3p66_20umbins.root']
-fn3 = ['2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root', '2v_from_jets_5track_noclearing_c1p35_e2_a3p66_20umbins.root']
+fn1 = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_v11.root', '2v_from_jets_3track_noclearing_c1p35_e2_a3p66_v11.root']
+fn2 = ['2v_from_jets_4track_average4_c1p35_e2_a3p66_v11.root', '2v_from_jets_4track_noclearing_c1p35_e2_a3p66_v11.root']
+fn3 = ['2v_from_jets_5track_average5_c1p35_e2_a3p66_v11.root', '2v_from_jets_5track_noclearing_c1p35_e2_a3p66_v11.root']
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']

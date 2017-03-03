@@ -95,22 +95,22 @@ int main(int argc, const char* argv[]) {
   if (ntracks == 3) {
     tree_path = "tre33/t";
     eff_hist = "average3";
-    n1v = 195827.;
+    n1v = 195945.;
     n2v = 1323.;
   } else if (ntracks == 4) {
     tree_path = "tre44/t";
     eff_hist = "average4";
-    n1v = 26746.;
+    n1v = 26758.;
     n2v = 22.;
   } else if (ntracks == 5) {
     tree_path = "mfvMiniTree/t";
     eff_hist = "average5";
-    n1v = 4404.;
+    n1v = 4405.;
     n2v = 1.;
   } else if (ntracks == 7) {
     tree_path = "tre34/t";
     eff_hist = "average3";
-    n1v = 221892.;
+    n1v = 222021.;
     n2v = 335.;
     min_ntracks0 = 4;
     max_ntracks0 = 4;
