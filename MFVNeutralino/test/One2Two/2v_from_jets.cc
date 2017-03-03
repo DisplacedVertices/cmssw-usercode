@@ -17,7 +17,6 @@ int ntracks = 3;
 
 int bquarks = -1;
 bool vary_dphi = false;
-bool dphi_from_jets = false;
 
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
@@ -25,7 +24,6 @@ const char* eff_file = "eff_avg.root";
 double dphi_pdf_c = 1.35;
 double dphi_pdf_e = 2;
 double dphi_pdf_a = 3.66;
-double dphi_pdf_a2 = 6.09;
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
@@ -204,15 +202,8 @@ int main(int argc, const char* argv[]) {
     }
   }
 
-  TH1F* h_c1v_dphijv = new TH1F("h_c1v_dphijv", "constructed from only-one-vertex events;#Delta#phi_{JV} from uniform #phi_{V};jet-vertex pairs", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_dphijvmin = new TH1F("h_c1v_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{JV}^{min} from uniform #phi_{V};events", 50, 0, 3.1416);
-  TH1F* h_c1v_jetswr1_dphijj = new TH1F("h_c1v_jetswr1_dphijj", "constructed from only-one-vertex events;#Delta#phi_{JJ} from p_{T}-weighted jets with replacement;events", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_jetswr1_dphivv_dphijv = new TH1F("h_c1v_jetswr1_dphivv_dphijv", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV} with replacement;events", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_jetswr1_dphivv_dphijvmin = new TH1F("h_c1v_jetswr1_dphivv_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV}^{min} with replacement;events", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_jetswr0_dphijj = new TH1F("h_c1v_jetswr0_dphijj", "constructed from only-one-vertex events;#Delta#phi_{JJ} from p_{T}-weighted jets without replacement;events", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_jetswr0_dphivv_dphijv = new TH1F("h_c1v_jetswr0_dphivv_dphijv", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV} without replacement;events", 100, -3.1416, 3.1416);
-  TH1F* h_c1v_jetswr0_dphivv_dphijvmin = new TH1F("h_c1v_jetswr0_dphivv_dphijvmin", "constructed from only-one-vertex events;#Delta#phi_{VV} from #Delta#phi_{JV}^{min} without replacement;events", 100, -3.1416, 3.1416);
-  if (dphi_from_jets) {
+  TH1F* h_c1v_absdphivv_dphijvmin = new TH1F("h_c1v_absdphivv_dphijvmin", "constructed from only-one-vertex events;|#Delta#phi_{VV}| from #Delta#phi_{JV}^{min};events", 50, 0, 3.1416);
+  if (vary_dphi) {
     for (int i = 0; i < nbkg; ++i) {
       mfv::MiniNtuple nt;
       TFile* f = TFile::Open(TString::Format("%s/%s.root", file_path, samples[i]));
@@ -230,31 +221,10 @@ int main(int argc, const char* argv[]) {
 
         const float w = weights[i] * nt.weight;
         if (nt.nvtx == 1) {
-          double phi = gRandom->Uniform(-M_PI, M_PI);
-          double dphijvmin = M_PI;
           for (int k = 0; k < nt.njets; ++k) {
-            h_c1v_dphijv->Fill(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k]), w);
-            if (fabs(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k])) < dphijvmin) dphijvmin = fabs(TVector2::Phi_mpi_pi(phi - nt.jet_phi[k]));
-
-            double dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, 0, 0, true);
-            h_c1v_jetswr1_dphijj->Fill(dphi, w);
-
-            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom(), h_1v_dphijv->GetRandom(), true);
-            h_c1v_jetswr1_dphivv_dphijv->Fill(dphi, w);
-
-            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom(), h_1v_dphijvmin->GetRandom(), true);
-            h_c1v_jetswr1_dphivv_dphijvmin->Fill(dphi, w);
-
-            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, 0, 0, false);
-            h_c1v_jetswr0_dphijj->Fill(dphi, w);
-
-            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijv->GetRandom(), h_1v_dphijv->GetRandom(), false);
-            h_c1v_jetswr0_dphivv_dphijv->Fill(dphi, w);
-
-            dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom(), h_1v_dphijvmin->GetRandom(), false);
-            h_c1v_jetswr0_dphivv_dphijvmin->Fill(dphi, w);
+            double dphi = throw_dphi(nt.njets, nt.jet_pt, nt.jet_phi, h_1v_dphijvmin->GetRandom(), h_1v_dphijvmin->GetRandom(), true);
+            h_c1v_absdphivv_dphijvmin->Fill(fabs(dphi), w);
           }
-          h_c1v_dphijvmin->Fill(dphijvmin, w);
         }
       }
     }
@@ -272,12 +242,15 @@ int main(int argc, const char* argv[]) {
   f_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
 
   TF1* i_dphi = 0;
+  TF1* f_dphi2 = 0;
   TF1* i_dphi2 = 0;
   if (vary_dphi) {
     i_dphi = new TF1("i_dphi", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
     i_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
-    i_dphi2 = new TF1("i_dphi2", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
-    i_dphi2->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a2);
+    f_dphi2 = new TF1("f_dphi2", "[0]*cos(2*x) + [1]", 0, M_PI);
+    h_c1v_absdphivv_dphijvmin->Fit("f_dphi2");
+    i_dphi2 = new TF1("i_dphi2", "(([0]/2)*sin(2*x) + [1]*x) / ([1]*3.14159)", 0, M_PI);
+    i_dphi2->SetParameters(f_dphi2->GetParameter(0), f_dphi2->GetParameter(1));
   }
 
   TH1F* h_eff = 0;
@@ -313,6 +286,8 @@ int main(int argc, const char* argv[]) {
         if (!(dvvc >= 0.07) && (dvvc2 >= 0.07)) ++intobin3;
         if ((dvvc >= 0.04 && dvvc < 0.07) && !(dvvc2 >= 0.04 && dvvc2 < 0.07)) ++outofbin2;
         if ((dvvc >= 0.07) && !(dvvc2 >= 0.07)) ++outofbin3;
+        dphi = dphi2;
+        dvvc = dvvc2;
       }
 
       double p = 1;
@@ -356,17 +331,6 @@ int main(int argc, const char* argv[]) {
   h_2v_dvv->Write();
   h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
-
-  if (dphi_from_jets) {
-    h_c1v_dphijv->Write();
-    h_c1v_dphijvmin->Write();
-    h_c1v_jetswr1_dphijj->Write();
-    h_c1v_jetswr1_dphivv_dphijv->Write();
-    h_c1v_jetswr1_dphivv_dphijvmin->Write();
-    h_c1v_jetswr0_dphijj->Write();
-    h_c1v_jetswr0_dphivv_dphijv->Write();
-    h_c1v_jetswr0_dphivv_dphijvmin->Write();
-  }
 
   h_c1v_dbv->Write();
   h_c1v_dvv->Write();
@@ -424,6 +388,8 @@ int main(int argc, const char* argv[]) {
   }
   if (vary_dphi) {
     i_dphi->Write();
+    h_c1v_absdphivv_dphijvmin->Write();
+    f_dphi2->Write();
     i_dphi2->Write();
   }
 
