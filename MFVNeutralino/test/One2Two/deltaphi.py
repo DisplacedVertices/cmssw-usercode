@@ -77,7 +77,7 @@ for i in [3,4,5]:
   print '%i-track: f1(x) = (x - %.2f)^%i + %.2f, f2(x) = %8.2f * cos(2x) + %8.2f' % (i, f_dphi1.GetParameter(0), f_dphi1.GetParameter(1), f_dphi1.GetParameter(2), f_dphi2.GetParameter(0), f_dphi2.GetParameter(1))
   integral1 = f_dphi1.Integral(0,3.1416)
   integral2 = f_dphi2.Integral(0,3.1416)
-  f_dphi1_norm = ROOT.TF1("f1", "((x - [0])**[1] + [2]) / [3]", 0, 3.1416)
+  f_dphi1_norm = ROOT.TF1("f1", "((abs(x)-[0])**[1] + [2]) / [3]", 0, 3.1416)
   f_dphi1_norm.SetParameters(f_dphi1.GetParameter(0), f_dphi1.GetParameter(1), f_dphi1.GetParameter(2), integral1)
   f_dphi2_norm = ROOT.TF1("f2", "([0]*cos(2*x) + [1]) / [2]", 0, 3.1416)
   f_dphi2_norm.SetParameters(f_dphi2.GetParameter(0), f_dphi2.GetParameter(1), integral2)

@@ -17,9 +17,9 @@ for i,n in enumerate(ntk):
   h1.SetLineWidth(3)
   h1.Scale(1./h1.Integral())
   h1.GetYaxis().SetRangeUser(0,0.02)
-  f_dphi = ROOT.TF1("f_dphi", "[1]*(abs(x - [0])**2 + [2])", 0.8, 3.15)
+  f_dphi = ROOT.TF1("f_dphi", "[1]*((abs(x)-[0])**2 + [2])", 0.8, 3.15)
   if n == 'presel':
-    f_dphi = ROOT.TF1("f_dphi", "[1]*(abs(x - [0])**2 + [2])", 1.0, 3.15)
+    f_dphi = ROOT.TF1("f_dphi", "[1]*((abs(x)-[0])**2 + [2])", 1.0, 3.15)
   f_dphi.SetParameters(0,0,0)
   h1.Fit('f_dphi', 'R')
   h1.SetTitle(';#Delta#phi;')
