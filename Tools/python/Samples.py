@@ -392,7 +392,7 @@ for x in (mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um
           testqcdht2000, testqcdht2000_noPU, testqcdht2000_16PU, testqcdht2000_16PU_tksim16):
     x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
 
-for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_16PU, testqcdht2000_16PU_tksim16):
+for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_16PU, testqcdht2000_16PU_tksim16, testqcdht2000_16PU_tksim16_tkali16):
     x.add_dataset('ntuplev11_notrigfilt', '/%s/None/None' % x.primary_dataset, 0)
 
 for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_16PU, testqcdht2000_16PU_tksim16, testqcdht2000_16PU_tksim16_tkali16):

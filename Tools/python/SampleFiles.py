@@ -151,6 +151,12 @@ _add_ds('ntuplev11_notrigfilt', {
 'testqcdht2000_16PU': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU/170301_124815/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
 'testqcdht2000_16PU_tksim16': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU_tksim16/170301_124815/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
 'testqcdht2000_noPU': ( 65 , ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_noPU/170301_124815/0000/ntuple_%i.root' % i for i in chain(xrange(65))] ),
+'testqcdht2000_16PU_tksim16_tkali16': (65,
+                                       ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU_tksim16_tkali16/170302_101236/0000/ntuple_%i.root' % i for i in [37, 54]] +
+                                       ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU_tksim16_tkali16/170302_161115/0000/ntuple_%i.root' % i for i in [0]] +
+                                       ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU_tksim16_tkali16/170302_162551/0000/ntuple_%i.root' % i for i in chain(xrange(1,22), xrange(23,31), xrange(32,37), xrange(38,54), xrange(55,65))] +
+                                       ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_testqcdht2000_16PU_tksim16_tkali16/170302_145629/0000/ntuple_%i.root' % i for i in [22, 31]]),
+
 })
 
 ################################################################################
