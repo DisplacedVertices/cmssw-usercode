@@ -179,6 +179,10 @@ def set_fns(process, list_fn, jobnum):
 def set_nopu(process):
     process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 
+def set_pu15(process):
+    process.mix.input.nbPileupEvents.probFunctionVariable = cms.vint32(*range(50))
+    process.mix.input.nbPileupEvents.probValue = cms.vdouble(0.000108643, 0.000388957, 0.000332882, 0.00038397, 0.000549167, 0.00105412, 0.00459007, 0.0210314, 0.0573688, 0.103986, 0.142369, 0.157729, 0.147685, 0.121027, 0.08855, 0.0582866, 0.0348526, 0.019457, 0.0107907, 0.00654313, 0.00463195, 0.00370927, 0.0031137, 0.00261141, 0.00215499, 0.00174491, 0.00138268, 0.00106731, 0.000798828, 0.00057785, 0.00040336, 0.00027161, 0.000176535, 0.00011092, 6.75502e-05, 4.00323e-05, 2.32123e-05, 1.32585e-05, 7.51611e-06, 4.25902e-06, 2.42513e-06, 1.39077e-06, 8.02452e-07, 4.64159e-07, 2.67845e-07, 1.5344e-07, 8.68966e-08, 4.84931e-08, 2.6606e-08, 1.433e-08)
+
 def set_pu16(process):
     process.mix.input.nbPileupEvents.probFunctionVariable = cms.vint32(*range(75))
     process.mix.input.nbPileupEvents.probValue = cms.vdouble(1.78653e-05, 2.56602e-05, 5.27857e-05, 8.88954e-05, 0.000109362, 0.000140973, 0.000240998, 0.00071209, 0.00130121, 0.00245255, 0.00502589, 0.00919534, 0.0146697, 0.0204126, 0.0267586, 0.0337697, 0.0401478, 0.0450159, 0.0490577, 0.0524855, 0.0548159, 0.0559937, 0.0554468, 0.0537687, 0.0512055, 0.0476713, 0.0435312, 0.0393107, 0.0349812, 0.0307413, 0.0272425, 0.0237115, 0.0208329, 0.0182459, 0.0160712, 0.0142498, 0.012804, 0.011571, 0.010547, 0.00959489, 0.00891718, 0.00829292, 0.0076195, 0.0069806, 0.0062025, 0.00546581, 0.00484127, 0.00407168, 0.00337681, 0.00269893, 0.00212473, 0.00160208, 0.00117884, 0.000859662, 0.000569085, 0.000365431, 0.000243565, 0.00015688, 9.88128e-05, 6.53783e-05, 3.73924e-05, 2.61382e-05, 2.0307e-05, 1.73032e-05, 1.435e-05, 1.36486e-05, 1.35555e-05, 1.37491e-05, 1.34255e-05, 1.33987e-05, 1.34061e-05, 1.34211e-05, 1.34177e-05, 1.32959e-05, 1.33287e-05)
@@ -422,3 +426,9 @@ def set_trackersim16(process):
 
 def set_trackerali16(process):
     prefer_it(process, 'tkAlign', 'frontier://FrontierProd/CMS_CONDITIONS', 'TrackerAlignmentRcd', 'TrackerAlignment_Asymptotic_Run2016_v2_mc')
+
+def set_cond15(process):
+    prefer_it(process, 'tk15pixdyneff', 'frontier://FrontierProd/CMS_CONDITIONS', 'SiPixelDynamicInefficiencyRcd', 'SiPixelDynamicInefficiency_13TeV_v1_mc')
+    prefer_it(process, 'tk15pixqual',   'frontier://FrontierProd/CMS_CONDITIONS', 'SiPixelQualityFromDbRcd',       'SiPixelQuality_v28_mc')
+    prefer_it(process, 'tk15strqual',   'frontier://FrontierProd/CMS_CONDITIONS', 'SiStripBadChannelRcd',          'SiStripBadComponents_realisticMC_for2015_v1_mc')
+    prefer_it(process, 'tkAlign',       'frontier://FrontierProd/CMS_CONDITIONS', 'TrackerAlignmentRcd',           'TrackerAlignment_run2Asymptotic_v1_mc')
