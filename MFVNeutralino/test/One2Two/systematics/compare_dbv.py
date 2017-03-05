@@ -7,13 +7,14 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 set_style()
 
 ntk = 5
-path = 'MinitreeV10'
+tree_path = 'mfvMiniTree/t'
 if ntk == 3:
-    path = 'MinitreeV10_ntk3'
+    tree_path = 'tre33/t'
 if ntk == 4:
-    path = 'MinitreeV10_ntk4'
+    tree_path = 'tre44/t'
 
-ps = plot_saver('../../plots/bkgest/%s' % path, size=(700,700), root=False)
+path = 'MinitreeV11_15'
+ps = plot_saver('../../plots/bkgest/%s_ntk%i' % (path, ntk), size=(700,700), root=False)
 trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 
 def book_dbv(n):
@@ -29,7 +30,7 @@ h_dbv_qcdb = book_dbv('dbv_qcdb')
 hs_nob = []
 for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
-    t = f.Get('mfvMiniTree/t')
+    t = f.Get(tree_path)
     s = getattr(Samples, sn)
 
     n = sn + ', no b quarks'
@@ -46,7 +47,7 @@ for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
 hs_b = []
 for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
-    t = f.Get('mfvMiniTree/t')
+    t = f.Get(tree_path)
     s = getattr(Samples, sn)
 
     if sn != 'ttbar':

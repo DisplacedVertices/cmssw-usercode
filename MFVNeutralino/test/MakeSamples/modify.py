@@ -421,4 +421,4 @@ def set_trackersim16(process):
     prefer_it(process, 'tk16strqual',   'frontier://FrontierProd/CMS_CONDITIONS', 'SiStripBadChannelRcd',          'SiStripBadComponents_realisticMC_for2016_v1_mc')
 
 def set_trackerali16(process):
-    prefer_it(process, 'tkAlign', 'frontier://FrontierProd/CMS_COND_ALIGNMENT', 'TrackerAlignmentRcd', 'TrackerAlignment_Asymptotic_Run2016_v2_mc')
+    prefer_it(process, 'tkAlign', 'frontier://FrontierProd/CMS_CONDITIONS', 'TrackerAlignmentRcd', 'TrackerAlignment_Asymptotic_Run2016_v2_mc')

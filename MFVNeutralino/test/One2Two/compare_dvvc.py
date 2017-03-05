@@ -10,44 +10,27 @@ set_style()
 ROOT.gStyle.SetOptFit(0)
 ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
 
+fn1 = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_v11.root']
+fn2 = ['2v_from_jets_4track_average4_c1p35_e2_a3p66_v11.root']
+fn3 = ['2v_from_jets_5track_average5_c1p35_e2_a3p66_v11.root']
+
 if mode == 'vary_eff':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_3track_maxtk3_c1p35_e2_a3p66_20umbins.root'''.split('\n')
-
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_4track_maxtk4_c1p35_e2_a3p66_20umbins.root'''.split('\n')
-
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_5track_maxtk5_c1p35_e2_a3p66_20umbins.root'''.split('\n')
-
-    ls = '''average efficiency
-maxtk efficiency'''.split('\n')
+    fn1.append('2v_from_jets_3track_maxtk3_c1p35_e2_a3p66_v11.root')
+    fn2.append('2v_from_jets_4track_maxtk4_c1p35_e2_a3p66_v11.root')
+    fn3.append('2v_from_jets_5track_maxtk5_c1p35_e2_a3p66_v11.root')
+    ls = ['average efficiency', 'maxtk efficiency']
 
 if mode == 'vary_dphi':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_3track_average3_c1p35_e2_a6p09_20umbins.root'''.split('\n')
-
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_4track_average4_c1p35_e2_a6p09_20umbins.root'''.split('\n')
-
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_5track_average5_c1p35_e2_a6p09_20umbins.root'''.split('\n')
-
-    ls = '''|#Delta#phi| from jets
-|#Delta#phi| between jets and flat'''.split('\n')
+    fn1.append('2v_from_jets_3track_average3_dphijvmin_v11.root')
+    fn2.append('2v_from_jets_4track_average4_dphijvmin_v11.root')
+    fn3.append('2v_from_jets_5track_average5_dphijvmin_v11.root')
+    ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', '|#Delta#phi| from #Delta#phi_{JV}^{min}']
 
 if mode == 'vary_dbv':
-    fn1 = '''2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_3track_average3_c1p35_e2_a3p66_20umbins_sum.root'''.split('\n')
-
-    fn2 = '''2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_4track_average4_c1p35_e2_a3p66_20umbins_sum.root'''.split('\n')
-
-    fn3 = '''2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins.root
-2v_from_jets_5track_average5_c1p35_e2_a3p66_20umbins_sum.root'''.split('\n')
-
-    ls = '''default
-sort by b quarks'''.split('\n')
+    fn1.append('2v_from_jets_3track_average3_c1p35_e2_a3p66_v11_sum.root')
+    fn2.append('2v_from_jets_4track_average4_c1p35_e2_a3p66_v11_sum.root')
+    fn3.append('2v_from_jets_5track_average5_c1p35_e2_a3p66_v11_sum.root')
+    ls = ['default', 'sort by b quarks']
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
@@ -187,14 +170,14 @@ for i in range(3):
 
     if mode == 'vary_dphi':
         if i == 0:
-            er2 *= 0.124194
-            er3 *= 0.097202
+            er2 *= 0.203370
+            er3 *= 0.154157
         if i == 1:
-            er2 *= 0.125128
-            er3 *= 0.107277
+            er2 *= 0.200499
+            er3 *= 0.161360
         if i == 2:
-            er2 *= 0.129385
-            er3 *= 0.096314
+            er2 *= 0.187591
+            er3 *= 0.130377
     if mode == 'vary_eff':
         er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
         er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5

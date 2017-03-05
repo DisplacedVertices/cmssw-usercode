@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk5'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV11_15'
 plot_dir = 'plots/AN-16-394/data_mc_comp'
 
 set_style()
@@ -70,15 +70,6 @@ C('nocuts_ht40',
   cut_line = ((1000, 0, 1000, 2.5e8), 2, 5, 1),
   )
 
-C('nsv_presel',
-  histogram_path = 'mfvVertexHistosPreSel/h_nsv',
-  x_title = 'Number of vertices',
-  y_title = 'Events',
-  x_range = (0, 8),
-  y_range = (1, 1e8),
-  cut_line = ((2, 0, 2, 2.5e8), 2, 5, 1),
-  )
-
 C('onevtx_ntracks',
   histogram_path = 'vtxHst1VNoNtracks/h_sv_best0_ntracks',
   x_title = 'Number of tracks per vertex',
@@ -104,25 +95,8 @@ C('onevtx_dbv',
   cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
   )
 
-C('dbv',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  x_range = (0, 0.4),
-  y_range = (1, 1e4),
-  )
-
-C('dvv',
-  histogram_path = 'mfvVertexHistosWAnaCuts/h_svdist2d',
-  rebin = 10,
-  x_title = 'd_{VV} (cm)',
-  y_title = 'Events/200 #mum',
-  y_range = (1e-2, 10),
-  )
-
 C('nsv_3track',
-  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk3', '%(name)s.root'),
-  histogram_path = 'mfvVertexHistosPreSel/h_nsv',
+  histogram_path = 'Ntk3mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 3-track vertices',
   y_title = 'Events',
   x_range = (0, 8),
@@ -130,8 +104,7 @@ C('nsv_3track',
   )
 
 C('nsv_4track',
-  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk4', '%(name)s.root'),
-  histogram_path = 'mfvVertexHistosPreSel/h_nsv',
+  histogram_path = 'Ntk4mfvVertexHistosPreSel/h_nsv',
   x_title = 'Number of 4-track vertices',
   y_title = 'Events',
   x_range = (0, 8),
@@ -144,4 +117,21 @@ C('nsv_5track',
   y_title = 'Events',
   x_range = (0, 8),
   y_range = (1, 1e8),
+  cut_line = ((2, 0, 2, 2.5e8), 2, 5, 1),
+  )
+
+C('dbv',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_best0_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e4),
+  )
+
+C('dvv',
+  histogram_path = 'mfvVertexHistosFullSel/h_svdist2d',
+  rebin = 10,
+  x_title = 'd_{VV} (cm)',
+  y_title = 'Events/200 #mum',
+  y_range = (1e-2, 10),
   )
