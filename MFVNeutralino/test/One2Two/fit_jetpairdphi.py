@@ -70,3 +70,26 @@ for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/
       h2.Draw('sames')
   l.Draw()
   ps.save('abs_%s'%n.split('/')[1])
+
+f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_763p2/HistosV10_0/background.root')
+for n in ['mfvVertexHistosOnlyOneVtx/h_sv_best0_jet0_deltaphi0']:
+  colors = [ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2]
+  l = ROOT.TLegend(0.15,0.75,0.85,0.85)
+  h2s = []
+  for i in [0,2,3]:
+    h = f.Get('%s%s' % (ntk[i], n))
+    h.SetStats(0)
+    h.SetLineColor(colors[i])
+    h.SetLineWidth(3)
+    h.Scale(1./h.Integral())
+    h.Rebin(5)
+    h.GetYaxis().SetRangeUser(0,1)
+    h.SetTitle(';#Delta#phi_{JV}^{min};')
+    if i == 0:
+      h.Draw()
+    else:
+      h.Draw('sames')
+    l.AddEntry(h, '%s one-vertex events' % ntracks[i], 'LE')
+  l.SetFillColor(0)
+  l.Draw()
+  ps.save(n.split('/')[1])

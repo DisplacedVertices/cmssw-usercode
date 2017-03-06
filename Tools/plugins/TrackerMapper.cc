@@ -35,6 +35,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_npv;
 
   TH1D* h_ntracks[3];
+  TH1D* h_tracks_algo[3];
+  TH1D* h_tracks_quality[3];
   TH1D* h_tracks_pt[3];
   TH1D* h_tracks_eta[3];
   TH1D* h_tracks_phi[3];
@@ -84,6 +86,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   const char* ex[3] = {"all", "sel", "seed"};
   for (int i = 0; i < 3; ++i) {
     h_ntracks[i] = fs->make<TH1D>(TString::Format("h_%s_ntracks", ex[i]), TString::Format(";number of %s tracks;events", ex[i]), 2000, 0, 2000);
+    h_tracks_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_algo", ex[i]), TString::Format(";%s tracks algo;events", ex[i]), 50, 0, 50);
+    h_tracks_quality[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_quality", ex[i]), TString::Format(";%s tracks quality;events", ex[i]), 8, 0, 8);
     h_tracks_pt[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
     h_tracks_phi[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_phi", ex[i]), TString::Format("%s tracks;tracks phi;arb. units", ex[i]), 50, -3.15, 3.15);
     h_tracks_eta[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_eta", ex[i]), TString::Format("%s tracks;tracks eta;arb. units", ex[i]), 50, -4, 4);
@@ -202,6 +206,10 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
       ++ntracks[i];
 
+      h_tracks_algo[i]->Fill(int(tk.algo()), *weight);
+      for (int j = 0; j < 8; ++j)
+        if (tk.quality(reco::TrackBase::TrackQuality(j)))
+          h_tracks_quality[i]->Fill(j, *weight);
       h_tracks_pt[i]->Fill(tk.pt(), *weight);
       h_tracks_eta[i]->Fill(tk.eta(), *weight);
       h_tracks_phi[i]->Fill(tk.phi(), *weight);
