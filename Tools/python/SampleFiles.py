@@ -71,6 +71,8 @@ _add({('testqcdht2000', 'gensim') : (60 + 263,
 _add_ds('main', {
 'testqcdht2000':      _fromnum0('/store/user/tucker/qcdht2000_80',      323, fnbase='reco', but=[142,144,200,318,59,6,86], numbereddirs=False),
 'testqcdht2000_noPU': _fromnum0('/store/user/tucker/qcdht2000_80_noPU', 323, fnbase='reco', numbereddirs=False),
+'testqcdht2000_15PU': _fromnum0('/store/user/tucker/qcdht2000_80_15PU', 323, fnbase='reco', numbereddirs=False),
+'testqcdht2000_15PU_cond15': _fromnum0('/store/user/tucker/qcdht2000_80_15PU_cond15', 323, but=[27], fnbase='reco', numbereddirs=False),
 })
 
 _add_ds('ntuplev10', {
@@ -188,6 +190,13 @@ _add({('JetHT2016H2', 'ntuplev10fromminiaodtestv2'): (33, ['/store/user/tucker/J
 _add({('JetHT2016H2', 'ntuplev10correspondingsubset'): (4, ['/store/user/tucker/JetHT/NtupleV10/170128_191149/0000/ntuple_%i.root' % i for i in [45,46,47,49]])})
 
 _add({('official_mfv_neu_tau10000um_M0800', 'ntuplev10fromminiaodtestv2'): (16, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV10FromMiniAODTestv2_signal/170210_135908/0000/ntuple_%i.root' % i for i in xrange(16)])})
+
+_add_ds('ntuplev11_notrigfilt', {
+'testqcdht2000': _fromnum0('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_16_testqcdht2000/170305_175126', 64),
+'testqcdht2000_noPU': _fromnum0('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_16_testqcdht2000_noPU/170305_175126', 65),
+'testqcdht2000_15PU': _fromnum0('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_16_testqcdht2000_15PU/170305_173757', 65),
+'testqcdht2000_15PU_cond15': _fromnum0('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV11_16_testqcdht2000_15PU_cond15/170305_173757', 65),
+})
 
 __all__ = [
     'dump',
