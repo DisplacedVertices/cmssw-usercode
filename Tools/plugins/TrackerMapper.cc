@@ -26,6 +26,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
 
+  const int use_duplicateMerge;
+
   TH1D* h_npu;
 
   TH1D* h_bsx;
@@ -70,7 +72,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     pileup_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
-    pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
+    pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
+    use_duplicateMerge(cfg.getParameter<int>("use_duplicateMerge"))
 {
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -171,6 +174,9 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   int ntracks[3] = {0};
   int ntracks_dxyslices[3][6] = {{0}, {0}, {0}};
   for (const reco::Track& tk : *tracks) {
+    if (use_duplicateMerge != -1 && (tk.algo() == reco::TrackBase::duplicateMerge) != use_duplicateMerge)
+      continue;
+
     TrackerSpaceExtents tracker_extents;
     const double pt = tk.pt();
     const double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false).min_r;
