@@ -156,6 +156,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     w *= pileup_weight(npu);
   }
 
+  h_w->Fill(w);
+
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
 
