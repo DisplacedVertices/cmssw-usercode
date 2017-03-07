@@ -27,6 +27,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   double pileup_weight(int mc_npu) const;
 
   TH1D* h_npu;
+  TH1D* h_w;
 
   TH1D* h_bsx;
   TH1D* h_bsy;
@@ -78,6 +79,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   TH1::SetDefaultSumw2();
 
   h_npu = fs->make<TH1D>("h_npu", ";number of pileup interactions;events", 100, 0, 100);
+  h_w = fs->make<TH1D>("h_w", ";event weight;events", 20, 0, 10);
 
   h_bsx = fs->make<TH1D>("h_bsx", ";beamspot x (cm);events", 200, -1, 1);
   h_bsy = fs->make<TH1D>("h_bsy", ";beamspot y (cm);events", 200, -1, 1);
@@ -136,10 +138,9 @@ double TrackerMapper::pileup_weight(int mc_npu) const {
 }
 
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  std::auto_ptr<double> weight(new double);
-  *weight = 1;
-
+  double w = 1;
   int npu = -1;
+
   if (!event.isRealData()) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup;
     event.getByToken(pileup_token, pileup);
@@ -149,9 +150,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
         npu = psi->getTrueNumInteractions();
 
     h_npu->Fill(npu);
-
-    const double pu_w = pileup_weight(npu);
-    *weight *= pu_w;
+    w *= pileup_weight(npu);
   }
 
   edm::Handle<reco::BeamSpot> beamspot;
@@ -167,7 +166,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertex_token, primary_vertices);
-  h_npv->Fill(int(primary_vertices->size()), *weight);
+  h_npv->Fill(int(primary_vertices->size()), w);
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(track_token, tracks);
@@ -198,7 +197,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
         if (i == 0 || (i == 1 && nm1_sel[j])) {
           for (int ibin = 1; ibin <= nm1_h[j]->GetNbinsX(); ++ibin) {
             const double cut = nm1_h[j]->GetXaxis()->GetBinLowEdge(ibin);
-            if (nm1_v[j] >= cut) nm1_h[j]->Fill(cut, tk.dxyError(), *weight);
+            if (nm1_v[j] >= cut) nm1_h[j]->Fill(cut, tk.dxyError(), w);
           }
         }
       }
@@ -214,53 +213,53 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
       ++ntracks[i];
 
-      h_tracks_algo[i]->Fill(int(tk.algo()), *weight);
+      h_tracks_algo[i]->Fill(int(tk.algo()), w);
       for (int j = 0; j < 8; ++j)
         if (tk.quality(reco::TrackBase::TrackQuality(j)))
-          h_tracks_quality[i]->Fill(j, *weight);
-      h_tracks_pt[i]->Fill(tk.pt(), *weight);
-      h_tracks_eta[i]->Fill(tk.eta(), *weight);
-      h_tracks_phi[i]->Fill(tk.phi(), *weight);
-      h_tracks_vx[i]->Fill(tk.vx() - bsx, *weight);
-      h_tracks_vy[i]->Fill(tk.vy() - bsy, *weight);
-      h_tracks_vz[i]->Fill(tk.vz() - bsz, *weight);
-      h_tracks_vphi[i]->Fill(atan2(tk.vy() - bsy, tk.vx() - bsx), *weight);
-      h_tracks_dxy[i]->Fill(tk.dxy(*beamspot), *weight);
-      if (tk.charge() > 0) h_tracks_qp_dxy[i]->Fill(dxy, *weight);
-      if (tk.charge() < 0) h_tracks_qm_dxy[i]->Fill(dxy, *weight);
-      h_tracks_dxyerr[i]->Fill(tk.dxyError(), *weight);
-      h_tracks_dzerr[i]->Fill(tk.dzError(), *weight);
-      h_tracks_nhits[i]->Fill(tk.hitPattern().numberOfValidHits(), *weight);
-      h_tracks_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits(), *weight);
-      h_tracks_nsthits[i]->Fill(tk.hitPattern().numberOfValidStripHits(), *weight);
+          h_tracks_quality[i]->Fill(j, w);
+      h_tracks_pt[i]->Fill(tk.pt(), w);
+      h_tracks_eta[i]->Fill(tk.eta(), w);
+      h_tracks_phi[i]->Fill(tk.phi(), w);
+      h_tracks_vx[i]->Fill(tk.vx() - bsx, w);
+      h_tracks_vy[i]->Fill(tk.vy() - bsy, w);
+      h_tracks_vz[i]->Fill(tk.vz() - bsz, w);
+      h_tracks_vphi[i]->Fill(atan2(tk.vy() - bsy, tk.vx() - bsx), w);
+      h_tracks_dxy[i]->Fill(tk.dxy(*beamspot), w);
+      if (tk.charge() > 0) h_tracks_qp_dxy[i]->Fill(dxy, w);
+      if (tk.charge() < 0) h_tracks_qm_dxy[i]->Fill(dxy, w);
+      h_tracks_dxyerr[i]->Fill(tk.dxyError(), w);
+      h_tracks_dzerr[i]->Fill(tk.dzError(), w);
+      h_tracks_nhits[i]->Fill(tk.hitPattern().numberOfValidHits(), w);
+      h_tracks_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits(), w);
+      h_tracks_nsthits[i]->Fill(tk.hitPattern().numberOfValidStripHits(), w);
 
-      if (z<-5)         h_tracks_dxy_zslices[i][0]->Fill(dxy, *weight);
-      if (z>-5 && z<-2) h_tracks_dxy_zslices[i][1]->Fill(dxy, *weight);
-      if (z>-2 && z<0)  h_tracks_dxy_zslices[i][2]->Fill(dxy, *weight);
-      if (z>0 && z<2)   h_tracks_dxy_zslices[i][3]->Fill(dxy, *weight);
-      if (z>2 && z<5)   h_tracks_dxy_zslices[i][4]->Fill(dxy, *weight);
-      if (z>5)          h_tracks_dxy_zslices[i][5]->Fill(dxy, *weight);
+      if (z<-5)         h_tracks_dxy_zslices[i][0]->Fill(dxy, w);
+      if (z>-5 && z<-2) h_tracks_dxy_zslices[i][1]->Fill(dxy, w);
+      if (z>-2 && z<0)  h_tracks_dxy_zslices[i][2]->Fill(dxy, w);
+      if (z>0 && z<2)   h_tracks_dxy_zslices[i][3]->Fill(dxy, w);
+      if (z>2 && z<5)   h_tracks_dxy_zslices[i][4]->Fill(dxy, w);
+      if (z>5)          h_tracks_dxy_zslices[i][5]->Fill(dxy, w);
 
-      h_tracks_min_r[i]->Fill(min_r, *weight);
-      h_tracks_npxlayers[i]->Fill(npxlayers, *weight);
-      h_tracks_nstlayers[i]->Fill(nstlayers, *weight);
-      h_tracks_sigmadxy[i]->Fill(sigmadxybs, *weight);
+      h_tracks_min_r[i]->Fill(min_r, w);
+      h_tracks_npxlayers[i]->Fill(npxlayers, w);
+      h_tracks_nstlayers[i]->Fill(nstlayers, w);
+      h_tracks_sigmadxy[i]->Fill(sigmadxybs, w);
 
-      h_tracks_absdxy[i]->Fill(absdxy, *weight);
+      h_tracks_absdxy[i]->Fill(absdxy, w);
       for (int j = 0; j < 6; ++j) {
         if (absdxy >= 0.01*j && absdxy < 0.01*(j+1)) {
           ++ntracks_dxyslices[i][j];
-          h_tracks_sigmadxy_dxyslices[i][j]->Fill(sigmadxybs, *weight);
+          h_tracks_sigmadxy_dxyslices[i][j]->Fill(sigmadxybs, w);
         }
       }
     }
   }
 
   for (int i = 0; i < 3; ++i) {
-    h_ntracks[i]->Fill(ntracks[i], *weight);
+    h_ntracks[i]->Fill(ntracks[i], w);
 
     for (int j = 0; j < 6; ++j) {
-      h_ntracks_dxyslices[i][j]->Fill(ntracks_dxyslices[i][j], *weight);
+      h_ntracks_dxyslices[i][j]->Fill(ntracks_dxyslices[i][j], w);
     }
   }
 }
