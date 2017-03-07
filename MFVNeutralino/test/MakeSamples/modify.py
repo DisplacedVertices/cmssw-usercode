@@ -433,10 +433,12 @@ def set_cond15(process):
     prefer_it(process, 'tk15strqual',   'frontier://FrontierProd/CMS_CONDITIONS', 'SiStripBadChannelRcd',          'SiStripBadComponents_realisticMC_for2015_v1_mc')
     prefer_it(process, 'tkAlign',       'frontier://FrontierProd/CMS_CONDITIONS', 'TrackerAlignmentRcd',           'TrackerAlignment_run2Asymptotic_v1_mc')
 
-def set_oldduplicatemerge(process):
+def set_oldduplicatemerge(process, outliers_rejection=False):
     if process.name_() == 'RECO':
         process.duplicateTrackClassifier.mva.maxChi2n = [9999., 9999., 9999.]
         for x in process.duplicateTrackClassifier, process.jetCoreRegionalStep, process.muonSeededTracksInOutClassifier, process.muonSeededTracksOutInClassifier:
             x.mva.maxDzWrtBS = [3.40282346639e+38, 3.40282346639e+38, 3.40282346639e+38] # I think the PV cuts get used, which are same
             x.mva.minHits = [0, 0, 0]
             x.mva.minNVtxTrk = 0
+        if outliers_rejection:
+            process.mergedDuplicateTracks.Fitter = 'KFFittingSmootherWithOutliersRejectionAndRK'
