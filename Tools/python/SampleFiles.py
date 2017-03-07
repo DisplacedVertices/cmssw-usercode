@@ -73,6 +73,8 @@ _add_ds('main', {
 'testqcdht2000_noPU': _fromnum0('/store/user/tucker/qcdht2000_80_noPU', 323, fnbase='reco', numbereddirs=False),
 'testqcdht2000_15PU': _fromnum0('/store/user/tucker/qcdht2000_80_15PU', 323, fnbase='reco', numbereddirs=False),
 'testqcdht2000_15PU_cond15': _fromnum0('/store/user/tucker/qcdht2000_80_15PU_cond15', 323, but=[27], fnbase='reco', numbereddirs=False),
+'testqcdht2000_noPU_cond15': _fromnum0('/store/user/tucker/qcdht2000_80_noPU_cond15', 323, fnbase='reco', numbereddirs=False),
+'testqcdht2000_noPU_cond15_oldDM': _fromnum0('/store/user/tucker/qcdht2000_80_noPU_cond15_oldDM', 323, fnbase='reco', numbereddirs=False),
 })
 
 _add_ds('ntuplev10', {
