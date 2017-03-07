@@ -45,6 +45,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_vz[3];
   TH1D* h_tracks_vphi[3];
   TH1D* h_tracks_dxy[3];
+  TH1D* h_tracks_qp_dxy[3];
+  TH1D* h_tracks_qm_dxy[3];
   TH1D* h_tracks_dxy_zslices[3][6];
   TH1D* h_tracks_dxyerr[3];
   TH1D* h_tracks_dzerr[3];
@@ -96,6 +98,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_vz[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_vz", ex[i]), TString::Format("%s tracks;tracks vz - beamspot z;arb. units", ex[i]), 400, -20, 20);
     h_tracks_vphi[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_vphi", ex[i]), TString::Format("%s tracks;tracks vphi w.r.t. beamspot;arb. units", ex[i]), 50, -3.15, 3.15);
     h_tracks_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
+    h_tracks_qp_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_qp_dxy", ex[i]), TString::Format("%s tracks;q=+1 tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
+    h_tracks_qm_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_qm_dxy", ex[i]), TString::Format("%s tracks;q=-1 tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
     for (int j = 0; j < 6; ++j) {
       h_tracks_dxy_zslices[i][j] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy_z%d", ex[i], j), TString::Format("%s tracks z%d;tracks dxy to beamspot;arb. units", ex[i], j), 400, -0.2, 0.2);
     }
@@ -204,6 +208,10 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       if (i==1 && !sel) continue;
       if (i==2 && !seed) continue;
 
+      const double dxy = tk.dxy(*beamspot);
+      const double absdxy = fabs(dxy);
+      const double z = tk.vz() - bsz;
+
       ++ntracks[i];
 
       h_tracks_algo[i]->Fill(int(tk.algo()), *weight);
@@ -218,14 +226,14 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_vz[i]->Fill(tk.vz() - bsz, *weight);
       h_tracks_vphi[i]->Fill(atan2(tk.vy() - bsy, tk.vx() - bsx), *weight);
       h_tracks_dxy[i]->Fill(tk.dxy(*beamspot), *weight);
+      if (tk.charge() > 0) h_tracks_qp_dxy[i]->Fill(dxy, *weight);
+      if (tk.charge() < 0) h_tracks_qm_dxy[i]->Fill(dxy, *weight);
       h_tracks_dxyerr[i]->Fill(tk.dxyError(), *weight);
       h_tracks_dzerr[i]->Fill(tk.dzError(), *weight);
       h_tracks_nhits[i]->Fill(tk.hitPattern().numberOfValidHits(), *weight);
       h_tracks_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits(), *weight);
       h_tracks_nsthits[i]->Fill(tk.hitPattern().numberOfValidStripHits(), *weight);
 
-      double z = tk.vz() - bsz;
-      double dxy = tk.dxy(*beamspot);
       if (z<-5)         h_tracks_dxy_zslices[i][0]->Fill(dxy, *weight);
       if (z>-5 && z<-2) h_tracks_dxy_zslices[i][1]->Fill(dxy, *weight);
       if (z>-2 && z<0)  h_tracks_dxy_zslices[i][2]->Fill(dxy, *weight);
@@ -238,7 +246,6 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_nstlayers[i]->Fill(nstlayers, *weight);
       h_tracks_sigmadxy[i]->Fill(sigmadxybs, *weight);
 
-      double absdxy = fabs(dxy);
       h_tracks_absdxy[i]->Fill(absdxy, *weight);
       for (int j = 0; j < 6; ++j) {
         if (absdxy >= 0.01*j && absdxy < 0.01*(j+1)) {
