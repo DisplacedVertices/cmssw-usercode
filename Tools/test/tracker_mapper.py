@@ -12,10 +12,14 @@ process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                        track_src = cms.InputTag('generalTracks'),
                                        beamspot_src = cms.InputTag('offlineBeamSpot'),
                                        primary_vertex_src = cms.InputTag('offlinePrimaryVertices'),
+                                       use_duplicateMerge = cms.int32(-1),
                                        pileup_weights = cms.vdouble(*([1]*100)),
                                        )
 
-process.p = cms.Path(process.triggerFilter * process.TrackerMapper)
+process.tmNoDuplicateMerge = process.TrackerMapper.clone(use_duplicateMerge = 0)
+process.tmDuplicateMerge = process.TrackerMapper.clone(use_duplicateMerge = 1)
+
+process.p = cms.Path(process.triggerFilter * process.TrackerMapper * process.tmNoDuplicateMerge * process.tmDuplicateMerge)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
