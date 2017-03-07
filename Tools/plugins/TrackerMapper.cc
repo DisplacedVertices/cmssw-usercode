@@ -38,8 +38,9 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_npv;
 
   TH1D* h_ntracks[3];
+  TH1D* h_ntracks_quality[3][5]; // 0th of 2nd is not used
   TH1D* h_tracks_algo[3];
-  TH1D* h_tracks_quality[3];
+  TH1D* h_tracks_original_algo[3];
   TH1D* h_tracks_pt[3];
   TH1D* h_tracks_eta[3];
   TH1D* h_tracks_phi[3];
@@ -93,8 +94,10 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   const char* ex[3] = {"all", "sel", "seed"};
   for (int i = 0; i < 3; ++i) {
     h_ntracks[i] = fs->make<TH1D>(TString::Format("h_%s_ntracks", ex[i]), TString::Format(";number of %s tracks;events", ex[i]), 2000, 0, 2000);
+    for (int j = 1; j <= 4; ++j) 
+      h_ntracks_quality[i][j] = fs->make<TH1D>(TString::Format("h_%s_ntracks_quality%i", ex[i], j), TString::Format(";number of %s tracks quality=%i;events", ex[i], j), 2000, 0, 2000);
     h_tracks_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_algo", ex[i]), TString::Format(";%s tracks algo;events", ex[i]), 50, 0, 50);
-    h_tracks_quality[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_quality", ex[i]), TString::Format(";%s tracks quality;events", ex[i]), 8, 0, 8);
+    h_tracks_original_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_original_algo", ex[i]), TString::Format(";%s tracks original algo;events", ex[i]), 50, 0, 50);
     h_tracks_pt[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
     h_tracks_phi[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_phi", ex[i]), TString::Format("%s tracks;tracks phi;arb. units", ex[i]), 50, -3.15, 3.15);
     h_tracks_eta[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_eta", ex[i]), TString::Format("%s tracks;tracks eta;arb. units", ex[i]), 50, -4, 4);
@@ -175,7 +178,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   event.getByToken(track_token, tracks);
 
   int ntracks[3] = {0};
-  int ntracks_dxyslices[3][6] = {{0}, {0}, {0}};
+  int ntracks_quality[3][5] = {{0}};
+  int ntracks_dxyslices[3][6] = {{0}};
   for (const reco::Track& tk : *tracks) {
     if (use_duplicateMerge != -1 && (tk.algo() == reco::TrackBase::duplicateMerge) != use_duplicateMerge)
       continue;
@@ -219,10 +223,12 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
       ++ntracks[i];
 
-      h_tracks_algo[i]->Fill(int(tk.algo()), w);
-      for (int j = 0; j < 8; ++j)
+      for (int j = 1; j <= 4; ++j)
         if (tk.quality(reco::TrackBase::TrackQuality(j)))
-          h_tracks_quality[i]->Fill(j, w);
+          ++ntracks_quality[i][j];
+
+      h_tracks_algo[i]->Fill(int(tk.algo()), w);
+      h_tracks_original_algo[i]->Fill(int(tk.originalAlgo()), w);
       h_tracks_pt[i]->Fill(tk.pt(), w);
       h_tracks_eta[i]->Fill(tk.eta(), w);
       h_tracks_phi[i]->Fill(tk.phi(), w);
@@ -263,10 +269,10 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
   for (int i = 0; i < 3; ++i) {
     h_ntracks[i]->Fill(ntracks[i], w);
-
-    for (int j = 0; j < 6; ++j) {
+    for (int j = 1; j <= 4; ++j)
+      h_ntracks_quality[i][j]->Fill(ntracks_quality[i][j], w);
+    for (int j = 0; j < 6; ++j)
       h_ntracks_dxyslices[i][j]->Fill(ntracks_dxyslices[i][j], w);
-    }
   }
 }
 
