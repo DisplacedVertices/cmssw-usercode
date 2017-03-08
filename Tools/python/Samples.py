@@ -5,16 +5,6 @@ from JMTucker.Tools.Sample import *
 
 ########################################################################
 
-my_qcd_test_samples = [
-    MCSample('testqcdht2000',      '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  -1),
-    MCSample('testqcdht2000_noPU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  -1),
-    MCSample('testqcdht2000_15PU', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-PU25nsData2015v1_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',       -1),
-    MCSample('testqcdht2000_15PU_cond15', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-PU25nsData2015v1_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15-v1/AODSIM',       -1),
-    MCSample('testqcdht2000_noPU_cond15', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15-v1/AODSIM',       -1),
-    MCSample('testqcdht2000_noPU_cond15_oldDM', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15oldDM-v1/AODSIM',       -1),
-    MCSample('testqcdht2000_noPU_cond15_oldDMoutrej', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15oldDMoutrej-v1/AODSIM',       -1),
-    ]
-
 qcd_samples = [
     MCSample('qcdht0500', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  18929951, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=3.163e4),
     MCSample('qcdht0700', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM', 15629253, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.802e3),
@@ -31,10 +21,7 @@ qcd_samples_ext = [
     MCSample('qcdht2000ext', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/AODSIM',   4047360, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=25.3),
     ]
 
-# JMTBAD so the scripts downstream have an easy time
-qcd_samples_sum = [ MCSample(x.name.replace('', '') + 'sum', '/None/', x.nevents_orig + y.nevents_orig, nice=x.nice, color=x.color, syst_frac=x.syst_frac, xsec=x.xsec) for x,y in zip(qcd_samples, qcd_samples_ext) ]
-
-# for x in 0500 0700 1000 1500 2000; hadd.py qcdht${x}sum.root qcdht${x}ext.root qcdht${x}.root
+qcd_samples_sum = [ MCSample(x.name.replace('', '') + 'sum', '/None/', x.nevents_orig + y.nevents_orig, nice=x.nice, color=x.color, syst_frac=x.syst_frac, xsec=x.xsec) for x,y in zip(qcd_samples, qcd_samples_ext) ] # for scripts downstream
 
 ttbar_samples = [
     MCSample('ttbar', '/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/RunIISummer16DR80Premix-PUMoriond17_backup_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM', 43662343, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
@@ -71,12 +58,6 @@ official_mfv_signal_samples = [
     ]
 
 for s in official_mfv_signal_samples:
-    s.xsec = 1e-3
-
-xx4j_samples = [
-    ]
-
-for s in xx4j_samples:
     s.xsec = 1e-3
 
 ########################################################################
@@ -116,15 +97,16 @@ for s in data_samples + auxiliary_data_samples:
 
 registry = SamplesRegistry()
 
+_adbp = registry.add_dataset_by_primary # but can't add data, qcd datasets by primary (have the same primary for different datasets)
+_adbp3 = partial(_adbp, dbs_inst='phys03')
+
 __all__ = [
-    'my_qcd_test_samples',
     'qcd_samples',
     'qcd_samples_ext',
     'qcd_samples_sum',
     'ttbar_samples',
     'leptonic_background_samples',
     'official_mfv_signal_samples',
-#    'xx4j_samples',
     'data_samples',
     'auxiliary_data_samples',
     'registry',
@@ -142,33 +124,22 @@ for x in __all__:
 ########################################################################
 
 # Extra datasets and other overrides go here.
-
-# Can't add data datasets by primary (many have the same primary).
-for sample in data_samples + auxiliary_data_samples:
-    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
-
-def add_dataset_by_primary(ds_name, dataset, nevents_orig, **kwargs):
-    x = registry.by_primary_dataset(dataset.split('/')[1])
-    if len(x) != 1:
-        raise ValueError('could not find sample for %s by primary dataset: %r' % (dataset, x))
-    sample = x[0]
-    sample.add_dataset(ds_name, dataset, nevents_orig, **kwargs)
-
-_adbp = add_dataset_by_primary
-_adbp3 = partial(_adbp, dbs_inst='phys03')
-
-# can't use _adbp* on data or qcds because of the -ext datasets that have same primary
-def add_dataset_phys03(sample, ds_name, dataset, nevents_orig, **kwargs):
-    sample.add_dataset(ds_name, dataset, nevents_orig, dbs_inst='phys03', **kwargs)
-
 # for x in $(<a.txt); echo _adbp3\(\'\', \'${x}\', $(dass 3 nevents $x)\) \# $(dass 3 file $x | wl) files
 
-JetHT2016H2.add_dataset('fortest', '/JetHT/None/None')
-JetHT2016H2.add_dataset('miniaodskimtestv1', '/JetHT/None/None')
-JetHT2016H2.add_dataset('miniaodfortest', '/JetHT/None/None')
-JetHT2016H2.datasets['fortest'].nevents_orig = 11707
-JetHT2016H2.datasets['miniaodskimtestv1'].nevents_orig = 1652
-JetHT2016H2.datasets['miniaodfortest'].nevents_orig = 64381
+########
+# gensims
+########
+
+# /qcdht2000_gensim/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
+# /qcdht2000_gensim_ext1/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
+#testqcdht2000.add_dataset('gensim', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer15GS-MCRUN2_71_V1/GEN-SIM', 33377, dbs_inst='phys03', condor=True)
+
+########
+# miniaod
+########
+
+for sample in data_samples + auxiliary_data_samples:
+    sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
 qcdht0500.add_dataset('miniaod', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',  18929951)
 qcdht0700.add_dataset('miniaod', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM', 15629253)
@@ -208,6 +179,40 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   100000)
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   99004)
 
+########
+# ntuples
+########
+
+# condor-run have no info in dbs, so no dataset info
+for x in (official_mfv_neu_tau00100um_M0800,
+          qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext):
+    x.add_dataset('ntuplev11')
+
+# crab-run
+qcdht1000.add_dataset('ntuplev11', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-2d5962ffa78f8ab85f960c7fe846404b/USER', 4838788)
+qcdht2000.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-df8522cc708057e6d4d7bdca37f1ad35/USER', 1991645)
+qcdht2000ext.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-b2cadb9c972c89c96ec11f8287fd9a9f/USER', 4047360)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-f8accded35148baf419dc8a8895faecd/USER', 99349)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-6f9590d29f299702b0303bba964b9b86/USER', 98639)
+_adbp3('ntuplev11', '/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/tucker-NtupleV11_2016-103966dbf38b40ab2f1836aa20e01d52/USER', 1836993)
+
+JetHT2016B3.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-f4f1c3ebc1857c56bf5b53ded980e564/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016C.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-b7a6d1e5bc74f8dee0cc92b3a32034fc/USER')
+JetHT2016D.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-74ca04a1e5273d587b1c0f3812b6a5c1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016E.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-8029c8407d97a41fd70a9822d86c3dc1/USER')
+JetHT2016F.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-d7d515d43b5340461c48f19cc210d335/USER')
+JetHT2016G.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-d30725605bf98b582e3488fe5d5b0b8f/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016H2.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-5dd8af2237d539cec6557fcf17bbf6b1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
+JetHT2016H3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-718c77125c164f4c9d22a32b3c9a9364/USER')
+#datarecovery_JetHT2016B3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-4ae165e321bb24427141878bd9f852cc/USER', 74729)
+#datarecovery_JetHT2016D.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-72c66019e84e46e773e97b19976668a0/USER', 43674)
+#datarecovery_JetHT2016G.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-78315d1c78a5a95900ec00a9cb927c5d/USER', 145561)
+#datarecovery_JetHT2016H2.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-21eedbb3cc9247d80637006fd6d24378/USER', 144483)
+
+########
+# other condor declarations
+########
+
 for x in (SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
           qcdht0500, qcdht1500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000,
           wjetstolnu, dyjetstollM50, qcdmupt15,
@@ -224,41 +229,8 @@ for x in (JetHT2016B3,
           official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600):
     x.datasets['miniaod'].condor = True
 
-for x in (official_mfv_neu_tau00100um_M0800,
-          qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext,
-          testqcdht2000, testqcdht2000_noPU):
-    x.add_dataset('ntuplev11', '/%s/None/None' % x.primary_dataset, 0)
-
-official_mfv_neu_tau00300um_M0800.add_dataset('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-f8accded35148baf419dc8a8895faecd/USER', 99349)
-official_mfv_neu_tau10000um_M0800.add_dataset('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-6f9590d29f299702b0303bba964b9b86/USER', 98639)
-qcdht1000.add_dataset('ntuplev11', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-2d5962ffa78f8ab85f960c7fe846404b/USER', 4838788)
-qcdht2000.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-df8522cc708057e6d4d7bdca37f1ad35/USER', 1991645)
-qcdht2000ext.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-b2cadb9c972c89c96ec11f8287fd9a9f/USER', 4047360)
-ttbar.add_dataset('ntuplev11', '/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/tucker-NtupleV11_2016-103966dbf38b40ab2f1836aa20e01d52/USER', 1836993)
-
-JetHT2016B3.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-f4f1c3ebc1857c56bf5b53ded980e564/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016C.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-b7a6d1e5bc74f8dee0cc92b3a32034fc/USER')
-JetHT2016D.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-74ca04a1e5273d587b1c0f3812b6a5c1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016E.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-8029c8407d97a41fd70a9822d86c3dc1/USER')
-JetHT2016F.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-d7d515d43b5340461c48f19cc210d335/USER')
-JetHT2016G.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-d30725605bf98b582e3488fe5d5b0b8f/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016H2.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-5dd8af2237d539cec6557fcf17bbf6b1/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
-JetHT2016H3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-718c77125c164f4c9d22a32b3c9a9364/USER')
-#datarecovery_JetHT2016B3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-4ae165e321bb24427141878bd9f852cc/USER', 74729)
-#datarecovery_JetHT2016D.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-72c66019e84e46e773e97b19976668a0/USER', 43674)
-#datarecovery_JetHT2016G.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-78315d1c78a5a95900ec00a9cb927c5d/USER', 145561)
-#datarecovery_JetHT2016H2.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-21eedbb3cc9247d80637006fd6d24378/USER', 144483)
-
-for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_15PU, testqcdht2000_15PU_cond15, testqcdht2000_noPU_cond15, testqcdht2000_noPU_cond15_oldDM, testqcdht2000_noPU_cond15_oldDMoutrej):
-    x.condor = True
-    x.add_dataset('ntuplev11_notrigfilt', '/%s/None/None' % x.primary_dataset, 0, condor=True)
-
-# /qcdht2000_gensim/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
-# /qcdht2000_gensim_ext1/tucker-RunIISummer15GS-MCRUN2_71_V1-b23e9743a38a9c86cad94bbc723daab4/USER
-testqcdht2000.add_dataset('gensim', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer15GS-MCRUN2_71_V1/GEN-SIM', 33377, dbs_inst='phys03', condor=True)
-
 for s in registry.all():
-    for ds in s.dataset.keys():
+    for ds in s.datasets.keys():
         if ds.startswith('ntuple'):
             s.datasets[ds].condor = True
 
