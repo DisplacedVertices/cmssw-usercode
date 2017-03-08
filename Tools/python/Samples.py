@@ -258,8 +258,8 @@ for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_15PU, testqcdht2000_1
 testqcdht2000.add_dataset('gensim', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer15GS-MCRUN2_71_V1/GEN-SIM', 33377, dbs_inst='phys03', condor=True)
 
 for s in registry.all():
-    for ds in 'ntuplev10', 'ntuplev11':
-        if s.has_dataset(ds):
+    for ds in s.dataset.keys():
+        if ds.startswith('ntuple'):
             s.datasets[ds].condor = True
 
 ########################################################################
