@@ -1,8 +1,16 @@
+#include "JMTucker/MFVNeutralinoFormats/interface/Year.h"
+#if defined(MFVNEUTRALINO_2015)
+  #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
+#elif defined(MFVNEUTRALINO_2016)
+  #include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
+  #include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
+  #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+#else
+  #error what year is it
+#endif
+
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
-#include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
-#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -23,7 +31,11 @@ private:
 
   const bool prints;
 
+#if defined(MFVNEUTRALINO_2015)
+  L1GtUtils l1_cfg;
+#elif defined(MFVNEUTRALINO_2016)
   const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1_results_token;
+#endif
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
 
@@ -42,7 +54,11 @@ private:
 
 MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
   : prints(cfg.getUntrackedParameter<bool>("prints", false)),
+#if defined(MFVNEUTRALINO_2015)
+    l1_cfg(cfg, consumesCollector(), false),
+#elif defined(MFVNEUTRALINO_2016)
     l1_results_token(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag>("l1_results_src"))),
+#endif
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
@@ -75,13 +91,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     t.found = 0;
     t.pass  = 0;
   }
-
-  edm::Handle<GlobalAlgBlkBxCollection> l1_results_all;
-  event.getByToken(l1_results_token, l1_results_all);
-  const std::vector<bool>& l1_results = l1_results_all->at(0, 0).getAlgoDecisionFinal();
-
-  edm::ESHandle<L1TUtmTriggerMenu> l1_menu;
-  setup.get<L1TUtmTriggerMenuRcd>().get(l1_menu);
 
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
@@ -145,26 +154,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (prints)
     printf("TriggerFloats: ht = %f  ht4mc = %f\n", *ht, *ht4mc);
 
-  for (int i = 0; i < mfv::n_l1_paths; ++i) {
-    const auto& m = l1_menu->getAlgorithmMap();
-    const auto& e = m.find(mfv::l1_paths[i]);
-    const bool found = e != m.end();
-    const bool pass = found ? l1_results[e->second.getIndex()] : false;
-
-    if (found) (*L1decisions)[i] = pass;
-
-    if (prints)
-      printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], (*L1decisions)[i]);
-
-    if (tree) {
-      if (found) {
-        const unsigned bit = 1 << i;
-        t.found |= bit;
-        if (pass) t.pass |= bit;
-      }
-    }
-  }
-
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     const std::pair<bool, bool> paf = helper.pass_and_found_any_version(mfv::hlt_paths[i]);
     if (paf.second)
@@ -178,6 +167,43 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         const unsigned bit = 1 << (31 - i);
         t.found |= bit;
         if (paf.first) t.pass |= bit;
+      }
+    }
+  }
+
+#if defined(MFVNEUTRALINO_2015)
+  l1_cfg.getL1GtRunCache(event, setup, true, false);
+#elif defined(MFVNEUTRALINO_2016)
+  edm::Handle<GlobalAlgBlkBxCollection> l1_results_all;
+  event.getByToken(l1_results_token, l1_results_all);
+  const std::vector<bool>& l1_results = l1_results_all->at(0, 0).getAlgoDecisionFinal();
+
+  edm::ESHandle<L1TUtmTriggerMenu> l1_menu;
+  setup.get<L1TUtmTriggerMenuRcd>().get(l1_menu);
+#endif
+
+  for (int i = 0; i < mfv::n_l1_paths; ++i) {
+#if defined(MFVNEUTRALINO_2015)
+    int l1err = 0;
+    const bool pass = l1_cfg.decision(event, mfv::l1_paths[i], l1err);
+    const bool found = l1err == 0;
+#elif defined(MFVNEUTRALINO_2016)
+    const auto& m = l1_menu->getAlgorithmMap();
+    const auto& e = m.find(mfv::l1_paths[i]);
+    const bool found = e != m.end();
+    const bool pass = found ? l1_results[e->second.getIndex()] : false;
+#endif
+
+    if (found) (*L1decisions)[i] = pass;
+
+    if (prints)
+      printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], (*L1decisions)[i]);
+
+    if (tree) {
+      if (found) {
+        const unsigned bit = 1 << i;
+        t.found |= bit;
+        if (pass) t.pass |= bit;
       }
     }
   }
