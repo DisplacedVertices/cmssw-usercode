@@ -15,12 +15,6 @@ int main(int argc, char** argv) {
   }
 
   EventIdsReader reader;
-  if (getenv("EVENTIDSREADER_PRINTS"))
-    reader.prints = true;
-  if (getenv("EVENTIDSREADER_IS_MC") || getenv("EVENTIDSREADER_USE_EXTRA"))
-    EventIdsReader::RLE::set_type(true);
-  if (getenv("EVENTIDSREADER_USE_EXTRA"))
-    reader.use_extra = true;
 
   const char* paths[2] = { argv[1], argv[3] };
   const char* filelist[2] = { argv[2], argv[4] };
