@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-which = 'qcdht2000_76_16PU'
+which = 'qcdht2000_80_noPU_cond15_oldDMoutrej'
 output_dir = which
 inputfns_fn = 'inputfns.txt'
 todos = [
     'fns,%s,$(Process)' % inputfns_fn,
-    'pu16',
+    'nopu',
+    'cond15',
+    'oldduplicatemerge,True',
     ]
 njobs = None
 
