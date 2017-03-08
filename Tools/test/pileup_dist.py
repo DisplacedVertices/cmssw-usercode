@@ -1,13 +1,15 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
+from_miniaod = False
+
 import JMTucker.Tools.SampleFiles as sf
 sf.set_process(process, 'mfv_neu_tau10000um_M0800', 'main', 1)
 
 process.TFileService.fileName = 'mc_pileup.root'
 
 process.MCPileupDist = cms.EDAnalyzer('PileupDist',
-                                      pileup_info_src = cms.InputTag('slimmedAddPileupInfo'),
+                                      pileup_info_src = cms.InputTag('slimmedAddPileupInfo' if from_miniaod else 'addPileupInfo'),
                                       binning = cms.vdouble(100, 0, 100)
                                       )
 process.MCPileupDistHLTPFHT = process.MCPileupDist.clone()
