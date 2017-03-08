@@ -8,13 +8,12 @@ from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 
 is_mc = True
 htskim = True
-version = '2015v1'
-json = '../ana_2015.json'
+version = '2016v1'
+json = '../ana_2016.json'
 
 global_tag(process, which_global_tag(is_mc))
 process.maxEvents.input = 1000
-process.source.fileNames = ['/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/DC02DAAB-27BE-E511-8E1F-0025905AC99A.root' if is_mc else '/store/data/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10001/661BF376-F7A8-E511-B938-0CC47A745284.root']
-#process.source.fileNames = ['/store/user/tucker/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/trigeff_htskim_v7/151203_184423/0000/htskim_1.root']
+process.source.fileNames = ['/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
 #process.options.wantSummary = True
 process.TFileService.fileName = 'eff.root'
 
@@ -24,8 +23,7 @@ if not is_mc:
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.mutrig = hltHighLevel.clone()
-process.mutrig.HLTPaths = ['HLT_IsoMu20_v*']
-process.mutrig.andOr = True # = OR
+process.mutrig.HLTPaths = ['HLT_IsoMu24_v*']
 
 process.load('JMTucker.MFVNeutralino.EmulateHT800_cfi')
 from JMTucker.Tools.L1GtUtils_cff import l1GtUtilsTags
@@ -38,7 +36,7 @@ process.num = cms.EDFilter('MFVTriggerEfficiency',
                            require_4jets = cms.bool(True),
                            hlt_process_name = cms.string('HLT'),
                            muons_src = cms.InputTag('slimmedMuons'),
-                           muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 23'),
+                           muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > 27'),
                            jets_src = cms.InputTag('slimmedJets'),
                            jet_cut = jtupleParams.jetCut,
                            jet_ht_cut = cms.double(0),
@@ -50,7 +48,7 @@ process.p = cms.Path(process.mutrig * cms.ignore(process.emu) * cms.ignore(proce
 
 if htskim:
     process.setName_('EffHtSkim')
-    process.htskim = process.den.clone(jet_ht_cut = 800)
+    process.htskim = process.den.clone(jet_ht_cut = 900)
     process.phtskim = cms.Path(process.mutrig * process.htskim)
     process.load('Configuration.EventContent.EventContent_cff')
     process.out = cms.OutputModule('PoolOutputModule',
@@ -72,7 +70,7 @@ SimpleTriggerEfficiency.setup_endpath(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-    samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
+    samples = Samples.auxiliary_data_samples # + Samples.leptonic_background_samples + Samples.ttbar_samples
     for sample in samples:
         if sample.is_mc:
             sample.events_per = 100000

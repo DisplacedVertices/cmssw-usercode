@@ -146,7 +146,7 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
 
     for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
       char path[1024];
-      snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
+      snprintf(path, 1024, "HLT_PFHT900_v%i", hlt_version);
       if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
         continue;
 
@@ -168,7 +168,7 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
     }
 
     if (!found)
-      throw cms::Exception("BadAssumption", "one of HLT_PFHT800_v{1..9} not found");
+      throw cms::Exception("BadAssumption", "one of HLT_PFHT900_v{1..9} not found");
 
     if (!pass)
       return false;

@@ -36,8 +36,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     samples = Samples.data_samples + \
         Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
-        [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
+        [Samples.official_mfv_neu_tau00100um_M0800, Samples.official_mfv_neu_tau00300um_M0800, Samples.official_mfv_neu_tau10000um_M0800]
 
     for sample in samples:
         sample.files_per = 20
@@ -51,7 +50,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MinitreeV11_15',
+    cs = CondorSubmitter('MinitreeV11_16',
                          dataset = 'ntuplev11',
                          pset_modifier = modify
                          )

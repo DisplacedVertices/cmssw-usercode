@@ -9,6 +9,8 @@ process.source.fileNames = ['/store/data/Run2015C_25ns/JetHT/MINIAOD/16Dec2015-v
 process.source.fileNames = ['/store/data/Run2015D/JetHT/MINIAOD/16Dec2015-v1/50001/9E62C986-A9AA-E511-BB43-0CC47A4D9A10.root']
 process.source.fileNames = ['/store/mc/RunIIFall15MiniAODv2/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/10000/C6CD95B8-45B9-E511-A12B-141877411FED.root']
 
+process.source.fileNames = ['/store/data/Run2016H/JetHT/MINIAOD/PromptReco-v3/000/284/044/00000/BE5F4C22-D29F-E611-AEAA-02163E011C32.root']
+
 process.maxEvents.input = 100
 process.TFileService.fileName = 'triggerfloats.root'
 
@@ -43,7 +45,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('TriggerFloats_15_trigfilt',
+    cs = CRABSubmitter('TriggerFloats_16_trigfilt',
                        pset_modifier = pset_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',

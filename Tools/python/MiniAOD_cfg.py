@@ -2,20 +2,15 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages
 
 def which_global_tag(is_mc):
-    return '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15'
+    return '80X_mcRun2_asymptotic_2016_miniAODv2_v1' if is_mc else '80X_dataRun2_2016SeptRepro_v4'
 
 def pat_tuple_process(customize_before_unscheduled, is_mc):
-    if is_mc:
-        from Configuration.StandardSequences.Eras import eras
-        process = cms.Process('PAT', eras.Run2_25ns)
-    else:
-        process = cms.Process('PAT')
+    from Configuration.StandardSequences.Eras import eras
+    process = cms.Process('PAT', eras.Run2_25ns if is_mc else eras.Run2_2016)
 
     report_every(process, 1000000)
     registration_warnings(process)
-    print 'suppressing HLTConfigData warnings'
     #silence_messages(process, ['MatchedJetsFarApart', 'HLTConfigData', 'NoModule'])
-    silence_messages(process, ['HLTConfigData'])
     print 'suppressing EcalLaserCorrFilter warnings'
     silence_messages(process, ['EcalLaserDbService'])
 
@@ -28,27 +23,24 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     process.load('PhysicsTools.PatAlgos.slimming.metFilterPaths_cff')
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-    from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+    from Configuration.AlCa.GlobalTag import GlobalTag
     process.GlobalTag = GlobalTag(process.GlobalTag, which_global_tag(is_mc), '')
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True),
                                          wantSummary = cms.untracked.bool(False),
                                          )
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/RunIIFall15DR76/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0039E642-58BD-E511-B773-002590DE7230.root'))
+    process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('/store/mc/RunIISpring16DR80/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/AODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/30000/00E624D5-F6FA-E511-B7EF-0CC47A4C8E56.root'))
     if not is_mc:
-        process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/16Dec2015-v1/00000/0A2C6696-AEAF-E511-8551-0026189438EB.root']
+        process.source.fileNames = ['/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/100000/0006CE1E-9986-E611-8DFB-6C3BE5B5C0B0.root']
 
     output_file(process, 'pat.root', process.MINIAODSIMEventContent.outputCommands)
 
-    if not is_mc: # is_mc taken care of by Eras in cms.Process definition?
-        # I think these next two are already set but just in
-        # case. This replaces the use of
-        # Configuration.DataProcessing.RecoTLR.customiseDataRun2Common_25ns,
-        # which seems to be only needed if running raw2digi, L1reco,
-        # reco, or dqm.
-        process.CSCGeometryESModule.useGangedStripsInME1a = False
-        process.idealForDigiCSCGeometry.useGangedStripsInME1a = False
+    # the only customization in the 23sept rereco for runs B-F (not G
+    # or H) was the customizeMinPtForHitRecoveryInGluedDet, but this
+    # doesn't affect re-miniaoding
+
+    #if not is_mc: # is_mc taken care of by Eras in cms.Process definition?
 
     if customize_before_unscheduled is not None:
         customize_before_unscheduled(process)
@@ -63,16 +55,6 @@ def pat_tuple_process(customize_before_unscheduled, is_mc):
     else:
         process.load('Configuration.StandardSequences.PAT_cff')
         customize = miniAOD_customizeAllData
-
-    # Don't use the CombinedMVAV2 jet tags, they crash on the data from memory leak (can remove after next (?) patch of 763)
-    process.patJets.discriminatorSources = cms.VInputTag(cms.InputTag("pfJetBProbabilityBJetTags"),
-                                                         cms.InputTag("pfJetProbabilityBJetTags"),
-                                                         cms.InputTag("pfTrackCountingHighPurBJetTags"),
-                                                         cms.InputTag("pfTrackCountingHighEffBJetTags"),
-                                                         cms.InputTag("pfSimpleSecondaryVertexHighEffBJetTags"),
-                                                         cms.InputTag("pfSimpleSecondaryVertexHighPurBJetTags"),
-                                                         cms.InputTag("pfCombinedSecondaryVertexV2BJetTags"),
-                                                         cms.InputTag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))
 
     process = cleanUnscheduled(process)
     process = customize(process)

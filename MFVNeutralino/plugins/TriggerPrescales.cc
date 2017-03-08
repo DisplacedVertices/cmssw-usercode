@@ -25,6 +25,7 @@ private:
   const bool prints;
   std::map<std::pair<unsigned, unsigned>, bool> ls_seen;
 
+  L1GtUtils l1_cfg;
   HLTPrescaleProvider trig_cfg;
 
   struct tree_t {
@@ -58,12 +59,13 @@ private:
   tree_t nt;
 };
 
-const int MFVTriggerPrescales::NL1 = 4;
-const int MFVTriggerPrescales::NHLT = 2;
+const int MFVTriggerPrescales::NL1 = 9;
+const int MFVTriggerPrescales::NHLT = 5;
 
 MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
   : hlt_token(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"))),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
+    l1_cfg(cfg, consumesCollector(), true, *this),
     trig_cfg(cfg, consumesCollector(), *this)
 {
   edm::Service<TFileService> fs;
@@ -81,6 +83,8 @@ MFVTriggerPrescales::MFVTriggerPrescales(const edm::ParameterSet& cfg)
 }
 
 void MFVTriggerPrescales::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
+  l1_cfg.getL1GtRunCache(run, setup, true, true);
+
   bool changed = true;
   if (!trig_cfg.init(run, setup, "HLT", changed))
     throw cms::Exception("MFVTriggerPrescales", "HLTConfigProvider::init failed with process name HLT");
@@ -117,7 +121,6 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
   nt.run  = event.id().run();
   nt.lumi = event.luminosityBlock();
 
-  const L1GtUtils& l1_cfg = trig_cfg.l1GtUtils();
   const HLTConfigProvider& hlt_cfg = trig_cfg.hltConfigProvider();
 
   edm::Handle<edm::TriggerResults> hlt_results;
@@ -125,15 +128,15 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
   const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
   const size_t npaths = hlt_names.size();
 
-  const std::vector<std::string> all_l1_seeds = { "L1_HTT100", "L1_HTT125", "L1_HTT150", "L1_HTT175" };
-  const std::vector<int> hlt_versions = {1,2};
+  const std::vector<std::string> all_l1_seeds = { "L1_HTT160", "L1_HTT200", "L1_HTT220", "L1_HTT240", "L1_HTT255", "L1_HTT270", "L1_HTT280", "L1_HTT300", "L1_HTT320" };
+  const std::vector<int> hlt_versions = {1,2,3,4,6};
   assert(all_l1_seeds.size() == NL1);
   assert(hlt_versions.size() == NHLT);
 
   for (size_t ihlt = 0; ihlt < NHLT; ++ihlt) {
     const int hlt_version = hlt_versions[ihlt];
     char path[1024];
-    snprintf(path, 1024, "HLT_PFHT800_v%i", hlt_version);
+    snprintf(path, 1024, "HLT_PFHT900_v%i", hlt_version);
     bool found = false;
     if ((found = nt.hlt_found[ihlt] = hlt_cfg.triggerIndex(path) != hlt_cfg.size()))
       nt.hlt_prescale[ihlt] = trig_cfg.prescaleValue(event, setup, path);
@@ -149,11 +152,11 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
     if (!found)
       continue;
 
-    const auto& v = hlt_cfg.hltL1GTSeeds(path);
+    const auto& v = hlt_cfg.hltL1TSeeds(path);
     if (v.size() != 1)
       throw cms::Exception("BadAssumption") << "more than one seed returned: " << v.size();
 
-    std::string s = v[0].second;
+    std::string s = v[0];
     if (prints) printf("L1 seed %s\n", s.c_str());
     const std::string delim = " OR ";
     while (s.size()) {

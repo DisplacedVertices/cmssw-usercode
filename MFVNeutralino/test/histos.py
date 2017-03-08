@@ -78,7 +78,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV11_15',
+    cs = CondorSubmitter('HistosV11_16',
                          dataset = 'ntuplev11',
                          pset_modifier = modify
                          )

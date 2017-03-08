@@ -110,11 +110,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     for s in samples:
         if not s.is_mc:
-            s.json = '../ana_2015.json'
+            s.json = '../ana_2016.json'
 
     ex = '%i%i' % (njets, nbjets)
 
-    cs = CRABSubmitter('TrackMover2015_' + ex,
+    cs = CRABSubmitter('TrackMover2016_' + ex,
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        )
