@@ -12,6 +12,7 @@ my_qcd_test_samples = [
     MCSample('testqcdht2000_15PU_cond15', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-PU25nsData2015v1_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15-v1/AODSIM',       -1),
     MCSample('testqcdht2000_noPU_cond15', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15-v1/AODSIM',       -1),
     MCSample('testqcdht2000_noPU_cond15_oldDM', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15oldDM-v1/AODSIM',       -1),
+    MCSample('testqcdht2000_noPU_cond15_oldDMoutrej', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-RunIISummer16DR80-NoPU_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cond15oldDMoutrej-v1/AODSIM',       -1),
     ]
 
 qcd_samples = [
@@ -244,7 +245,7 @@ JetHT2016H3.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-718c77125c164
 #datarecovery_JetHT2016G.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-78315d1c78a5a95900ec00a9cb927c5d/USER', 145561)
 #datarecovery_JetHT2016H2.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-21eedbb3cc9247d80637006fd6d24378/USER', 144483)
 
-for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_15PU, testqcdht2000_15PU_cond15, testqcdht2000_noPU_cond15, testqcdht2000_noPU_cond15_oldDM):
+for x in (testqcdht2000, testqcdht2000_noPU, testqcdht2000_15PU, testqcdht2000_15PU_cond15, testqcdht2000_noPU_cond15, testqcdht2000_noPU_cond15_oldDM, testqcdht2000_noPU_cond15_oldDMoutrej):
     x.condor = True
     x.add_dataset('ntuplev11_notrigfilt', '/%s/None/None' % x.primary_dataset, 0, condor=True)
 
