@@ -19,12 +19,14 @@ global_tag(process, which_global_tag(is_mc))
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.mfvTriggerFloats.tree = True
 
-process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
-process.hltHighLevel.HLTPaths = [ 'HLT_PFHT800_v*', 'HLT_PFHT900_v*' ]
-process.hltHighLevel.andOr = True # = OR
-process.hltHighLevel.throw = False
-
-process.p = cms.Path(process.hltHighLevel * process.mfvTriggerFloats)
+if False:
+    process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
+    process.hltHighLevel.HLTPaths = [ 'HLT_PFHT800_v*', 'HLT_PFHT900_v*' ]
+    process.hltHighLevel.andOr = True # = OR
+    process.hltHighLevel.throw = False
+    process.p = cms.Path(process.hltHighLevel * process.mfvTriggerFloats)
+else:
+    process.p = cms.Path(process.mfvTriggerFloats)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
