@@ -62,6 +62,8 @@ class Sample(object):
         return True
 
     def add_dataset(self, c, *args, **kwargs):
+        if len(args) == 0:
+            args = ('/%s/None/None' % self.datasets['main'].dataset.split('/')[1], -1)
         self.datasets[c] = Dataset(*args, **kwargs)
 
     @property
@@ -253,6 +255,13 @@ class SamplesRegistry:
             if s.primary_dataset == pd:
                 x.append(s)
         return x
+
+    def add_dataset_by_primary(self, ds_name, dataset, nevents_orig=-1, **kwargs):
+        x = self.by_primary_dataset(dataset.split('/')[1])
+        if len(x) != 1:
+            raise ValueError('could not find sample for %s by primary dataset: %r' % (dataset, x))
+        sample = x[0]
+        sample.add_dataset(ds_name, dataset, nevents_orig, **kwargs)
 
     def from_argv(self, default=[], sort_and_set=True, from_root_fns=False):
         ready_only = 'fa_ready_only' in sys.argv
