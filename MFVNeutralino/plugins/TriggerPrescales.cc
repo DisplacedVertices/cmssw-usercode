@@ -1,3 +1,4 @@
+#if 0
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -208,3 +209,4 @@ void MFVTriggerPrescales::analyze(const edm::Event& event, const edm::EventSetup
 }
 
 DEFINE_FWK_MODULE(MFVTriggerPrescales);
+#endif
