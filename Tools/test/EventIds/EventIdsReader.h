@@ -61,7 +61,18 @@ public:
   bool prints;
   std::map<RLE, std::set<int>> m;
 
- EventIdsReader() : use_extra(false), prints(false) {}
+  EventIdsReader() : use_extra(false), prints(false) {
+    setup_from_env();
+  }
+
+  void setup_from_env() {
+    if (getenv("EVENTIDSREADER_PRINTS"))
+      prints = true;
+    if (getenv("EVENTIDSREADER_IS_MC") || getenv("EVENTIDSREADER_USE_EXTRA"))
+      EventIdsReader::RLE::set_type(true);
+    if (getenv("EVENTIDSREADER_USE_EXTRA"))
+      use_extra = true;
+  }
 
   void process_file(const char* fn, const char* path, int fileno) {
     if (prints) fprintf(stderr, "read from %s:%s in file #%i\n", fn, path, fileno);
