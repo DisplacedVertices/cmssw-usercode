@@ -20,10 +20,10 @@ process.p = cms.Path(process.triggerFilter * process.TrackerMapper)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
-    samples = Samples.my_qcd_test_samples[:2]
+    samples = Samples.my_qcd_test_samples[1:2]
     for s in samples:
         s.files_per = 10
 
     from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('TrackerMapper_testqcdht2000_15_v2')
+    ms = MetaSubmitter('TrackerMapper_testqcdht2000_15_v4')
     ms.submit(samples)
