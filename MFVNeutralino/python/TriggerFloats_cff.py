@@ -7,6 +7,7 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   l1_results_src = cms.InputTag('gtStage2Digis'), # ditto 2015
                                   trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
                                   trigger_objects_src = cms.InputTag('selectedPatTrigger'),
+                                  ht_cut = cms.double(-1),
                                   prints = cms.untracked.bool(False),
                                   tree = cms.untracked.bool(False),
                                   )

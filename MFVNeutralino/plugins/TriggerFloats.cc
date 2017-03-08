@@ -29,8 +29,6 @@ public:
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&) override;
 
-  const bool prints;
-
 #if defined(MFVNEUTRALINO_2015)
   L1GtUtils l1_cfg;
 #elif defined(MFVNEUTRALINO_2016)
@@ -38,8 +36,9 @@ private:
 #endif
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
-
   const double ht_cut;
+
+  const bool prints;
 
   TTree* tree;
   struct tree_t {
@@ -55,7 +54,7 @@ private:
 };
 
 MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
-  : prints(cfg.getUntrackedParameter<bool>("prints", false)),
+  :
 #if defined(MFVNEUTRALINO_2015)
     l1_cfg(cfg, consumesCollector(), false),
 #elif defined(MFVNEUTRALINO_2016)
@@ -64,6 +63,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     ht_cut(cfg.getParameter<double>("ht_cut")),
+    prints(cfg.getUntrackedParameter<bool>("prints", false)),
     tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
 {
   produces<float>("ht");
