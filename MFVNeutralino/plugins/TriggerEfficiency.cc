@@ -5,38 +5,31 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
-#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 
-class MFVTriggerEfficiency : public edm::EDFilter {
+class MFVTriggerEfficiency : public edm::EDProducer {
 public:
   explicit MFVTriggerEfficiency(const edm::ParameterSet&);
 
 private:
-  virtual bool filter(edm::Event&, const edm::EventSetup&);
-  virtual void beginRun(const edm::Run&, const edm::EventSetup&);
+  virtual void produce(edm::Event&, const edm::EventSetup&);
 
-  const bool require_trigger;
+  const int require_bits[2]; // HLT then L1
   const bool require_muon;
   const bool require_4jets;
-  const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
+  const edm::EDGetTokenT<std::vector<int>> decisions_tokens[2];
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
-  const double jet_ht_cut;
-  const edm::EDGetTokenT<float> hlt_ht_token; // "emu"
+  const edm::EDGetTokenT<float> hlt_ht_token;
   const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
-
-  L1GtUtils l1_cfg;
-  HLTConfigProvider hlt_cfg;
 
   TH1F* h_nnoselmuons;
   TH1F* h_nmuons;
@@ -69,20 +62,24 @@ private:
 };
 
 MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
-  : require_trigger(cfg.getParameter<bool>("require_trigger")),
+  : require_bits{cfg.getParameter<int>("require_hlt"), cfg.getParameter<int>("require_l1")},
     require_muon(cfg.getParameter<bool>("require_muon")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
-    trigger_results_token(consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", cfg.getParameter<std::string>("hlt_process_name")))),
+    decisions_tokens{
+      consumes<std::vector<int>>(edm::InputTag("mfvTriggerFloats", "HLTdecisions")),
+      consumes<std::vector<int>>(edm::InputTag("mfvTriggerFloats", "L1decisions"))
+      },
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
-    jet_ht_cut(cfg.getParameter<double>("jet_ht_cut")),
-    hlt_ht_token(consumes<float>(edm::InputTag("emu"))),
+    hlt_ht_token(consumes<float>(edm::InputTag("mfvTriggerFloats", "ht"))),
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
-    use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != ""),
-    l1_cfg(cfg, consumesCollector(), false)
+    use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
+  assert(require_bits[0] >= -1); // ORs will be represented by other negative numbers, not implemented yet
+  assert(require_bits[1] >= -1);
+
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
@@ -126,52 +123,17 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
 }
 
-void MFVTriggerEfficiency::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
-  bool changed = true;
-  if (!hlt_cfg.init(run, setup, "HLT", changed))
-    throw cms::Exception("CheckPrescale", "HLTConfigProvider::init failed with process name HLT");
-}
-
-bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setup) {
-  if (require_trigger) {
-    l1_cfg.getL1GtRunCache(event, setup, true, false);
-
-    edm::Handle<edm::TriggerResults> hlt_results;
-    event.getByToken(trigger_results_token, hlt_results);
-    const edm::TriggerNames& hlt_names = event.triggerNames(*hlt_results);
-    const size_t npaths = hlt_names.size();
-
-    bool found = false;
-    bool pass = false;
-
-    for (int hlt_version : {1, 2, 3, 4, 5, 6, 7, 8, 9} ) {
-      char path[1024];
-      snprintf(path, 1024, "HLT_PFHT900_v%i", hlt_version);
-      if (hlt_cfg.triggerIndex(path) == hlt_cfg.size())
-        continue;
-
-      found = true;
-
-      //int l1err;
-      //const bool l1_pass = l1_cfg.decision(event, "L1_QuadJetC40", l1err);
-      //if (l1err != 0) throw cms::Exception("L1ResultError") << "error code when getting L1 decision for L1_QuadJetC40: " << l1err;
-
-      const size_t ipath = hlt_names.triggerIndex(path);
-      if (!(ipath < npaths))
-        throw cms::Exception("BadAssumption") << "hlt_cfg and triggerNames don't agree on " << path;
-      const bool hlt_pass = hlt_results->accept(ipath);
-
-      //pass = l1_pass && hlt_pass;
-      pass = hlt_pass;
-
-      break;
+void MFVTriggerEfficiency::produce(edm::Event& event, const edm::EventSetup& setup) {
+  for (int i = 0; i < 2; ++i) { // HLT then L1
+    if (require_bits[i] != -1) {
+      edm::Handle<std::vector<int>> decisions;
+      event.getByToken(decisions_tokens[i], decisions);
+      const int decision = (*decisions)[require_bits[i]];
+      if (decision == -1)
+        throw cms::Exception("TriggerNotFound") << (i == 0 ? "HLT" : "L1") << " bit " << require_bits[i] << " wasn't found";
+      else if (decision == 0)
+        return;
     }
-
-    if (!found)
-      throw cms::Exception("BadAssumption", "one of HLT_PFHT900_v{1..9} not found");
-
-    if (!pass)
-      return false;
   }
 
   if (require_muon) {
@@ -196,7 +158,7 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
     h_nmuons->Fill(nmuons[1]);
 
     if (nmuons[1] < 1)
-      return false;
+      return;
   }
 
   edm::Handle<pat::JetCollection> jets;
@@ -208,7 +170,7 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
       if (jet_selector(jet))
         ++njets;
     if (njets < 4)
-      return false;
+      return;
   }
 
   h_nnoseljets->Fill(jets->size());
@@ -284,8 +246,6 @@ bool MFVTriggerEfficiency::filter(edm::Event& event, const edm::EventSetup& setu
     h_ngenjets->Fill(ngenjet);
     h_genjet_ht->Fill(genjet_ht);
   }
-
-  return jet_ht >= jet_ht_cut;
 }
 
 DEFINE_FWK_MODULE(MFVTriggerEfficiency);
