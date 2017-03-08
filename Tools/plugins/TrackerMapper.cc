@@ -183,7 +183,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   int ntracks_quality[3][5] = {{0}};
   int ntracks_dxyslices[3][6] = {{0}};
   for (const reco::Track& tk : *tracks) {
-    if (use_duplicateMerge != -1 && (tk.algo() == reco::TrackBase::duplicateMerge) != use_duplicateMerge)
+    if (use_duplicateMerge != -1 && (tk.algo() == 2) != use_duplicateMerge) // reco::TrackBase::duplicateMerge
       continue;
 
     TrackerSpaceExtents tracker_extents;
