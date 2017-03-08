@@ -21,6 +21,8 @@ if os.path.isfile(global_json_fn):
 
 ll_alls = []
 
+problem = False
+
 for wd in wds:
     print colors.bold(wd)
 
@@ -30,26 +32,29 @@ for wd in wds:
     for i in xrange(njobs):
         fjr_fn = os.path.join(wd, 'fjr_%i.xml' % i)
         try:
-            lls.append(fjr2ll(fjr_fn))
+            lls.append((i,fjr2ll(fjr_fn)))
         except:
+            problem = True
             print colors.red('problem with fjr for job %i' % i)
 
-    if len(lls) != njobs:
-        continue
-
-    if any(lla & llb for lla,llb in combinations(lls,2)):
-        print colors.red('overlap found')
-        continue
+    for (ia,lla),(ib,llb) in combinations(lls,2):
+        if lla & llb:
+            problem = True
+            print colors.red('overlap found in pair %i + %i' % (ia,ib))
+            print ia, lla
+            print ib, llb
+            print 'and', (lla&llb)
+            continue
 
     ll_all = lls.pop()
-    for ll in lls:
+    for i,ll in lls:
         ll_all |= ll
     ll_all.writeJSON(os.path.join(wd, 'processedLumis.json'))
     ll_alls.append(ll_all)
 
 if any(lla & llb for lla,llb in combinations(ll_alls,2)):
     print colors.red('globally overlap found')
-else:
+elif not problem:
     print colors.green('no overlap, writing to %s' % global_json_fn)
     ll_all = ll_alls.pop()
     for ll in ll_alls:
