@@ -33,10 +33,17 @@ for mn,mx in (3,3), (3,4), (4,4):
     setattr(process, pth_name, pth)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
-    samples = Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        [Samples.official_mfv_neu_tau00100um_M0800, Samples.official_mfv_neu_tau00300um_M0800, Samples.official_mfv_neu_tau10000um_M0800]
+    from JMTucker.MFVNeutralino.Year import year
+    import JMTucker.Tools.Samples as Samples 
+    if year == 2015:
+        samples = Samples.data_samples_2015 + \
+            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
+            [Samples.mfv_neu_tau00100um_M0800_2015, Samples.mfv_neu_tau00300um_M0800_2015, Samples.mfv_neu_tau01000um_M0800_2015, Samples.mfv_neu_tau10000um_M0800_2015] + \
+            [Samples.xx4j_tau00001mm_M0300_2015, Samples.xx4j_tau00010mm_M0300_2015, Samples.xx4j_tau00001mm_M0700_2015, Samples.xx4j_tau00010mm_M0700_2015]
+    elif year == 2016:
+        samples = Samples.data_samples + \
+            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
+            [Samples.official_mfv_neu_tau00100um_M0800, Samples.official_mfv_neu_tau00300um_M0800, Samples.official_mfv_neu_tau10000um_M0800]
 
     for sample in samples:
         sample.files_per = 20
@@ -50,7 +57,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MinitreeV11_16',
+    cs = CondorSubmitter('MinitreeV11/%i' % year,
                          dataset = 'ntuplev11',
                          pset_modifier = modify
                          )
