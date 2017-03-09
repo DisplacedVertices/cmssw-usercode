@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 import JMTucker.Tools.SampleFiles as sf
-sf.set_process(process, 'qcdht2000', 'ntuplev10', 10)
+sf.set_process(process, 'qcdht2000', 'ntuplev11', 10)
 
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
@@ -60,11 +60,17 @@ def force_bs(process, bs):
             ana.force_bs = bs
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.MFVNeutralino.Year import year
     import JMTucker.Tools.Samples as Samples 
-    samples = Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
-        [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
+    if year == 2015:
+        samples = Samples.data_samples_2015 + \
+            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
+            [Samples.mfv_neu_tau00100um_M0800_2015, Samples.mfv_neu_tau00300um_M0800_2015, Samples.mfv_neu_tau01000um_M0800_2015, Samples.mfv_neu_tau10000um_M0800_2015] + \
+            [Samples.xx4j_tau00001mm_M0300_2015, Samples.xx4j_tau00010mm_M0300_2015, Samples.xx4j_tau00001mm_M0700_2015, Samples.xx4j_tau00010mm_M0700_2015]
+    elif year == 2016:
+        samples = Samples.data_samples + \
+            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
+            [Samples.official_mfv_neu_tau00100um_M0800, Samples.official_mfv_neu_tau00300um_M0800, Samples.official_mfv_neu_tau10000um_M0800]
 
     for sample in samples:
         sample.files_per = 20
@@ -74,11 +80,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def modify(sample):
         to_add, to_replace = [], []
         if not sample.is_mc:
-            to_add.append('del process.pFullSel', 'del process.pSigReg')
+            to_add.extend(['del process.pFullSel', 'del process.pSigReg'])
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV11_16',
+    cs = CondorSubmitter('HistosV11/%i' % year,
                          dataset = 'ntuplev11',
                          pset_modifier = modify
                          )
