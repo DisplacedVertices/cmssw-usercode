@@ -572,20 +572,11 @@ if __name__ == '__main__':
             print s.name.ljust(30), ' '.join(sites)
 
     if 0:
-        from DBS import *
-        for s in official_mfv_signal_samples:
-            if not s.datasets.has_key('ntuplev10'):
-                try:
-                    x = das_query(instance=3)('dataset dataset=/%s/*/USER' % s.primary_dataset)
-                except RuntimeError:
-                    x = ''
-                print s.name, repr(x)
-
-    if 0:
         for s in official_mfv_signal_samples:
             n1, n2 = s.datasets['main'].nevents_orig, s.datasets['miniaod'].nevents_orig
             if n1 != n2:
                 print s.name, n1, n2
+
     if 0:
         from DBS import *
         for s in data_samples:
