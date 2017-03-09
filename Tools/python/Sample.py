@@ -62,7 +62,9 @@ class Sample(object):
         return True
 
     def add_dataset(self, c, *args, **kwargs):
-        if len(args) == 0:
+        if len(args) == 1:
+            args = (args[0], -1)
+        elif len(args) == 0:
             args = ('/%s/None/None' % self.datasets['main'].dataset.split('/')[1], -1)
         self.datasets[c] = Dataset(*args, **kwargs)
 
@@ -202,10 +204,6 @@ class DataSample(Sample):
 
         self.lumis_per = kwargs.get('lumis_per', self.LUMIS_PER)
         self.total_lumis = kwargs.get('total_lumis', self.TOTAL_LUMIS)
-
-    def add_dataset(self, c, *args, **kwargs):
-        assert len(args) == 1 and type(args[0]) == str # JMTBAD
-        self.datasets[c] = Dataset(args[0], -1, **kwargs)
 
     def lumi_mask(self):
         # JMTBAD run_range checking
