@@ -46,8 +46,8 @@ for wd in wds:
             print 'and', (lla&llb)
             continue
 
-    ll_all = lls.pop()
-    for i,ll in lls:
+    ll_all = lls.pop()[1]
+    for _,ll in lls:
         ll_all |= ll
     ll_all.writeJSON(os.path.join(wd, 'processedLumis.json'))
     ll_alls.append(ll_all)
@@ -60,5 +60,3 @@ elif not problem:
     for ll in ll_alls:
         ll_all |= ll
     ll_all.writeJSON(global_json_fn)
-
-
