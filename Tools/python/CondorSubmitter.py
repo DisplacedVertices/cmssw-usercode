@@ -170,8 +170,25 @@ def get(i): return _l[i]
                 batch_name = arg.replace('cs_name=', '')
                 break
 
-        if not set(self.batch_name_allowed).issuperset(set(batch_name)):
+        if not set(self.batch_name_allowed).issuperset(set(batch_name.replace('/', ''))):
             raise ValueError('illegal batch name %s, allowed characters are letters, numbers, and _' % batch_name)
+
+        nslash = batch_name.count('/')
+        if nslash > 1:
+            raise ValueError('only one slash allowed in batch name %s' % batch_name)
+        elif nslash == 1:
+            batch_path = os.path.abspath(crab_dirs_root(batch_name))
+            batch_root = os.path.dirname(batch_path)
+            if os.path.exists(batch_root):
+                if not os.path.isdir(batch_root):
+                    raise ValueError('slashy mode: batch_root %s exists but is not a dir?' % batch_root)
+                for x in os.listdir(batch_root):
+                    fx = os.path.join(batch_root, x)
+                    if x == 'gitstatus' or x == 'inputs' or x == 'psets' or not os.path.isdir(fx):
+                        raise ValueError('bad slashy %s' % batch_path)
+            else:
+                os.mkdir(batch_root)
+                os.mkdir(batch_path)
 
         self.batch_name = batch_name
         self.batch_dir = os.path.abspath(crab_dirs_root(batch_name))
