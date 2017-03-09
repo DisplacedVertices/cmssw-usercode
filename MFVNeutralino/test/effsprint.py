@@ -118,6 +118,8 @@ print_sum = 'sum' in sys.argv
 if not fns:
     dir = [x for x in sys.argv[1:] if os.path.isdir(x)][0]
     fns = [os.path.join(dir, fn) for fn in 'qcdht0500sum.root qcdht0700sum.root qcdht1000sum.root qcdht1500sum.root qcdht2000sum.root ttbar.root'.split()]
+    if dir.endswith('/2015'):
+        fns = [fn.replace('.root', '_2015.root') for fn in fns]
     nosort = True
     print_sum = True
 if not nosort:

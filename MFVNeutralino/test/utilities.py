@@ -5,6 +5,8 @@ from JMTucker.Tools import Samples
 from JMTucker.Tools import SampleFiles
 from JMTucker.Tools.hadd import hadd
 from JMTucker.MFVNeutralino import AnalysisConstants
+
+is2015 = os.getcwd().endswith('/2015')
  
 def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
@@ -17,27 +19,33 @@ def cmd_hadd_vertexer_histos():
 def cmd_hadd_qcd_sum():
     for x in [500, 700, 1000, 1500, 2000]:
         base = 'qcdht%04i' % x
-        a = base + '.root'
-        b = base + 'ext.root'
+        if is2015:
+            a = base + '_2015.root'
+            b = base + 'ext_2015.root'
+        else:
+            a = base + '.root'
+            b = base + 'ext.root'
         if not os.path.isfile(a) or not os.path.isfile(b):
             print 'skipping', x, 'because at least one input file missing'
         else:
-            hadd(base + 'sum.root', [a, b])
+            hadd(base + 'sum_2015.root', [a, b])
 
 def cmd_merge_background():
     files = ['ttbar.root']
     files += ['qcdht%04isum.root' % x for x in [500, 700, 1000, 1500, 2000]]
+    if is2015:
+        files = [fn.replace('.root', '_2015.root') for fn in files]
     for fn in files:
         if not os.path.isfile(fn):
             raise RuntimeError('%s not found' % fn)
     scale = -AnalysisConstants.int_lumi * AnalysisConstants.scale_factor
-    cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background.root ' % scale
+    cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, '_2015' if is2015 else '')
     cmd += ' '.join(files)
     print cmd
     os.system(cmd)
 
 def cmd_effsprint():
-    for which, which_files in [('background', '.'), ('signals', 'mfv*root xx4j*root')]:
+    for which, which_files in [('background', '.'), ('signals', '*mfv*root xx4j*root')]:
         for ntk in (3,4,'3or4',5):
             for vtx in (1,2):
                 out = 'effsprint_%s_ntk%s_%iv' % (which, ntk, vtx)
