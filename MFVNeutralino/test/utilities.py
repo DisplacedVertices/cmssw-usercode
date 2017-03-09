@@ -7,6 +7,7 @@ from JMTucker.Tools.hadd import hadd
 from JMTucker.MFVNeutralino import AnalysisConstants
 
 is2015 = os.getcwd().endswith('/2015')
+is2015_s = '_2015' if is2015 else ''
  
 def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
@@ -28,7 +29,7 @@ def cmd_hadd_qcd_sum():
         if not os.path.isfile(a) or not os.path.isfile(b):
             print 'skipping', x, 'because at least one input file missing'
         else:
-            hadd(base + 'sum_2015.root', [a, b])
+            hadd(base + 'sum%s.root' % is2015_s, [a, b])
 
 def cmd_merge_background():
     files = ['ttbar.root']
@@ -39,7 +40,7 @@ def cmd_merge_background():
         if not os.path.isfile(fn):
             raise RuntimeError('%s not found' % fn)
     scale = -AnalysisConstants.int_lumi * AnalysisConstants.scale_factor
-    cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, '_2015' if is2015 else '')
+    cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
     cmd += ' '.join(files)
     print cmd
     os.system(cmd)
