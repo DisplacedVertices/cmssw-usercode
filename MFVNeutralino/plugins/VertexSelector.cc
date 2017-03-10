@@ -21,7 +21,7 @@ private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const bool use_mevent;
 
-  bool use_vertex(const MFVVertexAux& vtx, const MFVEvent* evt=0) const;
+  bool use_vertex(const MFVVertexAux& vtx, const MFVEvent* mevent=0) const;
 
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_aux_token;
@@ -208,8 +208,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_nsingleclusterspb050(cfg.getParameter<int>("max_nsingleclusterspb050")),
     min_avgnconstituents(cfg.getParameter<double>("min_avgnconstituents"))
 {
-  assert(use_mevent); // JMTBAD why not always?
-
   if (produce_refs)
     produces<reco::VertexRefVector>();
   else
@@ -231,12 +229,18 @@ namespace {
   }
 }
 
-bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* evt) const {
+bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* mevent) const {
   if (use_mva) {
     if (vtx.ntracks() < 5)
       return false;
 
     return mva->value(vtx) > mva_cut;
+  }
+
+  if (min_bsbs2ddist > 0 || max_bsbs2ddist < 1e6) {
+    assert(mevent);
+    if (mevent->bs2ddist(vtx) < min_bsbs2ddist || mevent->bs2ddist(vtx) > max_bsbs2ddist)
+      return false;
   }
 
   if (use_match_to_vertices) {
@@ -258,7 +262,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* evt)
   }
 
   if (use_cluster_cuts) {
-    assert(evt);
+    assert(mevent);
 
     const mfv::track_clusters clusters(vtx);
 
@@ -276,7 +280,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* evt)
     if (clusters.avgnconst() < min_avgnconstituents)
       return false;
 
-    const TVector2 flight_dir = TVector2(vtx.x - evt->bsx, vtx.y - evt->bsy).Unit();
+    const TVector2 flight_dir = TVector2(vtx.x - mevent->bsx, vtx.y - mevent->bsy).Unit();
     int nsinglepb025 = 0;
     int nsinglepb050 = 0;
     for (const mfv::track_cluster& c : clusters) {
@@ -376,9 +380,8 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* evt)
 
 void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
-  if (use_mevent) {
+  if (use_mevent)
     event.getByToken(mevent_token, mevent);
-  }
 
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertex_token, vertices);
@@ -396,14 +399,9 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
   std::auto_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
 
-  for (const MFVVertexAux& aux : *auxes) {
-    bool pass_bsbs2ddist = true;
-    if (use_mevent)
-      pass_bsbs2ddist = mevent->bs2ddist(aux) >= min_bsbs2ddist && mevent->bs2ddist(aux) < max_bsbs2ddist;
-
-    if (use_vertex(aux, use_mevent ? &*mevent : 0) && pass_bsbs2ddist)
+  for (const MFVVertexAux& aux : *auxes)
+    if (use_vertex(aux, use_mevent ? &*mevent : 0))
       selected->push_back(aux);
-  }
 
   sorter.sort(*selected);
 
