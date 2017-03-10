@@ -107,7 +107,8 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year):
     process.selectedPatMuons.cut = process.jtupleParams.muonCut
     process.selectedPatElectrons.cut = process.jtupleParams.electronCut
 
-    del process.ptau
+    if hasattr(process, 'ptau'):
+        del process.ptau
     return process
 
 def keep_random_state(process):
