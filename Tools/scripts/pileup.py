@@ -99,12 +99,16 @@ while weights[-1] == 0:
     weights.pop()
 print 'average weight =', sum(weights)/len(weights)
 
-print '\npython:\n'
-print 'weights = %r' % weights
-print '\nc++:\n'
+print '\npython:'
+print 'weights = [',
+for w in weights:
+    print '%.6g,' % w,
+print ']'
+print '\nc++:'
 print 'const int max_npu = %i;' % len(weights)
-print 'const double pileup_weights[max_npu] = {'
-print ', '.join(repr(w) for w in weights)
+print 'const double pileup_weights[max_npu] = {',
+for w in weights:
+    print '%.6g,' % w,
 print '};'
 
 if options.plots:
