@@ -317,6 +317,7 @@ def set_seeds(process, seed=12191982, size=2**24):
 def silence_messages(process, categories):
     '''Make MessageLogger shut up about the categories listed.'''
 
+    print 'silencing MessageLogger about these categories:', categories
     if not hasattr(process, 'MessageLogger'):
         process.load('FWCore.MessageLogger.MessageLogger_cfi')
     if not hasattr(categories, '__iter__'):
