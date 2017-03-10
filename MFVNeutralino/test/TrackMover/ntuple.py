@@ -42,6 +42,7 @@ JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process, path_name='p'
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.mfvVertices.track_src = 'mfvMovedTracks'
 
+process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.mfvEvent.cleaning_results_src = ''
 
@@ -75,7 +76,7 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                       for_mctruth = cms.bool(False),
                                       )
 
-process.p *= process.mfvMovedTracks * process.mfvVertexSequence * process.mfvEvent * process.mfvWeight * process.mfvMovedTree
+process.p *= process.mfvMovedTree
 
 process.options.wantSummary = True
 process.maxEvents.input = 100
