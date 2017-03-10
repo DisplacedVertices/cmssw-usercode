@@ -5,25 +5,27 @@ import os, sys, JMTucker.Tools.argparse as argparse
 parser = argparse.ArgumentParser(description = 'pileup.py: use analysis JSONs to get lumi-weighted pileup distribution and derive set of weights for a MC sample.',
                                  usage = '%(prog)s <required options>')
 
+parser.add_argument('--year', type=int, choices=[2015, 2016],
+                    help='Which year to use.')
 parser.add_argument('--ana-json',
                     help='The JSON file produced from crab -report (or multiple crab reports, added together with mergeJSON.py).')
-parser.add_argument('--lumi-json', default='/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/PileUp/pileup_latest.txt',
-                    help='The centrally produced lumi-weighted pileup JSON (default %(default)s).')
-parser.add_argument('--max-npu', type=int, default=52,
+parser.add_argument('--lumi-json', default='default',
+                    help='The centrally produced lumi-weighted pileup JSON (default /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%(two-digit-year)i/13TeV/PileUp/pileup_latest.txt).')
+parser.add_argument('--max-npu', type=int, default=100,
                     help='The maximum pileup bin (default %(default)s).')
 parser.add_argument('--pileupcalc-mode', default='true',
                     help='The mode for pileupCalc.py: "true" or "observed" (default %(default)s).')
-parser.add_argument('--pileupcalc-mbxsec', default=69000, type=int,
-                    help='The minbias cross section for pileupCalc.py, in microbarn (default %(default)s).')
-parser.add_argument('--data-fn', default='pileup.root',
+parser.add_argument('--pileupcalc-mbxsec', default=-1, type=int,
+                    help='The minbias cross section for pileupCalc.py, in microbarn (default 69000 for 2015 and 69200 for 2016).')
+parser.add_argument('--data-fn', default='default',
                     help='The output filename for pileupCalc.py (default %(default)s).')
 parser.add_argument('--data-path', default='pileup',
-                    help='The name of the histogram for pileupCalc.py to produce in the file given by --data-fn (default %(default)s).')
+                    help='The name of the histogram for pileupCalc.py to produce in the file given by --data-fn (default pileup_%(year)i.root).')
 parser.add_argument('--no-run-pileupcalc', action='store_false', dest='run_pileupcalc', default=True,
                     help='If specified, do not run pileupCalc.py, but assume that the data distribution already exists in the file given by --data-fn.')
 parser.add_argument('--mc-fn', default='pileup_mc.root',
                     help='The input filename for the MC distribution (default %(default)s).')
-parser.add_argument('--mc-path', default='pileup',
+parser.add_argument('--mc-path', default='MCPileupDist/h_npu',
                     help='The name of the input MC histogram in the file given by --mc-fn (default %(default)s).')
 parser.add_argument('--tol', type=float, default=1e-9,
                     help='The tolerance for the data npu value when the MC npu value is == 0 (default %(default)g).')
@@ -31,6 +33,13 @@ parser.add_argument('--plots', default='',
                     help='Whether to make an overlay plot of the input histograms and the derived weights.')
 
 options = parser.parse_args()
+
+if options.lumi_json == 'default':
+    options.lumi_json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%i/13TeV/PileUp/pileup_latest.txt' % (options.year-2000)
+if options.pileupcalc_mbxsec == -1:
+    options.pileupcalc_mbxsec = 69000 if options.year == 2015 else 69200
+if options.data_fn == 'default':
+    options.data_fn = 'pileup_%i.root' % options.year
 
 if options.ana_json is None and options.run_pileupcalc:
     raise ValueError('need an ana JSON input')
@@ -53,6 +62,7 @@ mc_h   = mc_f.Get(options.mc_path)
 
 def norm(h):
     h = h.Clone(h.GetName() + '_norm')
+    h.Sumw2()
     h.Scale(1/h.Integral(1, h.GetNbinsX()+1))
     return h
 
@@ -85,16 +95,12 @@ for i in xrange(1, ndata+1):
         w = d/m
     weights.append(w)
 
-print 'sum weights =', sum(weights), 'average weight =', sum(weights)/len(weights)
 while weights[-1] == 0:
     weights.pop()
-
-sw = sum(weights)
-weights_normalized = [w/sw for w in weights]
+print 'average weight =', sum(weights)/len(weights)
 
 print '\npython:\n'
 print 'weights = %r' % weights
-print '\n(normalized: %r)' % weights_normalized
 print '\nc++:\n'
 print 'const int max_npu = %i;' % len(weights)
 print 'const double pileup_weights[max_npu] = {'
@@ -124,6 +130,3 @@ if options.plots:
 
     h_w.Draw()
     ps.save('weights')
-
-    h_w.DrawNormalized()
-    ps.save('weights_normalized')
