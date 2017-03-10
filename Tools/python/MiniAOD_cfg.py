@@ -107,6 +107,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year):
     process.selectedPatMuons.cut = process.jtupleParams.muonCut
     process.selectedPatElectrons.cut = process.jtupleParams.electronCut
 
+    del process.ptau
     return process
 
 def keep_random_state(process):
@@ -116,4 +117,4 @@ def keep_mixing_info(process):
     process.out.outputCommands.append('keep CrossingFramePlaybackInfoExtended_*_*_*')
 
 if __name__ == '__main__':
-    process = pat_tuple_process(None, True)
+    process = pat_tuple_process(None, True, 2016)
