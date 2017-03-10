@@ -19,7 +19,7 @@ def customize_before_unscheduled(process):
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-    process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
+    process.p = cms.Path(process.mfvVertexSequence * cms.ignore(process.mfvTriggerFloats) * process.mfvEvent)
 
     tfileservice(process, 'vertex_histos.root')
     random_service(process, {'mfvVertices': 1222})
