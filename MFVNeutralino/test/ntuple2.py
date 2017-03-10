@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.MiniAOD_cfg import cms, which_global_tag
 from JMTucker.Tools.CMSSWTools import *
+from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 version = 'v9'
@@ -12,7 +13,7 @@ batch_name = 'Ntuple' + version.upper()
 process = basic_process('Ntuple')
 report_every(process, 1000000)
 registration_warnings(process)
-geometry_etc(process, which_global_tag(is_mc))
+geometry_etc(process, which_global_tag(is_mc, year))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
 output_file(process, 'ntuple.root', [

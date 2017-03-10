@@ -4,6 +4,7 @@ import sys
 from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
 from JMTucker.Tools.CMSSWTools import *
+from JMTucker.MFVNeutralino.Year import year
 
 # 3 magic lines, don't touch
 is_mc = True
@@ -17,7 +18,7 @@ if len(ints) > 0:
     njets, nbjets = ints
 
 
-process = pat_tuple_process(None, is_mc=is_mc)
+process = pat_tuple_process(None, is_mc, year)
 
 tfileservice(process, 'movedtree.root')
 random_service(process, {'mfvVertices': 12179, 'mfvMovedTracks': 13068})

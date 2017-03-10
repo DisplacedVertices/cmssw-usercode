@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
 from JMTucker.Tools.CMSSWTools import *
+from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 prepare_vis = False
@@ -71,7 +72,7 @@ def customize_before_unscheduled(process):
                 dedrop(process.MINIAODEventContent.outputCommands) + \
                 dedrop(output_commands)
 
-process = pat_tuple_process(customize_before_unscheduled, is_mc)
+process = pat_tuple_process(customize_before_unscheduled, is_mc, year)
 process.out.fileName = 'ntuple.root'
 
 process.out.outputCommands += [

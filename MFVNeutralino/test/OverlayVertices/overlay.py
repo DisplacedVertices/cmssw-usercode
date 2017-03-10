@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.Tools.CMSSWTools import *
+from JMTucker.MFVNeutralino.Year import year
 
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
@@ -52,7 +53,7 @@ process = basic_process('Overlay')
 process.source.fileNames = files
 process.maxEvents.input = args.max_events
 report_every(process, 1000000 if args.batch else 100)
-geometry_etc(process, which_global_tag(not args.is_data))
+geometry_etc(process, which_global_tag(not args.is_data, year))
 tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices':      12179 + args.which_event,
                          'mfvOverlayTracks': 12180 + args.which_event})

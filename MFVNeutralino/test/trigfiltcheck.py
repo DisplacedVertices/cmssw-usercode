@@ -1,10 +1,11 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import cms, global_tag, process, file_event_from_argv
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.MFVNeutralino.Year import year
 
 file_event_from_argv(process)
 process.TFileService.fileName = 'trigeff.root'
-global_tag(process, which_global_tag(True)) # needed for emulator that checks L1 bits
+global_tag(process, which_global_tag(True, year)) # needed for emulator that checks L1 bits
 
 from JMTucker.MFVNeutralino.TriggerFilter import *
 setup_trigger_filter_soup(process, 'pmfvfilt')

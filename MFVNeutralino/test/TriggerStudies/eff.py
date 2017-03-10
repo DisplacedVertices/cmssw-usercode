@@ -25,7 +25,7 @@ elif year == 2016:
     ht_skim_cut = 900
     hlt_bit = 2
 
-global_tag(process, which_global_tag(is_mc))
+global_tag(process, which_global_tag(is_mc, year))
 process.maxEvents.input = 1000
 process.source.fileNames = ['/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
 #process.options.wantSummary = True

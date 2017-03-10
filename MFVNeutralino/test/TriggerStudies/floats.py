@@ -1,6 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 
@@ -14,7 +15,7 @@ process.source.fileNames = ['/store/data/Run2016H/JetHT/MINIAOD/PromptReco-v3/00
 process.maxEvents.input = 100
 process.TFileService.fileName = 'triggerfloats.root'
 
-global_tag(process, which_global_tag(is_mc))
+global_tag(process, which_global_tag(is_mc, year))
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.mfvTriggerFloats.tree = True

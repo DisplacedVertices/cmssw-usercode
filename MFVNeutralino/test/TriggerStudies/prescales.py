@@ -3,9 +3,10 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.MFVNeutralino.Year import year
 
 process.TFileService.fileName = 'prescales.root'
-global_tag(process, which_global_tag(is_mc=False))
+global_tag(process, which_global_tag(is_mc=False, year=year))
 
 process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/PromptReco-v4/000/260/627/00000/78D8E6A7-6484-E511-89B4-02163E0134F6.root']
 

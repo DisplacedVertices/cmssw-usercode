@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
 from JMTucker.Tools.CMSSWTools import file_event_from_argv
+from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 
@@ -25,7 +26,7 @@ def customize_before_unscheduled(process):
         'keep *_addPileupInfo_*_*',
         ]
 
-process = pat_tuple_process(customize_before_unscheduled, is_mc)
+process = pat_tuple_process(customize_before_unscheduled, is_mc, year)
 process.out.fileName = 'miniaod.root'
 
 process.out.outputCommands += [
