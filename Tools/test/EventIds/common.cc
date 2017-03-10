@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 
   fprintf(out, "only1 = [\n");
   for (auto p : reader.m) {
-    if (p.second.size() == 1 && p.second.find(0) != p.second.end()) {
+    if (p.second.size() == 1 && std::find(p.second.begin(), p.second.end(), 0) != p.second.end()) {
       p.first.print(out);
       fprintf(out, ",\n");
       ++only1;
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
 
   fprintf(out, "only2 = [\n");
   for (auto p : reader.m) {
-    if (p.second.size() == 1 && p.second.find(1) != p.second.end()) {
+    if (p.second.size() == 1 && std::find(p.second.begin(), p.second.end(), 1) != p.second.end()) {
       p.first.print(out);
       fprintf(out, ",\n");
       ++only2;

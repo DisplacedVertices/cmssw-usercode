@@ -59,7 +59,7 @@ public:
 
   bool use_extra;
   bool prints;
-  std::map<RLE, std::set<int>> m;
+  std::map<RLE, std::vector<int>> m;
 
   EventIdsReader() : use_extra(false), prints(false) {
     setup_from_env();
@@ -112,10 +112,7 @@ public:
       if (use_extra)
         rle.extra(extra);
 
-      if (m.find(rle) == m.end())
-        m[rle] = std::set<int>({fileno});
-      else
-        m[rle].insert(fileno);
+      m[rle].push_back(fileno);
     }
 
     if (prints) {
