@@ -35,8 +35,8 @@ for wd in cs_dirs_from_argv():
     os.chdir(wd)
     for cmd in cmds:
         #print cmd
-        if cmd.startswith('tar') and glob('publish*txt'):
-            cmd.replace('PUBLISH', 'publish*txt')
+        if cmd.startswith('tar'):
+            cmd.replace('PUBLISH', 'publish*txt' if glob('publish*txt') else '')
         os.system(cmd)
     print
     os.chdir(prev_wd)
