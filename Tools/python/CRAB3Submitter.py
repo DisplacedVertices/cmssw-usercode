@@ -12,6 +12,7 @@ from CRAB3Tools import Config, crab_global_options, crab_dirs_root, crab_renew_p
 from general import mkdirs_if_needed, popen, save_git_status
 
 class CRABSubmitter:
+    batch_name_allowed = string.ascii_letters + string.digits + '_'
     get_proxy = True
     aaa_locations = [
         #'T1_US_FNAL',
@@ -63,9 +64,25 @@ class CRABSubmitter:
                 batch_name = arg.replace('cs_name=', '')
                 break
 
-        allowed = string.ascii_letters + string.digits + '_'
-        if not set(allowed).issuperset(set(batch_name)):
+        if not set(self.batch_name_allowed).issuperset(set(batch_name.replace('/', ''))):
             raise ValueError('illegal batch name %s, allowed characters are letters, numbers, and _' % batch_name)
+
+        nslash = batch_name.count('/')
+        if nslash > 1:
+            raise ValueError('only one slash allowed in batch name %s' % batch_name)
+        elif nslash == 1:
+            batch_path = os.path.abspath(crab_dirs_root(batch_name))
+            batch_root = os.path.dirname(batch_path)
+            if os.path.exists(batch_root):
+                if not os.path.isdir(batch_root):
+                    raise ValueError('slashy mode: batch_root %s exists but is not a dir?' % batch_root)
+                for x in os.listdir(batch_root):
+                    fx = os.path.join(batch_root, x)
+                    if x == 'gitstatus' or x == 'inputs' or x == 'psets' or not os.path.isdir(fx):
+                        raise ValueError('bad slashy %s' % batch_path)
+            else:
+                os.mkdir(batch_root)
+                os.mkdir(batch_path)
 
         self.batch_name = batch_name
         self.batch_dir = crab_dirs_root(batch_name) # JMTBAD rename -- what crab3 calls workArea
@@ -178,7 +195,7 @@ class CRABSubmitter:
     def cfg(self, sample):
         cfg = deepcopy(self.cfg_template) # JMTBAD needed?
         
-        cfg.General.requestName = self.batch_name + '_' + self.working_dir_pattern % sample
+        cfg.General.requestName = self.batch_name.replace('/', '_') + '_' + self.working_dir_pattern % sample
         cfg.JobType.psetName = self.pset_fn_pattern % sample
         cfg.Data.inputDataset = sample.dataset
         cfg.Data.inputDBS = sample.dbs_inst
