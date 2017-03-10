@@ -8,7 +8,7 @@ is_mc = True
 prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
-version = 'v11_16'
+version = 'v11'
 batch_name = 'Ntuple' + version.upper()
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
@@ -101,12 +101,16 @@ file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-    samples = Samples.registry.from_argv(
-        Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        [Samples.official_mfv_neu_tau00100um_M0800, Samples.official_mfv_neu_tau00300um_M0800, Samples.official_mfv_neu_tau10000um_M0800]
-        )
-       #[Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
+    if year == 2015:
+        samples = \
+            Samples.data_samples_2015 + \
+            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
+            Samples.mfv_signal_samples_2015, Samples.mfv_signal_samples_glu_2015, Samples.mfv_signal_samples_gluddbar_2015, Samples.xx4j_samples_2015
+    elif year == 2016:
+        samples = \
+            Samples.data_samples + \
+            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
+            Samples.official_mfv_signal_samples
 
     filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'qcdht0500ext': 2.9065e-03, 'qcdht0700ext': 3.2294e-01, 'ttbar': 3.6064e-02, 'ttbaraux': 3.6064e-02, 'qcdpt0120': 3.500e-05, 'qcdpt0170': 7.856e-03, 'qcdpt0300': 2.918e-01 }
     for s in samples:
@@ -120,7 +124,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         'qcdht1000ext': {'lumis': '32328',  'events': '108237235'},
         }
     modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips))
-    ms = MetaSubmitter(batch_name)
+    ms = MetaSubmitter(batch_name + '/%i' % year)
     ms.common.pset_modifier = modify
     ms.common.publish_name = batch_name
     ms.crab.job_control_from_sample = True
