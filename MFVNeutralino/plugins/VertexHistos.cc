@@ -31,8 +31,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   const std::vector<double> force_bs;
-  const edm::InputTag reco_vertex_src;
-  const edm::InputTag vertex_to_jets_src;
   const bool do_trackplots;
   const bool do_scatterplots;
   const bool do_only_1v;
@@ -57,11 +55,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
 
   // max number of extra track-related plots to make
   static const int max_ntracks;
-
-  // indices for h_sv_tracks below:
-  enum sv_tracks_index { sv_tracks_all, sv_tracks_jet, sv_tracks_track, sv_tracks_num_indices };
-  enum sv_jet_tracks_index { sv_jet_tracks_all, sv_jet_tracks_jet, sv_jet_tracks_vertex, sv_jet_tracks_num_indices }; // if these two enums aren't same length, bazinga
-  static const char* sv_tracks_index_names[2][sv_tracks_num_indices];
 
   void fill_multi(TH1F** hs, const int isv, const double val, const double weight) const;
   void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
@@ -148,92 +141,16 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_track_nhits[sv_num_indices];
   TH1F* h_sv_track_injet[sv_num_indices];
   TH1F* h_sv_track_inpv[sv_num_indices];
-
-  TH1F* h_sv_tracks_pt[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_eta[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_phi[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_charge[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxybs[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dzbs[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxypv[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dzpv[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxyerr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dzerr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxyipv1[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxyipv[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxyipverr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_d3dipv1[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_d3dipv[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_d3dipverr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxyisv1[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxyisv[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dxyisverr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_d3disv1[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_d3disv[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_d3disverr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_chi2dof[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_nhits[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_npixel[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_nstrip[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_npxlayer[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_deltar2px[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_deltaz2px[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_deltar3px[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_deltaz3px[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_minr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_minz[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_maxr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_maxz[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_jetdr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_jetdphi[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracks_bs2derr_jetdr[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dzpv0[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dzpv1[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_dzpv2[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracks_dzpv2_dzpv0[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracks_dzpv2sig_dzpv0sig[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt1_npixel_eta[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt1_npixel_phi[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt1_nstrip_eta[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt1_nstrip_phi[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt3_npixel_eta[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt3_npixel_phi[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt3_nstrip_eta[2][sv_tracks_num_indices][sv_num_indices];
-  TH2F* h_sv_tracksptgt3_nstrip_phi[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_algo[2][sv_tracks_num_indices][sv_num_indices];
-  TH1F* h_sv_tracks_quality[2][sv_tracks_num_indices][sv_num_indices];
-
-  TH1F* h_sv_jets_ntracks[sv_num_indices];
-  TH1F* h_sv_jets_ntracksinvtx[sv_num_indices];
-  TH1F* h_sv_jets_energy[sv_num_indices];
-  TH1F* h_sv_jets_pt[sv_num_indices];
-  TH1F* h_sv_jets_eta[sv_num_indices];
-  TH1F* h_sv_jets_phi[sv_num_indices];
-  TH1F* h_sv_jets_mass[sv_num_indices];
-  TH1F* h_sv_jets_bdisc[sv_num_indices];
-  TH1F* h_sv_jets_numDaughters[sv_num_indices];
-  TH1F* h_sv_jets_neutralHadEnFrac[sv_num_indices];
-  TH1F* h_sv_jets_neutralEmEnFrac[sv_num_indices];
-  TH1F* h_sv_jets_chargedHadEnFrac[sv_num_indices];
-  TH1F* h_sv_jets_chargedEmEnFrac[sv_num_indices];
-  TH1F* h_sv_jets_chargedMult[sv_num_indices];
-  TH1F* h_sv_jets_n60[sv_num_indices];
-  TH1F* h_sv_jets_n90[sv_num_indices];
-  TH1F* h_sv_jets_area[sv_num_indices];
-  TH1F* h_sv_jets_maxDist[sv_num_indices];
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "all" };
 const int MFVVertexHistos::max_ntracks = 5;
-const char* MFVVertexHistos::sv_tracks_index_names[2][MFVVertexHistos::sv_tracks_num_indices] = { { "all", "jet", "track" }, {"all", "jet", "vertex" } };
 
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
-    reco_vertex_src(cfg.getParameter<edm::InputTag>("reco_vertex_src")),
-    vertex_to_jets_src(cfg.getParameter<edm::InputTag>("vertex_to_jets_src")),
     do_trackplots(cfg.getParameter<bool>("do_trackplots")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
     do_only_1v(cfg.getParameter<bool>("do_only_1v"))
@@ -276,60 +193,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       hs.add(TString::Format("track%i_inpv",          i).Data(), TString::Format("track%i in-PV?",                      i).Data(),  10, -1,      9);
       hs.add(TString::Format("track%i_jet_deltaphi0", i).Data(), TString::Format("track%i |#Delta#phi| to closest jet", i).Data(),  25,  0,      3.15);
     }
-  }
-
-  if (reco_vertex_src.label() != "") {
-    for (int itk = 0; itk < max_ntracks; ++itk) {
-      hs.add(TString::Format("track%i_pt",        itk).Data(), TString::Format("track%i p_{T} (GeV)",                    itk).Data(), 100,   0,     150);
-      hs.add(TString::Format("track%i_eta",       itk).Data(), TString::Format("track%i #eta",                           itk).Data(),  50,  -4,       4);
-      hs.add(TString::Format("track%i_phi",       itk).Data(), TString::Format("track%i #phi",                           itk).Data(),  50,  -3.15,    3.15);
-      hs.add(TString::Format("track%i_charge",    itk).Data(), TString::Format("track%i charge",                         itk).Data(),   4,  -2,       2);
-      hs.add(TString::Format("track%i_dxybs",     itk).Data(), TString::Format("track%i dxy(BS) (cm)",                   itk).Data(), 100,  -2,       2);
-      hs.add(TString::Format("track%i_dzbs",      itk).Data(), TString::Format("track%i dz(BS) (cm)",                    itk).Data(), 100, -20,      20);
-      hs.add(TString::Format("track%i_dxypv",     itk).Data(), TString::Format("track%i dxy(PV) (cm)",                   itk).Data(), 100,  -2,       2);
-      hs.add(TString::Format("track%i_dzpv",      itk).Data(), TString::Format("track%i dz(PV) (cm)",                    itk).Data(), 100, -20,      20);
-      hs.add(TString::Format("track%i_dxyerr",    itk).Data(), TString::Format("track%i #sigma(dxy) (cm)",               itk).Data(),  50,   0,       0.5);
-      hs.add(TString::Format("track%i_dzerr",     itk).Data(), TString::Format("track%i #sigma(dz) (cm)",                itk).Data(),  50,   0,       2);
-      hs.add(TString::Format("track%i_dxyipv1",   itk).Data(), TString::Format("track%i dxyipv success",                 itk).Data(),   2,   0,       2);
-      hs.add(TString::Format("track%i_dxyipv",    itk).Data(), TString::Format("track%i transverse IP to the PV (cm)",   itk).Data(),  50,   0,       2);
-      hs.add(TString::Format("track%i_dxyipverr", itk).Data(), TString::Format("track%i #sigma(dxyipv) (cm)",            itk).Data(),  50,   0,       0.5);
-      hs.add(TString::Format("track%i_d3dipv1",   itk).Data(), TString::Format("track%i d3dipv success",                 itk).Data(),   2,   0,       2);
-      hs.add(TString::Format("track%i_d3dipv",    itk).Data(), TString::Format("track%i 3D IP to the PV (cm)",           itk).Data(),  50,   0,      20);
-      hs.add(TString::Format("track%i_d3dipverr", itk).Data(), TString::Format("track%i #sigma(d3dipv) (cm)",            itk).Data(),  50,   0,       2);
-      hs.add(TString::Format("track%i_dxyisv1",   itk).Data(), TString::Format("track%i dxyisv success",                 itk).Data(),   2,   0,       2);
-      hs.add(TString::Format("track%i_dxyisv",    itk).Data(), TString::Format("track%i transverse IP to the SV (cm)",   itk).Data(),  50,   0,       2);
-      hs.add(TString::Format("track%i_dxyisverr", itk).Data(), TString::Format("track%i #sigma(dxyisv) (cm)",            itk).Data(),  50,   0,       0.5);
-      hs.add(TString::Format("track%i_d3disv1",   itk).Data(), TString::Format("track%i d3disv success",                 itk).Data(),   2,   0,       2);
-      hs.add(TString::Format("track%i_d3disv",    itk).Data(), TString::Format("track%i 3D IP to the SV (cm)",           itk).Data(),  50,   0,      20);
-      hs.add(TString::Format("track%i_d3disverr", itk).Data(), TString::Format("track%i #sigma(d3disv) (cm)",            itk).Data(),  50,   0,       2);
-      hs.add(TString::Format("track%i_chi2dof",   itk).Data(), TString::Format("track%i #chi^2/dof",                     itk).Data(),  50,   0,       7);
-      hs.add(TString::Format("track%i_nhits",     itk).Data(), TString::Format("track%i number of hits",                 itk).Data(),  40,   0,      40);
-      hs.add(TString::Format("track%i_npixel",    itk).Data(), TString::Format("track%i number of pixel hits",           itk).Data(),  40,   0,      40);
-      hs.add(TString::Format("track%i_nstrip",    itk).Data(), TString::Format("track%i number of strip hits",           itk).Data(),  40,   0,      40);
-      hs.add(TString::Format("track%i_npxlayer",  itk).Data(), TString::Format("track%i number of pixel layer hits",     itk).Data(),   6,   0,       6);
-      hs.add(TString::Format("track%i_deltar2px", itk).Data(), TString::Format("track%i delta r for 2 pixel hits (cm)",  itk).Data(), 100,   0,      10);
-      hs.add(TString::Format("track%i_deltaz2px", itk).Data(), TString::Format("track%i delta z for 2 pixel hits (cm)",  itk).Data(), 100,   0,      20);
-      hs.add(TString::Format("track%i_deltar3px", itk).Data(), TString::Format("track%i delta r for 3 pixel hits (cm)",  itk).Data(), 100,   0,      10);
-      hs.add(TString::Format("track%i_deltaz3px", itk).Data(), TString::Format("track%i delta z for 3 pixel hits (cm)",  itk).Data(), 100,   0,      20);
-      hs.add(TString::Format("track%i_minr",      itk).Data(), TString::Format("track%i innermost radius of hit module", itk).Data(),  14,   0,      14);
-      hs.add(TString::Format("track%i_minz",      itk).Data(), TString::Format("track%i innermost z of hit module",      itk).Data(),  15,   0,      15);
-      hs.add(TString::Format("track%i_maxr",      itk).Data(), TString::Format("track%i outermost radius of hit module", itk).Data(),  14,   0,      14);
-      hs.add(TString::Format("track%i_maxz",      itk).Data(), TString::Format("track%i outermost z of hit module",      itk).Data(),  15,   0,      15);
-      hs.add(TString::Format("track%i_jetdr",     itk).Data(), TString::Format("track%i #DeltaR(jets,track)",            itk).Data(),  50,   0,       7);
-      hs.add(TString::Format("track%i_jetdphi",   itk).Data(), TString::Format("track%i #Delta#phi(jets,track)",         itk).Data(),  64,  -3.2,     3.2);
-      hs.add(TString::Format("track%i_dzpv0",     itk).Data(), TString::Format("track%i dz(the PV) (cm)",                itk).Data(), 100,   0,       2);
-      hs.add(TString::Format("track%i_dzpv1",     itk).Data(), TString::Format("track%i dz(closest PV) (cm)",            itk).Data(), 100,   0,       2);
-      hs.add(TString::Format("track%i_dzpv2",     itk).Data(), TString::Format("track%i dz(closest PV not the PV) (cm)", itk).Data(), 100,   0,       2);
-      hs.add(TString::Format("track%i_algo",      itk).Data(), TString::Format("track%i algorithm",                      itk).Data(),  30,   0,      30);
-    }
-
-    hs.add("ntracksdrlt0p50", "# of tracks/SV w/ #DeltaR(jets,track) < 0.50", 40, 0, 40);
-    hs.add("ntracksdr0p50to1p57", "# of tracks/SV w/ 0.50 <= #DeltaR(jets,track) < 1.57", 40, 0, 40);
-    hs.add("ntracksdrgt1p57", "# of tracks/SV w/ #DeltaR(jets,track) >= 1.57", 40, 0, 40);
-
-    hs.add("tracksdrlt1p57pt", "SV tracks w/ #DeltaR(jets,track) < 1.57 p_{T}", 100, 0, 300);
-    hs.add("tracksdrlt1p57eta", "SV tracks w/ #DeltaR(jets,track) < 1.57 #eta", 50, -4, 4);
-    hs.add("tracksdrlt1p57phi", "SV tracks w/ #DeltaR(jets,track) < 1.57 #phi", 50, -3.15, 3.15);
   }
 
   hs.add("mva", "MVA output", 100, -2, 3);
@@ -626,89 +489,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_nhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nhits", exc), TString::Format(";%s SV tracks number of hits", exc), 40, 0, 40);
     h_sv_track_injet[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_injet", exc), TString::Format(";%s SV tracks in-jet?", exc), 2, 0, 2);
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
-
-    if (reco_vertex_src.label() != "") {
-      assert(int(sv_tracks_num_indices) == int(sv_jet_tracks_num_indices));
-      for (int k = 0; k < 2; ++k) {
-        for (int i = 0; i < sv_tracks_num_indices; ++i) {
-          const char* extc = sv_tracks_index_names[k][i];
-          const char* extc2 = k == 1 ? "jet_" : "";
-
-          h_sv_tracks_pt[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_pt", exc, extc2, extc), TString::Format(";%s SV %s %stracks p_{T} (GeV);arb. units", exc, extc2, extc), 100, 0, 150);
-          h_sv_tracks_eta[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_eta", exc, extc2, extc), TString::Format(";%s SV %s %stracks #eta;arb. units", exc, extc2, extc), 50, -4, 4);
-          h_sv_tracks_phi[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_phi", exc, extc2, extc), TString::Format(";%s SV %s %stracks #phi;arb. units", exc, extc2, extc), 50, -3.15, 3.15);
-          h_sv_tracks_charge[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_charge", exc, extc2, extc), TString::Format(";%s SV %s %stracks charge;arb. units", exc, extc2, extc), 4, -2, 2);
-          h_sv_tracks_dxybs[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxybs", exc, extc2, extc), TString::Format(";%s SV %s %stracks dxy(BS) (cm);arb. units", exc, extc2, extc), 100, -2, 2);
-          h_sv_tracks_dzbs[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzbs", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(BS) (cm);arb. units", exc, extc2, extc), 100, -20, 20);
-          h_sv_tracks_dxypv[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxypv", exc, extc2, extc), TString::Format(";%s SV %s %stracks dxy(PV) (cm);arb. units", exc, extc2, extc), 100, -2, 2);
-          h_sv_tracks_dzpv[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzpv", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(PV) (cm);arb. units", exc, extc2, extc), 100, -20, 20);
-          h_sv_tracks_dxyerr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxyerr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #sigma(dxy) (cm);arb. units", exc, extc2, extc), 50, 0, 0.5);
-          h_sv_tracks_dzerr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzerr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #sigma(dz) (cm);arb. units", exc, extc2, extc), 50, 0, 2);
-          h_sv_tracks_dxyipv1[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxyipv1", exc, extc2, extc), TString::Format(";%s SV %s %stracks dxyipv success;arb. units", exc, extc2, extc), 2, 0, 2);
-          h_sv_tracks_dxyipv[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxyipv", exc, extc2, extc), TString::Format(";%s SV %s %stracks transverse IP to the PV (cm);arb. units", exc, extc2, extc), 50, 0, 2);
-          h_sv_tracks_dxyipverr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxyipverr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #sigma(dxyipv) (cm);arb. units", exc, extc2, extc), 50, 0, 0.5);
-          h_sv_tracks_d3dipv1[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_d3dipv1", exc, extc2, extc), TString::Format(";%s SV %s %stracks d3dipv success;arb. units", exc, extc2, extc), 2, 0, 2);
-          h_sv_tracks_d3dipv[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_d3dipv", exc, extc2, extc), TString::Format(";%s SV %s %stracks 3D IP to the PV (cm);arb. units", exc, extc2, extc), 50, 0, 20);
-          h_sv_tracks_d3dipverr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_d3dipverr", exc, extc2, extc), TString::Format(";%s SV %s #sigma(%s d3dipv) (cm);arb. units", exc, extc2, extc), 50, 0, 2);
-          h_sv_tracks_dxyisv1[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxyisv1", exc, extc2, extc), TString::Format(";%s SV %s %stracks dxyisv success;arb. units", exc, extc2, extc), 2, 0, 2);
-          h_sv_tracks_dxyisv[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxyisv", exc, extc2, extc), TString::Format(";%s SV %s %stracks transverse IP to the SV (cm);arb. units", exc, extc2, extc), 50, 0, 2);
-          h_sv_tracks_dxyisverr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dxyisverr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #sigma(dxyisv) (cm);arb. units", exc, extc2, extc), 50, 0, 0.5);
-          h_sv_tracks_d3disv1[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_d3disv1", exc, extc2, extc), TString::Format(";%s SV %s %stracks d3disv success;arb. units", exc, extc2, extc), 2, 0, 2);
-          h_sv_tracks_d3disv[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_d3disv", exc, extc2, extc), TString::Format(";%s SV %s %stracks 3D IP to the SV (cm);arb. units", exc, extc2, extc), 50, 0, 20);
-          h_sv_tracks_d3disverr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_d3disverr", exc, extc2, extc), TString::Format(";%s SV %s #sigma(%s d3disv) (cm);arb. units", exc, extc2, extc), 50, 0, 2);
-          h_sv_tracks_chi2dof[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_chi2dof", exc, extc2, extc), TString::Format(";%s SV %s %stracks #chi^2/dof;arb. units", exc, extc2, extc), 50, 0, 7);
-          h_sv_tracks_nhits[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_nhits", exc, extc2, extc), TString::Format(";%s SV %s %stracks number of hits;arb. units", exc, extc2, extc), 40, 0, 40);
-          h_sv_tracks_npixel[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_npixel", exc, extc2, extc), TString::Format(";%s SV %s %stracks number of pixel hits;arb. units", exc, extc2, extc), 40, 0, 40);
-          h_sv_tracks_nstrip[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_nstrip", exc, extc2, extc), TString::Format(";%s SV %s %stracks number of strip hits;arb. units", exc, extc2, extc), 40, 0, 40);
-	  h_sv_tracks_npxlayer[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_npxlayer", exc, extc2, extc), TString::Format(";%s SV %s %stracks number of pixel layer hits;arb. units", exc, extc2, extc), 6, 0, 6);
-	  h_sv_tracks_deltar2px[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_deltar2px", exc, extc2, extc), TString::Format(";%s SV %s %s delta r for 2 pixel hits (cm);arb. units", exc, extc2, extc), 100, 0, 10);
-	  h_sv_tracks_deltaz2px[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_deltaz2px", exc, extc2, extc), TString::Format(";%s SV %s %s delta z for 2 pixel hits (cm);arb. units", exc, extc2, extc), 100, 0, 20);
-	  h_sv_tracks_deltar3px[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_deltar3px", exc, extc2, extc), TString::Format(";%s SV %s %s delta r for 3 pixel hits (cm);arb. units", exc, extc2, extc), 100, 0, 10);
-	  h_sv_tracks_deltaz3px[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_deltaz3px", exc, extc2, extc), TString::Format(";%s SV %s %s delta z for 3 pixel hits (cm);arb.units", exc, extc2, extc), 100, 0, 20);
-          h_sv_tracks_minr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_minr", exc, extc2, extc), TString::Format(";%s SV %s %stracks innermost radius of hit module;arb. units", exc, extc2, extc), 14, 0, 14);
-          h_sv_tracks_minz[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_minz", exc, extc2, extc), TString::Format(";%s SV %s %stracks innermost z of hit module;arb. units", exc, extc2, extc), 15, 0, 15);
-          h_sv_tracks_maxr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_maxr", exc, extc2, extc), TString::Format(";%s SV %s %stracks outermost radius of hit module;arb. units", exc, extc2, extc), 14, 0, 14);
-          h_sv_tracks_maxz[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_maxz", exc, extc2, extc), TString::Format(";%s SV %s %stracks outermost z of hit module;arb. units", exc, extc2, extc), 15, 0, 15);
-          h_sv_tracks_jetdr[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_jetdr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #DeltaR(jets,track);arb. units", exc, extc2, extc), 50, 0, 7);
-          h_sv_tracks_jetdphi[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_jetdphi", exc, extc2, extc), TString::Format(";%s SV %s %stracks #Delta#phi(jets,track);arb. units", exc, extc2, extc), 64, -3.2, 3.2);
-          h_sv_tracks_bs2derr_jetdr[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracks_%s_bs2derr_jetdr", exc, extc2, extc), TString::Format(";%s SV %s %stracks #DeltaR(jets,track);bs2derr", exc, extc2, extc), 50, 0, 7, 100, 0, 0.05);
-          h_sv_tracks_dzpv0[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzpv0", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(the PV) (cm);arb. units", exc, extc2, extc), 100, 0, 2);
-          h_sv_tracks_dzpv1[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzpv1", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(closest PV) (cm);arb. units", exc, extc2, extc), 100, 0, 2);
-          h_sv_tracks_dzpv2[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_dzpv2", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(closest PV not the PV) (cm);arb. units", exc, extc2, extc), 100, 0, 2);
-          h_sv_tracks_dzpv2_dzpv0[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracks_%s_dzpv2_dzpv0", exc, extc2, extc), TString::Format(";%s SV %s %stracks dz(the PV) (cm);%s SV %s %stracks dz(closest PV not the PV) (cm)", exc, extc2, extc, exc, extc2, extc), 100, 0, 2, 100, 0, 2);
-          h_sv_tracks_dzpv2sig_dzpv0sig[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracks_%s_dzpv2sig_dzpv0sig", exc, extc2, extc), TString::Format(";%s SV %s %stracks N#sigma(dz(the PV));%s SV %s %stracks N#sigma(dz(closest PV not the PV))", exc, extc2, extc, exc, extc2, extc), 100, 0, 100, 100, 0, 100);
-          h_sv_tracksptgt1_npixel_eta[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt1_%s_npixel_eta", exc, extc2, extc), TString::Format(";%s SV %s %stracks eta;%s SV %s %stracks number of pixel hits", exc, extc2, extc, exc, extc2, extc), 50, -4, 4, 40, 0, 40);
-          h_sv_tracksptgt1_npixel_phi[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt1_%s_npixel_phi", exc, extc2, extc), TString::Format(";%s SV %s %stracks phi;%s SV %s %stracks number of pixel hits", exc, extc2, extc, exc, extc2, extc), 50, -3.15, 3.15, 40, 0, 40);
-          h_sv_tracksptgt1_nstrip_eta[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt1_%s_nstrip_eta", exc, extc2, extc), TString::Format(";%s SV %s %stracks eta;%s SV %s %stracks number of strip hits", exc, extc2, extc, exc, extc2, extc), 50, -4, 4, 40, 0, 40);
-          h_sv_tracksptgt1_nstrip_phi[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt1_%s_nstrip_phi", exc, extc2, extc), TString::Format(";%s SV %s %stracks phi;%s SV %s %stracks number of strip hits", exc, extc2, extc, exc, extc2, extc), 50, -3.15, 3.15, 40, 0, 40);
-          h_sv_tracksptgt3_npixel_eta[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt3_%s_npixel_eta", exc, extc2, extc), TString::Format(";%s SV %s %stracks eta;%s SV %s %stracks number of pixel hits", exc, extc2, extc, exc, extc2, extc), 50, -4, 4, 40, 0, 40);
-          h_sv_tracksptgt3_npixel_phi[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt3_%s_npixel_phi", exc, extc2, extc), TString::Format(";%s SV %s %stracks phi;%s SV %s %stracks number of pixel hits", exc, extc2, extc, exc, extc2, extc), 50, -3.15, 3.15, 40, 0, 40);
-          h_sv_tracksptgt3_nstrip_eta[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt3_%s_nstrip_eta", exc, extc2, extc), TString::Format(";%s SV %s %stracks eta;%s SV %s %stracks number of strip hits", exc, extc2, extc, exc, extc2, extc), 50, -4, 4, 40, 0, 40);
-          h_sv_tracksptgt3_nstrip_phi[k][i][j] = fs->make<TH2F>(TString::Format("h_sv_%s_%stracksptgt3_%s_nstrip_phi", exc, extc2, extc), TString::Format(";%s SV %s %stracks phi;%s SV %s %stracks number of strip hits", exc, extc2, extc, exc, extc2, extc), 50, -3.15, 3.15, 40, 0, 40);
-          h_sv_tracks_algo[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_algo", exc, extc2, extc), TString::Format(";%s SV %s %stracks algorithm;arb. units", exc, extc2, extc), 30, 0, 30);
-          h_sv_tracks_quality[k][i][j] = fs->make<TH1F>(TString::Format("h_sv_%s_%stracks_%s_quality", exc, extc2, extc), TString::Format(";%s SV %s %stracks quality;arb.units", exc, extc2, extc), 7, 0, 7);
-        }
-      }
-
-      h_sv_jets_ntracks[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_ntracks", exc), TString::Format("h_sv_%s_jets_ntracks", exc), 50, 0, 50);
-      h_sv_jets_ntracksinvtx[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_ntracksinvtx", exc), TString::Format("h_sv_%s_jets_ntracksinvtx", exc), 20, 0, 20);
-      h_sv_jets_energy[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_energy", exc), TString::Format("h_sv_%s_jets_energy", exc), 50, 0, 1000);
-      h_sv_jets_pt[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_pt", exc), TString::Format("h_sv_%s_jets_pt", exc), 50, 0, 1000);
-      h_sv_jets_eta[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_eta", exc), TString::Format("h_sv_%s_jets_eta", exc), 50, -3, 3);
-      h_sv_jets_phi[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_phi", exc), TString::Format("h_sv_%s_jets_phi", exc), 50, -3.15, 3.15);
-      h_sv_jets_mass[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_mass", exc), TString::Format("h_sv_%s_jets_mass", exc), 50, 0, 100);
-      h_sv_jets_bdisc[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_bdisc", exc), TString::Format("h_sv_%s_jets_bdisc", exc), 50, 0, 1);
-      h_sv_jets_numDaughters[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_numDaughters", exc), TString::Format("h_sv_%s_jets_numDaughters", exc), 25, 0, 75);
-      h_sv_jets_neutralHadEnFrac[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_neutralHadEnFrac", exc), TString::Format("h_sv_%s_jets_neutralHadEnFrac", exc), 26, 0, 1.04);
-      h_sv_jets_neutralEmEnFrac[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_neutralEmEnFrac", exc), TString::Format("h_sv_%s_jets_neutralEmEnFrac", exc), 26, 0, 1.04);
-      h_sv_jets_chargedHadEnFrac[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_chargedHadEnFrac", exc), TString::Format("h_sv_%s_jets_chargedHadEnFrac", exc), 26, 0, 1.04);
-      h_sv_jets_chargedEmEnFrac[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_chargedEmEnFrac", exc), TString::Format("h_sv_%s_jets_chargedEmEnFrac", exc), 26, 0, 1.04);
-      h_sv_jets_chargedMult[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_chargedMult", exc), TString::Format("h_sv_%s_jets_chargedMult", exc), 25, 0, 50);
-      h_sv_jets_n60[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_n60", exc), TString::Format("h_sv_%s_jets_n60", exc), 25, 0, 50);
-      h_sv_jets_n90[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_n90", exc), TString::Format("h_sv_%s_jets_n90", exc), 25, 0, 50);
-      h_sv_jets_area[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_area", exc), TString::Format("h_sv_%s_jets_area", exc), 20, 0, 1);
-      h_sv_jets_maxDist[j] = fs->make<TH1F>(TString::Format("h_sv_%s_jets_maxDist", exc), TString::Format("h_sv_%s_jets_maxDist", exc), 20, 0, 1);
-    }
   }
 
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
@@ -777,21 +557,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
 
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_token, auxes);
-
-  edm::Handle<reco::VertexCollection> primary_vertices;
-  edm::Handle<reco::VertexCollection> vertices;
-  edm::Handle<mfv::JetVertexAssociation> vertices_to_jets;
-  edm::ESHandle<TransientTrackBuilder> tt_builder;
-  TrackerSpaceExtents tracker_extents;
-  
-  if (reco_vertex_src.label() != "") { 
-    event.getByLabel("offlinePrimaryVertices", primary_vertices);
-    event.getByLabel(reco_vertex_src, vertices);
-    setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
-    tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
-    if (vertex_to_jets_src.label() != "")
-      event.getByLabel(vertex_to_jets_src, vertices_to_jets);
-  }
 
   const int nsv = int(auxes->size());
 
@@ -1210,300 +975,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& se
           v[TString::Format("track%i_injet",         i).Data()] = -1e6;
           v[TString::Format("track%i_inpv",          i).Data()] = -1e6;
           v[TString::Format("track%i_jet_deltaphi0", i).Data()] = -1e6;
-        }
-      }
-    }
-
-    if (reco_vertex_src.label() != "") {
-      const reco::Vertex& thepv = primary_vertices->at(0);
-      const reco::Vertex& rv = vertices->at(aux.which);
-
-      const reco::VertexRef rvref(vertices, aux.which);
-      
-      std::vector<reco::TrackBase> tracks;
-
-      for (auto it = rv.tracks_begin(), ite = rv.tracks_end(); it != ite; ++it) {
-        const reco::TrackBaseRef& tk = *it;
-        tracks.push_back(*tk);
-      }
-      std::sort(tracks.begin(), tracks.end(), [](const reco::TrackBase& tk1, const reco::TrackBase& tk2) { return tk1.pt() > tk2.pt(); });
-
-      int ntracksdrlt0p50 = 0;
-      int ntracksdr0p50to1p57 = 0;
-      int ntracksdrgt1p57 = 0;
-      TVector3 tracksdrlt1p57 = aux.p4(mfv::PTracksOnly).Vect();
-
-      for (int itk = 0, itke = int(tracks.size()); itk < itke; ++itk) {
-        const reco::TransientTrack& ttk = tt_builder->build((const reco::Track*)(&tracks[itk]));
-        auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, thepv);
-        auto dxy_isv = IPTools::absoluteTransverseImpactParameter(ttk, rv);
-        auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, thepv);
-        auto d3d_isv = IPTools::absoluteImpactParameter3D(ttk, rv);
-
-        NumExtents se = tracker_extents.numExtentInRAndZ(tracks[itk].hitPattern(), false);
-	SpatialExtents se2 = tracker_extents.extentInRAndZ(tracks[itk].hitPattern(),tracks[itk].hitPattern().numberOfValidPixelHits() != 0);
-
-        double trackjetdr = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
-        if (trackjetdr < 0.5) {
-          ntracksdrlt0p50++;
-        } else if (trackjetdr < 1.57) {
-          ntracksdr0p50to1p57++;
-        } else {
-          ntracksdrgt1p57++;
-          tracksdrlt1p57 -= TVector3(tracks[itk].px(), tracks[itk].py(), tracks[itk].pz());
-        }
-
-        double absdz = 100000;
-        for (int i = 1; i < int(primary_vertices->size()); ++i) {
-          const reco::Vertex& pvi = primary_vertices->at(i);
-          const math::XYZPoint pvi_xyz(pvi.x(), pvi.y(), pvi.z());
-            if (fabs(tracks[itk].dz(pvi_xyz)) < absdz) {
-              absdz = fabs(tracks[itk].dz(pvi_xyz));
-            }
-        }
-        double absdz0 = fabs(tracks[itk].dz(pv));
-        double absdz1 = absdz0 < absdz ? absdz0 : absdz;
-        double absdz2 = absdz;
-		
-        if (itk < max_ntracks) {
-          v[TString::Format("track%i_pt",        itk).Data()] = tracks[itk].pt();
-          v[TString::Format("track%i_eta",       itk).Data()] = tracks[itk].eta();
-          v[TString::Format("track%i_phi",       itk).Data()] = tracks[itk].phi();
-          v[TString::Format("track%i_charge",    itk).Data()] = tracks[itk].charge();
-          v[TString::Format("track%i_dxybs",     itk).Data()] = tracks[itk].dxy(bs);
-          v[TString::Format("track%i_dzbs",      itk).Data()] = tracks[itk].dz(bs);
-          v[TString::Format("track%i_dxypv",     itk).Data()] = tracks[itk].dxy(pv);
-          v[TString::Format("track%i_dzpv",      itk).Data()] = tracks[itk].dz(pv);
-          v[TString::Format("track%i_dxyerr",    itk).Data()] = tracks[itk].dxyError();
-          v[TString::Format("track%i_dzerr",     itk).Data()] = tracks[itk].dzError();
-          v[TString::Format("track%i_dxyipv1",   itk).Data()] = dxy_ipv.first;
-          v[TString::Format("track%i_dxyipv",    itk).Data()] = dxy_ipv.second.value();
-          v[TString::Format("track%i_dxyipverr", itk).Data()] = dxy_ipv.second.error();
-          v[TString::Format("track%i_d3dipv1",   itk).Data()] = d3d_ipv.first;
-          v[TString::Format("track%i_d3dipv",    itk).Data()] = d3d_ipv.second.value();
-          v[TString::Format("track%i_d3dipverr", itk).Data()] = d3d_ipv.second.error();
-          v[TString::Format("track%i_dxyisv1",   itk).Data()] = dxy_isv.first;
-          v[TString::Format("track%i_dxyisv",    itk).Data()] = dxy_isv.second.value();
-          v[TString::Format("track%i_dxyisverr", itk).Data()] = dxy_isv.second.error();
-          v[TString::Format("track%i_d3disv1",   itk).Data()] = d3d_isv.first;
-          v[TString::Format("track%i_d3disv",    itk).Data()] = d3d_isv.second.value();
-          v[TString::Format("track%i_d3disverr", itk).Data()] = d3d_isv.second.error();
-          v[TString::Format("track%i_chi2dof",   itk).Data()] = tracks[itk].chi2() / tracks[itk].ndof();
-          v[TString::Format("track%i_nhits",     itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits();
-          v[TString::Format("track%i_npixel",    itk).Data()] = tracks[itk].hitPattern().numberOfValidPixelHits();
-          v[TString::Format("track%i_nstrip",    itk).Data()] = tracks[itk].hitPattern().numberOfValidStripHits();
-	  v[TString::Format("track%i_npxlayer",  itk).Data()] = tracks[itk].hitPattern().pixelLayersWithMeasurement();
-	  if(tracks[itk].hitPattern().numberOfValidPixelHits()==2) {
-	    double deltaR = se2.max_r - se2.min_r;
-	    double deltaZ = se2.max_z - se2.min_z;
-	    v[TString::Format("track%i_deltar2px",  itk).Data()] = deltaR;
-	    v[TString::Format("track%i_deltaz2px",  itk).Data()] = deltaZ;
-	  }
-	  else {
-	    v[TString::Format("track%i_deltar2px",  itk).Data()] = -1;
-            v[TString::Format("track%i_deltaz2px",  itk).Data()] = -1;
-	  }
-	  if(tracks[itk].hitPattern().numberOfValidPixelHits()==3) {
-	    double deltaR = se2.max_r - se2.min_r;
-	    double deltaZ = se2.max_z - se2.min_z;
-	    v[TString::Format("track%i_deltar3px",  itk).Data()] = deltaR;
-            v[TString::Format("track%i_deltaz3px",  itk).Data()] = deltaZ;	  
-	  }
-	  else {
-	    v[TString::Format("track%i_deltar3px",  itk).Data()] = -1;
-            v[TString::Format("track%i_deltaz3px",  itk).Data()] = -1;
-	  }
-          v[TString::Format("track%i_minr",      itk).Data()] = se.min_r;
-          v[TString::Format("track%i_minz",      itk).Data()] = se.min_z;
-          v[TString::Format("track%i_maxr",      itk).Data()] = se.max_r;
-          v[TString::Format("track%i_maxz",      itk).Data()] = se.max_z;
-          v[TString::Format("track%i_jetdr",     itk).Data()] = reco::deltaR(aux.eta[mfv::PJetsByNtracks], aux.phi[mfv::PJetsByNtracks], tracks[itk].eta(), tracks[itk].phi());
-          v[TString::Format("track%i_jetdphi",   itk).Data()] = reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi());
-          v[TString::Format("track%i_dzpv0",     itk).Data()] = absdz0;
-          v[TString::Format("track%i_dzpv1",     itk).Data()] = absdz1;
-          v[TString::Format("track%i_dzpv2",     itk).Data()] = absdz2;
-          v[TString::Format("track%i_algo",      itk).Data()] = tracks[itk].algo();
-        }
-
-        for (int i = 0; i < sv_tracks_num_indices; ++i) {
-          if (i == 1 && trackjetdr >= 0.5) continue;
-          if (i == 2 && (trackjetdr < 1.57 || tracks[itk].dxyError() < 0.02)) continue;
-          fill_multi(h_sv_tracks_pt[0][i],        isv, tracks[itk].pt(), w);
-          fill_multi(h_sv_tracks_eta[0][i],       isv, tracks[itk].eta(), w);
-          fill_multi(h_sv_tracks_phi[0][i],       isv, tracks[itk].phi(), w);
-          fill_multi(h_sv_tracks_charge[0][i],    isv, tracks[itk].charge(), w);
-          fill_multi(h_sv_tracks_dxybs[0][i],     isv, tracks[itk].dxy(bs), w);
-          fill_multi(h_sv_tracks_dzbs[0][i],      isv, tracks[itk].dz(bs), w);
-          fill_multi(h_sv_tracks_dxypv[0][i],     isv, tracks[itk].dxy(pv), w);
-          fill_multi(h_sv_tracks_dzpv[0][i],      isv, tracks[itk].dz(pv), w);
-          fill_multi(h_sv_tracks_dxyerr[0][i],    isv, tracks[itk].dxyError(), w);
-          fill_multi(h_sv_tracks_dzerr[0][i],     isv, tracks[itk].dzError(), w);
-          fill_multi(h_sv_tracks_dxyipv1[0][i],   isv, dxy_ipv.first, w);
-          fill_multi(h_sv_tracks_dxyipv[0][i],    isv, dxy_ipv.second.value(), w);
-          fill_multi(h_sv_tracks_dxyipverr[0][i], isv, dxy_ipv.second.error(), w);
-          fill_multi(h_sv_tracks_d3dipv1[0][i],   isv, d3d_ipv.first, w);
-          fill_multi(h_sv_tracks_d3dipv[0][i],    isv, d3d_ipv.second.value(), w);
-          fill_multi(h_sv_tracks_d3dipverr[0][i], isv, d3d_ipv.second.error(), w);
-          fill_multi(h_sv_tracks_dxyisv1[0][i],   isv, dxy_isv.first, w);
-          fill_multi(h_sv_tracks_dxyisv[0][i],    isv, dxy_isv.second.value(), w);
-          fill_multi(h_sv_tracks_dxyisverr[0][i], isv, dxy_isv.second.error(), w);
-          fill_multi(h_sv_tracks_d3disv1[0][i],   isv, d3d_isv.first, w);
-          fill_multi(h_sv_tracks_d3disv[0][i],    isv, d3d_isv.second.value(), w);
-          fill_multi(h_sv_tracks_d3disverr[0][i], isv, d3d_isv.second.error(), w);
-          fill_multi(h_sv_tracks_chi2dof[0][i],   isv, tracks[itk].chi2() / tracks[itk].ndof(), w);
-          fill_multi(h_sv_tracks_nhits[0][i],     isv, tracks[itk].hitPattern().numberOfValidPixelHits() + tracks[itk].hitPattern().numberOfValidStripHits(), w);
-          fill_multi(h_sv_tracks_npixel[0][i],    isv, tracks[itk].hitPattern().numberOfValidPixelHits(), w);
-          fill_multi(h_sv_tracks_nstrip[0][i],    isv, tracks[itk].hitPattern().numberOfValidStripHits(), w);
-	  fill_multi(h_sv_tracks_npxlayer[0][i],  isv, tracks[itk].hitPattern().pixelLayersWithMeasurement(), w);
-	  if(tracks[itk].hitPattern().numberOfValidPixelHits()==2) {
-	    double deltaR = se2.max_r - se2.min_r;
-	    double deltaZ = se2.max_z - se2.min_z;
-	    fill_multi(h_sv_tracks_deltar2px[0][i],  isv, deltaR, w);
-	    fill_multi(h_sv_tracks_deltaz2px[0][i],  isv, deltaZ, w);
-	  }
-	  if(tracks[itk].hitPattern().numberOfValidPixelHits()==3) {
-	    double deltaR = se2.max_r - se2.min_r;
-	    double deltaZ = se2.max_z - se2.min_z;
-            fill_multi(h_sv_tracks_deltar3px[0][i],  isv, deltaR, w);
-            fill_multi(h_sv_tracks_deltaz3px[0][i],  isv, deltaZ, w);
-	  }
-	  fill_multi(h_sv_tracks_minr[0][i],      isv, se.min_r, w);
-          fill_multi(h_sv_tracks_minz[0][i],      isv, se.min_z, w);
-          fill_multi(h_sv_tracks_maxr[0][i],      isv, se.max_r, w);
-          fill_multi(h_sv_tracks_maxz[0][i],      isv, se.max_z, w);
-          fill_multi(h_sv_tracks_jetdr[0][i],     isv, trackjetdr, w);
-          fill_multi(h_sv_tracks_jetdphi[0][i],   isv, reco::deltaPhi(aux.phi[mfv::PJetsByNtracks], tracks[itk].phi()), w);
-          fill_multi(h_sv_tracks_bs2derr_jetdr[0][i], isv, trackjetdr, aux.bs2derr, w);
-          fill_multi(h_sv_tracks_dzpv0[0][i],     isv, absdz0, w);
-          fill_multi(h_sv_tracks_dzpv1[0][i],     isv, absdz1, w);
-          fill_multi(h_sv_tracks_dzpv2[0][i],     isv, absdz2, w);
-          fill_multi(h_sv_tracks_dzpv2_dzpv0[0][i], isv, absdz0, absdz2, w);
-          fill_multi(h_sv_tracks_dzpv2sig_dzpv0sig[0][i], isv, absdz0 / tracks[itk].dzError(), absdz2 / tracks[itk].dzError(), w);
-          if (tracks[itk].pt() > 1) {
-            fill_multi(h_sv_tracksptgt1_npixel_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
-            fill_multi(h_sv_tracksptgt1_npixel_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
-            fill_multi(h_sv_tracksptgt1_nstrip_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
-            fill_multi(h_sv_tracksptgt1_nstrip_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
-          }
-          if (tracks[itk].pt() > 3) {
-            fill_multi(h_sv_tracksptgt3_npixel_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
-            fill_multi(h_sv_tracksptgt3_npixel_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidPixelHits(), w);
-            fill_multi(h_sv_tracksptgt3_nstrip_eta[0][i], isv, tracks[itk].eta(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
-            fill_multi(h_sv_tracksptgt3_nstrip_phi[0][i], isv, tracks[itk].phi(), tracks[itk].hitPattern().numberOfValidStripHits(), w);
-          }
-          fill_multi(h_sv_tracks_algo[0][i],      isv, tracks[itk].algo(), w);
-          for (int j = 0; j < 7; ++j) {
-            if (tracks[itk].quality(reco::Track::TrackQuality(j))) fill_multi(h_sv_tracks_quality[0][i], isv, j, w);
-          }
-        }
-      }
-      v["ntracksdrlt0p50"] = ntracksdrlt0p50;
-      v["ntracksdr0p50to1p57"] = ntracksdr0p50to1p57;
-      v["ntracksdrgt1p57"] = ntracksdrgt1p57;
-      v["tracksdrlt1p57pt"] = tracksdrlt1p57.Pt();
-      v["tracksdrlt1p57eta"] = tracksdrlt1p57.Eta();
-      v["tracksdrlt1p57phi"] = tracksdrlt1p57.Phi();
-
-      if (vertex_to_jets_src.label() != "") {
-        int njets = vertices_to_jets->numberOfAssociations(rvref);
-        assert(njets == aux.njets[0]); // JMTBAD
-
-        if (njets > 0) {
-          const edm::RefVector<pat::JetCollection>& jets = (*vertices_to_jets)[rvref];
-          std::set<reco::TrackRef> vertex_tracks;
-
-          for (auto it = rv.tracks_begin(), ite = rv.tracks_end(); it != ite; ++it)
-            if (rv.trackWeight(*it) >= mfv::track_vertex_weight_min)
-              vertex_tracks.insert(it->castTo<reco::TrackRef>());
-     
-          for (int ijet = 0; ijet < njets; ++ijet) {
-            int njettk = 0, njettkinvtx = 0;
-            for (const reco::PFCandidatePtr& pfcand : jets[ijet]->getPFConstituents()) {
-              const reco::TrackRef& tk = pfcand->trackRef();
-              if (tk.isNonnull()) {
-                ++njettk;
-                const bool tk_in_vtx = vertex_tracks.count(tk);
-                if (tk_in_vtx)
-                  ++njettkinvtx;
-                const reco::TransientTrack& ttk = tt_builder->build((const reco::Track*)(&*tk));
-                auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, thepv);
-                auto dxy_isv = IPTools::absoluteTransverseImpactParameter(ttk, rv);
-                auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, thepv);
-                auto d3d_isv = IPTools::absoluteImpactParameter3D(ttk, rv);
-                NumExtents se = tracker_extents.numExtentInRAndZ(tk->hitPattern(), false);
-		SpatialExtents se2 = tracker_extents.extentInRAndZ(tk->hitPattern(),tk->hitPattern().numberOfValidPixelHits() != 0);
-
-                for (int i = 0; i < sv_jet_tracks_num_indices; ++i) {
-                  if ((i == sv_jet_tracks_jet && tk_in_vtx) ||
-                      (i == sv_jet_tracks_vertex && !tk_in_vtx))
-                    continue;
-
-                  fill_multi(h_sv_tracks_pt[1][i],        isv, tk->pt(), w);
-                  fill_multi(h_sv_tracks_eta[1][i],       isv, tk->eta(), w);
-                  fill_multi(h_sv_tracks_phi[1][i],       isv, tk->phi(), w);
-                  fill_multi(h_sv_tracks_charge[1][i],    isv, tk->charge(), w);
-                  fill_multi(h_sv_tracks_dxybs[1][i],     isv, tk->dxy(bs), w);
-                  fill_multi(h_sv_tracks_dzbs[1][i],      isv, tk->dz(bs), w);
-                  fill_multi(h_sv_tracks_dxypv[1][i],     isv, tk->dxy(pv), w);
-                  fill_multi(h_sv_tracks_dzpv[1][i],      isv, tk->dz(pv), w);
-                  fill_multi(h_sv_tracks_dxyerr[1][i],    isv, tk->dxyError(), w);
-                  fill_multi(h_sv_tracks_dzerr[1][i],     isv, tk->dzError(), w);
-                  fill_multi(h_sv_tracks_dxyipv1[1][i],   isv, dxy_ipv.first, w);
-                  fill_multi(h_sv_tracks_dxyipv[1][i],    isv, dxy_ipv.second.value(), w);
-                  fill_multi(h_sv_tracks_dxyipverr[1][i], isv, dxy_ipv.second.error(), w);
-                  fill_multi(h_sv_tracks_d3dipv1[1][i],   isv, d3d_ipv.first, w);
-                  fill_multi(h_sv_tracks_d3dipv[1][i],    isv, d3d_ipv.second.value(), w);
-                  fill_multi(h_sv_tracks_d3dipverr[1][i], isv, d3d_ipv.second.error(), w);
-                  fill_multi(h_sv_tracks_dxyisv1[1][i],   isv, dxy_isv.first, w);
-                  fill_multi(h_sv_tracks_dxyisv[1][i],    isv, dxy_isv.second.value(), w);
-                  fill_multi(h_sv_tracks_dxyisverr[1][i], isv, dxy_isv.second.error(), w);
-                  fill_multi(h_sv_tracks_d3disv1[1][i],   isv, d3d_isv.first, w);
-                  fill_multi(h_sv_tracks_d3disv[1][i],    isv, d3d_isv.second.value(), w);
-                  fill_multi(h_sv_tracks_d3disverr[1][i], isv, d3d_isv.second.error(), w);
-                  fill_multi(h_sv_tracks_chi2dof[1][i],   isv, tk->chi2() / tk->ndof(), w);
-                  fill_multi(h_sv_tracks_nhits[1][i],     isv, tk->hitPattern().numberOfValidPixelHits() + tk->hitPattern().numberOfValidStripHits(), w);
-                  fill_multi(h_sv_tracks_npixel[1][i],    isv, tk->hitPattern().numberOfValidPixelHits(), w);
-                  fill_multi(h_sv_tracks_nstrip[1][i],    isv, tk->hitPattern().numberOfValidStripHits(), w);
-		  fill_multi(h_sv_tracks_npxlayer[1][i],  isv, tk->hitPattern().pixelLayersWithMeasurement(),w);
-		  if(tk->hitPattern().numberOfValidPixelHits()==2) {
-		    double deltaR = se2.max_r - se2.min_r;
-		    double deltaZ = se2.max_z - se2.min_z;
-		    fill_multi(h_sv_tracks_deltar2px[1][i],  isv, deltaR, w);
-		    fill_multi(h_sv_tracks_deltaz2px[1][i],  isv, deltaZ, w);
-		  }
-		  if(tk->hitPattern().numberOfValidPixelHits()==3) {
-		    double deltaR = se2.max_r - se2.min_r;
-		    double deltaZ = se2.max_z - se2.min_z;
-		    fill_multi(h_sv_tracks_deltar3px[1][i],  isv, deltaR, w);
-		    fill_multi(h_sv_tracks_deltaz3px[1][i],  isv, deltaZ, w);
-		  }
-                  fill_multi(h_sv_tracks_minr[1][i],      isv, se.min_r, w);
-                  fill_multi(h_sv_tracks_minz[1][i],      isv, se.min_z, w);
-                  fill_multi(h_sv_tracks_maxr[1][i],      isv, se.max_r, w);
-                  fill_multi(h_sv_tracks_maxz[1][i],      isv, se.max_z, w);
-                }
-              }
-            }
-
-            fill_multi(h_sv_jets_ntracks,      isv, njettk,                                                        w);
-            fill_multi(h_sv_jets_ntracksinvtx, isv, njettkinvtx,                                                   w);
-            fill_multi(h_sv_jets_energy,       isv, jets[ijet]->energy(),                                          w);
-            fill_multi(h_sv_jets_pt,           isv, jets[ijet]->pt(),                                              w);
-            fill_multi(h_sv_jets_eta,          isv, jets[ijet]->eta(),                                             w);
-            fill_multi(h_sv_jets_phi,          isv, jets[ijet]->phi(),                                             w);
-            fill_multi(h_sv_jets_mass,         isv, jets[ijet]->mass(),                                            w);
-            fill_multi(h_sv_jets_bdisc,        isv, jets[ijet]->bDiscriminator("combinedSecondaryVertexBJetTags"), w);
-            fill_multi(h_sv_jets_numDaughters, isv, jets[ijet]->numberOfDaughters(), w);
-            fill_multi(h_sv_jets_neutralHadEnFrac, isv, jets[ijet]->neutralHadronEnergyFraction(), w);
-            fill_multi(h_sv_jets_neutralEmEnFrac, isv, jets[ijet]->neutralEmEnergyFraction(), w);
-            fill_multi(h_sv_jets_chargedHadEnFrac, isv, jets[ijet]->chargedHadronEnergyFraction(), w);
-            fill_multi(h_sv_jets_chargedEmEnFrac, isv, jets[ijet]->chargedEmEnergyFraction(), w);
-            fill_multi(h_sv_jets_chargedMult, isv, jets[ijet]->chargedMultiplicity(), w);
-            fill_multi(h_sv_jets_n60, isv, jets[ijet]->n60(), w);
-            fill_multi(h_sv_jets_n90, isv, jets[ijet]->n90(), w);
-            fill_multi(h_sv_jets_area, isv, jets[ijet]->jetArea(), w);
-            fill_multi(h_sv_jets_maxDist, isv, jets[ijet]->maxDistance(), w);
-          }
         }
       }
     }
