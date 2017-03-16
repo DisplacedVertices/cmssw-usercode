@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-raise 'add the mcstatproducer before you rerun'
-
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
@@ -14,24 +12,24 @@ version = 'v2'
 batch_name = 'TrigEff%s/%i' % (version, year)
 json = '../ana_2015p6.json'
 
+ht_skim_cut = 800
 if year == 2015:
     mu_thresh_hlt = 20
     mu_thresh_offline = 23
-    ht_skim_cut = 800
-    hlt_bit = 1
 elif year == 2016:
     mu_thresh_hlt = 24
     mu_thresh_offline = 27
-    ht_skim_cut = 900
-    hlt_bit = 2
 
 global_tag(process, which_global_tag(is_mc, year))
 process.maxEvents.input = 1000
-process.source.fileNames = ['/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
+process.source.fileNames = ['/store/user/tucker/temp/wjetstolnu.miniaod.163E57C9-7ABE-E611-A73A-0025905B857E.root' if is_mc else
+                            '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
 #process.options.wantSummary = True
 process.TFileService.fileName = 'eff.root'
 
-if not is_mc:
+if is_mc:
+    process.load('JMTucker.Tools.MCStatProducer_cff')
+else:
     from FWCore.PythonUtilities.LumiList import LumiList
     process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
 
@@ -53,9 +51,10 @@ process.den = cms.EDProducer('MFVTriggerEfficiency',
                              jet_cut = jtupleParams.jetCut,
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
-process.num = process.num.clone(require_hlt = hlt_bit)
+process.num800 = process.den.clone(require_hlt = 1)
+process.num900 = process.den.clone(require_hlt = 2)
 
-process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den * process.num)
+process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den * process.num800 * process.num900)
 
 if htskim:
     process.setName_('EffHtSkim')
