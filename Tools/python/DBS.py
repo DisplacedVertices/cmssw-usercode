@@ -10,8 +10,6 @@ from JMTucker.Tools.general import popen
 # could use DBSAPI or DASAPI or whatever, but I'm lazy
 
 class das_query:
-    json_keys_expected = ['apilist', 'ctime', 'data', 'incache', 'mongo_query', 'nresults', 'status', 'timestamp']
-
     def __init__(self, instance='global', json=False):
         if type(instance) == int:
             instance = 'phys0%i' % instance
@@ -36,9 +34,7 @@ class das_query:
                 full_cmd = full_cmd[:-1] + ' ' + self.instance_cmd + "'"
         cmdout = os.popen(full_cmd).readlines()
         if self.json:
-            json_obj = json.loads(cmdout[0])
-            assert type(json_obj) == dict and sorted(json_obj.keys()) == das_query.json_keys_expected
-            return json_obj
+            return json.loads(''.join(cmdout))
         else:
             ret = []
             for line in cmdout:
@@ -91,12 +87,10 @@ def sites_for_dataset(dataset, instance='global'):
     return sorted(set(l)) # dasgo gives same lines to you many times
 
 def file_details_run_lumis(dataset, instance='global'):
-    obj = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
-    #obj = json.load(open('json_str'))
+    objs = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
     raw = defaultdict(lambda: defaultdict(list))
-
-    for o in obj['data']:
-        assert type(o) == dict and sorted(o.keys()) == ['_id', 'cache_id', 'das', 'das_id', 'file', 'lumi', 'qhash', 'run']
+    for o in objs:
+        assert type(o) == dict and set(o) == set([u'qhash', u'das', u'run', u'file', u'lumi'])
         files, runs, lumis = o['file'], o['run'], o['lumi']
         assert len(files) == len(runs) and len(runs) == len(lumis)
         for f,r,l in izip(files, runs, lumis):
@@ -104,8 +98,6 @@ def file_details_run_lumis(dataset, instance='global'):
             assert type(r) == dict and r.keys() == ['run_number'] and type(r['run_number']) == int
             assert type(l) == dict and l.keys() == ['number'] and type(l['number']) == list
             f,r,l = str(f['name']), r['run_number'], l['number']
-            for x in l:
-                assert len(x) == 2 and type(x[0]) == int and type(x[1]) == int
             raw[f][r] += l
 
     ret = {}
@@ -117,6 +109,7 @@ def file_details_run_lumis(dataset, instance='global'):
     return ret
 
 def file_details_nevents(dataset, instance='global', check=False):
+    raise NotImplementedError('update for dasgo needed')
     obj = das_query(instance, json=True)('file dataset=%s | grep file.name,file.nevents' % dataset)
     #obj = json.load(open('json_str2'))
 
@@ -136,11 +129,11 @@ def file_details_nevents(dataset, instance='global', check=False):
     return ret
 
 def ll_from_file_details(details):
-    compact_list = defaultdict(list)
+    rl = defaultdict(list)
     for run_lumis in details.itervalues():
-        for run, lumi_ranges in run_lumis.iteritems():
-            compact_list[run].extend(lumi_ranges)
-    return LumiList(compactList=compact_list)
+        for run, lumis in run_lumis.iteritems():
+            rl[run].extend(lumis)
+    return LumiList(runsAndLumis=rl)
 
 def ll_for_dataset(dataset, instance='global'):
     return ll_from_file_details(file_details_run_lumis(dataset, instance))
@@ -160,7 +153,7 @@ def files_for_events(run_events, dataset, instance='global'):
 
     files = set()
     for file, run_lumis in file_details_run_lumis(dataset, instance).iteritems():
-        ll = LumiList(compactList=run_lumis)
+        ll = LumiList(runsAndLumis=run_lumis)
         for x in wanted_run_lumis:
             if ll.contains(*x):
                 files.add(file)
@@ -187,7 +180,9 @@ if __name__ == '__main__':
     pass
 
     #print ll_for_dataset('duh')
-    #print files_for_events([(272818, 519, 103103)], 'duh')
+    #from Samples import *
+    #print files_for_events([(1,15324,51305214)], qcdht1000ext.dataset)
+    #print files_for_events([(1,85331,33407210)], ttbar.dataset)
 
     #for name, dataset in [
     #    ('JetHT2016B1', '/JetHT/Run2016B-23Sep2016-v1/AOD'),
