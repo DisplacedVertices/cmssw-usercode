@@ -44,6 +44,7 @@ private:
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const bool use_met;
   const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
@@ -75,6 +76,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    use_met(cfg.getParameter<edm::InputTag>("met_src").label() != ""),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
@@ -321,11 +323,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
-  edm::Handle<pat::METCollection> mets;
-  event.getByToken(met_token, mets);
-  const pat::MET& met = mets->at(0);
-  mevent->metx = met.px();
-  mevent->mety = met.py();
+  if (use_met) {
+    edm::Handle<pat::METCollection> mets;
+    event.getByToken(met_token, mets);
+    const pat::MET& met = mets->at(0);
+    mevent->metx = met.px();
+    mevent->mety = met.py();
+  }
 
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
