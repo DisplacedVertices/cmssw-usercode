@@ -88,7 +88,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.gen_partons_in_acc = mevent->gen_partons_in_acc;
   }
 
-  nt.pass_clean = mevent->pass_clean_all();
+  nt.pass_hlt = mevent->pass_ & 0x1F;
   nt.npu = int(mevent->npu);
   nt.npv = mevent->npv;
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
@@ -96,7 +96,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.pvz = mevent->pvz;
   nt.pvntracks = mevent->pv_ntracks;
   nt.pvsumpt2 = mevent->pv_sumpt2;
-  nt.jetht = mevent->jet_ht();
+  nt.jetht = mevent->jet_ht(40);
   nt.jetpt4 = mevent->jetpt4();
   nt.met = mevent->met();
   nt.nlep = mevent->nlep(2);

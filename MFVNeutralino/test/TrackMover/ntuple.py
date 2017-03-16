@@ -5,6 +5,7 @@ from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
+assert year == 2016 # need to change for 2015
 
 # 3 magic lines, don't touch
 is_mc = True
@@ -38,6 +39,7 @@ for p in process.paths.keys():
 
 import JMTucker.MFVNeutralino.TriggerFilter
 JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process, path_name='p')
+process.triggerFilter.HLTPaths = ['HLT_PFHT800_v*', 'HLT_PFHT900_v*']
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.mfvVertices.track_src = 'mfvMovedTracks'
@@ -78,7 +80,7 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
 
 process.p *= process.mfvMovedTree
 
-process.options.wantSummary = True
+#process.options.wantSummary = True
 process.maxEvents.input = 100
 file_event_from_argv(process)
 
@@ -86,10 +88,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     import JMTucker.Tools.Samples as Samples 
 
-    samples = Samples.registry.from_argv(
-        Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
-        )
+    samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
     def modify(sample):
         to_add = []

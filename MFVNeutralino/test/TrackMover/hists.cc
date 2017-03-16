@@ -5,6 +5,8 @@
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "utils.h"
 
+#error need to support picking hlt bit and final ht cut
+
 int main(int argc, char** argv) {
   if (argc < 5) {
     fprintf(stderr, "usage: hists.exe in.root out.root njets_req nbjets_req\n");
@@ -143,7 +145,7 @@ int main(int argc, char** argv) {
       Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
       Fill(nd("pvntracks")    .den, nt.pvntracks);
       Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
-      Fill(nd("ht")        .den, nt.jetht);
+      Fill(nd("ht")           .den, nt.jetht);
       Fill(nd("met")          .den, nt.met);
       Fill(nd("nlep")         .den, nt.nlep);
       Fill(nd("ntracks")      .den, nt.ntracks);

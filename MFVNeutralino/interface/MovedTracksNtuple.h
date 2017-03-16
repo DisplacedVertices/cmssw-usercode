@@ -25,7 +25,7 @@ namespace mfv {
     uchar gen_decay_type[2];
     uchar gen_partons_in_acc;
 
-    bool pass_clean;
+    uchar pass_hlt;
     uchar npu;
     uchar npv;
     float pvx;
