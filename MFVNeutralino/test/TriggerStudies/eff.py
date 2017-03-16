@@ -6,13 +6,15 @@ from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 from JMTucker.MFVNeutralino.Year import year
 
+# 1st two magic
 is_mc = True
+to_do = (800, 900)
 htskim = True
+ht_skim_cut = min(to_do)
 version = 'v2'
 batch_name = 'TrigEff%s/%i' % (version, year)
 json = '../ana_2015p6.json'
 
-ht_skim_cut = 800
 if year == 2015:
     mu_thresh_hlt = 20
     mu_thresh_offline = 23
@@ -23,7 +25,8 @@ elif year == 2016:
 global_tag(process, which_global_tag(is_mc, year))
 process.maxEvents.input = 1000
 process.source.fileNames = ['/store/user/tucker/temp/wjetstolnu.miniaod.163E57C9-7ABE-E611-A73A-0025905B857E.root' if is_mc else
-                            '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
+         #                   '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
+                            '/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/283/283/00000/780D7FAA-FF95-E611-AC56-02163E011B49.root']
 #process.options.wantSummary = True
 process.TFileService.fileName = 'eff.root'
 
@@ -51,10 +54,15 @@ process.den = cms.EDProducer('MFVTriggerEfficiency',
                              jet_cut = jtupleParams.jetCut,
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
-process.num800 = process.den.clone(require_hlt = 1)
-process.num900 = process.den.clone(require_hlt = 2)
 
-process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den * process.num800 * process.num900)
+process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den)
+
+if 800 in to_do:
+    process.num800 = process.den.clone(require_hlt = 1)
+    process.p *= process.num800
+if 900 in to_do:
+    process.num900 = process.den.clone(require_hlt = 2)
+    process.p *= process.num900
 
 if htskim:
     process.setName_('EffHtSkim')
@@ -89,6 +97,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             magic = 'is_mcX=XTrue'.replace('X', ' ')
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'is_mc = False', err))
+
+        if year == 2015 or (year == 2016 and not sample.is_mc and sample.name.split('2016')[1].startswith('H'))
+            magic = 'to_doX=X(800,X900)'.replace('X', ' ')
+            repwith = 'to_do = (%i,)' % (800 if year == 2015 else 900)
+            err = 'trying to submit on data, and need to change to_do but no magic string'
+            to_replace.append((magic, repwith, err))
 
         return to_add, to_replace
 
