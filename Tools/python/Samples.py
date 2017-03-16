@@ -575,6 +575,7 @@ if __name__ == '__main__':
     from JMTucker.Tools.general import popen
 
     if 0:
+        from JMTucker.Tools.SampleFiles import _d
         for y,l in [(2015, sum([eval(l) for l in __all__ if type(eval(l)) == list and l.endswith('2015')], [])),
                     (2016, sum([eval(l) for l in __all__ if type(eval(l)) == list and not l.endswith('2015')], []))]:
             print y
@@ -585,6 +586,9 @@ if __name__ == '__main__':
                             continue
                         if not s.has_dataset(ds):
                             print s.name, 'no', ds
+                        else:
+                            if not _d.has_key((s.name, 'ntuplev11')):
+                                print s.name, 'no files'
 
     if 0:
         for l in xx4j_samples_2015, official_mfv_signal_samples:
