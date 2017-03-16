@@ -21,10 +21,10 @@ if mode == 'vary_eff':
     ls = ['average efficiency', 'maxtk efficiency']
 
 if mode == 'vary_dphi':
-    fn1.append('2v_from_jets_3track_average3_dphijvmin_v11.root')
-    fn2.append('2v_from_jets_4track_average4_dphijvmin_v11.root')
-    fn3.append('2v_from_jets_5track_average5_dphijvmin_v11.root')
-    ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', '|#Delta#phi| from #Delta#phi_{JV}^{min}']
+    fn1.append('2v_from_jets_3track_average3_dphijvpt_v11.root')
+    fn2.append('2v_from_jets_4track_average4_dphijvpt_v11.root')
+    fn3.append('2v_from_jets_5track_average5_dphijvpt_v11.root')
+    ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', '|#Delta#phi| from p_{T}-weighted #Delta#phi_{JV}']
 
 if mode == 'vary_dbv':
     fn1.append('2v_from_jets_3track_average3_c1p35_e2_a3p66_v11_sum.root')
@@ -170,14 +170,14 @@ for i in range(3):
 
     if mode == 'vary_dphi':
         if i == 0:
-            er2 *= 0.203370
-            er3 *= 0.154157
+            er2 *= 0.207052
+            er3 *= 0.162448
         if i == 1:
-            er2 *= 0.200499
-            er3 *= 0.161360
+            er2 *= 0.210285
+            er3 *= 0.179084
         if i == 2:
-            er2 *= 0.187591
-            er3 *= 0.130377
+            er2 *= 0.222209
+            er3 *= 0.168349
     if mode == 'vary_eff':
         er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
         er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5
