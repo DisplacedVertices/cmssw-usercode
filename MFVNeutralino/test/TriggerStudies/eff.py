@@ -68,8 +68,12 @@ SimpleTriggerEfficiency.setup_endpath(process)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples 
-    samples = Samples.auxiliary_data_samples # + Samples.leptonic_background_samples + Samples.ttbar_samples
+    import JMTucker.Tools.Samples as Samples
+    if year == 2015:
+        samples = Samples.auxiliary_data_samples_2015 + Samples.leptonic_background_samples_2015 + Samples.ttbar_samples_2015
+    elif year == 2016:
+        samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
+
     for sample in samples:
         if sample.is_mc:
             sample.events_per = 100000
@@ -93,6 +97,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        pset_modifier = pset_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',
-                       publish_name = 'trigeff_htskim_' + version  # if htskim False, then crab will just complain?
+                       publish_name = 'trigeff_htskim_' + version,
                        )
     cs.submit_all(samples)
