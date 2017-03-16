@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from itertools import chain
 from JMTucker.Tools.Sample import *
 
 ########################################################################
@@ -163,7 +164,7 @@ xx4j_samples_2015 = [    # M = 50, 100 GeV also exist
     MCSample('xx4j_tau01000mm_M0500_2015', '/XXTo4J_M-500_CTau-1000mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  10000),
     MCSample('xx4j_tau02000mm_M0500_2015', '/XXTo4J_M-500_CTau-2000mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',  10000),
     MCSample('xx4j_tau00001mm_M0700_2015', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',     10000),
-    MCSample('xx4j_tau00003mm_M0700_2015', '/XXTo4J_M-700_CTau-3mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',     10000),
+    #MCSample('xx4j_tau00003mm_M0700_2015', '/XXTo4J_M-700_CTau-3mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',     10000), # crab didn't work and so forget it
     MCSample('xx4j_tau00010mm_M0700_2015', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',    10000),
     #MCSample('xx4j_tau00030mm_M0700_2015', '/XXTo4J_M-700_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',    10000), # only at bad t2
     MCSample('xx4j_tau00100mm_M0700_2015', '/XXTo4J_M-700_CTau-100mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',   10000),
@@ -450,31 +451,58 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_T
 ########
 
 # condor-run have no info in dbs, so no dataset info
-for x in (
-    qcdht0500_2015, qcdht0500ext_2015, qcdht0700_2015, qcdht0700ext_2015, qcdht1000_2015, qcdht1000ext_2015, qcdht1500_2015, qcdht1500ext_2015, qcdht2000_2015, qcdht2000ext_2015,
-    ttbar_2015, 
-    JetHT2015C, JetHT2015D,
-
-    official_mfv_neu_tau00100um_M0800,
-    qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext
-    ):
+for x in chain(qcd_samples_2015, qcd_samples_ext_2015, mfv_signal_samples_2015, 
+               (ttbar_2015, 
+                JetHT2015C, JetHT2015D,
+                xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
+ 
+                official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau01000um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau00100um_M0400, official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau01000um_M0800, official_mfv_neu_tau00100um_M1200, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M1200, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600, official_mfv_neu_tau00300um_M0800,
+                qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext
+                )):
     x.add_dataset('ntuplev11')
 
-for x in mfv_signal_samples_2015:
-    x.add_dataset('ntuplev11')
+_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-cb13b8cdde3b6b2f90cf7308805ef9ac/USER', 3523)
+_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-45bac0ae302f24f4c55a15765be974bc/USER', 3407)
+_adbp3('ntuplev11', '/XXTo4J_M-500_CTau-3mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-9525ac42c708012008d4ff5d478312a3/USER', 9025)
+_adbp3('ntuplev11', '/XXTo4J_M-500_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-4a59331dc3a5106790d73f02873de2c4/USER', 8609)
+_adbp3('ntuplev11', '/XXTo4J_M-500_CTau-1000mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-90ce56bfb0189a589d765bbc9a777763/USER', 7268)
+_adbp3('ntuplev11', '/XXTo4J_M-500_CTau-2000mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-4f78f351446d72912aa28e369a10e059/USER', 5672)
+_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-311b61b4feb63d7a20eb7f8f119f6a98/USER', 9899)
+_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-100mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-d65d92489f94cb64e6bdf47e3461e305/USER', 9801)
+_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-300mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-f877ce3c787e93098e0ff7b13dd50ef7/USER', 9780)
+_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-1000mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-be7d2c7b7389ad8009dda7e0f89fdde9/USER', 9358)
+_adbp3('ntuplev11', '/XXTo4J_M-1000_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-a4d6a2d1edba29c341d6a849456f2204/USER', 9993)
+_adbp3('ntuplev11', '/XXTo4J_M-1000_CTau-3mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-fbd007019edab3dfc15cc8569b4f11f2/USER', 9996)
+_adbp3('ntuplev11', '/XXTo4J_M-1000_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-01828aa16e58ec889a4f3ddb202aac8c/USER', 9986)
+_adbp3('ntuplev11', '/XXTo4J_M-1000_CTau-1000mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-5b0936c629a6178e2041f65182976f2b/USER', 9903)
+_adbp3('ntuplev11', '/XXTo4J_M-1000_CTau-2000mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-724fec0fe1d7bd8a1556cb2c8451ae92/USER', 9291)
+_adbp3('ntuplev11', '/XXTo4J_M-1500_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-72ff0f70065ce73f5c4dc7468d59d201/USER', 9908)
+_adbp3('ntuplev11', '/XXTo4J_M-1500_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-418fca19380dcd651a10a526bdd79f23/USER', 10000)
+_adbp3('ntuplev11', '/XXTo4J_M-1500_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-cef559cfb282bc00c4f1175ad78a02b3/USER', 10000)
+_adbp3('ntuplev11', '/XXTo4J_M-3000_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-fb75294031e3d3468862e4c550ba3efc/USER', 10000)
+_adbp3('ntuplev11', '/XXTo4J_M-3000_CTau-30mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-74b2b7c2b3f1f18b7caa6aaab7aced23/USER', 10000)
+_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-100mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-b64faa3a3f168068fbe14f2b39913568/USER', 3310)
 
 # crab-run
-_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-47b4d92ab7c9e362250fb90d61403b2e/USER',  4059) # 1 files
-_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-4dbc3d9997f1942245d06c2c0975b498/USER',  9899) # 1 files
-_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-ccc57cf4f7777cad4fc82c378fe4034c/USER', 3523) # 1 files
-_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-c5f8067ba76a07bc0223df2865ed288d/USER', 9868) # 1 files
+#_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-47b4d92ab7c9e362250fb90d61403b2e/USER',  4059) # 1 files
+#_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-4dbc3d9997f1942245d06c2c0975b498/USER',  9899) # 1 files
+#_adbp3('ntuplev11', '/XXTo4J_M-300_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-ccc57cf4f7777cad4fc82c378fe4034c/USER', 3523) # 1 files
+#_adbp3('ntuplev11', '/XXTo4J_M-700_CTau-10mm_TuneCUETP8M1_13TeV_pythia8/tucker-NtupleV11-c5f8067ba76a07bc0223df2865ed288d/USER', 9868) # 1 files
 
 qcdht1000.add_dataset('ntuplev11', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-2d5962ffa78f8ab85f960c7fe846404b/USER', 4838788)
 qcdht2000.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-df8522cc708057e6d4d7bdca37f1ad35/USER', 1991645)
 qcdht2000ext.add_dataset('ntuplev11', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV11_2016-b2cadb9c972c89c96ec11f8287fd9a9f/USER', 4047360)
 ttbar.add_dataset('ntuplev11', '/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/tucker-NtupleV11_2016-103966dbf38b40ab2f1836aa20e01d52/USER', 1836993)
-_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-f8accded35148baf419dc8a8895faecd/USER', 99349)
-_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-6f9590d29f299702b0303bba964b9b86/USER', 98639)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-dc6557def8cab57baf6d364ad5539443/USER', 18421)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-c9e6ca2eec4e58a5a83cb5770241ab8c/USER', 43311)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-a8007e11f8e1a30066595e1fac320e04/USER', 34083)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-bb873dee407067721df477aee4ac22c6/USER', 98639)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-92c7123859bbd811f65f32eed5280450/USER', 99997)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-0b36a2ca3c407d038a8c6b37765cd31e/USER', 75114)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-24995ac26d1d7da91c2b03ca51c025a4/USER', 44679)
+_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11-aeef3dcd437e7bfbd6c57b896442add9/USER', 99982)
+#_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-f8accded35148baf419dc8a8895faecd/USER', 99349)
+#_adbp3('ntuplev11', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV11_2016-6f9590d29f299702b0303bba964b9b86/USER', 98639)
 
 JetHT2016B3.add_dataset('ntuplev11', '/JetHT/None/None') # tucker-NtupleV11_2016-f4f1c3ebc1857c56bf5b53ded980e564/USER  HAS ANOTHER DATASET FOR DATA RECOVERY
 JetHT2016C.add_dataset('ntuplev11', '/JetHT/tucker-NtupleV11_2016-b7a6d1e5bc74f8dee0cc92b3a32034fc/USER')
@@ -551,8 +579,8 @@ if __name__ == '__main__':
                     (2016, sum([eval(l) for l in __all__ if type(eval(l)) == list and not l.endswith('2015')], []))]:
             print y
             for s in l:
-                if 'sum' not in s.name:
-                    for ds in 'miniaod', 'ntuplev11':
+                if s.name.startswith('mfv_') or s.name.startswith('xx4j') or s.name.startswith('official_mfv_'): #'sum' not in s.name:
+                    for ds in ('ntuplev11',): #'miniaod', 'ntuplev11':
                         if (s.name.startswith('mfv_') or s.name.startswith('xx4j')) and ds == 'miniaod':
                             continue
                         if not s.has_dataset(ds):
