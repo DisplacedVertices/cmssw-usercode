@@ -20,6 +20,7 @@ def get_f_t(x, min_ntracks=None, tree_path='trees'):
         input_fn = x
     f = ROOT.TFile.Open(input_fn)
     t = f.Get('mfvMiniTree/t')
+    t.SetAlias('jetht', 'Sum$((jet_pt>40)*jet_pt)')
     t.SetAlias('svdist', 'sqrt((x0-x1)**2 + (y0-y1)**2)')
     t.SetAlias('svdphi', 'TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))')
     t.SetAlias('svdz',   'z0 - z1')
@@ -27,8 +28,8 @@ def get_f_t(x, min_ntracks=None, tree_path='trees'):
         t.SetAlias('min_ntracks_ok', 'ntk0 >= %i && ntk1 >= %i' % (min_ntracks, min_ntracks))
     return f, t
 
-bkg_samples = Samples.ttbar_samples + Samples.qcd_samples_sum
-sig_samples = [Samples.mfv_neu_tau00100um_M0400, Samples.mfv_neu_tau00300um_M0400, Samples.mfv_neu_tau01000um_M0400, Samples.mfv_neu_tau10000um_M0400]
+#bkg_samples = Samples.ttbar_samples + Samples.qcd_samples_sum
+#sig_samples = [] #Samples.mfv_neu_tau00100um_M0400, Samples.mfv_neu_tau00300um_M0400, Samples.mfv_neu_tau01000um_M0400, Samples.mfv_neu_tau10000um_M0400]
 
 class FitResult:
     def __init__(self, *args):
