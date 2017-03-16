@@ -71,6 +71,13 @@ def customize_before_unscheduled(process):
                 process.AODEventContent.outputCommands + \
                 dedrop(process.MINIAODEventContent.outputCommands) + \
                 dedrop(output_commands)
+        # for some reason taus crash with this cfg in 8025, and you have to drop met too then (then have to kill it in EventProducer)
+        process.mfvEvent.met_src = ''
+        process.out.outputCommands = [x for x in process.out.outputCommands if 'tau' not in x.lower() and 'MET' not in x]
+        for x in dir(process):
+            xl = x.lower()
+            if 'tau' in xl or 'MET' in x:
+                delattr(process, x)
 
 process = pat_tuple_process(customize_before_unscheduled, is_mc, year)
 process.out.fileName = 'ntuple.root'
