@@ -62,6 +62,8 @@ class Sample(object):
         return True
 
     def add_dataset(self, c, *args, **kwargs):
+        if self.has_dataset(c):
+            raise KeyError('sample %s already has dataset %s' % (self.name, c))
         if len(args) == 1:
             args = (args[0], -1)
         elif len(args) == 0:
