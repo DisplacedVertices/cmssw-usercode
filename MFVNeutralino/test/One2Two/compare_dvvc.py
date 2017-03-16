@@ -21,10 +21,10 @@ if mode == 'vary_eff':
     ls = ['average efficiency', 'maxtk efficiency']
 
 if mode == 'vary_dphi':
-    fn1.append('2v_from_jets_3track_average3_dphijvpt_v11.root')
-    fn2.append('2v_from_jets_4track_average4_dphijvpt_v11.root')
-    fn3.append('2v_from_jets_5track_average5_dphijvpt_v11.root')
-    ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', '|#Delta#phi| from p_{T}-weighted #Delta#phi_{JV}']
+    fn1.append('2v_from_jets_3track_average3_dphiflat_v11.root')
+    fn2.append('2v_from_jets_4track_average4_dphiflat_v11.root')
+    fn3.append('2v_from_jets_5track_average5_dphiflat_v11.root')
+    ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
 
 if mode == 'vary_dbv':
     fn1.append('2v_from_jets_3track_average3_c1p35_e2_a3p66_v11_sum.root')
@@ -160,6 +160,20 @@ for i in range(3):
     r3 = v3/c3
     er3 = (v3/c3) * ((ev3/v3)**2 + (ec3/c3)**2)**0.5
 
+    if mode == 'vary_dphi':
+        if i == 0:
+            er2 *= 0.211780
+            er3 *= 0.167324
+        if i == 1:
+            er2 *= 0.213850
+            er3 *= 0.183206
+        if i == 2:
+            er2 *= 0.219530
+            er3 *= 0.167883
+    if mode == 'vary_eff':
+        er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
+        er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5
+
     print
     print '    simulated events: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s1, es1, s2, es2, s3, es3)
     print 'default construction: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c1, ec1, c2, ec2, c3, ec3)
@@ -167,20 +181,6 @@ for i in range(3):
     print ' variation / default: 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r1, er1, r2, er2, r3, er3)
     print
     print
-
-    if mode == 'vary_dphi':
-        if i == 0:
-            er2 *= 0.207052
-            er3 *= 0.162448
-        if i == 1:
-            er2 *= 0.210285
-            er3 *= 0.179084
-        if i == 2:
-            er2 *= 0.222209
-            er3 *= 0.168349
-    if mode == 'vary_eff':
-        er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
-        er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5
 
     x.append(i-2)
     ex.append(0)
