@@ -6,6 +6,7 @@ from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
 from JMTucker.Tools.CRAB3ToolsSh import crab_get_njobs_from_log, crab_get_output_dataset_from_log
 from JMTucker.Tools.DBS import files_in_dataset, numevents_in_dataset
 from JMTucker.Tools.general import coderep_files
+from JMTucker.Tools import colors
 from JMTucker.Tools.SampleFiles import _enc
 
 parser = argparse.ArgumentParser(description = 'cr_publish: get the staged-out files from crab directories and print out lines for SampleFiles.py',
@@ -39,6 +40,8 @@ for wd in wds:
     assert not publish.has_key((sample, options.dataset))
     njobs = crab_get_njobs_from_log(wd)
     ds = crab_get_output_dataset_from_log(wd)
+    if ds is None:
+        print colors.red('no dataset in log for ') + wd
     dbs_files = files_in_dataset(ds, 3)
     files = []
     for fn in dbs_files:
