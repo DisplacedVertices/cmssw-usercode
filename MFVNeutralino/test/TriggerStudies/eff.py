@@ -98,7 +98,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'is_mc = False', err))
 
-        if year == 2015 or (year == 2016 and not sample.is_mc and sample.name.split('2016')[1].startswith('H'))
+        if year == 2015 or (year == 2016 and not sample.is_mc and sample.name.split('2016')[1].startswith('H')):
             magic = 'to_doX=X(800,X900)'.replace('X', ' ')
             repwith = 'to_do = (%i,)' % (800 if year == 2015 else 900)
             err = 'trying to submit on data, and need to change to_do but no magic string'
