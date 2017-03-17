@@ -7,8 +7,6 @@ def setup_trigger_filter(process, path_name='pevtsel', filt_name='triggerFilter'
     triggerFilter.HLTPaths = [
         "HLT_PFHT800_v*",
         "HLT_PFHT900_v*",
-        "HLT_PFJet450_v*",
-        "HLT_AK8PFJet450_v*"
         ]
     triggerFilter.andOr = True # = OR
     triggerFilter.throw = False
