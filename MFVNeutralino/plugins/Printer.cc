@@ -150,6 +150,15 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     printf("npv: %u\n", mevent->npv);
     printf("pv: ntracks: %u   sumpt2: %11.3g   coords: (%11.3g, %11.3g, %11.3g)   rho: %11.3g\n", mevent->pv_ntracks, mevent->pv_sumpt2, mevent->pvx, mevent->pvy, mevent->pvz, mevent->pv_rho());
     printf("njets: %u  (no pu l: %u  m: %u  t: %u)  jet_ht: %11.3g   pt of jet #4: %11.3g   pt of jet #5: %11.3g   pt of jet #6: %11.3g\n", mevent->njets(), mevent->njetsnopu(0), mevent->njetsnopu(1), mevent->njetsnopu(2), mevent->jet_ht(), mevent->jetpt4(), mevent->jetpt5(), mevent->jetpt6());
+    printf("jet tracks (n total = %lu)\n", mevent->n_jet_tracks());
+    for (size_t i = 0, ie = mevent->n_jet_tracks(); i < ie; ++i)
+      printf("  jet %2i  qpt %11.3g +- %11.3g eta %11.3g +- %11.3g phi %11.3g +- %11.3g dxy %11.3g +- %11.3g dz %11.3g +- %11.3g\n",
+             mevent->jet_track_which_jet[i],
+             mevent->jet_track_qpt[i], mevent->jet_track_pt_err[i], 
+             mevent->jet_track_eta[i], mevent->jet_track_eta_err[i], 
+             mevent->jet_track_phi[i], mevent->jet_track_phi_err[i], 
+             mevent->jet_track_dxy[i], mevent->jet_track_dxy_err[i], 
+             mevent->jet_track_dz[i], mevent->jet_track_dz_err[i]);
     printf("met: %11.3g   phi: %11.3g\n", mevent->met(), mevent->metphi());
     printf("nbtags (l,m,t): ");
     for (int i = 0; i < 3; ++i)

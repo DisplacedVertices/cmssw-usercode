@@ -320,9 +320,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<pat::JetCollection> jets;
-  event.getByToken(jets_token, jets);
-
   if (use_met) {
     edm::Handle<pat::METCollection> mets;
     event.getByToken(met_token, mets);
@@ -330,6 +327,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->metx = met.px();
     mevent->mety = met.py();
   }
+
+  //////////////////////////////////////////////////////////////////////
+
+  edm::Handle<pat::JetCollection> jets;
+  event.getByToken(jets_token, jets);
 
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
@@ -350,6 +352,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         bdisc_level = i+1;
 
     mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level));
+    const size_t ijet = mevent->njets() - 1; // will stay in track with jjet as long as jets are pt ordered...
 
     const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
     mevent->jet_svnvertices.push_back(svtag ? svtag->nVertices() : -1);
@@ -385,6 +388,27 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->jet_svcyy.push_back(0);
       mevent->jet_svcyz.push_back(0);
       mevent->jet_svczz.push_back(0);
+    }
+
+    assert(ijet <= 255);
+    for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
+      const reco::TrackRef& tk = pfcand->trackRef();
+      if (tk.isNonnull()) {
+        assert(abs(tk->charge()) == 1);
+        mevent->jet_track_which_jet.push_back(ijet);
+        mevent->jet_track_chi2dof.push_back(tk->normalizedChi2());
+        mevent->jet_track_qpt.push_back(tk->charge() * tk->pt());
+        mevent->jet_track_eta.push_back(tk->eta());
+        mevent->jet_track_phi.push_back(tk->phi());
+        mevent->jet_track_dxy.push_back(tk->dxy(beamspot->position()));
+        mevent->jet_track_dz.push_back(primary_vertex ? tk->dz(primary_vertex->position()) : 0);
+        mevent->jet_track_pt_err.push_back(tk->ptError());
+        mevent->jet_track_eta_err.push_back(tk->etaError());
+        mevent->jet_track_phi_err.push_back(tk->phiError());
+        mevent->jet_track_dxy_err.push_back(tk->dxyError());
+        mevent->jet_track_dz_err.push_back(tk->dzError());
+        mevent->jet_track_hp_.push_back(MFVEvent::make_track_hitpattern(tk->hitPattern().numberOfValidPixelHits(), tk->hitPattern().numberOfValidStripHits(), tk->hitPattern().pixelLayersWithMeasurement(), tk->hitPattern().stripLayersWithMeasurement()));
+      }
     }
   }
 
