@@ -59,7 +59,20 @@ def cs_analyze(d,
             _cmsRun_re=re.compile(r"cmsRun exited with code (\d+)"),
             _exception_re=re.compile(r"An exception of category '(.*)' occurred while")):
     class cs_analyze_result:
-        pass
+        def _list(self, ret):
+            if type(ret) == int:
+                ret = lambda r: ret
+            return [i for i,r in enumerate(self.returns) if ret(r)]
+        def idle(self):
+            return self._list(-1)
+        def running(self):
+            return self._list(-2)
+        def killed(self):
+            return self._list(lambda r: r == -3 or r == -4)
+        def probs(self):
+            return self._list(lambda r: r > 0)
+        def done(self):
+            return self._list(0)
     result = cs_analyze_result()
     result.working_dir = d
     result.njobs = cs_njobs(d)
