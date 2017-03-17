@@ -9,11 +9,20 @@ from JMTucker.MFVNeutralino.Year import year
 # 1st two magic
 is_mc = True
 to_do = (800, 900)
+H_for_test = False
+if year == 2015:
+    to_do = (800,)
+    if H_for_test:
+        print 'H_for_test does nothing in 2015'
+elif year == 2016 and H_for_test:
+    to_do = (900,)
+
 htskim = True
 ht_skim_cut = min(to_do)
+
 version = 'v2'
-batch_name = 'TrigEff%s/%i' % (version, year)
 json = '../ana_2015p6.json'
+batch_name = 'TrigEff%s/%i' % (version, year)
 
 if year == 2015:
     mu_thresh_hlt = 20
@@ -22,13 +31,16 @@ elif year == 2016:
     mu_thresh_hlt = 24
     mu_thresh_offline = 27
 
-global_tag(process, which_global_tag(is_mc, year))
-process.maxEvents.input = 1000
-process.source.fileNames = ['/store/user/tucker/temp/wjetstolnu.miniaod.163E57C9-7ABE-E611-A73A-0025905B857E.root' if is_mc else
-         #                   '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
-                            '/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/283/283/00000/780D7FAA-FF95-E611-AC56-02163E011B49.root']
-#process.options.wantSummary = True
 process.TFileService.fileName = 'eff.root'
+global_tag(process, which_global_tag(is_mc, year))
+#process.options.wantSummary = True
+process.maxEvents.input = 1000
+process.source.fileNames = {
+    (2015,True):  ['/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/2018871D-CABC-E511-95C1-A4BADB0F4C29.root'],
+    (2015,False): ['/store/data/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10000/7C7A3D21-C0A8-E511-94E7-0025905A60DE.root'],
+    (2016,True):  ['/store/user/tucker/temp/wjetstolnu.miniaod.163E57C9-7ABE-E611-A73A-0025905B857E.root'],
+    (2016,False): ['/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/283/283/00000/780D7FAA-FF95-E611-AC56-02163E011B49.root' if H_for_test else '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root'],
+    }[(year, is_mc)]
 
 if is_mc:
     process.load('JMTucker.Tools.MCStatProducer_cff')
