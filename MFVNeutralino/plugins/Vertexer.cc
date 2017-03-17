@@ -120,6 +120,7 @@ private:
 
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
+  const double min_jet_pt_for_ht;
   const bool disregard_event;
   const bool use_tracks;
   const edm::EDGetTokenT<reco::TrackCollection> track_token;
@@ -241,10 +242,10 @@ private:
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
 
-  // not using 1 in these 3
-  ByRunTH1<TH1F> h_pairs_d2d[6];
-  ByRunTH1<TH1F> h_merge_d2d[6];
-  ByRunTH1<TH1F> h_erase_d2d[6];
+  // 1st index is jet ht cut, 2nd index is min_ntracks, with 0 inclusive, 1 unused
+  ByRunTH1<TH1F> h_pairs_d2d[3][6];
+  ByRunTH1<TH1F> h_merge_d2d[3][6];
+  ByRunTH1<TH1F> h_erase_d2d[3][6];
 
   struct track_cuts {
     const MFVVertexer& mv;
@@ -348,6 +349,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     av_reco(new ConfigurableVertexReconstructor(cfg.getParameter<edm::ParameterSet>("avr_params"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
+    min_jet_pt_for_ht(cfg.getParameter<double>("min_jet_pt_for_ht")),
     disregard_event(cfg.getParameter<bool>("disregard_event")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
@@ -517,11 +519,14 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
-    for (int i = 0; i <= 5; ++i) {
-      if (i == 1) continue;
-      h_pairs_d2d[i].set(&fs, TString::Format("h_pairs_d2d_maxtk%i", i), "", 4000, 0, 4);
-      h_merge_d2d[i].set(&fs, TString::Format("h_merge_d2d_maxtk%i", i), "", 4000, 0, 4);
-      h_erase_d2d[i].set(&fs, TString::Format("h_erase_d2d_maxtk%i", i), "", 4000, 0, 4);
+    for (int iht = 0; iht < 3; ++iht) {
+      const int jet_ht_cut[3] = {1000, 1050, 1100};
+      for (int i = 0; i <= 5; ++i) {
+        if (i == 1) continue;
+        h_pairs_d2d[iht][i].set(&fs, TString::Format("h_pairs_d2d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
+        h_merge_d2d[iht][i].set(&fs, TString::Format("h_merge_d2d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
+        h_erase_d2d[iht][i].set(&fs, TString::Format("h_erase_d2d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
+      }
     }
   }
 }
@@ -551,11 +556,13 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const unsigned run = event.id().run();
-  for (int i = 0; i <= 5; ++i) {
-    if (i == 1) continue;
-    h_pairs_d2d[i].book(run);
-    h_merge_d2d[i].book(run);
-    h_erase_d2d[i].book(run);
+  for (int iht = 0; iht < 3; ++iht) {
+    for (int i = 0; i <= 5; ++i) {
+      if (i == 1) continue;
+      h_pairs_d2d[iht][i].book(run);
+      h_merge_d2d[iht][i].book(run);
+      h_erase_d2d[iht][i].book(run);
+    }
   }
 
   if (verbose) {
@@ -575,6 +582,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const reco::Vertex* primary_vertex = 0;
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
+
+  edm::Handle<pat::JetCollection> jets_for_ht;
+  event.getByToken(pat_jet_token, jets_for_ht);
+  const double njets = jets_for_ht->size(); // JMTBAD relies on pt cut in selectedPatJets
+  const double jet_ht = std::accumulate(jets_for_ht->begin(), jets_for_ht->end(), 0.,
+                                        [this](double init, const pat::Jet& j) { if (j.pt() > min_jet_pt_for_ht) init += j.pt(); return init; });
 
   //////////////////////////////////////////////////////////////////////
   // The tracks to be used. Will be filled from a track collection or
@@ -961,9 +974,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
         const double d2d = mag(v[0]->x() - v[1]->x(),
                                v[0]->y() - v[1]->y());
-        if (ntk_max >= 2)
-          h_pairs_d2d[ntk_max][run]->Fill(d2d);
-        h_pairs_d2d[0][run]->Fill(d2d);
+        for (int iht = 0; iht < 3; ++iht) {
+          const int jet_ht_cut[3] = {1000, 1050, 1100};
+          if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
+            if (ntk_max >= 2)
+              h_pairs_d2d[iht][ntk_max][run]->Fill(d2d);
+            h_pairs_d2d[iht][0][run]->Fill(d2d);
+          }
+        }
       }
       
       reco::TrackRefVector shared_tracks;
@@ -1096,9 +1114,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
           const double d2d = mag(v[0]->x() - v[1]->x(),
                                  v[0]->y() - v[1]->y());
-          if (ntk_max >= 2)
-            h_merge_d2d[ntk_max][run]->Fill(d2d);
-          h_merge_d2d[0][run]->Fill(d2d);
+          for (int iht = 0; iht < 3; ++iht) {
+            const int jet_ht_cut[3] = {1000, 1050, 1100};
+            if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
+              if (ntk_max >= 2)
+                h_merge_d2d[iht][ntk_max][run]->Fill(d2d);
+              h_merge_d2d[iht][0][run]->Fill(d2d);
+            }
+          }
         }
         vertices->erase(v[1]);
         *v[0] = reco::Vertex(new_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
@@ -1157,9 +1180,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
         const double d2d = mag(vsave[0].x() - vsave[1].x(),
                                vsave[0].y() - vsave[1].y());
-        if (ntk_max >= 2)
-          h_erase_d2d[ntk_max][run]->Fill(d2d);
-        h_erase_d2d[0][run]->Fill(d2d);
+        for (int iht = 0; iht < 3; ++iht) {
+          const int jet_ht_cut[3] = {1000, 1050, 1100};
+          if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
+            if (ntk_max >= 2)
+              h_erase_d2d[iht][ntk_max][run]->Fill(d2d);
+            h_erase_d2d[iht][0][run]->Fill(d2d);
+          }
+        }
       }
 
       if (erase[1]) vertices->erase(v[1]);
