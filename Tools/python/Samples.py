@@ -559,7 +559,7 @@ for x in (JetHT2016B3,
     x.datasets['miniaod'].condor = True
 
 ttbar_2015.datasets['miniaod'].condor = True
-ttbar_2015.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
+ttbar_2015.datasets['miniaod'].xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
 for s in registry.all():
     for ds in s.datasets.keys():
