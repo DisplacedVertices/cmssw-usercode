@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+
+import os, sys
+join = os.path.join
+from glob import glob
+from JMTucker.Tools.CRAB3ToolsBase import crabify_list, crab_jobs_from_argv
+from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from JMTucker.Tools.CondorTools import *
+from JMTucker.Tools.general import mkdirp
+
+use_log = '-l' in sys.argv
+if use_log:
+    sys.argv.remove('-l')
+    
+if len(sys.argv) < 3:
+    print 'usage: cs_resubmit condor_dir jobs_list'
+    print '    jobs_list can be space separated, or can handle a string like 1,3,5-7'
+    sys.exit(1)
+
+wd = os.path.abspath(sys.argv[1])
+if not is_cs_dir(wd):
+    raise ValueError('first arg must be a CondorSubmitter dir')
+
+jobs = crab_jobs_from_argv()
+if not jobs:
+    raise ValueError('expect a list of jobs in argv')
+
+for job in jobs:
+    os.system('less %s/%s.%s' % (wd, 'log' if use_log else 'stdout', job))
