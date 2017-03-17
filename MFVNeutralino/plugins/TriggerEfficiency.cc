@@ -46,7 +46,9 @@ private:
   TH1F* h_jet_phi[6];
   TH1F* h_jet_frac_mu[6];
   TH1F* h_jet_muef[6];
+  TH1F* h_jet_ht_all;
   TH1F* h_jet_ht;
+  TH1F* h_jet_ht_ptlt200;
   TH1F* h_jet_ht_no_mu_fromcand;
   TH1F* h_jet_ht_no_mu;
   TH1F* h_jet_ht_m_hlt_ht;
@@ -104,7 +106,9 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     h_jet_frac_mu[i] = fs->make<TH1F>(TString::Format("h_jet_frac_mu_%i", i), "", 11, 0, 1.1);
     h_jet_muef[i] = fs->make<TH1F>(TString::Format("h_jet_muef_%i", i), "", 11, 0, 1.1);
   }
+  h_jet_ht_all = fs->make<TH1F>("h_jet_ht_all", "", 250, 0, 5000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", "", 250, 0, 5000);
+  h_jet_ht_ptlt200 = fs->make<TH1F>("h_jet_ht_ptlt200", "", 250, 0, 5000);
   h_jet_ht_no_mu_fromcand = fs->make<TH1F>("h_jet_ht_no_mu_fromcand", "", 250, 0, 5000);
   h_jet_ht_no_mu = fs->make<TH1F>("h_jet_ht_no_mu", "", 250, 0, 5000);
   h_jet_ht_m_hlt_ht = fs->make<TH1F>("h_jet_ht_m_hlt_ht", "", 100, -500, 500);
@@ -176,13 +180,20 @@ void MFVTriggerEfficiency::produce(edm::Event& event, const edm::EventSetup& set
   h_nnoseljets->Fill(jets->size());
 
   int njet = 0;
+  double jet_ht_all = 0;
   double jet_ht = 0;
+  double jet_ht_ptlt200 = 0;
   double jet_ht_no_mu = 0;
   double jet_ht_no_mu_fromcand = 0;
   for (const pat::Jet& jet : *jets) {
     if (jet_selector(jet)) {
       ++njet;
-      jet_ht += jet.pt();
+      jet_ht_all += jet.pt();
+      if (jet.pt() > 40) {
+        jet_ht += jet.pt();
+        if (jet.pt() < 200)
+          jet_ht_ptlt200 += jet.pt();
+      }
       if (jet.muonEnergyFraction() < 0.8)
         jet_ht_no_mu += jet.pt();
 
@@ -211,7 +222,9 @@ void MFVTriggerEfficiency::produce(edm::Event& event, const edm::EventSetup& set
   }
 
   h_njets->Fill(njet);
+  h_jet_ht_all->Fill(jet_ht_all);
   h_jet_ht->Fill(jet_ht);
+  h_jet_ht_ptlt200->Fill(jet_ht_ptlt200);
   h_jet_ht_no_mu_fromcand->Fill(jet_ht_no_mu_fromcand);
   h_jet_ht_no_mu->Fill(jet_ht_no_mu);
   h_njets_v_ht->Fill(jet_ht, njet);
