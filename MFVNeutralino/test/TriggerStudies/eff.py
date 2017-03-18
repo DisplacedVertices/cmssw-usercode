@@ -17,7 +17,7 @@ if year == 2015:
 elif year == 2016 and H_for_test:
     to_do = (900,)
 
-htskim = True
+htskim = False
 ht_skim_cut = min(to_do)
 
 version = 'v3'
