@@ -59,6 +59,8 @@ private:
     unsigned lumi;
     unsigned long long evt;
     float l1htt;
+    float myhtt;
+    float myhttwbug;
     float ht;
     float ht4mc;
     unsigned found;
@@ -83,6 +85,8 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
 {
   produces<float>("l1htt");
+  produces<float>("myhtt");
+  produces<float>("myhttwbug");
   produces<float>("ht");
   produces<float>("ht4mc");
   produces<std::vector<int>>("L1decisions");
@@ -95,6 +99,8 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     tree->Branch("lumi",  &t.lumi,  "lumi/i");
     tree->Branch("event", &t.evt,   "event/l");
     tree->Branch("l1htt", &t.l1htt, "l1htt/F");
+    tree->Branch("myhtt", &t.myhtt, "myhtt/F");
+    tree->Branch("myhttwbug", &t.myhttwbug, "myhttwbug/F");
     tree->Branch("ht",    &t.ht,    "ht/F");
     tree->Branch("ht4mc", &t.ht4mc, "ht4mc/F");
     tree->Branch("found", &t.found, "found/i");
@@ -108,6 +114,8 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
     t.lumi  = event.luminosityBlock();
     t.evt   = event.id().event();
     t.l1htt = -1;
+    t.myhtt = -1;
+    t.myhttwbug = -1;
     t.ht    = -1;
     t.ht4mc = -1;
     t.found = 0;
@@ -125,6 +133,21 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 #ifdef MFVNEUTRALINO_2016
   edm::Handle<l1t::JetBxCollection> l1_jets;
   event.getByToken(l1_jets_token, l1_jets);
+
+  double my_htt = 0;
+  double my_htt_wbug = 0;
+  for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
+    const l1t::Jet& jet = l1_jets->at(0, i);
+    const double pt = jet.pt();
+    if (fabs(jet.eta()) < 3 && pt >= 30) {
+      my_htt += pt;
+      if (pt < 255)
+        my_htt_wbug += pt;
+      else
+        my_htt = 1000;
+    }
+  }
+  if (my_htt >= 1000) my_htt = 1000;
 
   edm::Handle<l1t::EtSumBxCollection> l1_etsums;
   event.getByToken(l1_etsums_token, l1_etsums);
@@ -169,7 +192,6 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 #ifdef MFVNEUTRALINO_2016
     std::cout << " === L1 CaloStage2 digis ===\n";
 
-    double my_htt = 0;
     for (int bx = l1_jets->getFirstBX(), bxe = l1_jets->getLastBX(); bx < bxe; ++bx) {
       if (l1_jets->isEmpty(bx))
         std::cout << "\t    bx " << bx << " is empty for jets\n";
@@ -178,7 +200,6 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
         std::cout << "\t    bx " << bx << " has " << n << " jets:\n";
         for (size_t i = 0; i < n; ++i) {
           const l1t::Jet& jet = l1_jets->at(bx, i);
-          if (bx == 0) my_htt += jet.et();
           std::cout << "\t      jet " << i << ": " << jet << "\n"
                     << "\t             rawEt " << jet.rawEt() << " seedEt " << jet.seedEt() << " PUEt: " << jet.puEt() << " towerIEta: " << jet.towerIEta() << " towerIPhi: " << jet.towerIPhi() << "\n";
         }
@@ -200,7 +221,7 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 
     std::cout << "\tEtSumHelper says MET " << etsumhelper.MissingEt() << " phi " << etsumhelper.MissingEtPhi()
               << " MHT " << etsumhelper.MissingHt() << " phi " << etsumhelper.MissingHtPhi()
-              << " ETT " << etsumhelper.TotalEt() << " HTT " << etsumhelper.TotalHt() << "  My HTT " << my_htt << "\n";
+              << " ETT " << etsumhelper.TotalEt() << " HTT " << etsumhelper.TotalHt() << "  My HTT " << my_htt << " with bug " << my_htt_wbug << "\n";
 #endif
 
     std::cout << std::endl;
@@ -208,6 +229,8 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   float ht_for_cut = -1;
   std::auto_ptr<float> l1htt(new float(-1));
+  std::auto_ptr<float> myhtt(new float(-1));
+  std::auto_ptr<float> myhttwbug(new float(-1));
   std::auto_ptr<float> ht(new float(-1));
   std::auto_ptr<float> ht4mc(new float(-1));
   std::auto_ptr<std::vector<int>> L1decisions(new std::vector<int>(mfv::n_l1_paths, -1));
@@ -227,6 +250,8 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 
 #ifdef MFVNEUTRALINO_2016
   t.l1htt = *l1htt = etsumhelper.TotalHt();
+  t.myhtt = *myhtt = my_htt;
+  t.myhttwbug = *myhttwbug = my_htt_wbug;
 #endif
 
   if (prints)
@@ -290,6 +315,8 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
     tree->Fill();
 
   event.put(l1htt, "l1htt");
+  event.put(myhtt, "myhtt");
+  event.put(myhttwbug, "myhttwbug");
   event.put(ht, "ht");
   event.put(ht4mc, "ht4mc");
   event.put(L1decisions, "L1decisions");
