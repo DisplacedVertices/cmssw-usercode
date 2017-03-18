@@ -20,7 +20,7 @@ elif year == 2016 and H_for_test:
 htskim = True
 ht_skim_cut = min(to_do)
 
-version = 'v2'
+version = 'v3'
 json = '../ana_2015p6.json'
 batch_name = 'TrigEff%s/%i' % (version, year)
 
@@ -93,6 +93,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.auxiliary_data_samples_2015 + Samples.leptonic_background_samples_2015 + Samples.ttbar_samples_2015
     elif year == 2016:
         samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
+        samples += [getattr(Samples, 'official_mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [official_mfv_neu_tau10000um_M0800]
 
     for sample in samples:
         if sample.is_mc:
