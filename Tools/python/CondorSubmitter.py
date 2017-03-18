@@ -266,7 +266,7 @@ def get(i): return _l[i]
                     stageout_path = '/' + stageout_path
                 stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
                 if not publish_name:
-                    publish_name = batch_name
+                    publish_name = batch_name.replace('/', '_')
                 stageout_path += '/$(<cs_primaryds)/' + publish_name + '_$(<cs_samplename)/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
 
             print 'CondorSubmitter init: stageout files are', stageout_files
