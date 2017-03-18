@@ -576,18 +576,6 @@ if __name__ == '__main__':
     from JMTucker.Tools import DBS
     from JMTucker.Tools.general import popen
 
-    if 'filename' in sys.argv:
-        sample_name  = sys.argv[sys.argv.index('filename')+1]
-        try:
-            sample = eval(sample_name)
-        except NameError:
-            raise NameError('no sample %s' % sample_name)
-        dataset = sys.argv[sys.argv.index('filename')+2]
-        if not sample.has_dataset(dataset):
-            raise KeyError('no dataset %s in %s' % (dataset, sample))
-        sample.set_curr_dataset(dataset)
-        pprint(sample.filenames[:5])
-
     if 0:
         from JMTucker.Tools.SampleFiles import _d
         for y,l in [(2015, sum([eval(l) for l in __all__ if type(eval(l)) == list and l.endswith('2015')], [])),
