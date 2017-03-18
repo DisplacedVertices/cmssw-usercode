@@ -135,7 +135,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips))
     ms = MetaSubmitter(batch_name + '/%i' % year)
     ms.common.pset_modifier = modify
-    ms.common.publish_name = batch_name
+    ms.common.publish_name = batch_name + '_' + str(year)
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
