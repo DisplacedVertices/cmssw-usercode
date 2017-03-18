@@ -123,7 +123,7 @@ fi
 echo START RAWHLT
 
 (
-scram project -n RAWHLT CMSSW CMSSW_7_6_1
+scram project -n RAWHLT CMSSW CMSSW_8_0_21
 cd RAWHLT/src
 eval $(scram runtime -sh)
 cd ../..
@@ -133,8 +133,7 @@ cmsRun rawhlt.py ${TODO2} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
-    gzip RandomEngineState.xml
-    mv RandomEngineState.xml.gz RandomEngineState_RAWHLT.xml.gz
+    tar czf RandomEngineState_RAWHLT.tgz RandomEngineState.xml*
     echo RAWHLT ls -l
     ls -l
 fi
@@ -155,7 +154,7 @@ echo END RAWHLT
 ################################################################################
 
 echo START RECO
-cd CMSSW_7_6_3_patch2/src
+cd CMSSW_8_0_25/src
 eval $(scram runtime -sh)
 cd ../..
 

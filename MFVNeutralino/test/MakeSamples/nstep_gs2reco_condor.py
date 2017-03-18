@@ -52,7 +52,7 @@ inputs_dir = os.path.join(work_area, 'inputs')
 os.mkdir(inputs_dir)
 
 sh_fn = 'nstep_gs2reco_condor.sh'
-input_files = 'todoify.sh rawhlt.py reco.py modify.py inputfns.txt minbias.py minbias_files.py minbias_files.pkl'.split()
+input_files = 'todoify.sh rawhlt.py reco.py modify.py inputfns.txt minbias.py minbias.txt.gz minbias_premix.txt.gz'.split()
 for fn in [sh_fn] + input_files:
     shutil.copy2(fn, inputs_dir)
 
