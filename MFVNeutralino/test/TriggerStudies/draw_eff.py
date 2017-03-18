@@ -4,7 +4,9 @@ from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
-which = typed_from_argv(int, 0)
+num_dir = 'num800'
+which = typed_from_argv(int, 1)
+year = 2016
 data_period, int_lumi = [
     ('',  36802.),
     ('BthruG', 27945.),
@@ -19,11 +21,12 @@ data_period, int_lumi = [
     ('H3',  221.),
     ][which]
 
-v = '2016v1'
-root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff' + v
-if data_period:
-    v += '_' + data_period
-plot_path = 'TrigEff_' + v
+if num_dir == 'num800' and (year == 2015 or data_period.startswith('H')):
+    raise ValueError('invalid combo: %s %s %s' % (num_dir, year, data_period))
+
+nooffmucut = '' # '_nooffmucut'
+root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEffv2%s/%s' % (nooffmucut, year)
+plot_path = 'TrigEffv2%s_%s_%s%s' % (nooffmucut, num_dir, year, data_period)
 
 set_style()
 ROOT.gStyle.SetOptStat(0)
@@ -35,8 +38,8 @@ save_more = True
 data_fn = os.path.join(root_dir, 'SingleMuon2016%s.root' % data_period)
 data_f = ROOT.TFile(data_fn)
 
-bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10] #, qcdmupt15]
-bkg_samples = [wjetstolnu, dyjetstollM50, dyjetstollM10] #, qcdmupt15]
+bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10, qcdmupt15]
+#bkg_samples = [wjetstolnu, dyjetstollM50, dyjetstollM10] #, qcdmupt15]
 n_bkg_samples = len(bkg_samples)
 for sample in bkg_samples:
     sample.fn = os.path.join(root_dir, sample.name + '.root')
@@ -78,7 +81,7 @@ def rebin_pt(h):
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_ht(h):
-    a = to_array(range(0, 500, 20) + range(500, 1100, 60) + range(1100, 1500, 100) + range(1500, 5001, 250))
+    a = to_array(range(0, 500, 20) + range(500, 1000, 50) + range(1000, 1500, 100) + range(1500, 2000, 250) + [2000, 3000, 5000])
     hnew = h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
     move_overflow_into_last_bin(hnew)
     return hnew
@@ -90,7 +93,7 @@ def get(f, kind, n):
         rebin = rebin_pt
     elif 'ht' in n:
         rebin = rebin_ht
-    return rebin(f.Get(kind + 'num/%s' % n)), rebin(f.Get(kind + 'den/%s' % n))
+    return rebin(f.Get(kind + '%s/%s' % (num_dir, n))), rebin(f.Get(kind + 'den/%s' % n))
 
 for kind in kinds:
     for n in ns:
