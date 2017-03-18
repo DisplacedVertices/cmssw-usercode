@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+import os, sys
+from pprint import pprint
+from JMTucker.Tools.CondorTools import cs_dirs_from_argv
+
+wds = cs_dirs_from_argv()
+if not wds:
+    print 'No condor dirs in argv\n'
+    sys.exit(1)
+
+for wd in wds:
+    execfile(os.path.join(wd, 'cs_filelist.py'))
+    with open(os.path.join(wd, 'cs_filelist2.py'), 'wt') as f:
+        f.write('_l = ')
+        pprint(_l, f)
+        f.write('\ndef get(i): return _l[i]\n')
+
