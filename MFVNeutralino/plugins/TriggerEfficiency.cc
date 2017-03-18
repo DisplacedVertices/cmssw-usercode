@@ -40,12 +40,12 @@ private:
 
   TH1F* h_nnoseljets;
   TH1F* h_njets;
-  TH1F* h_jet_e[6];
-  TH1F* h_jet_pt[6];
-  TH1F* h_jet_eta[6];
-  TH1F* h_jet_phi[6];
-  TH1F* h_jet_frac_mu[6];
-  TH1F* h_jet_muef[6];
+  TH1F* h_jet_e[11];
+  TH1F* h_jet_pt[11];
+  TH1F* h_jet_eta[11];
+  TH1F* h_jet_phi[11];
+  TH1F* h_jet_frac_mu[11];
+  TH1F* h_jet_muef[11];
   TH1F* h_jet_ht_all;
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_ptlt200;
@@ -56,10 +56,10 @@ private:
   TH2F* h_njets_v_ht;
 
   TH1F* h_ngenjets;
-  TH1F* h_genjet_e[6];
-  TH1F* h_genjet_pt[6];
-  TH1F* h_genjet_eta[6];
-  TH1F* h_genjet_phi[6];
+  TH1F* h_genjet_e[11];
+  TH1F* h_genjet_pt[11];
+  TH1F* h_genjet_eta[11];
+  TH1F* h_genjet_phi[11];
   TH1F* h_genjet_ht;
 };
 
@@ -98,7 +98,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
 
   h_nnoseljets = fs->make<TH1F>("h_nnoseljets", "", 30, 0, 30);
   h_njets = fs->make<TH1F>("h_njets", "", 30, 0, 30);
-  for (int i = 0; i < 6; ++i) {
+  for (int i = 0; i < 11; ++i) {
     h_jet_e[i]   = fs->make<TH1F>(TString::Format("h_jet_e_%i",   i), "", 200, 0, 1000);
     h_jet_pt[i]  = fs->make<TH1F>(TString::Format("h_jet_pt_%i",  i), "", 200, 0, 1000);
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i), "", 50, -6, 6);
@@ -117,7 +117,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
 
   if (use_genjets) {
     h_ngenjets = fs->make<TH1F>("h_ngenjets", "", 30, 0, 30);
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 11; ++i) {
       h_genjet_e[i]   = fs->make<TH1F>(TString::Format("h_genjet_e_%i",   i), "", 200, 0, 1000);
       h_genjet_pt[i]  = fs->make<TH1F>(TString::Format("h_genjet_pt_%i",  i), "", 200, 0, 1000);
       h_genjet_eta[i] = fs->make<TH1F>(TString::Format("h_genjet_eta_%i", i), "", 50, -6, 6);
@@ -209,7 +209,7 @@ void MFVTriggerEfficiency::produce(edm::Event& event, const edm::EventSetup& set
         jet_ht_no_mu_fromcand += jet.pt();
 
       for (int i : {0, njet}) {
-        if (i == 0 || njet < 6) {
+        if (i == 0 || njet < 11) {
           h_jet_e[i]->Fill(jet.energy());
           h_jet_pt[i]->Fill(jet.pt());
           h_jet_eta[i]->Fill(jet.eta());
@@ -246,7 +246,7 @@ void MFVTriggerEfficiency::produce(edm::Event& event, const edm::EventSetup& set
         genjet_ht += genjet.pt();
 
         for (int i : {0, ngenjet}) {
-          if (i == 0 || ngenjet < 6) {
+          if (i == 0 || ngenjet < 11) {
             h_genjet_e[i]->Fill(genjet.energy());
             h_genjet_pt[i]->Fill(genjet.pt());
             h_genjet_eta[i]->Fill(genjet.eta());
