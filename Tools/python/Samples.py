@@ -634,14 +634,14 @@ if __name__ == '__main__':
             print s.name, popen('dasgoclient_linux -query "site dataset=%s" | sort | uniq' % s.dataset).replace('\n', ' ')
 
     if 0:
-        aod_strings = ['RunIISpring16DR80-PUSpring16', 'RunIISummer16DR80Premix-PUMoriond17']
-        miniaod_strings = ['RunIISpring16MiniAODv2-PUSpring16', 'RunIISummer16MiniAODv2-PUMoriond17']
+        aod_strings = ['RunIIFall15DR76-PU25nsData2015v1', 'RunIISummer16DR80Premix-PUMoriond17']
+        miniaod_strings = ['RunIIFall15MiniAODv2-PU25nsData2015v1', 'RunIISummer16MiniAODv2-PUMoriond17']
         no = 'Trains Material ALCA Flat RunIISpring16MiniAODv1'.split()
         from JMTucker.Tools.general import popen
-        for s in qcd_samples + ttbar_samples + leptonic_background_samples:
+        for s in xx4j_samples_2015: #qcd_samples + ttbar_samples + leptonic_background_samples:
             print s.name
             #print s.primary_dataset
-            output = popen('dasgoclient_linux -query "dataset=/%s/*16*/*AODSIM"' % s.primary_dataset).split('\n')
+            output = popen('dasgoclient_linux -query "dataset=/%s/*/*AODSIM"' % s.primary_dataset).split('\n')
             for y in 'AODSIM MINIAODSIM'.split():
                 for x in output:
                     ok = True
