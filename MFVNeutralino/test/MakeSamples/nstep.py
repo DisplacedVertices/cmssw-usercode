@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-nevents = 10000
-events_per = 200
+nevents = 9990
+events_per = 333
 from_lhe = False
 output_level = 'reco'
-output_dataset_tag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
 
 if 1:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
