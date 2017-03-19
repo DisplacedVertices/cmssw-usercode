@@ -536,7 +536,6 @@ for x in (SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
           ttbar,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau01000um_M0300,
-          official_mfv_neu_tau00100um_M0400,
           official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M0800,
           official_mfv_neu_tau00100um_M1200, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M1200,
           official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600,
@@ -593,17 +592,18 @@ if __name__ == '__main__':
                                 print s.name, 'no files'
 
     if 0:
-        for l in xx4j_samples_2015, official_mfv_signal_samples:
+        for l in [official_mfv_signal_samples]:
             for s in l:
                 #s.set_curr_dataset('miniaod')
                 try:
                     sites = DBS.sites_for_dataset(s.dataset)
-                    files = DBS.files_in_dataset(s.dataset)
+                    #files = DBS.files_in_dataset(s.dataset)
                 except RuntimeError:
                     print s.name, 'PROBLEM'
                     continue
                 sites = [x for x in sites if not x.endswith('_Buffer') and not x.endswith('_MSS')]
-                print s.name.ljust(30), str(len(files)).ljust(10), ' '.join(sites)
+                #print s.name.ljust(30), str(len(files)).ljust(10), ' '.join(sites)
+                print s.name.ljust(50), ' '.join(sites)
 
     if 0:
         for s in official_mfv_signal_samples:
