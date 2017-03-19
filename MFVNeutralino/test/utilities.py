@@ -57,6 +57,16 @@ def cmd_effsprint():
                 print cmd
                 os.system('%s %s | tee %s' % (cmd, which_files, out))
                 print
+
+def cmd_trigeff_hadds():
+    assert not is2015
+    scale = -AnalysisConstants.int_lumi_2016
+    cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
+    files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root qcdmupt15.root'.split()
+    cmd += ' '.join(files)
+    print cmd
+    os.system(cmd)
+
 ####
 
 cmd = sys.argv[1] if len(sys.argv) > 1 else ''
