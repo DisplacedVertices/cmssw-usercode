@@ -98,7 +98,9 @@ if [ $EXITCODE -eq 0 ]; then
     ls -l
 fi
 
-python fixfjr.py
+if [[ $FROMLHE -eq 1 ]]; then
+    python fixfjr.py
+fi
 
 exit $EXITCODE
 )
@@ -113,7 +115,7 @@ fi
 
 echo END GENSIM
 
-if [[ $OUTPUTLEVEL -eq "gensim" ]]; then
+if [[ $OUTPUTLEVEL == "gensim" ]]; then
     echo OUTPUTLEVEL told me to exit
     exit 0
 fi
@@ -180,7 +182,7 @@ echo END RECO
 
 ################################################################################
 
-if [[ $OUTPUTLEVEL -eq "minitree" ]]; then
+if [[ $OUTPUTLEVEL == "minitree" ]]; then
     echo START NTUPLE+MINITREE
 
     echo "process.source.fileNames = ['file:reco.root']" >> ntuple.py
