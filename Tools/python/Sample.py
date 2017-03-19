@@ -245,9 +245,11 @@ class SamplesRegistry:
             return sorted(a)
 
     def add(self, s):
+        assert not self.d_samples.has_key(s.name)
         self.d_samples[s.name] = s
 
     def add_list(self, name, l):
+        assert not self.d_lists.has_key(name)
         self.d_lists[name] = l
 
     def by_primary_dataset(self, pd):
