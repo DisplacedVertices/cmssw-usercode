@@ -398,7 +398,7 @@ def main(samples_registry):
         norm_path = typed_from_argv(str, default_value='', name='norm_path')
         merge(samples, output=out_fn, norm_to=norm_to, norm_path=norm_path)
 
-    elif 'filename' in sys.argv:
+    elif 'file' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         if len(samples) != 1:
             raise ValueError('must have exactly one sample in argv')
@@ -408,6 +408,23 @@ def main(samples_registry):
             raise KeyError('no dataset %s in %s' % (dataset, sample))
         sample.set_curr_dataset(dataset)
         pprint(sample.filenames[:typed_from_argv(int, 5)])
+
+    elif 'site' in sys.argv:
+        samples = samples_registry.from_argv(raise_if_none=True)
+        sample_names = [s.name for s in samples]
+        dataset = [x for x in sys.argv[1:] if x != 'site' and x not in sample_names]
+        if len(dataset) > 1:
+            raise ValueError('dunno how to get dataset from argv')
+        dataset = dataset[0] if len(dataset) == 1 else 'main'
+        mlen = max(len(sn) for sn in sample_names)
+        for sample in samples:
+            sample.set_curr_dataset(dataset)
+            try:
+                sites = DBS.sites_for_dataset(s.dataset)
+            except RuntimeError:
+                print s.name, 'PROBLEM'
+                continue
+            print s.name.ljust(mlen+5), ' '.join(sites)
 
     elif 'samplefiles' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
