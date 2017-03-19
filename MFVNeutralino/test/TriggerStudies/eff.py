@@ -18,9 +18,9 @@ elif year == 2016 and H_for_test:
     to_do = (900,)
 
 htskim = False
-ht_skim_cut = min(to_do)
+ht_skim_cut = min(to_do) if htskim else -1
 
-version = 'v3'
+version = 'v4'
 json = '../ana_2015p6.json'
 batch_name = 'TrigEff%s/%i' % (version, year)
 
@@ -44,6 +44,7 @@ process.source.fileNames = {
 
 if is_mc:
     process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.mcStat.histos = True
 else:
     from FWCore.PythonUtilities.LumiList import LumiList
     process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
@@ -60,6 +61,7 @@ process.den = cms.EDProducer('MFVTriggerEfficiency',
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
                              require_4jets = cms.bool(True),
+                             require_ht = cms.double(-1),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > %i' % mu_thresh_offline),
                              jets_src = cms.InputTag('slimmedJets'),
@@ -69,12 +71,22 @@ process.den = cms.EDProducer('MFVTriggerEfficiency',
 
 process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den)
 
+process.dennomu = process.den.clone(require_muon = False)
+process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
+process.pforsig = cms.Path(cms.ignore(process.mfvTriggerFloats) * process.dennomu * process.dennomuht1000)
+
 if 800 in to_do:
     process.num800 = process.den.clone(require_hlt = 1)
+    process.num800nomu = process.dennomu.clone(require_hlt = 1)
+    process.num800nomuht1000 = process.dennomuht1000.clone(require_hlt = 1)
     process.p *= process.num800
+    process.pforsig *= process.num800nomu * process.num800nomuht1000
 if 900 in to_do:
     process.num900 = process.den.clone(require_hlt = 2)
+    process.num900nomu = process.dennomu.clone(require_hlt = 2)
+    process.num900nomuht1000 = process.dennomuht1000.clone(require_hlt = 2)
     process.p *= process.num900
+    process.pforsig *= process.num900nomu * process.num900nomuht1000
 
 if htskim:
     process.setName_('EffHtSkim')
