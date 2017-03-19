@@ -38,7 +38,7 @@ process.maxEvents.input = 1000
 process.source.fileNames = {
     (2015,True):  ['/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/2018871D-CABC-E511-95C1-A4BADB0F4C29.root'],
     (2015,False): ['/store/data/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10000/7C7A3D21-C0A8-E511-94E7-0025905A60DE.root'],
-    (2016,True):  ['/store/user/tucker/temp/wjetstolnu.miniaod.163E57C9-7ABE-E611-A73A-0025905B857E.root'],
+    (2016,True):  ['root://dcache-cms-xrootd.desy.de//store/mc/RunIISummer16MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/163E57C9-7ABE-E611-A73A-0025905B857E.root'],
     (2016,False): ['/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/283/283/00000/780D7FAA-FF95-E611-AC56-02163E011B49.root' if H_for_test else '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root'],
     }[(year, is_mc)]
 
@@ -56,7 +56,7 @@ process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.mfvTriggerFloats.ht_cut = ht_skim_cut
 
-process.den = cms.EDProducer('MFVTriggerEfficiency',
+process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),

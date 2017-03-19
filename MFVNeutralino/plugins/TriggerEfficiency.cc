@@ -5,19 +5,19 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 
-class MFVTriggerEfficiency : public edm::EDProducer {
+class MFVTriggerEfficiency : public edm::EDAnalyzer {
 public:
   explicit MFVTriggerEfficiency(const edm::ParameterSet&);
 
 private:
-  virtual void produce(edm::Event&, const edm::EventSetup&);
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   const int require_bits[2]; // HLT then L1
   const bool require_muon;
@@ -132,7 +132,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
 }
 
-void MFVTriggerEfficiency::produce(edm::Event& event, const edm::EventSetup& setup) {
+void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   for (int i = 0; i < 2; ++i) { // HLT then L1
     if (require_bits[i] != -1) {
       edm::Handle<std::vector<int>> decisions;
