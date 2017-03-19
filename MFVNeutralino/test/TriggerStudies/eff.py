@@ -22,7 +22,7 @@ ht_skim_cut = min(to_do) if htskim else -1
 
 version = 'v4'
 json = '../ana_2015p6.json'
-batch_name = 'TrigEff%s/%i' % (version, year)
+batch_name = 'TrigEff%s' % version
 
 if year == 2015:
     mu_thresh_hlt = 20
