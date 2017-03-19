@@ -88,8 +88,11 @@ class CRABSubmitter:
         self.batch_dir = crab_dirs_root(batch_name) # JMTBAD rename -- what crab3 calls workArea
         self.existed = False
 
-        self.psets_dir = os.path.join(self.batch_dir, 'psets')
+        self.ex_str = 'ex_' + str(int(time.time()*1000))
 
+        self.psets_dir = os.path.join(self.batch_dir, self.ex_str, 'psets')
+
+        # JMTBAD this will never happen now that we allow multiple submits to the same dir
         if os.path.exists(self.psets_dir):  # check psets_dir instead of batch_dir since we might be from metasubmitter
             if 'cs_append' not in sys.argv:
                 raise ValueError('batch_dir %s already exists, refusing to clobber ("cs_append" in argv to override)' % self.batch_dir)
@@ -103,7 +106,7 @@ class CRABSubmitter:
         self.username = os.environ['USER']
         os.system('mkdir -p /tmp/%s' % self.username)
 
-        self.git_status_dir = os.path.join(self.batch_dir, 'gitstatus')
+        self.git_status_dir = os.path.join(self.batch_dir, self.ex_str, 'gitstatus')
         save_git_status(self.git_status_dir)
 
         self.testing = testing
@@ -269,6 +272,7 @@ class CRABSubmitter:
 
             if not os.path.isdir(working_dir):
                 result = crab_command('submit', config = cfg)
+                open(os.path.join(working_dir, 'cs_ex'), 'wt').write(self.ex_str)
             else:
                 print '\033[1m warning: \033[0m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
 
