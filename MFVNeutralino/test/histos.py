@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 import JMTucker.Tools.SampleFiles as sf
-sf.set_process(process, 'qcdht2000', 'ntuplev11', 10)
+sf.set_process(process, 'qcdht2000', 'ntuplev12', 10)
 
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
@@ -84,8 +84,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV11/%i' % year,
-                         dataset = 'ntuplev11',
+    cs = CondorSubmitter('HistosV12',
+                         dataset = 'ntuplev12',
                          pset_modifier = modify
                          )
     cs.submit_all(samples)
