@@ -8,8 +8,11 @@ from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 from JMTucker.Tools.CondorTools import *
 from JMTucker.Tools.general import mkdirp
 
+fns_only = '-f' in sys.argv
 include_log = '-l' in sys.argv
 include_stderr = '-e' in sys.argv
+if fns_only:
+    sys.argv.remove('-f')
 if include_log:
     sys.argv.remove('-l')
 if include_stderr:
@@ -31,9 +34,19 @@ jobs = crab_jobs_from_argv()
 if not jobs:
     raise ValueError('expect a list of jobs in argv')
 
+def doit(fn):
+    if fns_only:
+        print fn,
+    else:
+        os.system('less %s' % fn)
+
 for job in jobs:
-    os.system('less %s/stdout.%s' % (wd, job))
+    doit('%s/stdout.%s' % (wd, job))
     if include_stderr:
-        os.system('less %s/stderr.%s' % (wd, job))
+        doit('%s/stderr.%s' % (wd, job))
     if include_log:
-        os.system('less %s/log.%s' % (wd, job))
+        doit('%s/log.%s' % (wd, job))
+
+if fns_only:
+    print
+
