@@ -4,7 +4,7 @@ x = ET.parse('tempfjr.xml')
 
 inputs = x.findall('InputFile')
 if len(inputs) != 1:
-    raise ValueError('tempfjr.xml is weird, len(inputs) is %i' % len(inputs)
+    raise ValueError('tempfjr.xml is weird, len(inputs) is %i' % len(inputs))
 
 x.getroot().remove(inputs[0])
 
