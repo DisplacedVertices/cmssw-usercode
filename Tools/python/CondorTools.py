@@ -3,6 +3,7 @@
 import sys, os, re, fnmatch
 from datetime import datetime
 from glob import glob
+import xml.etree.ElementTree as ET
 from JMTucker.Tools.general import sub_popen
 from JMTucker.Tools.hadd import hadd
 
@@ -22,6 +23,25 @@ def cs_dirs_from_argv():
                 if is_cs_dir(sub):
                     dirs.append(sub)
     return dirs
+
+def cs_fjrs(d):
+    return glob(os.path.join(d, 'fjr_*.xml'))
+
+def cs_eventsread(d):
+    n = 0
+    for fjr_fn in cs_fjrs(d):
+        fjr = ET.parse(fjr_fn)
+        for f in fjr.findall('InputFile'):
+            n += int(f.find('EventsRead').text)
+    return n
+
+def cs_eventswritten(d):
+    n = 0
+    for fjr_fn in cs_fjrs(d):
+        fjr = ET.parse(fjr_fn)
+        for f in fjr.findall('File'):
+            n += int(f.find('TotalEvents').text)
+    return n
 
 def cs_njobs(d):
     return int(open(os.path.join(d, 'njobs')).read())
@@ -50,6 +70,9 @@ def cs_jobs_running(d):
             if line.startswith(cluster):
                 jobs.append(int(line.split()[0].split('.')[1]))
     return jobs
+
+def cs_primaryds(d):
+    return open(os.path.join(d, 'cs_primaryds')).read()
 
 def cs_published(d):
     return [line.strip() for fn in glob(os.path.join(d, 'publish_*.txt')) if os.path.isfile(fn) for line in open(fn) if line.strip()]
@@ -174,3 +197,6 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         hadd(new_name, files, chunk_size)
 
     return new_name
+
+if __name__ == '__main__':
+    cs_eventsread('/uscms_data/d2/tucker/crab_dirs/NtupleV12/2015/condor_JetHT2015C')
