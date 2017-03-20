@@ -19,6 +19,7 @@ class LumiLine:
         }
 
 class LumiLines:
+    ls_time = 2**18 / 11245.5
     run_boundary_15_16 = 260627
     era_boundaries = [254227, 256630, 272007, 275657, 276315, 276831, 277772, 278820, 280919]
 
@@ -84,7 +85,6 @@ class LumiLines:
             del ll.time
             del ll.beam_status
             del ll.energy
-            del ll.delivered
         to_pickle(lls, new_fn, comp=True)
 
     def __init__(self, fn, mask_fn=None):
@@ -115,6 +115,13 @@ class LumiLines:
     def recorded(self, run):
         return sum(ll.recorded for ll in self.by_run[run])
 
+    def avg_inst(self, run):
+        n, s = 0, 0.
+        for ll in self.by_run[run]:
+            s += ll.delivered / self.ls_time
+            n += 1
+        return s/n
+
     def avg_pu(self, run):
         s, sw = 0., 0.
         for ll in self.by_run[run]:
@@ -127,5 +134,5 @@ class LumiLines:
 if __name__ == '__main__':
     #import sys
     #lls = LumiLines.save(sys.argv[1], sys.argv[1].replace('.csv', '.gzpickle'))
-    #LumiLines.strip('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle', '/uscms/home/tucker/public/mfv/2015plus2016stripped.gzpickle')
-    lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped.gzpickle')
+    #LumiLines.strip('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle', '/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle')
+    lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle')
