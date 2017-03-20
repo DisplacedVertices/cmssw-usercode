@@ -122,6 +122,9 @@ class LumiLines:
             n += 1
         return s/n
 
+    def max_inst(self, run):
+        return max(ll.delivered for ll in self.by_run[run]) / self.ls_time
+
     def avg_pu(self, run):
         s, sw = 0., 0.
         for ll in self.by_run[run]:
