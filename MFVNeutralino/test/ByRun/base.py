@@ -17,7 +17,7 @@ class ByRunPlotter:
     @property
     def lls(self):
         if not self._lls:
-            self._lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped.gzpickle', self.mask_fn)
+            self._lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle', self.mask_fn)
         return self._lls
 
     def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False, draw_boundaries=True, use_index=True):
