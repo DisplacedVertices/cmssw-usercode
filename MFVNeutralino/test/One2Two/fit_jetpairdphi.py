@@ -7,7 +7,7 @@ ps = plot_saver('../plots/bkgest/fit_jetpairdphi', size=(700,700), log=False, ro
 ntk = ['Ntk3', 'Ntk3or4', 'Ntk4', '']
 ntracks = ['3-track', '3-or-4-track', '4-track', '5-or-more-track']
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11_15/background.root')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11/2016/background.root')
 for i,n in enumerate(ntk):
   h = f.Get('%smfvEventHistosOnlyOneVtx/h_jet_pairdphi' % n)
   h.SetStats(0)
@@ -27,7 +27,7 @@ for i,n in enumerate(ntk):
   l.Draw()
   ps.save('%s_jetpairdphi' % ntracks[i])
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11_15/background.root')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11/2016/background.root')
 ROOT.TH1.AddDirectory(0)
 for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/h_sv_best0_jets_deltaphi']:
   colors = [ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2]
@@ -71,7 +71,6 @@ for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/
   l.Draw()
   ps.save('abs_%s'%n.split('/')[1])
 
-f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_763p2/HistosV10_0/background.root')
 for n in ['mfvVertexHistosOnlyOneVtx/h_sv_best0_jet0_deltaphi0']:
   colors = [ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2]
   l = ROOT.TLegend(0.15,0.75,0.85,0.85)

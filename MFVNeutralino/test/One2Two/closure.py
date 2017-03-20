@@ -4,9 +4,9 @@ ROOT.TH1.AddDirectory(0)
 set_style()
 ps = plot_saver('../plots/bkgest/closure', size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_v11.root', '2v_from_jets_4track3track_average3_c1p35_e2_a3p66_v11.root', '2v_from_jets_4track_average4_c1p35_e2_a3p66_v11.root', '2v_from_jets_5track_average5_c1p35_e2_a3p66_v11.root']
+fns = ['2v_from_jets_3track_average3_c1p37_e2_a3p50_v11.root', '2v_from_jets_4track3track_average3_c1p37_e2_a3p50_v11.root', '2v_from_jets_4track_average4_c1p37_e2_a3p50_v11.root', '2v_from_jets_5track_average5_c1p37_e2_a3p50_v11.root']
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
-n2v = [1323., 335., 22., 1.]
+n2v = [2117., 544., 44., 4.]
 
 ebin1 = [0.0025, 0.0063, 0.0063, 0.0110]
 ebin2 = [0.0021, 0.0068, 0.0068, 0.0280]
@@ -75,6 +75,6 @@ for i in range(4):
     er3 = (c3/s3) * ((ec3/c3)**2 + (es3/s3)**2)**0.5
 
     print ntk[i]
-    print '   simulated events: %7.2f +/- %5.2f, 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s, es, s1, es1, s2, es2, s3, es3)
-    print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
-    print '   ratio dVVC / dVV: %7.2f +/- %5.2f, 0-400 um: %6.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r, er, r1, er1, r2, er2, r3, er3)
+    print '   simulated events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s, es, s1, es1, s2, es2, s3, es3)
+    print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
+    print '   ratio dVVC / dVV: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r, er, r1, er1, r2, er2, r3, er3)

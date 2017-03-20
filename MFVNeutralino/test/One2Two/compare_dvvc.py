@@ -10,14 +10,14 @@ set_style()
 ROOT.gStyle.SetOptFit(0)
 ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_v11.root']
-fn2 = ['2v_from_jets_4track_average4_c1p35_e2_a3p66_v11.root']
-fn3 = ['2v_from_jets_5track_average5_c1p35_e2_a3p66_v11.root']
+fn1 = ['2v_from_jets_3track_average3_c1p37_e2_a3p50_v11.root']
+fn2 = ['2v_from_jets_4track_average4_c1p37_e2_a3p50_v11.root']
+fn3 = ['2v_from_jets_5track_average5_c1p37_e2_a3p50_v11.root']
 
 if mode == 'vary_eff':
-    fn1.append('2v_from_jets_3track_maxtk3_c1p35_e2_a3p66_v11.root')
-    fn2.append('2v_from_jets_4track_maxtk4_c1p35_e2_a3p66_v11.root')
-    fn3.append('2v_from_jets_5track_maxtk5_c1p35_e2_a3p66_v11.root')
+    fn1.append('2v_from_jets_3track_maxtk3_c1p37_e2_a3p50_v11.root')
+    fn2.append('2v_from_jets_4track_maxtk4_c1p37_e2_a3p50_v11.root')
+    fn3.append('2v_from_jets_5track_maxtk5_c1p37_e2_a3p50_v11.root')
     ls = ['average efficiency', 'maxtk efficiency']
 
 if mode == 'vary_dphi':
@@ -27,14 +27,14 @@ if mode == 'vary_dphi':
     ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
 
 if mode == 'vary_dbv':
-    fn1.append('2v_from_jets_3track_average3_c1p35_e2_a3p66_v11_sum.root')
-    fn2.append('2v_from_jets_4track_average4_c1p35_e2_a3p66_v11_sum.root')
-    fn3.append('2v_from_jets_5track_average5_c1p35_e2_a3p66_v11_sum.root')
+    fn1.append('2v_from_jets_3track_average3_c1p37_e2_a3p50_v11_sum.root')
+    fn2.append('2v_from_jets_4track_average4_c1p37_e2_a3p50_v11_sum.root')
+    fn3.append('2v_from_jets_5track_average5_c1p37_e2_a3p50_v11_sum.root')
     ls = ['default', 'sort by b quarks']
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
-n2v = [1323., 22., 1.]
+n2v = [2117., 44., 4.]
 
 ebin1 = [0.0025, 0.0063, 0.0110]
 ebin2 = [0.0021, 0.0068, 0.0280]
@@ -87,7 +87,6 @@ for i in range(3):
             h.Scale(n2v[i]/h.Integral())
             if j == 0:
                 h.SetTitle(';d_{VV}^{C} (cm);Events')
-                h.GetYaxis().SetRangeUser(0,0.4)
                 h.Draw('hist e')
             elif j == 1:
                 h.Draw('hist e sames')
@@ -162,14 +161,14 @@ for i in range(3):
 
     if mode == 'vary_dphi':
         if i == 0:
-            er2 *= 0.211780
-            er3 *= 0.167324
+            er2 *= 0.211892
+            er3 *= 0.160610
         if i == 1:
-            er2 *= 0.213850
-            er3 *= 0.183206
+            er2 *= 0.216494
+            er3 *= 0.176812
         if i == 2:
-            er2 *= 0.219530
-            er3 *= 0.167883
+            er2 *= 0.216863
+            er3 *= 0.161848
     if mode == 'vary_eff':
         er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
         er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5

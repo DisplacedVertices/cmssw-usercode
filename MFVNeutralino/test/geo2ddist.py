@@ -1,12 +1,9 @@
 from JMTucker.Tools.ROOTTools import *
 
 set_style()
-ps = plot_saver('plots/AN-16-394/geo2ddist', size=(700,700), root=False, log=False)
+ps = plot_saver('plots/geo2ddist/HistosV11_2016', size=(700,700), root=False, log=False)
 
-#f = ROOT.TFile('~/crabdirs/HistosV6p1_76x_nstlays3_27/background.root')
-#f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV10/background_noqcdext.root')
-#f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV10/ntk5/background.root')
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11_15/background.root')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11/2016/background.root')
 h = f.Get('vtxHst1VNoGeo2ddist/h_sv_pos_2d_0xy')
 h.SetStats(0)
 h.SetTitle(';Vertex x (cm);Vertex y (cm)')

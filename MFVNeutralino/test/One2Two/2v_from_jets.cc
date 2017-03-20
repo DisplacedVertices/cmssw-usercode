@@ -21,18 +21,18 @@ bool vary_dphi = false;
 bool clearing_from_eff = true;
 const char* eff_file = "eff_avg.root";
 
-double dphi_pdf_c = 1.35;
+double dphi_pdf_c = 1.37;
 double dphi_pdf_e = 2;
-double dphi_pdf_a = 3.66;
+double dphi_pdf_a = 3.50;
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
 
-const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV11_15";
+const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV11/2016";
 
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
-float weights[nbkg] = {3.10725, 0.40282, 0.16663, 0.85378};
+float weights[nbkg] = {3.13184, 0.40037, 0.16549, 0.75270};
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
@@ -95,23 +95,23 @@ int main(int argc, const char* argv[]) {
   if (ntracks == 3) {
     tree_path = "tre33/t";
     eff_hist = "average3";
-    n1v = 195945.;
-    n2v = 1323.;
+    n1v = 297372.;
+    n2v = 2117.;
   } else if (ntracks == 4) {
     tree_path = "tre44/t";
     eff_hist = "average4";
-    n1v = 26758.;
-    n2v = 22.;
+    n1v = 43003.;
+    n2v = 44.;
   } else if (ntracks == 5) {
     tree_path = "mfvMiniTree/t";
     eff_hist = "average5";
-    n1v = 4405.;
-    n2v = 1.;
+    n1v = 6842.;
+    n2v = 4.;
   } else if (ntracks == 7) {
     tree_path = "tre34/t";
     eff_hist = "average3";
-    n1v = 222021.;
-    n2v = 335.;
+    n1v = 339282.;
+    n2v = 544.;
     min_ntracks0 = 4;
     max_ntracks0 = 4;
     min_ntracks1 = 3;

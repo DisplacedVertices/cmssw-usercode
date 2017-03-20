@@ -6,8 +6,8 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV11_15'
-plot_dir = 'plots/AN-16-394/data_mc_comp'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV11/2016'
+plot_dir = 'plots/data_mc_comp/HistosV11_2016'
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -17,15 +17,15 @@ scale_factor = 1. #245750.0 / 264843.310478
 data_samples = [] #Samples.data_samples
 background_samples = Samples.ttbar_samples + Samples.qcd_samples_sum
 
-signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
+signal_samples = [Samples.official_mfv_neu_tau00100um_M0800, Samples.official_mfv_neu_tau00300um_M0800, Samples.official_mfv_neu_tau01000um_M0800, Samples.official_mfv_neu_tau10000um_M0800]
 y = ['100 #mum', '300 #mum', '1 mm', '10 mm']
 c = [7, 4, 6, 8]
 for i, signal_sample in enumerate(signal_samples):
     signal_sample.xsec = 0.001
     signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = %s, M = 800 GeV' % y[i]
     signal_sample.color = c[i]
-Samples.mfv_neu_tau01000um_M0800.color = 8
-signal_samples = [Samples.mfv_neu_tau01000um_M0800]
+Samples.official_mfv_neu_tau00300um_M0800.color = 8
+signal_samples = [Samples.official_mfv_neu_tau00300um_M0800]
 
 for s in Samples.qcd_samples_sum:
     s.join_info = True, 'Multijet events', ROOT.kBlue-9
