@@ -448,6 +448,6 @@ def set_hip(process, scale=1.0): # scale relative to 6e33
         try:
             y = eval(x)
         except AttributeError:
-            pass
+            continue
         y.APVSaturationFromHIP = True
         y.APVSaturationProbScaling = scale
