@@ -12,6 +12,8 @@ from collections import defaultdict
 from JMTucker.Tools.CRAB3Tools import *
 
 parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
+parser.add_option('-v', '--verbose', action='store_true', default=False,
+                  help='Print way more.')
 parser.add_option('-o', '--once', action='store_true', default=False,
                   help='Only make one -status,-get,-resubmit pass, then exit.')
 parser.add_option('-w', '--wait-time', type='int', default=60*10,
@@ -145,14 +147,15 @@ if options.dir_sort:
     dirs.sort()
 dirs_done = []
 
-print 'crmon, called with options:'
-pprint(options.__dict__)
-if options.fake_results:
-    print 'using fake results dict from %s' % options.fake_results
-else:
-    print 'checking these %i dirs:' % len(dirs)
-    for d in dirs:
-        print d
+#print 'crmon, called with options:'
+#pprint(options.__dict__)
+#if options.fake_results:
+#    print 'using fake results dict from %s' % options.fake_results
+#else:
+#    print 'checking these %i dirs:' % len(dirs)
+#    for d in dirs:
+#        print d
+print 'crmon: checking %i dirs' % len(dirs)
 
 def check_proxies():
     if options.renew_proxies:
@@ -188,7 +191,8 @@ while 1:
         tee = Tee(options.tee)
 
     pass_string = str(int(time.time()))
-    print '\n*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\nmaking a pass (#%i string %s):\n' % (pass_count, pass_string)
+    if not options.once:
+        print '\n*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\nmaking a pass (#%i string %s):\n' % (pass_count, pass_string)
     if options.fake_results:
         # Fake statuses for debugging the table printing below.
         print 'fake_results dict:'
@@ -221,42 +225,43 @@ while 1:
                 crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
 
     # Print task statuses. I don't know what all these mean yet.
-    print
-    print_header('Task statuses:')
-    tasks_by_status = defaultdict(list)
-    for d in dirs:
-        tasks_by_status[results[d]['status']].append(d)
-    for k,v in tasks_by_status.iteritems():
-        print_subheader('%s:' % k)
-        for d in sorted(v):
-            print d
+    #print
+    #print_header('Task statuses:')
+    #tasks_by_status = defaultdict(list)
+    #for d in dirs:
+    #    tasks_by_status[results[d]['status']].append(d)
+    #for k,v in tasks_by_status.iteritems():
+    #    print_subheader('%s:' % k)
+    #    for d in sorted(v):
+    #        print d
 
-    # Print a recap of all the status summaries.
-    print
-    print_header('Recap (everything, sorted by directory):')
-    for d in dirs:
-        if not results.has_key(d):
-            continue
-        print_subheader('%s:' % d)
-        job_lists = results[d]['jobListByStatus']
-        for status in sorted(job_lists.keys()):
-            print '%s: %s' % (status.ljust(25), crabify_list(job_lists[status], simple=False))
-
-    print
-    print_header('Recap (everything, sorted by status):')
-    statuses = defaultdict(list)
-    for d in dirs:
-        job_lists = results[d]['jobListByStatus']
-        for status in job_lists.keys():
-            statuses[status].append(d)
-    for status in sorted(statuses.keys()):
-        print_subheader('%s:' % status)
-        these_dirs = [d for d in statuses[status] if d in dirs]
-        these_dirs.sort()
-        max_w = max(len(d) for d in these_dirs)
-        for d in these_dirs:
+    if options.verbose:
+        # Print a recap of all the status summaries.
+        print
+        print_header('Recap (everything, sorted by directory):')
+        for d in dirs:
+            if not results.has_key(d):
+                continue
+            print_subheader('%s:' % d)
             job_lists = results[d]['jobListByStatus']
-            print '%s %s' % (d.ljust(max_w + 1), crabify_list(job_lists[status], simple=False))
+            for status in sorted(job_lists.keys()):
+                print '%s: %s' % (status.ljust(25), crabify_list(job_lists[status], simple=False))
+
+        print
+        print_header('Recap (everything, sorted by status):')
+        statuses = defaultdict(list)
+        for d in dirs:
+            job_lists = results[d]['jobListByStatus']
+            for status in job_lists.keys():
+                statuses[status].append(d)
+        for status in sorted(statuses.keys()):
+            print_subheader('%s:' % status)
+            these_dirs = [d for d in statuses[status] if d in dirs]
+            these_dirs.sort()
+            max_w = max(len(d) for d in these_dirs)
+            for d in these_dirs:
+                job_lists = results[d]['jobListByStatus']
+                print '%s %s' % (d.ljust(max_w + 1), crabify_list(job_lists[status], simple=False))
 
     #print
     #print_header('Recap (skipping exit code 0 but  where X, Y != 0):')
@@ -384,12 +389,16 @@ while 1:
 
     done_stats = set(''.split())
     done_stats_info_text = repr(tuple(sorted(done_stats)))
+    fail = []
     done = []
     notdone = []
     for k,v in results.iteritems():
+        if any(stat for stat in v['jobsPerStatusEx'].keys() if 'fail' in stat):
+            fail.append(k)
         statuses_left = set(stat for stat in v['jobsPerStatusEx'].keys() if stat != 'finished')
         statuses_left -= done_stats
         (notdone if statuses_left else done).append(k)
+    fail.sort(key=dirs.index)
     done.sort(key=dirs.index)
     notdone.sort(key=dirs.index)
 
@@ -422,6 +431,11 @@ while 1:
         print_header('To resume with just the not-done dirs, do:')
         s = 'crmon ' + ' '.join(notdone)
         backdoor_print('resume', [s])
+
+    if fail:
+        print_header('To resubmit failed jobs, do:')
+        s = 'cr res ' + ' '.join(fail)
+        backdoor_print('resubmit', [s])
 
     if not dirs:
         print
