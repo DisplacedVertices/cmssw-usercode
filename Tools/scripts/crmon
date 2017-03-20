@@ -159,7 +159,7 @@ print 'crmon: checking %i dirs' % len(dirs)
 
 def check_proxies():
     if options.renew_proxies:
-        print 'checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
+        #print 'checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
         crab_renew_proxy_if_needed()
         #for d in dirs:
         #    if crab_is_using_server(d):
