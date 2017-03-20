@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-nevents = 9990
-events_per = 333
+nevents = 20000
+events_per = 100
 from_lhe = False
 output_level = 'reco'
 output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
@@ -27,6 +27,9 @@ elif 0:
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 
 ex = ''
+#ex = '_test'
+#nevents, events_per = 1,1
+#meta, taus, masses = 'neu', [10000], [800]
 
 ################################################################################
 
