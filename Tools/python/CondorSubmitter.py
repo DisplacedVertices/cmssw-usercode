@@ -140,6 +140,7 @@ def get(i): return _l[i]
 
     def __init__(self,
                  batch_name,
+                 ex = '',
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
@@ -190,7 +191,9 @@ def get(i): return _l[i]
                 os.mkdir(batch_root)
                 os.mkdir(batch_path)
 
-        self.ex_str = 'ex_' + str(int(time.time()*1000))
+        if ex:
+            ex = str(ex) + '_'
+        self.ex_str = 'ex_%s%s' % (ex, str(int(time.time()*1000)))
 
         self.batch_name = batch_name
         self.batch_dir = os.path.abspath(crab_dirs_root(batch_name))

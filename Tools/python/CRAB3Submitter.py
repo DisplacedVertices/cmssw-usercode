@@ -34,6 +34,7 @@ class CRABSubmitter:
 
     def __init__(self,    # JMTBAD check for needed and reorder args
                  batch_name,
+                 ex = '',
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  max_threads = 5,
                  cfg_modifier = None,
@@ -88,7 +89,9 @@ class CRABSubmitter:
         self.batch_dir = crab_dirs_root(batch_name) # JMTBAD rename -- what crab3 calls workArea
         self.existed = False
 
-        self.ex_str = 'ex_' + str(int(time.time()*1000))
+        if ex:
+            ex = str(ex) + '_'
+        self.ex_str = 'ex_%s%s' % (ex, str(int(time.time()*1000)))
 
         self.psets_dir = os.path.join(self.batch_dir, self.ex_str, 'psets')
 
