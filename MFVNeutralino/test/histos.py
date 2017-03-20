@@ -85,6 +85,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('HistosV12',
+                         ex = year,
                          dataset = 'ntuplev12',
                          pset_modifier = modify
                          )
