@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+
+import os, sys, argparse
+from fnmatch import fnmatch
+from pprint import pprint
+from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
+from JMTucker.Tools.CRAB3ToolsSh import crab_get_njobs_from_log, crab_get_output_dataset_from_log
+from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_njobs, cs_primaryds, cs_eventswritten
+from JMTucker.Tools.DBS import files_in_dataset, numevents_in_dataset
+from JMTucker.Tools.general import coderep_files
+from JMTucker.Tools import Samples, colors
+from JMTucker.Tools.SampleFiles import _enc
+
+parser = argparse.ArgumentParser(description = 'mpublish: get the staged-out files from condor/crab directories and print out lines for SampleFiles.py',
+                                 usage = '%(prog)s [options] condor_or_crab_dirs')
+
+parser.add_argument('condor_or_crab_dirs', nargs='*', help='The condor/crab directories.')
+
+parser.add_argument('--dataset', required=True,
+                    help='The dataset name to use.')
+parser.add_argument('--pattern',
+                    help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
+parser.add_argument('--partial', action='store_true',
+                    help='If set, partial publishing is allowed.')
+parser.add_argument('--include-condor-nevents', action='store_true',
+                    help='If set, parse xmls to get nevents from condor wds.')
+
+options = parser.parse_args()
+
+########################################################################
+
+wds = cs_dirs_from_argv() + crab_dirs_from_argv()
+if not wds:
+    print 'No dirs in argv\n'
+    parser.print_help()
+    sys.exit(1)
+
+publish = {}
+samples = []
+samples_lump = []
+for wd in wds:
+    print colors.bold(wd)
+    bd = os.path.basename(wd)
+    is_crab = bd.startswith('crab_')
+    assert is_crab or bd.startswith('condor_')
+    sample = Samples.sample_from_end_string(Samples, wd).name
+    assert not publish.has_key(sample)
+
+    if is_crab:
+        njobs = crab_get_njobs_from_log(wd)
+        ds = crab_get_output_dataset_from_log(wd)
+        if ds is None and not options.partial:
+            raise ValueError('no dataset in log for ' + wd)
+        files = files_in_dataset(ds, 3)
+        nevents = numevents_in_dataset(ds, 3)
+    else:
+        njobs = cs_njobs(wd)
+        ds = '/%s/None/None' % cs_primaryds(wd)
+        files = []
+        for job in xrange(njobs):
+            publish_fn = os.path.join(wd, 'publish_%i.txt' % job)
+            if not os.path.isfile(publish_fn):
+                if options.partial:
+                    print 'warning: missing', fn
+                else:
+                    raise IOError('no publish file %s' % publish_fn)
+            else:
+                for fn in open(publish_fn):
+                    files.append(fn.strip()[fn.find('/store'):])
+        nevents = cs_eventswritten(wd) if options.include_condor_nevents else 0
+
+    if options.pattern:
+        files = [fn for fn in files if fnmatch(os.path.basename(fn), options.pattern)]
+
+    if len(files) != njobs:
+        msg = '# files %i != njobs %i' % (len(files), njobs)
+        if options.partial:
+            print colors.yellow('warning: %s, but partial publish allowed' % msg)
+        else:
+            raise ValueError(msg)
+
+    if ds.endswith('/None') and nevents == 0:
+        samples_lump.append(sample)
+    else:
+        samples.append((sample, ds, nevents))
+    code = coderep_files(files)
+    publish[sample] = (len(files), code if code is not None else files)
+
+samples.sort()
+samples_lump.sort()
+
+print
+print colors.bold('new entries:')
+print '_add_ds("%s", {' % options.dataset
+for k in sorted(publish.keys()):
+    n,c = publish[k]
+    if type(c) == str:
+        if '_fromnum' in c:
+            if not c.endswith(', %i)' % n):
+                print 'FUCK', n
+            print '%r: %s,' % (k, c)
+        else:
+            print '%r: (%i, %s),' % (k, n, c)
+    else:
+        pprint((k,(n,c)))
+print '})'
+print
+encoded = _enc(publish)
+print colors.bold('line for SampleFiles (len(repr(publish)) = %i, len(encoded) = %i):' % (len(repr(publish)), len(encoded)))
+print "_add('%s')" % encoded
+print
+print colors.bold('lines for Samples:')
+for sample, ds, nevents in samples:
+    print "%s.add_dataset('%s', '%s', %i)" % (sample, options.dataset, ds, nevents)
+if samples_lump:
+    print 'for x in (%s,):' % ', '.join(samples_lump)
+    print '    x.add_dataset("%s")' % options.dataset
