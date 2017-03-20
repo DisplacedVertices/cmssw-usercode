@@ -65,7 +65,7 @@ def get(name, ds):
     return _d.get((name, ds), None)
 
 def set_process(process, name, ds, num=-1):
-    fns = get(name, ds)[1]
+    fns = _d[(name, ds)][1]
     if num > 0:
         fns = fns[:num]
     process.source.fileNames = fns
