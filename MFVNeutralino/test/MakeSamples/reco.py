@@ -28,8 +28,6 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True),
     allowUnscheduled = cms.untracked.bool(True),
-    numberOfThreads = cms.untracked.uint32(4),
-    numberOfStreams = cms.untracked.uint32(0),
     )
 
 if not 'debug' in sys.argv:

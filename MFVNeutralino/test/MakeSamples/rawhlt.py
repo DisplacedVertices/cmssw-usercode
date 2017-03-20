@@ -33,11 +33,7 @@ process.load('HLTrigger.Configuration.HLT_25ns15e33_v4_cff')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
-process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(False),
-    numberOfThreads = cms.untracked.uint32(4),
-    numberOfStreams = cms.untracked.uint32(0),
-    )
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:gensim.root'))
 
 if 'debug' in sys.argv:
