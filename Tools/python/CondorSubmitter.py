@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, string, shutil, base64, zlib, imp, cPickle as pickle
+import sys, os, string, shutil, time, base64, zlib, imp, cPickle as pickle
 from datetime import datetime
 from JMTucker.Tools.CMSSWTools import make_tarball, find_output_files
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
