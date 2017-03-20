@@ -409,7 +409,8 @@ def main(samples_registry):
         if not sample.has_dataset(dataset):
             raise KeyError('no dataset %s in %s' % (dataset, sample))
         sample.set_curr_dataset(dataset)
-        pprint(sample.filenames[:typed_from_argv(int, 5)])
+        for x in sample.filenames[:typed_from_argv(int, 5)]:
+            print x
 
     elif 'site' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
