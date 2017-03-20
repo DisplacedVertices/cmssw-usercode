@@ -8,7 +8,7 @@ output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_
 
 if 1:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-    meta, taus, masses = 'neu', [300, 10000], [400, 1600]
+    meta, taus, masses = 'neu', [300, 1000], [600, 800]
 elif 0:
     meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 elif 0:
