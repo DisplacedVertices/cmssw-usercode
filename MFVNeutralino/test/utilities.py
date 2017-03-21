@@ -59,13 +59,22 @@ def cmd_effsprint():
                 print
 
 def cmd_trigeff_hadds():
-    assert not is2015
-    scale = -AnalysisConstants.int_lumi_2016
-    cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
-    files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root qcdmupt15.root'.split()
-    cmd += ' '.join(files)
-    print cmd
-    os.system(cmd)
+    hadd('SingleMuon2015.root', ['SingleMuon2015%s.root' % x for x in 'CD'])
+    hadd('SingleMuon2016BthruG.root', ['SingleMuon2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
+    hadd('SingleMuon2016H.root', ['SingleMuon2016%s.root' % x for x in ('H2', 'H3')])
+    hadd('dyjetstollM10sum_2015.root', ['dyjetstollM10%s_2015.root' % x for x in '123'])
+    hadd('dyjetstollM50sum_2015.root', ['dyjetstollM50%s_2015.root' % x for x in '123'])
+    hadd('wjetstolnusum_2015.root', ['wjetstolnu%s_2015.root' % x for x in '123'])
+
+    for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016), ('_2015', -AnalysisConstants.int_lumi_2015):
+        cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
+        if is2015_s:
+            files = 'ttbar_2015.root wjetstolnusum_2015.root dyjetstollM10sum_2015.root dyjetstollM50sum_2015.root qcdmupt15_2015.root'.split()
+        else:
+            files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root qcdmupt15.root'.split()
+        cmd += ' '.join(files)
+        print cmd
+        os.system(cmd)
 
 ####
 
