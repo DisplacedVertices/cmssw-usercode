@@ -69,7 +69,8 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
 
-process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den)
+process.denht1000 = process.den.clone(require_ht = 1000)
+process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den * process.denht1000)
 
 process.dennomu = process.den.clone(require_muon = False)
 process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
