@@ -16,6 +16,7 @@ if year == 2015:
         print 'H_for_test does nothing in 2015'
 elif year == 2016 and H_for_test:
     to_do = (900,)
+use_ak8450 = True and year == 2016
 
 htskim = False
 ht_skim_cut = min(to_do) if htskim else -1
@@ -41,6 +42,7 @@ process.source.fileNames = {
     (2016,True):  ['root://dcache-cms-xrootd.desy.de//store/mc/RunIISummer16MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/163E57C9-7ABE-E611-A73A-0025905B857E.root'],
     (2016,False): ['/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/283/283/00000/780D7FAA-FF95-E611-AC56-02163E011B49.root' if H_for_test else '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root'],
     }[(year, is_mc)]
+#process.source.fileNames = ['/store/data/Run2016B/SingleMuon/MINIAOD/23Sep2016-v3/120000/58678DBC-1599-E611-AE77-FA163E4986BD.root']
 
 if is_mc:
     process.load('JMTucker.Tools.MCStatProducer_cff')
@@ -80,7 +82,7 @@ if 800 in to_do:
     process.num800 = process.den.clone(require_hlt = 1)
     process.num800450 = process.den.clone(require_hlt = -2)
     process.p *= process.num800 * process.num800450
-    if year == 2016:
+    if use_ak8450:
         process.num800450ak = process.den.clone(require_hlt = -3)
         process.p *= process.num800450ak
 
@@ -91,8 +93,10 @@ if 800 in to_do:
 if 900 in to_do:
     process.num900 = process.den.clone(require_hlt = 2)
     process.num900450 = process.den.clone(require_hlt = -4)
-    process.num900450ak = process.den.clone(require_hlt = -5)
-    process.p *= process.num900 * process.num900450 * process.num900450ak
+    process.p *= process.num900 * process.num900450
+    if use_ak8450:
+        process.num900450ak = process.den.clone(require_hlt = -5)
+        process.p *= process.num900450ak
 
     process.num900nomu = process.dennomu.clone(require_hlt = 2)
     process.num900nomuht1000 = process.dennomuht1000.clone(require_hlt = 2)
@@ -129,6 +133,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             magic = 'is_mcX=XTrue'.replace('X', ' ')
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'is_mc = False', err))
+
+        if '2016B3' in sample.name:
+            magic = 'use_ak8450 =XTrue'.replace('X', ' ')
+            err = "trying to submit on B3 and want to kill ak8450 but can't find magic"
+            to_replace.append((magic, 'use_ak8450 = False', err))
 
         if year == 2015 or (year == 2016 and not sample.is_mc and sample.name.split('2016')[1].startswith('H')):
             magic = 'to_doX=X(800,X900)'.replace('X', ' ')
