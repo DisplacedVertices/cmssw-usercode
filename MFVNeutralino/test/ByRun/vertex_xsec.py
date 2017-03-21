@@ -11,11 +11,11 @@ if event_filter_fn:
     plot_path += '_' + os.path.basename(event_filter_fn).replace('.bin', '')
 title = '%i, %i-track %i-vtx events' % (year, ntracks, oneortwo)
 if year == 2015:
-    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV10_sidebanddata2015/JetHT2015%s.root' % s for s in 'CD']
-    mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_sidebanddata2015/lumiSummary.json'
+    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV12/JetHT2015%s.root' % s for s in 'CD']
+    mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12/dataok_2015.json'
 else:
-    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV10_2016_data_partial_notrigbit/JetHT2016%s.root' % s for s in 'B3 C D E F G H2 H3'.split()]
-    mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_2016_data_partial_notrigbit/processedLumis.json'
+    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV12/JetHT2016%s.root' % s for s in 'B3 C D E F H2 H3'.split()]
+    mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12/dataok_2016_noG.json'
 
 ####
 
