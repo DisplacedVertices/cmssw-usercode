@@ -67,14 +67,17 @@ def cmd_trigeff_hadds():
     hadd('wjetstolnusum_2015.root', ['wjetstolnu%s_2015.root' % x for x in '123'])
 
     for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016), ('_2015', -AnalysisConstants.int_lumi_2015):
-        cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
-        if is2015_s:
-            files = 'ttbar_2015.root wjetstolnusum_2015.root dyjetstollM10sum_2015.root dyjetstollM50sum_2015.root qcdmupt15_2015.root'.split()
-        else:
-            files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root qcdmupt15.root'.split()
-        cmd += ' '.join(files)
-        print cmd
-        os.system(cmd)
+        for wqcd_s in '', '_wqcd':
+            cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s%s.root ' % (scale, wqcd_s, is2015_s)
+            if is2015_s:
+                files = 'ttbar_2015.root wjetstolnusum_2015.root dyjetstollM10sum_2015.root dyjetstollM50sum_2015.root'.split()
+            else:
+                files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root'.split()
+            if wqcd_s:
+                files.append('qcdmupt15_2015.root' if is2015_s else 'qcdmupt15.root')
+            cmd += ' '.join(files)
+            print cmd
+            os.system(cmd)
 
 ####
 
