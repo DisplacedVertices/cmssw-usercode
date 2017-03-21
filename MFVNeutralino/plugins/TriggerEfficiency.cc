@@ -87,7 +87,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   // -4 = HLT_PFHT900 || PFJet450
   // -5 = HLT_PFHT900 || PFJet450 || AK8PFJet450
   assert(require_bits[0] >= -5 && require_bits[0] < mfv::n_hlt_paths);
-  assert(require_bits[1] >= -1 && require_bits[0] < mfv::n_l1_paths);
+  assert(require_bits[1] >= -1 && require_bits[1] < mfv::n_l1_paths);
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
