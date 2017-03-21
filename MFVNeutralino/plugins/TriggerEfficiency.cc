@@ -11,6 +11,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 class MFVTriggerEfficiency : public edm::EDAnalyzer {
 public:
@@ -77,8 +78,13 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
     use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
-  assert(require_bits[0] >= -1); // ORs will be represented by other negative numbers, not implemented yet
-  assert(require_bits[1] >= -1);
+  // -1 = don't care, ORs represented by negative numbers other than -1
+  // -2 = HLT_PFHT800 || PFJet450
+  // -3 = HLT_PFHT800 || PFJet450 || AK8PFJet450
+  // -4 = HLT_PFHT900 || PFJet450
+  // -5 = HLT_PFHT900 || PFJet450 || AK8PFJet450
+  assert(require_bits[0] >= -5 && require_bits[0] < mfv::n_hlt_paths);
+  assert(require_bits[1] >= -1 && require_bits[0] < mfv::n_l1_paths);
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -132,14 +138,37 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
 }
 
+namespace {
+  bool orem(const std::vector<int>& decisions, std::vector<int> which) {
+    for (int w : which) {
+      const int decision = decisions[w];
+      if (decision == -1) throw cms::Exception("TriggerNotFound") << mfv::hlt_paths[w] << " wasn't found";
+      else if (decision == 1) return true;
+    }
+    return false;
+  }
+}
+
 void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   for (int i = 0; i < 2; ++i) { // HLT then L1
-    if (require_bits[i] != -1) {
-      edm::Handle<std::vector<int>> decisions;
-      event.getByToken(decisions_tokens[i], decisions);
-      const int decision = (*decisions)[require_bits[i]];
+    const int r = require_bits[i];
+    if (r == -1)
+      continue;
+
+    edm::Handle<std::vector<int>> decisions;
+    event.getByToken(decisions_tokens[i], decisions);
+
+    if (i == 0 && r < 0) {
+      if ((r == -2 && !orem(*decisions, {1,3})) ||
+          (r == -3 && !orem(*decisions, {1,3,4})) ||
+          (r == -4 && !orem(*decisions, {2,3})) ||
+          (r == -5 && !orem(*decisions, {2,3,4})))
+        return;
+    }
+    else {
+      const int decision = (*decisions)[r];
       if (decision == -1)
-        throw cms::Exception("TriggerNotFound") << (i == 0 ? "HLT" : "L1") << " bit " << require_bits[i] << " wasn't found";
+        throw cms::Exception("TriggerNotFound") << (i == 0 ? "HLT" : "L1") << " bit " << r << " wasn't found";
       else if (decision == 0)
         return;
     }

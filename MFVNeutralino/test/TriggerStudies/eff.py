@@ -20,7 +20,7 @@ elif year == 2016 and H_for_test:
 htskim = False
 ht_skim_cut = min(to_do) if htskim else -1
 
-version = 'v4'
+version = 'v5'
 json = '../ana_2015p6.json'
 batch_name = 'TrigEff%s' % version
 
@@ -77,15 +77,24 @@ process.pforsig = cms.Path(cms.ignore(process.mfvTriggerFloats) * process.dennom
 
 if 800 in to_do:
     process.num800 = process.den.clone(require_hlt = 1)
+    process.num800450 = process.den.clone(require_hlt = -2)
+    process.p *= process.num800 * process.num800450
+    if year == 2016:
+        process.num800450ak = process.den.clone(require_hlt = -3)
+        process.p *= process.num800450ak
+
     process.num800nomu = process.dennomu.clone(require_hlt = 1)
     process.num800nomuht1000 = process.dennomuht1000.clone(require_hlt = 1)
-    process.p *= process.num800
     process.pforsig *= process.num800nomu * process.num800nomuht1000
+
 if 900 in to_do:
     process.num900 = process.den.clone(require_hlt = 2)
+    process.num900450 = process.den.clone(require_hlt = -4)
+    process.num900450ak = process.den.clone(require_hlt = -5)
+    process.p *= process.num900 * process.num900450 * process.num900450ak
+
     process.num900nomu = process.dennomu.clone(require_hlt = 2)
     process.num900nomuht1000 = process.dennomuht1000.clone(require_hlt = 2)
-    process.p *= process.num900
     process.pforsig *= process.num900nomu * process.num900nomuht1000
 
 if htskim:
@@ -108,10 +117,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples += [getattr(Samples, 'official_mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.official_mfv_neu_tau10000um_M0800]
 
     for sample in samples:
-        if sample.is_mc:
-            sample.events_per = 100000
-        else:
-            sample.lumis_per = 50
+        if not sample.is_mc:
             sample.json = json
 
     def pset_modifier(sample):
@@ -134,7 +140,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     cs = CRABSubmitter(batch_name,
                        pset_modifier = pset_modifier,
-                       job_control_from_sample = True,
+                       splitting = 'FileBased',
+                       units_per_job = 10,
+                       total_units = -1,
                        dataset = 'miniaod',
                        publish_name = 'trigeff_htskim_' + version,
                        )
