@@ -2,14 +2,17 @@ import sys, os
 from array import array
 from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.ROOTTools import *
+from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
 version = 'v4'
+zoom = False #(0.98,1.005)
 save_more = True
+data_only = False
 use_qcd = False
-num_dir = 'num800'
-year = 2015
-which = typed_from_argv(int, 0)
+num_dir = 'num900'
+year = 2016
+which = typed_from_argv(int, 2)
 data_period, int_lumi = [
     ('',  35861. if year == 2016 else 2689.),
     ('BthruG', 27255.),
@@ -34,6 +37,8 @@ if any((year not in (2015, 2016),
 
 root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff%s' % version
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
+if zoom:
+    plot_path += '_zoom'
 
 set_style()
 ROOT.gStyle.SetOptStat(0)
@@ -43,14 +48,17 @@ ROOT.TH1.AddDirectory(0)
 data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
 data_f = ROOT.TFile(data_fn)
 
-if year == 2015:
-    bkg_samples = [ttbar_2015, wjetstolnusum_2015, dyjetstollM50sum_2015, dyjetstollM10sum_2015]
-    sig_samples = [] #mfv_signal_samples_2015  no miniaod
-elif year == 2016:
-    bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10]
-    sig_samples = [getattr(Samples, 'official_mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.official_mfv_neu_tau10000um_M0800]
-if use_qcd:
-    bkg_samples.append(qcdmupt15_2015 if year == 2015 else qcdmupt15)
+if data_only:
+    bkg_samples, sig_samples = [], []
+else:
+    if year == 2015:
+        bkg_samples = [ttbar_2015, wjetstolnusum_2015, dyjetstollM50sum_2015, dyjetstollM10sum_2015]
+        sig_samples = [] #mfv_signal_samples_2015  no miniaod
+    elif year == 2016:
+        bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10]
+        sig_samples = [getattr(Samples, 'official_mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.official_mfv_neu_tau10000um_M0800]
+    if use_qcd:
+        bkg_samples.append(qcdmupt15_2015 if year == 2015 else qcdmupt15)
 
 n_bkg_samples = len(bkg_samples)
 for sample in bkg_samples:
@@ -64,7 +72,19 @@ for sample in sig_samples:
 kinds = ['']
 ns = ['h_jet_ht']
 
-def limits(kind, n):
+def fit_limits(kind, n):
+    if 'ht' in n:
+        return 650, 5000
+    else:
+        if 'pf' in kind:
+            if 'pt_4' in n:
+                return 85, 250
+            else:
+                return 75, 250
+        else:
+            return 60, 250
+
+def draw_limits(kind, n):
     if 'ht' in n:
         return 500, 5000
     else:
@@ -77,14 +97,16 @@ def limits(kind, n):
             return 60, 250
 
 def make_fcn(name, kind, n):
-    fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *limits(kind,n))
+    fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *fit_limits(kind,n))
     fcn.SetParNames('floor', 'ceil', 'turnmu', 'turnsig')
     if 'ht' in n:
         fcn.SetParameters(0, 1, 900, 100)
     else:
         fcn.SetParameters(0, 1, 48, 5)
     fcn.SetParLimits(1, 0, 1)
-    fcn.SetLineWidth(1)
+    fcn.SetLineWidth(2)
+    fcn.SetLineStyle(2)
+    
     return fcn
 
 def rebin_pt(h):
@@ -136,7 +158,7 @@ for kind in kinds:
                 if 'pt' in n:
                     rat.GetXaxis().SetLimits(0, 260)
                 elif 'ht' in n:
-                    rat.GetXaxis().SetLimits(0, limits(kind,n)[1])
+                    rat.GetXaxis().SetLimits(0, draw_limits(kind,n)[1])
 
                 fcn = make_fcn('f_' + subsubname, kind, n)
                 res = rat.Fit(fcn, 'RQS')
@@ -200,11 +222,12 @@ for kind in kinds:
                     hpar.GetYaxis().SetRangeUser(0, 300)
                 ps.save(subsubname)
 
-        bkg_effective_den = sum_scaled_dens**2 / sum_scaled_dens_var
-        bkg_effective_num = sum_scaled_nums / sum_scaled_dens * bkg_effective_den
-        print 'sum bkgs with effective n =', bkg_effective_den
-        print '   %10.2f %10.2f %10s %10s  %.6f [%.6f, %.6f]' % ((sum_scaled_nums, sum_scaled_dens, '', '') + clopper_pearson(bkg_effective_num, bkg_effective_den))
-        print '+- %10.2f %10.2f' % (sum_scaled_nums_var**0.5, sum_scaled_dens_var**0.5)
+        if sum_scaled_dens_var > 0 and sum_scaled_dens > 0:
+            bkg_effective_den = sum_scaled_dens**2 / sum_scaled_dens_var
+            bkg_effective_num = sum_scaled_nums / sum_scaled_dens * bkg_effective_den
+            print 'sum bkgs with effective n =', bkg_effective_den
+            print '   %10.2f %10.2f %10s %10s  %.6f [%.6f, %.6f]' % ((sum_scaled_nums, sum_scaled_dens, '', '') + clopper_pearson(bkg_effective_num, bkg_effective_den))
+            print '+- %10.2f %10.2f' % (sum_scaled_nums_var**0.5, sum_scaled_dens_var**0.5)
 
         if 'gen' in n:
             continue
@@ -236,13 +259,16 @@ for kind in kinds:
                 k = 'PF' if 'pf' in kind else 'calo'
                 r.SetTitle(';%ith %s jet p_{T} (GeV);efficiency' % (i, k))
             elif 'ht' in n:
-                r.GetXaxis().SetLimits(0, limits(kind, n)[1])
+                r.GetXaxis().SetLimits(0, draw_limits(kind, n)[1])
                 k = ''
                 r.SetTitle(';%s H_{T} (GeV);efficiency' % k)
             r.GetHistogram().SetMinimum(0)
             r.GetHistogram().SetMaximum(1.05)
+            r.SetLineWidth(2)
 
         data_rat.Draw('AP')
+        if zoom:
+            data_rat.GetYaxis().SetRangeUser(*zoom)
         ROOT.gStyle.SetOptFit(1111)
         data_fcn = make_fcn('f_data', kind, n)
         data_fcn.SetLineColor(ROOT.kBlack)
@@ -261,19 +287,19 @@ for kind in kinds:
             bkg_rat.Draw('E2 same')
 
         ps.c.Update()
+        move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
         if bkg_rat:
-            s = move_stat_box(bkg_rat,  (0.518, 0.350, 0.866, 0.560))
+            s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.350, 0.866, 0.560))
             s.SetLineColor(2)
             s.SetTextColor(2)
-        move_stat_box(data_rat, (0.518, 0.133, 0.866, 0.343))
 
         ps.save(subname)
 
-        print 'signals'
+        print '\nsignals'
         for sample in sig_samples:
             sig_num, sig_den = get(sample.f, kind, n)
-            ll = limits(kind, n)[0]
-            ib = num.FindBin(ll)
+            ll = 1000. # fit_limits(kind, n)[0]
+            ib = sig_num.FindBin(ll)
             ni = sig_num.Integral(ib, 10000)
             di = sig_den.Integral(ib, 10000)
             print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
