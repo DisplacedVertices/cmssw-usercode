@@ -30,6 +30,7 @@ private:
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
   const edm::EDGetTokenT<float> hlt_ht_token;
+  const edm::EDGetTokenT<std::vector<float>> l1jets_pts_token;
   const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
 
@@ -52,6 +53,7 @@ private:
   TH1F* h_jet_ht_ptlt200;
   TH1F* h_jet_ht_m_hlt_ht;
   TH2F* h_njets_v_ht;
+  TH1F* h_l1jet_pt[11];
 
   TH1F* h_ngenjets;
   TH1F* h_genjet_e[11];
@@ -75,6 +77,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     hlt_ht_token(consumes<float>(edm::InputTag("mfvTriggerFloats", "ht"))),
+    l1jets_pts_token(consumes<std::vector<float>>(edm::InputTag("mfvTriggerFloats", "l1jetspts"))),
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
     use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
@@ -114,6 +117,12 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     h_jet_eta[i]  = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i),  TString::Format(";%s #eta;events/0.12", buf), 50, -6, 6);
     h_jet_phi[i]  = fs->make<TH1F>(TString::Format("h_jet_phi_%i", i),  TString::Format(";%s #phi;events/0.125", buf), 50, -M_PI, M_PI);
     h_jet_muef[i] = fs->make<TH1F>(TString::Format("h_jet_muef_%i", i), TString::Format(";%s #mu energy fraction;events/0.1", buf), 11, 0, 1.1);
+
+    if (i == 0)
+      snprintf(buf, 32, "all L1 jets");
+    else
+      snprintf(buf, 32, "L1 jet %i", i);
+    h_l1jet_pt[i] = fs->make<TH1F>(TString::Format("h_l1jet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
   }
   h_jet_ht_all = fs->make<TH1F>("h_jet_ht_all", ";jet (p_{T} > 20 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
@@ -253,6 +262,16 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   edm::Handle<float> hlt_ht;
   event.getByToken(hlt_ht_token, hlt_ht);
   h_jet_ht_m_hlt_ht->Fill(jet_ht - *hlt_ht); 
+
+  edm::Handle<std::vector<float>> l1jets_pts;
+  event.getByToken(l1jets_pts_token, l1jets_pts);
+  int nl1jet = 0;
+  for (float pt : *l1jets_pts) {
+    ++nl1jet;
+    for (int i : {0, nl1jet})
+      if (i == 0 || nl1jet < 11)
+        h_l1jet_pt[i]->Fill(pt);
+  }
 
   if (use_genjets) {
     edm::Handle<reco::GenJetCollection> genjets;
