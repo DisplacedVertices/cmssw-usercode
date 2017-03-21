@@ -1260,6 +1260,8 @@ def move_stat_box(s, ndc_coords):
     if type(s) != ROOT.TPaveStats:
         s = s.FindObject('stats')
 
+    if ndc_coords == 'inf':
+        ndc_coords = (1e6,1e6,1e6,1e6)
     s.SetX1NDC(ndc_coords[0])
     s.SetY1NDC(ndc_coords[1])
     s.SetX2NDC(ndc_coords[2])
