@@ -84,6 +84,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
 {
+  produces<std::vector<float>>("l1jetspts");
   produces<float>("l1htt");
   produces<float>("myhtt");
   produces<float>("myhttwbug");
@@ -228,6 +229,7 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   float ht_for_cut = -1;
+  std::auto_ptr<std::vector<float>> l1jetspts(new std::vector<float>);
   std::auto_ptr<float> l1htt(new float(-1));
   std::auto_ptr<float> myhtt(new float(-1));
   std::auto_ptr<float> myhttwbug(new float(-1));
@@ -249,6 +251,13 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   }
 
 #ifdef MFVNEUTRALINO_2016
+  for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
+    const l1t::Jet& jet = l1_jets->at(0, i);
+    if (fabs(jet.eta()) < 3)
+      l1jetspts->push_back(jet.pt());
+  }
+  std::sort(l1jetspts->begin(), l1jetspts->end(), std::greater<float>());
+
   t.l1htt = *l1htt = etsumhelper.TotalHt();
   t.myhtt = *myhtt = my_htt;
   t.myhttwbug = *myhttwbug = my_htt_wbug;
@@ -314,6 +323,7 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (tree)
     tree->Fill();
 
+  event.put(l1jetspts, "l1jetspts");
   event.put(l1htt, "l1htt");
   event.put(myhtt, "myhtt");
   event.put(myhttwbug, "myhttwbug");
