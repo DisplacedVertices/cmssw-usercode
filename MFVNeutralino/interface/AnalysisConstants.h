@@ -17,10 +17,16 @@ namespace mfv {
     int_lumi = 38550.;
 
     const char*
-    int_lumi_nice = "38.6 fb^{-1} (13 TeV)";
+    int_lumi_nice_2015 = "2.7 fb^{-1} (13 TeV)";
+
+    const char*
+    int_lumi_nice_2016 = "35.9 fb^{-1} (13 TeV)";
 
     const double
-    scale_factor = 1.;
+    scale_factor_2015 = 1.;
+
+    const double
+    scale_factor_2016 = 1.;
   }
 }
 
