@@ -4,48 +4,59 @@ from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
+version = 'v4'
+save_more = True
+use_qcd = False
 num_dir = 'num800'
-which = typed_from_argv(int, 1)
-year = 2016
+year = 2015
+which = typed_from_argv(int, 0)
 data_period, int_lumi = [
-    ('',  36802.),
-    ('BthruG', 27945.),
-    ('H', 8857.),
-    ('B3', 5929.),
-    ('C',  2638.),
-    ('D',  4353.),
-    ('E',  4117.),
-    ('F',  3186.),
-    ('G',  7721.),
-    ('H2', 8636.),
-    ('H3',  221.),
+    ('',  35861. if year == 2016 else 2689.),
+    ('BthruG', 27255.),
+    ('H', 8606.),
+    ('B3', 5783.),
+    ('C',  2573.),
+    ('D',  4248.),
+    ('E',  4009.),
+    ('F',  3102.),
+    ('G',  7540.),
+    ('H2', 8391.),
+    ('H3',  215.),
     ][which]
 
-if num_dir == 'num800' and (year == 2015 or data_period.startswith('H')):
+########################################################################
+
+if any((year not in (2015, 2016),
+        year == 2015 and which > 0,
+        year == 2015 and num_dir == 'num900',
+        num_dir == 'num800' and (data_period.startswith('H') or year == 2016 and data_period == ''))):
     raise ValueError('invalid combo: %s %s %s' % (num_dir, year, data_period))
 
-nooffmucut = '' # '_nooffmucut'
-root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEffv2%s/%s' % (nooffmucut, year)
-plot_path = 'TrigEffv2%s_%s_%s%s' % (nooffmucut, num_dir, year, data_period)
+root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff%s' % version
+plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
 
 set_style()
 ROOT.gStyle.SetOptStat(0)
 ps = plot_saver(plot_dir(plot_path), size=(600,600), log=False, pdf=True)
 ROOT.TH1.AddDirectory(0)
 
-save_more = True
-
-data_fn = os.path.join(root_dir, 'SingleMuon2016%s.root' % data_period)
+data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
 data_f = ROOT.TFile(data_fn)
 
-bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10, qcdmupt15]
-#bkg_samples = [wjetstolnu, dyjetstollM50, dyjetstollM10] #, qcdmupt15]
+if year == 2015:
+    bkg_samples = [ttbar_2015, wjetstolnusum_2015, dyjetstollM50sum_2015, dyjetstollM10sum_2015]
+    sig_samples = [] #mfv_signal_samples_2015  no miniaod
+elif year == 2016:
+    bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10]
+    sig_samples = [getattr(Samples, 'official_mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.official_mfv_neu_tau10000um_M0800]
+if use_qcd:
+    bkg_samples.append(qcdmupt15_2015 if year == 2015 else qcdmupt15)
+
 n_bkg_samples = len(bkg_samples)
 for sample in bkg_samples:
     sample.fn = os.path.join(root_dir, sample.name + '.root')
     sample.f = ROOT.TFile(sample.fn)
 
-sig_samples = [] #mfv_signal_samples
 for sample in sig_samples:
     sample.fn = os.path.join(root_dir, sample.name + '.root')
     sample.f = ROOT.TFile(sample.fn)
@@ -95,13 +106,15 @@ def get(f, kind, n):
         rebin = rebin_ht
     return rebin(f.Get(kind + '%s/%s' % (num_dir, n))), rebin(f.Get(kind + 'den/%s' % n))
 
+########################################################################
+
 for kind in kinds:
     for n in ns:
         print
         print '============================================================================='
         print kind, n
         print '-----------------------'
-        subname = '%s_%s' % (kind, n)
+        subname = '%s_%s' % (kind, n) if kind else n
 
         bkg_num, bkg_den = None, None
         sum_scaled_nums, sum_scaled_dens = 0., 0.
@@ -134,7 +147,7 @@ for kind in kinds:
                 reses.append(None)
 
             sample.total_events = -1
-            scale = sample.partial_weight_orig * int_lumi # JMTBAD run mcstatproducer
+            scale = sample.partial_weight(sample.f) * int_lumi
 
             print '%s (%f)' % (sample.name, scale)
             ll = 1000. #limits(kind, n)[0]
