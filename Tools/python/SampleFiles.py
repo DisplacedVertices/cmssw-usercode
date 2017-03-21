@@ -164,15 +164,6 @@ _add_ds("ntuplev12", {
 'official_mfv_neu_tau10000um_M1200': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV12_official_mfv_neu_tau10000um_M1200/170316_214939", 5),
 'official_mfv_neu_tau10000um_M1600': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV12_official_mfv_neu_tau10000um_M1600/170316_214939", 7),
 
-#'JetHT2016B3': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024059", 1758),
-#'JetHT2016C': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024130", 580),
-#'JetHT2016D': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024203", 972),
-#'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024232", 826),
-#'JetHT2016F': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024305", 603),
-#'JetHT2016G': 
-'JetHT2016H2': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024402", 1541),
-'JetHT2016H3': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024433", 41),
-
 'xx4j_tau00001mm_M0300_2015': (1, ['/store/user/tucker/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV12_xx4j_tau00001mm_M0300_2015/170316_220019/0000/ntuple_0.root']),
 'xx4j_tau00001mm_M0700_2015': (1, ['/store/user/tucker/XXTo4J_M-700_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV12/170317_025314/0000/ntuple_1.root']),
 'xx4j_tau00001mm_M1000_2015': (1, ['/store/user/tucker/XXTo4J_M-1000_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/NtupleV12/170317_025525/0000/ntuple_1.root']),
@@ -208,6 +199,16 @@ _add_ds("ntuplev12", {
 'xx4j_tau02000mm_M0500_2015': (1, ['/store/user/tucker/XXTo4J_M-500_CTau-2000mm_TuneCUETP8M1_13TeV_pythia8/NtupleV12/170317_025243/0000/ntuple_1.root']),
 'xx4j_tau02000mm_M1000_2015': (1, ['/store/user/tucker/XXTo4J_M-1000_CTau-2000mm_TuneCUETP8M1_13TeV_pythia8/NtupleV12/170317_025732/0000/ntuple_1.root']),
 'xx4j_tau02000mm_M3000_2015': _fromnum0("/store/user/tucker/XXTo4J_M-3000_CTau-2000mm_TuneCUETP8M1_13TeV_pythia8/NtupleV12_xx4j_tau02000mm_M3000_2015/170316_220019", 2),
+
+'JetHT2016B3': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024059", 1758),
+'JetHT2016C': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024130", 580),
+'JetHT2016D': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024203", 972),
+'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024232", 826),
+'JetHT2016F': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024305", 603),
+#'JetHT2016G': 
+'JetHT2016H2': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024402", 1541),
+'JetHT2016H3': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024433", 41),
+
 })
 
 
