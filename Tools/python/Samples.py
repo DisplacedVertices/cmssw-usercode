@@ -412,11 +412,11 @@ _adbp3('ntuplev12', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm
 _adbp3('ntuplev12', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV12-023000c29873201b6e9e0d593be98714/USER', 34040)
 _adbp3('ntuplev12', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV12-1df51208804a01868becde20111f4ae7/USER', 98620)
 
-#JetHT2016B3.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-ed09b748f6be0007d3f80d7a9c651110/USER', 20459353)
-#JetHT2016C.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-4de46f5786c935edf774085b52be2cc3/USER', 9003136)
-#JetHT2016D.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c0862f82c6d9e4968498ec9a917038a7/USER', 14726858)
-#JetHT2016E.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c0c08c96cd0b60bbd85c4f0b2427e38b/USER', 13664363)
-#JetHT2016F.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-0af523479fcfbed97639cbffb0aa89d8/USER', 10755341)
+JetHT2016B3.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-ed09b748f6be0007d3f80d7a9c651110/USER', 20459353)
+JetHT2016C.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-4de46f5786c935edf774085b52be2cc3/USER', 9003136)
+JetHT2016D.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c0862f82c6d9e4968498ec9a917038a7/USER', 14726858)
+JetHT2016E.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c0c08c96cd0b60bbd85c4f0b2427e38b/USER', 13664363)
+JetHT2016F.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-0af523479fcfbed97639cbffb0aa89d8/USER', 10755341)
 JetHT2016H2.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-72bc9d6c7302b35406ec73af1e478c83/USER', 14180580)
 JetHT2016H3.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c2c950db55264ce616ae0a4bfc441bdb/USER', 361026)
 
