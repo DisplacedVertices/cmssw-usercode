@@ -29,10 +29,10 @@ echo START RAWHLT
 scram project -n RAWHLT CMSSW CMSSW_8_0_21 2>&1
 cd RAWHLT/src
 eval $(scram runtime -sh)
-cp $WD/{inputfns.txt,*.py,*.pkl} .
+cp $WD/{inputfns.txt,*.py,*.txt.gz} .
 
 echo cmsRun
-cmsRun -j fjr.xml rawhlt.py ${TODOS} 2>&1
+cmsRun -j fjr.xml rawhlt.py nopremix ${TODOS} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
@@ -70,7 +70,7 @@ cp $WD/{reco.py,modify.py} .
 mv $WD/hlt.root .
 
 echo cmsRun
-cmsRun -j fjr.xml reco.py ${TODOS2} 2>&1
+cmsRun -j fjr.xml reco.py nopremix ${TODOS2} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
