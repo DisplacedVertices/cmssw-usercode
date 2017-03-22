@@ -3,7 +3,9 @@
 import sys, os, re, fnmatch
 from datetime import datetime
 from glob import glob
+from itertools import combinations
 import xml.etree.ElementTree as ET
+from JMTucker.Tools.LumiJSONTools import fjr2ll
 from JMTucker.Tools.general import sub_popen
 from JMTucker.Tools.hadd import hadd
 
@@ -197,6 +199,28 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         hadd(new_name, files, chunk_size)
 
     return new_name
+
+def cs_report(wd):
+    njobs = cs_njobs(wd)
+    lls = []
+
+    for i in xrange(njobs):
+        fjr_fn = os.path.join(wd, 'fjr_%i.xml' % i)
+        lls.append((i, fjr2ll(fjr_fn)))
+
+    for (ia,lla),(ib,llb) in combinations(lls,2):
+        if lla & llb:
+            problem = 'problem with fjrs for %s: overlap found in pair %i + %i\n' % (wd,ia,ib)
+            problem += repr((ia, lla)) + '\n'
+            problem += repr((ib, llb)) + '\n'
+            problem += 'and ' + repr(lla & llb) + '\n'
+            raise ValueError(problem)
+
+    ll_all = lls.pop()[1]
+    for _,ll in lls:
+        ll_all |= ll
+    ll_all.writeJSON(os.path.join(wd, 'processedLumis.json'))
+    return ll_all
 
 if __name__ == '__main__':
     cs_eventsread('/uscms_data/d2/tucker/crab_dirs/NtupleV12/2015/condor_JetHT2015C')
