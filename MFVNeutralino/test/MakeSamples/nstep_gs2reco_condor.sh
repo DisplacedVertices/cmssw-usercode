@@ -26,7 +26,7 @@ echo TODOS2: $TODOS2
 echo START RAWHLT
 
 (
-scram project -n RAWHLT CMSSW CMSSW_8_0_21 2>&1
+scram project -n RAWHLT CMSSW CMSSW_8_0_25 2>&1
 cd RAWHLT/src
 eval $(scram runtime -sh)
 cp $WD/{inputfns.txt,*.py,*.txt.gz} .
@@ -63,7 +63,7 @@ echo END RAWHLT
 echo START RECO
 
 (
-scram project -n RECO CMSSW CMSSW_8_0_21 2>&1
+scram project -n RECO CMSSW CMSSW_8_0_25 2>&1
 cd RECO/src
 eval $(scram runtime -sh)
 cp $WD/{reco.py,modify.py} .
