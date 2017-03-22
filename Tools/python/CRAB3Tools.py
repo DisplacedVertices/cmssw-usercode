@@ -92,7 +92,7 @@ def crab_status(working_dir, verbose=True):
     if verbose:
         print 'checking', working_dir
 
-    result = crab_command('status', '--long', dir=working_dir)
+    result = crab_command('status', dir=working_dir)
 
     jl = crab_job_lists_by_status(result)
     if not jl:
