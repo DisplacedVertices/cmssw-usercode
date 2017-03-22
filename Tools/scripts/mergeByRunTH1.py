@@ -5,11 +5,13 @@ from fnmatch import fnmatch
 from pprint import pprint
 from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
+from JMTucker.Tools.general import bool_from_argv
 
 if len(sys.argv) < 5:
     print 'usage: mergeByRunTH1.py in_fn out_fn min_run max_run [glob_pattern_1 ...]'
     sys.exit(1)
 
+yes = bool_from_argv('yes')
 in_fn = sys.argv[1]
 out_fn = sys.argv[2]
 min_run = int(sys.argv[3])
@@ -47,7 +49,8 @@ groups = dict(groups)
 
 print 'will add these groups:'
 pprint(groups)
-raw_input('<hit enter if ok>')
+if not yes:
+    raw_input('<hit enter if ok>')
 
 for path in sorted(groups.keys()):
     l = groups[path]
