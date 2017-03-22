@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, string, shutil, base64, zlib, imp, cPickle as pickle
+import sys, os, string, shutil, time, base64, zlib, imp, cPickle as pickle
 from datetime import datetime
 from JMTucker.Tools.CMSSWTools import make_tarball, find_output_files
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
@@ -140,6 +140,7 @@ def get(i): return _l[i]
 
     def __init__(self,
                  batch_name,
+                 ex = '',
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
@@ -190,9 +191,13 @@ def get(i): return _l[i]
                 os.mkdir(batch_root)
                 os.mkdir(batch_path)
 
+        if ex:
+            ex = str(ex) + '_'
+        self.ex_str = 'ex_%s%s' % (ex, str(int(time.time()*1000)))
+
         self.batch_name = batch_name
         self.batch_dir = os.path.abspath(crab_dirs_root(batch_name))
-        self.inputs_dir = os.path.join(self.batch_dir, 'inputs')
+        self.inputs_dir = os.path.join(self.batch_dir, self.ex_str, 'inputs')
         if os.path.exists(self.inputs_dir): # check inputs_dir instead of batch_dir since we might be from metasubmitter
             raise ValueError('batch_dir %s already exists, refusing to clobber' % self.batch_dir)
 
@@ -209,7 +214,7 @@ def get(i): return _l[i]
         #os.system('mkdir -p /tmp/%s' % username)
 
         print 'CondorSubmitter init: saving git status'
-        save_git_status(os.path.join(self.batch_dir, 'gitstatus'))
+        save_git_status(os.path.join(self.batch_dir, self.ex_str, 'gitstatus'))
 
         os.mkdir(self.inputs_dir)
 
@@ -266,7 +271,7 @@ def get(i): return _l[i]
                     stageout_path = '/' + stageout_path
                 stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
                 if not publish_name:
-                    publish_name = batch_name
+                    publish_name = batch_name.replace('/', '_')
                 stageout_path += '/$(<cs_primaryds)/' + publish_name + '_$(<cs_samplename)/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
 
             print 'CondorSubmitter init: stageout files are', stageout_files
@@ -409,6 +414,7 @@ def get(i): return _l[i]
         working_dir = os.path.join(self.batch_dir, 'condor_%s' % sample.name)
         os.mkdir(working_dir)
         touch(os.path.join(working_dir, 'cs_dir'))
+        open(os.path.join(working_dir, 'cs_ex'), 'wt').write(self.ex_str)
 
         njobs = self.filelist(sample, working_dir)
         pset_fn = self.pset(sample, working_dir)

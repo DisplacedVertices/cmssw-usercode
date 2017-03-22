@@ -1,7 +1,11 @@
 # from configs in dbs for /QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM
+# and /QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM
+# and https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVMCcampaignRunIISummer16DR80Premix
 
 import os, sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
+
+premix = 'nopremix' not in sys.argv
 
 process = cms.Process('RECO', eras.Run2_2016)
 
@@ -13,7 +17,8 @@ process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
-process.load('Configuration.StandardSequences.L1Reco_cff')
+if not premix:
+    process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('CommonTools.ParticleFlow.EITopPAG_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -41,12 +46,16 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v6', '')
 
 process.raw2digi_step = cms.Path(process.RawToDigi)
-process.L1Reco_step = cms.Path(process.L1Reco)
+if not premix:
+    process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstruction)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 process.AODSIMoutput_step = cms.EndPath(process.AODSIMoutput)
 
-process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.eventinterpretaion_step,process.AODSIMoutput_step)
+process.schedule = cms.Schedule(process.raw2digi_step)
+if not premix:
+    process.schedule.append(process.L1Reco_step)
+process.schedule.extend([process.reconstruction_step,process.eventinterpretaion_step,process.AODSIMoutput_step])
 
 from FWCore.ParameterSet.Utilities import convertToUnscheduled, cleanUnscheduled
 process = cleanUnscheduled(convertToUnscheduled(process))

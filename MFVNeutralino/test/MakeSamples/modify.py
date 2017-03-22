@@ -442,3 +442,12 @@ def set_oldduplicatemerge(process, outliers_rejection=False):
             x.mva.minNVtxTrk = 0
         if outliers_rejection:
             process.mergedDuplicateTracks.Fitter = 'KFFittingSmootherWithOutliersRejectionAndRK'
+
+def set_hip(process, scale=1.0): # scale relative to 6e33
+    for x in 'process.SiStripSimBlock process.stripDigitizer process.theDigitizers.strip process.theDigitizersValid.strip process.theDigitizersMixPreMix.strip process.theDigitizersMixPreMixValid.strip process.mix.digitizers.strip process.mixData'.split():
+        try:
+            y = eval(x)
+        except AttributeError:
+            continue
+        y.APVSaturationFromHIP = True
+        y.APVSaturationProbScaling = scale

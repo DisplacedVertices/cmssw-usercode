@@ -37,7 +37,7 @@ for wd in wds:
 
     color = colors.cyan
     if ana.nprobs:
-        color = colors.red
+        color = colors.magenta
     elif ana.nkilled:
         color = colors.yellow
     elif ana.ndone == ana.njobs:
@@ -46,7 +46,10 @@ for wd in wds:
     
     print color(fmt % (wd.ljust(ml), z(ana.njobs), z(ana.ndone), z(ana.nidle), z(ana.nrun), z(ana.nkilled), z(ana.nprobs))), 
     if ana.nprobs:
-        print ' :', crabify_list([i for i,r in enumerate(ana.returns) if r > 0]),
+        print ' :', colors.magenta(crabify_list(ana.probs())),
+    if ana.nkilled:
+        print ' :', colors.yellow(crabify_list(ana.killed())),
+    if ana.nprobs:
         if verbose:
             print
             by_exit = defaultdict(list)

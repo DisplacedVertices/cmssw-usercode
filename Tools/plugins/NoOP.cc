@@ -21,6 +21,10 @@ NoOP::NoOP(const edm::ParameterSet& cfg)
   edm::Service<edm::RandomNumberGenerator> rng;
   if (exception_chance > 0 && !rng.isAvailable())
     throw cms::Exception("NoOP", "RandomNumberGeneratorService not available");
+
+  const std::string ctor_msg = cfg.getUntrackedParameter<std::string>("ctor_msg", "");
+  if (ctor_msg != "")
+    std::cout << ctor_msg << std::endl;
 }
 
 void NoOP::analyze(const edm::Event& event, const edm::EventSetup&) {

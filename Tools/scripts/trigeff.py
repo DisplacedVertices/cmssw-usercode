@@ -101,7 +101,7 @@ if options.table:
         if options.table_nevents:
             c = (i-1, path, num, int(round(lo*den)), int(round(hi*den)))
         else:
-            c = (i-1, path, eff, lo, hi)
+            c = (i-1, path, eff, (hi-lo)/2, lo, hi)
         if options.table_apply_prescales:
             c += (l1, hlt, overall, prescaled_eff)
         content.append(c)
@@ -110,7 +110,7 @@ if options.table:
         num_width = '%' + str(int(round(log10(mx))) + 2) + 'i'
         fmt = '(%3i) %' + str(width + 2) + 's ' + num_width + '  68%% CL: [' + num_width + ', ' + num_width + ']'
     else:
-        fmt = '(%3i) %' + str(width + 2) + 's %.3e  68%% CL: [%.3e, %.3e]'
+        fmt = '(%3i) %' + str(width + 2) + 's %.3e +- %.3e 68%% CL: [%.3e, %.3e]'
     if options.table_apply_prescales:
         fmt += '   after prescales: (%10i * %10i = %10i):  %.4f'
 

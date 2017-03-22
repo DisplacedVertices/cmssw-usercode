@@ -3,6 +3,7 @@
 import os, sys
 from collections import defaultdict
 from fnmatch import fnmatch
+from pprint import pprint
 import JMTucker.Tools.DBS as DBS
 from JMTucker.Tools.general import big_warn, typed_from_argv
 
@@ -244,9 +245,11 @@ class SamplesRegistry:
             return sorted(a)
 
     def add(self, s):
+        assert not self.d_samples.has_key(s.name)
         self.d_samples[s.name] = s
 
     def add_list(self, name, l):
+        assert not self.d_lists.has_key(name)
         self.d_lists[name] = l
 
     def by_primary_dataset(self, pd):
@@ -263,7 +266,7 @@ class SamplesRegistry:
         sample = x[0]
         sample.add_dataset(ds_name, dataset, nevents_orig, **kwargs)
 
-    def from_argv(self, default=[], sort_and_set=True, from_root_fns=False):
+    def from_argv(self, default=[], sort_and_set=True, from_root_fns=False, raise_if_none=False):
         ready_only = 'fa_ready_only' in sys.argv
         check = 'fa_check' in sys.argv
         use_all = 'fa_all' in sys.argv
@@ -299,6 +302,9 @@ class SamplesRegistry:
             for s in samples:
                 print s.name
             raw_input('ok?')
+
+        if raise_if_none and not samples:
+            raise ValueError('no samples found in argv')
 
         return samples if samples else default
 
@@ -382,13 +388,66 @@ def sample_from_end_string(namespace, d):
 
 def main(samples_registry):
     import sys
+    options = ('merge', 'filename')
+    if len([o for o in options if o in sys.argv]) > 1:
+        raise ValueError('only one of %r allowed' % options)
+
     if 'merge' in sys.argv:
-        samples = samples_registry.from_argv(from_root_fns=True)
+        samples = samples_registry.from_argv(from_root_fns=True, raise_if_none=True)
         out_fn = [x for x in sys.argv if x.endswith('.root') and not os.path.isfile(x)]
         out_fn = out_fn[0] if out_fn else 'merge.root'
         norm_to = typed_from_argv(float, default_value=1.)
         norm_path = typed_from_argv(str, default_value='', name='norm_path')
         merge(samples, output=out_fn, norm_to=norm_to, norm_path=norm_path)
+
+    elif 'file' in sys.argv:
+        samples = samples_registry.from_argv(raise_if_none=True)
+        if len(samples) != 1:
+            raise ValueError('must have exactly one sample in argv')
+        sample = samples[0]
+        dataset = sys.argv[sys.argv.index(sample.name)+1]
+        if not sample.has_dataset(dataset):
+            raise KeyError('no dataset %s in %s' % (dataset, sample))
+        sample.set_curr_dataset(dataset)
+        for x in sample.filenames[:typed_from_argv(int, 5)]:
+            print x
+
+    elif 'site' in sys.argv:
+        samples = samples_registry.from_argv(raise_if_none=True)
+        sample_names = [s.name for s in samples]
+        dataset = [x for x in sys.argv[1:] if x != 'site' and x not in sample_names]
+        if len(dataset) > 1:
+            raise ValueError('dunno how to get dataset from argv')
+        dataset = dataset[0] if len(dataset) == 1 else 'main'
+        mlen = max(len(sn) for sn in sample_names)
+        for sample in samples:
+            sample.set_curr_dataset(dataset)
+            try:
+                sites = DBS.sites_for_dataset(s.dataset)
+            except RuntimeError:
+                print s.name, 'PROBLEM'
+                continue
+            print s.name.ljust(mlen+5), ' '.join(sites)
+
+    elif 'samplefiles' in sys.argv:
+        samples = samples_registry.from_argv(raise_if_none=True)
+        dataset = 'main'
+        for arg in sys.argv[1:]:
+            if arg == 'miniaod' or arg.startswith('ntuple'):
+                dataset = arg
+                break
+        print 'getting files for dataset %s:' % dataset, ', '.join(s.name for s in samples)
+        import SampleFiles as sf
+        d = {}
+        for s in samples:
+            if sf.has(s.name, dataset):
+                raise KeyError('SampleFiles already has an entry for %s' % s.name)
+            else:
+                fns = s.filenames
+                print 'DBS has %i files for %s' % (len(fns), s.name)
+                d[(s.name, dataset)] = (len(fns), fns)
+        print 'encoded line:'
+        print "_add('%s')" % sf._enc(d)
 
 __all__ = [
     'us_aaa',

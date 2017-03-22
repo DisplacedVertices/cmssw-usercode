@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+import os, sys
+from glob import glob
+from JMTucker.Tools.general import bool_from_argv, touch
+from JMTucker.Tools.CondorTools import cs_dirs_from_argv
+from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
+from JMTucker.Tools import colors
+
+if len(sys.argv) < 2:
+    print 'usage: mtidy wd [wd2 ...]'
+    sys.exit(1)
+
+rm_root_files = bool_from_argv('rm_root_files')
+cr_cmds = ['gzip crab.log', 'tar --remove-files -czf inputs.tgz inputs/']
+cs_cmds = ['tar --remove-files -czf stdouterrlogxmlpublish.tgz stdout.* stderr.* log.* fjr*xml PUBLISH']
+if rm_root_files:
+    cs_cmds.append('rm -r *.root')
+
+cr_dirs = crab_dirs_from_argv()
+if cr_dirs and rm_root_files:
+    print colors.yellow('rm_root_files does nothing for crab dirs')
+
+prev_wd = os.getcwd()
+    
+for wd in cr_dirs + cs_dirs_from_argv():
+    is_cr = wd in cr_dirs
+
+    print colors.bold(wd)
+    if os.path.isfile(os.path.join(wd, 'mtidied')):
+        if not os.path.isfile(os.path.join(wd, 'mtidied_finished')):
+            print colors.red('mtidied but no _finished?')
+        else:
+            print 'already mtidied, skipping'
+            continue
+
+    os.chdir(wd)
+    touch('mtidied')
+    touch('mtidied_started')
+    for cmd in (cr_cmds if is_cr else cs_cmds):
+        #print cmd
+        if not is_cr and cmd.endswith('PUBLISH'):
+            cmd = cmd.replace('PUBLISH', 'publish*txt' if glob('publish*txt') else '')
+        os.system(cmd)
+    touch('mtidied_finished')
+    os.chdir(prev_wd)

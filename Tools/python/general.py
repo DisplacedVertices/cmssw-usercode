@@ -45,23 +45,41 @@ def coderep_compactify_list(l):
         if singles:
             return 'chain(%s, %r)' % (', '.join(xranges), singles)
         else:
+            if len(xranges) == 1:
+                return xranges[0]
             return 'chain(%s)' % ', '.join(xranges)
     else:
         return repr(singles)
 
 def coderep_files(files):
+    if len(files) == 1:
+        return repr(files)
     bn = os.path.basename(files[0]).split('_')[0]
     bases = set(fn.rsplit('/', 2)[0] for fn in files)
     codes = []
     check = []
+    if len(bases) == 1:
+        nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
+        cnums = coderep_compactify_list(nums)
+        if cnums.count('xrange') == 1:
+            assert cnums.startswith('xrange(')
+            base = bases.pop()
+            from1 = cnums.startswith('xrange(1,')
+            s = '_fromnum%i("%s", %i)' % (1 if from1 else 0, base, len(files))
+            if bn != 'ntuple':
+                s = s.replace(')', ', fnbase="%s")' % bn)
+            return s
     for base in bases:
         nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files if fn.startswith(base)]
-        cnums = coderep_compactify_list(nums)
-        mn,mx = min(nums), max(nums)
-        if mn/1000 != mx/1000:
-            code = "[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in %s]" % (base, bn, cnums)
+        if len(nums) == 1:
+            code = "['%s/%04i/%s_%i.root']" % (base, nums[0]/1000, bn, nums[0])
         else:
-            code = "['%s/%04i/%s_%%i.root' %% i for i in %s]" % (base, mn/1000, bn, cnums)
+            cnums = coderep_compactify_list(nums)
+            mn,mx = min(nums), max(nums)
+            if mn/1000 != mx/1000:
+                code = "[%r + '/%%04i/%s_%%i.root' %% (i/1000,i) for i in %s]" % (base, bn, cnums)
+            else:
+                code = "['%s/%04i/%s_%%i.root' %% i for i in %s]" % (base, mn/1000, bn, cnums)
         codes.append(code)
         check += eval(code)
     #pprint(codes)

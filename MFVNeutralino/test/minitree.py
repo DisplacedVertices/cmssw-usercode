@@ -57,8 +57,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MinitreeV11/%i' % year,
-                         dataset = 'ntuplev11',
+    cs = CondorSubmitter('MinitreeV12',
+                         ex = year,
+                         dataset = 'ntuplev12',
                          pset_modifier = modify
                          )
     cs.submit_all(samples)

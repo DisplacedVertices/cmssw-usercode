@@ -1,12 +1,31 @@
 import os
+from gzip import GzipFile as gzip_open
 
-try:
-    print 'getting minbias file list from cache'
-    from minbias_files import files
-except ImportError:
-    print 'nope, getting minbias file list from DBS and caching'
+def _read_gzip_file(fn):
+    print 'getting minbias file list from cache', fn
+    files = []
+    with gzip_open(fn) as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                files.append(line)
+    return files
+
+def _from_dbs_and_cache(fn, ds):
+    print 'hitting DBS %s for %s' % (ds, fn)
     from JMTucker.Tools.DBS import files_in_dataset
-    from JMTucker.Tools.general import to_pickle
-    files = files_in_dataset('/MinBias_TuneCUETP8M1_13TeV-pythia8/RunIISummer15GS-MCRUN2_71_V1-v2/GEN-SIM')
-    to_pickle(files, 'minbias_files.pkl', comp=True)
-    open('minbias_files.py', 'wt').write("import cPickle, gzip; files = cPickle.load(gzip.GzipFile('minbias_files.pkl', 'rb'))\n")
+    files = files_in_dataset(ds)
+    with gzip_open(fn, 'w') as f:
+        for file in files:
+            f.write(fn)
+            f.write('\n')
+    return files
+
+def _from_cache_or_dbs(fn, ds):
+    return _read_gzip_file(fn) if os.path.isfile(fn) else _from_dbs_and_cache(fn, ds)
+
+def files():
+    return _from_cache_or_dbs('minbias.txt.gz', '/MinBias_TuneCUETP8M1_13TeV-pythia8/RunIISummer15GS-MCRUN2_71_V1-v2/GEN-SIM')
+
+def premix_files():
+    return _from_cache_or_dbs('minbias_premix.txt.gz', '/Neutrino_E-10_gun/RunIISpring15PrePremix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v2-v2/GEN-SIM-DIGI-RAW')

@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
-nevents = 10000
-events_per = 200
+nevents = 20000
+events_per = 100
 from_lhe = False
 output_level = 'reco'
-output_dataset_tag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
 
-if 0:
+if 1:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+    meta, taus, masses = 'neu', [300, 1000], [600, 800]
 elif 0:
     meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
 elif 0:
@@ -18,7 +19,7 @@ elif 0:
     meta = 'ttbar'
     nevents, events_per
     output_level = 'minitree'
-elif 1:
+elif 0:
     meta = 'qcdht2000_gensim_ext1'
     nevents, events_per = 396000, 1500
     from_lhe = True
@@ -26,6 +27,9 @@ elif 1:
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 
 ex = ''
+#ex = '_test'
+#nevents, events_per = 1,1
+#meta, taus, masses = 'neu', [10000], [800]
 
 ################################################################################
 
@@ -67,7 +71,7 @@ config.JobType.psetName = 'dummy.py'
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.sendPythonFolder = True
 
-config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias_files.py', 'minbias_files.pkl', 'reco.py', 'fixfjr.py']
+config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
 if output_level == 'minitree':
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
@@ -76,11 +80,11 @@ if from_lhe:
     config.JobType.outputFiles += ['RandomEngineState_LHE.xml.gz']
 
 if output_level == 'reco':
-    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.xml.gz', 'reco.root']
+    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.tgz', 'reco.root']
 elif output_level == 'gensim':
     config.JobType.outputFiles += ['gensim.root']
 elif output_level == 'minitree':
-    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.xml.gz', 'minitree.root', 'vertex_histos.root']
+    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.tgz', 'minitree.root', 'vertex_histos.root']
 
 
 config.JobType.scriptArgs = [

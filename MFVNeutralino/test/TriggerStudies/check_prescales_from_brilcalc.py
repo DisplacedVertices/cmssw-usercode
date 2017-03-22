@@ -1,14 +1,15 @@
 import csv
+from pprint import pprint
 from itertools import izip
 from collections import defaultdict
 from JMTucker.Tools.LumiJSONTools import LumiList
 
-name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFHT900', 'PFHT900.txt', '../2016.json', 'HLT_PFHT900_v', 'L1_HTT', lambda x: x == [160, 200, 220, 240, 255, 270, 280, 300, 320]
 name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFHT800_2015', 'PFHT800_2015.txt', '../2015.json', 'HLT_PFHT800_v', 'L1_HTT', lambda x: x == [100, 125, 150, 175] or x == [150, 175]
 name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFHT800_2016', 'PFHT800_2016.txt', '../2016.json', 'HLT_PFHT800_v', 'L1_HTT', lambda x: x == [160, 200, 220, 240, 255, 270, 280, 300, 320]
 name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFJet450_2015', 'PFJet450_2015.txt', '../2015.json', 'HLT_PFJet450_v', 'L1_SingleJet', lambda x: x == [128, 200] or x == [200]
 name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFJet450_2016', 'PFJet450_2016.txt', '../2016.json', 'HLT_PFJet450_v', 'L1_SingleJet', lambda x: x == [170, 180, 200] or x == [170]
 name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'AK8PFJet450', 'AK8PFJet450.txt', '../2016.json', 'HLT_AK8PFJet450_v', 'L1_SingleJet', lambda x: x == [170, 180, 200] or x == [170]
+name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFHT900', 'PFHT900.txt', '../2016.json', 'HLT_PFHT900_v', 'L1_HTT', lambda x: x == [160, 200, 220, 240, 255, 270, 280, 300, 320]
 
 json = LumiList(json_fn)
 minls, maxls = defaultdict(lambda: 999999), defaultdict(int)
@@ -49,6 +50,7 @@ for row in rows:
             lowest_l1_threshold = l1_threshold
         l1_prescales.append((l1_threshold, l1_prescale))
     l1_prescales.sort()
+    #print row, '\n\t', lowest_l1_threshold
     assert l1_thresholds_possible([t for t,p in l1_prescales])
     changes[run][ls] = (lowest_l1_threshold, l1_prescales)
 
@@ -64,11 +66,10 @@ for run in sorted(changes.keys()):
             end_ls = maxls[run]
         else:
             end_ls = ls_thresh[i+1][0] - 1
-        ll = LumiList(compactList={run: [[ls, end_ls]]})
-        ll_by_lowest_thresh[lowest_thresh] += ll
+        ll_by_lowest_thresh[lowest_thresh] += LumiList(compactList={run: [[ls, end_ls]]})
         for thresh, prescale in prescales:
             if prescale == 1:
-                ll_by_unprescaled_thresh[thresh] += ll
+                ll_by_unprescaled_thresh[thresh] += LumiList(compactList={run: [[ls, end_ls]]})
 
 for thresh, ll in ll_by_lowest_thresh.iteritems():
     (json & ll).writeJSON('%s_lowestL1%i.json' % (name, thresh))

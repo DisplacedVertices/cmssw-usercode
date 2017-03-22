@@ -5,6 +5,9 @@
   #include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
   #include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
   #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+  #include "DataFormats/L1Trigger/interface/EtSum.h"
+  #include "DataFormats/L1Trigger/interface/EtSumHelper.h"
+  #include "DataFormats/L1Trigger/interface/Jet.h"
 #else
   #error what year is it
 #endif
@@ -22,6 +25,14 @@
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
+#ifdef MFVNEUTRALINO_2016
+std::ostream& operator<<(std::ostream& o, const l1t::L1Candidate& c) {
+  o << "et: " << c.et() << " eta: " << c.eta() << " phi: " << c.phi()
+    << " hwPt: " << c.hwPt() << " hwEta: " << c.hwEta() << " hwPhi: " << c.hwPhi() << " hwQual: " << c.hwQual() << " hwIso: " << c.hwIso();
+  return o;
+}
+#endif
+
 class MFVTriggerFloats : public edm::EDFilter {
 public:
   explicit MFVTriggerFloats(const edm::ParameterSet&);
@@ -32,6 +43,8 @@ private:
 #if defined(MFVNEUTRALINO_2015)
   L1GtUtils l1_cfg;
 #elif defined(MFVNEUTRALINO_2016)
+  const edm::EDGetTokenT<l1t::JetBxCollection> l1_jets_token;
+  const edm::EDGetTokenT<l1t::EtSumBxCollection> l1_etsums_token;
   const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1_results_token;
 #endif
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
@@ -45,6 +58,9 @@ private:
     unsigned run;
     unsigned lumi;
     unsigned long long evt;
+    float l1htt;
+    float myhtt;
+    float myhttwbug;
     float ht;
     float ht4mc;
     unsigned found;
@@ -58,6 +74,8 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
 #if defined(MFVNEUTRALINO_2015)
     l1_cfg(cfg, consumesCollector(), false),
 #elif defined(MFVNEUTRALINO_2016)
+    l1_jets_token(consumes<l1t::JetBxCollection>(edm::InputTag("caloStage2Digis", "Jet"))),
+    l1_etsums_token(consumes<l1t::EtSumBxCollection>(edm::InputTag("caloStage2Digis", "EtSum"))),
     l1_results_token(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag>("l1_results_src"))),
 #endif
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
@@ -66,6 +84,10 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
 {
+  produces<std::vector<float>>("l1jetspts");
+  produces<float>("l1htt");
+  produces<float>("myhtt");
+  produces<float>("myhttwbug");
   produces<float>("ht");
   produces<float>("ht4mc");
   produces<std::vector<int>>("L1decisions");
@@ -77,6 +99,9 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     tree->Branch("run",   &t.run,   "run/i");
     tree->Branch("lumi",  &t.lumi,  "lumi/i");
     tree->Branch("event", &t.evt,   "event/l");
+    tree->Branch("l1htt", &t.l1htt, "l1htt/F");
+    tree->Branch("myhtt", &t.myhtt, "myhtt/F");
+    tree->Branch("myhttwbug", &t.myhttwbug, "myhttwbug/F");
     tree->Branch("ht",    &t.ht,    "ht/F");
     tree->Branch("ht4mc", &t.ht4mc, "ht4mc/F");
     tree->Branch("found", &t.found, "found/i");
@@ -89,6 +114,9 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
     t.run   = event.id().run();
     t.lumi  = event.luminosityBlock();
     t.evt   = event.id().event();
+    t.l1htt = -1;
+    t.myhtt = -1;
+    t.myhttwbug = -1;
     t.ht    = -1;
     t.ht4mc = -1;
     t.found = 0;
@@ -102,6 +130,30 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   edm::Handle<pat::TriggerObjectStandAloneCollection> trigger_objects;
   event.getByToken(trigger_objects_token, trigger_objects);
+
+#ifdef MFVNEUTRALINO_2016
+  edm::Handle<l1t::JetBxCollection> l1_jets;
+  event.getByToken(l1_jets_token, l1_jets);
+
+  double my_htt = 0;
+  double my_htt_wbug = 0;
+  for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
+    const l1t::Jet& jet = l1_jets->at(0, i);
+    const double pt = jet.pt();
+    if (fabs(jet.eta()) < 3 && pt >= 30) {
+      my_htt += pt;
+      if (pt < 255)
+        my_htt_wbug += pt;
+      else
+        my_htt = 1000;
+    }
+  }
+  if (my_htt >= 1000) my_htt = 1000;
+
+  edm::Handle<l1t::EtSumBxCollection> l1_etsums;
+  event.getByToken(l1_etsums_token, l1_etsums);
+  l1t::EtSumHelper etsumhelper(l1_etsums);
+#endif
 
   if (prints) {
     std::cout << "event: (" << event.id().run() << ", " << event.luminosityBlock() << ", " << event.id().event() << ")\n";
@@ -137,10 +189,50 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
       }
       std::cout << "\n";
     }
+
+#ifdef MFVNEUTRALINO_2016
+    std::cout << " === L1 CaloStage2 digis ===\n";
+
+    for (int bx = l1_jets->getFirstBX(), bxe = l1_jets->getLastBX(); bx < bxe; ++bx) {
+      if (l1_jets->isEmpty(bx))
+        std::cout << "\t    bx " << bx << " is empty for jets\n";
+      else {
+        const size_t n = l1_jets->size(bx);
+        std::cout << "\t    bx " << bx << " has " << n << " jets:\n";
+        for (size_t i = 0; i < n; ++i) {
+          const l1t::Jet& jet = l1_jets->at(bx, i);
+          std::cout << "\t      jet " << i << ": " << jet << "\n"
+                    << "\t             rawEt " << jet.rawEt() << " seedEt " << jet.seedEt() << " PUEt: " << jet.puEt() << " towerIEta: " << jet.towerIEta() << " towerIPhi: " << jet.towerIPhi() << "\n";
+        }
+      }
+    }
+
+    for (int bx = l1_etsums->getFirstBX(), bxe = l1_etsums->getLastBX(); bx < bxe; ++bx) {
+      if (l1_etsums->isEmpty(bx))
+        std::cout << "\t    bx " << bx << " is empty for etsums\n";
+      else {
+        const size_t n = l1_etsums->size(bx);
+        std::cout << "\t    bx " << bx << " has " << n << " etsums:\n";
+        for (size_t i = 0; i < n; ++i) {
+          const l1t::EtSum& etsum = l1_etsums->at(bx, i);
+          std::cout << "\t      etsum " << i << ": type " << etsum.getType() << " " << etsum << "\n";
+        }
+      }
+    }
+
+    std::cout << "\tEtSumHelper says MET " << etsumhelper.MissingEt() << " phi " << etsumhelper.MissingEtPhi()
+              << " MHT " << etsumhelper.MissingHt() << " phi " << etsumhelper.MissingHtPhi()
+              << " ETT " << etsumhelper.TotalEt() << " HTT " << etsumhelper.TotalHt() << "  My HTT " << my_htt << " with bug " << my_htt_wbug << "\n";
+#endif
+
     std::cout << std::endl;
   }
 
   float ht_for_cut = -1;
+  std::auto_ptr<std::vector<float>> l1jetspts(new std::vector<float>);
+  std::auto_ptr<float> l1htt(new float(-1));
+  std::auto_ptr<float> myhtt(new float(-1));
+  std::auto_ptr<float> myhttwbug(new float(-1));
   std::auto_ptr<float> ht(new float(-1));
   std::auto_ptr<float> ht4mc(new float(-1));
   std::auto_ptr<std::vector<int>> L1decisions(new std::vector<int>(mfv::n_l1_paths, -1));
@@ -157,6 +249,19 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
       }
     }
   }
+
+#ifdef MFVNEUTRALINO_2016
+  for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
+    const l1t::Jet& jet = l1_jets->at(0, i);
+    if (fabs(jet.eta()) < 3)
+      l1jetspts->push_back(jet.pt());
+  }
+  std::sort(l1jetspts->begin(), l1jetspts->end(), std::greater<float>());
+
+  t.l1htt = *l1htt = etsumhelper.TotalHt();
+  t.myhtt = *myhtt = my_htt;
+  t.myhttwbug = *myhttwbug = my_htt_wbug;
+#endif
 
   if (prints)
     printf("TriggerFloats: ht = %f  ht4mc = %f\n", *ht, *ht4mc);
@@ -218,6 +323,10 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (tree)
     tree->Fill();
 
+  event.put(l1jetspts, "l1jetspts");
+  event.put(l1htt, "l1htt");
+  event.put(myhtt, "myhtt");
+  event.put(myhttwbug, "myhttwbug");
   event.put(ht, "ht");
   event.put(ht4mc, "ht4mc");
   event.put(L1decisions, "L1decisions");
