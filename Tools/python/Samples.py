@@ -417,6 +417,7 @@ JetHT2016C.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-4de46f5786c935edf77
 JetHT2016D.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c0862f82c6d9e4968498ec9a917038a7/USER', 14726858)
 JetHT2016E.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c0c08c96cd0b60bbd85c4f0b2427e38b/USER', 13664363)
 JetHT2016F.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-0af523479fcfbed97639cbffb0aa89d8/USER', 10755341)
+JetHT2016G.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-248d7971c1c7719f6ec9ef73221e7dcf/USER', 27659741)
 JetHT2016H2.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-72bc9d6c7302b35406ec73af1e478c83/USER', 14180580)
 JetHT2016H3.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c2c950db55264ce616ae0a4bfc441bdb/USER', 361026)
 

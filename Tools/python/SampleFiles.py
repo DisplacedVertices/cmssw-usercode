@@ -205,7 +205,7 @@ _add_ds("ntuplev12", {
 'JetHT2016D': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024203", 972),
 'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024232", 826),
 'JetHT2016F': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024305", 603),
-#'JetHT2016G': 
+'JetHT2016G': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024334", 1423),
 'JetHT2016H2': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024402", 1541),
 'JetHT2016H3': _fromnum1("/store/user/tucker/JetHT/NtupleV12/170317_024433", 41),
 
