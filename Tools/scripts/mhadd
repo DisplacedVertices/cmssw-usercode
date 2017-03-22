@@ -32,10 +32,11 @@ if options.lpc_shortcut:
 ########################################################################
 
 wds = options.positional
-
-ok = False
+found_one = False
 
 def hadd_(is_crab, *args, **kwargs):
+    global found_one
+    found_one = True
     kwargs['chunk_size'] = options.chunk_size
     kwargs['pattern'] = options.pattern
     if is_crab:
@@ -47,15 +48,13 @@ def hadd_(is_crab, *args, **kwargs):
 for x in wds:
     is_crab = is_crab_working_dir(x)
     if is_crab or is_cs_dir(x):
-        ok = True
         hadd_(is_crab, x)
     elif os.path.isdir(x):
         # if we have a dir of condor/crab dirs, cs/crab_hadd all the directories in it.
         for d in glob.glob(os.path.join(x, '*')):
             is_crab = is_crab_working_dir(d)
             if is_crab or is_cs_dir(x):
-                ok = True
                 hadd_(is_crab, d, new_dir=x)
 
-if not ok:
+if not found_one:
     raise ValueError('no condor/crab dirs found in argv')
