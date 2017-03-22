@@ -15,6 +15,7 @@ class MFVByX : public edm::EDAnalyzer {
 
  private:
   const edm::EDGetTokenT<MFVEvent> event_token;
+  const bool use_vertices;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
   const bool by_run;
@@ -58,6 +59,7 @@ class MFVByX : public edm::EDAnalyzer {
 
 MFVByX::MFVByX(const edm::ParameterSet& cfg)
   : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
+    use_vertices(cfg.getParameter<edm::InputTag>("vertex_src").label() != ""),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     by_run(cfg.existsAs<bool>("by_run") && cfg.getParameter<bool>("by_run")),
     by_npu(cfg.existsAs<bool>("by_npu") && cfg.getParameter<bool>("by_npu"))
@@ -68,6 +70,8 @@ MFVByX::MFVByX(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   for (int i = 0; i < 2; ++i) {
+    if (!use_vertices && i == 1)
+      break;
     h_n_vertex_seed_tracks[i].set(&fs, TString::Format("h_n_vertex_seed_tracks_%i", i), ";# vertex seed tracks;events", 100, 0, 100);
     h_vertex_seed_track_chi2dof[i].set(&fs, TString::Format("h_vertex_seed_track_chi2dof_%i", i), ";vertex seed track #chi^{2}/dof;tracks/0.1", 100, 0, 10);
     h_vertex_seed_track_q[i].set(&fs, TString::Format("h_vertex_seed_track_q_%i", i), ";vertex seed track charge;tracks", 3, -1, 2);
@@ -99,10 +103,12 @@ MFVByX::MFVByX(const edm::ParameterSet& cfg)
     h_ana[i].set(&fs, TString::Format("h_ana_%i", i), "", 2, 0, 2);
   }
 
-  h_vertex_x[1].set(&fs, "h_vertex_x_1", ";vertex x (cm);events/10 #mum", 2000, -1, 1);
-  h_vertex_y[1].set(&fs, "h_vertex_y_1", ";vertex y (cm);events/10 #mum", 2000, -1, 1);
-  h_vertex_dbv[1].set(&fs, "h_vertex_dbv_1", ";vertex d_{BV} (cm);events/10 #mum", 2500, 0, 2.5);
-  h_vertex_bs2derr[1].set(&fs, "h_vertex_bs2derr_1", ";#sigma(vertex d_{BV}) (cm);events/0.25 #mum", 100, 0, 0.0025);
+  if (use_vertices) {
+    h_vertex_x[1].set(&fs, "h_vertex_x_1", ";vertex x (cm);events/10 #mum", 2000, -1, 1);
+    h_vertex_y[1].set(&fs, "h_vertex_y_1", ";vertex y (cm);events/10 #mum", 2000, -1, 1);
+    h_vertex_dbv[1].set(&fs, "h_vertex_dbv_1", ";vertex d_{BV} (cm);events/10 #mum", 2500, 0, 2.5);
+    h_vertex_bs2derr[1].set(&fs, "h_vertex_bs2derr_1", ";#sigma(vertex d_{BV}) (cm);events/0.25 #mum", 100, 0, 0.0025);
+  }
 }
 
 void MFVByX::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -115,10 +121,13 @@ void MFVByX::analyze(const edm::Event& event, const edm::EventSetup& setup) {
     : 1;
 
   edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByToken(vertex_token, vertices);
-  const size_t nsv = vertices->size();
-  if (nsv >= 2)
-    return;
+  size_t nsv = 0;
+  if (use_vertices) {
+    event.getByToken(vertex_token, vertices);
+    nsv = vertices->size();
+    if (nsv >= 2)
+      return;
+  }
 
   h_njets[nsv][by]->Fill(mevent->njets());
   h_jetpt1[nsv][by]->Fill(mevent->njets() >= 1 ? mevent->jet_pt[0] : 0.f);
@@ -153,7 +162,7 @@ void MFVByX::analyze(const edm::Event& event, const edm::EventSetup& setup) {
     h_vertex_seed_track_nlayers  [nsv][by]->Fill(mevent->vertex_seed_track_nlayers(i));
   }
 
-  if (nsv == 1) {
+  if (use_vertices && nsv == 1) {
     const MFVVertexAux& v = vertices->at(0);
     h_vertex_x[1][by]->Fill(v.x - mevent->bsx_at_z(v.z));
     h_vertex_y[1][by]->Fill(v.y - mevent->bsy_at_z(v.z));
