@@ -137,18 +137,32 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   double my_htt = 0;
   double my_htt_wbug = 0;
+  double my_htt_pos = 0;
+  double my_htt_neg = 0;
+
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
     const double pt = jet.pt();
-    if (fabs(jet.eta()) < 3 && pt >= 30) {
-      my_htt += pt;
-      if (pt < 255)
-        my_htt_wbug += pt;
-      else
-        my_htt = 1000;
+    const double eta = jet.eta();
+    if (fabs(eta) < 3 && pt >= 30) {
+      if (eta > 0 && my_htt_pos < 1023) {
+        if (pt < 1023)
+          my_htt_pos += pt;
+        else
+          my_htt_pos = 1023;
+      }
+      if (eta < 0 && my_htt_neg < 1023) {
+        if (pt < 1023)
+          my_htt_neg += pt;
+        else 
+          my_htt_neg = 1023;
+      }
     }
   }
-  if (my_htt >= 1000) my_htt = 1000;
+
+  my_htt = my_htt_wbug = my_htt_pos + my_htt_neg;
+  if ((my_htt_neg == 1023 && my_htt_pos > 0) || (my_htt_pos == 1023 && my_htt_neg > 0))
+    my_htt_wbug -= 1024;
 
   edm::Handle<l1t::EtSumBxCollection> l1_etsums;
   event.getByToken(l1_etsums_token, l1_etsums);
