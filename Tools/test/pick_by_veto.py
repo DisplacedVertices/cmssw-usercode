@@ -68,19 +68,12 @@ else:
 ####
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.MFVNeutralino.Year import year
     import JMTucker.Tools.Samples as Samples 
-
-    samples = Samples.registry.from_argv(
-        Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        Samples.auxiliary_background_samples[:1] + \
-        Samples.qcdpt_samples + \
-        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
-        Samples.xx4j_samples
-        )
-
-    samples = [Samples.qcdht1000, Samples.qcdht1500, Samples.qcdht2000] + Samples.ttbar_samples
+    if year == 2015:
+        samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
+    elif year == 2016:
+        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
     def vetolist_fn(sample):
         fn = 'vetolist.%s.gz' % sample.name
@@ -92,14 +85,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     def cfg_modifier(cfg, sample):
         cfg.JobType.inputFiles = [vetolist_fn(sample)]
+        cfg.Data.lumiMask = 'json.%s' % sample.name
 
-    cs = CRABSubmitter('Pick1Vtx',
+    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    batch_name = 'Pick1VtxV1'
+    cs = CRABSubmitter(batch_name,
                        pset_modifier = pset_modifier,
                        cfg_modifier = cfg_modifier,
                        splitting = 'FileBased',
-                       units_per_job = 30,
+                       units_per_job = 50,
                        total_units = -1,
-                       publish_name = 'pick1vtx',
+                       publish_name = batch_name,
                        )
-
     cs.submit_all(samples)
