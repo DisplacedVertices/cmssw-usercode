@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import os
+import glob
+import sys
+import JMTucker.Tools.argparse as argparse
+from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd
+from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd
+
+parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condor/crab directories',
+                                 usage = '%(prog)s [options] condor_or_crab_dirs')
+
+parser.add_argument('positional', nargs='*', help='The condor/crab directories.')
+
+parser.add_argument('--chunk-size', default=900, type=int,
+                    help='The maximum number files hadded at once.')
+parser.add_argument('--pattern',
+                    help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
+parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', default=True,
+                    help='(Only for crab dirs) Most of the time files went to FNAL LPC EOS, this is used to bypass talking to the crab server--turn off if needed.')
+
+options = parser.parse_args()
+
+if len(options.positional) == 0:
+    print 'Required positional args missing: at least one crab directory\n'
+    parser.print_help()
+    sys.exit(1)
+
+if options.lpc_shortcut:
+    print 'using LPC shortcut'
+
+########################################################################
+
+wds = options.positional
+
+ok = False
+
+def hadd_(is_crab, *args, **kwargs):
+    kwargs['chunk_size'] = options.chunk_size
+    kwargs['pattern'] = options.pattern
+    if is_crab:
+        kwargs['lpc_shortcut'] = options.lpc_shortcut
+        return crab_hadd(*args, **kwargs)
+    else:
+        return cs_hadd(*args, **kwargs)
+
+for x in wds:
+    is_crab = is_crab_working_dir(x)
+    if is_crab or is_cs_dir(x):
+        ok = True
+        hadd_(is_crab, x)
+    elif os.path.isdir(x):
+        # if we have a dir of condor/crab dirs, cs/crab_hadd all the directories in it.
+        for d in glob.glob(os.path.join(x, '*')):
+            is_crab = is_crab_working_dir(d)
+            if is_crab or is_cs_dir(x):
+                ok = True
+                hadd_(is_crab, d, new_dir=x)
+
+if not ok:
+    raise ValueError('no condor/crab dirs found in argv')
