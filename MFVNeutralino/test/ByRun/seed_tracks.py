@@ -40,9 +40,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.MFVNeutralino.Year import year
     import JMTucker.Tools.Samples as Samples 
     if year == 2015:
-        samples = Samples.data_samples
-    elif year == 2016:
         samples = Samples.data_samples_2015
+    elif year == 2016:
+        samples = Samples.data_samples
 
     for sample in samples:
         sample.files_per = 50
@@ -51,4 +51,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('ByRunStuffV12', dataset='ntuplev12')
-    cs.submit_all(Samples.data_samples + Samples.data_samples)
+    cs.submit_all(samples)
