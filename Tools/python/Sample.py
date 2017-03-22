@@ -400,6 +400,16 @@ def main(samples_registry):
         norm_path = typed_from_argv(str, default_value='', name='norm_path')
         merge(samples, output=out_fn, norm_to=norm_to, norm_path=norm_path)
 
+    elif 'ds' in sys.argv:
+        samples = samples_registry.from_argv(raise_if_none=True)
+        if len(samples) != 1:
+            raise ValueError('must have exactly one sample in argv')
+        sample = samples[0]
+        dataset = sys.argv[sys.argv.index(sample.name)+1]
+        if not sample.has_dataset(dataset):
+            raise KeyError('no dataset %s in %s' % (dataset, sample))
+        print sample.datasets[dataset].dataset
+
     elif 'file' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         if len(samples) != 1:
