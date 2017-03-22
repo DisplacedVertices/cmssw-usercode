@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 
-nevents = 20000
+nevents = 10000
 events_per = 100
 from_lhe = False
 output_level = 'reco'
 output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
 
-if 1:
-    meta, taus, masses = 'neu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-    meta, taus, masses = 'neu', [300, 1000], [600, 800]
+if 0:
+    meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
 elif 0:
-    meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+    meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
 elif 0:
-    meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
-elif 0:
-    meta, taus, masses = 'gluddbar', [100, 300, 1000, 10000], [300, 400, 800, 1200, 1600]
+    meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
+elif 1:
+    meta, taus, masses = 'ddbar', [100, 300, 1000, 10000, 30000], [300, 400, 500, 600, 800, 1200, 1600]
 elif 0:
     meta = 'ttbar'
     nevents, events_per
@@ -179,10 +178,10 @@ elif meta == 'glu':
             todo = 'todo=mfv_gluino,%.1f,%i' % (tau/1000., mass)
             submit(config, name, todo)
 
-elif meta == 'gluddbar':
+elif meta == 'ddbar':
     for tau in taus:
         for mass in masses:
-            name = 'mfv_gluddbar_tau%05ium_M%04i' % (tau, mass)
+            name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
             todo = 'todo=gluino_ddbar,%.1f,%i' % (tau/1000., mass)
             submit(config, name, todo)
 
