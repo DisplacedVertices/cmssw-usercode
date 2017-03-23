@@ -257,3 +257,8 @@ std::vector<const reco::GenParticle*> MCInteractionMFV3j::ElsOrMus() {
     }
   return v;
 }
+
+double MCInteractionMFV3j::dvv() const {
+  return mag(stranges[0]->vx() - stranges[1]->vx(),
+             stranges[0]->vy() - stranges[1]->vy());
+}

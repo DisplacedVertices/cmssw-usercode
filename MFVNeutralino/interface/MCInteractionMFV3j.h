@@ -49,6 +49,8 @@ struct MCInteractionMFV3j : public MCInteraction {
   std::vector<const reco::GenParticle*> ElsOrMus();
   bool is_bottom_from_top(int which);
   const reco::Candidate* Ancestor(const reco::Candidate* c, const std::string& type);
+
+  double dvv() const;
 };
 
 #endif
