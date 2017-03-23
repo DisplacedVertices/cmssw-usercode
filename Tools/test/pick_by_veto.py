@@ -81,7 +81,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return fn
 
     def pset_modifier(sample):
-        return ['process.veto.list_fn = "%s"' % vetolist_fn(sample)], []
+        to_add = ['process.veto.list_fn = "%s"' % vetolist_fn(sample)]
+        if not sample.is_mc:
+            to_add.append('process.veto.use_run = True')
+        return to_add, []
 
     def cfg_modifier(cfg, sample):
         cfg.JobType.inputFiles = [vetolist_fn(sample)]
