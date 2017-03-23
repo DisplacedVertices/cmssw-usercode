@@ -3,6 +3,7 @@
 import os
 from sys import argv
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
+from JMTucker.Tools import colors
 
 dirs = crab_dirs_from_argv()
 
@@ -11,11 +12,11 @@ def simple_cmd(cmd_fmt):
         cmd = cmd_fmt % d
         verbose = True
         if verbose:
-            print '\033[1;37m%s\033[m' % cmd
+            print colors.bold(cmd)
         code = os.system(cmd)
         if verbose:
-            color = 91 if code != 0 else 92
-            print '\033[1;%smexit code: %s\033[m' % (color, code)
+            color = colors.boldred if code != 0 else colors.green
+            print color('exit code: %s' % code)
             print
 
 if 'st' in argv or 'stat' in argv:
@@ -31,6 +32,6 @@ elif 'res' in argv:
 elif 'rep' in argv:
     simple_cmd('crab report -d %s')
 elif 'hl' in argv:
-    os.system('mkdir haddlogs ; mv *.haddlog haddlogs/')
+    os.system('mkdir haddlogs ; mv -i *.haddlog haddlogs/')
 else:
     raise ValueError("didn't understand command, argv was %r", argv)
