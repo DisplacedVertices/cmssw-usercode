@@ -57,12 +57,15 @@ for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
 
             check_and_print_diff('goodInputDatasetLumis', 'goodInputDatasetLumisDBS')
 
-            lumisToProcess = LumiList(os.path.join(wd, 'results/lumisToProcess.json'))
             processedLumis = LumiList(os.path.join(wd, 'results/processedLumis.json'))
             ll_alls.append((wd, processedLumis))
 
-            check_and_print_diff('goodInputDatasetLumis', 'lumisToProcess')
-            check_and_print_diff('lumisToProcess', 'processedLumis')
+            check_and_print_diff('goodInputDatasetLumis', 'processedLumis')
+
+            lumisToProcess_fn = os.path.join(wd, 'results/lumisToProcess.json')
+            if os.path.isfile(lumisToProcess_fn):
+                lumisToProcess = LumiList(lumisToProcess_fn)
+                check_and_print_diff('lumisToProcess', 'processedLumis')
 
 if len(ll_alls) > 1:
     print colors.bold('check overlaps')
