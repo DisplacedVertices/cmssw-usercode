@@ -36,18 +36,14 @@ for hlt in False, True:
             setattr(process, 'p' + name, p)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     import JMTucker.Tools.Samples as Samples 
-
-    samples = Samples.mfv_signal_samples + \
-        Samples.mfv_signal_samples_glu + \
-        Samples.mfv_signal_samples_gluddbar + \
-        Samples.xx4j_samples
-
+    samples = Samples.official_mfv_signal_samples
     for sample in samples:
-        sample.files_per = 100
+        sample.files_per = 5
 
-    CondorSubmitter('L1SigEff').submit_all(samples)
+    from JMTucker.Tools.MetaSubmitter import *
+    ms.crab.job_control_from_sample = True
+    ms.submit(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
     from JMTucker.Tools.ROOTTools import ROOT
