@@ -5,17 +5,18 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = 'v4'
+version = 'v5'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
 use_qcd = False
-num_dir = 'num900'
+num_dir = 'num900450ak'
 year = 2016
-which = typed_from_argv(int, 2)
+which = typed_from_argv(int, 3)
 data_period, int_lumi = [
     ('',  35861. if year == 2016 else 2689.),
     ('BthruG', 27255.),
+    ('CthruG', 21472.),
     ('H', 8606.),
     ('B3', 5783.),
     ('C',  2573.),
