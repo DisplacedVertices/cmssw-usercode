@@ -412,6 +412,19 @@ def hlt_filter(process, hlt_path):
     if hasattr(process, 'schedule'):
         process.schedule.insert(0, process.ptriggerFilter)
 
+def deterministic_seeds(process, base, job, save_fn='RandomEngineState.xml'):
+    def check_assert(x):
+        assert x
+        return x
+    seed_psets = [(k,v) for k,v in process.RandomNumberGeneratorService.parameters_().iteritems()
+                  if isinstance(v, cms.PSet) and check_assert(not hasattr(v, 'initialSeedSet')) and hasattr(v, 'initialSeed')]
+    seed_psets.sort(key = lambda x: x[0])
+    n = len(seed_psets)
+    for i, (k,_) in enumerate(seed_psets):
+        getattr(process.RandomNumberGeneratorService, k).initialSeed = base + job*n + i
+    if save_fn:
+        process.RandomNumberGeneratorService.saveFileName =  cms.untracked.string(save_fn)
+
 def randomize_seeds(process, save_fn='RandomEngineState.xml'):
     from IOMC.RandomEngine.RandomServiceHelper import RandomNumberServiceHelper
     randHelper =  RandomNumberServiceHelper(process.RandomNumberGeneratorService)
