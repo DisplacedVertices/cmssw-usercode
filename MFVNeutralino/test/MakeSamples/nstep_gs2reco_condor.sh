@@ -36,10 +36,6 @@ cmsRun -j fjr.xml rawhlt.py nopremix ${TODOS} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
-    echo RAWHLT ls -l
-    ls -l
-    gzip RandomEngineState.xml
-    mv RandomEngineState.xml.gz $WD/RandomEngineState_RAWHLT_${JOBNUM}.xml.gz
     gzip fjr.xml
     mv fjr.xml.gz $WD/fjr_RAWHLT_${JOBNUM}.xml.gz
     mv hlt.root $WD/
@@ -74,8 +70,6 @@ cmsRun -j fjr.xml reco.py nopremix ${TODOS2} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
 if [ $EXITCODE -eq 0 ]; then
-    echo RECO ls -l
-    ls -l
     gzip fjr.xml
     mv fjr.xml.gz $WD/fjr_RECO_${JOBNUM}.xml.gz
     xrdcp -s reco.root root://cmseos.fnal.gov//store/user/tucker/${OUTPUTDIR}/reco_${JOBNUM}.root 2>&1

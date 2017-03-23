@@ -3,18 +3,19 @@ import sys, FWCore.ParameterSet.Config as cms
 genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
 randomize = 'norandomize' not in sys.argv
+salt = ''
 fromlhe = False
 maxevents = 1
 jobnum = 1
 
 for arg in sys.argv:
     if arg == 'fromlhe=1':
-        print 'fromlhe: wiping out todos, maxevents, jobnum'
+        print 'fromlhe: wiping out todos'
         todos = []
         fromlhe = True
-        break
-
-    if arg.startswith('maxevents='):
+    elif arg.startswith('salt='):
+        salt = arg.replace('salt=','')
+    elif arg.startswith('maxevents='):
         maxevents = int(arg.replace('maxevents=',''))
     elif arg.startswith('jobnum='):
         jobnum = int(arg.replace('jobnum=',''))
@@ -148,5 +149,5 @@ from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
 process = customisePostLS1(process)
 
 if randomize:
-    from modify import randomize_seeds
-    randomize_seeds(process)
+    from modify import deterministic_seeds
+    deterministic_seeds(process, 8675309, salt, jobnum)

@@ -6,7 +6,15 @@ import sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 
 randomize = 'norandomize' not in sys.argv
+salt = ''
 premix = 'nopremix' not in sys.argv
+jobnum = 1
+
+for arg in sys.argv:
+    if arg.startswith('salt='):
+        salt = arg.replace('salt=','')
+    elif arg.startswith('jobnum='):
+        jobnum = int(arg.replace('jobnum=',''))
 
 process = cms.Process('HLT', eras.Run2_2016)
 
@@ -76,5 +84,5 @@ from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim
 process = customizeHLTforFullSim(process)
 
 if randomize: # for minbias
-    from modify import randomize_seeds
-    randomize_seeds(process)
+    from modify import deterministic_seeds
+    deterministic_seeds(process, 74205, salt, jobnum)

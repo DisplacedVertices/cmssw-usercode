@@ -5,6 +5,7 @@ events_per = 100
 from_lhe = False
 output_level = 'reco'
 output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+fixed_salt = ''
 
 if 0:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
@@ -12,7 +13,7 @@ elif 0:
     meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
 elif 0:
     meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
-elif 1:
+elif 0:
     meta, taus, masses = 'ddbar', [100, 300, 1000, 10000, 30000], [300, 400, 500, 600, 800, 1200, 1600]
 elif 0:
     meta = 'ttbar'
@@ -20,6 +21,12 @@ elif 0:
     output_level = 'minitree'
 elif 0:
     meta = 'qcdht2000_gensim_ext1'
+    nevents, events_per = 396000, 1500
+    from_lhe = True
+    output_level = 'gensim'
+    output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
+elif 1:
+    meta = 'qcdht2000_80'
     nevents, events_per = 396000, 1500
     from_lhe = True
     output_level = 'gensim'
@@ -74,20 +81,17 @@ config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'modify.py', '
 if output_level == 'minitree':
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
-config.JobType.outputFiles = ['RandomEngineState_GENSIM.xml.gz']
-if from_lhe:
-    config.JobType.outputFiles += ['RandomEngineState_LHE.xml.gz']
-
 if output_level == 'reco':
-    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.tgz', 'reco.root']
+    config.JobType.outputFiles += ['reco.root']
 elif output_level == 'gensim':
     config.JobType.outputFiles += ['gensim.root']
 elif output_level == 'minitree':
-    config.JobType.outputFiles += ['RandomEngineState_RAWHLT.tgz', 'minitree.root', 'vertex_histos.root']
+    config.JobType.outputFiles += ['minitree.root', 'vertex_histos.root']
 
 
 config.JobType.scriptArgs = [
     'maxevents=%i' % events_per,
+    'salt=' + fixed_salt,
     'fromlhe=%i' % from_lhe,
     'dummyforhash=%i' % dummy_for_hash,  # stupid crab requires a =
     'outputlevel=%s' % output_level,
@@ -152,9 +156,13 @@ outputs = {}
 def submit(config, name, todo, todo2=None):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
-    config.JobType.scriptArgs[4] = todo
+    if not fixed_salt:
+        config.JobType.scriptArgs[1] = 'salt=' + name + todo
+    config.JobType.scriptArgs[5] = todo
     if todo2 is not None:
-        config.JobType.scriptArgs[5] = todo2
+        config.JobType.scriptArgs[6] = todo2
+        if not fixed_salt:
+            config.JobType.scriptArgs[1] += todo2
 
     if not testing:
         output = crab_command('submit', config=config)

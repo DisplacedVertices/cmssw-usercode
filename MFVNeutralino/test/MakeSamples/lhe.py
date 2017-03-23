@@ -2,11 +2,14 @@ import sys, FWCore.ParameterSet.Config as cms
 
 debug = 'debug' in sys.argv
 randomize = 'norandomize' not in sys.argv
+salt = ''
 maxevents = 1
 jobnum = 1
 
 for arg in sys.argv:
-    if arg.startswith('maxevents='):
+    if arg.startswith('salt='):
+        salt = arg.replace('salt=','')
+    elif arg.startswith('maxevents='):
         maxevents = int(arg.replace('maxevents=',''))
     elif arg.startswith('jobnum='):
         jobnum = int(arg.replace('jobnum=',''))
@@ -61,5 +64,5 @@ if debug:
     process.schedule.insert(-1, process.pa)
 
 if randomize:
-    from modify import randomize_seeds
-    randomize_seeds(process)
+    from modify import deterministic_seeds
+    deterministic_seeds(process, 1701, salt, jobnum)

@@ -11,11 +11,12 @@ done
 
 JOBNUM=$1
 MAXEVENTS=$2
-FROMLHE=$(echo $3 | cut -d = -f 2)
-export DUMMYFORHASH=$(echo $4 | cut -d = -f 2) # crab scriptArgs requires a =
-OUTPUTLEVEL=$(echo $5 | cut -d = -f 2)
-TODO=$6
-TODO2=$7
+SALT=$3
+FROMLHE=$(echo $4 | cut -d = -f 2)
+export DUMMYFORHASH=$(echo $5 | cut -d = -f 2) # crab scriptArgs requires a =
+OUTPUTLEVEL=$(echo $6 | cut -d = -f 2)
+TODO=$7
+TODO2=$8
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
@@ -44,19 +45,13 @@ if [[ $FROMLHE -eq 1 ]]; then
 
     echo cmsRun
     cmsRun lhe.py \
+        salt=${SALT} \
         jobnum=${JOBNUM} \
         ${MAXEVENTS} \
         ${TODO} \
         2>&1
 
     EXITCODE=${PIPESTATUS[0]}
-    if [ $EXITCODE -eq 0 ]; then
-        gzip RandomEngineState.xml
-        mv RandomEngineState.xml.gz RandomEngineState_LHE.xml.gz
-        echo LHE ls -l
-        ls -l
-    fi
-
     exit $EXITCODE
     )
 
@@ -85,18 +80,13 @@ cd ../..
 echo cmsRun
 cmsRun -j tempfjr.xml gensim.py \
     fromlhe=${FROMLHE} \
+    salt=${SALT} \
     jobnum=${JOBNUM} \
     ${MAXEVENTS} \
     ${TODO} \
     2>&1
 
 EXITCODE=${PIPESTATUS[0]}
-if [ $EXITCODE -eq 0 ]; then
-    gzip RandomEngineState.xml
-    mv RandomEngineState.xml.gz RandomEngineState_GENSIM.xml.gz
-    echo GENSIM ls -l
-    ls -l
-fi
 
 if [[ $FROMLHE -eq 1 ]]; then
     python fixfjr.py
@@ -131,15 +121,13 @@ eval $(scram runtime -sh)
 cd ../..
 
 echo cmsRun
-cmsRun rawhlt.py ${TODO2} 2>&1
+cmsRun rawhlt.py \
+    salt=${SALT} \
+    jobnum=${JOBNUM} \
+    ${TODO2} \
+    2>&1
 
 EXITCODE=${PIPESTATUS[0]}
-if [ $EXITCODE -eq 0 ]; then
-    tar czf RandomEngineState_RAWHLT.tgz RandomEngineState.xml*
-    echo RAWHLT ls -l
-    ls -l
-fi
-
 exit $EXITCODE
 )
 
@@ -164,10 +152,6 @@ echo cmsRun
 cmsRun -j tempfjr.xml reco.py ${TODO2} 2>&1
 
 EXITCODE=${PIPESTATUS[0]}
-if [ $EXITCODE -eq 0 ]; then
-    echo RECO ls -l
-    ls -l
-fi
 
 python fixfjr.py
 
@@ -193,8 +177,6 @@ if [[ $OUTPUTLEVEL == "minitree" ]]; then
     EXITCODE=${PIPESTATUS[0]}
     if [ $EXITCODE -eq 0 ]; then
         echo NTUPLE nevents $(edmEventSize -v ntuple.root | grep Events)
-        echo NTUPLE ls -l
-        ls -l
 
         echo "process.source.fileNames = ['file:ntuple.root']" >> minitree.py
         echo "process.maxEvents.input = -1" >> minitree.py
@@ -204,8 +186,6 @@ if [[ $OUTPUTLEVEL == "minitree" ]]; then
         python fixfjr.py
         if [ $EXITCODE -eq 0 ]; then
             echo MINITREE nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('tre33/t').GetEntries(), f.Get('tre44/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
-            echo MINITREE ls -l
-            ls -l
         fi
     fi
 

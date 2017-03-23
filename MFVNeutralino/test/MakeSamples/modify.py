@@ -412,7 +412,8 @@ def hlt_filter(process, hlt_path):
     if hasattr(process, 'schedule'):
         process.schedule.insert(0, process.ptriggerFilter)
 
-def deterministic_seeds(process, base, job, save_fn='RandomEngineState.xml'):
+def deterministic_seeds(process, base, salt, job, save_fn=''):
+    salt = sum(ord(x) for x in str(salt))
     def check_assert(x):
         assert x
         return x
@@ -421,7 +422,7 @@ def deterministic_seeds(process, base, job, save_fn='RandomEngineState.xml'):
     seed_psets.sort(key = lambda x: x[0])
     n = len(seed_psets)
     for i, (k,_) in enumerate(seed_psets):
-        getattr(process.RandomNumberGeneratorService, k).initialSeed = base + job*n + i
+        getattr(process.RandomNumberGeneratorService, k).initialSeed = base + salt + job*n + i
     if save_fn:
         process.RandomNumberGeneratorService.saveFileName =  cms.untracked.string(save_fn)
 
