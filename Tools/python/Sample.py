@@ -308,6 +308,39 @@ class SamplesRegistry:
 
         return samples if samples else default
 
+    def known_datasets(self):
+        ds = []
+        for s in self.all():
+            ds.extend(s.datasets.keys())
+        return sorted(set(ds))
+
+    def datasets_from_argv(self, default=[], sort_and_set=True, raise_if_none=False):
+        check = 'fa_check' in sys.argv
+        use_all = 'fa_all' in sys.argv
+
+        ds = []
+        if use_all:
+            ds = self.known_datasets()
+        else:
+            known = self.known_datasets()
+            for arg in sys.argv:
+                if arg in known:
+                    ds.append(arg)
+
+        if sort_and_set:
+            ds = sorted(set(ds))
+
+        if check:
+            print 'from_argv got these datasets:'
+            for s in ds:
+                print s
+            raw_input('ok?')
+
+        if raise_if_none and not ds:
+            raise ValueError('no ds found in argv')
+
+        return ds if ds else default
+        
 ########################################################################
 
 def anon_samples(txt, **kwargs):
@@ -424,20 +457,19 @@ def main(samples_registry):
 
     elif 'site' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
-        sample_names = [s.name for s in samples]
-        dataset = [x for x in sys.argv[1:] if x != 'site' and x not in sample_names]
+        dataset = samples_registry.datasets_from_argv()
         if len(dataset) > 1:
-            raise ValueError('dunno how to get dataset from argv')
+            raise ValueError('only zero/one dataset allowed')
         dataset = dataset[0] if len(dataset) == 1 else 'main'
-        mlen = max(len(sn) for sn in sample_names)
+        mlen = max(len(s.name) for s in samples)
         for sample in samples:
             sample.set_curr_dataset(dataset)
             try:
-                sites = DBS.sites_for_dataset(s.dataset)
+                sites = DBS.sites_for_dataset(sample.dataset)
             except RuntimeError:
-                print s.name, 'PROBLEM'
+                print sample.name, 'PROBLEM'
                 continue
-            print s.name.ljust(mlen+5), ' '.join(sites)
+            print sample.name.ljust(mlen+5), ' '.join(s for s in sites if not s.endswith('_Buffer') and not s.endswith('_MSS'))
 
     elif 'samplefiles' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
