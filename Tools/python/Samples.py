@@ -74,11 +74,6 @@ mfv_signal_samples_2015 = [
     MCSample('mfv_neu_tau10000um_M1600_2015', '/mfv_neu_tau10000um_M1600/tucker-RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-05e8cfd69022b6357c491ecab3cf47fb/USER', 10000),
     ]
 
-for s in mfv_signal_samples_2015:
-    s.dbs_inst = 'phys03'
-    s.xsec = 1e-3
-    s.condor = True
-
 xx4j_samples_2015 = [    # M = 50, 100 GeV also exist
     MCSample('xx4j_tau00001mm_M0300_2015', '/XXTo4J_M-300_CTau-1mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',     10000),
     MCSample('xx4j_tau00003mm_M0300_2015', '/XXTo4J_M-300_CTau-3mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM',     10000),
@@ -121,6 +116,11 @@ xx4j_samples_2015 = [    # M = 50, 100 GeV also exist
     MCSample('xx4j_tau01000mm_M3000_2015', '/XXTo4J_M-3000_CTau-1000mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 10000),
     MCSample('xx4j_tau02000mm_M3000_2015', '/XXTo4J_M-3000_CTau-2000mm_TuneCUETP8M1_13TeV_pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM', 10000),
     ]
+
+for s in mfv_signal_samples_2015:
+    s.dbs_inst = 'phys03'
+    s.xsec = 1e-3
+    s.condor = True
 
 for s in xx4j_samples_2015:
     s.xsec = 1e-3
@@ -185,7 +185,12 @@ official_mfv_signal_samples = [
     MCSample('official_mfv_neu_tau10000um_M1600', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',   99751),
     ]
 
-for s in mfv_signal_samples + official_mfv_signal_samples:
+for s in mfv_signal_samples:
+    s.dbs_inst = 'phys03'
+    s.xsec = 1e-3
+    s.condor = True
+
+for s in official_mfv_signal_samples:
     s.xsec = 1e-3
 
 ########################################################################
