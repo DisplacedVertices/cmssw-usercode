@@ -1,6 +1,8 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Year.h"
 #if defined(MFVNEUTRALINO_2015)
   #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
+  #include "DataFormats/L1Trigger/interface/L1EtMissParticle.h"
+  #include "DataFormats/L1Trigger/interface/L1EtMissParticleFwd.h"
 #elif defined(MFVNEUTRALINO_2016)
   #include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
   #include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
@@ -42,6 +44,7 @@ private:
 
 #if defined(MFVNEUTRALINO_2015)
   L1GtUtils l1_cfg;
+  const edm::EDGetTokenT<l1extra::L1EtMissParticleCollection> l1_htt_token;
 #elif defined(MFVNEUTRALINO_2016)
   const edm::EDGetTokenT<l1t::JetBxCollection> l1_jets_token;
   const edm::EDGetTokenT<l1t::EtSumBxCollection> l1_etsums_token;
@@ -73,6 +76,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
   :
 #if defined(MFVNEUTRALINO_2015)
     l1_cfg(cfg, consumesCollector(), false),
+    l1_htt_token(consumes<l1extra::L1EtMissParticleCollection>(edm::InputTag("l1extraParticles", "MHT"))),
 #elif defined(MFVNEUTRALINO_2016)
     l1_jets_token(consumes<l1t::JetBxCollection>(edm::InputTag("caloStage2Digis", "Jet"))),
     l1_etsums_token(consumes<l1t::EtSumBxCollection>(edm::InputTag("caloStage2Digis", "EtSum"))),
@@ -264,7 +268,17 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
-#ifdef MFVNEUTRALINO_2016
+#if defined(MFVNEUTRALINO_2015)
+  edm::Handle<l1extra::L1EtMissParticleCollection> l1_htts;
+  event.getByToken(l1_htt_token, l1_htts);
+  if (l1_htts->size() != 1)
+    throw cms::Exception("BadAssumption", "not exactly one L1 MHT object");
+  const l1extra::L1EtMissParticle& l1_htt = l1_htts->at(0);
+  if (l1_htt.type() != 1)
+    throw cms::Exception("BadAssumption", "L1 MHT object in collection not right type");
+  t.l1htt = *l1htt = l1_htt.etTotal();
+
+#elif defined(MFVNEUTRALINO_2016)
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
     if (fabs(jet.eta()) < 3)
