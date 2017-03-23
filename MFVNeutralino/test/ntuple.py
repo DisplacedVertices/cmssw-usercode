@@ -133,7 +133,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
         }
     modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips))
-    ms = MetaSubmitter(batch_name + '/%i' % year)
+    ms = MetaSubmitter(batch_name)
+    ms.common.ex = year
     ms.common.pset_modifier = modify
     ms.common.publish_name = batch_name + '_' + str(year)
     ms.crab.job_control_from_sample = True
