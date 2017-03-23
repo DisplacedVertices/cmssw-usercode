@@ -54,6 +54,7 @@ private:
   TH1F* h_jet_ht_m_hlt_ht;
   TH2F* h_njets_v_ht;
   TH1F* h_l1jet_pt[11];
+  TH2F* h_jetpt2v1;
 
   TH1F* h_ngenjets;
   TH1F* h_genjet_e[11];
@@ -128,7 +129,15 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht_ptlt200 = fs->make<TH1F>("h_jet_ht_ptlt200", ";jet (40 < p_{T} < 200 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht_m_hlt_ht = fs->make<TH1F>("h_jet_ht_m_hlt_ht", ";offline jet (p_{T} > 40 GeV) H_{T} - HLT H_{T} (GeV);events/10 GeV", 100, -500, 500);
-  h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);# selected jets", 50, 0, 2000, 15, 0, 15);
+  h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);# selected jets", 20, 0, 2000, 15, 0, 15);
+
+  {
+    const int nx = 5;
+    const float xbins[nx+1] = {0, 250, 400, 550, 700, 1000};
+    const int ny = 5;
+    const float ybins[ny+1] = {0, 150, 250, 400, 600, 1000};
+    h_jetpt2v1 = fs->make<TH2F>("h_jetpt2v1", ";jet 1 p_{T} (GeV);jet 2 p_{T} (GeV)", nx, xbins, ny, ybins);
+  }
 
   if (use_genjets) {
     h_ngenjets = fs->make<TH1F>("h_ngenjets", ";# gen jets;events", 30, 0, 30);
@@ -231,9 +240,14 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   double jet_ht_all = 0;
   double jet_ht = 0;
   double jet_ht_ptlt200 = 0;
+  double jet_pt_1 = 0, jet_pt_2 = 0;
   for (const pat::Jet& jet : *jets) {
     if (jet_selector(jet)) {
       ++njet;
+      if (njet == 1)
+        jet_pt_1 = jet.pt();
+      else if (njet == 2)
+        jet_pt_2 = jet.pt();
       jet_ht_all += jet.pt();
       if (jet.pt() > 40) {
         jet_ht += jet.pt();
@@ -258,6 +272,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   h_jet_ht->Fill(jet_ht);
   h_jet_ht_ptlt200->Fill(jet_ht_ptlt200);
   h_njets_v_ht->Fill(jet_ht, njet);
+  h_jetpt2v1->Fill(jet_pt_1, jet_pt_2);
 
   edm::Handle<float> hlt_ht;
   event.getByToken(hlt_ht_token, hlt_ht);

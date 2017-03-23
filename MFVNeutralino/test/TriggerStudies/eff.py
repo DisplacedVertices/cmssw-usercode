@@ -21,7 +21,7 @@ use_ak8450 = True and year == 2016
 htskim = False
 ht_skim_cut = min(to_do) if htskim else -1
 
-version = 'v5'
+version = 'v6'
 json = '../ana_2015p6.json'
 batch_name = 'TrigEff%s' % version
 
