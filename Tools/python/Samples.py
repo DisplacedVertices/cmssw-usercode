@@ -428,8 +428,6 @@ JetHT2015C.condor = True
 JetHT2015D.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
-# root://xrootd2.ihepa.ufl.edu/
-
 for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015,
           qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015,
           ttbar_2015):
@@ -449,6 +447,9 @@ for x in (SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
     x.condor = True
 
 qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
+official_mfv_neu_tau01000um_M0300.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
+official_mfv_neu_tau01000um_M0800.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
+official_mfv_neu_tau10000um_M1200.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
 official_mfv_neu_tau00300um_M0800.xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in qcd_samples_2015:
