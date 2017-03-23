@@ -15,7 +15,7 @@ def simple_cmd(cmd_fmt):
             print colors.bold(cmd)
         code = os.system(cmd)
         if verbose:
-            color = colors.boldred if code != 0 else colors.green
+            color = colors.boldred if code != 0 else colors.boldgreen
             print color('exit code: %s' % code)
             print
 
@@ -33,5 +33,7 @@ elif 'rep' in argv:
     simple_cmd('crab report -d %s')
 elif 'hl' in argv:
     os.system('mkdir haddlogs ; mv -i *.haddlog haddlogs/')
+elif 'ds' in argv:
+    simple_cmd('grep "Output dataset:" %s/crab.log | tail -1')
 else:
     raise ValueError("didn't understand command, argv was %r", argv)
