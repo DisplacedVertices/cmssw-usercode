@@ -89,6 +89,9 @@ _add({('testqcdht2000', 'gensim') : (60 + 263,
                                      ['/store/user/tucker/qcdht2000_gensim_ext1/RunIISummer15GS-MCRUN2_71_V1/170224_210305/0000/gensim_%i.root' % i for i in chain(xrange(1,255), xrange(256,265))]
                                      )})
 
+_add_ds("main", {
+'mfv_neu_tau00300um_M0800_temp': (196, ['/store/user/tucker/mfv_neu_tau00300um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170320_183126/0000/reco_%i.root' % i for i in chain(xrange(1,33), xrange(34,69), xrange(70,133), xrange(134,175), xrange(176,201))]),
+})
 
 _add_ds("ntuplev12", {
 

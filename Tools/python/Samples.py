@@ -158,6 +158,10 @@ leptonic_background_samples = [
     MCSample('qcdmupt15',     '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',          22094081, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=7.21e8 * 4.2e-4),
     ]
 
+mfv_signal_samples = [
+    MCSample('mfv_neu_tau00300um_M0800_temp', '/mfv_neu_tau00300um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-36f33e35675d4fdda6e229a231c74a68/USER', 19600)
+    ]
+
 official_mfv_signal_samples = [
     MCSample('official_mfv_neu_tau00100um_M0300', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  100000),
     MCSample('official_mfv_neu_tau00300um_M0300', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',  100000),
@@ -181,7 +185,7 @@ official_mfv_signal_samples = [
     MCSample('official_mfv_neu_tau10000um_M1600', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',   99751),
     ]
 
-for s in official_mfv_signal_samples:
+for s in mfv_signal_samples + official_mfv_signal_samples:
     s.xsec = 1e-3
 
 ########################################################################
@@ -250,6 +254,7 @@ __all__ = [
     'qcd_samples_sum',
     'ttbar_samples',
     'leptonic_background_samples',
+    'mfv_signal_samples',
     'official_mfv_signal_samples',
     'data_samples',
     'auxiliary_data_samples',
