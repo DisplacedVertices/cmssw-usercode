@@ -6,9 +6,12 @@
 #include "TLorentzVector.h"
 
 namespace mfv {
-  static const int n_hlt_paths = 5;
-  static const int n_l1_paths = 17;
+  // JMTBAD hope you keep these in sync with Event.cc
   static const int n_clean_paths = 7;
+  enum {
+    b_HLT_PFHT350, b_HLT_PFHT800, b_HLT_PFHT900, b_HLT_PFJet450, b_HLT_AK8PFJet450, n_hlt_paths,
+    b_L1_HTT100=0, b_L1_HTT125, b_L1_HTT150, b_L1_HTT175, b_L1_HTT160, b_L1_HTT200, b_L1_HTT220, b_L1_HTT240, b_L1_HTT255, b_L1_HTT270, b_L1_HTT280, b_L1_HTT300, b_L1_HTT320, b_L1_SingleJet128, b_L1_SingleJet170, b_L1_SingleJet180, b_L1_SingleJet200, n_l1_paths
+  };
 
   extern const char* hlt_paths[n_hlt_paths];
   extern const char* l1_paths[n_l1_paths];
