@@ -51,7 +51,7 @@ def dosamples():
     for sample in samples:
         print sample.name
         lists = [getlist(os.path.join(root, '%s.root' % sample.name), p) for p in paths]
-        l = sum(lists, [])
+        l = sorted(set(sum(lists, [])))
         writelist(l, 'vetolist.%s' % sample.name, True)
         writejson(l, 'json.%s'     % sample.name)
 
