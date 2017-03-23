@@ -43,7 +43,11 @@ for wd in wds:
     bd = os.path.basename(wd)
     is_crab = bd.startswith('crab_')
     assert is_crab or bd.startswith('condor_')
-    sample = Samples.sample_from_end_string(Samples, wd).name
+    first_str = 'crab_' if is_crab else 'condor_'
+    if options.dataset == 'main':
+        sample = wd.replace(first_str, '')
+    else:
+        sample = Samples.sample_from_end_string(Samples, wd).name
     assert not publish.has_key(sample)
 
     if is_crab:
