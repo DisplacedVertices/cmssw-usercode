@@ -417,6 +417,9 @@ JetHT2016H3.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c2c950db55264ce616
 for x in (JetHT2015C, JetHT2015D, mfv_neu_tau00100um_M0300_2015, mfv_neu_tau00100um_M0400_2015, mfv_neu_tau00100um_M0800_2015, mfv_neu_tau00100um_M1200_2015, mfv_neu_tau00100um_M1600_2015, mfv_neu_tau00300um_M0300_2015, mfv_neu_tau00300um_M0400_2015, mfv_neu_tau00300um_M0800_2015, mfv_neu_tau00300um_M1200_2015, mfv_neu_tau00300um_M1600_2015, mfv_neu_tau01000um_M0300_2015, mfv_neu_tau01000um_M0400_2015, mfv_neu_tau01000um_M0800_2015, mfv_neu_tau01000um_M1200_2015, mfv_neu_tau01000um_M1600_2015, mfv_neu_tau10000um_M0300_2015, mfv_neu_tau10000um_M0400_2015, mfv_neu_tau10000um_M0800_2015, mfv_neu_tau10000um_M1200_2015, mfv_neu_tau10000um_M1600_2015, official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00100um_M1200, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M0300, official_mfv_neu_tau01000um_M0800, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau10000um_M1200, official_mfv_neu_tau10000um_M1600, qcdht0500, qcdht0500_2015, qcdht0500ext, qcdht0500ext_2015, qcdht0700, qcdht0700_2015, qcdht0700ext, qcdht0700ext_2015, qcdht1000_2015, qcdht1000ext, qcdht1000ext_2015, qcdht1500, qcdht1500_2015, qcdht1500ext, qcdht1500ext_2015, qcdht2000, qcdht2000_2015, qcdht2000ext_2015, ttbar, ttbar_2015, xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau02000mm_M3000_2015,):
     x.add_dataset('ntuplev12')
 
+for x in (mfv_neu_tau00300um_M0800_temp,):
+    x.add_dataset("ntuplev12validation")
+
 ########
 # other condor declarations
 ########

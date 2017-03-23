@@ -93,6 +93,10 @@ _add_ds("main", {
 'mfv_neu_tau00300um_M0800_temp': (196, ['/store/user/tucker/mfv_neu_tau00300um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170320_183126/0000/reco_%i.root' % i for i in chain(xrange(1,33), xrange(34,69), xrange(70,133), xrange(134,175), xrange(176,201))]),
 })
 
+_add_ds("ntuplev12validation", {
+'mfv_neu_tau00300um_M0800_temp': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0800/NtupleV12_2016_mfv_neu_tau00300um_M0800_temp/170323_041749", 40),
+})
+
 _add_ds("ntuplev12", {
 
 # 2015
