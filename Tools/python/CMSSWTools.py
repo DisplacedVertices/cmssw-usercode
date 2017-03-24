@@ -331,3 +331,9 @@ def tfileservice(process, filename='tfileservice.root'):
 
 def tracer(process):
     process.Tracer = cms.Service('Tracer')
+
+def want_summary(process, val=True):
+    if not hasattr(process, 'options'):
+        process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(val))
+    else:
+        process.options.wantSummary = cms.untracked.bool(val)
