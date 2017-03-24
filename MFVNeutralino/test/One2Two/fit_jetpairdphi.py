@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
 from JMTucker.Tools.ROOTTools import *
+
+year = 2016
+
 set_style()
-ps = plot_saver('../plots/bkgest/fit_jetpairdphi', size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/fit_jetpairdphi_%s' % year, size=(700,700), log=False, root=False)
+
+fn = '/uscms_data/d2/tucker/crab_dirs/HistosV12/background%s.root' % ('_2015' if year==2015 else '')
 
 ntk = ['Ntk3', 'Ntk3or4', 'Ntk4', '']
 ntracks = ['3-track', '3-or-4-track', '4-track', '5-or-more-track']
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11/2016/background.root')
+f = ROOT.TFile(fn)
 for i,n in enumerate(ntk):
   h = f.Get('%smfvEventHistosOnlyOneVtx/h_jet_pairdphi' % n)
   h.SetStats(0)
@@ -27,7 +32,7 @@ for i,n in enumerate(ntk):
   l.Draw()
   ps.save('%s_jetpairdphi' % ntracks[i])
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11/2016/background.root')
+f = ROOT.TFile(fn)
 ROOT.TH1.AddDirectory(0)
 for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/h_sv_best0_jets_deltaphi']:
   colors = [ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2]

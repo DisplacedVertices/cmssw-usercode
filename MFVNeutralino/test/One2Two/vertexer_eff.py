@@ -1,14 +1,17 @@
 from JMTucker.Tools.ROOTTools import *
-set_style()
-ps = plot_saver('../plots/bkgest/vertexer_eff', size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV10/background.root')
-fh = ROOT.TFile('eff.root', 'recreate')
+year = 2016
+
+set_style()
+ps = plot_saver('../plots/bkgest/vertexer_eff_%s' % year, size=(700,700), log=False, root=False)
+
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12/background%s.root' % ('_2015' if year==2015 else ''))
+fh = ROOT.TFile('eff_%s.root' % year, 'recreate')
 
 for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
-    h_merge = f.Get('mfvVertices/h_merge_d2d_%s' % maxtk)
-    h_pairs = f.Get('mfvVertices/h_pairs_d2d_%s' % maxtk)
-    h_erase = f.Get('mfvVertices/h_erase_d2d_%s' % maxtk)
+    h_merge = f.Get('mfvVertices/h_merge_d2d_jetht1000_%s' % maxtk)
+    h_pairs = f.Get('mfvVertices/h_pairs_d2d_jetht1000_%s' % maxtk)
+    h_erase = f.Get('mfvVertices/h_erase_d2d_jetht1000_%s' % maxtk)
 
     h_merge.Rebin(10)
     h_pairs.Rebin(10)
