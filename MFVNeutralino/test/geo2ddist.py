@@ -1,9 +1,12 @@
 from JMTucker.Tools.ROOTTools import *
+import JMTucker.MFVNeutralino.AnalysisConstants as ac
+
+year = 2016
 
 set_style()
-ps = plot_saver('plots/geo2ddist/HistosV11_2016', size=(700,700), root=False, log=False)
+ps = plot_saver('plots/geo2ddist/HistosV12_%s' % year, size=(700,700), root=False, log=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV11/2016/background.root')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV12/background%s.root' % ('_2015' if year==2015 else ''))
 h = f.Get('vtxHst1VNoGeo2ddist/h_sv_pos_2d_0xy')
 h.SetStats(0)
 h.SetTitle(';Vertex x (cm);Vertex y (cm)')
@@ -26,7 +29,7 @@ def write(font, size, x, y, text):
 subtr = 0.02
 lum_pos = 0.625
 stupid = 0
-lum = write(42, 0.04, lum_pos+stupid, 0.930-subtr, '39.5 fb^{-1} (13 TeV)')
+lum = write(42, 0.04, lum_pos+stupid, 0.930-subtr, ac.int_lumi_nice_2015 if year==2015 else ac.int_lumi_nice_2016)
 cms = write(61, 0.04, 0.098+stupid, 0.930-subtr, 'CMS')
 exlab_str = 'Simulation Preliminary'
 exlab = write(52, 0.035, 0.185, 0.930-subtr, exlab_str)
