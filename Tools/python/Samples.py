@@ -428,7 +428,8 @@ JetHT2015C.condor = True
 JetHT2015D.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
-for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015,
+for x in (qcdht2000ext,
+          qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015,
           qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015,
           ttbar_2015):
     x.condor = True
