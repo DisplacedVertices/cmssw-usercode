@@ -412,6 +412,10 @@ def get(i): return _l[i]
             return
 
         working_dir = os.path.join(self.batch_dir, 'condor_%s' % sample.name)
+        if os.path.exists(working_dir):
+            print "\033[1m warning: \033[0m sample %s not submitted, working dir %s already exists" % (sample.name, working_dir)
+            return
+
         os.mkdir(working_dir)
         touch(os.path.join(working_dir, 'cs_dir'))
         open(os.path.join(working_dir, 'cs_ex'), 'wt').write(self.ex_str)
