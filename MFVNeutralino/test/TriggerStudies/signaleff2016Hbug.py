@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-import sys
+import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.MFVNeutralino.Year import year
 
 global_tag(process, which_global_tag(True, year))
 process.maxEvents.input = 100
+#want_summary(process)
 
 #sample_files(process, 'official_mfv_neu_tau01000um_M0300', 'main')
 process.source.fileNames = ['root://xrootd2.ihepa.ufl.edu//store/mc/RunIISummer16DR80Premix/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/AODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/110000/0EE95A6E-A8F4-E611-9339-0025905AA9F0.root']
@@ -48,16 +49,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
     from JMTucker.Tools.ROOTTools import ROOT
-    for fn in sys.argv[1:]:
-        f = ROOT.TFile(fn)
-        h = f.Get('SimpleTriggerEfficiency/triggers_pass_num')
-
-        num0 = None
-        for i in xrange(1, h.GetNbinsX() + 1):
-            path = h.GetXaxis().GetBinLabel(i)
-            num = h.GetBinContent(i)
-            if num0 is None:
-                num0 = num
-            else:
-                if num - num0 > 0.01:
-                    print fn, path, num, num0
+    for fn in sys.argv:
+        if '.root' in fn:
+            print os.path.basename(fn)
+            f = ROOT.TFile(fn)
+            ct = [0,0,0]
+            for l1htt, w in (240, 0.333), (255, 0.248), (280, 0.125), (300, 0.294):
+                name = 'HLT1bugcheckL1%iusemywbug' % l1htt
+                d = f.Get(name)
+                n = d.Get('h_gendvv_den').GetEntries()
+                i = d.Get('h_gendvv_fail').GetEntries()
+                r = d.Get('h_gendvv_faill1htt_l1single450').GetEntries()
+                rak = d.Get('h_gendvv_faill1htt_l1single450ak').GetEntries()
+                c = float(i)/n, float(r)/i, float(rak)/i
+                ct = [a+w*b for a,b in zip(ct, c)]
+                print name.ljust(40), '%6i / %6i = %.4f  %.4f  %.4f' % ((i, n) + c)
+            print 'wavg:  %.4f  %.4f  %.4f' % tuple(ct)
+            print
