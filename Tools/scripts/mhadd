@@ -53,7 +53,7 @@ for x in wds:
         # if we have a dir of condor/crab dirs, cs/crab_hadd all the directories in it.
         for d in glob.glob(os.path.join(x, '*')):
             is_crab = is_crab_working_dir(d)
-            if is_crab or is_cs_dir(x):
+            if is_crab or is_cs_dir(d):
                 hadd_(is_crab, d, new_dir=x)
 
 if not found_one:
