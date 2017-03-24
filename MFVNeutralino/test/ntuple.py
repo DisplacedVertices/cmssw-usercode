@@ -112,7 +112,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = \
             Samples.data_samples_2015 + \
             Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.mfv_signal_samples_2015 + Samples.mfv_signal_samples_glu_2015 + Samples.mfv_signal_samples_gluddbar_2015 + Samples.xx4j_samples_2015
+            Samples.mfv_signal_samples_2015 + Samples.xx4j_samples_2015
     elif year == 2016:
         samples = \
             Samples.data_samples + \
