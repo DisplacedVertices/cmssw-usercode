@@ -140,6 +140,10 @@ def mkdirp(path):
     if not os.path.exists(path):
         os.mkdir(path)
 
+def mail(to, subject, body):
+    process = subprocess.Popen(['mail', '-s', subject, to], stdin=subprocess.PIPE)
+    process.communicate(body)
+
 def mkdirs_if_needed(path):
     dn = os.path.dirname(path)
     if dn:
