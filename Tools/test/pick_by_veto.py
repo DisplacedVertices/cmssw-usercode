@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-del process.TFileService
+from JMTucker.Tools.CMSSWTools import *
+process = basic_process('PickByVeto')
+report_every(process, 1000000)
 
 process.veto = cms.EDFilter('EventIdVeto',
                             use_run = cms.bool(False),
@@ -21,8 +22,7 @@ process.outp = cms.EndPath(process.out)
 if 'debug' in sys.argv:
     process.options.wantSummary = True
     process.veto.debug = True
-
-report_every(process, 500)
+    report_every(process, 1)
 
 ####
 
@@ -75,6 +75,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2016:
         samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
+    for sample in samples:
+        # JMTBAD need to unify the way crabsubmitter and condorsubmitter do this crap
+        sample.files_per = 50
+        sample.json = 'json.%s' % sample.name
+
     def vetolist_fn(sample):
         fn = 'vetolist.%s.gz' % sample.name
         assert os.path.isfile(fn)
@@ -90,14 +95,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         cfg.JobType.inputFiles = [vetolist_fn(sample)]
         cfg.Data.lumiMask = 'json.%s' % sample.name
 
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.Tools.MetaSubmitter import *
     batch_name = 'Pick1VtxV1'
-    cs = CRABSubmitter(batch_name,
-                       pset_modifier = pset_modifier,
-                       cfg_modifier = cfg_modifier,
-                       splitting = 'FileBased',
-                       units_per_job = 50,
-                       total_units = -1,
-                       publish_name = batch_name,
-                       )
-    cs.submit_all(samples)
+    ms = MetaSubmitter(batch_name)
+    ms.common.ex = year
+    ms.common.pset_modifier = pset_modifier
+    ms.common.publish_name = batch_name + '_' + str(year)
+    ms.crab.cfg_modifier = cfg_modifier
+    ms.crab.splitting = 'FileBased'
+    ms.crab.units_per_job = 50
+    ms.crab.total_units = -1
+    ms.condor.input_files = ['vetolist.%s.gz' % s.name for s in samples]
+    ms.condor.stageout_files = 'all'
+    ms.submit(samples)
