@@ -7,7 +7,7 @@ output_level = 'reco'
 output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
 fixed_salt = ''
 
-if 0:
+if 1:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
 elif 0:
     meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
@@ -34,7 +34,7 @@ elif 1:
 
 ex = ''
 #ex = '_test'
-#nevents, events_per = 1,1
+#nevents, events_per = 10,10 
 #meta, taus, masses = 'neu', [10000], [800]
 
 ################################################################################
@@ -82,12 +82,11 @@ if output_level == 'minitree':
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
 if output_level == 'reco':
-    config.JobType.outputFiles += ['reco.root']
+    config.JobType.outputFiles = ['reco.root']
 elif output_level == 'gensim':
-    config.JobType.outputFiles += ['gensim.root']
+    config.JobType.outputFiles = ['gensim.root']
 elif output_level == 'minitree':
-    config.JobType.outputFiles += ['minitree.root', 'vertex_histos.root']
-
+    config.JobType.outputFiles = ['minitree.root', 'vertex_histos.root']
 
 config.JobType.scriptArgs = [
     'maxevents=%i' % events_per,
