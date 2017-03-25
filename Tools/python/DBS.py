@@ -141,6 +141,15 @@ def ll_for_dataset(dataset, instance='global'):
 def json_for_dataset(json_fn, dataset, instance='global'):
     ll_for_dataset(dataset, instance).writeJSON(json_fn)
 
+def files_for_json(json_fn, dataset, instance='global'):
+    json = LumiList(json_fn)
+    files = set()
+    for file, run_lumis in file_details_run_lumis(dataset, instance).iteritems():
+        ll = LumiList(runsAndLumis=run_lumis)
+        if json & ll:
+            files.add(file)
+    return sorted(files)
+
 def files_for_events(run_events, dataset, instance='global'):
     wanted_run_lumis = []
     for x in run_events: # list of runs, or list of (run, event), or list of (run, lumi, event)
@@ -159,25 +168,14 @@ def files_for_events(run_events, dataset, instance='global'):
                 files.add(file)
     return sorted(files)
 
-#####
-
-# these use dasgoclient
-
-def dasgo_ll_for_dataset(dataset, instance='global', line_re = re.compile(r'^(/store.*root) (\d+) (\[.*\])$')):
-    assert instance == 'global'
-    d = defaultdict(set) 
-    for line in popen('dasgoclient_linux -query "file,run,lumi dataset=%s"' % dataset).split('\n'):
-        mo = line_re.match(line.strip())
-        if mo:
-            _, run, lumis = mo.groups()
-            d[int(run)] |= set(eval(lumis))
-    return LumiList(runsAndLumis=d)
-
-def dasgo_json_for_dataset(json_fn, dataset, instance='global'):
-    dasgo_ll_for_dataset(dataset, instance).writeJSON(json_fn)
-
 if __name__ == '__main__':
     pass
+
+    #ds = '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/AODSIM'
+    #all_files = files_in_dataset(ds)
+    #print len(all_files)
+    #files = files_for_json('json.qcdht2000ext', ds)
+    #print len(files)
 
     #print ll_for_dataset('duh')
     #from Samples import *
