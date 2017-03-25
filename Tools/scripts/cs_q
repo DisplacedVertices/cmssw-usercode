@@ -1,9 +1,12 @@
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
-   echo usage: cs_q working_dir
-   exit 1
+    crab_dirs_root=$(grep crab_dirs_root ~/.jmtct | cut -d ' ' -f 3)
+    for x in $(condor_q $USER | grep $USER | cut -d '.'  -f 1 | sort -n | uniq); do
+        echo $x $(readlink $crab_dirs_root/cs_links/$x)
+    done
+else
+    wd=$1
+    condor_q $(cat $wd/cluster)
 fi
 
-wd=$1
-condor_q $(cat $wd/cluster)
