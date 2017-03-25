@@ -115,34 +115,17 @@ def crab_requestcache(working_dir):
 def is_crab_working_dir(path):
     return os.path.isdir(path) and os.path.isfile(os.path.join(path, '.requestcache'))
 
-def crab_working_dirs(path=''):
-    return [d for d in glob.glob(os.path.join(path, 'crab_*')) if is_crab_working_dir(d)]
-    
-def last_crab_working_dir(path=''):
-    dirs = [(d, os.stat(d).st_mtime) for d in crab_working_dirs(path)]
-    if dirs:
-        dirs.sort(key=lambda x: x[1])
-        return dirs[-1][0]
-
 def crab_dirs_from_argv():
     dirs = []
 
-    if 'all' in sys.argv:
-        dirs = crab_working_dirs()
-    elif 'except' in sys.argv:
-        dirs = [d for d in crab_working_dirs() if d not in sys.argv]
-    elif len(sys.argv) > 1:
-        for d in sys.argv[1:]:
-            if is_crab_working_dir(d):
-                dirs.append(d)
-            elif os.path.isdir(d):
-                # if we have a dir of crab dirs, take all of them
-                for dd in glob.glob(os.path.join(d, '*')):
-                    if is_crab_working_dir(dd):
-                        dirs.append(dd)
-
-    if not dirs:
-        dirs = [last_crab_working_dir()]
+    for d in sys.argv[1:]:
+        if is_crab_working_dir(d):
+            dirs.append(d)
+        elif os.path.isdir(d):
+            # if we have a dir of crab dirs, take all of them
+            for dd in glob.glob(os.path.join(d, '*')):
+                if is_crab_working_dir(dd):
+                    dirs.append(dd)
 
     # make sure each entry is in only once, but don't use
     # list(set(dirs)) because we want to keep the sorted order
