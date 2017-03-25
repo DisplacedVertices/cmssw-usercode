@@ -415,8 +415,10 @@ def merge(samples, output='merge.root', norm_to=1., norm_path=''):
     os.system(cmd)
 
 def sample_from_end_string(namespace, d):
-    for x in vars(namespace).itervalues():
-        if issubclass(type(x), Sample) and d.endswith(x.name):
+    l = [x for x in vars(namespace).itervalues() if issubclass(type(x), Sample)]
+    l.sort(key=lambda x: -len(x.name))
+    for x in l:
+        if d.endswith(x.name):
             return x
 
 def main(samples_registry):
