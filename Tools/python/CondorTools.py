@@ -24,7 +24,11 @@ def cs_dirs_from_argv():
             for sub in glob(os.path.join(arg, '*')):
                 if is_cs_dir(sub):
                     dirs.append(sub)
-    return dirs
+    r = []
+    for d in dirs:
+        if d not in r and d is not None:
+            r.append(d)
+    return r
 
 def cs_fjrs(d):
     return glob(os.path.join(d, 'fjr_*.xml'))
