@@ -159,7 +159,6 @@ leptonic_background_samples = [
     ]
 
 mfv_signal_samples = [
-    MCSample('mfv_neu_tau00300um_M0800_temp', '/mfv_neu_tau00300um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-36f33e35675d4fdda6e229a231c74a68/USER', 19600)
     ]
 
 official_mfv_signal_samples = [
@@ -417,8 +416,27 @@ JetHT2016H3.add_dataset('ntuplev12', '/JetHT/tucker-NtupleV12-c2c950db55264ce616
 for x in (JetHT2015C, JetHT2015D, mfv_neu_tau00100um_M0300_2015, mfv_neu_tau00100um_M0400_2015, mfv_neu_tau00100um_M0800_2015, mfv_neu_tau00100um_M1200_2015, mfv_neu_tau00100um_M1600_2015, mfv_neu_tau00300um_M0300_2015, mfv_neu_tau00300um_M0400_2015, mfv_neu_tau00300um_M0800_2015, mfv_neu_tau00300um_M1200_2015, mfv_neu_tau00300um_M1600_2015, mfv_neu_tau01000um_M0300_2015, mfv_neu_tau01000um_M0400_2015, mfv_neu_tau01000um_M0800_2015, mfv_neu_tau01000um_M1200_2015, mfv_neu_tau01000um_M1600_2015, mfv_neu_tau10000um_M0300_2015, mfv_neu_tau10000um_M0400_2015, mfv_neu_tau10000um_M0800_2015, mfv_neu_tau10000um_M1200_2015, mfv_neu_tau10000um_M1600_2015, official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00100um_M1200, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M0300, official_mfv_neu_tau01000um_M0800, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau10000um_M1200, official_mfv_neu_tau10000um_M1600, qcdht0500, qcdht0500_2015, qcdht0500ext, qcdht0500ext_2015, qcdht0700, qcdht0700_2015, qcdht0700ext, qcdht0700ext_2015, qcdht1000_2015, qcdht1000ext, qcdht1000ext_2015, qcdht1500, qcdht1500_2015, qcdht1500ext, qcdht1500ext_2015, qcdht2000, qcdht2000_2015, qcdht2000ext_2015, ttbar, ttbar_2015, xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau02000mm_M3000_2015,):
     x.add_dataset('ntuplev12')
 
-for x in (mfv_neu_tau00300um_M0800_temp,):
-    x.add_dataset("ntuplev12validation")
+qcdht0500.add_dataset('pick1vtxv1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-fcc6aaec1961e7bcf17b9c0fe4107509/USER', 6)
+qcdht0700.add_dataset('pick1vtxv1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-2aea76e35d539298e18916833dbc74f1/USER', 2502)
+qcdht1000.add_dataset('pick1vtxv1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-8afc595d081ee1f94f783e1522e075c9/USER', 23215)
+qcdht1500.add_dataset('pick1vtxv1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-d4e99261570f80d2911af23da7638dca/USER', 36394)
+qcdht2000.add_dataset('pick1vtxv1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-68ed9a7d908fe44cd6d0b63faf778cf0/USER', 23593)
+qcdht0500ext.add_dataset('pick1vtxv1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-a37dfa072e5d03a021f17fce6afd2b00/USER', 24)
+qcdht0700ext.add_dataset('pick1vtxv1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-5638c525258d2251f88fd88d678c05ee/USER', 4941)
+qcdht1000ext.add_dataset('pick1vtxv1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-e2ba514394879e0966fe3e21073240c7/USER', 49350)
+qcdht1500ext.add_dataset('pick1vtxv1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-176431eb1f7b3da10a55c78c72f41e91/USER', 72588)
+ttbar.add_dataset('pick1vtxv1', '/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/tucker-Pick1VtxV1-2ff5f2f92aca436adf9b213a040bf828/USER', 19603)
+qcdht0500_2015.add_dataset('pick1vtxv1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-f043e40fc32d092cdc49150b3ec811b0/USER', 12)
+qcdht0700_2015.add_dataset('pick1vtxv1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-65df0d5e5c3f76c72b74221d7b5b8700/USER', 1766)
+qcdht1000_2015.add_dataset('pick1vtxv1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-75c290893cdb61f138b4fe4eefb1c5a7/USER', 15270)
+qcdht1500_2015.add_dataset('pick1vtxv1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-7305ee7a0ef5d247f9662bf418bce9ac/USER', 23069)
+qcdht2000_2015.add_dataset('pick1vtxv1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-0be3f492b9a08c8896c4c9d8e6fd6d56/USER', 16058)
+qcdht0500ext_2015.add_dataset('pick1vtxv1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-18bed05a3c605603df624a1c8c8f09a4/USER', 17)
+qcdht0700ext_2015.add_dataset('pick1vtxv1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-fc50c7c27ee475c86efd5a7b40d64868/USER', 3429)
+qcdht1000ext_2015.add_dataset('pick1vtxv1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-94d3fdf1dac0ad1ed94a7104e68a6299/USER', 30837)
+qcdht1500ext_2015.add_dataset('pick1vtxv1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-4d1af49094452e9e05493cdcade0780e/USER', 45870)
+qcdht2000ext_2015.add_dataset('pick1vtxv1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/None/None', 32178)
+ttbar_2015.add_dataset('pick1vtxv1', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-Pick1VtxV1-375a5077021b79bab6d9cc16597b393e/USER', 15381)
 
 ########
 # other condor declarations

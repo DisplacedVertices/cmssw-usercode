@@ -99,6 +99,31 @@ _add_ds("ntuplev12validation", {
 'mfv_neu_tau00300um_M0800_temp': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0800/NtupleV12_2016_mfv_neu_tau00300um_M0800_temp/170323_041749", 40),
 })
 
+_add_ds("pick1vtxv1", {
+'qcdht0500': (1, ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194536/0000/pick_1.root']),
+'qcdht0700': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194548", 27, fnbase="pick"),
+'qcdht1000': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194601", 16, fnbase="pick"),
+'qcdht1500': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194614", 14, fnbase="pick"),
+'qcdht2000': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194635", 6, fnbase="pick"),
+'qcdht0500ext': (1, ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194654/0000/pick_1.root']),
+'qcdht0700ext': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194715", 52, fnbase="pick"),
+'qcdht1000ext': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194729", 30, fnbase="pick"),
+'qcdht1500ext': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194744", 26, fnbase="pick"),
+'ttbar': _fromnum1("/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/Pick1VtxV1/170322_194523", 97, fnbase="pick"),
+
+'qcdht0500_2015': (1, ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195259/0000/pick_1.root']),
+'qcdht0700_2015': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195315", 20, fnbase="pick"),
+'qcdht1000_2015': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195329", 10, fnbase="pick"),
+'qcdht1500_2015': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195344", 8, fnbase="pick"),
+'qcdht2000_2015': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195357", 5, fnbase="pick"),
+'qcdht0500ext_2015': (1, ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195412/0000/pick_1.root']),
+'qcdht0700ext_2015': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195425", 36, fnbase="pick"),
+'qcdht1000ext_2015': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195439", 21, fnbase="pick"),
+'qcdht1500ext_2015': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_195455", 13, fnbase="pick"),
+'qcdht2000ext_2015': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1_2015_qcdht2000ext_2015/170324_185858", 9, fnbase="pick"),
+'ttbar_2015': _fromnum1("/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Pick1VtxV1/170322_195246", 55, fnbase="pick"),
+})
+
 _add_ds("ntuplev12", {
 
 # 2015
