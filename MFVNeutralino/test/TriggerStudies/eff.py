@@ -59,6 +59,7 @@ process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.mfvTriggerFloats.ht_cut = ht_skim_cut
 
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
+                             use_weight = cms.int32(0),
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
