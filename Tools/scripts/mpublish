@@ -101,7 +101,7 @@ for k in sorted(publish.keys()):
     if type(c) == str:
         if '_fromnum' in c:
             if not c.endswith(', %i)' % n):
-                print 'FUCK', n
+                print 'OOPS', n
             print '%r: %s,' % (k, c)
         else:
             print '%r: (%i, %s),' % (k, n, c)
