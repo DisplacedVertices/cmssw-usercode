@@ -18,6 +18,17 @@ def cmd_hadd_vertexer_histos():
         s.set_curr_dataset(ntuple)
         hadd(s.name + '.root', ['root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos') for fn in s.filenames])
 
+def cmd_report_data():
+    for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''):
+        if not glob('*%s*' % ds):
+            continue
+        for year in 2015, 2016:
+            os.system('mreport crab*%s%i*' % (ds, year))
+            print 'jsondiff'
+            os.system('compareJSON.py --diff processedLumis.json $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/ana_avail_%i%s.json' % (year, ex))
+            raw_input('ok?')
+            os.rename('processedLumis.json', 'dataok_%i.json' % year)
+
 def cmd_hadd_data():
     for ds in 'SingleMuon', 'JetHT':
         files = glob(ds + '*.root')
@@ -76,14 +87,18 @@ def cmd_effsprint():
                 print
 
 def cmd_histos():
+    cmd_report_data()
     cmd_hadd_qcd_sum()
     cmd_merge_background()
     cmd_effsprint()
 
 def cmd_minitree():
+    cmd_report_data()
     cmd_hadd_qcd_sum()
 
-def cmd_trigeff_hadds():
+def cmd_trigeff():
+    cmd_report_data()
+
     hadd('SingleMuon2015.root', ['SingleMuon2015%s.root' % x for x in 'CD'])
     hadd('SingleMuon2016BthruG.root', ['SingleMuon2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
     hadd('SingleMuon2016H.root', ['SingleMuon2016%s.root' % x for x in ('H2', 'H3')])
