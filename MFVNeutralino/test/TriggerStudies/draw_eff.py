@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = 'v5'
+version = 'v6'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
