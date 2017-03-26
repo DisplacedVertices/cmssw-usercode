@@ -583,11 +583,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
 
-  edm::Handle<pat::JetCollection> jets_for_ht;
-  event.getByToken(pat_jet_token, jets_for_ht);
-  const double njets = jets_for_ht->size(); // JMTBAD relies on pt cut in selectedPatJets
-  const double jet_ht = std::accumulate(jets_for_ht->begin(), jets_for_ht->end(), 0.,
-                                        [this](double init, const pat::Jet& j) { if (j.pt() > min_jet_pt_for_ht) init += j.pt(); return init; });
+  int njets = 0;
+  double jet_ht = 0;
+  if (histos) {
+    edm::Handle<pat::JetCollection> jets_for_ht;
+    event.getByToken(pat_jet_token, jets_for_ht);
+    njets = jets_for_ht->size(); // JMTBAD relies on pt cut in selectedPatJets
+    jet_ht = std::accumulate(jets_for_ht->begin(), jets_for_ht->end(), 0.,
+                             [this](double init, const pat::Jet& j) { if (j.pt() > min_jet_pt_for_ht) init += j.pt(); return init; });
+  }
 
   //////////////////////////////////////////////////////////////////////
   // The tracks to be used. Will be filled from a track collection or
