@@ -2,12 +2,15 @@
 
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.Tools.CMSSWTools import *
-import JMTucker.Tools.SampleFiles as sf
+import JMTucker.Tools.SampleFiles as SampleFiles
+import JMTucker.Tools.Samples as Samples
 from JMTucker.MFVNeutralino.Year import year
+
+allowed_samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
 
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
-parser.add_argument('+sample', help='which sample to use', choices=['ttbar', 'qcdht1000', 'qcdht1500', 'qcdht2000'], default='ttbar')
+parser.add_argument('+sample', help='which sample to use', choices=[s.name for s in allowed_samples], default='ttbar')
 parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3)
 parser.add_argument('+rest-of-event', action='store_true', help='whether to use the rest of the tracks in the edm event')
 parser.add_argument('+z-model', help='z model', choices=['deltasv', 'deltasvgaus', 'deltapv', 'none'], default='deltasv')
@@ -43,9 +46,10 @@ args_printer('overlay args', args)
 ####
 
 process = basic_process('Overlay')
-process.source.fileNames = sf.get(args.sample, 'pick1vtxv1')
+process.source.fileNames = SampleFiles.get(args.sample, 'pick1vtxv1')[1]
 process.maxEvents.input = args.max_events
-report_every(process, 1000000 if args.batch else 100)
+want_summary(process, args.debug)
+report_every(process, 1 if args.debug else (1000000 if args.batch else 100))
 geometry_etc(process, which_global_tag(not args.is_data, year))
 tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices':      12179 + args.which_event,
