@@ -176,15 +176,19 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
   // rest of truth is (ntk0 + ntk1) * 3 : px, py, pz, ... tracks for v1_0
 
   RLE rle(event.id().run(), event.luminosityBlock(), event.id().event());
-  if (event_index.find(rle) == event_index.end())
+  if (event_index.find(rle) == event_index.end()) {
+    if (verbose) std::cout << "OverlayTracks rle " << rle << " not found, returning" << std::endl;
     return false;
+  }
 
   const int index = event_index[rle];
-  if (index == which_event ||
-      (!rest_of_event && index > which_event)) // don't double count e.g. (3,2) and (2,3) when not using the rest of e0
-    return false;
 
   if (verbose) std::cout << "OverlayTracks " << rle << " : index = " << index << " which_event " << which_event << "\n";
+
+  if (index == which_event || (!rest_of_event && index > which_event)) { // don't double count e.g. (3,2) and (2,3) when not using the rest of e0
+    std::cout << "  don't double count, returning" << std::endl;
+    return false;
+  }
     
   mfv::MiniNtuple* nt0 = minitree_events[index];
   mfv::MiniNtuple* nt1 = minitree_events[which_event];
