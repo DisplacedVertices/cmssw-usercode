@@ -20,9 +20,9 @@ def cmd_hadd_vertexer_histos():
 
 def cmd_report_data():
     for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''):
-        if not glob('*%s*' % ds):
-            continue
         for year in 2015, 2016:
+            if not glob('*%s%i*' % (ds, year)):
+                continue
             os.system('mreport crab*%s%i*' % (ds, year))
             print 'jsondiff'
             os.system('compareJSON.py --diff processedLumis.json $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/ana_avail_%i%s.json' % (year, ex))
