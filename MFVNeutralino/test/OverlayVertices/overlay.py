@@ -6,7 +6,7 @@ import JMTucker.Tools.SampleFiles as SampleFiles
 import JMTucker.Tools.Samples as Samples
 from JMTucker.MFVNeutralino.Year import year
 
-allowed_samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
+allowed_samples = Samples.ttbar_samples + Samples.qcd_samples_sum + Samples.ttbar_samples_2015 + Samples.qcd_samples_sum_2015
 
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
@@ -45,11 +45,24 @@ args_printer('overlay args', args)
 
 ####
 
+def files_for_sample(s):
+    return ['root://cmseos.fnal.gov/' + x for x in SampleFiles.get(s, 'pick1vtxv1')[1]]
+
+if 'qcd' in args.sample:
+    assert 'sum' in args.sample
+    files  = files_for_sample(args.sample.replace('sum', ''))
+    files += files_for_sample(args.sample.replace('sum', 'ext'))
+else:
+    files = files_for_sample(args.sample)
+
+####
+
 process = basic_process('Overlay')
-process.source.fileNames = SampleFiles.get(args.sample, 'pick1vtxv1')[1]
+process.source.fileNames = files
 process.maxEvents.input = args.max_events
 want_summary(process, args.debug)
-report_every(process, 1 if args.debug else (1000000 if args.batch else 100))
+silence_messages(process, ['TwoTrackMinimumDistanceHelixLine'])
+report_every(process, 1 if args.debug else 1000000)
 geometry_etc(process, which_global_tag(not args.is_data, year))
 tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices':      12179 + args.which_event,
