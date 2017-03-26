@@ -102,7 +102,7 @@ _add_ds("pick1vtxv1", {
 'qcdht1000ext': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194729", 30, fnbase="pick"),
 'qcdht1500ext': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194744", 26, fnbase="pick"),
 'qcdht2000ext': (13,
-                 _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1_2016_qcdht2000ext/170325_092956", 12, fnbase="pick") +
+                 _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1_2016_qcdht2000ext/170325_092956", 12, fnbase="pick")[1] +
                  ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1_lastbit_2016_qcdht2000ext/170326_094704/0000/qcdht2000ext_lastbit.root']),
 'ttbar': _fromnum1("/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/Pick1VtxV1/170322_194523", 97, fnbase="pick"),
 
