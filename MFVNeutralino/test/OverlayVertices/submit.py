@@ -78,7 +78,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     
     tarball_fn_base = 'input.tgz'
     tarball_fn = os.path.join(inputs_dir, tarball_fn_base)
-    make_tarball(tarball_fn, include_python=True)
+    make_tarball(tarball_fn, include_python=True, include_interface=True)
     
     cmssw_py_fn = os.path.join(inputs_dir, cmssw_py)
     shutil.copy2(cmssw_py, cmssw_py_fn)
