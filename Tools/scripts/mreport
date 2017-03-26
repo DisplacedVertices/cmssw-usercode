@@ -7,7 +7,7 @@ from FWCore.PythonUtilities.LumiList import LumiList
 import JMTucker.Tools.Samples as Samples 
 from JMTucker.Tools.CRAB3Tools import crab_command, crab_dirs_from_argv
 from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_report
-from JMTucker.Tools.DBS import dasgo_ll_for_dataset as ll_for_dataset
+from JMTucker.Tools.DBS import ll_for_dataset
 import JMTucker.Tools.colors as colors
 
 def ll2str(ll):
