@@ -435,8 +435,10 @@ qcdht0500ext_2015.add_dataset('pick1vtxv1', '/QCD_HT500to700_TuneCUETP8M1_13TeV-
 qcdht0700ext_2015.add_dataset('pick1vtxv1', '/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-fc50c7c27ee475c86efd5a7b40d64868/USER', 3429)
 qcdht1000ext_2015.add_dataset('pick1vtxv1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-94d3fdf1dac0ad1ed94a7104e68a6299/USER', 30837)
 qcdht1500ext_2015.add_dataset('pick1vtxv1', '/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-Pick1VtxV1-4d1af49094452e9e05493cdcade0780e/USER', 45870)
-qcdht2000ext_2015.add_dataset('pick1vtxv1', '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/None/None', 32178)
 ttbar_2015.add_dataset('pick1vtxv1', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/tucker-Pick1VtxV1-375a5077021b79bab6d9cc16597b393e/USER', 15381)
+
+for x in qcdht2000ext, qcdht2000ext_2015:
+    x.add_dataset('pick1vtxv1')
 
 ########
 # other condor declarations
