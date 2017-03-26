@@ -7,13 +7,14 @@ from JMTucker.Tools.Samples import *
 def is_data_fn(fn):
     return 'JetHT' in fn
 
-def getlist(root_fn, path):
-    is_data = is_data_fn(root_fn)
-    if path == 'mfvMiniTree':
-        return []
+def gettree(root_fn, path):
     f = ROOT.TFile(root_fn)
     t = f.Get(path + '/t')
-    print root_fn, f, t
+    return f, t
+
+def getlist(root_fn, path):
+    f, t = gettree(root_fn, path)
+    is_data = is_data_fn(root_fn)
     branches = 'run:lumi:event' if is_data else 'lumi:event'
     return sorted(set(detree(t, branches)))
     
@@ -43,6 +44,19 @@ def writejson(l, out_fn):
         rll[run].append(lumi)
     LumiList(runsAndLumis=rll).writeJSON(out_fn)
 
+def printforsubmit():
+    root = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12'
+    samples = data_samples + data_samples_2015 + ttbar_samples + ttbar_samples_2015 + qcd_samples_sum + qcd_samples_sum_2015
+
+    for sample in samples:
+        fn = os.path.join(root, '%s.root' % sample.name)
+        for ntracks, path in (3,'tre33'), (4,'tre44'), (5,'mfvMiniTree'):
+            if is_data_fn(sample.name) and ntracks == 5:
+                continue
+            f, t = gettree(fn, path)
+            n = t.Draw('nvtx', 'nvtx==1')
+            print "(('%s', %i), %i)," % (sample.name, ntracks, n)
+
 def dosamples():
     root = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12'
     paths = 'tre33', 'tre34', 'tre44', 'mfvMiniTree'
@@ -57,4 +71,6 @@ def dosamples():
 
 #writelist(sum([getlist('/uscms_data/d2/tucker/crab_dirs/MinitreeV12/qcdht1000ext.root', p) for p in 'tre33', 'tre34', 'tre44', 'mfvMiniTree'], []), 'veto_temp', True)
 #makelist('/uscms_data/d2/tucker/crab_dirs/MinitreeV12/ttbar.root', 'veto_ttbar_temp', True)
-dosamples()
+#dosamples()
+printforsubmit()
+
