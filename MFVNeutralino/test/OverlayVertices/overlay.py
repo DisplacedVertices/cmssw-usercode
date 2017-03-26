@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.Tools.CMSSWTools import *
+import JMTucker.Tools.SampleFiles as sf
 from JMTucker.MFVNeutralino.Year import year
 
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
@@ -21,36 +22,28 @@ parser.add_argument('+debug', action='store_true', help='turn on debug prints')
 parser.add_argument('+out-fn', help='override output fn')
 parser.add_argument('+minitree-path', help='override minitree path')
 parser.add_argument('+minitree-fn', help='override minitree fn')
+parser.add_argument('+minitree-treepath', help='override minitree tree path')
 parser.add_argument('+max-events', type=int, help='max edm events to run on', default=-1)
 
 args = parser.parse_args()
 if args.out_fn is None:
     args.out_fn = 'overlay_%i.root' % args.which_event
 if args.minitree_path is None:
-    args.minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV9/ntk%i' % args.ntracks
+    args.minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV12'
 if args.minitree_fn is None:
     args.minitree_fn = '%s/%s.root' % (args.minitree_path, args.sample)
+if args.minitree_treepath is None:
+    if args.ntracks != 5:
+        args.minitree_treepath = 'tre%i%i/t' % (args.ntracks, args.ntracks)
+    else:
+        args.minitree_treepath = 'mfvMiniTree/t' % (args.ntracks, args.ntracks)
 
 args_printer('overlay args', args)
 
 ####
 
-if args.sample == 'ttbar':
-    files = ['/store/user/tucker/pick1vtx/ttbar/161104_153826/0000/pick_%i.root' % i for i in range(1,94)]
-elif args.sample == 'qcdht1000':
-    files = ['/store/user/tucker/pick1vtx/qcdht1000/pick_%i.root' % i for i in range(50)]
-elif args.sample == 'qcdht1500':
-    files  = ['/store/user/tucker/pick1vtx/qcdht1500/161104_153718/0000/pick_%i.root' % i for i in range(1,15) if i != 9]
-    files += ['/store/user/tucker/pick1vtx/qcdht1500/qcdht1500_%i.root' % i for i in (0,1,2)]
-elif args.sample == 'qcdht2000':
-    files = ['/store/user/tucker/pick1vtx/qcdht2000/pick_%i.root' % i for i in range(23)]
-else:
-    raise ValueError('bad sample %s' % args.sample)
-
-####
-
 process = basic_process('Overlay')
-process.source.fileNames = files
+process.source.fileNames = sf.get(args.sample, 'pick1vtxv1')
 process.maxEvents.input = args.max_events
 report_every(process, 1000000 if args.batch else 100)
 geometry_etc(process, which_global_tag(not args.is_data, year))
@@ -70,6 +63,7 @@ if not args.rest_of_event:
 
 process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         minitree_fn = cms.string(args.minitree_fn),
+                                        minitree_treepath = cms.string(args.minitree_treepath),
                                         which_event = cms.int32(args.which_event),
                                         rotate_x = cms.bool(args.rotate_x),
                                         rotate_p = cms.bool(args.rotate_p),

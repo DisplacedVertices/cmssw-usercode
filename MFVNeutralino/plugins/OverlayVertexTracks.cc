@@ -35,6 +35,7 @@ private:
                                     Measurement1D& min_d, Measurement1D& min_d_sig);
 
   const std::string minitree_fn;
+  const std::string minitree_treepath;
   const int which_event;
   const bool rotate_x;
   const bool rotate_p;
@@ -60,6 +61,7 @@ namespace {
 
 MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg) 
   : minitree_fn(cfg.getParameter<std::string>("minitree_fn")),
+    minitree_treepath(cfg.getParameter<std::string>("minitree_treepath")),
     which_event(cfg.getParameter<int>("which_event")),
     rotate_x(cfg.getParameter<bool>("rotate_x")),
     rotate_p(cfg.getParameter<bool>("rotate_p")),
@@ -86,7 +88,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVOverlayVertexTracks", "bad minitree file: ") << minitree_fn;
 
   mfv::MiniNtuple nt;
-  TTree* t = (TTree*)f->Get("mfvMiniTree/t");
+  TTree* t = (TTree*)f->Get(minitree_treepath.c_str());
   if (!t)
     throw cms::Exception("MFVOverlayVertexTracks", "bad tree");
 
