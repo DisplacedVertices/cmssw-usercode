@@ -4,6 +4,7 @@ import sys, os, shutil
 from textwrap import dedent
 from JMTucker.Tools.CMSSWTools import make_tarball
 from JMTucker.Tools.general import save_git_status
+from JMTucker.MFVNeutralino.Year import year
 
 pwd = os.getcwd()
 
@@ -12,18 +13,36 @@ def int_ceil(x,y):
 
 per = 10
 max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y in [
-            (('qcdht1000', 3), 13371),
-            (('qcdht1000', 4), 1841),
-            (('qcdht1000', 5), 237),
-            (('qcdht1500', 3), 20009),
-            (('qcdht1500', 4), 2936),
-            (('qcdht1500', 5), 454),
-            (('qcdht2000', 3), 13656),
-            (('qcdht2000', 4), 2310),
-            (('qcdht2000', 5), 335),
-            (('ttbar', 3), 13398),
-            (('ttbar', 4), 1811),
-            (('ttbar', 5), 194),
+            (('ttbar', 3), 17085),
+            (('ttbar', 4), 2313),
+            (('ttbar', 5), 307),
+            (('ttbar_2015', 3), 13399),
+            (('ttbar_2015', 4), 1811),
+            (('ttbar_2015', 5), 226),
+            (('qcdht0700sum', 3), 6442),
+            (('qcdht0700sum', 4), 966),
+            (('qcdht0700sum', 5), 123),
+            (('qcdht1000sum', 3), 63348),
+            (('qcdht1000sum', 4), 8907),
+            (('qcdht1000sum', 5), 1421),
+            (('qcdht1500sum', 3), 93828),
+            (('qcdht1500sum', 4), 14576),
+            (('qcdht1500sum', 5), 2630),
+            (('qcdht2000sum', 3), 60612),
+            (('qcdht2000sum', 4), 10444),
+            (('qcdht2000sum', 5), 2191),
+            (('qcdht0700sum_2015', 3), 4571),
+            (('qcdht0700sum_2015', 4), 600),
+            (('qcdht0700sum_2015', 5), 84),
+            (('qcdht1000sum_2015', 3), 40505),
+            (('qcdht1000sum_2015', 4), 5427),
+            (('qcdht1000sum_2015', 5), 885),
+            (('qcdht1500sum_2015', 3), 59671),
+            (('qcdht1500sum_2015', 4), 8930),
+            (('qcdht1500sum_2015', 5), 1798),
+            (('qcdht2000sum_2015', 3), 41121),
+            (('qcdht2000sum_2015', 4), 6835),
+            (('qcdht2000sum_2015', 5), 1422),
             ]])
 
 def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=''):
@@ -48,7 +67,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
 
     cmssw_py = 'overlay.py'
     
-    batch_dir = '/uscms_data/d2/tucker/overlay/%s/%s' % (batch_name, sample)
+    batch_dir = '/uscms_data/d2/tucker/OverlayV1_%i/%s/%s' % (year, batch_name, sample)
     
     inputs_dir = os.path.join(batch_dir, 'inputs')
     outputs_dir = os.path.join(batch_dir, 'outputs')
@@ -148,9 +167,14 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
         os.system('condor_submit < ' + jdl_fn)
         os.chdir(pwd)
 
+if year == 2015:
+    samples = ['qcdht0700sum_2015', 'qcdht1000sum_2015', 'qcdht1500sum_2015', 'qcdht2000sum_2015', 'ttbar_sum']
+elif year == 2016:
+    samples = ['qcdht0700sum', 'qcdht1000sum', 'qcdht1500sum', 'qcdht2000sum', 'ttbar']
+
 overlay_argses = ['', '+z-model deltasvgaus', '+rest-of-event', '+rest-of-event +z-model deltasvgaus']
 for overlay_args in overlay_argses:
-    for sample in ['qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbar']:
+    for sample in samples:
         for ntracks in [3,4,5]:
             submit(sample, ntracks, overlay_args)
             print
