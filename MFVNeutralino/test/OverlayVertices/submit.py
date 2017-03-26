@@ -11,7 +11,7 @@ pwd = os.getcwd()
 def int_ceil(x,y):
     return (x+y-1)/y
 
-per = 10
+per = 50
 max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y in [
             (('ttbar', 3), 17085),
             (('ttbar', 4), 2313),
@@ -123,7 +123,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
 
     set -x
     for i in $(seq 0 $nev); do
-        cmsRun ${workdir}/%(cmssw_py)s +batch +which-event $((job*10+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+        cmsRun ${workdir}/%(cmssw_py)s +batch +which-event $((job*50+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
         cmsexit=$?
         if [[ $cmsexit -ne 0 ]]; then
             echo cmsRun exited with code $cmsexit
