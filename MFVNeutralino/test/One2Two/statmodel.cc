@@ -227,7 +227,7 @@ int main(int, char**) {
   const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 100000000L);
-  const double oversample = env.get_double("oversample", 1);
+  const double oversample = env.get_double("oversample", 20);
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
   phi_c = env.get_double("phi_c", 1.35);
