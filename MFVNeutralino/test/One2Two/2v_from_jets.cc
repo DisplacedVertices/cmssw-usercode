@@ -28,7 +28,7 @@ double dphi_pdf_a = 3.50;
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
 
-const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV11/2016";
+const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV12";
 
 const int nbkg = 4;
 const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
