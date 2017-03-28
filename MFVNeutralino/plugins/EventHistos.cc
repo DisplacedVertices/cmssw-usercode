@@ -54,7 +54,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_hlt_bits;
   TH1F* h_hlt_cross;
   TH1F* h_l1_bits;
-  TH1F* h_pass_clean;
 
   TH1F* h_npu;
 
@@ -315,7 +314,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_hlt_cross = fs->make<TH1F>("h_hlt_cross", ";;events", 6, 0, 6);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
-  h_pass_clean = fs->make<TH1F>("h_pass_clean", ";;events", mfv::n_clean_paths+2, 0, mfv::n_clean_paths+2);
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
@@ -327,10 +325,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::l1_paths[i]));
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+2, TString::Format(" pass %s", mfv::l1_paths[i]));
   }
-  h_pass_clean->GetXaxis()->SetBinLabel(1, "nevents");
-  h_pass_clean->GetXaxis()->SetBinLabel(2, "pass all");
-  for (int i = 0; i < mfv::n_clean_paths; ++i)
-    h_pass_clean->GetXaxis()->SetBinLabel(3+i, TString::Format("pass %s", mfv::clean_paths[i]));
 
   h_hlt_cross->GetXaxis()->SetBinLabel(1, "nevents");
   h_hlt_cross->GetXaxis()->SetBinLabel(2, "HT800 && !HT900");
@@ -643,13 +637,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (mevent->found_l1(i)) h_l1_bits->Fill(1+2*i,   w);
     if (mevent->pass_l1 (i)) h_l1_bits->Fill(1+2*i+1, w);
   }
-
-  h_pass_clean->Fill(0., w);
-  if (mevent->pass_clean_all())
-    h_pass_clean->Fill(1, w);
-  for (int i = 0; i < mfv::n_clean_paths; ++i)
-    if (mevent->pass_clean(i))
-      h_pass_clean->Fill(2+i, w);
 
   {
     const bool pass_800  = mevent->pass_hlt(1);

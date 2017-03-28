@@ -4,8 +4,6 @@ from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
 mfvEvent = cms.EDProducer('MFVEventProducer',
                           triggerfloats_src = cms.InputTag('mfvTriggerFloats'),
-                          cleaning_results_src = cms.InputTag('TriggerResults', '', 'PAT'),
-                          skip_event_filter = cms.string('pevtsel'),
                           jet_pt_min = cms.double(20),
                           beamspot_src = cms.InputTag('offlineBeamSpot'),
                           primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),

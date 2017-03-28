@@ -14,80 +14,76 @@ batch_name = 'Ntuple' + version.upper()
 
 ####
 
-def customize_before_unscheduled(process):
-    process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-    process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-    process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+process = pat_tuple_process(None, is_mc, year)
 
-    process.p = cms.Path(process.mfvVertexSequence * cms.ignore(process.mfvTriggerFloats) * process.mfvEvent)
+process.out.fileName = 'ntuple.root'
+process.out.outputCommands = output_commands = [
+    'drop *',
+    'keep *_mcStat_*_*',
+    'keep *_mfvCleaningBits_*_*',
+    'keep MFVVertexAuxs_mfvVerticesAux_*_*',
+    'keep MFVEvent_mfvEvent__*',
+    ]
 
-    tfileservice(process, 'vertex_histos.root')
-    random_service(process, {'mfvVertices': 1222})
+tfileservice(process, 'vertex_histos.root')
+random_service(process, {'mfvVertices': 1222})
 
-    process.out.outputCommands = output_commands = [
-        'drop *',
-        'keep *_mcStat_*_*',
-        'keep MFVVertexAuxs_mfvVerticesAux_*_*',
-        'keep MFVEvent_mfvEvent__*',
+process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+process.load('JMTucker.MFVNeutralino.CleaningBits_cff')
+process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+
+process.p = cms.Path(process.mfvVertexSequence * cms.ignore(process.mfvTriggerFloats) * process.mfvEvent)
+
+if trig_filter:
+    import JMTucker.MFVNeutralino.TriggerFilter
+    JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process, path_name='p')
+
+if prepare_vis:
+    process.mfvSelectedVerticesTight.produce_vertices = True
+    process.mfvSelectedVerticesTight.produce_tracks = True
+
+    process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
+    process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
+    process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
+    process.p *= process.mfvSelectedVerticesSeq * process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0
+
+    output_commands += [
+        'keep *_mfvVertices_*_*',
+        'keep *_mfvSelectedVerticesTight_*_*',
+        'keep *_mfvVertexRefits_*_*',
+        'keep *_mfvVertexRefitsDrop2_*_*',
+        'keep *_mfvVertexRefitsDrop0_*_*',
         ]
 
-    if prepare_vis:
-        process.mfvSelectedVerticesTight.produce_vertices = True
-        process.mfvSelectedVerticesTight.produce_tracks = True
+    if is_mc:
+        process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
+                                                 gen_particles_src = cms.InputTag('genParticles'),
+                                                 print_info = cms.bool(True),
+                                                 )
+        process.p *= process.mfvGenParticles
+        output_commands += ['keep *_mfvGenParticles_*_*']
 
-        process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
-        process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
-        process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
-        process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0
-
-        output_commands += [
-            'keep *_mfvVertices_*_*',
-            'keep *_mfvSelectedVerticesTight_*_*',
-            'keep *_mfvVertexRefits_*_*',
-            'keep *_mfvVertexRefitsDrop2_*_*',
-            'keep *_mfvVertexRefitsDrop0_*_*',
-            ]
-
-        if is_mc:
-            process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
-                                                     gen_particles_src = cms.InputTag('genParticles'),
-                                                     print_info = cms.bool(True),
-                                                     )
-            process.p *= process.mfvGenParticles
-            output_commands += ['keep *_mfvGenParticles_*_*']
-
-    if keep_all:
-        process.mfvEvent.skip_event_filter = ''
-
-        def dedrop(l):
-            return [x for x in l if not x.strip().startswith('drop')]
-        if is_mc:
-            process.out.outputCommands += \
-                process.AODSIMEventContent.outputCommands + \
-                dedrop(process.MINIAODSIMEventContent.outputCommands) + \
-                dedrop(output_commands)
-        else:
-            process.out.outputCommands += \
-                process.AODEventContent.outputCommands + \
-                dedrop(process.MINIAODEventContent.outputCommands) + \
-                dedrop(output_commands)
-        # for some reason taus crash with this cfg in 8025, and you have to drop met too then (then have to kill it in EventProducer)
-        process.mfvEvent.met_src = ''
-        process.out.outputCommands = [x for x in process.out.outputCommands if 'tau' not in x.lower() and 'MET' not in x]
-        for x in dir(process):
-            xl = x.lower()
-            if 'tau' in xl or 'MET' in x:
-                delattr(process, x)
-
-process = pat_tuple_process(customize_before_unscheduled, is_mc, year)
-process.out.fileName = 'ntuple.root'
-
-process.out.outputCommands += [
-    # these three get added to the end
-    'drop patMETs_patPFMetPuppi__PAT',
-    'drop patMETs_patCaloMet__PAT',
-    'drop patMETs_patMETPuppi__PAT',
-    ]
+if keep_all:
+    def dedrop(l):
+        return [x for x in l if not x.strip().startswith('drop')]
+    if is_mc:
+        process.out.outputCommands += \
+            process.AODSIMEventContent.outputCommands + \
+            dedrop(process.MINIAODSIMEventContent.outputCommands) + \
+            dedrop(output_commands)
+    else:
+        process.out.outputCommands += \
+            process.AODEventContent.outputCommands + \
+            dedrop(process.MINIAODEventContent.outputCommands) + \
+            dedrop(output_commands)
+    # for some reason taus crash with this cfg in 8025, and you have to drop met too then (then have to kill it in EventProducer)
+    process.mfvEvent.met_src = ''
+    process.out.outputCommands = [x for x in process.out.outputCommands if 'tau' not in x.lower() and 'MET' not in x]
+    for x in dir(process):
+        xl = x.lower()
+        if 'tau' in xl or 'MET' in x:
+            delattr(process, x)
 
 if is_mc:
     process.mcStat.histos = True
@@ -95,12 +91,6 @@ if is_mc:
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
-
-if trig_filter:
-    import JMTucker.MFVNeutralino.TriggerFilter
-    JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
-else:
-    process.mfvEvent.skip_event_filter = ''
 
 #process.options.wantSummary = True
 process.maxEvents.input = 100

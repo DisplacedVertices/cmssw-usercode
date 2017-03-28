@@ -10,6 +10,9 @@ def setup_trigger_filter(process, path_name='pevtsel', filt_name='triggerFilter'
         ]
     triggerFilter.andOr = True # = OR
     triggerFilter.throw = False
-    setattr(process, path_name, cms.Path(triggerFilter))
+    if hasattr(process, path_name):
+        getattr(process, path_name).insert(0, triggerFilter)
+    else:
+        setattr(process, path_name, cms.Path(triggerFilter))
     if hasattr(process, 'out'):
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(path_name))

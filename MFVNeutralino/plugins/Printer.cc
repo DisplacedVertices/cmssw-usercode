@@ -141,10 +141,6 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     for (int i = 0; i < mfv::n_hlt_paths; ++i)
       printf("%i ", mevent->pass_hlt(i));
     printf("\n");
-    printf("pass clean (n_clean_paths = %i):\n", mfv::n_clean_paths);
-    for (int i = 0; i < mfv::n_clean_paths; ++i)
-      printf("%i ", mevent->pass_clean(i));
-    printf("\n");
     printf("npu: %f\n", mevent->npu);
     printf("beamspot: (%11.3g, %11.3g, %11.3g)  dxdz: %11.3g  dydz: %11.3g  widthx: %11.3g  widthy: %11.3g\n", mevent->bsx, mevent->bsy, mevent->bsz, mevent->bsdxdz, mevent->bsdydz, mevent->bswidthx, mevent->bswidthy);
     printf("npv: %u\n", mevent->npv);

@@ -15,5 +15,4 @@ mfvVertexSequence = cms.Sequence(mfvVertices *
                                  mfvVerticesAuxTmp *
                                  mfvSelectedVerticesTmp *
                                  mfvVerticesToJets *
-                                 mfvVerticesAux *
-                                 mfvSelectedVerticesSeq)
+                                 mfvVerticesAux)

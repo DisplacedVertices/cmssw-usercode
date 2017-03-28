@@ -33,8 +33,6 @@ public:
 
 private:
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
-  const edm::InputTag cleaning_results_src;
-  const edm::EDGetTokenT<edm::TriggerResults> cleaning_results_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
@@ -47,7 +45,6 @@ private:
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
   
-  const std::string skip_event_filter;
   const double jet_pt_min;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
@@ -60,8 +57,6 @@ private:
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
   : triggerfloats_token(consumes<mfv::TriggerFloats>(cfg.getParameter<edm::InputTag>("triggerfloats_src"))),
-    cleaning_results_src(cfg.getParameter<edm::InputTag>("cleaning_results_src")),
-    cleaning_results_token(consumes<edm::TriggerResults>(cleaning_results_src)),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
@@ -73,8 +68,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))),
-
-    skip_event_filter(cfg.getParameter<std::string>("skip_event_filter")),
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
     b_discriminator_mins(cfg.getParameter<std::vector<double> >("b_discriminator_mins")),
@@ -89,9 +82,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-  if (cleaning_results_src.label() != "" && skip_event_filter != "" && !TriggerHelper(event, cleaning_results_token).pass(skip_event_filter))
-    return;
-
   std::auto_ptr<MFVEvent> mevent(new MFVEvent);
 
   edm::Handle<reco::BeamSpot> beamspot;
@@ -256,16 +246,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     const bool found = triggerfloats->HLTdecisions[i] != -1;
     mevent->found_hlt(i, found);
     mevent-> pass_hlt(i, found && triggerfloats->HLTdecisions[i]);
-  }
-
-  if (cleaning_results_src.label() != "") {
-    TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
-    for (size_t i = 0; i < mfv::n_clean_paths; ++i) {
-      const auto& paf = trig_helper_cleaning.pass_and_found_any_version(mfv::clean_paths[i]);
-      if (!paf.second)
-        assert(i>=5); // the 2016/2015 versions come after that
-      mevent->pass_clean(i, !paf.second || paf.first); // if not found, it passes
-    }
   }
 
   //////////////////////////////////////////////////////////////////////

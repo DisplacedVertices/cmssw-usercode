@@ -24,10 +24,7 @@ private:
 
   const int l1_bit;
   const int trigger_bit;
-  const int clean_bit;
-  const bool invert_clean;
   const bool apply_cleaning_filters;
-  const bool invert_cleaning_filters;
 
   const int min_npv;
   const int max_npv;
@@ -85,10 +82,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(cfg.getParameter<int>("l1_bit")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
-    clean_bit(cfg.getParameter<int>("clean_bit")),
-    invert_clean(cfg.getParameter<bool>("invert_clean")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
-    invert_cleaning_filters(cfg.getParameter<bool>("invert_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_npu(cfg.getParameter<double>("min_npu")),
@@ -135,6 +129,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     max_fractrackssharedwpv01(cfg.getParameter<double>("max_fractrackssharedwpv01")),
     max_fractrackssharedwpvs01(cfg.getParameter<double>("max_fractrackssharedwpvs01"))
 {
+  if (apply_cleaning_filters)
+    throw cms::Exception("NotImplemented", "cleaning filters not yet implemented");
 }
 
 namespace {
@@ -163,14 +159,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
-      return false;
-
-    if (clean_bit >= 0) {
-      if (invert_clean == mevent->pass_clean(clean_bit))
-        return false;
-    }
-
-    if (apply_cleaning_filters && invert_cleaning_filters == mevent->pass_clean_all())
       return false;
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)

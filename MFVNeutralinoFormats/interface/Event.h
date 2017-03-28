@@ -119,18 +119,6 @@ struct MFVEvent {
   void pass_l1(size_t i, bool x)          { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths;                             set_bit(pass_, i, x); }
   bool found_l1(size_t i)           const { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;   return test_bit(pass_, i   ); }
   void found_l1(size_t i, bool x)         { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;           set_bit(pass_, i, x); }
-  bool pass_clean(size_t i)         const { assert(i < mfv::n_clean_paths); i += 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths; return test_bit(pass_, i   ); }
-  void pass_clean(size_t i, bool x)       { assert(i < mfv::n_clean_paths); i += 2*mfv::n_hlt_paths + 2*mfv::n_l1_paths;         set_bit(pass_, i, x); }
-
-  bool pass_clean_all() const {
-    bool pass = true;
-    return pass;
-    //const int N_all = 13;
-    //const int clean_all[N_all] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19};
-    //for (int i = 0; i < N_all; ++i)
-    //  pass = pass && pass_clean(clean_all[i]);
-    //return pass;
-  }
 
   float npu;
 
