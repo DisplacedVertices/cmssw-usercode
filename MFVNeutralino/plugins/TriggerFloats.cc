@@ -26,6 +26,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 
 #ifdef MFVNEUTRALINO_2016
 std::ostream& operator<<(std::ostream& o, const l1t::L1Candidate& c) {
@@ -88,14 +89,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
 {
-  produces<std::vector<float>>("l1jetspts");
-  produces<float>("l1htt");
-  produces<float>("myhtt");
-  produces<float>("myhttwbug");
-  produces<float>("ht");
-  produces<float>("ht4mc");
-  produces<std::vector<int>>("L1decisions");
-  produces<std::vector<int>>("HLTdecisions");
+  produces<mfv::TriggerFloats>();
 
   if (tree) {
     edm::Service<TFileService> fs;
@@ -247,23 +241,16 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   float ht_for_cut = -1;
-  std::auto_ptr<std::vector<float>> l1jetspts(new std::vector<float>);
-  std::auto_ptr<float> l1htt(new float(-1));
-  std::auto_ptr<float> myhtt(new float(-1));
-  std::auto_ptr<float> myhttwbug(new float(-1));
-  std::auto_ptr<float> ht(new float(-1));
-  std::auto_ptr<float> ht4mc(new float(-1));
-  std::auto_ptr<std::vector<int>> L1decisions(new std::vector<int>(mfv::n_l1_paths, -1));
-  std::auto_ptr<std::vector<int>> HLTdecisions(new std::vector<int>(mfv::n_hlt_paths, -1));
+  std::auto_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
 
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
       if (obj.collection() == "hltPFHT::HLT")
-        ht_for_cut = t.ht = *ht = obj.pt();
+        ht_for_cut = t.ht = floats->ht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT") {
-        t.ht4mc = *ht4mc = obj.pt();
+        t.ht4mc = floats->ht4mc = obj.pt();
         if (ht_for_cut < 0)
-          ht_for_cut = *ht4mc;
+          ht_for_cut = floats->ht4mc;
       }
     }
   }
@@ -276,31 +263,31 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   const l1extra::L1EtMissParticle& l1_htt = l1_htts->at(0);
   if (l1_htt.type() != 1)
     throw cms::Exception("BadAssumption", "L1 MHT object in collection not right type");
-  t.l1htt = *l1htt = l1_htt.etTotal();
+  t.l1htt = floats->l1htt = l1_htt.etTotal();
 
 #elif defined(MFVNEUTRALINO_2016)
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
     if (fabs(jet.eta()) < 3)
-      l1jetspts->push_back(jet.pt());
+      floats->l1jetspts.push_back(jet.pt());
   }
-  std::sort(l1jetspts->begin(), l1jetspts->end(), std::greater<float>());
+  std::sort(std::begin(floats->l1jetspts), std::end(floats->l1jetspts), std::greater<float>());
 
-  t.l1htt = *l1htt = etsumhelper.TotalHt();
-  t.myhtt = *myhtt = my_htt;
-  t.myhttwbug = *myhttwbug = my_htt_wbug;
+  t.l1htt = floats->l1htt = etsumhelper.TotalHt();
+  t.myhtt = floats->myhtt = my_htt;
+  t.myhttwbug = floats->myhttwbug = my_htt_wbug;
 #endif
 
   if (prints)
-    printf("TriggerFloats: ht = %f  ht4mc = %f\n", *ht, *ht4mc);
+    printf("TriggerFloats: ht = %f  ht4mc = %f\n", floats->ht, floats->ht4mc);
 
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     const std::pair<bool, bool> paf = helper.pass_and_found_any_version(mfv::hlt_paths[i]);
     if (paf.second)
-      (*HLTdecisions)[i] = paf.first;
+      floats->HLTdecisions[i] = paf.first;
 
     if (prints)
-      printf("HLT bit %2i %30s: %2i\n", i, mfv::hlt_paths[i], (*HLTdecisions)[i]);
+      printf("HLT bit %2i %30s: %2i\n", i, mfv::hlt_paths[i], floats->HLTdecisions[i]);
 
     if (tree) {
       if (paf.second) {
@@ -334,10 +321,10 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
     const bool pass = found ? l1_results[e->second.getIndex()] : false;
 #endif
 
-    if (found) (*L1decisions)[i] = pass;
+    if (found) floats->L1decisions[i] = pass;
 
     if (prints)
-      printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], (*L1decisions)[i]);
+      printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
 
     if (tree) {
       if (found) {
@@ -351,14 +338,7 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (tree)
     tree->Fill();
 
-  event.put(l1jetspts, "l1jetspts");
-  event.put(l1htt, "l1htt");
-  event.put(myhtt, "myhtt");
-  event.put(myhttwbug, "myhttwbug");
-  event.put(ht, "ht");
-  event.put(ht4mc, "ht4mc");
-  event.put(L1decisions, "L1decisions");
-  event.put(HLTdecisions, "HLTdecisions");
+  event.put(floats);
 
   return ht_cut < 0 || ht_for_cut > ht_cut;
 }

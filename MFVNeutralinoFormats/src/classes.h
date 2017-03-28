@@ -7,6 +7,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 namespace JMTucker_MFVNeutralinoFormats {
@@ -23,5 +24,7 @@ namespace JMTucker_MFVNeutralinoFormats {
 
     edm::Wrapper<MFVEvent> we;
     edm::Wrapper<std::vector<MFVVertexAux> > wvva;
+
+    edm::Wrapper<mfv::TriggerFloats> wtf;
   };
 }

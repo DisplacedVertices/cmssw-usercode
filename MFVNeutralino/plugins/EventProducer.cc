@@ -18,6 +18,7 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/MCInteractionTops.h"
@@ -31,11 +32,7 @@ public:
   void produce(edm::Event&, const edm::EventSetup&);
 
 private:
-  const edm::EDGetTokenT<float> triggerfloats_ht_token;
-  const edm::EDGetTokenT<float> triggerfloats_ht4mc_token;
-  const edm::EDGetTokenT<std::vector<int>> triggerfloats_l1_token;
-  const edm::EDGetTokenT<std::vector<int>> triggerfloats_hlt_token;
-
+  const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::InputTag cleaning_results_src;
   const edm::EDGetTokenT<edm::TriggerResults> cleaning_results_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
@@ -62,14 +59,9 @@ private:
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
-  : triggerfloats_ht_token(consumes<float>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "ht"))),
-    triggerfloats_ht4mc_token(consumes<float>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "ht4mc"))),
-    triggerfloats_l1_token(consumes<std::vector<int>>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "L1decisions"))),
-    triggerfloats_hlt_token(consumes<std::vector<int>>(edm::InputTag(cfg.getParameter<std::string>("triggerfloats_src"), "HLTdecisions"))),
-
+  : triggerfloats_token(consumes<mfv::TriggerFloats>(cfg.getParameter<edm::InputTag>("triggerfloats_src"))),
     cleaning_results_src(cfg.getParameter<edm::InputTag>("cleaning_results_src")),
     cleaning_results_token(consumes<edm::TriggerResults>(cleaning_results_src)),
-    
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
@@ -246,30 +238,24 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<float> triggerfloats_ht;
-  edm::Handle<float> triggerfloats_ht4mc;
-  edm::Handle<std::vector<int>> triggerfloats_l1;
-  edm::Handle<std::vector<int>> triggerfloats_hlt;
-  event.getByToken(triggerfloats_ht_token, triggerfloats_ht);
-  event.getByToken(triggerfloats_ht4mc_token, triggerfloats_ht4mc);
-  event.getByToken(triggerfloats_l1_token, triggerfloats_l1);
-  event.getByToken(triggerfloats_hlt_token, triggerfloats_hlt);
+  edm::Handle<mfv::TriggerFloats> triggerfloats;
+  event.getByToken(triggerfloats_token, triggerfloats);
 
-  mevent->hlt_ht = *triggerfloats_ht;
-  mevent->hlt_ht4mc = *triggerfloats_ht4mc;
+  mevent->hlt_ht = triggerfloats->ht;
+  mevent->hlt_ht4mc = triggerfloats->ht4mc;
 
-  assert(triggerfloats_l1->size() == mfv::n_l1_paths);
+  assert(triggerfloats->L1decisions.size() == mfv::n_l1_paths);
   for (size_t i = 0; i < mfv::n_l1_paths; ++i) {
-    const bool found = (*triggerfloats_l1)[i] != -1;
+    const bool found = triggerfloats->L1decisions[i] != -1;
     mevent->found_l1(i, found);
-    mevent-> pass_l1(i, found && (*triggerfloats_l1)[i]);
+    mevent-> pass_l1(i, found && triggerfloats->L1decisions[i]);
   }
 
-  assert(triggerfloats_hlt->size() == mfv::n_hlt_paths);
+  assert(triggerfloats->HLTdecisions.size() == mfv::n_hlt_paths);
   for (size_t i = 0; i < mfv::n_hlt_paths; ++i) {
-    const bool found = (*triggerfloats_hlt)[i] != -1;
+    const bool found = triggerfloats->HLTdecisions[i] != -1;
     mevent->found_hlt(i, found);
-    mevent-> pass_hlt(i, found && (*triggerfloats_hlt)[i]);
+    mevent-> pass_hlt(i, found && triggerfloats->HLTdecisions[i]);
   }
 
   if (cleaning_results_src.label() != "") {

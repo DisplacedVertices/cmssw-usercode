@@ -8,6 +8,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 
 class MFVSignalEff2016HBug : public edm::EDAnalyzer {
 public:
@@ -16,11 +17,7 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
-  const edm::EDGetTokenT<std::vector<int>> l1decisions_token;
-  const edm::EDGetTokenT<std::vector<int>> hltdecisions_token;
-  const edm::EDGetTokenT<float> l1htt_token;
-  const edm::EDGetTokenT<float> myhtt_token;
-  const edm::EDGetTokenT<float> myhttwbug_token;
+  const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const int l1htt_threshold;
   const int l1htt_bit;
 
@@ -39,11 +36,7 @@ private:
 };
 
 MFVSignalEff2016HBug::MFVSignalEff2016HBug(const edm::ParameterSet& cfg)
-  : l1decisions_token(consumes<std::vector<int>>(edm::InputTag("mfvTriggerFloats", "L1decisions"))),
-    hltdecisions_token(consumes<std::vector<int>>(edm::InputTag("mfvTriggerFloats", "HLTdecisions"))),
-    l1htt_token(consumes<float>(edm::InputTag("mfvTriggerFloats", "l1htt"))),
-    myhtt_token(consumes<float>(edm::InputTag("mfvTriggerFloats", "myhtt"))),
-    myhttwbug_token(consumes<float>(edm::InputTag("mfvTriggerFloats", "myhttwbug"))),
+  : triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     l1htt_threshold(cfg.getParameter<int>("l1htt_threshold")),
     l1htt_bit(l1htt_threshold == 160 ? mfv::b_L1_HTT160 :
               l1htt_threshold == 200 ? mfv::b_L1_HTT200 :
@@ -80,32 +73,27 @@ MFVSignalEff2016HBug::MFVSignalEff2016HBug(const edm::ParameterSet& cfg)
 }
 
 void MFVSignalEff2016HBug::analyze(const edm::Event& event, const edm::EventSetup&) {
-  edm::Handle<std::vector<int>> l1decisions, hltdecisions;
-  event.getByToken(l1decisions_token, l1decisions);
-  event.getByToken(hltdecisions_token, hltdecisions);
+  edm::Handle<mfv::TriggerFloats> triggerfloats;
+  event.getByToken(triggerfloats_token, triggerfloats);
 
-  if ((*hltdecisions)[mfv::b_HLT_PFHT900] == -1 ||
-      (*hltdecisions)[mfv::b_HLT_PFJet450] == -1 ||
-      (*hltdecisions)[mfv::b_HLT_AK8PFJet450] == -1 ||
-      (*l1decisions)[mfv::b_L1_SingleJet170] == -1 ||
-      (*l1decisions)[mfv::b_L1_SingleJet180] == -1 || 
-      (*l1decisions)[mfv::b_L1_SingleJet200] == -1)
+  if (triggerfloats->HLTdecisions[mfv::b_HLT_PFHT900] == -1 ||
+      triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450] == -1 ||
+      triggerfloats->HLTdecisions[mfv::b_HLT_AK8PFJet450] == -1 ||
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet170] == -1 ||
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet180] == -1 || 
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet200] == -1)
     throw cms::Exception("Trigger", "one of the trigger bits was not found:")
-      << " " << (*hltdecisions)[mfv::b_HLT_PFHT900]
-      << " " << (*hltdecisions)[mfv::b_HLT_PFJet450]
-      << " " << (*hltdecisions)[mfv::b_HLT_AK8PFJet450]
-      << " " << (*l1decisions)[mfv::b_L1_SingleJet170]
-      << " " << (*l1decisions)[mfv::b_L1_SingleJet180] 
-      << " " << (*l1decisions)[mfv::b_L1_SingleJet200];
+      << " " << triggerfloats->HLTdecisions[mfv::b_HLT_PFHT900]
+      << " " << triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450]
+      << " " << triggerfloats->HLTdecisions[mfv::b_HLT_AK8PFJet450]
+      << " " << triggerfloats->L1decisions[mfv::b_L1_SingleJet170]
+      << " " << triggerfloats->L1decisions[mfv::b_L1_SingleJet180] 
+      << " " << triggerfloats->L1decisions[mfv::b_L1_SingleJet200];
 
-  edm::Handle<float> l1htt, myhtt, myhttwbug;
-  event.getByToken(l1htt_token, l1htt);
-  event.getByToken(myhtt_token, myhtt);
-  event.getByToken(myhttwbug_token, myhttwbug);
-  const float l1htts[3] = {*l1htt, *myhtt, *myhttwbug};
+  const float l1htts[3] = {triggerfloats->l1htt, triggerfloats->myhtt, triggerfloats->myhttwbug};
   const float use_l1htt = l1htts[which_l1htt];
 
-  h_l1_check->Fill(use_l1htt, (*l1decisions)[l1htt_bit]);
+  h_l1_check->Fill(use_l1htt, triggerfloats->L1decisions[l1htt_bit]);
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByToken(gen_particles_token, gen_particles);
@@ -122,14 +110,14 @@ void MFVSignalEff2016HBug::analyze(const edm::Event& event, const edm::EventSetu
   else {
     h_gendvv_fail->Fill(gendvv);
     const bool l1single = 
-      (*l1decisions)[mfv::b_L1_SingleJet170] ||
-      (*l1decisions)[mfv::b_L1_SingleJet180] ||
-      (*l1decisions)[mfv::b_L1_SingleJet200];
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet170] ||
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet180] ||
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet200];
     if (l1single) {
       h_gendvv_faill1htt_l1single->Fill(gendvv);
-      if ((*hltdecisions)[mfv::b_HLT_PFJet450])
+      if (triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450])
         h_gendvv_faill1htt_l1single450->Fill(gendvv);
-      if ((*hltdecisions)[mfv::b_HLT_PFJet450] || (*hltdecisions)[mfv::b_HLT_AK8PFJet450])
+      if (triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450] || triggerfloats->HLTdecisions[mfv::b_HLT_AK8PFJet450])
         h_gendvv_faill1htt_l1single450ak->Fill(gendvv);
     }      
   }

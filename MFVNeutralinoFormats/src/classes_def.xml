@@ -9,6 +9,8 @@
   <class name="edm::RefProd<std::vector<pat::Jet> >"/>
   <class name="edm::Wrapper<edm::RefVector<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> > >"/>
 
+  <class name="mfv::TriggerFloats"/>
+  <class name="edm::Wrapper<mfv::TriggerFloats>"/>
   <class name="MFVEvent"/>
   <class name="edm::Wrapper<MFVEvent>"/>
   <class name="MFVVertexAux"/>

@@ -12,6 +12,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 
 class MFVTriggerEfficiency : public edm::EDAnalyzer {
 public:
@@ -25,13 +26,11 @@ private:
   const bool require_muon;
   const bool require_4jets;
   const double require_ht;
-  const edm::EDGetTokenT<std::vector<int>> decisions_tokens[2];
+  const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
-  const edm::EDGetTokenT<float> hlt_ht_token;
-  const edm::EDGetTokenT<std::vector<float>> l1jets_pts_token;
   const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
 
@@ -71,16 +70,11 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     require_muon(cfg.getParameter<bool>("require_muon")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
     require_ht(cfg.getParameter<double>("require_ht")),
-    decisions_tokens{
-      consumes<std::vector<int>>(edm::InputTag("mfvTriggerFloats", "HLTdecisions")),
-      consumes<std::vector<int>>(edm::InputTag("mfvTriggerFloats", "L1decisions"))
-      },
+    triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
-    hlt_ht_token(consumes<float>(edm::InputTag("mfvTriggerFloats", "ht"))),
-    l1jets_pts_token(consumes<std::vector<float>>(edm::InputTag("mfvTriggerFloats", "l1jetspts"))),
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
     use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
@@ -255,23 +249,25 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     else if (use_weight == 2) w = jetpt12_weight_mfvM800(jet_pt_1, jet_pt_2);
   }
 
+  edm::Handle<mfv::TriggerFloats> triggerfloats;
+  event.getByToken(triggerfloats_token, triggerfloats);
+
   for (int i = 0; i < 2; ++i) { // HLT then L1
     const int r = require_bits[i];
     if (r == -1)
       continue;
 
-    edm::Handle<std::vector<int>> decisions;
-    event.getByToken(decisions_tokens[i], decisions);
+    const std::vector<int>& decisions = i == 0 ? triggerfloats->HLTdecisions : triggerfloats->L1decisions;
 
     if (i == 0 && r < 0) {
-      if ((r == -2 && !orem(*decisions, {1,3})) ||
-          (r == -3 && !orem(*decisions, {1,3,4})) ||
-          (r == -4 && !orem(*decisions, {2,3})) ||
-          (r == -5 && !orem(*decisions, {2,3,4})))
+      if ((r == -2 && !orem(decisions, {1,3})) ||
+          (r == -3 && !orem(decisions, {1,3,4})) ||
+          (r == -4 && !orem(decisions, {2,3})) ||
+          (r == -5 && !orem(decisions, {2,3,4})))
         return;
     }
     else {
-      const int decision = (*decisions)[r];
+      const int decision = decisions[r];
       if (decision == -1)
         throw cms::Exception("TriggerNotFound") << (i == 0 ? "HLT" : "L1") << " bit " << r << " wasn't found";
       else if (decision == 0)
@@ -358,14 +354,10 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   h_njets_v_ht->Fill(jet_ht, njet, w);
   h_jetpt2v1->Fill(jet_pt_1, jet_pt_2, w);
 
-  edm::Handle<float> hlt_ht;
-  event.getByToken(hlt_ht_token, hlt_ht);
-  h_jet_ht_m_hlt_ht->Fill(jet_ht - *hlt_ht, w); 
+  h_jet_ht_m_hlt_ht->Fill(jet_ht - triggerfloats->ht, w); 
 
-  edm::Handle<std::vector<float>> l1jets_pts;
-  event.getByToken(l1jets_pts_token, l1jets_pts);
   int nl1jet = 0;
-  for (float pt : *l1jets_pts) {
+  for (float pt : triggerfloats->l1jetspts) {
     ++nl1jet;
     for (int i : {0, nl1jet})
       if (i == 0 || nl1jet < 11)
