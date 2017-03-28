@@ -42,46 +42,6 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-int throw_jet(int njets, float* jet_pt) {
-  double rand = gRandom->Rndm();
-  double sumpt = 0;
-  for (int j = 0; j < njets; ++j) {
-    sumpt += jet_pt[j];
-    if (rand < sumpt/ht(njets, jet_pt)) {
-      return j;
-    }
-  }
-  return 0;
-}
-
-float throw_phi(int ijet, float* jet_phi, double rdphi) {
-  double rjetphi = jet_phi[ijet];
-
-  double vtx_phi = 0;
-  if (gRandom->Rndm() < 0.5) {
-    vtx_phi = rjetphi - rdphi;
-  } else {
-    vtx_phi = rjetphi + rdphi;
-  }
-
-  return TVector2::Phi_mpi_pi(vtx_phi);
-}
-
-float throw_dphi(int njets, float* jet_pt, float* jet_phi, double rdphi0, double rdphi1, bool with_replacement) {
-  int ijet0 = throw_jet(njets, jet_pt);
-  int ijet1 = throw_jet(njets, jet_pt);
-
-  if (!with_replacement && njets > 1) {
-    while (ijet1 == ijet0) {
-      ijet1 = throw_jet(njets, jet_pt);
-    }
-  }
-
-  float phi0 = throw_phi(ijet0, jet_phi, rdphi0);
-  float phi1 = throw_phi(ijet1, jet_phi, rdphi1);
-  return TVector2::Phi_mpi_pi(phi0 - phi1);
-}
-
 int main(int argc, const char* argv[]) {
   const char* tree_path;
   const char* eff_hist;
