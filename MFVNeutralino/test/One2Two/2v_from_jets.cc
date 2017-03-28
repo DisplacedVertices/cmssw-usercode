@@ -13,26 +13,20 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+int year = 2016;
 int ntracks = 3;
 
 int bquarks = -1;
 bool vary_dphi = false;
 
-bool clearing_from_eff = true;
-const char* eff_file = "eff_avg.root";
+const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV12";
+const int nbkg = 4;
 
-double dphi_pdf_c = 1.37;
 double dphi_pdf_e = 2;
-double dphi_pdf_a = 3.50;
+bool clearing_from_eff = true;
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
-
-const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV12";
-
-const int nbkg = 4;
-const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
-float weights[nbkg] = {3.13184, 0.40037, 0.16549, 0.75270};
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
@@ -43,6 +37,28 @@ float ht(int njets, float* jet_pt) {
 }
 
 int main(int argc, const char* argv[]) {
+  const char* samples[nbkg];
+  float weights[nbkg];
+  double dphi_pdf_c;
+  double dphi_pdf_a;
+  const char* eff_file;
+
+  if (year == 2015) {
+    samples[0] = "qcdht1000sum_2015"; samples[1] = "qcdht1500sum_2015"; samples[2] = "qcdht2000sum_2015"; samples[3] = "ttbar_2015";
+    weights[0] = 0.21105;             weights[1] = 0.02736;             weights[2] = 0.01132;             weights[3] = 0.05799;
+    dphi_pdf_c = 1.35;
+    dphi_pdf_a = 3.66;
+    eff_file = "eff_avg_2015.root";
+  } else if (year == 2016) {
+    samples[0] = "qcdht1000sum";      samples[1] = "qcdht1500sum";      samples[2] = "qcdht2000sum";      samples[3] = "ttbar";
+    weights[0] = 2.84372;             weights[1] = 0.36354;             weights[2] = 0.15026;             weights[3] = 0.68346;
+    dphi_pdf_c = 1.37;
+    dphi_pdf_a = 3.50;
+    eff_file = "eff_avg_2016.root";
+  } else {
+    fprintf(stderr, "bad year"); exit(1);
+  }
+
   const char* tree_path;
   const char* eff_hist;
   int min_ntracks0 = 0;
@@ -69,17 +85,8 @@ int main(int argc, const char* argv[]) {
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
   }
-  printf("tree_path = %s, eff_hist = %s\n", tree_path, eff_hist);
 
-  if (argc == 6) {
-    clearing_from_eff = true;
-    eff_file = argv[1];
-    eff_hist = argv[2];
-    dphi_pdf_c = atof(argv[3]);
-    dphi_pdf_e = atof(argv[4]);
-    dphi_pdf_a = atof(argv[5]);
-  }
-  printf("eff_file = %s, eff_hist = %s, dphi_pdf_c = %f, dphi_pdf_e = %f, dphi_pdf_a = %f\n", eff_file, eff_hist, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+  printf("year = %d, ntracks = %d, dphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file = %s, eff_hist = %s\n", year, ntracks, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file, eff_hist);
 
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(12191982);
