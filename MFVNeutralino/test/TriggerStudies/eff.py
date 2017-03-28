@@ -92,8 +92,8 @@ for require_l1, l1_threshold in (-1, 0), (-2, 240), (-3, 255), (-4, 280), (-5, 3
             a('num%i450%s' % z, process.den.clone(require_hlt = hlt2, require_l1 = require_l1))
             if use_ak8450:
                 a('num%i450ak%s' % z, process.den.clone(require_hlt = hlt3, require_l1 = require_l1))
-            a('num%inomu%s' % z, process.dennomu.clone(require_hlt = 1, require_l1 = require_l1), process.pforsig)
-            a('num%inomuht1000%s' % z, process.dennomuht1000.clone(require_hlt = 1, require_l1 = require_l1), process.pforsig)
+            a('num%inomu%s' % z, process.dennomu.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
+            a('num%inomuht1000%s' % z, process.dennomuht1000.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
 
 if htskim:
     process.setName_('EffHtSkim')
