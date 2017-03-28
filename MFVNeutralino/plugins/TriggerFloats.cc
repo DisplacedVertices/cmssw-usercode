@@ -56,21 +56,6 @@ private:
   const double ht_cut;
 
   const bool prints;
-
-  TTree* tree;
-  struct tree_t {
-    unsigned run;
-    unsigned lumi;
-    unsigned long long evt;
-    float l1htt;
-    float myhtt;
-    float myhttwbug;
-    float ht;
-    float ht4mc;
-    unsigned found;
-    unsigned pass;
-  };
-  tree_t t;
 };
 
 MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
@@ -86,41 +71,12 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     ht_cut(cfg.getParameter<double>("ht_cut")),
-    prints(cfg.getUntrackedParameter<bool>("prints", false)),
-    tree((TTree*)cfg.getUntrackedParameter<bool>("tree", false))
+    prints(cfg.getUntrackedParameter<bool>("prints", false))
 {
   produces<mfv::TriggerFloats>();
-
-  if (tree) {
-    edm::Service<TFileService> fs;
-    tree = fs->make<TTree>("t", "");
-    tree->Branch("run",   &t.run,   "run/i");
-    tree->Branch("lumi",  &t.lumi,  "lumi/i");
-    tree->Branch("event", &t.evt,   "event/l");
-    tree->Branch("l1htt", &t.l1htt, "l1htt/F");
-    tree->Branch("myhtt", &t.myhtt, "myhtt/F");
-    tree->Branch("myhttwbug", &t.myhttwbug, "myhttwbug/F");
-    tree->Branch("ht",    &t.ht,    "ht/F");
-    tree->Branch("ht4mc", &t.ht4mc, "ht4mc/F");
-    tree->Branch("found", &t.found, "found/i");
-    tree->Branch("pass",  &t.pass,  "pass/i");
-  }
 }
 
 bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
-  if (tree) {
-    t.run   = event.id().run();
-    t.lumi  = event.luminosityBlock();
-    t.evt   = event.id().event();
-    t.l1htt = -1;
-    t.myhtt = -1;
-    t.myhttwbug = -1;
-    t.ht    = -1;
-    t.ht4mc = -1;
-    t.found = 0;
-    t.pass  = 0;
-  }
-
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
@@ -246,9 +202,9 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
       if (obj.collection() == "hltPFHT::HLT")
-        ht_for_cut = t.ht = floats->ht = obj.pt();
+        ht_for_cut = floats->ht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT") {
-        t.ht4mc = floats->ht4mc = obj.pt();
+        floats->ht4mc = obj.pt();
         if (ht_for_cut < 0)
           ht_for_cut = floats->ht4mc;
       }
@@ -263,7 +219,7 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   const l1extra::L1EtMissParticle& l1_htt = l1_htts->at(0);
   if (l1_htt.type() != 1)
     throw cms::Exception("BadAssumption", "L1 MHT object in collection not right type");
-  t.l1htt = floats->l1htt = l1_htt.etTotal();
+  floats->l1htt = l1_htt.etTotal();
 
 #elif defined(MFVNEUTRALINO_2016)
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
@@ -273,9 +229,9 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   }
   std::sort(std::begin(floats->l1jetspts), std::end(floats->l1jetspts), std::greater<float>());
 
-  t.l1htt = floats->l1htt = etsumhelper.TotalHt();
-  t.myhtt = floats->myhtt = my_htt;
-  t.myhttwbug = floats->myhttwbug = my_htt_wbug;
+  floats->l1htt = etsumhelper.TotalHt();
+  floats->myhtt = my_htt;
+  floats->myhttwbug = my_htt_wbug;
 #endif
 
   if (prints)
@@ -288,14 +244,6 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 
     if (prints)
       printf("HLT bit %2i %30s: %2i\n", i, mfv::hlt_paths[i], floats->HLTdecisions[i]);
-
-    if (tree) {
-      if (paf.second) {
-        const unsigned bit = 1 << (31 - i);
-        t.found |= bit;
-        if (paf.first) t.pass |= bit;
-      }
-    }
   }
 
 #if defined(MFVNEUTRALINO_2015)
@@ -325,18 +273,7 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 
     if (prints)
       printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
-
-    if (tree) {
-      if (found) {
-        const unsigned bit = 1 << i;
-        t.found |= bit;
-        if (pass) t.pass |= bit;
-      }
-    }
   }
-
-  if (tree)
-    tree->Fill();
 
   event.put(floats);
 
