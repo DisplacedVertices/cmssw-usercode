@@ -215,7 +215,7 @@ int main(int, char**) {
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
-  const int ntoys = env.get_int("ntoys", 100000);
+  const int ntoys = env.get_int("ntoys", 10000);
   const std::string out_fn = env.get_string("out_fn", "statmodel");
   const int year_index = env.get_int("year_index", 2);
   assert(year_index >= 0 && year_index <= 2);
@@ -225,8 +225,8 @@ int main(int, char**) {
   const double n2v = env.get_double("n2v", default_n2v[year_index][ntracks]);
   const std::string true_fn = env.get_string("true_fn", "");
   const bool true_from_file = true_fn != "";
-  const long ntrue_1v = env.get_long("ntrue_1v", 1000000000L);
-  const long ntrue_2v = env.get_long("ntrue_2v", 100000000L);
+  const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
+  const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
