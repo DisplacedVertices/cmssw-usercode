@@ -10,4 +10,4 @@ notification  = never
 should_transfer_files   = YES
 transfer_input_files = statmodel.exe,eff_avg.root
 when_to_transfer_output = ON_EXIT
-Queue 15
+Queue 9

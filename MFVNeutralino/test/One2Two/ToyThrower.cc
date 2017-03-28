@@ -20,7 +20,7 @@ namespace mfv {
       max_ntracks0(env.get_int("max_ntracks0", 1000000)),
       min_ntracks1(env.get_int("min_ntracks1", 0)),
       max_ntracks1(env.get_int("max_ntracks1", 1000000)),
-      int_lumi(env.get_double("int_lumi", mfv::AnalysisConstants::int_lumi * mfv::AnalysisConstants::scale_factor)),
+      int_lumi(env.get_double("int_lumi", mfv::AnalysisConstants::int_lumi_2016 * mfv::AnalysisConstants::scale_factor_2016)),
       scale_1v(env.get_double("scale_1v", 1.)),
       scale_2v(env.get_double("scale_2v", 1.)),
       allow_cap(env.get_bool("allow_cap", false)),

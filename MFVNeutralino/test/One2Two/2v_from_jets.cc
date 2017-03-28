@@ -13,26 +13,20 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+int year = 2016;
 int ntracks = 3;
 
 int bquarks = -1;
 bool vary_dphi = false;
 
-bool clearing_from_eff = true;
-const char* eff_file = "eff_avg.root";
+const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV12";
+const int nbkg = 4;
 
-double dphi_pdf_c = 1.37;
 double dphi_pdf_e = 2;
-double dphi_pdf_a = 3.50;
+bool clearing_from_eff = true;
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
-
-const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV11/2016";
-
-const int nbkg = 4;
-const char* samples[nbkg] = {"qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
-float weights[nbkg] = {3.13184, 0.40037, 0.16549, 0.75270};
 
 float ht(int njets, float* jet_pt) {
   double sum = 0;
@@ -42,51 +36,31 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-int throw_jet(int njets, float* jet_pt) {
-  double rand = gRandom->Rndm();
-  double sumpt = 0;
-  for (int j = 0; j < njets; ++j) {
-    sumpt += jet_pt[j];
-    if (rand < sumpt/ht(njets, jet_pt)) {
-      return j;
-    }
-  }
-  return 0;
-}
-
-float throw_phi(int ijet, float* jet_phi, double rdphi) {
-  double rjetphi = jet_phi[ijet];
-
-  double vtx_phi = 0;
-  if (gRandom->Rndm() < 0.5) {
-    vtx_phi = rjetphi - rdphi;
-  } else {
-    vtx_phi = rjetphi + rdphi;
-  }
-
-  return TVector2::Phi_mpi_pi(vtx_phi);
-}
-
-float throw_dphi(int njets, float* jet_pt, float* jet_phi, double rdphi0, double rdphi1, bool with_replacement) {
-  int ijet0 = throw_jet(njets, jet_pt);
-  int ijet1 = throw_jet(njets, jet_pt);
-
-  if (!with_replacement && njets > 1) {
-    while (ijet1 == ijet0) {
-      ijet1 = throw_jet(njets, jet_pt);
-    }
-  }
-
-  float phi0 = throw_phi(ijet0, jet_phi, rdphi0);
-  float phi1 = throw_phi(ijet1, jet_phi, rdphi1);
-  return TVector2::Phi_mpi_pi(phi0 - phi1);
-}
-
 int main(int argc, const char* argv[]) {
+  const char* samples[nbkg];
+  float weights[nbkg];
+  double dphi_pdf_c;
+  double dphi_pdf_a;
+  const char* eff_file;
+
+  if (year == 2015) {
+    samples[0] = "qcdht1000sum_2015"; samples[1] = "qcdht1500sum_2015"; samples[2] = "qcdht2000sum_2015"; samples[3] = "ttbar_2015";
+    weights[0] = 0.21105;             weights[1] = 0.02736;             weights[2] = 0.01132;             weights[3] = 0.05799;
+    dphi_pdf_c = 1.35;
+    dphi_pdf_a = 3.66;
+    eff_file = "eff_avg_2015.root";
+  } else if (year == 2016) {
+    samples[0] = "qcdht1000sum";      samples[1] = "qcdht1500sum";      samples[2] = "qcdht2000sum";      samples[3] = "ttbar";
+    weights[0] = 2.84372;             weights[1] = 0.36354;             weights[2] = 0.15026;             weights[3] = 0.68346;
+    dphi_pdf_c = 1.37;
+    dphi_pdf_a = 3.50;
+    eff_file = "eff_avg_2016.root";
+  } else {
+    fprintf(stderr, "bad year"); exit(1);
+  }
+
   const char* tree_path;
   const char* eff_hist;
-  double n1v;
-  double n2v;
   int min_ntracks0 = 0;
   int max_ntracks0 = 1000000;
   int min_ntracks1 = 0;
@@ -95,23 +69,15 @@ int main(int argc, const char* argv[]) {
   if (ntracks == 3) {
     tree_path = "tre33/t";
     eff_hist = "average3";
-    n1v = 297372.;
-    n2v = 2117.;
   } else if (ntracks == 4) {
     tree_path = "tre44/t";
     eff_hist = "average4";
-    n1v = 43003.;
-    n2v = 44.;
   } else if (ntracks == 5) {
     tree_path = "mfvMiniTree/t";
     eff_hist = "average5";
-    n1v = 6842.;
-    n2v = 4.;
   } else if (ntracks == 7) {
     tree_path = "tre34/t";
     eff_hist = "average3";
-    n1v = 339282.;
-    n2v = 544.;
     min_ntracks0 = 4;
     max_ntracks0 = 4;
     min_ntracks1 = 3;
@@ -119,17 +85,8 @@ int main(int argc, const char* argv[]) {
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
   }
-  printf("tree_path = %s, eff_hist = %s, n1v = %d, n2v = %d\n", tree_path, eff_hist, int(n1v), int(n2v));
 
-  if (argc == 6) {
-    clearing_from_eff = true;
-    eff_file = argv[1];
-    eff_hist = argv[2];
-    dphi_pdf_c = atof(argv[3]);
-    dphi_pdf_e = atof(argv[4]);
-    dphi_pdf_a = atof(argv[5]);
-  }
-  printf("eff_file = %s, eff_hist = %s, dphi_pdf_c = %f, dphi_pdf_e = %f, dphi_pdf_a = %f\n", eff_file, eff_hist, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
+  printf("year = %d, ntracks = %d, dphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file = %s, eff_hist = %s\n", year, ntracks, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file, eff_hist);
 
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(12191982);
@@ -315,13 +272,13 @@ int main(int argc, const char* argv[]) {
   h_2v_dvv->SetTitle(";d_{VV} (cm);events");
   h_2v_dvv->SetLineColor(kBlue);
   h_2v_dvv->SetLineWidth(3);
-  h_2v_dvv->Scale(n2v/h_2v_dvv->Integral());
+  h_2v_dvv->Scale(1./h_2v_dvv->Integral());
   h_2v_dvv->SetStats(0);
   h_2v_dvv->Draw();
   l_dvv->AddEntry(h_2v_dvv, "two-vertex events");
   h_c1v_dvv->SetLineColor(kRed);
   h_c1v_dvv->SetLineWidth(3);
-  h_c1v_dvv->Scale(n2v/h_c1v_dvv->Integral());
+  h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->SetStats(0);
   h_c1v_dvv->Draw("sames");
   l_dvv->AddEntry(h_c1v_dvv, "constructed from only-one-vertex events");
@@ -336,13 +293,13 @@ int main(int argc, const char* argv[]) {
   h_2v_absdphivv->SetTitle(";|#Delta#phi_{VV}|;events");
   h_2v_absdphivv->SetLineColor(kBlue);
   h_2v_absdphivv->SetLineWidth(3);
-  h_2v_absdphivv->Scale(n2v/h_2v_absdphivv->Integral());
+  h_2v_absdphivv->Scale(1./h_2v_absdphivv->Integral());
   h_2v_absdphivv->SetStats(0);
   h_2v_absdphivv->Draw();
   l_absdphivv->AddEntry(h_2v_absdphivv, "two-vertex events");
   h_c1v_absdphivv->SetLineColor(kRed);
   h_c1v_absdphivv->SetLineWidth(3);
-  h_c1v_absdphivv->Scale(n2v/h_c1v_absdphivv->Integral());
+  h_c1v_absdphivv->Scale(1./h_c1v_absdphivv->Integral());
   h_c1v_absdphivv->SetStats(0);
   h_c1v_absdphivv->Draw("sames");
   l_absdphivv->AddEntry(h_c1v_absdphivv, "constructed from only-one-vertex events");

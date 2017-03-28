@@ -18,14 +18,14 @@ int_lumi = ac.int_lumi_2016 * ac.scale_factor_2016
 int_lumi_nice = ac.int_lumi_nice_2016
 qcd_samples = Samples.qcd_samples_sum
 ttbar_samples = Samples.ttbar_samples
-signal_sample = Samples.official_mfv_neu_tau00300um_M0800
+signal_sample = Samples.official_mfv_neu_tau01000um_M0800
 
 if year == 2015:
     int_lumi = ac.int_lumi_2015 * ac.scale_factor_2015
     int_lumi_nice = ac.int_lumi_nice_2015
     qcd_samples = Samples.qcd_samples_sum_2015
     ttbar_samples = Samples.ttbar_samples_2015
-    signal_sample = Samples.mfv_neu_tau00300um_M0800_2015
+    signal_sample = Samples.mfv_neu_tau01000um_M0800_2015
 
 data_samples = []
 
@@ -36,7 +36,7 @@ for s in ttbar_samples:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7
 
 signal_samples = [signal_sample]
-signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 300 #mum, M = 800 GeV'
+signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 800 GeV'
 signal_sample.color = 8
 
 C = partial(data_mc_comparison,
@@ -141,4 +141,41 @@ C('dvv',
   x_title = 'd_{VV} (cm)',
   y_title = 'Events/200 #mum',
   y_range = (1e-2, 10),
+  )
+
+C('track_pt',
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
+  histogram_path = 'mfvVertices/h_seed_nm1_pt',
+  x_title = 'Track p_{T} (GeV)',
+  y_title = 'Tracks/0.2 GeV',
+  y_range  = (1, 1e10),
+  cut_line = ((1, 0, 1, 2.8e10), 2, 5, 1),
+  )
+
+C('track_npxlayers',
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
+  histogram_path = 'mfvVertices/h_seed_nm1_npxlayers',
+  x_title = 'Number of pixel layers',
+  y_title = 'Tracks',
+  y_range  = (1, 1e10),
+  cut_line = ((2, 0, 2, 2.8e10), 2, 5, 1),
+  )
+
+C('track_nstlayers',
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
+  histogram_path = 'mfvVertices/h_seed_nm1_nstlayers',
+  x_title = 'Number of strip layers',
+  y_title = 'Tracks',
+  y_range  = (1, 1e10),
+  cut_line = ((3, 0, 3, 2.8e10), 2, 5, 1),
+  )
+
+C('track_sigmadxybs',
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
+  histogram_path = 'mfvVertices/h_seed_nm1_sigmadxybs',
+  x_title = 'N#sigma(dxy)',
+  y_title = 'Tracks',
+  x_range = (0, 10),
+  y_range  = (1, 1e10),
+  cut_line = ((4, 0, 4, 2.8e10), 2, 5, 1),
   )
