@@ -21,7 +21,7 @@ use_ak8450 = True and year == 2016
 htskim = False
 ht_skim_cut = min(to_do) if htskim else -1
 
-version = 'v6'
+version = 'v7'
 json = '../ana_2015p6.json'
 batch_name = 'TrigEff%s' % version
 
@@ -79,29 +79,21 @@ process.dennomu = process.den.clone(require_muon = False)
 process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
 process.pforsig = cms.Path(cms.ignore(process.mfvTriggerFloats) * process.dennomu * process.dennomuht1000)
 
-if 800 in to_do:
-    process.num800 = process.den.clone(require_hlt = 1)
-    process.num800450 = process.den.clone(require_hlt = -2)
-    process.p *= process.num800 * process.num800450
-    if use_ak8450:
-        process.num800450ak = process.den.clone(require_hlt = -3)
-        process.p *= process.num800450ak
+def a(name, obj, p=process.p):
+    setattr(process, name, obj)
+    p *= obj
 
-    process.num800nomu = process.dennomu.clone(require_hlt = 1)
-    process.num800nomuht1000 = process.dennomuht1000.clone(require_hlt = 1)
-    process.pforsig *= process.num800nomu * process.num800nomuht1000
-
-if 900 in to_do:
-    process.num900 = process.den.clone(require_hlt = 2)
-    process.num900450 = process.den.clone(require_hlt = -4)
-    process.p *= process.num900 * process.num900450
-    if use_ak8450:
-        process.num900450ak = process.den.clone(require_hlt = -5)
-        process.p *= process.num900450ak
-
-    process.num900nomu = process.dennomu.clone(require_hlt = 2)
-    process.num900nomuht1000 = process.dennomuht1000.clone(require_hlt = 2)
-    process.pforsig *= process.num900nomu * process.num900nomuht1000
+for require_l1, l1_threshold in (-1, 0), (-2, 240), (-3, 255), (-4, 280), (-5, 300), (-6, 320):
+    l1_ex = 'bugL1%i' % l1_threshold if require_l1 != -1 else ''
+    for ht_threshold, hlt1, hlt2, hlt3 in (800, 1, -2, -3), (900, 2, -4, -5):
+        if ht_threshold in to_do:
+            z = (ht_threshold, l1_ex)
+            a('num%i%s'    % z, process.den.clone(require_hlt = hlt1, require_l1 = require_l1))
+            a('num%i450%s' % z, process.den.clone(require_hlt = hlt2, require_l1 = require_l1))
+            if use_ak8450:
+                a('num%i450ak%s' % z, process.den.clone(require_hlt = hlt3, require_l1 = require_l1))
+            a('num%inomu%s' % z, process.dennomu.clone(require_hlt = 1, require_l1 = require_l1), process.pforsig)
+            a('num%inomuht1000%s' % z, process.dennomuht1000.clone(require_hlt = 1, require_l1 = require_l1), process.pforsig)
 
 if htskim:
     process.setName_('EffHtSkim')

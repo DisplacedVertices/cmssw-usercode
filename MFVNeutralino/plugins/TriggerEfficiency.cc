@@ -53,6 +53,8 @@ private:
   TH1F* h_jet_ht_ptlt200;
   TH1F* h_jet_ht_m_hlt_ht;
   TH2F* h_njets_v_ht;
+  TH1F* h_myhtt_m_l1htt;
+  TH1F* h_myhttwbug_m_l1htt;
   TH1F* h_l1jet_pt[11];
   TH2F* h_jetpt2v1;
 
@@ -80,13 +82,21 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
 {
   assert(use_weight >= 0 && use_weight <= 2);
 
-  // -1 = don't care, ORs represented by negative numbers other than -1
+  // require_bits:
+  // -1 = don't care, ORs or other combinations represented by negative numbers other than -1
+  // HLT:
   // -2 = HLT_PFHT800 || PFJet450
   // -3 = HLT_PFHT800 || PFJet450 || AK8PFJet450
   // -4 = HLT_PFHT900 || PFJet450
   // -5 = HLT_PFHT900 || PFJet450 || AK8PFJet450
+  // L1:
+  // -2 = L1 HTT calculation bugged as in 2016H, threshold 240 GeV
+  // -3 = ditto, 255 GeV
+  // -4 = ditto, 280 GeV
+  // -5 = ditto, 300 GeV
+  // -6 = ditto, 320 GeV -- probably don't need to do every single one separately but just in case
   assert(require_bits[0] >= -5 && require_bits[0] < mfv::n_hlt_paths);
-  assert(require_bits[1] >= -1 && require_bits[1] < mfv::n_l1_paths);
+  assert(require_bits[1] >= -6 && require_bits[1] < mfv::n_l1_paths);
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -128,6 +138,9 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   h_jet_ht_ptlt200 = fs->make<TH1F>("h_jet_ht_ptlt200", ";jet (40 < p_{T} < 200 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht_m_hlt_ht = fs->make<TH1F>("h_jet_ht_m_hlt_ht", ";offline jet (p_{T} > 40 GeV) H_{T} - HLT H_{T} (GeV);events/10 GeV", 100, -500, 500);
   h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);# selected jets", 20, 0, 2000, 15, 0, 15);
+
+  h_myhtt_m_l1htt = fs->make<TH1F>("h_myhtt_m_l1htt", ";my L1 HTT - L1 HTT in event;events/5 GeV", 100, -250, 250);
+  h_myhttwbug_m_l1htt = fs->make<TH1F>("h_myhttwbug_m_l1htt", ";my L1 HTT with bug - L1 HTT in event;events/5 GeV", 100, -250, 250);
 
   {
     const int nx = 5;
@@ -260,10 +273,15 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     const std::vector<int>& decisions = i == 0 ? triggerfloats->HLTdecisions : triggerfloats->L1decisions;
 
     if (i == 0 && r < 0) {
-      if ((r == -2 && !orem(decisions, {1,3})) ||
-          (r == -3 && !orem(decisions, {1,3,4})) ||
-          (r == -4 && !orem(decisions, {2,3})) ||
-          (r == -5 && !orem(decisions, {2,3,4})))
+      if ((r == -2 && !orem(decisions, {mfv::b_HLT_PFHT800, mfv::b_HLT_PFJet450})) ||
+          (r == -3 && !orem(decisions, {mfv::b_HLT_PFHT800, mfv::b_HLT_PFJet450, mfv::b_HLT_AK8PFJet450})) ||
+          (r == -4 && !orem(decisions, {mfv::b_HLT_PFHT900, mfv::b_HLT_PFJet450})) ||
+          (r == -5 && !orem(decisions, {mfv::b_HLT_PFHT900, mfv::b_HLT_PFJet450, mfv::b_HLT_AK8PFJet450})))
+        return;
+    }
+    else if (i == 1 && r < 0) {
+      const double thresholds[5] = {240, 255, 280, 300, 320};
+      if (triggerfloats->myhttwbug < thresholds[-r-2])
         return;
     }
     else {
@@ -352,8 +370,9 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   h_jet_ht->Fill(jet_ht, w);
   h_jet_ht_ptlt200->Fill(jet_ht_ptlt200, w);
   h_njets_v_ht->Fill(jet_ht, njet, w);
+  h_myhtt_m_l1htt->Fill(triggerfloats->myhtt - triggerfloats->l1htt);
+  h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt);
   h_jetpt2v1->Fill(jet_pt_1, jet_pt_2, w);
-
   h_jet_ht_m_hlt_ht->Fill(jet_ht - triggerfloats->ht, w); 
 
   int nl1jet = 0;
