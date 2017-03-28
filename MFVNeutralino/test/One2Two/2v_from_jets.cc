@@ -45,8 +45,6 @@ float ht(int njets, float* jet_pt) {
 int main(int argc, const char* argv[]) {
   const char* tree_path;
   const char* eff_hist;
-  double n1v;
-  double n2v;
   int min_ntracks0 = 0;
   int max_ntracks0 = 1000000;
   int min_ntracks1 = 0;
@@ -55,23 +53,15 @@ int main(int argc, const char* argv[]) {
   if (ntracks == 3) {
     tree_path = "tre33/t";
     eff_hist = "average3";
-    n1v = 297372.;
-    n2v = 2117.;
   } else if (ntracks == 4) {
     tree_path = "tre44/t";
     eff_hist = "average4";
-    n1v = 43003.;
-    n2v = 44.;
   } else if (ntracks == 5) {
     tree_path = "mfvMiniTree/t";
     eff_hist = "average5";
-    n1v = 6842.;
-    n2v = 4.;
   } else if (ntracks == 7) {
     tree_path = "tre34/t";
     eff_hist = "average3";
-    n1v = 339282.;
-    n2v = 544.;
     min_ntracks0 = 4;
     max_ntracks0 = 4;
     min_ntracks1 = 3;
@@ -79,7 +69,7 @@ int main(int argc, const char* argv[]) {
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
   }
-  printf("tree_path = %s, eff_hist = %s, n1v = %d, n2v = %d\n", tree_path, eff_hist, int(n1v), int(n2v));
+  printf("tree_path = %s, eff_hist = %s\n", tree_path, eff_hist);
 
   if (argc == 6) {
     clearing_from_eff = true;
@@ -275,13 +265,13 @@ int main(int argc, const char* argv[]) {
   h_2v_dvv->SetTitle(";d_{VV} (cm);events");
   h_2v_dvv->SetLineColor(kBlue);
   h_2v_dvv->SetLineWidth(3);
-  h_2v_dvv->Scale(n2v/h_2v_dvv->Integral());
+  h_2v_dvv->Scale(1./h_2v_dvv->Integral());
   h_2v_dvv->SetStats(0);
   h_2v_dvv->Draw();
   l_dvv->AddEntry(h_2v_dvv, "two-vertex events");
   h_c1v_dvv->SetLineColor(kRed);
   h_c1v_dvv->SetLineWidth(3);
-  h_c1v_dvv->Scale(n2v/h_c1v_dvv->Integral());
+  h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->SetStats(0);
   h_c1v_dvv->Draw("sames");
   l_dvv->AddEntry(h_c1v_dvv, "constructed from only-one-vertex events");
@@ -296,13 +286,13 @@ int main(int argc, const char* argv[]) {
   h_2v_absdphivv->SetTitle(";|#Delta#phi_{VV}|;events");
   h_2v_absdphivv->SetLineColor(kBlue);
   h_2v_absdphivv->SetLineWidth(3);
-  h_2v_absdphivv->Scale(n2v/h_2v_absdphivv->Integral());
+  h_2v_absdphivv->Scale(1./h_2v_absdphivv->Integral());
   h_2v_absdphivv->SetStats(0);
   h_2v_absdphivv->Draw();
   l_absdphivv->AddEntry(h_2v_absdphivv, "two-vertex events");
   h_c1v_absdphivv->SetLineColor(kRed);
   h_c1v_absdphivv->SetLineWidth(3);
-  h_c1v_absdphivv->Scale(n2v/h_c1v_absdphivv->Integral());
+  h_c1v_absdphivv->Scale(1./h_c1v_absdphivv->Integral());
   h_c1v_absdphivv->SetStats(0);
   h_c1v_absdphivv->Draw("sames");
   l_absdphivv->AddEntry(h_c1v_absdphivv, "constructed from only-one-vertex events");
