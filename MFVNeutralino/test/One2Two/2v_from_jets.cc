@@ -13,13 +13,6 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-int year = 2016;
-int ntracks = 3;
-
-int bquarks = -1;
-bool vary_dphi = false;
-bool vary_eff = false;
-
 const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV12";
 const int nbkg = 4;
 
@@ -37,7 +30,9 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-int main(int argc, const char* argv[]) {
+void construct_dvvc(int year, int ntracks, int bquarks, bool vary_dphi, bool vary_eff, const char* out_fn) {
+  printf("year = %d, ntracks = %d, bquarks = %d, vary_dphi = %d, vary_eff = %d, out_fn = %s\n", year, ntracks, bquarks, vary_dphi, vary_eff, out_fn);
+
   const char* samples[nbkg];
   float weights[nbkg];
   double dphi_pdf_c;
@@ -105,7 +100,7 @@ int main(int argc, const char* argv[]) {
     }
   }
 
-  printf("year = %d, ntracks = %d, dphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file = %s, eff_hist = %s\n", year, ntracks, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file, eff_hist);
+  printf("\tdphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file = %s, eff_hist = %s\n", dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file, eff_hist);
 
   TH1::SetDefaultSumw2();
   gRandom->SetSeed(12191982);
@@ -260,7 +255,7 @@ int main(int argc, const char* argv[]) {
     printf("uncertainty correlated / uncorrelated (bin 3): %f\n", sqrt(intobin3 + outofbin3) / sqrt(bin3 + bin3 + intobin3 - outofbin3));
   }
 
-  TFile* fh = TFile::Open("2v_from_jets.root", "recreate");
+  TFile* fh = TFile::Open(out_fn, "recreate");
 
   h_1v_dbv->Write();
   h_1v_dbv0->Write();
@@ -339,4 +334,36 @@ int main(int argc, const char* argv[]) {
   }
 
   fh->Close();
+
+  delete h_1v_dbv;
+  delete h_1v_dbv0;
+  delete h_1v_dbv1;
+  delete h_1v_phiv;
+  delete h_1v_njets;
+  delete h_1v_ht;
+  delete h_1v_phij;
+  delete h_1v_dphijj;
+  delete h_1v_dphijv;
+  delete h_1v_dphijvpt;
+  delete h_1v_dphijvmin;
+  delete h_2v_dbv;
+  delete h_2v_dbv1_dbv0;
+  delete h_2v_dvv;
+  delete h_2v_dphivv;
+  delete h_2v_absdphivv;
+  delete c_dvv;
+  delete c_absdphivv;
+}
+
+int main(int argc, const char* argv[]) {
+  for (int year = 2015; year <= 2016; ++year) {
+    for (int ntracks = 3; ntracks <= 5; ++ntracks) {
+      construct_dvvc(year, ntracks, -1, false, false, TString::Format("2v_from_jets_%d_%dtrack_default_v12.root", year, ntracks));
+      construct_dvvc(year, ntracks,  1, false, false, TString::Format("2v_from_jets_%d_%dtrack_bquarks_v12.root", year, ntracks));
+      construct_dvvc(year, ntracks,  0, false, false, TString::Format("2v_from_jets_%d_%dtrack_nobquarks_v12.root", year, ntracks));
+      construct_dvvc(year, ntracks, -1,  true, false, TString::Format("2v_from_jets_%d_%dtrack_vary_dphi_v12.root", year, ntracks));
+      construct_dvvc(year, ntracks, -1, false,  true, TString::Format("2v_from_jets_%d_%dtrack_vary_eff_v12.root", year, ntracks));
+    }
+    construct_dvvc(year, 7, -1, false, false, TString::Format("2v_from_jets_%d_4track3track_default_v12.root", year));
+  }
 }
