@@ -556,14 +556,16 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const unsigned run = event.id().run();
-  for (int iht = 0; iht < 3; ++iht) {
-    for (int i = 0; i <= 5; ++i) {
-      if (i == 1) continue;
-      h_pairs_d2d[iht][i].book(run);
-      h_merge_d2d[iht][i].book(run);
-      h_erase_d2d[iht][i].book(run);
+
+  if (histos)
+    for (int iht = 0; iht < 3; ++iht) {
+      for (int i = 0; i <= 5; ++i) {
+        if (i == 1) continue;
+        h_pairs_d2d[iht][i].book(run);
+        h_merge_d2d[iht][i].book(run);
+        h_erase_d2d[iht][i].book(run);
+      }
     }
-  }
 
   if (verbose) {
     printf("------------------------------------------------------------------------\n");
