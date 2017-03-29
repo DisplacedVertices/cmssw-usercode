@@ -18,6 +18,7 @@ int ntracks = 3;
 
 int bquarks = -1;
 bool vary_dphi = false;
+bool vary_eff = false;
 
 const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MinitreeV12";
 const int nbkg = 4;
@@ -84,6 +85,24 @@ int main(int argc, const char* argv[]) {
     max_ntracks1 = 3;
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
+  }
+
+  if (vary_eff) {
+    if (year == 2015) {
+      eff_file = "eff_2015.root";
+    } else if (year == 2016) {
+      eff_file = "eff_2016.root";
+    }
+
+    if (ntracks == 3) {
+      eff_hist = "maxtk3";
+    } else if (ntracks == 4) {
+      eff_hist = "maxtk4";
+    } else if (ntracks == 5) {
+      eff_hist = "maxtk5";
+    } else if (ntracks == 7) {
+      eff_hist = "maxtk3";
+    }
   }
 
   printf("year = %d, ntracks = %d, dphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file = %s, eff_hist = %s\n", year, ntracks, dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file, eff_hist);
