@@ -5,6 +5,15 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 set_style()
+ROOT.TH1.SetDefaultSumw2()
+
+year = 2016
+sns = 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split()
+sc = ac.int_lumi_2016 * ac.scale_factor_2016
+
+if year == 2015:
+    sns = 'qcdht0700sum_2015 qcdht1000sum_2015 qcdht1500sum_2015 qcdht2000sum_2015 ttbar_2015'.split()
+    sc = ac.int_lumi_2015 * ac.scale_factor_2015
 
 ntk = 5
 tree_path = 'mfvMiniTree/t'
@@ -13,14 +22,12 @@ if ntk == 3:
 if ntk == 4:
     tree_path = 'tre44/t'
 
-path = 'MinitreeV11/2016'
-ps = plot_saver('../../plots/bkgest/%s_ntk%i' % (path, ntk), size=(700,700), root=False)
+path = 'MinitreeV12'
+ps = plot_saver('../../plots/bkgest/%s/%s_ntk%i' % (path, year, ntk), size=(700,700), root=False)
 trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 
 def book_dbv(n):
     return ROOT.TH1F(n, '', 40, 0, 0.2)
-
-sc = ac.int_lumi * ac.scale_factor
 
 h_dbv_sum = book_dbv('dbv_sum')
 h_dbv_nob = book_dbv('dbv_nob')
@@ -28,7 +35,7 @@ h_dbv_b = book_dbv('dbv_b')
 h_dbv_qcdb = book_dbv('dbv_qcdb')
 
 hs_nob = []
-for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
+for sn in sns:
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get(tree_path)
     s = getattr(Samples, sn)
@@ -45,12 +52,12 @@ for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
     hs_nob.append(h)
 
 hs_b = []
-for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
+for sn in sns:
     f = ROOT.TFile('%s/%s.root' % (trees,sn))
     t = f.Get(tree_path)
     s = getattr(Samples, sn)
 
-    if sn != 'ttbar':
+    if 'ttbar' not in sn:
         n = sn + ', b quarks'
     else:
         n = sn
@@ -58,7 +65,7 @@ for sn in 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split():
     t.Draw('dist0>>%s' % n, 'nvtx == 1 && gen_flavor_code == 2')
     h_dbv_sum.Add(h_dbv, sc * s.partial_weight_orig)
     h_dbv_b.Add(h_dbv, sc * s.partial_weight_orig)
-    if sn != 'ttbar':
+    if 'ttbar' not in sn:
         h_dbv_qcdb.Add(h_dbv, sc * s.partial_weight_orig)
     ps.save(n)
 
@@ -76,7 +83,7 @@ h_dbv_sum.SetLineColor(ROOT.kBlack)
 h_dbv_sum.SetLineWidth(3)
 h_dbv_sum.Scale(1./h_dbv_sum.Integral())
 h_dbv_sum.GetYaxis().SetRangeUser(1e-5,1)
-h_dbv_sum.Draw()
+h_dbv_sum.Draw('hist')
 
 l = ROOT.TLegend(0.3,0.6,0.9,0.9)
 l.AddEntry(h_dbv_sum, 'total background: mean d_{BV} = %4.1f #pm %2.1f #mum' % (10000*h_dbv_sum.GetMean(), 10000*h_dbv_sum.GetMeanError()))
@@ -102,7 +109,7 @@ l.Draw()
 ps.save('dbv')
 
 
-h_dbv_sum.Draw()
+h_dbv_sum.Draw('hist')
 l = ROOT.TLegend(0.3,0.78,0.9,0.9)
 l.AddEntry(h_dbv_sum, 'total background: mean d_{BV} = %4.1f #pm %2.1f #mum' % (10000*h_dbv_sum.GetMean(), 10000*h_dbv_sum.GetMeanError()))
 h_dbv_nob.SetStats(0)
@@ -122,7 +129,7 @@ l.Draw()
 ps.save('dbv_qcdb')
 
 
-h_dbv_sum.Draw()
+h_dbv_sum.Draw('hist')
 l = ROOT.TLegend(0.3,0.65,0.9,0.9)
 l.AddEntry(h_dbv_sum, 'total background:')
 l.AddEntry(h_dbv_sum, '  mean d_{BV} = %4.1f #pm %2.1f #mum' % (10000*h_dbv_sum.GetMean(), 10000*h_dbv_sum.GetMeanError()), '')
@@ -142,4 +149,4 @@ l.SetFillColor(0)
 l.Draw()
 ps.save('dbv_b')
 
-print '%d-track: difference in mean dBV (b quarks - no b quarks) = %4.1f +/- %2.1f um' % (ntk, 10000*h_dbv_b.GetMean() - 10000*h_dbv_nob.GetMean(), ((10000*h_dbv_b.GetMeanError())**2 + (10000*h_dbv_nob.GetMeanError())**2)**0.5)
+print '%d %d-track: difference in mean dBV (b quarks - no b quarks) = %4.1f +/- %2.1f um' % (year, ntk, 10000*h_dbv_b.GetMean() - 10000*h_dbv_nob.GetMean(), ((10000*h_dbv_b.GetMeanError())**2 + (10000*h_dbv_nob.GetMeanError())**2)**0.5)
