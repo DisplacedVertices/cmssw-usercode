@@ -2,43 +2,51 @@ from JMTucker.Tools.ROOTTools import *
 from array import array
 ROOT.TH1.AddDirectory(0)
 
+year = 2016
+
 mode = 'vary_eff'
 #mode = 'vary_dphi'
 #mode = 'vary_dbv'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('../plots/bkgest/compare_dvvc_%s' % mode, size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/compare_dvvc_%s_%s' % (mode, year), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets_3track_average3_c1p37_e2_a3p50_v11.root']
-fn2 = ['2v_from_jets_4track_average4_c1p37_e2_a3p50_v11.root']
-fn3 = ['2v_from_jets_5track_average5_c1p37_e2_a3p50_v11.root']
+fn1 = ['2v_from_jets_%s_3track_default_v12.root' % year]
+fn2 = ['2v_from_jets_%s_4track_default_v12.root' % year]
+fn3 = ['2v_from_jets_%s_5track_default_v12.root' % year]
 
 if mode == 'vary_eff':
-    fn1.append('2v_from_jets_3track_maxtk3_c1p37_e2_a3p50_v11.root')
-    fn2.append('2v_from_jets_4track_maxtk4_c1p37_e2_a3p50_v11.root')
-    fn3.append('2v_from_jets_5track_maxtk5_c1p37_e2_a3p50_v11.root')
+    fn1.append('2v_from_jets_%s_3track_vary_eff_v12.root' % year)
+    fn2.append('2v_from_jets_%s_4track_vary_eff_v12.root' % year)
+    fn3.append('2v_from_jets_%s_5track_vary_eff_v12.root' % year)
     ls = ['average efficiency', 'maxtk efficiency']
 
 if mode == 'vary_dphi':
-    fn1.append('2v_from_jets_3track_average3_dphiflat_v11.root')
-    fn2.append('2v_from_jets_4track_average4_dphiflat_v11.root')
-    fn3.append('2v_from_jets_5track_average5_dphiflat_v11.root')
+    fn1.append('2v_from_jets_%s_3track_vary_dphi_v12.root' % year)
+    fn2.append('2v_from_jets_%s_4track_vary_dphi_v12.root' % year)
+    fn3.append('2v_from_jets_%s_5track_vary_dphi_v12.root' % year)
     ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
 
 if mode == 'vary_dbv':
-    fn1.append('2v_from_jets_3track_average3_c1p37_e2_a3p50_v11_sum.root')
-    fn2.append('2v_from_jets_4track_average4_c1p37_e2_a3p50_v11_sum.root')
-    fn3.append('2v_from_jets_5track_average5_c1p37_e2_a3p50_v11_sum.root')
+    fn1.append('2v_from_jets_%s_3track_vary_dbv_v12.root' % year)
+    fn2.append('2v_from_jets_%s_4track_vary_dbv_v12.root' % year)
+    fn3.append('2v_from_jets_%s_5track_vary_dbv_v12.root' % year)
     ls = ['default', 'sort by b quarks']
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
-n2v = [2117., 44., 4.]
 
-ebin1 = [0.0025, 0.0063, 0.0110]
-ebin2 = [0.0021, 0.0068, 0.0280]
-ebin3 = [0.0056, 0.0200, 0.0910]
+n2v = [1924., 40., 4.]
+ebin1 = [0.0021, 0.0053, 0.0098]
+ebin2 = [0.0018, 0.0056, 0.0236]
+ebin3 = [0.0047, 0.0170, 0.0766]
+
+if year == 2015:
+    n2v = [90., 2., 1.]
+    ebin1 = [0.0097, 0.0242, 0.0449]
+    ebin2 = [0.0083, 0.0260, 0.1069]
+    ebin3 = [0.0212, 0.0788, 0.3507]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
@@ -160,15 +168,26 @@ for i in range(3):
     er3 = (v3/c3) * ((ev3/v3)**2 + (ec3/c3)**2)**0.5
 
     if mode == 'vary_dphi':
-        if i == 0:
-            er2 *= 0.211892
-            er3 *= 0.160610
-        if i == 1:
-            er2 *= 0.216494
-            er3 *= 0.176812
-        if i == 2:
-            er2 *= 0.216863
-            er3 *= 0.161848
+        if year == 2015:
+            if i == 0:
+                er2 *= 0.211763
+                er3 *= 0.167168
+            if i == 1:
+                er2 *= 0.213812
+                er3 *= 0.183399
+            if i == 2:
+                er2 *= 0.218547
+                er3 *= 0.171132
+        if year == 2016:
+            if i == 0:
+                er2 *= 0.211908
+                er3 *= 0.160616
+            if i == 1:
+                er2 *= 0.216431
+                er3 *= 0.176878
+            if i == 2:
+                er2 *= 0.216790
+                er3 *= 0.162593
     if mode == 'vary_eff':
         er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
         er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5
