@@ -271,5 +271,23 @@ if __name__ == '__main__':
             n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn), 'Events')
             if dataset.startswith('ntuple'):
                 n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos')), 'mfvVertices/h_n_all_tracks')
+
+    elif 'forcopy' in sys.argv:
+        sample = sys.argv[sys.argv.index('forcopy')+1]
+        dataset = sys.argv[sys.argv.index('forcopy')+2]
+        if not has(sample, dataset):
+            raise KeyError('no key sample = %s dataset = %s' % (sample, dataset))
+        print sample, dataset
+        import JMTucker.Tools.EOS as eos
+        out_fn = '%s_%s' % (sample, dataset)
+        out_f = open(out_fn, 'wt')
+        out_f.write('copy\n')
+        for fn in get(sample, dataset)[1]:
+            md5sum = eos.md5sum(fn)
+            x = '%s  %s\n' % (md5sum, fn)
+            out_f.write(x)
+            print x,
+        out_f.close()
+
     else:
         summary()
