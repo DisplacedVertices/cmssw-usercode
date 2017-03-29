@@ -217,11 +217,9 @@ def report_every(process, i):
         process.load('FWCore.MessageLogger.MessageLogger_cfi')
     process.MessageLogger.cerr.FwkReport.reportEvery = i
 
-def sample_files(process, sample, dataset, a=0, b=None):
+def sample_files(process, sample, dataset, n=-1):
     import JMTucker.Tools.SampleFiles as sf
-    if b is None:
-        b = a+1
-    process.source.fileNames = sf.get(sample, dataset)[1][a:b]
+    sf.set_process(process, sample, dataset, n)
 
 def set_events_to_process_ex(run_events, run=None):
     if run is not None:
