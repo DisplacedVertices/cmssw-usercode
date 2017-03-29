@@ -186,7 +186,7 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
   if (verbose) std::cout << "OverlayTracks " << rle << " : index = " << index << " which_event " << which_event << "\n";
 
   if (index == which_event || (!rest_of_event && index > which_event)) { // don't double count e.g. (3,2) and (2,3) when not using the rest of e0
-    std::cout << "  don't double count, returning" << std::endl;
+    if (verbose) std::cout << "  don't double count, returning" << std::endl;
     return false;
   }
     
