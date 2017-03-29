@@ -1,8 +1,11 @@
 from JMTucker.Tools.ROOTTools import *
-set_style()
-ps = plot_saver('../plots/bkgest/average_eff', size=(700,700), log=False, root=False)
 
-f1 = ROOT.TFile('eff.root')
+year = 2016
+
+set_style()
+ps = plot_saver('../plots/bkgest/average_eff_%s' % year, size=(700,700), log=False, root=False)
+
+f1 = ROOT.TFile('eff_%s.root' % year)
 f2 = ROOT.TFile('~tucker/public/export_smoothed.root')
 
 colors = [0, 0, 0, ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
@@ -37,18 +40,18 @@ for n in ['', '_wevent', '_deltasvgaus', '_deltasvgaus_wevent']:
     l.Draw()
     ps.save('ntk%s' % n)
 
-fh = ROOT.TFile('eff_avg.root', 'recreate')
+fh = ROOT.TFile('eff_avg_%s.root' % year, 'recreate')
 for i in [3,4,5]:
     h1 = f1.Get('maxtk%i'%i)
     hh = f2.Get('ntk%i_deltasvgaus_wevent'%i)
     hh.Rebin(100)
     hh.Scale(0.01)
     hh.SetBinContent(hh.GetNbinsX()+1, hh.GetBinContent(hh.GetNbinsX()))
-    h2 = ROOT.TH1F(hh.GetName(), ';d_{VV} (cm);Efficiency', 100, 0, 1)
+    h2 = ROOT.TH1F(hh.GetName(), ';d_{VV} (cm);Efficiency', 400, 0, 4)
     h2.SetStats(0)
     for j in range(1, h2.GetNbinsX()+2):
         h2.SetBinContent(j, hh.GetBinContent(j))
-    h = ROOT.TH1F('average%i'%i, 'average (%s, %s);d_{VV} (cm);efficiency' % (h1.GetName(), h2.GetName()), 100, 0, 1)
+    h = ROOT.TH1F('average%i'%i, 'average (%s, %s);d_{VV} (cm);efficiency' % (h1.GetName(), h2.GetName()), 400, 0, 4)
     h.SetStats(0)
     h.GetYaxis().SetRangeUser(0,1.05)
     for j in range(1, h.GetNbinsX()+2):
@@ -91,7 +94,7 @@ for i in [3,4,5]:
 
 fh.Close()
 
-f = ROOT.TFile('eff_avg.root')
+f = ROOT.TFile('eff_avg_%s.root' % year)
 l = ROOT.TLegend(0.50,0.15,0.85,0.30)
 for i in [3,4,5]:
     h = f.Get('average%i'%i)
@@ -112,9 +115,9 @@ ps.save('average')
 
 ROOT.TH1.AddDirectory(0)
 
-fn1 = ['2v_from_jets_3track_average3_c1p35_e2_a3p66_v11.root', '2v_from_jets_3track_noclearing_c1p35_e2_a3p66_v11.root']
-fn2 = ['2v_from_jets_4track_average4_c1p35_e2_a3p66_v11.root', '2v_from_jets_4track_noclearing_c1p35_e2_a3p66_v11.root']
-fn3 = ['2v_from_jets_5track_average5_c1p35_e2_a3p66_v11.root', '2v_from_jets_5track_noclearing_c1p35_e2_a3p66_v11.root']
+fn1 = ['2v_from_jets_%s_3track_default_v12.root' % year, '2v_from_jets_%s_3track_noclearing_v12.root' % year]
+fn2 = ['2v_from_jets_%s_4track_default_v12.root' % year, '2v_from_jets_%s_4track_noclearing_v12.root' % year]
+fn3 = ['2v_from_jets_%s_5track_default_v12.root' % year, '2v_from_jets_%s_5track_noclearing_v12.root' % year]
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
