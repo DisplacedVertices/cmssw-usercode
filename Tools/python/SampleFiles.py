@@ -142,11 +142,11 @@ _add_ds("main", {
 'mfv_neu_tau30000um_M1200': _fromnum1("/store/user/wsun/croncopyeos/mfv_neu_tau30000um_M1200/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170322_105955", 100, fnbase="reco"),
 'mfv_neu_tau30000um_M1600': _fromnum1("/store/user/wsun/croncopyeos/mfv_neu_tau30000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170322_110010", 100, fnbase="reco"),
 
-'mfv_neu_tau00100um_M3000': (97, ['/store/user/tucker/mfv_neu_tau00100um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193250/0000/reco_%i.root' % i for i in chain(xrange(1,11), xrange(12,31), xrange(32,74), xrange(75,101))]),
-'mfv_neu_tau00300um_M3000': (98, ['/store/user/tucker/mfv_neu_tau00300um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193307/0000/reco_%i.root' % i for i in chain(xrange(1,51), xrange(52,91), xrange(92,101))]),
-'mfv_neu_tau01000um_M3000': (93, ['/store/user/tucker/mfv_neu_tau01000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193321/0000/reco_%i.root' % i for i in chain(xrange(1,18), xrange(19,34), xrange(35,41), xrange(42,47), xrange(48,56), xrange(57,75), xrange(76,95), xrange(96,101))]),
-'mfv_neu_tau10000um_M3000': (95, ['/store/user/tucker/mfv_neu_tau10000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193337/0000/reco_%i.root' % i for i in chain(xrange(1,38), xrange(39,42), xrange(44,71), xrange(72,88), xrange(89,101))]),
-'mfv_neu_tau30000um_M3000': (97, ['/store/user/tucker/mfv_neu_tau30000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193352/0000/reco_%i.root' % i for i in chain(xrange(1,79), xrange(80,89), xrange(90,98), xrange(99,101))]),
+'mfv_neu_tau00100um_M3000': (97, ['/store/user/wsun/croncopyeos/mfv_neu_tau00100um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193250/0000/reco_%i.root' % i for i in chain(xrange(1,11), xrange(12,31), xrange(32,74), xrange(75,101))]),
+'mfv_neu_tau00300um_M3000': (98, ['/store/user/wsun/croncopyeos/mfv_neu_tau00300um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193307/0000/reco_%i.root' % i for i in chain(xrange(1,51), xrange(52,91), xrange(92,101))]),
+'mfv_neu_tau01000um_M3000': (93, ['/store/user/wsun/croncopyeos/mfv_neu_tau01000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193321/0000/reco_%i.root' % i for i in chain(xrange(1,18), xrange(19,34), xrange(35,41), xrange(42,47), xrange(48,56), xrange(57,75), xrange(76,95), xrange(96,101))]),
+'mfv_neu_tau10000um_M3000': (95, ['/store/user/wsun/croncopyeos/mfv_neu_tau10000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193337/0000/reco_%i.root' % i for i in chain(xrange(1,38), xrange(39,42), xrange(44,71), xrange(72,88), xrange(89,101))]),
+'mfv_neu_tau30000um_M3000': (97, ['/store/user/wsun/croncopyeos/mfv_neu_tau30000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193352/0000/reco_%i.root' % i for i in chain(xrange(1,79), xrange(80,89), xrange(90,98), xrange(99,101))]),
 })
 
 _add_ds("pick1vtxv1", {
