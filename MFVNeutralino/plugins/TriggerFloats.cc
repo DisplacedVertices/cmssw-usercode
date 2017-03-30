@@ -202,11 +202,11 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
       if (obj.collection() == "hltPFHT::HLT")
-        ht_for_cut = floats->ht = obj.pt();
+        ht_for_cut = floats->hltht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT") {
-        floats->ht4mc = obj.pt();
+        floats->hltht4mc = obj.pt();
         if (ht_for_cut < 0)
-          ht_for_cut = floats->ht4mc;
+          ht_for_cut = floats->hltht4mc;
       }
     }
   }
@@ -235,7 +235,7 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
 #endif
 
   if (prints)
-    printf("TriggerFloats: ht = %f  ht4mc = %f\n", floats->ht, floats->ht4mc);
+    printf("TriggerFloats: ht = %f  ht4mc = %f\n", floats->hltht, floats->hltht4mc);
 
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     const std::pair<bool, bool> paf = helper.pass_and_found_any_version(mfv::hlt_paths[i]);

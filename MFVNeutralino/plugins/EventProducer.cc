@@ -231,8 +231,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<mfv::TriggerFloats> triggerfloats;
   event.getByToken(triggerfloats_token, triggerfloats);
 
-  mevent->hlt_ht = triggerfloats->ht;
-  mevent->hlt_ht4mc = triggerfloats->ht4mc;
+  mevent->hlt_ht = triggerfloats->hltht;
+  mevent->hlt_ht4mc = triggerfloats->hltht4mc;
 
   assert(triggerfloats->L1decisions.size() == mfv::n_l1_paths);
   for (size_t i = 0; i < mfv::n_l1_paths; ++i) {

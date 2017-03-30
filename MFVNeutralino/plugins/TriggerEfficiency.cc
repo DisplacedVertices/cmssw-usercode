@@ -373,7 +373,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   h_myhtt_m_l1htt->Fill(triggerfloats->myhtt - triggerfloats->l1htt);
   h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt);
   h_jetpt2v1->Fill(jet_pt_1, jet_pt_2, w);
-  h_jet_ht_m_hlt_ht->Fill(jet_ht - triggerfloats->ht, w); 
+  h_jet_ht_m_hlt_ht->Fill(jet_ht - triggerfloats->hltht, w); 
 
   int nl1jet = 0;
   for (float pt : triggerfloats->l1jetspts) {

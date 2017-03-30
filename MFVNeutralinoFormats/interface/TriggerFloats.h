@@ -9,13 +9,13 @@ namespace mfv {
     float l1htt;
     float myhtt;
     float myhttwbug;
-    float ht;
-    float ht4mc;
+    float hltht;
+    float hltht4mc;
     std::vector<int> L1decisions;
     std::vector<int> HLTdecisions;
 
     TriggerFloats()
-      : l1htt(-1), myhtt(-1), myhttwbug(-1), ht(-1), ht4mc(-1),
+      : l1htt(-1), myhtt(-1), myhttwbug(-1), hltht(-1), hltht4mc(-1),
         L1decisions(n_l1_paths, -1),
         HLTdecisions(n_hlt_paths, -1)
     {}
