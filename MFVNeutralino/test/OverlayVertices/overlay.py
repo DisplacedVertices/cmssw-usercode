@@ -11,7 +11,7 @@ allowed_samples = Samples.ttbar_samples + Samples.qcd_samples_sum + Samples.ttba
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
 parser.add_argument('+sample', help='which sample to use', choices=[s.name for s in allowed_samples], default='ttbar')
-parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3)
+parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3, choices=[3,4,5])
 parser.add_argument('+rest-of-event', action='store_true', help='whether to use the rest of the tracks in the edm event')
 parser.add_argument('+z-model', help='z model', choices=['deltasv', 'deltasvgaus', 'deltapv', 'none'], default='deltasv')
 parser.add_argument('+z-width', type=float, help='width of gaus used in z model (cm)', default=0.02)
@@ -36,10 +36,7 @@ if args.minitree_path is None:
 if args.minitree_fn is None:
     args.minitree_fn = '%s/%s.root' % (args.minitree_path, args.sample)
 if args.minitree_treepath is None:
-    if args.ntracks != 5:
-        args.minitree_treepath = 'tre%i%i/t' % (args.ntracks, args.ntracks)
-    else:
-        args.minitree_treepath = 'mfvMiniTree/t' % (args.ntracks, args.ntracks)
+    args.minitree_treepath = 'tre%i%i/t' % (args.ntracks, args.ntracks) if args.ntracks != 5 else 'mfvMiniTree/t'
 
 args_printer('overlay args', args)
 
