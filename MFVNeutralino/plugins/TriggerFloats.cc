@@ -18,7 +18,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -36,12 +36,12 @@ std::ostream& operator<<(std::ostream& o, const l1t::L1Candidate& c) {
 }
 #endif
 
-class MFVTriggerFloats : public edm::EDFilter {
+class MFVTriggerFloats : public edm::EDProducer {
 public:
   explicit MFVTriggerFloats(const edm::ParameterSet&);
 
 private:
-  virtual bool filter(edm::Event&, const edm::EventSetup&) override;
+  virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
 #if defined(MFVNEUTRALINO_2015)
   L1GtUtils l1_cfg;
@@ -53,7 +53,6 @@ private:
 #endif
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
-  const double ht_cut;
 
   const bool prints;
 };
@@ -70,13 +69,12 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
 #endif
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
-    ht_cut(cfg.getParameter<double>("ht_cut")),
     prints(cfg.getUntrackedParameter<bool>("prints", false))
 {
   produces<mfv::TriggerFloats>();
 }
 
-bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
+void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
@@ -196,17 +194,14 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
     std::cout << std::endl;
   }
 
-  float ht_for_cut = -1;
   std::auto_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
 
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
       if (obj.collection() == "hltPFHT::HLT")
-        ht_for_cut = floats->hltht = obj.pt();
+        floats->hltht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT") {
         floats->hltht4mc = obj.pt();
-        if (ht_for_cut < 0)
-          ht_for_cut = floats->hltht4mc;
       }
     }
   }
@@ -276,8 +271,6 @@ bool MFVTriggerFloats::filter(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   event.put(floats);
-
-  return ht_cut < 0 || ht_for_cut > ht_cut;
 }
 
 DEFINE_FWK_MODULE(MFVTriggerFloats);

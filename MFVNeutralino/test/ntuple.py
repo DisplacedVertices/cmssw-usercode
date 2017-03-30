@@ -33,7 +33,7 @@ process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.CleaningBits_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-process.p = cms.Path(process.mfvVertexSequence * cms.ignore(process.mfvTriggerFloats) * process.mfvEvent)
+process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
 
 if trig_filter:
     import JMTucker.MFVNeutralino.TriggerFilter

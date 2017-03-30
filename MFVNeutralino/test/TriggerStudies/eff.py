@@ -56,7 +56,7 @@ process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-process.mfvTriggerFloats.ht_cut = ht_skim_cut
+#process.mfvTriggerFloats.ht_cut = ht_skim_cut
 
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_weight = cms.int32(0),
@@ -73,11 +73,11 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              )
 
 process.denht1000 = process.den.clone(require_ht = 1000)
-process.p = cms.Path(process.mutrig * cms.ignore(process.mfvTriggerFloats) * process.den * process.denht1000)
+process.p = cms.Path(process.mutrig * process.mfvTriggerFloats * process.den * process.denht1000)
 
 process.dennomu = process.den.clone(require_muon = False)
 process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
-process.pforsig = cms.Path(cms.ignore(process.mfvTriggerFloats) * process.dennomu * process.dennomuht1000)
+process.pforsig = cms.Path(process.mfvTriggerFloats * process.dennomu * process.dennomuht1000)
 
 def a(name, obj, p=process.p):
     setattr(process, name, obj)
