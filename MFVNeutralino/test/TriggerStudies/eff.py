@@ -18,9 +18,6 @@ elif year == 2016 and H_for_test:
     to_do = (900,)
 use_ak8450 = True and year == 2016
 
-htskim = False
-ht_skim_cut = min(to_do) if htskim else -1
-
 version = 'v7'
 json = '../ana_2015p6.json'
 batch_name = 'TrigEff%s' % version
@@ -94,13 +91,6 @@ for require_l1, l1_threshold in (-1, 0), (-2, 240), (-3, 255), (-4, 280), (-5, 3
                 a('num%i450ak%s' % z, process.den.clone(require_hlt = hlt3, require_l1 = require_l1))
             a('num%inomu%s' % z, process.dennomu.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
             a('num%inomuht1000%s' % z, process.dennomuht1000.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
-
-if htskim:
-    process.setName_('EffHtSkim')
-    process.phtskim = cms.Path(process.mutrig * process.mfvTriggerFloats)
-    process.load('Configuration.EventContent.EventContent_cff')
-    output_file(process, 'htskim.root', process.MINIAODSIMEventContent.outputCommands)
-    process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('phtskim'))
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
