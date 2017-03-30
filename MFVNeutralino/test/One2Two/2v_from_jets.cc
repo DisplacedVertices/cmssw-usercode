@@ -43,13 +43,13 @@ void construct_dvvc(int year, int ntracks, int bquarks, bool vary_dphi, bool cle
     weights[0] = 0.21105;             weights[1] = 0.02736;             weights[2] = 0.01132;             weights[3] = 0.05799;
     dphi_pdf_c = 1.35;
     dphi_pdf_a = 3.66;
-    eff_file = "eff_avg_2015.root";
+    eff_file = "eff_2015.root";
   } else if (year == 2016) {
     samples[0] = "qcdht1000sum";      samples[1] = "qcdht1500sum";      samples[2] = "qcdht2000sum";      samples[3] = "ttbar";
     weights[0] = 2.84372;             weights[1] = 0.36354;             weights[2] = 0.15026;             weights[3] = 0.68346;
     dphi_pdf_c = 1.37;
     dphi_pdf_a = 3.50;
-    eff_file = "eff_avg_2016.root";
+    eff_file = "eff_2016.root";
   } else {
     fprintf(stderr, "bad year"); exit(1);
   }
@@ -63,16 +63,16 @@ void construct_dvvc(int year, int ntracks, int bquarks, bool vary_dphi, bool cle
 
   if (ntracks == 3) {
     tree_path = "tre33/t";
-    eff_hist = "average3";
+    eff_hist = "maxtk3";
   } else if (ntracks == 4) {
     tree_path = "tre44/t";
-    eff_hist = "average4";
+    eff_hist = "maxtk4";
   } else if (ntracks == 5) {
     tree_path = "mfvMiniTree/t";
-    eff_hist = "average5";
+    eff_hist = "maxtk5";
   } else if (ntracks == 7) {
     tree_path = "tre34/t";
-    eff_hist = "average3";
+    eff_hist = "maxtk3";
     min_ntracks0 = 4;
     max_ntracks0 = 4;
     min_ntracks1 = 3;
@@ -89,13 +89,13 @@ void construct_dvvc(int year, int ntracks, int bquarks, bool vary_dphi, bool cle
     }
 
     if (ntracks == 3) {
-      eff_hist = "maxtk3";
+      eff_hist = "maxtk3_merge";
     } else if (ntracks == 4) {
-      eff_hist = "maxtk4";
+      eff_hist = "maxtk4_merge";
     } else if (ntracks == 5) {
-      eff_hist = "maxtk5";
+      eff_hist = "maxtk5_merge";
     } else if (ntracks == 7) {
-      eff_hist = "maxtk3";
+      eff_hist = "maxtk3_merge";
     }
   }
 
