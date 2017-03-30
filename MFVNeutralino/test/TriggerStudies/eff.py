@@ -53,7 +53,7 @@ process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-#process.mfvTriggerFloats.ht_cut = ht_skim_cut
+process.mfvTriggerFloats.jets_src = 'slimmedJets'
 
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_weight = cms.int32(0),
@@ -64,8 +64,6 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_ht = cms.double(-1),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > %i' % mu_thresh_offline),
-                             jets_src = cms.InputTag('slimmedJets'),
-                             jet_cut = jtupleParams.jetCut,
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
 

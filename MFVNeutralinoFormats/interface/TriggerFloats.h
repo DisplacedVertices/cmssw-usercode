@@ -1,11 +1,13 @@
 #ifndef JMTucker_MFVNeutralinoFormats_interface_TriggerFloats_h
 #define JMTucker_MFVNeutralinoFormats_interface_TriggerFloats_h
 
+#include "TLorentzVector.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 namespace mfv {
   struct TriggerFloats {
-    std::vector<float> l1jetspts;
+    std::vector<TLorentzVector> l1jets;
+    int nl1jets() const { return l1jets.size(); }
     float l1htt;
     float myhtt;
     float myhttwbug;
@@ -14,10 +16,22 @@ namespace mfv {
     std::vector<int> L1decisions;
     std::vector<int> HLTdecisions;
 
+    // related offline stuff 
+    int nalljets;
+    std::vector<TLorentzVector> jets;
+    std::vector<float> jetmuef;
+    int njets() const { return jets.size(); }
+    float jetpt1() const { return njets() >= 1 ? jets[0].Pt() : -1; }
+    float jetpt2() const { return njets() >= 2 ? jets[1].Pt() : -1; }
+    float htall;
+    float ht;
+    float htptgt30;
+
     TriggerFloats()
-      : l1htt(-1), myhtt(-1), myhttwbug(-1), hltht(-1), hltht4mc(-1),
-        L1decisions(n_l1_paths, -1),
-        HLTdecisions(n_hlt_paths, -1)
+    : l1htt(-1), myhtt(-1), myhttwbug(-1), hltht(-1), hltht4mc(-1),
+      L1decisions(n_l1_paths, -1),
+      HLTdecisions(n_hlt_paths, -1),
+      nalljets(0), htall(0), ht(0), htptgt30(0)
     {}
   };
 }

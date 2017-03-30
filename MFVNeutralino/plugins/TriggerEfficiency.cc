@@ -2,7 +2,6 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -29,8 +28,6 @@ private:
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
-  const edm::EDGetTokenT<pat::JetCollection> jets_token;
-  const StringCutObjectSelector<pat::Jet> jet_selector;
   const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
 
@@ -50,7 +47,6 @@ private:
   TH1F* h_jet_muef[11];
   TH1F* h_jet_ht_all;
   TH1F* h_jet_ht;
-  TH1F* h_jet_ht_ptlt200;
   TH1F* h_jet_ht_m_hlt_ht;
   TH2F* h_njets_v_ht;
   TH1F* h_myhtt_m_l1htt;
@@ -75,8 +71,6 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
-    jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
-    jet_selector(cfg.getParameter<std::string>("jet_cut")),
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
     use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
@@ -135,7 +129,6 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
   h_jet_ht_all = fs->make<TH1F>("h_jet_ht_all", ";jet (p_{T} > 20 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
-  h_jet_ht_ptlt200 = fs->make<TH1F>("h_jet_ht_ptlt200", ";jet (40 < p_{T} < 200 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht_m_hlt_ht = fs->make<TH1F>("h_jet_ht_m_hlt_ht", ";offline jet (p_{T} > 40 GeV) H_{T} - HLT H_{T} (GeV);events/10 GeV", 100, -500, 500);
   h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);# selected jets", 20, 0, 2000, 15, 0, 15);
 
@@ -239,31 +232,14 @@ namespace {
 }
 
 void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  edm::Handle<pat::JetCollection> jets;
-  event.getByToken(jets_token, jets);
-
-  double w = 1;
-
-  if (use_weight) {
-    double jet_pt_1 = -1, jet_pt_2 = -1;
-    int njet = 0;
-    for (const pat::Jet& jet : *jets) {
-      if (jet_selector(jet)) {
-        ++njet;
-        if (njet == 1)
-          jet_pt_1 = jet.pt();
-        else if (njet == 2) {
-          jet_pt_2 = jet.pt();
-          break;
-        }
-      }
-    }
-    if      (use_weight == 1) w = jetpt12_weight_mfvM300(jet_pt_1, jet_pt_2);
-    else if (use_weight == 2) w = jetpt12_weight_mfvM800(jet_pt_1, jet_pt_2);
-  }
-
   edm::Handle<mfv::TriggerFloats> triggerfloats;
   event.getByToken(triggerfloats_token, triggerfloats);
+
+  double w = 1;
+  if (use_weight) {
+    if      (use_weight == 1) w = jetpt12_weight_mfvM300(triggerfloats->jetpt1(), triggerfloats->jetpt2());
+    else if (use_weight == 2) w = jetpt12_weight_mfvM800(triggerfloats->jetpt1(), triggerfloats->jetpt2());
+  }
 
   for (int i = 0; i < 2; ++i) { // HLT then L1
     const int r = require_bits[i];
@@ -302,7 +278,6 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       for (int i = 0; i < 2; ++i) {
         if (i == 0 || muon_selector(muon)) {
           ++nmuons[i];
-
           h_muon_pt[i]->Fill(muon.pt(), w);
           h_muon_eta[i]->Fill(muon.eta(), w);
           h_muon_phi[i]->Fill(muon.phi(), w);
@@ -318,70 +293,37 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       return;
   }
 
-  if (require_4jets || require_ht > 0) {
-    int njets = 0;
-    double ht = 0;
-    for (const pat::Jet& jet : *jets)
-      if (jet_selector(jet)) {
-        ++njets;
-        if (jet.pt() > 40)
-          ht += jet.pt();
-      }
+  if ((require_4jets && triggerfloats->njets() < 4) || (require_ht > 0 && triggerfloats->ht < require_ht))
+    return;
 
-    if ((require_4jets && njets < 4) || (ht < require_ht))
-      return;
-  }
+  h_nnoseljets->Fill(triggerfloats->nalljets, w);
 
-  h_nnoseljets->Fill(jets->size(), w);
-
-  int njet = 0;
-  double jet_ht_all = 0;
-  double jet_ht = 0;
-  double jet_ht_ptlt200 = 0;
-  double jet_pt_1 = 0, jet_pt_2 = 0;
-  for (const pat::Jet& jet : *jets) {
-    if (jet_selector(jet)) {
-      ++njet;
-      if (njet == 1)
-        jet_pt_1 = jet.pt();
-      else if (njet == 2)
-        jet_pt_2 = jet.pt();
-      jet_ht_all += jet.pt();
-      if (jet.pt() > 40) {
-        jet_ht += jet.pt();
-        if (jet.pt() < 200)
-          jet_ht_ptlt200 += jet.pt();
-      }
-
-      for (int i : {0, njet}) {
-        if (i == 0 || njet < 11) {
-          h_jet_e[i]->Fill(jet.energy(), w);
-          h_jet_pt[i]->Fill(jet.pt(), w);
-          h_jet_eta[i]->Fill(jet.eta(), w);
-          h_jet_phi[i]->Fill(jet.phi(), w);
-          h_jet_muef[i]->Fill(jet.muonEnergyFraction(), w);
-        }
+  for (int ijet = 0; ijet < triggerfloats->njets(); ++ijet) {
+    for (int i : {0, ijet+1}) {
+      if (i == 0 || ijet < 10) {
+        h_jet_e[i]->Fill(triggerfloats->jets[ijet].E(), w);
+        h_jet_pt[i]->Fill(triggerfloats->jets[ijet].Pt(), w);
+        h_jet_eta[i]->Fill(triggerfloats->jets[ijet].Eta(), w);
+        h_jet_phi[i]->Fill(triggerfloats->jets[ijet].Phi(), w);
+        h_jet_muef[i]->Fill(triggerfloats->jetmuef[ijet], w);
       }
     }
   }
 
-  h_njets->Fill(njet, w);
-  h_jet_ht_all->Fill(jet_ht_all, w);
-  h_jet_ht->Fill(jet_ht, w);
-  h_jet_ht_ptlt200->Fill(jet_ht_ptlt200, w);
-  h_njets_v_ht->Fill(jet_ht, njet, w);
+  h_njets->Fill(triggerfloats->njets(), w);
+  h_jet_ht_all->Fill(triggerfloats->htall, w);
+  h_jet_ht->Fill(triggerfloats->ht, w);
+  h_njets_v_ht->Fill(triggerfloats->ht, triggerfloats->njets(), w);
   h_myhtt_m_l1htt->Fill(triggerfloats->myhtt - triggerfloats->l1htt);
   h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt);
-  h_jetpt2v1->Fill(jet_pt_1, jet_pt_2, w);
-  h_jet_ht_m_hlt_ht->Fill(jet_ht - triggerfloats->hltht, w); 
+  h_jetpt2v1->Fill(triggerfloats->jetpt1(), triggerfloats->jetpt2(), w);
+  h_jet_ht_m_hlt_ht->Fill(triggerfloats->ht - triggerfloats->hltht, w); 
 
-  int nl1jet = 0;
-  for (float pt : triggerfloats->l1jetspts) {
-    ++nl1jet;
-    for (int i : {0, nl1jet})
-      if (i == 0 || nl1jet < 11)
-        h_l1jet_pt[i]->Fill(pt, w);
-  }
+  for (int il1jet = 0; il1jet < triggerfloats->nl1jets(); ++il1jet)
+    for (int i : {0, il1jet+1})
+      if (i == 0 || il1jet < 10)
+        h_l1jet_pt[i]->Fill(triggerfloats->l1jets[il1jet].Pt(), w);
+
 
   if (use_genjets) {
     edm::Handle<reco::GenJetCollection> genjets;

@@ -16,6 +16,8 @@
 
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDProducer.h"
@@ -54,6 +56,9 @@ private:
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
 
+  const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const StringCutObjectSelector<pat::Jet> jet_selector;
+
   const bool prints;
 };
 
@@ -69,6 +74,8 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
 #endif
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
+    jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    jet_selector(cfg.getParameter<std::string>("jet_cut")),
     prints(cfg.getUntrackedParameter<bool>("prints", false))
 {
   produces<mfv::TriggerFloats>();
@@ -219,10 +226,13 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 #elif defined(MFVNEUTRALINO_2016)
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
-    if (fabs(jet.eta()) < 3)
-      floats->l1jetspts.push_back(jet.pt());
+    if (fabs(jet.eta()) < 3) {
+      TLorentzVector v;
+      v.SetPtEtaPhiE(jet.pt(), jet.eta(), jet.phi(), jet.energy());
+      floats->l1jets.push_back(v);
+    }
   }
-  std::sort(std::begin(floats->l1jetspts), std::end(floats->l1jetspts), std::greater<float>());
+  std::sort(std::begin(floats->l1jets), std::end(floats->l1jets), [](const auto& v1, const auto& v2) { return v1.Pt() > v2.Pt(); });
 
   floats->l1htt = etsumhelper.TotalHt();
   floats->myhtt = my_htt;
@@ -270,6 +280,22 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
   }
 
+  edm::Handle<pat::JetCollection> jets;
+  event.getByToken(jets_token, jets);
+
+  for (const pat::Jet& jet : *jets)
+    if (jet_selector(jet)) {
+      const double pt = jet.pt();
+      TLorentzVector v;
+      v.SetPtEtaPhiE(pt, jet.eta(), jet.phi(), jet.energy());
+      floats->jets.push_back(v);
+      floats->jetmuef.push_back(jet.muonEnergyFraction());
+
+      floats->htall += pt;
+      if (pt > 30) floats->htptgt30 += pt;
+      if (pt > 40) floats->ht += pt;
+    }
+  
   event.put(floats);
 }
 
