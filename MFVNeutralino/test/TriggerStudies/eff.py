@@ -135,6 +135,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                        units_per_job = 10,
                        total_units = -1,
                        dataset = 'miniaod',
-                       publish_name = 'trigeff_htskim_' + version,
                        )
     cs.submit_all(samples)
