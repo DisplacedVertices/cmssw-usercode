@@ -17,7 +17,6 @@ process.TFileService.fileName = 'triggerfloats.root'
 global_tag(process, which_global_tag(is_mc, year))
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-process.mfvTriggerFloats.tree = True
 #process.mfvTriggerFloats.prints = True
 
 if False:

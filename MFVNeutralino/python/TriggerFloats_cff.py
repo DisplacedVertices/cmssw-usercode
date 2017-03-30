@@ -9,5 +9,4 @@ mfvTriggerFloats = cms.EDFilter('MFVTriggerFloats',
                                 trigger_objects_src = cms.InputTag('selectedPatTrigger'),
                                 ht_cut = cms.double(-1),
                                 prints = cms.untracked.bool(False),
-                                tree = cms.untracked.bool(False),
                                 )
