@@ -103,7 +103,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     const l1t::Jet& jet = l1_jets->at(0, i);
     const double pt = jet.pt();
     const double eta = jet.eta();
-    if (fabs(eta) < 3 && pt >= 30) {
+    if (fabs(eta) < 3 && pt > 30) {
       if (eta > 0 && my_htt_pos < 1023) {
         if (pt < 1023)
           my_htt_pos += pt;
@@ -295,7 +295,10 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (pt > 30) floats->htptgt30 += pt;
       if (pt > 40) floats->ht += pt;
     }
-  
+
+  if (prints)
+    printf("# all jets: %lu  selected: %i  jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->jetpt1(), floats->jetpt2(), floats->ht);
+
   event.put(floats);
 }
 
