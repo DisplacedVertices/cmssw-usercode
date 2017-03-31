@@ -1,11 +1,11 @@
 from JMTucker.Tools.ROOTTools import *
 
-year = 2016
+year = '2016'
 
 set_style()
 ps = plot_saver('../plots/bkgest/vertexer_eff_%s' % year, size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12/background%s.root' % ('_2015' if year==2015 else ''))
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12/background%s.root' % ('' if year=='2016' else '_%s'%year))
 fh = ROOT.TFile('eff_%s.root' % year, 'recreate')
 
 for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:

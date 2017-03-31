@@ -123,8 +123,8 @@ def cmd_trigeff():
             os.system(cmd)
 
 def cmd_merge_bquarks_nobquarks():
-    for year in [2015,2016]:
-        weights = '0.84,0.16' if year==2015 else '0.76,0.24'
+    for year in ['2015', '2016', '2015p6']:
+        weights = '0.84,0.16' if year=='2015' else '0.76,0.24'
         for ntracks in [3,4,5]:
             files = ['One2Two/2v_from_jets_%s_%dtrack_bquarks_v12.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobquarks_v12.root' % (year, ntracks)]
             for fn in files:

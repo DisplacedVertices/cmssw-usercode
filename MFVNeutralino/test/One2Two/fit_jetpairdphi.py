@@ -2,12 +2,12 @@
 
 from JMTucker.Tools.ROOTTools import *
 
-year = 2016
+year = '2016'
 
 set_style()
 ps = plot_saver('../plots/bkgest/fit_jetpairdphi_%s' % year, size=(700,700), log=False, root=False)
 
-fn = '/uscms_data/d2/tucker/crab_dirs/HistosV12/background%s.root' % ('_2015' if year==2015 else '')
+fn = '/uscms_data/d2/tucker/crab_dirs/HistosV12/background%s.root' % ('' if year=='2016' else '_%s'%year)
 
 ntk = ['Ntk3', 'Ntk3or4', 'Ntk4', '']
 ntracks = ['3-track', '3-or-4-track', '4-track', '5-or-more-track']

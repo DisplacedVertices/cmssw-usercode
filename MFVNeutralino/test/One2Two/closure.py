@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
-year = 2016
+year = '2016'
 
 set_style()
 ps = plot_saver('../plots/bkgest/closure_%s' % year, size=(700,700), root=False, log=False)
@@ -14,11 +14,17 @@ ebin1 = [0.0021, 0.0053, 0.0053, 0.0098]
 ebin2 = [0.0018, 0.0056, 0.0056, 0.0236]
 ebin3 = [0.0047, 0.0170, 0.0170, 0.0766]
 
-if year == 2015:
+if year == '2015':
     n2v = [90., 23., 2., 1.]
     ebin1 = [0.0097, 0.0242, 0.0242, 0.0449]
     ebin2 = [0.0083, 0.0260, 0.0260, 0.1069]
     ebin3 = [0.0212, 0.0788, 0.0788, 0.3507]
+
+if year == '2015p6':
+    n2v = [2014., 518., 42., 4.]
+    ebin1 = [0.0021, 0.0051, 0.0051, 0.0096]
+    ebin2 = [0.0018, 0.0056, 0.0056, 0.0229]
+    ebin3 = [0.0046, 0.0166, 0.0166, 0.0747]
 
 for i in range(4):
     hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
