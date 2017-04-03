@@ -186,7 +186,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
         os.chdir(pwd)
 
 if year == 2015:
-    samples = ['qcdht0700sum_2015', 'qcdht1000sum_2015', 'qcdht1500sum_2015', 'qcdht2000sum_2015', 'ttbar_sum']
+    samples = ['qcdht0700sum_2015', 'qcdht1000sum_2015', 'qcdht1500sum_2015', 'qcdht2000sum_2015', 'ttbar_2015']
 elif year == 2016:
     samples = ['qcdht0700sum', 'qcdht1000sum', 'qcdht1500sum', 'qcdht2000sum', 'ttbar']
 
