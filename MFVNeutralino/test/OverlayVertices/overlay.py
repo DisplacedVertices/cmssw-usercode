@@ -56,6 +56,7 @@ else:
 
 process = basic_process('Overlay')
 process.source.fileNames = files
+process.source.inputCommands = cms.untracked.vstring('keep *', 'drop edmTriggerResults_TriggerResults__PickByVeto', 'drop edmTriggerResults_TriggerResults__BasicAnalyzer') # I changed the process name in the middle of pick1vtxv1
 process.maxEvents.input = args.max_events
 want_summary(process, args.debug)
 silence_messages(process, ['TwoTrackMinimumDistanceHelixLine'])
