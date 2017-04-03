@@ -510,7 +510,8 @@ for x in (qcdht2000ext,
     x.condor = True
     x.xrootd_url = 'root://cmseos.fnal.gov/'
 
-for x in (SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
+for x in (JetHT2016G,
+          SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
           qcdht0500, qcdht1500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000,
           ttbar,
           wjetstolnu, dyjetstollM50, qcdmupt15,
