@@ -3,7 +3,7 @@
 import sys, os, shutil
 from textwrap import dedent
 from JMTucker.Tools.CMSSWTools import make_tarball
-from JMTucker.Tools.general import save_git_status
+from JMTucker.Tools.general import save_git_status, popen, touch
 from JMTucker.MFVNeutralino.Year import year
 
 pwd = os.getcwd()
@@ -70,9 +70,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     batch_dir = '/uscms_data/d2/tucker/OverlayV1_%i/%s/%s' % (year, batch_name, sample)
     
     inputs_dir = os.path.join(batch_dir, 'inputs')
-    outputs_dir = os.path.join(batch_dir, 'outputs')
     os.makedirs(inputs_dir)
-    os.makedirs(outputs_dir)
     
     save_git_status(os.path.join(batch_dir, 'gitstatus'))
     
@@ -148,9 +146,9 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     universe = vanilla
     Executable = %(sh_fn)s
     arguments = $(Process)
-    Output = overlay_$(Cluster)_$(Process).stdout
-    Error = overlay_$(Cluster)_$(Process).stderr
-    Log = overlay_$(Cluster)_$(Process).log
+    Output = stdout.$(Cluster).$(Process)
+    Error = stderr.$(Cluster).$(Process)
+    Log = log.$(Cluster)$(Process)
     stream_output = false
     stream_error  = false
     notification  = never
@@ -163,8 +161,28 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     open(jdl_fn, 'wt').write(jdl)
 
     if not testing:
-        os.chdir(outputs_dir)
-        os.system('condor_submit < ' + jdl_fn)
+        os.chdir(batch_dir)
+        submit_out, submit_ret = popen('condor_submit < ' + jdl_fn, return_exit_code=True)
+        ok = False
+        for line in submit_out.split('\n'):
+            if 'job(s) submitted to cluster' in line:
+                ok = True
+                line = line.split()
+                try:
+                    njobs_sub = int(line[0])
+                    cluster = int(line[-1][:-1])
+                    touch(os.path.join(batch_dir, 'cs_dir'))
+                    open(os.path.join(batch_dir, 'njobs'), 'wt').write(str(njobs_sub))
+                    open(os.path.join(batch_dir, 'cluster'), 'wt').write(str(cluster))
+                    if njobs_sub != njobs:
+                        ok = False
+                except ValueError:
+                    ok = False
+        if not ok:
+            print '\033[1m problem! \033[0m'
+            print submit_out
+        else:
+            print 'success! cluster', cluster
         os.chdir(pwd)
 
 if year == 2015:
@@ -172,7 +190,7 @@ if year == 2015:
 elif year == 2016:
     samples = ['qcdht0700sum', 'qcdht1000sum', 'qcdht1500sum', 'qcdht2000sum', 'ttbar']
 
-overlay_argses = ['', '+z-model deltasvgaus', '+rest-of-event', '+rest-of-event +z-model deltasvgaus']
+overlay_argses = ['+rest-of-event +z-model deltasvgaus']
 for overlay_args in overlay_argses:
     for sample in samples:
         for ntracks in [3,4,5]:
