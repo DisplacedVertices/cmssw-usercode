@@ -67,7 +67,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
 
     cmssw_py = 'overlay.py'
     
-    batch_dir = '/uscms_data/d2/tucker/OverlayV1_%i/%s/%s' % (year, batch_name, sample)
+    batch_dir = '/uscms_data/d2/tucker/OverlayV2_%i/%s/%s' % (year, batch_name, sample)
     
     inputs_dir = os.path.join(batch_dir, 'inputs')
     os.makedirs(inputs_dir)
