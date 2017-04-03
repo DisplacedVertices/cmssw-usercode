@@ -138,6 +138,29 @@ for i in range(3):
     l2.Draw()
     ps.save('%s_dphi'%ntk[i])
 
+    if i == 2:
+        h2s = []
+        l2 = ROOT.TLegend(0.15,0.75,0.50,0.85)
+        for j in range(len(ls)):
+            h = ROOT.TFile(fns[i][j]).Get('h_c1v_absdphivv')
+            h.SetStats(0)
+            h.SetLineColor(colors[j])
+            h.SetLineWidth(2)
+            h.Scale(n2v[i]/h.Integral())
+            if j == 0:
+                h.SetTitle(';|#Delta#phi_{VV}|;Events')
+                h.SetMinimum(0)
+                h.Draw('hist e')
+            elif j == 1:
+                h.Draw('hist e sames')
+            h2s.append(h)
+            if j > 1:
+                continue
+            l2.AddEntry(h, ls[j])
+        l2.SetFillColor(0)
+        l2.Draw()
+        ps.save('compare_dphi_%s' % mode)
+
     es1 = ROOT.Double(0)
     s1 = hh.IntegralAndError(1,4,es1)
     es2 = ROOT.Double(0)
