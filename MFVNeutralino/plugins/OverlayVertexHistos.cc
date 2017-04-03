@@ -73,21 +73,21 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
 
   h_dz_true = fs->make<TH1F>("h_dz_true", "", 100, -0.1, 0.1);
 
-  h_dvv_true                       = fs->make<TH1F>("h_dvv_true",                       "", 1000, 0, 1);
-  h_dvv_pass_anytwo                = fs->make<TH1F>("h_dvv_pass_anytwo",                "", 1000, 0, 1);
-  h_dvv_pass_twominntk             = fs->make<TH1F>("h_dvv_pass_twominntk",             "", 1000, 0, 1);
-  h_dvv_pass_foundv0andv1          = fs->make<TH1F>("h_dvv_pass_foundv0andv1",          "", 1000, 0, 1);
-  h_dvv_pass_foundv0andv1samentk   = fs->make<TH1F>("h_dvv_pass_foundv0andv1samentk",   "", 1000, 0, 1);
-  h_dvv_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_dvv_pass_foundv0andv1asmanyntk", "", 1000, 0, 1);
-  h_dvv_pass_foundv0andv1bytracks  = fs->make<TH1F>("h_dvv_pass_foundv0andv1bytracks",  "", 1000, 0, 1);
+  h_dvv_true                       = fs->make<TH1F>("h_dvv_true",                       "", 4000, 0, 4);
+  h_dvv_pass_anytwo                = fs->make<TH1F>("h_dvv_pass_anytwo",                "", 4000, 0, 4);
+  h_dvv_pass_twominntk             = fs->make<TH1F>("h_dvv_pass_twominntk",             "", 4000, 0, 4);
+  h_dvv_pass_foundv0andv1          = fs->make<TH1F>("h_dvv_pass_foundv0andv1",          "", 4000, 0, 4);
+  h_dvv_pass_foundv0andv1samentk   = fs->make<TH1F>("h_dvv_pass_foundv0andv1samentk",   "", 4000, 0, 4);
+  h_dvv_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_dvv_pass_foundv0andv1asmanyntk", "", 4000, 0, 4);
+  h_dvv_pass_foundv0andv1bytracks  = fs->make<TH1F>("h_dvv_pass_foundv0andv1bytracks",  "", 4000, 0, 4);
 
-  h_d3d_true                       = fs->make<TH1F>("h_d3d_true",                       "", 1000, 0, 1);
-  h_d3d_pass_anytwo                = fs->make<TH1F>("h_d3d_pass_anytwo",                "", 1000, 0, 1);
-  h_d3d_pass_twominntk             = fs->make<TH1F>("h_d3d_pass_twominntk",             "", 1000, 0, 1);
-  h_d3d_pass_foundv0andv1          = fs->make<TH1F>("h_d3d_pass_foundv0andv1",          "", 1000, 0, 1);
-  h_d3d_pass_foundv0andv1samentk   = fs->make<TH1F>("h_d3d_pass_foundv0andv1samentk",   "", 1000, 0, 1);
-  h_d3d_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_d3d_pass_foundv0andv1asmanyntk", "", 1000, 0, 1);
-  h_d3d_pass_foundv0andv1bytracks  = fs->make<TH1F>("h_d3d_pass_foundv0andv1bytracks",  "", 1000, 0, 1);
+  h_d3d_true                       = fs->make<TH1F>("h_d3d_true",                       "", 4000, 0, 4);
+  h_d3d_pass_anytwo                = fs->make<TH1F>("h_d3d_pass_anytwo",                "", 4000, 0, 4);
+  h_d3d_pass_twominntk             = fs->make<TH1F>("h_d3d_pass_twominntk",             "", 4000, 0, 4);
+  h_d3d_pass_foundv0andv1          = fs->make<TH1F>("h_d3d_pass_foundv0andv1",          "", 4000, 0, 4);
+  h_d3d_pass_foundv0andv1samentk   = fs->make<TH1F>("h_d3d_pass_foundv0andv1samentk",   "", 4000, 0, 4);
+  h_d3d_pass_foundv0andv1asmanyntk = fs->make<TH1F>("h_d3d_pass_foundv0andv1asmanyntk", "", 4000, 0, 4);
+  h_d3d_pass_foundv0andv1bytracks  = fs->make<TH1F>("h_d3d_pass_foundv0andv1bytracks",  "", 4000, 0, 4);
 
   for (int i = 0; i < 2; ++i) {
     h_min_track_vertex_dist[i] = fs->make<TH1F>(TString::Format("h_min_track_vertex_dist_%i", i), "", 1000, 0, 1);
