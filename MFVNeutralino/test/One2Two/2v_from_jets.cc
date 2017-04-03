@@ -205,10 +205,13 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
 
+  int bin1 = 0;
   int bin2 = 0;
   int bin3 = 0;
+  int intobin1 = 0;
   int intobin2 = 0;
   int intobin3 = 0;
+  int outofbin1 = 0;
   int outofbin2 = 0;
   int outofbin3 = 0;
 
@@ -226,10 +229,13 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
       if (vary_dphi) {
         double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);
         double dvvc2 = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi2));
+        if (dvvc < 0.04) ++bin1;
         if (dvvc >= 0.04 && dvvc < 0.07) ++bin2;
         if (dvvc >= 0.07) ++bin3;
+        if (!(dvvc < 0.04) && (dvvc2 < 0.04)) ++intobin1;
         if (!(dvvc >= 0.04 && dvvc < 0.07) && (dvvc2 >= 0.04 && dvvc2 < 0.07)) ++intobin2;
         if (!(dvvc >= 0.07) && (dvvc2 >= 0.07)) ++intobin3;
+        if ((dvvc < 0.04) && !(dvvc2 < 0.04)) ++outofbin1;
         if ((dvvc >= 0.04 && dvvc < 0.07) && !(dvvc2 >= 0.04 && dvvc2 < 0.07)) ++outofbin2;
         if ((dvvc >= 0.07) && !(dvvc2 >= 0.07)) ++outofbin3;
         dphi = dphi2;
@@ -251,7 +257,10 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
   }
 
   if (vary_dphi) {
-    printf("bin2 = %d, bin3 = %d, intobin2 = %d, intobin3 = %d, outofbin2 = %d, outofbin3 = %d\n", bin2, bin3, intobin2, intobin3, outofbin2, outofbin3);
+    printf("bin1 = %d, bin2 = %d, bin3 = %d, intobin1 = %d, intobin2 = %d, intobin3 = %d, outofbin1 = %d, outofbin2 = %d, outofbin3 = %d\n", bin1, bin2, bin3, intobin1, intobin2, intobin3, outofbin1, outofbin2, outofbin3);
+    printf("uncorrelated variation / default (bin 1): %f +/- %f\n", 1 + (intobin1 - outofbin1) / (1.*bin1), sqrt(bin1 + bin1 + intobin1 - outofbin1) / bin1);
+    printf("  correlated variation / default (bin 1): %f +/- %f\n", 1 + (intobin1 - outofbin1) / (1.*bin1), sqrt(intobin1 + outofbin1) / bin1);
+    printf("uncertainty correlated / uncorrelated (bin 1): %f\n", sqrt(intobin1 + outofbin1) / sqrt(bin1 + bin1 + intobin1 - outofbin1));
     printf("uncorrelated variation / default (bin 2): %f +/- %f\n", 1 + (intobin2 - outofbin2) / (1.*bin2), sqrt(bin2 + bin2 + intobin2 - outofbin2) / bin2);
     printf("  correlated variation / default (bin 2): %f +/- %f\n", 1 + (intobin2 - outofbin2) / (1.*bin2), sqrt(intobin2 + outofbin2) / bin2);
     printf("uncertainty correlated / uncorrelated (bin 2): %f\n", sqrt(intobin2 + outofbin2) / sqrt(bin2 + bin2 + intobin2 - outofbin2));

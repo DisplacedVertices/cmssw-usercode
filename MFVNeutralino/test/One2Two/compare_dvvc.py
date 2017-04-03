@@ -49,6 +49,8 @@ colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROO
 
 x = []
 ex = []
+y1 = []
+ey1 = []
 y2 = []
 ey2 = []
 y3 = []
@@ -167,32 +169,41 @@ for i in range(3):
     if mode == 'vary_dphi':
         if year == '2015':
             if i == 0:
+                er1 *= 0.121149
                 er2 *= 0.211763
                 er3 *= 0.167168
             if i == 1:
+                er1 *= 0.112227
                 er2 *= 0.213812
                 er3 *= 0.183399
             if i == 2:
+                er1 *= 0.089197
                 er2 *= 0.218547
                 er3 *= 0.171132
         if year == '2016':
             if i == 0:
+                er1 *= 0.116704
                 er2 *= 0.211908
                 er3 *= 0.160616
             if i == 1:
+                er1 *= 0.109404
                 er2 *= 0.216431
                 er3 *= 0.176878
             if i == 2:
+                er1 *= 0.086512
                 er2 *= 0.216790
                 er3 *= 0.162593
         if year == '2015p6':
             if i == 0:
+                er1 *= 0.116713
                 er2 *= 0.211614
                 er3 *= 0.160821
             if i == 1:
+                er1 *= 0.109870
                 er2 *= 0.216282
                 er3 *= 0.175091
             if i == 2:
+                er1 *= 0.086836
                 er2 *= 0.217034
                 er3 *= 0.160045
     if mode == 'vary_eff':
@@ -209,16 +220,18 @@ for i in range(3):
 
     x.append(i-2)
     ex.append(0)
+    y1.append(r1)
+    ey1.append(er1)
     y2.append(r2)
     ey2.append(er2)
     y3.append(r3)
     ey3.append(er3)
 
-bins = ['bin2', 'bin3']
-dvvc = ['400 #mum < d_{VV}^{C} < 700 #mum', 'd_{VV}^{C} > 700 #mum']
-ys = [y2, y3]
-eys = [ey2, ey3]
-for i in range(2):
+bins = ['bin1', 'bin2', 'bin3']
+dvvc = ['d_{VV}^{C} < 400 #mum', '400 #mum < d_{VV}^{C} < 700 #mum', 'd_{VV}^{C} > 700 #mum']
+ys = [y1, y2, y3]
+eys = [ey1, ey2, ey3]
+for i in range(3):
     g = ROOT.TGraphErrors(len(x), array('d',x), array('d',ys[i]), array('d',ex), array('d',eys[i]))
     g.SetMarkerStyle(21)
     g.SetTitle('variation / default (%s);3-track%12s4-track%12s5-or-more-track%2s' % (dvvc[i], '','',''))
