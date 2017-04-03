@@ -146,9 +146,9 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     universe = vanilla
     Executable = %(sh_fn)s
     arguments = $(Process)
-    Output = stdout.$(Cluster).$(Process)
-    Error = stderr.$(Cluster).$(Process)
-    Log = log.$(Cluster)$(Process)
+    Output = stdout.$(Process)
+    Error = stderr.$(Process)
+    Log = log.$(Process)
     stream_output = false
     stream_error  = false
     notification  = never
