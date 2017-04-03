@@ -177,6 +177,17 @@ _add_ds("pick1vtxv1", {
 'ttbar_2015': _fromnum1("/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Pick1VtxV1/170322_195246", 55, fnbase="pick"),
 })
 
+_add_ds("trigskimv1", {
+'SingleMuon2016B3': _fromnum1("/store/user/tucker/SingleMuon/TrigSkimV1/170330_203857", 129, fnbase="trigskim"),
+'SingleMuon2016C': _fromnum1("/store/user/tucker/SingleMuon/TrigSkimV1/170330_203911", 72, fnbase="trigskim"),
+'SingleMuon2016D': _fromnum1("/store/user/tucker/SingleMuon/TrigSkimV1/170330_203927", 106, fnbase="trigskim"),
+'SingleMuon2016E': _fromnum1("/store/user/tucker/SingleMuon/TrigSkimV1/170330_203941", 89, fnbase="trigskim"),
+'SingleMuon2016F': _fromnum1("/store/user/tucker/SingleMuon/TrigSkimV1/170330_203958", 77, fnbase="trigskim"),
+'SingleMuon2016G': _fromnum1("/store/user/tucker/SingleMuon/TrigSkimV1/170330_204012", 143, fnbase="trigskim"),
+'SingleMuon2016H2': (188, ['/store/user/tucker/SingleMuon/TrigSkimV1/170330_204027/0000/trigskim_%i.root' % i for i in chain(xrange(1,26), xrange(27,38), xrange(39,75), xrange(76,89), xrange(90,101), xrange(102,194))]),
+'SingleMuon2016H3': _fromnum1("/store/user/tucker/SingleMuon/TrigSkimV1/170330_204041", 6, fnbase="trigskim"),
+})
+
 _add_ds("ntuplev12", {
 
 # 2015
