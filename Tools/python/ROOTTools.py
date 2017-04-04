@@ -782,6 +782,10 @@ def data_mc_comparison(name,
         subtr = 0.02
         lum_pos = 0.625
         stupid = 0
+        if data_sample is not None:
+            subtr = 0
+            lum_pos = 0.618
+            stupid = 0.02
         lum = write(42, 0.04, lum_pos+stupid, 0.930-subtr, int_lumi_nice)
         cms = write(61, 0.04, 0.098+stupid, 0.930-subtr, 'CMS')
         if simulation and preliminary:
@@ -791,7 +795,7 @@ def data_mc_comparison(name,
         elif simulation:
             exlab_str = 'Simulation'
         if simulation or preliminary:
-            exlab = write(52, 0.035, 0.185, 0.930-subtr, exlab_str)
+            exlab = write(52, 0.035, 0.185+stupid, 0.930-subtr, exlab_str)
 
     if verbose:
         if data_sample is not None:
