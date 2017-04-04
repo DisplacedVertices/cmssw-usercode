@@ -30,14 +30,6 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 
-#ifdef MFVNEUTRALINO_2016
-std::ostream& operator<<(std::ostream& o, const l1t::L1Candidate& c) {
-  o << "et: " << c.et() << " eta: " << c.eta() << " phi: " << c.phi()
-    << " hwPt: " << c.hwPt() << " hwEta: " << c.hwEta() << " hwPhi: " << c.hwPhi() << " hwQual: " << c.hwQual() << " hwIso: " << c.hwIso();
-  return o;
-}
-#endif
-
 class MFVTriggerFloats : public edm::EDProducer {
 public:
   explicit MFVTriggerFloats(const edm::ParameterSet&);
@@ -59,7 +51,7 @@ private:
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
 
-  const bool prints;
+  const int prints;
 };
 
 MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
@@ -76,12 +68,14 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
-    prints(cfg.getUntrackedParameter<bool>("prints", false))
+    prints(cfg.getUntrackedParameter<int>("prints", 0))
 {
   produces<mfv::TriggerFloats>();
 }
 
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
+  if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
   const edm::TriggerNames& trigger_names = event.triggerNames(*trigger_results);
@@ -117,6 +111,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
           my_htt_neg = 1023;
       }
     }
+
+    if (prints) printf("after jet #%2lu (pt %7.1f eta %7.2f is pos? %i): i2pt_neg_first: %7i pos %7i i2htt_neg: %7i pos: %7i\n", i, jet.pt(), jet.eta(), is_pos, i2pt_first[0], i2pt_first[1], i2htt[0], i2htt[1]);
   }
 
   my_htt = my_htt_wbug = my_htt_pos + my_htt_neg;
@@ -128,7 +124,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   l1t::EtSumHelper etsumhelper(l1_etsums);
 #endif
 
-  if (prints) {
+  if (prints > 1) {
     std::cout << "event: (" << event.id().run() << ", " << event.luminosityBlock() << ", " << event.id().event() << ")\n";
     std::cout << " === TRIGGER PATHS === " << "\n";
     for (unsigned int i = 0, n = trigger_results->size(); i < n; ++i)
@@ -163,42 +159,65 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       std::cout << "\n";
     }
 
+    std::cout << std::endl;
+  }
+
 #ifdef MFVNEUTRALINO_2016
-    std::cout << " === L1 CaloStage2 digis ===\n";
+  if (prints) {
+    std::cout << "=== L1 CaloStage2 digis ===\n";
+
+    auto intok = [](double x) { assert(x - int(x) < 1e-3); return int(x); };
+    std::streamsize p = std::cout.precision();
 
     for (int bx = l1_jets->getFirstBX(), bxe = l1_jets->getLastBX(); bx < bxe; ++bx) {
-      if (l1_jets->isEmpty(bx))
-        std::cout << "\t    bx " << bx << " is empty for jets\n";
-      else {
-        const size_t n = l1_jets->size(bx);
-        std::cout << "\t    bx " << bx << " has " << n << " jets:\n";
-        for (size_t i = 0; i < n; ++i) {
-          const l1t::Jet& jet = l1_jets->at(bx, i);
-          std::cout << "\t      jet " << i << ": " << jet << "\n"
-                    << "\t             rawEt " << jet.rawEt() << " seedEt " << jet.seedEt() << " PUEt: " << jet.puEt() << " towerIEta: " << jet.towerIEta() << " towerIPhi: " << jet.towerIPhi() << "\n";
+      if (prints > 1 || bx == 0) {
+        if (l1_jets->isEmpty(bx))
+          std::cout << "bx " << bx << " is empty for jets\n";
+        else {
+          const size_t n = l1_jets->size(bx);
+          std::cout << "bx " << bx << " has " << n << " jets:\n";
+          for (size_t i = 0; i < n; ++i) {
+            const l1t::Jet& jet = l1_jets->at(bx, i);
+            assert(fabs(jet.pt() - jet.et()) < 1e-3);
+            std::cout << "  jet " << i << " et: " << std::setw(7) << jet.et() << " eta: " << std::setw(7) << std::setprecision(3) << jet.eta() << " phi: " << std::setw(7) << jet.phi() << "        "
+                      << " hwPt: " << intok(jet.hwPt()) << " hwEta: " << intok(jet.hwEta()) << " hwPhi: " << intok(jet.hwPhi()) << " hwQual: " << intok(jet.hwQual()) << " hwIso: " << intok(jet.hwIso())
+                      << " rawEt " << intok(jet.rawEt()) << " seedEt " << intok(jet.seedEt()) << " PUEt: " << intok(jet.puEt()) << " towerIEta: " << intok(jet.towerIEta()) << " towerIPhi: " << intok(jet.towerIPhi()) << "\n";
+          }
         }
       }
     }
 
-    for (int bx = l1_etsums->getFirstBX(), bxe = l1_etsums->getLastBX(); bx < bxe; ++bx) {
-      if (l1_etsums->isEmpty(bx))
-        std::cout << "\t    bx " << bx << " is empty for etsums\n";
-      else {
-        const size_t n = l1_etsums->size(bx);
-        std::cout << "\t    bx " << bx << " has " << n << " etsums:\n";
-        for (size_t i = 0; i < n; ++i) {
-          const l1t::EtSum& etsum = l1_etsums->at(bx, i);
-          std::cout << "\t      etsum " << i << ": type " << etsum.getType() << " " << etsum << "\n";
+    std::cout.precision(p);
+
+    if (prints > 1) {
+      for (int bx = l1_etsums->getFirstBX(), bxe = l1_etsums->getLastBX(); bx < bxe; ++bx) {
+        if (prints > 1 || bx == 0) {
+          if (l1_etsums->isEmpty(bx))
+            std::cout << "bx " << bx << " is empty for etsums\n";
+          else {
+            const size_t n = l1_etsums->size(bx);
+            std::cout << "bx " << bx << " has " << n << " etsums:\n";
+            for (size_t i = 0; i < n; ++i) {
+              const l1t::EtSum& etsum = l1_etsums->at(bx, i);
+              std::cout << "  etsum " << i << ": type " << etsum.getType() << " et: " << etsum.et() << " hwPt: " << etsum.hwPt() << "\n";
+            }
+          }
         }
       }
     }
 
-    std::cout << "\tEtSumHelper says MET " << etsumhelper.MissingEt() << " phi " << etsumhelper.MissingEtPhi()
-              << " MHT " << etsumhelper.MissingHt() << " phi " << etsumhelper.MissingHtPhi()
-              << " ETT " << etsumhelper.TotalEt() << " HTT " << etsumhelper.TotalHt() << "  My HTT " << my_htt << " with bug " << my_htt_wbug << "\n";
-#endif
+    if (prints > 1)
+      std::cout << "EtSumHelper: MET " << etsumhelper.MissingEt() << " phi " << etsumhelper.MissingEtPhi()
+                << " MHT " << etsumhelper.MissingHt() << " phi " << etsumhelper.MissingHtPhi()
+                << " ETT " << etsumhelper.TotalEt() << "   HTT " << etsumhelper.TotalHt() << " Mine " << my_htt << " w.bug " << my_htt_wbug << "\n";
+    else
+      std::cout << "EtSumHelper: HTT " << etsumhelper.TotalHt() << " Mine " << my_htt << " w.bug " << my_htt_wbug;
+
+    if (fabs(my_htt - etsumhelper.TotalHt()) > 0.4 || fabs(my_htt_wbug - etsumhelper.TotalHt()) > 0.4)
+      std::cout << "  DIFFERENT";
 
     std::cout << std::endl;
+#endif
   }
 
   std::auto_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
@@ -240,7 +259,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 #endif
 
   if (prints)
-    printf("TriggerFloats: ht = %f  ht4mc = %f\n", floats->hltht, floats->hltht4mc);
+    printf("TriggerFloats: hltht = %f  hltht4mc = %f\n", floats->hltht, floats->hltht4mc);
 
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     const std::pair<bool, bool> paf = helper.pass_and_found_any_version(mfv::hlt_paths[i]);
@@ -248,7 +267,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       floats->HLTdecisions[i] = paf.first;
 
     if (prints)
-      printf("HLT bit %2i %30s: %2i\n", i, mfv::hlt_paths[i], floats->HLTdecisions[i]);
+      printf("HLT bit %2i %20s: %2i\n", i, mfv::hlt_paths[i], floats->HLTdecisions[i]);
   }
 
 #if defined(MFVNEUTRALINO_2015)
@@ -277,7 +296,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (found) floats->L1decisions[i] = pass;
 
     if (prints)
-      printf("L1 bit %2i %30s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
+      printf("L1  bit %2i %20s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
   }
 
   edm::Handle<pat::JetCollection> jets;

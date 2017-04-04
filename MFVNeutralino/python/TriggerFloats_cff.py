@@ -10,5 +10,5 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   trigger_objects_src = cms.InputTag('selectedPatTrigger'),
                                   jets_src = cms.InputTag('selectedPatJets'), # slimmedJets for miniaod
                                   jet_cut = jtupleParams.jetCut,
-                                  prints = cms.untracked.bool(False),
+                                  prints = cms.untracked.int32(0),
                                   )
