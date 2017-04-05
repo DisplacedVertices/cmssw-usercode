@@ -51,16 +51,15 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
   void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const;
 
-  TH1F* h_sv_pos_1d[2][3];
-  TH2F* h_sv_pos_2d[2][3];
-  TH2F* h_sv_pos_rz[2];
-  TH1F* h_sv_pos_phi[2];
-  TH1F* h_sv_pos_phi_pv[2];
-
-  TH1F* h_sv_pos_bs1d[2][3];
-  TH2F* h_sv_pos_bs2d[2][3];
-  TH2F* h_sv_pos_bsrz[2];
-  TH1F* h_sv_pos_bsphi[2];
+  TH1F* h_sv_pos_1d[3];
+  TH2F* h_sv_pos_2d[3];
+  TH2F* h_sv_pos_rz;
+  TH1F* h_sv_pos_phi;
+  TH1F* h_sv_pos_phi_pv;
+  TH1F* h_sv_pos_bs1d[3];
+  TH2F* h_sv_pos_bs2d[3];
+  TH2F* h_sv_pos_bsrz;
+  TH1F* h_sv_pos_bsphi;
 
   PairwiseHistos h_sv[sv_num_indices];
 
@@ -296,28 +295,25 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     hs.add(TString::Format("jet%d_deltaphi1", i).Data(), TString::Format("|#Delta#phi| to next closest %sjet", lmt_ex[i]).Data(),          25, 0,   3.15);
   }
 
+  for (int i = 0; i < 3; ++i) {
+    float l = i == 2 ? 25 : 4;
+    h_sv_pos_1d[i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i", i), TString::Format(";SV pos[%i] (cm);arb. units", i), 100, -l, l);
+    h_sv_pos_bs1d[i] = fs->make<TH1F>(TString::Format("h_sv_pos_bs1d_%i", i), TString::Format(";SV pos[%i] (cm);arb. units", i), 100, -l, l);
+  }
+  h_sv_pos_2d[0] = fs->make<TH2F>("h_sv_pos_2d_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
+  h_sv_pos_2d[1] = fs->make<TH2F>("h_sv_pos_2d_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_pos_2d[2] = fs->make<TH2F>("h_sv_pos_2d_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_pos_rz    = fs->make<TH2F>("h_sv_pos_rz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_pos_phi   = fs->make<TH1F>("h_sv_pos_phi", ";SV phi;arb. units", 25, -3.15, 3.15);
+  h_sv_pos_phi_pv = fs->make<TH1F>("h_sv_pos_phi_pv", ";SV phi w.r.t. PV;arb. units", 25, -3.15, 3.15);
+  h_sv_pos_bs2d[0] = fs->make<TH2F>("h_sv_pos_bs2dxy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
+  h_sv_pos_bs2d[1] = fs->make<TH2F>("h_sv_pos_bs2dxz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_pos_bs2d[2] = fs->make<TH2F>("h_sv_pos_bs2dyz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_pos_bsrz    = fs->make<TH2F>("h_sv_pos_bsrz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_pos_bsphi   = fs->make<TH1F>("h_sv_pos_bsphi", ";SV phi;arb. units", 25, -3.15, 3.15);
+
   for (int j = 0; j < sv_num_indices; ++j) {
     const char* exc = sv_index_names[j];
-
-    if (j < 2) {
-      for (int i = 0; i < 3; ++i) {
-        float l = i == 2 ? 25 : 4;
-        h_sv_pos_1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
-        h_sv_pos_bs1d[j][i] = fs->make<TH1F>(TString::Format("h_sv_pos_bs1d_%i%i", j, i), TString::Format(";%s SV pos[%i] (cm);arb. units", exc, i), 100, -l, l);
-      }
-      h_sv_pos_2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -4, 4, 100, -4, 4);
-      h_sv_pos_2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
-      h_sv_pos_2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
-      h_sv_pos_rz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_rz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
-      h_sv_pos_phi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_phi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 25, -3.15, 3.15);
-      h_sv_pos_phi_pv[j] = fs->make<TH1F>(TString::Format("h_sv_pos_phi_pv_%i", j), TString::Format(";%s SV phi w.r.t. PV;arb. units", exc), 25, -3.15, 3.15);
-
-      h_sv_pos_bs2d[j][0] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixy", j), TString::Format(";%s SV x (cm);%s SV y (cm)", exc, exc), 100, -4, 4, 100, -4, 4);
-      h_sv_pos_bs2d[j][1] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%ixz", j), TString::Format(";%s SV x (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
-      h_sv_pos_bs2d[j][2] = fs->make<TH2F>(TString::Format("h_sv_pos_bs2d_%iyz", j), TString::Format(";%s SV y (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
-      h_sv_pos_bsrz[j]    = fs->make<TH2F>(TString::Format("h_sv_pos_bsrz_%i",   j), TString::Format(";%s SV r (cm);%s SV z (cm)", exc, exc), 100, -4, 4, 100, -25, 25);
-      h_sv_pos_bsphi[j]   = fs->make<TH1F>(TString::Format("h_sv_pos_bsphi_%i",  j), TString::Format(";%s SV phi;arb. units", exc), 25, -3.15, 3.15);
-    }
 
     h_sv[j].Init("h_sv_" + std::string(exc), hs, true, do_scatterplots);
 
@@ -394,28 +390,26 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
 
-    if (isv < 2) {
-      h_sv_pos_1d[isv][0]->Fill(aux.x - bsx, w);
-      h_sv_pos_1d[isv][1]->Fill(aux.y - bsy, w);
-      h_sv_pos_1d[isv][2]->Fill(aux.z - bsz, w);
-      h_sv_pos_2d[isv][0]->Fill(aux.x - bsx, aux.y - bsy, w);
-      h_sv_pos_2d[isv][1]->Fill(aux.x - bsx, aux.z - bsz, w);
-      h_sv_pos_2d[isv][2]->Fill(aux.y - bsy, aux.z - bsz, w);
-      h_sv_pos_rz[isv]->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, w);
-      const double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
-      h_sv_pos_phi[isv]->Fill(pos_phi, w);
-      h_sv_pos_phi_pv[isv]->Fill(atan2(aux.y - mevent->pvy, aux.x - mevent->pvx), w);
+    h_sv_pos_1d[0]->Fill(aux.x - bsx, w);
+    h_sv_pos_1d[1]->Fill(aux.y - bsy, w);
+    h_sv_pos_1d[2]->Fill(aux.z - bsz, w);
+    h_sv_pos_2d[0]->Fill(aux.x - bsx, aux.y - bsy, w);
+    h_sv_pos_2d[1]->Fill(aux.x - bsx, aux.z - bsz, w);
+    h_sv_pos_2d[2]->Fill(aux.y - bsy, aux.z - bsz, w);
+    h_sv_pos_rz->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, w);
+    const double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
+    h_sv_pos_phi->Fill(pos_phi, w);
+    h_sv_pos_phi_pv->Fill(atan2(aux.y - mevent->pvy, aux.x - mevent->pvx), w);
 
-      h_sv_pos_bs1d[isv][0]->Fill(aux.x - mevent->bsx_at_z(aux.z), w);
-      h_sv_pos_bs1d[isv][1]->Fill(aux.y - mevent->bsy_at_z(aux.z), w);
-      h_sv_pos_bs1d[isv][2]->Fill(aux.z - bsz, w);
-      h_sv_pos_bs2d[isv][0]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
-      h_sv_pos_bs2d[isv][1]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
-      h_sv_pos_bs2d[isv][2]->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);
-      h_sv_pos_bsrz[isv]->Fill(mevent->bs2ddist(aux) * (aux.y - mevent->bsy_at_z(aux.z) >= 0 ? 1 : -1), aux.z - bsz, w);
-      const double pos_bsphi = atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z));
-      h_sv_pos_bsphi[isv]->Fill(pos_bsphi, w);
-    }
+    h_sv_pos_bs1d[0]->Fill(aux.x - mevent->bsx_at_z(aux.z), w);
+    h_sv_pos_bs1d[1]->Fill(aux.y - mevent->bsy_at_z(aux.z), w);
+    h_sv_pos_bs1d[2]->Fill(aux.z - bsz, w);
+    h_sv_pos_bs2d[0]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
+    h_sv_pos_bs2d[1]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
+    h_sv_pos_bs2d[2]->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);
+    h_sv_pos_bsrz->Fill(mevent->bs2ddist(aux) * (aux.y - mevent->bsy_at_z(aux.z) >= 0 ? 1 : -1), aux.z - bsz, w);
+    const double pos_bsphi = atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z));
+    h_sv_pos_bsphi->Fill(pos_bsphi, w);
 
     PairwiseHistos::ValueMap v = {
         {"nlep",                    aux.which_lep.size()},
