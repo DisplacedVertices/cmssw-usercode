@@ -22,8 +22,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
   const std::vector<double> force_bs;
-  const edm::InputTag primary_vertex_src;
-  const edm::InputTag jets_src;
 
   TH1F* h_w;
 
@@ -95,14 +93,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdr;
 
-  TH1F* h_jet_Fox_Wolfram[11];
-  TH1F* h_jet_ST;
-  TH1F* h_jetlep_ST;
-
-  TH2F* h_jet_ST_njets;
-  TH2F* h_jet_ST_ht;
-  TH2F* h_jet_ST_ht40;
-
   TH1F* h_met;
   TH1F* h_metphi;
 
@@ -134,59 +124,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_leptons_dxybs[2][3];
   TH1F* h_leptons_dz[2][3];
   TH1F* h_leptons_iso[2][3];
-  TH1F* h_leptons_iso_neargenel_hardint[2][3];
-  TH1F* h_leptons_iso_neargenmu_hardint[2][3];
-  TH1F* h_leptons_iso_neargenb[2][3];
-  TH1F* h_leptons_iso_nearnothing[2][3];
-
-  TH1F* h_leptons_iso_0e0mu[2][3];
-  TH1F* h_leptons_iso_1e0mu[2][3];
-  TH1F* h_leptons_iso_0e1mu[2][3];
-  TH1F* h_leptons_iso_1e1mu[2][3];
-  TH1F* h_leptons_iso_2e0mu[2][3];
-  TH1F* h_leptons_iso_0e2mu[2][3];
-
-  TH1F* h_leptons_iso_0e0mu_neargenel[2][3];
-  TH1F* h_leptons_iso_1e0mu_neargenel[2][3];
-  TH1F* h_leptons_iso_0e1mu_neargenel[2][3];
-  TH1F* h_leptons_iso_1e1mu_neargenel[2][3];
-  TH1F* h_leptons_iso_2e0mu_neargenel[2][3];
-  TH1F* h_leptons_iso_0e2mu_neargenel[2][3];
-
-  TH1F* h_leptons_iso_0e0mu_neargenel_hardint[2][3];
-  TH1F* h_leptons_iso_1e0mu_neargenel_hardint[2][3];
-  TH1F* h_leptons_iso_0e1mu_neargenel_hardint[2][3];
-  TH1F* h_leptons_iso_1e1mu_neargenel_hardint[2][3];
-  TH1F* h_leptons_iso_2e0mu_neargenel_hardint[2][3];
-  TH1F* h_leptons_iso_0e2mu_neargenel_hardint[2][3];
-
-  TH1F* h_leptons_iso_0e0mu_neargenmu[2][3];
-  TH1F* h_leptons_iso_1e0mu_neargenmu[2][3];
-  TH1F* h_leptons_iso_0e1mu_neargenmu[2][3];
-  TH1F* h_leptons_iso_1e1mu_neargenmu[2][3];
-  TH1F* h_leptons_iso_2e0mu_neargenmu[2][3];
-  TH1F* h_leptons_iso_0e2mu_neargenmu[2][3];
-
-  TH1F* h_leptons_iso_0e0mu_neargenmu_hardint[2][3];
-  TH1F* h_leptons_iso_1e0mu_neargenmu_hardint[2][3];
-  TH1F* h_leptons_iso_0e1mu_neargenmu_hardint[2][3];
-  TH1F* h_leptons_iso_1e1mu_neargenmu_hardint[2][3];
-  TH1F* h_leptons_iso_2e0mu_neargenmu_hardint[2][3];
-  TH1F* h_leptons_iso_0e2mu_neargenmu_hardint[2][3];
-
-  TH1F* h_leptons_iso_0e0mu_neargenb[2][3];
-  TH1F* h_leptons_iso_1e0mu_neargenb[2][3];
-  TH1F* h_leptons_iso_0e1mu_neargenb[2][3];
-  TH1F* h_leptons_iso_1e1mu_neargenb[2][3];
-  TH1F* h_leptons_iso_2e0mu_neargenb[2][3];
-  TH1F* h_leptons_iso_0e2mu_neargenb[2][3];
-
-  TH1F* h_leptons_iso_0e0mu_nearnothing[2][3];
-  TH1F* h_leptons_iso_1e0mu_nearnothing[2][3];
-  TH1F* h_leptons_iso_0e1mu_nearnothing[2][3];
-  TH1F* h_leptons_iso_1e1mu_nearnothing[2][3];
-  TH1F* h_leptons_iso_2e0mu_nearnothing[2][3];
-  TH1F* h_leptons_iso_0e2mu_nearnothing[2][3];
 
   TH1F* h_muons_absdphi[3];
   TH1F* h_muons_dphi[3];
@@ -196,66 +133,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_muons_avgeta_dphi[3];
   TH1F* h_muons_dR[3];
   TH2F* h_muons_dR_dphi[3];
-
-  TH1F* h_jet_svnvertices;
-  TH1F* h_jet_svntracks;
-  TH1F* h_jet_svsumpt2;
-  TH1F* h_jet_svx;
-  TH1F* h_jet_svy;
-  TH1F* h_jet_svz;
-  TH2F* h_jet_svyx;
-  TH2F* h_jet_svzr;
-  TH2F* h_jet_momphi_posphi;
-  TH1F* h_jet_svcxx;
-  TH1F* h_jet_svcxy;
-  TH1F* h_jet_svcxz;
-  TH1F* h_jet_svcyy;
-  TH1F* h_jet_svcyz;
-  TH1F* h_jet_svczz;
-  TH1F* h_jet_svpv2ddist;
-  TH1F* h_jet_svpv2derr;
-  TH1F* h_jet_svpv2dsig;
-
-  TH1F* h_jetsv_absdphi;
-  TH1F* h_jetsv_dxy;
-  TH1F* h_jetsv_dxyerr;
-  TH1F* h_jetsv_dxysig;
-  TH1F* h_jetsv_dz;
-  TH1F* h_jetsv_dzerr;
-  TH1F* h_jetsv_dzsig;
-  TH1F* h_jetsv_d3d;
-  TH1F* h_jetsv_d3derr;
-  TH1F* h_jetsv_d3dsig;
-
-  TH1F* h_bjetsv_absdphi;
-  TH1F* h_bjetsv_dxy;
-  TH1F* h_bjetsv_dxyerr;
-  TH1F* h_bjetsv_dxysig;
-  TH1F* h_bjetsv_dz;
-  TH1F* h_bjetsv_dzerr;
-  TH1F* h_bjetsv_dzsig;
-  TH1F* h_bjetsv_d3d;
-  TH1F* h_bjetsv_d3derr;
-  TH1F* h_bjetsv_d3dsig;
-
-  TH1F* h_pv_n;
-  TH1F* h_pv_x[4];
-  TH1F* h_pv_y[4];
-  TH1F* h_pv_z[4];
-  TH1F* h_pv_rho[4];
-  TH1F* h_pv_phi[4];
-  TH1F* h_pv_ntracks[4];
-  TH1F* h_pv_sumpt2[4];
-
-  TH1F* h_jets_n;
-  TH1F* h_jets_pt;
-  TH1F* h_jets_eta;
-  TH1F* h_jets_phi;
-
-  TH1F* h_bjets_n[NBDISC][3];
-  TH1F* h_bjets_pt[NBDISC][3];
-  TH1F* h_bjets_eta[NBDISC][3];
-  TH1F* h_bjets_phi[NBDISC][3];
 
   TH1F* h_n_vertex_seed_tracks;
   TH1F* h_vertex_seed_track_chi2dof;
@@ -276,9 +153,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
-    primary_vertex_src(cfg.getParameter<edm::InputTag>("primary_vertex_src")),
-    jets_src(cfg.getParameter<edm::InputTag>("jets_src"))
+    force_bs(cfg.getParameter<std::vector<double> >("force_bs"))
 {
   if (force_bs.size() && force_bs.size() != 3)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
@@ -375,15 +250,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_jet_pairdr = fs->make<TH1F>("h_jet_pairdr", ";jet pair #DeltaR (rad);jet pairs/.047", 150, 0, 7);
 
-  for (int i = 0; i < 11; ++i) {
-    h_jet_Fox_Wolfram[i] = fs->make<TH1F>(TString::Format("h_jet_H%dT",i), TString::Format(";jets transverse Fox-Wolfram moment H_{%d}^{T};events",i), 101, 0, 1.01);
-  }
-  h_jet_ST = fs->make<TH1F>("h_jet_ST", ";jets transverse sphericity S_{T};events", 101, 0, 1.01);
-  h_jetlep_ST = fs->make<TH1F>("h_jetlep_ST", ";jets + dilep muons transverse sphericity S_{T};events", 101, 0, 1.01);
-  h_jet_ST_njets = fs->make<TH2F>("h_jet_ST_njets", ";number of jets;jets transverse sphericity S_{T}", 20, 0, 20, 101, 0, 1.01);
-  h_jet_ST_ht = fs->make<TH2F>("h_jet_ST_ht", ";H_{T} of jets (GeV);jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
-  h_jet_ST_ht40 = fs->make<TH2F>("h_jet_ST_ht40", ";H_{T} of jets with p_{T} > 40 GeV;jets transverse sphericity S_{T}", 200, 0, 5000, 101, 0, 1.01);
-
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
 
@@ -422,60 +288,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
       h_leptons_dxybs[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_dxybs", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss dxy(BS) (cm);%ss/50 #mum", lep_ex[i], lep_kind[j], lep_kind[j]), 200, -0.5, 0.5);
       h_leptons_dz   [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_dz",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss dz (cm);%ss/50 #mum",       lep_ex[i], lep_kind[j], lep_kind[j]), 200, -0.5, 0.5);
       h_leptons_iso  [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%ss/.04",       lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-      h_leptons_iso_neargenel_hardint  [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_neargenel_hardint",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%ss/.04",       lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-      h_leptons_iso_neargenmu_hardint  [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_neargenmu_hardint",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%ss/.04",       lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-      h_leptons_iso_neargenb  [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_neargenb",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%ss/.04",       lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-      h_leptons_iso_nearnothing  [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_nearnothing",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%ss/.04",       lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-
-    h_leptons_iso_0e0mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e0mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e1mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e1mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_2e0mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e2mu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-
-    h_leptons_iso_0e0mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e0mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e1mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e1mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_2e0mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e2mu_neargenel[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenel", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-
-
-    h_leptons_iso_0e0mu_neargenel_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenel_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e0mu_neargenel_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenel_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e1mu_neargenel_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenel_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e1mu_neargenel_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenel_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_2e0mu_neargenel_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenel_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e2mu_neargenel_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenel_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-
-    h_leptons_iso_0e0mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e0mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e1mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e1mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_2e0mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e2mu_neargenmu[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenmu", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-
-    h_leptons_iso_0e0mu_neargenmu_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenmu_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e0mu_neargenmu_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenmu_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e1mu_neargenmu_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenmu_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e1mu_neargenmu_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenmu_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_2e0mu_neargenmu_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenmu_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e2mu_neargenmu_hardint[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenmu_hardint", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-
-    h_leptons_iso_0e0mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e0mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e1mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e1mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_2e0mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e2mu_neargenb[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_neargenb", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-
-    h_leptons_iso_0e0mu_nearnothing[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e0mu_nearnothing", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e0mu_nearnothing[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e0mu_nearnothing", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e1mu_nearnothing[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e1mu_nearnothing", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_1e1mu_nearnothing[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_1e1mu_nearnothing", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_2e0mu_nearnothing[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_2e0mu_nearnothing", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
-    h_leptons_iso_0e2mu_nearnothing[j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso_0e2mu_nearnothing", lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%s/.04", lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
     }
 
     h_muons_absdphi[i] = fs->make<TH1F>(TString::Format("h_muons_%s_absdphi", lep_ex[i]), TString::Format("events with two %s muons;|#Delta#phi| (rad);events/0.126", lep_ex[i]), 25, 0, 3.15);
@@ -486,78 +298,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_muons_avgeta_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_avgeta_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);avg #eta (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, -4, 4);
     h_muons_dR[i] = fs->make<TH1F>(TString::Format("h_muons_%s_dR", lep_ex[i]), TString::Format("events with two %s muons;#Delta R (rad);events/0.14", lep_ex[i]), 50, 0, 7);
     h_muons_dR_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_dR_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);#Delta R (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, 0, 7);
-  }
-
-  h_jet_svnvertices = fs->make<TH1F>("h_jet_svnvertices", ";number of secondary vertices;number of jets", 10, 0, 10);
-  h_jet_svntracks = fs->make<TH1F>("h_jet_svntracks", ";# of tracks/SV;number of jets", 40, 0, 40);
-  h_jet_svsumpt2 = fs->make<TH1F>("h_jet_svsumpt2", ";SV #Sigma p_{T}^{2} (GeV^2);number of jets", 300, 0, 6000);
-  h_jet_svx = fs->make<TH1F>("h_jet_svx", ";SV x (cm);number of jets", 100, -8, 8);
-  h_jet_svy = fs->make<TH1F>("h_jet_svy", ";SV y (cm);number of jets", 100, -8, 8);
-  h_jet_svz = fs->make<TH1F>("h_jet_svz", ";SV z (cm);number of jets", 100, -25, 25);
-  h_jet_svyx = fs->make<TH2F>("h_jet_svyx", ";SV x (cm);SV y (cm)", 100, -8, 8, 100, -8, 8);
-  h_jet_svzr = fs->make<TH2F>("h_jet_svzr", ";SV rho (cm);SV z (cm)", 100, -8, 8, 100, -25, 25);
-  h_jet_momphi_posphi = fs->make<TH2F>("h_jet_momphi_posphi", ";SV position phi;jet momentum phi", 50, -3.15, 3.15, 50, -3.15, 3.15);
-  h_jet_svcxx = fs->make<TH1F>("h_jet_svcxx", ";SV cxx;number of jets", 100, -0.01, 0.01);
-  h_jet_svcxy = fs->make<TH1F>("h_jet_svcxy", ";SV cxy;number of jets", 100, -0.01, 0.01);
-  h_jet_svcxz = fs->make<TH1F>("h_jet_svcxz", ";SV cxz;number of jets", 100, -0.01, 0.01);
-  h_jet_svcyy = fs->make<TH1F>("h_jet_svcyy", ";SV cyy;number of jets", 100, -0.01, 0.01);
-  h_jet_svcyz = fs->make<TH1F>("h_jet_svcyz", ";SV cyz;number of jets", 100, -0.01, 0.01);
-  h_jet_svczz = fs->make<TH1F>("h_jet_svczz", ";SV czz;number of jets", 100, -0.01, 0.01);
-  h_jet_svpv2ddist = fs->make<TH1F>("h_jet_svpv2ddist", ";dist2d(SV, PV) (cm);number of jets", 100, 0, 5);
-  h_jet_svpv2derr = fs->make<TH1F>("h_jet_svpv2derr", ";#sigma(dist2d(SV, PV)) (cm);number of jets", 100, 0, 0.05);
-  h_jet_svpv2dsig = fs->make<TH1F>("h_jet_svpv2dsig", ";N#sigma(dist2d(SV, PV));number of jets", 100, 0, 100);
-
-  h_jetsv_absdphi = fs->make<TH1F>("h_jetsv_dphi", "events with two jet vertices;|#Delta#phi| (rad);events/0.126", 25, 0, 3.15);
-  h_jetsv_dxy = fs->make<TH1F>("h_jetsv_dxy", "events with two jet vertices;dist2d(sv #0, #1) (cm);arb. units", 500, 0, 5);
-  h_jetsv_dxyerr = fs->make<TH1F>("h_jetsv_dxyerr", "events with two jet vertices;#sigma(dist2d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
-  h_jetsv_dxysig = fs->make<TH1F>("h_jetsv_dxysig", "events with two jet vertices;N#sigma(dist2d(sv #0, #1));arb. units", 100, 0, 100);
-  h_jetsv_dz = fs->make<TH1F>("h_jetsv_dz", "events with two jet vertices;|dz(sv #0, #1)| (cm);arb. units", 500, 0, 5);
-  h_jetsv_dzerr = fs->make<TH1F>("h_jetsv_dzerr", "events with two jet vertices;#sigma(dz(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
-  h_jetsv_dzsig = fs->make<TH1F>("h_jetsv_dzsig", "events with two jet vertices;N#sigma(dz(sv #0, #1));arb. units", 100, 0, 100);
-  h_jetsv_d3d = fs->make<TH1F>("h_jetsv_d3d", "events with two jet vertices;dist3d(sv #0, #1) (cm);arb. units", 500, 0, 5);
-  h_jetsv_d3derr = fs->make<TH1F>("h_jetsv_d3derr", "events with two jet vertices;#sigma(dist3d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
-  h_jetsv_d3dsig = fs->make<TH1F>("h_jetsv_d3dsig", "events with two jet vertices;N#sigma(dist3d(sv #0, #1));arb. units", 100, 0, 100);
-
-  h_bjetsv_absdphi = fs->make<TH1F>("h_bjetsv_dphi", "events with two bjet vertices;|#Delta#phi| (rad);events/0.126", 25, 0, 3.15);
-  h_bjetsv_dxy = fs->make<TH1F>("h_bjetsv_dxy", "events with two bjet vertices;dist2d(sv #0, #1) (cm);arb. units", 500, 0, 5);
-  h_bjetsv_dxyerr = fs->make<TH1F>("h_bjetsv_dxyerr", "events with two bjet vertices;#sigma(dist2d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
-  h_bjetsv_dxysig = fs->make<TH1F>("h_bjetsv_dxysig", "events with two bjet vertices;N#sigma(dist2d(sv #0, #1));arb. units", 100, 0, 100);
-  h_bjetsv_dz = fs->make<TH1F>("h_bjetsv_dz", "events with two bjet vertices;|dz(sv #0, #1)| (cm);arb. units", 500, 0, 5);
-  h_bjetsv_dzerr = fs->make<TH1F>("h_bjetsv_dzerr", "events with two bjet vertices;#sigma(dz(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
-  h_bjetsv_dzsig = fs->make<TH1F>("h_bjetsv_dzsig", "events with two bjet vertices;N#sigma(dz(sv #0, #1));arb. units", 100, 0, 100);
-  h_bjetsv_d3d = fs->make<TH1F>("h_bjetsv_d3d", "events with two bjet vertices;dist3d(sv #0, #1) (cm);arb. units", 500, 0, 5);
-  h_bjetsv_d3derr = fs->make<TH1F>("h_bjetsv_d3derr", "events with two bjet vertices;#sigma(dist3d(sv #0, #1)) (cm);arb. units", 500, 0, 0.5);
-  h_bjetsv_d3dsig = fs->make<TH1F>("h_bjetsv_d3dsig", "events with two bjet vertices;N#sigma(dist3d(sv #0, #1));arb. units", 100, 0, 100);
-
-  if (primary_vertex_src.label() != "") {
-    h_pv_n = fs->make<TH1F>("h_pv_n", ";# of primary vertices;events", 65, 0, 65);
-    const char* pv_names[4] = {"pv1_sumpt2", "rest_sumpt2", "pv1_absdz", "rest_absdz"};
-    for (int i = 0; i < 4; ++i) {
-      h_pv_x[i] = fs->make<TH1F>(TString::Format("h_%s_x", pv_names[i]), TString::Format(";%s x (cm);events/10 #mum", pv_names[i]), 200, -0.1, 0.1);
-      h_pv_y[i] = fs->make<TH1F>(TString::Format("h_%s_y", pv_names[i]), TString::Format(";%s y (cm);events/10 #mum", pv_names[i]), 200, -0.1, 0.1);
-      h_pv_z[i] = fs->make<TH1F>(TString::Format("h_%s_z", pv_names[i]), TString::Format(";%s z (cm);events/1.5 mm", pv_names[i]), 200, -15, 15);
-      h_pv_rho[i] = fs->make<TH1F>(TString::Format("h_%s_rho", pv_names[i]), TString::Format(";%s rho (cm);events/5 #mum", pv_names[i]), 200, 0, 0.1);
-      h_pv_phi[i] = fs->make<TH1F>(TString::Format("h_%s_phi", pv_names[i]), TString::Format(";%s #phi (rad);events/.063", pv_names[i]), 100, -3.1416, 3.1416);
-      h_pv_ntracks[i] = fs->make<TH1F>(TString::Format("h_%s_ntracks", pv_names[i]), TString::Format(";%s # of tracks in primary vertex;events", pv_names[i]), 200, 0, 200);
-      h_pv_sumpt2[i] = fs->make<TH1F>(TString::Format("h_%s_sumpt2", pv_names[i]), TString::Format(";%s #Sigma p_{T}^{2} (GeV^{2});events/10 GeV^{2}", pv_names[i]), 200, 0, 2000);
-    }
-  }
-
-  if (jets_src.label() != "") {
-    h_jets_n = fs->make<TH1F>("h_jets_n", ";# of jets;events", 20, 0, 20);
-    h_jets_pt = fs->make<TH1F>("h_jets_pt", ";jet pt;number of jets", 100, 0, 500);
-    h_jets_eta = fs->make<TH1F>("h_jets_eta", ";jet eta;number of jets", 50, -4, 4);
-    h_jets_phi = fs->make<TH1F>("h_jets_phi", ";jet phi;number of jets", 50, -3.15, 3.15);
-
-    const char* b_wpnames[NBDISC] = {"JP", "CSV"};
-    for (int i = 0; i < NBDISC; ++i) {
-      for (int j = 0; j < 3; ++j) {
-        h_bjets_n[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_n", b_wpnames[i], lmt_ex[j]), TString::Format(";# of %s %s bjets;events", b_wpnames[i], lmt_ex[j]), 20, 0, 20);
-        h_bjets_pt[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_pt", b_wpnames[i], lmt_ex[j]), TString::Format(";%s %s bjet pt;number of bjets", b_wpnames[i], lmt_ex[j]), 100, 0, 500);
-        h_bjets_eta[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_eta", b_wpnames[i], lmt_ex[j]), TString::Format(";%s %s bjet eta;number of bjets", b_wpnames[i], lmt_ex[j]), 50, -4, 4);
-        h_bjets_phi[i][j] = fs->make<TH1F>(TString::Format("h_bjets_%s%s_phi", b_wpnames[i], lmt_ex[j]), TString::Format(";%s %s bjet phi;number of bjets", b_wpnames[i], lmt_ex[j]), 50, -3.15, 3.15);
-      }
-    }
   }
 
   h_n_vertex_seed_tracks = fs->make<TH1F>("h_n_vertex_seed_tracks", ";# vertex seed tracks;events", 100, 0, 100);
@@ -698,8 +438,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  uchar lep0 = mevent->gen_decay_type[0];
-  uchar lep1 = mevent->gen_decay_type[1];
   for (size_t ilep = 0; ilep < mevent->lep_id.size(); ++ilep) {
     const size_t j = mevent->is_electron(ilep);
     for (size_t i = 0; i < 3; ++i)
@@ -711,216 +449,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_leptons_dxybs[j][i]->Fill(mevent->lep_dxybs[ilep]);
         h_leptons_dz[j][i]->Fill(mevent->lep_dz[ilep]);
         h_leptons_iso[j][i]->Fill(mevent->lep_iso[ilep]);
-
-	bool near_b = false;
-	bool near_el = false;
-	bool near_mu = false;
-	bool hard_int = false;
-	for (size_t ibquark = 0; ibquark < mevent->gen_bquark_pt.size(); ++ibquark) {
-	  double dR = reco::deltaR(mevent->gen_bquark_eta[ibquark], mevent->gen_bquark_phi[ibquark], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
-	  if (dR < 0.5) {
-	    near_b = true;
-	    break;
-	  }
-	}
-	for (size_t igenlep = 0; igenlep < mevent->gen_lepton_id.size(); ++igenlep) {
-	  double dR = reco::deltaR(mevent->gen_lepton_eta[igenlep], mevent->gen_lepton_phi[igenlep], mevent->lep_eta[ilep], mevent->lep_phi[ilep]);
-	  if (dR < 0.1) {
-	    if (mevent->gen_lepton_id[igenlep] & 0x80) 
-	      hard_int = true;
-            if (mevent->gen_lepton_id[igenlep] & 1)
-              near_el = true;
-            else 
-              near_mu = true;
-	    break;
-	  }
-	}
-
-	if (near_el && hard_int) h_leptons_iso_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	if (near_mu && hard_int) h_leptons_iso_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	if (near_b) h_leptons_iso_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	if (!near_el && !near_mu && !near_b) h_leptons_iso_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-
-	if (lep0 == 0) {
-	  if (lep1 == 0) {
-	    h_leptons_iso_2e0mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_2e0mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_2e0mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_2e0mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_2e0mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_2e0mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_2e0mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	  else if (lep1 == 1) {
-	    h_leptons_iso_1e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_1e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_1e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e1mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_1e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e1mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_1e1mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	  else {
-	    h_leptons_iso_1e0mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_1e0mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_1e0mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e0mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_1e0mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e0mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_1e0mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	}
-	else if (lep0 == 1) {
-	  if (lep1 == 0) {
-	    h_leptons_iso_1e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_1e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_1e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e1mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_1e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e1mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_1e1mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	  else if (lep1 == 1) {
-	    h_leptons_iso_0e2mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_0e2mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_0e2mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e2mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_0e2mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e2mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_0e2mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	  else {
-	    h_leptons_iso_0e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_0e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_0e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e1mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_0e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e1mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_0e1mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	}
-	else {
-	  if (lep1 == 0) {
-	    h_leptons_iso_1e0mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_1e0mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_1e0mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e0mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_1e0mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_1e0mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_1e0mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	  else if (lep1 == 1) {
-	    h_leptons_iso_0e1mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_0e1mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_0e1mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e1mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_0e1mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e1mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_0e1mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  } 
-	  else {
-	    h_leptons_iso_0e0mu[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_b) h_leptons_iso_0e0mu_neargenb[j][i]->Fill(mevent->lep_iso[ilep]);
-	    if (near_el) {
-	      h_leptons_iso_0e0mu_neargenel[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e0mu_neargenel_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (near_mu) {
-	      h_leptons_iso_0e0mu_neargenmu[j][i]->Fill(mevent->lep_iso[ilep]);
-	      if (hard_int) 
-		h_leptons_iso_0e0mu_neargenmu_hardint[j][i]->Fill(mevent->lep_iso[ilep]);
-	    }
-	    if (!near_el && !near_mu && !near_b)
-	      h_leptons_iso_0e0mu_nearnothing[j][i]->Fill(mevent->lep_iso[ilep]);
-	  }
-	}
       }
   }
-  double Fox_Wolfram[11] = {0};
-  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-    double theta_i = 2 * atan(exp(-mevent->jet_eta[ijet]));
-    for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
-      double theta_j = 2 * atan(exp(-mevent->jet_eta[jjet]));
-      double WT_ij = mevent->jet_pt[ijet] * mevent->jet_pt[jjet] / (mevent->jet_ht() * mevent->jet_ht());
-      double x = cos(theta_i) * cos(theta_j) + sin(theta_i) * sin(theta_j) * cos(mevent->jet_phi[ijet] - mevent->jet_phi[jjet]);
-      Fox_Wolfram[0] += WT_ij * 1;
-      Fox_Wolfram[1] += WT_ij * x;
-      Fox_Wolfram[2] += WT_ij * 1./2. * (3*pow(x,2) - 1);
-      Fox_Wolfram[3] += WT_ij * 1./2. * (5*pow(x,3) - 3*x);
-      Fox_Wolfram[4] += WT_ij * 1./8. * (35*pow(x,4) - 30*pow(x,2) + 3);
-      Fox_Wolfram[5] += WT_ij * 1./8. * (63*pow(x,5) - 70*pow(x,3) + 15*x);
-      Fox_Wolfram[6] += WT_ij * 1./16. * (231*pow(x,6) - 315*pow(x,4) + 105*pow(x,2) - 5);
-      Fox_Wolfram[7] += WT_ij * 1./16. * (429*pow(x,7) - 693*pow(x,5) + 315*pow(x,3) - 35*x);
-      Fox_Wolfram[8] += WT_ij * 1./128. * (6435*pow(x,8) - 12012*pow(x,6) + 6930*pow(x,4) - 1260*pow(x,2) + 35);
-      Fox_Wolfram[9] += WT_ij * 1./128. * (12155*pow(x,9) - 25740*pow(x,7) + 18018*pow(x,5) - 4620*pow(x,3) + 315*x);
-      Fox_Wolfram[10] += WT_ij * 1./256. * (46189*pow(x,10) - 109395*pow(x,8) + 90090*pow(x,6) - 30030*pow(x,4) + 3465*pow(x,2) - 63);
-    }
-  }
-  for (int i = 0; i < 11; ++i) {
-    h_jet_Fox_Wolfram[i]->Fill(Fox_Wolfram[i]);
-  }
-  h_jet_ST->Fill(mevent->jet_ST());
-  h_jetlep_ST->Fill(mevent->jetlep_ST(0, MFVEvent::mu_dilep));
-  h_jet_ST_njets->Fill(mevent->njets(), mevent->jet_ST());
-  h_jet_ST_ht->Fill(mevent->jet_ht(), mevent->jet_ST());
-  h_jet_ST_ht40->Fill(mevent->jet_ht(40), mevent->jet_ST());
 
   h_met->Fill(mevent->met());
   h_metphi->Fill(mevent->metphi());
@@ -968,212 +498,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_bjets_avgeta_dphi[i][j]->Fill(dphi, avgeta);
         h_bjets_dR[i][j]->Fill(dR);
         h_bjets_dR_dphi[i][j]->Fill(dphi, dR);
-      }
-    }
-  }
-
-  std::vector<double> jetsv_x;
-  std::vector<double> jetsv_y;
-  std::vector<double> jetsv_z;
-  std::vector<double> jetsv_cxx;
-  std::vector<double> jetsv_cxy;
-  std::vector<double> jetsv_cxz;
-  std::vector<double> jetsv_cyy;
-  std::vector<double> jetsv_cyz;
-  std::vector<double> jetsv_czz;
-  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-    h_jet_svnvertices->Fill(mevent->jet_svnvertices[ijet]);
-    if (mevent->jet_svnvertices[ijet] > 0) {
-      jetsv_x.push_back(mevent->jet_svx[ijet] - mevent->bsx);
-      jetsv_y.push_back(mevent->jet_svy[ijet] - mevent->bsy);
-      jetsv_z.push_back(mevent->jet_svz[ijet] - mevent->bsz);
-      jetsv_cxx.push_back(mevent->jet_svcxx[ijet]);
-      jetsv_cxy.push_back(mevent->jet_svcxy[ijet]);
-      jetsv_cxz.push_back(mevent->jet_svcxz[ijet]);
-      jetsv_cyy.push_back(mevent->jet_svcyy[ijet]);
-      jetsv_cyz.push_back(mevent->jet_svcyz[ijet]);
-      jetsv_czz.push_back(mevent->jet_svczz[ijet]);
-
-      h_jet_svntracks->Fill(mevent->jet_svntracks[ijet]);
-      h_jet_svsumpt2->Fill(mevent->jet_svsumpt2[ijet]);
-      h_jet_svx->Fill(mevent->jet_svx[ijet] - mevent->bsx);
-      h_jet_svy->Fill(mevent->jet_svy[ijet] - mevent->bsy);
-      h_jet_svz->Fill(mevent->jet_svz[ijet] - mevent->bsz);
-      h_jet_svyx->Fill(mevent->jet_svx[ijet] - mevent->bsx, mevent->jet_svy[ijet] - mevent->bsy);
-      float svr = sqrt((mevent->jet_svx[ijet] - mevent->bsx) * (mevent->jet_svx[ijet] - mevent->bsx) + (mevent->jet_svy[ijet] - mevent->bsy) * (mevent->jet_svy[ijet] - mevent->bsy));
-      h_jet_svzr->Fill(svr * (mevent->jet_svy[ijet] - mevent->bsy >= 0 ? 1 : -1), mevent->jet_svz[ijet] - mevent->bsz);
-      h_jet_momphi_posphi->Fill(atan2(mevent->jet_svy[ijet] - mevent->bsy, mevent->jet_svx[ijet] - mevent->bsx), mevent->jet_phi[ijet]);
-      h_jet_svcxx->Fill(mevent->jet_svcxx[ijet]);
-      h_jet_svcxy->Fill(mevent->jet_svcxy[ijet]);
-      h_jet_svcxz->Fill(mevent->jet_svcxz[ijet]);
-      h_jet_svcyy->Fill(mevent->jet_svcyy[ijet]);
-      h_jet_svcyz->Fill(mevent->jet_svcyz[ijet]);
-      h_jet_svczz->Fill(mevent->jet_svczz[ijet]);
-      h_jet_svpv2ddist->Fill(mevent->jet_svpv2ddist(ijet));
-      h_jet_svpv2derr->Fill(mevent->jet_svpv2derr(ijet));
-      h_jet_svpv2dsig->Fill(mevent->jet_svpv2dsig(ijet));
-    }
-  }
-  if (jetsv_x.size() == 2) {
-    double dphi = reco::deltaPhi(atan2(jetsv_y[0], jetsv_x[0]), atan2(jetsv_y[1], jetsv_x[1]));
-    h_jetsv_absdphi->Fill(fabs(dphi));
-
-    double dxy = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]));
-    double dx = (jetsv_x[0] - jetsv_x[1]) / dxy;
-    double dy = (jetsv_y[0] - jetsv_y[1]) / dxy;
-    double dxyerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dx*dx + (jetsv_cyy[0] + jetsv_cyy[1])*dy*dy + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dx*dy);
-    h_jetsv_dxy->Fill(dxy);
-    h_jetsv_dxyerr->Fill(dxyerr);
-    h_jetsv_dxysig->Fill(dxy / dxyerr);
-
-    double dz = fabs(jetsv_z[0] - jetsv_z[1]);
-    double dzerr = sqrt(jetsv_czz[0] + jetsv_czz[1]);
-    h_jetsv_dz->Fill(dz);
-    h_jetsv_dzerr->Fill(dzerr);
-    h_jetsv_dzsig->Fill(dz / dzerr);
-
-    double dr = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]) + (jetsv_z[0] - jetsv_z[1]) * (jetsv_z[0] - jetsv_z[1]));
-    double dxr = (jetsv_x[0] - jetsv_x[1]) / dr;
-    double dyr = (jetsv_y[0] - jetsv_y[1]) / dr;
-    double dzr = (jetsv_z[0] - jetsv_z[1]) / dr;
-    double drerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dxr*dxr + (jetsv_cyy[0] + jetsv_cyy[1])*dyr*dyr + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dxr*dyr
-                    + 2*(jetsv_cxz[0] + jetsv_cxz[1])*dxr*dzr + 2*(jetsv_cyz[0] + jetsv_cyz[1])*dyr*dzr + (jetsv_czz[0] + jetsv_czz[1])*dzr*dzr);
-    h_jetsv_d3d->Fill(dr);
-    h_jetsv_d3derr->Fill(drerr);
-    h_jetsv_d3dsig->Fill(dr / drerr);
-  }
-
-  jetsv_x.clear();
-  jetsv_y.clear();
-  jetsv_z.clear();
-  jetsv_cxx.clear();
-  jetsv_cxy.clear();
-  jetsv_cxz.clear();
-  jetsv_cyy.clear();
-  jetsv_cyz.clear();
-  jetsv_czz.clear();
-  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-    if (((mevent->jet_id[ijet] >> 2) & 3) >= 2 && mevent->jet_svnvertices[ijet] > 0) {
-      jetsv_x.push_back(mevent->jet_svx[ijet] - mevent->bsx);
-      jetsv_y.push_back(mevent->jet_svy[ijet] - mevent->bsy);
-      jetsv_z.push_back(mevent->jet_svz[ijet] - mevent->bsz);
-      jetsv_cxx.push_back(mevent->jet_svcxx[ijet]);
-      jetsv_cxy.push_back(mevent->jet_svcxy[ijet]);
-      jetsv_cxz.push_back(mevent->jet_svcxz[ijet]);
-      jetsv_cyy.push_back(mevent->jet_svcyy[ijet]);
-      jetsv_cyz.push_back(mevent->jet_svcyz[ijet]);
-      jetsv_czz.push_back(mevent->jet_svczz[ijet]);
-    }
-  }
-
-  if (jetsv_x.size() == 2) {
-    double dphi = reco::deltaPhi(atan2(jetsv_y[0], jetsv_x[0]), atan2(jetsv_y[1], jetsv_x[1]));
-    h_bjetsv_absdphi->Fill(fabs(dphi));
-
-    double dxy = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]));
-    double dx = (jetsv_x[0] - jetsv_x[1]) / dxy;
-    double dy = (jetsv_y[0] - jetsv_y[1]) / dxy;
-    double dxyerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dx*dx + (jetsv_cyy[0] + jetsv_cyy[1])*dy*dy + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dx*dy);
-    h_bjetsv_dxy->Fill(dxy);
-    h_bjetsv_dxyerr->Fill(dxyerr);
-    h_bjetsv_dxysig->Fill(dxy / dxyerr);
-
-    double dz = fabs(jetsv_z[0] - jetsv_z[1]);
-    double dzerr = sqrt(jetsv_czz[0] + jetsv_czz[1]);
-    h_bjetsv_dz->Fill(dz);
-    h_bjetsv_dzerr->Fill(dzerr);
-    h_bjetsv_dzsig->Fill(dz / dzerr);
-
-    double dr = sqrt((jetsv_x[0] - jetsv_x[1]) * (jetsv_x[0] - jetsv_x[1]) + (jetsv_y[0] - jetsv_y[1]) * (jetsv_y[0] - jetsv_y[1]) + (jetsv_z[0] - jetsv_z[1]) * (jetsv_z[0] - jetsv_z[1]));
-    double dxr = (jetsv_x[0] - jetsv_x[1]) / dr;
-    double dyr = (jetsv_y[0] - jetsv_y[1]) / dr;
-    double dzr = (jetsv_z[0] - jetsv_z[1]) / dr;
-    double drerr = sqrt((jetsv_cxx[0] + jetsv_cxx[1])*dxr*dxr + (jetsv_cyy[0] + jetsv_cyy[1])*dyr*dyr + 2*(jetsv_cxy[0] + jetsv_cxy[1])*dxr*dyr
-                    + 2*(jetsv_cxz[0] + jetsv_cxz[1])*dxr*dzr + 2*(jetsv_cyz[0] + jetsv_cyz[1])*dyr*dzr + (jetsv_czz[0] + jetsv_czz[1])*dzr*dzr);
-    h_bjetsv_d3d->Fill(dr);
-    h_bjetsv_d3derr->Fill(drerr);
-    h_bjetsv_d3dsig->Fill(dr / drerr);
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  edm::Handle<reco::VertexCollection> primary_vertices;
-  if (primary_vertex_src.label() != "") {
-    event.getByLabel(primary_vertex_src, primary_vertices);
-
-    const int npv = int(primary_vertices->size());
-    h_pv_n->Fill(npv, w);
-
-    const reco::Vertex& pv0 = primary_vertices->at(0);
-    double absdz = 100000;
-    int ipvdz = 0;
-    for (int ipv = 1; ipv < npv; ++ipv) {
-      const reco::Vertex& pv = primary_vertices->at(ipv);
-      if (fabs(pv.z() - pv0.z()) < absdz) {
-        absdz = fabs(pv.z() - pv0.z());
-        ipvdz = ipv;
-      }
-    }
-
-    for (int ipv = 1; ipv < npv; ++ipv) {
-      const reco::Vertex& pv = primary_vertices->at(ipv);
-      double sumpt2 = 0;
-      for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki) {
-        double trkpt = (*trki)->pt();
-        sumpt2 += trkpt * trkpt;
-      }
-
-      const int isumpt2 = ipv == 1 ? 0 : 1;
-      h_pv_x[isumpt2]->Fill(pv.x() - bsx, w);
-      h_pv_y[isumpt2]->Fill(pv.y() - bsy, w);
-      h_pv_z[isumpt2]->Fill(pv.z() - bsz, w);
-      h_pv_rho[isumpt2]->Fill(sqrt((pv.x() - bsx) * (pv.x() - bsx) + (pv.y() - bsy) * (pv.y() - bsy)), w);
-      h_pv_phi[isumpt2]->Fill(atan2(pv.y() - bsy, pv.x() - bsx), w);
-      h_pv_ntracks[isumpt2]->Fill(pv.nTracks(), w);
-      h_pv_sumpt2[isumpt2]->Fill(sumpt2, w);
-
-      const int iabsdz = ipv == ipvdz ? 2 : 3;
-      h_pv_x[iabsdz]->Fill(pv.x() - bsx, w);
-      h_pv_y[iabsdz]->Fill(pv.y() - bsy, w);
-      h_pv_z[iabsdz]->Fill(pv.z() - bsz, w);
-      h_pv_rho[iabsdz]->Fill(sqrt((pv.x() - bsx) * (pv.x() - bsx) + (pv.y() - bsy) * (pv.y() - bsy)), w);
-      h_pv_phi[iabsdz]->Fill(atan2(pv.y() - bsy, pv.x() - bsx), w);
-      h_pv_ntracks[iabsdz]->Fill(pv.nTracks(), w);
-      h_pv_sumpt2[iabsdz]->Fill(sumpt2, w);
-    }
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  edm::Handle<pat::JetCollection> jets;
-  if (jets_src.label() != "") {
-    event.getByLabel(jets_src, jets);
-
-    const int njets = int(jets->size());
-    h_jets_n->Fill(njets, w);
-
-    const char* b_discriminators[NBDISC] = {"jetProbabilityBJetTags", "combinedSecondaryVertexBJetTags"};
-    const double b_discriminator_mins[NBDISC][3] = {{0.275, 0.545, 0.790}, {0.244, 0.679, 0.898}};
-    int nbjets[NBDISC][3] = {{0, 0, 0}, {0, 0, 0}};
-    for (int i = 0; i < njets; ++i) {
-      const pat::Jet& jet = jets->at(i);
-      h_jets_pt->Fill(jet.pt(), w);
-      h_jets_eta->Fill(jet.eta(), w);
-      h_jets_phi->Fill(jet.phi(), w);
-      for (int j = 0; j < NBDISC; ++j) {
-        for (int k = 0; k < 3; ++k) {
-          if (jet.bDiscriminator(b_discriminators[j]) > b_discriminator_mins[j][k]) {
-            nbjets[j][k] += 1;
-            h_bjets_pt[j][k]->Fill(jet.pt(), w);
-            h_bjets_eta[j][k]->Fill(jet.eta(), w);
-            h_bjets_phi[j][k]->Fill(jet.phi(), w);
-          }
-        }
-      }
-    }
-    for (int j = 0; j < NBDISC; ++j) {
-      for (int k = 0; k < 3; ++k) {
-        h_bjets_n[j][k]->Fill(nbjets[j][k], w);
       }
     }
   }
