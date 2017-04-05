@@ -49,6 +49,8 @@ colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROO
 
 x = []
 ex = []
+y1 = []
+ey1 = []
 y2 = []
 ey2 = []
 y3 = []
@@ -136,6 +138,29 @@ for i in range(3):
     l2.Draw()
     ps.save('%s_dphi'%ntk[i])
 
+    if i == 2:
+        h2s = []
+        l2 = ROOT.TLegend(0.15,0.75,0.50,0.85)
+        for j in range(len(ls)):
+            h = ROOT.TFile(fns[i][j]).Get('h_c1v_absdphivv')
+            h.SetStats(0)
+            h.SetLineColor(colors[j])
+            h.SetLineWidth(2)
+            h.Scale(n2v[i]/h.Integral())
+            if j == 0:
+                h.SetTitle(';|#Delta#phi_{VV}|;Events')
+                h.SetMinimum(0)
+                h.Draw('hist e')
+            elif j == 1:
+                h.Draw('hist e sames')
+            h2s.append(h)
+            if j > 1:
+                continue
+            l2.AddEntry(h, ls[j])
+        l2.SetFillColor(0)
+        l2.Draw()
+        ps.save('compare_dphi_%s' % mode)
+
     es1 = ROOT.Double(0)
     s1 = hh.IntegralAndError(1,4,es1)
     es2 = ROOT.Double(0)
@@ -167,32 +192,41 @@ for i in range(3):
     if mode == 'vary_dphi':
         if year == '2015':
             if i == 0:
+                er1 *= 0.121149
                 er2 *= 0.211763
                 er3 *= 0.167168
             if i == 1:
+                er1 *= 0.112227
                 er2 *= 0.213812
                 er3 *= 0.183399
             if i == 2:
+                er1 *= 0.089197
                 er2 *= 0.218547
                 er3 *= 0.171132
         if year == '2016':
             if i == 0:
+                er1 *= 0.116704
                 er2 *= 0.211908
                 er3 *= 0.160616
             if i == 1:
+                er1 *= 0.109404
                 er2 *= 0.216431
                 er3 *= 0.176878
             if i == 2:
+                er1 *= 0.086512
                 er2 *= 0.216790
                 er3 *= 0.162593
         if year == '2015p6':
             if i == 0:
+                er1 *= 0.116713
                 er2 *= 0.211614
                 er3 *= 0.160821
             if i == 1:
+                er1 *= 0.109870
                 er2 *= 0.216282
                 er3 *= 0.175091
             if i == 2:
+                er1 *= 0.086836
                 er2 *= 0.217034
                 er3 *= 0.160045
     if mode == 'vary_eff':
@@ -209,16 +243,18 @@ for i in range(3):
 
     x.append(i-2)
     ex.append(0)
+    y1.append(r1)
+    ey1.append(er1)
     y2.append(r2)
     ey2.append(er2)
     y3.append(r3)
     ey3.append(er3)
 
-bins = ['bin2', 'bin3']
-dvvc = ['400 #mum < d_{VV}^{C} < 700 #mum', 'd_{VV}^{C} > 700 #mum']
-ys = [y2, y3]
-eys = [ey2, ey3]
-for i in range(2):
+bins = ['bin1', 'bin2', 'bin3']
+dvvc = ['d_{VV}^{C} < 400 #mum', '400 #mum < d_{VV}^{C} < 700 #mum', 'd_{VV}^{C} > 700 #mum']
+ys = [y1, y2, y3]
+eys = [ey1, ey2, ey3]
+for i in range(3):
     g = ROOT.TGraphErrors(len(x), array('d',x), array('d',ys[i]), array('d',ex), array('d',eys[i]))
     g.SetMarkerStyle(21)
     g.SetTitle('variation / default (%s);3-track%12s4-track%12s5-or-more-track%2s' % (dvvc[i], '','',''))
@@ -233,27 +269,39 @@ for i in range(2):
     line.SetLineWidth(2)
     line.Draw()
 
-    r = g.Fit('pol1','S','',-2,-1)
-    g5 = ROOT.TGraphErrors(1, array('d',[-0.1]), array('d',[r.Value(0)]), array('d',[0]), array('d',[r.ParError(0)]))
-    g5.SetLineColor(ROOT.kRed)
-    g5.SetMarkerColor(ROOT.kRed)
-    g5.SetMarkerStyle(21)
-    g5.Draw('P')
+    if mode == 'vary_dphi':
+        t5 = ROOT.TLatex()
+        t5.SetTextFont(42)
+        t5.SetTextSize(0.04)
+        t5.DrawLatex(0, ys[i][2] - eys[i][2] - t5.GetTextSize(), '%.2f #pm %.2f' % (ys[i][2], eys[i][2]))
 
-    t5 = ROOT.TLatex()
-    t5.SetTextFont(42)
-    t5.SetTextSize(0.04)
-    t5.SetTextColor(ROOT.kRed)
-    t5.DrawLatex(-0.1, r.Value(0) - r.ParError(0) - t5.GetTextSize(), '%.2f #pm %.2f' % (r.Value(0), r.ParError(0)))
+        t = ROOT.TLatex()
+        t.SetTextFont(42)
+        t.SetTextSize(0.04)
+        t.DrawLatex(-2.5, 0.7, '#splitline{difference of 5-or-more-track ratio from 1:}{%.2f #pm %.2f}' % (abs(ys[i][2] - 1), eys[i][2]))
 
-    t3 = ROOT.TLatex()
-    t3.SetTextFont(42)
-    t3.SetTextSize(0.04)
-    t3.DrawLatex(-2, ys[i][0] - eys[i][0] - t3.GetTextSize(), '%.2f #pm %.2f' % (ys[i][0], eys[i][0]))
+    else:
+        r = g.Fit('pol1','S','',-2,-1)
+        g5 = ROOT.TGraphErrors(1, array('d',[-0.1]), array('d',[r.Value(0)]), array('d',[0]), array('d',[r.ParError(0)]))
+        g5.SetLineColor(ROOT.kRed)
+        g5.SetMarkerColor(ROOT.kRed)
+        g5.SetMarkerStyle(21)
+        g5.Draw('P')
 
-    t = ROOT.TLatex()
-    t.SetTextFont(42)
-    t.SetTextSize(0.04)
-    t.DrawLatex(-2.5, 0.7, '#splitline{difference from 3-track to 5-or-more-track:}{%.2f #pm %.2f}' % (abs(r.Value(0) - ys[i][0]), (r.ParError(0)**2 + eys[i][0]**2)**0.5))
+        t5 = ROOT.TLatex()
+        t5.SetTextFont(42)
+        t5.SetTextSize(0.04)
+        t5.SetTextColor(ROOT.kRed)
+        t5.DrawLatex(-0.1, r.Value(0) - r.ParError(0) - t5.GetTextSize(), '%.2f #pm %.2f' % (r.Value(0), r.ParError(0)))
+
+        t3 = ROOT.TLatex()
+        t3.SetTextFont(42)
+        t3.SetTextSize(0.04)
+        t3.DrawLatex(-2, ys[i][0] - eys[i][0] - t3.GetTextSize(), '%.2f #pm %.2f' % (ys[i][0], eys[i][0]))
+
+        t = ROOT.TLatex()
+        t.SetTextFont(42)
+        t.SetTextSize(0.04)
+        t.DrawLatex(-2.5, 0.7, '#splitline{difference from 3-track to 5-or-more-track:}{%.2f #pm %.2f}' % (abs(r.Value(0) - ys[i][0]), (r.ParError(0)**2 + eys[i][0]**2)**0.5))
 
     ps.save('ratio_%s_%s' % (bins[i], mode))
