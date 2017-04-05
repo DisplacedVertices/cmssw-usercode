@@ -32,7 +32,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   const std::vector<double> force_bs;
   const bool do_trackplots;
   const bool do_scatterplots;
-  const bool do_only_1v;
 
   VertexDistanceXY distcalc_2d;
   VertexDistance3D distcalc_3d;
@@ -42,7 +41,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_nsv;
 
   // indices for h_sv below:
-  enum sv_index { sv_best0, sv_best1, sv_all, sv_num_indices };
+  enum sv_index { sv_all, sv_num_indices };
   static const char* sv_index_names[sv_num_indices];
 
   // max number of extra track-related plots to make
@@ -100,7 +99,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_track_inpv[sv_num_indices];
 };
 
-const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "best0", "best1", "all" };
+const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "all" };
 const int MFVVertexHistos::max_ntracks = 5;
 
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
@@ -109,8 +108,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     do_trackplots(cfg.getParameter<bool>("do_trackplots")),
-    do_scatterplots(cfg.getParameter<bool>("do_scatterplots")),
-    do_only_1v(cfg.getParameter<bool>("do_only_1v"))
+    do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
   if (force_bs.size() && force_bs.size() != 3)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
@@ -299,9 +297,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   }
 
   for (int j = 0; j < sv_num_indices; ++j) {
-    if (j > 0 && do_only_1v)
-      break;
-
     const char* exc = sv_index_names[j];
 
     if (j < 2) {
@@ -363,35 +358,20 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_pvmosttracksshared = fs->make<TH2F>("h_pvmosttracksshared", ";index of pv most-shared to sv #0; index of pv most-shared to sv #1", 71, -1, 70, 71, -1, 70);
 }
 
-// JMTBAD ugh
-void MFVVertexHistos::fill_multi(TH1F** hs, const int isv, const double val, const double weight) const {
-  if (do_only_1v && isv > 0)
-    return;
-  if (isv < sv_all)
-    hs[isv]->Fill(val, weight);
-  if (!do_only_1v)
-    hs[sv_all]->Fill(val, weight);
+// JMTBAD get rid of this crap
+void MFVVertexHistos::fill_multi(TH1F** hs, const int, const double val, const double weight) const {
+  hs[sv_all]->Fill(val, weight);
 }
 
-void MFVVertexHistos::fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const {
-  if (do_only_1v && isv > 0)
-    return;
-  if (isv < sv_all)
-    hs[isv]->Fill(val, val2, weight);
-  if (!do_only_1v)
-    hs[sv_all]->Fill(val, val2, weight);
+void MFVVertexHistos::fill_multi(TH2F** hs, const int, const double val, const double val2, const double weight) const {
+  hs[sv_all]->Fill(val, val2, weight);
 }
 
-void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const {
-  if (do_only_1v && isv > 0)
-    return;
-  if (isv < sv_all)
-    hs[isv].Fill(val, -1, weight);
-  if (!do_only_1v)
-    hs[sv_all].Fill(val, -1, weight);
+void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int, const PairwiseHistos::ValueMap& val, const double weight) const {
+  hs[sv_all].Fill(val, -1, weight);
 }
 
-void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
