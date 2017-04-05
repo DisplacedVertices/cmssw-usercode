@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-year = 2016
+year = '2016'
 
 root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV12'
 plot_dir = 'plots/data_mc_comp/HistosV12_%s' % year
@@ -21,7 +21,7 @@ ttbar_samples = Samples.ttbar_samples
 signal_sample = Samples.official_mfv_neu_tau01000um_M0800
 data_samples = Samples.data_samples
 
-if year == 2015:
+if year == '2015':
     int_lumi = ac.int_lumi_2015 * ac.scale_factor_2015
     int_lumi_nice = ac.int_lumi_nice_2015
     qcd_samples = Samples.qcd_samples_sum_2015
@@ -180,14 +180,39 @@ C('track_sigmadxybs',
   cut_line = ((4, 0, 4, 2.8e10), 2, 5, 1),
   )
 
+if year == '2015':
+    int_lumi = 268.3 * (247663.0 / 273176.706743)
+    int_lumi_nice = '0.27 fb^{-1} (13 TeV)'
+    data_samples = Samples.data_samples_2015
+elif year == '2016':
+    int_lumi = 3586.7 * (3103098.0 / 3452501.33131)
+    int_lumi_nice = '3.59 fb^{-1} (13 TeV)'
+    data_samples = Samples.data_samples
+elif year == '2016BCD':
+    int_lumi = 1259. * (1116774.0 / 1211893.72059)
+    int_lumi_nice = '1.26 fb^{-1} (13 TeV)'
+    data_samples = [Samples.JetHT2016B3, Samples.JetHT2016C, Samples.JetHT2016D]
+elif year == '2016EF':
+    int_lumi = 711. * (627209.0 / 684397.479668)
+    int_lumi_nice = '0.71 fb^{-1} (13 TeV)'
+    data_samples = [Samples.JetHT2016E, Samples.JetHT2016F]
+elif year == '2016G':
+    int_lumi = 763. * (708704.0 / 734451.869958)
+    int_lumi_nice = '0.76 fb^{-1} (13 TeV)'
+    data_samples = [Samples.JetHT2016G]
+elif year == '2016H':
+    int_lumi = 855. * (650411.0 / 823009.636355)
+    int_lumi_nice = '0.86 fb^{-1} (13 TeV)'
+    data_samples = [Samples.JetHT2016H2, Samples.JetHT2016H3]
+
 D = partial(data_mc_comparison,
             background_samples = background_samples,
             signal_samples = signal_samples,
             data_samples = data_samples,
             plot_saver = ps,
             file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_0', '%(name)s.root'),
-            int_lumi = int_lumi/10 * (247663.0 / 273176.706743 if year==2015 else 3103098.0 / 3452501.33131),
-            int_lumi_nice = '0.27 fb^{-1} (13 TeV)' if year==2015 else '3.59 fb^{-1} (13 TeV)',
+            int_lumi = int_lumi,
+            int_lumi_nice = int_lumi_nice,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
             poisson_intervals = True,
@@ -204,7 +229,6 @@ D('3t1v_nocuts_njets',
   histogram_path = 'mfvEventHistosNoCuts/h_njets',
   x_title = 'Number of jets',
   y_title = 'Events',
-  y_range = (1, 1e8),
   cut_line = ((4, 0, 4, 2.5e8), 2, 5, 1),
   )
 
@@ -214,7 +238,6 @@ D('3t1v_nocuts_ht40',
   x_title = 'Jet H_{T} (GeV)',
   y_title = 'Events/100 GeV',
   x_range = (800, 5000),
-  y_range = (1, 1e8),
   cut_line = ((1000, 0, 1000, 2.5e8), 2, 5, 1),
   )
 
@@ -222,14 +245,12 @@ D('3t1v_presel_npv',
   histogram_path = 'Ntk3mfvEventHistosPreSel/h_npv',
   x_title = 'Number of primary vertices',
   y_title = 'Events',
-  y_range = (1, 1e8),
   )
 
 D('3t1v_onevtx_ntracks',
   histogram_path = 'Ntk3vtxHst1VNoNtracks/h_sv_best0_ntracks',
   x_title = 'Number of tracks per vertex',
   y_title = 'Vertices',
-  y_range = (1, 1e6),
   cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
   )
 
@@ -237,7 +258,6 @@ D('3t1v_onevtx_bs2derr',
   histogram_path = 'Ntk3vtxHst1VNoBs2derr/h_sv_best0_bs2derr',
   x_title = 'Uncertainty in d_{BV} (cm)',
   y_title = 'Vertices/5 #mum',
-  y_range = (1, 1e6),
   cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
   )
 
@@ -246,7 +266,6 @@ D('3t1v_onevtx_dbv',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 0.4),
-  y_range = (1, 1e6),
   cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
   )
 
@@ -255,5 +274,4 @@ D('3t1v_dbv',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 0.4),
-  y_range = (1, 1e4),
   )
