@@ -32,9 +32,9 @@ nm1s = [
 #nm1s = []
 
 ntks = [5,3,4,7]
-nvs = [1,2]
+nvs = [0,1,2]
 ntks = [3] 
-nvs = [1]
+nvs = [0,1]
 
 for ntk in ntks:
     if ntk == 5:
@@ -81,6 +81,9 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
         vtx_name = '%svtxNo' % EX1 + name
 
         for nv in nvs:
+            if nv == 0 and cut != '':
+                continue
+
             ana = eval('process.mfvAnalysisCuts.clone(%s)' % evt_cut)
             ana.vertex_src = vtx_name
             if nv == 1:
