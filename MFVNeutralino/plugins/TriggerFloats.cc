@@ -88,36 +88,80 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<l1t::JetBxCollection> l1_jets;
   event.getByToken(l1_jets_token, l1_jets);
 
-  double my_htt = 0;
-  double my_htt_wbug = 0;
-  double my_htt_pos = 0;
-  double my_htt_neg = 0;
-
+  int i2pt_first[2] = {0};
+  int i2htt[2] = {0};
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
-    const double pt = jet.pt();
+
     const double eta = jet.eta();
-    if (fabs(eta) < 3 && pt > 30) {
-      if (eta > 0 && my_htt_pos < 1023) {
-        if (pt < 1023)
-          my_htt_pos += pt;
-        else
-          my_htt_pos = 1023;
-      }
-      if (eta < 0 && my_htt_neg < 1023) {
-        if (pt < 1023)
-          my_htt_neg += pt;
-        else 
-          my_htt_neg = 1023;
+    const bool is_pos = eta >= 0; // ?
+    const double pt = jet.pt();
+    const int i2pt = int(pt*2);
+    assert(fabs(pt*2 - double(i2pt)) < 1e-3);
+
+    if (fabs(eta) < 3 && i2pt >= 61) {
+      if (i2pt_first[is_pos] == 0)
+        i2pt_first[is_pos] = i2pt;
+
+      if (i2pt == 2047)
+        i2htt[is_pos] = 2047;
+      else if (i2pt_first[is_pos] != 2047) {
+        i2htt[is_pos] += i2pt;
+        if (i2htt[is_pos] > 4095)
+          i2htt[is_pos] = 4095;
       }
     }
 
     if (prints) printf("after jet #%2lu (pt %7.1f eta %7.2f is pos? %i): i2pt_neg_first: %7i pos %7i i2htt_neg: %7i pos: %7i\n", i, jet.pt(), jet.eta(), is_pos, i2pt_first[0], i2pt_first[1], i2htt[0], i2htt[1]);
   }
 
-  my_htt = my_htt_wbug = my_htt_pos + my_htt_neg;
-  if ((my_htt_neg == 1023 && my_htt_pos > 0) || (my_htt_pos == 1023 && my_htt_neg > 0))
-    my_htt_wbug -= 1024;
+  double my_htt = 0;
+  double my_htt_wbug = 0;
+
+  if ((i2pt_first[0] == 2047 && i2pt_first[1] ==    0) ||
+      (i2pt_first[0] ==    0 && i2pt_first[1] == 2047) ||
+      (i2pt_first[0] == 2047 && i2pt_first[1] == 2047))
+    my_htt = my_htt_wbug = 2047.5;
+  else {
+    my_htt = my_htt_wbug = (i2htt[0] + i2htt[1]) / 2.;
+    if ((i2htt[0] == 2047 && i2htt[1]) || (i2htt[1] == 2047 && i2htt[0]))
+      my_htt_wbug -= 1024;
+  }
+
+  if (prints) {
+    //    double htt = 0;
+    double htt_wbug = 0;
+    double htt_pos = 0;
+    double htt_neg = 0;
+
+    for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
+      const l1t::Jet& jet = l1_jets->at(0, i);
+      const double pt = jet.pt();
+      if (fabs(jet.eta()) < 3 && pt >= 30) {
+        if(jet.eta() > 0 && htt_pos < 1023){
+          if(pt < 1023)
+            htt_pos += pt;
+          else
+            htt_pos = 1023;
+        }
+        if(jet.eta() < 0 && htt_neg < 1023) {
+          if(pt < 1023)
+            htt_neg += pt;
+          else 
+            htt_neg = 1023;
+        } 
+      }
+    }
+
+    //    htt = htt_pos + htt_neg;
+    htt_wbug = htt_pos + htt_neg;
+
+    if( ( htt_neg == 1023 && htt_pos > 0 )
+        || ( htt_pos == 1023 && htt_neg > 0 ) )
+      htt_wbug -= 1024;
+
+    printf("Aaron gets %7.1f\n",  htt_wbug);
+  }
 
   edm::Handle<l1t::EtSumBxCollection> l1_etsums;
   event.getByToken(l1_etsums_token, l1_etsums);
@@ -213,8 +257,28 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     else
       std::cout << "EtSumHelper: HTT " << etsumhelper.TotalHt() << " Mine " << my_htt << " w.bug " << my_htt_wbug;
 
-    if (fabs(my_htt - etsumhelper.TotalHt()) > 0.4 || fabs(my_htt_wbug - etsumhelper.TotalHt()) > 0.4)
-      std::cout << "  DIFFERENT";
+    if (fabs(my_htt - etsumhelper.TotalHt()) > 0.4 || fabs(my_htt_wbug - etsumhelper.TotalHt()) > 0.4) {
+      std::cout << "  DIFFERENT\n";
+
+      size_t n = l1_jets->size(0);
+      assert(n < 30);
+      for (unsigned x = 1, xe = 1<<n; x < xe; ++x) {
+        double sum = 0;
+        for (unsigned i = 0; i < n; ++i)
+          if (x & (1<<i))
+            sum += l1_jets->at(0, i).pt();
+        while (sum > 0) {
+          if (fabs(sum - etsumhelper.TotalHt()) < 4) {
+            printf("to get %7.1f should've used 0x%x =", sum, x);
+            for (unsigned i = 0; i < n; ++i)
+              if (x & (1<<i))
+                printf(" %u", i);
+            printf("\n");
+          }
+          sum -= 1024.;
+        }
+      }
+    }
 
     std::cout << std::endl;
 #endif
@@ -245,13 +309,13 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 #elif defined(MFVNEUTRALINO_2016)
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
+    if (i > 0) assert(jet.pt() <= l1_jets->at(0, i-1).pt());
     if (fabs(jet.eta()) < 3) {
       TLorentzVector v;
       v.SetPtEtaPhiE(jet.pt(), jet.eta(), jet.phi(), jet.energy());
       floats->l1jets.push_back(v);
     }
   }
-  std::sort(std::begin(floats->l1jets), std::end(floats->l1jets), [](const auto& v1, const auto& v2) { return v1.Pt() > v2.Pt(); });
 
   floats->l1htt = etsumhelper.TotalHt();
   floats->myhtt = my_htt;
