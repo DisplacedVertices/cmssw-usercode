@@ -41,7 +41,7 @@ def cmd_hadd_data():
             hadd(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
             hadd(ds + '2016BthruG.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
             hadd(ds + '2016BCD.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D')])
-            hadd(ds + '2016EFG.root', [ds + '2016%s.root' % x for x in ('E', 'F', 'G')])
+            hadd(ds + '2016EF.root', [ds + '2016%s.root' % x for x in ('E', 'F')])
             hadd(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
 
 def cmd_hadd_qcd_sum():
