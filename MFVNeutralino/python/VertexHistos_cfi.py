@@ -7,5 +7,4 @@ mfvVertexHistos = cms.EDAnalyzer('MFVVertexHistos',
                                  force_bs = cms.vdouble(),
                                  do_trackplots = cms.bool(True),
                                  do_scatterplots = cms.bool(False),
-                                 do_only_1v = cms.bool(False),
                                  )
