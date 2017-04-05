@@ -23,9 +23,9 @@ def cmd_report_data():
         for year in 2015, 2016:
             if not glob('*%s%i*' % (ds, year)):
                 continue
-            os.system('mreport crab*%s%i*' % (ds, year))
+            os.system('mreport condor_%s%i*' % (ds, year))
             print 'jsondiff'
-            os.system('compareJSON.py --diff processedLumis.json $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/ana_avail_%i%s.json' % (year, ex))
+            os.system('compareJSON.py --diff processedLumis.json $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/ana_avail_%i%s_10pc.json' % (year, ex))
             raw_input('ok?')
             os.rename('processedLumis.json', 'dataok_%i.json' % year)
 
