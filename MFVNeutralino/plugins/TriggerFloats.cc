@@ -281,8 +281,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
 
     std::cout << std::endl;
-#endif
   }
+#endif
 
   std::auto_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
 
