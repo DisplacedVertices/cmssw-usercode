@@ -117,5 +117,30 @@ def keep_random_state(process):
 def keep_mixing_info(process):
     process.out.outputCommands.append('keep CrossingFramePlaybackInfoExtended_*_*_*')
 
+def remove_met_filters(process):
+    for k in process.paths.keys():
+        if k.startswith('Flag_'):
+            delattr(process, k)
+
+def remove_output_module(process):
+    del process.out
+    del process.outp
+
+def streamline_jets(process, drop_tags=True, drop_puid=True):
+    process.patJets.addGenJetMatch    = False
+    process.patJets.addGenPartonMatch = False
+    process.patJets.addJetFlavourInfo = False
+    process.patJets.embedGenJetMatch  = False
+    process.patJets.getJetMCFlavour   = False
+    if drop_tags:
+        process.patJets.addTagInfos = False
+        process.patJets.addBTagInfo = False
+        process.patJets.addDiscriminators = False
+        process.patJets.userData.userFunctionLabels = []
+        process.patJets.userData.userFunctions = []
+    if drop_puid:
+        process.patJets.userData.userFloats.src = [cms.InputTag("caloJetMap","pt"), cms.InputTag("caloJetMap","emEnergyFraction")]
+        process.patJets.userData.userInts.src = []
+
 if __name__ == '__main__':
     process = pat_tuple_process(None, True, 2016)
