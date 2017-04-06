@@ -11,13 +11,16 @@ process.source.fileNames = ['/store/data/Run2015D/JetHT/MINIAOD/16Dec2015-v1/500
 process.source.fileNames = ['/store/mc/RunIIFall15MiniAODv2/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/10000/C6CD95B8-45B9-E511-A12B-141877411FED.root']
 process.source.fileNames = ['/store/data/Run2016H/JetHT/MINIAOD/PromptReco-v3/000/284/044/00000/BE5F4C22-D29F-E611-AEAA-02163E011C32.root']
 
-process.maxEvents.input = 100
+sample_files(process, 'SingleMuon2016H2', 'trigskimv1', 4)
+
+process.maxEvents.input = -1
 process.TFileService.fileName = 'triggerfloats.root'
 
 global_tag(process, which_global_tag(is_mc, year))
+want_summary(process, True)
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-#process.mfvTriggerFloats.prints = True
+process.mfvTriggerFloats.jets_src = 'slimmedJets'
 
 if False:
     process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
@@ -28,7 +31,26 @@ if False:
 else:
     process.p = cms.Path(process.mfvTriggerFloats)
 
-#add_analyzer(process, 'MFVJetHTPrinter', _path='p')
+process.load('JMTucker.MFVNeutralino.TriggerFloatsFilter_cfi')
+#process.mfvTriggerFloatsFilter.ht_cut = 1000
+process.mfvTriggerFloatsFilter.myhttwbug_m_l1htt_cut = 0.1
+process.p *= process.mfvTriggerFloatsFilter
+
+process.mfvTriggerFloatsForPrints = process.mfvTriggerFloats.clone(prints = 1)
+process.p *= process.mfvTriggerFloatsForPrints
+
+process.plots = cms.EDAnalyzer('MFVTriggerEfficiency',
+                               use_weight = cms.int32(0),
+                               require_hlt = cms.int32(-1),
+                               require_l1 = cms.int32(-1),
+                               require_muon = cms.bool(False),
+                               require_4jets = cms.bool(False),
+                               require_ht = cms.double(-1),
+                               muons_src = cms.InputTag('slimmedMuons'),
+                               muon_cut = cms.string(''),
+                               genjets_src = cms.InputTag(''),
+                               )
+process.p *= process.plots
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
