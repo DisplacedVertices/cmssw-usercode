@@ -506,14 +506,13 @@ JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 for x in (qcdht2000ext,
           qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015,
           qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015,
-          ttbar_2015):
+          ttbar_2015, ttbar):
     x.condor = True
     x.xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in (JetHT2016G,
           SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
           qcdht0500, qcdht1500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000,
-          ttbar,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau01000um_M0300,
           official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M0800,
