@@ -142,5 +142,10 @@ def streamline_jets(process, drop_tags=True, drop_puid=True):
         process.patJets.userData.userFloats.src = [cms.InputTag("caloJetMap","pt"), cms.InputTag("caloJetMap","emEnergyFraction")]
         process.patJets.userData.userInts.src = []
 
+def jets_only(process):
+    remove_met_filters(process)
+    remove_output_module(process)
+    streamline_jets(process)
+
 if __name__ == '__main__':
     process = pat_tuple_process(None, True, 2016)
