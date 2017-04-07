@@ -248,6 +248,30 @@ D('3t1v_presel_npv',
   y_title = 'Events',
   )
 
+D('3t1v_presel_nseedtracks',
+  histogram_path = 'Ntk3mfvEventHistosPreSel/h_n_vertex_seed_tracks',
+  x_title = 'Number of seed tracks',
+  y_title = 'Events',
+  )
+
+D('3t1v_presel_seedtrack_pt',
+  histogram_path = 'Ntk3mfvEventHistosPreSel/h_vertex_seed_track_pt',
+  x_title = 'Seed track p_{T} (GeV)',
+  y_title = 'Tracks/GeV',
+  )
+
+D('3t1v_presel_seedtrack_npxlayers',
+  histogram_path = 'Ntk3mfvEventHistosPreSel/h_vertex_seed_track_npxlayers',
+  x_title = 'Seed track number of pixel layers',
+  y_title = 'Tracks',
+  )
+
+D('3t1v_presel_seedtrack_nstlayers',
+  histogram_path = 'Ntk3mfvEventHistosPreSel/h_vertex_seed_track_nstlayers',
+  x_title = 'Seed track number of strip layers',
+  y_title = 'Tracks',
+  )
+
 D('3t1v_onevtx_ntracks',
   histogram_path = 'Ntk3vtxHst1VNoNtracks/h_sv_best0_ntracks',
   x_title = 'Number of tracks per vertex',
