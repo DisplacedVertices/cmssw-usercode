@@ -20,6 +20,10 @@ common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
 
+process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
+
 nm1s = [
     ('Njets',      ('', 'min_njets = 0')),
     ('Ht',         ('', 'min_ht = 0')),
@@ -47,12 +51,10 @@ for ntk in ntks:
         EX2 = "vertex_src = 'mfvSelectedVerticesTight%s', " % EX1
 
     exec '''
-process.EX1mfvAnalysisCutsPreSel     = process.mfvAnalysisCuts.clone(EX2apply_vertex_cuts = False)
 process.EX1mfvAnalysisCutsOnlyOneVtx = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
 process.EX1mfvAnalysisCutsFullSel    = process.mfvAnalysisCuts.clone(EX2)
 process.EX1mfvAnalysisCutsSigReg     = process.mfvAnalysisCuts.clone(EX2min_svdist2d = 0.04)
 
-process.EX1mfvEventHistosPreSel     = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel    = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosSigReg     = process.mfvEventHistos.clone()
@@ -62,7 +64,7 @@ process.EX1mfvVertexHistosOnlyOneVtx = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosFullSel    = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
-process.EX1pPreSel     = cms.Path(common * process.EX1mfvAnalysisCutsPreSel     * process.EX1mfvEventHistosPreSel     * process.EX1mfvVertexHistosPreSel)
+process.EX1pPreSel     = cms.Path(common * process.mfvAnalysisCutsPreSel                                              * process.EX1mfvVertexHistosPreSel)
 process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
 '''.replace('EX1', EX1).replace('EX2', EX2)
 
