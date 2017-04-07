@@ -33,12 +33,8 @@ nm1s = [
     ('Bs2derr',    'max_bs2derr = 1e9'),
     ]
 
-#nm1s = []
-
 ntks = [5,3,4,7]
 nvs = [0,1,2]
-#ntks = [3] 
-#nvs = [0,1]
 
 for ntk in ntks:
     if ntk == 5:
@@ -83,7 +79,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
         vtx_name = '%svtxNo' % EX1 + name
 
         for nv in nvs:
-            if nv == 0 and cut != '':
+            if nv == 0 and (cut != '' or EX1 != ''):
                 continue
 
             ana = eval('process.mfvAnalysisCuts.clone(%s)' % evt_cut)
@@ -132,7 +128,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             to_add.append('''
 for p in process.paths.keys():
-    if p == 'pPreSel' or p == 'Ntk3or4pOnlyOneVtx' or p == 'Ntk4pOnlyOneVtx' or p == 'pOnlyOneVtx' or p.endswith('FullSel') or p.endswith('SigReg'):
+    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'Ntk3pOnlyOneVtx' or p.startswith('p0V') or p.startswith('Ntk3p1V')):
         delattr(process, p)
 ''')
         return to_add, to_replace
