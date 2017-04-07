@@ -37,8 +37,8 @@ nm1s = [
 
 ntks = [5,3,4,7]
 nvs = [0,1,2]
-ntks = [3] 
-nvs = [0,1]
+#ntks = [3] 
+#nvs = [0,1]
 
 for ntk in ntks:
     if ntk == 5:
@@ -130,7 +130,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def modify(sample):
         to_add, to_replace = [], []
         if not sample.is_mc:
-            to_add.extend(['if hasattr(process, "pFullSel"):\n  del process.pFullSel', 'if hasattr(process, "pSigReg"):\n  del process.pSigReg'])
+            to_add.append('''
+for p in process.paths.keys():
+    if p == 'pPreSel' or p == 'Ntk3or4pOnlyOneVtx' or p == 'Ntk4pOnlyOneVtx' or p == 'pOnlyOneVtx' or p.endswith('FullSel') or p.endswith('SigReg'):
+        delattr(process, p)
+''')
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
