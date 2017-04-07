@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
+from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
+minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
 trig_filter = not keep_all
-version = 'v12'
-batch_name = 'Ntuple' + version.upper()
+version = 'V12'
+batch_name = 'Ntuple' + version
+if minitree_only:
+    batch_name = 'MiniNtuple'  + version
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
 ####
@@ -95,6 +98,11 @@ process.patElectrons.embedTrack = False
 #process.options.wantSummary = True
 process.maxEvents.input = 100
 file_event_from_argv(process)
+
+if minitree_only:
+    remove_output_module(process)
+    process.load('JMTucker.MFVNeutralino.MiniTree_cff')
+    process.TFileService.fileName = 'minintuple.root'
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
