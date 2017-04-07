@@ -60,16 +60,18 @@ C = partial(data_mc_comparison,
             )
 
 if year == '2015' or year == '2016':
-    C('nocuts_njets',
-      histogram_path = 'mfvEventHistosNoCuts/h_njets',
+    C('presel_njets',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_1', '%(name)s.root'),
+      histogram_path = 'Ntk3evtHst0VNoNjets/h_njets',
       x_title = 'Number of jets',
       y_title = 'Events',
       y_range = (1, 1e8),
       cut_line = ((4, 0, 4, 2.5e8), 2, 5, 1),
       )
 
-    C('nocuts_ht40',
-      histogram_path = 'mfvEventHistosNoCuts/h_jet_ht_40',
+    C('presel_ht40',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_1', '%(name)s.root'),
+      histogram_path = 'Ntk3evtHst0VNoHt/h_jet_ht_40',
       rebin = 4,
       x_title = 'Jet H_{T} (GeV)',
       y_title = 'Events/100 GeV',
@@ -226,15 +228,17 @@ D = partial(data_mc_comparison,
             simulation = False,
             )
 
-D('3t1v_nocuts_njets',
-  histogram_path = 'mfvEventHistosNoCuts/h_njets',
+D('3t1v_presel_njets',
+  file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_1', '%(name)s.root'),
+  histogram_path = 'Ntk3evtHst0VNoNjets/h_njets',
   x_title = 'Number of jets',
   y_title = 'Events',
   cut_line = ((4, 0, 4, 2.5e8), 2, 5, 1),
   )
 
-D('3t1v_nocuts_ht40',
-  histogram_path = 'mfvEventHistosNoCuts/h_jet_ht_40',
+D('3t1v_presel_ht40',
+  file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_1', '%(name)s.root'),
+  histogram_path = 'Ntk3evtHst0VNoHt/h_jet_ht_40',
   rebin = 4,
   x_title = 'Jet H_{T} (GeV)',
   y_title = 'Events/100 GeV',
