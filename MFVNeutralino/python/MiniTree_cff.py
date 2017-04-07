@@ -1,23 +1,28 @@
+import FWCore.ParameterSet.Config as cms
 
 from JMTucker.MFVNeutralino.VertexSelector_cfi import *
 from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
 from JMTucker.MFVNeutralino.WeightProducer_cfi import *
 
-mfvAnalysisCuts.min_nvertex = 1
+mfvAnalysisCutsGE1Vtx = mfvAnalysisCuts.clone(min_nvertex = 1)
 
 mfvMiniTree = cms.EDAnalyzer('MFVMiniTreer',
                              event_src = cms.InputTag('mfvEvent'),
                              vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                              weight_src = cms.InputTag('mfvWeight'),
-                             save_tracks = cms.bool(True)
+                             save_tracks = cms.bool(True),
                              )
 
-pMiniTree = cms.Path(mfvWeight * mfvSelectedVerticesTight * mfvAnalysisCuts * mfvMiniTree)
+pMiniTree = cms.Path(mfvWeight * mfvSelectedVerticesTight * mfvAnalysisCutsGE1Vtx * mfvMiniTree)
 
-for mn,mx in (3,3), (3,4), (4,4):
-    exec '''
-vtxMNMX = mfvSelectedVerticesTight.clone(min_ntracks = MN, max_ntracks = MX)
-anaMNMX = mfvAnalysisCuts.clone(vertex_src = 'vtxMNMX')
-treMNMX = mfvMiniTree.clone(vertex_src = 'vtxMNMX')
-pMiniTreeMNMX = cms.Path(mfvWeight * vtxMNMX * anaMNMX * treMNMX)
-'''.replace('MN', str(mn)).replace('MX', str(mx))
+mfvAnalysisCutsGE1VtxNtk3    = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3')
+mfvAnalysisCutsGE1VtxNtk4    = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk4')
+mfvAnalysisCutsGE1VtxNtk3or4 = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
+
+mfvMiniTreeNtk3    = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3')
+mfvMiniTreeNtk4    = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk4')
+mfvMiniTreeNtk3or4 = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
+
+pMiniTreeNtk3    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3    * mfvAnalysisCutsGE1VtxNtk3    * mfvMiniTreeNtk3)
+pMiniTreeNtk4    = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk4    * mfvAnalysisCutsGE1VtxNtk4    * mfvMiniTreeNtk4)
+pMiniTreeNtk3or4 = cms.Path(mfvWeight * mfvSelectedVerticesTightNtk3or4 * mfvAnalysisCutsGE1VtxNtk3or4 * mfvMiniTreeNtk3or4)

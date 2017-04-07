@@ -27,7 +27,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def modify(sample):
         to_add, to_replace = [], []
         if not sample.is_mc:
-            to_add.append('del process.p')
+            to_add.append('del process.pMiniTree')
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
