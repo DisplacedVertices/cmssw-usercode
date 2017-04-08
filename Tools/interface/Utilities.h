@@ -6,6 +6,7 @@
 #include "TH2F.h"
 #include "TLorentzVector.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 double cos_angle(const TVector3& v1, const TVector3& v2);
 double cos_angle(const TLorentzVector& v1, const TLorentzVector& v2);
@@ -15,10 +16,16 @@ TLorentzVector lorentz_boost(const TLorentzVector& boost_frame, const TLorentzVe
 TLorentzVector make_tlv(const reco::Candidate::LorentzVector& lv);
 TLorentzVector make_tlv(const reco::Candidate& c);
 TLorentzVector make_tlv(const reco::Candidate* c);
+TLorentzVector make_tlv(const reco::GenParticleRef& c);
 double pt_proj(const TLorentzVector& a, const TLorentzVector& b);
 void set_bin_labels(TAxis* xax, const char** labels);
 void fill_by_label(TH1F* h, const std::string& label);
 void fill_by_label(TH2F* h, const std::string& label_x, const std::string& label_y);
+
+template <typename T>
+int sgn(T x) {
+  return x >= 0 ? 1 : -1;
+}
 
 template <typename T>
 T min(T x, T y) {
@@ -38,6 +45,13 @@ T mag(T x, T y, T z) {
 template <typename T, typename T2>
 T2 mag(const T& v) {
   return mag<T2>(v.x(), v.y(), v.z());
+}
+
+template <typename T>
+T signed_mag(T x, T y) {
+  T m = mag(x,y);
+  if (y < 0) return -m;
+  return m;
 }
 
 template <typename V>

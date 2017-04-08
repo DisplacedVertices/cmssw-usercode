@@ -76,6 +76,21 @@ int original_index(const reco::Candidate* c, const reco::GenParticleCollection& 
   return -1;
 }
 
+reco::GenParticleRef gen_ref(const reco::Candidate* c, const edm::Handle<reco::GenParticleCollection>& gens) {
+  int i = original_index(c, *gens);
+  if (i >= 0)
+    return reco::GenParticleRef(gens, i);
+  else
+    return reco::GenParticleRef();
+}
+
+bool is_quark(const reco::GenParticleRef& c) { return is_quark(&*c); }
+bool is_lepton(const reco::GenParticleRef& c) { return is_lepton(&*c); }
+bool is_neutrino(const reco::GenParticleRef& c) { return is_neutrino(&*c); }
+int lepton_code(const reco::GenParticleRef& c) { return lepton_code(&*c); }
+const reco::Candidate* daughter_with_id(const reco::GenParticleRef& c, int id, bool take_abs) { return daughter_with_id(&*c, id, take_abs); }
+const reco::Candidate* final_candidate(const reco::GenParticleRef& c, int allowed_others) { return final_candidate(&*c, allowed_others); }
+
 bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_ancestor) {
   if (c == 0 || possible_ancestor == 0)
     return false;
@@ -270,6 +285,10 @@ void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::
   p.Print(c, name);
 }
 
+void print_gen_and_daus(const reco::GenParticleRef c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus, const bool print_vtx) {
+  print_gen_and_daus(&*c, name, gens, print_daus, print_vtx);
+}
+
 int gen_jet_id(const reco::GenJet& jet) {
   int id = 0;
   for (const reco::GenParticle* g : jet.getGenConstituents()) {
@@ -282,3 +301,4 @@ int gen_jet_id(const reco::GenJet& jet) {
   }
   return id;
 }
+

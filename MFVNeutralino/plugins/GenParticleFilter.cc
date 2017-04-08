@@ -4,7 +4,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 
 class MFVGenParticleFilter : public edm::EDFilter {
@@ -113,6 +112,8 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
 {
+  throw cms::Exception("NotImplemented", "update to new MCInteractions format");
+
   if (!(doing_h2xqq || doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j))
     throw cms::Exception("Configuration") << "mode must be h2xqq, mfv2j, mfv3j, mfv4j, or mfv5j, got " << mode;
 }
@@ -130,6 +131,7 @@ namespace {
 }
 
 bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
+#if 0
   edm::Handle<reco::GenParticleCollection> gen_particles;
   event.getByLabel(gen_src, gen_particles);
   const size_t ngen = gen_particles->size();
@@ -349,7 +351,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     if (drmax > max_drmax)
       return false;
   }
-
+#endif
   return true;
 }
 
