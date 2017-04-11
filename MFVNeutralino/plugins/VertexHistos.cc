@@ -135,6 +135,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   PairwiseHistos::HistoDefs hs;
 
   if (do_trackplots) {
+    for (int i = 0; i < 11; ++i) {
+      hs.add(TString::Format("ntracksstgt%i", i).Data(), TString::Format("# of tracks/SV w/ number of strip hits >= %i", i).Data(), 10, 0, 10);
+    }
     for (int i = 0; i < max_ntracks; ++i) {
       hs.add(TString::Format("track%i_weight",        i).Data(), TString::Format("track%i weight",                      i).Data(),  21,  0,      1.05);
       hs.add(TString::Format("track%i_q",             i).Data(), TString::Format("track%i charge",                      i).Data(),   4, -2,      2);
@@ -644,10 +647,23 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     if (do_trackplots) {
+      int ntracksstgtn[11] = {0};
+
       std::vector<std::pair<int,float>> itk_pt;
       for (int i = 0; i < int(aux.ntracks()); ++i) {
         itk_pt.push_back(std::make_pair(i, aux.track_pt(i)));
+
+        for (int j = 0; j < 11; ++j) {
+          if (aux.track_nsthits(i) >= j) {
+            ++ntracksstgtn[j];
+          }
+        }
       }
+
+      for (int i = 0; i < 11; ++i) {
+        v[TString::Format("ntracksstgt%i", i).Data()] = ntracksstgtn[i];
+      }
+
       std::sort(itk_pt.begin(), itk_pt.end(), [](std::pair<int,float> itk_pt1, std::pair<int,float> itk_pt2) { return itk_pt1.second > itk_pt2.second; } );
       for (int i = 0; i < max_ntracks; ++i) {
         if (i < int(aux.ntracks())) {
