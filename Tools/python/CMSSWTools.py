@@ -26,8 +26,10 @@ def basic_process(name, filenames=['file:input.root']):
     process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(*filenames))
     return process
 
-def files_from_file(process, fn):
+def files_from_file(process, fn, n=-1):
     fns = [line.strip() for line in open(fn).read().split('\n') if line.strip().endswith('.root')]
+    if n > 0:
+        fns = fns[:n]
     process.source.fileNames = cms.untracked.vstring(*fns)
     return fns
 
