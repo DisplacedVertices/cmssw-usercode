@@ -73,16 +73,8 @@ void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, c
         h_sums->Fill(sum_gen_weightprod_total, *sumWeightProd);
       }
     }
-    else {
-      if (prints)
-        printf("MFVWeight::beginLuminosityBlock r: %u l: %u  mcStat branch products not found!\n", lumi.run(), lumi.luminosityBlock());
-      
-      if (histos) {
-        h_sums->Fill(sum_nevents_total, -1e6);
-        h_sums->Fill(sum_gen_weight_total, -1e6);
-        h_sums->Fill(sum_gen_weightprod_total, -1e6);
-      }
-    }
+    else
+      throw cms::Exception("ProductNotFound", "MCStatProducer luminosity branch products not found!");
   }
 }
 
