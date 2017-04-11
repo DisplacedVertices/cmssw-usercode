@@ -68,6 +68,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_sigmadxy_dxyslices[3][6];
   TH1D* h_ntracks_dxyslices[3][6];
 
+  TH2D* h_tracks_nstlayers_v_eta[3];
+
   TH1D* h_nm1_tracks_pt;
   TH1D* h_nm1_tracks_min_r;
   TH1D* h_nm1_tracks_npxlayers;
@@ -139,6 +141,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
       h_tracks_sigmadxy_dxyslices[i][j] = fs->make<TH1D>(TString::Format("h_%s_tracks_sigmadxy_dxy%d", ex[i], j), TString::Format("%s tracks with %.2f <= |dxy| < %.2f;tracks sigmadxy;arb. units", ex[i], 0.01*j, 0.01*(j+1)), 200, 0, 20);
       h_ntracks_dxyslices[i][j] = fs->make<TH1D>(TString::Format("h_%s_ntracks_dxy%d", ex[i], j), TString::Format(";number of %s tracks with %.2f <= |dxy| < %.2f;events", ex[i], 0.01*j, 0.01*(j+1)), 500, 0, 500);
     }
+
+    h_tracks_nstlayers_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nstlayers_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks nstlayers", ex[i]), 80, -4, 4, 20, 0, 20);
   }
 
   h_nm1_tracks_pt = fs->make<TH1D>("h_nm1_tracks_pt", "nm1 tracks;tracks pt;arb. units", 200, 0, 20);
@@ -294,6 +298,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
           h_tracks_sigmadxy_dxyslices[i][j]->Fill(sigmadxybs, w);
         }
       }
+
+      h_tracks_nstlayers_v_eta[i]->Fill(tk.eta(), nstlayers, w);
     }
   }
 
