@@ -12,6 +12,7 @@ pileup_weights = {
     }
 
 mfvWeight = cms.EDProducer('MFVWeightProducer',
+                           throw_if_no_mcstat = cms.bool(True),
                            mevent_src = cms.InputTag('mfvEvent'),
                            enable = cms.bool(True),
                            prints = cms.untracked.bool(False),
