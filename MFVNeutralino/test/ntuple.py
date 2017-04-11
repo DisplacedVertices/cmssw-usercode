@@ -101,8 +101,12 @@ file_event_from_argv(process)
 
 if minitree_only:
     remove_output_module(process)
-    process.load('JMTucker.MFVNeutralino.MiniTree_cff')
     process.TFileService.fileName = 'minintuple.root'
+    process.load('JMTucker.MFVNeutralino.MiniTree_cff')
+    process.mfvWeight.throw_if_no_mcstat = False
+    for p in process.pMiniTree, process.pMiniTreeNtk3, process.pMiniTreeNtk4, process.pMiniTreeNtk3or4:
+        p.insert(0, process.pmcStat._seq)
+        p.insert(0, process.p._seq)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
