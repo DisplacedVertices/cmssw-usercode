@@ -142,6 +142,14 @@ def poisson_intervalize(h, zero_x=False, include_zero_bins=False, rescales=None)
         np += 1
     return h2
 
+def wilson_score(n_on, n_tot, alpha=1-0.6827):
+    z = ROOT.Math.normal_quantile(1-alpha/2, 1)
+    phat = float(n_on) / n_tot
+    dn = 1 + z**2 / n_tot
+    c = (phat + z**2/2/n_tot) / dn
+    e = z * (phat*(1-phat)/n_tot + z**2/4/n_tot**2)**0.5
+    return c, c-e, c+e
+
 def clopper_pearson(n_on, n_tot, alpha=1-0.6827, equal_tailed=True):
     if equal_tailed:
         alpha_min = alpha/2
@@ -1746,6 +1754,7 @@ __all__ = [
     'bin_iterator',
     'check_consistency',
     'histogram_divide',
+    'wilson_score',
     'clopper_pearson',
     'clopper_pearson_poisson_means',
     'cmssw_setup',
