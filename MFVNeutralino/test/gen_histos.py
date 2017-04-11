@@ -2,19 +2,27 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 debug = 'debug' in sys.argv
 
-process.source.fileNames = ['root://osg-se.cac.cornell.edu//xrootd/path/cms/store/user/tucker/mfv_neu_tau01000um_M0800/gen/150728_203042/0000/gen_1.root']
+sample_files(process, 'official_mfv_neu_tau10000um_M0800', 'main', 1)
 process.TFileService.fileName = 'gen_histos.root'
 file_event_from_argv(process)
 
+process.load('JMTucker.MFVNeutralino.GenParticles_cff')
 #process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 #process.mfvGenParticleFilter.required_num_leptonic = 0
 
-process.load('JMTucker.MFVNeutralino.GenHistos_cff')
+process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+process.mfvGenHistos = cms.EDAnalyzer('MFVGenHistos',
+                                      gen_src = cms.InputTag('genParticles'),
+                                      gen_jet_src = cms.InputTag('ak4GenJets'),
+                                      mci_src = cms.InputTag('mfvGenParticles'),
+                                      )
 
-#process.p = cms.Path(process.mfvGenParticleFilter * process.mfvGenHistos)
-process.p = cms.Path(process.mfvGenHistos)
+#process.p = cms.Path(process.mfvGenParticles * process.mfvGenParticleFilter * process.mfvGenHistos)
+process.p = cms.Path(process.mfvGenParticles * process.mfvGenHistos)
 
 if debug:
+    process.mfvGenParticles.debug = True
+
     process.printList = cms.EDAnalyzer('JMTParticleListDrawer',
                                        src = cms.InputTag('genParticles'),
                                        printVertex = cms.untracked.bool(True),

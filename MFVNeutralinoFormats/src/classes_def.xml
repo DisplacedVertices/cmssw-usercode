@@ -16,4 +16,8 @@
   <class name="MFVVertexAux"/>
   <class name="std::vector<MFVVertexAux>"/>
   <class name="edm::Wrapper<std::vector<MFVVertexAux> >"/>
+
+  <class name="mfv::MCInteraction"/>
+  <class name="edm::Wrapper<mfv::MCInteraction>"/>
+
 </lcgdict>

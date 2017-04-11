@@ -112,6 +112,9 @@ class LumiLines:
             assert year is None
         return runs
 
+    def delivered(self, run):
+        return sum(ll.delivered for ll in self.by_run[run])
+
     def recorded(self, run):
         return sum(ll.recorded for ll in self.by_run[run])
 
@@ -139,3 +142,15 @@ if __name__ == '__main__':
     #lls = LumiLines.save(sys.argv[1], sys.argv[1].replace('.csv', '.gzpickle'))
     #LumiLines.strip('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle', '/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle')
     lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle')
+    eb = lls.era_boundaries[:] + [1000000]
+    bins = [ [x,y,-1,0] for x,y in zip(eb, eb[1:]) ]
+    print bins
+    for run in lls.runs(2016):
+        for i in xrange(len(bins)):
+            x,y,r,d = bins[i]
+            if x <= run < y:
+                delivered = lls.delivered(run)
+                if delivered > d:
+                    bins[i] = x,y,run,delivered
+    for x,y,r,d in bins:
+        print x,y,r,d

@@ -8,7 +8,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
@@ -94,6 +94,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
     min_dbv(cfg.getParameter<double>("min_dbv")),
     max_dbv(cfg.getParameter<double>("max_dbv"))
 {
+  throw cms::Exception("NotImplemented", "update to new MCInteractions format");
+
   if (!(doing_h2xqq || doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j))
     throw cms::Exception("Configuration") << "mode must be h2xqq, mfv2j, mfv3j, mfv4j, or mfv5j, got " << mode;
 
@@ -138,13 +140,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
   h_lsp_ntracks0_ntracks1 = fs->make<TH2F>("h_lsp_ntracks0_ntracks1", ";ntracks of vtx0 matched to LSP;ntracks of vtx1 matched to LSP", 40, 0, 40, 40, 0, 40);
 }
 
-namespace {
-  float mag(float x, float y) {
-    return sqrt(x*x + y*y);
-  }
-}
-
 void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&) {
+#if 0
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
@@ -422,7 +419,7 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       }
     }
   }
-
+#endif
 }
 
 DEFINE_FWK_MODULE(MFVTheoristRecipe);

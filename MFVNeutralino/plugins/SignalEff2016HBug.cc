@@ -6,8 +6,8 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 
 class MFVSignalEff2016HBug : public edm::EDAnalyzer {
@@ -24,7 +24,7 @@ private:
   const std::string which_l1htt_s;
   const enum use_which { use_event_l1htt, use_my_l1htt, use_my_l1htt_wbug, use_none } which_l1htt;
 
-  const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
+  const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
 
   TH2F* h_l1_check;
   TH1F* h_gendvv_den;
@@ -53,7 +53,7 @@ MFVSignalEff2016HBug::MFVSignalEff2016HBug(const edm::ParameterSet& cfg)
                 which_l1htt_s == "my"     ? use_my_l1htt      :
                 which_l1htt_s == "mywbug" ? use_my_l1htt_wbug :
                 use_none),
-    gen_particles_token(consumes<reco::GenParticleCollection>(edm::InputTag("genParticles")))
+    mci_token(consumes<mfv::MCInteraction>(edm::InputTag("mfvGenParticles")))
 {
   if (which_l1htt == use_none)
     throw cms::Exception("Configuration", "bad setting for which_l1htt: ") << which_l1htt_s;
@@ -95,14 +95,12 @@ void MFVSignalEff2016HBug::analyze(const edm::Event& event, const edm::EventSetu
 
   h_l1_check->Fill(use_l1htt, triggerfloats->L1decisions[l1htt_bit]);
 
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByToken(gen_particles_token, gen_particles);
-  MCInteractionMFV3j mci;
-  mci.Init(*gen_particles);
-  if (!mci.Valid())
+  edm::Handle<mfv::MCInteraction> mci;
+  event.getByToken(mci_token, mci);
+  if (!mci->valid())
     throw cms::Exception("MCInteraction", "not a signal file?");
 
-  const double gendvv = mci.dvv();
+  const double gendvv = mci->dvv();
   h_gendvv_den->Fill(gendvv);
 
   if (use_l1htt >= l1htt_threshold)

@@ -18,12 +18,11 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
-#include "JMTucker/MFVNeutralino/interface/MCInteractionMFV3j.h"
-#include "JMTucker/Tools/interface/MCInteractionTops.h"
-#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
+#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVEventProducer : public edm::EDProducer {
@@ -37,6 +36,7 @@ private:
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
+  const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const bool use_met;
@@ -61,6 +61,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
+    mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     use_met(cfg.getParameter<edm::InputTag>("met_src").label() != ""),
@@ -136,61 +137,39 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (saw_c && mevent->gen_flavor_code == 0)
       mevent->gen_flavor_code = 1;
 
-    std::vector<const reco::GenParticle*> lep_from_hardint;
-    MCInteractionMFV3j mci;
-    mci.Init(*gen_particles);
-    if (!mci.Valid()) {
-      if (!warned_non_mfv) {
-        edm::LogWarning("MCInteractionMFV3j") << "invalid! hope this is not an MFV signal file, will try ttbar";
-        warned_non_mfv = true;
-      }
+    edm::Handle<mfv::MCInteraction> mci;
+    event.getByToken(mci_token, mci);
 
-      MCInteractionTops mci_tt;
-      mci_tt.Init(*gen_particles);
-      if (mci_tt.Valid()) {
-        lep_from_hardint = mci_tt.ElsOrMus();
-        for (int i = 0; i < 2; ++i) {
-          mevent->gen_lsp_pt  [i] = mci_tt.tops[i]->pt();
-          mevent->gen_lsp_eta [i] = mci_tt.tops[i]->eta();
-          mevent->gen_lsp_phi [i] = mci_tt.tops[i]->phi();
-          mevent->gen_lsp_mass[i] = mci_tt.tops[i]->mass();
-          mevent->gen_decay_type[i] = mci_tt.decay_type[i];
-        }
-      }
-    }
-    else {
-      lep_from_hardint = mci.ElsOrMus();
+    std::vector<reco::GenParticleRef> mci_lep;
+
+    if (mci->valid()) {
       mevent->gen_valid = true;
-      std::vector<const reco::GenParticle*> lsp_partons;
+
+      assert(mci->primaries().size() == 2);
       for (int i = 0; i < 2; ++i) {
-        mevent->gen_lsp_pt  [i] = mci.lsps[i]->pt();
-        mevent->gen_lsp_eta [i] = mci.lsps[i]->eta();
-        mevent->gen_lsp_phi [i] = mci.lsps[i]->phi();
-        mevent->gen_lsp_mass[i] = mci.lsps[i]->mass();
-	
-        mevent->gen_lsp_decay[i*3+0] = mci.stranges[i]->vx();
-        mevent->gen_lsp_decay[i*3+1] = mci.stranges[i]->vy();
-        mevent->gen_lsp_decay[i*3+2] = mci.stranges[i]->vz();
+        mevent->gen_lsp_pt  [i] = mci->primaries()[i]->pt();
+        mevent->gen_lsp_eta [i] = mci->primaries()[i]->eta();
+        mevent->gen_lsp_phi [i] = mci->primaries()[i]->phi();
+        mevent->gen_lsp_mass[i] = mci->primaries()[i]->mass();
 
-        lsp_partons.push_back(mci.stranges[i]);
-        lsp_partons.push_back(mci.bottoms[i]);
-        lsp_partons.push_back(mci.bottoms_from_tops[i]);
+        auto p = mci->decay_point(i);
+        mevent->gen_lsp_decay[i*3+0] = p.x;
+        mevent->gen_lsp_decay[i*3+1] = p.y;
+        mevent->gen_lsp_decay[i*3+2] = p.z;
 
-        mevent->gen_decay_type[i] = mci.decay_type[i];
-        if (mci.decay_type[i] == 3) {
-          lsp_partons.push_back(mci.W_daughters[i][0]);
-          lsp_partons.push_back(mci.W_daughters[i][1]);
-        }
-      } 
+        mevent->gen_decay_type[i] = mci->decay_type()[i];
+      }
 
       mevent->gen_partons_in_acc = 0;
-      for (const reco::GenParticle* p : lsp_partons) 
+      for (auto p : mci->visible())
         if (p->pt() > jet_pt_min && fabs(p->eta()) < 2.5)
           inc_uchar(mevent->gen_partons_in_acc);
+
+      mci_lep = mci->light_leptons();
     }
 
     for (const reco::GenParticle& gen : *gen_particles) {
-      int id = abs(gen.pdgId());
+      const int id = abs(gen.pdgId());
 
       if (id == 5) {
         bool has_b_dau = false;
@@ -212,8 +191,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
                (id == 11 || id == 13) &&
                (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29))) {
         uchar gen_lep_id = id == 11; // same convention as on reco lep_id below el = 1 mu = 0
-        for (size_t ihi = 0, ihie = lep_from_hardint.size(); ihi < ihie; ++ihi)
-          if (reco::deltaR(*lep_from_hardint[ihi], gen) < 0.05) {
+        for (auto p : mci_lep)
+          if (reco::deltaR(*p, gen) < 0.05) {
             gen_lep_id |= 0x80;
             break;
           }

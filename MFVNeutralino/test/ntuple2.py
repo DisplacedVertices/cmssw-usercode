@@ -44,7 +44,7 @@ process.p = cms.Path(process.goodOfflinePrimaryVertices *
                      process.selectedPatElectrons *
                      process.mfvVertices *
                      process.mfvEvent *
-                     process.mfvGenVertices *
+                     process.mfvGenParticles *
                      process.mfvVerticesAuxTmp *
                      process.mfvSelectedVerticesTmp *
                      process.mfvVerticesToJets *

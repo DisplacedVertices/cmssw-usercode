@@ -11,6 +11,9 @@ jets_only(process)
 sample_files(process, 'qcdht2000ext', 'main', 5)
 tfileservice(process, 'tracker_mapper.root')
 
+if is_mc:
+    process.load('JMTucker.Tools.MCStatProducer_cff')
+
 import JMTucker.MFVNeutralino.TriggerFilter
 JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 

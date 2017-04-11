@@ -49,6 +49,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_vz[3];
   TH1D* h_tracks_vphi[3];
   TH1D* h_tracks_dxy[3];
+  TH1D* h_tracks_dz[3];
+  TH1D* h_tracks_dzpv[3];
   TH1D* h_tracks_qp_dxy[3];
   TH1D* h_tracks_qm_dxy[3];
   TH1D* h_tracks_dxy_zslices[3][6];
@@ -79,6 +81,9 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
     use_duplicateMerge(cfg.getParameter<int>("use_duplicateMerge"))
 {
+  std::cout << "to add:\n"
+    "\tdxy err in slices\n";
+
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
@@ -106,6 +111,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_vz[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_vz", ex[i]), TString::Format("%s tracks;tracks vz - beamspot z;arb. units", ex[i]), 400, -20, 20);
     h_tracks_vphi[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_vphi", ex[i]), TString::Format("%s tracks;tracks vphi w.r.t. beamspot;arb. units", ex[i]), 50, -3.15, 3.15);
     h_tracks_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
+    h_tracks_dz[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;arb. units", ex[i]), 400, -20, 20);
+    h_tracks_dzpv[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;arb. units", ex[i]), 400, -20, 20);
     h_tracks_qp_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_qp_dxy", ex[i]), TString::Format("%s tracks;q=+1 tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
     h_tracks_qm_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_qm_dxy", ex[i]), TString::Format("%s tracks;q=-1 tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
     for (int j = 0; j < 6; ++j) {
@@ -175,6 +182,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertex_token, primary_vertices);
   h_npv->Fill(int(primary_vertices->size()), w);
+  const reco::Vertex* pv = primary_vertices->size() ? &primary_vertices->at(0) : 0;
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(track_token, tracks);
@@ -239,6 +247,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_vz[i]->Fill(tk.vz() - bsz, w);
       h_tracks_vphi[i]->Fill(atan2(tk.vy() - bsy, tk.vx() - bsx), w);
       h_tracks_dxy[i]->Fill(tk.dxy(*beamspot), w);
+      h_tracks_dz[i]->Fill(tk.dz(beamspot->position()), w);
+      if (pv) h_tracks_dzpv[i]->Fill(tk.dz(pv->position()), w);
       if (tk.charge() > 0) h_tracks_qp_dxy[i]->Fill(dxy, w);
       if (tk.charge() < 0) h_tracks_qm_dxy[i]->Fill(dxy, w);
       h_tracks_dxyerr[i]->Fill(tk.dxyError(), w);

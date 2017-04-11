@@ -1,4 +1,5 @@
 #include <cstdarg>
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -42,6 +43,10 @@ TLorentzVector make_tlv(const reco::Candidate* c) {
 
 TLorentzVector make_tlv(const reco::Candidate& c) {
   return make_tlv(c.p4());
+}
+
+TLorentzVector make_tlv(const reco::GenParticleRef& c) {
+  return make_tlv(c->p4());
 }
 
 double pt_proj(const TLorentzVector& a, const TLorentzVector& b) {
