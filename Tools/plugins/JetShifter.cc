@@ -14,21 +14,23 @@ public:
 private:
   void produce(edm::Event&, const edm::EventSetup&);
 
-  const edm::InputTag jet_src;
+  const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const bool enable;
+  const double mult;
   const bool jes;
   const bool up;
 };
 
 JMTJetShifter::JMTJetShifter(const edm::ParameterSet& cfg)
-  : jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
+  : jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     enable(cfg.getParameter<bool>("enable")),
+    mult(cfg.getParameter<double>("mult")),
     jes(cfg.getParameter<bool>("jes")), // true jes, false jer
     up(cfg.getParameter<bool>("up"))
 {
   produces<pat::JetCollection>();
 
-  if (!jes) throw cms::Exception("NotImplemented", "JES");
+  if (!jes) throw cms::Exception("NotImplemented", "didn't finish JER implementation");
 }
 
 void JMTJetShifter::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -36,7 +38,7 @@ void JMTJetShifter::produce(edm::Event& event, const edm::EventSetup& setup) {
     throw cms::Exception("BadConfiguration", "JER requested but running on data");
     
   edm::Handle<pat::JetCollection> jets;
-  event.getByLabel(jet_src, jets);
+  event.getByToken(jets_token, jets);
   
   std::auto_ptr<pat::JetCollection> new_jets(new pat::JetCollection);
 
@@ -54,12 +56,13 @@ void JMTJetShifter::produce(edm::Event& event, const edm::EventSetup& setup) {
         jec_unc.setJetEta(jet.eta());
         jec_unc.setJetPt(jet.pt());
         const double unc = jec_unc.getUncertainty(up);
-        if (up) scale = 1 + unc;
-        else    scale = 1 - unc;
+        if (up) scale = 1 + mult * unc;
+        else    scale = 1 - mult * unc;
+        //printf("JetShifter jet pt %f eta %f unc %f up? %i scale %f\n", jet.pt(), jet.eta(), unc, up, scale);
       }
       else {
         double factor = 1;
-
+        assert(fabs(mult-1) < 1e-3);
         const float aeta = fabs(jet.eta());
         if      (aeta < 0.5) {
           if (up) factor = 1.117;
@@ -125,8 +128,10 @@ void JMTJetShifter::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
 
       new_jet.scaleEnergy(scale);
+      //printf("  new pt %f\n", new_jet.pt());
     }
-
+    //else
+    //  printf("  disabled\n");
 
     new_jets->push_back(new_jet);
   }
