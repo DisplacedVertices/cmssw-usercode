@@ -68,6 +68,12 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_sigmadxy_dxyslices[3][6];
   TH1D* h_ntracks_dxyslices[3][6];
 
+  TH1D* h_nm1_tracks_pt;
+  TH1D* h_nm1_tracks_min_r;
+  TH1D* h_nm1_tracks_npxlayers;
+  TH1D* h_nm1_tracks_nstlayers;
+  TH1D* h_nm1_tracks_sigmadxybs;
+
   TH2D* h_dxyerr_v_ptcut[2];
   TH2D* h_dxyerr_v_npxlayerscut[2];
   TH2D* h_dxyerr_v_nstlayerscut[2];
@@ -134,6 +140,12 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
       h_ntracks_dxyslices[i][j] = fs->make<TH1D>(TString::Format("h_%s_ntracks_dxy%d", ex[i], j), TString::Format(";number of %s tracks with %.2f <= |dxy| < %.2f;events", ex[i], 0.01*j, 0.01*(j+1)), 500, 0, 500);
     }
   }
+
+  h_nm1_tracks_pt = fs->make<TH1D>("h_nm1_tracks_pt", "nm1 tracks;tracks pt;arb. units", 200, 0, 20);
+  h_nm1_tracks_min_r = fs->make<TH1D>("h_nm1_tracks_min_r", "nm1 tracks;tracks min_r;arb. units", 20, 0, 20);
+  h_nm1_tracks_npxlayers = fs->make<TH1D>("h_nm1_tracks_npxlayers", "nm1 tracks;tracks npxlayers;arb. units", 20, 0, 20);
+  h_nm1_tracks_nstlayers = fs->make<TH1D>("h_nm1_tracks_nstlayers", "nm1 tracks;tracks nstlayers;arb. units", 20, 0, 20);
+  h_nm1_tracks_sigmadxybs = fs->make<TH1D>("h_nm1_tracks_sigmadxybs", "nm1 tracks;tracks sigmadxybs;arb. units", 200, 0, 20);
 
   const char* ex2[2] = {"all", "nm1"};
   for (int i = 0; i < 2; ++i) {
@@ -203,6 +215,12 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
     const bool sel = pt > 1 && min_r <= 1 && npxlayers >= 2 && nstlayers >= 3;
     const bool seed = sel && sigmadxybs > 4;
+
+    if (          min_r <= 1 && npxlayers >= 2 && nstlayers >= 3 && sigmadxybs > 4) h_nm1_tracks_pt->Fill(pt, w);
+    if (pt > 1               && npxlayers >= 2 && nstlayers >= 3 && sigmadxybs > 4) h_nm1_tracks_min_r->Fill(min_r, w);
+    if (pt > 1 && min_r <= 1                   && nstlayers >= 3 && sigmadxybs > 4) h_nm1_tracks_npxlayers->Fill(npxlayers, w);
+    if (pt > 1 && min_r <= 1 && npxlayers >= 2                   && sigmadxybs > 4) h_nm1_tracks_nstlayers->Fill(nstlayers, w);
+    if (pt > 1 && min_r <= 1 && npxlayers >= 2 && nstlayers >= 3                  ) h_nm1_tracks_sigmadxybs->Fill(sigmadxybs, w);
 
     const bool nm1_sel[3] = {
       min_r <= 1 && npxlayers >= 2 && nstlayers >= 3,
