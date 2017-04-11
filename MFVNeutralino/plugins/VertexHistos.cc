@@ -96,6 +96,20 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_track_nhits[sv_num_indices];
   TH1F* h_sv_track_injet[sv_num_indices];
   TH1F* h_sv_track_inpv[sv_num_indices];
+
+  TH2F* h_sv_track_nsthits_track_eta[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_pt[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_eta[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_phi[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_dxy[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_dz[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_pt_err[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_eta_err[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_phi_err[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_dxy_err[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_dz_err[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_npxhits[sv_num_indices];
+  TH2F* h_sv_bs2derr_track_nsthits[sv_num_indices];
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "all" };
@@ -342,6 +356,20 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_nhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nhits", exc), TString::Format(";%s SV tracks number of hits", exc), 40, 0, 40);
     h_sv_track_injet[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_injet", exc), TString::Format(";%s SV tracks in-jet?", exc), 2, 0, 2);
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
+
+    h_sv_track_nsthits_track_eta[j] = fs->make<TH2F>(TString::Format("h_sv_%s_track_nsthits_track_eta", exc), TString::Format("%s SV;tracks #eta;tracks number of strip hits;", exc), 50, -4, 4, 28, 0, 28);
+    h_sv_bs2derr_track_pt[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_pt", exc), TString::Format("%s SV;tracks p_{T} (GeV);#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 200, 100, 0, 0.05);
+    h_sv_bs2derr_track_eta[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_eta", exc), TString::Format("%s SV;tracks #eta;#sigma(dist2d(SV, beamspot)) (cm)", exc), 50, -4, 4, 100, 0, 0.05);
+    h_sv_bs2derr_track_phi[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_phi", exc), TString::Format("%s SV;tracks #phi;#sigma(dist2d(SV, beamspot)) (cm)", exc), 50, -3.15, 3.15, 100, 0, 0.05);
+    h_sv_bs2derr_track_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dxy", exc), TString::Format("%s SV;tracks dxy (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 1, 100, 0, 0.05);
+    h_sv_bs2derr_track_dz[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dz", exc), TString::Format("%s SV;tracks dz (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 1, 100, 0, 0.05);
+    h_sv_bs2derr_track_pt_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_pt_err", exc), TString::Format("%s SV;tracks #sigma(p_{T})/p_{T};#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 2, 100, 0, 0.05);
+    h_sv_bs2derr_track_eta_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_eta_err", exc), TString::Format("%s SV;tracks #sigma(#eta);#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 0.02, 100, 0, 0.05);
+    h_sv_bs2derr_track_phi_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_phi_err", exc), TString::Format("%s SV;tracks #sigma(#phi);#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 0.02, 100, 0, 0.05);
+    h_sv_bs2derr_track_dxy_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dxy_err", exc), TString::Format("%s SV;tracks #sigma(dxy) (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 0.1, 100, 0, 0.05);
+    h_sv_bs2derr_track_dz_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dz_err", exc), TString::Format("%s SV;tracks #sigma(dz) (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 0.1, 100, 0, 0.05);
+    h_sv_bs2derr_track_npxhits[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_npxhits", exc), TString::Format("%s SV;tracks number of pixel hits;#sigma(dist2d(SV, beamspot)) (cm)", exc), 12, 0, 12, 100, 0, 0.05);
+    h_sv_bs2derr_track_nsthits[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_nsthits", exc), TString::Format("%s SV;tracks number of strip hits;#sigma(dist2d(SV, beamspot)) (cm)", exc), 28, 0, 28, 100, 0, 0.05);
   }
 
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
@@ -599,6 +627,20 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       fill_multi(h_sv_track_nhits, isv, aux.track_nhits(i), w);
       fill_multi(h_sv_track_injet, isv, aux.track_injet[i], w);
       fill_multi(h_sv_track_inpv, isv, aux.track_inpv[i], w);
+
+      fill_multi(h_sv_track_nsthits_track_eta, isv, aux.track_eta(i), aux.track_nsthits(i), w);
+      fill_multi(h_sv_bs2derr_track_pt, isv, aux.track_pt(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_eta, isv, aux.track_eta(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_phi, isv, aux.track_phi(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_dxy, isv, aux.track_dxy[i], aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_dz, isv, aux.track_dz[i], aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_pt_err, isv, aux.track_pt_err(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_eta_err, isv, aux.track_eta_err(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_phi_err, isv, aux.track_phi_err(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_dxy_err, isv, aux.track_dxy_err(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_dz_err, isv, aux.track_dz_err(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_npxhits, isv, aux.track_npxhits(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_nsthits, isv, aux.track_nsthits(i), aux.bs2derr, w);
     }
 
     if (do_trackplots) {
