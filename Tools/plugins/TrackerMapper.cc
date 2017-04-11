@@ -69,6 +69,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_ntracks_dxyslices[3][6];
 
   TH2D* h_tracks_nstlayers_v_eta[3];
+  TH2D* h_tracks_dxyerr_v_eta[3];
 
   TH1D* h_nm1_tracks_pt;
   TH1D* h_nm1_tracks_min_r;
@@ -89,9 +90,6 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
     use_duplicateMerge(cfg.getParameter<int>("use_duplicateMerge"))
 {
-  std::cout << "to add:\n"
-    "\tdxy err in slices\n";
-
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
@@ -143,6 +141,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     }
 
     h_tracks_nstlayers_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nstlayers_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks nstlayers", ex[i]), 80, -4, 4, 20, 0, 20);
+    h_tracks_dxyerr_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxyerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dxyerr", ex[i]), 80, -4, 4, 200, 0, 0.2);
   }
 
   h_nm1_tracks_pt = fs->make<TH1D>("h_nm1_tracks_pt", "nm1 tracks;tracks pt;arb. units", 200, 0, 20);
@@ -300,6 +299,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       }
 
       h_tracks_nstlayers_v_eta[i]->Fill(tk.eta(), nstlayers, w);
+      h_tracks_dxyerr_v_eta[i]->Fill(tk.eta(), tk.dxyError(), w);
     }
   }
 
