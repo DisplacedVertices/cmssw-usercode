@@ -4,6 +4,8 @@
 <library file="*.cc" name="JMTuckerToolsPlugins">
   <use name="clhep"/>
   <use name="CommonTools/UtilAlgos"/>
+  <use name="CondFormats/JetMETObjects"/>
+  <use name="JetMETCorrections/Objects"/>
   <use name="DataFormats/PatCandidates"/>
   <use name="DataFormats/VertexReco"/>
   <use name="HLTrigger/HLTcore"/>
