@@ -2,9 +2,9 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-class MFVJetFilter : public edm::EDFilter {
+class JMTJetFilter : public edm::EDFilter {
 public:
-  explicit MFVJetFilter(const edm::ParameterSet&);
+  explicit JMTJetFilter(const edm::ParameterSet&);
 private:
   bool filter(edm::Event&, const edm::EventSetup&) override;
 
@@ -17,7 +17,7 @@ private:
   const bool debug;
 };
 
-MFVJetFilter::MFVJetFilter(const edm::ParameterSet& cfg)
+JMTJetFilter::JMTJetFilter(const edm::ParameterSet& cfg)
   : jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_pt_for_ht(cfg.getParameter<double>("min_pt_for_ht")),
@@ -27,7 +27,7 @@ MFVJetFilter::MFVJetFilter(const edm::ParameterSet& cfg)
 {
 }
 
-bool MFVJetFilter::filter(edm::Event& event, const edm::EventSetup&) {
+bool JMTJetFilter::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
@@ -45,4 +45,4 @@ bool MFVJetFilter::filter(edm::Event& event, const edm::EventSetup&) {
     ht >= min_ht;
 }
 
-DEFINE_FWK_MODULE(MFVJetFilter);
+DEFINE_FWK_MODULE(JMTJetFilter);
