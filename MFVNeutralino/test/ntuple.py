@@ -134,7 +134,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
         }
-    modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips))
+    modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     ms.common.ex = year
     ms.common.pset_modifier = modify

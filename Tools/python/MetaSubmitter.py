@@ -11,8 +11,9 @@ def is_mc_modifier(sample):
     return [], to_replace
 
 class event_veto_modifier:
-    def __init__(self, d):
+    def __init__(self, d, filter_path):
         self.d = d
+        self.filter_path = filter_path
     def __call__(self, sample):
         to_add, to_replace = [], []
         if self.d.has_key(sample.name):
@@ -25,8 +26,8 @@ process.eventVeto = cms.EDFilter('EventIdVeto',
                                  runs = cms.vuint32(%(runs)s),
                                  lumis = cms.vuint32(%(lumis)s),
                                  events = cms.vuint64(%(events)s))
-process.pevtsel.insert(0, process.eventVeto)
-'''
+process.%s.insert(0, process.eventVeto)
+''' % self.filter_path
             else:
                 x = '''
 process.eventVeto = cms.EDFilter('EventIdVeto',
@@ -34,8 +35,8 @@ process.eventVeto = cms.EDFilter('EventIdVeto',
                                  use_run = cms.bool(False),
                                  lumis = cms.vuint32(%(lumis)s),
                                  events = cms.vuint64(%(events)s))
-process.pevtsel.insert(0, process.eventVeto)
-'''
+process.%s.insert(0, process.eventVeto)
+''' % self.filter_path
             to_add = [x % d2]
         return to_add, to_replace
 
