@@ -7,8 +7,10 @@ mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
                                    electrons_src = cms.InputTag('selectedPatElectrons'),
                                    gen_vertices_src = cms.InputTag('mfvGenParticles'),
                                    vertex_src = cms.InputTag('mfvVertices'),
+                                   min_ntracks = cms.int32(0),
                                    sv_to_jets_src = cms.string('dummy'),
                                    sort_by = cms.string('ntracks_then_mass'),
                                    )
 
-mfvVerticesAux = mfvVerticesAuxTmp.clone(sv_to_jets_src = 'mfvVerticesToJets')
+mfvVerticesAux = mfvVerticesAuxTmp.clone(sv_to_jets_src = 'mfvVerticesToJets',
+                                         min_ntracks = 3)
