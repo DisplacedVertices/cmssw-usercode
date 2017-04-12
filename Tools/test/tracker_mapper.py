@@ -18,10 +18,10 @@ if is_mc:
 import JMTucker.MFVNeutralino.TriggerFilter
 JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 
-process.load('JMTucker.MFVNeutralino.JetFilter_cfi')
+process.load('JMTucker.Tools.JetFilter_cfi')
 
 process.load('JMTucker.Tools.TrackerMapper_cfi')
-process.p = cms.Path(process.triggerFilter * process.mfvJetFilter * process.TrackerMapper)
+process.p = cms.Path(process.triggerFilter * process.jmtJetFilter * process.TrackerMapper)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples

@@ -15,6 +15,7 @@ private:
   const edm::EDGetTokenT<int> nevents_token;
   const edm::EDGetTokenT<float> sumweight_token;
   const edm::EDGetTokenT<float> sumweightprod_token;
+  const bool throw_if_no_mcstat;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const bool enable;
   const bool prints;
@@ -34,6 +35,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   : nevents_token(consumes<int, edm::InLumi>(edm::InputTag("mcStat", "nEvents"))),
     sumweight_token(consumes<float, edm::InLumi>(edm::InputTag("mcStat", "sumWeight"))),
     sumweightprod_token(consumes<float, edm::InLumi>(edm::InputTag("mcStat", "sumWeightProd"))),
+    throw_if_no_mcstat(cfg.getParameter<bool>("throw_if_no_mcstat")),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
@@ -73,7 +75,7 @@ void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, c
         h_sums->Fill(sum_gen_weightprod_total, *sumWeightProd);
       }
     }
-    else
+    else if (throw_if_no_mcstat)
       throw cms::Exception("ProductNotFound", "MCStatProducer luminosity branch products not found!");
   }
 }
