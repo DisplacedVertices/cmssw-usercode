@@ -1,51 +1,70 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
-from JMTucker.Tools.CMSSWTools import file_event_from_argv
+from JMTucker.Tools.MiniAOD_cfg import *
+from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 
 ####
 
-def customize_before_unscheduled(process):
-    process.out.outputCommands = [
-        'drop *',
-        'keep *_mcStat_*_*',
-        'keep *_skimmedGeneralTracks_*_*',
-        'keep recoGenParticles_genParticles_*_*',
-        'keep *_preselectedPatJets_*_*',
-        'keep patMuons_patMuons_*_*',
-        'keep patElectrons_patElectrons_*_*',
-        'keep *_patMETsNoHF_*_*',
-        'keep recoBeamSpot_offlineBeamSpot_*_*',
-        'keep recoVertexs_offlinePrimaryVertices_*_*',
-        'keep *_TriggerResults_*_HLT',
-        'keep *_TriggerResults_*_PAT',
-        'keep GenEventInfoProduct_generator_*_*',
-        'keep *_addPileupInfo_*_*',
-        ]
+process = pat_tuple_process(None, is_mc, year)
 
-process = pat_tuple_process(customize_before_unscheduled, is_mc, year)
 process.out.fileName = 'miniaod.root'
-
 process.out.outputCommands += [
-    # these three get added to the end somehow
-    'drop patMETs_patPFMetPuppi__PAT',
-    'drop patMETs_patCaloMet__PAT',
-    'drop patMETs_patMETPuppi__PAT',
+    'drop *',
+    'keep *_mcStat_*_*',
+    'keep *_skimmedGeneralTracks_*_*',
+    'keep recoGenParticles_genParticles_*_*',
+    'keep *_selectedPatJets_*_*',
+    'keep patMuons_selectedPatMuons_*_*',
+    'keep patElectrons_selectedPatElectrons_*_*',
+    'keep *_patMETsNoHF_*_*',
+    'keep recoBeamSpot_offlineBeamSpot_*_*',
+    'keep recoVertexs_offlinePrimaryVertices_*_*',
+    'keep *_mfvTriggerFloats_*_*',
+    'keep *_mfvCleaningBits_*_*',
+    'keep GenEventInfoProduct_generator_*_*',
+    'keep *_addPileupInfo_*_*',
     ]
 
 process.skimmedGeneralTracks = cms.EDProducer('MFVSkimmedTracks')
 
 process.patJets.embedPFCandidates = True
-process.preselectedPatJets = process.selectedPatJets.clone(cut = process.jtupleParams.jetPresel)
+
 process.patMuons.embedTrack = True
+process.patMuons.embedCaloMETMuonCorrs   = False
+process.patMuons.embedHighLevelSelection = False
+process.patMuons.embedCombinedMuon       = False
+process.patMuons.embedMuonBestTrack      = False
+process.patMuons.embedPFCandidate        = False
+process.patMuons.embedPfEcalEnergy       = False
+process.patMuons.embedStandAloneMuon     = False
+process.patMuons.embedTunePMuonBestTrack = False
+process.patMuons.isolationValues = cms.PSet()
+
 process.patElectrons.embedTrack = True
 process.patElectrons.embedGsfElectronCore = True
+process.patElectrons.embedHighLevelSelection = False
+process.patElectrons.addElectronID = False
+process.patElectrons.embedPFCandidate = False
+process.patElectrons.addPFClusterIso  = False
+process.patElectrons.isolationValues = cms.PSet()
+process.patElectrons.isolationValuesNoPFId = cms.PSet()
+process.patElectrons.electronIDSources = cms.PSet()
+
+process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+process.load('JMTucker.MFVNeutralino.CleaningBits_cff')
 
 import JMTucker.MFVNeutralino.TriggerFilter
 JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
 
-process.maxEvents.input = 100
+process.load('JMTucker.Tools.JetShifter_cfi')
+process.load('JMTucker.Tools.JetFilter_cfi')
+
+process.jmtJetShifter.mult = 2
+process.jmtJetFilter.jets_src = 'jmtJetShifter'
+process.pevtsel *= process.jmtJetShifter * process.jmtJetFilter
+
+process.maxEvents.input = 500
 file_event_from_argv(process)
