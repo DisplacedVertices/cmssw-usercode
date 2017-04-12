@@ -149,6 +149,26 @@ _add_ds("main", {
 'mfv_neu_tau30000um_M3000': (97, ['/store/user/wsun/croncopyeos/mfv_neu_tau30000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170324_193352/0000/reco_%i.root' % i for i in chain(xrange(1,79), xrange(80,89), xrange(90,98), xrange(99,101))]),
 })
 
+_add_ds('validation', {
+'qcdht0700':   (15, _d[('qcdht0700', 'main')][1][:15]),
+'qcdht2000':   (5, _d[('qcdht2000', 'main')][1][:5]),
+'ttbar':       (10, _d[('ttbar', 'main')][1][:10]),
+'mfv_neu_tau00300um_M0800': (10, _d[('mfv_neu_tau00300um_M0800', 'main')][1][:10]),
+'mfv_neu_tau01000um_M0600': (10, _d[('mfv_neu_tau01000um_M0600', 'main')][1][:10]),
+'mfv_neu_tau30000um_M0800': (10, _d[('mfv_neu_tau30000um_M0800', 'main')][1][:10]),
+'mfv_ddbar_tau00300um_M0400': (10, _d[('mfv_ddbar_tau00300um_M0400', 'main')][1][:10]),
+'mfv_ddbar_tau00300um_M0800': (10, _d[('mfv_ddbar_tau00300um_M0800', 'main')][1][:10]),
+'mfv_ddbar_tau01000um_M0400': (10, _d[('mfv_ddbar_tau01000um_M0400', 'main')][1][:10]),
+'mfv_ddbar_tau01000um_M0800': (10, _d[('mfv_ddbar_tau01000um_M0800', 'main')][1][:10]),
+'JetHT2016B3': (3, ['/store/data/Run2016B/JetHT/AOD/23Sep2016-v3/00000/3AA5D404-2797-E611-8B82-02163E01603E.root', '/store/data/Run2016B/JetHT/AOD/23Sep2016-v3/00000/1A5C4C57-3997-E611-B483-02163E013DB7.root', '/store/data/Run2016B/JetHT/AOD/23Sep2016-v3/00000/040A954A-5197-E611-B495-FA163E6CA8AB.root']),
+'JetHT2016C' : (3, ['/store/data/Run2016C/JetHT/AOD/23Sep2016-v1/90000/06BBBDC5-1982-E611-9B59-00259029E920.root', '/store/data/Run2016C/JetHT/AOD/23Sep2016-v1/90000/182FEABA-DA82-E611-8A96-008CFA110C78.root', '/store/data/Run2016C/JetHT/AOD/23Sep2016-v1/90000/5E56098B-FC81-E611-A5C6-0002C94CDACC.root']),
+'JetHT2016D' : (3, ['/store/data/Run2016D/JetHT/AOD/23Sep2016-v1/100000/38F0FFAA-7484-E611-8E02-0CC47AA98A3A.root', '/store/data/Run2016D/JetHT/AOD/23Sep2016-v1/100000/AC44715A-7284-E611-811E-008CFA197E0C.root', '/store/data/Run2016D/JetHT/AOD/23Sep2016-v1/100000/84310354-7284-E611-8E70-0CC47AB0B704.root']),
+'JetHT2016E' : (3, ['/store/data/Run2016E/JetHT/AOD/23Sep2016-v1/80000/42C18B56-3386-E611-8F10-0025905A6126.root', '/store/data/Run2016E/JetHT/AOD/23Sep2016-v1/80000/70F8640B-3686-E611-96D4-0CC47A7C35A8.root', '/store/data/Run2016E/JetHT/AOD/23Sep2016-v1/80000/18380D41-3986-E611-BB3F-0CC47A7C35C8.root']),
+'JetHT2016F' : (3, ['/store/data/Run2016F/JetHT/AOD/23Sep2016-v1/80000/A87DC7D8-1C85-E611-AA81-009C02AABEB8.root', '/store/data/Run2016F/JetHT/AOD/23Sep2016-v1/80000/9677543D-6685-E611-A3A0-0026B92779BD.root', '/store/data/Run2016F/JetHT/AOD/23Sep2016-v1/80000/AAF64FDB-9D85-E611-A424-BC305B390A66.root']),
+'JetHT2016G' : (3, ['/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/70000/70B64A42-5C85-E611-88B0-848F69FD4E98.root', '/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/70000/825F68A9-8A85-E611-8BAF-7845C4FC3A07.root', '/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/70000/04A529BD-9885-E611-BDA3-008CFAFBFEBE.root']),
+'JetHT2016H2': (3, ['/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/BAAECA7C-8E97-E611-A5D1-FA163EF54263.root', '/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/EE7D84AF-CB97-E611-9D55-02163E014234.root', '/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/D69C211F-7B98-E611-A91F-FA163E13C2C9.root']),
+})
+
 _add_ds("pick1vtxv1", {
 'qcdht0500': (1, ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194536/0000/pick_1.root']),
 'qcdht0700': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV1/170322_194548", 27, fnbase="pick"),

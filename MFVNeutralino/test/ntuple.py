@@ -130,6 +130,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                 if s.name.startswith(k):
                     s.events_per = min(int(25000/v), 200000)
 
+    if 'validation' in sys.argv:
+        batch_name += '_validation'
+        import JMTucker.Tools.SampleFiles as SampleFiles
+        samples = [s for s in samples if SampleFiles.has(s.name, 'validation')]
+        for s in samples:
+            s.files_per = 100000 # let max_output_modifier handle it
+
     from JMTucker.Tools.MetaSubmitter import *
     skips = {
         'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
@@ -137,6 +144,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         }
     modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips))
     ms = MetaSubmitter(batch_name)
+    if 'validation' in sys.argv:
+        modify.append(max_output_modifier(500))
+        ms.common.dataset = 'validation'
     ms.common.ex = year
     ms.common.pset_modifier = modify
     ms.common.publish_name = batch_name + '_' + str(year)

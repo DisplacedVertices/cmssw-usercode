@@ -495,6 +495,10 @@ ttbar_2015.add_dataset('pick1vtxv1', '/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-py
 for x in qcdht2000ext, qcdht2000ext_2015:
     x.add_dataset('pick1vtxv1')
 
+for x in data_samples + [qcdht0700, qcdht2000, ttbar, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0600, mfv_neu_tau30000um_M0800, mfv_ddbar_tau00300um_M0400, mfv_ddbar_tau00300um_M0800, mfv_ddbar_tau01000um_M0400, mfv_ddbar_tau01000um_M0800]:
+    x.add_dataset('validation')
+    x.datasets['validation'].condor = True
+
 ########
 # other condor declarations
 ########
