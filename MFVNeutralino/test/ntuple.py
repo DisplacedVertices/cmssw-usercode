@@ -23,7 +23,6 @@ process.out.fileName = 'ntuple.root'
 process.out.outputCommands = output_commands = [
     'drop *',
     'keep *_mcStat_*_*',
-    'keep *_mfvCleaningBits_*_*',
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     'keep MFVEvent_mfvEvent__*',
     ]
@@ -33,7 +32,6 @@ random_service(process, {'mfvVertices': 1222})
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-process.load('JMTucker.MFVNeutralino.CleaningBits_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
 process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
