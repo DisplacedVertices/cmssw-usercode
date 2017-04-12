@@ -210,6 +210,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<mfv::TriggerFloats> triggerfloats;
   event.getByToken(triggerfloats_token, triggerfloats);
 
+  mevent->l1_htt = triggerfloats->l1htt;
+  mevent->l1_myhtt = triggerfloats->myhtt;
+  mevent->l1_myhttwbug = triggerfloats->myhttwbug;
   mevent->hlt_ht = triggerfloats->hltht;
   mevent->hlt_ht4mc = triggerfloats->hltht4mc;
 
