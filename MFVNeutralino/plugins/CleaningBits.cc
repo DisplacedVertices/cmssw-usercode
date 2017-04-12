@@ -23,8 +23,9 @@ MFVCleaningBits::MFVCleaningBits(const edm::ParameterSet& cfg)
 }
 
 void MFVCleaningBits::produce(edm::Event& event, const edm::EventSetup& setup) {
-  std::auto_ptr<cleaning_word_t> cleaning_word(new cleaning_word_t);
-  *cleaning_word = 0;
+  static const bool debug = false;
+
+  std::auto_ptr<cleaning_word_t> cleaning_word(new cleaning_word_t(0));
 
   TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
   for (size_t i = 0; i < mfv::n_clean_paths; ++i) {
@@ -33,6 +34,7 @@ void MFVCleaningBits::produce(edm::Event& event, const edm::EventSetup& setup) {
       assert(i>=5); // the 2016/2015 versions come after that
     bool pass = !paf.second || paf.first; // if not found, pass
     *cleaning_word |= (pass << i);
+    if (debug) printf("clean path: %40s found? %i pass? %i   word -> %x \n", mfv::clean_paths[i], paf.second, paf.first, *cleaning_word);
   }
 
   event.put(cleaning_word);
