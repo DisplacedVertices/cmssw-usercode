@@ -17,6 +17,10 @@
   <class name="std::vector<MFVVertexAux>"/>
   <class name="edm::Wrapper<std::vector<MFVVertexAux> >"/>
 
+  <class name="VertexerPairEff"/>
+  <class name="std::vector<VertexerPairEff>"/>
+  <class name="edm::Wrapper<std::vector<VertexerPairEff> >"/>
+
   <class name="mfv::MCInteraction"/>
   <class name="edm::Wrapper<mfv::MCInteraction>"/>
 

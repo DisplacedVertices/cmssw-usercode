@@ -24,6 +24,7 @@ process.out.fileName = 'ntuple.root'
 process.out.outputCommands = output_commands = [
     'drop *',
     'keep *_mcStat_*_*',
+    'keep VertexerPairEffs_mfvVertices_*_*',
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     'keep MFVEvent_mfvEvent__*',
     ]
