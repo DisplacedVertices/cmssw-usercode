@@ -243,9 +243,9 @@ private:
   TH1F* h_n_output_vertices;
 
   // 1st index is jet ht cut, 2nd index is min_ntracks, with 0 inclusive, 1 unused
-  ByRunTH1<TH1F> h_pairs_d2d[3][6];
-  ByRunTH1<TH1F> h_merge_d2d[3][6];
-  ByRunTH1<TH1F> h_erase_d2d[3][6];
+  ByRunTH1<TH1F> h_pairs_d2d[2][6];
+  ByRunTH1<TH1F> h_merge_d2d[2][6];
+  ByRunTH1<TH1F> h_erase_d2d[2][6];
 
   struct track_cuts {
     const MFVVertexer& mv;
@@ -519,8 +519,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
 
-    for (int iht = 0; iht < 3; ++iht) {
-      const int jet_ht_cut[3] = {1000, 1050, 1100};
+    for (int iht = 0; iht < 2; ++iht) {
+      const int jet_ht_cut[2] = {-1, 1000};
       for (int i = 0; i <= 5; ++i) {
         if (i == 1) continue;
         h_pairs_d2d[iht][i].set(&fs, TString::Format("h_pairs_d2d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
@@ -558,7 +558,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const unsigned run = event.id().run();
 
   if (histos)
-    for (int iht = 0; iht < 3; ++iht) {
+    for (int iht = 0; iht < 2; ++iht) {
       for (int i = 0; i <= 5; ++i) {
         if (i == 1) continue;
         h_pairs_d2d[iht][i].book(run);
@@ -980,8 +980,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose) printf("t0 %i t1 %i min %i max %i\n", int(tracks[0].size()), int(tracks[1].size()), ntk_min, ntk_max);
         const double d2d = mag(v[0]->x() - v[1]->x(),
                                v[0]->y() - v[1]->y());
-        for (int iht = 0; iht < 3; ++iht) {
-          const int jet_ht_cut[3] = {1000, 1050, 1100};
+        for (int iht = 0; iht < 2; ++iht) {
+          const int jet_ht_cut[2] = {-1, 1000};
           if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
             if (ntk_max >= 2)
               h_pairs_d2d[iht][ntk_max][run]->Fill(d2d);
@@ -1120,8 +1120,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
           const double d2d = mag(v[0]->x() - v[1]->x(),
                                  v[0]->y() - v[1]->y());
-          for (int iht = 0; iht < 3; ++iht) {
-            const int jet_ht_cut[3] = {1000, 1050, 1100};
+          for (int iht = 0; iht < 2; ++iht) {
+            const int jet_ht_cut[2] = {-1, 1000};
             if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
               if (ntk_max >= 2)
                 h_merge_d2d[iht][ntk_max][run]->Fill(d2d);
@@ -1186,8 +1186,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
         const double d2d = mag(vsave[0].x() - vsave[1].x(),
                                vsave[0].y() - vsave[1].y());
-        for (int iht = 0; iht < 3; ++iht) {
-          const int jet_ht_cut[3] = {1000, 1050, 1100};
+        for (int iht = 0; iht < 2; ++iht) {
+          const int jet_ht_cut[3] = {-1, 1000};
           if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
             if (ntk_max >= 2)
               h_erase_d2d[iht][ntk_max][run]->Fill(d2d);
