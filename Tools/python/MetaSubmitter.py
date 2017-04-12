@@ -2,6 +2,12 @@ import sys
 from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 
+class max_output_modifier:
+    def __init__(self, n):
+        self.n = n
+    def __call__(self, sample):
+        return ['process.maxEvents.output = cms.untracked.int32(500)'], []
+
 def is_mc_modifier(sample):
     to_replace = []
     if not sample.is_mc:
@@ -42,7 +48,9 @@ process.%s.insert(0, process.eventVeto)
 
 class chain_modifiers:
     def __init__(self, *modifiers):
-        self.modifiers = modifiers
+        self.modifiers = list(modifiers)
+    def append(self, x):
+        self.modifiers.append(x)
     def __call__(self, sample):
         to_add, to_replace = [], []
         for m in self.modifiers:
