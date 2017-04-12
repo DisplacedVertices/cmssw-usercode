@@ -277,7 +277,13 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
       aux.track_weight(-1, sv.trackWeight(tri));
       aux.track_q(-1, tri->charge());
-      aux.track_hitpattern(-1, tri->hitPattern().numberOfValidPixelHits(), tri->hitPattern().numberOfValidStripHits(), nhitsbehind, tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS)); // JMTBAD could add missing inner, outer
+      aux.track_hitpattern(-1,
+                           tri->hitPattern().numberOfValidPixelHits(), 
+                           tri->hitPattern().pixelLayersWithMeasurement(), 
+                           tri->hitPattern().numberOfValidStripHits(),
+                           tri->hitPattern().stripLayersWithMeasurement(), 
+                           nhitsbehind,
+                           tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS)); // JMTBAD could add missing inner, outer
 
       aux.track_injet.push_back(jets_tracks[0].count(trref)); // JMTBAD
       aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
