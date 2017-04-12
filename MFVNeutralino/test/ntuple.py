@@ -18,6 +18,7 @@ if minitree_only:
 ####
 
 process = pat_tuple_process(None, is_mc, year)
+remove_met_filters(process)
 
 process.out.fileName = 'ntuple.root'
 process.out.outputCommands = output_commands = [
