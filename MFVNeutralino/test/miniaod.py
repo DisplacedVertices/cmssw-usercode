@@ -57,14 +57,7 @@ process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.CleaningBits_cff')
 
 import JMTucker.MFVNeutralino.EventFilter
-JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process)
-
-process.load('JMTucker.Tools.JetShifter_cfi')
-process.load('JMTucker.Tools.JetFilter_cfi')
-
-process.jmtJetShifter.mult = 2
-process.jmtJetFilter.jets_src = 'jmtJetShifter'
-process.pevtsel *= process.jmtJetShifter * process.jmtJetFilter
+JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, event_filter=True)
 
 process.maxEvents.input = 500
 file_event_from_argv(process)

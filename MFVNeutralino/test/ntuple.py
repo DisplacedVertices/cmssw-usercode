@@ -39,7 +39,7 @@ process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * proc
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
-    JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
+    JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True)
 
 if prepare_vis:
     process.mfvSelectedVerticesTight.produce_vertices = True
