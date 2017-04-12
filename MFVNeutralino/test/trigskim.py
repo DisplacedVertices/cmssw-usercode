@@ -4,8 +4,8 @@ process = basic_process('TrigSkim')
 report_every(process, 1000000)
 output_file(process, 'trigskim.root', ['keep *'])
 
-import JMTucker.MFVNeutralino.TriggerFilter as tf
-tf.setup_trigger_filter(process)
+import JMTucker.MFVNeutralino.EventFilter as tf
+tf.setup_event_filter(process)
 
 #process.options.wantSummary = True
 #set_lumis_to_process_from_json(process, 'ana_2015.json')

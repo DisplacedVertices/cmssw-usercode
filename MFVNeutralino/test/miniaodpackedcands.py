@@ -9,5 +9,5 @@ process.source.secondaryFileNames = cms.untracked.vstring('/store/user/tucker/Je
 from FWCore.PythonUtilities.LumiList import LumiList
 process.source.lumisToProcess = LumiList('test.json').getVLuminosityBlockRange()
 
-import JMTucker.MFVNeutralino.TriggerFilter
-JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
+import JMTucker.MFVNeutralino.EventFilter
+JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process)

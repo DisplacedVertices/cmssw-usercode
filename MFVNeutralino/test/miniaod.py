@@ -56,8 +56,8 @@ process.patElectrons.electronIDSources = cms.PSet()
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.CleaningBits_cff')
 
-import JMTucker.MFVNeutralino.TriggerFilter
-JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
+import JMTucker.MFVNeutralino.EventFilter
+JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process)
 
 process.load('JMTucker.Tools.JetShifter_cfi')
 process.load('JMTucker.Tools.JetFilter_cfi')

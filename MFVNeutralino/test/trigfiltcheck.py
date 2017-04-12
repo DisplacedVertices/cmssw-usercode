@@ -7,14 +7,14 @@ file_event_from_argv(process)
 process.TFileService.fileName = 'trigeff.root'
 global_tag(process, which_global_tag(True, year)) # needed for emulator that checks L1 bits
 
-from JMTucker.MFVNeutralino.TriggerFilter import *
-setup_trigger_filter_soup(process, 'pmfvfilt')
-setup_trigger_filter_soup(process, 'ponlyhtpt', 'tfonlyhtpt')
-setup_trigger_filter_soup(process, 'ponlyht', 'tfonlyht')
-setup_trigger_filter_soup(process, 'ponlyht8', 'tfonlyht8')
-setup_trigger_filter_soup(process, 'ponlyht9', 'tfonlyht9')
-setup_trigger_filter(process, 'pemuht8',             need_pat=True)
-setup_trigger_filter(process, 'pemuht9', 'emuht900', need_pat=True)
+from JMTucker.MFVNeutralino.EventFilter import *
+setup_event_filter_soup(process, 'pmfvfilt')
+setup_event_filter_soup(process, 'ponlyhtpt', 'tfonlyhtpt')
+setup_event_filter_soup(process, 'ponlyht', 'tfonlyht')
+setup_event_filter_soup(process, 'ponlyht8', 'tfonlyht8')
+setup_event_filter_soup(process, 'ponlyht9', 'tfonlyht9')
+setup_event_filter(process, 'pemuht8',             need_pat=True)
+setup_event_filter(process, 'pemuht9', 'emuht900', need_pat=True)
 
 process.emuht900.return_actual = False
 process.emuht900.return_ht900 = True

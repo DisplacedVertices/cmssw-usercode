@@ -8,7 +8,7 @@ is_mc = True
 minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
-trig_filter = not keep_all
+event_filter = not keep_all
 version = 'V12'
 batch_name = 'Ntuple' + version
 if minitree_only:
@@ -37,9 +37,9 @@ process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
 process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
 
-if trig_filter:
-    import JMTucker.MFVNeutralino.TriggerFilter
-    JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process, path_name='p')
+if event_filter:
+    import JMTucker.MFVNeutralino.EventFilter
+    JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
 
 if prepare_vis:
     process.mfvSelectedVerticesTight.produce_vertices = True

@@ -32,8 +32,8 @@ process.tt = cms.EDAnalyzer('TrackingTreer',
                            assert_diag_cov = cms.bool(True),
                            )
 
-from JMTucker.MFVNeutralino.TriggerFilter import setup_trigger_filter
-setup_trigger_filter(process, 'p', need_pat=True)
+from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+setup_event_filter(process, 'p', need_pat=True)
 process.p *= process.goodVertices * process.tt
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

@@ -26,9 +26,9 @@ for p in process.paths.keys():
 
 process.p = cms.Path(cleaning_seq * common_seq * process.mfvEvent * process.mfvAnalysisCuts)
 
-import JMTucker.MFVNeutralino.TriggerFilter
-JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process)
-del process.pevtsel
+import JMTucker.MFVNeutralino.EventFilter
+JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process)
+del process.pevtsel # does it even do anything then???
 
 process.bs = cms.EDAnalyzer('BeamSpotTreer',
                             beamspot_src = cms.InputTag('offlineBeamSpot'),
