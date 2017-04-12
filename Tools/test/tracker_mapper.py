@@ -37,7 +37,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                 if s.name.startswith(k):
                     s.events_per = min(int(25000/v), 400000)
         else:
-            s.json = 'ana_2015p6.json'
+            s.json = 'ana_2015p6_10pc.json'
 
     from JMTucker.Tools.MetaSubmitter import *
     ms = MetaSubmitter('TrackerMapperV0')
