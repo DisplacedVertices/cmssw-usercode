@@ -36,7 +36,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year):
     process.load('SimGeneral.MixingModule.mixNoPU_cfi')
     process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
     process.load('Configuration.StandardSequences.MagneticField_cff')
-    process.load('PhysicsTools.PatAlgos.slimming.metFilterPaths_cff')
+    #process.load('PhysicsTools.PatAlgos.slimming.metFilterPaths_cff')
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
