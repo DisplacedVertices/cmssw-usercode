@@ -144,40 +144,41 @@ if year == '2015' or year == '2016':
       y_range = (1e-2, 10),
       )
 
+if year == '2016':
     C('track_pt',
-      file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
-      histogram_path = 'mfvVertices/h_seed_nm1_pt',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_pt',
       x_title = 'Track p_{T} (GeV)',
-      y_title = 'Tracks/0.2 GeV',
-      y_range  = (1, 1e10),
+      y_title = 'Tracks/0.1 GeV',
+      y_range = (1, 1e10),
       cut_line = ((1, 0, 1, 2.8e10), 2, 5, 1),
       )
 
     C('track_npxlayers',
-      file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
-      histogram_path = 'mfvVertices/h_seed_nm1_npxlayers',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_npxlayers',
       x_title = 'Number of pixel layers',
       y_title = 'Tracks',
-      y_range  = (1, 1e10),
+      y_range = (1, 1e10),
       cut_line = ((2, 0, 2, 2.8e10), 2, 5, 1),
       )
 
     C('track_nstlayers',
-      file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
-      histogram_path = 'mfvVertices/h_seed_nm1_nstlayers',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_nstlayers',
       x_title = 'Number of strip layers',
       y_title = 'Tracks',
-      y_range  = (1, 1e10),
+      y_range = (1, 1e10),
       cut_line = ((3, 0, 3, 2.8e10), 2, 5, 1),
       )
 
     C('track_sigmadxybs',
-      file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12', '%(name)s.root'),
-      histogram_path = 'mfvVertices/h_seed_nm1_sigmadxybs',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_sigmadxybs',
       x_title = 'N#sigma(dxy)',
       y_title = 'Tracks',
       x_range = (0, 10),
-      y_range  = (1, 1e10),
+      y_range = (1, 1e10),
       cut_line = ((4, 0, 4, 2.8e10), 2, 5, 1),
       )
 

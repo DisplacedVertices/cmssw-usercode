@@ -13,6 +13,7 @@ tfileservice(process, 'tracker_mapper.root')
 
 if is_mc:
     process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.mcStat.histos = True
 
 import JMTucker.MFVNeutralino.EventFilter
 JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process)
@@ -37,7 +38,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                 if s.name.startswith(k):
                     s.events_per = min(int(25000/v), 400000)
         else:
-            s.json = 'ana_2015p6.json'
+            s.json = 'ana_2015p6_10pc.json'
 
     from JMTucker.Tools.MetaSubmitter import *
     ms = MetaSubmitter('TrackerMapperV0')
