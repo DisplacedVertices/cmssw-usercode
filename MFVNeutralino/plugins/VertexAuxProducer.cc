@@ -41,7 +41,6 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<std::vector<double> > gen_vertices_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
-  const int min_ntracks;
   const std::string sv_to_jets_src;
   edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
   const MFVVertexAuxSorter sorter;
@@ -54,7 +53,6 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     gen_vertices_token(consumes<std::vector<double> >(cfg.getParameter<edm::InputTag>("gen_vertices_src"))),
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
-    min_ntracks(cfg.getParameter<int>("min_ntracks")),
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
     //sv_to_jets_token(consumes<mfv::JetVertexAssociation>(edm::InputTag("sv_to_jets_src"))),
     sorter(cfg.getParameter<std::string>("sort_by"))
@@ -127,8 +125,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices->at(isv);
-    if (int(sv.nTracks(0.)) < min_ntracks)
-      continue;
     const reco::VertexRef svref(secondary_vertices, isv);
     MFVVertexAux& aux = auxes->at(isv);
     aux.which = int2uchar(isv);
