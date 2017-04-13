@@ -346,6 +346,7 @@ if __name__ == '__main__':
         n = len(fns)
         print '# %s, %s, %i files' % (sample, dataset, n)
         print '_add(%r)' % _enc({(sample,dataset):(n,fns)})
+
     elif 'testfiles' in sys.argv:
         sample = sys.argv[sys.argv.index('testfiles')+1]
         dataset = sys.argv[sys.argv.index('testfiles')+2]
@@ -377,6 +378,11 @@ if __name__ == '__main__':
             out_f.write(x)
             print x,
         out_f.close()
+
+    elif 'allfiles' in sys.argv:
+        for (sample, ds), (n, fns) in _d.iteritems():
+            for fn in fns:
+                print fn
 
     else:
         summary()
