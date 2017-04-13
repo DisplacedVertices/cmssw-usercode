@@ -102,7 +102,7 @@ elif __name__ == '__main__' and 'validation' in sys.argv:
             }
         }
 
-    which = sys.argv[1]
+    which = sys.argv[sys.argv.index('validation')+1]
     for s, (_, fns) in x[which].iteritems():
         print s
         out_fn = '/uscmst1b_scratch/lpc1/3DayLifetime/%s/%s.%s' % (os.environ['USER'], which, s)
