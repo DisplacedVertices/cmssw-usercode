@@ -25,6 +25,11 @@ printer = cms.EDAnalyzer('MFVPrinter',
                          vertex_aux_src = cms.InputTag('mfvVerticesAux'),
                          )
 
+if 'validation' in sys.argv:
+    process.ht1000 = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+    process.mfvVerticesAux3 = process.mfvSelectedVertices.clone(min_ntracks = 3)
+    printer.vertex_aux_src = 'mfvVerticesAux3'
+
 if simple:
     process.justPrint = printer.clone(print_event = True, print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
     process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvAnalysisCuts * process.justPrint)
@@ -36,7 +41,10 @@ else:
     process.printVertexAll = printer.clone(print_vertex_aux = True)
     process.printVertexSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
     process.printVertexSelEvtSel = printer.clone(print_vertex_aux = True, vertex_aux_src = 'mfvSelectedVerticesTight')
-    process.p = cms.Path(process.printEventAll * process.printVertexAll * process.mfvSelectedVerticesSeq * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
+    if 'validation' in sys.argv:
+        process.p = cms.Path(process.ht1000 * process.mfvVerticesAux3 * process.mfvSelectedVerticesSeq * process.printEventAll * process.printVertexAll * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
+    else:
+        process.p = cms.Path(process.printEventAll * process.printVertexAll * process.mfvSelectedVerticesSeq * process.printVertexSel * process.mfvAnalysisCuts * process.printEventSel * process.printVertexSelEvtSel)
 
 if __name__ == '__main__' and 'splitlog' in sys.argv:
     log_fn = sys.argv[sys.argv.index('splitlog')+1]
