@@ -15,9 +15,7 @@ if not is_mc:
 
 process.TFileService.fileName = 'tracking_tree.root'
 
-if is_mc:
-    process.load('JMTucker.Tools.MCStatProducer_cff')
-    process.mcStat.histos = True
+process.load('JMTucker.Tools.MCStatProducer_cff')
 
 process.goodVertices = cms.EDFilter('VertexSelector',
                                     filter = cms.bool(True),

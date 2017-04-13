@@ -99,8 +99,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year):
     process = cleanUnscheduled(process)
     process = customize(process)
 
-    if is_mc:
-        process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.load('JMTucker.Tools.MCStatProducer_cff')
 
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.selectedPatJets.cut = process.jtupleParams.jetCut
