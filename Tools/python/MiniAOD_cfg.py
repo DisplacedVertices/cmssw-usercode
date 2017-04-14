@@ -1,15 +1,19 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages
 
-def which_global_tag(is_mc, year):
+def which_global_tag(is_mc, year, H):
     if year == 2015:
+        assert not H
         return '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15'
     elif year == 2016:
-        return '80X_mcRun2_asymptotic_2016_miniAODv2_v1' if is_mc else '80X_dataRun2_2016SeptRepro_v4'
+        if is_mc:
+            return '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
+        else:
+            return '80X_dataRun2_Prompt_v16' if H else '80X_dataRun2_2016SeptRepro_v7'
     else:
         raise ValueError('what year is it')
 
-def pat_tuple_process(customize_before_unscheduled, is_mc, year):
+def pat_tuple_process(customize_before_unscheduled, is_mc, year, H):
     if year not in (2015,2016):
         raise ValueError('what year is it')
 
@@ -40,7 +44,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year):
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, which_global_tag(is_mc, year), '')
+    process.GlobalTag = GlobalTag(process.GlobalTag, which_global_tag(is_mc, year, H), '')
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True),
                                          wantSummary = cms.untracked.bool(False),
