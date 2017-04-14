@@ -182,7 +182,9 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
     expected = cs_njobs(working_dir)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
-    files = glob(os.path.join(working_dir, '*.root'))
+    files = cs_published(working_dir)
+    if not files:
+        files = glob(os.path.join(working_dir, '*.root'))
 
     if pattern:
         if '/' not in pattern:
