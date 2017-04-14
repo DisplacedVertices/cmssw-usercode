@@ -69,19 +69,23 @@ class MetaSubmitter:
     class args:
         pass
 
-    def __init__(self, batch_name, dataset='main'):
+    def __init__(self, batch_name, dataset='main', override=None):
         self.testing = 'testing' in sys.argv or 'cs_testing' in sys.argv
         self.batch_name = batch_name
         self.common = MetaSubmitter.args()
         self.common.dataset = dataset
         self.crab = MetaSubmitter.args()
         self.condor = MetaSubmitter.args()
+        self.override = override
 
     def submit(self, samples):
         crab_samples, condor_samples = [], []
         for s in samples:
             s.set_curr_dataset(self.common.dataset)
-            (condor_samples if s.condor else crab_samples).append(s)
+            if s.condor or override == 'condor':
+                condor_samples.append(s)
+            elif not s.condor or override == 'crab':
+                crab_samples.append(s)
 
         if self.testing:
             print 'MetaSubmitter: crab samples ='
