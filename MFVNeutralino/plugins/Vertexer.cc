@@ -136,6 +136,7 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> second_track_token;
   const bool no_track_cuts;
   const double min_seed_jet_pt;
+  const bool stlayers_v_eta;
   const double min_all_track_pt;
   const double min_all_track_dxy;
   const double min_all_track_sigmadxy;
@@ -255,6 +256,7 @@ private:
     const TransientTrackBuilder& tt_builder;
 
     double pt;
+    double abs_eta;
     double dxybs;
     double dxypv;
     double dxyerr;
@@ -270,6 +272,7 @@ private:
       : mv(*mv_), tk(tk_), bs(bs_), pv(pv_), tt_builder(tt)
     {
       pt = tk.pt();
+      abs_eta = fabs(tk.eta());
       dxybs = tk.dxy(bs);
       dxypv = pv ? tk.dxy(pv->position()) : 1e99;
       dxyerr = tk.dxyError();
@@ -284,6 +287,13 @@ private:
 
     // these are cheap
     bool use_ex(bool for_seed) const {
+      if (mv.stlayers_v_eta) {
+        if ((                  abs_eta < 0.9 && nstlayers < 5) ||
+            (0.9 <= abs_eta && abs_eta < 2.0 && nstlayers < 6) ||
+            (2.0 <= abs_eta                  && nstlayers < 7))
+          return false;
+      }
+
       if (for_seed) {
         return 
           npxlayers >= mv.min_seed_track_npxlayers && 
@@ -365,6 +375,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     second_track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("second_track_src"))),
     no_track_cuts(cfg.getParameter<bool>("no_track_cuts")),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
+    stlayers_v_eta(cfg.getParameter<bool>("stlayers_v_eta")),
     min_all_track_pt(cfg.getParameter<double>("min_all_track_pt")),
     min_all_track_dxy(cfg.getParameter<double>("min_all_track_dxy")),
     min_all_track_sigmadxy(cfg.getParameter<double>("min_all_track_sigmadxy")),
