@@ -289,9 +289,7 @@ private:
     // these are cheap
     bool use_ex(bool for_seed) const {
       if (mv.stlayers_v_eta) {
-        if ((                  abs_eta < 0.9 && nstlayers < 5) ||
-            (0.9 <= abs_eta && abs_eta < 2.0 && nstlayers < 6) ||
-            (2.0 <= abs_eta                  && nstlayers < 7))
+        if ((abs_eta < 2.0 && nstlayers < 6) || (abs_eta >= 2.0 && nstlayers < 7))
           return false;
       }
 
