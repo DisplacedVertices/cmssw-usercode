@@ -100,6 +100,22 @@ class Sample(object):
         return self.datasets[self.curr_dataset].nevents_orig
 
     @property
+    def events_per(self):
+        return self.datasets[self.curr_dataset].events_per
+
+    @property
+    def total_events(self):
+        return self.datasets[self.curr_dataset].total_events
+
+    @property
+    def json(self):
+        return self.datasets[self.curr_dataset].json
+        
+    @property
+    def run_range(self):
+        return self.datasets[self.curr_dataset].run_range
+        
+    @property
     def hlt_name(self):
         return self.datasets[self.curr_dataset].hlt_name
 
