@@ -300,7 +300,7 @@ def get(i): return _l[i]
     def filelist(self, sample, working_dir):
         # JMTBAD are there performance problems by not matching the json to the files per job?
         json_fn = os.path.join(working_dir, 'cs.json')
-        if hasattr(sample, 'json'):
+        if hasattr(sample, 'json') and sample.json:
             shutil.copy2(sample.json, json_fn)
         else:
             touch(json_fn)
