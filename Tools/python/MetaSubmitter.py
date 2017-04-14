@@ -11,15 +11,15 @@ class max_output_modifier:
 def is_mc_modifier(sample):
     to_replace = []
     if not sample.is_mc:
-        magic = 'is_mcX=XTrue'.replace('X', ' ')
-        err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
-        to_replace.append((magic, 'is_mc = False', err))
+        magic = 'is_mc = True'
+        to_replace.append((magic, 'is_mc = False', 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic))
     return [], to_replace
 
 def H_modifier(sample):
     to_replace = []
     if sample.name.startswith('JetHT2016H'):
-        to_replace = [(magic, 'H = True', 'trying to submit on 2016H and no magic string "%s"' % magic)]
+        magic = 'H = False'
+        to_replace.append((magic, 'H = True', 'trying to submit on 2016H and no magic string "%s"' % magic))
     return [], to_replace
 
 class event_veto_modifier:
