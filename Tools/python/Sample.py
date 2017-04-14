@@ -103,17 +103,33 @@ class Sample(object):
     def events_per(self):
         return self.datasets[self.curr_dataset].events_per
 
+    @events_per.setter
+    def events_per(self, val):
+        self.datasets[self.curr_dataset].events_per = val
+
     @property
     def total_events(self):
         return self.datasets[self.curr_dataset].total_events
+
+    @total_events.setter
+    def total_events(self, val):
+        self.datasets[self.curr_dataset].total_events = val
 
     @property
     def json(self):
         return self.datasets[self.curr_dataset].json
         
+    @json.setter
+    def json(self, val):
+        self.datasets[self.curr_dataset].json = val
+        
     @property
     def run_range(self):
         return self.datasets[self.curr_dataset].run_range
+        
+    @run_range.setter
+    def run_range(self, val):
+        self.datasets[self.curr_dataset].run_range = val
         
     @property
     def hlt_name(self):
