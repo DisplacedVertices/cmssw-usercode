@@ -2,8 +2,9 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages
 
 def which_global_tag(is_mc, year, H):
+    if H:
+        assert not is_mc and year != 2015
     if year == 2015:
-        assert not H
         return '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15'
     elif year == 2016:
         if is_mc:
