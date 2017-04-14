@@ -358,7 +358,7 @@ def get(i): return _l[i]
 
         pset_end_template = self.pset_end_template \
             .replace('__PFN_PREFIX__', repr(sample.xrootd_url)) \
-            .replace('__EVENTS_PER__', str(sample.events_per if sample.is_mc else 0))
+            .replace('__EVENTS_PER__', str(sample.events_per))
 
         pset += pset_end_template
         pset_fn = os.path.join(working_dir, 'cs_pset.py')
