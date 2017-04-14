@@ -146,7 +146,7 @@ if year == '2015' or year == '2016':
 
 if year == '2016':
     C('track_pt',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_nm1_tracks_pt',
       x_title = 'Track p_{T} (GeV)',
       y_title = 'Tracks/0.1 GeV',
@@ -155,7 +155,7 @@ if year == '2016':
       )
 
     C('track_npxlayers',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_nm1_tracks_npxlayers',
       x_title = 'Number of pixel layers',
       y_title = 'Tracks',
@@ -164,7 +164,7 @@ if year == '2016':
       )
 
     C('track_nstlayers',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_nm1_tracks_nstlayers',
       x_title = 'Number of strip layers',
       y_title = 'Tracks',
@@ -172,9 +172,9 @@ if year == '2016':
       cut_line = ((3, 0, 3, 2.8e10), 2, 5, 1),
       )
 
-    C('track_sigmadxybs',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV0', '%(name)s.root'),
-      histogram_path = 'TrackerMapper/h_nm1_tracks_sigmadxybs',
+    C('track_nsigmadxy',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_nsigmadxy',
       x_title = 'N#sigma(dxy)',
       y_title = 'Tracks',
       x_range = (0, 10),
