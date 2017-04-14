@@ -88,9 +88,6 @@ if keep_all:
         if 'tau' in xl or 'MET' in x:
             delattr(process, x)
 
-if is_mc:
-    process.mcStat.histos = True
-
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
