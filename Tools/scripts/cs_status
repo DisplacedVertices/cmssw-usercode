@@ -1,19 +1,29 @@
 #!/usr/bin/env python
 
 import sys
-from collections import defaultdict
 from JMTucker.Tools.CRAB3ToolsBase import crabify_list
 from JMTucker.Tools.CondorTools import *
 from JMTucker.Tools import colors
 
-if len(sys.argv) < 2:
-    print 'usage: cs_status wd [wd2 ...]'
+if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
+    print 'usage: cs_status [options] wd [wd2 ...]'
+    print '   -h   print this msg'
+    print '   -v   verbose: give a report on the exit codes of each failed job, and print list of done directories'
+    print '   -r   resubmit: resubmit all failed jobs (with no check on exit code)'
+    print '   -k   resubmit killed: resubmit all killed jobs (with no check on reason)'
     sys.exit(1)
 
+resubmit_all = '-a' in sys.argv
+resubmit = resubmit_all or '-r' in sys.argv
+resubmit_killed = '-k' in sys.argv
 verbose = '-v' in sys.argv
 wds = cs_dirs_from_argv()
 ml = max(len(wd) for wd in wds) + 3
 fmt = '%' + str(ml) + 's %10s | %10s %10s %10s %10s %10s'
+
+def safe_to_resubmit(r):
+    return resubmit_all or \
+        r in [147,84]  # xrdcp problem, file open error
 
 def return_code(r):
     if r == 147:
@@ -49,30 +59,33 @@ for wd in wds:
         print ' :', colors.magenta(crabify_list(ana.probs())),
     if ana.nkilled:
         print ' :', colors.yellow(crabify_list(ana.killed())),
-    if ana.nprobs:
-        if verbose:
-            print
-            by_exit = defaultdict(list)
-            for i, r in enumerate(ana.returns):
-                if r > 0:
-                    assert ana.cmsRun_returns[i] == (0 if r == 147 else r)
-                    by_exit[r].append(i)
-
-            by_exception = defaultdict(list)
-            for i, e in ana.exceptions.iteritems():
-                by_exception[e].append(i)
-
-            for r, l in by_exit.iteritems():
-                print '  %s:' % return_code(r), crabify_list(l)
-            for e, l in by_exception.iteritems():
-                print '  %s:' % e, crabify_list(l)
-    elif verbose:
-        print
     print
+
+    if ana.nprobs:
+        if verbose or resubmit:
+            for r, l in ana.by_exit.iteritems():
+                print '  %s:' % return_code(r), crabify_list(l)
+            for e, l in ana.by_exception.iteritems():
+                print '  %s:' % e, crabify_list(l)
+
+        if resubmit:
+            to_resubmit = []
+            for r, l in ana.by_exit.iteritems():
+                if safe_to_resubmit(r):
+                    to_resubmit.extend(l)
+            if to_resubmit:
+                cl = crabify_list(l)
+                print '  resubmit these:', cl
+                os.system('cs_resubmit %s %s' % (wd, cl))
+
+    if ana.nkilled and resubmit_killed:
+        cl = crabify_list(ana.killed())
+        print '  resubmit these:', cl
+        os.system('cs_resubmit %s %s' % (wd, cl))
 
 print colors.bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
 
-if done:
+if verbose and done:
     print '\nthese are done:', ' '.join(done)
 if len(done) == len(wds):
     print '\nAll done!'

@@ -347,6 +347,15 @@ for x in __all__:
 # Extra datasets and other overrides go here.
 ########
 
+SingleMuon2016B3.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-6ba5dd8c9a33aab8a6e2472789317878/USER', 35241)
+SingleMuon2016C.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-82edc478e1c389712ac7b0eb3d3b0434/USER', 18229)
+SingleMuon2016D.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-1ed6f4ab317ce7bb7309546437e1421b/USER', 31034)
+SingleMuon2016E.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-5cf9154b23f7eea54d7241d0e9a81907/USER', 29185)
+SingleMuon2016F.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-eb2acd8cc58caef922ab0468b30922df/USER', 21755)
+SingleMuon2016G.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-10a79bb3ddc729731322877ecdf5fef6/USER', 51891)
+SingleMuon2016H2.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-04ce4943aa061593fed4ddb8c85f283c/USER', 139374)
+SingleMuon2016H3.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-42f42c38f8f1c9713ac6dac6d8fe4da2/USER', 3706)
+
 ########
 # gensims
 ########
@@ -520,15 +529,13 @@ for x in (JetHT2016G,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau01000um_M0300,
           official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M0800,
-          official_mfv_neu_tau00100um_M1200, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M1200,
+          official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M1200,
           official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600,
           xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
           ):
     x.condor = True
 
 qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
-official_mfv_neu_tau01000um_M0300.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
-official_mfv_neu_tau01000um_M0800.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
 official_mfv_neu_tau10000um_M1200.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
 official_mfv_neu_tau00300um_M0800.xrootd_url = 'root://cmseos.fnal.gov/'
 

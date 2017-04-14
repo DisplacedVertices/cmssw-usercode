@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, re, fnmatch
+from collections import defaultdict
 from datetime import datetime
 from glob import glob
 from itertools import combinations
@@ -83,6 +84,9 @@ def cs_primaryds(d):
 def cs_published(d):
     return [line.strip() for fn in glob(os.path.join(d, 'publish_*.txt')) if os.path.isfile(fn) for line in open(fn) if line.strip()]
 
+def cs_rootfiles(d):
+    return [fn for fn in glob(os.path.join(d, '*.root')) if os.path.isfile(fn)]
+
 def cs_analyze(d, 
             _re=re.compile(r'return value (\d+)'),
             _cmsRun_re=re.compile(r"cmsRun exited with code (\d+)"),
@@ -153,6 +157,16 @@ def cs_analyze(d,
     result.ndone, result.nidle, result.nrun, result.nkilled, result.nprobs = ns
     result.ns = [result.njobs] + ns
 
+    result.by_exit = defaultdict(list)
+    for i, r in enumerate(result.returns):
+        if r > 0:
+            assert result.cmsRun_returns[i] == (0 if r == 147 else r)
+            result.by_exit[r].append(i)
+
+    result.by_exception = defaultdict(list)
+    for i, e in result.exceptions.iteritems():
+        result.by_exception[e].append(i)
+
     return result
 
 def cs_timestamp():
@@ -171,7 +185,9 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
     expected = cs_njobs(working_dir)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
-    files = glob(os.path.join(working_dir, '*.root'))
+    files = cs_published(working_dir)
+    if not files:
+        files = cs_rootfiles(working_dir)
 
     if pattern:
         if '/' not in pattern:
@@ -196,7 +212,10 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
             print '\033[36;7m', msg, '\033[m'
     elif l == 1:
         print working_dir, ': just one file found, copying'
-        cmd = 'cp %s %s' % (files[0], new_name)
+        if files[0].startswith('root://'):
+            cmd = 'xrdcp -s %s %s' % (files[0], new_name)
+        else:
+            cmd = 'cp %s %s' % (files[0], new_name)
         os.system(cmd)
         os.chmod(new_name, 0644)
     else:
