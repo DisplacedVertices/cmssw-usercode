@@ -16,6 +16,12 @@ def is_mc_modifier(sample):
         to_replace.append((magic, 'is_mc = False', err))
     return [], to_replace
 
+def H_modifier(sample):
+    to_replace = []
+    if sample.name.startswith('JetHT2016H'):
+        to_replace = [(magic, 'H = True', 'trying to submit on 2016H and no magic string "%s"' % magic)]
+    return [], to_replace
+
 class event_veto_modifier:
     def __init__(self, d, filter_path):
         self.d = d
