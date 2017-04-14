@@ -84,6 +84,9 @@ def cs_primaryds(d):
 def cs_published(d):
     return [line.strip() for fn in glob(os.path.join(d, 'publish_*.txt')) if os.path.isfile(fn) for line in open(fn) if line.strip()]
 
+def cs_rootfiles(d):
+    return [fn for fn in glob(os.path.join(d, '*.root')) if os.path.isfile(fn)]
+
 def cs_analyze(d, 
             _re=re.compile(r'return value (\d+)'),
             _cmsRun_re=re.compile(r"cmsRun exited with code (\d+)"),
@@ -184,7 +187,7 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
 
     files = cs_published(working_dir)
     if not files:
-        files = glob(os.path.join(working_dir, '*.root'))
+        files = cs_rootfiles(working_dir)
 
     if pattern:
         if '/' not in pattern:
@@ -209,7 +212,10 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
             print '\033[36;7m', msg, '\033[m'
     elif l == 1:
         print working_dir, ': just one file found, copying'
-        cmd = 'cp %s %s' % (files[0], new_name)
+        if files[0].startswith('root://'):
+            cmd = 'xrdcp -s %s %s' % (files[0], new_name)
+        else:
+            cmd = 'cp %s %s' % (files[0], new_name)
         os.system(cmd)
         os.chmod(new_name, 0644)
     else:
