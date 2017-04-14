@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, re, fnmatch
+from collections import defaultdict
 from datetime import datetime
 from glob import glob
 from itertools import combinations
@@ -152,6 +153,16 @@ def cs_analyze(d,
 
     result.ndone, result.nidle, result.nrun, result.nkilled, result.nprobs = ns
     result.ns = [result.njobs] + ns
+
+    result.by_exit = defaultdict(list)
+    for i, r in enumerate(result.returns):
+        if r > 0:
+            assert result.cmsRun_returns[i] == (0 if r == 147 else r)
+            result.by_exit[r].append(i)
+
+    result.by_exception = defaultdict(list)
+    for i, e in result.exceptions.iteritems():
+        result.by_exception[e].append(i)
 
     return result
 
