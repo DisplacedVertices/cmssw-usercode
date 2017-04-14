@@ -5,11 +5,12 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
+H = False
 minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
 event_filter = not keep_all
-version = 'V13'
+version = 'V13p1'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
@@ -17,7 +18,7 @@ if minitree_only:
 
 ####
 
-process = pat_tuple_process(None, is_mc, year)
+process = pat_tuple_process(None, is_mc, year, H)
 remove_met_filters(process)
 
 process.out.fileName = 'ntuple.root'
@@ -139,7 +140,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
         }
-    modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips, 'p'))
+            
+    modify = chain_modifiers(is_mc_modifier, H_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))
