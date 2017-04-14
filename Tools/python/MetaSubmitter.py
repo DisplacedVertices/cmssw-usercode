@@ -38,8 +38,8 @@ process.eventVeto = cms.EDFilter('EventIdVeto',
                                  runs = cms.vuint32(%(runs)s),
                                  lumis = cms.vuint32(%(lumis)s),
                                  events = cms.vuint64(%(events)s))
-process.%s.insert(0, process.eventVeto)
-''' % self.filter_path
+process.FILTER_PATH.insert(0, process.eventVeto)
+'''.replace('FILTER_PATH', self.filter_path)
             else:
                 x = '''
 process.eventVeto = cms.EDFilter('EventIdVeto',
@@ -47,8 +47,8 @@ process.eventVeto = cms.EDFilter('EventIdVeto',
                                  use_run = cms.bool(False),
                                  lumis = cms.vuint32(%(lumis)s),
                                  events = cms.vuint64(%(events)s))
-process.%s.insert(0, process.eventVeto)
-''' % self.filter_path
+process.FILTER_PATH.insert(0, process.eventVeto)
+'''.replace('FILTER_PATH', self.filter_path)
             to_add = [x % d2]
         return to_add, to_replace
 
