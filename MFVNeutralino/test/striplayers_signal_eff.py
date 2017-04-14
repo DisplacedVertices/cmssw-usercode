@@ -19,7 +19,7 @@ fns = [x for x in sys.argv[1:] if x.endswith('.root')]
 fs = { fn : ROOT.TFile(fn) for fn in fns }
 samples = defaultdict(list)
 for fn in fns:
-    s = os.path.basename(fn).replace('.root', '').replace('stl6_', '').replace('stl8_', '')
+    s = os.path.basename(fn).replace('.root', '').replace('stl6_', '').replace('stl8_', '').replace('stlveta_', '')
     if s == 'mfv_neu_tau00300um_M0800':
         continue
         #s = 'my_' + s
@@ -31,7 +31,7 @@ nsamples = len(samples)
 
 heff = {}
 seen = {}
-for x in 'nom', 'stl6', 'stl8':
+for x in 'nom', 'stlveta', 'stl6', 'stl8':
     for y in 'all', 'mid', 'far':
         name = '%s_%s' % (x,y)
         heff[name] = h = ROOT.TH1F(name, '', nsamples, 0, nsamples)
@@ -42,7 +42,7 @@ for x in 'nom', 'stl6', 'stl8':
             sam = samples[i][0].replace('mfv_', '').replace('tau', 't')
             h.GetXaxis().SetBinLabel(i+1, sam)
 
-colors = { 'nom': ROOT.kRed, 'stl6': ROOT.kBlue, 'stl8': ROOT.kGreen+2 }
+colors = { 'nom': ROOT.kRed, 'stlveta': ROOT.kOrange+2, 'stl6': ROOT.kBlue, 'stl8': ROOT.kGreen+2 }
 
 for isample, (s, s_fns) in enumerate(samples):
     print s, s_fns
@@ -86,7 +86,7 @@ for isample, (s, s_fns) in enumerate(samples):
             heff['%s_%s' % (z, which)].SetBinError  (isample+1, ee)
 
     otherh = []
-    for name in 'nom', 'stl6', 'stl8':
+    for name in 'nom', 'stlveta', 'stl6', 'stl8':
         if not hs.has_key(name):
             continue
         h = hs[name].Clone(s + name + 'norm')
@@ -101,7 +101,7 @@ for isample, (s, s_fns) in enumerate(samples):
     ps.save(s, log=False)
 
     otherh = []
-    for name in 'stl6', 'stl8':
+    for name in 'stlveta', 'stl6', 'stl8':
         if not hs.has_key(name) or not hs.has_key('nom'):
             continue
         h_alt = hs[name].Clone(s + name + 'num')
@@ -118,7 +118,7 @@ for y in 'all', 'mid', 'far':
     h_nom = heff['nom_%s' % y]
     #h_nom.Draw()
     #ps.save('nom_%s' % y)
-    for x in 'stl6', 'stl8':
+    for x in 'stlveta', 'stl6', 'stl8':
         name = '%s_%s' % (x,y)
         h_alt = heff[name]
         h_alt.Draw()
@@ -140,15 +140,19 @@ for y in 'all', 'mid', 'far':
         ps.save('diff_' + name, log=False)
 
 heff['nom_all' ].SetLineColor(ROOT.kRed)
+heff['stlveta_all'].SetLineColor(ROOT.kOrange+2)
 heff['stl6_all'].SetLineColor(ROOT.kBlue)
 heff['stl8_all'].SetLineColor(ROOT.kGreen+2)
 heff['nom_all' ].Draw()
+heff['stlveta_all'].Draw('same')
 heff['stl6_all'].Draw('same')
 heff['stl8_all'].Draw('same')
 ps.save('all')
 
+heff['diff_stlveta_all'].SetLineColor(ROOT.kOrange+2)
 heff['diff_stl6_all'].SetLineColor(ROOT.kBlue)
 heff['diff_stl8_all'].SetLineColor(ROOT.kGreen+2)
 heff['diff_stl8_all'].Draw()
 heff['diff_stl6_all'].Draw('same')
+heff['diff_stlveta_all'].Draw('same')
 ps.save('diff')
