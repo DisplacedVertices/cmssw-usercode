@@ -21,6 +21,25 @@ if minitree_only:
 process = pat_tuple_process(None, is_mc, year, H)
 remove_met_filters(process)
 
+# speed up by 15%
+#del process.packedGenParticles
+#del process.prunedGenParticles
+#del process.prunedGenParticlesWithStatusOne
+#del process.primaryVertexAssociation
+#process.patMuons.addGenMatch = False
+#process.patElectrons.addGenMatch = False
+#process.patJets.addGenJetMatch    = False
+#process.patJets.addGenPartonMatch = False
+#process.patJets.addTagInfos = False
+#process.patJets.addJetCharge = False
+#process.patJets.addJetFlavourInfo = False
+#process.patJets.getJetMCFlavour = False
+#process.patJets.discriminatorSources = ['pfCombinedInclusiveSecondaryVertexV2BJetTags']
+#process.patJets.userData.userFloats.src = []
+#process.patJets.userData.userFunctionLabels = []
+#process.patJets.userData.userFunctions = []
+#process.patJets.userData.userInts.src = []
+
 process.out.fileName = 'ntuple.root'
 process.out.outputCommands = output_commands = [
     'drop *',
