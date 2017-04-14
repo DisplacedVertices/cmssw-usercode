@@ -529,15 +529,13 @@ for x in (JetHT2016G,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau01000um_M0300,
           official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M0800,
-          official_mfv_neu_tau00100um_M1200, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M1200,
+          official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M1200,
           official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600,
           xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
           ):
     x.condor = True
 
 qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
-official_mfv_neu_tau01000um_M0300.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
-official_mfv_neu_tau01000um_M0800.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
 official_mfv_neu_tau10000um_M1200.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
 official_mfv_neu_tau00300um_M0800.xrootd_url = 'root://cmseos.fnal.gov/'
 
