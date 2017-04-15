@@ -510,12 +510,12 @@ for x in data_samples + [qcdht0700, qcdht2000, ttbar, mfv_neu_tau00300um_M0800, 
 
 JetHT2016H3.add_dataset('ntuplev13', '/JetHT/tucker-NtupleV13_2016-37fe2930b7c7c895432234b7692629b0/USER', 211788)
 qcdht1000.add_dataset('ntuplev13', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV13_2016-a7376dd672ba202610433ce7accfb8ca/USER', 3103065)
-for x in (qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext, ttbar,):
+for x in (qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext, ttbar, official_mfv_neu_tau01000um_M0800):
     x.add_dataset("ntuplev13")
 
 JetHT2016H3.add_dataset('ntuplev13p1', '/JetHT/tucker-NtupleV13p1_2016-28cbc68337d6f574c1597b595381a5dc/USER', 191679)
 qcdht1000.add_dataset('ntuplev13p1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV13p1_2016-512eed94f71af7517e3f36913ece1ca2/USER', 3069279)
-for x in (qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext, ttbar,):
+for x in (qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext, ttbar, official_mfv_neu_tau01000um_M0800):
     x.add_dataset("ntuplev13p1")
 
 ########
