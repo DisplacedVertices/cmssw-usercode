@@ -102,7 +102,7 @@ def set_splitting(samples, dataset, jobtype):
         if not d.has_key(sample.name):
             if 'mfv' in sample.name:
                 sample.events_per = 1000
-                sample.files_per = 10
+                sample.files_per = 1 if 'official' in sample.name else 10
             else:
                 sample.events_per = 50000
                 sample.files_per = 5
