@@ -68,30 +68,48 @@ class chain_modifiers:
 ####
 
 def set_splitting(samples, dataset, jobtype):
-    pass
-#    d = {
-#        5.00E+01, 5.76E-03
-#        5.00E+02, 6.03E-02
-#        3.85E+01, 4.54E-03
-#        1.54E+00, 2.42E-04
-#        1.19E+00, 2.03E-04
-#        1.23E+00, 1.65E-04
-#        5.00E+02, 6.10E-02
-#        3.85E+01, 4.53E-03
-#        1.54E+00, 2.16E-04
-#        1.19E+00, 1.92E-04
-#        1.23E+00, 1.84E-04
-#        1.75E+01, 8.30E-04
-#        1.75E+01, 7.65E-04
-#        1.75E+01, 1.05E-03
-#        1.61E+01, 1.12E-03
-#        1.85E+01, 1.27E-03
-#        1.37E+01, 1.02E-03
-#        1.47E+01, 1.23E-03
-#        1.10E+01, 8.97E-04
-#        1.11E+01, 8.81E-04
-#        1.11E+01, 8.83E-04
-#        }
+    target = {
+        'ntuple': 5000
+        }[jobtype]
+    d = {
+        'ntuple' : {
+            # sample       # events to run to get 1 event out   corresponding file frac
+            'ttbar'       :  ( 5.00E+01, 5.76E-03 ),
+            'qcdht0500'   :  ( 5.00E+02, 6.03E-02 ),
+            'qcdht0700'   :  ( 3.85E+01, 4.54E-03 ),
+            'qcdht1000'   :  ( 1.54E+00, 2.42E-04 ),
+            'qcdht1500'   :  ( 1.19E+00, 2.03E-04 ),
+            'qcdht2000'   :  ( 1.23E+00, 1.65E-04 ),
+            'qcdht0500ext':  ( 5.00E+02, 6.10E-02 ),
+            'qcdht0700ext':  ( 3.85E+01, 4.53E-03 ),
+            'qcdht1000ext':  ( 1.54E+00, 2.16E-04 ),
+            'qcdht1500ext':  ( 1.19E+00, 1.92E-04 ),
+            'qcdht2000ext':  ( 1.23E+00, 1.84E-04 ),
+            'JetHT2015C'  :  ( 1.75E+01, 8.30E-04 ),
+            'JetHT2015D'  :  ( 1.75E+01, 7.65E-04 ),
+            'JetHT2016B3' :  ( 1.75E+01, 1.05E-03 ),
+            'JetHT2016C'  :  ( 1.61E+01, 1.12E-03 ),
+            'JetHT2016D'  :  ( 1.85E+01, 1.27E-03 ),
+            'JetHT2016E'  :  ( 1.37E+01, 1.02E-03 ),
+            'JetHT2016F'  :  ( 1.47E+01, 1.23E-03 ),
+            'JetHT2016G'  :  ( 1.10E+01, 8.97E-04 ),
+            'JetHT2016H2' :  ( 1.11E+01, 8.81E-04 ),
+            'JetHT2016H3' :  ( 1.11E+01, 8.83E-04 ),
+            }
+        }
+    for sample in samples:
+        sample.set_curr_dataset(dataset)
+        if not d.has_key(sample.name):
+            if 'mfv' in sample.name:
+                sample.events_per = 1000
+                sample.files_per = 1
+            else:
+                sample.events_per = 50000
+                sample.files_per = 5
+        else:
+            erate, frate = d[sample.name]
+            sample.events_per = min(int(target * erate + 1), 200000)
+            sample.files_per = int(frate * sample.events_per / erate + 1)
     
 ####
 
@@ -112,9 +130,9 @@ class MetaSubmitter:
         crab_samples, condor_samples = [], []
         for s in samples:
             s.set_curr_dataset(self.common.dataset)
-            if s.condor or override == 'condor':
+            if s.condor or self.override == 'condor':
                 condor_samples.append(s)
-            elif not s.condor or override == 'crab':
+            elif not s.condor or self.override == 'crab':
                 crab_samples.append(s)
 
         if self.testing:
