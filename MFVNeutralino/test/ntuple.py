@@ -126,7 +126,9 @@ if minitree_only:
         p.insert(0, process.p._seq)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
+
     if year == 2015:
         samples = \
             Samples.data_samples_2015 + \
@@ -139,22 +141,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.official_mfv_signal_samples + \
             Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
-    filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'ttbar': 3.6064e-02, 'qcdpt0120': 3.500e-05, 'qcdpt0170': 7.856e-03, 'qcdpt0300': 2.918e-01 }
-    for s in samples:
-        s.files_per = 5
-        if s.is_mc:
-            for k,v in filter_eff.iteritems():
-                if s.name.startswith(k):
-                    s.events_per = min(int(25000/v), 200000)
-
     if 'validation' in sys.argv:
         batch_name += '_validation'
         import JMTucker.Tools.SampleFiles as SampleFiles
         samples = [s for s in samples if SampleFiles.has(s.name, 'validation')]
         for s in samples:
             s.files_per = 100000 # let max_output_modifier handle it
+    else:
+        set_splitting(samples, 'main', 'ntuple')
 
-    from JMTucker.Tools.MetaSubmitter import *
     skips = {
         'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
