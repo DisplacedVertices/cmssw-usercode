@@ -100,7 +100,7 @@ for k in sorted(publish.keys()):
     n,c = publish[k]
     if type(c) == str:
         if '_fromnum' in c:
-            if int(c.split(',')[1]) != n:
+            if int(c.replace(')', '').split(',')[1]) != n:
                 print 'OOPS', n
             print '%r: %s,' % (k, c)
         else:
