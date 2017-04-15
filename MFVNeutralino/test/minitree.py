@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'qcdht2000', 'ntuplev12', 1)
+sample_files(process, 'qcdht2000', 'ntuplev13', 1)
 #process.source.fileNames = ['file:ntuple.root']
 process.TFileService.fileName = 'minitree.root'
 
@@ -31,9 +31,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MinitreeV12',
+    cs = CondorSubmitter('MiniTreeV13',
                          ex = year,
-                         dataset = 'ntuplev12',
+                         dataset = 'ntuplev13',
                          pset_modifier = modify
                          )
     cs.submit_all(samples)
