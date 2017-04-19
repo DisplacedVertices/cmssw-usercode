@@ -237,21 +237,29 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     const double dxy = tk.dxy(*beamspot);
     const double nsigmadxy = fabs(dxy / tk.dxyError());
 
-    const bool sel = pt > 1 && min_r <= 1 && npxlayers >= 2 && ((abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7));
-    const bool seed = sel && nsigmadxy > 4;
+    const bool nm1[5] = {
+      pt > 1,
+      min_r <= 1,
+      npxlayers >= 2,
+      (abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7),
+      nsigmadxy > 4
+    };
 
-    if (          min_r <= 1 && npxlayers >= 2 && ((abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7)) && nsigmadxy > 4) h_nm1_tracks_pt->Fill(pt, w);
-    if (pt > 1               && npxlayers >= 2 && ((abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7)) && nsigmadxy > 4) h_nm1_tracks_min_r->Fill(min_r, w);
-    if (pt > 1 && min_r <= 1                   && ((abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7)) && nsigmadxy > 4) h_nm1_tracks_npxlayers->Fill(npxlayers, w);
-    if (pt > 1 && min_r <= 1 && npxlayers >= 2                                                                            && nsigmadxy > 4) h_nm1_tracks_nstlayers->Fill(nstlayers, w);
-    if (pt > 1 && min_r <= 1 && npxlayers >= 2 &&   abseta < 2.0                                                          && nsigmadxy > 4) h_nm1_tracks_nstlayers_etalt2->Fill(nstlayers, w);
-    if (pt > 1 && min_r <= 1 && npxlayers >= 2 &&                                       abseta >= 2.0                     && nsigmadxy > 4) h_nm1_tracks_nstlayers_etagt2->Fill(nstlayers, w);
-    if (pt > 1 && min_r <= 1 && npxlayers >= 2 && ((abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7))                 ) h_nm1_tracks_nsigmadxy->Fill(nsigmadxy, w);
+    const bool sel = nm1[0] && nm1[1] && nm1[2] && nm1[3];
+    const bool seed = sel && nm1[4];
+
+    if (          nm1[1] && nm1[2] && nm1[3] && nm1[4]) h_nm1_tracks_pt->Fill(pt, w);
+    if (nm1[0]           && nm1[2] && nm1[3] && nm1[4]) h_nm1_tracks_min_r->Fill(min_r, w);
+    if (nm1[0] && nm1[1]           && nm1[3] && nm1[4]) h_nm1_tracks_npxlayers->Fill(npxlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4]) h_nm1_tracks_nstlayers->Fill(nstlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta <  2.0) h_nm1_tracks_nstlayers_etalt2->Fill(nstlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta >= 2.0) h_nm1_tracks_nstlayers_etagt2->Fill(nstlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2] && nm1[3]          ) h_nm1_tracks_nsigmadxy->Fill(nsigmadxy, w);
 
     const bool nm1_sel[3] = {
-      min_r <= 1 && npxlayers >= 2 && ((abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7)),
-      min_r <= 1 && pt > 1 && ((abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7)),
-      min_r <= 1 && pt > 1 && npxlayers >= 2
+      nm1[1] && nm1[2] && nm1[3],
+      nm1[1] && nm1[0] && nm1[3],
+      nm1[1] && nm1[0] && nm1[2]
     };
     const double nm1_v[3] = { pt, npxlayers, nstlayers };
 
