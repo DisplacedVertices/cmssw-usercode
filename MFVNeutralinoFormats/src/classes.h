@@ -10,6 +10,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
 
 namespace JMTucker_MFVNeutralinoFormats {
   struct dictionary {
@@ -28,5 +29,7 @@ namespace JMTucker_MFVNeutralinoFormats {
 
     edm::Wrapper<mfv::MCInteraction> wmci;
     edm::Wrapper<mfv::TriggerFloats> wtf;
+
+    edm::Wrapper<std::vector<VertexerPairEff> > wvvpe;
   };
 }

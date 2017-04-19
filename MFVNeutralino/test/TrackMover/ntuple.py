@@ -37,8 +37,8 @@ for p in process.paths.keys():
     if p.startswith('Flag_'):
         delattr(process, p)
 
-import JMTucker.MFVNeutralino.TriggerFilter
-JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process, path_name='p')
+import JMTucker.MFVNeutralino.EventFilter
+JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
 process.triggerFilter.HLTPaths = ['HLT_PFHT800_v*', 'HLT_PFHT900_v*']
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')

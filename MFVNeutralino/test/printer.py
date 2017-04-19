@@ -107,6 +107,21 @@ elif __name__ == '__main__' and 'validation' in sys.argv:
             'JetHT2016H2': (1, ['/store/user/tucker/JetHT/NtupleV12_validation_2016_JetHT2016H2/170412_192453/0000/ntuple_0.root']),
             },
         'v13': {
+'JetHT2016B3': (1, ['/store/user/tucker/JetHT/NtupleV13_validation_2016_JetHT2016B3/170413_104026/0000/ntuple_0.root']),
+'JetHT2016C': (1, ['/store/user/tucker/JetHT/NtupleV13_validation_2016_JetHT2016C/170413_104026/0000/ntuple_0.root']),
+'JetHT2016D': (1, ['/store/user/tucker/JetHT/NtupleV13_validation_2016_JetHT2016D/170413_104026/0000/ntuple_0.root']),
+'JetHT2016E': (1, ['/store/user/tucker/JetHT/NtupleV13_validation_2016_JetHT2016E/170413_104026/0000/ntuple_0.root']),
+'JetHT2016F': (1, ['/store/user/tucker/JetHT/NtupleV13_validation_2016_JetHT2016F/170413_104026/0000/ntuple_0.root']),
+'JetHT2016G': (1, ['/store/user/tucker/JetHT/NtupleV13_validation_2016_JetHT2016G/170413_104026/0000/ntuple_0.root']),
+'JetHT2016H2': (1, ['/store/user/tucker/JetHT/NtupleV13_validation_2016_JetHT2016H2/170413_104026/0000/ntuple_0.root']),
+'mfv_ddbar_tau00300um_M0400': (1, ['/store/user/tucker/mfv_ddbar_tau00300um_M0400/NtupleV13_validation_2016_mfv_ddbar_tau00300um_M0400/170413_104026/0000/ntuple_0.root']),
+'mfv_ddbar_tau00300um_M0800': (1, ['/store/user/tucker/mfv_ddbar_tau00300um_M0800/NtupleV13_validation_2016_mfv_ddbar_tau00300um_M0800/170413_104026/0000/ntuple_0.root']),
+'mfv_ddbar_tau01000um_M0400': (1, ['/store/user/tucker/mfv_ddbar_tau01000um_M0400/NtupleV13_validation_2016_mfv_ddbar_tau01000um_M0400/170413_104026/0000/ntuple_0.root']),
+'mfv_ddbar_tau01000um_M0800': (1, ['/store/user/tucker/mfv_ddbar_tau01000um_M0800/NtupleV13_validation_2016_mfv_ddbar_tau01000um_M0800/170413_104026/0000/ntuple_0.root']),
+'mfv_neu_tau00300um_M0800': (1, ['/store/user/tucker/mfv_neu_tau00300um_M0800/NtupleV13_validation_2016_mfv_neu_tau00300um_M0800/170413_104026/0000/ntuple_0.root']),
+'mfv_neu_tau01000um_M0600': (1, ['/store/user/tucker/mfv_neu_tau01000um_M0600/NtupleV13_validation_2016_mfv_neu_tau01000um_M0600/170413_104026/0000/ntuple_0.root']),
+'mfv_neu_tau30000um_M0800': (1, ['/store/user/tucker/mfv_neu_tau30000um_M0800/NtupleV13_validation_2016_mfv_neu_tau30000um_M0800/170413_104026/0000/ntuple_0.root']),
+'ttbar': (1, ['/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV13_validation_2016_ttbar/170413_104026/0000/ntuple_0.root']),
             }
         }
 

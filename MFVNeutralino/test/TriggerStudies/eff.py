@@ -41,10 +41,9 @@ process.source.fileNames = {
     }[(year, is_mc)]
 #process.source.fileNames = ['/store/data/Run2016B/SingleMuon/MINIAOD/23Sep2016-v3/120000/58678DBC-1599-E611-AE77-FA163E4986BD.root']
 
-if is_mc:
-    process.load('JMTucker.Tools.MCStatProducer_cff')
-    process.mcStat.histos = True
-else:
+process.load('JMTucker.Tools.MCStatProducer_cff')
+
+if not is_mc:
     from FWCore.PythonUtilities.LumiList import LumiList
     process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
 

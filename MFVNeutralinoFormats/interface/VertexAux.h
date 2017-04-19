@@ -202,7 +202,7 @@ struct MFVVertexAux {
 
   std::vector<uchar> track_w_;
   std::vector<bool> track_q_;
-  std::vector<ushort> track_hp_;
+  std::vector<unsigned> track_hp_;
   std::vector<bool> track_injet;
   std::vector<short> track_inpv;
   std::vector<float> track_dxy;
@@ -223,13 +223,15 @@ struct MFVVertexAux {
   void  track_q(int i, float q) { assert(q == 1 || q == -1); _set(track_q_, i, q > 0); }
   float track_q(int i) const { return track_q_[i] ? 1.f : -1.f; }
 
-  void track_hitpattern(int i, int npx, int nst, int nbehind, int nlost) {
-    assert(npx >= 0 && nst >= 0 && nbehind >= 0 && nlost >= 0);
-    if (npx > 7) npx = 7;
-    if (nst > 31) nst = 31;
+  void track_hitpattern(int i, int npxh, int npxl, int nsth, int nstl, int nbehind, int nlost) {
+    assert(npxh >= 0 && nsth >= 0 && npxl >= 0 && nstl >= 0 && nbehind >= 0 && nlost >= 0);
+    if (npxh > 7) npxh = 7;
+    if (npxl > 7) npxl = 7;
+    if (nsth > 31) nsth = 31;
+    if (nstl > 31) nstl = 31;
     if (nbehind > 15) nbehind = 15;
-    if (nlost > 15) nlost = 15;
-    const ushort hp = (nlost << 12) | (nbehind << 8) | (nst << 3) | npx;
+    if (nlost   > 15) nlost   = 15;
+    const unsigned hp = (nstl << 19) | (npxl << 16) | (nlost << 12) | (nbehind << 8) | (nsth << 3) | npxh;
     _set(track_hp_, i, hp);
   }
   int track_npxhits(int i) const { return track_hp_[i] & 0x7; }
@@ -237,6 +239,9 @@ struct MFVVertexAux {
   int track_nhitsbehind(int i) const { return (track_hp_[i] >> 8) & 0xF; }
   int track_nhitslost(int i) const { return (track_hp_[i] >> 12) & 0xF; }
   int track_nhits(int i) const { return track_npxhits(i) + track_nsthits(i); }
+  int track_npxlayers(int i) const { return (track_hp_[i] >> 16) & 0x7; }
+  int track_nstlayers(int i) const { return (track_hp_[i] >> 19) & 0x1F; }
+  int track_nlayers(int i) const { return track_npxlayers(i) + track_nstlayers(i); }
 
   double track_p(int i) const { return mag(track_px[i], track_py[i], track_pz[i]); }
   double track_pt(int i) const { return mag(track_px[i], track_py[i]); }

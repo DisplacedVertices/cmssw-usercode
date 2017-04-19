@@ -5,11 +5,12 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
+H = False
 minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
-trig_filter = not keep_all
-version = 'V12'
+event_filter = not keep_all
+version = 'V14'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
@@ -17,13 +18,33 @@ if minitree_only:
 
 ####
 
-process = pat_tuple_process(None, is_mc, year)
+process = pat_tuple_process(None, is_mc, year, H)
+remove_met_filters(process)
+
+# speed up by 15%
+#del process.packedGenParticles
+#del process.prunedGenParticles
+#del process.prunedGenParticlesWithStatusOne
+#del process.primaryVertexAssociation
+#process.patMuons.addGenMatch = False
+#process.patElectrons.addGenMatch = False
+#process.patJets.addGenJetMatch    = False
+#process.patJets.addGenPartonMatch = False
+#process.patJets.addTagInfos = False
+#process.patJets.addJetCharge = False
+#process.patJets.addJetFlavourInfo = False
+#process.patJets.getJetMCFlavour = False
+#process.patJets.discriminatorSources = ['pfCombinedInclusiveSecondaryVertexV2BJetTags']
+#process.patJets.userData.userFloats.src = []
+#process.patJets.userData.userFunctionLabels = []
+#process.patJets.userData.userFunctions = []
+#process.patJets.userData.userInts.src = []
 
 process.out.fileName = 'ntuple.root'
 process.out.outputCommands = output_commands = [
     'drop *',
     'keep *_mcStat_*_*',
-    'keep *_mfvCleaningBits_*_*',
+    'keep VertexerPairEffs_mfvVertices_*_*',
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     'keep MFVEvent_mfvEvent__*',
     ]
@@ -33,14 +54,13 @@ random_service(process, {'mfvVertices': 1222})
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-process.load('JMTucker.MFVNeutralino.CleaningBits_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
 process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
 
-if trig_filter:
-    import JMTucker.MFVNeutralino.TriggerFilter
-    JMTucker.MFVNeutralino.TriggerFilter.setup_trigger_filter(process, path_name='p')
+if event_filter:
+    import JMTucker.MFVNeutralino.EventFilter
+    JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True)
 
 if prepare_vis:
     process.mfvSelectedVerticesTight.produce_vertices = True
@@ -88,9 +108,6 @@ if keep_all:
         if 'tau' in xl or 'MET' in x:
             delattr(process, x)
 
-if is_mc:
-    process.mcStat.histos = True
-
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
@@ -109,12 +126,13 @@ if minitree_only:
         p.insert(0, process.p._seq)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
+
     if year == 2015:
         samples = \
             Samples.data_samples_2015 + \
-            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.mfv_signal_samples_2015 + Samples.xx4j_samples_2015
+            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
     elif year == 2016:
         samples = \
             Samples.data_samples + \
@@ -122,27 +140,21 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.official_mfv_signal_samples + \
             Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
-    filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'ttbar': 3.6064e-02, 'qcdpt0120': 3.500e-05, 'qcdpt0170': 7.856e-03, 'qcdpt0300': 2.918e-01 }
-    for s in samples:
-        s.files_per = 5
-        if s.is_mc:
-            for k,v in filter_eff.iteritems():
-                if s.name.startswith(k):
-                    s.events_per = min(int(25000/v), 200000)
-
     if 'validation' in sys.argv:
         batch_name += '_validation'
         import JMTucker.Tools.SampleFiles as SampleFiles
         samples = [s for s in samples if SampleFiles.has(s.name, 'validation')]
         for s in samples:
             s.files_per = 100000 # let max_output_modifier handle it
+    else:
+        set_splitting(samples, 'main', 'ntuple')
 
-    from JMTucker.Tools.MetaSubmitter import *
     skips = {
         'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
         }
-    modify = chain_modifiers(is_mc_modifier, event_veto_modifier(skips))
+            
+    modify = chain_modifiers(is_mc_modifier, H_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))

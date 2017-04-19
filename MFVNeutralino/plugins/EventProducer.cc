@@ -210,6 +210,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<mfv::TriggerFloats> triggerfloats;
   event.getByToken(triggerfloats_token, triggerfloats);
 
+  mevent->l1_htt = triggerfloats->l1htt;
+  mevent->l1_myhtt = triggerfloats->myhtt;
+  mevent->l1_myhttwbug = triggerfloats->myhttwbug;
   mevent->hlt_ht = triggerfloats->hltht;
   mevent->hlt_ht4mc = triggerfloats->hltht4mc;
 
@@ -243,6 +246,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
   
   mevent->npv = int2uchar(primary_vertices->size());
+  mevent->ngoodpv = 0;
+  for (auto v : *primary_vertices)
+    if (!v.isFake() && v.ndof() > 4 && fabs(v.z()) <= 24 && v.position().rho() < 2)
+      inc_uchar(mevent->ngoodpv);
 
   if (primary_vertex != 0) {
     mevent->pvx = primary_vertex->x();

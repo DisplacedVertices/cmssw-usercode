@@ -15,6 +15,9 @@ eu_aaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Eston
 ########################################################################
 
 class Dataset(object):
+    EVENTS_PER = 25000
+    TOTAL_EVENTS = -1
+    JSON = ''
     HLT_NAME = 'HLT'
     DBS_INST = 'global'
     AAA = []
@@ -23,12 +26,26 @@ class Dataset(object):
         self.dataset = dataset
         self.nevents_orig = nevents_orig
 
+        self.events_per = kwargs.get('events_per', self.EVENTS_PER)
+        self.total_events = kwargs.get('total_events', self.TOTAL_EVENTS)
+        self.json = kwargs.get('json', self.JSON)
+        self.run_range = kwargs.get('run_range', None)
+
         self.hlt_name = kwargs.get('hlt_name', self.HLT_NAME)
         self.dbs_inst = kwargs.get('dbs_inst', self.DBS_INST)
         self.aaa = kwargs.get('aaa', self.AAA)
         self.condor = kwargs.get('condor', False)
         self.xrootd_url = kwargs.get('xrootd_url', '')
         self.filenames = kwargs.get('filenames', [])
+
+    def job_control(self, conf_obj):
+        conf_obj.splitting = 'EventAwareLumiBased'
+        conf_obj.unitsPerJob = self.events_per
+        conf_obj.totalUnits = self.total_events
+        if self.json:
+            conf_obj.lumiMask = self.json
+        if self.run_range:
+            conf_obj.runRange = self.run_range
 
 ########################################################################
 
@@ -71,6 +88,9 @@ class Sample(object):
             args = ('/%s/None/None' % self.datasets['main'].dataset.split('/')[1], -1)
         self.datasets[c] = Dataset(*args, **kwargs)
 
+    def job_control(self, conf_obj):
+        return self.datasets[self.curr_dataset].job_control(conf_obj)
+
     @property
     def dataset(self):
         return self.datasets[self.curr_dataset].dataset
@@ -79,6 +99,38 @@ class Sample(object):
     def nevents_orig(self):
         return self.datasets[self.curr_dataset].nevents_orig
 
+    @property
+    def events_per(self):
+        return self.datasets[self.curr_dataset].events_per
+
+    @events_per.setter
+    def events_per(self, val):
+        self.datasets[self.curr_dataset].events_per = val
+
+    @property
+    def total_events(self):
+        return self.datasets[self.curr_dataset].total_events
+
+    @total_events.setter
+    def total_events(self, val):
+        self.datasets[self.curr_dataset].total_events = val
+
+    @property
+    def json(self):
+        return self.datasets[self.curr_dataset].json
+        
+    @json.setter
+    def json(self, val):
+        self.datasets[self.curr_dataset].json = val
+        
+    @property
+    def run_range(self):
+        return self.datasets[self.curr_dataset].run_range
+        
+    @run_range.setter
+    def run_range(self, val):
+        self.datasets[self.curr_dataset].run_range = val
+        
     @property
     def hlt_name(self):
         return self.datasets[self.curr_dataset].hlt_name
@@ -145,15 +197,9 @@ class Sample(object):
     def __getitem__(self, key):
         return getattr(self, key)
 
-    def job_control(self, conf_obj):
-        raise NotImplementedError('job_control needs to be implemented')
-
 ########################################################################
 
 class MCSample(Sample):
-    EVENTS_PER = 25000
-    TOTAL_EVENTS = -1
-    
     def __init__(self, name, dataset, nevents_orig, **kwargs):
         super(MCSample, self).__init__(name, dataset, nevents_orig, **kwargs)
 
@@ -161,9 +207,6 @@ class MCSample(Sample):
         self.color = kwargs.get('color', -1)
         self.syst_frac = float(kwargs.get('syst_frac', -1))
         self.xsec = float(kwargs.get('xsec', -1)) # assumed pb
-
-        self.events_per = kwargs.get('events_per', self.EVENTS_PER)
-        self.total_events = kwargs.get('total_events', self.TOTAL_EVENTS)
 
         self.join_info = (False, self.nice, self.color)
 
@@ -186,46 +229,12 @@ class MCSample(Sample):
     def int_lumi(self, f_or_fn):
         return 1./self.partial_weight(f_or_fn)
             
-    def job_control(self, conf_obj):
-        conf_obj.splitting = 'EventAwareLumiBased'
-        conf_obj.unitsPerJob = self.events_per
-        conf_obj.totalUnits = self.total_events
-
 ########################################################################
 
 class DataSample(Sample):
     IS_MC = False
-    JSON = None
-    LUMIS_PER = 30
-    TOTAL_LUMIS = -1
-
     def __init__(self, name, dataset, **kwargs):
         super(DataSample, self).__init__(name, dataset, -1, **kwargs)
-
-        self.run_range = kwargs.get('run_range', None)
-        self.json = kwargs.get('json', self.JSON)
-
-        self.lumis_per = kwargs.get('lumis_per', self.LUMIS_PER)
-        self.total_lumis = kwargs.get('total_lumis', self.TOTAL_LUMIS)
-
-    def lumi_mask(self):
-        # JMTBAD run_range checking
-        if type(self.json) == str and os.path.isfile(self.json):
-            return self.json
-        elif self.json is None:
-            return ''
-        else: # implement LumiList object -> tmp.json
-            raise NotImplementedError('need to do something more complicated when combining lumimasks')
-
-    def job_control(self, conf_obj):
-        conf_obj.splitting = 'LumiBased'
-        conf_obj.unitsPerJob = self.lumis_per
-        conf_obj.totalUnits = self.total_lumis
-        lumi_mask = self.lumi_mask()
-        if lumi_mask:
-            conf_obj.lumiMask = lumi_mask
-        if self.run_range:
-            conf_obj.runRange = self.run_range
 
 ########################################################################
 

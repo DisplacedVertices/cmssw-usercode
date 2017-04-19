@@ -23,7 +23,7 @@ fmt = '%' + str(ml) + 's %10s | %10s %10s %10s %10s %10s'
 
 def safe_to_resubmit(r):
     return resubmit_all or \
-        r in [147,84]  # xrdcp problem, file open error
+        r in [147,84,92]  # xrdcp problem, file open error, fallback file open error
 
 def return_code(r):
     if r == 147:

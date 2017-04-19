@@ -27,10 +27,10 @@ void MFVSkimmedTracks::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   for (const reco::Track& tk : *tracks) {
     const double pt = tk.pt();
-    //    const int npxhits = tk.hitPattern().numberOfValidPixelHits();
     const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
     const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
-    if (pt > 1. && npxlayers >= 2 && nstlayers >= 3)
+    const bool min_r = tk.hitPattern().hasValidHitInFirstPixelBarrel();
+    if (pt > 1. && min_r && npxlayers >= 2 && nstlayers >= 3)
       output_tracks->push_back(tk);
   }
 

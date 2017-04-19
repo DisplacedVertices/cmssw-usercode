@@ -21,22 +21,22 @@ def denewline(s):
 electronId = denewline('''
 (
  isEB &&
+ full5x5_sigmaIetaIeta < 0.0115 &&
+ abs(deltaEtaSuperClusterTrackAtVtx - superCluster.eta + superCluster.seed.eta) < 0.00749 &&
+ abs(deltaPhiSuperClusterTrackAtVtx) < 0.228 &&
+ hadronicOverEm < 0.356 &&
+ abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.299 &&
  gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 2 &&
- abs(deltaEtaSuperClusterTrackAtVtx) < 0.00926 &&
- abs(deltaPhiSuperClusterTrackAtVtx) < 0.0336 &&
- full5x5_sigmaIetaIeta < 0.0101 &&
- hadronicOverEm < 0.0597 &&
- abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.012 &&
  passConversionVeto
  ) ||
 (
  isEE &&
- gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 1 &&
- abs(deltaEtaSuperClusterTrackAtVtx) < 0.00724 &&
- abs(deltaPhiSuperClusterTrackAtVtx) < 0.0918 &&
- full5x5_sigmaIetaIeta < 0.0279 &&
- hadronicOverEm < 0.0615 &&
- abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.00999 &&
+ full5x5_sigmaIetaIeta < 0.037 &&
+ abs(deltaEtaSuperClusterTrackAtVtx - superCluster.eta + superCluster.seed.eta) < 0.00895 &&
+ abs(deltaPhiSuperClusterTrackAtVtx) < 0.213 &&
+ hadronicOverEm < 0.211 &&
+ abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.15 &&
+ gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 3 &&
  passConversionVeto
  )
 ''')

@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'qcdht2000', 'ntuplev12', 1)
+sample_files(process, 'qcdht2000', 'ntuplev14', 1)
 #process.source.fileNames = ['file:ntuple.root']
 process.TFileService.fileName = 'minitree.root'
 
@@ -22,18 +22,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in samples:
         sample.files_per = 20
         if not sample.is_mc:
-            sample.json = 'ana_2015p6.json'
+            sample.json = 'ana_2015p6_10pc.json'
 
     def modify(sample):
         to_add, to_replace = [], []
         if not sample.is_mc:
+            to_add.append('del process.pMiniTreeNtk3or4')
+            to_add.append('del process.pMiniTreeNtk4')
             to_add.append('del process.pMiniTree')
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MinitreeV12',
+    cs = CondorSubmitter('MiniTreeV14_10pc',
                          ex = year,
-                         dataset = 'ntuplev12',
+                         dataset = 'ntuplev14',
                          pset_modifier = modify
                          )
     cs.submit_all(samples)

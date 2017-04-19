@@ -108,14 +108,14 @@ void MFVSignalEff2016HBug::analyze(const edm::Event& event, const edm::EventSetu
   else {
     h_gendvv_fail->Fill(gendvv);
     const bool l1single = 
-      triggerfloats->L1decisions[mfv::b_L1_SingleJet170] ||
-      triggerfloats->L1decisions[mfv::b_L1_SingleJet180] ||
-      triggerfloats->L1decisions[mfv::b_L1_SingleJet200];
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet170] == 1 ||
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet180] == 1 ||
+      triggerfloats->L1decisions[mfv::b_L1_SingleJet200] == 1;
     if (l1single) {
       h_gendvv_faill1htt_l1single->Fill(gendvv);
-      if (triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450])
+      if (triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450] == 1)
         h_gendvv_faill1htt_l1single450->Fill(gendvv);
-      if (triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450] || triggerfloats->HLTdecisions[mfv::b_HLT_AK8PFJet450])
+      if (triggerfloats->HLTdecisions[mfv::b_HLT_PFJet450] == 1 || triggerfloats->HLTdecisions[mfv::b_HLT_AK8PFJet450] == 1)
         h_gendvv_faill1htt_l1single450ak->Fill(gendvv);
     }      
   }

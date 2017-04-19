@@ -508,6 +508,33 @@ for x in data_samples + [qcdht0700, qcdht2000, ttbar, mfv_neu_tau00300um_M0800, 
     x.add_dataset('validation')
     x.datasets['validation'].condor = True
 
+JetHT2016H3.add_dataset('ntuplev13', '/JetHT/tucker-NtupleV13_2016-37fe2930b7c7c895432234b7692629b0/USER', 211788)
+qcdht1000.add_dataset('ntuplev13', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV13_2016-a7376dd672ba202610433ce7accfb8ca/USER', 3103065)
+for x in (qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext, ttbar, official_mfv_neu_tau01000um_M0800):
+    x.add_dataset("ntuplev13")
+
+JetHT2016H3.add_dataset('ntuplev13p1', '/JetHT/tucker-NtupleV13p1_2016-28cbc68337d6f574c1597b595381a5dc/USER', 191679)
+qcdht1000.add_dataset('ntuplev13p1', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV13p1_2016-512eed94f71af7517e3f36913ece1ca2/USER', 3069279)
+for x in (qcdht0500, qcdht0500ext, qcdht0700, qcdht0700ext, qcdht1000ext, qcdht1500, qcdht1500ext, qcdht2000, qcdht2000ext, ttbar, official_mfv_neu_tau01000um_M0800):
+    x.add_dataset("ntuplev13p1")
+
+JetHT2016B3.add_dataset('ntuplev14', '/JetHT/tucker-NtupleV14_2016-2ea1795893dc085057876076cf530e3b/USER', 5429966)
+JetHT2016C.add_dataset('ntuplev14', '/JetHT/tucker-NtupleV14_2016-f2520a672ca2f4c684656dce1d6d2332/USER', 2395718)
+JetHT2016D.add_dataset('ntuplev14', '/JetHT/tucker-NtupleV14_2016-b657a27737da77d787c11a9609aa53e3/USER', 3944702)
+JetHT2016E.add_dataset('ntuplev14', '/JetHT/tucker-NtupleV14_2016-5a9618756bf9e71da76c325539798d68/USER', 3706657)
+JetHT2016F.add_dataset('ntuplev14', '/JetHT/tucker-NtupleV14_2016-b33199e26055d5e7e2fc2b856ff18ea3/USER', 2874737)
+JetHT2016H2.add_dataset('ntuplev14', '/JetHT/tucker-NtupleV14_2016-33f7fb6acd7dd49f9834d6ba4cc21c6a/USER', 7615387)
+JetHT2016H3.add_dataset('ntuplev14', '/JetHT/tucker-NtupleV14_2016-50ddfea9ac759b136a3290a37140777c/USER', 191679)
+official_mfv_neu_tau00100um_M0400.add_dataset('ntuplev14', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV14_2016-26e2be0442f5ed8c4f08b31db3a41ea6/USER', 17547)
+official_mfv_neu_tau00100um_M1200.add_dataset('ntuplev14', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV14_2016-6394cfab8994ceda49438e57bee5284a/USER', 99069)
+official_mfv_neu_tau00300um_M0400.add_dataset('ntuplev14', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV14_2016-9528b494706ae264d1b160dc5353b9f2/USER', 16042)
+official_mfv_neu_tau00300um_M1200.add_dataset('ntuplev14', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV14_2016-9a6bab6827dac4a5044169b695c1b9a0/USER', 99232)
+official_mfv_neu_tau01000um_M0400.add_dataset('ntuplev14', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV14_2016-b2a399d84dd9e13246f4d7ad106933af/USER', 13445)
+official_mfv_neu_tau10000um_M0400.add_dataset('ntuplev14', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/tucker-NtupleV14_2016-70c22b0859daf5db4747bae24c70389c/USER', 15499)
+qcdht1000.add_dataset('ntuplev14', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/tucker-NtupleV14_2016-fde4cb84061f0d1187b7dc75c73917b4/USER', 3069279)
+for x in (JetHT2015D, JetHT2016G, mfv_ddbar_tau00100um_M0300, mfv_ddbar_tau00100um_M0400, mfv_ddbar_tau00100um_M0500, mfv_ddbar_tau00100um_M0600, mfv_ddbar_tau00100um_M0800, mfv_ddbar_tau00100um_M1200, mfv_ddbar_tau00100um_M1600, mfv_ddbar_tau00300um_M0300, mfv_ddbar_tau00300um_M0400, mfv_ddbar_tau00300um_M0500, mfv_ddbar_tau00300um_M0600, mfv_ddbar_tau00300um_M0800, mfv_ddbar_tau00300um_M1200, mfv_ddbar_tau00300um_M1600, mfv_ddbar_tau01000um_M0300, mfv_ddbar_tau01000um_M0400, mfv_ddbar_tau01000um_M0500, mfv_ddbar_tau01000um_M0600, mfv_ddbar_tau01000um_M0800, mfv_ddbar_tau01000um_M1200, mfv_ddbar_tau01000um_M1600, mfv_ddbar_tau10000um_M0300, mfv_ddbar_tau10000um_M0400, mfv_ddbar_tau10000um_M0500, mfv_ddbar_tau10000um_M0600, mfv_ddbar_tau10000um_M0800, mfv_ddbar_tau10000um_M1200, mfv_ddbar_tau10000um_M1600, mfv_ddbar_tau30000um_M0300, mfv_ddbar_tau30000um_M0400, mfv_ddbar_tau30000um_M0500, mfv_ddbar_tau30000um_M0600, mfv_ddbar_tau30000um_M0800, mfv_ddbar_tau30000um_M1200, mfv_ddbar_tau30000um_M1600, mfv_neu_tau00100um_M0600, mfv_neu_tau00100um_M3000, mfv_neu_tau00300um_M0600, mfv_neu_tau00300um_M0800, mfv_neu_tau00300um_M3000, mfv_neu_tau01000um_M0600, mfv_neu_tau01000um_M3000, mfv_neu_tau10000um_M0600, mfv_neu_tau10000um_M3000, mfv_neu_tau30000um_M0300, mfv_neu_tau30000um_M0400, mfv_neu_tau30000um_M0600, mfv_neu_tau30000um_M0800, mfv_neu_tau30000um_M1200, mfv_neu_tau30000um_M1600, mfv_neu_tau30000um_M3000, official_mfv_neu_tau00100um_M0300, official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau00300um_M0300, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau00300um_M1600, official_mfv_neu_tau01000um_M0300, official_mfv_neu_tau01000um_M0800, official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau01000um_M1600, official_mfv_neu_tau10000um_M0300, official_mfv_neu_tau10000um_M0800, official_mfv_neu_tau10000um_M1200, official_mfv_neu_tau10000um_M1600, qcdht0500, qcdht0500_2015, qcdht0500ext, qcdht0500ext_2015, qcdht0700, qcdht0700_2015, qcdht0700ext, qcdht0700ext_2015, qcdht1000_2015, qcdht1000ext, qcdht1000ext_2015, qcdht1500, qcdht1500_2015, qcdht1500ext, qcdht1500ext_2015, qcdht2000, qcdht2000_2015, qcdht2000ext, qcdht2000ext_2015, ttbar, ttbar_2015,):
+    x.add_dataset("ntuplev14")
+
 ########
 # other condor declarations
 ########
@@ -531,6 +558,7 @@ for x in (JetHT2016G,
           official_mfv_neu_tau00100um_M0800, official_mfv_neu_tau00300um_M0800, official_mfv_neu_tau01000um_M0800,
           official_mfv_neu_tau01000um_M1200, official_mfv_neu_tau10000um_M1200,
           official_mfv_neu_tau00100um_M1600, official_mfv_neu_tau10000um_M1600,
+          official_mfv_neu_tau00300um_M0300, official_mfv_neu_tau00300um_M1600, official_mfv_neu_tau01000um_M1600, official_mfv_neu_tau10000um_M0800,
           xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
           ):
     x.condor = True

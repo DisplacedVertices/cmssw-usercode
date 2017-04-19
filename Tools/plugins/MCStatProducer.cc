@@ -17,7 +17,6 @@ private:
   virtual void endLuminosityBlockProduce(edm::LuminosityBlock&, const edm::EventSetup&) override;
 
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
-  const bool histos;
 
   int nevents;
   float sumweight;
@@ -29,17 +28,17 @@ private:
 
 MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
   : gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
-    histos(cfg.getUntrackedParameter<bool>("histos", false)),
     nevents(0),
     sumweight(0),
-    sumweightprod(0)
+    sumweightprod(0),
+    h_sums(0)
 {
   produces<int,   edm::InLumi>("nEvents");
   produces<float, edm::InLumi>("sumWeight");
   produces<float, edm::InLumi>("sumWeightProd");
 
-  if (histos) {
-    edm::Service<TFileService> fs;
+  edm::Service<TFileService> fs;
+  if (fs) {
     TH1::SetDefaultSumw2();
     h_sums = fs->make<TH1F>("h_sums", "", n_sums, 0, n_sums);
     int ibin = 1;
@@ -49,16 +48,18 @@ MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
 }
 
 void MCStatProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-  edm::Handle<GenEventInfoProduct> gen_info;
-  event.getByToken(gen_info_token, gen_info);
-
   nevents += 1;
-  sumweight += gen_info->weight();
-  sumweightprod += gen_info->weightProduct();
+
+  if (!event.isRealData()) {
+    edm::Handle<GenEventInfoProduct> gen_info;
+    event.getByToken(gen_info_token, gen_info);
+    sumweight += gen_info->weight();
+    sumweightprod += gen_info->weightProduct();
+  }
 }
 
 void MCStatProducer::endLuminosityBlockProduce(edm::LuminosityBlock& lumi, const edm::EventSetup&) {
-  if (histos) {
+  if (h_sums) {
     h_sums->Fill(sum_nevents_total, nevents);
     h_sums->Fill(sum_gen_weight_total, sumweight);
     h_sums->Fill(sum_gen_weight_prod_total, sumweightprod);

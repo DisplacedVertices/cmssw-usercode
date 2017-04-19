@@ -10,9 +10,13 @@ mfvSelectedVerticesTmp = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVertices
                                                    produce_refs = True,
                                                    min_ntracks = 3)
 
+mfvVerticesAuxPresel = mfvVerticesAux
+mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 3)
+
 mfvVertexSequence = cms.Sequence(mfvVertices *
                                  mfvGenParticles *
                                  mfvVerticesAuxTmp *
                                  mfvSelectedVerticesTmp *
                                  mfvVerticesToJets *
+                                 mfvVerticesAuxPresel *
                                  mfvVerticesAux)
