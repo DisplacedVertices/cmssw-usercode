@@ -4,8 +4,9 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
+H = False
 
-process = pat_tuple_process(None, is_mc, year)
+process = pat_tuple_process(None, is_mc, year, H)
 jets_only(process)
 
 sample_files(process, 'qcdht2000ext', 'main', 5)
@@ -41,6 +42,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     ms = MetaSubmitter('TrackerMapperV0')
     ms.common.ex = year
-    ms.common.pset_modifier = is_mc_modifier
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier)
     ms.crab.job_control_from_sample = True
     ms.submit(samples)
