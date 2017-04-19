@@ -134,9 +134,9 @@ for p in process.paths.keys():
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV12',
+    cs = CondorSubmitter('HistosV14',
                          ex = year,
-                         dataset = 'ntuplev12',
+                         dataset = 'ntuplev14',
                          pset_modifier = modify,
                          )
     cs.submit_all(samples)
