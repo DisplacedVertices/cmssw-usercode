@@ -17,12 +17,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2016:
         samples = Samples.data_samples + \
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.official_mfv_signal_samples
+            Samples.official_mfv_signal_samples + \
+            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
+
+    dataset = 'ntuplev14'
 
     for sample in samples:
         sample.files_per = 20
         if not sample.is_mc:
-            sample.json = 'ana_2015p6_10pc.json'
+            sample.datasets[dataset].json = 'ana_2015p6_10pc.json'
 
     def modify(sample):
         to_add, to_replace = [], []
@@ -35,7 +38,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('MiniTreeV14',
                          ex = year,
-                         dataset = 'ntuplev14',
+                         dataset = dataset,
                          pset_modifier = modify
                          )
     cs.submit_all(samples)
