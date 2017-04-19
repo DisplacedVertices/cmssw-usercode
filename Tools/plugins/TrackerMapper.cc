@@ -65,6 +65,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_min_r[3];
   TH1D* h_tracks_npxlayers[3];
   TH1D* h_tracks_nstlayers[3];
+  TH1D* h_tracks_nstlayers_etalt2[3];
+  TH1D* h_tracks_nstlayers_etagt2[3];
   TH1D* h_tracks_nsigmadxy[3];
 
   TH2D* h_tracks_nstlayers_v_eta[3];
@@ -82,6 +84,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_nm1_tracks_min_r;
   TH1D* h_nm1_tracks_npxlayers;
   TH1D* h_nm1_tracks_nstlayers;
+  TH1D* h_nm1_tracks_nstlayers_etalt2;
+  TH1D* h_nm1_tracks_nstlayers_etagt2;
   TH1D* h_nm1_tracks_nsigmadxy;
 
   TH2D* h_dxyerr_v_ptcut[2];
@@ -142,6 +146,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_min_r[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_min_r", ex[i]), TString::Format("%s tracks;tracks min_r;arb. units", ex[i]), 20, 0, 20);
     h_tracks_npxlayers[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nstlayers[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
+    h_tracks_nstlayers_etalt2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers_etalt2", ex[i]), TString::Format("%s tracks;|#eta| < 2 tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
+    h_tracks_nstlayers_etagt2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers_etagt2", ex[i]), TString::Format("%s tracks;|#eta| #geq 2 tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nsigmadxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 200, 0, 20);
 
     h_tracks_nstlayers_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nstlayers_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks nstlayers", ex[i]), 80, -4, 4, 20, 0, 20);
@@ -160,6 +166,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_nm1_tracks_min_r = fs->make<TH1D>("h_nm1_tracks_min_r", "nm1 tracks;tracks min_r;arb. units", 20, 0, 20);
   h_nm1_tracks_npxlayers = fs->make<TH1D>("h_nm1_tracks_npxlayers", "nm1 tracks;tracks npxlayers;arb. units", 20, 0, 20);
   h_nm1_tracks_nstlayers = fs->make<TH1D>("h_nm1_tracks_nstlayers", "nm1 tracks;tracks nstlayers;arb. units", 20, 0, 20);
+  h_nm1_tracks_nstlayers_etalt2 = fs->make<TH1D>("h_nm1_tracks_nstlayers_etalt2", "nm1 tracks;|#eta| < 2 tracks nstlayers;arb. units", 20, 0, 20);
+  h_nm1_tracks_nstlayers_etagt2 = fs->make<TH1D>("h_nm1_tracks_nstlayers_etagt2", "nm1 tracks;|#eta| #geq 2 tracks nstlayers;arb. units", 20, 0, 20);
   h_nm1_tracks_nsigmadxy = fs->make<TH1D>("h_nm1_tracks_nsigmadxy", "nm1 tracks;tracks nsigmadxy;arb. units", 200, 0, 20);
 
   const char* ex2[2] = {"all", "nm1"};
@@ -225,22 +233,33 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     const double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false).min_r;
     const double npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
     const double nstlayers = tk.hitPattern().stripLayersWithMeasurement();
+    const double abseta = fabs(tk.eta());
     const double dxy = tk.dxy(*beamspot);
     const double nsigmadxy = fabs(dxy / tk.dxyError());
 
-    const bool sel = pt > 1 && min_r <= 1 && npxlayers >= 2 && nstlayers >= 3;
-    const bool seed = sel && nsigmadxy > 4;
+    const bool nm1[5] = {
+      pt > 1,
+      min_r <= 1,
+      npxlayers >= 2,
+      (abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7),
+      nsigmadxy > 4
+    };
 
-    if (          min_r <= 1 && npxlayers >= 2 && nstlayers >= 3 && nsigmadxy > 4) h_nm1_tracks_pt->Fill(pt, w);
-    if (pt > 1               && npxlayers >= 2 && nstlayers >= 3 && nsigmadxy > 4) h_nm1_tracks_min_r->Fill(min_r, w);
-    if (pt > 1 && min_r <= 1                   && nstlayers >= 3 && nsigmadxy > 4) h_nm1_tracks_npxlayers->Fill(npxlayers, w);
-    if (pt > 1 && min_r <= 1 && npxlayers >= 2                   && nsigmadxy > 4) h_nm1_tracks_nstlayers->Fill(nstlayers, w);
-    if (pt > 1 && min_r <= 1 && npxlayers >= 2 && nstlayers >= 3                 ) h_nm1_tracks_nsigmadxy->Fill(nsigmadxy, w);
+    const bool sel = nm1[0] && nm1[1] && nm1[2] && nm1[3];
+    const bool seed = sel && nm1[4];
+
+    if (          nm1[1] && nm1[2] && nm1[3] && nm1[4]) h_nm1_tracks_pt->Fill(pt, w);
+    if (nm1[0]           && nm1[2] && nm1[3] && nm1[4]) h_nm1_tracks_min_r->Fill(min_r, w);
+    if (nm1[0] && nm1[1]           && nm1[3] && nm1[4]) h_nm1_tracks_npxlayers->Fill(npxlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4]) h_nm1_tracks_nstlayers->Fill(nstlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta <  2.0) h_nm1_tracks_nstlayers_etalt2->Fill(nstlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta >= 2.0) h_nm1_tracks_nstlayers_etagt2->Fill(nstlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2] && nm1[3]          ) h_nm1_tracks_nsigmadxy->Fill(nsigmadxy, w);
 
     const bool nm1_sel[3] = {
-      min_r <= 1 && npxlayers >= 2 && nstlayers >= 3,
-      min_r <= 1 && pt > 1 && nstlayers >= 3,
-      min_r <= 1 && pt > 1 && npxlayers >= 2
+      nm1[1] && nm1[2] && nm1[3],
+      nm1[1] && nm1[0] && nm1[3],
+      nm1[1] && nm1[0] && nm1[2]
     };
     const double nm1_v[3] = { pt, npxlayers, nstlayers };
 
@@ -298,6 +317,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_min_r[i]->Fill(min_r, w);
       h_tracks_npxlayers[i]->Fill(npxlayers, w);
       h_tracks_nstlayers[i]->Fill(nstlayers, w);
+      if (abseta <  2.0) h_tracks_nstlayers_etalt2[i]->Fill(nstlayers, w);
+      if (abseta >= 2.0) h_tracks_nstlayers_etagt2[i]->Fill(nstlayers, w);
       h_tracks_nsigmadxy[i]->Fill(nsigmadxy, w);
 
       h_tracks_absdxy[i]->Fill(fabs(dxy), w);
