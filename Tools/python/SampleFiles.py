@@ -374,7 +374,7 @@ _add_ds("ntuplev14", {
 'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/NtupleV14_2016/170415_024441", 1348),
 'JetHT2016F': _fromnum1("/store/user/tucker/JetHT/NtupleV14_2016/170415_024513", 968),
 'JetHT2016G': (1970, ['/store/user/tucker/JetHT/NtupleV14_2016_JetHT2016G/170414_215210' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in chain(xrange(24), xrange(25,918), xrange(919,1243), xrange(1244,1336), xrange(1337,1971))] + ['/store/user/tucker/JetHT/NtupleV14_2016_JetHT2016G/170414_233407' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in [24, 918, 1336]]),
-'JetHT2016H2': _fromnum1("/store/user/tucker/JetHT/NtupleV14_2016/170415_024544", 2406),
+'JetHT2016H2': _fromnum1("/store/user/tucker/JetHT/NtupleV14_2016/170415_024544", 2406, but=[321]),
 'JetHT2016H3': _fromnum1("/store/user/tucker/JetHT/NtupleV14_2016/170415_024616", 63),
 'mfv_ddbar_tau00100um_M0300': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0300/NtupleV14_2016_mfv_ddbar_tau00100um_M0300/170414_215210", 100),
 'mfv_ddbar_tau00100um_M0400': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0400/NtupleV14_2016_mfv_ddbar_tau00100um_M0400/170414_215210", 100),
