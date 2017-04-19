@@ -22,16 +22,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in samples:
         sample.files_per = 20
         if not sample.is_mc:
-            sample.json = 'ana_2015p6.json'
+            sample.json = 'ana_2015p6_10pc.json'
 
     def modify(sample):
         to_add, to_replace = [], []
         if not sample.is_mc:
+            to_add.append('del process.pMiniTreeNtk3or4')
+            to_add.append('del process.pMiniTreeNtk4')
             to_add.append('del process.pMiniTree')
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MiniTreeV14',
+    cs = CondorSubmitter('MiniTreeV14_10pc',
                          ex = year,
                          dataset = 'ntuplev14',
                          pset_modifier = modify
