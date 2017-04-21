@@ -84,6 +84,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_nm1_tracks_min_r;
   TH1D* h_nm1_tracks_npxlayers;
   TH1D* h_nm1_tracks_nstlayers;
+  TH2D* h_nm1_tracks_nstlayers_v_eta;
   TH1D* h_nm1_tracks_nstlayers_etalt2;
   TH1D* h_nm1_tracks_nstlayers_etagt2;
   TH1D* h_nm1_tracks_nsigmadxy;
@@ -166,6 +167,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_nm1_tracks_min_r = fs->make<TH1D>("h_nm1_tracks_min_r", "nm1 tracks;tracks min_r;arb. units", 20, 0, 20);
   h_nm1_tracks_npxlayers = fs->make<TH1D>("h_nm1_tracks_npxlayers", "nm1 tracks;tracks npxlayers;arb. units", 20, 0, 20);
   h_nm1_tracks_nstlayers = fs->make<TH1D>("h_nm1_tracks_nstlayers", "nm1 tracks;tracks nstlayers;arb. units", 20, 0, 20);
+  h_nm1_tracks_nstlayers_v_eta = fs->make<TH2D>("h_nm1_tracks_nstlayers_v_eta", "nm1 tracks;tracks #eta;tracks number of strip layers", 80, -4, 4, 20, 0, 20);
   h_nm1_tracks_nstlayers_etalt2 = fs->make<TH1D>("h_nm1_tracks_nstlayers_etalt2", "nm1 tracks;|#eta| < 2 tracks nstlayers;arb. units", 20, 0, 20);
   h_nm1_tracks_nstlayers_etagt2 = fs->make<TH1D>("h_nm1_tracks_nstlayers_etagt2", "nm1 tracks;|#eta| #geq 2 tracks nstlayers;arb. units", 20, 0, 20);
   h_nm1_tracks_nsigmadxy = fs->make<TH1D>("h_nm1_tracks_nsigmadxy", "nm1 tracks;tracks nsigmadxy;arb. units", 200, 0, 20);
@@ -252,6 +254,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     if (nm1[0]           && nm1[2] && nm1[3] && nm1[4]) h_nm1_tracks_min_r->Fill(min_r, w);
     if (nm1[0] && nm1[1]           && nm1[3] && nm1[4]) h_nm1_tracks_npxlayers->Fill(npxlayers, w);
     if (nm1[0] && nm1[1] && nm1[2]           && nm1[4]) h_nm1_tracks_nstlayers->Fill(nstlayers, w);
+    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4]) h_nm1_tracks_nstlayers_v_eta->Fill(tk.eta(), nstlayers, w);
     if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta <  2.0) h_nm1_tracks_nstlayers_etalt2->Fill(nstlayers, w);
     if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta >= 2.0) h_nm1_tracks_nstlayers_etagt2->Fill(nstlayers, w);
     if (nm1[0] && nm1[1] && nm1[2] && nm1[3]          ) h_nm1_tracks_nsigmadxy->Fill(nsigmadxy, w);
