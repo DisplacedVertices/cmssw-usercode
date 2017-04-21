@@ -432,9 +432,6 @@ def sample_from_end_string(namespace, d):
 
 def main(samples_registry):
     import sys
-    options = ('merge', 'filename')
-    if len([o for o in options if o in sys.argv]) > 1:
-        raise ValueError('only one of %r allowed' % options)
 
     if 'merge' in sys.argv:
         samples = samples_registry.from_argv(from_root_fns=True, raise_if_none=True)
