@@ -7,12 +7,12 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
-#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
+//#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
 class MFVVertexSelector : public edm::EDProducer {
 public:
   explicit MFVVertexSelector(const edm::ParameterSet&);
-  ~MFVVertexSelector() { delete mva; }
+  //~MFVVertexSelector() { delete mva; }
 
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
@@ -31,7 +31,7 @@ private:
   const MFVVertexAuxSorter sorter;
 
   const bool use_mva;
-  const MFVVertexMVAWrap* mva;
+  //const MFVVertexMVAWrap* mva;
   const double mva_cut;
 
   const edm::InputTag match_to_vertices_src;
@@ -127,7 +127,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     produce_refs(cfg.getParameter<bool>("produce_refs")),
     sorter(cfg.getParameter<std::string>("sort_by")),
     use_mva(cfg.getParameter<bool>("use_mva")),
-    mva(use_mva ? new MFVVertexMVAWrap : 0),
+    //mva(use_mva ? new MFVVertexMVAWrap : 0),
     mva_cut(cfg.getParameter<double>("mva_cut")),
     match_to_vertices_src(cfg.getParameter<edm::InputTag>("match_to_vertices_src")),
     match_to_vertices_token(consumes<std::vector<double> >(match_to_vertices_src)),
@@ -208,6 +208,9 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_nsingleclusterspb050(cfg.getParameter<int>("max_nsingleclusterspb050")),
     min_avgnconstituents(cfg.getParameter<double>("min_avgnconstituents"))
 {
+  if (use_mva)
+    throw cms::Exception("NotImplemented", "use_mva true and mva is disabled");
+
   if (produce_refs)
     produces<reco::VertexRefVector>();
   else
@@ -234,7 +237,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
     if (vtx.ntracks() < 5)
       return false;
 
-    return mva->value(vtx) > mva_cut;
+    //return mva->value(vtx) > mva_cut;
   }
 
   if (min_bsbs2ddist > 0 || max_bsbs2ddist < 1e6) {
