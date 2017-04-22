@@ -5,21 +5,21 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-class MFVFirstGoodPrimaryVertex : public edm::EDProducer {
+class JMTFirstGoodPrimaryVertex : public edm::EDProducer {
 public:
-  explicit MFVFirstGoodPrimaryVertex(const edm::ParameterSet&);
+  explicit JMTFirstGoodPrimaryVertex(const edm::ParameterSet&);
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
   const edm::EDGetTokenT<reco::VertexCollection> vertices_token;
 };
 
-MFVFirstGoodPrimaryVertex::MFVFirstGoodPrimaryVertex(const edm::ParameterSet& cfg)
+JMTFirstGoodPrimaryVertex::JMTFirstGoodPrimaryVertex(const edm::ParameterSet& cfg)
   : vertices_token(consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices")))
 {
   produces<reco::VertexCollection>();
 }
 
-void MFVFirstGoodPrimaryVertex::produce(edm::Event& event, const edm::EventSetup&) {
+void JMTFirstGoodPrimaryVertex::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertices_token, vertices);
   
@@ -34,4 +34,4 @@ void MFVFirstGoodPrimaryVertex::produce(edm::Event& event, const edm::EventSetup
   event.put(std::move(output));
 }
 
-DEFINE_FWK_MODULE(MFVFirstGoodPrimaryVertex);
+DEFINE_FWK_MODULE(JMTFirstGoodPrimaryVertex);
