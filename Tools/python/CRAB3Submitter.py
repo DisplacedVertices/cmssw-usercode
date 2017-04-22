@@ -121,6 +121,10 @@ class CRABSubmitter:
             if k.startswith('crab_cfg_'):
                 self.cfg_modifier_strings.append((k.replace('crab_', '').replace('__', 'UNDERSCORE').replace('_', '.').replace('UNDERSCORE', '_'), v))
 
+        if '$' in pset_template_fn:
+            pset_template_fn =  os.path.expandvars(pset_template_fn)
+        if '~' in pset_template_fn:
+            pset_template_fn = os.path.expanduser(pset_template_fn)
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
 

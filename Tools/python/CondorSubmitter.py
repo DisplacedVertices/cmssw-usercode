@@ -158,6 +158,10 @@ def get(i): return _l[i]
                  ):
 
         self.testing = testing
+        if '$' in pset_template_fn:
+            pset_template_fn =  os.path.expandvars(pset_template_fn)
+        if '~' in pset_template_fn:
+            pset_template_fn = os.path.expanduser(pset_template_fn)
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
         self.dataset = dataset
@@ -237,7 +241,7 @@ def get(i): return _l[i]
 
         # JMTBAD if pset_modifier or cmsrun_args modifies the output filenames, we won't catch them
         print 'CondorSubmitter init: importing pset_template fn %s to get output filenames' % pset_template_fn
-        module = imp.load_source('dummy', pset_template_fn)
+        module = imp.load_source('dummy', self.pset_template_fn)
         module_output_files = find_output_files(module.process)
         for l in module_output_files.itervalues():
             for x in l:
