@@ -55,7 +55,7 @@ void MFVSkimmedTracks::produce(edm::Event& event, const edm::EventSetup& setup) 
       const double dxybs = tk.dxy(*beamspot);
       const double dxyerr = tk.dxyError();
       const double sigmadxybs = dxybs / dxyerr;
-      pass = pass && sigmadxybs > 4;
+      pass = pass && fabs(sigmadxybs) > 4;
       if (debug) std::cout << " dxybs " << dxybs << " dxyerr " << dxyerr << " sigmadxybs " << sigmadxybs;
     }
 
