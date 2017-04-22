@@ -9,9 +9,6 @@ import JMTucker.Tools.Samples as Samples
 set_style()
 ROOT.TH1.AddDirectory(0)
 
-def arrit(l):
-    return array('d', l)
-
 def get_f_t(x, min_ntracks=None, tree_path='trees'):
     if issubclass(type(x), Samples.Sample):
         sample = x
@@ -35,7 +32,7 @@ class FitResult:
     def __init__(self, *args):
         self.fcn, self.fit = args
 
-binning = array('d', [0.02*i for i in xrange(5)] + [0.1, 5]) # JMTBAD keep in sync with Templates.cc
+binning = to_array([0.02*i for i in xrange(5)] + [0.1, 5]) # JMTBAD keep in sync with Templates.cc
 short_binning = binning[:]
 short_binning[-1] = 0.15
 nbins = len(binning) - 1

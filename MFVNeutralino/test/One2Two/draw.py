@@ -352,7 +352,7 @@ for stat_name in ('chi2',): #, 'ks', 'ad', 'cvm'):
     Fh2v.Draw('same')
     ps.save('%s_Fs' % stat_name)
 
-    g = ROOT.TGraph(nshifts, arrit(shifts), arrit(stats))
+    g = ROOT.TGraph(nshifts, to_array(shifts), to_array(stats))
     g.SetTitle('%s;shift;stat' % stat_name)
     g.SetMarkerStyle(20)
     g.SetMarkerSize(1)

@@ -55,9 +55,9 @@ for nuis0_d in d.GetListOfKeys():
     stop1 = 0.04
     delta1_orig = (stop1 - start1)/100
     delta1_draw = (stop1 - start1)/200
-    x = arrit([start1 + delta1_draw * i for i in xrange(200)])
+    x = to_array([start1 + delta1_draw * i for i in xrange(200)])
     for i, thing in enumerate([means, rmses] + vals):
-        g = ROOT.TGraph(n, x, arrit(thing))
+        g = ROOT.TGraph(n, x, to_array(thing))
         g.SetTitle(names[i])
         g.SetMarkerStyle(20)
         g.SetMarkerSize(0.8)

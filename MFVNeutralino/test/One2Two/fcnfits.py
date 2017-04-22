@@ -112,8 +112,8 @@ def fit_dphi(h, is_abs, plot_name=None):
     if plot_name is not None:
         # Draw the chi2 well, and draw little lines indicating our
         # delta chi2 = 1 interval finding.
-        exps = arrit(result.exp for result in results)
-        chi2s = arrit(result.fit.Chi2() for result in results)
+        exps = to_array(result.exp for result in results)
+        chi2s = to_array(result.fit.Chi2() for result in results)
         g = ROOT.TGraph(nsteps, exps, chi2s)
         g.SetMarkerStyle(20)
         g.SetMarkerSize(0.4)
