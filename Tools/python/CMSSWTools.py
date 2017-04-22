@@ -223,78 +223,28 @@ def sample_files(process, sample, dataset, n=-1):
     import JMTucker.Tools.SampleFiles as sf
     sf.set_process(process, sample, dataset, n)
 
-def set_events_to_process_ex(run_events, run=None):
-    if run is not None:
-        for event in run_events:
-            if type(event) != int:
-                raise ValueError('with run=%s, expected run_events to be flat list of event numbers, but encountered item %r' % (run, event))
-        run_events = [(run, event) for event in run_events]
-    lengths = list(set(len(x) for x in run_events))
-    if len(lengths) != 1 or lengths[0] not in (2,3):
-        raise ValueError('expected either list of (run,event) or (run,ls,event) in run_events')
-    return run_events
+def set_events_to_process_ex(events, run=None):
+    if type(run) == int:
+        for event in events:
+            if type(event) != tuple or len(event) != 2:
+                raise ValueError('with run=%s, expected events to be list of (lumi,event) pairs, but encountered item %r' % (run, event))
+        events = [(run,) + event for event in events]
+    lengths = list(set(len(x) for x in events))
+    if len(lengths) != 1 or lengths[0] != 3:
+        raise ValueError('expected either list of (lumi,event) or (run,lumi,event) in events')
+    return events
 
-def set_events_to_process(process, run_events, run=None):
+def set_events_to_process(process, events, run=None):
     '''Set the PoolSource parameter eventsToProcess appropriately,
     given the desired runs/event numbers passed in. If run is None,
-    run_events must be a list of 2-tuples, each entry being a (run,
-    event) pair. Otherwise, the run number is taken from run, and
-    run_events is just a list of event numbers to be paired with run.
-
-    run_events can also be a list of 3-tuples, where the middle entry
-    in each is the lumisection number.
+    run_events must be a list of 3-tuples, each entry being (run, lumi,
+    event). If run is a number, list must be of 2-tuples (lumi, event).
     '''
-    run_events = set_events_to_process_ex(run_events, run)
-    process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[-1],x[0],x[-1]) for x in run_events])
-    if len(run_events[0]) == 3:
-        process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(*[cms.untracked.LuminosityBlockRange(x[0],x[1],x[0],x[1]) for x in run_events])
+    events = set_events_to_process_ex(events, run)
+    process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[1],x[2], x[0],x[1],x[2]) for x in events])
 
 def set_events_to_process_by_filter(process, run_events=None, run=None, run_events_fn='set_events_to_process_by_filter.txt', path_name=None):
-    '''Like the other function, only run specific events specified in
-    run_events. Here we use the EventIdVeto plugin with a temp file
-    listing the events. This works better with splitting among batch
-    jobs where event numbers might be duplicated in different lumis,
-    or the particular combination of events/lumisToProcess
-    specifications result in no events and invalid root files returned
-    in certain jobs.
-
-    The run_events list must include luminosity block (i.e. a list of
-    3-tuples).
-
-    Or if run_events is None, take the list pre-made from run_events_fn (no
-    value checking done).
-    
-    We return the filename for the list of events so that it can be
-    passed to e.g. CRABSubmitter.
-    '''
-    if run_events is not None:
-        run_events = set_events_to_process_ex(run_events, run)
-        if len(run_events[0]) == 3:
-            raise ValueError('run_events must be a list of 3-tuples (run, lumi, event)')
-
-        f = open(run_events_fn, 'wt')
-        for rle in run_events:
-            f.write('(%i,%i,%i),\n' % rle)
-        f.close()
-
-    if hasattr(process, 'EventIdVeto'):
-        raise ValueError('process already has EventIdVeto object')
-    process.EventIdVeto = cms.EDFilter('EventIdVeto',
-                                       use_run = cms.bool(False),
-                                       list_fn = cms.string(run_events_fn)
-                                       )
-    for p in process.paths.keys():
-        getattr(process, p).insert(0, ~process.EventIdVeto)
-
-    if path_name is not None:
-        setattr(process, path_name, cms.Path(~process.EventIdVeto))
-
-    process.maxEvents.input = cms.untracked.int32(-1)
-    for x in 'skipEvents eventsToSkip lumisToSkip eventsToProcess lumisToProcess firstRun firstLuminosityBlock firstEvent'.split():
-        if hasattr(process.source, x):
-            delattr(process.source, x)
-
-    return run_events_fn
+    raise NotImplemented('the other one should work now')
 
 def set_lumis_to_process_from_json(process, json):
     '''What CRAB does when you use lumi_mask.'''
