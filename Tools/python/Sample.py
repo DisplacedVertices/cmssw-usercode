@@ -17,6 +17,9 @@ eu_aaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Eston
 class Dataset(object):
     EVENTS_PER = 25000
     TOTAL_EVENTS = -1
+    FILES_PER = 10
+    TOTAL_FILES = -1
+    SPLIT_BY = 'events'
     JSON = ''
     HLT_NAME = 'HLT'
     DBS_INST = 'global'
@@ -28,6 +31,9 @@ class Dataset(object):
 
         self.events_per = kwargs.get('events_per', self.EVENTS_PER)
         self.total_events = kwargs.get('total_events', self.TOTAL_EVENTS)
+        self.files_per = kwargs.get('files_per', self.FILES_PER)
+        self.total_files = kwargs.get('total_files', self.TOTAL_FILES)
+        self.split_by = kwargs.get('split_by', self.SPLIT_BY)
         self.json = kwargs.get('json', self.JSON)
         self.run_range = kwargs.get('run_range', None)
 
@@ -39,9 +45,14 @@ class Dataset(object):
         self.filenames = kwargs.get('filenames', [])
 
     def job_control(self, conf_obj):
-        conf_obj.splitting = 'EventAwareLumiBased'
-        conf_obj.unitsPerJob = self.events_per
-        conf_obj.totalUnits = self.total_events
+        if self.split_by == 'events':
+            conf_obj.splitting = 'EventAwareLumiBased'
+            conf_obj.unitsPerJob = self.events_per
+            conf_obj.totalUnits = self.total_events
+        else:
+            conf_obj.splitting = 'FileBased'
+            conf_obj.unitsPerJob = self.files_per
+            conf_obj.totalUnits = self.total_files
         if self.json:
             conf_obj.lumiMask = self.json
         if self.run_range:
@@ -114,6 +125,33 @@ class Sample(object):
     @total_events.setter
     def total_events(self, val):
         self.datasets[self.curr_dataset].total_events = val
+
+    @property
+    def files_per(self):
+        return self.datasets[self.curr_dataset].files_per
+
+    @files_per.setter
+    def files_per(self, val):
+        self.datasets[self.curr_dataset].files_per = val
+
+    @property
+    def total_files(self):
+        return self.datasets[self.curr_dataset].total_files
+
+    @total_files.setter
+    def total_files(self, val):
+        self.datasets[self.curr_dataset].total_files = val
+
+    @property
+    def split_by(self):
+        return self.datasets[self.curr_dataset].split_by
+
+    @split_by.setter
+    def split_by(self, val):
+        allowed = ('events', 'files')
+        if val not in allowed:
+            raise ValueError('split_by may only be one of %r' % allowed)
+        self.datasets[self.curr_dataset].split_by = val
 
     @property
     def json(self):
