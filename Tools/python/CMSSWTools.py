@@ -120,6 +120,7 @@ def is_edm_file(fn):
     return os.system('edmFileUtil %s >/dev/null 2>&1' % fn) == 0
 
 def merge_edm_files(out_fn, fns):
+    print 'merging %i edm files to %s' % (len(fns), out_fn)
     cmd = 'cmsRun $CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py argv %s out=%s >%s.mergelog 2>&1' % (' '.join(fns), out_fn, out_fn)
     #print cmd
     return os.system(cmd) == 0
