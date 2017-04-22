@@ -6,7 +6,17 @@ from glob import glob
 from JMTucker.Tools import Samples
 from JMTucker.Tools import SampleFiles
 from JMTucker.Tools.hadd import hadd
+from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files
 from JMTucker.MFVNeutralino import AnalysisConstants
+
+def hadd_or_merge(out_fn, files):
+    is_edm = set([is_edm_file(f) for f in files])
+    if len(is_edm) != 1:
+        raise ValueError('uh you have a mix of edm and non-edm files?')
+    is_edm = is_edm.pop()
+    (merge_edm_files if is_edm else hadd)(out_fn, files)
+    
+####
 
 def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
@@ -35,17 +45,20 @@ def cmd_hadd_data():
         files = glob(ds + '*.root')
         if not files:
             continue
-        files.sort()  
+        files.sort()
+
         if files != [ds + '2015%s.root' % x for  x in 'CD'] + [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')]:
             print 'some files missing for', ds
             pprint(files)
         else:
-            hadd(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
-            hadd(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')])
-            hadd(ds + '2016BthruG.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
-            hadd(ds + '2016BCD.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D')])
-            hadd(ds + '2016EF.root', [ds + '2016%s.root' % x for x in ('E', 'F')])
-            hadd(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
+            hadd_or_merge(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
+            hadd_or_merge(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')])
+            hadd_or_merge(ds + '2016BthruG.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
+            hadd_or_merge(ds + '2016BCD.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D')])
+            hadd_or_merge(ds + '2016EF.root', [ds + '2016%s.root' % x for x in ('E', 'F')])
+            hadd_or_merge(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
+
+cmd_merge_data = cmd_hadd_data
 
 def cmd_hadd_qcd_sum():
     for is2015_s in '_2015', '':
@@ -60,7 +73,9 @@ def cmd_hadd_qcd_sum():
             if not os.path.isfile(a) or not os.path.isfile(b):
                 print 'skipping', x, 'because at least one input file missing'
             else:
-                hadd(base + 'sum%s.root' % is2015_s, [a, b])
+                hadd_or_merge(base + 'sum%s.root' % is2015_s, [a, b])
+
+cmd_merge_qcd_sum = cmd_hadd_qcd_sum
 
 def cmd_merge_background():
     for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016 * AnalysisConstants.scale_factor_2016), ('_2015', -AnalysisConstants.int_lumi_2015 * AnalysisConstants.scale_factor_2015):
