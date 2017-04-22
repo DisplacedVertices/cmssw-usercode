@@ -1,6 +1,7 @@
 import sys, os, glob
 from array import array
 from collections import namedtuple
+from itertools import combinations, permutations
 from math import log, pi
 from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.ROOTTools import *
