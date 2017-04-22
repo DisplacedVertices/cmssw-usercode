@@ -1,15 +1,67 @@
-OverlayTracks: run on all pairs (a,b) of one-vertex events. Take
-vertex tracks from event b (stored in minitrees) and add them to
-vertex or seed tracks (i.e. those that ended up in the vertex + extra)
-from event a (stored in edm files), run the vertexer, and plot whether
-two vertices survived as a function of dvv.
+OverlayTracks: run on all pairs (A,B) of one-vertex events. Take
+vertex tracks from event B--those stored in minitrees--and add them to
+vertex or seed tracks, i.e. those that ended up in the vertex + extra
+from event A--stored in edm files. Then run the vertexer, and plot
+whether two vertices survived as a function of dvv.
 
-Since we vertex in 3D, there are a few models for moving vertex b
-tracks in z. There's also the idea to rotate the tracks in x or p
-space but it doesn't seem to work yet.
 
-Also only works on MC so far--have to understand how to move for the
-beamspot first, maybe we don't care?
+Technical pieces other than the scripts described in Workflow below:
+
+- SkimmedTracks: used elsewhere, but this gets run to make small edm
+  input files that contain only the beamspot and seed tracks for the
+  events we want.
+
+- OverlayVertexTracks: reads all the events+tracks from the minitree
+  in ctor, and then per edm event input, produces a new set of tracks
+  from the vertices or events B.
+
+  Currently this works on MC only--have to understand how to move for
+  the beamspot first, maybe we don't care and just let dvv be what it
+  is? Reduces statistics, but we have a lot... Minitrees are beamspot
+  subtracted
+
+  Since we vertex in 3D, there are a few models for moving vertex B
+  tracks in z: deltapv; to move tracks in z by the difference between
+  PV B and A; deltasv, to move tracks from B to same z as the SV in A;
+  and deltasvgaus, to do the same but put a little gaussian smearing
+  on that. Get the width from MC or data if you dare.
+
+  "rest_of_event" is whether to also take along all seed tracks from
+  event B instead of just those from vertex B.
+
+  There's also the idea to rotate the tracks in x or p space but it
+  crashed last time I (JMT) tried it. Maybe I didn't get the jacobians
+  right...
+
+  Prescales are used to turn down the *billion* pairs that you can
+  have at low dvv to not waste cpu time. (Don't know yet if we
+  sufficiently integrate over all the track/detector space with those
+  billion pairs, though.)
+
+  Doubles for truth about vertex A and B are also put in the event for
+  Histos below.
+
+- Vertexer was modified to take a "second track source" so that you
+  get all seed tracks from event A and the ones OverlayVertexTracks
+  produced. The rest of the vertexing algorithm proceeds normally.
+
+- OverlayVertexHistos uses the output of Vertexer and the truth
+  doubles to make h_dvv/d3d denominator for all pairs, and numerator
+  for:
+  - where Vertexer came back with any two vertices;
+  - ditto, but each passes the min ntracks requirement;
+  - where Vertexer found two vertices in the same spots within our
+    position resolution;
+  - ditto, but require the vertices to have the same number of tracks
+    as before;
+  - ditto, but require the vertices to have at least the same number
+    of tracks as before;
+  - where Vertexer found two vertices with the same tracks, not just
+    by number of tracks.
+  I consider the last one the figure of merit.
+
+- Plotting scripts divide the numerator/denominator and extract
+  h_efficiency.
 
 
 Workflow: "run" below means "read, edit+update as needed, test
@@ -67,6 +119,8 @@ locally, submit, babysit, gather jobs".
 - You'll need to do a couple manual merges of the sum samples:
   e.g. qcdht1000sum, JetHT2016BCD, etc. You can do this with
   utilities.py (merge_data and merge_qcd_sum commands).
+
+- Figure out what z-model width you want with deltaz.py.
 
 - Update and run overlay.py. Print the help msg with
 
