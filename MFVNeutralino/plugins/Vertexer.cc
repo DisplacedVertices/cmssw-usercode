@@ -120,6 +120,7 @@ private:
   }
 
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const bool use_primary_vertices;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const double min_jet_pt_for_ht;
   const bool disregard_event;
@@ -357,6 +358,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     av_reco(new ConfigurableVertexReconstructor(cfg.getParameter<edm::ParameterSet>("avr_params"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    use_primary_vertices(cfg.getParameter<edm::InputTag>("primary_vertices_src").label() != ""),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     min_jet_pt_for_ht(cfg.getParameter<double>("min_jet_pt_for_ht")),
     disregard_event(cfg.getParameter<bool>("disregard_event")),
@@ -422,6 +424,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
   if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
+
+  if ((use_non_pv_tracks || use_non_pvs_tracks) && !use_primary_vertices)
+    throw cms::Exception("MFVVertexer", "can't use_non_pv_tracks || use_non_pvs_tracks if !use_primary_vertices");
 
   edm::Service<edm::RandomNumberGenerator> rng;
   if ((jumble_tracks || remove_tracks_frac > 0) && !rng.isAvailable())
@@ -591,10 +596,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const double bs_z = beamspot->position().z();
 
   edm::Handle<reco::VertexCollection> primary_vertices;
-  event.getByToken(primary_vertices_token, primary_vertices);
   const reco::Vertex* primary_vertex = 0;
-  if (primary_vertices->size())
-    primary_vertex = &primary_vertices->at(0);
+  if (use_primary_vertices) {
+    event.getByToken(primary_vertices_token, primary_vertices);
+    if (primary_vertices->size())
+      primary_vertex = &primary_vertices->at(0);
+  }
 
   int njets = 0;
   double jet_ht = 0;
@@ -733,7 +740,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     if (verbose) {
       printf("track %5lu: pt: %7.3f dxy: %7.3f nhits %3i ", i, tc.pt, tc.dxybs, tc.nhits);
       if (use)
-        printf(" selected for seed! (#%lu)", seed_tracks.size()-1);
+        printf(" selected for seed(false)! (#%lu)", seed_tracks.size()-1);
       printf("\n");
     }        
 
@@ -828,10 +835,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   std::vector<bool> seed_use(ntk, 0);
+  if (verbose) printf("seed_use:");
   for (size_t itk = 0; itk < ntk; ++itk) {
     const track_cuts itk_tc(this, seed_tracks[itk].track(), *beamspot, primary_vertex, *tt_builder);
     seed_use[itk] = no_track_cuts || seed_track_is_second[itk] || itk_tc.use(true);
+    if (verbose && seed_use[itk]) printf(" %lu", itk);
   }
+  if (verbose) printf("\n");
 
   for (size_t itk = 0; itk < ntk-1; ++itk) {
     if (!seed_use[itk])
