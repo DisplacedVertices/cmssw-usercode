@@ -77,6 +77,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submitmerge' in sys.argv
     for sample in samples:
         sample.datasets[dataset].files_per = 100000
 
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('Pick1VtxV14_merge',
                          pset_template_fn = '$CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py',
                          ex = year,
