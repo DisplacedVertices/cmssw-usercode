@@ -31,13 +31,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sample.files_per = files_per[sample.name]
         sample.json = 'json.%s' % sample.name
 
-    def vetolist_fn(sample):
-        fn = 'vetolist.%s.gz' % sample.name
+    def eventlist_fn(sample):
+        fn = 'eventlist.%s.gz' % sample.name
         assert os.path.isfile(fn)
         return fn
 
     def pset_modifier(sample):
-        l = gzip.GzipFile(vetolist_fn(sample)).read().replace('\n', ' ')
+        l = gzip.GzipFile(eventlist_fn(sample)).read().replace('\n', ' ')
         r = ', run=1' if sample.is_mc else ''
         to_add = ['set_events_to_process(process, [%s]%s)' % (l, r)]
         return to_add, []
@@ -51,19 +51,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
-
-'''
-for x in vetolist.*.gz; do
-z=${x/vetolist./}
-sample=${z/.gz/}
-nsel=$(zcat $x | wl)
-nevt=$(samples nevents $sample main)
-nfile=$(samples file $sample main 10000000 | grep root | wl)
-filesper=$(python -c "from math import ceil; nevtarget=100; filesmax=100; print min(ceil(${nfile}*nevtarget/${nsel}),filesmax)")
-njobs=$(( (nfile+filesper-1)/filesper ))
-echo $sample $nsel $nevt $nfile $filesper $njobs
-done
-'''
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submitmerge' in sys.argv:
     from JMTucker.MFVNeutralino.Year import year
@@ -86,3 +73,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submitmerge' in sys.argv
                          stageout_files = 'all'
                          )
     cs.submit_all(samples)
+
+
+'''
+# little zsh (bash?) for-loop to help figure out the job splitting
+for x in eventlist.*.gz; do
+z=${x/eventlist./}
+sample=${z/.gz/}
+nsel=$(zcat $x | wc -l)
+nevt=$(samples nevents $sample main)
+nfile=$(samples file $sample main 10000000 | grep root | wc -l)
+filesper=$(python -c "from math import ceil; nevtarget=100; filesmax=100; print min(ceil(${nfile}*nevtarget/${nsel}),filesmax)")
+njobs=$(( (nfile+filesper-1)/filesper ))
+echo $sample $nsel $nevt $nfile $filesper $njobs
+done
+'''

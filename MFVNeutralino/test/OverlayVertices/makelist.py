@@ -66,10 +66,10 @@ def dosamples():
         print sample.name
         lists = [getlist(os.path.join(tree_path, '%s.root' % sample.name), p) for p in paths]
         l = sorted(set(sum(lists, [])))
-        writelist(l, 'vetolist.%s' % sample.name, True)
+        writelist(l, 'eventlist.%s' % sample.name, True)
         writejson(l, 'json.%s'     % sample.name)
 
 #writelist(sum([getlist('/uscms_data/d2/tucker/crab_dirs/MinitreeV12/qcdht1000ext.root', p) for p in 'tre33', 'tre34', 'tre44', 'mfvMiniTree'], []), 'veto_temp', True)
 #makelist('/uscms_data/d2/tucker/crab_dirs/MinitreeV12/ttbar.root', 'veto_ttbar_temp', True)
-#dosamples()
+dosamples()
 printforsubmit()
