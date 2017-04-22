@@ -10,7 +10,7 @@ allowed_samples = Samples.ttbar_samples + Samples.qcd_samples_sum + Samples.ttba
 
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
-parser.add_argument('+sample', help='which sample to use', choices=[s.name for s in allowed_samples], default='ttbar')
+parser.add_argument('+sample', help='which sample to use', choices=[s.name for s in allowed_samples], default='qcdht1500sum')
 parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3, choices=[3,4,5])
 parser.add_argument('+rest-of-event', action='store_true', help='whether to use the rest of the tracks in the edm event')
 parser.add_argument('+z-model', help='z model', choices=['deltasv', 'deltasvgaus', 'deltapv', 'none'], default='deltasv')
@@ -20,6 +20,7 @@ parser.add_argument('+found-dist', type=float, help='3D distance for matching by
 parser.add_argument('+rotate-x', action='store_true', help='azimuthally rotate x of tracks (around beam line)')
 parser.add_argument('+rotate-p', action='store_true', help='azimuthally rotate p of tracks')
 parser.add_argument('+is-data', action='store_true', help='whether input is data / MC')
+parser.add_argument('+is-H', action='store_true', help='if data, whether input is the H dataset')
 parser.add_argument('+batch', action='store_true', help='run in batch mode')
 parser.add_argument('+debug', action='store_true', help='turn on debug prints')
 parser.add_argument('+out-fn', help='override output fn')
@@ -32,18 +33,18 @@ args = parser.parse_args()
 if args.out_fn is None:
     args.out_fn = 'overlay_%i.root' % args.which_event
 if args.minitree_path is None:
-    args.minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MinitreeV12'
+    args.minitree_path = 'root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick'
 if args.minitree_fn is None:
     args.minitree_fn = '%s/%s.root' % (args.minitree_path, args.sample)
 if args.minitree_treepath is None:
-    args.minitree_treepath = 'tre%i%i/t' % (args.ntracks, args.ntracks) if args.ntracks != 5 else 'mfvMiniTree/t'
+    args.minitree_treepath = 'mfvMiniTreeNtk%i/t' % args.ntracks if args.ntracks != 5 else 'mfvMiniTree/t'
 
 args_printer('overlay args', args)
 
 ####
 
 def files_for_sample(s):
-    return ['root://cmseos.fnal.gov/' + x for x in SampleFiles.get(s, 'pick1vtxv1')[1]]
+    return ['root://cmsxrootd.fnal.gov/' + x for x in SampleFiles.get(s, 'pick1vtxv14')[1]]
 
 if 'qcd' in args.sample:
     assert 'sum' in args.sample
@@ -56,23 +57,23 @@ else:
 
 process = basic_process('Overlay')
 process.source.fileNames = files
-process.source.inputCommands = cms.untracked.vstring('keep *', 'drop edmTriggerResults_TriggerResults__PickByVeto', 'drop edmTriggerResults_TriggerResults__BasicAnalyzer') # I changed the process name in the middle of pick1vtxv1
 process.maxEvents.input = args.max_events
 want_summary(process, args.debug)
 silence_messages(process, ['TwoTrackMinimumDistanceHelixLine'])
 report_every(process, 1 if args.debug else 1000000)
-geometry_etc(process, which_global_tag(not args.is_data, year))
+geometry_etc(process, which_global_tag(not args.is_data, year, args.is_H))
 tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices':      12179 + args.which_event,
                          'mfvOverlayTracks': 12180 + args.which_event})
 
-process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('JMTucker.MFVNeutralino.Vertexer_cfi')
-
 process.mfvVertices.histos = False
 process.mfvVertices.verbose = args.debug
+process.mfvVertices.track_src = 'mfvSkimmedTracks'
+process.mfvVertices.primary_vertices_src = '' #firstGoodPrimaryVertex
 process.mfvVertices.use_second_tracks = True
 process.mfvVertices.second_track_src = 'mfvOverlayTracks'
+
 if not args.rest_of_event:
     process.mfvVertices.disregard_event = True
 
@@ -99,4 +100,4 @@ process.mfvOverlayHistos = cms.EDAnalyzer('MFVOverlayVertexHistos',
                                           debug = cms.bool(args.debug),
                                           )
 
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvOverlayTracks * process.mfvVertices * process.mfvOverlayHistos)
+process.p = cms.Path(process.mfvOverlayTracks * process.mfvVertices * process.mfvOverlayHistos)
