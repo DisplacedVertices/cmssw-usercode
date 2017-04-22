@@ -1,4 +1,4 @@
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 path = 'crab/MiniTreeV20'
 

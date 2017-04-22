@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 ps = plot_saver('plots/hme', size=(600,600))
 
 nec = 5000 # ROOT.TColor.GetNumberOfColors() + 1

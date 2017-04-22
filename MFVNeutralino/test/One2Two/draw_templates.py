@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 fn_pattern = 'trees/mfv*root'
 plot_dir = 'plots/o2t_signal_templates_zzz'

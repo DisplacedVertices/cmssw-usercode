@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 out_dir = 'combine_new'
 force_overwrite = 'force' in sys.argv

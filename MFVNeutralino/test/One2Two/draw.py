@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 input_fn = [x for x in sys.argv if x.endswith('.root') and os.path.isfile(x)][0]
 plot_path = os.path.join('plots/one2two', os.path.basename(input_fn).replace('.root', ''))
 ps = plot_saver(plot_path, size=(600,600))

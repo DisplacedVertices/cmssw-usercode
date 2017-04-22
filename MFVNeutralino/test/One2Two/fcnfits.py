@@ -8,7 +8,7 @@ foreach ntk ( 5 6 7 8 )
 end
 '''
 
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 sample_name = None
 samples = Samples.from_argv([Samples.qcdht1000])

@@ -1,4 +1,4 @@
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 ROOT.gStyle.SetOptStat(2211)
 
 int_lumi = 39501.

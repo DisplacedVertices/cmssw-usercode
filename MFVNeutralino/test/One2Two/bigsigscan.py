@@ -172,7 +172,7 @@ tau2range = dict(tau2range)
 print 'last num =', num
 
 def make_templates(out_fn, in_fn):
-    from base import ROOT, make_h
+    from JMTucker.MFVNeutralino.MiniTreeBase import ROOT, make_h
 
     num2npass = {}
     num2npass600 = {}
