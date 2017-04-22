@@ -64,3 +64,24 @@ njobs=$(( (nfile+filesper-1)/filesper ))
 echo $sample $nsel $nevt $nfile $filesper $njobs
 done
 '''
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submitmerge' in sys.argv:
+    from JMTucker.MFVNeutralino.Year import year
+    import JMTucker.Tools.Samples as Samples 
+    if year == 2015:
+        samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
+    elif year == 2016:
+        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+
+    dataset = 'pick1vtxv14'
+    for sample in samples:
+        sample.datasets[dataset].files_per = 100000
+
+    cs = CondorSubmitter('Pick1VtxV14_merge',
+                         pset_template_fn = '$CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py',
+                         ex = year,
+                         dataset = dataset,
+                         publish_name = 'pick1vtxv14_merge',
+                         stageout_files = 'all'
+                         )
+    cs.submit_all(samples)
