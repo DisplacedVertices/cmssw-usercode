@@ -25,9 +25,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2016:
         samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
+    files_per = {'JetHT2015C': 16, 'JetHT2015D': 55, 'JetHT2016B3': 37, 'JetHT2016C': 34, 'JetHT2016D': 31, 'JetHT2016E': 58, 'JetHT2016F': 56, 'JetHT2016G': 40, 'JetHT2016H2': 37, 'JetHT2016H3': 36, 'qcdht0500': 100, 'qcdht0500_2015': 100, 'qcdht0500ext': 100, 'qcdht0500ext_2015': 100, 'qcdht0700': 100, 'qcdht0700_2015': 100, 'qcdht0700ext': 100, 'qcdht0700ext_2015': 100, 'qcdht1000': 6, 'qcdht1000_2015': 6, 'qcdht1000ext': 5, 'qcdht1000ext_2015': 6, 'qcdht1500': 3, 'qcdht1500_2015': 3, 'qcdht1500ext': 3, 'qcdht1500ext_2015': 3, 'qcdht2000': 2, 'qcdht2000_2015': 3, 'qcdht2000ext': 2, 'qcdht2000ext_2015': 2, 'ttbar': 36, 'ttbar_2015': 26}
     for sample in samples:
-        sample.files_per = 50
         sample.split_by = 'files'
+        sample.files_per = files_per[sample.name]
         sample.json = 'json.%s' % sample.name
 
     def vetolist_fn(sample):
@@ -50,3 +51,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
+
+'''
+for x in vetolist.*.gz; do
+z=${x/vetolist./}
+sample=${z/.gz/}
+nsel=$(zcat $x | wl)
+nevt=$(samples nevents $sample main)
+nfile=$(samples file $sample main 10000000 | grep root | wl)
+filesper=$(python -c "from math import ceil; nevtarget=100; filesmax=100; print min(ceil(${nfile}*nevtarget/${nsel}),filesmax)")
+njobs=$(( (nfile+filesper-1)/filesper ))
+echo $sample $nsel $nevt $nfile $filesper $njobs
+done
+'''
