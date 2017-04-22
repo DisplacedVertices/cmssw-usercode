@@ -116,6 +116,12 @@ def glob_store(pattern):
         raise ValueError('not at fermilab?')
     return [x.replace(magic, '/store') for x in glob.glob(pattern.replace('/store', magic))]
 
+def is_edm_file(fn):
+    return os.system('edmFileUtil %s >/dev/null 2>&1' % fn) == 0
+
+def merge_edm_files(out_fn, fns):
+    return os.system('cmsRun $CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py %s out=%s >%s.mergelog 2>&1' % (' '.join(fns), out_fn, out_fn)) == 0
+
 def make_tarball(fn, include_bin=True, include_python=False, include_interface=False, verbose=False):
     '''Make a tarball for the current work area. Paths in the tarball
     are relative to $CMSSW_BASE.
