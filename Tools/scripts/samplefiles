@@ -7,5 +7,5 @@ if '-i' in argv:
     interactive = '-i'
     argv.remove('-i')
 cmd = 'python %s $CMSSW_BASE/src/JMTucker/Tools/python/SampleFiles.py ' % interactive + ' '.join(argv)
-print cmd
+#print cmd
 os.system(cmd)
