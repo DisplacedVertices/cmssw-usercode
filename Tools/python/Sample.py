@@ -501,6 +501,17 @@ def main(samples_registry):
         for x in sample.filenames[:typed_from_argv(int, 5)]:
             print x
 
+    elif 'nevents' in sys.argv:
+        samples = samples_registry.from_argv(raise_if_none=True)
+        if len(samples) != 1:
+            raise ValueError('must have exactly one sample in argv')
+        sample = samples[0]
+        dataset = sys.argv[sys.argv.index(sample.name)+1]
+        if not sample.has_dataset(dataset):
+            raise KeyError('no dataset %s in %s' % (dataset, sample))
+        sample.set_curr_dataset(dataset)
+        print DBS.numevents_in_dataset(sample.dataset)
+
     elif 'site' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         dataset = samples_registry.datasets_from_argv()
