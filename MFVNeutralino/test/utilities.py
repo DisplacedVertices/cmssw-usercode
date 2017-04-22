@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os
+from pprint import pprint
 from glob import glob
 from JMTucker.Tools import Samples
 from JMTucker.Tools import SampleFiles
@@ -37,8 +38,10 @@ def cmd_hadd_data():
         files.sort()  
         if files != [ds + '2015%s.root' % x for  x in 'CD'] + [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')]:
             print 'some files missing for', ds
+            pprint(files)
         else:
             hadd(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
+            hadd(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')])
             hadd(ds + '2016BthruG.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
             hadd(ds + '2016BCD.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D')])
             hadd(ds + '2016EF.root', [ds + '2016%s.root' % x for x in ('E', 'F')])
