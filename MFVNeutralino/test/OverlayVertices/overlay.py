@@ -12,6 +12,7 @@ parser, args_printer = friendly_argparse(description='Overlay tracks from pairs 
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
 parser.add_argument('+sample', help='which sample to use', choices=[s.name for s in allowed_samples], default='qcdht1500sum')
 parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3, choices=[3,4,5])
+parser.add_argument('+no-prescales', action='store_false', dest='prescales', help='whether to use prescales')
 parser.add_argument('+no-rest-of-event', action='store_false', dest='rest_of_event', help='whether to use the rest of the tracks in the edm event')
 parser.add_argument('+z-model', help='z model', choices=['deltasv', 'deltasvgaus', 'deltapv', 'none'], default='deltasvgaus')
 parser.add_argument('+z-width', type=float, help='width of gaus used in z model (cm)', default=99)
@@ -74,6 +75,8 @@ if not args.rest_of_event:
 process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         minitree_fn = cms.string(args.minitree_fn),
                                         minitree_treepath = cms.string(args.minitree_treepath),
+                                        sample = cms.string(args.sample),
+                                        ntracks = cms.int32(args.ntracks),
                                         which_event = cms.int32(args.which_event),
                                         rotate_x = cms.bool(args.rotate_x),
                                         rotate_p = cms.bool(args.rotate_p),
@@ -81,6 +84,7 @@ process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         z_width = cms.double(args.z_width),
                                         rest_of_event = cms.bool(args.rest_of_event),
                                         only_other_tracks = cms.bool(args.rest_of_event),
+                                        use_prescales = cms.bool(args.prescales),
                                         verbose = cms.bool(args.debug),
                                         )
 

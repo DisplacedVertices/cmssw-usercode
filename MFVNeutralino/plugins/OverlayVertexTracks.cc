@@ -1,4 +1,5 @@
 #include "TFile.h"
+#include "TH1.h"
 #include "TTree.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGauss.h"
@@ -18,6 +19,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 
 typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
 
@@ -36,6 +38,8 @@ private:
 
   const std::string minitree_fn;
   const std::string minitree_treepath;
+  const std::string sample;
+  const int ntracks;
   const int which_event;
   const bool rotate_x;
   const bool rotate_p;
@@ -44,12 +48,15 @@ private:
   const double z_width;
   const bool rest_of_event;
   const bool only_other_tracks;
+  const bool use_prescales;
   const bool verbose;
 
   enum { z_none, z_deltasv, z_deltapv, z_deltasvgaus };
 
   std::vector<mfv::MiniNtuple*> minitree_events;
   std::map<RLE, int> event_index;
+
+  TH1D* h_prescales;
 };
 
 namespace {
@@ -62,6 +69,8 @@ namespace {
 MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg) 
   : minitree_fn(cfg.getParameter<std::string>("minitree_fn")),
     minitree_treepath(cfg.getParameter<std::string>("minitree_treepath")),
+    sample(cfg.getParameter<std::string>("sample")),
+    ntracks(cfg.getParameter<int>("ntracks")),
     which_event(cfg.getParameter<int>("which_event")),
     rotate_x(cfg.getParameter<bool>("rotate_x")),
     rotate_p(cfg.getParameter<bool>("rotate_p")),
@@ -74,7 +83,10 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     z_width(cfg.getParameter<double>("z_width")),
     rest_of_event(cfg.getParameter<bool>("rest_of_event")),
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
-    verbose(cfg.getParameter<bool>("verbose"))
+    use_prescales(cfg.getParameter<bool>("use_prescales")),
+    verbose(cfg.getParameter<bool>("verbose")),
+
+    h_prescales(0)
 {
   edm::Service<edm::RandomNumberGenerator> rng;
   if (z_model == z_deltasvgaus && !rng.isAvailable())
@@ -122,6 +134,18 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     }
   }
 
+  if (use_prescales) {
+    TFile* f_prescales = TFile::Open("prescales.root");
+    if (!f_prescales || !f_prescales->IsOpen())
+      throw cms::Exception("MFVOverlayVertexTracks", "bad prescales file");
+    TString prescales_path; prescales_path.Form("ntk%i/%s-%s_prescales", ntracks, sample.c_str(), rest_of_event ? "P" : "C");
+    if (verbose) std::cout << "getting prescales from prescales.root/" << prescales_path << "\n";
+    h_prescales = (TH1D*)f_prescales->Get(prescales_path)->Clone("h_prescales");
+    h_prescales->SetDirectory(0);
+    f_prescales->Close();
+    delete f_prescales;
+  }
+    
   produces<reco::TrackCollection>();
   produces<std::vector<double>>();
 }
@@ -129,13 +153,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
 MFVOverlayVertexTracks::~MFVOverlayVertexTracks() {
   for (mfv::MiniNtuple* nt : minitree_events)
     delete nt;
-}
-
-namespace {
-  template <typename T>
-  int sgn(T val) {
-    return (T(0) < val) - (val < T(0));
-  }
+  delete h_prescales;
 }
 
 reco::Track MFVOverlayVertexTracks::copy_track(int i, mfv::MiniNtuple* nt) {
@@ -169,7 +187,7 @@ void MFVOverlayVertexTracks::update_min_track_vertex_dist(const TransientTrackBu
 }
 
 bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
-  assert(!event.isRealData()); // JMTBAD lots of reasons this dosen't work on data yet
+  assert(!event.isRealData()); // JMTBAD lots of reasons this dosen't work on data yet, beamspot being the best one
 
   std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
   std::auto_ptr<std::vector<double>> truth(new std::vector<double>(13)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, min_track_vertex_dist, min_track_vertex_sig
@@ -260,6 +278,20 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
   if (verbose) std::cout << "ntk0 " << std::setw(2) << +nt0->ntk0 << " v0 " << nt0->x0 << ", " << nt0->y0 << ", " << nt0->z0 << "\n"
                          << "ntk1 " << std::setw(2) << +nt1->ntk0 << " v1 " << nt1->x0 << ", " << nt1->y0 << ", " << nt1->z0 << "\n"
                          << "       " << " v1_0 " << nt1_0->x0 << ", " << nt1_0->y0 << ", " << nt1_0->z0 << "\n";
+
+  if (use_prescales) {
+    const double dvv_true = mag(nt0->x0 - nt1_0->x0, nt0->y0 - nt1_0->y0);
+    const double prescale = h_prescales->GetBinContent(h_prescales->FindBin(dvv_true));
+    if (verbose) std::cout << "using prescales: dvv true = " << dvv_true << ", prescale " << prescale << "\n";
+    if (prescale > 1) {
+      edm::Service<edm::RandomNumberGenerator> rng;
+      const double u = rng->getEngine(event.streamID()).flat();
+      const bool killed = u > 1/prescale;
+      if (verbose) std::cout << "  draw " << u << " killed? " << killed << "\n";
+      if (killed)
+        return false;
+    }
+  }
 
   (*truth)[0]  = nt0->ntk0;
   (*truth)[1]  = nt0->x0;
