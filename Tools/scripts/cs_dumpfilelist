@@ -2,7 +2,10 @@
 
 import os, sys
 from pprint import pprint
+from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.CondorTools import cs_dirs_from_argv
+
+edit = bool_from_argv('edit')
 
 wds = cs_dirs_from_argv()
 if not wds:
@@ -16,3 +19,11 @@ for wd in wds:
         pprint(_l, f)
         f.write('\ndef get(i): return _l[i]\n')
 
+    if edit:
+        os.system('emacs -nw cs_filelist.py cs_filelist2.py')
+        if raw_input('replace? ') == 'y':
+            bak_fn = 'cs_filelist.py.bak'
+            while os.path.isfile(bak_fn):
+                bak_fn += '.bak'
+            os.rename('cs_filelist.py', bak_fn)
+            os.rename('cs_filelist2.py', 'cs_filelist.py')
