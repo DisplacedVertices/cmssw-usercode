@@ -363,6 +363,7 @@ _add_ds("ntuplev13p1", {
 
 
 _add_ds("ntuplev14", {
+'JetHT2015C': _fromnum0("/store/user/tucker/JetHT/NtupleV14_2015_JetHT2015C/170421_165150", 4),
 'JetHT2015D': (667, ['/store/user/tucker/JetHT/NtupleV14_2015_JetHT2015D/170415_082133/0000/ntuple_%i.root' % i for i in [24, 146, 409]] + ['/store/user/tucker/JetHT/NtupleV14_2015_JetHT2015D/170415_075656/0000/ntuple_%i.root' % i for i in chain(xrange(24), xrange(25,146), xrange(147,409), xrange(410,667))]),
 'JetHT2016B3': _fromnum1("/store/user/tucker/JetHT/NtupleV14_2016/170415_024305", 2544),
 'JetHT2016C': _fromnum1("/store/user/tucker/JetHT/NtupleV14_2016/170415_024336", 911),
