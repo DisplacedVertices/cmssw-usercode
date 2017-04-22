@@ -4,6 +4,8 @@ from FWCore.PythonUtilities.LumiList import LumiList
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Samples import *
 
+tree_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14_forpick_Jendontlook'
+
 def is_data_fn(fn):
     return 'JetHT' in fn
 
@@ -45,12 +47,11 @@ def writejson(l, out_fn):
     LumiList(runsAndLumis=rll).writeJSON(out_fn)
 
 def printforsubmit():
-    root = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12'
     samples = data_samples + data_samples_2015 + ttbar_samples + ttbar_samples_2015 + qcd_samples_sum + qcd_samples_sum_2015
 
     for sample in samples:
-        fn = os.path.join(root, '%s.root' % sample.name)
-        for ntracks, path in (3,'tre33'), (4,'tre44'), (5,'mfvMiniTree'):
+        fn = os.path.join(tree_path, '%s.root' % sample.name)
+        for ntracks, path in (3,'mfvMiniTreeNtk3'), (4,'mfvMiniTreeNtk4'), (5,'mfvMiniTree'):
             if is_data_fn(sample.name) and ntracks == 5:
                 continue
             f, t = gettree(fn, path)
@@ -58,13 +59,12 @@ def printforsubmit():
             print "(('%s', %i), %i)," % (sample.name, ntracks, n)
 
 def dosamples():
-    root = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12'
-    paths = 'tre33', 'tre34', 'tre44', 'mfvMiniTree'
+    paths = 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTreeNtk4', 'mfvMiniTree'
     samples = data_samples + data_samples_2015 + ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015
 
     for sample in samples:
         print sample.name
-        lists = [getlist(os.path.join(root, '%s.root' % sample.name), p) for p in paths]
+        lists = [getlist(os.path.join(tree_path, '%s.root' % sample.name), p) for p in paths]
         l = sorted(set(sum(lists, [])))
         writelist(l, 'vetolist.%s' % sample.name, True)
         writejson(l, 'json.%s'     % sample.name)
@@ -73,4 +73,3 @@ def dosamples():
 #makelist('/uscms_data/d2/tucker/crab_dirs/MinitreeV12/ttbar.root', 'veto_ttbar_temp', True)
 #dosamples()
 printforsubmit()
-
