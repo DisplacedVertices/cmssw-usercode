@@ -86,6 +86,12 @@ namespace mfv {
 
   //////////////////////////////////////////////////////////////////////////////
 
+  struct Run2Template : public Template {
+    Run2Template(int i_, TH1D* h_);
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+
   typedef std::vector<Template*> Templates;
 
   //////////////////////////////////////////////////////////////////////////////
@@ -111,7 +117,7 @@ namespace mfv {
     int i_Q(const std::vector<double>& pars) const;
     Template* get_Q(const std::vector<double>& pars) const;
     void interpolate(const std::vector<double>& pars, std::vector<double>* a_p=0);
-    void interpolate(double par0, double par1) { interpolate(std::vector<double>({par0,par1})); }
+    void interpolate(double, double) { interpolate(std::vector<double>()); }
   };
 }
 

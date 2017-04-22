@@ -807,7 +807,7 @@ namespace mfv {
     }
     else {
       std::vector<double> a(fit::n_bins+2, 0.);
-      fit::interp->interpolate(nuis_pars, &a);
+      fit::interp->interpolate(std::vector<double>(), &a);
       if (print_level > 0) printf("interpolate from nuispars\n");
       for (int ibin = 0; ibin <= fit::n_bins+1; ++ibin) {
         if (print_level > 0) printf("%i %f\n", ibin, a[ibin]);
@@ -1345,9 +1345,9 @@ namespace mfv {
     fit::calc_lnL_offset();
 
     if (bkg_gaussians_all)
-      fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
+      fit::eta_bkg = { -1, 0.09, 0.15, 0.19, -1 };
     else if (bkg_gaussians) 
-      fit::eta_bkg = { -1, 1e-3, 1e-3, 3.8, 1.4, 0.1, 0.1, -1 };
+      fit::eta_bkg = { -1, 0.09, 0.15, 0.19, -1 };
       //fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
       //fit::eta_bkg = { -1, 1, 1, 1, 3, 1, 1, -1 };
     else {
@@ -1464,7 +1464,7 @@ namespace mfv {
     print_level = -1;
     fit::extra_prints = 0;
 
-    if (save_plots) draw_likelihood(t_obs_0);
+    //    if (save_plots) draw_likelihood(t_obs_0);
     //scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
 

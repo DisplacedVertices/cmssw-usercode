@@ -10,6 +10,7 @@
 #include "ClearedJetsTemplater.h"
 #include "PhiShiftTemplater.h"
 #include "SimpleClearingTemplater.h"
+#include "Run2Templater.h"
 #include "Fitter.h"
 
 int main() {
@@ -21,11 +22,12 @@ int main() {
   const std::string out_fn = env.get_string("out_fn", "mfvo2t.root");
   const int seed = env.get_int("seed", 0);
   const int ntoys = env.get_int("ntoys", 1);
-  const std::string templates_kind = env.get_string_lower("templates_kind", "clearedjets");
+  const std::string templates_kind = env.get_string_lower("templates_kind", "run2");
   const bool templates_save_plots = env.get_bool("templates_save_plots", true);
   const bool templates_phishift = templates_kind == "phishift";
   const bool templates_clearedjets = templates_kind == "clearedjets";
   const bool templates_simpleclear = templates_kind == "simpleclear";
+  const bool templates_run2 = templates_kind == "run2";
   const int sig_from_file_num = env.get_int("sig_from_file_num", 0);
   const std::string sig_from_file_fn = env.get_string("sig_from_file_fn", "bigsigscan.root");
   const bool run_templater = env.get_bool("run_templater", true);
@@ -35,8 +37,8 @@ int main() {
   const int restore_state_num = env.get_int("restore_state_num", -1);
   const std::string restore_state_fn = env.get_string("restore_state_fn", "none");
 
-  if (!(templates_phishift || templates_clearedjets || templates_simpleclear))
-    jmt::vthrow("templates config must be one of \"phishift\", \"clearedjets\", \"simpleclear\"");
+  if (!(templates_phishift || templates_clearedjets || templates_simpleclear || templates_run2))
+    jmt::vthrow("templates config must be one of \"phishift\", \"clearedjets\", \"simpleclear\", \"run2\"");
 
   printf("mfvo2t config:\n");
   printf("trees from %s\n", tree_path.c_str());
@@ -44,7 +46,7 @@ int main() {
   printf("seed: %i\n", seed);
   printf("ntoys: %i\n", ntoys);
   printf("save plots in templater: %i\n", templates_save_plots);
-  printf("template kind: %s (phishift? %i clearedjets? %i simpleclear? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets, templates_simpleclear);
+  printf("template kind: %s (phishift? %i clearedjets? %i simpleclear? %i run2? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets, templates_simpleclear, templates_run2);
   printf("template binning: (%i, %f, %f)\n", mfv::Template::nbins, mfv::Template::min_val, mfv::Template::max_val);
   printf("process data from %s? %s\n", data_fn.c_str(), (process_data ? "YES!" : "no"));
 
@@ -77,6 +79,8 @@ int main() {
     ter = new mfv::ClearedJetsTemplater("", out_f, rand);
   else if (templates_simpleclear)
     ter = new mfv::SimpleClearingTemplater("", out_f, rand);
+  else if (templates_run2)
+    ter = new mfv::Run2Templater("", out_f, rand);
   ter->save_plots = templates_save_plots;
 
   mfv::Fitter* fitter = new mfv::Fitter("", out_f, rand);

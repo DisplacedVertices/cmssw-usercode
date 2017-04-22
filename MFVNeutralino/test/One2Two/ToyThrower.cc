@@ -83,13 +83,7 @@ namespace mfv {
   }
 
   void ToyThrower::book_hists() {
-    std::vector<double> bins;
-    for (int j = 0; j < 20; ++j)
-      bins.push_back(j*0.002);
-    for (double b : {0.04, 0.0425, 0.045, 0.05, 0.055, 0.06, 0.07, 0.085, 0.1, 0.2, 0.4, 2.5})
-      bins.push_back(b);
-    h_dbv = new TH1D("h_dbv", "", bins.size()-1, &bins[0]);
-
+    h_dbv = new TH1D("h_dbv", "", 995, 0.01, 2.);
     h_dvv = new TH1D("h_dvv", "", Template::nbins, Template::min_val, Template::max_val);
   }
 
@@ -339,7 +333,12 @@ namespace mfv {
       b_sum_bkg_2v = n2v_from_histogram > 0 ? n2v_from_histogram : b_sum_bkg_2v;
       toy_2v.clear();
       for (int i = 0; i < b_sum_bkg_2v; ++i) {
-        toy_2v.push_back(VertexPair(VertexSimple(0, 0), VertexSimple(h_dvv->GetRandom(), 0)));
+        double dvv = 0;
+        const double r = rand->Rndm();
+        if      (r < 0.77)      dvv = 0.02;
+        else if (r < 0.77+0.20) dvv = 0.055;
+        else                    dvv = 0.1;
+        toy_2v.push_back(VertexPair(VertexSimple(0, 0), VertexSimple(dvv, 0)));
       }
     }
 

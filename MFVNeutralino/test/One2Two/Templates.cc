@@ -20,19 +20,8 @@ namespace mfv {
   }
 
   std::vector<double> Template::binning(const bool shorten_last) {
-    std::vector<double> bins;
-    for (int i = 0; i < 6; ++i)
-      bins.push_back(i * 0.02);
-    if (fine_binning) {
-      if (shorten_last)
-        jmt::vthrow("cannot shorten_last when doing fine_binning");
-      bins.push_back(0.2);
-      bins.push_back(0.4);
-      bins.push_back(0.8);
-      bins.push_back(1.6);
-      bins.push_back(3.2);
-    }
-    bins.push_back(shorten_last ? 0.15 : 5);
+    std::vector<double> bins = {0, 0.04, 0.07};
+    bins.push_back(shorten_last ? 0.15 : 4);
     return bins;
   }
 
@@ -174,6 +163,13 @@ namespace mfv {
 
   //////////////////////////////////////////////////////////////////////////////
 
+  Run2Template::Run2Template(int i_, TH1D* h_)
+    : Template(i_, h_)
+  {
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
   int TemplateInterpolator::extra_prints = 0;
 
   TemplateInterpolator::TemplateInterpolator(Templates* templates_, int n_bins_,
@@ -198,20 +194,29 @@ namespace mfv {
     if (int(a.size()) != n_bins+2)
       jmt::vthrow("TemplateInterpolator:: wrong n_bins in a");
 
-    int nR = 0;
-    int nQ = 1;
-    for (int i = 0; i < n_pars; ++i) {
-      nR += 2*nQ;
-      nQ *= 2;
-    }
+    if (n_pars > 0) {
+      int nR = 0;
+      int nQ = 1;
+      for (int i = 0; i < n_pars; ++i) {
+        nR += 2*nQ;
+        nQ *= 2;
+      }
 
-    R.resize(nR);
-    for (std::vector<double>& v : R)
-      v.resize(n_bins+2);
-    Q.resize(nQ);
+      R.resize(nR);
+      for (std::vector<double>& v : R)
+        v.resize(n_bins+2);
+      Q.resize(nQ);
+    }
+    else {
+      if (templates->size() != 1)
+        jmt::vthrow("npars == 1 and more than one template");
+    }
   }
 
   int TemplateInterpolator::i_par(int i, double par) const {
+    if (n_pars == 0)
+      return 0;
+
     double dret = (par - par_infos[i].start) / par_infos[i].step;
     if (dret >= par_infos[i].nsteps)
       return par_infos[i].nsteps - 1;
@@ -225,6 +230,9 @@ namespace mfv {
   }
 
   int TemplateInterpolator::i_Q(const std::vector<double>& pars) const {
+    if (n_pars == 0)
+      return 0;
+
     std::vector<int> ipars;
     int ret = 0;
     int mult = 1;
@@ -248,6 +256,12 @@ namespace mfv {
 
     if (a_p == 0)
       a_p = &a;
+
+    if (n_pars == 0) {
+      for (int ibin = 1; ibin <= n_bins; ++ibin)
+        (*a_p)[ibin] = (*templates)[0]->h->GetBinContent(ibin);
+      return;
+    }
 
     if (n_pars == 1) {
       const int i_par0 = i_par(0, pars[0]);

@@ -1,4 +1,4 @@
-SOURCES       = MiniNtuple.cc Utility.cc ProgressBar.cc VAException.cc Phi.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc Templater.cc PhiShiftTemplater.cc ClearedJetsTemplater.cc SimpleClearingTemplater.cc Fitter.cc
+SOURCES       = MiniNtuple.cc Utility.cc ProgressBar.cc VAException.cc Phi.cc Prob.cc Random.cc ROOTTools.cc ToyThrower.cc Templates.cc Templater.cc PhiShiftTemplater.cc ClearedJetsTemplater.cc SimpleClearingTemplater.cc Run2Templater.cc Fitter.cc
 INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
