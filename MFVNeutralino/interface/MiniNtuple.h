@@ -91,7 +91,7 @@ namespace mfv {
   void write_to_tree(TTree* tree, MiniNtuple& nt);
   void read_from_tree(TTree* tree, MiniNtuple& nt);
   MiniNtuple* clone(const MiniNtuple& nt);
-  void loop(const char* fn, const char* tree_path, bool (*)(int, int, const mfv::MiniNtuple&));
+  long long loop(const char* fn, const char* tree_path, bool (*)(long long, long long, const mfv::MiniNtuple&));
 }
 
 #endif

@@ -194,7 +194,7 @@ namespace mfv {
     return nnt;
   }
 
-  void loop(const char* fn, const char* tree_path, bool (*fcn)(int, int, const mfv::MiniNtuple&)) {
+  long long loop(const char* fn, const char* tree_path, bool (*fcn)(long long, long long, const mfv::MiniNtuple&)) {
     TFile* f = TFile::Open(fn);
     assert(f);
 
@@ -204,10 +204,16 @@ namespace mfv {
     mfv::MiniNtuple nt;
     mfv::read_from_tree(tree, nt);
 
-    for (int j = 0, je = tree->GetEntries(); j < je; ++j) {
+    long long j = 0, je = tree->GetEntriesFast();
+    for (; j < je; ++j) {
       if (tree->LoadTree(j) < 0) break;
       if (tree->GetEntry(j) <= 0) continue;
       if (!fcn(j, je, nt)) break;
     }
+
+    f->Close();
+    delete f;
+
+    return j;
   }
 }
