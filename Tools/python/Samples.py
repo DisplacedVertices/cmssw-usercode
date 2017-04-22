@@ -456,7 +456,8 @@ for x in (JetHT2015C, JetHT2015D, JetHT2016G, mfv_ddbar_tau00100um_M0300, mfv_dd
     x.add_dataset("ntuplev14")
 
 for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
-    x.add_dataset('pick1vtxv14')
+    if x.name != 'qcdht0700':
+        x.add_dataset('pick1vtxv14')
 
 ########
 # other condor declarations
