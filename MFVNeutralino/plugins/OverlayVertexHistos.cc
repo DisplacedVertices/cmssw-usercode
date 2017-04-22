@@ -96,7 +96,7 @@ MFVOverlayVertexHistos::MFVOverlayVertexHistos(const edm::ParameterSet& cfg)
 }
 
 void MFVOverlayVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
-  assert(!event.isRealData()); // JMTBAD lots of reasons this dosen't work on data yet
+  assert(!event.isRealData()); // JMTBAD lots of reasons this dosen't work on data yet, beamspot is one
 
   edm::Handle<std::vector<double>> truth;
   event.getByToken(truth_token, truth);
