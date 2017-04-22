@@ -14,7 +14,7 @@ parser.add_argument('+sample', help='which sample to use', choices=[s.name for s
 parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3, choices=[3,4,5])
 parser.add_argument('+rest-of-event', action='store_true', help='whether to use the rest of the tracks in the edm event')
 parser.add_argument('+z-model', help='z model', choices=['deltasv', 'deltasvgaus', 'deltapv', 'none'], default='deltasv')
-parser.add_argument('+z-width', type=float, help='width of gaus used in z model (cm)', default=0.02)
+parser.add_argument('+z-width', type=float, help='width of gaus used in z model (cm)', default=99)
 parser.add_argument('+dz-true-max', type=float, help='max dz allowed for z model (cm)', default=1e9)
 parser.add_argument('+found-dist', type=float, help='3D distance for matching by position (cm)', default=0.008)
 parser.add_argument('+rotate-x', action='store_true', help='azimuthally rotate x of tracks (around beam line)')
@@ -39,6 +39,9 @@ if args.minitree_fn is None:
 if args.minitree_treepath is None:
     args.minitree_treepath = 'mfvMiniTreeNtk%i/t' % args.ntracks if args.ntracks != 5 else 'mfvMiniTree/t'
 
+if args.z_width == 99:
+    args.z_width = 0.03 if args.ntracks == 3 else 0.02
+    
 args_printer('overlay args', args)
 
 ####
