@@ -8,6 +8,7 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 import JMTucker.Tools.Samples as Samples
 set_style()
 ROOT.TH1.AddDirectory(0)
+ROOT.TH1.SetDefaultSumw2()
 
 def get_f_t(x, min_ntracks=None, tree_path='trees'):
     if issubclass(type(x), Samples.Sample):
