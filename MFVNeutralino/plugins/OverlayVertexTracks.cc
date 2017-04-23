@@ -49,6 +49,7 @@ private:
   const bool rest_of_event;
   const bool only_other_tracks;
   const bool use_prescales;
+  const std::string prescales_fn;
   const bool verbose;
 
   enum { z_none, z_deltasv, z_deltapv, z_deltasvgaus };
@@ -138,7 +139,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
   delete f;
 
   if (use_prescales) {
-    TFile* f_prescales = TFile::Open("prescales.root");
+    TFile* f_prescales = TFile::Open(prescales_fn.c_str());
     if (!f_prescales || !f_prescales->IsOpen())
       throw cms::Exception("MFVOverlayVertexTracks", "bad prescales file");
     TString prescales_path; prescales_path.Form("ntk%i/%s-%s_prescales", ntracks, sample.c_str(), rest_of_event ? "P" : "C");

@@ -13,6 +13,7 @@ parser.add_argument('+which-event', '+e', type=int, help='which event from minit
 parser.add_argument('+sample', help='which sample to use', choices=[s.name for s in allowed_samples], default='qcdht1500sum')
 parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3, choices=[3,4,5])
 parser.add_argument('+no-prescales', action='store_false', dest='prescales', help='whether to use prescales')
+parser.add_argument('+prescales-fn', help='override minitree tree path', default='root://cmseos.fnal.gov//store/user/tucker/MiniTreeV14_forpick/prescales.root')
 parser.add_argument('+no-rest-of-event', action='store_false', dest='rest_of_event', help='whether to use the rest of the tracks in the edm event')
 parser.add_argument('+z-model', help='z model', choices=['deltasv', 'deltasvgaus', 'deltapv', 'none'], default='deltasvgaus')
 parser.add_argument('+z-width', type=float, help='width of gaus used in z model (cm)', default=99)
@@ -85,6 +86,7 @@ process.mfvOverlayTracks = cms.EDFilter('MFVOverlayVertexTracks',
                                         rest_of_event = cms.bool(args.rest_of_event),
                                         only_other_tracks = cms.bool(args.rest_of_event),
                                         use_prescales = cms.bool(args.prescales),
+                                        prescales_fn = cms.string(args.prescales_fn),
                                         verbose = cms.bool(args.debug),
                                         )
 
