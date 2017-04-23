@@ -13,36 +13,62 @@ def int_ceil(x,y):
 
 per = 50
 max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y in [
-            (('ttbar', 3), 17085),
-            (('ttbar', 4), 2313),
-            (('ttbar', 5), 307),
-            (('ttbar_2015', 3), 13399),
-            (('ttbar_2015', 4), 1811),
-            (('ttbar_2015', 5), 226),
-            (('qcdht0700sum', 3), 6442),
-            (('qcdht0700sum', 4), 966),
-            (('qcdht0700sum', 5), 123),
-            (('qcdht1000sum', 3), 63348),
-            (('qcdht1000sum', 4), 8907),
-            (('qcdht1000sum', 5), 1421),
-            (('qcdht1500sum', 3), 93828),
-            (('qcdht1500sum', 4), 14576),
-            (('qcdht1500sum', 5), 2630),
-            (('qcdht2000sum', 3), 60612),
-            (('qcdht2000sum', 4), 10444),
-            (('qcdht2000sum', 5), 2191),
-            (('qcdht0700sum_2015', 3), 4571),
-            (('qcdht0700sum_2015', 4), 600),
-            (('qcdht0700sum_2015', 5), 84),
-            (('qcdht1000sum_2015', 3), 40505),
-            (('qcdht1000sum_2015', 4), 5427),
-            (('qcdht1000sum_2015', 5), 885),
-            (('qcdht1500sum_2015', 3), 59671),
-            (('qcdht1500sum_2015', 4), 8930),
-            (('qcdht1500sum_2015', 5), 1798),
-            (('qcdht2000sum_2015', 3), 41121),
-            (('qcdht2000sum_2015', 4), 6835),
-            (('qcdht2000sum_2015', 5), 1422),
+            (('JetHT2016B3', 3), 19521),
+            (('JetHT2016B3', 4), 2125),
+            (('JetHT2016C', 3), 8559),
+            (('JetHT2016C', 4), 945),
+            (('JetHT2016D', 3), 14478),
+            (('JetHT2016D', 4), 1659),
+            (('JetHT2016E', 3), 8128),
+            (('JetHT2016E', 4), 819),
+            (('JetHT2016F', 3), 6480),
+            (('JetHT2016F', 4), 687),
+            (('JetHT2016G', 3), 22317),
+            (('JetHT2016G', 4), 2427),
+            (('JetHT2016H2', 3), 23550),
+            (('JetHT2016H2', 4), 2572),
+            (('JetHT2016H3', 3), 643),
+            (('JetHT2016H3', 4), 66),
+            (('JetHT2015C', 3), 46),
+            (('JetHT2015C', 4), 8),
+            (('JetHT2015D', 3), 5376),
+            (('JetHT2015D', 4), 615),
+            (('ttbar', 3), 12257),
+            (('ttbar', 4), 1488),
+            (('ttbar', 5), 184),
+            (('ttbar_2015', 3), 9630),
+            (('ttbar_2015', 4), 1156),
+            (('ttbar_2015', 5), 122),
+            (('qcdht0500sum', 3), 16),
+            (('qcdht0500sum', 4), 0),
+            (('qcdht0500sum', 5), 0),
+            (('qcdht0700sum', 3), 4325),
+            (('qcdht0700sum', 4), 531),
+            (('qcdht0700sum', 5), 74),
+            (('qcdht1000sum', 3), 40603),
+            (('qcdht1000sum', 4), 5098),
+            (('qcdht1000sum', 5), 789),
+            (('qcdht1500sum', 3), 60851),
+            (('qcdht1500sum', 4), 8551),
+            (('qcdht1500sum', 5), 1552),
+            (('qcdht2000sum', 3), 40015),
+            (('qcdht2000sum', 4), 6340),
+            (('qcdht2000sum', 5), 1337),
+            (('qcdht0500sum_2015', 3), 15),
+            (('qcdht0500sum_2015', 4), 2),
+            (('qcdht0500sum_2015', 5), 0),
+            (('qcdht0700sum_2015', 3), 2850),
+            (('qcdht0700sum_2015', 4), 325),
+            (('qcdht0700sum_2015', 5), 38),
+            (('qcdht1000sum_2015', 3), 25123),
+            (('qcdht1000sum_2015', 4), 2923),
+            (('qcdht1000sum_2015', 5), 470),
+            (('qcdht1500sum_2015', 3), 36943),
+            (('qcdht1500sum_2015', 4), 5099),
+            (('qcdht1500sum_2015', 5), 1040),
+            (('qcdht2000sum_2015', 3), 25954),
+            (('qcdht2000sum_2015', 4), 3972),
+            (('qcdht2000sum_2015', 5), 888),
             ]])
 
 def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=''):
@@ -55,10 +81,10 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     per_last_m1 = per_last - 1
 
     batch_name = 'ntk%i' % ntracks
-    if 'deltasvgaus' in overlay_args:
-        batch_name += '_deltasvgaus'
-    if 'rest-of-event' in overlay_args:
-        batch_name += '_wevent'
+    if 'deltasv' in overlay_args:
+        batch_name += '_deltasv'
+    if 'no-rest-of-event' in overlay_args:
+        batch_name += '_woevent'
     batch_name += batch_name_ex
     if testing:
         batch_name += '_TEST'
@@ -67,7 +93,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
 
     cmssw_py = 'overlay.py'
     
-    batch_dir = '/uscms_data/d2/tucker/OverlayV2_%i/%s/%s' % (year, batch_name, sample)
+    batch_dir = '/uscms_data/d2/tucker/OverlayV3_%i/%s/%s' % (year, batch_name, sample)
     
     inputs_dir = os.path.join(batch_dir, 'inputs')
     os.makedirs(inputs_dir)
@@ -121,7 +147,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
 
     set -x
     for i in $(seq 0 $nev); do
-        cmsRun ${workdir}/%(cmssw_py)s +batch +which-event $((job*50+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+        cmsRun ${workdir}/%(cmssw_py)s +which-event $((job*50+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
         cmsexit=$?
         if [[ $cmsexit -ne 0 ]]; then
             echo cmsRun exited with code $cmsexit
@@ -190,7 +216,9 @@ if year == 2015:
 elif year == 2016:
     samples = ['qcdht0700sum', 'qcdht1000sum', 'qcdht1500sum', 'qcdht2000sum', 'ttbar']
 
-overlay_argses = ['+rest-of-event +z-model deltasvgaus']
+samples = ['qcdht1500sum']
+
+overlay_argses = [''] #['+rest-of-event +z-model deltasvgaus']
 for overlay_args in overlay_argses:
     for sample in samples:
         for ntracks in [3,4,5]:
