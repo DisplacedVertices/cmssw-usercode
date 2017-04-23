@@ -50,6 +50,7 @@ private:
   const bool only_other_tracks;
   const bool use_prescales;
   const std::string prescales_fn;
+  const double prescale_mult;
   const bool verbose;
 
   enum { z_none, z_deltasv, z_deltapv, z_deltasvgaus };
@@ -86,6 +87,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
     use_prescales(cfg.getParameter<bool>("use_prescales")),
     prescales_fn(cfg.getParameter<std::string>("prescales_fn")),
+    prescale_mult(cfg.getParameter<double>("prescale_mult")),
     verbose(cfg.getParameter<bool>("verbose")),
 
     h_prescales(0)
@@ -283,11 +285,12 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
   if (use_prescales) {
     const double dvv_true = mag(nt0->x0 - nt1_0->x0, nt0->y0 - nt1_0->y0);
     const double prescale = h_prescales->GetBinContent(h_prescales->FindBin(dvv_true));
-    if (verbose) std::cout << "using prescales: dvv true = " << dvv_true << ", prescale " << prescale << "\n";
+    const double final_prescale = prescale_mult * prescale;
+    if (verbose) std::cout << "using prescales: dvv true = " << dvv_true << ", prescale " << prescale << " mult " << prescale_mult << " final prescale " << final_prescale << "\n";
     if (prescale > 1) {
       edm::Service<edm::RandomNumberGenerator> rng;
       const double u = rng->getEngine(event.streamID()).flat();
-      const bool killed = u > 1/prescale;
+      const bool killed = u > 1/final_prescale;
       if (verbose) std::cout << "  draw " << u << " killed? " << killed << "\n";
       if (killed)
         return false;
