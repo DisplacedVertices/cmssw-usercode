@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 
+version = 'V3'
+per = 50
+
+####
+
 import sys, os, shutil
+from pprint import pprint
 from textwrap import dedent
-from JMTucker.Tools.CMSSWTools import make_tarball
-from JMTucker.Tools.general import save_git_status, popen, touch
+from JMTucker.Tools.CRAB3Tools import Config, crab_command
+from JMTucker.Tools.general import int_ceil, save_git_status, popen, touch
+from JMTucker.Tools import colors
 from JMTucker.MFVNeutralino.Year import year
 
-pwd = os.getcwd()
-
-def int_ceil(x,y):
-    return (x+y-1)/y
-
-per = 50
 max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y in [
             (('JetHT2016B3', 3), 19521),
             (('JetHT2016B3', 4), 2125),
@@ -71,12 +72,65 @@ max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y 
             (('qcdht2000sum_2015', 5), 888),
             ]])
 
-def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=''):
+sh_template = '''
+#!/bin/bash
+
+workdir=$(pwd)
+job=$1
+
+if [[ $job -eq %(njobs)i ]]; then
+    nev=%(per_last_m1)i
+else
+    nev=%(per_m1)i
+fi
+
+echo date: $(date)
+echo pwd: $workdir
+echo job: $job
+echo sample: $sample
+echo ntracks: $ntracks
+echo overlayargs: $overlayargs
+echo nev: $nev
+
+cd %(cmssw_version)s/src
+eval $(scram runtime -sh)
+
+echo start cmsRun loop at $(date)
+for i in $(seq 0 $nev); do
+    echo start cmsRun \#$i at $(date)
+    cmsRun -j tempfjr.xml ${workdir}/overlay.py +which-event $((job*%(per)s+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+    cmsexit=$?
+    echo end cmsRun \#$i at $(date)
+    if [[ $cmsexit -ne 0 ]]; then
+        echo cmsRun exited with code $cmsexit
+        exit $cmsexit
+    fi
+    ls -l
+done
+echo end cmsRun loop at $(date)
+
+python fixfjr.py
+ls -l FrameworkJobReport.xml
+cp FrameworkJobReport.xml $workdir
+
+echo start hadd at $(date)
+hadd overlay.root overlay_*.root 2>&1
+haddexit=$?
+echo end hadd at $(date)
+if [[ $haddexit -ne 0 ]]; then
+    echo hadd exited with code $haddexit
+    exit $haddexit
+fi
+mv overlay.root $workdir/overlay_${job}.root
+'''
+
+def submit(sample, ntracks, overlay_args, njobs=0, batch_name_ex=''):
+    testing = 'testing' in sys.argv
+
     if njobs <= 0:
         njobs, per_last = max_njobs[(sample, ntracks)]
     else:
         per_last = per
-    njobs_m1 = njobs - 1
     per_m1 = per - 1
     per_last_m1 = per_last - 1
 
@@ -89,127 +143,57 @@ def submit(sample, ntracks, overlay_args, njobs=0, testing=False, batch_name_ex=
     if testing:
         batch_name += '_TEST'
 
-    print batch_name, sample
+    work_area = '/uscms_data/d2/%s/crab_dirs/Overlay%s/%s' % (os.environ['USER'], version, batch_name)
+    
+    inputs_dir = os.path.join(work_area, 'inputs')
+    os.makedirs(inputs_dir)
+    save_git_status(os.path.join(work_area, 'gitstatus'))
 
     cmssw_py = 'overlay.py'
-    
-    batch_dir = '/uscms_data/d2/tucker/OverlayV3_%i/%s/%s' % (year, batch_name, sample)
-    
-    inputs_dir = os.path.join(batch_dir, 'inputs')
-    os.makedirs(inputs_dir)
-    
-    save_git_status(os.path.join(batch_dir, 'gitstatus'))
-    
-    tarball_fn_base = 'input.tgz'
-    tarball_fn = os.path.join(inputs_dir, tarball_fn_base)
-    make_tarball(tarball_fn, include_python=True, include_interface=True)
-    
     cmssw_py_fn = os.path.join(inputs_dir, cmssw_py)
     shutil.copy2(cmssw_py, cmssw_py_fn)
-    
+
     sh_fn = os.path.join(inputs_dir, 'run.sh')
-    jdl_fn = os.path.join(inputs_dir, 'submit.jdl')
-    
-    scram_arch = os.environ['SCRAM_ARCH']
     cmssw_version = os.environ['CMSSW_VERSION']
     
-    sh = dedent('''
-    #!/bin/bash
-    
-    workdir=$(pwd)
-    job=$1
-    
-    echo date: $(date)
-    echo job: $job
-    echo pwd: $workdir
-    
-    export SCRAM_ARCH=%(scram_arch)s
-    source /cvmfs/cms.cern.ch/cmsset_default.sh
-    
-    scram project CMSSW %(cmssw_version)s 2>&1 > /dev/null
-    scramexit=$?
-    if [[ $scramexit -ne 0 ]]; then
-        echo scram exited with code $scramexit
-        exit $scramexit
-    fi
+    sh_vars = locals()
+    sh_vars['per'] = per
 
-    cd %(cmssw_version)s
-    tar xf ${workdir}/%(tarball_fn_base)s
-    cd src
-    eval `scram ru -sh`
-    scram b -j 2 2>&1 > /dev/null
-
-    if [[ $job -eq %(njobs_m1)i ]]; then
-        nev=%(per_last_m1)i
-    else
-        nev=%(per_m1)i
-    fi
-
-    set -x
-    for i in $(seq 0 $nev); do
-        cmsRun ${workdir}/%(cmssw_py)s +which-event $((job*50+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
-        cmsexit=$?
-        if [[ $cmsexit -ne 0 ]]; then
-            echo cmsRun exited with code $cmsexit
-            exit $cmsexit
-        fi
-    done
-    set +x
-
-    hadd overlay.root overlay_*.root 2>&1
-    haddexit=$?
-    if [[ $haddexit -ne 0 ]]; then
-        echo hadd exited with code $haddexit
-        exit $haddexit
-    fi
-    mv overlay.root $workdir/overlay_${job}.root
-    ''' % locals())
-
-    open(sh_fn, 'wt').write(sh)
+    open(sh_fn, 'wt').write(sh_template % sh_vars)
     os.chmod(sh_fn, 0755)
-    
-    jdl = dedent('''
-    universe = vanilla
-    Executable = %(sh_fn)s
-    arguments = $(Process)
-    Output = stdout.$(Process)
-    Error = stderr.$(Process)
-    Log = log.$(Process)
-    stream_output = false
-    stream_error  = false
-    notification  = never
-    should_transfer_files   = YES
-    when_to_transfer_output = ON_EXIT
-    transfer_input_files = %(tarball_fn)s,%(cmssw_py_fn)s
-    Queue %(njobs)s
-    ''' % locals())
-    
-    open(jdl_fn, 'wt').write(jdl)
 
+    tool_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/test/MakeSamples') # JMTBAD put dummy.py and fixfjr.py somewhere better
+
+    config = Config()
+    config.General.transferLogs = True
+    config.General.transferOutputs = True
+    config.General.workArea = work_area
+    config.General.requestName = batch_name + '_' + sample
+
+    config.JobType.pluginName = 'PrivateMC'
+    config.JobType.psetName = os.path.join(tool_path, 'dummy.py')
+    config.JobType.scriptExe = sh_fn
+    config.JobType.sendPythonFolder = True
+
+    config.JobType.inputFiles = [cmssw_py_fn, os.path.join(tool_path, 'fixfjr.py')]
+    config.JobType.outputFiles = ['overlay.root']
+    config.JobType.scriptArgs = []
+
+    config.Data.splitting = 'EventBased'
+    config.Data.unitsPerJob = 1
+    config.Data.totalUnits = njobs
+    config.Data.publication = False
+
+    config.Site.storageSite = 'T3_US_FNALLPC'
+    config.Site.whitelist = ['T1_US_FNAL', 'T2_US_*', 'T3_US_*']
+    
     if not testing:
-        os.chdir(batch_dir)
-        submit_out, submit_ret = popen('condor_submit < ' + jdl_fn, return_exit_code=True)
-        ok = False
-        for line in submit_out.split('\n'):
-            if 'job(s) submitted to cluster' in line:
-                ok = True
-                line = line.split()
-                try:
-                    njobs_sub = int(line[0])
-                    cluster = int(line[-1][:-1])
-                    touch(os.path.join(batch_dir, 'cs_dir'))
-                    open(os.path.join(batch_dir, 'njobs'), 'wt').write(str(njobs_sub))
-                    open(os.path.join(batch_dir, 'cluster'), 'wt').write(str(cluster))
-                    if njobs_sub != njobs:
-                        ok = False
-                except ValueError:
-                    ok = False
-        if not ok:
-            print '\033[1m problem! \033[0m'
-            print submit_out
-        else:
-            print 'success! cluster', cluster
-        os.chdir(pwd)
+        output = crab_command('submit', config=config)
+        print colors.boldwhite('%s, %s' % (batch_name, sample))
+        pprint(output)
+        print
+    else:
+        print config
 
 if year == 2015:
     samples = ['qcdht0700sum_2015', 'qcdht1000sum_2015', 'qcdht1500sum_2015', 'qcdht2000sum_2015', 'ttbar_2015']
@@ -221,6 +205,6 @@ samples = ['qcdht1500sum']
 overlay_argses = [''] #['+rest-of-event +z-model deltasvgaus']
 for overlay_args in overlay_argses:
     for sample in samples:
-        for ntracks in [3,4,5]:
+        for ntracks in [5]: #3,4,5]:
             submit(sample, ntracks, overlay_args)
             print
