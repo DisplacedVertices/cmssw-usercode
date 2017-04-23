@@ -200,11 +200,9 @@ if year == 2015:
 elif year == 2016:
     samples = ['qcdht0700sum', 'qcdht1000sum', 'qcdht1500sum', 'qcdht2000sum', 'ttbar']
 
-samples = ['qcdht1500sum']
-
 overlay_argses = [''] #['+rest-of-event +z-model deltasvgaus']
 for overlay_args in overlay_argses:
     for sample in samples:
-        for ntracks in [5]: #3,4,5]:
+        for ntracks in [3,4,5]:
             submit(sample, ntracks, overlay_args)
             print
