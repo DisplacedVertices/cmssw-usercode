@@ -7,7 +7,6 @@ per = 50
 
 import sys, os, shutil
 from pprint import pprint
-from textwrap import dedent
 from JMTucker.Tools.CRAB3Tools import Config, crab_command
 from JMTucker.Tools.general import int_ceil, save_git_status, popen, touch
 from JMTucker.Tools import colors
@@ -77,6 +76,7 @@ sh_template = '''
 
 workdir=$(pwd)
 job=$1
+sample=$(echo $2 | cut -d = -f 2)
 
 if [[ $job -eq %(njobs)i ]]; then
     nev=%(per_last_m1)i
@@ -85,11 +85,9 @@ else
 fi
 
 echo date: $(date)
-echo pwd: $workdir
+echo workdir: $workdir
 echo job: $job
 echo sample: $sample
-echo ntracks: $ntracks
-echo overlayargs: $overlayargs
 echo nev: $nev
 
 cd %(cmssw_version)s/src
@@ -98,7 +96,7 @@ eval $(scram runtime -sh)
 echo start cmsRun loop at $(date)
 for i in $(seq 0 $nev); do
     echo start cmsRun \#$i at $(date)
-    cmsRun -j tempfjr.xml ${workdir}/overlay.py +which-event $((job*%(per)s+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+    cmsRun -j tempfjr.xml ${workdir}/overlay.py +which-event $((job*%(per)s+i)) +sample $sample +ntracks %(ntracks)s %(overlay_args)s 2>&1
     cmsexit=$?
     echo end cmsRun \#$i at $(date)
     if [[ $cmsexit -ne 0 ]]; then
@@ -124,7 +122,7 @@ fi
 mv overlay.root $workdir/overlay_${job}.root
 '''
 
-def submit(sample, ntracks, overlay_args, njobs=0, batch_name_ex=''):
+def submit(samples, ntracks, overlay_args, njobs=0, batch_name_ex=''):
     testing = 'testing' in sys.argv
 
     if njobs <= 0:
@@ -134,7 +132,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, batch_name_ex=''):
     per_m1 = per - 1
     per_last_m1 = per_last - 1
 
-    batch_name = 'ntk%i' % ntracks
+    batch_name = 'Overlay%s_ntk%i' % (version, ntracks)
     if 'deltasv' in overlay_args:
         batch_name += '_deltasv'
     if 'no-rest-of-event' in overlay_args:
@@ -143,9 +141,10 @@ def submit(sample, ntracks, overlay_args, njobs=0, batch_name_ex=''):
     if testing:
         batch_name += '_TEST'
 
-    work_area = '/uscms_data/d2/%s/crab_dirs/Overlay%s/%s' % (os.environ['USER'], version, batch_name)
+    work_area = '/uscms_data/d2/%s/crab_dirs/%s' % (os.environ['USER'], version, batch_name)
     
     inputs_dir = os.path.join(work_area, 'inputs')
+
     os.makedirs(inputs_dir)
     save_git_status(os.path.join(work_area, 'gitstatus'))
 
@@ -177,7 +176,7 @@ def submit(sample, ntracks, overlay_args, njobs=0, batch_name_ex=''):
 
     config.JobType.inputFiles = [cmssw_py_fn, os.path.join(tool_path, 'fixfjr.py')]
     config.JobType.outputFiles = ['overlay.root']
-    config.JobType.scriptArgs = []
+    config.JobType.scriptArgs = ['sample=%s' % sample]
 
     config.Data.splitting = 'EventBased'
     config.Data.unitsPerJob = 1
@@ -187,22 +186,25 @@ def submit(sample, ntracks, overlay_args, njobs=0, batch_name_ex=''):
     config.Site.storageSite = 'T3_US_FNALLPC'
     config.Site.whitelist = ['T1_US_FNAL', 'T2_US_*', 'T3_US_*']
     
-    if not testing:
-        output = crab_command('submit', config=config)
+    for sample in samples:
         print colors.boldwhite('%s, %s' % (batch_name, sample))
-        pprint(output)
+        if not testing:
+            output = crab_command('submit', config=config)
+            for k in sorted(output):
+                if k == 'stdout':
+                    continue
+                print '%s: %s' % (k, output[k])
+            print 'stdout:'
+            print output['stdout']
+        else:
+            print config
         print
-    else:
-        print config
 
 if year == 2015:
     samples = ['qcdht0700sum_2015', 'qcdht1000sum_2015', 'qcdht1500sum_2015', 'qcdht2000sum_2015', 'ttbar_2015']
 elif year == 2016:
     samples = ['qcdht0700sum', 'qcdht1000sum', 'qcdht1500sum', 'qcdht2000sum', 'ttbar']
 
-overlay_argses = [''] #['+rest-of-event +z-model deltasvgaus']
-for overlay_args in overlay_argses:
-    for sample in samples:
-        for ntracks in [3,4,5]:
-            submit(sample, ntracks, overlay_args)
-            print
+for overlay_args in ['']:
+    for ntracks in [3,4,5]:
+        submit(samples, ntracks, overlay_args)
