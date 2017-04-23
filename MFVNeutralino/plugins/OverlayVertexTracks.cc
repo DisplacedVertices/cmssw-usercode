@@ -85,6 +85,7 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     rest_of_event(cfg.getParameter<bool>("rest_of_event")),
     only_other_tracks(cfg.getParameter<bool>("only_other_tracks")),
     use_prescales(cfg.getParameter<bool>("use_prescales")),
+    prescales_fn(cfg.getParameter<std::string>("prescales_fn")),
     verbose(cfg.getParameter<bool>("verbose")),
 
     h_prescales(0)
