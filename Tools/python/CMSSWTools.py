@@ -285,6 +285,9 @@ def silence_messages(process, categories):
         process.MessageLogger.categories.append(category)
         setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
 
+def simple_memory_check(process):
+    process.add_(cms.Service('SimpleMemoryCheck'))
+
 def tfileservice(process, filename='tfileservice.root'):
     process.TFileService = cms.Service('TFileService', fileName = cms.string(filename))
 
