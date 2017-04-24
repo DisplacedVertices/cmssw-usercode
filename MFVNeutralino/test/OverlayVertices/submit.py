@@ -165,7 +165,7 @@ def submit(samples, ntracks, overlay_args, batch_name_ex=''):
     config.Data.publication = False
     config.Site.storageSite = 'T3_US_FNALLPC'
     config.Site.whitelist = ['T1_US_FNAL', 'T2_US_*', 'T3_US_*']
-    config.Site.blacklist = ['T3_US_UCR']
+    config.Site.blacklist = ['T3_US_UCR', 'T3_US_Rutgers']
     
     for sample in samples:
         njobs, per_last = max_njobs[(sample, ntracks)]
