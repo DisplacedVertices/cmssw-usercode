@@ -117,7 +117,14 @@ if [[ $haddexit -ne 0 ]]; then
     echo hadd exited with code $haddexit
     exit $haddexit
 fi
-mv overlay.root $workdir/overlay_${job}.root
+mv overlay.root $workdir
+
+echo ls -l src
+ls -l
+echo ls -l workdir
+ls -l $workdir
+
+echo end job at $(date)
 '''
 
 def submit(samples, ntracks, overlay_args, batch_name_ex=''):
