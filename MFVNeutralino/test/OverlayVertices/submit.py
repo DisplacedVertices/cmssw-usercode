@@ -76,7 +76,6 @@ sh_template = '''
 
 workdir=$(pwd)
 job=$1
-sample=$(echo $2 | cut -d = -f 2)
 
 if [[ $job -eq %(njobs)i ]]; then
     nev=%(per_last_m1)i
@@ -87,7 +86,6 @@ fi
 echo date: $(date)
 echo workdir: $workdir
 echo job: $job
-echo sample: $sample
 echo nev: $nev
 
 cd %(cmssw_version)s/src
@@ -96,7 +94,7 @@ eval $(scram runtime -sh)
 echo start cmsRun loop at $(date)
 for i in $(seq 0 $nev); do
     echo start cmsRun \#$i at $(date)
-    cmsRun -j tempfjr.xml ${workdir}/overlay.py +which-event $((job*%(per)s+i)) +sample $sample +ntracks %(ntracks)s %(overlay_args)s 2>&1
+    cmsRun -j tempfjr.xml ${workdir}/%(cmssw_py)s +which-event $((job*%(per)s+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
     cmsexit=$?
     echo end cmsRun \#$i at $(date)
     if [[ $cmsexit -ne 0 ]]; then
@@ -107,7 +105,7 @@ for i in $(seq 0 $nev); do
 done
 echo end cmsRun loop at $(date)
 
-python fixfjr.py
+python $workdir/fixfjr.py
 ls -l FrameworkJobReport.xml
 cp FrameworkJobReport.xml $workdir
 
@@ -122,17 +120,10 @@ fi
 mv overlay.root $workdir/overlay_${job}.root
 '''
 
-def submit(samples, ntracks, overlay_args, njobs=0, batch_name_ex=''):
+def submit(samples, ntracks, overlay_args, batch_name_ex=''):
     testing = 'testing' in sys.argv
 
-    if njobs <= 0:
-        njobs, per_last = max_njobs[(sample, ntracks)]
-    else:
-        per_last = per
-    per_m1 = per - 1
-    per_last_m1 = per_last - 1
-
-    batch_name = 'Overlay%s_ntk%i' % (version, ntracks)
+    batch_name = 'ntk%i' % ntracks
     if 'deltasv' in overlay_args:
         batch_name += '_deltasv'
     if 'no-rest-of-event' in overlay_args:
@@ -141,64 +132,62 @@ def submit(samples, ntracks, overlay_args, njobs=0, batch_name_ex=''):
     if testing:
         batch_name += '_TEST'
 
-    work_area = '/uscms_data/d2/%s/crab_dirs/%s' % (os.environ['USER'], version, batch_name)
+    work_area = '/uscms_data/d2/%s/crab_dirs/Overlay%s/%s' % (os.environ['USER'], version, batch_name)
     
     inputs_dir = os.path.join(work_area, 'inputs')
-
     os.makedirs(inputs_dir)
     save_git_status(os.path.join(work_area, 'gitstatus'))
 
     cmssw_py = 'overlay.py'
     cmssw_py_fn = os.path.join(inputs_dir, cmssw_py)
     shutil.copy2(cmssw_py, cmssw_py_fn)
-
-    sh_fn = os.path.join(inputs_dir, 'run.sh')
-    cmssw_version = os.environ['CMSSW_VERSION']
     
-    sh_vars = locals()
-    sh_vars['per'] = per
-
-    open(sh_fn, 'wt').write(sh_template % sh_vars)
-    os.chmod(sh_fn, 0755)
-
     tool_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/test/MakeSamples') # JMTBAD put dummy.py and fixfjr.py somewhere better
 
     config = Config()
     config.General.transferLogs = True
     config.General.transferOutputs = True
     config.General.workArea = work_area
-    config.General.requestName = batch_name + '_' + sample
-
     config.JobType.pluginName = 'PrivateMC'
     config.JobType.psetName = os.path.join(tool_path, 'dummy.py')
-    config.JobType.scriptExe = sh_fn
     config.JobType.sendPythonFolder = True
-
     config.JobType.inputFiles = [cmssw_py_fn, os.path.join(tool_path, 'fixfjr.py')]
     config.JobType.outputFiles = ['overlay.root']
-    config.JobType.scriptArgs = ['sample=%s' % sample]
-
     config.Data.splitting = 'EventBased'
     config.Data.unitsPerJob = 1
-    config.Data.totalUnits = njobs
     config.Data.publication = False
-
     config.Site.storageSite = 'T3_US_FNALLPC'
     config.Site.whitelist = ['T1_US_FNAL', 'T2_US_*', 'T3_US_*']
+    config.Site.blacklist = ['T3_US_UCR']
     
     for sample in samples:
+        njobs, per_last = max_njobs[(sample, ntracks)]
+        sh_vars = {
+            'per': per,
+            'njobs': njobs,
+            'per_m1': per - 1,
+            'per_last_m1': per_last - 1,
+            'ntracks': ntracks,
+            'sample': sample,
+            'overlay_args': overlay_args,
+            'cmssw_version': os.environ['CMSSW_VERSION'],
+            'cmssw_py': cmssw_py,
+            }
+        sh_fn = os.path.join(inputs_dir, 'run.%s.sh' % sample)
+        open(sh_fn, 'wt').write(sh_template % sh_vars)
+        os.chmod(sh_fn, 0755)
+
+        config.General.requestName = '%s_%s' % (batch_name, sample)
+        config.JobType.scriptExe = sh_fn
+        config.Data.totalUnits = njobs
+
         print colors.boldwhite('%s, %s' % (batch_name, sample))
         if not testing:
             output = crab_command('submit', config=config)
-            for k in sorted(output):
-                if k == 'stdout':
-                    continue
-                print '%s: %s' % (k, output[k])
-            print 'stdout:'
             print output['stdout']
         else:
             print config
-        print
+            print
 
 if year == 2015:
     samples = ['qcdht0700sum_2015', 'qcdht1000sum_2015', 'qcdht1500sum_2015', 'qcdht2000sum_2015', 'ttbar_2015']
