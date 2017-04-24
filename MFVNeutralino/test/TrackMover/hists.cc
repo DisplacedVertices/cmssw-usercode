@@ -5,7 +5,7 @@
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "utils.h"
 
-#error need to support picking hlt bit and final ht cut
+// #error need to support picking hlt bit and final ht cut
 
 int main(int argc, char** argv) {
   if (argc < 5) {
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
   TH1F* h_weight = new TH1F("h_weight", ";weight;events/0.01", 200, 0, 2);
   TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
 
-  const int num_numdens = 6;
+  const int num_numdens = 5;
 
   TH1F* h_vtxntracks     [num_numdens] = {0};
   TH1F* h_vtxntracksptgt3[num_numdens] = {0};
@@ -54,9 +54,8 @@ int main(int argc, char** argv) {
   numdens nds[num_numdens] = {
     numdens("nocuts"),
     numdens("ntracks"),
-    numdens("ntracksPptgt3"),
-    numdens("ntracksPptgt3Pdr"),
-    numdens("ntracksPptgt3Pbs2d"),
+    numdens("ntracksPdrmin"),
+    numdens("ntracksPbs2d"),
     numdens("all")
   };
 
@@ -104,6 +103,11 @@ int main(int argc, char** argv) {
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
+    const bool pass_800 = bool(nt.pass_hlt & 0x2);
+    const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
+    const bool H_data = strcmp(in_fn, "JetHT2016H2.root") == 0 || strcmp(in_fn, "JetHT2016H3.root") == 0;
+    const bool triggers_if_H = pass_900_450_AK450 && H_data;
+
     double jet_sume = 0;
     double jet_drmax = 0;
     double jet_dravg = 0;
@@ -127,6 +131,8 @@ int main(int argc, char** argv) {
         nt.npreselbjets < nbjets_req ||
         nt.jetht < 1000 ||
         movedist2 < 0.03 ||
+	!pass_800 ||
+	!triggers_if_H ||
         movedist2 > 2.5)
       continue;
 
@@ -162,9 +168,8 @@ int main(int argc, char** argv) {
 
     int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;
-    int n_pass_ntracksPptgt3 = 0;
-    int n_pass_ntracksPptgt3Pdr = 0;
-    int n_pass_ntracksPptgt3Pbs2d = 0;
+    int n_pass_ntracksPdrmin = 0;
+    int n_pass_ntracksPbs2d = 0;
     int n_pass_all = 0;
 
     std::vector<int> first_vtx_to_pass(num_numdens, -1);
@@ -178,19 +183,14 @@ int main(int argc, char** argv) {
         continue;
 
       const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
-      const bool pass_ntracksptgt3 = true; // nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
       const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
-      const bool pass_drmax        = true; // nt.p_vtxs_drmax       ->at(ivtx) < 4;
-      const bool pass_mindrmax     = true; // nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
       const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
-      const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
 
-      if (1)                                                                 { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;             }
-      if (pass_ntracks)                                                      { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;            }
-      if (pass_ntracks && pass_ntracksptgt3)                                 { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_ntracksPptgt3;      }
-      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts)                  { set_it_if_first(first_vtx_to_pass[3], ivtx); ++n_pass_ntracksPptgt3Pdr;   }
-      if (pass_ntracks && pass_ntracksptgt3 &&                pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[4], ivtx); ++n_pass_ntracksPptgt3Pbs2d; }
-      if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[5], ivtx); ++n_pass_all;                }
+      if (1)                                           { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;        }
+      if (pass_ntracks)                                { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;       }
+      if (pass_ntracks && pass_drmin)                  { set_it_if_first(first_vtx_to_pass[3], ivtx); ++n_pass_ntracksPdrmin; }
+      if (pass_ntracks &&               pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[4], ivtx); ++n_pass_ntracksPbs2d;  }
+      if (pass_ntracks && pass_drmin && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[5], ivtx); ++n_pass_all;           }
     }
 
     for (int i = 0; i < num_numdens; ++i) {
@@ -206,17 +206,15 @@ int main(int argc, char** argv) {
 
     if (n_pass_nocuts)             nums["nocuts"]             += w;
     if (n_pass_ntracks)            nums["ntracks"]            += w;
-    if (n_pass_ntracksPptgt3)      nums["ntracksPptgt3"]      += w;
-    if (n_pass_ntracksPptgt3Pdr)   nums["ntracksPptgt3Pdr"]   += w;
-    if (n_pass_ntracksPptgt3Pbs2d) nums["ntracksPptgt3Pbs2d"] += w;
+    if (n_pass_ntracksPdrmin)      nums["ntracksPdrmin"]      += w;
+    if (n_pass_ntracksPbs2d)       nums["ntracksPbs2d"]       += w;
     if (n_pass_all)                nums["all"]                += w;
 
     const int passes[num_numdens] = {
       n_pass_nocuts,
       n_pass_ntracks,
-      n_pass_ntracksPptgt3,
-      n_pass_ntracksPptgt3Pdr,
-      n_pass_ntracksPptgt3Pbs2d,
+      n_pass_ntracksPdrmin,
+      n_pass_ntracksPbs2d,
       n_pass_all
     };
 
@@ -232,7 +230,7 @@ int main(int argc, char** argv) {
         Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
         Fill(nd("pvntracks")    .num, nt.pvntracks);
         Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
-        Fill(nd("ht")        .num, nt.jetht);
+        Fill(nd("ht")           .num, nt.jetht);
         Fill(nd("met")          .num, nt.met);
         Fill(nd("nlep")         .num, nt.nlep);
         Fill(nd("ntracks")      .num, nt.ntracks);
