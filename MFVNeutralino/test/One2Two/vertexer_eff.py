@@ -3,10 +3,10 @@ from JMTucker.Tools.ROOTTools import *
 year = '2016'
 
 set_style()
-ps = plot_saver('../plots/bkgest/vertexer_eff_%s' % year, size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v14/vertexer_eff_%s' % year, size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV12/background%s.root' % ('' if year=='2016' else '_%s'%year))
-fh = ROOT.TFile('eff_%s.root' % year, 'recreate')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV14/background%s.root' % ('' if year=='2016' else '_%s'%year))
+fh = ROOT.TFile('eff_%s_v14.root' % year, 'recreate')
 
 for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
     h_merge = f.Get('mfvVertices/h_merge_d2d_jetht1000_%s' % maxtk)

@@ -210,14 +210,14 @@ int main(int, char**) {
 
   jmt::ConfigFromEnv env("sm", true);
 
-  const double default_n1v[3][6] = {{ -1, -1, -1, 13309, 1817, 299 }, { -1, -1, -1, 270078, 39055, 6215 }, { -1, -1, -1, 283387, 40872, 6514 }};
-  const double default_n2v[3][6] = {{ -1, -1, -1,    90,    2,   1 }, { -1, -1, -1,   1924,    40,    4 }, { -1, -1, -1,   2014,    42,    4 }};
+  const double default_n1v[3][6] = {{ -1, -1, -1, 8338, 1003, 160 }, { -1, -1, -1, 175485, 22427, 3532 }, { -1, -1, -1, 183823, 23430, 3692 }};
+  const double default_n2v[3][6] = {{ -1, -1, -1,   44,    1,   1 }, { -1, -1, -1,    934,     7,    1 }, { -1, -1, -1,    978,     7,    1 }};
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
   const int ntoys = env.get_int("ntoys", 10000);
   const std::string out_fn = env.get_string("out_fn", "statmodel");
-  const int year_index = env.get_int("year_index", 2);
+  const int year_index = env.get_int("year_index", 1);
   assert(year_index >= 0 && year_index <= 2);
   ntracks = env.get_int("ntracks", 3);
   assert(ntracks >= 3 && ntracks <= 5);
@@ -230,11 +230,11 @@ int main(int, char**) {
   const double oversample = env.get_double("oversample", 20);
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
-  phi_c = env.get_double("phi_c", 1.35);
+  phi_c = env.get_double("phi_c", 1.34);
   phi_e = env.get_double("phi_e", 2);
-  phi_a = env.get_double("phi_a", 3.66);
-  const std::string eff_fn = env.get_string("eff_fn", "eff_avg.root");
-  const std::string eff_path = env.get_string("eff_path", TString::Format("average%i", ntracks).Data());
+  phi_a = env.get_double("phi_a", 3.86);
+  const std::string eff_fn = env.get_string("eff_fn", "eff_2016_v14.root");
+  const std::string eff_path = env.get_string("eff_path", TString::Format("maxtk%i", ntracks).Data());
 
   /////////////////////////////////////////////
 
