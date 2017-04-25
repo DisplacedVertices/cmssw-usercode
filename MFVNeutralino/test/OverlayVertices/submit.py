@@ -94,7 +94,7 @@ eval $(scram runtime -sh)
 echo start cmsRun loop at $(date)
 for i in $(seq 0 $nev); do
     echo start cmsRun \#$i at $(date)
-    cmsRun -j tempfjr.xml ${workdir}/%(cmssw_py)s +which-event $((job*%(per)s+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+    cmsRun -j tempfjr.xml ${workdir}/%(cmssw_py)s +which-event $(((job-1)*%(per)s+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
     cmsexit=$?
     echo end cmsRun \#$i at $(date)
     if [[ $cmsexit -ne 0 ]]; then
