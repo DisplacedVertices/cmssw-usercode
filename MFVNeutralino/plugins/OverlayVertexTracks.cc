@@ -146,8 +146,10 @@ MFVOverlayVertexTracks::MFVOverlayVertexTracks(const edm::ParameterSet& cfg)
     if (!f_prescales || !f_prescales->IsOpen())
       throw cms::Exception("MFVOverlayVertexTracks", "bad prescales file");
     TString prescales_path; prescales_path.Form("ntk%i/%s-%s_prescales", ntracks, sample.c_str(), rest_of_event ? "P" : "C");
-    if (verbose) std::cout << "getting prescales from prescales.root/" << prescales_path << "\n";
-    h_prescales = (TH1D*)f_prescales->Get(prescales_path)->Clone("h_prescales");
+    if (verbose) std::cout << "getting prescales from " << prescales_fn << "/" << prescales_path << "\n";
+    TObject* temp = f_prescales->Get(prescales_path);
+    if (!temp) throw cms::Exception("MFVOverlayVertexTracks") << "no " << prescales_path << " in " << prescales_fn;
+    h_prescales = (TH1D*)temp->Clone("h_prescales");
     h_prescales->SetDirectory(0);
     f_prescales->Close();
     delete f_prescales;
