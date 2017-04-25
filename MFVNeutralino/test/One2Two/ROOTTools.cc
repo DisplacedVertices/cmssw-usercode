@@ -57,6 +57,10 @@ namespace jmt {
     }
   }
 
+  double integral(const TH1* h) {
+    return h->Integral(0, h->GetNbinsX()+1);
+  }
+
   TPaveStats* move_stat_box(TPaveStats* s, double dx, double dy) {
     // Move the stat box s by (dx, dy), preserving width. (Remember
     // to call TCanvas::Update first.)
