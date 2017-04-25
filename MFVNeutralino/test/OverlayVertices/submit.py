@@ -91,17 +91,45 @@ echo nev: $nev
 cd %(cmssw_version)s/src
 eval $(scram runtime -sh)
 
-echo start xrdcp input at $(date)
-for fn in root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/prescales.root root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/%(sample)s.root root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14/%(sample)s.root; do
-    echo $fn
-    xrdcp -f -t 10 $fn . 2>&1
-    xrdcpexit=$?
+function xrdcpit {
+    src=$1
+    dst=$2
+    echo $src to $dst
+
+    xrdcpexit=99
+    counter=0
+    tries=10
+    sleeptime=60
+    while [[ $counter -lt $tries ]]; do
+        xrdcp -f -t 5 $src $dst 2>&1
+        xrdcpexit=$?
+        if [[ $xrdcpexit -eq 0 ]]; then
+            break
+        fi
+        if [[ $counter -lt $((tries-1)) ]]; then
+            echo xrdcp exit was $xrdcpexit, sleeping $sleeptime then trying again
+            sleep $sleeptime
+        fi
+        let counter++
+    done
+
     if [[ $xrdcpexit -ne 0 ]]; then
-        echo xrdcp exited with code $xrdcpexit
-        exit $xrdcpexit
+        echo xrdcp never succeeded
     fi
-done
-echo end xrdcp input at $(date)
+    exit $xrdcpexit
+}
+
+echo start xrdcp input at $(date)
+(xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/prescales.root .) && \
+(xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/qcdht0700sum.root qcdht0700sum_tree.root) && \
+(xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14/qcdht0700sum.root qcdht0700sum_edm.root)
+xrdcpexit=$?
+if [[ xrdcpexit -ne 0 ]]; then
+    echo problem with one of the xrdcps
+    exit 1
+fi
+echo end xrdcp input at $(date), ls -l \*.root
+ls -l *.root
 
 echo start cmsRun loop at $(date)
 for i in $(seq 0 $nev); do
@@ -176,8 +204,7 @@ def submit(samples, ntracks, overlay_args, batch_name_ex=''):
     config.Data.unitsPerJob = 1
     config.Data.publication = False
     config.Site.storageSite = 'T3_US_FNALLPC'
-    config.Site.whitelist = ['T1_US_FNAL', 'T2_US_*', 'T3_US_*']
-    config.Site.blacklist = ['T3_US_UCR', 'T3_US_Rutgers']
+    config.Site.whitelist = 'T1_US_*,T2_US_*,T3_US_Baylor,T3_US_FIT,T3_US_FIU,T3_US_FSU,T3_US_JHU,T3_US_Kansas,T3_US_NERSC,T3_US_NU,T3_US_NotreDame,T3_US_OSG,T3_US_OSU,T3_US_Omaha,T3_US_Princeton_ICSE,T3_US_PuertoRico,T3_US_Rice,T3_US_SDSC,T3_US_TAMU,T3_US_TTU,T3_US_UCD,T3_US_UCSB,T3_US_UMD'.split(',')
     
     for sample in samples:
         njobs, per_last = max_njobs[(sample, ntracks)]
