@@ -92,7 +92,7 @@ cd %(cmssw_version)s/src
 eval $(scram runtime -sh)
 
 echo start xrdcp input at $(date)
-for fn in root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/prescales.root root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/${sample}.root root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14/${sample}.root; do
+for fn in root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/prescales.root root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/%(sample)s.root root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14/%(sample)s.root; do
     echo $fn
     xrdcp -f -t 10 $fn . 2>&1
     xrdcpexit=$?
