@@ -204,7 +204,7 @@ def submit(samples, ntracks, overlay_args, batch_name_ex=''):
     config.Data.unitsPerJob = 1
     config.Data.publication = False
     config.Site.storageSite = 'T3_US_FNALLPC'
-    config.Site.whitelist = 'T1_US_*,T2_US_*,T3_US_Baylor,T3_US_FIT,T3_US_FIU,T3_US_FSU,T3_US_JHU,T3_US_Kansas,T3_US_NERSC,T3_US_NU,T3_US_NotreDame,T3_US_OSG,T3_US_OSU,T3_US_Omaha,T3_US_Princeton_ICSE,T3_US_PuertoRico,T3_US_Rice,T3_US_SDSC,T3_US_TAMU,T3_US_TTU,T3_US_UCD,T3_US_UCSB,T3_US_UMD'.split(',')
+    config.Site.whitelist = 'T1_US_*,T2_US_*,T3_US_Baylor,T3_US_FIU,T3_US_FSU,T3_US_JHU,T3_US_Kansas,T3_US_NERSC,T3_US_NU,T3_US_NotreDame,T3_US_OSG,T3_US_OSU,T3_US_Omaha,T3_US_Princeton_ICSE,T3_US_PuertoRico,T3_US_Rice,T3_US_SDSC,T3_US_TAMU,T3_US_TTU,T3_US_UCD,T3_US_UCSB,T3_US_UMD'.split(',')
     
     for sample in samples:
         njobs, per_last = max_njobs[(sample, ntracks)]
