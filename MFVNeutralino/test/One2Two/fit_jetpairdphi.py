@@ -5,9 +5,9 @@ from JMTucker.Tools.ROOTTools import *
 year = '2016'
 
 set_style()
-ps = plot_saver('../plots/bkgest/fit_jetpairdphi_%s' % year, size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v14/fit_jetpairdphi_%s' % year, size=(700,700), log=False, root=False)
 
-fn = '/uscms_data/d2/tucker/crab_dirs/HistosV12/background%s.root' % ('' if year=='2016' else '_%s'%year)
+fn = '/uscms_data/d2/tucker/crab_dirs/HistosV14/background%s.root' % ('' if year=='2016' else '_%s'%year)
 
 ntk = ['Ntk3', 'Ntk3or4', 'Ntk4', '']
 ntracks = ['3-track', '3-or-4-track', '4-track', '5-or-more-track']
@@ -34,7 +34,7 @@ for i,n in enumerate(ntk):
 
 f = ROOT.TFile(fn)
 ROOT.TH1.AddDirectory(0)
-for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/h_sv_best0_jets_deltaphi']:
+for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/h_sv_all_jets_deltaphi']:
   colors = [ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2]
   l = ROOT.TLegend(0.15,0.75,0.85,0.85)
   h2s = []
@@ -44,16 +44,16 @@ for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/
     h.SetLineColor(colors[i])
     h.SetLineWidth(3)
     h.Scale(1./h.Integral())
-    if 'best0' in n:
+    if 'sv_all' in n:
       h.Rebin(5)
     h.GetYaxis().SetRangeUser(0,2./h.GetNbinsX())
-    h.SetTitle(';#Delta#phi_{%s};' % ('JV' if 'best0' in n else 'JJ'))
+    h.SetTitle(';#Delta#phi_{%s};' % ('JV' if 'sv_all' in n else 'JJ'))
     if i == 0:
       h.Draw()
     else:
       h.Draw('sames')
     l.AddEntry(h, '%s one-vertex events' % ntracks[i], 'LE')
-    h2 = ROOT.TH1F(h.GetName(), ';|#Delta#phi_{%s}|' % ('JV' if 'best0' in n else 'JJ'), h.GetNbinsX()/2, 0, 3.1416)
+    h2 = ROOT.TH1F(h.GetName(), ';|#Delta#phi_{%s}|' % ('JV' if 'sv_all' in n else 'JJ'), h.GetNbinsX()/2, 0, 3.1416)
     for j in range(1, h2.GetNbinsX()+1):
       h2.SetBinContent(j, h.GetBinContent(h.GetNbinsX()/2-j+1) + h.GetBinContent(h.GetNbinsX()/2+j))
       h2.SetBinError(j, (h.GetBinError(h.GetNbinsX()/2-j+1)**2 + h.GetBinError(h.GetNbinsX()/2+j)**2)**0.5)
@@ -76,7 +76,7 @@ for n in ['mfvEventHistosOnlyOneVtx/h_jet_pairdphi', 'mfvVertexHistosOnlyOneVtx/
   l.Draw()
   ps.save('abs_%s'%n.split('/')[1])
 
-for n in ['mfvVertexHistosOnlyOneVtx/h_sv_best0_jet0_deltaphi0']:
+for n in ['mfvVertexHistosOnlyOneVtx/h_sv_all_jet0_deltaphi0']:
   colors = [ROOT.kRed, 1, ROOT.kBlue, ROOT.kGreen+2]
   l = ROOT.TLegend(0.15,0.75,0.85,0.85)
   h2s = []

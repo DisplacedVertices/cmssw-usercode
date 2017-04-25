@@ -18,11 +18,11 @@ if year == 2015:
 ntk = 5
 tree_path = 'mfvMiniTree/t'
 if ntk == 3:
-    tree_path = 'tre33/t'
+    tree_path = 'mfvMiniTreeNtk3/t'
 if ntk == 4:
-    tree_path = 'tre44/t'
+    tree_path = 'mfvMiniTreeNtk4/t'
 
-path = 'MinitreeV12'
+path = 'MiniTreeV14'
 ps = plot_saver('../../plots/bkgest/%s/%s_ntk%i' % (path, year, ntk), size=(700,700), root=False)
 trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 

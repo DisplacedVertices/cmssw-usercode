@@ -8,6 +8,6 @@ stream_output = false
 stream_error  = false
 notification  = never
 should_transfer_files   = YES
-transfer_input_files = statmodel.exe,eff_avg.root
+transfer_input_files = statmodel.exe,eff_2016_v14.root
 when_to_transfer_output = ON_EXIT
 Queue 9

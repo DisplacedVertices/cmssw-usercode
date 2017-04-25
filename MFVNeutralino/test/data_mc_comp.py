@@ -8,8 +8,8 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_s
 
 year = '2016'
 
-root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2'
-plot_dir = 'plots/data_mc_comp/HistosV12_%s' % year
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV14'
+plot_dir = 'plots/data_mc_comp/HistosV14_%s' % year
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -38,6 +38,9 @@ for s in ttbar_samples:
 signal_samples = [signal_sample]
 signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 800 GeV'
 signal_sample.color = 8
+
+if year == '2015':
+    signal_samples = []
 
 C = partial(data_mc_comparison,
             background_samples = background_samples,
@@ -146,7 +149,7 @@ if year == '2015' or year == '2016':
 
 if year == '2016':
     C('track_pt',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_nm1_tracks_pt',
       x_title = 'Track p_{T} (GeV)',
       y_title = 'Tracks/0.1 GeV',
@@ -154,8 +157,17 @@ if year == '2016':
       cut_line = ((1, 0, 1, 2.8e10), 2, 5, 1),
       )
 
+    C('track_min_r',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_min_r',
+      x_title = 'Minimum layer number',
+      y_title = 'Tracks',
+      y_range = (1, 1e10),
+      cut_line = ((2, 0, 2, 2.8e10), 2, 5, 1),
+      )
+
     C('track_npxlayers',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_nm1_tracks_npxlayers',
       x_title = 'Number of pixel layers',
       y_title = 'Tracks',
@@ -163,17 +175,26 @@ if year == '2016':
       cut_line = ((2, 0, 2, 2.8e10), 2, 5, 1),
       )
 
-    C('track_nstlayers',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
-      histogram_path = 'TrackerMapper/h_nm1_tracks_nstlayers',
-      x_title = 'Number of strip layers',
+    C('track_nstlayers_etalt2',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_nstlayers_etalt2',
+      x_title = 'Number of strip layers (|#eta| < 2)',
       y_title = 'Tracks',
       y_range = (1, 1e10),
-      cut_line = ((3, 0, 3, 2.8e10), 2, 5, 1),
+      cut_line = ((6, 0, 6, 2.8e10), 2, 5, 1),
+      )
+
+    C('track_nstlayers_etagt2',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_nm1_tracks_nstlayers_etagt2',
+      x_title = 'Number of strip layers (|#eta| #geq 2)',
+      y_title = 'Tracks',
+      y_range = (1, 1e10),
+      cut_line = ((7, 0, 7, 2.8e10), 2, 5, 1),
       )
 
     C('track_nsigmadxy',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV1', '%(name)s.root'),
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_nm1_tracks_nsigmadxy',
       x_title = 'N#sigma(dxy)',
       y_title = 'Tracks',
@@ -183,27 +204,27 @@ if year == '2016':
       )
 
 if year == '2015':
-    int_lumi = 268.3 * (247663.0 / 273176.706743)
+    int_lumi = 268.3 * (247778.0 / 273178.525733)
     int_lumi_nice = '0.27 fb^{-1} (13 TeV)'
     data_samples = Samples.data_samples_2015
 elif year == '2016':
-    int_lumi = 3586.7 * (3103098.0 / 3452501.33131)
+    int_lumi = 3586.7 * (3021371.0 / 3472683.11285)
     int_lumi_nice = '3.59 fb^{-1} (13 TeV)'
     data_samples = Samples.data_samples
 elif year == '2016BCD':
-    int_lumi = 1259. * (1116774.0 / 1211893.72059)
+    int_lumi = 1259. * (1069961.0 / 1218977.92012)
     int_lumi_nice = '1.26 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016B3, Samples.JetHT2016C, Samples.JetHT2016D]
 elif year == '2016EF':
-    int_lumi = 711. * (627209.0 / 684397.479668)
+    int_lumi = 711. * (600771.0 / 688398.165594)
     int_lumi_nice = '0.71 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016E, Samples.JetHT2016F]
 elif year == '2016G':
-    int_lumi = 763. * (708704.0 / 734451.869958)
+    int_lumi = 763. * (643165.0 / 738745.15367)
     int_lumi_nice = '0.76 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016G]
 elif year == '2016H':
-    int_lumi = 855. * (650411.0 / 823009.636355)
+    int_lumi = 855. * (707474.0 / 827820.588491)
     int_lumi_nice = '0.86 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016H2, Samples.JetHT2016H3]
 

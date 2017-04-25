@@ -10,11 +10,11 @@ mode = 'vary_eff'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('../plots/bkgest/compare_dvvc_%s_%s' % (mode, year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v14/compare_dvvc_%s_%s' % (mode, year), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets_%s_3track_default_v12.root' % year, '2v_from_jets_%s_3track_%s_v12.root' % (year, mode)]
-fn2 = ['2v_from_jets_%s_4track_default_v12.root' % year, '2v_from_jets_%s_4track_%s_v12.root' % (year, mode)]
-fn3 = ['2v_from_jets_%s_5track_default_v12.root' % year, '2v_from_jets_%s_5track_%s_v12.root' % (year, mode)]
+fn1 = ['2v_from_jets_%s_3track_default_v14.root' % year, '2v_from_jets_%s_3track_%s_v14.root' % (year, mode)]
+fn2 = ['2v_from_jets_%s_4track_default_v14.root' % year, '2v_from_jets_%s_4track_%s_v14.root' % (year, mode)]
+fn3 = ['2v_from_jets_%s_5track_default_v14.root' % year, '2v_from_jets_%s_5track_%s_v14.root' % (year, mode)]
 
 if mode == 'vary_eff':
     ls = ['average efficiency', 'maxtk efficiency']
@@ -28,22 +28,22 @@ if mode == 'vary_dbv':
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 
-n2v = [1924., 40., 4.]
-ebin1 = [0.0021, 0.0053, 0.0098]
-ebin2 = [0.0018, 0.0056, 0.0236]
-ebin3 = [0.0047, 0.0170, 0.0766]
+n2v = [934., 7., 1.]
+ebin1 = [0.0026, 0.0062, 0.0124]
+ebin2 = [0.0023, 0.0078, 0.0328]
+ebin3 = [0.0060, 0.0231, 0.1019]
 
 if year == '2015':
-    n2v = [90., 2., 1.]
-    ebin1 = [0.0097, 0.0242, 0.0449]
-    ebin2 = [0.0083, 0.0260, 0.1069]
-    ebin3 = [0.0212, 0.0788, 0.3507]
+    n2v = [44., 1., 1.]
+    ebin1 = [0.0118, 0.0291, 0.0567]
+    ebin2 = [0.0106, 0.0371, 0.1513]
+    ebin3 = [0.0271, 0.1100, 0.4761]
 
 if year == '2015p6':
-    n2v = [2014., 42., 4.]
-    ebin1 = [0.0021, 0.0051, 0.0096]
-    ebin2 = [0.0018, 0.0056, 0.0229]
-    ebin3 = [0.0046, 0.0166, 0.0747]
+    n2v = [978., 7., 1.]
+    ebin1 = [0.0025, 0.0062, 0.0123]
+    ebin2 = [0.0023, 0.0076, 0.0323]
+    ebin3 = [0.0058, 0.0229, 0.1019]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
@@ -192,43 +192,43 @@ for i in range(3):
     if mode == 'vary_dphi':
         if year == '2015':
             if i == 0:
-                er1 *= 0.121149
-                er2 *= 0.211763
-                er3 *= 0.167168
+                er1 *= 0.122017
+                er2 *= 0.217034
+                er3 *= 0.178617
             if i == 1:
-                er1 *= 0.112227
-                er2 *= 0.213812
-                er3 *= 0.183399
+                er1 *= 0.109714
+                er2 *= 0.219117
+                er3 *= 0.189308
             if i == 2:
-                er1 *= 0.089197
-                er2 *= 0.218547
-                er3 *= 0.171132
+                er1 *= 0.076194
+                er2 *= 0.228316
+                er3 *= 0.142351
         if year == '2016':
             if i == 0:
-                er1 *= 0.116704
-                er2 *= 0.211908
-                er3 *= 0.160616
+                er1 *= 0.114920
+                er2 *= 0.213661
+                er3 *= 0.170409
             if i == 1:
-                er1 *= 0.109404
-                er2 *= 0.216431
-                er3 *= 0.176878
+                er1 *= 0.105188
+                er2 *= 0.220908
+                er3 *= 0.187441
             if i == 2:
-                er1 *= 0.086512
-                er2 *= 0.216790
-                er3 *= 0.162593
+                er1 *= 0.073343
+                er2 *= 0.219650
+                er3 *= 0.160530
         if year == '2015p6':
             if i == 0:
-                er1 *= 0.116713
-                er2 *= 0.211614
-                er3 *= 0.160821
+                er1 *= 0.114961
+                er2 *= 0.213431
+                er3 *= 0.170297
             if i == 1:
-                er1 *= 0.109870
-                er2 *= 0.216282
-                er3 *= 0.175091
+                er1 *= 0.104845
+                er2 *= 0.219375
+                er3 *= 0.185960
             if i == 2:
-                er1 *= 0.086836
-                er2 *= 0.217034
-                er3 *= 0.160045
+                er1 *= 0.071913
+                er2 *= 0.215773
+                er3 *= 0.157685
     if mode == 'vary_eff':
         er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
         er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5

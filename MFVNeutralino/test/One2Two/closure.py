@@ -4,27 +4,27 @@ ROOT.TH1.AddDirectory(0)
 year = '2016'
 
 set_style()
-ps = plot_saver('../plots/bkgest/closure_%s' % year, size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v14/closure_%s' % year, size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets_%s_3track_default_v12.root' % year, '2v_from_jets_%s_4track3track_default_v12.root' % year, '2v_from_jets_%s_4track_default_v12.root' % year, '2v_from_jets_%s_5track_default_v12.root' % year]
+fns = ['2v_from_jets_%s_3track_default_v14.root' % year, '2v_from_jets_%s_4track3track_default_v14.root' % year, '2v_from_jets_%s_4track_default_v14.root' % year, '2v_from_jets_%s_5track_default_v14.root' % year]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 
-n2v = [1924., 495., 40., 4.]
-ebin1 = [0.0021, 0.0053, 0.0053, 0.0098]
-ebin2 = [0.0018, 0.0056, 0.0056, 0.0236]
-ebin3 = [0.0047, 0.0170, 0.0170, 0.0766]
+n2v = [934., 211., 7., 1.]
+ebin1 = [0.0026, 0.0062, 0.0062, 0.0124]
+ebin2 = [0.0023, 0.0078, 0.0078, 0.0328]
+ebin3 = [0.0060, 0.0231, 0.0231, 0.1019]
 
 if year == '2015':
-    n2v = [90., 23., 2., 1.]
-    ebin1 = [0.0097, 0.0242, 0.0242, 0.0449]
-    ebin2 = [0.0083, 0.0260, 0.0260, 0.1069]
-    ebin3 = [0.0212, 0.0788, 0.0788, 0.3507]
+    n2v = [44., 9., 1., 1.]
+    ebin1 = [0.0118, 0.0291, 0.0291, 0.0567]
+    ebin2 = [0.0106, 0.0371, 0.0371, 0.1513]
+    ebin3 = [0.0271, 0.1100, 0.1100, 0.4761]
 
 if year == '2015p6':
-    n2v = [2014., 518., 42., 4.]
-    ebin1 = [0.0021, 0.0051, 0.0051, 0.0096]
-    ebin2 = [0.0018, 0.0056, 0.0056, 0.0229]
-    ebin3 = [0.0046, 0.0166, 0.0166, 0.0747]
+    n2v = [978., 220., 7., 1.]
+    ebin1 = [0.0025, 0.0062, 0.0062, 0.0123]
+    ebin2 = [0.0023, 0.0076, 0.0076, 0.0323]
+    ebin3 = [0.0058, 0.0229, 0.0229, 0.1019]
 
 for i in range(4):
     hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
@@ -91,4 +91,6 @@ for i in range(4):
     print ntk[i]
     print '   simulated events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s, es, s1, es1, s2, es2, s3, es3)
     print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
+    print '     dVV normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (s/s, es/s, s1/s, es1/s, s2/s, es2/s, s3/s, es3/s)
+    print '    dVVC normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (c/c, ec/c, c1/c, ec1/c, c2/c, ec2/c, c3/c, ec3/c)
     print '   ratio dVVC / dVV: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r, er, r1, er1, r2, er2, r3, er3)
