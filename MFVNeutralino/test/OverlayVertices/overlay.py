@@ -39,7 +39,7 @@ args = parser.parse_args()
 
 if args.in_fn is None:
     if args.batch:
-        args.in_fn = '%s.root' % args.sample
+        args.in_fn = '%s_edm.root' % args.sample
     else:
         args.in_fn = '%s/%s.root' % (args.in_path, args.sample)
     if not args.in_fn.startswith('root:') and not args.in_fn.startswith('/store'):
@@ -48,7 +48,7 @@ if args.out_fn is None:
     args.out_fn = 'overlay_%i.root' % args.which_event
 if args.minitree_fn is None:
     if args.batch:
-        args.minitree_fn = '%s.root' % args.sample
+        args.minitree_fn = '%s_tree.root' % args.sample
     else:
         args.minitree_fn = '%s/%s.root' % (args.minitree_path, args.sample)
 if args.minitree_treepath is None:
