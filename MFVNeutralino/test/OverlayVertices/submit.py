@@ -121,8 +121,8 @@ function xrdcpit {
 
 echo start xrdcp input at $(date)
 (xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/prescales.root .) && \
-(xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/qcdht0700sum.root qcdht0700sum_tree.root) && \
-(xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14/qcdht0700sum.root qcdht0700sum_edm.root)
+(xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/%(sample)ssum.root %(sample)ssum_tree.root) && \
+(xrdcpit root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14/%(sample)ssum.root %(sample)ssum_edm.root)
 xrdcpexit=$?
 if [[ xrdcpexit -ne 0 ]]; then
     echo problem with one of the xrdcps
