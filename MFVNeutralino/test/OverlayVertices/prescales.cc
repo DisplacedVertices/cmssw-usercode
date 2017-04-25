@@ -73,14 +73,15 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
 int main() {
   const char* samples[] = {
-    "qcdht0500sum", "qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar", "background_noweight",
-    "qcdht0500sum_2015", "qcdht1000sum_2015", "qcdht1500sum_2015", "qcdht2000sum_2015", "ttbar_2015", "background_noweight_2015",
+    "qcdht0500sum", "qcdht0700sum", "qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar", "background_noweight",
+    "qcdht0500sum_2015", "qcdht0700sum_2015", "qcdht1000sum_2015", "qcdht1500sum_2015", "qcdht2000sum_2015", "ttbar_2015", "background_noweight_2015",
     "JetHT2015C", "JetHT2015D", "JetHT2015",
     "JetHT2016B3", "JetHT2016C", "JetHT2016D", "JetHT2016E", "JetHT2016F", "JetHT2016G", "JetHT2016H",
     "JetHT2016", "JetHT2016BthruG", "JetHT2016BCD", "JetHT2016EF",
   };
+
   const char* fn_path = "root://cmseos.fnal.gov//store/user/tucker/MiniTreeV14_forpick/%s.root";
-  TFile out_f("prescales.root", "recreate");
+  TFile out_f("prescales.root", "new");
 
   for (ntracks = 3; ntracks <= 5; ++ntracks) {
     printf("ntracks = %i:\n", ntracks);
