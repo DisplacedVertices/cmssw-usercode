@@ -18,6 +18,8 @@ namespace mfv {
     const std::string path;
 
     jmt::ConfigFromEnv env;
+    const bool from_histograms;
+    const std::string from_histograms_fn;
     const int min_ntracks;
     const int min_ntracks0;
     const int max_ntracks0;
@@ -28,9 +30,6 @@ namespace mfv {
     const double scale_2v;
     const bool allow_cap;
     const bool poisson_means;
-    const bool throw_2v_from_histogram;
-    const int n2v_from_histogram;
-    const bool use_qcd700;
     const bool use_bkgsyst;
     const bool use_only_data_sample;
     const int sample_only;
@@ -49,6 +48,15 @@ namespace mfv {
     const int seed;
 
     ////////////////////////////////////////////////////////////////////////////
+
+    TH1D* h_bkg_dbv;
+    TH1D* h_bkg_dvv;
+    TH1D* h_bkg_dphi;
+    TH1D* h_injected_signal_dbv;
+    TH1D* h_injected_signal_dvv;
+    TH1D* h_injected_signal_dphi;
+    TH1D* h_injected_signal_norm;
+    TH1D* h_template_signal_dvv;
 
     std::map<int, VertexSimples> all_1v;
     std::map<int, VertexPairs>   all_2v;
@@ -96,6 +104,7 @@ namespace mfv {
 
     void book_hists();
     bool sel_vertex(const VertexSimple& v) const;
+    void read_histograms();
     void read_sample(const Sample& sample);
     void loop_over_samples(std::function<void(const Sample&)> fcn);
     void update_poisson_means();
