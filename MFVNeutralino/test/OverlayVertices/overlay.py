@@ -9,6 +9,7 @@ from JMTucker.MFVNeutralino.Year import year
 allowed_samples = Samples.ttbar_samples + Samples.qcd_samples_sum + Samples.ttbar_samples_2015 + Samples.qcd_samples_sum_2015
 
 parser, args_printer = friendly_argparse(description='Overlay tracks from pairs of 1-vertex events')
+parser.add_argument('+batch', action='store_true', help='running in batch, assume input files copied to cwd')
 parser.add_argument('+which-event', '+e', type=int, help='which event from minitree to use', required=True)
 parser.add_argument('+sample', help='which sample to use', choices=[s.name for s in allowed_samples], default='qcdht1500sum')
 parser.add_argument('+ntracks', type=int, help='ntracks to use', default=3, choices=[3,4,5])
@@ -37,13 +38,23 @@ parser.add_argument('+max-events', type=int, help='max edm events to run on', de
 args = parser.parse_args()
 
 if args.in_fn is None:
-    args.in_fn = '%s/%s.root' % (args.in_path, args.sample)
+    if args.batch:
+        args.in_fn = '%s.root' % args.sample
+    else:
+        args.in_fn = '%s/%s.root' % (args.in_path, args.sample)
+    if not args.in_fn.startswith('root:') and not args.in_fn.startswith('/store'):
+        args.in_fn = 'file:' + args.in_fn
 if args.out_fn is None:
     args.out_fn = 'overlay_%i.root' % args.which_event
 if args.minitree_fn is None:
-    args.minitree_fn = '%s/%s.root' % (args.minitree_path, args.sample)
+    if args.batch:
+        args.minitree_fn = '%s.root' % args.sample
+    else:
+        args.minitree_fn = '%s/%s.root' % (args.minitree_path, args.sample)
 if args.minitree_treepath is None:
     args.minitree_treepath = 'mfvMiniTreeNtk%i/t' % args.ntracks if args.ntracks != 5 else 'mfvMiniTree/t'
+if args.batch:
+    args.prescales_fn = 'prescales.root'
 
 if args.z_width == 99:
     args.z_width = 0.03 if args.ntracks == 3 else 0.02

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-version = 'V3'
+version = 'V3p1'
 per = 50
 
 ####
@@ -91,10 +91,22 @@ echo nev: $nev
 cd %(cmssw_version)s/src
 eval $(scram runtime -sh)
 
+echo start xrdcp input at $(date)
+for fn in root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/prescales.root root://cmsxrootd.fnal.gov//store/user/tucker/MiniTreeV14_forpick/${sample}.root root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14/${sample}.root; do
+    echo $fn
+    xrdcp -f -t 10 $fn . 2>&1
+    xrdcpexit=$?
+    if [[ $xrdcpexit -ne 0 ]]; then
+        echo xrdcp exited with code $xrdcpexit
+        exit $xrdcpexit
+    fi
+done
+echo end xrdcp input at $(date)
+
 echo start cmsRun loop at $(date)
 for i in $(seq 0 $nev); do
     echo start cmsRun \#$i at $(date)
-    cmsRun -j tempfjr.xml ${workdir}/%(cmssw_py)s +which-event $(((job-1)*%(per)s+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
+    cmsRun -j tempfjr.xml ${workdir}/%(cmssw_py)s +batch +which-event $(((job-1)*%(per)s+i)) +sample %(sample)s +ntracks %(ntracks)s %(overlay_args)s 2>&1
     cmsexit=$?
     echo end cmsRun \#$i at $(date)
     if [[ $cmsexit -ne 0 ]]; then
