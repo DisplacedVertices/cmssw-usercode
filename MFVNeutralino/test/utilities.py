@@ -5,6 +5,7 @@ from pprint import pprint
 from glob import glob
 from JMTucker.Tools import Samples
 from JMTucker.Tools import SampleFiles
+from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.hadd import hadd
 from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files
 from JMTucker.MFVNeutralino import AnalysisConstants
@@ -78,6 +79,7 @@ def cmd_hadd_qcd_sum():
 cmd_merge_qcd_sum = cmd_hadd_qcd_sum
 
 def cmd_merge_background():
+    permissive = bool_from_argv('permissive')
     for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016 * AnalysisConstants.scale_factor_2016), ('_2015', -AnalysisConstants.int_lumi_2015 * AnalysisConstants.scale_factor_2015):
         files = ['ttbar.root']
         files += ['qcdht%04isum.root' % x for x in [500, 700, 1000, 1500, 2000]]
@@ -85,7 +87,11 @@ def cmd_merge_background():
             files = [fn.replace('.root', '_2015.root') for fn in files]
         for fn in files:
             if not os.path.isfile(fn):
-                raise RuntimeError('%s not found' % fn)
+                msg = '%s not found' % fn
+                if permissive:
+                    print msg
+                else:
+                    raise RuntimeError(msg)
         cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
         cmd += ' '.join(files)
         print cmd
