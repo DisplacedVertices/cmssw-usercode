@@ -26,8 +26,11 @@ private:
   const bool weight_pileup;
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
+  const bool weight_npv;
+  const std::vector<double> npv_weights;
+  double npv_weight(int mc_npu) const;
 
-  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weightprod_total, sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_weight, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weightprod_total, sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_npv_weight, sum_weight, n_sums };
   TH1F* h_sums;
 };
 
@@ -43,7 +46,9 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     weight_gen(cfg.getParameter<bool>("weight_gen")),
     weight_gen_sign_only(cfg.getParameter<bool>("weight_gen_sign_only")),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
-    pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights"))
+    pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
+    weight_npv(cfg.getParameter<bool>("weight_npv")),
+    npv_weights(cfg.getParameter<std::vector<double> >("npv_weights"))
 {
   produces<double>();
 
@@ -52,7 +57,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     TH1::SetDefaultSumw2();
     h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weightprod_total", "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_weight", "n_sums" })
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weightprod_total", "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
   }
 }
@@ -85,6 +90,13 @@ double MFVWeightProducer::pileup_weight(int mc_npu) const {
     return 0;
   else
     return pileup_weights[mc_npu];
+}
+
+double MFVWeightProducer::npv_weight(int mc_npv) const {
+  if (mc_npv < 0 || mc_npv >= int(npv_weights.size()))
+    return 0;
+  else
+    return npv_weights[mc_npv];
 }
 
 void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
@@ -126,6 +138,15 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         if (histos)
           h_sums->Fill(sum_pileup_weight, pu_w);
         *weight *= pu_w;
+      }
+
+      if (weight_npv) {
+        const double npv_w = npv_weight(mevent->npv);
+        if (prints)
+          printf("mc_npv: %i  npv weight: %g  ", mevent->npv, npv_w);
+        if (histos)
+          h_sums->Fill(sum_npv_weight, npv_w);
+        *weight *= npv_w;
       }
     }
   }

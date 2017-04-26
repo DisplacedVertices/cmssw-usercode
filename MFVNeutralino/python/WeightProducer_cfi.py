@@ -21,4 +21,6 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
                            weight_gen_sign_only = cms.bool(False),
                            weight_pileup = cms.bool(True),
                            pileup_weights = cms.vdouble(*pileup_weights[year]),
+                           weight_npv = cms.bool(False),
+                           npv_weights = cms.vdouble(),
                            )
