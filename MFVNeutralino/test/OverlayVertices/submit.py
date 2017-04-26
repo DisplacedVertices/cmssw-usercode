@@ -171,10 +171,6 @@ def submit(samples, ntracks, overlay_args, batch_name_ex=''):
     testing = 'testing' in sys.argv
 
     batch_name = 'ntk%i' % ntracks
-    if 'deltasv' in overlay_args:
-        batch_name += '_deltasv'
-    if 'no-rest-of-event' in overlay_args:
-        batch_name += '_woevent'
     batch_name += batch_name_ex
     if testing:
         batch_name += '_TEST'
@@ -240,6 +236,13 @@ if year == 2015:
 elif year == 2016:
     samples = ['qcdht0700sum', 'qcdht1000sum', 'qcdht1500sum', 'qcdht2000sum', 'ttbar']
 
-for overlay_args in ['']:
+oes = [
+#    ('', ''),
+    ('+z-model deltasv',  '_deltasv'),
+    ('+no-rest-of-event', '_noevent'),
+    ('+z-width 0.06',     '_zwidth2x'),
+    ('+found-dist 0.016', '_found2sig'),
+    ]
+for overlay_args, ex in oes:
     for ntracks in [3,4,5]:
-        submit(samples, ntracks, overlay_args)
+        submit(samples, ntracks, overlay_args, ex)
