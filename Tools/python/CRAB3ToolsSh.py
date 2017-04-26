@@ -73,8 +73,14 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         expected = crab_get_njobs_from_log(working_dir)
         rq = crab_requestcache(working_dir)
         timestamp = rq['RequestName'].split(':')[0]
-        primary_dataset = rq['OriginalConfig'].Data.inputDataset.split('/')[1]
-        publish_name = rq['OriginalConfig'].Data.outputDatasetTag
+        try:
+            primary_dataset = rq['OriginalConfig'].Data.inputDataset.split('/')[1]
+        except AttributeError:
+            primary_dataset = 'CRAB_PrivateMC'
+        try:
+            publish_name = rq['OriginalConfig'].Data.outputDatasetTag
+        except AttributeError:
+            publish_name = None
         if not publish_name:
             assert not rq['OriginalConfig'].Data.publication
             publish_name = rq['RequestName'].split(username + '_')[1]
