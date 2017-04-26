@@ -39,6 +39,7 @@ process.mfvVertices.track_src = 'mfvMovedTracks'
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+process.mfvWeight.throw_if_no_mcstat = False
 
 process.mfvMovedTracks = cms.EDProducer('MFVTrackMover',
                                         tracks_src = cms.InputTag('generalTracks'),
