@@ -75,40 +75,33 @@ process.maxEvents.input = 100
 file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
 
-    samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+    if year == 2015:
+        samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
+    elif year == 2016:
+        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
-    def modify(sample):
+    def njets_modifier(sample):
         to_add = []
-        to_replace = []
-
-        to_replace.append(('njetsX= 2\nnbjets = 0'.replace('X', ' '),
-                           'njets = %i\nnbjets = %i' % (njets, nbjets),
-                           'could not find the magic string for njets/nbjets'))
-
-        if not sample.is_mc:
-            magic = 'is_mcX=XTrue'.replace('X', ' ')
-            err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
-            to_replace.append((magic, 'is_mc = False', err))
-
-            if sample.name.startswith('JetHT2016H'):
-                magic = 'H =XFalse'.replace('X', ' ')
-                err = 'trying to submit on 2016H and no magic string "%s"' % magic
-                to_replace.append((magic, 'H = True', err))
-
+        to_replace = [('njetsX= 2\nnbjets = 0'.replace('X', ' '),
+                       'njets = %i\nnbjets = %i' % (njets, nbjets),
+                       'could not find the magic string for njets/nbjets')]
         return to_add, to_replace
 
     for s in samples:
         if not s.is_mc:
             s.json = '../ana_2015p6.json'
 
-    ex = '%i%i' % (njets, nbjets)
+    skips = { 'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'}, 'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'}, }
+    modify = chain_modifiers(njets_modifier, is_mc_modifier, H_modifier, event_veto_modifier(skips, 'p'))
 
-    cs = CRABSubmitter('TrackMover_' + ex,
-                       pset_modifier = modify,
-                       job_control_from_sample = True,
-                       )
-
-    cs.submit_all(samples)
+    batch_name = 'TrackMoverV1_%i%i' % (njets, nbjets)
+    ms = MetaSubmitter(batch_name)
+    ms.common.ex = year
+    ms.common.pset_modifier = modify
+    ms.common.publish_name = batch_name
+    ms.crab.job_control_from_sample = True
+    ms.condor.stageout_files = 'all'
+    ms.submit(samples)
