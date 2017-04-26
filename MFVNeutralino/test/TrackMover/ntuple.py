@@ -2,13 +2,13 @@
 
 import sys
 from JMTucker.Tools.general import typed_from_argv
-from JMTucker.Tools.MiniAOD_cfg import cms, pat_tuple_process
+from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
-assert year == 2016 # need to change for 2015
 
-# 3 magic lines, don't touch
+# 4 magic lines
 is_mc = True
+H = False
 njets = 2
 nbjets = 0
 
@@ -19,23 +19,15 @@ if len(ints) > 0:
     njets, nbjets = ints
 
 
-process = pat_tuple_process(None, is_mc, year)
+process = pat_tuple_process(None, is_mc, year, H)
+remove_met_filters(process)
+remove_output_module(process)
 
 tfileservice(process, 'movedtree.root')
 random_service(process, {'mfvVertices': 12179, 'mfvMovedTracks': 13068})
 
-if is_mc:
-    process.mcStat.histos = True
-
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
-
-del process.outp
-del process.out
-
-for p in process.paths.keys():
-    if p.startswith('Flag_'):
-        delattr(process, p)
 
 import JMTucker.MFVNeutralino.EventFilter
 JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
@@ -96,24 +88,25 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                            'njets = %i\nnbjets = %i' % (njets, nbjets),
                            'could not find the magic string for njets/nbjets'))
 
-        if sample.is_mc:
-            if sample.is_fastsim:
-                raise NotImplementedError('zzzzzzz')
-        else:
+        if not sample.is_mc:
             magic = 'is_mcX=XTrue'.replace('X', ' ')
             err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
             to_replace.append((magic, 'is_mc = False', err))
-            # JMTBAD different globaltags?
+
+            if sample.name.startswith('JetHT2016H'):
+                magic = 'H =XFalse'.replace('X', ' ')
+                err = 'trying to submit on 2016H and no magic string "%s"' % magic
+                to_replace.append((magic, 'H = True', err))
 
         return to_add, to_replace
 
     for s in samples:
         if not s.is_mc:
-            s.json = '../ana_2016.json'
+            s.json = '../ana_2015p6.json'
 
     ex = '%i%i' % (njets, nbjets)
 
-    cs = CRABSubmitter('TrackMover2016_' + ex,
+    cs = CRABSubmitter('TrackMover_' + ex,
                        pset_modifier = modify,
                        job_control_from_sample = True,
                        )
