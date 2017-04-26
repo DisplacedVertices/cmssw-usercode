@@ -73,7 +73,7 @@ process.p *= process.mfvMovedTree
 
 #process.options.wantSummary = True
 process.maxEvents.input = 100
-file_event_from_argv(process)
+#file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
