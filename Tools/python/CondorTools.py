@@ -53,14 +53,22 @@ def cs_eventswritten(d):
 def cs_njobs(d):
     return int(open(os.path.join(d, 'njobs')).read())
 
+def cs_jobmap(d):
+    # takes fake job # (the jobnum in the cluster) tot he original real job number
+    # same for original submission, for resubdirs can be different
+    return dict(enumerate(open(os.path.join(d, 'cs_jobmap')).read().split()))
+
+def cs_realjob(d, job):
+    return cs_jobmap(d)[job]
+
 def cs_resubs(d):
     return glob(os.path.join(d, 'resub*'))
 
 def cs_clusters(d):
-    return [int(open(os.path.join(p, 'cluster')).read()) for p in [d] + cs_resubs(d)]
+    return [(p, int(open(os.path.join(p, 'cluster')).read())) for p in [d] + cs_resubs(d)]
     
 def cs_kill(d):
-    for c in cs_clusters(d):
+    for _, c in cs_clusters(d):
         os.system('condor_rm %s' % c)
 
 def cs_logs(d):
@@ -71,11 +79,13 @@ def cs_job_from_log(fn):
 
 def cs_jobs_running(d):
     jobs = []
-    for cluster in cs_clusters(d):
+    for subdir, cluster in cs_clusters(d):
         cluster = str(cluster)
         for line in sub_popen('condor_q -wide %s' % cluster).stdout:
             if line.startswith(cluster):
-                jobs.append(int(line.split()[0].split('.')[1]))
+                j = int(line.split()[0].split('.')[1])
+                j = cs_realjob(subdir, j)
+                jobs.append(j)
     return jobs
 
 def cs_primaryds(d):
@@ -124,6 +134,8 @@ def cs_analyze(d,
                 ret = -2
             elif 'Job was evicted' in line:
                 ret = -3
+            elif 'Job executing on host' in line and ret == -3:
+                ret = -2
             elif 'Job was aborted by the user' in line:
                 ret = -4
             else:
