@@ -90,6 +90,7 @@ def cmd_merge_background():
                 msg = '%s not found' % fn
                 if permissive:
                     print msg
+                    files.remove(fn)
                 else:
                     raise RuntimeError(msg)
         cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
