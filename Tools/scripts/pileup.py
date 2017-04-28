@@ -10,7 +10,7 @@ parser.add_argument('--year', type=int, choices=[2015, 2016],
 parser.add_argument('--ana-json',
                     help='The JSON file produced from crab -report (or multiple crab reports, added together with mergeJSON.py).')
 parser.add_argument('--lumi-json', default='default',
-                    help='The centrally produced lumi-weighted pileup JSON (default /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%(two-digit-year)i/13TeV/PileUp/pileup_latest.txt).')
+                    help='The centrally produced lumi-weighted pileup JSON (default /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/CollisionsYY/13TeV/PileUp/pileup_latest.txt).')
 parser.add_argument('--max-npu', type=int, default=100,
                     help='The maximum pileup bin (default %(default)s).')
 parser.add_argument('--pileupcalc-mode', default='true',
@@ -18,9 +18,9 @@ parser.add_argument('--pileupcalc-mode', default='true',
 parser.add_argument('--pileupcalc-mbxsec', default=-1, type=int,
                     help='The minbias cross section for pileupCalc.py, in microbarn (default 69000 for 2015 and 69200 for 2016).')
 parser.add_argument('--data-fn', default='default',
-                    help='The output filename for pileupCalc.py (default %(default)s).')
+                    help='The output filename for pileupCalc.py (default pileup_YYYY.root).')
 parser.add_argument('--data-path', default='pileup',
-                    help='The name of the histogram for pileupCalc.py to produce in the file given by --data-fn (default pileup_%(year)i.root).')
+                    help='The name of the histogram for pileupCalc.py to produce or look for in the file given by --data-fn.')
 parser.add_argument('--no-run-pileupcalc', action='store_false', dest='run_pileupcalc', default=True,
                     help='If specified, do not run pileupCalc.py, but assume that the data distribution already exists in the file given by --data-fn.')
 parser.add_argument('--mc-fn', default='pileup_mc.root',
