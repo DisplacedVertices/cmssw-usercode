@@ -261,7 +261,7 @@ for i in range(3):
     g.GetXaxis().SetLimits(-3,1)
     g.GetXaxis().SetLabelSize(0)
     g.GetXaxis().SetTitleOffset(0.5)
-    g.GetYaxis().SetRangeUser(0.6,1.4)
+    g.GetYaxis().SetRangeUser(0,2)
     g.Draw('AP')
 
     line = ROOT.TLine(-3,1,1,1)
@@ -278,7 +278,7 @@ for i in range(3):
         t = ROOT.TLatex()
         t.SetTextFont(42)
         t.SetTextSize(0.04)
-        t.DrawLatex(-2.5, 0.7, '#splitline{difference of 5-or-more-track ratio from 1:}{%.2f #pm %.2f}' % (abs(ys[i][2] - 1), eys[i][2]))
+        t.DrawLatex(-2.5, 0.2, '#splitline{difference of 5-or-more-track ratio from 1:}{%.2f #pm %.2f}' % (abs(ys[i][2] - 1), eys[i][2]))
 
     else:
         r = g.Fit('pol1','S','',-2,-1)
@@ -302,6 +302,6 @@ for i in range(3):
         t = ROOT.TLatex()
         t.SetTextFont(42)
         t.SetTextSize(0.04)
-        t.DrawLatex(-2.5, 0.7, '#splitline{difference from 3-track to 5-or-more-track:}{%.2f #pm %.2f}' % (abs(r.Value(0) - ys[i][0]), (r.ParError(0)**2 + eys[i][0]**2)**0.5))
+        t.DrawLatex(-2.5, 0.2, '#splitline{difference from 3-track to 5-or-more-track:}{%.2f #pm %.2f}' % (abs(r.Value(0) - ys[i][0]), (r.ParError(0)**2 + eys[i][0]**2)**0.5))
 
     ps.save('ratio_%s_%s' % (bins[i], mode))
