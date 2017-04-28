@@ -4,14 +4,19 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 from_miniaod = False
 
 import JMTucker.Tools.SampleFiles as sf
-sf.set_process(process, 'qcdht1000_2015', 'main', 5)
+sf.set_process(process, 'qcdht1500', 'main', 10)
 
-process.TFileService.fileName = 'mc_pileup.root'
+process.TFileService.fileName = 'pileup_mc.root'
 
 process.MCPileupDist = cms.EDAnalyzer('PileupDist',
-                                      pileup_info_src = cms.InputTag('slimmedAddPileupInfo' if from_miniaod else 'addPileupInfo'),
-                                      binning = cms.vdouble(100, 0, 100)
+                                      primary_vertices_src = cms.InputTag('offlinePrimaryVertices'),
+                                      pileup_info_src = cms.InputTag('addPileupInfo')
                                       )
+
+if from_miniaod:
+    process.MCPileupDist.primary_vertices_src = cms.InputTag('offlineSlimmedPrimaryVertices')
+    process.MCPileupDist.pileup_info_src = cms.InputTag('slimmedAddPileupInfo')
+
 process.MCPileupDistHLT = process.MCPileupDist.clone()
 
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
@@ -22,19 +27,21 @@ process.hltHighLevel.throw = False
 process.p = cms.Path(process.MCPileupDist * process.hltHighLevel * process.MCPileupDistHLT)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+   from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
 
-    # looks like it's OK to read older samples here just to get the addPileupInfo object
-    samples = [
-        Samples.qcdht0500, Samples.qcdht0500ext, Samples.qcdht2000, Samples.qcdht2000ext,
-        Samples.qcdht0500_2015, Samples.qcdht0500ext_2015, Samples.qcdht2000_2015, Samples.qcdht2000ext_2015,
-        Samples.mfv_neu_tau10000um_M0800_2015, Samples.official_mfv_neu_tau10000um_M0800
-        ]
+    if year == 2015:
+        samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
+    elif year == 2016:
+        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
     for s in samples:
-        s.files_per = 10
+        if not s.is_mc:
+            s.json = 'ana_2015p6.json'
+        s.split_by = 'files'
+        s.files_per = 200
 
-    from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('PileupDistV2')
+    ms = MetaSubmitter('PileupDistV3')
+    ms.common.ex = year
     ms.crab.job_control_from_sample = True
     ms.submit(samples)
