@@ -18,6 +18,9 @@ const int nbkg = 8;
 const char* samples[nbkg] = {"qcdht1000sum_2015", "qcdht1500sum_2015", "qcdht2000sum_2015", "ttbar_2015", "qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
 float       weights[nbkg] = {0.21105,             0.02736,             0.01132,             0.05799,      2.84372,        0.36354,        0.15026,        0.68346};
 
+const int min_npu = 0;
+const int max_npu = 255;
+
 double dphi_pdf_e = 2;
 
 int dvv_nbins = 40;
@@ -142,6 +145,7 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
       if (t->GetEntry(j) <= 0) continue;
 
       if ((bquarks == 0 && nt.gen_flavor_code == 2) || (bquarks == 1 && nt.gen_flavor_code != 2)) continue;
+      if (nt.npu < min_npu || nt.npu > max_npu) continue;
 
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1) {
