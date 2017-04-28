@@ -1687,8 +1687,11 @@ def tgraph_getpoint(g, i):
     g.GetPoint(i,x,y)
     return x,y
 
-def to_array(l):
-    return array('d', l)
+def to_array(*l):
+    if type(l[0]) in (tuple, list):
+        return array('d', l[0])
+    else:
+        return array('d', l)
 
 def ttree_iterator(tree, return_tree=False):
     for jentry in xrange(tree.GetEntriesFast()):
