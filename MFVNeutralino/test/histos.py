@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'qcdht2000', 'ntuplev12', 1)
+sample_files(process, 'qcdht2000', 'ntuplev14', 1)
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
