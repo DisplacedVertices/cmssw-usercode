@@ -17,7 +17,7 @@ def get_f_t(x, min_ntracks=None, tree_path='trees'):
     elif type(x) == str:
         input_fn = x
     f = ROOT.TFile.Open(input_fn)
-    if min_ntracks:
+    if min_ntracks and min_ntracks != 5:
         t = f.Get('mfvMiniTreeNtk%i/t' % min_ntracks)
     else:
         t = f.Get('mfvMiniTree/t')
