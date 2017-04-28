@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 version = 'V3p1'
-per = 50
+per = 250
 
 ####
 
