@@ -1,33 +1,44 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.MiniAOD_cfg import *
+from JMTucker.Tools.CMSSWTools import *
+from JMTucker.MFVNeutralino.Year import year
 
 from_miniaod = False
+is_mc = True
+H = False
 
-import JMTucker.Tools.SampleFiles as sf
-sf.set_process(process, 'qcdht1500', 'main', 10)
+process = pat_tuple_process(None, is_mc, year, H)
+jets_only(process)
 
-process.TFileService.fileName = 'pileup_mc.root'
+process.maxEvents.input = -1
+sample_files(process, 'qcdht1500', 'main', 10)
+tfileservice(process, 'pileup.root')
 
-process.MCPileupDist = cms.EDAnalyzer('PileupDist',
+process.load('JMTucker.Tools.MCStatProducer_cff')
+
+process.PileupDist = cms.EDAnalyzer('PileupDist',
                                       primary_vertices_src = cms.InputTag('offlinePrimaryVertices'),
                                       pileup_info_src = cms.InputTag('addPileupInfo')
                                       )
 
 if from_miniaod:
-    process.MCPileupDist.primary_vertices_src = cms.InputTag('offlineSlimmedPrimaryVertices')
-    process.MCPileupDist.pileup_info_src = cms.InputTag('slimmedAddPileupInfo')
+    process.PileupDist.primary_vertices_src = cms.InputTag('offlineSlimmedPrimaryVertices')
+    process.PileupDist.pileup_info_src = cms.InputTag('slimmedAddPileupInfo')
 
-process.MCPileupDistHLT = process.MCPileupDist.clone()
+process.PileupDistHLT    = process.PileupDist.clone()
+process.PileupDistPreSel = process.PileupDist.clone()
 
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 process.hltHighLevel.HLTPaths = ['HLT_PFHT800_v*', 'HLT_PFHT900_v*', 'HLT_PFJet450_v*', 'HLT_AK8PFJet450_v*']
 process.hltHighLevel.andOr = True
 process.hltHighLevel.throw = False
 
-process.p = cms.Path(process.MCPileupDist * process.hltHighLevel * process.MCPileupDistHLT)
+process.load('JMTucker.Tools.JetFilter_cfi')
+
+process.p = cms.Path(process.PileupDist * process.hltHighLevel * process.PileupDistHLT * process.jmtJetFilter * process.PileupDistPreSel)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-   from JMTucker.Tools.MetaSubmitter import *
+    from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
 
     if year == 2015:
@@ -36,12 +47,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
     for s in samples:
+        s.condor = False
         if not s.is_mc:
             s.json = 'ana_2015p6.json'
         s.split_by = 'files'
-        s.files_per = 200
+        s.files_per = 30
 
     ms = MetaSubmitter('PileupDistV3')
     ms.common.ex = year
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier)
     ms.crab.job_control_from_sample = True
     ms.submit(samples)
