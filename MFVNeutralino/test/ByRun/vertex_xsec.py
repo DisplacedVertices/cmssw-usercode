@@ -5,17 +5,18 @@ ROOT.gStyle.SetOptFit(0)
 year = 2016
 excludes = [('all', [])]
 event_filter_fn = None #'/uscms_data/d2/tucker/eventids_temp/HT900_L1300.bin'
-plot_path = 'vertex_xsec_%i' % year
+file_path = '/uscms_data/d2/tucker/crab_dirs/!done/MiniTreeV14_forpick'
+plot_path = 'vertex_xsec_v14_%i' % year
 
 if event_filter_fn:
     plot_path += '_' + os.path.basename(event_filter_fn).replace('.bin', '')
 
 if year == 2015:
-    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV12/JetHT2015%s.root' % s for s in 'CD']
-    mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12/dataok_2015.json'
+    fns = ['%s/JetHT2015%s.root' % (file_path, s) for s in 'CD']
+    mask_fn = '%s/dataok_2015.json' % file_path
 else:
-    fns = ['/uscms_data/d2/tucker/crab_dirs/MinitreeV12/JetHT2016%s.root' % s for s in 'B3 C D E F G H2 H3'.split()]
-    mask_fn = '/uscms_data/d2/tucker/crab_dirs/MinitreeV12/dataok_2016.json'
+    fns = ['%s/JetHT2016%s.root' % (file_path, s) for s in 'B3 C D E F G H2 H3'.split()]
+    mask_fn = '%s/dataok_2016.json' % file_path
 
 ####
 
@@ -25,7 +26,7 @@ plotter = ByRunPlotter(ps, mask_fn)
 event_filter = EventFilter(event_filter_fn) if event_filter_fn else None
 
 for ntracks, oneortwo in (3, 1), (4, 1), (3, 2), (4, 2):
-    tree_path = 'tre%i%i/t' % (ntracks, ntracks) if ntracks < 5 else 'mfvMiniTree/t'
+    tree_path = 'mfvMiniTreeNtk%i/t' % ntracks if ntracks < 5 else 'mfvMiniTree/t'
     title = '%i, %i-track %i-vtx events' % (year, ntracks, oneortwo)
     print title
 
