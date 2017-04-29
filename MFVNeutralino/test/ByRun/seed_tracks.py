@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'JetHT2016G', 'ntuplev12')
+sample_files(process, 'JetHT2016G', 'ntuplev14')
 process.TFileService.fileName = 'byrunseedtracks.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
@@ -50,5 +50,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             sample.json = '../ana_2015p6.json'
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('ByRunStuffV12', dataset='ntuplev12')
+    cs = CondorSubmitter('ByRunStuffV14', dataset='ntuplev14')
     cs.submit_all(samples)
