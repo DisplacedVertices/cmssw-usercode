@@ -102,10 +102,10 @@ def set_splitting(samples, dataset, jobtype):
             'qcdht2000ext_2015':  (  49705,     5),
             'ttbar':              ( 399372,    46),
             'ttbar_2015':         ( 919380,    66),
-            }[
+            }
         for sample in samples:
             sample.set_curr_dataset(dataset)
-            assert d.has_key(sample.name):
+            assert d.has_key(sample.name)
             sample.events_per, sample.files_per = d[sample.name]
         return
 
