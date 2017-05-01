@@ -68,6 +68,47 @@ class chain_modifiers:
 ####
 
 def set_splitting(samples, dataset, jobtype):
+    if jobtype == 'trackmover':
+        d = {
+            'JetHT2015C':         ( 200000,    33),
+            'JetHT2015D':         ( 665202,    29),
+            'JetHT2016B3':        ( 288462,    17),
+            'JetHT2016C':         ( 111940,     8),
+            'JetHT2016D':         ( 245902,    17),
+            'JetHT2016E':         ( 157895,    12),
+            'JetHT2016F':         ( 104167,     9),
+            'JetHT2016G':         ( 232826,    19),
+            'JetHT2016H2':        ( 202703,    16),
+            'JetHT2016H3':        ( 319149,    25),
+            'qcdht0500':          (1657600,   200),
+            'qcdht0500_2015':     (4762566,   333),
+            'qcdht0500ext':       (1753088,   214),
+            'qcdht0500ext_2015':  (4645127,   353),
+            'qcdht0700':          (  98684,    12),
+            'qcdht0700_2015':     ( 211212,    18),
+            'qcdht0700ext':       ( 110422,    13),
+            'qcdht0700ext_2015':  ( 200896,    16),
+            'qcdht1000':          (  55762,     9),
+            'qcdht1000_2015':     (  61176,     6),
+            'qcdht1000ext':       (  56880,     8),
+            'qcdht1000ext_2015':  (  60624,     6),
+            'qcdht1500':          (  52785,     9),
+            'qcdht1500_2015':     (  49775,     5),
+            'qcdht1500ext':       (  49520,     8),
+            'qcdht1500ext_2015':  (  48996,     4),
+            'qcdht2000':          (  44922,     6),
+            'qcdht2000_2015':     (  53304,     6),
+            'qcdht2000ext':       (  40338,     6),
+            'qcdht2000ext_2015':  (  49705,     5),
+            'ttbar':              ( 399372,    46),
+            'ttbar_2015':         ( 919380,    66),
+            }[
+        for sample in samples:
+            sample.set_curr_dataset(dataset)
+            assert d.has_key(sample.name):
+            sample.events_per, sample.files_per = d[sample.name]
+        return
+
     target = {
         'ntuple': 5000
         }[jobtype]

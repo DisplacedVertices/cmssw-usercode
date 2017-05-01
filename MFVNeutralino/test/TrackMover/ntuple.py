@@ -95,6 +95,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not s.is_mc:
             s.json = '../ana_2015p6.json'
 
+    set_splitting(samples, 'main', 'trackmover')
+
     skips = { 'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'}, 'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'}, }
     modify = chain_modifiers(njets_modifier, is_mc_modifier, H_modifier, event_veto_modifier(skips, 'p'))
 
