@@ -11,6 +11,10 @@ from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files
 from JMTucker.MFVNeutralino import AnalysisConstants
 
 def hadd_or_merge(out_fn, files):
+    files = [os.path.exists(fn) for fn in files]
+    print out_fn, files
+    if not files:
+        print 'skipping', out_fn, 'because no files'
     is_edm = set([is_edm_file(f) for f in files])
     if len(is_edm) != 1:
         raise ValueError('uh you have a mix of edm and non-edm files?')
@@ -42,16 +46,20 @@ def cmd_report_data():
             os.rename('processedLumis.json', 'dataok_%i.json' % year)
 
 def cmd_hadd_data():
+    permissive = bool_from_argv('permissive')
     for ds in 'SingleMuon', 'JetHT':
         files = glob(ds + '*.root')
         if not files:
             continue
         files.sort()
 
+        ok = True
         if files != [ds + '2015%s.root' % x for  x in 'CD'] + [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')]:
             print 'some files missing for', ds
             pprint(files)
-        else:
+            if not permissive:
+                ok = False
+        if ok:
             hadd_or_merge(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
             hadd_or_merge(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')])
             hadd_or_merge(ds + '2016BthruG.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
@@ -72,7 +80,7 @@ def cmd_hadd_qcd_sum():
                 a = base + '.root'
                 b = base + 'ext.root'
             if not os.path.isfile(a) or not os.path.isfile(b):
-                print 'skipping', x, 'because at least one input file missing'
+                print 'skipping', x, is2015_s, 'because at least one input file missing'
             else:
                 hadd_or_merge(base + 'sum%s.root' % is2015_s, [a, b])
 
@@ -85,18 +93,21 @@ def cmd_merge_background():
         files += ['qcdht%04isum.root' % x for x in [500, 700, 1000, 1500, 2000]]
         if is2015_s:
             files = [fn.replace('.root', '_2015.root') for fn in files]
+        files2 = []
         for fn in files:
             if not os.path.isfile(fn):
                 msg = '%s not found' % fn
                 if permissive:
                     print msg
-                    files.remove(fn)
                 else:
                     raise RuntimeError(msg)
-        cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
-        cmd += ' '.join(files)
-        print cmd
-        os.system(cmd)
+            else:
+                files2.append(fn)
+        if files2:
+            cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
+            cmd += ' '.join(files2)
+            print cmd
+            os.system(cmd)
 
 def cmd_effsprint():
     for which, which_files in [('background', '.'), ('signals', '*mfv*root xx4j*root')]:
