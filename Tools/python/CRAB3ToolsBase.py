@@ -231,3 +231,24 @@ def crab_results_by_task_status(results):
     for working_dir, res in results.iteritems():
         d[res['status']][working_dir] = dict(res)
     return d
+
+def crab_get_output_dir(working_dir):
+    rq = crab_requestcache(working_dir)
+    rq_name = rq['RequestName'].split(':')
+    timestamp = rq_name[0]
+    username = rq_name[1].split('_')[0]
+    try:
+        primary_dataset = rq['OriginalConfig'].Data.inputDataset.split('/')[1]
+    except AttributeError:
+        primary_dataset = 'CRAB_PrivateMC'
+    try:
+        publish_name = rq['OriginalConfig'].Data.outputDatasetTag
+    except AttributeError:
+        publish_name = None
+    if not publish_name:
+        assert not rq['OriginalConfig'].Data.publication
+        publish_name = rq['RequestName'].split(username + '_')[1]
+    return '/store/user/%s/%s/%s/%s' % (username, primary_dataset, publish_name, timestamp)
+
+if __name__ == '__main__':
+    rq = crab_requestcache(sys.argv[1])

@@ -69,22 +69,8 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         new_name = os.path.join(new_dir, new_name)
 
     if lpc_shortcut:
-        username = os.environ['USER']
         expected = crab_get_njobs_from_log(working_dir)
-        rq = crab_requestcache(working_dir)
-        timestamp = rq['RequestName'].split(':')[0]
-        try:
-            primary_dataset = rq['OriginalConfig'].Data.inputDataset.split('/')[1]
-        except AttributeError:
-            primary_dataset = 'CRAB_PrivateMC'
-        try:
-            publish_name = rq['OriginalConfig'].Data.outputDatasetTag
-        except AttributeError:
-            publish_name = None
-        if not publish_name:
-            assert not rq['OriginalConfig'].Data.publication
-            publish_name = rq['RequestName'].split(username + '_')[1]
-        path = '/eos/uscms/store/user/%(username)s/%(primary_dataset)s/%(publish_name)s/%(timestamp)s' % locals()
+        path = '/eos/uscms' + crab_get_output_dir(working_dir)
         zero_dirs = [x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s' % path).split('\n') if x.strip()]
         files = []
         dbase = path.replace('/eos/uscms', 'root://cmseos.fnal.gov/') + '/'
