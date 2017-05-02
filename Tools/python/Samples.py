@@ -470,7 +470,7 @@ for x in (qcdht2000ext,
 
 for x in (JetHT2016G,
           SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
-          qcdht0500, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, qcdht2000,
+          qcdht0500, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, #qcdht2000,
           wjetstolnu, dyjetstollM50, qcdmupt15,
           mfv_neu_tau00100um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau01000um_M0300,
           mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800,
@@ -481,7 +481,7 @@ for x in (JetHT2016G,
           ):
     x.condor = True
 
-qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
+#qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
 mfv_neu_tau10000um_M1200.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
 mfv_neu_tau00300um_M0800.xrootd_url = 'root://cmseos.fnal.gov/'
 
