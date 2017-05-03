@@ -30,3 +30,6 @@ test:
 clean:	
 	-rm -f hists.exe
 	-rm -rf bin/
+
+setup:
+	ln -s ../../src/MovedTracksNtuple.cc
