@@ -237,7 +237,8 @@ mfv_signal_samples = [
 
 for s in mfv_ddbar_samples + mfv_signal_samples:
     s.xsec = 1e-3
-    if s.dataset.startswith('/mfv_'):
+    s.is_private = s.dataset.startswith('/mfv_')
+    if s.is_private:
         s.dbs_inst = 'phys03'
         s.condor = True
 
