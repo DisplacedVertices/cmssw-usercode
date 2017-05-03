@@ -8,7 +8,6 @@ from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
 process.TFileService.fileName = 'mctruth.root'
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-process.p = cms.Path(process.mfvWeight)
 
 process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                       event_src = cms.InputTag('mfvEvent'),
@@ -22,18 +21,26 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                       for_mctruth = cms.bool(True),
                                       )
 
-process.p *= process.mfvMovedTree
+process.p = cms.Path(process.mfvWeight * process.mfvMovedTree)
+
 file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.MFVNeutralino.Year import year
     import JMTucker.Tools.Samples as Samples
+    if year == 2015:
+        samples = Samples.mfv_signal_samples_2015
+    elif year == 2016:
+        samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
-    cs = CRABSubmitter('TrackMoverMCTruthV6p1_76X',
-                       dataset = 'ntuplev6p1_76x_nstlays3',
-                       job_control_from_sample = True,
-                       max_threads = 3,
-                       )
+    dataset = 'ntuplev14'
+    for sample in samples:
+        sample.datasets[dataset].files_per = 2
 
-    samples = Samples.registry.from_argv(Samples.mfv_signal_samples)
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    cs = CondorSubmitter('TrackMoverMCTruthV14',
+                         ex = year,
+                         dataset = dataset,
+                         job_control_from_sample = True,
+                         )
     cs.submit_all(samples)
