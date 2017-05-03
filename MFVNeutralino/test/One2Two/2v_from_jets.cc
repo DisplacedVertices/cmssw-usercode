@@ -18,9 +18,6 @@ const int nbkg = 8;
 const char* samples[nbkg] = {"qcdht1000sum_2015", "qcdht1500sum_2015", "qcdht2000sum_2015", "ttbar_2015", "qcdht1000sum", "qcdht1500sum", "qcdht2000sum", "ttbar"};
 float       weights[nbkg] = {0.21105,             0.02736,             0.01132,             0.05799,      2.84372,        0.36354,        0.15026,        0.68346};
 
-const int min_npu = 0;
-const int max_npu = 255;
-
 double dphi_pdf_e = 2;
 
 int dvv_nbins = 40;
@@ -34,7 +31,7 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bquarks, bool vary_dphi, bool clearing_from_eff, bool vary_eff, const char* out_fn) {
+void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bquarks, bool vary_dphi, bool clearing_from_eff, bool vary_eff, int min_npu, int max_npu, const char* out_fn) {
   printf("year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, out_fn = %s\n", year.c_str(), ntracks, correct_bquarks, bquarks, vary_dphi, clearing_from_eff, vary_eff, out_fn);
 
   int ibkg_begin = 0;
@@ -135,6 +132,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   TH1D* h_1v_dbv0 = new TH1D("h_1v_dbv0", "only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1D* h_1v_dbv1 = new TH1D("h_1v_dbv1", "only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
+  TH1D* h_1v_npu = new TH1D("h_1v_npu", "only-one-vertex events;# PU interactions;events", 100, 0, 100);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
   TH1F* h_1v_ht = new TH1F("h_1v_ht", "only-one-vertex events;#Sigma H_{T} of jets (GeV);events", 200, 0, 5000);
   TH1F* h_1v_phij = new TH1F("h_1v_phij", "only-one-vertex events;jets #phi;jets", 50, -3.15, 3.15);
@@ -147,6 +145,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
+  TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
 
   for (int i = ibkg_begin; i < ibkg_end; ++i) {
     mfv::MiniNtuple nt;
@@ -170,6 +169,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
         if (nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0) h_1v_dbv0->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
         if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) h_1v_dbv1->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
+        h_1v_npu->Fill(nt.npu, w);
         h_1v_njets->Fill(nt.njets, w);
         h_1v_ht->Fill(ht(nt.njets, nt.jet_pt), w);
         double dphijvmin = M_PI;
@@ -197,6 +197,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
         double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
         h_2v_dphivv->Fill(dphi, w);
         h_2v_absdphivv->Fill(fabs(dphi), w);
+        h_2v_npu->Fill(nt.npu, w);
       }
     }
   }
@@ -306,6 +307,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   h_1v_dbv0->Write();
   h_1v_dbv1->Write();
   h_1v_phiv->Write();
+  h_1v_npu->Write();
   h_1v_njets->Write();
   h_1v_ht->Write();
   h_1v_phij->Write();
@@ -318,6 +320,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   h_2v_dvv->Write();
   h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
+  h_2v_npu->Write();
 
   h_c1v_dbv->Write();
   h_c1v_dvv->Write();
@@ -384,6 +387,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   delete h_1v_dbv0;
   delete h_1v_dbv1;
   delete h_1v_phiv;
+  delete h_1v_npu;
   delete h_1v_njets;
   delete h_1v_ht;
   delete h_1v_phij;
@@ -396,6 +400,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   delete h_2v_dvv;
   delete h_2v_dphivv;
   delete h_2v_absdphivv;
+  delete h_2v_npu;
   delete c_dvv;
   delete c_absdphivv;
 }
@@ -407,13 +412,13 @@ int main(int argc, const char* argv[]) {
     const char* year = years[i];
     for (int j = 0; j < 4; ++j) {
       const int ntracks = ntks[j];
-      construct_dvvc(year, ntracks, false, -1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks, false,  1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_bquarks_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks, false,  0, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks,  true, -1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_default_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks,  true, -1,  true,  true, false, TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks,  true, -1, false, false, false, TString::Format("2v_from_jets_%s_%dtrack_noclearing_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks,  true, -1, false,  true,  true, TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks, false, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks, false,  1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquarks_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks, false,  0, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_default_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1,  true,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1, false, false, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_noclearing_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1, false,  true,  true, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v14.root", year, ntracks));
     }
   }
 }
