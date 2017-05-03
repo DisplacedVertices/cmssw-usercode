@@ -9,7 +9,7 @@ year = 2016
 
 int_lumi = ac.int_lumi_2016 * ac.scale_factor_2016
 background_samples = Samples.qcd_samples_sum + Samples.ttbar_samples
-signal_samples = [Samples.official_mfv_neu_tau00100um_M0800, Samples.official_mfv_neu_tau00300um_M0800, Samples.official_mfv_neu_tau01000um_M0800, Samples.official_mfv_neu_tau10000um_M0800]
+signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
 
 if year == 2015:
     int_lumi = ac.int_lumi_2015 * ac.scale_factor_2015

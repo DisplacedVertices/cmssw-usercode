@@ -18,7 +18,7 @@ int_lumi = ac.int_lumi_2016 * ac.scale_factor_2016
 int_lumi_nice = ac.int_lumi_nice_2016
 qcd_samples = Samples.qcd_samples_sum
 ttbar_samples = Samples.ttbar_samples
-signal_sample = Samples.official_mfv_neu_tau01000um_M0800
+signal_sample = Samples.mfv_neu_tau01000um_M0800
 data_samples = Samples.data_samples
 
 if year == '2015':

@@ -17,13 +17,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2016:
         samples = Samples.data_samples + \
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.official_mfv_signal_samples + \
             Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
     dataset = 'ntuplev14'
-
     for sample in samples:
-        sample.files_per = 20
+        sample.datasets[dataset].files_per = 20
         if not sample.is_mc:
             sample.datasets[dataset].json = 'ana_2015p6_10pc.json'
 

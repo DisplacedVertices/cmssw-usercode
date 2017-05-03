@@ -9,7 +9,7 @@ global_tag(process, which_global_tag(True, year))
 process.maxEvents.input = 100
 #want_summary(process)
 
-#sample_files(process, 'official_mfv_neu_tau01000um_M0300', 'main')
+#sample_files(process, 'mfv_neu_tau01000um_M0300', 'main')
 process.source.fileNames = ['root://xrootd2.ihepa.ufl.edu//store/mc/RunIISummer16DR80Premix/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/AODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v2/110000/0EE95A6E-A8F4-E611-9339-0025905AA9F0.root']
 
 process.TFileService.fileName = 'signaleff2016Hbug.root'
@@ -38,7 +38,7 @@ for hlt in False, True:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-    samples = Samples.official_mfv_signal_samples
+    samples = Samples.mfv_signal_samples
     for sample in samples:
         sample.files_per = 5
 
