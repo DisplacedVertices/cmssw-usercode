@@ -112,7 +112,7 @@ for i in range(3):
     h0.SetTitle(';d_{VV}^{C} (cm);Events')
     h0.SetStats(0)
     h0.SetLineColor(ROOT.kRed)
-    h0.SetLineWidth(2)
+    h0.SetLineWidth(3)
     h0.Scale(n2v[i]/h0.Integral())
     if i == 2:
         h0.GetYaxis().SetRangeUser(0,0.4)
@@ -121,7 +121,7 @@ for i in range(3):
     h1 = ROOT.TFile(fns[i][1]).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
-    h1.SetLineWidth(2)
+    h1.SetLineWidth(3)
     h1.Scale(n2v[i]/h1.Integral())
     h1.Draw('hist e sames')
 
