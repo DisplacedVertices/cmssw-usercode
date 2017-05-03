@@ -106,7 +106,9 @@ int main(int argc, char** argv) {
     const bool pass_800 = bool(nt.pass_hlt & 0x2);
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
     const bool H_data = strcmp(in_fn, "JetHT2016H2.root") == 0 || strcmp(in_fn, "JetHT2016H3.root") == 0;
-    const bool triggers_if_H = pass_900_450_AK450 && H_data;
+    bool triggers_if_H;
+    if (H_data) triggers_if_H = pass_900_450_AK450;
+    else triggers_if_H = true;
 
     double jet_sume = 0;
     double jet_drmax = 0;
