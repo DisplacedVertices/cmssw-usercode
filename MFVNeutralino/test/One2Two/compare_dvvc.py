@@ -6,7 +6,6 @@ year = '2016'
 
 mode = 'vary_eff'
 #mode = 'vary_dphi'
-#mode = 'vary_dbv'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
@@ -17,13 +16,10 @@ fn2 = ['2v_from_jets_%s_4track_default_v14.root' % year, '2v_from_jets_%s_4track
 fn3 = ['2v_from_jets_%s_5track_default_v14.root' % year, '2v_from_jets_%s_5track_%s_v14.root' % (year, mode)]
 
 if mode == 'vary_eff':
-    ls = ['average efficiency', 'maxtk efficiency']
+    ls = ['vertex pair survival efficiency', 'vertex survival efficiency']
 
 if mode == 'vary_dphi':
     ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
-
-if mode == 'vary_dbv':
-    ls = ['default', 'sort by b quarks']
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']

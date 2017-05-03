@@ -6,7 +6,7 @@ year = '2016'
 set_style()
 ps = plot_saver('../plots/bkgest/v14/closure_%s' % year, size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets_%s_3track_default_v14.root' % year, '2v_from_jets_%s_4track3track_default_v14.root' % year, '2v_from_jets_%s_4track_default_v14.root' % year, '2v_from_jets_%s_5track_default_v14.root' % year]
+fns = ['2v_from_jets_%s_3track_default_v14.root' % year, '2v_from_jets_%s_7track_default_v14.root' % year, '2v_from_jets_%s_4track_default_v14.root' % year, '2v_from_jets_%s_5track_default_v14.root' % year]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 
 n2v = [934., 211., 7., 1.]
