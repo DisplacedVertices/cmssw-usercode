@@ -13,7 +13,7 @@ if len(sys.argv) < 2:
 
 rm_root_files = bool_from_argv('rm_root_files')
 cr_cmds = ['gzip crab.log', 'tar --remove-files -czf inputs.tgz inputs/']
-cs_cmds = ['tar --remove-files -czf stdouterrlogxmlpublish.tgz stdout.* stderr.* log.* fjr*xml PUBLISH']
+cs_cmds = ['tar --remove-files -czf mtidied.tgz stdout.* stderr.* log.* fjr*xml EXTRA']
 if rm_root_files:
     cs_cmds.append('rm -r *.root')
 
@@ -40,7 +40,12 @@ for wd in cr_dirs + cs_dirs_from_argv():
     for cmd in (cr_cmds if is_cr else cs_cmds):
         #print cmd
         if not is_cr and cmd.endswith('PUBLISH'):
-            cmd = cmd.replace('PUBLISH', 'publish*txt' if glob('publish*txt') else '')
+            extra = ''
+            if glob('publish*txt'):
+                extra += ' publish*txt'
+            if glob('resub*'):
+                extra += ' resub*'
+            cmd = cmd.replace('EXTRA', extra)
         os.system(cmd)
     touch('mtidied_finished')
     os.chdir(prev_wd)
