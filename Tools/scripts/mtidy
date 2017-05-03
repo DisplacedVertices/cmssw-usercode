@@ -39,7 +39,7 @@ for wd in cr_dirs + cs_dirs_from_argv():
     touch('mtidied_started')
     for cmd in (cr_cmds if is_cr else cs_cmds):
         #print cmd
-        if not is_cr and cmd.endswith('PUBLISH'):
+        if not is_cr and cmd.endswith('EXTRA'):
             extra = ''
             if glob('publish*txt'):
                 extra += ' publish*txt'
