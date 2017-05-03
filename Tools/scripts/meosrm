@@ -24,6 +24,10 @@ if not all_dirs:
 #if cs_dirs and rm_failed:
 #    print colors.yellow('rm_failed does nothing for condor dirs')
 
+def do(cmd):
+    print cmd
+    os.system(cmd)
+
 for wd in cr_dirs + cs_dirs:
     is_cr = wd in cr_dirs
 
@@ -47,8 +51,8 @@ for wd in cr_dirs + cs_dirs:
         log_dirs = []
         for nd in eos.glob(output_dir, '????'):
             log_dirs.extend(eos.glob(os.path.join(output_dir, nd), 'log'))
-        print 'cd /eos/uscms%s && tar --remove-files -czf %s/cmsRun_logs.tgz ' % (dn, awd) + ' '.join(os.path.relpath(ld, dn) for ld in log_dirs) + ' && cd -'
-        print 'cd /eos/uscms%s && rm -r %s && cd -' % (dn, bn)
+        do('cd /eos/uscms%s && tar --remove-files -cf %s/cmsRun_logs.tar ' % (dn, awd) + ' '.join(os.path.relpath(ld, dn) for ld in log_dirs) + ' && cd -')
+        do('cd /eos/uscms%s && rm -r %s && cd -' % (dn, bn))
     else:
         dirs = set()
         for fn in cs_published(wd):
@@ -59,7 +63,7 @@ for wd in cr_dirs + cs_dirs:
             assert fnmatch(bn, '????')
             dirs.add(os.path.dirname(dn))
         for d in dirs:
-            print 'cd /eos/uscms%s && rm -r %s && cd -' % (os.path.dirname(d), os.path.basename(d))
+            do('cd /eos/uscms%s && rm -r %s && cd -' % (os.path.dirname(d), os.path.basename(d)))
         
     touch(os.path.join(wd, 'meosrmed_finished'))
 
