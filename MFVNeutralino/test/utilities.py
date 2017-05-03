@@ -126,12 +126,18 @@ def cmd_effsprint():
 
 def cmd_histos():
     cmd_report_data()
+    cmd_hadd_data()
     cmd_hadd_qcd_sum()
     cmd_merge_background()
     cmd_effsprint()
 
 def cmd_minitree():
     cmd_report_data()
+    cmd_hadd_qcd_sum()
+
+def cmd_trackmover():
+    cmd_report_data()
+    cmd_hadd_data()
     cmd_hadd_qcd_sum()
 
 def cmd_trigeff():
