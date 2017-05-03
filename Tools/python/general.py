@@ -136,6 +136,9 @@ def from_argv(*args, **kwargs):
 def int_ceil(x,y):
     return (x+y-1)/y
 
+def md5sum(fn):
+    return popen('md5sum %s' % fn).split()[0]
+
 def mkdirp(path):
     if not os.path.exists(path):
         os.mkdir(path)
