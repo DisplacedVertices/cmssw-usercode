@@ -1,6 +1,7 @@
-import subprocess, os
+import subprocess, os, fnmatch
 
 url = 'root://cmseos.fnal.gov/'
+global_url = 'root://cms-xrd-global.cern.ch/'
 user = os.environ['USER']
 
 def _popen(cmd, shell=False):
@@ -14,7 +15,7 @@ def _system(cmd):
     return subprocess.call(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT) == 0
     
 def quota():
-    x = popen('eos root://cmseos.fnal.gov quota').communicate()[0].split('\n')
+    x = _popen('eos root://cmseos.fnal.gov quota').communicate()[0].split('\n')
     for i, line in enumerate(x):
         if user in line:
             return x[i-1] + '\n' + line
@@ -28,6 +29,17 @@ def mkdir(fn):
     if exists(dn):
         return True
     return _system('eos %s mkdir -p %s' % (url, dn))
+
+def ls(path):
+    #print 'ls', path
+    cmd = str('eos %s ls %s' % (url, path))
+    #print repr(cmd)
+    fns = _popen(cmd).communicate()[0].strip().split()
+    return [os.path.join(path, fn) for fn in fns]
+
+def glob(path, pattern):
+    fns = ls(path)
+    return [fn for fn in fns if fnmatch.fnmatch(os.path.basename(fn), pattern)]
 
 def cp(src, dst):
     return _system('xrdcp -s %s%s %s%s' % (url, src, url, dst))
