@@ -12,8 +12,21 @@ def _popen(cmd, shell=False):
 def _system(cmd):
     if type(cmd) == str:
         cmd = cmd.split()
+    #print cmd
     return subprocess.call(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT) == 0
+
+def _storeonly(fn):
+    if not fn.startswith('/store'):
+        raise ValueError('fn passed %r does not start with /store' % fn)
     
+def _canon(fn):
+    if fn.startswith('root:'):
+        return fn
+    elif fn.startswith('/store'):
+        return url + fn
+    else:
+        return os.path.realpath(fn)
+
 def quota():
     x = _popen('eos root://cmseos.fnal.gov quota').communicate()[0].split('\n')
     for i, line in enumerate(x):
@@ -22,19 +35,19 @@ def quota():
     return "eos quota command didn't work or didn't find user %s" % user
 
 def exists(fn):
+    _storeonly(fn)
     return _system('eos %s ls %s' % (url, fn))
 
 def mkdir(fn):
+    _storeonly(fn)
     dn = os.path.dirname(fn)
     if exists(dn):
         return True
     return _system('eos %s mkdir -p %s' % (url, dn))
 
 def ls(path):
-    #print 'ls', path
-    cmd = str('eos %s ls %s' % (url, path))
-    #print repr(cmd)
-    fns = _popen(cmd).communicate()[0].strip().split()
+    _storeonly(path)
+    fns = _popen(str('eos %s ls %s' % (url, path))).communicate()[0].strip().split()
     return [os.path.join(path, fn) for fn in fns]
 
 def glob(path, pattern):
@@ -42,12 +55,18 @@ def glob(path, pattern):
     return [fn for fn in fns if fnmatch.fnmatch(os.path.basename(fn), pattern)]
 
 def cp(src, dst):
-    return _system('xrdcp -s %s%s %s%s' % (url, src, url, dst))
+    src = _canon(src)
+    dst = _canon(dst)
+    if not src.startswith(url) and not dst.startswith(url):
+        raise ValueError('refusing to use xrdcp for non eos copy: %r -> %r' % (src, dst))
+    return _system('xrdcp -s %s %s' % (src, dst))
 
 def rm(fn):
+    _storeonly(fn)
     return _system('eos %s rm %s' % (url, fn))
 
 def md5sum(fn):
+    _storeonly(fn)
     cmd = 'xrdcp -s %s%s -' % (url, fn)
     p  = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p2 = subprocess.Popen(('md5sum',), stdin=p.stdout, stdout=subprocess.PIPE)
@@ -77,6 +96,7 @@ if __name__ == '__main__':
             fns = sys.argv[2:-1]
             if not fns:
                 raise ValueError('usage: eos.py mv fn1 [fn2...] /store/.../dest')
+            print dest
             for fn in fns:
                 print fn
                 if not os.path.isfile(fn):
@@ -84,13 +104,11 @@ if __name__ == '__main__':
                 if not cp(fn, dest):
                     raise IOError("problem copying?")
                 dest_fn = os.path.join(dest, os.path.basename(fn))
-                raw_input('ok?')
                 md5src = general.md5sum(fn)
                 md5dst = md5sum(dest_fn)
-                print fn, md5src, md5dst, dest_fn
+                print fn, md5src, dest_fn, md5dst
                 if md5src != md5dst:
                     raise ValueError("problem with md5sums: src %s dst %s" % (md5src, md5dst))
-                raw_input('ok?')
                 if cmd == 'mv':
                     raw_input('going to rm, ok?')
                     os.remove(fn)
