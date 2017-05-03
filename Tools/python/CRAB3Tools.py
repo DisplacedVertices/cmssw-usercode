@@ -148,11 +148,12 @@ def crab_process_statuses_with_redo(working_dirs, max_processes, verbose=True):
 
     return results
 
-def crab_output_files(working_dir, jobs=None):
+def crab_output_files(working_dir, jobs=None, logs=False):
+    cmd = 'getlog' if logs else 'getoutput'
     if jobs is not None:
-        d = crab_command('getoutput', '--xrootd', '--jobids=%s' % crabify_list(jobs, simple=True), dir=working_dir)
+        d = crab_command(cmd, '--xrootd', '--jobids=%s' % crabify_list(jobs, simple=True), dir=working_dir)
     else:
-        d = crab_command('getoutput', '--xrootd', dir=working_dir)
+        d = crab_command(cmd, '--xrootd', dir=working_dir)
     return d.get('xrootd', [])
 
 class UserCacheHelper:
