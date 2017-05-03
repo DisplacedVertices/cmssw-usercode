@@ -31,9 +31,10 @@ for i,h in enumerate(hs):
     else:
         h.Draw('hist e same')
 
-    print '        ', '%18s' % '0-400 um', '%18s' % '400-700 um', '%18s' % '>700um'
-    for fn, h in zip(fns, hs):
-        name = os.path.basename(fn).replace('.root', '')
-        print '%8s:' % name, '%7.4f +- %7.4f' % get_integral(hdef, 0, 0.04), '%7.4f +- %7.4f' % get_integral(hdef, 0.04, 0.07), '%7.4f +- %7.4f' % get_integral(hdef, 0.07, 4)
-    ps.save('ntracks%i' % ntk)
+print ' '*40, '%18s' % '0-400 um', '%18s' % '400-700 um', '%18s' % '>700um'
+for fn, h in zip(fns, hs):
+    name = os.path.basename(fn).replace('.root', '')
+    print '%40s:' % name, '%7.4f +- %7.4f' % get_integral(h, 0, 0.04), '%7.4f +- %7.4f' % get_integral(h, 0.04, 0.07), '%7.4f +- %7.4f' % get_integral(h, 0.07, 4)
+
+ps.save('cmp')
 
