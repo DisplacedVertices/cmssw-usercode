@@ -162,7 +162,7 @@ namespace mfv {
     MCInteraction::Point p;
     p.x = secondaries_[indices_[i]]->vx();
     p.y = secondaries_[indices_[i]]->vy();
-    p.z = secondaries_[indices_[i]]->vy();
+    p.z = secondaries_[indices_[i]]->vz();
     return p;
   }
 
