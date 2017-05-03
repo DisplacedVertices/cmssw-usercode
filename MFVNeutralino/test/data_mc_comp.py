@@ -64,6 +64,7 @@ C = partial(data_mc_comparison,
 
 if year == '2015' or year == '2016':
     C('presel_njets',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
       histogram_path = 'evtHst0VNoNjets/h_njets',
       x_title = 'Number of jets',
       y_title = 'Events',
@@ -72,6 +73,7 @@ if year == '2015' or year == '2016':
       )
 
     C('presel_ht40',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
       histogram_path = 'evtHst0VNoHt/h_jet_ht_40',
       rebin = 4,
       x_title = 'Jet H_{T} (GeV)',
@@ -249,19 +251,23 @@ D = partial(data_mc_comparison,
             )
 
 D('3t1v_presel_njets',
+  file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
   histogram_path = 'evtHst0VNoNjets/h_njets',
   x_title = 'Number of jets',
   y_title = 'Events',
-  cut_line = ((4, 0, 4, 2.5e8), 2, 5, 1),
+  y_range = (1, 1e7),
+  cut_line = ((4, 0, 4, 2.4e7), 2, 5, 1),
   )
 
 D('3t1v_presel_ht40',
+  file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
   histogram_path = 'evtHst0VNoHt/h_jet_ht_40',
   rebin = 4,
   x_title = 'Jet H_{T} (GeV)',
   y_title = 'Events/100 GeV',
   x_range = (800, 5000),
-  cut_line = ((1000, 0, 1000, 2.5e8), 2, 5, 1),
+  y_range = (1, 1e7),
+  cut_line = ((1000, 0, 1000, 2.4e7), 2, 5, 1),
   )
 
 D('3t1v_presel_npv',
@@ -305,7 +311,8 @@ D('3t1v_onevtx_bs2derr',
   histogram_path = 'Ntk3vtxHst1VNoBs2derr/h_sv_all_bs2derr',
   x_title = 'Uncertainty in d_{BV} (cm)',
   y_title = 'Vertices/5 #mum',
-  cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
+  y_range = (1, 1e4),
+  cut_line = ((0.0025, 0, 0.0025, 1.8e4), 2, 5, 1),
   )
 
 D('3t1v_onevtx_dbv',
@@ -313,7 +320,8 @@ D('3t1v_onevtx_dbv',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 0.4),
-  cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
+  y_range = (1, 1e4),
+  cut_line = ((0.01, 0, 0.01, 1.8e4), 2, 5, 1),
   )
 
 D('3t1v_dbv',
