@@ -34,8 +34,8 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, bool clearing_from_eff, bool vary_eff, const char* out_fn) {
-  printf("year = %s, ntracks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, out_fn = %s\n", year.c_str(), ntracks, bquarks, vary_dphi, clearing_from_eff, vary_eff, out_fn);
+void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bquarks, bool vary_dphi, bool clearing_from_eff, bool vary_eff, const char* out_fn) {
+  printf("year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, out_fn = %s\n", year.c_str(), ntracks, correct_bquarks, bquarks, vary_dphi, clearing_from_eff, vary_eff, out_fn);
 
   int ibkg_begin = 0;
   int ibkg_end = nbkg;
@@ -63,6 +63,7 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
 
   const char* tree_path;
   const char* eff_hist;
+  double bquark_correction[3];
   int min_ntracks0 = 0;
   int max_ntracks0 = 1000000;
   int min_ntracks1 = 0;
@@ -71,21 +72,37 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
   if (ntracks == 3) {
     tree_path = "mfvMiniTreeNtk3/t";
     eff_hist = "maxtk3";
+    if (year == "2015")   { bquark_correction[0] = 0.91; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
+    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
+    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.08; bquark_correction[2] = 1.12; }
   } else if (ntracks == 4) {
     tree_path = "mfvMiniTreeNtk4/t";
     eff_hist = "maxtk4";
+    if (year == "2015")   { bquark_correction[0] = 0.91; bquark_correction[1] = 1.13; bquark_correction[2] = 1.14; }
+    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
+    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.13; bquark_correction[2] = 1.23; }
   } else if (ntracks == 5) {
     tree_path = "mfvMiniTree/t";
     eff_hist = "maxtk5";
+    if (year == "2015")   { bquark_correction[0] = 0.90; bquark_correction[1] = 1.34; bquark_correction[2] = 1.28; }
+    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.23; bquark_correction[2] = 1.48; }
+    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.56; }
   } else if (ntracks == 7) {
     tree_path = "mfvMiniTreeNtk3or4/t";
     eff_hist = "maxtk3";
+    if (year == "2015")   { bquark_correction[0] = 0.91; bquark_correction[1] = 1.09; bquark_correction[2] = 1.12; }
+    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
+    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.10; bquark_correction[2] = 1.15; }
     min_ntracks0 = 4;
     max_ntracks0 = 4;
     min_ntracks1 = 3;
     max_ntracks1 = 3;
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
+  }
+
+  if (!correct_bquarks) {
+    bquark_correction[0] = 1; bquark_correction[1] = 1; bquark_correction[2] = 1;
   }
 
   if (vary_eff) {
@@ -260,6 +277,16 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
     }
   }
 
+  for (int i = 1; i <= h_c1v_dvv->GetNbinsX(); ++i) {
+    if (h_c1v_dvv->GetBinLowEdge(i) < 0.04) {
+      h_c1v_dvv->SetBinContent(i, h_c1v_dvv->GetBinContent(i) * bquark_correction[0]);
+    } else if (h_c1v_dvv->GetBinLowEdge(i) < 0.07) {
+      h_c1v_dvv->SetBinContent(i, h_c1v_dvv->GetBinContent(i) * bquark_correction[1]);
+    } else {
+      h_c1v_dvv->SetBinContent(i, h_c1v_dvv->GetBinContent(i) * bquark_correction[2]);
+    }
+  }
+
   if (vary_dphi) {
     printf("bin1 = %d, bin2 = %d, bin3 = %d, intobin1 = %d, intobin2 = %d, intobin3 = %d, outofbin1 = %d, outofbin2 = %d, outofbin3 = %d\n", bin1, bin2, bin3, intobin1, intobin2, intobin3, outofbin1, outofbin2, outofbin3);
     printf("uncorrelated variation / default (bin 1): %f +/- %f\n", 1 + (intobin1 - outofbin1) / (1.*bin1), sqrt(bin1 + bin1 + intobin1 - outofbin1) / bin1);
@@ -375,16 +402,18 @@ void construct_dvvc(std::string year, int ntracks, int bquarks, bool vary_dphi, 
 
 int main(int argc, const char* argv[]) {
   const char* years[3] = {"2015", "2016", "2015p6"};
+  const int ntks[4] = {3, 4, 5, 7};
   for (int i = 0; i < 3; ++i) {
     const char* year = years[i];
-    for (int ntracks = 3; ntracks <= 5; ++ntracks) {
-      construct_dvvc(year, ntracks, -1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_default_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks,  1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_bquarks_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks,  0, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks, -1,  true,  true, false, TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks, -1, false, false, false, TString::Format("2v_from_jets_%s_%dtrack_noclearing_v14.root", year, ntracks));
-      construct_dvvc(year, ntracks, -1, false,  true,  true, TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v14.root", year, ntracks));
+    for (int j = 0; j < 4; ++j) {
+      const int ntracks = ntks[j];
+      construct_dvvc(year, ntracks, false, -1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks, false,  1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_bquarks_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks, false,  0, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1, false,  true, false, TString::Format("2v_from_jets_%s_%dtrack_default_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1,  true,  true, false, TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1, false, false, false, TString::Format("2v_from_jets_%s_%dtrack_noclearing_v14.root", year, ntracks));
+      construct_dvvc(year, ntracks,  true, -1, false,  true,  true, TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v14.root", year, ntracks));
     }
-    construct_dvvc(year, 7, -1, false, true, false, TString::Format("2v_from_jets_%s_4track3track_default_v14.root", year));
   }
 }

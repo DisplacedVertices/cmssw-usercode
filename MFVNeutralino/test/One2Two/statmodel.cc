@@ -210,8 +210,11 @@ int main(int, char**) {
 
   jmt::ConfigFromEnv env("sm", true);
 
-  const double default_n1v[3][6] = {{ -1, -1, -1, 8338, 1003, 160 }, { -1, -1, -1, 175485, 22427, 3532 }, { -1, -1, -1, 183823, 23430, 3692 }};
-  const double default_n2v[3][6] = {{ -1, -1, -1,   44,    1,   1 }, { -1, -1, -1,    934,     7,    1 }, { -1, -1, -1,    978,     7,    1 }};
+  const double default_n1v[3][6] = {{ -1, -1, -1,  8338, 1003, 160 }, { -1, -1, -1, 175485, 22427, 3532 }, { -1, -1, -1, 183823, 23430, 3692 }};
+  const double default_n2v[3][6] = {{ -1, -1, -1,    44,    1,   1 }, { -1, -1, -1,    934,     7,    1 }, { -1, -1, -1,    978,     7,    1 }};
+
+  const double  mc_eff_n1v[3][6] = {{ -1, -1, -1, 41481, 5150, 902 }, { -1, -1, -1,  65121,  8597, 1412 }, { -1, -1, -1,  71203,  9103, 1538 }};
+  const double  mc_eff_n2v[3][6] = {{ -1, -1, -1,   237,    3,   1 }, { -1, -1, -1,    390,     5,    1 }, { -1, -1, -1,    426,     6,    1 }};
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
@@ -221,8 +224,9 @@ int main(int, char**) {
   assert(year_index >= 0 && year_index <= 2);
   ntracks = env.get_int("ntracks", 3);
   assert(ntracks >= 3 && ntracks <= 5);
-  const double n1v = env.get_double("n1v", default_n1v[year_index][ntracks]);
-  const double n2v = env.get_double("n2v", default_n2v[year_index][ntracks]);
+  const bool use_mc_eff = env.get_bool("use_mc_eff", false);
+  const double n1v = env.get_double("n1v", use_mc_eff ? mc_eff_n1v[year_index][ntracks] : default_n1v[year_index][ntracks]);
+  const double n2v = env.get_double("n2v", use_mc_eff ? mc_eff_n2v[year_index][ntracks] : default_n2v[year_index][ntracks]);
   const std::string true_fn = env.get_string("true_fn", "");
   const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
