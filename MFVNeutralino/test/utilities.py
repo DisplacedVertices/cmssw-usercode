@@ -11,7 +11,7 @@ from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files
 from JMTucker.MFVNeutralino import AnalysisConstants
 
 def hadd_or_merge(out_fn, files):
-    files = [os.path.exists(fn) for fn in files]
+    files = [fn for fn in files if os.path.exists(fn)]
     print out_fn, files
     if not files:
         print 'skipping', out_fn, 'because no files'
