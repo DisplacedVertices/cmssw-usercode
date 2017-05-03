@@ -41,6 +41,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CondorSubmitter('TrackMoverMCTruthV14',
                          ex = year,
                          dataset = dataset,
-                         job_control_from_sample = True,
                          )
     cs.submit_all(samples)
