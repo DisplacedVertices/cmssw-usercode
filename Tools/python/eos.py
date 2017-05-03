@@ -1,4 +1,4 @@
-import subprocess, os, fnmatch
+import sys, subprocess, os, fnmatch
 
 url = 'root://cmseos.fnal.gov/'
 global_url = 'root://cms-xrd-global.cern.ch/'
@@ -53,3 +53,10 @@ def md5sum(fn):
     p2 = subprocess.Popen(('md5sum',), stdin=p.stdout, stdout=subprocess.PIPE)
     p.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
     return p2.communicate()[0].split()[0]
+
+
+if __name__ == '__main__':
+    if sys.argv[1] == 'md5sum':
+        for x in sys.argv[2:]:
+            if x.startswith('/store'):
+                print '%s  %s' % (md5sum(x), x)

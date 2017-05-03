@@ -63,7 +63,7 @@ void root_setup() {
 }
 
 file_and_tree::file_and_tree(const char* in_fn, const char* out_fn) {
-  f = new TFile(in_fn);
+  f = TFile::Open(in_fn);
   if (!f || !f->IsOpen()) {
     fprintf(stderr, "could not open %s\n", in_fn);
     exit(1);
