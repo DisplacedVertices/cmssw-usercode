@@ -56,7 +56,41 @@ def md5sum(fn):
 
 
 if __name__ == '__main__':
-    if sys.argv[1] == 'md5sum':
-        for x in sys.argv[2:]:
-            if x.startswith('/store'):
-                print '%s  %s' % (md5sum(x), x)
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
+
+        if cmd == 'md5sum':
+            for x in sys.argv[2:]:
+                if x.startswith('/store'):
+                    print '%s  %s' % (md5sum(x), x)
+
+        elif cmd == 'cp' or cmd == 'mv':
+            import general
+
+            dest = sys.argv[-1]
+            if not dest.startswith('/store'):
+                raise ValueError('dest must start with /store')
+            if not exists(dest):
+                raise IOError("dest %s doesn't exist" % dest)
+            if not dest.endswith('/'):
+                dest += '/'
+            fns = sys.argv[2:-1]
+            if not fns:
+                raise ValueError('usage: eos.py mv fn1 [fn2...] /store/.../dest')
+            for fn in fns:
+                print fn
+                if not os.path.isfile(fn):
+                    raise ValueError("files only, can't recurse")
+                if not cp(fn, dest):
+                    raise IOError("problem copying?")
+                dest_fn = os.path.join(dest, os.path.basename(fn))
+                raw_input('ok?')
+                md5src = general.md5sum(fn)
+                md5dst = md5sum(dest_fn)
+                print fn, md5src, md5dst, dest_fn
+                if md5src != md5dst:
+                    raise ValueError("problem with md5sums: src %s dst %s" % (md5src, md5dst))
+                raw_input('ok?')
+                if cmd == 'mv':
+                    raw_input('going to rm, ok?')
+                    os.remove(fn)
