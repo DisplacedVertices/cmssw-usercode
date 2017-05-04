@@ -235,7 +235,20 @@ mfv_signal_samples = [
     MCSample('mfv_neu_tau30000um_M3000', '/mfv_neu_tau30000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-799254d98714d4bddcfc4dddd0b67e7b/USER', 9699),
     ]
 
-for s in mfv_ddbar_samples + mfv_signal_samples:
+mfv_hip_samples = [
+    MCSample('mfv_ddbar_tau00300um_M0800_hip1p0', '/mfv_ddbar_tau00300um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c9d4f23f336551cd4b7676c0e811e2f5/USER', 10000),
+    MCSample('mfv_ddbar_tau01000um_M0400_hip1p0', '/mfv_ddbar_tau01000um_M0400_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d978253ed35b72103ef016e80cd74b96/USER', 10000),
+    MCSample('mfv_ddbar_tau01000um_M0800_hip1p0', '/mfv_ddbar_tau01000um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c9d4f23f336551cd4b7676c0e811e2f5/USER', 9899),
+    MCSample('mfv_ddbar_tau01000um_M1600_hip1p0', '/mfv_ddbar_tau01000um_M1600_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d978253ed35b72103ef016e80cd74b96/USER', 10000),
+    MCSample('mfv_ddbar_tau10000um_M0800_hip1p0', '/mfv_ddbar_tau10000um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c9d4f23f336551cd4b7676c0e811e2f5/USER', 9999),
+    MCSample('mfv_neu_tau00300um_M0800_hip1p0', '/mfv_neu_tau00300um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2c7bd99f8dc35e5e4016b1d3a0cf7432/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M0400_hip1p0', '/mfv_neu_tau01000um_M0400_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-30e149ba9da0eb269aa36815fd2741c0/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M0800_hip1p0', '/mfv_neu_tau01000um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2c7bd99f8dc35e5e4016b1d3a0cf7432/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M1600_hip1p0', '/mfv_neu_tau01000um_M1600_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-30e149ba9da0eb269aa36815fd2741c0/USER', 9799),
+    MCSample('mfv_neu_tau10000um_M0800_hip1p0', '/mfv_neu_tau10000um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2c7bd99f8dc35e5e4016b1d3a0cf7432/USER', 10000),
+    ]
+
+for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
     s.xsec = 1e-3
     s.is_private = s.dataset.startswith('/mfv_')
     if s.is_private:
@@ -310,6 +323,7 @@ __all__ = [
     'leptonic_background_samples',
     'mfv_ddbar_samples',
     'mfv_signal_samples',
+    'mfv_hip_samples',
     'data_samples',
     'auxiliary_data_samples',
 
