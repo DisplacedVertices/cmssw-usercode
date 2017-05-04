@@ -4,6 +4,7 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "utils.h"
+#include <iostream>
 
 // #error need to support picking hlt bit and final ht cut
 
@@ -28,6 +29,10 @@ int main(int argc, char** argv) {
   TH1F* h_sums = ((TH1F*)fat.f->Get("mcStat/h_sums"));
   bool is_mc = h_sums != 0;
 
+  fat.f_out->mkdir("mfvWeight")->cd();
+  fat.f->Get("mcStat/h_sums")->Clone("h_sums");
+  fat.f_out->cd();
+
   TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
   if (is_mc)
     h_norm->Fill(0.5, ((TH1F*)fat.f->Get("mcStat/h_sums"))->GetBinContent(1));
@@ -35,7 +40,7 @@ int main(int argc, char** argv) {
   TH1F* h_weight = new TH1F("h_weight", ";weight;events/0.01", 200, 0, 2);
   TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
 
-  const int num_numdens = 5;
+  const int num_numdens = 3;
 
   TH1F* h_vtxntracks     [num_numdens] = {0};
   TH1F* h_vtxntracksptgt3[num_numdens] = {0};
@@ -54,8 +59,6 @@ int main(int argc, char** argv) {
   numdens nds[num_numdens] = {
     numdens("nocuts"),
     numdens("ntracks"),
-    numdens("ntracksPdrmin"),
-    numdens("ntracksPbs2d"),
     numdens("all")
   };
 
@@ -105,10 +108,9 @@ int main(int argc, char** argv) {
 
     const bool pass_800 = bool(nt.pass_hlt & 0x2);
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
-    const bool H_data = strcmp(in_fn, "JetHT2016H2.root") == 0 || strcmp(in_fn, "JetHT2016H3.root") == 0;
-    bool triggers_if_H;
-    if (H_data) triggers_if_H = pass_900_450_AK450;
-    else triggers_if_H = true;
+    std::string in_fn_str(in_fn);
+    std::string filename = in_fn_str.substr(in_fn_str.find_last_of("/") + 1);
+    const bool H_data = filename.compare("JetHT2016H2.root") == 0 || filename.compare("JetHT2016H3.root") == 0;
 
     double jet_sume = 0;
     double jet_drmax = 0;
@@ -128,15 +130,14 @@ int main(int argc, char** argv) {
       }
     }
     jet_dravg /= n_jets * (n_jets - 1) / 2.;
-    
     if (nt.npreseljets < njets_req || 
         nt.npreselbjets < nbjets_req ||
         nt.jetht < 1000 ||
         movedist2 < 0.03 ||
-	!pass_800 ||
-	!triggers_if_H ||
-        movedist2 > 2.5)
+	!(pass_800 || (H_data && pass_900_450_AK450)) ||
+        movedist2 > 2.5) {
       continue;
+    }
 
     h_weight->Fill(w);
     h_npu->Fill(nt.npu, w);
@@ -170,8 +171,6 @@ int main(int argc, char** argv) {
 
     int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;
-    int n_pass_ntracksPdrmin = 0;
-    int n_pass_ntracksPbs2d = 0;
     int n_pass_all = 0;
 
     std::vector<int> first_vtx_to_pass(num_numdens, -1);
@@ -185,14 +184,11 @@ int main(int argc, char** argv) {
         continue;
 
       const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
-      const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
       const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
 
       if (1)                                           { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;        }
       if (pass_ntracks)                                { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;       }
-      if (pass_ntracks && pass_drmin)                  { set_it_if_first(first_vtx_to_pass[3], ivtx); ++n_pass_ntracksPdrmin; }
-      if (pass_ntracks &&               pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[4], ivtx); ++n_pass_ntracksPbs2d;  }
-      if (pass_ntracks && pass_drmin && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[5], ivtx); ++n_pass_all;           }
+      if (pass_ntracks && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all;           }
     }
 
     for (int i = 0; i < num_numdens; ++i) {
@@ -208,15 +204,11 @@ int main(int argc, char** argv) {
 
     if (n_pass_nocuts)             nums["nocuts"]             += w;
     if (n_pass_ntracks)            nums["ntracks"]            += w;
-    if (n_pass_ntracksPdrmin)      nums["ntracksPdrmin"]      += w;
-    if (n_pass_ntracksPbs2d)       nums["ntracksPbs2d"]       += w;
     if (n_pass_all)                nums["all"]                += w;
 
     const int passes[num_numdens] = {
       n_pass_nocuts,
       n_pass_ntracks,
-      n_pass_ntracksPdrmin,
-      n_pass_ntracksPbs2d,
       n_pass_all
     };
 
