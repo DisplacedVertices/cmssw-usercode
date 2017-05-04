@@ -496,11 +496,11 @@ for x in (JetHT2016G,
           SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
           qcdht0500, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, #qcdht2000,
           wjetstolnu, dyjetstollM50, qcdmupt15,
-          mfv_neu_tau00100um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau01000um_M0300,
+          mfv_neu_tau00100um_M0300, mfv_neu_tau10000um_M0300,
           mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800,
           mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200,
           mfv_neu_tau00100um_M1600, mfv_neu_tau10000um_M1600,
-          mfv_neu_tau00300um_M0300, mfv_neu_tau01000um_M1600, mfv_neu_tau10000um_M0800,
+          mfv_neu_tau10000um_M0800,
           xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
           ):
     x.condor = True
