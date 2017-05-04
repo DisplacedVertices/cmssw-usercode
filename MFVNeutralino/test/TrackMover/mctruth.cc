@@ -26,14 +26,11 @@ int main(int argc, char** argv) {
   TH1F* h_weight = new TH1F("h_weight", ";weight;events/0.01", 200, 0, 2);
   TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
 
-  const int num_numdens = 6;
+  const int num_numdens = 3;
 
   numdens nds[num_numdens] = {
     numdens("nocuts"),
     numdens("ntracks"),
-    numdens("ntracksPptgt3"),
-    numdens("ntracksPptgt3Pdr"),
-    numdens("ntracksPptgt3Pbs2d"),
     numdens("all")
   };
 
@@ -54,6 +51,8 @@ int main(int argc, char** argv) {
   double den = 0;
   std::map<std::string, double> nums;
 
+  printf("\n*********************************\nafter fixing gen z bug in ntuple, redo moved tracks treer and fix the min_lspdist3 and movedist cut in vtx loop below\n*********************************\n");
+
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
     if (t->LoadTree(j) < 0) break;
     if (t->GetEntry(j) <= 0) continue;
@@ -62,7 +61,12 @@ int main(int argc, char** argv) {
       fflush(stdout);
     }
 
-    if (nt.jetht < 500 || nt.jetpt4 < 60)
+    const bool pass_800 = bool(nt.pass_hlt & 0x2);
+    const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
+    const bool H_scheme = false; // could throw random number?
+
+    if (nt.jetht < 1000 ||
+        !(pass_800 || (H_scheme && pass_900_450_AK450)))
       continue;
 
     const double w = apply_weight ? nt.weight : 1.;
@@ -79,8 +83,10 @@ int main(int argc, char** argv) {
                                 nt.gen_lsp_decay[2] - nt.gen_lsp_decay[5]);
     const double lspdistz = fabs(nt.gen_lsp_decay[2] - nt.gen_lsp_decay[5]);
 
+    //printf("lspdist2 %f dist3 %f distz %f n_raw_vtx %lu  weight %f\n", lspdist2, lspdist3, lspdistz, n_raw_vtx, w);
+
     if (lspdist2 < 0 ||
-        lspdist3 < min_lspdist3 ||
+        lspdist2 < min_lspdist3 || // JMTBAD put back to lspdist3 after fixing
         lspdistz < 0)
       continue;
 
@@ -90,6 +96,8 @@ int main(int argc, char** argv) {
       const double gen_vz = nt.gen_lsp_decay[ilsp*3 + 2];
       const double movedist2 = mag(gen_vx, gen_vy);
       const double movedist3 = mag(gen_vx, gen_vy, gen_vz);
+
+      //printf("ilsp %i movedist2 %f dist3 %f\n", ilsp, movedist2, movedist3);
 
       if (movedist2 < 0.03 ||
           movedist2 > 2.5)
@@ -113,9 +121,6 @@ int main(int argc, char** argv) {
 
       int n_pass_nocuts = 0;
       int n_pass_ntracks = 0;
-      int n_pass_ntracksPptgt3 = 0;
-      int n_pass_ntracksPptgt3Pdr = 0;
-      int n_pass_ntracksPptgt3Pbs2d = 0;
       int n_pass_all = 0;
 
       std::vector<int> first_vtx_to_pass(num_numdens, -1);
@@ -123,27 +128,20 @@ int main(int argc, char** argv) {
 
       for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
         const double dist2move = mag(gen_vx - nt.p_vtxs_x->at(ivtx),
-                                     gen_vy - nt.p_vtxs_y->at(ivtx),
-                                     gen_vz - nt.p_vtxs_z->at(ivtx));
-        if (dist2move > 0.005)
+                                     gen_vy - nt.p_vtxs_y->at(ivtx));
+                                     //                                     gen_vz - nt.p_vtxs_z->at(ivtx));  // JMTBAD maybe put back to 3D
+        //printf("ivtx %lu dist2move %f\n", ivtx, dist2move);
+        if (dist2move > 0.0084)
           continue;
 
-        const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
-        const bool pass_ntracksptgt3 = true; // nt.p_vtxs_ntracksptgt3->at(ivtx) >= 3;
-        const bool pass_drmin        = nt.p_vtxs_drmin       ->at(ivtx) < 0.4;
-        const bool pass_drmax        = true; // nt.p_vtxs_drmax       ->at(ivtx) < 4;
-        const bool pass_mindrmax     = true; // nt.p_vtxs_drmax       ->at(ivtx) > 1.2;
-        const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
-        const bool pass_drcuts = pass_drmin && pass_drmax && pass_mindrmax;
+        const bool pass_ntracks = nt.p_vtxs_ntracks->at(ivtx) >= 5;
+        const bool pass_bs2derr = nt.p_vtxs_bs2derr->at(ivtx) < 0.0025;
 
-        //printf("ivtx %lu dist2move %f passes: %i %i %i %i %i %i %i\n", ivtx, dist2move, pass_ntracks,pass_ntracksptgt3,pass_drmin,pass_drmax,pass_mindrmax,pass_bs2derr,pass_drcuts);
+        //printf("  ntracks %i pass? %i  bs2derr %f pass? %i\n", nt.p_vtxs_ntracks->at(ivtx), pass_ntracks, nt.p_vtxs_bs2derr->at(ivtx), pass_bs2derr);
 
-        if (1)                                                                 { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;             }
-        if (pass_ntracks)                                                      { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;            }
-        if (pass_ntracks && pass_ntracksptgt3)                                 { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_ntracksPptgt3;      }
-        if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts)                  { set_it_if_first(first_vtx_to_pass[3], ivtx); ++n_pass_ntracksPptgt3Pdr;   }
-        if (pass_ntracks && pass_ntracksptgt3 &&                pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[4], ivtx); ++n_pass_ntracksPptgt3Pbs2d; }
-        if (pass_ntracks && pass_ntracksptgt3 && pass_drcuts && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[5], ivtx); ++n_pass_all;                }
+        if (1)                             { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;       }
+        if (pass_ntracks)                  { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;      }
+        if (pass_ntracks && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all; }
       }
 
       //for (int i = 0; i < num_numdens; ++i) {
@@ -157,19 +155,13 @@ int main(int argc, char** argv) {
       //  }
       //}
 
-      if (n_pass_nocuts)             nums["nocuts"]             += w;
-      if (n_pass_ntracks)            nums["ntracks"]            += w;
-      if (n_pass_ntracksPptgt3)      nums["ntracksPptgt3"]      += w;
-      if (n_pass_ntracksPptgt3Pdr)   nums["ntracksPptgt3Pdr"]   += w;
-      if (n_pass_ntracksPptgt3Pbs2d) nums["ntracksPptgt3Pbs2d"] += w;
-      if (n_pass_all)                nums["all"]                += w;
+      if (n_pass_nocuts)       nums["nocuts"]       += w;
+      if (n_pass_ntracks)      nums["ntracks"]      += w;
+      if (n_pass_all)          nums["all"]          += w;
 
       const int passes[num_numdens] = {
         n_pass_nocuts,
         n_pass_ntracks,
-        n_pass_ntracksPptgt3,
-        n_pass_ntracksPptgt3Pdr,
-        n_pass_ntracksPptgt3Pbs2d,
         n_pass_all
       };
 
