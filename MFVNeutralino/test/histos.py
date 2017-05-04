@@ -120,9 +120,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     dataset = 'ntuplev14'
     for sample in samples:
-        sample.datasets[dataset].files_per = 4 if sample.name.startswith('mfv_') else 20
+        sample.set_curr_dataset(dataset)
+        sample.split_by = 'file'
+        sample.files_per = 1 if sample.name.startswith('mfv_') else 20
         if not sample.is_mc:
-            sample.datasets[dataset].json = 'ana_2015p6_10pc.json'
+            sample.json = 'ana_2015p6_10pc.json'
 
     def modify(sample):
         to_add, to_replace = [], []
