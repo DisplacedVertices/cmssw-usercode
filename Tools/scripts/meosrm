@@ -8,8 +8,7 @@ from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_published
 from JMTucker.Tools.CRAB3Tools import crab_dirs_from_argv, crab_get_output_dir, crab_output_files
 from JMTucker.Tools import colors, eos
 
-#rm_logs = bool_from_argv('rm_logs')
-#rm_failed = bool_from_argv('rm_failed')
+forget_logs = bool_from_argv('forget_logs')
 
 cs_dirs = cs_dirs_from_argv()
 cr_dirs = crab_dirs_from_argv()
@@ -19,10 +18,8 @@ if not all_dirs:
     print 'usage: mrmeos wd [wd2 ...]'
     sys.exit(1)
 
-#if cs_dirs and rm_logs:
-#    print colors.yellow('rm_logs does nothing for condor dirs')
-#if cs_dirs and rm_failed:
-#    print colors.yellow('rm_failed does nothing for condor dirs')
+if cs_dirs and forget_logs:
+    print colors.yellow('forget_logs does nothing for condor dirs')
 
 def do(cmd):
     print cmd
@@ -48,10 +45,11 @@ for wd in cr_dirs + cs_dirs:
         print output_dir
         dn = os.path.dirname(output_dir)
         bn = os.path.basename(output_dir)
-        log_dirs = []
-        for nd in eos.glob(output_dir, '????'):
-            log_dirs.extend(eos.glob(os.path.join(output_dir, nd), 'log'))
-        do('cd /eos/uscms%s && tar --remove-files -cf %s/cmsRun_logs.tar ' % (dn, awd) + ' '.join(os.path.relpath(ld, dn) for ld in log_dirs) + ' && cd -')
+        if not forget_logs:
+            log_dirs = []
+            for nd in eos.glob(output_dir, '????'):
+                log_dirs.extend(eos.glob(os.path.join(output_dir, nd), 'log'))
+            do('cd /eos/uscms%s && tar --remove-files -cf %s/cmsRun_logs.tar ' % (dn, awd) + ' '.join(os.path.relpath(ld, dn) for ld in log_dirs) + ' && cd -')
         do('cd /eos/uscms%s && rm -r %s && cd -' % (dn, bn))
     else:
         dirs = set()
