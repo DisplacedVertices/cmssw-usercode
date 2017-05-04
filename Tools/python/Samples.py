@@ -246,6 +246,15 @@ mfv_hip_samples = [
     MCSample('mfv_neu_tau01000um_M0800_hip1p0', '/mfv_neu_tau01000um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2c7bd99f8dc35e5e4016b1d3a0cf7432/USER', 10000),
     MCSample('mfv_neu_tau01000um_M1600_hip1p0', '/mfv_neu_tau01000um_M1600_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-30e149ba9da0eb269aa36815fd2741c0/USER', 9799),
     MCSample('mfv_neu_tau10000um_M0800_hip1p0', '/mfv_neu_tau10000um_M0800_hip1p0/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2c7bd99f8dc35e5e4016b1d3a0cf7432/USER', 10000),
+
+    MCSample('mfv_ddbar_tau00300um_M0800_hip1p2', '/mfv_ddbar_tau00300um_M0800_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ffee1968925614fe813305c33c66fb42/USER', 10000),
+    MCSample('mfv_ddbar_tau01000um_M0800_hip1p2', '/mfv_ddbar_tau01000um_M0800_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ffee1968925614fe813305c33c66fb42/USER', 10000),
+    MCSample('mfv_ddbar_tau10000um_M0800_hip1p2', '/mfv_ddbar_tau10000um_M0800_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ffee1968925614fe813305c33c66fb42/USER', 10000),
+    MCSample('mfv_neu_tau00300um_M0800_hip1p2', '/mfv_neu_tau00300um_M0800_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-379ca86c743293c6c413a21319cb68e6/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M0400_hip1p2', '/mfv_neu_tau01000um_M0400_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cb03901f4aa56953a31e20bb8000a180/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M0800_hip1p2', '/mfv_neu_tau01000um_M0800_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-379ca86c743293c6c413a21319cb68e6/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M1600_hip1p2', '/mfv_neu_tau01000um_M1600_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cb03901f4aa56953a31e20bb8000a180/USER', 9800),
+    MCSample('mfv_neu_tau10000um_M0800_hip1p2', '/mfv_neu_tau10000um_M0800_hip1p2/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-379ca86c743293c6c413a21319cb68e6/USER', 10000),
     ]
 
 for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
