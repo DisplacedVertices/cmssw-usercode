@@ -10,7 +10,7 @@ minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
 event_filter = not keep_all
-version = 'V14'
+version = 'V14p1'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
@@ -138,7 +138,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = \
             Samples.data_samples + \
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
+            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples
 
     if 'validation' in sys.argv:
         batch_name += '_validation'
