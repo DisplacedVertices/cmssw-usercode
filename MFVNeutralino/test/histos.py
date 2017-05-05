@@ -121,7 +121,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     dataset = 'ntuplev14'
     for sample in samples:
         sample.set_curr_dataset(dataset)
-        sample.split_by = 'file'
+        sample.split_by = 'files'
         sample.files_per = 1 if sample.name.startswith('mfv_') else 20
         if not sample.is_mc:
             sample.json = 'ana_2015p6_10pc.json'
