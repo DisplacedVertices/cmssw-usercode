@@ -34,15 +34,26 @@ def crab_command(*args, **kwargs):
         old_stdout = sys.stdout
         sys.stdout = buf = StringIO()
 
+    ok = True
+
     try:
         result = crabCommand(*args, **kwargs)
-        if type(result) != tuple or len(result) != 2 or type(result[0]) != dict or type(result[1]) != dict \
-                or set(result[0].keys()) & set(result[1].keys()) != set(['jobsPerStatus']) \
-                or result[0]['jobsPerStatus'] != result[1]['jobsPerStatus']:
-            raise CRABToolsException('problem with crabCommand return value')
-        a,b = result
-        a.update(b)
-        result = a
+
+        # what the hell happened in the last crab version?
+        if type(result) == tuple:
+            d = {}
+            for r in result:
+                if type(r) == dict:
+                    for k,v in r.iteritems():
+                        if d.has_key(k):
+                            if d[k] != v:
+                                ok = False
+                        else:
+                            d[k] = v
+                elif r is not None:
+                    ok = False
+            result = d
+
     except httplib.HTTPException, e:
         result = {}
         result['jobList'] = []
@@ -57,6 +68,12 @@ def crab_command(*args, **kwargs):
     if suppress_stdout:
         result['stdout'] = buf.getvalue()
         sys.stdout = old_stdout
+
+    if not ok or type(result) != dict:
+        print 'problem with crabCommand return value'
+        print type(result)
+        pprint(result)
+        raise CRABToolsException('problem')
 
     os.remove(cache_file)
     os.environ['CRAB3_CACHE_FILE'] = old_cache_file
