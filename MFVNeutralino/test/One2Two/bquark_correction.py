@@ -105,16 +105,22 @@ eys = [ey1, ey2, ey3]
 for i in range(3):
     g = ROOT.TGraphErrors(len(x), array('d',x), array('d',ys[i]), array('d',ex), array('d',eys[i]))
     g.SetMarkerStyle(21)
-    g.SetTitle('variation / default (%s);3-track%12s4-track%12s5-or-more-track%2s' % (dvvc[i], '','',''))
-    g.GetXaxis().SetLimits(-3,1)
+    g.SetTitle('b quark correction (%s);3-track%8s4-track%7s5-track%8s4x3-track%2s' % (dvvc[i], '','','',''))
+    g.GetXaxis().SetLimits(-3,2)
     g.GetXaxis().SetLabelSize(0)
     g.GetXaxis().SetTitleOffset(0.5)
     g.GetYaxis().SetRangeUser(0,2)
     g.Draw('AP')
 
-    line = ROOT.TLine(-3,1,1,1)
+    line = ROOT.TLine(-3,1,2,1)
     line.SetLineStyle(2)
     line.SetLineWidth(2)
     line.Draw()
 
-    ps.save('ratio_%s' % bins[i])
+    for j in range(len(x)):
+        t = ROOT.TLatex()
+        t.SetTextFont(42)
+        t.SetTextSize(0.03)
+        t.DrawLatex(j-2+0.03, ys[i][j] + eys[i][j] - t.GetTextSize(), '%.2f #pm %.2f' % (ys[i][j], eys[i][j]))
+
+    ps.save('bquark_correction_%s' % bins[i])
