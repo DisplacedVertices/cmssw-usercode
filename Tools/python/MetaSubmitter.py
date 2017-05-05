@@ -111,7 +111,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             sample.events_per, sample.files_per = d[sample.name]
 
     elif jobtype == 'histos' or jobtype == 'minitree':
-        x = {
+        d = {
             'JetHT2015C': 4,
             'JetHT2015D': 200,
             'mfv_neu_tau00100um_M0300_2015': 2,
