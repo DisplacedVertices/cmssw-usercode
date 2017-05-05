@@ -26,8 +26,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def modify(sample):
         to_add, to_replace = [], []
         if not sample.is_mc:
-            to_add.append('del process.pMiniTreeNtk3or4')
-            to_add.append('del process.pMiniTreeNtk4')
             to_add.append('del process.pMiniTree')
         return to_add, to_replace
 
