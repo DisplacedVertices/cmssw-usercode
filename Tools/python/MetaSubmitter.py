@@ -240,7 +240,6 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
             sample.files_per = d.get(sample.name, 20)
-        return
 
     elif jobtype == 'ntuple':
         target = 5000
