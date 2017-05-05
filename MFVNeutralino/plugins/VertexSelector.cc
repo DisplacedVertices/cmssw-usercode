@@ -310,11 +310,12 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
       ++ntracks_sub;
 
   float trackpairdphimax = -1;
-  for (int i = 0; i < int(vtx.trackpairdphis().size()); ++i) {
-    if (fabs(vtx.trackpairdphis()[i]) > trackpairdphimax) {
-      trackpairdphimax = fabs(vtx.trackpairdphis()[i]);
+  if (min_trackpairdphimax > 0)
+    for (float dphi : vtx.trackpairdphis()) {
+      dphi = fabs(dphi);
+      if (dphi > trackpairdphimax)
+        trackpairdphimax = dphi;
     }
-  }
 
   return 
     (vtx.ntracks() - ntracks_sub) >= min_ntracks &&
