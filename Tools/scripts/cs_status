@@ -35,7 +35,9 @@ def return_code(r):
 def z(n):
     return '-' if n == 0 else str(n)
 
-print colors.bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'idle', 'run', 'killed', 'problem'))
+def header():
+    print colors.bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'idle', 'run', 'killed', 'problem'))
+header()
 
 sums = [0]*6
 done = []
@@ -84,6 +86,7 @@ for wd in wds:
         print '  resubmit these:', cl
         os.system('cs_resubmit %s %s' % (wd, cl))
 
+header()
 print colors.bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
 
 #if verbose and done:
