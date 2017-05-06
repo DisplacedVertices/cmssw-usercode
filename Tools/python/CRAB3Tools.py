@@ -112,7 +112,7 @@ def crab_process_simple_cmd(cmd, dirs, max_processes):
             pprint(res)
     return results
 
-def crab_status(working_dir, verbose=True):
+def crab_status(working_dir, verbose=False):
     if verbose:
         print 'checking', working_dir
 
@@ -138,7 +138,7 @@ def crab_status(working_dir, verbose=True):
 
     return working_dir, result
 
-def crab_process_statuses(working_dirs, max_processes, verbose=True):
+def crab_process_statuses(working_dirs, max_processes, verbose=False):
     if verbose:
         print 'launching processes...'
     #results = {working_dirs[0]: crab_status(working_dirs[0])}
@@ -147,7 +147,7 @@ def crab_process_statuses(working_dirs, max_processes, verbose=True):
         print 'done waiting for processes!'
     return results
 
-def crab_process_statuses_with_redo(working_dirs, max_processes, verbose=True):
+def crab_process_statuses_with_redo(working_dirs, max_processes, verbose=False):
     results = dict(crab_process_statuses(working_dirs, max_processes, verbose))
 
     def redoable(res):
