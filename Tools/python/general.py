@@ -233,6 +233,9 @@ def touch(path):
     with open(path, 'a'):
         os.utime(path, None)
 
+def terminal_size():
+    return int(popen('tput cols')), int(popen('tput lines'))
+
 def intlumi_from_brilcalc_csv(fn, has_hlt):
     intlumis = {}
     intlumi_sum = 0.
@@ -274,5 +277,6 @@ __all__ = [
     'popen',
     'reverse_readline',
     'save_git_status',
+    'terminal_size',
     'touch',
     ]
