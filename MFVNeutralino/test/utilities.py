@@ -112,7 +112,16 @@ def cmd_merge_background():
             os.system(cmd)
 
 def cmd_effsprint():
-    for which, which_files in [('background', '.'), ('signals', '*mfv*root xx4j*root')]:
+    if 'allmc' in sys.argv:
+        which = 'all'
+        which_files = []
+        for x in 'qcd', 'ttbar', 'mfv':
+            which_files += [fn for fn in glob(x + '*.root') if '2015' not in fn]
+        which_files = ' '.join(sorted(which_files))
+        todo = [(which, which_files)]
+    else:
+        todo = [('background', '.'), ('signals', '*mfv*root xx4j*root')]
+    for which, which_files in todo:
         for ntk in (3,4,'3or4',5):
             for vtx in (1,2):
                 out = 'effsprint_%s_ntk%s_%iv' % (which, ntk, vtx)
