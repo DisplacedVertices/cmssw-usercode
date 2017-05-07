@@ -39,7 +39,6 @@ private:
   const std::vector<int> max_nbtags;
   const double min_ht;
   const double max_ht;
-  const double min_jet_ST;
   const double min_sum_other_pv_sumpt2;
   const double max_sum_other_pv_sumpt2;
   const int min_nmuons;
@@ -96,7 +95,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
     min_ht(cfg.getParameter<double>("min_ht")),
     max_ht(cfg.getParameter<double>("max_ht")),
-    min_jet_ST(cfg.getParameter<double>("min_jet_ST")),
     min_sum_other_pv_sumpt2(cfg.getParameter<double>("min_sum_other_pv_sumpt2")),
     max_sum_other_pv_sumpt2(cfg.getParameter<double>("max_sum_other_pv_sumpt2")),
     min_nmuons(cfg.getParameter<int>("min_nmuons")),
@@ -197,19 +195,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (mevent->jet_ht(40) > max_ht)
-      return false;
-
-    double sum = 0;
-    for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-      double px_i = mevent->jet_pt[ijet] * cos(mevent->jet_phi[ijet]);
-      double py_i = mevent->jet_pt[ijet] * sin(mevent->jet_phi[ijet]);
-      for (size_t jjet = 0; jjet < mevent->jet_id.size(); ++jjet) {
-        double px_j = mevent->jet_pt[jjet] * cos(mevent->jet_phi[jjet]);
-        double py_j = mevent->jet_pt[jjet] * sin(mevent->jet_phi[jjet]);
-        sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (mevent->jet_pt[ijet] * mevent->jet_pt[jjet]);
-      }
-    }
-    if (1 - sqrt(1 - 4/(mevent->jet_ht() * mevent->jet_ht()) * sum) < min_jet_ST)
       return false;
 
     if (min_sum_other_pv_sumpt2 > 0 || max_sum_other_pv_sumpt2 < 1e9) {

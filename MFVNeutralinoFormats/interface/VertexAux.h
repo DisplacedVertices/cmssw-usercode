@@ -319,8 +319,9 @@ struct MFVVertexAux {
   }
 
   bool use_track(size_t i) const {
-    static const float pt_err_thr = 0.5;
-    return track_pt_err(i) / track_pt(i) <= pt_err_thr;
+    return true;
+    //static const float pt_err_thr = 0.5;
+    //return track_pt_err(i) / track_pt(i) <= pt_err_thr;
   }
 
   int nbadtracks() const {

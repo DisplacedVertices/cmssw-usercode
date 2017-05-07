@@ -34,8 +34,26 @@ def crab_command(*args, **kwargs):
         old_stdout = sys.stdout
         sys.stdout = buf = StringIO()
 
+    ok = True
+
     try:
         result = crabCommand(*args, **kwargs)
+
+        # what the hell happened in the last crab version?
+        if type(result) == tuple:
+            d = {}
+            for r in result:
+                if type(r) == dict:
+                    for k,v in r.iteritems():
+                        if d.has_key(k):
+                            if d[k] != v:
+                                ok = False
+                        else:
+                            d[k] = v
+                elif r is not None:
+                    ok = False
+            result = d
+
     except httplib.HTTPException, e:
         result = {}
         result['jobList'] = []
@@ -50,6 +68,12 @@ def crab_command(*args, **kwargs):
     if suppress_stdout:
         result['stdout'] = buf.getvalue()
         sys.stdout = old_stdout
+
+    if not ok or type(result) != dict:
+        print 'problem with crabCommand return value'
+        print type(result)
+        pprint(result)
+        raise CRABToolsException('problem')
 
     os.remove(cache_file)
     os.environ['CRAB3_CACHE_FILE'] = old_cache_file
@@ -88,7 +112,7 @@ def crab_process_simple_cmd(cmd, dirs, max_processes):
             pprint(res)
     return results
 
-def crab_status(working_dir, verbose=True):
+def crab_status(working_dir, verbose=False):
     if verbose:
         print 'checking', working_dir
 
@@ -114,7 +138,7 @@ def crab_status(working_dir, verbose=True):
 
     return working_dir, result
 
-def crab_process_statuses(working_dirs, max_processes, verbose=True):
+def crab_process_statuses(working_dirs, max_processes, verbose=False):
     if verbose:
         print 'launching processes...'
     #results = {working_dirs[0]: crab_status(working_dirs[0])}
@@ -123,14 +147,14 @@ def crab_process_statuses(working_dirs, max_processes, verbose=True):
         print 'done waiting for processes!'
     return results
 
-def crab_process_statuses_with_redo(working_dirs, max_processes, verbose=True):
+def crab_process_statuses_with_redo(working_dirs, max_processes, verbose=False):
     results = dict(crab_process_statuses(working_dirs, max_processes, verbose))
 
     def redoable(res):
         return \
             res.has_key('HTTPException') or \
             res.has_key('pycurlError') or \
-            'Timeout when waiting for remote host' in res.get('taskFailureMsg', '')
+            (res.get('taskFailureMsg', '') != None and 'Timeout when waiting for remote host' in res.get('taskFailureMsg', ''))
 
     to_redo = [d for d, res in results.iteritems() if redoable(res)]
 

@@ -353,6 +353,26 @@ _add_ds("ntuplev14", {
 'qcdht2000ext_2015': (81, ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV14_2015_qcdht2000ext_2015/170416_113215/0000/ntuple_72.root'] + ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV14_2015_qcdht2000ext_2015/170415_132556/0000/ntuple_%i.root' % i for i in chain(xrange(66,71), [26, 73])] + ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV14_2015_qcdht2000ext_2015/170415_075656/0000/ntuple_%i.root' % i for i in chain(xrange(26), xrange(27,66), xrange(74,81), [71])]),
 'ttbar': (1006, ['/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV14_2016_ttbar/170414_215210' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in chain(xrange(122), xrange(123,1006))] + ['/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV14_2016_ttbar/170414_233409/0000/ntuple_122.root']),
 'ttbar_2015': (553, ['/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV14_2015_ttbar_2015/170415_085318/0000/ntuple_257.root'] + ['/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV14_2015_ttbar_2015/170415_075656/0000/ntuple_%i.root' % i for i in chain(xrange(257), xrange(258,553))]),
+
+'mfv_ddbar_tau00300um_M0800_hip1p0': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M0800_hip1p0/NtupleV14p1_2016_mfv_ddbar_tau00300um_M0800_hip1p0/170503_194704", 10),
+'mfv_ddbar_tau00300um_M0800_hip1p2': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M0800_hip1p2/NtupleV14p1_2016_mfv_ddbar_tau00300um_M0800_hip1p2/170503_200244", 10),
+'mfv_ddbar_tau01000um_M0400_hip1p0': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0400_hip1p0/NtupleV14p1_2016_mfv_ddbar_tau01000um_M0400_hip1p0/170503_194704", 10),
+'mfv_ddbar_tau01000um_M0800_hip1p0': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0800_hip1p0/NtupleV14p1_2016_mfv_ddbar_tau01000um_M0800_hip1p0/170503_194704", 10),
+'mfv_ddbar_tau01000um_M0800_hip1p2': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0800_hip1p2/NtupleV14p1_2016_mfv_ddbar_tau01000um_M0800_hip1p2/170503_200244", 10),
+'mfv_ddbar_tau01000um_M1600_hip1p0': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M1600_hip1p0/NtupleV14p1_2016_mfv_ddbar_tau01000um_M1600_hip1p0/170503_194704", 10),
+'mfv_ddbar_tau10000um_M0800_hip1p0': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M0800_hip1p0/NtupleV14p1_2016_mfv_ddbar_tau10000um_M0800_hip1p0/170503_194704", 10),
+'mfv_ddbar_tau10000um_M0800_hip1p2': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M0800_hip1p2/NtupleV14p1_2016_mfv_ddbar_tau10000um_M0800_hip1p2/170503_200244", 10),
+'mfv_neu_tau00300um_M0800_hip1p0': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0800_hip1p0/NtupleV14p1_2016_mfv_neu_tau00300um_M0800_hip1p0/170503_194704", 10),
+'mfv_neu_tau00300um_M0800_hip1p2': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0800_hip1p2/NtupleV14p1_2016_mfv_neu_tau00300um_M0800_hip1p2/170503_200244", 10),
+'mfv_neu_tau01000um_M0400_hip1p0': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M0400_hip1p0/NtupleV14p1_2016_mfv_neu_tau01000um_M0400_hip1p0/170503_194704", 10),
+'mfv_neu_tau01000um_M0400_hip1p2': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M0400_hip1p2/NtupleV14p1_2016_mfv_neu_tau01000um_M0400_hip1p2/170503_200244", 10),
+'mfv_neu_tau01000um_M0800_hip1p0': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M0800_hip1p0/NtupleV14p1_2016_mfv_neu_tau01000um_M0800_hip1p0/170503_194704", 10),
+'mfv_neu_tau01000um_M0800_hip1p2': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M0800_hip1p2/NtupleV14p1_2016_mfv_neu_tau01000um_M0800_hip1p2/170503_200244", 10),
+'mfv_neu_tau01000um_M1600_hip1p0': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M1600_hip1p0/NtupleV14p1_2016_mfv_neu_tau01000um_M1600_hip1p0/170503_194704", 10),
+'mfv_neu_tau01000um_M1600_hip1p2': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M1600_hip1p2/NtupleV14p1_2016_mfv_neu_tau01000um_M1600_hip1p2/170503_200244", 10),
+'mfv_neu_tau10000um_M0800_hip1p0': _fromnum0("/store/user/tucker/mfv_neu_tau10000um_M0800_hip1p0/NtupleV14p1_2016_mfv_neu_tau10000um_M0800_hip1p0/170503_194704", 10),
+'mfv_neu_tau10000um_M0800_hip1p2': _fromnum0("/store/user/tucker/mfv_neu_tau10000um_M0800_hip1p2/NtupleV14p1_2016_mfv_neu_tau10000um_M0800_hip1p2/170503_200244", 10),
+
 })
 
 _add_ds("pick1vtxv14", {

@@ -473,6 +473,9 @@ qcdht1000.add_dataset('ntuplev14', '/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgrap
 for x in tuple(mfv_signal_samples_2015) + (JetHT2015C, JetHT2015D, JetHT2016G, mfv_ddbar_tau00100um_M0300, mfv_ddbar_tau00100um_M0400, mfv_ddbar_tau00100um_M0500, mfv_ddbar_tau00100um_M0600, mfv_ddbar_tau00100um_M0800, mfv_ddbar_tau00100um_M1200, mfv_ddbar_tau00100um_M1600, mfv_ddbar_tau00300um_M0300, mfv_ddbar_tau00300um_M0400, mfv_ddbar_tau00300um_M0500, mfv_ddbar_tau00300um_M0600, mfv_ddbar_tau00300um_M0800, mfv_ddbar_tau00300um_M1200, mfv_ddbar_tau00300um_M1600, mfv_ddbar_tau01000um_M0300, mfv_ddbar_tau01000um_M0400, mfv_ddbar_tau01000um_M0500, mfv_ddbar_tau01000um_M0600, mfv_ddbar_tau01000um_M0800, mfv_ddbar_tau01000um_M1200, mfv_ddbar_tau01000um_M1600, mfv_ddbar_tau10000um_M0300, mfv_ddbar_tau10000um_M0400, mfv_ddbar_tau10000um_M0500, mfv_ddbar_tau10000um_M0600, mfv_ddbar_tau10000um_M0800, mfv_ddbar_tau10000um_M1200, mfv_ddbar_tau10000um_M1600, mfv_ddbar_tau30000um_M0300, mfv_ddbar_tau30000um_M0400, mfv_ddbar_tau30000um_M0500, mfv_ddbar_tau30000um_M0600, mfv_ddbar_tau30000um_M0800, mfv_ddbar_tau30000um_M1200, mfv_ddbar_tau30000um_M1600, mfv_neu_tau00100um_M0600, mfv_neu_tau00100um_M3000, mfv_neu_tau00300um_M0600, my_mfv_neu_tau00300um_M0800, mfv_neu_tau00300um_M3000, mfv_neu_tau01000um_M0600, mfv_neu_tau01000um_M3000, mfv_neu_tau10000um_M0600, mfv_neu_tau10000um_M3000, mfv_neu_tau30000um_M0300, mfv_neu_tau30000um_M0400, mfv_neu_tau30000um_M0600, mfv_neu_tau30000um_M0800, mfv_neu_tau30000um_M1200, mfv_neu_tau30000um_M1600, mfv_neu_tau30000um_M3000, mfv_neu_tau00100um_M0300, mfv_neu_tau00100um_M0800, mfv_neu_tau00100um_M1600, mfv_neu_tau00300um_M0300, mfv_neu_tau00300um_M0800, mfv_neu_tau00300um_M1600, mfv_neu_tau01000um_M0300, mfv_neu_tau01000um_M0800, mfv_neu_tau01000um_M1200, mfv_neu_tau01000um_M1600, mfv_neu_tau10000um_M0300, mfv_neu_tau10000um_M0800, mfv_neu_tau10000um_M1200, mfv_neu_tau10000um_M1600, qcdht0500, qcdht0500_2015, qcdht0500ext, qcdht0500ext_2015, qcdht0700, qcdht0700_2015, qcdht0700ext, qcdht0700ext_2015, qcdht1000_2015, qcdht1000ext, qcdht1000ext_2015, qcdht1500, qcdht1500_2015, qcdht1500ext, qcdht1500ext_2015, qcdht2000, qcdht2000_2015, qcdht2000ext, qcdht2000ext_2015, ttbar, ttbar_2015,):
     x.add_dataset("ntuplev14")
 
+for x in (mfv_ddbar_tau00300um_M0800_hip1p0, mfv_ddbar_tau00300um_M0800_hip1p2, mfv_ddbar_tau01000um_M0400_hip1p0, mfv_ddbar_tau01000um_M0800_hip1p0, mfv_ddbar_tau01000um_M0800_hip1p2, mfv_ddbar_tau01000um_M1600_hip1p0, mfv_ddbar_tau10000um_M0800_hip1p0, mfv_ddbar_tau10000um_M0800_hip1p2, mfv_neu_tau00300um_M0800_hip1p0, mfv_neu_tau00300um_M0800_hip1p2, mfv_neu_tau01000um_M0400_hip1p0, mfv_neu_tau01000um_M0400_hip1p2, mfv_neu_tau01000um_M0800_hip1p0, mfv_neu_tau01000um_M0800_hip1p2, mfv_neu_tau01000um_M1600_hip1p0, mfv_neu_tau01000um_M1600_hip1p2, mfv_neu_tau10000um_M0800_hip1p0, mfv_neu_tau10000um_M0800_hip1p2,):
+    x.add_dataset("ntuplev14")
+
 for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
     if x.name != 'qcdht0700':
         x.add_dataset('pick1vtxv14')
@@ -496,11 +499,11 @@ for x in (JetHT2016G,
           SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
           qcdht0500, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, #qcdht2000,
           wjetstolnu, dyjetstollM50, qcdmupt15,
-          mfv_neu_tau00100um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau01000um_M0300,
+          mfv_neu_tau00100um_M0300, mfv_neu_tau10000um_M0300,
           mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800,
           mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200,
           mfv_neu_tau00100um_M1600, mfv_neu_tau10000um_M1600,
-          mfv_neu_tau00300um_M0300, mfv_neu_tau00300um_M1600, mfv_neu_tau01000um_M1600, mfv_neu_tau10000um_M0800,
+          mfv_neu_tau10000um_M0800,
           xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
           ):
     x.condor = True

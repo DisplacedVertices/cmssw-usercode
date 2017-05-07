@@ -15,8 +15,8 @@ from JMTucker.Tools import colors
 parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
 parser.add_option('-v', '--verbose', action='store_true', default=False,
                   help='Print way more.')
-parser.add_option('-o', '--once', action='store_true', default=False,
-                  help='Only make one -status,-get,-resubmit pass, then exit.')
+parser.add_option('-c', '--continuous', action='store_true', default=False,
+                  help='Keep making passes.')
 parser.add_option('-w', '--wait-time', type='int', default=60*10,
                   help='Time between passes, in seconds. Default is %default.')
 parser.add_option('-d', '--delay', action='store_true', default=False,
@@ -70,9 +70,9 @@ if options.resub_white_codes and options.resub_black_codes:
 options.resub_white_codes = options.resub_white_codes.split(',')
 options.resub_black_codes = options.resub_black_codes.split(',')
 
-if not options.once and options.fake_results:
-    print '--fake-results implies --once, setting it.'
-    options.once = True
+if options.continuous and options.fake_results:
+    print '--fake-results implies not continuous, setting it.'
+    options.continuous = False
 
 if options.post_process:
     raise NotImplementedError('--post-process not implemented')
@@ -138,6 +138,12 @@ def backdoor_print(filename, l):
     f.write(s)
     print filename, 'is', fn
     print s
+    return s
+
+def make_script(filename, cmd):
+    fn, f = backdoor_file(filename)
+    f.write(cmd)
+    return fn
 
 dirs = crab_dirs_from_argv()
 
@@ -156,7 +162,7 @@ dirs_done = []
 #    print 'checking these %i dirs:' % len(dirs)
 #    for d in dirs:
 #        print d
-print 'crmon: checking %i dirs' % len(dirs)
+print 'crmon: checking %i dirs, be patient' % len(dirs)
 
 def check_proxies():
     if options.renew_proxies:
@@ -192,7 +198,7 @@ while 1:
         tee = Tee(options.tee)
 
     pass_string = str(int(time.time()))
-    if not options.once:
+    if options.continuous:
         print '\n*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\nmaking a pass (#%i string %s):\n' % (pass_count, pass_string)
     if options.fake_results:
         # Fake statuses for debugging the table printing below.
@@ -356,8 +362,6 @@ while 1:
     #print repr(table_format)
 
     # Header.
-    print
-    print_header('Summary:')
     header = ['directory', 'total |'] + status_columns
     print_header(table_format % tuple(header))
 
@@ -392,10 +396,9 @@ while 1:
             color = colors.cyan
         print color(table_format % row)
     sums[0] = '%s |' % sums[0]
-    sums = tuple(['Sums'] + sums)
+    sums = tuple(['totals'] + sums)
     sum_row = table_format % sums
-    print '-' * len(sum_row)
-    print sum_row
+    print colors.bold(sum_row)
     print
 
     # Figure out which directories are done, and remove them from the
@@ -443,21 +446,18 @@ while 1:
             print d
 
     if notdone:
-        print_header('To resume with just the not-done dirs, do:')
-        s = 'crmon ' + ' '.join(notdone)
-        backdoor_print('resume', [s])
+        print colors.bold('Resume not-done:')
+        print '.', make_script('resume', 'crmon ' + ' '.join(notdone))
 
     if fail:
-        print_header('To resubmit failed jobs, do:')
-        s = 'cr res ' + ' '.join(fail)
-        backdoor_print('resubmit', [s])
+        print colors.bold('Resubmit failed:')
+        print '.', make_script('resubmit', 'cr res ' + ' '.join(fail))
 
     if not dirs:
         print_header('All done!')
         break
 
-    if options.once:
-        print_header('--once specified, quitting.')
+    if not options.continuous:
         break
 
     # Might want to break but can't count on being in front of the

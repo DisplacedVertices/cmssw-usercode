@@ -8,15 +8,16 @@ from JMTucker.Tools import colors
 if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
     print 'usage: cs_status [options] wd [wd2 ...]'
     print '   -h   print this msg'
-    print '   -v   verbose: give a report on the exit codes of each failed job, and print list of done directories'
-    print '   -r   resubmit: resubmit all failed jobs (with no check on exit code)'
+#    print '   -v   verbose: give a report on the exit codes of each failed job, and print list of done directories'
+    print '   -a   resubmit: resubmit any jobs that failed (no check on exit code)'
+    print '   -r   resubmit: resubmit jobs that failed because of xrdcp problems'
     print '   -k   resubmit killed: resubmit all killed jobs (with no check on reason)'
     sys.exit(1)
 
 resubmit_all = '-a' in sys.argv
 resubmit = resubmit_all or '-r' in sys.argv
 resubmit_killed = '-k' in sys.argv
-verbose = '-v' in sys.argv
+verbose = True #'-v' in sys.argv
 wds = cs_dirs_from_argv()
 ml = max(len(wd) for wd in wds) + 3
 fmt = '%' + str(ml) + 's %10s | %10s %10s %10s %10s %10s'
@@ -34,7 +35,9 @@ def return_code(r):
 def z(n):
     return '-' if n == 0 else str(n)
 
-print colors.bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'idle', 'run', 'killed', 'problem'))
+def header():
+    print colors.bold(fmt % ('dir'.ljust(ml), 'njobs', 'done', 'idle', 'run', 'killed', 'problem'))
+header()
 
 sums = [0]*6
 done = []
@@ -83,9 +86,10 @@ for wd in wds:
         print '  resubmit these:', cl
         os.system('cs_resubmit %s %s' % (wd, cl))
 
+header()
 print colors.bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
 
-if verbose and done:
-    print '\nthese are done:', ' '.join(done)
+#if verbose and done:
+#    print '\nthese are done:', ' '.join(done)
 if len(done) == len(wds):
     print '\nAll done!'

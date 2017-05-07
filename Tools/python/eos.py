@@ -98,17 +98,18 @@ if __name__ == '__main__':
                 raise ValueError('usage: eos.py mv fn1 [fn2...] /store/.../dest')
             print dest
             for fn in fns:
-                print fn
+                dest_fn = os.path.join(dest, os.path.basename(fn))
+                print fn, '->', dest_fn
                 if not os.path.isfile(fn):
                     raise ValueError("files only, can't recurse")
+                if exists(dest_fn):
+                    raise IOError("dest exists, refusing to clobber")
                 if not cp(fn, dest):
                     raise IOError("problem copying?")
-                dest_fn = os.path.join(dest, os.path.basename(fn))
                 md5src = general.md5sum(fn)
                 md5dst = md5sum(dest_fn)
-                print fn, md5src, dest_fn, md5dst
+                print '    ', md5src, '->', md5dst
                 if md5src != md5dst:
                     raise ValueError("problem with md5sums: src %s dst %s" % (md5src, md5dst))
                 if cmd == 'mv':
-                    raw_input('going to rm, ok?')
                     os.remove(fn)

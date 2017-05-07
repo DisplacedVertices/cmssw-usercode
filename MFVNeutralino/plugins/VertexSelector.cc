@@ -310,10 +310,20 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
       ++ntracks_sub;
 
   float trackpairdphimax = -1;
-  for (int i = 0; i < int(vtx.trackpairdphis().size()); ++i) {
-    if (fabs(vtx.trackpairdphis()[i]) > trackpairdphimax) {
-      trackpairdphimax = fabs(vtx.trackpairdphis()[i]);
+  if (min_trackpairdphimax > 0)
+    for (float dphi : vtx.trackpairdphis()) {
+      dphi = fabs(dphi);
+      if (dphi > trackpairdphimax)
+        trackpairdphimax = dphi;
     }
+
+  if (min_drmin > 0 || max_drmin < 1e9 || min_drmax > 0 || max_drmax < 1e9) {
+    MFVVertexAux::stats s(&vtx, vtx.trackpairdrs());
+    if (s.min <  min_drmin ||
+        s.min >= max_drmin ||
+        s.max <  min_drmax ||
+        s.max >= max_drmax)
+      return false;
   }
 
   return 
@@ -353,10 +363,6 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
     vtx.trackdzerravg() < max_trackdzerravg &&
     vtx.trackdzerrrms() < max_trackdzerrrms &&
     trackpairdphimax > min_trackpairdphimax &&
-    vtx.drmin() >= min_drmin &&
-    vtx.drmin() <  max_drmin &&
-    vtx.drmax() >= min_drmax &&
-    vtx.drmax() <  max_drmax &&
     (max_jetpairdrmin > 1e6 || vtx.jetpairdrmin() < max_jetpairdrmin) &&
     vtx.jetpairdrmax() < max_jetpairdrmax &&
     vtx.gen2derr < max_err2d &&

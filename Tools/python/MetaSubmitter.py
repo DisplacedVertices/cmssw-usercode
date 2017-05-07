@@ -67,7 +67,7 @@ class chain_modifiers:
 
 ####
 
-def set_splitting(samples, dataset, jobtype):
+def set_splitting(samples, dataset, jobtype, data_json=None):
     if jobtype == 'trackmover':
         d = {
             'JetHT2015C':         ( 200000,    33),
@@ -104,16 +104,146 @@ def set_splitting(samples, dataset, jobtype):
             'ttbar_2015':         ( 919380,    66),
             }
         for sample in samples:
+            # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
             sample.set_curr_dataset(dataset)
+            sample.split_by = 'files' if sample.condor else 'events'
             assert d.has_key(sample.name)
             sample.events_per, sample.files_per = d[sample.name]
-        return
 
-    target = {
-        'ntuple': 5000
-        }[jobtype]
-    d = {
-        'ntuple' : {
+    elif jobtype == 'histos' or jobtype == 'minitree':
+        d = {
+            'JetHT2015C': 2,
+            'JetHT2015D': 67,
+            'mfv_neu_tau00100um_M0300_2015': 2,
+            'mfv_neu_tau00100um_M0400_2015': 2,
+            'mfv_neu_tau00100um_M0800_2015': 2,
+            'mfv_neu_tau00100um_M1200_2015': 2,
+            'mfv_neu_tau00100um_M1600_2015': 2,
+            'mfv_neu_tau00300um_M0300_2015': 2,
+            'mfv_neu_tau00300um_M0400_2015': 2,
+            'mfv_neu_tau00300um_M0800_2015': 2,
+            'mfv_neu_tau00300um_M1200_2015': 2,
+            'mfv_neu_tau00300um_M1600_2015': 2,
+            'mfv_neu_tau01000um_M0300_2015': 2,
+            'mfv_neu_tau01000um_M0400_2015': 2,
+            'mfv_neu_tau01000um_M0800_2015': 2,
+            'mfv_neu_tau01000um_M1200_2015': 2,
+            'mfv_neu_tau01000um_M1600_2015': 2,
+            'mfv_neu_tau10000um_M0300_2015': 2,
+            'mfv_neu_tau10000um_M0400_2015': 2,
+            'mfv_neu_tau10000um_M0800_2015': 2,
+            'mfv_neu_tau10000um_M1200_2015': 2,
+            'mfv_neu_tau10000um_M1600_2015': 2,
+            'qcdht0500_2015': 229,
+            'qcdht0500ext_2015': 269,
+            'qcdht0700_2015': 93,
+            'qcdht0700ext_2015': 141,
+            'qcdht1000_2015': 10,
+            'qcdht1000ext_2015': 15,
+            'qcdht1500_2015': 12,
+            'qcdht1500ext_2015': 12,
+            'qcdht2000_2015': 8,
+            'qcdht2000ext_2015': 10,
+            'ttbar_2015': 168,
+            'JetHT2016B3': 95,
+            'JetHT2016C': 76,
+            'JetHT2016D': 98,
+            'JetHT2016E': 90,
+            'JetHT2016F': 81,
+            'JetHT2016G': 73,
+            'JetHT2016H2': 115,
+            'JetHT2016H3': 21,
+            'mfv_ddbar_tau00100um_M0300': 50,
+            'mfv_ddbar_tau00100um_M0400': 50,
+            'mfv_ddbar_tau00100um_M0500': 50,
+            'mfv_ddbar_tau00100um_M0600': 50,
+            'mfv_ddbar_tau00100um_M0800': 50,
+            'mfv_ddbar_tau00100um_M1200': 50,
+            'mfv_ddbar_tau00100um_M1600': 50,
+            'mfv_ddbar_tau00300um_M0300': 50,
+            'mfv_ddbar_tau00300um_M0400': 50,
+            'mfv_ddbar_tau00300um_M0500': 50,
+            'mfv_ddbar_tau00300um_M0600': 50,
+            'mfv_ddbar_tau00300um_M0800': 50,
+            'mfv_ddbar_tau00300um_M1200': 50,
+            'mfv_ddbar_tau00300um_M1600': 50,
+            'mfv_ddbar_tau01000um_M0300': 50,
+            'mfv_ddbar_tau01000um_M0400': 50,
+            'mfv_ddbar_tau01000um_M0500': 50,
+            'mfv_ddbar_tau01000um_M0600': 50,
+            'mfv_ddbar_tau01000um_M0800': 50,
+            'mfv_ddbar_tau01000um_M1200': 50,
+            'mfv_ddbar_tau01000um_M1600': 50,
+            'mfv_ddbar_tau10000um_M0300': 50,
+            'mfv_ddbar_tau10000um_M0400': 50,
+            'mfv_ddbar_tau10000um_M0500': 50,
+            'mfv_ddbar_tau10000um_M0600': 50,
+            'mfv_ddbar_tau10000um_M0800': 50,
+            'mfv_ddbar_tau10000um_M1200': 50,
+            'mfv_ddbar_tau10000um_M1600': 50,
+            'mfv_ddbar_tau30000um_M0300': 50,
+            'mfv_ddbar_tau30000um_M0400': 50,
+            'mfv_ddbar_tau30000um_M0500': 50,
+            'mfv_ddbar_tau30000um_M0600': 50,
+            'mfv_ddbar_tau30000um_M0800': 50,
+            'mfv_ddbar_tau30000um_M1200': 50,
+            'mfv_ddbar_tau30000um_M1600': 50,
+            'mfv_neu_tau00100um_M0300': 26,
+            'mfv_neu_tau00100um_M0400': 54,
+            'mfv_neu_tau00100um_M0600': 50,
+            'mfv_neu_tau00100um_M0800': 7,
+            'mfv_neu_tau00100um_M1200': 36,
+            'mfv_neu_tau00100um_M1600': 8,
+            'mfv_neu_tau00100um_M3000': 49,
+            'mfv_neu_tau00300um_M0300': 1,
+            'mfv_neu_tau00300um_M0400': 50,
+            'mfv_neu_tau00300um_M0600': 100,
+            'mfv_neu_tau00300um_M0800': 7,
+            'mfv_neu_tau00300um_M1200': 27,
+            'mfv_neu_tau00300um_M1600': 1,
+            'mfv_neu_tau00300um_M3000': 49,
+            'mfv_neu_tau01000um_M0300': 9,
+            'mfv_neu_tau01000um_M0400': 48,
+            'mfv_neu_tau01000um_M0600': 100,
+            'mfv_neu_tau01000um_M0800': 4,
+            'mfv_neu_tau01000um_M1200': 6,
+            'mfv_neu_tau01000um_M1600': 1,
+            'mfv_neu_tau01000um_M3000': 47,
+            'mfv_neu_tau10000um_M0300': 12,
+            'mfv_neu_tau10000um_M0400': 51,
+            'mfv_neu_tau10000um_M0600': 50,
+            'mfv_neu_tau10000um_M0800': 1,
+            'mfv_neu_tau10000um_M1200': 4,
+            'mfv_neu_tau10000um_M1600': 5,
+            'mfv_neu_tau10000um_M3000': 48,
+            'mfv_neu_tau30000um_M0300': 50,
+            'mfv_neu_tau30000um_M0400': 50,
+            'mfv_neu_tau30000um_M0600': 50,
+            'mfv_neu_tau30000um_M0800': 50,
+            'mfv_neu_tau30000um_M1200': 50,
+            'mfv_neu_tau30000um_M1600': 50,
+            'mfv_neu_tau30000um_M3000': 49,
+            'my_mfv_neu_tau00300um_M0800': 100,
+            'qcdht0500': 229,
+            'qcdht0500ext': 269,
+            'qcdht0700': 93,
+            'qcdht0700ext': 141,
+            'qcdht1000': 10,
+            'qcdht1000ext': 15,
+            'qcdht1500': 12,
+            'qcdht1500ext': 12,
+            'qcdht2000': 8,
+            'qcdht2000ext': 10,
+            'ttbar': 168,
+            }
+        for sample in samples:
+            sample.set_curr_dataset(dataset)
+            sample.split_by = 'files'
+            sample.files_per = d.get(sample.name, 20)
+
+    elif jobtype == 'ntuple':
+        target = 5000
+        d = {
             # sample       # events to run to get 1 event out   corresponding file frac
             'ttbar'       :  ( 5.00E+01, 5.76E-03 ),
             'qcdht0500'   :  ( 5.00E+02, 6.03E-02 ),
@@ -137,21 +267,30 @@ def set_splitting(samples, dataset, jobtype):
             'JetHT2016H2' :  ( 1.11E+01, 8.81E-04 ),
             'JetHT2016H3' :  ( 1.11E+01, 8.83E-04 ),
             }
-        }
-    for sample in samples:
-        sample.set_curr_dataset(dataset)
-        if not d.has_key(sample.name):
-            if 'mfv' in sample.name:
-                sample.events_per = 1000
-                sample.files_per = 1 if 'official' in sample.name else 10
+        for sample in samples:
+            # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
+            sample.set_curr_dataset(dataset)
+            sample.split_by = 'files' if sample.condor else 'events'
+            if not d.has_key(sample.name):
+                if 'mfv' in sample.name:
+                    sample.events_per = 1000
+                    sample.files_per = 1 if 'official' in sample.name else 10
+                else:
+                    sample.events_per = 50000
+                    sample.files_per = 5
             else:
-                sample.events_per = 50000
-                sample.files_per = 5
-        else:
-            erate, frate = d[sample.name]
-            sample.events_per = min(int(target * erate + 1), 200000)
-            sample.files_per = int(frate * sample.events_per / erate + 1)
-    
+                erate, frate = d[sample.name]
+                sample.events_per = min(int(target * erate + 1), 200000)
+                sample.files_per = int(frate * sample.events_per / erate + 1)
+
+    else:
+        raise ValueError("don't know anything about jobtype %s" % jobtype)
+
+    if data_json:
+        for sample in samples:
+            if not sample.is_mc:
+                sample.json = data_json
+
 ####
 
 class MetaSubmitter:

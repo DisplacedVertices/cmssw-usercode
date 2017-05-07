@@ -442,6 +442,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const double pos_bsphi = atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z));
     h_sv_pos_bsphi->Fill(pos_bsphi, w);
 
+    MFVVertexAux::stats trackpairdeta_stats(&aux, aux.trackpairdetas());
+    MFVVertexAux::stats   trackpairdr_stats(&aux, aux.trackpairdrs());
+
     PairwiseHistos::ValueMap v = {
         {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 aux.ntracks()},
@@ -541,15 +544,15 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackdzerravg", aux.trackdzerravg()},
         {"trackdzerrrms", aux.trackdzerrrms()},
 
-        {"trackpairdetamin", aux.trackpairdetamin()},
-        {"trackpairdetamax", aux.trackpairdetamax()},
-        {"trackpairdetaavg", aux.trackpairdetaavg()},
-        {"trackpairdetarms", aux.trackpairdetarms()},
+        {"trackpairdetamin", trackpairdeta_stats.min},
+        {"trackpairdetamax", trackpairdeta_stats.max},
+        {"trackpairdetaavg", trackpairdeta_stats.avg},
+        {"trackpairdetarms", trackpairdeta_stats.rms},
 
-        {"drmin",  aux.drmin()},
-        {"drmax",  aux.drmax()},
-        {"dravg",  aux.dravg()},
-        {"drrms",  aux.drrms()},
+        {"drmin",  trackpairdr_stats.min},
+        {"drmax",  trackpairdr_stats.max},
+        {"dravg",  trackpairdr_stats.avg},
+        {"drrms",  trackpairdr_stats.rms},
 
         {"costhtkmomvtxdispmin", aux.costhtkmomvtxdispmin()},
         {"costhtkmomvtxdispmax", aux.costhtkmomvtxdispmax()},

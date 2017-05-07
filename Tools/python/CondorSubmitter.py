@@ -116,7 +116,7 @@ import cs_filelist
 if __SPLIT_BY_EVENTS__:
     process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(0)]
     process.source.skipEvents = cms.untracked.uint32(cs_job * __EVENTS_PER__)
-    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__EVENTS_PER__))
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__ if __MAX_EVENTS__ != -1 else __EVENTS_PER__))
 else:
     process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__))
@@ -151,7 +151,6 @@ def get(i): return _l[i]
                  stageout_path = '', # if / in it, does not try to generate
                  publish_name = '',
                  dataset = 'main',
-                 split_by = 'file',
                  _events = -1,
                  _njobs = None,
                  _fail = [],
@@ -165,9 +164,6 @@ def get(i): return _l[i]
         self.pset_template_fn = pset_template_fn
         self.pset_modifier = pset_modifier
         self.dataset = dataset
-        if split_by not in ('file', 'events'):
-            raise ValueError('split_by must be either "file" or "events"')
-        self.split_by = split_by
         self._njobs = _njobs
 
         for arg in sys.argv:
@@ -296,8 +292,7 @@ def get(i): return _l[i]
 
         self.pset_end_template = self.pset_end_template \
             .replace('__MAX_EVENTS__', str(_events)) \
-            .replace('__FAIL_LIST__', repr(_fail)) \
-            .replace('__SPLIT_BY_EVENTS__', str(self.split_by == 'events'))
+            .replace('__FAIL_LIST__', repr(_fail))
 
         open(sh_fn, 'wt').write(self.sh_template)
 
@@ -309,7 +304,7 @@ def get(i): return _l[i]
         else:
             touch(json_fn)
 
-        if self.split_by == 'events':
+        if sample.split_by == 'events':
             per = sample.events_per
             njobs = int_ceil(sample.nevents_orig, per)
             fn_groups = [sample.filenames]
@@ -362,7 +357,8 @@ def get(i): return _l[i]
 
         pset_end_template = self.pset_end_template \
             .replace('__PFN_PREFIX__', repr(sample.xrootd_url)) \
-            .replace('__EVENTS_PER__', str(sample.events_per))
+            .replace('__EVENTS_PER__', str(sample.events_per)) \
+            .replace('__SPLIT_BY_EVENTS__', str(sample.split_by == 'events'))
 
         pset += pset_end_template
         pset_fn = os.path.join(working_dir, 'cs_pset.py')
@@ -411,7 +407,7 @@ def get(i): return _l[i]
             print "\033[1m warning: \033[0m sample %s not submitted, doesn't have dataset %s" % (sample.name, self.dataset)
             return
 
-        if self.split_by == 'events' and not sample.is_mc:
+        if sample.split_by == 'events' and not sample.is_mc:
             print "\033[1m warning: \033[0m sample %s not submitted because can't split by events on data sample"
             return
 
