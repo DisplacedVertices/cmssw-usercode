@@ -1168,7 +1168,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                                  v[0]->y() - v[1]->y(),
                                  v[0]->z() - v[1]->z());
           VertexerPairEff& vpeff(vpeffs->back());
-          assert(fabs(vpeff.d2d() - d2d) < 1e-5 && fabs(vpeff.d3d() - d3d) < 1e-5 && vpeff.ntkmin() == ntk_min && vpeff.ntkmax() == ntk_max);
+          if (!(fabs(vpeff.d2d() - d2d)/vpeff.d2d() < 1e-4 && fabs(vpeff.d3d() - d3d)/vpeff.d3d() < 1e-4 && vpeff.ntkmin() == ntk_min && vpeff.ntkmax() == ntk_max))
+            throw cms::Exception("Vertexer", "problem with vpeff back")
+              << " d2d " << vpeff.d2d() << " now " << d2d
+              << " d3d " << vpeff.d3d() << " now " << d3d
+              << " ntkmin " << vpeff.ntkmin() << " now " << ntk_min
+              << " ntkmax " << vpeff.ntkmax() << " now " << ntk_max;
           vpeff.kind(VertexerPairEff::merge);
 
           if (histos) {
@@ -1247,7 +1252,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                                vsave[0].y() - vsave[1].y(),
                                vsave[0].z() - vsave[1].z());
         VertexerPairEff& vpeff(vpeffs->back());
-        assert(fabs(vpeff.d2d() - d2d) < 1e-5 && fabs(vpeff.d3d() - d3d) < 1e-5 && vpeff.ntkmin() == ntk_min && vpeff.ntkmax() == ntk_max);
+          if (!(fabs(vpeff.d2d() - d2d)/vpeff.d2d() < 1e-4 && fabs(vpeff.d3d() - d3d)/vpeff.d3d() < 1e-4 && vpeff.ntkmin() == ntk_min && vpeff.ntkmax() == ntk_max))
+            throw cms::Exception("Vertexer", "problem with vpeff back")
+              << " d2d " << vpeff.d2d() << " now " << d2d
+              << " d3d " << vpeff.d3d() << " now " << d3d
+              << " ntkmin " << vpeff.ntkmin() << " now " << ntk_min
+              << " ntkmax " << vpeff.ntkmax() << " now " << ntk_max;
         vpeff.kind(VertexerPairEff::erase);
 
         if (histos) {
