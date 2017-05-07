@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#exec 2>&1
-
 for fn in lhe.py gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
     if [[ -e $fn ]]; then
         ./todoify.sh $fn > temp
@@ -21,15 +19,18 @@ TODO2=$8
 INDIR=$(pwd)
 OUTDIR=$(pwd)
 
-eval $(scram unsetenv -sh)
-
 echo JOBNUM: ${JOBNUM}
 echo MAXEVENTS: ${MAXEVENTS}
+echo SALT: ${SALT}
 echo FROMLHE: ${FROMLHE}
 echo DUMMYFORHASH: ${DUMMYFORHASH}
 echo OUTPUTLEVEL: ${OUTPUTLEVEL}
 echo TODO: ${TODO}
 echo TODO2: ${TODO2}
+
+################################################################################
+
+eval $(scram unsetenv -sh)
 
 ################################################################################
 
