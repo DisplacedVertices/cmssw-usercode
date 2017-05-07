@@ -27,6 +27,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   double pileup_weight(int mc_npu) const;
 
   const int use_duplicateMerge;
+  const bool old_stlayers_cut;
 
   TH1D* h_npu;
   TH1D* h_w;
@@ -100,7 +101,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     pileup_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
-    use_duplicateMerge(cfg.getParameter<int>("use_duplicateMerge"))
+    use_duplicateMerge(cfg.getParameter<int>("use_duplicateMerge")),
+    old_stlayers_cut(cfg.getParameter<bool>("old_stlayers_cut"))
 {
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -243,7 +245,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       pt > 1,
       min_r <= 1,
       npxlayers >= 2,
-      (abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7),
+      old_stlayers_cut ? nstlayers >= 3 : (abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7),
       nsigmadxy > 4
     };
 
