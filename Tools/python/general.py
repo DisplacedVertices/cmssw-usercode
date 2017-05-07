@@ -133,6 +133,12 @@ def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=Non
 def from_argv(*args, **kwargs):
     return typed_from_argv(str, *args, **kwargs)
 
+def index_startswith(l, s):
+    for i,x in enumerate(l):
+        if type(x) == str and x.startswith(s):
+            return i
+    raise ValueError('no string starting with %s in list' % s)
+
 def int_ceil(x,y):
     return (x+y-1)/y
 
@@ -270,6 +276,7 @@ __all__ = [
     'to_pickle',
     'typed_from_argv',
     'from_argv',
+    'index_startswith',
     'int_ceil',
     'mkdirp',
     'mkdirs_if_needed',
