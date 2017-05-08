@@ -39,7 +39,7 @@ void numdens::book(const char* name, const char* title, int nbins, double xlo, d
 
 numden& numdens::operator()(const std::string& w) {
   auto it = m.find(w);
-  assert(it != m.end());
+  //  assert(it != m.end());
   return it->second;
 }
 
