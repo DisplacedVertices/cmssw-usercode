@@ -63,8 +63,9 @@ if event_filter:
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True)
 
 if prepare_vis:
-    process.mfvSelectedVerticesTight.produce_vertices = True
-    process.mfvSelectedVerticesTight.produce_tracks = True
+    for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
+        x.produce_vertices = True
+        x.produce_tracks = True
 
     process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
     process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
