@@ -19,7 +19,7 @@ class Dataset(object):
     TOTAL_EVENTS = -1
     FILES_PER = 10
     TOTAL_FILES = -1
-    SPLIT_BY = 'events'
+    SPLIT_BY = 'files'
     JSON = ''
     HLT_NAME = 'HLT'
     DBS_INST = 'global'
