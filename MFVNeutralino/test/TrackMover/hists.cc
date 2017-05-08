@@ -88,7 +88,11 @@ int main(int argc, char** argv) {
   double den = 0;
   std::map<std::string, double> nums;
 
+  //TFile* f_pvzweights = TFile::Open("../pvzweights.root");
+  //TH1F* h_pvzweights = (TH1F*)f_pvzweights->Get("rat");
+
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
+    //if (j == 100000) break;
     if (t->LoadTree(j) < 0) break;
     if (t->GetEntry(j) <= 0) continue;
     if (j % 250000 == 0) {
@@ -97,6 +101,11 @@ int main(int argc, char** argv) {
     }
 
     const double w = apply_weight ? nt.weight : 1.;
+    //if (0) {
+    //  int bin = h_pvzweights->FindBin(nt.pvz);
+    //  if (bin >= 1 && bin <= h_pvzweights->GetNbinsX())
+    //    w *= h_pvzweights->GetBinContent(bin);
+    //}
 
     const double movedist2 = mag(nt.move_x - nt.pvx,
                                  nt.move_y - nt.pvy);
@@ -115,7 +124,7 @@ int main(int argc, char** argv) {
     double jet_sume = 0;
     double jet_drmax = 0;
     double jet_dravg = 0;
-    double jet_sumntracks;
+    double jet_sumntracks = 0;
     const size_t n_jets = nt.p_jets_pt->size();
     for (size_t ijet = 0; ijet < n_jets; ++ijet) {
       jet_sume += nt.p_jets_energy->at(ijet);
