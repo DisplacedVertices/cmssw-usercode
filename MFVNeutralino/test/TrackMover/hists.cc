@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
     std::string in_fn_str(in_fn);
     std::string filename = in_fn_str.substr(in_fn_str.find_last_of("/") + 1);
-    const bool H_data = filename.compare("JetHT2016H2.root") == 0 || filename.compare("JetHT2016H3.root") == 0;
+    const bool H_data = nt.run > 281000;
 
     double jet_sume = 0;
     double jet_drmax = 0;
