@@ -74,7 +74,7 @@ if prepare_vis:
 
     output_commands += [
         'keep *_mfvVertices_*_*',
-        'keep *_mfvSelectedVerticesTight_*_*',
+        'keep *_mfvSelectedVerticesTight*_*_*',
         'keep *_mfvVertexRefits_*_*',
         'keep *_mfvVertexRefitsDrop2_*_*',
         'keep *_mfvVertexRefitsDrop0_*_*',
